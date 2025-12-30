@@ -6,6 +6,12 @@ FreeTube is an open source desktop YouTube player built with privacy in mind.
 Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
 Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to Electron.
 
+> [!WARNING]
+> **This is a fork in its early stages.** It currently provides the following extra features:
+> - Remember playback speed on a per-channel basis
+>
+> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/FreeTube/actions?query=workflow%3ABuild).
+
 <p align="center"><a href="https://github.com/D3SOX/FreeTube/releases">Download FreeTube</a></p>
 <p align="center">
   <a href="https://github.com/D3SOX/FreeTube/actions/workflows/build.yml">
