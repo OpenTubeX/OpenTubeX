@@ -1,0 +1,6 @@
+version: "1"
+rules:
+  - base: development
+    upstream: FreeTubeApp:development
+    mergeMethod: merge
+    mergeUnstable: false
