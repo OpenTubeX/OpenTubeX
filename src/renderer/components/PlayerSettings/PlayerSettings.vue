@@ -174,6 +174,13 @@
         @change="updateRememberPlaybackSpeedPerChannel"
       />
     </FtFlexBox>
+    <FtFlexBox v-if="rememberPlaybackSpeedPerChannel">
+      <FtButton
+        :label="t('Settings.Player Settings.Manage Channel Playback Speeds')"
+        :icon="['fas', 'sliders-h']"
+        @click="showChannelSpeedManager = true"
+      />
+    </FtFlexBox>
     <br>
     <FtFlexBox>
       <FtToggleSwitch
@@ -259,6 +266,57 @@
       </FtFlexBox>
       <br>
     </div>
+    <FtPrompt
+      v-if="showChannelSpeedManager"
+      :label="t('Settings.Player Settings.Channel Playback Speed Manager')"
+      theme="readable-width"
+      @click="handleChannelSpeedManagerClick"
+    >
+      <div
+        v-if="channelSpeedEntries.length === 0"
+        class="emptyState"
+      >
+        <p>{{ t("Settings.Player Settings.No Saved Playback Speeds") }}</p>
+      </div>
+      <div
+        v-else
+        class="channelSpeedList"
+      >
+        <div
+          v-for="entry in channelSpeedEntries"
+          :key="entry.channelId"
+          class="channelSpeedEntry"
+        >
+          <div class="channelSpeedInfo">
+            <p class="channelId">
+              {{ entry.channelName }}
+            </p>
+            <FtSlider
+              :label="t('Settings.Player Settings.Playback Speed')"
+              :default-value="entry.speed"
+              :min-value="videoPlaybackRateInterval"
+              :max-value="maxVideoPlaybackRate"
+              :step="videoPlaybackRateInterval"
+              value-extension="x"
+              @change="(value) => updateChannelSpeed(entry.channelId, value)"
+            />
+          </div>
+          <FtButton
+            :label="t('Delete')"
+            :icon="['fas', 'trash']"
+            text-color="var(--destructive-text-color)"
+            background-color="var(--destructive-color)"
+            @click="deleteChannelSpeed(entry.channelId)"
+          />
+        </div>
+      </div>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Close')"
+          @click="showChannelSpeedManager = false"
+        />
+      </FtFlexBox>
+    </FtPrompt>
   </FtSettingsSection>
 </template>
 
@@ -274,10 +332,15 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
 import { DefaultFolderKind } from '../../../constants'
+import {
+  findChannelTagInfo,
+  checkYoutubeChannelId,
+} from '../../helpers/channels'
 
 const { t } = useI18n()
 
@@ -581,6 +644,127 @@ const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRemember
  */
 function updateRememberPlaybackSpeedPerChannel(value) {
   store.dispatch('updateRememberPlaybackSpeedPerChannel', value)
+}
+
+/** @type {import('vue').Ref<boolean>} */
+const showChannelSpeedManager = ref(false)
+
+/** @type {import('vue').ComputedRef<string>} */
+const channelPlaybackSpeeds = computed(
+  () => store.getters.getChannelPlaybackSpeeds
+)
+
+/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const backendFallback = computed(() => store.getters.getBackendFallback)
+
+const backendOptions = computed(() => ({
+  preference: backendPreference.value,
+  fallback: backendFallback.value,
+}))
+
+/** @type {import('vue').Ref<Map<string, string>>} */
+const channelNamesCache = ref(new Map())
+
+/** @type {import('vue').ComputedRef<Array<{channelId: string, speed: number, channelName: string}>>} */
+const channelSpeedEntries = computed(() => {
+  try {
+    const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+    return Object.entries(speeds).map(([channelId, speed]) => ({
+      channelId,
+      speed: typeof speed === 'number' ? speed : parseFloat(speed),
+      channelName: channelNamesCache.value.get(channelId) || channelId,
+    }))
+  } catch (e) {
+    console.error('Failed to parse channel playback speeds:', e)
+    return []
+  }
+})
+
+/**
+ * Fetch channel names for all playback speed entries
+ * @returns {Promise<void>}
+ */
+async function fetchChannelNames() {
+  const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+  const channelIds = Object.keys(speeds)
+
+  for (const channelId of channelIds) {
+    if (channelNamesCache.value.has(channelId)) {
+      continue
+    }
+
+    if (!checkYoutubeChannelId(channelId)) {
+      channelNamesCache.value.set(channelId, channelId)
+      continue
+    }
+
+    try {
+      const { preferredName, invalidId } = await findChannelTagInfo(
+        channelId,
+        backendOptions.value
+      )
+      if (invalidId || !preferredName) {
+        channelNamesCache.value.set(channelId, channelId)
+      } else {
+        channelNamesCache.value.set(channelId, preferredName)
+      }
+    } catch (e) {
+      console.error(`Failed to fetch channel name for ${channelId}:`, e)
+      channelNamesCache.value.set(channelId, channelId)
+    }
+  }
+}
+
+watch(showChannelSpeedManager, (isOpen) => {
+  if (isOpen) {
+    fetchChannelNames()
+  }
+})
+
+watch(channelPlaybackSpeeds, () => {
+  if (showChannelSpeedManager.value) {
+    fetchChannelNames()
+  }
+})
+
+/**
+ * @param {string | null} value
+ */
+function handleChannelSpeedManagerClick(value) {
+  if (value === null) {
+    showChannelSpeedManager.value = false
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @param {number} newSpeed
+ */
+function updateChannelSpeed(channelId, newSpeed) {
+  try {
+    const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+    speeds[channelId] = newSpeed
+    store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(speeds))
+  } catch (e) {
+    console.error('Failed to update channel playback speed:', e)
+  }
+}
+
+/**
+ * @param {string} channelId
+ */
+function deleteChannelSpeed(channelId) {
+  try {
+    const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+    delete speeds[channelId]
+    store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(speeds))
+    channelNamesCache.value.delete(channelId)
+  } catch (e) {
+    console.error('Failed to delete channel playback speed:', e)
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

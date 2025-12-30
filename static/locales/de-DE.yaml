@@ -379,6 +379,10 @@ Settings:
     Default Volume: Standard-Lautstärke
     Default Playback Rate: Standard-Wiedergabegeschwindigkeit
     Remember Playback Speed Per Channel: Wiedergabegeschwindigkeit pro Kanal merken
+    Manage Channel Playback Speeds: Kanalspezifische Wiedergabegeschwindigkeiten verwalten
+    Channel Playback Speed Manager: Verwaltung der Wiedergabegeschwindigkeiten
+    No Saved Playback Speeds: Keine gespeicherten Wiedergabegeschwindigkeiten
+    Playback Speed: Wiedergabegeschwindigkeit
     Default Video Format:
       Default Video Format: Standard-Videoformat
       Dash Formats: DASH-Formate

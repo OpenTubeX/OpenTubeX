@@ -18,3 +18,37 @@
   flex-grow: 1;
   margin-block-start: 10px;
 }
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+}
+
+.channelSpeedList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-block: 1rem;
+}
+
+.channelSpeedEntry {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.channelSpeedInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.channelId {
+  margin: 0;
+  font-weight: 500;
+  word-break: break-all;
+}
