@@ -160,6 +160,7 @@ export default defineComponent({
     'toggle-autoplay',
     'toggle-theatre-mode',
     'playback-rate-updated',
+    'playback-rate-user-set',
     'skip-to-next',
     'skip-to-prev',
   ],
@@ -2544,6 +2545,24 @@ export default defineComponent({
       nextTick(showOverlayControls)
     }
 
+    /**
+     * @param {MouseEvent} event
+     */
+    function handlePlaybackRateMenuClick(event) {
+      const target = event.target
+      const playbackRatesContainer = target.closest('.shaka-playback-rates')
+
+      if (playbackRatesContainer) {
+        const button = target.closest('button')
+
+        if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
+          setTimeout(() => {
+            emit('playback-rate-user-set', player.getPlaybackRate())
+          }, 10)
+        }
+      }
+    }
+
     window.addEventListener('online', onlineHandler)
     window.addEventListener('offline', offlineHandler)
 
@@ -2644,6 +2663,8 @@ export default defineComponent({
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
+      // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
+      document.addEventListener('click', handlePlaybackRateMenuClick, true)
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
@@ -2985,6 +3006,7 @@ export default defineComponent({
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
+      document.removeEventListener('click', handlePlaybackRateMenuClick, true)
 
       if (resizeObserver) {
         resizeObserver.disconnect()

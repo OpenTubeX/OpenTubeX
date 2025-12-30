@@ -338,7 +338,7 @@ export default defineComponent({
     this.autoplayNextPlaylistVideo = this.autoplayNextPlaylistVideoByDefault
 
     this.checkIfTimestamp()
-    this.currentPlaybackRate = this.$store.getters.getDefaultPlayback
+    this.initializePlaybackRate()
   },
   mounted: function () {
     this.onMountedDependOnLocalStateLoading()
@@ -446,6 +446,8 @@ export default defineComponent({
           channelName: this.channelName,
           channelId: this.channelId
         })
+
+        this.initializePlaybackRate()
 
         if (result.page[0].microformat?.publish_date) {
           // `result.page[0].microformat.publish_date` example value: `2023-08-12T08:59:59-07:00`
@@ -886,6 +888,8 @@ export default defineComponent({
             channelName: result.author,
             channelId: result.authorId
           })
+
+          this.initializePlaybackRate()
 
           this.videoPublished = result.published * 1000
           this.videoDescriptionHtml = result.descriptionHtml
@@ -1779,6 +1783,37 @@ export default defineComponent({
 
     updatePlaybackRate(newRate) {
       this.currentPlaybackRate = newRate
+    },
+
+    handlePlaybackRateUserSet(newRate) {
+      const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
+      if (!rememberPerChannel || !this.channelId) {
+        return
+      }
+
+      try {
+        const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
+        channelSpeeds[this.channelId] = newRate
+        this.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(channelSpeeds))
+      } catch (e) {
+        console.error('Failed to save channel playback speed:', e)
+      }
+    },
+
+    initializePlaybackRate() {
+      const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
+      if (rememberPerChannel && this.channelId) {
+        try {
+          const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
+          if (channelSpeeds[this.channelId] !== undefined) {
+            this.currentPlaybackRate = channelSpeeds[this.channelId]
+            return
+          }
+        } catch (e) {
+          console.error('Failed to parse channel playback speeds:', e)
+        }
+      }
+      this.currentPlaybackRate = this.$store.getters.getDefaultPlayback
     },
 
     destroyPlayer: async function() {

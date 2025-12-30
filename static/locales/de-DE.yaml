@@ -378,6 +378,7 @@ Settings:
     Enable Theatre Mode by Default: Kinomodus standardmäßig aktivieren
     Default Volume: Standard-Lautstärke
     Default Playback Rate: Standard-Wiedergabegeschwindigkeit
+    Remember Playback Speed Per Channel: Wiedergabegeschwindigkeit pro Kanal merken
     Default Video Format:
       Default Video Format: Standard-Videoformat
       Dash Formats: DASH-Formate

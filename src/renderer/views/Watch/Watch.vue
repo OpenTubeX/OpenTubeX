@@ -49,6 +49,7 @@
           @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
           @toggle-autoplay="toggleAutoplay"
           @playback-rate-updated="updatePlaybackRate"
+          @playback-rate-user-set="handlePlaybackRateUserSet"
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
         />

@@ -166,6 +166,14 @@
         @change="updateMaxVideoPlaybackRate"
       />
     </FtFlexBox>
+    <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Remember Playback Speed Per Channel')"
+        :compact="true"
+        :default-value="rememberPlaybackSpeedPerChannel"
+        @change="updateRememberPlaybackSpeedPerChannel"
+      />
+    </FtFlexBox>
     <br>
     <FtFlexBox>
       <FtToggleSwitch
@@ -563,6 +571,16 @@ const maxVideoPlaybackRate = computed(() => store.getters.getMaxVideoPlaybackRat
  */
 function updateMaxVideoPlaybackRate(value) {
   store.dispatch('updateMaxVideoPlaybackRate', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRememberPlaybackSpeedPerChannel)
+
+/**
+ * @param {boolean} value
+ */
+function updateRememberPlaybackSpeedPerChannel(value) {
+  store.dispatch('updateRememberPlaybackSpeedPerChannel', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
