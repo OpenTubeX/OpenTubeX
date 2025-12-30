@@ -9,14 +9,14 @@
   "author": {
     "name": "FreeTube Team",
     "email": "FreeTubeApp@protonmail.com",
-    "url": "https://github.com/FreeTubeApp/FreeTube"
+    "url": "https://github.com/D3SOX/FreeTube"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FreeTubeApp/FreeTube.git"
+    "url": "git+https://github.com/D3SOX/FreeTube.git"
   },
   "bugs": {
-    "url": "https://github.com/FreeTubeApp/FreeTube/issues"
+    "url": "https://github.com/D3SOX/FreeTube/issues"
   },
   "scripts": {
     "build": "run-s patch-shaka pack build-release",

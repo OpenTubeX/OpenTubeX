@@ -56,22 +56,22 @@ const chunks = computed(() => [
   {
     icon: ['fab', 'github'],
     title: t('About.Source code'),
-    content: `<a href="https://github.com/FreeTubeApp/FreeTube" lang="en" dir="ltr">GitHub: FreeTubeApp/FreeTube</a><br>${t('About.Licensed under the')} <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`
+    content: `<a href="https://github.com/D3SOX/FreeTube" lang="en" dir="ltr">GitHub: D3SOX/FreeTube</a><br>${t('About.Licensed under the')} <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`
   },
   {
     icon: ['fas', 'file-download'],
     title: t('About.Downloads / Changelog'),
-    content: `<a href="https://github.com/FreeTubeApp/FreeTube/releases">${t('About.GitHub releases')}</a>`
+    content: `<a href="https://github.com/D3SOX/FreeTube/releases">${t('About.GitHub releases')}</a>`
   },
   {
     icon: ['fas', 'question-circle'],
     title: t('About.Help'),
-    content: `<a href="https://docs.freetubeapp.io/">${t('About.FreeTube Wiki')}</a> / <a href="https://docs.freetubeapp.io/faq/">${t('About.FAQ')}</a> / <a href="https://github.com/FreeTubeApp/FreeTube/discussions/">${t('About.Discussions')}</a>`
+    content: `<a href="https://docs.freetubeapp.io/">${t('About.FreeTube Wiki')}</a> / <a href="https://docs.freetubeapp.io/faq/">${t('About.FAQ')}</a> / <a href="https://github.com/D3SOX/FreeTube/discussions/">${t('About.Discussions')}</a>`
   },
   {
     icon: ['fas', 'exclamation-circle'],
     title: t('About.Report a problem'),
-    content: `<a href="https://github.com/FreeTubeApp/FreeTube/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
+    content: `<a href="https://github.com/D3SOX/FreeTube/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
   },
   {
     icon: ['fas', 'globe'],
