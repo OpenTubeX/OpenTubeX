@@ -8,7 +8,9 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 > [!WARNING]
 > **This is a fork in its early stages.** It currently provides the following extra features:
-> - Remember playback speed on a per-channel basis
+> - Remember playback speed on a per-channel basis. You can enable it in settings. If the feature is turned on and you manually change the playback speed it will be saved for that channel
+>  <img height="150" alt="image" src="https://github.com/user-attachments/assets/82c82626-2611-48ba-97be-a86465423de2" />
+>  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
 >
 > If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/FreeTube/actions?query=workflow%3ABuild).
 
