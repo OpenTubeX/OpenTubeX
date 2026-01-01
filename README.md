@@ -12,7 +12,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/82c82626-2611-48ba-97be-a86465423de2" />
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
 >
-> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`freetube-git-d3sox`](https://aur.archlinux.org/packages/freetube-git-d3sox).
+> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
 
 <p align="center"><a href="https://github.com/D3SOX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
@@ -116,7 +116,7 @@ The first build with a green check mark is the latest build.
 > [!IMPORTANT]
 > You will need to have a GitHub account to download these builds.
 
-* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/freetube-git-d3sox/)
+* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/)
 
 ## Contributing
 Thank you very much to the people and projects that make OpenTubeX possible!
