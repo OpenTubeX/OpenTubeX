@@ -252,7 +252,7 @@ Settings:
     Auto Load Next Page:
       Label: Sonraki Sayfayı Otomatik Yükle
       Tooltip: Sonraki sayfaları ve yorumları otomatik olarak yükle.
-    Open Deep Links In New Window: FreeTube'a Geçen URL'leri Yeni Pencerede Aç
+    Open Deep Links In New Window: OpenTubeX'a Geçen URL'leri Yeni Pencerede Aç
     Minimize to system tray: Sistem tepsisine küçült
   Theme Settings:
     Theme Settings: 'Tema'
@@ -373,7 +373,7 @@ Settings:
     Expand Side Bar by Default: Kenar Çubuğunu Öntanımlı Olarak Genişlet
     Disable Smooth Scrolling: Düzgün Kaydırmayı Devre Dışı Bırak
     Hide Side Bar Labels: Kenar Çubuğu Etiketlerini Gizle
-    Hide FreeTube Header Logo: FreeTube Başlık Logosunu Gizle
+    Hide OpenTubeX Header Logo: OpenTubeX Başlık Logosunu Gizle
   Player Settings:
     Player Settings: 'Oynatıcı'
     Play Next Video: 'Önerilen Videoları Otomatik Oynat'
@@ -467,7 +467,7 @@ Settings:
     Select Export Type: 'Dışa Aktarma Türünü Seç'
     Import Subscriptions: 'Abonelikleri İçe Aktar'
     Export Subscriptions: 'Abonelikleri Dışa Aktar'
-    Export FreeTube: 'Freetube Biçiminde Dışa Aktar'
+    Export OpenTubeX: 'OpenTubeX Biçiminde Dışa Aktar'
     Export YouTube: 'YouTube Biçiminde Dışa Aktar'
     Export NewPipe: 'NewPipe Biçiminde Dışa Aktar'
     Import History: 'Geçmişi İçe Aktar'
@@ -494,9 +494,9 @@ Settings:
     Playlist File: Oynatma Listesi Dosyası
     Subscription File: Abonelik Dosyası
     History File: Geçmiş Dosyası
-    Export Playlists For Older FreeTube Versions:
-      Label: Eski FreeTube Sürümleri İçin Oynatma Listelerini Dışa Aktar
-      Tooltip: "Bu seçenek, tüm oynatma listelerindeki videoları 'Favoriler' adlı tek bir oynatma listesine aktarır.\nFreeTube'un eski bir sürümü için oynatma listelerindeki videolar nasıl dışa ve içe aktarılır:\n1. Oynatma listelerinizi bu seçenek etkinken dışa aktarın.\n2. Gizlilik Ayarları altındaki Tüm Oynatma Listelerini Kaldır seçeneğini kullanarak var olan tüm oynatma listelerinizi silin.\n3. FreeTube'un eski sürümünü başlatın ve dışa aktarılan oynatma listelerini içe aktarın.\""
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Eski OpenTubeX Sürümleri İçin Oynatma Listelerini Dışa Aktar
+      Tooltip: "Bu seçenek, tüm oynatma listelerindeki videoları 'Favoriler' adlı tek bir oynatma listesine aktarır.\nOpenTubeX'un eski bir sürümü için oynatma listelerindeki videolar nasıl dışa ve içe aktarılır:\n1. Oynatma listelerinizi bu seçenek etkinken dışa aktarın.\n2. Gizlilik Ayarları altındaki Tüm Oynatma Listelerini Kaldır seçeneğini kullanarak var olan tüm oynatma listelerinizi silin.\n3. OpenTubeX'un eski sürümünü başlatın ve dışa aktarılan oynatma listelerini içe aktarın.\""
 
     Search history file: Arama geçmişi dosyası
     Search history: Arama geçmişi
@@ -567,7 +567,7 @@ Settings:
     Proxy Protocol: Vekil Sunucu Protokolü
     Enable Tor / Proxy: Tor / Vekil Sunucu Etkinleştir
     Proxy Settings: Vekil Sunucu
-    Proxy Warning: FreeTube yerleşik bir vekil sunucusu sağlamaz fakat cihazınızda çalışan Tor veya bazı VPN'ler tarafından sağlanan harici vekil sunucu SOCKS5 gibi harici bir vekil sunucuya bağlanabilir. İzin verildiği takdirde, vekil sunucu/Tor ağının düzgün ayarlandığından emin olun, aksi takdirde FreeTube herhangi bir veri sağlayamayacaktır.
+    Proxy Warning: OpenTubeX yerleşik bir vekil sunucusu sağlamaz fakat cihazınızda çalışan Tor veya bazı VPN'ler tarafından sağlanan harici vekil sunucu SOCKS5 gibi harici bir vekil sunucuya bağlanabilir. İzin verildiği takdirde, vekil sunucu/Tor ağının düzgün ayarlandığından emin olun, aksi takdirde OpenTubeX herhangi bir veri sağlayamayacaktır.
     Proxy Username: Vekil Kullanıcı Adı
     Proxy Password: Vekil Parolası
   SponsorBlock Settings:
@@ -635,7 +635,7 @@ About:
   Donate: Bağış Yap
   Help: Yardım
   these people and projects: bu kişiler ve projeler
-  FreeTube is made possible by: FreeTube'e katkıda bulunanlar
+  OpenTubeX is made possible by: OpenTubeX'e katkıda bulunanlar
   Translate: Çevir
   room rules: oda kuralları
   Please read the: Lütfen okuyun
@@ -644,7 +644,7 @@ About:
   Please check for duplicates before posting: Lütfen bildirmeden önce bildirilmiş olup olmadığına bakın
   GitHub issues: GitHub sorunları
   Report a problem: Sorun bildir
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   GitHub releases: GitHub Sürümleri
   Downloads / Changelog: İndirmeler / Değişiklikler
   Source code: Kaynak kodları
@@ -725,7 +725,7 @@ Channel:
     Details: Ayrıntılar
     Joined: Katıldı
     Location: Konum
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Bu kanal yaş sınırlamasına tabidir ve şu anda FreeTube'da görüntülenememektedir.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Bu kanal yaş sınırlamasına tabidir ve şu anda OpenTubeX'da görüntülenememektedir.
   Channel Tabs: Kanal Sekmeleri
   This channel does not allow searching: Bu kanal aramaya izin vermiyor
   This channel does not exist: Bu kanal mevcut değil
@@ -734,7 +734,7 @@ Channel:
     votes: '{votes} oy'
     Reveal Answers: Yanıtları Göster
     Hide Answers: Yanıtları Gizle
-    Video hidden by FreeTube: FreeTube tarafından gizlenen video
+    Video hidden by OpenTubeX: OpenTubeX tarafından gizlenen video
     View Full Post: Gönderinin Tamamını Görüntüle
     Viewing Posts Only Supported By Invidious: Gönderileri görüntüleme yalnızca Invidious tarafından desteklenir. Invidious olmadan içeriği görüntülemek için bir kanalın topluluk sekmesine gidin.
   Live:
@@ -860,13 +860,13 @@ Video:
     Autoplay is on: Otomatik Oynat Açık
   IP block: YouTube, IP adresinizin video izlemesini engelledi. Lütfen farklı bir VPN veya vekil sunucuya geçmeyi deneyin.
   Unlisted: Listelenmemiş
-  AgeRestricted: Yaş sınırlamalı videolar, Google hesabına giriş ve yaş doğrulaması yapılmış bir YouTube hesabının kullanımını gerektirdiği için FreeTube üzerinden izlenemez.
-  MembersOnly: Sadece üyelere özel videolar, Google hesabına giriş ve yükleyicinin kanalına ücretli abonelik gerektirdiği için FreeTube üzerinden izlenemez.
+  AgeRestricted: Yaş sınırlamalı videolar, Google hesabına giriş ve yaş doğrulaması yapılmış bir YouTube hesabının kullanımını gerektirdiği için OpenTubeX üzerinden izlenemez.
+  MembersOnly: Sadece üyelere özel videolar, Google hesabına giriş ve yükleyicinin kanalına ücretli abonelik gerektirdiği için OpenTubeX üzerinden izlenemez.
   DeArrow:
     Show Original Details: Düzenlenmemiş Detayları Göster
     Show Modified Details: Düzenlenmiş Detayları Göster
 #& Playlists
-  DRMProtected: DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden FreeTube ile oynatılamaz. Bu videoyu izlemek istiyorsanız lütfen resmi YouTube web sitesinde DRM etkinleştirilmiş bir web tarayıcısında izleyin.
+  DRMProtected: DRM korumalı videolar, özel kapalı kaynak bileşenleri gerektirdiğinden OpenTubeX ile oynatılamaz. Bu videoyu izlemek istiyorsanız lütfen resmi YouTube web sitesinde DRM etkinleştirilmiş bir web tarayıcısında izleyin.
   Watched Progress Saved: İzlenen İlerleme Kaydedildi
   Save Watched Progress: İzlenen İlerlemeyi Kaydet
 Playlist:
@@ -959,25 +959,25 @@ No: 'Hayır'
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Eksik biçimler nedeniyle bu video kullanılamıyor. Bu durum, ülke kullanılamazlığı nedeniyle gerçekleşebilir.
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Etkinleştirildiğinde, FreeTube abonelik akışınızı almak için varsayılan yöntemi yerine RSS kullanacaktır. RSS daha hızlıdır ve IP engellemesini önler, ancak video süresi, canlı durum veya gönderiler gibi belirli bilgileri sağlamaz
-    Fetch Automatically: Etkinleştirildiğinde, FreeTube başlangıçta ve yeni bir pencere açıldığında abonelik beslemenizi otomatik olarak getirecektir.
+    Fetch Feeds from RSS: Etkinleştirildiğinde, OpenTubeX abonelik akışınızı almak için varsayılan yöntemi yerine RSS kullanacaktır. RSS daha hızlıdır ve IP engellemesini önler, ancak video süresi, canlı durum veya gönderiler gibi belirli bilgileri sağlamaz
+    Fetch Automatically: Etkinleştirildiğinde, OpenTubeX başlangıçta ve yeni bir pencere açıldığında abonelik beslemenizi otomatik olarak getirecektir.
   Player Settings:
     Default Video Format: Bir video oynatılırken kullanılan biçimleri ayarlayın. DASH biçimleri daha yüksek kalitelerde oynatabilir. Eski biçimler en fazla 360p ile sınırlıdır ancak daha az bant genişliği kullanır. Ses biçimleri yalnızca ses akışlarıdır.
     Proxy Videos Through Invidious: Videoları sunmak için YouTube ile doğrudan bağlantı kurmak yerine Invidious'a bağlanılacak.
     Scroll Playback Rate Over Video Player: Oynatma hızını denetlemek için, imleç videonun üzerindeyken Ctrl tuşunu (Mac'te Komut tuşu) basılı tutun ve oynatma hızını denetlemek için fare tekerleğini ileri veya geri kaydırın. Öntanımlı oynatma hızına (ayarlarda değiştirilmediği sürece 1x) hızlı bir şekilde dönmek için Ctrl tuşunu (Mac'te Komut tuşu) basılı tutun ve fareye sol tıklayın.
     Skip by Scrolling Over Video Player: MPV'deki gibi videoda atlamak için kaydırma tekerleğini kullanın.
   General Settings:
-    Invidious Instance: FreeTube'un API çağrıları için bağlanacağı Invidious örneği.
-    Thumbnail Preference: FreeTube'daki tüm küçük resimler, varsayılan küçük resim yerine videonun bir karesiyle, bulanık veya gizli şekilde değiştirilecektir.
-    Fallback to Non-Preferred Backend on Failure: Etkinleştirildiğinde, tercih ettiğiniz API'de bir sorun olduğunda FreeTube otomatik olarak tercih edilmeyen API'nizi yedek yöntem olarak kullanmaya çalışır.
-    Preferred API Backend: FreeTube'un veri elde etmek için kullandığı arka ucu seçin. Yerel API yerleşik bir çıkarıcıdır. Invidious API'si, bağlanmak için bir Invidious sunucusu gerektirir.
+    Invidious Instance: OpenTubeX'un API çağrıları için bağlanacağı Invidious örneği.
+    Thumbnail Preference: OpenTubeX'daki tüm küçük resimler, varsayılan küçük resim yerine videonun bir karesiyle, bulanık veya gizli şekilde değiştirilecektir.
+    Fallback to Non-Preferred Backend on Failure: Etkinleştirildiğinde, tercih ettiğiniz API'de bir sorun olduğunda OpenTubeX otomatik olarak tercih edilmeyen API'nizi yedek yöntem olarak kullanmaya çalışır.
+    Preferred API Backend: OpenTubeX'un veri elde etmek için kullandığı arka ucu seçin. Yerel API yerleşik bir çıkarıcıdır. Invidious API'si, bağlanmak için bir Invidious sunucusu gerektirir.
     Region for Trending: Öne çıkanların bölgesi, hangi ülkenin öne çıkan videolarını görüntülemek istediğinizi seçmenize olanak tanır.
-    External Link Handling: "FreeTube'da açılamayan bir bağlantı tıklandığında öntanımlı davranışı seçin.\nÖntanımlı olarak FreeTube, tıklanan bağlantıyı öntanımlı tarayıcınızda açacaktır.\n"
-    Open Deep Links In New Window: Yeniden yönlendirilmiş tarayıcı eklentileri veya komut satırı bağımsız değişkenleri gibi FreeTube'a yönlendirilen URL'ler, yeni pencerede açılırlar.
+    External Link Handling: "OpenTubeX'da açılamayan bir bağlantı tıklandığında öntanımlı davranışı seçin.\nÖntanımlı olarak OpenTubeX, tıklanan bağlantıyı öntanımlı tarayıcınızda açacaktır.\n"
+    Open Deep Links In New Window: Yeniden yönlendirilmiş tarayıcı eklentileri veya komut satırı bağımsız değişkenleri gibi OpenTubeX'a yönlendirilen URL'ler, yeni pencerede açılırlar.
   External Player Settings:
     Custom External Player Arguments: Harici oynatıcıya iletmek isteyeceğiniz, herhangi özel komut satırı argümanları.
     Ignore Warnings: Mevcut harici oynatıcının geçerli eylemi desteklemediği durumlar için uyarıları bastır (örn. oynatma listelerini ters çevirme vb.).
-    Custom External Player Executable: Öntanımlı olarak FreeTube, seçilen harici oynatıcının PATH ortam değişkeni aracılığıyla bulunabileceğini varsayacaktır. Gerekirse, burada özel bir yol ayarlanabilir.
+    Custom External Player Executable: Öntanımlı olarak OpenTubeX, seçilen harici oynatıcının PATH ortam değişkeni aracılığıyla bulunabileceğini varsayacaktır. Gerekirse, burada özel bir yol ayarlanabilir.
     External Player: 'Harici bir oynatıcı seçmek, videoyu (destekleniyorsa oynatma listesini) harici oynatıcıda açmak için önizleme görselinde bir simge görüntüleyecektir. Uyarı: Invidious ayarları harici oynatıcıları etkilemez.'
     DefaultCustomArgumentsTemplate: "(Öntanımlı: '{defaultCustomArguments}')"
     Ignore Default Arguments: Harici oynatıcıya video URL'si dışında herhangi bir öntanımlı argüman gönderme (örn. oynatma hızı, oynatma listesi URL'si vb.). Özel argümanlar yine de gönderilecektir.
@@ -986,7 +986,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Tüm videoların, oynatma listelerinin ve kanalın kendisinin arama, öne çıkanlar, en popüler ve tavsiye edilenlerde görünmesini engellemek için bir kanal kimliği girin. Girilen kanal kimliği tam olarak eşleşmelidir ve büyük/küçük harfe duyarlıdır.
     Hide Subscriptions Live: Bu ayar, "{settingsSection}" bölümünün "{subsection}" kısmında yer alan uygulama genelindeki "{appWideSetting}" ayarı tarafından geçersiz kılınıyor
-    Hide Videos, Playlists and Channels Containing Text: Yalnızca Geçmiş, Oynatma Listeleriniz ve oynatma listelerindeki videolar hariç olmak üzere, FreeTube'un tamamında orijinal başlıkları bu sözcüğü içeren tüm videoları ve oynatma listelerini gizlemek için bir sözcük, sözcük parçası veya ifade girin (büyük/küçük harfe duyarlı değildir).
+    Hide Videos, Playlists and Channels Containing Text: Yalnızca Geçmiş, Oynatma Listeleriniz ve oynatma listelerindeki videolar hariç olmak üzere, OpenTubeX'un tamamında orijinal başlıkları bu sözcüğü içeren tüm videoları ve oynatma listelerini gizlemek için bir sözcük, sözcük parçası veya ifade girin (büyük/küçük harfe duyarlı değildir).
     Hide Videos on Watch: Abonelik ve kanal sayfalarındaki videolar, kısalar ve canlı sekmelerindeki izlenen videoları gizler. Bu, kanal sayfalarındaki ana sayfa sekmesini etkilemez
   SponsorBlock Settings:
     UseDeArrowTitles: Video başlıklarını DeArrow'dan kullanıcıların gönderdiği başlıklarla değiştir.

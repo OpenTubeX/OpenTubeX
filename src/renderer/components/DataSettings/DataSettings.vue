@@ -169,7 +169,7 @@ const SUBSCRIPTIONS_PROMPT_VALUES = [
 ]
 
 const exportSubscriptionsPromptNames = computed(() => {
-  const exportFreeTube = t('Settings.Data Settings.Export FreeTube')
+  const exportFreeTube = t('Settings.Data Settings.Export OpenTubeX')
   const exportYouTube = t('Settings.Data Settings.Export YouTube')
   const exportNewPipe = t('Settings.Data Settings.Export NewPipe')
 
@@ -763,7 +763,7 @@ const WATCH_SEARCH_HISTORY_PROMPT_VALUES = [
 ]
 
 const exportWatchSearchHistoryPromptNames = computed(() => [
-  `${t('Settings.Data Settings.Export FreeTube')} (.db)`,
+  `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`,
   `${t('Settings.Data Settings.Export YouTube')} (.json)`,
   t('Close')
 ])

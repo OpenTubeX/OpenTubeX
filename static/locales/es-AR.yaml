@@ -219,7 +219,7 @@ Settings:
       External Link Handling: Manejo de Enlaces Externos
       Open Link: Abrir enlace
       Ask Before Opening Link: Preguntar antes de abrir el enlace
-    Open Deep Links In New Window: Abrir las URLs enviadas a FreeTube en una nueva ventana
+    Open Deep Links In New Window: Abrir las URLs enviadas a OpenTubeX en una nueva ventana
     Auto Load Next Page:
       Label: Cargar automáticamente la próxima página
       Tooltip: Cargar automáticamente páginas y comentarios adicionales.
@@ -289,7 +289,7 @@ Settings:
     Disable Smooth Scrolling: Desactivar desplazamiento suave
     Expand Side Bar by Default: Expandir la barra lateral por defecto
     Hide Side Bar Labels: Esconder las etiquetas de la barra lateral
-    Hide FreeTube Header Logo: Ocultar el logo de FreeTube del encabezado
+    Hide OpenTubeX Header Logo: Ocultar el logo de OpenTubeX del encabezado
   Player Settings:
     Player Settings: 'Configuraciones del reproductor'
     Play Next Video: 'Reproducción automática de videos recomendados'
@@ -383,7 +383,7 @@ Settings:
     Select Export Type: 'Seleccionar tipo para exportar'
     Import Subscriptions: 'Importar suscripciones'
     Export Subscriptions: 'Exportar suscripciones'
-    Export FreeTube: 'Exportar Freetube'
+    Export OpenTubeX: 'Exportar OpenTubeX'
     Export YouTube: 'Exportar Youtube'
     Export NewPipe: 'Exportar NewPipe'
     Import History: 'Importar historial'
@@ -410,9 +410,9 @@ Settings:
     Unable to write file: No se pudo escribir el archivo
     Unknown data key: Clave de datos desconocida
     Invalid history file: Archivo de historial no válido
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "\"Esta opción exporta los videos de todas las listas de reproducción en una sola lista llamada 'Favoritos'.\nCómo exportar e importar videos en listas de reproducción para una versión anterior de FreeTube:\n\nExportá tus listas de reproducción con esta opción activada.\n\nEliminá todas tus listas existentes usando la opción 'Eliminar todas las listas de reproducción' en la sección de Configuración de privacidad.\n\nIniciá la versión anterior de FreeTube e importá las listas de reproducción exportadas.\""
-      Label: Exportar listas de reproducción para versiones anteriores de FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "\"Esta opción exporta los videos de todas las listas de reproducción en una sola lista llamada 'Favoritos'.\nCómo exportar e importar videos en listas de reproducción para una versión anterior de OpenTubeX:\n\nExportá tus listas de reproducción con esta opción activada.\n\nEliminá todas tus listas existentes usando la opción 'Eliminar todas las listas de reproducción' en la sección de Configuración de privacidad.\n\nIniciá la versión anterior de OpenTubeX e importá las listas de reproducción exportadas.\""
+      Label: Exportar listas de reproducción para versiones anteriores de OpenTubeX
   Distraction Free Settings:
     Hide Active Subscriptions: Ocultar suscripciones activas
     Hide Live Chat: Ocultar chat en vivo
@@ -474,7 +474,7 @@ Settings:
     Error getting network information. Is your proxy configured properly?: Error al recibir datos de la red. ¿Configuraste bien tu Proxy?
     Your Info: Sus datos
     Proxy Host: Host del Proxy
-    Proxy Warning: FreeTube no tiene un proxy integrado, pero puede conectarse a un proxy externo, como uno que se esté ejecutando en tu máquina (como Tor) o un proxy externo, como un proxy SOCKS5 provisto por algunas VPNs. Si activás esta opción, asegurate de que tu proxy o Tor esté configurado correctamente, de lo contrario FreeTube no podrá obtener datos.
+    Proxy Warning: OpenTubeX no tiene un proxy integrado, pero puede conectarse a un proxy externo, como uno que se esté ejecutando en tu máquina (como Tor) o un proxy externo, como un proxy SOCKS5 provisto por algunas VPNs. Si activás esta opción, asegurate de que tu proxy o Tor esté configurado correctamente, de lo contrario OpenTubeX no podrá obtener datos.
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Notificar cuando el tramo publicitario es omitido
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL de la API de SponsorBlock (https://sponsor.ajay.app por defecto)

@@ -248,7 +248,7 @@ Settings:
     Auto Load Next Page:
       Label: Auto-indlæs næste side
       Tooltip: Indlæs flere sider og kommentarer automatisk.
-    Open Deep Links In New Window: Åbn URL'er sendt til FreeTube i et nyt vindue
+    Open Deep Links In New Window: Åbn URL'er sendt til OpenTubeX i et nyt vindue
   Theme Settings:
     Theme Settings: 'Tema'
     Match Top Bar with Main Color: 'Match topbjælken med hovedfarven'
@@ -365,7 +365,7 @@ Settings:
     Disable Smooth Scrolling: Deaktivér jævn rulning
     Expand Side Bar by Default: Udvid sidebjælken som standard
     Hide Side Bar Labels: Skjul sidebjælkens etiketter
-    Hide FreeTube Header Logo: Skjul FreeTube's header-logo
+    Hide OpenTubeX Header Logo: Skjul OpenTubeX's header-logo
   Player Settings:
     Player Settings: 'Afspiller'
     Play Next Video: 'Auto-afspil anbefalede videoer'
@@ -458,7 +458,7 @@ Settings:
     Select Export Type: 'Vælg eksporttype'
     Import Subscriptions: 'Importér abonnementer'
     Export Subscriptions: 'Eksportér abonnementer'
-    Export FreeTube: 'Eksportér FreeTube'
+    Export OpenTubeX: 'Eksportér OpenTubeX'
     Export YouTube: 'Eksportér YouTube'
     Export NewPipe: 'Eksportér NewPipe'
     Import History: 'Importér historik'
@@ -486,9 +486,9 @@ Settings:
     Playlist File: Playlistefil
 
     Subscription File: Abonnementsfil
-    Export Playlists For Older FreeTube Versions:
-      Label: Eksportér playlister til ældre FreeTube-versioner
-      Tooltip: "Denne indstilling eksporterer videoer fra alle playlister til én playliste kaldet \"Favoritter\".\nSådan eksporterer og importerer du playlister til en ældre version af FreeTube:\n1. Eksportér dine playlister med denne indstilling aktiveret.\n2. Slet alle eksisterende playlister via \"Fjern alle playlister\" under Privatlivsindstillinger.\n3. Start den ældre version af FreeTube og importér de eksporterede playlister."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Eksportér playlister til ældre OpenTubeX-versioner
+      Tooltip: "Denne indstilling eksporterer videoer fra alle playlister til én playliste kaldet \"Favoritter\".\nSådan eksporterer og importerer du playlister til en ældre version af OpenTubeX:\n1. Eksportér dine playlister med denne indstilling aktiveret.\n2. Slet alle eksisterende playlister via \"Fjern alle playlister\" under Privatlivsindstillinger.\n3. Start den ældre version af OpenTubeX og importér de eksporterede playlister."
   Proxy Settings:
     Error getting network information. Is your proxy configured properly?: Fejl ved hentning af netværksoplysninger. Er din proxy korrekt konfigureret?
     City: By
@@ -503,7 +503,7 @@ Settings:
     Proxy Protocol: Proxy-protokol
     Enable Tor / Proxy: Aktivér Tor/proxy
     Proxy Settings: Proxy
-    Proxy Warning: FreeTube har ikke en indbygget proxy, men kan oprette forbindelse til en ekstern proxy, f.eks. en, der kører på din maskine som Tor, eller en ekstern proxy som SOCKS5, der tilbydes af nogle VPN'er. Hvis aktiveret, så sørg for, at din proxy/Tor er konfigureret korrekt, ellers vil FreeTube ikke kunne hente nogen data.
+    Proxy Warning: OpenTubeX har ikke en indbygget proxy, men kan oprette forbindelse til en ekstern proxy, f.eks. en, der kører på din maskine som Tor, eller en ekstern proxy som SOCKS5, der tilbydes af nogle VPN'er. Hvis aktiveret, så sørg for, at din proxy/Tor er konfigureret korrekt, ellers vil OpenTubeX ikke kunne hente nogen data.
   Distraction Free Settings:
     Hide Active Subscriptions: Skjul aktive abonnementer
     Hide Live Chat: Skjul live chat
@@ -610,7 +610,7 @@ About:
   #& About
   Donate: Donér
   these people and projects: disse mennesker og projekter
-  FreeTube is made possible by: FreeTube er gjort mulig af
+  OpenTubeX is made possible by: OpenTubeX er gjort mulig af
   Credits: Krediteringer
   Translate: Oversæt
   room rules: reglerne for rummet
@@ -624,7 +624,7 @@ About:
   GitHub issues: GitHub-problemer
   Report a problem: Rapportér et problem
   FAQ: OSS
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   Help: Hjælp
   GitHub releases: GitHub-udgivelser
   Downloads / Changelog: Downloads / Ændringslog
@@ -710,13 +710,13 @@ Channel:
   Posts:
     Hide Answers: Skjul svar
     This channel currently does not have any posts: Denne kanal har i øjeblikket ingen opslag
-    Video hidden by FreeTube: Video skjult af FreeTube
+    Video hidden by OpenTubeX: Video skjult af OpenTubeX
     votes: '{votes} stemmer'
     Reveal Answers: Vis svar
     View Full Post: Se hele opslaget
     Viewing Posts Only Supported By Invidious: Visning af opslag understøttes kun af Invidious. Gå til en kanals fællesskabsfane for at se indholdet uden Invidious.
   This channel does not allow searching: Denne kanal tillader ikke søgning
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Denne kanal er aldersbegrænset og kan i øjeblikket ikke ses på FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Denne kanal er aldersbegrænset og kan i øjeblikket ikke ses på OpenTubeX.
   Live:
     This channel does not currently have any live streams: Denne kanal har i øjeblikket ingen livestreams
     Live: Live
@@ -838,10 +838,10 @@ Video:
     Hide Stats: Skjul statistik
     Exit Theatre Mode: Afslut teatertilstand
   Unlisted: Ikke noteret
-  MembersOnly: Videoer kun for medlemmer kan ikke ses med FreeTube, da de kræver Google-login og betalt medlemskab af uploaderens kanal.
+  MembersOnly: Videoer kun for medlemmer kan ikke ses med OpenTubeX, da de kræver Google-login og betalt medlemskab af uploaderens kanal.
   IP block: YouTube har blokeret din IP-adresse fra at se videoer. Prøv at skifte til en anden VPN eller proxy.
-  AgeRestricted: Aldersbegrænsede videoer kan ikke ses med FreeTube, da de kræver Google-login og brug af en aldersverificeret YouTube-konto.
-  DRMProtected: DRM-beskyttede videoer kan ikke afspilles i FreeTube, da de kræver proprietære komponenter med lukket kilde. Hvis du vil se denne video, skal du se den på det officielle YouTube-websted i en DRM-aktiveret webbrowser.
+  AgeRestricted: Aldersbegrænsede videoer kan ikke ses med OpenTubeX, da de kræver Google-login og brug af en aldersverificeret YouTube-konto.
+  DRMProtected: DRM-beskyttede videoer kan ikke afspilles i OpenTubeX, da de kræver proprietære komponenter med lukket kilde. Hvis du vil se denne video, skal du se den på det officielle YouTube-websted i en DRM-aktiveret webbrowser.
   More Options: Flere muligheder
   Show Super Chat Comment: Vis Super Chat-kommentar
   DeArrow:
@@ -937,8 +937,8 @@ No: 'Nej'
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Denne video er utilgængelig på grund af manglende formater. Dette kan ske ved landbaseret utilgængelighed.
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Når aktiveret, bruger FreeTube RSS i stedet for standardmetoden til at hente dit abonnementsfeed. RSS er hurtigere og forhindrer IP-blokering, men giver ikke visse oplysninger som videovarighed, live-status eller opslag
-    Fetch Automatically: Når aktiveret, henter FreeTube automatisk dit abonnementsfeed ved opstart og hver gang et nyt vindue åbnes.
+    Fetch Feeds from RSS: Når aktiveret, bruger OpenTubeX RSS i stedet for standardmetoden til at hente dit abonnementsfeed. RSS er hurtigere og forhindrer IP-blokering, men giver ikke visse oplysninger som videovarighed, live-status eller opslag
+    Fetch Automatically: Når aktiveret, henter OpenTubeX automatisk dit abonnementsfeed ved opstart og hver gang et nyt vindue åbnes.
   Player Settings:
     Default Video Format: Vælg de formater, der bruges, når en video afspilles. DASH-formater kan afspille højere kvaliteter. Ældre formater er begrænset til maks. 360p, men bruger mindre båndbredde. Lydformater er kun lydstrømme.
     Proxy Videos Through Invidious: Forbinder til Invidious for at vise videoer i stedet for at oprette en direkte forbindelse til YouTube.
@@ -946,14 +946,14 @@ Tooltips:
     Skip by Scrolling Over Video Player: Brug rullehjulet til at springe gennem videoen i bedste MPV-stil.
   General Settings:
     Region for Trending: Trendregionen lader dig vælge, hvilket lands trending videoer du vil have vist.
-    Preferred API Backend: Vælg den backend, FreeTube skal bruge til at hente data. Den lokale API er en indbygget udtrækker. Invidious-API'en kræver forbindelse til en Invidious-server.
-    Invidious Instance: Den Invidious-instans, som FreeTube forbinder til for API-opkald.
-    Thumbnail Preference: Alle miniaturebilleder på FreeTube erstattes med et billede af videoen, sløret eller skjult, i stedet for standardminiaturebilledet.
-    Fallback to Non-Preferred Backend on Failure: Når din foretrukne API har et problem, vil FreeTube automatisk forsøge at bruge din ikke-foretrukne API som en fallback-metode, hvis den er aktiveret.
-    External Link Handling: "Vælg standardadfærd, når du klikker på et link, som ikke kan åbnes i FreeTube.\nSom standard vil FreeTube åbne det klikkede link i din standardbrowser.\n"
-    Open Deep Links In New Window: URL'er, der sendes til FreeTube, f.eks. ved at omdirigere browserudvidelser eller kommandolinjeargumenter, åbnes i et nyt vindue.
+    Preferred API Backend: Vælg den backend, OpenTubeX skal bruge til at hente data. Den lokale API er en indbygget udtrækker. Invidious-API'en kræver forbindelse til en Invidious-server.
+    Invidious Instance: Den Invidious-instans, som OpenTubeX forbinder til for API-opkald.
+    Thumbnail Preference: Alle miniaturebilleder på OpenTubeX erstattes med et billede af videoen, sløret eller skjult, i stedet for standardminiaturebilledet.
+    Fallback to Non-Preferred Backend on Failure: Når din foretrukne API har et problem, vil OpenTubeX automatisk forsøge at bruge din ikke-foretrukne API som en fallback-metode, hvis den er aktiveret.
+    External Link Handling: "Vælg standardadfærd, når du klikker på et link, som ikke kan åbnes i OpenTubeX.\nSom standard vil OpenTubeX åbne det klikkede link i din standardbrowser.\n"
+    Open Deep Links In New Window: URL'er, der sendes til OpenTubeX, f.eks. ved at omdirigere browserudvidelser eller kommandolinjeargumenter, åbnes i et nyt vindue.
   External Player Settings:
-    Custom External Player Executable: Som standard antager FreeTube, at den valgte eksterne afspiller kan findes via PATH-miljøvariablen. Om nødvendigt kan en brugerdefineret sti angives her.
+    Custom External Player Executable: Som standard antager OpenTubeX, at den valgte eksterne afspiller kan findes via PATH-miljøvariablen. Om nødvendigt kan en brugerdefineret sti angives her.
     DefaultCustomArgumentsTemplate: "(Standard: '{defaultCustomArguments}')"
     Custom External Player Arguments: Eventuelle brugerdefinerede kommandolinjeargumenter, du vil sende videre til den eksterne afspiller.
     External Player: 'Vælger du en ekstern afspiller, vises et ikon for at åbne videoen (playlisten, hvis understøttet) på miniaturebilledet. Advarsel: Invidious-indstillinger påvirker ikke eksterne afspillere.'
@@ -962,7 +962,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Indtast en kanal-ID for at skjule alle videoer, playlister og selve kanalen fra søgeresultater, trending, mest populære og anbefalinger. Den indtastede kanal-ID skal matche fuldstændigt og er versalfølsom.
     Hide Subscriptions Live: Denne indstilling tilsidesættes af den app-dækkende "{appWideSetting}"-indstilling i sektionen "{subsection}" i "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Indtast et ord, ordfragment eller en sætning (ikke versalfølsom) for at skjule alle videoer og playlister, hvis originale titler indeholder det, overalt i FreeTube – undtagen historik, dine playlister og videoer inde i playlister.
+    Hide Videos, Playlists and Channels Containing Text: Indtast et ord, ordfragment eller en sætning (ikke versalfølsom) for at skjule alle videoer og playlister, hvis originale titler indeholder det, overalt i OpenTubeX – undtagen historik, dine playlister og videoer inde i playlister.
   SponsorBlock Settings:
     UseDeArrowTitles: Udskift videotitler med brugerindsendte titler fra DeArrow.
     UseDeArrowThumbnails: Erstat videominiaturebilleder med miniaturebilleder fra DeArrow.

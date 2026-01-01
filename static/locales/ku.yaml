@@ -218,7 +218,7 @@ Settings:
     External Link Handling:
       External Link Handling: چارەسەرکردنی لینکی دەرەکی
       Ask Before Opening Link: پرسیار بکە پێش کردنەوەی بەستەر
-    Open Deep Links In New Window: بەستەرە کراوەکان لە پەنجەرەیەکی نوێدا نێردراون بۆ FreeTube
+    Open Deep Links In New Window: بەستەرە کراوەکان لە پەنجەرەیەکی نوێدا نێردراون بۆ OpenTubeX
     No default instance has been set: هیچ حاڵەتێکی بنەڕەت دانەنراوە
     Preferred API Backend:
       Preferred API Backend: پشتەوەی پەسەندکراوی API
@@ -235,7 +235,7 @@ Settings:
     Default Landing Page: لاپەڕەی نیشتنەوەی پێشوەختە
     System Default: سیستەمی پێشوەختە
   Theme Settings:
-    Hide FreeTube Header Logo: شاردنەوەی لۆگۆی سەرپەڕەی FreeTube
+    Hide OpenTubeX Header Logo: شاردنەوەی لۆگۆی سەرپەڕەی OpenTubeX
     Hide Side Bar Labels: شاردنەوەی پێناسەکانی شریتی تەنیشت
     Match Top Bar with Main Color: بەراوردی شریتی لوتکە لەگەڵ ڕەنگی سەرەکی
     Expand Side Bar by Default: فراوانکردنی شریتی تەنیشت بە گریمانەیی
@@ -272,7 +272,7 @@ Settings:
     Playlist insufficient data: داتای تەواو نیە بۆ لیستی پەخشکردنی "{playlist}"، پەڕاندنی ئایتم
     Subscriptions have been successfully exported: بەشداربووەکان بە سەرکەوتوویی هەناردە کران
     All playlists has been successfully imported: هەموو لیستەکانی پەخشکردن بە سەرکەوتوویی هاوردە کران
-    Export FreeTube: هەناردەکردنی FreeTube
+    Export OpenTubeX: هەناردەکردنی OpenTubeX
     All playlists has been successfully exported: هەموو لیستەکانی پەخشکردن بە سەرکەوتوویی هەناردە کران
     History object has insufficient data, skipping item: ئۆبجێکتی مێژوو داتای تەواو ناکات، بڕگە دەپەڕێنێت
     All watched history has been successfully imported: هەموو مێژووی چاودێریکراو بە سەرکەوتوویی هاوردە کرا
@@ -291,7 +291,7 @@ Settings:
     Proxy Protocol: پرۆتۆکۆڵی پڕۆکسی
     Enable Tor / Proxy: تۆر/پرۆکسی بەکاربخە
     Proxy Settings: گۆڕانکاری پرۆکسی
-    Proxy Warning: FreeTube پرۆکسی ناوەکی نییە بەڵام دەتوانێت بە بریکارێکی دەرەکی گرێ بدات، وەک ئەوەی لەسەر ئامێرەکەت کار دەکات وەک Tor یان پرۆکسی دەرەکی وەک پرۆکسی SOCKS5 کە لەلایەن هەندێک VPN دابینکراوە. ئەگەر چالاک بوو، دڵنیابە لەوەی کە بریکارەکەت بە دروستی شێوەبەند کراوە، ئەگەرنا FreeTube ناتوانێت هیچ داتایەک بهێنێت.
+    Proxy Warning: OpenTubeX پرۆکسی ناوەکی نییە بەڵام دەتوانێت بە بریکارێکی دەرەکی گرێ بدات، وەک ئەوەی لەسەر ئامێرەکەت کار دەکات وەک Tor یان پرۆکسی دەرەکی وەک پرۆکسی SOCKS5 کە لەلایەن هەندێک VPN دابینکراوە. ئەگەر چالاک بوو، دڵنیابە لەوەی کە بریکارەکەت بە دروستی شێوەبەند کراوە، ئەگەرنا OpenTubeX ناتوانێت هیچ داتایەک بهێنێت.
   The app needs to restart for changes to take effect. Restart and apply change?: ئەم ئەپڵیکەیشنە دەبێت دووبارە بکرێتەوە بۆ ئەوەی گۆڕانکارێکان بگانە ئەنجام. دووبارە کردنەوە و چەسپکردنی گۆڕانکارێکان؟
   Return to Settings Menu: گەڕانەوە بۆ پێرستی ڕێکبەندەکان
   Distraction Free Settings:
@@ -337,7 +337,7 @@ About:
   #& About
   Donate: دۆنەیشن
   these people and projects: ئەم کەسانە و پڕۆژانە
-  FreeTube is made possible by: فریتوب بونی هەیە بەهۆی
+  OpenTubeX is made possible by: فریتوب بونی هەیە بەهۆی
   Translate: تەرجومە
   room rules: یاسای ژوورەکە
   Please read the: تکایە شتەکە بخوێنەوە
@@ -350,7 +350,7 @@ About:
   GitHub issues: GitHub کێشاکانی
   Report a problem: کێشەیەک ڕاگەیەنە
   FAQ: پرسیارانەی زۆر دەکرێن
-  FreeTube Wiki: ویکی فریتیوب
+  OpenTubeX Wiki: ویکی فریتیوب
   Help: یارمەتی
   GitHub releases: GitHub دەرچونەکانی
   Downloads / Changelog: دابەزاندنەکان / لیستی گۆڕانکاری
@@ -395,7 +395,7 @@ Channel:
   Removed subscription from {count} other channel(s): ئابوونە لە کەناڵەکانی تر لابرایەوە
   Your search results have returned 0 results: ئەنجامەکانی بەدواگەڕانەکەت 0 ئەنجامیان گەڕاندەوە
   Channel has been removed from your subscriptions: کەناڵەکە لە بەشداربوونەکانت لابراوە
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: ئەم کەناڵە تەمەنی سنووردارە و لە ئێستادا ناتوانرێت لە FreeTube ببینرێت.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ئەم کەناڵە تەمەنی سنووردارە و لە ئێستادا ناتوانرێت لە OpenTubeX ببینرێت.
   Videos:
     This channel does not currently have any videos: ئەم کەناڵە لە ئێستادا هیچ ڤیدیۆیەکی نییە
   Live:

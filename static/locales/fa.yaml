@@ -234,7 +234,7 @@ Settings:
     Auto Load Next Page:
       Label: بارگذاری خودکار صفحه بعدی
       Tooltip: صفحات و نظرات اضافی را به صورت خودکار بارگیری کنید.
-    Open Deep Links In New Window: نشانی های ارسال شده به FreeTube را در یک پنجره جدید باز کنید
+    Open Deep Links In New Window: نشانی های ارسال شده به OpenTubeX را در یک پنجره جدید باز کنید
     Minimize to system tray: کوچک کردن در سینی سیستم
   Theme Settings:
     Theme Settings: 'طرح'
@@ -352,7 +352,7 @@ Settings:
     Secondary Color Theme: 'رنگ دوم تم'
         #* Main Color Theme
     Hide Side Bar Labels: مخفی کردن عنوان های ستون فرعی
-    Hide FreeTube Header Logo: لوگوی سربرگ FreeTube را مخفی کنید
+    Hide OpenTubeX Header Logo: لوگوی سربرگ OpenTubeX را مخفی کنید
   Player Settings:
     Player Settings: 'پخش کننده'
     Play Next Video: 'پخش اتوماتیک ویدیو پیشنهادی'
@@ -504,7 +504,7 @@ Settings:
     Select Export Type: 'انتخاب روش پشتیبان گیری'
     Import Subscriptions: 'وارد کردن بک آپ دنبال شوندگان'
     Export Subscriptions: 'ذخیره (پشتیبان گیری)دنبال شوندگان'
-    Export FreeTube: 'استخراج FreeTube'
+    Export OpenTubeX: 'استخراج OpenTubeX'
     Export YouTube: 'استخراج YouTube'
     Export NewPipe: 'استخراج NewPipe'
     Import History: 'وارد کردن تاریخچه'
@@ -531,9 +531,9 @@ Settings:
     History File: فایل تاریخچه
     Subscription File: فایل اشتراک
     Playlist insufficient data: داده ناکافی برای لیست پخش «{playlist}»، در حال رد شدن از مورد
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "این گزینه ویدئوها را از همه لیست های پخش به یک لیست پخش به نام \" مورد علاقه\" صادر می کند.\nنحوه صادر کردن و وارد کردن ویدیوها در لیست پخش برای نسخه قدیمی FreeTube:\n1. لیست های پخش خود را با فعال بودن این گزینه صادر کنید.\n2. با استفاده از گزینه حذف تمام لیست‌های پخش در قسمت تنظیمات حریم خصوصی، تمام لیست های پخش موجود خود را حذف کنید.\n3. نسخه قدیمی FreeTube را راه اندازی کنید و لیست های پخش صادر شده را وارد کنید.\""
-      Label: صادر‌کردن لیست‌های پخش برای نسخه های قدیمی FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "این گزینه ویدئوها را از همه لیست های پخش به یک لیست پخش به نام \" مورد علاقه\" صادر می کند.\nنحوه صادر کردن و وارد کردن ویدیوها در لیست پخش برای نسخه قدیمی OpenTubeX:\n1. لیست های پخش خود را با فعال بودن این گزینه صادر کنید.\n2. با استفاده از گزینه حذف تمام لیست‌های پخش در قسمت تنظیمات حریم خصوصی، تمام لیست های پخش موجود خود را حذف کنید.\n3. نسخه قدیمی OpenTubeX را راه اندازی کنید و لیست های پخش صادر شده را وارد کنید.\""
+      Label: صادر‌کردن لیست‌های پخش برای نسخه های قدیمی OpenTubeX
   Proxy Settings:
     Proxy Host: میزبان پروکسی
     Region: منطقه
@@ -548,7 +548,7 @@ Settings:
     City: شهر
     Clicking on Test Proxy will send a request to: با کلیک بر روی تست پروکسی یک درخواست ارسال می شود
     Your Info: اطلاعات شما
-    Proxy Warning: FreeTube یک پروکسی داخلی ندارد اما می‌تواند به یک پروکسی خارجی مانند پروکسی که روی دستگاه شما اجرا می‌شود مانند تور یا یک پراکسی خارجی مثل یک پراکسی SOCKS5 که توسط برخی VPN‌ها ارائه می‌شود، متصل شود. در صورت فعال بودن، مطمئن شوید که پروکسی/تور شما به درستی پیکربندی شده است، در غیر این صورت FreeTube نمی تواند هیچ داده ای را واکشی کند.
+    Proxy Warning: OpenTubeX یک پروکسی داخلی ندارد اما می‌تواند به یک پروکسی خارجی مانند پروکسی که روی دستگاه شما اجرا می‌شود مانند تور یا یک پراکسی خارجی مثل یک پراکسی SOCKS5 که توسط برخی VPN‌ها ارائه می‌شود، متصل شود. در صورت فعال بودن، مطمئن شوید که پروکسی/تور شما به درستی پیکربندی شده است، در غیر این صورت OpenTubeX نمی تواند هیچ داده ای را واکشی کند.
     Proxy Username: نام کاربری پروکسی
     Proxy Password: رمز عبور پراکسی
   SponsorBlock Settings:
@@ -601,7 +601,7 @@ Channel:
       Newest: جدیدترین
     Playlists: فهرست های پخش
     This channel does not currently have any playlists: این کانال در حال حاضر هیچ لیست پخشی ندارد
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: این کانال دارای محدودیت سنی است و در حال حاضر نمی توان آن را در FreeTube مشاهده کرد.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: این کانال دارای محدودیت سنی است و در حال حاضر نمی توان آن را در OpenTubeX مشاهده کرد.
   Live:
     Live: زنده
     This channel does not currently have any live streams: این کانال در حال حاضر هیچ پخش زنده ای ندارد
@@ -622,7 +622,7 @@ Channel:
     This channel currently does not have any posts: این کانال در حال حاضر هیچ پستی ندارد
     Hide Answers: پنهان کردن پاسخ ها
     View Full Post: مشاهده کامل پست
-    Video hidden by FreeTube: ویدیو توسط FreeTube مخفی شده
+    Video hidden by OpenTubeX: ویدیو توسط OpenTubeX مخفی شده
     Viewing Posts Only Supported By Invidious: مشاهده پست ها فقط توسط Invidious پشتیبانی می شود. برای مشاهده محتوا بدون Invidious، به برگه انجمن کانال بروید.
   Removed subscription from {count} other channel(s): اشتراک از {count} کانال(های) دیگر حذف شد
   About:
@@ -759,23 +759,23 @@ Video:
   More Options: گزینه‌های بیشتر
   Unhide Channel: نمایش کانال
   Unlisted: بدون لیست
-  MembersOnly: ویدیوهای مختص اعضا را نمی‌توان با FreeTube تماشا کرد زیرا به ورود Google و عضویت پولی در کانال آپلودکننده نیاز دارند.
-  AgeRestricted: ویدیوهای دارای محدودیت سنی را نمی‌توان با FreeTube تماشا کرد، زیرا نیاز به ورود به سیستم Google و استفاده از یک حساب YouTube تأیید شده برای سن دارند.
+  MembersOnly: ویدیوهای مختص اعضا را نمی‌توان با OpenTubeX تماشا کرد زیرا به ورود Google و عضویت پولی در کانال آپلودکننده نیاز دارند.
+  AgeRestricted: ویدیوهای دارای محدودیت سنی را نمی‌توان با OpenTubeX تماشا کرد، زیرا نیاز به ورود به سیستم Google و استفاده از یک حساب YouTube تأیید شده برای سن دارند.
   DeArrow:
     Show Original Details: نمایش جزئیات اصلی
     Show Modified Details: نمایش جزئیات اصلاح شده
-  DRMProtected: ویدیوهای محافظت شده DRM را نمی توان در FreeTube پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند. اگر می‌خواهید این ویدیو را تماشا کنید، لطفاً آن را در وب‌سایت رسمی YouTube در یک مرورگر وب با قابلیت DRM تماشا کنید.
+  DRMProtected: ویدیوهای محافظت شده DRM را نمی توان در OpenTubeX پخش کرد، زیرا به اجزای اختصاصی و منبع بسته نیاز دارند. اگر می‌خواهید این ویدیو را تماشا کنید، لطفاً آن را در وب‌سایت رسمی YouTube در یک مرورگر وب با قابلیت DRM تماشا کنید.
   Save Watched Progress: ذخیره پیشرفت تماشا شده
   Watched Progress Saved: پیشرفت های تماشا شده نجات یافته
 Tooltips:
   General Settings:
-    External Link Handling: "وقتی روی پیوندی که در FreeTube باز نمی شود، روی آن کلیک می شود، رفتار پیش فرض را انتخاب کنید.\nبه طور پیش فرض FreeTube پیوند کلیک شده را در مرورگر پیش فرض شما باز می کند.\n"
+    External Link Handling: "وقتی روی پیوندی که در OpenTubeX باز نمی شود، روی آن کلیک می شود، رفتار پیش فرض را انتخاب کنید.\nبه طور پیش فرض OpenTubeX پیوند کلیک شده را در مرورگر پیش فرض شما باز می کند.\n"
     Region for Trending: منطقه گرایش‌ها به شما امکان می‌دهد ویدیوهای پرطرفدار کشوری را که می‌خواهید نمایش دهید انتخاب کنید.
-    Thumbnail Preference: تمام تصاویر کوچک در سراسر FreeTube با یک قاب از ویدیو، به جای تصویر کوچک پیش‌فرض، محو یا پنهان می‌شوند.
-    Invidious Instance: نمونه Invidious که FreeTube برای تماس های API به آن متصل می شود.
-    Fallback to Non-Preferred Backend on Failure: هنگامی که API ترجیحی شما با مشکل مواجه شود، FreeTube به طور خودکار سعی می کند از API غیر ترجیحی شما به عنوان روش بازگشتی در صورت فعال شدن استفاده کند.
-    Preferred API Backend: پس زمینه ای را انتخاب کنید که FreeTube برای به دست آوردن داده ها استفاده می کند. API محلی یک استخراج کننده داخلی است. Invidious API برای اتصال به سرور Invidious نیاز دارد.
-    Open Deep Links In New Window: نشانی هایی که به FreeTube ارسال می شوند، مانند پسوندهای مرورگر تغییر مسیر یا برهان های خط فرمان، در یک پنجره جدید باز می شوند.
+    Thumbnail Preference: تمام تصاویر کوچک در سراسر OpenTubeX با یک قاب از ویدیو، به جای تصویر کوچک پیش‌فرض، محو یا پنهان می‌شوند.
+    Invidious Instance: نمونه Invidious که OpenTubeX برای تماس های API به آن متصل می شود.
+    Fallback to Non-Preferred Backend on Failure: هنگامی که API ترجیحی شما با مشکل مواجه شود، OpenTubeX به طور خودکار سعی می کند از API غیر ترجیحی شما به عنوان روش بازگشتی در صورت فعال شدن استفاده کند.
+    Preferred API Backend: پس زمینه ای را انتخاب کنید که OpenTubeX برای به دست آوردن داده ها استفاده می کند. API محلی یک استخراج کننده داخلی است. Invidious API برای اتصال به سرور Invidious نیاز دارد.
+    Open Deep Links In New Window: نشانی هایی که به OpenTubeX ارسال می شوند، مانند پسوندهای مرورگر تغییر مسیر یا برهان های خط فرمان، در یک پنجره جدید باز می شوند.
   SponsorBlock Settings:
     UseDeArrowTitles: عناوین ویدیویی را با عناوین ارسال شده توسط کاربر از DeArrow جایگزین کنید.
     UseDeArrowThumbnails: ریز عکسها را با ریز عکسهای DeArrow جایگزین کنید.
@@ -785,10 +785,10 @@ Tooltips:
     Proxy Videos Through Invidious: به جای اتصال مستقیم به YouTube، به Invidious متصل می شود تا ویدیوها را ارائه دهد.
     Default Video Format: فرمت‌های مورد استفاده هنگام پخش ویدیو را تنظیم کنید. فرمت‌های DASH می‌توانند کیفیت‌های بالاتری را پخش کنند. فرمت‌های قدیمی حداکثر به 360p محدود می‌شوند اما از پهنای باند کمتری استفاده می‌کنند. فرمت‌های صوتی فقط جریان‌های صوتی هستند.
   Subscription Settings:
-    Fetch Feeds from RSS: وقتی این گزینه فعال باشد، FreeTube به جای روش پیش‌فرض خود برای دریافت فید اشتراک شما از RSS استفاده می‌کند. RSS سریع‌تر است و از مسدود شدن IP جلوگیری می‌کند، اما اطلاعات خاصی مانند مدت زمان ویدیو، وضعیت پخش زنده یا پست‌ها را ارائه نمی‌دهد
-    Fetch Automatically: وقتی این گزینه فعال باشد، FreeTube به طور خودکار فید اشتراک شما را در هنگام راه‌اندازی و باز شدن یک پنجره جدید دریافت می‌کند.
+    Fetch Feeds from RSS: وقتی این گزینه فعال باشد، OpenTubeX به جای روش پیش‌فرض خود برای دریافت فید اشتراک شما از RSS استفاده می‌کند. RSS سریع‌تر است و از مسدود شدن IP جلوگیری می‌کند، اما اطلاعات خاصی مانند مدت زمان ویدیو، وضعیت پخش زنده یا پست‌ها را ارائه نمی‌دهد
+    Fetch Automatically: وقتی این گزینه فعال باشد، OpenTubeX به طور خودکار فید اشتراک شما را در هنگام راه‌اندازی و باز شدن یک پنجره جدید دریافت می‌کند.
   External Player Settings:
-    Custom External Player Executable: به طور پیش فرض، FreeTube فرض می کند که پخش کننده خارجی انتخاب شده را می توان از طریق متغیر محیطی PATH پیدا کرد. در صورت نیاز، یک مسیر سفارشی را می توان در اینجا تنظیم کرد.
+    Custom External Player Executable: به طور پیش فرض، OpenTubeX فرض می کند که پخش کننده خارجی انتخاب شده را می توان از طریق متغیر محیطی PATH پیدا کرد. در صورت نیاز، یک مسیر سفارشی را می توان در اینجا تنظیم کرد.
     DefaultCustomArgumentsTemplate: "(پیش‌فرض: '{defaultCustomArguments}')"
     Ignore Warnings: اخطارها را برای زمانی که پخش کننده خارجی فعلی از عملکرد فعلی پشتیبانی نمی کند (به عنوان مثال معکوس کردن لیست های پخش و غیره) حذف کنید.
     Custom External Player Arguments: هر برهان خط فرمان سفارشی که می خواهید به پخش کننده خارجی منتقل شود.
@@ -797,7 +797,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Subscriptions Live: این تنظیم توسط تنظیم "{appWideSetting}" در سطح برنامه، در بخش "{subsection}" از "{settingsSection}" لغو می‌شود
     Hide Channels: یک شناسه کانال وارد کنید تا همه ویدیوها، لیست‌های پخش و خود کانال در جستجو، پرطرفدار، محبوب‌ترین و توصیه‌شده‌ها ظاهر نشود. شناسه کانال وارد شده باید کاملاً مطابقت داشته باشد و شامل حروف کوچک و بزرگ باشد.
-    Hide Videos, Playlists and Channels Containing Text: یک کلمه، قطعه کلمه یا عبارت (بدون حساسیت به حروف کوچک) وارد کنید تا همه ویدیوها و فهرست‌های پخشی که عنوان اصلی آنها حاوی آن در تمام FreeTube است، پنهان شود، به استثنای تاریخچه، فهرست‌های پخش شما، و ویدیوهای داخل فهرست‌های پخش.
+    Hide Videos, Playlists and Channels Containing Text: یک کلمه، قطعه کلمه یا عبارت (بدون حساسیت به حروف کوچک) وارد کنید تا همه ویدیوها و فهرست‌های پخشی که عنوان اصلی آنها حاوی آن در تمام OpenTubeX است، پنهان شود، به استثنای تاریخچه، فهرست‌های پخش شما، و ویدیوهای داخل فهرست‌های پخش.
     Hide Videos on Watch: ویدیوهای تماشا شده را از تب‌های ویدیوها، ویدیوهای کوتاه و ویدیوهای زنده در صفحات اشتراک و کانال پنهان می‌کند. این کار روی تب خانه در صفحات کانال تأثیری ندارد
   Experimental Settings:
     Replace HTTP Cache: حافظه پنهان HTTP مبتنی بر دیسک Electron را غیرفعال می کند و یک کش تصویر سفارشی در حافظه را فعال می کند. منجر به افزایش مصرف رم خواهد شد.
@@ -815,7 +815,7 @@ About:
   Credits: اعتبارات
   Beta: بتا
   About: درباره
-  FreeTube Wiki: ویکی فریتیوب
+  OpenTubeX Wiki: ویکی فریتیوب
   GitHub releases: نسخه های گیت هاب
   FAQ: پرسش و پاسخ
   Please read the: لطفاً بخوانید
@@ -829,7 +829,7 @@ About:
   Donate: اهدا
   Source code: کد منبع
   Mastodon: برنامه ماستودون
-  FreeTube is made possible by: فری تیوب ممکن است ساخته شده توسط
+  OpenTubeX is made possible by: فری تیوب ممکن است ساخته شده توسط
   AGPLv3: پروانه‌عمومی‌جامع‌آفرو نسخه‌3
   Licensed under the: دارای مجوز تحت
 New Window: پنجره جدید

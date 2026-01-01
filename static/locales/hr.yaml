@@ -247,7 +247,7 @@ Settings:
     Auto Load Next Page:
       Label: Automatski učitaj sljedeću stranicu
       Tooltip: Automatski učitaj dodatne stranice i komentare.
-    Open Deep Links In New Window: Otvori URL-ove proslijeđene FreeTubeu u novom prozoru
+    Open Deep Links In New Window: Otvori URL-ove proslijeđene OpenTubeXu u novom prozoru
     Minimize to system tray: Smanji na programsku traku
   Theme Settings:
     Theme Settings: 'Tema'
@@ -365,7 +365,7 @@ Settings:
     Disable Smooth Scrolling: Deaktiviraj neisprekidano pomicanje
     Expand Side Bar by Default: Standardno proširi bočnu traku
     Hide Side Bar Labels: Sakrij oznake bočnih traka
-    Hide FreeTube Header Logo: Sakrij FreeTube logotip u zaglavlju
+    Hide OpenTubeX Header Logo: Sakrij OpenTubeX logotip u zaglavlju
   Player Settings:
     Player Settings: 'Player'
     Play Next Video: 'Automatski reproduciraj preporučena videa'
@@ -472,7 +472,7 @@ Settings:
     Import History: Uvezi povijest
     Export NewPipe: Izvezi NewPipe
     Export YouTube: Izvezi YouTube
-    Export FreeTube: Izvezi FreeTube
+    Export OpenTubeX: Izvezi OpenTubeX
     Export Subscriptions: Izvezi pretplate
     Import Subscriptions: Uvezi pretplate
     Select Export Type: Odaberi vrstu izvoza
@@ -487,9 +487,9 @@ Settings:
     Subscription File: Datoteka pretplate
     History File: Datoteka povijesti
     Playlist File: Datoteka zbirke
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Ova opcija izvozi videa iz svih zbirki u jednu zbirku pod nazivom „Favoriti”.\nKako izvesti i uvesti videa u zbirkama za stariju FreeTube verziju:\n 1. Izvezi svoje zbirke s ovom opcijom aktiviranom.\n2. Izbriši sve svoje postojeće zbirke pomoću opcije „Ukloni sve zbirke” u postavkama privatnosti.\n3. Pokreni stariju FreeTube verziju i uvezi izvezene zbirke.\""
-      Label: Izvezi zbirke za starije FreeTube verzije
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Ova opcija izvozi videa iz svih zbirki u jednu zbirku pod nazivom „Favoriti”.\nKako izvesti i uvesti videa u zbirkama za stariju OpenTubeX verziju:\n 1. Izvezi svoje zbirke s ovom opcijom aktiviranom.\n2. Izbriši sve svoje postojeće zbirke pomoću opcije „Ukloni sve zbirke” u postavkama privatnosti.\n3. Pokreni stariju OpenTubeX verziju i uvezi izvezene zbirke.\""
+      Label: Izvezi zbirke za starije OpenTubeX verzije
   Distraction Free Settings:
     Hide Trending Videos: Sakrij videa u trendu
     Hide Recommended Videos: Sakrij preporučena videa
@@ -553,7 +553,7 @@ Settings:
     Proxy Protocol: Protokol posrednika
     Enable Tor / Proxy: Aktiviraj Tor/Posrednik
     Proxy Settings: Posrednik
-    Proxy Warning: FreeTube nema ugrađeni proxy, ali se može povezati s eksternim proxyjem, poput onog koji radi na tvom računalu poput Tor-a ili eksternog proxyja, poput SOCKS5 proxyja koji pružaju neki VPN-ovi. Ako je aktiviran, provjeri je li tvoj proxy/Tor pravilno konfiguriran, inače FreeTube neće moći dohvatiti nikoje podatke.
+    Proxy Warning: OpenTubeX nema ugrađeni proxy, ali se može povezati s eksternim proxyjem, poput onog koji radi na tvom računalu poput Tor-a ili eksternog proxyja, poput SOCKS5 proxyja koji pružaju neki VPN-ovi. Ako je aktiviran, provjeri je li tvoj proxy/Tor pravilno konfiguriran, inače OpenTubeX neće moći dohvatiti nikoje podatke.
     Proxy Username: Korisničko ime za proxy
     Proxy Password: Lozinka za proxy
   SponsorBlock Settings:
@@ -623,14 +623,14 @@ About:
   Chat on Matrix: Razgovaraj na Matrixu
   Please check for duplicates before posting: Prije slanja greške, provjeri, je li ista greška već prijavljena
   these people and projects: ovi ljudi i projekti
-  FreeTube is made possible by: FreeTube omogućuju
+  OpenTubeX is made possible by: OpenTubeX omogućuju
   Translate: Prevodi
   room rules: pravila sobe
   Please read the: Pročitaj
   Mastodon: Mastodon
   GitHub issues: GitHub problemi
   Report a problem: Prijavi grešku
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   GitHub releases: GitHub izdanja
   Downloads / Changelog: Preuzimanja/dnevnik promjena
   Source code: Izvorni kod
@@ -714,7 +714,7 @@ Channel:
   Channel Tabs: Kartice kanala
   This channel does not exist: Ovaj kanal ne postoji
   This channel does not allow searching: Ovaj kanal ne dozvoljava pretraživanje
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Ovaj je kanal dobno ograničen i trenutačno se ne može gledati na FreeTubeu.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Ovaj je kanal dobno ograničen i trenutačno se ne može gledati na OpenTubeXu.
   Live:
     Live: Uživo
     This channel does not currently have any live streams: Ovaj kanal trenutačno nema prijenosa uživo
@@ -723,7 +723,7 @@ Channel:
     Reveal Answers: Prikaži odgovore
     Hide Answers: Sakrij odgovore
     votes: '{votes} glasa'
-    Video hidden by FreeTube: Video skriven od FreeTubea
+    Video hidden by OpenTubeX: Video skriven od OpenTubeXa
     View Full Post: Pogledaj cijeli post
     Viewing Posts Only Supported By Invidious: Prikazivanje postova podržava samo Invidious. Idi na karticu zajednice kanala za prikaz sadržaja bez Invidiousa.
   Shorts:
@@ -844,14 +844,14 @@ Video:
     Full Window: Cjeloekranski prikaz
     Autoplay is off: Automatska reprodukcija je isključena
     Autoplay is on: Automatska reprodukcija je uključena
-  MembersOnly: Videa koja su namijenjena samo za članove ne mogu se gledati putem FreeTubea jer zahtijevaju prijavu na Google i plaćeno članstvo na kanalu prenositelja.
+  MembersOnly: Videa koja su namijenjena samo za članove ne mogu se gledati putem OpenTubeXa jer zahtijevaju prijavu na Google i plaćeno članstvo na kanalu prenositelja.
   Unlisted: Skriveni za javnost
   IP block: YouTube je blokirao tvoju IP adresu za gledanje videa. Pokušaj se prebaciti na jedan drugi VPN ili proxy.
-  AgeRestricted: Videa s dobnim ograničenjem se ne mogu gledati s FreeTubeom jer zahtijevaju prijavu na Google i korištenje YouTube računa s dobnom provjerom.
+  AgeRestricted: Videa s dobnim ograničenjem se ne mogu gledati s OpenTubeXom jer zahtijevaju prijavu na Google i korištenje YouTube računa s dobnom provjerom.
   DeArrow:
     Show Original Details: Prikaži detalje originala
     Show Modified Details: Prikaži detalje promjena
-  DRMProtected: DRM-om zaštićena videa ne mogu se reproducirati u FreeTubeu jer zahtijevaju vlasničke komponente zatvorenog koda. Ako želiš gledati ovaj video, gledaj ga na službenoj YouTube web stranici u web pregledniku s aktiviranim DRM-om.
+  DRMProtected: DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda. Ako želiš gledati ovaj video, gledaj ga na službenoj YouTube web stranici u web pregledniku s aktiviranim DRM-om.
 #& Playlists
   Watched Progress Saved: Napredak gledanja spremljen
   Save Watched Progress: Spremi napredak gledanja
@@ -949,21 +949,21 @@ Tooltips:
     Scroll Playback Rate Over Video Player: Dok se pokazivač nalazi na videu, pritisni i drži tipku Control (Command tipka na Macu) i pomiči kotačić miša naprijed ili natrag za upravljanje brzine reprodukcije. Pritisni i drži tipku Control (Command tipka na Macu) i pritisni lijevom tipkom miša za brzo vraćanje na standardnu brzinu reprodukcije (jednostruka brzina, ukoliko nije promijenjena u postavkama).
     Skip by Scrolling Over Video Player: Koristi kotačić za pregledavanje videa, MPV stil.
   General Settings:
-    Invidious Instance: Invidious primjerak na koji će se FreeTube povezati za pozive API-a.
-    Thumbnail Preference: U FreeTubeu će se sve minijature zamijeniti s jednim kadrom videa – zamućeno ili skriveno – umjesto standardne minijature.
-    Fallback to Non-Preferred Backend on Failure: Ako primarno odabrano sučelje ima problema, FreeTube će automatski pokušati koristiti sekundarno sučelje kao zamjensku metodu, ako je aktivirano.
-    Preferred API Backend: Odaberi pozadinski sustav koji FreeTube koristi za dobivanje podataka. Lokalno sučelje je ugrađeni sustav. Invidious sučelje zahtijeva Invidious poslužitelja na koji će se povezati.
+    Invidious Instance: Invidious primjerak na koji će se OpenTubeX povezati za pozive API-a.
+    Thumbnail Preference: U OpenTubeXu će se sve minijature zamijeniti s jednim kadrom videa – zamućeno ili skriveno – umjesto standardne minijature.
+    Fallback to Non-Preferred Backend on Failure: Ako primarno odabrano sučelje ima problema, OpenTubeX će automatski pokušati koristiti sekundarno sučelje kao zamjensku metodu, ako je aktivirano.
+    Preferred API Backend: Odaberi pozadinski sustav koji OpenTubeX koristi za dobivanje podataka. Lokalno sučelje je ugrađeni sustav. Invidious sučelje zahtijeva Invidious poslužitelja na koji će se povezati.
     Region for Trending: 'Regija trendova omogućuje biranje prikaza videa u trendu za određenu zemlju.'
-    External Link Handling: "Odaberi standardno ponašanje kad se pritisne poveznica koja se ne može otvoriti u FreeTubeu.\nFreeTube takve poveznice otvara u tvom standardnom pregledniku.\n"
-    Open Deep Links In New Window: URL adrese koje su proslijeđene na FreeTube, kao što su proširenja preglednika za preusmjeravanje ili argumenti naredbenog retka, otvaraju se u novom prozoru.
+    External Link Handling: "Odaberi standardno ponašanje kad se pritisne poveznica koja se ne može otvoriti u OpenTubeXu.\nOpenTubeX takve poveznice otvara u tvom standardnom pregledniku.\n"
+    Open Deep Links In New Window: URL adrese koje su proslijeđene na OpenTubeX, kao što su proširenja preglednika za preusmjeravanje ili argumenti naredbenog retka, otvaraju se u novom prozoru.
   Subscription Settings:
-    Fetch Feeds from RSS: Kada je aktivirano, FreeTube će koristiti RSS umjesto vlastite standardne metode za dohvaćanje podataka tvoje pretplate. RSS je brži i sprečava blokiranje IP adresa, ali ne pruža određene podatke kao što su trajanje videa, stanje „uživo” ili postovi
-    Fetch Automatically: Kada je aktivirano, FreeTube će automatski dohvatiti feed tvoje pretplate pri pokretanju programa i kada se otvori novi prozor.
+    Fetch Feeds from RSS: Kada je aktivirano, OpenTubeX će koristiti RSS umjesto vlastite standardne metode za dohvaćanje podataka tvoje pretplate. RSS je brži i sprečava blokiranje IP adresa, ali ne pruža određene podatke kao što su trajanje videa, stanje „uživo” ili postovi
+    Fetch Automatically: Kada je aktivirano, OpenTubeX će automatski dohvatiti feed tvoje pretplate pri pokretanju programa i kada se otvori novi prozor.
   External Player Settings:
     External Player: Biranjem eksternog playera prikazat će se ikona, za otvaranje videa (zbirka, ako je podržana) u vanjskom playeru, na minijaturi. Upozorenje, Invidious postavke ne utječu na eksterne playere.
     Custom External Player Arguments: Svi prilagođeni argumenti naredbenog retka, koje želiš da se proslijede eksternom playeru.
     Ignore Warnings: Nemoj prikazati upozorenja kad trenutačni eksterni player ne podržava trenutačnu radnju (npr. preokretanje redoslijeda zbirke itd.).
-    Custom External Player Executable: Prema standardnim postavkama, FreeTube će pretpostaviti da se odabrani eksterni player može pronaći putem varijable okruženja PATH (putanja). Ako je potrebno, ovdje se može postaviti prilagođena putanja.
+    Custom External Player Executable: Prema standardnim postavkama, OpenTubeX će pretpostaviti da se odabrani eksterni player može pronaći putem varijable okruženja PATH (putanja). Ako je potrebno, ovdje se može postaviti prilagođena putanja.
     DefaultCustomArgumentsTemplate: '(Standardno: „{defaultCustomArguments}”)'
     Ignore Default Arguments: Ne šalji bilo koje standardne argumente eksternom playeru osim URL-a videa (npr. brzina reprodukcije, URL zbirke itd.). Prilagođeni argumenti će se i dalje prosljediti.
   Experimental Settings:
@@ -971,7 +971,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Upiši ID kanala za skrivanje svih videa, zbirki kao i samog kanala u prikazu pretrage, trendova, najpopularniji i preporučeni. Upisani ID kanala se mora potpuno poklapati i razlikuje velika i mala slova.
     Hide Subscriptions Live: Ovu postavku nadjačava programska postavka „{appWideSetting}”, u odjeljku „{subsection}” u „{settingsSection}”
-    Hide Videos, Playlists and Channels Containing Text: Upiši riječ, fragment riječi ili izraz (ne razlikuje velika i mala slova) za skrivanje svih videa i zbirki s tim sadržajem u njihovim izvornim naslovima u cijelom FreeTubeu, isključujući samo povijest, tvoje zbirke i videa unutar zbirki.
+    Hide Videos, Playlists and Channels Containing Text: Upiši riječ, fragment riječi ili izraz (ne razlikuje velika i mala slova) za skrivanje svih videa i zbirki s tim sadržajem u njihovim izvornim naslovima u cijelom OpenTubeXu, isključujući samo povijest, tvoje zbirke i videa unutar zbirki.
     Hide Videos on Watch: Skriva gledana videa s kartica „Videa”, „Kratka videa” i „Uživo” na stranicama „Pretplata” i „Kanal”. To ne utječe na karticu „Početna” na stranicama „Kanal”
   SponsorBlock Settings:
     UseDeArrowTitles: Zamijeni naslove videa koje su poslali korisnici s DeArrow naslovima.

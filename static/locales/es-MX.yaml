@@ -231,7 +231,7 @@ Settings:
     Auto Load Next Page:
       Label: Cargar automáticamente la siguiente página
       Tooltip: Cargar automáticamente páginas y comentarios adicionales.
-    Open Deep Links In New Window: Abrir las URL enviadas a FreeTube en una nueva ventana
+    Open Deep Links In New Window: Abrir las URL enviadas a OpenTubeX en una nueva ventana
   Theme Settings:
     Theme Settings: 'Ajustes de apariencia'
     Match Top Bar with Main Color: 'Igualar la barra superior con el color principal'
@@ -281,7 +281,7 @@ Settings:
     UI Scale: Escala de la interfaz
     Disable Smooth Scrolling: Desactivar desplazamiento suave
     Hide Side Bar Labels: Ocultar etiquetas de la barra lateral
-    Hide FreeTube Header Logo: Ocultar el logo del encabezado de FreeTube
+    Hide OpenTubeX Header Logo: Ocultar el logo del encabezado de OpenTubeX
   Player Settings:
     Player Settings: 'Reproductor'
     Play Next Video: 'Reproducir automáticamente videos recomendados'
@@ -357,7 +357,7 @@ Settings:
     Import History: Importar Historia
     Export NewPipe: Exportar NewPipe
     Export YouTube: Exportar YouTube
-    Export FreeTube: Exportar FreeTube
+    Export OpenTubeX: Exportar OpenTubeX
     Export Subscriptions: Exportar Suscripciones
     Import Subscriptions: Importar Suscripciones
     Select Export Type: Seleccionar tipo de exportación
@@ -451,7 +451,7 @@ About:
   Downloads / Changelog: Descargas / Informe de cambios
   GitHub releases: Lanzamientos en GitHub
   Help: Ayuda
-  FreeTube Wiki: Wiki de FreeTube
+  OpenTubeX Wiki: Wiki de OpenTubeX
   Please check for duplicates before posting: Por favor evite repetir preguntas
   FAQ: Preguntas Frecuentes
   Report a problem: Reportar un problema
@@ -460,7 +460,7 @@ About:
   Chat on Matrix: Contáctenos en Matrix
   Please read the: Por favor lea las
   Translate: Traducir
-  FreeTube is made possible by: FreeTube existe gracias a
+  OpenTubeX is made possible by: OpenTubeX existe gracias a
   these people and projects: estas personas y proyectos
   Donate: Donar
   Credits: Créditos
@@ -669,24 +669,24 @@ Search Bar:
   Remove: Eliminar
 Tooltips:
   General Settings:
-    Preferred API Backend: Elija el método que usará FreeTube para obtener datos. La API local es un recolector integrado. La API de Invidious requerirá un servidor al cual conectarse.
-    Invidious Instance: La dirección de Invidious a la que FreeTube se conectará para solicitudes de la API.
+    Preferred API Backend: Elija el método que usará OpenTubeX para obtener datos. La API local es un recolector integrado. La API de Invidious requerirá un servidor al cual conectarse.
+    Invidious Instance: La dirección de Invidious a la que OpenTubeX se conectará para solicitudes de la API.
     Region for Trending: La región de tendencias le permitirá elegir las tendencias del país que deseé ver mostradas.
-    Thumbnail Preference: Todas las miniaturas a través de FreeTube serán reemplazadas con un fotograma del video en vez de su miniatura por defecto.
-    External Link Handling: "Elija el comportamiento previsto para cuando un link, que no pueda ser abierto en FreeTube, sea cliqueado.\nPor defecto FreeTube abrirá el link cliqueado en su navegador predeterminado.\n"
-    Fallback to Non-Preferred Backend on Failure: Si la API que eligió sufre algún problema, FreeTube intentará usar automáticamente otra API como método de respaldo al activar esta opción.
+    Thumbnail Preference: Todas las miniaturas a través de OpenTubeX serán reemplazadas con un fotograma del video en vez de su miniatura por defecto.
+    External Link Handling: "Elija el comportamiento previsto para cuando un link, que no pueda ser abierto en OpenTubeX, sea cliqueado.\nPor defecto OpenTubeX abrirá el link cliqueado en su navegador predeterminado.\n"
+    Fallback to Non-Preferred Backend on Failure: Si la API que eligió sufre algún problema, OpenTubeX intentará usar automáticamente otra API como método de respaldo al activar esta opción.
   External Player Settings:
     Custom External Player Arguments: Cualquier argumento, que deseé anticipar al reproductor externo.
     DefaultCustomArgumentsTemplate: "(Por defecto: '{defaultCustomArguments}')"
     External Player: Elegir un reproductor externo mostrará un ícono, para abrir el video (o lista, si es compatible) en el reproductor externo, sobre la miniatura del video.
-    Custom External Player Executable: Por defecto, FreeTube asumirá que el reproductor externo elegido estará en la ruta variable del entorno (PATH environment variable). De ser necesario, coloque aquí una ruta personalizada.
+    Custom External Player Executable: Por defecto, OpenTubeX asumirá que el reproductor externo elegido estará en la ruta variable del entorno (PATH environment variable). De ser necesario, coloque aquí una ruta personalizada.
     Ignore Warnings: Ignorar advertencias en caso de que el reproductor externo sea incompatible con la acción solicitada (p. ej. revertir listas de reproducción, etc.).
   Player Settings:
     Proxy Videos Through Invidious: Se conectará a Invidious para obtener videos en lugar de conectarse directamente a YouTube.
     Default Video Format: Establezca los formatos a usar cuando reproduce un video. Los formatos DASH pueden alcanzar mejores calidades. Los formatos heredados están limitados a un máximo de 720 píxeles de ancho, pero usan menos ancho de banda. Los formatos de audio permiten escuchar solamente el audio.
     Scroll Playback Rate Over Video Player: Mientras el cursor esté sobre el video, mantenga presionada la tecla Ctrl (tecla Comando en Mac) y use la rueda del ratón hacia adelante o atrás para controlar la velocidad de reproducción. Mantenga presionada la tecla Ctrl (tecla Comando en Mac) y haga clic izquierdo para reestablecer la velocidad de reproducción predeterminada (que es de 1x, a menos que la haya cambiado en configuración).
   Subscription Settings:
-    Fetch Feeds from RSS: Si se habilita, FreeTube usará RSS en lugar del método predeterminado para recibir videos de sus suscripciones. RSS es más rápido y previene que bloqueen su IP, pero no es capaz de proveer ciertos datos del video, como su duración, o si está en directo
+    Fetch Feeds from RSS: Si se habilita, OpenTubeX usará RSS en lugar del método predeterminado para recibir videos de sus suscripciones. RSS es más rápido y previene que bloqueen su IP, pero no es capaz de proveer ciertos datos del video, como su duración, o si está en directo
   Distraction Free Settings:
     Hide Subscriptions Live: Esta configuración se reemplaza por la configuración «{appWideSetting}» de toda la aplicación, en la sección «{subsection}» de «{settingsSection}»
 Downloading has completed: '"{videoTitle}" ha acabado de descargarse'

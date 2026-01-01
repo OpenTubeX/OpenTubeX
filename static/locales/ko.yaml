@@ -226,7 +226,7 @@ Settings:
     Secondary Color Theme: '보조색상테마'
         #* Main Color Theme
     Hide Side Bar Labels: 사이드 바 레이블 숨기기
-    Hide FreeTube Header Logo: FreeTube 헤더 로고 숨기기
+    Hide OpenTubeX Header Logo: OpenTubeX 헤더 로고 숨기기
   Player Settings:
     Player Settings: '플레이어 설정'
     Play Next Video: '다음 동영상 재생'
@@ -318,7 +318,7 @@ Settings:
     Select Export Type: '내보내기 유형 선택'
     Import Subscriptions: '구독 목록 가져오기'
     Export Subscriptions: '구독 목록 내보내기'
-    Export FreeTube: 'FreeTube 내보내기'
+    Export OpenTubeX: 'OpenTubeX 내보내기'
     Export YouTube: 'YouTube 내보내기'
     Export NewPipe: 'NewPipe 내보내기'
     Import History: '재생 기록 가져오기'
@@ -410,7 +410,7 @@ About:
   #& About
   Donate: 기부
   these people and projects: 이 사람들과 프로젝트
-  FreeTube is made possible by: FreeTube는 가능합니다
+  OpenTubeX is made possible by: OpenTubeX는 가능합니다
   Credits: 제작
   Translate: 번역
   room rules: 방 규정
@@ -424,7 +424,7 @@ About:
   GitHub issues: GitHub 이슈
   Report a problem: 문제 보고
   FAQ: FAQ
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   Help: 도움말
   GitHub releases: GitHub 릴리스
   Downloads / Changelog: 다운로드 / 변경 로그
@@ -621,25 +621,25 @@ Up Next: '다음 위로'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'FreeTube가 데이터를 얻기 위해 사용하는 백엔드를 선택하십시오. 로컬 API는 기본 제공 추출기입니다. Invidious API는 연결할 Invidious 서버가 필요합니다.'
-    Fallback to Non-Preferred Backend on Failure: '선호하는 API에 문제가 있는 경우 FreeTube는 활성화될 때, 선호하지 않는 API를 대체 방법으로 사용하려고 자동으로 시도합니다.'
-    Thumbnail Preference: 'FreeTube 전체의 모든 썸네일은 기본 썸네일 대신 비디오 프레임으로 대체됩니다.'
-    Invidious Instance: 'FreeTube가 API 호출을 위해 연결할 Invidious 인스턴스입니다.'
+    Preferred API Backend: 'OpenTubeX가 데이터를 얻기 위해 사용하는 백엔드를 선택하십시오. 로컬 API는 기본 제공 추출기입니다. Invidious API는 연결할 Invidious 서버가 필요합니다.'
+    Fallback to Non-Preferred Backend on Failure: '선호하는 API에 문제가 있는 경우 OpenTubeX는 활성화될 때, 선호하지 않는 API를 대체 방법으로 사용하려고 자동으로 시도합니다.'
+    Thumbnail Preference: 'OpenTubeX 전체의 모든 썸네일은 기본 썸네일 대신 비디오 프레임으로 대체됩니다.'
+    Invidious Instance: 'OpenTubeX가 API 호출을 위해 연결할 Invidious 인스턴스입니다.'
     Region for Trending: '트렌드 지역을 통해 표시하고 싶은 국가의 트렌드 비디오를 선택할 수 있습니다.'
-    External Link Handling: "FreeTube에서 열 수 없는 링크를 클릭할 때 기본 동작을 선택합니다.\n기본적으로 FreeTube는 기본 브라우저에서 클릭한 링크를 엽니다.\n"
+    External Link Handling: "OpenTubeX에서 열 수 없는 링크를 클릭할 때 기본 동작을 선택합니다.\n기본적으로 OpenTubeX는 기본 브라우저에서 클릭한 링크를 엽니다.\n"
   Player Settings:
     Proxy Videos Through Invidious: 'YouTube에 직접 연결하는 대신 Invidious에 연결하여 동영상을 제공합니다. API 기본 설정을 재정의합니다.'
     Default Video Format: '동영상 재생 시 사용되는 형식을 설정합니다. DASH 형식은 더 높은 품질을 재생할 수 있습니다. 레거시 형식은 최대 720p로 제한되지만 더 적은 대역폭을 사용합니다. 오디오 형식은 오디오 전용 스트림입니다.'
     Scroll Playback Rate Over Video Player: 커서가 비디오 위에 있는 동안 Control 키( Mac의 경우 Command 키)를 길게 누르고 마우스 휠을 앞뒤로 스크롤하여 재생 속도를 제어합니다. Control 키 (Mac의 경우 Command 키)를 길게 누르고 마우스 왼쪽 버튼을 클릭하여 기본 재생 속도(설정에서 변경되지 않은 경우 1배)로 빠르게 돌아갑니다.
     Skip by Scrolling Over Video Player: MPV 방식으로 마우스 스크롤을 이용해 영상을 스킵합니다.
   Subscription Settings:
-    Fetch Feeds from RSS: '활성화되면 FreeTube는 구독 피드를 가져오는 기본 방법 대신 RSS를 사용합니다. RSS는 더 빠르고 IP 차단을 방지하지만 비디오 길이 또는 라이브 상태와 같은 특정 정보를 제공하지 않습니다'
+    Fetch Feeds from RSS: '활성화되면 OpenTubeX는 구독 피드를 가져오는 기본 방법 대신 RSS를 사용합니다. RSS는 더 빠르고 IP 차단을 방지하지만 비디오 길이 또는 라이브 상태와 같은 특정 정보를 제공하지 않습니다'
 
 # Toast Messages
   External Player Settings:
     DefaultCustomArgumentsTemplate: "(기본: '{defaultCustomArguments}')"
     External Player: 외부 플레이어를 선택하면 썸네일에서 비디오 (지원되는 경우 재생 목록)를 열 수 있는 아이콘이 표시됩니다. 경고, 위반 설정은 외부 플레이어에 영향을 주지 않습니다.
-    Custom External Player Executable: 기본적으로 FreeTube는 PATH 환경 변수를 통해 선택한 외부 플레이어를 찾을 수 있다고 가정합니다. 필요한 경우 여기에서 사용자 정의 경로를 설정할 수 있습니다.
+    Custom External Player Executable: 기본적으로 OpenTubeX는 PATH 환경 변수를 통해 선택한 외부 플레이어를 찾을 수 있다고 가정합니다. 필요한 경우 여기에서 사용자 정의 경로를 설정할 수 있습니다.
     Ignore Warnings: '현재 외부 플레이어가 현재 작업을 지원하지 않는 경우(예: 재생 목록 반전 등) 경고를 표시하지 않습니다.'
     Custom External Player Arguments: 외부 플레이어로 전달되기를 원하는사용자 지정 명령줄 인수는 세미콜론(';')으로 구분됩니다.
   Distraction Free Settings:

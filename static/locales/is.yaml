@@ -254,7 +254,7 @@ Settings:
     Auto Load Next Page:
       Label: Hlaða næstu síðu sjálfvirkt
       Tooltip: Hlaða viðbótarsíðum og athugasemdum sjálfkrafa inn.
-    Open Deep Links In New Window: Opna slóðir sem beint er til FreeTube í nýjum glugga
+    Open Deep Links In New Window: Opna slóðir sem beint er til OpenTubeX í nýjum glugga
     Minimize to system tray: Lágmarka í kerfisbakka
   Theme Settings:
     Theme Settings: 'Þema'
@@ -375,7 +375,7 @@ Settings:
     Secondary Color Theme: 'Aukalitur þema'
         #* Main Color Theme
     Hide Side Bar Labels: Fela skýringar á hliðarstiku
-    Hide FreeTube Header Logo: Fela táknmynd FreeTube í haus
+    Hide OpenTubeX Header Logo: Fela táknmynd OpenTubeX í haus
   Player Settings:
     Player Settings: 'Spilari'
     Play Next Video: 'Spila sjálfkrafa myndskeið sem mælt er með'
@@ -517,7 +517,7 @@ Settings:
     Select Export Type: 'Veldu tegund útflutnings'
     Import Subscriptions: 'Flytja inn áskriftir'
     Export Subscriptions: 'Flytja út áskriftir'
-    Export FreeTube: 'Flytja út FreeTube'
+    Export OpenTubeX: 'Flytja út OpenTubeX'
     Export YouTube: 'Flytja út YouTube'
     Export NewPipe: 'Flytja út NewPipe'
     Import History: 'Flytja inn áhorfsferil'
@@ -544,9 +544,9 @@ Settings:
     Subscription File: Skrá með áskriftum
     History File: Skrá með atvikaferli
     Playlist File: Spilunarlistaskrá
-    Export Playlists For Older FreeTube Versions:
-      Label: Flytja út spilunarlista fyrir eldri útgáfur FreeTube
-      Tooltip: "Þessi valkostur flytur út myndskeið úr öllum spilunarlistum inn í einn spilunarlista sem kallast 'Eftirlæti'.\nHér er skýrt hvernig eigi að flytja út eða inn myndskeið í spilunarlistum fyrir eldri útgáfur FreeTube:\n 1. Flyttu út spilunarlistana þína með þennan valkost virkann.\n2. Eyddu út öllum fyrirliggjandi spilunarlistum hjá þér með valkostinum 'Fjarlægja alla spilunarlista' í stillingum gagnaleyndar.\n3. Ræstu eldri útgáfu FreeTube og flyttu inn spilunarlistana sem þú fluttir út.\""
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Flytja út spilunarlista fyrir eldri útgáfur OpenTubeX
+      Tooltip: "Þessi valkostur flytur út myndskeið úr öllum spilunarlistum inn í einn spilunarlista sem kallast 'Eftirlæti'.\nHér er skýrt hvernig eigi að flytja út eða inn myndskeið í spilunarlistum fyrir eldri útgáfur OpenTubeX:\n 1. Flyttu út spilunarlistana þína með þennan valkost virkann.\n2. Eyddu út öllum fyrirliggjandi spilunarlistum hjá þér með valkostinum 'Fjarlægja alla spilunarlista' í stillingum gagnaleyndar.\n3. Ræstu eldri útgáfu OpenTubeX og flyttu inn spilunarlistana sem þú fluttir út.\""
     Search history file: Leita í ferilskrá
     Search history: Leitarferill
     Import search history: Flytja inn leitarferil
@@ -567,7 +567,7 @@ Settings:
     Region: 'Hérað'
     City: 'Borg/Sveitarfélag'
     Error getting network information. Is your proxy configured properly?: 'Það tókst ekki að sækja upplýsingar um netkerfið. Er milliþjónninn rétt uppsettur?'
-    Proxy Warning: FreeTube er ekki með innbyggðan milliþjón en getur tengst við utanaðkomandi milliþjóna, til dæmis einhvern sem keyrir á vélinni þinni eins og Tor eða fjartengdan milliþjón á borð við SOCKS5-milliþjóna sem sumar VPN-þjónustur bjóða. Ef þetta er virkt skaltu ganga úr skugga um að milliþjónninn/Tor sé rétt stillt, annars mun FreeTube ekki geta sótt nein gögn.
+    Proxy Warning: OpenTubeX er ekki með innbyggðan milliþjón en getur tengst við utanaðkomandi milliþjóna, til dæmis einhvern sem keyrir á vélinni þinni eins og Tor eða fjartengdan milliþjón á borð við SOCKS5-milliþjóna sem sumar VPN-þjónustur bjóða. Ef þetta er virkt skaltu ganga úr skugga um að milliþjónninn/Tor sé rétt stillt, annars mun OpenTubeX ekki geta sótt nein gögn.
     Proxy Username: Notandanafn á milliþjóni
     Proxy Password: Lykilorð á milliþjóni
   SponsorBlock Settings:
@@ -630,7 +630,7 @@ About:
   Downloads / Changelog: 'Sóttar skrár / Breytingaskrá'
   GitHub releases: 'Útgáfur af GitHub'
   Help: 'Hjálp'
-  FreeTube Wiki: 'FreeTube wikivefur'
+  OpenTubeX Wiki: 'OpenTubeX wikivefur'
   FAQ: 'FAQ / Algengar spurningar'
   Report a problem: 'Tilkynna vandamál'
   GitHub issues: 'GitHub verkbeiðnir'
@@ -644,7 +644,7 @@ About:
   room rules: 'reglur spjallsins'
   Translate: 'Þýða'
   Credits: 'Framlög'
-  FreeTube is made possible by: 'FreeTube er gert mögulegt af'
+  OpenTubeX is made possible by: 'OpenTubeX er gert mögulegt af'
   these people and projects: 'þessu fólki og verkefnum'
   Donate: 'Styrkja'
 
@@ -727,7 +727,7 @@ Channel:
     Location: Staðsetning
   This channel does not exist: Þessi rás er ekki til
   This channel does not allow searching: Þessi rás gefur ekki kost á að leita
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Þessi rás er með aldurstakmark og er í augnablikinu ekki hægt að skoða í FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Þessi rás er með aldurstakmark og er í augnablikinu ekki hægt að skoða í OpenTubeX.
   Channel Tabs: Rásaflipar
   Live:
     Live: Í beinni
@@ -737,7 +737,7 @@ Channel:
     Reveal Answers: Birta svör
     Hide Answers: Fela svör
     votes: '{votes} atkvæði'
-    Video hidden by FreeTube: Myndskeið falið af FreeTube
+    Video hidden by OpenTubeX: Myndskeið falið af OpenTubeX
     View Full Post: Skoða alla færsluna
     Viewing Posts Only Supported By Invidious: Einungis er hægt að skoða innsendar færslur á Invidious. Farðu á samfélagsflipa rásar til að skoða efni þar án Invidious.
   Shorts:
@@ -859,13 +859,13 @@ Video:
     Autoplay is off: Slökkt er á sjálfvirkri afspilun
     Autoplay is on: Kveikt er á sjálfvirkri afspilun
   Unlisted: Óskráð
-  MembersOnly: Ekki er hægt að horfa á myndskeið einungis fyrir meðlimi með FreeTube þar sem þau krefjast innskráningar á Google og greiddu þátttökugjaldi á rás innsendandans.
-  AgeRestricted: Ekki er hægt að horfa á aldurstakmörkuð myndskeið með FreeTube þar sem þau krefjast innskráningar á Google og notkunar á aldursvottuðum YouTube-reikningi.
+  MembersOnly: Ekki er hægt að horfa á myndskeið einungis fyrir meðlimi með OpenTubeX þar sem þau krefjast innskráningar á Google og greiddu þátttökugjaldi á rás innsendandans.
+  AgeRestricted: Ekki er hægt að horfa á aldurstakmörkuð myndskeið með OpenTubeX þar sem þau krefjast innskráningar á Google og notkunar á aldursvottuðum YouTube-reikningi.
   IP block: YouTube hefur útilokað IP-vistfang þitt frá því að horfa á myndskeið. Prófaðu að skipta yfir á annan VPN eða milliþjón.
   DeArrow:
     Show Original Details: Birta upprunalegar nánari upplýsingar
     Show Modified Details: Birta breyttar nánari upplýsingar
-  DRMProtected: Ekki er hægt að spila DRM-varin myndskeið í FreeTube, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar. Ef þú vilt endilega horfa á þetta myndskeið, skaltu gera það á opinbera YouTube-vefsvæðinu í vafra með uppsettum DRM-hugbúnaði.
+  DRMProtected: Ekki er hægt að spila DRM-varin myndskeið í OpenTubeX, þar sem þau krefjast notkunar lokaðs séreignarhugbúnaðar. Ef þú vilt endilega horfa á þetta myndskeið, skaltu gera það á opinbera YouTube-vefsvæðinu í vafra með uppsettum DRM-hugbúnaði.
 #& Playlists
   Save Watched Progress: Vista áhorfsferil
   Watched Progress Saved: Áhorfsferill vistaður
@@ -943,27 +943,27 @@ Up Next: 'Næst í spilun'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Veldu bakendann sem FreeTube notar til að ná í gögn. Staðværa API-kerfisviðmótið er innbyggður skrapari. Invidious API-kerfisviðmótið krefst tengingar við Invidious-netþjón.'
-    Fallback to Non-Preferred Backend on Failure: 'Þegar forgangsbakendi API-kerfisviðmóts á í vandræðum, mun FreeTube reyna sjálfkrafa að nota ekki-forgangsbakenda API-kerfisviðmóts sem varaleið, þegar þetta er virkjað.'
-    Thumbnail Preference: 'Öllum smámyndum í FreeTube verður skipt út fyrir ramma með myndskeiðinu, móskaðan eða falinn, í stað sjálfgefinnar smámyndar.'
-    Invidious Instance: 'Tilvik Invidious-netþjóns sem FreeTube mun tengjast fyrir beiðnir í API-kerfisviðmót.'
+    Preferred API Backend: 'Veldu bakendann sem OpenTubeX notar til að ná í gögn. Staðværa API-kerfisviðmótið er innbyggður skrapari. Invidious API-kerfisviðmótið krefst tengingar við Invidious-netþjón.'
+    Fallback to Non-Preferred Backend on Failure: 'Þegar forgangsbakendi API-kerfisviðmóts á í vandræðum, mun OpenTubeX reyna sjálfkrafa að nota ekki-forgangsbakenda API-kerfisviðmóts sem varaleið, þegar þetta er virkjað.'
+    Thumbnail Preference: 'Öllum smámyndum í OpenTubeX verður skipt út fyrir ramma með myndskeiðinu, móskaðan eða falinn, í stað sjálfgefinnar smámyndar.'
+    Invidious Instance: 'Tilvik Invidious-netþjóns sem OpenTubeX mun tengjast fyrir beiðnir í API-kerfisviðmót.'
     Region for Trending: 'Landssvæði sem skal miða vinsældir við gerir þér kleift að velja í hvaða landi aukning á vinsældum í umræðunni skal miða við.'
-    External Link Handling: "Veldu sjálfgefna hegðun þegar smellt er á tengil sem ekki er hægt að opna í FreeTube.\nSjálfgefið mun FreeTube opna viðkomandi tengil í sjálfgefna vafranum þínum.\n"
-    Open Deep Links In New Window: Slóðir sem beint er til FreeTube, til dæmis með endurbeiningum vafraviðbóta eða skipanalínuviðföngum, verða opnaðar í nýjum glugga.
+    External Link Handling: "Veldu sjálfgefna hegðun þegar smellt er á tengil sem ekki er hægt að opna í OpenTubeX.\nSjálfgefið mun OpenTubeX opna viðkomandi tengil í sjálfgefna vafranum þínum.\n"
+    Open Deep Links In New Window: Slóðir sem beint er til OpenTubeX, til dæmis með endurbeiningum vafraviðbóta eða skipanalínuviðföngum, verða opnaðar í nýjum glugga.
   Player Settings:
     Proxy Videos Through Invidious: 'Mun tengjast við Invidious til að miðla myndskeiðum í stað þess að tengjast beint við YouTube.'
     Default Video Format: 'Stillu skráasniðin sem notuð eru við afspilun myndskeiða. DASH-snið (Dynamic Adaptive Streaming over HTTP) er hægt að spila í meiri gæðum. Eldri snið takmarkast við 360p en nota minni bandbreidd. Hljóðsnið eru streymi einungis með hljóði.'
     Scroll Playback Rate Over Video Player: Á meðan bendillinn er yfir myndspilaranum, ýttu og haltu niðri Ctrl-lyklinum ('Command' slaufulykill á Mac) og skrunaðu með músarhjólinu áfram eða afturábak til að stýra hraða afspilunar. Ýttu og haltu niðri Ctrl-lyklinum ('Command' slaufulykill á Mac) og smelltu með vinstri músarhnappnum til að snúa aftur í sjálfgefinn hraða (1x nema ef því hefur verið breytt í stillingunum).
     Skip by Scrolling Over Video Player: Nota skrunhjólið til að fletta í gegnum myndskeið, svipað og í MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: 'Þegar þetta er virkt, mun FreeTube nota RSS í stað sjálfgefinnar aðferðar við að safna streymi áskriftarinnar þinnar. RSS er hraðvirkara og kemur í veg fyrir útilokun IP-vistfanga, en nær ekki að birta ákveðnar upplýsingar á borð við tímalengd myndskeiða, stöðu í beinni útsendingu eða færslur'
+    Fetch Feeds from RSS: 'Þegar þetta er virkt, mun OpenTubeX nota RSS í stað sjálfgefinnar aðferðar við að safna streymi áskriftarinnar þinnar. RSS er hraðvirkara og kemur í veg fyrir útilokun IP-vistfanga, en nær ekki að birta ákveðnar upplýsingar á borð við tímalengd myndskeiða, stöðu í beinni útsendingu eða færslur'
 
 # Toast Messages
-    Fetch Automatically: Þegar þetta er virkt, mun FreeTube sækja sjálfkrafa áskriftarstreymin þín í ræsingu og þegar nýr gluggi er opnaður.
+    Fetch Automatically: Þegar þetta er virkt, mun OpenTubeX sækja sjálfkrafa áskriftarstreymin þín í ræsingu og þegar nýr gluggi er opnaður.
   External Player Settings:
     Custom External Player Arguments: Öll sérsniðin skipanaviðföng og rofar, sem beina á til utanaðkomandi spilarans.
     Ignore Warnings: Hunsa aðvarinir þegar valinn utanaðkomandi spilari styður ekki viðkomandi aðgerð (t.d. að snúa við spilunarlista, o.s.frv.).
-    Custom External Player Executable: Sjálfgefið gengur FreeTube út frá því að valinn utanaðkomandi spilari finnist í gegnum PATH umhverfisbreytuna. Ef þess þarf, má setja sérsniðna slóð hér.
+    Custom External Player Executable: Sjálfgefið gengur OpenTubeX út frá því að valinn utanaðkomandi spilari finnist í gegnum PATH umhverfisbreytuna. Ef þess þarf, má setja sérsniðna slóð hér.
     External Player: Sé valinn utanaðkomandi spilari, birtist táknmynd á smámyndinni til að opna myndskeiðið (í spilunarlista ef stuðningur er við slíkt) í þessum utanaðkomandi spilara. Aðvörun, stillingar Invidious hafa ekki áhrif á utanaðkomandi spilara.
     DefaultCustomArgumentsTemplate: "(Sjálfgefið: '{defaultCustomArguments}')"
     Ignore Default Arguments: Ekki senda nein sjálfgefin viðföng til utanaðkomandi spilarans önnur en URL-slóð myndskeiðs (t.d. afspilunarhraða, slóð spilunarlista, o.s.frv.). Sérsniðin viðföng verða send eftir sem áður.
@@ -972,7 +972,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Settu inn auðkenni rásar til að fela öll myndskeið, spilunarlista og sjálfa rásina við leit eða því sem er vinsælast, mest skoðað og mælt með. Auðkenni rásarinnar sem sett er inn þarf að vera nákvæmlega stafrétt og tekur tillit til hástafa/lágstafa.
     Hide Subscriptions Live: Þessa stillingu er hægt að taka yfir með "{appWideSetting}" stillingunni fyrir allt forritið, í "{subsection}" hlutanum í "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Settu inn orð, orðhluta eða setningu (óháð stafstöðu) til að fela öll myndskeið og spilunarlista þar sem titillinn inniheldur þetta, hvar sem er í FreeTube, með undantekningum innan áhorfsferils, spilunarlistanna þinna og myndskeiða innan spilunarlista.
+    Hide Videos, Playlists and Channels Containing Text: Settu inn orð, orðhluta eða setningu (óháð stafstöðu) til að fela öll myndskeið og spilunarlista þar sem titillinn inniheldur þetta, hvar sem er í OpenTubeX, með undantekningum innan áhorfsferils, spilunarlistanna þinna og myndskeiða innan spilunarlista.
     Hide Videos on Watch: Felur myndskeið sem búið er að horfa á, úr flipunum Myndskeið, Símamyndir og Í beinni, á áskriftar- og rásasíðunum. Þetta hefur ekki áhrif á heimaflipann á rásasíðunum
   SponsorBlock Settings:
     UseDeArrowTitles: Skipta út titlum myndskeiða fyrir titla sem notendur hafa sent inn á DeArrow.

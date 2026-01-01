@@ -212,7 +212,7 @@ Settings:
     General Settings: 'Загальні'
     Check for Updates: 'Перевірити наявність оновлень'
     Check for Latest Blog Posts: 'Перевірити останні повідомлення в блозі'
-    Fallback to Non-Preferred Backend on Failure: 'Коли у вашого головного API виникає проблема, FreeTube спробує автоматично використати допоміжний API у якості резервного, якщо він увімкнений'
+    Fallback to Non-Preferred Backend on Failure: 'Коли у вашого головного API виникає проблема, OpenTubeX спробує автоматично використати допоміжний API у якості резервного, якщо він увімкнений'
     Enable Search Suggestions: 'Увімкнути рекомендації пошуку'
     Default Landing Page: 'Типова головна сторінка'
     Locale Preference: 'Локальні налаштування'
@@ -250,7 +250,7 @@ Settings:
     Auto Load Next Page:
       Label: Автозавантаження наступної сторінки
       Tooltip: Автоматично завантажувати додаткові сторінки та коментарі.
-    Open Deep Links In New Window: Відкривати URL-адреси, передані в FreeTube, в новому вікні
+    Open Deep Links In New Window: Відкривати URL-адреси, передані в OpenTubeX, в новому вікні
   Theme Settings:
     Theme Settings: 'Теми'
     Match Top Bar with Main Color: 'Верхня панель основного кольору'
@@ -367,7 +367,7 @@ Settings:
     Secondary Color Theme: 'Другорядна кольорова тема'
         #* Main Color Theme
     Hide Side Bar Labels: Сховати мітки бічної панелі
-    Hide FreeTube Header Logo: Сховати логотип FreeTube із заголовка
+    Hide OpenTubeX Header Logo: Сховати логотип OpenTubeX із заголовка
   Player Settings:
     Player Settings: 'Плеєр'
     Play Next Video: 'Автовідтворення рекомендованих відео'
@@ -509,7 +509,7 @@ Settings:
     Select Export Type: 'Оберіть тип експорту'
     Import Subscriptions: 'Імпортувати підписки'
     Export Subscriptions: 'Експортувати підписки'
-    Export FreeTube: 'Експортувати FreeTube'
+    Export OpenTubeX: 'Експортувати OpenTubeX'
     Export YouTube: 'Експортувати YouTube'
     Export NewPipe: 'Експортувати NewPipe'
     Import History: 'Імпортувати історію'
@@ -536,9 +536,9 @@ Settings:
     Playlist File: Файл списку відтворення
     Subscription File: Файл підписки
     History File: Файл історії
-    Export Playlists For Older FreeTube Versions:
-      Label: Експортувати добірки для старих версій FreeTube
-      Tooltip: "Ця опція експортує відео з усіх добірок в одну добірку під назвою \"Улюблені\".\nЯк експортувати та імпортувати відео з добірок для старої версії FreeTube:\n1. Експортуйте свої добірки увімкнувши цю опцію.\n2. Видаліть усі свої наявні добірки за допомогою опції \"Вилучити всі добірки\" в налаштуваннях приватності..\n3. Запустіть стару версію FreeTube та імпортуйте експортовані добірки."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Експортувати добірки для старих версій OpenTubeX
+      Tooltip: "Ця опція експортує відео з усіх добірок в одну добірку під назвою \"Улюблені\".\nЯк експортувати та імпортувати відео з добірок для старої версії OpenTubeX:\n1. Експортуйте свої добірки увімкнувши цю опцію.\n2. Видаліть усі свої наявні добірки за допомогою опції \"Вилучити всі добірки\" в налаштуваннях приватності..\n3. Запустіть стару версію OpenTubeX та імпортуйте експортовані добірки."
   Proxy Settings:
     Error getting network information. Is your proxy configured properly?: Помилка отримання відомостей про мережу. Чи правильно налаштовано ваш проксі?
     City: Місто
@@ -553,7 +553,7 @@ Settings:
     Proxy Protocol: Проксі-протокол
     Enable Tor / Proxy: Увімкнути Tor / Проксі
     Proxy Settings: Проксі
-    Proxy Warning: FreeTube не має вбудованого проксі, але може підключатися до зовнішнього проксі, такого як Tor, що працює на вашому комп'ютері, або зовнішній проксі, наприклад, SOCKS5 проксі, який надають деякі VPN-сервіси. Якщо ця опція увімкнена, переконайтеся, що ваш проксі/Tor налаштовані правильно, інакше FreeTube не зможе завантажувати дані.
+    Proxy Warning: OpenTubeX не має вбудованого проксі, але може підключатися до зовнішнього проксі, такого як Tor, що працює на вашому комп'ютері, або зовнішній проксі, наприклад, SOCKS5 проксі, який надають деякі VPN-сервіси. Якщо ця опція увімкнена, переконайтеся, що ваш проксі/Tor налаштовані правильно, інакше OpenTubeX не зможе завантажувати дані.
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Сповіщати про пропуск спонсорованого відтинка
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL-адреса API SponsorBlock (типово https://sponsor.ajay.app)
@@ -612,7 +612,7 @@ About:
   #& About
   Donate: Підтримати
   these people and projects: цим людям та проєктам
-  FreeTube is made possible by: FreeTube доступний завдяки
+  OpenTubeX is made possible by: OpenTubeX доступний завдяки
   Credits: Про авторів
   Translate: Перекласти
   room rules: правила кімнати
@@ -626,7 +626,7 @@ About:
   GitHub issues: Проблеми на GitHub
   Report a problem: Повідомити про проблему
   FAQ: ЧаПи
-  FreeTube Wiki: Вікі FreeTube
+  OpenTubeX Wiki: Вікі OpenTubeX
   Help: Довідка
   GitHub releases: Випуски GitHub
   Downloads / Changelog: Завантаження / Журнал змін
@@ -711,14 +711,14 @@ Channel:
     Location: Розташування
   This channel does not exist: Цей канал не існує
   This channel does not allow searching: Цей канал не дозволяє здійснювати пошук
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Цей канал має вікові обмеження і наразі не може бути переглянутий на FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Цей канал має вікові обмеження і наразі не може бути переглянутий на OpenTubeX.
   Channel Tabs: Вкладки каналів
   Posts:
     This channel currently does not have any posts: Зараз на цьому каналі немає публікацій
     votes: 'Голосів: {votes}'
     Reveal Answers: Розгорнути відповіді
     Hide Answers: Сховати відповіді
-    Video hidden by FreeTube: Відео приховане FreeTube
+    Video hidden by OpenTubeX: Відео приховане OpenTubeX
     View Full Post: Переглянути повний пост
     Viewing Posts Only Supported By Invidious: Перегляд постів підтримується лише через Invidious. Перейдіть до вкладки спільноти каналу, щоб переглядати контент без Invidious.
   Live:
@@ -843,13 +843,13 @@ Video:
     Autoplay is on: Автовідтворення увімкнено
   IP block: YouTube заблокував вашу IP-адресу для перегляду відео. Будь ласка, спробуйте змінити VPN або проксі.
   Unlisted: Не в списку
-  AgeRestricted: Відео з віковими обмеженнями не можна переглядати за допомогою FreeTube, оскільки вони вимагають входу через Google та використання відео-аккаунту YouTube з підтвердженням віку.
+  AgeRestricted: Відео з віковими обмеженнями не можна переглядати за допомогою OpenTubeX, оскільки вони вимагають входу через Google та використання відео-аккаунту YouTube з підтвердженням віку.
   More Options: Більше опцій
   DeArrow:
     Show Original Details: Показати оригінальні деталі
     Show Modified Details: Показати змінені деталі
-  MembersOnly: Відео, доступні лише для учасників, не можна переглядати за допомогою FreeTube, оскільки вони вимагають входу через Google та платної підписки на канал завантажувача.
-  DRMProtected: Відео, захищені DRM, неможливо відтворити у FreeTube, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом. Щоб переглянути це відео, скористайтеся офіційним сайтом YouTube у веб-браузері з підтримкою DRM.
+  MembersOnly: Відео, доступні лише для учасників, не можна переглядати за допомогою OpenTubeX, оскільки вони вимагають входу через Google та платної підписки на канал завантажувача.
+  DRMProtected: Відео, захищені DRM, неможливо відтворити у OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом. Щоб переглянути це відео, скористайтеся офіційним сайтом YouTube у веб-браузері з підтримкою DRM.
 #& Playlists
   Save Watched Progress: Зберегти переглянутий прогрес
   Watched Progress Saved: Переглянутий прогрес збережено
@@ -923,27 +923,27 @@ Up Next: 'Далі'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Виберіть сервер, який FreeTube використовує для отримання даних. Локальний API є вбудованим видобувачем. Для API Invidious потрібен сервер Invidious для з'' єднання.'
-    Fallback to Non-Preferred Backend on Failure: 'Коли бажаний API має проблеми, FreeTube автоматично спробує використовувати ваш не вибраний API як запасний метод, коли його увімкнено.'
-    Thumbnail Preference: 'Усі ескізи у FreeTube будуть замінені на кадр з відео, розмитий або схований замість стандартного ескізу.'
-    Invidious Instance: 'Сервер Invidious, до якого FreeTube під''єднуватиметься для викликів API.'
+    Preferred API Backend: 'Виберіть сервер, який OpenTubeX використовує для отримання даних. Локальний API є вбудованим видобувачем. Для API Invidious потрібен сервер Invidious для з'' єднання.'
+    Fallback to Non-Preferred Backend on Failure: 'Коли бажаний API має проблеми, OpenTubeX автоматично спробує використовувати ваш не вибраний API як запасний метод, коли його увімкнено.'
+    Thumbnail Preference: 'Усі ескізи у OpenTubeX будуть замінені на кадр з відео, розмитий або схований замість стандартного ескізу.'
+    Invidious Instance: 'Сервер Invidious, до якого OpenTubeX під''єднуватиметься для викликів API.'
     Region for Trending: 'Регіон популярного дозволяє вам вибрати популярні відео країни, які ви хочете бачити.'
-    External Link Handling: "Визначте типову поведінку, коли натиснено на посилання, яке не можна відкрити у FreeTube.\nТипово FreeTube відкриває натиснуте посилання у вашому типовому переглядачі.\n"
-    Open Deep Links In New Window: URL-адреси, передані в FreeTube, наприклад через розширення для браузера або аргументи командного рядка, відкриваються в новому вікні.
+    External Link Handling: "Визначте типову поведінку, коли натиснено на посилання, яке не можна відкрити у OpenTubeX.\nТипово OpenTubeX відкриває натиснуте посилання у вашому типовому переглядачі.\n"
+    Open Deep Links In New Window: URL-адреси, передані в OpenTubeX, наприклад через розширення для браузера або аргументи командного рядка, відкриваються в новому вікні.
   Player Settings:
     Proxy Videos Through Invidious: 'Під’єднається до Invidious, щоб дивитися відео, а не встановлювати пряме з’єднання з YouTube.'
     Default Video Format: 'Встановіть формати, що використовуються при відтворенні відео. Формати DASH підтримують вищі якості. Старі формати обмежені максимальним роздільною здатністю 360p, але використовують менше пропускної здатності. Аудіоформати — це потоки тільки з аудіо.'
     Scroll Playback Rate Over Video Player: Поки курсор знаходиться над відео, натисніть і утримуйте клавішу Control (клавіша Command на Mac) і прокрутіть коліщатко миші вперед або назад, щоб контролювати швидкість відтворення. Натисніть і утримуйте клавішу Control (клавіша Command на Mac) і клацніть лівою кнопкою миші, щоб швидко повернутися до типової швидкості відтворення (1x, якщо вона не була змінена в налаштуваннях).
     Skip by Scrolling Over Video Player: Використовувати колесо прокрутки для прокручування відео в стилі MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: 'При увімкненні, FreeTube використовуватиме RSS замість стандартного методу для отримання вашого фіду підписок. RSS є швидшим і запобігає блокуванню IP-адрес, але не надає певну інформацію, таку як тривалість відео, статус в прямому ефірі або пости'
+    Fetch Feeds from RSS: 'При увімкненні, OpenTubeX використовуватиме RSS замість стандартного методу для отримання вашого фіду підписок. RSS є швидшим і запобігає блокуванню IP-адрес, але не надає певну інформацію, таку як тривалість відео, статус в прямому ефірі або пости'
 
 # Toast Messages
-    Fetch Automatically: При увімкненні, FreeTube автоматично завантажуватиме фід ваших підписок під час запуску та коли відкривається нове вікно.
+    Fetch Automatically: При увімкненні, OpenTubeX автоматично завантажуватиме фід ваших підписок під час запуску та коли відкривається нове вікно.
   External Player Settings:
     Custom External Player Arguments: Будь-які користувацькі аргументи командного рядка, які ви хочете передати зовнішньому плеєру.
     Ignore Warnings: Заборонити попередження, якщо поточний зовнішній програвач не підтримує поточну дію (наприклад, зворотна почерговість відтворення добірок тощо).
-    Custom External Player Executable: Усталено FreeTube вважатиме, що вибраний зовнішній програвач можна знайти за допомогою змінної середовища PATH. Якщо потрібно, тут можна призначити нетиповий шлях.
+    Custom External Player Executable: Усталено OpenTubeX вважатиме, що вибраний зовнішній програвач можна знайти за допомогою змінної середовища PATH. Якщо потрібно, тут можна призначити нетиповий шлях.
     External Player: Якщо обрано зовнішній програвач, з'явиться піктограма для відкриття відео (список відтворення, якщо підтримується) у зовнішньому програвачі, на мініатюрі. Увага, налаштування Invidious не застосовуються до сторонніх програвачів.
     DefaultCustomArgumentsTemplate: "(Типово: '{defaultCustomArguments}')"
     Ignore Default Arguments: Не надсилати жодних стандартних аргументів зовнішньому плеєру, окрім URL-адреси відео (наприклад, швидкість відтворення, URL-адреса добірки тощо). Користувацькі аргументи все одно будуть передаватися.
@@ -952,7 +952,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Введіть ID, щоб сховати всі відео, добірки та сам канал від появи в пошуку, тренді, найпопулярніших і рекомендованих. Введений ID каналу повинен повністю збігатися і чутливий до регістру.
     Hide Subscriptions Live: Цей параметр перевизначається загальнодоступним налаштуванням "{appWideSetting}" у розділі "{subsection}" "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Введіть слово, фрагмент слова або фразу (незалежно від регістру), щоб приховати всі відео та добірки, у заголовках яких вона міститься, по всьому FreeTube, за винятком Історії, Ваших Добірок і відео в межах добірок.
+    Hide Videos, Playlists and Channels Containing Text: Введіть слово, фрагмент слова або фразу (незалежно від регістру), щоб приховати всі відео та добірки, у заголовках яких вона міститься, по всьому OpenTubeX, за винятком Історії, Ваших Добірок і відео в межах добірок.
     Hide Videos on Watch: Приховує переглянуті відео з вкладок Відео,Shorts, та Наживо на сторінках підписок та каналу. Це не впливає на Домашню вкладку сторінок каналів
   SponsorBlock Settings:
     UseDeArrowTitles: Замінити назви відео на надіслані користувачем назви з DeArrow.

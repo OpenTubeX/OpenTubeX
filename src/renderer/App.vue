@@ -272,7 +272,7 @@ async function checkForNewUpdates() {
   }
 
   try {
-    const response = await fetch('https://api.github.com/repos/freetubeapp/freetube/releases?per_page=1')
+    const response = await fetch('https://api.github.com/repos/D3SOX/OpenTubeX/releases?per_page=1')
     const json = await response.json()
 
     const tagName = json[0].tag_name
@@ -282,7 +282,7 @@ async function checkForNewUpdates() {
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234
-      .replaceAll(/https:\/\/github\.com\/FreeTubeApp\/FreeTube\/pull\/(\d+)/g, '[#$1]($&)')
+      .replaceAll(/https:\/\/github\.com\/D3SOX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
     // Add the title
     changelog = `${changelog}`
@@ -302,7 +302,7 @@ async function checkForNewUpdates() {
       showUpdatesBanner.value = true
     }
   } catch (error) {
-    console.error('errored while checking for updates', 'https://api.github.com/repos/freetubeapp/freetube/releases?per_page=1', error)
+    console.error('errored while checking for updates', 'https://api.github.com/repos/D3SOX/OpenTubeX/releases?per_page=1', error)
   }
 }
 
@@ -322,7 +322,7 @@ function handleUpdateBannerClick(response) {
 }
 
 function openDownloadsPage() {
-  openExternalLink('https://freetubeapp.io#download')
+  openExternalLink('https://github.com/D3SOX/OpenTubeX/releases')
   showReleaseNotes.value = false
   showUpdatesBanner.value = false
 }

@@ -100,7 +100,7 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
 
   return await Innertube.create({
     // This setting is enabled by default and results in YouTube.js reusing the same session across different Innertube instances.
-    // That behavior is highly undesirable for FreeTube, as we want to create a new session every time to limit tracking.
+    // That behavior is highly undesirable for OpenTubeX, as we want to create a new session every time to limit tracking.
     enable_session_cache: false,
     retrieve_innertube_config: !generateSessionLocally,
     user_agent: navigator.userAgent,

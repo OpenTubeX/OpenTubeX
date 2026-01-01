@@ -252,7 +252,7 @@ Settings:
     Auto Load Next Page:
       Label: Laadi järgmine leht automaatselt
       Tooltip: Laadi järgmised lehed ja kommentaarid automaatselt.
-    Open Deep Links In New Window: Ava FreeTube'ile antud võrguaadressid uues aknas
+    Open Deep Links In New Window: Ava OpenTubeX'ile antud võrguaadressid uues aknas
     Minimize to system tray: Minimeeri süsteemisalve
   Theme Settings:
     Theme Settings: 'Kujundus'
@@ -373,7 +373,7 @@ Settings:
     Disable Smooth Scrolling: Ära kasuta sujuvat kerimist
     Expand Side Bar by Default: Vaikimisi näita külgriba laiana
     Hide Side Bar Labels: Peida külgriba sildid
-    Hide FreeTube Header Logo: Peida FreeTube'i päise logo
+    Hide OpenTubeX Header Logo: Peida OpenTubeX'i päise logo
   Player Settings:
     Player Settings: 'Meediamängija'
     Play Next Video: 'Esita soovitatud videoid automaatselt'
@@ -467,7 +467,7 @@ Settings:
     Select Export Type: 'Vali eksporditava faili vorming'
     Import Subscriptions: 'Impordi tellimused'
     Export Subscriptions: 'Ekspordi tellimused'
-    Export FreeTube: 'Ekspordi FreeTube vormingus'
+    Export OpenTubeX: 'Ekspordi OpenTubeX vormingus'
     Export YouTube: 'Ekspordi YouTube vormingus'
     Export NewPipe: 'Ekspordi NewPipe vormingus'
     Import History: 'Impordi ajalugu'
@@ -494,9 +494,9 @@ Settings:
     Subscription File: Tellimuse fail
     History File: Ajaloo fail
     Playlist File: Esitusloendi fail
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Selle valikuga ekspordid kõik esitusloendid ühte esitusloendisse „Lemmikud“.\n Kuidas saad seda eksportimise ja importimise valikut kasutada vanemate FreeTube'i versioonidega:\n1. Ekspordi kõik oma esitusloendid kasutades seda valikut.\n 2. Kustuta kõik oma esitusloendid Privaatsusseadistustest kasutades valikut „Kustuta kõik esitusloendid“.\n3. Käivita vanem FreeTube'i versioon ja impordi esimeses sammus eksporditud esitusloendid."
-      Label: Ekspordi esitusloendid vanemate FreeTube'i versioonide jaoks
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Selle valikuga ekspordid kõik esitusloendid ühte esitusloendisse „Lemmikud“.\n Kuidas saad seda eksportimise ja importimise valikut kasutada vanemate OpenTubeX'i versioonidega:\n1. Ekspordi kõik oma esitusloendid kasutades seda valikut.\n 2. Kustuta kõik oma esitusloendid Privaatsusseadistustest kasutades valikut „Kustuta kõik esitusloendid“.\n3. Käivita vanem OpenTubeX'i versioon ja impordi esimeses sammus eksporditud esitusloendid."
+      Label: Ekspordi esitusloendid vanemate OpenTubeX'i versioonide jaoks
     Search history file: Otsinguajaloo fail
     Search history: Otsinguajalugu
     Import search history: Impordi otsinguajalugu
@@ -565,7 +565,7 @@ Settings:
     Proxy Protocol: Puhverserveri protokoll
     Enable Tor / Proxy: Kasuta Tor'i või puhverserverit
     Proxy Settings: Puhverserver
-    Proxy Warning: FreeTube'is pole sisseehitatud proksilahendust, kuid ta võib luua ühenduse välise proksi kaudu. Näiteks kasutades sellist, mis töötab sinu arvutis või nutiseadmes, olgu selleks Tor või mõne VPNi poolt pakutav SOCKS5. Kui sa selle eelistuse sisse lülitad, palun jälgi et selline väline proksi on korralikult seadistatud. Vastasel juhul võrguühendus ei toimi ja FreeTube ei saa andmeid laadida.
+    Proxy Warning: OpenTubeX'is pole sisseehitatud proksilahendust, kuid ta võib luua ühenduse välise proksi kaudu. Näiteks kasutades sellist, mis töötab sinu arvutis või nutiseadmes, olgu selleks Tor või mõne VPNi poolt pakutav SOCKS5. Kui sa selle eelistuse sisse lülitad, palun jälgi et selline väline proksi on korralikult seadistatud. Vastasel juhul võrguühendus ei toimi ja OpenTubeX ei saa andmeid laadida.
     Proxy Username: Puhverserveri kasutajanimi
     Proxy Password: Puhverserveri salasõna
   The app needs to restart for changes to take effect. Restart and apply change?: See rakendus vajab muudatuste jõustamiseks uuesti käivitamist. Kas teeme seda nüüd?
@@ -628,7 +628,7 @@ About:
   Email: E-post
   Donate: Toeta meid
   these people and projects: tänu nendele inimestele ja projektidele
-  FreeTube is made possible by: FreeTube loomine ja arendamine on olnud võimalik
+  OpenTubeX is made possible by: OpenTubeX loomine ja arendamine on olnud võimalik
   Credits: Tänuavaldused
   Translate: Tõlgi
   room rules: jututoa reeglitega
@@ -641,7 +641,7 @@ About:
   GitHub issues: Teata vigadest GitHub'i vahendusel
   Report a problem: Vead ja probleemid
   FAQ: KKK
-  FreeTube Wiki: FreeTube viki
+  OpenTubeX Wiki: OpenTubeX viki
   Help: Abiteave
   GitHub releases: GitHub'is avaldatud versioonid
   Downloads / Changelog: Allalaadimised ja muudatuste logi
@@ -736,11 +736,11 @@ Channel:
     Reveal Answers: Näita vastuseid
     Hide Answers: Peida vastused
     votes: '{votes} häält'
-    Video hidden by FreeTube: FreeTube'i poolt peidetud video
+    Video hidden by OpenTubeX: OpenTubeX'i poolt peidetud video
     View Full Post: Vaata kogu postitust
     Viewing Posts Only Supported By Invidious: Postituste vaatamine toimib vaid Invidiouse liidestusega. Ilma selleta saad lugeda sisu, mida näed kanali kogukonna vaatest.
   This channel does not exist: Sellist kanalit ei leidu
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Sellel kanalil on vanusega seotud piirangud ja teda ei saa hetkel FreeTube'i vahendusel vaadata.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Sellel kanalil on vanusega seotud piirangud ja teda ei saa hetkel OpenTubeX'i vahendusel vaadata.
   Podcasts:
     Podcasts: Taskuhäälingud
     This channel does not currently have any podcasts: Sellel kanalil hetkel pole taskuhäälinguid
@@ -858,13 +858,13 @@ Video:
     Autoplay is off: Automaatne esitamine on kasutusel
     Autoplay is on: Automaatne esitamine pole kasutusel
   IP block: YouTube on blokeerinud sinu nutiseadme IP-aadressilt videote vaatamise. Palun kasuta mõnda muud lahendust, nagu VPN-teenust või puhverserverit.
-  MembersOnly: Kuna vajalik on sisselogimine Google'i kontoga ja tasuline liikmelisus üleslaadija kanalis, siis ainult liikmetele mõeldud videoid ei saa FreeTube'is vaadata.
-  AgeRestricted: Kuna vajalik on sisselogimine Google'i kontoga, kus vanus on kontrollitud, siis vanusepiiranguga videoid ei saa FreeTube'is vaadata.
+  MembersOnly: Kuna vajalik on sisselogimine Google'i kontoga ja tasuline liikmelisus üleslaadija kanalis, siis ainult liikmetele mõeldud videoid ei saa OpenTubeX'is vaadata.
+  AgeRestricted: Kuna vajalik on sisselogimine Google'i kontoga, kus vanus on kontrollitud, siis vanusepiiranguga videoid ei saa OpenTubeX'is vaadata.
   Unlisted: Registriväline
   DeArrow:
     Show Original Details: Näita algseid üksikasju
     Show Modified Details: Näita muudetud üksikasju
-  DRMProtected: Kuna vajalikud on suletud lähtekoodil põhinevad komponendid, siis DRMiga kaitstud videoid FreeTube esitada ei saa. Kui soovid seda videot vaadata, siis tee seda otse YouTube'i saidis kasutades DRMi-suutlikku brauserit.
+  DRMProtected: Kuna vajalikud on suletud lähtekoodil põhinevad komponendid, siis DRMiga kaitstud videoid OpenTubeX esitada ei saa. Kui soovid seda videot vaadata, siis tee seda otse YouTube'i saidis kasutades DRMi-suutlikku brauserit.
 #& Playlists
   Save Watched Progress: Salvesta vaatamise järg
   Watched Progress Saved: Vaatamise järg on salvestatud
@@ -961,23 +961,23 @@ Open New Window: Ava uus aken
 Unknown YouTube url type, cannot be opened in app: Tundmatu YouTube'i urli tüüp, mida ei saa rakenduses avada
 Tooltips:
   External Player Settings:
-    Custom External Player Executable: Vaikimisi eeldab FreeTube, et väline meediamängija on leitav PATH keskkonnamuutuja alusel. Aga kui vaja, siis saad siin seadistada muu asukoha.
+    Custom External Player Executable: Vaikimisi eeldab OpenTubeX, et väline meediamängija on leitav PATH keskkonnamuutuja alusel. Aga kui vaja, siis saad siin seadistada muu asukoha.
     Ignore Warnings: Kui väline meediamängija antud funktsionaalsust (näiteks esitusloendi järjekorra pööramine) ei toeta, siis ära näita hoiatusi.
     Custom External Player Arguments: Misiganes käsurea argumendid, mida sa soovid välisele meediamängijale saata.
     External Player: "Seadistades välise meediamängija kuvame pisipildil ikooni video (või esitusloendi) esitamiseks välises meediamängijas. Hoiatus: Invidious'e seadistused ei mõjuta välise meediamängija kasutamist."
     DefaultCustomArgumentsTemplate: "(Vaikimisi: '{defaultCustomArguments}')"
     Ignore Default Arguments: Ära edasta välisele meediamängijale ühtegi vaikimisi määratud argumenti peale video urli (näiteks taasesituse kiirus, esitusloend jne). Sinu enda määratud argumendid edastatakse vaatamata sellele seadistusele.
   Subscription Settings:
-    Fetch Feeds from RSS: Selle valiku kasutamisel FreeTube pruugib tellimuste andmete laadimisel vaikimisi meetodi asemel RSS-uudisvoogu. RSS on kiirem ja välistab IP-aadressi blokeerimise, kuid ei sisalda video kestust, otseesituse olekut ja postitusi
-    Fetch Automatically: Kui see valik on kasutusel, siis FreeTube automaatselt laadib rakenduse käivitamisel ja uue akna avamisel sinu tellimuste loendi.
+    Fetch Feeds from RSS: Selle valiku kasutamisel OpenTubeX pruugib tellimuste andmete laadimisel vaikimisi meetodi asemel RSS-uudisvoogu. RSS on kiirem ja välistab IP-aadressi blokeerimise, kuid ei sisalda video kestust, otseesituse olekut ja postitusi
+    Fetch Automatically: Kui see valik on kasutusel, siis OpenTubeX automaatselt laadib rakenduse käivitamisel ja uue akna avamisel sinu tellimuste loendi.
   General Settings:
     Region for Trending: Piirkond, mille alusel kuvame hetkel menukad ehk populaarsust koguvad videod.
-    Thumbnail Preference: Vaikimisi pisipildi asemel kuvab FreeTube kõikjal läbi rakenduse kaadrit videost ja seda hägusena ja peidetuna.
-    Fallback to Non-Preferred Backend on Failure: Kui sinu eelistatud APi ei toimi, siis kui vähegi võimalik, FreeTube üritab kasutada alternatiivi.
-    Preferred API Backend: Vali taustateenus, mida FreeTube kasutab andmete laadimisel. Kohalik API on rakenduses olemas ja Invidious'e API eeldab välise teenuseserveri kasutamist.
-    Invidious Instance: Invidious'e teenuse server, mida FreeTube kasutab API kutse tegemisel.
-    External Link Handling: "Vali vaikekäitumine, kui vajutatakse linki, mida ei saa avada FreeTubes.\nVaikimisi avaneb link kasutaja vaikebrauseris.\n"
-    Open Deep Links In New Window: FreeTube'ile brauseritest või käsurealt antud võrguaadressid avatakse uues aknas.
+    Thumbnail Preference: Vaikimisi pisipildi asemel kuvab OpenTubeX kõikjal läbi rakenduse kaadrit videost ja seda hägusena ja peidetuna.
+    Fallback to Non-Preferred Backend on Failure: Kui sinu eelistatud APi ei toimi, siis kui vähegi võimalik, OpenTubeX üritab kasutada alternatiivi.
+    Preferred API Backend: Vali taustateenus, mida OpenTubeX kasutab andmete laadimisel. Kohalik API on rakenduses olemas ja Invidious'e API eeldab välise teenuseserveri kasutamist.
+    Invidious Instance: Invidious'e teenuse server, mida OpenTubeX kasutab API kutse tegemisel.
+    External Link Handling: "Vali vaikekäitumine, kui vajutatakse linki, mida ei saa avada OpenTubeXs.\nVaikimisi avaneb link kasutaja vaikebrauseris.\n"
+    Open Deep Links In New Window: OpenTubeX'ile brauseritest või käsurealt antud võrguaadressid avatakse uues aknas.
   Player Settings:
     Default Video Format: Vali kasutatavad videovormingud. DASH-vormingutel on üldjuhul parem kvaliteet. Pärandvormingute kvaliteedi ülempiir on 360p ja seetõttu kasutavad nad vähem ribalaiust. Helivormingud kehtivad vaid helifailide jaoks.
     Proxy Videos Through Invidious: Kasutab videote esitamiseks Invidious'e teenust ega tee päringuid otse YouTube serveri pihta.
@@ -986,7 +986,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Sisesta kanali tunnus, et kõik videod, esitusloendid ja kanal ise ei oleks nähtav otsingus, soovitatavate videote, populaarsete videote ja populaarsust koguvate videote vaates. Sisestatud kanali tunnus peab otsingule vastama täpselt ja on tõstutundlik.
     Hide Subscriptions Live: Selle seadistuse tühistab rakenduseülene „{appWideSetting}“ seadistus „{subsection}“/„{settingsSection}“
-    Hide Videos, Playlists and Channels Containing Text: Sisesta sõna, sõnaosa või fraas (tõstutundetuna), mille alusel peidetakse läbivalt FreeTube'is kõik videod või esitusloendid, kus see leidub algses pealkirjas. Peitmine ei toimi ajaloos, sinu loodud esitusloendites ja esitusloendi sees olevate videote puhul.
+    Hide Videos, Playlists and Channels Containing Text: Sisesta sõna, sõnaosa või fraas (tõstutundetuna), mille alusel peidetakse läbivalt OpenTubeX'is kõik videod või esitusloendid, kus see leidub algses pealkirjas. Peitmine ei toimi ajaloos, sinu loodud esitusloendites ja esitusloendi sees olevate videote puhul.
     Hide Videos on Watch: Peidab vaadatud sisu videote, lühivideote ja otseeetri kaartidelt tellimuste ja kanalite lehtedelt. Ei mõjuta avakaarti kanalite lehtedel
   Experimental Settings:
     Replace HTTP Cache: Sellega lülitatakse välja Electron'i standardne kettal paiknev http-puhver ja võetakse kasutusele rakenduse mälupõhine puhver. Üheks tulemuseks saab olema suurem mälukasutus.

@@ -2,8 +2,8 @@ import packageDetails from '../package.json' with { type: 'json' }
 
 /** @type {import('electron-builder').Configuration} */
 export default {
-  appId: `io.freetubeapp.${packageDetails.name}`,
-  copyright: 'Copyleft © 2020-2025 freetubeapp@protonmail.com',
+  appId: `io.opentubex.${packageDetails.name}`,
+  copyright: 'Copyleft © 2020-2025',
   // asar: false,
   // compression: 'store',
   productName: packageDetails.productName,
@@ -12,9 +12,9 @@ export default {
   },
   protocols: [
     {
-      name: 'FreeTube',
+      name: 'OpenTubeX',
       schemes: [
-        'freetube'
+        'opentubex'
       ]
     }
   ],
@@ -80,10 +80,10 @@ export default {
     type: 'distribution',
     extendInfo: {
       CFBundleURLTypes: [
-        'freetube'
+        'opentubex'
       ],
       CFBundleURLSchemes: [
-        'freetube'
+        'opentubex'
       ]
     }
   },

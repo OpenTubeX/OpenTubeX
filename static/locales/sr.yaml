@@ -252,7 +252,7 @@ Settings:
     Auto Load Next Page:
       Label: Аутоматски учитај следећу страницу
       Tooltip: Аутоматско учитавање додатних страница и коментара.
-    Open Deep Links In New Window: Отворите URL адресе прослеђене FreeTube-у у новом прозору
+    Open Deep Links In New Window: Отворите URL адресе прослеђене OpenTubeX-у у новом прозору
     Minimize to system tray: Минимизирај у системску траку
   Theme Settings:
     Theme Settings: 'Тема'
@@ -369,7 +369,7 @@ Settings:
       Everforest Light Purple: Everforest светлољубичаста
     Secondary Color Theme: 'Секундарна тема боје'
         #* Main Color Theme
-    Hide FreeTube Header Logo: Сакриј FreeTube логотип у заглављу
+    Hide OpenTubeX Header Logo: Сакриј OpenTubeX логотип у заглављу
     Hide Side Bar Labels: Сакриј ознаке бочне траке
   Player Settings:
     Player Settings: 'Плејер'
@@ -512,7 +512,7 @@ Settings:
     Select Export Type: 'Избор врсте извоза'
     Import Subscriptions: 'Увоз праћења'
     Export Subscriptions: 'Извоз праћења'
-    Export FreeTube: 'Извоз FreeTube-а'
+    Export OpenTubeX: 'Извоз OpenTubeX-а'
     Export YouTube: 'Извоз YouTube-а'
     Export NewPipe: 'Извоз NewPipe-а'
     Import History: 'Увоз историје'
@@ -539,9 +539,9 @@ Settings:
     Import Playlists: Увоз плејлиста
     All playlists has been successfully imported: Све плејлисте су успешно увезене
     Playlist insufficient data: Нема довољно података за плејлисту „{playlist}“, прескакање предмета
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Ова опција извози видео снимке са свих плејлиста у једну плејлисту под називом „Омиљено“.\nКако да извезете и увезете видео снимке у плејлисте за старију верзију FreeTube-а:\n1. Извезите своје плејлисте са омогућеном овом опцијом.\n2. Избришите све своје постојеће плејлисте користећи опцију „Уклони све плејлисте“ у оквиру подешавања приватности.\n3. Покрените старију верзију FreeTube-а и увезите извезене плејлисте."
-      Label: Извоз плејлиста за старије верзије FreeTube-а
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Ова опција извози видео снимке са свих плејлиста у једну плејлисту под називом „Омиљено“.\nКако да извезете и увезете видео снимке у плејлисте за старију верзију OpenTubeX-а:\n1. Извезите своје плејлисте са омогућеном овом опцијом.\n2. Избришите све своје постојеће плејлисте користећи опцију „Уклони све плејлисте“ у оквиру подешавања приватности.\n3. Покрените старију верзију OpenTubeX-а и увезите извезене плејлисте."
+      Label: Извоз плејлиста за старије верзије OpenTubeX-а
   Proxy Settings:
     Proxy Settings: 'Прокси'
     Enable Tor / Proxy: 'Омогући Tor / Прокси'
@@ -556,7 +556,7 @@ Settings:
     Region: 'Регион'
     City: 'Град'
     Error getting network information. Is your proxy configured properly?: 'Грешка при набављању информација о мрежи. Да ли је ваш прокси исправно конфигурисан?'
-    Proxy Warning: FreeTube нема уграђени прокси, али може да се повеже са спољним проксијем, као што је онај који ради на вашој машини као што је Tor или спољни прокси као што је SOCKS5 прокси који пружају неки VPN-ови. Ако је омогућено, уверите се да је ваш прокси/Tor исправно конфигурисан или FreeTube неће моћи да прикупи никакве податке.
+    Proxy Warning: OpenTubeX нема уграђени прокси, али може да се повеже са спољним проксијем, као што је онај који ради на вашој машини као што је Tor или спољни прокси као што је SOCKS5 прокси који пружају неки VPN-ови. Ако је омогућено, уверите се да је ваш прокси/Tor исправно конфигурисан или OpenTubeX неће моћи да прикупи никакве податке.
   Experimental Settings:
     Replace HTTP Cache: Замени HTTP кеш
     Experimental Settings: Експериментално
@@ -617,7 +617,7 @@ About:
   Downloads / Changelog: 'Преузимања / Евиденција промена'
   GitHub releases: 'GitHub издања'
   Help: 'Помоћ'
-  FreeTube Wiki: 'FreeTube Wiki'
+  OpenTubeX Wiki: 'OpenTubeX Wiki'
   FAQ: 'ЧПП'
   Report a problem: 'Пријава проблема'
   GitHub issues: 'Пријава проблема на GitHub-у'
@@ -631,7 +631,7 @@ About:
   room rules: 'правила собе'
   Translate: 'Преведи'
   Credits: 'Заслуге'
-  FreeTube is made possible by: 'FreeTube су омогућили'
+  OpenTubeX is made possible by: 'OpenTubeX су омогућили'
   these people and projects: 'ови људи и пројекти'
   Donate: 'Донација'
 
@@ -717,7 +717,7 @@ Channel:
     Reveal Answers: Откриј одговоре
     Hide Answers: Сакриј одговоре
     votes: 'Гласова: {votes}'
-    Video hidden by FreeTube: Видео снимак сакрио је FreeTube
+    Video hidden by OpenTubeX: Видео снимак сакрио је OpenTubeX
     View Full Post: Погледај целу објаву
     Viewing Posts Only Supported By Invidious: Гледање објава подржава само Invidious. Идите на картицу заједнице канала да видите садржај тамо без Invidious-a.
   Live:
@@ -733,7 +733,7 @@ Channel:
     This channel does not currently have any podcasts: Овај канал тренутно нема ниједан подкаст
     Podcasts: Подкасти
   Channel Tabs: Картице канала
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Овај канал је старосно ограничен и тренутно се не може гледати на FreeTube-у.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Овај канал је старосно ограничен и тренутно се не може гледати на OpenTubeX-у.
   This channel does not exist: Овај канал не постоји
   Home:
     Home: Почетна
@@ -846,39 +846,39 @@ Video:
     Autoplay is on: Аутоматско пуштање је укључено
   IP block: YouTube је блокирао вашу IP адресу за гледање видео снимака. Покушајте прећи на други VPN или прокси.
   Unlisted: По позиву
-  MembersOnly: Видео снимци само за чланове не могу да се гледају на FreeTube-у јер захтевају пријављивање на Google налог и плаћено чланство на каналу.
-  AgeRestricted: Видео снимци са старосним ограничењемне могу се гледати на FreeTube-у јер захтевају пријаву на Google налог и коришћење YouTube налога који је старосно верификован.
+  MembersOnly: Видео снимци само за чланове не могу да се гледају на OpenTubeX-у јер захтевају пријављивање на Google налог и плаћено чланство на каналу.
+  AgeRestricted: Видео снимци са старосним ограничењемне могу се гледати на OpenTubeX-у јер захтевају пријаву на Google налог и коришћење YouTube налога који је старосно верификован.
   DeArrow:
     Show Modified Details: Прикажи измењене детаље
     Show Original Details: Прикажи оригиналне детаље
-  DRMProtected: Видео снимци заштићени DRM не могу се репродуковати у FreeTube-у, јер захтевају власничке компоненте затвореног кода. Ако желите да гледате овај видео снимак, погледајте га на званичном сајту YouTube-а у веб-прегледачу с омогућеним DRM.
+  DRMProtected: Видео снимци заштићени DRM не могу се репродуковати у OpenTubeX-у, јер захтевају власничке компоненте затвореног кода. Ако желите да гледате овај видео снимак, погледајте га на званичном сајту YouTube-а у веб-прегледачу с омогућеним DRM.
   Save Watched Progress: Сачувај напредак гледања
   Watched Progress Saved: Напредак гледања је сачуван
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: 'Када је омогућено, FreeTube ће користити RSS уместо свог подразумеваног метода за прикупљање вашег фида праћења. RSS је бржи и спречава блокирање IP адресе, али не пружа одређене информације као што су трајање видео снимка, статус уживо или објаве'
+    Fetch Feeds from RSS: 'Када је омогућено, OpenTubeX ће користити RSS уместо свог подразумеваног метода за прикупљање вашег фида праћења. RSS је бржи и спречава блокирање IP адресе, али не пружа одређене информације као што су трајање видео снимка, статус уживо или објаве'
 
 # Toast Messages
-    Fetch Automatically: Када је омогућено, FreeTube ће аутоматски преузети ваш фид претплата при покретању и када се отвори нови прозор.
+    Fetch Automatically: Када је омогућено, OpenTubeX ће аутоматски преузети ваш фид претплата при покретању и када се отвори нови прозор.
   General Settings:
-    External Link Handling: "Изаберите подразумевано понашање када се кликне на линк који се не може отворити у FreeTube-у.\nПодразумевано, FreeTube ће отворити линк на који сте кликнули у вашем подразумеваном прегледачу.\n"
-    Fallback to Non-Preferred Backend on Failure: Када ваш преферирани API има проблем, FreeTube ће аутоматски покушати да користи ваш непреферирани API као резервни метод, када је омогућено.
-    Preferred API Backend: Изаберите бек-енд коју FreeTube користи за добијање података. Локални API је уграђени екстрактор. Invidious API захтева Invidious сервер за повезивање.
-    Thumbnail Preference: Све сличице на FreeTube-у биће замењене оквиром видеа, замућеним или скривеним уместо подразумеване сличице.
+    External Link Handling: "Изаберите подразумевано понашање када се кликне на линк који се не може отворити у OpenTubeX-у.\nПодразумевано, OpenTubeX ће отворити линк на који сте кликнули у вашем подразумеваном прегледачу.\n"
+    Fallback to Non-Preferred Backend on Failure: Када ваш преферирани API има проблем, OpenTubeX ће аутоматски покушати да користи ваш непреферирани API као резервни метод, када је омогућено.
+    Preferred API Backend: Изаберите бек-енд коју OpenTubeX користи за добијање података. Локални API је уграђени екстрактор. Invidious API захтева Invidious сервер за повезивање.
+    Thumbnail Preference: Све сличице на OpenTubeX-у биће замењене оквиром видеа, замућеним или скривеним уместо подразумеване сличице.
     Region for Trending: Регион трендова вам омогућава да изаберете државу за видео снимке у тренду коју желите да се приказује.
-    Invidious Instance: Invidious инстанца на коју ће се FreeTube повезати за API позиве.
-    Open Deep Links In New Window: URL адресе прослеђене FreeTube-у, као што су додаци прегледача за преусмеравање или аргументи командне линије, отварају се у новом прозору.
+    Invidious Instance: Invidious инстанца на коју ће се OpenTubeX повезати за API позиве.
+    Open Deep Links In New Window: URL адресе прослеђене OpenTubeX-у, као што су додаци прегледача за преусмеравање или аргументи командне линије, отварају се у новом прозору.
   External Player Settings:
     Custom External Player Arguments: Сви прилагођени аргументи командне линије, желите да буду прослеђени спољном плејеру.
     External Player: Избором спољног плејера ће приказати иконицу, за отварање видео снимка (плејлисте, ако је подржана) у спољном плејеру, на сличици. Упозорење, подешавања Invidious-а не утичу на спољне плејере.
     DefaultCustomArgumentsTemplate: (Подразумевано:„{defaultCustomArguments}“)
-    Custom External Player Executable: Подразумевано, FreeTube ће претпоставити да се изабрани спољни плејер може пронаћи преко PATH променљиве окружења. Ако је потребно, овде се може подесити прилагођена путања.
+    Custom External Player Executable: Подразумевано, OpenTubeX ће претпоставити да се изабрани спољни плејер може пронаћи преко PATH променљиве окружења. Ако је потребно, овде се може подесити прилагођена путања.
     Ignore Warnings: Поништи упозорења када тренутни спољни плејер не подржава тренутну радњу (нпр. обртање плејлиста итд.).
     Ignore Default Arguments: Немојте слати никакве подразумеване аргументе спољном плејеру осим URL адресе видео снимка (нпр. брзина репродукције, URL адреса плејлисте итд.). Прилагођени аргументи ће и даље бити прослеђени.
   Distraction Free Settings:
     Hide Channels: Унесите назив канала или ID канала да бисте сакрили све видео снимке, плејлисте и сам канал, да се не појављују у претрази, у тренду, најпопуларнијима и препорученима. ID канала који сте унели мора се потпуно подударати и разликовати велика и мала слова.
     Hide Subscriptions Live: Ово подешавање је замењено подешавањем за целу апликацију „{appWideSetting}“ у одељку „{subsection}“ у „{settingsSection}“
-    Hide Videos, Playlists and Channels Containing Text: Унесите реч, део речи или фразу (не разликује велика и мала слова) да бисте сакрили све видео снимке и плејлисте чији их оригинални наслови садрже у целом FreeTube-у, искључујући само историју, ваше плејлисте и видео снимке унутар плејлиста.
+    Hide Videos, Playlists and Channels Containing Text: Унесите реч, део речи или фразу (не разликује велика и мала слова) да бисте сакрили све видео снимке и плејлисте чији их оригинални наслови садрже у целом OpenTubeX-у, искључујући само историју, ваше плејлисте и видео снимке унутар плејлиста.
     Hide Videos on Watch: Скрива гледане видео снимке са картица „Видео снимци“, „Shorts“ и „Уживо“ на страницама „Праћења“ и „Канал“. Ово не утиче на картицу „Почетна“ на страницама „Канал“
   Player Settings:
     Default Video Format: Подесите формате који се користе приликом репродукције видеа. DASH формати могу да репродукују бољи квалитет. Застарели формати су ограничени на највише 360p, али користе мањи пропусни опсег. Звучни формати су само звучни стримови.

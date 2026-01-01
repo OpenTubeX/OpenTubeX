@@ -295,7 +295,7 @@ Settings:
       Open Link: 'Open skakel'
       Ask Before Opening Link: 'Vra voordat skakel geopen word'
       No Action: 'Geen aksie'
-    Open Deep Links In New Window: Open URL’s na FreeTube gestuur in ’n nuwe venster
+    Open Deep Links In New Window: Open URL’s na OpenTubeX gestuur in ’n nuwe venster
   Theme Settings:
     Theme Settings: 'Tema'
     Match Top Bar with Main Color: 'Gebruik primêre temakleur vir boonste balk'
@@ -303,7 +303,7 @@ Settings:
     Disable Smooth Scrolling: 'Deaktiveer vloeiende rol'
     UI Scale: 'Koppelvlakskaal'
     Hide Side Bar Labels: 'Versteek systaafetikette'
-    Hide FreeTube Header Logo: 'Versteek FreeTube-koplogo'
+    Hide OpenTubeX Header Logo: 'Versteek OpenTubeX-koplogo'
     Base Theme:
       Base Theme: 'Basistema'
       Black: 'Swart'
@@ -558,22 +558,22 @@ Settings:
     History File: 'Geskiedenislêer'
     Playlist File: 'Afspeellyslêer'
     Export Subscriptions: 'Stuur intekenings uit'
-    Export FreeTube: 'Stuur FreeTube uit'
+    Export OpenTubeX: 'Stuur OpenTubeX uit'
     Export YouTube: 'Stuur YouTube uit'
     Export NewPipe: 'Stuur NewPipe uit'
     Import History: 'Voer geskiedenis in'
     Export History: 'Stuur geskiedenis uit'
     Import Playlists: 'Voer afspeellyste in'
     Export Playlists: 'Stuur afspeellyste uit'
-    Export Playlists For Older FreeTube Versions:
-      Label: 'Stuur afspeellyste uit vir ouer FreeTube-weergawes'
+    Export Playlists For Older OpenTubeX Versions:
+      Label: 'Stuur afspeellyste uit vir ouer OpenTubeX-weergawes'
       # |- = Keep newlines, No newline at end
       Tooltip: |-
         Hierdie opsie stuur video’s van alle afspeel­lyste uit na een afspeel­lys genaamd ‘Gunstelinge’.
-        Uitstuur en invoer van video’s in afspeel­lyste vir ’n ouer weergawe van FreeTube:
+        Uitstuur en invoer van video’s in afspeel­lyste vir ’n ouer weergawe van OpenTubeX:
         1. Stuur u afspeel­lyste uit met hierdie opsie geaktiveer.
         2. Verwyder al u bestaande afspeel­lyste met die opsie ‘Verwyder alle afspeel­lyste’ onder ‘Privaatheids­instellings’.
-         3. Begin die ouer weergawe van FreeTube en ivoer die uitgestuurde afspeel­lyste in.
+         3. Begin die ouer weergawe van OpenTubeX en ivoer die uitgestuurde afspeel­lyste in.
     Profile object has insufficient data, skipping item: 'Profielobjek het onvoldoende data, item word oorgeslaan'
     All subscriptions and profiles have been successfully imported: 'Alle intekenings en profiele is suksesvol ingevoer'
     All subscriptions have been successfully imported: 'Alle intekenings is suksesvol ingevoer'
@@ -605,7 +605,7 @@ Settings:
     Region: 'Streek'
     City: 'Stad'
     Error getting network information. Is your proxy configured properly?: 'Fout by ophaal van netwerkinligting. Is u instaanbediener korrek opgestel?'
-    Proxy Warning: FreeTube het nie ’n ingeboude instaanbediener nie maar kan aan ’n eksterne een koppel, soos een wat op u masjien loop soos Tor of ’n eksterne een soos ’n SOCKS5-instaanbediener wat deur sommige VPN’s verskaf word. Indien geaktiveer, maak seker u instaanbediener/Tor is korrek opgestel anders kan FreeTube geen data ophaal nie.
+    Proxy Warning: OpenTubeX het nie ’n ingeboude instaanbediener nie maar kan aan ’n eksterne een koppel, soos een wat op u masjien loop soos Tor of ’n eksterne een soos ’n SOCKS5-instaanbediener wat deur sommige VPN’s verskaf word. Indien geaktiveer, maak seker u instaanbediener/Tor is korrek opgestel anders kan OpenTubeX geen data ophaal nie.
   SponsorBlock Settings:
     SponsorBlock Settings: 'SponsorBlock'
     Enable SponsorBlock: 'Aktiveer SponsorBlock'
@@ -655,7 +655,7 @@ About:
   Downloads / Changelog: 'Aflaaie / Veranderingslogboek'
   GitHub releases: 'GitHub-vrystellings'
   Help: 'Hulp'
-  FreeTube Wiki: 'FreeTube Wiki'
+  OpenTubeX Wiki: 'OpenTubeX Wiki'
   FAQ: 'Gereelde vrae'
   Discussions: 'Besprekings'
   Report a problem: 'Rapporteer ’n probleem'
@@ -670,7 +670,7 @@ About:
   room rules: 'kamerreëls'
   Translate: 'Vertaal'
   Credits: 'Danksegging'
-  FreeTube is made possible by: 'FreeTube is moontlik gemaak deur'
+  OpenTubeX is made possible by: 'OpenTubeX is moontlik gemaak deur'
   these people and projects: 'hierdie mense en projekte'
   Donate: 'Skenk'
 
@@ -726,7 +726,7 @@ Channel:
   Your search results have returned 0 results: 'U soekaksie het 0 resultate gelewer'
   This channel does not exist: 'Hierdie kanaal bestaan nie'
   This channel does not allow searching: 'Hierdie kanaal laat nie soektogte toe nie'
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: 'Hierdie kanaal is ouderdomsbeperk en kan nie tans in FreeTube bekyk word nie.'
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 'Hierdie kanaal is ouderdomsbeperk en kan nie tans in OpenTubeX bekyk word nie.'
   Channel Tabs: 'Kanaaloortjies'
   Videos:
     Videos: 'Video’s'
@@ -768,7 +768,7 @@ Channel:
     votes: '{votes} stemme'
     Reveal Answers: 'Onthul antwoorde'
     Hide Answers: 'Versteek antwoorde'
-    Video hidden by FreeTube: 'Video is deur FreeTube versteek'
+    Video hidden by OpenTubeX: 'Video is deur OpenTubeX versteek'
     View Full Post: Bekyk volle plasing
     Viewing Posts Only Supported By Invidious: Bekyk van plasings word slegs vir Invidious ondersteun. Gaan na ’n kanaal se gemeenskapsblad om inhoud te sien sonder Invidious.
   Home:
@@ -880,13 +880,13 @@ Video:
     Autoplay is on: Outo-afspeel is aan
   Unlisted: Ongelys
   IP block: YouTube het u IP-adres versper en u kan nie video’s kyk nie. Verander u VPN of instaanbediener.
-  MembersOnly: Videos slegs vir lede kan nie met FreeTube gekyk word nie omdat dit ’n Google-aantekening en betaalde lidmaatskap op die oplaaier se kanaal vereis.
-  AgeRestricted: Video’s met ’n ouderdomsperk kan nie met FreeTube gekyk word nie omdat dit ’n Google-aantekening en ouderdomvebestigde YouTube-rekening vereis.
+  MembersOnly: Videos slegs vir lede kan nie met OpenTubeX gekyk word nie omdat dit ’n Google-aantekening en betaalde lidmaatskap op die oplaaier se kanaal vereis.
+  AgeRestricted: Video’s met ’n ouderdomsperk kan nie met OpenTubeX gekyk word nie omdat dit ’n Google-aantekening en ouderdomvebestigde YouTube-rekening vereis.
   DeArrow:
     Show Original Details: Toon oorspronklike details
     Show Modified Details: Toon gewysigde details
 #& Playlists
-  DRMProtected: DRM-beskermde video’s kan nie in FreeTube afgespeel word nie omdat dit eiendoms geslotebronkomponente vereis. Indien u die video wil kyk, doen dit asb. op die amptelike YouTube-webwerf in ’n webblaaier met DRM geaktiveer.
+  DRMProtected: DRM-beskermde video’s kan nie in OpenTubeX afgespeel word nie omdat dit eiendoms geslotebronkomponente vereis. Indien u die video wil kyk, doen dit asb. op die amptelike YouTube-webwerf in ’n webblaaier met DRM geaktiveer.
   Watched Progress Saved: Kykvordering is bewaar
 Playlist:
   #& About
@@ -968,23 +968,23 @@ Up Next: 'Volgende'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Kies die agterpunt wat FreeTube gebruik om data te versamel. Die lokale API is ’n ingeboude uithaler. Die Invidious API moet met ’n Invidious-bediener gekoppel word.'
-    Fallback to Non-Preferred Backend on Failure: 'Wanneer u voorkeur-API probleme gee sal FreeTube outomaties terugval op die alternatiewe nie-voorkeur-API wanneer hierdie instelling geaktiveer is.'
-    Thumbnail Preference: 'Alle duimnaels in FreeTube sal vervang word met ’n beeld uit die video, vervaag of versteek i.p.v. die verstek duimnael.'
-    Invidious Instance: 'Die Invidious-instansie waarmee FreeTube sal verbind om API-oproepe te maak.'
+    Preferred API Backend: 'Kies die agterpunt wat OpenTubeX gebruik om data te versamel. Die lokale API is ’n ingeboude uithaler. Die Invidious API moet met ’n Invidious-bediener gekoppel word.'
+    Fallback to Non-Preferred Backend on Failure: 'Wanneer u voorkeur-API probleme gee sal OpenTubeX outomaties terugval op die alternatiewe nie-voorkeur-API wanneer hierdie instelling geaktiveer is.'
+    Thumbnail Preference: 'Alle duimnaels in OpenTubeX sal vervang word met ’n beeld uit die video, vervaag of versteek i.p.v. die verstek duimnael.'
+    Invidious Instance: 'Die Invidious-instansie waarmee OpenTubeX sal verbind om API-oproepe te maak.'
     Region for Trending: 'Met streek van stygend kan u kies welke land se gewilde videos aan u vertoon moet word.'
     External Link Handling: |
-      Kies die verstek gedrag vir wanneer ’n skakel geklik word wat nie in FreeTube geopen kan word nie.
-      FreeTube sal die geklikte skakel by verstek in u verstek blaaier open.
-    Open Deep Links In New Window: Bronadresse wat aan FreeTube gegee word, soos wat deur blaaieruitbreidings of bevellynargumente gestuur word, word in ’n nuwe venster geopen.
+      Kies die verstek gedrag vir wanneer ’n skakel geklik word wat nie in OpenTubeX geopen kan word nie.
+      OpenTubeX sal die geklikte skakel by verstek in u verstek blaaier open.
+    Open Deep Links In New Window: Bronadresse wat aan OpenTubeX gegee word, soos wat deur blaaieruitbreidings of bevellynargumente gestuur word, word in ’n nuwe venster geopen.
   Player Settings:
-    Proxy Videos Through Invidious: 'FreeTube sal verbind met Invidious en die video’s van daar aflaai eerder as om ’n direkte verbinding met YouTube te maak.'
+    Proxy Videos Through Invidious: 'OpenTubeX sal verbind met Invidious en die video’s van daar aflaai eerder as om ’n direkte verbinding met YouTube te maak.'
     Default Video Format: 'Kies die formate wat gebruik word wanneer ’n video afspeel. DASH-formate kan hoër kwaliteit afspeel. Legaat formate word beperk tot ’n maks van 360p maar gebruik minder bandwydte. Oudio formate is slegs oudio strome.'
     Scroll Playback Rate Over Video Player: 'Terwyl die muis oor die video is, druk en hou die Control-toets (Command-toets op Mac) en rol met die muis om die afspeelsnelheid te beheer. Druk en hou die Control-toets (Command-toets op Mac) en klik met die linker muisknop om vinnig terug te keer na die verstek afspeelsnelheid (1x tensy aangepas in die instellings).'
     Skip by Scrolling Over Video Player: 'Gebruik die rolwiel om deur die video te spoel, soos by MPV.'
   External Player Settings:
     External Player: 'Deur die kies van ’n eksterne videospeler sal daar ’n ikoone op die video se duimnael verskyn waarmee dit (of afspeellys indien ondersteun) in die gekose eksterne videospeler geopen kan word. Let op: Invidious-instellings beïnvloed nie eksterne videospelers nie.'
-    Custom External Player Executable: 'FreeTube neem by verstek aan dat die gekose eksterne videospeler d.m.v. die PATH-omgewingsveranderlike gevind kan word. Indien nodig kan ’n pasgemaakte pad hier ingevoer word.'
+    Custom External Player Executable: 'OpenTubeX neem by verstek aan dat die gekose eksterne videospeler d.m.v. die PATH-omgewingsveranderlike gevind kan word. Indien nodig kan ’n pasgemaakte pad hier ingevoer word.'
     Ignore Warnings: 'Onderdruk waarskuwings wanneer die huidige eksterne videospeler nie die huidige aksie ondersteun nie (bv. afspeellyste omkeer, ens.).'
     Ignore Default Arguments: 'Moet geen verstek argumente na die eksterne videospeler stuur buiten die video-URL nie (bv. afspeelsnelheid, afspeellys-URL, ens.). Pasgemaakte argumente word steeds deurgestuur.'
     Custom External Player Arguments: 'Enige pasgemaakte bevellynrgumente, wat u aan die eksterne videospeler vir deurgee.'
@@ -992,11 +992,11 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: 'Voer ’n kanaal-ID in om alle video’s, afspeellyste en die kanaal self te versteek sodat dit nie in soek, stygend, gewildste, en aanbeveel weergegee word nie. Die ingevoerde kanaal-ID moet volledig ooreenstem en is hooflettergevoelig.'
     Hide Subscriptions Live: 'Hierdie instelling woord oorheers deur die toepwye “{appWideSetting}”-instelling in die “{subsection}” gedeelte van “{settingsSection}”'
-    Hide Videos, Playlists and Channels Containing Text: 'Voer ’n woord, woordfragment of woordgroep in (nie hooflettergevoelig) om alle video’s en afspeellyste waarvan die oorspronklike titel dit bevat, regoor FreeTube te versteek, met uitsondering van net geskiedenis, u afspeellyste en video’s in afspeellyste.'
+    Hide Videos, Playlists and Channels Containing Text: 'Voer ’n woord, woordfragment of woordgroep in (nie hooflettergevoelig) om alle video’s en afspeellyste waarvan die oorspronklike titel dit bevat, regoor OpenTubeX te versteek, met uitsondering van net geskiedenis, u afspeellyste en video’s in afspeellyste.'
     Hide Videos on Watch: Versteek bekykte video’s op die Video’s-, Shorts- en Live-oortjies op die blaaie Intekeninge en Kanale. Dit beïnvloed nie die Tuis-oortjie op kanaalblaaie nie
   Subscription Settings:
-    Fetch Feeds from RSS: 'Wanneer geaktiveer, sal FreeTube RSS i.p.v. sy verstek metode gebruik om u intekenvoer op te haal. RSS is vinniger en voorkom IP-versperring, maar bied nie sekere inligting soos videoduur, status of plasings nie'
-    Fetch Automatically: 'Wanneer geaktiveer, sal FreeTube u intekenvoer outomaties ophaal wanneer ’n nuwe venster geopen word.'
+    Fetch Feeds from RSS: 'Wanneer geaktiveer, sal OpenTubeX RSS i.p.v. sy verstek metode gebruik om u intekenvoer op te haal. RSS is vinniger en voorkom IP-versperring, maar bied nie sekere inligting soos videoduur, status of plasings nie'
+    Fetch Automatically: 'Wanneer geaktiveer, sal OpenTubeX u intekenvoer outomaties ophaal wanneer ’n nuwe venster geopen word.'
   Experimental Settings:
     Replace HTTP Cache: 'Deaktiveer die skyfgebaseerde HTTP-kas van Electron en aktiveer ’n aangepaste afbeeldingskas in die geheue in. Sal lei tot ’n verhoogde RAM-gebruik.'
   SponsorBlock Settings:

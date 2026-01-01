@@ -243,7 +243,7 @@ Settings:
     Auto Load Next Page:
       Label: Lataa seuraava sivu automaattisesti
       Tooltip: Lataa lisäsivut ja kommentit automaattisesti.
-    Open Deep Links In New Window: Avaa FreeTube uudelleenohjatut URL-osoitteet uudessa ikkunassa
+    Open Deep Links In New Window: Avaa OpenTubeX uudelleenohjatut URL-osoitteet uudessa ikkunassa
   Theme Settings:
     Theme Settings: 'Teema'
     Match Top Bar with Main Color: 'Käytä pääväriä yläpalkissa'
@@ -308,7 +308,7 @@ Settings:
     Disable Smooth Scrolling: Poista tasainen vieritys käytöstä
     Expand Side Bar by Default: Laajenna sivupalkki oletusarvoisesti
     Hide Side Bar Labels: Piilota sivupalkin nimikkeet
-    Hide FreeTube Header Logo: Piilota FreeTube-otsikkologo
+    Hide OpenTubeX Header Logo: Piilota OpenTubeX-otsikkologo
   Player Settings:
     Player Settings: 'Soittimen asetukset'
     Play Next Video: 'Toista seuraava video'
@@ -406,7 +406,7 @@ Settings:
     Import History: Tuo historia
     Export NewPipe: Vie NewPipe-tilaukset
     Export YouTube: Vie YouTube-tilaukset
-    Export FreeTube: Vie FreeTube-tilaukset
+    Export OpenTubeX: Vie OpenTubeX-tilaukset
     Export Subscriptions: Vie tilaukset
     Import Subscriptions: Tuo tilaukset
     Select Export Type: Valitse Viennin tyyppi
@@ -420,8 +420,8 @@ Settings:
     Playlist File: Soittolistatiedosto
     History File: Historia-tiedosto
     Subscription File: Tilaustiedosto
-    Export Playlists For Older FreeTube Versions:
-      Label: Vie soittolistat FreeTuben vanhempiin versioihin
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Vie soittolistat OpenTubeXn vanhempiin versioihin
   Distraction Free Settings:
     Hide Live Chat: Piilota Live-keskustelu
     Hide Popular Videos: Piilota suositut videot
@@ -475,7 +475,7 @@ Settings:
     Enable Tor / Proxy: Ota käyttöön Tor / välityspalvelin
     Proxy Protocol: Välityspalvelimen protokolla
     Clicking on Test Proxy will send a request to: Napsauttamalla testaa välityspalvelinta lähettää pyynnön kohteeseen
-    Proxy Warning: FreeTubella ei ole sisäänrakennettua välityspalvelinta, mutta voit yhdistää ulkoisella välityspalvelimella, kuten Tor:lla tai jonkin VPN-tarjoajan Socks5:llä.
+    Proxy Warning: OpenTubeXlla ei ole sisäänrakennettua välityspalvelinta, mutta voit yhdistää ulkoisella välityspalvelimella, kuten Tor:lla tai jonkin VPN-tarjoajan Socks5:llä.
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Ilmoita sponsoriosuuden yli hypättäessä
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-sponsorieston API-ohjelmointirajapinnan Url-osoite (vakio-osoite on https://sponsor.ajay.app)
@@ -545,11 +545,11 @@ About:
   Translate: Käännös
   Credits: Kiitettävää
   Help: Apua
-  FreeTube is made possible by: FreeTuben mahdollistavat
+  OpenTubeX is made possible by: OpenTubeXn mahdollistavat
   GitHub releases: GitHub-julkaisut
   Downloads / Changelog: Lataukset/muutosloki
   Beta: Beta
-  FreeTube Wiki: FreeTuben wiki
+  OpenTubeX Wiki: OpenTubeXn wiki
   Donate: Lahjoita
   Source code: Lähdekoodi
   Discussions: Keskustelut
@@ -588,7 +588,7 @@ Channel:
   Removed subscription from {count} other channel(s): Poistettu tilaus {count} muulta kanavalta
   Channel has been removed from your subscriptions: Kanava on poistettu tilauksistasi
   Channel Tabs: Kanavavälilehdet
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Tämä kanava on ikärajoitettu, eikä sitä voi tällä hetkellä katsoa FreeTubessa.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Tämä kanava on ikärajoitettu, eikä sitä voi tällä hetkellä katsoa OpenTubeXssa.
   This channel does not exist: Tätä kanavaa ei ole olemassa
   This channel does not allow searching: Tämä kanava ei salli etsintää
   Posts:
@@ -596,7 +596,7 @@ Channel:
     Reveal Answers: Näytä vastaukset
     Hide Answers: Piilota vastaukset
     votes: '{votes} ääntä'
-    Video hidden by FreeTube: Video on piilotettu FreeTuben toimesta
+    Video hidden by OpenTubeX: Video on piilotettu OpenTubeXn toimesta
   Live:
     Live: Livenä
     This channel does not currently have any live streams: Tällä kanavalla ei ole tällä hetkellä yhtään suoraa lähetystä
@@ -803,15 +803,15 @@ A new blog is now available, {blogTitle}. Click to view more: Uusi blogi on saat
 Download From Site: Lataa sivustolta
 Tooltips:
   General Settings:
-    Preferred API Backend: Valitse taustaohjelma, jota Freetube käyttää datan noutamiseen. Paikallinen API on ohjelmiston sisäinen. Invidious API vaatii yhteyden Invidious-palvelimeen.
+    Preferred API Backend: Valitse taustaohjelma, jota OpenTubeX käyttää datan noutamiseen. Paikallinen API on ohjelmiston sisäinen. Invidious API vaatii yhteyden Invidious-palvelimeen.
     Region for Trending: Valitsee minkä maan Nousevat videot sinulle näytetään.
-    Invidious Instance: Invidious instanssi, jota Freetube käyttää.
-    Thumbnail Preference: Kaikki pikkukuvat Freetubessa korvataan ruudulla videosta alkuperäisen pikkukuvan sijaan.
-    Fallback to Non-Preferred Backend on Failure: Kun valitsemasi API kohtaa ongelman, Freetube yrittää automaattisestia käyttää toissijaista vaihtoehtoa.
-    External Link Handling: "Valitse oletuskäyttäytyminen, kun linkkiä, jota ei voi avata FreeTubessa, napsautetaan.\nOletusarvoisesti FreeTube avaa napsautetun linkin oletusselaimessasi.\n"
+    Invidious Instance: Invidious instanssi, jota OpenTubeX käyttää.
+    Thumbnail Preference: Kaikki pikkukuvat OpenTubeXssa korvataan ruudulla videosta alkuperäisen pikkukuvan sijaan.
+    Fallback to Non-Preferred Backend on Failure: Kun valitsemasi API kohtaa ongelman, OpenTubeX yrittää automaattisestia käyttää toissijaista vaihtoehtoa.
+    External Link Handling: "Valitse oletuskäyttäytyminen, kun linkkiä, jota ei voi avata OpenTubeXssa, napsautetaan.\nOletusarvoisesti OpenTubeX avaa napsautetun linkin oletusselaimessasi.\n"
   Subscription Settings:
-    Fetch Feeds from RSS: Kun valittuna, FreeTube käyttää RSS-syötettä oletusmetodin sijaan tilauslistasi hakemisessa. RSS on nopeampi ja ehkäisee IP-estoa, mutta ei anna tietoja, kuten videon kesto tai livetila
-    Fetch Automatically: Kun tämä on käytössä, FreeTube hakee automaattisesti tilauksesi syötteen, kun uusi ikkuna avataan ja kun vaihdat profiilia.
+    Fetch Feeds from RSS: Kun valittuna, OpenTubeX käyttää RSS-syötettä oletusmetodin sijaan tilauslistasi hakemisessa. RSS on nopeampi ja ehkäisee IP-estoa, mutta ei anna tietoja, kuten videon kesto tai livetila
+    Fetch Automatically: Kun tämä on käytössä, OpenTubeX hakee automaattisesti tilauksesi syötteen, kun uusi ikkuna avataan ja kun vaihdat profiilia.
   Player Settings:
     Default Video Format: Aseta videon toistamisessa käytätettävä formaatti. DASH-formaatit toistavat korkealaatuisempia videoita. Legacy-formaatit ovat rajoitettu 720p-resoluutioon, mutta käyttävät vähemmän dataa. Audioformaatit ovat vain äänistriimeihin.
     Proxy Videos Through Invidious: Yhdistää Invidious-palvelimeen suoran YouTuben-yhteyden sijaan.
@@ -820,7 +820,7 @@ Tooltips:
   External Player Settings:
     Custom External Player Arguments: Kaikki ne omavalintaiset komentorivin määreet, jotka haluat siirtää eteenpäin ulkoiselle toisto-ohjelmalle.
     Ignore Warnings: Estä varoitukset, kun käytetty ulkoinen toisto-ohjelma ei tue määrättyä toimintamallia (kuten käänteiset soittoluettelot, jne.).
-    Custom External Player Executable: Vakiollisesti FreeTube olettaa, että valittu ulkoinen toisto-ohjelma voidaan löytää PATH-polkuympäristömuuttujan kautta. Mikäli tarvetta ilmenee, voidaan asettaa omavalintainen polku tähän.
+    Custom External Player Executable: Vakiollisesti OpenTubeX olettaa, että valittu ulkoinen toisto-ohjelma voidaan löytää PATH-polkuympäristömuuttujan kautta. Mikäli tarvetta ilmenee, voidaan asettaa omavalintainen polku tähän.
     External Player: Ulkoisen soittimen valitsemisen johdosta näkyy kuvake videon avaamiseen (soittoluettelonkin avaamiseen jos tuettu) ulkoisessa toistimessa. Varoitus, Invidious-asetukset eivät vaikuta ulkoisiin toistimiin.
     DefaultCustomArgumentsTemplate: "(Oletus: '{defaultCustomArguments}')"
   Experimental Settings:

@@ -644,7 +644,7 @@ const EXPORT_VALUES = [
 ]
 
 const exportNames = computed(() => [
-  `${t('Settings.Data Settings.Export FreeTube')} (.db)`,
+  `${t('Settings.Data Settings.Export OpenTubeX')} (.db)`,
   `${t('Settings.Data Settings.Export YouTube')} (.csv)`,
   `${t('User Playlists.Export list of URLs')} (.txt)`,
   t('Close')

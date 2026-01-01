@@ -312,7 +312,7 @@ Settings:
     Disable Smooth Scrolling: ''
     UI Scale: ''
     Hide Side Bar Labels: ''
-    Hide FreeTube Header Logo: ''
+    Hide OpenTubeX Header Logo: ''
     Base Theme:
       Base Theme: ''
       Black: ''
@@ -572,14 +572,14 @@ Settings:
     History File: ''
     Playlist File: ''
     Export Subscriptions: ''
-    Export FreeTube: ''
+    Export OpenTubeX: ''
     Export YouTube: ''
     Export NewPipe: ''
     Import History: ''
     Export History: ''
     Import Playlists: ''
     Export Playlists: ''
-    Export Playlists For Older FreeTube Versions:
+    Export Playlists For Older OpenTubeX Versions:
       Label: ''
       # |- = Keep newlines, No newline at end
       Tooltip: |
@@ -664,7 +664,7 @@ About:
   Downloads / Changelog: ''
   GitHub releases: ''
   Help: ''
-  FreeTube Wiki: ''
+  OpenTubeX Wiki: ''
   FAQ: ''
   Discussions: ''
   Report a problem: ''
@@ -679,7 +679,7 @@ About:
   room rules: ''
   Translate: ''
   Credits: ''
-  FreeTube is made possible by: ''
+  OpenTubeX is made possible by: ''
   these people and projects: ''
   Donate: ''
 
@@ -735,7 +735,7 @@ Channel:
   Your search results have returned 0 results: ''
   This channel does not exist: ''
   This channel does not allow searching: ''
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: ''
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: ''
   Channel Tabs: ''
   Videos:
     Videos: ''
@@ -784,7 +784,7 @@ Channel:
     View Full Post: ''
     Reveal Answers: ''
     Hide Answers: ''
-    Video hidden by FreeTube: ''
+    Video hidden by OpenTubeX: ''
     Viewing Posts Only Supported By Invidious: ''
 Video:
   IP block: ''

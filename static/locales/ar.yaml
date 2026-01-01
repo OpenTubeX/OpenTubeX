@@ -247,7 +247,7 @@ Settings:
     Auto Load Next Page:
       Label: تحميل تلقائي للصفحة التالية
       Tooltip: قم بتحميل الصفحات والتعليقات الإضافية تلقائيًا.
-    Open Deep Links In New Window: افتح عناوين URL التي تم تمريرها إلى FreeTube في نافذة جديدة
+    Open Deep Links In New Window: افتح عناوين URL التي تم تمريرها إلى OpenTubeX في نافذة جديدة
     Minimize to system tray: تصفير إلى علبة النظام
   Theme Settings:
     Theme Settings: 'السِمة'
@@ -365,7 +365,7 @@ Settings:
     Disable Smooth Scrolling: عطّل التمرير المتجانس
     Expand Side Bar by Default: كبّر الشريط الجانبي بشكل افتراضي
     Hide Side Bar Labels: إخفاء تسميات الشريط الجانبي
-    Hide FreeTube Header Logo: إخفاء شعار رأس FreeTube
+    Hide OpenTubeX Header Logo: إخفاء شعار رأس OpenTubeX
   Player Settings:
     Player Settings: 'المشغل'
     Play Next Video: 'التشغيل التلقائي لمقاطع الفيديو الموصى بها'
@@ -473,7 +473,7 @@ Settings:
     Profile object has insufficient data, skipping item: لا يحتوي عنصر الملف الشخصي على بيانات كافية, تخطي العنصر
     Export NewPipe: تصدير NewPipe
     Export YouTube: تصدير Youtube
-    Export FreeTube: تصدير FreeTube
+    Export OpenTubeX: تصدير OpenTubeX
     Export Subscriptions: تصدير الاشتراكات
     Import Subscriptions: استيراد الاشتراكات
     Select Export Type: حدّد نوع التصدير
@@ -487,9 +487,9 @@ Settings:
     Subscription File: Subscription ملف
     History File: ملف التاريخ
     Playlist File: Playlist ملف
-    Export Playlists For Older FreeTube Versions:
-      Label: تصدير قوائم التشغيل لإصدارات FreeTube الأقدم
-      Tooltip: "يقوم هذا الخيار بتصدير مقاطع الفيديو من جميع قوائم التشغيل إلى قائمة تشغيل واحدة تسمى \"المفضلة\".\nكيفية تصدير واستيراد مقاطع الفيديو في قوائم التشغيل لإصدار أقدم من FreeTube:\n1. قم بتصدير قوائم التشغيل الخاصة بك مع تمكين هذا الخيار.\n2. احذف جميع قوائم التشغيل الموجودة لديك باستخدام خيار إزالة جميع قوائم التشغيل ضمن إعدادات الخصوصية.\n3. قم بتشغيل الإصدار الأقدم من FreeTube واستورد قوائم التشغيل المصدرة.\""
+    Export Playlists For Older OpenTubeX Versions:
+      Label: تصدير قوائم التشغيل لإصدارات OpenTubeX الأقدم
+      Tooltip: "يقوم هذا الخيار بتصدير مقاطع الفيديو من جميع قوائم التشغيل إلى قائمة تشغيل واحدة تسمى \"المفضلة\".\nكيفية تصدير واستيراد مقاطع الفيديو في قوائم التشغيل لإصدار أقدم من OpenTubeX:\n1. قم بتصدير قوائم التشغيل الخاصة بك مع تمكين هذا الخيار.\n2. احذف جميع قوائم التشغيل الموجودة لديك باستخدام خيار إزالة جميع قوائم التشغيل ضمن إعدادات الخصوصية.\n3. قم بتشغيل الإصدار الأقدم من OpenTubeX واستورد قوائم التشغيل المصدرة.\""
   Distraction Free Settings:
     Hide Live Chat: اخفي الدردشة المباشرة
     Hide Popular Videos: اخفي الفيديوهات الأكثر شعبية
@@ -553,7 +553,7 @@ Settings:
     Proxy Settings: البروكسي
     Error getting network information. Is your proxy configured properly?: هنالك خطأ في جلب معلومات الشبكة. هل ضبطت إعدادات وكيلك بصورة صحيحة؟
     Clicking on Test Proxy will send a request to: النقر على اختبار البروكسي سيؤدي إلى إرسال طلب إلى
-    Proxy Warning: لا يحتوي FreeTube على وكيل مدمج ولكن يمكنه الاتصال بوكيل خارجي، مثل وكيل يعمل على جهازك مثل Tor أو وكيل خارجي مثل وكيل SOCKS5 الذي توفره بعض شبكات VPN. إذا تم التمكين، فتأكد من تكوين الوكيل/الاختصاص الخاص بك بشكل صحيح، وإلا فلن يتمكن FreeTube من جلب أي بيانات.
+    Proxy Warning: لا يحتوي OpenTubeX على وكيل مدمج ولكن يمكنه الاتصال بوكيل خارجي، مثل وكيل يعمل على جهازك مثل Tor أو وكيل خارجي مثل وكيل SOCKS5 الذي توفره بعض شبكات VPN. إذا تم التمكين، فتأكد من تكوين الوكيل/الاختصاص الخاص بك بشكل صحيح، وإلا فلن يتمكن OpenTubeX من جلب أي بيانات.
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: تنبيه عندما يتم تخطي شريحة الراعي
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API عنوان (الافتراضي هو https://sponsor.ajay.app)
@@ -611,7 +611,7 @@ About:
   About: 'حول'
   #& About
   Donate: التبرع
-  Translate: ساعدنا في ترجمة Freetube
+  Translate: ساعدنا في ترجمة OpenTubeX
   Chat on Matrix: الدردشة على ماتريكس
   Mastodon: ماستدون
   Email: البريد الإلكتروني
@@ -623,13 +623,13 @@ About:
   Source code: الشفرة المصدرية
   Beta: تجريبي
   these people and projects: هؤلاء الناس والمشاريع
-  FreeTube is made possible by: Freetube أصبح ممكنا بواسطة
+  OpenTubeX is made possible by: OpenTubeX أصبح ممكنا بواسطة
   Credits: الاعتمادات
   room rules: قواعد الغرفة
   Please read the: يرجى قراءة
   Please check for duplicates before posting: يرجى التحقق من التكرارات قبل النشر
   GitHub issues: مشاكل GitHub
-  FreeTube Wiki: ويكي Freetube
+  OpenTubeX Wiki: ويكي OpenTubeX
   GitHub releases: إصدارات GitHub
   Downloads / Changelog: التحميلات\التغييرات
   Discussions: المناقشات
@@ -712,13 +712,13 @@ Channel:
   Channel Tabs: علامات تبويب القنوات
   This channel does not exist: هذه القناة غير موجودة
   This channel does not allow searching: هذه القناة لا تسمح بالبحث
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: هذه القناة مصنفة حسب العمر ولا يمكن عرضها حاليا في FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: هذه القناة مصنفة حسب العمر ولا يمكن عرضها حاليا في OpenTubeX.
   Posts:
     This channel currently does not have any posts: لا تحتوي هذه القناة حاليا على أي مشاركات
     Hide Answers: إخفاء الأجوبة
     votes: '{votes} أصوات'
     Reveal Answers: كشف الإجابات
-    Video hidden by FreeTube: تم إخفاء الفيديو بواسطة FreeTube
+    Video hidden by OpenTubeX: تم إخفاء الفيديو بواسطة OpenTubeX
     Viewing Posts Only Supported By Invidious: عرض المنشورات مدعوم فقط من قبل Invidious. توجه إلى علامة التبويب مجتمع القناة لعرض المحتوى هناك دون Invidious.
     View Full Post: عرض المنشور كاملا
   Live:
@@ -844,13 +844,13 @@ Video:
     Autoplay is on: التشغيل التلقائي مفعل
   IP block: حظر YouTube عنوان IP الخاص بك من مشاهدة مقاطع الفيديو. يرجى محاولة التبديل إلى VPN أو وكيل مختلف.
   Unlisted: غير مدرج
-  AgeRestricted: لا يمكن مشاهدة مقاطع الفيديو المقيدة حسب العمر مع FreeTube لأنها تتطلب تسجيل الدخول إلى Google واستخدام حساب YouTube تم التحقق من عمره.
-  MembersOnly: لا يمكن مشاهدة مقاطع الفيديو الخاصة بالأعضاء فقط مع FreeTube لأنها تتطلب تسجيل الدخول إلى Google والعضوية المدفوعة لقناة القائم بالتحميل.
+  AgeRestricted: لا يمكن مشاهدة مقاطع الفيديو المقيدة حسب العمر مع OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google واستخدام حساب YouTube تم التحقق من عمره.
+  MembersOnly: لا يمكن مشاهدة مقاطع الفيديو الخاصة بالأعضاء فقط مع OpenTubeX لأنها تتطلب تسجيل الدخول إلى Google والعضوية المدفوعة لقناة القائم بالتحميل.
 #& Playlists
   DeArrow:
     Show Modified Details: إظهار التفاصيل المعدلة
     Show Original Details: إظهار التفاصيل الأصلية
-  DRMProtected: لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في FreeTube، لأنها تتطلب مكونات خاصة ومغلقة المصدر. إذا كنت ترغب في مشاهدة هذا الفيديو، فيرجى مشاهدته على موقع يوتيوب الرسمي في متصفح ويب يدعم إدارة الحقوق الرقمية.
+  DRMProtected: لا يمكن تشغيل مقاطع الفيديو المحمية بنظام إدارة الحقوق الرقمية في OpenTubeX، لأنها تتطلب مكونات خاصة ومغلقة المصدر. إذا كنت ترغب في مشاهدة هذا الفيديو، فيرجى مشاهدته على موقع يوتيوب الرسمي في متصفح ويب يدعم إدارة الحقوق الرقمية.
   Save Watched Progress: حفظ التقدم الذي تمت مشاهدته
   Watched Progress Saved: تم مشاهدة التقدم المحفوظ
 Playlist:
@@ -941,25 +941,25 @@ Download From Site: تنزيل من الموقع
 Version {versionNumber} is now available!  Click for more details: 'الإصدار {versionNumber} متاح الآن!  انقر لمزيد من التفاصيل'
 Tooltips:
   General Settings:
-    Thumbnail Preference: كلّ الصّور المصغّرة في FreeTube سيتمّ استبدالها بإطار من الفيديو، يكون ضبابيًا أو مخفيًا، بدل من الصّورة المصغّرة الافتراضيّة.
-    Preferred API Backend: اختر الواجهة الخلفية التي يستخدمها FreeTube لجلب البيانات. الواجهة البرمجية المحلية للتطبيق هي مستخرج محلي. الواجهة البرمجية للتطبيق التابعة لInvidious (بديل لموقع يوتيوب) يتطلب التواصل مع خادم شبكة Invidious.
-    Invidious Instance: مثيل Invidious الذي سيتصل به FreeTube لاستدعاءات API.
-    Fallback to Non-Preferred Backend on Failure: عند التفعيل اذا واجه الAPI المفضّل لديك أيّ مشكلة، سيحاول FreeTube استخدام الAPI الغير مفضّل لديك تلقائيّاً كإجراء التراجع.
-    External Link Handling: "اختر السلوك الافتراضي عند النقر فوق رابط، لا يمكن فتحه في FreeTube.\nبشكل افتراضي، سيفتح FreeTube الرابط الذي تم النقر عليه في المتصفح الافتراضي.\n"
+    Thumbnail Preference: كلّ الصّور المصغّرة في OpenTubeX سيتمّ استبدالها بإطار من الفيديو، يكون ضبابيًا أو مخفيًا، بدل من الصّورة المصغّرة الافتراضيّة.
+    Preferred API Backend: اختر الواجهة الخلفية التي يستخدمها OpenTubeX لجلب البيانات. الواجهة البرمجية المحلية للتطبيق هي مستخرج محلي. الواجهة البرمجية للتطبيق التابعة لInvidious (بديل لموقع يوتيوب) يتطلب التواصل مع خادم شبكة Invidious.
+    Invidious Instance: مثيل Invidious الذي سيتصل به OpenTubeX لاستدعاءات API.
+    Fallback to Non-Preferred Backend on Failure: عند التفعيل اذا واجه الAPI المفضّل لديك أيّ مشكلة، سيحاول OpenTubeX استخدام الAPI الغير مفضّل لديك تلقائيّاً كإجراء التراجع.
+    External Link Handling: "اختر السلوك الافتراضي عند النقر فوق رابط، لا يمكن فتحه في OpenTubeX.\nبشكل افتراضي، سيفتح OpenTubeX الرابط الذي تم النقر عليه في المتصفح الافتراضي.\n"
     Region for Trending: الانتشار المحلي (Trend) يسمح لك بأن تشاهد الفيديوهات الأكثر انتشارا حسب الدولة. ليست كل الدول المعروضة في هذه القائمة مدعومة من طرف يوتيوب.
-    Open Deep Links In New Window: يتم فتح عناوين URL التي تم تمريرها إلى FreeTube، مثل إعادة توجيه ملحقات المتصفح أو حجج سطر الأوامر، في نافذة جديدة.
+    Open Deep Links In New Window: يتم فتح عناوين URL التي تم تمريرها إلى OpenTubeX، مثل إعادة توجيه ملحقات المتصفح أو حجج سطر الأوامر، في نافذة جديدة.
   Player Settings:
     Proxy Videos Through Invidious: سيتم الاتصال بـ Invidious لعرض مقاطع الفيديو بدلاً من إجراء اتصال مباشر بـ YouTube.
     Default Video Format: حدّد التنسيقات المستخدمة عند تشغيل الفيديو. تنسيق داش (التدفق الميكانيكي المتكيّف عبر بروتوكول نقل النص التشعبي) يمكنها أن تُشغِّل جودات أعلى. التنسيقات القديمة محدودة بجودة 360p كحدّ أقصى لكنها تستخدم عرضًا أقل للنطاق. التنسيقات الصوتية هي للتدفق الصوتي فقط.
     Scroll Playback Rate Over Video Player: أثناء وجود المؤشر فوق الفيديو، اضغط مع الاستمرار على مفتاح التحكم (مفتاح القيادة على Mac) ومرر عجلة الماوس للأمام أو للخلف للتحكم في معدل التشغيل. اضغط مع الاستمرار على مفتاح التحكم (مفتاح الأوامر على Mac) ثم انقر فوق الماوس للعودة بسرعة إلى معدل التشغيل الافتراضي (1x ما لم يتم تغييره في الإعدادات).
     Skip by Scrolling Over Video Player: استخدم عجلة التمرير لتخطي الفيديو بنمط MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: عند التفعيل، سيستخدم FreeTube بروتوكول RSS بدلاً من طريقته الافتراضية لجلب خلاصة الاشتراكات. يعتبر RSS أسرع ويساعد على منع حظر عنوان الـIP، لكنه لا يوفر بعض المعلومات مثل مدة الفيديو، حالة البث المباشر أو المنشورات
-    Fetch Automatically: عند التفعيل، سيقوم FreeTube تلقائيًا بجلب خلاصة الاشتراكات عند بدء التشغيل وعند فتح نافذة جديدة.
+    Fetch Feeds from RSS: عند التفعيل، سيستخدم OpenTubeX بروتوكول RSS بدلاً من طريقته الافتراضية لجلب خلاصة الاشتراكات. يعتبر RSS أسرع ويساعد على منع حظر عنوان الـIP، لكنه لا يوفر بعض المعلومات مثل مدة الفيديو، حالة البث المباشر أو المنشورات
+    Fetch Automatically: عند التفعيل، سيقوم OpenTubeX تلقائيًا بجلب خلاصة الاشتراكات عند بدء التشغيل وعند فتح نافذة جديدة.
   External Player Settings:
     Custom External Player Arguments: أي وسيطات سطر أوامر مخصصة تريد تمريرها إلى المشغل الخارجي.
     Ignore Warnings: منع التحذيرات عندما لا يدعم اللاعب الخارجي الحالي الإجراء الحالي (على سبيل المثال، عكس قوائم التشغيل، وما إلى ذلك).
-    Custom External Player Executable: بشكل افتراضي ، ستفترض FreeTube أنه يمكن العثور على المشغل الخارجي المختار عبر متغير بيئة PATH. إذا لزم الأمر ، يمكن تعيين مسار مخصص هنا.
+    Custom External Player Executable: بشكل افتراضي ، ستفترض OpenTubeX أنه يمكن العثور على المشغل الخارجي المختار عبر متغير بيئة PATH. إذا لزم الأمر ، يمكن تعيين مسار مخصص هنا.
     External Player: سيؤدي اختيار مشغل خارجي إلى عرض رمز لفتح الفيديو (قائمة التشغيل إذا كانت مدعومة) في المشغل الخارجي على الصورة المصغرة. تحذير ، لا تؤثر إعدادات Invidious على المشغلات الخارجية.
     DefaultCustomArgumentsTemplate: "(الافتراضي: '{defaultCustomArguments}')"
     Ignore Default Arguments: لا ترسل أي وسائط افتراضية إلى المشغل الخارجي بخلاف عنوان URL للفيديو (مثل معدل التشغيل وعنوان URL لقائمة التشغيل وما إلى ذلك). سيستمر تمرير الوسائط المخصصة.
@@ -968,7 +968,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: أدخل معرف القناة لإخفاء جميع مقاطع الفيديو وقوائم التشغيل والقناة نفسها من الظهور في نتائج البحث والشائعة والأكثر شهرة والموصى بها. يجب أن يكون معرف القناة الذي تم إدخاله متطابقًا تمامًا وأن يكون حساسًا لحالة الأحرف.
     Hide Subscriptions Live: يتم تجاوز هذا الإعداد من خلال إعداد "{appWideSetting}" على مستوى التطبيق، في قسم "{subsection}" من "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: أدخل كلمة أو جزء كلمة أو عبارة (غير حساسة لحالة الأحرف) لإخفاء جميع مقاطع الفيديو وقوائم التشغيل التي تحتوي عناوينها الأصلية عليها في جميع أنحاء FreeTube، باستثناء السجل وقوائم التشغيل الخاصة بك ومقاطع الفيديو الموجودة داخل قوائم التشغيل فقط.
+    Hide Videos, Playlists and Channels Containing Text: أدخل كلمة أو جزء كلمة أو عبارة (غير حساسة لحالة الأحرف) لإخفاء جميع مقاطع الفيديو وقوائم التشغيل التي تحتوي عناوينها الأصلية عليها في جميع أنحاء OpenTubeX، باستثناء السجل وقوائم التشغيل الخاصة بك ومقاطع الفيديو الموجودة داخل قوائم التشغيل فقط.
     Hide Videos on Watch: إخفاء مقاطع الفيديو التي تمت مشاهدتها من علامات التبويب "مقاطع الفيديو" و "الفيديوهات القصيرة" و "البث المباشر" في صفحتي الاشتراك والقناة. هذا لا يؤثر على علامة التبويب الرئيسية على صفحات القناة
   SponsorBlock Settings:
     UseDeArrowTitles: استبدل عناوين الفيديو بالعناوين التي أرسلها المستخدم من DeArrow.

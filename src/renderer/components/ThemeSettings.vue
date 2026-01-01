@@ -32,7 +32,7 @@
           @change="updateHideLabelsSideBar"
         />
         <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Hide FreeTube Header Logo')"
+          :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
           compact
           :default-value="hideHeaderLogo"
           @change="updateHideHeaderLogo"

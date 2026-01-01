@@ -685,7 +685,7 @@ async function getChannelLocal() {
 
       store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId: id.value })
 
-      setErrorMessage(t('Channel["This channel is age-restricted and currently cannot be viewed in FreeTube."]'), true)
+      setErrorMessage(t('Channel["This channel is age-restricted and currently cannot be viewed in OpenTubeX."]'), true)
       return
     }
 

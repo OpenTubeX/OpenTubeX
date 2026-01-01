@@ -201,7 +201,7 @@ Settings:
     Secondary Color Theme: 'Sekundærfargetema'
         #* Main Color Theme
     Hide Side Bar Labels: Skjul sidefeltetikettar
-    Hide FreeTube Header Logo: Skjul FreeTube-tittellogo
+    Hide OpenTubeX Header Logo: Skjul OpenTubeX-tittellogo
   Player Settings:
     Player Settings: 'Videoavspelingsinnstillingar'
     Play Next Video: 'Spel av neste video'
@@ -293,7 +293,7 @@ Settings:
     Select Export Type: 'Vel eksporttype'
     Import Subscriptions: 'Importer abonnement'
     Export Subscriptions: 'Eksporter abonnement'
-    Export FreeTube: 'Eksporter FreeTube'
+    Export OpenTubeX: 'Eksporter OpenTubeX'
     Export YouTube: 'Eksporter YouTube'
     Export NewPipe: 'Eksporter NewPipe'
     Import History: 'Importer historikk'
@@ -387,7 +387,7 @@ About:
   Downloads / Changelog: 'Nedlastingar / Endringslogg'
   GitHub releases: 'GitHub-utgjevingar'
   Help: 'Hjelp'
-  FreeTube Wiki: 'FreeTube-wiki'
+  OpenTubeX Wiki: 'OpenTubeX-wiki'
   FAQ: 'Ofte stilte spørsmål'
   Report a problem: 'Rapporter eit problem'
   GitHub issues: 'GitHub-problemsporar'
@@ -401,7 +401,7 @@ About:
   room rules: 'Romreglar'
   Translate: 'Omsetje'
   Credits: 'Bidrag'
-  FreeTube is made possible by: 'FreeTube er mogleggjort av'
+  OpenTubeX is made possible by: 'OpenTubeX er mogleggjort av'
   these people and projects: 'desse folka og prosjekta'
   Donate: 'Doner'
 
@@ -594,25 +594,25 @@ Up Next: 'Neste'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Vel metoden FreeTube bruker for å hente data. Det lokale API-et er ein innebygd utpakkar. Invidious-API-et krev ein Invidious-tenar å kople til.'
-    Fallback to Non-Preferred Backend on Failure: 'Når ditt føretrekte API har eit problem, vil FreeTube prøve å automatisk bruke ditt ikkje-føretrekte API som ein tilbakefallingsmetode dersom det er aktivert.'
-    Thumbnail Preference: 'Alle miniatyrbilete i FreeTube vil bli erstatta av eit bilete av videoen i staden for standardminiatyrbiletet'
-    Invidious Instance: 'Invidious-førekomsten som FreeTube vil kople til for API-kall.'
+    Preferred API Backend: 'Vel metoden OpenTubeX bruker for å hente data. Det lokale API-et er ein innebygd utpakkar. Invidious-API-et krev ein Invidious-tenar å kople til.'
+    Fallback to Non-Preferred Backend on Failure: 'Når ditt føretrekte API har eit problem, vil OpenTubeX prøve å automatisk bruke ditt ikkje-føretrekte API som ein tilbakefallingsmetode dersom det er aktivert.'
+    Thumbnail Preference: 'Alle miniatyrbilete i OpenTubeX vil bli erstatta av eit bilete av videoen i staden for standardminiatyrbiletet'
+    Invidious Instance: 'Invidious-førekomsten som OpenTubeX vil kople til for API-kall.'
     Region for Trending: 'Trendsregionen lar deg enkelt velje kva lands populære videoar du ynskjer å vise.'
-    External Link Handling: "Vel kva FreeTube skal gjer, når ein trykker på ei lenke, som ikkje kan bli opna av FreeTube. \nFreeTube vil vanlegvis opne lenka i din standardnettlesar.\n"
+    External Link Handling: "Vel kva OpenTubeX skal gjer, når ein trykker på ei lenke, som ikkje kan bli opna av OpenTubeX. \nOpenTubeX vil vanlegvis opne lenka i din standardnettlesar.\n"
   Player Settings:
     Proxy Videos Through Invidious: 'Koplar til Invidious for å servere videoar i staden for å kople direkte til YouTube.'
     Default Video Format: 'Sett format som blir brukt når ein video spelast. DASH-format kan spele høgare kvalitet. Utdaterte format er avgrensa til maks 720p, men bruker mindre bandbreidde. Lydformat er berre for lydstraumar.'
     Skip by Scrolling Over Video Player: Bla for å hoppe deg gjennom videoen i MPV-stil.
     Scroll Playback Rate Over Video Player: Mens musepeikaren er over videoen, trykk og hald inne CTRL-tasten (kommandotasen på Mac) og bla opp og ned for å kontrollere avspelingshastigheita. Trykk og hald inne CTRL-tasten (kommandotasten på Mac) og venstretrykk rakst for å gå tilbake til standard avspelingshastigheita. Standard avspelingshastigheit er 1x med mindre den har blitt endra i innstillingane.
   Subscription Settings:
-    Fetch Feeds from RSS: 'Bruk RSS i staden for FreeTube sin standardmetode for innhenting av din abonnementsstraum. RSS er raskaren og forhindrar IP-blokkering, men manglar noko informasjon som videovarigheit og sanntidsstatus.'
+    Fetch Feeds from RSS: 'Bruk RSS i staden for OpenTubeX sin standardmetode for innhenting av din abonnementsstraum. RSS er raskaren og forhindrar IP-blokkering, men manglar noko informasjon som videovarigheit og sanntidsstatus.'
 
 # Toast Messages
-    Fetch Automatically: Om dette alternativet er aktivert, vil FreeTube automatisk hente abonnementfeeden din når eit nytt vindauge opnast og når du bytter profil.
+    Fetch Automatically: Om dette alternativet er aktivert, vil OpenTubeX automatisk hente abonnementfeeden din når eit nytt vindauge opnast og når du bytter profil.
   External Player Settings:
     DefaultCustomArgumentsTemplate: "(Standard: '{defaultCustomArguments}')"
-    Custom External Player Executable: Som standard vil FreeTube anta at den valte eksterne videoavspelaren kan bli funnen via programstivariabelen. Om naudsynt kan ein endre på programstien.
+    Custom External Player Executable: Som standard vil OpenTubeX anta at den valte eksterne videoavspelaren kan bli funnen via programstivariabelen. Om naudsynt kan ein endre på programstien.
     Ignore Warnings: Skjul åtvaringar angåande eksterne videoavspelarar som ikkje støtter gjeldande handlingar (f.eks. snu spelelister, osv.).
     External Player: Viss ein har valt ein ekstern videoavspelar, blir eit ikon vist på miniatyrbiletet til videoar. Dette ikonet lar ein opne desse videoane i ein ekstern videoavspelar. Ver merksam på at Invidious-innstillingar ikkje påverker den eksterne videoavspelaren.
     Custom External Player Arguments: Eventuelle eigendefinerte kommandolinjeargument, du vil at skal bli sendt til den eksterne videoavspelaren.

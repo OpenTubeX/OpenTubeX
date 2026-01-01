@@ -253,7 +253,7 @@ Settings:
     Auto Load Next Page:
       Tooltip: Carrega as páginas e comentários automaticamente.
       Label: Carregar seguinte automaticamente
-    Open Deep Links In New Window: Abrir URLs passados para o FreeTube numa nova janela
+    Open Deep Links In New Window: Abrir URLs passados para o OpenTubeX numa nova janela
     Minimize to system tray: Minimizar para o Tabuleiro do Sistema
   Theme Settings:
     Theme Settings: Tema
@@ -371,7 +371,7 @@ Settings:
     Secondary Color Theme: Cor secundária
         #* Main Color Theme
     Hide Side Bar Labels: Ocultar texto na barra lateral
-    Hide FreeTube Header Logo: Ocultar logotipo FreeTube no topo
+    Hide OpenTubeX Header Logo: Ocultar logotipo OpenTubeX no topo
   Player Settings:
     Player Settings: Reprodutor
     Play Next Video: Reproduzir automaticamente os vídeos recomendados
@@ -513,7 +513,7 @@ Settings:
     Select Export Type: Selecione o tipo de exportação
     Import Subscriptions: Importar subscrições
     Export Subscriptions: Exportar subscrições
-    Export FreeTube: Exportar FreeTube
+    Export OpenTubeX: Exportar OpenTubeX
     Export YouTube: Exportar YouTube
     Export NewPipe: Exportar NewPipe
     Import History: Importar histórico
@@ -540,9 +540,9 @@ Settings:
     Subscription File: Ficheiro de subscrição
     History File: Ficheiro de histórico
     Playlist File: Ficheiro de lista de reprodução
-    Export Playlists For Older FreeTube Versions:
-      Label: Exportar listas de reprodução para versões mais antigas do FreeTube
-      Tooltip: "Esta opção exporta os vídeos de todas as listas de reprodução para uma lista de reprodução chamada \"Favoritos\".\nComo exportar e importar vídeos em listas de reprodução para uma versão mais antiga do FreeTube:\n1. Exporte as suas listas de reprodução com esta opção ativada.\n2. Elimine todas as listas de reprodução existentes usando a opção \"Remover todas as listas de reprodução\" em \"Definições de privacidade\".\n3. Abra a versão mais antiga do FreeTube e importe as listas de reprodução."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Exportar listas de reprodução para versões mais antigas do OpenTubeX
+      Tooltip: "Esta opção exporta os vídeos de todas as listas de reprodução para uma lista de reprodução chamada \"Favoritos\".\nComo exportar e importar vídeos em listas de reprodução para uma versão mais antiga do OpenTubeX:\n1. Exporte as suas listas de reprodução com esta opção ativada.\n2. Elimine todas as listas de reprodução existentes usando a opção \"Remover todas as listas de reprodução\" em \"Definições de privacidade\".\n3. Abra a versão mais antiga do OpenTubeX e importe as listas de reprodução."
   Proxy Settings:
     Proxy Settings: Proxy
     Enable Tor / Proxy: Ativar Tor / proxy
@@ -557,7 +557,7 @@ Settings:
     Region: Região
     City: Cidade
     Error getting network information. Is your proxy configured properly?: Erro ao obter informações da rede. O seu proxy está configurado corretamente?
-    Proxy Warning: O FreeTube não tem um proxy incorporado, mas pode conectar-se a um proxy externo, como um que esteja a ser executado na sua máquina, como o Tor, ou um proxy externo, como um proxy SOCKS5 fornecido por algumas VPNs. Se estiver ativado, certifique-se de que o seu proxy / Tor está configurado corretamente, ou o FreeTube não conseguirá obter quaisquer dados.
+    Proxy Warning: O OpenTubeX não tem um proxy incorporado, mas pode conectar-se a um proxy externo, como um que esteja a ser executado na sua máquina, como o Tor, ou um proxy externo, como um proxy SOCKS5 fornecido por algumas VPNs. Se estiver ativado, certifique-se de que o seu proxy / Tor está configurado corretamente, ou o OpenTubeX não conseguirá obter quaisquer dados.
     Proxy Username: Nome de Utilizador da Proxy
     Proxy Password: Palavra-passe da Proxy
   SponsorBlock Settings:
@@ -596,7 +596,7 @@ Settings:
     Ask Download Path: Perguntar local para guardar
     Choose Path: Escolher local
     Download Behavior: Como descarregar
-    Download in app: Descarregar no FreeTube
+    Download in app: Descarregar no OpenTubeX
     Download Settings: Descargas
   Experimental Settings:
     Experimental Settings: Experimentais
@@ -620,7 +620,7 @@ About:
   Downloads / Changelog: Descargas / alterações
   GitHub releases: Versões do GitHub
   Help: Ajuda
-  FreeTube Wiki: Wiki FreeTube
+  OpenTubeX Wiki: Wiki OpenTubeX
   FAQ: FAQ
   Report a problem: Reportar um problema
   GitHub issues: Problemas no GitHub
@@ -634,7 +634,7 @@ About:
   room rules: regras da sala de conversa
   Translate: Traduzir
   Credits: Créditos
-  FreeTube is made possible by: O FreeTube existe graças a
+  OpenTubeX is made possible by: O OpenTubeX existe graças a
   these people and projects: estas pessoas e projetos
   Donate: Doar
   Discussions: Discussões
@@ -716,14 +716,14 @@ Channel:
     Location: Localização
   This channel does not exist: Este canal não existe
   This channel does not allow searching: Este canal não permite pesquisas
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Este canal tem restrição de idade e, atualmente, não pode ser visto no Free Tube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Este canal tem restrição de idade e, atualmente, não pode ser visto no Free Tube.
   Channel Tabs: Separadores de canais
   Posts:
     This channel currently does not have any posts: Este canal não tem, atualmente, quaisquer publicações
     Reveal Answers: Mostrar respostas
     Hide Answers: Ocultar respostas
     votes: '{votes} votos'
-    Video hidden by FreeTube: Freetube ocultou este vídeo
+    Video hidden by OpenTubeX: OpenTubeX ocultou este vídeo
     View Full Post: Ver publicação na íntegra
     Viewing Posts Only Supported By Invidious: A visualização de publicações só é suportada pelo Invidious. Aceda ao separador Comunidade de um canal para ver o conteúdo sem o Invidious.
   Live:
@@ -849,13 +849,13 @@ Video:
     Autoplay is on: A reprodução automática está ativada
     Take Screenshot: Tirar uma captura de ecrã
     Show Stats: Mostrar estatísticas
-  MembersOnly: Os vídeos só para membros não podem ser visualizados com o FreeTube, uma vez que requerem um início de sessão do Google e uma inscrição paga no canal do autor do vídeo.
-  AgeRestricted: Os vídeos com restrições de idade não podem ser vistos com o FreeTube, uma vez que requerem o início de sessão no Google e a utilização de uma conta YouTube com idade verificada.
+  MembersOnly: Os vídeos só para membros não podem ser visualizados com o OpenTubeX, uma vez que requerem um início de sessão do Google e uma inscrição paga no canal do autor do vídeo.
+  AgeRestricted: Os vídeos com restrições de idade não podem ser vistos com o OpenTubeX, uma vez que requerem o início de sessão no Google e a utilização de uma conta YouTube com idade verificada.
   Unlisted: Não listado
   DeArrow:
     Show Modified Details: Mostrar detalhes modificados
     Show Original Details: Mostrar detalhes originais
-  DRMProtected: Os vídeos protegidos por DRM não podem ser reproduzidos no FreeTube, uma vez que requerem componentes proprietários e de código fechado. Se quiser ver este vídeo, veja-o no sítio Web oficial do YouTube num navegador Web com DRM.
+  DRMProtected: Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, uma vez que requerem componentes proprietários e de código fechado. Se quiser ver este vídeo, veja-o no sítio Web oficial do YouTube num navegador Web com DRM.
   Save Watched Progress: Gravar progresso de visualização
   Watched Progress Saved: O Progresso de Visualização foi gravado
 Playlist:
@@ -928,27 +928,27 @@ Up Next: Próximo
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: Escolha o sistema que o FreeTube usa para se ligar ao YouTube. A API local é um extrator incorporado. A API Invidious requer um servidor Invidious para fazer a ligação.
-    Fallback to Non-Preferred Backend on Failure: Se a sua API preferida tiver um problema, FreeTube tentará usar automaticamente a API secundária, caso esta opção esteja ativada.
-    Thumbnail Preference: Todas as miniaturas dos vídeos no FreeTube serão substituídas por um quadro borrado ou escondido do vídeo em vez da miniatura original.
-    Invidious Instance: A instância Invidious à qual o FreeTube se irá ligar para invocar a API.
+    Preferred API Backend: Escolha o sistema que o OpenTubeX usa para se ligar ao YouTube. A API local é um extrator incorporado. A API Invidious requer um servidor Invidious para fazer a ligação.
+    Fallback to Non-Preferred Backend on Failure: Se a sua API preferida tiver um problema, OpenTubeX tentará usar automaticamente a API secundária, caso esta opção esteja ativada.
+    Thumbnail Preference: Todas as miniaturas dos vídeos no OpenTubeX serão substituídas por um quadro borrado ou escondido do vídeo em vez da miniatura original.
+    Invidious Instance: A instância Invidious à qual o OpenTubeX se irá ligar para invocar a API.
     Region for Trending: A região permite-lhe escolher de que país virão os vídeos na secção de tendências.
-    External Link Handling: "Escolha o comportamento padrão quando uma hiperligação, que não pode ser aberta no FreeTube, é clicada.\nPor definição, o FreeTube abrirá a hiperligação no seu navegador de Internet.\n"
-    Open Deep Links In New Window: Os URLs passados para o FreeTube, como por extensões de navegador de redirecionamento ou argumentos de linha de comando, são abertos numa nova janela.
+    External Link Handling: "Escolha o comportamento padrão quando uma hiperligação, que não pode ser aberta no OpenTubeX, é clicada.\nPor definição, o OpenTubeX abrirá a hiperligação no seu navegador de Internet.\n"
+    Open Deep Links In New Window: Os URLs passados para o OpenTubeX, como por extensões de navegador de redirecionamento ou argumentos de linha de comando, são abertos numa nova janela.
   Player Settings:
     Proxy Videos Through Invidious: Estabelece uma conexão ao Invidious para obter vídeos em vez de fazer uma conexão direta ao YouTube.
     Default Video Format: Define os formatos usados quando um vídeo é reproduzido. Os formatos DASH podem reproduzir em qualidades mais altas. Os formatos antigos estão limitados a um máximo de 360p, mas usam menos largura de banda. Os formatos de áudio são apenas para reproduções de áudio (sem vídeo).
     Scroll Playback Rate Over Video Player: Com o cursor sobre o vídeo, prima e mantenha premida a tecla Ctrl (tecla Comando em Mac) e desloque a roda do rato para controlar a velocidade de reprodução. Prima e mantenha premida a tecla Ctrl (tecla Comando em Mac) e clique com o botão esquerdo do rato para voltar rapidamente à velocidade de reprodução padrão (1 a não ser que tenha sido alterada nas definições).
     Skip by Scrolling Over Video Player: Utilizar roda do rato para avançar ou recuar o vídeo, estilo MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: Se ativa, o FreeTube irá obter as subscrições através de RSS em vez do método normal. O formato RSS é mais rápido e não é bloqueado pelo YouTube, mas não disponibiliza certas informações como, por exemplo, a duração dos vídeos, se são emissões em direto e publicações
+    Fetch Feeds from RSS: Se ativa, o OpenTubeX irá obter as subscrições através de RSS em vez do método normal. O formato RSS é mais rápido e não é bloqueado pelo YouTube, mas não disponibiliza certas informações como, por exemplo, a duração dos vídeos, se são emissões em direto e publicações
 
 # Toast Messages
-    Fetch Automatically: Se ativado, o FreeTube irá obter automaticamente as subscrições ao iniciar e ao abrir uma nova janela.
+    Fetch Automatically: Se ativado, o OpenTubeX irá obter automaticamente as subscrições ao iniciar e ao abrir uma nova janela.
   External Player Settings:
     Custom External Player Arguments: Quaisquer argumentos de linha de comando, que quiser passar ao reprodutor externo.
     Ignore Warnings: Ignorar avisos quando o reprodutor externo escolhido não suporte uma ação (por exemplo, inverter listas de reprodução).
-    Custom External Player Executable: Por omissão, FreeTube assume que o reprodutor externo pode ser encontrado através da variável PATH. Se for preciso, pode escolher um caminho personalizado aqui.
+    Custom External Player Executable: Por omissão, OpenTubeX assume que o reprodutor externo pode ser encontrado através da variável PATH. Se for preciso, pode escolher um caminho personalizado aqui.
     External Player: Escolher um reprodutor externo mostra um ícone para abrir o vídeo (lista de reprodução, se suportado) nessa aplicação. Mas tenha em conta de que as definições Invidious não afetam os reprodutores externos.
     DefaultCustomArgumentsTemplate: "(Padrão: '{defaultCustomArguments}')"
     Ignore Default Arguments: 'Não enviar quaisquer argumentos padrão ao reprodutor externo a não ser o URL (ex: velocidade de reprodução, URL da lista de reprodução...). Os argumentos personalizados serão enviados.'
@@ -957,7 +957,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Introduza o ID de um canal para impedir que os vídeos, listas de reprodução e o próprio canal apareçam na pesquisa, tendências, mais populares e recomendados. O nome do canal introduzido tem que ser uma correspondência exata e diferencia maiúsculas de minúsculas.
     Hide Subscriptions Live: Esta definição é substituída pela definição global "{appWideSetting}", existente na secção "{subsection}" de "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Introduza uma palavra, fragmento de palavra ou frase (sem distinção entre maiúsculas e minúsculas) para ocultar todos os vídeos e listas de reprodução cujos títulos originais a contenham em todo o FreeTube, excluindo apenas o histórico, as suas listas de reprodução e os vídeos dentro das listas de reprodução.
+    Hide Videos, Playlists and Channels Containing Text: Introduza uma palavra, fragmento de palavra ou frase (sem distinção entre maiúsculas e minúsculas) para ocultar todos os vídeos e listas de reprodução cujos títulos originais a contenham em todo o OpenTubeX, excluindo apenas o histórico, as suas listas de reprodução e os vídeos dentro das listas de reprodução.
     Hide Videos on Watch: Oculta os vídeos já reproduzidos dos separadores "Vídeos", "Shorts" e "Em direto" nas páginas "Subscrições" e "Canais". Não afeta o separador "Início" nas páginas "Canais"
   SponsorBlock Settings:
     UseDeArrowTitles: Substituir títulos de vídeo por títulos enviados pelo utilizador a partir do DeArrow.

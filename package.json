@@ -1,22 +1,21 @@
 {
-  "name": "freetube",
-  "productName": "FreeTube",
+  "name": "opentubex",
+  "productName": "OpenTubeX",
   "description": "A private YouTube client",
   "version": "0.23.12",
   "license": "AGPL-3.0-or-later",
   "main": "./dist/main.js",
   "private": true,
   "author": {
-    "name": "FreeTube Team",
-    "email": "FreeTubeApp@protonmail.com",
-    "url": "https://github.com/D3SOX/FreeTube"
+    "name": "D3SOX",
+    "url": "https://github.com/D3SOX"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/D3SOX/FreeTube.git"
+    "url": "git+https://github.com/D3SOX/OpenTubeX.git"
   },
   "bugs": {
-    "url": "https://github.com/D3SOX/FreeTube/issues"
+    "url": "https://github.com/D3SOX/OpenTubeX/issues"
   },
   "scripts": {
     "build": "run-s patch-shaka pack build-release",

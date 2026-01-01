@@ -248,7 +248,7 @@ Settings:
     Auto Load Next Page:
       Label: Last inn den neste siden automatisk
       Tooltip: Last inn flere sider og kommentarer automatisk.
-    Open Deep Links In New Window: Åpne linker gitt til FreeTube i et nytt vindu
+    Open Deep Links In New Window: Åpne linker gitt til OpenTubeX i et nytt vindu
     Minimize to system tray: Minimer til systemkurven
   Theme Settings:
     Theme Settings: 'Tema'
@@ -369,7 +369,7 @@ Settings:
     Disable Smooth Scrolling: Slå av jevn skrolling
     Expand Side Bar by Default: Utvidet sidefelt som standard
     Hide Side Bar Labels: Skjul etiketter i sidefeiltet
-    Hide FreeTube Header Logo: Skjul FreeTubes tittel og logo
+    Hide OpenTubeX Header Logo: Skjul OpenTubeXs tittel og logo
   Player Settings:
     Player Settings: 'Videoavspiller'
     Play Next Video: 'Spill av neste anbefalte video automatisk'
@@ -478,7 +478,7 @@ Settings:
     Import History: Importer historikk
     Export NewPipe: Eksporter NewPipe
     Export YouTube: Eksporter YouTube
-    Export FreeTube: Eksporter FreeTube
+    Export OpenTubeX: Eksporter OpenTubeX
     Export Subscriptions: Eksporter abonnementer
     Import Subscriptions: Importer abonnementer
     Select Export Type: Velg eksporttype
@@ -491,9 +491,9 @@ Settings:
     Import Playlists: Importer spillelister
     All playlists has been successfully exported: Alle spillelister har blitt eksportert
     Playlist insufficient data: Utilstrekkelig data i «{playlist}»-spillelisten. Hopper over elementet
-    Export Playlists For Older FreeTube Versions:
-      Label: Eksporter spillelister for eldre FreeTube-versjoner
-      Tooltip: "Denne funksjonen eksporterer videoer fra alle spillelister inn i en spilleliste med navnet «Favoritter».\nFor å eksportere og importere videoer i spillelister i eldre versjoner av FreeTube:\n1.) Eksporter spillelistene dine med denne funksjonen skrudd på.\n2.) Slett alle spillelistene dine med «Fjern alle spillelister» under «Personvern».\n3.) Start opp den eldre versjonen av FreeTube og importer de eksporterte spillelistene dine."
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Eksporter spillelister for eldre OpenTubeX-versjoner
+      Tooltip: "Denne funksjonen eksporterer videoer fra alle spillelister inn i en spilleliste med navnet «Favoritter».\nFor å eksportere og importere videoer i spillelister i eldre versjoner av OpenTubeX:\n1.) Eksporter spillelistene dine med denne funksjonen skrudd på.\n2.) Slett alle spillelistene dine med «Fjern alle spillelister» under «Personvern».\n3.) Start opp den eldre versjonen av OpenTubeX og importer de eksporterte spillelistene dine."
     Search history file: Søkshistorikkfil
     Search history: Søkshistorikk
     Import search history: Importer søkshistorikk
@@ -514,7 +514,7 @@ Settings:
     Proxy Protocol: Mellomtjenerprotokoll
     Enable Tor / Proxy: Skru på Tor / mellomtjener
     Proxy Settings: Mellomtjener (proxy)
-    Proxy Warning: FreeTube har ikke en innebygd mellomtjener (proxy), men det kan koble til en ekstern en, for eksempel en som kjører på din egen maskin, som Tor, eller en ekstern mellomtjener som SOCKS5 som tilbys av enkelte VPN-er. Hvis dette skrus på, pass på at mellomtjeneren din er konfigurert riktig; hvis ikke kommer ikke FreeTube til å klare å hente noen data.
+    Proxy Warning: OpenTubeX har ikke en innebygd mellomtjener (proxy), men det kan koble til en ekstern en, for eksempel en som kjører på din egen maskin, som Tor, eller en ekstern mellomtjener som SOCKS5 som tilbys av enkelte VPN-er. Hvis dette skrus på, pass på at mellomtjeneren din er konfigurert riktig; hvis ikke kommer ikke OpenTubeX til å klare å hente noen data.
     Proxy Username: Mellomtjener-brukernavn
     Proxy Password: Mellomtjener-passord
   Distraction Free Settings:
@@ -637,11 +637,11 @@ About:
   Translate: Oversett
   Please check for duplicates before posting: Vennligst sjekk om problemet ditt allerede har blitt sendt inn før du sender inn en melding
   these people and projects: disse folkene og prosjektene
-  FreeTube is made possible by: FreeTube er gjort mulig av
+  OpenTubeX is made possible by: OpenTubeX er gjort mulig av
   Credits: Bidragsytere
   room rules: reglene for rommet
   GitHub issues: GitHub-problemsporer
-  FreeTube Wiki: FreeTube-wiki
+  OpenTubeX Wiki: OpenTubeX-wiki
   GitHub releases: GitHub-utgivelser
   Beta: Beta
   Chat on Matrix: Snakk med oss på Matrix
@@ -682,14 +682,14 @@ Channel:
   Channel has been removed from your subscriptions: Kanalen har blitt fjernet fra dine abonnement
   This channel does not exist: Denne kanalen finnes ikke
   This channel does not allow searching: Denne kanalen tillater ikke søk
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Denne kanalen er aldersbegrenset og kan derfor ikke vises i FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Denne kanalen er aldersbegrenset og kan derfor ikke vises i OpenTubeX.
   Channel Tabs: Kanalfaner
   Posts:
     This channel currently does not have any posts: Denne kanalen har ingen oppføringer
     Hide Answers: Skjul svar
     votes: '{votes} stemmer'
     View Full Post: Se hele innlegget
-    Video hidden by FreeTube: Video skjult av FreeTube
+    Video hidden by OpenTubeX: Video skjult av OpenTubeX
     Viewing Posts Only Supported By Invidious: Innlegg kan bare vises gjennom Invidious. Gå til kanalens fellesskapside for å se innholdet der uten Invidious.
     Reveal Answers: Vis svar
   Shorts:
@@ -815,10 +815,10 @@ Video:
   Unhide Channel: Vis kanal
   More Options: Flere valg
   Hide Channel: Skjul kanal
-  AgeRestricted: Videoer med aldersbegrensning kan ikke bli sett med FreeTube ettersom det kreves en Google-pålogging og at man bruker en YouTube-bruker med verifisert alder.
-  MembersOnly: Videoer kun for medlemmer kan ikke bli sett med FreeTube ettersom de krever en Google-pålogging og et betalt medlemsskap i opplasterens kanal.
+  AgeRestricted: Videoer med aldersbegrensning kan ikke bli sett med OpenTubeX ettersom det kreves en Google-pålogging og at man bruker en YouTube-bruker med verifisert alder.
+  MembersOnly: Videoer kun for medlemmer kan ikke bli sett med OpenTubeX ettersom de krever en Google-pålogging og et betalt medlemsskap i opplasterens kanal.
   IP block: YouTube har blokkert din IP adresse fra å se videoer. Prøv å bytte til en annen VPN eller mellomtjener.
-  DRMProtected: Kopibeskyttede videoer kan ikke bli avspilt i FreeTube, ettersom det krever proprietære komponenter med lukket kildekode. Gå til den offisielle YouTube-nettsiden i en støttet nettleser for å spille av denne videoen.
+  DRMProtected: Kopibeskyttede videoer kan ikke bli avspilt i OpenTubeX, ettersom det krever proprietære komponenter med lukket kildekode. Gå til den offisielle YouTube-nettsiden i en støttet nettleser for å spille av denne videoen.
   Save Watched Progress: Lagre sted i videoen
   Watched Progress Saved: Sted i videoen lagret
   DeArrow:
@@ -954,15 +954,15 @@ Profile:
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Denne videoen er utilgjengelig på grunn av manglende formater. Dette kan skyldes tilgangbegrensninger i landet ditt.
 Tooltips:
   General Settings:
-    Invidious Instance: Invidious-forekomsten FreeTube kobler til for API-kall.
-    Thumbnail Preference: Alle miniatyrbilder i FreeTube vil bli erstattet av et enkeltbilde fra videoen som har blitt skjult eller blurret, i stedet for standard miniatyrbildet.
-    Fallback to Non-Preferred Backend on Failure: Når ditt foretrukne API har et problem, vil FreeTube automatisk prøve å bruke ditt ikke-foretrukne API som en reservemetode dersom det er aktivert.
+    Invidious Instance: Invidious-forekomsten OpenTubeX kobler til for API-kall.
+    Thumbnail Preference: Alle miniatyrbilder i OpenTubeX vil bli erstattet av et enkeltbilde fra videoen som har blitt skjult eller blurret, i stedet for standard miniatyrbildet.
+    Fallback to Non-Preferred Backend on Failure: Når ditt foretrukne API har et problem, vil OpenTubeX automatisk prøve å bruke ditt ikke-foretrukne API som en reservemetode dersom det er aktivert.
     Region for Trending: Trendregionen lar deg enkelt velge hvilket lands populære videoer du ønsker å se.
-    Preferred API Backend: Velg metoden FreeTube bruker til å hente data. Det lokale API-et er en innebygd utpakker. Invidious-API-et krever en Invidious-tjener å koble til.
-    External Link Handling: "Velg hva som skjer når en link som ikke kan åpnes i FreeTube klikkes.\nSom standard vil FreeTube åpne lenken i nettleseren din.\n"
-    Open Deep Links In New Window: Lenker sent til FreeTube, som for eksempel via omdirigeringer fra nettleseren eller via terminalprosesser, åpnes i et nytt vindu.
+    Preferred API Backend: Velg metoden OpenTubeX bruker til å hente data. Det lokale API-et er en innebygd utpakker. Invidious-API-et krever en Invidious-tjener å koble til.
+    External Link Handling: "Velg hva som skjer når en link som ikke kan åpnes i OpenTubeX klikkes.\nSom standard vil OpenTubeX åpne lenken i nettleseren din.\n"
+    Open Deep Links In New Window: Lenker sent til OpenTubeX, som for eksempel via omdirigeringer fra nettleseren eller via terminalprosesser, åpnes i et nytt vindu.
   Subscription Settings:
-    Fetch Feeds from RSS: Bruk RSS istedenfor FreeTube sin standardmetode for innhenting av abonnementsstrømmen din. RSS er raskere og forhindrer IP-blokkering, men mangler noe informasjon som videovarighet, sanntidsstatus og innlegg
+    Fetch Feeds from RSS: Bruk RSS istedenfor OpenTubeX sin standardmetode for innhenting av abonnementsstrømmen din. RSS er raskere og forhindrer IP-blokkering, men mangler noe informasjon som videovarighet, sanntidsstatus og innlegg
     Fetch Automatically: Hent abonnementer når programmet starter og når et nytt vindu åpnes.
   Player Settings:
     Default Video Format: Velg formater som blir brukt når en video spilles. DASH-formater kan spilles i høyere kvalitet. Foreldede formater er begrenset opptil 360p, men bruker mindre båndbredde. Lydformater er kun lydstrømmer.
@@ -972,7 +972,7 @@ Tooltips:
   External Player Settings:
     Custom External Player Arguments: Alle egendefinerte kommandolinjeargumenter du ønsker å sende til den eksterne avspilleren.
     Ignore Warnings: Skjuler advarsler når nåværende eksterne avspiller ikke støtter den gjeldende handlingen (f.eks. reversering av spillelister, osv.).
-    Custom External Player Executable: Som standard vil FreeTube anta at den valgte eksterne avspilleren er tilgjengelig via PATH-miljøvariabelen. Hvis det trengs kan en egendefinert sti settes her.
+    Custom External Player Executable: Som standard vil OpenTubeX anta at den valgte eksterne avspilleren er tilgjengelig via PATH-miljøvariabelen. Hvis det trengs kan en egendefinert sti settes her.
     External Player: Hvis en velger å bruke ekstern avspiller, vises et ikon for åpning av video (eller spilleliste hvis det støttes) i den eksterne avspilleren, i miniatyrbildet. Invidious-innstillinger gjelder ikke for eksterne avspillere.
     DefaultCustomArgumentsTemplate: "(Standard: '{defaultCustomArguments}')"
     Ignore Default Arguments: Ikke send noen standardargumenter til den eksterne spilleren utenom videolenken (f.eks avspillingshastighet, spillelistelenke, osv.). Egenvalgte argumenter vil fortsatt bli videresendt.

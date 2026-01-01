@@ -245,7 +245,7 @@ Settings:
     Auto Load Next Page:
       Label: 次のページを自動で読み込む
       Tooltip: 追加のページやコメント欄の続きを自動的に読み込みます。
-    Open Deep Links In New Window: FreeTube に渡された URL を新しいウィンドウで開く
+    Open Deep Links In New Window: OpenTubeX に渡された URL を新しいウィンドウで開く
     Minimize to system tray: システムトレイに最小化
   Theme Settings:
     Theme Settings: 'テーマ'
@@ -366,7 +366,7 @@ Settings:
     Expand Side Bar by Default: 幅広のサイド バーで起動
     Disable Smooth Scrolling: スムーズ スクロールの無効化
     Hide Side Bar Labels: サイドバー ラベルの非表示
-    Hide FreeTube Header Logo: FreeTube ヘッダー ロゴの非表示
+    Hide OpenTubeX Header Logo: OpenTubeX ヘッダー ロゴの非表示
   Player Settings:
     Player Settings: 'プレーヤー'
     Play Next Video: 'おすすめの動画を自動再生'
@@ -473,7 +473,7 @@ Settings:
     Import History: 履歴のインポート
     Export NewPipe: NewPipe エクスポート
     Export YouTube: YouTube エクスポート
-    Export FreeTube: FreeTube エクスポート
+    Export OpenTubeX: OpenTubeX エクスポート
     Export Subscriptions: 登録チャンネルのエクスポート
     Import Subscriptions: 登録チャンネルのインポート
     Select Export Type: エクスポート形式の選択
@@ -487,9 +487,9 @@ Settings:
     Subscription File: 登録チャンネル ファイル
     History File: 履歴ファイル
     Playlist File: 再生リスト
-    Export Playlists For Older FreeTube Versions:
-      Label: 古いバージョンの FreeTube 用に再生リストをエクスポートする
-      Tooltip: "このオプションは、すべての再生リストから動画をエクスポートし、1つの再生リスト「Favorites」にまとめます。\n古いバージョンのFreeTube用に再生リストの動画をエクスポートおよびインポートする方法は以下の通りです：\n 1. このオプションを有効にして再生リストをエクスポートします。\n2. プライバシー設定の「再生リストをすべて削除」オプションを使用して、既存のすべての再生リストを削除します。\n 3. 古いバージョンのFreeTubeを起動し、エクスポートした再生リストをインポートします。"
+    Export Playlists For Older OpenTubeX Versions:
+      Label: 古いバージョンの OpenTubeX 用に再生リストをエクスポートする
+      Tooltip: "このオプションは、すべての再生リストから動画をエクスポートし、1つの再生リスト「Favorites」にまとめます。\n古いバージョンのOpenTubeX用に再生リストの動画をエクスポートおよびインポートする方法は以下の通りです：\n 1. このオプションを有効にして再生リストをエクスポートします。\n2. プライバシー設定の「再生リストをすべて削除」オプションを使用して、既存のすべての再生リストを削除します。\n 3. 古いバージョンのOpenTubeXを起動し、エクスポートした再生リストをインポートします。"
     Search history file: 検索履歴ファイル
     Search history: 検索履歴
     Import search history: 検索履歴のインポート
@@ -559,7 +559,7 @@ Settings:
     Proxy Protocol: プロキシのプロトコル
     Enable Tor / Proxy: Tor / プロキシの有効化
     Proxy Settings: プロキシ
-    Proxy Warning: FreeTube にはプロキシは内蔵されていませんが、Tor のようなご使用のマシン上で動作するものや、一部の VPN が提供する SOCKS5 プロキシのような外部プロキシに接続することができます。有効にした場合は、プロキシ/Tor が適切に設定されていることを確認してください。そうでないと、FreeTube はデータを取得できなくなります。
+    Proxy Warning: OpenTubeX にはプロキシは内蔵されていませんが、Tor のようなご使用のマシン上で動作するものや、一部の VPN が提供する SOCKS5 プロキシのような外部プロキシに接続することができます。有効にした場合は、プロキシ/Tor が適切に設定されていることを確認してください。そうでないと、OpenTubeX はデータを取得できなくなります。
     Proxy Username: プロキシのユーザー名
     Proxy Password: プロキシのパスワード
   SponsorBlock Settings:
@@ -620,7 +620,7 @@ About:
   #& About
 #On Channel Page
   Donate: 寄付
-  FreeTube is made possible by: FreeTube が実現できているのは
+  OpenTubeX is made possible by: OpenTubeX が実現できているのは
   these people and projects: これらの人々とプロジェクトのおかげです
   Credits: クレジット
   Translate: 翻訳
@@ -635,7 +635,7 @@ About:
   GitHub issues: GitHub の課題
   Report a problem: 問題の報告
   FAQ: よくある質問
-  FreeTube Wiki: FreeTube の Wiki
+  OpenTubeX Wiki: OpenTubeX の Wiki
   Help: ヘルプ
   GitHub releases: GitHub リリース
   Downloads / Changelog: ダウンロード / 変更ログ
@@ -681,12 +681,12 @@ Channel:
     votes: '{votes} 投票'
     Reveal Answers: 回答を表示
     Hide Answers: 回答を非表示
-    Video hidden by FreeTube: FreeTube によって非表示にされた動画
+    Video hidden by OpenTubeX: OpenTubeX によって非表示にされた動画
     View Full Post: 全文表示
     Viewing Posts Only Supported By Invidious: 投稿の閲覧は Invidious でのみサポートされています。Invidious がなくても、チャンネルのコミュニティタブでコンテンツを見ることができます。
   This channel does not exist: このチャンネルは存在しません
   This channel does not allow searching: このチャンネルでは検索できません
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: このチャンネルは年齢制限があり、現在 FreeTube では視聴できません。
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: このチャンネルは年齢制限があり、現在 OpenTubeX では視聴できません。
   Channel Tabs: チャンネル タブ
   Live:
     This channel does not currently have any live streams: このチャンネルは現在、ライブ配信を行っていません
@@ -811,12 +811,12 @@ Video:
     Autoplay is on: 自動再生 オン
   IP block: YouTube はあなたのIPアドレスからの動画視聴をブロックしました。別の VPN またはプロキシに切り替えてみてください。
   Unlisted: 限定公開
-  MembersOnly: メンバー限定動画は Google にログインし、投稿チャンネルに課金する必要があるので FreeTube から直接見ることはできません。
-  AgeRestricted: 年齢制限がかかっている 動画 は Google にログインしておりかつ年齢確認を済ましている YouTube アカウントが必要なため、FreeTube から直接見ることはできません。
+  MembersOnly: メンバー限定動画は Google にログインし、投稿チャンネルに課金する必要があるので OpenTubeX から直接見ることはできません。
+  AgeRestricted: 年齢制限がかかっている 動画 は Google にログインしておりかつ年齢確認を済ましている YouTube アカウントが必要なため、OpenTubeX から直接見ることはできません。
   DeArrow:
     Show Original Details: 元の情報を表示
     Show Modified Details: 変更された詳細を表示
-  DRMProtected: DRM保護された動画はFreeTubeでは再生できません。これらの動画には、独自の非オープンソースのコンポーネントが必要です。この動画を視聴したい場合は、DRM対応のウェブブラウザで公式のYouTubeウェブサイトでご覧ください。
+  DRMProtected: DRM保護された動画はOpenTubeXでは再生できません。これらの動画には、独自の非オープンソースのコンポーネントが必要です。この動画を視聴したい場合は、DRM対応のウェブブラウザで公式のYouTubeウェブサイトでご覧ください。
 #& Playlists
   Save Watched Progress: 視聴進捗を保存
   Watched Progress Saved: 視聴進捗を保存しました
@@ -955,25 +955,25 @@ Version {versionNumber} is now available!  Click for more details: 最新バー�
 This video is unavailable because of missing formats. This can happen due to country unavailability.: この動画は、動画形式の情報が利用できないため再生できません。再生が許可されていない国で発生します。
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: 有効にすると、FreeTube は通常の方法の代わりに RSS を使用して購読フィードを取得します。RSS は高速で IP ブロックを防ぎますが、動画の長さやライブ配信などの情報は提供されません
-    Fetch Automatically: 有効にすると、FreeTube は起動時や新しいウィンドウを開いたときに自動的に登録チャンネルフィードを取得します。
+    Fetch Feeds from RSS: 有効にすると、OpenTubeX は通常の方法の代わりに RSS を使用して購読フィードを取得します。RSS は高速で IP ブロックを防ぎますが、動画の長さやライブ配信などの情報は提供されません
+    Fetch Automatically: 有効にすると、OpenTubeX は起動時や新しいウィンドウを開いたときに自動的に登録チャンネルフィードを取得します。
   Player Settings:
     Default Video Format: 動画を再生する際に使用する形式を設定します。DASH形式はより高い画質で再生できます。旧形式は最大360pに制限されますが、帯域幅の使用量が少なくなります。音声形式は音声のみです。
     Proxy Videos Through Invidious: YouTube に直接接続するのではなく、Invidious を通じて動画を提供します。
     Scroll Playback Rate Over Video Player: カーソルが動画上にあるとき、Ctrl キー（Mac では Command キー）を押したまま、マウスホイールを前後にスクロールして再生速度を調整します。Control キー（Mac では Command キー）を押したままマウスを左クリックすると、すぐにデフォルトの再生速度（設定を変更していない場合は 1 x）に戻ります。
     Skip by Scrolling Over Video Player: MPVスタイルでスクロールホイールを使って動画をスキップします。
   General Settings:
-    Invidious Instance: FreeTube が API 呼び出しのために接続する Invidious のインスタンスです。
-    Preferred API Backend: FreeTube がデータを取得するために使用する方法を選択してください。内部 API はアプリ内蔵の取得機能です。 Invidious API は、 Invidious サーバーへの接続が必要です。
-    Thumbnail Preference: FreeTube 全体のすべてのサムネイルが、デフォルトのサムネイルの代わりに動画のフレームに置き換えられ、ぼかされるか非表示になります。
-    Fallback to Non-Preferred Backend on Failure: 有効にすると、選択した API で取得できなければ、FreeTube は自動的に他の API での取得を試みます。
+    Invidious Instance: OpenTubeX が API 呼び出しのために接続する Invidious のインスタンスです。
+    Preferred API Backend: OpenTubeX がデータを取得するために使用する方法を選択してください。内部 API はアプリ内蔵の取得機能です。 Invidious API は、 Invidious サーバーへの接続が必要です。
+    Thumbnail Preference: OpenTubeX 全体のすべてのサムネイルが、デフォルトのサムネイルの代わりに動画のフレームに置き換えられ、ぼかされるか非表示になります。
+    Fallback to Non-Preferred Backend on Failure: 有効にすると、選択した API で取得できなければ、OpenTubeX は自動的に他の API での取得を試みます。
     Region for Trending: 急上昇の地域設定では、急上昇動画を表示する国を選択できます。
-    External Link Handling: "FreeTube で開けないリンクをクリックしたときのデフォルトの動作を選択します。\nデフォルトでは、FreeTube はクリックしたリンクをデフォルトのブラウザで開きます。\n"
-    Open Deep Links In New Window: FreeTube に渡された URL は、ブラウザの拡張機能やコマンドライン引数などによって、新しいウィンドウで開かれます。
+    External Link Handling: "OpenTubeX で開けないリンクをクリックしたときのデフォルトの動作を選択します。\nデフォルトでは、OpenTubeX はクリックしたリンクをデフォルトのブラウザで開きます。\n"
+    Open Deep Links In New Window: OpenTubeX に渡された URL は、ブラウザの拡張機能やコマンドライン引数などによって、新しいウィンドウで開かれます。
   External Player Settings:
     Custom External Player Arguments: '外部プレーヤーに渡したいカスタムコマンドライン引数。'
     Ignore Warnings: 現在の外部プレーヤーが、現在のアクションに未対応の場合（再生リストを逆順にするなど）に警告を抑制します。
-    Custom External Player Executable: デフォルトでは、FreeTube は選択した外部プレーヤーが PATH 環境変数を介して見つかると想定します。必要に応じて、カスタム パスをここで設定できます。
+    Custom External Player Executable: デフォルトでは、OpenTubeX は選択した外部プレーヤーが PATH 環境変数を介して見つかると想定します。必要に応じて、カスタム パスをここで設定できます。
     External Player: 外部プレーヤーを選択すると、動画（対応している場合は再生リスト）を開くためのアイコンがサムネイルに表示されます。警告：Invidious の設定は、外部プレーヤーには影響しません。
     DefaultCustomArgumentsTemplate: "（デフォルト： '{defaultCustomArguments}'）"
     Ignore Default Arguments: 動画の URL 以外のデフォルトの引数（再生速度、再生リストの URL など）を外部プレーヤーに送信しないでください。カスタム引数はそのまま引き継がれます。
@@ -982,7 +982,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: チャンネル ID を入力すると、すべての動画、再生リスト、チャンネル自体が検索や人気、およびおすすめに表示されなくなります。入力するチャンネル ID は、大文字と小文字を区別するので完全に一致させてください。
     Hide Subscriptions Live: この設定は、アプリ全体の "{appWideSetting}" 設定により上書きされます。"{settingsSection}" 項目の "{subsection}" にあります
-    Hide Videos, Playlists and Channels Containing Text: FreeTube 全体での履歴やあなたの再生リストと再生リスト内の動画を除き、元のタイトルにその単語を含む動画や単語の一部または、フレーズ（大文字と小文字を区別しない）が含まれているすべての動画と再生リストを非表示にします。
+    Hide Videos, Playlists and Channels Containing Text: OpenTubeX 全体での履歴やあなたの再生リストと再生リスト内の動画を除き、元のタイトルにその単語を含む動画や単語の一部または、フレーズ（大文字と小文字を区別しない）が含まれているすべての動画と再生リストを非表示にします。
     Hide Videos on Watch: 視聴済みの動画を、購読ページやチャンネルページの 動画、ショート、ライブ タブから非表示にします。ただし、チャンネルページの ホーム タブには影響しません
   SponsorBlock Settings:
     UseDeArrowTitles: 動画のタイトルを DeArrow からユーザーが投稿したタイトルに置き換えます。

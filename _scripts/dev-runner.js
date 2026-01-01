@@ -42,7 +42,7 @@ if (remoteDebugging) {
 
 // Define exit code for relaunch and set it in the environment
 const relaunchExitCode = 69
-process.env.FREETUBE_RELAUNCH_EXIT_CODE = relaunchExitCode
+process.env.OPENTUBEX_RELAUNCH_EXIT_CODE = relaunchExitCode
 
 const port = 9080
 

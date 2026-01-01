@@ -311,7 +311,7 @@ Settings:
       Open Link: 'Digeriñ an ere'
       Ask Before Opening Link: 'Goulenn a-raok digeriñ ul liamm'
       No Action: 'Netra'
-    Open Deep Links In New Window: Digeriñ an URLoù kaset da FreeTube e-barzh ur prenestr nevez
+    Open Deep Links In New Window: Digeriñ an URLoù kaset da OpenTubeX e-barzh ur prenestr nevez
     Minimize to system tray: Bihanaat er varenn kemennadennoù
   Theme Settings:
     Theme Settings: 'Tem'
@@ -320,7 +320,7 @@ Settings:
     Disable Smooth Scrolling: 'Diweredekaat an dibunañ flour'
     UI Scale: 'Skeul an UI'
     Hide Side Bar Labels: 'Kuzhat tikedennoù ar varrenn gostez'
-    Hide FreeTube Header Logo: 'Kuzhat logo FreeTube an talbenn'
+    Hide OpenTubeX Header Logo: 'Kuzhat logo OpenTubeX an talbenn'
     Base Theme:
       Base Theme: 'Tem diazez'
       Black: 'Du'
@@ -590,22 +590,22 @@ Settings:
     Playlist File: 'Restr ar roll-videoioù'
     Check for Legacy Subscriptions: ''
     Export Subscriptions: 'Ezporzhiañ ar c''houmanantoù'
-    Export FreeTube: 'Ezporzhiañ FreeTube'
+    Export OpenTubeX: 'Ezporzhiañ OpenTubeX'
     Export YouTube: 'Ezporzhiañ YouTube'
     Export NewPipe: 'Ezporzhiañ NewPipe'
     Import History: 'Enporzhiañ ar roll istor'
     Export History: 'Ezporzhiañ ar roll istor'
     Import Playlists: 'Enporzhiañ rolloù-videoioù'
     Export Playlists: 'Ezporzhiañ rolloù-videoioù'
-    Export Playlists For Older FreeTube Versions:
-      Label: 'Ezporzhiañ rolloù-videoioù evit stummoù kozh FreeTube'
+    Export Playlists For Older OpenTubeX Versions:
+      Label: 'Ezporzhiañ rolloù-videoioù evit stummoù kozh OpenTubeX'
       # |- = Keep newlines, No newline at end
       Tooltip: |-
         An dibarzh-mañ a ezporzh videoioù an holl rolloù-videoioù e-barzh ur roll-videoioù anvet « Favorites ».
-        Penaos ezporzhiañ & enporzhiañ videoioù e-barzh rolloù-videoioù gant stummoù kozh FreeTube :
+        Penaos ezporzhiañ & enporzhiañ videoioù e-barzh rolloù-videoioù gant stummoù kozh OpenTubeX :
         1. Ezporzhiañ ho rolloù-videoioù gant an dibarzh-mañ gweredekaet.
         2. Dilemel an holl rolloù-videoioù en ur implijout an dibarzh Dilemel an holl rolloù-videoioù dindan Prevezded.
-        3. Loc'hañ stumm kozh FreeTube hag enporzhiañ ar rolloù-videoioù ezporzhiet."
+        3. Loc'hañ stumm kozh OpenTubeX hag enporzhiañ ar rolloù-videoioù ezporzhiet."
     Profile object has insufficient data, skipping item: 'Diouer a roadennoù evit profil an elfenn-mañ, o leuskel an elfenn a-gostez'
     All subscriptions and profiles have been successfully imported: 'Enporzhiet eo bet an holl goumanantoù ha profiloù gant berzh'
     All subscriptions have been successfully imported: 'Enporzhiet eo bet an holl goumanantoù gant berzh'
@@ -643,7 +643,7 @@ Settings:
     Region: 'Rannvro'
     City: 'Kêr'
     Error getting network information. Is your proxy configured properly?: 'C''hoarvezet ez eus bet ur gudenn en ur glask war-lerc''h titouroù ar rouedad. Ha kefluniet mat eo ho proksi ?'
-    Proxy Warning: N'eus ket ur proksi enframmet gant FreeTube met gallout a ra kennaskañ gant ur proksi diavaez, evel unan o vont en-dro war hoc'h urzhiataer evel Tor pe ur proksi diavaez SOCKS5 pourvezet gant VPNoù zo. Ma vez enaouet, deoc'h da wiriekaat e vez kefluniet mat ho proksi/Tor, mod-all ne vo ket FreeTube evit mont da gerc'hat an traoù.
+    Proxy Warning: N'eus ket ur proksi enframmet gant OpenTubeX met gallout a ra kennaskañ gant ur proksi diavaez, evel unan o vont en-dro war hoc'h urzhiataer evel Tor pe ur proksi diavaez SOCKS5 pourvezet gant VPNoù zo. Ma vez enaouet, deoc'h da wiriekaat e vez kefluniet mat ho proksi/Tor, mod-all ne vo ket OpenTubeX evit mont da gerc'hat an traoù.
     Proxy Password: Ger-tremen ar Proksi
     Proxy Username: Anv-Implijer ar Proksi
   SponsorBlock Settings:
@@ -696,7 +696,7 @@ About:
   Downloads / Changelog: 'Pellgargañ / Deizlevr ar cheñchamantoù'
   GitHub releases: 'Ermaeziadennoù GitHub'
   Help: 'Skoazell'
-  FreeTube Wiki: 'Wiki FreeTube'
+  OpenTubeX Wiki: 'Wiki OpenTubeX'
   FAQ: 'FAG'
   Discussions: 'Kaozeadennoù'
   Report a problem: 'Menegiñ ur gudenn'
@@ -711,7 +711,7 @@ About:
   room rules: 'reolennoù ar sal'
   Translate: 'Treiñ'
   Credits: 'Kreditoù'
-  FreeTube is made possible by: 'Bez ez eus deus FreeTube a-drugarez da'
+  OpenTubeX is made possible by: 'Bez ez eus deus OpenTubeX a-drugarez da'
   these people and projects: 'an dud-se hag ar raktresoù-se'
   Donate: 'Ober un donezon'
 
@@ -767,7 +767,7 @@ Channel:
   Your search results have returned 0 results: 'N''eus disoc''h ebet gant ho klask'
   This channel does not exist: 'N''eus ket deus ar chadenn-mañ'
   This channel does not allow searching: 'Ne vez ket aotreet klask gant ar chadenn-mañ'
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: 'Ur vevenn oad a zo d''ar chadenn-mañ ha ne c''hall ket bezañ gwelet war FreeTube evit poent.'
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 'Ur vevenn oad a zo d''ar chadenn-mañ ha ne c''hall ket bezañ gwelet war OpenTubeX evit poent.'
   Channel Tabs: 'Ivinelloù ar chadenn'
   Videos:
     Videos: 'Videoioù'
@@ -810,7 +810,7 @@ Channel:
     View Full Post: 'Gwelet ar pennad a-bezh'
     Reveal Answers: 'Diskouez ar respontoù'
     Hide Answers: 'Kuzhat ar respontoù'
-    Video hidden by FreeTube: 'Video kuzhet gant FreeTube'
+    Video hidden by OpenTubeX: 'Video kuzhet gant OpenTubeX'
     Viewing Posts Only Supported By Invidious: 'Posupl eo gwelet ar pennadoù gant Invidious hepken. Kit war ivinell kumuniezh ur chadenn evit gwelet he fennadoù hep Invidious.'
   Home:
     Home: Degemer
@@ -924,10 +924,10 @@ Video:
     Autoplay is off: Lazhet eo al lenn emgefreek
     Autoplay is on: Enaouet eo al lenn emgefreek
   Unlisted: Anlistennet
-  MembersOnly: N'haller ket sellet ouzh ar videoioù miret d'an izili hepken gant FreeTube, peogwir eo ret bezañ luget gant ur gont Google ha paeañ ur c'houmanant d'ar chadenn.
-  AgeRestricted: N'haller ket sellet ouzh ar videoioù gant ur vevenn oad war FreeTube, peogwir eo ret bezañ luget gant ur gont Google kadarnaet gant hoc'h oad.
+  MembersOnly: N'haller ket sellet ouzh ar videoioù miret d'an izili hepken gant OpenTubeX, peogwir eo ret bezañ luget gant ur gont Google ha paeañ ur c'houmanant d'ar chadenn.
+  AgeRestricted: N'haller ket sellet ouzh ar videoioù gant ur vevenn oad war OpenTubeX, peogwir eo ret bezañ luget gant ur gont Google kadarnaet gant hoc'h oad.
 #& Playlists
-  DRMProtected: Ne c'heller ket lenn ar videoioù gwarezet gant DRM war FreeTube, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor. Ma faot deoc'h sellet ouzh ar video-mañ e rankit mont war lec'hienn ofisiel YouTube gant ur merdeer web gouest da lenn an DRM.
+  DRMProtected: Ne c'heller ket lenn ar videoioù gwarezet gant DRM war OpenTubeX, peogwir e vije ezhomm implijout elfennoù perc'hennet gant gwirioù ha n'int ket digor. Ma faot deoc'h sellet ouzh ar video-mañ e rankit mont war lec'hienn ofisiel YouTube gant ur merdeer web gouest da lenn an DRM.
   Save Watched Progress: Enrollañ araokadur al lenn
   Watched Progress Saved: Enrollet eo bet araokadur al lenn
   DeArrow:
@@ -1018,15 +1018,15 @@ Up Next: 'Da-heul'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Choazit ar backend implijet gant FreeTube evit tapout ar roadennoù. Un eztenner enkorfet eo an API lec''hel. Ezhomm en deus an API Invidious da gaout ur servijer Invidious evit kevreañ outañ.'
-    Fallback to Non-Preferred Backend on Failure: 'Pa c''hoarvezo ur gudenn gant hoc''h API karetañ, e klasko FreeTube implijout an API ha n''eo ket hoc''h hini karetañ evel doare sikour ma vez gweredekaet.'
-    Thumbnail Preference: 'Erlec''hiet e vo an holl skeudennoùigoù war FreeTube gant ur skeudenn tennet eus ar video, kuzhet pe displannet, e-lec''h ar skeudennig dre ziouer.'
-    Invidious Instance: 'Istañs Invidious implijet gant FreeTube evit galvoù API.'
+    Preferred API Backend: 'Choazit ar backend implijet gant OpenTubeX evit tapout ar roadennoù. Un eztenner enkorfet eo an API lec''hel. Ezhomm en deus an API Invidious da gaout ur servijer Invidious evit kevreañ outañ.'
+    Fallback to Non-Preferred Backend on Failure: 'Pa c''hoarvezo ur gudenn gant hoc''h API karetañ, e klasko OpenTubeX implijout an API ha n''eo ket hoc''h hini karetañ evel doare sikour ma vez gweredekaet.'
+    Thumbnail Preference: 'Erlec''hiet e vo an holl skeudennoùigoù war OpenTubeX gant ur skeudenn tennet eus ar video, kuzhet pe displannet, e-lec''h ar skeudennig dre ziouer.'
+    Invidious Instance: 'Istañs Invidious implijet gant OpenTubeX evit galvoù API.'
     Region for Trending: 'Gant an dra-se e c''hallit dibab ar vro evit ar videoioù diouzh ar c''hiz a faot deoc''h gwelet.'
     External Link Handling: |
-      Choazit an emzalc'h dre ziouer pa vo kliket war ul liamm ha n'hall ket bezañ digoret gant FreeTube.
+      Choazit an emzalc'h dre ziouer pa vo kliket war ul liamm ha n'hall ket bezañ digoret gant OpenTubeX.
       Dre ziouer, e vo digoret al liamm e-barzh ho merdeer web.
-    Open Deep Links In New Window: An URLoù kaset da FreeTube gant askouezhioù ur merdeer web pe roet war arroudenn an arc'had, a vo digoret e-barzh ur prenestr nevez.
+    Open Deep Links In New Window: An URLoù kaset da OpenTubeX gant askouezhioù ur merdeer web pe roet war arroudenn an arc'had, a vo digoret e-barzh ur prenestr nevez.
   Player Settings:
     Proxy Videos Through Invidious: 'Kevreañ a raio ouzh Invidious evit mont da gerc''hat ar videoioù e-lec''h kevreañ war-eeun ouzh YouTube.'
     Default Video Format: 'Arventennañ ar furmadoù implijet pa vez lennet ur video. Ar furmadoù DASH a c''hell bezañ lennet gant ur c''halite uheloc''h. Bevennet eo ar furmadoù Legacy da 360p d''ar muiañ met nebeutoc''h a vann- drafet a vez implijet. Ar furmadoù aodio zo lanvioù aodio hepken.'
@@ -1034,7 +1034,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: 'Tremen d''ur video d''egile en ur zibunañ rodellig al logodenn war al lenner video, doare MPV.'
   External Player Settings:
     External Player: 'Dibab ul lenner diavaez a ziskouezo un ikon war ar skeudennig, evit digeriñ ar video (pe ar roll-videoioù ma vez skoret) el lenner diavaez. Diwallit, arventennoù Invidious n''o deus ket efed ebet war al lenner diavaez.'
-    Custom External Player Executable: 'Dre ziouer e soñjo FreeTube e c''hall mont da glask al lenner diavaez choazet dre an argemmenn endro PATH. Mar bez ezhomm e c''haller lakaat un hent personelaet amañ.'
+    Custom External Player Executable: 'Dre ziouer e soñjo OpenTubeX e c''hall mont da glask al lenner diavaez choazet dre an argemmenn endro PATH. Mar bez ezhomm e c''haller lakaat un hent personelaet amañ.'
     Ignore Warnings: 'Diweredekaat ar c''hemennadennoù pa ne vez ket skoret un obererezh bennak gant al lenner diavaez (da sk. cheñch tu ar rolloù-videoioù, etc.).'
     Ignore Default Arguments: 'Arabat kas arguzennoù dre ziouer d''al lenner diavaez nemet URL ar video (d.s. feur lenn, URL ar roll-videoioù, etc.). Treuzkaset e vo an arguzennoù personelaet.'
     Custom External Player Arguments: 'An holl arguzennoù personelaet el linennoù urzhiañ, a faot deoc''h e vefe treuzkaset d''al lenner diavaez.'
@@ -1042,11 +1042,11 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: 'Lakait ID ur chadenn evit mirout ouzh an holl videoioù, rolloù-videoioù hag ar chadenn hec''h-unan da vezañ gwelet en enklaskoù, e roll ar videoioù brudetañ, ar re vuiañ karet, hag ar re aliet. Ret eo d''an ID bezañ klot ha ret eo doujañ d''ar pennlizherennoù.'
     Hide Subscriptions Live: 'Erlec''hiet eo an arventenn-mañ gant an arventenn "{appWideSetting}" evit an arload a-bezh, e lodenn "{subsection}" e-barzh "{settingsSection}"'
-    Hide Videos, Playlists and Channels Containing Text: 'Ebarzhit ur ger, lodenn ur ger pe ur frazenn (o toujañ d''ar pennlizherennoù) evit kuzhat an holl videoioù & rolloù-videoioù gant ar ger pe ar frazenn-mañ en titl orin war FreeTube, nemet er roll-istor, e-barzh ho rolloù-videoioù hag ar videoioù e-barzh ar rolloù-videoioù.'
+    Hide Videos, Playlists and Channels Containing Text: 'Ebarzhit ur ger, lodenn ur ger pe ur frazenn (o toujañ d''ar pennlizherennoù) evit kuzhat an holl videoioù & rolloù-videoioù gant ar ger pe ar frazenn-mañ en titl orin war OpenTubeX, nemet er roll-istor, e-barzh ho rolloù-videoioù hag ar videoioù e-barzh ar rolloù-videoioù.'
     Hide Videos on Watch: Kuzhat ar videoioù bet lennet diouzh ar Videoioù, Shortoù hag ivinell ar skignañ war-eeun war bajenn ar c'houmanantoù ha pajenn ar chadennoù. Ne vo ket kemmet pajenn degemer ar chadennoù
   Subscription Settings:
-    Fetch Feeds from RSS: 'Pa vez gweredekaet e vez implijet RSS gant FreeTube e-lec''h e zoare dre ziouer evit adtapout ho kwazh koumanantiñ. Buanoc''h ez an traoù gant an RSS ha ne vo ket stanket ar chomlec''h IP, met ne ginnig ket titouroù ''zo evel padelezh ar video, statud ar video war-eeun, pe c''hoazh an evezhiadennoù'
-    Fetch Automatically: 'Pa vo gweredekaet e vo adtapet ho kwazh koumanantiñ gant FreeTube ent emgefre pa vo lañset pe pa vo digoret ur prenestr nevez.'
+    Fetch Feeds from RSS: 'Pa vez gweredekaet e vez implijet RSS gant OpenTubeX e-lec''h e zoare dre ziouer evit adtapout ho kwazh koumanantiñ. Buanoc''h ez an traoù gant an RSS ha ne vo ket stanket ar chomlec''h IP, met ne ginnig ket titouroù ''zo evel padelezh ar video, statud ar video war-eeun, pe c''hoazh an evezhiadennoù'
+    Fetch Automatically: 'Pa vo gweredekaet e vo adtapet ho kwazh koumanantiñ gant OpenTubeX ent emgefre pa vo lañset pe pa vo digoret ur prenestr nevez.'
   Experimental Settings:
     Replace HTTP Cache: 'Diweredekaat ar grubuilh HTTP diazezet war ar bladenn Electron ha gweredekaat krubuilh personelaet ar skeudennoù e-barzh ar memor. Implijet e vo muioc''h a vemor RAM.'
   SponsorBlock Settings:

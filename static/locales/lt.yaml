@@ -205,7 +205,7 @@ Settings:
     Secondary Color Theme: 'Papildoma temos spalva'
         #* Main Color Theme
     Hide Side Bar Labels: Slėpti šoninės juostos etiketes
-    Hide FreeTube Header Logo: Slėpti FreeTube logotipą antraštėje
+    Hide OpenTubeX Header Logo: Slėpti OpenTubeX logotipą antraštėje
   Player Settings:
     Player Settings: 'Grotuvo nustatymai'
     Play Next Video: 'Leisti sekanti vaizdo įrašą'
@@ -315,7 +315,7 @@ Settings:
     Select Export Type: 'Pasirinkti eksportavimo tipą'
     Import Subscriptions: 'Importuoti prenumeratas'
     Export Subscriptions: 'Eksportuoti prenumeratas'
-    Export FreeTube: 'Eksportuoti FreeTube'
+    Export OpenTubeX: 'Eksportuoti OpenTubeX'
     Export YouTube: 'Eksportuoti YouTube'
     Export NewPipe: 'Eksportuoti NewPipe'
     Import History: 'Importuoti istoriją'
@@ -395,7 +395,7 @@ About:
   Downloads / Changelog: 'Atsisiuntimai / pakeitimų žurnalas'
   GitHub releases: 'Versijos GitHub'
   Help: 'Pagalba'
-  FreeTube Wiki: 'FreeTube Wiki'
+  OpenTubeX Wiki: 'OpenTubeX Wiki'
   FAQ: 'DUK'
   Report a problem: 'Pranešti apie problemą'
   GitHub issues: 'GitHub problemos'
@@ -409,7 +409,7 @@ About:
   room rules: 'kambario taisykles'
   Translate: 'Vertimai'
   Credits: 'Projekto komanda'
-  FreeTube is made possible by: 'FreeTube sukurta dėka'
+  OpenTubeX is made possible by: 'OpenTubeX sukurta dėka'
   these people and projects: 'šių žmonių ir projektų'
   Donate: 'Paremti'
 
@@ -597,25 +597,25 @@ Up Next: 'Sekantis'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Pasirinkite posistemę, kurią „FreeTube“ naudoja duomenims gauti. Vietinis API yra su integruota ištraukimo funkciją. Norint prisijungti prie „Invidious“ API reikalingas „Invidious“ serveris.'
-    Fallback to Non-Preferred Backend on Failure: 'Kai jūsų pageidaujamoje API kyla problemų, „FreeTube“ automatiškai bandys naudoti jūsų nepasirinktą API kaip atsarginį metodą, kai tai yra įgalinta.'
-    Thumbnail Preference: 'Visos FreeTube vaizdo įrašų miniatiūros vietoje numatytosios bus pakeistos atitinkamu vaizdo įrašo stop kardu.'
-    Invidious Instance: 'Invidious perdavimo šaltinis, prie kurio FreeTube prisijungs, kad gautų API pasikreipimus.'
+    Preferred API Backend: 'Pasirinkite posistemę, kurią „OpenTubeX“ naudoja duomenims gauti. Vietinis API yra su integruota ištraukimo funkciją. Norint prisijungti prie „Invidious“ API reikalingas „Invidious“ serveris.'
+    Fallback to Non-Preferred Backend on Failure: 'Kai jūsų pageidaujamoje API kyla problemų, „OpenTubeX“ automatiškai bandys naudoti jūsų nepasirinktą API kaip atsarginį metodą, kai tai yra įgalinta.'
+    Thumbnail Preference: 'Visos OpenTubeX vaizdo įrašų miniatiūros vietoje numatytosios bus pakeistos atitinkamu vaizdo įrašo stop kardu.'
+    Invidious Instance: 'Invidious perdavimo šaltinis, prie kurio OpenTubeX prisijungs, kad gautų API pasikreipimus.'
     Region for Trending: '„Dabar populiaru“ regionas leidžia pasirinkti, kurios šalies populiarius vaizdo įrašus norite rodyti.'
-    External Link Handling: "Pasirinkite numatytąjį elgesį, kai spustelėjama nuoroda, kurios negalima atidaryti „FreeTube“.\nPagal numatytuosius nustatymus „FreeTube“ atidarys spustelėtą nuorodą numatytojoje naršyklėje.\n"
+    External Link Handling: "Pasirinkite numatytąjį elgesį, kai spustelėjama nuoroda, kurios negalima atidaryti „OpenTubeX“.\nPagal numatytuosius nustatymus „OpenTubeX“ atidarys spustelėtą nuorodą numatytojoje naršyklėje.\n"
   Player Settings:
     Proxy Videos Through Invidious: 'Bus prisijungęs prie „Invidious“, kad galėtų teikti vaizdo įrašus, užuot užmezgęs tiesioginį ryšį su „YouTube“.'
     Default Video Format: 'Nustatykite vaizdo įrašo atkūrimo formatus. DASH formatai gali rodyti aukštesnes kokybės vaizdo įrašus. Senieji formatai (Legacy) gali būti ne daugiau kaip 720p kokybės, tačiau jie reikalauja mažesnių tinklo resursų. Garso formatai -tai tik garsas, vaizdo įrašas nėra rodomas ar siunčiamas.'
     Scroll Playback Rate Over Video Player: Kai žymeklis yra virš vaizdo įrašo, paspauskite ir laikykite nuspaudę valdymo klavišą („Mac“ komandų klavišas) ir slinkite pelės ratuką pirmyn arba atgal, kad valdytumėte atkūrimo greitį. Paspauskite ir laikykite nuspaudę valdymo klavišą („Mac“ komandų klavišas) ir spustelėkite kairįjį pelės klavišą, kad greitai grįžtumėte į numatytąjį atkūrimo greitį (1 kartą, nebent jis buvo pakeistas nustatymuose).
   External Player Settings:
     External Player: 'Pasirinkus išorinį grotuvą, miniatiūroje bus rodoma piktograma, leidžianti atidaryti vaizdo įrašą (grojaraštį, jei palaikoma) išoriniame grotuve. Įspėjimas, Invidious nustatymai neturi įtakos išoriniams grotuvams.'
-    Custom External Player Executable: 'Pagal numatytuosius nustatymus „FreeTube“ manys, kad pasirinktą išorinį grotuvą galima rasti per PATH aplinkos kintamąjį. Jei reikia, čia galite nustatyti pasirinktinį kelią.'
+    Custom External Player Executable: 'Pagal numatytuosius nustatymus „OpenTubeX“ manys, kad pasirinktą išorinį grotuvą galima rasti per PATH aplinkos kintamąjį. Jei reikia, čia galite nustatyti pasirinktinį kelią.'
     Ignore Warnings: 'Neatvaizduoti įspėjimų, kai dabartinis išorinis grotuvas nepalaiko dabartinio veiksmo (pvz., grojaraščių atkūrimas ir kt.).'
     Custom External Player Arguments: 'Bet kokius pasirinktinius komandinės eilutės argumentus, kuriuos norite perduoti išoriniam grotuvui.'
     DefaultCustomArgumentsTemplate: '(Numatytasis: „{defaultCustomArguments}“)'
   Subscription Settings:
-    Fetch Feeds from RSS: 'Kai bus įgalinta, „FreeTube“ naudos RSS, o ne numatytąjį metodą, kad užpildytų jūsų prenumeratos kanalą. RSS yra greitesnė ir išvengia IP blokavimo, tačiau nepateikia tam tikros informacijos, pvz., vaizdo įrašo trukmės ar tiesioginės transliacijos būsenos'
-    Fetch Automatically: Kai ši funkcija įjungta, FreeTube automatiškai įkels naują turinį iš prenumeratų, kai atidaromas naujas langas ir perjungiamas profilis.
+    Fetch Feeds from RSS: 'Kai bus įgalinta, „OpenTubeX“ naudos RSS, o ne numatytąjį metodą, kad užpildytų jūsų prenumeratos kanalą. RSS yra greitesnė ir išvengia IP blokavimo, tačiau nepateikia tam tikros informacijos, pvz., vaizdo įrašo trukmės ar tiesioginės transliacijos būsenos'
+    Fetch Automatically: Kai ši funkcija įjungta, OpenTubeX automatiškai įkels naują turinį iš prenumeratų, kai atidaromas naujas langas ir perjungiamas profilis.
 
 # Toast Messages
   Experimental Settings:

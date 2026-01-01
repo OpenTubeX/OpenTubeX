@@ -252,7 +252,7 @@ Settings:
     Auto Load Next Page:
       Label: טעינת העמוד הבא אוטומטית
       Tooltip: טען דפים ותגובות נוספים באופן אוטומטי.
-    Open Deep Links In New Window: פתיחת כתובות שהועברו ל־FreeTube בחלון חדש
+    Open Deep Links In New Window: פתיחת כתובות שהועברו ל־OpenTubeX בחלון חדש
     Minimize to system tray: מזעור לשורת המערכת
   Theme Settings:
     Theme Settings: 'ערכת עיצוב'
@@ -373,7 +373,7 @@ Settings:
     Expand Side Bar by Default: הרחבת סרגל צד כברירת מחדל
     Disable Smooth Scrolling: השבתת גלילה חלקה
     Hide Side Bar Labels: הסתרת התוויות בסרגל הצד
-    Hide FreeTube Header Logo: הסתרת הלוגו התחתון של FreeTube
+    Hide OpenTubeX Header Logo: הסתרת הלוגו התחתון של OpenTubeX
   Player Settings:
     Player Settings: 'נגן'
     Play Next Video: 'הפעלה אוטומטית של סרטונים מומלצים'
@@ -467,7 +467,7 @@ Settings:
     Select Export Type: 'נא לבחור את תסדיר הייצוא'
     Import Subscriptions: 'ייבוא מינויים'
     Export Subscriptions: 'ייצוא מינויים'
-    Export FreeTube: 'ייצוא בתסדיר של FreeTube'
+    Export OpenTubeX: 'ייצוא בתסדיר של OpenTubeX'
     Export YouTube: 'ייצוא בתסדיר של YouTube'
     Export NewPipe: 'ייצוא בתסדיר של NewPipe'
     Import History: 'ייבוא היסטוריה'
@@ -494,9 +494,9 @@ Settings:
     Playlist File: קובץ רשימות נגינה
     Subscription File: קובץ מינויים
     History File: קובץ היסטוריה
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "אפשרות זו מייצאת סרטונים מכל הרשימות לרשימת שידורים אחת בשם 'מועדפים'.\n איך לייצא ולייבא סרטונים ברשימות לגרסה ישנה של FreeTube:\n1. יצא את הרשימות שלך עם אפשרות זו מופעלת.\n2. מחק את כל הרשימות הקיימות שלך באמצעות אפשרות הסרת כל הרשימות בהגדרות הפרטיות.\n3. הפעל את הגרסה הישנה של FreeTube וייבא את הרשימות שיוצאו."
-      Label: ייצוא רשימות לגרסאות ישנות של FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "אפשרות זו מייצאת סרטונים מכל הרשימות לרשימת שידורים אחת בשם 'מועדפים'.\n איך לייצא ולייבא סרטונים ברשימות לגרסה ישנה של OpenTubeX:\n1. יצא את הרשימות שלך עם אפשרות זו מופעלת.\n2. מחק את כל הרשימות הקיימות שלך באמצעות אפשרות הסרת כל הרשימות בהגדרות הפרטיות.\n3. הפעל את הגרסה הישנה של OpenTubeX וייבא את הרשימות שיוצאו."
+      Label: ייצוא רשימות לגרסאות ישנות של OpenTubeX
 
     Search history file: קובץ היסטוריית חיפוש
     Search history: היסטוריית חיפוש
@@ -567,7 +567,7 @@ Settings:
     Proxy Protocol: פרוטוקול מתווך
     Enable Tor / Proxy: הפעלת Tor / מתווך
     Proxy Settings: מתווך (פרוקסי)
-    Proxy Warning: ל־FreeTube אין מתווך מובנה אבל הוא יכול להתחבר למתווך חיצוני, כמו למשל כזה שרץ על המחשב שלך כמו Tor או מתווך חיצוני כגון מתווך SOCKS5 שמסופק על ידי איזשהו ספק VPN. אם האפשרות פעילה, נא לוודא שהמתווך/Tor שלך מוגדרים כראוי, או ש־FreeTube לא יוכל למשוך נתונים כלל.
+    Proxy Warning: ל־OpenTubeX אין מתווך מובנה אבל הוא יכול להתחבר למתווך חיצוני, כמו למשל כזה שרץ על המחשב שלך כמו Tor או מתווך חיצוני כגון מתווך SOCKS5 שמסופק על ידי איזשהו ספק VPN. אם האפשרות פעילה, נא לוודא שהמתווך/Tor שלך מוגדרים כראוי, או ש־OpenTubeX לא יוכל למשוך נתונים כלל.
     Proxy Password: סיסמת מתווך
     Proxy Username: שם משתמש במתווך
   External Player Settings:
@@ -635,7 +635,7 @@ About:
   Donate: תרומה
   Help: עזרה
   these people and projects: האנשים והמיזמים האלו
-  FreeTube is made possible by: FreeTube קיים בזכות
+  OpenTubeX is made possible by: OpenTubeX קיים בזכות
   Translate: תרגום
   room rules: כללי החדר
   Please read the: נא לקרוא את
@@ -644,7 +644,7 @@ About:
   Please check for duplicates before posting: נא לבדוק כפילויות בטרם פרסום תקלה
   GitHub issues: תקלות ב־GitHub
   Report a problem: דיווח על תקלה
-  FreeTube Wiki: הוויקי של FreeTube
+  OpenTubeX Wiki: הוויקי של OpenTubeX
   GitHub releases: מהדורות ב־GitHub
   Downloads / Changelog: הורדות / יומן שינויים
   Source code: קוד מקור
@@ -728,7 +728,7 @@ Channel:
   This channel does not allow searching: הערוץ הזה לא מאפשר חיפוש
   Channel Tabs: לשוניות ערוצים
   This channel does not exist: הערוץ הזה לא קיים
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: הערוץ מוגבל לפי גיל וכרגע אי אפשר לצפות בו ב־FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: הערוץ מוגבל לפי גיל וכרגע אי אפשר לצפות בו ב־OpenTubeX.
   Posts:
     This channel currently does not have any posts: אין רשומות בערוץ הזה כרגע
     votes: '{votes} הצבעות'
@@ -736,7 +736,7 @@ Channel:
     Hide Answers: הסתרת התשובות
     View Full Post: צפה בפוסט המלא
     Viewing Posts Only Supported By Invidious: צפייה בפוסטים מתאפשרת רק באמצעות Invidious. עבור ללשונית הקהילה של הערוץ כדי לצפות בתוכן שם ללא Invidious.
-    Video hidden by FreeTube: סרטון מוסתר על ידי FreeTube
+    Video hidden by OpenTubeX: סרטון מוסתר על ידי OpenTubeX
   Live:
     Live: חי
     This channel does not currently have any live streams: לערוץ הזה אין שידורים חיים כרגע
@@ -860,15 +860,15 @@ Video:
   Unhide Channel: הצג ערוץ
   More Options: אפשרויות נוספות
   IP block: YouTube חסמו את כתובת ה־IP לצפייה בסרטונים. נא לנסות לעבור ל־VPN או למתווך אחרים.
-  MembersOnly: אי אפשר לצפות בסרטונים לחברים בלבד עם FreeTube כיוון שהם דורשים כניסה ל־Google וחברות בתשלום לערוץ של מי שהעלה.
-  AgeRestricted: אי אפשר לצפות בסרטונים שמוגבלים בגיל עם FreeTube כיוון שהם דורשים כניסה עם Google ושימוש בחשבון YouTube עם גיל מאומת.
+  MembersOnly: אי אפשר לצפות בסרטונים לחברים בלבד עם OpenTubeX כיוון שהם דורשים כניסה ל־Google וחברות בתשלום לערוץ של מי שהעלה.
+  AgeRestricted: אי אפשר לצפות בסרטונים שמוגבלים בגיל עם OpenTubeX כיוון שהם דורשים כניסה עם Google ושימוש בחשבון YouTube עם גיל מאומת.
   Unlisted: לא מופיע
   DeArrow:
     Show Modified Details: הצגת פרטים לאחר שינוי
     Show Original Details: הצגת פרטים מקוריים
 #& Playlists
   Save Watched Progress: שמור התקדמות נצפית
-  DRMProtected: סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-FreeTube, מכיוון שהם דורשים רכיבים סגורים ובעלים. אם אתה רוצה לצפות בסרטון הזה, אנא צפה בו באתר הרשמי של YouTube בדפדפן אינטרנט עם תמיכה ב-DRM.
+  DRMProtected: סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים סגורים ובעלים. אם אתה רוצה לצפות בסרטון הזה, אנא צפה בו באתר הרשמי של YouTube בדפדפן אינטרנט עם תמיכה ב-DRM.
   Watched Progress Saved: התקדמות שנשמרה נצפתה
 Playlist:
   #& About
@@ -960,26 +960,26 @@ Yes: 'כן'
 No: 'לא'
 Tooltips:
   General Settings:
-    Fallback to Non-Preferred Backend on Failure: כאשר ל־API המועדף עליך יש בעיה, FreeTube ינסה להשתמש ב־API בעדיפות הנמוכה יותר באופן אוטומטי כשיטת נסיגה כאשר האפשרות פעילה.
-    Preferred API Backend: נא לבחור את המנגנון לשימוש FreeTube כדי לקבל נתונים. ה־API המקומי הוא מחלץ מובנה. ה־API של Invidious דורש התחברות לשרת Invidious.
-    Invidious Instance: העותק של Invidious שאליו FreeTube יתחבר לקבלת פניות API.
-    Thumbnail Preference: כל התמונות הממוזערות ברחבי FreeTube יוחלפו בתמונית מתוך הסרטון, בצורה מטושטשת או מוסתרת במקום התמונה הממוזערת כברירת המחדל.
-    External Link Handling: "נא לבחור את התנהגות ברירת המחדל כשנלחץ קישור שלא ניתן לפתוח ב־FreeTube.\nכברירת מחדל FreeTube יפתח את הקישור שנלחץ בדפדפן ברירת המחדל שלך.\n"
+    Fallback to Non-Preferred Backend on Failure: כאשר ל־API המועדף עליך יש בעיה, OpenTubeX ינסה להשתמש ב־API בעדיפות הנמוכה יותר באופן אוטומטי כשיטת נסיגה כאשר האפשרות פעילה.
+    Preferred API Backend: נא לבחור את המנגנון לשימוש OpenTubeX כדי לקבל נתונים. ה־API המקומי הוא מחלץ מובנה. ה־API של Invidious דורש התחברות לשרת Invidious.
+    Invidious Instance: העותק של Invidious שאליו OpenTubeX יתחבר לקבלת פניות API.
+    Thumbnail Preference: כל התמונות הממוזערות ברחבי OpenTubeX יוחלפו בתמונית מתוך הסרטון, בצורה מטושטשת או מוסתרת במקום התמונה הממוזערת כברירת המחדל.
+    External Link Handling: "נא לבחור את התנהגות ברירת המחדל כשנלחץ קישור שלא ניתן לפתוח ב־OpenTubeX.\nכברירת מחדל OpenTubeX יפתח את הקישור שנלחץ בדפדפן ברירת המחדל שלך.\n"
     Region for Trending: מגמות אזוריות מאפשרות לך לבחור סרטונים חמים של איזו מדינה שמעניין אותך לראות.
-    Open Deep Links In New Window: כתובות שמועברות ל־FreeTube, כגון העברת הרחבות דפדפן או ארגומנטים בשורת הפקודה, תיפתחנה בחלון חדש.
+    Open Deep Links In New Window: כתובות שמועברות ל־OpenTubeX, כגון העברת הרחבות דפדפן או ארגומנטים בשורת הפקודה, תיפתחנה בחלון חדש.
   Player Settings:
     Proxy Videos Through Invidious: יתבצע חיבור ל־Invidious כדי להגיש סרטונים במקום להתחבר ישירות ל־YouTube.
     Default Video Format: קביעת התסדירים בעת ניגון סרטונים. תסדירי DASH יכולים להתנגן באיכויות גבוהות יותר. התסדירים המיושנים מוגבלים ל־360 פיקסלים לכל היותר אך משתמשים בפחות רוחב פס. תסדירי שמע הם הזרמות של שמע בלבד.
     Scroll Playback Rate Over Video Player: כאשר הסמן מעל הסרטון, יש ללחוץ ולהחזיק את מקש ה־Control (או Command ב־Mac) ולגלול עם גלגלת העכבר קדימה או אחורה כדי לשלוט בקצב הנגינה. לחיצה והחזקה של מקש Control (או Command ב־Mac) ולחיצה על הכפתור השמאלי בעכבר מחזירה במהירות לקצב הנגינה כברירת מחדל (1x אלמלא בוצע שינוי בהגדרות).
     Skip by Scrolling Over Video Player: ניתן להשתמש בגלגלת כדי לדלג בתוך הסרטון, כמו ב־MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: כאשר זה מופעל, FreeTube ישתמש ב-RSS במקום בשיטה המוגדרת כברירת מחדל כדי לתפוס את זרם המנויים שלך. RSS מהיר יותר ומונע חסימת IP, אך אינו מספק מידע מסוים כמו משך הווידאו, מצב חי או פוסטים
-    Fetch Automatically: כאשר האפשרות מופעלת, FreeTube ימשוך אוטומטית את רשימת המנויים שלך בעת הפעלת התוכנה ובפתיחת חלון חדש.
+    Fetch Feeds from RSS: כאשר זה מופעל, OpenTubeX ישתמש ב-RSS במקום בשיטה המוגדרת כברירת מחדל כדי לתפוס את זרם המנויים שלך. RSS מהיר יותר ומונע חסימת IP, אך אינו מספק מידע מסוים כמו משך הווידאו, מצב חי או פוסטים
+    Fetch Automatically: כאשר האפשרות מופעלת, OpenTubeX ימשוך אוטומטית את רשימת המנויים שלך בעת הפעלת התוכנה ובפתיחת חלון חדש.
   External Player Settings:
     DefaultCustomArgumentsTemplate: '(ברירת מחדל: ‚{defaultCustomArguments}’)'
     Ignore Warnings: 'להשבית אזהרות כאשר הנגן החיצוני הנוכחי לא תומך בפעולה הנוכחית (למשל: היפוך רשימת נגינה וכו׳).'
     External Player: בחירה בנגן חיצוני תציג סמל, לפתיחת הווידאו (רשימת הנגינה אם יש תמיכה) בנגן חיצוני, על גבי התמונה הממוזערת. אזהרה, הגדרות Invidious לא משפיעות על נגנים חיצוניים.
-    Custom External Player Executable: כברירת מחדל FreeTube יניח שהנגן החיצוני הנבחר נגיש דרך משתנה הסביבה PATH. במקרה הצורך, ניתן להגדיר כאן נתיב משלך.
+    Custom External Player Executable: כברירת מחדל OpenTubeX יניח שהנגן החיצוני הנבחר נגיש דרך משתנה הסביבה PATH. במקרה הצורך, ניתן להגדיר כאן נתיב משלך.
     Custom External Player Arguments: ארגומנטים כלשהם משלך לשורת הפקודה להעברה הלאה לנגן החיצוני.
     Ignore Default Arguments: אל תשלח אף ארגומנט סטנדרטי לנגן החיצוני, מלבד כתובת הסרטון (למשל, קצב הפלייבק, כתובת הרשימה, וכו'). ארגומנטים מותאמים ימשיכו להיות מועברים.
   Experimental Settings:
@@ -987,7 +987,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: יש למלא את שם או מזהה הערוץ כדי להסתיר את כל הסרטונים, רשימות הנגינה ואת הערוץ עצמו כך שלא יופיע בחיפוש, במובילים, בנפוצים ביותר או במומלצים. שם הערוץ שמילאת צריך להיות תואם במלואו ותואם מבחינת רישיות (אותיות גדולות/קטנות).
     Hide Subscriptions Live: הגדרה זו נדרסת על ידי ההגדרה הכללית „{appWideSetting}”, בסעיף „{subsection}” שב„{settingsSection}”
-    Hide Videos, Playlists and Channels Containing Text: הכנס מילה, חלק ממילה או ביטוי (ללא הבחנה בין אותיות גדולות וקטנות) כדי להסתיר את כל הסרטונים והרשימות שבשמם המקורי מופיע הביטוי, בכל FreeTube, למעט ההיסטוריה, הרשימות שלך וסרטונים בתוך רשימות.
+    Hide Videos, Playlists and Channels Containing Text: הכנס מילה, חלק ממילה או ביטוי (ללא הבחנה בין אותיות גדולות וקטנות) כדי להסתיר את כל הסרטונים והרשימות שבשמם המקורי מופיע הביטוי, בכל OpenTubeX, למעט ההיסטוריה, הרשימות שלך וסרטונים בתוך רשימות.
     Hide Videos on Watch: הסתרת סרטונים שנצפו מלשוניות סרטונים, Shorts וחי בעמודי המינוי והערוץ. לא משפיע על לשונית הבית בעמודי הערוצים
   SponsorBlock Settings:
     UseDeArrowTitles: החלפת כותרות הסרטונים עם כותרות ששלחו משתמשים ב־DeArrow.

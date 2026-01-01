@@ -28,7 +28,7 @@ import contextMenu from 'electron-context-menu'
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { generatePoToken } from './poTokenGenerator'
-import { isFreeTubeUrl } from './utils'
+import { isOpenTubeXUrl } from './utils'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -301,15 +301,15 @@ function runApp() {
 
   // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
   // remove so we can register each time as we run the app.
-  app.removeAsDefaultProtocolClient('freetube')
+  app.removeAsDefaultProtocolClient('opentubex')
 
   // If we are running a non-packaged version of the app && on windows
   if (process.env.NODE_ENV === 'development' && process.platform === 'win32') {
     // Set the path of electron.exe and your app.
     // These two additional parameters are only available on windows.
-    app.setAsDefaultProtocolClient('freetube', process.execPath, [path.resolve(process.argv[1])])
+    app.setAsDefaultProtocolClient('opentubex', process.execPath, [path.resolve(process.argv[1])])
   } else {
-    app.setAsDefaultProtocolClient('freetube')
+    app.setAsDefaultProtocolClient('opentubex')
   }
 
   if (process.env.NODE_ENV !== 'development') {
@@ -358,7 +358,7 @@ function runApp() {
          * @param {import('electron').IpcMainEvent} event
          */
         const readyHandler = (event) => {
-          if (isFreeTubeUrl(event.senderFrame.url)) {
+          if (isOpenTubeXUrl(event.senderFrame.url)) {
             newWindow.webContents.ipc.off(IpcChannels.APP_READY, readyHandler)
 
             event.reply(IpcChannels.OPEN_URL, newStartupUrl)
@@ -431,16 +431,16 @@ function runApp() {
     }
 
     // Electron defaults to approving all permission checks and permission requests.
-    // FreeTube only needs a few permissions, so we reject requests for other permissions
-    // and reject all requests on non-FreeTube URLs.
+    // OpenTubeX only needs a few permissions, so we reject requests for other permissions
+    // and reject all requests on non-OpenTubeX URLs.
     //
-    // FreeTube needs the following permissions:
+    // OpenTubeX needs the following permissions:
     // - "fullscreen": So that the video player can enter full screen
     // - "clipboard-sanitized-write": To allow the user to copy video URLs and error messages
     // - "fileSystem" Needed for the Web File System API (e.g. importing and exporting data)
 
     session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
-      if (!isFreeTubeUrl(requestingOrigin)) {
+      if (!isOpenTubeXUrl(requestingOrigin)) {
         return false
       }
 
@@ -452,7 +452,7 @@ function runApp() {
     })
 
     session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
-      if (!isFreeTubeUrl(webContents.getURL())) {
+      if (!isOpenTubeXUrl(webContents.getURL())) {
         // eslint-disable-next-line n/no-callback-literal
         callback(false)
         return
@@ -466,7 +466,7 @@ function runApp() {
     })
 
     session.defaultSession.on('file-system-access-restricted', (event, details, callback) => {
-      if (!isFreeTubeUrl(details.origin)) {
+      if (!isOpenTubeXUrl(details.origin)) {
         // eslint-disable-next-line n/no-callback-literal
         callback('deny')
         return
@@ -981,9 +981,9 @@ function runApp() {
     newWindow.webContents.setWindowOpenHandler((details) => {
       const url = URL.parse(details.url)
 
-      // Only handle valid URLs that came from a FreeTube page
-      if (url !== null && isFreeTubeUrl(newWindow.webContents.getURL())) {
-        if (isFreeTubeUrl(url)) {
+      // Only handle valid URLs that came from an OpenTubeX page
+      if (url !== null && isOpenTubeXUrl(newWindow.webContents.getURL())) {
+        if (isOpenTubeXUrl(url)) {
           createWindow({
             replaceMainWindow: false,
             showWindowNow: true,
@@ -1027,7 +1027,7 @@ function runApp() {
           tray = new Tray(icon)
 
           tray.setIgnoreDoubleClickEvents(true)
-          tray.setToolTip('FreeTube')
+          tray.setToolTip('OpenTubeX')
 
           trayWindows = [window]
           createTrayContextMenu()
@@ -1094,7 +1094,7 @@ function runApp() {
        * @param {import('electron').IpcMainEvent} event
        */
       const searchInputReadyHandler = (event) => {
-        if (isFreeTubeUrl(event.senderFrame.url)) {
+        if (isOpenTubeXUrl(event.senderFrame.url)) {
           newWindow.webContents.ipc.off(IpcChannels.SEARCH_INPUT_HANDLING_READY, searchInputReadyHandler)
 
           event.reply(IpcChannels.UPDATE_SEARCH_INPUT_TEXT, searchQueryText)
@@ -1165,7 +1165,7 @@ function runApp() {
   }
 
   ipcMain.on(IpcChannels.APP_READY, (event) => {
-    if (isFreeTubeUrl(event.senderFrame.url)) {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
       if (startupUrl) {
         mainWindow.webContents.send(IpcChannels.OPEN_URL, startupUrl)
       }
@@ -1174,14 +1174,14 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, title) => {
-    if (isFreeTubeUrl(event.senderFrame.url) && typeof title === 'string') {
+    if (isOpenTubeXUrl(event.senderFrame.url) && typeof title === 'string') {
       BrowserWindow.fromWebContents(event.sender)?.setTitle(title)
     }
   })
 
   function relaunch() {
     if (process.env.NODE_ENV === 'development') {
-      app.exit(parseInt(process.env.FREETUBE_RELAUNCH_EXIT_CODE))
+      app.exit(parseInt(process.env.OPENTUBEX_RELAUNCH_EXIT_CODE))
       return
     }
 
@@ -1220,20 +1220,20 @@ function runApp() {
     const allWindows = BrowserWindow.getAllWindows()
 
     allWindows.forEach((window) => {
-      if (isFreeTubeUrl(window.webContents.getURL())) {
+      if (isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
       }
     })
   })
 
   ipcMain.handle(IpcChannels.GENERATE_PO_TOKEN, (event, videoId, context) => {
-    if (isFreeTubeUrl(event.senderFrame.url)) {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
       return generatePoToken(videoId, context, proxyUrl)
     }
   })
 
   ipcMain.on(IpcChannels.ENABLE_PROXY, (event, url) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1245,7 +1245,7 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.DISABLE_PROXY, (event) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1261,7 +1261,7 @@ function runApp() {
   const HALF_OF_NAV_HISTORY_DISPLAY_LIMIT = (NAV_HISTORY_DISPLAY_LIMIT / 2) | 0
 
   ipcMain.handle(IpcChannels.GET_NAVIGATION_HISTORY, ({ senderFrame, sender }) => {
-    if (!isFreeTubeUrl(senderFrame.url)) {
+    if (!isOpenTubeXUrl(senderFrame.url)) {
       return
     }
 
@@ -1296,20 +1296,20 @@ function runApp() {
   // #endregion navigation history
 
   ipcMain.handle(IpcChannels.GET_SYSTEM_LOCALE, (event) => {
-    if (isFreeTubeUrl(event.senderFrame.url)) {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
       // we should switch to getPreferredSystemLanguages at some point and iterate through until we find a supported locale
       return app.getSystemLocale()
     }
   })
 
   ipcMain.handle(IpcChannels.GET_SCREENSHOT_FALLBACK_FOLDER, (event) => {
-    if (isFreeTubeUrl(event.senderFrame.url)) {
-      return path.join(app.getPath('pictures'), 'Freetube')
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
+      return path.join(app.getPath('pictures'), 'OpenTubeX')
     }
   })
 
   ipcMain.on(IpcChannels.CHOOSE_DEFAULT_FOLDER, async (event, kind) => {
-    if (!isFreeTubeUrl(event.senderFrame.url) || (kind !== DefaultFolderKind.DOWNLOADS && kind !== DefaultFolderKind.SCREENSHOTS)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || (kind !== DefaultFolderKind.DOWNLOADS && kind !== DefaultFolderKind.SCREENSHOTS)) {
       return
     }
 
@@ -1350,7 +1350,7 @@ function runApp() {
     }
 
     BrowserWindow.getAllWindows().forEach((window) => {
-      if (isFreeTubeUrl(window.webContents.getURL())) {
+      if (isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
       }
     })
@@ -1358,7 +1358,7 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.WRITE_TO_DEFAULT_FOLDER, async (event, kind, filename, arrayBuffer) => {
     if (
-      !isFreeTubeUrl(event.senderFrame.url) ||
+      !isOpenTubeXUrl(event.senderFrame.url) ||
       (kind !== DefaultFolderKind.DOWNLOADS && kind !== DefaultFolderKind.SCREENSHOTS) ||
       typeof filename !== 'string' ||
       !(arrayBuffer instanceof ArrayBuffer)) {
@@ -1373,7 +1373,7 @@ function runApp() {
     if (typeof folderPath === 'string' && folderPath.length > 0) {
       directory = folderPath
     } else {
-      directory = path.join(app.getPath(kind === DefaultFolderKind.DOWNLOADS ? 'downloads' : 'pictures'), 'FreeTube')
+      directory = path.join(app.getPath(kind === DefaultFolderKind.DOWNLOADS ? 'downloads' : 'pictures'), 'OpenTubeX')
     }
 
     directory = path.normalize(directory)
@@ -1413,7 +1413,7 @@ function runApp() {
   }
 
   ipcMain.on(IpcChannels.STOP_POWER_SAVE_BLOCKER, (event) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1425,7 +1425,7 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.START_POWER_SAVE_BLOCKER, (event) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1439,7 +1439,7 @@ function runApp() {
   })
 
   ipcMain.on(IpcChannels.CREATE_NEW_WINDOW, (event, path, query, searchQueryText) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1472,13 +1472,13 @@ function runApp() {
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
 
   ipcMain.handle(IpcChannels.GET_REPLACE_HTTP_CACHE, (event) => {
-    if (isFreeTubeUrl(event.senderFrame.url)) {
+    if (isOpenTubeXUrl(event.senderFrame.url)) {
       return replaceHttpCache
     }
   })
 
   ipcMain.once(IpcChannels.TOGGLE_REPLACE_HTTP_CACHE, async (event) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1503,7 +1503,7 @@ function runApp() {
   }
 
   ipcMain.handle(IpcChannels.PLAYER_CACHE_GET, async (event, key) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1525,7 +1525,7 @@ function runApp() {
   })
 
   ipcMain.handle(IpcChannels.PLAYER_CACHE_SET, async (event, key, value) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1540,7 +1540,7 @@ function runApp() {
   const invidiousAuthorizations = new Map()
 
   ipcMain.on(IpcChannels.SET_INVIDIOUS_AUTHORIZATION, (event, authorization, url) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1557,7 +1557,7 @@ function runApp() {
 
   // Settings
   ipcMain.handle(IpcChannels.DB_SETTINGS, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1619,7 +1619,7 @@ function runApp() {
   // *********** //
   // History
   ipcMain.handle(IpcChannels.DB_HISTORY, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1695,7 +1695,7 @@ function runApp() {
   // *********** //
   // Profiles
   ipcMain.handle(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1767,7 +1767,7 @@ function runApp() {
   // The remaining should have it implemented only when playlists
   // get fully implemented into the app
   ipcMain.handle(IpcChannels.DB_PLAYLISTS, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1872,7 +1872,7 @@ function runApp() {
   // ************** //
   // Search History
   ipcMain.handle(IpcChannels.DB_SEARCH_HISTORY, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -1930,7 +1930,7 @@ function runApp() {
   // *********** //
   // Profiles
   ipcMain.handle(IpcChannels.DB_SUBSCRIPTION_CACHE, async (event, { action, data }) => {
-    if (!isFreeTubeUrl(event.senderFrame.url)) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
     }
 
@@ -2016,7 +2016,7 @@ function runApp() {
 
   function syncOtherWindows(channel, event, payload) {
     const otherWindows = BrowserWindow.getAllWindows().filter((window) => {
-      return window.webContents.id !== event.sender.id && isFreeTubeUrl(window.webContents.getURL())
+      return window.webContents.id !== event.sender.id && isOpenTubeXUrl(window.webContents.getURL())
     })
 
     for (const window of otherWindows) {
@@ -2102,7 +2102,7 @@ function runApp() {
   })
 
   /*
-   * Callback when processing a freetube:// link (macOS)
+   * Callback when processing an opentubex:// link (macOS)
    */
   app.on('open-url', async (event, url) => {
     event.preventDefault()
@@ -2131,7 +2131,7 @@ function runApp() {
      * @param {import('electron').IpcMainEvent} event
      */
     const readyHandler = (event) => {
-      if (isFreeTubeUrl(event.senderFrame.url)) {
+      if (isOpenTubeXUrl(event.senderFrame.url)) {
         newWindow.webContents.ipc.off(IpcChannels.APP_READY, readyHandler)
 
         event.reply(IpcChannels.OPEN_URL, newStartupUrl)
@@ -2197,7 +2197,7 @@ function runApp() {
    */
 
   function navigateTo(path, browserWindow) {
-    if (browserWindow == null || !isFreeTubeUrl(browserWindow.webContents.getURL())) {
+    if (browserWindow == null || !isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       return
     }
 

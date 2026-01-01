@@ -4,6 +4,7 @@
  *
  * This allows the main process to validate the paths which the renderer process accesses,
  * to ensure that it cannot access other files on the disk, without the users permission (e.g. file picker).
+ * Note: The constant name __FREETUBE_ALLOWED_PATHS__ is kept for compatibility but this is for OpenTubeX.
  */
 import { closeSync, ftruncateSync, openSync, readFileSync, readdirSync, writeSync } from 'fs'
 import { join, relative, resolve } from 'path'

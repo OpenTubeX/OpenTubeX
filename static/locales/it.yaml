@@ -248,7 +248,7 @@ Settings:
     Auto Load Next Page:
       Label: Carica automaticamente la pagina successiva
       Tooltip: Carica automaticamente pagine e commenti aggiuntivi.
-    Open Deep Links In New Window: Apri URL passati a FreeTube in una nuova finestra
+    Open Deep Links In New Window: Apri URL passati a OpenTubeX in una nuova finestra
     Minimize to system tray: Riduci a icona nella barra delle applicazioni
   Theme Settings:
     Theme Settings: 'Tema'
@@ -369,7 +369,7 @@ Settings:
     Disable Smooth Scrolling: Disabilita lo scorrimento fluido
     Expand Side Bar by Default: Espandi automaticamente la barra laterale
     Hide Side Bar Labels: Nascondi le etichette della barra laterale
-    Hide FreeTube Header Logo: Nascondi il logo dell'intestazione di FreeTube
+    Hide OpenTubeX Header Logo: Nascondi il logo dell'intestazione di OpenTubeX
   Player Settings:
     Player Settings: 'Lettore'
     Play Next Video: 'Riproduzione automatica dei video consigliati'
@@ -478,7 +478,7 @@ Settings:
     Import History: Importa la Cronologia
     Export NewPipe: Esporta per NewPipe
     Export YouTube: Esporta per YouTube
-    Export FreeTube: Esporta per FreeTube
+    Export OpenTubeX: Esporta per OpenTubeX
     Export Subscriptions: Esporta le iscrizioni
     Select Export Type: Seleziona il tipo di esportazione
     Data Settings: Dati
@@ -491,9 +491,9 @@ Settings:
     History File: File della Cronologia
     Subscription File: File delle iscrizioni
     Playlist File: File delle playlist
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Questa opzione esporta i video da tutte le playlist in una playlist denominata \"Preferiti\".\nCome esportare e importare video nelle playlist per una versione precedente di FreeTube:\n1. Esporta le tue playlist con questa opzione abilitata.\n2. Elimina tutte le playlist esistenti usando l'opzione Rimuovi tutte le playlist in Impostazioni della privacy.\n3. Avvia la versione precedente di FreeTube e importa le playlist esportate."
-      Label: Esporta playlist per versioni precedenti di FreeTube
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Questa opzione esporta i video da tutte le playlist in una playlist denominata \"Preferiti\".\nCome esportare e importare video nelle playlist per una versione precedente di OpenTubeX:\n1. Esporta le tue playlist con questa opzione abilitata.\n2. Elimina tutte le playlist esistenti usando l'opzione Rimuovi tutte le playlist in Impostazioni della privacy.\n3. Avvia la versione precedente di OpenTubeX e importa le playlist esportate."
+      Label: Esporta playlist per versioni precedenti di OpenTubeX
     Search history file: File della cronologia delle ricerche
     Search history: Cronologia delle ricerche
     Import search history: Importa cronologia ricerche
@@ -563,7 +563,7 @@ Settings:
     Clicking on Test Proxy will send a request to: Facendo clic su Testa proxy verrà inviata una richiesta a
     Proxy Port Number: Numero di porta del proxy
     Proxy Host: Host del proxy
-    Proxy Warning: FreeTube non ha un proxy integrato ma può connettersi a un proxy esterno, come uno in esecuzione sul tuo computer come Tor o un proxy esterno come un proxy SOCKS5 fornito da alcune VPN. Se abilitato, assicurati che il tuo proxy/Tor sia configurato correttamente, altrimenti FreeTube non sarà in grado di recuperare alcun dato.
+    Proxy Warning: OpenTubeX non ha un proxy integrato ma può connettersi a un proxy esterno, come uno in esecuzione sul tuo computer come Tor o un proxy esterno come un proxy SOCKS5 fornito da alcune VPN. Se abilitato, assicurati che il tuo proxy/Tor sia configurato correttamente, altrimenti OpenTubeX non sarà in grado di recuperare alcun dato.
     Proxy Username: Nome utente proxy
     Proxy Password: Password proxy
   SponsorBlock Settings:
@@ -628,12 +628,12 @@ About:
   GitHub issues: Segnalazioni GitHub
   Report a problem: Segnala un problema
   FAQ: Domande frequenti
-  FreeTube Wiki: Wiki FreeTube
+  OpenTubeX Wiki: Wiki OpenTubeX
   Help: Aiuto
   Downloads / Changelog: Download / Registro delle modifiche
   GitHub releases: Versioni di GitHub
   these people and projects: queste persone e questi progetti
-  FreeTube is made possible by: FreeTube è reso possibile grazie a
+  OpenTubeX is made possible by: OpenTubeX è reso possibile grazie a
   Credits: Crediti
   Translate: Traduzioni
   room rules: regole stanza
@@ -683,13 +683,13 @@ Channel:
   This channel does not exist: Questo canale non esiste
   This channel does not allow searching: Questo canale non consente la ricerca
   Channel Tabs: Schede canale
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Questo canale è soggetto a limiti di età e al momento non può essere visualizzato su FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Questo canale è soggetto a limiti di età e al momento non può essere visualizzato su OpenTubeX.
   Posts:
     This channel currently does not have any posts: Questo canale attualmente non ha alcun post
     votes: '{votes} voti'
     Reveal Answers: Rivela le risposte
     Hide Answers: Nascondi le risposte
-    Video hidden by FreeTube: Video nascosto da FreeTube
+    Video hidden by OpenTubeX: Video nascosto da OpenTubeX
     Viewing Posts Only Supported By Invidious: La visualizzazione dei post è supportata solo da Invidious. Vai alla scheda comunità di un canale per visualizzare i contenuti senza Invidious.
     View Full Post: Visualizza il post completo
   Live:
@@ -815,12 +815,12 @@ Video:
     Autoplay is on: La riproduzione automatica è attiva
   IP block: YouTube ha bloccato il tuo indirizzo IP impedendogli di guardare i video. Prova a passare a una VPN o a un proxy diverso.
   Unlisted: Non elencato
-  MembersOnly: I video riservati agli abbonati non possono essere guardati con FreeTube, poiché richiedono l'accesso a Google e l'iscrizione a pagamento al canale dell'utente che li ha caricati.
-  AgeRestricted: I video con limiti di età non possono essere guardati con FreeTube poiché richiedono l'accesso a Google e l'utilizzo di un account YouTube con età verificata.
+  MembersOnly: I video riservati agli abbonati non possono essere guardati con OpenTubeX, poiché richiedono l'accesso a Google e l'iscrizione a pagamento al canale dell'utente che li ha caricati.
+  AgeRestricted: I video con limiti di età non possono essere guardati con OpenTubeX poiché richiedono l'accesso a Google e l'utilizzo di un account YouTube con età verificata.
   DeArrow:
     Show Original Details: Mostra dettagli originali
     Show Modified Details: Mostra dettagli modificati
-  DRMProtected: I video protetti da DRM non possono essere riprodotti in FreeTube, poiché richiedono componenti proprietari e closed source. Se vuoi guardare questo video, guardalo sul sito Web ufficiale di YouTube in un browser Web abilitato DRM.
+  DRMProtected: I video protetti da DRM non possono essere riprodotti in OpenTubeX, poiché richiedono componenti proprietari e closed source. Se vuoi guardare questo video, guardalo sul sito Web ufficiale di YouTube in un browser Web abilitato DRM.
 #& Playlists
   Watched Progress Saved: Progresso guardato salvato
   Save Watched Progress: Salva i progressi raggiunti
@@ -963,20 +963,20 @@ Tooltips:
     Scroll Playback Rate Over Video Player: Mentre il cursore è sopra il video, tieni premuto il tasto CTRL (Command su Mac) e scorri la rotella del mouse in avanti o indietro per controllare la velocità di riproduzione. Tieni premuto il tasto CTRL (Command su Mac) e fai clic con il tasto sinistro del mouse per tornare rapidamente alla velocità di riproduzione predefinita (1x a meno che non sia stata cambiata nelle Impostazioni).
     Skip by Scrolling Over Video Player: Usa la rotella di scorrimento per saltare il video, in stile MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: Se abilitato, FreeTube userà gli RSS invece del metodo standard per leggere le iscrizioni. Gli RSS sono più veloci e impediscono il blocco dell'IP, ma non forniscono determinate informazioni come la durata del video, lo stato dal vivo o i post
-    Fetch Automatically: Se abilitato, FreeTube recupererà automaticamente il feed delle tue iscrizioni all'avvio e quando viene aperta una nuova finestra.
+    Fetch Feeds from RSS: Se abilitato, OpenTubeX userà gli RSS invece del metodo standard per leggere le iscrizioni. Gli RSS sono più veloci e impediscono il blocco dell'IP, ma non forniscono determinate informazioni come la durata del video, lo stato dal vivo o i post
+    Fetch Automatically: Se abilitato, OpenTubeX recupererà automaticamente il feed delle tue iscrizioni all'avvio e quando viene aperta una nuova finestra.
   General Settings:
-    Invidious Instance: Istanza Invidious che FreeTube usa per le chiamate API.
-    Thumbnail Preference: Tutte le miniature su FreeTube verranno sostituite con un fotogramma del video, sfocato o nascosto al posto della miniatura predefinita.
-    Fallback to Non-Preferred Backend on Failure: Quando le API preferite hanno un problema, FreeTube userà automaticamente le API secondarie come riserva (se abilitate).
-    Preferred API Backend: Scegli il backend usato da FreeTube per ottenere i dati. Le API locali sono integrate nel programma. Le API Invidious richiedono un server Invidious al quale connettersi.
+    Invidious Instance: Istanza Invidious che OpenTubeX usa per le chiamate API.
+    Thumbnail Preference: Tutte le miniature su OpenTubeX verranno sostituite con un fotogramma del video, sfocato o nascosto al posto della miniatura predefinita.
+    Fallback to Non-Preferred Backend on Failure: Quando le API preferite hanno un problema, OpenTubeX userà automaticamente le API secondarie come riserva (se abilitate).
+    Preferred API Backend: Scegli il backend usato da OpenTubeX per ottenere i dati. Le API locali sono integrate nel programma. Le API Invidious richiedono un server Invidious al quale connettersi.
     Region for Trending: La regione delle tendenze permette di scegliere la nazione di cui si vogliono vedere i video di tendenza.
-    External Link Handling: "Scegli il comportamento predefinito quando si fa clic su un link che non può essere aperto in FreeTube.\nPer impostazione predefinita, FreeTube aprirà il link cliccato nel browser predefinito.\n"
-    Open Deep Links In New Window: Gli URL passati a FreeTube, ad esempio tramite estensioni del browser di reindirizzamento o argomenti della riga di comando, vengono aperti in una nuova finestra.
+    External Link Handling: "Scegli il comportamento predefinito quando si fa clic su un link che non può essere aperto in OpenTubeX.\nPer impostazione predefinita, OpenTubeX aprirà il link cliccato nel browser predefinito.\n"
+    Open Deep Links In New Window: Gli URL passati a OpenTubeX, ad esempio tramite estensioni del browser di reindirizzamento o argomenti della riga di comando, vengono aperti in una nuova finestra.
   External Player Settings:
     Ignore Warnings: Non notifica gli avvisi quando il lettore esterno selezionato non supporta l'azione richiesta (ad esempio invertire la playlist, etc.).
     Custom External Player Arguments: Invia al lettore esterno qualsiasi argomento personalizzato dalla linea di comando.
-    Custom External Player Executable: Per impostazione predefinita, FreeTube imposta il lettore esterno scelto tramite la variabile d'ambiente PATH. Se necessario, un percorso personalizzato può essere impostato qui.
+    Custom External Player Executable: Per impostazione predefinita, OpenTubeX imposta il lettore esterno scelto tramite la variabile d'ambiente PATH. Se necessario, un percorso personalizzato può essere impostato qui.
     External Player: Scegliendo un lettore esterno sarà visualizzata sulla miniatura un'icona per aprire il video nel lettore esterno (se la playlist lo supporta). Attenzione, le Impostazioni Invidious non influiscono sui lettori esterni.
     DefaultCustomArgumentsTemplate: '(Predefinito: {defaultCustomArguments})'
     Ignore Default Arguments: Non inviare argomenti predefiniti al lettore esterno oltre all'URL del video (ad esempio velocità di riproduzione, URL della playlist, ecc.). Gli argomenti personalizzati verranno comunque trasmessi.
@@ -985,7 +985,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Inserisci l'ID di un canale per impedire che tutti i video, le playlist e il canale stesso vengano visualizzati nelle ricerche, tendenze, più popolari e consigliati. Il nome del canale inserito deve avere una corrispondenza completa e fa distinzione tra maiuscole e minuscole.
     Hide Subscriptions Live: Questa impostazione è sovrascritta dall'impostazione "{appWideSetting}" a livello di app, nella sezione "{subsection}" di "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Inserisci una parola, un frammento di parola o una frase (senza distinzione tra maiuscole e minuscole) per nascondere tutti i video e le playlist i cui titoli originali la contengono in tutto FreeTube, escludendo solo Cronologia, Le tue playlist e i video all'interno delle playlist.
+    Hide Videos, Playlists and Channels Containing Text: Inserisci una parola, un frammento di parola o una frase (senza distinzione tra maiuscole e minuscole) per nascondere tutti i video e le playlist i cui titoli originali la contengono in tutto OpenTubeX, escludendo solo Cronologia, Le tue playlist e i video all'interno delle playlist.
     Hide Videos on Watch: Nasconde i video guardati dalle schede Video, Video brevi e Dal vivo nelle pagine Iscrizioni e Canali. Questo non influisce sulla scheda Pagina iniziale nelle pagine Canali
   SponsorBlock Settings:
     UseDeArrowTitles: Sostituisci i titoli dei video coi titoli inviati dagli utenti di DeArrow.

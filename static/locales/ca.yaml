@@ -234,7 +234,7 @@ Settings:
     Select Export Type: 'Selecciona tipus d''exportació'
     Import Subscriptions: 'Importa les subscripcions'
     Export Subscriptions: 'Exporta subscripcions'
-    Export FreeTube: 'Exporta FreeTube'
+    Export OpenTubeX: 'Exporta OpenTubeX'
     Export YouTube: 'Exporta YouTube'
     Export NewPipe: 'Exporta NewPipe'
     Import History: 'Importa l''historial'
@@ -313,7 +313,7 @@ About:
   Chat on Matrix: Xat a Matrix
   Please read the: Si us plau, llegeix les
   room rules: normes de la sala
-  FreeTube is made possible by: FreeTube és possible gràcies a
+  OpenTubeX is made possible by: OpenTubeX és possible gràcies a
   these people and projects: aquesta gent i projectes
   Source code: Codi font
   GitHub issues: Incidències del GitHub
@@ -326,7 +326,7 @@ About:
   Donate: Dona
   Translate: Tradueix
   GitHub releases: Llançaments del GitHub
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
 Profile:
   Profile Select: 'Selecciona perfil'
   All Channels: 'Tots els canals'

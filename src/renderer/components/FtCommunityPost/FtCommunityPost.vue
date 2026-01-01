@@ -97,7 +97,7 @@
         v-else
         class="hiddenVideo"
       >
-        {{ '[' + $t('Channel.Posts.Video hidden by FreeTube') + ']' }}
+        {{ '[' + $t('Channel.Posts.Video hidden by OpenTubeX') + ']' }}
       </p>
     </div>
     <div

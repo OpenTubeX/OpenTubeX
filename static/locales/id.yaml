@@ -252,7 +252,7 @@ Settings:
     Auto Load Next Page:
       Label: Otomatis Memuat Halaman Selanjutnya
       Tooltip: Muat halaman dan komentar tambahan secara otomatis.
-    Open Deep Links In New Window: Buka URL yang Diteruskan ke FreeTube di Jendela Baru
+    Open Deep Links In New Window: Buka URL yang Diteruskan ke OpenTubeX di Jendela Baru
     Minimize to system tray: Minimalkan ke System Tray
   Theme Settings:
     Theme Settings: 'Tema'
@@ -373,7 +373,7 @@ Settings:
     UI Scale: Skala UI
     Disable Smooth Scrolling: Nonaktifkan Gulir Halus
     Hide Side Bar Labels: Sembunyikan Label Bilah Samping
-    Hide FreeTube Header Logo: Sembunyikan Logo Header FreeTube
+    Hide OpenTubeX Header Logo: Sembunyikan Logo Header OpenTubeX
   Player Settings:
     Player Settings: 'Pemutar'
     Play Next Video: 'Putar Otomatis Video Rekomendasi'
@@ -467,7 +467,7 @@ Settings:
     Select Export Type: 'Pilih Tipe Ekspor'
     Import Subscriptions: 'Impor Langganan'
     Export Subscriptions: 'Ekspor Langganan'
-    Export FreeTube: 'Ekspor FreeTube'
+    Export OpenTubeX: 'Ekspor OpenTubeX'
     Export YouTube: 'Ekspor YouTube'
     Export NewPipe: 'Ekspor NewPipe'
     Import History: 'Impor Riwayat'
@@ -494,10 +494,10 @@ Settings:
     Subscription File: Berkas Langganan
     History File: Berkas Riwayat
     Playlist File: Berkas Daftar Putar
-    Export Playlists For Older FreeTube Versions:
-      Label: Ekspor Daftar Putar untuk Versi FreeTube yang Lebih Tua
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Ekspor Daftar Putar untuk Versi OpenTubeX yang Lebih Tua
 
-      Tooltip: "Opsi ini mengekspor video dari semua daftar putar ke dalam satu daftar putar bernama 'Favorit'.\nCara mengekspor & mengimpor video dalam daftar putar untuk FreeTube versi lama:\n1. Ekspor daftar putar Anda dengan mengaktifkan opsi ini.\n2. Hapus semua daftar putar Anda yang ada menggunakan opsi Hapus Semua Daftar Putar di bawah Pengaturan Privasi.\n3. Luncurkan FreeTube versi lama dan impor daftar putar yang diekspor.\""
+      Tooltip: "Opsi ini mengekspor video dari semua daftar putar ke dalam satu daftar putar bernama 'Favorit'.\nCara mengekspor & mengimpor video dalam daftar putar untuk OpenTubeX versi lama:\n1. Ekspor daftar putar Anda dengan mengaktifkan opsi ini.\n2. Hapus semua daftar putar Anda yang ada menggunakan opsi Hapus Semua Daftar Putar di bawah Pengaturan Privasi.\n3. Luncurkan OpenTubeX versi lama dan impor daftar putar yang diekspor.\""
     Search history file: Berkas riwayat pencarian
     Search history: Riwayat pencarian
     Import search history: Impor riwayat pencarian
@@ -567,7 +567,7 @@ Settings:
     Proxy Protocol: Protokol Proksi
     Enable Tor / Proxy: Aktifkan Tor / Proksi
     Proxy Settings: Proksi
-    Proxy Warning: FreeTube tidak memiliki proxy bawaan tetapi dapat terhubung ke proxy eksternal, seperti proxy yang berjalan di komputer Anda seperti Tor atau proxy eksternal seperti proxy SOCKS5 yang disediakan oleh beberapa VPN. Jika diaktifkan, pastikan proxy/Tor Anda dikonfigurasi dengan benar, atau FreeTube tidak akan dapat mengambil data apa pun.
+    Proxy Warning: OpenTubeX tidak memiliki proxy bawaan tetapi dapat terhubung ke proxy eksternal, seperti proxy yang berjalan di komputer Anda seperti Tor atau proxy eksternal seperti proxy SOCKS5 yang disediakan oleh beberapa VPN. Jika diaktifkan, pastikan proxy/Tor Anda dikonfigurasi dengan benar, atau OpenTubeX tidak akan dapat mengambil data apa pun.
     Proxy Username: Nama pengguna proksi
     Proxy Password: Kata sandi proksi
   SponsorBlock Settings:
@@ -628,7 +628,7 @@ About:
   #& About
   Donate: Donasi
   these people and projects: pengembang dan proyek berikut
-  FreeTube is made possible by: FreeTube dikembangkan oleh
+  OpenTubeX is made possible by: OpenTubeX dikembangkan oleh
   Credits: Kredit
   Translate: Terjemahkan
   room rules: aturan kamar
@@ -642,7 +642,7 @@ About:
   GitHub issues: Isu GitHub
   Report a problem: Laporkan masalah
   FAQ: PYSD
-  FreeTube Wiki: Wiki FreeTube
+  OpenTubeX Wiki: Wiki OpenTubeX
   Help: Bantuan
   GitHub releases: Rilis GitHub
   Downloads / Changelog: Unduhan / Catatan Perubahan
@@ -731,7 +731,7 @@ Channel:
   Posts:
     Hide Answers: Sembunyikan jawaban
     Reveal Answers: Tampilkan jawaban
-    Video hidden by FreeTube: Video disembunyikan oleh FreeTube
+    Video hidden by OpenTubeX: Video disembunyikan oleh OpenTubeX
     This channel currently does not have any posts: Kanal ini belum memiliki pos apa pun
     votes: '{votes} memilih'
     View Full Post: Lihat Postingan Lengkap
@@ -750,7 +750,7 @@ Channel:
     This channel does not currently have any shorts: Saluran ini saat ini tidak memiliki shorts
   This channel does not allow searching: Saluran ini tidak mengizinkan pencarian
   Channel Tabs: Tab Saluran
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Saluran ini dibatasi usia dan saat ini tidak dapat ditonton di FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Saluran ini dibatasi usia dan saat ini tidak dapat ditonton di OpenTubeX.
   Courses:
     This channel does not currently have any courses: Saluran ini saat ini tidak memiliki kursus apa pun
     Courses: kursus
@@ -823,7 +823,7 @@ Video:
   Upcoming: Akan Datang
 #& Playlists
   IP block: YouTube telah memblokir alamat IP Anda agar tidak dapat menonton video. Coba beralih ke VPN atau proxy lain.
-  DRMProtected: Video yang dilindungi DRM tidak dapat diputar di FreeTube, karena memerlukan komponen sumber tertutup dan berpemilik. Jika Anda ingin menonton video ini, silakan tonton di situs web YouTube resmi di peramban web yang mendukung DRM.
+  DRMProtected: Video yang dilindungi DRM tidak dapat diputar di OpenTubeX, karena memerlukan komponen sumber tertutup dan berpemilik. Jika Anda ingin menonton video ini, silakan tonton di situs web YouTube resmi di peramban web yang mendukung DRM.
   Published:
     In less than a minute: Dalam waktu kurang dari satu menit
   DeArrow:
@@ -861,12 +861,12 @@ Video:
   More Options: Lebih Banyak Pilihan
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Obrolan Langsung tidak tersedia untuk streaming ini. Mungkin telah dinonaktifkan oleh pengunggah.
   Show Super Chat Comment: Tampilkan Komentar Super Chat
-  MembersOnly: Video khusus anggota tidak dapat ditonton dengan FreeTube karena memerlukan login Google dan keanggotaan berbayar ke saluran pengunggah.
+  MembersOnly: Video khusus anggota tidak dapat ditonton dengan OpenTubeX karena memerlukan login Google dan keanggotaan berbayar ke saluran pengunggah.
   Unlisted: Tidak terdaftar
   Unhide Channel: Tampilkan Saluran
   Scroll to Bottom: Gulir ke Bawah
   Premieres: Penayangan perdana
-  AgeRestricted: Video yang dibatasi usia tidak dapat ditonton dengan FreeTube karena memerlukan login Google dan menggunakan akun YouTube yang diverifikasi usianya.
+  AgeRestricted: Video yang dibatasi usia tidak dapat ditonton dengan OpenTubeX karena memerlukan login Google dan menggunakan akun YouTube yang diverifikasi usianya.
   Save Watched Progress: Simpan Progress Tontonan
   Watched Progress Saved: Progress Tontonan yang telah Disimpan
 Playlist:
@@ -959,8 +959,8 @@ No: 'Tidak'
 This video is unavailable because of missing formats. This can happen due to country unavailability.: Video ini tidak tersedia karena format hilang. Ini bisa terjadi karena dibatasi berdasarkan wilayah.
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Saat diaktifkan, FreeTube akan menggunakan RSS, bukan metode default untuk mengambil umpan langganan Anda. RSS lebih cepat dan mencegah pemblokiran IP, tetapi tidak memberikan informasi tertentu seperti durasi video, status langsung, atau postingan komunitas
-    Fetch Automatically: Ketika dinyalakan, FreeTube akan mengambil secara otomatis umpan langganan Anda saat memulai ketika jendala baru dibuka.
+    Fetch Feeds from RSS: Saat diaktifkan, OpenTubeX akan menggunakan RSS, bukan metode default untuk mengambil umpan langganan Anda. RSS lebih cepat dan mencegah pemblokiran IP, tetapi tidak memberikan informasi tertentu seperti durasi video, status langsung, atau postingan komunitas
+    Fetch Automatically: Ketika dinyalakan, OpenTubeX akan mengambil secara otomatis umpan langganan Anda saat memulai ketika jendala baru dibuka.
   Player Settings:
     Default Video Format: Atur format ketika video dimainkan. Format DASH dapat memutar kualitas yang lebih tinggi. Format lama terbatas ke maksimum 720p tetapi dengan bandwidth yang lebih rendah. Format audio hanya berisi aliran audio.
     Proxy Videos Through Invidious: Akan menyambung ke Invidious daripada YouTube.
@@ -969,16 +969,16 @@ Tooltips:
     Skip by Scrolling Over Video Player: Gunakan guliran tetikus untuk melewati lewat video, seperti MPV.
   General Settings:
     Region for Trending: Wilayah tren memungkinkan Anda memilih video yang sedang ngetren dari negara tersebut untuk ditampilkan.
-    Invidious Instance: Situs Invidious yang akan tersambung dengan FreeTube untuk panggilan API.
-    Thumbnail Preference: Semua gambar mini di dalam aplikasi FreeTube akan diganti dengan frame dari video, diburamkan atau disembunyikan alih-alih menggunakan gambar mini bawaan.
-    Fallback to Non-Preferred Backend on Failure: Ketika API yang Anda pilih memiliki masalah, FreeTube akan secara otomatis menggunakan layanan API lainnya sebagai cadangan jika diaktifkan.
-    Preferred API Backend: Pilih layanan yang digunakan oleh FreeTube untuk mengambil data. API lokal adalah ekstraktor bawaan. API Invidious membutuhkan sambungan ke server Invidious.
-    External Link Handling: "Pilih perilaku default ketika tautan, yang tidak dapat dibuka di FreeTube, diklik.\nSecara default FreeTube akan membuka tautan yang diklik dengan browser default Anda.\n"
-    Open Deep Links In New Window: URL yang diteruskan ke FreeTube, seperti melalui ekstensi browser pengalihan atau argumen baris perintah, dibuka di jendela baru.
+    Invidious Instance: Situs Invidious yang akan tersambung dengan OpenTubeX untuk panggilan API.
+    Thumbnail Preference: Semua gambar mini di dalam aplikasi OpenTubeX akan diganti dengan frame dari video, diburamkan atau disembunyikan alih-alih menggunakan gambar mini bawaan.
+    Fallback to Non-Preferred Backend on Failure: Ketika API yang Anda pilih memiliki masalah, OpenTubeX akan secara otomatis menggunakan layanan API lainnya sebagai cadangan jika diaktifkan.
+    Preferred API Backend: Pilih layanan yang digunakan oleh OpenTubeX untuk mengambil data. API lokal adalah ekstraktor bawaan. API Invidious membutuhkan sambungan ke server Invidious.
+    External Link Handling: "Pilih perilaku default ketika tautan, yang tidak dapat dibuka di OpenTubeX, diklik.\nSecara default OpenTubeX akan membuka tautan yang diklik dengan browser default Anda.\n"
+    Open Deep Links In New Window: URL yang diteruskan ke OpenTubeX, seperti melalui ekstensi browser pengalihan atau argumen baris perintah, dibuka di jendela baru.
   External Player Settings:
     Custom External Player Arguments: Semua argumen perintah khusus, yang Anda ingin gunakan dengan pemutar eksternal.
     Ignore Warnings: Jangan tampilkan peringatan saat pemutar eksternal saat ini tidak mendukung tindakan yang ada (mis. membalik urutan daftar putar, dsb.).
-    Custom External Player Executable: Secara bawaan, FreeTube akan berasumsi bahwa pemutar eksternal yang dipilih bisa diitemukan via variabel lingkungan PATH. Jika diperlukan, bisa menggunakan jalur khusus di sini.
+    Custom External Player Executable: Secara bawaan, OpenTubeX akan berasumsi bahwa pemutar eksternal yang dipilih bisa diitemukan via variabel lingkungan PATH. Jika diperlukan, bisa menggunakan jalur khusus di sini.
     External Player: Memilih pemutar eksternal akan menampilkan ikon khusus, untuk membuka video (daftar putar jika didukung) di dalam pemutar eksternal, pada thumbnail. Peringatan, pengaturan Invidious tidak berdampak pada pemutar eksternal.
     DefaultCustomArgumentsTemplate: "(Default: '{defaultCustomArguments}')"
     Ignore Default Arguments: Jangan kirim argumen default apa pun ke pemutar eksternal selain URL video (misalnya kecepatan pemutaran, URL daftar putar, dll.). Argumen khusus akan tetap diteruskan.
@@ -988,7 +988,7 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: Masukkan ID Kanal untuk menyembunyikan semua video, daftar putar, dan kanal itu sendiri dari pencarian, halaman tren, halaman video popular, dan bagian rekomendasi. ID Kanal yang dimasukkan harus sesuai.
     Hide Subscriptions Live: Pengaturan ini digantikan oleh pengaturan "{appWideSetting}" di seluruh aplikasi, di bagian "{subsection}" dari "{settingsSection}"
-    Hide Videos, Playlists and Channels Containing Text: Masukkan kata, pecahan kata, atau frasa (tanpa memperhatikan huruf besar/kecil) untuk menyembunyikan semua video & daftar putar yang judul aslinya memuatnya di seluruh FreeTube, kecuali hanya Riwayat, Daftar Putar Anda, dan video di dalam daftar putar.
+    Hide Videos, Playlists and Channels Containing Text: Masukkan kata, pecahan kata, atau frasa (tanpa memperhatikan huruf besar/kecil) untuk menyembunyikan semua video & daftar putar yang judul aslinya memuatnya di seluruh OpenTubeX, kecuali hanya Riwayat, Daftar Putar Anda, dan video di dalam daftar putar.
     Hide Videos on Watch: Menyembunyikan video yang telah ditonton dari Tab Video, Video Pendek, dan Langsung pada Halaman Langganan dan Kanal. Hal tersebut tidak mempengaruhi Tab Beranda pada Halaman Kanal
   Experimental Settings:
     Replace HTTP Cache: Menonaktifkan cache HTTP berbasis disk Electron dan mengaktifkan cache gambar dalam memori khusus. Akan menyebabkan peningkatan penggunaan RAM.

@@ -1,6 +1,6 @@
 # Put the name of your locale in the same language
 Locale Name: 'Azərbaycanca'
-FreeTube: 'FreeTube'
+OpenTubeX: 'OpenTubeX'
 
 # Webkit Menu Bar
 File: 'Fayl'
@@ -296,7 +296,7 @@ Settings:
     Hide Side Bar Labels: Kənar Hissə Etiketlərini Gizlət
     Theme Settings: Tema
     Expand Side Bar by Default: Kənar Hissəni İlkin Olaraq Genişləndir
-    Hide FreeTube Header Logo: FreeTube Başlıq Simvolunu Gizlət
+    Hide OpenTubeX Header Logo: OpenTubeX Başlıq Simvolunu Gizlət
   Player Settings:
     Screenshot: {}
   SponsorBlock Settings: {}

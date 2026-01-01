@@ -269,7 +269,7 @@ Settings:
     Auto Load Next Page:
       Label: Llwytho'r Dudalen Nesaf yn Awtomatig
       Tooltip: Llwytho tudalennau a sylwadau ychwanegol yn awtomatig.
-    Open Deep Links In New Window: Agor URLs Wedi'u Pasio i FreeTube mewn Ffenest Newydd
+    Open Deep Links In New Window: Agor URLs Wedi'u Pasio i OpenTubeX mewn Ffenest Newydd
     Minimize to system tray: Lleihau i ddror y system
   Theme Settings:
     Theme Settings: 'Thema'
@@ -278,7 +278,7 @@ Settings:
     Disable Smooth Scrolling: 'Analluogi Sgrolio Llyfn'
     UI Scale: 'Graddfa UI'
     Hide Side Bar Labels: 'Cuddio Labeli Bar Ochr'
-    Hide FreeTube Header Logo: 'Cuddio Logo Pennawd FreeTube'
+    Hide OpenTubeX Header Logo: 'Cuddio Logo Pennawd OpenTubeX'
     Base Theme:
       Base Theme: 'Thema Sylfaenol'
       Black: 'Du'
@@ -542,7 +542,7 @@ Settings:
     History File: 'Ffeil Hanes'
     Playlist File: 'Ffeil Rhestr Chwarae'
     Export Subscriptions: 'Allforio Tanysgrifiadau'
-    Export FreeTube: 'Allforio FreeTube'
+    Export OpenTubeX: 'Allforio OpenTubeX'
     Export YouTube: 'Allforio YouTube'
     Export NewPipe: 'Allforio NewPipe'
     Import History: 'Mewnforio Hanes'
@@ -566,9 +566,9 @@ Settings:
     Unknown data key: 'Allwedd ddata anhysbys'
     How do I import my subscriptions?: 'Sut ydw i''n mewnforio fy nhanysgrifiadau?'
     Manage Subscriptions: 'Rheoli Tanysgrifiadau'
-    Export Playlists For Older FreeTube Versions:
-      Tooltip: "Mae'r opsiwn hwn yn allforio fideos o bob rhestr chwarae i un rhestr chwarae o'r enw 'Ffefrynnau'.\nSut i allforio a mewnforio fideos mewn rhestrau chwarae ar gyfer fersiwn hŷn o FreeTube:\n1. Allforio eich rhestri chwarae gyda'r opsiwn hwn wedi'i alluogi.\n2. Dileu eich holl restrau chwarae presennol gan ddefnyddio'r opsiwn Dileu Pob Rhestr Chwarae o dan Gosodiadau Preifatrwydd.\n 3. Lansio'r fersiwn hŷn o FreeTube a mewngludo'r rhestri chwarae allforio.\""
-      Label: Allforio Rhestrau Chwarae Fersiynau FreeTube Hŷn
+    Export Playlists For Older OpenTubeX Versions:
+      Tooltip: "Mae'r opsiwn hwn yn allforio fideos o bob rhestr chwarae i un rhestr chwarae o'r enw 'Ffefrynnau'.\nSut i allforio a mewnforio fideos mewn rhestrau chwarae ar gyfer fersiwn hŷn o OpenTubeX:\n1. Allforio eich rhestri chwarae gyda'r opsiwn hwn wedi'i alluogi.\n2. Dileu eich holl restrau chwarae presennol gan ddefnyddio'r opsiwn Dileu Pob Rhestr Chwarae o dan Gosodiadau Preifatrwydd.\n 3. Lansio'r fersiwn hŷn o OpenTubeX a mewngludo'r rhestri chwarae allforio.\""
+      Label: Allforio Rhestrau Chwarae Fersiynau OpenTubeX Hŷn
   Proxy Settings:
     Proxy Settings: 'Dirprwy'
     Enable Tor / Proxy: 'Galluogi Tor/Dirprwy'
@@ -583,7 +583,7 @@ Settings:
     Region: 'Rhanbarth'
     City: 'Dinas'
     Error getting network information. Is your proxy configured properly?: 'Gwall wrth gael manylion rhwydwaith. A yw eich dirprwy wedi''i ffurfweddu''n gywir?'
-    Proxy Warning: Nid oes gan FreeTube ddirprwy mewnol ond gall gysylltu â dirprwy allanol, fel un sy'n rhedeg ar eich peiriant fel Tor neu ddirprwy allanol fel dirprwy SOCKS5 a ddarperir gan rai VPNs. Os yw wedi'i alluogi, gwnewch yn siŵr bod eich dirprwy/Tor wedi'i ffurfweddu'n gywir, neu ni fydd FreeTube yn gallu nôl unrhyw ddata.
+    Proxy Warning: Nid oes gan OpenTubeX ddirprwy mewnol ond gall gysylltu â dirprwy allanol, fel un sy'n rhedeg ar eich peiriant fel Tor neu ddirprwy allanol fel dirprwy SOCKS5 a ddarperir gan rai VPNs. Os yw wedi'i alluogi, gwnewch yn siŵr bod eich dirprwy/Tor wedi'i ffurfweddu'n gywir, neu ni fydd OpenTubeX yn gallu nôl unrhyw ddata.
     Proxy Username: Enw defnyddiwr Dirprwy
     Proxy Password: Cyfrinair Dirprwy
   SponsorBlock Settings:
@@ -636,7 +636,7 @@ About:
   Downloads / Changelog: 'Llwytho i lawr / Cofnod newid'
   GitHub releases: 'Ryddhau drwy GitHub'
   Help: 'Cymorth'
-  FreeTube Wiki: 'Wici FreeTube'
+  OpenTubeX Wiki: 'Wici OpenTubeX'
   FAQ: 'Cwestiynau Cyffredin'
   Discussions: 'Sgyrsiau'
   Report a problem: 'Adrodd am broblem'
@@ -651,7 +651,7 @@ About:
   room rules: 'rheolau ystafell'
   Translate: 'Cyfieithu'
   Credits: 'Cydnabyddiaeth'
-  FreeTube is made possible by: 'Mae FreeTube yn bosibl oherwydd gwaith'
+  OpenTubeX is made possible by: 'Mae OpenTubeX yn bosibl oherwydd gwaith'
   these people and projects: 'y bobl a''r projectau hyn'
   Donate: 'Cyfrannu'
 
@@ -709,7 +709,7 @@ Channel:
   Your search results have returned 0 results: 'Mae eich canlyniadau chwilio wedi dod o hyd i 0 canlyniad'
   This channel does not exist: 'Nid yw''r sianel hon yn bodoli'
   This channel does not allow searching: 'Nid yw''r sianel hon yn caniatáu chwilio'
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: 'Mae cyfyngiad oedran ar y sianel hon ac ar hyn o bryd nid oes modd ei gweld yn FreeTube.'
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 'Mae cyfyngiad oedran ar y sianel hon ac ar hyn o bryd nid oes modd ei gweld yn OpenTubeX.'
   Channel Tabs: 'Tabiau Sianel'
   Videos:
     Videos: 'Fideos'
@@ -751,7 +751,7 @@ Channel:
     votes: '{votes} pleidlais'
     Reveal Answers: 'Datgelu Atebion'
     Hide Answers: 'Cuddio Atebion'
-    Video hidden by FreeTube: Fideo wedi'i guddio gan FreeTube
+    Video hidden by OpenTubeX: Fideo wedi'i guddio gan OpenTubeX
     View Full Post: Gweld Post Llawn
     Viewing Posts Only Supported By Invidious: Dim ond Invidious sy'n cefnogi Gweld Postiadau. Ewch i dab cymunedol sianel i weld cynnwys yno heb Invidious.
   Home:
@@ -864,14 +864,14 @@ Video:
     Autoplay is on: Awtochwarae ymlaen
     Autoplay is off: Awtochwarae i ffwrdd
   More Options: Rhagor o Ddewisiadau
-  AgeRestricted: Nid oes modd gwylio fideos â chyfyngiad oedran gyda FreeTube gan fod angen mewngofnodi Google a defnyddio cyfrif YouTube a ddilysir yn ôl oedran arnynt.
-  MembersOnly: Nid oes modd gwylio fideos aelodau-yn-unig gyda FreeTube gan fod angen mewngofnodi Google ac aelodaeth â thâl i sianel yr llwythwr.
+  AgeRestricted: Nid oes modd gwylio fideos â chyfyngiad oedran gyda OpenTubeX gan fod angen mewngofnodi Google a defnyddio cyfrif YouTube a ddilysir yn ôl oedran arnynt.
+  MembersOnly: Nid oes modd gwylio fideos aelodau-yn-unig gyda OpenTubeX gan fod angen mewngofnodi Google ac aelodaeth â thâl i sianel yr llwythwr.
   Unlisted: Heb ei restru
   IP block: Mae YouTube wedi rhwystro'ch cyfeiriad IP rhag gwylio fideos. Ceisiwch newid i VPN neu ddirprwy arall.
   DeArrow:
     Show Modified Details: Dangos Manylion Addasedig
     Show Original Details: Dangos Manylion Gwreiddiol
-  DRMProtected: Nid oes modd chwarae fideos gwarchodedig DRM yn FreeTube, gan fod angen cydrannau ffynhonnell caeedig perchnogol arnynt. Os ydych chi am wylio'r fideo hwn, gwyliwch ef ar wefan swyddogol YouTube mewn porwr gwe sydd wedi'i alluogi i chwarae DRM.
+  DRMProtected: Nid oes modd chwarae fideos gwarchodedig DRM yn OpenTubeX, gan fod angen cydrannau ffynhonnell caeedig perchnogol arnynt. Os ydych chi am wylio'r fideo hwn, gwyliwch ef ar wefan swyddogol YouTube mewn porwr gwe sydd wedi'i alluogi i chwarae DRM.
 #& Playlists
   Save Watched Progress: Cadw Cynnydd Gwylio
   Watched Progress Saved: Cynnydd Gwylio Wedi'i Gadw
@@ -951,15 +951,15 @@ Up Next: 'Nesaf'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Dewiswch y peirianwaith cefn y mae FreeTube yn ei ddefnyddio i gael data. Mae''r API lleol yn echdynnwr mewnol. Mae''r API Invidious angen gweinydd Invidious i gysylltu ag ef.'
-    Fallback to Non-Preferred Backend on Failure: 'Pan fydd gan eich API dewisol broblem, bydd FreeTube yn ceisio defnyddio''ch API nad yw''n well gennych yn awtomatig fel dull wrth gefn pan fydd wedi''i alluogi.'
-    Thumbnail Preference: 'Bydd holl luniau bach FreeTube yn cael eu newid i ffrâm o''r fideo, pŵl neu gudd yn lle''r llun bach rhagosodedig.'
-    Invidious Instance: 'Yr enghraifft Invidious y bydd FreeTube yn cysylltu ag ef ar gyfer galwadau API.'
+    Preferred API Backend: 'Dewiswch y peirianwaith cefn y mae OpenTubeX yn ei ddefnyddio i gael data. Mae''r API lleol yn echdynnwr mewnol. Mae''r API Invidious angen gweinydd Invidious i gysylltu ag ef.'
+    Fallback to Non-Preferred Backend on Failure: 'Pan fydd gan eich API dewisol broblem, bydd OpenTubeX yn ceisio defnyddio''ch API nad yw''n well gennych yn awtomatig fel dull wrth gefn pan fydd wedi''i alluogi.'
+    Thumbnail Preference: 'Bydd holl luniau bach OpenTubeX yn cael eu newid i ffrâm o''r fideo, pŵl neu gudd yn lle''r llun bach rhagosodedig.'
+    Invidious Instance: 'Yr enghraifft Invidious y bydd OpenTubeX yn cysylltu ag ef ar gyfer galwadau API.'
     Region for Trending: 'Mae''r rhanbarth o dueddiadau yn caniatáu ichi ddewis fideos tueddiadol o''r wlad rydych chi am eu gweld.'
     External Link Handling: |
-      Dewiswch yr ymddygiad rhagosodedig pan fydd dolen, nad oes modd ei hagor yn FreeTube, yn cael ei chlicio.
-      Fel rhagosodiad bydd FreeTube yn agor y ddolen a gliciwyd yn eich porwr rhagosodedig.
-    Open Deep Links In New Window: Mae URLau wedi'u trosglwyddo i FreeTube, megis trwy ailgyfeirio estyniadau porwr neu ymresymiadau llinell orchymyn, yn cael eu hagor mewn ffenestr newydd.
+      Dewiswch yr ymddygiad rhagosodedig pan fydd dolen, nad oes modd ei hagor yn OpenTubeX, yn cael ei chlicio.
+      Fel rhagosodiad bydd OpenTubeX yn agor y ddolen a gliciwyd yn eich porwr rhagosodedig.
+    Open Deep Links In New Window: Mae URLau wedi'u trosglwyddo i OpenTubeX, megis trwy ailgyfeirio estyniadau porwr neu ymresymiadau llinell orchymyn, yn cael eu hagor mewn ffenestr newydd.
   Player Settings:
     Proxy Videos Through Invidious: 'Bydd yn cysylltu ag Invidious i weini fideos yn lle gwneud cysylltiad uniongyrchol â YouTube.'
     Default Video Format: 'Gosodwch y fformatau i''w defnyddio pan fydd fideo yn chwarae. Gall fformatau DASH chwarae ansoddau uwch. Mae hen fformatau wedi''u cyfyngu i uchafswm o 360p ond yn defnyddio llai o led band. Mae fformatau sain yn ffrydiau sain yn unig.'
@@ -967,7 +967,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: 'Defnyddiwch yr olwyn sgrolio i symud yn gyflym trwy''r fideo, arddull MPV.'
   External Player Settings:
     External Player: 'Bydd dewis chwaraewr allanol yn dangos eicon, ar gyfer agor y fideo (rhestr chwarae os yw''n cael ei gefnogi) yn y chwaraewr allanol, ar y llun bach. Rhybudd, nid yw gosodiadau Invidious yn effeithio ar chwaraewyr allanol.'
-    Custom External Player Executable: 'Fel rhagosodiad, bydd FreeTube yn cymryd y bydd modd dod o hyd i''r chwaraewr allanol a ddewiswyd trwy''r newidyn amgylchedd PATH. Os oes angen, mae modd gosod llwybr cyfaddas yma.'
+    Custom External Player Executable: 'Fel rhagosodiad, bydd OpenTubeX yn cymryd y bydd modd dod o hyd i''r chwaraewr allanol a ddewiswyd trwy''r newidyn amgylchedd PATH. Os oes angen, mae modd gosod llwybr cyfaddas yma.'
     Ignore Warnings: 'Atal rhybuddion pan nad yw''r chwaraewr allanol cyfredol yn cefnogi''r weithred gyfredol (e.e. gwrthdroi rhestri chwarae, ac ati).'
     Custom External Player Arguments: 'Unrhyw ymresymiadau llinell orchymyn cyfaddas rydych am eu trosglwyddo i''r chwaraewr allanol.'
     DefaultCustomArgumentsTemplate: "(Rhagosodiad: '{defaultCustomArguments}')"
@@ -975,11 +975,11 @@ Tooltips:
   Distraction Free Settings:
     Hide Channels: 'Rhowch ID sianel i guddio''r holl fideos, rhestri chwarae a''r sianel ei hun rhag ymddangos wrth chwilio, tueddu, mwyaf poblogaidd ac argymell. Rhaid i ID y sianel fod yn cyfateb yn llwyr ac mae''n sensitif i faint nodau.'
     Hide Subscriptions Live: 'Mae''r gosodiad hwn wedi''i ddiystyru gan y gosodiad "{appWideSetting}" ar draws yr ap, yn adran "{subsection}" y "{settingsSection}"'
-    Hide Videos, Playlists and Channels Containing Text: Rhowch air, darn gair, neu ymadrodd (anwybyddu maint nodau) i guddio'r holl fideos a rhestri chwarae y mae eu teitlau gwreiddiol yn ei gynnwys trwy FreeTube gyfan, ac eithrio dim ond Hanes, Eich Rhestrau Chwarae, a fideos o fewn rhestrau chwarae.
+    Hide Videos, Playlists and Channels Containing Text: Rhowch air, darn gair, neu ymadrodd (anwybyddu maint nodau) i guddio'r holl fideos a rhestri chwarae y mae eu teitlau gwreiddiol yn ei gynnwys trwy OpenTubeX gyfan, ac eithrio dim ond Hanes, Eich Rhestrau Chwarae, a fideos o fewn rhestrau chwarae.
     Hide Videos on Watch: Yn cuddio fideos wedi'u gwylio o'r tabiau Fideos, Byrion a Byw ar dudalennau Tanysgrifio a Sianeli, Dyw hyn ddim yn effeithio ar y tab Cartref ar dudalennau Sianel
   Subscription Settings:
-    Fetch Feeds from RSS: 'Pan fydd wedi''i alluogi, bydd FreeTube yn defnyddio RSS yn lle ei ddull rhagosodedig ar gyfer cydio yn eich ffrwd tanysgrifio. Mae RSS yn gyflymach ac yn atal rhwystro IP, ond nid yw''n darparu gwybodaeth benodol fel hyd fideo, statws byw neu bostiadau'
-    Fetch Automatically: 'Pan fydd wedi''i alluogi, bydd FreeTube yn nôl eich ffrwd tanysgrifio yn awtomatig wrth gychwyn a phan fydd ffenestr newydd yn cael ei hagor.'
+    Fetch Feeds from RSS: 'Pan fydd wedi''i alluogi, bydd OpenTubeX yn defnyddio RSS yn lle ei ddull rhagosodedig ar gyfer cydio yn eich ffrwd tanysgrifio. Mae RSS yn gyflymach ac yn atal rhwystro IP, ond nid yw''n darparu gwybodaeth benodol fel hyd fideo, statws byw neu bostiadau'
+    Fetch Automatically: 'Pan fydd wedi''i alluogi, bydd OpenTubeX yn nôl eich ffrwd tanysgrifio yn awtomatig wrth gychwyn a phan fydd ffenestr newydd yn cael ei hagor.'
   Experimental Settings:
     Replace HTTP Cache: 'Yn analluogi storfa HTTP ar ddisg Electron ac yn galluogi storfa delwedd mewn cof cyfaddas. Bydd yn arwain at fwy o ddefnydd o RAM.'
   SponsorBlock Settings:

@@ -310,7 +310,7 @@ Settings:
     Disable Smooth Scrolling: 'மென்மையான ச்க்ரோலிங் முடக்கு'
     UI Scale: 'இடைமுகம் அளவுகோல்'
     Hide Side Bar Labels: 'பக்க பார் லேபிள்களை மறைக்கவும்'
-    Hide FreeTube Header Logo: 'ஃப்ரீட்யூப் தலைப்பு லோகோவை மறைக்கவும்'
+    Hide OpenTubeX Header Logo: 'ஃப்ரீட்யூப் தலைப்பு லோகோவை மறைக்கவும்'
     Base Theme:
       Base Theme: 'அடிப்படை கருப்பொருள்'
       Black: 'கருப்பு'
@@ -575,14 +575,14 @@ Settings:
     History File: 'வரலாற்று கோப்பு'
     Playlist File: 'பிளேலிச்ட் கோப்பு'
     Export Subscriptions: 'ஏற்றுமதி சந்தாக்கள்'
-    Export FreeTube: 'ஃப்ரீட்யூப் ஏற்றுமதி'
+    Export OpenTubeX: 'ஃப்ரீட்யூப் ஏற்றுமதி'
     Export YouTube: 'YouTube ஐ ஏற்றுமதி செய்யுங்கள்'
     Export NewPipe: 'புதிய பக்கத்தை ஏற்றுமதி செய்யுங்கள்'
     Import History: 'இறக்குமதி வரலாறு'
     Export History: 'ஏற்றுமதி வரலாறு'
     Import Playlists: 'பிளேலிச்ட்களை இறக்குமதி செய்யுங்கள்'
     Export Playlists: 'பிளேலிச்ட்கள் ஏற்றுமதி'
-    Export Playlists For Older FreeTube Versions:
+    Export Playlists For Older OpenTubeX Versions:
       Label: 'பழைய ஃப்ரீட்யூப் பதிப்புகளுக்கான பிளேலிச்ட்களை ஏற்றுமதி செய்யுங்கள்'
       # |- = Keep newlines, No newline at end
       Tooltip: |-
@@ -672,7 +672,7 @@ About:
   Downloads / Changelog: 'பதிவிறக்கங்கள் / சேஞ்ச்லாக்'
   GitHub releases: 'அறிவிலிமையம் வெளியிடுகிறது'
   Help: 'உதவி'
-  FreeTube Wiki: 'ஒரு வாரம் freetube'
+  OpenTubeX Wiki: 'ஒரு வாரம் OpenTubeX'
   FAQ: 'கேள்விகள்'
   Discussions: 'விவாதங்கள்'
   Report a problem: 'ஒரு சிக்கலைப் புகாரளிக்கவும்'
@@ -687,7 +687,7 @@ About:
   room rules: 'அறை விதிகள்'
   Translate: 'மொழிபெயர்த்திடு'
   Credits: 'வரவு'
-  FreeTube is made possible by: 'ஃப்ரீட்யூப் சாத்தியமானது'
+  OpenTubeX is made possible by: 'ஃப்ரீட்யூப் சாத்தியமானது'
   these people and projects: 'இந்த நபர்கள் மற்றும் திட்டங்கள்'
   Donate: 'நன்கொடை'
 
@@ -743,7 +743,7 @@ Channel:
   Your search results have returned 0 results: 'உங்கள் தேடல் முடிவுகள் 0 முடிவுகளைத் தருகின்றன'
   This channel does not exist: 'இந்த சேனல் இல்லை'
   This channel does not allow searching: 'இந்த சேனல் தேடலை அனுமதிக்காது'
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: 'இந்த சேனல் வயதுக்கு தடை விதிக்கப்பட்டுள்ளது, தற்போது ஃப்ரீட்யூப்பில் பார்க்க முடியாது.'
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 'இந்த சேனல் வயதுக்கு தடை விதிக்கப்பட்டுள்ளது, தற்போது ஃப்ரீட்யூப்பில் பார்க்க முடியாது.'
   Channel Tabs: 'சேனல் தாவல்கள்'
   Videos:
     Videos: 'வீடியோக்கள்'
@@ -786,7 +786,7 @@ Channel:
     View Full Post: 'முழு இடுகையைக் காண்க'
     Reveal Answers: 'பதில்களை வெளிப்படுத்துங்கள்'
     Hide Answers: 'பதில்களை மறைக்கவும்'
-    Video hidden by FreeTube: 'ஃப்ரீட்யூப் மறைத்த வீடியோ'
+    Video hidden by OpenTubeX: 'ஃப்ரீட்யூப் மறைத்த வீடியோ'
     Viewing Posts Only Supported By Invidious: 'இடுகைகளைப் பார்ப்பது வெறுப்புடன் மட்டுமே ஆதரிக்கப்படுகிறது. வன்கவர்வு இல்லாமல் உள்ளடக்கத்தைக் காண சேனலின் சமூக தாவலுக்குச் செல்லுங்கள்.'
   Home:
     Home: வீடு
@@ -1017,7 +1017,7 @@ Up Next: 'அடுத்து'
 Tooltips:
   General Settings:
     Preferred API Backend: 'தரவைப் பெற ஃப்ரீட்யூப் பயன்படுத்தும் பின்தளத்தில் தேர்வு செய்யவும். உள்ளக பநிஇ ஒரு உள்ளமைக்கப்பட்ட பிரித்தெடுத்தல். வன்கவர்வு பநிஇ உடன் இணைக்க ஒரு விலக்கப்பட்ட சேவையகம் தேவைப்படுகிறது.'
-    Fallback to Non-Preferred Backend on Failure: 'உங்களுக்கு விருப்பமான பநிஇ க்கு சிக்கல் இருக்கும்போது, உங்கள் விருப்பமில்லாத பநிஇ ஐ இயக்கும்போது குறைவடையும் முறையாக FREETube தானாகவே பயன்படுத்த முயற்சிக்கும்.'
+    Fallback to Non-Preferred Backend on Failure: 'உங்களுக்கு விருப்பமான பநிஇ க்கு சிக்கல் இருக்கும்போது, உங்கள் விருப்பமில்லாத பநிஇ ஐ இயக்கும்போது குறைவடையும் முறையாக OpenTubeX தானாகவே பயன்படுத்த முயற்சிக்கும்.'
     Thumbnail Preference: 'ஃப்ரீட்யூப் முழுவதும் உள்ள அனைத்து சிறு உருவங்களும் வீடியோவின் சட்டத்துடன் மாற்றப்படும், இயல்புநிலை சிறுபடத்திற்கு பதிலாக மங்கலாக அல்லது மறைக்கப்படும்.'
     Invidious Instance: 'பநிஇ அழைப்புகளுக்காக ஃப்ரீட்யூப் இணைக்கும் மோசமான நிகழ்வு.'
     Region for Trending: 'நீங்கள் காண்பிக்க விரும்பும் நாட்டின் பிரபலமான வீடியோக்களைத் தேர்வுசெய்ய போக்குகளின் பகுதி உங்களை அனுமதிக்கிறது.'

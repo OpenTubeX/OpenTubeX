@@ -254,7 +254,7 @@ Settings:
     Auto Load Next Page:
       Tooltip: Kargatu orrialde eta iruzkin gehigarriak automatikoki.
       Label: Kargatu automatikoki hurrengo orria
-    Open Deep Links In New Window: Ireki FreeTube-ra pasatu diren URLak leiho berri batean
+    Open Deep Links In New Window: Ireki OpenTubeX-ra pasatu diren URLak leiho berri batean
     Minimize to system tray: Minimizatu sistemaren erretiluan
   Theme Settings:
     Theme Settings: 'Gaia'
@@ -375,7 +375,7 @@ Settings:
     Secondary Color Theme: 'Gaiaren bigarren mailako kolorea'
         #* Main Color Theme
     Hide Side Bar Labels: Ezkutatu alboko barraren etiketak
-    Hide FreeTube Header Logo: Ezkutatu FreeTube goiburuko logotipoa
+    Hide OpenTubeX Header Logo: Ezkutatu OpenTubeX goiburuko logotipoa
   Player Settings:
     Player Settings: 'Erreproduzitzailea'
     Play Next Video: 'Gomendatutako bideoak automatikoki erreproduzitu'
@@ -517,7 +517,7 @@ Settings:
     Select Export Type: 'Hautatu esportazio mota'
     Import Subscriptions: 'Harpidetzak inportatu'
     Export Subscriptions: 'Harpidetzak esportatu'
-    Export FreeTube: 'Freetubera esportatu'
+    Export OpenTubeX: 'OpenTubeXra esportatu'
     Export YouTube: 'Youtubera esportatu'
     Export NewPipe: 'Newpipera esportatu'
     Import History: 'Historikoa inportatu'
@@ -543,9 +543,9 @@ Settings:
     Playlist insufficient data: Ez da datu nahikorik "{playlist}" erreprodukzio zerrendarentzat, elementutik ateratzen
     History File: Historikoaren fitxategia
     Playlist File: Erreprodukzio-zerrendaren fitxategia
-    Export Playlists For Older FreeTube Versions:
-      Label: Esportatu erreprodukzio zerrendak FreeTube bertsio zaharretarako
-      Tooltip: "Aukera honek erreprodukzio-zerrenda guztietako bideoak \"Gogokoak\" izeneko erreprodukzio-zerrenda batera esportatzen ditu.\nNola esportatu eta inportatu bideoak erreprodukzio-zerrendetan FreeTube-ren bertsio zaharrago baterako:\n 1. Esportatu zure erreprodukzio zerrendak aukera hau gaituta.\n 2. Ezabatu lehendik dituzun erreprodukzio-zerrenda guztiak Pribatutasun-ezarpenetan dagoen Kendu zerrenda guztiak aukera erabiliz.\n 3. Abiarazi FreeTube-ren bertsio zaharra eta inportatu esportatutako erreprodukzio-zerrendak.\""
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Esportatu erreprodukzio zerrendak OpenTubeX bertsio zaharretarako
+      Tooltip: "Aukera honek erreprodukzio-zerrenda guztietako bideoak \"Gogokoak\" izeneko erreprodukzio-zerrenda batera esportatzen ditu.\nNola esportatu eta inportatu bideoak erreprodukzio-zerrendetan OpenTubeX-ren bertsio zaharrago baterako:\n 1. Esportatu zure erreprodukzio zerrendak aukera hau gaituta.\n 2. Ezabatu lehendik dituzun erreprodukzio-zerrenda guztiak Pribatutasun-ezarpenetan dagoen Kendu zerrenda guztiak aukera erabiliz.\n 3. Abiarazi OpenTubeX-ren bertsio zaharra eta inportatu esportatutako erreprodukzio-zerrendak.\""
     Subscription File: Harpidetza Fitxategia
     Search history file: Bilaketa-historiaren fitxategia
     Search history: Bilaketa-historia
@@ -567,7 +567,7 @@ Settings:
     Region: 'Eskualdea'
     City: 'Hiria'
     Error getting network information. Is your proxy configured properly?: 'Errore bat gertatu da sareko informazioa eskuratzean. Zure proxya behar bezala konfiguratuta al dago?'
-    Proxy Warning: FreeTube-k ez du proxy-rik, baina kanpoko proxy batera konekta daiteke, adibidez, zure makinan Tor gisa exekutatzen den bat edo kanpoko proxy bat, VPN batzuek emandako proxy bat bezala. Aktibatuta badago, ziurtatu proxy/Tor behar bezala konfiguratuta dagoela, edo FreeTube-k ezingo du daturik lortu.
+    Proxy Warning: OpenTubeX-k ez du proxy-rik, baina kanpoko proxy batera konekta daiteke, adibidez, zure makinan Tor gisa exekutatzen den bat edo kanpoko proxy bat, VPN batzuek emandako proxy bat bezala. Aktibatuta badago, ziurtatu proxy/Tor behar bezala konfiguratuta dagoela, edo OpenTubeX-k ezingo du daturik lortu.
     Proxy Username: Proxy-aren erabiltzailea
     Proxy Password: Proxyaren pasahitza
   External Player Settings:
@@ -630,7 +630,7 @@ About:
   Downloads / Changelog: 'Deskargak / Aldaketen erregistroa'
   GitHub releases: 'Github Argitalpenak'
   Help: 'Laguntza'
-  FreeTube Wiki: 'Freetuberen wikia'
+  OpenTubeX Wiki: 'OpenTubeXren wikia'
   FAQ: 'Ohiko galderak'
   Report a problem: 'Arazo baten berri eman'
   GitHub issues: 'Github-en gaiak'
@@ -644,7 +644,7 @@ About:
   room rules: 'Gelaren arauak'
   Translate: 'Itzuli'
   Credits: 'Kredituak'
-  FreeTube is made possible by: 'Freetube honakoei esker sortu da'
+  OpenTubeX is made possible by: 'OpenTubeX honakoei esker sortu da'
   these people and projects: 'Hurrengo pertsonak eta proiektuak'
   Donate: 'Donazioa egin'
 
@@ -726,7 +726,7 @@ Channel:
       Search for: Bilatu "{tag}"
     Details: Xehetasunak
   This channel does not exist: Kanal hau ez da existitzen
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Kanal hau adin mugatuta dago eta une honetan ezin da ikusi FreeTube-n.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Kanal hau adin mugatuta dago eta une honetan ezin da ikusi OpenTubeX-n.
   Shorts:
     This channel does not currently have any shorts: Une honetan kanal honek ez du bideo laburrik
   Releases:
@@ -737,7 +737,7 @@ Channel:
     votes: '{votes} bozka'
     This channel currently does not have any posts: Une honetan kanal honek ez du argitalpenik
     Reveal Answers: Erantzunak agerian utzi
-    Video hidden by FreeTube: FreeTube-k ezkutatutako bideoa
+    Video hidden by OpenTubeX: OpenTubeX-k ezkutatutako bideoa
     View Full Post: Ikusi mezu osoa
     Viewing Posts Only Supported By Invidious: Argitalpenak ikustea Invidious-ek soilik onartzen du. Zoaz kanal baten komunitatearen fitxara bertan edukia ikusteko Invidious gabe.
   Channel Tabs: Kanalaren fitxak
@@ -858,14 +858,14 @@ Video:
     Full Window: Leiho osoa
     Autoplay is off: Autoerreprodukzioa desaktibatuta dago
     Autoplay is on: Autoerreprodukzioa aktibatuta dago
-  MembersOnly: Kideentzat baino ez diren bideoak ezin dira FreeTube-rekin ikusi, Googleren saioa hastea eta eduki sortzailearen kanalari ordaindutako bazkidetza eskatzen baitute.
+  MembersOnly: Kideentzat baino ez diren bideoak ezin dira OpenTubeX-rekin ikusi, Googleren saioa hastea eta eduki sortzailearen kanalari ordaindutako bazkidetza eskatzen baitute.
   Unlisted: Zerrendatugabeak
-  AgeRestricted: Adin muga duten bideoak ezin dira FreeTube-rekin ikusi, Googlen saioa hasi eta adinak egiaztatutako YouTube-ko kontu bat erabili behar delako.
+  AgeRestricted: Adin muga duten bideoak ezin dira OpenTubeX-rekin ikusi, Googlen saioa hasi eta adinak egiaztatutako YouTube-ko kontu bat erabili behar delako.
   IP block: YouTubek bideoak ikusteko zure IP helbidea blokeatu du. Mesedez, saiatu VPN edo proxy desberdin batera aldatzen.
   DeArrow:
     Show Original Details: Erakutsi jatorrizko xehetasunak
     Show Modified Details: Erakutsi aldatutako xehetasunak
-  DRMProtected: DRM babestutako bideoak ezin dira erreproduzitu FreeTube-n, kode itxiko osagai jabedunak behar baitituzte. Bideo hau ikusi nahi baduzu, ikusi YouTube webgune ofizialean DRM gaituta duen web arakatzaile batean.
+  DRMProtected: DRM babestutako bideoak ezin dira erreproduzitu OpenTubeX-n, kode itxiko osagai jabedunak behar baitituzte. Bideo hau ikusi nahi baduzu, ikusi YouTube webgune ofizialean DRM gaituta duen web arakatzaile batean.
 #& Playlists
   Save Watched Progress: Gorde ikusitako aurrerapena
   Watched Progress Saved: Ikusitako aurrerapena gordeta
@@ -943,25 +943,25 @@ Up Next: 'Hurrengoa'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Aukeratu FreeTubek datuak lortzeko erabiltzen duen backend-a. Tokiko APIa integratutako erauzgailua da. Invidious APIak Invidious zerbitzari bat behar du konektatzeko.'
-    Fallback to Non-Preferred Backend on Failure: 'Zure hobetsitako APIak arazoren bat duenean, FreeTube automatikoki saiatuko da hobetsi ez den APIa erabiltzen ordezko metodo gisa, posible denean.'
-    Thumbnail Preference: 'FreeTube-ko miniatura guztiak bideoaren fotograma batekin ordezkatuko dira, lausotuta edo ezkutatuta, lehenetsitako miniaturaren ordez.'
-    Invidious Instance: 'API deientzat Individious-eko instantzia, zeinetara Freetube konektatuko den.'
+    Preferred API Backend: 'Aukeratu OpenTubeXk datuak lortzeko erabiltzen duen backend-a. Tokiko APIa integratutako erauzgailua da. Invidious APIak Invidious zerbitzari bat behar du konektatzeko.'
+    Fallback to Non-Preferred Backend on Failure: 'Zure hobetsitako APIak arazoren bat duenean, OpenTubeX automatikoki saiatuko da hobetsi ez den APIa erabiltzen ordezko metodo gisa, posible denean.'
+    Thumbnail Preference: 'OpenTubeX-ko miniatura guztiak bideoaren fotograma batekin ordezkatuko dira, lausotuta edo ezkutatuta, lehenetsitako miniaturaren ordez.'
+    Invidious Instance: 'API deientzat Individious-eko instantzia, zeinetara OpenTubeX konektatuko den.'
     Region for Trending: 'Joeren eskualdeak aukera ematen dizu bistaratu nahi dituzun herrialdeko joerako bideoak hautatzeko.'
-    External Link Handling: "Lehenetsitako portaera hautatu, Freetube-n ireki ezin den esteka bat klikatua izan denean.\nLehentasunez, Freetube-k lehenetsitako nabigatazailean irekiko du klikatutako esteka.\n"
-    Open Deep Links In New Window: FreeTube-ra pasatzen diren URLak, birbideratzeko arakatzailearen luzapenek edo komando-lerroko argumentuek, leiho berri batean irekiko dira.
+    External Link Handling: "Lehenetsitako portaera hautatu, OpenTubeX-n ireki ezin den esteka bat klikatua izan denean.\nLehentasunez, OpenTubeX-k lehenetsitako nabigatazailean irekiko du klikatutako esteka.\n"
+    Open Deep Links In New Window: OpenTubeX-ra pasatzen diren URLak, birbideratzeko arakatzailearen luzapenek edo komando-lerroko argumentuek, leiho berri batean irekiko dira.
   Player Settings:
     Proxy Videos Through Invidious: 'Bideoak hornitzeko Invidious-era konektatuko da, YouTube-ra zuzeneko konexioa egin beharrean.'
     Default Video Format: 'Ezarri bideo bat erreproduzitzean erabiliko diren formatuak. DASH formatuek kalitate handiagoak erreproduzi ditzakete. Legatu diren formatuek gehienez 360p-ra mugatuta daude, baina banda-zabalera gutxiago erabiltzen dute. Audio formatuak audio-jarioak soilik dira.'
     Scroll Playback Rate Over Video Player: Kursorea bideoaren gainean denean, kontrol tekla sakatu eta mantendu (Komando tekla MAC-etan) eta saguaren gurpila aurrera eta atzera mugiarazi erreprodukzio tasa kontrolatzeko. Kontrol tekla sakatu eta mantendu (Komando tekla MAC-etan) eta ondoren saguaren ezkerreko botoia sakatu, lehenetsitako erreprodukzio tasara itzultzeko (1x baldin eta ezarpenetan aldaketarik egin ez bada).
     Skip by Scrolling Over Video Player: Erabili korritze-gurpila bideoa saltatzeko, MPV estiloa.
   Subscription Settings:
-    Fetch Feeds from RSS: 'Gaituta dagoenean, FreeTube-k RSS erabiliko du bere metodo lehenetsiaren ordez zure harpidetza-jarioa lortzeko. RSS azkarragoa da eta IP blokeatzea eragozten du, baina ez du informazio jakin bat ematen, hala nola bideoaren iraupena, zuzeneko egoera edo argitalpenak'
-    Fetch Automatically: Gaituta dagoenean, FreeTube-k automatikoki eskuratuko du zure harpidetza-jarioa abiaraztean eta leiho berri bat irekitzen denean.
+    Fetch Feeds from RSS: 'Gaituta dagoenean, OpenTubeX-k RSS erabiliko du bere metodo lehenetsiaren ordez zure harpidetza-jarioa lortzeko. RSS azkarragoa da eta IP blokeatzea eragozten du, baina ez du informazio jakin bat ematen, hala nola bideoaren iraupena, zuzeneko egoera edo argitalpenak'
+    Fetch Automatically: Gaituta dagoenean, OpenTubeX-k automatikoki eskuratuko du zure harpidetza-jarioa abiaraztean eta leiho berri bat irekitzen denean.
 
 # Toast Messages
   External Player Settings:
-    Custom External Player Executable: Lehentasunez, Freetube-k uste izango du hautatutako kanpo erreproduzitzailea aurkitu dezakeela PATH ingurune aldagaiari esker. Beharrezkoa balitz, ohiko PATH-a ezarri ahalko litzateke.
+    Custom External Player Executable: Lehentasunez, OpenTubeX-k uste izango du hautatutako kanpo erreproduzitzailea aurkitu dezakeela PATH ingurune aldagaiari esker. Beharrezkoa balitz, ohiko PATH-a ezarri ahalko litzateke.
     DefaultCustomArgumentsTemplate: "(Lehenetsia: '{defaultCustomArguments}')"
     Ignore Warnings: Jakinarazpenak kendu, uneko kanpo erreproduzitzaileak uneko ekintza onartzen ez duenean (esaterako, alderantzizko erreprodukzio zerrendak, etab.).
     External Player: Kanpo erreproduzitzaile bat hautatuz gero, bideoa edo erreproduzkio zerrenda (posible bada) irekitzerakoan, ikono bat agertuko da miniaturan. Kontuz, Individious-en ezarpenek ez dituzte kanpo erreproduzitzaileak trabatzen.
@@ -969,7 +969,7 @@ Tooltips:
     Ignore Default Arguments: Ez bidali argumentu lehenetsirik kanpoko erreproduzitzaileari bideoaren URLaz gain (adibidez, erreprodukzio-tasa, erreprodukzio-zerrendaren URLa, etab.). Argumentu pertsonalizatuak transmitituko dira oraindik.
   Distraction Free Settings:
     Hide Channels: Sartu kanalaren ID bat bideo, erreprodukzio-zerrenda eta kanala bera bilaketetan, joeran, ezagunenetan eta gomendagarrienetan ager ez dadin ezkutatzeko. Sartutako kanalaren IDak guztiz bat etorri behar du eta maiuskulak eta minuskulak bereizten ditu.
-    Hide Videos, Playlists and Channels Containing Text: Idatzi hitz bat, hitz-zati bat edo esaldi bat (maiuskulak eta minuskulak bereizten ez diren) jatorrizko izenburuak FreeTube osoan duten bideo eta erreprodukzio-zerrenda guztiak ezkutatzeko, historia, zure erreprodukzio-zerrendak eta erreprodukzio-zerrenden barneko bideoak soilik kenduta.
+    Hide Videos, Playlists and Channels Containing Text: Idatzi hitz bat, hitz-zati bat edo esaldi bat (maiuskulak eta minuskulak bereizten ez diren) jatorrizko izenburuak OpenTubeX osoan duten bideo eta erreprodukzio-zerrenda guztiak ezkutatzeko, historia, zure erreprodukzio-zerrendak eta erreprodukzio-zerrenden barneko bideoak soilik kenduta.
     Hide Subscriptions Live: Ezarpen hau aplikazio osorako "{appWideSetting}" ezarpenak ordezkatzen du, "{settingsSection}" ataleko "{subsection}" atalean
     Hide Videos on Watch: Ikusitako bideoak ezkutatzen ditu Harpidetza eta Kanalen orrialdeetako Bideoak, Laburpenak eta Zuzeneko fitxetatik. Honek ez dio eragiten Kanalen orrialdeetako Hasiera fitxari
   Experimental Settings:

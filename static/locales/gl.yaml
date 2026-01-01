@@ -196,7 +196,7 @@ Settings:
     Secondary Color Theme: 'Cor secundaria'
         #* Main Color Theme
     Hide Side Bar Labels: Ocultalas etiquetas da barra lateral
-    Hide FreeTube Header Logo: Ocultalo logotipo de Freetube na cabeceira
+    Hide OpenTubeX Header Logo: Ocultalo logotipo de OpenTubeX na cabeceira
   Player Settings:
     Player Settings: 'Axustes do reprodutor'
     Play Next Video: 'Reproducir próximo vídeo'
@@ -289,7 +289,7 @@ Settings:
     Select Export Type: 'Escoller tipo de exportación'
     Import Subscriptions: 'Importar subscricións'
     Export Subscriptions: 'Exportar subscricións'
-    Export FreeTube: 'Exportar Freetube'
+    Export OpenTubeX: 'Exportar OpenTubeX'
     Export YouTube: 'Exportar YouTube'
     Export NewPipe: 'Exportar NewPipe'
     Import History: 'Importar histórico'
@@ -382,7 +382,7 @@ About:
   #& About
   Donate: Doar
   these people and projects: aquelas persoas e proxectos
-  FreeTube is made possible by: FreeTube é posible grazas a
+  OpenTubeX is made possible by: OpenTubeX é posible grazas a
   Credits: Créditos
   Translate: Traducir
   room rules: normas do cuarto
@@ -396,7 +396,7 @@ About:
   GitHub issues: Problemas de GitHub
   Report a problem: Informar dun problema
   FAQ: Cuestións frecuentes
-  FreeTube Wiki: Wiki de FreeTube
+  OpenTubeX Wiki: Wiki de OpenTubeX
   Help: Axuda
   GitHub releases: Lanzamentos de GitHub
   Downloads / Changelog: Descargas / Rexistro de cambios
@@ -472,7 +472,7 @@ Channel:
     Location: Localización
   This channel does not exist: Esta canle non existe
   This channel does not allow searching: Esta canle non permite buscas
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Esta canle ten unha limitación de idade e actualmente non se pode ver en FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Esta canle ten unha limitación de idade e actualmente non se pode ver en OpenTubeX.
   Channel Tabs: Pestanas das canles
   Posts:
     This channel currently does not have any posts: Esta canle actualmente non ten publicacións
@@ -603,26 +603,26 @@ Up Next: 'Seguintes'
 #Tooltips
 Tooltips:
   General Settings:
-    Preferred API Backend: 'Escolle o back-end que FreeTube utiliza para obter os datos. A API local é un extractor incluído. A API de Invidious require un servidor Invidious ao que se conectar.'
-    Fallback to Non-Preferred Backend on Failure: 'Cando a túa API preferida teña un problema, FreeTube tentará usar automaticamente a túa API non preferida como método alternativo cando estea activo.'
-    Thumbnail Preference: 'Todalas miniaturas de FreeTube substituiranse por un fotograma do vídeo no lugar da miniatura predeterminada.'
-    Invidious Instance: 'A instancia de Invidious á que se conectará FreeTube para as chamadas da aplicacion.'
+    Preferred API Backend: 'Escolle o back-end que OpenTubeX utiliza para obter os datos. A API local é un extractor incluído. A API de Invidious require un servidor Invidious ao que se conectar.'
+    Fallback to Non-Preferred Backend on Failure: 'Cando a túa API preferida teña un problema, OpenTubeX tentará usar automaticamente a túa API non preferida como método alternativo cando estea activo.'
+    Thumbnail Preference: 'Todalas miniaturas de OpenTubeX substituiranse por un fotograma do vídeo no lugar da miniatura predeterminada.'
+    Invidious Instance: 'A instancia de Invidious á que se conectará OpenTubeX para as chamadas da aplicacion.'
     Region for Trending: 'A rexión das tendencias permíteche escoller os vídeos máis populares nun Estado.'
-    External Link Handling: "Escolla o comportamento predeterminado cando se fai clic nunha ligazón, que non se pode abrir en FreeTube.\nDe forma predeterminada, FreeTube abrirá a ligazón na que premeches no teu navegador predeterminado.\n"
+    External Link Handling: "Escolla o comportamento predeterminado cando se fai clic nunha ligazón, que non se pode abrir en OpenTubeX.\nDe forma predeterminada, OpenTubeX abrirá a ligazón na que premeches no teu navegador predeterminado.\n"
   Player Settings:
     Proxy Videos Through Invidious: 'Conectarase a Invidious para obter vídeos no canto de recorrer directamente a YouTube.'
     Default Video Format: 'Establecelos formatos utilizados cando se reproduce un vídeo. Os formatos DASH poden reproducir calidades superiores. Os formatos legados están limitados a un máximo de 720p pero usan menos ancho de banda. Os formatos de audio son fluxos de audio só.'
     Scroll Playback Rate Over Video Player: Mentres o cursor está sobre o vídeo, manteña premida a tecla Control (tecla Comando no Mac) e desprácese coa roda do rato cara adiante ou cara atrás para controlala velocidade da reprodución. Manteña premida a tecla Control (tecla Comando no Mac) e prema co botón esquerdo do rato para voltar rapidamente á taxa de reprodución predeterminada (1x a menos que o modificase na configuración).
     Skip by Scrolling Over Video Player: Usala roda de desprazamento para saltalo vídeo, estilo MPV.
   Subscription Settings:
-    Fetch Feeds from RSS: 'Cando está activado, FreeTube usará RSS no canto do método predeterminao para obter as subscricións. RSS é máis rápido e impide o bloqueo da IP, pero non proporciona certa información como a duración dun vídeo ou se é en vivo'
+    Fetch Feeds from RSS: 'Cando está activado, OpenTubeX usará RSS no canto do método predeterminao para obter as subscricións. RSS é máis rápido e impide o bloqueo da IP, pero non proporciona certa información como a duración dun vídeo ou se é en vivo'
 
 # Toast Messages
-    Fetch Automatically: Cando estea activado, FreeTube buscará automaticamente o teu feed da subscrición, cando se abra unha nova ventá e cando cambies de perfil.
+    Fetch Automatically: Cando estea activado, OpenTubeX buscará automaticamente o teu feed da subscrición, cando se abra unha nova ventá e cando cambies de perfil.
   External Player Settings:
     Custom External Player Arguments: Calquera argumento de liña de comandos personalizado, que desexa que se pase ao reprodutor externo.
     Ignore Warnings: Suprime avisos para cando os reprodutores externos actuais non apoian a acción actual (e.g. Invertendo listas de reprodución, etc.).
-    Custom External Player Executable: Por defecto, FreeTube asumirá que o reprodutor externo elixido pode atoparse a través da variable de entorno PATH. Se é necesario, pódese establecer un camiño personalizado aquí.
+    Custom External Player Executable: Por defecto, OpenTubeX asumirá que o reprodutor externo elixido pode atoparse a través da variable de entorno PATH. Se é necesario, pódese establecer un camiño personalizado aquí.
     External Player: Ao escoller un reprodutor externo, aparecerá unha icona para abrilo vídeo (lista de reprodución se é compatible) no reprodutor externo, na miniatura. Aviso, a configuración de Invidious non afecta aos reprodutores externos.
     DefaultCustomArgumentsTemplate: "(Default: '{defaultCustomArguments}')"
   Experimental Settings:

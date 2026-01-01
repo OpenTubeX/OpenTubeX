@@ -1,7 +1,7 @@
 /**
  * @param {string | URL} url
  */
-export function isFreeTubeUrl(url) {
+export function isOpenTubeXUrl(url) {
   let url_
 
   if (url instanceof URL) {

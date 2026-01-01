@@ -250,7 +250,7 @@ Settings:
     Auto Load Next Page:
       Label: Încarcă următoarea pagină automat
       Tooltip: Încarcă automat pagini și comentarii suplimentare.
-    Open Deep Links In New Window: Deschideți URL-urile transmise către FreeTube într-o fereastră nouă
+    Open Deep Links In New Window: Deschideți URL-urile transmise către OpenTubeX într-o fereastră nouă
     Minimize to system tray: Minimizare în bara de sistem
   Theme Settings:
     Theme Settings: 'Setări temă'
@@ -368,7 +368,7 @@ Settings:
     Disable Smooth Scrolling: Dezactivați derularea lină
     Expand Side Bar by Default: Extindeți bara laterală în mod implicit
     Hide Side Bar Labels: Ascunde etichetele din bara laterală
-    Hide FreeTube Header Logo: Ascundeți logo-ul antetului FreeTube
+    Hide OpenTubeX Header Logo: Ascundeți logo-ul antetului OpenTubeX
   Player Settings:
     Player Settings: 'jucător'
     Play Next Video: 'Redare automată videoclipuri recomandate'
@@ -462,7 +462,7 @@ Settings:
     Select Export Type: 'Selectează tipul de export'
     Import Subscriptions: 'Importă abonamente'
     Export Subscriptions: 'Exportați abonamentele'
-    Export FreeTube: 'Exportați FreeTube'
+    Export OpenTubeX: 'Exportați OpenTubeX'
     Export YouTube: 'Exportați YouTube'
     Export NewPipe: 'Exportați NewPipe'
     Import History: 'Importați istoricul'
@@ -489,9 +489,9 @@ Settings:
     Playlist File: Fișier listă de redare
     History File: Fișier istoric
     Subscription File: Fișier abonament
-    Export Playlists For Older FreeTube Versions:
-      Label: Exportați liste de redare pentru versiunile FreeTube mai vechi
-      Tooltip: "Această opțiune exportă videoclipurile din toate listele de redare într-o singură listă de redare numită 'Favorite'.\nCum să exportați și să importați videoclipurile în listele de redare pentru o versiune mai veche a FreeTube:\n1. Exportați-vă listele de redare cu această opțiune activată.\n 2. Ștergeți toate listele de redare existente utilizând opțiunea Eliminați toate listele de redare din Setări de confidențialitate.\n3. Lansați versiunea mai veche a FreeTube și importați listele de redare exportate.”"
+    Export Playlists For Older OpenTubeX Versions:
+      Label: Exportați liste de redare pentru versiunile OpenTubeX mai vechi
+      Tooltip: "Această opțiune exportă videoclipurile din toate listele de redare într-o singură listă de redare numită 'Favorite'.\nCum să exportați și să importați videoclipurile în listele de redare pentru o versiune mai veche a OpenTubeX:\n1. Exportați-vă listele de redare cu această opțiune activată.\n 2. Ștergeți toate listele de redare existente utilizând opțiunea Eliminați toate listele de redare din Setări de confidențialitate.\n3. Lansați versiunea mai veche a OpenTubeX și importați listele de redare exportate.”"
   The app needs to restart for changes to take effect. Restart and apply change?: Aplicația trebuie repornită pentru ca modificările să intre în vigoare. Reporniți și aplicați modificările?
   External Player Settings:
     Custom External Player Arguments: Argumente personalizate pentru playerul extern
@@ -580,7 +580,7 @@ Settings:
     Proxy Protocol: Protocol Proxy
     Enable Tor / Proxy: Activați Tor / Proxy
     Proxy Settings: Proxy
-    Proxy Warning: FreeTube nu are un proxy încorporat, dar se poate conecta la un proxy extern, cum ar fi unul care rulează pe computer, cum ar fi Tor, sau un proxy extern, cum ar fi un proxy SOCKS5 furnizat de unele VPN-uri. Dacă este activat, asigurați-vă că proxy/Tor este configurat corect, altfel FreeTube nu va putea prelua date.
+    Proxy Warning: OpenTubeX nu are un proxy încorporat, dar se poate conecta la un proxy extern, cum ar fi unul care rulează pe computer, cum ar fi Tor, sau un proxy extern, cum ar fi un proxy SOCKS5 furnizat de unele VPN-uri. Dacă este activat, asigurați-vă că proxy/Tor este configurat corect, altfel OpenTubeX nu va putea prelua date.
   Download Settings:
     Ask Download Path: Solicită calea de descărcare
     Choose Path: Alege calea
@@ -616,7 +616,7 @@ About:
   Email: E-mail
   Donate: Donează
   these people and projects: aceste persoane și proiecte
-  FreeTube is made possible by: FreeTube este posibil datorită
+  OpenTubeX is made possible by: OpenTubeX este posibil datorită
   Credits: Credite
   Translate: Traduceți
   room rules: regulile camerei
@@ -628,7 +628,7 @@ About:
   GitHub issues: Issues pe GitHub
   Report a problem: Raportați o problemă
   FAQ: Întrebări frecvente
-  FreeTube Wiki: FreeTube Wiki
+  OpenTubeX Wiki: OpenTubeX Wiki
   Help: Ajutor
   GitHub releases: Lansări GitHub
   Downloads / Changelog: Descărcări / Jurnal de modificări
@@ -718,9 +718,9 @@ Channel:
     Hide Answers: Ascunde Răspunsurile
     votes: '{votes} voturi'
     View Full Post: Vezi postarea integrală
-    Video hidden by FreeTube: Videoclip ascuns de FreeTube
+    Video hidden by OpenTubeX: Videoclip ascuns de OpenTubeX
     Viewing Posts Only Supported By Invidious: Vizualizarea postărilor este acceptată numai de Invidious. Mergeți la fila comunității unui canal pentru a vedea conținutul acolo fără Invidious.
-  This channel is age-restricted and currently cannot be viewed in FreeTube.: Acest canal are restricții de vârstă și momentan nu poate fi vizionat în FreeTube.
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Acest canal are restricții de vârstă și momentan nu poate fi vizionat în OpenTubeX.
   This channel does not exist: Acest canal nu există
   This channel does not allow searching: Acest canal nu permite căutarea
   Live:
@@ -846,10 +846,10 @@ Video:
     Full Window: Fereastra plină
     Exit Full Window: Ieșiți din fereastra completă
   More Options: Mai multe opțiuni
-  AgeRestricted: Videoclipurile cu restricții de vârstă nu pot fi vizionate cu FreeTube, deoarece necesită autentificare la Google și utilizarea unui cont YouTube verificat în funcție de vârstă.
+  AgeRestricted: Videoclipurile cu restricții de vârstă nu pot fi vizionate cu OpenTubeX, deoarece necesită autentificare la Google și utilizarea unui cont YouTube verificat în funcție de vârstă.
   Unlisted: nelistate
-  MembersOnly: Videoclipurile destinate exclusiv membrilor nu pot fi vizionate cu FreeTube, deoarece necesită autentificare Google și abonament plătit la canalul persoanei care a încărcat.
-  DRMProtected: Videoclipurile protejate DRM nu pot fi redate în FreeTube, deoarece necesită componente proprietare, cu sursă închisă. Dacă doriți să vizionați acest videoclip, vizionați-l pe site-ul oficial YouTube într-un browser web compatibil DRM.
+  MembersOnly: Videoclipurile destinate exclusiv membrilor nu pot fi vizionate cu OpenTubeX, deoarece necesită autentificare Google și abonament plătit la canalul persoanei care a încărcat.
+  DRMProtected: Videoclipurile protejate DRM nu pot fi redate în OpenTubeX, deoarece necesită componente proprietare, cu sursă închisă. Dacă doriți să vizionați acest videoclip, vizionați-l pe site-ul oficial YouTube într-un browser web compatibil DRM.
   DeArrow:
     Show Original Details: Afișați detaliile originale
     Show Modified Details: Afișați detaliile modificate
@@ -952,12 +952,12 @@ Playing Next Video Interval: Se redară următorul videoclip în cel mai scurt t
 Unknown YouTube url type, cannot be opened in app: Tip url YouTube necunoscut, nu poate fi deschis în aplicație
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: Atunci când este activat, FreeTube va utiliza RSS în locul metodei implicite de preluare a fluxului dvs. de abonament. RSS este mai rapid și previne blocarea IP, dar nu oferă anumite informații, cum ar fi durata videoclipului, starea live sau postările
-    Fetch Automatically: Când activat, FreeTube va prelua automat feed-ul de abonament la pornire și când se deschide o fereastră nouă.
+    Fetch Feeds from RSS: Atunci când este activat, OpenTubeX va utiliza RSS în locul metodei implicite de preluare a fluxului dvs. de abonament. RSS este mai rapid și previne blocarea IP, dar nu oferă anumite informații, cum ar fi durata videoclipului, starea live sau postările
+    Fetch Automatically: Când activat, OpenTubeX va prelua automat feed-ul de abonament la pornire și când se deschide o fereastră nouă.
   External Player Settings:
     Custom External Player Arguments: Orice argumente personalizate din linia de comandă, pe care doriți să le transmiteți playerului extern.
     Ignore Warnings: Suprimarea avertismentelor în cazul în care playerul extern curent nu acceptă acțiunea curentă (de exemplu, inversarea listelor de redare etc.).
-    Custom External Player Executable: În mod implicit, FreeTube va presupune că playerul extern ales poate fi găsit prin intermediul variabilei de mediu PATH. Dacă este necesar, aici poate fi setată o cale personalizată.
+    Custom External Player Executable: În mod implicit, OpenTubeX va presupune că playerul extern ales poate fi găsit prin intermediul variabilei de mediu PATH. Dacă este necesar, aici poate fi setată o cale personalizată.
     External Player: Alegerea unui player extern va afișa o pictogramă, pentru a deschide videoclipul (playlist, dacă este acceptat) în playerul extern, pe thumbnail. Atenție, setările Invidious nu afectează playerele externe.
     DefaultCustomArgumentsTemplate: "(Implicit: '{defaultCustomArguments}')"
     Ignore Default Arguments: Nu trimiteți niciun argument implicit către playerul extern în afară de URL-ul video (de exemplu, rata de redare, URL-ul listei de redare etc.). Argumentele personalizate vor fi transmise în continuare.
@@ -967,17 +967,17 @@ Tooltips:
     Scroll Playback Rate Over Video Player: În timp ce cursorul se află deasupra videoclipului, țineți apăsată tasta Control (tasta Command pe Mac) și derulați rotița mouse-ului înainte sau înapoi pentru a controla rata de redare. Țineți apăsată tasta Control (tasta Command pe Mac) și faceți clic cu butonul stâng al mouse-ului pentru a reveni rapid la rata de redare implicită (1x, cu excepția cazului în care aceasta a fost modificată în setări).
     Skip by Scrolling Over Video Player: Utilizați rotița de derulare pentru a trece prin videoclip, stil MPV.
   General Settings:
-    External Link Handling: "Alegeți comportamentul implicit atunci când faceți clic pe un link care nu poate fi deschis în FreeTube.\nÎn mod implicit, FreeTube va deschide linkul accesat în browserul dvs. implicit.\n"
+    External Link Handling: "Alegeți comportamentul implicit atunci când faceți clic pe un link care nu poate fi deschis în OpenTubeX.\nÎn mod implicit, OpenTubeX va deschide linkul accesat în browserul dvs. implicit.\n"
     Region for Trending: Regiunea de tendințe vă permite să alegeți ce videoclipuri în tendințe din fiecare țară doriți să fie afișate.
-    Invidious Instance: Instanța Invidious la care FreeTube se va conecta pentru apelurile API.
-    Thumbnail Preference: Toate miniaturile din FreeTube vor fi înlocuite cu un cadru al videoclipului, încețoșat sau ascuns în loc de miniatura implicită.
-    Fallback to Non-Preferred Backend on Failure: Atunci când API-ul preferat are o problemă, FreeTube va încerca automat să utilizeze API-ul nepreferat ca metodă de rezervă, atunci când este activat.
-    Preferred API Backend: Alegeți backend-ul pe care FreeTube îl folosește pentru a obține date. API-ul local este un extractor incorporat. API-ul Invidious necesită un server Invidious la care să vă conectați.
-    Open Deep Links In New Window: URL-urile transmise către FreeTube, cum ar fi prin redirecționarea extensiilor de browser sau a argumentelor din linia de comandă, sunt deschise într-o fereastră nouă.
+    Invidious Instance: Instanța Invidious la care OpenTubeX se va conecta pentru apelurile API.
+    Thumbnail Preference: Toate miniaturile din OpenTubeX vor fi înlocuite cu un cadru al videoclipului, încețoșat sau ascuns în loc de miniatura implicită.
+    Fallback to Non-Preferred Backend on Failure: Atunci când API-ul preferat are o problemă, OpenTubeX va încerca automat să utilizeze API-ul nepreferat ca metodă de rezervă, atunci când este activat.
+    Preferred API Backend: Alegeți backend-ul pe care OpenTubeX îl folosește pentru a obține date. API-ul local este un extractor incorporat. API-ul Invidious necesită un server Invidious la care să vă conectați.
+    Open Deep Links In New Window: URL-urile transmise către OpenTubeX, cum ar fi prin redirecționarea extensiilor de browser sau a argumentelor din linia de comandă, sunt deschise într-o fereastră nouă.
   Distraction Free Settings:
     Hide Channels: Introduceți un ID de canal pentru a ascunde toate videoclipurile, listele de redare și canalul însuși de la apariția în căutare, tendințe, cele mai populare și recomandate. ID-ul canalului introdus trebuie să fie o potrivire completă și este sensibil la majuscule și minuscule.
     Hide Subscriptions Live: Această setare este înlocuită de setarea "{appWideSetting}” la nivel de aplicație, în secțiunea „{subsection}” din „{settingsSection}”
-    Hide Videos, Playlists and Channels Containing Text: Introduceți un cuvânt, un fragment de cuvânt sau o frază (fără a ține cont de majuscule) pentru a ascunde toate videoclipurile și listele de redare ale căror titluri originale conțin acest cuvânt în întregul FreeTube, excluzând doar Istoric, Listele dvs. de redare și videoclipurile din listele de redare.
+    Hide Videos, Playlists and Channels Containing Text: Introduceți un cuvânt, un fragment de cuvânt sau o frază (fără a ține cont de majuscule) pentru a ascunde toate videoclipurile și listele de redare ale căror titluri originale conțin acest cuvânt în întregul OpenTubeX, excluzând doar Istoric, Listele dvs. de redare și videoclipurile din listele de redare.
     Hide Videos on Watch: Ascunde videoclipurile vizionate din secțiunile Shorts, Live și Videoclipuri de pe paginile Abonamente și Canal. Aceasta nu afectează fila Acasă de pe paginile de canal
   Experimental Settings:
     Replace HTTP Cache: Dezactivează memoria cache HTTP bazată pe disc Electron și activează un cache de imagini personalizat în memorie. Va duce la o utilizare crescută a memoriei RAM.
