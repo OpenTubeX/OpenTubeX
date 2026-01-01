@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { join } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { settings } from '../datastores/handlers/base'
-import { isFreeTubeUrl } from './utils'
+import { isOpenTubeXUrl } from './utils'
 import { IpcChannels, UnsupportedPlayerActions } from '../constants'
 
 /**
@@ -41,7 +41,7 @@ const externalPlayerCmdArgs = new Map()
  * @param {ExternalPlayerPayload} payload
  */
 export async function handleOpenInExternalPlayer(event, payload) {
-  if (!isFreeTubeUrl(event.senderFrame.url) || !event.sender.isFocused()) {
+  if (!isOpenTubeXUrl(event.senderFrame.url) || !event.sender.isFocused()) {
     return
   }
 
