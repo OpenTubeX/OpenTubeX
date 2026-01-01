@@ -116,10 +116,6 @@ The first build with a green check mark is the latest build.
 > [!IMPORTANT]
 > You will need to have a GitHub account to download these builds.
 
-### Unofficial Downloads
-> [!WARNING]
-> These builds are maintained by the community. While they should be safe, download at your own risk. There may be issues with using these versus the official builds. Any issues specific with these builds should be sent to their respective maintainer. Make sure you always try an [official download](https://github.com/D3SOX/OpenTubeX/releases) before reporting your issue to us!
-
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/freetube-git-d3sox/)
 
 ## Contributing
