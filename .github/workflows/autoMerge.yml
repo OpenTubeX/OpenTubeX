@@ -14,4 +14,4 @@ jobs:
     - name: Auto Merge PR
       env:
         GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
-      run: gh pr merge https://github.com/FreeTubeApp/FreeTube/pull/${{ github.event.pull_request.number }} --auto --squash
+      run: gh pr merge https://github.com/D3SOX/OpenTubeX/pull/${{ github.event.pull_request.number }} --auto --squash

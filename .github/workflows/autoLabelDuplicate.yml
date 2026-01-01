@@ -11,6 +11,6 @@ jobs:
       - name: Check Comment Author
         uses: Amwam/issue-comment-action@v1.5.0
         with:
-          keywords: '["duplicate of #", "duplicate of https://github.com/FreeTubeApp/FreeTube/issues/", "duplicate of https://github.com/FreeTubeApp/FreeTube/pulls/"]'
+          keywords: '["duplicate of #", "duplicate of https://github.com/D3SOX/OpenTubeX/issues/", "duplicate of https://github.com/D3SOX/OpenTubeX/pulls/"]'
           labels: '["U: duplicate"]'
           github-token: "${{ secrets.GITHUB_TOKEN }}"
