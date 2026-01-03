@@ -276,6 +276,9 @@ export default defineComponent({
     const defaultSkipInterval = computed(() => {
       return store.getters.getDefaultSkipInterval
     })
+    const seekIntervalMultiplyByPlaybackRate = computed(() => {
+      return store.getters.getSeekIntervalMultiplyByPlaybackRate
+    })
 
     watch(defaultSkipInterval, (newValue) => {
       ui.configure({
@@ -2060,10 +2063,11 @@ export default defineComponent({
      * @param {WheelEvent} event
      */
     function mouseScrollSkip(event) {
+      const seekMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
       if ((event.deltaY < 0 || event.deltaX > 0)) {
-        seekBySeconds(defaultSkipInterval.value * player.getPlaybackRate(), true)
+        seekBySeconds(defaultSkipInterval.value * seekMultiplier, true)
       } else if ((event.deltaY > 0 || event.deltaX < 0)) {
-        seekBySeconds(-defaultSkipInterval.value * player.getPlaybackRate(), true)
+        seekBySeconds(-defaultSkipInterval.value * seekMultiplier, true)
       }
     }
     const mouseScrollSkipThrottle = throttle(mouseScrollSkip, mouseScrollThrottleWaitMs)
@@ -2291,7 +2295,8 @@ export default defineComponent({
             showOverlayControls()
           } else {
             // Rewind by the time-skip interval (in seconds)
-            seekBySeconds(-defaultSkipInterval.value * player.getPlaybackRate(), false, true)
+            const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+            seekBySeconds(-defaultSkipInterval.value * smallRewindMultiplier, false, true)
           }
           break
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_FAST_FORWARD:
@@ -2302,7 +2307,8 @@ export default defineComponent({
             showOverlayControls()
           } else {
             // Fast-Forward by the time-skip interval (in seconds)
-            seekBySeconds(defaultSkipInterval.value * player.getPlaybackRate(), false, true)
+            const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+            seekBySeconds(defaultSkipInterval.value * smallFastForwardMultiplier, false, true)
           }
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE:

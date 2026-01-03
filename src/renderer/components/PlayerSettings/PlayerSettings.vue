@@ -40,6 +40,13 @@
           :tooltip="t('Tooltips.Player Settings.Skip by Scrolling Over Video Player')"
           @change="updateVideoSkipMouseScroll"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Multiply Seek Interval by Playback Rate')"
+          :compact="true"
+          :default-value="seekIntervalMultiplyByPlaybackRate"
+          :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
+          @change="updateSeekIntervalMultiplyByPlaybackRate"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -399,6 +406,16 @@ const videoSkipMouseScroll = computed(() => store.getters.getVideoSkipMouseScrol
  */
 function updateVideoSkipMouseScroll(value) {
   store.dispatch('updateVideoSkipMouseScroll', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const seekIntervalMultiplyByPlaybackRate = computed(() => store.getters.getSeekIntervalMultiplyByPlaybackRate)
+
+/**
+ * @param {boolean} value
+ */
+function updateSeekIntervalMultiplyByPlaybackRate(value) {
+  store.dispatch('updateSeekIntervalMultiplyByPlaybackRate', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

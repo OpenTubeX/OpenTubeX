@@ -421,6 +421,7 @@ Settings:
       File Name Tooltip: Du kannst die folgenden Variablen verwenden. %Y Jahr 4-stellig. %M Monat 2 Ziffern. %D Tag 2 Ziffern. %H Stunde 2 Ziffern. %N Minute 2 Ziffern. %S Sekunde 2 Ziffern. %T Millisekunde 3 Ziffern. %s Video-Sekunde. %t Video Millisekunde 3 Ziffern. %i Video-ID.
     Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
     Skip by Scrolling Over Video Player: Überspringen durch Scrollen
+    Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
     Autoplay Interruption Timer: Abbruch-Timer für Automatische Wiedergabe
     Default Viewing Mode:
       Theater: Kinomodus
@@ -978,6 +979,7 @@ Tooltips:
     Proxy Videos Through Invidious: Stellt eine Verbindung zu Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung zu YouTube herzustellen.
     Scroll Playback Rate Over Video Player: Während sich der Cursor über dem Video befindet, halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und bewege das Mausrad vorwärts oder rückwärts, um die Abspielgeschwindigkeit zu steuern. Halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und klicke mit der linken Maustaste, um schnell zur Standard-Wiedergabegeschwindigkeit zurückzukehren (1x, sofern sie nicht in den Einstellungen geändert wurde).
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
+    Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).

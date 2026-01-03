@@ -166,6 +166,7 @@ const state = {
   defaultProfile: MAIN_PROFILE_ID,
   defaultQuality: '720',
   defaultSkipInterval: 5,
+  seekIntervalMultiplyByPlaybackRate: false,
   defaultViewingMode: 'default',
   defaultVideoFormat: 'dash',
   disableSmoothScrolling: false,
