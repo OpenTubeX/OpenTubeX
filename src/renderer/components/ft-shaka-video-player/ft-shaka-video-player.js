@@ -2228,16 +2228,20 @@ export default defineComponent({
           event.preventDefault()
           video_.paused ? video_.play() : video_.pause()
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND:
+        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND: {
           // Rewind by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          seekBySeconds(-defaultSkipInterval.value * player.getPlaybackRate() * 2, false, true)
+          const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+          seekBySeconds(-defaultSkipInterval.value * largeRewindMultiplier * 2, false, true)
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD:
+        }
+        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD: {
           // Fast-Forward by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          seekBySeconds(defaultSkipInterval.value * player.getPlaybackRate() * 2, false, true)
+          const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+          seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
+        }
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED:
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT:
           // Decrease playback rate by user configured interval
