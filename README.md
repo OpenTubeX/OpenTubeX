@@ -11,6 +11,9 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 > - Remember playback speed on a per-channel basis. You can enable it in settings. If the feature is turned on and you manually change the playback speed it will be saved for that channel
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/82c82626-2611-48ba-97be-a86465423de2" />
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
+> 
+> - Option to disable multiplying seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can enable this behavior in Player Settings if you prefer the previous behavior.
+>  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
 >
 > If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
