@@ -45,7 +45,6 @@ import { useI18n } from '../../composables/use-i18n-polyfill'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 
-import { ABOUT_BITCOIN_ADDRESS } from '../../../constants'
 import packageDetails from '../../../../package.json'
 
 const { t } = useI18n()
@@ -72,11 +71,6 @@ const chunks = computed(() => [
     icon: ['fas', 'exclamation-circle'],
     title: t('About.Report a problem'),
     content: `<a href="https://github.com/D3SOX/OpenTubeX/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
-  },
-  {
-    icon: ['fab', 'bitcoin'],
-    title: `${t('About.Donate')} - BTC`,
-    content: `<a href="bitcoin:${ABOUT_BITCOIN_ADDRESS}">${ABOUT_BITCOIN_ADDRESS}</a>`
   }
 ])
 </script>
