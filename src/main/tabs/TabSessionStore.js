@@ -3,8 +3,6 @@
  */
 import * as baseHandlers from '../../datastores/handlers/base.js'
 
-const TAB_SESSION_KEY = 'tabSession'
-
 /**
  * @typedef {object} TabSessionData
  * @property {Array<{id: string, url: string, title: string}>} tabs
@@ -12,15 +10,12 @@ const TAB_SESSION_KEY = 'tabSession'
  */
 
 /**
- * Load the saved tab session from the settings datastore
+ * Load the saved tab session from the tab session datastore
  * @returns {Promise<TabSessionData|null>}
  */
 export async function loadTabSession() {
   try {
-    const doc = await baseHandlers.settings._findOne(TAB_SESSION_KEY)
-    if (doc && doc.value) {
-      return doc.value
-    }
+    return await baseHandlers.tabSession.load()
   } catch (err) {
     console.error('Failed to load tab session:', err)
   }
@@ -28,13 +23,13 @@ export async function loadTabSession() {
 }
 
 /**
- * Save the tab session to the settings datastore
+ * Save the tab session to the tab session datastore
  * @param {TabSessionData} sessionData
  * @returns {Promise<void>}
  */
 export async function saveTabSession(sessionData) {
   try {
-    await baseHandlers.settings.upsert(TAB_SESSION_KEY, sessionData)
+    await baseHandlers.tabSession.save(sessionData)
   } catch (err) {
     console.error('Failed to save tab session:', err)
   }
@@ -46,7 +41,7 @@ export async function saveTabSession(sessionData) {
  */
 export async function clearTabSession() {
   try {
-    await baseHandlers.settings.upsert(TAB_SESSION_KEY, null)
+    await baseHandlers.tabSession.clear()
   } catch (err) {
     console.error('Failed to clear tab session:', err)
   }
