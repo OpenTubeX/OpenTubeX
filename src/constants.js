@@ -28,6 +28,7 @@ const IpcChannels = {
   TABS_RESTORE_CLOSED: 'tabs-restore-closed',
   TABS_STATE_UPDATED: 'tabs-state-updated',
   TABS_UPDATE_TITLE: 'tabs-update-title',
+  TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
   CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',

@@ -222,6 +222,22 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
+    // Exit fullscreen on the previous tab before switching
+    if (this.activeTabId && this.activeTabId !== tabId) {
+      const previousTab = this.tabs.get(this.activeTabId)
+      if (previousTab && !previousTab.view.webContents.isDestroyed()) {
+        try {
+          const url = previousTab.view.webContents.getURL()
+          if (url && isOpenTubeXUrl(url)) {
+            previousTab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
+          }
+        } catch (error) {
+          // Silently ignore errors if webContents is not ready
+          console.error('Error sending exit fullscreen message:', error)
+        }
+      }
+    }
+
     // Hide current active tab
     if (this.activeTabId && this.activeTabId !== tabId) {
       const currentTab = this.tabs.get(this.activeTabId)

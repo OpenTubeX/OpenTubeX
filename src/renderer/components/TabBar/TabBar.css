@@ -42,6 +42,7 @@
   border-block-end: 0;
   transition: background-color 0.15s ease;
   position: relative;
+  user-select: none;
 }
 
 .tab::after {

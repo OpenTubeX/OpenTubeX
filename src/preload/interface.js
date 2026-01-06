@@ -400,6 +400,21 @@ export default {
       ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, (_, state) => {
         handler(state)
       })
+    },
+
+    /**
+     * Listen for exit fullscreen notification (when tab becomes inactive)
+     * @param {() => void} handler
+     * @returns {() => void} Function to remove the listener
+     */
+    onExitFullscreen: (handler) => {
+      const listener = () => {
+        handler()
+      }
+      ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
+      }
     }
   }
 }
