@@ -595,11 +595,19 @@ function handleKeyboardShortcuts(event) {
   const ctrlOrCommandPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey)
 
+  const target = event.target
+  const isTypingInInput = target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+
+  const isSlashKey = event.key === '/' && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey
+
   if (
     !hideSearchBar.value &&
     (
       (ctrlOrCommandPressed && (event.key === 'L' || event.key === 'l')) ||
-      (event.altKey && (event.key === 'D' || event.key === 'd' || (process.platform === 'darwin' && event.key === '∂')))
+      (event.altKey && (event.key === 'D' || event.key === 'd' || (process.platform === 'darwin' && event.key === '∂'))) ||
+      (isSlashKey && !isTypingInInput)
     )
   ) {
     event.preventDefault()

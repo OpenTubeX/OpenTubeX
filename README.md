@@ -15,6 +15,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 > - Option to disable multiplying seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can enable this behavior in Player Settings if you prefer the previous behavior.
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
 >
+> - Focus search bar when pressing `/` key in addition to Ctrl+L/Cmd+L.
+> 
 > If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
 
