@@ -12,7 +12,7 @@
         :key="tab.id"
         class="tab"
         :class="{ active: tab.isActive }"
-        :title="tab.title"
+        :title="getDisplayTitle(tab.title)"
         role="button"
         tabindex="0"
         @click="activateTab(tab.id)"
@@ -20,7 +20,7 @@
         @keydown.space.prevent="activateTab(tab.id)"
         @auxclick.prevent="handleMiddleClick($event, tab.id)"
       >
-        <span class="tabTitle">{{ tab.title }}</span>
+        <span class="tabTitle">{{ getDisplayTitle(tab.title) }}</span>
         <button
           class="closeButton"
           :aria-label="t('Close Tab')"
@@ -56,6 +56,7 @@ import { useI18n } from '../../composables/use-i18n-polyfill'
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
+import packageDetails from '../../../package.json'
 
 const { t } = useI18n()
 
@@ -108,6 +109,20 @@ function handleMiddleClick(event, tabId) {
 
 function createNewTab() {
   store.dispatch('createTab', { makeActive: true })
+}
+
+/**
+ * Strip the "- OpenTubeX" suffix from tab title for display in tab bar
+ * @param {string} title - The full tab title
+ * @returns {string} - Title without the suffix
+ */
+function getDisplayTitle(title) {
+  if (!title) return title
+  const suffix = ` - ${packageDetails.productName}`
+  if (title.endsWith(suffix)) {
+    return title.slice(0, -suffix.length)
+  }
+  return title
 }
 </script>
 
