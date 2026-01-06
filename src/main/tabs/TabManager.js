@@ -283,6 +283,22 @@ export class TabManager {
       this.closedTabUrls.shift()
     }
 
+    // Get ordered tabs BEFORE deleting to find the previous tab
+    const orderedTabs = Array.from(this.tabs.entries())
+    const closedTabIndex = orderedTabs.findIndex(([id]) => id === tabId)
+    let tabToActivate = null
+
+    // If we closed the active tab, determine which tab to activate
+    if (this.activeTabId === tabId && closedTabIndex !== -1) {
+      if (closedTabIndex > 0) {
+        // Not the first tab - activate the previous tab
+        tabToActivate = orderedTabs[closedTabIndex - 1][1]
+      } else if (orderedTabs.length > 1) {
+        // First tab - activate the next tab (which becomes first after deletion)
+        tabToActivate = orderedTabs[1][1]
+      }
+    }
+
     // Remove from view if active
     if (this.activeTabId === tabId) {
       this.browserWindow.contentView.removeChildView(tab.view)
@@ -293,15 +309,12 @@ export class TabManager {
 
     this.tabs.delete(tabId)
 
-    // If we closed the active tab, activate another one
-    if (this.activeTabId === tabId) {
+    // Activate the determined tab
+    if (tabToActivate) {
       this.activeTabId = null
-      const remainingTabs = Array.from(this.tabs.values())
-      if (remainingTabs.length > 0) {
-        // Activate the most recently active tab
-        remainingTabs.sort((a, b) => b.lastActiveAt - a.lastActiveAt)
-        this.activateTab(remainingTabs[0].id)
-      }
+      this.activateTab(tabToActivate.id)
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
     }
 
     this._broadcastStateUpdate()
