@@ -521,7 +521,8 @@ function handleLinkClick(event) {
   if (isYoutubeLink) {
     handleYoutubeLink(href, {
       doCreateNewWindow,
-      doCreateNewTab
+      doCreateNewTab,
+      isMiddleClick
     })
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
@@ -537,8 +538,10 @@ function handleLinkClick(event) {
   }
 }
 
-async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewTab = false } = {}) {
+async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewTab = false, isMiddleClick = false } = {}) {
   const result = await store.dispatch('getYoutubeUrlInfo', href)
+  // Middle clicks should open tabs in background (not make them active)
+  const makeActive = !isMiddleClick
 
   switch (result.urlType) {
     case 'video': {
@@ -556,7 +559,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         path: `/watch/${videoId}`,
         query,
         doCreateNewWindow,
-        doCreateNewTab
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -568,7 +572,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         path: `/playlist/${playlistId}`,
         query,
         doCreateNewWindow,
-        doCreateNewTab
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -581,6 +586,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         query,
         doCreateNewWindow,
         doCreateNewTab,
+        makeActive,
         searchQueryText: searchQuery
       })
       break
@@ -591,7 +597,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
       openInternalPath({
         path: `/hashtag/${encodeURIComponent(hashtag)}`,
         doCreateNewWindow,
-        doCreateNewTab
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -603,7 +610,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         path: `/post/${postId}`,
         query,
         doCreateNewWindow,
-        doCreateNewTab
+        doCreateNewTab,
+        makeActive
       })
       break
     }
@@ -615,6 +623,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         path: `/channel/${channelId}/${subPath}`,
         doCreateNewWindow,
         doCreateNewTab,
+        makeActive,
         query: {
           url
         }
@@ -629,7 +638,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
       openInternalPath({
         path: `/${result.urlType}`,
         doCreateNewWindow,
-        doCreateNewTab
+        doCreateNewTab,
+        makeActive
       })
       break
 

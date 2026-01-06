@@ -230,10 +230,11 @@ export async function openExternalLink(url) {
  * @param {string} params.path the internal path to open
  * @param {boolean} [params.doCreateNewWindow] set to true to open a new window (Shift+click)
  * @param {boolean} [params.doCreateNewTab] set to true to open in a new tab (Ctrl/Cmd+click or middle-click)
+ * @param {boolean} [params.makeActive=true] set to false to open tab in background (only used when doCreateNewTab is true)
  * @param {object} [params.query] the query params to use (optional)
  * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, searchQueryText = null }) {
+export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, searchQueryText = null }) {
   if (process.env.IS_ELECTRON) {
     if (doCreateNewTab) {
       // Open in new tab
@@ -241,7 +242,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
-      window.ftElectron.tabs.create({ route, query, makeActive: true })
+      window.ftElectron.tabs.create({ route, query, makeActive })
     } else if (doCreateNewWindow) {
       // Open in new window
       window.ftElectron.openInNewWindow(path, query, searchQueryText)
