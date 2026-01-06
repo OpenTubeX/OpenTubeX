@@ -34,9 +34,9 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch, onUnmounted } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
-import { useDroppable } from '@vue-dnd-kit/core'
+import { useDroppable, useDnDStore } from '@vue-dnd-kit/core'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
@@ -66,10 +66,27 @@ const {
   }
 })
 
+// Watch global drag state to add body class for global cursor styling
+const dndStore = useDnDStore()
+watch(
+  () => dndStore.isDragging.value,
+  (dragging) => {
+    if (dragging) {
+      document.body.classList.add('vue-dnd-dragging')
+    } else {
+      document.body.classList.remove('vue-dnd-dragging')
+    }
+  }
+)
+
 onMounted(() => {
   if (isElectron) {
     store.dispatch('initializeTabs')
   }
+})
+
+onUnmounted(() => {
+  document.body.classList.remove('vue-dnd-dragging')
 })
 
 /**

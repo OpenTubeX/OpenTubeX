@@ -10,7 +10,10 @@
     @keydown.enter.prevent="handleClick"
     @keydown.space.prevent="handleClick"
     @auxclick.prevent="handleAuxClick"
-    @pointerdown="handleDragStart"
+    @pointerdown="handlePointerDown"
+    @pointerup="handlePointerUp"
+    @pointercancel="handlePointerCancel"
+    @pointermove="handlePointerMove"
   >
     <span class="tabTitle">{{ displayTitle }}</span>
     <button
@@ -30,7 +33,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useDraggable } from '@vue-dnd-kit/core'
 import packageDetails from '@root/package.json'
 
@@ -51,17 +54,129 @@ const props = defineProps({
 
 const emit = defineEmits(['activate', 'close', 'middleClick'])
 
+// Drag delay implementation
+const dragDelayTimeout = ref(null)
+const dragStartPosition = ref(null)
+const hasDragged = ref(false)
+const DRAG_DELAY_MS = 200 // Delay before drag starts
+const DRAG_THRESHOLD_PX = 5 // Minimum movement to start drag
+
 const {
   elementRef,
   isDragging,
-  handleDragStart
+  handleDragStart: originalHandleDragStart
 } = useDraggable({
   id: props.tab.id,
   data: {
     index: props.index,
     tabId: props.tab.id
+  },
+  containerProps: {
+    style: {
+      fontFamily: 'inherit',
+      fontSize: 'inherit',
+      fontWeight: 'inherit',
+      fontStyle: 'inherit',
+      textRendering: 'auto',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale'
+    }
+  },
+  events: {
+    onStart: () => {
+      hasDragged.value = true
+    },
+    onEnd: () => {
+      // Reset after a short delay to allow click event to be prevented
+      setTimeout(() => {
+        hasDragged.value = false
+      }, 100)
+    }
   }
 })
+
+/**
+ * Wrapper for handleDragStart that sets the dragged flag
+ * @param {PointerEvent} event
+ */
+function handleDragStart(event) {
+  hasDragged.value = true
+  originalHandleDragStart(event)
+}
+
+/**
+ * Handle pointer down - start delay timer for drag
+ * @param {PointerEvent} event
+ */
+function handlePointerDown(event) {
+  // Don't start drag if clicking on close button
+  if (event.target.closest('.closeButton')) {
+    return
+  }
+
+  // Reset drag flag
+  hasDragged.value = false
+  dragStartPosition.value = {
+    x: event.clientX,
+    y: event.clientY
+  }
+
+  // Clear any existing timeout
+  if (dragDelayTimeout.value) {
+    clearTimeout(dragDelayTimeout.value)
+  }
+
+  // Set timeout to start drag after delay
+  dragDelayTimeout.value = setTimeout(() => {
+    dragDelayTimeout.value = null
+    handleDragStart(event)
+  }, DRAG_DELAY_MS)
+}
+
+/**
+ * Handle pointer move - cancel drag if moved too much before delay
+ * @param {PointerEvent} event
+ */
+function handlePointerMove(event) {
+  if (!dragStartPosition.value || !dragDelayTimeout.value) {
+    return
+  }
+
+  const deltaX = Math.abs(event.clientX - dragStartPosition.value.x)
+  const deltaY = Math.abs(event.clientY - dragStartPosition.value.y)
+
+  // If moved beyond threshold, start drag immediately
+  if (deltaX > DRAG_THRESHOLD_PX || deltaY > DRAG_THRESHOLD_PX) {
+    if (dragDelayTimeout.value) {
+      clearTimeout(dragDelayTimeout.value)
+      dragDelayTimeout.value = null
+    }
+    handleDragStart(event)
+  }
+}
+
+/**
+ * Handle pointer up - cancel drag delay if it was just a click
+ * @param {PointerEvent} event
+ */
+function handlePointerUp(event) {
+  if (dragDelayTimeout.value) {
+    clearTimeout(dragDelayTimeout.value)
+    dragDelayTimeout.value = null
+  }
+  dragStartPosition.value = null
+}
+
+/**
+ * Handle pointer cancel - cleanup
+ */
+function handlePointerCancel() {
+  if (dragDelayTimeout.value) {
+    clearTimeout(dragDelayTimeout.value)
+    dragDelayTimeout.value = null
+  }
+  dragStartPosition.value = null
+}
 
 const displayTitle = computed(() => {
   const title = props.tab.title
@@ -77,8 +192,8 @@ const displayTitle = computed(() => {
  * Handle click to activate tab
  */
 function handleClick() {
-  // Don't activate if we just finished dragging
-  if (!isDragging.value) {
+  // Don't activate if we're currently dragging or just finished dragging
+  if (!isDragging.value && !hasDragged.value) {
     emit('activate', props.tab.id)
   }
 }
@@ -141,6 +256,17 @@ function handleAuxClick(event) {
 .tab.dragging {
   opacity: 0.5;
   z-index: 10;
+  cursor: grabbing !important;
+}
+
+.tab.dragging .tabTitle {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: inherit;
+  font-style: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .tabTitle {
@@ -150,6 +276,12 @@ function handleAuxClick(event) {
   white-space: nowrap;
   font-size: 12px;
   color: var(--primary-text-color);
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .closeButton {
@@ -179,5 +311,47 @@ function handleAuxClick(event) {
 
 .closeIcon {
   font-size: 10px;
+}
+</style>
+
+<style>
+/* Global styles for drag operations */
+body.vue-dnd-dragging {
+  cursor: grabbing !important;
+}
+
+body.vue-dnd-dragging * {
+  cursor: grabbing !important;
+}
+
+/* Prevent font changes in drag overlays - target all possible drag overlay elements */
+body.vue-dnd-dragging .tab,
+body.vue-dnd-dragging [data-vue-dnd-kit-draggable],
+body.vue-dnd-dragging [class*="drag"],
+body.vue-dnd-dragging [class*="overlay"] {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+body.vue-dnd-dragging .tab .tabTitle,
+body.vue-dnd-dragging [data-vue-dnd-kit-draggable] .tabTitle,
+body.vue-dnd-dragging [class*="drag"] .tabTitle,
+body.vue-dnd-dragging [class*="overlay"] .tabTitle,
+body.vue-dnd-dragging span.tabTitle {
+  font-family: inherit !important;
+  font-size: 12px !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  transform: none !important;
 }
 </style>
