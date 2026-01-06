@@ -12,6 +12,7 @@ jobs:
 
     steps:
     - name: Auto Merge PR
+      shell: bash
       env:
         GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
       run: gh pr merge https://github.com/D3SOX/OpenTubeX/pull/${{ github.event.pull_request.number }} --auto --squash
