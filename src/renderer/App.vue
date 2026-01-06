@@ -9,6 +9,9 @@
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen
     }"
   >
+    <TabBar
+      :inert="isAnyPromptOpen"
+    />
     <TopNav
       :inert="isAnyPromptOpen"
     />
@@ -120,6 +123,7 @@ import { useRoute, useRouter } from 'vue-router'
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
+import TabBar from './components/TabBar/TabBar.vue'
 import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
@@ -388,8 +392,52 @@ function handleKeyboardShortcuts(event) {
     store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
   }
 
-  if (event.key === 'Tab') {
+  if (event.key === 'Tab' && !event.ctrlKey) {
     store.dispatch('showOutlines')
+  }
+
+  // Tab keyboard shortcuts (Electron only)
+  if (process.env.IS_ELECTRON) {
+    const ctrlOrCmdPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
+      (process.platform === 'darwin' && event.metaKey)
+
+    // Ctrl+T: New tab
+    if (ctrlOrCmdPressed && (event.key === 't' || event.key === 'T') && !event.shiftKey) {
+      event.preventDefault()
+      store.dispatch('createTab', { makeActive: true })
+      return
+    }
+
+    // Ctrl+Shift+T: Restore closed tab
+    if (ctrlOrCmdPressed && event.shiftKey && (event.key === 't' || event.key === 'T')) {
+      event.preventDefault()
+      store.dispatch('restoreClosedTab')
+      return
+    }
+
+    // Ctrl+W: Close tab (handled in menu, but also here for robustness)
+    if (ctrlOrCmdPressed && (event.key === 'w' || event.key === 'W') && !event.shiftKey) {
+      event.preventDefault()
+      store.dispatch('closeActiveTab').then((hasRemainingTabs) => {
+        if (!hasRemainingTabs) {
+          window.close()
+        }
+      })
+      return
+    }
+
+    // Ctrl+Tab: Next tab
+    if (event.ctrlKey && event.key === 'Tab' && !event.shiftKey) {
+      event.preventDefault()
+      store.dispatch('nextTab')
+      return
+    }
+
+    // Ctrl+Shift+Tab: Previous tab
+    if (event.ctrlKey && event.shiftKey && event.key === 'Tab') {
+      event.preventDefault()
+      store.dispatch('prevTab')
+    }
   }
 }
 
@@ -463,11 +511,17 @@ function handleLinkClick(event) {
   const youtubeUrlPattern = /^https?:\/\/((www\.)?youtube\.com(\/embed)?|youtu\.be)\/.*$/
   const isYoutubeLink = youtubeUrlPattern.test(href)
 
+  // Determine if we should open in new tab or new window
+  const ctrlOrCmdPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
+    (process.platform === 'darwin' && event.metaKey)
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
+  const doCreateNewWindow = event.shiftKey
+
   if (isYoutubeLink) {
-    // `auxclick` is the event type for non-left click
-    // https://developer.mozilla.org/en-US/docs/Web/API/Element/auxclick_event
     handleYoutubeLink(href, {
-      doCreateNewWindow: event.type === 'auxclick'
+      doCreateNewWindow,
+      doCreateNewTab
     })
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
@@ -483,7 +537,7 @@ function handleLinkClick(event) {
   }
 }
 
-async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
+async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewTab = false } = {}) {
   const result = await store.dispatch('getYoutubeUrlInfo', href)
 
   switch (result.urlType) {
@@ -501,7 +555,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
       openInternalPath({
         path: `/watch/${videoId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab
       })
       break
     }
@@ -512,7 +567,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
       openInternalPath({
         path: `/playlist/${playlistId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab
       })
       break
     }
@@ -524,6 +580,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
         path: `/search/${encodeURIComponent(searchQuery)}`,
         query,
         doCreateNewWindow,
+        doCreateNewTab,
         searchQueryText: searchQuery
       })
       break
@@ -533,7 +590,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
       const { hashtag } = result
       openInternalPath({
         path: `/hashtag/${encodeURIComponent(hashtag)}`,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab
       })
       break
     }
@@ -544,7 +602,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
       openInternalPath({
         path: `/post/${postId}`,
         query,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab
       })
       break
     }
@@ -555,6 +614,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
       openInternalPath({
         path: `/channel/${channelId}/${subPath}`,
         doCreateNewWindow,
+        doCreateNewTab,
         query: {
           url
         }
@@ -568,7 +628,8 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false } = {}) {
     case 'userplaylists':
       openInternalPath({
         path: `/${result.urlType}`,
-        doCreateNewWindow
+        doCreateNewWindow,
+        doCreateNewTab
       })
       break
 

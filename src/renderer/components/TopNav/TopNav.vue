@@ -379,6 +379,9 @@ const searchSettings = computed(() => store.getters.getSearchSettings)
  */
 function goToSearch(queryText, { event }) {
   const doCreateNewWindow = event && event.shiftKey
+  const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
+    (process.platform === 'darwin' && event.metaKey))
+  const doCreateNewTab = ctrlOrCmdPressed
 
   if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
     searchContainer.value.blur()
@@ -406,6 +409,7 @@ function goToSearch(queryText, { event }) {
           path: `/watch/${videoId}`,
           query,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: queryText,
         })
         break
@@ -418,6 +422,7 @@ function goToSearch(queryText, { event }) {
           path: `/playlist/${playlistId}`,
           query,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: queryText,
         })
         break
@@ -430,6 +435,7 @@ function goToSearch(queryText, { event }) {
           path: `/search/${encodeURIComponent(searchQuery)}`,
           query,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: searchQuery,
         })
         break
@@ -440,6 +446,7 @@ function goToSearch(queryText, { event }) {
         openInternalPath({
           path: `/hashtag/${encodeURIComponent(hashtag)}`,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: `#${hashtag}`,
         })
 
@@ -453,6 +460,7 @@ function goToSearch(queryText, { event }) {
           path: `/post/${postId}`,
           query,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: queryText,
         })
         break
@@ -464,6 +472,7 @@ function goToSearch(queryText, { event }) {
         openInternalPath({
           path: `/channel/${channelId}/${subPath}`,
           doCreateNewWindow,
+          doCreateNewTab,
           query: {
             url,
           },
@@ -479,6 +488,7 @@ function goToSearch(queryText, { event }) {
         openInternalPath({
           path: `/${result.urlType}`,
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: queryText
         })
         break
@@ -496,6 +506,7 @@ function goToSearch(queryText, { event }) {
             features: [...searchSettings.value.features],
           },
           doCreateNewWindow,
+          doCreateNewTab,
           searchQueryText: queryText,
         })
       }

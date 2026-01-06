@@ -1,5 +1,6 @@
 # Webkit Menu Bar
 File: Datei
+New Tab: Neuer Tab
 Quit: Beenden
 Edit: Bearbeiten
 Undo: Rückgängig
@@ -17,6 +18,7 @@ Toggle fullscreen: Vollbild aktivieren/deaktivieren
 Window: Fenster
 Minimize: Minimieren
 Close: Schließen
+Close Tab: Tab schließen
 Back: Zurück
 Forward: Vorwärts
 
