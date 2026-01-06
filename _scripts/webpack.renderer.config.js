@@ -186,6 +186,7 @@ const config = {
   ],
   resolve: {
     alias: {
+      '@root': path.resolve(__dirname, '..'),
       DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/electron.js'),
 
       'youtubei.js$': 'youtubei.js/web',

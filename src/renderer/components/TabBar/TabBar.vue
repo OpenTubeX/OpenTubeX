@@ -56,7 +56,7 @@ import { useI18n } from '../../composables/use-i18n-polyfill'
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
-import packageDetails from '../../../package.json'
+import packageDetails from '@root/package.json'
 
 const { t } = useI18n()
 
