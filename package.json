@@ -8,6 +8,7 @@
   "private": true,
   "author": {
     "name": "D3SOX",
+    "email": "nico@d3sox.me",
     "url": "https://github.com/D3SOX"
   },
   "repository": {
@@ -59,6 +60,8 @@
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/vue-fontawesome": "^3.1.2",
     "@seald-io/nedb": "^4.1.2",
+    "@vue-dnd-kit/core": "^1.7.0",
+    "@vueuse/core": "^14.1.0",
     "autolinker": "^4.1.5",
     "bgutils-js": "^3.2.0",
     "electron-context-menu": "^4.1.1",
