@@ -273,8 +273,44 @@ export class TabManager {
     this._broadcastStateUpdate()
     this._saveSession()
 
+    // Check if the tab is still loading. If so, and there's a previous active tab,
+    // wait for it to finish loading before showing it to prevent flashing.
+    // This is especially important for tabs restored from session that haven't been shown yet.
+    const isTabLoading = tab.view.webContents.isLoading()
+    const isSwitchingToDifferentTab = previousActiveId && previousActiveId !== tabId
+
+    // If tab is loading and we're switching from another tab, keep the previous tab
+    // visible until the new tab finishes loading to prevent flashing
+    if (isTabLoading && isSwitchingToDifferentTab) {
+      const activateWhenReady = () => {
+        // Clean up both listeners in case did-fail-load fires instead
+        tab.view.webContents.removeListener('did-finish-load', activateWhenReady)
+        tab.view.webContents.removeListener('did-fail-load', activateWhenReady)
+
+        // Only activate if this tab is still the active tab (user might have switched away)
+        if (this.activeTabId === tab.id) {
+          this._doActivateTab(tab, previousActiveId)
+        }
+      }
+
+      tab.view.webContents.once('did-finish-load', activateWhenReady)
+      tab.view.webContents.once('did-fail-load', activateWhenReady)
+      return
+    }
+
+    // Tab is ready or no previous tab to hide - activate immediately
+    this._doActivateTab(tab, previousActiveId)
+  }
+
+  /**
+   * Internal method to actually perform the tab activation (show/hide views)
+   * @param {TabInfo} tab
+   * @param {string|null} previousActiveId
+   * @private
+   */
+  _doActivateTab(tab, previousActiveId) {
     // Hide current active tab
-    if (previousActiveId && previousActiveId !== tabId) {
+    if (previousActiveId && previousActiveId !== tab.id) {
       const currentTab = this.tabs.get(previousActiveId)
       if (currentTab) {
         this.browserWindow.contentView.removeChildView(currentTab.view)
@@ -302,6 +338,19 @@ export class TabManager {
   closeTab(tabId) {
     const tab = this.tabs.get(tabId)
     if (!tab) return
+
+    // Exit fullscreen on the tab being closed if it's the active tab
+    if (this.activeTabId === tabId && !tab.view.webContents.isDestroyed()) {
+      try {
+        const url = tab.view.webContents.getURL()
+        if (url && isOpenTubeXUrl(url)) {
+          tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
+        }
+      } catch (error) {
+        // Silently ignore errors if webContents is not ready
+        console.error('Error sending exit fullscreen message:', error)
+      }
+    }
 
     // Store URL for potential restore
     this.closedTabUrls.push(tab.url)
