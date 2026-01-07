@@ -164,6 +164,7 @@ const config = {
   ],
   resolve: {
     alias: {
+      '@root': path.resolve(__dirname, '..'),
       DB_HANDLERS_ELECTRON_RENDERER_OR_WEB$: path.resolve(__dirname, '../src/datastores/handlers/web.js'),
 
       // change to "shaka-player.ui.debug.js" to get debug logs (update jsconfig to get updated types)

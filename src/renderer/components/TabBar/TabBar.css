@@ -1,0 +1,51 @@
+.tabBar {
+  display: flex;
+  align-items: center;
+  background-color: var(--side-nav-color);
+  border-block-end: 1px solid var(--tertiary-text-color);
+  min-block-size: 32px;
+  padding-inline: 4px;
+  gap: 2px;
+  -webkit-app-region: drag;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
+  inline-size: 100%;
+}
+
+.tabsContainer {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.tabsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.newTabButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  color: var(--secondary-text-color);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+.newTabButton:hover {
+  background-color: var(--side-nav-hover-color);
+  color: var(--primary-text-color);
+}
+
+.newTabIcon {
+  font-size: 12px;
+}

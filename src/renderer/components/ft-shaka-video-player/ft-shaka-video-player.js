@@ -198,6 +198,7 @@ export default defineComponent({
     const startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
+    let exitFullscreenCleanup = null
 
     /**
      * @type {{
@@ -2555,6 +2556,28 @@ export default defineComponent({
       nextTick(showOverlayControls)
     }
 
+    function exitFullscreenHandler() {
+      if (!process.env.IS_ELECTRON || !ui) return
+
+      try {
+        const controls = ui.getControls()
+        // Exit fullscreen if enabled
+        if (controls && controls.isFullScreenEnabled && controls.isFullScreenEnabled()) {
+          controls.toggleFullScreen()
+        }
+
+        // Exit fullwindow if enabled
+        if (fullWindowEnabled.value && events) {
+          events.dispatchEvent(new CustomEvent('setFullWindow', {
+            detail: false
+          }))
+        }
+      } catch (error) {
+        // Silently ignore errors if component is not fully initialized
+        console.error('Error exiting fullscreen on tab switch:', error)
+      }
+    }
+
     /**
      * @param {MouseEvent} event
      */
@@ -2675,6 +2698,16 @@ export default defineComponent({
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
       document.addEventListener('click', handlePlaybackRateMenuClick, true)
+
+      // Set up IPC listener for exit fullscreen when tab becomes inactive (Electron only)
+      // Only set up after UI is fully initialized
+      if (process.env.IS_ELECTRON && ui && window.ftElectron?.tabs?.onExitFullscreen) {
+        try {
+          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitFullscreenHandler)
+        } catch (error) {
+          console.error('Failed to set up exit fullscreen listener:', error)
+        }
+      }
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
@@ -3017,6 +3050,12 @@ export default defineComponent({
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
+
+      // Clean up IPC listener for exit fullscreen
+      if (exitFullscreenCleanup) {
+        exitFullscreenCleanup()
+        exitFullscreenCleanup = null
+      }
 
       if (resizeObserver) {
         resizeObserver.disconnect()

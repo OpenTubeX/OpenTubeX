@@ -1,6 +1,6 @@
 import {
   app, BrowserWindow, dialog, Menu, ipcMain,
-  powerSaveBlocker, screen, session, shell,
+  powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard,
   Tray
 } from 'electron'
@@ -28,6 +28,7 @@ import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { generatePoToken } from './poTokenGenerator'
 import { isOpenTubeXUrl } from './utils'
+import { TabManager, setupTabsIPC } from './tabs/TabManager'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -87,31 +88,51 @@ function runApp() {
     showCopyImageAddress: true,
     showSelectAll: false,
     showCopyLink: false,
-    prepend: (defaultActions, parameters, browserWindow) => [
-      {
-        label: 'Open in a New Window',
-        // Only show the option for in-app URLs and not external ones
-        visible: parameters.linkURL.split('#')[0] === browserWindow.webContents.getURL().split('#')[0],
-        click: () => {
-          createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL, showWindowNow: true })
+    prepend: (defaultActions, parameters, browserWindow, event) => {
+      // With tabs, the actual page content is in a WebContentsView, not the window's webContents
+      // Use the event's sender (webContents) or parameters.pageURL to detect in-app URLs
+      const pageUrl = parameters.pageURL || ''
+      const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
+
+      return [
+        {
+          label: 'Open in a New Tab',
+          // Only show the option for in-app URLs and not external ones
+          visible: isInAppUrl,
+          click: () => {
+            const manager = TabManager.getFromWebContents(event.sender)
+            if (manager) {
+              manager.createTab({ url: parameters.linkURL, makeActive: true })
+            }
+          }
+        },
+        {
+          label: 'Open in a New Window',
+          // Only show the option for in-app URLs and not external ones
+          visible: isInAppUrl,
+          click: () => {
+            createWindow({ replaceMainWindow: false, windowStartupUrl: parameters.linkURL, showWindowNow: true })
+          }
+        },
+        // Only show select all in text fields
+        {
+          label: 'Select All',
+          enabled: parameters.editFlags.canSelectAll,
+          visible: parameters.isEditable,
+          click: () => {
+            event.sender.selectAll()
+          }
         }
-      },
-      // Only show select all in text fields
-      {
-        label: 'Select All',
-        enabled: parameters.editFlags.canSelectAll,
-        visible: parameters.isEditable,
-        click: () => {
-          browserWindow.webContents.selectAll()
-        }
-      }
-    ],
+      ]
+    },
     // only show the copy link entry for external links and the /playlist, /channel and /watch in-app URLs
     // the /playlist, /channel and /watch in-app URLs get transformed to their equivalent YouTube or Invidious URLs
-    append: (defaultActions, parameters, browserWindow) => {
+    append: (defaultActions, parameters, browserWindow, event) => {
+      // With tabs, use parameters.pageURL to detect the current page URL
+      const pageUrl = parameters.pageURL || ''
       let visible = false
       const urlParts = parameters.linkURL.split('#')
-      const isInAppUrl = urlParts[0] === browserWindow.webContents.getURL().split('#')[0]
+      const isInAppUrl = isOpenTubeXUrl(pageUrl) && urlParts[0] === pageUrl.split('#')[0]
 
       if (parameters.linkURL.length > 0) {
         if (isInAppUrl) {
@@ -236,7 +257,7 @@ function runApp() {
         // NOT link with no customized link text
         // NOT link for timestamp
         {
-          label: textShortEnoughForSearch ? 'Search “{selection}” in a New Window' : `“{selection}” is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Window' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
@@ -719,10 +740,20 @@ function runApp() {
       // --- end of `if experimentsDisableDiskCache` ---
     }
 
+    // Setup tab IPC handlers
+    setupTabsIPC()
+
     await createWindow()
 
     if (isDebug) {
-      mainWindow.webContents.openDevTools()
+      // With tabs, we need to open devtools on the active tab's webContents
+      const tabManager = TabManager.getForWindow(mainWindow.id)
+      if (tabManager) {
+        const webContents = tabManager.getActiveWebContents()
+        if (webContents) {
+          webContents.openDevTools()
+        }
+      }
     }
   })
 
@@ -976,35 +1007,17 @@ function runApp() {
 
     // region Ensure child windows use same options since electron 14
 
-    // https://github.com/electron/electron/blob/14-x-y/docs/api/window-open.md#native-window-example
-    newWindow.webContents.setWindowOpenHandler((details) => {
-      const url = URL.parse(details.url)
-
-      // Only handle valid URLs that came from an OpenTubeX page
-      if (url !== null && isOpenTubeXUrl(newWindow.webContents.getURL())) {
-        if (isOpenTubeXUrl(url)) {
-          createWindow({
-            replaceMainWindow: false,
-            showWindowNow: true,
-            windowStartupUrl: details.url
-          })
-        } else if (
-          url.protocol === 'http:' || url.protocol === 'https:' ||
-
-          // Email address on the about page and Autolinker detects and links email addresses
-          url.protocol === 'mailto:' ||
-
-          // Autolinker detects and links phone numbers
-          url.protocol === 'tel:'
-        ) {
-          shell.openExternal(details.url)
-        }
-      }
-
-      return { action: 'deny' }
-    })
+    // Note: With tabs, window.open handler is set on each tab's webContents in TabManager
+    // This handler on the BrowserWindow is kept as a fallback but may not be triggered
 
     // endregion Ensure child windows use same options since electron 14
+
+    // Initialize TabManager for this window
+    const preloadPath = process.env.NODE_ENV === 'development'
+      ? path.resolve(__dirname, '../../dist/preload.js')
+      : path.resolve(__dirname, 'preload.js')
+
+    const tabManager = new TabManager(newWindow, ROOT_APP_URL, preloadPath, windowBackground)
 
     if (process.platform !== 'darwin') {
       function manageTray(window, removeWindow = false) {
@@ -1078,28 +1091,6 @@ function runApp() {
       setMenu()
     }
 
-    // load root file/url
-    if (windowStartupUrl != null) {
-      newWindow.loadURL(windowStartupUrl)
-    } else {
-      newWindow.loadURL(ROOT_APP_URL)
-    }
-
-    if (typeof searchQueryText === 'string' && searchQueryText.length > 0) {
-      /**
-       * @param {import('electron').IpcMainEvent} event
-       */
-      const searchInputReadyHandler = (event) => {
-        if (isOpenTubeXUrl(event.senderFrame.url)) {
-          newWindow.webContents.ipc.off(IpcChannels.SEARCH_INPUT_HANDLING_READY, searchInputReadyHandler)
-
-          event.reply(IpcChannels.UPDATE_SEARCH_INPUT_TEXT, searchQueryText)
-        }
-      }
-
-      newWindow.webContents.ipc.on(IpcChannels.SEARCH_INPUT_HANDLING_READY, searchInputReadyHandler)
-    }
-
     const showWindow = () => {
       if (newWindow.isVisible()) {
         // only open the dev tools if they aren't already open
@@ -1121,16 +1112,47 @@ function runApp() {
       }
     }
 
-    // The `ready-to-show` event doesn't always fire on wayland.
-    // Use the `did-finish-load` event on the web contents instead as that is similar enough
-    // https://github.com/electron/electron/issues/48859
+    // Initialize tabs - try to restore session or create initial tab
+    const initializeTabs = async () => {
+      // Try to restore session (only for the first window on startup)
+      const sessionRestored = replaceMainWindow && !windowStartupUrl && await tabManager.restoreSession()
 
-    if (process.platform === 'linux' && app.commandLine.getSwitchValue('ozone-platform') === 'wayland') {
-      newWindow.webContents.once('did-finish-load', showWindow)
-    } else {
-      // Show when loaded
-      newWindow.once('ready-to-show', showWindow)
+      if (!sessionRestored) {
+        // Create initial tab
+        if (windowStartupUrl != null) {
+          tabManager.createTab({ url: windowStartupUrl, makeActive: true })
+        } else {
+          tabManager.createTab({ url: ROOT_APP_URL, makeActive: true })
+        }
+      }
+
+      // After we have an active tab, ensure the window is shown when that tab finishes loading.
+      // This is more reliable now that content lives in WebContentsView rather than the window's webContents.
+      const activeWebContents = tabManager.getActiveWebContents()
+      if (activeWebContents) {
+        const handleFirstLoad = () => {
+          activeWebContents.removeListener('did-finish-load', handleFirstLoad)
+          showWindow()
+        }
+        activeWebContents.once('did-finish-load', handleFirstLoad)
+      } else {
+        // Fallback: if no active tab yet, just show the window to avoid it staying hidden
+        showWindow()
+      }
     }
+
+    // Kick off tab initialization (errors are logged but shouldn't crash the app)
+    initializeTabs().catch(error => {
+      console.error('Failed to initialize tabs', error)
+      showWindow()
+    })
+
+    // Note: searchQueryText handling is now done through the tab's webContents
+    // The IPC listeners are set up on each tab's webContents in TabManager
+
+    // Keep the old BrowserWindow events as an additional safety net, in case
+    // the active tab events don't fire for some reason.
+    newWindow.once('ready-to-show', showWindow)
 
     newWindow.once('close', async () => {
       if (BrowserWindow.getAllWindows().length !== 1) {
@@ -1171,7 +1193,25 @@ function runApp() {
 
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, title) => {
     if (isOpenTubeXUrl(event.senderFrame.url) && typeof title === 'string') {
-      BrowserWindow.fromWebContents(event.sender)?.setTitle(title)
+      // With tabs, also update the tab title
+      const manager = TabManager.getFromWebContents(event.sender)
+      const tabId = TabManager.getTabIdFromWebContents(event.sender)
+
+      if (manager && tabId) {
+        const tab = manager.tabs.get(tabId)
+        if (tab) {
+          tab.title = title
+          // Only update window title if this is the active tab
+          if (manager.activeTabId === tabId) {
+            manager.browserWindow.setTitle(title)
+          }
+          manager._broadcastStateUpdate()
+          manager._saveSession()
+        }
+      } else {
+        // Fallback for non-tabbed windows
+        BrowserWindow.fromWebContents(event.sender)?.setTitle(title)
+      }
     }
   })
 
@@ -1216,7 +1256,16 @@ function runApp() {
     const allWindows = BrowserWindow.getAllWindows()
 
     allWindows.forEach((window) => {
-      if (isOpenTubeXUrl(window.webContents.getURL())) {
+      const tabManager = TabManager.getForWindow(window.id)
+      if (tabManager) {
+        // Send to all tabs
+        for (const tab of tabManager.tabs.values()) {
+          if (isOpenTubeXUrl(tab.view.webContents.getURL())) {
+            tab.view.webContents.send(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
+          }
+        }
+      } else if (isOpenTubeXUrl(window.webContents.getURL())) {
+        // Fallback for non-tabbed windows
         window.webContents.send(IpcChannels.NATIVE_THEME_UPDATE, nativeTheme.shouldUseDarkColors)
       }
     })
@@ -1463,6 +1512,18 @@ function runApp() {
       windowStartupUrl,
       searchQueryText
     })
+  })
+
+  // Handler for creating new tab from renderer
+  ipcMain.on(IpcChannels.CREATE_NEW_TAB, (event, path, query) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager) {
+      manager.createTab({ route: path, query, makeActive: true })
+    }
   })
 
   ipcMain.on(IpcChannels.OPEN_IN_EXTERNAL_PLAYER, handleOpenInExternalPlayer)
@@ -2011,12 +2072,21 @@ function runApp() {
   // *********** //
 
   function syncOtherWindows(channel, event, payload) {
-    const otherWindows = BrowserWindow.getAllWindows().filter((window) => {
-      return window.webContents.id !== event.sender.id && isOpenTubeXUrl(window.webContents.getURL())
-    })
+    const allWindows = BrowserWindow.getAllWindows()
 
-    for (const window of otherWindows) {
-      window.webContents.send(channel, payload)
+    for (const window of allWindows) {
+      const tabManager = TabManager.getForWindow(window.id)
+      if (tabManager) {
+        // Send to all tabs except the sender
+        for (const tab of tabManager.tabs.values()) {
+          if (tab.view.webContents.id !== event.sender.id && isOpenTubeXUrl(tab.view.webContents.getURL())) {
+            tab.view.webContents.send(channel, payload)
+          }
+        }
+      } else if (window.webContents.id !== event.sender.id && isOpenTubeXUrl(window.webContents.getURL())) {
+        // Fallback for non-tabbed windows
+        window.webContents.send(channel, payload)
+      }
     }
   }
 
@@ -2193,11 +2263,21 @@ function runApp() {
    */
 
   function navigateTo(path, browserWindow) {
-    if (browserWindow == null || !isOpenTubeXUrl(browserWindow.webContents.getURL())) {
+    if (browserWindow == null) {
       return
     }
 
-    browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, path)
+    // With tabs, send to the active tab's webContents
+    const tabManager = TabManager.getForWindow(browserWindow.id)
+    if (tabManager) {
+      const webContents = tabManager.getActiveWebContents()
+      if (webContents && isOpenTubeXUrl(webContents.getURL())) {
+        webContents.send(IpcChannels.CHANGE_VIEW, path)
+      }
+    } else if (isOpenTubeXUrl(browserWindow.webContents.getURL())) {
+      // Fallback for non-tabbed windows
+      browserWindow.webContents.send(IpcChannels.CHANGE_VIEW, path)
+    }
   }
 
   async function setMenu() {
@@ -2420,6 +2500,83 @@ function runApp() {
             type: 'normal'
           },
         ].filter((v) => v !== false),
+      },
+      {
+        label: 'Tabs',
+        submenu: [
+          {
+            label: 'New Tab',
+            accelerator: 'CmdOrCtrl+T',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager) {
+                  tabManager.createTab({ makeActive: true })
+                }
+              }
+            }
+          },
+          {
+            label: 'Close Tab',
+            accelerator: 'CmdOrCtrl+W',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager && tabManager.activeTabId) {
+                  const hasRemainingTabs = tabManager.closeTab(tabManager.activeTabId)
+                  if (!hasRemainingTabs) {
+                    browserWindow.close()
+                  }
+                } else {
+                  browserWindow.close()
+                }
+              }
+            }
+          },
+          {
+            label: 'Reopen Closed Tab',
+            accelerator: 'CmdOrCtrl+Shift+T',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager) {
+                  tabManager.restoreClosedTab()
+                }
+              }
+            }
+          },
+          { type: 'separator' },
+          {
+            label: 'Next Tab',
+            accelerator: 'Ctrl+Tab',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager && tabManager.tabs.size > 1) {
+                  const tabIds = Array.from(tabManager.tabs.keys())
+                  const currentIndex = tabIds.indexOf(tabManager.activeTabId)
+                  const nextIndex = (currentIndex + 1) % tabIds.length
+                  tabManager.activateTab(tabIds[nextIndex])
+                }
+              }
+            }
+          },
+          {
+            label: 'Previous Tab',
+            accelerator: 'Ctrl+Shift+Tab',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager && tabManager.tabs.size > 1) {
+                  const tabIds = Array.from(tabManager.tabs.keys())
+                  const currentIndex = tabIds.indexOf(tabManager.activeTabId)
+                  const prevIndex = (currentIndex - 1 + tabIds.length) % tabIds.length
+                  tabManager.activateTab(tabIds[prevIndex])
+                }
+              }
+            }
+          }
+        ]
       },
       {
         role: 'window',

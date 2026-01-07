@@ -324,5 +324,97 @@ export default {
     ipcRenderer.on(IpcChannels.SYNC_SUBSCRIPTION_CACHE, (_, { event, data }) => {
       handler(event, data)
     })
+  },
+
+  // Tab management API
+  tabs: {
+    /**
+     * Get the current tab state
+     * @returns {Promise<{tabs: Array<{id: string, url: string, title: string, isActive: boolean}>, activeTabId: string|null}>}
+     */
+    getState: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_GET_STATE)
+    },
+
+    /**
+     * Create a new tab
+     * @param {object} options
+     * @param {string} [options.url] - Full URL to load
+     * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
+     * @param {object} [options.query] - Query params for the route
+     * @param {boolean} [options.makeActive=true] - Whether to activate the tab
+     * @returns {Promise<{id: string, url: string, title: string}|null>}
+     */
+    create: (options) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CREATE, options)
+    },
+
+    /**
+     * Activate a tab
+     * @param {string} tabId
+     */
+    activate: (tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_ACTIVATE, tabId)
+    },
+
+    /**
+     * Close a tab
+     * @param {string} tabId
+     * @returns {Promise<{hasRemainingTabs: boolean}>}
+     */
+    close: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CLOSE, tabId)
+    },
+
+    /**
+     * Duplicate a tab
+     * @param {string} tabId
+     * @returns {Promise<{id: string, url: string, title: string}|null>}
+     */
+    duplicate: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_DUPLICATE, tabId)
+    },
+
+    /**
+     * Move a tab to a new position
+     * @param {string} tabId
+     * @param {number} toIndex
+     */
+    move: (tabId, toIndex) => {
+      ipcRenderer.send(IpcChannels.TABS_MOVE, tabId, toIndex)
+    },
+
+    /**
+     * Restore the last closed tab
+     * @returns {Promise<{id: string, url: string, title: string}|null>}
+     */
+    restoreClosed: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_RESTORE_CLOSED)
+    },
+
+    /**
+     * Listen for tab state updates
+     * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
+     */
+    onStateUpdated: (handler) => {
+      ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, (_, state) => {
+        handler(state)
+      })
+    },
+
+    /**
+     * Listen for exit fullscreen notification (when tab becomes inactive)
+     * @param {() => void} handler
+     * @returns {() => void} Function to remove the listener
+     */
+    onExitFullscreen: (handler) => {
+      const listener = () => {
+        handler()
+      }
+      ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
+      }
+    }
   }
 }

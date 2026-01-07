@@ -18,6 +18,19 @@ const IpcChannels = {
   OPEN_URL: 'open-url',
   CHANGE_VIEW: 'change-view',
 
+  // Tab management
+  TABS_GET_STATE: 'tabs-get-state',
+  TABS_CREATE: 'tabs-create',
+  TABS_CLOSE: 'tabs-close',
+  TABS_ACTIVATE: 'tabs-activate',
+  TABS_DUPLICATE: 'tabs-duplicate',
+  TABS_MOVE: 'tabs-move',
+  TABS_RESTORE_CLOSED: 'tabs-restore-closed',
+  TABS_STATE_UPDATED: 'tabs-state-updated',
+  TABS_UPDATE_TITLE: 'tabs-update-title',
+  TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
+  CREATE_NEW_TAB: 'create-new-tab',
+
   DB_SETTINGS: 'db-settings',
   DB_HISTORY: 'db-history',
   DB_PROFILES: 'db-profiles',
@@ -160,8 +173,13 @@ const KeyboardShortcuts = {
       SEARCH_IN_NEW_WINDOW: 'shift+enter',
       RESET_ZOOM: 'ctrl+0',
       ZOOM_IN: 'ctrl+plus',
-      ZOOM_OUT: 'ctrl+-'
-
+      ZOOM_OUT: 'ctrl+-',
+      // Tab shortcuts
+      NEW_TAB: 'ctrl+T',
+      CLOSE_TAB: 'ctrl+W',
+      NEXT_TAB: 'ctrl+tab',
+      PREV_TAB: 'ctrl+shift+tab',
+      RESTORE_CLOSED_TAB: 'ctrl+shift+T',
     },
     SITUATIONAL: {
       REFRESH: 'r',

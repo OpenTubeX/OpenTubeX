@@ -39,6 +39,15 @@
   }
 }
 
+/* Adjust top position when tab bar is present */
+.app:has(.tabBar) .topNav {
+  inset-block-start: 32px;
+
+  @media only screen and (width <= 680px) {
+    inset-block-start: 32px;
+  }
+}
+
 .menuButton {
   @media only screen and (width <= 680px) {
     display: none;
@@ -222,5 +231,12 @@
     .searchInput {
       flex: 1;
     }
+  }
+}
+
+/* Adjust search container position when tab bar is present (mobile) */
+.app:has(.tabBar) .middle .searchContainer {
+  @media only screen and (width <= 680px) {
+    inset-block-start: 92px;
   }
 }

@@ -80,3 +80,16 @@
     block-size: 65vh;
   }
 }
+
+/* Adjust SideNav position when tab bar is present */
+.app:has(.tabBar) :deep(.sideNav) {
+  block-size: calc(100vh - 92px);
+  inset-block-start: 92px;
+}
+
+@media only screen and (width <= 680px) {
+  .app:has(.tabBar) :deep(.sideNav) {
+    block-size: 60px;
+    inset-block-start: auto;
+  }
+}

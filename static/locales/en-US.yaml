@@ -4,6 +4,7 @@ Locale Name: English (US)
 # Webkit Menu Bar
 File: File
 New Window: New Window
+New Tab: New Tab
 Preferences: Preferences
 Quit: Quit
 Edit: Edit
@@ -22,6 +23,7 @@ Toggle fullscreen: Toggle fullscreen
 Window: Window
 Minimize: Minimize
 Close: Close
+Close Tab: Close Tab
 Compact side navigation: Compact side navigation
 Expand side navigation: Expand side navigation
 Back: Back

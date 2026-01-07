@@ -7,6 +7,7 @@ import {
   formatNumber,
   getRelativeTimeFromDate,
   openExternalLink,
+  openInternalPath,
   showToast,
   toDistractionFreeTitle,
   deepCopy,
@@ -575,9 +576,44 @@ export default defineComponent({
     }
   },
   methods: {
-    handleWatchPageLinkClick: function() {
+    handleWatchPageLinkClick: function(event) {
       if (this.externalPlayerIsDefaultViewingMode) {
         this.handleExternalPlayer()
+        return
+      }
+
+      // Handle middle click to open in background tab
+      if (process.env.IS_ELECTRON && event && event.button === 1) {
+        event.preventDefault()
+        const doCreateNewWindow = event.shiftKey
+        const makeActive = false // Middle click opens in background
+
+        openInternalPath({
+          path: `/watch/${this.id}`,
+          query: this.watchPageLinkQuery,
+          doCreateNewWindow,
+          doCreateNewTab: true,
+          makeActive
+        })
+      }
+    },
+    handleChannelLinkClick: function(event) {
+      if (!process.env.IS_ELECTRON || !event || this.channelId === null) {
+        return
+      }
+
+      // Handle middle click to open in background tab
+      if (event.button === 1) {
+        event.preventDefault()
+        const doCreateNewWindow = event.shiftKey
+        const makeActive = false // Middle click opens in background
+
+        openInternalPath({
+          path: `/channel/${this.channelId}`,
+          doCreateNewWindow,
+          doCreateNewTab: true,
+          makeActive
+        })
       }
     },
     fetchDeArrowThumbnail: async function() {

@@ -16,6 +16,7 @@
         tabindex="-1"
         :to="watchVideoRouterLink"
         @click="handleWatchPageLinkClick"
+        @auxclick="handleWatchPageLinkClick"
       >
         <img
           :src="thumbnail"
@@ -114,6 +115,7 @@
         class="title"
         :to="watchVideoRouterLink"
         @click="handleWatchPageLinkClick"
+        @auxclick="handleWatchPageLinkClick"
       >
         <h3
           class="h3Title"
@@ -128,6 +130,7 @@
           class="channelName"
           dir="auto"
           :to="`/channel/${channelId}`"
+          @auxclick="handleChannelLinkClick"
         >
           {{ channelName }}
         </router-link>

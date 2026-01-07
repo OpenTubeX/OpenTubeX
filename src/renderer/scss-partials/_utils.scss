@@ -16,6 +16,15 @@
   }
 }
 
+@mixin has-tab-bar {
+  @at-root {
+    .app:has(.tabBar) &,
+    .app:has(.tabBar)#{&} {
+      @content;
+    }
+  }
+}
+
 @mixin fixed-top-bar {
   position: fixed;
   inset-block-start: 60px;
@@ -32,6 +41,10 @@
     inline-size: calc(100% - 60px);
   }
 
+  @include has-tab-bar {
+    inset-block-start: 92px;
+  }
+
   @media only screen and (width <= 680px) {
     /* stylelint-disable-next-line no-invalid-position-declaration */
     inline-size: 100%;
@@ -42,6 +55,10 @@
 
     @include are-side-bar-labels-hidden {
       inline-size: 100%;
+    }
+
+    @include has-tab-bar {
+      inset-block-start: 92px;
     }
   }
 }
