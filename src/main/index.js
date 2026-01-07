@@ -1091,26 +1091,6 @@ function runApp() {
       setMenu()
     }
 
-    // Initialize tabs - try to restore session or create initial tab
-    const initializeTabs = async () => {
-      // Try to restore session (only for the first window on startup)
-      const sessionRestored = replaceMainWindow && !windowStartupUrl && await tabManager.restoreSession()
-
-      if (!sessionRestored) {
-        // Create initial tab
-        if (windowStartupUrl != null) {
-          tabManager.createTab({ url: windowStartupUrl, makeActive: true })
-        } else {
-          tabManager.createTab({ url: ROOT_APP_URL, makeActive: true })
-        }
-      }
-    }
-
-    initializeTabs()
-
-    // Note: searchQueryText handling is now done through the tab's webContents
-    // The IPC listeners are set up on each tab's webContents in TabManager
-
     const showWindow = () => {
       if (newWindow.isVisible()) {
         // only open the dev tools if they aren't already open
@@ -1132,16 +1112,47 @@ function runApp() {
       }
     }
 
-    // The `ready-to-show` event doesn't always fire on wayland.
-    // Use the `did-finish-load` event on the web contents instead as that is similar enough
-    // https://github.com/electron/electron/issues/48859
+    // Initialize tabs - try to restore session or create initial tab
+    const initializeTabs = async () => {
+      // Try to restore session (only for the first window on startup)
+      const sessionRestored = replaceMainWindow && !windowStartupUrl && await tabManager.restoreSession()
 
-    if (process.platform === 'linux' && app.commandLine.getSwitchValue('ozone-platform') === 'wayland') {
-      newWindow.webContents.once('did-finish-load', showWindow)
-    } else {
-      // Show when loaded
-      newWindow.once('ready-to-show', showWindow)
+      if (!sessionRestored) {
+        // Create initial tab
+        if (windowStartupUrl != null) {
+          tabManager.createTab({ url: windowStartupUrl, makeActive: true })
+        } else {
+          tabManager.createTab({ url: ROOT_APP_URL, makeActive: true })
+        }
+      }
+
+      // After we have an active tab, ensure the window is shown when that tab finishes loading.
+      // This is more reliable now that content lives in WebContentsView rather than the window's webContents.
+      const activeWebContents = tabManager.getActiveWebContents()
+      if (activeWebContents) {
+        const handleFirstLoad = () => {
+          activeWebContents.removeListener('did-finish-load', handleFirstLoad)
+          showWindow()
+        }
+        activeWebContents.once('did-finish-load', handleFirstLoad)
+      } else {
+        // Fallback: if no active tab yet, just show the window to avoid it staying hidden
+        showWindow()
+      }
     }
+
+    // Kick off tab initialization (errors are logged but shouldn't crash the app)
+    initializeTabs().catch(error => {
+      console.error('Failed to initialize tabs', error)
+      showWindow()
+    })
+
+    // Note: searchQueryText handling is now done through the tab's webContents
+    // The IPC listeners are set up on each tab's webContents in TabManager
+
+    // Keep the old BrowserWindow events as an additional safety net, in case
+    // the active tab events don't fire for some reason.
+    newWindow.once('ready-to-show', showWindow)
 
     newWindow.once('close', async () => {
       if (BrowserWindow.getAllWindows().length !== 1) {
