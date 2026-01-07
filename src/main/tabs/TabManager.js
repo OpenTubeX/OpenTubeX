@@ -239,9 +239,15 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
+    // Keep track of the previously active tab so we can update state before
+    // swapping views. This ensures renderers know which tab is active by the
+    // time their view becomes visible, preventing a brief flash where the old
+    // tab still appears active in the tab bar.
+    const previousActiveId = this.activeTabId
+
     // Exit fullscreen on the previous tab before switching
-    if (this.activeTabId && this.activeTabId !== tabId) {
-      const previousTab = this.tabs.get(this.activeTabId)
+    if (previousActiveId && previousActiveId !== tabId) {
+      const previousTab = this.tabs.get(previousActiveId)
       if (previousTab && !previousTab.view.webContents.isDestroyed()) {
         try {
           const url = previousTab.view.webContents.getURL()
@@ -255,9 +261,21 @@ export class TabManager {
       }
     }
 
+    // Update tab state *before* changing the visible WebContentsView so that
+    // all renderers (including the one we are about to show) can update their
+    // UI to reflect the new active tab without a visible flicker.
+    tab.lastActiveAt = Date.now()
+    this.activeTabId = tabId
+
+    // Update window title to match tab title
+    this.browserWindow.setTitle(tab.title)
+
+    this._broadcastStateUpdate()
+    this._saveSession()
+
     // Hide current active tab
-    if (this.activeTabId && this.activeTabId !== tabId) {
-      const currentTab = this.tabs.get(this.activeTabId)
+    if (previousActiveId && previousActiveId !== tabId) {
+      const currentTab = this.tabs.get(previousActiveId)
       if (currentTab) {
         this.browserWindow.contentView.removeChildView(currentTab.view)
       }
@@ -275,15 +293,6 @@ export class TabManager {
     // Show new active tab
     this.browserWindow.contentView.addChildView(tab.view)
     tab.view.webContents.focus()
-
-    tab.lastActiveAt = Date.now()
-    this.activeTabId = tabId
-
-    // Update window title to match tab title
-    this.browserWindow.setTitle(tab.title)
-
-    this._broadcastStateUpdate()
-    this._saveSession()
   }
 
   /**
