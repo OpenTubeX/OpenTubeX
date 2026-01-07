@@ -204,8 +204,25 @@ export class TabManager {
     // Load the URL
     view.webContents.loadURL(loadUrl)
 
+    // When opening a new tab while another one is already active, keep the
+    // current tab visible until the new tab has finished loading. This avoids
+    // the window flashing the background color while the new tab bootstraps.
     if (makeActive) {
-      this.activateTab(id)
+      if (this.activeTabId == null) {
+        // Initial tab for this window – activate immediately so that
+        // createWindow's startup logic can wait on did-finish-load.
+        this.activateTab(id)
+      } else {
+        const activateWhenReady = () => {
+          // Clean up both listeners in case did-fail-load fires instead
+          view.webContents.removeListener('did-finish-load', activateWhenReady)
+          view.webContents.removeListener('did-fail-load', activateWhenReady)
+          this.activateTab(id)
+        }
+
+        view.webContents.once('did-finish-load', activateWhenReady)
+        view.webContents.once('did-fail-load', activateWhenReady)
+      }
     }
 
     this._broadcastStateUpdate()
@@ -370,12 +387,23 @@ export class TabManager {
    * @returns {object}
    */
   getState() {
-    const tabs = Array.from(this.tabs.values()).map(tab => ({
-      id: tab.id,
-      url: tab.url,
-      title: tab.title,
-      isActive: tab.id === this.activeTabId
-    }))
+    const tabs = Array.from(this.tabs.values()).map(tab => {
+      const isActive = tab.id === this.activeTabId
+
+      return {
+        id: tab.id,
+        url: tab.url,
+        title: tab.title,
+        isActive,
+        // Consider a tab "loading" if it is not yet active and its webContents
+        // has not finished loading. This is used by the renderer to show a
+        // visual loading indicator in the tab bar while the new tab is
+        // bootstrapping in the background.
+        isLoading: !isActive && !tab.view.webContents.isLoadingMainFrame()
+          ? false
+          : !isActive && tab.view.webContents.isLoading()
+      }
+    })
 
     return {
       tabs,

@@ -2,7 +2,7 @@
   <div
     ref="elementRef"
     class="tab"
-    :class="{ active: tab.isActive, dragging: isDragging }"
+    :class="{ active: tab.isActive, loading: tab.isLoading, dragging: isDragging }"
     :title="displayTitle"
     role="button"
     tabindex="0"
@@ -15,7 +15,14 @@
     @pointercancel="handlePointerCancel"
     @pointermove="handlePointerMove"
   >
-    <span class="tabTitle">{{ displayTitle }}</span>
+    <span class="tabTitle">
+      <span
+        v-if="tab.isLoading"
+        class="loadingDot"
+        aria-hidden="true"
+      />
+      {{ displayTitle }}
+    </span>
     <button
       class="closeButton"
       :aria-label="closeLabel"
@@ -249,6 +256,10 @@ function handleAuxClick(event) {
   border-color: var(--tertiary-text-color);
 }
 
+.tab.loading {
+  opacity: 0.8;
+}
+
 .tab.active::after {
   opacity: 1;
 }
@@ -282,6 +293,32 @@ function handleAuxClick(event) {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.loadingDot {
+  display: inline-block;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  margin-inline-end: 6px;
+  background-color: var(--accent-color, var(--primary-text-color));
+  animation: tab-loading-pulse 0.9s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+@keyframes tab-loading-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
 }
 
 .closeButton {
