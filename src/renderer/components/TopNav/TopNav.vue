@@ -245,10 +245,18 @@ const newWindowText = computed(() => {
 })
 
 function createNewWindow() {
-  const url = new URL(window.location.href)
-  url.hash = landingPage.value
-
-  window.open(url.toString(), '_blank', 'noreferrer')
+  // In the Electron build, use the dedicated IPC-based helper so that a real
+  // new BrowserWindow is created instead of a new tab via window.open.
+  if (process.env.IS_ELECTRON) {
+    openInternalPath({
+      path: landingPage.value,
+      doCreateNewWindow: true
+    })
+  } else {
+    const url = new URL(window.location.href)
+    url.hash = landingPage.value
+    window.open(url.toString(), '_blank', 'noreferrer')
+  }
 }
 
 const usingOnlySearchHistoryResults = computed(() => lastSuggestionQuery.value.length === 0)
