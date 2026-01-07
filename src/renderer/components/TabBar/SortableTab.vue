@@ -337,8 +337,8 @@ function handleAuxClick(event) {
 }
 
 .closeButton:hover {
-  background-color: var(--destructive-text-color);
-  color: var(--text-with-main-color);
+  background-color: var(--destructive-color);
+  color: var(--destructive-text-color);
 }
 
 .tab:hover .closeButton,
