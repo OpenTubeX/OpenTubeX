@@ -393,6 +393,13 @@ export default {
     },
 
     /**
+     * Reload the active tab
+     */
+    reload: () => {
+      ipcRenderer.send(IpcChannels.TABS_RELOAD)
+    },
+
+    /**
      * Listen for tab state updates
      * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
      */

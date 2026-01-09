@@ -431,6 +431,18 @@ export class TabManager {
   }
 
   /**
+   * Reload the active tab
+   */
+  reloadTab() {
+    if (!this.activeTabId) return
+
+    const tab = this.tabs.get(this.activeTabId)
+    if (!tab || tab.view.webContents.isDestroyed()) return
+
+    tab.view.webContents.reload()
+  }
+
+  /**
    * Move a tab to a new position
    * @param {string} tabId
    * @param {number} toIndex
@@ -640,6 +652,14 @@ export function setupTabsIPC() {
       }
     }
     return null
+  })
+
+  // Reload tab
+  ipcMain.on(IpcChannels.TABS_RELOAD, (event) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager) {
+      manager.reloadTab()
+    }
   })
 
   // Update tab title (called from renderer when page title changes)

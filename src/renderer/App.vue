@@ -437,6 +437,13 @@ function handleKeyboardShortcuts(event) {
     if (event.ctrlKey && event.shiftKey && event.key === 'Tab') {
       event.preventDefault()
       store.dispatch('prevTab')
+      return
+    }
+
+    // Ctrl+R: Reload tab
+    if (ctrlOrCmdPressed && (event.key === 'r' || event.key === 'R') && !event.shiftKey) {
+      event.preventDefault()
+      store.dispatch('reloadActiveTab')
     }
   }
 }

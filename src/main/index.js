@@ -2534,6 +2534,18 @@ function runApp() {
             }
           },
           {
+            label: 'Reload Tab',
+            accelerator: 'CmdOrCtrl+R',
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                const tabManager = TabManager.getForWindow(browserWindow.id)
+                if (tabManager) {
+                  tabManager.reloadTab()
+                }
+              }
+            }
+          },
+          {
             label: 'Reopen Closed Tab',
             accelerator: 'CmdOrCtrl+Shift+T',
             click: (_menuItem, browserWindow) => {

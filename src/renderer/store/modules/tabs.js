@@ -120,6 +120,24 @@ const actions = {
   },
 
   /**
+   * Reload a tab
+   */
+  reloadTab(_context) {
+    if (!process.env.IS_ELECTRON) return
+
+    window.ftElectron.tabs.reload()
+  },
+
+  /**
+   * Reload the current active tab
+   */
+  reloadActiveTab({ dispatch }) {
+    if (!process.env.IS_ELECTRON) return
+
+    dispatch('reloadTab')
+  },
+
+  /**
    * Go to next tab
    */
   nextTab({ state }) {
