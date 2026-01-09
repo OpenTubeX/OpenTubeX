@@ -217,7 +217,8 @@ export class TabManager {
           // Clean up both listeners in case did-fail-load fires instead
           view.webContents.removeListener('did-finish-load', activateWhenReady)
           view.webContents.removeListener('did-fail-load', activateWhenReady)
-          this.activateTab(id)
+          // Force activation since we know the tab has finished loading
+          this.activateTab(id, true)
         }
 
         view.webContents.once('did-finish-load', activateWhenReady)
@@ -234,8 +235,9 @@ export class TabManager {
   /**
    * Activate a tab
    * @param {string} tabId
+   * @param {boolean} [forceImmediate=false] - If true, skip loading check and activate immediately
    */
-  activateTab(tabId) {
+  activateTab(tabId, forceImmediate = false) {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
@@ -272,6 +274,13 @@ export class TabManager {
 
     this._broadcastStateUpdate()
     this._saveSession()
+
+    // If forceImmediate is true, we know the tab has finished loading (e.g., from did-finish-load)
+    // so skip the loading check and activate immediately
+    if (forceImmediate) {
+      this._doActivateTab(tab, previousActiveId)
+      return
+    }
 
     // Check if the tab is still loading. If so, and there's a previous active tab,
     // wait for it to finish loading before showing it to prevent flashing.
