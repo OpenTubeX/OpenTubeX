@@ -340,15 +340,23 @@ export class TabManager {
     if (!tab) return
 
     // Exit fullscreen on the tab being closed if it's the active tab
-    if (this.activeTabId === tabId && !tab.view.webContents.isDestroyed()) {
-      try {
-        const url = tab.view.webContents.getURL()
-        if (url && isOpenTubeXUrl(url)) {
-          tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
+    if (this.activeTabId === tabId) {
+      // Exit BrowserWindow fullscreen directly
+      if (this.browserWindow.isFullScreen()) {
+        this.browserWindow.setFullScreen(false)
+      }
+
+      // Also send IPC message to exit video player fullscreen
+      if (!tab.view.webContents.isDestroyed()) {
+        try {
+          const url = tab.view.webContents.getURL()
+          if (url && isOpenTubeXUrl(url)) {
+            tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
+          }
+        } catch (error) {
+          // Silently ignore errors if webContents is not ready
+          console.error('Error sending exit fullscreen message:', error)
         }
-      } catch (error) {
-        // Silently ignore errors if webContents is not ready
-        console.error('Error sending exit fullscreen message:', error)
       }
     }
 
