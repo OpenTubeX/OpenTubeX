@@ -955,11 +955,11 @@ function runApp() {
       return nativeTheme.shouldUseDarkColors ? '#212121' : '#f1f1f1'
     })
 
-    let savedBounds, savedMaximized, savedFullScreen
+    let savedBounds, savedMaximized
 
     const boundsDoc = await baseHandlers.settings._findOne('bounds')
     if (typeof boundsDoc?.value === 'object') {
-      const { maximized, fullScreen, ...bounds } = boundsDoc.value
+      const { maximized, ...bounds } = boundsDoc.value
       const windowVisible = screen.getAllDisplays().some(display => {
         const { x, y, width, height } = display.bounds
         return !(bounds.x > x + width || bounds.x + bounds.width < x || bounds.y > y + height || bounds.y + bounds.height < y)
@@ -970,7 +970,6 @@ function runApp() {
       }
 
       savedMaximized = maximized
-      savedFullScreen = fullScreen
     }
 
     const newWindow = new BrowserWindow({
@@ -1079,10 +1078,6 @@ function runApp() {
 
     if (savedMaximized) {
       newWindow.maximize()
-    }
-
-    if (savedFullScreen) {
-      newWindow.setFullScreen(true)
     }
 
     // If called multiple times
@@ -2109,6 +2104,7 @@ function runApp() {
 
       if (resourcesCleanUpDone) { return }
 
+      exitFullscreenOnAllWindows()
       e.preventDefault()
       cleanUpResources().finally(() => {
         // Quit AFTER the resources cleanup is finished
