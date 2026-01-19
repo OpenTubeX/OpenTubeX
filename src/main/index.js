@@ -834,6 +834,15 @@ function runApp() {
         })
       },
       {
+        label: 'Show All Windows',
+        click: () => {
+          // Use while loop instead of for loop as trayClick modifies the trayWindows array
+          while (trayWindows.length > 0) {
+            trayClick(trayWindows[0])
+          }
+        }
+      },
+      {
         label: 'Quit',
         click: handleQuit
       }

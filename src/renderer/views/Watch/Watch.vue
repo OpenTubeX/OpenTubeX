@@ -21,6 +21,7 @@
           ref="player"
           :manifest-src="manifestSrc"
           :manifest-mime-type="manifestMimeType"
+          :sabr-data="sabrData"
           :legacy-formats="legacyFormats"
           :start-time="startTimeSeconds"
           :captions="captions"
@@ -41,6 +42,7 @@
           :start-in-fullwindow="startNextVideoInFullwindow"
           :start-in-pip="startNextVideoInPip"
           :current-playback-rate="currentPlaybackRate"
+          :delay-load-until-unix="adEndTimeUnixMs"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -52,6 +54,7 @@
           @playback-rate-user-set="handlePlaybackRateUserSet"
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
+          @player-reload-requested="onPlayerReloadRequested"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
