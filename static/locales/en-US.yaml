@@ -464,6 +464,7 @@ Settings:
     Default Volume: Default Volume
     Default Playback Rate: Default Playback Rate
     Remember Playback Speed Per Channel: Remember Playback Speed Per Channel
+    Auto Update Channel Playback Speed: Automatically update when changing via player options
     Manage Channel Playback Speeds: Manage Channel Playback Speeds
     Channel Playback Speed Manager: Channel Playback Speed Manager
     No Saved Playback Speeds: No saved playback speeds
@@ -854,6 +855,8 @@ Video:
   Video has been removed from your history: Video has been removed from your history
   Save Watched Progress: Save Watched Progress
   Watched Progress Saved: Watched Progress Saved
+  Save Channel Playback Speed: Save Channel Playback Speed
+  Channel Playback Speed Saved: Channel Playback Speed Saved
   Save Video: Save Video
   Video has been saved: Video has been saved
   Video has been removed from your saved list: Video has been removed from your saved list

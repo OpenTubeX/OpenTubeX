@@ -180,6 +180,13 @@
         :default-value="rememberPlaybackSpeedPerChannel"
         @change="updateRememberPlaybackSpeedPerChannel"
       />
+      <FtToggleSwitch
+        v-if="rememberPlaybackSpeedPerChannel"
+        :label="t('Settings.Player Settings.Auto Update Channel Playback Speed')"
+        :compact="true"
+        :default-value="autoUpdateChannelPlaybackSpeeds"
+        @change="updateAutoUpdateChannelPlaybackSpeeds"
+      />
     </FtFlexBox>
     <FtFlexBox v-if="rememberPlaybackSpeedPerChannel">
       <FtButton
@@ -661,6 +668,16 @@ const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRemember
  */
 function updateRememberPlaybackSpeedPerChannel(value) {
   store.dispatch('updateRememberPlaybackSpeedPerChannel', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
+
+/**
+ * @param {boolean} value
+ */
+function updateAutoUpdateChannelPlaybackSpeeds(value) {
+  store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', value)
 }
 
 /** @type {import('vue').Ref<boolean>} */

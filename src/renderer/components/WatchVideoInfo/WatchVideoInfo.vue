@@ -98,6 +98,12 @@
             :icon="['fas', 'bars-progress']"
             @click="saveWatchedProgressManually"
           />
+          <FtIconButton
+            v-if="showSaveChannelPlaybackSpeedButton"
+            :title="t('Video.Save Channel Playback Speed')"
+            :icon="['fas', 'gauge']"
+            @click="saveChannelPlaybackSpeedManually"
+          />
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
@@ -264,6 +270,7 @@ const emit = defineEmits([
   'set-info-area-sticky',
   'scroll-to-info-area',
   'save-watched-progress',
+  'save-channel-playback-speed',
 ])
 
 const USING_ELECTRON = process.env.IS_ELECTRON
@@ -346,6 +353,20 @@ const watchedProgressSavingInSemiAutoMode = computed(() => {
 
 function saveWatchedProgressManually() {
   emit('save-watched-progress')
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRememberPlaybackSpeedPerChannel)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
+
+const showSaveChannelPlaybackSpeedButton = computed(() => {
+  return !props.isUpcoming && rememberPlaybackSpeedPerChannel.value && !autoUpdateChannelPlaybackSpeeds.value
+})
+
+function saveChannelPlaybackSpeedManually() {
+  emit('save-channel-playback-speed')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

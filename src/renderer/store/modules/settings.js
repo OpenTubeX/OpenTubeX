@@ -288,6 +288,7 @@ const state = {
   videoSkipMouseScroll: false,
   videoPlaybackRateInterval: 0.25,
   rememberPlaybackSpeedPerChannel: false,
+  autoUpdateChannelPlaybackSpeeds: false,
   channelPlaybackSpeeds: '{}',
   downloadAskPath: true,
   downloadFolderPath: '',

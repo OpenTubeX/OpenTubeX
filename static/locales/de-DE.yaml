@@ -381,6 +381,7 @@ Settings:
     Default Volume: Standard-Lautstärke
     Default Playback Rate: Standard-Wiedergabegeschwindigkeit
     Remember Playback Speed Per Channel: Wiedergabegeschwindigkeit pro Kanal merken
+    Auto Update Channel Playback Speed: Beim Ändern über Player-Optionen automatisch aktualisieren
     Manage Channel Playback Speeds: Kanalspezifische Wiedergabegeschwindigkeiten verwalten
     Channel Playback Speed Manager: Verwaltung der Wiedergabegeschwindigkeiten
     No Saved Playback Speeds: Keine gespeicherten Wiedergabegeschwindigkeiten
@@ -831,6 +832,8 @@ Video:
 #& Playlists
   Save Watched Progress: Videofortschritt speichern
   Watched Progress Saved: Videofortschritt gespeichert
+  Save Channel Playback Speed: Kanal-Wiedergabegeschwindigkeit speichern
+  Channel Playback Speed Saved: Kanal-Wiedergabegeschwindigkeit gespeichert
 Playlist:
   #& About
   View Full Playlist: Vollständige Playlist ansehen

@@ -1237,6 +1237,16 @@ export default defineComponent({
       this._saveWatchProgress()
       showToast(this.$t('Video.Watched Progress Saved'))
     },
+    handleChannelPlaybackSpeedManualSave() {
+      // Should be called by manual action, settings should be checked in UI
+      const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
+      if (!rememberPerChannel || !this.channelId) {
+        return
+      }
+
+      this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
+      showToast(this.$t('Video.Channel Playback Speed Saved'))
+    },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
       this._saveWatchProgress()
@@ -1919,13 +1929,22 @@ export default defineComponent({
 
     handlePlaybackRateUserSet(newRate) {
       const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
-      if (!rememberPerChannel || !this.channelId) {
+      const autoUpdate = this.$store.getters.getAutoUpdateChannelPlaybackSpeeds
+      if (!rememberPerChannel || !autoUpdate || !this.channelId) {
+        return
+      }
+
+      this.saveChannelPlaybackSpeed(newRate)
+    },
+
+    saveChannelPlaybackSpeed(rate) {
+      if (!this.channelId) {
         return
       }
 
       try {
         const channelSpeeds = JSON.parse(this.$store.getters.getChannelPlaybackSpeeds || '{}')
-        channelSpeeds[this.channelId] = newRate
+        channelSpeeds[this.channelId] = rate
         this.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(channelSpeeds))
       } catch (e) {
         console.error('Failed to save channel playback speed:', e)
