@@ -12,15 +12,21 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
 >  <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
-> 
+>
 > - Option to disable multiplying seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can enable this behavior in Player Settings if you prefer the previous behavior.
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
 >
 > - Focus search bar when pressing `/` key in addition to Ctrl+L/Cmd+L.
 >
+> - SponsorBlock auto-skip temporary toggle under video player
+> <img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
+>
+> - SponsorBlock unskip/reskip buttons
+> <img width="266" height="48" alt="image" src="https://github.com/user-attachments/assets/aefda586-0907-4e9a-add5-1d68abcd712a" />
+>
 > - Experimental tab support. This is still a work in progress and may have bugs or missing functionality.
 >  <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
-> 
+>
 > If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
 
