@@ -168,6 +168,9 @@ export default defineComponent({
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
       currentPlaybackRate: null,
+
+      // Local, non-persistent toggle for temporarily disabling SponsorBlock auto-skipping
+      sponsorBlockAutoSkipTemporarilyDisabled: false,
     }
   },
   computed: {
@@ -316,6 +319,9 @@ export default defineComponent({
 
       // `this.$refs.player?.hasLoaded` cannot be used in computed property
       return !this.isLoading
+    },
+    useSponsorBlock: function () {
+      return this.$store.getters.getUseSponsorBlock
     },
   },
   watch: {
@@ -1908,6 +1914,10 @@ export default defineComponent({
       } else {
         this.autoplayNextRecommendedVideo = !this.autoplayEnabled
       }
+    },
+
+    handleSponsorBlockAutoSkipToggle: function() {
+      this.sponsorBlockAutoSkipTemporarilyDisabled = !this.sponsorBlockAutoSkipTemporarilyDisabled
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {

@@ -125,16 +125,48 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  align-items: center;
+  align-items: flex-end;
   pointer-events: none;
+  z-index: 3;
 }
 
 .skippedSegment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-block: 0;
-  padding: 10px;
+  padding: 8px 12px;
   border-radius: 20px;
   background-color: rgb(0 0 0 / 80%);
   color: #fff;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.skippedSegmentText {
+  white-space: nowrap;
+}
+
+.unskipButton {
+  padding: 4px 10px;
+  border-style: none;
+  border-radius: 12px;
+  background-color: rgb(255 255 255 / 20%);
+  color: #fff;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.unskipButton:hover {
+  background-color: rgb(255 255 255 / 35%);
+}
+
+.unskipButton:focus {
+  outline: 2px solid rgb(255 255 255 / 50%);
+  outline-offset: 1px;
 }
 
 :deep(.markerContainer) {

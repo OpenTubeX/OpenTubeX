@@ -162,6 +162,10 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    sponsorBlockAutoSkipDisabled: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: [
     'error',
@@ -481,12 +485,22 @@ export default defineComponent({
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
      * but Vue 2 doesn't support reactivity on Maps, so we have to use an array instead
-     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, timeoutId: number}[]>}
+     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, timeoutId: number, unskipped: boolean}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
 
+    /**
+     * Set of segment UUIDs that the user has explicitly unskipped.
+     * These segments will not be auto-skipped again until the user leaves the segment.
+     * @type {Set<string>}
+     */
+    let sponsorBlockDoNotSkipSegments = new Set()
+
     async function setupSponsorBlock() {
       let segments, averageDuration
+
+      // Reset the do-not-skip set for the new video
+      sponsorBlockDoNotSkipSegments = new Set()
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
@@ -519,12 +533,30 @@ export default defineComponent({
         return
       }
 
+      // Check if we've left any unskipped segments - if so, re-enable auto-skip for them
+      for (const uuid of sponsorBlockDoNotSkipSegments) {
+        const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+        if (segment && (currentTime < segment.startTime || currentTime >= segment.endTime)) {
+          sponsorBlockDoNotSkipSegments.delete(uuid)
+          // Also remove the toast if it exists
+          const toastIndex = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
+          if (toastIndex !== -1) {
+            clearTimeout(skippedSponsorBlockSegments.value[toastIndex].timeoutId)
+            skippedSponsorBlockSegments.value.splice(toastIndex, 1)
+          }
+        }
+      }
+
       const video_ = video.value
 
       let newTime = 0
       const skippedSegments = []
 
       sponsorBlockSegments.forEach(segment => {
+        if (sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+          return
+        }
+
         if (autoSkip.has(segment.category) && currentTime < segment.endTime &&
           (segment.startTime <= currentTime ||
             // if we already have a segment to skip, check if there are any that are less than 150ms later,
@@ -559,6 +591,7 @@ export default defineComponent({
           if (existingSkip) {
             clearTimeout(existingSkip.timeoutId)
 
+            existingSkip.unskipped = false
             existingSkip.timeoutId = setTimeout(() => {
               const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
               skippedSponsorBlockSegments.value.splice(index, 1)
@@ -567,6 +600,7 @@ export default defineComponent({
             skippedSponsorBlockSegments.value.push({
               uuid,
               translatedCategory: translateSponsorBlockCategory(category),
+              unskipped: false,
               timeoutId: setTimeout(() => {
                 const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
                 skippedSponsorBlockSegments.value.splice(index, 1)
@@ -574,6 +608,68 @@ export default defineComponent({
             })
           }
         })
+      }
+    }
+
+    /**
+     * Unskips a SponsorBlock segment by seeking back to its start time
+     * and preventing it from being auto-skipped again until the user leaves the segment.
+     * @param {string} uuid - The UUID of the segment to unskip
+     */
+    function unskipSponsorBlockSegment(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment) {
+        return
+      }
+
+      sponsorBlockDoNotSkipSegments.add(uuid)
+
+      if (canSeek()) {
+        const seekRange = player.seekRange()
+        const targetTime = Math.max(segment.startTime, seekRange.start)
+        video.value.currentTime = targetTime
+      }
+
+      // Update the toast entry to show it's been unskipped
+      // Keep showing it for the duration of the segment (no timeout)
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      if (toastEntry) {
+        clearTimeout(toastEntry.timeoutId)
+        toastEntry.unskipped = true
+        toastEntry.timeoutId = 0
+      }
+    }
+
+    /**
+     * Re-skips a SponsorBlock segment that was previously unskipped,
+     * seeking to the end of the segment and restoring auto-skip behavior.
+     * @param {string} uuid - The UUID of the segment to re-skip
+     */
+    function redoSkipSponsorBlockSegment(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment) {
+        return
+      }
+
+      sponsorBlockDoNotSkipSegments.delete(uuid)
+
+      if (canSeek()) {
+        const seekRange = player.seekRange()
+        const targetTime = Math.min(segment.endTime, seekRange.end)
+        video.value.currentTime = targetTime
+      }
+
+      // Update the toast entry to show it's been re-skipped and reset the timeout
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      if (toastEntry) {
+        clearTimeout(toastEntry.timeoutId)
+        toastEntry.unskipped = false
+        toastEntry.timeoutId = setTimeout(() => {
+          const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
+          if (index !== -1) {
+            skippedSponsorBlockSegments.value.splice(index, 1)
+          }
+        }, 2000)
       }
     }
 
@@ -1224,7 +1320,7 @@ export default defineComponent({
           updateStats()
         }
 
-        if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
+        if (useSponsorBlock.value && !props.sponsorBlockAutoSkipDisabled && sponsorBlockSegments.length > 0 && canSeek()) {
           skipSponsorBlockSegments(currentTime)
         }
       }
@@ -3363,6 +3459,8 @@ export default defineComponent({
       sponsorBlockShowSkippedToast,
 
       skippedSponsorBlockSegments,
+      unskipSponsorBlockSegment,
+      redoSkipSponsorBlockSegment,
 
       showOfflineMessage,
 

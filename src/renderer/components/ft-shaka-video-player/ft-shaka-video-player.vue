@@ -115,13 +115,31 @@
       v-if="sponsorBlockShowSkippedToast && skippedSponsorBlockSegments.length > 0"
       class="skippedSegmentsWrapper"
     >
-      <p
-        v-for="{ uuid, translatedCategory } in skippedSponsorBlockSegments"
+      <div
+        v-for="{ uuid, translatedCategory, unskipped } in skippedSponsorBlockSegments"
         :key="uuid"
         class="skippedSegment"
       >
-        {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
-      </p>
+        <span class="skippedSegmentText">
+          {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
+        </span>
+        <button
+          v-if="unskipped"
+          class="unskipButton"
+          :title="$t('Redo')"
+          @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
+        >
+          {{ $t('Redo') }}
+        </button>
+        <button
+          v-else
+          class="unskipButton"
+          :title="$t('Undo')"
+          @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
+        >
+          {{ $t('Undo') }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

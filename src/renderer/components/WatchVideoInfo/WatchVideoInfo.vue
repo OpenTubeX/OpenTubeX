@@ -104,6 +104,14 @@
             :icon="['fas', 'gauge']"
             @click="saveChannelPlaybackSpeedManually"
           />
+          <FtIconButton
+            v-if="useSponsorBlock && !isUpcoming"
+            :title="sponsorBlockToggleTitle"
+            :icon="['fas', 'shield-halved']"
+            :overlay-icon="sponsorBlockAutoSkipDisabled ? ['fas', 'slash'] : null"
+            :theme="sponsorBlockAutoSkipDisabled ? 'destructive' : 'base'"
+            @click="toggleSponsorBlockAutoSkip"
+          />
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
@@ -262,6 +270,10 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
+  sponsorBlockAutoSkipDisabled: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const emit = defineEmits([
@@ -271,6 +283,7 @@ const emit = defineEmits([
   'scroll-to-info-area',
   'save-watched-progress',
   'save-channel-playback-speed',
+  'toggle-sponsorblock-autoskip',
 ])
 
 const USING_ELECTRON = process.env.IS_ELECTRON
@@ -367,6 +380,19 @@ const showSaveChannelPlaybackSpeedButton = computed(() => {
 
 function saveChannelPlaybackSpeedManually() {
   emit('save-channel-playback-speed')
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
+
+const sponsorBlockToggleTitle = computed(() => {
+  return props.sponsorBlockAutoSkipDisabled
+    ? t('Video.Player.SponsorBlock.EnableAutoSkipTemporarily')
+    : t('Video.Player.SponsorBlock.DisableAutoSkipTemporarily')
+})
+
+function toggleSponsorBlockAutoSkip() {
+  emit('toggle-sponsorblock-autoskip')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

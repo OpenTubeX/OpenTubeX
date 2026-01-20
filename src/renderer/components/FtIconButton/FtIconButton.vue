@@ -24,7 +24,15 @@
       @contextmenu.prevent
       @click="handleIconClick"
     >
+      <FontAwesomeLayers
+        v-if="overlayIcon"
+        class="icon"
+      >
+        <FontAwesomeIcon :icon="icon" />
+        <FontAwesomeIcon :icon="overlayIcon" />
+      </FontAwesomeLayers>
       <FontAwesomeIcon
+        v-else
         class="icon"
         :icon="icon"
       />
@@ -117,7 +125,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -130,6 +138,10 @@ const props = defineProps({
   icon: {
     type: Array,
     default: () => ['fas', 'ellipsis-v']
+  },
+  overlayIcon: {
+    type: Array,
+    default: null
   },
   disabled: {
     type: Boolean,

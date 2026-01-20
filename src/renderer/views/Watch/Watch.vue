@@ -43,6 +43,7 @@
           :start-in-pip="startNextVideoInPip"
           :current-playback-rate="currentPlaybackRate"
           :delay-load-until-unix="adEndTimeUnixMs"
+          :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -158,6 +159,7 @@
         :in-user-playlist="!!selectedUserPlaylist"
         :is-unlisted="isUnlisted"
         :can-save-watched-progress="canSaveWatchProgress"
+        :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
         class="watchVideo"
         :class="{ theatreWatchVideo: useTheatreMode }"
         @change-format="handleFormatChange"
@@ -166,6 +168,7 @@
         @scroll-to-info-area="$refs.infoArea.scrollIntoView()"
         @save-watched-progress="handleWatchProgressManualSave"
         @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+        @toggle-sponsorblock-autoskip="handleSponsorBlockAutoSkipToggle"
       />
       <watch-video-chapters
         v-if="!hideChapters && !isLoading && videoChapters.length > 0"
