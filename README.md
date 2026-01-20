@@ -8,9 +8,10 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 > [!WARNING]
 > **This is a fork in its early stages.** It currently provides the following extra features:
-> - Remember playback speed on a per-channel basis. You can enable it in settings. If the feature is turned on and you manually change the playback speed it will be saved for that channel
->  <img height="150" alt="image" src="https://github.com/user-attachments/assets/82c82626-2611-48ba-97be-a86465423de2" />
+> - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
+>  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
+>  <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
 > 
 > - Option to disable multiplying seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can enable this behavior in Player Settings if you prefer the previous behavior.
 >  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
