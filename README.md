@@ -120,6 +120,7 @@ RedirectTube, doesn't automatically open YouTube links in OpenTubeX. Instead, it
 > OpenTubeX is only supported on Windows 10 and later, macOS 12 and above, and various Linux distributions. Installing it on unsupported systems may result in unexpected issues.
 
 * [GitHub Releases](https://github.com/D3SOX/OpenTubeX/releases)
+* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
 
 #### Automated Builds (Nightly / Weekly)
 > [!WARNING]
