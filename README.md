@@ -19,6 +19,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 > - Focus search bar when pressing `/` key in addition to Ctrl+L/Cmd+L.
 >
 > - Experimental tab support. This is still a work in progress and may have bugs or missing functionality.
+>  <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 > 
 > If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
