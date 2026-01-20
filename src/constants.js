@@ -30,6 +30,7 @@ const IpcChannels = {
   TABS_STATE_UPDATED: 'tabs-state-updated',
   TABS_UPDATE_TITLE: 'tabs-update-title',
   TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
+  TABS_SET_PLAYBACK_STATE: 'tabs-set-playback-state',
   CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',

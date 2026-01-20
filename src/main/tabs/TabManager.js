@@ -16,6 +16,7 @@ const tabManagers = new Map()
  * @property {string} url
  * @property {string} title
  * @property {number} lastActiveAt
+ * @property {boolean} isPlaying
  * @property {WebContentsView} view
  */
 
@@ -196,6 +197,7 @@ export class TabManager {
       url: loadUrl,
       title: `Tab ${++this.tabCounter}`,
       lastActiveAt: Date.now(),
+      isPlaying: false,
       view
     }
 
@@ -488,7 +490,8 @@ export class TabManager {
         // bootstrapping in the background.
         isLoading: !isActive && !tab.view.webContents.isLoadingMainFrame()
           ? false
-          : !isActive && tab.view.webContents.isLoading()
+          : !isActive && tab.view.webContents.isLoading(),
+        isPlaying: tab.isPlaying || false
       }
     })
 
@@ -688,6 +691,23 @@ export function setupTabsIPC() {
         }
         manager._broadcastStateUpdate()
         manager._saveSession()
+      }
+    }
+  })
+
+  // Update tab playback state (called from renderer when video plays/pauses/ends)
+  ipcMain.on(IpcChannels.TABS_SET_PLAYBACK_STATE, (event, playbackState) => {
+    if (typeof playbackState !== 'string') return
+
+    const manager = TabManager.getFromWebContents(event.sender)
+    const tabId = TabManager.getTabIdFromWebContents(event.sender)
+
+    if (manager && tabId) {
+      const tab = manager.tabs.get(tabId)
+      if (tab) {
+        tab.isPlaying = playbackState === 'playing'
+        // Broadcast state update but don't save to session (isPlaying is ephemeral)
+        manager._broadcastStateUpdate()
       }
     }
   })

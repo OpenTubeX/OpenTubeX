@@ -2,7 +2,7 @@
   <div
     ref="elementRef"
     class="tab"
-    :class="{ active: tab.isActive, loading: tab.isLoading, dragging: isDragging }"
+    :class="{ active: tab.isActive, loading: tab.isLoading, playing: tab.isPlaying, dragging: isDragging }"
     :title="displayTitle"
     role="button"
     tabindex="0"
@@ -19,6 +19,12 @@
       <span
         v-if="tab.isLoading"
         class="loadingDot"
+        aria-hidden="true"
+      />
+      <FontAwesomeIcon
+        v-else-if="tab.isPlaying"
+        :icon="['fas', 'play']"
+        class="playingIcon"
         aria-hidden="true"
       />
       {{ displayTitle }}
@@ -319,6 +325,13 @@ function handleAuxClick(event) {
     transform: scale(0.7);
     opacity: 0.5;
   }
+}
+
+.playingIcon {
+  font-size: 8px;
+  margin-inline-end: 6px;
+  color: var(--accent-color, var(--primary-text-color));
+  flex-shrink: 0;
 }
 
 .closeButton {

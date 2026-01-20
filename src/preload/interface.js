@@ -400,6 +400,14 @@ export default {
     },
 
     /**
+     * Set playback state for the current tab (used to show play indicator)
+     * @param {'playing' | 'paused' | 'none'} state - The current playback state
+     */
+    setPlaybackState: (state) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_PLAYBACK_STATE, state)
+    },
+
+    /**
      * Listen for tab state updates
      * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
      */

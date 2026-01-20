@@ -1151,6 +1151,10 @@ export default defineComponent({
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing'
       }
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('playing')
+      }
     }
 
     function handlePause() {
@@ -1159,6 +1163,10 @@ export default defineComponent({
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
       }
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('paused')
+      }
     }
 
     function handleEnded() {
@@ -1166,6 +1174,10 @@ export default defineComponent({
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'none'
+      }
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('none')
       }
 
       emit('ended')
@@ -3204,6 +3216,11 @@ export default defineComponent({
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'none'
+      }
+
+      // Clear tab playback state indicator when player is destroyed
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('none')
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
