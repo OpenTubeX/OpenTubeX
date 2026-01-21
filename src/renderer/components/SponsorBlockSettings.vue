@@ -33,6 +33,16 @@
           :default-value="sponsorBlockShowSkippedToast"
           @change="handleUpdateSponsorBlockShowSkippedToast"
         />
+        <FtSlider
+          :label="$t('Settings.SponsorBlock Settings.Skip notification timeout')"
+          :default-value="sponsorBlockSkippedToastDuration"
+          :min-value="2"
+          :max-value="15"
+          :step="1"
+          value-extension="s"
+          :disabled="!sponsorBlockShowSkippedToast"
+          @change="handleUpdateSponsorBlockSkippedToastDuration"
+        />
       </FtFlexBox>
       <FtFlexBox>
         <FtInput
@@ -75,6 +85,7 @@ import { computed } from 'vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 import FtInput from './FtInput/FtInput.vue'
+import FtSlider from './FtSlider/FtSlider.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import FtSponsorBlockCategory from './FtSponsorBlockCategory/FtSponsorBlockCategory.vue'
 
@@ -99,6 +110,9 @@ const sponsorBlockUrl = computed(() => store.getters.getSponsorBlockUrl)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const sponsorBlockShowSkippedToast = computed(() => store.getters.getSponsorBlockShowSkippedToast)
+
+/** @type {import('vue').ComputedRef<number>} */
+const sponsorBlockSkippedToastDuration = computed(() => store.getters.getSponsorBlockSkippedToastDuration)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useDeArrowTitles = computed(() => store.getters.getUseDeArrowTitles)
@@ -135,6 +149,13 @@ function handleUpdateUseDeArrowThumbnails(value) {
  */
 function handleUpdateSponsorBlockShowSkippedToast(value) {
   store.dispatch('updateSponsorBlockShowSkippedToast', value)
+}
+
+/**
+ * @param {number} value
+ */
+function handleUpdateSponsorBlockSkippedToastDuration(value) {
+  store.dispatch('updateSponsorBlockSkippedToastDuration', value)
 }
 
 /**

@@ -386,6 +386,15 @@ export default defineComponent({
       return store.getters.getSponsorBlockShowSkippedToast
     })
 
+    /** @type {import('vue').ComputedRef<number>} */
+    const sponsorBlockSkippedToastDuration = computed(() => {
+      return store.getters.getSponsorBlockSkippedToastDuration
+    })
+
+    const sponsorBlockSkippedToastDurationMs = computed(() => {
+      return Math.max(2, Math.min(15, sponsorBlockSkippedToastDuration.value)) * 1000
+    })
+
     const sponsorSkips = computed(() => {
       // save some work when sponsorblock is disabled
       if (!useSponsorBlock.value) {
@@ -595,7 +604,7 @@ export default defineComponent({
             existingSkip.timeoutId = setTimeout(() => {
               const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
               skippedSponsorBlockSegments.value.splice(index, 1)
-            }, 2000)
+            }, sponsorBlockSkippedToastDurationMs.value)
           } else {
             skippedSponsorBlockSegments.value.push({
               uuid,
@@ -604,7 +613,7 @@ export default defineComponent({
               timeoutId: setTimeout(() => {
                 const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
                 skippedSponsorBlockSegments.value.splice(index, 1)
-              }, 2000)
+              }, sponsorBlockSkippedToastDurationMs.value)
             })
           }
         })
@@ -669,7 +678,7 @@ export default defineComponent({
           if (index !== -1) {
             skippedSponsorBlockSegments.value.splice(index, 1)
           }
-        }, 2000)
+        }, sponsorBlockSkippedToastDurationMs.value)
       }
     }
 

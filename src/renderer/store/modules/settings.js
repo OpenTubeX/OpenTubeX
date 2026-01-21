@@ -244,6 +244,7 @@ const state = {
   saveVideoHistoryWithLastViewedPlaylist: true,
   showFamilyFriendlyOnly: false,
   sponsorBlockShowSkippedToast: true,
+  sponsorBlockSkippedToastDuration: 6,
   sponsorBlockUrl: 'https://sponsor.ajay.app',
   sponsorBlockSponsor: {
     color: 'Green',
