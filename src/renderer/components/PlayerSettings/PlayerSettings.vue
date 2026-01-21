@@ -350,7 +350,6 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { DefaultFolderKind } from '../../../constants'
 import {
   findChannelTagInfo,
   checkYoutubeChannelId,
@@ -857,7 +856,7 @@ watch(screenshotFolder, () => {
 function chooseScreenshotFolder() {
   // only use with electron
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.chooseDefaultFolder(DefaultFolderKind.SCREENSHOTS)
+    window.ftElectron.chooseDefaultFolder()
   }
 }
 
