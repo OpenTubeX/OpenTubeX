@@ -546,10 +546,20 @@ export async function getLocalVideoInfo(id) {
     }
 
     if (info.streaming_data.dash_manifest_url) {
-      info.streaming_data.dash_manifest_url = await decipherDashManifestUrl(
+      info.streaming_data.dash_manifest_url = await decipherManifestUrl(
         info.streaming_data.dash_manifest_url,
         webInnertube.session.player,
-        contentPoToken
+        contentPoToken,
+        true
+      )
+    }
+
+    if (info.streaming_data.hls_manifest_url) {
+      info.streaming_data.hls_manifest_url = await decipherManifestUrl(
+        info.streaming_data.hls_manifest_url,
+        webInnertube.session.player,
+        contentPoToken,
+        false
       )
     }
   }
@@ -611,24 +621,30 @@ async function decipherFormats(formats, player) {
  * @param {string} url
  * @param {import('youtubei.js').Player} player
  * @param {string} poToken
+ * @param {boolean} isDash
  */
-async function decipherDashManifestUrl(url, player, poToken) {
+async function decipherManifestUrl(url, player, poToken, isDash) {
   const urlObject = new URL(url)
 
   if (urlObject.searchParams.size > 0) {
     urlObject.searchParams.set('pot', poToken)
-    urlObject.searchParams.set('mpd_version', '7')
+
+    if (isDash) {
+      urlObject.searchParams.set('mpd_version', '7')
+    }
 
     return await player.decipher(urlObject.toString())
   }
 
+  const pathPrefix = isDash ? '/api/manifest/dash' : '/api/manifest/hls_variant'
+
   // Convert path params to query params
   const pathParts = urlObject.pathname
-    .replace('/api/manifest/dash', '')
+    .replace(pathPrefix, '')
     .split('/')
     .filter(part => part.length > 0)
 
-  urlObject.pathname = '/api/manifest/dash'
+  urlObject.pathname = pathPrefix
 
   for (let i = 0; i + 1 < pathParts.length; i += 2) {
     urlObject.searchParams.set(pathParts[i], decodeURIComponent(pathParts[i + 1]))
@@ -645,7 +661,11 @@ async function decipherDashManifestUrl(url, player, poToken) {
   }
 
   decipheredUrlObject.search = ''
-  decipheredUrlObject.pathname += `/pot/${encodeURIComponent(poToken)}/mpd_version/7`
+  decipheredUrlObject.pathname += `/pot/${encodeURIComponent(poToken)}`
+
+  if (isDash) {
+    decipheredUrlObject.pathname += '/mpd_version/7'
+  }
 
   return decipheredUrlObject.toString()
 }
@@ -1381,7 +1401,7 @@ export function parseLocalPlaylistVideo(video) {
       videoId: video_.id,
       title: video_.title.text,
       author: video_.author.name,
-      authorId: video_.author.id,
+      authorId: (video_.author?.id != null && video_.author.id !== 'N/A') ? video_.author.id : null,
       viewCount,
       published,
       lengthSeconds: isNaN(video_.duration.seconds) ? '' : video_.duration.seconds,
@@ -1437,7 +1457,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       videoId: video.video_id,
       title: video.title.text,
       author: video.author?.name ?? channelName,
-      authorId: video.author?.id ?? channelId,
+      authorId: (video.author?.id != null && video.author.id !== 'N/A') ? video.author.id : channelId,
       viewCount: video.views.text == null ? null : extractNumberFromString(video.views.text),
       published,
       lengthSeconds: isLive ? '' : Utils.timeToSeconds(video.duration.text),

@@ -823,11 +823,15 @@ Video:
     Show Modified Details: Geänderte Details anzeigen
     Show Original Details: Originaldetails anzeigen
   DRMProtected: DRM-geschützte Videos können in OpenTubeX nicht abgespielt werden, da sie proprietäre Closed-Source-Komponenten benötigen. Wenn du dieses Video ansehen möchtest, sieh es dir bitte auf der offiziellen YouTube-Website in einem DRM-fähigen Webbrowser an.
-#& Playlists
-  Save Watched Progress: Videofortschritt speichern
-  Watched Progress Saved: Videofortschritt gespeichert
   Save Channel Playback Speed: Kanal-Wiedergabegeschwindigkeit speichern
   Channel Playback Speed Saved: Kanal-Wiedergabegeschwindigkeit gespeichert
+  #& Playlists
+  Save Watched Progress: Videofortschritt speichern
+  Watched Progress Saved: Videofortschritt gespeichert
+  Popout Live Chat: Öffnet ein neues Browserfenster mit dem aktuellen Video-Live-Chat
+  Watch:
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Verbleibende SABR Wartezeit: {remindingTimeSeconds}s'
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Verbleibende Werbezeit: {remindingTimeSeconds}s'
 Playlist:
   #& About
   View Full Playlist: Vollständige Playlist ansehen
