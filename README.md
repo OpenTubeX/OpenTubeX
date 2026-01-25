@@ -126,7 +126,7 @@ RedirectTube, doesn't automatically open YouTube links in OpenTubeX. Instead, it
 > [!WARNING]
 > Use these builds at your own risk. These are pre-release versions and are only intended for people that want to test changes early and are willing to accept that things could break from one build to another. 
 
-Builds are automatically created from changes to our development branch via [GitHub Actions](https://github.com/OpenTubeX/OpenTubeX/actions?query=workflow%3ABuild).
+Builds are automatically created from changes to our development branch via [GitHub Actions](http://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml).
 
 The first build with a green check mark is the latest build.
 
