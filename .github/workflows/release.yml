@@ -117,7 +117,7 @@ jobs:
         appimage="OpenTubeX-${VERSION}.AppImage"
         wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O ./appimagetool.AppImage
         chmod +x ./"$appimage" ./appimagetool.AppImage
-        update_information="gh-releases-zsync|D3SOX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync"
+        update_information="gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync"
         ./"$appimage" --appimage-extract && rm -f ./"$appimage"
         ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
           -u "$update_information" -n ./squashfs-root ./"$appimage"
@@ -135,7 +135,7 @@ jobs:
         wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O ./appimagetool.AppImage
         wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64" -O runtime
         chmod +x ./"$appimage" ./appimagetool.AppImage ./runtime
-        update_information="gh-releases-zsync|D3SOX|OpenTubeX|latest-all|opentubex-*-armv7l.AppImage.zsync"
+        update_information="gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-armv7l.AppImage.zsync"
         TARGET_APPIMAGE="$appimage" ./runtime --appimage-extract && rm -f ./"$appimage"
         ARCH=armhf ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
           -u "$update_information" -n ./squashfs-root ./"$appimage"
@@ -153,7 +153,7 @@ jobs:
         wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O ./appimagetool.AppImage
         wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64" -O runtime
         chmod +x ./"$appimage" ./appimagetool.AppImage ./runtime
-        update_information="gh-releases-zsync|D3SOX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync"
+        update_information="gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync"
         TARGET_APPIMAGE="$appimage" ./runtime --appimage-extract && rm -f ./"$appimage"
         ARCH=aarch64 ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
           -u "$update_information" -n ./squashfs-root ./"$appimage"

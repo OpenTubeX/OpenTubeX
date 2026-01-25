@@ -1,10 +1,10 @@
 blank_issues_enabled: true
 contact_links:
   - name: Discussions
-    url: https://github.com/D3SOX/FreeTube/discussions/categories/general
+    url: https://github.com/OpenTubeX/OpenTubeX/discussions/categories/general
     about: View discussions or start one yourself
   - name: Questions
-    url: https://github.com/D3SOX/FreeTube/discussions/categories/q-a
+    url: https://github.com/OpenTubeX/OpenTubeX/discussions/categories/q-a
     about: Ask and answer questions
   - name: Matrix Community
     url: https://matrix.to/#/#freetube:matrix.org

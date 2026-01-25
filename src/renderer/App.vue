@@ -286,7 +286,7 @@ async function checkForNewUpdates() {
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234
-      .replaceAll(/https:\/\/github\.com\/D3SOX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
+      .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
     // Add the title
     changelog = `${changelog}`

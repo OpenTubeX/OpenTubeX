@@ -7,9 +7,9 @@
   "main": "./dist/main.js",
   "private": true,
   "author": {
-    "name": "D3SOX",
-    "email": "nico@d3sox.me",
-    "url": "https://github.com/D3SOX"
+    "name": "OpenTubeX contributors",
+    "email": "info@opentubex.org",
+    "url": "https://github.com/OpenTubeX/"
   },
   "repository": {
     "type": "git",

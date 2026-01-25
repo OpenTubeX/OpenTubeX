@@ -36,7 +36,7 @@ jobs:
         command: repos.listReleases
         payload: >
             {
-              "owner": "D3SOX",
+              "owner": "OpenTubeX",
               "repo": "OpenTubeX"
             }
       env:
