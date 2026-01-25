@@ -75,7 +75,7 @@ const chunks = computed(() => [
   {
     icon: ['fas', 'globe'],
     title: t('About.Website'),
-    content: '<a href="https://opentubex.github.io/">https://opentubex.github.io/</a>'
+    content: '<a href="https://opentubex.org/">https://opentubex.org/</a>'
   },
 ])
 </script>
