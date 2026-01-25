@@ -10,10 +10,10 @@ permissions: {}
 
 jobs:
   build:
-    # As this action runs on a schedule, only run it in the D3SOX/OpenTubeX repository to avoid unnecessary GitHub Actions usage/billing in forks.
+    # As this action runs on a schedule, only run it in the OpenTubeX/OpenTubeX repository to avoid unnecessary GitHub Actions usage/billing in forks.
     # Still allow the workflow to be manually triggered.
     # If a fork does need this workflow, they can change this condition in their fork to include their repository.
-    if: github.repository == 'D3SOX/OpenTubeX' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name == 'workflow_dispatch'
 
     name: calibreapp/image-actions
     runs-on: ubuntu-latest

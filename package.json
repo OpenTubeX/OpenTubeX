@@ -13,10 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/D3SOX/OpenTubeX.git"
+    "url": "git+https://github.com/OpenTubeX/OpenTubeX.git"
   },
   "bugs": {
-    "url": "https://github.com/D3SOX/OpenTubeX/issues"
+    "url": "https://github.com/OpenTubeX/OpenTubeX/issues"
   },
   "scripts": {
     "build": "run-s patch-shaka pack build-release",

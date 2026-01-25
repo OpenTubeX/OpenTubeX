@@ -62,13 +62,13 @@ jobs:
       uses: fabriciobastian/download-release-asset-action@35e62aa5a2fe4a6ec79004f6052918349013ae4f #v1.0.6
       with:
         version: v${{ steps.sub.outputs.result }}-beta
-        repository: D3SOX/OpenTubeX
+        repository: OpenTubeX/OpenTubeX
         file: opentubex-${{ steps.sub.outputs.result }}-beta-linux-x64-portable.zip
     - name: Download ARM Release
       uses: fabriciobastian/download-release-asset-action@35e62aa5a2fe4a6ec79004f6052918349013ae4f #v1.0.6
       with:
         version: v${{ steps.sub.outputs.result }}-beta
-        repository: D3SOX/OpenTubeX
+        repository: OpenTubeX/OpenTubeX
         file: opentubex-${{ steps.sub.outputs.result }}-beta-linux-arm64-portable.zip
     - name: Set x64 Hash Variable
       id: hash_x64
@@ -101,7 +101,7 @@ jobs:
       env:
         VERSION: steps.sub.outputs.result
       run: |
-        yq -i '.modules[0].sources[0].url = "https://github.com/D3SOX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-x64-portable.zip"' io.opentubex.OpenTubeX.yml
+        yq -i '.modules[0].sources[0].url = "https://github.com/OpenTubeX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-x64-portable.zip"' io.opentubex.OpenTubeX.yml
 
     - name: Update x64 Hash in yml File
       shell: bash
@@ -115,7 +115,7 @@ jobs:
       env:
         VERSION: steps.sub.outputs.result
       run: |
-        yq -i '.modules[0].sources[1].url = "https://github.com/D3SOX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-arm64-portable.zip"' io.opentubex.OpenTubeX.yml
+        yq -i '.modules[0].sources[1].url = "https://github.com/OpenTubeX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-arm64-portable.zip"' io.opentubex.OpenTubeX.yml
 
     - name: Update ARM Hash in yml File
       shell: bash
@@ -129,7 +129,7 @@ jobs:
       env:
         CURRENT_DATE: ${{ steps.current_date.outputs.current_date }}
         VERSION: ${{ steps.sub.outputs.result }}
-      run: xmlstarlet ed -L -i /component/releases/release[1] -t elem -n releaseTMP -v "" -i //releaseTMP -t attr -n version -v "${VERSION} Beta" -i //releaseTMP -t attr -n date -v "${CURRENT_DATE}" -s //releaseTMP -t elem -n url -v "" -s //releaseTMP/url -t text -n "" -v "https://github.com/D3SOX/OpenTubeX/releases/tag/v${VERSION}-beta" -r //releaseTMP -v "release" io.opentubex.OpenTubeX.metainfo.xml
+      run: xmlstarlet ed -L -i /component/releases/release[1] -t elem -n releaseTMP -v "" -i //releaseTMP -t attr -n version -v "${VERSION} Beta" -i //releaseTMP -t attr -n date -v "${CURRENT_DATE}" -s //releaseTMP -t elem -n url -v "" -s //releaseTMP/url -t text -n "" -v "https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta" -r //releaseTMP -v "release" io.opentubex.OpenTubeX.metainfo.xml
     - name: Remove Release Files
       shell: bash
       env:

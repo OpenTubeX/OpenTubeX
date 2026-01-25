@@ -276,7 +276,7 @@ async function checkForNewUpdates() {
   }
 
   try {
-    const response = await fetch('https://api.github.com/repos/D3SOX/OpenTubeX/releases?per_page=1')
+    const response = await fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=1')
     const json = await response.json()
 
     const tagName = json[0].tag_name
@@ -306,7 +306,7 @@ async function checkForNewUpdates() {
       showUpdatesBanner.value = true
     }
   } catch (error) {
-    console.error('errored while checking for updates', 'https://api.github.com/repos/D3SOX/OpenTubeX/releases?per_page=1', error)
+    console.error('errored while checking for updates', 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=1', error)
   }
 }
 
@@ -326,7 +326,7 @@ function handleUpdateBannerClick(response) {
 }
 
 function openDownloadsPage() {
-  openExternalLink('https://github.com/D3SOX/OpenTubeX/releases')
+  openExternalLink('https://github.com/OpenTubeX/OpenTubeX/releases')
   showReleaseNotes.value = false
   showUpdatesBanner.value = false
 }

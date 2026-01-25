@@ -13,10 +13,10 @@ permissions: {}
 
 jobs:
   analyze:
-    # As this action runs on a schedule, only run it in the D3SOX/OpenTubeX repository to avoid unnecessary GitHub Actions usage/billing in forks.
+    # As this action runs on a schedule, only run it in the OpenTubeX/OpenTubeX repository to avoid unnecessary GitHub Actions usage/billing in forks.
     # We still allow it to run if it was triggered by a pull request or a push as active forks should care about security.
     # If a fork does need this workflow to run on a schedule, they can change this condition in their fork to include their repository.
-    if: github.repository == 'D3SOX/OpenTubeX' || github.event_name != 'schedule'
+    if: github.repository == 'OpenTubeX/OpenTubeX' || github.event_name != 'schedule'
 
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest

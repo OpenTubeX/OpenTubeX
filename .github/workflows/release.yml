@@ -4,6 +4,7 @@ name: Upload Release
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
+# Get release ID: gh api repos/OpenTubeX/OpenTubeX/releases/tags/<tagname> --jq .id
 on:
   workflow_dispatch:
     inputs:
@@ -164,7 +165,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.zip
         asset_content_type: application/zip
@@ -175,7 +176,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.7z
         asset_content_type: application/x-7z-compressed
@@ -186,7 +187,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-armv7l-portable.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-armv7l.zip
         asset_content_type: application/zip
@@ -197,7 +198,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-armv7l-portable.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-armv7l.7z
         asset_content_type: application/x-7z-compressed
@@ -208,7 +209,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.zip
         asset_content_type: application/zip
@@ -219,7 +220,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.7z
         asset_content_type: application/x-7z-compressed
@@ -230,7 +231,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_amd64.deb
         asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_amd64.deb
         asset_content_type: application/vnd.debian.binary-package
@@ -241,7 +242,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_armv7l.deb
         asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_armv7l.deb
         asset_content_type: application/vnd.debian.binary-package
@@ -252,7 +253,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_arm64.deb
         asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_arm64.deb
         asset_content_type: application/vnd.debian.binary-package
@@ -263,7 +264,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}.AppImage
         asset_content_type: application/vnd.appimage
@@ -274,7 +275,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage.zsync
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}.AppImage.zsync
         asset_content_type: application/x-zsync
@@ -285,7 +286,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-armv7l.AppImage
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-armv7l.AppImage
         asset_content_type: application/vnd.appimage
@@ -296,7 +297,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-armv7l.AppImage.zsync
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-armv7l.AppImage.zsync
         asset_content_type: application/x-zsync
@@ -307,7 +308,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage
         asset_content_type: application/vnd.appimage
@@ -318,7 +319,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage.zsync
         asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage.zsync
         asset_content_type: application/x-zsync
@@ -329,7 +330,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta.amd64.rpm
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.x86_64.rpm
         asset_content_type: application/x-rpm
@@ -342,7 +343,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta.arm64.rpm
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.aarch64.rpm
         asset_content_type: application/x-rpm
@@ -353,7 +354,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.pacman
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.pacman
         asset_content_type: application/x-zstd-compressed-tar
@@ -364,7 +365,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-setup-x64.exe
         asset_path: build/opentubex Setup ${{ steps.getPackageInfo.outputs.version }}.exe
         asset_content_type: application/x-ms-dos-executable
@@ -375,7 +376,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.exe
         asset_path: build/OpenTubeX ${{ steps.getPackageInfo.outputs.version }}.exe
         asset_content_type: application/x-ms-dos-executable
@@ -386,7 +387,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-win.zip
         asset_content_type: application/zip
@@ -397,7 +398,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-win.7z
         asset_content_type: application/x-7z-compressed
@@ -408,7 +409,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-setup-arm64.exe
         asset_path: build/opentubex Setup ${{ steps.getPackageInfo.outputs.version }}.exe
         asset_content_type: application/x-ms-dos-executable
@@ -419,7 +420,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.exe
         asset_path: build/OpenTubeX ${{ steps.getPackageInfo.outputs.version }}.exe
         asset_content_type: application/x-ms-dos-executable
@@ -430,7 +431,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-win.zip
         asset_content_type: application/zip
@@ -441,7 +442,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-win.7z
         asset_content_type: application/x-7z-compressed
@@ -452,7 +453,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.dmg
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.dmg
         asset_content_type: application/x-apple-diskimage
@@ -463,7 +464,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-mac.zip
         asset_content_type: application/zip
@@ -474,7 +475,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-mac.7z
         asset_content_type: application/x-7z-compressed
@@ -485,7 +486,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.dmg
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.dmg
         asset_content_type: application/x-apple-diskimage
@@ -496,7 +497,7 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.zip
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.zip
         asset_content_type: application/x-apple-diskimage
@@ -507,7 +508,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: https://uploads.github.com/repos/D3SOX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
+        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.7z
         asset_content_type: application/x-7z-compressed

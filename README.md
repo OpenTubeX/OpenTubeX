@@ -27,25 +27,25 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 > - Experimental tab support. This is still a work in progress and may have bugs or missing functionality.
 >  <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 >
-> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
-> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
+> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/OpenTubeX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
+> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
 
-<p align="center"><a href="https://github.com/D3SOX/OpenTubeX/releases">Download OpenTubeX</a></p>
+<p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
-  <a href="https://github.com/D3SOX/OpenTubeX/actions/workflows/build.yml">
-    <img alt='Build status' src="https://github.com/D3SOX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
+    <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
   </a>
 </p>
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://github.com/D3SOX/OpenTubeX/discussions">Discussions</a></p>
+<p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
 > [!NOTE] 
 > OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
 >
-> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/D3SOX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/D3SOX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
+> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
 ## Screenshots
 | The main OpenTubeX window                                                                         |
@@ -119,20 +119,20 @@ RedirectTube, doesn't automatically open YouTube links in OpenTubeX. Instead, it
 > [!CAUTION]
 > OpenTubeX is only supported on Windows 10 and later, macOS 12 and above, and various Linux distributions. Installing it on unsupported systems may result in unexpected issues.
 
-* [GitHub Releases](https://github.com/D3SOX/OpenTubeX/releases)
+* [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
 
 #### Automated Builds (Nightly / Weekly)
 > [!WARNING]
 > Use these builds at your own risk. These are pre-release versions and are only intended for people that want to test changes early and are willing to accept that things could break from one build to another. 
 
-Builds are automatically created from changes to our development branch via [GitHub Actions](https://github.com/D3SOX/OpenTubeX/actions?query=workflow%3ABuild).
+Builds are automatically created from changes to our development branch via [GitHub Actions](https://github.com/OpenTubeX/OpenTubeX/actions?query=workflow%3ABuild).
 
 The first build with a green check mark is the latest build.
 
 > [!IMPORTANT]
 > You will need to have a GitHub account to download these builds.
-> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/D3SOX/OpenTubeX/workflows/build/development).
+> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
 
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/)
 
@@ -143,14 +143,14 @@ If you like to get your hands dirty and want to contribute, we would love to
 have your help.  Send a pull request and someone will review your code. 
 
 > [!IMPORTANT]
-> Please follow the [Contribution Guidelines](https://github.com/D3SOX/OpenTubeX/blob/development/CONTRIBUTING.md) before sending your pull request.
+> Please follow the [Contribution Guidelines](https://github.com/OpenTubeX/OpenTubeX/blob/development/CONTRIBUTING.md) before sending your pull request.
 
 ## Localization
 
 We are actively looking for translations! Contributions are welcome.
 
 ## Contact
-If you ever have any questions, feel free to ask it on our [Discussions](https://github.com/D3SOX/OpenTubeX/discussions) page.
+If you ever have any questions, feel free to ask it on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page.
 
 ## License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  

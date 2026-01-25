@@ -55,22 +55,22 @@ const chunks = computed(() => [
   {
     icon: ['fab', 'github'],
     title: t('About.Source code'),
-    content: `<a href="https://github.com/D3SOX/OpenTubeX" lang="en" dir="ltr">GitHub: D3SOX/OpenTubeX</a><br>${t('About.Licensed under the')} <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`
+    content: `<a href="https://github.com/OpenTubeX/OpenTubeX" lang="en" dir="ltr">GitHub: OpenTubeX/OpenTubeX</a><br>${t('About.Licensed under the')} <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">${t('About.AGPLv3')}</a>`
   },
   {
     icon: ['fas', 'file-download'],
     title: t('About.Downloads / Changelog'),
-    content: `<a href="https://github.com/D3SOX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`
+    content: `<a href="https://github.com/OpenTubeX/OpenTubeX/releases">${t('About.GitHub releases')}</a>`
   },
   {
     icon: ['fas', 'question-circle'],
     title: t('About.Help'),
-    content: `<a href="https://github.com/D3SOX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`
+    content: `<a href="https://github.com/OpenTubeX/OpenTubeX/discussions/">${t('About.Discussions')}</a>`
   },
   {
     icon: ['fas', 'exclamation-circle'],
     title: t('About.Report a problem'),
-    content: `<a href="https://github.com/D3SOX/OpenTubeX/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
+    content: `<a href="https://github.com/OpenTubeX/OpenTubeX/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
   }
 ])
 </script>
