@@ -39,7 +39,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+<p align="center"><a href="https://opentubex.github.io/">Website</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
 > [!NOTE] 

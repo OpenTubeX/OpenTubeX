@@ -71,7 +71,12 @@ const chunks = computed(() => [
     icon: ['fas', 'exclamation-circle'],
     title: t('About.Report a problem'),
     content: `<a href="https://github.com/OpenTubeX/OpenTubeX/issues">${t('About.GitHub issues')}</a><br>${t('About.Please check for duplicates before posting')}`
-  }
+  },
+  {
+    icon: ['fas', 'globe'],
+    title: t('About.Website'),
+    content: '<a href="https://opentubex.github.io/">https://opentubex.github.io/</a>'
+  },
 ])
 </script>
 
