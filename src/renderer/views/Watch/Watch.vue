@@ -44,6 +44,7 @@
           :current-playback-rate="currentPlaybackRate"
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -56,6 +57,7 @@
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
+          @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"

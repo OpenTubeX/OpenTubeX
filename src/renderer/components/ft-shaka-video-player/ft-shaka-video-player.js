@@ -166,6 +166,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    resumePlaybackAfterSabrReload: {
+      type: Boolean,
+      default: false
+    },
   },
   emits: [
     'error',
@@ -179,6 +183,7 @@ export default defineComponent({
     'skip-to-next',
     'skip-to-prev',
     'player-reload-requested',
+    'resume-playback-after-sabr-reload-done',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -1411,7 +1416,7 @@ export default defineComponent({
       }, 1000))
       sabrStream.onReloadOnce(() => {
         sabrAbortController.abort()
-        emit('player-reload-requested')
+        emit('player-reload-requested', { wasPlaying: !video.value?.paused })
       })
     }
 
@@ -3132,6 +3137,11 @@ export default defineComponent({
       if (startInFullscreen && process.env.IS_ELECTRON) {
         startInFullscreen = false
         window.ftElectron.requestFullscreen()
+      }
+
+      if (props.resumePlaybackAfterSabrReload) {
+        video.value?.play()
+        emit('resume-playback-after-sabr-reload-done')
       }
     }
 

@@ -169,6 +169,9 @@ export default defineComponent({
 
       // Local, non-persistent toggle for temporarily disabling SponsorBlock auto-skipping
       sponsorBlockAutoSkipTemporarilyDisabled: false,
+
+      // When true, the new player after a SABR reload should start playback (was playing before reload)
+      resumePlaybackAfterSabrReload: false,
     }
   },
   computed: {
@@ -1920,7 +1923,8 @@ export default defineComponent({
       this.startNextVideoInPip = uiState.startNextVideoInPip
     },
 
-    async onPlayerReloadRequested() {
+    async onPlayerReloadRequested(payload) {
+      this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
       showToast('Reloading player according to SABR request')
 
       const timestamp = this.getTimestamp()
@@ -1940,6 +1944,10 @@ export default defineComponent({
         }
       }
       await this.reloadView()
+    },
+
+    onResumePlaybackAfterSabrReloadDone() {
+      this.resumePlaybackAfterSabrReload = false
     },
 
     ...mapActions([
