@@ -1,14 +1,13 @@
 <template>
+  <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
   <div
     ref="elementRef"
     class="tab"
     :class="{ active: tab.isActive, loading: tab.isLoading, playing: tab.isPlaying, dragging: isDragging }"
     :title="displayTitle"
     role="button"
-    tabindex="0"
+    tabindex="-1"
     @click="handleClick"
-    @keydown.enter.prevent="handleClick"
-    @keydown.space.prevent="handleClick"
     @auxclick.prevent="handleAuxClick"
     @pointerdown="handlePointerDown"
     @pointerup="handlePointerUp"
