@@ -1201,6 +1201,9 @@ export default defineComponent({
       if (!this.rememberHistory || !this.watchedProgressSavingEnabled) { return }
       this._saveWatchProgress()
     },
+    handleVideoPause() {
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
+    },
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
       if (!this.$refs.player?.hasLoaded) { return }

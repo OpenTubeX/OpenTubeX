@@ -50,6 +50,7 @@
           @loaded="handleVideoLoaded"
           @timeupdate="updateCurrentChapter"
           @ended="handleVideoEnded"
+          @pause="handleVideoPause"
           @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
           @toggle-autoplay="toggleAutoplay"
           @playback-rate-updated="updatePlaybackRate"

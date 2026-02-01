@@ -175,6 +175,7 @@ export default defineComponent({
     'error',
     'loaded',
     'ended',
+    'pause',
     'timeupdate',
     'toggle-autoplay',
     'toggle-theatre-mode',
@@ -1277,6 +1278,8 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('paused')
       }
+
+      emit('pause')
     }
 
     function handleEnded() {
