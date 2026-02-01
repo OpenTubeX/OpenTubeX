@@ -442,6 +442,19 @@ export class TabManager {
   }
 
   /**
+   * Ask the renderer to prepare (e.g. save watch timestamp) and reload; used by menu.
+   * The renderer will send TABS_RELOAD when ready, which triggers reloadTab().
+   */
+  requestReload() {
+    if (!this.activeTabId) return
+
+    const tab = this.tabs.get(this.activeTabId)
+    if (!tab || tab.view.webContents.isDestroyed()) return
+
+    tab.view.webContents.send(IpcChannels.TABS_REQUEST_RELOAD)
+  }
+
+  /**
    * Reload the active tab
    */
   reloadTab() {

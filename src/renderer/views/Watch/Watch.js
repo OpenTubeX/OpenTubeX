@@ -73,6 +73,7 @@ export default defineComponent({
     'ft-age-restricted': FtAgeRestricted
   },
   beforeRouteLeave: async function (to, from, next) {
+    this.$store.commit('tabs/setCurrentWatchTimestamp', null)
     this.handleRouteChange()
     window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
     document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)

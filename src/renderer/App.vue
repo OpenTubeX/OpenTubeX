@@ -204,6 +204,7 @@ onMounted(async () => {
       document.addEventListener('auxclick', handleAuxClick)
       enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
+      window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
     }
 
     dataReady.value = true
@@ -443,9 +444,22 @@ function handleKeyboardShortcuts(event) {
     // Ctrl+R: Reload tab
     if (ctrlOrCmdPressed && (event.key === 'r' || event.key === 'R') && !event.shiftKey) {
       event.preventDefault()
-      store.dispatch('reloadActiveTab')
+      prepareAndReloadTab()
     }
   }
+}
+
+function prepareAndReloadTab() {
+  if (route.path.startsWith('/watch/')) {
+    const timestamp = store.getters.getCurrentWatchTimestamp
+    if (typeof timestamp === 'number' && timestamp > 0) {
+      router.replace({
+        path: route.path,
+        query: { ...route.query, oneTimeTimestamp: Math.floor(timestamp) }
+      })
+    }
+  }
+  store.dispatch('reloadActiveTab')
 }
 
 function handleMouseDown() {

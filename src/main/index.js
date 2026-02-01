@@ -2561,7 +2561,7 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
-                  tabManager.reloadTab()
+                  tabManager.requestReload()
                 }
               }
             }

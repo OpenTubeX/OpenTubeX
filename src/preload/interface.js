@@ -396,6 +396,14 @@ export default {
     },
 
     /**
+     * Listen for reload request from main (e.g. menu "Reload Tab")
+     * @param {() => void} handler
+     */
+    onRequestReload: (handler) => {
+      ipcRenderer.on(IpcChannels.TABS_REQUEST_RELOAD, handler)
+    },
+
+    /**
      * Set playback state for the current tab (used to show play indicator)
      * @param {'playing' | 'paused' | 'none'} state - The current playback state
      */

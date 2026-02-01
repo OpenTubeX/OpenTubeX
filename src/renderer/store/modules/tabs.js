@@ -4,20 +4,25 @@
 
 const state = {
   tabs: [],
-  activeTabId: null
+  activeTabId: null,
+  currentWatchTimestamp: null
 }
 
 const getters = {
   getTabs: (state) => state.tabs,
   getActiveTabId: (state) => state.activeTabId,
   getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId),
-  getTabCount: (state) => state.tabs.length
+  getTabCount: (state) => state.tabs.length,
+  getCurrentWatchTimestamp: (state) => state.currentWatchTimestamp
 }
 
 const mutations = {
   setTabsState(state, { tabs, activeTabId }) {
     state.tabs = tabs
     state.activeTabId = activeTabId
+  },
+  setCurrentWatchTimestamp(state, value) {
+    state.currentWatchTimestamp = value
   }
 }
 
