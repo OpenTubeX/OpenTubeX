@@ -402,6 +402,23 @@ function handleKeyboardShortcuts(event) {
     const ctrlOrCmdPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
       (process.platform === 'darwin' && event.metaKey)
 
+    // Ctrl+1..9: Switch to tab by number
+    if (ctrlOrCmdPressed && event.key >= '1' && event.key <= '9' && !event.shiftKey) {
+      const target = event.target
+      const isTypingInInput = target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      if (!isTypingInInput) {
+        const index = parseInt(event.key, 10) - 1
+        const tabs = store.state.tabs.tabs
+        if (index < tabs.length) {
+          event.preventDefault()
+          store.dispatch('activateTab', tabs[index].id)
+          return
+        }
+      }
+    }
+
     // Ctrl+T: New tab
     if (ctrlOrCmdPressed && (event.key === 't' || event.key === 'T') && !event.shiftKey) {
       event.preventDefault()
