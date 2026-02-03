@@ -7,23 +7,21 @@ body:
     attributes:
       value: |
         **README: Before You Submit Your Issue**
-        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/FreeTubeApp/FreeTube/discussions).
+        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/OpenTubeX/OpenTubeX/discussions).
   - type: checkboxes
     attributes:
       label: Guidelines
       description: Please ensure you've completed all of the following.
       options:
-        - label: I have encountered this bug in the [latest release of FreeTube](https://github.com/FreeTubeApp/FreeTube/releases).
+        - label: I have encountered this bug in the [latest release of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX/releases).
           required: true
-        - label: I have encountered this bug in the [official downloads of FreeTube](https://github.com/FreeTubeApp/FreeTube#official-downloads).
+        - label: I have encountered this bug in the [official downloads of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX#official-downloads).
           required: true
-        - label: I have [searched the issue tracker for open and closed issues](https://github.com/FreeTubeApp/FreeTube/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
+        - label: I have [searched the issue tracker for open and closed issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
           required: true
-        - label: I have searched the [documentation](https://docs.freetubeapp.io/) for information that matches the description of the bug I want to file, without success.
+        - label: I have searched the [documentation](https://opentubex.org/) for information that matches the description of the bug I want to file, without success.
           required: true
         - label: This issue contains only one bug.
-          required: true
-        - label: I have read and agree to follow the [rules](https://docs.freetubeapp.io/community/rules/).
           required: true
   - type: textarea
     attributes:
@@ -65,10 +63,10 @@ body:
       required: true
   - type: input
     attributes:
-      label: FreeTube Version
+      label: OpenTubeX Version
       description: |
         If using releases, enter the version.
-        If using nightly builds, enter commit hash or build number, you can find it via about page in the FreeTube application.
+        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
       placeholder: v0.14.0, 8c4278
     validations:
       required: true
@@ -88,22 +86,11 @@ body:
         - .deb
         - .dmg
         - .exe
-        - Flathub
         - .pacman
         - Portable
         - .rpm
         - .zip / .7z
-        - .apk (FreeTubeAndroid Unofficial)
-        - .apk (Alpine Linux Package Unofficial)
-        - AUR (Unofficial)
-        - Chocolatey (Unofficial)
-        - Homebrew (Unofficial)
-        - Nix (Unofficial)
-        - PortableApps (Unofficial)
-        - Scoop (Unofficial)
-        - Snapcraft (Unofficial)
-        - WAPT (Unofficial)
-        - winget (Unofficial)
+        - AUR
         - other
     validations:
       required: true
@@ -119,8 +106,8 @@ body:
       required: true
   - type: input
     attributes:
-      label: 'Last Known Working FreeTube Version (If Any)'
-      description: What is the last version of FreeTube this worked in, if applicable?
+      label: 'Last Known Working OpenTubeX Version (If Any)'
+      description: What is the last version of OpenTubeX this worked in, if applicable?
       placeholder: v0.14.0
   - type: textarea
     attributes:
@@ -133,5 +120,5 @@ body:
       label: Nightly Build
       description: Please ensure you've completed the following, if applicable.
       options:
-        - label: I have encountered this bug in the latest [nightly build](https://docs.freetubeapp.io/development/nightly-builds).
+        - label: I have encountered this bug in the latest [nightly build](https://opentubex.org/downloads/#automated-builds).
           required: false

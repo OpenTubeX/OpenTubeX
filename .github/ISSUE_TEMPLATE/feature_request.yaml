@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for FreeTube which you would like to see in a future release
+description: Suggest an idea for OpenTubeX which you would like to see in a future release
 title: "[Feature Request]: "
 labels: "enhancement"
 body:
@@ -7,19 +7,17 @@ body:
     attributes:
       value: |
         **README: Before You Submit Your Issue**
-        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/FreeTubeApp/FreeTube/discussions).
+        - Issues are not a place to go ask support questions or start discussions. Please ask support questions or start discussions on the [discussions page](https://github.com/OpenTubeX/OpenTubeX/discussions).
   - type: checkboxes
     attributes:
       label: Guidelines
       description: Please ensure you've completed all of the following.
       options:
-          - label: I have [searched the issue tracker for open and closed issues](https://github.com/FreeTubeApp/FreeTube/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the feature request I want to file, without success.
+          - label: I have [searched the issue tracker for open and closed issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the feature request I want to file, without success.
             required: true
-          - label: I have searched the [documentation](https://docs.freetubeapp.io/) for information that matches the description of the feature request I want to file, without success.
+          - label: I have searched the [documentation](https://opentubex.org/) for information that matches the description of the feature request I want to file, without success.
             required: true
           - label: This issue contains only one feature request.
-            required: true
-          - label: I have read and agree to follow the [rules](https://docs.freetubeapp.io/community/rules/).
             required: true
   - type: textarea
     attributes:
