@@ -240,7 +240,7 @@
         </p>
         <FtInput
           class="screenshotFolderPath"
-          :placeholder="screenshotFolderPlaceholder"
+          :placeholder="screenshotFolder"
           :show-action-button="false"
           :show-label="false"
           :disabled="true"
@@ -335,7 +335,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
@@ -844,14 +844,8 @@ function updateScreenshotAskPath(value) {
   store.dispatch('updateScreenshotAskPath', value)
 }
 
-const screenshotFolderPlaceholder = ref('')
-
 /** @type {import('vue').ComputedRef<string>} */
 const screenshotFolder = computed(() => store.getters.getScreenshotFolderPath)
-
-watch(screenshotFolder, () => {
-  getScreenshotFolderPlaceholder()
-})
 
 function chooseScreenshotFolder() {
   // only use with electron
@@ -860,24 +854,10 @@ function chooseScreenshotFolder() {
   }
 }
 
-async function getScreenshotFolderPlaceholder() {
-  if (screenshotFolder.value !== '') {
-    screenshotFolderPlaceholder.value = screenshotFolder.value
-    return
-  }
-
-  if (process.env.IS_ELECTRON) {
-    screenshotFolderPlaceholder.value = await window.ftElectron.getScreenshotFallbackFolder()
-  } else {
-    screenshotFolderPlaceholder.value = ''
-  }
-}
-
 /** @type {import('vue').ComputedRef<string>} */
 const screenshotFilenamePattern = computed(() => store.getters.getScreenshotFilenamePattern)
 
 onMounted(() => {
-  getScreenshotFolderPlaceholder()
   getScreenshotFilenameExample(screenshotFilenamePattern.value)
 })
 
