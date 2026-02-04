@@ -86,21 +86,13 @@ jobs:
         original_version="$(jq -r '.version' package.json)"
         version="$original_version"
 
-        ref_lc="$(printf '%s' "$GITHUB_REF" | tr '[:upper:]' '[:lower:]')"
-        ref_uc="$(printf '%s' "$GITHUB_REF" | tr '[:lower:]' '[:upper:]')"
+        lower_case_ref="$(echo -E "$GITHUB_REF" | tr '[:upper:]' '[:lower:]')"
 
-        case "$ref_lc" in
-          *development*)
-            version="${original_version}-nightly-${GITHUB_RUN_NUMBER}"
-            ;;
-          *)
-            case "$ref_uc" in
-              *RC*)
-                version="${original_version}-RC-${GITHUB_RUN_NUMBER}"
-                ;;
-            esac
-            ;;
-        esac
+        if [[ "$lower_case_ref" == *development* ]]; then
+          version="${original_version}-nightly-${GITHUB_RUN_NUMBER}"
+        elif [[ "$lower_case_ref" == *rc* ]]; then
+          version="${original_version}-RC-${GITHUB_RUN_NUMBER}"
+        fi
 
         package_json="$(jq --arg version "$version" '.version = $version' package.json)"
 
