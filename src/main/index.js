@@ -2171,20 +2171,7 @@ function runApp() {
     })
   }
 
-  /**
-   * Exit fullscreen mode on all open windows
-   */
-  function exitFullscreenOnAllWindows() {
-    const allWindows = BrowserWindow.getAllWindows()
-    for (const window of allWindows) {
-      if (window.isFullScreen()) {
-        window.setFullScreen(false)
-      }
-    }
-  }
-
   function handleQuit() {
-    exitFullscreenOnAllWindows()
     cleanUpResources().finally(() => {
       mainWindow = null
       if (process.platform !== 'darwin') {
