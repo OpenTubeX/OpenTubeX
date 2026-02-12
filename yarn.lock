@@ -2223,6 +2223,11 @@
   resolved "https://registry.yarnpkg.com/@unrs/resolver-binding-win32-x64-msvc/-/resolver-binding-win32-x64-msvc-1.11.0.tgz#70c6b7d5807ece551c57dee4587dd4a40d197bd2"
   integrity sha512-+oLKLHw3I1UQo4MeHfoLYF+e6YBa8p5vYUw3Rgt7IDzCs+57vIZqQlIo62NDpYM0VG6BjWOwnzBczMvbtH8hag==
 
+"@vue-dnd-kit/core@^1.7.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@vue-dnd-kit/core/-/core-1.7.0.tgz#fd9374db1ce6fa72c3a45905c6b3d886d160e3c3"
+  integrity sha512-6Otpo/9Fp/cX5EiUoN6XmIPtm/mOreAXi8clr9HgzVvDHD0sfkgVOFxCUiVbH46yAzr6KBU1Q1tjSWLBqua+5g==
+
 "@vue-macros/common@^3.1.1":
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/@vue-macros/common/-/common-3.1.2.tgz#6b5f71ea219732fc955fdcfb15a95a417b87a0fe"
@@ -2233,11 +2238,6 @@
     local-pkg "^1.1.2"
     magic-string-ast "^1.0.2"
     unplugin-utils "^0.3.0"
-
-"@vue-dnd-kit/core@^1.7.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@vue-dnd-kit/core/-/core-1.7.0.tgz#fd9374db1ce6fa72c3a45905c6b3d886d160e3c3"
-  integrity sha512-6Otpo/9Fp/cX5EiUoN6XmIPtm/mOreAXi8clr9HgzVvDHD0sfkgVOFxCUiVbH46yAzr6KBU1Q1tjSWLBqua+5g==
 
 "@vue/compiler-core@3.5.27":
   version "3.5.27"
@@ -4019,10 +4019,10 @@ electron-to-chromium@^1.5.263:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.267.tgz#5d84f2df8cdb6bfe7e873706bb21bd4bfb574dc7"
   integrity sha512-0Drusm6MVRXSOJpGbaSVgcQsuB4hEkMpHXaVstcPmhu5LIedxs1xNK/nIxmQIU/RPC0+1/o0AVZfBTkTNJOdUw==
 
-electron@^40.2.1:
-  version "40.2.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-40.2.1.tgz#2a733d1c4289ad9d91592e8518d6bab50951b582"
-  integrity sha512-0zOeyN8LB1KHIjVV5jyMmQmkqx3J8OkkVlab3p7vOM28jI46blxW7M52Tcdi6X2m5o2jj8ejOlAh5+boL3w8aQ==
+electron@^40.4.0:
+  version "40.4.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-40.4.0.tgz#e2e73d837df141216dcd91fb6c3f754e771387c2"
+  integrity sha512-31l4V7Ys4oUuXyaN/cCNnyBdDXN9RwOVOG+JhiHCf4zx5tZkHd43PKGY6KLEWpeYCxaphsuGSEjagJLfPqKj8g==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^24.9.0"
