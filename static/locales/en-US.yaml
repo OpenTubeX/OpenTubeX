@@ -700,7 +700,7 @@ About:
   About: About
   Beta: Beta
   Source code: Source code
-  Licensed under the: Licensed under the
+  Licensed under the {licenseLink}: Licensed under the {licenseLink}
   AGPLv3: AGPLv3
   Downloads / Changelog: Downloads / Changelog
   GitHub releases: GitHub Releases
@@ -716,11 +716,11 @@ About:
   Email: Email
   Mastodon: Mastodon
   Chat on Matrix: Chat on Matrix
-  Please read the: Please read the
+  Please read the {roomRulesLink}: Please read the {roomRulesLink}
   room rules: room rules
   Translate: Translate
   Credits: Credits
-  OpenTubeX is made possible by: OpenTubeX is made possible by
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX is made possible by {creditsPageLink}
   these people and projects: these people and projects
   Donate: Donate
 
