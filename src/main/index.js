@@ -2260,7 +2260,6 @@ function runApp() {
 
       if (resourcesCleanUpDone) { return }
 
-      exitFullscreenOnAllWindows()
       e.preventDefault()
       cleanUpResources().finally(() => {
         // Quit AFTER the resources cleanup is finished
