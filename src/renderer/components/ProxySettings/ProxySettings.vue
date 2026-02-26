@@ -19,6 +19,19 @@
         @change="handleUpdateProxy"
       />
     </FtFlexBox>
+    <FtFlexBox class="settingsFlexStart500px">
+      <FtInput
+        :placeholder="$t('Settings.Proxy Settings.IP Block Recovery Script Path')"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
+        show-label
+        :value="videoIpBlockScriptPath"
+        :tooltip="$t('Tooltips.Proxy Settings.IP Block Recovery Script Path')"
+        @input="handleUpdateVideoIpBlockScriptPath"
+        @click="handlePickVideoIpBlockRecoveryScriptPath"
+      />
+    </FtFlexBox>
     <template
       v-if="useProxy"
     >
@@ -179,6 +192,11 @@ const proxyPassword = computed(() => {
   return store.getters.getProxyPassword
 })
 
+/** @type {import('vue').ComputedRef<string>} */
+const videoIpBlockScriptPath = computed(() => {
+  return store.getters.getVideoIpBlockScriptPath
+})
+
 const proxyUrl = computed(() => {
   return `${proxyProtocol.value}://${proxyHostname.value}:${proxyPort.value}`
 })
@@ -278,6 +296,29 @@ function handleUpdateProxyPassword(value) {
   }
 
   store.dispatch('updateProxyPassword', value)
+}
+
+/**
+ * @param {string} value
+ */
+function handleUpdateVideoIpBlockScriptPath(value) {
+  store.dispatch('updateVideoIpBlockScriptPath', value)
+}
+
+async function handlePickVideoIpBlockRecoveryScriptPath() {
+  if (!process.env.IS_ELECTRON || typeof window.ftElectron?.chooseIpBlockRecoveryScript !== 'function') {
+    return
+  }
+
+  try {
+    const scriptPath = await window.ftElectron.chooseIpBlockRecoveryScript(videoIpBlockScriptPath.value)
+    if (typeof scriptPath === 'string' && scriptPath.length > 0) {
+      store.dispatch('updateVideoIpBlockScriptPath', scriptPath)
+    }
+  } catch (error) {
+    console.error('Failed to select IP block recovery script:', error)
+    showToast(t('Settings.Proxy Settings.Failed to select IP block recovery script'))
+  }
 }
 
 function enableProxy() {

@@ -235,6 +235,7 @@ const state = {
   proxyUsername: '',
   proxyPassword: '',
   proxyProtocol: 'socks5',
+  videoIpBlockScriptPath: '',
   proxyVideos: !process.env.SUPPORTS_LOCAL_API,
   region: 'US',
   rememberHistory: true,

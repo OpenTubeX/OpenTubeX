@@ -1413,6 +1413,45 @@ function runApp() {
     return result.filePaths[0]
   }
 
+  /**
+   * @param {import('electron').WebContents} webContents
+   * @param {string | undefined} [currentPath]
+   * @returns {Promise<string | undefined>}
+   */
+  async function chooseIpBlockRecoveryScript(webContents, currentPath) {
+    if (typeof currentPath !== 'string' || currentPath.length === 0) {
+      currentPath = app.getPath('home')
+    }
+
+    /** @type {import('electron').FileFilter[]} */
+    const filters = process.platform === 'win32'
+      ? [
+          { name: 'Windows Script Files', extensions: ['bat', 'ps1', 'vbs'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      : [
+          { name: 'Shell Script Files', extensions: ['sh'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+
+    const dialogOptions = {
+      defaultPath: currentPath,
+      properties: ['openFile'],
+      filters
+    }
+
+    const window = BrowserWindow.fromWebContents(webContents)
+    const result = window
+      ? await dialog.showOpenDialog(window, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return undefined
+    }
+
+    return result.filePaths[0]
+  }
+
   ipcMain.on(IpcChannels.CHOOSE_DEFAULT_FOLDER, async (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
       return
@@ -1425,6 +1464,17 @@ function runApp() {
     if (typeof currentPath !== 'string' || currentPath.length === 0) {
       currentPath = app.getPath('pictures')
     }
+  })
+
+  ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event, currentPath) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      (currentPath != null && typeof currentPath !== 'string')
+    ) {
+      return
+    }
+
+    return await chooseIpBlockRecoveryScript(event.sender, currentPath)
   })
 
   ipcMain.handle(IpcChannels.WRITE_TO_DEFAULT_FOLDER, async (event, filename, arrayBuffer) => {
@@ -1477,6 +1527,69 @@ function runApp() {
     }
 
     return true
+  })
+
+  /**
+   * @param {string} scriptPath
+   * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
+   */
+  async function executeIpBlockRecoveryScript(scriptPath) {
+    const normalizedPath = path.normalize(path.resolve(scriptPath))
+    const maxOutputLength = 16_384
+
+    return new Promise((resolve, reject) => {
+      const child = cp.spawn(normalizedPath, [], {
+        shell: process.platform === 'win32',
+        windowsHide: true
+      })
+
+      let stdout = ''
+      let stderr = ''
+
+      child.stdout?.on('data', (chunk) => {
+        stdout += chunk.toString()
+        if (stdout.length > maxOutputLength) {
+          stdout = stdout.slice(-maxOutputLength)
+        }
+      })
+
+      child.stderr?.on('data', (chunk) => {
+        stderr += chunk.toString()
+        if (stderr.length > maxOutputLength) {
+          stderr = stderr.slice(-maxOutputLength)
+        }
+      })
+
+      child.once('error', (error) => {
+        reject(error)
+      })
+
+      child.once('close', (exitCode, signal) => {
+        resolve({
+          exitCode,
+          signal,
+          stdout,
+          stderr
+        })
+      })
+    })
+  }
+
+  ipcMain.handle(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, async (event, scriptPath) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      typeof scriptPath !== 'string' ||
+      scriptPath.trim().length === 0
+    ) {
+      return
+    }
+
+    try {
+      return await executeIpBlockRecoveryScript(scriptPath)
+    } catch (error) {
+      console.error('EXECUTE_IP_BLOCK_RECOVERY_SCRIPT failed', error)
+      throw new Error('Failed to execute script')
+    }
   })
 
   /** @type {Map<number, number>} */

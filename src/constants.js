@@ -59,7 +59,9 @@ const IpcChannels = {
   GENERATE_PO_TOKEN: 'generate-po-token',
 
   CHOOSE_DEFAULT_FOLDER: 'choose-default-folder',
+  CHOOSE_IP_BLOCK_RECOVERY_SCRIPT: 'choose-ip-block-recovery-script',
   WRITE_TO_DEFAULT_FOLDER: 'write-to-default-folder',
+  EXECUTE_IP_BLOCK_RECOVERY_SCRIPT: 'execute-ip-block-recovery-script',
 
   OPEN_IN_EXTERNAL_PLAYER: 'open-in-external-player',
   OPEN_IN_EXTERNAL_PLAYER_RESULT: 'open-in-external-player-result'

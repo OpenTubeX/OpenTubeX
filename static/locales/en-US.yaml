@@ -653,6 +653,8 @@ Settings:
     Proxy Port Number: Proxy Port Number
     Proxy Username: Proxy Username
     Proxy Password: Proxy Password
+    IP Block Recovery Script Path: IP Block Recovery Script Path
+    Select IP Block Recovery Script File: Select IP Block Recovery Script File
     Clicking on Test Proxy will send a request to: Clicking on Test Proxy will send a request to
     Test Proxy: Test Proxy
     Your Info: Your Info
@@ -661,6 +663,11 @@ Settings:
     Region: Region
     City: City
     Error getting network information. Is your proxy configured properly?: Error getting network information. Is your proxy configured properly?
+    Running IP block recovery script: Running IP block recovery script
+    IP block recovery script failed: 'IP block recovery script failed (exit code: {exitCode})'
+    IP block recovery script finished: IP block recovery script finished
+    Reloading video after IP block recovery: Reloading video after IP block recovery
+    Failed to select IP block recovery script: Failed to select IP block recovery script
   SponsorBlock Settings:
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Enable SponsorBlock
@@ -1067,6 +1074,8 @@ Tooltips:
       By default OpenTubeX will open the clicked link in your default browser.
     Open Deep Links In New Window: URLs passed to OpenTubeX, such as by redirect
       browser extensions or command line arguments, are opened in a new window.
+  Proxy Settings:
+    IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead
       of making a direct connection to YouTube.

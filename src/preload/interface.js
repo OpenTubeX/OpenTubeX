@@ -123,12 +123,28 @@ export default {
   },
 
   /**
+   * @param {string} currentPath
+   * @returns {Promise<string | undefined>}
+   */
+  chooseIpBlockRecoveryScript: (currentPath) => {
+    return ipcRenderer.invoke(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, currentPath)
+  },
+
+  /**
    * @param {string} filename
    * @param {ArrayBuffer} contents
    * @returns {Promise<boolean>}
    */
   writeToDefaultFolder: async (filename, contents) => {
     return await ipcRenderer.invoke(IpcChannels.WRITE_TO_DEFAULT_FOLDER, filename, contents)
+  },
+
+  /**
+   * @param {string} scriptPath
+   * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
+   */
+  executeIpBlockRecoveryScript: async (scriptPath) => {
+    return await ipcRenderer.invoke(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, scriptPath)
   },
 
   relaunch: () => {

@@ -63,7 +63,7 @@
         v-if="showActionButton"
         class="inputAction"
         :class="{
-          enabled: inputDataPresent,
+          enabled: inputDataPresent || allowActionButtonWhenEmpty,
           withLabel: showLabel
         }"
         @click="handleClick"
@@ -193,6 +193,10 @@ const props = defineProps({
   tooltip: {
     type: String,
     default: ''
+  },
+  allowActionButtonWhenEmpty: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -257,7 +261,7 @@ function handleClick(event) {
   inputData.value = query
 
   // No action if no input text
-  if (!inputDataPresent.value) {
+  if (!inputDataPresent.value && !props.allowActionButtonWhenEmpty) {
     return
   }
 

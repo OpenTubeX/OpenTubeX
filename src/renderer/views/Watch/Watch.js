@@ -173,6 +173,8 @@ export default defineComponent({
 
       // When true, the new player after a SABR reload should start playback (was playing before reload)
       resumePlaybackAfterSabrReload: false,
+      ipBlockDetectedInCurrentChain: false,
+      ipBlockRecoveryAttemptedForCurrentVideo: false,
     }
   },
   computed: {
@@ -199,6 +201,9 @@ export default defineComponent({
     },
     backendFallback: function () {
       return this.$store.getters.getBackendFallback
+    },
+    videoIpBlockScriptPath: function () {
+      return this.$store.getters.getVideoIpBlockScriptPath
     },
     currentInvidiousInstanceUrl: function () {
       return this.$store.getters.getCurrentInvidiousInstanceUrl
@@ -356,7 +361,12 @@ export default defineComponent({
       }
 
       // react to route changes...
+      const previousVideoId = this.videoId
       this.videoId = this.$route.params.id
+      if (this.videoId !== previousVideoId) {
+        this.ipBlockRecoveryAttemptedForCurrentVideo = false
+      }
+      this.ipBlockDetectedInCurrentChain = false
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
@@ -638,6 +648,7 @@ export default defineComponent({
 
           if (playabilityStatus.reason === BOT_MESSAGE || playabilityStatus.reason === 'Please sign in') {
             errorText = this.$t('Video.IP block')
+            this.ipBlockDetectedInCurrentChain = true
           } else {
             errorText = `[${playabilityStatus.status}] ${playabilityStatus.reason}`
 
@@ -649,6 +660,11 @@ export default defineComponent({
           if (this.backendFallback) {
             throw new Error(errorText)
           } else {
+            const didReload = await this.runIpBlockRecoveryScriptAndReload()
+            if (didReload) {
+              return
+            }
+
             this.errorMessage = errorText
             this.isLoading = false
             this.updateTitle()
@@ -887,6 +903,11 @@ export default defineComponent({
           showToast(this.$t('Falling back to Invidious API'))
           this.getVideoInformationInvidious()
         } else {
+          const didReload = await this.runIpBlockRecoveryScriptAndReload()
+          if (didReload) {
+            return
+          }
+
           this.isLoading = false
         }
       }
@@ -1066,7 +1087,7 @@ export default defineComponent({
 
           this.isLoading = false
         })
-        .catch(err => {
+        .catch(async err => {
           console.error(err)
           const errorMessage = this.$t('Invidious API Error (Click to copy)')
           showToast(`${errorMessage}: ${err}`, 10000, () => {
@@ -1077,9 +1098,49 @@ export default defineComponent({
             showToast(this.$t('Falling back to Local API'))
             this.getVideoInformationLocal()
           } else {
+            const didReload = await this.runIpBlockRecoveryScriptAndReload()
+            if (didReload) {
+              return
+            }
+
             this.isLoading = false
           }
         })
+    },
+
+    async runIpBlockRecoveryScriptAndReload() {
+      if (
+        !this.ipBlockDetectedInCurrentChain ||
+        this.ipBlockRecoveryAttemptedForCurrentVideo ||
+        !process.env.IS_ELECTRON
+      ) {
+        return false
+      }
+
+      const scriptPath = this.videoIpBlockScriptPath.trim()
+      if (scriptPath.length === 0 || typeof window.ftElectron?.executeIpBlockRecoveryScript !== 'function') {
+        return false
+      }
+
+      this.ipBlockRecoveryAttemptedForCurrentVideo = true
+      showToast(this.$t('Settings.Proxy Settings.Running IP block recovery script'))
+
+      try {
+        const result = await window.ftElectron.executeIpBlockRecoveryScript(scriptPath)
+        if (result?.exitCode !== 0) {
+          const exitCode = result?.exitCode == null ? 'unknown' : `${result.exitCode}`
+          showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }))
+        } else {
+          showToast(this.$t('Settings.Proxy Settings.IP block recovery script finished'))
+        }
+      } catch (error) {
+        console.error('IP block recovery script failed:', error)
+        showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }))
+      }
+
+      showToast(this.$t('Settings.Proxy Settings.Reloading video after IP block recovery'))
+      await this.reloadView()
+      return true
     },
 
     extractExpiryDateFromStreamingUrl: function (url) {
@@ -1473,7 +1534,7 @@ export default defineComponent({
     /**
      * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
      */
-    handlePlayerError: function (error) {
+    handlePlayerError: async function (error) {
       // the error is logged to the console inside the player so we don't have to do it here
 
       const { Code } = shaka.util.Error
@@ -1505,6 +1566,9 @@ export default defineComponent({
             } else {
               this.errorMessage = '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
             }
+
+            this.ipBlockDetectedInCurrentChain = true
+            await this.runIpBlockRecoveryScriptAndReload()
             return
         }
       } else if (error.code === Code.VIDEO_ERROR) {

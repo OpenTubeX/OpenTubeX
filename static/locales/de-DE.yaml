@@ -573,6 +573,13 @@ Settings:
     Proxy Warning: OpenTubeX hat keinen eingebauten Proxy, kann aber mit einem externen Proxy verbunden werden, wie z. B. einem, der auf deinem Gerät läuft wie Tor, oder einem externen Proxy wie einem SOCKS5-Proxy, der von einigen VPNs bereitgestellt wird. Falls aktiviert, stelle sicher, dass dein Proxy/Tor richtig konfiguriert ist, da OpenTubeX ansonsten keine Daten abrufen kann.
     Proxy Username: Proxy-Anmeldename
     Proxy Password: Proxy-Passwort
+    IP Block Recovery Script Path: Skriptpfad zur IP-Block-Wiederherstellung
+    Select IP Block Recovery Script File: Skriptdatei für IP-Block-Wiederherstellung auswählen
+    Running IP block recovery script: IP-Block-Wiederherstellungsskript wird ausgeführt
+    IP block recovery script failed: 'IP-Block-Wiederherstellungsskript fehlgeschlagen (Exit-Code: {exitCode})'
+    IP block recovery script finished: IP-Block-Wiederherstellungsskript abgeschlossen
+    Reloading video after IP block recovery: Video wird nach IP-Block-Wiederherstellung neu geladen
+    Failed to select IP block recovery script: Auswahl der IP-Block-Wiederherstellungsskriptdatei fehlgeschlagen
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Benachrichtigen, wenn ein Abschnitt übersprungen wird
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
@@ -974,6 +981,8 @@ Tooltips:
     Region for Trending: Die Trendregion erlaubt es dir auszuwählen, aus welchem Land die Trends angezeigt werden sollen.
     External Link Handling: "Wähle das Standardverhalten, wenn ein Link angeklickt wird, der nicht in OpenTubeX geöffnet werden kann.\nStandardmäßig wird OpenTubeX den angeklickten Link in deinem Standardbrowser öffnen.\n"
     Open Deep Links In New Window: URLs, die an OpenTubeX übergeben werden, z. B. durch Redirect-Browser-Erweiterungen oder Befehlszeilenargumente, werden in einem neuen Fenster geöffnet.
+  Proxy Settings:
+    IP Block Recovery Script Path: Pfad zur Skriptdatei, die bei erkannter IP-Sperre ausgeführt wird. OpenTubeX wartet bis zum Abschluss und lädt danach das Video neu. Wenn der Fallback aktiviert ist, wird das Skript nur ausgeführt, wenn auch der Fallback fehlschlägt.
   Subscription Settings:
     Fetch Feeds from RSS: Wenn aktiviert, verwendet OpenTubeX RSS anstelle der Standardmethode, um deinen Abo-Feed abzurufen. RSS ist schneller und verhindert die IP-Sperren, liefert aber bestimmte Informationen wie Videodauer, den Live-Status oder Beiträge nicht
     Fetch Automatically: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
