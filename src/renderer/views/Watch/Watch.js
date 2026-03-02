@@ -1123,22 +1123,23 @@ export default defineComponent({
       }
 
       this.ipBlockRecoveryAttemptedForCurrentVideo = true
-      showToast(this.$t('Settings.Proxy Settings.Running IP block recovery script'))
+      const longToastDurationMs = 10000
+      showToast(this.$t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
 
       try {
         const result = await window.ftElectron.executeIpBlockRecoveryScript(scriptPath)
         if (result?.exitCode !== 0) {
           const exitCode = result?.exitCode == null ? 'unknown' : `${result.exitCode}`
-          showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }))
+          showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs)
         } else {
-          showToast(this.$t('Settings.Proxy Settings.IP block recovery script finished'))
+          showToast(this.$t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs)
         }
       } catch (error) {
         console.error('IP block recovery script failed:', error)
-        showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }))
+        showToast(this.$t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
       }
 
-      showToast(this.$t('Settings.Proxy Settings.Reloading video after IP block recovery'))
+      showToast(this.$t('Settings.Proxy Settings.Reloading video after IP block recovery'), longToastDurationMs)
       await this.reloadView()
       return true
     },
