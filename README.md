@@ -25,10 +25,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 > <img width="266" height="48" alt="image" src="https://github.com/user-attachments/assets/aefda586-0907-4e9a-add5-1d68abcd712a" />
 >
 > - Experimental tab support. This is still a work in progress and may have bugs or missing functionality.
->  <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
+> <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 >
-> If you want to try or test it, you can download a build from [GitHub Actions](https://github.com/OpenTubeX/OpenTubeX/actions?query=workflow%3ABuild) or if you are using Arch Linux it is available on the AUR as [`opentubex-git`](https://aur.archlinux.org/packages/opentubex-git).
-> If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
+> - Option to define a script to run when YouTube blocked your IP
+> <img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
+
 
 <p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
