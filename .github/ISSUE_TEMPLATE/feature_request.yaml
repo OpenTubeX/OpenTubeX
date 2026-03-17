@@ -53,6 +53,13 @@ body:
         - visual improvement
     validations:
       required: true
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Upload screenshots or videos
+      description: If applicable, add screenshots or videos to help explain your request.
+    validations:
+      required: false
   - type: textarea
     attributes:
       label: Additional Information
