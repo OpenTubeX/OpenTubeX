@@ -22,22 +22,9 @@ const TRACKING_PARAM_NAMES = [
 ]
 
 if (process.env.SUPPORTS_LOCAL_API) {
-  Platform.shim.eval = (data, env) => {
+  Platform.shim.eval = (data) => {
     return new Promise((resolve, reject) => {
-      const properties = []
-
-      if (env.n) {
-        properties.push(`n: exportedVars.nFunction("${env.n}")`)
-      }
-
-      if (env.sig) {
-        properties.push(`sig: exportedVars.sigFunction("${env.sig}")`)
-      }
-
-      // Triggers permission errors if we don't remove it (added by YouTube.js), as sessionStorage isn't accessible in sandboxed cross-origin iframes
-      const modifiedOutput = data.output.replace('const window = Object.assign({}, globalThis);', '')
-
-      const code = `${modifiedOutput}\nreturn {${properties.join(', ')}}`
+      const code = data.output
 
       // Generate a unique ID, as there may be multiple eval calls going on at the same time (e.g. DASH manifest generation)
       const messageId = process.env.IS_ELECTRON || crypto.randomUUID
@@ -108,7 +95,6 @@ async function createInnertube({ withPlayer = false, location = undefined, safet
     user_agent: navigator.userAgent,
 
     retrieve_player: !!withPlayer,
-    player_id: '9f4cc5e4',
     location: location,
     enable_safety_mode: !!safetyMode,
     client_type: clientType,
@@ -1110,7 +1096,7 @@ export function parseShort(short, channelId, channelName) {
     return {
       type: 'video',
       videoId: reelItem.id,
-      title: reelItem.title.text,
+      title: reelItem.title.text?.trim(),
       author: channelName,
       authorId: channelId,
       viewCount: reelItem.views.isEmpty() ? null : parseLocalSubscriberCount(reelItem.views.text),
@@ -1123,7 +1109,7 @@ export function parseShort(short, channelId, channelName) {
     return {
       type: 'video',
       videoId: shortsLockupView.on_tap_endpoint.payload.videoId,
-      title: shortsLockupView.overlay_metadata.primary_text.text,
+      title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
       author: channelName,
       authorId: channelId,
       viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
@@ -1318,7 +1304,7 @@ export function parseLocalPlaylistVideo(video) {
     return {
       type: 'video',
       videoId: short.id,
-      title: short.title.text,
+      title: short.title.text?.trim(),
       viewCount: parseLocalSubscriberCount(short.views.text),
       lengthSeconds: ''
     }
@@ -1354,7 +1340,7 @@ export function parseLocalPlaylistVideo(video) {
     return {
       type: 'video',
       videoId: shortsLockupView.on_tap_endpoint.payload.videoId,
-      title: shortsLockupView.overlay_metadata.primary_text.text,
+      title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
       viewCount,
       lengthSeconds: ''
     }
@@ -1400,7 +1386,7 @@ export function parseLocalPlaylistVideo(video) {
     return {
       type: 'video',
       videoId: video_.id,
-      title: video_.title.text,
+      title: video_.title.text?.trim(),
       author: video_.author.name,
       authorId: (video_.author?.id != null && video_.author.id !== 'N/A') ? video_.author.id : null,
       viewCount,
@@ -1426,7 +1412,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: movie.id,
-      title: movie.title.text,
+      title: movie.title.text?.trim(),
       author: movie.author.name !== 'N/A' ? movie.author.name : channelName,
       authorId: movie.author.id !== 'N/A' ? movie.author.id : channelId,
       description: movie.description_snippet?.text,
@@ -1456,7 +1442,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: video.video_id,
-      title: video.title.text,
+      title: video.title.text?.trim(),
       author: video.author?.name ?? channelName,
       authorId: (video.author?.id != null && video.author.id !== 'N/A') ? video.author.id : channelId,
       viewCount: video.views.text == null ? null : extractNumberFromString(video.views.text),
@@ -1507,7 +1493,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
     return {
       type: 'video',
       videoId: video.video_id,
-      title: video.title.text,
+      title: video.title.text?.trim(),
       author: video.author.name !== 'N/A' ? video.author.name : channelName,
       authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
       description: video.description,
@@ -1616,7 +1602,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       return {
         type: 'video',
         videoId: lockupView.content_id,
-        title: lockupView.metadata.title.text,
+        title: lockupView.metadata.title.text?.trim(),
         author: lockupView.metadata.metadata?.metadata_rows[0].metadata_parts?.[0].text?.text,
         authorId: lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId,
         viewCount,
@@ -1664,13 +1650,12 @@ function parseListItem(item, channelId, channelName) {
       /** @type {import('youtubei.js').YTNodes.GridChannel} */
       const channel = item
       let subscribers = null
-      let videos = null
 
       if (channel.subscribers?.text) {
         subscribers = parseLocalSubscriberCount(channel.subscribers.text)
       }
 
-      videos = extractNumberFromString(channel.video_count.text)
+      const videos = extractNumberFromString(channel.video_count.text)
 
       return {
         type: 'channel',
@@ -1757,7 +1742,7 @@ export function parseLocalWatchNextVideo(video) {
     return {
       type: 'video',
       videoId: video.id,
-      title: video.title.text,
+      title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
       lengthSeconds: video.duration.seconds
@@ -1776,7 +1761,7 @@ export function parseLocalWatchNextVideo(video) {
     return {
       type: 'video',
       videoId: video.video_id,
-      title: video.title.text,
+      title: video.title.text?.trim(),
       author: video.author.name,
       authorId: video.author.id,
       viewCount: video.view_count == null ? null : extractNumberFromString(video.view_count.text),

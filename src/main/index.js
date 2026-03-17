@@ -1063,7 +1063,16 @@ function runApp() {
 
       newWindow.on('minimize', () => {
         if (trayOnMinimize) {
-          newWindow.hide()
+          // Workaround for https://github.com/electron/electron/issues/49253
+          if (process.platform === 'linux') {
+            setTimeout(() => {
+              newWindow.restore()
+              newWindow.hide()
+            }, 100)
+          } else {
+            newWindow.hide()
+          }
+
           manageTray(newWindow)
 
           if (newWindow === mainWindow) {
@@ -1460,13 +1469,9 @@ function runApp() {
       return
     }
 
-    let currentPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
+    const currentPath = (await baseHandlers.settings._findOne('screenshotFolderPath'))?.value
 
     await chooseDefaultFolder(event.sender, currentPath)
-
-    if (typeof currentPath !== 'string' || currentPath.length === 0) {
-      currentPath = app.getPath('pictures')
-    }
   })
 
   ipcMain.handle(IpcChannels.CHOOSE_IP_BLOCK_RECOVERY_SCRIPT, async (event, currentPath) => {
@@ -1526,6 +1531,7 @@ function runApp() {
     } catch (error) {
       console.error('WRITE_TO_DEFAULT_FOLDER failed', error)
       // throw a new error so that we don't expose the real error to the renderer
+      // eslint-disable-next-line preserve-caught-error
       throw new Error('Failed to save')
     }
 
@@ -1591,7 +1597,7 @@ function runApp() {
       return await executeIpBlockRecoveryScript(scriptPath)
     } catch (error) {
       console.error('EXECUTE_IP_BLOCK_RECOVERY_SCRIPT failed', error)
-      throw new Error('Failed to execute script')
+      throw new Error('Failed to execute script', { cause: error })
     }
   })
 
