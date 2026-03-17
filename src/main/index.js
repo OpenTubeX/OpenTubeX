@@ -1597,7 +1597,7 @@ function runApp() {
       return await executeIpBlockRecoveryScript(scriptPath)
     } catch (error) {
       console.error('EXECUTE_IP_BLOCK_RECOVERY_SCRIPT failed', error)
-      throw new Error('Failed to execute script')
+      throw new Error('Failed to execute script', { cause: error })
     }
   })
 
