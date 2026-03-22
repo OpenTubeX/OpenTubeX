@@ -53,6 +53,22 @@ body:
         - visual improvement
     validations:
       required: true
+  - type: input
+    attributes:
+      label: OpenTubeX Version
+      description: |
+        If using releases, enter the version.
+        If using nightly builds, enter commit hash or build number, you can find it via about page in the OpenTubeX application.
+      placeholder: v0.14.0, 8c4278
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Operating System Version
+      description: What operating system version are you using? On Windows, click Start button > Settings > System > About. On macOS, click the Apple Menu > About This Mac. On Linux, use lsb_release or uname -a.
+      placeholder: "e.g. Windows 10 version 1909, macOS Catalina 10.15.7, or Ubuntu 20.04"
+    validations:
+      required: true
   - type: upload
     id: screenshots
     attributes:
