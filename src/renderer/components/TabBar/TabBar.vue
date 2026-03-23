@@ -6,6 +6,7 @@
     <div
       ref="dropZoneRef"
       class="tabsContainer"
+      @wheel.prevent="handleWheel"
     >
       <SortableTab
         v-for="(tab, index) in tabs"
@@ -188,6 +189,16 @@ function handleMiddleClick(event, tabId) {
 
 function createNewTab() {
   store.dispatch('createTab', { makeActive: true })
+}
+
+/**
+ * @param {WheelEvent} event
+ */
+function handleWheel(event) {
+  const container = dropZoneRef.value
+  if (!container) return
+
+  container.scrollLeft += event.deltaY || event.deltaX
 }
 </script>
 
