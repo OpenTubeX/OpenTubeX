@@ -191,6 +191,28 @@ function createNewTab() {
   store.dispatch('createTab', { makeActive: true })
 }
 
+let scrollTarget = null
+let scrollAnimationId = null
+
+function animateScroll() {
+  const container = dropZoneRef.value
+  if (!container || scrollTarget == null) {
+    scrollAnimationId = null
+    return
+  }
+
+  const diff = scrollTarget - container.scrollLeft
+  if (Math.abs(diff) < 0.5) {
+    container.scrollLeft = scrollTarget
+    scrollTarget = null
+    scrollAnimationId = null
+    return
+  }
+
+  container.scrollLeft += diff * 0.25
+  scrollAnimationId = requestAnimationFrame(animateScroll)
+}
+
 /**
  * @param {WheelEvent} event
  */
@@ -198,7 +220,17 @@ function handleWheel(event) {
   const container = dropZoneRef.value
   if (!container) return
 
-  container.scrollLeft += event.deltaY || event.deltaX
+  const delta = event.deltaY || event.deltaX
+  const maxScroll = container.scrollWidth - container.clientWidth
+
+  if (scrollTarget == null) {
+    scrollTarget = container.scrollLeft
+  }
+  scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget + delta))
+
+  if (!scrollAnimationId) {
+    scrollAnimationId = requestAnimationFrame(animateScroll)
+  }
 }
 </script>
 
