@@ -24,7 +24,7 @@
       :inert="isAnyPromptOpen"
     >
       <div
-        v-if="showUpdatesBanner || showBlogBanner"
+        v-if="showUpdatesBanner"
         class="banner-wrapper"
       >
         <FtNotificationBanner
@@ -33,13 +33,6 @@
           :message="updateBannerMessage"
           role="link"
           @click="handleUpdateBannerClick"
-        />
-        <FtNotificationBanner
-          v-if="showBlogBanner"
-          class="banner"
-          :message="blogBannerMessage"
-          role="link"
-          @click="handleNewBlogBannerClick"
         />
       </div>
       <RouterView
@@ -212,7 +205,6 @@ onMounted(async () => {
 
     setTimeout(() => {
       checkForNewUpdates()
-      checkForNewBlogPosts()
     }, 500)
   })
 
@@ -331,55 +323,6 @@ function openDownloadsPage() {
   openExternalLink('https://github.com/OpenTubeX/OpenTubeX/releases')
   showReleaseNotes.value = false
   showUpdatesBanner.value = false
-}
-
-const showBlogBanner = ref(false)
-const latestBlogTitle = ref('')
-const latestBlogUrl = ref('')
-
-const blogBannerMessage = computed(() => {
-  return t('A new blog is now available, {blogTitle}. Click to view more', { blogTitle: latestBlogTitle.value })
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const checkForBlogPosts = computed(() => store.getters.getCheckForBlogPosts)
-
-async function checkForNewBlogPosts() {
-  if (!checkForBlogPosts.value) {
-    return
-  }
-
-  let lastAppWasRunning = localStorage.getItem('lastAppWasRunning')
-
-  if (lastAppWasRunning !== null) {
-    lastAppWasRunning = new Date(lastAppWasRunning)
-  }
-
-  const response = await fetch('https://write.as/freetube/feed/')
-  const text = await response.text()
-  const xmlDom = new DOMParser().parseFromString(text, 'application/xml')
-
-  const latestBlog = xmlDom.querySelector('item')
-  const latestPubDate = new Date(latestBlog.querySelector('pubDate').textContent)
-
-  if (lastAppWasRunning === null || latestPubDate > lastAppWasRunning) {
-    latestBlogTitle.value = latestBlog.querySelector('title').textContent
-    latestBlogUrl.value = latestBlog.querySelector('link').textContent
-    showBlogBanner.value = true
-  }
-
-  localStorage.setItem('lastAppWasRunning', new Date())
-}
-
-/**
- * @param {boolean} response
- */
-function handleNewBlogBannerClick(response) {
-  if (response) {
-    openExternalLink(latestBlogUrl.value)
-  }
-
-  showBlogBanner.value = false
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
