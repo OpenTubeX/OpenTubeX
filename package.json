@@ -2,7 +2,7 @@
   "name": "opentubex",
   "productName": "OpenTubeX",
   "description": "A private YouTube client",
-  "version": "0.24.3",
+  "version": "0.24.4",
   "license": "AGPL-3.0-or-later",
   "main": "./dist/main.js",
   "private": true,
