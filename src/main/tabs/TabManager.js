@@ -10,6 +10,8 @@ import { isOpenTubeXUrl } from '../utils.js'
 /** @type {Map<number, TabManager>} windowId -> TabManager */
 const tabManagers = new Map()
 
+const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'x11'
+
 /**
  * @typedef {object} TabInfo
  * @property {string} id
@@ -21,6 +23,8 @@ const tabManagers = new Map()
  */
 
 export class TabManager {
+  static _isX11 = isX11
+
   /**
    * @param {import('electron').BrowserWindow} browserWindow
    * @param {string} rootAppUrl
@@ -47,8 +51,14 @@ export class TabManager {
 
     tabManagers.set(browserWindow.id, this)
 
-    // Update view bounds when window resizes
+    // Update view bounds when window resizes or fullscreen state changes.
+    // On X11, entering/leaving fullscreen from a WebContentsView may not
+    // reliably trigger a resize event, so we listen explicitly.
     this.browserWindow.on('resize', () => this._updateActiveViewBounds())
+    this.browserWindow.on('enter-full-screen', () => this._updateActiveViewBounds())
+    this.browserWindow.on('leave-full-screen', () => this._updateActiveViewBounds())
+    this.browserWindow.on('enter-html-full-screen', () => this._updateActiveViewBounds())
+    this.browserWindow.on('leave-html-full-screen', () => this._updateActiveViewBounds())
 
     // Clean up when window closes
     this.browserWindow.on('closed', () => {
@@ -164,6 +174,16 @@ export class TabManager {
       }
 
       return { action: 'deny' }
+    })
+
+    // Update view bounds when this tab enters or leaves HTML fullscreen.
+    // On X11, the BrowserWindow fullscreen events may not fire reliably for
+    // WebContentsView children, so we also listen on the individual webContents.
+    view.webContents.on('enter-html-full-screen', () => {
+      this._updateActiveViewBounds()
+    })
+    view.webContents.on('leave-html-full-screen', () => {
+      this._updateActiveViewBounds()
     })
 
     // Listen for title updates
@@ -525,20 +545,39 @@ export class TabManager {
   }
 
   /**
-   * Update the active view bounds to match the window content area
+   * Update the active view bounds to match the window content area.
+   * On X11, window manager fullscreen transitions are asynchronous so the
+   * content bounds may not be final when this is first called. A deferred
+   * second pass ensures the view is correctly sized once the transition
+   * settles.
    */
   _updateActiveViewBounds() {
     if (!this.activeTabId) return
     const tab = this.tabs.get(this.activeTabId)
     if (!tab) return
 
-    const bounds = this.browserWindow.getContentBounds()
-    tab.view.setBounds({
-      x: 0,
-      y: 0,
-      width: bounds.width,
-      height: bounds.height
-    })
+    const applyBounds = () => {
+      if (tab.view.webContents.isDestroyed()) return
+      const bounds = this.browserWindow.getContentBounds()
+      tab.view.setBounds({
+        x: 0,
+        y: 0,
+        width: bounds.width,
+        height: bounds.height
+      })
+    }
+
+    applyBounds()
+
+    if (TabManager._isX11) {
+      if (this._boundsUpdateTimer) {
+        clearTimeout(this._boundsUpdateTimer)
+      }
+      this._boundsUpdateTimer = setTimeout(() => {
+        this._boundsUpdateTimer = null
+        applyBounds()
+      }, 100)
+    }
   }
 
   /**
