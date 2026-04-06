@@ -35,7 +35,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, watch, onUnmounted } from 'vue'
+import { computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 import { useDroppable, useDnDStore } from '@vue-dnd-kit/core'
 
@@ -191,6 +191,8 @@ function createNewTab() {
   store.dispatch('createTab', { makeActive: true })
 }
 
+const tabBarScrollPosition = computed(() => store.getters.getTabBarScrollPosition)
+
 let scrollTarget = null
 let scrollAnimationId = null
 
@@ -228,10 +230,32 @@ function handleWheel(event) {
   }
   scrollTarget = Math.max(0, Math.min(maxScroll, scrollTarget + delta))
 
+  if (isElectron) {
+    window.ftElectron.tabs.setTabBarScroll(scrollTarget)
+  }
+
   if (!scrollAnimationId) {
     scrollAnimationId = requestAnimationFrame(animateScroll)
   }
 }
+
+// Apply scroll position received from main process state broadcasts.
+// This keeps all tab renderers' tab bars at the same scroll offset.
+watch(tabBarScrollPosition, (newPosition) => {
+  if (newPosition == null) return
+
+  nextTick(() => {
+    const container = dropZoneRef.value
+    if (!container) return
+
+    if (scrollAnimationId) {
+      scrollTarget = newPosition
+    } else {
+      container.scrollLeft = newPosition
+      scrollTarget = newPosition
+    }
+  })
+})
 </script>
 
 <style scoped src="./TabBar.css" />

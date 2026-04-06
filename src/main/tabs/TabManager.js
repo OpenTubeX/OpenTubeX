@@ -48,6 +48,8 @@ export class TabManager {
     this.closedTabUrls = [] // For restore closed tab functionality
     /** @type {number} */
     this.tabCounter = 0
+    /** @type {number} */
+    this.tabBarScrollPosition = 0
 
     tabManagers.set(browserWindow.id, this)
 
@@ -530,7 +532,8 @@ export class TabManager {
 
     return {
       tabs,
-      activeTabId: this.activeTabId
+      activeTabId: this.activeTabId,
+      tabBarScrollPosition: this.tabBarScrollPosition
     }
   }
 
@@ -744,6 +747,16 @@ export function setupTabsIPC() {
         manager._broadcastStateUpdate()
         manager._saveSession()
       }
+    }
+  })
+
+  // Update tab bar scroll position (keeps scroll in sync across all tab renderers)
+  ipcMain.on(IpcChannels.TABS_SET_TAB_BAR_SCROLL, (event, position) => {
+    if (typeof position !== 'number') return
+
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager) {
+      manager.tabBarScrollPosition = position
     }
   })
 

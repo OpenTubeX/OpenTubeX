@@ -422,6 +422,14 @@ export default {
     },
 
     /**
+     * Set the tab bar scroll position (synced across all tab renderers via main process)
+     * @param {number} position
+     */
+    setTabBarScroll: (position) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_TAB_BAR_SCROLL, position)
+    },
+
+    /**
      * Listen for tab state updates
      * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
      */
