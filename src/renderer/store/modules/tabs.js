@@ -5,6 +5,7 @@
 const state = {
   tabs: [],
   activeTabId: null,
+  tabBarScrollPosition: 0,
   currentWatchTimestamp: null
 }
 
@@ -13,13 +14,17 @@ const getters = {
   getActiveTabId: (state) => state.activeTabId,
   getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId),
   getTabCount: (state) => state.tabs.length,
+  getTabBarScrollPosition: (state) => state.tabBarScrollPosition,
   getCurrentWatchTimestamp: (state) => state.currentWatchTimestamp
 }
 
 const mutations = {
-  setTabsState(state, { tabs, activeTabId }) {
+  setTabsState(state, { tabs, activeTabId, tabBarScrollPosition }) {
     state.tabs = tabs
     state.activeTabId = activeTabId
+    if (tabBarScrollPosition != null) {
+      state.tabBarScrollPosition = tabBarScrollPosition
+    }
   },
   setCurrentWatchTimestamp(state, value) {
     state.currentWatchTimestamp = value
