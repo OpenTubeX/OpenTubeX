@@ -138,7 +138,8 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
       detail: {
         format,
         playbackPosition,
-        restoreCaptionIndex
+        restoreCaptionIndex,
+        userSelected: true
       }
     }))
   }
