@@ -105,6 +105,12 @@
             @click="saveChannelPlaybackSpeedManually"
           />
           <FtIconButton
+            v-if="showSaveChannelVideoQualityButton"
+            :title="t('Video.Save Channel Video Quality')"
+            :icon="['fas', 'photo-film']"
+            @click="saveChannelVideoQualityManually"
+          />
+          <FtIconButton
             v-if="useSponsorBlock && !isUpcoming"
             :title="sponsorBlockToggleTitle"
             :icon="['fas', 'shield-halved']"
@@ -256,6 +262,7 @@ const emit = defineEmits([
   'pause-player',
   'save-watched-progress',
   'save-channel-playback-speed',
+  'save-channel-video-quality',
   'toggle-sponsorblock-autoskip',
 ])
 
@@ -353,6 +360,20 @@ const showSaveChannelPlaybackSpeedButton = computed(() => {
 
 function saveChannelPlaybackSpeedManually() {
   emit('save-channel-playback-speed')
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberVideoQualityPerChannel = computed(() => store.getters.getRememberVideoQualityPerChannel)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoUpdateChannelVideoQualities = computed(() => store.getters.getAutoUpdateChannelVideoQualities)
+
+const showSaveChannelVideoQualityButton = computed(() => {
+  return !props.isUpcoming && rememberVideoQualityPerChannel.value && !autoUpdateChannelVideoQualities.value
+})
+
+function saveChannelVideoQualityManually() {
+  emit('save-channel-video-quality')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

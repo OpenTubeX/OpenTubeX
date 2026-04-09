@@ -42,6 +42,7 @@
           :start-in-fullwindow="startNextVideoInFullwindow"
           :start-in-pip="startNextVideoInPip"
           :current-playback-rate="currentPlaybackRate"
+          :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
@@ -55,6 +56,8 @@
           @toggle-autoplay="toggleAutoplay"
           @playback-rate-updated="updatePlaybackRate"
           @playback-rate-user-set="handlePlaybackRateUserSet"
+          @video-quality-updated="updateVideoQuality"
+          @video-quality-user-set="handleVideoQualityUserSet"
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
@@ -163,6 +166,7 @@
         @pause-player="pausePlayer"
         @save-watched-progress="handleWatchProgressManualSave"
         @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+        @save-channel-video-quality="handleChannelVideoQualityManualSave"
         @toggle-sponsorblock-autoskip="handleSponsorBlockAutoSkipToggle"
       />
       <watch-video-chapters

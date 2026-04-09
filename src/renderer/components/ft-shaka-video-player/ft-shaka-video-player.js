@@ -158,6 +158,10 @@ export default defineComponent({
       type: Number,
       default: 1
     },
+    currentVideoQuality: {
+      type: String,
+      default: '720'
+    },
     delayLoadUntilUnix: {
       type: Number,
       default: 0
@@ -181,6 +185,8 @@ export default defineComponent({
     'toggle-theatre-mode',
     'playback-rate-updated',
     'playback-rate-user-set',
+    'video-quality-updated',
+    'video-quality-user-set',
     'skip-to-next',
     'skip-to-prev',
     'player-reload-requested',
@@ -298,6 +304,12 @@ export default defineComponent({
       // if (value === 'auto') { return value }
 
       return parseInt(value)
+    })
+
+    /** @type {import('vue').ComputedRef<number>} */
+    const preferredVideoQuality = computed(() => {
+      const value = Number.parseInt(props.currentVideoQuality)
+      return Number.isNaN(value) ? defaultQuality.value : value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -1568,6 +1580,32 @@ export default defineComponent({
     // #region set quality
 
     /**
+     * @param {number | undefined} width
+     * @param {number | undefined} height
+     * @returns {string | null}
+     */
+    function getQualityFromDimensions(width, height) {
+      if (typeof width !== 'number' || typeof height !== 'number') {
+        return null
+      }
+
+      return `${height > width ? width : height}`
+    }
+
+    /**
+     * @returns {string | null}
+     */
+    function getActiveVariantQuality() {
+      const activeVariant = player.getVariantTracks().find(track => track.active)
+
+      if (!activeVariant) {
+        return null
+      }
+
+      return getQualityFromDimensions(activeVariant.width, activeVariant.height)
+    }
+
+    /**
      * @param {number} quality
      * @param {number | undefined} audioBandwidth
      * @param {string | undefined} label
@@ -1622,11 +1660,7 @@ export default defineComponent({
      */
     async function setLegacyQuality(playbackPosition = null, previousQuality = undefined) {
       if (typeof previousQuality === 'undefined') {
-        if (defaultQuality.value === 'auto') {
-          previousQuality = Infinity
-        } else {
-          previousQuality = defaultQuality.value
-        }
+        previousQuality = preferredVideoQuality.value
       }
 
       /** @type {object[]} */
@@ -1989,13 +2023,23 @@ export default defineComponent({
 
     function registerLegacyQualitySelection() {
       events.addEventListener('setLegacyFormat', async (/** @type {CustomEvent} */ event) => {
-        const { format, playbackPosition, restoreCaptionIndex: restoreCaptionIndex_ = null } = event.detail
+        const { format, playbackPosition, restoreCaptionIndex: restoreCaptionIndex_ = null, userSelected = false } = event.detail
 
         if (restoreCaptionIndex_ !== null) {
           restoreCaptionIndex = restoreCaptionIndex_
         }
 
         activeLegacyFormat.value = event.detail.format
+        const quality = getQualityFromDimensions(format.width, format.height)
+
+        if (quality !== null) {
+          emit('video-quality-updated', quality)
+        }
+
+        if (userSelected && quality !== null) {
+          emit('video-quality-user-set', quality)
+        }
+
         try {
           await player.load(format.url, playbackPosition, format.mimeType)
         } catch (error) {
@@ -2830,6 +2874,32 @@ export default defineComponent({
       }
     }
 
+    /**
+     * @param {MouseEvent} event
+     */
+    function handleQualityMenuClick(event) {
+      const target = event.target
+      const resolutionsContainer = target.closest('.shaka-resolutions')
+
+      if (resolutionsContainer) {
+        const button = target.closest('button')
+
+        if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
+          setTimeout(() => {
+            if (!player || player.getConfiguration().abr.enabled) {
+              return
+            }
+
+            const quality = getActiveVariantQuality()
+
+            if (quality !== null) {
+              emit('video-quality-user-set', quality)
+            }
+          }, 50)
+        }
+      }
+    }
+
     window.addEventListener('online', onlineHandler)
     window.addEventListener('offline', offlineHandler)
 
@@ -2891,7 +2961,7 @@ export default defineComponent({
 
       player.addEventListener('error', event => handleError(event.detail, 'shaka error handler'))
 
-      player.configure(getPlayerConfig(props.format, defaultQuality.value === 'auto'))
+      player.configure(getPlayerConfig(props.format, false))
 
       if (process.env.SUPPORTS_LOCAL_API) {
         player.getNetworkingEngine().registerRequestFilter(requestFilter)
@@ -2935,6 +3005,7 @@ export default defineComponent({
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
       document.addEventListener('click', handlePlaybackRateMenuClick, true)
+      document.addEventListener('click', handleQualityMenuClick, true)
 
       // Set up IPC listener for exit fullscreen when tab becomes inactive (Electron only)
       // Only set up after UI is fully initialized
@@ -2951,6 +3022,17 @@ export default defineComponent({
       })
 
       player.addEventListener('loaded', handleLoaded)
+      player.addEventListener('variantchanged', () => {
+        if (props.format === 'legacy' || player.getConfiguration().abr.enabled) {
+          return
+        }
+
+        const quality = getActiveVariantQuality()
+
+        if (quality !== null) {
+          emit('video-quality-updated', quality)
+        }
+      })
 
       if (props.format !== 'legacy') {
         player.addEventListener('streaming', () => {
@@ -3029,22 +3111,20 @@ export default defineComponent({
         try {
           await player.load(props.manifestSrc, props.startTime, props.manifestMimeType)
 
-          if (defaultQuality.value !== 'auto') {
-            if (props.format === 'dash') {
-              setDashQuality(defaultQuality.value)
-            } else {
-              let variants = player.getVariantTracks()
+          if (props.format === 'dash') {
+            setDashQuality(preferredVideoQuality.value)
+          } else {
+            let variants = player.getVariantTracks()
 
-              if (hasMultipleAudioTracks.value) {
-                // default audio track
-                variants = variants.filter(variant => variant.audioRoles.includes('main'))
-              }
-
-              const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
-              variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
-
-              player.selectVariantTrack(variants[0])
+            if (hasMultipleAudioTracks.value) {
+              // default audio track
+              variants = variants.filter(variant => variant.audioRoles.includes('main'))
             }
+
+            const highestBandwidth = Math.max(...variants.map(variant => variant.audioBandwidth))
+            variants = variants.filter(variant => variant.audioBandwidth === highestBandwidth)
+
+            player.selectVariantTrack(variants[0])
           }
         } catch (error) {
           handleError(error, 'loading dash/audio manifest and setting default quality in mounted')
@@ -3197,7 +3277,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          player.configure(getPlayerConfig(newFormat, defaultQuality.value === 'auto'))
+          player.configure(getPlayerConfig(newFormat, false))
 
           await performFirstLoad()
           return
@@ -3207,7 +3287,7 @@ export default defineComponent({
 
         const wasPaused = video_.paused
 
-        let useAutoQuality = oldFormat === 'legacy' ? defaultQuality.value === 'auto' : player.getConfiguration().abr.enabled
+        const useAutoQuality = oldFormat === 'legacy' ? false : player.getConfiguration().abr.enabled
 
         if (!wasPaused) {
           video_.pause()
@@ -3251,12 +3331,7 @@ export default defineComponent({
           }
 
           if (oldFormat === 'audio' && newFormat === 'dash' && !useAutoQuality) {
-            if (defaultQuality.value !== 'auto') {
-              dimension = defaultQuality.value
-            } else {
-              // Use auto as we don't know what resolution to pick
-              useAutoQuality = true
-            }
+            dimension = preferredVideoQuality.value
           }
 
           try {
@@ -3350,6 +3425,7 @@ export default defineComponent({
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
+      document.removeEventListener('click', handleQualityMenuClick, true)
 
       // Clean up IPC listener for exit fullscreen
       if (exitFullscreenCleanup) {

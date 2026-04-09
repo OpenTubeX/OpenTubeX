@@ -381,6 +381,11 @@ Settings:
     Manage Channel Playback Speeds: Kanalspezifische Wiedergabegeschwindigkeiten verwalten
     Channel Playback Speed Manager: Verwaltung der Wiedergabegeschwindigkeiten
     No Saved Playback Speeds: Keine gespeicherten Wiedergabegeschwindigkeiten
+    Remember Video Quality Per Channel: Videoqualität pro Kanal merken
+    Auto Update Channel Video Quality: Beim Ändern über Player-Optionen automatisch aktualisieren
+    Manage Channel Video Qualities: Kanalspezifische Videoqualitäten verwalten
+    Channel Video Quality Manager: Verwaltung der Videoqualitäten
+    No Saved Video Qualities: Keine gespeicherten Videoqualitäten
     Playback Speed: Wiedergabegeschwindigkeit
     Default Video Format:
       Default Video Format: Standard-Videoformat
@@ -827,6 +832,8 @@ Video:
   DRMProtected: DRM-geschützte Videos können in OpenTubeX nicht abgespielt werden, da sie proprietäre Closed-Source-Komponenten benötigen. Wenn du dieses Video ansehen möchtest, sieh es dir bitte auf der offiziellen YouTube-Website in einem DRM-fähigen Webbrowser an.
   Save Channel Playback Speed: Kanal-Wiedergabegeschwindigkeit speichern
   Channel Playback Speed Saved: Kanal-Wiedergabegeschwindigkeit gespeichert
+  Save Channel Video Quality: Kanal-Videoqualität speichern
+  Channel Video Quality Saved: Kanal-Videoqualität gespeichert
   #& Playlists
   Save Watched Progress: Videofortschritt speichern
   Watched Progress Saved: Videofortschritt gespeichert

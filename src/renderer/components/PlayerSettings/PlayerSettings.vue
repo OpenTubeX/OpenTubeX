@@ -195,6 +195,28 @@
         @click="showChannelSpeedManager = true"
       />
     </FtFlexBox>
+    <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Remember Video Quality Per Channel')"
+        :compact="true"
+        :default-value="rememberVideoQualityPerChannel"
+        @change="updateRememberVideoQualityPerChannel"
+      />
+      <FtToggleSwitch
+        v-if="rememberVideoQualityPerChannel"
+        :label="t('Settings.Player Settings.Auto Update Channel Video Quality')"
+        :compact="true"
+        :default-value="autoUpdateChannelVideoQualities"
+        @change="updateAutoUpdateChannelVideoQualities"
+      />
+    </FtFlexBox>
+    <FtFlexBox v-if="rememberVideoQualityPerChannel">
+      <FtButton
+        :label="t('Settings.Player Settings.Manage Channel Video Qualities')"
+        :icon="['fas', 'sliders-h']"
+        @click="showChannelQualityManager = true"
+      />
+    </FtFlexBox>
     <br>
     <FtFlexBox>
       <FtToggleSwitch
@@ -328,6 +350,56 @@
         <FtButton
           :label="t('Close')"
           @click="showChannelSpeedManager = false"
+        />
+      </FtFlexBox>
+    </FtPrompt>
+    <FtPrompt
+      v-if="showChannelQualityManager"
+      :label="t('Settings.Player Settings.Channel Video Quality Manager')"
+      theme="readable-width"
+      @click="handleChannelQualityManagerClick"
+    >
+      <div
+        v-if="channelQualityEntries.length === 0"
+        class="emptyState"
+      >
+        <p>{{ t("Settings.Player Settings.No Saved Video Qualities") }}</p>
+      </div>
+      <div
+        v-else
+        class="channelSpeedList"
+      >
+        <div
+          v-for="entry in channelQualityEntries"
+          :key="entry.channelId"
+          class="channelSpeedEntry"
+        >
+          <div class="channelSpeedInfo">
+            <p class="channelId">
+              {{ entry.channelName }}
+            </p>
+            <FtSelect
+              :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
+              :value="entry.quality"
+              :select-names="qualityNames"
+              :select-values="QUALITY_VALUES"
+              :icon="['fas', 'photo-film']"
+              @change="(value) => updateChannelQuality(entry.channelId, value)"
+            />
+          </div>
+          <FtButton
+            :label="t('Delete')"
+            :icon="['fas', 'trash']"
+            text-color="var(--destructive-text-color)"
+            background-color="var(--destructive-color)"
+            @click="deleteChannelQuality(entry.channelId)"
+          />
+        </div>
+      </div>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Close')"
+          @click="showChannelQualityManager = false"
         />
       </FtFlexBox>
     </FtPrompt>
@@ -693,9 +765,37 @@ function updateAutoUpdateChannelPlaybackSpeeds(value) {
 /** @type {import('vue').Ref<boolean>} */
 const showChannelSpeedManager = ref(false)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberVideoQualityPerChannel = computed(() => store.getters.getRememberVideoQualityPerChannel)
+
+/**
+ * @param {boolean} value
+ */
+function updateRememberVideoQualityPerChannel(value) {
+  store.dispatch('updateRememberVideoQualityPerChannel', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoUpdateChannelVideoQualities = computed(() => store.getters.getAutoUpdateChannelVideoQualities)
+
+/**
+ * @param {boolean} value
+ */
+function updateAutoUpdateChannelVideoQualities(value) {
+  store.dispatch('updateAutoUpdateChannelVideoQualities', value)
+}
+
+/** @type {import('vue').Ref<boolean>} */
+const showChannelQualityManager = ref(false)
+
 /** @type {import('vue').ComputedRef<string>} */
 const channelPlaybackSpeeds = computed(
   () => store.getters.getChannelPlaybackSpeeds
+)
+
+/** @type {import('vue').ComputedRef<string>} */
+const channelVideoQualities = computed(
+  () => store.getters.getChannelVideoQualities
 )
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
@@ -712,19 +812,43 @@ const backendOptions = computed(() => ({
 /** @type {import('vue').Ref<Map<string, string>>} */
 const channelNamesCache = ref(new Map())
 
+/**
+ * @param {string} value
+ * @param {string} errorContext
+ * @returns {Record<string, string | number>}
+ */
+function parseChannelPreferences(value, errorContext) {
+  try {
+    const parsed = JSON.parse(value || '{}')
+    return parsed != null && typeof parsed === 'object' ? parsed : {}
+  } catch (e) {
+    console.error(`Failed to parse ${errorContext}:`, e)
+    return {}
+  }
+}
+
 /** @type {import('vue').ComputedRef<Array<{channelId: string, speed: number, channelName: string}>>} */
 const channelSpeedEntries = computed(() => {
-  try {
-    const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
-    return Object.entries(speeds).map(([channelId, speed]) => ({
+  const speeds = parseChannelPreferences(channelPlaybackSpeeds.value, 'channel playback speeds')
+  return Object.entries(speeds).map(([channelId, speed]) => ({
+    channelId,
+    speed: typeof speed === 'number' ? speed : parseFloat(speed),
+    channelName: channelNamesCache.value.get(channelId) || channelId,
+  }))
+})
+
+/** @type {import('vue').ComputedRef<Array<{channelId: string, quality: string, channelName: string}>>} */
+const channelQualityEntries = computed(() => {
+  const qualities = parseChannelPreferences(channelVideoQualities.value, 'channel video qualities')
+  return Object.entries(qualities).map(([channelId, quality]) => {
+    const normalizedQuality = String(quality) === 'auto' ? defaultQuality.value : String(quality)
+
+    return {
       channelId,
-      speed: typeof speed === 'number' ? speed : parseFloat(speed),
+      quality: normalizedQuality,
       channelName: channelNamesCache.value.get(channelId) || channelId,
-    }))
-  } catch (e) {
-    console.error('Failed to parse channel playback speeds:', e)
-    return []
-  }
+    }
+  })
 })
 
 /**
@@ -732,8 +856,12 @@ const channelSpeedEntries = computed(() => {
  * @returns {Promise<void>}
  */
 async function fetchChannelNames() {
-  const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
-  const channelIds = Object.keys(speeds)
+  const speeds = parseChannelPreferences(channelPlaybackSpeeds.value, 'channel playback speeds')
+  const qualities = parseChannelPreferences(channelVideoQualities.value, 'channel video qualities')
+  const channelIds = new Set([
+    ...Object.keys(speeds),
+    ...Object.keys(qualities),
+  ])
 
   for (const channelId of channelIds) {
     if (channelNamesCache.value.has(channelId)) {
@@ -762,14 +890,14 @@ async function fetchChannelNames() {
   }
 }
 
-watch(showChannelSpeedManager, (isOpen) => {
-  if (isOpen) {
+watch([showChannelSpeedManager, showChannelQualityManager], ([isSpeedManagerOpen, isQualityManagerOpen]) => {
+  if (isSpeedManagerOpen || isQualityManagerOpen) {
     fetchChannelNames()
   }
 })
 
-watch(channelPlaybackSpeeds, () => {
-  if (showChannelSpeedManager.value) {
+watch([channelPlaybackSpeeds, channelVideoQualities], () => {
+  if (showChannelSpeedManager.value || showChannelQualityManager.value) {
     fetchChannelNames()
   }
 })
@@ -780,6 +908,15 @@ watch(channelPlaybackSpeeds, () => {
 function handleChannelSpeedManagerClick(value) {
   if (value === null) {
     showChannelSpeedManager.value = false
+  }
+}
+
+/**
+ * @param {string | null} value
+ */
+function handleChannelQualityManagerClick(value) {
+  if (value === null) {
+    showChannelQualityManager.value = false
   }
 }
 
@@ -802,12 +939,47 @@ function updateChannelSpeed(channelId, newSpeed) {
  */
 function deleteChannelSpeed(channelId) {
   try {
-    const speeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+    const speeds = parseChannelPreferences(channelPlaybackSpeeds.value, 'channel playback speeds')
     delete speeds[channelId]
     store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(speeds))
     channelNamesCache.value.delete(channelId)
   } catch (e) {
     console.error('Failed to delete channel playback speed:', e)
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @param {string} newQuality
+ */
+function updateChannelQuality(channelId, newQuality) {
+  try {
+    const qualities = parseChannelPreferences(channelVideoQualities.value, 'channel video qualities')
+
+    if (newQuality === defaultQuality.value) {
+      delete qualities[channelId]
+      channelNamesCache.value.delete(channelId)
+    } else {
+      qualities[channelId] = newQuality
+    }
+
+    store.dispatch('updateChannelVideoQualities', JSON.stringify(qualities))
+  } catch (e) {
+    console.error('Failed to update channel video quality:', e)
+  }
+}
+
+/**
+ * @param {string} channelId
+ */
+function deleteChannelQuality(channelId) {
+  try {
+    const qualities = parseChannelPreferences(channelVideoQualities.value, 'channel video qualities')
+    delete qualities[channelId]
+    store.dispatch('updateChannelVideoQualities', JSON.stringify(qualities))
+    channelNamesCache.value.delete(channelId)
+  } catch (e) {
+    console.error('Failed to delete channel video quality:', e)
   }
 }
 

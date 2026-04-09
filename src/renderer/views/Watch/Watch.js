@@ -166,6 +166,7 @@ export default defineComponent({
       /** @type {Date|null} */
       streamingDataExpiryDate: null,
       currentPlaybackRate: null,
+      currentVideoQuality: null,
 
       // Local, non-persistent toggle for temporarily disabling SponsorBlock auto-skipping
       sponsorBlockAutoSkipTemporarilyDisabled: false,
@@ -347,6 +348,7 @@ export default defineComponent({
 
     this.checkIfTimestamp()
     this.initializePlaybackRate()
+    this.initializeVideoQuality()
   },
   mounted: function () {
     this.onMountedDependOnLocalStateLoading()
@@ -494,6 +496,7 @@ export default defineComponent({
         })
 
         this.initializePlaybackRate()
+        this.initializeVideoQuality()
 
         if (result.page[0].microformat?.publish_date) {
           // `result.page[0].microformat.publish_date` example value: `2023-08-12T08:59:59-07:00`
@@ -950,6 +953,7 @@ export default defineComponent({
           })
 
           this.initializePlaybackRate()
+          this.initializeVideoQuality()
 
           this.videoPublished = result.published * 1000
           this.videoDescriptionHtml = result.descriptionHtml
@@ -1247,6 +1251,17 @@ export default defineComponent({
 
       this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
       showToast(this.$t('Video.Channel Playback Speed Saved'))
+    },
+    handleChannelVideoQualityManualSave() {
+      // Should be called by manual action, settings should be checked in UI
+      const rememberPerChannel = this.$store.getters.getRememberVideoQualityPerChannel
+      if (!rememberPerChannel || !this.channelId) {
+        return
+      }
+
+      if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
+        showToast(this.$t('Video.Channel Video Quality Saved'))
+      }
     },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
@@ -1940,6 +1955,13 @@ export default defineComponent({
       this.currentPlaybackRate = newRate
     },
 
+    /**
+     * @param {string} newQuality
+     */
+    updateVideoQuality(newQuality) {
+      this.currentVideoQuality = this.normalizeVideoQuality(newQuality)
+    },
+
     handlePlaybackRateUserSet(newRate) {
       const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
       const autoUpdate = this.$store.getters.getAutoUpdateChannelPlaybackSpeeds
@@ -1948,6 +1970,38 @@ export default defineComponent({
       }
 
       this.saveChannelPlaybackSpeed(newRate)
+    },
+
+    /**
+     * @param {string} newQuality
+     */
+    handleVideoQualityUserSet(newQuality) {
+      const rememberPerChannel = this.$store.getters.getRememberVideoQualityPerChannel
+      const autoUpdate = this.$store.getters.getAutoUpdateChannelVideoQualities
+      if (!rememberPerChannel || !autoUpdate || !this.channelId) {
+        return
+      }
+
+      this.saveChannelVideoQuality(newQuality)
+    },
+
+    /**
+     * @param {string | number | null | undefined} quality
+     * @returns {string}
+     */
+    normalizeVideoQuality(quality) {
+      const normalizedQuality = quality == null ? '' : String(quality)
+
+      // TODO: Revert when auto is fixed
+      if (normalizedQuality === 'auto') {
+        return '720'
+      }
+
+      return normalizedQuality
+    },
+
+    getDefaultVideoQuality() {
+      return this.normalizeVideoQuality(this.$store.getters.getDefaultQuality)
     },
 
     saveChannelPlaybackSpeed(rate) {
@@ -1961,6 +2015,35 @@ export default defineComponent({
         this.$store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(channelSpeeds))
       } catch (e) {
         console.error('Failed to save channel playback speed:', e)
+      }
+    },
+
+    /**
+     * @param {string | number | null | undefined} quality
+     * @returns {boolean} whether a channel-specific quality was stored
+     */
+    saveChannelVideoQuality(quality) {
+      if (!this.channelId) {
+        return false
+      }
+
+      try {
+        const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
+        const normalizedQuality = this.normalizeVideoQuality(quality)
+        const defaultQuality = this.getDefaultVideoQuality()
+
+        if (normalizedQuality.length === 0 || normalizedQuality === defaultQuality) {
+          delete channelQualities[this.channelId]
+          this.$store.dispatch('updateChannelVideoQualities', JSON.stringify(channelQualities))
+          return false
+        }
+
+        channelQualities[this.channelId] = normalizedQuality
+        this.$store.dispatch('updateChannelVideoQualities', JSON.stringify(channelQualities))
+        return true
+      } catch (e) {
+        console.error('Failed to save channel video quality:', e)
+        return false
       }
     },
 
@@ -1978,6 +2061,23 @@ export default defineComponent({
         }
       }
       this.currentPlaybackRate = this.$store.getters.getDefaultPlayback
+    },
+
+    initializeVideoQuality() {
+      const rememberPerChannel = this.$store.getters.getRememberVideoQualityPerChannel
+      if (rememberPerChannel && this.channelId) {
+        try {
+          const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
+          if (channelQualities[this.channelId] !== undefined) {
+            this.currentVideoQuality = this.normalizeVideoQuality(channelQualities[this.channelId])
+            return
+          }
+        } catch (e) {
+          console.error('Failed to parse channel video qualities:', e)
+        }
+      }
+
+      this.currentVideoQuality = this.getDefaultVideoQuality()
     },
 
     destroyPlayer: async function() {

@@ -463,6 +463,11 @@ Settings:
     Manage Channel Playback Speeds: Manage Channel Playback Speeds
     Channel Playback Speed Manager: Channel Playback Speed Manager
     No Saved Playback Speeds: No saved playback speeds
+    Remember Video Quality Per Channel: Remember Video Quality Per Channel
+    Auto Update Channel Video Quality: Automatically update when changing via player options
+    Manage Channel Video Qualities: Manage Channel Video Qualities
+    Channel Video Quality Manager: Channel Video Quality Manager
+    No Saved Video Qualities: No saved video qualities
     Playback Speed: Playback Speed
     Max Video Playback Rate: Max Video Playback Rate
     Video Playback Rate Interval: Video Playback Rate Interval
@@ -852,6 +857,8 @@ Video:
   Watched Progress Saved: Watched Progress Saved
   Save Channel Playback Speed: Save Channel Playback Speed
   Channel Playback Speed Saved: Channel Playback Speed Saved
+  Save Channel Video Quality: Save Channel Video Quality
+  Channel Video Quality Saved: Channel Video Quality Saved
   Save Video: Save Video
   Video has been saved: Video has been saved
   Video has been removed from your saved list: Video has been removed from your saved list
