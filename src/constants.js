@@ -33,6 +33,7 @@ const IpcChannels = {
   TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
   TABS_SET_PLAYBACK_STATE: 'tabs-set-playback-state',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',
+  TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',
   CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',

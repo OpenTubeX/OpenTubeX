@@ -92,10 +92,55 @@ function runApp() {
     showSelectAll: false,
     showCopyLink: false,
     prepend: (defaultActions, parameters, webContents) => {
+      const manager = TabManager.getFromWebContents(webContents)
+      const contextMenuTab = manager?.contextMenuTabId != null
+        ? manager.tabs.get(manager.contextMenuTabId)
+        : undefined
+      const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuOnTabBar === true
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
       return [
+        {
+          label: 'Close Tab',
+          visible: contextMenuTab != null,
+          click: () => {
+            if (!manager || !contextMenuTab) return
+
+            const hasRemainingTabs = manager.closeTab(contextMenuTab.id)
+            if (!hasRemainingTabs) {
+              manager.browserWindow.close()
+            }
+          }
+        },
+        {
+          label: 'Reopen Closed Tab',
+          visible: isTabBarContextMenu,
+          enabled: manager?.closedTabUrls.length > 0,
+          click: () => {
+            manager?.restoreClosedTab()
+          }
+        },
+        {
+          label: 'Reload Tab',
+          visible: contextMenuTab != null,
+          click: () => {
+            if (!manager || !contextMenuTab) return
+
+            manager.requestReload(contextMenuTab.id)
+          }
+        },
+        {
+          label: 'New Tab',
+          visible: isTabBarContextMenu,
+          click: () => {
+            manager?.createTab({ makeActive: true })
+          }
+        },
+        {
+          type: 'separator',
+          visible: contextMenuTab != null
+        },
         {
           label: 'Open in a New Tab',
           // Only show the option for in-app URLs and not external ones

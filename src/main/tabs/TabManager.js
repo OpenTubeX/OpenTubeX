@@ -50,6 +50,10 @@ export class TabManager {
     this.tabCounter = 0
     /** @type {number} */
     this.tabBarScrollPosition = 0
+    /** @type {string | null} */
+    this.contextMenuTabId = null
+    /** @type {boolean} */
+    this.contextMenuOnTabBar = false
 
     tabManagers.set(browserWindow.id, this)
 
@@ -466,23 +470,25 @@ export class TabManager {
   /**
    * Ask the renderer to prepare (e.g. save watch timestamp) and reload; used by menu.
    * The renderer will send TABS_RELOAD when ready, which triggers reloadTab().
+   * @param {string | null} [tabId]
    */
-  requestReload() {
-    if (!this.activeTabId) return
+  requestReload(tabId = this.activeTabId) {
+    if (!tabId) return
 
-    const tab = this.tabs.get(this.activeTabId)
+    const tab = this.tabs.get(tabId)
     if (!tab || tab.view.webContents.isDestroyed()) return
 
     tab.view.webContents.send(IpcChannels.TABS_REQUEST_RELOAD)
   }
 
   /**
-   * Reload the active tab
+   * Reload a tab
+   * @param {string | null} [tabId]
    */
-  reloadTab() {
-    if (!this.activeTabId) return
+  reloadTab(tabId = this.activeTabId) {
+    if (!tabId) return
 
-    const tab = this.tabs.get(this.activeTabId)
+    const tab = this.tabs.get(tabId)
     if (!tab || tab.view.webContents.isDestroyed()) return
 
     tab.view.webContents.reload()
@@ -725,7 +731,8 @@ export function setupTabsIPC() {
   ipcMain.on(IpcChannels.TABS_RELOAD, (event) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
-      manager.reloadTab()
+      const tabId = TabManager.getTabIdFromWebContents(event.sender)
+      manager.reloadTab(tabId)
     }
   })
 
@@ -757,6 +764,17 @@ export function setupTabsIPC() {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
       manager.tabBarScrollPosition = position
+    }
+  })
+
+  // Track which tab the shared Electron context menu should act on.
+  ipcMain.on(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, (event, payload) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager) {
+      manager.contextMenuTabId = typeof payload?.tabId === 'string' && manager.tabs.has(payload.tabId)
+        ? payload.tabId
+        : null
+      manager.contextMenuOnTabBar = payload?.isTabBar === true
     }
   })
 

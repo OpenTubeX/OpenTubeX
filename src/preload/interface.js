@@ -430,6 +430,14 @@ export default {
     },
 
     /**
+     * Track which tab-related surface the next context menu should target.
+     * @param {{ tabId: string | null, isTabBar: boolean }} payload
+     */
+    setContextMenuTab: (payload) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, payload)
+    },
+
+    /**
      * Listen for tab state updates
      * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
      */

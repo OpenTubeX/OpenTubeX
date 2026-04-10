@@ -83,10 +83,17 @@ watch(
 onMounted(() => {
   if (isElectron) {
     store.dispatch('initializeTabs')
+    document.addEventListener('pointerdown', handleContextMenuPointerDown, true)
+    document.addEventListener('contextmenu', handleContextMenuEvent, true)
   }
 })
 
 onUnmounted(() => {
+  if (isElectron) {
+    document.removeEventListener('pointerdown', handleContextMenuPointerDown, true)
+    document.removeEventListener('contextmenu', handleContextMenuEvent, true)
+    updateContextMenuTab({ tabId: null, isTabBar: false })
+  }
   document.body.classList.remove('vue-dnd-dragging')
 })
 
@@ -189,6 +196,41 @@ function handleMiddleClick(event, tabId) {
 
 function createNewTab() {
   store.dispatch('createTab', { makeActive: true })
+}
+
+/**
+ * @param {{ tabId: string | null, isTabBar: boolean }} payload
+ */
+function updateContextMenuTab(payload) {
+  window.ftElectron.tabs.setContextMenuTab(payload)
+}
+
+/**
+ * Keep the next Electron context menu targeted at the tab under the pointer.
+ * @param {PointerEvent} event
+ */
+function handleContextMenuPointerDown(event) {
+  if (!isElectron || event.button !== 2 || !(event.target instanceof Element)) {
+    return
+  }
+
+  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const isTabBar = event.target.closest('.tabBar') != null
+  updateContextMenuTab({ tabId, isTabBar })
+}
+
+/**
+ * Support keyboard-triggered context menus and clear stale targets elsewhere.
+ * @param {MouseEvent} event
+ */
+function handleContextMenuEvent(event) {
+  if (!isElectron || !(event.target instanceof Element)) {
+    return
+  }
+
+  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const isTabBar = event.target.closest('.tabBar') != null
+  updateContextMenuTab({ tabId, isTabBar })
 }
 
 const tabBarScrollPosition = computed(() => store.getters.getTabBarScrollPosition)

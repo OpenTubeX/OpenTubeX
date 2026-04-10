@@ -3,6 +3,7 @@
   <div
     ref="elementRef"
     class="tab"
+    :data-tab-id="tab.id"
     :class="{ active: tab.isActive, loading: tab.isLoading, playing: tab.isPlaying, dragging: isDragging }"
     :title="displayTitle"
     role="button"
@@ -121,6 +122,17 @@ function handleDragStart(event) {
  * @param {PointerEvent} event
  */
 function handlePointerDown(event) {
+  // Only allow dragging with the primary/left mouse button.
+  // This keeps middle-click close and right-click context menu interactions intact.
+  if (event.button !== 0) {
+    if (dragDelayTimeout.value) {
+      clearTimeout(dragDelayTimeout.value)
+      dragDelayTimeout.value = null
+    }
+    dragStartPosition.value = null
+    return
+  }
+
   // Don't start drag if clicking on close button
   if (event.target.closest('.closeButton')) {
     return
