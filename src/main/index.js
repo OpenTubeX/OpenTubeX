@@ -81,15 +81,17 @@ function runApp() {
   let backendPreference = 'local'
   let backendFallback = true
 
-  contextMenu({
+  // Registered per-webContents in 'web-contents-created' instead of calling contextMenu()
+  // globally, because the global call only hooks BrowserWindow.webContents but page content
+  // lives in WebContentsView tabs managed by TabManager.
+  /** @type {import('electron-context-menu').Options} */
+  const contextMenuOptions = {
     showSearchWithGoogle: false,
     showSaveImageAs: true,
     showCopyImageAddress: true,
     showSelectAll: false,
     showCopyLink: false,
-    prepend: (defaultActions, parameters, browserWindow, event) => {
-      // With tabs, the actual page content is in a WebContentsView, not the window's webContents
-      // Use the event's sender (webContents) or parameters.pageURL to detect in-app URLs
+    prepend: (defaultActions, parameters, webContents) => {
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
@@ -99,7 +101,7 @@ function runApp() {
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
-            const manager = TabManager.getFromWebContents(event.sender)
+            const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
               manager.createTab({ url: parameters.linkURL, makeActive: true })
             }
@@ -119,15 +121,14 @@ function runApp() {
           enabled: parameters.editFlags.canSelectAll,
           visible: parameters.isEditable,
           click: () => {
-            event.sender.selectAll()
+            webContents.selectAll()
           }
         }
       ]
     },
     // only show the copy link entry for external links and the /playlist, /channel and /watch in-app URLs
     // the /playlist, /channel and /watch in-app URLs get transformed to their equivalent YouTube or Invidious URLs
-    append: (defaultActions, parameters, browserWindow, event) => {
-      // With tabs, use parameters.pageURL to detect the current page URL
+    append: (defaultActions, parameters, browserWindow) => {
       const pageUrl = parameters.pageURL || ''
       let visible = false
       const urlParts = parameters.linkURL.split('#')
@@ -276,7 +277,7 @@ function runApp() {
         },
       ]
     },
-  })
+  }
 
   if (process.platform === 'win32') {
     app.setUserTasks([
@@ -2368,6 +2369,8 @@ function runApp() {
   })
 
   app.on('web-contents-created', (_, webContents) => {
+    contextMenu({ ...contextMenuOptions, window: webContents })
+
     webContents.once('destroyed', () => {
       invidiousAuthorizations.delete(webContents.id)
     })
