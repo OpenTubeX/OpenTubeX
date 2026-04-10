@@ -1124,6 +1124,122 @@ export default defineComponent({
       }
     }
 
+    /**
+     * @param {HTMLElement} seekBarContainer
+     */
+    function getChapterPreviewParent(seekBarContainer) {
+      return container.value?.querySelector('.shaka-player-ui-thumbnail-container') ?? seekBarContainer
+    }
+
+    /**
+     * @param {HTMLElement} parent
+     */
+    function getChapterPreview(parent) {
+      if (!container.value) return null
+
+      let chapterPreview = container.value.querySelector('.ft-chapter-preview')
+
+      if (!chapterPreview) {
+        chapterPreview = document.createElement('div')
+        chapterPreview.className = 'ft-chapter-preview'
+        chapterPreview.dir = 'auto'
+      }
+
+      if (chapterPreview.parentElement !== parent) {
+        parent.appendChild(chapterPreview)
+      }
+
+      return chapterPreview
+    }
+
+    /**
+     * @param {MouseEvent} event
+     */
+    function handleSeekBarMouseMove(event) {
+      if (!container.value || !player) return
+
+      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      if (!seekBarContainer) return
+
+      if (props.chapters.length === 0) {
+        const chapterPreview = container.value.querySelector('.ft-chapter-preview')
+        if (chapterPreview) {
+          chapterPreview.style.display = 'none'
+        }
+
+        return
+      }
+
+      const chapterPreviewParent = getChapterPreviewParent(seekBarContainer)
+      const chapterPreview = getChapterPreview(chapterPreviewParent)
+      if (!chapterPreview) return
+
+      const rect = seekBarContainer.getBoundingClientRect()
+      if (rect.width === 0) {
+        chapterPreview.style.display = 'none'
+        return
+      }
+
+      const offsetX = event.clientX - rect.left
+      const percentage = Math.max(0, Math.min(1, offsetX / rect.width))
+
+      const seekRange = player.seekRange()
+      const duration = seekRange.end - seekRange.start
+      const hoverTime = seekRange.start + (duration * percentage)
+
+      const chapter = props.chapters.find((candidate, index) => {
+        return hoverTime >= candidate.startSeconds &&
+          (hoverTime < candidate.endSeconds || (index === props.chapters.length - 1 && hoverTime === candidate.endSeconds))
+      })
+
+      if (!chapter) {
+        chapterPreview.style.display = 'none'
+        return
+      }
+
+      if (chapterPreview.textContent !== chapter.title) {
+        chapterPreview.textContent = chapter.title
+      }
+
+      chapterPreview.style.display = 'block'
+      chapterPreview.style.maxWidth = `${Math.max(Math.min(rect.width - 8, window.innerWidth - 24, 360), 0)}px`
+      chapterPreview.style.bottom = ''
+
+      if (chapterPreviewParent === seekBarContainer) {
+        const previewWidth = chapterPreview.offsetWidth
+        const minX = previewWidth / 2
+        const maxX = rect.width - (previewWidth / 2)
+        const targetX = percentage * rect.width
+        const clampedX = Math.max(minX, Math.min(maxX, targetX))
+
+        chapterPreview.style.left = `${clampedX}px`
+      } else {
+        chapterPreview.style.left = ''
+      }
+    }
+
+    function handleSeekBarMouseLeave() {
+      if (!container.value) return
+
+      const chapterPreview = container.value.querySelector('.ft-chapter-preview')
+
+      if (chapterPreview) {
+        chapterPreview.style.display = 'none'
+      }
+    }
+
+    function setupChapterPreview() {
+      if (!container.value) return
+
+      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      if (!seekBarContainer) return
+
+      seekBarContainer.removeEventListener('mousemove', handleSeekBarMouseMove)
+      seekBarContainer.removeEventListener('mouseleave', handleSeekBarMouseLeave)
+      seekBarContainer.addEventListener('mousemove', handleSeekBarMouseMove)
+      seekBarContainer.addEventListener('mouseleave', handleSeekBarMouseLeave)
+    }
+
     function addUICustomizations() {
       /** @type {HTMLDivElement} */
       const controlsContainer = ui.getControls().getControlsContainer()
@@ -1155,6 +1271,8 @@ export default defineComponent({
       if (hasLoaded.value && props.chapters.length > 0) {
         createChapterMarkers()
       }
+
+      setupChapterPreview()
 
       if (useSponsorBlock.value && sponsorBlockSegments.length > 0) {
         let duration
