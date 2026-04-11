@@ -1089,3 +1089,17 @@ export function throttle(func, wait) {
     }
   }
 }
+
+/**
+ * @param {string} videoId
+ * @returns {Promise<string | null>}
+ */
+export async function getOembedTitle(videoId) {
+  try {
+    const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
+    return oembedInfo.title
+  } catch (error) {
+    console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
+    return null
+  }
+}

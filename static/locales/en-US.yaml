@@ -284,6 +284,11 @@ Settings:
     Default Landing Page: Default Landing Page
     Locale Preference: Locale Preference
     System Default: System Default
+    Avoid translation:
+      Avoid translation: Keep original text
+      Disabled: Disabled
+      Watch Only: Video UI Only
+      Entire App: Entire App (may be unsafe)
     Preferred API Backend:
       Preferred API Backend: Preferred API Backend
       Local API: Local API
@@ -1058,6 +1063,10 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Avoid translation: |
+      Disable YouTube's autotranslation of title, description and chapters of a video.
+      Too many requests, such as fetching video titles across lists, may temporarily
+      impact app reliability.
     Preferred API Backend: Choose the backend that OpenTubeX uses to obtain data. The
       local API is a built-in extractor. The Invidious API requires an Invidious server
       to connect to.

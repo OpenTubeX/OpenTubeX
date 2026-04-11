@@ -473,8 +473,14 @@ export default defineComponent({
           return
         }
 
-        // extract localised title first and fall back to the not localised one
-        this.videoTitle = result.primary_info?.title.text?.trim() ?? result.basic_info.title?.trim()
+        const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
+
+        if (avoidTranslation) {
+          this.videoTitle = result.basic_info.title?.trim()
+        } else {
+          // extract localised title first and fall back to the not localised one
+          this.videoTitle = result.primary_info?.title.text?.trim() ?? result.basic_info.title?.trim()
+        }
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
 
@@ -506,7 +512,9 @@ export default defineComponent({
           this.videoPublished = Date.parse(result.primary_info.published)
         }
 
-        if (result.secondary_info?.description.runs) {
+        if (avoidTranslation) {
+          this.videoDescription = result.basic_info.short_description
+        } else if (result.secondary_info?.description.runs) {
           try {
             this.videoDescription = parseLocalTextRuns(result.secondary_info.description.runs)
           } catch (error) {
@@ -561,7 +569,7 @@ export default defineComponent({
           const rawChapters = result.player_overlays?.decorated_player_bar?.player_bar?.markers_map
             ?.find(marker => marker.marker_key === 'DESCRIPTION_CHAPTERS')?.value.chapters
 
-          if (rawChapters) {
+          if (rawChapters && !avoidTranslation) {
             for (const chapter of rawChapters) {
               const start = chapter.time_range_start_millis / 1000
 
@@ -578,7 +586,7 @@ export default defineComponent({
             const macroMarkersList = result.page[1]?.engagement_panels
               ?.find(pannel => pannel.panel_identifier === 'engagement-panel-macro-markers-auto-chapters')?.content
 
-            if (macroMarkersList) {
+            if (macroMarkersList && !avoidTranslation) {
               for (const item of macroMarkersList.contents) {
                 if (item instanceof YTNodes.MacroMarkersListItem) {
                   chapters.push({
