@@ -654,13 +654,7 @@ const windowTitle = computed(() => {
     !routePath.startsWith('/playlist/') &&
     !routePath.startsWith('/search/')
   ) {
-    let title = translateWindowTitle(route.meta.title)
-    if (!title) {
-      title = packageDetails.productName
-    } else {
-      title = `${title} - ${packageDetails.productName}`
-    }
-    return title
+    return translateWindowTitle(route.meta.title) ?? ''
   } else {
     return null
   }
@@ -670,7 +664,11 @@ const windowTitle = computed(() => {
 const appTitle = computed(() => store.getters.getAppTitle)
 
 watch(appTitle, (value) => {
-  document.title = value
+  if (value.length > 0) {
+    document.title = `${value} - ${packageDetails.productName}`
+  } else {
+    document.title = packageDetails.productName
+  }
 })
 
 watch(windowTitle, setWindowTitle)
