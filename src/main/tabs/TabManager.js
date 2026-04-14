@@ -1,7 +1,7 @@
 /**
  * TabManager - Manages tabs for a single BrowserWindow using WebContentsView
  */
-import { WebContentsView, ipcMain } from 'electron'
+import { WebContentsView, ipcMain, app } from 'electron'
 import { randomUUID } from 'crypto'
 import { IpcChannels } from '../../constants.js'
 import { saveTabSession, loadTabSession } from './TabSessionStore.js'
@@ -114,6 +114,80 @@ export class TabManager {
   }
 
   /**
+   * @param {string} tabId
+   * @returns {TabManager|undefined}
+   */
+  static getManagerForTabId(tabId) {
+    for (const manager of tabManagers.values()) {
+      if (manager.tabs.has(tabId)) {
+        return manager
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * Other windows for "move tab to window", with disambiguated labels.
+   * @param {number} excludeWindowId
+   * @returns {Array<{ windowId: number, label: string }>}
+   */
+  static listMoveTargets(excludeWindowId) {
+    const candidates = Array.from(tabManagers.values())
+      .filter(m => !m.browserWindow.isDestroyed() && m.browserWindow.id !== excludeWindowId)
+      .sort((a, b) => a.browserWindow.id - b.browserWindow.id)
+
+    const baseTitle = (m) => {
+      const t = m.browserWindow.getTitle()
+      return (t && t.trim()) ? t : app.getName()
+    }
+
+    const counts = new Map()
+    for (const m of candidates) {
+      const t = baseTitle(m)
+      counts.set(t, (counts.get(t) || 0) + 1)
+    }
+
+    const indexByTitle = new Map()
+    return candidates.map(m => {
+      const t = baseTitle(m)
+      const n = counts.get(t) ?? 1
+      let label = t
+      if (n > 1) {
+        const i = (indexByTitle.get(t) || 0) + 1
+        indexByTitle.set(t, i)
+        label = `${t} (${i})`
+      }
+      return { windowId: m.browserWindow.id, label }
+    })
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} targetWindowId
+   */
+  static moveTabToWindow(tabId, targetWindowId) {
+    const source = TabManager.getManagerForTabId(tabId)
+    const target = TabManager.getForWindow(targetWindowId)
+    if (!source || !target || source.browserWindow.id === targetWindowId) {
+      return
+    }
+    if (source.browserWindow.isDestroyed() || target.browserWindow.isDestroyed()) {
+      return
+    }
+
+    const tabInfo = source.detachTabForTransfer(tabId)
+    if (!tabInfo) {
+      return
+    }
+
+    target.adoptTransferredTab(tabInfo)
+
+    if (source.tabs.size === 0) {
+      source.browserWindow.close()
+    }
+  }
+
+  /**
    * Create a new tab
    * @param {object} options
    * @param {string} [options.url] - Full URL to load
@@ -162,14 +236,18 @@ export class TabManager {
       height: bounds.height
     })
 
-    // Set up window.open handler for this tab
+    // Set up window.open handler for this tab (lookup manager so moved tabs open in the right window)
     view.webContents.setWindowOpenHandler((details) => {
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      if (!mgr) {
+        return { action: 'deny' }
+      }
+
       const parsedUrl = URL.parse(details.url)
 
       if (parsedUrl !== null && isOpenTubeXUrl(view.webContents.getURL())) {
         if (isOpenTubeXUrl(parsedUrl)) {
-          // Open in new tab instead of new window
-          this.createTab({ url: details.url, makeActive: true })
+          mgr.createTab({ url: details.url, makeActive: true })
         } else if (
           parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:' ||
           parsedUrl.protocol === 'mailto:' || parsedUrl.protocol === 'tel:'
@@ -186,35 +264,50 @@ export class TabManager {
     // On X11, the BrowserWindow fullscreen events may not fire reliably for
     // WebContentsView children, so we also listen on the individual webContents.
     view.webContents.on('enter-html-full-screen', () => {
-      this._updateActiveViewBounds()
+      TabManager.getFromWebContents(view.webContents)?._updateActiveViewBounds()
     })
     view.webContents.on('leave-html-full-screen', () => {
-      this._updateActiveViewBounds()
+      TabManager.getFromWebContents(view.webContents)?._updateActiveViewBounds()
     })
 
     // Listen for title updates
     view.webContents.on('page-title-updated', (_, title) => {
-      const tabInfo = this.tabs.get(id)
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+      const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.title = title
-        this._broadcastStateUpdate()
+        mgr._broadcastStateUpdate()
       }
     })
 
     // Listen for navigation to update URL
     view.webContents.on('did-navigate-in-page', (_, url) => {
-      const tabInfo = this.tabs.get(id)
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+      const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        this._saveSession()
+        mgr._saveSession()
       }
     })
 
     view.webContents.on('did-navigate', (_, url) => {
-      const tabInfo = this.tabs.get(id)
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+      const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        this._saveSession()
+        mgr._saveSession()
       }
     })
 
@@ -510,6 +603,81 @@ export class TabManager {
     this.tabs = new Map(entries)
     this._broadcastStateUpdate()
     this._saveSession()
+  }
+
+  /**
+   * Remove a tab from this window without destroying its webContents (for cross-window transfer).
+   * @param {string} tabId
+   * @returns {TabInfo|null}
+   */
+  detachTabForTransfer(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return null
+    }
+
+    if (this.activeTabId === tabId) {
+      if (this.browserWindow.isFullScreen()) {
+        this.browserWindow.setFullScreen(false)
+      }
+
+      if (!tab.view.webContents.isDestroyed()) {
+        try {
+          const url = tab.view.webContents.getURL()
+          if (url && isOpenTubeXUrl(url)) {
+            tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
+          }
+        } catch (error) {
+          console.error('Error sending exit fullscreen message:', error)
+        }
+      }
+    }
+
+    const orderedTabs = Array.from(this.tabs.entries())
+    const detachedIndex = orderedTabs.findIndex(([id]) => id === tabId)
+    let tabToActivate = null
+
+    if (this.activeTabId === tabId && detachedIndex !== -1) {
+      if (detachedIndex > 0) {
+        tabToActivate = orderedTabs[detachedIndex - 1][1]
+      } else if (orderedTabs.length > 1) {
+        tabToActivate = orderedTabs[1][1]
+      }
+    }
+
+    if (this.activeTabId === tabId) {
+      this.browserWindow.contentView.removeChildView(tab.view)
+    }
+
+    const entries = orderedTabs.filter(([id]) => id !== tabId)
+    this.tabs = new Map(entries)
+
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+
+    if (tabToActivate) {
+      this.activeTabId = null
+      this.activateTab(tabToActivate.id)
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
+    }
+
+    this._broadcastStateUpdate()
+    this._saveSession()
+
+    return tab
+  }
+
+  /**
+   * Attach a tab transferred from another window at the end and activate it.
+   * @param {TabInfo} tabInfo
+   */
+  adoptTransferredTab(tabInfo) {
+    this.tabs = new Map([...this.tabs, [tabInfo.id, tabInfo]])
+    tabInfo.view.setBackgroundColor(this.backgroundColor)
+    this.activateTab(tabInfo.id)
+    this.browserWindow.focus()
   }
 
   /**

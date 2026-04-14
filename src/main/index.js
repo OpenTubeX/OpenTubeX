@@ -100,6 +100,10 @@ function runApp() {
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
+      const moveTargets = contextMenuTab != null && manager != null
+        ? TabManager.listMoveTargets(manager.browserWindow.id)
+        : []
+
       return [
         {
           label: 'Close Tab',
@@ -136,6 +140,19 @@ function runApp() {
           click: () => {
             manager?.createTab({ makeActive: true })
           }
+        },
+        {
+          label: 'Move Tab to Window',
+          visible: contextMenuTab != null && moveTargets.length > 0,
+          submenu: moveTargets.map(({ windowId, label }) => ({
+            label,
+            click: () => {
+              if (!contextMenuTab) {
+                return
+              }
+              TabManager.moveTabToWindow(contextMenuTab.id, windowId)
+            }
+          }))
         },
         {
           type: 'separator',
