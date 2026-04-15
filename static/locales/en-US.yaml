@@ -458,6 +458,7 @@ Settings:
     Multiply Seek Interval by Playback Rate: Multiply Seek Interval by Playback Rate
     Display Play Button In Video Player: Display Play Button In Video Player
     Enter Fullscreen on Display Rotate: Enter Fullscreen on Display Rotate
+    Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
     Next Video Interval: Autoplay Countdown Timer
     Autoplay Interruption Timer: Autoplay Interruption Timer
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
@@ -1098,6 +1099,7 @@ Tooltips:
       to quickly return to the default playback rate (1x unless it has been changed in the settings).
     Skip by Scrolling Over Video Player: Use the scroll wheel to skip through the video, MPV style.
     Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
+    Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

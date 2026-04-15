@@ -80,6 +80,13 @@
           :default-value="enterFullscreenOnDisplayRotate"
           @change="updateEnterFullscreenOnDisplayRotate"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
+          :compact="true"
+          :default-value="showPlaybackRateAdjustedTimestamp"
+          :tooltip="t('Tooltips.Player Settings.Show Playback Rate Adjusted Timestamp')"
+          @change="updateShowPlaybackRateAdjustedTimestamp"
+        />
       </div>
     </div>
     <FtFlexBox>
@@ -547,6 +554,16 @@ const enterFullscreenOnDisplayRotate = computed(() => store.getters.getEnterFull
  */
 function updateEnterFullscreenOnDisplayRotate(value) {
   store.dispatch('updateEnterFullscreenOnDisplayRotate', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showPlaybackRateAdjustedTimestamp = computed(() => store.getters.getShowPlaybackRateAdjustedTimestamp)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowPlaybackRateAdjustedTimestamp(value) {
+  store.dispatch('updateShowPlaybackRateAdjustedTimestamp', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

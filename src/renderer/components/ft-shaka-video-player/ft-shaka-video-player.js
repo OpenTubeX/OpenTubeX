@@ -12,6 +12,7 @@ import { StatsButton } from './player-components/StatsButton'
 import { TheatreModeButton } from './player-components/TheatreModeButton'
 import { AutoplayToggle } from './player-components/AutoplayToggle'
 import { SkipButton } from './player-components/SkipButton'
+import { FtPlaybackAdjustedTime } from './player-components/FtPlaybackAdjustedTime'
 import {
   deduplicateAudioTracks,
   findMostSimilarAudioBandwidth,
@@ -288,11 +289,18 @@ export default defineComponent({
     const seekIntervalMultiplyByPlaybackRate = computed(() => {
       return store.getters.getSeekIntervalMultiplyByPlaybackRate
     })
+    const showPlaybackRateAdjustedTimestamp = computed(() => {
+      return store.getters.getShowPlaybackRateAdjustedTimestamp
+    })
 
     watch(defaultSkipInterval, (newValue) => {
       ui.configure({
         tapSeekDistance: newValue
       })
+    })
+
+    watch(showPlaybackRateAdjustedTimestamp, () => {
+      events.dispatchEvent(new CustomEvent('timeDisplaySettingsChanged'))
     })
 
     /** @type {import('vue').ComputedRef<number | 'auto'>} */
@@ -918,6 +926,7 @@ export default defineComponent({
         'mute',
         'volume',
         'time_and_duration',
+        'ft_playback_adjusted_time',
         'spacer'
       ]
       const controlPanelElementsWithSkipButtons = [
@@ -2265,6 +2274,22 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_skip_previous', new SkipPreviousButtonFactory())
     }
 
+    function registerPlaybackAdjustedTime() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class PlaybackAdjustedTimeFactory {
+        create(rootElement, controls) {
+          return new FtPlaybackAdjustedTime(
+            () => showPlaybackRateAdjustedTimestamp.value,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaControls.registerElement('ft_playback_adjusted_time', new PlaybackAdjustedTimeFactory())
+    }
+
     /**
      * As shaka-player doesn't let you unregister custom control factories,
      * overwrite them with `null` instead so the referenced objects
@@ -2296,6 +2321,8 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_skip_previous', null)
       shakaOverflowMenu.registerElement('ft_skip_previous', null)
+
+      shakaControls.registerElement('ft_playback_adjusted_time', null)
     }
 
     // #endregion custom player controls
@@ -3117,6 +3144,7 @@ export default defineComponent({
       registerLegacyQualitySelection()
       registerStatsButton()
       registerSkipButtons()
+      registerPlaybackAdjustedTime()
 
       if (ui.isMobile()) {
         onlyUseOverFlowMenu.value = true
