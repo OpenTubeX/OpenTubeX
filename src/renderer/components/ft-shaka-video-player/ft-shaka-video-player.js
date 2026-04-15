@@ -1127,14 +1127,7 @@ export default defineComponent({
     /**
      * @param {HTMLElement} seekBarContainer
      */
-    function getChapterPreviewParent(seekBarContainer) {
-      return container.value?.querySelector('.shaka-player-ui-thumbnail-container') ?? seekBarContainer
-    }
-
-    /**
-     * @param {HTMLElement} parent
-     */
-    function getChapterPreview(parent) {
+    function getChapterPreview(seekBarContainer) {
       if (!container.value) return null
 
       let chapterPreview = container.value.querySelector('.ft-chapter-preview')
@@ -1145,8 +1138,8 @@ export default defineComponent({
         chapterPreview.dir = 'auto'
       }
 
-      if (chapterPreview.parentElement !== parent) {
-        parent.appendChild(chapterPreview)
+      if (chapterPreview.parentElement !== seekBarContainer) {
+        seekBarContainer.appendChild(chapterPreview)
       }
 
       return chapterPreview
@@ -1170,8 +1163,7 @@ export default defineComponent({
         return
       }
 
-      const chapterPreviewParent = getChapterPreviewParent(seekBarContainer)
-      const chapterPreview = getChapterPreview(chapterPreviewParent)
+      const chapterPreview = getChapterPreview(seekBarContainer)
       if (!chapterPreview) return
 
       const rect = seekBarContainer.getBoundingClientRect()
@@ -1201,21 +1193,41 @@ export default defineComponent({
         chapterPreview.textContent = chapter.title
       }
 
-      chapterPreview.style.display = 'block'
-      chapterPreview.style.maxWidth = `${Math.max(Math.min(rect.width - 8, window.innerWidth - 24, 360), 0)}px`
-      chapterPreview.style.bottom = ''
+      chapterPreview.style.display = 'inline-block'
 
-      if (chapterPreviewParent === seekBarContainer) {
-        const previewWidth = chapterPreview.offsetWidth
-        const minX = previewWidth / 2
-        const maxX = rect.width - (previewWidth / 2)
-        const targetX = percentage * rect.width
-        const clampedX = Math.max(minX, Math.min(maxX, targetX))
+      const playerRect = container.value.getBoundingClientRect()
+      const maxFromSeekBar = rect.width - 8
+      const maxFromPlayer = playerRect.width - 16
+      const maxW = Math.max(
+        Math.min(
+          maxFromSeekBar,
+          maxFromPlayer,
+          window.innerWidth - 24
+        ),
+        0
+      )
+      chapterPreview.style.maxWidth = `${maxW}px`
 
-        chapterPreview.style.left = `${clampedX}px`
-      } else {
-        chapterPreview.style.left = ''
+      const thumbContainer = seekBarContainer.querySelector('.shaka-player-ui-thumbnail-container')
+      let bottomPx
+      if (thumbContainer && window.getComputedStyle(thumbContainer).visibility === 'visible') {
+        const thumbRect = thumbContainer.getBoundingClientRect()
+        if (thumbRect.width > 0 && thumbRect.height > 0) {
+          bottomPx = rect.bottom - thumbRect.top + 8
+        }
       }
+      if (bottomPx == null || !Number.isFinite(bottomPx)) {
+        bottomPx = seekBarContainer.offsetHeight + 8
+      }
+      chapterPreview.style.bottom = `${bottomPx}px`
+
+      const previewWidth = chapterPreview.offsetWidth
+      const minX = previewWidth / 2
+      const maxX = rect.width - (previewWidth / 2)
+      const targetX = percentage * rect.width
+      const clampedX = Math.max(minX, Math.min(maxX, targetX))
+
+      chapterPreview.style.left = `${clampedX}px`
     }
 
     function handleSeekBarMouseLeave() {

@@ -192,10 +192,6 @@
   background-color: #000;
 }
 
-:deep(.shaka-player-ui-thumbnail-container) {
-  overflow: visible;
-}
-
 :deep(.sponsorBlockMarker),
 :deep(.chapterMarker) {
   position: absolute;
@@ -260,27 +256,25 @@
   height: 100%;
 }
 
-/* Chapter labels shown above the seek bar while hovering */
+/* Chapter title while hovering the seek bar; bottom/left/max-width from JS */
 :deep(.ft-chapter-preview) {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
   transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  padding: 6px 12px;
+  overflow: hidden;
   background-color: rgb(27 27 27 / 67%);
   border-radius: 999px;
   color: #fff;
   font-size: 13px;
   font-weight: bold;
   font-family: Roboto, Arial, sans-serif;
-  white-space: nowrap;
   text-align: center;
-  max-width: min(360px, calc(100vw - 24px));
-  padding: 6px 12px;
-  box-sizing: border-box;
-  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   box-shadow: none;
   text-shadow: none;
-  text-overflow: ellipsis;
   pointer-events: none;
   z-index: 11;
   display: none;
