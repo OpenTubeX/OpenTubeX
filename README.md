@@ -7,31 +7,47 @@ Use YouTube without advertisements and prevent Google from tracking you with the
 Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to Electron.
 
 > [!WARNING]
-> **This is a fork in its early stages.** It currently provides the following extra features:
-> - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
->  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
->  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
->  <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
->
-> - Option to disable multiplying seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can enable this behavior in Player Settings if you prefer the previous behavior.
->  <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
->
-> - Focus search bar when pressing `/` key in addition to Ctrl+L/Cmd+L.
->
-> - SponsorBlock auto-skip temporary toggle under video player
-> <img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
->
-> - SponsorBlock unskip/reskip buttons
-> <img width="266" height="48" alt="image" src="https://github.com/user-attachments/assets/aefda586-0907-4e9a-add5-1d68abcd712a" />
->
-> - Experimental tab support. This is still a work in progress and may have bugs or missing functionality.
-> <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
->
-> - Option to define a script to run when YouTube blocked your IP
-> <img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
+> 🚧 **This is a fork in its early stages.** Expect bugs.
+
+## Extra features compared to FreeTube
+
+- Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
+ <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
+ <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
+ <img height="75" alt="image" src="https://github.com/user-attachments/assets/560a55c0-f653-4c21-ae30-5cdeff6ac428" />
+
+- Remember video quality on a per-channel basis. Works the same way as above
+
+- Option if you want to multiply seek intervals by playback rate. By default, seek intervals (arrow keys and J/L) are not multiplied by playback rate. You can change this in Player Settings if you prefer the previous behavior.
+ <img height="150" alt="image" src="https://github.com/user-attachments/assets/9195f70e-a881-4052-b199-bbdad043e39a" />
+
+- Option for playback rate adjusted timestamps
+<img height="150" alt="image" src="https://github.com/user-attachments/assets/d4d3cb45-b227-4521-a88b-2ff14051d0a6" />
+<br><img height="150" alt="image" src="https://github.com/user-attachments/assets/982ef08a-7f53-4efb-9ebc-c49328e306b9" />
+
+- Chapter tooltips on seekbar
+<img height="150" alt="image" src="https://github.com/user-attachments/assets/c6bed647-e872-458d-a4d6-2be58f4c17a0" />
+
+- Option to prevent title/description translations by YouTube
+<img width="259" height="156" alt="image" src="https://github.com/user-attachments/assets/4713b8eb-9933-45cb-81ca-8db950ebec71" />
+
+- Focus search bar when pressing <kbd>/</kbd> key in addition to <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>L</kbd>
+
+- SponsorBlock auto-skip temporary toggle under video player
+<img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
+
+- SponsorBlock unskip/reskip buttons
+<img width="266" height="48" alt="image" src="https://github.com/user-attachments/assets/aefda586-0907-4e9a-add5-1d68abcd712a" />
+
+- Tabs like in a web browser (experimental)
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
+
+- Option to define a script to run when YouTube blocked your IP. It will automatically run it and reload the video after it has finished
+<img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
 
 
-<p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
+
+<br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
     <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
