@@ -210,6 +210,16 @@ const forbiddenTitles = computed(() => {
   return JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
 })
 
+/**
+ * @param {{
+ *  liveNow?: boolean,
+ *  isUpcoming?: boolean,
+ * }} video
+ */
+function shouldHideLiveStreamVideo(video) {
+  return hideLiveStreams.value && (video.liveNow || video.isUpcoming)
+}
+
 const showResult = computed(() => {
   const dataType = finalDataType.value
 
@@ -218,7 +228,7 @@ const showResult = computed(() => {
   }
 
   if (dataType === 'video' || dataType === 'shortVideo') {
-    if (hideLiveStreams.value && (props.data.liveNow || props.data.lengthSeconds == null)) {
+    if (shouldHideLiveStreamVideo(props.data)) {
       // hide livestreams
       return false
     }

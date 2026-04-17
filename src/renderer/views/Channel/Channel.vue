@@ -60,7 +60,7 @@
           @change="shortSortBy = $event"
         />
         <FtSelect
-          v-if="!hideLiveStreams && showLiveSortBy"
+          v-if="showLiveSortBy"
           v-show="currentTab === 'live' && (showFetchMoreButton || filteredLive.length > 1)"
           :value="liveSortBy"
           :select-names="videoLiveShortSelectNames"
@@ -125,7 +125,6 @@
           </p>
         </FtFlexBox>
         <FtElementList
-          v-if="!hideLiveStreams"
           v-show="currentTab === 'live'"
           id="livePanel"
           :data="filteredLive"
@@ -134,7 +133,7 @@
           aria-labelledby="liveTab"
         />
         <FtFlexBox
-          v-if="!hideLiveStreams && currentTab === 'live' && latestLive.length === 0"
+          v-if="currentTab === 'live' && filteredLive.length === 0"
         >
           <p class="message">
             {{ $t("Channel.Live.This channel does not currently have any live streams") }}
@@ -471,6 +470,16 @@ const hideChannelCommunity = computed(() => store.getters.getHideChannelCommunit
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideWatchedSubs = computed(() => store.getters.getHideWatchedSubs)
 
+/**
+ * @param {{
+ *  liveNow?: boolean,
+ *  isUpcoming?: boolean,
+ * }} video
+ */
+function shouldHideLiveStreamVideo(video) {
+  return hideLiveStreams.value && (video.liveNow || video.isUpcoming)
+}
+
 const tabInfoValues = computed(() => {
   const values = [...channelTabs.value]
 
@@ -481,10 +490,6 @@ const tabInfoValues = computed(() => {
 
   if (hideChannelShorts.value) {
     removeFromArrayIfExists(values, 'shorts')
-  }
-
-  if (hideLiveStreams.value) {
-    removeFromArrayIfExists(values, 'live')
   }
 
   if (hideChannelPlaylists.value) {
@@ -774,7 +779,7 @@ async function getChannelLocal() {
       getChannelShortsLocal()
     }
 
-    if (!hideLiveStreams.value && channelInstance.has_live_streams) {
+    if (channelInstance.has_live_streams) {
       tabs.push('live')
       getChannelLiveLocal()
     }
@@ -989,7 +994,7 @@ async function getChannelInfoInvidious() {
       channelInvidiousShorts()
     }
 
-    if (!hideLiveStreams.value && response.tabs.includes('live')) {
+    if (response.tabs.includes('live')) {
       channelInvidiousLive()
     }
 
@@ -1054,11 +1059,17 @@ const filteredShorts = computed(() => {
 })
 
 const filteredLive = computed(() => {
+  let videos = latestLive.value
+
   if (hideWatchedSubs.value) {
-    return filterWatchedArray(latestLive.value)
-  } else {
-    return latestLive.value
+    videos = filterWatchedArray(videos)
   }
+
+  if (hideLiveStreams.value) {
+    videos = videos.filter(video => !shouldHideLiveStreamVideo(video))
+  }
+
+  return videos
 })
 
 watch(videoSortBy, () => {
