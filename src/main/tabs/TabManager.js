@@ -449,6 +449,13 @@ export class TabManager {
       const currentTab = this.tabs.get(previousActiveId)
       if (currentTab) {
         this.browserWindow.contentView.removeChildView(currentTab.view)
+        if (!currentTab.view.webContents.isDestroyed()) {
+          try {
+            currentTab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, false)
+          } catch (error) {
+            console.error('Error sending tab inactive notification:', error)
+          }
+        }
       }
     }
 
@@ -464,6 +471,14 @@ export class TabManager {
     // Show new active tab
     this.browserWindow.contentView.addChildView(tab.view)
     tab.view.webContents.focus()
+
+    if (!tab.view.webContents.isDestroyed()) {
+      try {
+        tab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, true)
+      } catch (error) {
+        console.error('Error sending tab active notification:', error)
+      }
+    }
   }
 
   /**

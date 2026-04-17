@@ -460,6 +460,21 @@ export default {
       return () => {
         ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
       }
+    },
+
+    /**
+     * Listen for active tab changes (notifies this tab when it becomes active or inactive)
+     * @param {(isActive: boolean) => void} handler
+     * @returns {() => void} Function to remove the listener
+     */
+    onActiveChanged: (handler) => {
+      const listener = (_event, isActive) => {
+        handler(isActive)
+      }
+      ipcRenderer.on(IpcChannels.TABS_ACTIVE_CHANGED, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.TABS_ACTIVE_CHANGED, listener)
+      }
     }
   }
 }

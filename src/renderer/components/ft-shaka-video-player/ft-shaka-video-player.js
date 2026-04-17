@@ -1437,6 +1437,8 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('playing')
       }
+
+      updateAutoPip()
     }
 
     function handlePause() {
@@ -1449,6 +1451,8 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('paused')
       }
+
+      updateAutoPip()
 
       emit('pause')
     }
@@ -1464,6 +1468,8 @@ export default defineComponent({
         window.ftElectron.tabs.setPlaybackState('none')
       }
 
+      updateAutoPip()
+
       emit('ended')
     }
 
@@ -1473,6 +1479,10 @@ export default defineComponent({
         startInPip = false
         window.ftElectron.requestPiP()
       }
+
+      // Re-evaluate auto-PiP now that PiP is actually allowed (the video was possibly
+      // in a hidden tab / scrolled out of view while still loading).
+      updateAutoPip()
     }
 
     function updateVolume() {
@@ -1548,7 +1558,95 @@ export default defineComponent({
       pipWindow = null
       pipWindowWidth.value = null
       pipWindowHeight.value = null
+
+      // If the user manually exits PiP (or the browser dismisses the PiP window for any
+      // other reason), forget that auto-PiP initiated it so we don't re-enter later.
+      autoPipActive = false
     }
+
+    // #region auto picture-in-picture
+
+    /** @type {import('vue').ComputedRef<'never' | 'tab' | 'scroll' | 'both'>} */
+    const autoPictureInPictureMode = computed(() => store.getters.getAutoPictureInPictureMode)
+
+    // Whether this auto-mechanism is currently responsible for the active PiP session.
+    // Used to avoid auto-exiting PiP sessions that the user initiated themselves.
+    let autoPipActive = false
+    let tabVisible = !document.hidden
+    // Assume visible until the IntersectionObserver reports otherwise.
+    let videoMostlyVisible = true
+
+    /** @type {IntersectionObserver | null} */
+    let videoIntersectionObserver = null
+    /** @type {(() => void) | null} */
+    let activeTabChangedCleanup = null
+
+    function shouldAutoPipNow() {
+      const mode = autoPictureInPictureMode.value
+      if (mode === 'never' || props.format === 'audio') return false
+
+      // Only auto-switch while the video is actually playing - paused or ended videos
+      // shouldn't be forced into a mini window.
+      const videoElement = video.value
+      if (!videoElement || videoElement.paused || videoElement.ended) return false
+
+      const tabTrigger = (mode === 'tab' || mode === 'both') && !tabVisible
+      const scrollTrigger = (mode === 'scroll' || mode === 'both') && !videoMostlyVisible
+
+      return tabTrigger || scrollTrigger
+    }
+
+    function triggerPipToggle() {
+      // In Electron we go through a privileged channel so the call is treated as a
+      // user gesture (otherwise the browser refuses to enter PiP programmatically).
+      if (process.env.IS_ELECTRON && window.ftElectron?.requestPiP) {
+        window.ftElectron.requestPiP()
+        return true
+      }
+
+      if (!ui) return false
+
+      try {
+        ui.getControls().togglePiP()
+        return true
+      } catch (err) {
+        console.warn('Auto Picture-in-Picture: togglePiP failed', err)
+        return false
+      }
+    }
+
+    function updateAutoPip() {
+      if (!ui) return
+      const controls = ui.getControls?.()
+      if (!controls) return
+
+      const wantPip = shouldAutoPipNow()
+      const inPip = controls.isPiPEnabled()
+
+      if (wantPip && !inPip) {
+        if (!controls.isPiPAllowed()) return
+        // Optimistically mark auto as active before issuing the toggle - if it
+        // fails we reset the flag so a later manual request is still respected.
+        autoPipActive = true
+        if (!triggerPipToggle()) {
+          autoPipActive = false
+        }
+      } else if (!wantPip && inPip && autoPipActive) {
+        triggerPipToggle()
+        autoPipActive = false
+      }
+    }
+
+    function handleDocumentVisibilityChange() {
+      tabVisible = !document.hidden
+      updateAutoPip()
+    }
+
+    watch(autoPictureInPictureMode, () => {
+      updateAutoPip()
+    })
+
+    // #endregion auto picture-in-picture
 
     function handlePictureInPictureResize() {
       const devicePixelRatio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1
@@ -3175,6 +3273,30 @@ export default defineComponent({
         }
       }
 
+      // Set up auto picture-in-picture listeners. The actual entering/exiting of PiP
+      // happens once the video reaches `canplay` (see handleCanPlay).
+      document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.onActiveChanged) {
+        try {
+          activeTabChangedCleanup = window.ftElectron.tabs.onActiveChanged((isActive) => {
+            tabVisible = isActive
+            updateAutoPip()
+          })
+        } catch (error) {
+          console.error('Failed to set up active tab listener for auto PiP:', error)
+        }
+      }
+
+      if (container.value && props.format !== 'audio' && typeof IntersectionObserver !== 'undefined') {
+        videoIntersectionObserver = new IntersectionObserver((entries) => {
+          const entry = entries[entries.length - 1]
+          videoMostlyVisible = entry.intersectionRatio >= 0.25
+          updateAutoPip()
+        }, { threshold: [0, 0.25, 1] })
+        videoIntersectionObserver.observe(container.value)
+      }
+
       player.addEventListener('loading', () => {
         hasLoaded.value = false
       })
@@ -3589,6 +3711,17 @@ export default defineComponent({
       if (exitFullscreenCleanup) {
         exitFullscreenCleanup()
         exitFullscreenCleanup = null
+      }
+
+      // Clean up auto picture-in-picture listeners
+      document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
+      if (activeTabChangedCleanup) {
+        activeTabChangedCleanup()
+        activeTabChangedCleanup = null
+      }
+      if (videoIntersectionObserver) {
+        videoIntersectionObserver.disconnect()
+        videoIntersectionObserver = null
       }
 
       if (containerResizeObserver) {

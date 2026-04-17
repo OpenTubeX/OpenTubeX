@@ -452,6 +452,12 @@ Settings:
       Full Screen: Full Screen
       Picture in Picture: Picture in Picture
       External Player: External Player ({externalPlayerName})
+    Auto Picture in Picture:
+      Auto Picture in Picture: Auto Picture-in-Picture
+      Never: Never
+      When Switching Tab: When switching tab
+      When Scrolling Down: When scrolling down
+      Both: When switching tab or scrolling down
     Scroll Volume Over Video Player: Scroll Volume Over Video Player
     Scroll Playback Rate Over Video Player: Scroll Playback Rate Over Video Player
     Skip by Scrolling Over Video Player: Skip by Scrolling Over Video Player

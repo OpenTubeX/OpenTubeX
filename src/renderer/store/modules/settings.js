@@ -151,6 +151,7 @@ const defaultSideEffectsTriggerId = settingId =>
 const state = {
   autoplayPlaylists: true,
   autoplayVideos: true,
+  autoPictureInPictureMode: 'never',
   avoidTranslation: 'disabled',
   backendFallback: false,
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',

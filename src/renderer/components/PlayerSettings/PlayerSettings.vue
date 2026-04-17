@@ -123,6 +123,14 @@
         :icon="['fas', 'gauge']"
         @change="updateVideoPlaybackRateInterval"
       />
+      <FtSelect
+        :placeholder="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
+        :value="autoPictureInPictureMode"
+        :select-names="autoPictureInPictureNames"
+        :select-values="AUTO_PICTURE_IN_PICTURE_VALUES"
+        :icon="['fas', 'clone']"
+        @change="updateAutoPictureInPictureMode"
+      />
     </FtFlexBox>
     <FtFlexBox>
       <FtSlider
@@ -627,6 +635,25 @@ const viewingModeValues = computed(() => {
  */
 function updateDefaultViewingMode(value) {
   store.dispatch('updateDefaultViewingMode', value)
+}
+
+const AUTO_PICTURE_IN_PICTURE_VALUES = ['never', 'tab', 'scroll', 'both']
+
+const autoPictureInPictureNames = computed(() => [
+  t('Settings.Player Settings.Auto Picture in Picture.Never'),
+  t('Settings.Player Settings.Auto Picture in Picture.When Switching Tab'),
+  t('Settings.Player Settings.Auto Picture in Picture.When Scrolling Down'),
+  t('Settings.Player Settings.Auto Picture in Picture.Both')
+])
+
+/** @type {import('vue').ComputedRef<'never' | 'tab' | 'scroll' | 'both'>} */
+const autoPictureInPictureMode = computed(() => store.getters.getAutoPictureInPictureMode)
+
+/**
+ * @param {'never' | 'tab' | 'scroll' | 'both'} value
+ */
+function updateAutoPictureInPictureMode(value) {
+  store.dispatch('updateAutoPictureInPictureMode', value)
 }
 
 const FORMAT_VALUES = ['dash', 'legacy', 'audio']
