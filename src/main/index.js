@@ -190,7 +190,7 @@ function runApp() {
     },
     // only show the copy link entry for external links and the /playlist, /channel and /watch in-app URLs
     // the /playlist, /channel and /watch in-app URLs get transformed to their equivalent YouTube or Invidious URLs
-    append: (defaultActions, parameters, browserWindow) => {
+    append: (defaultActions, parameters, webContents) => {
       const pageUrl = parameters.pageURL || ''
       let visible = false
       const urlParts = parameters.linkURL.split('#')
@@ -313,11 +313,31 @@ function runApp() {
             copy(transformURL(false))
           }
         },
-        // Only show search in new window for
+        // Only show search in new tab/window for
         // Static text or link
         // NOT internal link
         // NOT link with no customized link text
         // NOT link for timestamp
+        {
+          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Tab' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          enabled: textShortEnoughForSearch,
+          visible: (
+            !isInAppUrl &&
+            !parameters.isEditable &&
+            (parameters.linkURL != null && !parameters.linkURL.includes(parameters.selectionText) && !(/(\d{1,2}:)*\d{1,2}:\d{2}/.test(parameters.linkText))) &&
+            parameters.selectionText.trim().length > 0
+          ),
+          click: () => {
+            const queryText = parameters.selectionText.trim()
+            const manager = TabManager.getFromWebContents(webContents)
+            if (manager) {
+              manager.createTab({
+                route: `/search/${encodeURIComponent(queryText)}`,
+                makeActive: true,
+              })
+            }
+          }
+        },
         {
           label: textShortEnoughForSearch ? 'Search "{selection}" in a New Window' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
