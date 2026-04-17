@@ -12,6 +12,11 @@ const ProcessLocalesPlugin = require('./ProcessLocalesPlugin')
 
 let electronProcess = null
 let manualRestart = null
+let restartTimer = null
+let manualRestartResetTimer = null
+
+const restartDebounceMs = 300
+const manualRestartResetMs = 2500
 
 const remoteDebugging = process.argv.indexOf('--remote-debug') !== -1
 const web = process.argv.indexOf('--web') !== -1
@@ -86,6 +91,37 @@ async function restartElectron() {
   })
 }
 
+function scheduleElectronRestart() {
+  manualRestart = true
+
+  if (restartTimer) {
+    clearTimeout(restartTimer)
+  }
+
+  if (manualRestartResetTimer) {
+    clearTimeout(manualRestartResetTimer)
+    manualRestartResetTimer = null
+  }
+
+  restartTimer = setTimeout(async () => {
+    restartTimer = null
+
+    try {
+      await restartElectron()
+    } catch (err) {
+      console.error(err)
+    }
+
+    manualRestartResetTimer = setTimeout(() => {
+      manualRestartResetTimer = null
+
+      if (!restartTimer) {
+        manualRestart = false
+      }
+    }, manualRestartResetMs)
+  }, restartDebounceMs)
+}
+
 /**
  * @param {import('webpack').Compiler} compiler
  * @param {WebpackDevServer} devServer
@@ -117,11 +153,7 @@ function startMain() {
   compiler.hooks.afterEmit.tap('afterEmit', async () => {
     console.log(`\nCompiled ${name} script!`)
 
-    manualRestart = true
-    await restartElectron()
-    setTimeout(() => {
-      manualRestart = false
-    }, 2500)
+    scheduleElectronRestart()
 
     console.log(`\nWatching file changes for ${name} script...`)
   })
@@ -146,11 +178,7 @@ function startPreload() {
     if (firstTime) {
       firstTime = false
     } else {
-      manualRestart = true
-      await restartElectron()
-      setTimeout(() => {
-        manualRestart = false
-      }, 2500)
+      scheduleElectronRestart()
     }
 
     console.log(`\nWatching file changes for ${name} script...`)
