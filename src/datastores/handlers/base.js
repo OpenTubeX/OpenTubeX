@@ -370,20 +370,40 @@ class SubscriptionCache {
 }
 
 class TabSession {
-  static async load() {
-    const doc = await db.tabSession.findOneAsync({ _id: 'session' })
+  static async load(sessionId = 'session') {
+    const doc = await db.tabSession.findOneAsync({ _id: sessionId })
     if (doc && doc.value) {
       return doc.value
     }
     return null
   }
 
-  static async save(sessionData) {
-    return db.tabSession.updateAsync({ _id: 'session' }, { _id: 'session', value: sessionData }, { upsert: true })
+  static async loadAll() {
+    const docs = await db.tabSession.findAsync({})
+    return docs
+      .filter(doc => doc && doc.value)
+      .map(doc => ({ sessionId: doc._id, ...doc.value }))
   }
 
-  static async clear() {
-    return db.tabSession.updateAsync({ _id: 'session' }, { _id: 'session', value: null }, { upsert: true })
+  static async save(sessionId, sessionData) {
+    // Backwards-compatible single argument form: treat as legacy singleton record.
+    if (typeof sessionId !== 'string') {
+      sessionData = sessionId
+      sessionId = 'session'
+    }
+    return db.tabSession.updateAsync(
+      { _id: sessionId },
+      { _id: sessionId, value: sessionData },
+      { upsert: true }
+    )
+  }
+
+  static async clear(sessionId = 'session') {
+    return db.tabSession.removeAsync({ _id: sessionId })
+  }
+
+  static async clearAll() {
+    return db.tabSession.removeAsync({}, { multi: true })
   }
 }
 

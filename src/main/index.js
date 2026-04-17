@@ -28,6 +28,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { generatePoToken } from './poTokenGenerator'
 import { isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
+import { loadAllTabSessions } from './tabs/TabSessionStore'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -80,6 +81,13 @@ function runApp() {
 
   let backendPreference = 'local'
   let backendFallback = true
+
+  // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
+  // item / last-window-closed on non-darwin). Window close handlers use this to
+  // decide whether their persisted tab session record should be kept (so the
+  // window is restored on the next launch) or cleared (so a window that was
+  // manually closed while the app keeps running is forgotten).
+  let isQuitting = false
 
   // Registered per-webContents in 'web-contents-created' instead of calling contextMenu()
   // globally, because the global call only hooks BrowserWindow.webContents but page content
@@ -828,7 +836,23 @@ function runApp() {
     // Setup tab IPC handlers
     setupTabsIPC()
 
-    await createWindow()
+    // Restore every window that was open last time the app quit. Each window
+    // has its own persisted session record, so a multi-window Ctrl+Q session
+    // is fully rebuilt here (one window per saved session). If there are no
+    // saved sessions yet, fall back to creating a single empty window.
+    const savedSessions = await loadAllTabSessions()
+    if (savedSessions.length === 0) {
+      await createWindow()
+    } else {
+      await createWindow({ sessionData: savedSessions[0] })
+      for (let i = 1; i < savedSessions.length; i++) {
+        await createWindow({
+          replaceMainWindow: false,
+          showWindowNow: true,
+          sessionData: savedSessions[i]
+        })
+      }
+    }
 
     if (isDebug) {
       // With tabs, we need to open devtools on the active tab's webContents
@@ -990,7 +1014,8 @@ function runApp() {
       replaceMainWindow = true,
       windowStartupUrl = null,
       showWindowNow = false,
-      searchQueryText = null
+      searchQueryText = null,
+      sessionData = null
     } = { }) {
     // Syncing new window background to theme choice.
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then((setting) => {
@@ -1053,19 +1078,38 @@ function runApp() {
 
     let savedBounds, savedMaximized
 
-    const boundsDoc = await baseHandlers.settings._findOne('bounds')
-    if (typeof boundsDoc?.value === 'object') {
-      const { maximized, ...bounds } = boundsDoc.value
-      const windowVisible = screen.getAllDisplays().some(display => {
+    /**
+     * Check that the saved bounds still lie on one of the currently connected
+     * displays. If a monitor was disconnected since the bounds were saved, we
+     * want to fall back to a default position instead of placing the window
+     * off-screen.
+     * @param {{x: number, y: number, width: number, height: number}} bounds
+     */
+    const boundsOnVisibleDisplay = (bounds) => {
+      return screen.getAllDisplays().some(display => {
         const { x, y, width, height } = display.bounds
         return !(bounds.x > x + width || bounds.x + bounds.width < x || bounds.y > y + height || bounds.y + bounds.height < y)
       })
+    }
 
-      if (windowVisible) {
+    // Prefer this window's own persisted bounds (from its last session) if
+    // available. Otherwise fall back to the legacy app-wide `bounds` setting
+    // so brand-new windows still open where the user last had one.
+    if (sessionData?.bounds && typeof sessionData.bounds === 'object') {
+      const { maximized, fullScreen: _fullScreen, ...bounds } = sessionData.bounds
+      if (boundsOnVisibleDisplay(bounds)) {
         savedBounds = bounds
       }
-
       savedMaximized = maximized
+    } else {
+      const boundsDoc = await baseHandlers.settings._findOne('bounds')
+      if (typeof boundsDoc?.value === 'object') {
+        const { maximized, ...bounds } = boundsDoc.value
+        if (boundsOnVisibleDisplay(bounds)) {
+          savedBounds = bounds
+        }
+        savedMaximized = maximized
+      }
     }
 
     const newWindow = new BrowserWindow({
@@ -1112,7 +1156,13 @@ function runApp() {
       ? path.resolve(__dirname, '../../dist/preload.js')
       : path.resolve(__dirname, 'preload.js')
 
-    const tabManager = new TabManager(newWindow, ROOT_APP_URL, preloadPath, windowBackground)
+    const tabManager = new TabManager(
+      newWindow,
+      ROOT_APP_URL,
+      preloadPath,
+      windowBackground,
+      sessionData?.sessionId
+    )
 
     if (process.platform !== 'darwin') {
       function manageTray(window, removeWindow = false) {
@@ -1214,8 +1264,10 @@ function runApp() {
 
     // Initialize tabs - try to restore session or create initial tab
     const initializeTabs = async () => {
-      // Try to restore session (only for the first window on startup)
-      const sessionRestored = replaceMainWindow && !windowStartupUrl && await tabManager.restoreSession()
+      // Restore tabs from the pre-loaded session data if one was passed in
+      // (the startup flow loads every window's session up-front so that each
+      // window gets its own data).
+      const sessionRestored = !windowStartupUrl && tabManager.restoreFromData(sessionData)
 
       if (!sessionRestored) {
         // Create initial tab
@@ -1266,10 +1318,6 @@ function runApp() {
       // returns true if the element existed in the set
       const htmlFullscreen = htmlFullscreenWindowIds.delete(newWindow.id)
 
-      if (BrowserWindow.getAllWindows().length !== 1) {
-        return
-      }
-
       const value = {
         ...newWindow.getNormalBounds(),
         maximized: newWindow.isMaximized(),
@@ -1278,7 +1326,36 @@ function runApp() {
         fullScreen: newWindow.isFullScreen() && !htmlFullscreen
       }
 
-      await baseHandlers.settings._updateBounds(value)
+      // The current window is still part of getAllWindows() at the point the
+      // `close` event fires, so length === 1 means we're closing the last one.
+      const isLastWindow = BrowserWindow.getAllWindows().length === 1
+
+      // Preserve this window's tab session when:
+      //   - the app is quitting (so every open window comes back on next launch)
+      //   - or this is the last window closing (single-window sessions have
+      //     always been restored historically, keep that behavior)
+      // Otherwise the user manually closed one of several windows and we don't
+      // want it resurrected the next time the app runs.
+      if (isQuitting || isLastWindow) {
+        try {
+          await tabManager._saveSession()
+        } catch (err) {
+          console.error('Failed to persist tab session on window close', err)
+        }
+      } else {
+        try {
+          await tabManager.clearSession()
+        } catch (err) {
+          console.error('Failed to clear tab session on window close', err)
+        }
+      }
+
+      // Keep the legacy single-window `bounds` setting up to date so brand-new
+      // windows (with no saved session of their own) still open at the user's
+      // preferred size/position.
+      if (isLastWindow) {
+        await baseHandlers.settings._updateBounds(value)
+      }
     })
 
     newWindow.once('closed', () => {
@@ -2337,6 +2414,15 @@ function runApp() {
 
   let resourcesCleanUpDone = false
 
+  // `before-quit` fires on every platform before any windows start closing, so
+  // this is the earliest reliable place to mark the app as quitting. Each
+  // BrowserWindow's close handler checks this flag to decide whether to
+  // preserve or clear its persisted tab session.
+  app.on('before-quit', () => {
+    isQuitting = true
+    if (process.platform !== 'darwin' && tray) { tray.destroy() }
+  })
+
   app.on('window-all-closed', () => {
     // Clean up resources (datastores' compaction + Electron cache and storage data clearing)
     handleQuit()
@@ -2359,12 +2445,6 @@ function runApp() {
 
         app.quit()
       })
-    })
-  }
-
-  if (process.platform !== 'darwin') {
-    app.on('before-quit', () => {
-      if (tray) { tray.destroy() }
     })
   }
 

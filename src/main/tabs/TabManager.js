@@ -4,7 +4,7 @@
 import { WebContentsView, ipcMain, app } from 'electron'
 import { randomUUID } from 'crypto'
 import { IpcChannels } from '../../constants.js'
-import { saveTabSession, loadTabSession } from './TabSessionStore.js'
+import { saveTabSession, clearTabSession } from './TabSessionStore.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
@@ -30,8 +30,9 @@ export class TabManager {
    * @param {string} rootAppUrl
    * @param {string} preloadPath
    * @param {string} [backgroundColor='#212121']
+   * @param {string} [sessionId] - Stable id used to persist this window's tab session. Generated if omitted.
    */
-  constructor(browserWindow, rootAppUrl, preloadPath, backgroundColor = '#212121') {
+  constructor(browserWindow, rootAppUrl, preloadPath, backgroundColor = '#212121', sessionId) {
     /** @type {import('electron').BrowserWindow} */
     this.browserWindow = browserWindow
     /** @type {string} */
@@ -40,6 +41,8 @@ export class TabManager {
     this.preloadPath = preloadPath
     /** @type {string} */
     this.backgroundColor = backgroundColor
+    /** @type {string} */
+    this.sessionId = sessionId || randomUUID()
     /** @type {Map<string, TabInfo>} */
     this.tabs = new Map()
     /** @type {string|null} */
@@ -54,6 +57,8 @@ export class TabManager {
     this.contextMenuTabId = null
     /** @type {boolean} */
     this.contextMenuOnTabBar = false
+    /** @type {boolean} */
+    this._sessionPersistenceDisabled = false
 
     tabManagers.set(browserWindow.id, this)
 
@@ -770,36 +775,76 @@ export class TabManager {
   }
 
   /**
-   * Save session to persistent storage
+   * Save session to persistent storage. Each window persists its state
+   * under its own stable sessionId so multiple open windows can be
+   * restored on the next launch.
    */
   async _saveSession() {
+    if (this._sessionPersistenceDisabled) return
+
     const tabs = Array.from(this.tabs.values()).map(tab => ({
       id: tab.id,
       url: tab.url,
       title: tab.title
     }))
 
-    await saveTabSession({
+    await saveTabSession(this.sessionId, {
       tabs,
-      activeTabId: this.activeTabId
+      activeTabId: this.activeTabId,
+      bounds: this._getCurrentBounds()
     })
   }
 
   /**
-   * Restore session from persistent storage
-   * @returns {Promise<boolean>} Whether session was restored
+   * @returns {import('./TabSessionStore').TabSessionBounds | undefined}
+   * @private
    */
-  async restoreSession() {
-    const session = await loadTabSession()
-    if (!session || !session.tabs || session.tabs.length === 0) {
+  _getCurrentBounds() {
+    const win = this.browserWindow
+    if (!win || win.isDestroyed()) return undefined
+
+    try {
+      return {
+        ...win.getNormalBounds(),
+        maximized: win.isMaximized(),
+        fullScreen: win.isFullScreen()
+      }
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
+   * Forget this window's persisted session. Used when a window is closed
+   * by the user while the app keeps running, so we don't resurrect it on
+   * the next launch.
+   */
+  async clearSession() {
+    // Setting the flag synchronously before awaiting the clear ensures that
+    // any later `_saveSession` call (e.g. from a trailing webContents event)
+    // short-circuits instead of re-creating the record we're about to remove.
+    // NeDB serializes writes per datastore, so an already-in-flight save will
+    // land before this clear and still be erased by it.
+    this._sessionPersistenceDisabled = true
+    await clearTabSession(this.sessionId)
+  }
+
+  /**
+   * Restore tabs from previously loaded session data. The caller is
+   * responsible for loading the data (e.g. via loadAllTabSessions) and
+   * deciding which window should own which session.
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string}>, activeTabId?: string }} sessionData
+   * @returns {boolean} Whether any tabs were restored
+   */
+  restoreFromData(sessionData) {
+    if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
       return false
     }
 
-    // Create tabs from session
-    for (const tabData of session.tabs) {
+    for (const tabData of sessionData.tabs) {
       this.createTab({
         url: tabData.url,
-        makeActive: tabData.id === session.activeTabId
+        makeActive: tabData.id === sessionData.activeTabId
       })
     }
 
