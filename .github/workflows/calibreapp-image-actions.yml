@@ -30,13 +30,13 @@ jobs:
 
       - name: Compress Images
         id: calibre
-        uses: calibreapp/image-actions@03c976c29803442fc4040a9de5509669e7759b81
+        uses: calibreapp/image-actions@4f7260f5dbd809ec86d03721c1ad71b8a841d3e0
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           compressOnly: true
       - name: Create New Pull Request If Needed
         if: steps.calibre.outputs.markdown != ''
-        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 #v8.1.0
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 #v8.1.1
         with:
           title: Compressed Images Nightly
           branch-suffix: timestamp
