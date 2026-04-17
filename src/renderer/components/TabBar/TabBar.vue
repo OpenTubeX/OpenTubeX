@@ -4,20 +4,39 @@
     class="tabBar"
   >
     <div
-      ref="dropZoneRef"
-      class="tabsContainer"
-      @wheel.prevent="handleWheel"
+      ref="tabsViewportRef"
+      class="tabsViewport"
+      :class="{ hasScrollbar: showScrollbar }"
     >
-      <SortableTab
-        v-for="(tab, index) in tabs"
-        :key="tab.id"
-        :tab="tab"
-        :index="index"
-        :close-label="t('Close Tab')"
-        @activate="activateTab"
-        @close="closeTab"
-        @middle-click="handleMiddleClick"
-      />
+      <div
+        ref="dropZoneRef"
+        class="tabsContainer"
+        @scroll="handleScroll"
+        @wheel.prevent="handleWheel"
+      >
+        <SortableTab
+          v-for="(tab, index) in tabs"
+          :key="tab.id"
+          :tab="tab"
+          :index="index"
+          :close-label="t('Close Tab')"
+          @activate="activateTab"
+          @close="closeTab"
+          @middle-click="handleMiddleClick"
+        />
+      </div>
+      <div
+        v-show="showScrollbar"
+        ref="scrollbarRef"
+        class="tabsScrollbar"
+        @pointerdown="handleScrollbarTrackPointerDown"
+      >
+        <div
+          class="tabsScrollbarThumb"
+          :style="scrollbarThumbStyle"
+          @pointerdown.stop="handleScrollbarThumbPointerDown"
+        />
+      </div>
     </div>
     <button
       class="newTabButton"
@@ -35,7 +54,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, watch, onUnmounted, nextTick } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 import { useDroppable, useDnDStore } from '@vue-dnd-kit/core'
 
@@ -86,6 +105,26 @@ onMounted(() => {
     document.addEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.addEventListener('contextmenu', handleContextMenuEvent, true)
   }
+
+  window.addEventListener('resize', handleWindowResize)
+
+  nextTick(() => {
+    if (typeof ResizeObserver === 'function') {
+      resizeObserver = new ResizeObserver(() => {
+        updateScrollbar()
+      })
+
+      if (tabsViewportRef.value) {
+        resizeObserver.observe(tabsViewportRef.value)
+      }
+
+      if (dropZoneRef.value) {
+        resizeObserver.observe(dropZoneRef.value)
+      }
+    }
+
+    updateScrollbar()
+  })
 })
 
 onUnmounted(() => {
@@ -94,6 +133,11 @@ onUnmounted(() => {
     document.removeEventListener('contextmenu', handleContextMenuEvent, true)
     updateContextMenuTab({ tabId: null, isTabBar: false })
   }
+
+  stopScrollbarThumbDrag()
+  cancelScrollAnimation()
+  resizeObserver?.disconnect()
+  window.removeEventListener('resize', handleWindowResize)
   document.body.classList.remove('vue-dnd-dragging')
 })
 
@@ -234,9 +278,25 @@ function handleContextMenuEvent(event) {
 }
 
 const tabBarScrollPosition = computed(() => store.getters.getTabBarScrollPosition)
+const tabsViewportRef = useTemplateRef('tabsViewportRef')
+const scrollbarRef = useTemplateRef('scrollbarRef')
+const showScrollbar = ref(false)
+const scrollbarThumbWidth = ref(0)
+const scrollbarThumbOffset = ref(0)
 
 let scrollTarget = null
 let scrollAnimationId = null
+let resizeObserver = null
+let scrollbarDragState = null
+
+const MIN_SCROLLBAR_THUMB_WIDTH = 24
+
+const scrollbarThumbStyle = computed(() => {
+  return {
+    inlineSize: `${scrollbarThumbWidth.value}px`,
+    transform: `translateX(${scrollbarThumbOffset.value}px)`
+  }
+})
 
 function animateScroll() {
   const container = dropZoneRef.value
@@ -250,11 +310,58 @@ function animateScroll() {
     container.scrollLeft = scrollTarget
     scrollTarget = null
     scrollAnimationId = null
+    updateScrollbar()
     return
   }
 
   container.scrollLeft += diff * 0.25
+  updateScrollbar()
   scrollAnimationId = requestAnimationFrame(animateScroll)
+}
+
+function cancelScrollAnimation() {
+  if (scrollAnimationId != null) {
+    cancelAnimationFrame(scrollAnimationId)
+    scrollAnimationId = null
+  }
+
+  if (dropZoneRef.value) {
+    scrollTarget = dropZoneRef.value.scrollLeft
+  }
+}
+
+function updateScrollbar() {
+  const container = dropZoneRef.value
+  const viewport = tabsViewportRef.value
+
+  if (!container || !viewport) {
+    return
+  }
+
+  const maxScroll = container.scrollWidth - container.clientWidth
+
+  if (maxScroll <= 1) {
+    showScrollbar.value = false
+    scrollbarThumbWidth.value = 0
+    scrollbarThumbOffset.value = 0
+    return
+  }
+
+  showScrollbar.value = true
+
+  const trackWidth = viewport.clientWidth
+  const visibleRatio = container.clientWidth / container.scrollWidth
+  const thumbWidth = Math.min(
+    trackWidth,
+    Math.max(Math.round(trackWidth * visibleRatio), MIN_SCROLLBAR_THUMB_WIDTH)
+  )
+  const maxThumbOffset = Math.max(0, trackWidth - thumbWidth)
+  const thumbOffset = maxScroll > 0
+    ? (container.scrollLeft / maxScroll) * maxThumbOffset
+    : 0
+
+  scrollbarThumbWidth.value = thumbWidth
+  scrollbarThumbOffset.value = Math.max(0, Math.min(maxThumbOffset, thumbOffset))
 }
 
 /**
@@ -281,6 +388,105 @@ function handleWheel(event) {
   }
 }
 
+function handleScroll() {
+  updateScrollbar()
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleScrollbarTrackPointerDown(event) {
+  if (event.button !== 0 || event.target.closest('.tabsScrollbarThumb')) {
+    return
+  }
+
+  const container = dropZoneRef.value
+  const scrollbar = scrollbarRef.value
+  if (!container || !scrollbar) return
+
+  event.preventDefault()
+  cancelScrollAnimation()
+
+  const maxScroll = container.scrollWidth - container.clientWidth
+  const maxThumbOffset = scrollbar.clientWidth - scrollbarThumbWidth.value
+  const trackRect = scrollbar.getBoundingClientRect()
+  const desiredThumbOffset = event.clientX - trackRect.left - scrollbarThumbWidth.value / 2
+  const clampedThumbOffset = Math.max(0, Math.min(maxThumbOffset, desiredThumbOffset))
+  const nextScrollLeft = maxThumbOffset > 0
+    ? (clampedThumbOffset / maxThumbOffset) * maxScroll
+    : 0
+
+  container.scrollLeft = nextScrollLeft
+  if (isElectron) {
+    window.ftElectron.tabs.setTabBarScroll(nextScrollLeft)
+  }
+  updateScrollbar()
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleScrollbarThumbPointerDown(event) {
+  if (event.button !== 0) {
+    return
+  }
+
+  const container = dropZoneRef.value
+  const scrollbar = scrollbarRef.value
+  if (!container || !scrollbar) return
+
+  const maxScroll = container.scrollWidth - container.clientWidth
+  const maxThumbOffset = scrollbar.clientWidth - scrollbarThumbWidth.value
+  if (maxScroll <= 0 || maxThumbOffset <= 0) {
+    return
+  }
+
+  event.preventDefault()
+  cancelScrollAnimation()
+
+  scrollbarDragState = {
+    startX: event.clientX,
+    startScrollLeft: container.scrollLeft,
+    maxScroll,
+    maxThumbOffset
+  }
+
+  window.addEventListener('pointermove', handleScrollbarThumbPointerMove)
+  window.addEventListener('pointerup', stopScrollbarThumbDrag)
+  window.addEventListener('pointercancel', stopScrollbarThumbDrag)
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleScrollbarThumbPointerMove(event) {
+  if (!scrollbarDragState || !dropZoneRef.value) {
+    return
+  }
+
+  const deltaX = event.clientX - scrollbarDragState.startX
+  const nextScrollLeft = scrollbarDragState.startScrollLeft +
+    (deltaX / scrollbarDragState.maxThumbOffset) * scrollbarDragState.maxScroll
+  const clampedScrollLeft = Math.max(0, Math.min(scrollbarDragState.maxScroll, nextScrollLeft))
+
+  dropZoneRef.value.scrollLeft = clampedScrollLeft
+  if (isElectron) {
+    window.ftElectron.tabs.setTabBarScroll(clampedScrollLeft)
+  }
+  updateScrollbar()
+}
+
+function stopScrollbarThumbDrag() {
+  scrollbarDragState = null
+  window.removeEventListener('pointermove', handleScrollbarThumbPointerMove)
+  window.removeEventListener('pointerup', stopScrollbarThumbDrag)
+  window.removeEventListener('pointercancel', stopScrollbarThumbDrag)
+}
+
+function handleWindowResize() {
+  updateScrollbar()
+}
+
 // Apply scroll position received from main process state broadcasts.
 // This keeps all tab renderers' tab bars at the same scroll offset.
 watch(tabBarScrollPosition, (newPosition) => {
@@ -296,8 +502,16 @@ watch(tabBarScrollPosition, (newPosition) => {
       container.scrollLeft = newPosition
       scrollTarget = newPosition
     }
+
+    updateScrollbar()
   })
 })
+
+watch(tabs, () => {
+  nextTick(() => {
+    updateScrollbar()
+  })
+}, { deep: true })
 </script>
 
 <style scoped src="./TabBar.css" />

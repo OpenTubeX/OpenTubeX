@@ -14,11 +14,21 @@
   overflow: hidden;
 }
 
-.tabsContainer {
-  display: flex;
+.tabsViewport {
+  position: relative;
   flex: 1;
   min-inline-size: 0;
-  overflow-x: auto;
+  -webkit-app-region: no-drag;
+}
+
+.tabsViewport.hasScrollbar {
+  align-self: stretch;
+}
+
+.tabsContainer {
+  display: flex;
+  min-inline-size: 0;
+  overflow: auto hidden;
   scrollbar-width: none;
   gap: 2px;
   -webkit-app-region: no-drag;
@@ -26,6 +36,42 @@
 
 .tabsContainer::-webkit-scrollbar {
   display: none;
+}
+
+.tabsScrollbar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 3px;
+  border-radius: 999px;
+  background-color: var(--scrollbar-color);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.tabsScrollbarThumb {
+  block-size: 100%;
+  border-radius: inherit;
+  background-color: var(--primary-text-color);
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+  cursor: grab;
+  opacity: 0.95;
+}
+
+.tabsScrollbarThumb:active {
+  background-color: var(--primary-text-color);
+  opacity: 1;
+  cursor: grabbing;
+}
+
+.tabsScrollbarThumb:hover {
+  background-color: var(--primary-text-color);
+  opacity: 1;
+}
+
+.tabsScrollbar:hover .tabsScrollbarThumb {
+  background-color: var(--primary-text-color);
+  opacity: 1;
 }
 
 .newTabButton {
