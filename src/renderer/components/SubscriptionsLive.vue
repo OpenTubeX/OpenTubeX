@@ -237,7 +237,7 @@ async function loadVideosForSubscriptionsFromRemote() {
       })
     }
 
-    return videos ?? []
+    return videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
   }))).flat()
 
   videoList.value = updateVideoListAfterProcessing(videoListFromRemote)
