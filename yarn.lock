@@ -4768,10 +4768,10 @@ globals@^16.0.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-16.5.0.tgz#ccf1594a437b97653b2be13ed4d8f5c9f850cac1"
   integrity sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==
 
-globals@^17.4.0:
-  version "17.4.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-17.4.0.tgz#33d7d297ed1536b388a0e2f4bcd0ff19c8ff91b5"
-  integrity sha512-hjrNztw/VajQwOLsMNT1cbJiH2muO3OROCHnbehc8eY5JyD2gqz4AcMHPqgaOR59DjgUjYAYLeH699g/eWi2jw==
+globals@^17.4.0, globals@^17.5.0:
+  version "17.5.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-17.5.0.tgz#a82c641d898f8dfbe0e81f66fdff7d0de43f88c6"
+  integrity sha512-qoV+HK2yFl/366t2/Cb3+xxPUo5BuMynomoDmiaZBIdbs+0pYbjfZU+twLhGKp4uCZ/+NbtpVepH5bGCxRyy2g==
 
 globalthis@^1.0.1:
   version "1.0.4"
@@ -7473,10 +7473,10 @@ setprototypeof@1.2.0, setprototypeof@~1.2.0:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-shaka-player@^5.0.10:
-  version "5.0.10"
-  resolved "https://registry.yarnpkg.com/shaka-player/-/shaka-player-5.0.10.tgz#bcf06563fe0f7f40aec4f761429c3eb4d84bbb13"
-  integrity sha512-jyS7P3NEMaIsjHG+UXzqwKxptCYIzJ/PmjdLR7y/NypBRmfaHZXgxRwpfS9xYOJuY6YfRoFOu2G+iDCz1SuiSg==
+shaka-player@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/shaka-player/-/shaka-player-5.1.0.tgz#7ec640d7bbd0d445aefae2c2f5ec64b1060db1ed"
+  integrity sha512-S1rSGvsC86wDT7fqbJFqG8AbRiUkFUBTuy/LxM/VrW5x/sZsJctLBnJPPWseimpvQMNoF8PP5yQnENmKA4K51Q==
 
 shallow-clone@^3.0.0:
   version "3.0.1"
