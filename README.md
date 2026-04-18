@@ -45,6 +45,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - Option to define a script to run when YouTube blocked your IP. It will automatically run it and reload the video after it has finished
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
 
+- Auto Picture-in-Picture: automatically enter PiP when switching tabs or scrolling away from a video
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/acb02ab5-2d9b-4e03-9c63-5f3988e2ddcb" />
 
 
 <br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
