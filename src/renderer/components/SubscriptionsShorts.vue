@@ -247,6 +247,9 @@ async function getChannelShortsLocal(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return {
+          videos: null
+        }
       }
 
       return {
@@ -269,12 +272,12 @@ async function getChannelShortsLocal(channel, failedAttempts = 0) {
           return await getChannelShortsInvidious(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -297,6 +300,7 @@ async function getChannelShortsInvidious(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return { videos: null }
       }
 
       return { videos: [] }
@@ -317,12 +321,12 @@ async function getChannelShortsInvidious(channel, failedAttempts = 0) {
           return await getChannelShortsLocal(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }

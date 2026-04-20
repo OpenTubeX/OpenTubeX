@@ -254,7 +254,7 @@ async function getChannelVideosLocalScraper(channel, failedAttempts = 0) {
     if (result === null) {
       errorChannels.value.push(channel)
       return {
-        videos: []
+        videos: null
       }
     }
 
@@ -275,14 +275,14 @@ async function getChannelVideosLocalScraper(channel, failedAttempts = 0) {
           return await getChannelVideosInvidiousScraper(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelVideosLocalRSS(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -311,6 +311,9 @@ async function getChannelVideosLocalRSS(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return {
+          videos: null
+        }
       }
 
       return {
@@ -335,14 +338,14 @@ async function getChannelVideosLocalRSS(channel, failedAttempts = 0) {
           return await getChannelVideosInvidiousRSS(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelVideosLocalScraper(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -378,14 +381,14 @@ async function getChannelVideosInvidiousScraper(channel, failedAttempts = 0) {
           return await getChannelVideosLocalScraper(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelVideosInvidiousRSS(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -408,6 +411,9 @@ async function getChannelVideosInvidiousRSS(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return {
+          videos: null
+        }
       }
 
       return {
@@ -432,14 +438,14 @@ async function getChannelVideosInvidiousRSS(channel, failedAttempts = 0) {
           return await getChannelVideosLocalRSS(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelVideosInvidiousScraper(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }

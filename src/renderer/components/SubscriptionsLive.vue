@@ -255,7 +255,7 @@ async function getChannelLiveLocal(channel, failedAttempts = 0) {
     if (result === null) {
       errorChannels.value.push(channel)
       return {
-        videos: []
+        videos: null
       }
     }
 
@@ -276,14 +276,14 @@ async function getChannelLiveLocal(channel, failedAttempts = 0) {
           return await getChannelLiveInvidious(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelLiveLocalRSS(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -312,6 +312,9 @@ async function getChannelLiveLocalRSS(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return {
+          videos: null
+        }
       }
 
       return {
@@ -336,14 +339,14 @@ async function getChannelLiveLocalRSS(channel, failedAttempts = 0) {
           return await getChannelLiveInvidiousRSS(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelLiveLocal(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -379,14 +382,14 @@ async function getChannelLiveInvidious(channel, failedAttempts = 0) {
           return await getChannelLiveLocal(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelLiveInvidiousRSS(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
@@ -409,6 +412,9 @@ async function getChannelLiveInvidiousRSS(channel, failedAttempts = 0) {
 
       if (response2.status === 404) {
         errorChannels.value.push(channel)
+        return {
+          videos: null
+        }
       }
 
       return {
@@ -433,14 +439,14 @@ async function getChannelLiveInvidiousRSS(channel, failedAttempts = 0) {
           return await getChannelLiveLocalRSS(channel, failedAttempts + 1)
         } else {
           return {
-            videos: []
+            videos: null
           }
         }
       case 2:
         return await getChannelLiveInvidious(channel, failedAttempts + 1)
       default:
         return {
-          videos: []
+          videos: null
         }
     }
   }
