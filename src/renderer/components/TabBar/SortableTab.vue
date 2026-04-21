@@ -1,19 +1,22 @@
 <template>
   <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
   <div
-    ref="elementRef"
     class="tab"
     :data-tab-id="tab.id"
-    :class="{ active: tab.isActive, loading: tab.isLoading, playing: tab.isPlaying, dragging: isDragging }"
+    :class="{
+      active: tab.isActive,
+      loading: tab.isLoading,
+      playing: tab.isPlaying,
+      dragging: isDragging,
+      settling: isSettling,
+      noTransition: suppressTransition
+    }"
+    :style="tabStyle"
     :title="displayTitle"
     role="button"
     tabindex="-1"
     @click="handleClick"
     @auxclick.prevent="handleAuxClick"
-    @pointerdown="handlePointerDown"
-    @pointerup="handlePointerUp"
-    @pointercancel="handlePointerCancel"
-    @pointermove="handlePointerMove"
   >
     <span class="tabTitle">
       <span
@@ -46,8 +49,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref } from 'vue'
-import { useDraggable } from '@vue-dnd-kit/core'
+import { computed } from 'vue'
 import packageDetails from '@root/package.json'
 
 const props = defineProps({
@@ -62,145 +64,33 @@ const props = defineProps({
   index: {
     type: Number,
     required: true
+  },
+  offset: {
+    type: Number,
+    default: 0
+  },
+  isDragging: {
+    type: Boolean,
+    default: false
+  },
+  isSettling: {
+    type: Boolean,
+    default: false
+  },
+  suppressTransition: {
+    type: Boolean,
+    default: false
   }
 })
 
 const emit = defineEmits(['activate', 'close', 'middleClick'])
 
-// Drag delay implementation
-const dragDelayTimeout = ref(null)
-const dragStartPosition = ref(null)
-const hasDragged = ref(false)
-const DRAG_DELAY_MS = 200 // Delay before drag starts
-const DRAG_THRESHOLD_PX = 5 // Minimum movement to start drag
-
-const {
-  elementRef,
-  isDragging,
-  handleDragStart: originalHandleDragStart
-} = useDraggable({
-  id: props.tab.id,
-  data: {
-    index: props.index,
-    tabId: props.tab.id
-  },
-  containerProps: {
-    style: {
-      fontFamily: 'inherit',
-      fontSize: 'inherit',
-      fontWeight: 'inherit',
-      fontStyle: 'inherit',
-      textRendering: 'auto',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale'
-    }
-  },
-  events: {
-    onStart: () => {
-      hasDragged.value = true
-    },
-    onEnd: () => {
-      // Reset after a short delay to allow click event to be prevented
-      setTimeout(() => {
-        hasDragged.value = false
-      }, 100)
-    }
+const tabStyle = computed(() => {
+  const transform = props.offset !== 0 ? `translate3d(${props.offset}px, 0, 0)` : ''
+  return {
+    transform: transform || undefined
   }
 })
-
-/**
- * Wrapper for handleDragStart that sets the dragged flag
- * @param {PointerEvent} event
- */
-function handleDragStart(event) {
-  hasDragged.value = true
-  originalHandleDragStart(event)
-}
-
-/**
- * Handle pointer down - start delay timer for drag
- * @param {PointerEvent} event
- */
-function handlePointerDown(event) {
-  // Only allow dragging with the primary/left mouse button.
-  // This keeps middle-click close and right-click context menu interactions intact.
-  if (event.button !== 0) {
-    if (dragDelayTimeout.value) {
-      clearTimeout(dragDelayTimeout.value)
-      dragDelayTimeout.value = null
-    }
-    dragStartPosition.value = null
-    return
-  }
-
-  // Don't start drag if clicking on close button
-  if (event.target.closest('.closeButton')) {
-    return
-  }
-
-  // Reset drag flag
-  hasDragged.value = false
-  dragStartPosition.value = {
-    x: event.clientX,
-    y: event.clientY
-  }
-
-  // Clear any existing timeout
-  if (dragDelayTimeout.value) {
-    clearTimeout(dragDelayTimeout.value)
-  }
-
-  // Set timeout to start drag after delay
-  dragDelayTimeout.value = setTimeout(() => {
-    dragDelayTimeout.value = null
-    handleDragStart(event)
-  }, DRAG_DELAY_MS)
-}
-
-/**
- * Handle pointer move - cancel drag if moved too much before delay
- * @param {PointerEvent} event
- */
-function handlePointerMove(event) {
-  if (!dragStartPosition.value || !dragDelayTimeout.value) {
-    return
-  }
-
-  const deltaX = Math.abs(event.clientX - dragStartPosition.value.x)
-  const deltaY = Math.abs(event.clientY - dragStartPosition.value.y)
-
-  // If moved beyond threshold, start drag immediately
-  if (deltaX > DRAG_THRESHOLD_PX || deltaY > DRAG_THRESHOLD_PX) {
-    if (dragDelayTimeout.value) {
-      clearTimeout(dragDelayTimeout.value)
-      dragDelayTimeout.value = null
-    }
-    handleDragStart(event)
-  }
-}
-
-/**
- * Handle pointer up - cancel drag delay if it was just a click
- * @param {PointerEvent} event
- */
-function handlePointerUp(event) {
-  if (dragDelayTimeout.value) {
-    clearTimeout(dragDelayTimeout.value)
-    dragDelayTimeout.value = null
-  }
-  dragStartPosition.value = null
-}
-
-/**
- * Handle pointer cancel - cleanup
- */
-function handlePointerCancel() {
-  if (dragDelayTimeout.value) {
-    clearTimeout(dragDelayTimeout.value)
-    dragDelayTimeout.value = null
-  }
-  dragStartPosition.value = null
-}
 
 const displayTitle = computed(() => {
   const title = props.tab.title
@@ -212,18 +102,11 @@ const displayTitle = computed(() => {
   return title
 })
 
-/**
- * Handle click to activate tab
- */
 function handleClick() {
-  // Don't activate if we're currently dragging or just finished dragging
-  if (!isDragging.value && !hasDragged.value) {
-    emit('activate', props.tab.id)
-  }
+  emit('activate', props.tab.id)
 }
 
 /**
- * Handle middle click to close tab
  * @param {MouseEvent} event
  */
 function handleAuxClick(event) {
@@ -248,9 +131,15 @@ function handleAuxClick(event) {
   flex-shrink: 0;
   border: 1px solid transparent;
   border-block-end: 0;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.2s ease;
   position: relative;
   user-select: none;
+  touch-action: none;
+  will-change: transform;
+}
+
+.tab.noTransition {
+  transition: background-color 0.15s ease;
 }
 
 .tab::after {
@@ -282,19 +171,14 @@ function handleAuxClick(event) {
 }
 
 .tab.dragging {
-  opacity: 0.5;
   z-index: 10;
-  cursor: grabbing !important;
+  cursor: grabbing;
+  transition: background-color 0.15s ease;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
 }
 
-.tab.dragging .tabTitle {
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: inherit;
-  font-style: inherit;
-  text-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.tab.settling {
+  z-index: 10;
 }
 
 .tabTitle {
@@ -304,12 +188,6 @@ function handleAuxClick(event) {
   white-space: nowrap;
   font-size: 12px;
   color: var(--primary-text-color);
-  font-family: inherit;
-  font-weight: inherit;
-  font-style: inherit;
-  text-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .loadingDot {
@@ -328,10 +206,12 @@ function handleAuxClick(event) {
     transform: scale(0.7);
     opacity: 0.5;
   }
+
   50% {
     transform: scale(1);
     opacity: 1;
   }
+
   100% {
     transform: scale(0.7);
     opacity: 0.5;
@@ -372,47 +252,5 @@ function handleAuxClick(event) {
 
 .closeIcon {
   font-size: 10px;
-}
-</style>
-
-<style>
-/* Global styles for drag operations */
-body.vue-dnd-dragging {
-  cursor: grabbing !important;
-}
-
-body.vue-dnd-dragging * {
-  cursor: grabbing !important;
-}
-
-/* Prevent font changes in drag overlays - target all possible drag overlay elements */
-body.vue-dnd-dragging .tab,
-body.vue-dnd-dragging [data-vue-dnd-kit-draggable],
-body.vue-dnd-dragging [class*="drag"],
-body.vue-dnd-dragging [class*="overlay"] {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  font-weight: inherit !important;
-  font-style: inherit !important;
-  text-rendering: auto !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  transform: none !important;
-  will-change: auto !important;
-}
-
-body.vue-dnd-dragging .tab .tabTitle,
-body.vue-dnd-dragging [data-vue-dnd-kit-draggable] .tabTitle,
-body.vue-dnd-dragging [class*="drag"] .tabTitle,
-body.vue-dnd-dragging [class*="overlay"] .tabTitle,
-body.vue-dnd-dragging span.tabTitle {
-  font-family: inherit !important;
-  font-size: 12px !important;
-  font-weight: inherit !important;
-  font-style: inherit !important;
-  text-rendering: auto !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  transform: none !important;
 }
 </style>

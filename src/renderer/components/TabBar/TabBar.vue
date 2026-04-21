@@ -13,14 +13,19 @@
         class="tabsContainer"
         @scroll="handleScroll"
         @wheel.prevent="handleWheel"
+        @pointerdown="handleTabContainerPointerDown"
       >
         <SortableTab
           v-for="(tab, index) in tabs"
           :key="tab.id"
           :tab="tab"
           :index="index"
+          :offset="tabOffsets[tab.id] || 0"
+          :is-dragging="draggingTabId === tab.id"
+          :is-settling="isSettling && draggingTabId === tab.id"
+          :suppress-transition="suppressTransitions"
           :close-label="t('Close Tab')"
-          @activate="activateTab"
+          @activate="handleActivate"
           @close="closeTab"
           @middle-click="handleMiddleClick"
         />
@@ -56,7 +61,6 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
-import { useDroppable, useDnDStore } from '@vue-dnd-kit/core'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
@@ -77,28 +81,425 @@ const newTabTooltip = computed(() => {
   )
 })
 
-// Set up droppable zone for tab reordering - bind elementRef directly to template
-const {
-  elementRef: dropZoneRef
-} = useDroppable({
-  events: {
-    onDrop: handleDrop
-  }
-})
+const tabsViewportRef = useTemplateRef('tabsViewportRef')
+const dropZoneRef = useTemplateRef('dropZoneRef')
+const scrollbarRef = useTemplateRef('scrollbarRef')
 
-// Watch global drag state to add body class for global cursor styling
-const dndStore = useDnDStore()
-watch(
-  () => dndStore.isDragging.value,
-  (dragging) => {
-    if (dragging) {
-      document.body.classList.add('vue-dnd-dragging')
-    } else {
-      document.body.classList.remove('vue-dnd-dragging')
+// ===== Drag and drop state =====
+const DRAG_THRESHOLD_PX = 5
+const SETTLE_DURATION_MS = 180
+
+/** @type {import('vue').Ref<string | null>} */
+const draggingTabId = ref(null)
+/** @type {import('vue').Ref<Record<string, number>>} */
+const tabOffsets = ref({})
+const isSettling = ref(false)
+const suppressTransitions = ref(false)
+
+/**
+ * @typedef {object} DragSession
+ * @property {string} tabId
+ * @property {number} sourceIndex
+ * @property {number} targetIndex
+ * @property {number} pointerStartX
+ * @property {Array<{id: string, left: number, width: number}>} rects
+ * @property {number} gap
+ * @property {boolean} started
+ * @property {boolean} moved
+ * @property {number} draggedOffset
+ */
+
+/** @type {DragSession | null} */
+let dragSession = null
+let settleTimeoutId = null
+
+/**
+ * Begin tracking a potential drag from a tab.
+ * @param {PointerEvent} event
+ */
+function handleTabContainerPointerDown(event) {
+  if (event.button !== 0) return
+
+  const target = event.target
+  if (!(target instanceof Element)) return
+
+  // Ignore clicks on the close button
+  if (target.closest('.closeButton')) return
+
+  const tabEl = target.closest('.tab[data-tab-id]')
+  if (!(tabEl instanceof HTMLElement)) return
+
+  const container = dropZoneRef.value
+  if (!container) return
+
+  const tabId = tabEl.dataset.tabId
+  const tabsList = tabs.value
+  const sourceIndex = tabsList.findIndex(t => t.id === tabId)
+  if (sourceIndex === -1) return
+
+  const tabEls = Array.from(container.querySelectorAll('.tab[data-tab-id]'))
+  if (tabEls.length === 0) return
+
+  const containerRect = container.getBoundingClientRect()
+  const containerScrollLeft = container.scrollLeft
+
+  // Layout left = position within the scrollable content (so it stays
+  // consistent regardless of the current scroll offset).
+  const rects = tabEls.map(el => {
+    const rect = el.getBoundingClientRect()
+    return {
+      id: el.dataset.tabId,
+      left: rect.left - containerRect.left + containerScrollLeft,
+      width: rect.width
+    }
+  })
+
+  // Compute the gap between adjacent tabs (matches the .tabsContainer gap)
+  let gap = 0
+  if (rects.length > 1) {
+    gap = rects[1].left - (rects[0].left + rects[0].width)
+  }
+
+  finishSettle(true)
+
+  dragSession = {
+    tabId,
+    sourceIndex,
+    targetIndex: sourceIndex,
+    pointerStartX: event.clientX,
+    rects,
+    gap,
+    started: false,
+    moved: false,
+    draggedOffset: 0
+  }
+
+  window.addEventListener('pointermove', handleDragPointerMove)
+  window.addEventListener('pointerup', handleDragPointerUp)
+  window.addEventListener('pointercancel', handleDragPointerCancel)
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleDragPointerMove(event) {
+  if (!dragSession) return
+
+  const dx = event.clientX - dragSession.pointerStartX
+
+  if (!dragSession.started) {
+    if (Math.abs(dx) < DRAG_THRESHOLD_PX) return
+    dragSession.started = true
+    draggingTabId.value = dragSession.tabId
+    document.body.classList.add('tab-dragging')
+  }
+
+  dragSession.moved = true
+  // Prevent text selection while dragging
+  event.preventDefault()
+
+  const { rects, sourceIndex, gap } = dragSession
+  const sourceRect = rects[sourceIndex]
+  const lastRect = rects[rects.length - 1]
+
+  // Clamp so the dragged tab's center can sweep across the entire row
+  // (from the very left edge to the very right edge of the strip). Anything
+  // tighter would prevent reaching the leftmost / rightmost slot when the
+  // dragged tab is at least as wide as its neighbours.
+  const minLeft = rects[0].left - sourceRect.width / 2
+  const maxLeft = lastRect.left + lastRect.width - sourceRect.width / 2
+  const newLeft = Math.max(minLeft, Math.min(maxLeft, sourceRect.left + dx))
+  const draggedOffset = newLeft - sourceRect.left
+  const draggedCenter = newLeft + sourceRect.width / 2
+
+  dragSession.draggedOffset = draggedOffset
+
+  // Determine the target slot by comparing the dragged tab's center
+  // against the centers of the other (stationary, original layout) tabs.
+  let targetIndex = sourceIndex
+  for (let i = 0; i < rects.length; i++) {
+    if (i === sourceIndex) continue
+    const center = rects[i].left + rects[i].width / 2
+    if (i < sourceIndex && draggedCenter < center) {
+      targetIndex = Math.min(targetIndex, i)
+    } else if (i > sourceIndex && draggedCenter > center) {
+      targetIndex = Math.max(targetIndex, i)
     }
   }
-)
 
+  dragSession.targetIndex = targetIndex
+
+  tabOffsets.value = computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
+}
+
+/**
+ * Build the offset map for every tab given the proposed reorder.
+ * The dragged tab gets the user's pointer offset; all other tabs animate
+ * to the slot they would occupy in the reordered layout.
+ * @param {Array<{id: string, left: number, width: number}>} rects
+ * @param {number} sourceIndex
+ * @param {number} targetIndex
+ * @param {number} gap
+ * @param {number} draggedOffset
+ * @returns {Record<string, number>}
+ */
+function computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset) {
+  const offsets = {}
+
+  if (sourceIndex === targetIndex) {
+    offsets[rects[sourceIndex].id] = draggedOffset
+    return offsets
+  }
+
+  const order = rects.map((_, i) => i)
+  const [src] = order.splice(sourceIndex, 1)
+  order.splice(targetIndex, 0, src)
+
+  let cursor = rects[0].left
+  for (const idx of order) {
+    const rect = rects[idx]
+    if (idx === sourceIndex) {
+      offsets[rect.id] = draggedOffset
+    } else {
+      const delta = cursor - rect.left
+      if (delta !== 0) {
+        offsets[rect.id] = delta
+      }
+    }
+    cursor += rect.width + gap
+  }
+
+  return offsets
+}
+
+function handleDragPointerUp() {
+  cleanupDragListeners()
+
+  if (!dragSession) return
+
+  const { sourceIndex, targetIndex, started, moved, tabId, rects, gap, draggedOffset } = dragSession
+
+  if (started && moved) {
+    suppressNextClick()
+  }
+
+  document.body.classList.remove('tab-dragging')
+
+  if (!started) {
+    // Treated as a click; let the regular click handler activate the tab.
+    dragSession = null
+    return
+  }
+
+  // Snap the dragged tab to its final slot with an animation, then commit
+  // the reorder once the snap finishes. Other tabs are already shifted to
+  // their target positions via offsets, so they'll stay put through the swap.
+  const snapOffsets = computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
+
+  tabOffsets.value = snapOffsets
+  draggingTabId.value = null
+  isSettling.value = true
+
+  settleTimeoutId = window.setTimeout(() => {
+    settleTimeoutId = null
+    commitReorder(tabId, sourceIndex, targetIndex)
+  }, SETTLE_DURATION_MS)
+
+  dragSession = null
+}
+
+/**
+ * Compute offsets that place every tab (including the dragged one)
+ * exactly where it will live after the reorder commits.
+ * @param {Array<{id: string, left: number, width: number}>} rects
+ * @param {number} sourceIndex
+ * @param {number} targetIndex
+ * @param {number} gap
+ * @param {number} draggedOffset
+ * @returns {Record<string, number>}
+ */
+function computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset) {
+  if (sourceIndex === targetIndex) {
+    // Dragged tab returns to its origin; other tabs already at 0.
+    return {}
+  }
+
+  const offsets = computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
+
+  // Replace the dragged tab's pointer-following offset with the snap-to-slot offset.
+  const order = rects.map((_, i) => i)
+  const [src] = order.splice(sourceIndex, 1)
+  order.splice(targetIndex, 0, src)
+
+  let cursor = rects[0].left
+  for (const idx of order) {
+    if (idx === sourceIndex) {
+      offsets[rects[idx].id] = cursor - rects[idx].left
+      break
+    }
+    cursor += rects[idx].width + gap
+  }
+
+  return offsets
+}
+
+/**
+ * Commit the reorder to the store, then reset transforms without animating
+ * (so the elements don't jump from their offset positions back to 0).
+ * @param {string} tabId
+ * @param {number} sourceIndex
+ * @param {number} targetIndex
+ */
+function commitReorder(tabId, sourceIndex, targetIndex) {
+  if (sourceIndex !== targetIndex) {
+    suppressTransitions.value = true
+    store.dispatch('moveTab', { tabId, toIndex: targetIndex })
+  }
+
+  tabOffsets.value = {}
+  isSettling.value = false
+
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      suppressTransitions.value = false
+    })
+  })
+}
+
+function handleDragPointerCancel() {
+  cleanupDragListeners()
+  document.body.classList.remove('tab-dragging')
+
+  if (!dragSession) return
+
+  if (dragSession.started) {
+    // Animate the dragged tab back to its slot; other offsets are already
+    // shifted toward the proposed target, so animate them back to 0 too.
+    tabOffsets.value = {}
+    draggingTabId.value = null
+    isSettling.value = true
+
+    settleTimeoutId = window.setTimeout(() => {
+      settleTimeoutId = null
+      isSettling.value = false
+    }, SETTLE_DURATION_MS)
+  }
+
+  dragSession = null
+}
+
+function cleanupDragListeners() {
+  window.removeEventListener('pointermove', handleDragPointerMove)
+  window.removeEventListener('pointerup', handleDragPointerUp)
+  window.removeEventListener('pointercancel', handleDragPointerCancel)
+}
+
+/**
+ * If a settle animation is currently in progress, finish it immediately so a
+ * new drag starts from a clean state.
+ * @param {boolean} cancel
+ */
+function finishSettle(cancel) {
+  if (settleTimeoutId != null) {
+    clearTimeout(settleTimeoutId)
+    settleTimeoutId = null
+  }
+  if (cancel) {
+    suppressTransitions.value = true
+    tabOffsets.value = {}
+    isSettling.value = false
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        suppressTransitions.value = false
+      })
+    })
+  }
+}
+
+/**
+ * Suppress the `click` event that would otherwise fire after a drag completes.
+ */
+function suppressNextClick() {
+  const handler = (event) => {
+    event.stopPropagation()
+    event.preventDefault()
+    window.removeEventListener('click', handler, true)
+  }
+  window.addEventListener('click', handler, true)
+  // Safety net: drop the listener if no click ever fires (pointer released
+  // outside the source element so no click event is dispatched).
+  setTimeout(() => {
+    window.removeEventListener('click', handler, true)
+  }, 200)
+}
+
+// ===== Tab actions =====
+/**
+ * @param {string} tabId
+ */
+function handleActivate(tabId) {
+  store.dispatch('activateTab', tabId)
+}
+
+/**
+ * @param {string} tabId
+ */
+async function closeTab(tabId) {
+  const hasRemainingTabs = await store.dispatch('closeTab', tabId)
+  if (!hasRemainingTabs) {
+    window.close()
+  }
+}
+
+/**
+ * @param {MouseEvent} event
+ * @param {string} tabId
+ */
+function handleMiddleClick(event, tabId) {
+  if (event.button === 1) {
+    closeTab(tabId)
+  }
+}
+
+function createNewTab() {
+  store.dispatch('createTab', { makeActive: true })
+}
+
+// ===== Context menu =====
+/**
+ * @param {{ tabId: string | null, isTabBar: boolean }} payload
+ */
+function updateContextMenuTab(payload) {
+  window.ftElectron.tabs.setContextMenuTab(payload)
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleContextMenuPointerDown(event) {
+  if (!isElectron || event.button !== 2 || !(event.target instanceof Element)) {
+    return
+  }
+
+  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const isTabBar = event.target.closest('.tabBar') != null
+  updateContextMenuTab({ tabId, isTabBar })
+}
+
+/**
+ * @param {MouseEvent} event
+ */
+function handleContextMenuEvent(event) {
+  if (!isElectron || !(event.target instanceof Element)) {
+    return
+  }
+
+  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const isTabBar = event.target.closest('.tabBar') != null
+  updateContextMenuTab({ tabId, isTabBar })
+}
+
+// ===== Lifecycle =====
 onMounted(() => {
   if (isElectron) {
     store.dispatch('initializeTabs')
@@ -134,152 +535,21 @@ onUnmounted(() => {
     updateContextMenuTab({ tabId: null, isTabBar: false })
   }
 
+  cleanupDragListeners()
+  if (settleTimeoutId != null) {
+    clearTimeout(settleTimeoutId)
+    settleTimeoutId = null
+  }
+
   stopScrollbarThumbDrag()
   cancelScrollAnimation()
   resizeObserver?.disconnect()
   window.removeEventListener('resize', handleWindowResize)
-  document.body.classList.remove('vue-dnd-dragging')
+  document.body.classList.remove('tab-dragging')
 })
 
-/**
- * Handle drop event for tab reordering
- * @param {import('@vue-dnd-kit/core').IDnDStore} dndStoreInstance
- * @param {import('@vue-dnd-kit/core').IDnDPayload} payload
- */
-function handleDrop(dndStoreInstance, payload) {
-  if (!payload.items || payload.items.length === 0) return
-
-  const draggedItem = payload.items[0]
-  if (!draggedItem.data) return
-
-  const draggedTabId = draggedItem.data.tabId
-  if (!draggedTabId) return
-
-  // Get the current pointer position to determine drop target
-  const pointerPos = dndStoreInstance.pointerPosition.current.value
-  if (!pointerPos) return
-
-  // Find the drop target index by checking which tab the pointer is over
-  const tabElements = dropZoneRef.value?.querySelectorAll('.tab')
-  if (!tabElements) return
-
-  let targetIndex = -1
-  const tabsArray = tabs.value
-
-  for (let i = 0; i < tabElements.length; i++) {
-    const tabEl = tabElements[i]
-    const rect = tabEl.getBoundingClientRect()
-
-    // Check if pointer is within this tab's horizontal bounds
-    if (pointerPos.x >= rect.left && pointerPos.x <= rect.right) {
-      // Determine if we should insert before or after based on which half the pointer is in
-      const midPoint = rect.left + rect.width / 2
-      if (pointerPos.x < midPoint) {
-        targetIndex = i
-      } else {
-        targetIndex = i + 1
-      }
-      break
-    }
-  }
-
-  // If pointer is to the right of all tabs, append at end
-  if (targetIndex === -1 && tabElements.length > 0) {
-    const lastRect = tabElements[tabElements.length - 1].getBoundingClientRect()
-    if (pointerPos.x > lastRect.right) {
-      targetIndex = tabsArray.length
-    }
-  }
-
-  // If we still don't have a target, bail
-  if (targetIndex === -1) return
-
-  // Find source index
-  const sourceIndex = tabsArray.findIndex(tab => tab.id === draggedTabId)
-  if (sourceIndex === -1) return
-
-  // Adjust target index if moving to a later position
-  if (sourceIndex < targetIndex) {
-    targetIndex--
-  }
-
-  // Only dispatch if position actually changed
-  if (sourceIndex !== targetIndex) {
-    store.dispatch('moveTab', { tabId: draggedTabId, toIndex: targetIndex })
-  }
-}
-
-/**
- * @param {string} tabId
- */
-function activateTab(tabId) {
-  store.dispatch('activateTab', tabId)
-}
-
-/**
- * @param {string} tabId
- */
-async function closeTab(tabId) {
-  const hasRemainingTabs = await store.dispatch('closeTab', tabId)
-  if (!hasRemainingTabs) {
-    // Close window if no tabs left
-    window.close()
-  }
-}
-
-/**
- * @param {MouseEvent} event
- * @param {string} tabId
- */
-function handleMiddleClick(event, tabId) {
-  // Middle click to close tab
-  if (event.button === 1) {
-    closeTab(tabId)
-  }
-}
-
-function createNewTab() {
-  store.dispatch('createTab', { makeActive: true })
-}
-
-/**
- * @param {{ tabId: string | null, isTabBar: boolean }} payload
- */
-function updateContextMenuTab(payload) {
-  window.ftElectron.tabs.setContextMenuTab(payload)
-}
-
-/**
- * Keep the next Electron context menu targeted at the tab under the pointer.
- * @param {PointerEvent} event
- */
-function handleContextMenuPointerDown(event) {
-  if (!isElectron || event.button !== 2 || !(event.target instanceof Element)) {
-    return
-  }
-
-  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
-  const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({ tabId, isTabBar })
-}
-
-/**
- * Support keyboard-triggered context menus and clear stale targets elsewhere.
- * @param {MouseEvent} event
- */
-function handleContextMenuEvent(event) {
-  if (!isElectron || !(event.target instanceof Element)) {
-    return
-  }
-
-  const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
-  const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({ tabId, isTabBar })
-}
-
+// ===== Scrollbar =====
 const tabBarScrollPosition = computed(() => store.getters.getTabBarScrollPosition)
-const tabsViewportRef = useTemplateRef('tabsViewportRef')
-const scrollbarRef = useTemplateRef('scrollbarRef')
 const showScrollbar = ref(false)
 const scrollbarThumbWidth = ref(0)
 const scrollbarThumbOffset = ref(0)
@@ -515,3 +785,11 @@ watch(tabs, () => {
 </script>
 
 <style scoped src="./TabBar.css" />
+
+<style>
+body.tab-dragging,
+body.tab-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+</style>

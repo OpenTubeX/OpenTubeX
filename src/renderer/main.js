@@ -12,8 +12,6 @@ import { register as registerSwiper } from 'swiper/element'
 
 import { ObserveVisibility } from 'vue-observe-visibility'
 
-import VueDndKit from '@vue-dnd-kit/core'
-
 // Please keep the list of constants sorted by name
 // to avoid code conflict and duplicate entries
 import {
@@ -280,7 +278,6 @@ app
   .use(router)
   .use(store)
   .use(i18n)
-  .use(VueDndKit)
 
 router.isReady().then(() => {
   app.mount('#app')
