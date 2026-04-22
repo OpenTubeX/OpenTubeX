@@ -4,6 +4,7 @@
 import { WebContentsView, ipcMain, app } from 'electron'
 import { randomUUID } from 'crypto'
 import { IpcChannels } from '../../constants.js'
+import * as baseHandlers from '../../datastores/handlers/base.js'
 import { saveTabSession, clearTabSession } from './TabSessionStore.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
@@ -11,6 +12,7 @@ import { isOpenTubeXUrl } from '../utils.js'
 const tabManagers = new Map()
 
 const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'x11'
+const DEFAULT_NEW_TAB_POSITION = 'end'
 
 /**
  * @typedef {object} TabInfo
@@ -24,6 +26,27 @@ const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === '
 
 export class TabManager {
   static _isX11 = isX11
+
+  /**
+   * @param {unknown} value
+   * @returns {'end' | 'afterCurrent'}
+   */
+  static normalizeNewTabPosition(value) {
+    return value === 'afterCurrent' ? 'afterCurrent' : DEFAULT_NEW_TAB_POSITION
+  }
+
+  /**
+   * @returns {Promise<'end' | 'afterCurrent'>}
+   */
+  static async getStoredNewTabPosition() {
+    try {
+      const value = (await baseHandlers.settings._findOne('newTabPosition'))?.value
+      return TabManager.normalizeNewTabPosition(value)
+    } catch (error) {
+      console.error('Failed to load new tab position preference:', error)
+      return DEFAULT_NEW_TAB_POSITION
+    }
+  }
 
   /**
    * @param {import('electron').BrowserWindow} browserWindow
@@ -199,9 +222,10 @@ export class TabManager {
    * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
    * @param {object} [options.query] - Query params for the route
    * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
+   * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
    * @returns {TabInfo}
    */
-  createTab({ url, route, query, makeActive = true } = {}) {
+  createTab({ url, route, query, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION } = {}) {
     const id = randomUUID()
 
     // Determine the URL to load
@@ -252,7 +276,9 @@ export class TabManager {
 
       if (parsedUrl !== null && isOpenTubeXUrl(view.webContents.getURL())) {
         if (isOpenTubeXUrl(parsedUrl)) {
-          mgr.createTab({ url: details.url, makeActive: true })
+          mgr.createTabWithPreference({ url: details.url, makeActive: true }).catch(error => {
+            console.error('Failed to open window.open URL in a new tab:', error)
+          })
         } else if (
           parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:' ||
           parsedUrl.protocol === 'mailto:' || parsedUrl.protocol === 'tel:'
@@ -325,7 +351,19 @@ export class TabManager {
       view
     }
 
-    this.tabs.set(id, tabInfo)
+    if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
+      const entries = Array.from(this.tabs.entries())
+      const activeTabIndex = entries.findIndex(([tabId]) => tabId === this.activeTabId)
+
+      if (activeTabIndex !== -1) {
+        entries.splice(activeTabIndex + 1, 0, [id, tabInfo])
+        this.tabs = new Map(entries)
+      } else {
+        this.tabs.set(id, tabInfo)
+      }
+    } else {
+      this.tabs.set(id, tabInfo)
+    }
 
     // Load the URL
     view.webContents.loadURL(loadUrl)
@@ -356,6 +394,27 @@ export class TabManager {
     this._saveSession()
 
     return tabInfo
+  }
+
+  /**
+   * Create a new tab using the user's preferred insertion position unless overridden.
+   * @param {object} options
+   * @param {string} [options.url]
+   * @param {string} [options.route]
+   * @param {object} [options.query]
+   * @param {boolean} [options.makeActive=true]
+   * @param {'end' | 'afterCurrent'} [options.openPosition]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreference(options = {}) {
+    const openPosition = options.openPosition == null
+      ? await TabManager.getStoredNewTabPosition()
+      : TabManager.normalizeNewTabPosition(options.openPosition)
+
+    return this.createTab({
+      ...options,
+      openPosition
+    })
   }
 
   /**
@@ -892,10 +951,10 @@ export function setupTabsIPC() {
   })
 
   // Create new tab
-  ipcMain.handle(IpcChannels.TABS_CREATE, (event, options) => {
+  ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
-      const tab = manager.createTab(options || {})
+      const tab = await manager.createTabWithPreference(options || {})
       return { id: tab.id, url: tab.url, title: tab.title }
     }
     return null

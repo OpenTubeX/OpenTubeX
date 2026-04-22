@@ -146,7 +146,9 @@ function runApp() {
           label: 'New Tab',
           visible: isTabBarContextMenu,
           click: () => {
-            manager?.createTab({ makeActive: true })
+            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
+              console.error('Failed to create a new tab from the tab bar context menu:', error)
+            })
           }
         },
         {
@@ -173,7 +175,9 @@ function runApp() {
           click: () => {
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
-              manager.createTab({ url: parameters.linkURL, makeActive: true })
+              manager.createTabWithPreference({ url: parameters.linkURL, makeActive: true }).catch(error => {
+                console.error('Failed to open link in a new tab:', error)
+              })
             }
           }
         },
@@ -339,9 +343,11 @@ function runApp() {
             const queryText = parameters.selectionText.trim()
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
-              manager.createTab({
+              manager.createTabWithPreference({
                 route: `/search/${encodeURIComponent(queryText)}`,
                 makeActive: true,
+              }).catch(error => {
+                console.error('Failed to open search in a new tab:', error)
               })
             }
           }
@@ -1842,7 +1848,9 @@ function runApp() {
 
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
-      manager.createTab({ route: path, query, makeActive: true })
+      manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
+        console.error('Failed to create a new tab from the renderer:', error)
+      })
     }
   })
 
@@ -2836,7 +2844,9 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
-                  tabManager.createTab({ makeActive: true })
+                  tabManager.createTabWithPreference({ makeActive: true }).catch(error => {
+                    console.error('Failed to create a new tab from the app menu:', error)
+                  })
                 }
               }
             }

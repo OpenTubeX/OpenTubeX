@@ -69,6 +69,15 @@
         @change="updateLandingPage"
       />
       <FtSelect
+        v-if="USING_ELECTRON"
+        :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
+        :value="newTabPosition"
+        :select-names="newTabPositionNames"
+        :select-values="NEW_TAB_POSITION_VALUES"
+        :icon="['fas', 'plus']"
+        @change="updateNewTabPosition"
+      />
+      <FtSelect
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
         :select-names="viewTypeNames"
@@ -341,6 +350,23 @@ const landingPage = computed(() => store.getters.getLandingPage)
  */
 function updateLandingPage(value) {
   store.dispatch('updateLandingPage', value)
+}
+
+const NEW_TAB_POSITION_VALUES = ['end', 'afterCurrent']
+
+const newTabPositionNames = computed(() => [
+  t('Settings.General Settings.New Tab Position.At the end'),
+  t('Settings.General Settings.New Tab Position.After current tab')
+])
+
+/** @type {import('vue').ComputedRef<'end' | 'afterCurrent'>} */
+const newTabPosition = computed(() => store.getters.getNewTabPosition)
+
+/**
+ * @param {'end' | 'afterCurrent'} value
+ */
+function updateNewTabPosition(value) {
+  store.dispatch('updateNewTabPosition', value)
 }
 
 const VIEW_TYPE_VALUES = ['grid', 'list']

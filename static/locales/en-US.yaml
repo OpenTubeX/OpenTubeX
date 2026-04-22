@@ -282,6 +282,10 @@ Settings:
       Label: Auto Load Next Page
       Tooltip: Load additional pages and comments automatically.
     Default Landing Page: Default Landing Page
+    New Tab Position:
+      New Tab Position: New Tab Position
+      At the end: At the end
+      After current tab: After current tab
     Locale Preference: Locale Preference
     System Default: System Default
     Avoid translation:
