@@ -191,7 +191,7 @@ function handleDragPointerMove(event) {
     if (Math.abs(dx) < DRAG_THRESHOLD_PX) return
     dragSession.started = true
     draggingTabId.value = dragSession.tabId
-    document.body.classList.add('tab-dragging')
+    document.body.classList.add('tab-bar-grabbing')
   }
 
   dragSession.moved = true
@@ -283,7 +283,7 @@ function handleDragPointerUp() {
     suppressNextClick()
   }
 
-  document.body.classList.remove('tab-dragging')
+  document.body.classList.remove('tab-bar-grabbing')
 
   if (!started) {
     // Treated as a click; let the regular click handler activate the tab.
@@ -368,7 +368,7 @@ function commitReorder(tabId, sourceIndex, targetIndex) {
 
 function handleDragPointerCancel() {
   cleanupDragListeners()
-  document.body.classList.remove('tab-dragging')
+  document.body.classList.remove('tab-bar-grabbing')
 
   if (!dragSession) return
 
@@ -545,7 +545,7 @@ onUnmounted(() => {
   cancelScrollAnimation()
   resizeObserver?.disconnect()
   window.removeEventListener('resize', handleWindowResize)
-  document.body.classList.remove('tab-dragging')
+  document.body.classList.remove('tab-bar-grabbing')
 })
 
 // ===== Scrollbar =====
@@ -721,6 +721,7 @@ function handleScrollbarThumbPointerDown(event) {
     maxThumbOffset
   }
 
+  document.body.classList.add('tab-bar-grabbing')
   window.addEventListener('pointermove', handleScrollbarThumbPointerMove)
   window.addEventListener('pointerup', stopScrollbarThumbDrag)
   window.addEventListener('pointercancel', stopScrollbarThumbDrag)
@@ -748,6 +749,7 @@ function handleScrollbarThumbPointerMove(event) {
 
 function stopScrollbarThumbDrag() {
   scrollbarDragState = null
+  document.body.classList.remove('tab-bar-grabbing')
   window.removeEventListener('pointermove', handleScrollbarThumbPointerMove)
   window.removeEventListener('pointerup', stopScrollbarThumbDrag)
   window.removeEventListener('pointercancel', stopScrollbarThumbDrag)
@@ -787,8 +789,8 @@ watch(tabs, () => {
 <style scoped src="./TabBar.css" />
 
 <style>
-body.tab-dragging,
-body.tab-dragging * {
+body.tab-bar-grabbing,
+body.tab-bar-grabbing * {
   cursor: grabbing !important;
   user-select: none !important;
 }
