@@ -12,7 +12,8 @@ import { isOpenTubeXUrl } from '../utils.js'
 const tabManagers = new Map()
 
 const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'x11'
-const DEFAULT_NEW_TAB_POSITION = 'end'
+const DEFAULT_NEW_TAB_POSITION = 'afterCurrent'
+const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
 
 /**
  * @typedef {object} TabInfo
@@ -32,7 +33,9 @@ export class TabManager {
    * @returns {'end' | 'afterCurrent'}
    */
   static normalizeNewTabPosition(value) {
-    return value === 'afterCurrent' ? 'afterCurrent' : DEFAULT_NEW_TAB_POSITION
+    return VALID_NEW_TAB_POSITIONS.has(value)
+      ? value
+      : DEFAULT_NEW_TAB_POSITION
   }
 
   /**
