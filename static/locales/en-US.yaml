@@ -687,7 +687,15 @@ Settings:
   SponsorBlock Settings:
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Enable SponsorBlock
+    Enable SponsorBlock Submission: Enable SponsorBlock Submission
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API Url (Default is https://sponsor.ajay.app)
+    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID Tooltip: Paste the private SponsorBlock user ID from the browser extension. Leave this empty to use an app-generated ID.
+    Generated SponsorBlock User ID: Generated SponsorBlock User ID
+    Generated SponsorBlock User ID Tooltip: This app-generated SponsorBlock user ID can be used in the browser extension or if you use the app on another computer.
+    Export Generated User ID: Export Generated User ID
+    Generated SponsorBlock User ID Copy Button: Copy generated SponsorBlock user ID
+    Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
     Notify when sponsor segment is skipped: Notify when sponsor segment is skipped
     Skip notification timeout: Skip notification timeout
     UseDeArrowTitles: Use DeArrow Video Titles
@@ -980,8 +988,43 @@ Video:
     Playback will resume automatically when your connection comes back: Playback will resume automatically when your connection comes back.
     Skipped segment: 'Skipped {segmentCategory} segment'
     SponsorBlock:
+      CancelCurrentSegment: Cancel Creating Segment
+      ClearSegments: Clear Segments
+      ClearSegmentsPrompt: Are you sure you want to clear all drafted SponsorBlock segments for this video?
+      CompleteSegmentsBeforeSubmitting: Complete every drafted segment before submitting.
+      CategoryLabel: Segment category
+      DeleteSegment: Delete
+      DuplicateSegments: Duplicate drafted segments are not allowed.
+      EditSegment: Edit
+      EndAction: (End)
+      EndActionLabel: End
+      EndTimeAfterStart: The segment end time must be after the start time.
+      EndTimeBeforeVideoEnd: The segment end time must be within the video duration.
+      EndTimeLabel: Segment end time
       DisableAutoSkipTemporarily: Temporarily disable SponsorBlock auto-skipping
       EnableAutoSkipTemporarily: Re-enable SponsorBlock auto-skipping
+      Guidelines: Guidelines
+      InspectSegment: Inspect
+      InvalidStartTime: Enter a valid segment start time.
+      NoSegmentsToSubmit: Create at least one complete segment before submitting.
+      NowAction: (Now)
+      OpenSubmissionMenu: Open Submission Menu
+      PreviewRequired: Please preview every segment before submitting.
+      PreviewSegment: Preview
+      SaveSegment: Save
+      SetSegmentEndNow: End Segment Now
+      StartAction: (Start)
+      StartSegmentNow: Start Segment Now
+      SubmissionBadRequest: SponsorBlock rejected the submission request.
+      SubmissionDuplicate: SponsorBlock says these segments were already submitted.
+      SubmissionFailed: Failed to submit SponsorBlock segments.
+      SubmissionForbidden: SponsorBlock rejected the submission.
+      SubmissionRateLimited: SponsorBlock rate limited this submission.
+      SubmissionSuccess: SponsorBlock segments submitted.
+      SubmitSegment: Submit Segment
+      SubmitSegments: Submit
+      StartTimeLabel: Segment start time
+      TimeDivider: to
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
   Watch:

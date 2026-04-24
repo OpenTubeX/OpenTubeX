@@ -174,6 +174,171 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="sponsorBlockSubmissionMenuOpen"
+      class="sponsorBlockSubmissionWrapper"
+    >
+      <div class="sponsorBlockSubmissionMenu">
+        <div class="sponsorBlockSubmissionHeader">
+          <div class="sponsorBlockSubmissionTitle">
+            <font-awesome-icon
+              class="sponsorBlockSubmissionShield"
+              :icon="['fas', 'shield-halved']"
+            />
+            <span>{{ $t('Video.Player.SponsorBlock.SubmitSegment') }}</span>
+          </div>
+          <button
+            class="sponsorBlockSubmissionClose"
+            :title="$t('Close')"
+            @click="closeSponsorBlockSubmissionMenu"
+          >
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
+        <p
+          v-if="sponsorBlockSubmissionError !== ''"
+          class="sponsorBlockSubmissionError"
+        >
+          {{ sponsorBlockSubmissionError }}
+        </p>
+        <div class="sponsorBlockSubmissionSegments">
+          <div
+            v-for="segment in sponsorBlockDraftSegments"
+            :key="segment.id"
+            class="sponsorBlockDraftSegment"
+          >
+            <div
+              class="sponsorBlockDraftTimes"
+              :class="{
+                editing: isSponsorBlockDraftEditing(segment.id),
+                viewing: !isSponsorBlockDraftEditing(segment.id)
+              }"
+            >
+              <template v-if="isSponsorBlockDraftEditing(segment.id)">
+                <button
+                  class="sponsorBlockDraftTimeAction"
+                  @click="setSponsorBlockDraftTime(segment.id, 'startTime', 0)"
+                >
+                  {{ $t('Video.Player.SponsorBlock.StartAction') }}
+                </button>
+                <button
+                  class="sponsorBlockDraftTimeAction"
+                  @click="setSponsorBlockDraftTime(segment.id, 'startTime', video?.currentTime ?? 0)"
+                >
+                  {{ $t('Video.Player.SponsorBlock.NowAction') }}
+                </button>
+                <input
+                  class="sponsorBlockDraftTimeInput"
+                  :value="sponsorBlockDraftEditValues[segment.id]?.startTime ?? ''"
+                  :aria-label="$t('Video.Player.SponsorBlock.StartTimeLabel')"
+                  @input="updateSponsorBlockDraftEditField(segment.id, 'startTime', $event.target.value)"
+                >
+              </template>
+              <span
+                v-else
+                class="sponsorBlockDraftTimeText"
+              >
+                {{ sponsorBlockDraftEditValues[segment.id]?.startTime ?? '' }}
+              </span>
+              <span class="sponsorBlockDraftTimeDivider">{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
+              <template v-if="isSponsorBlockDraftEditing(segment.id)">
+                <input
+                  class="sponsorBlockDraftTimeInput"
+                  :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
+                  :aria-label="$t('Video.Player.SponsorBlock.EndTimeLabel')"
+                  @input="updateSponsorBlockDraftEditField(segment.id, 'endTime', $event.target.value)"
+                >
+                <button
+                  class="sponsorBlockDraftTimeAction"
+                  @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.currentTime ?? 0)"
+                >
+                  {{ $t('Video.Player.SponsorBlock.NowAction') }}
+                </button>
+                <button
+                  class="sponsorBlockDraftTimeAction"
+                  @click="setSponsorBlockDraftTime(segment.id, 'endTime', video?.duration ?? 0)"
+                >
+                  {{ $t('Video.Player.SponsorBlock.EndAction') }}
+                </button>
+              </template>
+              <span
+                v-else
+                class="sponsorBlockDraftTimeText"
+              >
+                {{ sponsorBlockDraftEditValues[segment.id]?.endTime ?? '' }}
+              </span>
+            </div>
+            <select
+              class="sponsorBlockDraftCategory"
+              :value="sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category"
+              :aria-label="$t('Video.Player.SponsorBlock.CategoryLabel')"
+              @change="updateSponsorBlockDraftCategory(segment.id, $event.target.value)"
+            >
+              <option
+                v-for="category in sponsorBlockSubmissionCategories"
+                :key="category"
+                :value="category"
+              >
+                {{ translateSponsorBlockCategory(category) }}
+              </option>
+            </select>
+            <div class="sponsorBlockDraftActions">
+              <button
+                class="sponsorBlockDraftActionButton"
+                @click="deleteSponsorBlockDraft(segment.id)"
+              >
+                {{ $t('Video.Player.SponsorBlock.DeleteSegment') }}
+              </button>
+              <button
+                class="sponsorBlockDraftActionButton"
+                :disabled="segment.endTime == null"
+                @click="previewSponsorBlockDraft(segment.id, 'preview')"
+              >
+                {{ $t('Video.Player.SponsorBlock.PreviewSegment') }}
+              </button>
+              <button
+                class="sponsorBlockDraftActionButton"
+                @click="previewSponsorBlockDraft(segment.id, 'inspect')"
+              >
+                {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
+              </button>
+              <button
+                class="sponsorBlockDraftActionButton"
+                :disabled="segment.endTime == null"
+                @click="previewSponsorBlockDraft(segment.id, 'end')"
+              >
+                {{ $t('Video.Player.SponsorBlock.EndActionLabel') }}
+              </button>
+              <button
+                class="sponsorBlockDraftActionButton"
+                @click="toggleSponsorBlockDraftEditing(segment.id)"
+              >
+                {{
+                  isSponsorBlockDraftEditing(segment.id)
+                    ? $t('Video.Player.SponsorBlock.SaveSegment')
+                    : $t('Video.Player.SponsorBlock.EditSegment')
+                }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="sponsorBlockSubmissionFooter">
+          <button
+            class="sponsorBlockSubmissionGuidelines"
+            @click="openSponsorBlockGuidelines"
+          >
+            {{ $t('Video.Player.SponsorBlock.Guidelines') }}
+          </button>
+          <button
+            class="sponsorBlockSubmissionButton"
+            :disabled="sponsorBlockSubmissionPending"
+            @click="submitSponsorBlockDrafts"
+          >
+            {{ $t('Video.Player.SponsorBlock.SubmitSegments') }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

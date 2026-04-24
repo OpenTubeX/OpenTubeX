@@ -587,6 +587,14 @@ Settings:
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
     Enable SponsorBlock: SponsorBlock aktivieren
+    Enable SponsorBlock Submission: SponsorBlock-Einreichung aktivieren
+    SponsorBlock Private User ID (optional): SponsorBlock Private User ID (optional)
+    SponsorBlock Private User ID Tooltip: Füge die private SponsorBlock-Benutzer-ID aus der Browser-Erweiterung ein. Lasse dieses Feld leer, um eine von der App erzeugte ID zu verwenden.
+    Generated SponsorBlock User ID: Erzeugte SponsorBlock-Benutzer-ID
+    Generated SponsorBlock User ID Tooltip: Diese von der App erzeugte SponsorBlock-Benutzer-ID kann in der Browser-Erweiterung oder bei Nutzung der App auf einem anderen Computer verwendet werden.
+    Export Generated User ID: Erzeugte Benutzer-ID exportieren
+    Generated SponsorBlock User ID Copy Button: Erzeugte SponsorBlock-Benutzer-ID kopieren
+    Generated SponsorBlock User ID Copied: Erzeugte SponsorBlock-Benutzer-ID in die Zwischenablage kopiert
     SponsorBlock Settings: SponsorBlock
     Skip Options:
       Skip Option: Option überspringen
@@ -816,8 +824,43 @@ Video:
     Playback will resume automatically when your connection comes back: Die Wiedergabe wird automatisch fortgesetzt, wenn deine Verbindung wiederhergestellt ist.
     Skipped segment: 'Segment {segmentCategory} übersprungen'
     SponsorBlock:
+      CancelCurrentSegment: Segmenterstellung abbrechen
+      ClearSegments: Segmente löschen
+      ClearSegmentsPrompt: Bist du sicher, dass du alle entworfenen SponsorBlock-Segmente für dieses Video löschen möchtest?
+      CompleteSegmentsBeforeSubmitting: Vervollständige jedes entworfene Segment, bevor du es absendest.
+      CategoryLabel: Segmentkategorie
+      DeleteSegment: Löschen
+      DuplicateSegments: Doppelte entworfene Segmente sind nicht erlaubt.
+      EditSegment: Bearbeiten
+      EndAction: (Ende)
+      EndActionLabel: Ende
+      EndTimeAfterStart: Die Endzeit des Segments muss nach der Startzeit liegen.
+      EndTimeBeforeVideoEnd: Die Endzeit des Segments muss innerhalb der Videodauer liegen.
+      EndTimeLabel: Segmentendzeit
       DisableAutoSkipTemporarily: SponsorBlock Überspringen vorübergehend deaktivieren
       EnableAutoSkipTemporarily: SponsorBlock Überspringen wieder aktivieren
+      Guidelines: Richtlinien
+      InspectSegment: Prüfen
+      InvalidStartTime: Gib eine gültige Segmentstartzeit ein.
+      NoSegmentsToSubmit: Erstelle mindestens ein vollständiges Segment, bevor du es absendest.
+      NowAction: (Jetzt)
+      OpenSubmissionMenu: Einreichungsmenü öffnen
+      PreviewRequired: Bitte sieh dir jedes Segment vor dem Absenden an.
+      PreviewSegment: Vorschau
+      SaveSegment: Speichern
+      SetSegmentEndNow: Segment jetzt beenden
+      StartAction: (Start)
+      StartSegmentNow: Segment jetzt starten
+      SubmissionBadRequest: SponsorBlock hat die Einreichungsanfrage abgelehnt.
+      SubmissionDuplicate: SponsorBlock sagt, dass diese Segmente bereits eingereicht wurden.
+      SubmissionFailed: SponsorBlock-Segmente konnten nicht eingereicht werden.
+      SubmissionForbidden: SponsorBlock hat die Einreichung abgelehnt.
+      SubmissionRateLimited: SponsorBlock hat diese Einreichung rate-limitiert.
+      SubmissionSuccess: SponsorBlock-Segmente wurden eingereicht.
+      SubmitSegment: Segment einreichen
+      SubmitSegments: Einreichen
+      StartTimeLabel: Segmentstartzeit
+      TimeDivider: bis
       SkipToastUnskip: Nicht überspringen
       SkipToastReskip: Nochmal überspringen
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
