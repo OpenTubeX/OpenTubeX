@@ -982,6 +982,8 @@ Video:
     SponsorBlock:
       DisableAutoSkipTemporarily: Temporarily disable SponsorBlock auto-skipping
       EnableAutoSkipTemporarily: Re-enable SponsorBlock auto-skipping
+      SkipToastUnskip: Unskip
+      SkipToastReskip: Reskip
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

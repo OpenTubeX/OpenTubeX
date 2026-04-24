@@ -677,7 +677,9 @@ export default defineComponent({
      * @returns {string}
      */
     function getSponsorBlockToastActionLabel(unskipped) {
-      const actionLabel = unskipped ? t('Redo') : t('Undo')
+      const actionLabel = unskipped
+        ? t('Video.Player.SponsorBlock.SkipToastReskip')
+        : t('Video.Player.SponsorBlock.SkipToastUnskip')
 
       return addKeyboardShortcutToActionTitle(
         actionLabel,

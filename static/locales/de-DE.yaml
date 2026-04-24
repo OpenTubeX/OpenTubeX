@@ -818,6 +818,8 @@ Video:
     SponsorBlock:
       DisableAutoSkipTemporarily: SponsorBlock Überspringen vorübergehend deaktivieren
       EnableAutoSkipTemporarily: SponsorBlock Überspringen wieder aktivieren
+      SkipToastUnskip: Nicht überspringen
+      SkipToastReskip: Nochmal überspringen
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
     Exit Full Window: Vollständiges Fenster beenden
     Hide Stats: Statistiken ausblenden
