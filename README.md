@@ -40,6 +40,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="330" height="86" alt="image" src="https://github.com/user-attachments/assets/299af609-e7f7-4b0d-802e-4062009fc77c" />
 <img width="328" height="84" alt="image" src="https://github.com/user-attachments/assets/260874ac-1577-4f37-aa32-3b9a830e6d13" />
 
+- Display SponsorBlock community contributed chapters
 
 - Tabs like in a web browser (experimental)
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
