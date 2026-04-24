@@ -11,12 +11,17 @@ async function getVideoHash(videoId) {
 }
 
 /**
- * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'music_offtopic' | 'filler'} SponsorBlockCategory
+ * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'music_offtopic' | 'filler' | 'chapter'} SponsorBlockCategory
+ */
+
+/**
+ * @typedef {'skip' | 'mute' | 'full' | 'poi' | 'chapter'} SponsorBlockActionType
  */
 
 /**
  * @param {string} videoId
  * @param {SponsorBlockCategory[]} categories
+ * @param {SponsorBlockActionType[]} [actionTypes=['skip']]
  * @returns {Promise<{
  *   UUID: string,
  *   actionType: string,
@@ -31,9 +36,11 @@ async function getVideoHash(videoId) {
  *   votes: number
  * }[]>}
  */
-export async function sponsorBlockSkipSegments(videoId, categories) {
+export async function sponsorBlockSkipSegments(videoId, categories, actionTypes = ['skip']) {
   const videoIdHashPrefix = await getVideoHash(videoId)
-  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments/${videoIdHashPrefix}?categories=${JSON.stringify(categories)}`
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments/${videoIdHashPrefix}` +
+    `?categories=${encodeURIComponent(JSON.stringify(categories))}` +
+    `&actionTypes=${encodeURIComponent(JSON.stringify(actionTypes))}`
 
   try {
     const response = await fetch(requestUrl)

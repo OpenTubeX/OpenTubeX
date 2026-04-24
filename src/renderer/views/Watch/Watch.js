@@ -36,6 +36,7 @@ import {
   mapInvidiousLegacyFormat,
   youtubeImageUrlToInvidious
 } from '../../helpers/api/invidious'
+import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { sortCaptions } from '../../helpers/player/utils'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 
@@ -604,13 +605,9 @@ export default defineComponent({
           }
 
           if (chapters.length > 0) {
-            this.addChaptersEndSeconds(chapters, result.basic_info.duration)
-
-            // prevent vue from adding reactivity which isn't needed
-            // as the chapter objects are read-only after this anyway
-            // the chapters are checked for every timeupdate event that the player emits
-            // this should lessen the performance and memory impact of the chapters
-            chapters.forEach(Object.freeze)
+            this.finalizeChapters(chapters, result.basic_info.duration)
+          } else {
+            chapters = await this.getSponsorBlockCommunityChapters(result.basic_info.duration)
           }
         }
 
@@ -1015,13 +1012,9 @@ export default defineComponent({
             chapters = this.extractChaptersFromDescription(result.description)
 
             if (chapters.length > 0) {
-              this.addChaptersEndSeconds(chapters, result.lengthSeconds)
-
-              // prevent vue from adding reactivity which isn't needed
-              // as the chapter objects are read-only after this anyway
-              // the chapters are checked for every timeupdate event that the player emits
-              // this should lessen the performance and memory impact of the chapters
-              chapters.forEach(Object.freeze)
+              this.finalizeChapters(chapters, result.lengthSeconds)
+            } else {
+              chapters = await this.getSponsorBlockCommunityChapters(result.lengthSeconds)
             }
           }
           this.videoChapters = chapters
@@ -1199,6 +1192,87 @@ export default defineComponent({
         chapters[i].endSeconds = chapters[i + 1].startSeconds
       }
       chapters.at(-1).endSeconds = videoLengthSeconds
+    },
+
+    finalizeChapters: function (chapters, videoLengthSeconds) {
+      this.addChaptersEndSeconds(chapters, videoLengthSeconds)
+
+      // prevent vue from adding reactivity which isn't needed
+      // as the chapter objects are read-only after this anyway
+      // the chapters are checked for every timeupdate event that the player emits
+      // this should lessen the performance and memory impact of the chapters
+      chapters.forEach(Object.freeze)
+    },
+
+    /**
+     * @param {number} videoLengthSeconds
+     * @returns {Promise<{title: string, timestamp: string, startSeconds: number, endSeconds: number}[]>}
+     */
+    async getSponsorBlockCommunityChapters(videoLengthSeconds) {
+      if (!this.useSponsorBlock || this.isLive || this.isPostLiveDvr || !Number.isFinite(videoLengthSeconds) || videoLengthSeconds <= 0) {
+        return []
+      }
+
+      try {
+        const sponsorBlockChapters = await sponsorBlockSkipSegments(this.videoId, ['chapter'], ['chapter'])
+
+        if (sponsorBlockChapters.length === 0) {
+          return []
+        }
+
+        const chapters = sponsorBlockChapters
+          .filter(({ description, segment }) => {
+            return description.trim() !== '' &&
+              Array.isArray(segment) &&
+              segment.length === 2 &&
+              Number.isFinite(segment[0]) &&
+              Number.isFinite(segment[1]) &&
+              segment[0] >= 0 &&
+              segment[1] > segment[0]
+          })
+          .map(({ description, segment: [startSeconds, endSeconds] }) => {
+            return {
+              title: description.trim(),
+              timestamp: formatDurationAsTimestamp(startSeconds),
+              startSeconds,
+              endSeconds
+            }
+          })
+          .sort((chapterA, chapterB) => chapterA.startSeconds - chapterB.startSeconds)
+
+        /** @type {{title: string, timestamp: string, startSeconds: number, endSeconds: number}[]} */
+        const deduplicatedChapters = []
+
+        for (const chapter of chapters) {
+          if (chapter.startSeconds >= videoLengthSeconds) {
+            continue
+          }
+
+          if (deduplicatedChapters.length > 0 && deduplicatedChapters.at(-1).startSeconds === chapter.startSeconds) {
+            deduplicatedChapters.pop()
+          }
+
+          deduplicatedChapters.push(chapter)
+        }
+
+        if (deduplicatedChapters.length === 0) {
+          return []
+        }
+
+        for (let i = 0; i < deduplicatedChapters.length - 1; i++) {
+          deduplicatedChapters[i].endSeconds = deduplicatedChapters[i + 1].startSeconds
+        }
+
+        const lastChapter = deduplicatedChapters.at(-1)
+        lastChapter.endSeconds = Math.min(videoLengthSeconds, Math.max(lastChapter.endSeconds, lastChapter.startSeconds))
+
+        deduplicatedChapters.forEach(Object.freeze)
+
+        return deduplicatedChapters
+      } catch (error) {
+        console.error('failed to fetch SponsorBlock community chapters', this.videoId, error)
+        return []
+      }
     },
 
     /**
