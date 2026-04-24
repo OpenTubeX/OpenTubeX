@@ -116,29 +116,62 @@
       class="skippedSegmentsWrapper"
     >
       <div
-        v-for="{ uuid, translatedCategory, unskipped } in skippedSponsorBlockSegments"
+        v-for="{ uuid, translatedCategory, color, unskipped } in skippedSponsorBlockSegments"
         :key="uuid"
         class="skippedSegment"
+        @mouseenter="pauseSponsorBlockToastCountdown(uuid)"
+        @mouseleave="resumeSponsorBlockToastCountdown(uuid)"
+        @focusin="pauseSponsorBlockToastCountdown(uuid)"
+        @focusout="resumeSponsorBlockToastCountdown(uuid)"
       >
-        <span class="skippedSegmentText">
-          {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
-        </span>
-        <button
-          v-if="unskipped"
-          class="unskipButton"
-          :title="$t('Redo')"
-          @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
-        >
-          {{ $t('Redo') }}
-        </button>
-        <button
-          v-else
-          class="unskipButton"
-          :title="$t('Undo')"
-          @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
-        >
-          {{ $t('Undo') }}
-        </button>
+        <div class="skippedSegmentHeader">
+          <div class="skippedSegmentTitle">
+            <font-awesome-icon
+              class="skippedSegmentShield"
+              :icon="['fas', 'shield-halved']"
+              :style="{ color }"
+            />
+            <span class="skippedSegmentText">
+              {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
+            </span>
+          </div>
+          <div class="skippedSegmentHeaderActions">
+            <span class="skippedSegmentTimer">
+              <font-awesome-icon
+                v-if="isSponsorBlockToastCountdownPaused(uuid)"
+                :icon="['fas', 'pause']"
+              />
+              <template v-else>
+                {{ getSponsorBlockToastTimeLabel(uuid) }}
+              </template>
+            </span>
+            <button
+              class="closeSkippedSegmentButton"
+              :title="$t('Close')"
+              @click.stop.prevent="removeSponsorBlockToast(uuid)"
+            >
+              <font-awesome-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+        </div>
+        <div class="skippedSegmentActions">
+          <button
+            v-if="unskipped"
+            class="unskipButton"
+            :title="getSponsorBlockToastActionLabel(true)"
+            @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
+          >
+            {{ getSponsorBlockToastActionLabel(true) }}
+          </button>
+          <button
+            v-else
+            class="unskipButton"
+            :title="getSponsorBlockToastActionLabel(false)"
+            @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
+          >
+            {{ getSponsorBlockToastActionLabel(false) }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

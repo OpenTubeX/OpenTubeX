@@ -23,12 +23,14 @@ import {
 } from '../../helpers/player/utils'
 import {
   addKeyboardShortcutToActionTitle,
+  formatDurationAsTimestamp,
   showToast,
   writeFileWithPicker,
   throttle,
   debounce,
   removeFromArrayIfExists,
 } from '../../helpers/utils'
+import { colors } from '../../helpers/colors'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 
@@ -523,9 +525,12 @@ export default defineComponent({
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
      * but Vue 2 doesn't support reactivity on Maps, so we have to use an array instead
-     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, timeoutId: number, unskipped: boolean}[]>}
+     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
+    const sponsorBlockToastNow = ref(Date.now())
+    const sponsorBlockCurrentTime = ref(0)
+    let sponsorBlockToastTimeInterval = null
 
     /**
      * Set of segment UUIDs that the user has explicitly unskipped.
@@ -561,6 +566,183 @@ export default defineComponent({
       }
     }
 
+    function startSponsorBlockToastTimer() {
+      if (sponsorBlockToastTimeInterval !== null) {
+        return
+      }
+
+      sponsorBlockToastTimeInterval = setInterval(() => {
+        sponsorBlockToastNow.value = Date.now()
+      }, 250)
+    }
+
+    function stopSponsorBlockToastTimer() {
+      if (sponsorBlockToastTimeInterval !== null) {
+        clearInterval(sponsorBlockToastTimeInterval)
+        sponsorBlockToastTimeInterval = null
+      }
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function removeSponsorBlockToast(uuid) {
+      const index = skippedSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
+      if (index !== -1) {
+        clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
+        skippedSponsorBlockSegments.value.splice(index, 1)
+      }
+    }
+
+    /**
+     * @param {SponsorBlockCategory} category
+     * @returns {string}
+     */
+    function getSponsorBlockToastColor(category) {
+      const colorName = sponsorSkips.value.categoryData[category]?.color
+      return colors.find(color => color.name === colorName)?.value ?? '#39be70'
+    }
+
+    /**
+     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
+     */
+    function upsertSkippedSponsorBlockToast({ uuid, translatedCategory, color }) {
+      const hideAt = Date.now() + sponsorBlockSkippedToastDurationMs.value
+      const existingSkip = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+
+      if (existingSkip) {
+        clearTimeout(existingSkip.timeoutId)
+        existingSkip.translatedCategory = translatedCategory
+        existingSkip.color = color
+        existingSkip.unskipped = false
+        existingSkip.hideAt = hideAt
+        existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
+        existingSkip.countdownPaused = false
+        existingSkip.timeoutId = setTimeout(() => {
+          removeSponsorBlockToast(uuid)
+        }, sponsorBlockSkippedToastDurationMs.value)
+        return
+      }
+
+      skippedSponsorBlockSegments.value.push({
+        uuid,
+        translatedCategory,
+        color,
+        unskipped: false,
+        hideAt,
+        hideRemainingMs: sponsorBlockSkippedToastDurationMs.value,
+        countdownPaused: false,
+        timeoutId: setTimeout(() => {
+          removeSponsorBlockToast(uuid)
+        }, sponsorBlockSkippedToastDurationMs.value)
+      })
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {string}
+     */
+    function getSponsorBlockToastTimeLabel(uuid) {
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+
+      if (!toastEntry || !segment) {
+        return '0s'
+      }
+
+      const remainingSeconds = toastEntry.unskipped
+        ? Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
+        : (toastEntry.countdownPaused
+            ? Math.max(toastEntry.hideRemainingMs, 0)
+            : Math.max((toastEntry.hideAt ?? 0) - sponsorBlockToastNow.value, 0)) / 1000
+
+      if (remainingSeconds < 60) {
+        return `${Math.ceil(remainingSeconds)}s`
+      }
+
+      return formatDurationAsTimestamp(Math.ceil(remainingSeconds))
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {boolean}
+     */
+    function isSponsorBlockToastCountdownPaused(uuid) {
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      return Boolean(toastEntry?.countdownPaused && !toastEntry.unskipped)
+    }
+
+    /**
+     * @param {boolean} unskipped
+     * @returns {string}
+     */
+    function getSponsorBlockToastActionLabel(unskipped) {
+      const actionLabel = unskipped ? t('Redo') : t('Undo')
+
+      return addKeyboardShortcutToActionTitle(
+        actionLabel,
+        t('Keys.enter')
+      )
+    }
+
+    /**
+     * @returns {{uuid: string, translatedCategory: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, unskipped: boolean}|null}
+     */
+    function getActiveSponsorBlockToast() {
+      if (skippedSponsorBlockSegments.value.length === 0) {
+        return null
+      }
+
+      return skippedSponsorBlockSegments.value[skippedSponsorBlockSegments.value.length - 1]
+    }
+
+    function toggleActiveSponsorBlockSkipState() {
+      const toastEntry = getActiveSponsorBlockToast()
+      if (!toastEntry) {
+        return false
+      }
+
+      if (toastEntry.unskipped) {
+        redoSkipSponsorBlockSegment(toastEntry.uuid)
+      } else {
+        unskipSponsorBlockSegment(toastEntry.uuid)
+      }
+
+      return true
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function pauseSponsorBlockToastCountdown(uuid) {
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      if (!toastEntry || toastEntry.unskipped || toastEntry.countdownPaused) {
+        return
+      }
+
+      clearTimeout(toastEntry.timeoutId)
+      toastEntry.hideRemainingMs = Math.max((toastEntry.hideAt ?? 0) - Date.now(), 0)
+      toastEntry.hideAt = null
+      toastEntry.timeoutId = 0
+      toastEntry.countdownPaused = true
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function resumeSponsorBlockToastCountdown(uuid) {
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+      if (!toastEntry || toastEntry.unskipped || !toastEntry.countdownPaused) {
+        return
+      }
+
+      toastEntry.hideAt = Date.now() + toastEntry.hideRemainingMs
+      toastEntry.timeoutId = setTimeout(() => {
+        removeSponsorBlockToast(uuid)
+      }, toastEntry.hideRemainingMs)
+      toastEntry.countdownPaused = false
+    }
+
     /**
      * @param {number} currentTime
      */
@@ -576,12 +758,7 @@ export default defineComponent({
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
         if (segment && (currentTime < segment.startTime || currentTime >= segment.endTime)) {
           sponsorBlockDoNotSkipSegments.delete(uuid)
-          // Also remove the toast if it exists
-          const toastIndex = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
-          if (toastIndex !== -1) {
-            clearTimeout(skippedSponsorBlockSegments.value[toastIndex].timeoutId)
-            skippedSponsorBlockSegments.value.splice(toastIndex, 1)
-          }
+          removeSponsorBlockToast(uuid)
         }
       }
 
@@ -620,31 +797,15 @@ export default defineComponent({
       }
 
       video_.currentTime = newTime
+      sponsorBlockCurrentTime.value = newTime
 
       if (sponsorBlockShowSkippedToast.value) {
         skippedSegments.forEach(({ uuid, category }) => {
-          // if the element already exists, just update the timeout, instead of creating a duplicate
-          // can happen at the end of the video sometimes
-          const existingSkip = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-          if (existingSkip) {
-            clearTimeout(existingSkip.timeoutId)
-
-            existingSkip.unskipped = false
-            existingSkip.timeoutId = setTimeout(() => {
-              const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
-              skippedSponsorBlockSegments.value.splice(index, 1)
-            }, sponsorBlockSkippedToastDurationMs.value)
-          } else {
-            skippedSponsorBlockSegments.value.push({
-              uuid,
-              translatedCategory: translateSponsorBlockCategory(category),
-              unskipped: false,
-              timeoutId: setTimeout(() => {
-                const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
-                skippedSponsorBlockSegments.value.splice(index, 1)
-              }, sponsorBlockSkippedToastDurationMs.value)
-            })
-          }
+          upsertSkippedSponsorBlockToast({
+            uuid,
+            translatedCategory: translateSponsorBlockCategory(category),
+            color: getSponsorBlockToastColor(category)
+          })
         })
       }
     }
@@ -666,6 +827,7 @@ export default defineComponent({
         const seekRange = player.seekRange()
         const targetTime = Math.max(segment.startTime, seekRange.start)
         video.value.currentTime = targetTime
+        sponsorBlockCurrentTime.value = targetTime
       }
 
       // Update the toast entry to show it's been unskipped
@@ -674,6 +836,9 @@ export default defineComponent({
       if (toastEntry) {
         clearTimeout(toastEntry.timeoutId)
         toastEntry.unskipped = true
+        toastEntry.hideAt = null
+        toastEntry.hideRemainingMs = 0
+        toastEntry.countdownPaused = false
         toastEntry.timeoutId = 0
       }
     }
@@ -695,19 +860,16 @@ export default defineComponent({
         const seekRange = player.seekRange()
         const targetTime = Math.min(segment.endTime, seekRange.end)
         video.value.currentTime = targetTime
+        sponsorBlockCurrentTime.value = targetTime
       }
 
       // Update the toast entry to show it's been re-skipped and reset the timeout
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
       if (toastEntry) {
-        clearTimeout(toastEntry.timeoutId)
-        toastEntry.unskipped = false
-        toastEntry.timeoutId = setTimeout(() => {
-          const index = skippedSponsorBlockSegments.value.findIndex(skipped => skipped.uuid === uuid)
-          if (index !== -1) {
-            skippedSponsorBlockSegments.value.splice(index, 1)
-          }
-        }, sponsorBlockSkippedToastDurationMs.value)
+        upsertSkippedSponsorBlockToast({
+          uuid,
+          translatedCategory: toastEntry.translatedCategory
+        })
       }
     }
 
@@ -1514,6 +1676,7 @@ export default defineComponent({
     function handleTimeupdate() {
       if (video.value) {
         const currentTime = video.value.currentTime
+        sponsorBlockCurrentTime.value = currentTime
 
         emit('timeupdate', currentTime)
 
@@ -2715,6 +2878,11 @@ export default defineComponent({
 
       const video_ = video.value
 
+      if (event.key === 'Enter' && toggleActiveSponsorBlockSkipState()) {
+        event.preventDefault()
+        return
+      }
+
       // Skip to next video in playlist or recommended
       if (event.shiftKey && event.key.toLowerCase() === 'n') {
         emit('skip-to-next')
@@ -3699,6 +3867,15 @@ export default defineComponent({
 
     // #endregion setup
 
+    watch(() => skippedSponsorBlockSegments.value.length, (length) => {
+      if (length > 0) {
+        sponsorBlockToastNow.value = Date.now()
+        startSponsorBlockToastTimer()
+      } else {
+        stopSponsorBlockToastTimer()
+      }
+    })
+
     // #region tear down
 
     onBeforeUnmount(() => {
@@ -3751,6 +3928,7 @@ export default defineComponent({
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
+      stopSponsorBlockToastTimer()
 
       window.removeEventListener('online', onlineHandler)
       window.removeEventListener('offline', offlineHandler)
@@ -3890,6 +4068,12 @@ export default defineComponent({
       sponsorBlockShowSkippedToast,
 
       skippedSponsorBlockSegments,
+      getSponsorBlockToastTimeLabel,
+      isSponsorBlockToastCountdownPaused,
+      getSponsorBlockToastActionLabel,
+      pauseSponsorBlockToastCountdown,
+      resumeSponsorBlockToastCountdown,
+      removeSponsorBlockToast,
       unskipSponsorBlockSegment,
       redoSkipSponsorBlockSegment,
 
