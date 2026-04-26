@@ -1750,6 +1750,9 @@ function runApp() {
     })
   }
 
+  /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
+  let ipBlockRecoveryScriptPromise = null
+
   ipcMain.handle(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, async (event, scriptPath) => {
     if (
       !isOpenTubeXUrl(event.senderFrame.url) ||
@@ -1760,7 +1763,14 @@ function runApp() {
     }
 
     try {
-      return await executeIpBlockRecoveryScript(scriptPath)
+      if (ipBlockRecoveryScriptPromise == null) {
+        ipBlockRecoveryScriptPromise = executeIpBlockRecoveryScript(scriptPath)
+          .finally(() => {
+            ipBlockRecoveryScriptPromise = null
+          })
+      }
+
+      return await ipBlockRecoveryScriptPromise
     } catch (error) {
       console.error('EXECUTE_IP_BLOCK_RECOVERY_SCRIPT failed', error)
       throw new Error('Failed to execute script', { cause: error })
