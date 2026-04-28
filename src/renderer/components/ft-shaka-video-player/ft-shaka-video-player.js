@@ -5,8 +5,10 @@ import { useI18n } from '../../composables/use-i18n-polyfill'
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
+import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
+import { LoopButton } from './player-components/LoopButton'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { StatsButton } from './player-components/StatsButton'
 import { TheatreModeButton } from './player-components/TheatreModeButton'
@@ -31,6 +33,7 @@ import {
   removeFromArrayIfExists,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
+import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 
@@ -1084,6 +1087,20 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    const currentShareBackend = computed(() => {
+      return (store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback)
+        ? 'invidious'
+        : 'youtube'
+    })
+
+    const currentShareBaseUrl = computed(() => {
+      if (currentShareBackend.value === 'invidious') {
+        return getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId)
+      }
+
+      return getYoutubeVideoShareUrl(props.videoId)
+    })
+
     const uiConfig = computed(() => {
       const controlPanelElements = [
         'play_pause',
@@ -1124,7 +1141,7 @@ export default defineComponent({
           'playback_rate',
           'captions',
           'ft_audio_tracks',
-          'loop',
+          'ft_loop',
           'ft_screenshot',
           'picture_in_picture',
           'ft_full_window',
@@ -1151,7 +1168,7 @@ export default defineComponent({
           'captions',
           'playback_rate',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          'loop',
+          'ft_loop',
           'recenter_vr',
           'toggle_stereoscopic',
         )
@@ -1201,7 +1218,7 @@ export default defineComponent({
         const firstTimeConfig = {
           addSeekBar: seekingIsPossible.value,
           customContextMenu: true,
-          contextMenuElements: ['ft_stats'],
+          contextMenuElements: ['ft_loop', 'ft_copy_video_url', 'ft_copy_video_url_at_current_time', 'ft_stats'],
           enableTooltips: true,
           seekBarColors: {
             played: 'var(--primary-color)'
@@ -2486,6 +2503,80 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_stats', new StatsButtonFactory())
     }
 
+    function registerContextMenuButtons() {
+      /**
+       * @returns {number}
+       */
+      function getCurrentTimestamp() {
+        const currentTime = Math.floor(video.value?.currentTime ?? 0)
+        return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+      }
+
+      /**
+       * @param {boolean} includeTimestamp
+       * @returns {string}
+       */
+      function getVideoUrl(includeTimestamp) {
+        const videoUrl = currentShareBaseUrl.value
+
+        if (!includeTimestamp) {
+          return videoUrl
+        }
+
+        return appendTimestamp(videoUrl, getCurrentTimestamp())
+      }
+
+      function getCopySuccessMessage() {
+        return currentShareBackend.value === 'invidious'
+          ? t('Share.Invidious URL copied to clipboard')
+          : t('Share.YouTube URL copied to clipboard')
+      }
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class CopyVideoUrlButtonFactory {
+        create(rootElement, controls) {
+          return new CopyVideoUrlButton(
+            () => getVideoUrl(false),
+            () => t('Share.Copy Link'),
+            () => getCopySuccessMessage(),
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class CopyVideoUrlAtCurrentTimeButtonFactory {
+        create(rootElement, controls) {
+          return new CopyVideoUrlButton(
+            () => getVideoUrl(true),
+            () => `${t('Share.Copy Link')} (${t('Share.Include Timestamp')})`,
+            () => getCopySuccessMessage(),
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class LoopButtonFactory {
+        create(rootElement, controls) {
+          return new LoopButton(rootElement, controls)
+        }
+      }
+
+      shakaContextMenu.registerElement('ft_copy_video_url', new CopyVideoUrlButtonFactory())
+      shakaContextMenu.registerElement('ft_copy_video_url_at_current_time', new CopyVideoUrlAtCurrentTimeButtonFactory())
+      shakaContextMenu.registerElement('ft_loop', new LoopButtonFactory())
+      shakaOverflowMenu.registerElement('ft_loop', new LoopButtonFactory())
+    }
+
     function registerScreenshotButton() {
       events.addEventListener('takeScreenshot', () => {
         takeScreenshot()
@@ -2571,7 +2662,11 @@ export default defineComponent({
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
 
+      shakaContextMenu.registerElement('ft_copy_video_url', null)
+      shakaContextMenu.registerElement('ft_copy_video_url_at_current_time', null)
+      shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
+      shakaOverflowMenu.registerElement('ft_loop', null)
 
       shakaControls.registerElement('ft_screenshot', null)
       shakaOverflowMenu.registerElement('ft_screenshot', null)
@@ -3407,6 +3502,7 @@ export default defineComponent({
       registerTheatreModeButton()
       registerFullWindowButton()
       registerLegacyQualitySelection()
+      registerContextMenuButtons()
       registerStatsButton()
       registerSkipButtons()
       registerPlaybackAdjustedTime()
