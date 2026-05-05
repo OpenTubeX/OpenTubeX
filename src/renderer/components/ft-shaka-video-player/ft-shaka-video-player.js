@@ -1087,18 +1087,27 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
-    const currentShareBackend = computed(() => {
-      return (store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback)
-        ? 'invidious'
-        : 'youtube'
+    const showInvidiousShareOptions = computed(() => {
+      return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
     })
 
-    const currentShareBaseUrl = computed(() => {
-      if (currentShareBackend.value === 'invidious') {
-        return getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId)
+    const contextMenuElements = computed(() => {
+      const elements = [
+        'ft_loop',
+        'ft_copy_youtube_video_url',
+        'ft_copy_youtube_video_url_at_current_time'
+      ]
+
+      if (showInvidiousShareOptions.value) {
+        elements.push(
+          'ft_copy_invidious_video_url',
+          'ft_copy_invidious_video_url_at_current_time'
+        )
       }
 
-      return getYoutubeVideoShareUrl(props.videoId)
+      elements.push('ft_stats')
+
+      return elements
     })
 
     const uiConfig = computed(() => {
@@ -1121,6 +1130,7 @@ export default defineComponent({
       const uiConfig = {
         controlPanelElements: props.watchingPlaylist ? controlPanelElementsWithSkipButtons : controlPanelElements,
         overflowMenuButtons: [],
+        contextMenuElements: contextMenuElements.value,
 
         // only set this to label when we actually have labels, so that the warning doesn't show up
         // about it being set to labels, but that the audio tracks don't have labels
@@ -1218,7 +1228,7 @@ export default defineComponent({
         const firstTimeConfig = {
           addSeekBar: seekingIsPossible.value,
           customContextMenu: true,
-          contextMenuElements: ['ft_loop', 'ft_copy_video_url', 'ft_copy_video_url_at_current_time', 'ft_stats'],
+          contextMenuElements: contextMenuElements.value,
           enableTooltips: true,
           seekBarColors: {
             played: 'var(--primary-color)'
@@ -2513,11 +2523,14 @@ export default defineComponent({
       }
 
       /**
+       * @param {'youtube' | 'invidious'} backend
        * @param {boolean} includeTimestamp
        * @returns {string}
        */
-      function getVideoUrl(includeTimestamp) {
-        const videoUrl = currentShareBaseUrl.value
+      function getVideoUrl(backend, includeTimestamp) {
+        const videoUrl = backend === 'invidious'
+          ? getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId)
+          : getYoutubeVideoShareUrl(props.videoId)
 
         if (!includeTimestamp) {
           return videoUrl
@@ -2526,36 +2539,51 @@ export default defineComponent({
         return appendTimestamp(videoUrl, getCurrentTimestamp())
       }
 
-      function getCopySuccessMessage() {
-        return currentShareBackend.value === 'invidious'
+      /**
+       * @param {'youtube' | 'invidious'} backend
+       * @returns {string}
+       */
+      function getCopySuccessMessage(backend) {
+        return backend === 'invidious'
           ? t('Share.Invidious URL copied to clipboard')
           : t('Share.YouTube URL copied to clipboard')
+      }
+
+      /**
+       * @param {'youtube' | 'invidious'} backend
+       * @param {boolean} includeTimestamp
+       * @returns {string}
+       */
+      function getCopyLabel(backend, includeTimestamp) {
+        const baseLabel = backend === 'invidious'
+          ? t('Video.Copy Invidious Link')
+          : t('Video.Copy YouTube Link')
+
+        if (!includeTimestamp) {
+          return baseLabel
+        }
+
+        return `${baseLabel} (${t('Share.Include Timestamp')})`
       }
 
       /**
        * @implements {shaka.extern.IUIElement.Factory}
        */
       class CopyVideoUrlButtonFactory {
-        create(rootElement, controls) {
-          return new CopyVideoUrlButton(
-            () => getVideoUrl(false),
-            () => t('Share.Copy Link'),
-            () => getCopySuccessMessage(),
-            rootElement,
-            controls
-          )
+        /**
+         * @param {'youtube' | 'invidious'} backend
+         * @param {boolean} includeTimestamp
+         */
+        constructor(backend, includeTimestamp) {
+          this.backend = backend
+          this.includeTimestamp = includeTimestamp
         }
-      }
 
-      /**
-       * @implements {shaka.extern.IUIElement.Factory}
-       */
-      class CopyVideoUrlAtCurrentTimeButtonFactory {
         create(rootElement, controls) {
           return new CopyVideoUrlButton(
-            () => getVideoUrl(true),
-            () => `${t('Share.Copy Link')} (${t('Share.Include Timestamp')})`,
-            () => getCopySuccessMessage(),
+            () => getVideoUrl(this.backend, this.includeTimestamp),
+            () => getCopyLabel(this.backend, this.includeTimestamp),
+            () => getCopySuccessMessage(this.backend),
             rootElement,
             controls
           )
@@ -2571,8 +2599,10 @@ export default defineComponent({
         }
       }
 
-      shakaContextMenu.registerElement('ft_copy_video_url', new CopyVideoUrlButtonFactory())
-      shakaContextMenu.registerElement('ft_copy_video_url_at_current_time', new CopyVideoUrlAtCurrentTimeButtonFactory())
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url', new CopyVideoUrlButtonFactory('youtube', false))
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', new CopyVideoUrlButtonFactory('youtube', true))
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url', new CopyVideoUrlButtonFactory('invidious', false))
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', new CopyVideoUrlButtonFactory('invidious', true))
       shakaContextMenu.registerElement('ft_loop', new LoopButtonFactory())
       shakaOverflowMenu.registerElement('ft_loop', new LoopButtonFactory())
     }
@@ -2662,8 +2692,10 @@ export default defineComponent({
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
 
-      shakaContextMenu.registerElement('ft_copy_video_url', null)
-      shakaContextMenu.registerElement('ft_copy_video_url_at_current_time', null)
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url', null)
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', null)
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url', null)
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', null)
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
