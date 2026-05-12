@@ -127,6 +127,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
 import store from '../../store/index'
+import { defaultUpdaterId, restartNeededKeys } from '../../store/modules/settings'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
@@ -1493,11 +1494,6 @@ const exportableSettings = computed(() => {
   return store.getters.getExportableSettings
 })
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const restartNeededKeys = computed(() => {
-  return store.getters.getRestartNeededKeys
-})
-
 const showRestartPrompt = ref(false)
 
 const pendingSettings = new Map()
@@ -1543,11 +1539,11 @@ async function importSettings() {
       continue
     }
 
-    if (restartNeededKeys.value.has(importedKey)) {
+    if (restartNeededKeys.has(importedKey)) {
       pendingSettings.set(importedKey, importedValue)
       showRestartPrompt.value = true
     } else {
-      const updaterId = await store.dispatch('getDefaultUpdaterId', importedKey)
+      const updaterId = defaultUpdaterId(importedKey)
       await store.dispatch(updaterId, importedValue)
     }
   }
@@ -1583,8 +1579,8 @@ function handleRestart(value) {
 
   if (process.env.IS_ELECTRON) {
     Promise.all(
-      Array.from(pendingSettings, async ([settingKey, settingValue]) => {
-        const updaterId = await store.dispatch('getDefaultUpdaterId', settingKey)
+      Array.from(pendingSettings, ([settingKey, settingValue]) => {
+        const updaterId = defaultUpdaterId(settingKey)
         return store.dispatch(updaterId, settingValue)
       })
     ).then(() => {
