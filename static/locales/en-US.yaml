@@ -982,6 +982,8 @@ Video:
     SponsorBlock:
       DisableAutoSkipTemporarily: Temporarily disable SponsorBlock auto-skipping
       EnableAutoSkipTemporarily: Re-enable SponsorBlock auto-skipping
+      SkipPrompt: Skip {segmentCategory} segment?
+      SkipPromptAction: Skip
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
   Watch:

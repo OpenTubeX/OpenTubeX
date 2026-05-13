@@ -531,6 +531,7 @@ export default defineComponent({
      * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
+    const promptSponsorBlockSegments = ref([])
     const sponsorBlockToastNow = ref(Date.now())
     const sponsorBlockCurrentTime = ref(0)
     let sponsorBlockToastTimeInterval = null
@@ -541,12 +542,18 @@ export default defineComponent({
      * @type {Set<string>}
      */
     let sponsorBlockDoNotSkipSegments = new Set()
+    /**
+     * Set of segment UUIDs whose prompt has been dismissed until playback leaves the segment.
+     * @type {Set<string>}
+     */
+    let sponsorBlockDismissedPromptSegments = new Set()
 
     async function setupSponsorBlock() {
       let segments, averageDuration
 
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
+      sponsorBlockDismissedPromptSegments = new Set()
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
@@ -594,6 +601,16 @@ export default defineComponent({
       if (index !== -1) {
         clearTimeout(skippedSponsorBlockSegments.value[index].timeoutId)
         skippedSponsorBlockSegments.value.splice(index, 1)
+      }
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function removePromptSponsorBlockToast(uuid) {
+      const index = promptSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
+      if (index !== -1) {
+        promptSponsorBlockSegments.value.splice(index, 1)
       }
     }
 
@@ -691,6 +708,43 @@ export default defineComponent({
     }
 
     /**
+     * @param {string} translatedCategory
+     * @returns {string}
+     */
+    function getSponsorBlockPromptLabel(translatedCategory) {
+      return t('Video.Player.SponsorBlock.SkipPrompt', { segmentCategory: translatedCategory })
+    }
+
+    /**
+     * @returns {string}
+     */
+    function getSponsorBlockPromptActionLabel() {
+      return addKeyboardShortcutToActionTitle(
+        t('Video.Player.SponsorBlock.SkipPromptAction'),
+        t('Keys.enter')
+      )
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {string}
+     */
+    function getSponsorBlockPromptTimeLabel(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment) {
+        return '0s'
+      }
+
+      const remainingSeconds = Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
+
+      if (remainingSeconds < 60) {
+        return `${Math.ceil(remainingSeconds)}s`
+      }
+
+      return formatDurationAsTimestamp(Math.ceil(remainingSeconds))
+    }
+
+    /**
      * @returns {{uuid: string, translatedCategory: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, unskipped: boolean}|null}
      */
     function getActiveSponsorBlockToast() {
@@ -701,7 +755,79 @@ export default defineComponent({
       return skippedSponsorBlockSegments.value[skippedSponsorBlockSegments.value.length - 1]
     }
 
+    /**
+     * @returns {{ uuid: string, translatedCategory: string, color: string }|null}
+     */
+    function getActivePromptSponsorBlockToast() {
+      if (promptSponsorBlockSegments.value.length === 0) {
+        return null
+      }
+
+      return promptSponsorBlockSegments.value[promptSponsorBlockSegments.value.length - 1]
+    }
+
+    /**
+     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
+     */
+    function upsertPromptSponsorBlockToast({ uuid, translatedCategory, color }) {
+      const existingPrompt = promptSponsorBlockSegments.value.find(prompt => prompt.uuid === uuid)
+
+      if (existingPrompt) {
+        existingPrompt.translatedCategory = translatedCategory
+        existingPrompt.color = color
+        return
+      }
+
+      promptSponsorBlockSegments.value.push({
+        uuid,
+        translatedCategory,
+        color
+      })
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function dismissPromptSponsorBlockSegment(uuid) {
+      sponsorBlockDismissedPromptSegments.add(uuid)
+      removePromptSponsorBlockToast(uuid)
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {boolean}
+     */
+    function skipPromptSponsorBlockSegment(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment || !canSeek()) {
+        return false
+      }
+
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
+
+      const seekRange = player.seekRange()
+      const targetTime = Math.min(segment.endTime, seekRange.end)
+      video.value.currentTime = targetTime
+      sponsorBlockCurrentTime.value = targetTime
+
+      if (sponsorBlockShowSkippedToast.value) {
+        upsertSkippedSponsorBlockToast({
+          uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category)
+        })
+      }
+
+      return true
+    }
+
     function toggleActiveSponsorBlockSkipState() {
+      const promptToastEntry = getActivePromptSponsorBlockToast()
+      if (promptToastEntry) {
+        return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
+      }
+
       const toastEntry = getActiveSponsorBlockToast()
       if (!toastEntry) {
         return false
@@ -714,6 +840,53 @@ export default defineComponent({
       }
 
       return true
+    }
+
+    /**
+     * @param {number} currentTime
+     */
+    function syncPromptSponsorBlockSegments(currentTime) {
+      const { promptSkip } = sponsorSkips.value
+
+      if (promptSkip.size === 0) {
+        promptSponsorBlockSegments.value = []
+        return
+      }
+
+      const activePromptUUIDs = new Set()
+
+      for (const uuid of sponsorBlockDismissedPromptSegments) {
+        const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
+          sponsorBlockDismissedPromptSegments.delete(uuid)
+        }
+      }
+
+      sponsorBlockSegments.forEach(segment => {
+        if (!promptSkip.has(segment.category) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+          return
+        }
+
+        if (currentTime < segment.startTime || currentTime >= segment.endTime) {
+          return
+        }
+
+        activePromptUUIDs.add(segment.uuid)
+
+        if (sponsorBlockDismissedPromptSegments.has(segment.uuid)) {
+          return
+        }
+
+        upsertPromptSponsorBlockToast({
+          uuid: segment.uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category)
+        })
+      })
+
+      promptSponsorBlockSegments.value
+        .filter(segment => !activePromptUUIDs.has(segment.uuid))
+        .forEach(segment => removePromptSponsorBlockToast(segment.uuid))
     }
 
     /**
@@ -806,6 +979,8 @@ export default defineComponent({
 
       if (sponsorBlockShowSkippedToast.value) {
         skippedSegments.forEach(({ uuid, category }) => {
+          removePromptSponsorBlockToast(uuid)
+          sponsorBlockDismissedPromptSegments.delete(uuid)
           upsertSkippedSponsorBlockToast({
             uuid,
             translatedCategory: translateSponsorBlockCategory(category),
@@ -827,6 +1002,8 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.add(uuid)
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
         const seekRange = player.seekRange()
@@ -860,6 +1037,8 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.delete(uuid)
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
         const seekRange = player.seekRange()
@@ -1707,8 +1886,12 @@ export default defineComponent({
           updateStats()
         }
 
-        if (useSponsorBlock.value && !props.sponsorBlockAutoSkipDisabled && sponsorBlockSegments.length > 0 && canSeek()) {
-          skipSponsorBlockSegments(currentTime)
+        if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
+          syncPromptSponsorBlockSegments(currentTime)
+
+          if (!props.sponsorBlockAutoSkipDisabled) {
+            skipSponsorBlockSegments(currentTime)
+          }
         }
       }
     }
@@ -4052,6 +4235,7 @@ export default defineComponent({
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
+      promptSponsorBlockSegments.value = []
       stopSponsorBlockToastTimer()
 
       window.removeEventListener('online', onlineHandler)
@@ -4191,6 +4375,12 @@ export default defineComponent({
       autoplayVideos,
       sponsorBlockShowSkippedToast,
 
+      promptSponsorBlockSegments,
+      getSponsorBlockPromptLabel,
+      getSponsorBlockPromptActionLabel,
+      getSponsorBlockPromptTimeLabel,
+      dismissPromptSponsorBlockSegment,
+      skipPromptSponsorBlockSegment,
       skippedSponsorBlockSegments,
       getSponsorBlockToastTimeLabel,
       isSponsorBlockToastCountdownPaused,
