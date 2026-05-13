@@ -157,6 +157,166 @@
   cursor: default;
 }
 
+.sponsorBlockSubmissionWrapper {
+  position: absolute;
+  right: 2%;
+  bottom: max(16%, calc(50px + 2.5% + 3%));
+  z-index: 4;
+  width: min(420px, calc(100% - 16px));
+  pointer-events: auto;
+}
+
+.sponsorBlockSubmissionMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 10px;
+  background-color: rgb(24 24 24 / 96%);
+  color: #fff;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
+  overflow-x: hidden;
+}
+
+.sponsorBlockSubmissionHeader,
+.sponsorBlockSubmissionTitle,
+.sponsorBlockSubmissionFooter,
+.sponsorBlockDraftTimes,
+.sponsorBlockDraftActions {
+  display: flex;
+  align-items: center;
+}
+
+.sponsorBlockSubmissionHeader,
+.sponsorBlockSubmissionFooter {
+  justify-content: space-between;
+}
+
+.sponsorBlockSubmissionTitle {
+  gap: 8px;
+  font-weight: 700;
+}
+
+.sponsorBlockSubmissionShield {
+  font-size: 14px;
+}
+
+.sponsorBlockSubmissionClose,
+.sponsorBlockDraftActionButton,
+.sponsorBlockDraftTimeAction,
+.sponsorBlockSubmissionGuidelines,
+.sponsorBlockSubmissionButton {
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.sponsorBlockSubmissionClose {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sponsorBlockSubmissionSegments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: min(45vh, 360px);
+  overflow: hidden auto;
+}
+
+.sponsorBlockDraftSegment {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sponsorBlockDraftTimes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.sponsorBlockDraftTimes.editing {
+  display: grid;
+  grid-template-columns: auto auto 78px auto 78px auto auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.sponsorBlockDraftTimes.viewing {
+  justify-content: center;
+}
+
+.sponsorBlockDraftTimeAction,
+.sponsorBlockDraftActionButton,
+.sponsorBlockSubmissionGuidelines,
+.sponsorBlockSubmissionButton {
+  padding: 0;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sponsorBlockDraftTimeInput,
+.sponsorBlockDraftCategory {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 4px;
+  background-color: rgb(0 0 0 / 35%);
+  color: inherit;
+}
+
+.sponsorBlockDraftTimeInput {
+  width: 78px;
+  min-width: 78px;
+  box-sizing: border-box;
+}
+
+.sponsorBlockDraftTimeText {
+  min-width: 78px;
+  color: rgb(255 255 255 / 92%);
+  font-size: 13px;
+  line-height: 30px;
+  text-align: center;
+}
+
+.sponsorBlockDraftTimeDivider {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  text-align: center;
+}
+
+.sponsorBlockDraftCategory {
+  width: 100%;
+}
+
+.sponsorBlockDraftActions {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sponsorBlockSubmissionError {
+  margin: 0;
+  color: #ff9a9a;
+  font-size: 13px;
+}
+
+.sponsorBlockSubmissionButton:disabled,
+.sponsorBlockDraftActionButton:disabled {
+  cursor: default;
+  opacity: 0.45;
+  text-decoration: none;
+}
+
 .skippedSegmentHeader,
 .skippedSegmentTitle,
 .skippedSegmentHeaderActions,
@@ -273,6 +433,10 @@
   background-color: var(--primary-color);
 }
 
+:deep(.sponsorBlockDraftMarker) {
+  background-color: #d3d3d3;
+}
+
 :deep(.chapterMarker) {
   width: 2px;
   background-color: #000;
@@ -321,6 +485,10 @@
 
 :deep(.shaka-controls-button-panel>.ft-shaka-skip-button .shaka-ui-icon) {
   font-size: 32px;
+}
+
+:deep(.ft-shaka-sponsorblock-button .shaka-ui-icon) {
+  font-size: 28px;
 }
 
 :deep(.ft-playback-adjusted-time) {
@@ -386,6 +554,12 @@
   :deep(.shaka-text-container) {
     /* make subtitles take up slightly less space when a mobile phone is in portrait orientation */
     font-size: 16px !important;
+  }
+
+  .sponsorBlockSubmissionWrapper {
+    right: 8px;
+    left: 8px;
+    width: auto;
   }
 }
 

@@ -249,6 +249,10 @@ const state = {
   showFamilyFriendlyOnly: false,
   sponsorBlockShowSkippedToast: true,
   sponsorBlockSkippedToastDuration: 6,
+  sponsorBlockEnableSubmission: false,
+  sponsorBlockUserId: '',
+  sponsorBlockGeneratedUserId: '',
+  sponsorBlockDraftSegmentsByVideoId: {},
   sponsorBlockUrl: 'https://sponsor.ajay.app',
   sponsorBlockSponsor: {
     color: 'Green',

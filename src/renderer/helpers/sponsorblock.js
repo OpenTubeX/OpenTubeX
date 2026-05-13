@@ -1,4 +1,17 @@
 import store from '../store/index'
+import packageDetails from '../../../package.json'
+
+const SPONSOR_BLOCK_ID_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+const SPONSOR_BLOCK_USER_ID_LENGTH = 30
+
+function generateSponsorBlockUserId() {
+  const randomValues = new Uint32Array(SPONSOR_BLOCK_USER_ID_LENGTH)
+  crypto.getRandomValues(randomValues)
+
+  return Array.from(randomValues, value => {
+    return SPONSOR_BLOCK_ID_CHARSET[value % SPONSOR_BLOCK_ID_CHARSET.length]
+  }).join('')
+}
 
 async function getVideoHash(videoId) {
   const videoIdBuffer = new TextEncoder().encode(videoId)
@@ -109,6 +122,74 @@ export async function deArrowThumbnail(videoId, timestamp) {
     return undefined
   } catch (error) {
     console.error('failed to fetch DeArrow data', requestUrl, error)
+    throw error
+  }
+}
+
+/**
+ * @param {string} rawUserId
+ * @returns {string}
+ */
+export function validateSponsorBlockUserId(rawUserId) {
+  return rawUserId.trim()
+}
+
+/**
+ * @returns {Promise<string>}
+ */
+export async function getOrCreateSponsorBlockUserId() {
+  const importedUserId = validateSponsorBlockUserId(store.getters.getSponsorBlockUserId)
+  if (importedUserId !== '') {
+    return importedUserId
+  }
+
+  let generatedUserId = store.getters.getSponsorBlockGeneratedUserId
+  if (generatedUserId === '') {
+    generatedUserId = generateSponsorBlockUserId()
+    await store.dispatch('updateSponsorBlockGeneratedUserId', generatedUserId)
+  }
+
+  return generatedUserId
+}
+
+/**
+ * @param {string} videoId
+ * @param {number} videoDuration
+ * @param {{
+ *   segment: [number, number]
+ *   category: SponsorBlockCategory
+ *   actionType: 'skip'
+ *   description: string
+ * }[]} segments
+ */
+export async function submitSponsorBlockSegments(videoId, videoDuration, segments) {
+  const userID = await getOrCreateSponsorBlockUserId()
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/skipSegments`
+
+  try {
+    const response = await fetch(requestUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        videoID: videoId,
+        userID,
+        videoDuration,
+        userAgent: `${packageDetails.productName}/${packageDetails.version}`,
+        segments
+      })
+    })
+
+    if (!response.ok) {
+      const error = new Error(await response.text())
+      error.name = `SponsorBlockSubmitError:${response.status}`
+      throw error
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('failed to submit SponsorBlock segments', requestUrl, error)
     throw error
   }
 }
