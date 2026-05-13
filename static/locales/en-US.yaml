@@ -1025,6 +1025,8 @@ Video:
       SubmitSegments: Submit
       StartTimeLabel: Segment start time
       TimeDivider: to
+      SkipPrompt: Skip {segmentCategory} segment?
+      SkipPromptAction: Skip
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
   Watch:

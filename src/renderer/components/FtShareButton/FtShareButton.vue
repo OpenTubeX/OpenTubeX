@@ -118,6 +118,7 @@
 <script setup>
 import { computed, ref, useTemplateRef } from 'vue'
 import { copyToClipboard, openExternalLink } from '../../helpers/utils'
+import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -222,13 +223,11 @@ const invidiousURL = computed(() => {
   if (isPost.value) {
     return `${currentInvidiousInstanceUrl.value}/post/${props.id}`
   }
-  let videoUrl = `${currentInvidiousInstanceUrl.value}/watch?v=${props.id}`
-  // `playlistId` can be undefined
-  if (playlistSharable.value) {
-    // `index` seems can be ignored
-    videoUrl += `&list=${props.playlistId}`
-  }
-  return videoUrl
+  return getInvidiousVideoUrl(
+    currentInvidiousInstanceUrl.value,
+    props.id,
+    playlistSharable.value ? props.playlistId : ''
+  )
 })
 
 const invidiousEmbedURL = computed(() => {
@@ -274,12 +273,7 @@ const youtubeShareURL = computed(() => {
   if (isPost.value) {
     return `https://www.youtube.com/post/${props.id}`
   }
-  const videoUrl = `https://youtu.be/${props.id}`
-  if (playlistSharable.value) {
-    // `index` seems can be ignored
-    return `${videoUrl}?list=${props.playlistId}`
-  }
-  return videoUrl
+  return getYoutubeVideoShareUrl(props.id, playlistSharable.value ? props.playlistId : '')
 })
 
 const youtubeEmbedURL = computed(() => {
@@ -341,10 +335,7 @@ function getFinalUrl(url) {
   if (isChannel.value || isPlaylist.value || isPost.value) {
     return url
   }
-  if (url.indexOf('?') === -1) {
-    return includeTimestamp.value ? `${url}?t=${props.getTimestamp()}` : url
-  }
-  return includeTimestamp.value ? `${url}&t=${props.getTimestamp()}` : url
+  return includeTimestamp.value ? appendTimestamp(url, props.getTimestamp()) : url
 }
 </script>
 <style scoped src="./FtShareButton.css" />

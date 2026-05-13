@@ -253,7 +253,7 @@ Settings:
     Minimize to system tray: Minimizatu sistemaren erretiluan
   Theme Settings:
     Theme Settings: 'Gaia'
-    Match Top Bar with Main Color: 'Lotu goiko barra kolore nagusiarekin'
+    Match Top Bar with Main Color: 'Margotu goiko barra kolore nagusiarekin'
     Expand Side Bar by Default: 'Zabaldu alboko barra lehenespenez'
     Disable Smooth Scrolling: 'Desgaitu korritze leuna'
     UI Scale: 'Erabiltzaile interfazearen eskala'
@@ -460,7 +460,7 @@ Settings:
     'Limit the number of videos displayed for each channel': Mugatu kanal bakoitzeko bistaratzen den bideo kopurua
     To: Hona
   Distraction Free Settings:
-    Distraction Free Settings: 'Arreta-galerarik gabea'
+    Distraction Free Settings: 'Arreta hobetzekoak'
     Hide Video Views: 'Ezkutatu bideoen ikustaldi kopurua'
     Hide Video Likes And Dislikes: 'Ezkutatu bideoen atsegiteak eta desatsegiteak'
     Hide Channel Subscribers: 'Ezkutatu kanalaren harpidedun kopurua'
@@ -586,7 +586,7 @@ Settings:
     Notify when sponsor segment is skipped: Jakinarazi babesleen segmentua saltatzen denean
     Enable SponsorBlock: Gaitu babesleak blokeatzea
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Babesleak blokeatzeko API Url (lehenetsia https://sponsor.ajay.app da)
-    SponsorBlock Settings: Babesleak blokeatu
+    SponsorBlock Settings: Babesleen blokeoa
     UseDeArrowTitles: Erabili DeArrow bideo-izenburuak
     UseDeArrowThumbnails: Erabili DeArrow irudi txikietarako
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow Thumbnail Generator API URLa (lehenetsia https://dearrow-thumb.ajay.app da)

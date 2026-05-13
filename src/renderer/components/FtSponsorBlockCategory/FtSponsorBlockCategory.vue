@@ -51,14 +51,14 @@ const { t } = useI18n()
 
 const SKIP_VALUES = [
   'autoSkip',
-  // 'promptToSkip',
+  'promptToSkip',
   'showInSeekBar',
   'doNothing'
 ]
 
 const skipNames = computed(() => [
   t('Settings.SponsorBlock Settings.Skip Options.Auto Skip'),
-  // t('Settings.SponsorBlock Settings.Skip Options.Prompt To Skip'),
+  t('Settings.SponsorBlock Settings.Skip Options.Prompt To Skip'),
   t('Settings.SponsorBlock Settings.Skip Options.Show In Seek Bar'),
   t('Settings.SponsorBlock Settings.Skip Options.Do Nothing')
 ])

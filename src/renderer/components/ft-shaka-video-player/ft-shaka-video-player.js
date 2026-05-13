@@ -5,8 +5,10 @@ import { useI18n } from '../../composables/use-i18n-polyfill'
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
+import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
+import { LoopButton } from './player-components/LoopButton'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
@@ -38,6 +40,7 @@ import {
   removeFromArrayIfExists,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
+import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 
@@ -628,6 +631,7 @@ export default defineComponent({
      * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
+    const promptSponsorBlockSegments = ref([])
     const sponsorBlockToastNow = ref(Date.now())
     const sponsorBlockCurrentTime = ref(0)
     let sponsorBlockToastTimeInterval = null
@@ -886,12 +890,18 @@ export default defineComponent({
      * @type {Set<string>}
      */
     let sponsorBlockDoNotSkipSegments = new Set()
+    /**
+     * Set of segment UUIDs whose prompt has been dismissed until playback leaves the segment.
+     * @type {Set<string>}
+     */
+    let sponsorBlockDismissedPromptSegments = new Set()
 
     async function setupSponsorBlock() {
       let segments, averageDuration
 
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
+      sponsorBlockDismissedPromptSegments = new Set()
       sponsorBlockSegments = []
       sponsorBlockAverageVideoDuration = 0
 
@@ -1341,6 +1351,16 @@ export default defineComponent({
     }
 
     /**
+     * @param {string} uuid
+     */
+    function removePromptSponsorBlockToast(uuid) {
+      const index = promptSponsorBlockSegments.value.findIndex(segment => segment.uuid === uuid)
+      if (index !== -1) {
+        promptSponsorBlockSegments.value.splice(index, 1)
+      }
+    }
+
+    /**
      * @param {SponsorBlockCategory} category
      * @returns {string}
      */
@@ -1434,6 +1454,43 @@ export default defineComponent({
     }
 
     /**
+     * @param {string} translatedCategory
+     * @returns {string}
+     */
+    function getSponsorBlockPromptLabel(translatedCategory) {
+      return t('Video.Player.SponsorBlock.SkipPrompt', { segmentCategory: translatedCategory })
+    }
+
+    /**
+     * @returns {string}
+     */
+    function getSponsorBlockPromptActionLabel() {
+      return addKeyboardShortcutToActionTitle(
+        t('Video.Player.SponsorBlock.SkipPromptAction'),
+        t('Keys.enter')
+      )
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {string}
+     */
+    function getSponsorBlockPromptTimeLabel(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment) {
+        return '0s'
+      }
+
+      const remainingSeconds = Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
+
+      if (remainingSeconds < 60) {
+        return `${Math.ceil(remainingSeconds)}s`
+      }
+
+      return formatDurationAsTimestamp(Math.ceil(remainingSeconds))
+    }
+
+    /**
      * @returns {{uuid: string, translatedCategory: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, unskipped: boolean}|null}
      */
     function getActiveSponsorBlockToast() {
@@ -1444,7 +1501,79 @@ export default defineComponent({
       return skippedSponsorBlockSegments.value[skippedSponsorBlockSegments.value.length - 1]
     }
 
+    /**
+     * @returns {{ uuid: string, translatedCategory: string, color: string }|null}
+     */
+    function getActivePromptSponsorBlockToast() {
+      if (promptSponsorBlockSegments.value.length === 0) {
+        return null
+      }
+
+      return promptSponsorBlockSegments.value[promptSponsorBlockSegments.value.length - 1]
+    }
+
+    /**
+     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
+     */
+    function upsertPromptSponsorBlockToast({ uuid, translatedCategory, color }) {
+      const existingPrompt = promptSponsorBlockSegments.value.find(prompt => prompt.uuid === uuid)
+
+      if (existingPrompt) {
+        existingPrompt.translatedCategory = translatedCategory
+        existingPrompt.color = color
+        return
+      }
+
+      promptSponsorBlockSegments.value.push({
+        uuid,
+        translatedCategory,
+        color
+      })
+    }
+
+    /**
+     * @param {string} uuid
+     */
+    function dismissPromptSponsorBlockSegment(uuid) {
+      sponsorBlockDismissedPromptSegments.add(uuid)
+      removePromptSponsorBlockToast(uuid)
+    }
+
+    /**
+     * @param {string} uuid
+     * @returns {boolean}
+     */
+    function skipPromptSponsorBlockSegment(uuid) {
+      const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+      if (!segment || !canSeek()) {
+        return false
+      }
+
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
+
+      const seekRange = player.seekRange()
+      const targetTime = Math.min(segment.endTime, seekRange.end)
+      video.value.currentTime = targetTime
+      sponsorBlockCurrentTime.value = targetTime
+
+      if (sponsorBlockShowSkippedToast.value) {
+        upsertSkippedSponsorBlockToast({
+          uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category)
+        })
+      }
+
+      return true
+    }
+
     function toggleActiveSponsorBlockSkipState() {
+      const promptToastEntry = getActivePromptSponsorBlockToast()
+      if (promptToastEntry) {
+        return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
+      }
+
       const toastEntry = getActiveSponsorBlockToast()
       if (!toastEntry) {
         return false
@@ -1457,6 +1586,53 @@ export default defineComponent({
       }
 
       return true
+    }
+
+    /**
+     * @param {number} currentTime
+     */
+    function syncPromptSponsorBlockSegments(currentTime) {
+      const { promptSkip } = sponsorSkips.value
+
+      if (promptSkip.size === 0) {
+        promptSponsorBlockSegments.value = []
+        return
+      }
+
+      const activePromptUUIDs = new Set()
+
+      for (const uuid of sponsorBlockDismissedPromptSegments) {
+        const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
+        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
+          sponsorBlockDismissedPromptSegments.delete(uuid)
+        }
+      }
+
+      sponsorBlockSegments.forEach(segment => {
+        if (!promptSkip.has(segment.category) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+          return
+        }
+
+        if (currentTime < segment.startTime || currentTime >= segment.endTime) {
+          return
+        }
+
+        activePromptUUIDs.add(segment.uuid)
+
+        if (sponsorBlockDismissedPromptSegments.has(segment.uuid)) {
+          return
+        }
+
+        upsertPromptSponsorBlockToast({
+          uuid: segment.uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category)
+        })
+      })
+
+      promptSponsorBlockSegments.value
+        .filter(segment => !activePromptUUIDs.has(segment.uuid))
+        .forEach(segment => removePromptSponsorBlockToast(segment.uuid))
     }
 
     /**
@@ -1549,6 +1725,8 @@ export default defineComponent({
 
       if (sponsorBlockShowSkippedToast.value) {
         skippedSegments.forEach(({ uuid, category }) => {
+          removePromptSponsorBlockToast(uuid)
+          sponsorBlockDismissedPromptSegments.delete(uuid)
           upsertSkippedSponsorBlockToast({
             uuid,
             translatedCategory: translateSponsorBlockCategory(category),
@@ -1570,6 +1748,8 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.add(uuid)
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
         const seekRange = player.seekRange()
@@ -1603,6 +1783,8 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.delete(uuid)
+      sponsorBlockDismissedPromptSegments.delete(uuid)
+      removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
         const seekRange = player.seekRange()
@@ -1830,6 +2012,29 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    const showInvidiousShareOptions = computed(() => {
+      return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
+    })
+
+    const contextMenuElements = computed(() => {
+      const elements = [
+        'ft_loop',
+        'ft_copy_youtube_video_url',
+        'ft_copy_youtube_video_url_at_current_time'
+      ]
+
+      if (showInvidiousShareOptions.value) {
+        elements.push(
+          'ft_copy_invidious_video_url',
+          'ft_copy_invidious_video_url_at_current_time'
+        )
+      }
+
+      elements.push('ft_stats')
+
+      return elements
+    })
+
     const uiConfig = computed(() => {
       const controlPanelElements = [
         'play_pause',
@@ -1850,6 +2055,7 @@ export default defineComponent({
       const uiConfig = {
         controlPanelElements: props.watchingPlaylist ? controlPanelElementsWithSkipButtons : controlPanelElements,
         overflowMenuButtons: [],
+        contextMenuElements: contextMenuElements.value,
 
         // only set this to label when we actually have labels, so that the warning doesn't show up
         // about it being set to labels, but that the audio tracks don't have labels
@@ -1870,7 +2076,7 @@ export default defineComponent({
           'playback_rate',
           'captions',
           'ft_audio_tracks',
-          'loop',
+          'ft_loop',
           'ft_screenshot',
           'picture_in_picture',
           'ft_full_window',
@@ -1902,7 +2108,7 @@ export default defineComponent({
           'captions',
           'playback_rate',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          'loop',
+          'ft_loop',
           'recenter_vr',
           'toggle_stereoscopic',
         )
@@ -1952,7 +2158,7 @@ export default defineComponent({
         const firstTimeConfig = {
           addSeekBar: seekingIsPossible.value,
           customContextMenu: true,
-          contextMenuElements: ['ft_stats'],
+          contextMenuElements: contextMenuElements.value,
           enableTooltips: true,
           seekBarColors: {
             played: 'var(--primary-color)'
@@ -2192,12 +2398,6 @@ export default defineComponent({
           controlsContainer.addEventListener('click', handleControlsContainerClick, true)
         }
       }
-
-      // we need to pass capture to ensure that our handler gets called before shaka-player's handler,
-      // we call preventDefault() and stopPropagation() so shaka-player's one isn't called.
-      // We register our own one, as shaka-player's one uses an inverted (the wrong) scroll direction
-      // ours: scroll up -> volume up, shaka-player's: scroll up -> volume down
-      container.value.querySelector('.shaka-volume-bar').addEventListener('wheel', mouseScrollVolumeHandler, { capture: true })
 
       // title overlay when the video is fullscreened
       // placing this inside the controls container so that we can fade it in and out at the same time as the controls
@@ -2452,8 +2652,12 @@ export default defineComponent({
 
         handleSponsorBlockPreviewSkip(currentTime)
 
-        if (useSponsorBlock.value && !props.sponsorBlockAutoSkipDisabled && sponsorBlockSegments.length > 0 && canSeek()) {
-          skipSponsorBlockSegments(currentTime)
+        if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
+          syncPromptSponsorBlockSegments(currentTime)
+
+          if (!props.sponsorBlockAutoSkipDisabled) {
+            skipSponsorBlockSegments(currentTime)
+          }
         }
       }
     }
@@ -3258,6 +3462,100 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_stats', new StatsButtonFactory())
     }
 
+    function registerContextMenuButtons() {
+      /**
+       * @returns {number}
+       */
+      function getCurrentTimestamp() {
+        const currentTime = Math.floor(video.value?.currentTime ?? 0)
+        return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+      }
+
+      /**
+       * @param {'youtube' | 'invidious'} backend
+       * @param {boolean} includeTimestamp
+       * @returns {string}
+       */
+      function getVideoUrl(backend, includeTimestamp) {
+        const videoUrl = backend === 'invidious'
+          ? getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId)
+          : getYoutubeVideoShareUrl(props.videoId)
+
+        if (!includeTimestamp) {
+          return videoUrl
+        }
+
+        return appendTimestamp(videoUrl, getCurrentTimestamp())
+      }
+
+      /**
+       * @param {'youtube' | 'invidious'} backend
+       * @returns {string}
+       */
+      function getCopySuccessMessage(backend) {
+        return backend === 'invidious'
+          ? t('Share.Invidious URL copied to clipboard')
+          : t('Share.YouTube URL copied to clipboard')
+      }
+
+      /**
+       * @param {'youtube' | 'invidious'} backend
+       * @param {boolean} includeTimestamp
+       * @returns {string}
+       */
+      function getCopyLabel(backend, includeTimestamp) {
+        const baseLabel = backend === 'invidious'
+          ? t('Video.Copy Invidious Link')
+          : t('Video.Copy YouTube Link')
+
+        if (!includeTimestamp) {
+          return baseLabel
+        }
+
+        return `${baseLabel} (${t('Share.Include Timestamp')})`
+      }
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class CopyVideoUrlButtonFactory {
+        /**
+         * @param {'youtube' | 'invidious'} backend
+         * @param {boolean} includeTimestamp
+         */
+        constructor(backend, includeTimestamp) {
+          this.backend = backend
+          this.includeTimestamp = includeTimestamp
+        }
+
+        create(rootElement, controls) {
+          return new CopyVideoUrlButton(
+            () => getVideoUrl(this.backend, this.includeTimestamp),
+            () => getCopyLabel(this.backend, this.includeTimestamp),
+            () => getCopySuccessMessage(this.backend),
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class LoopButtonFactory {
+        create(rootElement, controls) {
+          return new LoopButton(rootElement, controls)
+        }
+      }
+
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url', new CopyVideoUrlButtonFactory('youtube', false))
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', new CopyVideoUrlButtonFactory('youtube', true))
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url', new CopyVideoUrlButtonFactory('invidious', false))
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', new CopyVideoUrlButtonFactory('invidious', true))
+      shakaContextMenu.registerElement('ft_loop', new LoopButtonFactory())
+      shakaOverflowMenu.registerElement('ft_loop', new LoopButtonFactory())
+    }
+
     function registerScreenshotButton() {
       events.addEventListener('takeScreenshot', () => {
         takeScreenshot()
@@ -3403,7 +3701,13 @@ export default defineComponent({
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
 
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url', null)
+      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', null)
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url', null)
+      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', null)
+      shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
+      shakaOverflowMenu.registerElement('ft_loop', null)
 
       shakaControls.registerElement('ft_screenshot', null)
       shakaOverflowMenu.registerElement('ft_screenshot', null)
@@ -4297,6 +4601,7 @@ export default defineComponent({
       registerTheatreModeButton()
       registerFullWindowButton()
       registerLegacyQualitySelection()
+      registerContextMenuButtons()
       registerStatsButton()
       registerSponsorBlockSubmissionButtons()
       registerSkipButtons()
@@ -4815,6 +5120,7 @@ export default defineComponent({
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
+      promptSponsorBlockSegments.value = []
       stopSponsorBlockToastTimer()
 
       window.removeEventListener('online', onlineHandler)
@@ -4961,6 +5267,12 @@ export default defineComponent({
       sponsorBlockSubmissionPending,
       isSponsorBlockDraftEditing,
 
+      promptSponsorBlockSegments,
+      getSponsorBlockPromptLabel,
+      getSponsorBlockPromptActionLabel,
+      getSponsorBlockPromptTimeLabel,
+      dismissPromptSponsorBlockSegment,
+      skipPromptSponsorBlockSegment,
       skippedSponsorBlockSegments,
       getSponsorBlockToastTimeLabel,
       isSponsorBlockToastCountdownPaused,

@@ -921,7 +921,8 @@ export class TabManager {
     for (const tabData of sessionData.tabs) {
       this.createTab({
         url: tabData.url,
-        makeActive: tabData.id === sessionData.activeTabId
+        makeActive: tabData.id === sessionData.activeTabId,
+        openPosition: 'end'
       })
     }
 

@@ -17,7 +17,7 @@ body:
           required: true
         - label: I have encountered this bug in the [official downloads of OpenTubeX](https://github.com/OpenTubeX/OpenTubeX#official-downloads).
           required: true
-        - label: I have [searched the issue tracker for open and closed issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
+        - label: I have [searched the issue tracker for **open and closed** issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) that are similar to the bug report I want to file, without success.
           required: true
         - label: I have searched the [documentation](https://opentubex.org/) for information that matches the description of the bug I want to file, without success.
           required: true
@@ -127,5 +127,5 @@ body:
       label: Nightly Build
       description: Please ensure you've completed the following, if applicable.
       options:
-        - label: I have encountered this bug in the latest [nightly build](https://opentubex.org/downloads/#automated-builds).
+        - label: I have encountered this bug in the latest **official** [nightly build](https://opentubex.org/downloads/#automated-builds), do not check this box if you are using an unofficial or custom build.
           required: false

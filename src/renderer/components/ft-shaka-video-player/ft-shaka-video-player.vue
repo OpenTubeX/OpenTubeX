@@ -112,9 +112,48 @@
       </p>
     </div>
     <div
-      v-if="sponsorBlockShowSkippedToast && skippedSponsorBlockSegments.length > 0"
+      v-if="sponsorBlockShowSkippedToast && (promptSponsorBlockSegments.length > 0 || skippedSponsorBlockSegments.length > 0)"
       class="skippedSegmentsWrapper"
     >
+      <div
+        v-for="{ uuid, translatedCategory, color } in promptSponsorBlockSegments"
+        :key="uuid"
+        class="skippedSegment"
+      >
+        <div class="skippedSegmentHeader">
+          <div class="skippedSegmentTitle">
+            <font-awesome-icon
+              class="skippedSegmentShield"
+              :icon="['fas', 'shield-halved']"
+              :style="{ color }"
+            />
+            <span class="skippedSegmentText">
+              {{ getSponsorBlockPromptLabel(translatedCategory) }}
+            </span>
+          </div>
+          <div class="skippedSegmentHeaderActions">
+            <span class="skippedSegmentTimer">
+              {{ getSponsorBlockPromptTimeLabel(uuid) }}
+            </span>
+            <button
+              class="closeSkippedSegmentButton"
+              :title="$t('Close')"
+              @click.stop.prevent="dismissPromptSponsorBlockSegment(uuid)"
+            >
+              <font-awesome-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+        </div>
+        <div class="skippedSegmentActions">
+          <button
+            class="unskipButton"
+            :title="getSponsorBlockPromptActionLabel()"
+            @click.stop.prevent="skipPromptSponsorBlockSegment(uuid)"
+          >
+            {{ getSponsorBlockPromptActionLabel() }}
+          </button>
+        </div>
+      </div>
       <div
         v-for="{ uuid, translatedCategory, color, unskipped } in skippedSponsorBlockSegments"
         :key="uuid"
