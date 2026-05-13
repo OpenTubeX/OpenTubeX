@@ -423,7 +423,7 @@ Settings:
       Picture in Picture: Bild-i-bild
       Full Screen: Helskärm
       External Player: Extern spelare ({externalPlayerName})
-    Autoplay Interruption Timer: Avbrottstimer för autouppspelning
+    Autoplay Interruption Timer: Avbrottstimer för automatisk uppspelning
   Privacy Settings:
     Privacy Settings: 'Integritet'
     Remember History: 'Kom ihåg visningshistorik'
@@ -759,7 +759,7 @@ Video:
   Previous: 'Föregående'
   Next: 'Nästa'
   Watched: 'Sedd'
-  Autoplay: 'Autospelning'
+  Autoplay: 'Automatisk uppspelning'
   Starting soon, please refresh the page to check again: 'Börjar snart, uppdatera sidan för att kontrollera igen'
   # As in a Live Video
   Live: 'Live-visning'
@@ -835,8 +835,8 @@ Video:
     Playback will resume automatically when your connection comes back: Uppspelningen återupptas automatiskt när din anslutning kommer tillbaka.
     Skipped segment: Hoppade över {segmentCategory}-segmentet
     Audio Tracks: Ljudspår
-    Autoplay is off: Autouppspelning är avstängd
-    Autoplay is on: Autouppspelning är på
+    Autoplay is off: Automatisk uppspelning är avstängd
+    Autoplay is on: Automatisk uppspelning är på
     Theatre Mode: Teaterläge
     Exit Theatre Mode: Avsluta teaterläget
     Take Screenshot: Ta skärmdump
@@ -1044,7 +1044,7 @@ Description:
   Expand Description: '...mer'
   Collapse Description: Visa mindre
 Yes, Delete: Ja, ta bort
-Autoplay Interruption Timer: Autouppspelningen avbröts på grund av {autoplayInterruptionIntervalHours} timmars inaktivitet
+Autoplay Interruption Timer: Automatisk uppspelning avbröts på grund av {autoplayInterruptionIntervalHours} timmars inaktivitet
 shortcutJoinOperator: +
 shortcutLabelSeparator: ｜
 KeyboardShortcutPrompt:

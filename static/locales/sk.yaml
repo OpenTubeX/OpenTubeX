@@ -992,7 +992,7 @@ Channels:
   Search bar placeholder: Vyhľadať kanály
   Empty: Váš zoznam kanálov je momentálne prázdny.
   Unsubscribe Prompt: Určite sa chcete odhlásiť z odberu "{channelName}"?
-Preferences: Predvoľby
+Preferences: Preferencie
 Close Banner: Zatvoriť banner
 Search character limit: Hľadaný výraz presahuje povolený limit {searchCharacterLimit} znakov
 Search Listing:
