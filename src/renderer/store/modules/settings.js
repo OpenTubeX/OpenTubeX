@@ -432,7 +432,6 @@ const sideEffectHandlers = {
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
 
 const settingsNotExportable = new Set([
-  // Proxy
   'useProxy',
   'proxyHostname',
   'proxyPort',
@@ -440,16 +439,15 @@ const settingsNotExportable = new Set([
   'proxyPassword',
   'proxyProtocol',
   'proxyVideos',
-  // External player
   'externalPlayer',
   'externalPlayerExecutable',
   'externalPlayerIgnoreWarnings',
   'externalPlayerIgnoreDefaultArgs',
   'externalPlayerCustomArgs',
   'showAddedExternalPlayerCustomArgs',
-  // Screenshot
   'screenshotAskPath',
-  'screenshotFolderPath'
+  'screenshotFolderPath',
+  'backendPreference'
 ])
 
 export const settingsNeedingRestart = new Set([
