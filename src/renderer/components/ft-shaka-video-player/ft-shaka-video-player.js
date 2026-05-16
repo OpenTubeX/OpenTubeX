@@ -9,6 +9,7 @@ import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton } from './player-components/LoopButton'
+import { QuickPlaybackRateBar } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
@@ -250,6 +251,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    channelId: {
+      type: String,
+      default: ''
+    },
     currentPlaybackRate: {
       type: Number,
       default: 1
@@ -281,6 +286,7 @@ export default defineComponent({
     'toggle-theatre-mode',
     'playback-rate-updated',
     'playback-rate-user-set',
+    'save-channel-playback-speed',
     'video-quality-updated',
     'video-quality-user-set',
     'skip-to-next',
@@ -439,6 +445,58 @@ export default defineComponent({
 
     const maxVideoPlaybackRate = computed(() => {
       return parseInt(store.getters.getMaxVideoPlaybackRate)
+    })
+
+    /** @type {import('vue').ComputedRef<string>} */
+    const channelPlaybackSpeeds = computed(() => {
+      return store.getters.getChannelPlaybackSpeeds
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const rememberPlaybackSpeedPerChannel = computed(() => {
+      return store.getters.getRememberPlaybackSpeedPerChannel
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const autoUpdateChannelPlaybackSpeeds = computed(() => {
+      return store.getters.getAutoUpdateChannelPlaybackSpeeds
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const useQuickPlaybackSpeedBar = computed(() => {
+      return store.getters.getUseQuickPlaybackSpeedBar
+    })
+
+    /** @type {import('vue').ComputedRef<number | null>} */
+    const savedChannelPlaybackRate = computed(() => {
+      if (!rememberPlaybackSpeedPerChannel.value || props.channelId === '') {
+        return null
+      }
+
+      try {
+        const channelSpeeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+        const value = channelSpeeds[props.channelId]
+
+        if (typeof value === 'number' && Number.isFinite(value)) {
+          return value
+        }
+
+        if (typeof value === 'string') {
+          const parsedValue = Number.parseFloat(value)
+          return Number.isFinite(parsedValue) ? parsedValue : null
+        }
+      } catch (error) {
+        console.error('Failed to parse channel playback speeds for quick playback speed bar:', error)
+      }
+
+      return null
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const canManuallySaveChannelPlaybackRate = computed(() => {
+      return rememberPlaybackSpeedPerChannel.value &&
+        !autoUpdateChannelPlaybackSpeeds.value &&
+        props.channelId !== ''
     })
 
     const videoPlaybackRateInterval = computed(() => {
@@ -2089,6 +2147,7 @@ export default defineComponent({
         uiConfig.controlPanelElements.push('overflow_menu', 'fullscreen')
       } else {
         uiConfig.controlPanelElements.push(
+          ...(useQuickPlaybackSpeedBar.value ? ['ft_quick_playback_rate_bar'] : []),
           'ft_screenshot',
           'ft_autoplay_toggle',
           'ft_sponsorblock_open_menu',
@@ -2471,6 +2530,19 @@ export default defineComponent({
         }))
       }
     })
+
+    watch(
+      [
+        useQuickPlaybackSpeedBar,
+        rememberPlaybackSpeedPerChannel,
+        autoUpdateChannelPlaybackSpeeds,
+        savedChannelPlaybackRate,
+        () => props.channelId
+      ],
+      () => {
+        events.dispatchEvent(new CustomEvent('quickPlaybackRateBarStateChanged'))
+      }
+    )
 
     /** @type {ResizeObserver|null} */
     let containerResizeObserver = null
@@ -3680,6 +3752,31 @@ export default defineComponent({
       shakaControls.registerElement('ft_playback_adjusted_time', new PlaybackAdjustedTimeFactory())
     }
 
+    function registerQuickPlaybackRateBar() {
+      events.addEventListener('quickPlaybackRateUserSet', (/** @type {CustomEvent} */ event) => {
+        emit('playback-rate-user-set', event.detail)
+      })
+
+      events.addEventListener('saveChannelPlaybackSpeed', () => {
+        emit('save-channel-playback-speed')
+      })
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class QuickPlaybackRateBarFactory {
+        create(rootElement, controls) {
+          return new QuickPlaybackRateBar(
+            () => savedChannelPlaybackRate.value,
+            () => canManuallySaveChannelPlaybackRate.value,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaControls.registerElement('ft_quick_playback_rate_bar', new QuickPlaybackRateBarFactory())
+    }
+
     /**
      * As shaka-player doesn't let you unregister custom control factories,
      * overwrite them with `null` instead so the referenced objects
@@ -3725,6 +3822,7 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_skip_previous', null)
 
       shakaControls.registerElement('ft_playback_adjusted_time', null)
+      shakaControls.registerElement('ft_quick_playback_rate_bar', null)
     }
 
     // #endregion custom player controls
@@ -4606,6 +4704,7 @@ export default defineComponent({
       registerSponsorBlockSubmissionButtons()
       registerSkipButtons()
       registerPlaybackAdjustedTime()
+      registerQuickPlaybackRateBar()
 
       if (ui.isMobile()) {
         onlyUseOverFlowMenu.value = true

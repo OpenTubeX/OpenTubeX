@@ -476,6 +476,7 @@ Settings:
     Default Playback Rate: Default Playback Rate
     Remember Playback Speed Per Channel: Remember Playback Speed Per Channel
     Auto Update Channel Playback Speed: Automatically update when changing via player options
+    Use Quick Playback Speed Bar: Use Quick Playback Speed Bar
     Manage Channel Playback Speeds: Manage Channel Playback Speeds
     Channel Playback Speed Manager: Channel Playback Speed Manager
     No Saved Playback Speeds: No saved playback speeds
@@ -963,6 +964,8 @@ Video:
     Audio Tracks: Audio Tracks
     Autoplay is off: Autoplay is off
     Autoplay is on: Autoplay is on
+    Normal: Normal
+    Set Default: Set Default
     Theatre Mode: Theater Mode
     Exit Theatre Mode: Exit Theater Mode
     Full Window: Full Window
@@ -1150,6 +1153,7 @@ Tooltips:
     Default Video Format: Set the formats used when a video plays. DASH formats can
       play higher qualities. Legacy formats are limited to a max of 360p but use less
       bandwidth. Audio formats are audio only streams.
+    Use Quick Playback Speed Bar: Shows a quick playback speed bar in the player controls on the right side. If manual per-channel playback speed saving is enabled, the bar also includes the button to save the speed for the current channel.
     Scroll Playback Rate Over Video Player: While the cursor is over the video, press and
       hold the Control key (Command Key on Mac) and scroll the mouse wheel forwards or backwards to control
       the playback rate. Press and hold the Control key (Command Key on Mac) and left click the mouse

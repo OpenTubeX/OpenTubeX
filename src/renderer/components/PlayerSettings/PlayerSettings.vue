@@ -202,6 +202,13 @@
         :default-value="autoUpdateChannelPlaybackSpeeds"
         @change="updateAutoUpdateChannelPlaybackSpeeds"
       />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Use Quick Playback Speed Bar')"
+        :compact="true"
+        :default-value="useQuickPlaybackSpeedBar"
+        :tooltip="t('Tooltips.Player Settings.Use Quick Playback Speed Bar')"
+        @change="updateUseQuickPlaybackSpeedBar"
+      />
     </FtFlexBox>
     <FtFlexBox v-if="rememberPlaybackSpeedPerChannel">
       <FtButton
@@ -804,6 +811,16 @@ const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpda
  */
 function updateAutoUpdateChannelPlaybackSpeeds(value) {
   store.dispatch('updateAutoUpdateChannelPlaybackSpeeds', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useQuickPlaybackSpeedBar = computed(() => store.getters.getUseQuickPlaybackSpeedBar)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseQuickPlaybackSpeedBar(value) {
+  store.dispatch('updateUseQuickPlaybackSpeedBar', value)
 }
 
 /** @type {import('vue').Ref<boolean>} */

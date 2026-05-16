@@ -299,6 +299,7 @@ const state = {
   rememberPlaybackSpeedPerChannel: false,
   autoUpdateChannelPlaybackSpeeds: false,
   channelPlaybackSpeeds: '{}',
+  useQuickPlaybackSpeedBar: false,
   rememberVideoQualityPerChannel: false,
   autoUpdateChannelVideoQualities: false,
   channelVideoQualities: '{}',

@@ -378,6 +378,7 @@ Settings:
     Default Playback Rate: Standard-Wiedergabegeschwindigkeit
     Remember Playback Speed Per Channel: Wiedergabegeschwindigkeit pro Kanal merken
     Auto Update Channel Playback Speed: Beim Ändern über Player-Optionen automatisch aktualisieren
+    Use Quick Playback Speed Bar: Schnelle Wiedergabegeschwindigkeitsleiste verwenden
     Manage Channel Playback Speeds: Kanalspezifische Wiedergabegeschwindigkeiten verwalten
     Channel Playback Speed Manager: Verwaltung der Wiedergabegeschwindigkeiten
     No Saved Playback Speeds: Keine gespeicherten Wiedergabegeschwindigkeiten
@@ -801,6 +802,8 @@ Video:
   More Options: Weitere Optionen
   Player:
     Audio Tracks: Audiospuren
+    Normal: Normal
+    Set Default: Standard setzen
     Theatre Mode: Kinomodus
     Exit Theatre Mode: Kinomodus beenden
     Full Window: Vollständiges Fenster
@@ -1036,6 +1039,7 @@ Tooltips:
   Player Settings:
     Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
+    Use Quick Playback Speed Bar: Zeigt in den Player-Steuerelementen auf der rechten Seite eine schnelle Wiedergabegeschwindigkeitsleiste an. Wenn das manuelle Speichern der kanalbezogenen Wiedergabegeschwindigkeit aktiviert ist, enthält die Leiste außerdem die Schaltfläche, um die Geschwindigkeit für den aktuellen Kanal zu speichern.
     Scroll Playback Rate Over Video Player: Während sich der Cursor über dem Video befindet, halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und bewege das Mausrad vorwärts oder rückwärts, um die Abspielgeschwindigkeit zu steuern. Halte die Strg-Taste (Befehlstaste auf dem Mac) gedrückt und klicke mit der linken Maustaste, um schnell zur Standard-Wiedergabegeschwindigkeit zurückzukehren (1x, sofern sie nicht in den Einstellungen geändert wurde).
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.

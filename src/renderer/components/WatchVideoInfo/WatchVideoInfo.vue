@@ -354,8 +354,14 @@ const rememberPlaybackSpeedPerChannel = computed(() => store.getters.getRemember
 /** @type {import('vue').ComputedRef<boolean>} */
 const autoUpdateChannelPlaybackSpeeds = computed(() => store.getters.getAutoUpdateChannelPlaybackSpeeds)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const useQuickPlaybackSpeedBar = computed(() => store.getters.getUseQuickPlaybackSpeedBar)
+
 const showSaveChannelPlaybackSpeedButton = computed(() => {
-  return !props.isUpcoming && rememberPlaybackSpeedPerChannel.value && !autoUpdateChannelPlaybackSpeeds.value
+  return !props.isUpcoming &&
+    rememberPlaybackSpeedPerChannel.value &&
+    !autoUpdateChannelPlaybackSpeeds.value &&
+    !useQuickPlaybackSpeedBar.value
 })
 
 function saveChannelPlaybackSpeedManually() {

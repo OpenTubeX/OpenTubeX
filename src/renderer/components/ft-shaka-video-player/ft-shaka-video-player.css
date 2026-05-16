@@ -501,6 +501,65 @@
   color: var(--text-with-main-color, #fff);
 }
 
+:deep(.ft-quick-playback-rate-bar) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  max-width: min(70vw, 640px);
+  margin-inline-end: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+:deep(.shaka-controls-button-panel > .ft-quick-playback-rate-bar) {
+  width: fit-content;
+  min-width: 0;
+  height: 48px;
+  padding-inline: 2px;
+  flex: 0 1 auto;
+}
+
+:deep(.ft-quick-playback-rate-bar::-webkit-scrollbar) {
+  display: none;
+}
+
+:deep(.ft-quick-playback-rate-button) {
+  min-width: max-content;
+  min-height: 28px;
+  padding: 0 6px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 22%);
+  color: rgb(255 255 255 / 92%);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+:deep(.ft-quick-playback-rate-button:hover) {
+  background: rgb(255 255 255 / 16%);
+}
+
+:deep(.ft-quick-playback-rate-button:focus-visible) {
+  outline: 2px solid rgb(255 255 255 / 60%);
+  outline-offset: 1px;
+}
+
+:deep(.ft-quick-playback-rate-button.is-current-rate) {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 32%, transparent);
+  color: #fff;
+}
+
+:deep(.ft-quick-playback-rate-button.is-channel-default-rate) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 .ftVideoPlayer:fullscreen :deep(.theatre-button),
 .ftVideoPlayer:fullscreen :deep(.full-window-button),
 .fullWindow :deep(.theatre-button) {
