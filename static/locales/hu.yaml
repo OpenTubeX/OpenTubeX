@@ -403,7 +403,10 @@ Settings:
     Display Play Button In Video Player: Lejátszás gomb megjelenítése a videolejátszóban
     Fast-Forward / Rewind Interval: Gyors előre- és visszatekerési időköz
     Screenshot:
-      Ask Path: Rákérdezés a Mentési mappára
+      Modes:
+        Ask Path: Rákérdezés a Mentési mappára
+        Save To Folder: Mentés mappába
+        Clipboard: Másolás a vágólapra
       File Name Label: Fájlnévminta
       Folder Label: Képernyőképek mappa
       Folder Button: Mappa kiválasztása
@@ -414,6 +417,7 @@ Settings:
         Empty File Name: Üres fájlnév
       File Name Tooltip: Az alábbi változókat használhatja. %Y 4-számjegyű év. %M 2-számjegyű hónap. %D 2-számjegyű nap. %H 2-számjegyű óra. %N 2-számjegyű perc. %S 2-számjegyű másodperc. %T 3-számjegyű ezredmásodperc. %s Videó másodperc. %t Videó 3-számjegyű ezredmásodperc. %i videóazonosító.
       Quality Label: Képernyőkép minősége
+      Mode: Képernyőkép mód
     Scroll Playback Rate Over Video Player: A lejátszás sebességét a videolejátszó feletti kerékkel szabályozhatja
     Max Video Playback Rate: Legnagyobb videólejátszási sebesség
     Video Playback Rate Interval: Videó lejátszási sebesség léptetési köze
@@ -1117,3 +1121,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Kompakt oldalsó navigáció
 Expand side navigation: Oldalsó navigáció kibontása
+Screenshot Clipboard Success: Képernyőkép mentve a vágólapra
+Screenshot Clipboard Error: A képernyőkép másolása a vágólapra nem sikerült

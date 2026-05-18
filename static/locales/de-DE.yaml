@@ -416,7 +416,10 @@ Settings:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
       Quality Label: Qualität von Screenshots
-      Ask Path: Nach dem Ordner zum Speichern fragen
+      Modes:
+        Ask Path: Nach dem Ordner zum Speichern fragen
+        Save To Folder: In Ordner speichern
+        Clipboard: In die Zwischenablage kopieren
       Folder Label: Ordner für Screenshots
       Folder Button: Ordner auswählen
       File Name Label: Dateinamen-Muster
@@ -424,6 +427,7 @@ Settings:
         Forbidden Characters: Unerlaubte Zeichen
         Empty File Name: Leerer Dateiname
       File Name Tooltip: Du kannst die folgenden Variablen verwenden. %Y Jahr 4-stellig. %M Monat 2 Ziffern. %D Tag 2 Ziffern. %H Stunde 2 Ziffern. %N Minute 2 Ziffern. %S Sekunde 2 Ziffern. %T Millisekunde 3 Ziffern. %s Video-Sekunde. %t Video Millisekunde 3 Ziffern. %i Video-ID.
+      Mode: Screenshot-Modus
     Enter Fullscreen on Display Rotate: Beim Drehen des Bildschirms zu Vollbild wechseln
     Skip by Scrolling Over Video Player: Überspringen durch Scrollen
     Multiply Seek Interval by Playback Rate: Sprungintervalle mit Wiedergabegeschwindigkeit multiplizieren
@@ -1194,3 +1198,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Seitenleiste minimieren
 Expand side navigation: Seitenleiste erweitern
+Screenshot Clipboard Success: Screenshot in der Zwischenablage gespeichert
+Screenshot Clipboard Error: Screenshot-Kopie in die Zwischenablage ist fehlgeschlagen

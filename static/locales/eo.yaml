@@ -406,7 +406,8 @@ Settings:
       Enable: Ebligi ekrankopiojn
       Format Label: Dosiertipo de ekrankopioj
       Quality Label: Kvalito de ekrankopioj
-      Ask Path: Peti konservan dosierujon
+      Modes:
+        Ask Path: Peti konservan dosierujon
       Folder Label: Dosierujo de ekrankopioj
       Folder Button: Elekti dosierujon
       File Name Label: Dosiernoma ŝablono
@@ -784,8 +785,8 @@ Video:
       Bandwidth: 'Kapacito: {bandwidth} kbps'
       Buffered: 'Bufrita: {bufferedPercentage}%'
       Dropped Frames / Total Frames: 'Perditaj bildoj: {droppedFrames} / Tutaj bildoj: {totalFrames}'
-      CodecAudio: 'Kodeko: {audioCodec} ({audioltag})'
-      CodecsVideoAudio: 'Kodekoj: {videoCodec} ({videoltag}) / {audioCodec} ({audioltag})'
+      CodecAudio: 'Kodeko: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'Kodekoj: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
       CodecsVideoAudioNoItags: 'Kodekoj: {videoCodec} / {audioCodec}'
     You appear to be offline: Vi ŝajne ne havas retkonekton.
     Playback will resume automatically when your connection comes back: La ludado ados aŭtomate kiam via retkonekto revenos.
