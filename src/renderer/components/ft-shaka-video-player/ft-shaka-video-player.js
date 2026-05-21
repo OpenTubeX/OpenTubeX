@@ -2149,13 +2149,13 @@ export default defineComponent({
       } else {
         uiConfig.controlPanelElements.push(
           ...(useQuickPlaybackSpeedBar.value ? ['ft_quick_playback_rate_bar'] : []),
-          'ft_screenshot',
-          'ft_autoplay_toggle',
           'ft_sponsorblock_open_menu',
           'ft_sponsorblock_clear',
           'ft_sponsorblock_start',
           'ft_sponsorblock_cancel',
           'ft_sponsorblock_end',
+          'ft_screenshot',
+          'ft_autoplay_toggle',
           'overflow_menu',
           'picture_in_picture',
           'ft_theatre_mode',
