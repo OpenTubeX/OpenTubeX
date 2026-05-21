@@ -408,6 +408,8 @@ Settings:
       Quality Label: Kvalito de ekrankopioj
       Modes:
         Ask Path: Peti konservan dosierujon
+        Save To Folder: Konservi al dosierujo
+        Clipboard: Kopii al la tondujo
       Folder Label: Dosierujo de ekrankopioj
       Folder Button: Elekti dosierujon
       File Name Label: Dosiernoma ŝablono
@@ -415,6 +417,7 @@ Settings:
       Error:
         Forbidden Characters: Malpermesitaj signoj
         Empty File Name: Malplena dosiernomo
+      Mode: Ekrankopia reĝimo
   Sort Settings Sections (A-Z): Ordigi agordosekciojn (A-Z)
   Return to Settings Menu: Reveni al agordomenuo
   The app needs to restart for changes to take effect. Restart and apply change?: Necesas restartigi la aplikaĵon por ke ŝanĝoj estu aplikitaj. Ĉu restarti kaj apliki ŝanĝojn?
@@ -1084,3 +1087,5 @@ Keys:
   arrowleft: Maldekstra sago
   arrowright: Dekstra sago
   arrowup: Supra sago
+Screenshot Clipboard Success: Konservis ekrankopion al la tondujo
+Screenshot Clipboard Error: Malsukcesis kopii ekrankopion al la tondujo

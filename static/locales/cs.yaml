@@ -412,11 +412,14 @@ Settings:
       File Name Tooltip: Můžete použít proměnné níže. %Y Rok 4 číslice. %M Měsíc 2 číslice. %D Den 2 číslice. %H Hodina 2 číslice. %N Minuta 2 číslice. %S Sekunda 2 číslice. %T Milisekunda 3 číslice. %s Sekunda videa. %t Milisekunda videa 3 číslice. %i ID videa.
       Modes:
         Ask Path: Zeptat se na složku pro uložení
+        Save To Folder: Uložit do složky
+        Clipboard: Kopírovat do schránky
       Folder Label: Složka snímků obrazovky
       Enable: Povolit snímek obrazovky
       Format Label: Formát snímku obrazovky
       Quality Label: Kvalita snímku obrazovky
       Folder Button: Vybrat složku
+      Mode: Režim snímků obrazovky
     Enter Fullscreen on Display Rotate: Při otočení displeje přejít na celou obrazovku
     Skip by Scrolling Over Video Player: Posouvat čas posuvem kolečka myši na přehrávači
     Autoplay Interruption Timer: Čas přerušení automatického přehrávání
@@ -1119,3 +1122,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Kompaktní boční navigace
 Expand side navigation: Rozbalit boční navigaci
+Screenshot Clipboard Success: Snímek uložen do schránky
+Screenshot Clipboard Error: Nepodařilo se uložit snímek do schránky

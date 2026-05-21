@@ -412,7 +412,10 @@ Settings:
       Folder Label: Carpeta de capturas de pantalla
       Modes:
         Ask Path: Pedir la Carpeta para Guardar
+        Save To Folder: Guardar en carpeta
+        Clipboard: Copiar al Portapapeles
       File Name Tooltip: Puede utilizar las siguientes variables. %Y Año 4 dígitos. %M Mes 2 dígitos. %D Día 2 dígitos. %H Hora 2 dígitos. %N Minuto 2 dígitos. %S Segundo 2 dígitos. %T Milisegundo 3 dígitos. %s Video Segundo. %t Video Milisegundo 3 dígitos. %i Video ID.
+      Mode: Modo Captura De Pantalla
     Enter Fullscreen on Display Rotate: Entrar en pantalla completa al girar la pantalla
     Skip by Scrolling Over Video Player: Omitir al desplazarse sobre el reproductor de vídeo
     Autoplay Interruption Timer: Temporizador de interrupción de reproducción automática
@@ -1112,3 +1115,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Navegación lateral compacta
 Expand side navigation: Expandir navegación lateral
+Screenshot Clipboard Success: Captura de pantalla guardada en el portapapeles
+Screenshot Clipboard Error: Error al copiar la captura de pantalla al portapapeles

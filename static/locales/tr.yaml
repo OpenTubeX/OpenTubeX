@@ -407,6 +407,8 @@ Settings:
       Quality Label: Ekran Görüntüsü Kalitesi
       Modes:
         Ask Path: Kaydedileceği Klasörü Sor
+        Save To Folder: Klasöre Kaydet
+        Clipboard: Panoya Kopyala
       Folder Label: Ekran Görüntüsü Klasörü
       File Name Label: Dosya Adı Kalıbı
       Error:
@@ -416,6 +418,7 @@ Settings:
       Enable: Ekran Görüntüsünü Etkinleştir
       Folder Button: Klasör Seç
       File Name Tooltip: Aşağıda değişkenleri kullanabilirsiniz. %Y Yıl 4 basamak. %M Ay 2 basamak. %D Gün 2 basamak. %H Saat 2 basamak. %N Dakika 2 basamak. %S Saniye 2 basamak. %T Milisaniye 3 basamak. %s Video Saniyesi. %t Video Milisaniyesi 3 basamak. %i Video Kimliği.
+      Mode: Ekran Görüntüsü Modu
     Enter Fullscreen on Display Rotate: Ekran Döndürüldüğünde Tam Ekrana Geç
     Skip by Scrolling Over Video Player: Video Oynatıcı Üzerinde Kaydırarak Atla
     Autoplay Interruption Timer: Otomatik Oynatma Durdurma Sayacı
@@ -1116,3 +1119,5 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Oynatma listesindeki bir önceki videoya atla
 Compact side navigation: Yan gezinmeyi daralt
 Expand side navigation: Yan gezinmeyi genişlet
+Screenshot Clipboard Success: Ekran görüntüsü panoya kaydedildi
+Screenshot Clipboard Error: Ekran görüntüsü panoya kopyalanamadı

@@ -405,9 +405,12 @@ Settings:
       Folder Label: Priečinok snímky obrazovky
       Modes:
         Ask Path: Spýtať sa na priečinok uloženia
+        Save To Folder: Uložiť do priečinka
+        Clipboard: Kopírovať do schránky
       Quality Label: Kvalita snímky obrazovky
       Format Label: Formát snímky obrazovky
       Enable: Povoliť snímku obrazovky
+      Mode: Režim snímky obrazovky
     Video Playback Rate Interval: Interval rýchlosti prehrávania videa
     Max Video Playback Rate: Maximálna rýchlosť prehrávania videa
     Autoplay Interruption Timer: Časovač prerušenia automatického prehrávania
@@ -1107,3 +1110,5 @@ Clipboard:
 Tag already exists: Označenie "{tagName}" už existuje
 Compact side navigation: Kompaktná bočná navigácia
 Expand side navigation: Rozbaliť bočnú navigáciu
+Screenshot Clipboard Success: Snímka obrazovky uložená do schránky
+Screenshot Clipboard Error: Kopírovanie snímky obrazovky do schránky sa nepodarilo

@@ -410,10 +410,13 @@ Settings:
       Quality Label: Pantaila-argazkiaren kalitatea
       Modes:
         Ask Path: Galdetu zein karpetan gordeko den
+        Save To Folder: Karpetan gorde
+        Clipboard: Kopiatu arbelean
       Folder Label: Pantaila-argazkien karpeta
       Folder Button: Hautatu karpeta
       File Name Label: Fitxategi-izenen eredua
       File Name Tooltip: Hurrengo aldagaiak balia ditzakezu. %U Urtea 4 digitu. %H Hilabetea 2 digitu. %E Eguna 2 digitu. %O Ordua 2 digitu. %M Minutu 2 digitu. %S segundo 2 digitu. %T milisegundo 3 digitu. %s Bideoaren segundoa. %t Bideoaren milisegundoa 3 digitu. %i Bideoaren Identifikatzailea.
+      Mode: Pantaila-argazkia modua
     Scroll Playback Rate Over Video Player: Aldatu erreprodukzio-tasa bideo-erreproduzitzailean
     Display Play Button In Video Player: Bistaratu erreproduzitzeko botoia bideo-erreproduzitzailean
     Max Video Playback Rate: Bideoen gehieneko erreprodukzio-tasa
@@ -1115,3 +1118,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Trinkotu alboko nabigazioa
 Expand side navigation: Zabaldu alboko nabigazioa
+Screenshot Clipboard Success: Pantaila-argazkia arbelean gorde da
+Screenshot Clipboard Error: Pantaila-argazkia arbelean kopiatzeak huts egin du

@@ -406,16 +406,19 @@ Settings:
     Screenshot:
       Modes:
         Ask Path: Küsi salvestuskausta
-      Folder Label: Kuvatõmmise kaust
-      Format Label: Kuvatõmmise vorming
-      Quality Label: Kuvatõmmise kvaliteet
+        Save To Folder: Salvesta kausta
+        Clipboard: Kopeeri lõikelauale
+      Folder Label: Ekraanitõmmise kaust
+      Format Label: Ekraanitõmmise vorming
+      Quality Label: Ekraanitõmmise kvaliteet
       Folder Button: Vali kaust
       File Name Label: Failinime muster
       Error:
         Forbidden Characters: Keelatud tähemärgid
         Empty File Name: Puuduv failinimi
-      Enable: Luba kuvatõmmise tegemine
+      Enable: Luba ekraanitõmmise tegemine
       File Name Tooltip: Võid kasutada allpool näidatud muutujaid. %Y 4-numbriline aasta. %M 2-numbriline kuu. %D 2-numbriline päev. %H 2-numbriline tund 2. %N 2-numbriline minut. %S 2-numbriline sekund. %T 3-numbriline millisekund. %s 2-numbriline videosekund. %t 3-numbriline video millisekund. %i video tunnus.
+      Mode: Ekraanitõmmise tegemise viis
     Skip by Scrolling Over Video Player: Jäta vahele, kerides üle videopleieri
     Enter Fullscreen on Display Rotate: Ekraani pööramisel ava täisekraanivaade
     Autoplay Interruption Timer: Viivituse taimer järgmise video esitamise katkestamisel
@@ -991,7 +994,7 @@ Search Bar:
 External link opening has been disabled in the general settings: Väliste linkide avamine on üldistes seadistustes keelatud
 Are you sure you want to open this link?: Oled kindel, et soovid seda linki avada?
 New Window: Uus aken
-Screenshot Error: Kuvatõmmise tegemine ei õnnestunud. {error}
+Screenshot Error: Ekraanitõmmise tegemine ei õnnestunud. {error}
 Channels:
   Channels: Kanalid
   Title: Kanalite loend
@@ -1112,3 +1115,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Näita külgpaani kompaktsena
 Expand side navigation: Näita külgpaani avatuna
+Screenshot Clipboard Success: Ekraanitõmmis on salvestatud lõikelauale
+Screenshot Clipboard Error: Ekraanitõmmise salvestamine lõikelauale ei õnnestunud

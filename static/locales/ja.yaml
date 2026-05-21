@@ -409,7 +409,10 @@ Settings:
       Format Label: スクリーンショットの形式
       Modes:
         Ask Path: 保存フォルダを尋ねる
+        Save To Folder: フォルダーへ保存
+        Clipboard: クリップボードへコピー
       Folder Button: フォルダの選択
+      Mode: スクリーンショットモード
     Enter Fullscreen on Display Rotate: 画面の回転時に全画面表示にする
     Skip by Scrolling Over Video Player: 動画プレーヤーをスクロールして動画をスキップ
     Autoplay Interruption Timer: 自動再生の停止タイマー
@@ -1109,3 +1112,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: サイドナビゲーションを折りたたむ
 Expand side navigation: サイドナビゲーションを展開
+Screenshot Clipboard Success: スクリーンショットをクリップボードに保存しました
+Screenshot Clipboard Error: スクリーンショットのクリップボードへのコピーに失敗しました

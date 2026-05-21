@@ -401,6 +401,8 @@ Settings:
       Enable: Activer les captures d’écran
       Modes:
         Ask Path: Demander le dossier de sauvegarde
+        Save To Folder: Enregistrer dans un répertoire
+        Clipboard: Copier dans le presse-papier
       Folder Button: Sélectionner un dossier
       Error:
         Forbidden Characters: Caractères interdits
@@ -410,6 +412,7 @@ Settings:
       Format Label: Format des captures d’écran
       File Name Label: Modèle de nom de fichier
       Folder Label: Dossier des captures d’écran
+      Mode: Mode de copie d'écran
     Enter Fullscreen on Display Rotate: Entrer en plein écran sur l'affichage Rotation
     Skip by Scrolling Over Video Player: Passer au suivant par la molette sur la vidéo
     Autoplay Interruption Timer: Minuteur d'arrêt de la lecture automatique
@@ -1114,3 +1117,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Navigation latérale compacte
 Expand side navigation: Développer la navigation latérale
+Screenshot Clipboard Error: Échec de la copie de l'écran vers le presse-papier
+Screenshot Clipboard Success: Copie d'écran enregistrée dans le presse-papier

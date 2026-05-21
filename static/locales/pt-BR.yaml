@@ -402,6 +402,8 @@ Settings:
       Enable: Habilitar captura de tela
       Modes:
         Ask Path: Perguntar onde salvar os arquivos
+        Save To Folder: Salvar na pasta
+        Clipboard: Copiar para área de transferência
       Folder Label: Pasta de capturas de tela
       Folder Button: Selecionar pasta
       Error:
@@ -410,6 +412,7 @@ Settings:
       Format Label: Formato da captura de tela
       Quality Label: Qualidade da captura de tela
       File Name Tooltip: 'Você pode usar estas variáveis: %Y - ano com 4 dígitos, %M - mês com 2 dígitos, %D - dia com 2 dígitos, %H - hora com 2 dígitos, %N - minuto com 2 dígitos, %S - segundos com 2 dígitos, %T - milissegundos com 3 dígitos, %s - segundos do vídeo, %t - milissegundos do vídeo com 3 dígitos, %i - id do vídeo.'
+      Mode: Modo Captura de Tela
     Enter Fullscreen on Display Rotate: Entrar em tela cheia ao girar o dispositivo para o modo paisagem
     Skip by Scrolling Over Video Player: Avançar ou retroceder com o botão de rolagem do mouse com o cursor sobre a reprodução
     Autoplay Interruption Timer: Mostrar temporizador de interrupções para reprodução automática
@@ -1110,3 +1113,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Navegação lateral compacta
 Expand side navigation: Expandir navegação lateral
+Screenshot Clipboard Success: Captura de tela salva na área de transferência
+Screenshot Clipboard Error: Falha ao copiar captura de tela para área de transferência

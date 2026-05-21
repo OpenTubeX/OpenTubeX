@@ -408,11 +408,14 @@ Settings:
         Forbidden Characters: Förbjudna symboler
       Modes:
         Ask Path: Fråga efter sparmapp
+        Save To Folder: Spara till mapp
+        Clipboard: Kopiera till urklipp
       Folder Label: Skärmdumpsmapp
       Quality Label: Skärmdumpskvalitet
       Format Label: Skärmdumpsformat
       File Name Tooltip: Du kan använda variablerna nedan. %Y år 4 siffror. %M månad 2 siffror. %D dag 2 siffror. %H timme 2 siffror. %N minut 2 siffror. %S sekund 2 siffror. %T millisekund 3 siffror. %s videosekund. %t videomillisekund 3 siffror. %i video-ID.
       Folder Button: Välj mapp
+      Mode: Skärmdumpsläge
     Skip by Scrolling Over Video Player: Hoppa över genom att skrolla över videospelaren
     Max Video Playback Rate: Maximal uppspelningshastighet
     Video Playback Rate Interval: Uppspelningshastighetsintervall
@@ -619,7 +622,7 @@ About:
   these people and projects: dessa människor och projekt
   Credits: Tack till
   Translate: Översätt
-  room rules: Rumsregler
+  room rules: rumsregler
   Chat on Matrix: Chatta på Matrix
   Mastodon: Mastodon
   Email: E-post
@@ -1113,3 +1116,5 @@ Keys:
   arrowup: Uppåtpil
 Compact side navigation: Kompakt sidonavigering
 Expand side navigation: Expandera sidonavigeringen
+Screenshot Clipboard Success: Sparade skärmdump till urklipp
+Screenshot Clipboard Error: Kopiering av skärmdump till urklipp misslyckades
