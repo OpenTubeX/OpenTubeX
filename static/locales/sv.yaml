@@ -781,8 +781,8 @@ Video:
   Open Channel in Invidious: Öppna kanalen i Invidious
   Copy YouTube Channel Link: Kopiera YouTube-kanallänk
   Open Channel in YouTube: Öppna kanal i YouTube
-  Started streaming on: Började strömma den
-  Streamed on: Strömmades den
+  Started streaming on: Började sändas den
+  Streamed on: Sändes den
   Video has been removed from your saved list: Videon har tagits bort från din sparade lista
   Video has been saved: Videon har sparats
   Save Video: Spara video
@@ -813,7 +813,7 @@ Video:
   Upcoming: Kommande
   Show Super Chat Comment: Visa Superchatt-kommentar
   Scroll to Bottom: Rulla längst ned
-  'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Livechatt är inte tillgängligt för den här strömmen. Den kan ha inaktiverats av uppladdaren.
+  'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Livechatt är inte tillgängligt för den här livesändningen Den kan ha inaktiverats av uppladdaren.
   Unhide Channel: Visa kanal
   Hide Channel: Dölj kanal
 #& Playlists
@@ -951,11 +951,11 @@ Yes: 'Ja'
 No: 'Nej'
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: När det är aktiverat använder OpenTubeX RSS istället för standardmetoden för att hämta ditt prenumerationsflöde. RSS är snabbare och förhindrar IP-blockering, men ger inte viss information som videolängd, livestatus eller inlägg
+    Fetch Feeds from RSS: När det är aktiverat använder OpenTubeX RSS istället för standardmetoden för att hämta ditt prenumerationsflöde. RSS är snabbare och förhindrar IP-blockering, men ger inte all information som videolängd, livestatus eller inlägg
     Fetch Automatically: När det är aktiverat hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
   Player Settings:
     Default Video Format: Ställ in de format som används när en video spelas upp. DASH-format kan spela upp högre kvaliteter. Äldre format är begränsade till max 360p men använder mindre bandbredd. Ljudformat är endast ljudströmningar.
-    Proxy Videos Through Invidious: Kommer att ansluta till Invidious för att visa videor istället för att skapa en direktanslutning till YouTube.
+    Proxy Videos Through Invidious: Ansluter till Invidious för att visa videor i stället för att skapa en direktanslutning till YouTube.
     Skip by Scrolling Over Video Player: Använd scrollhjulet för att snabbspola igenom videon, MPV-stil.
     Scroll Playback Rate Over Video Player: Medan markören är över videon, håll ner Ctrl-tangenten (Kommandotangenten på Mac) och skrolla mushjulet framåt eller bakåt för att styra uppspelningshastigheten. Håll ner Ctrl-tangenten (Kommandotangenten på Mac) och vänsterklicka med musen för att snabbt återgå till standarduppspelningshastigheten (1x om den inte har ändrats i inställningarna).
   General Settings:
@@ -964,13 +964,13 @@ Tooltips:
     Thumbnail Preference: Alla miniatyrbilder på OpenTubeX kommer att ersättas med en bildruta från videon, suddig eller dold istället för standardminiatyrbilden.
     Fallback to Non-Preferred Backend on Failure: När ditt föredragna API har ett problem, kommer OpenTubeX automatiskt att försöka använda ditt icke-föredragna API som reservmetod när det är aktiverat.
     Preferred API Backend: Välj vilken datakälla OpenTubeX ska använda för att hämta data. Det lokala API:et är en inbyggd utdragare. Invidious API kräver en Invidious-server att ansluta till.
-    External Link Handling: "Välj standardbeteendet när en länk som inte kan öppnas i OpenTubeX klickas.\nSom standard öppnar OpenTubeX den klickade länken i din standardwebbläsare.\n"
+    External Link Handling: "Välj standardbeteende när man klickar på en länk som inte kan öppnas i OpenTubeX.\nSom standard öppnar OpenTubeX den klickade länken i din standardwebbläsare.\n"
     Open Deep Links In New Window: URL:er som skickas till OpenTubeX, till exempel via omdirigering av webbläsartillägg eller kommandoradsargument, öppnas i ett nytt fönster.
   External Player Settings:
     Custom External Player Arguments: Alla anpassade kommandoradsargument ska skickas till den externa spelaren.
     Ignore Warnings: Dämpa varningar för när den aktuella externa spelaren inte stöder den aktuella åtgärden (t.ex. vändning av spellistor, etc.).
     Custom External Player Executable: Som standard antar OpenTubeX att den valda externa spelaren kan hittas via PATH-miljövariabeln. Om det behövs kan en anpassad sökväg ställas in här.
-    External Player: Att välja en extern spelare visar en ikon för att öppna videon (spellista om den stöds) i den externa spelaren på miniatyrbilden. Varning, Invidious-inställningar påverkar inte externa videospelare.
+    External Player: Om du väljer en extern spelare visas en ikon på miniatyrbilden för att öppna videon, eller spellistan om det stöds, i den externa spelaren. Varning, Invidious-inställningar påverkar inte externa videospelare.
     DefaultCustomArgumentsTemplate: "(Standard: '{defaultCustomArguments}')"
     Ignore Default Arguments: Skicka inga standardargument till den externa spelaren förutom videons URL (t.ex. uppspelningshastighet, spelliste-URL, etc.). Anpassade argument kommer fortfarande att föras vidare.
   Distraction Free Settings:
@@ -985,7 +985,7 @@ Tooltips:
     UseDeArrowThumbnails: Ersätt videominiatyrer med miniatyrer från DeArrow.
 More: Mer
 Open New Window: Öppna nytt fönster
-Playing Next Video Interval: Spelar strax nästa video. Klicka för att stoppa. | Spelar nästa video om {nextVideoInterval} sekunder. Klicka för att stoppa. | Spelar nästa video om {nextVideoInterval} sekunder. Klicka för att stoppa.
+Playing Next Video Interval: Spelar upp nästa video strax. Klicka för att stoppa. | Spelar upp nästa video om {nextVideoInterval} sekunder. Klicka för att stoppa. | Spelar nästa video om {nextVideoInterval} sekunder. Klicka för att stoppa.
 Unknown YouTube url type, cannot be opened in app: Okänd YouTube-URL-typ, kan inte öppnas i appen
 Default Invidious instance has been cleared: Standard Invidious-instans har rensats
 Default Invidious instance has been set to {instance}: Standard Invidious-instans har ställts in på {instance}
@@ -1020,7 +1020,7 @@ Go to page: Gå till {page}
 Channel Unhidden: '{channel} har tagits bort från kanalfiltret'
 Close Banner: Stäng bannern
 Feed:
-  Feed Last Updated: '{feedName}-flödet senast uppdaterat: {date}'
+  Feed Last Updated: '{feedName}-flödet uppdaterades senast: {date}'
   Refresh Feed: Uppdatera {subscriptionName}
 checkmark: ✓
 Display Label: '{label}: {value}'
@@ -1043,7 +1043,7 @@ Moments Ago: för några ögonblick sedan
 Cancel: Avbryt
 KeyboardShortcutTemplate: '{label} ({shortcut})'
 Tag already exists: Taggen "{tagName}" finns redan
-Trimmed input must be at least N characters long: Den trimmade inmatningen måste vara minst 1 tecken lång | Den trimmade inmatningen måste vara minst {length} tecken lång
+Trimmed input must be at least N characters long: Den rensade inmatningen måste vara minst 1 tecken lång | Den rensade inmatningen måste vara minst {length} tecken lång
 Description:
   Expand Description: '...mer'
   Collapse Description: Visa mindre
