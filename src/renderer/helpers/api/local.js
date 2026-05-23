@@ -736,7 +736,7 @@ export async function getLocalChannelVideos(id) {
     // if the channel doesn't have a videos tab, YouTube returns the home tab instead
     // so we need to check that we got the right tab
     if (videosTab.current_tab?.endpoint.metadata.url?.endsWith('/videos')) {
-      videos = parseLocalChannelVideos(videosTab.videos, channelId, name)
+      videos = parseLocalChannelVideos(collectChannelTabVideos(videosTab), channelId, name)
     } else if (name.endsWith('- Topic') && !!videosTab.metadata.music_artist_name) {
       try {
         const playlist = await innertube.getPlaylist(getChannelPlaylistId(channelId, 'videos', 'newest'))
@@ -796,10 +796,10 @@ export async function getLocalChannelLiveStreams(id) {
       // work around YouTube bug where it will return a bunch of responses with only continuations in them
       // e.g. https://www.youtube.com/@TWLIVES/streams
 
-      let tempVideos = liveStreamsTab.videos
+      let tempVideos = collectChannelTabVideos(liveStreamsTab)
       while (tempVideos.length === 0 && liveStreamsTab.has_continuation) {
         liveStreamsTab = await liveStreamsTab.getContinuation()
-        tempVideos = liveStreamsTab.videos
+        tempVideos = collectChannelTabVideos(liveStreamsTab)
       }
 
       videos = parseLocalChannelVideos(tempVideos, channelId, name)
@@ -1068,7 +1068,22 @@ export function parseLocalChannelHeader(channel, onlyIdNameThumbnail = false) {
 }
 
 /**
- * @param {import('youtubei.js').YTNodes.Video[]} videos
+ * Collects the video-like items from a channel tab. The default
+ * `youtubei.js` `Feed.videos` getter only returns the legacy renderers and
+ * doesn't include `LockupView` items, which YouTube started using for
+ * channel video tabs in 2026.
+ *
+ * @param {import('youtubei.js').YT.Channel | import('youtubei.js').YT.ChannelListContinuation | import('youtubei.js').YT.FilteredChannelList} tab
+ */
+export function collectChannelTabVideos(tab) {
+  const lockupVideos = tab.memo?.getType(YTNodes.LockupView)
+    .filter(lockup => lockup.content_type === 'VIDEO') ?? []
+
+  return [...tab.videos, ...lockupVideos]
+}
+
+/**
+ * @param {(import('youtubei.js').YTNodes.Video | import('youtubei.js').YTNodes.LockupView)[]} videos
  * @param {string} channelId
  * @param {string} channelName
  */
@@ -1080,6 +1095,15 @@ export function parseLocalChannelVideos(videos, channelId, channelName) {
     if (video.is(YTNodes.Video) && video.badges.some(badge => badge.style === 'BADGE_STYLE_TYPE_MEMBERS_ONLY')) {
       continue
     }
+
+    if (video.is(YTNodes.LockupView)) {
+      const parsed = parseLockupView(video, channelId, channelName)
+      if (parsed) {
+        parsedVideos.push(parsed)
+      }
+      continue
+    }
+
     parsedVideos.push(parseLocalListVideo(video, channelId, channelName))
   }
 
@@ -1568,14 +1592,31 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       /** @type {YTNodes.ThumbnailBottomOverlayView | undefined } */
       const thumbnailBottomOverlayView = lockupView.content_image?.overlays?.firstOfType(YTNodes.ThumbnailBottomOverlayView)
 
+      // YouTube changed the metadata row structure in 2026, it may now be any of:
+      //   - 2 rows: [author] [views, date]            (e.g. related videos)
+      //   - 1 row:  [views, date]                     (e.g. channel video tabs, where the uploader row is omitted)
+      //   - 1 row:  [date, views]                     (parts can also appear in reverse order)
+      //   - 1 row:  [views]                           (e.g. live streams with watching count only)
+      // so search every part dynamically instead of relying on fixed [row][part] indexes.
+      const metadataParts = (lockupView.metadata?.metadata?.metadata_rows ?? [])
+        .flatMap(row => row.metadata_parts ?? [])
+
+      const findPartText = (predicate) => metadataParts
+        .find(part => part.text?.text && predicate(part.text.text))?.text?.text
+
       if (thumbnailBottomOverlayView) {
         if (thumbnailBottomOverlayView.badges.some(badge => badge.badge_style === 'THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE')) {
           liveNow = true
         } else if (thumbnailBottomOverlayView.badges.some(badge => badge.text.toLowerCase() === 'upcoming')) {
           isUpcoming = true
 
-          if (lockupView.metadata.metadata?.metadata_rows[1].metadata_parts?.[1].text?.text) {
-            premiereDate = new Date(lockupView.metadata.metadata.metadata_rows[1].metadata_parts[1].text.text)
+          const premiereText = findPartText(text => !VIEWS_OR_WATCHING_REGEX.test(text) && !text.endsWith('ago'))
+
+          if (premiereText) {
+            const parsed = new Date(premiereText)
+            if (!isNaN(parsed.getTime())) {
+              premiereDate = parsed
+            }
           }
         } else {
           const durationBadge = thumbnailBottomOverlayView.badges.find(badge => /^[\d:]+$/.test(badge.text))
@@ -1584,15 +1625,13 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
             lengthSeconds = Utils.timeToSeconds(durationBadge.text)
           }
 
-          publishedText = lockupView.metadata.metadata?.metadata_rows[1].metadata_parts?.find(part => part.text?.text?.endsWith('ago'))?.text?.text
+          publishedText = findPartText(text => text.endsWith('ago'))
         }
       }
 
       let viewCount = null
 
-      const viewsText = lockupView.metadata.metadata?.metadata_rows[1].metadata_parts?.find(part => {
-        return part.text?.text && VIEWS_OR_WATCHING_REGEX.test(part.text.text)
-      })?.text?.text
+      const viewsText = findPartText(text => VIEWS_OR_WATCHING_REGEX.test(text))
 
       if (viewsText) {
         const views = parseLocalSubscriberCount(viewsText)
@@ -1602,12 +1641,25 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         }
       }
 
+      // The author/channel link may not be present in the metadata anymore (e.g. on channel video tabs,
+      // where YouTube omits the uploader row because you're already on the channel page).
+      // Look for a part whose text endpoint links to a channel, otherwise fall back to the
+      // channelName/channelId passed in by the caller.
+      const channelPart = metadataParts.find(
+        part => part.text?.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL'
+      )?.text
+
+      const author = channelPart?.text ?? channelName
+      const authorId = channelPart?.endpoint?.payload.browseId ??
+        lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
+        channelId
+
       return {
         type: 'video',
         videoId: lockupView.content_id,
         title: lockupView.metadata.title.text?.trim(),
-        author: lockupView.metadata.metadata?.metadata_rows[0].metadata_parts?.[0].text?.text,
-        authorId: lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId,
+        author,
+        authorId,
         viewCount,
         published: calculatePublishedDate(publishedText, liveNow, isUpcoming, premiereDate),
         lengthSeconds,

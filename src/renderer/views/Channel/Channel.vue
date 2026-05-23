@@ -306,6 +306,7 @@ import {
   youtubeImageUrlToInvidious
 } from '../../helpers/api/invidious'
 import {
+  collectChannelTabVideos,
   getLocalChannel,
   getLocalChannelId,
   getLocalArtistTopicChannelReleases,
@@ -1122,7 +1123,7 @@ async function getChannelVideosLocal() {
         return
       }
 
-      latestVideos.value = parseLocalChannelVideos(videosTab.videos, id.value, channelName.value)
+      latestVideos.value = parseLocalChannelVideos(collectChannelTabVideos(videosTab), id.value, channelName.value)
       videoContinuationData.value = videosTab.has_continuation ? videosTab : null
       isElementListLoading.value = false
     }
@@ -1167,7 +1168,7 @@ async function getChannelVideosLocalMore() {
        */
       const continuation = await videoContinuationData.value.getContinuation()
 
-      latestVideos.value = latestVideos.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
+      latestVideos.value = latestVideos.value.concat(parseLocalChannelVideos(collectChannelTabVideos(continuation), id.value, channelName.value))
       videoContinuationData.value = continuation.has_continuation ? continuation : null
     }
   } catch (err) {
@@ -1406,10 +1407,10 @@ async function getChannelLiveLocal() {
     // work around YouTube bug where it will return a bunch of responses with only continuations in them
     // e.g. https://www.youtube.com/@TWLIVES/streams
 
-    let videos = liveTab.videos
+    let videos = collectChannelTabVideos(liveTab)
     while (videos.length === 0 && liveTab.has_continuation) {
       liveTab = await liveTab.getContinuation()
-      videos = liveTab.videos
+      videos = collectChannelTabVideos(liveTab)
     }
 
     latestLive.value = parseLocalChannelVideos(videos, id.value, channelName.value)
@@ -1444,7 +1445,7 @@ async function getChannelLiveLocalMore() {
      */
     const continuation = await liveContinuationData.value.getContinuation()
 
-    latestLive.value = latestLive.value.concat(parseLocalChannelVideos(continuation.videos, id.value, channelName.value))
+    latestLive.value = latestLive.value.concat(parseLocalChannelVideos(collectChannelTabVideos(continuation), id.value, channelName.value))
     liveContinuationData.value = continuation.has_continuation ? continuation : null
   } catch (err) {
     console.error(err)
