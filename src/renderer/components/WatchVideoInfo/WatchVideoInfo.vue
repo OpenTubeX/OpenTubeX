@@ -30,7 +30,20 @@
         <div
           class="likeSection"
         >
-          <span class="likeCount"><FontAwesomeIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
+          <div
+            v-if="useReturnYoutubeDislikes && likePercentageRatio !== null"
+            class="likeBar"
+            :style="{ background: `linear-gradient(to right, var(--accent-color) ${likePercentageRatio}%, #9E9E9E ${likePercentageRatio}%)` }"
+          />
+          <div class="likeCounts">
+            <span class="likeCount"><FontAwesomeIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
+            <span
+              v-if="useReturnYoutubeDislikes"
+              class="dislikeCount"
+            >
+              <FontAwesomeIcon :icon="['fas', 'thumbs-down']" /> {{ parsedDislikeCount }}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -288,6 +301,30 @@ const parsedLikeCount = computed(() => {
   }
 
   return formatNumber(props.likeCount)
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useReturnYoutubeDislikes = computed(() => store.getters.getUseReturnYouTubeDislikes)
+
+const parsedDislikeCount = computed(() => {
+  if (hideVideoLikesAndDislikes.value || props.dislikeCount === null) {
+    return null
+  }
+
+  return formatNumber(props.dislikeCount)
+})
+
+const likePercentageRatio = computed(() => {
+  if (hideVideoLikesAndDislikes.value || props.likeCount === null || props.dislikeCount === null) {
+    return null
+  }
+
+  const total = props.likeCount + props.dislikeCount
+  if (total === 0) {
+    return null
+  }
+
+  return Math.round((props.likeCount / total) * 100)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

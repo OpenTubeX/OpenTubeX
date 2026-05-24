@@ -37,6 +37,7 @@ import {
   youtubeImageUrlToInvidious
 } from '../../helpers/api/invidious'
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
+import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
 import { sortCaptions } from '../../helpers/player/utils'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 
@@ -330,6 +331,9 @@ export default defineComponent({
     useSponsorBlock: function () {
       return this.$store.getters.getUseSponsorBlock
     },
+    useReturnYouTubeDislikes: function () {
+      return this.$store.getters.getUseReturnYouTubeDislikes
+    },
   },
   watch: {
     async $route() {
@@ -548,6 +552,10 @@ export default defineComponent({
 
           // YouTube doesn't return dislikes anymore
           this.videoDislikeCount = 0
+
+          if (this.useReturnYouTubeDislikes) {
+            this.fetchVideoDislikes()
+          }
         }
 
         this.isLive = !!result.basic_info.is_live
@@ -942,6 +950,10 @@ export default defineComponent({
           } else {
             this.videoLikeCount = result.likeCount
             this.videoDislikeCount = result.dislikeCount
+
+            if (this.useReturnYouTubeDislikes) {
+              this.fetchVideoDislikes()
+            }
           }
 
           this.videoGenreIsMusic = result.genre === 'Music'
@@ -1367,6 +1379,19 @@ export default defineComponent({
         watchProgress: currentTime
       }
       this.updateWatchProgress(payload)
+    },
+
+    fetchVideoDislikes: function () {
+      const videoIdAtRequestTime = this.videoId
+      getVideoDislikes(videoIdAtRequestTime).then(dislikes => {
+        // Avoid overwriting the dislike count for a different video,
+        // e.g. if the user navigated away before the request resolved.
+        if (this.videoId !== videoIdAtRequestTime) { return }
+
+        this.videoDislikeCount = isNaN(dislikes) ? 0 : dislikes
+      }).catch(err => {
+        console.error('Failed to fetch dislikes from Return YouTube Dislike:', err)
+      })
     },
 
     handlePlaylistPersisting: function () {

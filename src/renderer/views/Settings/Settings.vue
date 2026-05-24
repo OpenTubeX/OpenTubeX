@@ -74,6 +74,7 @@ import DataSettings from '../../components/DataSettings/DataSettings.vue'
 import DistractionSettings from '../../components/DistractionSettings/DistractionSettings.vue'
 import ProxySettings from '../../components/ProxySettings/ProxySettings.vue'
 import SponsorBlockSettings from '../../components/SponsorBlockSettings.vue'
+import RydSettings from '../../components/RydSettings.vue'
 import ParentalControlSettings from '../../components/ParentalControlSettings.vue'
 import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
 import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
@@ -164,6 +165,12 @@ const settingsComponentsData = computed(() => {
       // TODO: replace with SponsorBlock icon
       icon: ['fas', 'shield'],
       component: SponsorBlockSettings
+    },
+    {
+      type: 'return-youtube-dislikes',
+      title: t('Settings.Return YouTube Dislikes Settings.Return YouTube Dislikes Settings'),
+      icon: ['fas', 'thumbs-down'],
+      component: RydSettings
     },
     {
       type: 'password',

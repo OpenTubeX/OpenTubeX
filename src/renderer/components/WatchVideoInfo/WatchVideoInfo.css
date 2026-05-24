@@ -77,7 +77,14 @@
   margin-block-end: 4px;
 }
 
-.likeCount {
+.likeCounts {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.likeCount,
+.dislikeCount {
   margin-inline-end: 0;
   display: flex;
   gap: 3px;
