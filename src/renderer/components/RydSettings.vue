@@ -1,10 +1,10 @@
 <template>
   <FtSettingsSection
-    :title="$t('Settings.Return YouTube Dislikes Settings.Return YouTube Dislikes Settings')"
+    :title="$t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Settings')"
   >
     <FtFlexBox class="settingsFlexStart500px">
       <FtToggleSwitch
-        :label="$t('Settings.Return YouTube Dislikes Settings.Enable Return YouTube Dislikes')"
+        :label="$t('Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike')"
         :default-value="useReturnYoutubeDislikes"
         @change="handleUpdateUseReturnYoutubeDislike"
       />
@@ -13,7 +13,7 @@
       v-if="useReturnYoutubeDislikes"
     >
       <FtInput
-        :placeholder="$t('Settings.Return YouTube Dislikes Settings.Return YouTube Dislikes Url')"
+        :placeholder="$t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Url')"
         :show-action-button="false"
         :show-label="true"
         :data-list="returnYoutubeDislikesInstances"

@@ -167,8 +167,8 @@ const settingsComponentsData = computed(() => {
       component: SponsorBlockSettings
     },
     {
-      type: 'return-youtube-dislikes',
-      title: t('Settings.Return YouTube Dislikes Settings.Return YouTube Dislikes Settings'),
+      type: 'return-youtube-dislike',
+      title: t('Settings.Return YouTube Dislike Settings.Return YouTube Dislike Settings'),
       icon: ['fas', 'thumbs-down'],
       component: RydSettings
     },
