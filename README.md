@@ -36,11 +36,13 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - SponsorBlock auto-skip temporary toggle under video player
 <img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
 
-- Improved SponsorBlock tooltips with unskip/reskip feature
+- Improved SponsorBlock tooltips with unskip/reskip/prompt to skip feature
 <img width="330" height="86" alt="image" src="https://github.com/user-attachments/assets/299af609-e7f7-4b0d-802e-4062009fc77c" />
 <img width="328" height="84" alt="image" src="https://github.com/user-attachments/assets/260874ac-1577-4f37-aa32-3b9a830e6d13" />
+<img width="331" height="87" alt="image" src="https://github.com/user-attachments/assets/996c0816-b237-47b6-8b7a-88f39f8e104c" />
 
 - Display SponsorBlock community contributed chapters
+- Experimental SponsorBlock submission
 
 - Tabs like in a web browser (experimental)
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
@@ -50,6 +52,12 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Auto Picture-in-Picture: automatically enter PiP when switching tabs or scrolling away from a video
 <img height="200" alt="image" src="https://github.com/user-attachments/assets/acb02ab5-2d9b-4e03-9c63-5f3988e2ddcb" />
+
+- Loop & Copy link in player context menu
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/24f7716f-27de-421d-8740-f9a5e30ed1e6" />
+
+- Optional Quick Playback Speed Bar in the player
+<img width="488" height="44" alt="image" src="https://github.com/user-attachments/assets/cd055a73-d188-4633-aac6-61ab708a4cd6" />
 
 
 <br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
