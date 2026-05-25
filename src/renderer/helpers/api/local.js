@@ -1592,14 +1592,15 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       /** @type {YTNodes.ThumbnailBottomOverlayView | undefined } */
       const thumbnailBottomOverlayView = lockupView.content_image?.overlays?.firstOfType(YTNodes.ThumbnailBottomOverlayView)
 
-      // YouTube changed the metadata row structure in 2026, it may now be any of:
-      //   - 2 rows: [author] [views, date]            (e.g. related videos)
+      // YouTube changed the metadata row structure in 2026. The layout can now be any of:
+      //   - 2 rows: [author] [views, date]            (e.g. related videos / Up Next)
       //   - 1 row:  [views, date]                     (e.g. channel video tabs, where the uploader row is omitted)
       //   - 1 row:  [date, views]                     (parts can also appear in reverse order)
       //   - 1 row:  [views]                           (e.g. live streams with watching count only)
-      // so search every part dynamically instead of relying on fixed [row][part] indexes.
-      const metadataParts = (lockupView.metadata?.metadata?.metadata_rows ?? [])
-        .flatMap(row => row.metadata_parts ?? [])
+      // Detect the uploader row structurally (only when 2+ rows are present),
+      // and search every part dynamically for views and dates so the part order doesn't matter.
+      const metadataRows = lockupView.metadata?.metadata?.metadata_rows ?? []
+      const metadataParts = metadataRows.flatMap(row => row.metadata_parts ?? [])
 
       const findPartText = (predicate) => metadataParts
         .find(part => part.text?.text && predicate(part.text.text))?.text?.text
@@ -1610,12 +1611,24 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         } else if (thumbnailBottomOverlayView.badges.some(badge => badge.text.toLowerCase() === 'upcoming')) {
           isUpcoming = true
 
-          const premiereText = findPartText(text => !VIEWS_OR_WATCHING_REGEX.test(text) && !text.endsWith('ago'))
+          // The premiere date can be in any non-views, non-relative-time part, often with a
+          // "Premieres "/"Scheduled for " prefix that breaks Date.parse. Try every candidate
+          // part (with and without the prefix stripped) and keep the first one that parses.
+          for (const part of metadataParts) {
+            const text = part.text?.text
+            if (!text || VIEWS_OR_WATCHING_REGEX.test(text) || text.endsWith('ago')) continue
 
-          if (premiereText) {
-            const parsed = new Date(premiereText)
+            let parsed = new Date(text)
+            if (isNaN(parsed.getTime())) {
+              const stripped = text.replace(/^(premieres?|premiered|scheduled for)\s+/i, '').trim()
+              if (stripped && stripped !== text) {
+                parsed = new Date(stripped)
+              }
+            }
+
             if (!isNaN(parsed.getTime())) {
               premiereDate = parsed
+              break
             }
           }
         } else {
@@ -1641,18 +1654,25 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         }
       }
 
-      // The author/channel link may not be present in the metadata anymore (e.g. on channel video tabs,
-      // where YouTube omits the uploader row because you're already on the channel page).
-      // Look for a part whose text endpoint links to a channel, otherwise fall back to the
+      // Author/channel detection. When YouTube includes the uploader row (related videos
+      // and similar 2+ row layouts), the uploader name is always the first part of the
+      // first row. When the uploader row is omitted (1-row layout used on channel video
+      // tabs because the user is already on the channel page), fall back to the
       // channelName/channelId passed in by the caller.
-      const channelPart = metadataParts.find(
-        part => part.text?.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL'
-      )?.text
+      let author
+      let authorId
 
-      const author = channelPart?.text ?? channelName
-      const authorId = channelPart?.endpoint?.payload.browseId ??
-        lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
-        channelId
+      if (metadataRows.length >= 2) {
+        const authorPart = metadataRows[0].metadata_parts?.[0]?.text
+        author = authorPart?.text ?? channelName
+        authorId = authorPart?.endpoint?.payload?.browseId ??
+          lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
+          channelId
+      } else {
+        author = channelName
+        authorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
+          channelId
+      }
 
       return {
         type: 'video',
