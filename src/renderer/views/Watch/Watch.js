@@ -1176,7 +1176,7 @@ export default defineComponent({
       // MM:SS - Text
       // HH:MM:SS - HH:MM:SS - Text // end timestamp is ignored, separator is one of '-', '–', '—'
       // HH:MM - HH:MM - Text // end timestamp is ignored
-      const chapterMatches = description.matchAll(/^(?<timestamp>((?<hours>\d+):)?(?<minutes>\d+):(?<seconds>\d+))(\s*[–—-]\s*(?:\d+:){1,2}\d+)?(?:\s*:\s*|\s+([–—•-]\s*)?)(?<title>.+)$/gm)
+      const chapterMatches = description.matchAll(/^(?<timestamp>((?<hours>\d+):)?(?<minutes>\d+):(?<seconds>\d+))(?!:\d)(\s*[–—-]\s*(?:\d+:){1,2}\d+)?(?:\s*:\s*|\s+([–—•-]\s*)?)(?<title>.+)$/gm)
 
       for (const { groups } of chapterMatches) {
         let start = 60 * Number(groups.minutes) + Number(groups.seconds)
