@@ -402,6 +402,8 @@ Settings:
       Quality Label: Jakość zrzutu
       Modes:
         Ask Path: Pytaj o folder zapisu
+        Save To Folder: Zapisz w folderze
+        Clipboard: Skopiuj do schowka
       Folder Label: Folder ze zrzutami
       Folder Button: Wybierz folder
       File Name Label: Wzorzec nazwy pliku
@@ -410,6 +412,7 @@ Settings:
         Forbidden Characters: Niedozwolone znaki
         Empty File Name: Pusta nazwa pliku
       Enable: Włącz zrzuty ekranu
+      Mode: Tryb - zrzut ekranu
     Enter Fullscreen on Display Rotate: Przyłącz na cały ekran przy obrocie wyświetlacza
     Skip by Scrolling Over Video Player: Przewijaj film kółkiem myszy na obszarze odtwarzacza
     Autoplay Interruption Timer: Czas do przerwania autoodtwarzania
@@ -1002,7 +1005,7 @@ Channels:
   Channels: Kanały
   Search bar placeholder: Przeszukaj kanały
 Clipboard:
-  Copy failed: Skopiowanie do zasobnika nie powiodło się
+  Copy failed: Skopiowanie do schowka nie powiodło się
   Cannot access clipboard without a secure connection: Bez bezpiecznego połączenia nie można uzyskać dostępu do schowka
 Chapters:
   Chapters: Rozdziały
@@ -1113,3 +1116,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
+Screenshot Clipboard Success: Zapisano zrzut ekranu do schowka
+Screenshot Clipboard Error: Zapisanie kopii zrzutu do schowka nie powiodło się
