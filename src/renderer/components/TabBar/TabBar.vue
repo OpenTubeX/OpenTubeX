@@ -687,6 +687,7 @@ function handleScrollbarTrackPointerDown(event) {
     : 0
 
   container.scrollLeft = nextScrollLeft
+  scrollTarget = nextScrollLeft
   if (isElectron) {
     window.ftElectron.tabs.setTabBarScroll(nextScrollLeft)
   }
@@ -741,6 +742,7 @@ function handleScrollbarThumbPointerMove(event) {
   const clampedScrollLeft = Math.max(0, Math.min(scrollbarDragState.maxScroll, nextScrollLeft))
 
   dropZoneRef.value.scrollLeft = clampedScrollLeft
+  scrollTarget = clampedScrollLeft
   if (isElectron) {
     window.ftElectron.tabs.setTabBarScroll(clampedScrollLeft)
   }
