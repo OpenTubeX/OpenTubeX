@@ -220,36 +220,10 @@ export class TabManager {
   }
 
   /**
-   * Create a new tab
-   * @param {object} options
-   * @param {string} [options.url] - Full URL to load
-   * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
-   * @param {object} [options.query] - Query params for the route
-   * @param {string} [options.title] - Initial tab title
-   * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
-   * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
-   * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
-   * @returns {TabInfo}
+   * Create a WebContentsView and attach the standard tab event handlers.
+   * @returns {WebContentsView}
    */
-  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false } = {}) {
-    const id = randomUUID()
-
-    // Determine the URL to load
-    let loadUrl = this.rootAppUrl
-    if (url) {
-      loadUrl = url
-    } else if (route) {
-      loadUrl = this.rootAppUrl
-      if (route.startsWith('/')) {
-        loadUrl += '#' + route
-      } else {
-        loadUrl += '#/' + route
-      }
-      if (query && Object.keys(query).length > 0) {
-        loadUrl += '?' + new URLSearchParams(query).toString()
-      }
-    }
-
+  _createTabView() {
     // Create WebContentsView with same webPreferences as main window
     const view = new WebContentsView({
       webPreferences: {
@@ -348,6 +322,42 @@ export class TabManager {
         mgr._saveSession()
       }
     })
+
+    return view
+  }
+
+  /**
+   * Create a new tab
+   * @param {object} options
+   * @param {string} [options.url] - Full URL to load
+   * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
+   * @param {object} [options.query] - Query params for the route
+   * @param {string} [options.title] - Initial tab title
+   * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
+   * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
+   * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
+   * @returns {TabInfo}
+   */
+  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false } = {}) {
+    const id = randomUUID()
+
+    // Determine the URL to load
+    let loadUrl = this.rootAppUrl
+    if (url) {
+      loadUrl = url
+    } else if (route) {
+      loadUrl = this.rootAppUrl
+      if (route.startsWith('/')) {
+        loadUrl += '#' + route
+      } else {
+        loadUrl += '#/' + route
+      }
+      if (query && Object.keys(query).length > 0) {
+        loadUrl += '?' + new URLSearchParams(query).toString()
+      }
+    }
+
+    const view = this._createTabView()
 
     const fallbackTitle = `Tab ${++this.tabCounter}`
     const tabInfo = {
@@ -714,6 +724,55 @@ export class TabManager {
     if (!tab || tab.view.webContents.isDestroyed()) return
 
     tab.view.webContents.reload()
+  }
+
+  /**
+   * Unload a tab's renderer while keeping its URL and title in the tab strip.
+   * @param {string} tabId
+   * @returns {boolean} Whether the tab was unloaded
+   */
+  unloadTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || !tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
+      return false
+    }
+
+    const wasActive = this.activeTabId === tabId
+    let tabToActivate = null
+
+    if (wasActive) {
+      const orderedTabs = Array.from(this.tabs.entries())
+      const unloadedTabIndex = orderedTabs.findIndex(([id]) => id === tabId)
+
+      if (unloadedTabIndex > 0) {
+        tabToActivate = orderedTabs[unloadedTabIndex - 1][1]
+      } else if (orderedTabs.length > 1) {
+        tabToActivate = orderedTabs[1][1]
+      } else {
+        return false
+      }
+
+      this.browserWindow.contentView.removeChildView(tab.view)
+      this.activeTabId = null
+    }
+
+    const previousView = tab.view
+    tab.view = this._createTabView()
+    tab.hasStartedLoading = false
+    tab.isPlaying = false
+
+    if (!previousView.webContents.isDestroyed()) {
+      previousView.webContents.close({ waitForBeforeUnload: false })
+    }
+
+    if (tabToActivate) {
+      this.activateTab(tabToActivate.id)
+    } else {
+      this._broadcastStateUpdate()
+      this._saveSession()
+    }
+
+    return true
   }
 
   /**

@@ -152,6 +152,17 @@ function runApp() {
           }
         },
         {
+          label: 'Unload Tab',
+          visible: contextMenuTab != null,
+          enabled: contextMenuTab?.hasStartedLoading === true &&
+            (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1),
+          click: () => {
+            if (!manager || !contextMenuTab) return
+
+            manager.unloadTab(contextMenuTab.id)
+          }
+        },
+        {
           label: 'New Tab',
           visible: isTabBarContextMenu,
           click: () => {
