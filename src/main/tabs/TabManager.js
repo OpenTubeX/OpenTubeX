@@ -194,6 +194,54 @@ export class TabManager {
   }
 
   /**
+   * Ask every other loaded OpenTubeX tab to leave PiP before a new tab enters it.
+   * @param {import('electron').WebContents} ownerWebContents
+   * @returns {Promise<void>}
+   */
+  static async clearPictureInPictureFromOtherTabs(ownerWebContents) {
+    const cleanupPromises = []
+
+    for (const manager of tabManagers.values()) {
+      for (const tab of manager.tabs.values()) {
+        const webContents = tab.view.webContents
+        if (webContents.id === ownerWebContents.id || webContents.isDestroyed()) {
+          continue
+        }
+
+        try {
+          if (tab.hasStartedLoading && isOpenTubeXUrl(webContents.getURL())) {
+            cleanupPromises.push(
+              webContents.executeJavaScript(`
+                (async () => {
+                  const video = document.querySelector('video.player')
+                  const controls = video?.ui?.getControls?.()
+                  const mightBeInPip = document.pictureInPictureElement || controls?.isPiPEnabled?.()
+
+                  if (document.pictureInPictureElement && document.exitPictureInPicture) {
+                    try {
+                      await document.exitPictureInPicture()
+                    } catch {}
+                  }
+
+                  if (mightBeInPip && video) {
+                    video.dispatchEvent(new Event('leavepictureinpicture'))
+                  }
+                })()
+              `, true).catch(error => {
+                console.error('Error clearing PiP in replaced tab:', error)
+              })
+            )
+          }
+        } catch (error) {
+          console.error('Error preparing PiP cleanup for replaced tab:', error)
+        }
+      }
+    }
+
+    await Promise.all(cleanupPromises)
+  }
+
+  /**
    * @param {string} tabId
    * @param {number} targetWindowId
    */
@@ -1191,6 +1239,15 @@ export function setupTabsIPC() {
         manager._broadcastStateUpdate()
       }
     }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event) => {
+    await TabManager.clearPictureInPictureFromOtherTabs(event.sender)
+
+    return event.sender.executeJavaScript(
+      'document.querySelector("video.player")?.ui.getControls().togglePiP()',
+      true
+    )
   })
 }
 

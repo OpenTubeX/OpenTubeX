@@ -2764,7 +2764,9 @@ export default defineComponent({
     }
 
     function handleLeavePictureInPicture() {
-      pipWindow.removeEventListener('resize', handlePictureInPictureResize)
+      if (pipWindow) {
+        pipWindow.removeEventListener('resize', handlePictureInPictureResize)
+      }
 
       pipWindow = null
       pipWindowWidth.value = null

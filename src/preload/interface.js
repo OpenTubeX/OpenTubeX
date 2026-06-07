@@ -84,7 +84,7 @@ export default {
   // Allows programmatic toggling of picture-in-picture mode without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
   requestPiP: () => {
-    webFrame.executeJavaScript('document.querySelector("video.player")?.ui.getControls().togglePiP()', true).catch()
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE).catch()
   },
 
   // Allows programmatic toggling of fullscreen without accompanying user interaction.
