@@ -23,6 +23,7 @@ const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
  * @property {WebContentsView} view
+ * @property {boolean} hasStartedLoading
  */
 
 export class TabManager {
@@ -224,11 +225,13 @@ export class TabManager {
    * @param {string} [options.url] - Full URL to load
    * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
    * @param {object} [options.query] - Query params for the route
+   * @param {string} [options.title] - Initial tab title
    * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
    * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
+   * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
    * @returns {TabInfo}
    */
-  createTab({ url, route, query, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION } = {}) {
+  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false } = {}) {
     const id = randomUUID()
 
     // Determine the URL to load
@@ -315,6 +318,7 @@ export class TabManager {
       if (tabInfo) {
         tabInfo.title = title
         mgr._broadcastStateUpdate()
+        mgr._saveSession()
       }
     })
 
@@ -345,13 +349,15 @@ export class TabManager {
       }
     })
 
+    const fallbackTitle = `Tab ${++this.tabCounter}`
     const tabInfo = {
       id,
       url: loadUrl,
-      title: `Tab ${++this.tabCounter}`,
+      title: title || fallbackTitle,
       lastActiveAt: Date.now(),
       isPlaying: false,
-      view
+      view,
+      hasStartedLoading: false
     }
 
     if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
@@ -368,8 +374,9 @@ export class TabManager {
       this.tabs.set(id, tabInfo)
     }
 
-    // Load the URL
-    view.webContents.loadURL(loadUrl)
+    if (!lazyLoad || makeActive) {
+      this._startTabLoad(tabInfo)
+    }
 
     // When opening a new tab while another one is already active, keep the
     // current tab visible until the new tab has finished loading. This avoids
@@ -400,13 +407,30 @@ export class TabManager {
   }
 
   /**
+   * Start loading a tab if it was restored lazily.
+   * @param {TabInfo} tab
+   */
+  _startTabLoad(tab) {
+    if (tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
+      return
+    }
+
+    tab.hasStartedLoading = true
+    tab.view.webContents.loadURL(tab.url).catch(error => {
+      console.error(`Failed to load tab URL ${tab.url}:`, error)
+    })
+  }
+
+  /**
    * Create a new tab using the user's preferred insertion position unless overridden.
    * @param {object} options
    * @param {string} [options.url]
    * @param {string} [options.route]
    * @param {object} [options.query]
+   * @param {string} [options.title]
    * @param {boolean} [options.makeActive=true]
    * @param {'end' | 'afterCurrent'} [options.openPosition]
+   * @param {boolean} [options.lazyLoad=false]
    * @returns {Promise<TabInfo>}
    */
   async createTabWithPreference(options = {}) {
@@ -460,8 +484,32 @@ export class TabManager {
     // Update window title to match tab title
     this.browserWindow.setTitle(tab.title)
 
+    const isSwitchingToDifferentTab = previousActiveId && previousActiveId !== tabId
+    const shouldWaitForInitialLoad = !forceImmediate && !tab.hasStartedLoading && isSwitchingToDifferentTab
+    if (shouldWaitForInitialLoad) {
+      const activateWhenReady = () => {
+        // Clean up both listeners in case did-fail-load fires instead
+        tab.view.webContents.removeListener('did-finish-load', activateWhenReady)
+        tab.view.webContents.removeListener('did-fail-load', activateWhenReady)
+
+        // Only activate if this tab is still the active tab (user might have switched away)
+        if (this.activeTabId === tab.id) {
+          this._doActivateTab(tab, previousActiveId)
+        }
+      }
+
+      tab.view.webContents.once('did-finish-load', activateWhenReady)
+      tab.view.webContents.once('did-fail-load', activateWhenReady)
+    }
+
+    this._startTabLoad(tab)
+
     this._broadcastStateUpdate()
     this._saveSession()
+
+    if (shouldWaitForInitialLoad) {
+      return
+    }
 
     // If forceImmediate is true, we know the tab has finished loading (e.g., from did-finish-load)
     // so skip the loading check and activate immediately
@@ -474,7 +522,6 @@ export class TabManager {
     // wait for it to finish loading before showing it to prevent flashing.
     // This is especially important for tabs restored from session that haven't been shown yet.
     const isTabLoading = tab.view.webContents.isLoading()
-    const isSwitchingToDifferentTab = previousActiveId && previousActiveId !== tabId
 
     // If tab is loading and we're switching from another tab, keep the previous tab
     // visible until the new tab finishes loading to prevent flashing
@@ -775,13 +822,9 @@ export class TabManager {
         url: tab.url,
         title: tab.title,
         isActive,
-        // Consider a tab "loading" if it is not yet active and its webContents
-        // has not finished loading. This is used by the renderer to show a
-        // visual loading indicator in the tab bar while the new tab is
-        // bootstrapping in the background.
-        isLoading: !isActive && !tab.view.webContents.isLoadingMainFrame()
-          ? false
-          : !isActive && tab.view.webContents.isLoading(),
+        // Lazy-restored tabs should look idle until the user activates them.
+        isUnloaded: !tab.hasStartedLoading,
+        isLoading: tab.hasStartedLoading && tab.view.webContents.isLoading(),
         isPlaying: tab.isPlaying || false
       }
     })
@@ -845,7 +888,7 @@ export class TabManager {
   _broadcastStateUpdate() {
     const state = this.getState()
     for (const tab of this.tabs.values()) {
-      if (isOpenTubeXUrl(tab.view.webContents.getURL())) {
+      if (tab.hasStartedLoading && isOpenTubeXUrl(tab.view.webContents.getURL())) {
         tab.view.webContents.send(IpcChannels.TABS_STATE_UPDATED, state)
       }
     }
@@ -919,10 +962,15 @@ export class TabManager {
     }
 
     for (const tabData of sessionData.tabs) {
+      const makeActive = tabData.id === sessionData.activeTabId
+      const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+
       this.createTab({
         url: tabData.url,
-        makeActive: tabData.id === sessionData.activeTabId,
-        openPosition: 'end'
+        title: hasSavedTitle ? tabData.title : undefined,
+        makeActive,
+        openPosition: 'end',
+        lazyLoad: !makeActive && hasSavedTitle
       })
     }
 

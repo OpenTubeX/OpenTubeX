@@ -6,6 +6,7 @@
     :class="{
       active: tab.isActive,
       loading: tab.isLoading,
+      unloaded: tab.isUnloaded,
       playing: tab.isPlaying,
       dragging: isDragging,
       settling: isSettling,
@@ -164,6 +165,17 @@ function handleAuxClick(event) {
 
 .tab.loading {
   opacity: 0.8;
+}
+
+.tab.unloaded .tabTitle {
+  color: var(--secondary-text-color);
+  opacity: 0.72;
+}
+
+.tab.unloaded:hover .tabTitle,
+.tab.unloaded.active .tabTitle,
+.tab.unloaded.loading .tabTitle {
+  opacity: 1;
 }
 
 .tab.active::after {
