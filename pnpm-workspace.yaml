@@ -11,3 +11,4 @@ allowBuilds:
 
 overrides:
   uuid@<11.1.1: '>=11.1.1'
+  yauzl: '>=3.3.1'
