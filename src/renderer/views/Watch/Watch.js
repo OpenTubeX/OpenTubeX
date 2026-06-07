@@ -13,6 +13,7 @@ import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLi
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
+import { calculateColorLuminance } from '../../helpers/colors'
 import {
   buildVTTFileLocally,
   copyToClipboard,
@@ -57,6 +58,10 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 
 const MANIFEST_TYPE_DASH = 'application/dash+xml'
 const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
+const UNAVAILABLE_VIDEO_THUMBNAILS = {
+  light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
+  dark: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video_dark_theme.png'
+}
 
 export default defineComponent({
   name: 'Watch',
@@ -372,18 +377,11 @@ export default defineComponent({
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
       }
       this.ipBlockDetectedInCurrentChain = false
+      this.resetVideoState()
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
-      this.errorMessage = null
-      this.customErrorIcon = null
       this.activeFormat = this.defaultVideoFormat
-      this.sabrData = null
-      this.videoStoryboardSrc = ''
-      this.captions = []
-      this.vrProjection = null
-      this.videoCurrentChapterIndex = 0
-      this.videoGenreIsMusic = false
 
       this.checkIfTimestamp()
       this.checkIfPlaylist()
@@ -397,6 +395,54 @@ export default defineComponent({
           break
       }
     },
+
+    resetVideoState: function () {
+      this.isLoading = true
+      this.isFamilyFriendly = false
+      this.isLive = false
+      this.liveChat = null
+      this.isLiveContent = false
+      this.isUpcoming = false
+      this.isPostLiveDvr = false
+      this.isUnlisted = false
+      this.upcomingTimestamp = null
+      this.upcomingTimeLeft = null
+      this.thumbnail = ''
+      this.videoTitle = ''
+      this.videoDescription = ''
+      this.videoDescriptionHtml = ''
+      this.license = ''
+      this.videoViewCount = 0
+      this.videoLikeCount = 0
+      this.videoDislikeCount = 0
+      this.videoLengthSeconds = 0
+      this.videoChapters = []
+      this.videoCurrentChapterIndex = 0
+      this.videoChaptersKind = 'chapters'
+      this.channelName = ''
+      this.channelThumbnail = ''
+      this.channelId = ''
+      this.channelSubscriptionCountText = ''
+      this.videoPublished = 0
+      this.premiereDate = undefined
+      this.videoStoryboardSrc = ''
+      this.manifestSrc = null
+      this.manifestMimeType = MANIFEST_TYPE_DASH
+      this.sabrData = null
+      this.legacyFormats = []
+      this.captions = []
+      this.vrProjection = null
+      this.recommendedVideos = []
+      this.playabilityStatus = ''
+      this.adEndTimeUnixMs = 0
+      this.errorMessage = null
+      this.customErrorIcon = null
+      this.videoGenreIsMusic = false
+      this.streamingDataExpiryDate = null
+      this.ipBlockDetectedInCurrentChain = false
+      this.updateTitle()
+    },
+
     onMountedDependOnLocalStateLoading() {
       // Prevent running twice
       if (this.onMountedRun) { return }
@@ -904,12 +950,12 @@ export default defineComponent({
         this.isLoading = false
         this.updateTitle()
       } catch (err) {
-        const errorMessage = this.$t('Local API Error (Click to copy)')
-        showToast(`${errorMessage}: ${err}`, 10000, () => {
-          copyToClipboard(err)
-        })
         console.error(err)
-        if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private')) {
+        if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
+          const errorMessage = this.$t('Local API Error (Click to copy)')
+          showToast(`${errorMessage}: ${err}`, 10000, () => {
+            copyToClipboard(err)
+          })
           showToast(this.$t('Falling back to Invidious API'))
           this.getVideoInformationInvidious()
         } else {
@@ -919,6 +965,11 @@ export default defineComponent({
           }
 
           this.isLoading = false
+
+          if (!this.thumbnail) {
+            this.thumbnail = this.getUnavailableVideoThumbnail()
+          }
+          this.errorMessage = err.message || err.toString()
         }
       }
     },
@@ -1098,12 +1149,11 @@ export default defineComponent({
         })
         .catch(async err => {
           console.error(err)
-          const errorMessage = this.$t('Invidious API Error (Click to copy)')
-          showToast(`${errorMessage}: ${err}`, 10000, () => {
-            copyToClipboard(err)
-          })
-          console.error(err)
           if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
+            const errorMessage = this.$t('Invidious API Error (Click to copy)')
+            showToast(`${errorMessage}: ${err}`, 10000, () => {
+              copyToClipboard(err)
+            })
             showToast(this.$t('Falling back to Local API'))
             this.getVideoInformationLocal()
           } else {
@@ -1113,6 +1163,11 @@ export default defineComponent({
             }
 
             this.isLoading = false
+
+            if (!this.thumbnail) {
+              this.thumbnail = this.getUnavailableVideoThumbnail()
+            }
+            this.errorMessage = err.message || err.toString()
           }
         })
     },
@@ -1157,6 +1212,15 @@ export default defineComponent({
       const expireString = new URL(url).searchParams.get('expire')
 
       return new Date(parseInt(expireString) * 1000)
+    },
+
+    getUnavailableVideoThumbnail: function () {
+      const backgroundColor = window.getComputedStyle(document.body).backgroundColor
+      const isLightTheme = calculateColorLuminance(backgroundColor) === '#000000'
+
+      return isLightTheme
+        ? UNAVAILABLE_VIDEO_THUMBNAILS.light
+        : UNAVAILABLE_VIDEO_THUMBNAILS.dark
     },
 
     /**

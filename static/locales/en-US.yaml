@@ -544,7 +544,7 @@ Settings:
         Semi-auto: Semi-auto
         Never: Never
       Tooltip:
-        Auto = Save on every video page exit, when video ended and error encountered (e.g. ratelimited and watch session expired). Semi-auto = Like Auto except on video page exit and can save progress manually via a button called Save Watched Progress, located beneath the video player.
+        Auto = Save every 2 seconds while a video is playing, on every video page exit, when video paused or ended, and when an error is encountered (e.g. ratelimited and watch session expired). Semi-auto = Like Auto except it does not save every 2 seconds or on video page exit, and can also save progress manually via a button called Save Watched Progress, located beneath the video player.
     Save Watched Videos With Last Viewed Playlist: Save Watched Videos With Last Viewed Playlist
     Clear Search History and Cache: Clear Search History and Cache
     Are you sure you want to clear out your search history and cache?: Are you sure you want to

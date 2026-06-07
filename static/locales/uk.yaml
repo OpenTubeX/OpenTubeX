@@ -416,7 +416,10 @@ Settings:
       Quality Label: Якість знімка екрана
       Modes:
         Ask Path: Запитувати у якій теці зберігати
+        Save To Folder: Зберегти в папку
+        Clipboard: Копіювати в буфер обміну
       File Name Tooltip: Нижче ви можете використовувати змінні. %Y Рік 4 цифри. %M Місяць 2 цифри. %D день 2 цифри. %H Година 2 цифри. %N Хвилина 2 цифри. %S Секунда 2 цифри. %T Мілісекунда 3 цифри. %s Секунда відео. %t Мілісекунда відео 3 цифри. %i ID відео.
+      Mode: Режим знімка екрана
     Enter Fullscreen on Display Rotate: Переходити в повноекранний режим за обертання екрана
     Skip by Scrolling Over Video Player: Пропустити гортанням відеопрогравача
     Autoplay Interruption Timer: Таймер переривання автозапуску
@@ -1115,3 +1118,5 @@ KeyboardShortcutPrompt:
 shortcutLabelSeparator: ｜
 Compact side navigation: Компактна бічна навігація
 Expand side navigation: Розгорнути бічну навігацію
+Screenshot Clipboard Success: Знімок єкрану збережно у буфер обміну
+Screenshot Clipboard Error: Не вдалося скопіювати знімок екрана в буфер обміну
