@@ -1654,25 +1654,12 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         }
       }
 
-      // Author/channel detection. When YouTube includes the uploader row (related videos
-      // and similar 2+ row layouts), the uploader name is always the first part of the
-      // first row. When the uploader row is omitted (1-row layout used on channel video
-      // tabs because the user is already on the channel page), fall back to the
-      // channelName/channelId passed in by the caller.
-      let author
-      let authorId
-
-      if (metadataRows.length >= 2) {
-        const authorPart = metadataRows[0].metadata_parts?.[0]?.text
-        author = authorPart?.text ?? channelName
-        authorId = authorPart?.endpoint?.payload?.browseId ??
-          lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
-          channelId
-      } else {
-        author = channelName
-        authorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload.browseId ??
-          channelId
-      }
+      const authorPart = metadataParts
+        .find(part => part.text?.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL')
+        ?.text
+      const imageAuthorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload?.browseId
+      const author = authorPart?.text ?? channelName
+      const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
 
       return {
         type: 'video',
