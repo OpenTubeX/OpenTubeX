@@ -58,7 +58,7 @@ jobs:
           os: ubuntu-latest
 
         - runtime: linux-arm64
-          os: ubuntu-latest
+          os: ubuntu-24.04-arm
 
         - runtime: osx-x64
           os: macOS-latest
@@ -132,12 +132,12 @@ jobs:
         printf '%s\n' "$package_json" > package.json
         printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
 
-    - name: Install libarchive-tools
+    - name: Install Linux packaging dependencies
       if: startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
         sudo apt update
-        sudo apt -y install libarchive-tools
+        sudo apt -y install binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
 
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
@@ -154,21 +154,34 @@ jobs:
       shell: bash
       run: pnpm run build:arm64
 
-    - name: Convert X64 AppImage to static runtime
+    - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       shell: bash
       env:
         VERSION: ${{ steps.versionNumber.outputs.version }}
       run: |
-        sudo apt install desktop-file-utils
-        cd build
-        appimage="OpenTubeX-${VERSION}.AppImage"
-        wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O ./appimagetool.AppImage
-        chmod +x ./"$appimage" ./appimagetool.AppImage
-        ./"$appimage" --appimage-extract && rm -f ./"$appimage"
-        ./appimagetool.AppImage --comp zstd --mksquashfs-opt -Xcompression-level --mksquashfs-opt 20 \
-          -n ./squashfs-root ./"$appimage"
-        rm -rf ./squashfs-root ./appimagetool.AppImage
+        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}"
+
+    - name: Convert ARMv7l AppImage to Anylinux AppImage
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
+      uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
+      with:
+        arch: armv7
+        distro: ubuntu24.04
+        shell: /bin/bash
+        install: |
+          apt-get update -q -y
+          apt-get install -q -y bash binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
+        run: |
+          bash _scripts/package-anylinux-appimage.sh "${{ steps.versionNumber.outputs.version }}" "${{ matrix.runtime }}"
+
+    - name: Convert ARM64 AppImage to Anylinux AppImage
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
+      shell: bash
+      env:
+        VERSION: ${{ steps.versionNumber.outputs.version }}
+      run: |
+        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}"
 
     - name: Upload Linux .zip x64 Artifact
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
