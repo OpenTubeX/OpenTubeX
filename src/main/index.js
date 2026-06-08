@@ -28,7 +28,7 @@ import { handleOpenInExternalPlayer } from './externalPlayer'
 import { generatePoToken } from './poTokenGenerator'
 import { isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
-import { loadAllTabSessions } from './tabs/TabSessionStore'
+import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -90,6 +90,18 @@ function runApp() {
 
   let backendPreference = 'local'
   let backendFallback = true
+  const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
+  const VALID_STARTUP_BEHAVIORS = new Set(['loadAllTabs', 'loadLastActiveTab', 'emptySession'])
+
+  async function getStartupBehavior() {
+    try {
+      const value = (await baseHandlers.settings._findOne('startupBehavior'))?.value
+      return VALID_STARTUP_BEHAVIORS.has(value) ? value : DEFAULT_STARTUP_BEHAVIOR
+    } catch (error) {
+      console.error('Failed to load startup behavior preference:', error)
+      return DEFAULT_STARTUP_BEHAVIOR
+    }
+  }
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
   // item / last-window-closed on non-darwin). Window close handlers use this to
@@ -866,16 +878,27 @@ function runApp() {
     // has its own persisted session record, so a multi-window Ctrl+Q session
     // is fully rebuilt here (one window per saved session). If there are no
     // saved sessions yet, fall back to creating a single empty window.
-    const savedSessions = await loadAllTabSessions()
+    const startupBehavior = await getStartupBehavior()
+    const shouldRestoreSession = startupBehavior !== 'emptySession'
+    const savedSessions = shouldRestoreSession ? await loadAllTabSessions() : []
+
+    if (!shouldRestoreSession) {
+      await clearAllTabSessions()
+    }
+
     if (savedSessions.length === 0) {
       await createWindow()
     } else {
-      await createWindow({ sessionData: savedSessions[0] })
+      await createWindow({
+        sessionData: savedSessions[0],
+        loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
+      })
       for (let i = 1; i < savedSessions.length; i++) {
         await createWindow({
           replaceMainWindow: false,
           showWindowNow: true,
-          sessionData: savedSessions[i]
+          sessionData: savedSessions[i],
+          loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
         })
       }
     }
@@ -1041,7 +1064,8 @@ function runApp() {
       windowStartupUrl = null,
       showWindowNow = false,
       searchQueryText = null,
-      sessionData = null
+      sessionData = null,
+      loadInactiveTabsOnRestore = false
     } = { }) {
     // Syncing new window background to theme choice.
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then((setting) => {
@@ -1293,7 +1317,9 @@ function runApp() {
       // Restore tabs from the pre-loaded session data if one was passed in
       // (the startup flow loads every window's session up-front so that each
       // window gets its own data).
-      const sessionRestored = !windowStartupUrl && tabManager.restoreFromData(sessionData)
+      const sessionRestored = !windowStartupUrl && tabManager.restoreFromData(sessionData, {
+        loadInactiveTabs: loadInactiveTabsOnRestore
+      })
 
       if (!sessionRestored) {
         // Create initial tab

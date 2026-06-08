@@ -207,6 +207,11 @@ Settings:
     Fallback to Non-Preferred Backend on Failure: Bei Ausfall auf nicht bevorzugtes Backend zurückgreifen
     Enable Search Suggestions: Suchvorschläge aktivieren
     Default Landing Page: Standard-Startseite
+    Startup Behavior:
+      Startup Behavior: Beim Start
+      Load all tabs: Alle Tabs laden
+      Load last active tab: Zuletzt aktiven Tab laden
+      Start with an empty session: Mit leerer Sitzung starten
 
     Locale Preference: Sprache
     Preferred API Backend:
@@ -1032,6 +1037,11 @@ Tooltips:
     Invidious Instance: Die Invidious-Instanz, mit der sich OpenTubeX für API-Aufrufe verbinden wird.
     Fallback to Non-Preferred Backend on Failure: Wenn deine bevorzugte API ein Problem hat, wird OpenTubeX automatisch versuchen, deine nicht-bevorzugte API als Ausweichmethode zu verwenden, wenn sie aktiviert ist.
     Preferred API Backend: Wähle das Backend aus, welches OpenTubeX zum Laden der Daten nutzen soll. Die lokale API ist ein eingebauter Extrahierer. Die Invidious-API erfordert einen Invidious-Server, zu dem eine Verbindung hergestellt werden muss.
+    Startup Behavior: |
+      Wähle aus, was OpenTubeX beim Start tun soll.
+      Alle Tabs laden stellt jeden gespeicherten Tab sofort wieder her, aber Videos in Hintergrund-Tabs werden nicht automatisch abgespielt.
+      Zuletzt aktiven Tab laden stellt die vorherige Sitzung wieder her; die anderen Tabs werden geöffnet, aber nicht geladen. Sie werden geladen, wenn du sie anklickst.
+      Mit leerer Sitzung starten überspringt die gespeicherten Tabs und öffnet ein frisches Fenster.
     Region for Trending: Die Trendregion erlaubt es dir auszuwählen, aus welchem Land die Trends angezeigt werden sollen.
     External Link Handling: "Wähle das Standardverhalten, wenn ein Link angeklickt wird, der nicht in OpenTubeX geöffnet werden kann.\nStandardmäßig wird OpenTubeX den angeklickten Link in deinem Standardbrowser öffnen.\n"
     Open Deep Links In New Window: URLs, die an OpenTubeX übergeben werden, z. B. durch Redirect-Browser-Erweiterungen oder Befehlszeilenargumente, werden in einem neuen Fenster geöffnet.

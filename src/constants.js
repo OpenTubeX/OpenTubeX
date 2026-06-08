@@ -32,6 +32,7 @@ const IpcChannels = {
   TABS_UPDATE_TITLE: 'tabs-update-title',
   TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
   TABS_ACTIVE_CHANGED: 'tabs-active-changed',
+  TABS_IS_ACTIVE: 'tabs-is-active',
   TABS_SET_PLAYBACK_STATE: 'tabs-set-playback-state',
   TABS_REQUEST_PICTURE_IN_PICTURE: 'tabs-request-picture-in-picture',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',

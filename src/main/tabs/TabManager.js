@@ -1061,9 +1061,10 @@ export class TabManager {
    * responsible for loading the data (e.g. via loadAllTabSessions) and
    * deciding which window should own which session.
    * @param {{ tabs?: Array<{id?: string, url: string, title?: string}>, activeTabId?: string }} sessionData
+   * @param {{ loadInactiveTabs?: boolean }} [options]
    * @returns {boolean} Whether any tabs were restored
    */
-  restoreFromData(sessionData) {
+  restoreFromData(sessionData, { loadInactiveTabs = false } = {}) {
     if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
       return false
     }
@@ -1077,7 +1078,7 @@ export class TabManager {
         title: hasSavedTitle ? tabData.title : undefined,
         makeActive,
         openPosition: 'end',
-        lazyLoad: !makeActive && hasSavedTitle
+        lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle
       })
     }
 
@@ -1125,6 +1126,12 @@ export function setupTabsIPC() {
     if (manager && typeof tabId === 'string') {
       manager.activateTab(tabId)
     }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_IS_ACTIVE, (event) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    const tabId = TabManager.getTabIdFromWebContents(event.sender)
+    return manager != null && tabId != null && manager.activeTabId === tabId
   })
 
   // Close tab

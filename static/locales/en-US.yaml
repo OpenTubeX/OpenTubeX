@@ -286,6 +286,11 @@ Settings:
       New Tab Position: New Tab Position
       At the end: At the end
       After current tab: After current tab
+    Startup Behavior:
+      Startup Behavior: On Startup
+      Load all tabs: Load all tabs
+      Load last active tab: Load last active tab
+      Start with an empty session: Start with an empty session
     Locale Preference: Locale Preference
     System Default: System Default
     Avoid translation:
@@ -1144,6 +1149,11 @@ Tooltips:
       method when enabled.
     Thumbnail Preference: All thumbnails throughout OpenTubeX will be replaced with
       a frame of the video, blurred or hidden instead of the default thumbnail.
+    Startup Behavior: |
+      Choose what OpenTubeX does when it starts.
+      Load all tabs restores every saved tab immediately, but background tabs will not autoplay videos.
+      Load last active tab restores the previous session with the other tabs opened but unloaded; they load when you click them.
+      Start with an empty session skips the saved tabs and opens a fresh window.
     Invidious Instance: The Invidious instance that OpenTubeX will connect to for API
       calls.
     Region for Trending: The region of trends allows you to pick which country's trending

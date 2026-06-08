@@ -364,6 +364,14 @@ export default {
     },
 
     /**
+     * Check whether this renderer owns the active tab.
+     * @returns {Promise<boolean>}
+     */
+    isActive: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_IS_ACTIVE)
+    },
+
+    /**
      * Close a tab
      * @param {string} tabId
      * @returns {Promise<{hasRemainingTabs: boolean}>}

@@ -368,9 +368,11 @@ export default defineComponent({
 
     // #region settings
 
+    const isActiveTab = ref(!process.env.IS_ELECTRON)
+
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
-      return store.getters.getAutoplayVideos
+      return store.getters.getAutoplayVideos && isActiveTab.value
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -2632,6 +2634,11 @@ export default defineComponent({
     // #region video event handlers
 
     function handlePlay() {
+      if (process.env.IS_ELECTRON && !isActiveTab.value) {
+        video.value.pause()
+        return
+      }
+
       startPowerSaveBlocker()
 
       if ('mediaSession' in navigator) {
@@ -4640,6 +4647,16 @@ export default defineComponent({
     onMounted(async () => {
       const videoElement = video.value
 
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.isActive) {
+        try {
+          const isActive = await window.ftElectron.tabs.isActive()
+          isActiveTab.value = isActive
+          tabVisible = isActive
+        } catch (error) {
+          console.error('Failed to get active tab state for video autoplay:', error)
+        }
+      }
+
       const volume = sessionStorage.getItem('volume')
       if (volume !== null) {
         videoElement.volume = parseFloat(volume)
@@ -4750,6 +4767,7 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.onActiveChanged) {
         try {
           activeTabChangedCleanup = window.ftElectron.tabs.onActiveChanged((isActive) => {
+            isActiveTab.value = isActive
             tabVisible = isActive
             updateAutoPip()
           })

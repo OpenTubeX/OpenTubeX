@@ -227,6 +227,7 @@ const state = {
   showDistractionFreeTitles: false,
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
+  startupBehavior: 'loadLastActiveTab',
   listType: 'grid',
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,

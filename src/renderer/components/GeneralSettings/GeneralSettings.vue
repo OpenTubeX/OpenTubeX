@@ -78,6 +78,16 @@
         @change="updateNewTabPosition"
       />
       <FtSelect
+        v-if="USING_ELECTRON"
+        :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
+        :value="startupBehavior"
+        :select-names="startupBehaviorNames"
+        :select-values="STARTUP_BEHAVIOR_VALUES"
+        :tooltip="t('Tooltips.General Settings.Startup Behavior')"
+        :icon="['fas', 'power-off']"
+        @change="updateStartupBehavior"
+      />
+      <FtSelect
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
         :select-names="viewTypeNames"
@@ -367,6 +377,24 @@ const newTabPosition = computed(() => store.getters.getNewTabPosition)
  */
 function updateNewTabPosition(value) {
   store.dispatch('updateNewTabPosition', value)
+}
+
+const STARTUP_BEHAVIOR_VALUES = ['loadAllTabs', 'loadLastActiveTab', 'emptySession']
+
+const startupBehaviorNames = computed(() => [
+  t('Settings.General Settings.Startup Behavior.Load all tabs'),
+  t('Settings.General Settings.Startup Behavior.Load last active tab'),
+  t('Settings.General Settings.Startup Behavior.Start with an empty session')
+])
+
+/** @type {import('vue').ComputedRef<'loadAllTabs' | 'loadLastActiveTab' | 'emptySession'>} */
+const startupBehavior = computed(() => store.getters.getStartupBehavior)
+
+/**
+ * @param {'loadAllTabs' | 'loadLastActiveTab' | 'emptySession'} value
+ */
+function updateStartupBehavior(value) {
+  store.dispatch('updateStartupBehavior', value)
 }
 
 const VIEW_TYPE_VALUES = ['grid', 'list']
