@@ -189,10 +189,12 @@ import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrap
 import store from '../../store/index'
 
 import {
+  collectPlaylistItems,
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
   getLocalPlaylistContinuation,
   parseLocalPlaylistVideo,
+  playlistHasContinuation,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -466,11 +468,11 @@ async function getPlaylistLocal() {
       }
     }
 
-    const playlistItems_ = result.items.map(parseLocalPlaylistVideo)
+    const playlistItems_ = collectPlaylistItems(result).map(parseLocalPlaylistVideo)
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
-    firstVideoId.value = playlistItems_[0].videoId
+    firstVideoId.value = playlistItems_[0]?.videoId ?? ''
     playlistThumbnail.value = result.info.thumbnails[0].url
     viewCount.value = result.info.views.toLowerCase() === 'no views' ? 0 : extractNumberFromString(result.info.views)
     videoCount.value = extractNumberFromString(result.info.total_items)
@@ -489,7 +491,7 @@ async function getPlaylistLocal() {
     playlistItems.value = playlistItems_
 
     let shouldGetNextPage = false
-    if (result.has_continuation) {
+    if (playlistHasContinuation(result)) {
       continuationData.value = result
       shouldGetNextPage = playlistItems.value.length < 100
     }
@@ -675,10 +677,10 @@ async function getNextPageLocal() {
   let shouldGetNextPage = false
 
   if (result) {
-    const parsedVideos = result.items.map(parseLocalPlaylistVideo)
+    const parsedVideos = collectPlaylistItems(result).map(parseLocalPlaylistVideo)
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
-    if (result.has_continuation) {
+    if (playlistHasContinuation(result)) {
       continuationData.value = result
 
       // To workaround the effect of useless continuation data

@@ -169,6 +169,7 @@ import store from '../../store/index'
 
 import { copyToClipboard, showToast } from '../../helpers/utils'
 import {
+  collectPlaylistItems,
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
   parseLocalPlaylistVideo,
@@ -492,6 +493,10 @@ function playNextVideo() {
 
   const targetPlaylistItem = targetList[targetVideoIndex]
 
+  if (!targetPlaylistItem?.videoId) {
+    return
+  }
+
   const routerPushPayload = {
     path: `/watch/${targetPlaylistItem.videoId}`,
     query: {
@@ -557,6 +562,10 @@ function playPreviousVideo() {
 
   const targetPlaylistItem = targetList[targetVideoIndex]
 
+  if (!targetPlaylistItem?.videoId) {
+    return
+  }
+
   router.push(
     {
       path: `/watch/${targetPlaylistItem.videoId}`,
@@ -587,10 +596,10 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
     const videos = cachedPlaylist.items
 
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    videos.push(...continuationData.items.map(parseLocalPlaylistVideo))
+    videos.push(...collectPlaylistItems(continuationData).map(parseLocalPlaylistVideo))
 
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      videos.push(...p.items.map(parseLocalPlaylistVideo))
+      videos.push(...collectPlaylistItems(p).map(parseLocalPlaylistVideo))
     }, { runCallbackOnceFirst: false })
 
     playlistItems.value = videos
@@ -622,7 +631,7 @@ async function getPlaylistInformationLocal() {
 
     const videos = []
     await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...p.items.map(parseLocalPlaylistVideo))
+      videos.push(...collectPlaylistItems(p).map(parseLocalPlaylistVideo))
     })
 
     playlistItems.value = videos
