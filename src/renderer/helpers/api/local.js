@@ -1806,9 +1806,24 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         }
       }
 
-      const authorPart = metadataParts
+      // Author/channel detection:
+      // 1. Prefer a part whose text endpoint links to a channel (subscription feed)
+      // 2. When YouTube uses a 2+ row layout without channel endpoints (e.g. recommended),
+      //    the uploader name is the first part of the first row if it's not views/date text
+      // 3. Otherwise fall back to channelName/channelId from the caller (e.g. channel video tabs)
+      let authorPart = metadataParts
         .find(part => part.text?.endpoint?.metadata.page_type === 'WEB_PAGE_TYPE_CHANNEL')
         ?.text
+
+      if (!authorPart && metadataRows.length >= 2) {
+        const firstPart = metadataRows[0].metadata_parts?.[0]?.text
+        const firstPartText = firstPart?.text
+
+        if (firstPartText && !VIEWS_OR_WATCHING_REGEX.test(firstPartText) && !firstPartText.endsWith('ago')) {
+          authorPart = firstPart
+        }
+      }
+
       const imageAuthorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload?.browseId
       const author = authorPart?.text ?? channelName
       const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
