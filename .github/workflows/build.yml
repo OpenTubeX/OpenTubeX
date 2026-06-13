@@ -177,34 +177,6 @@ jobs:
       run: |
         bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}"
 
-    - name: Convert ARMv7l AppImage to Anylinux AppImage
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      uses: uraimo/run-on-arch-action@fd7aa8593480287702b446a273a68f788a9bad3a # v3
-      with:
-        arch: armv7
-        distro: ubuntu24.04
-        shell: /bin/bash
-        install: |
-          apt-get update -q -y
-          apt_package() {
-            for package_name in "$@"; do
-              if apt-cache show "$package_name" >/dev/null 2>&1; then
-                printf '%s\n' "$package_name"
-                return 0
-              fi
-            done
-
-            return 1
-          }
-          apt-get install -q -y \
-            bash binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 \
-            "$(apt_package libatk-bridge2.0-0t64 libatk-bridge2.0-0)" \
-            "$(apt_package libatspi2.0-0t64 libatspi2.0-0)" \
-            "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
-            libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
-        run: |
-          bash _scripts/package-anylinux-appimage.sh "${{ steps.versionNumber.outputs.version }}" "${{ matrix.runtime }}"
-
     - name: Convert ARM64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       shell: bash

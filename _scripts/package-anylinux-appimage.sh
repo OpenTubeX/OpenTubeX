@@ -21,13 +21,13 @@ case "$RUNTIME" in
     deb_arch="arm64"
     appimage_name="OpenTubeX-$VERSION-arm64.AppImage"
     ;;
-  linux-armv7l)
-    appimage_arch="armv7l"
-    deb_arch="armv7l"
-    appimage_name="OpenTubeX-$VERSION-armv7l.AppImage"
-    ;;
   *)
-    printf 'Unsupported Anylinux AppImage runtime: %s\n' "$RUNTIME" >&2
+    if [[ "$RUNTIME" == linux-armv7l ]]; then
+      printf 'Anylinux AppImages are not supported for ARMv7: sharun only publishes x86_64 and aarch64 binaries.\n' >&2
+      printf 'Use the classic static-runtime AppImage conversion in CI instead.\n' >&2
+    else
+      printf 'Unsupported Anylinux AppImage runtime: %s\n' "$RUNTIME" >&2
+    fi
     exit 1
     ;;
 esac
