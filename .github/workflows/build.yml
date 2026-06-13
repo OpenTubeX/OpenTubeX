@@ -137,7 +137,22 @@ jobs:
       shell: bash
       run: |
         sudo apt update
-        sudo apt -y install binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
+        apt_package() {
+          for package_name in "$@"; do
+            if apt-cache show "$package_name" >/dev/null 2>&1; then
+              printf '%s\n' "$package_name"
+              return 0
+            fi
+          done
+
+          return 1
+        }
+        sudo apt -y install \
+          binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 \
+          "$(apt_package libatk-bridge2.0-0t64 libatk-bridge2.0-0)" \
+          "$(apt_package libatspi2.0-0t64 libatspi2.0-0)" \
+          "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
+          libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
 
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
@@ -171,7 +186,22 @@ jobs:
         shell: /bin/bash
         install: |
           apt-get update -q -y
-          apt-get install -q -y bash binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 libatk-bridge2.0-0 libatspi2.0-0 libgtk-3-0 libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
+          apt_package() {
+            for package_name in "$@"; do
+              if apt-cache show "$package_name" >/dev/null 2>&1; then
+                printf '%s\n' "$package_name"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+          apt-get install -q -y \
+            bash binutils dbus-x11 desktop-file-utils file gcc libarchive-tools libasound2t64 \
+            "$(apt_package libatk-bridge2.0-0t64 libatk-bridge2.0-0)" \
+            "$(apt_package libatspi2.0-0t64 libatspi2.0-0)" \
+            "$(apt_package libgtk-3-0t64 libgtk-3-0)" \
+            libnotify4 libnss3 libsecret-1-0 libxss1 libxtst6 patchelf strace wget xauth xdg-utils xvfb
         run: |
           bash _scripts/package-anylinux-appimage.sh "${{ steps.versionNumber.outputs.version }}" "${{ matrix.runtime }}"
 
