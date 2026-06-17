@@ -2148,6 +2148,11 @@ async function searchChannelInvidious() {
  * @param {string} query
  */
 function newSearch(query) {
+  if (query === '') {
+    clearSearch()
+    return
+  }
+
   lastSearchQuery.value = query
   searchContinuationData.value = null
   isSearchTabLoading.value = true
@@ -2168,6 +2173,15 @@ function newSearch(query) {
 function newSearchWithStatePersist(query) {
   saveStateInRouter(query)
   newSearch(query)
+}
+
+function clearSearch() {
+  lastSearchQuery.value = ''
+  searchContinuationData.value = null
+  isSearchTabLoading.value = false
+  searchPage = 1
+  searchResults.value = []
+  changeTab(currentOrFirstTab(undefined))
 }
 
 async function saveStateInRouter(query) {

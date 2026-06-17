@@ -244,6 +244,8 @@
           :show-clear-text-button="true"
           class="channelSearch"
           :maxlength="255"
+          @input="handleSearchInput"
+          @clear="clearSearch"
           @click="search"
         />
       </FtFlexBox>
@@ -380,6 +382,19 @@ function focusTab(currentTab, event) {
  */
 function search(query) {
   emit('search', query)
+}
+
+/**
+ * @param {string} query
+ */
+function handleSearchInput(query) {
+  if (query === '') {
+    clearSearch()
+  }
+}
+
+function clearSearch() {
+  emit('search', '')
 }
 
 const searchBar = useTemplateRef('searchBar')
