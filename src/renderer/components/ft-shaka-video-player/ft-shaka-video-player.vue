@@ -111,6 +111,24 @@
         </span>
       </p>
     </div>
+    <Transition name="fade">
+      <div
+        v-if="showSabrBackoffOverlay"
+        class="sabrBackoffOverlay"
+        role="status"
+        aria-live="polite"
+        :aria-label="sabrBackoffAriaLabel"
+      >
+        <div
+          class="sabrBackoffProgress"
+          :style="{ '--sabr-backoff-progress': sabrBackoffProgress }"
+        >
+          <span class="sabrBackoffTime">
+            {{ sabrBackoffTimeLabel }}
+          </span>
+        </div>
+      </div>
+    </Transition>
     <div
       v-if="sponsorBlockShowSkippedToast && (promptSponsorBlockSegments.length > 0 || skippedSponsorBlockSegments.length > 0)"
       class="skippedSegmentsWrapper"

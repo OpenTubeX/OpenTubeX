@@ -24,6 +24,7 @@ const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
  * @property {boolean} isPlaying
  * @property {WebContentsView} view
  * @property {boolean} hasStartedLoading
+ * @property {boolean} preloadInBackground
  */
 
 export class TabManager {
@@ -86,6 +87,8 @@ export class TabManager {
     this.contextMenuOnTabBar = false
     /** @type {boolean} */
     this._sessionPersistenceDisabled = false
+    /** @type {Set<string>} */
+    this._attachedTabIds = new Set()
 
     tabManagers.set(browserWindow.id, this)
 
@@ -384,9 +387,10 @@ export class TabManager {
    * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
    * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
    * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
+   * @param {boolean} [options.preloadInBackground=false] - Whether to attach an inactive tab while it loads
    * @returns {TabInfo}
    */
-  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false } = {}) {
+  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
     const id = randomUUID()
 
     // Determine the URL to load
@@ -415,7 +419,8 @@ export class TabManager {
       lastActiveAt: Date.now(),
       isPlaying: false,
       view,
-      hasStartedLoading: false
+      hasStartedLoading: false,
+      preloadInBackground: Boolean(preloadInBackground)
     }
 
     if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
@@ -430,6 +435,10 @@ export class TabManager {
       }
     } else {
       this.tabs.set(id, tabInfo)
+    }
+
+    if (!makeActive && preloadInBackground) {
+      this._attachBackgroundTab(tabInfo)
     }
 
     if (!lazyLoad || makeActive) {
@@ -489,6 +498,7 @@ export class TabManager {
    * @param {boolean} [options.makeActive=true]
    * @param {'end' | 'afterCurrent'} [options.openPosition]
    * @param {boolean} [options.lazyLoad=false]
+   * @param {boolean} [options.preloadInBackground=false]
    * @returns {Promise<TabInfo>}
    */
   async createTabWithPreference(options = {}) {
@@ -615,7 +625,7 @@ export class TabManager {
     if (previousActiveId && previousActiveId !== tab.id) {
       const currentTab = this.tabs.get(previousActiveId)
       if (currentTab) {
-        this.browserWindow.contentView.removeChildView(currentTab.view)
+        this._detachView(currentTab)
         if (!currentTab.view.webContents.isDestroyed()) {
           try {
             currentTab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, false)
@@ -636,7 +646,8 @@ export class TabManager {
     })
 
     // Show new active tab
-    this.browserWindow.contentView.addChildView(tab.view)
+    this._detachView(tab)
+    this._attachView(tab)
     tab.view.webContents.focus()
 
     if (!tab.view.webContents.isDestroyed()) {
@@ -699,10 +710,7 @@ export class TabManager {
       }
     }
 
-    // Remove from view if active
-    if (this.activeTabId === tabId) {
-      this.browserWindow.contentView.removeChildView(tab.view)
-    }
+    this._detachView(tab)
 
     // Destroy the webContents
     tab.view.webContents.close()
@@ -800,14 +808,16 @@ export class TabManager {
         return false
       }
 
-      this.browserWindow.contentView.removeChildView(tab.view)
       this.activeTabId = null
     }
+
+    this._detachView(tab)
 
     const previousView = tab.view
     tab.view = this._createTabView()
     tab.hasStartedLoading = false
     tab.isPlaying = false
+    tab.preloadInBackground = false
 
     if (!previousView.webContents.isDestroyed()) {
       previousView.webContents.close({ waitForBeforeUnload: false })
@@ -881,9 +891,7 @@ export class TabManager {
       }
     }
 
-    if (this.activeTabId === tabId) {
-      this.browserWindow.contentView.removeChildView(tab.view)
-    }
+    this._detachView(tab)
 
     const entries = orderedTabs.filter(([id]) => id !== tabId)
     this.tabs = new Map(entries)
@@ -986,6 +994,63 @@ export class TabManager {
         this._boundsUpdateTimer = null
         applyBounds()
       }, 100)
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _attachView(tab) {
+    if (tab.view.webContents.isDestroyed()) {
+      return
+    }
+
+    const bounds = this.browserWindow.getContentBounds()
+    tab.view.setBounds({
+      x: 0,
+      y: 0,
+      width: bounds.width,
+      height: bounds.height
+    })
+    this.browserWindow.contentView.addChildView(tab.view)
+    this._attachedTabIds.add(tab.id)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _detachView(tab) {
+    if (!this._attachedTabIds.has(tab.id)) {
+      return
+    }
+
+    try {
+      this.browserWindow.contentView.removeChildView(tab.view)
+    } catch (error) {
+      console.error('Error detaching tab view:', error)
+    } finally {
+      this._attachedTabIds.delete(tab.id)
+    }
+  }
+
+  /**
+   * Attach an inactive tab behind the current active tab so its renderer can
+   * initialize media work without stealing focus.
+   * @param {TabInfo} tab
+   */
+  _attachBackgroundTab(tab) {
+    if (this.activeTabId === tab.id || this._attachedTabIds.has(tab.id)) {
+      return
+    }
+
+    const activeTab = this.activeTabId ? this.tabs.get(this.activeTabId) : null
+
+    this._attachView(tab)
+
+    if (activeTab && activeTab.id !== tab.id && !activeTab.view.webContents.isDestroyed()) {
+      this._detachView(activeTab)
+      this._attachView(activeTab)
+      activeTab.view.webContents.focus()
     }
   }
 

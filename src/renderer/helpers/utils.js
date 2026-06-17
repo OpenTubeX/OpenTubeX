@@ -255,7 +255,12 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
-      window.ftElectron.tabs.create({ route, query, makeActive })
+      window.ftElectron.tabs.create({
+        route,
+        query,
+        makeActive,
+        preloadInBackground: !makeActive && path.startsWith('/watch/')
+      })
     } else if (doCreateNewWindow) {
       // Open in new window
       window.ftElectron.openInNewWindow(path, query, searchQueryText)

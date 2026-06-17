@@ -37,7 +37,6 @@ import {
   showToast,
   writeFileWithPicker,
   throttle,
-  debounce,
   removeFromArrayIfExists,
   copyToClipboard,
 } from '../../helpers/utils'
@@ -2890,24 +2889,70 @@ export default defineComponent({
     /** @type {AbortController | undefined} */
     let sabrAbortController
 
+    const sabrBackoffRemainingMs = ref(0)
+    const sabrBackoffDurationMs = ref(0)
+    /** @type {number|null} */
+    let sabrBackoffIntervalId = null
+
+    const showSabrBackoffOverlay = computed(() => sabrBackoffRemainingMs.value > 0)
+    const sabrBackoffTimeLabel = computed(() => `${+(sabrBackoffRemainingMs.value / 1000).toFixed(1)}s`)
+    const sabrBackoffAriaLabel = computed(() => {
+      return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: +(sabrBackoffRemainingMs.value / 1000).toFixed(1) })
+    })
+    const sabrBackoffProgress = computed(() => {
+      if (sabrBackoffDurationMs.value <= 0) {
+        return '0deg'
+      }
+
+      const progress = 1 - (sabrBackoffRemainingMs.value / sabrBackoffDurationMs.value)
+      return `${Math.min(1, Math.max(0, progress)) * 360}deg`
+    })
+
+    function clearSabrBackoffTimer() {
+      if (sabrBackoffIntervalId !== null) {
+        clearInterval(sabrBackoffIntervalId)
+        sabrBackoffIntervalId = null
+      }
+
+      sabrBackoffRemainingMs.value = 0
+      sabrBackoffDurationMs.value = 0
+    }
+
+    function startSabrBackoffTimer(backoffMs) {
+      if (backoffMs <= 0) {
+        clearSabrBackoffTimer()
+        return
+      }
+
+      const endsAt = Date.now() + backoffMs
+      sabrBackoffDurationMs.value = backoffMs
+
+      const updateRemainingMs = () => {
+        const remainingMs = Math.max(0, endsAt - Date.now())
+        sabrBackoffRemainingMs.value = remainingMs
+
+        if (remainingMs === 0) {
+          clearSabrBackoffTimer()
+        }
+      }
+
+      if (sabrBackoffIntervalId !== null) {
+        clearInterval(sabrBackoffIntervalId)
+      }
+
+      updateRemainingMs()
+      sabrBackoffIntervalId = setInterval(updateRemainingMs, 100)
+    }
+
     if (process.env.SUPPORTS_LOCAL_API && props.sabrData) {
       sabrStream = /** @__NOINLINE__ */ setupSabrScheme(props.sabrData, () => player, () => sabrManifest, playerWidth, playerHeight)
       sabrAbortController = new AbortController()
-      // Since there can be 2 requests at the same time (video + audio), we debounce the listener to only show the message once
-      sabrStream.onBackoffRequested(debounce(({ backoffMs }) => {
-        showToast(
-          ({ remainingMs }) => {
-            // `+value` converts string back to float
-            return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: +(remainingMs / 1000).toFixed(1) })
-          },
-          // So that we don't see last countdown text like 0/N
-          backoffMs,
-          null,
-          sabrAbortController.signal,
-        )
-      }, 1000))
+      sabrStream.onBackoffRequested(({ backoffMs }) => {
+        startSabrBackoffTimer(backoffMs)
+      })
       sabrStream.onReloadOnce(() => {
         sabrAbortController.abort()
+        clearSabrBackoffTimer()
         emit('player-reload-requested', { wasPlaying: !video.value?.paused })
       })
     }
@@ -4837,6 +4882,7 @@ export default defineComponent({
     })
     onUnmounted(() => {
       initLoadWaitTimeToastAC.abort()
+      clearSabrBackoffTimer()
     })
 
     async function performFirstLoad() {
@@ -5420,6 +5466,10 @@ export default defineComponent({
       translateSponsorBlockCategory,
 
       showOfflineMessage,
+      showSabrBackoffOverlay,
+      sabrBackoffTimeLabel,
+      sabrBackoffAriaLabel,
+      sabrBackoffProgress,
 
       handlePlay,
       handlePause,
