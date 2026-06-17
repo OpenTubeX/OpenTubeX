@@ -2804,10 +2804,10 @@ export default defineComponent({
       const mode = autoPictureInPictureMode.value
       if (mode === 'never' || props.format === 'audio') return false
 
-      // Only auto-switch while the video is actually playing - paused or ended videos
-      // shouldn't be forced into a mini window.
+      // Only enter auto PiP while playing. Once auto PiP owns the session,
+      // keep it open while paused as long as the tab/scroll trigger still applies.
       const videoElement = video.value
-      if (!videoElement || videoElement.paused || videoElement.ended) return false
+      if (!videoElement || videoElement.ended || (videoElement.paused && !autoPipActive)) return false
 
       const tabTrigger = (mode === 'tab' || mode === 'both') && !tabVisible
       const scrollTrigger = (mode === 'scroll' || mode === 'both') && !videoMostlyVisible
