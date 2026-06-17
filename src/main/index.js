@@ -147,6 +147,15 @@ function runApp() {
           }
         },
         {
+          label: 'Duplicate Tab',
+          visible: contextMenuTab != null,
+          click: () => {
+            if (!manager || !contextMenuTab) return
+
+            manager.duplicateTab(contextMenuTab.id)
+          }
+        },
+        {
           label: 'Reopen Closed Tab',
           visible: isTabBarContextMenu,
           enabled: manager?.closedTabUrls.length > 0,
