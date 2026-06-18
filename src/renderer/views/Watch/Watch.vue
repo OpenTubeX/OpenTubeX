@@ -42,6 +42,7 @@
           :start-in-fullwindow="startNextVideoInFullwindow"
           :start-in-pip="startNextVideoInPip"
           :channel-id="channelId"
+          :published="videoPublished"
           :current-playback-rate="currentPlaybackRate"
           :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"

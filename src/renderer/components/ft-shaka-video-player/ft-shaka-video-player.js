@@ -61,6 +61,9 @@ const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
 const SPONSORBLOCK_PREVIEW_SECONDS = 2
 const SPONSORBLOCK_TIMESTAMP_PRECISION_MS = 1
 const SPONSORBLOCK_PREVIEW_END_EPSILON_SECONDS = 0.01
+const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
+const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
+const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
 
 function createSponsorBlockDraftId() {
   if (typeof crypto.randomUUID === 'function') {
@@ -254,6 +257,10 @@ export default defineComponent({
     channelId: {
       type: String,
       default: ''
+    },
+    published: {
+      type: Number,
+      default: 0
     },
     currentPlaybackRate: {
       type: Number,
@@ -955,9 +962,80 @@ export default defineComponent({
      * @type {Set<string>}
      */
     let sponsorBlockDismissedPromptSegments = new Set()
+    let sponsorBlockNotFoundRefetchTimeout = null
+
+    function clearSponsorBlockNotFoundRefetchTimeout() {
+      if (sponsorBlockNotFoundRefetchTimeout !== null) {
+        clearTimeout(sponsorBlockNotFoundRefetchTimeout)
+        sponsorBlockNotFoundRefetchTimeout = null
+      }
+    }
+
+    function isRecentVideoForSponsorBlockRefetch() {
+      if (!Number.isFinite(props.published) || props.published <= 0) {
+        return false
+      }
+
+      const videoAgeMs = Date.now() - props.published
+      return videoAgeMs >= 0 && videoAgeMs <= SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS
+    }
+
+    function scheduleSponsorBlockNotFoundRefetch() {
+      clearSponsorBlockNotFoundRefetchTimeout()
+
+      if (
+        !useSponsorBlock.value ||
+        !isRecentVideoForSponsorBlockRefetch() ||
+        props.videoId === '' ||
+        sponsorSkips.value.seekBar.length === 0 ||
+        sponsorBlockSegments.length > 0
+      ) {
+        return
+      }
+
+      const videoId = props.videoId
+      const refetchDelayMs = SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS +
+        Math.random() * (SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS - SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS)
+
+      sponsorBlockNotFoundRefetchTimeout = setTimeout(() => {
+        sponsorBlockNotFoundRefetchTimeout = null
+
+        if (!ui || !player || props.videoId !== videoId || sponsorBlockSegments.length > 0) {
+          return
+        }
+
+        refetchSponsorBlockSegmentsWhenNotFound()
+      }, refetchDelayMs)
+    }
+
+    async function refetchSponsorBlockSegmentsWhenNotFound() {
+      let segments, averageDuration
+
+      try {
+        ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
+      } catch (e) {
+        console.error(e)
+        return
+      }
+
+      if (!ui || !player) {
+        return
+      }
+
+      if (segments.length > 0) {
+        sponsorBlockSegments = segments
+        sponsorBlockAverageVideoDuration = averageDuration
+        refreshSponsorBlockMarkers()
+      } else {
+        scheduleSponsorBlockNotFoundRefetch()
+      }
+    }
 
     async function setupSponsorBlock() {
       let segments, averageDuration
+      let refetchWhenNotFound = false
+
+      clearSponsorBlockNotFoundRefetchTimeout()
 
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
@@ -967,6 +1045,7 @@ export default defineComponent({
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
+        refetchWhenNotFound = segments.length === 0
       } catch (e) {
         console.error(e)
         segments = []
@@ -983,6 +1062,8 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockSegments = segments
         sponsorBlockAverageVideoDuration = averageDuration
+      } else if (refetchWhenNotFound) {
+        scheduleSponsorBlockNotFoundRefetch()
       }
 
       refreshSponsorBlockMarkers()
@@ -5293,6 +5374,7 @@ export default defineComponent({
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))
       promptSponsorBlockSegments.value = []
       stopSponsorBlockToastTimer()
+      clearSponsorBlockNotFoundRefetchTimeout()
 
       window.removeEventListener('online', onlineHandler)
       window.removeEventListener('offline', offlineHandler)
