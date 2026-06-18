@@ -27,26 +27,43 @@
   display: inline-block;
 }
 
-.commentSort {
+.commentHeaderActions {
   float: inline-end;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.commentHeaderActionsEmpty {
+  margin-block-start: 12px;
+  margin-inline-end: 8px;
 }
 
 @media only screen and (width <= 1000px) {
-  .commentSort {
+  .commentHeaderActions {
     float: none;
+    justify-content: flex-end;
   }
 }
 
+.reloadComments {
+  color: var(--title-color);
+}
+
+.reloadCommentsAligned {
+  margin-block-start: 39px;
+}
 
 .comment {
   padding: 15px;
 }
 
-.hideComments {
+.commentTitleAction {
   font-size: 13px;
   text-decoration: underline;
   cursor: pointer;
   color: var(--title-color);
+  margin-inline-start: 5px;
 }
 
 .commentThumbnail {

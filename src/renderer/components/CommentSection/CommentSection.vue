@@ -8,7 +8,7 @@
     >
       {{ $t("Comments.Comments") }}
       <span
-        class="hideComments"
+        class="commentTitleAction"
         role="button"
         tabindex="0"
         @click="showComments = false"
@@ -40,16 +40,31 @@
     >
       {{ $t("Comments.Click to View Comments") }}
     </h4>
-    <FtSelect
-      v-if="commentData.length > 0 && !isLoading && showComments && showSortBy"
-      class="commentSort"
-      :placeholder="$t('Global.Sort By')"
-      :value="currentSortValue"
-      :select-names="sortNames"
-      :select-values="sortValues"
-      :icon="['fas', 'arrow-down-short-wide']"
-      @change="handleSortChange"
-    />
+    <div
+      v-if="showComments && !isLoading"
+      class="commentHeaderActions"
+      :class="{ commentHeaderActionsEmpty: commentData.length === 0 || !showSortBy }"
+    >
+      <FtSelect
+        v-if="commentData.length > 0 && showSortBy"
+        :placeholder="$t('Global.Sort By')"
+        :value="currentSortValue"
+        :select-names="sortNames"
+        :select-values="sortValues"
+        :icon="['fas', 'arrow-down-short-wide']"
+        @change="handleSortChange"
+      />
+      <FtIconButton
+        :title="$t('Comments.Reload Comments')"
+        :icon="['fas', 'sync']"
+        :size="12"
+        :padding="8"
+        :use-shadow="false"
+        class="reloadComments"
+        :class="{ reloadCommentsAligned: commentData.length > 0 && showSortBy }"
+        @click="reloadCommentData"
+      />
+    </div>
     <div
       v-if="commentData.length > 0 && showComments"
     >
@@ -327,6 +342,7 @@ import { computed, ref, shallowRef } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 
 import FtCard from '../ft-card/ft-card.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
@@ -470,6 +486,14 @@ function handleSortChange() {
   getCommentData()
 }
 
+function reloadCommentData() {
+  commentData.value = []
+  nextPageToken.value = null
+  localCommentsInstance = undefined
+  replyTokens.clear()
+  getCommentData({ preserveSort: true })
+}
+
 const emit = defineEmits(['timestamp-event'])
 
 /**
@@ -493,7 +517,7 @@ function isSubscribedToChannel(channelId) {
   return subscribedChannelIds.value.has(channelId)
 }
 
-function getCommentData() {
+function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -503,7 +527,7 @@ function getCommentData() {
       getPostCommentsInvidious()
     }
   } else {
-    getCommentDataLocal()
+    getCommentDataLocal(false, preserveSort)
   }
 }
 
@@ -574,8 +598,9 @@ const replyTokens = new Map()
 
 /**
  * @param {boolean | undefined} more
+ * @param {boolean} preserveSort
  */
-async function getCommentDataLocal(more = false) {
+async function getCommentDataLocal(more = false, preserveSort = false) {
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
@@ -587,13 +612,17 @@ async function getCommentDataLocal(more = false) {
     } else {
       if (props.isPostComments) {
         comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
-        sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
-        localCommentsInstance = comments
       } else {
         comments = await getLocalComments(props.id)
-        sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
-        localCommentsInstance = comments
       }
+
+      if (preserveSort) {
+        comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
+      } else {
+        sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
+      }
+
+      localCommentsInstance = comments
     }
 
     const parsedComments = comments.contents
