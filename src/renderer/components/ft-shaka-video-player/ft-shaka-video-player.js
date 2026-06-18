@@ -4233,7 +4233,7 @@ export default defineComponent({
      * @param {KeyboardEvent} event
      */
     function keyboardShortcutHandler(event) {
-      if (!player || !hasLoaded.value) {
+      if (!player) {
         return
       }
 
@@ -4265,6 +4265,45 @@ export default defineComponent({
 
       // allow copying text
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
+        return
+      }
+
+      switch (event.key.toLowerCase()) {
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN:
+          // Toggle full screen
+          event.preventDefault()
+          ui.getControls().toggleFullScreen()
+          return
+        case 'escape':
+          // Exit full window
+          if (fullWindowEnabled.value) {
+            event.preventDefault()
+
+            events.dispatchEvent(new CustomEvent('setFullWindow', {
+              detail: false
+            }))
+          }
+          return
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW:
+          // Toggle full window mode
+          event.preventDefault()
+          events.dispatchEvent(new CustomEvent('setFullWindow', {
+            detail: !fullWindowEnabled.value
+          }))
+          return
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE:
+          // Toggle theatre mode
+          if (props.theatrePossible) {
+            event.preventDefault()
+
+            events.dispatchEvent(new CustomEvent('toggleTheatreMode', {
+              detail: !props.useTheatreMode
+            }))
+          }
+          return
+      }
+
+      if (!hasLoaded.value) {
         return
       }
 
@@ -4320,11 +4359,6 @@ export default defineComponent({
           // Increase playback rate by user configured interval
           event.preventDefault()
           changePlayBackRate(videoPlaybackRateInterval.value)
-          break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN:
-          // Toggle full screen
-          event.preventDefault()
-          ui.getControls().toggleFullScreen()
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE:
           // Toggle mute only if metakey is not pressed
@@ -4470,33 +4504,6 @@ export default defineComponent({
             const seekRange = player.seekRange()
             video_.currentTime = seekRange.end
             showOverlayControls()
-          }
-          break
-        case 'escape':
-          // Exit full window
-          if (fullWindowEnabled.value) {
-            event.preventDefault()
-
-            events.dispatchEvent(new CustomEvent('setFullWindow', {
-              detail: false
-            }))
-          }
-          break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW:
-          // Toggle full window mode
-          event.preventDefault()
-          events.dispatchEvent(new CustomEvent('setFullWindow', {
-            detail: !fullWindowEnabled.value
-          }))
-          break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE:
-          // Toggle theatre mode
-          if (props.theatrePossible) {
-            event.preventDefault()
-
-            events.dispatchEvent(new CustomEvent('toggleTheatreMode', {
-              detail: !props.useTheatreMode
-            }))
           }
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT:
