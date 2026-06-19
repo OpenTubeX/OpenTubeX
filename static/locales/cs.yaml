@@ -600,6 +600,7 @@ Settings:
     Show Family Friendly Only: Zobrazit pouze obsah vhodný pro rodiny
     Hide Unsubscribe Button: Skrýt tlačítko ke zrušení odběru
     Hide Uploader on Watch page: Skrýt autora na stránce sledování
+    Disable Channel Links: Vypnout odkazy kanálu
   Experimental Settings:
     Experimental Settings: Experimentální
     Warning: Tato nastavení jsou experimentální, při jejich aktivaci může docházet k pádům. Důrazně doporučujeme vytvářet zálohy. Používejte na vlastní nebezpečí!
@@ -864,6 +865,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Zbývající čas prvotní reklamy: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Zbývající čas pauzy SABR: {remindingTimeSeconds} s'
   Popout Live Chat: Vyskakovací chat
+  Private: Soukromá videa nelze sledovat v aplikaci OpenTubeX, jelikož vyžadují přihlášení k účtu Google a vlastnictví videa.
 Playlist:
   #& About
   View Full Playlist: 'Zobrazit celý seznam skladeb'

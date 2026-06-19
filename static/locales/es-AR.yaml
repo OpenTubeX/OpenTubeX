@@ -30,6 +30,8 @@ Search Filters:
   Search Filters: 'Filtros de búsqueda'
   Prioritize:
     Most Relevant: 'Más relevante'
+    Prioritize: Priorizar
+    Popularity: Popularidad
   Time:
     Time: 'Hora'
     Any Time: 'En cualquier momento'
@@ -64,6 +66,7 @@ Search Filters:
     Live: En vivo
     Location: Ubicación
     HDR: HDR
+    4K: 4k
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: 'Suscripciones'
@@ -81,6 +84,7 @@ Trending:
   Trending: 'Tendencias'
   Gaming: Juegos
   Trending Tabs: Lo más destacado
+  Sports: Deportes
 Most Popular: 'Más popular'
 Playlists: 'Listas de reproducción'
 User Playlists:

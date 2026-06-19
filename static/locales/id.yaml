@@ -612,6 +612,7 @@ Settings:
     Show Family Friendly Only: Tampilkan Hanya yang Ramah Keluarga
     Hide Search Bar: Sembunyikan Kotak Pencarian
     Hide Uploader on Watch page: Sembunyikan Pengunggah pada Halaman Tontonan
+    Disable Channel Links: Nonaktifkan Tautan Saluran
   Return to Settings Menu: Kembali ke Menu Pengaturan
   Sort Settings Sections (A-Z): Urutkan Bagian Pengaturan (A-Z)
 About:
@@ -861,6 +862,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Waktu iklan pra-putar yang tersisa: {remindingTimeSeconds}detik'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Waktu tunggu SABR yang tersisa: {remindingTimeSeconds}detik'
+  Private: Video pribadi tidak dapat ditonton di OpenTubeX karena memerlukan login Google dan hak kepemilikan atas video tersebut.
 Playlist:
   #& About
   View Full Playlist: 'Tampilkan Daftar Putar Penuh'

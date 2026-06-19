@@ -594,6 +594,7 @@ Settings:
     Hide Search Bar: 隐藏搜索栏
     Hide Unsubscribe Button: 隐藏“取消订阅”按钮
     Hide Uploader on Watch page: 在观看页面隐藏上传者
+    Disable Channel Links: 禁用频道链接
   Experimental Settings:
     Experimental Settings: 实验性
     Warning: 这些设置是实验性的，启用可能导致崩溃。强烈建议进行备份。使用风险自负！
@@ -817,6 +818,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 剩余的预滚动广告时间:：{remindingTimeSeconds} 秒
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 剩余 SABR 后退时间：{remindingTimeSeconds} 秒
   Popout Live Chat: 弹出式聊天
+  Private: 无法在 OpenTubeX 中观看私密视频，因它们需要 Google 登录和视频所有权。
 Playlist:
   #& About
   View Full Playlist: '查看完整播放列表'

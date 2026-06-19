@@ -599,6 +599,7 @@ Settings:
     Show Family Friendly Only: Näita ainult peresõbralikku sisu
     Hide Search Bar: Peida otsinguriba
     Hide Uploader on Watch page: Peida üleslaadija videovaate lehelt
+    Disable Channel Links: Lülita kanalite lingid välja
   Experimental Settings:
     Experimental Settings: Katsed
     Warning: Tegemist on katseliste seadistustega ja sisselülitamisel võivad põhjustada rakenduse kokkujooksmist. Kindlasti ära unusta oma andmete varundamist. Jätka omal vastutusel!
@@ -860,6 +861,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Järelejäänud sisueelse reklaami aeg: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Järelejäänud aeg SABR-protokollist loobumiseks: {remindingTimeSeconds}s'
   Popout Live Chat: Vestlus hüpikaknas
+  Private: Privaatseid videoid OpenTubeX'is vaadata ei saa - nad vajavad sisselogimist Google'i teenusega ja video omandi kinnitust.
 Playlist:
   #& About
   View Full Playlist: 'Näita kogu esitusloendit'

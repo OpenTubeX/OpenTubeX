@@ -728,6 +728,7 @@ Settings:
     Hide Uploader on Watch page: Hide Uploader on Watch page
     Show Family Friendly Only: Show Family Friendly Only
     Hide Search Bar: Hide Search Bar
+    Disable Channel Links: Disable Channel Links
   Experimental Settings:
     Experimental Settings: Experimental
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
@@ -886,6 +887,7 @@ Video:
   MembersOnly: Members-only videos cannot be watched with OpenTubeX as they require Google login and paid membership to the uploader's channel.
   AgeRestricted: Age-restricted videos cannot be watched with OpenTubeX as they require Google login and using an age-verified YouTube account.
   DRMProtected: DRM protected videos cannot be played in OpenTubeX, as they require proprietary, closed source components. If you want to watch this video please watch it on the official YouTube website in a DRM enabled web browser.
+  Private: Private videos cannot be watched in OpenTubeX as they require Google login and ownership of the video.
   More Options: More Options
   Mark As Watched: Mark As Watched
   Remove From History: Remove From History

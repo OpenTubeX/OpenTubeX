@@ -585,6 +585,7 @@ Settings:
     Hide Uploader on Watch page: Kaŝi kanalon sur spektopaĝo
     Show Family Friendly Only: Nur montri enhavon taŭgan por familioj
     Hide Search Bar: Kaŝi serĉobreton
+    Disable Channel Links: Malŝalti ligilojn al kanaloj
   Experimental Settings:
     Experimental Settings: Eksperimenta
     Warning: Ĉi tiuj agordoj estas eksperimentaj kaj povus kaŭzi kolapsojn dum ŝaltitaj. Savkopioj ege farindas. Vi estas avertita!
@@ -797,6 +798,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Restanta tempo de komenca anonco: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Restanta tempo de atendo por SABR: {remindingTimeSeconds}s'
+  Private: Privataj videaĵoj ne spekteblas per OpenTubeX, ĉar ili postulas ensaluton de Google kaj la videaĵo devas aparteni al la uzanto.
 More: Pli
 Search Bar:
   Clear Input: Klarigi enigon
@@ -806,7 +808,7 @@ Open New Window: Malfermi novan fenestron
 Preferences: Preferoj
 New Window: Nova Fenestro
 Go to page: Iri al {page}
-Actual size: Reala grando
+Actual size: Fakta grandeco
 Profile:
   Select All: Elekti ĉiujn
   Profile Settings: Profilo

@@ -446,7 +446,7 @@ Settings:
     Remember Search History: Ricorda la Cronologia delle ricerche
     Clear Search History and Cache: Cancella la Cronologia delle ricerche e la cache
     Watched Progress Saving Mode:
-      Tooltip: Automaico = Salva a ogni uscita dalla pagina video, quando il video è terminato e si è verificato un errore (ad esempio, ratelimited e sessione di visione scaduta). Semiautomatico = Come Automaico, tranne all'uscita dalla pagina video e può salvare manualmente i progressi tramite un pulsante denominato Salva i progressi guardati, situato sotto il lettore video.
+      Tooltip: Automatico = Salva a ogni uscita dalla pagina video, quando il video è terminato e si è verificato un errore (ad esempio, ratelimited e sessione di visione scaduta). Semiautomatico = Come Automatico, tranne all'uscita dalla pagina video e può salvare manualmente i progressi tramite un pulsante denominato Salva i progressi guardati, situato sotto il lettore video.
       Modes:
         Never: Mai
         Semi-auto: Semiautomatico
@@ -597,6 +597,7 @@ Settings:
     Show Family Friendly Only: Mostra Solo per famiglie
     Hide Search Bar: Nascondi la barra di ricerca
     Hide Uploader on Watch page: Nascondi l'autore del caricamento dalla Pagina di visualizzazione
+    Disable Channel Links: Disabilita i collegamenti del canale
   Experimental Settings:
     Replace HTTP Cache: Sostituisci la cache HTTP
     Experimental Settings: Sperimentale

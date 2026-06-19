@@ -145,7 +145,8 @@
         </h3>
       </router-link>
       <div class="infoLine">
-        <router-link
+        <component
+          :is="disableChannelLinks ? 'span' : 'router-link'"
           v-if="channelId !== null"
           class="channelName"
           dir="auto"
@@ -153,7 +154,7 @@
           @auxclick="handleChannelLinkClick"
         >
           {{ channelName }}
-        </router-link>
+        </component>
         <bdi v-else-if="channelName !== null">
           {{ channelName }}
         </bdi>

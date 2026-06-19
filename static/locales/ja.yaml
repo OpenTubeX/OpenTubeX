@@ -593,6 +593,7 @@ Settings:
     Show Family Friendly Only: ファミリー向けのみ表示
     Hide Unsubscribe Button: 登録解除ボタンの非表示
     Hide Uploader on Watch page: 視聴ページで投稿者情報を非表示
+    Disable Channel Links: チャンネルリンクを無効にする
   Experimental Settings:
     Replace HTTP Cache: HTTP キャッシュの置換
     Experimental Settings: 試験的
@@ -813,6 +814,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': '残りのプレロール広告時間: {remindingTimeSeconds}秒'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': '残りのSABRバックオフ時間: {remindingTimeSeconds}秒'
+  Private: 非公開動画は、Googleアカウントでのログインと動画の所有権が必要なため、OpenTubeXでは視聴できません。
 Playlist:
   #& About
   View Full Playlist: '完全な再生リストの表示'

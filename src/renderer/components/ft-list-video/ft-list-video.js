@@ -562,6 +562,10 @@ export default defineComponent({
     deArrowCache: function () {
       return this.$store.getters.getDeArrowCache[this.id]
     },
+
+    disableChannelLinks: function () {
+      return this.$store.getters.getDisableChannelLinks
+    },
   },
   watch: {
     showAddToPlaylistPrompt(value) {

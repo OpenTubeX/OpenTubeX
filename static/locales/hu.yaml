@@ -602,6 +602,7 @@ Settings:
     Hide Search Bar: Keresősáv elrejtése
     Hide Unsubscribe Button: Leiratkozás gomb elrejtése
     Hide Uploader on Watch page: Feltöltő nevének elrejtése a megtekintési lapról
+    Disable Channel Links: Csatornahivatkozások letiltása
   Experimental Settings:
     Replace HTTP Cache: HTTP-gyorsítótár cseréje
     Experimental Settings: Kísérleti
@@ -624,7 +625,7 @@ About:
   About: 'Névjegy'
   #& About
   these people and projects: az alábbi emberek és projektek
-  Donate: Adományozás
+  Donate: Adakozás
   Credits: Készítők
   Translate: Fordítás
   room rules: szobaszabályok
@@ -866,6 +867,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Hátralévő előzetes hirdetési idő: {remindingTimeSeconds} mp'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Hátralévő SABR várakozási idő: {remindingTimeSeconds} mp'
   Popout Live Chat: Felugró csevegés
+  Private: A privát videók nem tekinthetők meg a OpenTubeX-on, mivel a megtekintésükhöz Google-bejelentkezés és a videó tulajdonjoga szükséges.
 Playlist:
   #& About
   View Full Playlist: 'Teljes lejátszási lista megtekintése'
