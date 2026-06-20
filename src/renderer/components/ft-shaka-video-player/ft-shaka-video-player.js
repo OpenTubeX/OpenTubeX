@@ -5171,15 +5171,6 @@ export default defineComponent({
           )
         }
 
-        if (!isLive.value && props.chaptersSrc.length > 0) {
-          promises.push(
-            // Only log the error, as the chapters are a nice to have (we have our own UI outside of the player too)
-            // If an error occurs with them, it is not critical
-            player.addChaptersTrack(props.chaptersSrc, 'und', 'text/vtt')
-              .catch(error => logShakaError(error, 'addChaptersTrack', props.videoId, props.chaptersSrc))
-          )
-        }
-
         await Promise.all(promises)
       }
 
