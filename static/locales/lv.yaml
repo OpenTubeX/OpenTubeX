@@ -713,6 +713,14 @@ Video:
     Stats:
       Stats: Statistika
       Video ID: 'Video identifikators (ID): {videoId}'
+      Resolution: "Izšķirtspēja: {width}x{height}{'@'}{frameRate}"
+      Player Dimensions: 'Atskaņotāja izmēri: {width}x{height}'
+      Bitrate: 'Bitu pārraides ātrums: {bitrate} kbit/s'
+      Volume: 'Skaļums: {volumePercentage}%'
+      Dropped Frames / Total Frames: 'Izlaisti kadri: {droppedFrames} / Kopējais kadru skaits: {totalFrames}'
+      CodecAudio: 'Kodeks: {audioCodec} ({audioItag})'
+      CodecsVideoAudio: 'Kodeki: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
+      CodecsVideoAudioNoItags: 'Kodeki: {videoCodec} / {audioCodec}'
     Audio Tracks: Audio celiņi
     Autoplay is off: Automātiskā atskaņošana izslēgta
     Autoplay is on: Automātiskā atskaņošana ieslēgta
@@ -722,8 +730,8 @@ Video:
 Playlist:
   #& About
   Playlist: 'Atskaņošanas saraksts'
-  View Full Playlist: ''
-  Last Updated On: ''
+  View Full Playlist: 'Skatīt visu atskaņošanas sarakstu'
+  Last Updated On: 'Pēdējoreiz atjaunināts'
 
 # On Video Watch Page
 #* Published
