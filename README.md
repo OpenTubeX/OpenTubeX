@@ -59,6 +59,10 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - Optional Quick Playback Speed Bar in the player
 <img width="488" height="44" alt="image" src="https://github.com/user-attachments/assets/cd055a73-d188-4633-aac6-61ab708a4cd6" />
 
+- Return YouTube Dislike Support
+<img height="57" alt="image" src="https://github.com/user-attachments/assets/8ed84d30-9e6f-4e2e-a09e-c3dbd74f8c32" />
+<img width="140" height="57" alt="image" src="https://github.com/user-attachments/assets/45987612-64a1-48b6-8254-bd8966b3178a" />
+
 
 <br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
