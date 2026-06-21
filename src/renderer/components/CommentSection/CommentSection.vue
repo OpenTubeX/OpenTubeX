@@ -316,8 +316,12 @@
         {{ $t("Comments.There are no comments available for this video") }}
       </h3>
     </div>
+    <FtSpinner
+      v-if="shouldShowAutoLoadMoreCommentsSpinner"
+      label="Loading more comments"
+    />
     <h4
-      v-if="canPerformMoreCommentLoading"
+      v-else-if="canPerformMoreCommentLoading"
       class="getMoreComments"
       role="button"
       tabindex="0"
@@ -349,6 +353,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
@@ -396,6 +401,7 @@ const props = defineProps({
 })
 
 const isLoading = ref(false)
+const isLoadingMoreComments = ref(false)
 const showComments = ref(false)
 const nextPageToken = shallowRef(null)
 
@@ -436,7 +442,15 @@ const canPerformInitialCommentLoading = computed(() => {
 })
 
 const canPerformMoreCommentLoading = computed(() => {
-  return commentData.value.length > 0 && !isLoading.value && showComments.value && !!nextPageToken.value
+  return commentData.value.length > 0 && !isLoading.value && !isLoadingMoreComments.value && showComments.value && !!nextPageToken.value
+})
+
+const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
+  return generalAutoLoadMorePaginatedItemsEnabled.value &&
+    commentData.value.length > 0 &&
+    !isLoading.value &&
+    showComments.value &&
+    (isLoadingMoreComments.value || !!nextPageToken.value)
 })
 
 const observeVisibilityOptions = computed(() => {
@@ -541,15 +555,22 @@ function getMoreComments() {
   if (commentData.value.length === 0 || nextPageToken.value == null) {
     showToast(t('Comments.There are no more comments for this video'))
   } else {
+    isLoadingMoreComments.value = true
+    let commentLoadPromise
+
     if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
       if (!props.isPostComments) {
-        getCommentDataInvidious()
+        commentLoadPromise = getCommentDataInvidious()
       } else {
-        getPostCommentsInvidious()
+        commentLoadPromise = getPostCommentsInvidious()
       }
     } else {
-      getCommentDataLocal(true)
+      commentLoadPromise = getCommentDataLocal(true)
     }
+
+    commentLoadPromise?.finally(() => {
+      isLoadingMoreComments.value = false
+    })
   }
 }
 
@@ -678,9 +699,9 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       localCommentsInstance = undefined
       showToast(t('Falling back to Invidious API'))
       if (props.isPostComments) {
-        getPostCommentsInvidious()
+        return getPostCommentsInvidious()
       } else {
-        getCommentDataInvidious()
+        return getCommentDataInvidious()
       }
     } else {
       isLoading.value = false
@@ -781,7 +802,7 @@ async function getCommentDataInvidious() {
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
       showToast(t('Falling back to Local API'))
-      getCommentDataLocal()
+      return getCommentDataLocal()
     } else {
       isLoading.value = false
     }
@@ -827,7 +848,7 @@ function getPostCommentsInvidious() {
     ? getInvidiousCommunityPostComments({ postId: props.id, authorId: props.postAuthorId })
     : getInvidiousCommunityPostCommentReplies({ postId: props.id, replyToken: nextPageToken.value, authorId: props.postAuthorId })
 
-  fetchComments.then(({ response, commentData: comments, continuation }) => {
+  return fetchComments.then(({ response, commentData: comments, continuation }) => {
     comments = comments.map(({ replyToken, ...comment }) => {
       if (comment.hasReplyToken) {
         replyTokens.set(comment.id, replyToken)
@@ -851,7 +872,7 @@ function getPostCommentsInvidious() {
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
       showToast(t('Falling back to Local API'))
-      getCommentDataLocal()
+      return getCommentDataLocal()
     } else {
       isLoading.value = false
     }

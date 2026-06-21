@@ -9,13 +9,18 @@
         Dummy element to be observed by Intersection Observer
       -->
     </div>
-    <slot />
+    <FtSpinner
+      v-if="generalAutoLoadMorePaginatedItemsEnabled"
+      label="Loading more"
+    />
+    <slot v-else />
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 
+import FtSpinner from './FtSpinner/FtSpinner.vue'
 import store from '../store/index'
 
 const emit = defineEmits(['load-next-page'])

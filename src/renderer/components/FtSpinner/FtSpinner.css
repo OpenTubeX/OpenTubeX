@@ -1,0 +1,29 @@
+.spinnerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  padding-block: 16px;
+}
+
+.inline {
+  inline-size: auto;
+  padding-block: 0;
+}
+
+.spinner {
+  box-sizing: border-box;
+  display: inline-block;
+  border-style: solid;
+  border-color: var(--secondary-card-bg-color);
+  border-block-start-color: var(--primary-color);
+  border-inline-end-color: var(--primary-color);
+  border-radius: 50%;
+  animation: ft-spinner-rotate 700ms linear infinite;
+}
+
+@keyframes ft-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
