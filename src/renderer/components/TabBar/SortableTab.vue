@@ -17,7 +17,6 @@
     role="button"
     tabindex="-1"
     @click="handleClick"
-    @pointerdown="handlePointerDown"
     @mousedown.middle.prevent
     @auxclick.prevent="handleAuxClick"
   >
@@ -107,15 +106,6 @@ const displayTitle = computed(() => {
 
 function handleClick() {
   emit('activate', props.tab.id)
-}
-
-/**
- * @param {PointerEvent} event
- */
-function handlePointerDown(event) {
-  if (event.button === 1) {
-    event.preventDefault()
-  }
 }
 
 /**
