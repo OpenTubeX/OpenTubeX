@@ -205,7 +205,7 @@ const state = {
   hideVideoDescription: false,
   hideLiveChat: false,
   hideLiveStreams: false,
-  hideHeaderLogo: true,
+  hideHeaderLogo: false,
   hidePlaylists: false,
   hidePopularVideos: false,
   hideRecommendedVideos: false,
