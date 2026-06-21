@@ -139,28 +139,38 @@
 }
 
 .sabrBackoffProgress {
-  --sabr-backoff-progress: 0deg;
-
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 92px;
   height: 92px;
+  border: 1px solid rgb(255 255 255 / 22%);
   border-radius: 50%;
-  background:
-    radial-gradient(circle, rgb(0 0 0 / 82%) 0 56%, transparent 57%),
-    conic-gradient(var(--primary-color) var(--sabr-backoff-progress), rgb(255 255 255 / 24%) 0);
+  background: rgb(0 0 0 / 82%);
   box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
   color: #fff;
 }
 
-.sabrBackoffProgress::after {
-  content: '';
+.sabrBackoffRing {
   position: absolute;
-  inset: 8px;
-  border: 1px solid rgb(255 255 255 / 22%);
-  border-radius: 50%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.sabrBackoffRingTrack,
+.sabrBackoffRingProgress {
+  stroke-width: 4;
+}
+
+.sabrBackoffRingTrack {
+  stroke: rgb(255 255 255 / 24%);
+}
+
+.sabrBackoffRingProgress {
+  stroke: var(--primary-color);
 }
 
 .sabrBackoffTime {

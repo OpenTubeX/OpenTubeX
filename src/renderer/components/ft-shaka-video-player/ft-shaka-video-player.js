@@ -2996,13 +2996,16 @@ export default defineComponent({
     const sabrBackoffAriaLabel = computed(() => {
       return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: +(sabrBackoffRemainingMs.value / 1000).toFixed(1) })
     })
-    const sabrBackoffProgress = computed(() => {
+    const SABR_BACKOFF_RING_RADIUS = 38
+    const sabrBackoffRingCircumference = 2 * Math.PI * SABR_BACKOFF_RING_RADIUS
+    const sabrBackoffRingDashoffset = computed(() => {
       if (sabrBackoffDurationMs.value <= 0) {
-        return '0deg'
+        return sabrBackoffRingCircumference
       }
 
       const progress = 1 - (sabrBackoffRemainingMs.value / sabrBackoffDurationMs.value)
-      return `${Math.min(1, Math.max(0, progress)) * 360}deg`
+      const clampedProgress = Math.min(1, Math.max(0, progress))
+      return sabrBackoffRingCircumference * (1 - clampedProgress)
     })
 
     function clearSabrBackoffTimer() {
@@ -5603,7 +5606,8 @@ export default defineComponent({
       showSabrBackoffOverlay,
       sabrBackoffTimeLabel,
       sabrBackoffAriaLabel,
-      sabrBackoffProgress,
+      sabrBackoffRingCircumference,
+      sabrBackoffRingDashoffset,
 
       handlePlay,
       handlePause,

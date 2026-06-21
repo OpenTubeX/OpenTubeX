@@ -119,10 +119,29 @@
         aria-live="polite"
         :aria-label="sabrBackoffAriaLabel"
       >
-        <div
-          class="sabrBackoffProgress"
-          :style="{ '--sabr-backoff-progress': sabrBackoffProgress }"
-        >
+        <div class="sabrBackoffProgress">
+          <svg
+            class="sabrBackoffRing"
+            viewBox="0 0 92 92"
+            aria-hidden="true"
+          >
+            <circle
+              class="sabrBackoffRingTrack"
+              cx="46"
+              cy="46"
+              :r="38"
+              fill="none"
+            />
+            <circle
+              class="sabrBackoffRingProgress"
+              cx="46"
+              cy="46"
+              :r="38"
+              fill="none"
+              :stroke-dasharray="sabrBackoffRingCircumference"
+              :stroke-dashoffset="sabrBackoffRingDashoffset"
+            />
+          </svg>
           <span class="sabrBackoffTime">
             {{ sabrBackoffTimeLabel }}
           </span>
