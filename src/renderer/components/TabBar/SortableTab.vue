@@ -17,6 +17,7 @@
     role="button"
     tabindex="-1"
     @click="handleClick"
+    @mousedown.middle.prevent
     @auxclick.prevent="handleAuxClick"
   >
     <span class="tabTitle">
