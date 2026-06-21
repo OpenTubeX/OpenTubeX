@@ -44,7 +44,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - Display SponsorBlock community contributed chapters
 - Experimental SponsorBlock submission
 
-- Tabs like in a web browser (experimental)
+- Tabs like in a web browser
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 
 - Option to define a script to run when YouTube blocked your IP. It will automatically run it and reload the video after it has finished
