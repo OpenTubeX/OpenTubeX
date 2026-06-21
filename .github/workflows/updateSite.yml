@@ -1,65 +1,92 @@
-name: Update Site Version Number
+name: Update Download Site Release
 
 on:
   workflow_dispatch:
+    inputs:
+      releaseTag:
+        type: string
+        required: false
+        description: Release tag to publish on the download site, for example v0.25.5-beta
   release:
     types: [published]
 
 permissions: {}
 
 jobs:
-  build:
-    name: 'Update Site Version Number'
+  update-site:
+    name: Update download site release
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
-      with:
-        repository: OpenTubeX/OpenTubeXApp.io
-        token: ${{ secrets.FLATHUB_TOKEN }}
-        persist-credentials: true
-
-    - name: Get releases
-      id: releases
+    - name: Resolve release version
+      id: release
       shell: bash
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Fetch 4 releases as filtering out drafts happens on the client side and we are unlikely to have more than 2 drafts open at the same time
+        EVENT_TAG: ${{ github.event.release.tag_name }}
+        INPUT_TAG: ${{ inputs.releaseTag }}
       run: |
-        tags="$(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --json tagName --limit 4)"
+        tag="${INPUT_TAG:-$EVENT_TAG}"
+
+        if [ -z "$tag" ]; then
+          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+        fi
+
+        version="${tag#v}"
+        version="${version%-beta}"
 
         {
-          echo 'versions<<EOF'
-          echo "$tags" | jq --compact-output 'map(.tagName | ltrimstr("v") | rtrimstr("-beta"))'
-          echo EOF
+          echo "tag=$tag"
+          echo "version=$version"
         } >> "$GITHUB_OUTPUT"
 
-    - name: Set Master Branch
-    # Currently the default branch is master, but if that changes later, then this acts as a failsafe.
-      shell: bash
-      run: |
-        git checkout master
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+      with:
+        repository: OpenTubeX/opentubex.github.io
+        token: ${{ secrets.SITE_REPO_TOKEN || secrets.FLATHUB_TOKEN }}
+        persist-credentials: true
 
-    - name: Update index.php
+    - name: Update release data
       shell: bash
       env:
-        CURRENT: ${{ fromJson(steps.releases.outputs.versions)[0] }}
-        PREVIOUS: ${{ fromJson(steps.releases.outputs.versions)[1] }}
+        VERSION: ${{ steps.release.outputs.version }}
       run: |
-        sed -i "s/${PREVIOUS}/${CURRENT}/g" src/index.php
+        node --input-type=module <<'EOF'
+        import { readFileSync, writeFileSync } from 'node:fs';
+
+        const file = 'src/data/release.ts';
+        const version = process.env.VERSION;
+        const source = readFileSync(file, 'utf8');
+        const updated = source.replace(
+          /export const releaseVersion = '[^']+';/,
+          `export const releaseVersion = '${version}';`,
+        );
+
+        if (updated === source) {
+          console.log(`releaseVersion is already ${version}`);
+        } else {
+          writeFileSync(file, updated);
+          console.log(`Updated releaseVersion to ${version}`);
+        }
+        EOF
 
     - name: Commit and push
       shell: bash
       env:
-        CURRENT: ${{ fromJson(steps.releases.outputs.versions)[0] }}
+        VERSION: ${{ steps.release.outputs.version }}
       run: |
-        git fetch --depth=1
-        git add src/index.php
+        git add src/data/release.ts
+
+        if git diff --cached --quiet; then
+          echo "No site release update needed."
+          exit 0
+        fi
+
         git -c user.name='github-actions[bot]' \
             -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
-            commit -m "Update version number to v$CURRENT" \
-            --no-verify --signoff
+            commit -m "Update download release to v$VERSION-beta" \
+            --signoff
         git push --set-upstream origin master
