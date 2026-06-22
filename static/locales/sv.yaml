@@ -862,6 +862,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Återstående tid före annonsstart: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Återstående SABR-återställningstid: {remindingTimeSeconds}s'
+  Private: Privata videor kan inte ses i FreeTube eftersom de kräver Google-inloggning och äganderätt till videon.
 Playlist:
   #& About
   View Full Playlist: 'Visa hela spellistan'
