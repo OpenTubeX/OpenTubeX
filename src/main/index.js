@@ -1451,13 +1451,7 @@ function runApp() {
       if (manager && tabId) {
         const tab = manager.tabs.get(tabId)
         if (tab) {
-          tab.title = title
-          // Only update window title if this is the active tab
-          if (manager.activeTabId === tabId) {
-            manager.browserWindow.setTitle(title)
-          }
-          manager._broadcastStateUpdate()
-          manager._saveSession()
+          manager.applyTabTitle(tab, title)
         }
       } else {
         // Fallback for non-tabbed windows

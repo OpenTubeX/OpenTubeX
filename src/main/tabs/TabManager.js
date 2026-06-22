@@ -78,8 +78,6 @@ export class TabManager {
     /** @type {string[]} */
     this.closedTabUrls = [] // For restore closed tab functionality
     /** @type {number} */
-    this.tabCounter = 0
-    /** @type {number} */
     this.tabBarScrollPosition = 0
     /** @type {string | null} */
     this.contextMenuTabId = null
@@ -159,6 +157,101 @@ export class TabManager {
       }
     }
     return undefined
+  }
+
+  /**
+   * Derive a readable placeholder tab title from a tab URL before the page sets one.
+   * @param {string} url
+   * @returns {string}
+   */
+  static formatDefaultTabTitle(url) {
+    try {
+      const parsed = URL.parse(url)
+      if (!parsed) {
+        return url
+      }
+
+      if (parsed.hash) {
+        const route = parsed.hash.startsWith('#')
+          ? parsed.hash.slice(1)
+          : parsed.hash
+        if (route.length > 0) {
+          return route
+        }
+      }
+
+      if (isOpenTubeXUrl(parsed)) {
+        return '/'
+      }
+
+      const path = `${parsed.pathname || '/'}${parsed.search || ''}`
+      if (path !== '/') {
+        return path
+      }
+
+      return parsed.host ? `${parsed.host}${path}` : url
+    } catch {
+      return url
+    }
+  }
+
+  /**
+   * Whether a page title is the app bootstrap default, not page-specific content.
+   * @param {string} title
+   * @returns {boolean}
+   */
+  static isGenericTitle(title) {
+    if (typeof title !== 'string') {
+      return true
+    }
+
+    const trimmed = title.trim()
+    return trimmed.length === 0 || trimmed === app.getName()
+  }
+
+  /**
+   * Keep a meaningful tab title during page load when the renderer briefly
+   * resets document.title to the bare product name.
+   * @param {string | undefined} currentTitle
+   * @param {string} newTitle
+   * @returns {string}
+   */
+  static resolveTabTitle(currentTitle, newTitle) {
+    if (typeof newTitle !== 'string') {
+      return currentTitle ?? ''
+    }
+
+    if (
+      TabManager.isGenericTitle(newTitle) &&
+      currentTitle &&
+      !TabManager.isGenericTitle(currentTitle)
+    ) {
+      return currentTitle
+    }
+
+    return newTitle
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} title
+   * @returns {boolean} Whether the tab title changed
+   */
+  applyTabTitle(tab, title) {
+    const nextTitle = TabManager.resolveTabTitle(tab.title, title)
+    if (nextTitle === tab.title) {
+      return false
+    }
+
+    tab.title = nextTitle
+
+    if (this.activeTabId === tab.id) {
+      this.browserWindow.setTitle(nextTitle)
+    }
+
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return true
   }
 
   /**
@@ -341,9 +434,7 @@ export class TabManager {
       }
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        tabInfo.title = title
-        mgr._broadcastStateUpdate()
-        mgr._saveSession()
+        mgr.applyTabTitle(tabInfo, title)
       }
     })
 
@@ -411,11 +502,10 @@ export class TabManager {
 
     const view = this._createTabView()
 
-    const fallbackTitle = `Tab ${++this.tabCounter}`
     const tabInfo = {
       id,
       url: loadUrl,
-      title: title || fallbackTitle,
+      title: title || TabManager.formatDefaultTabTitle(loadUrl),
       lastActiveAt: Date.now(),
       isPlaying: false,
       view,
