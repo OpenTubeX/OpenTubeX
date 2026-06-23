@@ -189,7 +189,6 @@ import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrap
 import store from '../../store/index'
 
 import {
-  collectPlaylistItems,
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
   getLocalPlaylistContinuation,
@@ -468,7 +467,7 @@ async function getPlaylistLocal() {
       }
     }
 
-    const playlistItems_ = collectPlaylistItems(result).map(parseLocalPlaylistVideo)
+    const playlistItems_ = result.videos.map(parseLocalPlaylistVideo)
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
@@ -677,7 +676,7 @@ async function getNextPageLocal() {
   let shouldGetNextPage = false
 
   if (result) {
-    const parsedVideos = collectPlaylistItems(result).map(parseLocalPlaylistVideo)
+    const parsedVideos = result.videos.map(parseLocalPlaylistVideo)
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
     if (playlistHasContinuation(result)) {

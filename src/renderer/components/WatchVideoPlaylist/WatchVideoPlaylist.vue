@@ -169,7 +169,6 @@ import store from '../../store/index'
 
 import { copyToClipboard, showToast } from '../../helpers/utils'
 import {
-  collectPlaylistItems,
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
   parseLocalPlaylistVideo,
@@ -596,10 +595,10 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
     const videos = cachedPlaylist.items
 
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    videos.push(...collectPlaylistItems(continuationData).map(parseLocalPlaylistVideo))
+    videos.push(...continuationData.videos.map(parseLocalPlaylistVideo))
 
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      videos.push(...collectPlaylistItems(p).map(parseLocalPlaylistVideo))
+      videos.push(...p.videos.map(parseLocalPlaylistVideo))
     }, { runCallbackOnceFirst: false })
 
     playlistItems.value = videos
@@ -631,7 +630,7 @@ async function getPlaylistInformationLocal() {
 
     const videos = []
     await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...collectPlaylistItems(p).map(parseLocalPlaylistVideo))
+      videos.push(...p.videos.map(parseLocalPlaylistVideo))
     })
 
     playlistItems.value = videos

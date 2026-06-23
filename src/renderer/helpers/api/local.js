@@ -130,22 +130,6 @@ export function clearLocalSearchSuggestionsSession() {
 /** @type {WeakMap<import('youtubei.js').YT.Playlist, string>} */
 const playlistLockupContinuationTokens = new WeakMap()
 
-const PLAYLIST_LOCKUP_VIDEO_CONTENT_TYPES = new Set(['VIDEO', 'SHORT', 'MOVIE'])
-
-/**
- * YouTube moved playlist items from `playlistVideoRenderer` to `lockupViewModel`
- * in 2026. `youtubei.js` parses these as `LockupView`, but `YT.Playlist.items`
- * still only returns legacy `PlaylistVideo` nodes, so we collect both.
- *
- * @param {import('youtubei.js').YT.Playlist} playlist
- */
-export function collectPlaylistItems(playlist) {
-  const lockupVideos = playlist.memo?.getType(YTNodes.LockupView)
-    .filter(lockup => PLAYLIST_LOCKUP_VIDEO_CONTENT_TYPES.has(lockup.content_type)) ?? []
-
-  return [...playlist.items, ...lockupVideos]
-}
-
 /**
  * @param {import('youtubei.js').YT.Playlist} playlist
  */
@@ -155,7 +139,7 @@ export function playlistHasContinuation(playlist) {
   }
 
   return playlistLockupContinuationTokens.has(playlist) &&
-    collectPlaylistItems(playlist).length >= 100
+    playlist.videos.length >= 100
 }
 
 /**
@@ -886,12 +870,12 @@ export async function getLocalChannelVideos(id) {
     // if the channel doesn't have a videos tab, YouTube returns the home tab instead
     // so we need to check that we got the right tab
     if (videosTab.current_tab?.endpoint.metadata.url?.endsWith('/videos')) {
-      videos = parseLocalChannelVideos(collectChannelTabVideos(videosTab), channelId, name)
+      videos = parseLocalChannelVideos(videosTab.videos, channelId, name)
     } else if (name.endsWith('- Topic') && !!videosTab.metadata.music_artist_name) {
       try {
         const playlist = await innertube.getPlaylist(getChannelPlaylistId(channelId, 'videos', 'newest'))
 
-        videos = collectPlaylistItems(playlist).map(parseLocalPlaylistVideo)
+        videos = playlist.videos.map(parseLocalPlaylistVideo)
       } catch (error) {
         // If the channel doesn't exist, the API call to channel page above would have already failed,
         // so if we get an error that the playlist doesn't exist here, it just means that this artist topic channel
@@ -946,10 +930,10 @@ export async function getLocalChannelLiveStreams(id) {
       // work around YouTube bug where it will return a bunch of responses with only continuations in them
       // e.g. https://www.youtube.com/@TWLIVES/streams
 
-      let tempVideos = collectChannelTabVideos(liveStreamsTab)
+      let tempVideos = liveStreamsTab.videos
       while (tempVideos.length === 0 && liveStreamsTab.has_continuation) {
         liveStreamsTab = await liveStreamsTab.getContinuation()
-        tempVideos = collectChannelTabVideos(liveStreamsTab)
+        tempVideos = liveStreamsTab.videos
       }
 
       videos = parseLocalChannelVideos(tempVideos, channelId, name)
@@ -1215,21 +1199,6 @@ export function parseLocalChannelHeader(channel, onlyIdNameThumbnail = false) {
     subscriberText,
     tags
   }
-}
-
-/**
- * Collects the video-like items from a channel tab. The default
- * `youtubei.js` `Feed.videos` getter only returns the legacy renderers and
- * doesn't include `LockupView` items, which YouTube started using for
- * channel video tabs in 2026.
- *
- * @param {import('youtubei.js').YT.Channel | import('youtubei.js').YT.ChannelListContinuation | import('youtubei.js').YT.FilteredChannelList} tab
- */
-export function collectChannelTabVideos(tab) {
-  const lockupVideos = tab.memo?.getType(YTNodes.LockupView)
-    .filter(lockup => lockup.content_type === 'VIDEO') ?? []
-
-  return [...tab.videos, ...lockupVideos]
 }
 
 /**
