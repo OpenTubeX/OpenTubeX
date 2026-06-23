@@ -44,6 +44,7 @@ import { colors } from '../../helpers/colors'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
+import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
@@ -449,6 +450,18 @@ export default defineComponent({
     const defaultPlaybackRate = computed(() => {
       return store.getters.getDefaultPlayback
     })
+
+    /** @type {import('vue').ComputedRef<number>} */
+    const defaultVolume = computed(() => {
+      return store.getters.getDefaultVolume
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const rememberVolume = computed(() => {
+      return store.getters.getRememberVolume
+    })
+
+    let applyingInitialVolume = false
 
     watch(defaultPlaybackRate, (newValue) => {
       if (video.value) {
@@ -2794,25 +2807,49 @@ export default defineComponent({
 
     function updateVolume() {
       const video_ = video.value
-      // https://docs.videojs.com/html5#volume
-      if (sessionStorage.getItem('muted') === 'false' && video_.volume === 0) {
-        // If video is muted by dragging volume slider, it doesn't change 'muted' in sessionStorage to true
-        // hence compare it with 'false' and set volume to defaultVolume.
-        const volume = parseFloat(sessionStorage.getItem('defaultVolume'))
-        const muted = true
-        sessionStorage.setItem('volume', volume.toString())
-        sessionStorage.setItem('muted', String(muted))
-      } else {
-        // If volume isn't muted by dragging the slider, muted and volume values are carried over to next video.
-        const volume = video_.volume
-        const muted = video_.muted
-        sessionStorage.setItem('volume', volume.toString())
-        sessionStorage.setItem('muted', String(muted))
-      }
 
       if (showStats.value) {
         stats.volume = (video_.volume * 100).toFixed(1)
       }
+
+      if (!rememberVolume.value || applyingInitialVolume) {
+        return
+      }
+
+      const remembered = getRememberedPlayerVolume()
+
+      // https://docs.videojs.com/html5#volume
+      if (remembered !== null && !remembered.muted && video_.volume === 0) {
+        // If video is muted by dragging volume slider, it doesn't change 'muted' to true
+        // hence compare it with the last remembered unmuted state and restore default volume.
+        setRememberedPlayerVolume(defaultVolume.value, true)
+      } else {
+        setRememberedPlayerVolume(video_.volume, video_.muted)
+      }
+    }
+
+    /**
+     * @param {HTMLVideoElement} videoElement
+     */
+    function applyInitialVolume(videoElement) {
+      applyingInitialVolume = true
+
+      if (rememberVolume.value) {
+        const remembered = getRememberedPlayerVolume()
+
+        if (remembered !== null) {
+          videoElement.volume = remembered.volume
+          videoElement.muted = remembered.muted
+        } else {
+          videoElement.volume = defaultVolume.value
+          videoElement.muted = defaultVolume.value === 0
+        }
+      } else {
+        videoElement.volume = defaultVolume.value
+        videoElement.muted = defaultVolume.value === 0
+      }
+
+      applyingInitialVolume = false
     }
 
     function handleTimeupdate() {
@@ -4838,18 +4875,6 @@ export default defineComponent({
         }
       }
 
-      const volume = sessionStorage.getItem('volume')
-      if (volume !== null) {
-        videoElement.volume = parseFloat(volume)
-      }
-
-      const muted = sessionStorage.getItem('muted')
-      if (muted !== null) {
-        // as sessionStorage stores string values which are truthy by default so we must check with 'true'
-        // otherwise 'false' will be returned as true as well
-        videoElement.muted = (muted === 'true')
-      }
-
       const localPlayer = new shaka.Player()
 
       ui = new shaka.ui.Overlay(
@@ -4923,6 +4948,8 @@ export default defineComponent({
 
       controls.addEventListener('uiupdated', addUICustomizations)
       configureUI(true)
+
+      applyInitialVolume(videoElement)
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('keydown', keyboardShortcutHandler)

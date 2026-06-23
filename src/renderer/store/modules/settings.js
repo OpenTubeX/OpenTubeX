@@ -300,6 +300,7 @@ const state = {
   videoPlaybackRateMouseScroll: false,
   videoSkipMouseScroll: false,
   videoPlaybackRateInterval: 0.25,
+  rememberVolume: true,
   rememberPlaybackSpeedPerChannel: false,
   autoUpdateChannelPlaybackSpeeds: false,
   channelPlaybackSpeeds: '{}',
@@ -405,12 +406,6 @@ const sideEffectHandlers = {
     if (value !== '' && rootState.invidious.currentInvidiousInstance !== value) {
       commit('setCurrentInvidiousInstance', value)
     }
-  },
-
-  defaultVolume: (_, value) => {
-    sessionStorage.setItem('volume', value)
-    value === 0 ? sessionStorage.setItem('muted', 'true') : sessionStorage.setItem('muted', 'false')
-    sessionStorage.setItem('defaultVolume', value)
   },
 
   uiScale: (_, value) => {

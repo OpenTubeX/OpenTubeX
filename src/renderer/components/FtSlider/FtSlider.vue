@@ -17,11 +17,18 @@
     <span class="label">
       {{ $t('Display Label', {label: label, value: displayLabel}) }}
     </span>
+    <FtTooltip
+      v-if="tooltip !== ''"
+      class="selectTooltip"
+      :tooltip="tooltip"
+    />
   </label>
 </template>
 
 <script setup>
 import { computed, ref, useId, watch } from 'vue'
+
+import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
 const props = defineProps({
   label: {
@@ -51,6 +58,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  tooltip: {
+    type: String,
+    default: ''
   }
 })
 

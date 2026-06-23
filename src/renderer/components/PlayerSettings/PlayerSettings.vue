@@ -26,6 +26,12 @@
           @change="updateVideoVolumeMouseScroll"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Remember Volume')"
+          :compact="true"
+          :default-value="rememberVolume"
+          @change="updateRememberVolume"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Scroll Playback Rate Over Video Player')"
           :compact="true"
           :default-value="videoPlaybackRateMouseScroll"
@@ -167,6 +173,8 @@
         :max-value="100"
         :step="1"
         value-extension="%"
+        :disabled="rememberVolume"
+        :tooltip="rememberVolume ? t('Tooltips.Player Settings.Default Volume') : ''"
         @change="updateDefaultVolume"
       />
       <FtSlider
@@ -490,6 +498,16 @@ const videoVolumeMouseScroll = computed(() => store.getters.getVideoVolumeMouseS
  */
 function updateVideoVolumeMouseScroll(value) {
   store.dispatch('updateVideoVolumeMouseScroll', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberVolume = computed(() => store.getters.getRememberVolume)
+
+/**
+ * @param {boolean} value
+ */
+function updateRememberVolume(value) {
+  store.dispatch('updateRememberVolume', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
