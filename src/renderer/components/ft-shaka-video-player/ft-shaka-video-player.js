@@ -4056,23 +4056,53 @@ export default defineComponent({
       showValueChange(`${Math.round(video.value.volume * 100)}%`, messageIcon)
     }
 
+    const NORMAL_PLAYBACK_RATE = 1
+
+    /** @type {number | null} */
+    let togglePlaybackRate = null
+
     /**
-     * @param {number} step
+     * @param {number} rate
      */
-    function changePlayBackRate(step) {
-      const newPlaybackRateString = (player.getPlaybackRate() + step).toFixed(2)
+    function applyPlaybackRate(rate) {
+      const newPlaybackRateString = rate.toFixed(2)
       const newPlaybackRate = parseFloat(newPlaybackRateString)
 
       // The following error is thrown if you go below 0.07:
       // The provided playback rate (0.05) is not in the supported playback range.
       if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
-        if (newPlaybackRate === defaultPlaybackRate.value) {
+        if (Math.abs(newPlaybackRate - defaultPlaybackRate.value) < 0.01) {
           player.cancelTrickPlay()
         } else {
           player.trickPlay(newPlaybackRate, false)
         }
 
         showValueChange(`${newPlaybackRateString}x`)
+      }
+    }
+
+    /**
+     * @param {number} step
+     */
+    function changePlayBackRate(step) {
+      applyPlaybackRate(player.getPlaybackRate() + step)
+    }
+
+    /**
+     * @param {number} rate
+     */
+    function isNormalPlaybackRate(rate) {
+      return Math.abs(rate - NORMAL_PLAYBACK_RATE) < 0.01
+    }
+
+    function toggleNormalPlaybackRate() {
+      const currentRate = player.getPlaybackRate()
+
+      if (!isNormalPlaybackRate(currentRate)) {
+        togglePlaybackRate = currentRate
+        applyPlaybackRate(NORMAL_PLAYBACK_RATE)
+      } else if (togglePlaybackRate != null) {
+        applyPlaybackRate(togglePlaybackRate)
       }
     }
 
@@ -4441,6 +4471,11 @@ export default defineComponent({
           // Increase playback rate by user configured interval
           event.preventDefault()
           changePlayBackRate(videoPlaybackRateInterval.value)
+          break
+        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED:
+          // Toggle between 1x and the previous playback speed
+          event.preventDefault()
+          toggleNormalPlaybackRate()
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE:
           // Toggle mute only if metakey is not pressed
@@ -5116,6 +5151,7 @@ export default defineComponent({
      * if this was triggered by a format change and the user had the captions enabled.
      */
     async function handleLoaded() {
+      togglePlaybackRate = null
       hasLoaded.value = true
       emit('loaded')
 

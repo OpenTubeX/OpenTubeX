@@ -1308,6 +1308,7 @@ KeyboardShortcutPrompt:
   Mute: Toggle mute
   Decrease Video Speed: 'Decrease video speed based on Video Playback Rate Interval'
   Increase Video Speed: 'Increase video speed based on Video Playback Rate Interval'
+  Toggle Normal Playback Speed: Toggle between 1x speed and the previous playback speed
   Full Window: Toggle full window
   Theatre Mode: Toggle theater mode
   Take Screenshot: Take screenshot

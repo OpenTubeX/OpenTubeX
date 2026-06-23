@@ -224,6 +224,7 @@ const KeyboardShortcuts = {
       DECREASE_VIDEO_SPEED_ALT: '<',
       INCREASE_VIDEO_SPEED: 'p',
       INCREASE_VIDEO_SPEED_ALT: '>',
+      TOGGLE_NORMAL_PLAYBACK_SPEED: 'g',
       SKIP_N_TENTHS: '0..9',
       LAST_CHAPTER: 'ctrl+arrowleft',
       NEXT_CHAPTER: 'ctrl+arrowright',
