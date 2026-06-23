@@ -818,7 +818,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 剩餘前置廣告時間：{remindingTimeSeconds}秒
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 剩餘 SABR 後退時間：{remindingTimeSeconds}秒
   Popout Live Chat: 彈出式聊天
-  Private: 無法在 FreeTube 觀看私人影片，因為觀看私人影片需要 Google 登入和影片所有權。
+  Private: 無法在 OpenTubeX 觀看私人影片，因為觀看私人影片需要 Google 登入和影片所有權。
 Playlist:
   #& About
   View Full Playlist: '觀看完整播放清單'

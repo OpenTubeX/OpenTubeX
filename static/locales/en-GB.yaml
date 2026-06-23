@@ -864,7 +864,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'
   Popout Live Chat: Popout Chat
-  Private: Private videos cannot be watched in FreeTube as they require Google login and ownership of the video.
+  Private: Private videos cannot be watched in OpenTubeX as they require Google login and ownership of the video.
 Playlist:
   #& About
   Playlist: Playlist
