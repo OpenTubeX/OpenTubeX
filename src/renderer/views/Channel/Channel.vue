@@ -320,7 +320,6 @@ import {
   getLocalPlaylist,
   getLocalPlaylistContinuation,
   parseLocalPlaylistVideo,
-  playlistHasContinuation,
   parseChannelHomeTab
 } from '../../helpers/api/local'
 
@@ -1105,8 +1104,8 @@ async function getChannelVideosLocal() {
         return
       }
 
-      latestVideos.value = playlist.videos.map(parseLocalPlaylistVideo)
-      videoContinuationData.value = playlistHasContinuation(playlist) ? playlist : null
+      latestVideos.value = playlist.items.map(parseLocalPlaylistVideo)
+      videoContinuationData.value = playlist.has_continuation ? playlist : null
       isElementListLoading.value = false
     } else {
       await ensureChannelInstance()
@@ -1162,8 +1161,8 @@ async function getChannelVideosLocalMore() {
       const continuation = await getLocalPlaylistContinuation(videoContinuationData.value)
 
       if (continuation) {
-        latestVideos.value = latestVideos.value.concat(continuation.videos.map(parseLocalPlaylistVideo))
-        videoContinuationData.value = playlistHasContinuation(continuation) ? continuation : null
+        latestVideos.value = latestVideos.value.concat(continuation.items.map(parseLocalPlaylistVideo))
+        videoContinuationData.value = continuation.has_continuation ? continuation : null
       } else {
         videoContinuationData.value = null
       }

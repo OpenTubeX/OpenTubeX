@@ -127,82 +127,9 @@ export function clearLocalSearchSuggestionsSession() {
   searchSuggestionsSession = null
 }
 
-/** @type {WeakMap<import('youtubei.js').YT.Playlist, string>} */
-const playlistLockupContinuationTokens = new WeakMap()
-
-/**
- * @param {import('youtubei.js').YT.Playlist} playlist
- */
-export function playlistHasContinuation(playlist) {
-  if (playlist.has_continuation) {
-    return true
-  }
-
-  return playlistLockupContinuationTokens.has(playlist) &&
-    playlist.videos.length >= 100
-}
-
-/**
- * @param {any} data
- * @returns {string | null}
- */
-function findPlaylistLockupContinuationToken(data) {
-  if (!data || typeof data !== 'object') {
-    return null
-  }
-
-  const token = data.continuationItemViewModel?.continuationCommand?.innertubeCommand?.continuationCommand?.token
-
-  if (token) {
-    return token
-  }
-
-  if (Array.isArray(data)) {
-    for (const item of data) {
-      const found = findPlaylistLockupContinuationToken(item)
-
-      if (found) {
-        return found
-      }
-    }
-
-    return null
-  }
-
-  for (const value of Object.values(data)) {
-    const found = findPlaylistLockupContinuationToken(value)
-
-    if (found) {
-      return found
-    }
-  }
-
-  return null
-}
-
-/**
- * @param {import('youtubei.js').YT.Playlist} playlist
- * @param {string | null | undefined} token
- */
-function storePlaylistLockupContinuationToken(playlist, token) {
-  if (token) {
-    playlistLockupContinuationTokens.set(playlist, token)
-  } else {
-    playlistLockupContinuationTokens.delete(playlist)
-  }
-}
-
 export async function getLocalPlaylist(id) {
   const innertube = await createInnertube()
-  const response = await innertube.actions.execute('/browse', {
-    browseId: `VL${id}`,
-    parse: false
-  })
-
-  const playlist = new YT.Playlist(innertube.actions, Parser.parseResponse(response.data), true)
-  storePlaylistLockupContinuationToken(playlist, findPlaylistLockupContinuationToken(response.data))
-
-  return playlist
+  return await innertube.getPlaylist(id)
 }
 
 /**
@@ -268,16 +195,6 @@ function extractFeedContinuationItem(feed) {
  * @param {import('youtubei.js').YT.Playlist} playlist
  */
 export function extractLocalCacheablePlaylistContinuation(playlist) {
-  const lockupContinuationToken = playlistLockupContinuationTokens.get(playlist)
-
-  if (lockupContinuationToken) {
-    return JSON.stringify({
-      type: 'lockup',
-      token: lockupContinuationToken,
-      context: playlist.actions.session.context
-    })
-  }
-
   const sectionList = playlist.memo.getType(YTNodes.SectionList)[0]
 
   let continuationItem
@@ -328,30 +245,13 @@ export function extractLocalCacheableSearchContinuation(search) {
  * @param {string} continuation
  */
 export async function getLocalCachedFeedContinuation(type, continuation) {
+  /** @type {SerializedContinuation} */
   const data = JSON.parse(continuation)
 
   const innertube = await createInnertube()
+  innertube.session.context = data.context
 
-  if (data.type === 'lockup') {
-    innertube.session.context = data.context
-
-    const response = await innertube.actions.execute('/browse', {
-      continuation: data.token,
-      parse: false
-    })
-
-    const playlist = new YT.Playlist(innertube.actions, Parser.parseResponse(response.data), true)
-    storePlaylistLockupContinuationToken(playlist, findPlaylistLockupContinuationToken(response.data))
-
-    return playlist
-  }
-
-  /** @type {SerializedContinuation} */
-  const serializedContinuation = data
-
-  innertube.session.context = serializedContinuation.context
-
-  const page = await innertube.actions.execute(serializedContinuation.path, { ...serializedContinuation.payload, parse: true })
+  const page = await innertube.actions.execute(data.path, { ...data.payload, parse: true })
 
   if (!page) {
     throw new Utils.InnertubeError('Could not get continuation data')
@@ -364,45 +264,9 @@ export async function getLocalCachedFeedContinuation(type, continuation) {
   }
 }
 
-/**
- * @param {import('youtubei.js').YT.Playlist} playlist
- * @returns {Promise<import('youtubei.js').YT.Playlist|null>} null when no valid playlist can be found (e.g. `empty continuation response`)
- */
-async function getLocalPlaylistLockupContinuation(playlist) {
-  const token = playlistLockupContinuationTokens.get(playlist)
-
-  if (!token) {
-    return null
-  }
-
-  const innertube = playlist.actions
-
-  try {
-    const response = await innertube.actions.execute('/browse', {
-      continuation: token,
-      parse: false
-    })
-
-    const nextPlaylist = new YT.Playlist(innertube, Parser.parseResponse(response.data), true)
-    storePlaylistLockupContinuationToken(nextPlaylist, findPlaylistLockupContinuationToken(response.data))
-
-    return nextPlaylist
-  } catch (error) {
-    if (error.message.includes('Got empty continuation response.')) {
-      return null
-    }
-
-    throw error
-  }
-}
-
 export async function getLocalPlaylistContinuation(playlist) {
   try {
-    const result = await playlist.getContinuation()
-
-    if (result) {
-      return result
-    }
+    return await playlist.getContinuation()
   } catch (error) {
     const isExpectedContinuationError = error.message.includes('Got empty continuation response.') ||
       error.message.includes('There are no continuations.') ||
@@ -411,9 +275,9 @@ export async function getLocalPlaylistContinuation(playlist) {
     if (!isExpectedContinuationError) {
       throw error
     }
-  }
 
-  return await getLocalPlaylistLockupContinuation(playlist)
+    return null
+  }
 }
 
 /**
@@ -432,7 +296,7 @@ export async function getLocalPlaylistContinuation(playlist) {
 export async function untilEndOfLocalPlayList(playlist, callback, options = { runCallbackOnceFirst: true }) {
   if (options.runCallbackOnceFirst) { callback(playlist) }
 
-  while (playlist != null && playlistHasContinuation(playlist)) {
+  while (playlist != null && playlist.has_continuation) {
     playlist = await getLocalPlaylistContinuation(playlist)
 
     if (playlist != null) { callback(playlist) }
@@ -875,7 +739,7 @@ export async function getLocalChannelVideos(id) {
       try {
         const playlist = await innertube.getPlaylist(getChannelPlaylistId(channelId, 'videos', 'newest'))
 
-        videos = playlist.videos.map(parseLocalPlaylistVideo)
+        videos = playlist.items.map(parseLocalPlaylistVideo)
       } catch (error) {
         // If the channel doesn't exist, the API call to channel page above would have already failed,
         // so if we get an error that the playlist doesn't exist here, it just means that this artist topic channel

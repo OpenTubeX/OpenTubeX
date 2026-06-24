@@ -595,10 +595,10 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
     const videos = cachedPlaylist.items
 
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    videos.push(...continuationData.videos.map(parseLocalPlaylistVideo))
+    videos.push(...continuationData.items.map(parseLocalPlaylistVideo))
 
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      videos.push(...p.videos.map(parseLocalPlaylistVideo))
+      videos.push(...p.items.map(parseLocalPlaylistVideo))
     }, { runCallbackOnceFirst: false })
 
     playlistItems.value = videos
@@ -630,7 +630,7 @@ async function getPlaylistInformationLocal() {
 
     const videos = []
     await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...p.videos.map(parseLocalPlaylistVideo))
+      videos.push(...p.items.map(parseLocalPlaylistVideo))
     })
 
     playlistItems.value = videos

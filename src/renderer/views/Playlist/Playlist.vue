@@ -193,7 +193,6 @@ import {
   getLocalPlaylist,
   getLocalPlaylistContinuation,
   parseLocalPlaylistVideo,
-  playlistHasContinuation,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -467,7 +466,7 @@ async function getPlaylistLocal() {
       }
     }
 
-    const playlistItems_ = result.videos.map(parseLocalPlaylistVideo)
+    const playlistItems_ = result.items.map(parseLocalPlaylistVideo)
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
@@ -490,7 +489,7 @@ async function getPlaylistLocal() {
     playlistItems.value = playlistItems_
 
     let shouldGetNextPage = false
-    if (playlistHasContinuation(result)) {
+    if (result.has_continuation) {
       continuationData.value = result
       shouldGetNextPage = playlistItems.value.length < 100
     }
@@ -676,10 +675,10 @@ async function getNextPageLocal() {
   let shouldGetNextPage = false
 
   if (result) {
-    const parsedVideos = result.videos.map(parseLocalPlaylistVideo)
+    const parsedVideos = result.items.map(parseLocalPlaylistVideo)
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
-    if (playlistHasContinuation(result)) {
+    if (result.has_continuation) {
       continuationData.value = result
 
       // To workaround the effect of useless continuation data
