@@ -70,6 +70,9 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
     <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
   </a>
+  <a href="https://weblate.d3sox.me/engage/opentubex/">
+    <img src="https://weblate.d3sox.me/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
+  </a>
 </p>
 
 <hr>
@@ -184,8 +187,11 @@ have your help.  Send a pull request and someone will review your code.
 > Please follow the [Contribution Guidelines](https://github.com/OpenTubeX/OpenTubeX/blob/development/CONTRIBUTING.md) before sending your pull request.
 
 ## Localization
+<a href="https://weblate.d3sox.me/engage/opentubex/">
+<img src="https://weblate.d3sox.me/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
+</a>
 
-We are actively looking for translations! Contributions are welcome.
+We are actively looking for translations! We use [Weblate](https://weblate.d3sox.me/engage/opentubex/) to make it easy for translators to get involved. Click on the badge above to learn how to get involved.
 
 ## Contact
 If you ever have any questions, feel free to ask it on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page.

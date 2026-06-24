@@ -88,6 +88,11 @@ const chunks = computed(() => [
     title: t('About.Website'),
     content: '<a href="https://opentubex.org/">https://opentubex.org/</a>',
   },
+  {
+    icon: ['fas', 'language'],
+    title: t('About.Translate'),
+    content: '<a href="https://weblate.d3sox.me/engage/opentubex/">https://weblate.d3sox.me/engage/opentubex/</a>',
+  },
 ])
 </script>
 
