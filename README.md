@@ -6,9 +6,6 @@ OpenTubeX is an open source desktop YouTube player built with privacy in mind.
 Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
 Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to Electron.
 
-> [!WARNING]
-> 🚧 **This is a fork in its early stages.** Expect bugs.
-
 ## Extra features compared to FreeTube
 
 - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
@@ -63,6 +60,10 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img height="57" alt="image" src="https://github.com/user-attachments/assets/8ed84d30-9e6f-4e2e-a09e-c3dbd74f8c32" />
 <img width="140" height="57" alt="image" src="https://github.com/user-attachments/assets/45987612-64a1-48b6-8254-bd8966b3178a" />
 
+- Remember Volume feature (on by default)
+<img width="209" height="48" alt="image" src="https://github.com/user-attachments/assets/7b90cf31-5d90-41bb-b342-c15e2e7c33b6" />
+
+- Player shortcut <kbd>G</kbd> to toggle between 1x and the last playback speed
 
 <br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
 <p align="center">
@@ -156,6 +157,8 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
 
 #### Automated Builds (Nightly / Weekly)
 > [!WARNING]
