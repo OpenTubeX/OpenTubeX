@@ -46,7 +46,7 @@ jobs:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
       with:
         repository: OpenTubeX/opentubex.github.io
-        token: ${{ secrets.SITE_REPO_TOKEN || secrets.FLATHUB_TOKEN }}
+        token: ${{ secrets.PUSH_TOKEN }}
         persist-credentials: true
 
     - name: Update release data
