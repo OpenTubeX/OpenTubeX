@@ -24,14 +24,17 @@ Minimize: 'Minimizo'
 Close: 'Mbyll'
 Back: 'Mbrapa'
 Forward: 'Përpara'
-Right-click or hold to see history: 'Kliko me butonin e djathtë ose mbaj shtypur për të parë historinë'
+Right-click or hold to see history: 'Kliko me butonin e djathtë ose mbaj shtypur për
+  të parë historinë'
 Open New Window: 'Hap dritare të re'
 Go to page: 'Shko tek {page}'
 Close Banner: 'Mbyll bannerin'
 
-Version {versionNumber} is now available!  Click for more details: 'Versioni {versionNumber} është i disponueshëm! Kliko për më shumë detaje'
+Version {versionNumber} is now available!  Click for more details: 'Versioni {versionNumber}
+  është i disponueshëm! Kliko për më shumë detaje'
 Download From Site: 'Shkarko nga faqja'
-Are you sure you want to open this link?: 'A je i sigurt që dëshiron ta hapësh këtë link?'
+Are you sure you want to open this link?: 'A je i sigurt që dëshiron ta hapësh këtë
+  link?'
 
 # Global
 # Anything shared among components / views should be put here
@@ -116,15 +119,22 @@ Subscriptions:
   Subscriptions: 'Abonimet'
   # channels that were likely deleted
   Error Channels: 'Kanale me probleme'
-  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: 'Ky profil ka një numër të madh abonimesh. Do të përdoret RSS për të shmangur limitimet'
-  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Lista e abonimeve është bosh. Nëse dëshiron të importosh abonimet e tua mund të shkosh tek Opsionet e të dhënave dhe të zgjedhësh të importosh abonimet ose mund të kërkosh për një kanal dhe të abonohesh.'
-  Disabled Automatic Fetching: 'Ke çaktivizuar rekuperimin automatik të abonimeve. Rifresko abonimet që ti shohësh këtu.'
+  This profile has a large number of subscriptions. Forcing RSS to avoid rate 
+    limiting: 'Ky profil ka një numër të madh abonimesh. Do të përdoret RSS për të
+    shmangur limitimet'
+  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Lista
+    e abonimeve është bosh. Nëse dëshiron të importosh abonimet e tua mund të shkosh
+    tek Opsionet e të dhënave dhe të zgjedhësh të importosh abonimet ose mund të kërkosh
+    për një kanal dhe të abonohesh.'
+  Disabled Automatic Fetching: 'Ke çaktivizuar rekuperimin automatik të abonimeve.
+    Rifresko abonimet që ti shohësh këtu.'
   Empty Channels: 'Kanalet me të cilët je abonuar nuk kanë ndonjë video.'
   Empty Posts: 'Kanalet me të cilët je abonuar nuk kanë ndonjë postim.'
   Load More Videos: 'Kariko më shumë video'
   Load More Posts: 'Kariko më shumë postime'
   Subscriptions Tabs: 'Skedat e abonimeve'
-  All Subscription Tabs Hidden: 'Të gjitha skedat e abonimeve janë fshehur. Për të parë të dhëna këtu, shfaq disa skeda në sektorin "{subsection}" në "{settingsSection}".'
+  All Subscription Tabs Hidden: 'Të gjitha skedat e abonimeve janë fshehur. Për të
+    parë të dhëna këtu, shfaq disa skeda në sektorin "{subsection}" në "{settingsSection}".'
 More: 'Më shumë'
 Channels:
   Channels: 'Kanale'
@@ -144,7 +154,9 @@ Feed:
 Playlists: 'Playlist'
 User Playlists:
   Your Playlists: 'Playlistat e tu'
-  You have no playlists. Click on the create new playlist button to create a new one.: 'Nuk ke asnjë playlist. Kiliko butonin e krijimit të playlistit të ri për të krijuar një të re.'
+  You have no playlists. Click on the create new playlist button to create a new 
+    one.: 'Nuk ke asnjë playlist. Kiliko butonin e krijimit të playlistit të ri për
+    të krijuar një të re.'
   Empty Search Message: 'Nuk ka video në këtë playlist që i përputhen kërkimit tënd'
   Search bar placeholder: 'Kërko për playlist'
   Playlists with Matching Videos: 'Playlist me video të njëjta'
@@ -174,11 +186,21 @@ User Playlists:
   Quick Bookmark Enabled: 'Shënimi i shpejtë u aktivizua'
   Export Playlist: 'Eksporto këtë playlist'
   The playlist has been successfully exported: 'Playlisti u eksportua me sukses'
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: 'A je i sigurtë që do të heqësh 1 video të dyfishtë nga ky playlist? Ky veprim nuk mund të kthehet pas. | A je i sigurtë që do të heqësh {playlistItemCount} video të dyfishta nga ky playlist? Ky veprim nuk mund të kthehet pas.'
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: 'A je i sigurtë që do të heqësh 1 video të shikuar nga ky playlist? Ky veprim nuk mund të kthehet pas. | A je i sigurtë që do të heqësh {playlistItemCount} video të shikuara nga ky playlist? Ky veprim nuk mund të kthehet pas.'
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this 
+    playlist? This cannot be undone: 'A je i sigurtë që do të heqësh 1 video të dyfishtë
+    nga ky playlist? Ky veprim nuk mund të kthehet pas. | A je i sigurtë që do të
+    heqësh {playlistItemCount} video të dyfishta nga ky playlist? Ky veprim nuk mund
+    të kthehet pas.'
+  Are you sure you want to remove {playlistItemCount} watched videos from this 
+    playlist? This cannot be undone: 'A je i sigurtë që do të heqësh 1 video të shikuar
+    nga ky playlist? Ky veprim nuk mund të kthehet pas. | A je i sigurtë që do të
+    heqësh {playlistItemCount} video të shikuara nga ky playlist? Ky veprim nuk mund
+    të kthehet pas.'
   Delete Playlist: 'Fshi playlistin'
-  Cannot delete the quick bookmark target playlist.: 'Nuk mund të fshihet playlisti me destinacion tek shënimet e shpejta.'
-  Are you sure you want to delete this playlist? This cannot be undone: 'A je i sigurtë se do të fshish këtë playlist? Ky veprim nuk mund të kthehet pas.'
+  Cannot delete the quick bookmark target playlist.: 'Nuk mund të fshihet playlisti
+    me destinacion tek shënimet e shpejta.'
+  Are you sure you want to delete this playlist? This cannot be undone: 'A je i sigurtë
+    se do të fshish këtë playlist? Ky veprim nuk mund të kthehet pas.'
 
   TotalTimePlaylist: "Koha totale: {duration}"
 
@@ -201,36 +223,53 @@ User Playlists:
       This video cannot be moved up.: 'Kjo video nuk mund te lëvizet më lart.'
       This video cannot be moved down.: 'Kjo video nuk mund të lëvizet më poshtë.'
       Video has been removed: 'Video është hequr'
-      Video has been removed. Click here to undo.: 'Video është hequr. Kliko këtu për ta rikthyer.'
-      There was a problem with removing this video: 'Kishte një problem me heqjen e kësaj video'
+      Video has been removed. Click here to undo.: 'Video është hequr. Kliko këtu
+        për ta rikthyer.'
+      There was a problem with removing this video: 'Kishte një problem me heqjen
+        e kësaj video'
 
-      This playlist is already being used for quick bookmark.: 'Ky playlist është duke u perdorur tashmë si një shenjë e shpejtë.'
-      This playlist is now used for quick bookmark: 'Ky playlist po përdoret tani si shenjë e shpejtë'
-      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: 'Ky playlist po përdoret tani si shenjë e shpejte në vend të {oldPlaylistName}. Kliko këtu për të anulluar këtë veprim'
-      Reverted to use {oldPlaylistName} for quick bookmark: 'Shenja e shpejtë u rikthye tek {oldPlaylistName}'
+      This playlist is already being used for quick bookmark.: 'Ky playlist është
+        duke u perdorur tashmë si një shenjë e shpejtë.'
+      This playlist is now used for quick bookmark: 'Ky playlist po përdoret tani
+        si shenjë e shpejtë'
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. 
+        Click here to undo: 'Ky playlist po përdoret tani si shenjë e shpejte në vend
+        të {oldPlaylistName}. Kliko këtu për të anulluar këtë veprim'
+      Reverted to use {oldPlaylistName} for quick bookmark: 'Shenja e shpejtë u rikthye
+        tek {oldPlaylistName}'
 
-      Some videos in the playlist are not loaded yet. Click here to copy anyway.: 'Disa video në playlist nuk janë karikuar akoma. Kliko këtu për të kopjuar gjithsesi.'
-      Playlist name cannot be empty. Please input a name.: 'Emri i playlistit nuk mund të jetë bosh. Të lutem shto një emër.'
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: 'Disa
+        video në playlist nuk janë karikuar akoma. Kliko këtu për të kopjuar gjithsesi.'
+      Playlist name cannot be empty. Please input a name.: 'Emri i playlistit nuk
+        mund të jetë bosh. Të lutem shto një emër.'
       Playlist has been updated.: 'Playlisti u ndryshua.'
-      There was an issue with updating this playlist.: 'Kishte probleme me ndryshimin e këtij playlisti.'
-      "{videoCount} video(s) have been removed": "1 video u hoq | {videoCount} video u hoqën"
+      There was an issue with updating this playlist.: 'Kishte probleme me ndryshimin
+        e këtij playlisti.'
+      "{videoCount} video(s) have been removed": "1 video u hoq | {videoCount} video
+        u hoqën"
       There were no videos to remove.: 'Nuk ka video për të hequr.'
-      This playlist is protected and cannot be removed.: 'Ky playlist është i ruajtur dhe nuk mund të hiqet.'
+      This playlist is protected and cannot be removed.: 'Ky playlist është i ruajtur
+        dhe nuk mund të hiqet.'
       Playlist {playlistName} has been deleted.: 'Playlisti {playlistName} u hoq.'
 
       This playlist does not exist: 'Ky playlist nuk ekziston'
 
-      This playlist has a video with a duration error: 'Ky playlist përmban të paktën një video që nuk ka një kohëzgjatje, do të renditet sikur kohëzgjatja ështe zero.'
+      This playlist has a video with a duration error: 'Ky playlist përmban të paktën
+        një video që nuk ka një kohëzgjatje, do të renditet sikur kohëzgjatja ështe
+        zero.'
   AddVideoPrompt:
-    Select a playlist to add your N videos to: 'Zgjidh një playlist ku të shtosh videon tënde | Zgjidh një playlist ku të shtosh {videoCount} videot e tua'
+    Select a playlist to add your N videos to: 'Zgjidh një playlist ku të shtosh videon
+      tënde | Zgjidh një playlist ku të shtosh {videoCount} videot e tua'
     N playlists selected: '{playlistCount} zgjedhur'
     Search in Playlists: 'Kërko në playlist'
     Allow Adding Duplicate Video(s): 'Lejo shtimin e videove të dyfishta'
     Save: 'Ruaj'
 
     Added {count} Times: 'Tashmë shtuar | Shtuar {count} here'
-    "{videoCount}/{totalVideoCount} Videos Will Be Added": '{videoCount}/{totalVideoCount} video do të shtohen'
-    "{videoCount}/{totalVideoCount} Videos Already Added": 'Tashmë janë shtuar {videoCount}/{totalVideoCount} video'
+    "{videoCount}/{totalVideoCount} Videos Will Be Added": '{videoCount}/{totalVideoCount}
+      video do të shtohen'
+    "{videoCount}/{totalVideoCount} Videos Already Added": 'Tashmë janë shtuar {videoCount}/{totalVideoCount}
+      video'
 
     Toast:
       You haven't selected any playlist yet.: 'Nuk ke zgjedhur akoma asnjë playlist.'
@@ -240,9 +279,12 @@ User Playlists:
     Create: 'Krijo'
 
     Toast:
-      There is already a playlist with this name. Please pick a different name.: 'Tashmë ekziston një playlist me atë emer. Zgjidh një emër tjeter.'
-      Playlist {playlistName} has been successfully created.: 'Playlisti {playlistName} u krijua me sukses.'
-      There was an issue with creating the playlist.: 'Kishte një problem me krijimin e playlistit.'
+      There is already a playlist with this name. Please pick a different name.: 'Tashmë
+        ekziston një playlist me atë emer. Zgjidh një emër tjeter.'
+      Playlist {playlistName} has been successfully created.: 'Playlisti {playlistName}
+        u krijua me sukses.'
+      There was an issue with creating the playlist.: 'Kishte një problem me krijimin
+        e playlistit.'
 History:
   # On History Page
   History: 'Historia'
@@ -500,13 +542,13 @@ Settings:
     Are you sure you want to remove your entire watch history?: ''
     Watch history has been cleared: ''
     Remove All Subscriptions / Profiles: ''
-    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: ''
+    Are you sure you want to remove all subscriptions and profiles?  This cannot 
+      be undone.: ''
     Remove All Playlists: ''
     All playlists have been removed: ''
     Are you sure you want to remove all your playlists?: ''
   Subscription Settings:
     Subscription Settings: ''
-    Hide Videos on Watch: ''
     Fetch Feeds from RSS: ''
     Fetch Automatically: ''
     'Limit the number of videos displayed for each channel': ''
@@ -574,10 +616,6 @@ Settings:
     Export History: ''
     Import Playlists: ''
     Export Playlists: ''
-    Export Playlists For Older OpenTubeX Versions:
-      Label: ''
-      # |- = Keep newlines, No newline at end
-      Tooltip: |
     Profile object has insufficient data, skipping item: ''
     All subscriptions and profiles have been successfully imported: ''
     All subscriptions have been successfully imported: ''
@@ -703,9 +741,12 @@ Profile:
   Delete Selected: ''
   Add Selected To Profile: ''
   No channel(s) have been selected: ''
-  ? This is your primary profile.  Are you sure you want to delete the selected channels?  The same channels will be deleted in any profile they are found in.
+  ? This is your primary profile.  Are you sure you want to delete the selected 
+    channels?  The same channels will be deleted in any profile they are found 
+    in.
   : ''
-  Are you sure you want to delete the selected channels?  This will not delete the channel from any other profile.: ''
+  Are you sure you want to delete the selected channels?  This will not delete 
+    the channel from any other profile.: ''
   Close Profile Dropdown: ''
   Open Profile Dropdown: ''
 #On Channel Page
@@ -769,7 +810,6 @@ Channel:
     Reveal Answers: ''
     Hide Answers: ''
     Video hidden by OpenTubeX: ''
-    Viewing Posts Only Supported By Invidious: ''
 Video:
   IP block: ''
   MembersOnly: ''
@@ -999,7 +1039,8 @@ Local API Error (Click to copy): ''
 Invidious API Error (Click to copy): ''
 Falling back to Invidious API: ''
 Falling back to Local API: ''
-This video is unavailable because of missing formats. This can happen due to country unavailability.: ''
+This video is unavailable because of missing formats. This can happen due to 
+  country unavailability.: ''
 Unknown YouTube url type, cannot be opened in app: ''
 Loop is now disabled: ''
 Loop is now enabled: ''
