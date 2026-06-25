@@ -88,13 +88,15 @@ Subscriptions:
     # On Subscriptions Page
   Subscriptions: '訂閱'
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': '您的訂閱清單目前是空的。如果您想要匯入您的訂閱，您可以前往「資料設定」，然後選取「匯入訂閱」，或者您也可以搜尋頻道並訂閱。'
-  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: 這個設定檔有大量訂閱。 強制RSS以防止速率限制
+  This profile has a large number of subscriptions. Forcing RSS to avoid rate 
+    limiting: 這個設定檔有大量訂閱。 強制RSS以防止速率限制
   Load More Videos: 載入更多影片
   Error Channels: 有錯誤的頻道
   Disabled Automatic Fetching: 您已停用自動訂閱擷取。重新整理訂閱以在此處檢視。
   Empty Channels: 您訂閱的頻道目前沒有任何影片。
   Subscriptions Tabs: 訂閱分頁
-  All Subscription Tabs Hidden: 所有訂閱分頁均已隱藏。要檢視此處的內容，請取消隱藏「{settingsSection}」中「{subsection}」區塊中的一些分頁。
+  All Subscription Tabs Hidden: 
+    所有訂閱分頁均已隱藏。要檢視此處的內容，請取消隱藏「{settingsSection}」中「{subsection}」區塊中的一些分頁。
   Load More Posts: 載入更多影片
   Empty Posts: 您訂閱的頻道目前沒有任何影片。
 Trending:
@@ -120,7 +122,8 @@ User Playlists:
   Edit Playlist Info: 編輯播放清單資訊
   Copy Playlist: 複製播放清單
   Delete Playlist: 刪除播放清單
-  Are you sure you want to delete this playlist? This cannot be undone: 您確定您想要刪除播放清單嗎？這無法還原。
+  Are you sure you want to delete this playlist? This cannot be undone: 
+    您確定您想要刪除播放清單嗎？這無法還原。
   Sort By:
     NameAscending: A-Z
     NameDescending: Z-A
@@ -136,42 +139,54 @@ User Playlists:
       This video cannot be moved down.: 此影片無法向下移動。
       Video has been removed: 影片已被移除
       There was a problem with removing this video: 移除此影片時發生問題
-      Some videos in the playlist are not loaded yet. Click here to copy anyway.: 播放清單中的某些影片尚未載入。請按此處複製。
+      Some videos in the playlist are not loaded yet. Click here to copy anyway.: 
+        播放清單中的某些影片尚未載入。請按此處複製。
       Playlist name cannot be empty. Please input a name.: 播放清單名稱不能為空。請輸入名稱。
       Playlist has been updated.: 播放清單已更新。
       There were no videos to remove.: 沒有影片要移除。
       This playlist is protected and cannot be removed.: 此播放清單受保護且無法移除。
       There was an issue with updating this playlist.: 更新此播放清單時發生問題。
-      "{videoCount} video(s) have been removed": 移除了 1 部影片 | 移除了 {videoCount} 部影片
+      "{videoCount} video(s) have been removed": 移除了 1 部影片 | 移除了 {videoCount} 
+        部影片
       Playlist {playlistName} has been deleted.: 播放清單 {playlistName} 已刪除。
       This playlist does not exist: 此播放清單不存在
       This playlist is now used for quick bookmark: 此播放清單現在用於快速書籤
-      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: 此播放清單現在用於快速書籤，而非 {oldPlaylistName}。點擊此處撤銷
-      Reverted to use {oldPlaylistName} for quick bookmark: 恢復為使用 {oldPlaylistName} 進行快速書籤
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. 
+        Click here to undo: 此播放清單現在用於快速書籤，而非 {oldPlaylistName}。點擊此處撤銷
+      Reverted to use {oldPlaylistName} for quick bookmark: 恢復為使用 
+        {oldPlaylistName} 進行快速書籤
       This playlist is already being used for quick bookmark.: 此播放清單已用於快速書籤。
-      This playlist has a video with a duration error: 此播放清單至少包含一個沒有時間長度的影片，則會以時間長度為零的方式排序。
+      This playlist has a video with a duration error: 
+        此播放清單至少包含一個沒有時間長度的影片，則會以時間長度為零的方式排序。
       Video has been removed. Click here to undo.: 已移除影片。點選此處以還原。
     Search for Videos: 搜尋影片
   AddVideoPrompt:
-    Select a playlist to add your N videos to: 選擇要新增影片的播放清單 | 選擇播放清單以將您的 {videoCount} 部影片新增至其中
+    Select a playlist to add your N videos to: 選擇要新增影片的播放清單 | 選擇播放清單以將您的 
+      {videoCount} 部影片新增至其中
     N playlists selected: 已選取 {playlistCount}
     Search in Playlists: 在播放清單中搜尋
     Save: 儲存
     Toast:
       You haven't selected any playlist yet.: 您尚未選取任何播放清單。
-      "Video(s) added to {playlistCount} playlists": "影片已新增至 1 個播放清單 | 影片已新增至 {playlistCount} 個播放清單"
+      "Video(s) added to {playlistCount} playlists": "影片已新增至 1 個播放清單 | 影片已新增至 {playlistCount}
+        個播放清單"
     Added {count} Times: 已新增 | 新增了 {count} 次
     Allow Adding Duplicate Video(s): 允許新增重複影片
-    "{videoCount}/{totalVideoCount} Videos Already Added": 已新增 {videoCount}/{totalVideoCount} 部影片
-    "{videoCount}/{totalVideoCount} Videos Will Be Added": 將會新增 {videoCount}/{totalVideoCount} 部影片
+    "{videoCount}/{totalVideoCount} Videos Already Added": 已新增 
+      {videoCount}/{totalVideoCount} 部影片
+    "{videoCount}/{totalVideoCount} Videos Will Be Added": 將會新增 
+      {videoCount}/{totalVideoCount} 部影片
   CreatePlaylistPrompt:
     New Playlist Name: 新播放清單名稱
     Toast:
-      Playlist {playlistName} has been successfully created.: 已成功建立播放清單 {playlistName}。
+      Playlist {playlistName} has been successfully created.: 已成功建立播放清單 
+        {playlistName}。
       There was an issue with creating the playlist.: 建立播放清單時發生問題。
-      There is already a playlist with this name. Please pick a different name.: 已有一個同名的播放清單。請挑選其他名稱。
+      There is already a playlist with this name. Please pick a different name.: 
+        已有一個同名的播放清單。請挑選其他名稱。
     Create: 建立
-  You have no playlists. Click on the create new playlist button to create a new one.: 您沒有播放清單。按一下建立新播放清單按鈕以建立新的。
+  You have no playlists. Click on the create new playlist button to create a new 
+    one.: 您沒有播放清單。按一下建立新播放清單按鈕以建立新的。
   Save Changes: 儲存變更
   Remove Watched Videos: 移除已觀看的影片
   Add to Favorites: 新增至 {playlistName}
@@ -181,8 +196,12 @@ User Playlists:
   Quick Bookmark Enabled: 已啟用快速書籤
   Cannot delete the quick bookmark target playlist.: 無法刪除快速書籤目標播放清單。
   Remove Duplicate Videos: 移除重複的影片
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: 您確定要從此播放清單中刪除 1 個重複的影片嗎？這無法還原。 | 您確定要從此播放清單中刪除 {playlistItemCount} 個重複影片嗎？這無法還原。
-  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: 您確定要從此播放清單中刪除 1 個觀看過的影片嗎？這無法還原。 | 您確定要從此播放清單中刪除已觀看的 {playlistItemCount} 個影片嗎？這無法還原。
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this 
+    playlist? This cannot be undone: 您確定要從此播放清單中刪除 1 個重複的影片嗎？這無法還原。 | 
+    您確定要從此播放清單中刪除 {playlistItemCount} 個重複影片嗎？這無法還原。
+  Are you sure you want to remove {playlistItemCount} watched videos from this 
+    playlist? This cannot be undone: 您確定要從此播放清單中刪除 1 個觀看過的影片嗎？這無法還原。 | 
+    您確定要從此播放清單中刪除已觀看的 {playlistItemCount} 個影片嗎？這無法還原。
   Export Playlist: 匯出此播放清單
   The playlist has been successfully exported: 播放清單已成功匯出
   TotalTimePlaylist: '總時長: {duration}'
@@ -370,7 +389,6 @@ Settings:
     Autoplay Videos: '自動開始播放影片'
     Proxy Videos Through Invidious: '透過Invidious代理影片'
     Autoplay Playlists: '自動播放播放清單影片'
-    Enable Theatre Mode by Default: '預設開啟劇場模式'
     Default Volume: '預設音量'
     Default Playback Rate: '預設播放速度'
     Default Video Format:
@@ -411,7 +429,9 @@ Settings:
         Save To Folder: 儲存至資料夾
         Clipboard: 複製到剪貼簿
       Folder Label: 螢幕截圖資料夾
-      File Name Tooltip: 您可以使用下方的變數。%Y 為四位數的年份。%M 為兩位數的月份。%D 為兩位數的日。%H 為兩位數的小時。%N 為兩位數的分鐘。%S 為兩位數的秒數。%T 為三位數的毫秒。%s 為影片的秒數。%t 為三位數的影片毫秒數。%i 為影片 ID。
+      File Name Tooltip: 您可以使用下方的變數。%Y 為四位數的年份。%M 為兩位數的月份。%D 為兩位數的日。%H 
+        為兩位數的小時。%N 為兩位數的分鐘。%S 為兩位數的秒數。%T 為三位數的毫秒。%s 為影片的秒數。%t 為三位數的影片毫秒數。%i 為影片 
+        ID。
       Mode: 螢幕截圖模式
     Enter Fullscreen on Display Rotate: 在顯示旋轉時進入全螢幕
     Skip by Scrolling Over Video Player: 捲動影片播放器跳過
@@ -434,19 +454,18 @@ Settings:
     Watch history has been cleared: 已刪除觀看紀錄
     Are you sure you want to remove your entire watch history?: 您確定要移除全部的觀看紀錄嗎？
     Remove Watch History: 移除觀看紀錄
-    Search cache has been cleared: 搜尋快取已清除
-    Are you sure you want to clear out your search cache?: 您確定要清除搜尋快取嗎？
-    Clear Search Cache: 清除搜尋快取
     Save Watched Progress: 儲存觀看進度
     Remember History: 儲存觀看紀錄
     Privacy Settings: 隱私
-    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: 您確定要移除所有訂閱與設定檔嗎嗎?  注意:這無法復原。
+    Are you sure you want to remove all subscriptions and profiles?  This cannot 
+      be undone.: 您確定要移除所有訂閱與設定檔嗎嗎?  注意:這無法復原。
     Remove All Subscriptions / Profiles: 移除所有訂閱／設定檔
     Save Watched Videos With Last Viewed Playlist: 使用上次觀看的播放清單儲存觀看的影片
     Remove All Playlists: 移除所有播放清單
     All playlists have been removed: 所有播放清單已被移除
     Are you sure you want to remove all your playlists?: 您確定要移除所有播放清單嗎？
-    Are you sure you want to clear out your search history and cache?: 您確定要清除搜尋紀錄與快取嗎？
+    Are you sure you want to clear out your search history and cache?: 
+      您確定要清除搜尋紀錄與快取嗎？
     Remember Search History: 儲存搜尋紀錄
     Clear Search History and Cache: 清除搜尋紀錄與快取
     Search history and cache have been cleared: 已清除搜尋紀錄與快取
@@ -455,7 +474,8 @@ Settings:
         Never: 從不
         Auto: 自動
         Semi-auto: 半自動
-      Tooltip: 「自動」 = 每次退出影片頁面、影片結束以及遇到錯誤（如：速率受限和觀看連線階段已過期）時儲存。「半自動」 = 與自動類似（除了退出影片頁面外），並且可透過影片播放器下方的「儲存觀看進度」按鈕手動儲存進度。
+      Tooltip: 「自動」 = 每次退出影片頁面、影片結束以及遇到錯誤（如：速率受限和觀看連線階段已過期）時儲存。「半自動」 = 
+        與自動類似（除了退出影片頁面外），並且可透過影片播放器下方的「儲存觀看進度」按鈕手動儲存進度。
   Data Settings:
     How do I import my subscriptions?: 我要如何匯入我的訂閱？
     Unknown data key: 未知的資料金鑰
@@ -468,7 +488,8 @@ Settings:
     Invalid history file: 無效的觀看紀錄檔案
     Invalid subscriptions file: 無效的訂閱檔案
     All subscriptions have been successfully imported: 所有訂閱已成功匯入
-    All subscriptions and profiles have been successfully imported: 所有訂閱與設定檔已成功匯入
+    All subscriptions and profiles have been successfully imported: 
+      所有訂閱與設定檔已成功匯入
     Profile object has insufficient data, skipping item: 設定檔物件資料不足，正在跳過項目
     Export History: 匯出觀看紀錄
     Import History: 匯入觀看紀錄
@@ -488,9 +509,6 @@ Settings:
     Subscription File: 訂閱檔案
     History File: 歷史紀錄檔案
     Playlist File: 播放清單檔案
-    Export Playlists For Older OpenTubeX Versions:
-      Label: 匯出較舊 OpenTubeX 版本的播放清單
-      Tooltip: "此選項將所有播放清單中的影片匯出到名為「我的最愛」的播放清單中。\n如何匯出和匯入舊版 OpenTubeX 播放清單中的影片：\n1. 啟用此選項後匯出播放清單。\n2. 使用「隱私設定」下的「刪除所有播放清單」選項刪除所有現有播放清單。\n3. 啟動舊版的 OpenTubeX 並導入匯出的播放清單。”"
     Search history file: 搜尋歷史紀錄檔案
     Search history: 搜尋歷史紀錄
     Import search history: 匯入搜尋歷史紀錄
@@ -545,9 +563,11 @@ Settings:
     Hide Channel Courses: 隱藏頻道“課程”標籤
     Hide Channel Posts: 隱藏頻道「貼文」分頁
     Hide Subscriptions Posts: 隱藏訂閱貼文
-  The app needs to restart for changes to take effect. Restart and apply change?: 必須重新啟動應用程式以生效。重新啟動並套用變更嗎？
+  The app needs to restart for changes to take effect. Restart and apply change?: 
+    必須重新啟動應用程式以生效。重新啟動並套用變更嗎？
   Proxy Settings:
-    Error getting network information. Is your proxy configured properly?: 取得網路資訊時發生錯誤。您的代理伺服器設定正確嗎？
+    Error getting network information. Is your proxy configured properly?: 
+      取得網路資訊時發生錯誤。您的代理伺服器設定正確嗎？
     City: 城市
     Region: 區域
     Country: 國家
@@ -560,12 +580,15 @@ Settings:
     Proxy Protocol: 代理伺服器協定
     Enable Tor / Proxy: 啟用 Tor 或代理伺服器
     Proxy Settings: 代理伺服器
-    Proxy Warning: OpenTubeX 沒有內建代理伺服器，但可以連線至外部代理伺服器，例如在您的機器上執行的代理伺服器，如 Tor 或外部代理伺服器，如某些 VPN 提供的 SOCKS5 代理伺服器。如果啟用，請確定您的代理伺服器/Tor 已經正確設定，否則 OpenTubeX 將無法取得任何資料。
+    Proxy Warning: OpenTubeX 沒有內建代理伺服器，但可以連線至外部代理伺服器，例如在您的機器上執行的代理伺服器，如 Tor 
+      或外部代理伺服器，如某些 VPN 提供的 SOCKS5 代理伺服器。如果啟用，請確定您的代理伺服器/Tor 已經正確設定，否則 OpenTubeX 
+      將無法取得任何資料。
     Proxy Username: 代理伺服器使用者名稱
     Proxy Password: 代理伺服器密碼
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: 當贊助商片段被跳過時通知
-    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API 網址（預設為 https://sponsor.ajay.app）
+    'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock 
+      API 網址（預設為 https://sponsor.ajay.app）
     Enable SponsorBlock: 啟用 SponsorBlock
     SponsorBlock Settings: SponsorBlock
     Skip Options:
@@ -577,7 +600,8 @@ Settings:
     Category Color: 分類色彩
     UseDeArrowTitles: 使用 DeArrow 影片標題
     UseDeArrowThumbnails: 使用 DeArrow 製作縮圖
-    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': DeArrow 縮圖產生器 API（預設值為 https://dearrow-thumb.ajay.app）
+    'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': 
+      DeArrow 縮圖產生器 API（預設值為 https://dearrow-thumb.ajay.app）
   External Player Settings:
     Custom External Player Arguments: 自訂外部播放程式參數
     Custom External Player Executable: 自訂外部播放程式可執行檔
@@ -609,9 +633,6 @@ Settings:
     Enter Password To Unlock: 輸入密碼以解鎖設定
   Sort Settings Sections (A-Z): 對設定區塊進行排序 (A-Z)
   Return to Settings Menu: 回到設定選單
-  SABR:
-    Label: 啟用 SABR 作為 DASH 後端
-    Tooltip: SABR 將在未來版本成為唯一的 DASH 後端，且無法停用。此切換功能僅供早期實作出現無法修復的問題時使用。
 About:
   #On About page
   About: '關於'
@@ -625,7 +646,8 @@ About:
   Donate: 捐款
   Help: 說明
   these people and projects: 這些人與專案
-  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX 誕生都要感謝{creditsPageLink}
+  OpenTubeX is made possible by {creditsPageLink}: OpenTubeX 
+    誕生都要感謝{creditsPageLink}
   Translate: 翻譯
   room rules: 聊天室規則
   Please read the {roomRulesLink}: 請閱讀{roomRulesLink}
@@ -673,7 +695,8 @@ Channel:
   Added channel to your subscriptions: 已新增頻道至您的訂閱
   Removed subscription from {count} other channel(s): 從{count}個其他頻道移除訂閱
   Channel has been removed from your subscriptions: 頻道已從您的訂閱中移除
-  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 此頻道有年齡限制，目前無法在 OpenTubeX 中檢視。
+  This channel is age-restricted and currently cannot be viewed in OpenTubeX.: 
+    此頻道有年齡限制，目前無法在 OpenTubeX 中檢視。
   Channel Tabs: 頻道分頁
   This channel does not exist: 此頻道不存在
   This channel does not allow searching: 此頻道不允許搜尋
@@ -683,7 +706,6 @@ Channel:
     Reveal Answers: 揭露答案
     Hide Answers: 隱藏答案
     Video hidden by OpenTubeX: 由 OpenTubeX 隱藏的影片
-    Viewing Posts Only Supported By Invidious: 僅 Invidious 支援檢視貼文。前往頻道的社群分頁即可檢視其中的內容而不需使用 Invidious。
     View Full Post: 檢視完整貼文
   Live:
     Live: 直播
@@ -718,7 +740,8 @@ Video:
   Enable Live Chat: '啟用直播聊天室'
   Live Chat is currently not supported in this build.: '直播聊天室在此版本中目前不被支援。'
   Live chat is enabled. Chat messages will appear here once sent.: '直播聊天結束。 聊天訊息一旦傳送將出現在這裡。'
-  'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': '直播聊天室目前不被Invidious API支援。 需要直接連線YouTube。'
+  'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': '直播聊天室目前不被Invidious
+    API支援。 需要直接連線YouTube。'
   Published:
     In less than a minute: 不到一分鐘內
   Published on: '發布於'
@@ -733,7 +756,8 @@ Video:
   Reverse Playlist: 反向播放清單
   Shuffle Playlist: 隨機播放清單
   Loop Playlist: 循環播放清單
-  Starting soon, please refresh the page to check again: 影片即將開始，請重新整理頁面以再次檢查是否有更新
+  Starting soon, please refresh the page to check again: 
+    影片即將開始，請重新整理頁面以再次檢查是否有更新
   Copy Invidious Channel Link: 複製 Invidious 頻道連結
   Open Channel in Invidious: 在 Invidious 開啟頻道
   Copy YouTube Channel Link: 複製 YouTube 頻道連結
@@ -757,7 +781,8 @@ Video:
       looping playlists: 循環播放清單
       shuffling playlists: 隨機播放清單
       reversing playlists: 反向播放清單
-      opening specific video in a playlist (falling back to opening the video): 在播放清單中開啟特定影片（汰退至開啟影片）
+      opening specific video in a playlist (falling back to opening the video): 
+        在播放清單中開啟特定影片（汰退至開啟影片）
       opening playlists: 正在開啟播放清單
       setting a playback rate: 正在設定播放速度
       starting video at offset: 在偏移處開始影片
@@ -770,7 +795,8 @@ Video:
   Show Super Chat Comment: 顯示超級聊天留言
   Scroll to Bottom: 捲動至底部
   Upcoming: 即將到來
-  'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': 即時聊天在此串流不可用。其可能被上傳者停用了。
+  'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': 
+    即時聊天在此串流不可用。其可能被上傳者停用了。
   Unhide Channel: 顯示頻道
   Hide Channel: 隱藏頻道
   More Options: 更多選項
@@ -796,10 +822,12 @@ Video:
       Buffered: 已緩衝：{bufferedPercentage}%
       Dropped Frames / Total Frames: 丟棄的畫面數：{droppedFrames} / 總畫面數：{totalFrames}
       CodecAudio: 編解碼器：{audioCodec} ({audioItag})
-      CodecsVideoAudio: 編解碼器：{videoCodec} ({videoItag}) / {audioCodec} ({audioItag})
+      CodecsVideoAudio: 編解碼器：{videoCodec} ({videoItag}) / {audioCodec} 
+        ({audioItag})
       CodecsVideoAudioNoItags: 編解碼器：{videoCodec} / {audioCodec}
     You appear to be offline: 您似乎已離線。
-    Playback will resume automatically when your connection comes back: 當您的連線恢復時，將會自動繼續播放。
+    Playback will resume automatically when your connection comes back: 
+      當您的連線恢復時，將會自動繼續播放。
     Skipped segment: 已跳過 {segmentCategory} 段
     Autoplay is on: 自動播放已開啟
     Autoplay is off: 自動播放已關閉
@@ -811,12 +839,15 @@ Video:
     Show Original Details: 顯示原始詳細資訊
     Show Modified Details: 顯示修改後的詳細資訊
 #& Playlists
-  DRMProtected: 受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。如果您想觀賞此影片，請使用支援 DRM 的網路瀏覽器在 YouTube 官方網站觀賞。
+  DRMProtected: 受 DRM 保護的影片無法在 OpenTubeX 上播放，因為它們需要專屬的封閉原始碼元件。如果您想觀賞此影片，請使用支援 
+    DRM 的網路瀏覽器在 YouTube 官方網站觀賞。
   Save Watched Progress: 儲存觀看進度
   Watched Progress Saved: 觀看進度已儲存
   Watch:
-    'Remaining preroll-ad time: {remindingTimeSeconds}s': 剩餘前置廣告時間：{remindingTimeSeconds}秒
-    'Remaining SABR backoff time: {remindingTimeSeconds}s': 剩餘 SABR 後退時間：{remindingTimeSeconds}秒
+    'Remaining preroll-ad time: {remindingTimeSeconds}s': 
+      剩餘前置廣告時間：{remindingTimeSeconds}秒
+    'Remaining SABR backoff time: {remindingTimeSeconds}s': 剩餘 SABR 
+      後退時間：{remindingTimeSeconds}秒
   Popout Live Chat: 彈出式聊天
   Private: 無法在 OpenTubeX 觀看私人影片，因為觀看私人影片需要 Google 登入和影片所有權。
 Playlist:
@@ -886,7 +917,8 @@ Comments:
   There are no comments available for this post: 此貼文尚無留言
   Hide {replyCount} replies: 隱藏 1 則回覆 | 隱藏 {replyCount} 則回覆
   View 1 reply from {channelName}: 檢視來自 {channelName} 的 1 則回覆
-  View {replyCount} replies from {channelName} and others: 檢視來自 {channelName} 與其他頻道的 {replyCount} 則回覆
+  View {replyCount} replies from {channelName} and others: 檢視來自 {channelName} 
+    與其他頻道的 {replyCount} 則回覆
 Up Next: '觀看其他類似影片'
 
 # Toast Messages
@@ -908,7 +940,8 @@ No: '否'
 Locale Name: 繁體中文
 Profile:
   '{profile} is now the active profile': '{profile}現在是作用中的設定檔'
-  Your default profile has been changed to your primary profile: 您的預設設定檔已變更為您的主要設定檔
+  Your default profile has been changed to your primary profile: 
+    您的預設設定檔已變更為您的主要設定檔
   Removed {profile} from your profiles: 已從您的設定檔移除{profile}
   Your default profile has been set to {profile}: 您的預設設定檔已設定為{profile}
   Profile has been updated: 設定檔已更新
@@ -928,8 +961,11 @@ Profile:
   Profile Manager: 設定檔管理器
   All Channels: 所有頻道
   Profile Select: 選取設定檔
-  Are you sure you want to delete the selected channels?  This will not delete the channel from any other profile.: 您確定您想移除選取的頻道？ 這不會從其他設定檔中移除頻道。
-  ? This is your primary profile.  Are you sure you want to delete the selected channels?  The same channels will be deleted in any profile they are found in.
+  Are you sure you want to delete the selected channels?  This will not delete 
+    the channel from any other profile.: 您確定您想移除選取的頻道？ 這不會從其他設定檔中移除頻道。
+  ? This is your primary profile.  Are you sure you want to delete the selected 
+    channels?  The same channels will be deleted in any profile they are found 
+    in.
   : 這是您的主要設定檔。 您確定要移除選取的頻道？ 相同的頻道中任何找到的設定檔會被移除。
   No channel(s) have been selected: 無頻道已選取
   Add Selected To Profile: 添加選取的到設定檔
@@ -949,48 +985,67 @@ Profile:
   Create Profile Name: 建立設定檔名稱
 The playlist has been reversed: 播放清單已反轉
 Download From Site: 從網站下載
-Version {versionNumber} is now available!  Click for more details: 有新版本！最新版本是 {versionNumber} ！按此取得更多資訊
-This video is unavailable because of missing formats. This can happen due to country unavailability.: 沒有這個影片因為缺少格式。這個可能發生由於國家不可用。
+Version {versionNumber} is now available!  Click for more details: 有新版本！最新版本是 
+  {versionNumber} ！按此取得更多資訊
+This video is unavailable because of missing formats. This can happen due to 
+  country unavailability.: 沒有這個影片因為缺少格式。這個可能發生由於國家不可用。
 Tooltips:
   Subscription Settings:
-    Fetch Feeds from RSS: 啟用後，OpenTubeX 將使用 RSS 替代其預設方法來擷取您的訂閱 feed。RSS 的速度較快，而且可以防止 IP 封鎖，但它可能不會提供某些資訊，例如影片長度、直播狀態或貼文
+    Fetch Feeds from RSS: 啟用後，OpenTubeX 將使用 RSS 替代其預設方法來擷取您的訂閱 feed。RSS 
+      的速度較快，而且可以防止 IP 封鎖，但它可能不會提供某些資訊，例如影片長度、直播狀態或貼文
     Fetch Automatically: 啟用後，OpenTubeX 將會在啟動時和開啟新視窗時自動擷取您的訂閱 feed。
   Player Settings:
-    Default Video Format: 設定要用於影片播放的格式。DASH 格式有更高的畫質。傳統格式會限制在 360p 但頻寬需求更低。音訊格式為僅有音訊的串流。
+    Default Video Format: 設定要用於影片播放的格式。DASH 格式有更高的畫質。傳統格式會限制在 360p 
+      但頻寬需求更低。音訊格式為僅有音訊的串流。
     Proxy Videos Through Invidious: 將連線到 Invidious 而非直接連線到 YouTube 來提供影片。
-    Scroll Playback Rate Over Video Player: 當游標停在影片上時，按住 Ctrl 鍵（Mac 的話則是 Command 鍵），然後向前或向後滾動滑鼠滾輪來控制播放速度。按住 Ctrl 鍵（Mac 的話則是 Command 鍵）並點擊滑鼠左鍵以快速回到預設的播放速度（1x，除非在設定中更改）。
+    Scroll Playback Rate Over Video Player: 當游標停在影片上時，按住 Ctrl 鍵（Mac 的話則是 Command
+      鍵），然後向前或向後滾動滑鼠滾輪來控制播放速度。按住 Ctrl 鍵（Mac 的話則是 Command 
+      鍵）並點擊滑鼠左鍵以快速回到預設的播放速度（1x，除非在設定中更改）。
     Skip by Scrolling Over Video Player: 使用滾輪跳過影片，MPV 風格。
   General Settings:
     Invidious Instance: OpenTubeX 將連線到 Invidious 站台進行 API 呼叫。
     Thumbnail Preference: OpenTubeX 中所有縮圖都會被替換為經過模糊處理或隱藏的影片畫面而非預設縮圖。
-    Fallback to Non-Preferred Backend on Failure: 當您的偏好 API 有問題時，OpenTubeX 將自動嘗試使用您的非偏好 API 作為汰退方案。
-    Preferred API Backend: 選擇 OpenTubeX 要用於取得YouTube資料的伺服器。本地 API 是內建擷取器。Invidious API 需要 Invidious 伺服器才能連線。
+    Fallback to Non-Preferred Backend on Failure: 當您的偏好 API 有問題時，OpenTubeX 
+      將自動嘗試使用您的非偏好 API 作為汰退方案。
+    Preferred API Backend: 選擇 OpenTubeX 要用於取得YouTube資料的伺服器。本地 API 
+      是內建擷取器。Invidious API 需要 Invidious 伺服器才能連線。
     Region for Trending: 熱門影片區域可以讓您選擇想要顯示哪個國家的熱門影片。
     External Link Handling: "選擇點擊後無法在 OpenTubeX 中開啟連結時的預設行為。\n預設情況下 OpenTubeX 將會在您的預設瀏覽器中開啟點擊的連結。\n"
-    Open Deep Links In New Window: 傳遞給 OpenTubeX 的 URL，例如透過重定向瀏覽器擴充套件或命令列引數，會在新視窗中開啟。
+    Open Deep Links In New Window: 傳遞給 OpenTubeX 的 
+      URL，例如透過重定向瀏覽器擴充套件或命令列引數，會在新視窗中開啟。
   External Player Settings:
     Custom External Player Arguments: 要傳給外部播放器的任何自訂命令列引數。
     Ignore Warnings: 當目前的外部播放程式不支援目前動作時（例如反向播放清單等等），消除警告。
-    Custom External Player Executable: 預設情況下，OpenTubeX 會假設選定的外部播放程式可以透過 PATH 環境變數找到。如果需要的話，請在此設定自訂路徑。
-    External Player: 選擇外部播放程式將會在縮圖上顯示圖示，用來在外部播放程式中開啟影片（若支援的話，播放清單也可以）。警告：Invidious 設定不會影響外部播放程式。
+    Custom External Player Executable: 預設情況下，OpenTubeX 會假設選定的外部播放程式可以透過 PATH 
+      環境變數找到。如果需要的話，請在此設定自訂路徑。
+    External Player: 
+      選擇外部播放程式將會在縮圖上顯示圖示，用來在外部播放程式中開啟影片（若支援的話，播放清單也可以）。警告：Invidious 
+      設定不會影響外部播放程式。
     DefaultCustomArgumentsTemplate: （預設：'{defaultCustomArguments}'）
-    Ignore Default Arguments: 除了影片 URL 之外，不要向外部播放器傳送任何預設引數（例如播放速率、播放清單 URL 等）。 自訂引數仍會被傳遞。
+    Ignore Default Arguments: 除了影片 URL 之外，不要向外部播放器傳送任何預設引數（例如播放速率、播放清單 URL 等）。 
+      自訂引數仍會被傳遞。
   Experimental Settings:
     Replace HTTP Cache: 停用 Electron 以磁碟為基礎的 HTTP 快取並啟用自訂的記憶體圖片快取。會導致記憶體使用量增加。
   Distraction Free Settings:
-    Hide Channels: 輸入頻道 ID 以隱藏所有影片、播放清單與頻道本身，使其完全不出現在搜尋、趨勢、熱門與建議中。輸入的頻道 ID 必須完全符合，且區分大小寫。
-    Hide Subscriptions Live: 此設定會被「{settingsSection}」的「{subsection}」部分中應用程式範圍的「{appWideSetting}」設定覆寫
-    Hide Videos, Playlists and Channels Containing Text: 輸入單字、單字片段或片語（不分大小寫），以隱藏整個 OpenTubeX 中原始標題包含該單字、單字片段或片語的所有影片與播放清單，僅不包括歷史紀錄、您的播放清單與播放清單內的影片。
+    Hide Channels: 輸入頻道 ID 以隱藏所有影片、播放清單與頻道本身，使其完全不出現在搜尋、趨勢、熱門與建議中。輸入的頻道 ID 
+      必須完全符合，且區分大小寫。
+    Hide Subscriptions Live: 
+      此設定會被「{settingsSection}」的「{subsection}」部分中應用程式範圍的「{appWideSetting}」設定覆寫
+    Hide Videos, Playlists and Channels Containing Text: 
+      輸入單字、單字片段或片語（不分大小寫），以隱藏整個 OpenTubeX 
+      中原始標題包含該單字、單字片段或片語的所有影片與播放清單，僅不包括歷史紀錄、您的播放清單與播放清單內的影片。
     Hide Videos on Watch: 在訂閱和頻道頁面上的影片、短片和直播頁面中隱藏已觀看的影片。這不會影響頻道頁面上的主頁
   SponsorBlock Settings:
     UseDeArrowTitles: 將影片標題取代為 DeArrow 使用者遞交的標題。
     UseDeArrowThumbnails: 將影片縮圖替換為來自 DeArrow 的縮圖。
-Playing Next Video Interval: 馬上播放下一個影片。點擊取消。| 播放下一個影片的時間為{nextVideoInterval}秒。點擊取消。| 播放下一個影片的時間為{nextVideoInterval}秒。點擊取消。
+Playing Next Video Interval: 馬上播放下一個影片。點擊取消。| 
+  播放下一個影片的時間為{nextVideoInterval}秒。點擊取消。| 播放下一個影片的時間為{nextVideoInterval}秒。點擊取消。
 More: 更多
 Unknown YouTube url type, cannot be opened in app: 未知的 YouTube url 類型，無法在應用程式開啟
 Open New Window: 開新視窗
 Default Invidious instance has been cleared: 預設 Invidious 站台已被清除
-Default Invidious instance has been set to {instance}: 預設 Invidious 站台已被設定為 {instance}
+Default Invidious instance has been set to {instance}: 預設 Invidious 站台已被設定為 
+  {instance}
 Search Bar:
   Clear Input: 清除輸入
   Remove: 移除
@@ -1020,7 +1075,8 @@ Hashtag:
 Channel Hidden: '{channel} 已新增至頻道過濾條件'
 Go to page: 到 {page}
 Channel Unhidden: '{channel} 已從頻道過濾條件移除'
-Trimmed input must be at least N characters long: 修剪後的輸入必須至少有 1 個字元長 | 修剪後的輸入必須至少有 {length} 個字元長
+Trimmed input must be at least N characters long: 修剪後的輸入必須至少有 1 個字元長 | 
+  修剪後的輸入必須至少有 {length} 個字元長
 Tag already exists: 「{tagName}」標籤已存在
 Close Banner: 關閉橫幅
 Age Restricted:

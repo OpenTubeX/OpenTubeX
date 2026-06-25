@@ -81,7 +81,8 @@ Subscriptions:
   Subscriptions: ''
   # channels that were likely deleted
   Error Channels: ''
-  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: ''
+  This profile has a large number of subscriptions. Forcing RSS to avoid rate 
+    limiting: ''
   'Your Subscription list is currently empty. Start adding subscriptions to see them here.': ''
   Disabled Automatic Fetching: ''
   Empty Channels: ''
@@ -222,7 +223,6 @@ Settings:
     Autoplay Videos: ''
     Proxy Videos Through Invidious: ''
     Autoplay Playlists: ''
-    Enable Theatre Mode by Default: ''
     Scroll Volume Over Video Player: ''
     Scroll Playback Rate Over Video Player: ''
     Skip by Scrolling Over Video Player: ''
@@ -279,14 +279,12 @@ Settings:
     Remember History: ''
     Save Watched Progress: ''
     Save Watched Videos With Last Viewed Playlist: ''
-    Clear Search Cache: ''
-    Are you sure you want to clear out your search cache?: ''
-    Search cache has been cleared: ''
     Remove Watch History: ''
     Are you sure you want to remove your entire watch history?: ''
     Watch history has been cleared: ''
     Remove All Subscriptions / Profiles: ''
-    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: ''
+    Are you sure you want to remove all subscriptions and profiles?  This cannot 
+      be undone.: ''
     Remove All Playlists: ''
     All playlists have been removed: ''
     Are you sure you want to remove all your playlists?: ''
@@ -463,10 +461,12 @@ Profile:
   Delete Selected: ''
   Add Selected To Profile: ''
   No channel(s) have been selected: ''
-  ? This is your primary profile.  Are you sure you want to delete the selected channels?  The
-    same channels will be deleted in any profile they are found in.
+  ? This is your primary profile.  Are you sure you want to delete the selected 
+    channels?  The same channels will be deleted in any profile they are found 
+    in.
   : ''
-  Are you sure you want to delete the selected channels?  This will not delete the channel from any other profile.: ''
+  Are you sure you want to delete the selected channels?  This will not delete 
+    the channel from any other profile.: ''
 #On Channel Page
 Channel:
   Subscribe: ''
@@ -684,7 +684,8 @@ Local API Error (Click to copy): ''
 Invidious API Error (Click to copy): ''
 Falling back to Invidious API: ''
 Falling back to Local API: ''
-This video is unavailable because of missing formats. This can happen due to country unavailability.: ''
+This video is unavailable because of missing formats. This can happen due to 
+  country unavailability.: ''
 Unknown YouTube url type, cannot be opened in app: ''
 Loop is now disabled: ''
 Loop is now enabled: ''
