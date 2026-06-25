@@ -28,8 +28,7 @@ Open New Window: 'Nieuw koader opendoen'
 Go to page: 'Na dizn {page} goane'
 Close Banner: 'Banner toedeoene'
 
-Version {versionNumber} is now available!  Click for more details: 'Versie {versionNumber}
-  is beschikboar!..Klikt ier vo mjir details'
+Version {versionNumber} is now available!  Click for more details: 'Versie {versionNumber} is beschikboar!..Klikt ier vo mjir details'
 Download From Site: 'Download van de site'
 Are you sure you want to open this link?: 'Ziej zeker daj die link wilt opendoene?'
 
@@ -102,21 +101,16 @@ Search Filters:
   Search Results: 'Zoek resultoatn'
   Fetching results. Please wait: 'Resultoatn ant ipoaln. Efkes geduld alsjeblieft'
   Fetch more results: 'Mjir resultoatn ipoaln'
-  There are no more results for this search: 'Der zin gin resultoatn nimji vo dize
-    zoekipdracht'
+  There are no more results for this search: 'Der zin gin resultoatn nimji vo dize zoekipdracht'
 # Sidebar
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: 'Abonnees'
   # channels that were likely deleted
   Error Channels: 'Kanoaln me foutn'
-  This profile has a large number of subscriptions. Forcing RSS to avoid rate 
-    limiting: ''
-  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Tstoat
-    vo de moment nietn in jon lîste van abonnees. Vo der te ziene goaj moetn startn
-    me joe te abonneern.'
-  Disabled Automatic Fetching: 'Gêit otomoatisch abonnees ipoaln ofgezet. Erload jon
-    abonnees voor ze ier te ziene.'
+  This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting: ''
+  'Your Subscription list is currently empty. Start adding subscriptions to see them here.': 'Tstoat vo de moment nietn in jon lîste van abonnees. Vo der te ziene goaj moetn startn me joe te abonneern.'
+  Disabled Automatic Fetching: 'Gêit otomoatisch abonnees ipoaln ofgezet. Erload jon abonnees voor ze ier te ziene.'
   Empty Channels: 'Jon geabonneerde kanoaln ein vo de moment gin videos.'
   Empty Posts: 'Der zin vo de moment gin berichtn van jon geabonneerde kanoaln.'
   Load More Videos: 'Mjir videos loadn'
@@ -142,8 +136,7 @@ Feed:
 Playlists: ''
 User Playlists:
   Your Playlists: ''
-  You have no playlists. Click on the create new playlist button to create a new 
-    one.: ''
+  You have no playlists. Click on the create new playlist button to create a new one.: ''
   Empty Search Message: ''
   Search bar placeholder: ''
   Playlists with Matching Videos: ''
@@ -171,10 +164,8 @@ User Playlists:
   Remove Watched Videos: ''
   Enable Quick Bookmark With This Playlist: ''
   Quick Bookmark Enabled: ''
-  Are you sure you want to remove {playlistItemCount} duplicate videos from this 
-    playlist? This cannot be undone: ''
-  Are you sure you want to remove {playlistItemCount} watched videos from this 
-    playlist? This cannot be undone: ''
+  Are you sure you want to remove {playlistItemCount} duplicate videos from this playlist? This cannot be undone: ''
+  Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone: ''
   Delete Playlist: ''
   Cannot delete the quick bookmark target playlist.: ''
   Are you sure you want to delete this playlist? This cannot be undone: ''
@@ -202,8 +193,7 @@ User Playlists:
 
       This playlist is already being used for quick bookmark.: ''
       This playlist is now used for quick bookmark: ''
-      This playlist is now used for quick bookmark instead of {oldPlaylistName}. 
-        Click here to undo: ''
+      This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: ''
       Reverted to use {oldPlaylistName} for quick bookmark: ''
 
       Some videos in the playlist are not loaded yet. Click here to copy anyway.: ''
@@ -369,6 +359,7 @@ Settings:
     Autoplay Videos: ''
     Proxy Videos Through Invidious: ''
     Autoplay Playlists: ''
+    Enable Theatre Mode by Default: ''
     Scroll Volume Over Video Player: ''
     Scroll Playback Rate Over Video Player: ''
     Skip by Scrolling Over Video Player: ''
@@ -425,12 +416,14 @@ Settings:
     Remember History: ''
     Save Watched Progress: ''
     Save Watched Videos With Last Viewed Playlist: ''
+    Clear Search Cache: ''
+    Are you sure you want to clear out your search cache?: ''
+    Search cache has been cleared: ''
     Remove Watch History: ''
     Are you sure you want to remove your entire watch history?: ''
     Watch history has been cleared: ''
     Remove All Subscriptions / Profiles: ''
-    Are you sure you want to remove all subscriptions and profiles?  This cannot 
-      be undone.: ''
+    Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: ''
     Remove All Playlists: ''
     All playlists have been removed: ''
     Are you sure you want to remove all your playlists?: ''
@@ -496,6 +489,10 @@ Settings:
     Export History: ''
     Import Playlists: ''
     Export Playlists: ''
+    Export Playlists For Older OpenTubeX Versions:
+      Label: ''
+      # |- = Keep newlines, No newline at end
+      Tooltip: |
     Profile object has insufficient data, skipping item: ''
     All subscriptions and profiles have been successfully imported: ''
     All subscriptions have been successfully imported: ''
@@ -620,12 +617,9 @@ Profile:
   Delete Selected: ''
   Add Selected To Profile: ''
   No channel(s) have been selected: ''
-  ? This is your primary profile.  Are you sure you want to delete the selected 
-    channels?  The same channels will be deleted in any profile they are found 
-    in.
+  ? This is your primary profile.  Are you sure you want to delete the selected channels?  The same channels will be deleted in any profile they are found in.
   : ''
-  Are you sure you want to delete the selected channels?  This will not delete 
-    the channel from any other profile.: ''
+  Are you sure you want to delete the selected channels?  This will not delete the channel from any other profile.: ''
   Close Profile Dropdown: ''
   Open Profile Dropdown: ''
 #On Channel Page
@@ -683,6 +677,7 @@ Channel:
     Reveal Answers: ''
     Hide Answers: ''
     Video hidden by OpenTubeX: ''
+    Viewing Posts Only Supported By Invidious: ''
 Video:
   More Options: ''
   Mark As Watched: ''
@@ -891,8 +886,7 @@ Local API Error (Click to copy): ''
 Invidious API Error (Click to copy): ''
 Falling back to Invidious API: ''
 Falling back to Local API: ''
-This video is unavailable because of missing formats. This can happen due to 
-  country unavailability.: ''
+This video is unavailable because of missing formats. This can happen due to country unavailability.: ''
 Unknown YouTube url type, cannot be opened in app: ''
 Loop is now disabled: ''
 Loop is now enabled: ''
