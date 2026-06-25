@@ -95,12 +95,10 @@ Settings:
   Privacy Settings:
     Privacy Settings: 'ଗୋପନୀୟତା ସେଟିଂ'
     Remember History: 'ଇତିଵୃତ୍ତି ମନେରଖିବା'
-  Subscription Settings:
-    Manage Subscriptions: 'ସଦସ୍ୟତା ପରିଚାଳନା'
   Distraction Free Settings:
     Hide Comments: 'ମନ୍ତଵ୍ୟ ଲୁଚାଇବା'
-    Display Titles Without Excessive Capitalisation: ଅତ୍ୟଧିକ ବଡ଼ ଅକ୍ଷର ବିନା ଆଖ୍ୟା ପ୍ରଦର୍ଶନ
-      କରିବା
+    Display Titles Without Excessive Capitalisation: ଅତ୍ୟଧିକ ବଡ଼ ଅକ୍ଷର ବିନା ଆଖ୍ୟା
+      ପ୍ରଦର୍ଶନ କରିବା
   SponsorBlock Settings: {}
 Channel:
   Videos:
