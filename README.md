@@ -6,6 +6,26 @@ OpenTubeX is an open source desktop YouTube player built with privacy in mind.
 Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
 Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to Electron.
 
+<br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
+<p align="center">
+  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
+    <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
+  </a>
+  <a href="https://weblate.d3sox.me/engage/opentubex/">
+    <img src="https://weblate.d3sox.me/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
+  </a>
+</p>
+
+<hr>
+<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
+<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+<hr>
+
+> [!NOTE] 
+> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
+>
+> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
+
 ## Extra features compared to FreeTube
 
 - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
@@ -64,26 +84,6 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="209" height="48" alt="image" src="https://github.com/user-attachments/assets/7b90cf31-5d90-41bb-b342-c15e2e7c33b6" />
 
 - Player shortcut <kbd>G</kbd> to toggle between 1x and the last playback speed
-
-<br><p align="center"><a href="https://github.com/OpenTubeX/OpenTubeX/releases">Download OpenTubeX</a></p>
-<p align="center">
-  <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
-    <img alt='Build status' src="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml/badge.svg?branch=development" />
-  </a>
-  <a href="https://weblate.d3sox.me/engage/opentubex/">
-    <img src="https://weblate.d3sox.me/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
-  </a>
-</p>
-
-<hr>
-<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
-<hr>
-
-> [!NOTE] 
-> OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
->
-> If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
 ## Screenshots
 | The main OpenTubeX window                                                                         |
