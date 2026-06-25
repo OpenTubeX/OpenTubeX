@@ -243,6 +243,21 @@ Settings:
       Label: Automatycznie wczytaj kolejną stronę
     Open Deep Links In New Window: Odnośniki URL przekazane do OpenTubeX otwieraj w nowym oknie
     Minimize to system tray: Minimalizuj do zasobnika systemowego
+    New Tab Position:
+      New Tab Position: Położenie Nowej Karty
+      At the end: Na końcu
+      After current tab: Za aktywną kartą
+    Startup Behavior:
+      Startup Behavior: Przy uruchomieniu
+      Load all tabs: Załaduj wszystkie karty
+      Load last active tab: Załaduj tylko aktywną kartę
+      Start with an empty session: Uruchom nową sesję
+    Avoid translation:
+      Avoid translation: Zachowaj oryginalny tekst
+      Disabled: Wyłączone
+      Entire App: Cała aplikacja
+
+
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -1118,3 +1133,5 @@ Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
 Screenshot Clipboard Success: Zapisano zrzut ekranu do schowka
 Screenshot Clipboard Error: Zapisanie kopii zrzutu do schowka nie powiodło się
+New Tab: Nowa karta
+Close Tab: Zamknij kartę
