@@ -1,158 +1,48 @@
-# This is a basic workflow that is manually triggered
+name: Build Flatpak
 
-name: Create Flatpak PR
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
   workflow_dispatch:
-  # Disable running automatically as we now use flathub's external data checker
-  # to automatically open pull requests when we release updates
-  # release:
-  #   types: [published]
+    inputs:
+      releaseTag:
+        type: string
+        required: false
+        description: Release tag to build, for example v0.25.5-beta
+  release:
+    types: [published]
 
 permissions: {}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  trigger-flatpak:
+    name: Trigger Flatpak build
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
-      with:
-        repository: flathub/io.opentubex.OpenTubeX
-        token: ${{ secrets.FLATHUB_TOKEN }}
-        persist-credentials: true
+      - name: Resolve release tag
+        id: release
+        shell: bash
+        env:
+          EVENT_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.releaseTag }}
+        run: |
+          tag="${INPUT_TAG:-$EVENT_TAG}"
 
-    - name: Get Repo Release List
-      uses: moustacheful/github-api-exec-action@2135aaccb1220f81e6fa4f14c90cc20efba069fe #v0
-      id: list_results
-      with:
-        # Command to execute, (e.g: `pulls.create`), see https://octokit.github.io/rest.js/ for available commands
-        command: repos.listReleases
-        payload: >
-            {
-              "owner": "OpenTubeX",
-              "repo": "OpenTubeX"
-            }
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install xmlstarlet
-      shell: bash
-      run: sudo apt -y install xmlstarlet
-    - name: Create Version Variable
-      uses: bluwy/substitute-string-action@70ff0b17357670ffd3fee68e95b6de9963b66bad #v3.0.0
-      id: sub
-      with:
-        _input-text: ${{ fromJson(steps.list_results.outputs.result)[0].tag_name }}
-        -beta: ''
-        v: ''
-    - name: Create Release Branch
-      shell: bash
-      env:
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: |
-        git checkout -b "release-v${VERSION}"
-        git push --set-upstream origin "release-v${VERSION}"
-    - name: Download x64 Release
-      uses: fabriciobastian/download-release-asset-action@35e62aa5a2fe4a6ec79004f6052918349013ae4f #v1.0.6
-      with:
-        version: v${{ steps.sub.outputs.result }}-beta
-        repository: OpenTubeX/OpenTubeX
-        file: opentubex-${{ steps.sub.outputs.result }}-beta-linux-x64-portable.zip
-    - name: Download ARM Release
-      uses: fabriciobastian/download-release-asset-action@35e62aa5a2fe4a6ec79004f6052918349013ae4f #v1.0.6
-      with:
-        version: v${{ steps.sub.outputs.result }}-beta
-        repository: OpenTubeX/OpenTubeX
-        file: opentubex-${{ steps.sub.outputs.result }}-beta-linux-arm64-portable.zip
-    - name: Set x64 Hash Variable
-      id: hash_x64
-      shell: bash
-      env:
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: |
-        echo 'HASH_X64<<EOF' >> "$GITHUB_OUTPUT"
-        sha256sum "opentubex-${VERSION}-beta-linux-x64-portable.zip" | awk '{print $1}' >> "$GITHUB_OUTPUT"
-        echo 'EOF' >> "$GITHUB_OUTPUT"
-    - name: Set ARM Hash Variable
-      id: hash_arm64
-      shell: bash
-      env:
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: |
-        echo 'HASH_ARM64<<EOF' >> "$GITHUB_OUTPUT"
-        sha256sum "opentubex-${VERSION}-beta-linux-arm64-portable.zip" | awk '{print $1}' >> "$GITHUB_OUTPUT"
-        echo 'EOF' >> "$GITHUB_OUTPUT"
+          if [ -z "$tag" ]; then
+            echo "No release tag provided."
+            exit 1
+          fi
 
-    - name: Set Date Variable
-      id: current_date
-      shell: bash
-      run: |
-        echo 'CURRENT_DATE<<EOF' >> "$GITHUB_OUTPUT"
-        date +"%Y-%m-%d" >> "$GITHUB_OUTPUT"
-        echo 'EOF' >> "$GITHUB_OUTPUT"
-    - name: Update x64 File Location in yml File
-      shell: bash
-      env:
-        VERSION: steps.sub.outputs.result
-      run: |
-        yq -i '.modules[0].sources[0].url = "https://github.com/OpenTubeX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-x64-portable.zip"' io.opentubex.OpenTubeX.yml
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-    - name: Update x64 Hash in yml File
-      shell: bash
-      env:
-        HASH_X64: ${{ steps.hash_x64.outputs.HASH_X64 }}
-      run: |
-        yq -i '.modules[0].sources[0].sha256 = strenv(HASH_X64)' io.opentubex.OpenTubeX.yml
-
-    - name: Update ARM File Location in yml File
-      shell: bash
-      env:
-        VERSION: steps.sub.outputs.result
-      run: |
-        yq -i '.modules[0].sources[1].url = "https://github.com/OpenTubeX/OpenTubeX/releases/download/v" + strenv(VERSION) + "-beta/opentubex-" + strenv(VERSION) + "-beta-linux-arm64-portable.zip"' io.opentubex.OpenTubeX.yml
-
-    - name: Update ARM Hash in yml File
-      shell: bash
-      env:
-        HASH_ARM64: ${{ steps.hash_arm64.outputs.HASH_ARM64 }}
-      run: |
-        yq -i '.modules[0].sources[1].sha256 = strenv(HASH_ARM64)' io.opentubex.OpenTubeX.yml
-
-    - name: Add Patch Notes to XML File
-      shell: bash
-      env:
-        CURRENT_DATE: ${{ steps.current_date.outputs.current_date }}
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: xmlstarlet ed -L -i /component/releases/release[1] -t elem -n releaseTMP -v "" -i //releaseTMP -t attr -n version -v "${VERSION} Beta" -i //releaseTMP -t attr -n date -v "${CURRENT_DATE}" -s //releaseTMP -t elem -n url -v "" -s //releaseTMP/url -t text -n "" -v "https://github.com/OpenTubeX/OpenTubeX/releases/tag/v${VERSION}-beta" -r //releaseTMP -v "release" io.opentubex.OpenTubeX.metainfo.xml
-    - name: Remove Release Files
-      shell: bash
-      env:
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: |
-        rm "opentubex-${VERSION}-beta-linux-x64-portable.zip"
-        rm "opentubex-${VERSION}-beta-linux-arm64-portable.zip"
-    - name: Commit Files
-      uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 #v7.1.0
-      with:
-        # Optional but recommended
-        # Defaults to "Apply automatic changes"
-        commit_message: Update files for v${{ steps.sub.outputs.result }}
-
-        # Optional options appended to `git-commit`
-        # See https://git-scm.com/docs/git-commit for a list of available options
-        commit_options: '--no-verify --signoff'
-
-        # Optional: Disable dirty check and always try to create a commit and push
-        skip_dirty_check: true
-    - name: Create PR
-      shell: bash
-      env:
-        GH_TOKEN: ${{ secrets.FLATHUB_TOKEN }}
-        VERSION: ${{ steps.sub.outputs.result }}
-      run: gh pr create --title "Release v${VERSION}" --body "This is an automated PR for the v${VERSION} release. This PR will be updated and merged once testing is complete."
+      - name: Trigger flatpak build
+        env:
+          GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh api repos/OpenTubeX/flatpak/dispatches \
+            --method POST \
+            -f event_type=opentubex-release \
+            -f "client_payload[tag]=$TAG"
