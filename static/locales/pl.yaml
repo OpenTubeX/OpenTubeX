@@ -258,6 +258,7 @@ Settings:
       Entire App: Cała aplikacja
 
 
+      Watch Only: Tylko na stronie odtwarzacza
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -437,6 +438,27 @@ Settings:
       External Player: Zewnętrzny odtwarzacz ({externalPlayerName})
       Default Viewing Mode: Domyślny tryb odtwarzania
       Full Screen: Cały ekran
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatyczny Obraz w obrazie
+      Never: Nigdy
+      When Switching Tab: Podczas przełączania kart
+      When Scrolling Down: Podczas przewijania
+      Both: Podczas przewijania i przełączania kart
+    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do szybkości odtwarzania
+    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do szybkości odtwarzania
+    Remember Volume: Zapamiętaj głośność odtwarzania
+    Remember Playback Speed Per Channel: Pamiętaj prędkość odtwarzania na każdym kanale
+    Auto Update Channel Playback Speed: Zapamiętuj automatycznie przy każdej zmianie
+    Use Quick Playback Speed Bar: Wyświetl podręczny pasek zmiany prędkości odtwarzania
+    Manage Channel Playback Speeds: Zarządzaj zapisanymi prędkościami odtwarzania
+    Channel Playback Speed Manager: Menedżer zarządzania prędkościami odtwarzania
+    No Saved Playback Speeds: Brak zapisanych prędkości odtwarzania
+    Remember Video Quality Per Channel: Zapamiętuj rozdzielczość obrazu na każdym kanale
+    Auto Update Channel Video Quality: Zapamiętuj automatycznie przy każdej zmianie
+    Manage Channel Video Qualities: Zarządzaj zapisanymi ustawieniami rozdzielczości wideo
+    Channel Video Quality Manager: Menedżer zarządzania zapisanymi rozdzielczościami wideo
+    No Saved Video Qualities: Brak zapisanych ustawień rozdzielczości
+    Playback Speed: Prędkość odtwarzania
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -578,6 +600,13 @@ Settings:
     Proxy Warning: OpenTubeX nie ma wbudowanego proxy, ale może połączyć z zewnętrznym proxy. Na przykład z uruchomionym na Twoim komputerze, jak Tor, albo z uruchomionym na zewnętrznym serwerze, takim jak SOCKS5 proxy, oferowanym przez niektórych dostawców VPN. Po włączeniu upewnij się, że Twoje proxy lub Tor są skonfigurowane poprawnie, by OpenTubeX był w stanie wymieniać jakiekolwiek dane.
     Proxy Username: Nazwa użytkownika usługi proxy
     Proxy Password: Hasło do usługi proxy
+    IP Block Recovery Script Path: Ścieżka do skryptu omijania blokady IP
+    Select IP Block Recovery Script File: Wybierz plik skryptu omijania blokady IP
+    Running IP block recovery script: Uruchom skrypt omijania blokady IP
+    IP block recovery script failed: 'Błąd skryptu omijania blokady IP (kod błędu: {exitCode})'
+    IP block recovery script finished: Zakończono wykonywanie skryptu omijania blokady IP
+    Reloading video after IP block recovery: Przeładuj wideo po ominięciu blokady IP
+    Failed to select IP block recovery script: Nie udało się wybrać skryptu omijania blokady IP
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Powiadamiaj, kiedy segment sponsorowany zostanie pominięty
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Adres URL interfejsu API SponsorBlock (Domyślnie jest https://sponsor.ajay.app)
@@ -593,6 +622,15 @@ Settings:
     UseDeArrowTitles: Użyj tytułów filmów z DeArrow
     UseDeArrowThumbnails: Użyj DeArrow do miniaturek
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': URL do API generatora miniaturek DeArrow (Domyślny jest https://dearrow-thumb.ajay.app)
+    Enable SponsorBlock Submission: Włącz raportowanie SponsorBlock
+    SponsorBlock Private User ID (optional): Prywatny ID użytkownika SponsorBlock (opcjonalny)
+    SponsorBlock Private User ID Tooltip: Prywatny ID użytkownika SponsorBlock skopiowany z rozszerzenia przeglądarki. Pozostaw puste by używać ID użytkownika wygenerowane przez OpenTubeX.
+    Generated SponsorBlock User ID: Wygenerowany ID użytkownika SponsorBlock
+    Generated SponsorBlock User ID Tooltip: Ten wygenerowany przez OpenTubeX ID użytkownika SponsorBlock może być używany w rozszerzeniu przeglądarki, lub w OpenTubeX na innym komputerze.
+    Export Generated User ID: Wyeksportuj wygenerowany ID
+    Generated SponsorBlock User ID Copy Button: Skopiuj wygenerowany ID użytkownika SponsorBlock
+    Generated SponsorBlock User ID Copied: Wygenerowany ID użytkownika SponsorBlock został skopiowany do schowka
+    Skip notification timeout: Pomiń licznik czasu trwania powiadomienia
   External Player Settings:
     Custom External Player Arguments: Niestandardowe argumenty zewnętrznego odtwarzacza
     Custom External Player Executable: Niestandardowy plik wykonywalny zewnętrznego odtwarzacza
@@ -609,6 +647,7 @@ Settings:
     Show Family Friendly Only: Pokazuj tylko filmy przyjazne rodzinie
     Hide Search Bar: Schowaj pole wyszukiwania
     Hide Uploader on Watch page: Ukryj przesyłającego na stronie obserwowanych
+    Disable Channel Links: Wyłącz linki do kanałów
   Experimental Settings:
     Replace HTTP Cache: Zastąp pamięć podręczną HTTP
     Experimental Settings: Eksperymentalne
@@ -626,6 +665,10 @@ Settings:
   SABR:
     Label: Włącz SABR jako back-end dla DASH-a
     Tooltip: W przyszłości SABR będzie jedynym back-endem DASH-a i nie będzie można go wyłączyć. Ten przełącznik został wprowadzony na wypadek, gdyby wczesna implementacja powodowała problemy.
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Wyświetlanie łapek w dół z YouTube
+    Enable Return YouTube Dislike: Włącz wyświetlanie łapek w dół z YouTube
+    Return YouTube Dislike Url: Link do API wyświetlania łapek w dół z YouTube (Domyślnie https://ryd-proxy.kavin.rocks)
 About:
   #On About page
   About: 'O projekcie'
@@ -832,6 +875,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Do końca reklamy z początku pozostało: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR – do przeczekania pozostało: {remindingTimeSeconds}s'
+  Private: Prywatnych filmów nie można oglądać w OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
