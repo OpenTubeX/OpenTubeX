@@ -4,6 +4,8 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :last-refresh-timestamp="lastVideoRefreshTimestamp"
+    :next-auto-refresh-timestamp="nextVideoAutoRefreshTimestamp"
+    :next-auto-refresh-tooltip="nextVideoAutoRefreshTooltip"
     :attempted-fetch="attemptedFetch"
     :title="t('Global.Videos')"
     @refresh="loadVideosForSubscriptionsFromRemote"
@@ -11,7 +13,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from '../composables/use-i18n-polyfill'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -28,7 +30,7 @@ import { getInvidiousChannelVideos, invidiousFetch } from '../helpers/api/invidi
 import { getLocalChannelVideos } from '../helpers/api/local'
 import { parseYouTubeRSSFeed, updateVideoListAfterProcessing } from '../helpers/subscriptions'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
@@ -36,8 +38,10 @@ const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
+const now = ref(Date.now())
 
 let alreadyLoadedRemotely = false
+let nextAutoRefreshTicker = null
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -109,11 +113,67 @@ const lastVideoRefreshTimestamp = computed(() => {
   return getRelativeTimeFromDate(minTimestamp.getTime(), true)
 })
 
+const nextVideoAutoRefreshTimestamp = computed(() => {
+  const timestamp = store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
+  const interval = parseInt(store.getters.getSubscriptionFeedAutoRefreshInterval, 10)
+
+  if (!timestamp || Number.isNaN(interval) || interval <= 0) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat([locale.value, 'en'], {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(timestamp)
+})
+
+const nextVideoAutoRefreshTooltip = computed(() => {
+  const timestamp = store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
+  const interval = parseInt(store.getters.getSubscriptionFeedAutoRefreshInterval, 10)
+
+  if (!timestamp || Number.isNaN(interval) || interval <= 0) {
+    return ''
+  }
+
+  return new Intl.RelativeTimeFormat([locale.value, 'en'], { numeric: 'auto' }).format(
+    getRelativeTimeValue(timestamp - now.value).value,
+    getRelativeTimeValue(timestamp - now.value).unit
+  )
+})
+
+/**
+ * @param {number} remainingMs
+ */
+function getRelativeTimeValue(remainingMs) {
+  const absRemainingSeconds = Math.max(Math.ceil(Math.abs(remainingMs) / 1000), 0)
+
+  if (absRemainingSeconds < 60) {
+    return { value: Math.ceil(remainingMs / 1000), unit: 'second' }
+  }
+
+  const remainingMinutes = remainingMs / 60000
+  if (Math.abs(remainingMinutes) < 60) {
+    return { value: Math.ceil(remainingMinutes), unit: 'minute' }
+  }
+
+  const remainingHours = remainingMs / 3600000
+  return { value: Math.ceil(remainingHours), unit: 'hour' }
+}
+
 watch(activeSubscriptionList, () => {
   lastRemoteRefreshSuccessTimestamp.value = null
   isLoading.value = true
   loadVideosFromCacheSometimes()
 }, { deep: true })
+
+watch(
+  () => store.getters.getSubscriptionFeedLastRefreshTimestamp,
+  () => {
+    if (subscriptionCacheReady.value) {
+      loadVideosFromCacheForAllActiveProfileChannels()
+    }
+  }
+)
 
 if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
@@ -124,7 +184,14 @@ if (!subscriptionCacheReady.value) {
 }
 
 onMounted(() => {
+  nextAutoRefreshTicker = setInterval(() => {
+    now.value = Date.now()
+  }, 30000)
   loadVideosFromRemoteFirstPerWindowSometimes()
+})
+
+onBeforeUnmount(() => {
+  clearInterval(nextAutoRefreshTicker)
 })
 
 function loadVideosFromRemoteFirstPerWindowSometimes() {
@@ -174,15 +241,21 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
 }
 
 async function loadVideosForSubscriptionsFromRemote() {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return
+  }
+
   if (activeSubscriptionList.value.length === 0) {
     isLoading.value = false
     videoList.value = []
+    store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
     return
   }
 
   const channelsToLoadFromRemote = activeSubscriptionList.value
   let channelCount = 0
   isLoading.value = true
+  store.commit('setSubscriptionFeedRefreshInProgress', true)
 
   let useRss = useRssFeeds.value
   if (channelsToLoadFromRemote.length >= 125 && !useRss) {
@@ -197,54 +270,59 @@ async function loadVideosForSubscriptionsFromRemote() {
   store.commit('setProgressBarPercentage', 0)
   attemptedFetch.value = true
 
-  errorChannels.value = []
-  const subscriptionUpdates = []
+  try {
+    errorChannels.value = []
+    const subscriptionUpdates = []
 
-  const videoListFromRemote = (await Promise.all(channelsToLoadFromRemote.map(async (channel) => {
-    let videos, name, thumbnailUrl
+    const videoListFromRemote = (await Promise.all(channelsToLoadFromRemote.map(async (channel) => {
+      let videos, name, thumbnailUrl
 
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      if (useRss) {
-        ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousRSS(channel))
+      if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+        if (useRss) {
+          ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousRSS(channel))
+        } else {
+          ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousScraper(channel))
+        }
       } else {
-        ({ videos, name, thumbnailUrl } = await getChannelVideosInvidiousScraper(channel))
+        if (useRss) {
+          ({ videos, name, thumbnailUrl } = await getChannelVideosLocalRSS(channel))
+        } else {
+          ({ videos, name, thumbnailUrl } = await getChannelVideosLocalScraper(channel))
+        }
       }
-    } else {
-      if (useRss) {
-        ({ videos, name, thumbnailUrl } = await getChannelVideosLocalRSS(channel))
-      } else {
-        ({ videos, name, thumbnailUrl } = await getChannelVideosLocalScraper(channel))
+
+      channelCount++
+      const percentageComplete = (channelCount / channelsToLoadFromRemote.length) * 100
+      store.commit('setProgressBarPercentage', percentageComplete)
+
+      if (videos != null) {
+        store.dispatch('updateSubscriptionVideosCacheByChannel', {
+          channelId: channel.id,
+          videos: videos
+        })
       }
-    }
 
-    channelCount++
-    const percentageComplete = (channelCount / channelsToLoadFromRemote.length) * 100
-    store.commit('setProgressBarPercentage', percentageComplete)
+      if (name || thumbnailUrl) {
+        subscriptionUpdates.push({
+          channelId: channel.id,
+          channelName: name,
+          channelThumbnailUrl: thumbnailUrl
+        })
+      }
 
-    if (videos != null) {
-      store.dispatch('updateSubscriptionVideosCacheByChannel', {
-        channelId: channel.id,
-        videos: videos
-      })
-    }
+      return videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
+    }))).flat()
 
-    if (name || thumbnailUrl) {
-      subscriptionUpdates.push({
-        channelId: channel.id,
-        channelName: name,
-        channelThumbnailUrl: thumbnailUrl
-      })
-    }
+    videoList.value = updateVideoListAfterProcessing(videoListFromRemote)
+    lastRemoteRefreshSuccessTimestamp.value = Date.now()
+    store.commit('setSubscriptionFeedLastRefreshTimestamp', lastRemoteRefreshSuccessTimestamp.value)
 
-    return videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
-  }))).flat()
-
-  videoList.value = updateVideoListAfterProcessing(videoListFromRemote)
-  isLoading.value = false
-  store.commit('setShowProgressBar', false)
-  lastRemoteRefreshSuccessTimestamp.value = Date.now()
-
-  store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+    store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+  } finally {
+    isLoading.value = false
+    store.commit('setShowProgressBar', false)
+    store.commit('setSubscriptionFeedRefreshInProgress', false)
+  }
 }
 
 async function getChannelVideosLocalScraper(channel, failedAttempts = 0) {

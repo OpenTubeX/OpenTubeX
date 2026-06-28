@@ -1,10 +1,10 @@
 <template>
   <div>
     <FtLoader
-      v-if="isLoading"
+      v-if="displayIsLoading"
     />
     <div
-      v-if="!isLoading && errorChannels.length !== 0"
+      v-if="!displayIsLoading && errorChannels.length !== 0"
     >
       <h3> {{ $t("Subscriptions.Error Channels") }}</h3>
       <FtFlexBox>
@@ -18,7 +18,7 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="!isLoading && activeVideoList.length === 0"
+      v-if="!displayIsLoading && activeVideoList.length === 0"
     >
       <p
         v-if="!activeProfileHasSubscriptions"
@@ -40,13 +40,13 @@
       </p>
     </FtFlexBox>
     <FtElementList
-      v-if="!isLoading && activeVideoList.length > 0"
+      v-if="!displayIsLoading && activeVideoList.length > 0"
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
     />
     <FtAutoLoadNextPageWrapper
-      v-if="!isLoading && videoList.length > dataLimit"
+      v-if="!displayIsLoading && videoList.length > dataLimit"
       @load-next-page="increaseLimit"
     >
       <FtFlexBox>
@@ -60,8 +60,10 @@
     </FtAutoLoadNextPageWrapper>
 
     <FtRefreshWidget
-      :disable-refresh="isLoading || !activeProfileHasSubscriptions"
+      :disable-refresh="displayIsLoading || !activeProfileHasSubscriptions"
       :last-refresh-timestamp="lastRefreshTimestamp"
+      :next-auto-refresh-timestamp="nextAutoRefreshTimestamp"
+      :next-auto-refresh-tooltip="nextAutoRefreshTooltip"
       :title="title"
       @click="refresh"
     />
@@ -112,6 +114,14 @@ const props = defineProps({
     type: String,
     required: true
   },
+  nextAutoRefreshTimestamp: {
+    type: String,
+    default: ''
+  },
+  nextAutoRefreshTooltip: {
+    type: String,
+    default: ''
+  },
   title: {
     type: String,
     required: true
@@ -134,6 +144,15 @@ const activeVideoList = computed(() => {
 
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const subscriptionFeedRefreshInProgress = computed(() => {
+  return store.getters.getSubscriptionFeedRefreshInProgress
+})
+
+const displayIsLoading = computed(() => {
+  return props.isLoading || subscriptionFeedRefreshInProgress.value
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -215,7 +234,7 @@ function keyboardShortcutHandler(event) {
   switch (event.key.toLowerCase()) {
     case 'f5':
     case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!props.isLoading && activeProfileHasSubscriptions.value) {
+      if (!displayIsLoading.value && activeProfileHasSubscriptions.value) {
         event.preventDefault()
         refresh()
       }

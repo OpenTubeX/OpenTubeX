@@ -132,6 +132,7 @@ import store from './store/index'
 
 import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
+import { refreshSubscriptionVideosFromRemote } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { loadLocale } from './i18n/index'
 
@@ -168,7 +169,14 @@ const landingPage = computed(() => '/' + store.getters.getLandingPage)
 /** @type {import('vue').ComputedRef<string>} */
 const defaultInvidiousInstance = computed(() => store.getters.getDefaultInvidiousInstance)
 
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubscriptionFeedAutoRefreshInterval)
+
+/** @type {import('vue').ComputedRef<number | null>} */
+const subscriptionFeedLastRefreshTimestamp = computed(() => store.getters.getSubscriptionFeedLastRefreshTimestamp)
+
 const dataReady = ref(false)
+let subscriptionFeedAutoRefreshTimer = null
 
 onMounted(async () => {
   await store.dispatch('grabUserSettings')
@@ -220,12 +228,56 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  clearSubscriptionFeedAutoRefreshTimer()
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
 })
+
+watch([
+  dataReady,
+  subscriptionFeedAutoRefreshInterval,
+  subscriptionFeedLastRefreshTimestamp
+], scheduleSubscriptionFeedAutoRefresh)
+
+function scheduleSubscriptionFeedAutoRefresh() {
+  clearSubscriptionFeedAutoRefreshTimer()
+
+  const interval = parseInt(subscriptionFeedAutoRefreshInterval.value, 10)
+  if (
+    !dataReady.value ||
+    Number.isNaN(interval) ||
+    interval <= 0
+  ) {
+    store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', null)
+    return
+  }
+
+  store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + interval)
+  subscriptionFeedAutoRefreshTimer = setTimeout(refreshSubscriptionFeedAutomatically, interval)
+}
+
+async function refreshSubscriptionFeedAutomatically() {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    scheduleSubscriptionFeedAutoRefresh()
+    return
+  }
+
+  await refreshSubscriptionVideosFromRemote({
+    t,
+    showStartToast: true
+  })
+
+  scheduleSubscriptionFeedAutoRefresh()
+}
+
+function clearSubscriptionFeedAutoRefreshTimer() {
+  clearTimeout(subscriptionFeedAutoRefreshTimer)
+  subscriptionFeedAutoRefreshTimer = null
+  store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', null)
+}
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)

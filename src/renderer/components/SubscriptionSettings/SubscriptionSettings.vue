@@ -11,6 +11,15 @@
           compact
           @change="updateFetchSubscriptionsAutomatically"
         />
+        <FtSelect
+          :placeholder="$t('Settings.Subscription Settings.Auto Refresh Interval')"
+          :value="subscriptionFeedAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="subscriptionFeedAutoRefreshIntervalValues"
+          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+          :icon="['fas', 'clock']"
+          @change="updateSubscriptionFeedAutoRefreshInterval"
+        />
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
           :default-value="useRssFeeds"
@@ -52,6 +61,7 @@
 import { computed } from 'vue'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
@@ -60,11 +70,41 @@ import store from '../../store/index'
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
+const subscriptionFeedAutoRefreshIntervalNames = [
+  'Disabled',
+  '30 min',
+  '1 h',
+  '2 h',
+  '4 h',
+  '6 h',
+  '8 h'
+]
+
+const subscriptionFeedAutoRefreshIntervalValues = [
+  '0',
+  '1800000',
+  '3600000',
+  '7200000',
+  '14400000',
+  '21600000',
+  '28800000'
+]
+
 /**
  * @param {boolean} value
  */
 function updateFetchSubscriptionsAutomatically(value) {
   store.dispatch('updateFetchSubscriptionsAutomatically', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubscriptionFeedAutoRefreshInterval)
+
+/**
+ * @param {string} value
+ */
+function updateSubscriptionFeedAutoRefreshInterval(value) {
+  store.dispatch('updateSubscriptionFeedAutoRefreshInterval', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

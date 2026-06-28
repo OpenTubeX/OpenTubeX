@@ -15,7 +15,7 @@
   @include utils.fixed-top-bar;
 }
 
-.floatingRefreshSection:has(.lastRefreshTimestamp + .refreshButton) {
+.floatingRefreshSection:has(.lastRefreshTimestamp + .refreshActions) {
   justify-content: space-between;
 }
 
@@ -25,11 +25,26 @@
   font-size: 16px;
 }
 
+.refreshActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-inline-start: auto;
+}
+
+.nextAutoRefreshTimestamp {
+  text-align: end;
+}
+
 @media only screen and (width <= 680px) {
   .floatingRefreshSection,
   .floatingRefreshSection.sideNavOpen,
   .floatingRefreshSection.hideLabelsSideBar {
     inline-size: 100%;
     border-inline-start: none;
+  }
+
+  .nextAutoRefreshTimestamp {
+    display: none;
   }
 }

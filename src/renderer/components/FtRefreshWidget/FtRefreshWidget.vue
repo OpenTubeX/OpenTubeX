@@ -8,15 +8,24 @@
     >
       {{ t('Feed.Feed Last Updated', { feedName: title, date: lastRefreshTimestamp }) }}
     </p>
-    <FtIconButton
-      :disabled="disableRefresh"
-      :icon="['fas', 'sync']"
-      class="refreshButton"
-      :title="refreshFeedButtonTitle"
-      :size="12"
-      theme="primary"
-      @click="click"
-    />
+    <div class="refreshActions">
+      <p
+        v-if="nextAutoRefreshTimestamp"
+        class="lastRefreshTimestamp nextAutoRefreshTimestamp"
+        :title="nextAutoRefreshTooltip"
+      >
+        {{ t('Feed.Next Auto Refresh', { date: nextAutoRefreshTimestamp }) }}
+      </p>
+      <FtIconButton
+        :disabled="disableRefresh"
+        :icon="['fas', 'sync']"
+        class="refreshButton"
+        :title="refreshFeedButtonTitle"
+        :size="12"
+        theme="primary"
+        @click="click"
+      />
+    </div>
   </div>
 </template>
 
@@ -35,6 +44,14 @@ const props = defineProps({
     default: false
   },
   lastRefreshTimestamp: {
+    type: String,
+    default: ''
+  },
+  nextAutoRefreshTimestamp: {
+    type: String,
+    default: ''
+  },
+  nextAutoRefreshTooltip: {
     type: String,
     default: ''
   },

@@ -132,6 +132,7 @@ Subscriptions:
   Load More Posts: Load More Posts
   Subscriptions Tabs: Subscriptions Tabs
   All Subscription Tabs Hidden: 'All subscription tabs are hidden. To see content here, please unhide some tabs in the "{subsection}" section in "{settingsSection}".'
+  Refreshing Subscriptions: Refreshing subscriptions
 More: More
 Channels:
   Channels: Channels
@@ -148,6 +149,7 @@ Trending:
 Most Popular: Most Popular
 Feed:
   Feed Last Updated: '{feedName} feed last updated: {date}'
+  Next Auto Refresh: 'Next auto refresh: {date}'
   Refresh Feed: Refresh {subscriptionName}
 Playlists: Playlists
 User Playlists:
@@ -570,6 +572,7 @@ Settings:
     Subscription Settings: Subscription
     Fetch Feeds from RSS: Fetch Feeds from RSS
     Fetch Automatically: Fetch Feed Automatically
+    Auto Refresh Interval: Auto Refresh Interval
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
@@ -1212,6 +1215,7 @@ Tooltips:
       but doesn't provide certain information like video duration, live status or posts
     Fetch Automatically: When enabled, OpenTubeX will automatically fetch
       your subscription feed on startup and when a new window is opened.
+    Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
   SponsorBlock Settings:
