@@ -546,3 +546,38 @@ jobs:
           --repo "$GITHUB_REPOSITORY" \
           --ref "$GITHUB_REF_NAME" \
           -f "releaseTag=$TAG"
+
+  trigger-website-update:
+    name: Trigger website update
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Trigger website update workflow
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh workflow run updateSite.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref "$GITHUB_REF_NAME" \
+          -f "releaseTag=$TAG"

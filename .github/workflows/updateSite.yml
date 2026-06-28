@@ -7,8 +7,6 @@ on:
         type: string
         required: false
         description: Release tag to publish on the download site, for example v0.25.5-beta
-  release:
-    types: [published]
 
 permissions: {}
 
@@ -26,10 +24,9 @@ jobs:
       shell: bash
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        EVENT_TAG: ${{ github.event.release.tag_name }}
         INPUT_TAG: ${{ inputs.releaseTag }}
       run: |
-        tag="${INPUT_TAG:-$EVENT_TAG}"
+        tag="$INPUT_TAG"
 
         if [ -z "$tag" ]; then
           tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
