@@ -120,18 +120,18 @@ User Playlists:
     Search in Playlists: Keresés a lejátszási listában
     Save: Mentés
     Toast:
-      "Video(s) added to {playlistCount} playlists": "A videó(k) hozzá lettek adva 1 lejátszási listához | A videó(k) lettek adva {playlistCount} lejátszási listához"
+      "Video(s) added to {playlistCount} playlists": "Videó(k) hozzáadva 1 lejátszási listához | Videó(k) hozzáadva {playlistCount} lejátszási listához"
       You haven't selected any playlist yet.: Még nem választott ki egyetlen lejátszási listát sem.
     Select a playlist to add your N videos to: Válasszon ki egy lejátszási listát a videó hozzáadásához | Válasszon ki egy lejátszási listát a {videoCount} videó hozzáadásához
     N playlists selected: '{playlistCount} kiválasztva'
     Added {count} Times: Hozzáadva {count} Alkalommal
-    "{videoCount}/{totalVideoCount} Videos Will Be Added": '{videoCount}/{totalVideoCount} A videók hozzáadásra fognak kerülni'
-    "{videoCount}/{totalVideoCount} Videos Already Added": '{videoCount}/{totalVideoCount} Videó már hozzá lett adva'
+    "{videoCount}/{totalVideoCount} Videos Will Be Added": '{videoCount}/{totalVideoCount} videó hozzá lesz adva'
+    "{videoCount}/{totalVideoCount} Videos Already Added": '{videoCount}/{totalVideoCount} videó már hozzá lett adva'
     Allow Adding Duplicate Video(s): Duplikált videó(k) hozzáadásának engedélyezése
   SinglePlaylistView:
     Toast:
-      There were no videos to remove.: Nem voltak eltávolítható videók.
-      Video has been removed: A videó el lett távolítva
+      There were no videos to remove.: Nem volt eltávolítható videó.
+      Video has been removed: Videó eltávolítva
       Playlist has been updated.: Lejátszási lista frissítve.
       There was an issue with updating this playlist.: Volt egy probléma a lejátszási lista frissítésével.
       This video cannot be moved up.: Ez a videó nem mozgatható feljebb.
@@ -141,7 +141,7 @@ User Playlists:
       This playlist does not exist: Ez a lejátszási lista nem létezik
       Playlist name cannot be empty. Please input a name.: A lejátszási lista neve nem lehet üres. Adjon meg egy nevet.
       There was a problem with removing this video: Probléma adódott a videó eltávolításával
-      "{videoCount} video(s) have been removed": 1 videó el lett távolítva | {videoCount} videó el lett távolítva
+      "{videoCount} video(s) have been removed": 1 videó eltávolítva | {videoCount} videó eltávolítva
       This video cannot be moved down.: Ez a videó nem mozgatható lejjebb.
       This playlist is now used for quick bookmark: Ez a lejátszási lista most gyors könyvjelzőként van használva
       This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo: A(z) {oldPlaylistName} helyett mostantól ez a lejátszási lista szolgál gyors könyvjelzőként. Kattintson ide a visszavonáshoz
@@ -420,13 +420,13 @@ Settings:
       Mode: Képernyőkép-készítési mód
     Scroll Playback Rate Over Video Player: Lejátszási sebesség görgetése a videólejátszón
     Max Video Playback Rate: Legnagyobb videólejátszási sebesség
-    Video Playback Rate Interval: Videó lejátszási sebesség léptetési köze
+    Video Playback Rate Interval: Videólejátszási sebesség lépésköze
     Enter Fullscreen on Display Rotate: Belépés a teljes képernyős módba a kijelző elforgatásakor
     Skip by Scrolling Over Video Player: Kihagyás a videólejátszó felett görgetve
     Autoplay Interruption Timer: Automatikus lejátszás megszakításának időköze
     Default Viewing Mode:
       Full Screen: Teljes képernyő
-      Theater: Szélesvásznú
+      Theater: Mozi
       Picture in Picture: Kép a képben
       External Player: Külső lejátszó ({externalPlayerName})
       Default Viewing Mode: Alapértelmezett nézetmód
@@ -754,8 +754,8 @@ Channel:
 Video:
   Mark As Watched: 'Megjelölés megtekintettként'
   Remove From History: 'Eltávolítás az előzményekből'
-  Video has been marked as watched: 'A videó megtekintettnek lett jelölve'
-  Video has been removed from your history: 'A videó el lett távolítva az előzményekből'
+  Video has been marked as watched: 'Videó megtekintettnek lett jelölve'
+  Video has been removed from your history: 'Videó eltávolítva az előzményekből'
   Open in YouTube: 'Megnyitás a YouTube-ban'
   Copy YouTube Link: 'YouTube-hivatkozás másolása'
   Open YouTube Embedded Player: 'YouTube beágyazott lejátszó megnyitása'
@@ -789,8 +789,8 @@ Video:
   Open Channel in Invidious: Csatorna megnyitása az Invidious oldalán
   Started streaming on: Folyamatos átvitel indult
   Streamed on: 'Közvetítve'
-  Video has been removed from your saved list: A videó el lett távolíva a mentett listáról
-  Video has been saved: A videó mentve
+  Video has been removed from your saved list: Videó eltávolítva a mentett listáról
+  Video has been saved: Videó mentve
   Save Video: Videó mentése
   Sponsor Block category:
     music offtopic: Témán kívüli zene
@@ -811,7 +811,7 @@ Video:
       setting a playback rate: lejátszási sebesség beállítása
       starting video at offset: videó kezdésének eltolása
     UnsupportedActionTemplate: 'A(z) {externalPlayer} külső lejátszó nem támogatja a következőt: {action}'
-    OpeningTemplate: A(z) {videoOrPlaylist} videó megnyitása a(z) {externalPlayer} külső lejátszóban…
+    OpeningTemplate: '{videoOrPlaylist} megnyitása a következőben: {externalPlayer}...'
     playlist: lejátszási lista
     video: videó
     OpenInTemplate: 'Megnyitás ebben: {externalPlayer}'
@@ -826,7 +826,7 @@ Video:
   Player:
     Audio Tracks: Hangsávok
     Exit Theatre Mode: Kilépés a szélesvásznú módból
-    Theatre Mode: Szélesvásznú mód
+    Theatre Mode: Mozi mód
     Full Window: Teljes ablak
     Exit Full Window: Kilépés a teljes ablakból
     Take Screenshot: Képernyőkép készítése
@@ -988,7 +988,7 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Adjon meg egy szót, szótöredéket vagy kifejezést (nem érzékeny a nagy- és kisbetűkre), hogy elrejtse az összes olyan videót és lejátszási listát, amelynek eredeti címe tartalmazza ezt a szót vagy kifejezést a OpenTubeX egész területén, kivéve az előzményeket, a lejátszási listákat és a lejátszási listákon belüli videókat.
     Hide Videos on Watch: Elrejti a megtekintett videókat a videók-, rövidek- és élő lapokról a feliratkozás- és a csatornaoldalon. Ez nem érinti a kezdőoldalon található csatornalapokat
   SponsorBlock Settings:
-    UseDeArrowTitles: Cserélje le a videócímeket a DeArrow-ból, felhasználó által beküldött címekre.
+    UseDeArrowTitles: Videócímek cseréje a DeArrow felhasználói által beküldött címekre.
     UseDeArrowThumbnails: Videóbélyegkép cseréje DeArrow bélyegképpel.
 Playing Next Video Interval: A következő videó lejátszása folyamatban van. Kattintson a megszakításhoz. | A következő videó lejátszása {nextVideoInterval} másodperc múlva. Kattintson a megszakításhoz. | A következő videó lejátszása {nextVideoInterval} másodperc múlva. Kattintson a megszakításhoz.
 More: Több
@@ -1089,12 +1089,12 @@ KeyboardShortcutPrompt:
   Picture in Picture: Kép a képben mód be/ki
   Play: Lejátszás / Szüneteltetés be/ki
   Mute: Némítás be/ki
-  Decrease Video Speed: A videó lejátszási sebességének csökkentése a lejátszási sebesség időköze alapján
-  Increase Video Speed: A videó lejátszási sebességének növelése a lejátszási sebesség időköze alapján
+  Decrease Video Speed: Videó lejátszási sebességének csökkentése a lejátszási sebesség időköze alapján
+  Increase Video Speed: Videó lejátszási sebességének növelése a lejátszási sebesség időköze alapján
   Toggle Developer Tools: Fejlesztői eszközök be/ki
   Zoom In: Nagyítás
   Full Window: Teljes ablakmód be/ki
-  Theatre Mode: Szélesvásznú mód be/ki
+  Theatre Mode: Mozi mód be/ki
   Minimize Window: Ablak minimalizálása
   Last Frame: Előző képkocka megjelenítése (szüneteltetés alatt)
   Next Frame: Következő képkocka megjelenítése (szüneteltetés alatt)
