@@ -85,6 +85,10 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Player shortcut <kbd>G</kbd> to toggle between 1x and the last playback speed
 
+- Auto refresh subscriptions option
+<img width="237" height="264" alt="image" src="https://github.com/user-attachments/assets/a7a84b8a-f0a4-40d6-9c5e-68a1dc9abb07" />
+
+
 ## Screenshots
 | The main OpenTubeX window                                                                         |
 |--------------------------------------------------------------------------------------------------|
