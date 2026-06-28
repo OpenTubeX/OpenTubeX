@@ -84,6 +84,7 @@ body:
       options:
         - .AppImage
         - .deb
+        - Flatpak
         - .dmg
         - .exe
         - .pacman
