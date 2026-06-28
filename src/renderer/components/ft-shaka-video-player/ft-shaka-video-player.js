@@ -4380,54 +4380,7 @@ export default defineComponent({
         return
       }
 
-      switch (event.key.toLowerCase()) {
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN:
-          // Toggle full screen
-          event.preventDefault()
-          ui.getControls().toggleFullScreen()
-          blurTooltipButtons()
-          return
-        case 'escape':
-          // Exit full window
-          if (fullWindowEnabled.value) {
-            event.preventDefault()
-
-            events.dispatchEvent(new CustomEvent('setFullWindow', {
-              detail: false
-            }))
-          }
-          return
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW:
-          // Toggle full window mode
-          event.preventDefault()
-          events.dispatchEvent(new CustomEvent('setFullWindow', {
-            detail: !fullWindowEnabled.value
-          }))
-          blurTooltipButtons()
-          return
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE:
-          // Toggle theatre mode
-          if (props.theatrePossible) {
-            event.preventDefault()
-
-            events.dispatchEvent(new CustomEvent('toggleTheatreMode', {
-              detail: !props.useTheatreMode
-            }))
-            blurTooltipButtons()
-          }
-          return
-      }
-
-      if (!hasLoaded.value) {
-        return
-      }
-
       const video_ = video.value
-
-      if (event.key === 'Enter' && toggleActiveSponsorBlockSkipState()) {
-        event.preventDefault()
-        return
-      }
 
       // Skip to next video in playlist or recommended
       if (event.shiftKey && event.key.toLowerCase() === 'n') {
@@ -4438,6 +4391,66 @@ export default defineComponent({
       // Skip to previous video in playlist
       if (event.shiftKey && event.key.toLowerCase() === 'p') {
         emit('skip-to-prev')
+        return
+      }
+
+      switch (event.key.toLowerCase()) {
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN:
+          // Toggle full screen
+          event.preventDefault()
+          ui.getControls().toggleFullScreen()
+          blurTooltipButtons()
+          break
+        case 'escape':
+          // Exit full window
+          if (fullWindowEnabled.value) {
+            event.preventDefault()
+
+            events.dispatchEvent(new CustomEvent('setFullWindow', {
+              detail: false
+            }))
+          }
+          break
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW:
+          // Toggle full window mode
+          event.preventDefault()
+          events.dispatchEvent(new CustomEvent('setFullWindow', {
+            detail: !fullWindowEnabled.value
+          }))
+          blurTooltipButtons()
+          break
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE:
+          // Toggle theatre mode
+          if (props.theatrePossible) {
+            event.preventDefault()
+
+            events.dispatchEvent(new CustomEvent('toggleTheatreMode', {
+              detail: !props.useTheatreMode
+            }))
+          }
+          blurTooltipButtons()
+          break
+        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE:
+          // Toggle mute only if metakey is not pressed
+          if (!event.metaKey) {
+            event.preventDefault()
+            const isMuted = !video_.muted
+            video_.muted = isMuted
+
+            const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
+            const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
+            showValueChange(message, messageIcon)
+          }
+          blurTooltipButtons()
+          break
+      }
+
+      if (!hasLoaded.value) {
+        return
+      }
+
+      if (event.key === 'Enter' && toggleActiveSponsorBlockSkipState()) {
+        event.preventDefault()
         return
       }
 
@@ -4480,19 +4493,6 @@ export default defineComponent({
           // Toggle between 1x and the previous playback speed
           event.preventDefault()
           toggleNormalPlaybackRate()
-          break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE:
-          // Toggle mute only if metakey is not pressed
-          if (!event.metaKey) {
-            event.preventDefault()
-            const isMuted = !video_.muted
-            video_.muted = isMuted
-
-            const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
-            const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
-            showValueChange(message, messageIcon)
-          }
-          blurTooltipButtons()
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS: {
           // Toggle caption/subtitles
