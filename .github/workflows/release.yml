@@ -511,3 +511,38 @@ jobs:
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.7z
         asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.7z
         asset_content_type: application/x-7z-compressed
+
+  trigger-flatpak:
+    name: Trigger Flatpak build
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Trigger flatpak workflow
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh workflow run flatpak.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref "$GITHUB_REF_NAME" \
+          -f "releaseTag=$TAG"

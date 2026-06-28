@@ -7,8 +7,6 @@ on:
         type: string
         required: false
         description: Release tag to build, for example v0.25.5-beta
-  release:
-    types: [published]
 
 permissions: {}
 
@@ -25,10 +23,9 @@ jobs:
         id: release
         shell: bash
         env:
-          EVENT_TAG: ${{ github.event.release.tag_name }}
           INPUT_TAG: ${{ inputs.releaseTag }}
         run: |
-          tag="${INPUT_TAG:-$EVENT_TAG}"
+          tag="$INPUT_TAG"
 
           if [ -z "$tag" ]; then
             echo "No release tag provided."
