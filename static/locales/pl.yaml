@@ -97,6 +97,7 @@ Subscriptions:
   Subscriptions Tabs: Karty subskrypcji
   Load More Posts: Załaduj więcej wpisów
   Empty Posts: Zasubskrybowane przez Ciebie kanały nie mają żadnych wpisów.
+  Refreshing Subscriptions: Odświeżanie subskrypcji
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -465,8 +466,9 @@ Settings:
     Fetch Automatically: Automatycznie odświeżaj subskrypcje
     Confirm Before Unsubscribing: Uniknij przypadkowego usunięcia subskrypcji
 
-    To: do
+    To: Do
     'Limit the number of videos displayed for each channel': Ogranicz liczbę filmów wyświetlanych dla każdego z kanałów
+    Auto Refresh Interval: Interwał odświeżania
   Privacy Settings:
     Watch history has been cleared: Historia oglądania została wyczyszczona
     Are you sure you want to remove your entire watch history?: Jesteś pewny/a, że chcesz usunąć całą historię oglądania?
@@ -534,6 +536,10 @@ Settings:
     Export search history: Wyeksportuj historię wyszukiwania
     All search history has been successfully imported: Cała historia wyszukiwania została pomyślnie zaimportowana
     All search history has been successfully exported: Cała historia wyszukiwania została pomyślnie wyeksportowana
+    Import subscriptions formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup lub FreeTube export (.json)'
+    Import history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
+    Import playlists formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
@@ -860,6 +866,50 @@ Video:
     Full Window: Pełne okno
     Autoplay is off: Autoodtwarzanie jest wyłączone
     Autoplay is on: Autoodtwarzanie jest włączone
+    Normal: Normalna
+    Set Default: Ustaw domyślne
+    SponsorBlock:
+      CancelCurrentSegment: Anuluj tworzenie segmentu
+      ClearSegments: Wyczyść segmenty
+      ClearSegmentsPrompt: Czy na pewno chcesz wyczyścić wszystkie utworzone segmenty SponsorBlock dla tego filmu?
+      CompleteSegmentsBeforeSubmitting: Przed wysłaniem należy dokończyć tworzenie każdego segmentu.
+      CategoryLabel: Kategoria segmentu
+      DeleteSegment: Usuń
+      DuplicateSegments: Duplikowanie segmentów roboczych jest niedozwolone.
+      EditSegment: Edycja
+      EndAction: (Koniec)
+      EndActionLabel: Koniec
+      EndTimeAfterStart: Czas zakończenia segmentu musi przypadać po czasie rozpoczęcia.
+      EndTimeBeforeVideoEnd: Czas zakończenia segmentu musi mieścić się w czasie trwania filmu.
+      EndTimeLabel: Czas zakończenia segmentu
+      DisableAutoSkipTemporarily: Tymczasowo wyłącz automatyczne pomijanie SponsorBlock
+      EnableAutoSkipTemporarily: Włącz ponownie automatyczne pomijanie SponsorBlock
+      Guidelines: Wytyczne
+      InspectSegment: Zweryfikuj
+      InvalidStartTime: Wprowadź prawidłowy czas rozpoczęcia segmentu.
+      NoSegmentsToSubmit: Przed wysłaniem utwórz co najmniej jeden kompletny segment.
+      NowAction: (Teraz)
+      OpenSubmissionMenu: Otwórz menu zgłoszenia
+      PreviewRequired: Przed wysłaniem należy przejrzeć każdy segment.
+      PreviewSegment: Przejrzyj
+      SaveSegment: Zapisz
+      SetSegmentEndNow: Zakończ segment tutaj
+      StartAction: (Początek)
+      StartSegmentNow: Rozpocznij segment tutaj
+      SubmissionBadRequest: SponsorBlock odrzucił prośbę o przesłanie zgłoszenia.
+      SubmissionDuplicate: SponsorBlock twierdzi, że te segmenty zostały już przesłane.
+      SubmissionFailed: Nie udało się przesłać segmentów SponsorBlock.
+      SubmissionForbidden: SponsorBlock odrzucił zgłoszenie.
+      SubmissionRateLimited: SponsorBlock ograniczył liczbę zgłoszeń.
+      SubmissionSuccess: Segmenty SponsorBlock zostały zgłoszone.
+      SubmitSegment: Zgłoś segment
+      SubmitSegments: Zgłoś
+      StartTimeLabel: Czas rozpoczęcia segmentu
+      TimeDivider: do
+      SkipPrompt: Pominąć {segmentCategory} segment?
+      SkipPromptAction: Pomiń
+      SkipToastUnskip: Anuluj pominięcie
+      SkipToastReskip: Wznów pominięcie
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -876,6 +926,10 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Do końca reklamy z początku pozostało: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR – do przeczekania pozostało: {remindingTimeSeconds}s'
   Private: Prywatnych filmów nie można oglądać w OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
+  Save Channel Playback Speed: Zapisz prędkość odtwarzania kanału
+  Channel Playback Speed Saved: Zapisano prędkość odtwarzania kanału
+  Save Channel Video Quality: Zapisz jakość wideo kanału
+  Channel Video Quality Saved: Jakość wideo kanału zapisana
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -944,6 +998,7 @@ Comments:
   Hide {replyCount} replies: Ukryj 1 odpowiedź | Ukryj {replyCount} odpowiedzi
   View 1 reply from {channelName}: Zobacz 1 odpowiedź od {channelName}
   View {replyCount} replies from {channelName} and others: Zobacz {replyCount} odpowiedzi od {channelName} i innych
+  Reload Comments: Przeładuj komentarze
 Up Next: 'Następne'
 
 # Toast Messages
@@ -1012,6 +1067,7 @@ Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
     Fetch Automatically: Po włączeniu lub przy otwarciu nowego okna OpenTubeX będzie automatycznie odświeżał Twoje subskrypcje.
+    Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
   General Settings:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
     Preferred API Backend: Wybierz back-end , który OpenTubeX użyje do uzyskiwania danych. Lokalne API jest wbudowanym ekstraktorem. API Invidious wymaga połączenia z serwerem Invidious.
@@ -1020,11 +1076,24 @@ Tooltips:
     Thumbnail Preference: Wszystkie miniaturki na OpenTubeX zostaną ukryte, rozmazane albo zastąpione klatką z filmu zamiast miniaturki domyślnej.
     External Link Handling: "Wybierz domyślne zachowanie kiedy odnośnik, który nie może zostać otworzony w OpenTubeX, został kliknięty.\nDomyślnie OpenTubeX otworzy kliknięty odnośnik w domyślnej przeglądarce.\n"
     Open Deep Links In New Window: Odnośniki URL przekazane do OpenTubeX (np. przez rozszerzenie przeglądarki, albo argumenty linii komend) są otwierane w nowym oknie.
+    Avoid translation: |
+      Wyłącz automatyczne tłumaczenie tytułu, opisu i rozdziałów filmu przez YouTube.
+      Może to poprawić responsywność aplikacji, a także bywa pomocne, gdy YouTube
+      niepotrzebnie tłumaczy z języka narodowego na angielski.
+    Startup Behavior: |
+      Wybierz, co OpenTubeX zrobi po uruchomieniu:
+      Opcja „Załaduj wszystkie karty” ładuje wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
+      Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się po kliknięciu na nie.
+      Opcja „Nowa sesja” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
   Player Settings:
     Default Video Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
     Scroll Playback Rate Over Video Player: Umieść kursor nad odtwarzaczem, przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i przewijaj kółkiem myszy w górę i w dół, aby kontrolować szybkość odtwarzania. Przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i kliknij lewym przyciskiem myszy, by szybko powrócić do domyślnej wartości (1x, chyba że została zmieniona w ustawieniach).
     Skip by Scrolling Over Video Player: Użyj kółka myszy, by przewijać film tak jak w MPV.
+    Use Quick Playback Speed Bar: Wyświetla pasek szybkiego wyboru prędkości odtwarzania po prawej stronie odtwarzacza. Jeśli włączona jest funkcja ręcznego zapisywania prędkości odtwarzania dla poszczególnych kanałów, pasek zawiera również przycisk do zapisywania prędkości dla bieżącego kanału.
+    Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
+    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do szybkości odtwarzania.
+    Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
   External Player Settings:
     Ignore Warnings: Nie pokazuj ostrzeżeń o nieobsługiwanych akcjach przez zewnętrzny odtwarzacz (n.p. odwracanie playlist, itp.).
     External Player: Wybranie zewnętrznego odtwarzacza spowoduje wyświetlenie na miniaturkach ikony, która otworzy film (playlistę, jeśli są obsługiwane) w zewnętrznym odtwarzaczu. Uwaga! Ustawienia Invidious nie mają wpływu na zewnętrzny odtwarzacz.
@@ -1042,6 +1111,8 @@ Tooltips:
   SponsorBlock Settings:
     UseDeArrowTitles: Zastąp tytuły filmów tytułami zasugerowanymi przez użytkowników DeArrow.
     UseDeArrowThumbnails: Zastąp miniaturki filmów miniaturkami z DeArrow.
+  Proxy Settings:
+    IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
@@ -1088,6 +1159,7 @@ Display Label: '{label}: {value}'
 Feed:
   Refresh Feed: Odśwież „{subscriptionName}”
   Feed Last Updated: 'Ostatnia aktualizacja „{feedName}”: {date}'
+  Next Auto Refresh: 'Następne odświeżenie: {date}'
 Moments Ago: chwilę temu
 Yes, Delete: Tak, usuń
 Search character limit: Zapytanie przekroczyło limit {searchCharacterLimit} znaków
@@ -1172,6 +1244,7 @@ KeyboardShortcutPrompt:
   Home: Przeskocz na początek filmu
   Skip to Next Video: Odtwórz następny film z playlisty lub z rekomendowanych filmów
   Skip to Previous Video: Odtwórz poprzedni film z playlisty lub z rekomendowanych filmów
+  Toggle Normal Playback Speed: Przełączaj się między prędkością 1x a poprzednią prędkością odtwarzania
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
