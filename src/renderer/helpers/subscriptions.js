@@ -7,6 +7,119 @@ import {
   showToast
 } from './utils'
 
+const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
+const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
+
+/**
+ * @param {number | string | null | undefined} viewCount
+ */
+function getNumericViewCount(viewCount) {
+  if (viewCount == null) {
+    return null
+  }
+
+  const numericViewCount = typeof viewCount === 'string' ? parseInt(viewCount, 10) : viewCount
+
+  return Number.isNaN(numericViewCount) ? null : numericViewCount
+}
+
+/**
+ * RSS feeds don't expose premiere status directly. Upcoming premieres usually have
+ * very low view counts, so we only look up metadata for those entries.
+ * @param {number | string | null | undefined} viewCount
+ */
+function isRssUpcomingPremiereCandidate(viewCount) {
+  const numericViewCount = getNumericViewCount(viewCount)
+
+  return numericViewCount != null && numericViewCount <= 1
+}
+
+/**
+ * @param {{
+ *  isRSS?: boolean,
+ *  isUpcoming?: boolean,
+ *  viewCount?: number | string | null,
+ * }} video
+ */
+export function isRssUpcomingPremiere(video) {
+  if (!video?.isRSS) {
+    return false
+  }
+
+  if (video.isUpcoming === true) {
+    return true
+  }
+
+  if (video.isUpcoming === false) {
+    return false
+  }
+
+  // Fallback for cached RSS entries before enrichment.
+  return isRssUpcomingPremiereCandidate(video.viewCount)
+}
+
+/**
+ * @param {string} videoId
+ */
+async function fetchRssVideoUpcomingInfo(videoId) {
+  try {
+    const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`)
+
+    if (!response.ok) {
+      return { isUpcoming: false }
+    }
+
+    const html = await response.text()
+    const isUpcoming = IS_UPCOMING_REGEX.test(html)
+
+    if (!isUpcoming) {
+      return { isUpcoming: false }
+    }
+
+    const scheduledStartMatch = html.match(SCHEDULED_START_REGEX)
+    const premiereDate = scheduledStartMatch
+      ? new Date(parseInt(scheduledStartMatch[1], 10) * 1000)
+      : undefined
+
+    return {
+      isUpcoming: true,
+      premiereDate
+    }
+  } catch {
+    return { isUpcoming: false }
+  }
+}
+
+/**
+ * @param {any} video
+ */
+async function enrichRssVideoIfNeeded(video) {
+  if (!isRssUpcomingPremiereCandidate(video.viewCount)) {
+    return video
+  }
+
+  const upcomingInfo = await fetchRssVideoUpcomingInfo(video.videoId)
+
+  if (!upcomingInfo.isUpcoming) {
+    return {
+      ...video,
+      isUpcoming: false
+    }
+  }
+
+  const enrichedVideo = {
+    ...video,
+    isUpcoming: true
+  }
+
+  if (upcomingInfo.premiereDate) {
+    enrichedVideo.premiereDate = upcomingInfo.premiereDate
+    enrichedVideo.published = upcomingInfo.premiereDate.getTime()
+  }
+
+  return enrichedVideo
+}
+
 /**
  * Filtering and sort based on user preferences
  * @param {any[]} videos
@@ -22,12 +135,10 @@ export function updateVideoListAfterProcessing(videos) {
 
   if (store.getters.getHideUpcomingPremieres) {
     videoList = videoList.filter(item => {
-      if (item.isRSS) {
-        // viewCount is our only method of detecting premieres in RSS
-        // data without sending an additional request.
-        // If we ever get a better flag, use it here instead.
-        return item.viewCount !== '0'
+      if (isRssUpcomingPremiere(item)) {
+        return false
       }
+
       // Observed for premieres in Local API Subscriptions.
       return (item.premiereDate == null ||
         // Invidious API
@@ -62,9 +173,11 @@ export async function parseYouTubeRSSFeed(rssString, channelId) {
       promises.push(parseRSSEntry(entry, channelId, channelName))
     }
 
+    const videos = await Promise.all(promises)
+
     return {
       name: channelName,
-      videos: await Promise.all(promises)
+      videos: await Promise.all(videos.map(video => enrichRssVideoIfNeeded(video)))
     }
   } catch {
     return {

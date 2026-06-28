@@ -73,6 +73,7 @@ import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
 import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
 
 import store from '../../store/index'
+import { isRssUpcomingPremiere } from '../../helpers/subscriptions'
 
 const props = defineProps({
   data: {
@@ -240,10 +241,7 @@ const showResult = computed(() => {
           // `premiereTimestamp` only available on premiered videos
           // https://docs.invidious.io/api/common_types/#videoobject
           props.data.premiereTimestamp != null ||
-          // viewCount is our only method of detecting premieres in RSS
-          // data without sending an additional request.
-          // If we ever get a better flag, use it here instead.
-          (props.data.isRSS && props.data.viewCount === '0'))) {
+          isRssUpcomingPremiere(props.data))) {
       // hide upcoming
       return false
     }
