@@ -216,6 +216,7 @@ function keyboardShortcutHandler(event) {
     case 'f5':
     case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
       if (!props.isLoading && activeProfileHasSubscriptions.value) {
+        event.preventDefault()
         refresh()
       }
       break

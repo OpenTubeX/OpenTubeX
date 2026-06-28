@@ -402,8 +402,12 @@ function handleKeyboardShortcuts(event) {
       return
     }
 
-    // Ctrl+R: Reload tab
+    // Ctrl+R: Reload tab (unless the current view handles refresh itself)
     if (ctrlOrCmdPressed && (event.key === 'r' || event.key === 'R') && !event.shiftKey) {
+      if (route.path.startsWith('/subscriptions')) {
+        event.preventDefault()
+        return
+      }
       event.preventDefault()
       prepareAndReloadTab()
     }
