@@ -1,3 +1,11 @@
 .box {
   justify-content: center;
 }
+
+.importFormatsHint {
+  color: var(--secondary-text-color);
+  font-size: 0.9em;
+  margin-block: 0.25em 1em;
+  padding-inline: 1.5em;
+  text-align: center;
+}

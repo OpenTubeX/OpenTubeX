@@ -19,6 +19,9 @@
         @click="showExportSubscriptionsPrompt = true"
       />
     </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import subscriptions formats') }}
+    </p>
     <FtFlexBox>
       <p>
         <a href="https://docs.freetubeapp.io/usage/importing-subscriptions/">
@@ -39,6 +42,9 @@
         @click="showExportWatchHistoryPrompt = true"
       />
     </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import history formats') }}
+    </p>
     <h4 class="groupTitle">
       {{ $t('Playlists') }}
     </h4>
@@ -52,6 +58,9 @@
         @click="exportPlaylists"
       />
     </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import playlists formats') }}
+    </p>
     <h4 class="groupTitle">
       {{ t('Settings.Data Settings.Search history') }}
     </h4>
@@ -65,6 +74,9 @@
         @click="showExportSearchHistoryPrompt = true"
       />
     </FtFlexBox>
+    <p class="importFormatsHint">
+      {{ t('Settings.Data Settings.Import search history formats') }}
+    </p>
     <FtPrompt
       v-if="showExportSubscriptionsPrompt"
       :label="$t('Settings.Data Settings.Select Export Type')"
@@ -112,6 +124,14 @@ import {
   writeFileWithPicker,
 } from '../../helpers/utils'
 import { processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import {
+  convertLibreTubeSubscriptions,
+  convertLibreTubeWatchHistoryToOpenTubeX,
+  detectSubscriptionJsonFormat,
+  extractChannelIdFromUploaderUrl,
+  getLibreTubeSubscriptions,
+  isLibreTubeWatchHistoryBackup,
+} from '../../helpers/libretube'
 
 const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
@@ -156,6 +176,20 @@ async function promptAndWriteToFile(
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
     showToast(`${message}: ${error}`)
+  }
+}
+
+/**
+ * @param {string} content
+ * @param {string} invalidMessage
+ */
+function parseImportedJson(content, invalidMessage) {
+  try {
+    return JSON.parse(content)
+  } catch (error) {
+    console.error('Unable to parse imported JSON file', error)
+    showToast(invalidMessage)
+    return null
   }
 }
 
@@ -221,11 +255,28 @@ async function importSubscriptions() {
   } else if (filename.endsWith('.opml') || filename.endsWith('.xml')) {
     importOpmlYouTubeSubscriptions(content)
   } else if (filename.endsWith('.json')) {
-    const jsonContent = JSON.parse(content)
-    if (jsonContent.subscriptions) {
-      importNewPipeSubscriptions(jsonContent)
-    } else {
-      importYouTubeSubscriptions(jsonContent)
+    const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid subscriptions file'))
+    if (jsonContent === null) {
+      return
+    }
+
+    const subscriptionFormat = detectSubscriptionJsonFormat(jsonContent)
+
+    switch (subscriptionFormat) {
+      case 'libretube-backup':
+        importLibreTubeSubscriptions(getLibreTubeSubscriptions(jsonContent))
+        break
+      case 'libretube-freetube':
+        importLibreTubeSubscriptions(jsonContent.subscriptions)
+        break
+      case 'newpipe':
+        importNewPipeSubscriptions(jsonContent)
+        break
+      case 'youtube':
+        importYouTubeSubscriptions(jsonContent)
+        break
+      default:
+        showToast(t('Settings.Data Settings.Invalid subscriptions file'))
     }
   }
 }
@@ -531,6 +582,44 @@ function importOpmlYouTubeSubscriptions(data) {
 }
 
 /**
+ * @param {object[]} libreTubeSubscriptions
+ */
+function importLibreTubeSubscriptions(libreTubeSubscriptions) {
+  const subscriptions = convertLibreTubeSubscriptions(libreTubeSubscriptions)
+
+  if (subscriptions.length === 0) {
+    showToast(t('Settings.Data Settings.Invalid subscriptions file'))
+    return
+  }
+
+  mergeSubscriptionsIntoPrimaryProfile(subscriptions)
+}
+
+/**
+ * @param {{ id: string, name: string, thumbnail: string | null }[]} subscriptions
+ */
+function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
+  store.commit('setShowProgressBar', true)
+  store.commit('setProgressBarPercentage', 0)
+
+  const newSubscriptions = []
+
+  subscriptions.forEach((channel, index) => {
+    if (!isChannelSubscribed(channel.id, newSubscriptions)) {
+      newSubscriptions.push(channel)
+    }
+
+    const progressPercentage = ((index + 1) / subscriptions.length) * 100
+    store.commit('setProgressBarPercentage', progressPercentage)
+  })
+
+  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(newSubscriptions)
+  store.dispatch('updateProfile', primaryProfile.value)
+  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
+  store.commit('setShowProgressBar', false)
+}
+
+/**
  * @param {object} newPipeData
  */
 function importNewPipeSubscriptions(newPipeData) {
@@ -540,37 +629,23 @@ function importNewPipeSubscriptions(newPipeData) {
     return
   }
 
-  const newPipeSubscriptions = newPipeData.subscriptions.filter((channel) => {
-    return new URL(channel.url).hostname === 'www.youtube.com'
-  })
+  const subscriptions = newPipeData.subscriptions
+    .map((channel) => {
+      const channelId = extractChannelIdFromUploaderUrl(channel.url)
 
-  const subscriptions = []
+      if (!channelId) {
+        return null
+      }
 
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
-
-  let count = 0
-
-  newPipeSubscriptions.forEach((channel) => {
-    const channelId = channel.url.replace(/https:\/\/(www\.)?youtube\.com\/channel\//, '')
-
-    if (!isChannelSubscribed(channelId, subscriptions)) {
-      subscriptions.push({
+      return {
         id: channelId,
         name: channel.name,
-        thumbnail: null
-      })
-    }
-    count++
+        thumbnail: null,
+      }
+    })
+    .filter(subscription => subscription !== null)
 
-    const progressPercentage = (count / (newPipeSubscriptions.length - 1)) * 100
-    store.commit('setProgressBarPercentage', progressPercentage)
-  })
-
-  primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
-  store.dispatch('updateProfile', primaryProfile.value)
-  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
-  store.commit('updateShowProgressBar', false)
+  mergeSubscriptionsIntoPrimaryProfile(subscriptions)
 }
 
 // #endregion subscriptions import
@@ -805,7 +880,18 @@ async function importWatchHistory() {
   if (filename.endsWith('.db')) {
     importFreeTubeWatchHistory(content.split('\n'))
   } else if (filename.endsWith('.json')) {
-    importYouTubeWatchHistory(JSON.parse(content))
+    const jsonContent = parseImportedJson(content, t('Settings.Data Settings.Invalid history file'))
+    if (jsonContent === null) {
+      return
+    }
+
+    if (isLibreTubeWatchHistoryBackup(jsonContent)) {
+      importLibreTubeWatchHistory(jsonContent)
+    } else if (Array.isArray(jsonContent)) {
+      importYouTubeWatchHistory(jsonContent)
+    } else {
+      showToast(t('Settings.Data Settings.Invalid history file'))
+    }
   }
 }
 
@@ -876,6 +962,39 @@ async function importFreeTubeWatchHistory(textDecode) {
   })
 
   await store.dispatch('overwriteHistory', historyItems)
+
+  showToast(t('Settings.Data Settings.All watched history has been successfully imported'))
+}
+
+/**
+ * @param {object} backupData
+ */
+async function importLibreTubeWatchHistory(backupData) {
+  if (backupData.watchHistory.length === 0) {
+    showToast(t('Settings.Data Settings.Invalid history file'))
+    return
+  }
+
+  const historyItems = new Map(deepCopy(Object.entries(historyCacheById.value)))
+  const {
+    historyItems: convertedHistoryItems,
+    importedCount,
+    skippedCount,
+  } = convertLibreTubeWatchHistoryToOpenTubeX(
+    backupData,
+    historyItems
+  )
+
+  if (importedCount === 0) {
+    showToast(t('Settings.Data Settings.Invalid history file'))
+    return
+  }
+
+  if (skippedCount > 0) {
+    showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+  }
+
+  await store.dispatch('overwriteHistory', convertedHistoryItems)
 
   showToast(t('Settings.Data Settings.All watched history has been successfully imported'))
 }
