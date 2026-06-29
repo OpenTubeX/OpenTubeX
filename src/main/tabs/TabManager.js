@@ -830,19 +830,29 @@ export class TabManager {
         return null
       }
 
-      const { width, height } = image.getSize()
+      const contentBounds = await this._getTabPreviewContentBounds(webContents)
+      if (contentBounds == null) {
+        return null
+      }
+
+      const contentImage = this._cropTabPreviewToContent(image, contentBounds)
+      if (contentImage == null || contentImage.isEmpty()) {
+        return null
+      }
+
+      const { width, height } = contentImage.getSize()
       if (width <= 0 || height <= 0) {
         return null
       }
 
       const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
       const preview = ratio < 1
-        ? image.resize({
+        ? contentImage.resize({
             width: Math.max(1, Math.round(width * ratio)),
             height: Math.max(1, Math.round(height * ratio)),
             quality: 'good'
           })
-        : image
+        : contentImage
 
       return preview.toDataURL()
     } catch (error) {
@@ -851,6 +861,86 @@ export class TabManager {
     } finally {
       await this._setTabPreviewCaptureMode(webContents, false)
     }
+  }
+
+  /**
+   * @param {import('electron').WebContents} webContents
+   * @returns {Promise<{contentTop: number, viewportHeight: number} | null>}
+   */
+  async _getTabPreviewContentBounds(webContents) {
+    if (webContents.isDestroyed()) {
+      return null
+    }
+
+    try {
+      const bounds = await webContents.executeJavaScript(`
+        (() => {
+          const viewportHeight = Math.max(
+            window.visualViewport?.height || 0,
+            window.innerHeight || 0,
+            document.documentElement?.clientHeight || 0
+          )
+          const tabBar = document.querySelector('.tabBar')
+          const contentTop = tabBar instanceof HTMLElement
+            ? Math.min(viewportHeight, Math.max(0, tabBar.getBoundingClientRect().bottom))
+            : 0
+
+          return { contentTop, viewportHeight }
+        })()
+      `, true)
+
+      if (bounds == null || typeof bounds !== 'object') {
+        return null
+      }
+
+      const contentTop = Number(bounds.contentTop)
+      const viewportHeight = Number(bounds.viewportHeight)
+      if (
+        !Number.isFinite(contentTop) ||
+        !Number.isFinite(viewportHeight) ||
+        viewportHeight <= 0
+      ) {
+        return null
+      }
+
+      return {
+        contentTop: Math.max(0, contentTop),
+        viewportHeight
+      }
+    } catch {
+      return null
+    }
+  }
+
+  /**
+   * @param {import('electron').NativeImage} image
+   * @param {{contentTop: number, viewportHeight: number}} contentBounds
+   * @returns {import('electron').NativeImage | null}
+   */
+  _cropTabPreviewToContent(image, contentBounds) {
+    if (contentBounds.contentTop <= 0) {
+      return image
+    }
+
+    const { width, height } = image.getSize()
+    if (width <= 0 || height <= 0 || contentBounds.viewportHeight <= 0) {
+      return null
+    }
+
+    const scaleY = height / contentBounds.viewportHeight
+    const cropY = Math.min(height, Math.max(0, Math.ceil(contentBounds.contentTop * scaleY)))
+    const cropHeight = height - cropY
+
+    if (cropHeight <= 0) {
+      return null
+    }
+
+    return image.crop({
+      x: 0,
+      y: cropY,
+      width,
+      height: cropHeight
+    })
   }
 
   /**
