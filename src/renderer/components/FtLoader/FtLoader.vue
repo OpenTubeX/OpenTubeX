@@ -2,6 +2,7 @@
   <div
     class="container"
     :class="{ fullscreen }"
+    data-tab-loading-indicator
   >
     <div class="spinner">
       <div class="double-bounce1" />

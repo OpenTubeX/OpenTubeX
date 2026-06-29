@@ -284,9 +284,14 @@ app
   .use(i18n)
 
 const TAB_ROUTE_LOADING_MIN_MS = 450
+const TAB_ROUTE_LOADING_SOURCE = 'route'
+const TAB_LOADER_LOADING_SOURCE = 'loader'
+const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
+const tabLoadingSources = new Set()
 let tabRouteLoadingStartedAt = 0
 let tabRouteLoadingToken = 0
 let tabRouteLoadingTimeoutId = null
+let tabLoaderMutationObserver = null
 
 if (process.env.IS_ELECTRON) {
   registerTabRouteLoadingIndicator()
@@ -318,6 +323,8 @@ if (process.env.IS_ELECTRON) {
 }
 
 function registerTabRouteLoadingIndicator() {
+  observeTabLoaderIndicators()
+
   router.beforeEach((to, from) => {
     if (to.fullPath === from.fullPath) {
       return
@@ -328,12 +335,6 @@ function registerTabRouteLoadingIndicator() {
 
   router.afterEach((to, from, failure) => {
     if (to.fullPath === from.fullPath && !failure) {
-      return
-    }
-
-    // The watch view owns the final loading state so the tab indicator stays
-    // active until video metadata/player setup finishes.
-    if (!failure && to.path.startsWith('/watch/')) {
       return
     }
 
@@ -354,7 +355,7 @@ function startTabRouteLoading() {
     tabRouteLoadingTimeoutId = null
   }
 
-  setCurrentTabLoading(true)
+  setTabLoadingSource(TAB_ROUTE_LOADING_SOURCE, true)
 }
 
 /**
@@ -374,9 +375,51 @@ function finishTabRouteLoading(options = {}) {
   tabRouteLoadingTimeoutId = window.setTimeout(() => {
     tabRouteLoadingTimeoutId = null
     if (token === tabRouteLoadingToken) {
-      setCurrentTabLoading(false)
+      setTabLoadingSource(TAB_ROUTE_LOADING_SOURCE, false)
     }
   }, delay)
+}
+
+function observeTabLoaderIndicators() {
+  if (typeof MutationObserver !== 'function') {
+    return
+  }
+
+  const startObserver = () => {
+    if (!document.body || tabLoaderMutationObserver != null) {
+      return
+    }
+
+    tabLoaderMutationObserver = new MutationObserver(updateTabLoaderLoading)
+    tabLoaderMutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+    updateTabLoaderLoading()
+  }
+
+  if (document.body) {
+    startObserver()
+  } else {
+    document.addEventListener('DOMContentLoaded', startObserver, { once: true })
+  }
+}
+
+function updateTabLoaderLoading() {
+  setTabLoadingSource(
+    TAB_LOADER_LOADING_SOURCE,
+    document.querySelector(TAB_LOADER_SELECTOR) != null
+  )
+}
+
+function setTabLoadingSource(source, isLoading) {
+  if (isLoading) {
+    tabLoadingSources.add(source)
+  } else {
+    tabLoadingSources.delete(source)
+  }
+
+  setCurrentTabLoading(tabLoadingSources.size > 0)
 }
 
 function setCurrentTabLoading(isLoading) {

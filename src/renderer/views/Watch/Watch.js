@@ -355,12 +355,6 @@ export default defineComponent({
     async $route() {
       await this.reloadView()
     },
-    isLoading: {
-      immediate: true,
-      handler(value) {
-        this.setElectronTabLoading(value)
-      }
-    },
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
     },
@@ -380,17 +374,6 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   methods: {
-    setElectronTabLoading(isLoading) {
-      if (
-        !process.env.IS_ELECTRON ||
-        typeof window.ftElectron?.tabs?.setLoading !== 'function'
-      ) {
-        return
-      }
-
-      window.ftElectron.tabs.setLoading(isLoading === true)
-    },
-
     async reloadView() {
       await this.handleRouteChange()
 
