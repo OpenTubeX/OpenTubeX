@@ -458,6 +458,14 @@ export default {
     },
 
     /**
+     * Set loading state for client-side tab navigation.
+     * @param {boolean} isLoading
+     */
+    setLoading: (isLoading) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_LOADING, isLoading === true)
+    },
+
+    /**
      * Set the tab bar scroll position (synced across all tab renderers via main process)
      * @param {number} position
      */

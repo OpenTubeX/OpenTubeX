@@ -283,6 +283,15 @@ app
   .use(store)
   .use(i18n)
 
+const TAB_ROUTE_LOADING_MIN_MS = 450
+let tabRouteLoadingStartedAt = 0
+let tabRouteLoadingToken = 0
+let tabRouteLoadingTimeoutId = null
+
+if (process.env.IS_ELECTRON) {
+  registerTabRouteLoadingIndicator()
+}
+
 router.isReady().then(() => {
   app.mount('#app')
 })
@@ -306,4 +315,74 @@ if (process.env.IS_ELECTRON) {
       showToast(i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }))
     }
   )
+}
+
+function registerTabRouteLoadingIndicator() {
+  router.beforeEach((to, from) => {
+    if (to.fullPath === from.fullPath) {
+      return
+    }
+
+    startTabRouteLoading()
+  })
+
+  router.afterEach((to, from, failure) => {
+    if (to.fullPath === from.fullPath && !failure) {
+      return
+    }
+
+    // The watch view owns the final loading state so the tab indicator stays
+    // active until video metadata/player setup finishes.
+    if (!failure && to.path.startsWith('/watch/')) {
+      return
+    }
+
+    finishTabRouteLoading()
+  })
+
+  router.onError(() => {
+    finishTabRouteLoading({ immediate: true })
+  })
+}
+
+function startTabRouteLoading() {
+  tabRouteLoadingToken++
+  tabRouteLoadingStartedAt = Date.now()
+
+  if (tabRouteLoadingTimeoutId != null) {
+    clearTimeout(tabRouteLoadingTimeoutId)
+    tabRouteLoadingTimeoutId = null
+  }
+
+  setCurrentTabLoading(true)
+}
+
+/**
+ * @param {{ immediate?: boolean }} [options]
+ */
+function finishTabRouteLoading(options = {}) {
+  const token = tabRouteLoadingToken
+  const elapsed = Date.now() - tabRouteLoadingStartedAt
+  const delay = options.immediate
+    ? 0
+    : Math.max(0, TAB_ROUTE_LOADING_MIN_MS - elapsed)
+
+  if (tabRouteLoadingTimeoutId != null) {
+    clearTimeout(tabRouteLoadingTimeoutId)
+  }
+
+  tabRouteLoadingTimeoutId = window.setTimeout(() => {
+    tabRouteLoadingTimeoutId = null
+    if (token === tabRouteLoadingToken) {
+      setCurrentTabLoading(false)
+    }
+  }, delay)
+}
+
+function setCurrentTabLoading(isLoading) {
+  if (typeof window.ftElectron?.tabs?.setLoading !== 'function') {
+    return
+  }
+
+  window.ftElectron.tabs.setLoading(isLoading)
 }

@@ -1890,6 +1890,18 @@ export function setupTabsIPC() {
     }
   })
 
+  ipcMain.on(IpcChannels.TABS_SET_LOADING, (event, isLoading) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    const tabId = TabManager.getTabIdFromWebContents(event.sender)
+
+    if (manager && tabId) {
+      const tab = manager.tabs.get(tabId)
+      if (tab) {
+        manager._setTabLoading(tab, isLoading === true)
+      }
+    }
+  })
+
   ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event) => {
     await TabManager.clearPictureInPictureFromOtherTabs(event.sender)
 
