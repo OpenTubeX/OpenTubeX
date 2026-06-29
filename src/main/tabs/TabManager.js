@@ -1621,12 +1621,14 @@ export class TabManager {
   }
 
   /**
-   * Attach a tab transferred from another window at the end and activate it.
-   * Pinned transferred tabs still stay in the pinned group.
+   * Attach a tab transferred from another window after the current tab and activate it.
    * @param {TabInfo} tabInfo
    */
   adoptTransferredTab(tabInfo) {
-    this._insertTabEntry(tabInfo.id, tabInfo, this.tabs.size)
+    const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
+    const preferredIndex = activeTabIndex === -1 ? this.tabs.size : activeTabIndex + 1
+
+    this._insertTabEntry(tabInfo.id, tabInfo, preferredIndex)
     tabInfo.view.setBackgroundColor(this.backgroundColor)
     this.activateTab(tabInfo.id)
     this.browserWindow.focus()
