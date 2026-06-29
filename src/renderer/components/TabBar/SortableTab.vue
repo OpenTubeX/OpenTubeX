@@ -11,11 +11,11 @@
     role="button"
     tabindex="-1"
     @click="handleClick"
-    @pointerenter="showTooltip"
-    @pointerleave="hideTooltip"
+    @pointerenter="handlePointerEnter"
+    @pointerleave="handlePointerLeave"
     @focusin="showTooltip"
     @focusout="hideTooltip"
-    @pointerdown="hideTooltip"
+    @pointerdown="handlePointerDown"
     @mousedown.middle.prevent
     @auxclick.prevent="handleAuxClick"
   >
@@ -153,6 +153,7 @@ const tooltipPreviewUrl = ref(null)
 const tooltipStyle = ref({})
 const tooltipRequestId = ref(0)
 let showTooltipTimeoutId = null
+let suppressTooltipUntilPointerLeave = false
 
 const tabColor = computed(() => TAB_COLOR_ACCENTS[props.tab.color] ?? null)
 
@@ -206,14 +207,14 @@ function handleAuxClick(event) {
 }
 
 function showTooltip() {
-  if (props.disableTooltips || props.isDragging) {
+  if (props.disableTooltips || props.isDragging || suppressTooltipUntilPointerLeave) {
     return
   }
 
   clearShowTooltipTimeout()
   showTooltipTimeoutId = window.setTimeout(() => {
     showTooltipTimeoutId = null
-    if (props.disableTooltips || props.isDragging) {
+    if (props.disableTooltips || props.isDragging || suppressTooltipUntilPointerLeave) {
       return
     }
 
@@ -223,6 +224,21 @@ function showTooltip() {
     window.addEventListener('resize', updateTooltipPosition)
     loadTooltipPreview()
   }, TOOLTIP_SHOW_DELAY_MS)
+}
+
+function handlePointerEnter() {
+  suppressTooltipUntilPointerLeave = false
+  showTooltip()
+}
+
+function handlePointerLeave() {
+  suppressTooltipUntilPointerLeave = false
+  hideTooltip()
+}
+
+function handlePointerDown() {
+  suppressTooltipUntilPointerLeave = true
+  hideTooltip()
 }
 
 function hideTooltip() {
