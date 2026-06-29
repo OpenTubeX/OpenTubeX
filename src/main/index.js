@@ -156,9 +156,40 @@ function runApp() {
           }
         },
         {
+          label: contextMenuTab?.isPinned === true ? 'Unpin Tab' : 'Pin Tab',
+          visible: contextMenuTab != null,
+          click: () => {
+            if (!manager || !contextMenuTab) return
+
+            manager.setTabPinned(contextMenuTab.id, contextMenuTab.isPinned !== true)
+          }
+        },
+        {
+          label: 'Tab Color',
+          visible: contextMenuTab != null,
+          submenu: [
+            { label: 'Default', color: null },
+            { label: 'Red', color: 'red' },
+            { label: 'Orange', color: 'orange' },
+            { label: 'Yellow', color: 'yellow' },
+            { label: 'Green', color: 'green' },
+            { label: 'Blue', color: 'blue' },
+            { label: 'Purple', color: 'purple' }
+          ].map(({ label, color }) => ({
+            label,
+            type: 'radio',
+            checked: (contextMenuTab?.color ?? null) === color,
+            click: () => {
+              if (!manager || !contextMenuTab) return
+
+              manager.setTabColor(contextMenuTab.id, color)
+            }
+          }))
+        },
+        {
           label: 'Reopen Closed Tab',
           visible: isTabBarContextMenu,
-          enabled: manager?.closedTabUrls.length > 0,
+          enabled: manager?.closedTabs.length > 0,
           click: () => {
             manager?.restoreClosedTab()
           }
@@ -180,7 +211,9 @@ function runApp() {
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            manager.unloadTab(contextMenuTab.id)
+            manager.unloadTab(contextMenuTab.id).catch(error => {
+              console.error('Failed to unload tab:', error)
+            })
           }
         },
         {

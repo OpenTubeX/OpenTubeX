@@ -24,6 +24,8 @@
           :is-dragging="draggingTabId === tab.id"
           :is-settling="isSettling && draggingTabId === tab.id"
           :suppress-transition="suppressTransitions"
+          :disable-tooltips="draggingTabId != null"
+          :close-tooltips-signal="closeTooltipsSignal"
           :close-label="t('Close Tab')"
           @activate="handleActivate"
           @close="closeTab"
@@ -71,7 +73,7 @@ const { t } = useI18n()
 
 const isElectron = process.env.IS_ELECTRON
 
-/** @type {import('vue').ComputedRef<Array<{id: string, url: string, title: string, isActive: boolean}>>} */
+/** @type {import('vue').ComputedRef<Array<{id: string, url: string, title: string, isActive: boolean, isPinned?: boolean, color?: string | null}>>} */
 const tabs = computed(() => store.getters.getTabs)
 
 const newTabTooltip = computed(() => {
@@ -84,6 +86,7 @@ const newTabTooltip = computed(() => {
 const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
 const scrollbarRef = useTemplateRef('scrollbarRef')
+const closeTooltipsSignal = ref(0)
 
 // ===== Drag and drop state =====
 const DRAG_THRESHOLD_PX = 5
@@ -191,6 +194,7 @@ function handleDragPointerMove(event) {
     if (Math.abs(dx) < DRAG_THRESHOLD_PX) return
     dragSession.started = true
     draggingTabId.value = dragSession.tabId
+    closeTooltipsSignal.value++
     document.body.classList.add('tab-bar-grabbing')
   }
 
@@ -201,13 +205,34 @@ function handleDragPointerMove(event) {
   const { rects, sourceIndex, gap } = dragSession
   const sourceRect = rects[sourceIndex]
   const lastRect = rects[rects.length - 1]
+  const tabsList = tabs.value
+  const sourceTab = tabsList[sourceIndex]
+  const isSourcePinned = sourceTab?.isPinned === true
 
-  // Clamp so the dragged tab's center can sweep across the entire row
-  // (from the very left edge to the very right edge of the strip). Anything
-  // tighter would prevent reaching the leftmost / rightmost slot when the
-  // dragged tab is at least as wide as its neighbours.
-  const minLeft = rects[0].left - sourceRect.width / 2
-  const maxLeft = lastRect.left + lastRect.width - sourceRect.width / 2
+  // Clamp so the dragged tab's center can sweep across its allowed group.
+  // Pinned tabs stay in the pinned group; unpinned tabs stay after it.
+  let minLeft = rects[0].left - sourceRect.width / 2
+  let maxLeft = lastRect.left + lastRect.width - sourceRect.width / 2
+
+  if (isSourcePinned) {
+    const pinnedRects = rects.filter(rect => {
+      return tabsList.find(tab => tab.id === rect.id)?.isPinned === true
+    })
+    const lastPinnedRect = pinnedRects[pinnedRects.length - 1]
+
+    if (pinnedRects[0] && lastPinnedRect) {
+      minLeft = pinnedRects[0].left - sourceRect.width / 2
+      maxLeft = lastPinnedRect.left + lastPinnedRect.width - sourceRect.width / 2
+    }
+  } else {
+    const firstUnpinnedIndex = tabsList.findIndex(tab => tab.isPinned !== true)
+    const firstUnpinnedRect = firstUnpinnedIndex >= 0 ? rects[firstUnpinnedIndex] : rects[0]
+
+    if (firstUnpinnedRect) {
+      minLeft = firstUnpinnedRect.left - sourceRect.width / 2
+    }
+  }
+
   const newLeft = Math.max(minLeft, Math.min(maxLeft, sourceRect.left + dx))
   const draggedOffset = newLeft - sourceRect.left
   const draggedCenter = newLeft + sourceRect.width / 2
@@ -227,9 +252,35 @@ function handleDragPointerMove(event) {
     }
   }
 
+  targetIndex = clampTargetIndexForPinnedGroup(dragSession.tabId, targetIndex)
+
   dragSession.targetIndex = targetIndex
 
   tabOffsets.value = computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
+}
+
+/**
+ * Keep drag targets in the same group the main process will enforce.
+ * @param {string} tabId
+ * @param {number} targetIndex
+ * @returns {number}
+ */
+function clampTargetIndexForPinnedGroup(tabId, targetIndex) {
+  const tabsList = tabs.value
+  const sourceTab = tabsList.find(tab => tab.id === tabId)
+  if (!sourceTab) {
+    return targetIndex
+  }
+
+  const pinnedCountWithoutSource = tabsList.filter(tab => {
+    return tab.id !== tabId && tab.isPinned === true
+  }).length
+
+  if (sourceTab.isPinned === true) {
+    return Math.min(targetIndex, pinnedCountWithoutSource)
+  }
+
+  return Math.max(targetIndex, pinnedCountWithoutSource)
 }
 
 /**
@@ -505,6 +556,9 @@ onMounted(() => {
     store.dispatch('initializeTabs')
     document.addEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.addEventListener('contextmenu', handleContextMenuEvent, true)
+    removeActiveChangedListener = window.ftElectron.tabs.onActiveChanged(() => {
+      closeTooltipsSignal.value++
+    })
   }
 
   window.addEventListener('resize', handleWindowResize)
@@ -533,6 +587,8 @@ onUnmounted(() => {
     document.removeEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.removeEventListener('contextmenu', handleContextMenuEvent, true)
     updateContextMenuTab({ tabId: null, isTabBar: false })
+    removeActiveChangedListener?.()
+    removeActiveChangedListener = null
   }
 
   cleanupDragListeners()
@@ -558,6 +614,7 @@ let scrollTarget = null
 let scrollAnimationId = null
 let resizeObserver = null
 let scrollbarDragState = null
+let removeActiveChangedListener = null
 
 const MIN_SCROLLBAR_THUMB_WIDTH = 24
 

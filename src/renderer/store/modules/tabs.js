@@ -121,6 +121,28 @@ const actions = {
   },
 
   /**
+   * Pin or unpin a tab.
+   * @param {object} _context - Vuex action context
+   * @param {{ tabId: string, isPinned: boolean }} payload
+   */
+  setTabPinned(_context, { tabId, isPinned }) {
+    if (!process.env.IS_ELECTRON) return
+
+    window.ftElectron.tabs.setPinned(tabId, isPinned)
+  },
+
+  /**
+   * Set a tab color.
+   * @param {object} _context - Vuex action context
+   * @param {{ tabId: string, color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | null }} payload
+   */
+  setTabColor(_context, { tabId, color }) {
+    if (!process.env.IS_ELECTRON) return
+
+    window.ftElectron.tabs.setColor(tabId, color)
+  },
+
+  /**
    * Restore the last closed tab
    */
   async restoreClosedTab(_context) {

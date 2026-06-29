@@ -400,6 +400,33 @@ export default {
     },
 
     /**
+     * Pin or unpin a tab.
+     * @param {string} tabId
+     * @param {boolean} isPinned
+     */
+    setPinned: (tabId, isPinned) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_PINNED, tabId, isPinned)
+    },
+
+    /**
+     * Set a semantic color on a tab.
+     * @param {string} tabId
+     * @param {'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | null} color
+     */
+    setColor: (tabId, color) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_COLOR, tabId, color)
+    },
+
+    /**
+     * Capture a thumbnail preview for a tab when available.
+     * @param {string} tabId
+     * @returns {Promise<string | null>} Data URL for the thumbnail, or null.
+     */
+    capturePreview: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CAPTURE_PREVIEW, tabId)
+    },
+
+    /**
      * Restore the last closed tab
      * @returns {Promise<{id: string, url: string, title: string}|null>}
      */

@@ -1,25 +1,30 @@
 <template>
   <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
   <div
+    ref="tabRef"
     class="tab"
     :data-tab-id="tab.id"
-    :class="{
-      active: tab.isActive,
-      loading: tab.isLoading,
-      unloaded: tab.isUnloaded,
-      playing: tab.isPlaying,
-      dragging: isDragging,
-      settling: isSettling,
-      noTransition: suppressTransition
-    }"
+    :class="tabClasses"
     :style="tabStyle"
-    :title="displayTitle"
+    :aria-label="displayTitle"
+    :aria-describedby="isTooltipVisible ? tooltipId : undefined"
     role="button"
     tabindex="-1"
     @click="handleClick"
+    @pointerenter="showTooltip"
+    @pointerleave="hideTooltip"
+    @focusin="showTooltip"
+    @focusout="hideTooltip"
+    @pointerdown="hideTooltip"
     @mousedown.middle.prevent
     @auxclick.prevent="handleAuxClick"
   >
+    <FontAwesomeIcon
+      v-if="tab.isPinned"
+      :icon="['fas', 'thumbtack']"
+      class="pinBadge"
+      aria-hidden="true"
+    />
     <span class="tabTitle">
       <span
         v-if="tab.isLoading"
@@ -47,11 +52,44 @@
       />
     </button>
   </div>
+  <Teleport to="body">
+    <Transition name="tab-tooltip">
+      <div
+        v-if="isTooltipVisible"
+        :id="tooltipId"
+        class="tabTooltip"
+        :style="tooltipStyle"
+        role="tooltip"
+      >
+        <div class="tabTooltipTitle">
+          {{ displayTitle }}
+        </div>
+        <div class="tabTooltipPreview">
+          <img
+            v-if="tooltipPreviewUrl"
+            :src="tooltipPreviewUrl"
+            :alt="tooltipPreviewAlt"
+            draggable="false"
+          >
+          <div
+            v-else
+            class="tabTooltipPreviewFallback"
+            aria-hidden="true"
+          >
+            <FontAwesomeIcon
+              :icon="['fas', 'display']"
+              class="tabTooltipFallbackIcon"
+            />
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 
 const props = defineProps({
@@ -82,16 +120,63 @@ const props = defineProps({
   suppressTransition: {
     type: Boolean,
     default: false
+  },
+  disableTooltips: {
+    type: Boolean,
+    default: false
+  },
+  closeTooltipsSignal: {
+    type: Number,
+    default: 0
   }
 })
 
 const emit = defineEmits(['activate', 'close', 'middleClick'])
 
+const TAB_COLOR_ACCENTS = Object.freeze({
+  red: '#d84f4f',
+  orange: '#d9822b',
+  yellow: '#c7a72e',
+  green: '#3e9b62',
+  blue: '#3f7fd6',
+  purple: '#8b64d8'
+})
+
+const TOOLTIP_MAX_WIDTH_PX = 340
+const TOOLTIP_MARGIN_PX = 8
+const TOOLTIP_OFFSET_PX = 6
+const TOOLTIP_SHOW_DELAY_MS = 80
+
+const tabRef = useTemplateRef('tabRef')
+const isTooltipVisible = ref(false)
+const tooltipPreviewUrl = ref(null)
+const tooltipStyle = ref({})
+const tooltipRequestId = ref(0)
+let showTooltipTimeoutId = null
+
+const tabColor = computed(() => TAB_COLOR_ACCENTS[props.tab.color] ?? null)
+
+const tabClasses = computed(() => ({
+  active: props.tab.isActive,
+  loading: props.tab.isLoading,
+  unloaded: props.tab.isUnloaded,
+  playing: props.tab.isPlaying,
+  pinned: props.tab.isPinned,
+  colored: tabColor.value != null,
+  dragging: props.isDragging,
+  settling: props.isSettling,
+  noTransition: props.suppressTransition
+}))
+
 const tabStyle = computed(() => {
   const transform = props.offset !== 0 ? `translate3d(${props.offset}px, 0, 0)` : ''
-  return {
-    transform: transform || undefined
+  /** @type {Record<string, string | undefined>} */
+  const style = {
+    transform: transform || undefined,
+    '--tab-accent-color': tabColor.value || undefined
   }
+
+  return style
 })
 
 const displayTitle = computed(() => {
@@ -103,6 +188,9 @@ const displayTitle = computed(() => {
   }
   return title
 })
+
+const tooltipId = computed(() => `tab-tooltip-${props.tab.id}`)
+const tooltipPreviewAlt = computed(() => `${displayTitle.value} preview`)
 
 function handleClick() {
   emit('activate', props.tab.id)
@@ -116,6 +204,146 @@ function handleAuxClick(event) {
     emit('middleClick', event, props.tab.id)
   }
 }
+
+function showTooltip() {
+  if (props.disableTooltips || props.isDragging) {
+    return
+  }
+
+  clearShowTooltipTimeout()
+  showTooltipTimeoutId = window.setTimeout(() => {
+    showTooltipTimeoutId = null
+    if (props.disableTooltips || props.isDragging) {
+      return
+    }
+
+    updateTooltipPosition()
+    isTooltipVisible.value = true
+    addTooltipDismissListeners()
+    window.addEventListener('resize', updateTooltipPosition)
+    loadTooltipPreview()
+  }, TOOLTIP_SHOW_DELAY_MS)
+}
+
+function hideTooltip() {
+  clearShowTooltipTimeout()
+  isTooltipVisible.value = false
+  tooltipPreviewUrl.value = null
+  tooltipRequestId.value++
+  removeTooltipDismissListeners()
+  window.removeEventListener('resize', updateTooltipPosition)
+}
+
+function clearShowTooltipTimeout() {
+  if (showTooltipTimeoutId != null) {
+    clearTimeout(showTooltipTimeoutId)
+    showTooltipTimeoutId = null
+  }
+}
+
+function addTooltipDismissListeners() {
+  document.addEventListener('pointerdown', hideTooltip, true)
+  document.addEventListener('wheel', hideTooltip, true)
+  document.addEventListener('visibilitychange', hideTooltip, true)
+  document.addEventListener('keydown', handleTooltipKeydown, true)
+  window.addEventListener('blur', hideTooltip)
+}
+
+function removeTooltipDismissListeners() {
+  document.removeEventListener('pointerdown', hideTooltip, true)
+  document.removeEventListener('wheel', hideTooltip, true)
+  document.removeEventListener('visibilitychange', hideTooltip, true)
+  document.removeEventListener('keydown', handleTooltipKeydown, true)
+  window.removeEventListener('blur', hideTooltip)
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleTooltipKeydown(event) {
+  if (event.key === 'Escape') {
+    hideTooltip()
+  }
+}
+
+function updateTooltipPosition() {
+  const element = tabRef.value
+  if (!(element instanceof HTMLElement)) {
+    return
+  }
+
+  const rect = element.getBoundingClientRect()
+  const tooltipWidth = Math.min(
+    TOOLTIP_MAX_WIDTH_PX,
+    Math.max(120, window.innerWidth - TOOLTIP_MARGIN_PX * 2)
+  )
+  const left = Math.max(
+    TOOLTIP_MARGIN_PX,
+    Math.min(
+      window.innerWidth - tooltipWidth - TOOLTIP_MARGIN_PX,
+      rect.left + rect.width / 2 - tooltipWidth / 2
+    )
+  )
+
+  tooltipStyle.value = {
+    inlineSize: `${Math.round(tooltipWidth)}px`,
+    insetInlineStart: `${Math.round(left)}px`,
+    insetBlockStart: `${Math.round(rect.bottom + TOOLTIP_OFFSET_PX)}px`
+  }
+}
+
+async function loadTooltipPreview() {
+  const requestId = ++tooltipRequestId.value
+  tooltipPreviewUrl.value = null
+
+  if (
+    props.tab.isUnloaded ||
+    !process.env.IS_ELECTRON ||
+    typeof window.ftElectron?.tabs?.capturePreview !== 'function'
+  ) {
+    return
+  }
+
+  try {
+    const dataUrl = await window.ftElectron.tabs.capturePreview(props.tab.id)
+    if (requestId !== tooltipRequestId.value || !isTooltipVisible.value) {
+      return
+    }
+    tooltipPreviewUrl.value = typeof dataUrl === 'string' && dataUrl.length > 0
+      ? dataUrl
+      : null
+  } catch {
+    if (requestId === tooltipRequestId.value) {
+      tooltipPreviewUrl.value = null
+    }
+  }
+}
+
+onBeforeUnmount(() => {
+  hideTooltip()
+})
+
+watch(() => props.closeTooltipsSignal, () => {
+  hideTooltip()
+})
+
+watch(() => props.tab.isActive, (isActive) => {
+  if (isActive) {
+    hideTooltip()
+  }
+})
+
+watch(() => props.isDragging, (isDragging) => {
+  if (isDragging) {
+    hideTooltip()
+  }
+})
+
+watch(() => props.disableTooltips, (disableTooltips) => {
+  if (disableTooltips) {
+    hideTooltip()
+  }
+})
 </script>
 
 <style scoped>
@@ -125,7 +353,7 @@ function handleAuxClick(event) {
   gap: 6px;
   padding-inline: 10px;
   padding-block: 6px;
-  background-color: var(--bg-color);
+  background-color: var(--tab-surface-color, var(--bg-color));
   border-radius: 6px 6px 0 0;
   cursor: pointer;
   min-inline-size: 100px;
@@ -138,6 +366,8 @@ function handleAuxClick(event) {
   user-select: none;
   touch-action: none;
   will-change: transform;
+  --tab-accent-mix: 18%;
+  --tab-accent-border-mix: 55%;
 }
 
 .tab.noTransition {
@@ -150,18 +380,35 @@ function handleAuxClick(event) {
   inset-block-end: -1px;
   inset-inline: 0;
   block-size: 1px;
-  background-color: var(--bg-color);
+  background-color: var(--tab-surface-color, var(--bg-color));
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 
 .tab:hover {
-  background-color: var(--card-bg-color);
+  background-color: var(--tab-hover-color, var(--card-bg-color));
 }
 
 .tab.active {
-  background-color: var(--card-bg-color);
-  border-color: var(--tertiary-text-color);
+  background-color: var(--tab-active-color, var(--card-bg-color));
+  border-color: var(--tab-border-color, var(--tertiary-text-color));
+}
+
+.tab.colored {
+  --tab-surface-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-mix), var(--bg-color));
+  --tab-hover-color: color-mix(in srgb, var(--tab-accent-color) 22%, var(--card-bg-color));
+  --tab-active-color: color-mix(in srgb, var(--tab-accent-color) 26%, var(--card-bg-color));
+  --tab-border-color: color-mix(in srgb, var(--tab-accent-color) var(--tab-accent-border-mix), var(--tertiary-text-color));
+
+  box-shadow: inset 0 2px 0 var(--tab-accent-color);
+}
+
+.tab.pinned {
+  inline-size: 72px;
+  min-inline-size: 72px;
+  max-inline-size: 72px;
+  padding-inline: 9px 7px;
+  gap: 4px;
 }
 
 .tab.loading {
@@ -201,6 +448,22 @@ function handleAuxClick(event) {
   white-space: nowrap;
   font-size: 12px;
   color: var(--primary-text-color);
+}
+
+.tab.pinned .tabTitle {
+  padding-inline-start: 9px;
+  font-size: 11px;
+}
+
+.pinBadge {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 5px;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: var(--tab-accent-color, var(--secondary-text-color));
+  opacity: 0.92;
+  pointer-events: none;
 }
 
 .loadingDot {
@@ -253,6 +516,18 @@ function handleAuxClick(event) {
   flex-shrink: 0;
 }
 
+.tab.pinned .closeButton {
+  position: absolute;
+  inset-inline-end: 3px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  background-color: var(--tab-active-color, var(--card-bg-color));
+}
+
+.tab.pinned:hover .tabTitle {
+  padding-inline-end: 12px;
+}
+
 .closeButton:hover {
   background-color: var(--destructive-color);
   color: var(--destructive-text-color);
@@ -263,7 +538,80 @@ function handleAuxClick(event) {
   opacity: 1;
 }
 
+.tab.pinned.active:not(:hover) .closeButton {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .closeIcon {
   font-size: 10px;
+}
+
+.tabTooltip {
+  position: fixed;
+  z-index: 10000;
+  padding: 8px;
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: 8px;
+  background-color: var(--card-bg-color);
+  box-shadow: 0 8px 26px rgb(0 0 0 / 32%);
+  color: var(--primary-text-color);
+  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-weight: 400;
+  letter-spacing: 0;
+  pointer-events: none;
+  -webkit-app-region: no-drag;
+}
+
+.tab-tooltip-enter-active,
+.tab-tooltip-leave-active {
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.tab-tooltip-enter-from,
+.tab-tooltip-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.985);
+}
+
+.tabTooltipPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+  overflow: hidden;
+  border-radius: 5px;
+  background-color: var(--secondary-card-bg-color);
+}
+
+.tabTooltipPreview img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.tabTooltipPreviewFallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 100%;
+  block-size: 100%;
+  color: var(--tertiary-text-color);
+}
+
+.tabTooltipFallbackIcon {
+  font-size: 24px;
+  opacity: 0.72;
+}
+
+.tabTooltipTitle {
+  margin-block-end: 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.35;
 }
 </style>

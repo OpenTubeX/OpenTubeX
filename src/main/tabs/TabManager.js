@@ -14,6 +14,11 @@ const tabManagers = new Map()
 const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'x11'
 const DEFAULT_NEW_TAB_POSITION = 'afterCurrent'
 const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
+const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
+const TAB_PREVIEW_MAX_WIDTH = 360
+const TAB_PREVIEW_MAX_HEIGHT = 220
+const TAB_PREVIEW_REFRESH_DELAY_MS = 700
+const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
 
 /**
  * @typedef {object} TabInfo
@@ -22,6 +27,13 @@ const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
  * @property {string} title
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
+ * @property {boolean} isPinned
+ * @property {boolean} isLoading
+ * @property {string | null} color
+ * @property {string | null} previewDataUrl
+ * @property {number} previewCapturedAt
+ * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
+ * @property {Promise<string | null> | null} previewCapturePromise
  * @property {WebContentsView} view
  * @property {boolean} hasStartedLoading
  * @property {boolean} preloadInBackground
@@ -38,6 +50,14 @@ export class TabManager {
     return VALID_NEW_TAB_POSITIONS.has(value)
       ? value
       : DEFAULT_NEW_TAB_POSITION
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {string | null}
+   */
+  static normalizeTabColor(value) {
+    return VALID_TAB_COLORS.has(value) ? value : null
   }
 
   /**
@@ -75,8 +95,8 @@ export class TabManager {
     this.tabs = new Map()
     /** @type {string|null} */
     this.activeTabId = null
-    /** @type {string[]} */
-    this.closedTabUrls = [] // For restore closed tab functionality
+    /** @type {Array<{ url: string, title?: string, isPinned?: boolean, color?: string | null }>} */
+    this.closedTabs = [] // For restore closed tab functionality
     /** @type {number} */
     this.tabBarScrollPosition = 0
     /** @type {string | null} */
@@ -87,6 +107,10 @@ export class TabManager {
     this._sessionPersistenceDisabled = false
     /** @type {Set<string>} */
     this._attachedTabIds = new Set()
+    /** @type {string|null} */
+    this._visibleTabId = null
+    /** @type {number} */
+    this._activationToken = 0
 
     tabManagers.set(browserWindow.id, this)
 
@@ -425,6 +449,49 @@ export class TabManager {
       TabManager.getFromWebContents(view.webContents)?._updateActiveViewBounds()
     })
 
+    view.webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
+      if (isInPlace || !isMainFrame) {
+        return
+      }
+
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+
+      const tabInfo = mgr.tabs.get(tid)
+      if (tabInfo) {
+        mgr._setTabLoading(tabInfo, true)
+      }
+    })
+
+    view.webContents.on('did-start-loading', () => {
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+
+      const tabInfo = mgr.tabs.get(tid)
+      if (tabInfo) {
+        mgr._setTabLoading(tabInfo, true)
+      }
+    })
+
+    view.webContents.on('did-stop-loading', () => {
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+
+      const tabInfo = mgr.tabs.get(tid)
+      if (tabInfo) {
+        mgr._setTabLoading(tabInfo, false)
+      }
+    })
+
     // Listen for title updates
     view.webContents.on('page-title-updated', (_, title) => {
       const mgr = TabManager.getFromWebContents(view.webContents)
@@ -438,6 +505,35 @@ export class TabManager {
       }
     })
 
+    view.webContents.on('did-finish-load', () => {
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+
+      const tabInfo = mgr.tabs.get(tid)
+      if (tabInfo) {
+        mgr._setTabLoading(tabInfo, false)
+        if (mgr.activeTabId === tid) {
+          mgr._scheduleTabPreviewRefresh(tabInfo)
+        }
+      }
+    })
+
+    view.webContents.on('did-fail-load', () => {
+      const mgr = TabManager.getFromWebContents(view.webContents)
+      const tid = TabManager.getTabIdFromWebContents(view.webContents)
+      if (!mgr || !tid) {
+        return
+      }
+
+      const tabInfo = mgr.tabs.get(tid)
+      if (tabInfo) {
+        mgr._setTabLoading(tabInfo, false)
+      }
+    })
+
     // Listen for navigation to update URL
     view.webContents.on('did-navigate-in-page', (_, url) => {
       const mgr = TabManager.getFromWebContents(view.webContents)
@@ -448,6 +544,9 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
+        if (mgr.activeTabId === tid) {
+          mgr._scheduleTabPreviewRefresh(tabInfo)
+        }
         mgr._saveSession()
       }
     })
@@ -461,11 +560,194 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
+        if (mgr.activeTabId === tid) {
+          mgr._scheduleTabPreviewRefresh(tabInfo)
+        }
         mgr._saveSession()
       }
     })
 
     return view
+  }
+
+  /**
+   * Insert a tab while preserving the invariant that all pinned tabs stay
+   * before all unpinned tabs.
+   * @param {string} tabId
+   * @param {TabInfo} tabInfo
+   * @param {number} preferredIndex
+   */
+  _insertTabEntry(tabId, tabInfo, preferredIndex) {
+    const entries = Array.from(this.tabs.entries())
+    const pinnedCount = entries.filter(([, tab]) => tab.isPinned).length
+    let insertIndex = Math.max(0, Math.min(preferredIndex, entries.length))
+
+    if (tabInfo.isPinned) {
+      insertIndex = Math.min(insertIndex, pinnedCount)
+    } else {
+      insertIndex = Math.max(insertIndex, pinnedCount)
+    }
+
+    entries.splice(insertIndex, 0, [tabId, tabInfo])
+    this.tabs = new Map(entries)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {number} [delay]
+   */
+  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
+    this._clearTabPreviewRefresh(tab)
+
+    tab.previewCaptureTimeoutId = setTimeout(() => {
+      tab.previewCaptureTimeoutId = null
+      if (this.activeTabId !== tab.id) {
+        return
+      }
+
+      this._refreshTabPreview(tab).catch(error => {
+        console.error('Failed to refresh tab preview:', error)
+      })
+    }, delay)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _clearTabPreviewRefresh(tab) {
+    if (tab.previewCaptureTimeoutId != null) {
+      clearTimeout(tab.previewCaptureTimeoutId)
+      tab.previewCaptureTimeoutId = null
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {boolean} isLoading
+   */
+  _setTabLoading(tab, isLoading) {
+    const nextLoading = Boolean(isLoading)
+    if (tab.isLoading === nextLoading) {
+      return
+    }
+
+    tab.isLoading = nextLoading
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Promise<string | null>}
+   */
+  async _refreshTabPreview(tab) {
+    if (tab.previewCapturePromise != null) {
+      return tab.previewCapturePromise
+    }
+
+    tab.previewCapturePromise = (async () => {
+      const dataUrl = await this._captureTabPreviewDataUrl(tab)
+      if (dataUrl == null) {
+        return tab.previewDataUrl
+      }
+
+      tab.previewDataUrl = dataUrl
+      tab.previewCapturedAt = Date.now()
+      return dataUrl
+    })()
+
+    try {
+      return await tab.previewCapturePromise
+    } finally {
+      tab.previewCapturePromise = null
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Promise<string | null>}
+   */
+  async _captureTabPreviewDataUrl(tab) {
+    if (
+      !tab.hasStartedLoading ||
+      tab.view.webContents.isDestroyed() ||
+      !this._attachedTabIds.has(tab.id)
+    ) {
+      return null
+    }
+
+    const webContents = tab.view.webContents
+
+    try {
+      await this._setTabPreviewCaptureMode(webContents, true)
+
+      const image = await webContents.capturePage()
+      if (image.isEmpty()) {
+        return null
+      }
+
+      const { width, height } = image.getSize()
+      if (width <= 0 || height <= 0) {
+        return null
+      }
+
+      const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
+      const preview = ratio < 1
+        ? image.resize({
+            width: Math.max(1, Math.round(width * ratio)),
+            height: Math.max(1, Math.round(height * ratio)),
+            quality: 'good'
+          })
+        : image
+
+      return preview.toDataURL()
+    } catch (error) {
+      console.error('Failed to capture tab preview:', error)
+      return null
+    } finally {
+      await this._setTabPreviewCaptureMode(webContents, false)
+    }
+  }
+
+  /**
+   * Hide tab tooltip UI inside the captured renderer so previews do not
+   * recursively include another preview tooltip.
+   * @param {import('electron').WebContents} webContents
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  async _setTabPreviewCaptureMode(webContents, enabled) {
+    if (webContents.isDestroyed()) {
+      return
+    }
+
+    const script = enabled
+      ? `
+        (() => {
+          const styleId = ${JSON.stringify(TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID)}
+          let style = document.getElementById(styleId)
+          if (!style) {
+            style = document.createElement('style')
+            style.id = styleId
+            style.textContent = '.tabTooltip { visibility: hidden !important; }'
+            document.documentElement.append(style)
+          }
+        })()
+      `
+      : `
+        (() => {
+          document.getElementById(${JSON.stringify(TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID)})?.remove()
+        })()
+      `
+
+    try {
+      await webContents.executeJavaScript(script, true)
+      if (enabled) {
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
+    } catch {
+      // The renderer may be navigating or already torn down; the caller can
+      // still try capturePage and fall back to the cached preview.
+    }
   }
 
   /**
@@ -475,13 +757,15 @@ export class TabManager {
    * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
    * @param {object} [options.query] - Query params for the route
    * @param {string} [options.title] - Initial tab title
+   * @param {boolean} [options.isPinned=false] - Whether the tab is pinned
+   * @param {string | null} [options.color=null] - Semantic tab color key
    * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
    * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
    * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
    * @param {boolean} [options.preloadInBackground=false] - Whether to attach an inactive tab while it loads
    * @returns {TabInfo}
    */
-  createTab({ url, route, query, title, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
+  createTab({ url, route, query, title, isPinned = false, color = null, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
     const id = randomUUID()
 
     // Determine the URL to load
@@ -508,24 +792,29 @@ export class TabManager {
       title: title || TabManager.formatDefaultTabTitle(loadUrl),
       lastActiveAt: Date.now(),
       isPlaying: false,
+      isPinned: Boolean(isPinned),
+      isLoading: false,
+      color: TabManager.normalizeTabColor(color),
+      previewDataUrl: null,
+      previewCapturedAt: 0,
+      previewCaptureTimeoutId: null,
+      previewCapturePromise: null,
       view,
       hasStartedLoading: false,
       preloadInBackground: Boolean(preloadInBackground)
     }
 
+    let preferredIndex = this.tabs.size
     if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
       const entries = Array.from(this.tabs.entries())
       const activeTabIndex = entries.findIndex(([tabId]) => tabId === this.activeTabId)
 
       if (activeTabIndex !== -1) {
-        entries.splice(activeTabIndex + 1, 0, [id, tabInfo])
-        this.tabs = new Map(entries)
-      } else {
-        this.tabs.set(id, tabInfo)
+        preferredIndex = activeTabIndex + 1
       }
-    } else {
-      this.tabs.set(id, tabInfo)
     }
+
+    this._insertTabEntry(id, tabInfo, preferredIndex)
 
     if (!makeActive && preloadInBackground) {
       this._attachBackgroundTab(tabInfo)
@@ -573,8 +862,10 @@ export class TabManager {
     }
 
     tab.hasStartedLoading = true
+    tab.isLoading = true
     tab.view.webContents.loadURL(tab.url).catch(error => {
       console.error(`Failed to load tab URL ${tab.url}:`, error)
+      this._setTabLoading(tab, false)
     })
   }
 
@@ -585,6 +876,8 @@ export class TabManager {
    * @param {string} [options.route]
    * @param {object} [options.query]
    * @param {string} [options.title]
+   * @param {boolean} [options.isPinned=false]
+   * @param {string | null} [options.color=null]
    * @param {boolean} [options.makeActive=true]
    * @param {'end' | 'afterCurrent'} [options.openPosition]
    * @param {boolean} [options.lazyLoad=false]
@@ -616,6 +909,8 @@ export class TabManager {
     // time their view becomes visible, preventing a brief flash where the old
     // tab still appears active in the tab bar.
     const previousActiveId = this.activeTabId
+    const previousVisibleId = this._visibleTabId ?? previousActiveId
+    const activationToken = ++this._activationToken
 
     // Exit fullscreen on the previous tab before switching
     if (previousActiveId && previousActiveId !== tabId) {
@@ -652,7 +947,7 @@ export class TabManager {
 
         // Only activate if this tab is still the active tab (user might have switched away)
         if (this.activeTabId === tab.id) {
-          this._doActivateTab(tab, previousActiveId)
+          this._finishTabActivation(tab, previousVisibleId, activationToken)
         }
       }
 
@@ -672,7 +967,7 @@ export class TabManager {
     // If forceImmediate is true, we know the tab has finished loading (e.g., from did-finish-load)
     // so skip the loading check and activate immediately
     if (forceImmediate) {
-      this._doActivateTab(tab, previousActiveId)
+      this._finishTabActivation(tab, previousVisibleId, activationToken)
       return
     }
 
@@ -691,7 +986,7 @@ export class TabManager {
 
         // Only activate if this tab is still the active tab (user might have switched away)
         if (this.activeTabId === tab.id) {
-          this._doActivateTab(tab, previousActiveId)
+          this._finishTabActivation(tab, previousVisibleId, activationToken)
         }
       }
 
@@ -701,21 +996,61 @@ export class TabManager {
     }
 
     // Tab is ready or no previous tab to hide - activate immediately
-    this._doActivateTab(tab, previousActiveId)
+    this._finishTabActivation(tab, previousVisibleId, activationToken)
   }
 
   /**
-   * Internal method to actually perform the tab activation (show/hide views)
    * @param {TabInfo} tab
-   * @param {string|null} previousActiveId
+   * @param {string|null} previousVisibleId
+   * @param {number} activationToken
    * @private
    */
-  _doActivateTab(tab, previousActiveId) {
-    // Hide current active tab
-    if (previousActiveId && previousActiveId !== tab.id) {
-      const currentTab = this.tabs.get(previousActiveId)
+  _finishTabActivation(tab, previousVisibleId, activationToken) {
+    this._doActivateTab(tab, previousVisibleId, activationToken).catch(error => {
+      console.error('Failed to finish tab activation:', error)
+    })
+  }
+
+  /**
+   * Internal method to actually perform the tab activation (show/hide views).
+   * If another tab is visible, capture its final frame before detaching it so
+   * tooltip previews stay current after switching away.
+   * @param {TabInfo} tab
+   * @param {string|null} previousVisibleId
+   * @param {number} activationToken
+   * @private
+   */
+  async _doActivateTab(tab, previousVisibleId, activationToken) {
+    if (
+      activationToken !== this._activationToken ||
+      this.activeTabId !== tab.id ||
+      !this.tabs.has(tab.id)
+    ) {
+      return
+    }
+
+    // Hide current visible tab
+    if (previousVisibleId && previousVisibleId !== tab.id) {
+      const currentTab = this.tabs.get(previousVisibleId)
       if (currentTab) {
+        this._clearTabPreviewRefresh(currentTab)
+        await this._refreshTabPreview(currentTab).catch(error => {
+          console.error('Failed to refresh preview for hidden tab:', error)
+        })
+
+        if (
+          activationToken !== this._activationToken ||
+          this.activeTabId !== tab.id ||
+          !this.tabs.has(tab.id)
+        ) {
+          return
+        }
+
         this._detachView(currentTab)
+        if (this._visibleTabId === currentTab.id) {
+          this._visibleTabId = null
+        }
+
         if (!currentTab.view.webContents.isDestroyed()) {
           try {
             currentTab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, false)
@@ -724,6 +1059,15 @@ export class TabManager {
           }
         }
       }
+    }
+
+    if (
+      activationToken !== this._activationToken ||
+      this.activeTabId !== tab.id ||
+      !this.tabs.has(tab.id) ||
+      tab.view.webContents.isDestroyed()
+    ) {
+      return
     }
 
     // Set bounds BEFORE adding the view to prevent flash
@@ -738,6 +1082,7 @@ export class TabManager {
     // Show new active tab
     this._detachView(tab)
     this._attachView(tab)
+    this._visibleTabId = tab.id
     tab.view.webContents.focus()
 
     if (!tab.view.webContents.isDestroyed()) {
@@ -747,6 +1092,8 @@ export class TabManager {
         console.error('Error sending tab active notification:', error)
       }
     }
+
+    this._scheduleTabPreviewRefresh(tab)
   }
 
   /**
@@ -778,10 +1125,17 @@ export class TabManager {
       }
     }
 
-    // Store URL for potential restore
-    this.closedTabUrls.push(tab.url)
-    if (this.closedTabUrls.length > 10) {
-      this.closedTabUrls.shift()
+    this._clearTabPreviewRefresh(tab)
+
+    // Store URL and visual metadata for potential restore.
+    this.closedTabs.push({
+      url: tab.url,
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color
+    })
+    if (this.closedTabs.length > 10) {
+      this.closedTabs.shift()
     }
 
     // Get ordered tabs BEFORE deleting to find the previous tab
@@ -831,7 +1185,13 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return null
 
-    return this.createTab({ url: tab.url, makeActive: true })
+    return this.createTab({
+      url: tab.url,
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      makeActive: true
+    })
   }
 
   /**
@@ -839,10 +1199,90 @@ export class TabManager {
    * @returns {TabInfo|null}
    */
   restoreClosedTab() {
-    const url = this.closedTabUrls.pop()
-    if (!url) return null
+    const closedTab = this.closedTabs.pop()
+    if (!closedTab) return null
 
-    return this.createTab({ url, makeActive: true })
+    return this.createTab({
+      url: closedTab.url,
+      title: closedTab.title,
+      isPinned: closedTab.isPinned,
+      color: closedTab.color,
+      makeActive: true
+    })
+  }
+
+  /**
+   * Pin or unpin a tab and move it to the matching tab group.
+   * @param {string} tabId
+   * @param {boolean} isPinned
+   * @returns {boolean} Whether the tab changed
+   */
+  setTabPinned(tabId, isPinned) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextPinned = Boolean(isPinned)
+    if (tab.isPinned === nextPinned) {
+      return false
+    }
+
+    tab.isPinned = nextPinned
+
+    const entries = Array.from(this.tabs.entries()).filter(([id]) => id !== tabId)
+    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
+    entries.splice(pinnedCount, 0, [tabId, tab])
+    this.tabs = new Map(entries)
+
+    this._broadcastStateUpdate()
+    this._saveSession()
+
+    return true
+  }
+
+  /**
+   * Set a tab's semantic color key.
+   * @param {string} tabId
+   * @param {string | null} color
+   * @returns {boolean} Whether the tab changed
+   */
+  setTabColor(tabId, color) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextColor = TabManager.normalizeTabColor(color)
+    if (tab.color === nextColor) {
+      return false
+    }
+
+    tab.color = nextColor
+
+    this._broadcastStateUpdate()
+    this._saveSession()
+
+    return true
+  }
+
+  /**
+   * Capture a small thumbnail of a tab if its webContents can provide one.
+   * @param {string} tabId
+   * @returns {Promise<string | null>} Data URL for the thumbnail, or null.
+   */
+  async captureTabPreview(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return null
+    }
+
+    const canCaptureLive = tab.hasStartedLoading &&
+      !tab.view.webContents.isDestroyed() &&
+      this.activeTabId === tab.id &&
+      this._attachedTabIds.has(tab.id)
+
+    if (!canCaptureLive) {
+      return tab.previewDataUrl
+    }
+
+    return this._refreshTabPreview(tab)
   }
 
   /**
@@ -875,13 +1315,18 @@ export class TabManager {
   /**
    * Unload a tab's renderer while keeping its URL and title in the tab strip.
    * @param {string} tabId
-   * @returns {boolean} Whether the tab was unloaded
+   * @returns {Promise<boolean>} Whether the tab was unloaded
    */
-  unloadTab(tabId) {
+  async unloadTab(tabId) {
     const tab = this.tabs.get(tabId)
     if (!tab || !tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
       return false
     }
+
+    this._clearTabPreviewRefresh(tab)
+    await this._refreshTabPreview(tab).catch(error => {
+      console.error('Failed to refresh preview before unloading tab:', error)
+    })
 
     const wasActive = this.activeTabId === tabId
     let tabToActivate = null
@@ -907,6 +1352,7 @@ export class TabManager {
     tab.view = this._createTabView()
     tab.hasStartedLoading = false
     tab.isPlaying = false
+    tab.isLoading = false
     tab.preloadInBackground = false
 
     if (!previousView.webContents.isDestroyed()) {
@@ -934,7 +1380,17 @@ export class TabManager {
     if (fromIndex === -1) return
 
     const [entry] = entries.splice(fromIndex, 1)
-    entries.splice(toIndex, 0, entry)
+    const [, tab] = entry
+    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
+    let targetIndex = Math.max(0, Math.min(toIndex, entries.length))
+
+    if (tab.isPinned) {
+      targetIndex = Math.min(targetIndex, pinnedCount)
+    } else {
+      targetIndex = Math.max(targetIndex, pinnedCount)
+    }
+
+    entries.splice(targetIndex, 0, entry)
 
     this.tabs = new Map(entries)
     this._broadcastStateUpdate()
@@ -968,6 +1424,8 @@ export class TabManager {
         }
       }
     }
+
+    this._clearTabPreviewRefresh(tab)
 
     const orderedTabs = Array.from(this.tabs.entries())
     const detachedIndex = orderedTabs.findIndex(([id]) => id === tabId)
@@ -1005,10 +1463,11 @@ export class TabManager {
 
   /**
    * Attach a tab transferred from another window at the end and activate it.
+   * Pinned transferred tabs still stay in the pinned group.
    * @param {TabInfo} tabInfo
    */
   adoptTransferredTab(tabInfo) {
-    this.tabs = new Map([...this.tabs, [tabInfo.id, tabInfo]])
+    this._insertTabEntry(tabInfo.id, tabInfo, this.tabs.size)
     tabInfo.view.setBackgroundColor(this.backgroundColor)
     this.activateTab(tabInfo.id)
     this.browserWindow.focus()
@@ -1029,8 +1488,10 @@ export class TabManager {
         isActive,
         // Lazy-restored tabs should look idle until the user activates them.
         isUnloaded: !tab.hasStartedLoading,
-        isLoading: tab.hasStartedLoading && tab.view.webContents.isLoading(),
-        isPlaying: tab.isPlaying || false
+        isLoading: tab.isLoading || (tab.hasStartedLoading && tab.view.webContents.isLoading()),
+        isPlaying: tab.isPlaying || false,
+        isPinned: tab.isPinned || false,
+        color: TabManager.normalizeTabColor(tab.color)
       }
     })
 
@@ -1167,7 +1628,9 @@ export class TabManager {
     const tabs = Array.from(this.tabs.values()).map(tab => ({
       id: tab.id,
       url: tab.url,
-      title: tab.title
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: TabManager.normalizeTabColor(tab.color)
     }))
 
     await saveTabSession(this.sessionId, {
@@ -1215,7 +1678,7 @@ export class TabManager {
    * Restore tabs from previously loaded session data. The caller is
    * responsible for loading the data (e.g. via loadAllTabSessions) and
    * deciding which window should own which session.
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean }} [options]
    * @returns {boolean} Whether any tabs were restored
    */
@@ -1231,6 +1694,8 @@ export class TabManager {
       this.createTab({
         url: tabData.url,
         title: hasSavedTitle ? tabData.title : undefined,
+        isPinned: tabData.isPinned === true,
+        color: tabData.color,
         makeActive,
         openPosition: 'end',
         lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle
@@ -1270,7 +1735,7 @@ export function setupTabsIPC() {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
       const tab = await manager.createTabWithPreference(options || {})
-      return { id: tab.id, url: tab.url, title: tab.title }
+      return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
     }
     return null
   })
@@ -1309,7 +1774,7 @@ export function setupTabsIPC() {
     if (manager && typeof tabId === 'string') {
       const tab = manager.duplicateTab(tabId)
       if (tab) {
-        return { id: tab.id, url: tab.url, title: tab.title }
+        return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
       }
     }
     return null
@@ -1323,13 +1788,35 @@ export function setupTabsIPC() {
     }
   })
 
+  ipcMain.on(IpcChannels.TABS_SET_PINNED, (event, tabId, isPinned) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager && typeof tabId === 'string') {
+      manager.setTabPinned(tabId, isPinned === true)
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_COLOR, (event, tabId, color) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager && typeof tabId === 'string') {
+      manager.setTabColor(tabId, color)
+    }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_CAPTURE_PREVIEW, (event, tabId) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    if (manager && typeof tabId === 'string') {
+      return manager.captureTabPreview(tabId)
+    }
+    return null
+  })
+
   // Restore closed tab
   ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, (event) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
       const tab = manager.restoreClosedTab()
       if (tab) {
-        return { id: tab.id, url: tab.url, title: tab.title }
+        return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
       }
     }
     return null
