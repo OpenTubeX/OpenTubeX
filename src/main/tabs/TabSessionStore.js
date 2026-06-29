@@ -19,7 +19,7 @@ import * as baseHandlers from '../../datastores/handlers/base.js'
 
 /**
  * @typedef {object} TabSessionData
- * @property {Array<{id: string, url: string, title: string, isPinned?: boolean, color?: string | null}>} tabs
+ * @property {Array<{id: string, url: string, title: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number}>} tabs
  * @property {string} activeTabId
  * @property {TabSessionBounds} [bounds]
  */

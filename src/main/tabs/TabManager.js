@@ -3,6 +3,8 @@
  */
 import { WebContentsView, ipcMain, app } from 'electron'
 import { randomUUID } from 'crypto'
+import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
+import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
 import { saveTabSession, clearTabSession } from './TabSessionStore.js'
@@ -19,6 +21,8 @@ const TAB_PREVIEW_MAX_WIDTH = 360
 const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
+const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
+const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.png$/i
 
 /**
  * @typedef {object} TabInfo
@@ -32,6 +36,7 @@ const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
  * @property {string | null} color
  * @property {string | null} previewDataUrl
  * @property {number} previewCapturedAt
+ * @property {string | null} previewFileName
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
  * @property {Promise<string | null> | null} previewCapturePromise
  * @property {WebContentsView} view
@@ -58,6 +63,48 @@ export class TabManager {
    */
   static normalizeTabColor(value) {
     return VALID_TAB_COLORS.has(value) ? value : null
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {string | null}
+   */
+  static normalizePreviewFileName(value) {
+    return typeof value === 'string' && TAB_PREVIEW_FILE_PATTERN.test(value)
+      ? value
+      : null
+  }
+
+  /**
+   * @returns {string}
+   */
+  static getTabPreviewCacheDirectory() {
+    return join(app.getPath('userData'), TAB_PREVIEW_CACHE_DIR_NAME)
+  }
+
+  /**
+   * @param {string} dataUrl
+   * @returns {Buffer | null}
+   */
+  static tabPreviewDataUrlToBuffer(dataUrl) {
+    if (typeof dataUrl !== 'string') {
+      return null
+    }
+
+    const match = dataUrl.match(/^data:image\/png;base64,([A-Za-z0-9+/=]+)$/)
+    if (!match) {
+      return null
+    }
+
+    return Buffer.from(match[1], 'base64')
+  }
+
+  /**
+   * @param {Buffer} buffer
+   * @returns {string}
+   */
+  static tabPreviewBufferToDataUrl(buffer) {
+    return 'data:image/png;base64,' + buffer.toString('base64')
   }
 
   /**
@@ -622,6 +669,100 @@ export class TabManager {
   }
 
   /**
+   * @param {string | null | undefined} fileName
+   * @returns {string | null}
+   */
+  _getTabPreviewFilePath(fileName) {
+    const normalizedFileName = TabManager.normalizePreviewFileName(fileName)
+    if (normalizedFileName == null) {
+      return null
+    }
+
+    return join(TabManager.getTabPreviewCacheDirectory(), normalizedFileName)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} dataUrl
+   * @returns {Promise<void>}
+   */
+  async _persistTabPreview(tab, dataUrl) {
+    const buffer = TabManager.tabPreviewDataUrlToBuffer(dataUrl)
+    if (buffer == null || buffer.length === 0) {
+      return
+    }
+
+    const fileName = TabManager.normalizePreviewFileName(tab.previewFileName) ?? randomUUID() + '.png'
+    const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
+    const filePath = join(cacheDirectory, fileName)
+
+    await mkdir(cacheDirectory, { recursive: true })
+    await writeFile(filePath, buffer)
+
+    tab.previewFileName = fileName
+  }
+
+  /**
+   * @param {string | null | undefined} fileName
+   * @returns {Promise<string | null>}
+   */
+  async _loadTabPreviewDataUrl(fileName) {
+    const filePath = this._getTabPreviewFilePath(fileName)
+    if (filePath == null) {
+      return null
+    }
+
+    try {
+      const buffer = await readFile(filePath)
+      return buffer.length > 0
+        ? TabManager.tabPreviewBufferToDataUrl(buffer)
+        : null
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        console.error('Failed to load tab preview:', error)
+      }
+      return null
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Promise<string | null>}
+   */
+  async _getCachedTabPreviewDataUrl(tab) {
+    if (typeof tab.previewDataUrl === 'string' && tab.previewDataUrl.length > 0) {
+      return tab.previewDataUrl
+    }
+
+    const dataUrl = await this._loadTabPreviewDataUrl(tab.previewFileName)
+    if (dataUrl == null) {
+      return null
+    }
+
+    tab.previewDataUrl = dataUrl
+    return dataUrl
+  }
+
+  /**
+   * @param {string | null | undefined} fileName
+   * @returns {Promise<void>}
+   */
+  async _deleteTabPreviewFile(fileName) {
+    const filePath = this._getTabPreviewFilePath(fileName)
+    if (filePath == null) {
+      return
+    }
+
+    try {
+      await unlink(filePath)
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        console.error('Failed to delete tab preview:', error)
+      }
+    }
+  }
+
+  /**
    * @param {TabInfo} tab
    * @param {boolean} isLoading
    */
@@ -647,11 +788,15 @@ export class TabManager {
     tab.previewCapturePromise = (async () => {
       const dataUrl = await this._captureTabPreviewDataUrl(tab)
       if (dataUrl == null) {
-        return tab.previewDataUrl
+        return await this._getCachedTabPreviewDataUrl(tab)
       }
 
       tab.previewDataUrl = dataUrl
       tab.previewCapturedAt = Date.now()
+      await this._persistTabPreview(tab, dataUrl).catch(error => {
+        console.error('Failed to persist tab preview:', error)
+      })
+      await this._saveSession()
       return dataUrl
     })()
 
@@ -759,13 +904,16 @@ export class TabManager {
    * @param {string} [options.title] - Initial tab title
    * @param {boolean} [options.isPinned=false] - Whether the tab is pinned
    * @param {string | null} [options.color=null] - Semantic tab color key
+   * @param {string | null} [options.previewDataUrl=null] - Restored thumbnail data URL
+   * @param {number} [options.previewCapturedAt=0] - Thumbnail capture timestamp
+   * @param {string | null} [options.previewFileName=null] - Cached thumbnail file name
    * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
    * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
    * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
    * @param {boolean} [options.preloadInBackground=false] - Whether to attach an inactive tab while it loads
    * @returns {TabInfo}
    */
-  createTab({ url, route, query, title, isPinned = false, color = null, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
+  createTab({ url, route, query, title, isPinned = false, color = null, previewDataUrl = null, previewCapturedAt = 0, previewFileName = null, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
     const id = randomUUID()
 
     // Determine the URL to load
@@ -785,6 +933,13 @@ export class TabManager {
     }
 
     const view = this._createTabView()
+    const restoredPreviewDataUrl = typeof previewDataUrl === 'string' && previewDataUrl.startsWith('data:image/png;base64,')
+      ? previewDataUrl
+      : null
+    const restoredPreviewFileName = TabManager.normalizePreviewFileName(previewFileName)
+    const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
+      ? previewCapturedAt
+      : 0
 
     const tabInfo = {
       id,
@@ -795,8 +950,9 @@ export class TabManager {
       isPinned: Boolean(isPinned),
       isLoading: false,
       color: TabManager.normalizeTabColor(color),
-      previewDataUrl: null,
-      previewCapturedAt: 0,
+      previewDataUrl: restoredPreviewDataUrl,
+      previewCapturedAt: restoredPreviewCapturedAt,
+      previewFileName: restoredPreviewFileName,
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
       view,
@@ -1158,6 +1314,9 @@ export class TabManager {
 
     // Destroy the webContents
     tab.view.webContents.close()
+    this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
+      console.error('Failed to delete closed tab preview:', error)
+    })
 
     this.tabs.delete(tabId)
 
@@ -1279,7 +1438,7 @@ export class TabManager {
       this._attachedTabIds.has(tab.id)
 
     if (!canCaptureLive) {
-      return tab.previewDataUrl
+      return await this._getCachedTabPreviewDataUrl(tab)
     }
 
     return this._refreshTabPreview(tab)
@@ -1625,13 +1784,23 @@ export class TabManager {
   async _saveSession() {
     if (this._sessionPersistenceDisabled) return
 
-    const tabs = Array.from(this.tabs.values()).map(tab => ({
-      id: tab.id,
-      url: tab.url,
-      title: tab.title,
-      isPinned: tab.isPinned,
-      color: TabManager.normalizeTabColor(tab.color)
-    }))
+    const tabs = Array.from(this.tabs.values()).map(tab => {
+      const tabData = {
+        id: tab.id,
+        url: tab.url,
+        title: tab.title,
+        isPinned: tab.isPinned,
+        color: TabManager.normalizeTabColor(tab.color)
+      }
+
+      const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
+      if (previewFileName != null && tab.previewCapturedAt > 0) {
+        tabData.previewFileName = previewFileName
+        tabData.previewCapturedAt = tab.previewCapturedAt
+      }
+
+      return tabData
+    })
 
     await saveTabSession(this.sessionId, {
       tabs,
@@ -1671,6 +1840,7 @@ export class TabManager {
     // NeDB serializes writes per datastore, so an already-in-flight save will
     // land before this clear and still be erased by it.
     this._sessionPersistenceDisabled = true
+    await Promise.all(Array.from(this.tabs.values(), tab => this._deleteTabPreviewFile(tab.previewFileName)))
     await clearTabSession(this.sessionId)
   }
 
@@ -1678,11 +1848,11 @@ export class TabManager {
    * Restore tabs from previously loaded session data. The caller is
    * responsible for loading the data (e.g. via loadAllTabSessions) and
    * deciding which window should own which session.
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean }} [options]
-   * @returns {boolean} Whether any tabs were restored
+   * @returns {Promise<boolean>} Whether any tabs were restored
    */
-  restoreFromData(sessionData, { loadInactiveTabs = false } = {}) {
+  async restoreFromData(sessionData, { loadInactiveTabs = false } = {}) {
     if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
       return false
     }
@@ -1690,12 +1860,22 @@ export class TabManager {
     for (const tabData of sessionData.tabs) {
       const makeActive = tabData.id === sessionData.activeTabId
       const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+      const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
+      const previewDataUrl = previewFileName == null
+        ? null
+        : await this._loadTabPreviewDataUrl(previewFileName)
+      const previewCapturedAt = previewFileName != null && Number.isFinite(tabData.previewCapturedAt)
+        ? tabData.previewCapturedAt
+        : 0
 
       this.createTab({
         url: tabData.url,
         title: hasSavedTitle ? tabData.title : undefined,
         isPinned: tabData.isPinned === true,
         color: tabData.color,
+        previewDataUrl,
+        previewCapturedAt,
+        previewFileName,
         makeActive,
         openPosition: 'end',
         lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle

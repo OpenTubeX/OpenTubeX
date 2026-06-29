@@ -1359,9 +1359,12 @@ function runApp() {
       // Restore tabs from the pre-loaded session data if one was passed in
       // (the startup flow loads every window's session up-front so that each
       // window gets its own data).
-      const sessionRestored = !windowStartupUrl && tabManager.restoreFromData(sessionData, {
-        loadInactiveTabs: loadInactiveTabsOnRestore
-      })
+      let sessionRestored = false
+      if (!windowStartupUrl) {
+        sessionRestored = await tabManager.restoreFromData(sessionData, {
+          loadInactiveTabs: loadInactiveTabsOnRestore
+        })
+      }
 
       if (!sessionRestored) {
         // Create initial tab

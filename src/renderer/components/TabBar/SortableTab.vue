@@ -313,7 +313,6 @@ async function loadTooltipPreview() {
   tooltipPreviewUrl.value = null
 
   if (
-    props.tab.isUnloaded ||
     !process.env.IS_ELECTRON ||
     typeof window.ftElectron?.tabs?.capturePreview !== 'function'
   ) {
