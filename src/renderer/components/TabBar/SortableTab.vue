@@ -549,6 +549,11 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   color: var(--destructive-text-color);
 }
 
+.tab.pinned .closeButton:hover {
+  background-color: var(--destructive-color);
+  color: var(--destructive-text-color);
+}
+
 .tab:hover .closeButton,
 .tab.active .closeButton {
   opacity: 1;
