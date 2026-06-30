@@ -24,6 +24,8 @@ const TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS = 150
 const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
 const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.png$/i
+const TAB_LOADING_SOURCE_NAVIGATION = 'navigation'
+const TAB_LOADING_SOURCE_RENDERER = 'renderer'
 
 /**
  * @typedef {object} TabInfo
@@ -33,7 +35,8 @@ const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89a
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
  * @property {boolean} isPinned
- * @property {boolean} isLoading
+ * @property {boolean} isLoading Cached aggregate loading state for the tab bar.
+ * @property {Set<string>} loadingSources Active main-process and renderer-process loading sources.
  * @property {string | null} color
  * @property {string | null} previewDataUrl
  * @property {number} previewCapturedAt
@@ -510,7 +513,8 @@ export class TabManager {
 
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        mgr._setTabLoading(tabInfo, true)
+        mgr._setTabNavigationLoading(tabInfo, true)
+        mgr._setTabLoading(tabInfo, false)
       }
     })
 
@@ -523,7 +527,7 @@ export class TabManager {
 
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        mgr._setTabLoading(tabInfo, true)
+        mgr._setTabNavigationLoading(tabInfo, true)
       }
     })
 
@@ -536,7 +540,7 @@ export class TabManager {
 
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        mgr._setTabLoading(tabInfo, false)
+        mgr._setTabNavigationLoading(tabInfo, false)
       }
     })
 
@@ -562,7 +566,7 @@ export class TabManager {
 
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        mgr._setTabLoading(tabInfo, false)
+        mgr._setTabNavigationLoading(tabInfo, false)
         mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
           allowInactive: mgr.activeTabId !== tid
         })
@@ -578,7 +582,7 @@ export class TabManager {
 
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
-        mgr._setTabLoading(tabInfo, false)
+        mgr._setTabNavigationLoading(tabInfo, false)
       }
     })
 
@@ -771,16 +775,73 @@ export class TabManager {
 
   /**
    * @param {TabInfo} tab
-   * @param {boolean} isLoading
+   * @returns {Set<string>}
    */
-  _setTabLoading(tab, isLoading) {
-    const nextLoading = Boolean(isLoading)
+  _getTabLoadingSources(tab) {
+    if (!(tab.loadingSources instanceof Set)) {
+      tab.loadingSources = new Set()
+    }
+
+    return tab.loadingSources
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {boolean}
+   */
+  _getTabLoadingState(tab) {
+    const loadingSources = this._getTabLoadingSources(tab)
+    return loadingSources.size > 0 || (
+      tab.hasStartedLoading &&
+      !tab.view.webContents.isDestroyed() &&
+      tab.view.webContents.isLoading()
+    )
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _syncTabLoadingState(tab) {
+    const nextLoading = this._getTabLoadingState(tab)
     if (tab.isLoading === nextLoading) {
       return
     }
 
     tab.isLoading = nextLoading
     this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} source
+   * @param {boolean} isLoading
+   */
+  _setTabLoadingSource(tab, source, isLoading) {
+    const loadingSources = this._getTabLoadingSources(tab)
+
+    if (isLoading) {
+      loadingSources.add(source)
+    } else {
+      loadingSources.delete(source)
+    }
+
+    this._syncTabLoadingState(tab)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {boolean} isLoading
+   */
+  _setTabLoading(tab, isLoading) {
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_RENDERER, isLoading)
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {boolean} isLoading
+   */
+  _setTabNavigationLoading(tab, isLoading) {
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_NAVIGATION, isLoading)
   }
 
   /**
@@ -1081,6 +1142,7 @@ export class TabManager {
       isPlaying: false,
       isPinned: Boolean(isPinned),
       isLoading: false,
+      loadingSources: new Set(),
       color: TabManager.normalizeTabColor(color),
       previewDataUrl: restoredPreviewDataUrl,
       previewCapturedAt: restoredPreviewCapturedAt,
@@ -1150,10 +1212,10 @@ export class TabManager {
     }
 
     tab.hasStartedLoading = true
-    tab.isLoading = true
+    this._setTabNavigationLoading(tab, true)
     tab.view.webContents.loadURL(tab.url).catch(error => {
       console.error(`Failed to load tab URL ${tab.url}:`, error)
-      this._setTabLoading(tab, false)
+      this._setTabNavigationLoading(tab, false)
     })
   }
 
@@ -1646,6 +1708,7 @@ export class TabManager {
     tab.hasStartedLoading = false
     tab.isPlaying = false
     tab.isLoading = false
+    tab.loadingSources = new Set()
     tab.preloadInBackground = false
 
     if (!previousView.webContents.isDestroyed()) {
@@ -1783,7 +1846,7 @@ export class TabManager {
         isActive,
         // Lazy-restored tabs should look idle until the user activates them.
         isUnloaded: !tab.hasStartedLoading,
-        isLoading: tab.isLoading || (tab.hasStartedLoading && tab.view.webContents.isLoading()),
+        isLoading: this._getTabLoadingState(tab),
         isPlaying: tab.isPlaying || false,
         isPinned: tab.isPinned || false,
         color: TabManager.normalizeTabColor(tab.color)
