@@ -36,12 +36,42 @@
   text-align: end;
 }
 
+.floatingRefreshSection.embedded {
+  position: static;
+  inset: auto;
+  inline-size: auto;
+  padding-block: 0;
+  padding-inline: 0;
+  border: 0;
+  box-shadow: none;
+  background-color: transparent;
+  gap: 12px;
+  z-index: auto;
+
+  .lastRefreshTimestamp {
+    color: var(--tertiary-text-color);
+    font-size: 14px;
+  }
+
+  .refreshActions {
+    gap: 8px;
+    margin-inline-start: 0;
+  }
+}
+
 @media only screen and (width <= 680px) {
   .floatingRefreshSection,
   .floatingRefreshSection.sideNavOpen,
   .floatingRefreshSection.hideLabelsSideBar {
     inline-size: 100%;
     border-inline-start: none;
+  }
+
+  .floatingRefreshSection.embedded,
+  .floatingRefreshSection.embedded.sideNavOpen,
+  .floatingRefreshSection.embedded.hideLabelsSideBar {
+    inline-size: 100%;
+    justify-content: space-between;
   }
 
   .nextAutoRefreshTimestamp {

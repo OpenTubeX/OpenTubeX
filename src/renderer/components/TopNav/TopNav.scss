@@ -111,7 +111,16 @@
 .navFilterButton {
   $effect-distance: 20px;
 
-  margin-inline-start: $effect-distance;
+  position: absolute;
+  inset-block-start: -8px;
+  inset-inline-end: 42px;
+  margin-block: 0;
+  margin-inline: 3px;
+  padding: 10px;
+  border-radius: 100%;
+  font-size: 1em;
+  line-height: 1em;
+  z-index: 1;
 
   &.filterChanged {
     /* stylelint-disable-next-line declaration-property-value-no-unknown */
@@ -212,8 +221,9 @@
   max-inline-size: 440px;
 
   .searchContainer {
-    align-items: center;
+    align-items: flex-start;
     display: flex;
+    position: relative;
 
     @media only screen and (width <= 680px) {
       background-color: var(--side-nav-color);
@@ -228,6 +238,10 @@
 
     .searchInput {
       flex: 1;
+
+      :deep(.ft-input) {
+        padding-inline-end: 84px;
+      }
     }
   }
 }

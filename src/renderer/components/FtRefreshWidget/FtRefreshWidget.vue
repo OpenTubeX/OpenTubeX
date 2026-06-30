@@ -1,6 +1,7 @@
 <template>
   <div
     class="floatingRefreshSection"
+    :class="{ embedded: props.embedded }"
   >
     <p
       v-if="lastRefreshTimestamp"
@@ -54,6 +55,10 @@ const props = defineProps({
   nextAutoRefreshTooltip: {
     type: String,
     default: ''
+  },
+  embedded: {
+    type: Boolean,
+    default: false
   },
   title: {
     type: String,

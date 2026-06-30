@@ -4,8 +4,6 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
-    :last-refresh-timestamp="lastLiveRefreshTimestamp"
-    :title="t('Global.Live')"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
 </template>
@@ -108,6 +106,18 @@ const lastLiveRefreshTimestamp = computed(() => {
   })
 
   return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+})
+
+const refreshTitle = computed(() => {
+  return t('Global.Live')
+})
+
+const nextAutoRefreshTimestamp = computed(() => {
+  return ''
+})
+
+const nextAutoRefreshTooltip = computed(() => {
+  return ''
 })
 
 watch(activeSubscriptionList, () => {
@@ -451,4 +461,13 @@ async function getChannelLiveInvidiousRSS(channel, failedAttempts = 0) {
     }
   }
 }
+
+defineExpose({
+  refresh: loadVideosForSubscriptionsFromRemote,
+  isLoading,
+  lastRefreshTimestamp: lastLiveRefreshTimestamp,
+  nextAutoRefreshTimestamp,
+  nextAutoRefreshTooltip,
+  refreshTitle
+})
 </script>

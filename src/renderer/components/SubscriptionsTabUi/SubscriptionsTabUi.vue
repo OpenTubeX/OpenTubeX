@@ -58,15 +58,6 @@
         />
       </FtFlexBox>
     </FtAutoLoadNextPageWrapper>
-
-    <FtRefreshWidget
-      :disable-refresh="displayIsLoading || !activeProfileHasSubscriptions"
-      :last-refresh-timestamp="lastRefreshTimestamp"
-      :next-auto-refresh-timestamp="nextAutoRefreshTimestamp"
-      :next-auto-refresh-tooltip="nextAutoRefreshTooltip"
-      :title="title"
-      @click="refresh"
-    />
   </div>
 </template>
 
@@ -79,7 +70,6 @@ import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import FtRefreshWidget from '../FtRefreshWidget/FtRefreshWidget.vue'
 
 import store from '../../store/index'
 
@@ -109,22 +99,6 @@ const props = defineProps({
   initialDataLimit: {
     type: Number,
     default: 100
-  },
-  lastRefreshTimestamp: {
-    type: String,
-    required: true
-  },
-  nextAutoRefreshTimestamp: {
-    type: String,
-    default: ''
-  },
-  nextAutoRefreshTooltip: {
-    type: String,
-    default: ''
-  },
-  title: {
-    type: String,
-    required: true
   }
 })
 

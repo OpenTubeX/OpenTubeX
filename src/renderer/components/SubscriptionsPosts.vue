@@ -6,8 +6,6 @@
     :attempted-fetch="attemptedFetch"
     :is-community="true"
     :initial-data-limit="20"
-    :last-refresh-timestamp="lastPostsRefreshTimestamp"
-    :title="t('Global.Posts')"
     @refresh="loadPostsForSubscriptionsFromRemote"
   />
 </template>
@@ -98,6 +96,18 @@ const lastPostsRefreshTimestamp = computed(() => {
   })
 
   return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+})
+
+const refreshTitle = computed(() => {
+  return t('Global.Posts')
+})
+
+const nextAutoRefreshTimestamp = computed(() => {
+  return ''
+})
+
+const nextAutoRefreshTooltip = computed(() => {
+  return ''
 })
 
 watch(activeSubscriptionList, () => {
@@ -291,4 +301,13 @@ async function getChannelPostsInvidious(channel) {
     }
   }
 }
+
+defineExpose({
+  refresh: loadPostsForSubscriptionsFromRemote,
+  isLoading,
+  lastRefreshTimestamp: lastPostsRefreshTimestamp,
+  nextAutoRefreshTimestamp,
+  nextAutoRefreshTooltip,
+  refreshTitle
+})
 </script>

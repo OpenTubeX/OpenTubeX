@@ -59,6 +59,7 @@
         @blur="handleInputBlur"
         @keydown="handleKeyDown"
       >
+      <slot name="extraAction" />
       <button
         v-if="showActionButton"
         class="inputAction"
