@@ -89,7 +89,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 
 const props = defineProps({
@@ -232,11 +232,18 @@ function handlePointerEnter() {
 }
 
 function handlePointerLeave() {
-  suppressTooltipUntilPointerLeave = false
+  if (document.hasFocus()) {
+    suppressTooltipUntilPointerLeave = false
+  }
   hideTooltip()
 }
 
 function handlePointerDown() {
+  suppressTooltipUntilPointerLeave = true
+  hideTooltip()
+}
+
+function handleWindowBlur() {
   suppressTooltipUntilPointerLeave = true
   hideTooltip()
 }
@@ -262,7 +269,6 @@ function addTooltipDismissListeners() {
   document.addEventListener('wheel', hideTooltip, true)
   document.addEventListener('visibilitychange', hideTooltip, true)
   document.addEventListener('keydown', handleTooltipKeydown, true)
-  window.addEventListener('blur', hideTooltip)
 }
 
 function removeTooltipDismissListeners() {
@@ -270,7 +276,6 @@ function removeTooltipDismissListeners() {
   document.removeEventListener('wheel', hideTooltip, true)
   document.removeEventListener('visibilitychange', hideTooltip, true)
   document.removeEventListener('keydown', handleTooltipKeydown, true)
-  window.removeEventListener('blur', hideTooltip)
 }
 
 /**
@@ -334,7 +339,12 @@ async function loadTooltipPreview() {
   }
 }
 
+onMounted(() => {
+  window.addEventListener('blur', handleWindowBlur)
+})
+
 onBeforeUnmount(() => {
+  window.removeEventListener('blur', handleWindowBlur)
   hideTooltip()
 })
 
