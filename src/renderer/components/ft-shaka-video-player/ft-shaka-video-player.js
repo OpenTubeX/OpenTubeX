@@ -65,6 +65,7 @@ const SPONSORBLOCK_PREVIEW_END_EPSILON_SECONDS = 0.01
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
+const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 
 function createSponsorBlockDraftId() {
   if (typeof crypto.randomUUID === 'function') {
@@ -3045,7 +3046,18 @@ export default defineComponent({
       return sabrBackoffRingCircumference * (1 - clampedProgress)
     })
 
-    function clearSabrBackoffTimer() {
+    function requestTabPreviewRefresh(delayMs = SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS) {
+      if (
+        !process.env.IS_ELECTRON ||
+        typeof window.ftElectron?.tabs?.requestPreviewRefresh !== 'function'
+      ) {
+        return
+      }
+
+      window.ftElectron.tabs.requestPreviewRefresh({ delayMs })
+    }
+
+    function clearSabrBackoffTimer({ refreshPreview = false } = {}) {
       if (sabrBackoffIntervalId !== null) {
         clearInterval(sabrBackoffIntervalId)
         sabrBackoffIntervalId = null
@@ -3053,11 +3065,15 @@ export default defineComponent({
 
       sabrBackoffRemainingMs.value = 0
       sabrBackoffDurationMs.value = 0
+
+      if (refreshPreview) {
+        requestTabPreviewRefresh()
+      }
     }
 
     function startSabrBackoffTimer(backoffMs) {
       if (backoffMs <= 0) {
-        clearSabrBackoffTimer()
+        clearSabrBackoffTimer({ refreshPreview: true })
         return
       }
 
@@ -3069,7 +3085,7 @@ export default defineComponent({
         sabrBackoffRemainingMs.value = remainingMs
 
         if (remainingMs === 0) {
-          clearSabrBackoffTimer()
+          clearSabrBackoffTimer({ refreshPreview: true })
         }
       }
 
@@ -3078,6 +3094,7 @@ export default defineComponent({
       }
 
       updateRemainingMs()
+      requestTabPreviewRefresh()
       sabrBackoffIntervalId = setInterval(updateRemainingMs, 100)
     }
 

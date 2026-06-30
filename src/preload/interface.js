@@ -427,6 +427,15 @@ export default {
     },
 
     /**
+     * Ask the main process to refresh this tab's cached thumbnail preview.
+     * Useful when renderer-only UI changes without navigation/loading events.
+     * @param {{ delayMs?: number }} [options]
+     */
+    requestPreviewRefresh: (options = {}) => {
+      ipcRenderer.send(IpcChannels.TABS_REQUEST_PREVIEW_REFRESH, options)
+    },
+
+    /**
      * Restore the last closed tab
      * @returns {Promise<{id: string, url: string, title: string}|null>}
      */

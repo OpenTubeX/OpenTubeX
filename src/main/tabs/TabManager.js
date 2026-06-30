@@ -20,6 +20,7 @@ const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'p
 const TAB_PREVIEW_MAX_WIDTH = 360
 const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
+const TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS = 150
 const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
 const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.png$/i
@@ -562,9 +563,9 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         mgr._setTabLoading(tabInfo, false)
-        if (mgr.activeTabId === tid) {
-          mgr._scheduleTabPreviewRefresh(tabInfo)
-        }
+        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
+          allowInactive: mgr.activeTabId !== tid
+        })
       }
     })
 
@@ -591,9 +592,9 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        if (mgr.activeTabId === tid) {
-          mgr._scheduleTabPreviewRefresh(tabInfo)
-        }
+        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
+          allowInactive: mgr.activeTabId !== tid
+        })
         mgr._saveSession()
       }
     })
@@ -607,9 +608,9 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        if (mgr.activeTabId === tid) {
-          mgr._scheduleTabPreviewRefresh(tabInfo)
-        }
+        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
+          allowInactive: mgr.activeTabId !== tid
+        })
         mgr._saveSession()
       }
     })
@@ -642,17 +643,23 @@ export class TabManager {
   /**
    * @param {TabInfo} tab
    * @param {number} [delay]
+   * @param {{allowInactive?: boolean}} [options]
    */
-  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
+  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS, { allowInactive = false } = {}) {
     this._clearTabPreviewRefresh(tab)
 
     tab.previewCaptureTimeoutId = setTimeout(() => {
       tab.previewCaptureTimeoutId = null
-      if (this.activeTabId !== tab.id) {
+      const isActive = this.activeTabId === tab.id
+      if (!isActive && !allowInactive) {
         return
       }
 
-      this._refreshTabPreview(tab).catch(error => {
+      const refreshPromise = isActive
+        ? this._refreshTabPreview(tab)
+        : this._refreshInactiveTabPreview(tab)
+
+      refreshPromise.catch(error => {
         console.error('Failed to refresh tab preview:', error)
       })
     }, delay)
@@ -804,6 +811,41 @@ export class TabManager {
       return await tab.previewCapturePromise
     } finally {
       tab.previewCapturePromise = null
+    }
+  }
+
+  /**
+   * Refresh an inactive tab's preview. Inactive WebContentsViews may have
+   * finished loading without ever being attached, so attach them behind the
+   * active tab briefly to give Chromium a paintable surface for capture.
+   * @param {TabInfo} tab
+   * @returns {Promise<string | null>}
+   */
+  async _refreshInactiveTabPreview(tab) {
+    if (this._attachedTabIds.has(tab.id)) {
+      return await this._refreshTabPreview(tab)
+    }
+
+    if (
+      this.activeTabId === tab.id ||
+      !tab.hasStartedLoading ||
+      tab.view.webContents.isDestroyed()
+    ) {
+      return await this._getCachedTabPreviewDataUrl(tab)
+    }
+
+    this._attachBackgroundTab(tab)
+    if (!this._attachedTabIds.has(tab.id)) {
+      return await this._getCachedTabPreviewDataUrl(tab)
+    }
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS))
+      return await this._refreshTabPreview(tab)
+    } finally {
+      if (this.activeTabId !== tab.id && this._attachedTabIds.has(tab.id)) {
+        this._detachView(tab)
+      }
     }
   }
 
@@ -1523,15 +1565,17 @@ export class TabManager {
     }
 
     const canCaptureLive = tab.hasStartedLoading &&
-      !tab.view.webContents.isDestroyed() &&
-      this.activeTabId === tab.id &&
-      this._attachedTabIds.has(tab.id)
+      !tab.view.webContents.isDestroyed()
 
     if (!canCaptureLive) {
       return await this._getCachedTabPreviewDataUrl(tab)
     }
 
-    return this._refreshTabPreview(tab)
+    if (this._attachedTabIds.has(tab.id)) {
+      return this._refreshTabPreview(tab)
+    }
+
+    return this._refreshInactiveTabPreview(tab)
   }
 
   /**
@@ -1845,14 +1889,15 @@ export class TabManager {
       return
     }
 
-    const activeTab = this.activeTabId ? this.tabs.get(this.activeTabId) : null
+    const visibleTabId = this._visibleTabId ?? this.activeTabId
+    const visibleTab = visibleTabId ? this.tabs.get(visibleTabId) : null
 
     this._attachView(tab)
 
-    if (activeTab && activeTab.id !== tab.id && !activeTab.view.webContents.isDestroyed()) {
-      this._detachView(activeTab)
-      this._attachView(activeTab)
-      activeTab.view.webContents.focus()
+    if (visibleTab && visibleTab.id !== tab.id && !visibleTab.view.webContents.isDestroyed()) {
+      this._detachView(visibleTab)
+      this._attachView(visibleTab)
+      visibleTab.view.webContents.focus()
     }
   }
 
@@ -2080,6 +2125,25 @@ export function setupTabsIPC() {
       return manager.captureTabPreview(tabId)
     }
     return null
+  })
+
+  ipcMain.on(IpcChannels.TABS_REQUEST_PREVIEW_REFRESH, (event, options = {}) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    const tabId = TabManager.getTabIdFromWebContents(event.sender)
+    if (!manager || !tabId) {
+      return
+    }
+
+    const tab = manager.tabs.get(tabId)
+    if (!tab) {
+      return
+    }
+
+    const delayMs = Number.isFinite(options?.delayMs)
+      ? Math.max(0, Math.min(5000, options.delayMs))
+      : TAB_PREVIEW_REFRESH_DELAY_MS
+
+    manager._scheduleTabPreviewRefresh(tab, delayMs, { allowInactive: true })
   })
 
   // Restore closed tab
