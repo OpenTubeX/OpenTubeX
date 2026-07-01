@@ -175,7 +175,8 @@ jobs:
       env:
         VERSION: ${{ steps.versionNumber.outputs.version }}
       run: |
-        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}"
+        docker run --rm -v "$PWD":/work -w /work ghcr.io/pkgforge-dev/archlinux:latest \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
     - name: Convert ARM64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
@@ -183,7 +184,8 @@ jobs:
       env:
         VERSION: ${{ steps.versionNumber.outputs.version }}
       run: |
-        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}"
+        docker run --rm -v "$PWD":/work -w /work ghcr.io/pkgforge-dev/archlinux:latest \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
     - name: Upload Linux .zip x64 Artifact
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
@@ -253,7 +255,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
-        path: build/OpenTubeX-${{ steps.versionNumber.outputs.version }}.AppImage
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
 
     - name: Upload AppImage ARMv7l Artifact
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
@@ -267,7 +269,7 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
-        path: build/OpenTubeX-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
+        path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
 
     - name: Upload .rpm x64 Artifact
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
