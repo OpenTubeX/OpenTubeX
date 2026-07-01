@@ -128,9 +128,10 @@ jobs:
       shell: bash
       env:
         VERSION: ${{ steps.getPackageInfo.outputs.version }}
+        UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync'
       run: |
-        update_information='gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-amd64.AppImage.zsync'
-        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}" "$update_information"
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_amd64.deb"
 
     - name: Convert ARMv7l AppImage to static runtime and add update information
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
@@ -154,9 +155,10 @@ jobs:
       shell: bash
       env:
         VERSION: ${{ steps.getPackageInfo.outputs.version }}
+        UPINFO: 'gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync'
       run: |
-        update_information='gh-releases-zsync|OpenTubeX|OpenTubeX|latest-all|opentubex-*-arm64.AppImage.zsync'
-        bash _scripts/package-anylinux-appimage.sh "$VERSION" "${{ matrix.runtime }}" "$update_information"
+        docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest \
+          sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
     - name: Upload Linux .zip x64 Release
       uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
@@ -265,7 +267,7 @@ jobs:
       with:
         upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}.AppImage
+        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-amd64.AppImage
         asset_content_type: application/vnd.appimage
 
     - name: Upload AppImage .zsync x64 Release
@@ -276,7 +278,7 @@ jobs:
       with:
         upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage.zsync
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}.AppImage.zsync
+        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-amd64.AppImage.zsync
         asset_content_type: application/x-zsync
 
     - name: Upload AppImage ARMv7l Release
@@ -309,7 +311,7 @@ jobs:
       with:
         upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage
+        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage
         asset_content_type: application/vnd.appimage
 
     - name: Upload AppImage .zsync ARM64 Release
@@ -320,7 +322,7 @@ jobs:
       with:
         upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
         asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage.zsync
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage.zsync
+        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage.zsync
         asset_content_type: application/x-zsync
 
     - name: Upload Linux .rpm x64 Release
