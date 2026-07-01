@@ -235,6 +235,7 @@ const state = {
   onlyShowLatestFromChannelNumber: 1,
   openDeepLinksInNewWindow: false,
   playNextVideo: false,
+  playlistReverseStates: {},
   proxyHostname: '127.0.0.1',
   proxyPort: '9050',
   proxyUsername: '',

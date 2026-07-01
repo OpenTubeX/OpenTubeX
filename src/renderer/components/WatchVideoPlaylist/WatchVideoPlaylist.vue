@@ -233,6 +233,21 @@ const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvid
 
 const isUserPlaylist = computed(() => props.playlistType === 'user')
 
+const playlistReverseStateKey = computed(() => {
+  if (props.playlistId == null || props.playlistId === '') { return null }
+
+  return `${props.playlistType ?? 'default'}:${props.playlistId}`
+})
+
+const playlistReverseStates = computed(() => store.getters.getPlaylistReverseStates)
+
+const storedReversePlaylist = computed(() => {
+  const key = playlistReverseStateKey.value
+  if (key == null) { return false }
+
+  return playlistReverseStates.value?.[key] === true
+})
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)
 
@@ -376,6 +391,8 @@ watch(isLoading, (newVal, oldVal) => {
 })
 
 watch(() => props.playlistId, () => {
+  reversePlaylist.value = storedReversePlaylist.value
+
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
     getPlaylistInformationInvidious()
   } else {
@@ -383,7 +400,16 @@ watch(() => props.playlistId, () => {
   }
 })
 
+watch(storedReversePlaylist, (newVal) => {
+  if (reversePlaylist.value !== newVal) {
+    reversePlaylist.value = newVal
+    playlistItems.value = playlistItems.value.toReversed()
+  }
+})
+
 onMounted(() => {
+  reversePlaylist.value = storedReversePlaylist.value
+
   const cachedPlaylist = store.getters.getCachedPlaylist
 
   if (cachedPlaylist?.id === props.playlistId) {
@@ -475,6 +501,7 @@ function toggleReversePlaylist() {
   showToast(t('The playlist has been reversed'))
 
   reversePlaylist.value = !reversePlaylist.value
+  persistReversePlaylistState()
   // Create a new array to avoid changing array in data store state
   // it could be user playlist or cache playlist
   playlistItems.value = playlistItems.value.toReversed()
@@ -482,6 +509,27 @@ function toggleReversePlaylist() {
   nextTick(() => {
     isLoading.value = false
   })
+}
+
+function persistReversePlaylistState() {
+  const key = playlistReverseStateKey.value
+  if (key == null) { return }
+
+  const updatedPlaylistReverseStates = { ...(playlistReverseStates.value ?? {}) }
+  if (reversePlaylist.value) {
+    updatedPlaylistReverseStates[key] = true
+  } else {
+    delete updatedPlaylistReverseStates[key]
+  }
+
+  store.dispatch('updatePlaylistReverseStates', updatedPlaylistReverseStates)
+}
+
+/**
+ * @param {any[]} items
+ */
+function applyReversePlaylistState(items) {
+  return reversePlaylist.value ? items.toReversed() : items
 }
 
 function playNextVideo() {
@@ -590,7 +638,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
   channelId.value = cachedPlaylist.channelId
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious' || cachedPlaylist.continuationData === null) {
-    playlistItems.value = cachedPlaylist.items
+    playlistItems.value = applyReversePlaylistState(cachedPlaylist.items)
   } else {
     const videos = cachedPlaylist.items
 
@@ -601,7 +649,7 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
       videos.push(...p.items.map(parseLocalPlaylistVideo))
     }, { runCallbackOnceFirst: false })
 
-    playlistItems.value = videos
+    playlistItems.value = applyReversePlaylistState(videos)
   }
 
   isLoading.value = false
@@ -633,7 +681,7 @@ async function getPlaylistInformationLocal() {
       videos.push(...p.items.map(parseLocalPlaylistVideo))
     })
 
-    playlistItems.value = videos
+    playlistItems.value = applyReversePlaylistState(videos)
 
     isLoading.value = false
   } catch (err) {
@@ -661,7 +709,7 @@ async function getPlaylistInformationInvidious() {
     channelName.value = result.author
     channelId.value = result.authorId
 
-    playlistItems.value = result.videos
+    playlistItems.value = applyReversePlaylistState(result.videos)
 
     isLoading.value = false
   } catch (err) {
