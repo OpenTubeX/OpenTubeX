@@ -967,6 +967,7 @@ Video:
     music offtopic: Music Offtopic
     recap: Recap
     filler: Filler
+    highlight: Highlight
   External Player:
     OpenInTemplate: Open in {externalPlayer}
     video: video

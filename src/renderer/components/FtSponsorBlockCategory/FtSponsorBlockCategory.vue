@@ -22,7 +22,7 @@
       :placeholder="$t('Settings.SponsorBlock Settings.Skip Options.Skip Option')"
       :value="sponsorBlockValues.skip"
       :select-names="skipNames"
-      :select-values="SKIP_VALUES"
+      :select-values="selectableSkipValues"
       :icon="['fas', 'forward']"
       @change="updateSkipOption"
     />
@@ -56,12 +56,24 @@ const SKIP_VALUES = [
   'doNothing'
 ]
 
-const skipNames = computed(() => [
-  t('Settings.SponsorBlock Settings.Skip Options.Auto Skip'),
-  t('Settings.SponsorBlock Settings.Skip Options.Prompt To Skip'),
-  t('Settings.SponsorBlock Settings.Skip Options.Show In Seek Bar'),
-  t('Settings.SponsorBlock Settings.Skip Options.Do Nothing')
-])
+const HIGHLIGHT_SKIP_VALUES = [
+  'promptToSkip',
+  'showInSeekBar',
+  'doNothing'
+]
+
+const skipOptionNamesByValue = computed(() => ({
+  autoSkip: t('Settings.SponsorBlock Settings.Skip Options.Auto Skip'),
+  promptToSkip: t('Settings.SponsorBlock Settings.Skip Options.Prompt To Skip'),
+  showInSeekBar: t('Settings.SponsorBlock Settings.Skip Options.Show In Seek Bar'),
+  doNothing: t('Settings.SponsorBlock Settings.Skip Options.Do Nothing')
+}))
+
+const selectableSkipValues = computed(() => {
+  return props.categoryName === 'highlight' ? HIGHLIGHT_SKIP_VALUES : SKIP_VALUES
+})
+
+const skipNames = computed(() => selectableSkipValues.value.map(value => skipOptionNamesByValue.value[value]))
 
 const COLOR_VALUES = colors.map(color => color.name)
 const colorNames = useColorTranslations()
@@ -87,6 +99,13 @@ const sponsorBlockValues = computed(() => {
       return store.getters.getSponsorBlockMusicOffTopic
     case 'filler':
       return store.getters.getSponsorBlockFiller
+    case 'highlight': {
+      const highlightValues = store.getters.getSponsorBlockHighlight
+      return {
+        ...highlightValues,
+        skip: highlightValues.skip === 'autoSkip' ? 'promptToSkip' : highlightValues.skip
+      }
+    }
     default:
       return ''
   }
@@ -110,6 +129,8 @@ const translatedCategoryName = computed(() => {
       return t('Video.Sponsor Block category.music offtopic')
     case 'filler':
       return t('Video.Sponsor Block category.filler')
+    case 'highlight':
+      return t('Video.Sponsor Block category.highlight')
     default:
       return ''
   }
@@ -139,30 +160,37 @@ function updateSkipOption(skipOption) {
  * @param {{ color: string, skip: string }} payload
  */
 function updateSponsorCategory(payload) {
+  const nextPayload = props.categoryName === 'highlight' && payload.skip === 'autoSkip'
+    ? { ...payload, skip: 'promptToSkip' }
+    : payload
+
   switch (props.categoryName) {
     case 'sponsor':
-      store.dispatch('updateSponsorBlockSponsor', payload)
+      store.dispatch('updateSponsorBlockSponsor', nextPayload)
       break
     case 'self-promotion':
-      store.dispatch('updateSponsorBlockSelfPromo', payload)
+      store.dispatch('updateSponsorBlockSelfPromo', nextPayload)
       break
     case 'interaction':
-      store.dispatch('updateSponsorBlockInteraction', payload)
+      store.dispatch('updateSponsorBlockInteraction', nextPayload)
       break
     case 'intro':
-      store.dispatch('updateSponsorBlockIntro', payload)
+      store.dispatch('updateSponsorBlockIntro', nextPayload)
       break
     case 'outro':
-      store.dispatch('updateSponsorBlockOutro', payload)
+      store.dispatch('updateSponsorBlockOutro', nextPayload)
       break
     case 'recap':
-      store.dispatch('updateSponsorBlockRecap', payload)
+      store.dispatch('updateSponsorBlockRecap', nextPayload)
       break
     case 'music offtopic':
-      store.dispatch('updateSponsorBlockMusicOffTopic', payload)
+      store.dispatch('updateSponsorBlockMusicOffTopic', nextPayload)
       break
     case 'filler':
-      store.dispatch('updateSponsorBlockFiller', payload)
+      store.dispatch('updateSponsorBlockFiller', nextPayload)
+      break
+    case 'highlight':
+      store.dispatch('updateSponsorBlockHighlight', nextPayload)
       break
   }
 }

@@ -62,7 +62,8 @@ export function logShakaError(error, context, videoId, details) {
  * @param {SponsorBlockCategory[]} categories
  */
 export async function getSponsorBlockSegments(videoId, categories) {
-  const segments = await sponsorBlockSkipSegments(videoId, categories)
+  const actionTypes = categories.includes('poi_highlight') ? ['skip', 'poi'] : ['skip']
+  const segments = await sponsorBlockSkipSegments(videoId, categories, actionTypes)
 
   if (segments.length === 0) {
     return {
@@ -114,6 +115,8 @@ export function translateSponsorBlockCategory(category) {
       return i18n.global.t('Video.Sponsor Block category.music offtopic')
     case 'filler':
       return i18n.global.t('Video.Sponsor Block category.filler')
+    case 'poi_highlight':
+      return i18n.global.t('Video.Sponsor Block category.highlight')
     default:
       console.error(`Unknown translation for SponsorBlock category ${category}`)
       return category

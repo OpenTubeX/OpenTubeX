@@ -289,6 +289,10 @@ const state = {
     color: 'Purple',
     skip: 'doNothing'
   },
+  sponsorBlockHighlight: {
+    color: 'Red',
+    skip: 'promptToSkip'
+  },
   thumbnailPreference: '',
   blurThumbnails: false,
   useProxy: false,

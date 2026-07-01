@@ -488,6 +488,10 @@
   background-color: var(--primary-color);
 }
 
+:deep(.sponsorBlockPointMarker) {
+  width: 2px;
+}
+
 :deep(.sponsorBlockDraftMarker) {
   background-color: #d3d3d3;
 }

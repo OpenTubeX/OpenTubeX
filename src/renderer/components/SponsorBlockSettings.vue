@@ -166,7 +166,8 @@ const CATEGORIES = [
   'outro',
   'recap',
   'music offtopic',
-  'filler'
+  'filler',
+  'highlight'
 ]
 
 /** @type {import('vue').ComputedRef<boolean>} */

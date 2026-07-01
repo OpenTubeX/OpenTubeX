@@ -24,7 +24,7 @@ async function getVideoHash(videoId) {
 }
 
 /**
- * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'music_offtopic' | 'filler' | 'chapter'} SponsorBlockCategory
+ * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'music_offtopic' | 'filler' | 'poi_highlight' | 'chapter'} SponsorBlockCategory
  */
 
 /**

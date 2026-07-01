@@ -628,7 +628,8 @@ export default defineComponent({
         'outro',
         'preview',
         'music_offtopic',
-        'filler'
+        'filler',
+        'poi_highlight'
       ]
 
       /** @type {Set<SponsorBlockCategory>} */
@@ -676,21 +677,31 @@ export default defineComponent({
           case 'filler':
             sponsorVal = store.getters.getSponsorBlockFiller
             break
+          case 'poi_highlight':
+            sponsorVal = store.getters.getSponsorBlockHighlight
+            break
         }
 
-        if (sponsorVal.skip !== 'doNothing') {
+        const skip = x === 'poi_highlight' && sponsorVal.skip === 'autoSkip'
+          ? 'promptToSkip'
+          : sponsorVal.skip
+
+        if (skip !== 'doNothing') {
           seekBar.push(x)
         }
 
-        if (sponsorVal.skip === 'autoSkip') {
+        if (skip === 'autoSkip') {
           autoSkip.add(x)
         }
 
-        if (sponsorVal.skip === 'promptToSkip') {
+        if (skip === 'promptToSkip') {
           promptSkip.add(x)
         }
 
-        categoryData[x] = sponsorVal
+        categoryData[x] = {
+          ...sponsorVal,
+          skip
+        }
       })
       return { autoSkip, seekBar, promptSkip, categoryData }
     })
@@ -1044,6 +1055,9 @@ export default defineComponent({
         sponsorBlockSegments = segments
         sponsorBlockAverageVideoDuration = averageDuration
         refreshSponsorBlockMarkers()
+        if (canSeek()) {
+          syncPromptSponsorBlockSegments(video.value?.currentTime ?? 0)
+        }
       } else {
         scheduleSponsorBlockNotFoundRefetch()
       }
@@ -1085,6 +1099,9 @@ export default defineComponent({
       }
 
       refreshSponsorBlockMarkers()
+      if (segments.length > 0 && canSeek()) {
+        syncPromptSponsorBlockSegments(video.value?.currentTime ?? 0)
+      }
     }
 
     function getCurrentSponsorBlockDraft() {
@@ -1631,6 +1648,35 @@ export default defineComponent({
     }
 
     /**
+     * @param {{ category: SponsorBlockCategory }} segment
+     * @returns {boolean}
+     */
+    function isSponsorBlockPointSegment(segment) {
+      return segment.category === 'poi_highlight'
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory, startTime: number, endTime: number }} segment
+     * @returns {number}
+     */
+    function getSponsorBlockSegmentSkipTarget(segment) {
+      return isSponsorBlockPointSegment(segment) ? segment.startTime : segment.endTime
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory, startTime: number, endTime: number }} segment
+     * @param {number} currentTime
+     * @returns {boolean}
+     */
+    function isSponsorBlockSegmentActiveForPrompt(segment, currentTime) {
+      if (isSponsorBlockPointSegment(segment)) {
+        return currentTime < segment.startTime
+      }
+
+      return currentTime >= segment.startTime && currentTime < segment.endTime
+    }
+
+    /**
      * @param {string} uuid
      * @returns {string}
      */
@@ -1640,7 +1686,10 @@ export default defineComponent({
         return '0s'
       }
 
-      const remainingSeconds = Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
+      const remainingSeconds = Math.max(
+        getSponsorBlockSegmentSkipTarget(segment) - sponsorBlockCurrentTime.value,
+        0
+      )
 
       if (remainingSeconds < 60) {
         return `${Math.ceil(remainingSeconds)}s`
@@ -1712,7 +1761,10 @@ export default defineComponent({
       removePromptSponsorBlockToast(uuid)
 
       const seekRange = player.seekRange()
-      const targetTime = Math.min(segment.endTime, seekRange.end)
+      const targetTime = Math.min(
+        Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
+        seekRange.end
+      )
       video.value.currentTime = targetTime
       sponsorBlockCurrentTime.value = targetTime
 
@@ -1762,7 +1814,7 @@ export default defineComponent({
 
       for (const uuid of sponsorBlockDismissedPromptSegments) {
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
+        if (!segment || !isSponsorBlockSegmentActiveForPrompt(segment, currentTime)) {
           sponsorBlockDismissedPromptSegments.delete(uuid)
         }
       }
@@ -1772,7 +1824,7 @@ export default defineComponent({
           return
         }
 
-        if (currentTime < segment.startTime || currentTime >= segment.endTime) {
+        if (!isSponsorBlockSegmentActiveForPrompt(segment, currentTime)) {
           return
         }
 
@@ -4727,13 +4779,17 @@ export default defineComponent({
       return sponsorBlockAverageVideoDuration || getSponsorBlockSubmissionVideoDuration() || 0
     }
 
-    function createSponsorBlockMarker(duration, startTime, endTime, title, className) {
+    function createSponsorBlockMarker(duration, startTime, endTime, title, className, isPointMarker = false) {
       const markerDiv = document.createElement('div')
 
       markerDiv.title = title
       markerDiv.className = className
-      markerDiv.style.width = `${((endTime - startTime) / duration) * 100}%`
-      markerDiv.style.left = `${(startTime / duration) * 100}%`
+      if (isPointMarker) {
+        markerDiv.style.left = `calc(${(startTime / duration) * 100}% - 1px)`
+      } else {
+        markerDiv.style.width = `${((endTime - startTime) / duration) * 100}%`
+        markerDiv.style.left = `${(startTime / duration) * 100}%`
+      }
 
       return markerDiv
     }
@@ -4747,12 +4803,16 @@ export default defineComponent({
       }
 
       const markers = sponsorBlockSegments.map((segment) => {
+        const isPointMarker = isSponsorBlockPointSegment(segment)
+        const color = sponsorSkips.value.categoryData[segment.category]?.color ?? 'Green'
+
         return createSponsorBlockMarker(
           duration,
           segment.startTime,
           segment.endTime,
           translateSponsorBlockCategory(segment.category),
-          `sponsorBlockMarker main${sponsorSkips.value.categoryData[segment.category].color}`
+          `sponsorBlockMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''} main${color}`,
+          isPointMarker
         )
       })
 
