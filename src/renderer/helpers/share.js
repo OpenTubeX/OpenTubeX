@@ -118,15 +118,15 @@ export function transformOpenTubeXRouteUrl(routeWithQuery, toYouTube) {
       return url.toString()
     }
     case 'post': {
+      if (toYouTube) {
+        return `${origin}/post/${id}`
+      }
+
       if (query) {
         const authorId = new URLSearchParams(query).get('authorId')
 
         if (authorId) {
-          if (toYouTube) {
-            return `${origin}/channel/${authorId}/community?lb=${id}`
-          } else {
-            return `${origin}/post/${id}?ucid=${authorId}`
-          }
+          return `${origin}/post/${id}?ucid=${authorId}`
         }
       }
 
