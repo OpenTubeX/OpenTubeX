@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    class="subscriptionsPage"
+    :class="{ hasTabBar: isElectron }"
+  >
     <FtCard class="card">
       <div class="subscriptionsHeader">
         <div class="titleRow">
@@ -156,6 +159,8 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
+
+const isElectron = process.env.IS_ELECTRON
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {

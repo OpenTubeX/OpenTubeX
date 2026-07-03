@@ -1,4 +1,7 @@
 .card {
+  --subscriptions-header-gap: 8px;
+  --subscriptions-top-bar-block-size: 60px;
+
   inline-size: 100%;
   max-inline-size: 1800px;
   margin-block: 0 60px;
@@ -6,19 +9,19 @@
   overflow: visible;
 }
 
+.subscriptionsPage.hasTabBar .card {
+  --subscriptions-top-bar-block-size: 92px;
+}
+
 .subscriptionsHeader {
   position: sticky;
-  inset-block-start: 60px;
-  z-index: 2;
+  inset-block-start: var(--subscriptions-top-bar-block-size);
+  z-index: 3;
   margin-inline: -16px;
-  padding-block: 3px 12px;
+  padding-block: calc(3px + var(--subscriptions-header-gap)) 12px;
   padding-inline: 16px;
   background-color: var(--card-bg-color);
   box-shadow: 0 1px 0 var(--primary-shadow-color);
-}
-
-:global(.app:has(.tabBar)) .subscriptionsHeader {
-  inset-block-start: 92px;
 }
 
 .titleRow {
