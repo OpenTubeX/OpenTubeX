@@ -256,7 +256,10 @@ function runApp() {
           label: 'New Tab',
           visible: isTabBarContextMenu,
           click: () => {
-            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
+            manager?.createTabWithPreferenceFromOpener(
+              { makeActive: true },
+              contextMenuTab?.id ?? TabManager.getTabIdFromWebContents(webContents)
+            ).catch(error => {
               console.error('Failed to create a new tab from the tab bar context menu:', error)
             })
           }
@@ -285,7 +288,10 @@ function runApp() {
           click: () => {
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
-              manager.createTabWithPreference({ url: parameters.linkURL, makeActive: true }).catch(error => {
+              manager.createTabWithPreferenceFromOpener(
+                { url: parameters.linkURL, makeActive: true },
+                TabManager.getTabIdFromWebContents(webContents)
+              ).catch(error => {
                 console.error('Failed to open link in a new tab:', error)
               })
             }
@@ -379,10 +385,13 @@ function runApp() {
             const queryText = parameters.selectionText.trim()
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
-              manager.createTabWithPreference({
-                route: `/search/${encodeURIComponent(queryText)}`,
-                makeActive: true,
-              }).catch(error => {
+              manager.createTabWithPreferenceFromOpener(
+                {
+                  route: `/search/${encodeURIComponent(queryText)}`,
+                  makeActive: true
+                },
+                TabManager.getTabIdFromWebContents(webContents)
+              ).catch(error => {
                 console.error('Failed to open search in a new tab:', error)
               })
             }
@@ -1905,7 +1914,10 @@ function runApp() {
 
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
-      manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
+      manager.createTabWithPreferenceFromOpener(
+        { route: path, query, makeActive: true },
+        TabManager.getTabIdFromWebContents(event.sender)
+      ).catch(error => {
         console.error('Failed to create a new tab from the renderer:', error)
       })
     }
@@ -2901,7 +2913,7 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
-                  tabManager.createTabWithPreference({ makeActive: true }).catch(error => {
+                  tabManager.createTabWithPreferenceFromOpener({ makeActive: true }).catch(error => {
                     console.error('Failed to create a new tab from the app menu:', error)
                   })
                 }

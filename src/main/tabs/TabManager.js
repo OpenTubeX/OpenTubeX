@@ -222,6 +222,22 @@ export class TabManager {
   }
 
   /**
+   * Get a tab from webContents.
+   * @param {import('electron').WebContents} webContents
+   * @returns {{ manager: TabManager, tabId: string, tab: TabInfo }|null}
+   */
+  static getTabFromWebContents(webContents) {
+    for (const manager of tabManagers.values()) {
+      for (const [tabId, tab] of manager.tabs.entries()) {
+        if (tab.view.webContents.id === webContents.id) {
+          return { manager, tabId, tab }
+        }
+      }
+    }
+    return null
+  }
+
+  /**
    * @param {string} tabId
    * @returns {TabManager|undefined}
    */
@@ -466,16 +482,23 @@ export class TabManager {
 
     // Set up window.open handler for this tab (lookup manager so moved tabs open in the right window)
     view.webContents.setWindowOpenHandler((details) => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      if (!mgr) {
+      const tabContext = TabManager.getTabFromWebContents(view.webContents)
+      if (!tabContext) {
         return { action: 'deny' }
       }
 
+      const { manager: mgr, tabId } = tabContext
       const parsedUrl = URL.parse(details.url)
 
       if (parsedUrl !== null && isOpenTubeXUrl(view.webContents.getURL())) {
         if (isOpenTubeXUrl(parsedUrl)) {
-          mgr.createTabWithPreference({ url: details.url, makeActive: true }).catch(error => {
+          mgr.createTabWithPreferenceFromOpener(
+            {
+              url: details.url,
+              makeActive: true
+            },
+            tabId
+          ).catch(error => {
             console.error('Failed to open window.open URL in a new tab:', error)
           })
         } else if (
@@ -1243,6 +1266,40 @@ export class TabManager {
       ...options,
       openPosition
     })
+  }
+
+  /**
+   * Create a new tab using the user's preferred insertion position, inheriting
+   * the opener tab's color when the caller did not provide one.
+   * @param {object} [options]
+   * @param {string | undefined | null} [openerTabId=this.activeTabId]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
+    return this.createTabWithPreference(this._withOpenerTabColor(options, openerTabId))
+  }
+
+  /**
+   * Apply opener tab color to tab creation options unless the caller already
+   * supplied a color.
+   * @param {object} options
+   * @param {string | undefined | null} openerTabId
+   * @returns {object}
+   */
+  _withOpenerTabColor(options, openerTabId) {
+    if (Object.hasOwn(options, 'color')) {
+      return options
+    }
+
+    const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
+    if (openerColor == null) {
+      return options
+    }
+
+    return {
+      ...options,
+      color: openerColor
+    }
   }
 
   /**
@@ -2112,9 +2169,12 @@ export function setupTabsIPC() {
 
   // Create new tab
   ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      const tab = await manager.createTabWithPreference(options || {})
+    const tabContext = TabManager.getTabFromWebContents(event.sender)
+    if (tabContext) {
+      const tab = await tabContext.manager.createTabWithPreferenceFromOpener(
+        options || {},
+        tabContext.tabId
+      )
       return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
     }
     return null
