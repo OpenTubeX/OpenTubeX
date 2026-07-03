@@ -6,7 +6,7 @@
       v-if="commentData.length > 0 && !isLoading && showComments"
       class="commentsTitle"
     >
-      {{ $t("Comments.Comments") }}
+      <span>{{ commentsTitle }}</span>
       <span
         class="commentTitleAction"
         role="button"
@@ -368,7 +368,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useI18n } from '../../composables/use-i18n-polyfill'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -380,9 +380,14 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, showToast } from '../../helpers/utils'
+import { copyToClipboard, formatNumber, showToast } from '../../helpers/utils'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
-import { getLocalCommunityPostComments, getLocalComments, parseLocalComment } from '../../helpers/api/local'
+import {
+  getLocalCommunityPostComments,
+  getLocalComments,
+  parseLocalComment,
+  parseLocalSubscriberCount
+} from '../../helpers/api/local'
 import {
   getInvidiousCommunityPostCommentReplies,
   getInvidiousCommunityPostComments,
@@ -420,6 +425,10 @@ const props = defineProps({
   showSortBy: {
     type: Boolean,
     default: true,
+  },
+  initialCommentCount: {
+    type: Number,
+    default: null,
   }
 })
 
@@ -431,6 +440,7 @@ const nextPageToken = shallowRef(null)
 // Has to be ref not shallowRef, as the replies are stored in a property on the comments
 // we need to react to new replies and showReplies being toggled
 const commentData = ref([])
+const commentCount = ref(props.initialCommentCount)
 
 /** @type {import('youtubei.js').YT.Comments | undefined} */
 let localCommentsInstance
@@ -545,6 +555,61 @@ const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 function onTimestamp(timestamp) {
   emit('timestamp-event', timestamp)
 }
+
+/**
+ * @param {number} count
+ */
+function setCommentCount(count) {
+  if (typeof count === 'number' && !isNaN(count)) {
+    commentCount.value = count
+  }
+}
+
+/**
+ * @param {any} text
+ */
+function getCommentCountText(text) {
+  if (text == null) {
+    return ''
+  }
+
+  return text.text ?? text.toString()
+}
+
+/**
+ * @param {import('youtubei.js').YT.Comments} comments
+ */
+function setLocalCommentCount(comments) {
+  const countText = getCommentCountText(comments.header?.comments_count ?? comments.header?.count)
+  const count = parseLocalSubscriberCount(countText)
+
+  setCommentCount(count)
+}
+
+const formattedCommentCount = computed(() => {
+  if (commentCount.value == null) {
+    return ''
+  }
+
+  return formatNumber(commentCount.value)
+})
+
+const commentsTitle = computed(() => {
+  if (!formattedCommentCount.value) {
+    return t('Comments.Comments')
+  }
+
+  return `${formattedCommentCount.value} ${t('Comments.Comments')}`
+})
+
+watch(() => props.initialCommentCount, (value) => {
+  if (value == null) {
+    commentCount.value = null
+    return
+  }
+
+  setCommentCount(value)
+})
 
 /** @type {import('vue').ComputedRef<Set<string>>} */
 const subscribedChannelIds = computed(() => {
@@ -695,6 +760,8 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       localCommentsInstance = comments
     }
 
+    setLocalCommentCount(comments)
+
     const parsedComments = comments.contents
       .map(commentThread => {
         // Use destructuring to create a new object without the replyToken
@@ -726,6 +793,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       // e.g. https://youtu.be/8NBSwDEf8a8
       commentData.value = []
       nextPageToken.value = null
+      setCommentCount(0)
       isLoading.value = false
       showComments.value = true
       localCommentsInstance = undefined
@@ -809,6 +877,8 @@ async function getCommentDataInvidious() {
       sortNewest: sortNewest.value
     })
 
+    setCommentCount(response.commentCount)
+
     comments = comments.map(({ replyToken, ...comment }) => {
       if (comment.hasReplyToken) {
         replyTokens.set(comment.id, replyToken)
@@ -831,6 +901,7 @@ async function getCommentDataInvidious() {
       // e.g. https://youtu.be/8NBSwDEf8a8
       commentData.value = []
       nextPageToken.value = null
+      setCommentCount(0)
       isLoading.value = false
       showComments.value = true
       return
@@ -892,6 +963,8 @@ function getPostCommentsInvidious() {
     : getInvidiousCommunityPostCommentReplies({ postId: props.id, replyToken: nextPageToken.value, authorId: props.postAuthorId })
 
   return fetchComments.then(({ response, commentData: comments, continuation }) => {
+    setCommentCount(response?.commentCount)
+
     comments = comments.map(({ replyToken, ...comment }) => {
       if (comment.hasReplyToken) {
         replyTokens.set(comment.id, replyToken)

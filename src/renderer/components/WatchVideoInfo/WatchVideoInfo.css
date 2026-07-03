@@ -90,6 +90,11 @@
   gap: 3px;
 }
 
+.seperator {
+  margin-inline: 4px;
+}
+
+.publishedTimeAgo,
 .videoViews {
   white-space: nowrap;
 }

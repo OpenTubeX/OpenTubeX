@@ -16,11 +16,18 @@
     </div>
     <div class="videoMetrics">
       <div class="datePublishedAndViewCount">
-        {{ publishedString }} {{ dateString }}
+        <span class="publishedDate">
+          {{ publishedDateText }}
+        </span>
         <template
-          v-if="!hideVideoViews"
+          v-if="publishedTimeAgo"
         >
-          <span class="seperator">• </span><span class="videoViews">{{ parsedViewCount }}</span>
+          <span class="seperator">•</span><span class="publishedTimeAgo">{{ publishedTimeAgo }}</span>
+        </template>
+        <template
+          v-if="parsedViewCount"
+        >
+          <span class="seperator">•</span><span class="videoViews">{{ parsedViewCount }}</span>
         </template>
       </div>
       <div
@@ -176,7 +183,7 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 
 import store from '../../store'
 
-import { formatNumber, showToast } from '../../helpers/utils'
+import { formatNumber, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 
 const props = defineProps({
   id: {
@@ -349,6 +356,14 @@ const dateString = computed(() => {
   return localeDateString.replaceAll(' ', '\u00A0')
 })
 
+const publishedTimeAgo = computed(() => {
+  if (!locale.value || !props.published || props.published > Date.now()) {
+    return ''
+  }
+
+  return getRelativeTimeFromDate(props.published)
+})
+
 const publishedString = computed(() => {
   if (props.isLive) {
     return t('Video.Started streaming on')
@@ -357,6 +372,10 @@ const publishedString = computed(() => {
   } else {
     return t('Video.Published on')
   }
+})
+
+const publishedDateText = computed(() => {
+  return `${publishedString.value} ${dateString.value}`
 })
 
 const formatTypeOptions = computed(() => [

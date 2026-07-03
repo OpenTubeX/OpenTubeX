@@ -148,16 +148,6 @@
             aria-hidden="true"
           /> {{ formattedCommentCount }}</span>
       </router-link>
-      <span
-        v-else-if="commentCount != null"
-        class="commentCount"
-        :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-        :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
-      >
-        <FontAwesomeIcon
-          class="comment-count-icon"
-          :icon="['fas', 'comment']"
-        /> {{ commentCount }}</span>
       <FtShareButton
         v-if="!hideSharingActions"
         :id="postId"
