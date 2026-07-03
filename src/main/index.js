@@ -459,6 +459,9 @@ function runApp() {
   let trayOnMinimize = false
   let trayWindows = []
   const trayMaximizedWindows = {}
+  /** @type {Map<number, string>} */
+  const pendingOpenUrlsByWebContentsId = new Map()
+  const openUrlReadyWebContentsIds = new Set()
   const isTrayOnMinimizeSupported = process.platform !== 'darwin' && (process.platform !== 'linux' || app.commandLine.getSwitchValue('ozone-platform') !== 'wayland')
 
   const userDataPath = app.getPath('userData')
@@ -498,17 +501,21 @@ function runApp() {
 
         if (!(mainWindow && mainWindow.webContents)) {
           startupUrl = newStartupUrl
-          if (app.isReady()) await createWindow()
+          if (app.isReady()) {
+            const newWindow = await createWindow()
+            openUrlInWindow(newWindow, startupUrl, { reuseEmptyRootTab: true })
+            startupUrl = null
+          }
           return
         }
 
         if (commandLine.includes('--new-window')) {
           // The user wants to create a new window in the existing instance
-          if (newStartupUrl) startupUrl = newStartupUrl
-          await createWindow({
+          const newWindow = await createWindow({
             showWindowNow: true,
             replaceMainWindow: true,
           })
+          openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
           return
         }
 
@@ -523,7 +530,7 @@ function runApp() {
             }
           }
           mainWindow.focus()
-          if (newStartupUrl) mainWindow.webContents.send(IpcChannels.OPEN_URL, newStartupUrl)
+          openUrlInWindow(mainWindow, newStartupUrl)
           return
         }
 
@@ -532,18 +539,7 @@ function runApp() {
           showWindowNow: true,
         })
 
-        /**
-         * @param {import('electron').IpcMainEvent} event
-         */
-        const readyHandler = (event) => {
-          if (isOpenTubeXUrl(event.senderFrame.url)) {
-            newWindow.webContents.ipc.off(IpcChannels.APP_READY, readyHandler)
-
-            event.reply(IpcChannels.OPEN_URL, newStartupUrl)
-          }
-        }
-
-        newWindow.webContents.ipc.on(IpcChannels.APP_READY, readyHandler)
+        openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
       }
     })
   }
@@ -916,10 +912,12 @@ function runApp() {
       await clearAllTabSessions()
     }
 
+    let firstWindow
+
     if (savedSessions.length === 0) {
-      await createWindow()
+      firstWindow = await createWindow()
     } else {
-      await createWindow({
+      firstWindow = await createWindow({
         sessionData: savedSessions[0],
         loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
       })
@@ -931,6 +929,13 @@ function runApp() {
           loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
         })
       }
+    }
+
+    if (startupUrl) {
+      openUrlInWindow(firstWindow, startupUrl, {
+        reuseEmptyRootTab: savedSessions.length === 0
+      })
+      startupUrl = null
     }
 
     if (isDebug) {
@@ -1457,13 +1462,105 @@ function runApp() {
     return newWindow
   }
 
-  ipcMain.on(IpcChannels.APP_READY, (event) => {
-    if (isOpenTubeXUrl(event.senderFrame.url)) {
-      if (startupUrl) {
-        mainWindow.webContents.send(IpcChannels.OPEN_URL, startupUrl)
-      }
-      startupUrl = null
+  /**
+   * @param {import('electron').BrowserWindow | undefined | null} browserWindow
+   * @param {string | null | undefined} url
+   * @param {{ reuseEmptyRootTab?: boolean }} [options]
+   */
+  function openUrlInWindow(browserWindow, url, options = {}) {
+    if (!browserWindow || browserWindow.isDestroyed() || !url) {
+      return
     }
+
+    const tabManager = TabManager.getForWindow(browserWindow.id)
+    if (tabManager) {
+      openUrlInTab(tabManager, url, options).catch(error => {
+        console.error('Failed to open URL in a tab:', error)
+      })
+      return
+    }
+
+    sendOpenUrlToWebContents(browserWindow.webContents, url)
+  }
+
+  /**
+   * @param {TabManager} tabManager
+   * @param {string} url
+   * @param {{ reuseEmptyRootTab?: boolean }} options
+   */
+  async function openUrlInTab(tabManager, url, options) {
+    let tab = options.reuseEmptyRootTab ? getReusableOpenUrlTab(tabManager) : null
+
+    if (!tab) {
+      tab = await tabManager.createTabWithPreferenceFromOpener({
+        url: ROOT_APP_URL,
+        makeActive: true
+      })
+    }
+
+    sendOpenUrlToWebContents(tab.view.webContents, url)
+  }
+
+  /**
+   * @param {TabManager} tabManager
+   * @returns {import('./tabs/TabManager').TabInfo | null}
+   */
+  function getReusableOpenUrlTab(tabManager) {
+    if (tabManager.tabs.size !== 1 || !tabManager.activeTabId) {
+      return null
+    }
+
+    const activeTab = tabManager.tabs.get(tabManager.activeTabId)
+    return activeTab && TabManager.getOpenTubeXRoute(activeTab.url) === '/'
+      ? activeTab
+      : null
+  }
+
+  /**
+   * @param {import('electron').WebContents} webContents
+   * @param {string} url
+   * @returns {boolean}
+   */
+  function sendOpenUrlToWebContents(webContents, url) {
+    if (
+      !webContents.isDestroyed() &&
+      openUrlReadyWebContentsIds.has(webContents.id) &&
+      isOpenTubeXUrl(webContents.getURL())
+    ) {
+      webContents.send(IpcChannels.OPEN_URL, url)
+      return true
+    }
+
+    pendingOpenUrlsByWebContentsId.set(webContents.id, url)
+    return false
+  }
+
+  /**
+   * @param {import('electron').IpcMainEvent} event
+   */
+  function openPendingUrlForReadyWebContents(event) {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    openUrlReadyWebContentsIds.add(event.sender.id)
+
+    const tabContext = TabManager.getTabFromWebContents(event.sender)
+    const pendingOpenUrl = pendingOpenUrlsByWebContentsId.get(event.sender.id)
+    if (!pendingOpenUrl) {
+      return
+    }
+
+    if (!tabContext && !BrowserWindow.fromWebContents(event.sender)) {
+      return
+    }
+
+    pendingOpenUrlsByWebContentsId.delete(event.sender.id)
+    event.reply(IpcChannels.OPEN_URL, pendingOpenUrl)
+  }
+
+  ipcMain.on(IpcChannels.APP_READY, (event) => {
+    openPendingUrlForReadyWebContents(event)
   })
 
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, title) => {
@@ -2599,7 +2696,11 @@ function runApp() {
     const newStartupUrl = baseUrl(url)
     if (!(mainWindow && mainWindow.webContents)) {
       startupUrl = newStartupUrl
-      if (app.isReady()) await createWindow()
+      if (app.isReady()) {
+        const newWindow = await createWindow()
+        openUrlInWindow(newWindow, startupUrl, { reuseEmptyRootTab: true })
+        startupUrl = null
+      }
       return
     }
 
@@ -2607,7 +2708,7 @@ function runApp() {
     if (!openDeepLinksInNewWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
-      mainWindow.webContents.send(IpcChannels.OPEN_URL, newStartupUrl)
+      openUrlInWindow(mainWindow, newStartupUrl)
       return
     }
 
@@ -2616,31 +2717,22 @@ function runApp() {
       showWindowNow: true,
     })
 
-    /**
-     * @param {import('electron').IpcMainEvent} event
-     */
-    const readyHandler = (event) => {
-      if (isOpenTubeXUrl(event.senderFrame.url)) {
-        newWindow.webContents.ipc.off(IpcChannels.APP_READY, readyHandler)
-
-        event.reply(IpcChannels.OPEN_URL, newStartupUrl)
-      }
-    }
-
-    newWindow.webContents.ipc.on(IpcChannels.APP_READY, readyHandler)
+    openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
   })
 
   app.on('web-contents-created', (_, webContents) => {
     contextMenu({ ...contextMenuOptions, window: webContents })
 
     webContents.once('destroyed', () => {
+      pendingOpenUrlsByWebContentsId.delete(webContents.id)
+      openUrlReadyWebContentsIds.delete(webContents.id)
       invidiousAuthorizations.delete(webContents.id)
     })
   })
 
   /*
    * Check if an argument was passed and send it over to the GUI (Linux / Windows).
-   * Remove freetube:// protocol if present
+   * Remove app protocol if present
    */
   const url = getLinkUrl(process.argv)
   if (url) {
@@ -2648,11 +2740,11 @@ function runApp() {
   }
 
   function baseUrl(arg) {
-    let newArg = arg.replace('freetube://', '')
+    let newArg = arg.replace(/^(?:opentubex|freetube):\/\//, '')
     // add support for authority free url
-      .replace('freetube:', '')
+      .replace(/^(?:opentubex|freetube):/, '')
 
-    // fix for Qt URL, like `freetube://https//www.youtube.com/watch?v=...`
+    // fix for Qt URL, like `opentubex://https//www.youtube.com/watch?v=...`
     // For details see https://github.com/FreeTubeApp/FreeTube/pull/3119
     if (newArg.startsWith('https') && newArg.charAt(5) !== ':') {
       newArg = 'https:' + newArg.substring(5)
