@@ -183,6 +183,10 @@ function runApp() {
           }
         },
         {
+          type: 'separator',
+          visible: contextMenuTab != null
+        },
+        {
           label: 'Copy YouTube Link',
           visible: contextMenuTabYouTubeUrl != null,
           click: () => {
@@ -190,6 +194,10 @@ function runApp() {
 
             clipboard.writeText(contextMenuTabYouTubeUrl)
           }
+        },
+        {
+          type: 'separator',
+          visible: contextMenuTabYouTubeUrl != null
         },
         {
           label: contextMenuTab?.isPinned === true ? 'Unpin Tab' : 'Pin Tab',
@@ -221,6 +229,10 @@ function runApp() {
               manager.setTabColor(contextMenuTab.id, color)
             }
           }))
+        },
+        {
+          type: 'separator',
+          visible: contextMenuTab != null
         },
         {
           label: 'Reopen Closed Tab',
@@ -263,6 +275,10 @@ function runApp() {
               console.error('Failed to create a new tab from the tab bar context menu:', error)
             })
           }
+        },
+        {
+          type: 'separator',
+          visible: contextMenuTab != null && moveTargets.length > 0
         },
         {
           label: 'Move Tab to Window',
