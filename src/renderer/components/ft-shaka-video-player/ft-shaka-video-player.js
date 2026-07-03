@@ -3369,8 +3369,9 @@ export default defineComponent({
     /**
      * @param {number|null} playbackPosition
      * @param {number|undefined} previousQuality
+     * @param {number|null|undefined} playbackRate
      */
-    async function setLegacyQuality(playbackPosition = null, previousQuality = undefined) {
+    async function setLegacyQuality(playbackPosition = null, previousQuality = undefined, playbackRate = undefined) {
       if (typeof previousQuality === 'undefined') {
         previousQuality = preferredVideoQuality.value
       }
@@ -3401,7 +3402,8 @@ export default defineComponent({
       events.dispatchEvent(new CustomEvent('setLegacyFormat', {
         detail: {
           format: matches[0],
-          playbackPosition
+          playbackPosition,
+          playbackRate
         }
       }))
     }
@@ -3740,7 +3742,15 @@ export default defineComponent({
 
     function registerLegacyQualitySelection() {
       events.addEventListener('setLegacyFormat', async (/** @type {CustomEvent} */ event) => {
-        const { format, playbackPosition, restoreCaptionIndex: restoreCaptionIndex_ = null, userSelected = false } = event.detail
+        const {
+          format,
+          playbackPosition,
+          playbackRate = pendingPlaybackRateRestore ?? getCurrentPlaybackRate(),
+          restoreCaptionIndex: restoreCaptionIndex_ = null,
+          userSelected = false
+        } = event.detail
+
+        queuePlaybackRateRestore(playbackRate)
 
         if (restoreCaptionIndex_ !== null) {
           restoreCaptionIndex = restoreCaptionIndex_
@@ -4133,6 +4143,63 @@ export default defineComponent({
 
     /** @type {number | null} */
     let togglePlaybackRate = null
+
+    /** @type {number | null} */
+    let pendingPlaybackRateRestore = null
+
+    /**
+     * @param {unknown} rate
+     * @returns {number | null}
+     */
+    function normalizePlaybackRate(rate) {
+      const parsedRate = typeof rate === 'number' ? rate : Number(rate)
+      return Number.isFinite(parsedRate) && parsedRate > 0.07 ? parsedRate : null
+    }
+
+    /**
+     * @returns {number | null}
+     */
+    function getCurrentPlaybackRate() {
+      const playerRate = normalizePlaybackRate(player?.getPlaybackRate())
+      if (playerRate !== null) {
+        return playerRate
+      }
+
+      const videoRate = normalizePlaybackRate(video.value?.playbackRate)
+      if (videoRate !== null) {
+        return videoRate
+      }
+
+      return normalizePlaybackRate(props.currentPlaybackRate)
+    }
+
+    /**
+     * @param {number|null|undefined} rate
+     */
+    function queuePlaybackRateRestore(rate = getCurrentPlaybackRate()) {
+      pendingPlaybackRateRestore = normalizePlaybackRate(rate)
+    }
+
+    function restorePendingPlaybackRate() {
+      const playbackRate = pendingPlaybackRateRestore ?? normalizePlaybackRate(props.currentPlaybackRate)
+      pendingPlaybackRateRestore = null
+
+      if (playbackRate === null || !video.value || !player) {
+        return
+      }
+
+      video.value.defaultPlaybackRate = defaultPlaybackRate.value
+
+      try {
+        if (Math.abs(playbackRate - video.value.defaultPlaybackRate) < 0.01) {
+          player.cancelTrickPlay()
+        } else {
+          player.trickPlay(playbackRate, false)
+        }
+      } catch (error) {
+        console.error('Failed to restore playback rate:', error)
+      }
+    }
 
     /**
      * @param {number} rate
@@ -5004,6 +5071,7 @@ export default defineComponent({
       // otherwise it uses the browsers native captions which get displayed underneath the UI controls
       await localPlayer.attach(videoElement)
 
+      queuePlaybackRateRestore(props.currentPlaybackRate)
       videoElement.playbackRate = props.currentPlaybackRate
       videoElement.defaultPlaybackRate = defaultPlaybackRate.value
 
@@ -5234,6 +5302,7 @@ export default defineComponent({
     async function handleLoaded() {
       togglePlaybackRate = null
       hasLoaded.value = true
+      restorePendingPlaybackRate()
       emit('loaded')
 
       // ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
@@ -5353,6 +5422,7 @@ export default defineComponent({
        * Handles changing between formats. It tries its best to backup and restore the settings:
        * - playback position
        * - paused state
+       * - playback rate
        * - audio track
        * - captions track
        * - video quality
@@ -5380,6 +5450,7 @@ export default defineComponent({
         const video_ = video.value
 
         const wasPaused = video_.paused
+        const playbackRate = getCurrentPlaybackRate()
 
         const useAutoQuality = oldFormat === 'legacy' ? false : player.getConfiguration().abr.enabled
 
@@ -5433,6 +5504,7 @@ export default defineComponent({
           } catch { }
 
           ignoreErrors = false
+          queuePlaybackRateRestore(playbackRate)
 
           player.configure(getPlayerConfig(newFormat, useAutoQuality))
 
@@ -5499,7 +5571,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          await setLegacyQuality(playbackPosition, previousQuality)
+          await setLegacyQuality(playbackPosition, previousQuality, playbackRate)
         }
 
         if (wasPaused) {
