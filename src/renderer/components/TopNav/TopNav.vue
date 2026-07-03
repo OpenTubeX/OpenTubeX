@@ -99,19 +99,23 @@
           @click="goToSearch"
           @clear="clearLastSuggestionQuery"
           @remove="removeSearchHistoryEntryInDbAndCache"
-        />
-        <button
-          class="navFilterButton navButton"
-          :class="{ filterChanged: searchFilterValueChanged }"
-          :aria-label="t('Search Filters.Search Filters')"
-          :title="t('Search Filters.Search Filters')"
-          @click="showSearchFilters"
         >
-          <FontAwesomeIcon
-            class="navIcon"
-            :icon="['fas', 'filter']"
-          />
-        </button>
+          <template #extraAction>
+            <button
+              type="button"
+              class="navFilterButton navButton"
+              :class="{ filterChanged: searchFilterValueChanged }"
+              :aria-label="t('Search Filters.Search Filters')"
+              :title="t('Search Filters.Search Filters')"
+              @click="showSearchFilters"
+            >
+              <FontAwesomeIcon
+                class="navIcon"
+                :icon="['fas', 'filter']"
+              />
+            </button>
+          </template>
+        </FtInput>
       </div>
     </div>
     <FtProfileSelector class="side profiles" />

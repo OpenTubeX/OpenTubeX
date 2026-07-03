@@ -3,11 +3,7 @@
     :is-loading="isLoading"
     :video-list="videoList"
     :error-channels="errorChannels"
-    :last-refresh-timestamp="lastVideoRefreshTimestamp"
-    :next-auto-refresh-timestamp="nextVideoAutoRefreshTimestamp"
-    :next-auto-refresh-tooltip="nextVideoAutoRefreshTooltip"
     :attempted-fetch="attemptedFetch"
-    :title="t('Global.Videos')"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
 </template>
@@ -141,23 +137,27 @@ const nextVideoAutoRefreshTooltip = computed(() => {
   )
 })
 
+const refreshTitle = computed(() => {
+  return t('Global.Videos')
+})
+
 /**
  * @param {number} remainingMs
  */
 function getRelativeTimeValue(remainingMs) {
-  const absRemainingSeconds = Math.max(Math.ceil(Math.abs(remainingMs) / 1000), 0)
+  const direction = remainingMs < 0 ? -1 : 1
+  const absRemainingSeconds = Math.max(Math.round(Math.abs(remainingMs) / 1000), 0)
 
   if (absRemainingSeconds < 60) {
-    return { value: Math.ceil(remainingMs / 1000), unit: 'second' }
+    return { value: direction * absRemainingSeconds, unit: 'second' }
   }
 
-  const remainingMinutes = remainingMs / 60000
-  if (Math.abs(remainingMinutes) < 60) {
-    return { value: Math.ceil(remainingMinutes), unit: 'minute' }
+  const absRemainingMinutes = Math.round(absRemainingSeconds / 60)
+  if (absRemainingMinutes < 60) {
+    return { value: direction * absRemainingMinutes, unit: 'minute' }
   }
 
-  const remainingHours = remainingMs / 3600000
-  return { value: Math.ceil(remainingHours), unit: 'hour' }
+  return { value: direction * Math.round(absRemainingMinutes / 60), unit: 'hour' }
 }
 
 watch(activeSubscriptionList, () => {
@@ -528,4 +528,13 @@ async function getChannelVideosInvidiousRSS(channel, failedAttempts = 0) {
     }
   }
 }
+
+defineExpose({
+  refresh: loadVideosForSubscriptionsFromRemote,
+  isLoading,
+  lastRefreshTimestamp: lastVideoRefreshTimestamp,
+  nextAutoRefreshTimestamp: nextVideoAutoRefreshTimestamp,
+  nextAutoRefreshTooltip: nextVideoAutoRefreshTooltip,
+  refreshTitle
+})
 </script>

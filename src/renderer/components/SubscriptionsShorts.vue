@@ -4,8 +4,6 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
-    :last-refresh-timestamp="lastShortRefreshTimestamp"
-    :title="t('Global.Shorts')"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
 </template>
@@ -103,6 +101,18 @@ const lastShortRefreshTimestamp = computed(() => {
     }
   })
   return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+})
+
+const refreshTitle = computed(() => {
+  return t('Global.Shorts')
+})
+
+const nextAutoRefreshTimestamp = computed(() => {
+  return ''
+})
+
+const nextAutoRefreshTooltip = computed(() => {
+  return ''
 })
 
 watch(activeSubscriptionList, () => {
@@ -331,4 +341,13 @@ async function getChannelShortsInvidious(channel, failedAttempts = 0) {
     }
   }
 }
+
+defineExpose({
+  refresh: loadVideosForSubscriptionsFromRemote,
+  isLoading,
+  lastRefreshTimestamp: lastShortRefreshTimestamp,
+  nextAutoRefreshTimestamp,
+  nextAutoRefreshTooltip,
+  refreshTitle
+})
 </script>

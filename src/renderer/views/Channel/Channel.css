@@ -1,6 +1,7 @@
 .card {
   position: relative;
-  inline-size: 85%;
+  inline-size: 100%;
+  max-inline-size: 92vw;
   margin-block: 0 20px;
   margin-inline: auto;
   box-sizing: border-box;
@@ -8,7 +9,6 @@
 
 .channelDetails {
   padding: 0;
-  max-inline-size: 92vw;
 }
 
 .select-container {
@@ -46,11 +46,5 @@
   .card {
     max-inline-size: none;
     inline-size: 100%;
-  }
-}
-
-@media only screen and (width <= 260px) {
-  .channelDetails {
-    max-inline-size: none;
   }
 }

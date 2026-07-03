@@ -1,30 +1,35 @@
 <template>
   <div>
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <ft-card
-      v-else
       class="card"
     >
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'users']"
-          class="headingIcon"
-        />
-        {{ $t("Most Popular") }}
-      </h2>
+      <div class="pageHeader">
+        <div class="titleRow">
+          <h2 class="pageTitle">
+            <FontAwesomeIcon
+              :icon="['fas', 'users']"
+              class="headingIcon"
+            />
+            {{ $t("Most Popular") }}
+          </h2>
+          <ft-refresh-widget
+            embedded
+            class="headerRefreshWidget"
+            :disable-refresh="isLoading"
+            :last-refresh-timestamp="lastPopularRefreshTimestamp"
+            :title="$t('Most Popular')"
+            @click="fetchPopularInfo"
+          />
+        </div>
+      </div>
+      <ft-loader
+        v-if="isLoading"
+      />
       <ft-element-list
+        v-else
         :data="shownResults"
       />
     </ft-card>
-    <ft-refresh-widget
-      :disable-refresh="isLoading"
-      :last-refresh-timestamp="lastPopularRefreshTimestamp"
-      :title="$t('Most Popular')"
-      @click="fetchPopularInfo"
-    />
   </div>
 </template>
 
