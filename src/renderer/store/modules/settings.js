@@ -121,6 +121,15 @@ import { getSystemLocale, showToast } from '../../helpers/utils'
  * to evaluate if it is truly necessary
  * and to ensure that the implementation works as intended.
  *
+ ***
+ * `settingsNotTransferable`
+ * This set contains setting keys
+ * that should not be exported when a user chooses to "Export settings".
+ *
+ * When adding a new setting, it should be considered
+ * whether this setting can be exported or not. For example, settings
+ * that are OS or user specific like paths should not be exported.
+ *
  ****
  * ENDING NOTES
  *
@@ -141,10 +150,10 @@ import { getSystemLocale, showToast } from '../../helpers/utils'
 
 // HELPERS
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
-const defaultGetterId = settingId => 'get' + capitalize(settingId)
-const defaultMutationId = settingId => 'set' + capitalize(settingId)
-const defaultUpdaterId = settingId => 'update' + capitalize(settingId)
-const defaultSideEffectsTriggerId = settingId =>
+export const defaultGetterId = settingId => 'get' + capitalize(settingId)
+export const defaultMutationId = settingId => 'set' + capitalize(settingId)
+export const defaultUpdaterId = settingId => 'update' + capitalize(settingId)
+export const defaultSideEffectsTriggerId = settingId =>
   'trigger' + capitalize(settingId) + 'SideEffects'
 /*****/
 
@@ -437,10 +446,47 @@ const sideEffectHandlers = {
 
 const settingsWithSideEffects = Object.keys(sideEffectHandlers)
 
+const settingsNotTransferable = new Set([
+  /* Depends on process.env.IS_ELECTRON */
+  // ProxySettings
+  'useProxy',
+  'proxyProtocol',
+  'proxyHostname',
+  'proxyPort',
+  'proxyUsername',
+  'proxyPassword',
+  // ExternalPlayerSettings
+  'externalPlayer',
+  'externalPlayerExecutable',
+  'externalPlayerIgnoreWarnings',
+  'externalPlayerIgnoreDefaultArgs',
+  'externalPlayerCustomArgs',
+  'showAddedExternalPlayerCustomArgs',
+  // Others
+  'disableSmoothScrolling',
+  'hideToTrayOnMinimize',
+  'screenshotAskPath',
+  'screenshotFolderPath',
+
+  /* Depends on process.env.SUPPORTS_LOCAL_API */
+  'backendFallback',
+  'backendPreference',
+  'proxyVideos',
+])
+
 const customState = {
 }
 
 const customGetters = {
+  getTransferableSettings: (state) => {
+    const transferableSettings = {}
+    for (const [key, value] of Object.entries(state)) {
+      if (!settingsNotTransferable.has(key)) {
+        transferableSettings[key] = value
+      }
+    }
+    return transferableSettings
+  }
 }
 
 const customMutations = {}

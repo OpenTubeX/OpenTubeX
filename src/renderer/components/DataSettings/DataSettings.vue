@@ -77,6 +77,24 @@
     <p class="importFormatsHint">
       {{ t('Settings.Data Settings.Import search history formats') }}
     </p>
+    <h4 class="groupTitle">
+      {{ t('Settings.Settings') }}
+      <FtTooltip
+        class="selectTooltip"
+        position="top"
+        :tooltip="t('Settings.Data Settings.Settings Tooltip')"
+      />
+    </h4>
+    <FtFlexBox class="box">
+      <FtButton
+        :label="t('Settings.Data Settings.Import Settings')"
+        @click="importSettings"
+      />
+      <FtButton
+        :label="t('Settings.Data Settings.Export Settings')"
+        @click="exportSettings"
+      />
+    </FtFlexBox>
     <FtPrompt
       v-if="showExportSubscriptionsPrompt"
       :label="$t('Settings.Data Settings.Select Export Type')"
@@ -110,8 +128,10 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
+import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
 import store from '../../store/index'
+import { defaultUpdaterId } from '../../store/modules/settings'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
@@ -1584,6 +1604,85 @@ async function exportYouTubeSearchHistory() {
 }
 
 // #endregion search history
+
+// #region settings
+
+/** @type {import('vue').ComputedRef<object>} */
+const transferableSettings = computed(() => {
+  return store.getters.getTransferableSettings
+})
+
+async function importSettings() {
+  let response
+  try {
+    response = await readFileWithPicker(
+      t('Settings.Data Settings.Settings File'),
+      {
+        'application/x-freetube-db': '.db',
+        'application/json': '.json'
+      },
+      IMPORT_DIRECTORY_ID,
+      START_IN_DIRECTORY
+    )
+  } catch (err) {
+    const message = t('Settings.Data Settings.Unable to read file')
+    showToast(`${message}: ${err}`)
+    return
+  }
+
+  if (response === null) {
+    return
+  }
+
+  const { content } = response
+  const importedSettings = JSON.parse(content)
+  const currentTransferableSettings = transferableSettings.value
+  const currentSettings = store.state.settings
+
+  for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
+    if (!Object.hasOwn(currentSettings, importedKey)) {
+      const message = `${t('Settings.Data Settings.Unknown setting key')}: ${importedKey}`
+      showToast(message)
+      continue
+    }
+
+    if (!Object.hasOwn(currentTransferableSettings, importedKey)) {
+      const message = `${t('Settings.Data Settings.Non-transferable setting key')}: ${importedKey}`
+      showToast(message)
+      continue
+    }
+
+    const currentValue = currentTransferableSettings[importedKey]
+    const areValuesEqual = currentValue === importedValue ||
+      (typeof importedValue === 'object' && JSON.stringify(currentValue) === JSON.stringify(importedValue))
+    if (areValuesEqual) {
+      continue
+    }
+
+    const updaterId = defaultUpdaterId(importedKey)
+    await store.dispatch(updaterId, importedValue)
+  }
+
+  showToast(t('Settings.Data Settings.All settings have been successfully imported'))
+}
+
+async function exportSettings() {
+  const dateStr = getTodayDateStrLocalTimezone()
+  const exportFileName = `opentubex-settings-${dateStr}.db`
+  const settingsContent = JSON.stringify(transferableSettings.value)
+
+  await promptAndWriteToFile(
+    exportFileName,
+    settingsContent,
+    t('Settings.Data Settings.Settings File'),
+    'application/x-freetube-db',
+    '.db',
+    t('Settings.Data Settings.All settings have been successfully exported')
+  )
+}
+
+// #endregion settings
+
 </script>
 
 <style scoped src="./DataSettings.css" />
