@@ -73,7 +73,9 @@ onMounted(async () => {
 })
 
 function updateTitleAndRoute() {
-  store.commit('setAppTitle', post.value.author)
+  const titlePrefix = 'Community Post'
+  const title = post.value.author ? `${titlePrefix} | ${post.value.author}` : titlePrefix
+  store.commit('setAppTitle', title)
   isLoading.value = false
 
   // If the authorId is missing from the URL we should add it,
