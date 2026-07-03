@@ -135,6 +135,17 @@
           <span class="commentDate">
             {{ comment.time }}
           </span>
+          <button
+            type="button"
+            class="commentCopyLink"
+            :title="$t('Comments.Copy YouTube Link')"
+            :aria-label="$t('Comments.Copy YouTube Link')"
+            @click="copyCommentYoutubeLink(comment.id)"
+          >
+            <FontAwesomeIcon
+              :icon="['fas', 'link']"
+            />
+          </button>
         </p>
         <FtTimestampCatcher
           class="commentText"
@@ -242,6 +253,17 @@
               <span class="commentDate">
                 {{ reply.time }}
               </span>
+              <button
+                type="button"
+                class="commentCopyLink"
+                :title="$t('Comments.Copy YouTube Link')"
+                :aria-label="$t('Comments.Copy YouTube Link')"
+                @click="copyCommentYoutubeLink(reply.id)"
+              >
+                <FontAwesomeIcon
+                  :icon="['fas', 'link']"
+                />
+              </button>
             </p>
             <FtTimestampCatcher
               class="commentText"
@@ -359,6 +381,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import store from '../../store/index'
 
 import { copyToClipboard, showToast } from '../../helpers/utils'
+import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import { getLocalCommunityPostComments, getLocalComments, parseLocalComment } from '../../helpers/api/local'
 import {
   getInvidiousCommunityPostCommentReplies,
@@ -535,6 +558,26 @@ const subscribedChannelIds = computed(() => {
  */
 function isSubscribedToChannel(channelId) {
   return subscribedChannelIds.value.has(channelId)
+}
+
+/**
+ * @param {string} commentId
+ */
+function getCommentYoutubeLink(commentId) {
+  if (props.isPostComments) {
+    return getYoutubeCommunityPostCommentUrl(props.id, commentId)
+  }
+
+  return getYoutubeVideoCommentUrl(props.id, commentId)
+}
+
+/**
+ * @param {string} commentId
+ */
+function copyCommentYoutubeLink(commentId) {
+  copyToClipboard(getCommentYoutubeLink(commentId), {
+    messageOnSuccess: t('Comments.YouTube comment link copied to clipboard')
+  })
 }
 
 function getCommentData({ preserveSort = false } = {}) {

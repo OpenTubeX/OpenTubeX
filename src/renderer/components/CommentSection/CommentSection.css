@@ -156,6 +156,29 @@
   margin-block-start: 0;
 }
 
+.commentCopyLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 22px;
+  block-size: 22px;
+  padding: 0;
+  margin-inline-start: 6px;
+  color: var(--title-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.commentCopyLink:hover,
+.commentCopyLink:focus-visible {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
 .commentHeartBadge {
   display: inline-block;
   position: relative;

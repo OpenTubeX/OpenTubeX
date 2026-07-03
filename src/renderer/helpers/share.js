@@ -30,6 +30,31 @@ export function getYoutubeVideoShareUrl(videoId, playlistId = '') {
 }
 
 /**
+ * @param {string} videoId
+ * @param {string} commentId
+ * @returns {string}
+ */
+export function getYoutubeVideoCommentUrl(videoId, commentId) {
+  const url = new URL('https://www.youtube.com/watch')
+  url.searchParams.set('v', videoId)
+  url.searchParams.set('lc', commentId)
+
+  return url.toString()
+}
+
+/**
+ * @param {string} postId
+ * @param {string} commentId
+ * @returns {string}
+ */
+export function getYoutubeCommunityPostCommentUrl(postId, commentId) {
+  const url = new URL(`https://www.youtube.com/post/${postId}`)
+  url.searchParams.set('lc', commentId)
+
+  return url.toString()
+}
+
+/**
  * @param {string | null | undefined} route
  * @returns {boolean}
  */
