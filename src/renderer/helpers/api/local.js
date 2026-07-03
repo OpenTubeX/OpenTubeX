@@ -140,22 +140,22 @@ export async function getLocalPlaylist(id) {
  */
 
 /**
- * @param {import('youtubei.js').YTNodes.ContinuationItem} continuationItem
+ * @param {import('youtubei.js').YTNodes.ContinuationItem | import('youtubei.js').YTNodes.ContinuationItemView} continuationItemOrView
  * @param {import('youtubei.js').Actions} actions
  */
-function serializeContinuationItem(continuationItem, actions) {
+function serializeContinuation(continuationItemOrView, actions) {
   let path, payload
 
   // Based on YouTube.js' NavigationEndpoint#call()
-  if (continuationItem.endpoint.command.is(YTNodes.CommandExecutorCommand)) {
+  if (continuationItemOrView.endpoint.command.is(YTNodes.CommandExecutorCommand)) {
     /** @type {import('youtubei.js').Helpers.YTNode & import('youtubei.js').APIResponseTypes.IEndpoint} */
-    const command = continuationItem.endpoint.command.commands.at(-1)
+    const command = continuationItemOrView.endpoint.command.commands.at(-1)
 
     path = command.getApiPath()
     payload = command.buildRequest()
   } else {
-    path = continuationItem.endpoint.metadata.api_url
-    payload = continuationItem.endpoint.payload
+    path = continuationItemOrView.endpoint.metadata.api_url
+    payload = continuationItemOrView.endpoint.payload
   }
 
   /** @type {SerializedContinuation} */
@@ -169,18 +169,21 @@ function serializeContinuationItem(continuationItem, actions) {
 }
 
 /**
+ * @template {import('youtubei.js').YTNodes} N
  * @param {import('youtubei.js').Mixins.Feed} feed
+ * @param {import('youtubei.js').YTNodeConstructor<N>[]} types
+ * @return {N}
  */
-function extractFeedContinuationItem(feed) {
+function extractFeedContinuation(feed, types) {
   let continuationItem
 
   if (feed.page.header_memo) {
-    const headerContinuations = feed.page.header_memo.getType(YTNodes.ContinuationItem)
-    continuationItem = feed.memo.getType(YTNodes.ContinuationItem).find(
+    const headerContinuations = feed.page.header_memo.getType(...types)
+    continuationItem = feed.memo.getType(...types).find(
       (continuation) => !headerContinuations.includes(continuation)
     )
   } else {
-    continuationItem = feed.memo.getType(YTNodes.ContinuationItem)[0]
+    continuationItem = feed.memo.getType(types)[0]
   }
 
   if (!continuationItem) {
@@ -197,22 +200,22 @@ function extractFeedContinuationItem(feed) {
 export function extractLocalCacheablePlaylistContinuation(playlist) {
   const sectionList = playlist.memo.getType(YTNodes.SectionList)[0]
 
-  let continuationItem
+  let continuationItemOrView
 
   // No section list means there can't be additional continuation nodes here,
   // so no need to check.
   if (!sectionList) {
-    continuationItem = extractFeedContinuationItem(playlist)
+    continuationItemOrView = extractFeedContinuation(playlist, [YTNodes.ContinuationItem, YTNodes.ContinuationItemView])
   } else {
-    continuationItem = playlist.memo.getType(YTNodes.ContinuationItem)
+    continuationItemOrView = playlist.memo.getType(YTNodes.ContinuationItem, YTNodes.ContinuationItemView)
       .find((node) => !sectionList.contents.includes(node))
   }
 
-  if (!continuationItem) {
+  if (!continuationItemOrView) {
     throw new Utils.InnertubeError('There are no continuations.')
   }
 
-  return serializeContinuationItem(continuationItem, playlist.actions)
+  return serializeContinuation(continuationItemOrView, playlist.actions)
 }
 
 /**
@@ -221,9 +224,9 @@ export function extractLocalCacheablePlaylistContinuation(playlist) {
  * @returns {SerializedContinuation}
  */
 export function extractLocalCacheableSearchContinuation(search) {
-  const continuationItem = extractFeedContinuationItem(search)
+  const continuationItem = extractFeedContinuation(search, [YTNodes.ContinuationItem])
 
-  return serializeContinuationItem(continuationItem, search.actions)
+  return serializeContinuation(continuationItem, search.actions)
 }
 
 /**
@@ -1324,7 +1327,7 @@ export function parseLocalPlaylistVideo(video) {
     if (shortsLockupView.accessibility_text) {
       // the `.*\s+` at the start of the regex, ensures we match the last occurence
       // just in case the video title also contains that pattern
-      const match = shortsLockupView.accessibility_text.match(/.*\s+(\d+(?:[,.]\d+)?\s?(?:[BKMbkm]|million)?|no)\s+views?/)
+      const match = shortsLockupView.accessibility_text.match(/.*\s+(\d+(?:[,.]\d+)?\s?(?:[BKMbkm]|thousand|[bm]illion)?|no)\s+views?/)
 
       if (match) {
         const count = match[1]
@@ -1531,6 +1534,8 @@ const VIEWS_OR_WATCHING_REGEX = /views?|watching|waiting/i
 const WAITING_REGEX = /waiting/i
 const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[km]?$/i
 const PREMIERES_TIME_REGEX = /^(premieres|scheduled for) /i
+// Sometimes got `Streamed N (unit) ago`
+const PUBLISH_TIME_REGEX = /^(streamed )?\d+ \w+? ago/i
 
 /**
  * @param {string | undefined} text
@@ -1557,6 +1562,15 @@ function isPremieresTimeText(text) {
   if (typeof text !== 'string') { return false }
 
   return PREMIERES_TIME_REGEX.test(text)
+}
+
+/**
+ * @param {string | undefined} text
+ */
+function isPublishTimeText(text) {
+  if (typeof text !== 'string') { return false }
+
+  return PUBLISH_TIME_REGEX.test(text)
 }
 
 /**
@@ -1662,7 +1676,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
             lengthSeconds = Utils.timeToSeconds(durationBadge.text)
           }
 
-          publishedText = findPartText(text => text.endsWith('ago'))
+          publishedText = findPartText(isPublishTimeText)
         }
       }
 
@@ -2116,7 +2130,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
  * @param {string} text
  */
 export function parseLocalSubscriberCount(text) {
-  const match = text.match(/(\d+)(?:[,.](\d+))?\s?([BKMbkm]|million)\b/)
+  const match = text.match(/(\d+)(?:[,.](\d+))?\s?([BKMbkm]|thousand|[bm]illion)\b/)
 
   if (match) {
     let multiplier = 0
@@ -2124,6 +2138,7 @@ export function parseLocalSubscriberCount(text) {
     switch (match[3]) {
       case 'K':
       case 'k':
+      case 'thousand':
         multiplier = 3
         break
       case 'M':
@@ -2133,6 +2148,7 @@ export function parseLocalSubscriberCount(text) {
         break
       case 'B':
       case 'b':
+      case 'billion':
         multiplier = 9
         break
     }

@@ -925,7 +925,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Do końca reklamy z początku pozostało: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR – do przeczekania pozostało: {remindingTimeSeconds}s'
-  Private: Prywatnych filmów nie można oglądać w OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
+  Private: Prywatnych filmów nie można oglądać w serwisie OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
   Save Channel Playback Speed: Zapisz prędkość odtwarzania kanału
   Channel Playback Speed Saved: Zapisano prędkość odtwarzania kanału
   Save Channel Video Quality: Zapisz jakość wideo kanału

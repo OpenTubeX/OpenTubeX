@@ -36,12 +36,15 @@ jobs:
         include:
         - runtime: linux-x64
           os: ubuntu-latest
+          appimage-arch: amd64
 
         - runtime: linux-armv7l
           os: ubuntu-latest
+          appimage-arch: armv7l
 
         - runtime: linux-arm64
           os: ubuntu-24.04-arm
+          appimage-arch: arm64
 
         - runtime: osx-x64
           os: macOS-latest

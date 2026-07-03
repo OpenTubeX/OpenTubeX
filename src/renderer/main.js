@@ -39,7 +39,6 @@ import {
   faClockRotateLeft,
   faClone,
   faComment,
-  faCommentDots,
   faCopy,
   faDatabase,
   faDisplay,
@@ -137,6 +136,7 @@ import {
   faBitcoin,
   faGithub,
   faMastodon,
+  faMatrix,
 } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
 
@@ -168,7 +168,6 @@ library.add(
   faClockRotateLeft,
   faClone,
   faComment,
-  faCommentDots,
   faCopy,
   faDatabase,
   faDisplay,
@@ -266,6 +265,7 @@ library.add(
   faGithub,
   faBitcoin,
   faMastodon,
+  faMatrix,
 )
 
 registerSwiper()
