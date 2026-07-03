@@ -1,5 +1,7 @@
 minApprovals:
-    COLLABORATOR: 2
+  COLLABORATOR: 1
+requiredReviewers:
+  - D3SOX
 maxRequestedChanges:
   COLLABORATOR: 0
 mergeMethod: squash
