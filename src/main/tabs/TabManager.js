@@ -20,6 +20,7 @@ const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'p
 const TAB_PREVIEW_MAX_WIDTH = 360
 const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
+const TAB_PREVIEW_POST_ACTIVATION_REFRESH_DELAY_MS = 2000
 const TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS = 150
 const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
@@ -590,9 +591,7 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         mgr._setTabNavigationLoading(tabInfo, false)
-        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
-          allowInactive: mgr.activeTabId !== tid
-        })
+        mgr._scheduleTabPreviewRefresh(tabInfo)
       }
     })
 
@@ -619,9 +618,7 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
-          allowInactive: mgr.activeTabId !== tid
-        })
+        mgr._scheduleTabPreviewRefresh(tabInfo)
         mgr._saveSession()
       }
     })
@@ -635,9 +632,7 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
-        mgr._scheduleTabPreviewRefresh(tabInfo, TAB_PREVIEW_REFRESH_DELAY_MS, {
-          allowInactive: mgr.activeTabId !== tid
-        })
+        mgr._scheduleTabPreviewRefresh(tabInfo)
         mgr._saveSession()
       }
     })
@@ -1420,8 +1415,8 @@ export class TabManager {
 
   /**
    * Internal method to actually perform the tab activation (show/hide views).
-   * If another tab is visible, capture its final frame before detaching it so
-   * tooltip previews stay current after switching away.
+   * If another tab is visible, refresh its preview after the visible tab swap
+   * so preview capture does not block opening or activating tabs.
    * @param {TabInfo} tab
    * @param {string|null} previousVisibleId
    * @param {number} activationToken
@@ -1440,19 +1435,6 @@ export class TabManager {
     if (previousVisibleId && previousVisibleId !== tab.id) {
       const currentTab = this.tabs.get(previousVisibleId)
       if (currentTab) {
-        this._clearTabPreviewRefresh(currentTab)
-        await this._refreshTabPreview(currentTab).catch(error => {
-          console.error('Failed to refresh preview for hidden tab:', error)
-        })
-
-        if (
-          activationToken !== this._activationToken ||
-          this.activeTabId !== tab.id ||
-          !this.tabs.has(tab.id)
-        ) {
-          return
-        }
-
         this._detachView(currentTab)
         if (this._visibleTabId === currentTab.id) {
           this._visibleTabId = null
@@ -1465,6 +1447,12 @@ export class TabManager {
             console.error('Error sending tab inactive notification:', error)
           }
         }
+
+        this._scheduleTabPreviewRefresh(
+          currentTab,
+          TAB_PREVIEW_POST_ACTIVATION_REFRESH_DELAY_MS,
+          { allowInactive: true }
+        )
       }
     }
 
@@ -1686,15 +1674,16 @@ export class TabManager {
     const canCaptureLive = tab.hasStartedLoading &&
       !tab.view.webContents.isDestroyed()
 
-    if (!canCaptureLive) {
-      return await this._getCachedTabPreviewDataUrl(tab)
+    const cachedPreview = await this._getCachedTabPreviewDataUrl(tab)
+    if (cachedPreview != null) {
+      return cachedPreview
     }
 
-    if (this._attachedTabIds.has(tab.id)) {
+    if (canCaptureLive && this.activeTabId === tab.id) {
       return this._refreshTabPreview(tab)
     }
 
-    return this._refreshInactiveTabPreview(tab)
+    return null
   }
 
   /**
@@ -2266,7 +2255,7 @@ export function setupTabsIPC() {
       ? Math.max(0, Math.min(5000, options.delayMs))
       : TAB_PREVIEW_REFRESH_DELAY_MS
 
-    manager._scheduleTabPreviewRefresh(tab, delayMs, { allowInactive: true })
+    manager._scheduleTabPreviewRefresh(tab, delayMs)
   })
 
   // Restore closed tab
