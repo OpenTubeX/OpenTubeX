@@ -538,6 +538,14 @@
   display: block;
 }
 
+.ftVideoPlayer:fullscreen :deep(.shaka-bottom-controls) {
+  /*
+    Shaka defaults this to 98%, leaving a narrow bottom-right strip that
+    reaches the container click handler instead of the fullscreen button.
+  */
+  width: 100%;
+}
+
 :deep(.shaka-controls-container[shown='true'] > .playerFullscreenTitleOverlay) {
   opacity: 1;
 }
