@@ -862,7 +862,7 @@ Video:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Aurre-iragarkiaren gainerako denbora: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR atzerapen denbora geratzen da: {remindingTimeSeconds}s'
   Popout Live Chat: Erakutsi txata
-  Private: Bideo pribatuak ezin dira ikusi FreeTube-n, Google-ren saioa irekitzea eta bideoaren jabetza behar baitute.
+  Private: Bideo pribatuak ezin dira ikusi OpenTubeX-n, Google-ren saioa irekitzea eta bideoaren jabetza behar baitute.
 Playlist:
   #& About
   View Full Playlist: 'Ikusi erreprodukzio-zerrenda osoa'
