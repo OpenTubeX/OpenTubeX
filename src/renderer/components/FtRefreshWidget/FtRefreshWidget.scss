@@ -15,7 +15,7 @@
   @include utils.fixed-top-bar;
 }
 
-.floatingRefreshSection:has(.lastRefreshTimestamp + .refreshActions) {
+.floatingRefreshSection:not(.embedded):has(.lastRefreshTimestamp + .refreshActions) {
   justify-content: space-between;
 }
 
@@ -46,6 +46,7 @@
   box-shadow: none;
   background-color: transparent;
   gap: 12px;
+  justify-content: flex-end;
   z-index: auto;
 
   .lastRefreshTimestamp {
