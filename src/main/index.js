@@ -29,6 +29,7 @@ import { generatePoToken } from './poTokenGenerator'
 import { isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
+import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -93,6 +94,28 @@ function runApp() {
   const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
   const VALID_STARTUP_BEHAVIORS = new Set(['loadAllTabs', 'loadLastActiveTab', 'emptySession'])
 
+  /**
+   * @param {string} url
+   * @returns {string | null}
+   */
+  function getOpenTubeXRouteFromUrl(url) {
+    const parsed = URL.parse(url)
+
+    if (!parsed || !isOpenTubeXUrl(parsed)) {
+      return null
+    }
+
+    if (!parsed.hash) {
+      return '/'
+    }
+
+    const route = parsed.hash.startsWith('#')
+      ? parsed.hash.slice(1)
+      : parsed.hash
+
+    return route || '/'
+  }
+
   async function getStartupBehavior() {
     try {
       const value = (await baseHandlers.settings._findOne('startupBehavior'))?.value
@@ -126,6 +149,10 @@ function runApp() {
         ? manager.tabs.get(manager.contextMenuTabId)
         : undefined
       const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuOnTabBar === true
+      const contextMenuTabRoute = contextMenuTab ? getOpenTubeXRouteFromUrl(contextMenuTab.url) : null
+      const contextMenuTabYouTubeUrl = isShareableOpenTubeXRoute(contextMenuTabRoute)
+        ? transformOpenTubeXRouteUrl(contextMenuTabRoute, true)
+        : undefined
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
@@ -153,6 +180,15 @@ function runApp() {
             if (!manager || !contextMenuTab) return
 
             manager.duplicateTab(contextMenuTab.id)
+          }
+        },
+        {
+          label: 'Copy YouTube Link',
+          visible: contextMenuTabYouTubeUrl != null,
+          click: () => {
+            if (!contextMenuTabYouTubeUrl) return
+
+            clipboard.writeText(contextMenuTabYouTubeUrl)
           }
         },
         {
@@ -284,13 +320,7 @@ function runApp() {
 
       if (parameters.linkURL.length > 0) {
         if (isInAppUrl) {
-          const path = urlParts[1]
-
-          if (path) {
-            visible = ['/channel', '/watch', '/hashtag', '/post'].some(p => path.startsWith(p)) ||
-              // Only show copy link entry for non user playlists
-              (path.startsWith('/playlist') && !/playlistType=user/.test(path))
-          }
+          visible = isShareableOpenTubeXRoute(urlParts[1])
         } else {
           visible = true
         }
@@ -304,74 +334,6 @@ function runApp() {
           })
         } else {
           clipboard.writeText(url)
-        }
-      }
-
-      const transformURL = (toYouTube) => {
-        let origin
-
-        if (toYouTube) {
-          origin = 'https://www.youtube.com'
-        } else {
-          origin = 'https://redirect.invidious.io'
-        }
-
-        const [path, query] = urlParts[1].split('?')
-        const [route, id] = path.split('/').filter(p => p)
-
-        switch (route) {
-          case 'playlist':
-            return `${origin}/playlist?list=${id}`
-          case 'channel':
-            return `${origin}/channel/${id}`
-          case 'hashtag':
-            return `${origin}/hashtag/${id}`
-          case 'watch': {
-            let url
-
-            if (toYouTube) {
-              url = new URL(`https://youtu.be/${id}`)
-            } else {
-              url = new URL(`https://redirect.invidious.io/watch?v=${id}`)
-            }
-
-            if (query) {
-              const params = new URLSearchParams(query)
-              const newParams = new URLSearchParams(url.search)
-              let hasParams = false
-
-              if (params.has('playlistId') && params.get('playlistType') !== 'user') {
-                newParams.set('list', params.get('playlistId'))
-                hasParams = true
-              }
-
-              if (params.has('timestamp')) {
-                newParams.set('t', params.get('timestamp'))
-                hasParams = true
-              }
-
-              if (hasParams) {
-                url.search = newParams.toString()
-              }
-            }
-
-            return url.toString()
-          }
-          case 'post': {
-            if (query) {
-              const authorId = new URLSearchParams(query).get('authorId')
-
-              if (authorId) {
-                if (toYouTube) {
-                  return `${origin}/channel/${authorId}/community?lb=${id}`
-                } else {
-                  return `${origin}/post/${id}?ucid=${authorId}`
-                }
-              }
-            }
-
-            return `${origin}/post/${id}`
-          }
         }
       }
 
@@ -389,14 +351,14 @@ function runApp() {
           label: 'Copy YouTube Link',
           visible: visible && isInAppUrl,
           click: () => {
-            copy(transformURL(true))
+            copy(transformOpenTubeXRouteUrl(urlParts[1], true))
           }
         },
         {
           label: 'Copy Invidious Link',
           visible: visible && isInAppUrl && (backendPreference === 'invidious' || backendFallback),
           click: () => {
-            copy(transformURL(false))
+            copy(transformOpenTubeXRouteUrl(urlParts[1], false))
           }
         },
         // Only show search in new tab/window for
