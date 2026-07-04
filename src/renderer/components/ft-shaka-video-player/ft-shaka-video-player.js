@@ -57,7 +57,8 @@ const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
   'preview',
   'hook',
   'music_offtopic',
-  'filler'
+  'filler',
+  'poi_highlight'
 ])
 
 const SPONSORBLOCK_PREVIEW_SECONDS = 2
@@ -755,11 +756,11 @@ export default defineComponent({
     })
 
     const sponsorBlockCompleteDraftSegments = computed(() => {
-      return sponsorBlockDraftSegments.value.filter(segment => typeof segment.endTime === 'number')
+      return sponsorBlockDraftSegments.value.filter(isSponsorBlockDraftComplete)
     })
 
     const sponsorBlockHasIncompleteDraft = computed(() => {
-      return sponsorBlockDraftSegments.value.some(segment => segment.endTime == null)
+      return sponsorBlockDraftSegments.value.some(segment => !isSponsorBlockDraftComplete(segment))
     })
 
     const sponsorBlockSubmissionVisibleButtons = computed(() => {
@@ -903,7 +904,7 @@ export default defineComponent({
         startTime,
         endTime,
         category,
-        previewed: Boolean(segment?.previewed && endTime != null)
+        previewed: Boolean(segment?.previewed && (endTime != null || isSponsorBlockPointCategory(category)))
       }
     }
 
@@ -1241,8 +1242,9 @@ export default defineComponent({
 
       const editValue = getSponsorBlockDraftEditValue(segmentId)
       const startTime = parseSponsorBlockDraftTimestamp(editValue.startTime)
-      const endTime = editValue.endTime.trim() === '' ? null : parseSponsorBlockDraftTimestamp(editValue.endTime)
       const category = SPONSORBLOCK_SUBMISSION_CATEGORIES.includes(editValue.category) ? editValue.category : 'sponsor'
+      const isPointCategory = isSponsorBlockPointCategory(category)
+      const endTime = isPointCategory || editValue.endTime.trim() === '' ? null : parseSponsorBlockDraftTimestamp(editValue.endTime)
 
       if (startTime == null) {
         const errorMessage = t('Video.Player.SponsorBlock.InvalidStartTime')
@@ -1251,7 +1253,7 @@ export default defineComponent({
         return false
       }
 
-      if (endTime != null && endTime <= startTime) {
+      if (!isPointCategory && endTime != null && endTime <= startTime) {
         const errorMessage = t('Video.Player.SponsorBlock.EndTimeAfterStart')
         sponsorBlockSubmissionError.value = errorMessage
         showToast(errorMessage)
@@ -1259,7 +1261,7 @@ export default defineComponent({
       }
 
       const currentDuration = getSponsorBlockSubmissionVideoDuration()
-      if (endTime != null && currentDuration != null && endTime > currentDuration) {
+      if (currentDuration != null && (isPointCategory ? startTime : endTime) > currentDuration) {
         const errorMessage = t('Video.Player.SponsorBlock.EndTimeBeforeVideoEnd')
         sponsorBlockSubmissionError.value = errorMessage
         showToast(errorMessage)
@@ -1320,7 +1322,7 @@ export default defineComponent({
         return
       }
 
-      if (draft.endTime == null) {
+      if (draft.endTime == null && !isSponsorBlockPointSegment(draft)) {
         return
       }
 
@@ -1334,8 +1336,25 @@ export default defineComponent({
       }
 
       if (mode === 'end') {
+        if (draft.endTime == null) {
+          return
+        }
+
         video.value.currentTime = draft.endTime
         sponsorBlockCurrentTime.value = draft.endTime
+        showOverlayControls()
+        return
+      }
+
+      if (isSponsorBlockPointSegment(draft)) {
+        video.value.currentTime = draft.startTime
+        sponsorBlockCurrentTime.value = draft.startTime
+        replaceSponsorBlockDraftSegment(segmentId, (segment) => ({
+          ...segment,
+          previewed: true
+        }))
+        sponsorBlockSubmissionError.value = ''
+        await persistSponsorBlockDrafts()
         showOverlayControls()
         return
       }
@@ -1396,6 +1415,56 @@ export default defineComponent({
       }
     }
 
+    /**
+     * @param {SponsorBlockCategory} category
+     * @returns {boolean}
+     */
+    function isSponsorBlockPointCategory(category) {
+      return category === 'poi_highlight'
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory }} segment
+     * @returns {boolean}
+     */
+    function isSponsorBlockPointSegment(segment) {
+      return isSponsorBlockPointCategory(segment.category)
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory, endTime: number | null }} segment
+     * @returns {boolean}
+     */
+    function isSponsorBlockDraftComplete(segment) {
+      return isSponsorBlockPointSegment(segment) || typeof segment.endTime === 'number'
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory }} segment
+     * @returns {boolean}
+     */
+    function sponsorBlockDraftRequiresPreview(segment) {
+      return !isSponsorBlockPointSegment(segment)
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory, startTime: number, endTime: number | null }} segment
+     * @returns {[number, number]}
+     */
+    function getSponsorBlockSubmissionSegmentTimes(segment) {
+      return isSponsorBlockPointSegment(segment)
+        ? [segment.startTime, segment.startTime]
+        : [segment.startTime, segment.endTime]
+    }
+
+    /**
+     * @param {{ category: SponsorBlockCategory }} segment
+     * @returns {'skip' | 'poi'}
+     */
+    function getSponsorBlockSubmissionActionType(segment) {
+      return isSponsorBlockPointSegment(segment) ? 'poi' : 'skip'
+    }
+
     async function submitSponsorBlockDrafts() {
       if (!sponsorBlockSubmissionAvailable.value || sponsorBlockSubmissionPending.value) {
         return
@@ -1418,7 +1487,7 @@ export default defineComponent({
         }
       }
 
-      if (sponsorBlockDraftSegments.value.some(segment => !segment.previewed)) {
+      if (sponsorBlockDraftSegments.value.some(segment => sponsorBlockDraftRequiresPreview(segment) && !segment.previewed)) {
         sponsorBlockSubmissionError.value = t('Video.Player.SponsorBlock.PreviewRequired')
         showToast(sponsorBlockSubmissionError.value)
         return
@@ -1445,9 +1514,9 @@ export default defineComponent({
           props.videoId,
           videoDuration,
           sponsorBlockDraftSegments.value.map(segment => ({
-            segment: [segment.startTime, segment.endTime],
+            segment: getSponsorBlockSubmissionSegmentTimes(segment),
             category: segment.category,
-            actionType: 'skip',
+            actionType: getSponsorBlockSubmissionActionType(segment),
             description: ''
           }))
         )
@@ -1650,14 +1719,6 @@ export default defineComponent({
         t('Video.Player.SponsorBlock.SkipPromptAction'),
         t('Keys.enter')
       )
-    }
-
-    /**
-     * @param {{ category: SponsorBlockCategory }} segment
-     * @returns {boolean}
-     */
-    function isSponsorBlockPointSegment(segment) {
-      return segment.category === 'poi_highlight'
     }
 
     /**
@@ -4889,12 +4950,15 @@ export default defineComponent({
       })
 
       const draftMarkers = sponsorBlockCompleteDraftSegments.value.map((segment) => {
+        const isPointMarker = isSponsorBlockPointSegment(segment)
+
         return createSponsorBlockMarker(
           duration,
           segment.startTime,
           segment.endTime,
           translateSponsorBlockCategory(segment.category),
-          'sponsorBlockMarker sponsorBlockDraftMarker'
+          `sponsorBlockMarker sponsorBlockDraftMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''}`,
+          isPointMarker
         )
       })
 
@@ -5795,6 +5859,7 @@ export default defineComponent({
       sponsorBlockSubmissionMenuOpen,
       sponsorBlockSubmissionPending,
       isSponsorBlockDraftEditing,
+      isSponsorBlockPointSegment,
 
       promptSponsorBlockSegments,
       getSponsorBlockPromptLabel,

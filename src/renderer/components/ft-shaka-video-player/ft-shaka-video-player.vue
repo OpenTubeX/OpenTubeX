@@ -316,8 +316,11 @@
               >
                 {{ sponsorBlockDraftEditValues[segment.id]?.startTime ?? '' }}
               </span>
-              <span class="sponsorBlockDraftTimeDivider">{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
-              <template v-if="isSponsorBlockDraftEditing(segment.id)">
+              <span
+                v-if="!isSponsorBlockPointSegment(segment)"
+                class="sponsorBlockDraftTimeDivider"
+              >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
+              <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment)">
                 <input
                   class="sponsorBlockDraftTimeInput"
                   :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
@@ -338,7 +341,7 @@
                 </button>
               </template>
               <span
-                v-else
+                v-else-if="!isSponsorBlockPointSegment(segment)"
                 class="sponsorBlockDraftTimeText"
               >
                 {{ sponsorBlockDraftEditValues[segment.id]?.endTime ?? '' }}
@@ -367,7 +370,7 @@
               </button>
               <button
                 class="sponsorBlockDraftActionButton"
-                :disabled="segment.endTime == null"
+                :disabled="segment.endTime == null && !isSponsorBlockPointSegment(segment)"
                 @click="previewSponsorBlockDraft(segment.id, 'preview')"
               >
                 {{ $t('Video.Player.SponsorBlock.PreviewSegment') }}
@@ -379,6 +382,7 @@
                 {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
               </button>
               <button
+                v-if="!isSponsorBlockPointSegment(segment)"
                 class="sponsorBlockDraftActionButton"
                 :disabled="segment.endTime == null"
                 @click="previewSponsorBlockDraft(segment.id, 'end')"

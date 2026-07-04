@@ -158,7 +158,7 @@ export async function getOrCreateSponsorBlockUserId() {
  * @param {{
  *   segment: [number, number]
  *   category: SponsorBlockCategory
- *   actionType: 'skip'
+ *   actionType: 'skip' | 'poi'
  *   description: string
  * }[]} segments
  */
