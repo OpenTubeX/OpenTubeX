@@ -499,8 +499,9 @@ function runApp() {
         if (!(mainWindow && mainWindow.webContents)) {
           startupUrl = newStartupUrl
           if (app.isReady()) {
-            const newWindow = await createWindow()
-            openUrlInWindow(newWindow, startupUrl, { reuseEmptyRootTab: true })
+            await createWindowForOpenUrl(startupUrl, {
+              reuseEmptyRootTab: true
+            })
             startupUrl = null
           }
           return
@@ -508,11 +509,11 @@ function runApp() {
 
         if (commandLine.includes('--new-window')) {
           // The user wants to create a new window in the existing instance
-          const newWindow = await createWindow({
+          await createWindowForOpenUrl(newStartupUrl, {
             showWindowNow: true,
             replaceMainWindow: true,
+            reuseEmptyRootTab: true
           })
-          openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
           return
         }
 
@@ -531,12 +532,11 @@ function runApp() {
           return
         }
 
-        const newWindow = await createWindow({
+        await createWindowForOpenUrl(newStartupUrl, {
           replaceMainWindow: false,
           showWindowNow: true,
+          reuseEmptyRootTab: true
         })
-
-        openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
       }
     })
   }
@@ -911,8 +911,12 @@ function runApp() {
 
     let firstWindow
 
+    const directStartupUrl = getDirectOpenUrl(startupUrl)
+
     if (savedSessions.length === 0) {
-      firstWindow = await createWindow()
+      firstWindow = await createWindow({
+        windowStartupUrl: directStartupUrl
+      })
     } else {
       firstWindow = await createWindow({
         sessionData: savedSessions[0],
@@ -929,9 +933,11 @@ function runApp() {
     }
 
     if (startupUrl) {
-      openUrlInWindow(firstWindow, startupUrl, {
-        reuseEmptyRootTab: savedSessions.length === 0
-      })
+      if (directStartupUrl === null || savedSessions.length > 0) {
+        openUrlInWindow(firstWindow, startupUrl, {
+          reuseEmptyRootTab: savedSessions.length === 0
+        })
+      }
       startupUrl = null
     }
 
@@ -1460,6 +1466,29 @@ function runApp() {
   }
 
   /**
+   * @param {string | null | undefined} url
+   * @param {object} [options]
+   * @param {boolean} [options.replaceMainWindow]
+   * @param {boolean} [options.showWindowNow]
+   * @param {boolean} [options.reuseEmptyRootTab]
+   * @returns {Promise<import('electron').BrowserWindow>}
+   */
+  async function createWindowForOpenUrl(url, options = {}) {
+    const { reuseEmptyRootTab = false, ...createWindowOptions } = options
+    const directOpenUrl = getDirectOpenUrl(url)
+    const newWindow = await createWindow({
+      ...createWindowOptions,
+      ...(directOpenUrl ? { windowStartupUrl: directOpenUrl } : {})
+    })
+
+    if (!directOpenUrl) {
+      openUrlInWindow(newWindow, url, { reuseEmptyRootTab })
+    }
+
+    return newWindow
+  }
+
+  /**
    * @param {import('electron').BrowserWindow | undefined | null} browserWindow
    * @param {string | null | undefined} url
    * @param {{ reuseEmptyRootTab?: boolean }} [options]
@@ -1486,6 +1515,15 @@ function runApp() {
    * @param {{ reuseEmptyRootTab?: boolean }} options
    */
   async function openUrlInTab(tabManager, url, options) {
+    const directOpenUrl = getDirectOpenUrl(url)
+    if (directOpenUrl) {
+      await tabManager.createTabWithPreference({
+        url: directOpenUrl,
+        makeActive: true
+      })
+      return
+    }
+
     let tab = options.reuseEmptyRootTab ? getReusableOpenUrlTab(tabManager) : null
 
     if (!tab) {
@@ -1511,6 +1549,188 @@ function runApp() {
     return activeTab && TabManager.getOpenTubeXRoute(activeTab.url) === '/'
       ? activeTab
       : null
+  }
+
+  /**
+   * @param {string | null | undefined} url
+   * @returns {string | null}
+   */
+  function getDirectOpenUrl(url) {
+    if (typeof url !== 'string' || url.trim().length === 0) {
+      return null
+    }
+
+    const parsed = URL.parse(url)
+    if (!parsed) {
+      return null
+    }
+
+    if (isOpenTubeXUrl(parsed)) {
+      return url
+    }
+
+    const videoParams = getDirectVideoParams(parsed)
+    if (videoParams.videoId) {
+      return createAppRouteUrl(`/watch/${videoParams.videoId}`, {
+        timestamp: videoParams.timestamp,
+        playlistId: videoParams.playlistId
+      })
+    }
+
+    const playlistId = getDirectPlaylistId(parsed)
+    if (playlistId) {
+      return createAppRouteUrl(`/playlist/${encodeURIComponent(playlistId)}`, getRemainingUrlQuery(parsed, ['list']))
+    }
+
+    const searchQuery = getDirectSearchQuery(parsed)
+    if (searchQuery) {
+      return createAppRouteUrl(`/search/${encodeURIComponent(searchQuery)}`, getRemainingUrlQuery(parsed, ['q', 'search_query']))
+    }
+
+    const hashtag = parsed.pathname.match(/^\/hashtag\/(?<tag>[^#&/?]+)\/?$/)?.groups?.tag
+    if (hashtag) {
+      return createAppRouteUrl(`/hashtag/${encodeURIComponent(hashtag)}`)
+    }
+
+    const postId = parsed.pathname.match(/^\/post\/(?<postId>.+)/)?.groups?.postId
+    if (postId) {
+      return createAppRouteUrl(`/post/${encodeURIComponent(postId)}`, {
+        authorId: parsed.searchParams.get('ucid')
+      })
+    }
+
+    const feedType = parsed.pathname.match(/^\/feed\/(?<type>trending|subscriptions|history|playlists|you|library)/)?.groups?.type
+    if (feedType) {
+      return createAppRouteUrl(feedType === 'playlists' || feedType === 'you' || feedType === 'library'
+        ? '/userplaylists'
+        : `/${feedType}`)
+    }
+
+    return null
+  }
+
+  /**
+   * @param {URL} url
+   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null }}
+   */
+  function getDirectVideoParams(url) {
+    const params = {
+      videoId: null,
+      timestamp: null,
+      playlistId: null
+    }
+
+    const setVideoId = (value) => {
+      const videoId = getYoutubeId(value)
+      if (videoId) {
+        params.videoId = videoId
+        params.timestamp = getDirectTimestamp(url)
+        params.playlistId = url.searchParams.get('list')
+      }
+    }
+
+    if (url.pathname === '/watch') {
+      setVideoId(url.searchParams.get('v'))
+    } else if (url.hostname === 'youtu.be') {
+      setVideoId(url.pathname.slice(1))
+    } else {
+      const videoPath = url.pathname.match(/^\/(?:embed|shorts|live)\/(?<videoId>[\w-]+)/)?.groups?.videoId
+      setVideoId(videoPath)
+    }
+
+    return params
+  }
+
+  /**
+   * @param {string | null | undefined} value
+   * @returns {string | null}
+   */
+  function getYoutubeId(value) {
+    return typeof value === 'string'
+      ? value.match(/^[\w-]{11}/)?.[0] ?? null
+      : null
+  }
+
+  /**
+   * @param {URL} url
+   * @returns {string | null}
+   */
+  function getDirectTimestamp(url) {
+    const timestamp = url.searchParams.get('t')
+    if (!timestamp) {
+      return null
+    }
+
+    const timeParts = timestamp.match(/^(?:(?<hours>\d+)h)?(?:(?<minutes>\d+)m)?(?:(?<seconds>\d+)s?)?$/)?.groups
+    if (!timeParts || (!timeParts.hours && !timeParts.minutes && !timeParts.seconds)) {
+      return timestamp
+    }
+
+    return String(
+      Number(timeParts.seconds ?? 0) +
+      (Number(timeParts.minutes ?? 0) * 60) +
+      (Number(timeParts.hours ?? 0) * 3600)
+    )
+  }
+
+  /**
+   * @param {URL} url
+   * @returns {string | null}
+   */
+  function getDirectPlaylistId(url) {
+    if (!/^(\/playlist\/?|\/embed\/videoseries\/?)$/.test(url.pathname)) {
+      return null
+    }
+
+    return url.searchParams.get('list')
+  }
+
+  /**
+   * @param {URL} url
+   * @returns {string | null}
+   */
+  function getDirectSearchQuery(url) {
+    if (!/^(\/results|\/search\/?)$/.test(url.pathname)) {
+      return null
+    }
+
+    return url.searchParams.get('search_query') ?? url.searchParams.get('q')
+  }
+
+  /**
+   * @param {URL} url
+   * @param {string[]} excludedKeys
+   * @returns {Record<string, string>}
+   */
+  function getRemainingUrlQuery(url, excludedKeys) {
+    const excluded = new Set(excludedKeys)
+    const query = {}
+
+    for (const [key, value] of url.searchParams) {
+      if (!excluded.has(key)) {
+        query[key] = value
+      }
+    }
+
+    return query
+  }
+
+  /**
+   * @param {string} path
+   * @param {Record<string, string | number | null | undefined>} [query]
+   * @returns {string}
+   */
+  function createAppRouteUrl(path, query = {}) {
+    const searchParams = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== null && value !== undefined && String(value).length > 0) {
+        searchParams.set(key, String(value))
+      }
+    }
+
+    const search = searchParams.toString()
+    return `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
   }
 
   /**
@@ -2691,8 +2911,9 @@ function runApp() {
     if (!(mainWindow && mainWindow.webContents)) {
       startupUrl = newStartupUrl
       if (app.isReady()) {
-        const newWindow = await createWindow()
-        openUrlInWindow(newWindow, startupUrl, { reuseEmptyRootTab: true })
+        await createWindowForOpenUrl(startupUrl, {
+          reuseEmptyRootTab: true
+        })
         startupUrl = null
       }
       return
@@ -2706,12 +2927,11 @@ function runApp() {
       return
     }
 
-    const newWindow = await createWindow({
+    await createWindowForOpenUrl(newStartupUrl, {
       replaceMainWindow: false,
       showWindowNow: true,
+      reuseEmptyRootTab: true
     })
-
-    openUrlInWindow(newWindow, newStartupUrl, { reuseEmptyRootTab: true })
   })
 
   app.on('web-contents-created', (_, webContents) => {
