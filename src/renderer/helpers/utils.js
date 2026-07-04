@@ -288,6 +288,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         route,
         query,
         makeActive,
+        inheritColorFromOpener: true,
         preloadInBackground: !makeActive && path.startsWith('/watch/')
       })
     } else if (doCreateNewWindow) {

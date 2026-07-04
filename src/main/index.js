@@ -268,10 +268,7 @@ function runApp() {
           label: 'New Tab',
           visible: isTabBarContextMenu,
           click: () => {
-            manager?.createTabWithPreferenceFromOpener(
-              { makeActive: true },
-              contextMenuTab?.id ?? TabManager.getTabIdFromWebContents(webContents)
-            ).catch(error => {
+            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
               console.error('Failed to create a new tab from the tab bar context menu:', error)
             })
           }
@@ -1492,7 +1489,7 @@ function runApp() {
     let tab = options.reuseEmptyRootTab ? getReusableOpenUrlTab(tabManager) : null
 
     if (!tab) {
-      tab = await tabManager.createTabWithPreferenceFromOpener({
+      tab = await tabManager.createTabWithPreference({
         url: ROOT_APP_URL,
         makeActive: true
       })
@@ -2034,10 +2031,7 @@ function runApp() {
 
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager) {
-      manager.createTabWithPreferenceFromOpener(
-        { route: path, query, makeActive: true },
-        TabManager.getTabIdFromWebContents(event.sender)
-      ).catch(error => {
+      manager.createTabWithPreference({ route: path, query, makeActive: true }).catch(error => {
         console.error('Failed to create a new tab from the renderer:', error)
       })
     }
@@ -3028,7 +3022,7 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
-                  tabManager.createTabWithPreferenceFromOpener({ makeActive: true }).catch(error => {
+                  tabManager.createTabWithPreference({ makeActive: true }).catch(error => {
                     console.error('Failed to create a new tab from the app menu:', error)
                   })
                 }

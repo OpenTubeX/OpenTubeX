@@ -2160,10 +2160,15 @@ export function setupTabsIPC() {
   ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {
     const tabContext = TabManager.getTabFromWebContents(event.sender)
     if (tabContext) {
-      const tab = await tabContext.manager.createTabWithPreferenceFromOpener(
-        options || {},
-        tabContext.tabId
-      )
+      const {
+        inheritColorFromOpener = false,
+        ...tabOptions
+      } = options != null && typeof options === 'object' ? options : {}
+
+      const tab = inheritColorFromOpener === true
+        ? await tabContext.manager.createTabWithPreferenceFromOpener(tabOptions, tabContext.tabId)
+        : await tabContext.manager.createTabWithPreference(tabOptions)
+
       return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
     }
     return null

@@ -356,6 +356,7 @@ export default {
      * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
      * @param {object} [options.query] - Query params for the route
      * @param {boolean} [options.makeActive=true] - Whether to activate the tab
+     * @param {boolean} [options.inheritColorFromOpener=false] - Whether to inherit the opener tab color
      * @param {boolean} [options.preloadInBackground=false] - Whether to attach an inactive tab while it loads
      * @returns {Promise<{id: string, url: string, title: string}|null>}
      */

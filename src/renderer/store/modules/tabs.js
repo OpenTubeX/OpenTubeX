@@ -57,6 +57,7 @@ const actions = {
    * @param {string} [options.route] - Hash route
    * @param {object} [options.query] - Query params
    * @param {boolean} [options.makeActive=true] - Whether to activate
+   * @param {boolean} [options.inheritColorFromOpener=false] - Whether to inherit the opener tab color
    */
   async createTab(_context, options = {}) {
     if (!process.env.IS_ELECTRON) return null
