@@ -27,6 +27,10 @@
   margin-block-start: 30px;
 }
 
+.select.containsTooltip {
+  margin-inline-end: 28px;
+}
+
 .select-text {
   position: relative;
   font-family: inherit;
@@ -79,8 +83,8 @@
 
 .selectTooltip {
   position: absolute;
-  inset-block-start: -22px;
-  inset-inline-end: 13px;
+  inset-block-start: 12px;
+  inset-inline-start: calc(100% + 8px);
 }
 
 
@@ -97,13 +101,6 @@
   color: var(--tertiary-text-color);
 }
 
-.containsTooltip .select-label {
-  max-inline-size: calc(100% - 34px);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
 .select-icon {
   flex: 0 0 auto;
   inline-size: 14px;
@@ -112,9 +109,7 @@
 
 .select-label-text {
   min-inline-size: 0;
-  overflow: hidden;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 
 /* active state */
@@ -171,5 +166,9 @@
 @media only screen and (width <= 800px) {
   .select {
     inline-size: 100%;
+  }
+
+  .select.containsTooltip {
+    inline-size: calc(100% - 28px);
   }
 }
