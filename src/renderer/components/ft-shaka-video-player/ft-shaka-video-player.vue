@@ -1,12 +1,26 @@
 <template>
-  <div
-    ref="container"
-    class="ftVideoPlayer shaka-video-container"
-    :class="{
-      fullWindow: fullWindowEnabled,
-      sixteenByNine: forceAspectRatio && !fullWindowEnabled
-    }"
-  >
+  <div class="ftVideoPlayerHost">
+    <div
+      v-if="scrollMiniPlayerActive"
+      ref="scrollMiniPlaceholder"
+      class="scrollMiniPlaceholder"
+      :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
+      aria-hidden="true"
+    />
+    <div
+      ref="container"
+      class="ftVideoPlayer shaka-video-container"
+      :class="{
+        fullWindow: fullWindowEnabled,
+        sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
+        scrollMiniPlayer: scrollMiniPlayerActive
+      }"
+      :style="scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined"
+      @mouseenter="handleScrollMiniPlayerEnter"
+      @mouseleave="handleScrollMiniPlayerLeave"
+      @focusin="handleScrollMiniPlayerEnter"
+      @focusout="handleScrollMiniPlayerLeave"
+    >
     <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
     <video
       ref="video"
@@ -419,6 +433,77 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="scrollMiniPlayerActive"
+      class="scrollMiniPlayerControls"
+    >
+      <div
+        class="scrollMiniPointerLayer"
+        @pointermove="handleScrollMiniControlsPointerMove"
+        @wheel.passive="suppressScrollMiniPlayPausePointerReveal"
+      />
+      <button
+        type="button"
+        tabindex="-1"
+        class="scrollMiniScrollTop"
+        :title="$t('Video.Player.Scroll Mini Player.Back to Top')"
+        @click.stop.prevent="scrollMiniScrollToTop"
+        @mousedown.stop.prevent
+      >
+        <font-awesome-icon :icon="['fas', 'angle-up']" />
+      </button>
+      <button
+        type="button"
+        tabindex="-1"
+        class="scrollMiniPlayPause"
+        :class="{ isHidden: !scrollMiniPlayPauseVisible }"
+        :title="scrollMiniIsPaused ? $t('Video.Player.Scroll Mini Player.Play') : $t('Video.Player.Scroll Mini Player.Pause')"
+        @click.stop.prevent="scrollMiniTogglePlayPause"
+        @mouseenter="handleScrollMiniPlayPauseMouseEnter"
+        @focusin="handleScrollMiniPlayPauseMouseEnter"
+        @pointerdown.stop
+        @mousedown.stop.prevent
+      >
+        <font-awesome-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
+      </button>
+      <div class="scrollMiniVolume">
+        <font-awesome-icon
+          class="scrollMiniVolumeIcon"
+          :icon="scrollMiniVolumeIcon"
+        />
+        <div
+          ref="scrollMiniVolumeTrack"
+          class="shaka-range-container scrollMiniVolumeTrack"
+        >
+          <input
+            type="range"
+            tabindex="-1"
+            class="shaka-range-element scrollMiniVolumeBar"
+            min="0"
+            max="100"
+            step="any"
+            :value="scrollMiniVolumePercent"
+            :aria-label="$t('Video.Player.Scroll Mini Player.Volume')"
+            @input.stop="updateScrollMiniVolume"
+            @pointerdown.stop
+          >
+        </div>
+      </div>
+      <div
+        class="scrollMiniDragHandle"
+        :class="{ 'scrollMiniDragHandle-onLightBg': scrollMiniDragHandleOnLightBg }"
+        :title="$t('Video.Player.Scroll Mini Player.Drag Handle')"
+        @pointerdown.stop="handleScrollMiniDragPointerDown"
+        @mousedown.stop.prevent
+      />
+      <div
+        class="scrollMiniResizeHandle"
+        :class="`scrollMiniResizeHandle-${scrollMiniResizeCorner}`"
+        @pointerdown.stop="handleScrollMiniResizePointerDown"
+        @mousedown.stop.prevent
+      />
+    </div>
+    </div>
   </div>
 </template>
 
@@ -426,3 +511,52 @@
 
 <style src="shaka-player/dist/controls.css" />
 <style scoped src="./ft-shaka-video-player.css" />
+<style>
+/* Unscoped: pseudo-elements on range inputs do not work reliably with Vue scoped CSS. */
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: 0;
+  color: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  margin-top: -4px;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  border: 0;
+  color: transparent;
+  cursor: pointer;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .scrollMiniVolumeBar::-moz-range-thumb {
+  appearance: none;
+  border: 0;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+</style>

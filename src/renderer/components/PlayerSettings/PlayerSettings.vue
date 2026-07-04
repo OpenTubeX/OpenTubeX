@@ -93,6 +93,18 @@
           :tooltip="t('Tooltips.Player Settings.Show Playback Rate Adjusted Timestamp')"
           @change="updateShowPlaybackRateAdjustedTimestamp"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Auto Picture in Picture on Tab Change')"
+          :compact="true"
+          :default-value="autoPictureInPictureOnTabChange"
+          @change="updateAutoPictureInPictureOnTabChange"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
+          :compact="true"
+          :default-value="scrollMiniPlayerEnabled"
+          @change="updateScrollMiniPlayerEnabled"
+        />
       </div>
     </div>
     <FtFlexBox>
@@ -128,14 +140,6 @@
         :select-values="PLAYBACK_RATE_INTERVAL_VALUES"
         :icon="['fas', 'gauge']"
         @change="updateVideoPlaybackRateInterval"
-      />
-      <FtSelect
-        :placeholder="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
-        :value="autoPictureInPictureMode"
-        :select-names="autoPictureInPictureNames"
-        :select-values="AUTO_PICTURE_IN_PICTURE_VALUES"
-        :icon="['fas', 'clone']"
-        @change="updateAutoPictureInPictureMode"
       />
     </FtFlexBox>
     <FtFlexBox>
@@ -802,23 +806,24 @@ function updateDefaultViewingMode(value) {
   store.dispatch('updateDefaultViewingMode', value)
 }
 
-const AUTO_PICTURE_IN_PICTURE_VALUES = ['never', 'tab', 'scroll', 'both']
-
-const autoPictureInPictureNames = computed(() => [
-  t('Settings.Player Settings.Auto Picture in Picture.Never'),
-  t('Settings.Player Settings.Auto Picture in Picture.When Switching Tab'),
-  t('Settings.Player Settings.Auto Picture in Picture.When Scrolling Down'),
-  t('Settings.Player Settings.Auto Picture in Picture.Both')
-])
-
-/** @type {import('vue').ComputedRef<'never' | 'tab' | 'scroll' | 'both'>} */
-const autoPictureInPictureMode = computed(() => store.getters.getAutoPictureInPictureMode)
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoPictureInPictureOnTabChange = computed(() => store.getters.getAutoPictureInPictureOnTabChange)
 
 /**
- * @param {'never' | 'tab' | 'scroll' | 'both'} value
+ * @param {boolean} value
  */
-function updateAutoPictureInPictureMode(value) {
-  store.dispatch('updateAutoPictureInPictureMode', value)
+function updateAutoPictureInPictureOnTabChange(value) {
+  store.dispatch('updateAutoPictureInPictureOnTabChange', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
+
+/**
+ * @param {boolean} value
+ */
+function updateScrollMiniPlayerEnabled(value) {
+  store.dispatch('updateScrollMiniPlayerEnabled', value)
 }
 
 const FORMAT_VALUES = ['dash', 'legacy', 'audio']

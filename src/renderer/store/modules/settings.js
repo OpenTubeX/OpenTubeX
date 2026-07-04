@@ -161,7 +161,9 @@ export const defaultSideEffectsTriggerId = settingId =>
 const state = {
   autoplayPlaylists: true,
   autoplayVideos: true,
-  autoPictureInPictureMode: 'never',
+  autoPictureInPictureOnTabChange: false,
+  scrollMiniPlayerEnabled: true,
+  scrollMiniPlayerSavedRect: '',
   avoidTranslation: 'disabled',
   backendFallback: false,
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',
@@ -530,6 +532,24 @@ const customActions = {
 
         if (mutationIds.includes(defaultMutationId(_id))) {
           commit(defaultMutationId(_id), value)
+        }
+      }
+
+      const legacyAutoPipEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureMode')
+      const hasTabPipSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureOnTabChange')
+      const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
+
+      if (legacyAutoPipEntry && (!hasTabPipSetting || !hasScrollMiniSetting)) {
+        const mode = legacyAutoPipEntry.value
+
+        if (!hasTabPipSetting) {
+          const tabValue = mode === 'tab' || mode === 'both'
+          await dispatch('updateAutoPictureInPictureOnTabChange', tabValue)
+        }
+
+        if (!hasScrollMiniSetting) {
+          const scrollValue = mode !== 'never'
+          await dispatch('updateScrollMiniPlayerEnabled', scrollValue)
         }
       }
 

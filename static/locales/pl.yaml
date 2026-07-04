@@ -439,12 +439,7 @@ Settings:
       External Player: Zewnętrzny odtwarzacz ({externalPlayerName})
       Default Viewing Mode: Domyślny tryb odtwarzania
       Full Screen: Cały ekran
-    Auto Picture in Picture:
-      Auto Picture in Picture: Automatyczny obraz w obrazie
-      Never: Nigdy
-      When Switching Tab: Podczas przełączania kart
-      When Scrolling Down: Podczas przewijania
-      Both: Podczas przewijania i przełączania kart
+    Auto Picture in Picture on Tab Change: Automatycznie włączaj obraz w obrazie podczas przełączania kart
     Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do szybkości odtwarzania
     Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do szybkości odtwarzania
     Remember Volume: Zapamiętaj głośność odtwarzania
