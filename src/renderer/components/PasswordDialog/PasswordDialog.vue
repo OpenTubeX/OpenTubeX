@@ -10,7 +10,7 @@
       :show-action-button="false"
       input-type="password"
       class="passwordInput"
-      @input="handlePasswordInput"
+      @click="handlePasswordInput"
     />
   </FtCard>
 </template>
@@ -22,6 +22,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtInput from '../FtInput/FtInput.vue'
 
 import store from '../../store/index'
+import { isHashedPassword, verifyPassword } from '../../helpers/passwords'
 
 const emit = defineEmits(['unlocked'])
 
@@ -35,8 +36,12 @@ const settingsPassword = computed(() => {
   return store.getters.getSettingsPassword
 })
 
-function handlePasswordInput(input) {
-  if (input === settingsPassword.value) {
+async function handlePasswordInput(input) {
+  if (await verifyPassword(input, settingsPassword.value)) {
+    if (!isHashedPassword(settingsPassword.value)) {
+      store.dispatch('updateSettingsPassword', input)
+    }
+
     emit('unlocked')
   }
 }

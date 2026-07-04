@@ -2,6 +2,7 @@ import i18n, { loadLocale } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
 import { DBSettingHandlers } from '../../../datastores/handlers/index'
+import { hashPassword } from '../../helpers/passwords'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 
 /*
@@ -465,6 +466,7 @@ const settingsNotTransferable = new Set([
   // Others
   'disableSmoothScrolling',
   'hideToTrayOnMinimize',
+  'settingsPassword',
   'screenshotAskPath',
   'screenshotFolderPath',
 
@@ -492,6 +494,18 @@ const customGetters = {
 const customMutations = {}
 
 const customActions = {
+  updateSettingsPassword: async ({ commit }, value) => {
+    try {
+      const hashedPassword = await hashPassword(value)
+
+      await DBSettingHandlers.upsert('settingsPassword', hashedPassword)
+
+      commit('setSettingsPassword', hashedPassword)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+  },
+
   grabUserSettings: async ({ commit, dispatch, state }) => {
     try {
       const userSettings = await DBSettingHandlers.find()
