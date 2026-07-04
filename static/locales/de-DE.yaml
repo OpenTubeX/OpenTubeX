@@ -1124,6 +1124,7 @@ Moments Ago: vor wenigen Augenblicken
 Feed:
   Refresh Feed: '{subscriptionName} neu laden'
   Feed Last Updated: '{feedName} zuletzt aktualisiert: {date}'
+  Next Auto Refresh: 'Nächste automatische Aktualisierung: {date}'
 Yes, Delete: Ja, löschen
 Cancel: Abbrechen
 Search character limit: Die Suche ist länger als das {searchCharacterLimit}-Zeichen-Limit
