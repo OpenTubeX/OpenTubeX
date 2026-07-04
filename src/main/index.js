@@ -2746,12 +2746,34 @@ function runApp() {
     return newArg
   }
 
-  function getLinkUrl(argv) {
-    if (argv.length > 1) {
-      return baseUrl(argv[argv.length - 1])
-    } else {
+  /**
+   * @param {string} arg
+   * @returns {string | null}
+   */
+  function getNormalizedLinkArg(arg) {
+    if (typeof arg !== 'string' || arg.trim().length === 0 || arg.startsWith('-')) {
       return null
     }
+
+    const url = baseUrl(arg.trim())
+    const parsed = URL.parse(url)
+
+    if (parsed?.protocol === 'http:' || parsed?.protocol === 'https:') {
+      return url
+    }
+
+    return null
+  }
+
+  function getLinkUrl(argv) {
+    for (let i = argv.length - 1; i > 0; i--) {
+      const url = getNormalizedLinkArg(argv[i])
+      if (url) {
+        return url
+      }
+    }
+
+    return null
   }
 
   /*
