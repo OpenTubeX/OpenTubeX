@@ -107,6 +107,8 @@ export function translateSponsorBlockCategory(category) {
     case 'recap':
     case 'preview':
       return i18n.global.t('Video.Sponsor Block category.recap')
+    case 'hook':
+      return i18n.global.t('Video.Sponsor Block category.hook')
     case 'selfpromo':
       return i18n.global.t('Video.Sponsor Block category.self-promotion')
     case 'interaction':

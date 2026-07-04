@@ -165,6 +165,7 @@ const CATEGORIES = [
   'intro',
   'outro',
   'recap',
+  'hook',
   'music offtopic',
   'filler',
   'highlight'

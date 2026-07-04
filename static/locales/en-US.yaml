@@ -976,6 +976,7 @@ Video:
     interaction: Interaction
     music offtopic: Music Offtopic
     recap: Recap
+    hook: Hook/Greetings
     filler: Filler
     highlight: Highlight
   External Player:

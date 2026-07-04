@@ -95,6 +95,8 @@ const sponsorBlockValues = computed(() => {
       return store.getters.getSponsorBlockOutro
     case 'recap':
       return store.getters.getSponsorBlockRecap
+    case 'hook':
+      return store.getters.getSponsorBlockHook
     case 'music offtopic':
       return store.getters.getSponsorBlockMusicOffTopic
     case 'filler':
@@ -125,6 +127,8 @@ const translatedCategoryName = computed(() => {
       return t('Video.Sponsor Block category.outro')
     case 'recap':
       return t('Video.Sponsor Block category.recap')
+    case 'hook':
+      return t('Video.Sponsor Block category.hook')
     case 'music offtopic':
       return t('Video.Sponsor Block category.music offtopic')
     case 'filler':
@@ -182,6 +186,9 @@ function updateSponsorCategory(payload) {
       break
     case 'recap':
       store.dispatch('updateSponsorBlockRecap', nextPayload)
+      break
+    case 'hook':
+      store.dispatch('updateSponsorBlockHook', nextPayload)
       break
     case 'music offtopic':
       store.dispatch('updateSponsorBlockMusicOffTopic', nextPayload)

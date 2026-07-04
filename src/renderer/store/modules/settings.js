@@ -291,6 +291,10 @@ const state = {
     color: 'Indigo',
     skip: 'doNothing'
   },
+  sponsorBlockHook: {
+    color: 'Blue',
+    skip: 'doNothing'
+  },
   sponsorBlockMusicOffTopic: {
     color: 'Orange',
     skip: 'doNothing'

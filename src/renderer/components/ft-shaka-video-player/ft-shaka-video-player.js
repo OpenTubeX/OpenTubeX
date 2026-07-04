@@ -55,6 +55,7 @@ const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
   'intro',
   'outro',
   'preview',
+  'hook',
   'music_offtopic',
   'filler'
 ])
@@ -627,6 +628,7 @@ export default defineComponent({
         'intro',
         'outro',
         'preview',
+        'hook',
         'music_offtopic',
         'filler',
         'poi_highlight'
@@ -670,6 +672,9 @@ export default defineComponent({
             break
           case 'preview':
             sponsorVal = store.getters.getSponsorBlockRecap
+            break
+          case 'hook':
+            sponsorVal = store.getters.getSponsorBlockHook
             break
           case 'music_offtopic':
             sponsorVal = store.getters.getSponsorBlockMusicOffTopic
