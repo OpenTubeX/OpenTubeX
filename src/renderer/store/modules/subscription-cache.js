@@ -12,6 +12,10 @@ const state = {
   subscriptionFeedRefreshInProgress: false,
   subscriptionFeedLastRefreshTimestamp: null,
   subscriptionFeedNextAutoRefreshTimestamp: null,
+  subscriptionShortsLastRefreshTimestamp: null,
+  subscriptionShortsNextAutoRefreshTimestamp: null,
+  subscriptionLiveLastRefreshTimestamp: null,
+  subscriptionLiveNextAutoRefreshTimestamp: null,
 }
 
 const getters = {
@@ -19,6 +23,10 @@ const getters = {
   getSubscriptionFeedRefreshInProgress: (state) => state.subscriptionFeedRefreshInProgress,
   getSubscriptionFeedLastRefreshTimestamp: (state) => state.subscriptionFeedLastRefreshTimestamp,
   getSubscriptionFeedNextAutoRefreshTimestamp: (state) => state.subscriptionFeedNextAutoRefreshTimestamp,
+  getSubscriptionShortsLastRefreshTimestamp: (state) => state.subscriptionShortsLastRefreshTimestamp,
+  getSubscriptionShortsNextAutoRefreshTimestamp: (state) => state.subscriptionShortsNextAutoRefreshTimestamp,
+  getSubscriptionLiveLastRefreshTimestamp: (state) => state.subscriptionLiveLastRefreshTimestamp,
+  getSubscriptionLiveNextAutoRefreshTimestamp: (state) => state.subscriptionLiveNextAutoRefreshTimestamp,
 
   getVideoCache: (state) => state.videoCache,
 
@@ -237,6 +245,18 @@ const mutations = {
   },
   setSubscriptionFeedNextAutoRefreshTimestamp(state, payload) {
     state.subscriptionFeedNextAutoRefreshTimestamp = payload
+  },
+  setSubscriptionShortsLastRefreshTimestamp(state, payload) {
+    state.subscriptionShortsLastRefreshTimestamp = payload
+  },
+  setSubscriptionShortsNextAutoRefreshTimestamp(state, payload) {
+    state.subscriptionShortsNextAutoRefreshTimestamp = payload
+  },
+  setSubscriptionLiveLastRefreshTimestamp(state, payload) {
+    state.subscriptionLiveLastRefreshTimestamp = payload
+  },
+  setSubscriptionLiveNextAutoRefreshTimestamp(state, payload) {
+    state.subscriptionLiveNextAutoRefreshTimestamp = payload
   },
 }
 

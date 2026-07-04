@@ -336,6 +336,8 @@ const state = {
   settingsSectionSortEnabled: false,
   fetchSubscriptionsAutomatically: true,
   subscriptionFeedAutoRefreshInterval: '0',
+  subscriptionShortsAutoRefreshInterval: '0',
+  subscriptionLiveAutoRefreshInterval: '0',
   settingsPassword: '',
   useDeArrowTitles: false,
   useDeArrowThumbnails: false,

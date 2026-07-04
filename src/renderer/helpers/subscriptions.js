@@ -1,6 +1,6 @@
 import store from '../store/index'
-import { getInvidiousChannelVideos, invidiousFetch } from './api/invidious'
-import { getLocalChannelVideos } from './api/local'
+import { getInvidiousChannelLive, getInvidiousChannelVideos, invidiousFetch } from './api/invidious'
+import { getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
 import {
   copyToClipboard,
   getChannelPlaylistId,
@@ -277,6 +277,170 @@ export async function refreshSubscriptionVideosFromRemote({
   }
 }
 
+/**
+ * @param {{
+ *  t: (key: string, named?: Record<string, unknown>) => string,
+ *  showStartToast?: boolean,
+ *  errorChannels?: any[]
+ * }} options
+ */
+export async function refreshSubscriptionShortsFromRemote({
+  t,
+  showStartToast = false,
+  errorChannels = []
+}) {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return []
+  }
+
+  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+  if (activeSubscriptionList.length === 0) {
+    store.commit('setSubscriptionShortsLastRefreshTimestamp', Date.now())
+    return []
+  }
+
+  store.commit('setSubscriptionFeedRefreshInProgress', true)
+  store.commit('setShowProgressBar', true)
+  store.commit('setProgressBarPercentage', 0)
+
+  if (showStartToast) {
+    showToast(t('Subscriptions.Refreshing Subscriptions'))
+  }
+
+  const subscriptionUpdates = []
+  let channelCount = 0
+
+  try {
+    const videoListFromRemote = (await Promise.all(activeSubscriptionList.map(async (channel) => {
+      let videos, name
+
+      if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
+        ({ videos, name } = await getChannelShortsInvidious(channel, t, errorChannels))
+      } else {
+        ({ videos, name } = await getChannelShortsLocal(channel, t, errorChannels))
+      }
+
+      channelCount++
+      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+
+      if (videos != null) {
+        await store.dispatch('updateSubscriptionShortsCacheByChannel', {
+          channelId: channel.id,
+          videos
+        })
+      }
+
+      if (name) {
+        subscriptionUpdates.push({
+          channelId: channel.id,
+          channelName: name
+        })
+      }
+
+      return videos ?? store.getters.getShortsCache[channel.id]?.videos ?? []
+    }))).flat()
+
+    store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+    store.commit('setSubscriptionShortsLastRefreshTimestamp', Date.now())
+
+    return updateVideoListAfterProcessing(videoListFromRemote)
+  } finally {
+    store.commit('setShowProgressBar', false)
+    store.commit('setSubscriptionFeedRefreshInProgress', false)
+  }
+}
+
+/**
+ * @param {{
+ *  t: (key: string, named?: Record<string, unknown>) => string,
+ *  showStartToast?: boolean,
+ *  errorChannels?: any[]
+ * }} options
+ */
+export async function refreshSubscriptionLiveFromRemote({
+  t,
+  showStartToast = false,
+  errorChannels = []
+}) {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return []
+  }
+
+  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+  if (activeSubscriptionList.length === 0) {
+    store.commit('setSubscriptionLiveLastRefreshTimestamp', Date.now())
+    return []
+  }
+
+  store.commit('setSubscriptionFeedRefreshInProgress', true)
+  store.commit('setShowProgressBar', true)
+  store.commit('setProgressBarPercentage', 0)
+
+  if (showStartToast) {
+    showToast(t('Subscriptions.Refreshing Subscriptions'))
+  }
+
+  const subscriptionUpdates = []
+  let channelCount = 0
+  let useRss = store.getters.getUseRssFeeds
+
+  if (activeSubscriptionList.length >= 125 && !useRss) {
+    showToast(
+      t('Subscriptions["This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting"]'),
+      10000
+    )
+    useRss = true
+  }
+
+  try {
+    const videoListFromRemote = (await Promise.all(activeSubscriptionList.map(async (channel) => {
+      let videos, name, thumbnailUrl
+
+      if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
+        if (useRss) {
+          ({ videos, name, thumbnailUrl } = await getChannelLiveInvidiousRSS(channel, t, errorChannels))
+        } else {
+          ({ videos, name, thumbnailUrl } = await getChannelLiveInvidious(channel, t, errorChannels))
+        }
+      } else {
+        if (useRss) {
+          ({ videos, name, thumbnailUrl } = await getChannelLiveLocalRSS(channel, t, errorChannels))
+        } else {
+          ({ videos, name, thumbnailUrl } = await getChannelLiveLocal(channel, t, errorChannels))
+        }
+      }
+
+      channelCount++
+      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+
+      if (videos != null) {
+        await store.dispatch('updateSubscriptionLiveCacheByChannel', {
+          channelId: channel.id,
+          videos
+        })
+      }
+
+      if (name || thumbnailUrl) {
+        subscriptionUpdates.push({
+          channelId: channel.id,
+          channelName: name,
+          channelThumbnailUrl: thumbnailUrl
+        })
+      }
+
+      return videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
+    }))).flat()
+
+    store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+    store.commit('setSubscriptionLiveLastRefreshTimestamp', Date.now())
+
+    return updateVideoListAfterProcessing(videoListFromRemote)
+  } finally {
+    store.commit('setShowProgressBar', false)
+    store.commit('setSubscriptionFeedRefreshInProgress', false)
+  }
+}
+
 async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts = 0) {
   try {
     const result = await getLocalChannelVideos(channel.id)
@@ -432,6 +596,243 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
         return { videos: null }
       case 2:
         return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
+      default:
+        return { videos: null }
+    }
+  }
+}
+
+async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts = 0) {
+  const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
+
+  try {
+    const response = await fetch(feedUrl)
+
+    if (response.status === 403) {
+      return { videos: null }
+    }
+
+    if (response.status === 404) {
+      const response2 = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`, {
+        method: 'HEAD'
+      })
+
+      if (response2.status === 404) {
+        errorChannels.push(channel)
+        return { videos: null }
+      }
+
+      return { videos: [] }
+    }
+
+    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+  } catch (error) {
+    console.error(error)
+    showToast(`${t('Local API Error (Click to copy)')}: ${error}`, 10000, () => {
+      copyToClipboard(error)
+    })
+
+    if (failedAttempts === 0 && store.getters.getBackendFallback) {
+      showToast(t('Falling back to Invidious API'))
+      return await getChannelShortsInvidious(channel, t, errorChannels, failedAttempts + 1)
+    }
+
+    return { videos: null }
+  }
+}
+
+async function getChannelShortsInvidious(channel, t, errorChannels, failedAttempts = 0) {
+  const playlistId = getChannelPlaylistId(channel.id, 'shorts', 'newest')
+  const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
+
+  try {
+    const response = await invidiousFetch(feedUrl)
+
+    if (response.status === 404) {
+      const response2 = await fetch(`${store.getters.getCurrentInvidiousInstanceUrl}/feed/channel/${channel.id}`, {
+        method: 'GET'
+      })
+
+      if (response2.status === 404) {
+        errorChannels.push(channel)
+        return { videos: null }
+      }
+
+      return { videos: [] }
+    }
+
+    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+  } catch (error) {
+    console.error(error)
+    showToast(`${t('Invidious API Error (Click to copy)')}: ${error}`, 10000, () => {
+      copyToClipboard(error)
+    })
+
+    if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+      showToast(t('Falling back to Local API'))
+      return await getChannelShortsLocal(channel, t, errorChannels, failedAttempts + 1)
+    }
+
+    return { videos: null }
+  }
+}
+
+async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0) {
+  try {
+    const result = await getLocalChannelLiveStreams(channel.id)
+
+    if (result === null) {
+      errorChannels.push(channel)
+      return { videos: null }
+    }
+
+    return result
+  } catch (err) {
+    console.error(err)
+    showToast(`${t('Local API Error (Click to copy)')}: ${err}`, 10000, () => {
+      copyToClipboard(err)
+    })
+
+    switch (failedAttempts) {
+      case 0:
+        return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+      case 1:
+        if (store.getters.getBackendFallback) {
+          showToast(t('Falling back to Invidious API'))
+          return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
+        }
+        return { videos: null }
+      case 2:
+        return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+      default:
+        return { videos: null }
+    }
+  }
+}
+
+async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts = 0) {
+  const playlistId = getChannelPlaylistId(channel.id, 'live', 'newest')
+  const feedUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${playlistId}`
+
+  try {
+    const response = await fetch(feedUrl)
+
+    if (response.status === 403) {
+      return { videos: null }
+    }
+
+    if (response.status === 404) {
+      const response2 = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channel.id}`, {
+        method: 'HEAD'
+      })
+
+      if (response2.status === 404) {
+        errorChannels.push(channel)
+        return { videos: null }
+      }
+
+      return { videos: [] }
+    }
+
+    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+  } catch (error) {
+    console.error(error)
+    showToast(`${t('Local API Error (Click to copy)')}: ${error}`, 10000, () => {
+      copyToClipboard(error)
+    })
+
+    switch (failedAttempts) {
+      case 0:
+        return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+      case 1:
+        if (store.getters.getBackendFallback) {
+          showToast(t('Falling back to Invidious API'))
+          return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+        }
+        return { videos: null }
+      case 2:
+        return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+      default:
+        return { videos: null }
+    }
+  }
+}
+
+async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts = 0) {
+  try {
+    const result = await getInvidiousChannelLive(channel.id)
+    let name
+
+    if (result.videos.length > 0) {
+      name = result.videos.find(video => video.type === 'video' && video.author).author
+    }
+
+    return {
+      name,
+      videos: result.videos
+    }
+  } catch (err) {
+    console.error(err)
+    showToast(`${t('Invidious API Error (Click to copy)')}: ${err}`, 10000, () => {
+      copyToClipboard(err)
+    })
+
+    switch (failedAttempts) {
+      case 0:
+        return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+      case 1:
+        if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+          showToast(t('Falling back to Local API'))
+          return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
+        }
+        return { videos: null }
+      case 2:
+        return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
+      default:
+        return { videos: null }
+    }
+  }
+}
+
+async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts = 0) {
+  const playlistId = getChannelPlaylistId(channel.id, 'live', 'newest')
+  const feedUrl = `${store.getters.getCurrentInvidiousInstanceUrl}/feed/playlist/${playlistId}`
+
+  try {
+    const response = await invidiousFetch(feedUrl)
+
+    if (response.status === 404) {
+      const response2 = await fetch(`${store.getters.getCurrentInvidiousInstanceUrl}/feed/channel/${channel.id}`, {
+        method: 'GET'
+      })
+
+      if (response2.status === 404) {
+        errorChannels.push(channel)
+        return { videos: null }
+      }
+
+      return { videos: [] }
+    }
+
+    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+  } catch (error) {
+    console.error(error)
+    showToast(`${t('Invidious API Error (Click to copy)')}: ${error}`, 10000, () => {
+      copyToClipboard(error)
+    })
+
+    switch (failedAttempts) {
+      case 0:
+        return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
+      case 1:
+        if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
+          showToast(t('Falling back to Local API'))
+          return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
+        }
+        return { videos: null }
+      case 2:
+        return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
       default:
         return { videos: null }
     }

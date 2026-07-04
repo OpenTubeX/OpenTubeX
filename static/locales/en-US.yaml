@@ -573,6 +573,9 @@ Settings:
     Fetch Feeds from RSS: Fetch Feeds from RSS
     Fetch Automatically: Fetch Feed Automatically
     Auto Refresh Interval: Auto Refresh Interval
+    Videos Auto Refresh Interval: Videos Auto Refresh Interval
+    Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
+    Live Auto Refresh Interval: Live Auto Refresh Interval
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing

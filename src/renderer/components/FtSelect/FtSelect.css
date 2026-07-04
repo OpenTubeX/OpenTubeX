@@ -97,9 +97,24 @@
   color: var(--tertiary-text-color);
 }
 
+.containsTooltip .select-label {
+  max-inline-size: calc(100% - 34px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .select-icon {
+  flex: 0 0 auto;
   inline-size: 14px;
   block-size: 14px;
+}
+
+.select-label-text {
+  min-inline-size: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 /* active state */

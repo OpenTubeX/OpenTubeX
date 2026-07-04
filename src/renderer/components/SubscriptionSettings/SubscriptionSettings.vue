@@ -12,13 +12,31 @@
           @change="updateFetchSubscriptionsAutomatically"
         />
         <FtSelect
-          :placeholder="$t('Settings.Subscription Settings.Auto Refresh Interval')"
+          :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
           :value="subscriptionFeedAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="subscriptionFeedAutoRefreshIntervalValues"
           :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
           :icon="['fas', 'clock']"
           @change="updateSubscriptionFeedAutoRefreshInterval"
+        />
+        <FtSelect
+          :placeholder="$t('Settings.Subscription Settings.Shorts Auto Refresh Interval')"
+          :value="subscriptionShortsAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="subscriptionFeedAutoRefreshIntervalValues"
+          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+          :icon="['fas', 'clock']"
+          @change="updateSubscriptionShortsAutoRefreshInterval"
+        />
+        <FtSelect
+          :placeholder="$t('Settings.Subscription Settings.Live Auto Refresh Interval')"
+          :value="subscriptionLiveAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="subscriptionFeedAutoRefreshIntervalValues"
+          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+          :icon="['fas', 'clock']"
+          @change="updateSubscriptionLiveAutoRefreshInterval"
         />
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
@@ -105,6 +123,26 @@ const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubs
  */
 function updateSubscriptionFeedAutoRefreshInterval(value) {
   store.dispatch('updateSubscriptionFeedAutoRefreshInterval', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionShortsAutoRefreshInterval = computed(() => store.getters.getSubscriptionShortsAutoRefreshInterval)
+
+/**
+ * @param {string} value
+ */
+function updateSubscriptionShortsAutoRefreshInterval(value) {
+  store.dispatch('updateSubscriptionShortsAutoRefreshInterval', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubscriptionLiveAutoRefreshInterval)
+
+/**
+ * @param {string} value
+ */
+function updateSubscriptionLiveAutoRefreshInterval(value) {
+  store.dispatch('updateSubscriptionLiveAutoRefreshInterval', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

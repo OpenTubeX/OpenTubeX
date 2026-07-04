@@ -1,5 +1,8 @@
 <template>
-  <div class="select">
+  <div
+    class="select"
+    :class="{ containsTooltip: tooltip !== '' }"
+  >
     <select
       :id="id"
       :aria-describedby="describeById"
@@ -36,7 +39,9 @@
         class="select-icon"
         :color="iconColor"
       />
-      {{ placeholder }}
+      <span class="select-label-text">
+        {{ placeholder }}
+      </span>
     </label>
     <FtTooltip
       v-if="tooltip !== ''"

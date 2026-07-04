@@ -132,7 +132,11 @@ import store from './store/index'
 
 import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
-import { refreshSubscriptionVideosFromRemote } from './helpers/subscriptions'
+import {
+  refreshSubscriptionLiveFromRemote,
+  refreshSubscriptionShortsFromRemote,
+  refreshSubscriptionVideosFromRemote
+} from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { loadLocale } from './i18n/index'
 
@@ -172,11 +176,36 @@ const defaultInvidiousInstance = computed(() => store.getters.getDefaultInvidiou
 /** @type {import('vue').ComputedRef<string>} */
 const subscriptionFeedAutoRefreshInterval = computed(() => store.getters.getSubscriptionFeedAutoRefreshInterval)
 
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionShortsAutoRefreshInterval = computed(() => store.getters.getSubscriptionShortsAutoRefreshInterval)
+
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubscriptionLiveAutoRefreshInterval)
+
 /** @type {import('vue').ComputedRef<number | null>} */
 const subscriptionFeedLastRefreshTimestamp = computed(() => store.getters.getSubscriptionFeedLastRefreshTimestamp)
 
+/** @type {import('vue').ComputedRef<number | null>} */
+const subscriptionShortsLastRefreshTimestamp = computed(() => store.getters.getSubscriptionShortsLastRefreshTimestamp)
+
+/** @type {import('vue').ComputedRef<number | null>} */
+const subscriptionLiveLastRefreshTimestamp = computed(() => store.getters.getSubscriptionLiveLastRefreshTimestamp)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSubscriptionsVideos = computed(() => store.getters.getHideSubscriptionsVideos)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSubscriptionsShorts = computed(() => store.getters.getHideSubscriptionsShorts)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams || store.getters.getHideSubscriptionsLive)
+
 const dataReady = ref(false)
-let subscriptionFeedAutoRefreshTimer = null
+const subscriptionAutoRefreshTimers = {
+  videos: null,
+  shorts: null,
+  live: null
+}
 
 onMounted(async () => {
   await store.dispatch('grabUserSettings')
@@ -239,44 +268,134 @@ onBeforeUnmount(() => {
 watch([
   dataReady,
   subscriptionFeedAutoRefreshInterval,
-  subscriptionFeedLastRefreshTimestamp
-], scheduleSubscriptionFeedAutoRefresh)
+  subscriptionFeedLastRefreshTimestamp,
+  hideSubscriptionsVideos
+], () => scheduleSubscriptionTabAutoRefresh('videos'))
 
-function scheduleSubscriptionFeedAutoRefresh() {
-  clearSubscriptionFeedAutoRefreshTimer()
+watch([
+  dataReady,
+  subscriptionShortsAutoRefreshInterval,
+  subscriptionShortsLastRefreshTimestamp,
+  hideSubscriptionsShorts
+], () => scheduleSubscriptionTabAutoRefresh('shorts'))
 
-  const interval = parseInt(subscriptionFeedAutoRefreshInterval.value, 10)
+watch([
+  dataReady,
+  subscriptionLiveAutoRefreshInterval,
+  subscriptionLiveLastRefreshTimestamp,
+  hideSubscriptionsLive
+], () => scheduleSubscriptionTabAutoRefresh('live'))
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function scheduleSubscriptionTabAutoRefresh(tab) {
+  clearSubscriptionTabAutoRefreshTimer(tab)
+
+  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
   if (
     !dataReady.value ||
+    isSubscriptionTabHidden(tab) ||
     Number.isNaN(interval) ||
     interval <= 0
   ) {
-    store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', null)
+    setSubscriptionTabNextAutoRefreshTimestamp(tab, null)
     return
   }
 
-  store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', Date.now() + interval)
-  subscriptionFeedAutoRefreshTimer = setTimeout(refreshSubscriptionFeedAutomatically, interval)
+  setSubscriptionTabNextAutoRefreshTimestamp(tab, Date.now() + interval)
+  subscriptionAutoRefreshTimers[tab] = setTimeout(() => refreshSubscriptionFeedAutomatically(tab), interval)
 }
 
-async function refreshSubscriptionFeedAutomatically() {
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+async function refreshSubscriptionFeedAutomatically(tab) {
   if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    scheduleSubscriptionFeedAutoRefresh()
+    scheduleSubscriptionTabAutoRefresh(tab)
     return
   }
 
-  await refreshSubscriptionVideosFromRemote({
+  await getSubscriptionTabRefreshHandler(tab)({
     t,
     showStartToast: true
   })
 
-  scheduleSubscriptionFeedAutoRefresh()
+  scheduleSubscriptionTabAutoRefresh(tab)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function getSubscriptionAutoRefreshInterval(tab) {
+  switch (tab) {
+    case 'shorts':
+      return subscriptionShortsAutoRefreshInterval
+    case 'live':
+      return subscriptionLiveAutoRefreshInterval
+    default:
+      return subscriptionFeedAutoRefreshInterval
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function getSubscriptionTabRefreshHandler(tab) {
+  switch (tab) {
+    case 'shorts':
+      return refreshSubscriptionShortsFromRemote
+    case 'live':
+      return refreshSubscriptionLiveFromRemote
+    default:
+      return refreshSubscriptionVideosFromRemote
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function isSubscriptionTabHidden(tab) {
+  switch (tab) {
+    case 'shorts':
+      return hideSubscriptionsShorts.value
+    case 'live':
+      return hideSubscriptionsLive.value
+    default:
+      return hideSubscriptionsVideos.value
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {number | null} timestamp
+ */
+function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
+  switch (tab) {
+    case 'shorts':
+      store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
+      break
+    case 'live':
+      store.commit('setSubscriptionLiveNextAutoRefreshTimestamp', timestamp)
+      break
+    default:
+      store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
+  }
 }
 
 function clearSubscriptionFeedAutoRefreshTimer() {
-  clearTimeout(subscriptionFeedAutoRefreshTimer)
-  subscriptionFeedAutoRefreshTimer = null
-  store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', null)
+  clearSubscriptionTabAutoRefreshTimer('videos')
+  clearSubscriptionTabAutoRefreshTimer('shorts')
+  clearSubscriptionTabAutoRefreshTimer('live')
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function clearSubscriptionTabAutoRefreshTimer(tab) {
+  clearTimeout(subscriptionAutoRefreshTimers[tab])
+  subscriptionAutoRefreshTimers[tab] = null
+  setSubscriptionTabNextAutoRefreshTimestamp(tab, null)
 }
 
 /** @type {import('vue').ComputedRef<string>} */
