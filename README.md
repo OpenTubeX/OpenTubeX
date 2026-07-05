@@ -58,7 +58,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="328" height="84" alt="image" src="https://github.com/user-attachments/assets/260874ac-1577-4f37-aa32-3b9a830e6d13" />
 <img width="331" height="87" alt="image" src="https://github.com/user-attachments/assets/996c0816-b237-47b6-8b7a-88f39f8e104c" />
 
-- Display SponsorBlock community contributed chapters
+- Supports SponsorBlock community contributed chapters, Highlight and Hook/Greetings category
 - Experimental SponsorBlock submission
 
 - Tabs like in a web browser
