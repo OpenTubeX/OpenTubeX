@@ -826,6 +826,8 @@ Video:
     sponsor: sponsorowany
     filler: z wypełniaczem
     recap: z podsumowaniem
+    hook: Haczyki narracyjne/Pozdrowienia
+    highlight: Ważny moment
   External Player:
     Unsupported Actions:
       reversing playlists: odwracania playlist
@@ -1010,6 +1012,7 @@ Comments:
   View 1 reply from {channelName}: Zobacz 1 odpowiedź od {channelName}
   View {replyCount} replies from {channelName} and others: Zobacz {replyCount} odpowiedzi od {channelName} i innych
   Reload Comments: Przeładuj komentarze
+  Copy YouTube Link: Skopiuj odnośnik do strony YouTube
 Up Next: 'Następne'
 
 # Toast Messages
