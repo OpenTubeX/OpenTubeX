@@ -549,6 +549,7 @@ Settings:
     Settings Tooltip: Ustawień specyficznych dla systemu operacyjnego/użytkownika lub eksperymentalnych nie można eksportować ani importować (np. proxy, odtwarzacz zewnętrzny, folder zrzutów ekranu...)
     All settings have been successfully imported: Wszystkie ustawienia zostały pomyślnie zaimportowane
     All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
+    Unknown setting key: Nieznany klucz ustawień
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
