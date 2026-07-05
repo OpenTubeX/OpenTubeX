@@ -866,7 +866,7 @@ Video:
       Resolution: 'Rozdzielczość: {width}x{height}{''@''}{frameRate}'
     You appear to be offline: Zdaje się, że jesteś rozłączony.
     Playback will resume automatically when your connection comes back: Odtwarzanie zostanie wznowione, jak tylko połączenie zostanie odzyskane.
-    Skipped segment: Pominięto segment {segmentCategory}
+    Skipped segment: Pominięto segment „{segmentCategory}”
     Full Window: Pełne okno
     Autoplay is off: Autoodtwarzanie jest wyłączone
     Autoplay is on: Autoodtwarzanie jest włączone
@@ -910,7 +910,7 @@ Video:
       SubmitSegments: Zgłoś
       StartTimeLabel: Czas rozpoczęcia segmentu
       TimeDivider: do
-      SkipPrompt: Pominąć {segmentCategory} segment?
+      SkipPrompt: Pominąć segment „{segmentCategory}”?
       SkipPromptAction: Pomiń
       SkipToastUnskip: Anuluj pominięcie
       SkipToastReskip: Wznów pominięcie
@@ -929,7 +929,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Do końca reklamy z początku pozostało: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'SABR – do przeczekania pozostało: {remindingTimeSeconds}s'
-  Private: Prywatnych filmów nie można oglądać w serwisie OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
+  Private: Prywatnych filmów nie można oglądać w OpenTubeX, ponieważ do oglądania filmu wymagane jest zalogowanie się przez Google i potwierdzenie, że jest się właścicielem filmu.
   Save Channel Playback Speed: Zapisz prędkość odtwarzania kanału
   Channel Playback Speed Saved: Zapisano prędkość odtwarzania kanału
   Save Channel Video Quality: Zapisz jakość wideo kanału
