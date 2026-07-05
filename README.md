@@ -194,9 +194,10 @@ have your help.  Send a pull request and someone will review your code.
 ## Localization
 <a href="https://weblate.d3sox.me/engage/opentubex/">
 <img src="https://weblate.d3sox.me/widgets/opentubex/-/287x66-grey.png" alt="Translation status" />
+<img src="https://weblate.d3sox.me/widget/opentubex/application/matrix-auto.svg" alt="Translation matrix" />
 </a>
 
-We are actively looking for translations! We use [Weblate](https://weblate.d3sox.me/engage/opentubex/) to make it easy for translators to get involved. Click on the badge above to learn how to get involved.
+We are actively looking for translations! We use [Weblate](https://weblate.d3sox.me/engage/opentubex/) to make it easy for translators to get involved. Click on one of the graphics above to learn how to get involved.
 
 For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 
