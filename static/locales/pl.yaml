@@ -469,6 +469,9 @@ Settings:
     To: Do
     'Limit the number of videos displayed for each channel': Ogranicz liczbę filmów wyświetlanych dla każdego z kanałów
     Auto Refresh Interval: Interwał odświeżania
+    Videos Auto Refresh Interval: Interwał odświeżania filmów
+    Shorts Auto Refresh Interval: Interwał odświeżania filmów short
+    Live Auto Refresh Interval: Interwał odświeżania transmisji na żywo
   Privacy Settings:
     Watch history has been cleared: Historia oglądania została wyczyszczona
     Are you sure you want to remove your entire watch history?: Jesteś pewny/a, że chcesz usunąć całą historię oglądania?
@@ -544,6 +547,8 @@ Settings:
     Import Settings: Zaimportuj ustawienia
     Export Settings: Wyeksportuj ustawienia
     Settings Tooltip: Ustawień specyficznych dla systemu operacyjnego/użytkownika lub eksperymentalnych nie można eksportować ani importować (np. proxy, odtwarzacz zewnętrzny, folder zrzutów ekranu...)
+    All settings have been successfully imported: Wszystkie ustawienia zostały pomyślnie zaimportowane
+    All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
