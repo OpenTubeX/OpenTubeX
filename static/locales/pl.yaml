@@ -540,6 +540,10 @@ Settings:
     Import history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Obsługiwane formaty: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Settings File: Plik ustawień
+    Import Settings: Zaimportuj ustawienia
+    Export Settings: Wyeksportuj ustawienia
+    Settings Tooltip: Ustawień specyficznych dla systemu operacyjnego/użytkownika lub eksperymentalnych nie można eksportować ani importować (np. proxy, odtwarzacz zewnętrzny, folder zrzutów ekranu...)
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
