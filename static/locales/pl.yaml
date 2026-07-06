@@ -413,7 +413,7 @@ Settings:
     Fast-Forward / Rewind Interval: Interwał przewijania
     Scroll Playback Rate Over Video Player: Kontroluj szybkość odtwarzania kółkiem myszy na obszarze odtwarzacza
     Max Video Playback Rate: Maksymalna szybkość odtwarzania
-    Video Playback Rate Interval: Przeskoki w wyborze prędkości odtwarzania
+    Video Playback Rate Interval: Przeskoki w prędkości odtwarzania
     Screenshot:
       Format Label: Format zrzutu
       Quality Label: Jakość zrzutu
@@ -440,7 +440,7 @@ Settings:
       Default Viewing Mode: Domyślny tryb odtwarzania
       Full Screen: Cały ekran
     Auto Picture in Picture:
-      Auto Picture in Picture: Automatyczny Obraz w obrazie
+      Auto Picture in Picture: Automatyczny obraz w obrazie
       Never: Nigdy
       When Switching Tab: Podczas przełączania kart
       When Scrolling Down: Podczas przewijania
@@ -818,14 +818,14 @@ Video:
   Video has been saved: Film został zapisany
   Save Video: Zapisz film
   Sponsor Block category:
-    music offtopic: niemuzyczny
-    interaction: o interakcji
-    self-promotion: z własną promocją
-    outro: z ekranem końcowym
-    intro: z intrem
-    sponsor: sponsorowany
-    filler: z wypełniaczem
-    recap: z podsumowaniem
+    music offtopic: 'Muzyka: Sekcja niemuzyczna'
+    interaction: Przypomnienie o interakcji (subskrybuj)
+    self-promotion: Nieodpłatna/Autopromocja
+    outro: Napisy końcowe (Outro)
+    intro: Przerwa/Intro
+    sponsor: Sponsorowany
+    filler: Wypełniacze/Żarty
+    recap: Zapowiedź/Podsumowanie
     hook: Haczyki narracyjne/Pozdrowienia
     highlight: Ważny moment
   External Player:
@@ -1081,7 +1081,7 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
-    Fetch Automatically: Po włączeniu lub przy otwarciu nowego okna OpenTubeX będzie automatycznie odświeżał Twoje subskrypcje.
+    Fetch Automatically: Po włączeniu OpenTubeX będzie automatycznie odświeżał Twoje subskrypcje zgodnie z interwałem czasowym wybranym dla poszczególnych sekcji.
     Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
   General Settings:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
@@ -1097,9 +1097,9 @@ Tooltips:
       niepotrzebnie tłumaczy z języka narodowego na angielski.
     Startup Behavior: |
       Wybierz, co OpenTubeX zrobi po uruchomieniu:
-      Opcja „Załaduj wszystkie karty” ładuje wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
-      Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się po kliknięciu na nie.
-      Opcja „Nowa sesja” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
+      Opcja „Załaduj wszystkie karty” ładuje do pamięci wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
+      Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
+      Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
   Player Settings:
     Default Video Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
