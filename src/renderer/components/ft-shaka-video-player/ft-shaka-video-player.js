@@ -14,6 +14,7 @@ import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
+import { SponsorBlockHighlightButton } from './player-components/SponsorBlockHighlightButton'
 import { SponsorBlockOpenMenuButton } from './player-components/SponsorBlockOpenMenuButton'
 import { SponsorBlockStartButton } from './player-components/SponsorBlockStartButton'
 import { StatsButton } from './player-components/StatsButton'
@@ -661,7 +662,7 @@ export default defineComponent({
       return store.getters.getSponsorBlockEnableSubmission
     })
 
-    /** @type {import('vue').ComputedRef<Record<string, {id: string, startTime: number, endTime: number | null, category: SponsorBlockCategory, previewed: boolean}[]>>} */
+    /** @type {import('vue').ComputedRef<Record<string, {id: string, startTime: number, endTime: number | null, category: SponsorBlockCategory, actionType?: 'skip' | 'poi', previewed: boolean}[]>>} */
     const sponsorBlockDraftSegmentsByVideoId = computed(() => {
       return store.getters.getSponsorBlockDraftSegmentsByVideoId
     })
@@ -770,12 +771,14 @@ export default defineComponent({
      * @type {{
      *   uuid: string
      *   category: SponsorBlockCategory
+     *   actionType?: 'skip' | 'poi'
      *   startTime: number,
      *   endTime: number
      * }[]}
      */
     let sponsorBlockSegments = []
     let sponsorBlockAverageVideoDuration = 0
+    const activeSponsorBlockHighlightSegment = ref(null)
 
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
@@ -1112,7 +1115,9 @@ export default defineComponent({
         sponsorBlockAverageVideoDuration = averageDuration
         refreshSponsorBlockMarkers()
         if (canSeek()) {
-          syncPromptSponsorBlockSegments(video.value?.currentTime ?? 0)
+          const currentTime = video.value?.currentTime ?? 0
+          syncPromptSponsorBlockSegments(currentTime)
+          updateSponsorBlockHighlightState(currentTime)
         }
       } else {
         scheduleSponsorBlockNotFoundRefetch()
@@ -1130,6 +1135,8 @@ export default defineComponent({
       sponsorBlockDismissedPromptSegments = new Set()
       sponsorBlockSegments = []
       sponsorBlockAverageVideoDuration = 0
+      activeSponsorBlockHighlightSegment.value = null
+      updateSponsorBlockHighlightState(0)
 
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
@@ -1156,7 +1163,9 @@ export default defineComponent({
 
       refreshSponsorBlockMarkers()
       if (segments.length > 0 && canSeek()) {
-        syncPromptSponsorBlockSegments(video.value?.currentTime ?? 0)
+        const currentTime = video.value?.currentTime ?? 0
+        syncPromptSponsorBlockSegments(currentTime)
+        updateSponsorBlockHighlightState(currentTime)
       }
     }
 
@@ -1474,11 +1483,11 @@ export default defineComponent({
     }
 
     /**
-     * @param {{ category: SponsorBlockCategory }} segment
+     * @param {{ category: SponsorBlockCategory, actionType?: 'skip' | 'poi' }} segment
      * @returns {boolean}
      */
     function isSponsorBlockPointSegment(segment) {
-      return isSponsorBlockPointCategory(segment.category)
+      return segment.actionType === 'poi' || isSponsorBlockPointCategory(segment.category)
     }
 
     /**
@@ -1574,6 +1583,7 @@ export default defineComponent({
         const submittedSegments = response.map((segment) => ({
           uuid: segment.UUID,
           category: segment.category,
+          actionType: segment.actionType,
           startTime: segment.segment[0],
           endTime: segment.segment[1]
         }))
@@ -1869,7 +1879,7 @@ export default defineComponent({
      */
     function skipPromptSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment || !canSeek()) {
+      if (!segment || isSponsorBlockPointSegment(segment) || !canSeek()) {
         return false
       }
 
@@ -1895,10 +1905,32 @@ export default defineComponent({
       return true
     }
 
+    function skipToSponsorBlockHighlight() {
+      const segment = activeSponsorBlockHighlightSegment.value
+      if (!segment || !canSeek()) {
+        return false
+      }
+
+      const seekRange = player.seekRange()
+      const targetTime = Math.min(
+        Math.max(segment.startTime, seekRange.start),
+        seekRange.end
+      )
+      video.value.currentTime = targetTime
+      sponsorBlockCurrentTime.value = targetTime
+      updateSponsorBlockHighlightState(targetTime)
+      showOverlayControls()
+      return true
+    }
+
     function toggleActiveSponsorBlockSkipState() {
       const promptToastEntry = getActivePromptSponsorBlockToast()
       if (promptToastEntry) {
         return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
+      }
+
+      if (activeSponsorBlockHighlightSegment.value) {
+        return skipToSponsorBlockHighlight()
       }
 
       const toastEntry = getActiveSponsorBlockToast()
@@ -1936,7 +1968,7 @@ export default defineComponent({
       }
 
       sponsorBlockSegments.forEach(segment => {
-        if (!promptSkip.has(segment.category) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+        if (isSponsorBlockPointSegment(segment) || !promptSkip.has(segment.category) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
           return
         }
 
@@ -1960,6 +1992,27 @@ export default defineComponent({
       promptSponsorBlockSegments.value
         .filter(segment => !activePromptUUIDs.has(segment.uuid))
         .forEach(segment => removePromptSponsorBlockToast(segment.uuid))
+    }
+
+    /**
+     * @param {number} currentTime
+     */
+    function updateSponsorBlockHighlightState(currentTime = sponsorBlockCurrentTime.value) {
+      const { promptSkip } = sponsorSkips.value
+      const nextHighlightSegment = promptSkip.has('poi_highlight')
+        ? sponsorBlockSegments.find(segment => {
+          return isSponsorBlockPointSegment(segment) &&
+            segment.category === 'poi_highlight' &&
+            segment.startTime - currentTime > 0.5
+        }) ?? null
+        : null
+
+      activeSponsorBlockHighlightSegment.value = nextHighlightSegment
+      events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', {
+        detail: {
+          visible: nextHighlightSegment !== null
+        }
+      }))
     }
 
     /**
@@ -2007,7 +2060,7 @@ export default defineComponent({
       // Check if we've left any unskipped segments - if so, re-enable auto-skip for them
       for (const uuid of sponsorBlockDoNotSkipSegments) {
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-        if (segment && (currentTime < segment.startTime || currentTime >= segment.endTime)) {
+        if (segment && !isSponsorBlockPointSegment(segment) && (currentTime < segment.startTime || currentTime >= segment.endTime)) {
           sponsorBlockDoNotSkipSegments.delete(uuid)
           removeSponsorBlockToast(uuid)
         }
@@ -2019,7 +2072,7 @@ export default defineComponent({
       const skippedSegments = []
 
       sponsorBlockSegments.forEach(segment => {
-        if (sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+        if (isSponsorBlockPointSegment(segment) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
           return
         }
 
@@ -2070,7 +2123,7 @@ export default defineComponent({
      */
     function unskipSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment) {
+      if (!segment || isSponsorBlockPointSegment(segment)) {
         return
       }
 
@@ -2105,7 +2158,7 @@ export default defineComponent({
      */
     function redoSkipSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment) {
+      if (!segment || isSponsorBlockPointSegment(segment)) {
         return
       }
 
@@ -2371,6 +2424,7 @@ export default defineComponent({
         'volume',
         'time_and_duration',
         'ft_playback_adjusted_time',
+        'ft_sponsorblock_highlight',
         'spacer'
       ]
 
@@ -3120,6 +3174,7 @@ export default defineComponent({
 
         if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
           syncPromptSponsorBlockSegments(currentTime)
+          updateSponsorBlockHighlightState(currentTime)
 
           if (!props.sponsorBlockAutoSkipDisabled) {
             skipSponsorBlockSegments(currentTime)
@@ -4920,6 +4975,21 @@ export default defineComponent({
       updateSponsorBlockSubmissionState()
     }
 
+    function registerSponsorBlockHighlightButton() {
+      events.addEventListener('skipToSponsorBlockHighlight', () => {
+        skipToSponsorBlockHighlight()
+      })
+
+      class SponsorBlockHighlightButtonFactory {
+        create(rootElement, controls) {
+          return new SponsorBlockHighlightButton(events, rootElement, controls)
+        }
+      }
+
+      shakaControls.registerElement('ft_sponsorblock_highlight', new SponsorBlockHighlightButtonFactory())
+      updateSponsorBlockHighlightState()
+    }
+
     function registerSkipButtons() {
       // skip to next video button
       events.addEventListener('nextVideo', () => {
@@ -5029,6 +5099,7 @@ export default defineComponent({
       shakaControls.registerElement('ft_sponsorblock_open_menu', null)
       shakaControls.registerElement('ft_sponsorblock_cancel', null)
       shakaControls.registerElement('ft_sponsorblock_clear', null)
+      shakaControls.registerElement('ft_sponsorblock_highlight', null)
 
       shakaControls.registerElement('ft_next_previous', null)
       shakaOverflowMenu.registerElement('ft_next_previous', null)
@@ -6063,6 +6134,7 @@ export default defineComponent({
       registerContextMenuButtons()
       registerStatsButton()
       registerSponsorBlockSubmissionButtons()
+      registerSponsorBlockHighlightButton()
       registerSkipButtons()
       registerPlaybackAdjustedTime()
       registerQuickPlaybackRateBar()

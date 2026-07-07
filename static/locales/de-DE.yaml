@@ -874,6 +874,7 @@ Video:
       SubmitSegments: Einreichen
       StartTimeLabel: Segmentstartzeit
       TimeDivider: bis
+      SkipToHighlight: Zum Highlight springen?
       SkipToastUnskip: Nicht überspringen
       SkipToastReskip: Nochmal überspringen
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'

@@ -1085,6 +1085,7 @@ Video:
       TimeDivider: to
       SkipPrompt: Skip {segmentCategory} segment?
       SkipPromptAction: Skip
+      SkipToHighlight: Skip to Highlight?
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
   Watch:

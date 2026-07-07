@@ -76,10 +76,11 @@ export async function getSponsorBlockSegments(videoId, categories) {
     return accumulator + segment.videoDuration
   }, 0) / segments.length
 
-  const mappedSegments = segments.map(({ category, segment: [startTime, endTime], UUID }) => {
+  const mappedSegments = segments.map(({ category, segment: [startTime, endTime], UUID, actionType }) => {
     return {
       uuid: UUID,
       category,
+      actionType,
       startTime,
       endTime
     }
