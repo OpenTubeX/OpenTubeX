@@ -2145,8 +2145,16 @@ export class TabManager {
 
 /**
  * Set up IPC handlers for tabs
+ * @param {object} [options]
+ * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
+ * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
  */
-export function setupTabsIPC() {
+export function setupTabsIPC(options = {}) {
+  const {
+    confirmCloseWindow = () => true,
+    markWindowCloseConfirmed = () => {}
+  } = options
+
   // Get tab state
   ipcMain.handle(IpcChannels.TABS_GET_STATE, (event) => {
     const manager = TabManager.getFromWebContents(event.sender)
@@ -2189,12 +2197,17 @@ export function setupTabsIPC() {
   })
 
   // Close tab
-  ipcMain.handle(IpcChannels.TABS_CLOSE, (event, tabId) => {
+  ipcMain.handle(IpcChannels.TABS_CLOSE, async (event, tabId) => {
     const manager = TabManager.getFromWebContents(event.sender)
     if (manager && typeof tabId === 'string') {
+      if (manager.tabs.size === 1 && !await confirmCloseWindow(manager.browserWindow)) {
+        return { hasRemainingTabs: true }
+      }
+
       const hasRemainingTabs = manager.closeTab(tabId)
       // Close the window if no tabs remain
       if (!hasRemainingTabs) {
+        markWindowCloseConfirmed(manager.browserWindow)
         manager.browserWindow.close()
       }
       return { hasRemainingTabs }

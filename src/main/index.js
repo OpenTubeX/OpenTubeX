@@ -6,6 +6,7 @@ import {
 } from 'electron'
 import path from 'path'
 import cp from 'child_process'
+import { load as loadYaml } from 'js-yaml'
 
 import {
   IpcChannels,
@@ -91,8 +92,12 @@ function runApp() {
 
   let backendPreference = 'local'
   let backendFallback = true
+  const DEFAULT_CONFIRM_CLOSE_APP = true
   const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
   const VALID_STARTUP_BEHAVIORS = new Set(['loadAllTabs', 'loadLastActiveTab', 'emptySession'])
+  const closeConfirmedWindowIds = new Set()
+  let quitPromptInProgress = null
+  let isQuitConfirmed = false
 
   /**
    * @param {string} url
@@ -124,6 +129,136 @@ function runApp() {
       console.error('Failed to load startup behavior preference:', error)
       return DEFAULT_STARTUP_BEHAVIOR
     }
+  }
+
+  async function getConfirmCloseApp() {
+    try {
+      const value = (await baseHandlers.settings._findOne('confirmCloseApp'))?.value
+      return typeof value === 'boolean' ? value : DEFAULT_CONFIRM_CLOSE_APP
+    } catch (error) {
+      console.error('Failed to load close confirmation preference:', error)
+      return DEFAULT_CONFIRM_CLOSE_APP
+    }
+  }
+
+  /**
+   * @param {string} key
+   * @param {Record<string, unknown>} messages
+   * @returns {string | undefined}
+   */
+  function getLocaleMessage(key, messages) {
+    const value = key.split('.').reduce((current, segment) => {
+      return current != null && typeof current === 'object' ? current[segment] : undefined
+    }, messages)
+
+    return typeof value === 'string' ? value : undefined
+  }
+
+  /**
+   * @param {string} locale
+   * @returns {Promise<Record<string, unknown>>}
+   */
+  async function loadLocaleMessages(locale) {
+    const localePath = process.env.NODE_ENV === 'development'
+      ? path.resolve(__dirname, '../../static/locales', `${locale}.yaml`)
+      : path.resolve(__dirname, 'static/locales', `${locale}.json.br`)
+
+    if (process.env.NODE_ENV === 'development') {
+      const contents = await asyncFs.readFile(localePath, 'utf8')
+      return loadYaml(contents)
+    }
+
+    const contents = await asyncFs.readFile(localePath)
+    const decompressed = await brotliDecompressAsync(contents)
+    return JSON.parse(decompressed.toString('utf8'))
+  }
+
+  /**
+   * @returns {Promise<(key: string) => string>}
+   */
+  async function createMainTranslator() {
+    const fallbackLocale = 'en-US'
+    const storedLocale = (await baseHandlers.settings._findOne('currentLocale'))?.value
+    const currentLocale = typeof storedLocale === 'string' && storedLocale !== 'system'
+      ? storedLocale
+      : app.getLocale().replace('_', '-')
+
+    const messagesByLocale = []
+    for (const locale of [currentLocale, currentLocale.split('-')[0], fallbackLocale]) {
+      if (!locale || messagesByLocale.some(entry => entry.locale === locale)) {
+        continue
+      }
+
+      try {
+        messagesByLocale.push({
+          locale,
+          messages: await loadLocaleMessages(locale)
+        })
+      } catch (error) {
+        if (locale === fallbackLocale) {
+          console.error('Failed to load fallback locale for close confirmation dialog:', error)
+        }
+      }
+    }
+
+    return (key) => {
+      for (const { messages } of messagesByLocale) {
+        const message = getLocaleMessage(key, messages)
+        if (message) {
+          return message
+        }
+      }
+
+      return key
+    }
+  }
+
+  /**
+   * @param {import('electron').BrowserWindow | null | undefined} browserWindow
+   * @returns {Promise<boolean>}
+   */
+  async function confirmCloseApp(browserWindow) {
+    if (isQuitting || isQuitConfirmed || !await getConfirmCloseApp()) {
+      return true
+    }
+
+    if (quitPromptInProgress) {
+      return quitPromptInProgress
+    }
+
+    quitPromptInProgress = (async () => {
+      const t = await createMainTranslator()
+      const { response } = await dialog.showMessageBox(browserWindow ?? undefined, {
+        type: 'question',
+        title: t('Close Confirmation.Title'),
+        message: t('Close Confirmation.Message'),
+        buttons: [
+          t('Close Confirmation.Quit'),
+          t('Cancel'),
+          t('Close Confirmation.Never Ask Again')
+        ],
+        defaultId: 1,
+        cancelId: 1,
+        noLink: true
+      })
+
+      if (response === 2) {
+        await baseHandlers.settings.upsert('confirmCloseApp', false)
+        isQuitConfirmed = true
+        return true
+      }
+
+      if (response === 0) {
+        isQuitConfirmed = true
+        return true
+      }
+
+      return false
+    })().finally(() => {
+      quitPromptInProgress = null
+    })
+
+    return quitPromptInProgress
   }
 
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
@@ -164,11 +299,19 @@ function runApp() {
         {
           label: 'Close Tab',
           visible: contextMenuTab != null,
-          click: () => {
+          click: async () => {
             if (!manager || !contextMenuTab) return
+
+            const isLastWindow = BrowserWindow.getAllWindows().length === 1
+            if (manager.tabs.size === 1 && isLastWindow && !await confirmCloseApp(manager.browserWindow)) {
+              return
+            }
 
             const hasRemainingTabs = manager.closeTab(contextMenuTab.id)
             if (!hasRemainingTabs) {
+              if (isLastWindow) {
+                closeConfirmedWindowIds.add(manager.browserWindow.id)
+              }
               manager.browserWindow.close()
             }
           }
@@ -895,7 +1038,17 @@ function runApp() {
     }
 
     // Setup tab IPC handlers
-    setupTabsIPC()
+    setupTabsIPC({
+      confirmCloseWindow: (browserWindow) => {
+        const isLastWindow = BrowserWindow.getAllWindows().length === 1
+        return isLastWindow ? confirmCloseApp(browserWindow) : true
+      },
+      markWindowCloseConfirmed: (browserWindow) => {
+        if (BrowserWindow.getAllWindows().length === 1) {
+          closeConfirmedWindowIds.add(browserWindow.id)
+        }
+      }
+    })
 
     // Restore every window that was open last time the app quit. Each window
     // has its own persisted session record, so a multi-window Ctrl+Q session
@@ -1040,7 +1193,7 @@ function runApp() {
       },
       {
         label: 'Quit',
-        click: handleQuit
+        click: () => requestQuit(BrowserWindow.getFocusedWindow() ?? mainWindow)
       }
     ]
   }
@@ -1407,7 +1560,20 @@ function runApp() {
       htmlFullscreenWindowIds.delete(newWindow.id)
     })
 
-    newWindow.once('close', async () => {
+    newWindow.on('close', async (event) => {
+      const isLastWindow = BrowserWindow.getAllWindows().length === 1
+
+      if (!isQuitting && isLastWindow && !closeConfirmedWindowIds.delete(newWindow.id)) {
+        event.preventDefault()
+
+        if (await confirmCloseApp(newWindow)) {
+          closeConfirmedWindowIds.add(newWindow.id)
+          newWindow.close()
+        }
+
+        return
+      }
+
       // returns true if the element existed in the set
       const htmlFullscreen = htmlFullscreenWindowIds.delete(newWindow.id)
 
@@ -1421,8 +1587,6 @@ function runApp() {
 
       // The current window is still part of getAllWindows() at the point the
       // `close` event fires, so length === 1 means we're closing the last one.
-      const isLastWindow = BrowserWindow.getAllWindows().length === 1
-
       // Preserve this window's tab session when:
       //   - the app is quitting (so every open window comes back on next launch)
       //   - or this is the last window closing (single-window sessions have
@@ -1828,6 +1992,7 @@ function runApp() {
       subprocess.unref()
     }
 
+    isQuitConfirmed = true
     app.quit()
   }
 
@@ -2825,11 +2990,16 @@ function runApp() {
 
   let resourcesCleanUpDone = false
 
-  // `before-quit` fires on every platform before any windows start closing, so
-  // this is the earliest reliable place to mark the app as quitting. Each
-  // BrowserWindow's close handler checks this flag to decide whether to
-  // preserve or clear its persisted tab session.
-  app.on('before-quit', () => {
+  // `before-quit` fires on every platform before any windows start closing.
+  // Confirm app-level quit requests here, then mark the app as quitting so
+  // BrowserWindow close handlers preserve their tab sessions.
+  app.on('before-quit', (event) => {
+    if (!isQuitConfirmed) {
+      event.preventDefault()
+      requestQuit(BrowserWindow.getFocusedWindow() ?? mainWindow)
+      return
+    }
+
     isQuitting = true
     if (process.platform !== 'darwin' && tray) { tray.destroy() }
   })
@@ -2865,6 +3035,22 @@ function runApp() {
       if (process.platform !== 'darwin') {
         app.quit()
       }
+    })
+  }
+
+  /**
+   * @param {import('electron').BrowserWindow | null | undefined} browserWindow
+   */
+  function requestQuit(browserWindow) {
+    confirmCloseApp(browserWindow).then((shouldQuit) => {
+      if (!shouldQuit) {
+        return
+      }
+
+      isQuitConfirmed = true
+      app.quit()
+    }).catch((error) => {
+      console.error('Failed to confirm app quit:', error)
     })
   }
 

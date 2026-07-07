@@ -48,6 +48,13 @@
           :compact="true"
           @change="updateHideToTrayOnMinimize"
         />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Confirm Before Closing App')"
+          :default-value="confirmCloseApp"
+          :compact="true"
+          @change="updateConfirmCloseApp"
+        />
       </div>
     </div>
     <div class="switchGrid">
@@ -236,6 +243,16 @@ const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
  */
 function updateCheckForUpdates(value) {
   store.dispatch('updateCheckForUpdates', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const confirmCloseApp = computed(() => store.getters.getConfirmCloseApp)
+
+/**
+ * @param {boolean} value
+ */
+function updateConfirmCloseApp(value) {
+  store.dispatch('updateConfirmCloseApp', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

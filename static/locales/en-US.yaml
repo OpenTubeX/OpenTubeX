@@ -24,6 +24,11 @@ Window: Window
 Minimize: Minimize
 Close: Close
 Close Tab: Close Tab
+Close Confirmation:
+  Title: Quit OpenTubeX?
+  Message: Are you sure you want to quit OpenTubeX?
+  Quit: Quit
+  Never Ask Again: Never ask again
 Compact side navigation: Compact side navigation
 Expand side navigation: Expand side navigation
 Back: Back
@@ -274,6 +279,7 @@ Settings:
   General Settings:
     General Settings: General
     Check for Updates: Check for Updates
+    Confirm Before Closing App: Confirm before closing OpenTubeX
     Fallback to Non-Preferred Backend on Failure: Fallback to Non-Preferred Backend
       on Failure
     Enable Search Suggestions: Enable Search Suggestions
