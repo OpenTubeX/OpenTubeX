@@ -591,7 +591,7 @@ Settings:
     Hide Videos, Playlists and Channels Containing Text Placeholder: Słowo, fragment słowa, lub wyrażenie
     Hide Channel Home: Schowaj kartę kanału „Główna”
     Show Added Items: Pokaż dodane rzeczy
-    Hide Channel Courses: Ukryj kartę „Kursy” kanału
+    Hide Channel Courses: Schowaj kartę kanału „Kursy”
     Hide Channel Posts: Schowaj kartę kanału „Wpisy”
     Hide Subscriptions Posts: Schowaj wpisy z subskrypcji
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
@@ -814,14 +814,14 @@ Video:
   Save Video: Zapisz film
   Sponsor Block category:
     music offtopic: 'Muzyka: Sekcja niemuzyczna'
-    interaction: Przypomnienie o interakcji (subskrybuj)
+    interaction: Interakcja (subskrybuj)
     self-promotion: Nieodpłatna/Autopromocja
     outro: Napisy końcowe (Outro)
     intro: Przerwa/Intro
     sponsor: Sponsorowany
     filler: Wypełniacze/Żarty
     recap: Zapowiedź/Podsumowanie
-    hook: Haczyki narracyjne/Pozdrowienia
+    hook: Zachęty/Pozdrowienia
     highlight: Ważny moment
   External Player:
     Unsupported Actions:
