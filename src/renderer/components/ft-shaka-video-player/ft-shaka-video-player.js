@@ -2710,6 +2710,55 @@ export default defineComponent({
       }
     }
 
+    /**
+     * @param {number} hoverTime
+     * @param {number} secondsPerPixel
+     * @returns {string}
+     */
+    function getSponsorBlockSeekBarTooltipLabel(hoverTime, secondsPerPixel) {
+      const segments = sponsorBlockSegments.concat(sponsorBlockCompleteDraftSegments.value)
+      const pointTolerance = Math.max(secondsPerPixel, 0.5)
+      const segment = segments.find((candidate) => {
+        if (isSponsorBlockPointSegment(candidate)) {
+          return Math.abs(hoverTime - candidate.startTime) <= pointTolerance
+        }
+
+        return hoverTime >= candidate.startTime && hoverTime <= candidate.endTime
+      })
+
+      return segment ? translateSponsorBlockCategory(segment.category) : ''
+    }
+
+    /**
+     * @param {MouseEvent} event
+     */
+    function handleSponsorBlockSeekBarMouseMove(event) {
+      if (!container.value || !player) return
+
+      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      const thumbnailTime = seekBarContainer?.querySelector('.shaka-player-ui-thumbnail-time')
+      if (!seekBarContainer || !thumbnailTime) return
+
+      const rect = seekBarContainer.getBoundingClientRect()
+      if (rect.width === 0) return
+
+      const seekRange = player.seekRange()
+      const duration = seekRange.end - seekRange.start
+      if (!Number.isFinite(duration) || duration <= 0) return
+
+      const offsetX = event.clientX - rect.left
+      const percentage = Math.max(0, Math.min(1, offsetX / rect.width))
+      const hoverTime = seekRange.start + (duration * percentage)
+      const sponsorBlockLabel = getSponsorBlockSeekBarTooltipLabel(hoverTime, duration / rect.width)
+      if (sponsorBlockLabel === '') return
+
+      const labelSuffix = ` · ${sponsorBlockLabel}`
+      const currentText = thumbnailTime.textContent ?? ''
+      if (!currentText.endsWith(labelSuffix)) {
+        thumbnailTime.textContent = `${currentText}${labelSuffix}`
+      }
+    }
+
     function setupChapterPreview() {
       if (!container.value) return
 
@@ -2720,6 +2769,16 @@ export default defineComponent({
       seekBarContainer.removeEventListener('mouseleave', handleSeekBarMouseLeave)
       seekBarContainer.addEventListener('mousemove', handleSeekBarMouseMove)
       seekBarContainer.addEventListener('mouseleave', handleSeekBarMouseLeave)
+    }
+
+    function setupSponsorBlockSeekBarTooltip() {
+      if (!container.value) return
+
+      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      if (!seekBarContainer) return
+
+      seekBarContainer.removeEventListener('mousemove', handleSponsorBlockSeekBarMouseMove)
+      seekBarContainer.addEventListener('mousemove', handleSponsorBlockSeekBarMouseMove)
     }
 
     function addUICustomizations() {
@@ -2752,6 +2811,7 @@ export default defineComponent({
       }
 
       setupChapterPreview()
+      setupSponsorBlockSeekBarTooltip()
 
       const fullscreenButton = controlsContainer.querySelector('.shaka-fullscreen-button')
       if (fullscreenButton instanceof HTMLElement) {
