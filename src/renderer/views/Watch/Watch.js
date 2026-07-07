@@ -180,6 +180,7 @@ export default defineComponent({
 
       // When true, the new player after a SABR reload should start playback (was playing before reload)
       resumePlaybackAfterSabrReload: false,
+      preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
     }
@@ -374,7 +375,10 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   methods: {
-    async reloadView() {
+    async reloadView({ preserveTitle = false } = {}) {
+      preserveTitle ||= this.preserveTitleOnNextReload
+      this.preserveTitleOnNextReload = false
+
       await this.handleRouteChange()
 
       if (this.$refs.player) {
@@ -388,7 +392,7 @@ export default defineComponent({
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
       }
       this.ipBlockDetectedInCurrentChain = false
-      this.resetVideoState()
+      this.resetVideoState({ preserveTitle })
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
@@ -407,7 +411,9 @@ export default defineComponent({
       }
     },
 
-    resetVideoState: function () {
+    resetVideoState: function ({ preserveTitle = false } = {}) {
+      const previousVideoTitle = this.videoTitle
+
       this.isLoading = true
       this.isFamilyFriendly = false
       this.isLive = false
@@ -419,7 +425,7 @@ export default defineComponent({
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
       this.thumbnail = ''
-      this.videoTitle = ''
+      this.videoTitle = preserveTitle ? previousVideoTitle : ''
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.license = ''
@@ -451,7 +457,9 @@ export default defineComponent({
       this.videoGenreIsMusic = false
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
-      this.updateTitle()
+      if (!preserveTitle) {
+        this.updateTitle()
+      }
     },
 
     onMountedDependOnLocalStateLoading() {
@@ -2283,6 +2291,7 @@ export default defineComponent({
 
     async onPlayerReloadRequested(payload) {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
+      this.preserveTitleOnNextReload = true
       showToast('Reloading player according to SABR request')
 
       const timestamp = this.getTimestamp()
@@ -2301,7 +2310,7 @@ export default defineComponent({
           }
         }
       }
-      await this.reloadView()
+      await this.reloadView({ preserveTitle: true })
     },
 
     onResumePlaybackAfterSabrReloadDone() {
