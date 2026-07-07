@@ -538,12 +538,28 @@
   display: block;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-bottom-controls) {
+.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
+  position: relative;
+  overflow: visible;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before {
   /*
-    Shaka defaults this to 98%, leaving a narrow bottom-right strip that
-    reaches the container click handler instead of the fullscreen button.
+    Shaka keeps the bottom controls at 98% width, so the outer edges can reach
+    the container click handler instead of the nearest edge button.
   */
-  width: 100%;
+  content: '';
+  position: absolute;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before {
+  inset: -8px -8px -8px -2vw;
+}
+
+.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before {
+  inset: -8px -2vw -8px -8px;
 }
 
 :deep(.shaka-controls-container[shown='true'] > .playerFullscreenTitleOverlay) {
