@@ -108,8 +108,10 @@
       v-if="tabSwitcherVisible"
       class="tabSwitcherOverlay"
       @mousedown.prevent
+      @wheel.prevent="handleTabSwitcherWheel"
     >
       <div
+        ref="tabSwitcherRef"
         class="tabSwitcher"
         role="listbox"
         :aria-label="t('KeyboardShortcutPrompt.Tab Switcher')"
@@ -140,7 +142,12 @@
               v-else
               class="tabSwitcherPreviewFallback"
               aria-hidden="true"
-            />
+            >
+              <FontAwesomeIcon
+                :icon="['fas', 'display']"
+                class="tabSwitcherFallbackIcon"
+              />
+            </span>
           </span>
           <span class="tabSwitcherTitle">
             {{ formatTabSwitcherTitle(tab.title) }}
@@ -152,8 +159,9 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { marked } from 'marked'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from './composables/use-i18n-polyfill'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -248,6 +256,7 @@ const dataReady = ref(false)
 const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
+const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
@@ -733,6 +742,26 @@ function loadTabSwitcherPreviews() {
  */
 function setTabSwitcherSelectedIndex(index) {
   tabSwitcherSelectedIndex.value = index
+}
+
+/**
+ * @param {WheelEvent} event
+ */
+function handleTabSwitcherWheel(event) {
+  const switcher = tabSwitcherRef.value
+  if (!(switcher instanceof HTMLElement)) {
+    return
+  }
+
+  const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
+    ? event.deltaX
+    : event.deltaY
+
+  if (delta === 0) {
+    return
+  }
+
+  switcher.scrollLeft += delta
 }
 
 function scrollTabSwitcherSelectionIntoView() {
