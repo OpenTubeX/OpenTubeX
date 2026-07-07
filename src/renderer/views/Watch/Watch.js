@@ -390,11 +390,15 @@ export default defineComponent({
       // react to route changes...
       const previousVideoId = this.videoId
       this.videoId = this.$route.params.id
-      if (this.videoId !== previousVideoId) {
+      const videoIdChanged = this.videoId !== previousVideoId
+      if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
       }
       this.ipBlockDetectedInCurrentChain = false
-      this.resetVideoState({ preserveTitle })
+      this.resetVideoState({
+        preserveTitle,
+        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : ''
+      })
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
@@ -413,7 +417,11 @@ export default defineComponent({
       }
     },
 
-    resetVideoState: function ({ preserveTitle = false } = {}) {
+    getRoutePlaceholderTitle: function () {
+      return this.$route.fullPath
+    },
+
+    resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
       const previousVideoTitle = this.videoTitle
 
       this.isLoading = true
@@ -427,7 +435,7 @@ export default defineComponent({
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
       this.thumbnail = ''
-      this.videoTitle = preserveTitle ? previousVideoTitle : ''
+      this.videoTitle = preserveTitle ? previousVideoTitle : placeholderTitle
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.license = ''
@@ -2118,7 +2126,7 @@ export default defineComponent({
     },
 
     updateTitle: function () {
-      this.setAppTitle(this.videoTitle)
+      this.setAppTitle(this.videoTitle || this.getRoutePlaceholderTitle())
     },
 
     isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {

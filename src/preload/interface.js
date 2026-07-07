@@ -13,8 +13,21 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
 // as Electron doesn't do it when the back button is pressed, probably a bug.
 // It doesn't even fire the `page-title-updated` in the main process.
 
+function getTitleForCurrentRoute(title) {
+  const trimmedTitle = title.trim()
+  if (
+    window.location.hash.startsWith('#/watch/') &&
+    (trimmedTitle.length === 0 || trimmedTitle === 'OpenTubeX')
+  ) {
+    return window.location.hash.slice(1)
+  }
+
+  return title
+}
+
 const titleMutationObserver = new MutationObserver((mutations) => {
-  ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, mutations[0].addedNodes[0].textContent)
+  const title = mutations[0].addedNodes[0].textContent
+  ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, getTitleForCurrentRoute(title))
 })
 document.addEventListener('DOMContentLoaded', () => {
   titleMutationObserver.observe(document.querySelector('title'), { childList: true })
