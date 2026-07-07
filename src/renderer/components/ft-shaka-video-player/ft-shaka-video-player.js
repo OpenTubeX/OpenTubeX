@@ -3147,21 +3147,33 @@ export default defineComponent({
     /** @type {number|null} */
     let sabrBackoffIntervalId = null
 
-    const showSabrBackoffOverlay = computed(() => sabrBackoffRemainingMs.value > 0)
-    const sabrBackoffTimeLabel = computed(() => `${+(sabrBackoffRemainingMs.value / 1000).toFixed(1)}s`)
-    const sabrBackoffAriaLabel = computed(() => {
-      return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: +(sabrBackoffRemainingMs.value / 1000).toFixed(1) })
-    })
-    const SABR_BACKOFF_RING_RADIUS = 38
-    const sabrBackoffRingCircumference = 2 * Math.PI * SABR_BACKOFF_RING_RADIUS
-    const sabrBackoffRingDashoffset = computed(() => {
-      if (sabrBackoffDurationMs.value <= 0) {
-        return sabrBackoffRingCircumference
+    const preRollRemainingMs = ref(0)
+    const preRollDurationMs = ref(0)
+    /** @type {number|null} */
+    let preRollIntervalId = null
+
+    const countdownRemainingMs = computed(() => sabrBackoffRemainingMs.value || preRollRemainingMs.value)
+    const countdownDurationMs = computed(() => sabrBackoffRemainingMs.value > 0 ? sabrBackoffDurationMs.value : preRollDurationMs.value)
+    const showCountdownOverlay = computed(() => countdownRemainingMs.value > 0)
+    const countdownTimeSeconds = computed(() => +(countdownRemainingMs.value / 1000).toFixed(1))
+    const countdownTimeLabel = computed(() => `${countdownTimeSeconds.value}s`)
+    const countdownAriaLabel = computed(() => {
+      if (sabrBackoffRemainingMs.value > 0) {
+        return t('Video.Watch.Remaining SABR backoff time: {remindingTimeSeconds}s', { remindingTimeSeconds: countdownTimeSeconds.value })
       }
 
-      const progress = 1 - (sabrBackoffRemainingMs.value / sabrBackoffDurationMs.value)
+      return t('Video.Watch.Remaining preroll-ad time: {remindingTimeSeconds}s', { remindingTimeSeconds: countdownTimeSeconds.value })
+    })
+    const COUNTDOWN_RING_RADIUS = 38
+    const countdownRingCircumference = 2 * Math.PI * COUNTDOWN_RING_RADIUS
+    const countdownRingDashoffset = computed(() => {
+      if (countdownDurationMs.value <= 0) {
+        return countdownRingCircumference
+      }
+
+      const progress = 1 - (countdownRemainingMs.value / countdownDurationMs.value)
       const clampedProgress = Math.min(1, Math.max(0, progress))
-      return sabrBackoffRingCircumference * (1 - clampedProgress)
+      return countdownRingCircumference * (1 - clampedProgress)
     })
 
     function requestTabPreviewRefresh(delayMs = SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS) {
@@ -3189,6 +3201,16 @@ export default defineComponent({
       }
     }
 
+    function clearPreRollTimer() {
+      if (preRollIntervalId !== null) {
+        clearInterval(preRollIntervalId)
+        preRollIntervalId = null
+      }
+
+      preRollRemainingMs.value = 0
+      preRollDurationMs.value = 0
+    }
+
     function startSabrBackoffTimer(backoffMs) {
       if (backoffMs <= 0) {
         clearSabrBackoffTimer({ refreshPreview: true })
@@ -3214,6 +3236,32 @@ export default defineComponent({
       updateRemainingMs()
       requestTabPreviewRefresh()
       sabrBackoffIntervalId = setInterval(updateRemainingMs, 100)
+    }
+
+    function startPreRollTimer(delayMs) {
+      if (delayMs <= 0) {
+        clearPreRollTimer()
+        return
+      }
+
+      const endsAt = Date.now() + delayMs
+      preRollDurationMs.value = delayMs
+
+      const updateRemainingMs = () => {
+        const remainingMs = Math.max(0, endsAt - Date.now())
+        preRollRemainingMs.value = remainingMs
+
+        if (remainingMs === 0) {
+          clearPreRollTimer()
+        }
+      }
+
+      if (preRollIntervalId !== null) {
+        clearInterval(preRollIntervalId)
+      }
+
+      updateRemainingMs()
+      preRollIntervalId = setInterval(updateRemainingMs, 100)
     }
 
     if (process.env.SUPPORTS_LOCAL_API && props.sabrData) {
@@ -5112,8 +5160,6 @@ export default defineComponent({
     // #endregion offline message
 
     // #region setup
-    const initLoadWaitTimeToastAC = new AbortController()
-
     onMounted(async () => {
       const videoElement = video.value
 
@@ -5297,8 +5343,8 @@ export default defineComponent({
       })
     })
     onUnmounted(() => {
-      initLoadWaitTimeToastAC.abort()
       clearSabrBackoffTimer()
+      clearPreRollTimer()
     })
 
     async function performFirstLoad() {
@@ -5324,17 +5370,9 @@ export default defineComponent({
 
       const initialLoadDelayMs = props.delayLoadUntilUnix - Date.now()
       if (initialLoadDelayMs > 0 && (props.format === 'legacy' || props.manifestMimeType !== MANIFEST_TYPE_SABR)) {
-        showToast(
-          ({ remainingMs }) => {
-            // `+value` converts string back to float
-            return t('Video.Watch.Remaining preroll-ad time: {remindingTimeSeconds}s', { remindingTimeSeconds: +(remainingMs / 1000).toFixed(1) })
-          },
-          // So that we don't see last countdown text like 0/N
-          initialLoadDelayMs,
-          null,
-          initLoadWaitTimeToastAC.signal,
-        )
+        startPreRollTimer(initialLoadDelayMs)
         await new Promise((resolve) => setTimeout(resolve, initialLoadDelayMs))
+        clearPreRollTimer()
       }
 
       if (props.format === 'dash' || props.format === 'audio') {
@@ -5889,11 +5927,11 @@ export default defineComponent({
       translateSponsorBlockCategory,
 
       showOfflineMessage,
-      showSabrBackoffOverlay,
-      sabrBackoffTimeLabel,
-      sabrBackoffAriaLabel,
-      sabrBackoffRingCircumference,
-      sabrBackoffRingDashoffset,
+      showCountdownOverlay,
+      countdownTimeLabel,
+      countdownAriaLabel,
+      countdownRingCircumference,
+      countdownRingDashoffset,
 
       handlePlay,
       handlePause,

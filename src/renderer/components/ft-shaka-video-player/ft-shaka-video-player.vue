@@ -113,37 +113,37 @@
     </div>
     <Transition name="fade">
       <div
-        v-if="showSabrBackoffOverlay"
-        class="sabrBackoffOverlay"
+        v-if="showCountdownOverlay"
+        class="countdownOverlay"
         role="status"
         aria-live="polite"
-        :aria-label="sabrBackoffAriaLabel"
+        :aria-label="countdownAriaLabel"
       >
-        <div class="sabrBackoffProgress">
+        <div class="countdownProgress">
           <svg
-            class="sabrBackoffRing"
+            class="countdownRing"
             viewBox="0 0 92 92"
             aria-hidden="true"
           >
             <circle
-              class="sabrBackoffRingTrack"
+              class="countdownRingTrack"
               cx="46"
               cy="46"
               :r="38"
               fill="none"
             />
             <circle
-              class="sabrBackoffRingProgress"
+              class="countdownRingProgress"
               cx="46"
               cy="46"
               :r="38"
               fill="none"
-              :stroke-dasharray="sabrBackoffRingCircumference"
-              :stroke-dashoffset="sabrBackoffRingDashoffset"
+              :stroke-dasharray="countdownRingCircumference"
+              :stroke-dashoffset="countdownRingDashoffset"
             />
           </svg>
-          <span class="sabrBackoffTime">
-            {{ sabrBackoffTimeLabel }}
+          <span class="countdownTime">
+            {{ countdownTimeLabel }}
           </span>
         </div>
       </div>

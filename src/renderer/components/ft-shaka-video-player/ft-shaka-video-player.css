@@ -128,7 +128,7 @@
   font-size: 0.8em;
 }
 
-.sabrBackoffOverlay {
+.countdownOverlay {
   position: absolute;
   inset: 0;
   display: flex;
@@ -138,7 +138,7 @@
   pointer-events: none;
 }
 
-.sabrBackoffProgress {
+.countdownProgress {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -152,7 +152,7 @@
   color: #fff;
 }
 
-.sabrBackoffRing {
+.countdownRing {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -160,20 +160,20 @@
   transform: rotate(-90deg);
 }
 
-.sabrBackoffRingTrack,
-.sabrBackoffRingProgress {
+.countdownRingTrack,
+.countdownRingProgress {
   stroke-width: 4;
 }
 
-.sabrBackoffRingTrack {
+.countdownRingTrack {
   stroke: rgb(255 255 255 / 24%);
 }
 
-.sabrBackoffRingProgress {
+.countdownRingProgress {
   stroke: var(--primary-color);
 }
 
-.sabrBackoffTime {
+.countdownTime {
   position: relative;
   z-index: 1;
   font-size: 18px;
