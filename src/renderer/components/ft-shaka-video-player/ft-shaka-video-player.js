@@ -500,6 +500,29 @@ export default defineComponent({
       return store.getters.getUseQuickPlaybackSpeedBar
     })
 
+    /** @type {import('vue').ComputedRef<Array<{speed: number, name: string}>>} */
+    const quickPlaybackSpeedBarOptions = computed(() => {
+      try {
+        const parsedOptions = JSON.parse(store.getters.getQuickPlaybackSpeedBarOptions || '[]')
+
+        if (!Array.isArray(parsedOptions)) {
+          return [{ speed: 1, name: '' }]
+        }
+
+        const options = parsedOptions
+          .map((option) => ({
+            speed: Number.parseFloat(option?.speed),
+            name: typeof option?.name === 'string' ? option.name : '',
+          }))
+          .filter((option) => Number.isFinite(option.speed) && option.speed > 0)
+
+        return options.length > 0 ? options : [{ speed: 1, name: '' }]
+      } catch (error) {
+        console.error('Failed to parse quick playback speed bar options:', error)
+        return [{ speed: 1, name: '' }]
+      }
+    })
+
     /** @type {import('vue').ComputedRef<number | null>} */
     const savedChannelPlaybackRate = computed(() => {
       if (!rememberPlaybackSpeedPerChannel.value || props.channelId === '') {
@@ -2772,6 +2795,7 @@ export default defineComponent({
         rememberPlaybackSpeedPerChannel,
         autoUpdateChannelPlaybackSpeeds,
         savedChannelPlaybackRate,
+        quickPlaybackSpeedBarOptions,
         () => props.channelId
       ],
       () => {
@@ -4167,6 +4191,7 @@ export default defineComponent({
       class QuickPlaybackRateBarFactory {
         create(rootElement, controls) {
           return new QuickPlaybackRateBar(
+            () => quickPlaybackSpeedBarOptions.value,
             () => savedChannelPlaybackRate.value,
             () => canManuallySaveChannelPlaybackRate.value,
             events,

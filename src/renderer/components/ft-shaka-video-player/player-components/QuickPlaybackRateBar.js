@@ -2,30 +2,24 @@ import shaka from 'shaka-player'
 
 import i18n from '../../../i18n/index'
 
-const QUICK_PLAYBACK_RATE_OPTIONS = Object.freeze([
-  ['50%', 0.5],
-  ['75%', 0.75],
-  ['normal', 1],
-  ['1.25x', 1.25],
-  ['1.5x', 1.5],
-  ['1.75x', 1.75],
-  ['2x', 2],
-  ['2.25x', 2.25],
-  ['2.5x', 2.5],
-  ['3x', 3],
-  ['3.5x', 3.5],
-])
-
 export class QuickPlaybackRateBar extends shaka.ui.Element {
   /**
+   * @typedef {{ speed: number, name?: string }} QuickPlaybackRateOption
+   */
+
+  /**
+   * @param {() => QuickPlaybackRateOption[]} getPlaybackRateOptions
    * @param {() => number | null} getSavedChannelPlaybackRate
    * @param {() => boolean} getCanSaveChannelPlaybackSpeed
    * @param {EventTarget} events
    * @param {HTMLElement} parent
    * @param {shaka.ui.Controls} controls
    */
-  constructor(getSavedChannelPlaybackRate, getCanSaveChannelPlaybackSpeed, events, parent, controls) {
+  constructor(getPlaybackRateOptions, getSavedChannelPlaybackRate, getCanSaveChannelPlaybackSpeed, events, parent, controls) {
     super(parent, controls)
+
+    /** @private */
+    this.getPlaybackRateOptions_ = getPlaybackRateOptions
 
     /** @private */
     this.getSavedChannelPlaybackRate_ = getSavedChannelPlaybackRate
@@ -46,25 +40,8 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     this.saveButton_.type = 'button'
     this.root_.appendChild(this.saveButton_)
 
-    /** @private @type {Map<number, HTMLButtonElement>} */
-    this.rateButtons_ = new Map()
-
-    for (const [, rate] of QUICK_PLAYBACK_RATE_OPTIONS) {
-      const button = document.createElement('button')
-      button.classList.add('ft-quick-playback-rate-button')
-      button.type = 'button'
-      button.dataset.rate = String(rate)
-
-      this.eventManager.listen(button, 'click', () => {
-        this.setPlaybackRate_(rate)
-        this.events_.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
-          detail: rate
-        }))
-      })
-
-      this.rateButtons_.set(rate, button)
-      this.root_.appendChild(button)
-    }
+    /** @private @type {Array<{speed: number, button: HTMLButtonElement}>} */
+    this.rateButtons_ = []
 
     this.parent.appendChild(this.root_)
 
@@ -81,6 +58,7 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     })
 
     this.eventManager.listen(events, 'quickPlaybackRateBarStateChanged', () => {
+      this.rebuildRateButtons_()
       this.updateButtonStates_()
     })
 
@@ -89,8 +67,37 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
       this.updateButtonStates_()
     })
 
+    this.rebuildRateButtons_()
     this.updateLocalizedStrings_()
     this.updateButtonStates_()
+  }
+
+  /** @private */
+  rebuildRateButtons_() {
+    for (const { button } of this.rateButtons_) {
+      button.remove()
+    }
+
+    this.rateButtons_ = []
+
+    for (const { speed } of this.getPlaybackRateOptions_()) {
+      const button = document.createElement('button')
+      button.classList.add('ft-quick-playback-rate-button')
+      button.type = 'button'
+      button.dataset.rate = String(speed)
+
+      button.addEventListener('click', () => {
+        this.setPlaybackRate_(speed)
+        this.events_.dispatchEvent(new CustomEvent('quickPlaybackRateUserSet', {
+          detail: speed
+        }))
+      })
+
+      this.rateButtons_.push({ speed, button })
+      this.root_.appendChild(button)
+    }
+
+    this.updateLocalizedStrings_()
   }
 
   /** @private */
@@ -99,20 +106,42 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
     this.saveButton_.title = i18n.global.t('Video.Save Channel Playback Speed')
     this.saveButton_.ariaLabel = i18n.global.t('Video.Save Channel Playback Speed')
 
-    for (const [labelKey, rate] of QUICK_PLAYBACK_RATE_OPTIONS) {
-      const button = this.rateButtons_.get(rate)
-      if (!button) {
+    const options = this.getPlaybackRateOptions_()
+
+    for (const [index, { speed, name }] of options.entries()) {
+      const entry = this.rateButtons_[index]
+      if (!entry) {
         continue
       }
 
-      const label = labelKey === 'normal'
-        ? i18n.global.t('Video.Player.Normal')
-        : labelKey
+      const label = this.getPlaybackRateLabel_(speed, name)
 
-      button.textContent = label
-      button.title = label
-      button.ariaLabel = label
+      entry.button.textContent = label
+      entry.button.title = label
+      entry.button.ariaLabel = label
     }
+  }
+
+  /**
+   * @private
+   * @param {number} speed
+   * @param {string | null | undefined} name
+   * @returns {string}
+   */
+  getPlaybackRateLabel_(speed, name) {
+    if (typeof name === 'string' && name.trim() !== '') {
+      return name.trim()
+    }
+
+    if (this.isSameRate_(speed, 1)) {
+      return i18n.global.t('Video.Player.Normal')
+    }
+
+    if (speed < 1) {
+      return `${Math.round(speed * 100)}%`
+    }
+
+    return `${speed}x`
   }
 
   /** @private */
@@ -127,9 +156,9 @@ export class QuickPlaybackRateBar extends shaka.ui.Element {
       this.saveButton_.classList.add('shaka-hidden')
     }
 
-    for (const [rate, button] of this.rateButtons_) {
-      const isCurrentRate = this.isSameRate_(currentRate, rate)
-      const isSavedRate = savedRate != null && this.isSameRate_(savedRate, rate)
+    for (const { speed, button } of this.rateButtons_) {
+      const isCurrentRate = this.isSameRate_(currentRate, speed)
+      const isSavedRate = savedRate != null && this.isSameRate_(savedRate, speed)
 
       button.classList.toggle('is-current-rate', isCurrentRate)
       button.classList.toggle('is-channel-default-rate', isSavedRate)

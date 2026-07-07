@@ -490,6 +490,14 @@ Settings:
     Remember Playback Speed Per Channel: Remember Playback Speed Per Channel
     Auto Update Channel Playback Speed: Automatically update when changing via player options
     Use Quick Playback Speed Bar: Use Quick Playback Speed Bar
+    Customize Quick Playback Speed Bar: Customize Quick Playback Speed Bar
+    Quick Playback Speed Bar Manager: Quick Playback Speed Bar
+    Add Playback Speed: Add Playback Speed
+    Reset Quick Playback Speed Bar: Reset to Defaults
+    Playback Speed Name: Name
+    Edit Playback Speed Name: Edit playback speed name
+    Use Automatic Playback Speed Name: Use automatic playback speed name
+    Reorder Playback Speed: Drag to reorder playback speed
     Manage Channel Playback Speeds: Manage Channel Playback Speeds
     Channel Playback Speed Manager: Channel Playback Speed Manager
     No Saved Playback Speeds: No saved playback speeds
