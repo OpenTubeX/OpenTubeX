@@ -106,6 +106,8 @@ const suppressTransitions = ref(false)
  * @property {number} sourceIndex
  * @property {number} targetIndex
  * @property {number} pointerStartX
+ * @property {number} pointerCurrentX
+ * @property {number} scrollStartLeft
  * @property {Array<{id: string, left: number, width: number}>} rects
  * @property {number} gap
  * @property {boolean} started
@@ -171,6 +173,8 @@ function handleTabContainerPointerDown(event) {
     sourceIndex,
     targetIndex: sourceIndex,
     pointerStartX: event.clientX,
+    pointerCurrentX: event.clientX,
+    scrollStartLeft: containerScrollLeft,
     rects,
     gap,
     started: false,
@@ -189,10 +193,12 @@ function handleTabContainerPointerDown(event) {
 function handleDragPointerMove(event) {
   if (!dragSession) return
 
-  const dx = event.clientX - dragSession.pointerStartX
+  dragSession.pointerCurrentX = event.clientX
+
+  const pointerDx = event.clientX - dragSession.pointerStartX
 
   if (!dragSession.started) {
-    if (Math.abs(dx) < DRAG_THRESHOLD_PX) return
+    if (Math.abs(pointerDx) < DRAG_THRESHOLD_PX) return
     dragSession.started = true
     draggingTabId.value = dragSession.tabId
     closeTooltipsSignal.value++
@@ -202,6 +208,20 @@ function handleDragPointerMove(event) {
   dragSession.moved = true
   // Prevent text selection while dragging
   event.preventDefault()
+
+  updateActiveDragPosition()
+}
+
+function updateActiveDragPosition() {
+  if (!dragSession || !dragSession.started) return
+
+  const container = dropZoneRef.value
+  if (!container) return
+
+  const dx = dragSession.pointerCurrentX -
+    dragSession.pointerStartX +
+    container.scrollLeft -
+    dragSession.scrollStartLeft
 
   const { rects, sourceIndex, gap } = dragSession
   const sourceRect = rects[sourceIndex]
@@ -751,6 +771,7 @@ function handleWheel(event) {
 
 function handleScroll() {
   updateScrollbar()
+  updateActiveDragPosition()
 }
 
 /**
