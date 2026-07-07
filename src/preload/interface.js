@@ -37,6 +37,13 @@ let currentUpdateSearchInputTextListener
 
 export default {
   /**
+   * @param {string} title
+   */
+  setWindowTitle: (title) => {
+    ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, getTitleForCurrentRoute(title))
+  },
+
+  /**
    * @returns {Promise<string>}
    */
   getSystemLocale: () => {

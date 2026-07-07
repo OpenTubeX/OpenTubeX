@@ -299,6 +299,8 @@ onMounted(async () => {
     }, 500)
   })
 
+  await router.isReady()
+
   if (route.path === '/') {
     router.replace({ path: landingPage.value })
   }
@@ -1050,19 +1052,26 @@ const windowTitle = computed(() => {
 /** @type {import('vue').ComputedRef<string>} */
 const appTitle = computed(() => store.getters.getAppTitle)
 
-watch(appTitle, (value) => {
+function publishAppTitle(value) {
   if (value.length > 0) {
     document.title = `${value} - ${packageDetails.productName}`
   } else {
     document.title = packageDetails.productName
   }
-})
+
+  if (process.env.IS_ELECTRON) {
+    window.ftElectron.setWindowTitle(document.title)
+  }
+}
+
+watch(appTitle, publishAppTitle)
 
 watch(windowTitle, setWindowTitle)
 
 function setWindowTitle() {
   if (windowTitle.value !== null) {
     store.commit('setAppTitle', windowTitle.value)
+    publishAppTitle(windowTitle.value)
   }
 }
 

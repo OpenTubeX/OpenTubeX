@@ -347,6 +347,35 @@ export class TabManager {
   }
 
   /**
+   * The renderer can miss early title mutation forwarding while a tab is
+   * created or switched quickly. Pull the settled DOM title after navigation.
+   * @param {TabInfo} tab
+   */
+  scheduleDocumentTitleSync(tab) {
+    for (const delay of [0, 50, 250, 1000]) {
+      setTimeout(() => {
+        this.syncDocumentTitle(tab).catch(() => {})
+      }, delay)
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Promise<void>}
+   */
+  async syncDocumentTitle(tab) {
+    const webContents = tab.view.webContents
+    if (!tab.hasStartedLoading || webContents.isDestroyed()) {
+      return
+    }
+
+    const title = await webContents.executeJavaScript('document.title', true)
+    if (typeof title === 'string') {
+      this.applyTabTitle(tab, title)
+    }
+  }
+
+  /**
    * Other windows for "move tab to window", with disambiguated labels.
    * @param {number} excludeWindowId
    * @returns {Array<{ windowId: number, label: string }>}
@@ -592,6 +621,7 @@ export class TabManager {
       if (tabInfo) {
         mgr._setTabNavigationLoading(tabInfo, false)
         mgr._scheduleTabPreviewRefresh(tabInfo)
+        mgr.scheduleDocumentTitleSync(tabInfo)
       }
     })
 
@@ -618,6 +648,7 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
+        mgr.scheduleDocumentTitleSync(tabInfo)
         mgr._scheduleTabPreviewRefresh(tabInfo)
         mgr._saveSession()
       }
@@ -632,6 +663,7 @@ export class TabManager {
       const tabInfo = mgr.tabs.get(tid)
       if (tabInfo) {
         tabInfo.url = url
+        mgr.scheduleDocumentTitleSync(tabInfo)
         mgr._scheduleTabPreviewRefresh(tabInfo)
         mgr._saveSession()
       }
