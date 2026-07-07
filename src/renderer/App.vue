@@ -104,12 +104,56 @@
     <FtProgressBar
       v-if="showProgressBar"
     />
+    <div
+      v-if="tabSwitcherVisible"
+      class="tabSwitcherOverlay"
+      @mousedown.prevent
+    >
+      <div
+        class="tabSwitcher"
+        role="listbox"
+        :aria-label="t('KeyboardShortcutPrompt.Tab Switcher')"
+        :aria-activedescendant="tabSwitcherSelectedTabId"
+      >
+        <button
+          v-for="(tab, index) in tabSwitcherTabs"
+          :id="`tab-switcher-option-${tab.id}`"
+          :key="tab.id"
+          type="button"
+          class="tabSwitcherItem"
+          :class="{ selected: index === tabSwitcherSelectedIndex }"
+          :style="getTabSwitcherItemStyle(tab)"
+          role="option"
+          :aria-selected="index === tabSwitcherSelectedIndex"
+          @mouseenter="setTabSwitcherSelectedIndex(index)"
+          @focus="setTabSwitcherSelectedIndex(index)"
+          @click="commitTabSwitcherSelection(index)"
+        >
+          <span class="tabSwitcherPreview">
+            <img
+              v-if="tabSwitcherPreviewUrls[tab.id]"
+              :src="tabSwitcherPreviewUrls[tab.id]"
+              :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
+              draggable="false"
+            >
+            <span
+              v-else
+              class="tabSwitcherPreviewFallback"
+              aria-hidden="true"
+            />
+          </span>
+          <span class="tabSwitcherTitle">
+            {{ formatTabSwitcherTitle(tab.title) }}
+          </span>
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { marked } from 'marked'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from './composables/use-i18n-polyfill'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -201,11 +245,21 @@ const hideSubscriptionsShorts = computed(() => store.getters.getHideSubscription
 const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams || store.getters.getHideSubscriptionsLive)
 
 const dataReady = ref(false)
+const tabSwitcherVisible = ref(false)
+const tabSwitcherSelectedIndex = ref(-1)
+const tabSwitcherPreviewUrls = ref({})
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
   live: null
 }
+let tabSwitcherPreviewRequestId = 0
+
+const tabSwitcherTabs = computed(() => store.getters.getTabs)
+const tabSwitcherSelectedTabId = computed(() => {
+  const tab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
+  return tab ? `tab-switcher-option-${tab.id}` : undefined
+})
 
 onMounted(async () => {
   await store.dispatch('grabUserSettings')
@@ -252,17 +306,21 @@ onMounted(async () => {
   setWindowTitle()
 
   document.addEventListener('keydown', handleKeyboardShortcuts)
+  document.addEventListener('keyup', handleKeyboardShortcutKeyup)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
+  window.addEventListener('blur', cancelTabSwitcher)
 })
 
 onBeforeUnmount(() => {
   clearSubscriptionFeedAutoRefreshTimer()
   document.removeEventListener('keydown', handleKeyboardShortcuts)
+  document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
+  window.removeEventListener('blur', cancelTabSwitcher)
 })
 
 watch([
@@ -503,6 +561,12 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
+  if (tabSwitcherVisible.value && event.key === 'Escape') {
+    event.preventDefault()
+    cancelTabSwitcher()
+    return
+  }
+
   // ignore user typing in HTML `input` elements
   if (event.shiftKey && event.key === '?' && event.target.tagName !== 'INPUT') {
     store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
@@ -562,14 +626,14 @@ function handleKeyboardShortcuts(event) {
     // Ctrl+Tab: Next tab
     if (event.ctrlKey && event.key === 'Tab' && !event.shiftKey) {
       event.preventDefault()
-      store.dispatch('nextTab')
+      cycleTabSwitcher(1)
       return
     }
 
     // Ctrl+Shift+Tab: Previous tab
     if (event.ctrlKey && event.shiftKey && event.key === 'Tab') {
       event.preventDefault()
-      store.dispatch('prevTab')
+      cycleTabSwitcher(-1)
       return
     }
 
@@ -582,6 +646,154 @@ function handleKeyboardShortcuts(event) {
       event.preventDefault()
       prepareAndReloadTab()
     }
+  }
+}
+
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleKeyboardShortcutKeyup(event) {
+  if (!tabSwitcherVisible.value) {
+    return
+  }
+
+  if (event.key === 'Control' || !event.ctrlKey) {
+    event.preventDefault()
+    commitTabSwitcherSelection()
+  }
+}
+
+/**
+ * @param {number} direction
+ */
+function cycleTabSwitcher(direction) {
+  const tabs = tabSwitcherTabs.value
+  if (tabs.length <= 1) {
+    return
+  }
+
+  if (!tabSwitcherVisible.value) {
+    const activeIndex = Math.max(0, tabs.findIndex(tab => tab.id === store.getters.getActiveTabId))
+    tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
+    tabSwitcherPreviewUrls.value = {}
+    tabSwitcherVisible.value = true
+    scrollTabSwitcherSelectionIntoView()
+    loadTabSwitcherPreviews()
+    return
+  }
+
+  tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(
+    tabSwitcherSelectedIndex.value + direction,
+    tabs.length
+  )
+  scrollTabSwitcherSelectionIntoView()
+}
+
+/**
+ * @param {number} index
+ * @param {number} length
+ * @returns {number}
+ */
+function wrapTabSwitcherIndex(index, length) {
+  return (index + length) % length
+}
+
+function loadTabSwitcherPreviews() {
+  if (
+    !process.env.IS_ELECTRON ||
+    typeof window.ftElectron?.tabs?.capturePreview !== 'function'
+  ) {
+    return
+  }
+
+  const requestId = ++tabSwitcherPreviewRequestId
+  for (const tab of tabSwitcherTabs.value) {
+    window.ftElectron.tabs.capturePreview(tab.id).then((dataUrl) => {
+      if (
+        requestId !== tabSwitcherPreviewRequestId ||
+        !tabSwitcherVisible.value ||
+        typeof dataUrl !== 'string' ||
+        dataUrl.length === 0
+      ) {
+        return
+      }
+
+      tabSwitcherPreviewUrls.value = {
+        ...tabSwitcherPreviewUrls.value,
+        [tab.id]: dataUrl
+      }
+    }).catch(() => {})
+  }
+}
+
+/**
+ * @param {number} index
+ */
+function setTabSwitcherSelectedIndex(index) {
+  tabSwitcherSelectedIndex.value = index
+}
+
+function scrollTabSwitcherSelectionIntoView() {
+  nextTick(() => {
+    const selectedTabId = tabSwitcherSelectedTabId.value
+    if (selectedTabId == null) {
+      return
+    }
+
+    document.getElementById(selectedTabId)?.scrollIntoView({
+      block: 'nearest',
+      inline: 'nearest'
+    })
+  })
+}
+
+/**
+ * @param {number} [index]
+ */
+function commitTabSwitcherSelection(index) {
+  if (typeof index === 'number') {
+    tabSwitcherSelectedIndex.value = index
+  }
+
+  const selectedTab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
+  cancelTabSwitcher()
+
+  if (selectedTab && selectedTab.id !== store.getters.getActiveTabId) {
+    store.dispatch('activateTab', selectedTab.id)
+  }
+}
+
+function cancelTabSwitcher() {
+  if (!tabSwitcherVisible.value) {
+    return
+  }
+
+  tabSwitcherVisible.value = false
+  tabSwitcherSelectedIndex.value = -1
+  tabSwitcherPreviewUrls.value = {}
+  tabSwitcherPreviewRequestId++
+}
+
+/**
+ * @param {string} title
+ * @returns {string}
+ */
+function formatTabSwitcherTitle(title) {
+  if (!title) return title
+  const suffix = ` - ${packageDetails.productName}`
+  if (title.endsWith(suffix)) {
+    return title.slice(0, -suffix.length)
+  }
+  return title
+}
+
+/**
+ * @param {{color?: string | null}} tab
+ * @returns {Record<string, string | undefined>}
+ */
+function getTabSwitcherItemStyle(tab) {
+  return {
+    '--tab-switcher-accent-color': tab.color || undefined
   }
 }
 

@@ -61,6 +61,92 @@
   opacity: 0;
 }
 
+.tabSwitcherOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  pointer-events: none;
+}
+
+.tabSwitcher {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(160px, 220px);
+  gap: 10px;
+  max-inline-size: min(88vw, 980px);
+  max-block-size: min(48vh, 300px);
+  overflow: auto;
+  padding: 12px;
+  background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgb(0 0 0 / 38%);
+  pointer-events: auto;
+}
+
+.tabSwitcherItem {
+  display: grid;
+  grid-template-rows: 112px minmax(34px, auto);
+  gap: 8px;
+  min-inline-size: 0;
+  padding: 8px;
+  color: var(--primary-text-color);
+  background-color: var(--card-bg-color);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
+}
+
+.tabSwitcherItem:hover,
+.tabSwitcherItem.selected {
+  border-color: var(--tab-switcher-accent-color, var(--primary-text-color));
+  background-color: color-mix(in srgb, var(--card-bg-color) 82%, var(--primary-text-color));
+}
+
+.tabSwitcherItem.selected {
+  transform: translateY(-2px);
+}
+
+.tabSwitcherPreview {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 112px;
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--bg-color) 84%, #000);
+  border-radius: 6px;
+}
+
+.tabSwitcherPreview img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.tabSwitcherPreviewFallback {
+  inline-size: 48px;
+  block-size: 34px;
+  border: 2px solid var(--secondary-text-color);
+  border-radius: 5px;
+  opacity: 0.65;
+}
+
+.tabSwitcherTitle {
+  overflow: hidden;
+  min-inline-size: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 @media only screen and (width <= 680px) {
   .routerView {
     margin-block: 68px;
@@ -78,6 +164,21 @@
 
   .changeLogText {
     block-size: 65vh;
+  }
+
+  .tabSwitcher {
+    grid-auto-columns: minmax(138px, 176px);
+    gap: 8px;
+    max-inline-size: 94vw;
+    padding: 10px;
+  }
+
+  .tabSwitcherItem {
+    grid-template-rows: 86px minmax(34px, auto);
+  }
+
+  .tabSwitcherPreview {
+    block-size: 86px;
   }
 }
 
