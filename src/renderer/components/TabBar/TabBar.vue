@@ -91,6 +91,7 @@ const closeTooltipsSignal = ref(0)
 // ===== Drag and drop state =====
 const DRAG_THRESHOLD_PX = 5
 const SETTLE_DURATION_MS = 180
+const REORDER_STATE_UPDATE_TIMEOUT_MS = 300
 
 /** @type {import('vue').Ref<string | null>} */
 const draggingTabId = ref(null)
@@ -401,10 +402,12 @@ function computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset
  * @param {number} sourceIndex
  * @param {number} targetIndex
  */
-function commitReorder(tabId, sourceIndex, targetIndex) {
+async function commitReorder(tabId, sourceIndex, targetIndex) {
   if (sourceIndex !== targetIndex) {
     suppressTransitions.value = true
+    const reordered = waitForTabIndex(tabId, targetIndex)
     store.dispatch('moveTab', { tabId, toIndex: targetIndex })
+    await reordered
   }
 
   tabOffsets.value = {}
@@ -414,6 +417,37 @@ function commitReorder(tabId, sourceIndex, targetIndex) {
     requestAnimationFrame(() => {
       suppressTransitions.value = false
     })
+  })
+}
+
+/**
+ * Wait until the main-process tab state update reaches the renderer.
+ * @param {string} tabId
+ * @param {number} targetIndex
+ * @returns {Promise<void>}
+ */
+function waitForTabIndex(tabId, targetIndex) {
+  if (tabs.value.findIndex(tab => tab.id === tabId) === targetIndex) {
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+    let timeoutId = null
+    const stop = watch(tabs, (newTabs) => {
+      if (newTabs.findIndex(tab => tab.id === tabId) === targetIndex) {
+        cleanup()
+      }
+    })
+
+    function cleanup() {
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+      }
+      stop()
+      resolve()
+    }
+
+    timeoutId = window.setTimeout(cleanup, REORDER_STATE_UPDATE_TIMEOUT_MS)
   })
 }
 
