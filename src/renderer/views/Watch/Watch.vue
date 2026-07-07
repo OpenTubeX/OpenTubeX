@@ -49,6 +49,7 @@
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
+          :sabr-reload-caption-index="sabrReloadCaptionIndex"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"

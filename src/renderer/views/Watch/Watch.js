@@ -180,6 +180,8 @@ export default defineComponent({
 
       // When true, the new player after a SABR reload should start playback (was playing before reload)
       resumePlaybackAfterSabrReload: false,
+      /** @type {number|null} */
+      sabrReloadCaptionIndex: null,
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
@@ -458,6 +460,7 @@ export default defineComponent({
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
       if (!preserveTitle) {
+        this.sabrReloadCaptionIndex = null
         this.updateTitle()
       }
     },
@@ -1528,6 +1531,7 @@ export default defineComponent({
     handleVideoLoaded: function () {
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
+      this.sabrReloadCaptionIndex = null
 
       // will trigger again if you switch formats or change legacy quality
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
@@ -2291,6 +2295,7 @@ export default defineComponent({
 
     async onPlayerReloadRequested(payload) {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
+      this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       this.preserveTitleOnNextReload = true
       showToast('Reloading player according to SABR request')
 

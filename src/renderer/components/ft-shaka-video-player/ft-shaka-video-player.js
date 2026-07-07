@@ -290,6 +290,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    sabrReloadCaptionIndex: {
+      type: Number,
+      default: null
+    },
   },
   emits: [
     'error',
@@ -346,9 +350,9 @@ export default defineComponent({
     let exitFullscreenCleanup = null
 
     /** @type {number|null} */
-    let restoreCaptionIndex = null
+    let restoreCaptionIndex = props.sabrReloadCaptionIndex
 
-    if (store.getters.getEnableSubtitlesByDefault && props.captions.length > 0) {
+    if (restoreCaptionIndex === null && store.getters.getEnableSubtitlesByDefault && props.captions.length > 0) {
       restoreCaptionIndex = 0
     }
 
@@ -3271,9 +3275,13 @@ export default defineComponent({
         startSabrBackoffTimer(backoffMs)
       })
       sabrStream.onReloadOnce(() => {
+        const captionIndex = player?.getTextTracks().findIndex(caption => caption.active) ?? -1
         sabrAbortController.abort()
         clearSabrBackoffTimer()
-        emit('player-reload-requested', { wasPlaying: !video.value?.paused })
+        emit('player-reload-requested', {
+          wasPlaying: !video.value?.paused,
+          captionIndex: captionIndex >= 0 ? captionIndex : null
+        })
       })
     }
 
