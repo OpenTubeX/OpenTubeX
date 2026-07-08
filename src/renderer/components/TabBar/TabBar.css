@@ -1,8 +1,10 @@
 .tabBar {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   background-color: var(--side-nav-color);
   border-block-end: 1px solid var(--tertiary-text-color);
+  block-size: 32px;
   min-block-size: 32px;
   padding-inline: 4px;
   gap: 2px;
