@@ -5192,7 +5192,15 @@ export default defineComponent({
 
     function registerQuickPlaybackRateBar() {
       events.addEventListener('quickPlaybackRateUserSet', (/** @type {CustomEvent} */ event) => {
-        emit('playback-rate-user-set', event.detail)
+        const playbackRate = normalizePlaybackRate(event.detail)
+
+        if (playbackRate === null) {
+          return
+        }
+
+        queuePlaybackRateRestore(playbackRate)
+        emit('playback-rate-updated', playbackRate)
+        emit('playback-rate-user-set', playbackRate)
       })
 
       events.addEventListener('saveChannelPlaybackSpeed', () => {
@@ -5360,6 +5368,27 @@ export default defineComponent({
         console.error('Failed to restore playback rate:', error)
       }
     }
+
+    watch(
+      () => props.currentPlaybackRate,
+      (playbackRate) => {
+        if (hasLoaded.value) {
+          return
+        }
+
+        const normalizedPlaybackRate = normalizePlaybackRate(playbackRate)
+
+        if (normalizedPlaybackRate === null) {
+          return
+        }
+
+        queuePlaybackRateRestore(normalizedPlaybackRate)
+
+        if (video.value) {
+          video.value.playbackRate = normalizedPlaybackRate
+        }
+      }
+    )
 
     /**
      * @param {number} rate
