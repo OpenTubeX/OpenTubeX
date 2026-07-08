@@ -188,6 +188,7 @@
         v-if="!isLoading && !hideVideoDescription"
         :description="videoDescription"
         :description-html="videoDescriptionHtml"
+        :category="videoCategory"
         :license="license"
         class="watchVideo"
         :class="{ theatreWatchVideo: useTheatreMode }"

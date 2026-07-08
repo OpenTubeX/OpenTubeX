@@ -122,6 +122,7 @@ export default defineComponent({
       videoTitle: '',
       videoDescription: '',
       videoDescriptionHtml: '',
+      videoCategory: '',
       license: '',
       videoViewCount: 0,
       videoLikeCount: 0,
@@ -441,6 +442,7 @@ export default defineComponent({
       this.videoTitle = preserveTitle ? previousVideoTitle : placeholderTitle
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
+      this.videoCategory = ''
       this.license = ''
       this.videoViewCount = 0
       this.videoLikeCount = 0
@@ -589,7 +591,8 @@ export default defineComponent({
           this.channelThumbnail = ''
         }
 
-        this.videoGenreIsMusic = result.basic_info.category === 'Music'
+        this.videoCategory = result.basic_info.category ?? ''
+        this.videoGenreIsMusic = this.videoCategory === 'Music'
 
         this.updateSubscriptionDetails({
           channelThumbnailUrl: this.channelThumbnail.length === 0 ? null : this.channelThumbnail,
@@ -1052,7 +1055,8 @@ export default defineComponent({
             }
           }
 
-          this.videoGenreIsMusic = result.genre === 'Music'
+          this.videoCategory = result.genre ?? ''
+          this.videoGenreIsMusic = this.videoCategory === 'Music'
 
           this.channelId = result.authorId
           this.channelName = result.author
