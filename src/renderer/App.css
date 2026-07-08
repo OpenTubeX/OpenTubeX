@@ -51,6 +51,89 @@
   overflow-wrap: break-word;
 }
 
+.findbar {
+  position: fixed;
+  inset-block-start: 102px;
+  inset-inline-end: 18px;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  inline-size: min(420px, calc(100vw - 36px));
+  padding: 8px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--bg-color) 94%, #000);
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 32%);
+}
+
+.findbarIcon {
+  flex: 0 0 auto;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+}
+
+.findbarInput {
+  flex: 1 1 auto;
+  min-inline-size: 90px;
+  block-size: 32px;
+  padding-block: 0;
+  padding-inline: 8px;
+  color: var(--primary-text-color);
+  background-color: var(--primary-input-color);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  outline: none;
+}
+
+.findbarInput:focus {
+  border-color: var(--primary-text-color);
+}
+
+.findbarStatus {
+  flex: 0 0 auto;
+  min-inline-size: 68px;
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.findbarButton {
+  flex: 0 0 32px;
+  inline-size: 32px;
+  block-size: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--primary-text-color);
+  background-color: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.findbarButton:hover,
+.findbarButton:focus-visible {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.app .findbarMatch {
+  color: #111 !important;
+  background: #ffe15a !important;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 24%);
+}
+
+.app .findbarMatchCurrent {
+  color: #fff !important;
+  background: #e84100 !important;
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px #e84100, 0 0 12px 4px rgb(232 65 0 / 55%);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.15s;
@@ -169,6 +252,16 @@
 
   .changeLogText {
     block-size: 65vh;
+  }
+
+  .findbar {
+    inset-block-start: 12px;
+    inset-inline: 8px;
+    inline-size: auto;
+  }
+
+  .findbarStatus {
+    min-inline-size: 58px;
   }
 
   .tabSwitcher {

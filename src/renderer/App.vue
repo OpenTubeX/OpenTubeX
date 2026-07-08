@@ -105,6 +105,71 @@
       v-if="showProgressBar"
     />
     <div
+      v-if="findbarVisible"
+      class="findbar"
+      role="search"
+      @keydown.stop
+    >
+      <FontAwesomeIcon
+        :icon="['fas', 'search']"
+        class="findbarIcon"
+        aria-hidden="true"
+      />
+      <input
+        ref="findbarInputRef"
+        v-model="findbarQuery"
+        class="findbarInput"
+        type="search"
+        :placeholder="t('Find in page')"
+        :aria-label="t('Find in page')"
+        @input="findInPage"
+        @keydown.enter.prevent="findInPage($event.shiftKey)"
+        @keydown.esc.prevent="closeFindbar"
+      >
+      <span
+        class="findbarStatus"
+        aria-live="polite"
+      >
+        {{ findbarStatus }}
+      </span>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Previous match')"
+        :title="t('Previous match')"
+        @click="findInPage(true)"
+      >
+        <FontAwesomeIcon
+          :icon="['fas', 'angle-up']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Next match')"
+        :title="t('Next match')"
+        @click="findInPage(false)"
+      >
+        <FontAwesomeIcon
+          :icon="['fas', 'angle-down']"
+          aria-hidden="true"
+        />
+      </button>
+      <button
+        type="button"
+        class="findbarButton"
+        :aria-label="t('Close find bar')"
+        :title="t('Close')"
+        @click="closeFindbar"
+      >
+        <FontAwesomeIcon
+          :icon="['fas', 'xmark']"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+    <div
       v-if="tabSwitcherVisible"
       class="tabSwitcherOverlay"
       @mousedown.prevent
@@ -257,6 +322,11 @@ const hideSubscriptionsShorts = computed(() => store.getters.getHideSubscription
 const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams || store.getters.getHideSubscriptionsLive)
 
 const dataReady = ref(false)
+const findbarVisible = ref(false)
+const findbarQuery = ref('')
+const findbarMatchIndex = ref(0)
+const findbarMatchCount = ref(0)
+const findbarInputRef = useTemplateRef('findbarInputRef')
 const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
@@ -270,8 +340,20 @@ const subscriptionAutoRefreshTimers = {
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live']
 let refreshOverdueSubscriptionFeedsPromise = null
 let tabSwitcherPreviewRequestId = 0
+let findbarMatches = []
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
+const findbarStatus = computed(() => {
+  if (findbarQuery.value.trim().length === 0) {
+    return ''
+  }
+
+  if (findbarMatchCount.value === 0) {
+    return t('No matches')
+  }
+
+  return `${findbarMatchIndex.value}/${findbarMatchCount.value}`
+})
 const tabSwitcherSelectedTabId = computed(() => {
   const tab = tabSwitcherTabs.value[tabSwitcherSelectedIndex.value]
   return tab ? `tab-switcher-option-${tab.id}` : undefined
@@ -640,14 +722,33 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
+  const ctrlOrCmdPressed = isCtrlOrCmdPressed(event)
+
+  if (ctrlOrCmdPressed && (event.key === 'f' || event.key === 'F') && !event.shiftKey) {
+    event.preventDefault()
+    openFindbar()
+    return
+  }
+
   if (tabSwitcherVisible.value && event.key === 'Escape') {
     event.preventDefault()
     cancelTabSwitcher()
     return
   }
 
-  // ignore user typing in HTML `input` elements
-  if (event.shiftKey && event.key === '?' && event.target.tagName !== 'INPUT') {
+  if (findbarVisible.value && event.key === 'Escape') {
+    event.preventDefault()
+    closeFindbar()
+    return
+  }
+
+  if (findbarVisible.value && event.key === 'Enter' && !isTypingTarget(event.target)) {
+    event.preventDefault()
+    findInPage(event.shiftKey)
+    return
+  }
+
+  if (event.shiftKey && event.key === '?' && !isTypingTarget(event.target)) {
     store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
   }
 
@@ -657,16 +758,9 @@ function handleKeyboardShortcuts(event) {
 
   // Tab keyboard shortcuts (Electron only)
   if (process.env.IS_ELECTRON) {
-    const ctrlOrCmdPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
-      (process.platform === 'darwin' && event.metaKey)
-
     // Ctrl+1..9: Switch to tab by number
     if (ctrlOrCmdPressed && event.key >= '1' && event.key <= '9' && !event.shiftKey) {
-      const target = event.target
-      const isTypingInInput = target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      if (!isTypingInInput) {
+      if (!isTypingTarget(event.target)) {
         const index = parseInt(event.key, 10) - 1
         const tabs = store.state.tabs.tabs
         if (index < tabs.length) {
@@ -726,6 +820,216 @@ function handleKeyboardShortcuts(event) {
       prepareAndReloadTab()
     }
   }
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean}
+ */
+function isCtrlOrCmdPressed(event) {
+  return (process.platform !== 'darwin' && event.ctrlKey) ||
+    (process.platform === 'darwin' && event.metaKey)
+}
+
+/**
+ * @param {EventTarget | null} target
+ * @returns {boolean}
+ */
+function isTypingTarget(target) {
+  return target instanceof HTMLElement && (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable
+  )
+}
+
+function openFindbar() {
+  findbarVisible.value = true
+
+  const selection = window.getSelection()?.toString().trim()
+  if (selection) {
+    findbarQuery.value = selection
+  }
+
+  nextTick(() => {
+    findbarInputRef.value?.focus()
+    findbarInputRef.value?.select()
+    findInPage()
+  })
+}
+
+function closeFindbar() {
+  findbarVisible.value = false
+  findbarMatchIndex.value = 0
+  findbarMatchCount.value = 0
+  clearFindbarHighlights()
+}
+
+/**
+ * @param {boolean | Event} [backwards]
+ */
+function findInPage(backwards = null) {
+  const query = findbarQuery.value.trim()
+  if (query.length === 0) {
+    findbarMatchIndex.value = 0
+    findbarMatchCount.value = 0
+    clearFindbarHighlights()
+    return
+  }
+
+  const input = findbarInputRef.value
+  const selectionStart = input?.selectionStart ?? query.length
+  const selectionEnd = input?.selectionEnd ?? query.length
+  const isNavigation = typeof backwards === 'boolean'
+  const direction = backwards === true ? -1 : 1
+
+  if (!isNavigation || findbarMatches.length === 0) {
+    highlightFindbarMatches(query)
+  } else {
+    selectFindbarMatch(findbarMatchIndex.value - 1 + direction)
+  }
+
+  requestAnimationFrame(() => {
+    input?.focus()
+    input?.setSelectionRange(selectionStart, selectionEnd)
+  })
+}
+
+/**
+ * @param {string} query
+ */
+function highlightFindbarMatches(query) {
+  clearFindbarHighlights()
+
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => {
+        if (isFindbarTextNode(node) || isHiddenTextNode(node)) {
+          return NodeFilter.FILTER_REJECT
+        }
+
+        return NodeFilter.FILTER_ACCEPT
+      }
+    }
+  )
+  const normalizedQuery = query.toLocaleLowerCase()
+  const ranges = []
+
+  while (walker.nextNode()) {
+    const node = walker.currentNode
+    const text = node.textContent ?? ''
+    const normalizedText = text.toLocaleLowerCase()
+    let index = normalizedText.indexOf(normalizedQuery)
+
+    while (index !== -1) {
+      ranges.push({
+        node,
+        start: index,
+        end: index + normalizedQuery.length
+      })
+      index = normalizedText.indexOf(normalizedQuery, index + normalizedQuery.length)
+    }
+  }
+
+  const matches = []
+
+  for (const rangeInfo of [...ranges].reverse()) {
+    const range = document.createRange()
+    range.setStart(rangeInfo.node, rangeInfo.start)
+    range.setEnd(rangeInfo.node, rangeInfo.end)
+
+    const mark = document.createElement('mark')
+    mark.className = 'findbarMatch'
+    setFindbarMatchActive(mark, false)
+    range.surroundContents(mark)
+    matches.unshift(mark)
+  }
+
+  findbarMatches = matches
+  findbarMatchCount.value = matches.length
+  selectFindbarMatch(matches.length > 0 ? 0 : -1)
+}
+
+function clearFindbarHighlights() {
+  for (const match of findbarMatches) {
+    const parent = match.parentNode
+    match.replaceWith(document.createTextNode(match.textContent ?? ''))
+    parent?.normalize()
+  }
+
+  findbarMatches = []
+}
+
+/**
+ * @param {number} index
+ */
+function selectFindbarMatch(index) {
+  const matches = findbarMatches
+  if (matches.length === 0) {
+    findbarMatchIndex.value = 0
+    findbarMatchCount.value = 0
+    return
+  }
+
+  const nextIndex = (index + matches.length) % matches.length
+
+  for (const match of matches) {
+    match.classList.remove('findbarMatchCurrent')
+    setFindbarMatchActive(match, false)
+  }
+
+  const currentMatch = matches[nextIndex]
+  currentMatch.classList.add('findbarMatchCurrent')
+  setFindbarMatchActive(currentMatch, true)
+  currentMatch.scrollIntoView({
+    block: 'center',
+    inline: 'nearest',
+    behavior: 'smooth'
+  })
+
+  findbarMatchIndex.value = nextIndex + 1
+  findbarMatchCount.value = matches.length
+}
+
+/**
+ * @param {HTMLElement} match
+ * @param {boolean} active
+ */
+function setFindbarMatchActive(match, active) {
+  match.style.setProperty('color', active ? '#fff' : '#111', 'important')
+  match.style.setProperty('background-color', active ? '#e84100' : '#ffe15a', 'important')
+  match.style.setProperty('border-radius', '3px')
+  match.style.setProperty('box-shadow', active
+    ? '0 0 0 4px #e84100, 0 0 12px 4px rgb(232 65 0 / 55%)'
+    : '0 0 0 1px rgb(0 0 0 / 24%)')
+  match.style.setProperty('outline', active ? '2px solid #fff' : '0')
+  match.style.setProperty('outline-offset', '1px')
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isFindbarTextNode(node) {
+  return node.parentElement?.closest('.findbar') != null
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isHiddenTextNode(node) {
+  const element = node.parentElement
+  if (element == null) {
+    return true
+  }
+
+  const style = window.getComputedStyle(element)
+  return style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    element.closest('[aria-hidden="true"]') != null
 }
 
 /**
