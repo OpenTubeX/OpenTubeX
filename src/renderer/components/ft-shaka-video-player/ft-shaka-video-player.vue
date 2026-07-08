@@ -466,7 +466,14 @@
       >
         <font-awesome-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
       </button>
-      <div class="scrollMiniVolume">
+      <div
+        class="scrollMiniVolume"
+        :class="{ isExpanded: scrollMiniVolumeExpanded }"
+        @mouseenter="handleScrollMiniVolumeMouseEnter"
+        @mouseleave="handleScrollMiniVolumeMouseLeave"
+        @focusin="handleScrollMiniVolumeMouseEnter"
+        @focusout="handleScrollMiniVolumeMouseLeave"
+      >
         <font-awesome-icon
           class="scrollMiniVolumeIcon"
           :icon="scrollMiniVolumeIcon"
@@ -485,7 +492,7 @@
             :value="scrollMiniVolumePercent"
             :aria-label="$t('Video.Player.Scroll Mini Player.Volume')"
             @input.stop="updateScrollMiniVolume"
-            @pointerdown.stop
+            @pointerdown.stop="handleScrollMiniVolumePointerDown"
           >
         </div>
       </div>
@@ -498,7 +505,10 @@
       />
       <div
         class="scrollMiniResizeHandle"
-        :class="`scrollMiniResizeHandle-${scrollMiniResizeCorner}`"
+        :class="[
+          `scrollMiniResizeHandle-${scrollMiniResizeCorner}`,
+          { 'scrollMiniResizeHandle-onLightBg': scrollMiniResizeHandleOnLightBg }
+        ]"
         @pointerdown.stop="handleScrollMiniResizePointerDown"
         @mousedown.stop.prevent
       />

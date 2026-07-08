@@ -1,12 +1,11 @@
 export const DEFAULT_WIDTH = 360
 export const DEFAULT_HEIGHT = 202
 export const MIN_WIDTH = 240
-export const MIN_HEIGHT = 135
 export const MAX_WIDTH = 560
-export const MAX_HEIGHT = 315
 export const MARGIN = 16
 export const EDGE_SNAP = 72
 export const BOUNCE_MS = 450
+export const DEFAULT_ASPECT_RATIO = 16 / 9
 
 export const ENTER_MINI_RATIO = 0.15
 export const EXIT_MINI_RATIO = 0.35
@@ -129,12 +128,13 @@ export function getViewportInsets() {
 }
 
 /**
+ * @param {number} [aspectRatio]
  * @returns {ScrollMiniPlayerRect}
  */
-export function getDefaultScrollMiniPlayerRect() {
+export function getDefaultScrollMiniPlayerRect(aspectRatio = DEFAULT_ASPECT_RATIO) {
   const insets = getViewportInsets()
   const width = DEFAULT_WIDTH
-  const height = DEFAULT_HEIGHT
+  const height = getHeightForAspectRatio(width, aspectRatio)
 
   return {
     left: window.innerWidth - width - insets.right,
@@ -147,22 +147,20 @@ export function getDefaultScrollMiniPlayerRect() {
 
 /**
  * @param {ScrollMiniPlayerRect} rect
+ * @param {number} [aspectRatio]
  * @returns {ScrollMiniPlayerRect}
  */
-export function clampScrollMiniPlayerRect(rect) {
+export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO) {
   const insets = getViewportInsets()
   const maxWidth = Math.min(MAX_WIDTH, window.innerWidth - insets.left - insets.right)
-  const maxHeight = Math.min(MAX_HEIGHT, window.innerHeight - insets.top - insets.bottom)
+  const maxHeight = window.innerHeight - insets.top - insets.bottom
+  const normalizedAspectRatio = normalizeAspectRatio(aspectRatio)
 
   let width = Math.min(Math.max(rect.width, MIN_WIDTH), maxWidth)
-  let height = Math.round(width * 9 / 16)
+  let height = getHeightForAspectRatio(width, normalizedAspectRatio)
   if (height > maxHeight) {
     height = maxHeight
-    width = Math.round(height * 16 / 9)
-  }
-  if (height < MIN_HEIGHT) {
-    height = MIN_HEIGHT
-    width = Math.round(height * 16 / 9)
+    width = getWidthForAspectRatio(height, normalizedAspectRatio)
   }
 
   const maxLeft = window.innerWidth - insets.right - width
@@ -248,7 +246,7 @@ export function shouldBounceScrollMiniPlayerToEdge(rect, insets) {
  * @returns {ScrollMiniPlayerRect}
  */
 export function snapScrollMiniPlayerToEdge(rect, insets) {
-  const dock = getDockFromRect(rect, insets)
+  const dock = rect.dock
   const left = dock === 'left'
     ? insets.left
     : window.innerWidth - insets.right - rect.width
@@ -264,6 +262,36 @@ function easeOutBack(t) {
   const c1 = 1.70158
   const c3 = c1 + 1
   return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
+}
+
+/**
+ * @param {number} aspectRatio
+ * @returns {number}
+ */
+export function normalizeAspectRatio(aspectRatio) {
+  if (!Number.isFinite(aspectRatio) || aspectRatio <= 0) {
+    return DEFAULT_ASPECT_RATIO
+  }
+
+  return aspectRatio
+}
+
+/**
+ * @param {number} width
+ * @param {number} aspectRatio
+ * @returns {number}
+ */
+function getHeightForAspectRatio(width, aspectRatio) {
+  return Math.max(1, Math.round(width / normalizeAspectRatio(aspectRatio)))
+}
+
+/**
+ * @param {number} height
+ * @param {number} aspectRatio
+ * @returns {number}
+ */
+function getWidthForAspectRatio(height, aspectRatio) {
+  return Math.max(1, Math.round(height * normalizeAspectRatio(aspectRatio)))
 }
 
 /**
@@ -328,12 +356,14 @@ export function getResizeHandleCorner(rect, insets) {
  * @param {number} pointerX
  * @param {number} pointerY
  * @param {{ left: number, right: number, top: number, bottom: number }} insets
+ * @param {number} [aspectRatio]
  * @returns {ScrollMiniPlayerRect}
  */
-export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointerY, insets) {
+export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointerY, insets, aspectRatio = DEFAULT_ASPECT_RATIO) {
   const dock = getDockFromRect(rect, insets)
   const maxWidth = Math.min(MAX_WIDTH, window.innerWidth - insets.left - insets.right)
-  const maxHeight = Math.min(MAX_HEIGHT, window.innerHeight - insets.top - insets.bottom)
+  const maxHeight = window.innerHeight - insets.top - insets.bottom
+  const normalizedAspectRatio = normalizeAspectRatio(aspectRatio)
 
   let width
   if (corner.endsWith('right')) {
@@ -343,11 +373,11 @@ export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointer
   }
 
   width = Math.min(Math.max(width, MIN_WIDTH), maxWidth)
-  let height = Math.round(width * 9 / 16)
+  let height = getHeightForAspectRatio(width, normalizedAspectRatio)
 
   if (height > maxHeight) {
     height = maxHeight
-    width = Math.round(height * 16 / 9)
+    width = getWidthForAspectRatio(height, normalizedAspectRatio)
   }
 
   const left = dock === 'left' ? insets.left : window.innerWidth - insets.right - width
@@ -359,7 +389,7 @@ export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointer
     top = rect.top
   }
 
-  const clamped = clampScrollMiniPlayerRect({ left, top, width, height, dock })
+  const clamped = clampScrollMiniPlayerRect({ left, top, width, height, dock }, normalizedAspectRatio)
   return { ...clamped, dock }
 }
 
@@ -394,9 +424,10 @@ function getScrollMiniDragHandleSampleCanvas() {
  * @param {HTMLVideoElement | null | undefined} videoElement
  * @param {number} [displayWidth]
  * @param {number} [displayHeight]
+ * @param {{ left: number, top: number, width: number, height: number }} sampleRect
  * @returns {number | null}
  */
-export function sampleScrollMiniDragHandleLuminance(videoElement, displayWidth, displayHeight) {
+export function sampleScrollMiniHandleLuminance(videoElement, displayWidth, displayHeight, sampleRect) {
   if (!videoElement || videoElement.readyState < 2) return null
 
   const videoWidth = videoElement.videoWidth
@@ -413,18 +444,15 @@ export function sampleScrollMiniDragHandleLuminance(videoElement, displayWidth, 
   const offsetX = (resolvedDisplayWidth - renderedWidth) / 2
   const offsetY = (resolvedDisplayHeight - renderedHeight) / 2
 
-  const handleLeft = resolvedDisplayWidth / 2 - SCROLL_MINI_DRAG_HANDLE_WIDTH / 2
-  const handleTop = 0
-
   const contentLeft = offsetX
   const contentTop = offsetY
   const contentRight = offsetX + renderedWidth
   const contentBottom = offsetY + renderedHeight
 
-  const sampleLeft = Math.max(handleLeft, contentLeft)
-  const sampleTop = Math.max(handleTop, contentTop)
-  const sampleRight = Math.min(handleLeft + SCROLL_MINI_DRAG_HANDLE_WIDTH, contentRight)
-  const sampleBottom = Math.min(handleTop + SCROLL_MINI_DRAG_HANDLE_HEIGHT, contentBottom)
+  const sampleLeft = Math.max(sampleRect.left, contentLeft)
+  const sampleTop = Math.max(sampleRect.top, contentTop)
+  const sampleRight = Math.min(sampleRect.left + sampleRect.width, contentRight)
+  const sampleBottom = Math.min(sampleRect.top + sampleRect.height, contentBottom)
 
   if (sampleRight <= sampleLeft || sampleBottom <= sampleTop) {
     return 0
@@ -463,6 +491,23 @@ export function sampleScrollMiniDragHandleLuminance(videoElement, displayWidth, 
   } catch {
     return null
   }
+}
+
+/**
+ * @param {HTMLVideoElement | null | undefined} videoElement
+ * @param {number} [displayWidth]
+ * @param {number} [displayHeight]
+ * @returns {number | null}
+ */
+export function sampleScrollMiniDragHandleLuminance(videoElement, displayWidth, displayHeight) {
+  const resolvedDisplayWidth = displayWidth > 0 ? displayWidth : videoElement?.clientWidth
+
+  return sampleScrollMiniHandleLuminance(videoElement, displayWidth, displayHeight, {
+    left: resolvedDisplayWidth / 2 - SCROLL_MINI_DRAG_HANDLE_WIDTH / 2,
+    top: 0,
+    width: SCROLL_MINI_DRAG_HANDLE_WIDTH,
+    height: SCROLL_MINI_DRAG_HANDLE_HEIGHT,
+  })
 }
 
 /**

@@ -950,8 +950,7 @@
   transition: width 0.18s ease, opacity 0.18s ease, margin 0.18s ease;
 }
 
-.scrollMiniVolume:hover .scrollMiniVolumeTrack,
-.scrollMiniVolume:focus-within .scrollMiniVolumeTrack {
+.scrollMiniVolume.isExpanded .scrollMiniVolumeTrack {
   width: 88px;
   opacity: 1;
   margin-inline-start: 8px;
@@ -972,6 +971,12 @@
   width: 18px;
   height: 18px;
   z-index: 3;
+
+  --scroll-mini-resize-handle-color: rgb(255 255 255 / 70%);
+}
+
+.scrollMiniResizeHandle-onLightBg {
+  --scroll-mini-resize-handle-color: rgb(0 0 0 / 55%);
 }
 
 .scrollMiniResizeHandle-bottom-left {
@@ -981,8 +986,8 @@
   background: linear-gradient(
     to top right,
     transparent calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% + 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }
@@ -994,8 +999,8 @@
   background: linear-gradient(
     to top left,
     transparent calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% + 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }
@@ -1007,8 +1012,8 @@
   background: linear-gradient(
     to bottom right,
     transparent calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% + 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }
@@ -1020,8 +1025,8 @@
   background: linear-gradient(
     to bottom left,
     transparent calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% - 1px),
-    rgb(255 255 255 / 70%) calc(50% + 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% - 1px),
+    var(--scroll-mini-resize-handle-color) calc(50% + 1px),
     transparent calc(50% + 1px)
   );
 }

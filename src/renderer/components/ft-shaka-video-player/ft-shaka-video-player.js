@@ -49,6 +49,7 @@ import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../help
 import {
   animateScrollMiniPlayerBounce,
   clampScrollMiniPlayerRect,
+  DEFAULT_ASPECT_RATIO,
   getAnchorVisibleRatio,
   getDefaultScrollMiniPlayerRect,
   getResizeHandleCorner,
@@ -59,6 +60,7 @@ import {
   resizeScrollMiniPlayerFromCorner,
   resolveScrollMiniDragHandleOnLightBg,
   sampleScrollMiniDragHandleLuminance,
+  sampleScrollMiniHandleLuminance,
   scrollMiniPlayerRectToStyle,
   serializeScrollMiniPlayerSavedRect,
   setSavedScrollMiniPlayerRect,
@@ -3109,6 +3111,7 @@ export default defineComponent({
       // Re-evaluate auto-PiP now that PiP is actually allowed (the video was possibly
       // in a hidden tab / scrolled out of view while still loading).
       updateAutoPip()
+      updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
     }
 
@@ -3187,6 +3190,7 @@ export default defineComponent({
 
     const videoElementWidth = ref(0)
     const videoElementHeight = ref(0)
+    const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
 
     /** @type {ResizeObserver} */
     const videoResizeObserver = new ResizeObserver(() => {
@@ -3196,6 +3200,7 @@ export default defineComponent({
 
         videoElementWidth.value = video_.clientWidth * devicePixelRatio
         videoElementHeight.value = video_.clientHeight * devicePixelRatio
+        updateScrollMiniVideoAspectRatio()
       }
     })
 
@@ -3321,7 +3326,9 @@ export default defineComponent({
     const scrollMiniIsPaused = ref(true)
     const scrollMiniVolume = ref(1)
     const scrollMiniPlayPauseVisible = ref(true)
+    const scrollMiniVolumeExpanded = ref(false)
     const scrollMiniDragHandleOnLightBg = ref(false)
+    const scrollMiniResizeHandleOnLightBg = ref(false)
     const scrollMiniResizeCorner = ref('bottom-right')
     const scrollMiniPlaceholder = ref(null)
     const scrollMiniVolumeTrack = ref(null)
@@ -3341,6 +3348,7 @@ export default defineComponent({
     })
 
     const SCROLL_MINI_PLAY_PAUSE_HIDE_MS = 3000
+    const SCROLL_MINI_VOLUME_HIDE_MS = 1000
     const SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS = 400
     const SCROLL_MINI_POINTER_REVEAL_SUPPRESS_MS = 250
     const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
@@ -3349,6 +3357,8 @@ export default defineComponent({
     let scrollMiniIntersectionObserver = null
     /** @type {number | null} */
     let scrollMiniPlayPauseHideTimeout = null
+    /** @type {number | null} */
+    let scrollMiniVolumeHideTimeout = null
     /** @type {(() => void) | null} */
     let scrollMiniBounceCancel = null
     let scrollMiniPlayPauseHiddenByTimer = false
@@ -3359,9 +3369,22 @@ export default defineComponent({
     /** @type {number | null} */
     let scrollMiniPointerRevealSampleY = null
 
-    /** @type {{ type: 'drag' | 'resize', corner?: string, startX: number, startY: number, startRect: import('../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
+    /** @type {{ type: 'drag' | 'resize' | 'volume', corner?: string, startX: number, startY: number, startRect: import('../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
     let scrollMiniPointerSession = null
     let lastKnownInlinePlayerHeight = 0
+
+    function updateScrollMiniVideoAspectRatio() {
+      const videoElement = video.value
+      if (!videoElement?.videoWidth || !videoElement.videoHeight) {
+        return
+      }
+
+      scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
+
+      if (scrollMiniPlayerActive.value) {
+        applyScrollMiniPlayerRect(scrollMiniPlayerRect.value)
+      }
+    }
 
     function rememberInlinePlayerLayoutHeight() {
       if (scrollMiniPlayerActive.value) {
@@ -3412,6 +3435,27 @@ export default defineComponent({
         clearTimeout(scrollMiniPlayPauseHideTimeout)
         scrollMiniPlayPauseHideTimeout = null
       }
+    }
+
+    function clearScrollMiniVolumeHideTimeout() {
+      if (scrollMiniVolumeHideTimeout != null) {
+        clearTimeout(scrollMiniVolumeHideTimeout)
+        scrollMiniVolumeHideTimeout = null
+      }
+    }
+
+    function showScrollMiniVolume() {
+      clearScrollMiniVolumeHideTimeout()
+      scrollMiniVolumeExpanded.value = true
+    }
+
+    function scheduleScrollMiniVolumeHide() {
+      clearScrollMiniVolumeHideTimeout()
+
+      scrollMiniVolumeHideTimeout = window.setTimeout(() => {
+        scrollMiniVolumeHideTimeout = null
+        scrollMiniVolumeExpanded.value = false
+      }, SCROLL_MINI_VOLUME_HIDE_MS)
     }
 
     function hideScrollMiniPlayPause() {
@@ -3609,7 +3653,7 @@ export default defineComponent({
      * @param {boolean} [persist]
      */
     function applyScrollMiniPlayerRect(rect, persist = false) {
-      const clamped = clampScrollMiniPlayerRect(rect)
+      const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value)
       scrollMiniPlayerRect.value = clamped
       scrollMiniResizeCorner.value = getResizeHandleCorner(clamped, getViewportInsets())
       setSavedScrollMiniPlayerRect(clamped)
@@ -3667,6 +3711,34 @@ export default defineComponent({
         luminance,
         scrollMiniDragHandleOnLightBg.value
       )
+
+      const resizeLuminance = sampleScrollMiniHandleLuminance(
+        video.value,
+        rect.width,
+        rect.height,
+        getScrollMiniResizeHandleSampleRect(rect, scrollMiniResizeCorner.value)
+      )
+      if (resizeLuminance == null) return
+
+      scrollMiniResizeHandleOnLightBg.value = resolveScrollMiniDragHandleOnLightBg(
+        resizeLuminance,
+        scrollMiniResizeHandleOnLightBg.value
+      )
+    }
+
+    /**
+     * @param {import('../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect} rect
+     * @param {string} corner
+     * @returns {{ left: number, top: number, width: number, height: number }}
+     */
+    function getScrollMiniResizeHandleSampleRect(rect, corner) {
+      const size = 18
+      return {
+        left: corner.endsWith('right') ? rect.width - size : 0,
+        top: corner.startsWith('bottom') ? rect.height - size : 0,
+        width: size,
+        height: size,
+      }
     }
 
     function setupScrollMiniIntersectionObserver() {
@@ -3705,7 +3777,13 @@ export default defineComponent({
 
       const savedRect = getSavedScrollMiniPlayerRect()
       scrollMiniPlayerActive.value = true
-      applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(savedRect ?? getDefaultScrollMiniPlayerRect()))
+      updateScrollMiniVideoAspectRatio()
+      applyScrollMiniPlayerRect(
+        clampScrollMiniPlayerRect(
+          savedRect ?? getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
+          scrollMiniVideoAspectRatio.value
+        )
+      )
       syncScrollMiniPlayerState()
 
       if (scrollMiniPlayPauseHiddenByTimer) {
@@ -3725,8 +3803,11 @@ export default defineComponent({
       scrollMiniPlayerActive.value = false
       scrollMiniPlaceholderHeight.value = 0
       scrollMiniDragHandleOnLightBg.value = false
+      scrollMiniResizeHandleOnLightBg.value = false
       scrollMiniPlayPauseHiddenByTimer = false
       clearScrollMiniPlayPauseHideTimeout()
+      clearScrollMiniVolumeHideTimeout()
+      scrollMiniVolumeExpanded.value = false
 
       if (scrollMiniBounceCancel) {
         scrollMiniBounceCancel()
@@ -3775,7 +3856,8 @@ export default defineComponent({
     function handleScrollMiniWindowResize() {
       if (!scrollMiniPlayerActive.value) return
 
-      applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(scrollMiniPlayerRect.value), true)
+      const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
+      applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
     }
 
     function scrollMiniScrollToTop(event) {
@@ -3808,6 +3890,8 @@ export default defineComponent({
       const target = event.target
       if (!(target instanceof HTMLInputElement)) return
 
+      showScrollMiniVolume()
+
       const nextVolume = Number.parseFloat(target.value) / 100
       const videoElement = video.value
       if (!videoElement || Number.isNaN(nextVolume)) return
@@ -3816,6 +3900,47 @@ export default defineComponent({
       videoElement.muted = nextVolume === 0
       scrollMiniVolume.value = nextVolume
       updateScrollMiniVolumeBarFill()
+    }
+
+    function handleScrollMiniVolumeMouseEnter() {
+      if (!scrollMiniPlayerActive.value) return
+
+      showScrollMiniVolume()
+    }
+
+    function handleScrollMiniVolumeMouseLeave() {
+      if (!scrollMiniPlayerActive.value) return
+      if (scrollMiniPointerSession?.type === 'volume') return
+
+      scheduleScrollMiniVolumeHide()
+    }
+
+    /**
+     * @param {PointerEvent} event
+     */
+    function handleScrollMiniVolumePointerDown(event) {
+      if (!scrollMiniPlayerActive.value) return
+
+      showScrollMiniVolume()
+      scrollMiniPointerSession = {
+        type: 'volume',
+        startX: event.clientX,
+        startY: event.clientY,
+        startRect: { ...scrollMiniPlayerRect.value },
+      }
+
+      window.addEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
+      window.addEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
+    }
+
+    function handleScrollMiniVolumePointerUpWindow() {
+      if (scrollMiniPointerSession?.type === 'volume') {
+        scrollMiniPointerSession = null
+      }
+
+      window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
+      window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
+      scheduleScrollMiniVolumeHide()
     }
 
     function endScrollMiniPointerSession() {
@@ -3843,14 +3968,15 @@ export default defineComponent({
           ...startRect,
           left: startRect.left + dx,
           top: startRect.top + dy,
-        }))
+        }, scrollMiniVideoAspectRatio.value))
       } else if (scrollMiniPointerSession.type === 'resize' && scrollMiniPointerSession.corner) {
         applyScrollMiniPlayerRect(resizeScrollMiniPlayerFromCorner(
           scrollMiniPointerSession.startRect,
           /** @type {'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'} */ (scrollMiniPointerSession.corner),
           event.clientX,
           event.clientY,
-          insets
+          insets,
+          scrollMiniVideoAspectRatio.value
         ))
       }
 
@@ -3879,10 +4005,10 @@ export default defineComponent({
             fromRect,
             targetRect,
             (rect) => {
-              applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(rect))
+              applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value))
             },
             () => {
-              applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(targetRect), true)
+              applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(targetRect, scrollMiniVideoAspectRatio.value), true)
               scrollMiniBounceCancel = null
             }
           )
@@ -3890,7 +4016,7 @@ export default defineComponent({
           applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(currentRect, insets), true)
         }
       } else {
-        applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(scrollMiniPlayerRect.value), true)
+        applyScrollMiniPlayerRect(clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value), true)
       }
 
       endScrollMiniPointerSession()
@@ -3949,6 +4075,7 @@ export default defineComponent({
       }
 
       clearScrollMiniPlayPauseHideTimeout()
+      clearScrollMiniVolumeHideTimeout()
 
       if (scrollMiniBounceCancel) {
         scrollMiniBounceCancel()
@@ -3956,6 +4083,8 @@ export default defineComponent({
       }
 
       endScrollMiniPointerSession()
+      window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
+      window.removeEventListener('pointercancel', handleScrollMiniVolumePointerUpWindow)
 
       window.removeEventListener('scroll', handleScrollMiniWindowScroll)
       window.removeEventListener('resize', handleScrollMiniWindowResize)
@@ -6857,7 +6986,9 @@ export default defineComponent({
       scrollMiniVolumePercent,
       scrollMiniVolumeIcon,
       scrollMiniPlayPauseVisible,
+      scrollMiniVolumeExpanded,
       scrollMiniDragHandleOnLightBg,
+      scrollMiniResizeHandleOnLightBg,
       scrollMiniResizeCorner,
       scrollMiniPlaceholder,
       scrollMiniVolumeTrack,
@@ -6869,6 +7000,9 @@ export default defineComponent({
       scrollMiniTogglePlayPause,
       scrollMiniScrollToTop,
       updateScrollMiniVolume,
+      handleScrollMiniVolumeMouseEnter,
+      handleScrollMiniVolumeMouseLeave,
+      handleScrollMiniVolumePointerDown,
       handleScrollMiniDragPointerDown,
       handleScrollMiniResizePointerDown,
     }
