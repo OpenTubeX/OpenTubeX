@@ -260,6 +260,7 @@ Settings:
 
 
       Watch Only: Tylko na stronie odtwarzacza
+    Confirm Before Closing App: Potwierdzaj zamknięcie OpenTubeX
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -445,7 +446,7 @@ Settings:
     Remember Volume: Zapamiętaj głośność odtwarzania
     Remember Playback Speed Per Channel: Pamiętaj prędkość odtwarzania na każdym kanale
     Auto Update Channel Playback Speed: Zapamiętuj automatycznie przy każdej zmianie
-    Use Quick Playback Speed Bar: Wyświetl podręczny pasek zmiany prędkości odtwarzania
+    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru szybkości odtwarzania
     Manage Channel Playback Speeds: Zarządzaj zapisanymi prędkościami odtwarzania
     Channel Playback Speed Manager: Menedżer zarządzania prędkościami odtwarzania
     No Saved Playback Speeds: Brak zapisanych prędkości odtwarzania
@@ -455,6 +456,17 @@ Settings:
     Channel Video Quality Manager: Menedżer zarządzania zapisanymi rozdzielczościami wideo
     No Saved Video Qualities: Brak zapisanych ustawień rozdzielczości
     Playback Speed: Prędkość odtwarzania
+    Scroll Mini Player:
+      Scroll Mini Player: Mini odtwarzacz podczas przewijania
+      When Scrolling Down: Utrzymuj mini odtwarzacz na widoku podczas przewijania w dół
+    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru szybkości odtwarzania
+    Quick Playback Speed Bar Manager: Pasek wyboru szybkości odtwarzania
+    Add Playback Speed: Dodaj prędkość odtwarzania
+    Reset Quick Playback Speed Bar: Przywróć ustawienia domyślne
+    Playback Speed Name: Nazwa
+    Edit Playback Speed Name: Edytuj nazwę prędkości odtwarzania
+    Use Automatic Playback Speed Name: Użyj automatycznej nazwy prędkości odtwarzania
+    Reorder Playback Speed: Przeciągnij, aby zmienić prędkość odtwarzania
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -591,7 +603,7 @@ Settings:
     Hide Videos, Playlists and Channels Containing Text Placeholder: Słowo, fragment słowa, lub wyrażenie
     Hide Channel Home: Schowaj kartę kanału „Główna”
     Show Added Items: Pokaż dodane rzeczy
-    Hide Channel Courses: Ukryj kartę „Kursy” kanału
+    Hide Channel Courses: Schowaj kartę kanału „Kursy”
     Hide Channel Posts: Schowaj kartę kanału „Wpisy”
     Hide Subscriptions Posts: Schowaj wpisy z subskrypcji
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
@@ -814,14 +826,14 @@ Video:
   Save Video: Zapisz film
   Sponsor Block category:
     music offtopic: 'Muzyka: Sekcja niemuzyczna'
-    interaction: Przypomnienie o interakcji (subskrybuj)
+    interaction: Interakcja (subskrybuj)
     self-promotion: Nieodpłatna/Autopromocja
     outro: Napisy końcowe (Outro)
     intro: Przerwa/Intro
     sponsor: Sponsorowany
     filler: Wypełniacze/Żarty
     recap: Zapowiedź/Podsumowanie
-    hook: Haczyki narracyjne/Pozdrowienia
+    hook: Zachęty/Pozdrowienia
     highlight: Ważny moment
   External Player:
     Unsupported Actions:
@@ -918,6 +930,13 @@ Video:
       SkipPromptAction: Pomiń
       SkipToastUnskip: Anuluj pominięcie
       SkipToastReskip: Wznów pominięcie
+      SkipToHighlight: Przeskocz do „Ważny moment”
+    Scroll Mini Player:
+      Back to Top: Powrót na górę
+      Volume: Głośność
+      Play: Odtwarzaj
+      Pause: Pauza
+      Drag Handle: Przesuń mini odtwarzacz
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1255,6 +1274,7 @@ KeyboardShortcutPrompt:
   Skip to Next Video: Odtwórz następny film z playlisty lub z rekomendowanych filmów
   Skip to Previous Video: Odtwórz poprzedni film z playlisty lub z rekomendowanych filmów
   Toggle Normal Playback Speed: Przełączaj się między prędkością 1x a poprzednią prędkością odtwarzania
+  Tab Switcher: Przełącznik kart
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
@@ -1262,3 +1282,8 @@ Screenshot Clipboard Success: Zapisano zrzut ekranu do schowka
 Screenshot Clipboard Error: Zapisanie kopii zrzutu do schowka nie powiodło się
 New Tab: Nowa karta
 Close Tab: Zamknij kartę
+Close Confirmation:
+  Title: Zamykanie OpenTubeX
+  Message: Czy na pewno chcesz wyjść z OpenTubeX?
+  Quit: Wyjdź
+  Never Ask Again: Nie pytaj ponownie
