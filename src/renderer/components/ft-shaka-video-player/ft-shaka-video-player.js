@@ -298,6 +298,10 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    isLive: {
+      type: Boolean,
+      default: false
+    },
     videoGenreIsMusic: {
       type: Boolean,
       default: false
@@ -368,7 +372,7 @@ export default defineComponent({
     const hasLoaded = ref(false)
 
     const hasMultipleAudioTracks = ref(false)
-    const isLive = ref(false)
+    const isLive = ref(props.isLive)
 
     const onlyUseOverFlowMenu = ref(false)
     const forceAspectRatio = ref(false)
@@ -2504,7 +2508,7 @@ export default defineComponent({
         uiConfig.controlPanelElements.push('overflow_menu', 'fullscreen')
       } else {
         uiConfig.controlPanelElements.push(
-          ...(useQuickPlaybackSpeedBar.value ? ['ft_quick_playback_rate_bar'] : []),
+          ...(useQuickPlaybackSpeedBar.value && !isLive.value ? ['ft_quick_playback_rate_bar'] : []),
           'ft_sponsorblock_open_menu',
           'ft_sponsorblock_clear',
           'ft_sponsorblock_start',
@@ -2681,7 +2685,7 @@ export default defineComponent({
 
         player.cancelTrickPlay()
 
-        showValueChange(`${defaultPlaybackRate.value}x`)
+        showValueChange(`${getDefaultPlaybackRateForVideo()}x`)
       }
     }
 
@@ -2967,6 +2971,10 @@ export default defineComponent({
           detail: newValue
         }))
       }
+    })
+
+    watch(() => props.isLive, (newValue) => {
+      isLive.value = newValue
     })
 
     watch(
@@ -5361,7 +5369,7 @@ export default defineComponent({
     }
 
     const shouldUseNormalPlaybackRateByDefault = computed(() => {
-      return props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
+      return isLive.value || props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
     })
 
     /**
@@ -6584,6 +6592,8 @@ export default defineComponent({
     async function handleLoaded() {
       togglePlaybackRate = null
       hasLoaded.value = true
+      // Ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
+      isLive.value = player.isLive()
       restorePendingPlaybackRate()
       emit('loaded')
 
@@ -6591,8 +6601,6 @@ export default defineComponent({
         rememberInlinePlayerLayoutHeight()
       })
 
-      // ideally we would set this in the `streaming` event handler, but for HLS this is only set to true after the loaded event fires.
-      isLive.value = player.isLive()
       // getAudioTracks() returns an empty array when no variant is active, so we can't do this in the `streaming` event
       hasMultipleAudioTracks.value = deduplicateAudioTracks(player.getAudioTracks()).size > 1
 
