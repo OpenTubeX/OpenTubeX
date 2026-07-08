@@ -266,6 +266,8 @@ const subscriptionAutoRefreshTimers = {
   shorts: null,
   live: null
 }
+const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live']
+let refreshOverdueSubscriptionFeedsPromise = null
 let tabSwitcherPreviewRequestId = 0
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
@@ -325,6 +327,7 @@ onMounted(async () => {
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
+  window.addEventListener('online', refreshOverdueSubscriptionFeeds)
 })
 
 onBeforeUnmount(() => {
@@ -336,6 +339,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
   window.removeEventListener('blur', cancelTabSwitcher)
+  window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
 })
 
 watch([
@@ -397,6 +401,37 @@ async function refreshSubscriptionFeedAutomatically(tab) {
   scheduleSubscriptionTabAutoRefresh(tab)
 }
 
+function refreshOverdueSubscriptionFeeds() {
+  if (!dataReady.value) {
+    return
+  }
+
+  refreshOverdueSubscriptionFeedsPromise ??= refreshOverdueSubscriptionFeedsImmediately()
+    .finally(() => {
+      refreshOverdueSubscriptionFeedsPromise = null
+    })
+}
+
+async function refreshOverdueSubscriptionFeedsImmediately() {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return
+  }
+
+  const now = Date.now()
+
+  for (const tab of subscriptionAutoRefreshTabs) {
+    const nextAutoRefreshTimestamp = getSubscriptionTabNextAutoRefreshTimestamp(tab)
+
+    if (
+      nextAutoRefreshTimestamp !== null &&
+      nextAutoRefreshTimestamp <= now &&
+      isSubscriptionTabAutoRefreshEnabled(tab)
+    ) {
+      await refreshSubscriptionFeedAutomatically(tab)
+    }
+  }
+}
+
 /**
  * @param {'videos' | 'shorts' | 'live'} tab
  */
@@ -423,6 +458,34 @@ function getSubscriptionTabRefreshHandler(tab) {
     default:
       return refreshSubscriptionVideosFromRemote
   }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function getSubscriptionTabNextAutoRefreshTimestamp(tab) {
+  switch (tab) {
+    case 'shorts':
+      return store.getters.getSubscriptionShortsNextAutoRefreshTimestamp
+    case 'live':
+      return store.getters.getSubscriptionLiveNextAutoRefreshTimestamp
+    default:
+      return store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live'} tab
+ */
+function isSubscriptionTabAutoRefreshEnabled(tab) {
+  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+
+  return (
+    dataReady.value &&
+    !isSubscriptionTabHidden(tab) &&
+    !Number.isNaN(interval) &&
+    interval > 0
+  )
 }
 
 /**
