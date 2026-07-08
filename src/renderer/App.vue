@@ -194,6 +194,7 @@ import {
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { loadLocale } from './i18n/index'
+import { getTabAccentColor } from './constants/tabColors'
 
 const route = useRoute()
 const router = useRouter()
@@ -902,7 +903,7 @@ function formatTabSwitcherTitle(title) {
  */
 function getTabSwitcherItemStyle(tab) {
   return {
-    '--tab-switcher-accent-color': tab.color || undefined
+    '--tab-switcher-accent-color': getTabAccentColor(tab.color) || undefined
   }
 }
 

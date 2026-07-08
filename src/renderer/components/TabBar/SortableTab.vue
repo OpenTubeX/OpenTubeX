@@ -91,6 +91,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
+import { getTabAccentColor } from '../../constants/tabColors'
 
 const props = defineProps({
   tab: {
@@ -133,15 +134,6 @@ const props = defineProps({
 
 const emit = defineEmits(['activate', 'close', 'middleClick'])
 
-const TAB_COLOR_ACCENTS = Object.freeze({
-  red: '#d84f4f',
-  orange: '#d9822b',
-  yellow: '#c7a72e',
-  green: '#3e9b62',
-  blue: '#3f7fd6',
-  purple: '#8b64d8'
-})
-
 const TOOLTIP_MAX_WIDTH_PX = 340
 const TOOLTIP_MARGIN_PX = 8
 const TOOLTIP_OFFSET_PX = 6
@@ -155,7 +147,7 @@ const tooltipRequestId = ref(0)
 let showTooltipTimeoutId = null
 let suppressTooltipUntilPointerLeave = false
 
-const tabColor = computed(() => TAB_COLOR_ACCENTS[props.tab.color] ?? null)
+const tabColor = computed(() => getTabAccentColor(props.tab.color))
 
 const tabClasses = computed(() => ({
   active: props.tab.isActive,
