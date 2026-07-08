@@ -2308,6 +2308,8 @@ function runApp() {
     })
   }
 
+  const ipBlockRecoveryScriptCooldownMs = 10_000
+
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
 
@@ -2324,7 +2326,9 @@ function runApp() {
       if (ipBlockRecoveryScriptPromise == null) {
         ipBlockRecoveryScriptPromise = executeIpBlockRecoveryScript(scriptPath)
           .finally(() => {
-            ipBlockRecoveryScriptPromise = null
+            setTimeout(() => {
+              ipBlockRecoveryScriptPromise = null
+            }, ipBlockRecoveryScriptCooldownMs)
           })
       }
 
