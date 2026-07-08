@@ -44,6 +44,7 @@
           :start-in-pip="startNextVideoInPip"
           :channel-id="channelId"
           :published="videoPublished"
+          :video-genre-is-music="videoGenreIsMusic"
           :current-playback-rate="currentPlaybackRate"
           :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"

@@ -173,6 +173,8 @@ const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
 const { Severity: ErrorSeverity, Category: ErrorCategory, Code: ErrorCode } = shaka.util.Error
 
+const NORMAL_PLAYBACK_RATE = 1
+
 /*
   Mapping of Shaka localization keys for control labels to FreeTube shortcuts.
   See: https://github.com/shaka-project/shaka-player/blob/main/ui/locales/en.json
@@ -295,6 +297,10 @@ export default defineComponent({
     published: {
       type: Number,
       default: 0
+    },
+    videoGenreIsMusic: {
+      type: Boolean,
+      default: false
     },
     currentPlaybackRate: {
       type: Number,
@@ -498,7 +504,7 @@ export default defineComponent({
 
     watch(defaultPlaybackRate, (newValue) => {
       if (video.value) {
-        video.value.defaultPlaybackRate = newValue
+        video.value.defaultPlaybackRate = getDefaultPlaybackRateForVideo(newValue)
       }
     })
 
@@ -780,6 +786,7 @@ export default defineComponent({
      */
     let sponsorBlockSegments = []
     let sponsorBlockAverageVideoDuration = 0
+    const hasSponsorBlockMusicOfftopicSegment = ref(false)
     const activeSponsorBlockHighlightSegment = ref(null)
 
     /**
@@ -1115,6 +1122,7 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockSegments = segments
         sponsorBlockAverageVideoDuration = averageDuration
+        hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
         refreshSponsorBlockMarkers()
         if (canSeek()) {
           const currentTime = video.value?.currentTime ?? 0
@@ -1126,8 +1134,27 @@ export default defineComponent({
       }
     }
 
+    async function getHasSponsorBlockMusicOfftopicSegment() {
+      if (props.videoId === '') {
+        return false
+      }
+
+      if (sponsorSkips.value.seekBar.includes('music_offtopic')) {
+        return sponsorBlockSegments.some(segment => segment.category === 'music_offtopic')
+      }
+
+      try {
+        const { segments } = await getSponsorBlockSegments(props.videoId, ['music_offtopic'])
+        return segments.length > 0
+      } catch (e) {
+        console.error(e)
+        return false
+      }
+    }
+
     async function setupSponsorBlock() {
-      let segments, averageDuration
+      let segments = []
+      let averageDuration = 0
       let refetchWhenNotFound = false
 
       clearSponsorBlockNotFoundRefetchTimeout()
@@ -1137,15 +1164,18 @@ export default defineComponent({
       sponsorBlockDismissedPromptSegments = new Set()
       sponsorBlockSegments = []
       sponsorBlockAverageVideoDuration = 0
+      hasSponsorBlockMusicOfftopicSegment.value = false
       activeSponsorBlockHighlightSegment.value = null
       updateSponsorBlockHighlightState(0)
 
-      try {
-        ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
-        refetchWhenNotFound = segments.length === 0
-      } catch (e) {
-        console.error(e)
-        segments = []
+      if (sponsorSkips.value.seekBar.length > 0) {
+        try {
+          ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
+          refetchWhenNotFound = segments.length === 0
+        } catch (e) {
+          console.error(e)
+          segments = []
+        }
       }
 
       // check if the component is already getting destroyed
@@ -1159,8 +1189,13 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockSegments = segments
         sponsorBlockAverageVideoDuration = averageDuration
+        hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
       } else if (refetchWhenNotFound) {
         scheduleSponsorBlockNotFoundRefetch()
+      }
+
+      if (!hasSponsorBlockMusicOfftopicSegment.value && await getHasSponsorBlockMusicOfftopicSegment()) {
+        hasSponsorBlockMusicOfftopicSegment.value = true
       }
 
       refreshSponsorBlockMarkers()
@@ -5198,6 +5233,7 @@ export default defineComponent({
           return
         }
 
+        playbackRateUserSet = true
         queuePlaybackRateRestore(playbackRate)
         emit('playback-rate-updated', playbackRate)
         emit('playback-rate-user-set', playbackRate)
@@ -5307,13 +5343,13 @@ export default defineComponent({
       showValueChange(`${Math.round(video.value.volume * 100)}%`, messageIcon)
     }
 
-    const NORMAL_PLAYBACK_RATE = 1
-
     /** @type {number | null} */
     let togglePlaybackRate = null
 
     /** @type {number | null} */
     let pendingPlaybackRateRestore = null
+
+    let playbackRateUserSet = false
 
     /**
      * @param {unknown} rate
@@ -5322,6 +5358,29 @@ export default defineComponent({
     function normalizePlaybackRate(rate) {
       const parsedRate = typeof rate === 'number' ? rate : Number(rate)
       return Number.isFinite(parsedRate) && parsedRate > 0.07 ? parsedRate : null
+    }
+
+    const shouldUseNormalPlaybackRateByDefault = computed(() => {
+      return props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
+    })
+
+    /**
+     * @param {number} fallbackPlaybackRate
+     * @returns {number}
+     */
+    function getDefaultPlaybackRateForVideo(fallbackPlaybackRate = defaultPlaybackRate.value) {
+      return shouldUseNormalPlaybackRateByDefault.value ? NORMAL_PLAYBACK_RATE : fallbackPlaybackRate
+    }
+
+    /**
+     * @returns {number}
+     */
+    function getInitialPlaybackRate() {
+      if (shouldUseNormalPlaybackRateByDefault.value) {
+        return NORMAL_PLAYBACK_RATE
+      }
+
+      return normalizePlaybackRate(props.currentPlaybackRate) ?? NORMAL_PLAYBACK_RATE
     }
 
     /**
@@ -5349,14 +5408,14 @@ export default defineComponent({
     }
 
     function restorePendingPlaybackRate() {
-      const playbackRate = pendingPlaybackRateRestore ?? normalizePlaybackRate(props.currentPlaybackRate)
+      const playbackRate = pendingPlaybackRateRestore ?? getInitialPlaybackRate()
       pendingPlaybackRateRestore = null
 
       if (playbackRate === null || !video.value || !player) {
         return
       }
 
-      video.value.defaultPlaybackRate = defaultPlaybackRate.value
+      video.value.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
 
       try {
         if (Math.abs(playbackRate - video.value.defaultPlaybackRate) < 0.01) {
@@ -5376,19 +5435,42 @@ export default defineComponent({
           return
         }
 
-        const normalizedPlaybackRate = normalizePlaybackRate(playbackRate)
-
-        if (normalizedPlaybackRate === null) {
+        if (normalizePlaybackRate(playbackRate) === null) {
           return
         }
 
-        queuePlaybackRateRestore(normalizedPlaybackRate)
+        queuePlaybackRateRestore(getInitialPlaybackRate())
 
         if (video.value) {
-          video.value.playbackRate = normalizedPlaybackRate
+          video.value.playbackRate = getInitialPlaybackRate()
         }
       }
     )
+
+    watch(shouldUseNormalPlaybackRateByDefault, (shouldUseNormalPlaybackRate) => {
+      if (video.value) {
+        video.value.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
+      }
+
+      if (!shouldUseNormalPlaybackRate || playbackRateUserSet) {
+        return
+      }
+
+      queuePlaybackRateRestore(NORMAL_PLAYBACK_RATE)
+
+      if (!hasLoaded.value || !player || !video.value) {
+        if (video.value) {
+          video.value.playbackRate = NORMAL_PLAYBACK_RATE
+        }
+        return
+      }
+
+      try {
+        player.cancelTrickPlay()
+      } catch (error) {
+        console.error('Failed to apply normal playback rate default:', error)
+      }
+    })
 
     /**
      * @param {number} rate
@@ -5400,7 +5482,9 @@ export default defineComponent({
       // The following error is thrown if you go below 0.07:
       // The provided playback rate (0.05) is not in the supported playback range.
       if (newPlaybackRate > 0.07 && newPlaybackRate <= maxVideoPlaybackRate.value) {
-        if (Math.abs(newPlaybackRate - defaultPlaybackRate.value) < 0.01) {
+        playbackRateUserSet = true
+
+        if (Math.abs(newPlaybackRate - getDefaultPlaybackRateForVideo()) < 0.01) {
           player.cancelTrickPlay()
         } else {
           player.trickPlay(newPlaybackRate, false)
@@ -6199,7 +6283,12 @@ export default defineComponent({
         const button = target.closest('button')
 
         if (button && !button.classList.contains('shaka-back-to-overflow-button')) {
+          playbackRateUserSet = true
           setTimeout(() => {
+            if (!player) {
+              return
+            }
+
             emit('playback-rate-user-set', player.getPlaybackRate())
           }, 10)
         }
@@ -6271,9 +6360,10 @@ export default defineComponent({
       // otherwise it uses the browsers native captions which get displayed underneath the UI controls
       await localPlayer.attach(videoElement)
 
-      queuePlaybackRateRestore(props.currentPlaybackRate)
-      videoElement.playbackRate = props.currentPlaybackRate
-      videoElement.defaultPlaybackRate = defaultPlaybackRate.value
+      const initialPlaybackRate = getInitialPlaybackRate()
+      queuePlaybackRateRestore(initialPlaybackRate)
+      videoElement.playbackRate = initialPlaybackRate
+      videoElement.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
 
       // check if the component is already getting destroyed
       // which is possible because this function runs asynchronously
@@ -6410,7 +6500,7 @@ export default defineComponent({
         forceAspectRatio.value = firstFormat.width / firstFormat.height < 1.5
       }
 
-      if (useSponsorBlock.value && sponsorSkips.value.seekBar.length > 0) {
+      if (useSponsorBlock.value && (sponsorSkips.value.seekBar.length > 0 || !props.videoGenreIsMusic)) {
         setupSponsorBlock()
       }
 

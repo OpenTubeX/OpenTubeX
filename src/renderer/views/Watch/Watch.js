@@ -2265,6 +2265,11 @@ export default defineComponent({
     },
 
     initializePlaybackRate() {
+      if (this.videoGenreIsMusic) {
+        this.currentPlaybackRate = 1
+        return
+      }
+
       const rememberPerChannel = this.$store.getters.getRememberPlaybackSpeedPerChannel
       if (rememberPerChannel && this.channelId) {
         try {
