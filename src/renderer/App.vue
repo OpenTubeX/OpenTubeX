@@ -165,7 +165,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { marked } from 'marked'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
-import { useI18n } from './composables/use-i18n-polyfill'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'

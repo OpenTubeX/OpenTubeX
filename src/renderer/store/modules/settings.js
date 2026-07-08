@@ -424,7 +424,7 @@ const sideEffectHandlers = {
 
     await Promise.allSettled(loadPromises)
 
-    i18n.global.locale = targetLocale
+    i18n.global.locale.value = targetLocale
     await dispatch('getRegionData', targetLocale)
   },
 

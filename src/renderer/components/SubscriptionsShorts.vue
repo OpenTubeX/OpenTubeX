@@ -10,7 +10,7 @@
 
 <script setup>
 import { computed, shallowRef, ref, watch, onBeforeUnmount, onMounted } from 'vue'
-import { useI18n } from '../composables/use-i18n-polyfill'
+import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 

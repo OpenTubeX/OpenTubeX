@@ -119,7 +119,7 @@
 import { computed, ref, useTemplateRef } from 'vue'
 import { copyToClipboard, openExternalLink } from '../../helpers/utils'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
-import { useI18n } from '../../composables/use-i18n-polyfill'
+import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'

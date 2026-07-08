@@ -1531,11 +1531,10 @@ export function parseLocalListVideo(item, channelId, channelName) {
 }
 
 const VIEWS_OR_WATCHING_REGEX = /views?|watching|waiting/i
-const WAITING_REGEX = /waiting/i
-const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[km]?$/i
+const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[bkm]?$/i
 const PREMIERES_TIME_REGEX = /^(premieres|scheduled for) /i
 // Sometimes got `Streamed N (unit) ago`
-const PUBLISH_TIME_REGEX = /^(streamed )?\d+ \w+? ago/i
+const PUBLISH_TIME_REGEX = /^(streamed )?\d+ ?\w+? ago/i
 
 /**
  * @param {string | undefined} text
@@ -1544,15 +1543,6 @@ function isViewCountText(text) {
   if (typeof text !== 'string') { return false }
 
   return VIEWS_OR_WATCHING_REGEX.test(text) || VIEWS_IN_NUMBER_ONLY.test(text)
-}
-
-/**
- * @param {string | undefined} text
- */
-function isViewOrWaitingCountText(text) {
-  if (typeof text !== 'string') { return false }
-
-  return WAITING_REGEX.test(text) || isViewCountText(text)
 }
 
 /**
@@ -1705,7 +1695,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         const firstPart = metadataRows[0].metadata_parts?.[0]?.text
         const firstPartText = firstPart?.text
 
-        if (firstPartText && !isViewOrWaitingCountText(firstPartText) && !firstPartText.endsWith('ago') && !isPremieresTimeText(firstPartText)) {
+        if (firstPartText && !isViewCountText(firstPartText) && !firstPartText.endsWith('ago') && !isPremieresTimeText(firstPartText)) {
           authorPart = firstPart
         }
       }
