@@ -113,9 +113,12 @@
       <div
         ref="tabSwitcherRef"
         class="tabSwitcher"
+        :class="{ pointerActive: tabSwitcherPointerActive }"
         role="listbox"
         :aria-label="t('KeyboardShortcutPrompt.Tab Switcher')"
         :aria-activedescendant="tabSwitcherSelectedTabId"
+        @pointermove="activateTabSwitcherPointer"
+        @pointerleave="clearTabSwitcherSelection"
       >
         <button
           v-for="(tab, index) in tabSwitcherTabs"
@@ -127,7 +130,7 @@
           :style="getTabSwitcherItemStyle(tab)"
           role="option"
           :aria-selected="index === tabSwitcherSelectedIndex"
-          @mouseenter="setTabSwitcherSelectedIndex(index)"
+          @pointermove="setTabSwitcherSelectedIndex(index)"
           @focus="setTabSwitcherSelectedIndex(index)"
           @click="commitTabSwitcherSelection(index)"
         >
@@ -256,6 +259,7 @@ const dataReady = ref(false)
 const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
+const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const subscriptionAutoRefreshTimers = {
   videos: null,
@@ -687,6 +691,7 @@ function cycleTabSwitcher(direction) {
     const activeIndex = Math.max(0, tabs.findIndex(tab => tab.id === store.getters.getActiveTabId))
     tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
     tabSwitcherPreviewUrls.value = {}
+    tabSwitcherPointerActive.value = false
     tabSwitcherVisible.value = true
     scrollTabSwitcherSelectionIntoView()
     loadTabSwitcherPreviews()
@@ -742,6 +747,15 @@ function loadTabSwitcherPreviews() {
  */
 function setTabSwitcherSelectedIndex(index) {
   tabSwitcherSelectedIndex.value = index
+}
+
+function activateTabSwitcherPointer() {
+  tabSwitcherPointerActive.value = true
+}
+
+function clearTabSwitcherSelection() {
+  tabSwitcherSelectedIndex.value = -1
+  tabSwitcherPointerActive.value = false
 }
 
 /**
@@ -802,6 +816,7 @@ function cancelTabSwitcher() {
   tabSwitcherVisible.value = false
   tabSwitcherSelectedIndex.value = -1
   tabSwitcherPreviewUrls.value = {}
+  tabSwitcherPointerActive.value = false
   tabSwitcherPreviewRequestId++
 }
 
