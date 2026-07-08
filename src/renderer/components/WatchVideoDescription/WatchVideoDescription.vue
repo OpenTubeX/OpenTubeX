@@ -3,6 +3,17 @@
     v-if="shownDescription.length > 0"
     :class="{ videoDescription: true, short: !showFullDescription }"
   >
+    <FtIconButton
+      v-if="showControls && showFullDescription"
+      class="descriptionCloseButton"
+      :title="$t('Description.Collapse Description')"
+      :icon="['fas', 'xmark']"
+      theme="base-no-default"
+      :use-shadow="false"
+      :padding="8"
+      :size="18"
+      @click="collapseDescription"
+    />
     <span
       v-if="showControls && !showFullDescription"
       class="descriptionStatus"
@@ -47,6 +58,7 @@ import autolinker from 'autolinker'
 
 import { onMounted, ref, computed, useTemplateRef } from 'vue'
 import FtCard from '../ft-card/ft-card.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 const props = defineProps({

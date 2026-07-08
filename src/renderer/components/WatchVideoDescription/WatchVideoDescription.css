@@ -20,6 +20,15 @@
   color: var(--title-color);
 }
 
+.descriptionCloseButton {
+  position: sticky;
+  inset-block-start: 8px;
+  align-self: flex-end;
+  margin-block-end: -36px;
+  margin-inline-end: -16px;
+  z-index: 1;
+}
+
 .videoDescription.short {
   cursor: pointer;
 }
@@ -37,6 +46,10 @@
 .videoDescription:not(.short) .descriptionStatus {
   position: relative;
   margin-block-start: 1em;
+}
+
+.videoDescription:not(.short) .description {
+  padding-inline-end: 48px;
 }
 
 .videoDescription.short .descriptionStatus:dir(rtl) {
