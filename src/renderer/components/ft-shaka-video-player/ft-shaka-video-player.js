@@ -4127,6 +4127,31 @@ export default defineComponent({
       pipWindowHeight.value = pipWindow.height * devicePixelRatio
     }
 
+    function clearDisplayedCaptions() {
+      const textContainer = container.value?.getElementsByClassName('shaka-text-container')[0]
+
+      if (textContainer instanceof HTMLElement) {
+        textContainer.replaceChildren()
+      }
+    }
+
+    function wrapTextTrackSelection() {
+      const selectTextTrack = player.selectTextTrack.bind(player)
+
+      player.selectTextTrack = (track = null) => {
+        const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
+
+        if (track === null) {
+          clearDisplayedCaptions()
+        } else if (activeTextTrack && activeTextTrack.id !== track.id) {
+          selectTextTrack(null)
+          clearDisplayedCaptions()
+        }
+
+        selectTextTrack(track)
+      }
+    }
+
     const playerWidth = computed(() => Math.round(pipWindowWidth.value ?? videoElementWidth.value))
     const playerHeight = computed(() => Math.round(pipWindowHeight.value ?? videoElementHeight.value))
 
@@ -6229,6 +6254,7 @@ export default defineComponent({
 
       const controls = ui.getControls()
       player = controls.getPlayer()
+      wrapTextTrackSelection()
 
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
