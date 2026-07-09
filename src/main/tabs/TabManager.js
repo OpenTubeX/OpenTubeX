@@ -43,6 +43,7 @@ const TAB_LOADING_SOURCE_RENDERER = 'renderer'
  * @property {number} previewCapturedAt
  * @property {string | null} previewFileName
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
+ * @property {boolean} previewCaptureAllowInactive
  * @property {Promise<string | null> | null} previewCapturePromise
  * @property {WebContentsView} view
  * @property {boolean} hasStartedLoading
@@ -757,12 +758,20 @@ export class TabManager {
    * @param {{allowInactive?: boolean}} [options]
    */
   _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS, { allowInactive = false } = {}) {
+    const effectiveAllowInactive = allowInactive || tab.previewCaptureAllowInactive === true
     this._clearTabPreviewRefresh(tab)
+    tab.previewCaptureAllowInactive = effectiveAllowInactive
 
     tab.previewCaptureTimeoutId = setTimeout(() => {
       tab.previewCaptureTimeoutId = null
+      if (this._getTabLoadingState(tab)) {
+        this._scheduleTabPreviewRefresh(tab, delay, { allowInactive: effectiveAllowInactive })
+        return
+      }
+
       const isActive = this.activeTabId === tab.id
-      if (!isActive && !allowInactive) {
+      if (!isActive && !effectiveAllowInactive) {
+        tab.previewCaptureAllowInactive = false
         return
       }
 
@@ -772,6 +781,11 @@ export class TabManager {
 
       refreshPromise.catch(error => {
         console.error('Failed to refresh tab preview:', error)
+      })
+      refreshPromise.then(() => {
+        tab.previewCaptureAllowInactive = false
+      }, () => {
+        tab.previewCaptureAllowInactive = false
       })
     }, delay)
   }
@@ -784,6 +798,7 @@ export class TabManager {
       clearTimeout(tab.previewCaptureTimeoutId)
       tab.previewCaptureTimeoutId = null
     }
+    tab.previewCaptureAllowInactive = false
   }
 
   /**
@@ -909,13 +924,18 @@ export class TabManager {
    * @param {TabInfo} tab
    */
   _syncTabLoadingState(tab) {
+    const wasLoading = tab.isLoading
     const nextLoading = this._getTabLoadingState(tab)
-    if (tab.isLoading === nextLoading) {
+    if (wasLoading === nextLoading) {
       return
     }
 
     tab.isLoading = nextLoading
     this._broadcastStateUpdate()
+
+    if (wasLoading && !nextLoading && tab.previewCaptureTimeoutId == null) {
+      this._scheduleTabPreviewRefresh(tab)
+    }
   }
 
   /**
@@ -956,6 +976,11 @@ export class TabManager {
    * @returns {Promise<string | null>}
    */
   async _refreshTabPreview(tab) {
+    if (this._getTabLoadingState(tab)) {
+      this._scheduleTabPreviewRefresh(tab)
+      return await this._getCachedTabPreviewDataUrl(tab)
+    }
+
     if (tab.previewCapturePromise != null) {
       return tab.previewCapturePromise
     }
@@ -1025,6 +1050,7 @@ export class TabManager {
     if (
       !tab.hasStartedLoading ||
       tab.view.webContents.isDestroyed() ||
+      this._getTabLoadingState(tab) ||
       !this._attachedTabIds.has(tab.id)
     ) {
       return null
@@ -1255,6 +1281,7 @@ export class TabManager {
       previewCapturedAt: restoredPreviewCapturedAt,
       previewFileName: restoredPreviewFileName,
       previewCaptureTimeoutId: null,
+      previewCaptureAllowInactive: false,
       previewCapturePromise: null,
       view,
       hasStartedLoading: false,
@@ -1764,6 +1791,11 @@ export class TabManager {
       !tab.view.webContents.isDestroyed()
 
     const cachedPreview = await this._getCachedTabPreviewDataUrl(tab)
+    if (this._getTabLoadingState(tab)) {
+      this._scheduleTabPreviewRefresh(tab)
+      return cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
+    }
+
     if (cachedPreview != null) {
       return cachedPreview
     }
@@ -1818,6 +1850,7 @@ export class TabManager {
     await this._refreshTabPreview(tab).catch(error => {
       console.error('Failed to refresh preview before unloading tab:', error)
     })
+    this._clearTabPreviewRefresh(tab)
 
     const wasActive = this.activeTabId === tabId
     let tabToActivate = null
@@ -1845,6 +1878,7 @@ export class TabManager {
     tab.isPlaying = false
     tab.isLoading = false
     tab.loadingSources = new Set()
+    tab.previewCaptureAllowInactive = false
     tab.preloadInBackground = false
 
     if (!previousView.webContents.isDestroyed()) {
