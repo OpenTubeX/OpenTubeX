@@ -99,6 +99,7 @@ Subscriptions:
   All Subscription Tabs Hidden: Alle Registerkarten für Abos sind ausgeblendet. Um den Inhalt hier zu sehen, blende bitte einige Registerkarten im Abschnitt „{subsection}“ in „{settingsSection}“ ein.
   Load More Posts: Weitere Beiträge laden
   Empty Posts: Deine abonnierten Kanäle haben derzeit keine Beiträge.
+  Refreshing Subscriptions: Abos werden aktualisiert
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -251,6 +252,16 @@ Settings:
       Tooltip: Zusätzliche Seiten und Kommentare automatisch laden.
     Open Deep Links In New Window: An OpenTubeX übergebene URLs in einem neuen Fenster öffnen
     Minimize to system tray: In die Systemleiste minimieren
+    Confirm Before Closing App: Bestätigen vor dem Beenden von OpenTubeX
+    New Tab Position:
+      New Tab Position: Neuer Tab Position
+      At the end: Am Ende
+      After current tab: Nach dem aktuellen Tab
+    Avoid translation:
+      Avoid translation: Originaltext beibehalten
+      Disabled: Deaktiviert
+      Watch Only: Nur in der Videoansicht
+      Entire App: Komplette Anwendung (eventuell unsicher)
   Theme Settings:
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
@@ -444,6 +455,19 @@ Settings:
       External Player: Externer Player ({externalPlayerName})
       Full Screen: Vollbild
       Default Viewing Mode: Standard-Ansichtsmodus
+    Auto Picture in Picture on Tab Change: Bild im Bild automatisch aktivieren, wenn der Tab gewechselt wird
+    Scroll Mini Player:
+      Scroll Mini Player: Scroll mini player
+      When Scrolling Down: Einen Mini Player auf dem Bildschirm anzeigen beim runterscrollen
+    Remember Volume: Lautstärke beibehalten
+    Customize Quick Playback Speed Bar: Schnelle Wiedergabegeschwindigkeitsleiste anpassen
+    Quick Playback Speed Bar Manager: Schnelle Wiedergabegeschwindigkeitsleiste
+    Add Playback Speed: Wiedergabegeschwindigkeit hinzufügen
+    Reset Quick Playback Speed Bar: Auf Standard zurücksetzen
+    Playback Speed Name: Name
+    Edit Playback Speed Name: Wiedergabegeschwindigkeitsname bearbeiten
+    Use Automatic Playback Speed Name: Automatischen Wiedergabegeschwindigkeitsname verwenden
+    Reorder Playback Speed: Ziehen um Wiedergabegeschwindigkeit neu anzuordnen
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
@@ -452,6 +476,10 @@ Settings:
 
     'Limit the number of videos displayed for each channel': Anzahl der für jeden Kanal angezeigten Videos begrenzen
     To: Limitieren auf
+    Auto Refresh Interval: Automatisches Aktualisierungsintervall
+    Videos Auto Refresh Interval: Automatisches Aktualisierungsinterval für Videos
+    Shorts Auto Refresh Interval: Automatisches Aktualisierungsinterval für Shorts
+    Live Auto Refresh Interval: Automatisches Aktualisierungsinterval für Livestreams
   Privacy Settings:
     Watch history has been cleared: Wiedergabeverlauf wurde gelöscht
     Are you sure you want to remove your entire watch history?: Bist du sicher, dass du deinen gesamten Wiedergabeverlauf löschen willst?
@@ -519,6 +547,18 @@ Settings:
     Export search history: Suchverlauf exportieren
     All search history has been successfully imported: Der gesamte Suchverlauf wurde erfolgreich importiert
     All search history has been successfully exported: Der gesamte Suchverlauf wurde erfolgreich exportiert
+    Settings File: Einstellungs-Datei
+    Import Settings: Einstellungen importieren
+    Export Settings: Einstellungen exportieren
+    Settings Tooltip: Einstellungen die Betriebssystem/Benutzerspezifisch oder experimentell sind können nicht exportiert oder importiert werden (z.B. Proxy, Externer Video-Player, Screenshot Ordner, ...)
+    All settings have been successfully imported: Alle Einstellungen wurden erfolgreich importiert
+    All settings have been successfully exported: Alle Einstellungen wurden erfolgreich exportiert
+    Unknown setting key: Unbekannter Einstellungsschlüssel
+    Non-transferable setting key: Nicht übertragbarer Einstellungsschlüssel
+    Import subscriptions formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup oder FreeTube export (.json)'
+    Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
+    Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db)'
+    Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
   Distraction Free Settings:
     Hide Live Chat: Live-Chat ausblenden
     Hide Popular Videos: Beliebte Videos ausblenden
@@ -647,6 +687,10 @@ Settings:
     Set Password: Passwort festlegen
   Sort Settings Sections (A-Z): Einstellungsabschnitte sortieren (A–Z)
   Return to Settings Menu: Zurück zum Einstellungsmenü
+  Return YouTube Dislike Settings:
+    Return YouTube Dislike Settings: Return YouTube Dislike
+    Enable Return YouTube Dislike: Return YouTube Dislike aktivieren
+    Return YouTube Dislike Url: Return YouTube Dislike API URL (Standard ist https://ryd-proxy.kavin.rocks)
 About:
   #On About page
   About: Über
@@ -788,6 +832,8 @@ Video:
     sponsor: Sponsor
     recap: Vorschau/Rückblick
     filler: Füller
+    hook: Aufhänger/Begrüßung
+    highlight: Highlight
   External Player:
     OpenInTemplate: In {externalPlayer} öffnen
     Unsupported Actions:
@@ -877,11 +923,19 @@ Video:
       SkipToHighlight: Zum Highlight springen?
       SkipToastUnskip: Nicht überspringen
       SkipToastReskip: Nochmal überspringen
+      SkipPrompt: '{segmentCategory} Segment überspringen?'
+      SkipPromptAction: Überspringen
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
     Exit Full Window: Vollständiges Fenster beenden
     Hide Stats: Statistiken ausblenden
     Autoplay is off: Automatische Wiedergabe ist ausgeschaltet
     Autoplay is on: Automatische Wiedergabe ist eingeschaltet
+    Scroll Mini Player:
+      Back to Top: Zurück nach oben
+      Volume: Lautstärke
+      Play: Abspielen
+      Pause: Pausieren
+      Drag Handle: Mini-Player verschieben
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
   Unlisted: Nicht gelistet
   MembersOnly: Videos, die nur für Mitglieder bestimmt sind, können mit OpenTubeX nicht angesehen werden, da sie einen Google-Login und eine kostenpflichtige Kanalmitgliedschaft erfordern.
@@ -970,6 +1024,9 @@ Comments:
   Hide {replyCount} replies: 1 Antwort ausblenden | {replyCount} Antworten ausblenden
   View 1 reply from {channelName}: 1 Antwort von {channelName} ansehen
   View {replyCount} replies from {channelName} and others: '{replyCount} Antworten von {channelName} und anderen ansehen'
+  Copy YouTube Link: YouTube-Link kopieren
+  Reload Comments: Kommentare neu laden
+  YouTube comment link copied to clipboard: YouTube-Link in die Zwischenablage kopiert
 Up Next: Nächster Titel
 
 # Toast Messages
@@ -1048,11 +1105,16 @@ Tooltips:
     Region for Trending: Die Trendregion erlaubt es dir auszuwählen, aus welchem Land die Trends angezeigt werden sollen.
     External Link Handling: "Wähle das Standardverhalten, wenn ein Link angeklickt wird, der nicht in OpenTubeX geöffnet werden kann.\nStandardmäßig wird OpenTubeX den angeklickten Link in deinem Standardbrowser öffnen.\n"
     Open Deep Links In New Window: URLs, die an OpenTubeX übergeben werden, z. B. durch Redirect-Browser-Erweiterungen oder Befehlszeilenargumente, werden in einem neuen Fenster geöffnet.
+    Avoid translation: |
+      YouTubes automatische Übersetzung für Titel, Beschreibung und Kapitel eines Videos deaktivieren.
+      Zu viele Anfragen, wie Videotitel in Listen abfragen kann die Zuverlässigkeit der
+      Anwendung temporär beeinträchtigen.
   Proxy Settings:
     IP Block Recovery Script Path: Pfad zur Skriptdatei, die bei erkannter IP-Sperre ausgeführt wird. OpenTubeX wartet bis zum Abschluss und lädt danach das Video neu. Wenn der Fallback aktiviert ist, wird das Skript nur ausgeführt, wenn auch der Fallback fehlschlägt.
   Subscription Settings:
     Fetch Feeds from RSS: Wenn aktiviert, verwendet OpenTubeX RSS anstelle der Standardmethode, um deinen Abo-Feed abzurufen. RSS ist schneller und verhindert die IP-Sperren, liefert aber bestimmte Informationen wie Videodauer, den Live-Status oder Beiträge nicht
     Fetch Automatically: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
+    Auto Refresh Interval: Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist.
   Player Settings:
     Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
@@ -1061,6 +1123,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
+    Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).
@@ -1158,6 +1221,7 @@ Autoplay Interruption Timer: Automatische Wiedergabe wurde aufgrund von {autopla
 Description:
   Collapse Description: Weniger anzeigen
   Expand Description: '...mehr'
+  Video Category: 'Video-Kategorie:'
 KeyboardShortcutPrompt:
   Keyboard Shortcuts: Tastenkombinationen
   Sections:
@@ -1209,8 +1273,20 @@ KeyboardShortcutPrompt:
   Home: Zum Anfang des Videos springen
   Skip to Next Video: Zum nächsten Video in der Playlist bzw. nächsten empfohlenen Video springen
   Skip to Previous Video: Zum vorherigen Video in der Playlist springen
+  Toggle Normal Playback Speed: Zwischen 1x Wiedergabegeschwindigkeit und der vorherigen Geschwindigkeit wechseln
+  Tab Switcher: Tab-Wechsler
 shortcutLabelSeparator: ｜
 Compact side navigation: Seitenleiste minimieren
 Expand side navigation: Seitenleiste erweitern
 Screenshot Clipboard Success: Screenshot in der Zwischenablage gespeichert
 Screenshot Clipboard Error: Screenshot-Kopie in die Zwischenablage ist fehlgeschlagen
+Close Confirmation:
+  Title: OpenTubeX beenden?
+  Message: Bist du sicher, dass du OpenTubeX beenden möchtest?
+  Quit: Beenden
+  Never Ask Again: Nicht erneut fragen
+Find in page: Auf Seite suchen
+Previous match: Vorheriger Treffer
+Next match: Nächster Treffer
+Close find bar: Suchleiste schließen
+No matches: Keine Treffer
