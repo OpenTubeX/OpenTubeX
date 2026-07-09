@@ -92,15 +92,15 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 ## Screenshots
 | The main OpenTubeX window                                                                         |
 |--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube1.png)|
+| ![](docs/screenshots/OpenTubeX1.png)                                                            |
 
 | Watching a video                                                                                 |
 |--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube2.png)|
+| ![](docs/screenshots/OpenTubeX2.png)                                                            |
 
 | Settings                                                                                         |
 |--------------------------------------------------------------------------------------------------|
-| ![](https://raw.githubusercontent.com/FreeTubeApp/FreeTubeApp.io/master/src/images/FreeTube3.png)|
+| ![](docs/screenshots/OpenTubeX3.png)                                                            |
 
 ## How does it work?
 OpenTubeX uses a built in extractor to grab and serve data / videos. The [Invidious API](https://github.com/iv-org/invidious) can also optionally be used. OpenTubeX does not use any official APIs to obtain data. While YouTube can still see your video requests, it can no
