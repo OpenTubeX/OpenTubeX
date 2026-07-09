@@ -906,7 +906,11 @@ function highlightFindbarMatches(query) {
     NodeFilter.SHOW_TEXT,
     {
       acceptNode: (node) => {
-        if (isFindbarTextNode(node) || isHiddenTextNode(node)) {
+        if (
+          isFindbarTextNode(node) ||
+          isNonSearchableTextNode(node) ||
+          isHiddenTextNode(node)
+        ) {
           return NodeFilter.FILTER_REJECT
         }
 
@@ -933,33 +937,29 @@ function highlightFindbarMatches(query) {
     }
   }
 
-  const matches = []
-
-  for (const rangeInfo of [...ranges].reverse()) {
+  const matches = ranges.map((rangeInfo) => {
     const range = document.createRange()
     range.setStart(rangeInfo.node, rangeInfo.start)
     range.setEnd(rangeInfo.node, rangeInfo.end)
-
-    const mark = document.createElement('mark')
-    mark.className = 'findbarMatch'
-    setFindbarMatchActive(mark, false)
-    range.surroundContents(mark)
-    matches.unshift(mark)
-  }
+    return range
+  })
 
   findbarMatches = matches
   findbarMatchCount.value = matches.length
+  paintFindbarHighlights()
   selectFindbarMatch(matches.length > 0 ? 0 : -1)
 }
 
 function clearFindbarHighlights() {
-  for (const match of findbarMatches) {
-    const parent = match.parentNode
-    match.replaceWith(document.createTextNode(match.textContent ?? ''))
-    parent?.normalize()
-  }
-
+  window.CSS.highlights.delete('findbarmatch')
+  window.CSS.highlights.delete('findbarmatchcurrent')
   findbarMatches = []
+}
+
+function paintFindbarHighlights() {
+  const highlight = new window.Highlight(...findbarMatches)
+  highlight.priority = 0
+  window.CSS.highlights.set('findbarmatch', highlight)
 }
 
 /**
@@ -974,38 +974,32 @@ function selectFindbarMatch(index) {
   }
 
   const nextIndex = (index + matches.length) % matches.length
-
-  for (const match of matches) {
-    match.classList.remove('findbarMatchCurrent')
-    setFindbarMatchActive(match, false)
-  }
-
   const currentMatch = matches[nextIndex]
-  currentMatch.classList.add('findbarMatchCurrent')
-  setFindbarMatchActive(currentMatch, true)
-  currentMatch.scrollIntoView({
-    block: 'center',
-    inline: 'nearest',
-    behavior: 'smooth'
-  })
+  const currentHighlight = new window.Highlight(currentMatch)
+  currentHighlight.priority = 1
+
+  window.CSS.highlights.set('findbarmatchcurrent', currentHighlight)
+  scrollFindbarMatchIntoView(currentMatch)
 
   findbarMatchIndex.value = nextIndex + 1
   findbarMatchCount.value = matches.length
 }
 
 /**
- * @param {HTMLElement} match
- * @param {boolean} active
+ * @param {Range} match
  */
-function setFindbarMatchActive(match, active) {
-  match.style.setProperty('color', active ? '#fff' : '#111', 'important')
-  match.style.setProperty('background-color', active ? '#e84100' : '#ffe15a', 'important')
-  match.style.setProperty('border-radius', '3px')
-  match.style.setProperty('box-shadow', active
-    ? '0 0 0 4px #e84100, 0 0 12px 4px rgb(232 65 0 / 55%)'
-    : '0 0 0 1px rgb(0 0 0 / 24%)')
-  match.style.setProperty('outline', active ? '2px solid #fff' : '0')
-  match.style.setProperty('outline-offset', '1px')
+function scrollFindbarMatchIntoView(match) {
+  const rect = match.getBoundingClientRect()
+  if (rect.width === 0 && rect.height === 0) {
+    return
+  }
+
+  const targetBlockCenter = rect.top + rect.height / 2
+  const viewportBlockCenter = window.innerHeight / 2
+  window.scrollBy({
+    top: targetBlockCenter - viewportBlockCenter,
+    behavior: 'smooth'
+  })
 }
 
 /**
@@ -1014,6 +1008,14 @@ function setFindbarMatchActive(match, active) {
  */
 function isFindbarTextNode(node) {
   return node.parentElement?.closest('.findbar') != null
+}
+
+/**
+ * @param {Node} node
+ * @returns {boolean}
+ */
+function isNonSearchableTextNode(node) {
+  return node.parentElement?.closest('datalist, input, option, optgroup, script, select, style, template, textarea') != null
 }
 
 /**

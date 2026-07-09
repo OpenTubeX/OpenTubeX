@@ -81,14 +81,15 @@
   padding-block: 0;
   padding-inline: 8px;
   color: var(--primary-text-color);
-  background-color: var(--primary-input-color);
-  border: 1px solid transparent;
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--tertiary-text-color);
   border-radius: 6px;
   outline: none;
 }
 
 .findbarInput:focus {
   border-color: var(--primary-text-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-text-color) 18%, transparent);
 }
 
 .findbarStatus {
@@ -119,19 +120,14 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
 
-.app .findbarMatch {
-  color: #111 !important;
-  background: #ffe15a !important;
-  border-radius: 3px;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 24%);
+::highlight(findbarmatch) {
+  color: #111;
+  background-color: #ffe15a;
 }
 
-.app .findbarMatchCurrent {
-  color: #fff !important;
-  background: #e84100 !important;
-  outline: 2px solid #fff;
-  outline-offset: 1px;
-  box-shadow: 0 0 0 4px #e84100, 0 0 12px 4px rgb(232 65 0 / 55%);
+::highlight(findbarmatchcurrent) {
+  color: #fff;
+  background-color: #e84100;
 }
 
 .fade-enter-active,
