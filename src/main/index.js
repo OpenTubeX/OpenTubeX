@@ -618,6 +618,20 @@ function runApp() {
     app.commandLine.appendSwitch('disable-http-cache')
   }
 
+  if (process.platform === 'linux') {
+    const middleClickAutoscrollFeature = 'MiddleClickAutoscroll'
+    const enabledBlinkFeatures = app.commandLine.getSwitchValue('enable-blink-features')
+      .split(',')
+      .filter(Boolean)
+
+    if (!enabledBlinkFeatures.includes(middleClickAutoscrollFeature)) {
+      app.commandLine.appendSwitch('enable-blink-features', [
+        ...enabledBlinkFeatures,
+        middleClickAutoscrollFeature
+      ].join(','))
+    }
+  }
+
   const PLAYER_CACHE_PATH = `${userDataPath}/player_cache`
 
   // See: https://stackoverflow.com/questions/45570589/electron-protocol-handler-not-working-on-windows
