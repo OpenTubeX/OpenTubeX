@@ -38,11 +38,41 @@
   align-items: center;
 }
 
+.collaboratorSummary {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font: inherit;
+  margin: 0;
+  padding: 0;
+  text-align: start;
+}
+
+.collaboratorSummaryThumbnails {
+  display: flex;
+  margin-inline-end: 10px;
+  inline-size: 64px;
+}
+
 .channelThumbnail {
   border-radius: 50%;
   cursor: pointer;
   margin-inline-end: 10px;
   inline-size: 56px;
+}
+
+.collaboratorThumbnail {
+  border: 2px solid var(--card-bg-color);
+  flex: 0 0 auto;
+  inline-size: 36px;
+  margin-inline-end: 0;
+}
+
+.collaboratorThumbnail + .collaboratorThumbnail {
+  margin-inline-start: -12px;
 }
 
 .channelName {
@@ -54,6 +84,13 @@
   position: relative;
   text-decoration: inherit;
   inset-block-start: -2px;
+}
+
+.collaboratorSummaryName {
+  margin-inline-start: 0;
+  margin-block-end: 0;
+  overflow-wrap: anywhere;
+  inset-block-start: 0;
 }
 
 .videoMetrics {
@@ -138,6 +175,7 @@
   .seperator {
     display: none;
   }
+
 }
 
 @media screen and (width <= 380px) {

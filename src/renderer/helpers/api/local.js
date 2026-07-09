@@ -580,6 +580,53 @@ export async function getLocalVideoInfo(id) {
 }
 
 /**
+ * @typedef {object} LocalVideoCollaborator
+ * @property {string} id
+ * @property {string} name
+ * @property {string} thumbnail
+ * @property {string} subtitle
+ */
+
+/**
+ * @param {import('youtubei.js').YT.VideoInfo} videoInfo
+ * @returns {LocalVideoCollaborator[]}
+ */
+export function parseLocalVideoCollaborators(videoInfo) {
+  const listItems = videoInfo.secondary_info?.owner?.author?.endpoint?.payload
+    ?.panelLoadingStrategy?.inlineContent?.dialogViewModel?.customContent
+    ?.listViewModel?.listItems
+
+  if (!Array.isArray(listItems)) {
+    return []
+  }
+
+  const collaborators = []
+  const seenChannelIds = new Set()
+
+  for (const item of listItems) {
+    const viewModel = item.listItemViewModel
+    const avatar = viewModel?.leadingAccessory?.avatarViewModel
+    const channelId = viewModel?.title?.commandRuns?.[0]?.onTap?.innertubeCommand?.browseEndpoint?.browseId ??
+      avatar?.endpoint?.innertubeCommand?.browseEndpoint?.browseId
+    const name = viewModel?.title?.content
+
+    if (!channelId || !name || seenChannelIds.has(channelId)) {
+      continue
+    }
+
+    seenChannelIds.add(channelId)
+    collaborators.push({
+      id: channelId,
+      name,
+      thumbnail: avatar?.image?.sources?.at(-1)?.url ?? '',
+      subtitle: viewModel?.subtitle?.content?.replaceAll(/[\u200e\u2068\u2069]/g, '') ?? ''
+    })
+  }
+
+  return collaborators
+}
+
+/**
  * @param {string} id
  */
 export async function getLocalComments(id) {
@@ -1535,6 +1582,7 @@ const VIEWS_IN_NUMBER_ONLY = /^\d+(\.\d)?[bkm]?$/i
 const PREMIERES_TIME_REGEX = /^(premieres|scheduled for) /i
 // Sometimes got `Streamed N (unit) ago`
 const PUBLISH_TIME_REGEX = /^(streamed )?\d+ ?\w+? ago/i
+const COLLABORATIVE_AUTHOR_TEXT_REGEX = /\s+and\s+/i
 
 /**
  * @param {string | undefined} text
@@ -1703,6 +1751,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       const imageAuthorId = lockupView.metadata.image?.renderer_context?.command_context?.on_tap?.payload?.browseId
       const author = authorPart?.text ?? channelName
       const authorId = authorPart?.endpoint?.payload?.browseId ?? imageAuthorId ?? channelId
+      const hasCollaborators = authorPart?.endpoint == null && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(author ?? '')
 
       return {
         type: 'video',
@@ -1710,6 +1759,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         title: lockupView.metadata.title.text?.trim(),
         author,
         authorId,
+        hasCollaborators,
         viewCount,
         published: calculatePublishedDate(publishedText, liveNow, isUpcoming, premiereDate),
         lengthSeconds,

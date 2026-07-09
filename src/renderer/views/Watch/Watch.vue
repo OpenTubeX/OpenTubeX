@@ -149,6 +149,7 @@
         :channel-id="channelId"
         :channel-name="channelName"
         :channel-thumbnail="channelThumbnail"
+        :channel-collaborators="channelCollaborators"
         :published="videoPublished"
         :premiere-date="premiereDate"
         :subscription-count-text="channelSubscriptionCountText"

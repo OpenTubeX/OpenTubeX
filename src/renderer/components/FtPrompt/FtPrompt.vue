@@ -2,6 +2,7 @@
   <Teleport to=".app">
     <div
       class="prompt"
+      :class="{ lockScroll }"
       tabindex="-1"
       :inert="inert"
       @click.self="hide"
@@ -56,13 +57,17 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef } from 'vue'
+import { nextTick, onBeforeMount, onBeforeUnmount, onMounted, useId, useTemplateRef } from 'vue'
 
 import store from '../../store/index'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
+
+let scrollLockCount = 0
+let originalBodyOverflow = ''
+let originalBodyPaddingInlineEnd = ''
 
 const props = defineProps({
   label: {
@@ -96,6 +101,10 @@ const props = defineProps({
   inert: {
     type: Boolean,
     default: false
+  },
+  lockScroll: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -107,6 +116,12 @@ const promptCard = useTemplateRef('promptCard')
 
 let promptButtons = []
 let lastActiveElement = null
+
+onBeforeMount(() => {
+  if (props.lockScroll) {
+    lockBodyScroll()
+  }
+})
 
 onMounted(() => {
   lastActiveElement = document.activeElement
@@ -122,8 +137,37 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape, true)
   store.commit('removeOpenPrompt', id)
+  if (props.lockScroll) {
+    unlockBodyScroll()
+  }
   nextTick(() => lastActiveElement?.focus())
 })
+
+function lockBodyScroll() {
+  if (scrollLockCount === 0) {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+
+    originalBodyOverflow = document.body.style.overflow
+    originalBodyPaddingInlineEnd = document.body.style.paddingInlineEnd
+
+    document.body.style.overflow = 'hidden'
+
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingInlineEnd = `calc(${originalBodyPaddingInlineEnd || '0px'} + ${scrollbarWidth}px)`
+    }
+  }
+
+  scrollLockCount += 1
+}
+
+function unlockBodyScroll() {
+  scrollLockCount = Math.max(0, scrollLockCount - 1)
+
+  if (scrollLockCount === 0) {
+    document.body.style.overflow = originalBodyOverflow
+    document.body.style.paddingInlineEnd = originalBodyPaddingInlineEnd
+  }
+}
 
 /**
  * @param {number} index

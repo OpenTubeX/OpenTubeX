@@ -1,0 +1,73 @@
+:global(.promptCard.collaboratorsPrompt) {
+  padding-block-start: 24px;
+}
+
+.collaboratorsTitle {
+  font-size: 20px;
+  margin-block: 0 12px;
+  margin-inline: 0;
+  text-align: start;
+}
+
+.collaboratorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-inline-size: min(420px, 80vw);
+}
+
+.collaboratorRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.collaboratorLink {
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-inline-size: 0;
+  text-decoration: none;
+}
+
+.collaboratorModalThumbnail {
+  border-radius: 50%;
+  flex: 0 0 auto;
+  block-size: 40px;
+  inline-size: 40px;
+}
+
+.collaboratorText {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.collaboratorName {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.collaboratorSubtitle {
+  color: var(--tertiary-text-color);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.initialCursor {
+  cursor: initial;
+}
+
+@media screen and (width <= 460px) {
+  .collaboratorRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .collaboratorsList {
+    min-inline-size: min(300px, 80vw);
+  }
+}

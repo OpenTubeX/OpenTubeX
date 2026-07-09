@@ -2150,10 +2150,3 @@ a:visited {
 ::-webkit-scrollbar-thumb:focus {
   background: var(--scrollbar-color-hover);
 }
-
-/***** REMOVE MAIN SCROLLBAR WHEN PROMPT IS OPEN ******/
-
-/* stylelint-disable-next-line selector-no-qualifying-type */
-body:has(.prompt) {
-  overflow: hidden;
-}

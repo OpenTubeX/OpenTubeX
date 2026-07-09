@@ -58,43 +58,72 @@
       <div
         class="profileRow"
       >
-        <div
-          v-if="!hideUploader"
+        <button
+          v-if="!hideUploader && hasMultipleCollaborators"
+          type="button"
+          class="collaboratorSummary"
+          @click="showCollaboratorsPrompt = true"
         >
-          <component
-            :is="enableChannelLinks ? 'RouterLink' : 'div'"
-            :to="`/channel/${channelId}`"
-          >
+          <span class="collaboratorSummaryThumbnails">
             <img
-              :src="channelThumbnail"
-              :class="enableChannelLinks ? '' : 'initialCursor'"
-              class="channelThumbnail"
+              v-for="collaborator in summaryCollaborators"
+              :key="collaborator.id"
+              :src="collaborator.thumbnail"
+              class="channelThumbnail collaboratorThumbnail"
               alt=""
             >
-          </component>
-        </div>
-        <div>
+          </span>
+          <span
+            class="channelName collaboratorSummaryName"
+            dir="auto"
+          >
+            {{ collaboratorSummaryName }}
+          </span>
+        </button>
+        <template v-else>
           <div
             v-if="!hideUploader"
           >
             <component
-              :is="enableChannelLinks ? 'RouterLink' : 'span'"
+              :is="enableChannelLinks ? 'RouterLink' : 'div'"
               :to="`/channel/${channelId}`"
-              :class="enableChannelLinks ? '' : 'initialCursor'"
-              class="channelName"
-              dir="auto"
             >
-              {{ channelName }}
+              <img
+                :src="channelThumbnail"
+                :class="enableChannelLinks ? '' : 'initialCursor'"
+                class="channelThumbnail"
+                alt=""
+              >
             </component>
           </div>
-          <FtSubscribeButton
-            v-if="!hideUnsubscribeButton"
-            :channel-id="channelId"
-            :channel-name="channelName"
-            :channel-thumbnail="channelThumbnail"
-            :subscription-count-text="subscriptionCountText"
-          />
-        </div>
+          <div>
+            <div
+              v-if="!hideUploader"
+            >
+              <component
+                :is="enableChannelLinks ? 'RouterLink' : 'span'"
+                :to="`/channel/${channelId}`"
+                :class="enableChannelLinks ? '' : 'initialCursor'"
+                class="channelName"
+                dir="auto"
+              >
+                {{ channelName }}
+              </component>
+            </div>
+            <FtSubscribeButton
+              v-if="!hideUnsubscribeButton"
+              :channel-id="channelId"
+              :channel-name="channelName"
+              :channel-thumbnail="channelThumbnail"
+              :subscription-count-text="subscriptionCountText"
+            />
+          </div>
+        </template>
+        <FtCollaboratorsPrompt
+          v-if="showCollaboratorsPrompt"
+          :collaborators="channelCollaborators"
+          @close="showCollaboratorsPrompt = false"
+        />
       </div>
       <div class="videoOptions">
         <span class="videoOptionsMobileRow">
@@ -173,10 +202,11 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
+import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
@@ -205,6 +235,10 @@ const props = defineProps({
   channelThumbnail: {
     type: String,
     required: true
+  },
+  channelCollaborators: {
+    type: Array,
+    default: () => []
   },
   published: {
     type: Number,
@@ -294,6 +328,8 @@ const USING_ELECTRON = process.env.IS_ELECTRON
 
 const { locale, t } = useI18n()
 
+const showCollaboratorsPrompt = ref(false)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 
@@ -312,6 +348,23 @@ const parsedLikeCount = computed(() => {
   }
 
   return formatNumber(props.likeCount)
+})
+
+const hasMultipleCollaborators = computed(() => props.channelCollaborators.length > 1)
+
+const summaryCollaborators = computed(() => props.channelCollaborators.slice(0, 2))
+
+const collaboratorSummaryName = computed(() => {
+  const names = props.channelCollaborators.map(collaborator => collaborator.name).filter(Boolean)
+
+  if (names.length === 0) {
+    return props.channelName
+  }
+
+  return new Intl.ListFormat(locale.value, {
+    style: 'long',
+    type: 'conjunction'
+  }).format(names)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

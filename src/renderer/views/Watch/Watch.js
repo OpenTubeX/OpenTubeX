@@ -27,6 +27,7 @@ import {
   getLocalVideoInfo,
   mapLocalLegacyFormat,
   parseLocalSubscriberCount,
+  parseLocalVideoCollaborators,
   parseLocalTextRuns,
   parseLocalWatchNextVideo
 } from '../../helpers/api/local'
@@ -135,6 +136,7 @@ export default defineComponent({
       channelName: '',
       channelThumbnail: '',
       channelId: '',
+      channelCollaborators: [],
       channelSubscriptionCountText: '',
       videoPublished: 0,
       premiereDate: undefined,
@@ -454,6 +456,7 @@ export default defineComponent({
       this.channelName = ''
       this.channelThumbnail = ''
       this.channelId = ''
+      this.channelCollaborators = []
       this.channelSubscriptionCountText = ''
       this.videoPublished = 0
       this.premiereDate = undefined
@@ -582,14 +585,12 @@ export default defineComponent({
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
 
-        this.channelId = result.basic_info.channel_id ?? result.secondary_info.owner?.author.id
-        this.channelName = result.basic_info.author ?? result.secondary_info.owner?.author.name
+        this.channelCollaborators = parseLocalVideoCollaborators(result)
+        const primaryCollaborator = this.channelCollaborators[0]
 
-        if (result.secondary_info.owner?.author) {
-          this.channelThumbnail = result.secondary_info.owner.author.best_thumbnail?.url ?? ''
-        } else {
-          this.channelThumbnail = ''
-        }
+        this.channelId = result.basic_info.channel_id ?? result.secondary_info.owner?.author.id ?? primaryCollaborator?.id ?? ''
+        this.channelName = result.basic_info.author ?? result.secondary_info.owner?.author.name ?? primaryCollaborator?.name ?? ''
+        this.channelThumbnail = primaryCollaborator?.thumbnail ?? result.secondary_info.owner?.author?.best_thumbnail?.url ?? ''
 
         this.videoCategory = result.basic_info.category ?? ''
         this.videoGenreIsMusic = this.videoCategory === 'Music'
@@ -1060,6 +1061,7 @@ export default defineComponent({
 
           this.channelId = result.authorId
           this.channelName = result.author
+          this.channelCollaborators = []
           const channelThumb = result.authorThumbnails[1]
           this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
           this.updateSubscriptionDetails({

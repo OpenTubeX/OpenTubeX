@@ -35,6 +35,21 @@
   margin-block-start: 3px;
 }
 
+.collaboratorChannelButton {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: start;
+  text-decoration: underline;
+}
+
+.collaboratorChannelButton:disabled {
+  cursor: wait;
+}
+
 .videoTag {
   padding: 3px;
   margin-inline: 2px;

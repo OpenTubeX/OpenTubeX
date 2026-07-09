@@ -1,5 +1,6 @@
 import { defineComponent } from 'vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useI18n } from 'vue-i18n'
 import { mapActions } from 'vuex'
@@ -17,12 +18,14 @@ import {
   getOembedTitle
 } from '../../helpers/utils'
 import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock'
+import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 export default defineComponent({
   name: 'FtListVideo',
   components: {
+    FtCollaboratorsPrompt,
     'ft-icon-button': FtIconButton,
     'ft-awesome-icon': FontAwesomeIcon,
   },
@@ -115,6 +118,7 @@ export default defineComponent({
       title: '',
       channelName: null,
       channelId: null,
+      channelCollaborators: [],
       viewCount: 0,
       parsedViewCount: '',
       uploadedTime: '',
@@ -138,6 +142,8 @@ export default defineComponent({
       deArrowTogglePinned: false,
       showDeArrowTitle: false,
       showDeArrowThumbnail: false,
+      showCollaboratorsPrompt: false,
+      isFetchingCollaborators: false,
     }
   },
   computed: {
@@ -568,6 +574,10 @@ export default defineComponent({
     disableChannelLinks: function () {
       return this.$store.getters.getDisableChannelLinks
     },
+
+    shouldShowCollaboratorsButton: function () {
+      return !!this.data.hasCollaborators && this.channelName !== null
+    },
   },
   watch: {
     showAddToPlaylistPrompt(value) {
@@ -721,6 +731,33 @@ export default defineComponent({
       }
     },
 
+    openCollaboratorsPrompt: async function () {
+      if (this.isFetchingCollaborators) {
+        return
+      }
+
+      if (this.channelCollaborators.length > 1) {
+        this.showCollaboratorsPrompt = true
+        return
+      }
+
+      this.isFetchingCollaborators = true
+
+      try {
+        const videoInfo = await getLocalVideoInfo(this.id)
+        this.channelCollaborators = parseLocalVideoCollaborators(videoInfo.info)
+
+        if (this.channelCollaborators.length > 1) {
+          this.showCollaboratorsPrompt = true
+        }
+      } catch (error) {
+        console.error(`Failed to fetch collaborators for ${this.id}`, error)
+        showToast(this.t('Video.Failed to load collaborators'))
+      } finally {
+        this.isFetchingCollaborators = false
+      }
+    },
+
     handleOptionsClick: function (option) {
       switch (option) {
         case 'history':
@@ -784,6 +821,7 @@ export default defineComponent({
 
       this.channelName = this.data.author ?? null
       this.channelId = this.data.authorId ?? null
+      this.channelCollaborators = this.data.collaborators ?? []
 
       if ((this.data.lengthSeconds === '' || this.data.lengthSeconds === '0:00') && this.historyEntryExists) {
         this.lengthSeconds = this.historyEntry.lengthSeconds

@@ -145,9 +145,19 @@
         </h3>
       </router-link>
       <div class="infoLine">
+        <button
+          v-if="shouldShowCollaboratorsButton"
+          type="button"
+          class="channelName collaboratorChannelButton"
+          dir="auto"
+          :disabled="isFetchingCollaborators"
+          @click.stop.prevent="openCollaboratorsPrompt"
+        >
+          {{ channelName }}
+        </button>
         <component
           :is="disableChannelLinks ? 'span' : 'router-link'"
-          v-if="channelId !== null"
+          v-else-if="channelId !== null"
           class="channelName"
           dir="auto"
           :to="`/channel/${channelId}`"
@@ -174,6 +184,11 @@
           class="viewCount"
         > • {{ $t('Global.Counts.Watching Count', {count: parsedViewCount}, viewCount) }}</span>
       </div>
+      <FtCollaboratorsPrompt
+        v-if="showCollaboratorsPrompt"
+        :collaborators="channelCollaborators"
+        @close="showCollaboratorsPrompt = false"
+      />
       <div
         v-if="is4k || hasCaptions || is8k || isNew || isVr180 || isVr360 || is3D"
         class="videoTagLine"
