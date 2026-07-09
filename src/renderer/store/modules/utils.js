@@ -1,5 +1,6 @@
 import i18n from '../../i18n/index'
 
+import { checkYoutubeChannelId } from '../../helpers/channels'
 import {
   CHANNEL_HANDLE_REGEX,
   createWebURL,
@@ -502,9 +503,18 @@ const actions = {
       */
       case 'channel': {
         const match = url.pathname.match(channelPattern)
-        const channelId = match.groups.channelId
+        const rawChannelId = match.groups.channelId
+        let channelId = rawChannelId
+        if (rawChannelId.startsWith('@') && checkYoutubeChannelId(rawChannelId.slice(1))) {
+          channelId = rawChannelId.slice(1)
+        }
         if (!channelId) {
           return { urlType: 'unknown' }
+        }
+
+        let channelUrlPath = url.pathname
+        if (channelId !== rawChannelId) {
+          channelUrlPath = `/channel/${channelId}${match.groups.tab ? `/${match.groups.tab}` : ''}`
         }
 
         let subPath
@@ -558,7 +568,7 @@ const actions = {
           subPath,
           // The original URL could be from Invidious.
           // We need to make sure it starts with youtube.com, so that YouTube's resolve endpoint can recognise it
-          url: `https://www.youtube.com${url.pathname}`
+          url: `https://www.youtube.com${channelUrlPath}`
         }
       }
       case 'feed': {
