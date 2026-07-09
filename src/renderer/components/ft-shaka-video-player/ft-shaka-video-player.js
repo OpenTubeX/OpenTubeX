@@ -4499,6 +4499,16 @@ export default defineComponent({
       return getQualityFromDimensions(activeVariant.width, activeVariant.height)
     }
 
+    function refreshQualityControlLabels() {
+      requestAnimationFrame(() => {
+        if (!player || props.format !== 'dash') {
+          return
+        }
+
+        player.dispatchEvent(new shaka.util.FakeEvent('trackschanged'))
+      })
+    }
+
     /**
      * @param {number} quality
      * @param {number | undefined} audioBandwidth
@@ -4550,6 +4560,7 @@ export default defineComponent({
       }
 
       player.selectVariantTrack(chosenVariant)
+      refreshQualityControlLabels()
     }
 
     /**
