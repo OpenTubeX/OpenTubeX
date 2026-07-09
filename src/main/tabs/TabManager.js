@@ -288,6 +288,63 @@ export class TabManager {
   }
 
   /**
+   * @param {string} url
+   * @returns {string | null}
+   */
+  static getVideoIdFromUrl(url) {
+    const parsed = URL.parse(url)
+    if (parsed == null) {
+      return null
+    }
+
+    const route = parsed.hash.startsWith('#')
+      ? parsed.hash.slice(1)
+      : parsed.hash
+    const appVideoId = route.match(/^\/watch\/(?<videoId>[^/?#]+)/)?.groups?.videoId
+    if (TabManager.isValidVideoId(appVideoId)) {
+      return appVideoId
+    }
+
+    const directVideoId = parsed.searchParams.get('v')
+    if (TabManager.isValidVideoId(directVideoId)) {
+      return directVideoId
+    }
+
+    const pathVideoId = parsed.pathname.match(/^\/(?:shorts|embed|live)\/(?<videoId>[^/?#]+)/)?.groups?.videoId
+    if (TabManager.isValidVideoId(pathVideoId)) {
+      return pathVideoId
+    }
+
+    if (parsed.hostname === 'youtu.be') {
+      const shortUrlVideoId = parsed.pathname.match(/^\/(?<videoId>[^/?#]+)/)?.groups?.videoId
+      if (TabManager.isValidVideoId(shortUrlVideoId)) {
+        return shortUrlVideoId
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {boolean}
+   */
+  static isValidVideoId(value) {
+    return typeof value === 'string' && /^[\w-]{11}$/.test(value)
+  }
+
+  /**
+   * @param {string} url
+   * @returns {string | null}
+   */
+  static getVideoThumbnailUrl(url) {
+    const videoId = TabManager.getVideoIdFromUrl(url)
+    return videoId == null
+      ? null
+      : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+  }
+
+  /**
    * Whether a page title is the app bootstrap default, not page-specific content.
    * @param {string} title
    * @returns {boolean}
@@ -1695,7 +1752,7 @@ export class TabManager {
   /**
    * Capture a small thumbnail of a tab if its webContents can provide one.
    * @param {string} tabId
-   * @returns {Promise<string | null>} Data URL for the thumbnail, or null.
+   * @returns {Promise<string | null>} Data URL or fallback image URL for the thumbnail, or null.
    */
   async captureTabPreview(tabId) {
     const tab = this.tabs.get(tabId)
@@ -1712,10 +1769,11 @@ export class TabManager {
     }
 
     if (canCaptureLive && this.activeTabId === tab.id) {
-      return this._refreshTabPreview(tab)
+      const preview = await this._refreshTabPreview(tab)
+      return preview ?? TabManager.getVideoThumbnailUrl(tab.url)
     }
 
-    return null
+    return TabManager.getVideoThumbnailUrl(tab.url)
   }
 
   /**
