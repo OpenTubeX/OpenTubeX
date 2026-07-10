@@ -693,7 +693,7 @@
 }
 
 .fullWindow {
-  position: absolute !important;
+  position: fixed !important;
   max-width: initial !important;
   inset: 0;
   z-index: 1000;
