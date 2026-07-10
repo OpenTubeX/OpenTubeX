@@ -45,8 +45,11 @@ jobs:
         pr="$(gh api "repos/$REPOSITORY/pulls/$pr_number")"
         state="$(jq -r '.state' <<< "$pr")"
         pr_head_sha="$(jq -r '.head.sha' <<< "$pr")"
+        head_ref="$(jq -r '.head.ref' <<< "$pr")"
+        head_repository="$(jq -r '.head.repo.full_name' <<< "$pr")"
         base_ref="$(jq -r '.base.ref' <<< "$pr")"
         draft="$(jq -r '.draft' <<< "$pr")"
+        author="$(jq -r '.user.login' <<< "$pr")"
 
         if [[ "$state" != "open" || "$pr_head_sha" != "$HEAD_SHA" || "$draft" == "true" ]]; then
           echo "Pull request #$pr_number is closed, draft, or its head commit changed."
@@ -66,6 +69,11 @@ jobs:
         fi
 
         echo "pr_url=$(jq -r '.html_url' <<< "$pr")" >> "$GITHUB_OUTPUT"
+        if [[ "$author" == "pull[bot]" && "$head_repository" == "FreeTubeApp/FreeTube" && "$head_ref" == "development" && "$base_ref" == "development" ]]; then
+          echo "merge_method=merge" >> "$GITHUB_OUTPUT"
+        else
+          echo "merge_method=squash" >> "$GITHUB_OUTPUT"
+        fi
         echo "authorized=true" >> "$GITHUB_OUTPUT"
 
     - name: Enable auto-merge
@@ -75,4 +83,5 @@ jobs:
         GH_TOKEN: ${{ secrets.PUSH_TOKEN || github.token }}
         PR_URL: ${{ steps.approval.outputs.pr_url }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-      run: gh pr merge "$PR_URL" --auto --squash --match-head-commit "$HEAD_SHA"
+        MERGE_METHOD: ${{ steps.approval.outputs.merge_method }}
+      run: gh pr merge "$PR_URL" --auto "--$MERGE_METHOD" --match-head-commit "$HEAD_SHA"
