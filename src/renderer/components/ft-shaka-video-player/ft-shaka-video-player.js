@@ -3150,6 +3150,8 @@ export default defineComponent({
     }
 
     function handleCanPlay() {
+      refreshQualityControlLabels()
+
       // PiP can only be activated once the video's readState and video track are populated
       if (startInPip && props.format !== 'audio' && ui.getControls().isPiPAllowed() && process.env.IS_ELECTRON) {
         startInPip = false
