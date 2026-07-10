@@ -27,7 +27,8 @@ jobs:
         PR_URL: ${{ github.event.pull_request.html_url }}
       run: gh pr merge "$PR_URL" --disable-auto || true
 
-  enable-auto-merge:
+  authorize-auto-merge:
+    name: authorize-auto-merge-${{ github.event.pull_request.number }}
     if: |
       github.event_name == 'pull_request_review' &&
       github.event.review.state == 'approved' &&
@@ -37,15 +38,14 @@ jobs:
     runs-on: ubuntu-slim
 
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
+      pull-requests: read
 
     steps:
     - name: Verify reviewer is repository admin
-      id: reviewer
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN || github.token }}
+        GH_TOKEN: ${{ github.token }}
         REPOSITORY: ${{ github.repository }}
         REVIEWER: ${{ github.event.review.user.login }}
       run: |
@@ -53,17 +53,7 @@ jobs:
 
         if [[ "$permission" != "admin" ]]; then
           echo "Reviewer $REVIEWER has '$permission' permission, not admin. Auto-merge will not be enabled."
-          echo "is_admin=false" >> "$GITHUB_OUTPUT"
           exit 0
         fi
 
-        echo "is_admin=true" >> "$GITHUB_OUTPUT"
-
-    - name: Enable auto-merge
-      if: steps.reviewer.outputs.is_admin == 'true'
-      shell: bash
-      env:
-        GH_TOKEN: ${{ secrets.PUSH_TOKEN || github.token }}
-        PR_URL: ${{ github.event.pull_request.html_url }}
-        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      run: gh pr merge "$PR_URL" --auto --squash --match-head-commit "$HEAD_SHA"
+        echo "Admin approval authorized. A trusted follow-up workflow will enable auto-merge."

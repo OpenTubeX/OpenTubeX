@@ -1,0 +1,78 @@
+name: Enable Auto Merge
+on:
+  workflow_run:
+    workflows: [Auto Merge PR]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  enable-auto-merge:
+    if: github.event.workflow_run.event == 'pull_request_review'
+    runs-on: ubuntu-slim
+
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Validate admin approval
+      id: approval
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN || github.token }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+        REVIEWER: ${{ github.event.workflow_run.actor.login }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: |
+        job_name="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" \
+          --jq '.jobs[] | select(.name | startswith("authorize-auto-merge-")) | select(.conclusion == "success") | .name')"
+        pr_number="${job_name#authorize-auto-merge-}"
+
+        if [[ ! "$pr_number" =~ ^[0-9]+$ ]]; then
+          echo "The triggering review did not authorize auto-merge."
+          exit 0
+        fi
+
+        permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
+        if [[ "$permission" != "admin" ]]; then
+          echo "Reviewer $REVIEWER has '$permission' permission, not admin."
+          exit 0
+        fi
+
+        pr="$(gh api "repos/$REPOSITORY/pulls/$pr_number")"
+        state="$(jq -r '.state' <<< "$pr")"
+        pr_head_sha="$(jq -r '.head.sha' <<< "$pr")"
+        base_ref="$(jq -r '.base.ref' <<< "$pr")"
+        draft="$(jq -r '.draft' <<< "$pr")"
+
+        if [[ "$state" != "open" || "$pr_head_sha" != "$HEAD_SHA" || "$draft" == "true" ]]; then
+          echo "Pull request #$pr_number is closed, draft, or its head commit changed."
+          exit 0
+        fi
+
+        if [[ "$base_ref" != "development" && "$base_ref" != RC* ]]; then
+          echo "Pull request #$pr_number does not target an auto-merge branch."
+          exit 0
+        fi
+
+        latest_review_state="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | \
+          jq -rs '[.[][] | select(.user.login == env.REVIEWER and .commit_id == env.HEAD_SHA)] | sort_by(.submitted_at) | last | .state // empty')"
+        if [[ "$latest_review_state" != "APPROVED" ]]; then
+          echo "The latest review from $REVIEWER for $HEAD_SHA is not an approval."
+          exit 0
+        fi
+
+        echo "pr_url=$(jq -r '.html_url' <<< "$pr")" >> "$GITHUB_OUTPUT"
+        echo "authorized=true" >> "$GITHUB_OUTPUT"
+
+    - name: Enable auto-merge
+      if: steps.approval.outputs.authorized == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN || github.token }}
+        PR_URL: ${{ steps.approval.outputs.pr_url }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: gh pr merge "$PR_URL" --auto --squash --match-head-commit "$HEAD_SHA"
