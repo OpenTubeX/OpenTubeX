@@ -294,6 +294,23 @@ function runApp() {
       const moveTargets = contextMenuTab != null && manager != null
         ? TabManager.listMoveTargets(manager.browserWindow.id)
         : []
+      const contextMenuTabIds = contextMenuTab != null && manager != null
+        ? Array.from(manager.tabs.keys())
+        : []
+      const contextMenuTabIndex = contextMenuTabIds.indexOf(contextMenuTab?.id)
+      const contextMenuTabGroupIds = contextMenuTab != null && manager != null
+        ? Array.from(manager.tabs.values())
+            .filter(tab => tab.isPinned === contextMenuTab.isPinned)
+            .map(tab => tab.id)
+        : []
+      const contextMenuTabGroupIndex = contextMenuTabGroupIds.indexOf(contextMenuTab?.id)
+      const closeContextMenuTabs = (tabIds) => {
+        if (!manager) return
+
+        for (const tabId of tabIds) {
+          manager.closeTab(tabId)
+        }
+      }
 
       return [
         {
@@ -324,6 +341,61 @@ function runApp() {
 
             manager.duplicateTab(contextMenuTab.id)
           }
+        },
+        {
+          label: 'Move Tab',
+          visible: contextMenuTab != null,
+          submenu: [
+            {
+              label: 'To Beginning',
+              enabled: contextMenuTabGroupIndex > 0,
+              click: () => {
+                if (!manager || !contextMenuTab) return
+
+                manager.moveTab(contextMenuTab.id, 0)
+              }
+            },
+            {
+              label: 'To End',
+              enabled: contextMenuTabGroupIndex < contextMenuTabGroupIds.length - 1,
+              click: () => {
+                if (!manager || !contextMenuTab) return
+
+                manager.moveTab(contextMenuTab.id, manager.tabs.size)
+              }
+            }
+          ]
+        },
+        {
+          type: 'separator',
+          visible: contextMenuTab != null
+        },
+        {
+          label: 'Close Tabs',
+          visible: contextMenuTab != null,
+          submenu: [
+            {
+              label: 'To the Left',
+              enabled: contextMenuTabIndex > 0,
+              click: () => {
+                closeContextMenuTabs(contextMenuTabIds.slice(0, contextMenuTabIndex))
+              }
+            },
+            {
+              label: 'To the Right',
+              enabled: contextMenuTabIndex < contextMenuTabIds.length - 1,
+              click: () => {
+                closeContextMenuTabs(contextMenuTabIds.slice(contextMenuTabIndex + 1))
+              }
+            },
+            {
+              label: 'Other Tabs',
+              enabled: contextMenuTabIds.length > 1,
+              click: () => {
+                closeContextMenuTabs(contextMenuTabIds.filter(tabId => tabId !== contextMenuTab?.id))
+              }
+            }
+          ]
         },
         {
           type: 'separator',
