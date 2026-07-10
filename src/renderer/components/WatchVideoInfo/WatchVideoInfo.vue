@@ -8,10 +8,24 @@
         {{ title }}
       </h1>
       <div
-        v-if="isUnlisted"
-        class="unlistedBadge"
+        v-if="isUnlisted || hasAiGeneratedContent"
+        class="videoBadges"
       >
-        {{ t('Video.Unlisted') }}
+        <div
+          v-if="isUnlisted"
+          class="videoBadge"
+        >
+          {{ t('Video.Unlisted') }}
+        </div>
+        <div
+          v-if="hasAiGeneratedContent"
+          :aria-label="t('Video.AI-generated content')"
+          :title="t('Video.AI-generated content')"
+          class="videoBadge"
+        >
+          <FontAwesomeIcon :icon="['fas', 'info-circle']" />
+          {{ t('Video.AI') }}
+        </div>
       </div>
     </div>
     <div class="videoMetrics">
@@ -304,6 +318,10 @@ const props = defineProps({
   isUnlisted: {
     type: Boolean,
     required: false
+  },
+  hasAiGeneratedContent: {
+    type: Boolean,
+    default: false
   },
   canSaveWatchedProgress: {
     type: Boolean,

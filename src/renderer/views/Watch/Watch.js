@@ -114,6 +114,7 @@ export default defineComponent({
       isUpcoming: false,
       isPostLiveDvr: false,
       isUnlisted: false,
+      hasAiGeneratedContent: false,
       upcomingTimestamp: null,
       upcomingTimeLeft: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
@@ -438,6 +439,7 @@ export default defineComponent({
       this.isUpcoming = false
       this.isPostLiveDvr = false
       this.isUnlisted = false
+      this.hasAiGeneratedContent = false
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
       this.thumbnail = ''
@@ -659,6 +661,7 @@ export default defineComponent({
         this.isLiveContent = !!result.basic_info.is_live_content
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
         this.isUnlisted = !!result.basic_info.is_unlisted
+        this.hasAiGeneratedContent = result.primary_info?.badges.some(badge => badge.label === 'AI') ?? false
 
         const subCount = !result.secondary_info.owner.subscriber_count.isEmpty() ? parseLocalSubscriberCount(result.secondary_info.owner.subscriber_count.text) : NaN
 

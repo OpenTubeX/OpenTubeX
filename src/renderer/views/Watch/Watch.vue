@@ -166,6 +166,7 @@
         :video-thumbnail="thumbnail"
         :in-user-playlist="!!selectedUserPlaylist"
         :is-unlisted="isUnlisted"
+        :has-ai-generated-content="hasAiGeneratedContent"
         :can-save-watched-progress="canSaveWatchProgress"
         :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
         class="watchVideo"
