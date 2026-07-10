@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    class="trendingPage"
+    :class="{ hasTabBar: isElectron }"
+  >
     <FtCard
       class="card"
     >
@@ -123,6 +126,7 @@ import { KeyboardShortcuts } from '../../../constants'
 
 const { t } = useI18n()
 
+const isElectron = process.env.IS_ELECTRON
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference

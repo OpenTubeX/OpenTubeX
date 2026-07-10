@@ -1,4 +1,7 @@
 .card {
+  --popular-header-gap: 8px;
+  --popular-top-bar-block-size: 60px;
+
   box-sizing: border-box;
   inline-size: 100%;
   max-inline-size: 92vw;
@@ -7,19 +10,19 @@
   overflow: visible;
 }
 
+.popularPage.hasTabBar .card {
+  --popular-top-bar-block-size: 92px;
+}
+
 .pageHeader {
   position: sticky;
-  inset-block-start: 60px;
-  z-index: 2;
+  inset-block-start: var(--popular-top-bar-block-size);
+  z-index: 3;
   margin-inline: -16px;
-  padding-block: 3px 12px;
+  padding-block: calc(3px + var(--popular-header-gap)) 12px;
   padding-inline: 16px;
   background-color: var(--card-bg-color);
   box-shadow: 0 1px 0 var(--primary-shadow-color);
-}
-
-:global(.app:has(.tabBar)) .pageHeader {
-  inset-block-start: 92px;
 }
 
 .titleRow {

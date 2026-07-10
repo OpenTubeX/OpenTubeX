@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    class="popularPage"
+    :class="{ hasTabBar: isElectron }"
+  >
     <ft-card
       class="card"
     >
@@ -49,6 +52,8 @@ import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
 
 const { t } = useI18n()
+
+const isElectron = process.env.IS_ELECTRON
 
 const isLoading = ref(false)
 
