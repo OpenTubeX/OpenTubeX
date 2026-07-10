@@ -47,7 +47,7 @@
       padding-inline: 16px;
       box-sizing: border-box;
       inline-size: 100%;
-      max-inline-size: 1800px;
+      max-inline-size: 92vw;
       background-color: var(--card-bg-color);
       box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
 
@@ -61,8 +61,9 @@
     }
 
     .playlistItemsCard {
+      box-sizing: border-box;
       inline-size: 100%;
-      max-inline-size: 1800px;
+      max-inline-size: 92vw;
       margin-block: 0 60px;
       margin-inline: auto;
     }
