@@ -157,6 +157,7 @@ $watched-transition-duration: 0.5s;
     }
 
     .quickBookmarkVideoIcon,
+    .extraThumbnailActionIcon,
     .addToPlaylistIcon,
     .trashIcon,
     .upArrowIcon,
@@ -404,11 +405,13 @@ $watched-transition-duration: 0.5s;
 
   @media (hover: hover) {
     &:hover .quickBookmarkVideoIcon:not(.alwaysVisible),
+    &:hover .extraThumbnailActionIcon,
     .quickBookmarkVideoIcon.bookmarked:not(.alwaysVisible),
     &:hover .addToPlaylistIcon:not(.alwaysVisible),
     &:hover .externalPlayerIcon,
     &:has(:focus-visible) .addToPlaylistIcon:not(.alwaysVisible),
     &:has(:focus-visible) .quickBookmarkVideoIcon:not(.alwaysVisible),
+    &:has(:focus-visible) .extraThumbnailActionIcon,
     &:has(:focus-visible) .externalPlayerIcon {
       opacity: 1;
     }
@@ -421,6 +424,7 @@ $watched-transition-duration: 0.5s;
     }
 
     .quickBookmarkVideoIcon:not(.alwaysVisible),
+    .extraThumbnailActionIcon,
     .addToPlaylistIcon:not(.alwaysVisible),
     .externalPlayerIcon,
     .optionsButton {

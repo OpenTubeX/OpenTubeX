@@ -112,6 +112,14 @@
         @change="handleThumbnailPreferenceChange"
       />
       <FtSelect
+        :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
+        :value="extraThumbnailAction"
+        :select-names="extraThumbnailActionNames"
+        :select-values="EXTRA_THUMBNAIL_ACTION_VALUES"
+        :icon="['fas', 'ellipsis-v']"
+        @change="updateExtraThumbnailAction"
+      />
+      <FtSelect
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
         :select-names="localeNames"
@@ -465,6 +473,25 @@ const thumbnailPreference = computed(() => {
 function handleThumbnailPreferenceChange(value) {
   store.dispatch('updateBlurThumbnails', value === 'blur')
   store.dispatch('updateThumbnailPreference', value)
+}
+
+const EXTRA_THUMBNAIL_ACTION_VALUES = ['', 'history', 'copyYoutube', 'openYoutube']
+
+const extraThumbnailActionNames = computed(() => [
+  t('Settings.General Settings.Extra Thumbnail Action Button.None'),
+  t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
+  t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
+  t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube')
+])
+
+/** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube'>} */
+const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
+
+/**
+ * @param {'' | 'history' | 'copyYoutube' | 'openYoutube'} value
+ */
+function updateExtraThumbnailAction(value) {
+  store.dispatch('updateExtraThumbnailAction', value)
 }
 
 const LOCALE_VALUES = ['system', ...allLocales]

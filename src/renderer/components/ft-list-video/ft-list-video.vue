@@ -63,6 +63,16 @@
         @dragstart="onDragStart"
       >
         <ft-icon-button
+          v-if="extraThumbnailActionButton"
+          :title="extraThumbnailActionButton.title"
+          :icon="extraThumbnailActionButton.icon"
+          class="extraThumbnailActionIcon"
+          theme="base"
+          :padding="appearance === `watchPlaylistItem` ? 5 : 6"
+          :size="appearance === `watchPlaylistItem` ? 14 : 18"
+          @click="handleExtraThumbnailAction"
+        />
+        <ft-icon-button
           v-if="showPlaylists"
           :title="$t('User Playlists.Add to Playlist')"
           :icon="['fas', 'plus']"

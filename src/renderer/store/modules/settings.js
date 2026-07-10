@@ -311,6 +311,7 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  extraThumbnailAction: '',
   blurThumbnails: false,
   useProxy: false,
   userPlaylistSortOrder: 'date_added_descending',

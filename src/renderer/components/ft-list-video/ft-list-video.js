@@ -195,6 +195,34 @@ export default defineComponent({
       return !this.$store.getters.getHidePlaylists
     },
 
+    extraThumbnailAction: function () {
+      return this.$store.getters.getExtraThumbnailAction
+    },
+
+    extraThumbnailActionButton: function () {
+      switch (this.extraThumbnailAction) {
+        case 'history':
+          return {
+            title: this.historyEntryExists
+              ? this.t('Video.Remove From History')
+              : this.t('Video.Mark As Watched'),
+            icon: this.historyEntryExists ? ['fas', 'history'] : ['fas', 'check']
+          }
+        case 'copyYoutube':
+          return {
+            title: this.t('Video.Copy YouTube Link'),
+            icon: ['fas', 'link']
+          }
+        case 'openYoutube':
+          return {
+            title: this.t('Video.Open in YouTube'),
+            icon: ['fas', 'external-link-alt']
+          }
+        default:
+          return null
+      }
+    },
+
     inHistory: function () {
       // When in the history page, showing relative dates isn't very useful.
       // We want to show the exact date instead
@@ -804,6 +832,10 @@ export default defineComponent({
           this.unhideChannel(this.channelName, this.channelId)
           break
       }
+    },
+
+    handleExtraThumbnailAction: function () {
+      this.handleOptionsClick(this.extraThumbnailAction)
     },
 
     parseVideoData: function () {
