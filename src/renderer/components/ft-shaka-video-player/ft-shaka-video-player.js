@@ -682,7 +682,12 @@ export default defineComponent({
     const sponsorSkips = computed(() => {
       // save some work when sponsorblock is disabled
       if (!useSponsorBlock.value) {
-        return {}
+        return {
+          autoSkip: new Set(),
+          seekBar: [],
+          promptSkip: new Set(),
+          categoryData: {}
+        }
       }
 
       /** @type {SponsorBlockCategory[]} */
