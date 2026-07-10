@@ -14,6 +14,8 @@
         @scroll="handleScroll"
         @wheel.prevent="handleWheel"
         @pointerdown="handleTabContainerPointerDown"
+        @mousedown.middle="handleTabListMiddleMouseDown"
+        @auxclick="handleTabListAuxClick"
       >
         <SortableTab
           v-for="(tab, index) in tabs"
@@ -563,6 +565,27 @@ async function closeTab(tabId) {
 function handleMiddleClick(event, tabId) {
   if (event.button === 1) {
     closeTab(tabId)
+  }
+}
+
+/**
+ * Prevent the browser's middle-click scrolling mode in the empty tab-list area.
+ * @param {MouseEvent} event
+ */
+function handleTabListMiddleMouseDown(event) {
+  if (event.target === event.currentTarget) {
+    event.preventDefault()
+  }
+}
+
+/**
+ * Create a tab when the empty tab-list area is middle-clicked.
+ * @param {MouseEvent} event
+ */
+function handleTabListAuxClick(event) {
+  if (event.button === 1 && event.target === event.currentTarget) {
+    event.preventDefault()
+    createNewTab()
   }
 }
 
