@@ -200,23 +200,26 @@ export function scrollMiniPlayerRectToStyle(rect) {
 
 /**
  * @param {HTMLElement | null} element
+ * @param {number} [layoutHeight]
  * @returns {number}
  */
-export function getAnchorVisibleRatio(element) {
+export function getAnchorVisibleRatio(element, layoutHeight) {
   if (!element) {
     return 1
   }
 
   const rect = element.getBoundingClientRect()
+  const height = layoutHeight > 0 ? layoutHeight : rect.height
+  const bottom = rect.top + height
   const visibleTop = Math.max(rect.top, 0)
-  const visibleBottom = Math.min(rect.bottom, window.innerHeight)
+  const visibleBottom = Math.min(bottom, window.innerHeight)
   const visibleLeft = Math.max(rect.left, 0)
   const visibleRight = Math.min(rect.right, window.innerWidth)
 
   const visibleWidth = Math.max(0, visibleRight - visibleLeft)
   const visibleHeight = Math.max(0, visibleBottom - visibleTop)
   const visibleArea = visibleWidth * visibleHeight
-  const totalArea = rect.width * rect.height
+  const totalArea = rect.width * height
 
   if (totalArea <= 0) {
     // Zero-height anchors cannot be observed reliably; treat as fully visible

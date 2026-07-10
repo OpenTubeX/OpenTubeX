@@ -3467,10 +3467,6 @@ export default defineComponent({
       }
 
       scrollMiniPlaceholderHeight.value = layoutHeight
-
-      nextTick(() => {
-        setupScrollMiniIntersectionObserver()
-      })
     }
 
     function clearScrollMiniPlayPauseHideTimeout() {
@@ -3685,10 +3681,9 @@ export default defineComponent({
     }
 
     function getScrollMiniAnchor() {
-      if (scrollMiniPlayerActive.value && scrollMiniPlaceholder.value) {
-        return scrollMiniPlaceholder.value
-      }
-      return container.value
+      // The host remains mounted while the inline player and placeholder swap,
+      // keeping visibility measurements stable during state transitions.
+      return container.value?.parentElement ?? null
     }
 
     /**
@@ -3836,7 +3831,6 @@ export default defineComponent({
       }
 
       nextTick(() => {
-        setupScrollMiniIntersectionObserver()
         updateScrollMiniVolumeBarFill()
         updateScrollMiniDragHandleContrast(true)
       })
@@ -3856,10 +3850,6 @@ export default defineComponent({
         scrollMiniBounceCancel()
         scrollMiniBounceCancel = null
       }
-
-      nextTick(() => {
-        setupScrollMiniIntersectionObserver()
-      })
     }
 
     function updateScrollMiniPlayer() {
@@ -3877,7 +3867,7 @@ export default defineComponent({
       const anchor = getScrollMiniAnchor()
       if (!anchor) return
 
-      const ratio = getAnchorVisibleRatio(anchor)
+      const ratio = getAnchorVisibleRatio(anchor, getScrollMiniPlaceholderLayoutHeight())
 
       if (scrollMiniPlayerActive.value) {
         if (ratio >= EXIT_MINI_RATIO) {
@@ -3897,10 +3887,12 @@ export default defineComponent({
     }
 
     function handleScrollMiniWindowResize() {
-      if (!scrollMiniPlayerActive.value) return
+      if (scrollMiniPlayerActive.value) {
+        const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
+        applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
+      }
 
-      const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
-      applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
+      updateScrollMiniPlayer()
     }
 
     function scrollMiniScrollToTop(event) {
