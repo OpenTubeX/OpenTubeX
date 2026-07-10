@@ -66,7 +66,7 @@
         >
           <span class="collaboratorSummaryThumbnails">
             <img
-              v-for="collaborator in summaryCollaborators"
+              v-for="collaborator in channelCollaborators"
               :key="collaborator.id"
               :src="collaborator.thumbnail"
               class="channelThumbnail collaboratorThumbnail"
@@ -351,8 +351,6 @@ const parsedLikeCount = computed(() => {
 })
 
 const hasMultipleCollaborators = computed(() => props.channelCollaborators.length > 1)
-
-const summaryCollaborators = computed(() => props.channelCollaborators.slice(0, 2))
 
 const collaboratorSummaryName = computed(() => {
   const names = props.channelCollaborators.map(collaborator => collaborator.name).filter(Boolean)

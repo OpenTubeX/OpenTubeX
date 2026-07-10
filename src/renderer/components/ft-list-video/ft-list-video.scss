@@ -35,7 +35,7 @@
   margin-block-start: 3px;
 }
 
-.collaboratorChannelButton {
+.channelName.collaboratorChannelButton {
   background: none;
   border: 0;
   color: inherit;
@@ -46,7 +46,7 @@
   text-decoration: underline;
 }
 
-.collaboratorChannelButton:disabled {
+.channelName.collaboratorChannelButton:disabled {
   cursor: wait;
 }
 

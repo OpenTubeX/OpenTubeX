@@ -54,7 +54,6 @@
 .collaboratorSummaryThumbnails {
   display: flex;
   margin-inline-end: 10px;
-  inline-size: 64px;
 }
 
 .channelThumbnail {

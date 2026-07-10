@@ -1559,6 +1559,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       title: video.title.text?.trim(),
       author: video.author.name !== 'N/A' ? video.author.name : channelName,
       authorId: video.author.id !== 'N/A' ? video.author.id : channelId,
+      hasCollaborators: video.author.id === 'N/A' && COLLABORATIVE_AUTHOR_TEXT_REGEX.test(video.author.name),
       description: video.description,
       viewCount,
       published,
