@@ -126,9 +126,11 @@
           />
         </button>
       </div>
-      <div
+      <TransitionGroup
         v-if="!isLoading"
         ref="playlistItemsWrapper"
+        name="playlistItem"
+        tag="div"
         class="playlistItemsWrapper"
       >
         <FtListVideoNumbered
@@ -146,11 +148,21 @@
           :playlist-loop="loopEnabled"
           :video-index="index"
           :is-current-video="currentVideoIndexZeroBased === index"
+          :can-move-video-up="index > 0 && canMoveVideos"
+          :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
+          :dragged-video="draggedVideo"
+          :is-sort-order-custom="isSortOrderCustom"
+          :is-video-dragging="isVideoDragging"
           appearance="watchPlaylistItem"
           :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
+          @drag-video="setDraggedVideo"
+          @drag-video-end="onDragVideoEnd"
+          @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+          @move-video-up="moveVideoUp"
+          @move-video-down="moveVideoDown"
           @pause-player="pausePlayer"
         />
-      </div>
+      </TransitionGroup>
     </div>
   </FtCard>
 </template>
@@ -167,7 +179,7 @@ import FtListVideoNumbered from '../FtListVideoNumbered/FtListVideoNumbered.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, showToast } from '../../helpers/utils'
+import { copyToClipboard, deepCopy, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -214,6 +226,9 @@ const channelName = ref('')
 const playlistTitle = ref('')
 const playlistItems = shallowRef([])
 const randomizedPlaylistItems = shallowRef([])
+/** @import { VideoData } from '../../helpers/dragAndDrop' */
+/** @type {import('vue').Ref<VideoData>} */
+const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const showProgressBarPreview = ref(false)
 const previewPosition = ref(0)
 const previewVideoIndex = ref(1)
@@ -295,6 +310,18 @@ const playlistPageLinkTo = computed(() => ({
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
 
 const sortOrder = computed(() => isUserPlaylist.value ? userPlaylistSortOrder.value : SORT_BY_VALUES.Custom)
+
+const isSortOrderCustom = computed(() => sortOrder.value === SORT_BY_VALUES.Custom)
+
+const canMoveVideos = computed(() => {
+  return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1
+})
+
+const isVideoDragging = computed(() => {
+  const { videoId, playlistItemId } = draggedVideo.value
+
+  return videoId != null && playlistItemId != null
+})
 
 const previewTransformXPercentage = computed(() => {
   // Breakpoint for single-column-template
@@ -531,6 +558,88 @@ function persistReversePlaylistState() {
 function applyReversePlaylistState(items) {
   return reversePlaylist.value ? items.toReversed() : items
 }
+
+/**
+ * @param {any[]} items
+ */
+async function persistPlaylistOrder(items) {
+  const selectedPlaylist = selectedUserPlaylist.value
+  if (selectedPlaylist == null) { return }
+
+  const playlist = {
+    playlistName: selectedPlaylist.playlistName,
+    protected: selectedPlaylist.protected,
+    description: selectedPlaylist.description,
+    videos: deepCopy(reversePlaylist.value ? items.toReversed() : items),
+    _id: selectedPlaylist._id,
+  }
+
+  try {
+    await store.dispatch('updatePlaylist', playlist)
+  } catch (error) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    console.error(error)
+  }
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ * @param {-1 | 1} offset
+ */
+function moveVideo(videoId, playlistItemId, offset) {
+  const items = playlistItems.value.slice()
+  const index = items.findIndex((video) => {
+    return video.videoId === videoId && video.playlistItemId === playlistItemId
+  })
+  const targetIndex = index + offset
+
+  if (index === -1 || targetIndex < 0 || targetIndex >= items.length) { return }
+
+  [items[index], items[targetIndex]] = [items[targetIndex], items[index]]
+  playlistItems.value = items
+  persistPlaylistOrder(items)
+}
+
+function moveVideoUp(videoId, playlistItemId) {
+  moveVideo(videoId, playlistItemId, -1)
+}
+
+function moveVideoDown(videoId, playlistItemId) {
+  moveVideo(videoId, playlistItemId, 1)
+}
+
+/** @param {VideoData} video */
+function setDraggedVideo(video) {
+  draggedVideo.value = video
+}
+
+function onDragVideoEnd() {
+  persistPlaylistOrder(playlistItems.value)
+  setDraggedVideo({ videoId: null, playlistItemId: null })
+}
+
+/**
+ * @param {VideoData} draggedOverVideo
+ * @param {VideoData} draggedVideo_
+ */
+function moveDraggedVideoTemporarily(draggedOverVideo, draggedVideo_) {
+  const items = playlistItems.value.slice()
+  const draggedOverIndex = items.findIndex((video) => {
+    return video.videoId === draggedOverVideo.videoId && video.playlistItemId === draggedOverVideo.playlistItemId
+  })
+  const draggedVideoIndex = items.findIndex((video) => {
+    return video.videoId === draggedVideo_.videoId && video.playlistItemId === draggedVideo_.playlistItemId
+  })
+
+  if (draggedOverIndex === -1 || draggedVideoIndex === -1) { return }
+
+  const [itemToMove] = items.splice(draggedVideoIndex, 1)
+  items.splice(draggedOverIndex, 0, itemToMove)
+  playlistItems.value = items
+}
+
+const moveDraggedVideoTemporarilyThrottled = throttle(moveDraggedVideoTemporarily, 100)
 
 function playNextVideo() {
   const videoIndex = videoIndexInPlaylistItems.value
@@ -778,7 +887,7 @@ const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
  * @param {number} index
  */
 function scrollToVideo(index) {
-  const container = playlistItemsWrapper.value
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
 
   if (container != null) {
     const currentVideoItemEl = container.children[index]

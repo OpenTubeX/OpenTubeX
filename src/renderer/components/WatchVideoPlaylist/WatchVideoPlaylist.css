@@ -171,6 +171,14 @@
   transition: background 0.2s ease-out;
 }
 
+.playlistItem-move {
+  transition: transform 0.2s ease;
+}
+
+.playlistItem.draggedVideo {
+  opacity: 0.25;
+}
+
 .playlistItem:not(:last-child) {
   margin-block-end: 8px;
 }
