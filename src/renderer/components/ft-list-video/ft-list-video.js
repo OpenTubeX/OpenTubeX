@@ -216,7 +216,7 @@ export default defineComponent({
         case 'openYoutube':
           return {
             title: this.t('Video.Open in YouTube'),
-            icon: ['fas', 'external-link-alt']
+            icon: ['fab', 'youtube']
           }
         default:
           return null
