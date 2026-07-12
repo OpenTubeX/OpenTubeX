@@ -261,6 +261,12 @@ Settings:
 
       Watch Only: Tylko na stronie odtwarzacza
     Confirm Before Closing App: Potwierdzaj zamknięcie OpenTubeX
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Dodatkowy przycisk akcji na miniaturze
+      None: Żaden
+      Mark as Watched: Oznacz jako obejrzany
+      Copy YouTube Link: Skopiuj odnośnik do YouTube
+      Open in YouTube: Otwórz na stronie YouTube
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -390,7 +396,7 @@ Settings:
     Autoplay Playlists: 'Autoodtwarzanie playlist'
     Enable Theatre Mode by Default: 'Domyślnie włącz tryb kinowy'
     Default Volume: 'Domyślna głośność'
-    Default Playback Rate: 'Domyślna szybkość odtwarzania'
+    Default Playback Rate: 'Domyślna prędkość odtwarzania'
     Default Video Format:
       Default Video Format: 'Domyślny format filmów'
       Dash Formats: 'Formaty DASH'
@@ -412,8 +418,8 @@ Settings:
     Scroll Volume Over Video Player: Kontroluj głośność kółkiem myszy na obszarze odtwarzacza
     Display Play Button In Video Player: Pokaż przycisk odtwarzania na odtwarzaczu
     Fast-Forward / Rewind Interval: Interwał przewijania
-    Scroll Playback Rate Over Video Player: Kontroluj szybkość odtwarzania kółkiem myszy na obszarze odtwarzacza
-    Max Video Playback Rate: Maksymalna szybkość odtwarzania
+    Scroll Playback Rate Over Video Player: Kontroluj prędkość odtwarzania kółkiem myszy na obszarze odtwarzacza
+    Max Video Playback Rate: Maksymalna prędkość odtwarzania
     Video Playback Rate Interval: Przeskoki w prędkości odtwarzania
     Screenshot:
       Format Label: Format zrzutu
@@ -470,7 +476,7 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
-    Fetch Automatically: Automatycznie odświeżaj subskrypcje
+    Fetch Automatically: Odświeżaj subskrypcje przy uruchomieniu
     Confirm Before Unsubscribing: Uniknij przypadkowego usunięcia subskrypcji
 
     To: Do
@@ -671,7 +677,7 @@ Settings:
     Show Family Friendly Only: Pokazuj tylko filmy przyjazne rodzinie
     Hide Search Bar: Schowaj pole wyszukiwania
     Hide Uploader on Watch page: Ukryj przesyłającego na stronie obserwowanych
-    Disable Channel Links: Wyłącz linki do kanałów
+    Disable Channel Links: Wyłącz odnośniki do kanałów
   Experimental Settings:
     Replace HTTP Cache: Zastąp pamięć podręczną HTTP
     Experimental Settings: Eksperymentalne
@@ -692,7 +698,7 @@ Settings:
   Return YouTube Dislike Settings:
     Return YouTube Dislike Settings: Wyświetlanie łapek w dół z YouTube
     Enable Return YouTube Dislike: Włącz wyświetlanie łapek w dół z YouTube
-    Return YouTube Dislike Url: Link do API wyświetlania łapek w dół z YouTube (Domyślnie https://ryd-proxy.kavin.rocks)
+    Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
 About:
   #On About page
   About: 'O projekcie'
@@ -789,7 +795,7 @@ Video:
   Video has been marked as watched: 'Film został oznaczony jako obejrzany'
   Video has been removed from your history: 'Film został usunięty z Twojej historii'
   Open in YouTube: 'Otwórz na stronie YouTube'
-  Copy YouTube Link: 'Skopiuj odnośnik do strony YouTube'
+  Copy YouTube Link: 'Skopiuj odnośnik do YouTube'
   Open YouTube Embedded Player: 'Otwórz odtwarzacz YouTube'
   Copy YouTube Embedded Player Link: 'Skopiuj odnośnik do odtwarzacza YouTube'
   Open in Invidious: 'Otwórz na stronie Invidious'
@@ -957,6 +963,10 @@ Video:
   Channel Playback Speed Saved: Zapisano prędkość odtwarzania kanału
   Save Channel Video Quality: Zapisz jakość wideo kanału
   Channel Video Quality Saved: Jakość wideo kanału zapisana
+  Failed to load collaborators: Nie udało się załadować współautorów
+  AI: SI
+  AI-generated content: Treści generowane przez SI
+  Collaborators: Współautorzy
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1027,7 +1037,7 @@ Comments:
   View {replyCount} replies from {channelName} and others: Zobacz {replyCount} odpowiedzi od {channelName} i innych
   Reload Comments: Przeładuj komentarze
   Copy YouTube Link: Skopiuj odnośnik do YouTube
-  YouTube comment link copied to clipboard: Link do komentarza YouTube skopiowany do schowka
+  YouTube comment link copied to clipboard: Odnośnik do komentarza YouTube został skopiowany do schowka
 Up Next: 'Następne'
 
 # Toast Messages
@@ -1095,7 +1105,7 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
-    Fetch Automatically: Po włączeniu OpenTubeX będzie automatycznie odświeżał Twoje subskrypcje zgodnie z interwałem czasowym wybranym dla poszczególnych sekcji.
+    Fetch Automatically: Jeśli włączone, OpenTubeX będzie automatycznie pobierał subskrypcje przy uruchomieniu lub otwarciu nowego okna.
     Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
   General Settings:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
@@ -1117,7 +1127,7 @@ Tooltips:
   Player Settings:
     Default Video Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
-    Scroll Playback Rate Over Video Player: Umieść kursor nad odtwarzaczem, przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i przewijaj kółkiem myszy w górę i w dół, aby kontrolować szybkość odtwarzania. Przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i kliknij lewym przyciskiem myszy, by szybko powrócić do domyślnej wartości (1x, chyba że została zmieniona w ustawieniach).
+    Scroll Playback Rate Over Video Player: Umieść kursor nad odtwarzaczem, przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i przewijaj kółkiem myszy w górę i w dół, aby kontrolować prędkość odtwarzania. Przytrzymaj klawisz „Ctrl” („Command” na Mac-u) i kliknij lewym przyciskiem myszy, by szybko powrócić do domyślnej wartości (1x, chyba że została zmieniona w ustawieniach).
     Skip by Scrolling Over Video Player: Użyj kółka myszy, by przewijać film tak jak w MPV.
     Use Quick Playback Speed Bar: Wyświetla pasek szybkiego wyboru prędkości odtwarzania po prawej stronie odtwarzacza. Jeśli włączona jest funkcja ręcznego zapisywania prędkości odtwarzania dla poszczególnych kanałów, pasek zawiera również przycisk do zapisywania prędkości dla bieżącego kanału.
     Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
@@ -1152,7 +1162,7 @@ Search Bar:
   Clear Input: Wyczyść pole
   Remove: Usuń
 External link opening has been disabled in the general settings: Otwieranie zewnętrznych odnośników zostało wyłączone w ustawieniach ogólnych
-Are you sure you want to open this link?: Czy na pewno chcesz otworzyć ten link?
+Are you sure you want to open this link?: Czy na pewno chcesz otworzyć ten odnośnik?
 Screenshot Error: Wykonanie zrzutu nie powiodło się. {error}
 Screenshot Success: Zapisano zrzut ekranu jako „{filePath}”
 New Window: Nowe okno
@@ -1222,6 +1232,7 @@ Autoplay Interruption Timer: Automatyczne odtwarzanie zostało anulowane, z powo
 Description:
   Expand Description: '...więcej'
   Collapse Description: Zwiń
+  Video Category: 'Kategoria wideo:'
 KeyboardShortcutPrompt:
   Keyboard Shortcuts: Skróty
   Sections:
@@ -1287,3 +1298,8 @@ Close Confirmation:
   Message: Czy na pewno chcesz wyjść z OpenTubeX?
   Quit: Wyjdź
   Never Ask Again: Nie pytaj ponownie
+Find in page: Znajdź na stronie
+Previous match: Poprzednie trafienie
+Next match: Następne trafienie
+Close find bar: Zamknij pasek wyszukiwania
+No matches: Brak dopasowań
