@@ -480,15 +480,6 @@ function runApp() {
           }
         },
         {
-          label: 'New Tab',
-          visible: isTabBarContextMenu,
-          click: () => {
-            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
-              console.error('Failed to create a new tab from the tab bar context menu:', error)
-            })
-          }
-        },
-        {
           type: 'separator',
           visible: contextMenuTab != null && moveTargets.length > 0
         },
