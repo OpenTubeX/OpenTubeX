@@ -7,7 +7,8 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
-      watchSideNavOverlay: useWatchSideNavOverlay
+      watchSideNavOverlay: useWatchSideNavOverlay,
+      watchSideNavTransitionDisabled
     }"
   >
     <TabBar
@@ -288,12 +289,18 @@ const useWatchSideNavOverlay = computed(() => {
 })
 
 let sideNavOpenBeforeWatchOverlay = null
+const watchSideNavTransitionDisabled = ref(false)
+let watchSideNavTransitionFrame = null
 
 watch(useWatchSideNavOverlay, (enabled) => {
   if (enabled) {
+    disableWatchSideNavTransitionForNextFrame()
     sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
     closeSideNav()
   } else if (sideNavOpenBeforeWatchOverlay !== null) {
+    cancelWatchSideNavTransitionReset()
+    watchSideNavTransitionDisabled.value = false
+
     if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
       store.commit('toggleSideNav')
     }
@@ -301,6 +308,25 @@ watch(useWatchSideNavOverlay, (enabled) => {
     sideNavOpenBeforeWatchOverlay = null
   }
 }, { immediate: true })
+
+function disableWatchSideNavTransitionForNextFrame() {
+  cancelWatchSideNavTransitionReset()
+  watchSideNavTransitionDisabled.value = true
+
+  watchSideNavTransitionFrame = requestAnimationFrame(() => {
+    watchSideNavTransitionFrame = requestAnimationFrame(() => {
+      watchSideNavTransitionDisabled.value = false
+      watchSideNavTransitionFrame = null
+    })
+  })
+}
+
+function cancelWatchSideNavTransitionReset() {
+  if (watchSideNavTransitionFrame !== null) {
+    cancelAnimationFrame(watchSideNavTransitionFrame)
+    watchSideNavTransitionFrame = null
+  }
+}
 
 function closeSideNav() {
   if (isSideNavOpen.value) {
@@ -451,6 +477,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)

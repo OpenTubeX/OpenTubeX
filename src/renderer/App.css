@@ -59,6 +59,10 @@
     transition-property: transform;
   }
 
+  .watchSideNavOverlay.watchSideNavTransitionDisabled :deep(.sideNav) {
+    transition: none;
+  }
+
   .watchSideNavOverlay.isLocaleRightToLeft :deep(.sideNav) {
     transform: translateX(100%);
   }
