@@ -1347,16 +1347,27 @@ KeyboardShortcutPrompt:
       Playback: Video: Playback
       General: Video: General
     App:
-      Situational: 'App: Situational'
       General: App: General
+      Tabs: App: Tabs
+      Search and Page: App: Search & Page
+      Window and View: App: Window & View
   Show Keyboard Shortcuts: Show keyboard shortcuts
   History Backward: Go back one page
   History Forward: Go forward one page
   New Window: Create a new window
+  New Tab: Create a new tab
+  Close Tab: Close the current tab
+  Reload Tab: Reload the current tab
+  Reopen Closed Tab: Reopen the last closed tab
+  Next Tab: Switch to the next tab
+  Previous Tab: Switch to the previous tab
+  Switch to Tab: Switch to tab 1–9
   Navigate to Settings: Navigate to the Settings page
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content
-  Focus Secondary Search: Focus on the secondary search bar (if one is present)
+  Find in Page: Find text on the current page
+  Find Next Match: Jump to the next match
+  Find Previous Match: Jump to the previous match
   Captions: Toggle captions ON/OFF
   Stats: Show video statistics
   Fullscreen: Toggle fullscreen

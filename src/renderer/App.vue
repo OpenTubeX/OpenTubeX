@@ -108,7 +108,7 @@
       v-if="findbarVisible"
       class="findbar"
       role="search"
-      @keydown.stop
+      @keydown.stop="handleFindbarNavigationShortcut"
     >
       <FontAwesomeIcon
         :icon="['fas', 'search']"
@@ -730,6 +730,10 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
+  if (findbarVisible.value && handleFindbarNavigationShortcut(event)) {
+    return
+  }
+
   if (tabSwitcherVisible.value && event.key === 'Escape') {
     event.preventDefault()
     cancelTabSwitcher()
@@ -841,6 +845,26 @@ function isTypingTarget(target) {
     target.tagName === 'TEXTAREA' ||
     target.isContentEditable
   )
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean}
+ */
+function handleFindbarNavigationShortcut(event) {
+  const isFindNavigationShortcut = (
+    isCtrlOrCmdPressed(event) && (event.key === 'g' || event.key === 'G') && !event.altKey
+  ) || (
+    event.key === 'F3' && !event.ctrlKey && !event.metaKey && !event.altKey
+  )
+
+  if (!isFindNavigationShortcut) {
+    return false
+  }
+
+  event.preventDefault()
+  findInPage(event.shiftKey)
+  return true
 }
 
 function openFindbar() {

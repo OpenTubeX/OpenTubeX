@@ -30,20 +30,25 @@ h3 {
   text-align: center;
 }
 
-.primarySection {
-  inline-size: 100%;
+.shortcutColumns,
+.shortcutColumn {
+  display: flex;
+  gap: 30px;
 }
 
-.primarySections,
-.primarySection {
-  display: flex;
+.shortcutColumns {
+  align-items: flex-start;
   flex-flow: row wrap;
-  gap: 30px;
   justify-content: space-evenly;
 }
 
-.secondarySection {
-  flex: 0 0 500px;
+.shortcutColumn {
+  flex: 0 1 500px;
+  flex-flow: column nowrap;
+}
+
+.shortcutSection {
+  inline-size: 100%;
 }
 
 .labelsAndShortcuts {
@@ -90,11 +95,7 @@ h3 {
     inline-size: 200px;
   }
 
-  .secondarySection {
-    flex: 0;
-  }
-
-  .primarySection {
-    justify-content: flex-start;
+  .shortcutColumn {
+    display: contents;
   }
 }
