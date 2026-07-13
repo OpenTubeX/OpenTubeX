@@ -2693,6 +2693,12 @@ export default defineComponent({
       } else {
         ui.configure(uiConfig.value)
       }
+
+      // Shaka recreates the controls on configure, but its quality badge is not populated
+      // until the next player or submenu event.
+      if (hasLoaded.value) {
+        ui.getControls().dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
+      }
     }
 
     /**
@@ -3198,8 +3204,6 @@ export default defineComponent({
     }
 
     function handleCanPlay() {
-      refreshQualityControlLabels()
-
       // PiP can only be activated once the video's readState and video track are populated
       if (startInPip && props.format !== 'audio' && ui.getControls().isPiPAllowed() && process.env.IS_ELECTRON) {
         startInPip = false
@@ -4546,16 +4550,6 @@ export default defineComponent({
       return getQualityFromDimensions(activeVariant.width, activeVariant.height)
     }
 
-    function refreshQualityControlLabels() {
-      requestAnimationFrame(() => {
-        if (!player || props.format !== 'dash') {
-          return
-        }
-
-        player.dispatchEvent(new shaka.util.FakeEvent('trackschanged'))
-      })
-    }
-
     /**
      * @param {number} quality
      * @param {number | undefined} audioBandwidth
@@ -4607,7 +4601,6 @@ export default defineComponent({
       }
 
       player.selectVariantTrack(chosenVariant)
-      refreshQualityControlLabels()
     }
 
     /**
