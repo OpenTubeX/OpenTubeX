@@ -1008,23 +1008,24 @@ export class TabManager {
   }
 
   /**
-   * Refresh an inactive tab's preview. Inactive WebContentsViews may have
-   * finished loading without ever being attached, so attach them behind the
-   * active tab briefly to give Chromium a paintable surface for capture.
+   * Refresh an inactive tab's preview. Reattach it behind the active tab so
+   * Chromium paints a capturable frame, including when background video
+   * startup left the view attached but occluded.
    * @param {TabInfo} tab
    * @returns {Promise<string | null>}
    */
   async _refreshInactiveTabPreview(tab) {
-    if (this._attachedTabIds.has(tab.id)) {
-      return await this._refreshTabPreview(tab)
-    }
-
     if (
       this.activeTabId === tab.id ||
       !tab.hasStartedLoading ||
       tab.view.webContents.isDestroyed()
     ) {
       return await this._getCachedTabPreviewDataUrl(tab)
+    }
+
+    const wasAttached = this._attachedTabIds.has(tab.id)
+    if (wasAttached) {
+      this._detachView(tab)
     }
 
     this._attachBackgroundTab(tab)
@@ -1036,7 +1037,7 @@ export class TabManager {
       await new Promise(resolve => setTimeout(resolve, TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS))
       return await this._refreshTabPreview(tab)
     } finally {
-      if (this.activeTabId !== tab.id && this._attachedTabIds.has(tab.id)) {
+      if (!wasAttached && this.activeTabId !== tab.id && this._attachedTabIds.has(tab.id)) {
         this._detachView(tab)
       }
     }
@@ -1800,8 +1801,10 @@ export class TabManager {
       return cachedPreview
     }
 
-    if (canCaptureLive && this.activeTabId === tab.id) {
-      const preview = await this._refreshTabPreview(tab)
+    if (canCaptureLive) {
+      const preview = this.activeTabId === tab.id
+        ? await this._refreshTabPreview(tab)
+        : await this._refreshInactiveTabPreview(tab)
       return preview ?? TabManager.getVideoThumbnailUrl(tab.url)
     }
 
