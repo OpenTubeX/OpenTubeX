@@ -91,6 +91,7 @@ const SPONSORBLOCK_PREVIEW_SECONDS = 2
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 const SPONSORBLOCK_TIMESTAMP_PRECISION_MS = 1
 const SPONSORBLOCK_PREVIEW_END_EPSILON_SECONDS = 0.01
+const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
@@ -338,6 +339,7 @@ export default defineComponent({
     'ended',
     'pause',
     'timeupdate',
+    'terminal-outro-started',
     'toggle-autoplay',
     'toggle-theatre-mode',
     'playback-rate-updated',
@@ -795,6 +797,7 @@ export default defineComponent({
      * }[]}
      */
     let sponsorBlockSegments = []
+    let terminalSponsorBlockOutroStarted = false
     let sponsorBlockAverageVideoDuration = 0
     const hasSponsorBlockMusicOfftopicSegment = ref(false)
     const activeSponsorBlockHighlightSegment = ref(null)
@@ -1177,6 +1180,7 @@ export default defineComponent({
       sponsorBlockDoNotSkipSegments = new Set()
       sponsorBlockDismissedPromptSegments = new Set()
       sponsorBlockSegments = []
+      terminalSponsorBlockOutroStarted = false
       sponsorBlockAverageVideoDuration = 0
       hasSponsorBlockMusicOfftopicSegment.value = false
       activeSponsorBlockHighlightSegment.value = null
@@ -3270,6 +3274,7 @@ export default defineComponent({
         sponsorBlockCurrentTime.value = currentTime
 
         emit('timeupdate', currentTime)
+        emitTerminalSponsorBlockOutroStarted(currentTime)
 
         if (showStats.value && hasLoaded.value) {
           updateStats()
@@ -3287,6 +3292,32 @@ export default defineComponent({
         }
 
         updateScrollMiniDragHandleContrast()
+      }
+    }
+
+    /**
+     * @param {number} currentTime
+     */
+    function emitTerminalSponsorBlockOutroStarted(currentTime) {
+      if (terminalSponsorBlockOutroStarted || video.value?.paused || !useSponsorBlock.value) {
+        return
+      }
+
+      const videoDuration = getSponsorBlockSubmissionVideoDuration()
+      if (!Number.isFinite(videoDuration)) {
+        return
+      }
+
+      const terminalOutro = sponsorBlockSegments.find(segment =>
+        segment.category === 'outro' &&
+        Math.abs(segment.endTime - videoDuration) <= SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS &&
+        currentTime >= segment.startTime &&
+        currentTime <= segment.endTime
+      )
+
+      if (terminalOutro) {
+        terminalSponsorBlockOutroStarted = true
+        emit('terminal-outro-started', currentTime)
       }
     }
 

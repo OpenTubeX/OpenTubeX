@@ -1,6 +1,9 @@
-import { WATCHED_THRESHOLD } from './constants'
+import {
+  WATCHED_MAX_REMAINING_FRACTION,
+  WATCHED_MAX_REMAINING_SECONDS,
+} from './constants'
 
-export { WATCHED_THRESHOLD }
+export { WATCHED_MAX_REMAINING_FRACTION, WATCHED_MAX_REMAINING_SECONDS }
 
 /**
  * @param {object | undefined} historyEntry
@@ -24,10 +27,17 @@ export function isHistoryEntryWatched(historyEntry) {
  * @returns {boolean}
  */
 export function hasReachedWatchedThreshold(watchProgress, lengthSeconds) {
-  return Number.isFinite(watchProgress) &&
-    Number.isFinite(lengthSeconds) &&
-    lengthSeconds > 0 &&
-    watchProgress / lengthSeconds >= WATCHED_THRESHOLD
+  if (!Number.isFinite(watchProgress) || !Number.isFinite(lengthSeconds) || lengthSeconds <= 0) {
+    return false
+  }
+
+  const remainingSeconds = Math.max(lengthSeconds - watchProgress, 0)
+  const allowedRemainingSeconds = Math.min(
+    lengthSeconds * WATCHED_MAX_REMAINING_FRACTION,
+    WATCHED_MAX_REMAINING_SECONDS
+  )
+
+  return remainingSeconds <= allowedRemainingSeconds
 }
 
 /**
@@ -77,11 +87,12 @@ export function migrateLegacyHistoryRecord(record) {
 
   if (isLegacyLibreTubeRecord(record)) {
     const progressRatio = record.watchProgress
+    const watchProgress = progressRatio * record.lengthSeconds
 
     return {
       ...record,
-      watchProgress: progressRatio * record.lengthSeconds,
-      isWatched: progressRatio >= WATCHED_THRESHOLD,
+      watchProgress,
+      isWatched: hasReachedWatchedThreshold(watchProgress, record.lengthSeconds),
     }
   }
 

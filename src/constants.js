@@ -328,8 +328,9 @@ const SEARCH_RESULTS_DISPLAY_LIMIT = 14
 // max # of search history results we show when mixed with YT search suggestions
 const MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT = 4
 
-// A video is considered watched once playback reaches this portion of its duration
-const WATCHED_THRESHOLD = 0.97
+// A video is considered watched once no more than the smaller of 10% or 2 minutes remains
+const WATCHED_MAX_REMAINING_FRACTION = 0.1
+const WATCHED_MAX_REMAINING_SECONDS = 120
 
 export {
   IpcChannels,
@@ -345,5 +346,6 @@ export {
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,
-  WATCHED_THRESHOLD,
+  WATCHED_MAX_REMAINING_FRACTION,
+  WATCHED_MAX_REMAINING_SECONDS,
 }

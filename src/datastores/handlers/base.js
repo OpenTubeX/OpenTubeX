@@ -1,6 +1,5 @@
 import * as db from '../index'
-import { WATCHED_THRESHOLD } from '../../constants'
-import { migrateLegacyHistoryRecord } from '../../history'
+import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 
 class Settings {
   static async find() {
@@ -227,10 +226,7 @@ class WatchStats {
     const watchProgress = Number(record.watchProgress)
 
     let seconds = Number.isFinite(watchProgress) ? watchProgress : 0
-    const reachedLegacyWatchedThreshold = Number.isFinite(watchProgress) &&
-      Number.isFinite(lengthSeconds) &&
-      lengthSeconds > 0 &&
-      watchProgress / lengthSeconds >= WATCHED_THRESHOLD
+    const reachedLegacyWatchedThreshold = hasReachedWatchedThreshold(watchProgress, lengthSeconds)
 
     if ((record.isWatched === true || reachedLegacyWatchedThreshold) && lengthSeconds > 0) {
       seconds = lengthSeconds

@@ -1482,16 +1482,16 @@ export default defineComponent({
       this.updateHistory(videoData)
     },
 
-    markAsWatchedIfFinished(currentSeconds, hasEnded = false) {
+    markAsWatchedIfFinished(currentSeconds, isFinished = false) {
       if (!this.rememberHistory || this.isUpcoming || this.isLive || this.historyEntry?.isWatched === true) {
         return
       }
 
-      if (!hasEnded && this.$refs.player?.isPaused()) {
+      if (!isFinished && this.$refs.player?.isPaused()) {
         return
       }
 
-      if (hasEnded || hasReachedWatchedThreshold(currentSeconds, this.videoLengthSeconds)) {
+      if (isFinished || hasReachedWatchedThreshold(currentSeconds, this.videoLengthSeconds)) {
         const watchProgress = this.watchedProgressSavingEnabled
           ? currentSeconds
           : (this.historyEntry?.watchProgress ?? 0)
@@ -1788,6 +1788,10 @@ export default defineComponent({
     handlePlayerEnded: function () {
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
       this.handleVideoEnded()
+    },
+
+    handleTerminalOutroStarted: function (currentSeconds) {
+      this.markAsWatchedIfFinished(currentSeconds, true)
     },
 
     handleVideoEnded: function () {

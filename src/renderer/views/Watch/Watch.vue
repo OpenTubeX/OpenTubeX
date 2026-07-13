@@ -56,6 +56,7 @@
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
           @timeupdate="updateCurrentChapter"
+          @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
           @pause="handleVideoPause"
           @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
