@@ -2736,6 +2736,49 @@ function runApp() {
   })
 
   // *********** //
+  // Watch Stats
+  ipcMain.handle(IpcChannels.DB_WATCH_STATS, async (event, { action, data }) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    try {
+      switch (action) {
+        case DBActions.GENERAL.FIND:
+          return await baseHandlers.watchStats.find()
+
+        case DBActions.WATCH_STATS.ADD_WATCH_TIME:
+          await baseHandlers.watchStats.addWatchTime(data.date, data.seconds)
+          syncOtherWindows(
+            IpcChannels.SYNC_WATCH_STATS,
+            event,
+            { event: SyncEvents.WATCH_STATS.ADD_WATCH_TIME, data }
+          )
+          return null
+
+        case DBActions.WATCH_STATS.MIGRATE_HISTORY:
+          return await baseHandlers.watchStats.migrateHistory()
+
+        case DBActions.GENERAL.DELETE_ALL:
+          await baseHandlers.watchStats.deleteAll()
+          syncOtherWindows(
+            IpcChannels.SYNC_WATCH_STATS,
+            event,
+            { event: SyncEvents.GENERAL.DELETE_ALL }
+          )
+          return null
+
+        default:
+          // eslint-disable-next-line no-throw-literal
+          throw 'invalid watch stats db action'
+      }
+    } catch (err) {
+      if (typeof err === 'string') throw err
+      else throw err.toString()
+    }
+  })
+
+  // *********** //
   // Profiles
   ipcMain.handle(IpcChannels.DB_PROFILES, async (event, { action, data }) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {

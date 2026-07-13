@@ -128,6 +128,34 @@ Search Filters:
   There are no more results for this search: There are no more results for this search
   Clear Filters: Clear Filters
 # Sidebar
+Stats:
+  Stats: Stats
+  Watch time summary: Watch time summary
+  Today: Today
+  This week: This week
+  Total watch time: Total watch time
+  Daily average: Daily average
+  So far today: So far today
+  Since: Since {day}
+  All recorded time: All recorded time
+  Per calendar day: Per calendar day
+  Day by day: Day by day
+  Week by week: Week by week
+  Last 14 days: Last 14 days
+  Last 8 weeks: Last 8 weeks
+  Daily chart aria: Daily watch time for the last 14 days
+  Weekly chart aria: Weekly watch time for the last 8 weeks
+  No data: Watch time will appear here as you watch videos.
+  Estimate note: Watch time from before this update is estimated from your saved playback progress.
+  Reset statistics: Reset statistics
+  Reset: Reset
+  Reset confirmation: Are you sure you want to reset all watch statistics? This cannot be undone.
+  Reset success: Watch statistics have been reset
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} hr'
+  Hours and minutes: '{hours} hr {minutes} min'
+
 Subscriptions:
     # On Subscriptions Page
   Subscriptions: Subscriptions
@@ -566,6 +594,8 @@ Settings:
   Privacy Settings:
     Privacy Settings: Privacy
     Remember History: Remember Watch History
+    Enable Watch Statistics: Enable Watch Statistics
+    Week Starts On: Week Starts On
     Remember Search History: Remember Search History
     Save Watched Progress: Save Watched Progress
     Watched Progress Saving Mode:

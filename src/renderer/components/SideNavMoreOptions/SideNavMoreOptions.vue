@@ -117,6 +117,26 @@
         </p>
       </router-link>
       <router-link
+        v-if="showWatchStats"
+        class="navOption"
+        :title="$t('Stats.Stats')"
+        :aria-label="hideLabelsSideBar ? $t('Stats.Stats') : null"
+        to="/stats"
+        @click="closeMenu"
+      >
+        <FontAwesomeIcon
+          :icon="['fas', 'chart-line']"
+          class="navIcon"
+          :class="applyNavIconExpand"
+        />
+        <p
+          v-if="!hideLabelsSideBar"
+          class="navLabel"
+        >
+          {{ $t('Stats.Stats') }}
+        </p>
+      </router-link>
+      <router-link
         class="navOption smallMobileOnlyShow"
         :title="$t('Settings.Settings')"
         :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
@@ -222,6 +242,11 @@ const hideLabelsSideBar = computed(() => {
 const popularVisible = computed(() => {
   return !store.getters.getHidePopularVideos &&
     (store.getters.getBackendFallback || store.getters.getBackendPreference === 'invidious')
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showWatchStats = computed(() => {
+  return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
 
 const applyNavIconExpand = computed(() => {

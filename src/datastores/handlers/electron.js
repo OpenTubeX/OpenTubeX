@@ -46,6 +46,27 @@ class History {
   }
 }
 
+class WatchStats {
+  static find() {
+    return window.ftElectron.dbWatchStats(DBActions.GENERAL.FIND)
+  }
+
+  static addWatchTime(date, seconds) {
+    return window.ftElectron.dbWatchStats(
+      DBActions.WATCH_STATS.ADD_WATCH_TIME,
+      { date, seconds }
+    )
+  }
+
+  static migrateHistory() {
+    return window.ftElectron.dbWatchStats(DBActions.WATCH_STATS.MIGRATE_HISTORY)
+  }
+
+  static deleteAll() {
+    return window.ftElectron.dbWatchStats(DBActions.GENERAL.DELETE_ALL)
+  }
+}
+
 class Profiles {
   static create(profile) {
     return window.ftElectron.dbProfiles(DBActions.GENERAL.CREATE, profile)
@@ -204,6 +225,7 @@ class SubscriptionCache {
 export {
   Settings as settings,
   History as history,
+  WatchStats as watchStats,
   Profiles as profiles,
   Playlists as playlists,
   SearchHistory as searchHistory,

@@ -83,8 +83,9 @@ export default defineComponent({
   },
   beforeRouteLeave: async function (to, from, next) {
     this.$store.commit('tabs/setCurrentWatchTimestamp', null)
-    this.handleRouteChange()
+    await this.handleRouteChange()
     window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
+    window.removeEventListener('beforeunload', this.flushWatchTime)
     document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
     document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
 
@@ -196,6 +197,10 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
+      /** @type {number|null} */
+      watchTimeLastTick: null,
+      /** @type {Record<string, number>} */
+      pendingWatchTimeByDate: {},
     }
   },
   computed: {
@@ -207,6 +212,12 @@ export default defineComponent({
     },
     rememberHistory: function () {
       return this.$store.getters.getRememberHistory
+    },
+    enableWatchStats: function () {
+      return this.$store.getters.getEnableWatchStats
+    },
+    watchStatsResetVersion: function () {
+      return this.$store.getters.getWatchStatsResetVersion
     },
     watchedProgressSavingEnabled: function () {
       return this.$store.getters.getWatchedProgressSavingMode !== 'never'
@@ -369,6 +380,19 @@ export default defineComponent({
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
     },
+    enableWatchStats(enabled) {
+      if (!enabled) {
+        this.clearPendingWatchTime()
+      }
+    },
+    rememberHistory(enabled) {
+      if (!enabled) {
+        this.clearPendingWatchTime()
+      }
+    },
+    watchStatsResetVersion() {
+      this.clearPendingWatchTime()
+    },
   },
   created: function () {
     this.videoId = this.$route.params.id
@@ -509,6 +533,7 @@ export default defineComponent({
       document.addEventListener('click', this.resetAutoplayInterruptionTimeout)
 
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)
+      window.addEventListener('beforeunload', this.flushWatchTime)
       this.resetAutoplayInterruptionTimeout()
     },
 
@@ -1413,6 +1438,7 @@ export default defineComponent({
      * @param {number} currentSeconds
      */
     updateCurrentChapter: function (currentSeconds) {
+      this.trackWatchTime()
       this.markAsWatchedIfFinished(currentSeconds)
 
       const chapters = this.videoChapters
@@ -1509,7 +1535,57 @@ export default defineComponent({
       this._saveWatchProgress()
     },
     handleVideoPause() {
+      this.watchTimeLastTick = null
+      this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
+    },
+    clearPendingWatchTime() {
+      this.watchTimeLastTick = null
+      this.pendingWatchTimeByDate = {}
+    },
+    trackWatchTime() {
+      if (!this.rememberHistory || !this.enableWatchStats || this.$refs.player?.isPaused()) {
+        this.watchTimeLastTick = null
+        return
+      }
+
+      const now = Date.now()
+      if (this.watchTimeLastTick !== null) {
+        const elapsed = now - this.watchTimeLastTick
+
+        // Ignore suspended or heavily delayed timers instead of counting idle time.
+        if (elapsed > 0 && elapsed <= 5000) {
+          const watchedAt = new Date(now)
+          const date = [
+            watchedAt.getFullYear(),
+            String(watchedAt.getMonth() + 1).padStart(2, '0'),
+            String(watchedAt.getDate()).padStart(2, '0'),
+          ].join('-')
+
+          this.pendingWatchTimeByDate[date] = (this.pendingWatchTimeByDate[date] ?? 0) + elapsed
+        }
+      }
+
+      this.watchTimeLastTick = now
+
+      const pendingMilliseconds = Object.values(this.pendingWatchTimeByDate)
+        .reduce((total, milliseconds) => total + milliseconds, 0)
+
+      if (pendingMilliseconds >= 10000) {
+        this.flushWatchTime()
+      }
+    },
+    async flushWatchTime() {
+      this.watchTimeLastTick = null
+      const pending = this.pendingWatchTimeByDate
+      this.pendingWatchTimeByDate = {}
+
+      await Promise.all(Object.entries(pending).map(([date, milliseconds]) => {
+        return this.$store.dispatch('recordWatchTime', {
+          date,
+          seconds: milliseconds / 1000,
+        })
+      }))
     },
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
@@ -1805,9 +1881,10 @@ export default defineComponent({
       }
     },
 
-    handleRouteChange: function () {
+    handleRouteChange: async function () {
       this.abortAutoplayCountdown(true)
       this.handleWatchProgressAutoSave()
+      await this.flushWatchTime()
     },
 
     /**

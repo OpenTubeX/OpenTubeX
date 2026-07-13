@@ -187,6 +187,8 @@ const state = {
   disableSmoothScrolling: false,
   disableChannelLinks: false,
   displayVideoPlayButton: false,
+  enableWatchStats: true,
+  statsWeekStartsOn: '1',
   enableSearchSuggestions: true,
   enableSubtitlesByDefault: false,
   enterFullscreenOnDisplayRotate: false,
@@ -435,6 +437,12 @@ const sideEffectHandlers = {
     }
   },
 
+  enableWatchStats: ({ dispatch }, value) => {
+    if (value) {
+      dispatch('grabWatchStats')
+    }
+  },
+
   uiScale: (_, value) => {
     if (process.env.IS_ELECTRON) {
       window.ftElectron.setZoomFactor(value / 100)
@@ -619,6 +627,21 @@ const customActions = {
 
           default:
             console.error('history: invalid sync event received')
+        }
+      })
+
+      window.ftElectron.handleSyncWatchStats((event, data) => {
+        switch (event) {
+          case SyncEvents.WATCH_STATS.ADD_WATCH_TIME:
+            commit('addWatchTime', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE_ALL:
+            commit('resetWatchStats')
+            break
+
+          default:
+            console.error('watch stats: invalid sync event received')
         }
       })
 

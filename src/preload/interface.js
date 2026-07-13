@@ -238,6 +238,14 @@ export default {
    * @param {number} action
    * @param {any} [data]
    */
+  dbWatchStats: (action, data) => {
+    return ipcRenderer.invoke(IpcChannels.DB_WATCH_STATS, data ? { action, data } : { action })
+  },
+
+  /**
+   * @param {number} action
+   * @param {any} [data]
+   */
   dbProfiles: (action, data) => {
     return ipcRenderer.invoke(IpcChannels.DB_PROFILES, data ? { action, data } : { action })
   },
@@ -319,6 +327,15 @@ export default {
    */
   handleSyncHistory: (handler) => {
     ipcRenderer.on(IpcChannels.SYNC_HISTORY, (_, { event, data }) => {
+      handler(event, data)
+    })
+  },
+
+  /**
+   * @param {(event: number, data: any) => void} handler
+   */
+  handleSyncWatchStats: (handler) => {
+    ipcRenderer.on(IpcChannels.SYNC_WATCH_STATS, (_, { event, data }) => {
       handler(event, data)
     })
   },

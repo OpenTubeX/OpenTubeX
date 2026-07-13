@@ -1,4 +1,6 @@
-export const WATCHED_THRESHOLD = 0.97
+import { WATCHED_THRESHOLD } from '../../constants'
+
+export { WATCHED_THRESHOLD }
 
 /**
  * @param {object | undefined} historyEntry

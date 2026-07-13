@@ -13,6 +13,15 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="$t('Settings.Privacy Settings.Enable Watch Statistics')"
+          compact
+          :disabled="!rememberHistory"
+          :default-value="enableWatchStats"
+          @change="updateEnableWatchStats"
+        />
+      </div>
+      <div class="switchColumn">
+        <FtToggleSwitch
           :label="$t('Settings.Privacy Settings.Remember Search History')"
           compact
           :default-value="rememberSearchHistory"
@@ -31,6 +40,14 @@
     </div>
     <br>
     <FtFlexBox>
+      <FtSelect
+        :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
+        :value="statsWeekStartsOn"
+        :select-names="weekStartNames"
+        :select-values="WEEK_START_VALUES"
+        :icon="['fas', 'chart-line']"
+        @change="updateStatsWeekStartsOn"
+      />
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
         :value="watchedProgressSavingMode"
@@ -124,7 +141,7 @@ import store from '../store/index'
 import { MAIN_PROFILE_ID } from '../../constants'
 import { showToast } from '../helpers/utils'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 const PROMPT_VALUES = ['delete', 'cancel']
 const promptNames = computed(() => [
@@ -138,6 +155,38 @@ const removeSubscriptionsPromptMessage = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberHistory = computed(() => store.getters.getRememberHistory)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableWatchStats = computed(() => store.getters.getEnableWatchStats)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableWatchStats(value) {
+  store.dispatch('updateEnableWatchStats', value)
+}
+
+const WEEK_START_VALUES = ['0', '1', '2', '3', '4', '5', '6']
+const weekStartNames = computed(() => {
+  const formatter = new Intl.DateTimeFormat(locale.value, { weekday: 'long' })
+  const sunday = new Date(2024, 0, 7, 12)
+
+  return WEEK_START_VALUES.map((_, index) => {
+    const date = new Date(sunday)
+    date.setDate(date.getDate() + index)
+    return formatter.format(date)
+  })
+})
+
+/** @type {import('vue').ComputedRef<string>} */
+const statsWeekStartsOn = computed(() => store.getters.getStatsWeekStartsOn)
+
+/**
+ * @param {string} value
+ */
+function updateStatsWeekStartsOn(value) {
+  store.dispatch('updateStatsWeekStartsOn', value)
+}
 
 /**
  * @param {boolean} value

@@ -138,6 +138,24 @@
           {{ $t("History.History") }}
         </p>
       </router-link>
+      <router-link
+        v-if="showWatchStats"
+        class="navOption mobileHidden"
+        role="button"
+        to="/stats"
+        :title="$t('Stats.Stats')"
+      >
+        <div class="thumbnailContainer">
+          <FontAwesomeIcon
+            :icon="['fas', 'chart-line']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p class="navLabel">
+          {{ $t('Stats.Stats') }}
+        </p>
+      </router-link>
       <hr>
       <router-link
         class="navOption mobileShow smallMobileOnlyHidden"
@@ -312,6 +330,11 @@ const hideTrendingVideos = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideActiveSubscriptions = computed(() => {
   return store.getters.getHideActiveSubscriptions
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showWatchStats = computed(() => {
+  return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

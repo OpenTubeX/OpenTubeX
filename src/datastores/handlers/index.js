@@ -1,6 +1,7 @@
 export {
   settings as DBSettingHandlers,
   history as DBHistoryHandlers,
+  watchStats as DBWatchStatsHandlers,
   profiles as DBProfileHandlers,
   playlists as DBPlaylistHandlers,
   searchHistory as DBSearchHistoryHandlers,

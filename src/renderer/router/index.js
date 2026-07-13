@@ -6,6 +6,7 @@ import Trending from '../views/Trending/Trending.vue'
 import Popular from '../views/Popular/Popular.vue'
 import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
 import History from '../views/History/History.vue'
+import Stats from '../views/Stats/Stats.vue'
 import Settings from '../views/Settings/Settings.vue'
 import About from '../views/About/About.vue'
 import SearchPage from '../views/SearchPage/SearchPage.vue'
@@ -75,6 +76,14 @@ const router = createRouter({
         title: 'History'
       },
       component: History
+    },
+    {
+      path: '/stats',
+      name: 'stats',
+      meta: {
+        title: 'Stats'
+      },
+      component: Stats
     },
     {
       path: '/settings',

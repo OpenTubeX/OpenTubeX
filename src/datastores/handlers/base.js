@@ -1,4 +1,5 @@
 import * as db from '../index'
+import { WATCHED_THRESHOLD } from '../../constants'
 
 class Settings {
   static async find() {
@@ -130,6 +131,99 @@ class History {
 
   static deleteAll() {
     return db.history.removeAsync({}, { multi: true })
+  }
+}
+
+class WatchStats {
+  static find() {
+    return db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
+  }
+
+  static addWatchTime(date, seconds) {
+    return db.watchStats.updateAsync(
+      { date },
+      { $inc: { seconds }, $set: { date } },
+      { upsert: true }
+    )
+  }
+
+  static async addHistoricalWatchTime(date, seconds) {
+    const existingRecord = await db.watchStats.findOneAsync({ date })
+    if (existingRecord?.historyEstimateApplied) { return true }
+
+    await db.watchStats.updateAsync(
+      { date },
+      {
+        $inc: { seconds },
+        $set: { date, historyEstimateApplied: true }
+      },
+      { upsert: true }
+    )
+    return true
+  }
+
+  static async deleteAll() {
+    await db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
+    await db.watchStats.updateAsync(
+      { _id: 'history-watch-time-v1' },
+      { $set: { hadEstimates: false } },
+      { upsert: true }
+    )
+    this.migrationPromise = null
+  }
+
+  static migrateHistory() {
+    this.migrationPromise ??= this._migrateHistory()
+    return this.migrationPromise
+  }
+
+  static async _migrateHistory() {
+    const migrationId = 'history-watch-time-v1'
+    const alreadyMigrated = await db.watchStats.findOneAsync({ _id: migrationId })
+    if (alreadyMigrated) { return alreadyMigrated.hadEstimates === true }
+
+    const history = await db.history.findAsync({})
+    const secondsByDate = new Map()
+
+    for (const record of history) {
+      const timestamp = Number(record.timeWatched)
+      const lengthSeconds = Number(record.lengthSeconds)
+      const watchProgress = Number(record.watchProgress)
+
+      if (!Number.isFinite(timestamp)) { continue }
+
+      let seconds = Number.isFinite(watchProgress) ? watchProgress : 0
+      const reachedLegacyWatchedThreshold = Number.isFinite(watchProgress) &&
+        Number.isFinite(lengthSeconds) &&
+        lengthSeconds > 0 &&
+        watchProgress / lengthSeconds >= WATCHED_THRESHOLD
+
+      if ((record.isWatched === true || reachedLegacyWatchedThreshold) && lengthSeconds > 0) {
+        seconds = lengthSeconds
+      } else if (Number.isFinite(lengthSeconds)) {
+        seconds = Math.min(seconds, lengthSeconds)
+      }
+
+      if (seconds <= 0) { continue }
+
+      const watchedAt = new Date(timestamp)
+      const date = [
+        watchedAt.getFullYear(),
+        String(watchedAt.getMonth() + 1).padStart(2, '0'),
+        String(watchedAt.getDate()).padStart(2, '0'),
+      ].join('-')
+
+      secondsByDate.set(date, (secondsByDate.get(date) ?? 0) + seconds)
+    }
+
+    let hadEstimates = false
+    for (const [date, seconds] of secondsByDate) {
+      const imported = await this.addHistoricalWatchTime(date, seconds)
+      hadEstimates ||= imported
+    }
+
+    await db.watchStats.insertAsync({ _id: migrationId, completedAt: Date.now(), hadEstimates })
+    return hadEstimates
   }
 }
 
@@ -420,6 +514,7 @@ function loadDatastores() {
   return Promise.allSettled([
     db.settings.loadDatabaseAsync(),
     db.history.loadDatabaseAsync(),
+    db.watchStats.loadDatabaseAsync(),
     db.profiles.loadDatabaseAsync(),
     db.playlists.loadDatabaseAsync(),
     db.searchHistory.loadDatabaseAsync(),
@@ -432,6 +527,7 @@ function compactAllDatastores() {
   return Promise.allSettled([
     db.settings.compactDatafileAsync(),
     db.history.compactDatafileAsync(),
+    db.watchStats.compactDatafileAsync(),
     db.profiles.compactDatafileAsync(),
     db.playlists.compactDatafileAsync(),
     db.searchHistory.compactDatafileAsync(),
@@ -443,6 +539,7 @@ function compactAllDatastores() {
 export {
   Settings as settings,
   History as history,
+  WatchStats as watchStats,
   Profiles as profiles,
   Playlists as playlists,
   SearchHistory as searchHistory,

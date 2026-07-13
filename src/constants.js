@@ -47,6 +47,7 @@ const IpcChannels = {
 
   DB_SETTINGS: 'db-settings',
   DB_HISTORY: 'db-history',
+  DB_WATCH_STATS: 'db-watch-stats',
   DB_PROFILES: 'db-profiles',
   DB_PLAYLISTS: 'db-playlists',
   DB_SEARCH_HISTORY: 'db-search-history',
@@ -54,6 +55,7 @@ const IpcChannels = {
 
   SYNC_SETTINGS: 'sync-settings',
   SYNC_HISTORY: 'sync-history',
+  SYNC_WATCH_STATS: 'sync-watch-stats',
   SYNC_SEARCH_HISTORY: 'sync-search-history',
   SYNC_PROFILES: 'sync-profiles',
   SYNC_PLAYLISTS: 'sync-playlists',
@@ -97,6 +99,11 @@ const DBActions = {
     UPDATE_PLAYLIST: 21,
   },
 
+  WATCH_STATS: {
+    ADD_WATCH_TIME: 20,
+    MIGRATE_HISTORY: 21,
+  },
+
   PROFILES: {
     ADD_CHANNEL: 20,
     REMOVE_CHANNEL: 21
@@ -135,6 +142,10 @@ const SyncEvents = {
   HISTORY: {
     UPDATE_WATCH_PROGRESS: 20,
     UPDATE_PLAYLIST: 21,
+  },
+
+  WATCH_STATS: {
+    ADD_WATCH_TIME: 20,
   },
 
   PROFILES: {
@@ -314,6 +325,9 @@ const SEARCH_RESULTS_DISPLAY_LIMIT = 14
 // max # of search history results we show when mixed with YT search suggestions
 const MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT = 4
 
+// A video is considered watched once playback reaches this portion of its duration
+const WATCHED_THRESHOLD = 0.97
+
 export {
   IpcChannels,
   DBActions,
@@ -328,4 +342,5 @@ export {
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,
+  WATCHED_THRESHOLD,
 }

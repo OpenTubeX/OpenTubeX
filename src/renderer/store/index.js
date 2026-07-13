@@ -11,6 +11,7 @@ import subscriptionCache from './modules/subscription-cache'
 import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
+import watchStats from './modules/watch-stats'
 
 export default createStore({
   modules: {
@@ -24,6 +25,7 @@ export default createStore({
     utils,
     player,
     tabs,
+    watchStats,
   },
 
   // Detects unsafe changes to the store state e.g. outside of mutations
