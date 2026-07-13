@@ -590,6 +590,7 @@
   color: #fff !important;
   opacity: 1;
   text-shadow: 0 1px 2px rgb(0 0 0 / 85%);
+  transition: gap 200ms ease;
 }
 
 :deep(.ft-shaka-highlight-button .shaka-ui-icon) {
@@ -600,6 +601,7 @@
 }
 
 :deep(.ft-shaka-highlight-button-label) {
+  max-width: 220px;
   overflow: hidden;
   color: #fff;
   font-family: Roboto, Arial, sans-serif;
@@ -607,7 +609,19 @@
   font-weight: 400;
   line-height: normal;
   text-overflow: ellipsis;
+  transform: translateX(0);
+  transition: max-width 200ms ease, opacity 150ms ease, transform 200ms ease;
   white-space: nowrap;
+}
+
+:deep(.ft-shaka-highlight-button-collapsed) {
+  gap: 0;
+}
+
+:deep(.ft-shaka-highlight-button-collapsed .ft-shaka-highlight-button-label) {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-12px);
 }
 
 :deep(.shaka-tooltips-on > .ft-shaka-highlight-button:hover::after),

@@ -58,9 +58,11 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
 
   /**
    * @private
-   * @param {{ visible: boolean }} state
+   * @param {{ visible: boolean, labelVisible: boolean }} state
    */
   updateVisibility_(state) {
+    this.button_.classList.toggle('ft-shaka-highlight-button-collapsed', !state.labelVisible)
+
     if (state.visible) {
       this.button_.classList.remove('shaka-hidden')
     } else {

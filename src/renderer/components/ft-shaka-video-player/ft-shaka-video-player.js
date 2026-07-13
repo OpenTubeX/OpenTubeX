@@ -88,6 +88,7 @@ const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
 ])
 
 const SPONSORBLOCK_PREVIEW_SECONDS = 2
+const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 const SPONSORBLOCK_TIMESTAMP_PRECISION_MS = 1
 const SPONSORBLOCK_PREVIEW_END_EPSILON_SECONDS = 0.01
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
@@ -797,6 +798,10 @@ export default defineComponent({
     let sponsorBlockAverageVideoDuration = 0
     const hasSponsorBlockMusicOfftopicSegment = ref(false)
     const activeSponsorBlockHighlightSegment = ref(null)
+    let sponsorBlockHighlightLabelVisible = true
+    let sponsorBlockHighlightLabelRemainingMs = SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS
+    let sponsorBlockHighlightLabelStartedAt = null
+    let sponsorBlockHighlightLabelTimeout = null
 
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
@@ -2056,9 +2061,48 @@ export default defineComponent({
       activeSponsorBlockHighlightSegment.value = nextHighlightSegment
       events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', {
         detail: {
-          visible: nextHighlightSegment !== null
+          visible: nextHighlightSegment !== null,
+          labelVisible: sponsorBlockHighlightLabelVisible
         }
       }))
+    }
+
+    function pauseSponsorBlockHighlightLabelCountdown() {
+      if (sponsorBlockHighlightLabelStartedAt === null) {
+        return
+      }
+
+      clearTimeout(sponsorBlockHighlightLabelTimeout)
+      sponsorBlockHighlightLabelTimeout = null
+      sponsorBlockHighlightLabelRemainingMs = Math.max(
+        sponsorBlockHighlightLabelRemainingMs - (Date.now() - sponsorBlockHighlightLabelStartedAt),
+        0
+      )
+      sponsorBlockHighlightLabelStartedAt = null
+    }
+
+    function startSponsorBlockHighlightLabelCountdown() {
+      if (!sponsorBlockHighlightLabelVisible || sponsorBlockHighlightLabelStartedAt !== null) {
+        return
+      }
+
+      sponsorBlockHighlightLabelStartedAt = Date.now()
+      sponsorBlockHighlightLabelTimeout = setTimeout(() => {
+        sponsorBlockHighlightLabelVisible = false
+        sponsorBlockHighlightLabelRemainingMs = 0
+        sponsorBlockHighlightLabelStartedAt = null
+        sponsorBlockHighlightLabelTimeout = null
+        updateSponsorBlockHighlightState()
+      }, sponsorBlockHighlightLabelRemainingMs)
+    }
+
+    function resetSponsorBlockHighlightLabel() {
+      clearTimeout(sponsorBlockHighlightLabelTimeout)
+      sponsorBlockHighlightLabelVisible = true
+      sponsorBlockHighlightLabelRemainingMs = SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS
+      sponsorBlockHighlightLabelStartedAt = null
+      sponsorBlockHighlightLabelTimeout = null
+      updateSponsorBlockHighlightState()
     }
 
     /**
@@ -2937,6 +2981,7 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      resetSponsorBlockHighlightLabel()
       loadSponsorBlockDrafts()
       sponsorBlockSubmissionError.value = ''
       updateSponsorBlockSubmissionState()
@@ -3091,6 +3136,7 @@ export default defineComponent({
       }
 
       startPowerSaveBlocker()
+      startSponsorBlockHighlightLabelCountdown()
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing'
@@ -3110,6 +3156,7 @@ export default defineComponent({
 
     function handlePause() {
       stopPowerSaveBlocker()
+      pauseSponsorBlockHighlightLabelCountdown()
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'paused'
@@ -3131,6 +3178,7 @@ export default defineComponent({
 
     function handleEnded() {
       stopPowerSaveBlocker()
+      pauseSponsorBlockHighlightLabelCountdown()
 
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'none'
@@ -6538,6 +6586,7 @@ export default defineComponent({
     onUnmounted(() => {
       clearSabrBackoffTimer()
       clearPreRollTimer()
+      clearTimeout(sponsorBlockHighlightLabelTimeout)
     })
 
     async function performFirstLoad() {
