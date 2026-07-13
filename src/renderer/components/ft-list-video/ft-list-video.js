@@ -211,7 +211,7 @@ export default defineComponent({
             title: this.isWatched
               ? this.t('Video.Remove From History')
               : this.t('Video.Mark As Watched'),
-            icon: this.isWatched ? ['fas', 'history'] : ['fas', 'check']
+            icon: this.isWatched ? ['fas', 'history'] : ['fas', 'eye']
           }
         case 'copyYoutube':
           return {
