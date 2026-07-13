@@ -457,7 +457,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Langganan'
     Fetch Feeds from RSS: 'Ambil Umpan dari RSS'
-    Fetch Automatically: Ambil Umpan Secara Otomatis
     'Limit the number of videos displayed for each channel': Batasi jumlah video yang ditampilkan untuk setiap saluran
     To: Untuk
     Confirm Before Unsubscribing: Konfirmasi Sebelum Berhenti Berlangganan
@@ -954,7 +953,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Saat diaktifkan, OpenTubeX akan menggunakan RSS, bukan metode default untuk mengambil umpan langganan Anda. RSS lebih cepat dan mencegah pemblokiran IP, tetapi tidak memberikan informasi tertentu seperti durasi video, status langsung, atau postingan komunitas
-    Fetch Automatically: Ketika dinyalakan, OpenTubeX akan mengambil secara otomatis umpan langganan Anda saat memulai ketika jendala baru dibuka.
   Player Settings:
     Default Video Format: Atur format ketika video dimainkan. Format DASH dapat memutar kualitas yang lebih tinggi. Format lama terbatas ke maksimum 720p tetapi dengan bandwidth yang lebih rendah. Format audio hanya berisi aliran audio.
     Proxy Videos Through Invidious: Akan menyambung ke Invidious daripada YouTube.

@@ -447,7 +447,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonament'
     Fetch Feeds from RSS: 'Preluare de fluxuri din RSS'
-    Fetch Automatically: Preluați feedul automat
     Confirm Before Unsubscribing: Confirmă înainte de dezabonare
     'Limit the number of videos displayed for each channel': Limitați numărul de videoclipuri afișate pentru fiecare canal
     To: la
@@ -933,7 +932,6 @@ Unknown YouTube url type, cannot be opened in app: Tip url YouTube necunoscut, n
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Atunci când este activat, OpenTubeX va utiliza RSS în locul metodei implicite de preluare a fluxului dvs. de abonament. RSS este mai rapid și previne blocarea IP, dar nu oferă anumite informații, cum ar fi durata videoclipului, starea live sau postările
-    Fetch Automatically: Când activat, OpenTubeX va prelua automat feed-ul de abonament la pornire și când se deschide o fereastră nouă.
   External Player Settings:
     Custom External Player Arguments: Orice argumente personalizate din linia de comandă, pe care doriți să le transmiteți playerului extern.
     Ignore Warnings: Suprimarea avertismentelor în cazul în care playerul extern curent nu acceptă acțiunea curentă (de exemplu, inversarea listelor de redare etc.).

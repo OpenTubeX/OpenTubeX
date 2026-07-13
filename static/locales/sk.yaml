@@ -429,7 +429,6 @@ Settings:
     Confirm Before Unsubscribing: Potvrdiť pred odhlásením
     To: Do
     'Limit the number of videos displayed for each channel': Obmedziť počet zobrazovaných videí pre každý kanál
-    Fetch Automatically: Automaticky načítať kanál
   Data Settings:
     How do I import my subscriptions?: Ako môžem importovať svoje odbery?
     Unknown data key: Neznámy dátový kľúč
@@ -904,7 +903,6 @@ The playlist has been reversed: Playlist bol obrátený
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Keď je zapnuté, OpenTubeX použije RSS namiesto predvolenej metódy na získanie vášho odoberaného kanála. RSS je rýchlejší a zabraňuje blokovaniu IP, ale neposkytuje určité informácie ako trvanie videa, stav naživo alebo príspevky
-    Fetch Automatically: Keď je zapnuté, OpenTubeX automaticky načíta váš odoberaný kanál pri spustení a keď je otvorené nové okno.
   Player Settings:
     Default Video Format: Nastavte formáty používané pri prehrávaní videa. Formáty DASH umožňujú prehrávanie vo vyššej kvalite. Staršie formáty sú obmedzené na maximálne rozlíšenie 360p, ale využívajú menšiu šírku pásma. Formáty zvuku sú iba audio streamy.
     Proxy Videos Through Invidious: Pripojí sa k Invidious na poskytovanie videí namiesto priameho pripojenia k YouTube.

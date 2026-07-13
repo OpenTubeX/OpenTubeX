@@ -594,7 +594,7 @@ Settings:
   Subscription Settings:
     Subscription Settings: Subscription
     Fetch Feeds from RSS: Fetch Feeds from RSS
-    Fetch Automatically: Fetch Feed Automatically
+    Fetch Feed on Startup: Fetch Feed on Startup
     Auto Refresh Interval: Auto Refresh Interval
     Videos Auto Refresh Interval: Videos Auto Refresh Interval
     Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
@@ -1265,7 +1265,7 @@ Tooltips:
     Fetch Feeds from RSS: When enabled, OpenTubeX will use RSS instead of its default
       method for grabbing your subscription feed. RSS is faster and prevents IP blocking,
       but doesn't provide certain information like video duration, live status or posts
-    Fetch Automatically: When enabled, OpenTubeX will automatically fetch
+    Fetch Feed on Startup: When enabled, OpenTubeX will automatically fetch
       your subscription feed on startup and when a new window is opened.
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Experimental Settings:

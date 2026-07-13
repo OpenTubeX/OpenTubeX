@@ -425,7 +425,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: '登録チャンネル'
     Fetch Feeds from RSS: RSS から情報取得
-    Fetch Automatically: フィードの自動取得
     Confirm Before Unsubscribing: 登録解除する前に確認画面を表示する
     'Limit the number of videos displayed for each channel': 各チャンネルに表示する動画の数を制限する
     To: 上限
@@ -950,7 +949,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: 有効にすると、OpenTubeX は通常の方法の代わりに RSS を使用して購読フィードを取得します。RSS は高速で IP ブロックを防ぎますが、動画の長さやライブ配信などの情報は提供されません
-    Fetch Automatically: 有効にすると、OpenTubeX は起動時や新しいウィンドウを開いたときに自動的に登録チャンネルフィードを取得します。
   Player Settings:
     Default Video Format: 動画を再生する際に使用する形式を設定します。DASH形式はより高い画質で再生できます。旧形式は最大360pに制限されますが、帯域幅の使用量が少なくなります。音声形式は音声のみです。
     Proxy Videos Through Invidious: YouTube に直接接続するのではなく、Invidious を通じて動画を提供します。

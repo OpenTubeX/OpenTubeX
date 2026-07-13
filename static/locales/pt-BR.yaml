@@ -425,7 +425,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Inscrições'
     Fetch Feeds from RSS: Buscar Informações através de RSS
-    Fetch Automatically: Buscar feed automaticamente
     Confirm Before Unsubscribing: Pedir para confirmar antes de cancelar a inscrição
 
     'Limit the number of videos displayed for each channel': Limitar o número de vídeos exibidos para cada canal
@@ -949,7 +948,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Quando habilitado, o OpenTubeX usará RSS em vez de seu método padrão para obter o feed de sua inscrição. O RSS é mais rápido e evita bloqueio de IP, mas não fornece certas informações como duração do vídeo, status ao vivo ou postagens
-    Fetch Automatically: Quando habilitado, o OpenTubeX buscará automaticamente seu feed de inscrições na inicialização e quando uma nova janela for aberta.
   Player Settings:
     Default Video Format: Define os formatos usados quando um vídeo é reproduzido. Formatos DASH podem reproduzir qualidades mais altas. Os formatos antigos são limitados a um máximo de 360p, mas usam menos largura de banda. Formatos de áudio são para transmissões sem vídeo.
     Proxy Videos Through Invidious: Estabelece uma conexão ao Invidious para obter vídeos em vez de fazer uma conexão direta com o YouTube.

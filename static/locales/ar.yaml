@@ -454,7 +454,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'الاشتراك'
     Fetch Feeds from RSS: 'جلب المحتوى عن طريق RSS'
-    Fetch Automatically: جلب الخلاصة تلقائيا
     Confirm Before Unsubscribing: تجنب إلغاء الاشتراك عن طريق الخطأ
 
     To: إلى
@@ -963,7 +962,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: استخدم عجلة التمرير لتخطي الفيديو بنمط MPV.
   Subscription Settings:
     Fetch Feeds from RSS: عند التفعيل، سيستخدم OpenTubeX بروتوكول RSS بدلاً من طريقته الافتراضية لجلب خلاصة الاشتراكات. يعتبر RSS أسرع ويساعد على منع حظر عنوان الـIP، لكنه لا يوفر بعض المعلومات مثل مدة الفيديو، حالة البث المباشر أو المنشورات
-    Fetch Automatically: عند التفعيل، سيقوم OpenTubeX تلقائيًا بجلب خلاصة الاشتراكات عند بدء التشغيل وعند فتح نافذة جديدة.
   External Player Settings:
     Custom External Player Arguments: أي وسيطات سطر أوامر مخصصة تريد تمريرها إلى المشغل الخارجي.
     Ignore Warnings: منع التحذيرات عندما لا يدعم اللاعب الخارجي الحالي الإجراء الحالي (على سبيل المثال، عكس قوائم التشغيل، وما إلى ذلك).

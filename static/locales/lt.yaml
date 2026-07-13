@@ -277,7 +277,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Prenumeratų nustatymai'
     Fetch Feeds from RSS: 'Gauti kanalus iš RSS'
-    Fetch Automatically: Gauti sklaidos kanalą automatiškai
   Distraction Free Settings:
     Distraction Free Settings: 'Blaškančių elementų nustatymai'
     Hide Video Views: 'Slėpti vaizdo įrašų peržiūrų skaičių'
@@ -600,7 +599,6 @@ Tooltips:
     DefaultCustomArgumentsTemplate: '(Numatytasis: „{defaultCustomArguments}“)'
   Subscription Settings:
     Fetch Feeds from RSS: 'Kai bus įgalinta, „OpenTubeX“ naudos RSS, o ne numatytąjį metodą, kad užpildytų jūsų prenumeratos kanalą. RSS yra greitesnė ir išvengia IP blokavimo, tačiau nepateikia tam tikros informacijos, pvz., vaizdo įrašo trukmės ar tiesioginės transliacijos būsenos'
-    Fetch Automatically: Kai ši funkcija įjungta, OpenTubeX automatiškai įkels naują turinį iš prenumeratų, kai atidaromas naujas langas ir perjungiamas profilis.
 
 # Toast Messages
   Experimental Settings:

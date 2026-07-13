@@ -459,7 +459,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Áskrift'
     Fetch Feeds from RSS: 'Ná í streymi úr RSS'
-    Fetch Automatically: Sækja streymi sjálfvirkt
     Confirm Before Unsubscribing: Staðfesta uppsögn áskriftar
     To: Við
     'Limit the number of videos displayed for each channel': Takmarka fjölda myndskeiða sem birt eru fyrir hverja rás
@@ -953,7 +952,6 @@ Tooltips:
     Fetch Feeds from RSS: 'Þegar þetta er virkt, mun OpenTubeX nota RSS í stað sjálfgefinnar aðferðar við að safna streymi áskriftarinnar þinnar. RSS er hraðvirkara og kemur í veg fyrir útilokun IP-vistfanga, en nær ekki að birta ákveðnar upplýsingar á borð við tímalengd myndskeiða, stöðu í beinni útsendingu eða færslur'
 
 # Toast Messages
-    Fetch Automatically: Þegar þetta er virkt, mun OpenTubeX sækja sjálfkrafa áskriftarstreymin þín í ræsingu og þegar nýr gluggi er opnaður.
   External Player Settings:
     Custom External Player Arguments: Öll sérsniðin skipanaviðföng og rofar, sem beina á til utanaðkomandi spilarans.
     Ignore Warnings: Hunsa aðvarinir þegar valinn utanaðkomandi spilari styður ekki viðkomandi aðgerð (t.d. að snúa við spilunarlista, o.s.frv.).

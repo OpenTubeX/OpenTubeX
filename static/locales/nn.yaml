@@ -260,7 +260,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonnementinnstillingar'
     Fetch Feeds from RSS: 'Hent informasjonkanalar frå RSS'
-    Fetch Automatically: Hent informasjonkanalar automatisk
   Distraction Free Settings:
     Distraction Free Settings: '"Ikkje forstyrr"-innstillingar'
     Hide Video Views: 'Skjul videovisingar'
@@ -591,7 +590,6 @@ Tooltips:
     Fetch Feeds from RSS: 'Bruk RSS i staden for OpenTubeX sin standardmetode for innhenting av din abonnementsstraum. RSS er raskaren og forhindrar IP-blokkering, men manglar noko informasjon som videovarigheit og sanntidsstatus.'
 
 # Toast Messages
-    Fetch Automatically: Om dette alternativet er aktivert, vil OpenTubeX automatisk hente abonnementfeeden din når eit nytt vindauge opnast og når du bytter profil.
   External Player Settings:
     DefaultCustomArgumentsTemplate: "(Standard: '{defaultCustomArguments}')"
     Custom External Player Executable: Som standard vil OpenTubeX anta at den valte eksterne videoavspelaren kan bli funnen via programstivariabelen. Om naudsynt kan ein endre på programstien.

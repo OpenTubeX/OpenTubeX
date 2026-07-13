@@ -421,7 +421,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Tilaus'
     Fetch Feeds from RSS: Nouda RSS-syöte
-    Fetch Automatically: Nouda syöte automaattisesti
     'Limit the number of videos displayed for each channel': Rajoita kanavilta näytettyjen videoiden määrää
     Confirm Before Unsubscribing: Vahvista ennen tilauksen peruuttamista
     To: Kohteeseen
@@ -950,7 +949,6 @@ Tooltips:
     Open Deep Links In New Window: OpenTubeXen syötetyt URL:t, esimerkiksi selaimen uudelleenohjauslisäosista tai komentoriviargumenteista johtuen, avataan uudessa ikkunassa.
   Subscription Settings:
     Fetch Feeds from RSS: Kun valittuna, OpenTubeX käyttää RSS-syötettä oletusmetodin sijaan tilauslistasi hakemisessa. RSS on nopeampi ja ehkäisee IP-estoa, mutta ei anna tietoja, kuten videon kesto tai livetila
-    Fetch Automatically: Kun tämä on käytössä, OpenTubeX hakee automaattisesti tilauksesi syötteen, kun uusi ikkuna avataan.
   Player Settings:
     Default Video Format: Aseta videon toistamisessa käytätettävä formaatti. DASH-formaatit toistavat korkealaatuisempia videoita. Legacy-formaatit ovat rajoitettu 360p-resoluutioon, mutta käyttävät vähemmän dataa. Audioformaatit ovat vain äänistriimeihin.
     Proxy Videos Through Invidious: Yhdistää Invidious-palvelimeen suoran YouTuben-yhteyden sijaan.

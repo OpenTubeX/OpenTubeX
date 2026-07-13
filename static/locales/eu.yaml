@@ -459,7 +459,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Harpidetza'
     Fetch Feeds from RSS: 'Eskuratu RSS jarioak'
-    Fetch Automatically: Eskuratu jarioa automatikoki
     Confirm Before Unsubscribing: Berretsi harpidetza kendu baino lehen
     'Limit the number of videos displayed for each channel': Mugatu kanal bakoitzeko bistaratzen den bideo kopurua
     To: Hona
@@ -951,7 +950,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: Erabili korritze-gurpila bideoa saltatzeko, MPV estiloa.
   Subscription Settings:
     Fetch Feeds from RSS: 'Gaituta dagoenean, OpenTubeXk RSS erabiliko du bere metodo lehenetsiaren ordez zure harpidetza-jarioa lortzeko. RSS azkarragoa da eta IP blokeatzea eragozten du, baina ez du informazio jakin bat ematen, hala nola bideoaren iraupena, zuzeneko egoera edo argitalpenak'
-    Fetch Automatically: Gaituta dagoenean, OpenTubeXk automatikoki eskuratuko du zure harpidetza-jarioa abiaraztean eta leiho berri bat irekitzen denean.
 
 # Toast Messages
   External Player Settings:

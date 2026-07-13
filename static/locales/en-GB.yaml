@@ -474,7 +474,7 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Subscription'
     Fetch Feeds from RSS: 'Fetch feeds from RSS'
-    Fetch Automatically: Fetch feed automatically
+    Fetch Feed on Startup: Fetch feed on startup
     Confirm Before Unsubscribing: Confirm before unsubscribing
     'Limit the number of videos displayed for each channel': Limit the number of videos displayed for each channel
     To: To
@@ -965,7 +965,7 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: When enabled, OpenTubeX will use RSS instead of its default method to grab your subscription feed. RSS is faster and prevents IP blocking, but it doesn’t provide certain information like video duration, live status or posts
-    Fetch Automatically: When enabled, OpenTubeX will automatically fetch your subscription feed on startup and when a new window is opened.
+    Fetch Feed on Startup: When enabled, OpenTubeX will automatically fetch your subscription feed on startup and when a new window is opened.
   Player Settings:
     Default Video Format: Set the formats used when a video plays. DASH formats can play higher qualities. Legacy formats are limited to a max of 360p but use less bandwidth. Audio formats are audio only streams.
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead of making a direct connection to YouTube.

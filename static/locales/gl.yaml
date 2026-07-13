@@ -458,7 +458,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Subscrición'
     Fetch Feeds from RSS: 'Obter subscricións a través de RSS'
-    Fetch Automatically: Obter feed automaticamente
     To: A
     'Limit the number of videos displayed for each channel': Limitar o número de vídeos mostrados para cada canle
     Confirm Before Unsubscribing: Confirmar antes de cancelar a subscrición
@@ -947,7 +946,6 @@ Tooltips:
     Fetch Feeds from RSS: 'Cando está activado, OpenTubeX usará RSS en vez do seu método predeterminado para obter o teu feed de subscricións. RSS é máis rápido e evita bloqueos de IP, pero non fornece certa información como a duración dos vídeos, o estado de directo ou as publicacións'
 
 # Toast Messages
-    Fetch Automatically: Cando está activado, OpenTubeX obterá automaticamente o teu feed de subscricións ao iniciarse e cando se abra unha nova xanela.
   External Player Settings:
     Custom External Player Arguments: Calquera argumento de liña de comandos personalizado, que desexa que se pase ao reprodutor externo.
     Ignore Warnings: Suprime avisos para cando os reprodutores externos actuais non apoian a acción actual (e.g. Invertendo listas de reprodución, etc.).

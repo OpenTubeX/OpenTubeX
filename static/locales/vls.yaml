@@ -430,7 +430,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
     Confirm Before Unsubscribing: ''
   Distraction Free Settings:
     Distraction Free Settings: ''
@@ -874,7 +873,6 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

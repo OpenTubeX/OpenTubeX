@@ -525,7 +525,6 @@ Settings:
     Subscription Settings: 'Koumanant'
     Fetch Feeds from RSS: 'Adtapout ar gwazhioù RSS'
     Manage Subscriptions: ''
-    Fetch Automatically: 'Adtapout ar wazh ent emgefreek'
     Only Show Latest Video for Each Channel: 'Diskouez ar video-diwezhañ hepken evit pep chadenn'
     Confirm Before Unsubscribing: 'Kadarnaat a-raok Digoumanantiñ'
     To: Evit
@@ -1036,7 +1035,6 @@ Tooltips:
     Hide Videos on Watch: Kuzhat ar videoioù bet lennet diouzh ar Videoioù, Shortoù hag ivinell ar skignañ war-eeun war bajenn ar c'houmanantoù ha pajenn ar chadennoù. Ne vo ket kemmet pajenn degemer ar chadennoù
   Subscription Settings:
     Fetch Feeds from RSS: 'Pa vez gweredekaet e vez implijet RSS gant OpenTubeX e-lec''h e zoare dre ziouer evit adtapout ho kwazh koumanantiñ. Buanoc''h ez an traoù gant an RSS ha ne vo ket stanket ar chomlec''h IP, met ne ginnig ket titouroù ''zo evel padelezh ar video, statud ar video war-eeun, pe c''hoazh an evezhiadennoù'
-    Fetch Automatically: 'Pa vo gweredekaet e vo adtapet ho kwazh koumanantiñ gant OpenTubeX ent emgefre pa vo lañset pe pa vo digoret ur prenestr nevez.'
   Experimental Settings:
     Replace HTTP Cache: 'Diweredekaat ar grubuilh HTTP diazezet war ar bladenn Electron ha gweredekaat krubuilh personelaet ar skeudennoù e-barzh ar memor. Implijet e vo muioc''h a vemor RAM.'
   SponsorBlock Settings:

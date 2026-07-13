@@ -454,7 +454,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'מינוי'
     Fetch Feeds from RSS: 'ייבוא עדכונים בעזרת RSS'
-    Fetch Automatically: משיכת ערוץ העדכונים אוטומטית
     Confirm Before Unsubscribing: אישור לפני ביטול מינוי
     'Limit the number of videos displayed for each channel': הגבלת מספר הסרטונים שמופיעים בכל ערוץ
     To: עד
@@ -963,7 +962,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: ניתן להשתמש בגלגלת כדי לדלג בתוך הסרטון, כמו ב־MPV.
   Subscription Settings:
     Fetch Feeds from RSS: כאשר זה מופעל, OpenTubeX ישתמש ב-RSS במקום בשיטה המוגדרת כברירת מחדל כדי לתפוס את זרם המנויים שלך. RSS מהיר יותר ומונע חסימת IP, אך אינו מספק מידע מסוים כמו משך הווידאו, מצב חי או פוסטים
-    Fetch Automatically: כאשר האפשרות מופעלת, OpenTubeX ימשוך אוטומטית את רשימת המנויים שלך בעת הפעלת התוכנה ובפתיחת חלון חדש.
   External Player Settings:
     DefaultCustomArgumentsTemplate: '(ברירת מחדל: ‚{defaultCustomArguments}’)'
     Ignore Warnings: 'להשבית אזהרות כאשר הנגן החיצוני הנוכחי לא תומך בפעולה הנוכחית (למשל: היפוך רשימת נגינה וכו׳).'

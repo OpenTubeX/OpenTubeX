@@ -394,7 +394,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonementu'
     Fetch Feeds from RSS: 'Iegūt plūsmu no RSS'
-    Fetch Automatically: 'Iegūt plūsmu automātiski'
     To: Līdz
   Distraction Free Settings:
     Distraction Free Settings: 'Beztraucēšanas'
@@ -820,7 +819,6 @@ Tooltips:
     Hide Subscriptions Live: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

@@ -454,7 +454,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Абонаменти'
     Fetch Feeds from RSS: 'Извличане на съдържания през RSS'
-    Fetch Automatically: Автоматично извличане на съдържание
     Confirm Before Unsubscribing: Избягване на случайно отписване
     'Limit the number of videos displayed for each channel': Ограничаване на броя на показваните видеа за всеки канал
     To: на
@@ -949,7 +948,6 @@ No: 'Не'
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: OpenTubeX ще използва RSS вместо метода по подразбиране за получаване на абонаментите. RSS е по-бърз метод и преодолява блокиранията на IP адреса, но не получава някои съпътстващи данни, като продължителност на видеото, дали е на живо или публикации
-    Fetch Automatically: OpenTubeX автоматично ще извлича абонаментите при стартиране и при отваряне на нов прозорец.
   Player Settings:
     Default Video Format: Настройка на използваните формати. DASH форматите могат да показват видеа с по-високо качество. Старите формати са ограничени до макс. 360р, но пък генерират по-малък трафик. Аудио форматите предават само звук.
     Proxy Videos Through Invidious: Ще се свърже с Invidious, за да изтегли видеото, вместо да прави дирекна връзка с YouTube.

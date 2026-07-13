@@ -454,7 +454,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Iscrizioni'
     Fetch Feeds from RSS: Scarica gli aggiornamenti dai flussi RSS
-    Fetch Automatically: Recupera i feed automaticamente
     Confirm Before Unsubscribing: Evita la cancellazione accidentale dell'iscrizione
 
     'Limit the number of videos displayed for each channel': Limita il numero di video visualizzati per ogni canale
@@ -958,7 +957,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: Usa la rotella di scorrimento per saltare il video, in stile MPV.
   Subscription Settings:
     Fetch Feeds from RSS: Se abilitato, OpenTubeX userà gli RSS invece del metodo standard per leggere le iscrizioni. Gli RSS sono più veloci e impediscono il blocco dell'IP, ma non forniscono determinate informazioni come la durata del video, lo stato dal vivo o i post
-    Fetch Automatically: Se abilitato, OpenTubeX recupererà automaticamente il feed delle tue iscrizioni all'avvio e quando viene aperta una nuova finestra.
   General Settings:
     Invidious Instance: Istanza Invidious che OpenTubeX usa per le chiamate API.
     Thumbnail Preference: Tutte le miniature su OpenTubeX verranno sostituite con un fotogramma del video, sfocato o nascosto al posto della miniatura predefinita.

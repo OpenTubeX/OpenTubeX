@@ -451,7 +451,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonnement­'
     Fetch Feeds from RSS: Feeds ophalen via RSS
-    Fetch Automatically: Feed automatisch ophalen
     Confirm Before Unsubscribing: Onbedoeld deabonneren voor­komen
 
     'Limit the number of videos displayed for each channel': Limiteer de hoeveelheid getoonde videos per kanaal
@@ -947,7 +946,6 @@ Tooltips:
     Skip by Scrolling Over Video Player: Gebruik het scroll-wieltje om door de video te spoelen, zoals bij MPV.
   Subscription Settings:
     Fetch Feeds from RSS: Wanneer ingeschakeld zal OpenTubeX RSS gebruiken in plaats van de standaard­methode om uw abonnementen­feed op te halen. RSS is sneller en voorkomt IP-blokkering, maar geeft geen toegang tot sommige informatie zoals de video­duur, live-status en berichten
-    Fetch Automatically: Indien ingeschakeld, haalt OpenTubeX automatisch uw abonnementen­feed op bĳ het opstarten en wanneer een nieuw venster wordt geopend.
   General Settings:
     Invidious Instance: Dit is de Invidious-instantie waar OpenTubeX mee zal verbinden om API calls te maken.
     Thumbnail Preference: Alle miniaturen in OpenTubeX zullen worden vervangen met een moment­opname uit de video, worden vervaagd, of worden verborgen, in plaats van de standaard­miniatuur.

@@ -457,7 +457,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: Abono
     Fetch Feeds from RSS: Venigi fluojn per RSS
-    Fetch Automatically: Venigi fluon aŭtomate
     'Limit the number of videos displayed for each channel': Limi la kvanton de montrataj videaĵoj por ĉiu kanalo
     To: Limo
     Confirm Before Unsubscribing: Konfirmi antaŭ ol malaboni
@@ -1028,7 +1027,6 @@ Tooltips:
     Hide Videos on Watch: Kaŝas spektitajn videaĵojn en la langetoj de videaĵoj, videaĵetoj kaj tujelsendoj sur la paĝo de abonoj kaj kanalaj paĝoj. Tio ĉi ne afektas la hejman langeton en kanalaj paĝoj
   Subscription Settings:
     Fetch Feeds from RSS: Dum ŝaltita, OpenTubeX uzos RSS anstataŭ sian defaŭltan metodon por venigi viajn abonfluojn. RSS pli rapidas kaj evitas IP-blokojn, sed ne provizas kelkajn informojn kiel la daŭroj de videaĵoj, la stato de tujelsendoj aŭ afiŝoj
-    Fetch Automatically: Dum ŝaltita, OpenTubeX aŭtomate venigos viajn abonfluojn je startigo kaj kiam nova fenestro malfermiĝas.
   Experimental Settings:
     Replace HTTP Cache: Malŝaltas la HTTP-kaŝmemoron de Electron en la disko kaj ŝaltas laŭmendan bildkaŝmemoron en ĉefmemoro. La uzata memoro pligrandiĝos.
   SponsorBlock Settings:

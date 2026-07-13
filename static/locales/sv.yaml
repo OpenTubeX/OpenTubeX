@@ -457,7 +457,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Prenumeration'
     Fetch Feeds from RSS: 'Hämta flöden från RSS'
-    Fetch Automatically: Hämta flödet automatiskt
     'Limit the number of videos displayed for each channel': Begränsa antalet videor som visas för varje kanal
     To: Till
     Confirm Before Unsubscribing: Bekräfta innan du avslutar prenumerationen
@@ -954,7 +953,6 @@ No: 'Nej'
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: När det är aktiverat använder OpenTubeX RSS istället för standardmetoden för att hämta ditt prenumerationsflöde. RSS är snabbare och förhindrar IP-blockering, men ger inte all information som videolängd, livestatus eller inlägg
-    Fetch Automatically: När det är aktiverat hämtar OpenTubeX automatiskt ditt prenumerationsflöde vid start och när ett nytt fönster öppnas.
   Player Settings:
     Default Video Format: Ställ in de format som används när en video spelas upp. DASH-format kan spela upp högre kvaliteter. Äldre format är begränsade till max 360p men använder mindre bandbredd. Ljudformat är endast ljudströmningar.
     Proxy Videos Through Invidious: Ansluter till Invidious för att visa videor i stället för att skapa en direktanslutning till YouTube.

@@ -486,7 +486,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Tanysgrifiad'
     Fetch Feeds from RSS: 'Nôl Ffrwd o''r RSS'
-    Fetch Automatically: 'Nôl Ffrwd yn Awtomatig'
     Confirm Before Unsubscribing: Cadarnhau Cyn Dad-danysgrifio
     To: At
     'Limit the number of videos displayed for each channel': Cyfyngu ar nifer y fideos sy'n cael eu dangos ar gyfer pob sianel
@@ -988,7 +987,6 @@ Tooltips:
     Hide Videos on Watch: Yn cuddio fideos wedi'u gwylio o'r tabiau Fideos, Byrion a Byw ar dudalennau Tanysgrifio a Sianeli, Dyw hyn ddim yn effeithio ar y tab Cartref ar dudalennau Sianel
   Subscription Settings:
     Fetch Feeds from RSS: 'Pan fydd wedi''i alluogi, bydd OpenTubeX yn defnyddio RSS yn lle ei ddull rhagosodedig ar gyfer cydio yn eich ffrwd tanysgrifio. Mae RSS yn gyflymach ac yn atal rhwystro IP, ond nid yw''n darparu gwybodaeth benodol fel hyd fideo, statws byw neu bostiadau'
-    Fetch Automatically: 'Pan fydd wedi''i alluogi, bydd OpenTubeX yn nôl eich ffrwd tanysgrifio yn awtomatig wrth gychwyn a phan fydd ffenestr newydd yn cael ei hagor.'
   Experimental Settings:
     Replace HTTP Cache: 'Yn analluogi storfa HTTP ar ddisg Electron ac yn galluogi storfa delwedd mewn cof cyfaddas. Bydd yn arwain at fwy o ddefnydd o RAM.'
   SponsorBlock Settings:

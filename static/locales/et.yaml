@@ -457,7 +457,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Tellimused'
     Fetch Feeds from RSS: 'Laadi RSS-uudisvood'
-    Fetch Automatically: Laadi tellimuste voog automaatselt
     Confirm Before Unsubscribing: Väldi ekslikku ja juhuslikku tellimusest loobumist
     To: Kuni
     'Limit the number of videos displayed for each channel': Piira igas kanalis näidatavate videote arvu
@@ -963,7 +962,6 @@ Tooltips:
     Ignore Default Arguments: Ära edasta välisele meediamängijale ühtegi vaikimisi määratud argumenti peale video urli (näiteks taasesituse kiirus, esitusloend jne). Sinu enda määratud argumendid edastatakse vaatamata sellele seadistusele.
   Subscription Settings:
     Fetch Feeds from RSS: Selle valiku kasutamisel OpenTubeX pruugib tellimuste andmete laadimisel vaikimisi meetodi asemel RSS-uudisvoogu. RSS on kiirem ja välistab IP-aadressi blokeerimise, kuid ei sisalda video kestust, otseesituse olekut ja postitusi
-    Fetch Automatically: Kui see valik on kasutusel, siis OpenTubeX automaatselt laadib rakenduse käivitamisel ja uue akna avamisel sinu tellimuste loendi.
   General Settings:
     Region for Trending: Piirkond, mille alusel kuvame hetkel menukad ehk populaarsust koguvad videod.
     Thumbnail Preference: Vaikimisi pisipildi asemel kuvab OpenTubeX kõikjal läbi rakenduse kaadrit videost ja seda hägusena ja peidetuna.

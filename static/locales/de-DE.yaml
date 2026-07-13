@@ -471,7 +471,7 @@ Settings:
   Subscription Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
-    Fetch Automatically: Abos automatisch abrufen
+    Fetch Feed on Startup: Feed beim Start abrufen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
 
     'Limit the number of videos displayed for each channel': Anzahl der für jeden Kanal angezeigten Videos begrenzen
@@ -1115,7 +1115,7 @@ Tooltips:
     IP Block Recovery Script Path: Pfad zur Skriptdatei, die bei erkannter IP-Sperre ausgeführt wird. OpenTubeX wartet bis zum Abschluss und lädt danach das Video neu. Wenn der Fallback aktiviert ist, wird das Skript nur ausgeführt, wenn auch der Fallback fehlschlägt.
   Subscription Settings:
     Fetch Feeds from RSS: Wenn aktiviert, verwendet OpenTubeX RSS anstelle der Standardmethode, um deinen Abo-Feed abzurufen. RSS ist schneller und verhindert die IP-Sperren, liefert aber bestimmte Informationen wie Videodauer, den Live-Status oder Beiträge nicht
-    Fetch Automatically: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
+    Fetch Feed on Startup: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
     Auto Refresh Interval: Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist.
   Player Settings:
     Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.

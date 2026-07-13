@@ -496,7 +496,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Intekening'
     Fetch Feeds from RSS: 'Haal voer vanaf RSS op'
-    Fetch Automatically: 'Haal voer outomaties op'
     Confirm Before Unsubscribing: 'Bevestig voor uittekening'
     'Limit the number of videos displayed for each channel': Beperk die aantal video’s wat vir elke kanaal vertoon word
     To: tot
@@ -977,7 +976,6 @@ Tooltips:
     Hide Videos on Watch: Versteek bekykte video’s op die Video’s-, Shorts- en Live-oortjies op die blaaie Intekeninge en Kanale. Dit beïnvloed nie die Tuis-oortjie op kanaalblaaie nie
   Subscription Settings:
     Fetch Feeds from RSS: 'Wanneer geaktiveer, sal OpenTubeX RSS i.p.v. sy verstek metode gebruik om u intekenvoer op te haal. RSS is vinniger en voorkom IP-versperring, maar bied nie sekere inligting soos videoduur, status of plasings nie'
-    Fetch Automatically: 'Wanneer geaktiveer, sal OpenTubeX u intekenvoer outomaties ophaal wanneer ’n nuwe venster geopen word.'
   Experimental Settings:
     Replace HTTP Cache: 'Deaktiveer die skyfgebaseerde HTTP-kas van Electron en aktiveer ’n aangepaste afbeeldingskas in die geheue in. Sal lei tot ’n verhoogde RAM-gebruik.'
   SponsorBlock Settings:

@@ -449,7 +449,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Праћење'
     Fetch Feeds from RSS: 'Прикупи фидове из RSS-а'
-    Fetch Automatically: Аутоматски прикупи фид
     Confirm Before Unsubscribing: Избегни случајно отпраћивање
     To: На
     'Limit the number of videos displayed for each channel': Ограничи број приказаних видео снимака за сваки канал
@@ -839,7 +838,6 @@ Tooltips:
     Fetch Feeds from RSS: 'Када је омогућено, OpenTubeX ће користити RSS уместо свог подразумеваног метода за прикупљање вашег фида праћења. RSS је бржи и спречава блокирање IP адресе, али не пружа одређене информације као што су трајање видео снимка, статус уживо или објаве'
 
 # Toast Messages
-    Fetch Automatically: Када је омогућено, OpenTubeX ће аутоматски преузети ваш фид претплата при покретању и када се отвори нови прозор.
   General Settings:
     External Link Handling: "Изаберите подразумевано понашање када се кликне на линк који се не може отворити у OpenTubeX-у.\nПодразумевано, OpenTubeX ће отворити линк на који сте кликнули у вашем подразумеваном прегледачу.\n"
     Fallback to Non-Preferred Backend on Failure: Када ваш преферирани API има проблем, OpenTubeX ће аутоматски покушати да користи ваш непреферирани API као резервни метод, када је омогућено.

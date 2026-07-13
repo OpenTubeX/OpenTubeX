@@ -451,7 +451,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Συνδρομές'
     Fetch Feeds from RSS: 'Φόρτωση τροφοδοσίας RSS'
-    Fetch Automatically: Αυτόματη Λήψη Τροφοδοσίας
     'Limit the number of videos displayed for each channel': Περιορίστε τον αριθμό των βίντεο που εμφανίζονται για κάθε κανάλι
     Confirm Before Unsubscribing: Επιβεβαίωση πριν από τη Απεγραφή
     To: Προς
@@ -948,7 +947,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Όταν ενεργοποιηθεί, το OpenTubeX θα χρησιμοποιήσει RSS αντί για την προεπιλεγμένη μέθοδο για να αρπάξει τη ροή συνδρομής σας. Το RSS είναι ταχύτερο και αποτρέπει τον αποκλεισμό IP, αλλά δεν παρέχει ορισμένες πληροφορίες, όπως διάρκεια βίντεο, ζωντανή κατάσταση ή αναρτήσεις
-    Fetch Automatically: Όταν ενεργοποιηθεί, το OpenTubeX θα ανακτήσει αυτόματα τη ροή συνδρομής σας κατά την εκκίνηση και όταν ανοίξει ένα νέο παράθυρο.
   Player Settings:
     Default Video Format: Ορίστε τις μορφές που χρησιμοποιούνται κατά την αναπαραγωγή ενός βίντεο. Οι μορφές DASH μπορούν να αναπαράγουν υψηλότερες ποιότητες. Οι μορφές παλαιού τύπου περιορίζονται σε μέγιστο 360p, αλλά χρησιμοποιούν μικρότερο εύρος ζώνης. Οι μορφές ήχου είναι ροές μόνο ήχου.
     Proxy Videos Through Invidious: Θα συνδεθεί με το Invidious για να εξυπηρετήσει τα βίντεο αντί να κάνει μια άμεση σύνδεση με το YouTube.

@@ -497,7 +497,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: سبسکرپشن
     Fetch Feeds from RSS: RSS سے فیڈز حاصل کریں
-    Fetch Automatically: فیڈز خود بخود حاصل کریں
     'Limit the number of videos displayed for each channel': ہر چینل کے لیے ویڈیوز کی تعداد محدود کریں
     To: تک
     Confirm Before Unsubscribing: ان سبسکرائب کرنے سے پہلے تصدیق کریں
@@ -853,7 +852,6 @@ Tooltips:
     Fetch Feeds from RSS: 'فعال ہونے پر، OpenTubeX آپ کے سبسکرپشن فیڈ کو حاصل کرنے کے لیے اپنے پہلے سے طے شدہ طریقہ کے بجائے RSS کا استعمال کرے گا۔ RSS تیز ہے اور آئی پی کو بلاک کرنے سے روکتا ہے، لیکن کچھ معلومات فراہم نہیں کرتا ہے جیسے ویڈیو کا دورانیہ، لائیو اسٹیٹس یا کمیونٹی پوسٹس'
 
 # Toast Messages
-    Fetch Automatically: فعال ہونے پر، OpenTubeX ایپ شروع ہوتے ہی اور نئی ونڈو کھلنے پر آپ کی سبسکرپشن فیڈ خود بخود حاصل کر لے گا۔
   Distraction Free Settings:
     Hide Channels: تلاش، ٹرینڈنگ، مقبول اور تجویز کردہ فہرستوں سے ویڈیوز، پلے لسٹس اور چینل کو چھپانے کے لیے چینل آئی ڈی درج کریں۔ آئی ڈی کا مکمل طور پر درست ہونا ضروری ہے۔
     Hide Subscriptions Live: یہ سیٹنگ ایپ بھر کی ”{appWideSetting}“ سیٹنگ کے ذریعے تبدیل کر دی گئی ہے، جو کہ ”{settingsSection}“ کے ”{subsection}“ سیکشن میں ہے

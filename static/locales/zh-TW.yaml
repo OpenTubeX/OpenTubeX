@@ -425,7 +425,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: '訂閱'
     Fetch Feeds from RSS: 從RSS擷取推送
-    Fetch Automatically: 自動擷取 Feed
     Confirm Before Unsubscribing: 避免意外取消訂閱
 
     'Limit the number of videos displayed for each channel': 限制每個頻道顯示的影片數量
@@ -954,7 +953,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: 啟用後，OpenTubeX 將使用 RSS 替代其預設方法來擷取您的訂閱 feed。RSS 的速度較快，而且可以防止 IP 封鎖，但它可能不會提供某些資訊，例如影片長度、直播狀態或貼文
-    Fetch Automatically: 啟用後，OpenTubeX 將會在啟動時和開啟新視窗時自動擷取您的訂閱 feed。
   Player Settings:
     Default Video Format: 設定要用於影片播放的格式。DASH 格式有更高的畫質。傳統格式會限制在 360p 但頻寬需求更低。音訊格式為僅有音訊的串流。
     Proxy Videos Through Invidious: 將連線到 Invidious 而非直接連線到 YouTube 來提供影片。

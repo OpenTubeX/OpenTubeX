@@ -5,9 +5,9 @@
     <div class="switchColumnGrid">
       <div class="switchColumn">
         <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Fetch Automatically')"
+          :label="$t('Settings.Subscription Settings.Fetch Feed on Startup')"
           :default-value="fetchSubscriptionsAutomatically"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Automatically')"
+          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feed on Startup')"
           compact
           @change="updateFetchSubscriptionsAutomatically"
         />

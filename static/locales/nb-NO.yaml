@@ -451,7 +451,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonnementer'
     Fetch Feeds from RSS: Hent informasjonskanaler via RSS
-    Fetch Automatically: Hent informasjonskanaler automatisk
 
     Confirm Before Unsubscribing: Bekreft avslutning av abonnement
     'Limit the number of videos displayed for each channel': Begrens antallet videoer vist for hver kanal
@@ -953,7 +952,6 @@ Tooltips:
     Open Deep Links In New Window: Lenker sent til OpenTubeX, som for eksempel via omdirigeringer fra nettleseren eller via terminalprosesser, åpnes i et nytt vindu.
   Subscription Settings:
     Fetch Feeds from RSS: Bruk RSS istedenfor OpenTubeX sin standardmetode for innhenting av abonnementsstrømmen din. RSS er raskere og forhindrer IP-blokkering, men mangler noe informasjon som videovarighet, sanntidsstatus og innlegg
-    Fetch Automatically: Hent abonnementer når programmet starter og når et nytt vindu åpnes.
   Player Settings:
     Default Video Format: Velg formater som blir brukt når en video spilles. DASH-formater kan spilles i høyere kvalitet. Foreldede formater er begrenset opptil 360p, men bruker mindre båndbredde. Lydformater er kun lydstrømmer.
     Proxy Videos Through Invidious: Kobler til Invidious for å servere videoer istedenfor å koble direkte til YouTube.

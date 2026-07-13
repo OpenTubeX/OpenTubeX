@@ -458,7 +458,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Odběry'
     Fetch Feeds from RSS: 'Získávat odběry z RSS'
-    Fetch Automatically: Automaticky načítat odběry
     Confirm Before Unsubscribing: Zamezit nechtěným odběrům
     To: Do
     'Limit the number of videos displayed for each channel': Omezit počet videí zobrazených u každého kanálu
@@ -956,7 +955,6 @@ Tooltips:
     Fetch Feeds from RSS: 'Je-li povoleno, OpenTubeX použije RSS místo své výchozí metody pro získání vašich odběrů. RSS je rychlejší a brání blokování IP, neposkytuje ale určité informace, jako je délka videa, stav vysílání nebo příspěvky'
 
 # Toast Messages
-    Fetch Automatically: Při povolení tohoto nastavení OpenTubeX po spuštění a při přepnutí profilu automaticky načte vaše nová videa od vašich odběrů.
   External Player Settings:
     Ignore Warnings: Potlačuje varování, kdy současný externí přehrávač nepodporuje aktuální akci (např. obrácení seznamů skladeb apod.).
     External Player: Volba externího přehrávače zobrazí ikonu pro otevření videa (či seznamu skladeb, pokud je podporován) v externím přehrávači, na náhledu. Varování, nastavení Invidious neovlivňují externí přehrávače.

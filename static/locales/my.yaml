@@ -466,7 +466,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
     'Limit the number of videos displayed for each channel': ''
     To: ''
     Confirm Before Unsubscribing: ''
@@ -936,7 +935,6 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

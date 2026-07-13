@@ -457,7 +457,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Abonelik'
     Fetch Feeds from RSS: 'Akışları RSS''den Getir'
-    Fetch Automatically: Akışı Otomatik Olarak Getir
     Confirm Before Unsubscribing: Abonelikten Çıkmadan Önce Onayla
     'Limit the number of videos displayed for each channel': Her kanal için gösterilen video sayısını sınırlayın
     To: To
@@ -957,7 +956,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Etkinleştirildiğinde, OpenTubeX abonelik akışınızı almak için varsayılan yöntemi yerine RSS kullanacaktır. RSS daha hızlıdır ve IP engellemesini önler, ancak video süresi, canlı durum veya gönderiler gibi belirli bilgileri sağlamaz
-    Fetch Automatically: Etkinleştirildiğinde, OpenTubeX başlangıçta ve yeni bir pencere açıldığında abonelik beslemenizi otomatik olarak getirecektir.
   Player Settings:
     Default Video Format: Bir video oynatılırken kullanılan biçimleri ayarlayın. DASH biçimleri daha yüksek kalitelerde oynatabilir. Eski biçimler en fazla 360p ile sınırlıdır ancak daha az bant genişliği kullanır. Ses biçimleri yalnızca ses akışlarıdır.
     Proxy Videos Through Invidious: Videoları sunmak için YouTube ile doğrudan bağlantı kurmak yerine Invidious'a bağlanılacak.

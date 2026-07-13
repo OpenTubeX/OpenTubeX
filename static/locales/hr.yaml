@@ -451,7 +451,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Pretplata'
     Fetch Feeds from RSS: 'Dohvati feedove s RSS-a'
-    Fetch Automatically: Automatski dohvati feed
     Confirm Before Unsubscribing: Izbjegni slučajno otkazivanje pretplate
 
     'Limit the number of videos displayed for each channel': Ograniči broj prikazanih videa za svaki kanal
@@ -961,7 +960,6 @@ Tooltips:
     Open Deep Links In New Window: URL adrese koje su proslijeđene na OpenTubeX, kao što su proširenja preglednika za preusmjeravanje ili argumenti naredbenog retka, otvaraju se u novom prozoru.
   Subscription Settings:
     Fetch Feeds from RSS: Kada je aktivirano, OpenTubeX će koristiti RSS umjesto vlastite standardne metode za dohvaćanje podataka tvoje pretplate. RSS je brži i sprečava blokiranje IP adresa, ali ne pruža određene podatke kao što su trajanje videa, stanje „uživo” ili postovi
-    Fetch Automatically: Kada je aktivirano, OpenTubeX će automatski dohvatiti feed tvoje pretplate pri pokretanju programa i kada se otvori novi prozor.
   External Player Settings:
     External Player: Biranjem eksternog playera prikazat će se ikona, za otvaranje videa (zbirka, ako je podržana) u vanjskom playeru, na minijaturi. Upozorenje, Invidious postavke ne utječu na eksterne playere.
     Custom External Player Arguments: Svi prilagođeni argumenti naredbenog retka, koje želiš da se proslijede eksternom playeru.

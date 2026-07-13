@@ -476,7 +476,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
-    Fetch Automatically: Odświeżaj subskrypcje przy uruchomieniu
     Confirm Before Unsubscribing: Uniknij przypadkowego usunięcia subskrypcji
 
     To: Do
@@ -1105,7 +1104,6 @@ This video is unavailable because of missing formats. This can happen due to cou
 Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
-    Fetch Automatically: Jeśli włączone, OpenTubeX będzie automatycznie pobierał subskrypcje przy uruchomieniu lub otwarciu nowego okna.
     Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
   General Settings:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.

@@ -427,7 +427,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Đăng ký'
     Fetch Feeds from RSS: Cập nhật bảng tin qua RSS
-    Fetch Automatically: Tự động làm mới bảng tin
     Confirm Before Unsubscribing: Nhắc xác nhận trước khi hủy đăng ký
     'Limit the number of videos displayed for each channel': Giới hạn số video được hiển thị cho mỗi kênh
     To: Xuống
@@ -986,7 +985,6 @@ Tooltips:
     Ignore Default Arguments: Không gửi các tham số mặc định đến trình phát bên ngoài ngoài URL của video (như tốc độ phát, URL danh sách phát, v.v.). Các tham số tùy chỉnh vẫn sẽ được gửi.
   Subscription Settings:
     Fetch Feeds from RSS: Khi được bật lên, OpenTubeX sẽ sử dụng RSS thay vì phương thức mặc định để lấy nguồn cấp dữ liệu đăng ký của bạn. RSS nhanh hơn và tránh việc bị chặn IP, nhưng không cung cấp thông tin nhất định như thời lượng video, trạng thái phát trực tiếp hoặc các bài đăng
-    Fetch Automatically: Khi được bật, OpenTubeX sẽ tự động lấy nguồn cấp dữ liệu đăng ký của bạn khi khởi động, khi mở cửa sổ mới.
   Distraction Free Settings:
     Hide Channels: Nhập tên kênh hoặc ID kênh để ẩn tất cả video, danh sách phát và chính kênh đó khỏi xuất hiện trong tìm kiếm, xu hướng, phổ biến nhất và được đề xuất. Tên kênh đã nhập phải khớp hoàn toàn và có phân biệt chữ hoa chữ thường.
     Hide Subscriptions Live: Cài đặt này bị ghi đè bởi cài đặt "{appWideSetting}" trên toàn ứng dụng, trong phần "{subsection}" của "{settingsSection}"

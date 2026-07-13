@@ -439,7 +439,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'دنبال شوندگان'
     Fetch Feeds from RSS: 'دریافت feed ها از RSS'
-    Fetch Automatically: آوردن خودکار فید
     Confirm Before Unsubscribing: تایید لغو اشتراک
     'Limit the number of videos displayed for each channel': تعداد ویدیوهای نمایش داده شده برای هر کانال را محدود کنید
     To: به
@@ -768,7 +767,6 @@ Tooltips:
     Default Video Format: فرمت‌های مورد استفاده هنگام پخش ویدیو را تنظیم کنید. فرمت‌های DASH می‌توانند کیفیت‌های بالاتری را پخش کنند. فرمت‌های قدیمی حداکثر به 360p محدود می‌شوند اما از پهنای باند کمتری استفاده می‌کنند. فرمت‌های صوتی فقط جریان‌های صوتی هستند.
   Subscription Settings:
     Fetch Feeds from RSS: وقتی این گزینه فعال باشد، OpenTubeX به جای روش پیش‌فرض خود برای دریافت فید اشتراک شما از RSS استفاده می‌کند. RSS سریع‌تر است و از مسدود شدن IP جلوگیری می‌کند، اما اطلاعات خاصی مانند مدت زمان ویدیو، وضعیت پخش زنده یا پست‌ها را ارائه نمی‌دهد
-    Fetch Automatically: وقتی این گزینه فعال باشد، OpenTubeX به طور خودکار فید اشتراک شما را در هنگام راه‌اندازی و باز شدن یک پنجره جدید دریافت می‌کند.
   External Player Settings:
     Custom External Player Executable: به طور پیش فرض، OpenTubeX فرض می کند که پخش کننده خارجی انتخاب شده را می توان از طریق متغیر محیطی PATH پیدا کرد. در صورت نیاز، یک مسیر سفارشی را می توان در اینجا تنظیم کرد.
     DefaultCustomArgumentsTemplate: "(پیش‌فرض: '{defaultCustomArguments}')"

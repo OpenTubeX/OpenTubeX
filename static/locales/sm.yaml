@@ -293,7 +293,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: ''
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Distraction Free Settings:
     Distraction Free Settings: ''
     Sections:
@@ -673,7 +672,6 @@ Tooltips:
     Hide Subscriptions Live: ''
   Subscription Settings:
     Fetch Feeds from RSS: ''
-    Fetch Automatically: ''
   Experimental Settings:
     Replace HTTP Cache: ''
   SponsorBlock Settings:

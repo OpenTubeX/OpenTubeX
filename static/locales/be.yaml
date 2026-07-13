@@ -473,7 +473,6 @@ Settings:
   Subscription Settings:
     Subscription Settings: 'Падпіскі'
     Fetch Feeds from RSS: 'Атрымліваць стужкі з RSS'
-    Fetch Automatically: 'Атрымліваць стужку аўтаматычна'
     Confirm Before Unsubscribing: Пацвярджаць адпісванне
     To: Да
     'Limit the number of videos displayed for each channel': Абмежаваць колькасць відэа, якія паказваюцца на кожным канале
@@ -952,7 +951,6 @@ Tooltips:
     Hide Videos, Playlists and Channels Containing Text: Увядзіце слова, фрагмент слова або фразу (без уліку рэгістра), каб схаваць усе відэа і плэй-лісты, арыгінальныя назвы якіх утрымліваюць гэта, ва ўсім OpenTubeX, за выключэннем толькі Гісторыі, Вашых плэй-лістоў і відэа ў плэй-лістах.
   Subscription Settings:
     Fetch Feeds from RSS: 'Пры ўключэнні OpenTubeX будзе выкарыстоўваць RSS замест метаду па змаўчанні для атрымання вашай стужкі падпіскі. RSS працуе хутчэй і прадухіляе блакіроўку IP-адрасоў, але не дае пэўнай інфармацыі, такой як працягласць відэа, стан у прамым эфіры або паведамленняў у супольнасці'
-    Fetch Automatically: 'Калі ўключана, OpenTubeX будзе аўтаматычна атрымліваць стужку з вашых падпісак падчас запуску і пры адкрыцці новага акна.'
   Experimental Settings:
     Replace HTTP Cache: 'Адключае HTTP кэш Electron''у на дыску і ўключае карыстальніцкі кэш малюнкаў у памяці. Прывядзе да павелічэння выкарыстання аператыўнай памяці.'
   SponsorBlock Settings:
