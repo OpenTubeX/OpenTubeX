@@ -77,6 +77,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -85,18 +86,20 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
+const { t } = useI18n()
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
-const subscriptionFeedAutoRefreshIntervalNames = [
-  'Disabled',
+const subscriptionFeedAutoRefreshIntervalNames = computed(() => [
+  t('Settings.General Settings.Avoid translation.Disabled'),
   '30 min',
   '1 h',
   '2 h',
   '4 h',
   '6 h',
   '8 h'
-]
+])
 
 const subscriptionFeedAutoRefreshIntervalValues = [
   '0',
