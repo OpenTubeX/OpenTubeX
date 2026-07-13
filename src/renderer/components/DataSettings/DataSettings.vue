@@ -940,6 +940,7 @@ async function importFreeTubeWatchHistory(textDecode) {
     'lastViewedPlaylistId',
     'lastViewedPlaylistItemId',
     'lastViewedPlaylistType',
+    'isWatched',
     'viewCount',
     'description',
   ]
@@ -1103,6 +1104,7 @@ async function importYouTubeWatchHistory(historyData) {
       historyObject.description = ''
       historyObject.lengthSeconds = null
       historyObject.watchProgress = 1
+      historyObject.isWatched = true
       historyObject.isLive = false
 
       historyItems.set(historyObject.videoId, historyObject)

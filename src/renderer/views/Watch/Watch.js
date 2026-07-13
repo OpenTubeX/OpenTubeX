@@ -14,6 +14,7 @@ import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPl
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
+import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -1412,6 +1413,8 @@ export default defineComponent({
      * @param {number} currentSeconds
      */
     updateCurrentChapter: function (currentSeconds) {
+      this.markAsWatchedIfFinished(currentSeconds)
+
       const chapters = this.videoChapters
 
       if (this.hideChapters || chapters.length === 0) {
@@ -1432,8 +1435,9 @@ export default defineComponent({
       }
     },
 
-    addToHistory: function (watchProgress) {
+    addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
       const videoData = {
+        ...this.historyEntry,
         videoId: this.videoId,
         title: this.videoTitle,
         author: this.channelName,
@@ -1443,12 +1447,31 @@ export default defineComponent({
         viewCount: this.videoViewCount,
         lengthSeconds: this.videoLengthSeconds,
         watchProgress: watchProgress,
+        isWatched,
         timeWatched: Date.now(),
         isLive: false,
         type: 'video',
       }
 
       this.updateHistory(videoData)
+    },
+
+    markAsWatchedIfFinished(currentSeconds, hasEnded = false) {
+      if (!this.rememberHistory || this.isUpcoming || this.isLive || this.historyEntry?.isWatched === true) {
+        return
+      }
+
+      if (!hasEnded && this.$refs.player?.isPaused()) {
+        return
+      }
+
+      if (hasEnded || hasReachedWatchedThreshold(currentSeconds, this.videoLengthSeconds)) {
+        const watchProgress = this.watchedProgressSavingEnabled
+          ? currentSeconds
+          : (this.historyEntry?.watchProgress ?? 0)
+
+        this.addToHistory(watchProgress, true)
+      }
     },
 
     handleWatchProgressManualSave() {
@@ -1545,7 +1568,7 @@ export default defineComponent({
     },
 
     isRecommendedVideoWatched: function (videoId) {
-      return Object.hasOwn(this.$store.getters.getHistoryCacheById, videoId)
+      return isHistoryEntryWatched(this.$store.getters.getHistoryCacheById[videoId])
     },
 
     handleVideoLoaded: function () {
@@ -1684,6 +1707,11 @@ export default defineComponent({
       }
 
       this.activeFormat = 'audio'
+    },
+
+    handlePlayerEnded: function () {
+      this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
+      this.handleVideoEnded()
     },
 
     handleVideoEnded: function () {

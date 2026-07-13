@@ -534,11 +534,6 @@ function toggleSponsorBlockAutoSkip() {
   emit('toggle-sponsorblock-autoskip')
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const rememberHistory = computed(() => store.getters.getRememberHistory)
-
-const historyEntryExists = computed(() => store.getters.getHistoryCacheById[props.id] !== undefined)
-
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)
 
@@ -574,30 +569,6 @@ function handleExternalPlayer() {
 
   if (process.env.IS_ELECTRON) {
     window.ftElectron.openInExternalPlayer(payload)
-  }
-
-  if (rememberHistory.value) {
-    // Marking as watched
-    const videoData = {
-      videoId: props.id,
-      title: props.title,
-      author: props.channelName,
-      authorId: props.channelId,
-      published: props.published,
-      description: props.description,
-      viewCount: props.viewCount,
-      lengthSeconds: props.lengthSeconds,
-      watchProgress: 0,
-      timeWatched: Date.now(),
-      isLive: false,
-      type: 'video'
-    }
-
-    store.dispatch('updateHistory', videoData)
-
-    if (!historyEntryExists.value) {
-      showToast(t('Video.Video has been marked as watched'))
-    }
   }
 }
 

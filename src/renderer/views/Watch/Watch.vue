@@ -56,7 +56,7 @@
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
           @timeupdate="updateCurrentChapter"
-          @ended="handleVideoEnded"
+          @ended="handlePlayerEnded"
           @pause="handleVideoPause"
           @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
           @toggle-autoplay="toggleAutoplay"

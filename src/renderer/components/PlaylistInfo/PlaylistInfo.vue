@@ -280,6 +280,7 @@ import {
   writeFileWithPicker,
   deepCopy,
 } from '../../helpers/utils'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -478,7 +479,7 @@ const userPlaylistAnyVideoWatched = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.some((video) => {
-    return historyCacheById_[video.videoId] !== undefined
+    return isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 })
 
@@ -780,7 +781,7 @@ const userPlaylistWatchedVideoCount = computed(() => {
 
   const historyCacheById_ = historyCacheById.value
   return selectedUserPlaylist.value.videos.reduce((count, video) => {
-    return historyCacheById_[video.videoId] !== undefined ? count + 1 : count
+    return isHistoryEntryWatched(historyCacheById_[video.videoId]) ? count + 1 : count
   }, 0)
 })
 
@@ -850,7 +851,7 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
 
   const historyCacheById_ = historyCacheById.value
   const videosToWatch = selectedUserPlaylist.value.videos.filter((video) => {
-    return !Object.hasOwn(historyCacheById_, video.videoId)
+    return !isHistoryEntryWatched(historyCacheById_[video.videoId])
   })
 
   const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length

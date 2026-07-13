@@ -74,6 +74,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import store from '../../store/index'
 
 import { KeyboardShortcuts } from '../../../constants'
+import { isHistoryEntryWatched } from '../../helpers/history'
 
 const props = defineProps({
   isLoading: {
@@ -159,7 +160,7 @@ const filteredVideoList = computed(() => {
 
   if (hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
-      return historyCacheById.value[video.videoId] === undefined
+      return !isHistoryEntryWatched(historyCacheById.value[video.videoId])
     })
   }
 

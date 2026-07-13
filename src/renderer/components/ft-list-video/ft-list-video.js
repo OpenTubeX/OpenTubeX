@@ -19,6 +19,7 @@ import {
 } from '../../helpers/utils'
 import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock'
 import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
@@ -155,6 +156,10 @@ export default defineComponent({
       return typeof this.historyEntry !== 'undefined'
     },
 
+    isWatched: function () {
+      return isHistoryEntryWatched(this.historyEntry)
+    },
+
     watchProgress: function () {
       if (!this.historyEntryExists || !this.watchedProgressSavingEnabled) {
         return 0
@@ -203,10 +208,10 @@ export default defineComponent({
       switch (this.extraThumbnailAction) {
         case 'history':
           return {
-            title: this.historyEntryExists
+            title: this.isWatched
               ? this.t('Video.Remove From History')
               : this.t('Video.Mark As Watched'),
-            icon: this.historyEntryExists ? ['fas', 'history'] : ['fas', 'check']
+            icon: this.isWatched ? ['fas', 'history'] : ['fas', 'check']
           }
         case 'copyYoutube':
           return {
@@ -309,7 +314,7 @@ export default defineComponent({
     dropdownOptions: function () {
       const options = [
         {
-          label: this.historyEntryExists
+          label: this.isWatched
             ? this.t('Video.Remove From History')
             : this.t('Video.Mark As Watched'),
           value: 'history'
@@ -441,7 +446,7 @@ export default defineComponent({
     },
 
     addWatchedStyle: function () {
-      return this.historyEntryExists && !this.inHistory
+      return this.isWatched && !this.inHistory
     },
 
     externalPlayer: function () {
@@ -753,10 +758,6 @@ export default defineComponent({
       if (process.env.IS_ELECTRON) {
         window.ftElectron.openInExternalPlayer(payload)
       }
-
-      if (this.rememberHistory) {
-        this.markAsWatched()
-      }
     },
 
     openCollaboratorsPrompt: async function () {
@@ -789,7 +790,7 @@ export default defineComponent({
     handleOptionsClick: function (option) {
       switch (option) {
         case 'history':
-          if (this.historyEntryExists) {
+          if (this.isWatched) {
             this.removeFromWatched()
           } else {
             this.markAsWatched()
@@ -912,6 +913,7 @@ export default defineComponent({
 
     markAsWatched: function () {
       const videoData = {
+        ...this.historyEntry,
         videoId: this.id,
         title: this.title,
         author: this.channelName,
@@ -920,7 +922,8 @@ export default defineComponent({
         description: this.description,
         viewCount: this.viewCount,
         lengthSeconds: this.data.lengthSeconds,
-        watchProgress: 0,
+        watchProgress: this.historyEntry?.watchProgress ?? 0,
+        isWatched: true,
         timeWatched: Date.now(),
         isLive: false,
         type: 'video'
