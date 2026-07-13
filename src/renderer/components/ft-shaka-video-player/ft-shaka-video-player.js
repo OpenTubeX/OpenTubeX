@@ -5409,6 +5409,7 @@ export default defineComponent({
     let pendingPlaybackRateRestore = null
 
     let playbackRateUserSet = false
+    let musicPlaybackRateToastShown = false
 
     /**
      * @param {unknown} rate
@@ -5419,9 +5420,11 @@ export default defineComponent({
       return Number.isFinite(parsedRate) && parsedRate > 0.07 ? parsedRate : null
     }
 
-    const shouldUseNormalPlaybackRateByDefault = computed(() => {
-      return isLive.value || props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
+    const isMusicVideoDetected = computed(() => {
+      return props.videoGenreIsMusic || hasSponsorBlockMusicOfftopicSegment.value
     })
+
+    const shouldUseNormalPlaybackRateByDefault = computed(() => isLive.value || isMusicVideoDetected.value)
 
     /**
      * @param {number} fallbackPlaybackRate
@@ -5440,6 +5443,40 @@ export default defineComponent({
       }
 
       return normalizePlaybackRate(props.currentPlaybackRate) ?? NORMAL_PLAYBACK_RATE
+    }
+
+    /**
+     * @returns {number}
+     */
+    function getUnforcedPlaybackRate() {
+      if (savedChannelPlaybackRate.value !== null) {
+        return savedChannelPlaybackRate.value
+      }
+
+      const currentPlaybackRate = normalizePlaybackRate(props.currentPlaybackRate)
+      if (currentPlaybackRate !== null && Math.abs(currentPlaybackRate - NORMAL_PLAYBACK_RATE) >= 0.01) {
+        return currentPlaybackRate
+      }
+
+      return defaultPlaybackRate.value
+    }
+
+    /**
+     * @param {number|null} unforcedPlaybackRate
+     */
+    function showMusicPlaybackRateToast(unforcedPlaybackRate) {
+      if (
+        musicPlaybackRateToastShown ||
+        playbackRateUserSet ||
+        !isMusicVideoDetected.value ||
+        unforcedPlaybackRate === null ||
+        Math.abs(unforcedPlaybackRate - NORMAL_PLAYBACK_RATE) < 0.01
+      ) {
+        return
+      }
+
+      showToast(t('Video.Player.MusicPlaybackRateOverride'))
+      musicPlaybackRateToastShown = true
     }
 
     /**
@@ -5507,6 +5544,8 @@ export default defineComponent({
     )
 
     watch(shouldUseNormalPlaybackRateByDefault, (shouldUseNormalPlaybackRate) => {
+      const unforcedPlaybackRate = getCurrentPlaybackRate()
+
       if (video.value) {
         video.value.defaultPlaybackRate = getDefaultPlaybackRateForVideo()
       }
@@ -5516,6 +5555,7 @@ export default defineComponent({
       }
 
       queuePlaybackRateRestore(NORMAL_PLAYBACK_RATE)
+      showMusicPlaybackRateToast(unforcedPlaybackRate)
 
       if (!hasLoaded.value || !player || !video.value) {
         if (video.value) {
@@ -6448,6 +6488,10 @@ export default defineComponent({
       }
 
       await setLocale(locale.value)
+
+      if (isMusicVideoDetected.value) {
+        showMusicPlaybackRateToast(getUnforcedPlaybackRate())
+      }
 
       // check if the component is already getting destroyed
       // which is possible because this function runs asynchronously
