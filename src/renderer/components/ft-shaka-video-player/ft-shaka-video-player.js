@@ -3067,6 +3067,7 @@ export default defineComponent({
 
     // shaka-player ships with some locales prebundled and already loaded
     const loadedLocales = new Set(process.env.SHAKA_LOCALES_PREBUNDLED)
+    const originalShakaControlLocalizations = new Map()
 
     /**
      * @param {string} locale
@@ -3094,13 +3095,20 @@ export default defineComponent({
       localization.changeLocale([shakaLocale])
 
       // Add the keyboard shortcut to the label for the default Shaka controls
+      if (!originalShakaControlLocalizations.has(shakaLocale)) {
+        const controlLocalizations = new Map()
+        Object.keys(shakaControlKeysToShortcuts).forEach((shakaControlKey) => {
+          controlLocalizations.set(shakaControlKey, localization.resolve(shakaControlKey))
+        })
+        originalShakaControlLocalizations.set(shakaLocale, controlLocalizations)
+      }
 
       const shakaControlKeysToShortcutLocalizations = new Map()
       Object.entries(shakaControlKeysToShortcuts).forEach(([shakaControlKey, shortcut]) => {
-        const originalLocalization = localization.resolve(shakaControlKey)
+        const originalLocalization = originalShakaControlLocalizations.get(shakaLocale).get(shakaControlKey)
         if (originalLocalization === '') {
           // e.g., A Shaka localization key in shakaControlKeysToShortcuts has fallen out of date and need to be updated
-          console.error('Mising Shaka localization key "%s"', shakaControlKey)
+          console.error('Missing Shaka localization key "%s"', shakaControlKey)
           return
         }
 
