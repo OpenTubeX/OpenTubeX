@@ -3,6 +3,7 @@ import { DBWatchStatsHandlers } from '../../../datastores/handlers/index'
 const state = {
   watchSecondsByDate: {},
   hasHistoricalWatchTimeEstimate: false,
+  historicalWatchTimePlaybackSpeed: null,
   watchStatsResetVersion: 0
 }
 
@@ -15,6 +16,10 @@ const getters = {
     return state.hasHistoricalWatchTimeEstimate
   },
 
+  getHistoricalWatchTimePlaybackSpeed(state) {
+    return state.historicalWatchTimePlaybackSpeed
+  },
+
   getWatchStatsResetVersion(state) {
     return state.watchStatsResetVersion
   }
@@ -24,9 +29,13 @@ const actions = {
   async grabWatchStats({ commit }) {
     try {
       const hasHistoricalEstimate = await DBWatchStatsHandlers.migrateHistory()
-      const records = await DBWatchStatsHandlers.find()
+      const [records, historicalAdjustment] = await Promise.all([
+        DBWatchStatsHandlers.find(),
+        DBWatchStatsHandlers.getHistoricalAdjustment(),
+      ])
       commit('setWatchStats', records)
       commit('setHasHistoricalWatchTimeEstimate', hasHistoricalEstimate)
+      commit('setHistoricalWatchTimePlaybackSpeed', historicalAdjustment?.defaultSpeed ?? null)
     } catch (errMessage) {
       console.error(errMessage)
     }
@@ -52,6 +61,21 @@ const actions = {
     } catch (errMessage) {
       console.error(errMessage)
     }
+  },
+
+  async adjustHistoricalWatchTime({ commit }, { defaultSpeed, channelPlaybackSpeeds }) {
+    try {
+      const result = await DBWatchStatsHandlers.adjustHistoricalWatchTime(
+        defaultSpeed,
+        channelPlaybackSpeeds
+      )
+      commit('setWatchStats', result.records)
+      commit('setHistoricalWatchTimePlaybackSpeed', result.defaultSpeed)
+      return true
+    } catch (errMessage) {
+      console.error(errMessage)
+      return false
+    }
   }
 }
 
@@ -70,9 +94,14 @@ const mutations = {
     state.hasHistoricalWatchTimeEstimate = value
   },
 
+  setHistoricalWatchTimePlaybackSpeed(state, value) {
+    state.historicalWatchTimePlaybackSpeed = value
+  },
+
   resetWatchStats(state) {
     state.watchSecondsByDate = {}
     state.hasHistoricalWatchTimeEstimate = false
+    state.historicalWatchTimePlaybackSpeed = null
     state.watchStatsResetVersion++
   }
 }

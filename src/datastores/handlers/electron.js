@@ -62,6 +62,17 @@ class WatchStats {
     return window.ftElectron.dbWatchStats(DBActions.WATCH_STATS.MIGRATE_HISTORY)
   }
 
+  static getHistoricalAdjustment() {
+    return window.ftElectron.dbWatchStats(DBActions.WATCH_STATS.GET_HISTORICAL_ADJUSTMENT)
+  }
+
+  static adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds) {
+    return window.ftElectron.dbWatchStats(
+      DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME,
+      { defaultSpeed, channelPlaybackSpeeds }
+    )
+  }
+
   static deleteAll() {
     return window.ftElectron.dbWatchStats(DBActions.GENERAL.DELETE_ALL)
   }

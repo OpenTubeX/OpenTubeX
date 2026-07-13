@@ -2750,6 +2750,22 @@ function runApp() {
         case DBActions.WATCH_STATS.MIGRATE_HISTORY:
           return await baseHandlers.watchStats.migrateHistory()
 
+        case DBActions.WATCH_STATS.GET_HISTORICAL_ADJUSTMENT:
+          return await baseHandlers.watchStats.getHistoricalAdjustment()
+
+        case DBActions.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME: {
+          const result = await baseHandlers.watchStats.adjustHistoricalWatchTime(
+            data.defaultSpeed,
+            data.channelPlaybackSpeeds
+          )
+          syncOtherWindows(
+            IpcChannels.SYNC_WATCH_STATS,
+            event,
+            { event: SyncEvents.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME, data: result }
+          )
+          return result
+        }
+
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.watchStats.deleteAll()
           syncOtherWindows(

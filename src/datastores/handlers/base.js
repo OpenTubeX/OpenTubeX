@@ -178,6 +178,9 @@ class History {
 }
 
 class WatchStats {
+  static migrationId = 'history-watch-time-v1'
+  static defaultChannelKey = '__default__'
+
   static find() {
     return db.watchStats.findAsync({ date: { $exists: true } }).sort({ date: 1 })
   }
@@ -190,26 +193,150 @@ class WatchStats {
     )
   }
 
-  static async addHistoricalWatchTime(date, seconds) {
+  static async addHistoricalWatchTime(date, secondsByChannel) {
     const existingRecord = await db.watchStats.findOneAsync({ date })
     if (existingRecord?.historyEstimateApplied) { return true }
+
+    const historyEstimateSeconds = Object.values(secondsByChannel)
+      .reduce((total, seconds) => total + seconds, 0)
 
     await db.watchStats.updateAsync(
       { date },
       {
-        $inc: { seconds },
-        $set: { date, historyEstimateApplied: true }
+        $inc: { seconds: historyEstimateSeconds },
+        $set: {
+          date,
+          historyEstimateApplied: true,
+          historyEstimateSeconds,
+          historyAdjustedSeconds: historyEstimateSeconds,
+          historyEstimateByChannel: secondsByChannel,
+        }
       },
       { upsert: true }
     )
     return true
   }
 
+  static getHistoricalAdjustment() {
+    return db.watchStats.findOneAsync({ _id: this.migrationId })
+      .then(record => record?.adjustment ?? null)
+  }
+
+  static _getEstimatedSeconds(record) {
+    const lengthSeconds = Number(record.lengthSeconds)
+    const watchProgress = Number(record.watchProgress)
+
+    let seconds = Number.isFinite(watchProgress) ? watchProgress : 0
+    const reachedLegacyWatchedThreshold = Number.isFinite(watchProgress) &&
+      Number.isFinite(lengthSeconds) &&
+      lengthSeconds > 0 &&
+      watchProgress / lengthSeconds >= WATCHED_THRESHOLD
+
+    if ((record.isWatched === true || reachedLegacyWatchedThreshold) && lengthSeconds > 0) {
+      seconds = lengthSeconds
+    } else if (Number.isFinite(lengthSeconds)) {
+      seconds = Math.min(seconds, lengthSeconds)
+    }
+
+    return seconds > 0 ? seconds : 0
+  }
+
+  static async _getHistoryEstimates(completedAt = Number.POSITIVE_INFINITY) {
+    const history = await db.history.findAsync({})
+    const estimatesByDate = new Map()
+
+    for (const record of history) {
+      const timestamp = Number(record.timeWatched)
+      if (!Number.isFinite(timestamp) || timestamp > completedAt) { continue }
+
+      const seconds = this._getEstimatedSeconds(record)
+      if (seconds === 0) { continue }
+
+      const watchedAt = new Date(timestamp)
+      const date = [
+        watchedAt.getFullYear(),
+        String(watchedAt.getMonth() + 1).padStart(2, '0'),
+        String(watchedAt.getDate()).padStart(2, '0'),
+      ].join('-')
+      const channelId = record.authorId || this.defaultChannelKey
+      const secondsByChannel = estimatesByDate.get(date) ?? {}
+      secondsByChannel[channelId] = (secondsByChannel[channelId] ?? 0) + seconds
+      estimatesByDate.set(date, secondsByChannel)
+    }
+
+    return estimatesByDate
+  }
+
+  static async adjustHistoricalWatchTime(defaultSpeed, channelPlaybackSpeeds = {}) {
+    const normalizedDefaultSpeed = Number(defaultSpeed)
+    if (!Number.isFinite(normalizedDefaultSpeed) || normalizedDefaultSpeed <= 0) {
+      throw new Error('watch stats: invalid historical playback speed')
+    }
+
+    const migration = await db.watchStats.findOneAsync({ _id: this.migrationId })
+    if (!migration?.hadEstimates) {
+      throw new Error('watch stats: no historical estimate to adjust')
+    }
+
+    const normalizedChannelSpeeds = Object.fromEntries(
+      Object.entries(channelPlaybackSpeeds)
+        .map(([channelId, speed]) => [channelId, Number(speed)])
+        .filter(([, speed]) => Number.isFinite(speed) && speed > 0)
+    )
+    const reconstructedEstimates = await this._getHistoryEstimates(migration.completedAt)
+    const records = await db.watchStats.findAsync({ historyEstimateApplied: true })
+
+    for (const record of records) {
+      const secondsByChannel = record.historyEstimateByChannel ?? reconstructedEstimates.get(record.date) ?? {}
+      const reconstructedSeconds = Object.values(secondsByChannel)
+        .reduce((total, seconds) => total + seconds, 0)
+      // Records created by the original migration did not store the imported
+      // contribution separately, so reconstruct it before falling back to the
+      // day's total (which may also contain newly recorded watch time).
+      const baselineSeconds = Number(record.historyEstimateSeconds) ||
+        reconstructedSeconds ||
+        Number(record.seconds) ||
+        0
+      const previousAdjustedSeconds = Number(record.historyAdjustedSeconds) || baselineSeconds
+
+      if (reconstructedSeconds < baselineSeconds) {
+        secondsByChannel[this.defaultChannelKey] = (secondsByChannel[this.defaultChannelKey] ?? 0) +
+          baselineSeconds - reconstructedSeconds
+      }
+
+      const adjustedSeconds = Object.entries(secondsByChannel).reduce((total, [channelId, seconds]) => {
+        const speed = normalizedChannelSpeeds[channelId] ?? normalizedDefaultSpeed
+        return total + seconds / speed
+      }, 0)
+      const seconds = Math.max(0, Number(record.seconds) - previousAdjustedSeconds + adjustedSeconds)
+
+      await db.watchStats.updateAsync(
+        { _id: record._id },
+        {
+          $set: {
+            seconds,
+            historyEstimateSeconds: baselineSeconds,
+            historyAdjustedSeconds: adjustedSeconds,
+            historyEstimateByChannel: secondsByChannel,
+          }
+        }
+      )
+    }
+
+    const adjustment = { defaultSpeed: normalizedDefaultSpeed, updatedAt: Date.now() }
+    await db.watchStats.updateAsync(
+      { _id: this.migrationId },
+      { $set: { adjustment } }
+    )
+
+    return { records: await this.find(), ...adjustment }
+  }
+
   static async deleteAll() {
     await db.watchStats.removeAsync({ date: { $exists: true } }, { multi: true })
     await db.watchStats.updateAsync(
-      { _id: 'history-watch-time-v1' },
-      { $set: { hadEstimates: false } },
+      { _id: this.migrationId },
+      { $set: { hadEstimates: false, adjustment: null } },
       { upsert: true }
     )
     this.migrationPromise = null
@@ -221,53 +348,25 @@ class WatchStats {
   }
 
   static async _migrateHistory() {
-    const migrationId = 'history-watch-time-v1'
-    const alreadyMigrated = await db.watchStats.findOneAsync({ _id: migrationId })
+    const alreadyMigrated = await db.watchStats.findOneAsync({ _id: this.migrationId })
     if (alreadyMigrated) { return alreadyMigrated.hadEstimates === true }
 
     await History.migrateWatchedStatus()
 
-    const history = await db.history.findAsync({})
-    const secondsByDate = new Map()
-
-    for (const record of history) {
-      const timestamp = Number(record.timeWatched)
-      const lengthSeconds = Number(record.lengthSeconds)
-      const watchProgress = Number(record.watchProgress)
-
-      if (!Number.isFinite(timestamp)) { continue }
-
-      let seconds = Number.isFinite(watchProgress) ? watchProgress : 0
-      const reachedLegacyWatchedThreshold = Number.isFinite(watchProgress) &&
-        Number.isFinite(lengthSeconds) &&
-        lengthSeconds > 0 &&
-        watchProgress / lengthSeconds >= WATCHED_THRESHOLD
-
-      if ((record.isWatched === true || reachedLegacyWatchedThreshold) && lengthSeconds > 0) {
-        seconds = lengthSeconds
-      } else if (Number.isFinite(lengthSeconds)) {
-        seconds = Math.min(seconds, lengthSeconds)
-      }
-
-      if (seconds <= 0) { continue }
-
-      const watchedAt = new Date(timestamp)
-      const date = [
-        watchedAt.getFullYear(),
-        String(watchedAt.getMonth() + 1).padStart(2, '0'),
-        String(watchedAt.getDate()).padStart(2, '0'),
-      ].join('-')
-
-      secondsByDate.set(date, (secondsByDate.get(date) ?? 0) + seconds)
-    }
+    const secondsByDate = await this._getHistoryEstimates()
 
     let hadEstimates = false
-    for (const [date, seconds] of secondsByDate) {
-      const imported = await this.addHistoricalWatchTime(date, seconds)
+    for (const [date, secondsByChannel] of secondsByDate) {
+      const imported = await this.addHistoricalWatchTime(date, secondsByChannel)
       hadEstimates ||= imported
     }
 
-    await db.watchStats.insertAsync({ _id: migrationId, completedAt: Date.now(), hadEstimates })
+    await db.watchStats.insertAsync({
+      _id: this.migrationId,
+      completedAt: Date.now(),
+      hadEstimates,
+      adjustment: null,
+    })
     return hadEstimates
   }
 }

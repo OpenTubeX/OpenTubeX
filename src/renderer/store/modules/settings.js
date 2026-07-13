@@ -637,6 +637,11 @@ const customActions = {
             commit('addWatchTime', data)
             break
 
+          case SyncEvents.WATCH_STATS.ADJUST_HISTORICAL_WATCH_TIME:
+            commit('setWatchStats', data.records)
+            commit('setHistoricalWatchTimePlaybackSpeed', data.defaultSpeed)
+            break
+
           case SyncEvents.GENERAL.DELETE_ALL:
             commit('resetWatchStats')
             break

@@ -316,12 +316,47 @@
   margin-block-start: 14px;
 }
 
-.estimateNote {
+.estimateControls {
   grid-column: 2;
+  text-align: center;
+}
+
+.estimateNote {
   margin: 0;
   color: var(--tertiary-text-color);
   font-size: 0.78rem;
-  text-align: center;
+}
+
+.adjustEstimateButton {
+  padding: 2px;
+  border: 0;
+  color: var(--primary-color);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.historicalAdjustment {
+  inline-size: min(440px, 80vw);
+}
+
+.historicalAdjustment > p {
+  margin-block: 0 20px;
+}
+
+.historicalAdjustment .channelSpeedNote {
+  margin-block: 14px 20px;
+  color: var(--tertiary-text-color);
+  font-size: 0.8rem;
+}
+
+.adjustmentActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .resetStatsButton {
@@ -388,7 +423,7 @@
     grid-template-columns: 1fr;
   }
 
-  .estimateNote,
+  .estimateControls,
   .resetStatsButton {
     grid-column: 1;
   }

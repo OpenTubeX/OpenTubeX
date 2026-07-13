@@ -147,6 +147,13 @@ Stats:
   Weekly chart aria: Weekly watch time for the last 8 weeks
   No data: Watch time will appear here as you watch videos.
   Estimate note: Watch time from before this update is estimated from your saved playback progress.
+  Adjust imported watch time: Adjust imported watch time
+  Imported watch time: Imported watch time
+  Imported watch time explanation: Choose the playback speed you usually used. The imported video durations will be divided by this speed to estimate the actual time you spent watching.
+  Playback speed: Playback speed
+  Channel speed note: Saved channel playback speeds are used instead when available.
+  Apply playback speed: Apply playback speed
+  Imported watch time adjusted: Imported watch time has been adjusted
   Reset statistics: Reset statistics
   Reset: Reset
   Reset confirmation: Are you sure you want to reset all watch statistics? This cannot be undone.

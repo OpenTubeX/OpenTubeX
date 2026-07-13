@@ -181,12 +181,21 @@
       </section>
 
       <footer class="statsFooter">
-        <p
+        <div
           v-if="hasHistoricalEstimate"
-          class="estimateNote"
+          class="estimateControls"
         >
-          {{ t('Stats.Estimate note') }}
-        </p>
+          <p class="estimateNote">
+            {{ t('Stats.Estimate note') }}
+          </p>
+          <button
+            type="button"
+            class="adjustEstimateButton"
+            @click="openHistoricalAdjustment"
+          >
+            {{ t('Stats.Adjust imported watch time') }}
+          </button>
+        </div>
         <button
           type="button"
           class="resetStatsButton"
@@ -204,18 +213,53 @@
         is-first-option-destructive
         @click="handleResetStats"
       />
+      <FtPrompt
+        v-if="showHistoricalAdjustment"
+        :label="t('Stats.Imported watch time')"
+        autosize
+        @click="showHistoricalAdjustment = false"
+      >
+        <div class="historicalAdjustment">
+          <p>{{ t('Stats.Imported watch time explanation') }}</p>
+          <FtSelect
+            :placeholder="t('Stats.Playback speed')"
+            :value="selectedPlaybackSpeed"
+            :select-names="playbackSpeedNames"
+            :select-values="playbackSpeedValues"
+            :icon="['fas', 'gauge-high']"
+            @change="selectedPlaybackSpeed = $event"
+          />
+          <p class="channelSpeedNote">
+            {{ t('Stats.Channel speed note') }}
+          </p>
+          <div class="adjustmentActions">
+            <FtButton
+              :label="t('Stats.Apply playback speed')"
+              @click="applyHistoricalAdjustment"
+            />
+            <FtButton
+              :label="t('Cancel')"
+              background-color="var(--secondary-card-bg-color)"
+              text-color="var(--primary-text-color)"
+              @click="showHistoricalAdjustment = false"
+            />
+          </div>
+        </div>
+      </FtPrompt>
     </FtCard>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
+import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import store from '../../store'
 import { showToast } from '../../helpers/utils'
 
@@ -228,18 +272,86 @@ const RESET_PROMPT_VALUES = ['reset', 'cancel']
 const watchSecondsByDate = computed(() => store.getters.getWatchSecondsByDate)
 const hasData = computed(() => Object.values(watchSecondsByDate.value).some(seconds => seconds > 0))
 const hasHistoricalEstimate = computed(() => store.getters.getHasHistoricalWatchTimeEstimate)
+const historicalPlaybackSpeed = computed(() => store.getters.getHistoricalWatchTimePlaybackSpeed)
+const defaultPlaybackSpeed = computed(() => store.getters.getDefaultPlayback)
+const channelPlaybackSpeeds = computed(() => store.getters.getChannelPlaybackSpeeds)
+const playbackSpeedInterval = computed(() => store.getters.getVideoPlaybackRateInterval)
+const maximumPlaybackSpeed = computed(() => store.getters.getMaxVideoPlaybackRate)
 const statsWeekStartsOn = computed(() => Number(store.getters.getStatsWeekStartsOn))
 const watchStatsVisible = computed(() => {
   return store.getters.getRememberHistory && store.getters.getEnableWatchStats
 })
 const showResetPrompt = ref(false)
+const showHistoricalAdjustment = ref(false)
+const selectedPlaybackSpeed = ref('1')
+const hasShownHistoricalAdjustment = ref(false)
+const statsPageMounted = ref(false)
 const resetPromptNames = computed(() => [t('Stats.Reset'), t('Cancel')])
+
+const playbackSpeedValues = computed(() => {
+  const speeds = []
+  const interval = Math.max(Number(playbackSpeedInterval.value), 0.05)
+  for (let speed = interval; speed <= maximumPlaybackSpeed.value; speed += interval) {
+    speeds.push(Number(speed.toFixed(2)))
+  }
+
+  const selectedSpeed = Number(selectedPlaybackSpeed.value)
+  if (Number.isFinite(selectedSpeed) && !speeds.includes(selectedSpeed)) {
+    speeds.push(selectedSpeed)
+    speeds.sort((a, b) => a - b)
+  }
+
+  return speeds.map(String)
+})
+const playbackSpeedNames = computed(() => playbackSpeedValues.value.map(speed => `${speed}×`))
 
 watch(watchStatsVisible, (visible) => {
   if (!visible) {
     router.replace('/history')
   }
 }, { immediate: true })
+
+watch([hasHistoricalEstimate, historicalPlaybackSpeed], maybeOpenHistoricalAdjustment)
+
+onMounted(() => {
+  statsPageMounted.value = true
+  maybeOpenHistoricalAdjustment()
+})
+
+function maybeOpenHistoricalAdjustment() {
+  if (!statsPageMounted.value ||
+    !hasHistoricalEstimate.value ||
+    historicalPlaybackSpeed.value !== null ||
+    hasShownHistoricalAdjustment.value) {
+    return
+  }
+
+  hasShownHistoricalAdjustment.value = true
+  openHistoricalAdjustment()
+}
+
+function openHistoricalAdjustment() {
+  selectedPlaybackSpeed.value = String(historicalPlaybackSpeed.value ?? defaultPlaybackSpeed.value)
+  showHistoricalAdjustment.value = true
+}
+
+async function applyHistoricalAdjustment() {
+  let parsedChannelSpeeds = {}
+  try {
+    parsedChannelSpeeds = JSON.parse(channelPlaybackSpeeds.value || '{}')
+  } catch (error) {
+    console.error('Failed to parse channel playback speeds:', error)
+  }
+
+  const adjusted = await store.dispatch('adjustHistoricalWatchTime', {
+    defaultSpeed: Number(selectedPlaybackSpeed.value),
+    channelPlaybackSpeeds: parsedChannelSpeeds,
+  })
+  if (!adjusted) { return }
+
+  showHistoricalAdjustment.value = false
+  showToast(t('Stats.Imported watch time adjusted'))
+}
 
 /**
  * @param {'reset' | 'cancel' | null} option
