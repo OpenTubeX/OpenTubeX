@@ -1,5 +1,6 @@
 import * as db from '../index'
 import { WATCHED_THRESHOLD } from '../../constants'
+import { migrateLegacyHistoryRecord } from '../../history'
 
 class Settings {
   static async find() {
@@ -103,18 +104,60 @@ class Settings {
 }
 
 class History {
-  static find() {
+  static migrationPromise = null
+
+  static async find() {
+    await this.migrateWatchedStatus()
     return db.history.findAsync({}).sort({ timeWatched: -1 })
   }
 
   static upsert(record) {
-    return db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
+    const migratedRecord = migrateLegacyHistoryRecord(record)
+    return db.history.updateAsync({ videoId: migratedRecord.videoId }, migratedRecord, { upsert: true })
   }
 
   static async overwrite(records) {
+    const migratedRecords = records.map(migrateLegacyHistoryRecord)
+
     await db.history.removeAsync({}, { multi: true })
 
-    await db.history.insertAsync(records)
+    await db.history.insertAsync(migratedRecords)
+  }
+
+  static migrateWatchedStatus() {
+    this.migrationPromise ??= this._migrateWatchedStatus()
+    return this.migrationPromise
+  }
+
+  static async _migrateWatchedStatus() {
+    const records = await db.history.findAsync({ isWatched: { $exists: false } })
+    const batchSize = 250
+
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize)
+
+      await Promise.all(batch.map(record => {
+        const migratedRecord = migrateLegacyHistoryRecord(record)
+        const updates = { isWatched: migratedRecord.isWatched }
+
+        if (migratedRecord.watchProgress !== record.watchProgress) {
+          updates.watchProgress = migratedRecord.watchProgress
+        }
+
+        if (migratedRecord.isLive !== record.isLive) {
+          updates.isLive = migratedRecord.isLive
+        }
+
+        return db.history.updateAsync(
+          { _id: record._id },
+          { $set: updates }
+        )
+      }))
+    }
+
+    if (records.length > 0) {
+      await db.history.compactDatafileAsync()
+    }
   }
 
   static updateWatchProgress(videoId, watchProgress) {
@@ -181,6 +224,8 @@ class WatchStats {
     const migrationId = 'history-watch-time-v1'
     const alreadyMigrated = await db.watchStats.findOneAsync({ _id: migrationId })
     if (alreadyMigrated) { return alreadyMigrated.hadEstimates === true }
+
+    await History.migrateWatchedStatus()
 
     const history = await db.history.findAsync({})
     const secondsByDate = new Map()

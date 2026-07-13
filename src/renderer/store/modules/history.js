@@ -1,4 +1,5 @@
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
+import { migrateLegacyHistoryRecord } from '../../helpers/history'
 
 const state = {
   historyCacheSorted: [],
@@ -50,7 +51,10 @@ const actions = {
    */
   async overwriteHistory({ commit }, historyItems) {
     try {
-      const sortedRecords = Array.from(historyItems.values())
+      const migratedHistoryItems = new Map(
+        Array.from(historyItems, ([videoId, record]) => [videoId, migrateLegacyHistoryRecord(record)])
+      )
+      const sortedRecords = Array.from(migratedHistoryItems.values())
 
       // sort before sending saving to the database and passing to other windows
       // so that the other windows can use it as is, without having to sort the array themselves
@@ -59,7 +63,7 @@ const actions = {
       await DBHistoryHandlers.overwrite(sortedRecords)
 
       commit('setHistoryCacheSorted', sortedRecords)
-      commit('setHistoryCacheById', Object.fromEntries(historyItems))
+      commit('setHistoryCacheById', Object.fromEntries(migratedHistoryItems))
     } catch (errMessage) {
       console.error(errMessage)
     }

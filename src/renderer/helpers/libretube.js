@@ -1,3 +1,5 @@
+import { WATCHED_THRESHOLD } from '../../constants'
+
 const YOUTUBE_CHANNEL_ID_LENGTH = 24
 const YOUTUBE_CHANNEL_ID_REGEX = /^UC[\w-]{22}$/
 
@@ -223,11 +225,13 @@ export function convertLibreTubeWatchHistoryToOpenTubeX(backupData, existingHist
     const duration = toFiniteNumber(item.duration)
     const isLive = duration == null || duration <= 0
     const watchPosition = watchPositionsByVideoId.get(item.videoId)
-    let watchProgress = 1
+    let watchProgress = duration != null && duration > 0 ? duration : 0
+    let isWatched = true
 
     if (watchPosition != null && duration != null && duration > 0) {
       const positionSeconds = watchPosition > duration ? watchPosition / 1000 : watchPosition
-      watchProgress = Math.min(Math.max(positionSeconds / duration, 0), 1)
+      watchProgress = Math.min(Math.max(positionSeconds, 0), duration)
+      isWatched = watchProgress / duration >= WATCHED_THRESHOLD
     }
 
     const timeWatched = baseTimeWatched - index
@@ -243,6 +247,7 @@ export function convertLibreTubeWatchHistoryToOpenTubeX(backupData, existingHist
       description: '',
       lengthSeconds: isLive ? null : duration,
       watchProgress,
+      isWatched,
       isLive,
       type: 'video',
     })
