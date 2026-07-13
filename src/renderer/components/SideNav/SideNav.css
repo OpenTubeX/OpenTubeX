@@ -158,63 +158,65 @@
     block-size: 10px;
   }
 
-  .opened {
+  .expanded {
     inline-size: 200px;
   }
 
-  .opened .inner {
+  .expanded .inner {
     inline-size: 200px;
   }
 
-  .opened .refreshIcon {
+  .expanded .refreshIcon {
     display: block;
   }
 
-  .opened .navIcon {
+  .expanded .navIcon {
     inline-size: 1.25em;
     margin-inline-start: 10px;
   }
 
-  .opened .navIcon.fa-user-check {
+  .expanded .navIcon.fa-user-check {
     block-size: 1em;
   }
 
-  .opened .navOption {
+  .expanded .navOption {
+    display: flex;
+    align-items: center;
     padding-inline: 5px;
   }
 
-  .opened .navLabel {
+  .expanded .navLabel {
     text-align: start;
     margin-inline-start: 40px;
-    margin-block-end: 16px;
+    margin-block: 0;
     font-size: 16px;
   }
 
-  .opened .channelLink {
+  .expanded .channelLink {
     display: flex;
     align-items: center;
   }
 
-  .opened .navChannel .navLabel {
+  .expanded .navChannel .navLabel {
     font-size: 12px;
     flex-grow: 1;
     margin: 0;
   }
 
-  .opened .thumbnailContainer {
+  .expanded .thumbnailContainer {
     inset-block-start: 50%;
     position: absolute;
     transform: translateY(-50%);
     margin-block: 0;
   }
 
-  .opened .navChannel .thumbnailContainer {
+  .expanded .navChannel .thumbnailContainer {
     position: static;
     transform: none;
     margin: 5px;
   }
 
-  .opened.hiddenLabels .navLabel {
+  .expanded.hiddenLabels .navLabel {
     display: block;
   }
 }
@@ -282,4 +284,3 @@
     display: block;
   }
 }
-

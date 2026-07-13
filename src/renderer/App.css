@@ -36,6 +36,42 @@
   user-select: unset;
 }
 
+.sideNavBackdrop {
+  position: fixed;
+  inset-block: 60px 0;
+  inset-inline: 0;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background-color: rgb(0 0 0 / 60%);
+}
+
+.watchSideNavOverlay .routerView {
+  position: relative;
+  z-index: 1;
+}
+
+@media only screen and (width > 680px) {
+  .watchSideNavOverlay :deep(.sideNav) {
+    position: fixed;
+    inline-size: 200px;
+    transform: translateX(-100%);
+    transition-property: transform;
+  }
+
+  .watchSideNavOverlay.isLocaleRightToLeft :deep(.sideNav) {
+    transform: translateX(100%);
+  }
+
+  .watchSideNavOverlay :deep(.sideNav.opened) {
+    transform: translateX(0);
+  }
+
+  .watchSideNavOverlay :deep(.sideNav .inner) {
+    inline-size: 200px;
+  }
+}
+
 .changeLogTitle {
   padding-inline: 16px;
   overflow-wrap: break-word;
@@ -282,9 +318,17 @@
   inset-block-start: 92px;
 }
 
+.app:has(.tabBar) .sideNavBackdrop {
+  inset-block-start: 92px;
+}
+
 @media only screen and (width <= 680px) {
   .app:has(.tabBar) :deep(.sideNav) {
     block-size: 60px;
     inset-block-start: auto;
+  }
+
+  .sideNavBackdrop {
+    display: none;
   }
 }

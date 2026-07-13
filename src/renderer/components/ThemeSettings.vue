@@ -32,6 +32,12 @@
           @change="updateHideLabelsSideBar"
         />
         <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Hide Side Bar on Watch Pages')"
+          compact
+          :default-value="hideSideBarOnWatchPages"
+          @change="updateHideSideBarOnWatchPages"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
           compact
           :default-value="hideHeaderLogo"
@@ -242,6 +248,16 @@ function handleExpandSideBar(value) {
   }
 
   store.dispatch('updateExpandSideBar', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSideBarOnWatchPages = computed(() => store.getters.getHideSideBarOnWatchPages)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideSideBarOnWatchPages(value) {
+  store.dispatch('updateHideSideBarOnWatchPages', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

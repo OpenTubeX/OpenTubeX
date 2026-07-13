@@ -225,6 +225,7 @@ const state = {
   hidePopularVideos: false,
   hideRecommendedVideos: false,
   hideSearchBar: false,
+  hideSideBarOnWatchPages: true,
   hideSharingActions: false,
   hideSubscriptionsVideos: false,
   hideSubscriptionsShorts: false,

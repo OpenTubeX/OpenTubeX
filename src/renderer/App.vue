@@ -6,7 +6,8 @@
       hideOutlines: outlinesHidden,
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
-      hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen
+      hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      watchSideNavOverlay: useWatchSideNavOverlay
     }"
   >
     <TabBar
@@ -17,7 +18,17 @@
     />
     <SideNav
       :inert="isAnyPromptOpen"
+      :force-expanded="useWatchSideNavOverlay"
     />
+    <Transition name="fade">
+      <button
+        v-if="useWatchSideNavOverlay && isSideNavOpen"
+        type="button"
+        class="sideNavBackdrop"
+        :aria-label="t('Close')"
+        @click="closeSideNav"
+      />
+    </Transition>
     <FtFlexBox
       class="flexBox routerView"
       role="main"
@@ -270,6 +281,32 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useWatchSideNavOverlay = computed(() => {
+  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+})
+
+let sideNavOpenBeforeWatchOverlay = null
+
+watch(useWatchSideNavOverlay, (enabled) => {
+  if (enabled) {
+    sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
+    closeSideNav()
+  } else if (sideNavOpenBeforeWatchOverlay !== null) {
+    if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
+      store.commit('toggleSideNav')
+    }
+
+    sideNavOpenBeforeWatchOverlay = null
+  }
+}, { immediate: true })
+
+function closeSideNav() {
+  if (isSideNavOpen.value) {
+    store.commit('toggleSideNav')
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isAnyPromptOpen = computed(() => store.getters.isAnyPromptOpen)

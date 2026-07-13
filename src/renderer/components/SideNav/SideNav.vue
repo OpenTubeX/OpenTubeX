@@ -1,7 +1,7 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{opened: isOpen}, applyHiddenLabels]"
+    :class="[{ opened: isOpen, expanded: isOpen || props.forceExpanded }, applyHiddenLabels]"
     role="navigation"
   >
     <div
@@ -261,6 +261,13 @@ const { locale, t } = useI18n()
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 
+const props = defineProps({
+  forceExpanded: {
+    type: Boolean,
+    default: false
+  }
+})
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const isOpen = computed(() => {
   return store.getters.getIsSideNavOpen
@@ -339,7 +346,7 @@ const showWatchStats = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideText = computed(() => {
-  return !isOpen.value && store.getters.getHideLabelsSideBar
+  return !isOpen.value && !props.forceExpanded && store.getters.getHideLabelsSideBar
 })
 
 const applyNavIconExpand = computed(() => {

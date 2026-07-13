@@ -155,6 +155,9 @@ const lastSuggestionQuery = ref('')
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
+const useWatchSideNavOverlay = computed(() => {
+  return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
+})
 /** @type {import('vue').ComputedRef<boolean>} */
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
@@ -665,7 +668,7 @@ onMounted(() => {
 
   // Store is not up-to-date when the component mounts, so we use timeout.
   setTimeout(() => {
-    if (store.getters.getExpandSideBar) {
+    if (store.getters.getExpandSideBar && !useWatchSideNavOverlay.value) {
       toggleSideNav()
     }
   }, 0)
