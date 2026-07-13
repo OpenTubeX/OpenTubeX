@@ -104,6 +104,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  useHideUpcomingPremieresPreference: {
+    type: Boolean,
+    default: true,
+  },
   hideForbiddenTitles: {
     type: Boolean,
     default: true
@@ -188,6 +192,8 @@ const hideLiveStreams = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideUpcomingPremieres = computed(() => {
+  if (!props.useHideUpcomingPremieresPreference) { return false }
+
   return store.getters.getHideUpcomingPremieres
 })
 

@@ -705,8 +705,9 @@ Settings:
     Unable to read file: Unable to read file
     Unable to write file: Unable to write file
     Unknown data key: Unknown data key
-    Unknown setting key: Unknown setting key
-    Non-transferable setting key: Non-transferable setting key
+    Setting object has insufficient data, skipping item: Setting object has insufficient data, skipping item
+    Unknown setting key: 'Unknown setting key: {key}'
+    Non-transferable setting key: 'Non-transferable setting key: {key}'
     How do I import my subscriptions?: How do I import my subscriptions?
     Import subscriptions formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup or FreeTube export (.json)'
     Import history formats: 'Supported formats: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
@@ -874,6 +875,7 @@ Channel:
   This channel does not allow searching: This channel does not allow searching
   This channel is age-restricted and currently cannot be viewed in OpenTubeX.: This channel is age-restricted and currently cannot be viewed in OpenTubeX.
   Channel Tabs: Channel Tabs
+  View All: View All
   Videos:
     Videos: Videos
     This channel does not currently have any videos: This channel does not currently

@@ -131,7 +131,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
 import store from '../../store/index'
-import { defaultUpdaterId } from '../../store/modules/settings'
+import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../store/modules/settings'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
@@ -1634,20 +1634,36 @@ async function importSettings() {
     return
   }
 
-  const { content } = response
-  const importedSettings = JSON.parse(content)
+  const content = response.content.trim()
+  let importedSettings
+  try {
+    importedSettings = JSON.parse(content)
+  } catch {
+    importedSettings = Object.fromEntries(
+      content.split('\n').map((rawEntry) => {
+        const entry = JSON.parse(rawEntry)
+        if (typeof entry._id !== 'string' || !Object.hasOwn(entry, 'value')) {
+          showToast(t('Settings.Data Settings.Setting object has insufficient data, skipping item'))
+          console.error('Missing keys:', entry)
+          return []
+        }
+        return [entry._id, entry.value]
+      }).filter((entry) => entry.length > 0)
+    )
+  }
+
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings
 
   for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
     if (!Object.hasOwn(currentSettings, importedKey)) {
-      const message = `${t('Settings.Data Settings.Unknown setting key')}: ${importedKey}`
+      const message = t('Settings.Data Settings.Unknown setting key', { key: importedKey })
       showToast(message)
       continue
     }
 
-    if (!Object.hasOwn(currentTransferableSettings, importedKey)) {
-      const message = `${t('Settings.Data Settings.Non-transferable setting key')}: ${importedKey}`
+    if (NON_TRANSFERABLE_SETTINGS.has(importedKey)) {
+      const message = t('Settings.Data Settings.Non-transferable setting key', { key: importedKey })
       showToast(message)
       continue
     }
@@ -1667,13 +1683,15 @@ async function importSettings() {
 }
 
 async function exportSettings() {
+  const settingDb = Object.entries(transferableSettings.value)
+    .map(([_id, value]) => JSON.stringify({ _id, value }))
+    .join('\n') + '\n'
   const dateStr = getTodayDateStrLocalTimezone()
   const exportFileName = `opentubex-settings-${dateStr}.db`
-  const settingsContent = JSON.stringify(transferableSettings.value)
 
   await promptAndWriteToFile(
     exportFileName,
-    settingsContent,
+    settingDb,
     t('Settings.Data Settings.Settings File'),
     'application/x-freetube-db',
     '.db',
