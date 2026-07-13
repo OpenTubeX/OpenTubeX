@@ -105,6 +105,10 @@
   color: var(--tertiary-text-color);
 }
 
+.videoCategory {
+  white-space: nowrap;
+}
+
 .likeSection {
   color: var(--tertiary-text-color);
   display: flex;

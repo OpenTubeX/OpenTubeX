@@ -39,12 +39,6 @@
     >
       {{ license }}
     </bdi>
-    <bdi
-      v-if="category && showFullDescription"
-      class="category"
-    >
-      <strong>{{ $t('Description.Video Category') }}</strong> {{ category }}
-    </bdi>
     <span
       v-if="showControls && showFullDescription"
       class="descriptionStatus"
@@ -73,10 +67,6 @@ const props = defineProps({
     default: ''
   },
   descriptionHtml: {
-    type: String,
-    default: ''
-  },
-  category: {
     type: String,
     default: ''
   },

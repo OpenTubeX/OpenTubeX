@@ -43,6 +43,12 @@
         >
           <span class="seperator">•</span><span class="videoViews">{{ parsedViewCount }}</span>
         </template>
+        <template v-if="category">
+          <span class="seperator">•</span>
+          <bdi class="videoCategory">
+            <strong>{{ t('Description.Video Category') }}</strong> {{ category }}
+          </bdi>
+        </template>
       </div>
       <div
         v-if="!hideVideoLikesAndDislikes"
@@ -277,6 +283,10 @@ const props = defineProps({
   dislikeCount: {
     type: Number,
     default: 0
+  },
+  category: {
+    type: String,
+    default: ''
   },
   getTimestamp: {
     type: Function,
