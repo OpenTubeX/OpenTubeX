@@ -262,6 +262,12 @@ Settings:
       Disabled: Deaktiviert
       Watch Only: Nur in der Videoansicht
       Entire App: Komplette Anwendung (eventuell unsicher)
+    Extra Thumbnail Action Button:
+      Extra Thumbnail Action Button: Zusätzliche Aktion auf Vorschaubildern
+      None: Keine
+      Mark as Watched: Als „gesehen“ markieren
+      Copy YouTube Link: YouTube-Link kopieren
+      Open in YouTube: Auf YouTube öffnen
   Theme Settings:
     Theme Settings: Farbschema
     Match Top Bar with Main Color: Obere Leiste an Hauptfarbe anpassen
@@ -382,6 +388,7 @@ Settings:
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
     Hide OpenTubeX Header Logo: OpenTubeX-Titellogo ausblenden
+    Hide Side Bar on Watch Pages: Seitenleiste auf den Wiedergabeseiten ausblenden
   Player Settings:
     Player Settings: Video-Player
     Play Next Video: Empfohlene Videos automatisch abspielen
@@ -506,6 +513,8 @@ Settings:
         Semi-auto: Halbautomatisch
         Auto: Automatisch
         Never: Nie
+    Enable Watch Statistics: Wiedergabe-Statistiken aktivieren
+    Week Starts On: Die Woche beginnt am
   Data Settings:
     How do I import my subscriptions?: Wie importiere ich meine Abos?
     Unknown data key: Unbekannter Datenschlüssel
@@ -553,12 +562,13 @@ Settings:
     Settings Tooltip: Einstellungen die Betriebssystem/Benutzerspezifisch oder experimentell sind können nicht exportiert oder importiert werden (z.B. Proxy, Externer Video-Player, Screenshot Ordner, ...)
     All settings have been successfully imported: Alle Einstellungen wurden erfolgreich importiert
     All settings have been successfully exported: Alle Einstellungen wurden erfolgreich exportiert
-    Unknown setting key: Unbekannter Einstellungsschlüssel
-    Non-transferable setting key: Nicht übertragbarer Einstellungsschlüssel
+    Unknown setting key: 'Unbekannter Einstellungsschlüssel: {key}'
+    Non-transferable setting key: 'Nicht übertragbarer Einstellungsschlüssel: {key}'
     Import subscriptions formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup oder FreeTube export (.json)'
     Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db)'
     Import search history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json)'
+    Setting object has insufficient data, skipping item: Das Einstellungsobjekt enthält nicht genügend Daten; Element wird übersprungen
   Distraction Free Settings:
     Hide Live Chat: Live-Chat ausblenden
     Hide Popular Videos: Beliebte Videos ausblenden
@@ -781,6 +791,7 @@ Channel:
   Courses:
     This channel does not currently have any courses: Dieser Kanal hat derzeit keine Kurse
     Courses: Kurse
+  View All: Alle anzeigen
 Video:
   Open in YouTube: In YouTube öffnen
   Copy YouTube Link: YouTube-Link kopieren
@@ -936,6 +947,7 @@ Video:
       Play: Abspielen
       Pause: Pausieren
       Drag Handle: Mini-Player verschieben
+    MusicPlaybackRateOverride: Musikvideo erkannt, wird mit 1-facher Geschwindigkeit wiedergegeben
   IP block: YouTube hat deine IP-Adresse für die Videowiedergabe gesperrt. Bitte versuche, einen anderen VPN oder Proxy zu nutzen.
   Unlisted: Nicht gelistet
   AI: KI
@@ -958,6 +970,8 @@ Video:
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Verbleibende SABR-Wartezeit: {remindingTimeSeconds}s'
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Verbleibende Werbezeit: {remindingTimeSeconds}s'
   Private: Private Videos können in OpenTubeX nicht angesehen werden, da sie Google-Anmeldung und den Besitz des Videos erfordern.
+  Failed to load collaborators: Fehler beim Laden der Collab-Partner
+  Collaborators: Collab-Partner
 Playlist:
   #& About
   View Full Playlist: Vollständige Playlist ansehen
@@ -1233,6 +1247,9 @@ KeyboardShortcutPrompt:
     App:
       Situational: 'App: situationsbezogen'
       General: 'App: allgemein'
+      Tabs: 'App: Tabs'
+      Search and Page: 'App: Suche & Seite'
+      Window and View: 'App: Fenster & Ansicht'
   History Backward: Eine Seite zurückgehen
   New Window: Ein neues Fenster öffnen
   Navigate to Settings: Zur Einstellungsseite navigieren
@@ -1277,6 +1294,16 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Zum vorherigen Video in der Playlist springen
   Toggle Normal Playback Speed: Zwischen 1x Wiedergabegeschwindigkeit und der vorherigen Geschwindigkeit wechseln
   Tab Switcher: Tab-Wechsler
+  New Tab: Einen neuen Tab erstellen
+  Close Tab: Den aktuellen Tab schließen
+  Reload Tab: Den aktuellen Tab neu laden
+  Reopen Closed Tab: Den zuletzt geschlossenen Tab wieder öffnen
+  Next Tab: Wechsle zum nächsten Tab
+  Previous Tab: Wechsle zum vorherigen Tab
+  Switch to Tab: Wechsle zu Tab 1-9
+  Find in Page: Text auf der aktuellen Seite suchen
+  Find Next Match: Zum nächsten Treffer springen
+  Find Previous Match: Zum vorherigen Treffer springen
 shortcutLabelSeparator: ｜
 Compact side navigation: Seitenleiste minimieren
 Expand side navigation: Seitenleiste erweitern
@@ -1292,3 +1319,37 @@ Previous match: Vorheriger Treffer
 Next match: Nächster Treffer
 Close find bar: Suchleiste schließen
 No matches: Keine Treffer
+Stats:
+  Stats: Statistik
+  Watch time summary: Übersicht der Wiedergabezeit
+  Today: Heute
+  This week: Diese Woche
+  Total watch time: Gesamte Wiedergabezeit
+  Daily average: Tagesdurchschnitt
+  So far today: Bisher heute
+  Since: Seit {day}
+  All recorded time: Gesamte aufgezeichnete Zeit
+  Per calendar day: Pro Kalendertag
+  Day by day: Tag für Tag
+  Week by week: Woche für Woche
+  Last 14 days: Letzte 14 Tage
+  Last 8 weeks: Letzte 8 Wochen
+  Daily chart aria: Tägliche Wiedergabezeit der letzten 14 Tage
+  Weekly chart aria: Wöchentliche Wiedergabezeit der letzten 8 Wochen
+  No data: Die Wiedergabezeit wird hier angezeigt, wenn du dir Videos ansiehst.
+  Estimate note: Die Wiedergabezeit vor diesem Update wird anhand deines gespeicherten Wiedergabefortschritts geschätzt.
+  Adjust imported watch time: Importierte Wiedergabezeit anpassen
+  Imported watch time: Importierte Wiedergabezeit
+  Imported watch time explanation: Wähle die Wiedergabegeschwindigkeit, die du normalerweise verwendet hast. Die Dauer der importierten Videos wird durch diese Geschwindigkeit geteilt, um die tatsächliche Zeit zu schätzen, die du geschaut hast.
+  Playback speed: Wiedergabegeschwindigkeit
+  Channel speed note: Gespeicherte Wiedergabegeschwindigkeiten pro Kanal werden verwendet, wenn verfügbar.
+  Apply playback speed: Wiedergabegeschwindigkeit anwenden
+  Imported watch time adjusted: Die importierte Wiedergabezeit wurde angepasst
+  Reset statistics: Statistiken zurücksetzen
+  Reset: Zurücksetzen
+  Reset confirmation: Möchtest du wirklich alle Wiedergabe-Statistiken zurücksetzen? Dieser Vorgang kann nicht rückgängig gemacht werden.
+  Reset success: Wiedergabe-Statistiken wurden zurückgesetzt
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} h'
+  Hours and minutes: '{hours} h {minutes} min'
