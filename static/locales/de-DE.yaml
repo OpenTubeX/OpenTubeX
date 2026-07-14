@@ -25,6 +25,7 @@ Forward: Vorwärts
 # Global
 # Anything shared among components / views should be put here
 Global:
+  Ambient Mode: Beleuchtung wie im Kino
   Videos: Videos
   Shorts: Shorts
   Live: Live
@@ -1143,6 +1144,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
+    Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
