@@ -944,7 +944,7 @@ function handleWatchPageLinkClick(event) {
       path: `/watch/${id.value}`,
       query: watchPageLinkQuery.value,
       doCreateNewWindow: event.shiftKey,
-      doCreateNewTab: true,
+      doCreateNewTab: !event.shiftKey,
       makeActive: false
     })
   }
@@ -960,7 +960,7 @@ function handleChannelLinkClick(event) {
   openInternalPath({
     path: `/channel/${channelId.value}`,
     doCreateNewWindow: event.shiftKey,
-    doCreateNewTab: true,
+    doCreateNewTab: !event.shiftKey,
     makeActive: false
   })
 }
