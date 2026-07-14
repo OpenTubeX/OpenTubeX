@@ -55,6 +55,16 @@ export class AmbientModeButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    if (this.isSubMenu) {
+      this.eventManager.listen(this.controls, 'submenuopen', () => {
+        this.updateVisibility_()
+      })
+
+      this.eventManager.listen(this.controls, 'submenuclose', () => {
+        this.updateVisibility_()
+      })
+    }
+
     /** @private */
     this.stopAmbientModeWatch_ = watch(this.ambientMode_, () => {
       this.updateLocalisedStrings_()
@@ -75,5 +85,10 @@ export class AmbientModeButton extends shaka.ui.Element {
     this.nameSpan_.textContent = label
     this.currentState_.textContent = this.localization.resolve(this.ambientMode_.value ? 'ON' : 'OFF')
     this.button_.ariaLabel = label
+  }
+
+  /** @private */
+  updateVisibility_() {
+    this.button_.classList.toggle('shaka-hidden', this.isSubMenuOpened)
   }
 }
