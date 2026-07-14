@@ -50,6 +50,9 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Focus search bar when pressing <kbd>/</kbd> key in addition to <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>L</kbd>
 
+- In-page search with <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>F</kbd>, including previous and next match navigation
+<img width="742" height="181" alt="image" src="https://github.com/user-attachments/assets/b4f651f1-321f-4b83-a392-67367b677497" />
+
 - SponsorBlock auto-skip temporary toggle under video player
 <img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
 
@@ -59,21 +62,26 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="331" height="87" alt="image" src="https://github.com/user-attachments/assets/996c0816-b237-47b6-8b7a-88f39f8e104c" />
 
 - Supports SponsorBlock community contributed chapters, Highlight and Hook/Greetings category
+- SponsorBlock category labels when hovering over segments on the seekbar
+<img width="556" height="221" alt="image" src="https://github.com/user-attachments/assets/177e216b-2eec-4f54-9aa9-ea98f5d89e18" />
+
 - Experimental SponsorBlock submission
 
-- Tabs like in a web browser
+- Tabs like in a web browser, including pinning, colors, thumbnail previews, duplication, unloading, reordering, moving tabs between windows, bulk closing, copying YouTube links and configurable session restoration
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
 
 - Option to define a script to run when YouTube blocked your IP. It will automatically run it and reload the video after it has finished
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
 
-- Auto Picture-in-Picture: automatically enter PiP when switching tabs or scrolling away from a video
-<img height="200" alt="image" src="https://github.com/user-attachments/assets/acb02ab5-2d9b-4e03-9c63-5f3988e2ddcb" />
+- Auto Picture-in-Picture and scroll mini-player options
+<img width="477" height="73" alt="image" src="https://github.com/user-attachments/assets/ec0c130a-5af1-46d4-a970-1728a2f14472" />
+<br />
+<img width="400" height="211" alt="617132918-af4e2dc6-2eb6-49c4-bf95-92656237627a" src="https://github.com/user-attachments/assets/74411434-6ec6-4394-801f-2676074a742e" />
 
 - Loop & Copy link in player context menu
 <img height="200" alt="image" src="https://github.com/user-attachments/assets/24f7716f-27de-421d-8740-f9a5e30ed1e6" />
 
-- Optional Quick Playback Speed Bar in the player
+- Optional, fully customizable Quick Playback Speed Bar in the player
 <img width="488" height="44" alt="image" src="https://github.com/user-attachments/assets/cd055a73-d188-4633-aac6-61ab708a4cd6" />
 
 - Return YouTube Dislike Support
@@ -85,8 +93,32 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Player shortcut <kbd>G</kbd> to toggle between 1x and the last playback speed
 
-- Auto refresh subscriptions option
-<img width="237" height="264" alt="image" src="https://github.com/user-attachments/assets/a7a84b8a-f0a4-40d6-9c5e-68a1dc9abb07" />
+- Auto refresh subscriptions options
+<img width="246" height="226" alt="image" src="https://github.com/user-attachments/assets/31dfc690-b8a3-4ffd-994e-a53e59d0e71f" />
+
+- Watch time statistics with daily and weekly charts
+<img width="1762" height="546" alt="image" src="https://github.com/user-attachments/assets/61942468-a351-4a8c-813e-a7504828121f" />
+
+- Configurable extra thumbnail action button
+<img width="261" height="175" alt="image" src="https://github.com/user-attachments/assets/2d7d7549-db79-4d9d-9063-77124d3a9750" />
+<img width="94" height="43" alt="image" src="https://github.com/user-attachments/assets/1f74350c-11cc-4515-8e0e-9abedcebaa71" />
+
+- Additional video metadata, including AI-generated content labels, collaborators, categories, relative publication dates and comment counts
+<img width="510" height="330" alt="image" src="https://github.com/user-attachments/assets/90cfb4b3-1d26-438d-86de-c1be2e8858ce" />
+<br />
+<img width="488" height="142" alt="image" src="https://github.com/user-attachments/assets/ceaa25b3-2157-4904-80ad-619426862c1d" />
+<br />
+<img width="447" height="158" alt="image" src="https://github.com/user-attachments/assets/36674aa1-e6e9-4332-9018-0357667291c5" />
+
+- Reorder playlist items during playback and remember the reverse state of each playlist
+
+- Reload comments and copy direct YouTube links to comments
+<img width="597" height="132" alt="image" src="https://github.com/user-attachments/assets/81b94e05-e389-43c8-b01a-39f1d53f4932" />
+
+- Import subscriptions and watch history from [LibreTube](https://github.com/libre-tube/LibreTube)
+
+- Optional confirmation before closing the app
+<img width="457" height="237" alt="image" src="https://github.com/user-attachments/assets/a5e37f65-62ba-4fce-bc43-d408f7f17ce7" />
 
 
 ## Screenshots
