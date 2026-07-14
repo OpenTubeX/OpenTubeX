@@ -218,7 +218,7 @@ export async function refreshSubscriptionVideosFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscriptions'))
+    showToast(t('Subscriptions.Refreshing Subscription Videos'))
   }
 
   const subscriptionUpdates = []
@@ -309,7 +309,7 @@ export async function refreshSubscriptionShortsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscriptions'))
+    showToast(t('Subscriptions.Refreshing Subscription Shorts'))
   }
 
   const subscriptionUpdates = []
@@ -382,7 +382,7 @@ export async function refreshSubscriptionLiveFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscriptions'))
+    showToast(t('Subscriptions.Refreshing Subscription Live Streams'))
   }
 
   const subscriptionUpdates = []
@@ -473,7 +473,7 @@ export async function refreshSubscriptionPostsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscriptions'))
+    showToast(t('Subscriptions.Refreshing Subscription Posts'))
   }
 
   const subscriptionUpdates = []

@@ -178,7 +178,10 @@ Subscriptions:
   Load More Posts: Load More Posts
   Subscriptions Tabs: Subscriptions Tabs
   All Subscription Tabs Hidden: 'All subscription tabs are hidden. To see content here, please unhide some tabs in the "{subsection}" section in "{settingsSection}".'
-  Refreshing Subscriptions: Refreshing subscriptions
+  Refreshing Subscription Videos: Refreshing subscription videos
+  Refreshing Subscription Shorts: Refreshing subscription shorts
+  Refreshing Subscription Live Streams: Refreshing subscription live streams
+  Refreshing Subscription Posts: Refreshing subscription posts
 More: More
 Channels:
   Channels: Channels
