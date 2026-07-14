@@ -1839,6 +1839,21 @@ export class TabManager {
   }
 
   /**
+   * Load an unloaded tab without activating it.
+   * @param {string} tabId
+   * @returns {boolean} Whether the tab started loading
+   */
+  loadTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
+      return false
+    }
+
+    this._startTabLoad(tab)
+    return true
+  }
+
+  /**
    * Unload a tab's renderer while keeping its URL and title in the tab strip.
    * @param {string} tabId
    * @returns {Promise<boolean>} Whether the tab was unloaded

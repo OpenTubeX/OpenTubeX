@@ -283,6 +283,7 @@ function runApp() {
       const contextMenuTab = manager?.contextMenuTabId != null
         ? manager.tabs.get(manager.contextMenuTabId)
         : undefined
+      const isContextMenuTabUnloaded = contextMenuTab?.hasStartedLoading === false
       const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuOnTabBar === true
       const contextMenuTabRoute = contextMenuTab ? getOpenTubeXRouteFromUrl(contextMenuTab.url) : null
       const contextMenuTabYouTubeUrl = isShareableOpenTubeXRoute(contextMenuTabRoute)
@@ -467,12 +468,18 @@ function runApp() {
           }
         },
         {
-          label: 'Unload Tab',
+          label: isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab',
           visible: contextMenuTab != null,
-          enabled: contextMenuTab?.hasStartedLoading === true &&
-            (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1),
+          enabled: isContextMenuTabUnloaded ||
+            (contextMenuTab?.hasStartedLoading === true &&
+              (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1)),
           click: () => {
             if (!manager || !contextMenuTab) return
+
+            if (isContextMenuTabUnloaded) {
+              manager.loadTab(contextMenuTab.id)
+              return
+            }
 
             manager.unloadTab(contextMenuTab.id).catch(error => {
               console.error('Failed to unload tab:', error)
