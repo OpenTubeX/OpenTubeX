@@ -1331,6 +1331,7 @@ Stats:
   All recorded time: Gesamte aufgezeichnete Zeit
   Per calendar day: Pro Kalendertag
   Day by day: Tag für Tag
+  Highest: 'Höchstwert: {duration}'
   Week by week: Woche für Woche
   Last 14 days: Letzte 14 Tage
   Last 8 weeks: Letzte 8 Wochen

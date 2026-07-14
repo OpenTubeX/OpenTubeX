@@ -140,6 +140,7 @@ Stats:
   All recorded time: All recorded time
   Per calendar day: Per calendar day
   Day by day: Day by day
+  Highest: 'Highest: {duration}'
   Week by week: Week by week
   Last 14 days: Last 14 days
   Last 8 weeks: Last 8 weeks

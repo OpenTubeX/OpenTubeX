@@ -33,7 +33,9 @@
               </p>
               <h2>{{ t('Stats.Last 14 days') }}</h2>
             </div>
-            <span class="chartScale">{{ formatDuration(dailyMaximum) }}</span>
+            <span class="chartScale">
+              {{ t('Stats.Highest', { duration: formatDuration(dailyMaximum) }) }}
+            </span>
           </div>
 
           <div
@@ -140,6 +142,9 @@
               </p>
               <h2>{{ t('Stats.Last 8 weeks') }}</h2>
             </div>
+            <span class="chartScale">
+              {{ t('Stats.Highest', { duration: formatDuration(weeklyMaximum) }) }}
+            </span>
           </div>
 
           <div
@@ -488,7 +493,7 @@ const dailyChart = computed(() => {
   return { area, data, points }
 })
 
-const weeklyData = computed(() => {
+const weeklyTotals = computed(() => {
   const labelFormatter = new Intl.DateTimeFormat(locale.value, { month: 'short', day: 'numeric' })
   const fullFormatter = new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' })
   const currentWeek = startOfWeek(new Date())
@@ -509,12 +514,15 @@ const weeklyData = computed(() => {
     if (week) { week.seconds += seconds }
   })
 
-  const maximum = Math.max(...weeks.map(week => week.seconds), 0)
-  return weeks.map(week => ({
-    ...week,
-    percentage: maximum === 0 ? 0 : Math.max((week.seconds / maximum) * 100, week.seconds > 0 ? 3 : 0),
-  }))
+  return weeks
 })
+
+const weeklyMaximum = computed(() => Math.max(...weeklyTotals.value.map(week => week.seconds), 0))
+
+const weeklyData = computed(() => weeklyTotals.value.map(week => ({
+  ...week,
+  percentage: weeklyMaximum.value === 0 ? 0 : Math.max((week.seconds / weeklyMaximum.value) * 100, week.seconds > 0 ? 3 : 0),
+})))
 </script>
 
 <style scoped src="./Stats.css" />
