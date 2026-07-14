@@ -240,7 +240,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { marked } from 'marked'
+import { Marked } from 'marked'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -272,6 +272,54 @@ import {
 import { translateWindowTitle } from './helpers/strings'
 import { loadLocale } from './i18n/index'
 import { getTabAccentColor } from './constants/tabColors'
+
+const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
+const LOCAL_REPOSITORY = 'opentubex/opentubex'
+const UPSTREAM_REPOSITORY = 'freetubeapp/freetube'
+
+const releaseNotesMarkdown = new Marked({
+  extensions: [{
+    name: 'issueReference',
+    level: 'inline',
+    start: (source) => source.search(/#\d+\b/),
+    tokenizer(source, tokens) {
+      const match = /^#(\d+)\b/.exec(source)
+      const previousToken = tokens.at(-1)
+
+      if (match && !this.lexer.state.inLink && !/[\w/]$/.test(previousToken?.raw ?? '')) {
+        return {
+          type: 'issueReference',
+          raw: match[0],
+          issueNumber: match[1]
+        }
+      }
+    },
+    renderer({ issueNumber }) {
+      return `<a href="https://github.com/OpenTubeX/OpenTubeX/issues/${issueNumber}">#${issueNumber}</a>`
+    }
+  }],
+  renderer: {
+    link(token) {
+      const match = GITHUB_ISSUE_URL_PATTERN.exec(token.href)
+
+      if (!match) {
+        return false
+      }
+
+      const [, owner, repository, issueNumber] = match
+      const repositoryName = `${owner}/${repository}`
+      let label = `${repositoryName}#${issueNumber}`
+
+      if (repositoryName.toLowerCase() === LOCAL_REPOSITORY) {
+        label = `#${issueNumber}`
+      } else if (repositoryName.toLowerCase() === UPSTREAM_REPOSITORY) {
+        label = `${owner}#${issueNumber}`
+      }
+
+      return `<a href="${token.href}">${label}</a>`
+    }
+  }
+})
 
 const route = useRoute()
 const router = useRouter()
@@ -739,7 +787,7 @@ async function checkForNewUpdates() {
     // Add the title
     changelog = `${changelog}`
 
-    updateChangelog.value = marked.parse(changelog)
+    updateChangelog.value = releaseNotesMarkdown.parse(changelog)
     changeLogTitle.value = json[0].name
     latestVersionNumber.value = versionNumber
 

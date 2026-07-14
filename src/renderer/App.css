@@ -91,6 +91,16 @@
   overflow-wrap: break-word;
 }
 
+.changeLogText :deep(img) {
+  display: block;
+  max-inline-size: 100%;
+  margin-block: 8px;
+}
+
+.changeLogText :deep(img[width]) {
+  block-size: auto;
+}
+
 .findbar {
   position: fixed;
   inset-block-start: 102px;

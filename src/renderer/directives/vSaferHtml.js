@@ -3,6 +3,7 @@ import DOMPurify from 'dompurify'
 const USE_NATIVE_SANITIZER = process.env.IS_ELECTRON || ('Sanitizer' in window && typeof HTMLElement.prototype.setHTML === 'function')
 
 let sanitizer
+let lenientSanitizer
 /** @type {import('dompurify').Config | undefined} */
 let domPurifyStrictConfig
 
@@ -10,9 +11,37 @@ let domPurifyStrictConfig
 export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
   if (oldValue === null || value !== oldValue) {
     if (modifiers.lenient) {
-      // Use the default browser sanitizer configuration e.g. for the changelog
       if (USE_NATIVE_SANITIZER) {
-        element.setHTML(value)
+        if (lenientSanitizer === undefined) {
+          lenientSanitizer = new Sanitizer({
+            comments: false,
+            elements: [
+              'blockquote', 'br', 'code', 'del', 'details', 'em',
+              'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'kbd',
+              'p', 'pre', 's', 'strong', 'summary',
+              'table', 'tbody', 'td', 'th', 'thead', 'tr',
+              'ul',
+              {
+                name: 'a',
+                attributes: ['href', 'title']
+              },
+              {
+                name: 'img',
+                attributes: ['alt', 'height', 'loading', 'src', 'title', 'width']
+              },
+              {
+                name: 'li',
+                attributes: ['value']
+              },
+              {
+                name: 'ol',
+                attributes: ['start']
+              }
+            ]
+          })
+        }
+
+        element.setHTML(value, { sanitizer: lenientSanitizer })
       } else {
         element.innerHTML = DOMPurify.sanitize(value, { RETURN_TRUSTED_TYPE: false })
       }
