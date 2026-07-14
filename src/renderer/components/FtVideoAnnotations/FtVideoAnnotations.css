@@ -1,0 +1,230 @@
+.videoAnnotations {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  container-type: inline-size;
+  pointer-events: none;
+}
+
+.annotationToggle {
+  position: absolute;
+  inset-block-start: max(8px, 1.5%);
+  inset-inline-end: max(8px, 1.5%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 3px;
+  padding-block: 5px;
+  padding-inline: 8px;
+  background: rgb(0 0 0 / 72%);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 45%);
+  color: #fff;
+  font: inherit;
+  font-size: clamp(10px, 1.3cqw, 14px);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.annotationToggle:hover,
+.annotationToggle:focus-visible {
+  background: rgb(0 0 0 / 90%);
+}
+
+.annotation {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: clamp(3px, 0.7cqw, 9px);
+  background: #000;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 55%);
+  color: #fff;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.annotation:hover,
+.annotation:focus-visible {
+  border-color: #fff;
+  box-shadow: 0 3px 14px rgb(0 0 0 / 70%);
+  transform: scale(1.025);
+}
+
+.annotationThumbnail {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.annotationTitle {
+  --annotation-title-padding: clamp(3px, 0.75cqw, 10px);
+
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  overflow: hidden;
+  padding: var(--annotation-title-padding);
+  background: linear-gradient(to bottom, rgb(0 0 0 / 88%), transparent);
+  font-size: clamp(8px, 1.55cqw, 20px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px #000;
+}
+
+.annotationTitleText {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.annotationBadge {
+  position: absolute;
+  inset-block-end: clamp(3px, 0.55cqw, 8px);
+  inset-inline-end: clamp(3px, 0.55cqw, 8px);
+  border-radius: 2px;
+  padding-block: 2px;
+  padding-inline: 4px;
+  background: rgb(0 0 0 / 78%);
+  font-size: clamp(8px, 1.25cqw, 15px);
+  line-height: 1.2;
+}
+
+.channelAnnotation {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.channelAvatarLink {
+  position: relative;
+  z-index: 5;
+  display: block;
+  overflow: hidden;
+  inline-size: 100%;
+  block-size: 100%;
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: 50%;
+  background: #000;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 55%);
+  pointer-events: auto;
+  transform: scale(var(--channel-avatar-hover-scale));
+  transition: box-shadow 120ms ease;
+}
+
+.channelAvatarLink:hover,
+.channelAvatarLink:focus-visible {
+  border-color: #fff;
+  box-shadow: 0 3px 14px rgb(0 0 0 / 70%);
+}
+
+.channelHovercard {
+  --hovercard-padding: min(2.2cqw, 24px);
+
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 0;
+  z-index: 4;
+  display: block;
+  visibility: hidden;
+  box-sizing: border-box;
+  inline-size: 45cqw;
+  min-block-size: 17cqw;
+  padding-block: var(--hovercard-padding);
+  padding-inline: var(--hovercard-padding) calc(var(--channel-avatar-size) + var(--hovercard-padding));
+  border: 1px solid rgb(0 0 0 / 25%);
+  border-radius: min(0.7cqw, 8px);
+  background: #fff;
+  box-shadow: 0 4px 18px rgb(0 0 0 / 55%);
+  color: #282828;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.98);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+}
+
+.channelAnnotationAlignStart .channelHovercard {
+  inset-inline: 0 auto;
+  padding-inline: calc(var(--channel-avatar-size) + var(--hovercard-padding)) var(--hovercard-padding);
+}
+
+.channelAnnotation:hover .channelHovercard,
+.channelAnnotation:focus-within .channelHovercard {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+
+.channelHovercardInfo {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+}
+
+.channelHovercardTitle {
+  overflow: hidden;
+  color: #065fd4;
+  font-size: clamp(11px, 1.55cqw, 18px);
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.channelHovercardTitle:hover,
+.channelHovercardTitle:focus-visible {
+  text-decoration: underline;
+}
+
+.annotationSubscribeButton {
+  margin-block: min(0.7cqw, 8px) min(1.1cqw, 12px);
+}
+
+.annotationSubscribeButton :deep(.buttonList) {
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.annotationSubscribeButton :deep(.btn) {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none;
+  color: #282828 !important;
+  font-size: clamp(10px, 1.25cqw, 15px);
+  font-weight: 600;
+}
+
+.channelHovercardDescription {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  padding-block-start: min(1.2cqw, 14px);
+  border-block-start: 1px solid #ddd;
+  color: #707070;
+  font-size: clamp(9px, 1.2cqw, 14px);
+  line-height: 1.35;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+}
+
+:global(.scrollMiniPlayer) .videoAnnotations {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .annotation,
+  .channelAvatarLink,
+  .channelHovercard {
+    transition: none;
+  }
+}

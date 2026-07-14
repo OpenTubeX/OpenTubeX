@@ -1083,6 +1083,10 @@ Video:
     Take Screenshot: Take Screenshot
     Show Stats: Show Stats
     Hide Stats: Hide Stats
+    Hide Annotations: Hide annotations
+    Show Annotations: Show annotations
+    Hide: Hide
+    Show: Show
     Stats:
       Stats: Stats
       Video ID: 'Video ID: {videoId}'

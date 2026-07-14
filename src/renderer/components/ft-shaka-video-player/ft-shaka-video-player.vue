@@ -51,6 +51,10 @@
       ref="vrCanvas"
       class="vrCanvas"
     />
+    <FtVideoAnnotations
+      :annotations="annotations"
+      :current-time="annotationCurrentTime"
+    />
     <div
       v-if="showStats"
       class="stats"

@@ -28,6 +28,7 @@ import {
   getLocalVideoInfo,
   mapLocalLegacyFormat,
   parseLocalSubscriberCount,
+  parseLocalEndscreen,
   parseLocalVideoCollaborators,
   parseLocalTextRuns,
   parseLocalWatchNextVideo
@@ -144,6 +145,7 @@ export default defineComponent({
       videoPublished: 0,
       premiereDate: undefined,
       videoStoryboardSrc: '',
+      videoAnnotations: [],
       /** @type {string|null} */
       manifestSrc: null,
       /** @type {(MANIFEST_TYPE_DASH|MANIFEST_TYPE_HLS|MANIFEST_TYPE_SABR)} */
@@ -490,6 +492,7 @@ export default defineComponent({
       this.videoPublished = 0
       this.premiereDate = undefined
       this.videoStoryboardSrc = ''
+      this.videoAnnotations = []
       this.manifestSrc = null
       this.manifestMimeType = MANIFEST_TYPE_DASH
       this.sabrData = null
@@ -598,6 +601,8 @@ export default defineComponent({
           .map(parseLocalWatchNextVideo).filter(_ => _)
           // place watched recommended videos last
           .sort(this.sortWatchedVideosLast) ?? []
+
+        this.videoAnnotations = parseLocalEndscreen(result.endscreen)
 
         if (this.showFamilyFriendlyOnly && !this.isFamilyFriendly) {
           this.isLoading = false

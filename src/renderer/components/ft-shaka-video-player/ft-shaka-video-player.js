@@ -47,6 +47,7 @@ import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../help
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
+import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
@@ -91,6 +92,9 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
+  components: {
+    FtVideoAnnotations
+  },
   props: {
     format: {
       type: String,
@@ -135,6 +139,10 @@ export default defineComponent({
     storyboardSrc: {
       type: String,
       default: ''
+    },
+    annotations: {
+      type: Array,
+      default: () => []
     },
     videoId: {
       type: String,
@@ -269,6 +277,7 @@ export default defineComponent({
     const vrCanvas = ref(null)
 
     const hasLoaded = ref(false)
+    const annotationCurrentTime = ref(0)
 
     const hasMultipleAudioTracks = ref(false)
     const isLive = ref(props.isLive)
@@ -2514,6 +2523,7 @@ export default defineComponent({
       if (video.value) {
         const currentTime = video.value.currentTime
         sponsorBlockCurrentTime.value = currentTime
+        annotationCurrentTime.value = currentTime
 
         emit('timeupdate', currentTime)
         emitTerminalSponsorBlockOutroStarted(currentTime)
@@ -5591,6 +5601,7 @@ export default defineComponent({
       showStats,
       stats,
       playerDimensions,
+      annotationCurrentTime,
 
       autoplayVideos,
       sponsorBlockShowSkippedToast,

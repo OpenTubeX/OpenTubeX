@@ -45,6 +45,15 @@
   direction: ltr;
 }
 
+:deep(.shaka-controls-container:has(
+  .shaka-overflow-menu:not(.shaka-hidden),
+  .shaka-settings-menu:not(.shaka-hidden),
+  .shaka-sub-menu:not(.shaka-hidden),
+  .shaka-context-menu:not(.shaka-hidden)
+)) {
+  z-index: 3;
+}
+
 .sixteenByNine {
   aspect-ratio: 16 / 9;
 }

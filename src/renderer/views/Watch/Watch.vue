@@ -26,6 +26,7 @@
           :start-time="startTimeSeconds"
           :captions="captions"
           :storyboard-src="videoStoryboardSrc"
+          :annotations="videoAnnotations"
           :format="activeFormat"
           :thumbnail="thumbnail"
           :video-id="videoId"

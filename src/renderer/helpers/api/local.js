@@ -1929,6 +1929,66 @@ export function parseLocalWatchNextVideo(video) {
   }
 }
 
+/**
+ * @param {YTNodes.Endscreen | undefined} endscreen
+ */
+export function parseLocalEndscreen(endscreen) {
+  if (!endscreen) {
+    return []
+  }
+
+  return endscreen.elements.map((element) => {
+    const payload = element.endpoint.payload
+    let route
+
+    if (element.endpoint.name === 'watchEndpoint' && payload.videoId) {
+      route = {
+        path: `/watch/${payload.videoId}`,
+        query: payload.playlistId ? { playlistId: payload.playlistId } : undefined
+      }
+    } else if (element.endpoint.name === 'watchEndpoint' && payload.playlistId) {
+      route = `/playlist/${payload.playlistId}`
+    } else if (element.endpoint.name === 'watchPlaylistEndpoint' && payload.playlistId) {
+      route = `/playlist/${payload.playlistId}`
+    } else if (element.endpoint.name === 'browseEndpoint' && payload.browseId) {
+      route = element.style === 'CHANNEL'
+        ? `/channel/${payload.browseId}`
+        : `/playlist/${payload.browseId}`
+    }
+
+    const startTime = element.start_ms / 1000
+    const endTime = element.end_ms / 1000
+    const thumbnail = element.image?.find((image) => image.width <= 480)?.url ?? element.image?.at(-1)?.url
+    const hasValidGeometry = [element.left, element.top, element.width, element.aspect_ratio]
+      .every((value) => Number.isFinite(value))
+
+    if (!route || !thumbnail || !hasValidGeometry || element.width <= 0 || element.aspect_ratio <= 0 ||
+        !Number.isFinite(startTime) || !Number.isFinite(endTime) || startTime > endTime) {
+      return null
+    }
+
+    const durationOverlay = element.thumbnail_overlays
+      ?.find((overlay) => overlay.is(YTNodes.ThumbnailOverlayTimeStatus))
+
+    return {
+      id: element.id,
+      type: element.style,
+      title: element.title.text,
+      thumbnail,
+      channelId: element.style === 'CHANNEL' ? payload.browseId : undefined,
+      description: element.style === 'CHANNEL' ? element.metadata?.text ?? '' : '',
+      badge: durationOverlay?.text ?? element.playlist_length?.text ?? '',
+      route,
+      left: element.left,
+      top: element.top,
+      width: element.width,
+      aspectRatio: element.aspect_ratio,
+      startTime,
+      endTime
+    }
+  }).filter((annotation) => annotation !== null)
+}
+
 function convertSearchFilters(filters) {
   const convertedFilters = {}
 
