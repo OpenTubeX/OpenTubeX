@@ -410,10 +410,6 @@ const props = defineProps({
     type: String,
     required: true
   },
-  videoPlayerReady: {
-    type: Boolean,
-    required: true
-  },
   isPostComments: {
     type: Boolean,
     default: false,
@@ -490,7 +486,6 @@ const observeVisibilityOptions = computed(() => {
   if (!generalAutoLoadMorePaginatedItemsEnabled.value) {
     return false
   }
-  if (!props.videoPlayerReady && !props.isPostComments) { return false }
 
   return {
     /**

@@ -208,7 +208,6 @@
         :class="{ theatreWatchVideo: useTheatreMode }"
         :channel-thumbnail="channelThumbnail"
         :channel-name="channelName"
-        :video-player-ready="videoPlayerLoaded"
         @timestamp-event="changeTimestamp"
       />
     </div>
