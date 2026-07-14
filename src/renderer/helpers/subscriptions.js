@@ -14,6 +14,24 @@ import {
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
+const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
+const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
+
+async function fetchSubscriptionsInBatches(channels, fetchChannel) {
+  const results = []
+
+  for (let index = 0; index < channels.length; index += SUBSCRIPTION_FETCH_BATCH_SIZE) {
+    if (index > 0) {
+      await new Promise(resolve => setTimeout(resolve, SUBSCRIPTION_FETCH_BATCH_DELAY_MS))
+    }
+
+    const batch = channels.slice(index, index + SUBSCRIPTION_FETCH_BATCH_SIZE)
+    const batchResults = await Promise.all(batch.map(fetchChannel))
+    results.push(...batchResults.flat())
+  }
+
+  return results
+}
 
 /**
  * @param {{ id: string, name?: string }} channel
@@ -238,18 +256,10 @@ export async function refreshSubscriptionVideosFromRemote({
 
   const subscriptionUpdates = []
   let channelCount = 0
-  let useRss = store.getters.getUseRssFeeds
-
-  if (activeSubscriptionList.length >= 125 && !useRss) {
-    showToast(
-      t('Subscriptions["This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting"]'),
-      10000
-    )
-    useRss = true
-  }
+  const useRss = store.getters.getUseRssFeeds
 
   try {
-    const videoListFromRemote = (await Promise.all(activeSubscriptionList.map(async (channel) => {
+    const fetchChannel = async (channel) => {
       let videos, name, thumbnailUrl
 
       if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
@@ -285,7 +295,11 @@ export async function refreshSubscriptionVideosFromRemote({
       }
 
       return videos ?? store.getters.getVideoCache[channel.id]?.videos ?? []
-    }))).flat()
+    }
+
+    const videoListFromRemote = useRss
+      ? (await Promise.all(activeSubscriptionList.map(fetchChannel))).flat()
+      : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
     store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
@@ -402,18 +416,10 @@ export async function refreshSubscriptionLiveFromRemote({
 
   const subscriptionUpdates = []
   let channelCount = 0
-  let useRss = store.getters.getUseRssFeeds
-
-  if (activeSubscriptionList.length >= 125 && !useRss) {
-    showToast(
-      t('Subscriptions["This profile has a large number of subscriptions. Forcing RSS to avoid rate limiting"]'),
-      10000
-    )
-    useRss = true
-  }
+  const useRss = store.getters.getUseRssFeeds
 
   try {
-    const videoListFromRemote = (await Promise.all(activeSubscriptionList.map(async (channel) => {
+    const fetchChannel = async (channel) => {
       let videos, name, thumbnailUrl
 
       if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
@@ -449,7 +455,11 @@ export async function refreshSubscriptionLiveFromRemote({
       }
 
       return videos ?? store.getters.getLiveCache[channel.id]?.videos ?? []
-    }))).flat()
+    }
+
+    const videoListFromRemote = useRss
+      ? (await Promise.all(activeSubscriptionList.map(fetchChannel))).flat()
+      : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
     store.commit('setSubscriptionLiveLastRefreshTimestamp', Date.now())
@@ -533,18 +543,7 @@ export async function refreshSubscriptionPostsFromRemote({
       return posts
     }
 
-    const chunkSize = 80
-    const chunkDelayMs = 2000
-
-    for (let index = 0; index < activeSubscriptionList.length; index += chunkSize) {
-      if (index > 0) {
-        await new Promise(resolve => setTimeout(resolve, chunkDelayMs))
-      }
-
-      const chunk = activeSubscriptionList.slice(index, index + chunkSize)
-      const chunkResults = await Promise.all(chunk.map(processChannel))
-      postListFromRemote.push(...chunkResults.flat())
-    }
+    postListFromRemote.push(...await fetchSubscriptionsInBatches(activeSubscriptionList, processChannel))
 
     postListFromRemote.sort((a, b) => b.publishedTime - a.publishedTime)
 
