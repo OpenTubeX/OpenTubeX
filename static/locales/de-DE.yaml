@@ -562,8 +562,8 @@ Settings:
     Settings Tooltip: Einstellungen die Betriebssystem/Benutzerspezifisch oder experimentell sind können nicht exportiert oder importiert werden (z.B. Proxy, Externer Video-Player, Screenshot Ordner, ...)
     All settings have been successfully imported: Alle Einstellungen wurden erfolgreich importiert
     All settings have been successfully exported: Alle Einstellungen wurden erfolgreich exportiert
-    Unknown setting key: Unbekannter Einstellungsschlüssel
-    Non-transferable setting key: Nicht übertragbarer Einstellungsschlüssel
+    Unknown setting key: 'Unbekannter Einstellungsschlüssel: {key}'
+    Non-transferable setting key: 'Nicht übertragbarer Einstellungsschlüssel: {key}'
     Import subscriptions formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.csv, .json, .opml), NewPipe (.json), LibreTube backup oder FreeTube export (.json)'
     Import history formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db), YouTube Takeout (.json), LibreTube backup (.json)'
     Import playlists formats: 'Unterstützte Formate: OpenTubeX / FreeTube (.db)'
