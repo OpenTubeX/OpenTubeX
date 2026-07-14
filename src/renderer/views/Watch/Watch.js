@@ -194,6 +194,8 @@ export default defineComponent({
       resumePlaybackAfterSabrReload: false,
       /** @type {number|null} */
       sabrReloadCaptionIndex: null,
+      /** @type {number|null} */
+      sabrReloadPlaybackRate: null,
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
@@ -504,6 +506,7 @@ export default defineComponent({
       this.ipBlockDetectedInCurrentChain = false
       if (!preserveTitle) {
         this.sabrReloadCaptionIndex = null
+        this.sabrReloadPlaybackRate = null
         this.updateTitle()
       }
     },
@@ -1651,6 +1654,7 @@ export default defineComponent({
       // Only used one time = remove after use
       this.oneTimeTimestamp = null
       this.sabrReloadCaptionIndex = null
+      this.sabrReloadPlaybackRate = null
 
       // will trigger again if you switch formats or change legacy quality
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
@@ -2383,6 +2387,11 @@ export default defineComponent({
     },
 
     initializePlaybackRate() {
+      if (this.sabrReloadPlaybackRate !== null) {
+        this.currentPlaybackRate = this.sabrReloadPlaybackRate
+        return
+      }
+
       if (this.videoGenreIsMusic) {
         this.currentPlaybackRate = 1
         return
@@ -2430,6 +2439,10 @@ export default defineComponent({
     async onPlayerReloadRequested(payload) {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
       this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
+      const playbackRate = Number(payload?.playbackRate)
+      this.sabrReloadPlaybackRate = Number.isFinite(playbackRate) && playbackRate > 0.07
+        ? playbackRate
+        : this.currentPlaybackRate
       this.preserveTitleOnNextReload = true
       showToast('Reloading player according to SABR request')
 

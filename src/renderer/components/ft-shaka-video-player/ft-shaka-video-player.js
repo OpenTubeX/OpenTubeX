@@ -332,6 +332,10 @@ export default defineComponent({
       type: Number,
       default: null
     },
+    sabrReloadPlaybackRate: {
+      type: Number,
+      default: null
+    },
   },
   emits: [
     'error',
@@ -4434,7 +4438,8 @@ export default defineComponent({
         clearSabrBackoffTimer()
         emit('player-reload-requested', {
           wasPlaying: !video.value?.paused,
-          captionIndex: captionIndex >= 0 ? captionIndex : null
+          captionIndex: captionIndex >= 0 ? captionIndex : null,
+          playbackRate: getCurrentPlaybackRate()
         })
       })
     }
@@ -5447,7 +5452,7 @@ export default defineComponent({
     /** @type {number | null} */
     let pendingPlaybackRateRestore = null
 
-    let playbackRateUserSet = false
+    let playbackRateUserSet = normalizePlaybackRate(props.sabrReloadPlaybackRate) !== null
     let musicPlaybackRateToastShown = false
 
     /**
@@ -5477,6 +5482,11 @@ export default defineComponent({
      * @returns {number}
      */
     function getInitialPlaybackRate() {
+      const sabrReloadPlaybackRate = normalizePlaybackRate(props.sabrReloadPlaybackRate)
+      if (sabrReloadPlaybackRate !== null) {
+        return sabrReloadPlaybackRate
+      }
+
       if (shouldUseNormalPlaybackRateByDefault.value) {
         return NORMAL_PLAYBACK_RATE
       }

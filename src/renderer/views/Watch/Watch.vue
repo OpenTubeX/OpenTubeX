@@ -52,6 +52,7 @@
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
+          :sabr-reload-playback-rate="sabrReloadPlaybackRate"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
