@@ -266,6 +266,7 @@ import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   refreshSubscriptionLiveFromRemote,
+  refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote
 } from './helpers/subscriptions'
@@ -414,6 +415,9 @@ const subscriptionShortsAutoRefreshInterval = computed(() => store.getters.getSu
 /** @type {import('vue').ComputedRef<string>} */
 const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubscriptionLiveAutoRefreshInterval)
 
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionPostsAutoRefreshInterval = computed(() => store.getters.getSubscriptionPostsAutoRefreshInterval)
+
 /** @type {import('vue').ComputedRef<number | null>} */
 const subscriptionFeedLastRefreshTimestamp = computed(() => store.getters.getSubscriptionFeedLastRefreshTimestamp)
 
@@ -423,6 +427,9 @@ const subscriptionShortsLastRefreshTimestamp = computed(() => store.getters.getS
 /** @type {import('vue').ComputedRef<number | null>} */
 const subscriptionLiveLastRefreshTimestamp = computed(() => store.getters.getSubscriptionLiveLastRefreshTimestamp)
 
+/** @type {import('vue').ComputedRef<number | null>} */
+const subscriptionPostsLastRefreshTimestamp = computed(() => store.getters.getSubscriptionPostsLastRefreshTimestamp)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => store.getters.getHideSubscriptionsVideos)
 
@@ -431,6 +438,9 @@ const hideSubscriptionsShorts = computed(() => store.getters.getHideSubscription
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams || store.getters.getHideSubscriptionsLive)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
 const dataReady = ref(false)
 const findbarVisible = ref(false)
@@ -446,9 +456,10 @@ const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const subscriptionAutoRefreshTimers = {
   videos: null,
   shorts: null,
-  live: null
+  live: null,
+  posts: null
 }
-const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live']
+const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let refreshOverdueSubscriptionFeedsPromise = null
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
@@ -558,8 +569,15 @@ watch([
   hideSubscriptionsLive
 ], () => scheduleSubscriptionTabAutoRefresh('live'))
 
+watch([
+  dataReady,
+  subscriptionPostsAutoRefreshInterval,
+  subscriptionPostsLastRefreshTimestamp,
+  hideSubscriptionsPosts
+], () => scheduleSubscriptionTabAutoRefresh('posts'))
+
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function scheduleSubscriptionTabAutoRefresh(tab) {
   clearSubscriptionTabAutoRefreshTimer(tab)
@@ -580,7 +598,7 @@ function scheduleSubscriptionTabAutoRefresh(tab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 async function refreshSubscriptionFeedAutomatically(tab) {
   if (store.getters.getSubscriptionFeedRefreshInProgress) {
@@ -628,7 +646,7 @@ async function refreshOverdueSubscriptionFeedsImmediately() {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function getSubscriptionAutoRefreshInterval(tab) {
   switch (tab) {
@@ -636,13 +654,15 @@ function getSubscriptionAutoRefreshInterval(tab) {
       return subscriptionShortsAutoRefreshInterval
     case 'live':
       return subscriptionLiveAutoRefreshInterval
+    case 'posts':
+      return subscriptionPostsAutoRefreshInterval
     default:
       return subscriptionFeedAutoRefreshInterval
   }
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function getSubscriptionTabRefreshHandler(tab) {
   switch (tab) {
@@ -650,13 +670,15 @@ function getSubscriptionTabRefreshHandler(tab) {
       return refreshSubscriptionShortsFromRemote
     case 'live':
       return refreshSubscriptionLiveFromRemote
+    case 'posts':
+      return refreshSubscriptionPostsFromRemote
     default:
       return refreshSubscriptionVideosFromRemote
   }
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function getSubscriptionTabNextAutoRefreshTimestamp(tab) {
   switch (tab) {
@@ -664,13 +686,15 @@ function getSubscriptionTabNextAutoRefreshTimestamp(tab) {
       return store.getters.getSubscriptionShortsNextAutoRefreshTimestamp
     case 'live':
       return store.getters.getSubscriptionLiveNextAutoRefreshTimestamp
+    case 'posts':
+      return store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
     default:
       return store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
   }
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function isSubscriptionTabAutoRefreshEnabled(tab) {
   const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
@@ -684,7 +708,7 @@ function isSubscriptionTabAutoRefreshEnabled(tab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function isSubscriptionTabHidden(tab) {
   switch (tab) {
@@ -692,13 +716,15 @@ function isSubscriptionTabHidden(tab) {
       return hideSubscriptionsShorts.value
     case 'live':
       return hideSubscriptionsLive.value
+    case 'posts':
+      return hideSubscriptionsPosts.value
     default:
       return hideSubscriptionsVideos.value
   }
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  * @param {number | null} timestamp
  */
 function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
@@ -709,6 +735,9 @@ function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
     case 'live':
       store.commit('setSubscriptionLiveNextAutoRefreshTimestamp', timestamp)
       break
+    case 'posts':
+      store.commit('setSubscriptionPostsNextAutoRefreshTimestamp', timestamp)
+      break
     default:
       store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
   }
@@ -718,10 +747,11 @@ function clearSubscriptionFeedAutoRefreshTimer() {
   clearSubscriptionTabAutoRefreshTimer('videos')
   clearSubscriptionTabAutoRefreshTimer('shorts')
   clearSubscriptionTabAutoRefreshTimer('live')
+  clearSubscriptionTabAutoRefreshTimer('posts')
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 function clearSubscriptionTabAutoRefreshTimer(tab) {
   clearTimeout(subscriptionAutoRefreshTimers[tab])

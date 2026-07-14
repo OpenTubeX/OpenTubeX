@@ -346,6 +346,7 @@ const state = {
   subscriptionFeedAutoRefreshInterval: '0',
   subscriptionShortsAutoRefreshInterval: '0',
   subscriptionLiveAutoRefreshInterval: '0',
+  subscriptionPostsAutoRefreshInterval: '0',
   settingsPassword: '',
   useDeArrowTitles: false,
   useDeArrowThumbnails: false,

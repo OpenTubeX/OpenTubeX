@@ -1,6 +1,11 @@
 import store from '../store/index'
-import { getInvidiousChannelLive, getInvidiousChannelVideos, invidiousFetch } from './api/invidious'
-import { getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
+import {
+  getInvidiousChannelLive,
+  getInvidiousChannelVideos,
+  invidiousFetch,
+  invidiousGetCommunityPosts
+} from './api/invidious'
+import { getLocalChannelCommunity, getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
 import {
   copyToClipboard,
   getChannelPlaylistId,
@@ -438,6 +443,157 @@ export async function refreshSubscriptionLiveFromRemote({
   } finally {
     store.commit('setShowProgressBar', false)
     store.commit('setSubscriptionFeedRefreshInProgress', false)
+  }
+}
+
+/**
+ * @param {{
+ *  t: (key: string, named?: Record<string, unknown>) => string,
+ *  showStartToast?: boolean,
+ *  errorChannels?: any[]
+ * }} options
+ */
+export async function refreshSubscriptionPostsFromRemote({
+  t,
+  showStartToast = false,
+  errorChannels = []
+}) {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return []
+  }
+
+  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+  if (activeSubscriptionList.length === 0) {
+    store.commit('setSubscriptionPostsLastRefreshTimestamp', Date.now())
+    return []
+  }
+
+  store.commit('setSubscriptionFeedRefreshInProgress', true)
+  store.commit('setShowProgressBar', true)
+  store.commit('setProgressBarPercentage', 0)
+
+  if (showStartToast) {
+    showToast(t('Subscriptions.Refreshing Subscriptions'))
+  }
+
+  const subscriptionUpdates = []
+  const postListFromRemote = []
+  let channelCount = 0
+
+  try {
+    const processChannel = async (channel) => {
+      let posts
+
+      if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
+        posts = await getChannelPostsInvidious(channel, t, errorChannels)
+      } else {
+        posts = await getChannelPostsLocal(channel, t, errorChannels)
+      }
+
+      channelCount++
+      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+
+      await store.dispatch('updateSubscriptionPostsCacheByChannel', {
+        channelId: channel.id,
+        posts
+      })
+
+      const channelPost = posts.find(post => post.authorId === channel.id)
+      if (channelPost) {
+        let thumbnailUrl = channelPost.authorThumbnails?.[0]?.url
+
+        if (thumbnailUrl?.startsWith('//')) {
+          thumbnailUrl = 'https:' + thumbnailUrl
+        }
+
+        if (channelPost.author || thumbnailUrl) {
+          subscriptionUpdates.push({
+            channelId: channel.id,
+            channelName: channelPost.author,
+            channelThumbnailUrl: thumbnailUrl
+          })
+        }
+      }
+
+      return posts
+    }
+
+    const chunkSize = 80
+    const chunkDelayMs = 2000
+
+    for (let index = 0; index < activeSubscriptionList.length; index += chunkSize) {
+      if (index > 0) {
+        await new Promise(resolve => setTimeout(resolve, chunkDelayMs))
+      }
+
+      const chunk = activeSubscriptionList.slice(index, index + chunkSize)
+      const chunkResults = await Promise.all(chunk.map(processChannel))
+      postListFromRemote.push(...chunkResults.flat())
+    }
+
+    postListFromRemote.sort((a, b) => b.publishedTime - a.publishedTime)
+
+    const forbiddenTitles = JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
+    const filteredPosts = postListFromRemote.filter(post => {
+      return !forbiddenTitles.some(text => post.author.toLowerCase().includes(text))
+    })
+
+    store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+    store.commit('setSubscriptionPostsLastRefreshTimestamp', Date.now())
+
+    return filteredPosts
+  } finally {
+    store.commit('setShowProgressBar', false)
+    store.commit('setSubscriptionFeedRefreshInProgress', false)
+  }
+}
+
+async function getChannelPostsLocal(channel, t, errorChannels) {
+  try {
+    const posts = await getLocalChannelCommunity(channel.id)
+
+    if (posts === null) {
+      errorChannels.push(channel)
+      return []
+    }
+
+    return posts
+  } catch (err) {
+    console.error(err)
+    showToast(`${t('Local API Error (Click to copy)')}: ${err}`, 10000, () => {
+      copyToClipboard(err)
+    })
+
+    if (store.getters.getBackendPreference === 'local' && store.getters.getBackendFallback) {
+      showToast(t('Falling back to Invidious API'))
+      return await getChannelPostsInvidious(channel, t, errorChannels)
+    }
+
+    return []
+  }
+}
+
+async function getChannelPostsInvidious(channel, t, errorChannels) {
+  try {
+    const result = await invidiousGetCommunityPosts(channel.id)
+
+    return result.posts
+  } catch (err) {
+    console.error(err)
+    showToast(`${t('Invidious API Error (Click to copy)')}: ${err}`, 10000, () => {
+      copyToClipboard(err)
+    })
+
+    if (
+      process.env.SUPPORTS_LOCAL_API &&
+      store.getters.getBackendPreference === 'invidious' &&
+      store.getters.getBackendFallback
+    ) {
+      showToast(t('Falling back to Local API'))
+      return await getChannelPostsLocal(channel, t, errorChannels)
+    }
+
+    return []
   }
 }
 

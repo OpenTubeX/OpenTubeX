@@ -11,18 +11,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../helpers/utils'
-import { getLocalChannelCommunity } from '../helpers/api/local'
-import { invidiousGetCommunityPosts } from '../helpers/api/invidious'
+import { getRelativeTimeFromDate } from '../helpers/utils'
+import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 const isLoading = ref(true)
 const postList = shallowRef([])
@@ -30,14 +29,10 @@ const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
+const now = ref(Date.now())
 
 let alreadyLoadedRemotely = false
-
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendPreference = computed(() => store.getters.getBackendPreference)
-
-/** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
-const backendFallback = computed(() => store.getters.getBackendFallback)
+let nextAutoRefreshTicker = null
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -103,18 +98,68 @@ const refreshTitle = computed(() => {
 })
 
 const nextAutoRefreshTimestamp = computed(() => {
-  return ''
+  const timestamp = store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
+  const interval = parseInt(store.getters.getSubscriptionPostsAutoRefreshInterval, 10)
+
+  if (!timestamp || Number.isNaN(interval) || interval <= 0) {
+    return ''
+  }
+
+  return new Intl.DateTimeFormat([locale.value, 'en'], {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(timestamp)
 })
 
 const nextAutoRefreshTooltip = computed(() => {
-  return ''
+  const timestamp = store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
+  const interval = parseInt(store.getters.getSubscriptionPostsAutoRefreshInterval, 10)
+
+  if (!timestamp || Number.isNaN(interval) || interval <= 0) {
+    return ''
+  }
+
+  const relativeTime = getRelativeTimeValue(timestamp - now.value)
+
+  return new Intl.RelativeTimeFormat([locale.value, 'en'], { numeric: 'auto' }).format(
+    relativeTime.value,
+    relativeTime.unit
+  )
 })
+
+/**
+ * @param {number} remainingMs
+ */
+function getRelativeTimeValue(remainingMs) {
+  const direction = remainingMs < 0 ? -1 : 1
+  const absRemainingSeconds = Math.max(Math.round(Math.abs(remainingMs) / 1000), 0)
+
+  if (absRemainingSeconds < 60) {
+    return { value: direction * absRemainingSeconds, unit: 'second' }
+  }
+
+  const absRemainingMinutes = Math.round(absRemainingSeconds / 60)
+  if (absRemainingMinutes < 60) {
+    return { value: direction * absRemainingMinutes, unit: 'minute' }
+  }
+
+  return { value: direction * Math.round(absRemainingMinutes / 60), unit: 'hour' }
+}
 
 watch(activeSubscriptionList, () => {
   lastRemoteRefreshSuccessTimestamp.value = null
   isLoading.value = true
   loadPostsFromCacheSometimes()
 }, { deep: true })
+
+watch(
+  () => store.getters.getSubscriptionPostsLastRefreshTimestamp,
+  () => {
+    if (subscriptionCacheReady.value) {
+      loadPostsFromCacheForAllActiveProfileChannels()
+    }
+  }
+)
 
 if (!subscriptionCacheReady.value) {
   watch(subscriptionCacheReady, () => {
@@ -125,7 +170,14 @@ if (!subscriptionCacheReady.value) {
 }
 
 onMounted(() => {
+  nextAutoRefreshTicker = setInterval(() => {
+    now.value = Date.now()
+  }, 30000)
   loadPostsFromRemoteFirstPerWindowSometimes()
+})
+
+onBeforeUnmount(() => {
+  clearInterval(nextAutoRefreshTicker)
 })
 
 function loadPostsFromRemoteFirstPerWindowSometimes() {
@@ -184,135 +236,21 @@ function loadPostsFromCacheForAllActiveProfileChannels() {
 }
 
 async function loadPostsForSubscriptionsFromRemote() {
-  if (activeSubscriptionList.value.length === 0) {
-    isLoading.value = false
-    postList.value = []
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
     return
   }
 
-  const channelsToLoadFromRemote = activeSubscriptionList.value
-  let channelCount = 0
   isLoading.value = true
-
-  store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
   attemptedFetch.value = true
-
   errorChannels.value = []
-  const subscriptionUpdates = []
-  const postListFromRemote = []
-
-  const processChannel = async (channel) => {
-    let posts
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-      posts = await getChannelPostsInvidious(channel)
-    } else {
-      posts = await getChannelPostsLocal(channel)
-    }
-
-    channelCount++
-    const percentageComplete = (channelCount / channelsToLoadFromRemote.length) * 100
-    store.commit('setProgressBarPercentage', percentageComplete)
-
-    store.dispatch('updateSubscriptionPostsCacheByChannel', {
-      channelId: channel.id,
-      posts
-    })
-
-    if (posts.length > 0) {
-      const post = posts.find(post => post.authorId === channel.id)
-
-      if (post) {
-        const name = post.author
-        let thumbnailUrl = post.authorThumbnails?.[0]?.url
-
-        if (name || thumbnailUrl) {
-          if (thumbnailUrl?.startsWith('//')) {
-            thumbnailUrl = 'https:' + thumbnailUrl
-          }
-
-          subscriptionUpdates.push({
-            channelId: channel.id,
-            channelName: name,
-            channelThumbnailUrl: thumbnailUrl
-          })
-        }
-      }
-    }
-
-    posts = posts.filter(post => !forbiddenTitles.value.some(text => post.author.toLowerCase().includes(text)))
-    return posts
-  }
-
-  const CHUNK_SIZE = 80
-  const CHUNK_DELAY_MS = 2000
-
-  for (let i = 0; i < channelsToLoadFromRemote.length; i += CHUNK_SIZE) {
-    if (i > 0) {
-      await new Promise(resolve => setTimeout(resolve, CHUNK_DELAY_MS))
-    }
-
-    const chunk = channelsToLoadFromRemote.slice(i, i + CHUNK_SIZE)
-    const chunkResults = await Promise.all(chunk.map(processChannel))
-    postListFromRemote.push(...chunkResults.flat())
-  }
-
-  postListFromRemote.sort((a, b) => {
-    return b.publishedTime - a.publishedTime
-  })
-
-  postList.value = postListFromRemote
-  isLoading.value = false
-  store.commit('setShowProgressBar', false)
-  lastRemoteRefreshSuccessTimestamp.value = Date.now()
-
-  store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
-}
-
-async function getChannelPostsLocal(channel) {
   try {
-    const entries = await getLocalChannelCommunity(channel.id)
-
-    if (entries === null) {
-      errorChannels.value.push(channel)
-      return []
-    }
-
-    return entries
-  } catch (err) {
-    console.error(err)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
+    postList.value = await refreshSubscriptionPostsFromRemote({
+      t,
+      errorChannels: errorChannels.value
     })
-
-    if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
-      return await getChannelPostsInvidious(channel)
-    }
-
-    return []
-  }
-}
-
-async function getChannelPostsInvidious(channel) {
-  try {
-    const result = await invidiousGetCommunityPosts(channel.id)
-
-    return result.posts
-  } catch (err) {
-    console.error(err)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
-
-    if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
-      return await getChannelPostsLocal(channel)
-    } else {
-      return []
-    }
+    lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
+  } finally {
+    isLoading.value = false
   }
 }
 

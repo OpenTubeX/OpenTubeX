@@ -38,6 +38,15 @@
           :icon="['fas', 'clock']"
           @change="updateSubscriptionLiveAutoRefreshInterval"
         />
+        <FtSelect
+          :placeholder="$t('Settings.Subscription Settings.Posts Auto Refresh Interval')"
+          :value="subscriptionPostsAutoRefreshInterval"
+          :select-names="subscriptionFeedAutoRefreshIntervalNames"
+          :select-values="subscriptionFeedAutoRefreshIntervalValues"
+          :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
+          :icon="['fas', 'clock']"
+          @change="updateSubscriptionPostsAutoRefreshInterval"
+        />
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
           :default-value="useRssFeeds"
@@ -146,6 +155,16 @@ const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubs
  */
 function updateSubscriptionLiveAutoRefreshInterval(value) {
   store.dispatch('updateSubscriptionLiveAutoRefreshInterval', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const subscriptionPostsAutoRefreshInterval = computed(() => store.getters.getSubscriptionPostsAutoRefreshInterval)
+
+/**
+ * @param {string} value
+ */
+function updateSubscriptionPostsAutoRefreshInterval(value) {
+  store.dispatch('updateSubscriptionPostsAutoRefreshInterval', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
