@@ -1,0 +1,123 @@
+name: Update AUR packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseTag:
+        description: Release tag to publish (for example, v0.27.0-beta)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aur-packages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update opentubex packages
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    env:
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Install tools
+        run: pacman --sync --refresh --sysupgrade --noconfirm git github-cli openssh
+
+      - name: Resolve release version
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.releaseTag }}
+        run: |
+          tag="$INPUT_TAG"
+
+          if [[ -z "$tag" ]]; then
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+
+          if [[ ! "$tag" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-beta$ ]]; then
+            echo "Expected a tag like v0.27.0-beta, got: $tag" >&2
+            exit 1
+          fi
+
+          {
+            echo "RELEASE_TAG=$tag"
+            echo "VERSION=${BASH_REMATCH[1]}"
+          } >> "$GITHUB_ENV"
+
+      - name: Configure AUR access
+        shell: bash
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          printf '%s\n' \
+            'aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN' \
+            > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          git config --global core.sshCommand 'ssh -i ~/.ssh/aur -o IdentitiesOnly=yes'
+          git config --global user.name 'OpenTubeX Release Bot'
+          git config --global user.email 'actions@github.com'
+
+      - name: Clone AUR packages
+        run: |
+          git clone ssh://aur@aur.archlinux.org/opentubex-bin.git
+          git clone ssh://aur@aur.archlinux.org/opentubex.git
+
+      - name: Download release files
+        shell: bash
+        run: |
+          mkdir release-files
+          cd release-files
+
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "opentubex_${VERSION}_beta_amd64.deb" \
+            --pattern "opentubex_${VERSION}_beta_arm64.deb"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --archive tar.gz \
+            --output source.tar.gz
+
+      - name: Update package metadata
+        shell: bash
+        run: |
+          amd64_checksum=$(sha256sum "release-files/opentubex_${VERSION}_beta_amd64.deb" | cut -d ' ' -f 1)
+          arm64_checksum=$(sha256sum "release-files/opentubex_${VERSION}_beta_arm64.deb" | cut -d ' ' -f 1)
+          source_checksum=$(sha256sum release-files/source.tar.gz | cut -d ' ' -f 1)
+
+          sed -i -E "s/^pkgver=.*/pkgver=${VERSION}/" opentubex-bin/PKGBUILD
+          sed -i -E "s/^sha256sums_x86_64=.*/sha256sums_x86_64=('${amd64_checksum}')/" opentubex-bin/PKGBUILD
+          sed -i -E "s/^sha256sums_aarch64=.*/sha256sums_aarch64=('${arm64_checksum}')/" opentubex-bin/PKGBUILD
+
+          sed -i -E "s/^pkgver=.*/pkgver=${VERSION}/" opentubex/PKGBUILD
+          sed -i -E "0,/^sha256sums=\('[^']*'/s//sha256sums=('${source_checksum}'/" opentubex/PKGBUILD
+
+          useradd --create-home builder
+          chown -R builder:builder opentubex-bin opentubex
+          for package in opentubex-bin opentubex; do
+            runuser -u builder -- bash -c "cd '$GITHUB_WORKSPACE/$package' && makepkg --printsrcinfo" \
+              > "$package/.SRCINFO"
+          done
+          chown -R root:root opentubex-bin opentubex
+
+      - name: Commit and publish packages
+        shell: bash
+        run: |
+          for package in opentubex-bin opentubex; do
+            git -C "$package" add PKGBUILD .SRCINFO
+
+            if git -C "$package" diff --cached --quiet; then
+              echo "$package is already at ${VERSION}"
+              continue
+            fi
+
+            git -C "$package" diff --cached --check
+            git -C "$package" commit -m "update to ${VERSION}"
+            git -C "$package" push origin master
+          done
