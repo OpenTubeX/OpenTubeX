@@ -16,7 +16,11 @@
       aria-hidden="true"
     />
     <!-- Keep the ambient surface outside the element measured by the scroll mini player. -->
-    <div class="scrollMiniAnchor">
+    <div
+      ref="scrollMiniAnchor"
+      class="scrollMiniAnchor"
+      aria-hidden="true"
+    />
     <div
       v-if="scrollMiniPlayerActive"
       ref="scrollMiniPlaceholder"
@@ -533,7 +537,6 @@
         @pointerdown.stop="handleScrollMiniResizePointerDown"
         @mousedown.stop.prevent
       />
-    </div>
     </div>
     </div>
   </div>

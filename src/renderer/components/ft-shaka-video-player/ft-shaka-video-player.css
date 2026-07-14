@@ -727,6 +727,11 @@
   height: 100%;
 }
 
+:global(body.playerFullWindow .app > .routerView) {
+  position: relative;
+  z-index: 1000;
+}
+
 /* Chapter title while hovering the seek bar; bottom/left/max-width from JS */
 :deep(.ft-chapter-preview) {
   position: absolute;
@@ -825,6 +830,12 @@
     inset-inline-end: -54%;
     width: 158%;
   }
+}
+
+.scrollMiniAnchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .scrollMiniPlaceholder {

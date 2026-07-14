@@ -59,6 +59,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, props
   const scrollMiniDragHandleOnLightBg = ref(false)
   const scrollMiniResizeHandleOnLightBg = ref(false)
   const scrollMiniResizeCorner = ref('bottom-right')
+  const scrollMiniAnchor = ref(null)
   const scrollMiniPlaceholder = ref(null)
   const scrollMiniVolumeTrack = ref(null)
 
@@ -352,7 +353,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, props
   }
 
   function getScrollMiniAnchor() {
-    return container.value?.parentElement ?? null
+    return scrollMiniAnchor.value
   }
 
   /**
@@ -819,6 +820,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, props
     isNativeFullscreenActive,
     rememberInlinePlayerLayoutHeight,
     repairScrollMiniPlaceholderHeight,
+    scrollMiniAnchor,
     scrollMiniDragHandleOnLightBg,
     scrollMiniIsPaused,
     scrollMiniPlaceholder,
