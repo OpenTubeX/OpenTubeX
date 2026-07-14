@@ -1,5 +1,22 @@
 <template>
-  <div class="ftVideoPlayerHost">
+  <div
+    class="ftVideoPlayerHost"
+    :class="{ ambientWideLayout: theatrePossible && !useTheatreMode }"
+  >
+    <canvas
+      v-show="ambientModeVisible"
+      ref="ambientLayoutCanvas"
+      class="ambientLayoutCanvas"
+      aria-hidden="true"
+    />
+    <canvas
+      v-show="ambientModeVisible"
+      ref="ambientCanvas"
+      class="ambientCanvas"
+      aria-hidden="true"
+    />
+    <!-- Keep the ambient surface outside the element measured by the scroll mini player. -->
+    <div class="scrollMiniAnchor">
     <div
       v-if="scrollMiniPlayerActive"
       ref="scrollMiniPlaceholder"
@@ -516,6 +533,7 @@
         @pointerdown.stop="handleScrollMiniResizePointerDown"
         @mousedown.stop.prevent
       />
+    </div>
     </div>
     </div>
   </div>

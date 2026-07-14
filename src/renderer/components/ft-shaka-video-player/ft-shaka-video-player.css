@@ -798,6 +798,35 @@
   position: relative;
 }
 
+.ambientCanvas {
+  position: absolute;
+  inset: -5% -4% -9%;
+  display: block;
+  width: 108%;
+  height: 114%;
+  opacity: 0.42;
+  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
+  pointer-events: none;
+}
+
+.ambientLayoutCanvas {
+  position: absolute;
+  inset: -5% -4% -32%;
+  display: block;
+  width: 108%;
+  height: 137%;
+  opacity: 0.2;
+  filter: blur(clamp(32px, 5vw, 72px)) saturate(1.02);
+  pointer-events: none;
+}
+
+@media only screen and (width >=1351px) {
+  .ftVideoPlayerHost.ambientWideLayout .ambientLayoutCanvas {
+    inset-inline-end: -54%;
+    width: 158%;
+  }
+}
+
 .scrollMiniPlaceholder {
   width: 100%;
   pointer-events: none;

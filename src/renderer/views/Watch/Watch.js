@@ -256,6 +256,11 @@ export default defineComponent({
     defaultViewingMode: function () {
       return this.$store.getters.getDefaultViewingMode
     },
+    ambientModeActive: function () {
+      return this.$store.getters.getAmbientMode &&
+        this.activeFormat !== 'audio' &&
+        this.vrProjection !== 'EQUIRECTANGULAR'
+    },
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat
     },

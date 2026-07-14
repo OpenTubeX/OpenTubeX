@@ -53,6 +53,13 @@
           :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
           @change="updateSeekIntervalMultiplyByPlaybackRate"
         />
+        <FtToggleSwitch
+          :label="t('Global.Ambient Mode')"
+          :compact="true"
+          :default-value="ambientMode"
+          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
+          @change="updateAmbientMode"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -721,6 +728,16 @@ const displayVideoPlayButton = computed(() => store.getters.getDisplayVideoPlayB
  */
 function updateDisplayVideoPlayButton(value) {
   store.dispatch('updateDisplayVideoPlayButton', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const ambientMode = computed(() => store.getters.getAmbientMode)
+
+/**
+ * @param {boolean} value
+ */
+function updateAmbientMode(value) {
+  store.dispatch('updateAmbientMode', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -154,6 +154,14 @@
     }
   }
 
+  &.ambientModeActive {
+    .infoArea :deep(.watchVideoInfo.ft-card),
+    .sidebarArea :deep(.watchVideoRecommendations.ft-card) {
+      background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
+      backdrop-filter: blur(14px);
+    }
+  }
+
   .watchVideoPlaylist,
   .watchVideoSidebar,
   .theatrePlaylist {

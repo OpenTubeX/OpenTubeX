@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
+import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
@@ -44,6 +45,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
@@ -352,6 +354,15 @@ export default defineComponent({
     const displayVideoPlayButton = computed(() => {
       return store.getters.getDisplayVideoPlayButton
     })
+
+    const ambientMode = computed(() => {
+      return store.getters.getAmbientMode
+    })
+
+    /** @param {boolean} value */
+    function updateAmbientMode(value) {
+      store.dispatch('updateAmbientMode', value)
+    }
 
     watch(displayVideoPlayButton, (newValue) => {
       ui.configure({
@@ -1791,6 +1802,7 @@ export default defineComponent({
           'captions',
           'ft_audio_tracks',
           'chapter',
+          'ft_ambient_mode',
           'ft_loop',
           'ft_screenshot',
           'picture_in_picture',
@@ -1825,6 +1837,7 @@ export default defineComponent({
           'playback_rate',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'chapter',
+          'ft_ambient_mode',
           'ft_loop',
           'recenter_vr',
           'toggle_stereoscopic',
@@ -1847,6 +1860,10 @@ export default defineComponent({
 
       if (props.format === 'audio') {
         removeFromArrayIfExists(elementList, 'picture_in_picture')
+      }
+
+      if (props.format === 'audio' || useVrMode.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ambient_mode')
       }
 
       if (isLive.value) {
@@ -2622,6 +2639,19 @@ export default defineComponent({
       fullWindowEnabled,
       getUi: () => ui,
       props,
+      video,
+    })
+
+    const ambientModeVisible = computed(() => {
+      return ambientMode.value &&
+        props.format !== 'audio' &&
+        props.vrProjection !== 'EQUIRECTANGULAR' &&
+        !fullWindowEnabled.value &&
+        !scrollMiniPlayerActive.value
+    })
+
+    const { ambientCanvas, ambientLayoutCanvas } = useAmbientMode({
+      enabled: ambientModeVisible,
       video,
     })
 
@@ -3507,6 +3537,25 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_stats', new StatsButtonFactory())
     }
 
+    function registerAmbientModeButton() {
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class AmbientModeButtonFactory {
+        create(rootElement, controls) {
+          return new AmbientModeButton(
+            ambientMode,
+            updateAmbientMode,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaOverflowMenu.registerElement('ft_ambient_mode', new AmbientModeButtonFactory())
+    }
+
     function registerContextMenuButtons() {
       /**
        * @returns {number}
@@ -3802,6 +3851,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', null)
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
+      shakaOverflowMenu.registerElement('ft_ambient_mode', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
 
       shakaControls.registerElement('ft_screenshot', null)
@@ -4957,6 +5007,7 @@ export default defineComponent({
       registerScreenshotButton()
       registerAudioTrackSelection()
       registerAutoplayToggle()
+      registerAmbientModeButton()
 
       registerTheatreModeButton()
       registerFullWindowButton()
@@ -5591,6 +5642,9 @@ export default defineComponent({
     }
 
     return {
+      ambientCanvas,
+      ambientLayoutCanvas,
+      ambientModeVisible,
       container,
       video,
       vrCanvas,

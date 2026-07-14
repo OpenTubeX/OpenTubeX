@@ -187,6 +187,7 @@ const state = {
   disableSmoothScrolling: false,
   disableChannelLinks: false,
   displayVideoPlayButton: false,
+  ambientMode: false,
   enableWatchStats: true,
   statsWeekStartsOn: '1',
   enableSearchSuggestions: true,

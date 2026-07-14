@@ -2,6 +2,7 @@
   <div
     class="videoLayout"
     :class="{
+      ambientModeActive,
       isLoading,
       useTheatreMode: useTheatreMode && !isLoading,
       noSidebar: !theatrePossible

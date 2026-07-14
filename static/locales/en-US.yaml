@@ -51,6 +51,7 @@ Are you sure you want to open this link?: Are you sure you want to open this lin
 # Global
 # Anything shared among components / views should be put here
 Global:
+  Ambient Mode: Ambient Mode
   Videos: Videos
   Shorts: Shorts
   Live: Live
@@ -1291,6 +1292,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Use the scroll wheel to skip through the video, MPV style.
     Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
     Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.
+    Ambient Mode: Blends the video's colors into the area around the player.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
