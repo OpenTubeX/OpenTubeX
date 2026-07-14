@@ -16,9 +16,12 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { parseYouTubeRSSFeed, updateVideoListAfterProcessing } from '../helpers/subscriptions'
 import {
-  copyToClipboard,
+  parseYouTubeRSSFeed,
+  showSubscriptionFetchError,
+  updateVideoListAfterProcessing
+} from '../helpers/subscriptions'
+import {
   getChannelPlaylistId,
   getRelativeTimeFromDate,
   showToast
@@ -337,11 +340,7 @@ async function getChannelShortsLocal(channel, failedAttempts = 0) {
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    console.error(error)
-    const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
 
     switch (failedAttempts) {
       case 0:
@@ -386,11 +385,7 @@ async function getChannelShortsInvidious(channel, failedAttempts = 0) {
 
     return await parseYouTubeRSSFeed(await response.text(), channel.id)
   } catch (error) {
-    console.error(error)
-    const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
 
     switch (failedAttempts) {
       case 0:
