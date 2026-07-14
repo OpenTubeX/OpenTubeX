@@ -390,7 +390,11 @@ const collaboratorSummaryName = computed(() => {
   return new Intl.ListFormat(locale.value, {
     style: 'long',
     type: 'conjunction'
-  }).format(names)
+  }).formatToParts(names).map((part, index, parts) => {
+    return names.length > 2 && index === parts.length - 2
+      ? part.value.replace(',', '')
+      : part.value
+  }).join('')
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
