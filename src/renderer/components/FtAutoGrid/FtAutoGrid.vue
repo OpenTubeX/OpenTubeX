@@ -1,20 +1,52 @@
 <template>
   <div
+    ref="gridElement"
     :class="{
       grid: grid,
-      list: !grid
+      list: !grid,
+      thumbnailSizeReady: grid && gridWidth > 0
     }"
+    :style="gridStyle"
   >
     <slot />
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+
+import { DEFAULT_THUMBNAIL_SIZE, getThumbnailSizeStyles } from '../../constants/thumbnailSize'
+
+const props = defineProps({
   grid: {
     type: Boolean,
     required: true
+  },
+  thumbnailSize: {
+    type: Number,
+    default: DEFAULT_THUMBNAIL_SIZE
   }
+})
+
+const gridElement = useTemplateRef('gridElement')
+const gridWidth = ref(0)
+
+const gridStyle = computed(() => {
+  return getThumbnailSizeStyles(props.thumbnailSize, gridWidth.value)
+})
+
+let resizeObserver = null
+
+onMounted(() => {
+  resizeObserver = new ResizeObserver(([entry]) => {
+    gridWidth.value = entry.contentRect.width
+  })
+
+  resizeObserver.observe(gridElement.value)
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
 })
 </script>
 

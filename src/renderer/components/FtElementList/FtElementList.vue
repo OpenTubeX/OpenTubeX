@@ -1,6 +1,7 @@
 <template>
   <FtAutoGrid
     :grid="displayValue !== 'list'"
+    :thumbnail-size="thumbnailSize"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
@@ -140,6 +141,9 @@ const listType = computed(() => {
 const displayValue = computed(() => {
   return props.display === '' ? listType.value : props.display
 })
+
+/** @type {import('vue').ComputedRef<number>} */
+const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 /**
  * @param {string} videoId

@@ -118,7 +118,10 @@
         </FtInput>
       </div>
     </div>
-    <FtProfileSelector class="side profiles" />
+    <div class="side profiles">
+      <FtThumbnailSizeControl v-if="showThumbnailSizeControl" />
+      <FtProfileSelector />
+    </div>
   </nav>
 </template>
 
@@ -131,6 +134,7 @@ import { useRoute, useRouter } from 'vue-router'
 import FtInput from '../FtInput/FtInput.vue'
 import FtProfileSelector from '../FtProfileSelector/FtProfileSelector.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtThumbnailSizeControl from '../FtThumbnailSizeControl/FtThumbnailSizeControl.vue'
 
 import store from '../../store/index'
 
@@ -162,6 +166,9 @@ const useWatchSideNavOverlay = computed(() => {
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
 const barColor = computed(() => store.getters.getBarColor)
+const showThumbnailSizeControl = computed(() => {
+  return route.meta.hasResizableThumbnails === true && store.getters.getShowThumbnailSizeButtonInHeader
+})
 
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')

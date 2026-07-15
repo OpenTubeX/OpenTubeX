@@ -1,0 +1,14 @@
+.thumbnailSizeButton {
+  inline-size: fit-content;
+  margin-inline-start: auto;
+}
+
+.sliderContainer {
+  padding-block: 8px;
+  padding-inline: 12px;
+}
+
+:deep(.thumbnailSizeSlider) {
+  inline-size: min(280px, 70vw);
+  margin: 0;
+}

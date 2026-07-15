@@ -5,6 +5,10 @@
   justify-content: space-evenly;
 }
 
+.grid.thumbnailSizeReady {
+  grid-template-columns: repeat(auto-fill, min(var(--thumbnail-grid-size), 100%));
+}
+
 .list {
   display: grid;
   gap: 4px;

@@ -4,6 +4,7 @@ import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
 import { DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { getSystemLocale, showToast } from '../../helpers/utils'
+import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -315,6 +316,8 @@ const state = {
     skip: 'promptToSkip'
   },
   thumbnailPreference: '',
+  thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
+  showThumbnailSizeButtonInHeader: true,
   extraThumbnailAction: '',
   blurThumbnails: false,
   useProxy: false,

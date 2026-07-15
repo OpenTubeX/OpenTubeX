@@ -23,7 +23,8 @@ const router = createRouter({
       path: '/',
       name: 'default',
       meta: {
-        title: 'Subscriptions'
+        title: 'Subscriptions',
+        hasResizableThumbnails: true
       },
       component: Subscriptions
     },
@@ -31,7 +32,8 @@ const router = createRouter({
       path: '/subscriptions',
       name: 'subscriptions',
       meta: {
-        title: 'Subscriptions'
+        title: 'Subscriptions',
+        hasResizableThumbnails: true
       },
       component: Subscriptions
     },
@@ -48,7 +50,8 @@ const router = createRouter({
           path: '/trending',
           name: 'trending',
           meta: {
-            title: 'Trending'
+            title: 'Trending',
+            hasResizableThumbnails: true
           },
           component: Trending
         }]
@@ -57,7 +60,8 @@ const router = createRouter({
       path: '/popular',
       name: 'popular',
       meta: {
-        title: 'Most Popular'
+        title: 'Most Popular',
+        hasResizableThumbnails: true
       },
       component: Popular
     },
@@ -65,7 +69,8 @@ const router = createRouter({
       path: '/userplaylists',
       name: 'userPlaylists',
       meta: {
-        title: 'Your Playlists'
+        title: 'Your Playlists',
+        hasResizableThumbnails: true
       },
       component: UserPlaylists
     },
@@ -73,7 +78,8 @@ const router = createRouter({
       path: '/history',
       name: 'history',
       meta: {
-        title: 'History'
+        title: 'History',
+        hasResizableThumbnails: true
       },
       component: History
     },
@@ -112,21 +118,24 @@ const router = createRouter({
     {
       path: '/search/:query',
       meta: {
-        title: 'Search Results'
+        title: 'Search Results',
+        hasResizableThumbnails: true
       },
       component: SearchPage
     },
     {
       path: '/playlist/:id',
       meta: {
-        title: 'Playlist'
+        title: 'Playlist',
+        hasResizableThumbnails: true
       },
       component: Playlist
     },
     {
       path: '/channel/:id/:currentTab?',
       meta: {
-        title: 'Channel'
+        title: 'Channel',
+        hasResizableThumbnails: true
       },
       component: Channel
     },
@@ -140,7 +149,8 @@ const router = createRouter({
     {
       path: '/hashtag/:hashtag',
       meta: {
-        title: 'Hashtag'
+        title: 'Hashtag',
+        hasResizableThumbnails: true
       },
       component: Hashtag
     },

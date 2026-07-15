@@ -57,8 +57,28 @@
           @change="updateUiScale"
         />
       </FtFlexBox>
-      <br>
     </template>
+    <FtFlexBox>
+      <div class="switchColumn">
+        <FtSlider
+          :label="t('Settings.Theme Settings.Thumbnail Size')"
+          :default-value="thumbnailSize"
+          :min-value="MIN_THUMBNAIL_SIZE"
+          :max-value="MAX_THUMBNAIL_SIZE"
+          :step="THUMBNAIL_SIZE_STEP"
+          value-extension="%"
+          @input="previewThumbnailSize"
+          @change="updateThumbnailSize"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Thumbnail Size Button in Header')"
+          compact
+          :default-value="showThumbnailSizeButtonInHeader"
+          @change="updateShowThumbnailSizeButtonInHeader"
+        />
+      </div>
+    </FtFlexBox>
+    <br>
     <FtFlexBox>
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
@@ -114,6 +134,11 @@ import store from '../store/index'
 
 import { colors } from '../helpers/colors'
 import { useColorTranslations } from '../composables/colors'
+import {
+  MAX_THUMBNAIL_SIZE,
+  MIN_THUMBNAIL_SIZE,
+  THUMBNAIL_SIZE_STEP
+} from '../constants/thumbnailSize'
 
 const { t } = useI18n()
 
@@ -284,6 +309,18 @@ function updateHideHeaderLogo(value) {
   store.dispatch('updateHideHeaderLogo', value)
 }
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const showThumbnailSizeButtonInHeader = computed(() => {
+  return store.getters.getShowThumbnailSizeButtonInHeader
+})
+
+/**
+ * @param {boolean} value
+ */
+function updateShowThumbnailSizeButtonInHeader(value) {
+  store.dispatch('updateShowThumbnailSizeButtonInHeader', value)
+}
+
 /** @type {import('vue').ComputedRef<number>} */
 const uiScale = computed(() => store.getters.getUiScale)
 
@@ -292,6 +329,23 @@ const uiScale = computed(() => store.getters.getUiScale)
  */
 function updateUiScale(value) {
   store.dispatch('updateUiScale', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const thumbnailSize = computed(() => store.getters.getThumbnailSize)
+
+/**
+ * @param {number} value
+ */
+function previewThumbnailSize(value) {
+  store.commit('setThumbnailSize', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateThumbnailSize(value) {
+  store.dispatch('updateThumbnailSize', value)
 }
 
 /** @type {boolean} */

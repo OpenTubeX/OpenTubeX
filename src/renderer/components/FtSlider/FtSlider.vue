@@ -12,6 +12,7 @@
       :min="minValue"
       :max="maxValue"
       :step="step"
+      @input="input"
       @change="change"
     >
     <span class="label">
@@ -65,7 +66,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'input'])
 
 const id = useId()
 const currentValue = ref(props.defaultValue)
@@ -86,6 +87,13 @@ const displayLabel = computed(() => {
 
 function change() {
   emit('change', currentValue.value)
+}
+
+/**
+ * @param {Event} event
+ */
+function input(event) {
+  emit('input', event.target.valueAsNumber)
 }
 
 </script>
