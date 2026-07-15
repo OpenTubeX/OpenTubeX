@@ -2028,6 +2028,29 @@ function runApp() {
     openPendingUrlForReadyWebContents(event)
   })
 
+  ipcMain.on(IpcChannels.SHOW_TOAST, (event, message, time) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      typeof message !== 'string' ||
+      (time !== null && typeof time !== 'number')
+    ) {
+      return
+    }
+
+    for (const window of BrowserWindow.getAllWindows()) {
+      const tabManager = TabManager.getForWindow(window.id)
+      if (tabManager) {
+        for (const tab of tabManager.tabs.values()) {
+          if (isOpenTubeXUrl(tab.view.webContents.getURL())) {
+            tab.view.webContents.send(IpcChannels.SHOW_TOAST, message, time)
+          }
+        }
+      } else if (isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.SHOW_TOAST, message, time)
+      }
+    }
+  })
+
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, title) => {
     if (isOpenTubeXUrl(event.senderFrame.url) && typeof title === 'string') {
       // With tabs, also update the tab title

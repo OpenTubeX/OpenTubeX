@@ -9,7 +9,8 @@ import { getLocalChannelCommunity, getLocalChannelLiveStreams, getLocalChannelVi
 import {
   copyToClipboard,
   getChannelPlaylistId,
-  showToast
+  showToast,
+  showToastOnAllTabs
 } from './utils'
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
@@ -251,7 +252,7 @@ export async function refreshSubscriptionVideosFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscription Videos'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'))
   }
 
   const subscriptionUpdates = []
@@ -338,7 +339,7 @@ export async function refreshSubscriptionShortsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscription Shorts'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'))
   }
 
   const subscriptionUpdates = []
@@ -411,7 +412,7 @@ export async function refreshSubscriptionLiveFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscription Live Streams'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'))
   }
 
   const subscriptionUpdates = []
@@ -498,7 +499,7 @@ export async function refreshSubscriptionPostsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToast(t('Subscriptions.Refreshing Subscription Posts'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'))
   }
 
   const subscriptionUpdates = []

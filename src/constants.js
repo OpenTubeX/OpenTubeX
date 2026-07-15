@@ -18,6 +18,7 @@ const IpcChannels = {
 
   OPEN_URL: 'open-url',
   CHANGE_VIEW: 'change-view',
+  SHOW_TOAST: 'show-toast',
 
   // Tab management
   TABS_GET_STATE: 'tabs-get-state',

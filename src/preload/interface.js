@@ -294,6 +294,29 @@ export default {
   },
 
   /**
+   * @param {string} message
+   * @param {number | null} time
+   */
+  showToastOnAllTabs: (message, time) => {
+    ipcRenderer.send(IpcChannels.SHOW_TOAST, message, time)
+  },
+
+  /**
+   * @param {(message: string, time: number | null) => void} handler
+   * @returns {() => void}
+   */
+  handleShowToast: (handler) => {
+    const listener = (_, message, time) => {
+      handler(message, time)
+    }
+
+    ipcRenderer.on(IpcChannels.SHOW_TOAST, listener)
+    return () => {
+      ipcRenderer.removeListener(IpcChannels.SHOW_TOAST, listener)
+    }
+  },
+
+  /**
    * Pass `null` to clear the handler
    * @param {(text: string) => void | null} handler
    */

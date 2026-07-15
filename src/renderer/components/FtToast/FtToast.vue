@@ -20,9 +20,10 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, reactive } from 'vue'
-import { ToastEventBus } from '../../helpers/utils'
+import { showToast, ToastEventBus } from '../../helpers/utils'
 
 let idCounter = 0
+let removeShowToastListener = null
 
 /**
  * @typedef Toast
@@ -136,10 +137,15 @@ function cleanup(toast) {
 
 onMounted(() => {
   ToastEventBus.addEventListener('toast-open', open)
+
+  if (process.env.IS_ELECTRON) {
+    removeShowToastListener = window.ftElectron.handleShowToast(showToast)
+  }
 })
 
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
+  removeShowToastListener?.()
   toasts.forEach(cleanup)
 })
 </script>

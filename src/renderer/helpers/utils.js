@@ -216,6 +216,19 @@ export function showToast(message, time = null, action = null, abortSignal = nul
 }
 
 /**
+ * Shows a non-interactive toast in every tab.
+ * @param {string} message
+ * @param {number} time
+ */
+export function showToastOnAllTabs(message, time = null) {
+  if (process.env.IS_ELECTRON) {
+    window.ftElectron.showToastOnAllTabs(message, time)
+  } else {
+    showToast(message, time)
+  }
+}
+
+/**
  * This writes to the clipboard. If an error occurs during the copy,
  * a toast with the error is shown. If the copy is successful and
  * there is a success message, a toast with that message is shown.
