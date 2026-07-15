@@ -333,6 +333,7 @@ const state = {
   videoSkipMouseScroll: false,
   videoPlaybackRateInterval: 0.25,
   rememberVolume: true,
+  skipSilence: false,
   holdToDoublePlaybackSpeed: true,
   rememberPlaybackSpeedPerChannel: false,
   autoUpdateChannelPlaybackSpeeds: false,

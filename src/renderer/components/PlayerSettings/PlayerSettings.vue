@@ -32,6 +32,13 @@
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Fast-Forward Through Silence')"
+          :compact="true"
+          :default-value="skipSilence"
+          :tooltip="t('Tooltips.Player Settings.Fast-Forward Through Silence')"
+          @change="updateSkipSilence"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
           :compact="true"
           :default-value="holdToDoublePlaybackSpeed"
@@ -59,13 +66,6 @@
           :default-value="seekIntervalMultiplyByPlaybackRate"
           :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
           @change="updateSeekIntervalMultiplyByPlaybackRate"
-        />
-        <FtToggleSwitch
-          :label="t('Global.Ambient Mode')"
-          :compact="true"
-          :default-value="ambientMode"
-          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
-          @change="updateAmbientMode"
         />
       </div>
       <div class="switchColumn">
@@ -118,6 +118,13 @@
           :compact="true"
           :default-value="scrollMiniPlayerEnabled"
           @change="updateScrollMiniPlayerEnabled"
+        />
+        <FtToggleSwitch
+          :label="t('Global.Ambient Mode')"
+          :compact="true"
+          :default-value="ambientMode"
+          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
+          @change="updateAmbientMode"
         />
       </div>
     </div>
@@ -662,6 +669,16 @@ const rememberVolume = computed(() => store.getters.getRememberVolume)
  */
 function updateRememberVolume(value) {
   store.dispatch('updateRememberVolume', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const skipSilence = computed(() => store.getters.getSkipSilence)
+
+/**
+ * @param {boolean} value
+ */
+function updateSkipSilence(value) {
+  store.dispatch('updateSkipSilence', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

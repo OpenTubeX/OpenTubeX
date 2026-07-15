@@ -50,6 +50,7 @@ import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../help
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
+import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
@@ -394,6 +395,16 @@ export default defineComponent({
 
     const ambientMode = computed(() => {
       return store.getters.getAmbientMode
+    })
+
+    const skipSilence = computed(() => {
+      return store.getters.getSkipSilence
+    })
+
+    const silenceSkipping = useSilenceSkipping({
+      enabled: skipSilence,
+      isLive,
+      video,
     })
 
     /** @param {boolean} value */
@@ -4477,12 +4488,12 @@ export default defineComponent({
     function getCurrentPlaybackRate() {
       const playerRate = normalizePlaybackRate(player?.getPlaybackRate())
       if (playerRate !== null) {
-        return playerRate
+        return silenceSkipping.getNormalPlaybackRate(playerRate)
       }
 
       const videoRate = normalizePlaybackRate(video.value?.playbackRate)
       if (videoRate !== null) {
-        return videoRate
+        return silenceSkipping.getNormalPlaybackRate(videoRate)
       }
 
       return normalizePlaybackRate(props.currentPlaybackRate)
@@ -4530,9 +4541,11 @@ export default defineComponent({
         return
       }
 
+      silenceSkipping.suspend()
       const playbackRate = getCurrentPlaybackRate()
       if (playbackRate === null) {
         temporaryPlaybackRateSources.delete(source)
+        silenceSkipping.resume()
         return
       }
 
@@ -4555,6 +4568,7 @@ export default defineComponent({
         wasPausedBeforeTemporaryPlayback = false
         temporaryPlaybackRateActive = false
         showTemporaryPlaybackRateIndicator.value = false
+        silenceSkipping.resume()
         console.error('Failed to apply temporary playback rate:', error)
       }
     }
@@ -4608,6 +4622,7 @@ export default defineComponent({
         wasPausedBeforeTemporaryPlayback = false
         temporaryPlaybackRateActive = false
         showTemporaryPlaybackRateIndicator.value = false
+        silenceSkipping.resume()
       }
     }
 
@@ -4707,7 +4722,7 @@ export default defineComponent({
      * @param {number} step
      */
     function changePlayBackRate(step) {
-      applyPlaybackRate(player.getPlaybackRate() + step)
+      applyPlaybackRate(getCurrentPlaybackRate() + step)
     }
 
     /**
@@ -4718,7 +4733,7 @@ export default defineComponent({
     }
 
     function toggleNormalPlaybackRate() {
-      const currentRate = player.getPlaybackRate()
+      const currentRate = getCurrentPlaybackRate()
 
       if (!isNormalPlaybackRate(currentRate)) {
         togglePlaybackRate = currentRate
@@ -4818,7 +4833,7 @@ export default defineComponent({
      * @param {WheelEvent} event
      */
     function mouseScrollSkip(event) {
-      const seekMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+      const seekMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
       if ((event.deltaY < 0 || event.deltaX > 0)) {
         seekBySeconds(defaultSkipInterval.value * seekMultiplier, true)
       } else if ((event.deltaY > 0 || event.deltaX < 0)) {
@@ -5141,14 +5156,14 @@ export default defineComponent({
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND: {
           // Rewind by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+          const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
           seekBySeconds(-defaultSkipInterval.value * largeRewindMultiplier * 2, false, true)
           break
         }
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD: {
           // Fast-Forward by 2x the time-skip interval (in seconds)
           event.preventDefault()
-          const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+          const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
           seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
         }
@@ -5207,7 +5222,7 @@ export default defineComponent({
             showOverlayControls()
           } else {
             // Rewind by the time-skip interval (in seconds)
-            const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+            const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
             seekBySeconds(-defaultSkipInterval.value * smallRewindMultiplier, false, true)
           }
           break
@@ -5222,7 +5237,7 @@ export default defineComponent({
             showOverlayControls()
           } else {
             // Fast-Forward by the time-skip interval (in seconds)
-            const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? player.getPlaybackRate() : 1
+            const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
             seekBySeconds(defaultSkipInterval.value * smallFastForwardMultiplier, false, true)
           }
           break
@@ -5551,7 +5566,7 @@ export default defineComponent({
               return
             }
 
-            emit('playback-rate-user-set', player.getPlaybackRate())
+            emit('playback-rate-user-set', getCurrentPlaybackRate())
           }, 10)
         }
       }
@@ -5767,8 +5782,9 @@ export default defineComponent({
       // Whatever runs after `performFirstLoad` might be after switching to another page due to SABR backoff
 
       player?.addEventListener('ratechange', () => {
-        if (!temporaryPlaybackRateActive) {
-          emit('playback-rate-updated', player.getPlaybackRate())
+        const playbackRate = player.getPlaybackRate()
+        if (!temporaryPlaybackRateActive && !silenceSkipping.handlePlaybackRateChange(playbackRate)) {
+          emit('playback-rate-updated', playbackRate)
         }
       })
     })
