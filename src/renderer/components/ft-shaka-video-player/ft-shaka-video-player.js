@@ -1675,7 +1675,8 @@ export default defineComponent({
       if (toastEntry) {
         upsertSkippedSponsorBlockToast({
           uuid,
-          translatedCategory: toastEntry.translatedCategory
+          translatedCategory: toastEntry.translatedCategory,
+          color: toastEntry.color
         })
       }
     }
