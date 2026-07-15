@@ -7,6 +7,7 @@ import { KeyboardShortcuts } from '../../../constants'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
+import { CaptionToggleButton } from './player-components/CaptionToggleButton'
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
@@ -1943,7 +1944,7 @@ export default defineComponent({
 
         elementList = uiConfig.overflowMenuButtons
 
-        uiConfig.controlPanelElements.push('overflow_menu', 'fullscreen')
+        uiConfig.controlPanelElements.push('ft_caption_toggle', 'overflow_menu', 'fullscreen')
       } else {
         uiConfig.controlPanelElements.push(
           ...(useQuickPlaybackSpeedBar.value && !isLive.value ? ['ft_quick_playback_rate_bar'] : []),
@@ -1954,6 +1955,7 @@ export default defineComponent({
           'ft_sponsorblock_end',
           'ft_screenshot',
           'ft_autoplay_toggle',
+          'ft_caption_toggle',
           'overflow_menu',
           'picture_in_picture',
           'ft_theatre_mode',
@@ -3829,6 +3831,34 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('captions', new CaptionSelectionFactory())
     }
 
+    function toggleCaptions() {
+      const textTracks = player.getTextTracks()
+
+      if (textTracks.length === 0) {
+        return false
+      }
+
+      if (textTracks.some(track => track.active)) {
+        player.selectTextTrack(null)
+      } else {
+        player.selectTextTrack(findCaptionByLocale(textTracks, preferredCaptionLocale.value) ?? textTracks[0])
+      }
+
+      showOverlayControls()
+      return true
+    }
+
+    function registerCaptionToggleButton() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class CaptionToggleButtonFactory {
+        create(rootElement, controls) {
+          return new CaptionToggleButton(toggleCaptions, events, rootElement, controls)
+        }
+      }
+
+      shakaControls.registerElement('ft_caption_toggle', new CaptionToggleButtonFactory())
+    }
+
     function registerChapterOverlayButton() {
       events.addEventListener('setChaptersOverlay', (/** @type {CustomEvent} */ event) => {
         const shouldOpen = event.detail && props.chapters.length > 0
@@ -4412,6 +4442,8 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_audio_tracks', null)
       shakaOverflowMenu.registerElement('ft_audio_tracks', null)
+
+      shakaControls.registerElement('ft_caption_toggle', null)
 
       shakaControls.registerElement('ft_autoplay_toggle', null)
       shakaOverflowMenu.registerElement('ft_autoplay_toggle', null)
@@ -5283,18 +5315,8 @@ export default defineComponent({
           break
         case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS: {
           // Toggle caption/subtitles
-
-          const textTracks = player.getTextTracks()
-          if (textTracks.length > 0) {
+          if (toggleCaptions()) {
             event.preventDefault()
-
-            if (textTracks.some(track => track.active)) {
-              player.selectTextTrack(null)
-            } else {
-              player.selectTextTrack(findCaptionByLocale(textTracks, preferredCaptionLocale.value) ?? textTracks[0])
-            }
-
-            showOverlayControls()
           }
           break
         }
@@ -5771,6 +5793,7 @@ export default defineComponent({
       registerScreenshotButton()
       registerAudioTrackSelection()
       registerCaptionSelection()
+      registerCaptionToggleButton()
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
