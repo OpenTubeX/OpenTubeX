@@ -577,6 +577,7 @@ Settings:
     Default Volume: Default Volume
     Remember Volume: Remember Volume
     Fast-Forward Through Silence: Fast-Forward Through Silence
+    Show Fast-Forward Through Silence Toggle: Show Fast-Forward Through Silence Toggle
     Hold to Double Playback Speed: Hold to Double Playback Speed
     Default Playback Rate: Default Playback Rate
     Remember Playback Speed Per Channel: Remember Playback Speed Per Channel
@@ -1373,7 +1374,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Use the scroll wheel to skip through the video, MPV style.
     Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
     Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.
-    Fast-Forward Through Silence: Detects sustained silence and temporarily speeds through it without changing your selected playback rate. Live streams are unaffected.
+    Show Fast-Forward Through Silence Toggle: Shows an on/off toggle for fast-forwarding through silence in the player's settings menu.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.

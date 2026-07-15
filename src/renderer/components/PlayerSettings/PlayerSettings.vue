@@ -32,11 +32,11 @@
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Fast-Forward Through Silence')"
+          :label="t('Settings.Player Settings.Show Fast-Forward Through Silence Toggle')"
           :compact="true"
-          :default-value="skipSilence"
-          :tooltip="t('Tooltips.Player Settings.Fast-Forward Through Silence')"
-          @change="updateSkipSilence"
+          :default-value="showSkipSilenceButton"
+          :tooltip="t('Tooltips.Player Settings.Show Fast-Forward Through Silence Toggle')"
+          @change="updateShowSkipSilenceButton"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
@@ -672,13 +672,17 @@ function updateRememberVolume(value) {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const skipSilence = computed(() => store.getters.getSkipSilence)
+const showSkipSilenceButton = computed(() => store.getters.getShowSkipSilenceButton)
 
 /**
  * @param {boolean} value
  */
-function updateSkipSilence(value) {
-  store.dispatch('updateSkipSilence', value)
+function updateShowSkipSilenceButton(value) {
+  store.dispatch('updateShowSkipSilenceButton', value)
+
+  if (!value) {
+    store.dispatch('updateSkipSilence', false)
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

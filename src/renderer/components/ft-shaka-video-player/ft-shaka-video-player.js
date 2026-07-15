@@ -445,8 +445,16 @@ export default defineComponent({
       return store.getters.getSkipSilence
     })
 
+    const showSkipSilenceButton = computed(() => {
+      return store.getters.getShowSkipSilenceButton
+    })
+
+    const silenceSkippingEnabled = computed(() => {
+      return showSkipSilenceButton.value && skipSilence.value
+    })
+
     const silenceSkipping = useSilenceSkipping({
-      enabled: skipSilence,
+      enabled: silenceSkippingEnabled,
       isLive,
       video,
     })
@@ -2041,8 +2049,11 @@ export default defineComponent({
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ambient_mode')
       }
 
-      if (isLive.value) {
+      if (!showSkipSilenceButton.value || isLive.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_skip_silence')
+      }
+
+      if (isLive.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'loop')
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_loop')
       }
