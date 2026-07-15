@@ -1941,7 +1941,9 @@ export function parseLocalEndscreen(endscreen) {
     const payload = element.endpoint.payload
     let route
 
-    if (element.endpoint.name === 'watchEndpoint' && payload.videoId) {
+    if (element.style === 'PLAYLIST' && payload.playlistId) {
+      route = `/playlist/${payload.playlistId}`
+    } else if (element.endpoint.name === 'watchEndpoint' && payload.videoId) {
       route = {
         path: `/watch/${payload.videoId}`,
         query: payload.playlistId ? { playlistId: payload.playlistId } : undefined
