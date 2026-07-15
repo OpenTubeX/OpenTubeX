@@ -265,6 +265,52 @@
   transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
 }
 
+:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon)) {
+  position: relative;
+}
+
+:deep(.shaka-play-button:has(> .ft-play-pause-morph-icon) > .shaka-ui-icon:not(.ft-play-pause-morph-icon)) {
+  opacity: 0;
+}
+
+:deep(.shaka-play-button > .ft-play-pause-morph-icon) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+:deep(.ft-play-pause-morph-icon > path) {
+  d: path('M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z');
+  transition: d 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.shaka-play-button[data-ft-play-pause-state='pause'] > .ft-play-pause-morph-icon > path) {
+  d: path('M6.45 5.48 10.15 5.48 10.15 18.52 6.45 18.52ZM13.85 5.48 17.55 5.48 17.55 18.52 13.85 18.52Z');
+}
+
+:deep(.shaka-mute-button) {
+  position: relative;
+}
+
+:deep(.ft-mute-toggle-slash) {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 26px;
+  block-size: 2.5px;
+  border-radius: 999px;
+  background-color: currentcolor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
+  transition: transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.shaka-mute-button[data-ft-muted='true'] > .ft-mute-toggle-slash) {
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+}
+
 :deep(.shaka-controls-button-panel > .autoplay-toggle) {
   display: flex;
   align-items: center;
@@ -317,6 +363,8 @@
   :deep(.shaka-overflow-menu-button > .shaka-ui-icon),
   :deep(.ft-caption-toggle-icon),
   :deep(.ft-caption-toggle-slash),
+  :deep(.ft-play-pause-morph-icon > path),
+  :deep(.ft-mute-toggle-slash),
   :deep(.ft-autoplay-switch),
   :deep(.ft-autoplay-switch > .ft-autoplay-switch-thumb) {
     transition: none;

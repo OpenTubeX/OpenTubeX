@@ -81,6 +81,8 @@ const TEMPORARY_PLAYBACK_RATE_MULTIPLIER = 2
 const TEMPORARY_PLAYBACK_RATE_HOLD_DELAY_MS = 625
 const TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE = 'keyboard'
 const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
+const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z'
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
@@ -2122,6 +2124,9 @@ export default defineComponent({
       if (hasLoaded.value) {
         ui.getControls().dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
       }
+
+      syncPlayPauseControlIcons(video.value.paused)
+      syncMuteControlIcons(video.value.muted || video.value.volume === 0)
     }
 
     function closeChaptersOverlay() {
@@ -2851,11 +2856,69 @@ export default defineComponent({
 
     // #region video event handlers
 
+    /**
+     * @param {Element} button
+     * @param {string} iconPath
+     */
+    function createPlayPauseMorphIcon(button, iconPath) {
+      const icon = document.createElementNS(SVG_NAMESPACE, 'svg')
+      icon.classList.add('shaka-ui-icon', 'ft-play-pause-morph-icon')
+      icon.setAttribute('viewBox', '0 0 24 24')
+      icon.setAttribute('aria-hidden', 'true')
+
+      const path = document.createElementNS(SVG_NAMESPACE, 'path')
+      path.setAttribute('d', iconPath)
+      icon.appendChild(path)
+      button.appendChild(icon)
+    }
+
+    /**
+     * @param {boolean} paused
+     */
+    function syncPlayPauseControlIcons(paused) {
+      const nextState = paused ? 'play' : 'pause'
+
+      window.requestAnimationFrame(() => {
+        container.value?.querySelectorAll('.shaka-play-button').forEach((button) => {
+          if (!button.querySelector('.ft-play-pause-morph-icon')) {
+            createPlayPauseMorphIcon(button, PLAY_MORPH_PATH)
+          }
+
+          button.setAttribute('data-ft-play-pause-state', nextState)
+        })
+      })
+    }
+
+    /**
+     * @param {boolean} muted
+     */
+    function syncMuteControlIcons(muted) {
+      window.requestAnimationFrame(() => {
+        container.value?.querySelectorAll('.shaka-mute-button').forEach((button) => {
+          button.querySelector(':scope > .shaka-ui-icon > path')?.setAttribute(
+            'd',
+            shaka.ui.Enums.MaterialDesignSVGIcons.MUTE
+          )
+
+          if (!button.querySelector('.ft-mute-toggle-slash')) {
+            const slash = document.createElement('span')
+            slash.classList.add('ft-mute-toggle-slash')
+            slash.ariaHidden = 'true'
+            button.appendChild(slash)
+          }
+
+          button.setAttribute('data-ft-muted', String(muted))
+        })
+      })
+    }
+
     function handlePlay() {
       if (process.env.IS_ELECTRON && !isActiveTab.value) {
         video.value.pause()
         return
       }
+
+      syncPlayPauseControlIcons(false)
 
       sleepTimer.resumeCountdown()
       startPowerSaveBlocker()
@@ -2878,6 +2941,8 @@ export default defineComponent({
     }
 
     function handlePause() {
+      syncPlayPauseControlIcons(true)
+
       sleepTimer.pauseCountdown()
       stopPowerSaveBlocker()
       pauseSponsorBlockHighlightLabelCountdown()
@@ -2940,6 +3005,9 @@ export default defineComponent({
 
     function updateVolume() {
       const video_ = video.value
+      const muted = video_.muted || video_.volume === 0
+
+      syncMuteControlIcons(muted)
 
       if (showStats.value) {
         stats.volume = (video_.volume * 100).toFixed(1)
