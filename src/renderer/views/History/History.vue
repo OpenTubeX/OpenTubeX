@@ -3,13 +3,24 @@
     <FtCard
       class="card"
     >
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'history']"
-          class="headingIcon"
+      <div class="headingRow">
+        <h2>
+          <FontAwesomeIcon
+            :icon="['fas', 'history']"
+            class="headingIcon"
+          />
+          {{ t('History.History') }}
+        </h2>
+        <FtButton
+          v-if="historyCacheSorted.length > 0"
+          class="cleanupButton"
+          :label="t('History.Delete Old History')"
+          :icon="['fas', 'trash']"
+          text-color="var(--destructive-text-color)"
+          background-color="var(--destructive-color)"
+          @click="showHistoryCleanupPrompt = true"
         />
-        {{ t('History.History') }}
-      </h2>
+      </div>
       <FtInput
         v-show="fullData.length > 1"
         ref="searchBar"
@@ -75,6 +86,61 @@
           />
         </FtFlexBox>
       </FtAutoLoadNextPageWrapper>
+      <FtPrompt
+        v-if="showHistoryCleanupPrompt"
+        autosize
+        theme="slim"
+        @click="closeHistoryCleanupPrompt"
+      >
+        <template #label="{ labelId }">
+          <h2
+            :id="labelId"
+            class="cleanupPromptTitle"
+          >
+            {{ t('History.Delete Old History') }}
+          </h2>
+        </template>
+        <div class="cleanupPromptContent">
+          <p>
+            {{ t('History.Select History Age') }}
+          </p>
+          <FtSelect
+            :placeholder="t('History.Delete Entries Older Than')"
+            :value="historyCleanupPeriod"
+            :select-names="historyCleanupPeriodNames"
+            :select-values="HISTORY_CLEANUP_PERIOD_VALUES"
+            :icon="['fas', 'calendar-days']"
+            @change="historyCleanupPeriod = $event"
+          />
+          <FtInput
+            v-if="historyCleanupPeriod === 'custom'"
+            :placeholder="t('History.Number of Days')"
+            input-type="number"
+            :value="customHistoryCleanupDays"
+            :show-action-button="false"
+            @input="customHistoryCleanupDays = $event"
+          />
+          <p class="cleanupWarning">
+            {{ t('History.History Cleanup Warning') }}
+          </p>
+          <FtFlexBox>
+            <FtButton
+              :label="t('Delete')"
+              :icon="['fas', 'trash']"
+              text-color="var(--destructive-text-color)"
+              background-color="var(--destructive-color)"
+              :disabled="historyCleanupDays === null"
+              @click="deleteOldHistory"
+            />
+            <FtButton
+              :label="t('Cancel')"
+              :text-color="null"
+              :background-color="null"
+              @click="closeHistoryCleanupPrompt"
+            />
+          </FtFlexBox>
+        </div>
+      </FtPrompt>
     </FtCard>
   </div>
 </template>
@@ -91,12 +157,13 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
+import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store'
 
-import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -110,6 +177,41 @@ const doCaseSensitiveSearch = ref(false)
 const showLoadMoreButton = ref(false)
 const query = ref('')
 const activeData = ref([])
+const historyCleanupPeriod = ref('30')
+const customHistoryCleanupDays = ref('')
+const showHistoryCleanupPrompt = ref(false)
+
+const HISTORY_CLEANUP_PERIOD_VALUES = ['1', '7', '30', '90', '365', 'custom']
+const historyCleanupPeriodNames = computed(() => [
+  t('History.1 Day'),
+  t('History.1 Week'),
+  t('History.1 Month'),
+  t('History.3 Months'),
+  t('History.1 Year'),
+  t('History.Custom')
+])
+
+const historyCleanupDays = computed(() => {
+  const value = historyCleanupPeriod.value === 'custom'
+    ? customHistoryCleanupDays.value
+    : historyCleanupPeriod.value
+  const days = Number(value)
+
+  return Number.isInteger(days) && days > 0 ? days : null
+})
+
+function closeHistoryCleanupPrompt() {
+  showHistoryCleanupPrompt.value = false
+}
+
+async function deleteOldHistory() {
+  const days = historyCleanupDays.value
+  if (days === null) { return }
+
+  await store.dispatch('removeHistoryOlderThan', days)
+  closeHistoryCleanupPrompt()
+  showToast(t('History.History Older Than Days Removed', { days }))
+}
 
 const HISTORY_SORT_BY_VALUES = {
   DateAddedNewest: 'latest_played_first',

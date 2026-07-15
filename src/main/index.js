@@ -2714,6 +2714,27 @@ function runApp() {
           )
           return null
 
+        case DBActions.HISTORY.DELETE_OLDER_THAN: {
+          if (
+            typeof data !== 'number' ||
+            !Number.isFinite(data) ||
+            data < 0 ||
+            data > Date.now()
+          ) {
+            throw new TypeError('invalid history cutoff')
+          }
+
+          const videoIds = await baseHandlers.history.deleteOlderThan(data, getPlayingVideoIds())
+          if (videoIds.length > 0) {
+            syncOtherWindows(
+              IpcChannels.SYNC_HISTORY,
+              event,
+              { event: SyncEvents.GENERAL.DELETE_MULTIPLE, data: videoIds }
+            )
+          }
+          return videoIds
+        }
+
         case DBActions.GENERAL.DELETE_ALL:
           await baseHandlers.history.deleteAll()
           syncOtherWindows(
@@ -3131,6 +3152,26 @@ function runApp() {
         window.webContents.send(channel, payload)
       }
     }
+  }
+
+  function getPlayingVideoIds() {
+    const videoIds = []
+
+    for (const window of BrowserWindow.getAllWindows()) {
+      const tabManager = TabManager.getForWindow(window.id)
+      if (!tabManager) { continue }
+
+      for (const tab of tabManager.tabs.values()) {
+        if (!tab.isPlaying) { continue }
+
+        const videoId = URL.parse(tab.url)?.hash.match(/^#\/watch\/(?<videoId>[^/?]+)/)?.groups?.videoId
+        if (videoId) {
+          videoIds.push(decodeURIComponent(videoId))
+        }
+      }
+    }
+
+    return videoIds
   }
 
   // ************************************************* //

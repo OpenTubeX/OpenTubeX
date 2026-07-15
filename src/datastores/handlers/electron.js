@@ -41,6 +41,10 @@ class History {
     return window.ftElectron.dbHistory(DBActions.GENERAL.DELETE, videoId)
   }
 
+  static deleteOlderThan(cutoff) {
+    return window.ftElectron.dbHistory(DBActions.HISTORY.DELETE_OLDER_THAN, cutoff)
+  }
+
   static deleteAll() {
     return window.ftElectron.dbHistory(DBActions.GENERAL.DELETE_ALL)
   }

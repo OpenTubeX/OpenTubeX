@@ -40,6 +40,22 @@
     </div>
     <br>
     <FtFlexBox>
+      <FtInput
+        :placeholder="$t('Settings.Privacy Settings.Automatic History Retention Placeholder')"
+        :label="$t('Settings.Privacy Settings.Automatic History Retention')"
+        input-type="number"
+        :value="historyRetentionDaysInput"
+        :show-label="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'check']"
+        :tooltip="$t('Settings.Privacy Settings.Automatic History Retention Tooltip')"
+        :disabled="!rememberHistory"
+        @input="historyRetentionDaysInput = $event"
+        @click="saveHistoryRetention"
+      />
+    </FtFlexBox>
+    <br>
+    <FtFlexBox>
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
         :value="statsWeekStartsOn"
@@ -126,11 +142,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from './FtButton/FtButton.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtInput from './FtInput/FtInput.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
@@ -197,6 +214,38 @@ function handleRememberHistory(value) {
   }
 
   store.dispatch('updateRememberHistory', value)
+}
+
+/** @type {import('vue').ComputedRef<string>} */
+const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
+const historyRetentionDaysInput = ref(historyRetentionDays.value)
+
+watch(historyRetentionDays, value => {
+  historyRetentionDaysInput.value = value
+})
+
+function parseDays(value, allowEmpty = false) {
+  if (allowEmpty && value === '') {
+    return ''
+  }
+
+  const days = Number(value)
+  return Number.isInteger(days) && days > 0 ? String(days) : null
+}
+
+async function saveHistoryRetention() {
+  const days = parseDays(historyRetentionDaysInput.value, true)
+  if (days === null) {
+    showToast(t('Settings.Privacy Settings.Invalid History Retention Days'))
+    return
+  }
+
+  historyRetentionDaysInput.value = days
+  await store.dispatch('updateHistoryRetentionDays', days)
+  if (days !== '') {
+    await store.dispatch('removeHistoryOlderThan', days)
+  }
+  showToast(t('Settings.Privacy Settings.History Retention Saved'))
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

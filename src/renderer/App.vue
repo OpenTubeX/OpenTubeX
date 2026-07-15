@@ -429,6 +429,9 @@ const subscriptionLiveLastRefreshTimestamp = computed(() => store.getters.getSub
 /** @type {import('vue').ComputedRef<number | null>} */
 const subscriptionPostsLastRefreshTimestamp = computed(() => store.getters.getSubscriptionPostsLastRefreshTimestamp)
 
+/** @type {import('vue').ComputedRef<string>} */
+const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => store.getters.getHideSubscriptionsVideos)
 
@@ -458,6 +461,8 @@ const subscriptionAutoRefreshTimers = {
   live: null,
   posts: null
 }
+const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
+let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let refreshOverdueSubscriptionFeedsPromise = null
 let tabSwitcherPreviewRequestId = 0
@@ -537,6 +542,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
+  clearInterval(historyCleanupTimer)
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
@@ -546,6 +552,22 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
 })
+
+watch(historyRetentionDays, scheduleHistoryCleanup)
+
+function scheduleHistoryCleanup(days) {
+  clearInterval(historyCleanupTimer)
+  historyCleanupTimer = null
+
+  const parsedDays = Number(days)
+  if (!Number.isInteger(parsedDays) || parsedDays < 1) {
+    return
+  }
+
+  historyCleanupTimer = setInterval(() => {
+    store.dispatch('removeHistoryOlderThan', parsedDays)
+  }, HISTORY_CLEANUP_INTERVAL)
+}
 
 watch([
   dataReady,

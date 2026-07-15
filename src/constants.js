@@ -97,6 +97,7 @@ const DBActions = {
   HISTORY: {
     UPDATE_WATCH_PROGRESS: 20,
     UPDATE_PLAYLIST: 21,
+    DELETE_OLDER_THAN: 22,
   },
 
   WATCH_STATS: {

@@ -27,6 +27,40 @@
   margin-inline-start: auto;
 }
 
+.headingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cleanupButton {
+  min-inline-size: 0;
+  padding-block: 6px;
+  padding-inline: 10px;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.cleanupPromptContent {
+  inline-size: min(420px, 80vw);
+  margin-inline: auto;
+}
+
+.cleanupPromptTitle {
+  text-align: center;
+}
+
+.cleanupPromptContent > :deep(.select),
+.cleanupPromptContent > :deep(.ft-input-component) {
+  inline-size: 100%;
+}
+
+.cleanupWarning {
+  color: var(--tertiary-text-color);
+  font-size: 0.9rem;
+}
+
 .message {
   color: var(--tertiary-text-color);
 }

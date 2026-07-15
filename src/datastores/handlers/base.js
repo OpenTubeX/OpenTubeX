@@ -171,6 +171,22 @@ class History {
     return db.history.removeAsync({ videoId })
   }
 
+  static async deleteOlderThan(cutoff, excludedVideoIds = []) {
+    const query = { timeWatched: { $lt: cutoff } }
+    if (excludedVideoIds.length > 0) {
+      query.videoId = { $nin: excludedVideoIds }
+    }
+
+    const records = await db.history.findAsync(query)
+    const videoIds = records.map(record => record.videoId)
+
+    if (videoIds.length > 0) {
+      await db.history.removeAsync({ videoId: { $in: videoIds } }, { multi: true })
+    }
+
+    return videoIds
+  }
+
   static deleteAll() {
     return db.history.removeAsync({}, { multi: true })
   }

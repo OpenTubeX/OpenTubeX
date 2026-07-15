@@ -263,6 +263,8 @@ const state = {
   proxyVideos: !process.env.SUPPORTS_LOCAL_API,
   region: 'US',
   rememberHistory: true,
+  // Empty means history is retained indefinitely.
+  historyRetentionDays: '',
   rememberSearchHistory: true,
   // 'auto', 'semi-auto', 'never'
   watchedProgressSavingMode: 'auto',
@@ -634,6 +636,10 @@ const customActions = {
 
           case SyncEvents.GENERAL.DELETE:
             commit('removeFromHistoryCacheById', data)
+            break
+
+          case SyncEvents.GENERAL.DELETE_MULTIPLE:
+            commit('removeMultipleFromHistoryCache', data)
             break
 
           case SyncEvents.GENERAL.DELETE_ALL:

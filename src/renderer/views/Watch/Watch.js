@@ -203,6 +203,7 @@ export default defineComponent({
       watchTimeLastTick: null,
       /** @type {Record<string, number>} */
       pendingWatchTimeByDate: {},
+      historyLastTouchedAt: 0,
     }
   },
   computed: {
@@ -214,6 +215,10 @@ export default defineComponent({
     },
     rememberHistory: function () {
       return this.$store.getters.getRememberHistory
+    },
+    historyRetentionEnabled: function () {
+      const days = Number(this.$store.getters.getHistoryRetentionDays)
+      return Number.isInteger(days) && days > 0
     },
     enableWatchStats: function () {
       return this.$store.getters.getEnableWatchStats
@@ -1451,6 +1456,7 @@ export default defineComponent({
     updateCurrentChapter: function (currentSeconds) {
       this.trackWatchTime()
       this.markAsWatchedIfFinished(currentSeconds)
+      this.keepHistoryEntryAlive(currentSeconds)
 
       const chapters = this.videoChapters
 
@@ -1473,6 +1479,7 @@ export default defineComponent({
     },
 
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
+      const now = Date.now()
       const videoData = {
         ...this.historyEntry,
         videoId: this.videoId,
@@ -1485,12 +1492,34 @@ export default defineComponent({
         lengthSeconds: this.videoLengthSeconds,
         watchProgress: watchProgress,
         isWatched,
-        timeWatched: Date.now(),
+        timeWatched: now,
         isLive: false,
         type: 'video',
       }
 
+      this.historyLastTouchedAt = now
       this.updateHistory(videoData)
+    },
+
+    keepHistoryEntryAlive(currentSeconds) {
+      const now = Date.now()
+      if (
+        !this.rememberHistory ||
+        !this.historyRetentionEnabled ||
+        !this.videoPlayerLoaded ||
+        this.isUpcoming ||
+        this.isLive ||
+        this.$refs.player?.isPaused() ||
+        now - this.historyLastTouchedAt < 60_000
+      ) {
+        return
+      }
+
+      const watchProgress = this.watchedProgressSavingEnabled
+        ? currentSeconds
+        : (this.historyEntry?.watchProgress ?? 0)
+
+      this.addToHistory(watchProgress)
     },
 
     markAsWatchedIfFinished(currentSeconds, isFinished = false) {

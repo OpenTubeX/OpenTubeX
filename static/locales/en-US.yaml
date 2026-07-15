@@ -314,6 +314,18 @@ History:
   Case Sensitive Search: Case Sensitive Search
   DateOldestHistory: Date Watched (Oldest)
   DateNewestHistory: Date Watched (Newest)
+  Delete Old History: Delete Old History
+  Select History Age: Select how old an entry must be before it is deleted.
+  Delete Entries Older Than: Delete entries older than
+  Number of Days: Number of days
+  History Cleanup Warning: This permanently deletes matching watch history entries.
+  1 Day: 1 day
+  1 Week: 1 week
+  1 Month: 1 month
+  3 Months: 3 months
+  1 Year: 1 year
+  Custom: Custom
+  History Older Than Days Removed: Watch history older than {days} days has been removed
 Settings:
   # On Settings Page
   Settings: Settings
@@ -609,6 +621,11 @@ Settings:
   Privacy Settings:
     Privacy Settings: Privacy
     Remember History: Remember Watch History
+    Automatic History Retention: Automatic History Retention (Days)
+    Automatic History Retention Placeholder: Leave blank to keep forever
+    Automatic History Retention Tooltip: Leave blank to keep history forever. Saving a number removes older entries now and automatically while the app is open.
+    History Retention Saved: History retention has been saved
+    Invalid History Retention Days: Enter a whole number of days greater than zero
     Enable Watch Statistics: Enable Watch Statistics
     Week Starts On: Week Starts On
     Remember Search History: Remember Search History

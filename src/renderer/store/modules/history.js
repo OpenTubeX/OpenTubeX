@@ -1,6 +1,17 @@
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
 import { migrateLegacyHistoryRecord } from '../../helpers/history'
 
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
+
+function getRetentionCutoff(days) {
+  const parsedDays = Number(days)
+  if (!Number.isInteger(parsedDays) || parsedDays < 1) {
+    return null
+  }
+
+  return Date.now() - parsedDays * MILLISECONDS_PER_DAY
+}
+
 const state = {
   historyCacheSorted: [],
 
@@ -20,8 +31,13 @@ const getters = {
 }
 
 const actions = {
-  async grabHistory({ commit }) {
+  async grabHistory({ commit, rootGetters }) {
     try {
+      const cutoff = getRetentionCutoff(rootGetters.getHistoryRetentionDays)
+      if (cutoff !== null) {
+        await DBHistoryHandlers.deleteOlderThan(cutoff)
+      }
+
       const results = await DBHistoryHandlers.find()
 
       const resultsById = {}
@@ -75,6 +91,22 @@ const actions = {
       commit('removeFromHistoryCacheById', videoId)
     } catch (errMessage) {
       console.error(errMessage)
+    }
+  },
+
+  async removeHistoryOlderThan({ commit }, days) {
+    const cutoff = getRetentionCutoff(days)
+    if (cutoff === null) {
+      return 0
+    }
+
+    try {
+      const videoIds = await DBHistoryHandlers.deleteOlderThan(cutoff)
+      commit('removeMultipleFromHistoryCache', videoIds)
+      return videoIds.length
+    } catch (errMessage) {
+      console.error(errMessage)
+      return 0
     }
   },
 
@@ -166,6 +198,15 @@ const mutations = {
     }
 
     delete state.historyCacheById[videoId]
+  },
+
+  removeMultipleFromHistoryCache(state, videoIds) {
+    const videoIdSet = new Set(videoIds)
+    state.historyCacheSorted = state.historyCacheSorted.filter(record => !videoIdSet.has(record.videoId))
+
+    for (const videoId of videoIds) {
+      delete state.historyCacheById[videoId]
+    }
   }
 }
 
