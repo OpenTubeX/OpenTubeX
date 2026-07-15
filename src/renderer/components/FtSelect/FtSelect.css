@@ -114,7 +114,8 @@
 
 /* active state */
 .select-text:focus ~ .select-label,
-.select-text:valid ~ .select-label {
+.select-text:valid ~ .select-label,
+.select-text:disabled ~ .select-label {
   color: var(--accent-color);
   inset-block-start: -20px;
   transition: 0.2s ease all;

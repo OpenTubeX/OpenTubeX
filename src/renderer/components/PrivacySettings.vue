@@ -62,6 +62,7 @@
         :select-names="weekStartNames"
         :select-values="WEEK_START_VALUES"
         :icon="['fas', 'chart-line']"
+        :disabled="!rememberHistory || !enableWatchStats"
         @change="updateStatsWeekStartsOn"
       />
       <FtSelect

@@ -30,7 +30,6 @@
     <span class="select-highlight" />
     <span class="select-bar" />
     <label
-      v-if="!disabled"
       class="select-label"
       :for="id"
     >
