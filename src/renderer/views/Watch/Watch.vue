@@ -31,6 +31,7 @@
           :format="activeFormat"
           :thumbnail="thumbnail"
           :video-id="videoId"
+          :playlist-id="playlistId"
           :chapters="videoChapters"
           :current-chapter-index="videoCurrentChapterIndex"
           :chapters-kind="videoChaptersKind"

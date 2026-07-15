@@ -157,6 +157,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    playlistId: {
+      type: String,
+      default: ''
+    },
     title: {
       type: String,
       default: ''
@@ -291,6 +295,11 @@ export default defineComponent({
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
+    })
+    const shareablePlaylistId = computed(() => {
+      return props.playlistId && store.getters.getPlaylist(props.playlistId) == null
+        ? props.playlistId
+        : ''
     })
 
     const hasLoaded = ref(false)
@@ -3865,8 +3874,8 @@ export default defineComponent({
        */
       function getVideoUrl(backend, includeTimestamp) {
         const videoUrl = backend === 'invidious'
-          ? getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId)
-          : getYoutubeVideoShareUrl(props.videoId)
+          ? getInvidiousVideoUrl(store.getters.getCurrentInvidiousInstanceUrl, props.videoId, shareablePlaylistId.value)
+          : getYoutubeVideoShareUrl(props.videoId, shareablePlaylistId.value)
 
         if (!includeTimestamp) {
           return videoUrl
