@@ -411,7 +411,8 @@ const sideEffectHandlers = {
       }
     }
 
-    const loadPromises = []
+    // Always finish loading the English fallback before the app is ready.
+    const loadPromises = [loadLocale(fallbackLocale)]
 
     // "es" is used as a fallback for "es-AR" and "es-MX"
     if (targetLocale === 'es-AR' || targetLocale === 'es-MX') {
@@ -427,9 +428,11 @@ const sideEffectHandlers = {
       )
     }
 
-    loadPromises.push(
-      loadLocale(targetLocale)
-    )
+    if (targetLocale !== fallbackLocale) {
+      loadPromises.push(
+        loadLocale(targetLocale)
+      )
+    }
 
     await Promise.allSettled(loadPromises)
 
@@ -538,10 +541,13 @@ const customActions = {
       const mutationIds = Object.keys(mutations)
 
       const alreadyTriggeredSideEffects = []
+      const sideEffectPromises = []
 
       for (const { _id, value } of userSettings) {
         if (settingsWithSideEffects.includes(_id)) {
-          dispatch(defaultSideEffectsTriggerId(_id), value)
+          sideEffectPromises.push(
+            dispatch(defaultSideEffectsTriggerId(_id), value)
+          )
           alreadyTriggeredSideEffects.push(_id)
         }
 
@@ -570,9 +576,13 @@ const customActions = {
 
       for (const _id of settingsWithSideEffects) {
         if (!alreadyTriggeredSideEffects.includes(_id)) {
-          dispatch(defaultSideEffectsTriggerId(_id), state[_id])
+          sideEffectPromises.push(
+            dispatch(defaultSideEffectsTriggerId(_id), state[_id])
+          )
         }
       }
+
+      await Promise.allSettled(sideEffectPromises)
     } catch (errMessage) {
       console.error(errMessage)
     }
