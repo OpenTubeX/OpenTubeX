@@ -388,6 +388,8 @@ Settings:
     Secondary Color Theme: Sekundäre Farbe
         #* Main Color Theme
     UI Scale: Skalierung der Benutzeroberfläche
+    Thumbnail Size: Vorschaubildgröße
+    Show Thumbnail Size Button in Header: Schaltfläche für die Vorschaubildgröße in der Kopfzeile anzeigen
     Disable Smooth Scrolling: Gleichmäßiges Scrollen deaktivieren
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
@@ -881,6 +883,10 @@ Video:
     Full Window: Vollständiges Fenster
     Take Screenshot: Screenshot aufnehmen
     Show Stats: Statistiken anzeigen
+    Hide Annotations: Anmerkungen ausblenden
+    Show Annotations: Anmerkungen anzeigen
+    Hide: Ausblenden
+    Show: Anzeigen
     Stats:
       Stats: Statistiken
       Video ID: 'Videokennung (ID): {videoId}'
