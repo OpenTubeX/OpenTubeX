@@ -480,6 +480,7 @@ Settings:
     Video Playback Rate Interval: Intervall für Geschwindigkeitseinstellung
     Max Video Playback Rate: Maximale Wiedergabegeschwindigkeit
     Fast-Forward Through Silence: Stille vorspulen
+    Show Fast-Forward Through Silence Toggle: Schalter „Stille vorspulen“ anzeigen
     Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
     Screenshot:
       Enable: Screenshots aktivieren
@@ -845,6 +846,23 @@ Channel:
     Courses: Kurse
   View All: Alles anzeigen
 Video:
+  Transcript:
+    Title: Transkript
+    Search: Transkript durchsuchen
+    Language: Transkriptsprache
+    Copy: Kopieren
+    Save: Speichern
+    Show: Transkript anzeigen
+    Hide: Transkript ausblenden
+    Close: Transkript schließen
+    Copied: Transkript in die Zwischenablage kopiert
+    Saved: Transkript gespeichert
+    Save Error: Transkript konnte nicht gespeichert werden
+    Text File: Textdatei
+    Unavailable: Für dieses Video ist kein Transkript verfügbar.
+    Load Error: Das Transkript konnte nicht geladen werden.
+    Empty: Dieses Transkript enthält keinen Text.
+    No Results: Kein Transkriptabschnitt entspricht deiner Suche.
   Open in YouTube: In YouTube öffnen
   Copy YouTube Link: YouTube-Link kopieren
   Open YouTube Embedded Player: Eingebetteten YouTube-Player öffnen
@@ -1209,7 +1227,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
-    Fast-Forward Through Silence: Erkennt längere Stille und beschleunigt sie vorübergehend, ohne die ausgewählte Wiedergabegeschwindigkeit zu ändern. Livestreams sind davon nicht betroffen.
+    Show Fast-Forward Through Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Vorspulen von Stille an.
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
