@@ -144,6 +144,8 @@
 
   .sidebarArea {
     grid-area: sidebar;
+    position: relative;
+    z-index: 2;
 
     @media only screen and (width >= 1051px) {
       min-inline-size: 380px;
@@ -156,9 +158,9 @@
 
   &.ambientModeActive {
     .infoArea :deep(.watchVideoInfo.ft-card),
+    .sidebarArea :deep(.watchVideoPlaylist.ft-card),
     .sidebarArea :deep(.watchVideoRecommendations.ft-card) {
       background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
-      backdrop-filter: blur(14px);
     }
   }
 
