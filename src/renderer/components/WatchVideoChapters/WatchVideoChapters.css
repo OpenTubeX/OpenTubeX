@@ -1,88 +1,124 @@
-.videoChapters {
-  overflow-y: hidden;
-}
-
-.chaptersSummary {
-  margin-block: 10px 0;
-  cursor: pointer;
-  list-style: none;
-}
-
-.chaptersTitle {
-  margin-block: 0;
-}
-
-.currentChapter {
-  font-size: 15px;
-}
-
 .chaptersWrapper {
-  margin-block-start: 15px;
-  max-block-size: 250px;
-  overflow-y: scroll;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 8px;
-}
-
-.chaptersWrapper.compact {
-  max-block-size: 200px;
-}
-
-.chaptersChevron {
-  vertical-align: middle;
-}
-
-.chaptersDetails[open] .chaptersChevron {
-  transform: translateX(4px) rotate(90deg);
-}
-
-.chaptersDetails[open]:dir(rtl) .chaptersChevron {
-  transform: translateX(-4px) rotate(90deg);
+  min-block-size: 0;
+  overflow-y: auto;
+  scrollbar-color: rgb(255 255 255 / 45%) transparent;
 }
 
 .chapter {
-  display: grid;
-  grid-template:
-    'thumbnail title' 2fr
-    'thumbnail timestamp' 2fr / auto 1fr;
-  column-gap: 10px;
-  cursor: pointer;
-  font-size: 15px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  min-block-size: 74px;
+  border-block-end: 1px solid rgb(255 255 255 / 6%);
+  background-color: rgb(20 20 20 / 38%);
 }
 
-.chaptersWrapper.compact .chapter {
-  display: flex;
-  flex-direction: row;
+.chapter.current {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+.chapter:hover,
+.chapter:focus-within {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+.chapter.current:hover,
+.chapter.current:focus-within {
+  background-color: rgb(255 255 255 / 18%);
+}
+
+.chapterSeek {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 14px;
+  min-inline-size: 0;
+  padding-block: 8px;
+  padding-inline: 14px 8px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.chaptersWrapper.compact .chapterSeek {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .chapterThumbnail {
-  grid-area: thumbnail;
-  inline-size: 130px;
-  margin: 3px;
+  display: block;
+  align-self: center;
+  inline-size: 100px;
+  border-radius: 8px;
+  background-color: rgb(255 255 255 / 8%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
-.chapter.current .chapterThumbnail {
-  border: solid 3px var(--accent-color);
-  margin: 0;
+.chapterInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: center;
+  gap: 8px;
+  min-inline-size: 0;
 }
 
 .chapterTitle {
-  grid-area: title;
-  align-self: center;
-  margin: 0;
+  overflow: hidden;
+  max-inline-size: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .chapter.current .chapterTitle {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .chapterTimestamp {
-  grid-area: timestamp;
-  place-self: flex-start start;
-  padding-block: 3px;
-  padding-inline: 4px;
-  border-radius: 5px;
-  background-color: var(--accent-color);
-  color: var(--text-with-accent-color);
+  padding-block: 4px;
+  padding-inline: 6px;
+  border-radius: 2px;
+  background-color: rgb(36 76 119 / 88%);
+  color: #55b6ff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.copyTimestamp {
+  display: grid;
+  flex: 0 0 48px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  opacity: 0.9;
+}
+
+.copyTimestamp:hover,
+.copyTimestamp:focus-visible {
+  background-color: rgb(255 255 255 / 8%);
+  opacity: 1;
+}
+
+@media only screen and (width <= 680px) {
+  .chapterSeek {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 10px;
+    padding-inline-start: 10px;
+  }
+
+  .chapterThumbnail {
+    inline-size: 82px;
+  }
 }

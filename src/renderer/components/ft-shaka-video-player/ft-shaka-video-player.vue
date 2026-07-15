@@ -28,6 +28,8 @@
       :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
       aria-hidden="true"
     />
+    <!-- The capture listener dismisses the focused dialog; its keyboard equivalent is Escape on the dialog. -->
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
     <div
       ref="container"
       class="ftVideoPlayer shaka-video-container"
@@ -41,6 +43,7 @@
       @mouseleave="handleScrollMiniPlayerLeave"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"
+      @click.capture="handleChaptersOverlayOutsideClick"
     >
     <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
     <video
@@ -76,6 +79,44 @@
       :annotations="annotations"
       :current-time="annotationCurrentTime"
     />
+    <Transition name="chapter-slide">
+      <aside
+        v-if="showChaptersOverlay && chapters.length > 0"
+        ref="chapterOverlay"
+        class="chapterOverlay shaka-no-propagation"
+        role="dialog"
+        tabindex="-1"
+        :aria-label="$t('Chapters.Chapters')"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeChaptersOverlay"
+      >
+        <header class="chapterOverlayHeader">
+          <h2 class="chapterOverlayTitle">
+            {{ chaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
+          </h2>
+          <button
+            type="button"
+            class="chapterOverlayClose"
+            :aria-label="$t('Chapters.Close Chapters')"
+            :title="$t('Chapters.Close Chapters')"
+            @click="closeChaptersOverlay"
+          >
+            <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          </button>
+        </header>
+        <WatchVideoChapters
+          :chapters="chapters"
+          :chapter-thumbnails="chapterThumbnails"
+          :current-chapter-index="currentChapterIndex"
+          :fallback-thumbnail="thumbnail"
+          @copy-timestamp="copyChapterTimestamp"
+          @timestamp-event="selectOverlayChapter"
+        />
+      </aside>
+    </Transition>
     <div
       v-if="showStats"
       class="stats"

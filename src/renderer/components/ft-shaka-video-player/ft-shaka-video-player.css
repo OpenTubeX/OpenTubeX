@@ -36,6 +36,169 @@
   pointer-events: none;
 }
 
+.chapterOverlay {
+  position: absolute;
+  z-index: 4;
+  inset-block: 0 61px;
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(480px, 82%);
+  min-block-size: 0;
+  overflow: hidden;
+  background-color: rgb(12 12 12 / 62%);
+  box-shadow: -8px 0 24px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  user-select: auto;
+}
+
+.chapter-slide-enter-active,
+.chapter-slide-leave-active {
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chapter-slide-enter-from,
+.chapter-slide-leave-to {
+  transform: translateX(100%);
+}
+
+.chapter-slide-enter-from:dir(rtl),
+.chapter-slide-leave-to:dir(rtl) {
+  transform: translateX(-100%);
+}
+
+.chapterOverlayHeader {
+  display: flex;
+  flex: 0 0 46px;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 14px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.chapterOverlayTitle {
+  margin: 0;
+  font-size: 16px;
+}
+
+.chapterOverlayClose {
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  border: 0;
+  border-radius: 50%;
+  background-color: rgb(0 0 0 / 45%);
+  color: #fff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.chapterOverlayClose:hover,
+.chapterOverlayClose:focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.chapterOverlay :deep(.chaptersWrapper) {
+  flex: 1;
+  min-block-size: 0;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button) {
+  display: flex;
+  position: relative;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  inline-size: auto;
+  max-inline-size: min(260px, 28vw);
+  block-size: 48px;
+  margin-inline: 6px;
+  padding-inline: 12px 9px;
+  background-color: transparent;
+  line-height: 1;
+}
+
+:deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button)::before {
+  position: absolute;
+  inset-block: 8px;
+  inset-inline: 0;
+  border-radius: 18px;
+  background-color: rgb(0 0 0 / 16%);
+  content: '';
+  pointer-events: none;
+}
+
+:deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button:hover)::before,
+:deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button:focus-visible)::before,
+:deep(.shaka-controls-button-panel:not(.ft-controls-compact-chapters) > .ft-chapters-button.open)::before {
+  background-color: rgb(255 255 255 / 10%);
+}
+
+:deep(.shaka-tooltips-on > .ft-chapters-button:hover::after),
+:deep(.shaka-tooltips-on > .ft-chapters-button:focus-visible::after),
+:deep(.shaka-tooltips-on > .ft-chapters-button:active::after) {
+  left: 50%;
+}
+
+:deep(.ft-chapters-current-title) {
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-inline-size: 0;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:deep(.shaka-controls-button-panel > .ft-chapters-button .ft-chapters-icon) {
+  display: none;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button) {
+  justify-content: center;
+  inline-size: 48px;
+  max-inline-size: 48px;
+  block-size: 48px;
+  margin-inline: 0;
+  padding-inline: 2px;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-icon) {
+  display: block;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-chevron) {
+  display: none;
+}
+
+:deep(.ft-chapters-chevron) {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  inline-size: 12px;
+  block-size: 16px;
+  font-size: 18px;
+  line-height: 16px;
+}
+
+:deep(.shaka-overflow-menu .ft-chapters-current-title),
+:deep(.shaka-overflow-menu .ft-chapters-chevron) {
+  display: none;
+}
+
+@media only screen and (width <= 680px) {
+  .chapterOverlay {
+    inline-size: 90%;
+  }
+}
+
 :deep(.shaka-bottom-controls) {
   /*
     Force left to right, so that the UI doesn't break.
@@ -43,6 +206,11 @@
     video.js forced the direction for their controls too
   */
   direction: ltr;
+}
+
+:deep(.shaka-controls-button-panel) {
+  /* Keep the first controls anchored when even the compact layout cannot fit. */
+  justify-content: flex-start;
 }
 
 :deep(.shaka-controls-container:has(
@@ -627,10 +795,53 @@
   gap: 0;
 }
 
-:deep(.ft-shaka-highlight-button-collapsed .ft-shaka-highlight-button-label) {
+:deep(.ft-shaka-highlight-button-collapsed .ft-shaka-highlight-button-label),
+:deep(.ft-controls-hide-highlight-label > .ft-shaka-highlight-button .ft-shaka-highlight-button-label) {
   max-width: 0;
   opacity: 0;
   transform: translateX(-12px);
+}
+
+:deep(.ft-controls-hide-highlight-label > .ft-shaka-highlight-button) {
+  gap: 0;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button),
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button-label) {
+  transition: none;
+}
+
+:deep(.ft-time-display-group) {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  inline-size: auto;
+  block-size: 48px;
+  min-inline-size: 0;
+  padding: 0;
+  cursor: default;
+}
+
+:deep(.ft-time-display-group > .shaka-current-time) {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  block-size: 48px;
+  margin: 0;
+  border: 0;
+  background-color: transparent;
+  line-height: 0.5;
+}
+
+:deep(.ft-controls-stack-times > .ft-time-display-group) {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+:deep(.ft-controls-stack-times > .ft-time-display-group > .shaka-current-time) {
+  block-size: auto;
+  line-height: 1.2;
 }
 
 :deep(.shaka-tooltips-on > .ft-shaka-highlight-button:hover::after),
@@ -667,6 +878,10 @@
   height: 48px;
   padding-inline: 2px;
   flex: 0 1 auto;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-measuring > .ft-quick-playback-rate-bar) {
+  flex-shrink: 0;
 }
 
 :deep(.ft-quick-playback-rate-bar::-webkit-scrollbar) {

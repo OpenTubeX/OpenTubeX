@@ -6,6 +6,7 @@ import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
+import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
@@ -50,6 +51,7 @@ import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
+import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
@@ -95,7 +97,8 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
-    FtVideoAnnotations
+    FtVideoAnnotations,
+    WatchVideoChapters
   },
   props: {
     format: {
@@ -133,6 +136,10 @@ export default defineComponent({
     currentChapterIndex: {
       type: Number,
       default: 0
+    },
+    chaptersKind: {
+      type: String,
+      default: 'chapters'
     },
     chaptersSrc: {
       type: String,
@@ -277,6 +284,14 @@ export default defineComponent({
 
     /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
     const vrCanvas = ref(null)
+
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const chapterOverlay = ref(null)
+    const showChaptersOverlay = ref(false)
+    const chapterThumbnails = ref([])
+    const currentChapterTitle = computed(() => {
+      return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
+    })
 
     const hasLoaded = ref(false)
     const annotationCurrentTime = ref(0)
@@ -1772,6 +1787,9 @@ export default defineComponent({
         'volume',
         'time_and_duration',
         'ft_playback_adjusted_time',
+        ...(!onlyUseOverFlowMenu.value && props.chapters.length > 0
+          ? ['ft_chapters']
+          : []),
         'ft_sponsorblock_highlight',
         'spacer'
       ]
@@ -1801,7 +1819,7 @@ export default defineComponent({
           'playback_rate',
           'captions',
           'ft_audio_tracks',
-          'chapter',
+          ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
           'ft_ambient_mode',
           'ft_loop',
           'ft_screenshot',
@@ -1836,7 +1854,6 @@ export default defineComponent({
           'captions',
           'playback_rate',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
-          'chapter',
           'ft_ambient_mode',
           'ft_loop',
           'recenter_vr',
@@ -1879,10 +1896,6 @@ export default defineComponent({
       if (!props.watchingPlaylist) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_previous')
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_next')
-      }
-
-      if (props.chapters.length === 0) {
-        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'chapter')
       }
 
       return uiConfig
@@ -1963,6 +1976,47 @@ export default defineComponent({
       if (hasLoaded.value) {
         ui.getControls().dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
       }
+    }
+
+    function closeChaptersOverlay() {
+      showChaptersOverlay.value = false
+      events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
+        detail: false
+      }))
+    }
+
+    /**
+     * @param {number} startSeconds
+     */
+    function selectOverlayChapter(startSeconds) {
+      setCurrentTime(startSeconds)
+    }
+
+    /**
+     * @param {MouseEvent} event
+     */
+    function handleChaptersOverlayOutsideClick(event) {
+      const target = event.target
+
+      if (!showChaptersOverlay.value ||
+        (target instanceof Node && chapterOverlay.value?.contains(target))) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+      closeChaptersOverlay()
+    }
+
+    /**
+     * @param {number} startSeconds
+     */
+    function copyChapterTimestamp(startSeconds) {
+      const videoUrl = appendTimestamp(getYoutubeVideoShareUrl(props.videoId), Math.floor(startSeconds))
+
+      copyToClipboard(videoUrl, {
+        messageOnSuccess: t('Chapters.Timestamp Link Copied')
+      })
     }
 
     /**
@@ -2238,6 +2292,7 @@ export default defineComponent({
       }
 
       updateSponsorBlockSubmissionState()
+      setupAdaptiveControlPanelLayout()
     }
 
     watch(uiConfig, (newValue, oldValue) => {
@@ -2246,11 +2301,18 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.chapters.length, (chapterCount) => {
+      if (chapterCount === 0) {
+        closeChaptersOverlay()
+      }
+    })
+
     watch(sponsorBlockSubmissionVisibleButtons, () => {
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      closeChaptersOverlay()
       resetSponsorBlockHighlightLabel()
       loadSponsorBlockDrafts()
       sponsorBlockSubmissionError.value = ''
@@ -2313,6 +2375,128 @@ export default defineComponent({
 
     /** @type {ResizeObserver|null} */
     let containerResizeObserver = null
+
+    /** @type {ResizeObserver|null} */
+    let controlPanelResizeObserver = null
+
+    /** @type {MutationObserver|null} */
+    let controlPanelMutationObserver = null
+
+    /** @type {number|null} */
+    let controlPanelLayoutFrame = null
+
+    const controlPanelCompactClasses = [
+      'ft-controls-hide-highlight-label',
+      'ft-controls-compact-chapters',
+      'ft-controls-stack-times'
+    ]
+
+    /**
+     * @param {HTMLElement} controlPanel
+     * @returns {boolean}
+     */
+    function controlPanelOverflows(controlPanel) {
+      let contentWidth = 0
+      let crossesPanelEdge = false
+      const controlPanelBounds = controlPanel.getBoundingClientRect()
+
+      for (const child of controlPanel.children) {
+        if (!(child instanceof HTMLElement)) {
+          continue
+        }
+
+        const style = window.getComputedStyle(child)
+        if (style.display === 'none' || style.position === 'absolute') {
+          continue
+        }
+
+        const childBounds = child.getBoundingClientRect()
+        crossesPanelEdge ||= childBounds.left < controlPanelBounds.left - 1 ||
+          childBounds.right > controlPanelBounds.right + 1
+
+        contentWidth += childBounds.width +
+          (Number.parseFloat(style.marginLeft) || 0) +
+          (Number.parseFloat(style.marginRight) || 0)
+      }
+
+      return crossesPanelEdge ||
+        contentWidth > controlPanel.clientWidth + 1
+    }
+
+    /**
+     * Apply space-saving modes in priority order, only when the next mode is needed.
+     * @param {HTMLElement} controlPanel
+     */
+    function updateControlPanelLayout(controlPanel) {
+      if (!controlPanel.isConnected) {
+        return
+      }
+
+      controlPanel.classList.add('ft-controls-measuring')
+      controlPanel.classList.remove(...controlPanelCompactClasses)
+
+      for (const compactClass of controlPanelCompactClasses) {
+        if (!controlPanelOverflows(controlPanel)) {
+          break
+        }
+
+        controlPanel.classList.add(compactClass)
+      }
+
+      controlPanel.classList.remove('ft-controls-measuring')
+    }
+
+    /** @param {HTMLElement} controlPanel */
+    function scheduleControlPanelLayout(controlPanel) {
+      if (controlPanelLayoutFrame !== null) {
+        cancelAnimationFrame(controlPanelLayoutFrame)
+      }
+
+      controlPanelLayoutFrame = requestAnimationFrame(() => {
+        controlPanelLayoutFrame = null
+        updateControlPanelLayout(controlPanel)
+      })
+    }
+
+    function setupAdaptiveControlPanelLayout() {
+      controlPanelResizeObserver?.disconnect()
+      controlPanelMutationObserver?.disconnect()
+
+      const controlPanel = container.value?.querySelector('.shaka-controls-button-panel')
+      if (!(controlPanel instanceof HTMLElement)) {
+        return
+      }
+
+      const regularTime = controlPanel.querySelector(':scope > .shaka-current-time:not(.ft-playback-adjusted-time)')
+      const adjustedTime = controlPanel.querySelector(':scope > .ft-playback-adjusted-time')
+
+      if (regularTime instanceof HTMLElement && adjustedTime instanceof HTMLElement) {
+        const timeDisplayGroup = document.createElement('div')
+        timeDisplayGroup.classList.add('ft-time-display-group')
+        regularTime.before(timeDisplayGroup)
+        timeDisplayGroup.append(regularTime, adjustedTime)
+      }
+
+      controlPanelResizeObserver = new ResizeObserver(() => {
+        scheduleControlPanelLayout(controlPanel)
+      })
+      controlPanelResizeObserver.observe(controlPanel)
+
+      controlPanelMutationObserver = new MutationObserver(mutations => {
+        if (mutations.some(mutation => mutation.target !== controlPanel)) {
+          scheduleControlPanelLayout(controlPanel)
+        }
+      })
+      controlPanelMutationObserver.observe(controlPanel, {
+        attributeFilter: ['class'],
+        attributes: true,
+        characterData: true,
+        childList: true,
+        subtree: true
+      })
+
+      scheduleControlPanelLayout(controlPanel)
+    }
 
     /** @type {ResizeObserverCallback} */
     function resized(entries) {
@@ -3392,6 +3576,114 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
       shakaOverflowMenu.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
+    }
+
+    function registerChapterOverlayButton() {
+      events.addEventListener('setChaptersOverlay', (/** @type {CustomEvent} */ event) => {
+        const shouldOpen = event.detail && props.chapters.length > 0
+
+        showChaptersOverlay.value = shouldOpen
+
+        if (shouldOpen) {
+          ui?.getControls().hideSettingsMenus()
+          nextTick(() => chapterOverlay.value?.focus({ preventScroll: true }))
+        }
+      })
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class ChapterOverlayButtonFactory {
+        create(rootElement, controls) {
+          return new ChapterOverlayButton(
+            currentChapterTitle,
+            showChaptersOverlay.value,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaControls.registerElement('ft_chapters', new ChapterOverlayButtonFactory())
+      shakaOverflowMenu.registerElement('ft_chapters', new ChapterOverlayButtonFactory())
+    }
+
+    async function loadChapterThumbnails() {
+      chapterThumbnails.value = []
+
+      const activePlayer = player
+      const videoId = props.videoId
+
+      if (!activePlayer || activePlayer.getImageTracks().length === 0) {
+        return
+      }
+
+      const imageDimensions = new Map()
+      const thumbnails = await Promise.all(props.chapters.map(async chapter => {
+        if (chapter.thumbnail?.url) {
+          return null
+        }
+
+        try {
+          const thumbnail = await activePlayer.getThumbnails(null, chapter.startSeconds)
+          const uri = thumbnail?.uris[0]
+
+          if (!thumbnail || !uri || thumbnail.codecs === 'mjpg' || uri.startsWith('offline:')) {
+            return null
+          }
+
+          const result = {
+            url: uri.split('#xywh=')[0],
+            width: thumbnail.width,
+            height: thumbnail.height,
+            imageWidth: thumbnail.imageWidth,
+            imageHeight: thumbnail.imageHeight,
+            positionX: thumbnail.positionX,
+            positionY: thumbnail.positionY,
+            sprite: thumbnail.sprite ||
+              thumbnail.imageWidth > thumbnail.width ||
+              thumbnail.imageHeight > thumbnail.height
+          }
+
+          if (result.sprite && (!result.imageWidth || !result.imageHeight)) {
+            if (!imageDimensions.has(result.url)) {
+              imageDimensions.set(result.url, loadImageDimensions(result.url))
+            }
+
+            const dimensions = await imageDimensions.get(result.url)
+
+            if (!dimensions) {
+              return null
+            }
+
+            result.imageWidth = dimensions.width
+            result.imageHeight = dimensions.height
+          }
+
+          return result
+        } catch {
+          return null
+        }
+      }))
+
+      if (player === activePlayer && props.videoId === videoId) {
+        chapterThumbnails.value = thumbnails
+      }
+    }
+
+    /**
+     * @param {string} url
+     * @returns {Promise<{ width: number, height: number } | null>}
+     */
+    function loadImageDimensions(url) {
+      return new Promise(resolve => {
+        const image = new Image()
+
+        image.addEventListener('load', () => {
+          resolve({ width: image.naturalWidth, height: image.naturalHeight })
+        }, { once: true })
+        image.addEventListener('error', () => resolve(null), { once: true })
+        image.src = url
+      })
     }
 
     function registerAutoplayToggle() {
@@ -5007,6 +5299,7 @@ export default defineComponent({
 
       registerScreenshotButton()
       registerAudioTrackSelection()
+      registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
 
@@ -5063,6 +5356,7 @@ export default defineComponent({
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
+        chapterThumbnails.value = []
       })
 
       player.addEventListener('loaded', handleLoaded)
@@ -5270,6 +5564,8 @@ export default defineComponent({
 
         await Promise.all(promises)
       }
+
+      loadChapterThumbnails()
 
       if (restoreCaptionIndex !== null) {
         const index = restoreCaptionIndex
@@ -5497,6 +5793,21 @@ export default defineComponent({
         containerResizeObserver = null
       }
 
+      if (controlPanelResizeObserver) {
+        controlPanelResizeObserver.disconnect()
+        controlPanelResizeObserver = null
+      }
+
+      if (controlPanelMutationObserver) {
+        controlPanelMutationObserver.disconnect()
+        controlPanelMutationObserver = null
+      }
+
+      if (controlPanelLayoutFrame !== null) {
+        cancelAnimationFrame(controlPanelLayoutFrame)
+        controlPanelLayoutFrame = null
+      }
+
       if (videoResizeObserver) {
         videoResizeObserver.disconnect()
       }
@@ -5649,6 +5960,13 @@ export default defineComponent({
       container,
       video,
       vrCanvas,
+      chapterOverlay,
+      showChaptersOverlay,
+      chapterThumbnails,
+      closeChaptersOverlay,
+      handleChaptersOverlayOutsideClick,
+      selectOverlayChapter,
+      copyChapterTimestamp,
 
       fullWindowEnabled,
       forceAspectRatio,

@@ -1216,6 +1216,10 @@ Clipboard:
 Chapters:
   Chapters: Chapters
   Key Moments: Key Moments
+  Open Chapters: Open Chapters
+  Close Chapters: Close Chapters
+  Copy Timestamp Link: Copy link at {timestamp}
+  Timestamp Link Copied: Timestamp link copied to clipboard
 
 Mini Player: Mini Player
 Comments:

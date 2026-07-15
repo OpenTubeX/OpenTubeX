@@ -1,76 +1,60 @@
 <template>
-  <FtCard class="videoChapters">
-    <details
-      class="chaptersDetails"
-      @toggle="chaptersToggled"
+  <div
+    ref="chaptersWrapper"
+    v-observe-visibility="observeVisibilityOptions"
+    class="chaptersWrapper"
+    :class="{ compact }"
+    role="list"
+    @keydown.arrow-up.stop.prevent="navigateChapters('up')"
+    @keydown.arrow-down.stop.prevent="navigateChapters('down')"
+  >
+    <div
+      v-for="(chapter, index) in chaptersWithThumbnails"
+      :key="index"
+      class="chapter"
+      :class="{ current: index === currentIndex }"
+      role="listitem"
     >
-      <summary
-        class="chaptersSummary"
+      <button
+        class="chapterSeek"
+        type="button"
+        :aria-current="index === currentIndex ? 'true' : null"
+        @click="changeChapter(index)"
       >
-        <h3 class="chaptersTitle">
-          {{ kind === 'keyMoments' ? $t('Chapters.Key Moments') : $t("Chapters.Chapters") }}
-
-          <span class="currentChapter">
-            • <bdi>{{ currentTitle }}</bdi>
-          </span>
-
-          <FontAwesomeIcon
-            class="chaptersChevron"
-            :icon="['fas', 'chevron-right']"
-          />
-        </h3>
-      </summary>
-
-      <div
-        ref="chaptersWrapper"
-        v-observe-visibility="observeVisibilityOptions"
-        class="chaptersWrapper"
-        :class="{ compact }"
-        @keydown.arrow-up.stop.prevent="navigateChapters('up')"
-        @keydown.arrow-down.stop.prevent="navigateChapters('down')"
-      >
-        <div
-          v-for="(chapter, index) in chapters"
-          :key="index"
-          class="chapter"
-          role="button"
-          tabindex="0"
-          :aria-selected="index === currentIndex"
-          :class="{ current: index === currentIndex }"
-          @click="changeChapter(index)"
-          @keydown.space.stop.prevent="changeChapter(index)"
-          @keydown.enter.stop.prevent="changeChapter(index)"
-        >
-          <!-- Setting the aspect ratio avoids layout shifts when the images load -->
-          <img
-            v-if="!compact"
-            alt=""
-            aria-hidden="true"
-            class="chapterThumbnail"
-            loading="lazy"
-            :src="chapter.thumbnail.url"
-            :style="{ aspectRatio: chapter.thumbnail.width / chapter.thumbnail.height }"
-          >
-          <div class="chapterTimestamp">
-            {{ chapter.timestamp }}
-          </div>
-          <p
+        <span
+          v-if="!compact"
+          aria-hidden="true"
+          class="chapterThumbnail"
+          :style="getThumbnailStyle(chapter.displayThumbnail)"
+        />
+        <span class="chapterInfo">
+          <span
             class="chapterTitle"
             dir="auto"
           >
             {{ chapter.title }}
-          </p>
-        </div>
-      </div>
-    </details>
-  </FtCard>
+          </span>
+          <span class="chapterTimestamp">
+            {{ chapter.timestamp }}
+          </span>
+        </span>
+      </button>
+      <button
+        class="copyTimestamp"
+        type="button"
+        :aria-label="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
+        :title="$t('Chapters.Copy Timestamp Link', { timestamp: chapter.timestamp })"
+        @click="copyTimestamp(index)"
+      >
+        <FontAwesomeIcon :icon="['fas', 'share-alt']" />
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-import FtCard from '../ft-card/ft-card.vue'
 
 const props = defineProps({
   chapters: {
@@ -81,54 +65,87 @@ const props = defineProps({
     type: Number,
     required: true
   },
-  kind: {
+  chapterThumbnails: {
+    type: Array,
+    default: () => []
+  },
+  fallbackThumbnail: {
     type: String,
-    default: 'chapters'
+    default: ''
   }
 })
 
-const emit = defineEmits(['timestamp-event'])
+const emit = defineEmits(['copy-timestamp', 'timestamp-event'])
 
 const chaptersWrapper = useTemplateRef('chaptersWrapper')
-
-let chaptersVisible = false
 const currentIndex = ref(props.currentChapterIndex)
 
 watch(() => props.currentChapterIndex, (value) => {
   if (currentIndex.value !== value) {
     currentIndex.value = value
+    scrollToCurrentChapter()
   }
 })
 
-const currentChapter = computed(() => {
-  return props.chapters[currentIndex.value]
-})
+const chaptersWithThumbnails = computed(() => {
+  return props.chapters.map((chapter, index) => {
+    let displayThumbnail = chapter.thumbnail?.url ? chapter.thumbnail : props.chapterThumbnails[index]
 
-/** @type {import('vue').ComputedRef<string>} */
-const currentTitle = computed(() => {
-  return currentChapter.value.title
+    if (!displayThumbnail && props.fallbackThumbnail) {
+      displayThumbnail = {
+        url: props.fallbackThumbnail,
+        width: 16,
+        height: 9
+      }
+    }
+
+    return { ...chapter, displayThumbnail }
+  })
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const compact = computed(() => {
-  return !props.chapters[0].thumbnail
+  return !chaptersWithThumbnails.value.some(chapter => chapter.displayThumbnail)
 })
+
+/**
+ * @param {{ url: string, width?: number, height?: number, imageWidth?: number, imageHeight?: number, positionX?: number, positionY?: number, sprite?: boolean } | null} thumbnail
+ * @returns {Record<string, string>}
+ */
+function getThumbnailStyle(thumbnail) {
+  if (!thumbnail) {
+    return {}
+  }
+
+  const width = thumbnail.width || 16
+  const height = thumbnail.height || 9
+  const style = {
+    aspectRatio: `${width} / ${height}`,
+    backgroundImage: `url(${JSON.stringify(thumbnail.url)})`
+  }
+
+  if (thumbnail.sprite && thumbnail.imageWidth && thumbnail.imageHeight) {
+    const horizontalRange = thumbnail.imageWidth - width
+    const verticalRange = thumbnail.imageHeight - height
+    const horizontalPosition = horizontalRange > 0 ? (thumbnail.positionX ?? 0) / horizontalRange * 100 : 0
+    const verticalPosition = verticalRange > 0 ? (thumbnail.positionY ?? 0) / verticalRange * 100 : 0
+
+    style.backgroundPosition = `${horizontalPosition}% ${verticalPosition}%`
+    style.backgroundSize = `${thumbnail.imageWidth / width * 100}% ${thumbnail.imageHeight / height * 100}%`
+  }
+
+  return style
+}
 
 const observeVisibilityOptions = {
   callback: (isVisible, _entry) => {
-    // This is also fired when **hidden**
-    // No point doing anything if not visible
-    if (!isVisible) { return }
-    // Only auto scroll when expanded
-    if (!chaptersVisible) { return }
-
-    scrollToCurrentChapter()
+    if (isVisible) {
+      scrollToCurrentChapter()
+    }
   },
   intersection: {
-    // Only when it intersects with N% above bottom
     rootMargin: '0% 0% 0% 0%',
   },
-  // Callback responsible for scolling to current chapter multiple times
   once: false,
 }
 
@@ -138,51 +155,49 @@ const observeVisibilityOptions = {
 function changeChapter(index) {
   currentIndex.value = index
   emit('timestamp-event', props.chapters[index].startSeconds)
-  window.scrollTo(0, 0)
+}
+
+/**
+ * @param {number} index
+ */
+function copyTimestamp(index) {
+  emit('copy-timestamp', props.chapters[index].startSeconds)
 }
 
 /**
  * @param {'up' | 'down'} direction
  */
 function navigateChapters(direction) {
-  const chapterElements = Array.from(chaptersWrapper.value.children)
-  const focusedIndex = chapterElements.indexOf(document.activeElement)
+  const chapterRows = Array.from(chaptersWrapper.value.children)
+  const focusedRow = document.activeElement?.closest('.chapter')
+  const focusedIndex = chapterRows.indexOf(focusedRow)
+  const offset = direction === 'up' ? -1 : 1
+  let newIndex
 
-  let newIndex = focusedIndex
-  if (direction === 'up') {
-    if (focusedIndex === 0) {
-      newIndex = chapterElements.length - 1
-    } else {
-      newIndex--
-    }
+  if (focusedIndex === -1) {
+    newIndex = direction === 'up' ? chapterRows.length - 1 : 0
   } else {
-    if (focusedIndex === chapterElements.length - 1) {
-      newIndex = 0
-    } else {
-      newIndex++
-    }
+    newIndex = (focusedIndex + offset + chapterRows.length) % chapterRows.length
   }
 
-  chapterElements[newIndex].focus()
-}
-
-/**
- * @param {ToggleEvent} event
- */
-function chaptersToggled(event) {
-  chaptersVisible = event.target.open
-
-  if (chaptersVisible) {
-    scrollToCurrentChapter()
-  }
+  chapterRows[newIndex].querySelector('.chapterSeek')?.focus()
 }
 
 function scrollToCurrentChapter() {
   const container = chaptersWrapper.value
-  const currentItem = container ? Array.from(container.children)[currentIndex.value] : null
+  const currentItem = container?.children[currentIndex.value]
 
-  if (currentItem != null) {
-    container.scrollTop = currentItem.offsetTop - container.offsetTop
+  if (!container || !currentItem) {
+    return
+  }
+
+  const containerRect = container.getBoundingClientRect()
+  const currentItemRect = currentItem.getBoundingClientRect()
+
+  if (currentItemRect.top < containerRect.top) {
+    container.scrollTop += currentItemRect.top - containerRect.top
+  } else if (currentItemRect.bottom > containerRect.bottom) {
+    container.scrollTop += currentItemRect.bottom - containerRect.bottom
   }
 }
 </script>

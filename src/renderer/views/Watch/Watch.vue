@@ -33,6 +33,7 @@
           :video-id="videoId"
           :chapters="videoChapters"
           :current-chapter-index="videoCurrentChapterIndex"
+          :chapters-kind="videoChaptersKind"
           :chapters-src="chaptersSrc"
           :title="videoTitle"
           :theatre-possible="theatrePossible"
@@ -182,15 +183,6 @@
         @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
         @save-channel-video-quality="handleChannelVideoQualityManualSave"
         @toggle-sponsorblock-autoskip="handleSponsorBlockAutoSkipToggle"
-      />
-      <watch-video-chapters
-        v-if="!hideChapters && !isLoading && videoChapters.length > 0"
-        :chapters="videoChapters"
-        :current-chapter-index="videoCurrentChapterIndex"
-        :kind="videoChaptersKind"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @timestamp-event="changeTimestamp"
       />
       <watch-video-description
         v-if="!isLoading && !hideVideoDescription"
