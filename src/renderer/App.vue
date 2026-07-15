@@ -622,6 +622,11 @@ function scheduleSubscriptionTabAutoRefresh(tab) {
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 async function refreshSubscriptionFeedAutomatically(tab) {
+  if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
+    scheduleSubscriptionTabAutoRefresh(tab)
+    return
+  }
+
   if (store.getters.getSubscriptionFeedRefreshInProgress) {
     scheduleSubscriptionTabAutoRefresh(tab)
     return
