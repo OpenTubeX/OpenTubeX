@@ -68,6 +68,10 @@ const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const HTTP_IN_HEX = 0x68747470
 
 const USE_OVERFLOW_MENU_WIDTH_THRESHOLD = 634
+const TEMPORARY_PLAYBACK_RATE_MULTIPLIER = 2
+const TEMPORARY_PLAYBACK_RATE_HOLD_DELAY_MS = 625
+const TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE = 'keyboard'
+const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
 
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
@@ -606,6 +610,16 @@ export default defineComponent({
     /** @type {import('vue').ComputedRef<boolean>} */
     const videoPlaybackRateMouseScroll = computed(() => {
       return store.getters.getVideoPlaybackRateMouseScroll
+    })
+
+    const holdToDoublePlaybackSpeed = computed(() => {
+      return store.getters.getHoldToDoublePlaybackSpeed
+    })
+
+    watch(holdToDoublePlaybackSpeed, (enabled) => {
+      if (!enabled) {
+        handleTemporaryPlaybackRateFocusLoss()
+      }
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -2083,6 +2097,113 @@ export default defineComponent({
     }
 
     /**
+     * Only start click-and-hold playback from the non-interactive player surface.
+     * @param {EventTarget | null} target
+     * @returns {boolean}
+     */
+    function isPlayerSurfaceTarget(target) {
+      if (!(target instanceof HTMLElement)) {
+        return target === video.value
+      }
+
+      return target === video.value || [
+        'shaka-scrim-container',
+        'shaka-fast-forward-container',
+        'shaka-rewind-container',
+        'shaka-play-button-container',
+        'shaka-play-button',
+        'shaka-controls-container',
+      ].some(className => target.classList.contains(className))
+    }
+
+    /** @type {number | null} */
+    let temporaryPlaybackRatePointerId = null
+    let temporaryPlaybackRatePointerCancelled = false
+    let suppressTemporaryPlaybackRateClick = false
+
+    /**
+     * @param {PointerEvent} event
+     */
+    function handleTemporaryPlaybackRatePointerDown(event) {
+      if (
+        event.pointerType !== 'mouse' ||
+        event.button !== 0 ||
+        !event.isPrimary ||
+        event.ctrlKey ||
+        event.metaKey ||
+        !holdToDoublePlaybackSpeed.value ||
+        temporaryPlaybackRatePointerId !== null ||
+        !isPlayerSurfaceTarget(event.target)
+      ) {
+        return
+      }
+
+      temporaryPlaybackRatePointerId = event.pointerId
+      temporaryPlaybackRatePointerCancelled = false
+      startTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
+    }
+
+    /**
+     * @param {PointerEvent} event
+     */
+    function handleTemporaryPlaybackRatePointerUp(event) {
+      if (event.pointerId !== temporaryPlaybackRatePointerId) {
+        return
+      }
+
+      const wasActive = temporaryPlaybackRateSources.has(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
+      finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
+
+      temporaryPlaybackRatePointerId = null
+      suppressTemporaryPlaybackRateClick = wasActive || temporaryPlaybackRatePointerCancelled
+      temporaryPlaybackRatePointerCancelled = false
+
+      if (suppressTemporaryPlaybackRateClick) {
+        setTimeout(() => {
+          suppressTemporaryPlaybackRateClick = false
+        })
+      }
+    }
+
+    /**
+     * @param {PointerEvent} event
+     */
+    function handleTemporaryPlaybackRatePointerLeave(event) {
+      if (event.pointerId !== temporaryPlaybackRatePointerId) {
+        return
+      }
+
+      temporaryPlaybackRatePointerCancelled = true
+      finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
+    }
+
+    /**
+     * @param {PointerEvent} event
+     */
+    function handleTemporaryPlaybackRatePointerCancel(event) {
+      if (event.pointerId !== temporaryPlaybackRatePointerId) {
+        return
+      }
+
+      finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE)
+      temporaryPlaybackRatePointerId = null
+      temporaryPlaybackRatePointerCancelled = false
+    }
+
+    /**
+     * @param {MouseEvent} event
+     */
+    function handleTemporaryPlaybackRateClick(event) {
+      if (!suppressTemporaryPlaybackRateClick) {
+        return
+      }
+
+      suppressTemporaryPlaybackRateClick = false
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+
+    /**
      * @param {HTMLElement} seekBarContainer
      */
     function getChapterPreview(seekBarContainer) {
@@ -2275,6 +2396,13 @@ export default defineComponent({
 
       controlsContainer.removeEventListener('wheel', handleControlsContainerWheel)
       controlsContainer.removeEventListener('click', handleControlsContainerClick, true)
+      controlsContainer.removeEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
+      controlsContainer.removeEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
+      controlsContainer.removeEventListener('click', handleTemporaryPlaybackRateClick, true)
+
+      controlsContainer.addEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
+      controlsContainer.addEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
+      controlsContainer.addEventListener('click', handleTemporaryPlaybackRateClick, true)
 
       if (!useVrMode.value) {
         if (videoVolumeMouseScroll.value || videoSkipMouseScroll.value || videoPlaybackRateMouseScroll.value) {
@@ -4262,6 +4390,14 @@ export default defineComponent({
     let playbackRateUserSet = normalizePlaybackRate(props.sabrReloadPlaybackRate) !== null
     let musicPlaybackRateToastShown = false
 
+    /** @type {Map<string, number>} */
+    const temporaryPlaybackRateHoldTimeouts = new Map()
+    const temporaryPlaybackRateSources = new Set()
+    /** @type {number | null} */
+    let playbackRateBeforeTemporaryPlayback = null
+    let wasPausedBeforeTemporaryPlayback = false
+    let temporaryPlaybackRateActive = false
+
     /**
      * @param {unknown} rate
      * @returns {number | null}
@@ -4378,6 +4514,124 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to restore playback rate:', error)
       }
+    }
+
+    /**
+     * @param {string} source
+     */
+    function activateTemporaryPlaybackRate(source) {
+      if (!player || !video.value || !hasLoaded.value) {
+        return
+      }
+
+      temporaryPlaybackRateSources.add(source)
+
+      if (temporaryPlaybackRateActive) {
+        return
+      }
+
+      const playbackRate = getCurrentPlaybackRate()
+      if (playbackRate === null) {
+        temporaryPlaybackRateSources.delete(source)
+        return
+      }
+
+      playbackRateBeforeTemporaryPlayback = playbackRate
+      wasPausedBeforeTemporaryPlayback = video.value.paused
+      temporaryPlaybackRateActive = true
+
+      try {
+        const temporaryPlaybackRate = playbackRate * TEMPORARY_PLAYBACK_RATE_MULTIPLIER
+        player.trickPlay(temporaryPlaybackRate, false)
+        temporaryPlaybackRateIndicatorMessage.value = `${Number.parseFloat(temporaryPlaybackRate.toFixed(2))}x`
+        showTemporaryPlaybackRateIndicator.value = true
+        showOverlayControls()
+        if (wasPausedBeforeTemporaryPlayback) {
+          video.value.play()
+        }
+      } catch (error) {
+        temporaryPlaybackRateSources.delete(source)
+        playbackRateBeforeTemporaryPlayback = null
+        wasPausedBeforeTemporaryPlayback = false
+        temporaryPlaybackRateActive = false
+        showTemporaryPlaybackRateIndicator.value = false
+        console.error('Failed to apply temporary playback rate:', error)
+      }
+    }
+
+    /**
+     * @param {string} source
+     */
+    function startTemporaryPlaybackRateHold(source) {
+      if (
+        !player ||
+        !video.value ||
+        !hasLoaded.value ||
+        !holdToDoublePlaybackSpeed.value ||
+        temporaryPlaybackRateHoldTimeouts.has(source) ||
+        temporaryPlaybackRateSources.has(source)
+      ) {
+        return
+      }
+
+      const timeoutId = setTimeout(() => {
+        temporaryPlaybackRateHoldTimeouts.delete(source)
+        activateTemporaryPlaybackRate(source)
+      }, TEMPORARY_PLAYBACK_RATE_HOLD_DELAY_MS)
+
+      temporaryPlaybackRateHoldTimeouts.set(source, timeoutId)
+    }
+
+    function restoreTemporaryPlaybackRate() {
+      if (!temporaryPlaybackRateActive) {
+        return
+      }
+
+      const playbackRate = playbackRateBeforeTemporaryPlayback
+
+      try {
+        if (playbackRate !== null) {
+          if (Math.abs(playbackRate - getDefaultPlaybackRateForVideo()) < 0.01) {
+            player?.cancelTrickPlay()
+          } else {
+            player?.trickPlay(playbackRate, false)
+          }
+        }
+
+        if (wasPausedBeforeTemporaryPlayback) {
+          video.value?.pause()
+        }
+      } catch (error) {
+        console.error('Failed to restore playback after temporary playback rate:', error)
+      } finally {
+        playbackRateBeforeTemporaryPlayback = null
+        wasPausedBeforeTemporaryPlayback = false
+        temporaryPlaybackRateActive = false
+        showTemporaryPlaybackRateIndicator.value = false
+      }
+    }
+
+    /**
+     * @param {string} source
+     */
+    function finishTemporaryPlaybackRateHold(source) {
+      const timeoutId = temporaryPlaybackRateHoldTimeouts.get(source)
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId)
+        temporaryPlaybackRateHoldTimeouts.delete(source)
+      }
+
+      temporaryPlaybackRateSources.delete(source)
+      if (temporaryPlaybackRateSources.size === 0) {
+        restoreTemporaryPlaybackRate()
+      }
+    }
+
+    function cancelTemporaryPlaybackRateHolds() {
+      temporaryPlaybackRateHoldTimeouts.forEach(timeoutId => clearTimeout(timeoutId))
+      temporaryPlaybackRateHoldTimeouts.clear()
+      temporaryPlaybackRateSources.clear()
+      restoreTemporaryPlaybackRate()
     }
 
     watch(
@@ -4706,6 +4960,51 @@ export default defineComponent({
 
     /**
      * @param {KeyboardEvent} event
+     * @returns {boolean}
+     */
+    function isSpaceKey(event) {
+      return event.key === ' ' || event.key.toLowerCase() === 'spacebar'
+    }
+
+    /**
+     * @param {KeyboardEvent} event
+     */
+    function keyboardShortcutKeyupHandler(event) {
+      if (!isSpaceKey(event)) {
+        return
+      }
+
+      const wasPending = temporaryPlaybackRateHoldTimeouts.has(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
+      const wasActive = temporaryPlaybackRateSources.has(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
+
+      if (!wasPending && !wasActive) {
+        return
+      }
+
+      event.preventDefault()
+      finishTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
+
+      if (wasPending && !wasActive && player && hasLoaded.value && video.value) {
+        video.value.paused ? video.value.play() : video.value.pause()
+        blurTooltipButtons()
+      }
+    }
+
+    function handleTemporaryPlaybackRateFocusLoss() {
+      cancelTemporaryPlaybackRateHolds()
+      temporaryPlaybackRatePointerId = null
+      temporaryPlaybackRatePointerCancelled = false
+      suppressTemporaryPlaybackRateClick = false
+    }
+
+    function handleTemporaryPlaybackRateVisibilityChange() {
+      if (document.hidden) {
+        handleTemporaryPlaybackRateFocusLoss()
+      }
+    }
+
+    /**
+     * @param {KeyboardEvent} event
      */
     function keyboardShortcutHandler(event) {
       if (!player) {
@@ -4825,6 +5124,14 @@ export default defineComponent({
       switch (event.key.toLowerCase()) {
         case ' ':
         case 'spacebar': // older browsers might return spacebar instead of a space character
+          event.preventDefault()
+          if (holdToDoublePlaybackSpeed.value) {
+            startTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
+          } else {
+            video_.paused ? video_.play() : video_.pause()
+            blurTooltipButtons()
+          }
+          break
         case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY:
           // Toggle Play/Pause
           event.preventDefault()
@@ -5383,6 +5690,10 @@ export default defineComponent({
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('keydown', keyboardShortcutHandler)
+      document.addEventListener('keyup', keyboardShortcutKeyupHandler)
+      document.addEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+      document.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
+      document.addEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.addEventListener('fullscreenchange', fullscreenChangeHandler)
       // Use event delegation on document with capture phase to catch events before shaka-no-propagation stops them from bubbling
       document.addEventListener('click', handlePlaybackRateMenuClick, true)
@@ -5406,6 +5717,7 @@ export default defineComponent({
 
       window.addEventListener('scroll', handleScrollMiniWindowScroll, { passive: true })
       window.addEventListener('resize', handleScrollMiniWindowResize)
+      window.addEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
@@ -5455,7 +5767,9 @@ export default defineComponent({
       // Whatever runs after `performFirstLoad` might be after switching to another page due to SABR backoff
 
       player?.addEventListener('ratechange', () => {
-        emit('playback-rate-updated', player.getPlaybackRate())
+        if (!temporaryPlaybackRateActive) {
+          emit('playback-rate-updated', player.getPlaybackRate())
+        }
       })
     })
     onUnmounted(() => {
@@ -5828,9 +6142,16 @@ export default defineComponent({
       document.body.classList.remove('playerFullWindow')
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
+      document.removeEventListener('keyup', keyboardShortcutKeyupHandler)
+      document.removeEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
+      document.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
+      document.removeEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
       document.removeEventListener('fullscreenchange', fullscreenChangeHandler)
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
+      window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+
+      cancelTemporaryPlaybackRateHolds()
 
       // Clean up IPC listener for exit fullscreen
       if (exitFullscreenCleanup) {
@@ -5977,6 +6298,8 @@ export default defineComponent({
     const valueChangeMessage = ref('')
     const valueChangeIcon = ref(null)
     const invertValueChangeContentOrder = ref(false)
+    const showTemporaryPlaybackRateIndicator = ref(false)
+    const temporaryPlaybackRateIndicatorMessage = ref('')
     let valueChangeTimeout = null
 
     function showOverlayControls() {
@@ -6087,6 +6410,8 @@ export default defineComponent({
       valueChangeIcon,
       showValueChangePopup,
       invertValueChangeContentOrder,
+      showTemporaryPlaybackRateIndicator,
+      temporaryPlaybackRateIndicatorMessage,
 
       scrollMiniPlayerActive,
       scrollMiniPlaceholderHeight,

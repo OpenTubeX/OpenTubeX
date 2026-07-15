@@ -32,6 +32,13 @@
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
+          :compact="true"
+          :default-value="holdToDoublePlaybackSpeed"
+          :tooltip="t('Tooltips.Player Settings.Hold to Double Playback Speed')"
+          @change="updateHoldToDoublePlaybackSpeed"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Scroll Playback Rate Over Video Player')"
           :compact="true"
           :default-value="videoPlaybackRateMouseScroll"
@@ -655,6 +662,16 @@ const rememberVolume = computed(() => store.getters.getRememberVolume)
  */
 function updateRememberVolume(value) {
   store.dispatch('updateRememberVolume', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const holdToDoublePlaybackSpeed = computed(() => store.getters.getHoldToDoublePlaybackSpeed)
+
+/**
+ * @param {boolean} value
+ */
+function updateHoldToDoublePlaybackSpeed(value) {
+  store.dispatch('updateHoldToDoublePlaybackSpeed', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
