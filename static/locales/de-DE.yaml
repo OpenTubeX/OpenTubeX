@@ -204,6 +204,18 @@ History:
   Case Sensitive Search: Groß- und Kleinschreibung bei der Suche beachten
   DateOldestHistory: Wiedergabedatum (älteste)
   DateNewestHistory: Wiedergabedatum (neueste)
+  Delete Old History: Alten Verlauf löschen
+  Select History Age: Wähle aus, wie alt ein Eintrag sein muss, bevor er gelöscht wird.
+  Delete Entries Older Than: Einträge löschen, die älter sind als
+  Number of Days: Anzahl der Tage
+  History Cleanup Warning: Dadurch werden passende Einträge im Wiedergabeverlauf dauerhaft gelöscht.
+  1 Day: 1 Tag
+  1 Week: 1 Woche
+  1 Month: 1 Monat
+  3 Months: 3 Monate
+  1 Year: 1 Jahr
+  Custom: Benutzerdefiniert
+  History Older Than Days Removed: Der Wiedergabeverlauf, der älter als {days} Tage ist, wurde gelöscht
 Settings:
   # On Settings Page
   Settings: Einstellungen
@@ -467,6 +479,8 @@ Settings:
     Scroll Playback Rate Over Video Player: Abspielgeschwindigkeit durch Scrollen ändern
     Video Playback Rate Interval: Intervall für Geschwindigkeitseinstellung
     Max Video Playback Rate: Maximale Wiedergabegeschwindigkeit
+    Fast-Forward Through Silence: Stille vorspulen
+    Hold to Double Playback Speed: Für doppelte Wiedergabegeschwindigkeit gedrückt halten
     Screenshot:
       Enable: Screenshots aktivieren
       Format Label: Format von Screenshots
@@ -530,6 +544,11 @@ Settings:
     Save Watched Progress: Videofortschritt merken
     Remember History: Wiedergabeverlauf merken
     Privacy Settings: Datenschutz
+    Automatic History Retention: Automatisches Löschen des Wiedergabeverlaufs (Tage)
+    Automatic History Retention Placeholder: Leer lassen, um nie automatisch zu löschen
+    Automatic History Retention Tooltip: Leer lassen, um den Verlauf unbegrenzt aufzubewahren. Beim Speichern einer Zahl werden ältere Einträge sofort und automatisch gelöscht, solange die Anwendung geöffnet ist.
+    History Retention Saved: Aufbewahrungsdauer des Verlaufs wurde gespeichert
+    Invalid History Retention Days: Gib eine ganze Anzahl von Tagen größer als null ein
     Are you sure you want to remove all subscriptions and profiles?  This cannot be undone.: Bist du sicher, dass du alle Abos und Profile löschen möchtest?  Diese Aktion kann nicht rückgängig gemacht werden.
     Remove All Subscriptions / Profiles: Alle Abos / Profile löschen
     Save Watched Videos With Last Viewed Playlist: Angesehene Videos in der Playlist „Zuletzt angesehen“ speichern
@@ -905,6 +924,14 @@ Video:
       Options: Optionen
       Title: Untertiteldarstellung
       Sample: So sehen Untertitel aus
+    Sleep Timer:
+      Sleep Timer: Einschlaftimer
+      Off: Aus
+      Minutes: '{minutes} Minuten'
+      End of video: Ende des Videos
+      Remaining: Noch {time}
+      Cancel timer: Timer abbrechen
+      Timer ended: Einschlaftimer abgelaufen
     Audio Tracks: Audiospuren
     Normal: Normal
     Set Default: Standard setzen
@@ -1182,6 +1209,8 @@ Tooltips:
     Skip by Scrolling Over Video Player: Verwende das Scrollrad, um durch das Video zu springen, MPV-Stil.
     Multiply Seek Interval by Playback Rate: Wenn aktiviert, werden Sprungintervalle (Pfeiltasten und J/L) mit der aktuellen Wiedergabegeschwindigkeit multipliziert. Wenn deaktiviert, bleiben die Sprungintervalle unabhängig von der Wiedergabegeschwindigkeit konstant.
     Show Playback Rate Adjusted Timestamp: Wenn aktiviert und die Wiedergabegeschwindigkeit nicht 1x ist, zeigt der Player nach der normalen Zeitanzeige zusätzliche angepasste Zeitstempel in Klammern an.
+    Fast-Forward Through Silence: Erkennt längere Stille und beschleunigt sie vorübergehend, ohne die ausgewählte Wiedergabegeschwindigkeit zu ändern. Livestreams sind davon nicht betroffen.
+    Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
   External Player Settings:
