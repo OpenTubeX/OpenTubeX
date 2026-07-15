@@ -10,6 +10,17 @@
         <span>{{ t('Video.Player.Caption Appearance.Sample') }}</span>
       </div>
       <div class="captionControls">
+        <div class="captionControl">
+          <FtSelect
+            :placeholder="t('Settings.Player Settings.Caption Appearance.Preferred Language')"
+            :value="preferredCaptionLocale"
+            :select-names="captionLocaleNames"
+            :select-values="CAPTION_LOCALE_VALUES"
+            :icon="['fas', 'language']"
+            :is-locale-selector="true"
+            @change="updatePreferredCaptionLocale"
+          />
+        </div>
         <label class="captionControl captionColorControl">
           <span>{{ t('Settings.Player Settings.Caption Appearance.Text Color') }}</span>
           <input
@@ -119,11 +130,19 @@ import {
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
 import store from '../../store/index'
+import allLocales from '../../../../static/locales/activeLocales.json'
 
 const { t } = useI18n()
 
+const CAPTION_LOCALE_VALUES = ['', ...allLocales]
+
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
 const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
+const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
+const captionLocaleNames = computed(() => [
+  t('Settings.Player Settings.Caption Appearance.Application Language'),
+  ...process.env.LOCALE_NAMES,
+])
 const captionAnchorNames = computed(() => [
   t('Settings.Player Settings.Caption Appearance.Anchor.Top Left'),
   t('Settings.Player Settings.Caption Appearance.Anchor.Top Center'),
@@ -147,6 +166,11 @@ function updateCaptionSetting(setting, value) {
     ...captionSettings.value,
     [setting]: value,
   }))
+}
+
+/** @param {string} value */
+function updatePreferredCaptionLocale(value) {
+  store.dispatch('updatePreferredCaptionLocale', value)
 }
 
 function resetCaptionSettings() {

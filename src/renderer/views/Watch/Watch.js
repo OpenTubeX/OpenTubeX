@@ -42,7 +42,7 @@ import {
 } from '../../helpers/api/invidious'
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
-import { sortCaptions } from '../../helpers/player/utils'
+import { findCaptionByLocale, sortCaptions } from '../../helpers/player/utils'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 
@@ -258,6 +258,9 @@ export default defineComponent({
     },
     defaultViewingMode: function () {
       return this.$store.getters.getDefaultViewingMode
+    },
+    preferredCaptionLocale: function () {
+      return this.$store.getters.getPreferredCaptionLocale || this.currentLocale
     },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
@@ -944,10 +947,10 @@ export default defineComponent({
               }) ?? []
 
               if (captionTracks.length > 0) {
-                const languagesSet = new Set([this.currentLocale, this.currentLocale.split('-')[0]])
+                const languagesSet = new Set([this.preferredCaptionLocale, this.preferredCaptionLocale.split('-')[0]])
 
                 // special cases
-                switch (this.currentLocale) {
+                switch (this.preferredCaptionLocale) {
                   case 'nn':
                   case 'nb-NO':
                     // according to https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
@@ -961,7 +964,10 @@ export default defineComponent({
                     break
                 }
 
-                if (!captionTracks.some(captionTrack => languagesSet.has(captionTrack.language))) {
+                const hasPreferredCaption = findCaptionByLocale(captionTracks, this.preferredCaptionLocale) ||
+                  captionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
+
+                if (!hasPreferredCaption) {
                   const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet)
 
                   if (translatedCaptionTrack) {
@@ -970,7 +976,7 @@ export default defineComponent({
                 }
               }
 
-              this.captions = sortCaptions(captionTracks)
+              this.captions = sortCaptions(captionTracks, this.preferredCaptionLocale)
             }
           } else {
             // video might be region locked or something else. This leads to no formats being available
@@ -1145,7 +1151,7 @@ export default defineComponent({
               language: caption.language_code,
               mimeType: 'text/vtt'
             }
-          }))
+          }), this.preferredCaptionLocale)
 
           if (!this.isLive && !this.isPostLiveDvr) {
             this.videoStoryboardSrc = `${this.currentInvidiousInstanceUrl}/api/v1/storyboards/${this.videoId}?height=90`
@@ -2223,10 +2229,10 @@ export default defineComponent({
       const translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
 
       let translationName, translationCode
-      // otherwise just fallback to the FreeTube display language and hope that YouTube will be able to handle it
+      // Otherwise use the preferred caption locale and hope that YouTube can handle it.
       if (!translationLanguage) {
-        translationName = this.t('Locale Name')
         translationCode = userLanguages.values().next().value
+        translationName = new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(translationCode) ?? translationCode
       } else {
         translationName = translationLanguage.language_name.text
         translationCode = translationLanguage.language_code

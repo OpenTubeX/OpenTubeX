@@ -530,6 +530,8 @@ Settings:
     Caption Appearance:
       Caption Appearance: Caption Appearance
       Captions: Captions
+      Preferred Language: Preferred Caption Language
+      Application Language: Application Language
       Text Color: Text Color
       Background Color: Background Color
       Background Opacity: Background Opacity

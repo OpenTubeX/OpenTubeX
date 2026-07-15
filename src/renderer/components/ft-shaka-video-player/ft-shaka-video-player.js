@@ -28,6 +28,7 @@ import { SkipButton } from './player-components/SkipButton'
 import { FtPlaybackAdjustedTime } from './player-components/FtPlaybackAdjustedTime'
 import {
   deduplicateAudioTracks,
+  findCaptionByLocale,
   findMostSimilarAudioBandwidth,
   getSponsorBlockSegments,
   logShakaError,
@@ -328,6 +329,10 @@ export default defineComponent({
     const hasMultipleAudioTracks = ref(false)
     const isLive = ref(props.isLive)
 
+    const preferredCaptionLocale = computed(() => {
+      return store.getters.getPreferredCaptionLocale || locale.value
+    })
+
     const onlyUseOverFlowMenu = ref(false)
     const forceAspectRatio = ref(false)
 
@@ -343,7 +348,8 @@ export default defineComponent({
     let restoreCaptionIndex = props.sabrReloadCaptionIndex
 
     if (restoreCaptionIndex === null && store.getters.getEnableSubtitlesByDefault && props.captions.length > 0) {
-      restoreCaptionIndex = 0
+      const preferredCaption = findCaptionByLocale(props.captions, preferredCaptionLocale.value)
+      restoreCaptionIndex = preferredCaption ? props.captions.indexOf(preferredCaption) : 0
     }
 
     const showStats = ref(false)
@@ -1694,6 +1700,13 @@ export default defineComponent({
         // - `powerEfficient` the spec is quite vague but in Chromium it should prioritise hardware decoding when available
         // https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
         preferredDecodingAttributes: format === 'dash' ? ['smooth', 'powerEfficient'] : [],
+
+        preferredText: [{
+          language: preferredCaptionLocale.value,
+          role: '',
+          format: '',
+          forced: false,
+        }],
 
         // Electron doesn't like YouTube's vp9 VR video streams and throws:
         // "CHUNK_DEMUXER_ERROR_APPEND_FAILED: Projection element is incomplete; ProjectionPoseYaw required."
@@ -5278,7 +5291,7 @@ export default defineComponent({
             if (textTracks.some(track => track.active)) {
               player.selectTextTrack(null)
             } else {
-              player.selectTextTrack(textTracks[0])
+              player.selectTextTrack(findCaptionByLocale(textTracks, preferredCaptionLocale.value) ?? textTracks[0])
             }
 
             showOverlayControls()

@@ -127,7 +127,23 @@ export function translateSponsorBlockCategory(category) {
 }
 
 /**
- * Moves the captions that are the most similar to the display language to the top
+ * Finds the caption that most closely matches the preferred locale.
+ * @template {{ language: string }} T
+ * @param {T[]} captions
+ * @param {string} preferredLocale
+ * @returns {T | null}
+ */
+export function findCaptionByLocale(captions, preferredLocale) {
+  const normalizedLocale = preferredLocale.replace('_', '-').toLowerCase()
+  const preferredLanguage = normalizedLocale.split('-')[0]
+
+  return captions.find(caption => caption.language.replace('_', '-').toLowerCase() === normalizedLocale) ??
+    captions.find(caption => caption.language.replace('_', '-').toLowerCase().split('-')[0] === preferredLanguage) ??
+    null
+}
+
+/**
+ * Moves the captions that are the most similar to the preferred language to the top
  * and sorts the remaining ones alphabetically.
  * @param {{
  *   url: string,
@@ -136,9 +152,10 @@ export function translateSponsorBlockCategory(category) {
  *   mimeType: string,
  *   isAutotranslated?: boolean
  * }[]} captions
+ * @param {string} [preferredLocale]
  */
-export function sortCaptions(captions) {
-  const currentLocale = i18n.global.locale.value
+export function sortCaptions(captions, preferredLocale = i18n.global.locale.value) {
+  const currentLocale = preferredLocale.replace('_', '-')
   const userLocale = currentLocale.split('-') // ex. [en,US]
 
   const collator = new Intl.Collator([currentLocale, 'en'])

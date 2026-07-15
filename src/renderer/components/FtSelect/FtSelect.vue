@@ -18,7 +18,7 @@
         :key="selectValues[index]"
         :dir="isLocaleSelector ? 'auto' : null"
         :value="selectValues[index]"
-        :lang="isLocaleSelector && selectValues[index] !== 'system' ? selectValues[index] : null"
+        :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
       >
         {{ name }}
       </option>
