@@ -2024,7 +2024,7 @@ export default defineComponent({
       const videoUrl = appendTimestamp(getYoutubeVideoShareUrl(props.videoId), Math.floor(startSeconds))
 
       copyToClipboard(videoUrl, {
-        messageOnSuccess: t('Chapters.Timestamp Link Copied')
+        messageOnSuccess: t('Share.Timestamp Link Copied')
       })
     }
 
@@ -3886,9 +3886,14 @@ export default defineComponent({
 
       /**
        * @param {'youtube' | 'invidious'} backend
+       * @param {boolean} includeTimestamp
        * @returns {string}
        */
-      function getCopySuccessMessage(backend) {
+      function getCopySuccessMessage(backend, includeTimestamp) {
+        if (includeTimestamp) {
+          return t('Share.Timestamp Link Copied')
+        }
+
         return backend === 'invidious'
           ? t('Share.Invidious URL copied to clipboard')
           : t('Share.YouTube URL copied to clipboard')
@@ -3928,7 +3933,7 @@ export default defineComponent({
           return new CopyVideoUrlButton(
             () => getVideoUrl(this.backend, this.includeTimestamp),
             () => getCopyLabel(this.backend, this.includeTimestamp),
-            () => getCopySuccessMessage(this.backend),
+            () => getCopySuccessMessage(this.backend, this.includeTimestamp),
             rootElement,
             controls
           )

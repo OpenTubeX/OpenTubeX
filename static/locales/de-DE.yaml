@@ -1023,6 +1023,7 @@ Share:
   Invidious Channel URL copied to clipboard: Invidious-Kanal-URL in die Zwischenablage kopiert
   Share Channel: Kanal teilen
   Share Post: Post teilen
+  Timestamp Link Copied: Link mit Zeitstempel in die Zwischenablage kopiert
 Mini Player: Mini-Video-Player
 Comments:
   Comments: Kommentare
@@ -1190,6 +1191,9 @@ Clipboard:
 Chapters:
   Chapters: Kapitel
   Key Moments: Highlights
+  Open Chapters: Kapitel öffnen
+  Close Chapters: Kapitel schließen
+  Copy Timestamp Link: Link bei {timestamp} kopieren
 Preferences: Einstellungen
 Ok: OK
 Hashtag:

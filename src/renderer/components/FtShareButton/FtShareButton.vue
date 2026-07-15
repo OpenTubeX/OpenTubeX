@@ -293,7 +293,9 @@ function openInvidious() {
 }
 
 function copyInvidious() {
-  copyToClipboard(getFinalUrl(invidiousURL.value), { messageOnSuccess: t('Share.Invidious URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(invidiousURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.Invidious URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -303,7 +305,9 @@ function openYoutube() {
 }
 
 function copyYoutube() {
-  copyToClipboard(getFinalUrl(youtubeShareURL.value), { messageOnSuccess: t('Share.YouTube URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(youtubeShareURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.YouTube URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -313,7 +317,9 @@ function openYoutubeEmbed() {
 }
 
 function copyYoutubeEmbed() {
-  copyToClipboard(getFinalUrl(youtubeEmbedURL.value), { messageOnSuccess: t('Share.YouTube Embed URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(youtubeEmbedURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.YouTube Embed URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
 }
 
@@ -323,8 +329,14 @@ function openInvidiousEmbed() {
 }
 
 function copyInvidiousEmbed() {
-  copyToClipboard(getFinalUrl(invidiousEmbedURL.value), { messageOnSuccess: t('Share.Invidious Embed URL copied to clipboard') })
+  copyToClipboard(getFinalUrl(invidiousEmbedURL.value), {
+    messageOnSuccess: getCopySuccessMessage(t('Share.Invidious Embed URL copied to clipboard'))
+  })
   iconButton.value.hideDropdown()
+}
+
+function getCopySuccessMessage(defaultMessage) {
+  return includeTimestamp.value ? t('Share.Timestamp Link Copied') : defaultMessage
 }
 
 function updateIncludeTimestamp() {
