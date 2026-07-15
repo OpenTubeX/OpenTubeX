@@ -532,6 +532,7 @@ Settings:
       Captions: Captions
       Preferred Language: Preferred Caption Language
       Application Language: Application Language
+      Enable Translations: Enable Caption Translations
       Text Color: Text Color
       Background Color: Background Color
       Background Opacity: Background Opacity
@@ -1341,6 +1342,7 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:
+    Enable Caption Translations: When enabled, OpenTubeX adds an automatically translated caption track in the preferred caption language when the video does not provide a matching track. Machine translations may be inaccurate.
     Proxy Videos Through Invidious: Will connect to Invidious to serve videos instead
       of making a direct connection to YouTube.
     Default Video Format: Set the formats used when a video plays. DASH formats can

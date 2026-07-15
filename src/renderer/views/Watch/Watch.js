@@ -262,6 +262,9 @@ export default defineComponent({
     preferredCaptionLocale: function () {
       return this.$store.getters.getPreferredCaptionLocale || this.currentLocale
     },
+    enableCaptionTranslations: function () {
+      return this.$store.getters.getEnableCaptionTranslations
+    },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
@@ -967,7 +970,7 @@ export default defineComponent({
                 const hasPreferredCaption = findCaptionByLocale(captionTracks, this.preferredCaptionLocale) ||
                   captionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
 
-                if (!hasPreferredCaption) {
+                if (this.enableCaptionTranslations && !hasPreferredCaption) {
                   const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet)
 
                   if (translatedCaptionTrack) {
@@ -2232,7 +2235,9 @@ export default defineComponent({
       // Otherwise use the preferred caption locale and hope that YouTube can handle it.
       if (!translationLanguage) {
         translationCode = userLanguages.values().next().value
-        translationName = new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(translationCode) ?? translationCode
+        translationName = this.$store.getters.getPreferredCaptionLocale
+          ? new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(translationCode) ?? translationCode
+          : this.t('Locale Name')
       } else {
         translationName = translationLanguage.language_name.text
         translationCode = translationLanguage.language_code

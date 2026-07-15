@@ -402,6 +402,32 @@ Settings:
     Autoplay Videos: Videos automatisch starten
     Proxy Videos Through Invidious: Videos durch Invidious leiten
     Autoplay Playlists: Videos in Playlist automatisch abspielen
+    Caption Appearance:
+      Caption Appearance: Untertiteldarstellung
+      Captions: Untertitel
+      Preferred Language: Bevorzugte Untertitelsprache
+      Application Language: Anwendungssprache
+      Enable Translations: Untertitelübersetzungen aktivieren
+      Text Color: Textfarbe
+      Background Color: Hintergrundfarbe
+      Background Opacity: Hintergrunddeckkraft
+      Font Size: Schriftgröße
+      Vertical Position: Vertikale Position
+      Edge Color: Konturfarbe
+      Anchor:
+        Anchor: Position
+        Top Left: Oben links
+        Top Center: Oben mittig
+        Top Right: Oben rechts
+        Bottom Left: Unten links
+        Bottom Center: Unten mittig
+        Bottom Right: Unten rechts
+      Edge Style:
+        Edge Style: Konturstil
+        None: Keine
+        Outline: Kontur
+        Drop Shadow: Schlagschatten
+      Reset: Untertiteldarstellung zurücksetzen
     Enable Theatre Mode by Default: Kinomodus standardmäßig aktivieren
     Default Volume: Standard-Lautstärke
     Default Playback Rate: Standard-Wiedergabegeschwindigkeit
@@ -875,6 +901,10 @@ Video:
   Hide Channel: Kanal ausblenden
   More Options: Weitere Optionen
   Player:
+    Caption Appearance:
+      Options: Optionen
+      Title: Untertiteldarstellung
+      Sample: So sehen Untertitel aus
     Audio Tracks: Audiospuren
     Normal: Normal
     Set Default: Standard setzen
@@ -1144,6 +1174,7 @@ Tooltips:
     Fetch Feed on Startup: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
     Auto Refresh Interval: Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist.
   Player Settings:
+    Enable Caption Translations: Wenn aktiviert, fügt OpenTubeX eine automatisch übersetzte Untertitelspur in der bevorzugten Untertitelsprache hinzu, wenn das Video keine passende Spur bereitstellt. Maschinelle Übersetzungen können ungenau sein.
     Default Video Format: Lege die Formate fest, die bei der Wiedergabe eines Videos verwendet werden. DASH-Formate können höhere Auflösungen wiedergeben. Altformate sind auf maximal 360p beschränkt, verbrauchen aber weniger Bandbreite. Audioformate sind reine Audiostreams.
     Proxy Videos Through Invidious: Stellt eine Verbindung mit Invidious her, um Videos bereitzustellen, anstatt eine direkte Verbindung mit YouTube herzustellen.
     Use Quick Playback Speed Bar: Zeigt in den Player-Steuerelementen auf der rechten Seite eine schnelle Wiedergabegeschwindigkeitsleiste an. Wenn das manuelle Speichern der kanalbezogenen Wiedergabegeschwindigkeit aktiviert ist, enthält die Leiste außerdem die Schaltfläche, um die Geschwindigkeit für den aktuellen Kanal zu speichern.

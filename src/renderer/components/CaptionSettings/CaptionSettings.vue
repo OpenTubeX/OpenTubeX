@@ -21,6 +21,15 @@
             @change="updatePreferredCaptionLocale"
           />
         </div>
+        <div class="captionControl">
+          <FtToggleSwitch
+            :label="t('Settings.Player Settings.Caption Appearance.Enable Translations')"
+            :compact="true"
+            :default-value="enableCaptionTranslations"
+            :tooltip="t('Tooltips.Player Settings.Enable Caption Translations')"
+            @change="updateEnableCaptionTranslations"
+          />
+        </div>
         <label class="captionControl captionColorControl">
           <span>{{ t('Settings.Player Settings.Caption Appearance.Text Color') }}</span>
           <input
@@ -121,6 +130,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import {
   CAPTION_ANCHORS,
@@ -138,6 +148,7 @@ const CAPTION_LOCALE_VALUES = ['', ...allLocales]
 
 const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
 const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
+const enableCaptionTranslations = computed(() => store.getters.getEnableCaptionTranslations)
 const preferredCaptionLocale = computed(() => store.getters.getPreferredCaptionLocale)
 const captionLocaleNames = computed(() => [
   t('Settings.Player Settings.Caption Appearance.Application Language'),
@@ -171,6 +182,11 @@ function updateCaptionSetting(setting, value) {
 /** @param {string} value */
 function updatePreferredCaptionLocale(value) {
   store.dispatch('updatePreferredCaptionLocale', value)
+}
+
+/** @param {boolean} value */
+function updateEnableCaptionTranslations(value) {
+  store.dispatch('updateEnableCaptionTranslations', value)
 }
 
 function resetCaptionSettings() {

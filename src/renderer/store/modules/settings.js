@@ -176,6 +176,7 @@ const state = {
   secColor: 'Blue',
   defaultAutoplayInterruptionIntervalHours: 3,
   defaultCaptionSettings: '{}',
+  enableCaptionTranslations: false,
   preferredCaptionLocale: '',
   defaultInterval: 5,
   defaultPlayback: 1,
