@@ -57,6 +57,7 @@
       @play="handlePlay"
       @pause="handlePause"
       @ended="handleEnded"
+      @seeking="syncPlayPauseControlIcons"
       @canplay="handleCanPlay"
       @volumechange="updateVolume"
       @timeupdate="handleTimeupdate"

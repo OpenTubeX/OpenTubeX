@@ -2147,7 +2147,7 @@ export default defineComponent({
         ui.getControls().dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
       }
 
-      syncPlayPauseControlIcons(video.value.paused)
+      syncPlayPauseControlIcons()
       syncMuteControlIcons(video.value.muted || video.value.volume === 0)
     }
 
@@ -2894,11 +2894,9 @@ export default defineComponent({
       button.appendChild(icon)
     }
 
-    /**
-     * @param {boolean} paused
-     */
-    function syncPlayPauseControlIcons(paused) {
-      const nextState = paused ? 'play' : 'pause'
+    function syncPlayPauseControlIcons() {
+      const video_ = video.value
+      const nextState = video_.ended && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
 
       window.requestAnimationFrame(() => {
         container.value?.querySelectorAll('.shaka-play-button').forEach((button) => {
@@ -2940,7 +2938,7 @@ export default defineComponent({
         return
       }
 
-      syncPlayPauseControlIcons(false)
+      syncPlayPauseControlIcons()
 
       sleepTimer.resumeCountdown()
       startPowerSaveBlocker()
@@ -2963,7 +2961,7 @@ export default defineComponent({
     }
 
     function handlePause() {
-      syncPlayPauseControlIcons(true)
+      syncPlayPauseControlIcons()
 
       sleepTimer.pauseCountdown()
       stopPowerSaveBlocker()
@@ -2988,6 +2986,8 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      syncPlayPauseControlIcons()
+
       sleepTimer.pauseCountdown()
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
 
@@ -6721,6 +6721,7 @@ export default defineComponent({
 
       handlePlay,
       handlePause,
+      syncPlayPauseControlIcons,
       handleCanPlay,
       handleEnded,
       updateVolume,

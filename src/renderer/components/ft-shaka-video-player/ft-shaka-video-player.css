@@ -281,6 +281,16 @@
   transform: translate(-50%, -50%) scale(1.08);
 }
 
+:deep(
+  .shaka-play-button[data-ft-play-pause-state='replay'] > .shaka-ui-icon:not(.ft-play-pause-morph-icon)
+) {
+  opacity: 1;
+}
+
+:deep(.shaka-play-button[data-ft-play-pause-state='replay'] > .ft-play-pause-morph-icon) {
+  opacity: 0;
+}
+
 :deep(.ft-play-pause-morph-icon > path) {
   d: path('M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z');
   transition: d 180ms cubic-bezier(0.4, 0, 0.2, 1);
