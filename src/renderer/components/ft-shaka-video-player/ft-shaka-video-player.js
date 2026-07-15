@@ -1729,12 +1729,16 @@ export default defineComponent({
         // https://developer.mozilla.org/en-US/docs/Web/API/MediaCapabilities/decodingInfo
         preferredDecodingAttributes: format === 'dash' ? ['smooth', 'powerEfficient'] : [],
 
-        preferredText: [{
-          language: getCaptionToEnable()?.language ?? preferredCaptionLocale.value,
-          role: '',
-          format: '',
-          forced: false,
-        }],
+        // Shaka automatically shows a matching preferred text track on load.
+        // Only give it a preference when captions should be enabled or restored.
+        preferredText: restoreCaptionIndex === null
+          ? []
+          : [{
+              language: getCaptionToEnable()?.language ?? preferredCaptionLocale.value,
+              role: '',
+              format: '',
+              forced: false,
+            }],
 
         // Electron doesn't like YouTube's vp9 VR video streams and throws:
         // "CHUNK_DEMUXER_ERROR_APPEND_FAILED: Projection element is incomplete; ProjectionPoseYaw required."
