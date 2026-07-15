@@ -16,9 +16,17 @@ export class AutoplayToggle extends shaka.ui.Element {
     /** @private */
     this.button_ = document.createElement('button')
     this.button_.classList.add('autoplay-toggle', 'shaka-tooltip')
+    this.button_.type = 'button'
 
     /** @private */
-    this.icon_ = new shaka.ui.Icon(this.button_, PlayerIcons.PAUSE_CIRCLE_FILLED)
+    this.switch_ = document.createElement('span')
+    this.switch_.classList.add('ft-autoplay-switch')
+    this.switch_.ariaHidden = 'true'
+    this.button_.appendChild(this.switch_)
+
+    /** @private */
+    this.icon_ = new shaka.ui.Icon(this.switch_, PlayerIcons.PAUSE_CIRCLE_FILLED)
+    this.icon_.getSvgElement().classList.add('ft-autoplay-switch-thumb')
 
     const label = document.createElement('label')
     label.classList.add(
@@ -83,6 +91,7 @@ export class AutoplayToggle extends shaka.ui.Element {
 
     this.currentState_.textContent = this.localization.resolve(this.autoplayEnabled_ ? 'ON' : 'OFF')
 
+    this.button_.setAttribute('aria-pressed', String(this.autoplayEnabled_))
     this.button_.ariaLabel = this.autoplayEnabled_ ? i18n.global.t('Video.Player.Autoplay is on') : i18n.global.t('Video.Player.Autoplay is off')
   }
 
