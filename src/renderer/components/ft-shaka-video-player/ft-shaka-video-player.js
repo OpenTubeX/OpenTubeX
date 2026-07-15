@@ -13,8 +13,10 @@ import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton } from './player-components/LoopButton'
+import { PlaybackRateSelection } from './player-components/PlaybackRateSelection'
 import { QuickPlaybackRateBar } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
+import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { SleepTimer } from './player-components/SleepTimer'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
@@ -501,6 +503,11 @@ export default defineComponent({
     /** @param {boolean} value */
     function updateAmbientMode(value) {
       store.dispatch('updateAmbientMode', value)
+    }
+
+    /** @param {boolean} value */
+    function updateSkipSilence(value) {
+      store.dispatch('updateSkipSilence', value)
     }
 
     watch(displayVideoPlayButton, (newValue) => {
@@ -1963,6 +1970,7 @@ export default defineComponent({
           'ft_autoplay_toggle',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
+          'ft_skip_silence',
           'ft_sleep_timer',
           'captions',
           'ft_audio_tracks',
@@ -2001,6 +2009,7 @@ export default defineComponent({
           'ft_audio_tracks',
           'captions',
           'playback_rate',
+          'ft_skip_silence',
           'ft_sleep_timer',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_ambient_mode',
@@ -2033,6 +2042,7 @@ export default defineComponent({
       }
 
       if (isLive.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_skip_silence')
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'loop')
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_loop')
       }
@@ -3935,6 +3945,24 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('captions', new CaptionSelectionFactory())
     }
 
+    function registerPlaybackRateSelection() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class PlaybackRateSelectionFactory {
+        create(rootElement, controls) {
+          return new PlaybackRateSelection(
+            getCurrentPlaybackRate,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      const factory = new PlaybackRateSelectionFactory()
+      shakaControls.registerElement('playback_rate', factory)
+      shakaOverflowMenu.registerElement('playback_rate', factory)
+    }
+
     function toggleCaptions() {
       const textTracks = player.getTextTracks()
 
@@ -4232,6 +4260,23 @@ export default defineComponent({
       }
 
       shakaOverflowMenu.registerElement('ft_ambient_mode', new AmbientModeButtonFactory())
+    }
+
+    function registerSkipSilenceButton() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class SkipSilenceButtonFactory {
+        create(rootElement, controls) {
+          return new SkipSilenceButton(
+            skipSilence,
+            updateSkipSilence,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaOverflowMenu.registerElement('ft_skip_silence', new SkipSilenceButtonFactory())
     }
 
     function registerSleepTimer() {
@@ -4544,6 +4589,16 @@ export default defineComponent({
       shakaControls.registerElement('captions', defaultCaptionSelectionFactory)
       shakaOverflowMenu.registerElement('captions', defaultCaptionSelectionFactory)
 
+      class DefaultPlaybackRateSelectionFactory {
+        create(rootElement, controls) {
+          return new shaka.ui.PlaybackRateSelection(rootElement, controls)
+        }
+      }
+
+      const defaultPlaybackRateSelectionFactory = new DefaultPlaybackRateSelectionFactory()
+      shakaControls.registerElement('playback_rate', defaultPlaybackRateSelectionFactory)
+      shakaOverflowMenu.registerElement('playback_rate', defaultPlaybackRateSelectionFactory)
+
       shakaControls.registerElement('ft_audio_tracks', null)
       shakaOverflowMenu.registerElement('ft_audio_tracks', null)
 
@@ -4568,6 +4623,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
+      shakaOverflowMenu.registerElement('ft_skip_silence', null)
       shakaOverflowMenu.registerElement('ft_sleep_timer', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
 
@@ -4719,6 +4775,10 @@ export default defineComponent({
      * @returns {number | null}
      */
     function getCurrentPlaybackRate() {
+      if (temporaryPlaybackRateActive && playbackRateBeforeTemporaryPlayback !== null) {
+        return playbackRateBeforeTemporaryPlayback
+      }
+
       const playerRate = normalizePlaybackRate(player?.getPlaybackRate())
       if (playerRate !== null) {
         return silenceSkipping.getNormalPlaybackRate(playerRate)
@@ -5897,10 +5957,12 @@ export default defineComponent({
       registerScreenshotButton()
       registerAudioTrackSelection()
       registerCaptionSelection()
+      registerPlaybackRateSelection()
       registerCaptionToggleButton()
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
+      registerSkipSilenceButton()
       registerSleepTimer()
 
       registerTheatreModeButton()
