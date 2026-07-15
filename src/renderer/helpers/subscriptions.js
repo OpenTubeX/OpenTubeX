@@ -13,6 +13,8 @@ import {
   showToastOnAllTabs
 } from './utils'
 
+const AUTO_REFRESH_TOAST_DURATION = 5000
+
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
@@ -252,7 +254,7 @@ export async function refreshSubscriptionVideosFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION)
   }
 
   const subscriptionUpdates = []
@@ -339,7 +341,7 @@ export async function refreshSubscriptionShortsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION)
   }
 
   const subscriptionUpdates = []
@@ -412,7 +414,7 @@ export async function refreshSubscriptionLiveFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION)
   }
 
   const subscriptionUpdates = []
@@ -499,7 +501,7 @@ export async function refreshSubscriptionPostsFromRemote({
   store.commit('setProgressBarPercentage', 0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'))
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION)
   }
 
   const subscriptionUpdates = []
