@@ -85,7 +85,8 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 }
 
 .search .clearInputTextButton {
-  inset-block-start: 12px;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
 }
 
 .forceTextColor .clearInputTextButton {
@@ -133,6 +134,19 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   position: relative;
 }
 
+.search .inputWrapper {
+  display: block;
+  block-size: 45px;
+}
+
+.search .ft-input {
+  display: block;
+  padding-block: 0 var(--search-input-padding-block-end, 0);
+  font-family: inherit;
+  line-height: var(--search-input-line-height, 45px);
+  margin-block-end: 0;
+}
+
 .buttonIcon {
   inline-size: 1em;
 }
@@ -153,6 +167,11 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 
   /* this should look disabled by default */
   opacity: 0.5;
+}
+
+.search .inputAction {
+  inset-block-start: 50%;
+  transform: translateY(-50%);
 }
 
 .inputAction.enabled {

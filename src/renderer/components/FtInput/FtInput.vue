@@ -48,6 +48,7 @@
         :value="inputDataDisplayed"
         class="ft-input"
         :class="{ disabled }"
+        :style="inputTextStyle"
         :maxlength="maxlength"
         :type="inputType"
         :placeholder="placeholder"
@@ -127,6 +128,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import store from '../../store/index'
 
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
+import { getInputTextAscentOffset } from './inputTextMetrics'
 
 const { t } = useI18n()
 
@@ -244,6 +246,17 @@ const inputDataDisplayed = computed(() => {
 })
 
 const inputDataPresent = computed(() => inputDataDisplayed.value.length > 0)
+const inputTextStyle = computed(() => {
+  if (!props.isSearch) return null
+
+  const offset = getInputTextAscentOffset(inputDataDisplayed.value)
+  const paddingBlockEnd = offset * 2
+
+  return {
+    '--search-input-padding-block-end': `${paddingBlockEnd}px`,
+    '--search-input-line-height': `${45 - paddingBlockEnd}px`
+  }
+})
 
 watch(() => props.dataList, updateVisibleDataList, { deep: true })
 watch(inputData, updateVisibleDataList)

@@ -365,6 +365,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 
 <style scoped>
 .tab {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -373,6 +374,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   background-color: var(--tab-surface-color, var(--bg-color));
   border-radius: 6px 6px 0 0;
   cursor: pointer;
+  block-size: 31px;
   min-inline-size: 100px;
   max-inline-size: 200px;
   flex-shrink: 0;
@@ -460,10 +462,12 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 
 .tabTitle {
   flex: 1;
+  block-size: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
+  line-height: 16px;
   color: var(--primary-text-color);
 }
 

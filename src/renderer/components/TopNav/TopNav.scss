@@ -112,7 +112,7 @@
   $effect-distance: 20px;
 
   position: absolute;
-  inset-block-start: -8px;
+  inset-block-start: 50%;
   inset-inline-end: 42px;
   margin-block: 0;
   margin-inline: 3px;
@@ -120,6 +120,7 @@
   border-radius: 100%;
   font-size: 1em;
   line-height: 1em;
+  transform: translateY(-50%);
   z-index: 1;
 
   &.filterChanged {
