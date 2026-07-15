@@ -13,6 +13,7 @@ import { LegacyQualitySelection } from './player-components/LegacyQualitySelecti
 import { LoopButton } from './player-components/LoopButton'
 import { QuickPlaybackRateBar } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
+import { SleepTimer } from './player-components/SleepTimer'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
@@ -49,6 +50,7 @@ import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../help
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
+import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
@@ -285,6 +287,13 @@ export default defineComponent({
 
     /** @type {import('vue').Ref<HTMLVideoElement | null>} */
     const video = ref(null)
+
+    const sleepTimer = useSleepTimer({
+      getVideoId: () => props.videoId,
+      isPaused: () => video.value?.paused ?? true,
+      onExpired: () => showToast(t('Video.Player.Sleep Timer.Timer ended')),
+      pausePlayback: () => video.value?.pause(),
+    })
 
     /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
     const vrCanvas = ref(null)
@@ -1826,6 +1835,7 @@ export default defineComponent({
           'ft_autoplay_toggle',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
+          'ft_sleep_timer',
           'captions',
           'ft_audio_tracks',
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
@@ -1862,6 +1872,7 @@ export default defineComponent({
           'ft_audio_tracks',
           'captions',
           'playback_rate',
+          'ft_sleep_timer',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_ambient_mode',
           'ft_loop',
@@ -2606,6 +2617,7 @@ export default defineComponent({
         return
       }
 
+      sleepTimer.resumeCountdown()
       startPowerSaveBlocker()
       startSponsorBlockHighlightLabelCountdown()
 
@@ -2626,6 +2638,7 @@ export default defineComponent({
     }
 
     function handlePause() {
+      sleepTimer.pauseCountdown()
       stopPowerSaveBlocker()
       pauseSponsorBlockHighlightLabelCountdown()
 
@@ -2648,6 +2661,9 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      sleepTimer.pauseCountdown()
+      const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
+
       stopPowerSaveBlocker()
       pauseSponsorBlockHighlightLabelCountdown()
 
@@ -2665,7 +2681,7 @@ export default defineComponent({
         deactivateScrollMiniPlayer()
       }
 
-      emit('ended')
+      emit('ended', sleepTimerEnded)
     }
 
     function handleCanPlay() {
@@ -3858,6 +3874,27 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_ambient_mode', new AmbientModeButtonFactory())
     }
 
+    function registerSleepTimer() {
+      events.addEventListener('setSleepTimerDuration', (/** @type {CustomEvent} */ event) => {
+        sleepTimer.startDuration(event.detail)
+      })
+      events.addEventListener('setSleepTimerEndOfVideo', () => {
+        sleepTimer.startEndOfVideo()
+      })
+      events.addEventListener('cancelSleepTimer', () => {
+        sleepTimer.cancel()
+      })
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class SleepTimerFactory {
+        create(rootElement, controls) {
+          return new SleepTimer(sleepTimer, !isLive.value, events, rootElement, controls)
+        }
+      }
+
+      shakaOverflowMenu.registerElement('ft_sleep_timer', new SleepTimerFactory())
+    }
+
     function registerContextMenuButtons() {
       /**
        * @returns {number}
@@ -4159,6 +4196,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
+      shakaOverflowMenu.registerElement('ft_sleep_timer', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
 
       shakaControls.registerElement('ft_screenshot', null)
@@ -5316,6 +5354,7 @@ export default defineComponent({
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
+      registerSleepTimer()
 
       registerTheatreModeButton()
       registerFullWindowButton()

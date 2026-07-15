@@ -1072,6 +1072,14 @@ Video:
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
   Player:
+    Sleep Timer:
+      Sleep Timer: Sleep timer
+      Off: 'Off'
+      Minutes: '{minutes} minutes'
+      End of video: End of video
+      Remaining: '{time} remaining'
+      Cancel timer: Cancel timer
+      Timer ended: Sleep timer ended
     TranslatedCaptionTemplate: '{language} (translated from "{originalLanguage}")'
     Audio Tracks: Audio Tracks
     Autoplay is off: Autoplay is off

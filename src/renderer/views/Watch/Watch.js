@@ -1797,8 +1797,14 @@ export default defineComponent({
       this.activeFormat = 'audio'
     },
 
-    handlePlayerEnded: function () {
+    handlePlayerEnded: function (sleepTimerEnded = false) {
       this.markAsWatchedIfFinished(this.videoLengthSeconds, true)
+
+      if (sleepTimerEnded) {
+        this.handleWatchProgressAutoSaveWhenProgressEnabled()
+        return
+      }
+
       this.handleVideoEnded()
     },
 
