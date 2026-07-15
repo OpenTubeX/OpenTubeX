@@ -262,9 +262,6 @@ export default defineComponent({
     preferredCaptionLocale: function () {
       return this.$store.getters.getPreferredCaptionLocale || this.currentLocale
     },
-    enableCaptionTranslations: function () {
-      return this.$store.getters.getEnableCaptionTranslations
-    },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
@@ -970,7 +967,7 @@ export default defineComponent({
                 const hasPreferredCaption = findCaptionByLocale(captionTracks, this.preferredCaptionLocale) ||
                   captionTracks.some(captionTrack => languagesSet.has(captionTrack.language))
 
-                if (this.enableCaptionTranslations && !hasPreferredCaption) {
+                if (!hasPreferredCaption) {
                   const translatedCaptionTrack = this.getTranslatedLocaleCaption(result.captions, languagesSet)
 
                   if (translatedCaptionTrack) {

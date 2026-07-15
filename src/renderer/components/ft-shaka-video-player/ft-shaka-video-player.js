@@ -333,6 +333,33 @@ export default defineComponent({
     const preferredCaptionLocale = computed(() => {
       return store.getters.getPreferredCaptionLocale || locale.value
     })
+    let lastSelectedCaptionTrack = null
+
+    function getCaptionToEnable() {
+      const captions = store.getters.getEnableCaptionTranslations
+        ? props.captions
+        : props.captions.filter(caption => !caption.isAutotranslated)
+
+      return findCaptionByLocale(captions, preferredCaptionLocale.value) ?? captions[0] ?? null
+    }
+
+    function findMatchingTextTrack(textTracks, caption) {
+      if (!caption) {
+        return null
+      }
+
+      const originalTextId = caption.originalTextId ?? caption.id
+
+      return textTracks.find(track => originalTextId != null && track.originalTextId === originalTextId) ??
+        textTracks.find(track => track.language === caption.language && track.label === caption.label) ??
+        null
+    }
+
+    function getTextTrackToEnable(textTracks) {
+      return findMatchingTextTrack(textTracks, lastSelectedCaptionTrack) ??
+        findMatchingTextTrack(textTracks, getCaptionToEnable()) ??
+        textTracks[0]
+    }
 
     const onlyUseOverFlowMenu = ref(false)
     const forceAspectRatio = ref(false)
@@ -349,8 +376,8 @@ export default defineComponent({
     let restoreCaptionIndex = props.sabrReloadCaptionIndex
 
     if (restoreCaptionIndex === null && store.getters.getEnableSubtitlesByDefault && props.captions.length > 0) {
-      const preferredCaption = findCaptionByLocale(props.captions, preferredCaptionLocale.value)
-      restoreCaptionIndex = preferredCaption ? props.captions.indexOf(preferredCaption) : 0
+      const caption = getCaptionToEnable()
+      restoreCaptionIndex = caption ? props.captions.indexOf(caption) : 0
     }
 
     const showStats = ref(false)
@@ -1703,7 +1730,7 @@ export default defineComponent({
         preferredDecodingAttributes: format === 'dash' ? ['smooth', 'powerEfficient'] : [],
 
         preferredText: [{
-          language: preferredCaptionLocale.value,
+          language: getCaptionToEnable()?.language ?? preferredCaptionLocale.value,
           role: '',
           format: '',
           forced: false,
@@ -3141,9 +3168,13 @@ export default defineComponent({
 
         if (track === null) {
           clearDisplayedCaptions()
-        } else if (activeTextTrack && activeTextTrack.id !== track.id) {
-          selectTextTrack(null)
-          clearDisplayedCaptions()
+        } else {
+          lastSelectedCaptionTrack = track
+
+          if (activeTextTrack && activeTextTrack.id !== track.id) {
+            selectTextTrack(null)
+            clearDisplayedCaptions()
+          }
         }
 
         selectTextTrack(track)
@@ -3841,7 +3872,7 @@ export default defineComponent({
       if (textTracks.some(track => track.active)) {
         player.selectTextTrack(null)
       } else {
-        player.selectTextTrack(findCaptionByLocale(textTracks, preferredCaptionLocale.value) ?? textTracks[0])
+        player.selectTextTrack(getTextTrackToEnable(textTracks))
       }
 
       showOverlayControls()
