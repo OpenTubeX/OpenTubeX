@@ -10,6 +10,10 @@
   block-size: 100%;
 }
 
+.app:has(.videoLayout.ambientModeActive) {
+  overflow-inline: clip;
+}
+
 .routerView {
   flex: 1 1 0%;
   margin-block: 18px;
