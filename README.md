@@ -169,12 +169,12 @@ longer track you using cookies or JavaScript. Your subscriptions, playlists and 
 ### Browser Extensions
 The following extensions open YouTube links directly in OpenTubeX:
 
-- [LibRedirect](https://libredirect.manerakai.com/)
-- [RedirectTube](https://github.com/MStankiewiczOfficial/RedirectTube)
+- ~~[LibRedirect](https://libredirect.manerakai.com/)~~ not yet, pending PR [#1139](https://github.com/libredirect/browser_extension/pull/1139)
+- [RedirectTube](https://github.com/MStankiewiczOfficial/RedirectTube) since version 2.0.0 (26071)
 
 LibRedirect automatically redirect YouTube links to OpenTubeX.
 > [!IMPORTANT]
-> To ensure proper functionality, select FreeTube as Frontend in the Services settings of the extension.
+> To ensure proper functionality, select OpenTubeX as Frontend in the Services settings of the extension.
 
 RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although this feature can be enabled in the settings). Instead, it adds buttons to the toolbar and context menu, which you can click to open videos in OpenTubeX manually.
 
