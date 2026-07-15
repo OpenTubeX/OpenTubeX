@@ -1019,6 +1019,23 @@ Channel:
     Hide Answers: Hide Answers
     Video hidden by OpenTubeX: Video hidden by OpenTubeX
 Video:
+  Transcript:
+    Title: Transcript
+    Search: Search transcript
+    Language: Transcript language
+    Copy: Copy
+    Save: Save
+    Show: Show transcript
+    Hide: Hide transcript
+    Close: Close transcript
+    Copied: Transcript copied to clipboard
+    Saved: Transcript saved
+    Save Error: Unable to save transcript
+    Text File: Text file
+    Unavailable: A transcript is not available for this video.
+    Load Error: The transcript could not be loaded.
+    Empty: This transcript does not contain any text.
+    No Results: No transcript segments match your search.
   IP block: 'YouTube has blocked your IP address from watching videos. Please try switching to a different VPN or proxy.'
   MembersOnly: Members-only videos cannot be watched with OpenTubeX as they require Google login and paid membership to the uploader's channel.
   AgeRestricted: Age-restricted videos cannot be watched with OpenTubeX as they require Google login and using an age-verified YouTube account.

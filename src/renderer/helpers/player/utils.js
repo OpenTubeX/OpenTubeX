@@ -143,6 +143,22 @@ export function findCaptionByLocale(captions, preferredLocale) {
 }
 
 /**
+ * Selects the caption that should be enabled by default.
+ * @template {{ language: string, isAutotranslated?: boolean }} T
+ * @param {T[]} captions
+ * @param {string} preferredLocale
+ * @param {boolean} enableCaptionTranslations
+ * @returns {T | null}
+ */
+export function getPreferredCaption(captions, preferredLocale, enableCaptionTranslations) {
+  const selectableCaptions = enableCaptionTranslations
+    ? captions
+    : captions.filter(caption => !caption.isAutotranslated)
+
+  return findCaptionByLocale(selectableCaptions, preferredLocale) ?? selectableCaptions[0] ?? null
+}
+
+/**
  * Moves the captions that are the most similar to the preferred language to the top
  * and sorts the remaining ones alphabetically.
  * @param {{

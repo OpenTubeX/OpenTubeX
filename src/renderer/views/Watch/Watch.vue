@@ -60,7 +60,7 @@
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
-          @timeupdate="updateCurrentChapter"
+          @timeupdate="handleTimeUpdate"
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
           @pause="handleVideoPause"
@@ -176,6 +176,7 @@
         :has-ai-generated-content="hasAiGeneratedContent"
         :can-save-watched-progress="canSaveWatchProgress"
         :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+        :transcript-open="showTranscript"
         class="watchVideo"
         :class="{ theatreWatchVideo: useTheatreMode }"
         @change-format="handleFormatChange"
@@ -184,6 +185,7 @@
         @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
         @save-channel-video-quality="handleChannelVideoQualityManualSave"
         @toggle-sponsorblock-autoskip="handleSponsorBlockAutoSkipToggle"
+        @toggle-transcript="showTranscript = !showTranscript"
       />
       <watch-video-description
         v-if="!isLoading && !hideVideoDescription"
@@ -208,6 +210,16 @@
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       class="sidebarArea"
     >
+      <watch-video-transcript
+        v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+        :captions="captions"
+        :current-time="currentTime"
+        :preferred-caption-index="preferredTranscriptCaptionIndex"
+        :video-title="videoTitle"
+        class="watchVideoSideBar watchVideoTranscript"
+        @close="showTranscript = false"
+        @timestamp-event="playTranscriptSegment"
+      />
       <watch-video-live-chat
         v-if="!isLoading && !hideLiveChat && (isLive || isUpcoming)"
         :live-chat="liveChat"

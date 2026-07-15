@@ -191,6 +191,13 @@
             :theme="sponsorBlockAutoSkipDisabled ? 'destructive' : 'base'"
             @click="toggleSponsorBlockAutoSkip"
           />
+          <FtIconButton
+            v-if="!isLive && !isUpcoming"
+            :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
+            :icon="['fas', 'file-lines']"
+            :theme="transcriptOpen ? 'secondary' : 'base'"
+            @click="emit('toggle-transcript')"
+          />
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
@@ -341,6 +348,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  transcriptOpen: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const emit = defineEmits([
@@ -350,6 +361,7 @@ const emit = defineEmits([
   'save-channel-playback-speed',
   'save-channel-video-quality',
   'toggle-sponsorblock-autoskip',
+  'toggle-transcript',
 ])
 
 const USING_ELECTRON = process.env.IS_ELECTRON

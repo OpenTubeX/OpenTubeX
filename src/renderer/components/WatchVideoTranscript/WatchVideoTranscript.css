@@ -1,0 +1,118 @@
+.transcriptCard {
+  padding-block-start: 16px;
+}
+
+.transcriptHeader,
+.transcriptHeaderActions,
+.transcriptActions,
+.transcriptControls {
+  display: flex;
+  align-items: center;
+}
+
+.transcriptHeader {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.transcriptTitle {
+  margin: 0;
+}
+
+.transcriptActions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.transcriptHeaderActions {
+  gap: 8px;
+}
+
+.transcriptActions :deep(.btn) {
+  min-inline-size: auto;
+}
+
+.transcriptControls {
+  align-items: flex-end;
+  gap: 16px;
+  margin-block: 16px;
+}
+
+.transcriptControls > :first-child {
+  flex: 1;
+}
+
+.transcriptControls :deep(.select) {
+  margin-block: 20px 10px;
+}
+
+.transcriptMessage {
+  color: var(--tertiary-text-color);
+  margin-block: 24px 8px;
+  text-align: center;
+}
+
+.transcriptSegments {
+  position: relative;
+  max-block-size: 420px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.transcriptSegment {
+  display: grid;
+  grid-template-columns: 5em 1fr;
+  gap: 12px;
+  inline-size: 100%;
+  padding-block: 10px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.4;
+  text-align: start;
+}
+
+.transcriptSegment:hover,
+.transcriptSegment:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.transcriptSegment.active {
+  background-color: var(--accent-color);
+  color: var(--text-with-accent-color);
+}
+
+.transcriptTimestamp {
+  font-variant-numeric: tabular-nums;
+  font-weight: bold;
+}
+
+.transcriptText {
+  overflow-wrap: anywhere;
+}
+
+@media only screen and (width <= 600px) {
+  .transcriptHeader,
+  .transcriptControls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .transcriptActions {
+    justify-content: flex-start;
+  }
+
+  .transcriptControls :deep(.select) {
+    margin-block-start: 20px;
+  }
+
+  .transcriptSegment {
+    grid-template-columns: 4.5em 1fr;
+    padding-inline: 4px;
+  }
+}

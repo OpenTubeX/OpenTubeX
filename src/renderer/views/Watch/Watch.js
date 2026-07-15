@@ -7,6 +7,7 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
+import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
 import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
@@ -42,7 +43,7 @@ import {
 } from '../../helpers/api/invidious'
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
-import { findCaptionByLocale, sortCaptions } from '../../helpers/player/utils'
+import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 
@@ -74,6 +75,7 @@ export default defineComponent({
     'ft-shaka-video-player': FtShakaVideoPlayer,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
+    'watch-video-transcript': WatchVideoTranscript,
     CommentSection,
     'watch-video-live-chat': WatchVideoLiveChat,
     'watch-video-playlist': WatchVideoPlaylist,
@@ -152,6 +154,8 @@ export default defineComponent({
       sabrData: null,
       legacyFormats: [],
       captions: [],
+      currentTime: 0,
+      showTranscript: false,
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
       autoplayNextRecommendedVideo: false,
@@ -262,6 +266,15 @@ export default defineComponent({
     preferredCaptionLocale: function () {
       return this.$store.getters.getPreferredCaptionLocale || this.currentLocale
     },
+    preferredTranscriptCaptionIndex: function () {
+      const caption = getPreferredCaption(
+        this.captions,
+        this.preferredCaptionLocale,
+        this.$store.getters.getEnableCaptionTranslations
+      )
+
+      return caption ? this.captions.indexOf(caption) : 0
+    },
     ambientModeActive: function () {
       return this.$store.getters.getAmbientMode &&
         this.activeFormat !== 'audio' &&
@@ -304,7 +317,8 @@ export default defineComponent({
       return this.$store.getters.getHideVideoLikesAndDislikes
     },
     theatrePossible: function () {
-      return !this.hideRecommendedVideos || (!this.hideLiveChat && this.isLive) || this.watchingPlaylist
+      return this.showTranscript || !this.hideRecommendedVideos ||
+        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist
     },
     autoplayPossible: function () {
       return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
@@ -509,6 +523,8 @@ export default defineComponent({
       this.sabrData = null
       this.legacyFormats = []
       this.captions = []
+      this.currentTime = 0
+      this.showTranscript = false
       this.vrProjection = null
       this.recommendedVideos = []
       this.playabilityStatus = ''
@@ -575,6 +591,18 @@ export default defineComponent({
 
       if (!this.isLoading && player?.hasLoaded) {
         player.setCurrentTime(timestamp)
+      }
+    },
+
+    playTranscriptSegment: function (timestamp) {
+      const player = this.$refs.player
+
+      if (!this.isLoading && player?.hasLoaded) {
+        player.setCurrentTime(timestamp)
+
+        if (player.isPaused()) {
+          player.play()
+        }
       }
     },
 
@@ -1482,6 +1510,15 @@ export default defineComponent({
           }
         }
       }
+    },
+
+    updateCurrentTime: function (currentSeconds) {
+      this.currentTime = currentSeconds
+    },
+
+    handleTimeUpdate: function (currentSeconds) {
+      this.updateCurrentTime(currentSeconds)
+      this.updateCurrentChapter(currentSeconds)
     },
 
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {

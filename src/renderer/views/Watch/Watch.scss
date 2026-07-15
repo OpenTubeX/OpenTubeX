@@ -158,6 +158,7 @@
 
   &.ambientModeActive {
     .infoArea :deep(.watchVideoInfo.ft-card),
+    .sidebarArea :deep(.transcriptCard.ft-card),
     .sidebarArea :deep(.watchVideoPlaylist.ft-card),
     .sidebarArea :deep(.watchVideoRecommendations.ft-card) {
       background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
@@ -165,6 +166,7 @@
   }
 
   .watchVideoPlaylist,
+  .watchVideoTranscript,
   .watchVideoSidebar,
   .theatrePlaylist {
     margin-block: 0 16px;

@@ -31,8 +31,8 @@ import { SkipButton } from './player-components/SkipButton'
 import { FtPlaybackAdjustedTime } from './player-components/FtPlaybackAdjustedTime'
 import {
   deduplicateAudioTracks,
-  findCaptionByLocale,
   findMostSimilarAudioBandwidth,
+  getPreferredCaption,
   getSponsorBlockSegments,
   logShakaError,
   repairInvidiousManifest,
@@ -340,11 +340,11 @@ export default defineComponent({
     let lastSelectedCaptionTrack = null
 
     function getCaptionToEnable() {
-      const captions = store.getters.getEnableCaptionTranslations
-        ? props.captions
-        : props.captions.filter(caption => !caption.isAutotranslated)
-
-      return findCaptionByLocale(captions, preferredCaptionLocale.value) ?? captions[0] ?? null
+      return getPreferredCaption(
+        props.captions,
+        preferredCaptionLocale.value,
+        store.getters.getEnableCaptionTranslations
+      )
     }
 
     function findMatchingTextTrack(textTracks, caption) {
@@ -6524,6 +6524,10 @@ export default defineComponent({
       video.value.pause()
     }
 
+    function play() {
+      return video.value.play()
+    }
+
     function getCurrentTime() {
       return video.value.currentTime
     }
@@ -6589,6 +6593,7 @@ export default defineComponent({
       hasLoaded,
 
       isPaused,
+      play,
       pause,
       getCurrentTime,
       setCurrentTime,
