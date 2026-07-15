@@ -461,7 +461,9 @@ const subscriptionAutoRefreshTimers = {
   live: null,
   posts: null
 }
+const initializedSubscriptionAutoRefreshTimers = new Set()
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
+const SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let refreshOverdueSubscriptionFeedsPromise = null
@@ -604,18 +606,32 @@ function scheduleSubscriptionTabAutoRefresh(tab) {
   clearSubscriptionTabAutoRefreshTimer(tab)
 
   const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  if (!dataReady.value) {
+    return
+  }
+
   if (
-    !dataReady.value ||
     isSubscriptionTabHidden(tab) ||
     Number.isNaN(interval) ||
     interval <= 0
   ) {
+    initializedSubscriptionAutoRefreshTimers.add(tab)
     setSubscriptionTabNextAutoRefreshTimestamp(tab, null)
     return
   }
 
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, Date.now() + interval)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(() => refreshSubscriptionFeedAutomatically(tab), interval)
+  const now = Date.now()
+  const storedTimestamp = initializedSubscriptionAutoRefreshTimers.has(tab)
+    ? null
+    : getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
+  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
+
+  initializedSubscriptionAutoRefreshTimers.add(tab)
+  setSubscriptionTabNextAutoRefreshTimestamp(tab, nextAutoRefreshTimestamp)
+  subscriptionAutoRefreshTimers[tab] = setTimeout(
+    () => refreshSubscriptionFeedAutomatically(tab),
+    Math.max(0, nextAutoRefreshTimestamp - now)
+  )
 }
 
 /**
@@ -754,6 +770,8 @@ function isSubscriptionTabHidden(tab) {
  * @param {number | null} timestamp
  */
 function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
+  storeSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
+
   switch (tab) {
     case 'shorts':
       store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
@@ -766,6 +784,35 @@ function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
       break
     default:
       store.commit('setSubscriptionFeedNextAutoRefreshTimestamp', timestamp)
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function getStoredSubscriptionTabNextAutoRefreshTimestamp(tab) {
+  try {
+    const timestamp = Number(localStorage.getItem(`${SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`))
+    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {number | null} timestamp
+ */
+function storeSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
+  try {
+    const key = `${SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
+    if (timestamp === null) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, String(timestamp))
+    }
+  } catch {
+    // Auto refresh still works for the current session when storage is unavailable.
   }
 }
 
@@ -782,7 +829,6 @@ function clearSubscriptionFeedAutoRefreshTimer() {
 function clearSubscriptionTabAutoRefreshTimer(tab) {
   clearTimeout(subscriptionAutoRefreshTimers[tab])
   subscriptionAutoRefreshTimers[tab] = null
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, null)
 }
 
 /** @type {import('vue').ComputedRef<string>} */
