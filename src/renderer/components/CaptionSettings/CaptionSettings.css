@@ -1,0 +1,118 @@
+.captionPreview {
+  position: relative;
+  box-sizing: border-box;
+  min-block-size: 120px;
+  margin-block-end: 1rem;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #576574, #222f3e);
+  font-size: calc(20px * var(--caption-font-scale));
+  overflow: hidden;
+}
+
+.captionPreview span {
+  position: absolute;
+  max-inline-size: 90%;
+  padding-inline: 0.15em;
+  background-color: var(--caption-background-color);
+  color: var(--caption-text-color);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-stroke: var(--caption-text-stroke-width) var(--caption-edge-color);
+  paint-order: stroke fill;
+  text-align: var(--caption-text-align);
+  text-rendering: geometricprecision;
+  text-shadow: var(--caption-text-shadow);
+}
+
+.captionAnchor-top-left span,
+.captionAnchor-top-center span,
+.captionAnchor-top-right span {
+  inset-block-start: calc(var(--caption-edge-gap) + var(--caption-bottom-offset));
+}
+
+.captionAnchor-bottom-left span,
+.captionAnchor-bottom-center span,
+.captionAnchor-bottom-right span {
+  inset-block-end: calc(var(--caption-edge-gap) + var(--caption-bottom-offset));
+}
+
+.captionAnchor-top-left span,
+.captionAnchor-bottom-left span {
+  inset-inline-start: var(--caption-edge-gap);
+}
+
+.captionAnchor-top-center span,
+.captionAnchor-bottom-center span {
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+}
+
+.captionAnchor-top-right span,
+.captionAnchor-bottom-right span {
+  inset-inline-end: var(--caption-edge-gap);
+}
+
+.captionControls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-block-end: 1rem;
+}
+
+.captionControl {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  min-block-size: 76px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: var(--card-bg-color);
+}
+
+.captionControl :deep(.pure-material-slider) {
+  inline-size: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.captionControl :deep(.select) {
+  inline-size: 100%;
+  margin-block-start: 20px;
+}
+
+.captionColorControl {
+  justify-content: space-between;
+  gap: 1rem;
+  color: rgb(var(--primary-text-color) 0.87);
+  cursor: pointer;
+}
+
+.captionColorControl input {
+  inline-size: 48px;
+  block-size: 36px;
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.captionActions {
+  display: flex;
+  justify-content: flex-start;
+  padding-block-start: 0.25rem;
+  border-block-start: 1px solid var(--border-color);
+}
+
+@media only screen and (width <= 1100px) {
+  .captionControls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media only screen and (width <= 680px) {
+  .captionControls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

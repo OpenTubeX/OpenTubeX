@@ -38,7 +38,7 @@
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive
       }"
-      :style="scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined"
+      :style="[captionCssVariables, scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined]"
       @mouseenter="handleScrollMiniPlayerEnter"
       @mouseleave="handleScrollMiniPlayerLeave"
       @focusin="handleScrollMiniPlayerEnter"
@@ -79,6 +79,14 @@
       :annotations="annotations"
       :current-time="annotationCurrentTime"
     />
+    <div
+      v-if="showCaptionAppearanceSample"
+      class="captionAppearanceSample"
+      :style="{ bottom: captionAppearanceSampleBottom }"
+      aria-live="polite"
+    >
+      <span>{{ $t('Video.Player.Caption Appearance.Sample') }}</span>
+    </div>
     <Transition name="chapter-slide">
       <aside
         v-if="showChaptersOverlay && chapters.length > 0"

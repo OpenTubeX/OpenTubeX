@@ -6,6 +6,7 @@ import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
+import { CaptionSelection } from './player-components/CaptionSelection'
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
@@ -47,6 +48,11 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import {
+  DEFAULT_CAPTION_SETTINGS,
+  getCaptionCssVariables,
+  parseCaptionSettings,
+} from '../../helpers/player/caption-settings'
 import { useAmbientMode } from './opentubex/useAmbientMode'
 import { useAutoPictureInPicture } from './opentubex/useAutoPictureInPicture'
 import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
@@ -405,6 +411,55 @@ export default defineComponent({
       enabled: skipSilence,
       isLive,
       video,
+    })
+
+    const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
+    const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
+    const showCaptionAppearanceSample = ref(false)
+    const captionAppearanceSampleBottom = ref('var(--caption-hidden-bottom-gap)')
+    let captionAppearanceSampleTimeout = null
+
+    function previewCaptionAppearance() {
+      const textContainer = container.value?.querySelector('.shaka-text-container')
+      const displayedCaption = Array.from(
+        textContainer?.querySelectorAll('[translate="no"]') ?? []
+      ).some(element => element.textContent?.trim())
+
+      if (displayedCaption) {
+        showCaptionAppearanceSample.value = false
+        clearTimeout(captionAppearanceSampleTimeout)
+        return
+      }
+
+      if (textContainer) {
+        captionAppearanceSampleBottom.value = getComputedStyle(textContainer).bottom
+      }
+      showCaptionAppearanceSample.value = true
+      clearTimeout(captionAppearanceSampleTimeout)
+      captionAppearanceSampleTimeout = setTimeout(() => {
+        showCaptionAppearanceSample.value = false
+      }, 1000)
+    }
+
+    /**
+     * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
+     * @param {string | number} value
+     */
+    function updateCaptionAppearance(setting, value) {
+      store.dispatch('updateDefaultCaptionSettings', JSON.stringify({
+        ...captionSettings.value,
+        [setting]: value,
+      }))
+      previewCaptionAppearance()
+    }
+
+    function resetCaptionAppearance() {
+      store.dispatch('updateDefaultCaptionSettings', JSON.stringify(DEFAULT_CAPTION_SETTINGS))
+      previewCaptionAppearance()
+    }
+
+    onUnmounted(() => {
+      clearTimeout(captionAppearanceSampleTimeout)
     })
 
     /** @param {boolean} value */
@@ -3742,6 +3797,25 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
     }
 
+    function registerCaptionSelection() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class CaptionSelectionFactory {
+        create(rootElement, controls) {
+          return new CaptionSelection(
+            events,
+            () => captionSettings.value,
+            updateCaptionAppearance,
+            resetCaptionAppearance,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      shakaControls.registerElement('captions', new CaptionSelectionFactory())
+      shakaOverflowMenu.registerElement('captions', new CaptionSelectionFactory())
+    }
+
     function registerChapterOverlayButton() {
       events.addEventListener('setChaptersOverlay', (/** @type {CustomEvent} */ event) => {
         const shouldOpen = event.detail && props.chapters.length > 0
@@ -4313,6 +4387,16 @@ export default defineComponent({
      * (e.g. {@linkcode events}, {@linkcode fullWindowEnabled}) can get garbage collected
      */
     function cleanUpCustomPlayerControls() {
+      class DefaultCaptionSelectionFactory {
+        create(rootElement, controls) {
+          return new shaka.ui.TextSelection(rootElement, controls)
+        }
+      }
+
+      const defaultCaptionSelectionFactory = new DefaultCaptionSelectionFactory()
+      shakaControls.registerElement('captions', defaultCaptionSelectionFactory)
+      shakaOverflowMenu.registerElement('captions', defaultCaptionSelectionFactory)
+
       shakaControls.registerElement('ft_audio_tracks', null)
       shakaOverflowMenu.registerElement('ft_audio_tracks', null)
 
@@ -5673,6 +5757,7 @@ export default defineComponent({
 
       registerScreenshotButton()
       registerAudioTrackSelection()
+      registerCaptionSelection()
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
@@ -6349,6 +6434,9 @@ export default defineComponent({
       ambientCanvas,
       ambientLayoutCanvas,
       ambientModeVisible,
+      captionCssVariables,
+      captionAppearanceSampleBottom,
+      showCaptionAppearanceSample,
       container,
       video,
       vrCanvas,

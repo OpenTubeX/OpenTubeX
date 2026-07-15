@@ -527,6 +527,29 @@ Settings:
     Autoplay Playlists: Autoplay Playlist Videos
     Autoplay Videos: Start Videos Automatically
     Turn on Subtitles by Default: Enable Subtitles by Default
+    Caption Appearance:
+      Caption Appearance: Caption Appearance
+      Captions: Captions
+      Text Color: Text Color
+      Background Color: Background Color
+      Background Opacity: Background Opacity
+      Font Size: Font Size
+      Vertical Position: Vertical Position
+      Edge Color: Edge Color
+      Anchor:
+        Anchor: Anchor
+        Top Left: Top Left
+        Top Center: Top Center
+        Top Right: Top Right
+        Bottom Left: Bottom Left
+        Bottom Center: Bottom Center
+        Bottom Right: Bottom Right
+      Edge Style:
+        Edge Style: Edge Style
+        None: None
+        Outline: Outline
+        Drop Shadow: Drop Shadow
+      Reset: Reset Caption Appearance
     Proxy Videos Through Invidious: Proxy Videos Through Invidious
     Default Viewing Mode:
       Theater: Theater
@@ -1091,6 +1114,10 @@ Video:
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
   Player:
+    Caption Appearance:
+      Options: Options
+      Title: Caption Appearance
+      Sample: Captions look like this
     Sleep Timer:
       Sleep Timer: Sleep timer
       Off: 'Off'
