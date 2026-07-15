@@ -38,7 +38,6 @@
     "eslint-lint": "eslint --config eslint.config.mjs \"src/**/*.js\" \"src/renderer/**/*.vue\" \"static/*.js\" \"_scripts/*.js\" \"_scripts/**/*.mjs\"",
     "eslint-lint-fix": "eslint --config eslint.config.mjs --fix \"src/**/*.js\" \"src/renderer/**/*.vue\" \"static/*.js\" \"_scripts/*.js\" \"_scripts/**/*.mjs\"",
     "lint-json": "eslint --config eslint.config.mjs \"static/**/*.json\"",
-    "lint-translations": "eslint --config eslint.config.mjs \"static/locales/en-US.yaml\"",
     "lint-style": "stylelint \"src/**/*.{css,scss}\"",
     "lint-style-fix": "stylelint --fix \"src/**/*.{css,scss}\"",
     "lint-yml": "eslint --config eslint.config.mjs \"**/*.yml\" \"**/*.yaml\"",
