@@ -100,6 +100,7 @@ function runApp() {
   let isQuitConfirmed = false
   /** @type {import('electron').WebContents | null} */
   let subscriptionAutoRefreshOwner = null
+  let subscriptionAutoRefreshProgress = 0
 
   /**
    * @param {string} url
@@ -2071,43 +2072,66 @@ function runApp() {
     }
 
     subscriptionAutoRefreshOwner = event.sender
+    subscriptionAutoRefreshProgress = 0
     const owner = event.sender
     owner.once('destroyed', () => {
       if (subscriptionAutoRefreshOwner?.id === owner.id) {
         subscriptionAutoRefreshOwner = null
-        broadcastSubscriptionAutoRefreshState(false)
+        subscriptionAutoRefreshProgress = 0
+        broadcastSubscriptionAutoRefreshState()
       }
     })
-    broadcastSubscriptionAutoRefreshState(true)
+    broadcastSubscriptionAutoRefreshState()
     return true
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return false
+      return { inProgress: false, percentage: 0 }
     }
 
-    return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed()
+    return {
+      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed(),
+      percentage: subscriptionAutoRefreshProgress
+    }
+  })
+
+  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, (event, percentage) => {
+    if (
+      subscriptionAutoRefreshOwner?.id !== event.sender.id ||
+      !Number.isFinite(percentage)
+    ) {
+      return
+    }
+
+    subscriptionAutoRefreshProgress = Math.min(100, Math.max(0, percentage))
+    broadcastSubscriptionAutoRefreshState()
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event) => {
     if (subscriptionAutoRefreshOwner?.id === event.sender.id) {
       subscriptionAutoRefreshOwner = null
-      broadcastSubscriptionAutoRefreshState(false)
+      subscriptionAutoRefreshProgress = 0
+      broadcastSubscriptionAutoRefreshState()
     }
   })
 
-  function broadcastSubscriptionAutoRefreshState(inProgress) {
+  function broadcastSubscriptionAutoRefreshState() {
+    const state = {
+      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed(),
+      percentage: subscriptionAutoRefreshProgress
+    }
+
     for (const window of BrowserWindow.getAllWindows()) {
       const manager = TabManager.getForWindow(window.id)
       if (manager) {
         for (const tab of manager.tabs.values()) {
           if (!tab.view.webContents.isDestroyed() && isOpenTubeXUrl(tab.view.webContents.getURL())) {
-            tab.view.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, inProgress)
+            tab.view.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, state)
           }
         }
       } else if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, inProgress)
+        window.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, state)
       }
     }
   }

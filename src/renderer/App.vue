@@ -272,6 +272,7 @@ import {
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
   SUBSCRIPTION_REFRESH_LOCK_NAME,
+  SUBSCRIPTION_REFRESH_PROGRESS_EVENT,
   SUBSCRIPTION_REFRESH_STARTED_EVENT
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
@@ -402,7 +403,14 @@ const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylis
 const showCreatePlaylistPrompt = computed(() => store.getters.getShowCreatePlaylistPrompt)
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const showProgressBar = computed(() => store.getters.getShowProgressBar)
+const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
+
+const showProgressBar = computed(() => {
+  return localProgressBarVisible.value || subscriptionRefreshInProgress.value
+})
 
 const landingPage = computed(() => '/' + store.getters.getLandingPage)
 
@@ -545,12 +553,13 @@ onMounted(async () => {
   window.addEventListener('storage', handleSubscriptionAutoRefreshStorage)
   window.addEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.addEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
+  window.addEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
   window.addEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.addEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   if (process.env.IS_ELECTRON) {
-    removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged((inProgress) => {
-      store.commit('setSubscriptionFeedRefreshInProgress', inProgress)
-    })
+    removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
+      applySubscriptionAutoRefreshState
+    )
     synchronizeSubscriptionRefreshInProgress()
     removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
       if (isActive) {
@@ -578,6 +587,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
   window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
   window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
@@ -796,21 +806,28 @@ function handleSubscriptionAutoRefreshVisibilityChange() {
 
 async function synchronizeSubscriptionRefreshInProgress() {
   try {
-    let inProgress
+    let state
     if (process.env.IS_ELECTRON) {
-      inProgress = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+      state = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
     } else if (navigator.locks) {
       const { held } = await navigator.locks.query()
-      inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
+      const inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
       if (!inProgress) {
         localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
       }
+      state = {
+        inProgress,
+        percentage: inProgress ? getStoredSubscriptionRefreshProgress() : 0
+      }
     } else {
-      inProgress = false
-      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
+      const progressState = getStoredSubscriptionRefreshProgressState()
+      state = {
+        inProgress: progressState !== null,
+        percentage: progressState?.percentage ?? 0
+      }
     }
 
-    store.commit('setSubscriptionFeedRefreshInProgress', inProgress)
+    applySubscriptionAutoRefreshState(state)
   } catch {
     // Live start/finish events still keep the common path synchronized.
   }
@@ -1082,12 +1099,38 @@ function handleSubscriptionRefreshCompleted(event) {
 function handleSubscriptionRefreshStarted(event) {
   if (!process.env.IS_ELECTRON) {
     try {
-      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify(event.detail))
+      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
+        ...event.detail,
+        percentage: 0
+      }))
     } catch {
       // The owner still has its renderer-local progress state.
     }
   }
-  store.commit('setSubscriptionFeedRefreshInProgress', true)
+  applySubscriptionAutoRefreshState({ inProgress: true, percentage: 0 })
+}
+
+/**
+ * @param {CustomEvent<{percentage: number}>} event
+ */
+function handleSubscriptionRefreshProgress(event) {
+  const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
+  store.commit('setProgressBarPercentage', percentage)
+
+  if (process.env.IS_ELECTRON) {
+    window.ftElectron.subscriptionAutoRefresh.setProgress(percentage)
+    return
+  }
+
+  try {
+    const progressState = getStoredSubscriptionRefreshProgressState() ?? {}
+    localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify({
+      ...progressState,
+      percentage
+    }))
+  } catch {
+    // The owner still has its renderer-local progress state.
+  }
 }
 
 function handleSubscriptionRefreshFinished() {
@@ -1098,7 +1141,7 @@ function handleSubscriptionRefreshFinished() {
       // The owner still clears its renderer-local progress state.
     }
   }
-  store.commit('setSubscriptionFeedRefreshInProgress', false)
+  applySubscriptionAutoRefreshState({ inProgress: false, percentage: 0 })
 }
 
 /**
@@ -1106,7 +1149,11 @@ function handleSubscriptionRefreshFinished() {
  */
 function handleSubscriptionAutoRefreshStorage(event) {
   if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
-    store.commit('setSubscriptionFeedRefreshInProgress', event.newValue !== null)
+    const state = getSubscriptionRefreshProgressState(event.newValue)
+    applySubscriptionAutoRefreshState({
+      inProgress: state !== null,
+      percentage: state?.percentage ?? 0
+    })
     return
   }
 
@@ -1135,6 +1182,55 @@ function handleSubscriptionAutoRefreshStorage(event) {
       completion.tab,
       Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
     )
+  }
+}
+
+/**
+ * @param {{inProgress: boolean, percentage: number}} state
+ */
+function applySubscriptionAutoRefreshState(state) {
+  store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
+  store.commit('setProgressBarPercentage', normalizeSubscriptionRefreshProgress(state.percentage))
+}
+
+/**
+ * @param {number} percentage
+ */
+function normalizeSubscriptionRefreshProgress(percentage) {
+  return Number.isFinite(percentage) ? Math.min(100, Math.max(0, percentage)) : 0
+}
+
+function getStoredSubscriptionRefreshProgress() {
+  return getStoredSubscriptionRefreshProgressState()?.percentage ?? 0
+}
+
+function getStoredSubscriptionRefreshProgressState() {
+  try {
+    return getSubscriptionRefreshProgressState(
+      localStorage.getItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
+    )
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {string | null} value
+ * @returns {{percentage: number} | null}
+ */
+function getSubscriptionRefreshProgressState(value) {
+  if (value === null) {
+    return null
+  }
+
+  try {
+    const state = JSON.parse(value)
+    return {
+      ...state,
+      percentage: normalizeSubscriptionRefreshProgress(state.percentage)
+    }
+  } catch {
+    return null
   }
 }
 

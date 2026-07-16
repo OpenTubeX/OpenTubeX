@@ -17,6 +17,7 @@ const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
 export const SUBSCRIPTION_REFRESH_FINISHED_EVENT = 'opentubex-subscription-refresh-finished'
 export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
+export const SUBSCRIPTION_REFRESH_PROGRESS_EVENT = 'opentubex-subscription-refresh-progress'
 export const SUBSCRIPTION_REFRESH_STARTED_EVENT = 'opentubex-subscription-refresh-started'
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
@@ -82,6 +83,15 @@ function completeSubscriptionRefresh(tab, profileId) {
   const timestamp = Date.now()
   window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, {
     detail: { tab, profileId, timestamp }
+  }))
+}
+
+/**
+ * @param {number} percentage
+ */
+function setSubscriptionRefreshProgress(percentage) {
+  window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, {
+    detail: { percentage }
   }))
 }
 
@@ -321,7 +331,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+  setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION)
@@ -350,7 +360,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       }
 
       channelCount++
-      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
@@ -413,7 +423,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+  setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION)
@@ -433,7 +443,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       }
 
       channelCount++
-      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
         await store.dispatch('updateSubscriptionShortsCacheByChannel', {
@@ -491,7 +501,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+  setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION)
@@ -520,7 +530,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       }
 
       channelCount++
-      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
         await store.dispatch('updateSubscriptionLiveCacheByChannel', {
@@ -583,7 +593,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   store.commit('setShowProgressBar', true)
-  store.commit('setProgressBarPercentage', 0)
+  setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION)
@@ -604,7 +614,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       }
 
       channelCount++
-      store.commit('setProgressBarPercentage', (channelCount / activeSubscriptionList.length) * 100)
+      setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
         channelId: channel.id,

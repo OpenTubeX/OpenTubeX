@@ -312,10 +312,18 @@ export default {
 
     /**
      * Check whether a renderer currently owns the subscription refresh.
-     * @returns {Promise<boolean>}
+     * @returns {Promise<{inProgress: boolean, percentage: number}>}
      */
     isInProgress: () => {
       return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE)
+    },
+
+    /**
+     * Publish subscription refresh progress to every renderer.
+     * @param {number} percentage
+     */
+    setProgress: (percentage) => {
+      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, percentage)
     },
 
     /**
@@ -328,12 +336,12 @@ export default {
 
     /**
      * Listen for app-wide subscription refresh ownership changes.
-     * @param {(inProgress: boolean) => void} handler
+     * @param {(state: {inProgress: boolean, percentage: number}) => void} handler
      * @returns {() => void}
      */
     onStateChanged: (handler) => {
-      const listener = (_event, inProgress) => {
-        handler(inProgress)
+      const listener = (_event, state) => {
+        handler(state)
       }
       ipcRenderer.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, listener)
       return () => {
