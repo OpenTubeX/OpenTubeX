@@ -290,7 +290,11 @@ const mutations = {
 
   addChannelToProfiles(state, { channel, profileIds }) {
     for (const id of profileIds) {
-      state.profileList.find(profile => profile._id === id).subscriptions.push(channel)
+      const profile = state.profileList.find(profile => profile._id === id)
+
+      if (!profile.subscriptions.some(subscription => subscription.id === channel.id)) {
+        profile.subscriptions.push(channel)
+      }
     }
   },
 
