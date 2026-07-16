@@ -11,6 +11,7 @@
       :is="resolvedComponent"
       v-if="initialized && resolvedComponent"
       :key="tab.refreshKey || 0"
+      class="routerView"
     />
   </div>
 </template>
