@@ -139,7 +139,8 @@ onErrorCaptured((error) => {
   const mountRevision = props.tab.mountRevision
   tabRuntimeRegistry.markMountFailed(props.tab.id, mountRevision)
   window.ftElectron?.tabs?.mountFailed?.(props.tab.id, mountRevision)
-  return false
+  // Return undefined (not false) so the error still propagates to the app-level
+  // errorHandler in main.js after our IPC notification, preserving observability.
 })
 
 onBeforeUnmount(() => {

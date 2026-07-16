@@ -34,6 +34,7 @@ export class TabNavigationService {
     this.transitionQueue = Promise.resolve()
     this.staleTransitionResolvers = new Map()
     this.loadingSourcesByTabId = new Map()
+    this.navigationQueuesByTabId = new Map()
     this.routeLoadingStateByTabId = new Map()
     this.beforeEachHooksByTabId = new Map()
     this.afterEachHooksByTabId = new Map()
@@ -181,6 +182,25 @@ export class TabNavigationService {
   }
 
   async navigate(tabId, location, mode, historyState = null) {
+    // Serialise navigations per tab so concurrent callers (e.g. a component
+    // mounting and a lifecycle hook both pushing) don't read the same history
+    // snapshot and clobber each other's setTabNavigation commit.
+    const previous = this.navigationQueuesByTabId.get(tabId) ?? Promise.resolve()
+    const run = previous
+      .catch(() => {})
+      .then(() => this._performNavigate(tabId, location, mode, historyState))
+    this.navigationQueuesByTabId.set(tabId, run)
+
+    try {
+      return await run
+    } finally {
+      if (this.navigationQueuesByTabId.get(tabId) === run) {
+        this.navigationQueuesByTabId.delete(tabId)
+      }
+    }
+  }
+
+  async _performNavigate(tabId, location, mode, historyState = null) {
     const tab = this.store.getters.getTabById(tabId)
     if (!tab) {
       return
@@ -442,6 +462,7 @@ export class TabNavigationService {
 
   disposeTab(tabId) {
     this.loadingSourcesByTabId.delete(tabId)
+    this.navigationQueuesByTabId.delete(tabId)
     const routeLoadingState = this.routeLoadingStateByTabId.get(tabId)
     if (routeLoadingState?.timeoutId != null) {
       window.clearTimeout(routeLoadingState.timeoutId)

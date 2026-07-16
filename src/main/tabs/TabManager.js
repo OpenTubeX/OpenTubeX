@@ -817,6 +817,19 @@ export class TabManager {
     tab.pendingActivation = false
     this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
     this._resolveTabMountWaiters(tabId, mountRevision, false)
+
+    // The failed tab was activated as the replacement for one or more tabs whose
+    // close/unload was deferred until it presented. Since it will never present,
+    // markTabPresented would never run and those tabs would stay stranded in the
+    // bar/store forever. Finalize them now. The deferred close tab is still the
+    // presentedTabId, so clear it first to avoid closeTab re-deferring it.
+    if (this.activeTabId === tabId) {
+      if (this.presentedTabId != null && this._deferredCloseTabIds.has(this.presentedTabId)) {
+        this.presentedTabId = null
+      }
+      this._finalizeDeferredDisposals(tabId)
+    }
+
     this._broadcastStateUpdate()
     this._saveSession()
   }
@@ -840,24 +853,33 @@ export class TabManager {
       this._resolveInitialPresentation()
     }
 
+    this._finalizeDeferredDisposals(tabId)
+
+    const tab = this.tabs.get(tabId)
+    this._scheduleTabPreviewRefresh(tab)
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * Finalize any tab closes/unloads that were deferred until a new tab was
+   * presented, skipping the tab that should remain.
+   * @param {string} keepTabId
+   */
+  _finalizeDeferredDisposals(keepTabId) {
     for (const deferredTabId of [...this._deferredCloseTabIds]) {
-      if (deferredTabId !== tabId) {
+      if (deferredTabId !== keepTabId) {
         this._deferredCloseTabIds.delete(deferredTabId)
         this.closeTab(deferredTabId)
       }
     }
     for (const deferredTabId of [...this._deferredUnloadTabIds]) {
-      if (deferredTabId !== tabId) {
+      if (deferredTabId !== keepTabId) {
         this._deferredUnloadTabIds.delete(deferredTabId)
         this.unloadTab(deferredTabId).catch(error => {
           console.error('Failed to finish deferred tab unload:', error)
         })
       }
     }
-
-    const tab = this.tabs.get(tabId)
-    this._scheduleTabPreviewRefresh(tab)
-    this._broadcastStateUpdate()
   }
 
   _getNeighborTabId(tabId) {
@@ -1269,6 +1291,13 @@ export class TabManager {
     tab.previewCapturePromise = (async () => {
       try {
         await this._setTabPreviewCaptureMode(true)
+        // Entering capture mode awaits an IPC round-trip, during which the main
+        // process stays unblocked and another tab may have been activated. If so,
+        // the renderer is now painting a different tab, so capturing here would
+        // save the wrong content as this tab's preview. Bail out with the cache.
+        if (tab.id !== this.presentedTabId) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
         const image = await this.browserWindow.webContents.capturePage()
         if (image.isEmpty()) {
           return await this._getCachedTabPreviewDataUrl(tab)
