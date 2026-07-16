@@ -376,6 +376,11 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    // The setFullWindow listener is only attached once the shaka UI is built. An
+    // early isActiveTab tick can run applyPendingPresentationModes before then, so
+    // gate the full-window request on the listener being ready to avoid consuming
+    // (and dropping) the startup flag while nothing is listening for the event.
+    let fullWindowListenerReady = false
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
@@ -3055,7 +3060,7 @@ export default defineComponent({
         return
       }
 
-      if (startInFullwindow) {
+      if (startInFullwindow && fullWindowListenerReady) {
         startInFullwindow = false
         events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
       }
@@ -4227,6 +4232,7 @@ export default defineComponent({
         }
       })
 
+      fullWindowListenerReady = true
       applyPendingPresentationModes()
 
       /**

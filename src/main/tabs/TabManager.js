@@ -368,6 +368,17 @@ export class TabManager {
         return false
       }
 
+      // The destination mounted from the snapshot taken before the mount wait.
+      // The source tab may have resolved a real title or refreshed its preview in
+      // the meantime, so reconcile the order-independent metadata from the latest
+      // source state before activating. (url/route stay as mounted; isPinned is
+      // fixed by insertion order and must not change here.)
+      stagedTab.title = detached.title
+      stagedTab.color = detached.color
+      stagedTab.previewDataUrl = detached.previewDataUrl
+      stagedTab.previewCapturedAt = detached.previewCapturedAt
+      stagedTab.previewFileName = detached.previewFileName
+
       stagedTab.isTransferStaged = false
       target.activateTab(tabId)
       target.browserWindow.focus()
@@ -427,6 +438,12 @@ export class TabManager {
 
     browserWindow.on('closed', () => {
       tabManagers.delete(browserWindow.id)
+      // Preview refreshes can self-reschedule (see _scheduleTabPreviewRefresh), so
+      // any still-pending capture timer would keep firing and pin this manager
+      // alive after the window is gone. Clear them all before releasing it.
+      for (const tab of this.tabs.values()) {
+        this._clearTabPreviewRefresh(tab)
+      }
       for (const waiters of this._pendingTabMountWaiters.values()) {
         for (const waiter of waiters) {
           clearTimeout(waiter.timeoutId)
@@ -566,7 +583,7 @@ export class TabManager {
    */
   createTab(options = {}) {
     const {
-      id = randomUUID(),
+      id: requestedId,
       url,
       route,
       query,
@@ -582,6 +599,14 @@ export class TabManager {
       isUnloaded = false,
       preloadInBackground = false
     } = options
+
+    // Only trusted callers (session restore, transfers) supply an id; renderer
+    // options are stripped upstream. Validate defensively and never reuse an id
+    // that already exists, which would silently drop a tab from the Map.
+    let id = typeof requestedId === 'string' && requestedId.length > 0 ? requestedId : randomUUID()
+    while (this.tabs.has(id)) {
+      id = randomUUID()
+    }
 
     const location = this._resolveTabLocation(url, route, query)
     const startsUnloaded = (Boolean(lazyLoad) || Boolean(isUnloaded)) && !makeActive && !preloadInBackground
@@ -830,10 +855,14 @@ export class TabManager {
     // The failed tab was activated as the replacement for one or more tabs whose
     // close/unload was deferred until it presented. Since it will never present,
     // markTabPresented would never run and those tabs would stay stranded in the
-    // bar/store forever. Finalize them now. The deferred close tab is still the
-    // presentedTabId, so clear it first to avoid closeTab re-deferring it.
+    // bar/store forever. Finalize them now. The deferred tab is still the
+    // presentedTabId, so clear it first to avoid closeTab/unloadTab re-deferring it.
     if (this.activeTabId === tabId) {
-      if (this.presentedTabId != null && this._deferredCloseTabIds.has(this.presentedTabId)) {
+      if (
+        this.presentedTabId != null &&
+        (this._deferredCloseTabIds.has(this.presentedTabId) ||
+          this._deferredUnloadTabIds.has(this.presentedTabId))
+      ) {
         this.presentedTabId = null
       }
       this._finalizeDeferredDisposals(tabId)
@@ -2036,6 +2065,8 @@ export function setupTabsIPC(options = {}) {
     const {
       inheritColorFromOpener = false,
       openerTabId,
+      // Never let a renderer choose the internal tab id; it is always generated.
+      id,
       ...tabOptions
     } = options != null && typeof options === 'object' ? options : {}
 
