@@ -560,6 +560,9 @@ Settings:
       Full Screen: Full Screen
       Picture in Picture: Picture in Picture
       External Player: External Player ({externalPlayerName})
+      Full Window (Always On): Full Window (Always On)
+      Full Screen (Always On): Full Screen (Always On)
+      Tooltip: Most default viewing modes are only applied at the start of each watch session. Changes made during the session persist until it ends. Always-on viewing modes are applied whenever you switch to a new video, regardless of any viewing mode changes made when viewing the previous video.
     Auto Picture in Picture on Tab Change: Automatically enter picture-in-picture when switching tabs
     Scroll Mini Player:
       Scroll Mini Player: Scroll mini player
