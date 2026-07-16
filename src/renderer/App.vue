@@ -2050,6 +2050,21 @@ function handleAuxClick(event) {
   // otherwise the context menu breaks
   if (isExternalLink(event) && event.button === 1) {
     handleLinkClick(event)
+    return
+  }
+
+  // The tab rework replaced the browser's navigation history with a per-tab
+  // logical history, so Chromium's native mouse back/forward buttons no longer
+  // navigate anything. Route buttons 3 (back) and 4 (forward) through the tab
+  // navigation service instead. auxclick fires once per click, avoiding the
+  // double dispatch seen with mousedown/mouseup for these buttons.
+  if (event.button === 3 || event.button === 4) {
+    event.preventDefault()
+
+    const tabId = activeTabId.value
+    if (tabId != null) {
+      navigation.go(tabId, event.button === 3 ? -1 : 1)
+    }
   }
 }
 
