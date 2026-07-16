@@ -1199,7 +1199,7 @@ function handleSubscriptionRefreshProgress(event) {
   store.commit('setProgressBarPercentage', percentage)
 
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.subscriptionAutoRefresh.setProgress(percentage)
+    window.ftElectron.subscriptionAutoRefresh.setProgress(store.getters.getActiveTabId, percentage)
     return
   }
 

@@ -85,12 +85,17 @@ let loaderObserver = null
 let loaderAnimationFrameId = null
 let acknowledgedMountRevision = 0
 let previousRefreshKey = props.tab.refreshKey ?? 0
+// Guards against notifying `beforeDispose` twice for the same mounted instance:
+// the unload watcher and onBeforeUnmount can both fire for one instance. Reset
+// when the tab mounts again so a subsequent mount receives one notification.
+let disposalNotified = false
 
 watch(
   () => [shouldMount.value, props.tab.mountRevision, props.tab.refreshKey],
   async ([mount, mountRevision, refreshKey]) => {
     if (!mount) {
-      if (initialized.value) {
+      if (initialized.value && !disposalNotified) {
+        disposalNotified = true
         await tabLifecycleService.run(props.tab.id, 'beforeDispose')
         initialized.value = false
       }
@@ -111,6 +116,7 @@ watch(
     }
 
     initialized.value = true
+    disposalNotified = false
     await nextTick()
     if (mountRevision > acknowledgedMountRevision) {
       acknowledgedMountRevision = mountRevision
@@ -137,16 +143,24 @@ onMounted(() => {
 onErrorCaptured((error) => {
   console.error(`Logical tab ${props.tab.id} failed to render:`, error)
   const mountRevision = props.tab.mountRevision
-  tabRuntimeRegistry.markMountFailed(props.tab.id, mountRevision)
-  window.ftElectron?.tabs?.mountFailed?.(props.tab.id, mountRevision)
+  // Only treat this as a mount failure while the current mount revision has not
+  // yet been acknowledged as mounted. A later descendant render error on an
+  // already-mounted tab is logged but must not flip the tab back to failed.
+  if (mountRevision > acknowledgedMountRevision) {
+    tabRuntimeRegistry.markMountFailed(props.tab.id, mountRevision)
+    window.ftElectron?.tabs?.mountFailed?.(props.tab.id, mountRevision)
+  }
   // Return undefined (not false) so the error still propagates to the app-level
   // errorHandler in main.js after our IPC notification, preserving observability.
 })
 
 onBeforeUnmount(() => {
-  tabLifecycleService.run(props.tab.id, 'beforeDispose').catch(error => {
-    console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
-  })
+  if (!disposalNotified) {
+    disposalNotified = true
+    tabLifecycleService.run(props.tab.id, 'beforeDispose').catch(error => {
+      console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
+    })
+  }
   loaderObserver?.disconnect()
   loaderObserver = null
   if (loaderAnimationFrameId != null) {

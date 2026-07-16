@@ -600,7 +600,7 @@ watch(
         title,
         artist,
         artwork: artworkSrc
-          ? [{ src: artworkSrc, sizes: '128x128', type: 'img/png' }]
+          ? [{ src: artworkSrc, sizes: '128x128', type: 'image/png' }]
           : []
       }))
     }

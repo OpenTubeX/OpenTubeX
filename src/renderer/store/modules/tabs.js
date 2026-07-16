@@ -387,6 +387,19 @@ function stripDocumentTitle(title) {
   return title.endsWith(suffix) ? title.slice(0, -suffix.length) : title
 }
 
+function searchParamsToQuery(searchParams) {
+  const query = {}
+  for (const [key, value] of searchParams) {
+    if (key in query) {
+      const existing = query[key]
+      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+    } else {
+      query[key] = value
+    }
+  }
+  return query
+}
+
 function routeFromUrl(url) {
   try {
     const parsed = new URL(url)
@@ -394,7 +407,7 @@ function routeFromUrl(url) {
     const routeUrl = new URL(hashRoute || '/', parsed.origin)
     return normalizeRoute({
       path: routeUrl.pathname,
-      query: Object.fromEntries(routeUrl.searchParams),
+      query: searchParamsToQuery(routeUrl.searchParams),
       hash: routeUrl.hash
     })
   } catch {

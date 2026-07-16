@@ -35,7 +35,13 @@ export const tabLifecycleService = {
     for (const hooks of [...tabHooks]) {
       const hook = hooks[hookName]
       if (typeof hook === 'function') {
-        await hook(context)
+        // Isolate each hook: a rejection must not prevent the remaining hooks
+        // (e.g. player teardown, progress persistence) from running.
+        try {
+          await hook(context)
+        } catch (error) {
+          console.error(`Tab lifecycle hook "${hookName}" failed for tab ${tabId}:`, error)
+        }
       }
     }
   },

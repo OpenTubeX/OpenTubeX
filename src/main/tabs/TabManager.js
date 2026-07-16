@@ -165,7 +165,7 @@ export class TabManager {
       const hashUrl = new URL(rawHash || '/', 'https://opentubex.invalid')
       return normalizeRoute({
         path: hashUrl.pathname,
-        query: Object.fromEntries(hashUrl.searchParams),
+        query: searchParamsToQuery(hashUrl.searchParams),
         hash: hashUrl.hash
       })
     } catch {
@@ -411,6 +411,11 @@ export class TabManager {
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
     this._deferredUnloadTabIds = new Set()
+    // Serializes preview captures across every tab in this window. Captures share
+    // the window's single renderer, so running two at once would screenshot each
+    // other's content and toggle capture mode out from under one another.
+    /** @type {Promise<void>} */
+    this._previewCaptureLock = Promise.resolve()
     this.bridge = new TabRendererBridge(browserWindow)
     this._initialPresentationResolved = false
     this._initialPresentationPromise = new Promise(resolve => {
@@ -696,7 +701,11 @@ export class TabManager {
     }
 
     const previousActiveId = this.activeTabId
-    if (previousActiveId === tabId && tab.pendingActivation !== true) {
+    if (
+      previousActiveId === tabId &&
+      tab.pendingActivation !== true &&
+      tab.loadState !== 'unloaded'
+    ) {
       return
     }
 
@@ -893,7 +902,14 @@ export class TabManager {
       ...orderedTabIds.slice(0, tabIndex).reverse(),
       ...orderedTabIds.slice(tabIndex + 1)
     ]
-    return candidates.find(candidateId => this.tabs.get(candidateId)?.isTransferStaged !== true) ?? null
+    // A tab already queued for deferred close/unload must never be selected as
+    // the replacement, otherwise a rapid second close/unload would leave the
+    // window with no selectable tab.
+    return candidates.find(candidateId =>
+      this.tabs.get(candidateId)?.isTransferStaged !== true &&
+      !this._deferredCloseTabIds.has(candidateId) &&
+      !this._deferredUnloadTabIds.has(candidateId)
+    ) ?? null
   }
 
   _prepareNeighborActivation(tabId) {
@@ -902,10 +918,6 @@ export class TabManager {
       return false
     }
 
-    // A rapid second close/unload can otherwise select a tab that is still
-    // marked for deferred disposal and leave the window with no selectable tab.
-    this._deferredCloseTabIds.delete(tabId)
-    this._deferredUnloadTabIds.delete(tabId)
     return true
   }
 
@@ -1288,7 +1300,42 @@ export class TabManager {
       return tab.previewCapturePromise
     }
 
-    tab.previewCapturePromise = (async () => {
+    tab.previewCapturePromise = this._captureTabPreviewSerialized(tab)
+
+    try {
+      return await tab.previewCapturePromise
+    } finally {
+      tab.previewCapturePromise = null
+    }
+  }
+
+  /**
+   * Runs a single preview capture, serialized against every other capture in
+   * this window via {@link _previewCaptureLock}. Only the lock owner toggles
+   * capture mode, and presentation is revalidated across every async hop so a
+   * screenshot of a different tab is never persisted as this tab's preview.
+   * @param {TabInfo} tab
+   * @returns {Promise<string | null>}
+   */
+  async _captureTabPreviewSerialized(tab) {
+    const previousCapture = this._previewCaptureLock
+    /** @type {() => void} */
+    let releaseLock = () => {}
+    this._previewCaptureLock = new Promise(resolve => {
+      releaseLock = resolve
+    })
+    await previousCapture.catch(() => {})
+
+    try {
+      // Presentation and window state may have changed while waiting for the lock.
+      if (
+        tab.id !== this.presentedTabId ||
+        this.browserWindow.webContents.isDestroyed() ||
+        this._getTabLoadingState(tab)
+      ) {
+        return await this._getCachedTabPreviewDataUrl(tab)
+      }
+
       try {
         await this._setTabPreviewCaptureMode(true)
         // Entering capture mode awaits an IPC round-trip, during which the main
@@ -1299,6 +1346,11 @@ export class TabManager {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         const image = await this.browserWindow.webContents.capturePage()
+        // capturePage awaits another round-trip; the presented tab may have
+        // changed again. Never persist a screenshot captured for a stale tab.
+        if (tab.id !== this.presentedTabId) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
         if (image.isEmpty()) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
@@ -1330,12 +1382,8 @@ export class TabManager {
       } finally {
         await this._setTabPreviewCaptureMode(false)
       }
-    })()
-
-    try {
-      return await tab.previewCapturePromise
     } finally {
-      tab.previewCapturePromise = null
+      releaseLock()
     }
   }
 
@@ -1895,6 +1943,26 @@ function normalizeRoutePath(route) {
  * @param {object | undefined | null} query
  * @returns {Record<string, string>}
  */
+/**
+ * Convert URLSearchParams into a plain query object, preserving repeated keys as
+ * arrays while keeping single occurrences as scalars.
+ * @param {URLSearchParams} searchParams
+ * @returns {Record<string, string | string[]>}
+ */
+function searchParamsToQuery(searchParams) {
+  /** @type {Record<string, string | string[]>} */
+  const query = {}
+  for (const [key, value] of searchParams) {
+    if (key in query) {
+      const existing = query[key]
+      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+    } else {
+      query[key] = value
+    }
+  }
+  return query
+}
+
 function normalizeQuery(query) {
   if (!query || typeof query !== 'object') {
     return {}

@@ -66,7 +66,7 @@ export class TabNavigationService {
     }
 
     this.store.commit('setTabTransition', { revision, tabId })
-    const targetTab = this.store.getters.getTabById(tabId)
+    let targetTab = this.store.getters.getTabById(tabId)
     if (!targetTab) {
       return false
     }
@@ -100,6 +100,16 @@ export class TabNavigationService {
         return false
       }
     }
+
+    // The tab's route can change while we await mounting and the outgoing preview
+    // capture (a same-tab navigation keeps activeTabId/selectionRevision, so
+    // isTransitionStale won't catch it). Re-read the snapshot so projectRoute
+    // projects the current route rather than the one captured before waiting.
+    const refreshedTargetTab = this.store.getters.getTabById(tabId)
+    if (!refreshedTargetTab) {
+      return false
+    }
+    targetTab = refreshedTargetTab
 
     await this.projectRoute(targetTab.route)
     if (this.isTransitionStale(tabId, revision, requestId)) {
@@ -188,9 +198,11 @@ export class TabNavigationService {
     }
 
     this.saveScroll(tabId)
-    const history = tab.history.map(cloneHistoryEntry)
-    const targetEntry = history[historyIndex]
-    await this.navigate(tabId, targetEntry.route, 'history', { history, historyIndex })
+    const targetEntry = tab.history[historyIndex]
+    // Pass the offset, not a snapshot: an earlier queued push/replace may change
+    // the live history before this navigation runs, so _performNavigate re-derives
+    // the target from the live history inside the queue.
+    await this.navigate(tabId, targetEntry.route, 'history', { offset })
   }
 
   back(tabId) {
@@ -226,6 +238,18 @@ export class TabNavigationService {
       return
     }
 
+    // Re-derive history navigation from the live tab inside the queue: the
+    // snapshot go() captured may be stale if an earlier queued push/replace
+    // already changed the history and index.
+    let historyTargetIndex
+    if (mode === 'history') {
+      historyTargetIndex = tab.historyIndex + historyState.offset
+      if (historyTargetIndex < 0 || historyTargetIndex >= tab.history.length) {
+        return
+      }
+      location = tab.history[historyTargetIndex].route
+    }
+
     const from = this.resolve(tab.route)
     const to = this.resolve(location, from)
     const route = serializeResolvedRoute(to)
@@ -254,8 +278,8 @@ export class TabNavigationService {
       let history
       let historyIndex
       if (mode === 'history') {
-        history = historyState.history
-        historyIndex = historyState.historyIndex
+        history = tab.history.map(cloneHistoryEntry)
+        historyIndex = historyTargetIndex
       } else if (mode === 'replace') {
         history = tab.history.map(cloneHistoryEntry)
         historyIndex = tab.historyIndex

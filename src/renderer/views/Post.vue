@@ -63,8 +63,6 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
-watch(() => route.params.id, loadPost, { immediate: true })
-
 async function loadPost() {
   id.value = route.params.id
   authorId.value = route.query.authorId
@@ -138,15 +136,8 @@ async function loadDataInvidiousAsync() {
   }
 }
 
-watch(() => route.params.id, async () => {
-  // react to route changes...
-  isLoading.value = true
-  id.value = route.params.id
-  authorId.value = route.query.authorId
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
-    await loadDataInvidiousAsync()
-  } else {
-    await loadDataLocalAsync()
-  }
-})
+// Single trigger for the initial load and any subsequent route id change.
+// loadPost resets the route-derived state (id, authorId, post, isLoading)
+// before loading either backend.
+watch(() => route.params.id, loadPost, { immediate: true })
 </script>

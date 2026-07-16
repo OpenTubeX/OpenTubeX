@@ -175,7 +175,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
+import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -980,28 +980,53 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 })
 
+// Cache the playlist only when transitioning to one of its videos, so returning
+// from the watch page can reuse it without a refetch.
+function cachePlaylistForWatchTransition(to) {
+  if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
+    store.commit('setCachedPlaylist', {
+      tabId: playlistCacheTabId,
+      value: {
+        id: playlistId.value,
+        title: playlistTitle.value,
+        channelName: channelName.value,
+        channelId: channelId.value,
+        items: sortedPlaylistItems.value,
+        continuationData: continuationData.value
+          ? extractLocalCacheablePlaylistContinuation(continuationData.value)
+          : null,
+      }
+    })
+  }
+}
+
+// A query-only router.replace (e.g. updating the search query) keeps us on this
+// same playlist route and must not flush pending deletions before the undo
+// window elapses.
+function isDepartureFromThisPlaylist(to) {
+  return to.path !== `/playlist/${playlistId.value}`
+}
+
 useTabLifecycle({
   beforeNavigate: ({ to }) => {
-    if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
-      store.commit('setCachedPlaylist', {
-        tabId: playlistCacheTabId,
-        value: {
-          id: playlistId.value,
-          title: playlistTitle.value,
-          channelName: channelName.value,
-          channelId: channelId.value,
-          items: sortedPlaylistItems.value,
-          continuationData: continuationData.value
-            ? extractLocalCacheablePlaylistContinuation(continuationData.value)
-            : null,
-        }
-      })
-    }
+    cachePlaylistForWatchTransition(to)
 
-    removeToBeDeletedVideosSometimes()
+    if (isDepartureFromThisPlaylist(to)) {
+      removeToBeDeletedVideosSometimes()
+    }
   },
   beforeDispose: removeToBeDeletedVideosSometimes
 })
+
+// Fallback for browser navigation (web build) where no logical tab context
+// exists, so useTabLifecycle is a no-op. vue-router only runs leave guards on
+// actual route-record departures, so query-only replaces are already excluded.
+if (!tabId) {
+  onBeforeRouteLeave((to) => {
+    cachePlaylistForWatchTransition(to)
+    removeToBeDeletedVideosSometimes()
+  })
+}
 </script>
 
 <style scoped src="./Playlist.scss" lang="scss" />

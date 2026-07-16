@@ -446,8 +446,16 @@ export default defineComponent({
   },
   beforeUnmount: function () {
     this.deactivateWatchRuntime()
+    // When a logical-tab lifecycle is registered, its beforeDispose hook drives
+    // cleanupWatchRuntime before this component unmounts. Without one (e.g. the
+    // web build), beforeDispose never fires, so run the same teardown here so the
+    // beforeunload handlers, watch progress, and player are still disposed.
+    const lifecycleHandledDisposal = this.removeTabLifecycle != null
     this.removeTabLifecycle?.()
     this.removeTabLifecycle = null
+    if (!lifecycleHandledDisposal) {
+      this.cleanupWatchRuntime()
+    }
   },
   methods: {
     activateWatchRuntime() {

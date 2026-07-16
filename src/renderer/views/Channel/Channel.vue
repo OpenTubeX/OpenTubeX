@@ -697,6 +697,12 @@ async function getChannelLocal() {
   try {
     await ensureChannelInstance()
 
+    // Bail out if the channel changed while we were resolving this instance, so a
+    // delayed response can't update the tab title (including the age-gate branch).
+    if (expectedId !== id.value) {
+      return
+    }
+
     let channelName_
     let channelThumbnailUrl
 
@@ -722,9 +728,6 @@ async function getChannelLocal() {
     }
 
     errorMessage.value = ''
-    if (expectedId !== id.value) {
-      return
-    }
 
     const parsedHeader = parseLocalChannelHeader(channelInstance)
 

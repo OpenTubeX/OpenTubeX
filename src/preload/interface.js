@@ -88,13 +88,15 @@ export default {
   // Allows programmatic toggling of picture-in-picture mode without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
   requestPiP: (tabId) => {
-    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, tabId).catch()
+    // Fire-and-forget: swallow rejection so it never surfaces as an unhandled rejection.
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, tabId).catch(() => {})
   },
 
   // Allows programmatic toggling of fullscreen without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
   requestFullscreen: (tabId) => {
-    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_FULLSCREEN, tabId).catch()
+    // Fire-and-forget: swallow rejection so it never surfaces as an unhandled rejection.
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_FULLSCREEN, tabId).catch(() => {})
   },
 
   /**
@@ -312,18 +314,20 @@ export default {
 
     /**
      * Publish subscription refresh progress to every renderer.
+     * @param {string} tabId
      * @param {number} percentage
      */
-    setProgress: (percentage) => {
-      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, percentage)
+    setProgress: (tabId, percentage) => {
+      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, tabId, percentage)
     },
 
     /**
      * Release ownership of the subscription auto refresh.
+     * @param {string} tabId
      * @returns {Promise<void>}
      */
-    release: () => {
-      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE)
+    release: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, tabId)
     },
 
     /**

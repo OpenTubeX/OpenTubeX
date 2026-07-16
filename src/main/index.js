@@ -98,7 +98,7 @@ function runApp() {
   const closeConfirmedWindowIds = new Set()
   let quitPromptInProgress = null
   let isQuitConfirmed = false
-  /** @type {import('electron').WebContents | null} */
+  /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
   let subscriptionAutoRefreshOwner = null
   let subscriptionAutoRefreshProgress = 0
 
@@ -2054,15 +2054,15 @@ function runApp() {
       return false
     }
 
-    if (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.isDestroyed()) {
+    if (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.webContents.isDestroyed()) {
       return false
     }
 
-    subscriptionAutoRefreshOwner = event.sender
-    subscriptionAutoRefreshProgress = 0
     const owner = event.sender
+    subscriptionAutoRefreshOwner = { webContents: owner, tabId }
+    subscriptionAutoRefreshProgress = 0
     owner.once('destroyed', () => {
-      if (subscriptionAutoRefreshOwner?.id === owner.id) {
+      if (subscriptionAutoRefreshOwner?.webContents.id === owner.id) {
         subscriptionAutoRefreshOwner = null
         subscriptionAutoRefreshProgress = 0
         broadcastSubscriptionAutoRefreshState()
@@ -2078,14 +2078,15 @@ function runApp() {
     }
 
     return {
-      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed(),
+      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
       percentage: subscriptionAutoRefreshProgress
     }
   })
 
-  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, (event, percentage) => {
+  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, (event, tabId, percentage) => {
     if (
-      subscriptionAutoRefreshOwner?.id !== event.sender.id ||
+      subscriptionAutoRefreshOwner?.webContents.id !== event.sender.id ||
+      subscriptionAutoRefreshOwner?.tabId !== tabId ||
       !Number.isFinite(percentage)
     ) {
       return
@@ -2095,8 +2096,11 @@ function runApp() {
     broadcastSubscriptionAutoRefreshState()
   })
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event) => {
-    if (subscriptionAutoRefreshOwner?.id === event.sender.id) {
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event, tabId) => {
+    if (
+      subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
+      subscriptionAutoRefreshOwner?.tabId === tabId
+    ) {
       subscriptionAutoRefreshOwner = null
       subscriptionAutoRefreshProgress = 0
       broadcastSubscriptionAutoRefreshState()
@@ -2105,7 +2109,7 @@ function runApp() {
 
   function broadcastSubscriptionAutoRefreshState() {
     const state = {
-      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed(),
+      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
       percentage: subscriptionAutoRefreshProgress
     }
 
@@ -3355,6 +3359,16 @@ function runApp() {
 
   app.on('web-contents-created', (_, webContents) => {
     contextMenu({ ...contextMenuOptions, window: webContents })
+
+    // When a main-frame document starts loading, the previous renderer is gone.
+    // Drop its readiness entry so sendOpenUrlToWebContents queues messages until
+    // the new renderer signals APP_READY again, instead of delivering to a
+    // renderer that has not registered its OPEN_URL listener yet.
+    webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
+      if (isMainFrame && !isInPlace) {
+        openUrlReadyWebContentsIds.delete(webContents.id)
+      }
+    })
 
     webContents.once('destroyed', () => {
       pendingOpenUrlsByWebContentsId.delete(webContents.id)

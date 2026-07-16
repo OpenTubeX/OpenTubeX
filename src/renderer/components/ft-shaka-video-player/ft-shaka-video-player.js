@@ -442,6 +442,9 @@ export default defineComponent({
     watch(isActiveTab, (active) => {
       if (active) {
         nextTick(applyPendingPresentationModes)
+        // An already-scrolled tab that was inactive never got to reevaluate its
+        // scroll position, so restore the mini-player state now that it is active.
+        updateScrollMiniPlayer()
       } else {
         handleTemporaryPlaybackRateFocusLoss()
         if (scrollMiniPlayerActive.value) {
@@ -5731,6 +5734,10 @@ export default defineComponent({
         emit('error', error)
 
         tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
+
+        if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+          window.ftElectron.tabs.setPlaybackState('none', tabId)
+        }
       }
     }
 
