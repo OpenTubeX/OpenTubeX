@@ -376,8 +376,10 @@ watch(useWatchSideNavOverlay, (enabled) => {
     sideNavOpenBeforeWatchOverlay = isSideNavOpen.value
     closeSideNav()
   } else if (sideNavOpenBeforeWatchOverlay !== null) {
-    cancelWatchSideNavTransitionReset()
-    watchSideNavTransitionDisabled.value = false
+    // Leaving the overlay brings the sidebar back into normal flow and may
+    // reopen it. Suppress its inline-size transition for the reflow so the
+    // content snaps to its final position instead of sliding in from the right.
+    disableWatchSideNavTransitionForNextFrame()
 
     if (isSideNavOpen.value !== sideNavOpenBeforeWatchOverlay) {
       store.commit('toggleSideNav')

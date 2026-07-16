@@ -91,6 +91,14 @@ export class TabNavigationService {
     const outgoingTabId = this.store.getters.getPresentedTabId
     if (outgoingTabId && outgoingTabId !== tabId) {
       this.saveScroll(outgoingTabId)
+      // The single renderer only paints the presented tab, so a backgrounded tab
+      // (display:none) can't be captured on demand. Snapshot the outgoing tab now,
+      // while it is still the painted/presented one, so its switcher preview stays
+      // fresh. Main persists the result; a failure just keeps the previous cache.
+      await this.captureLeavingTabPreview(outgoingTabId)
+      if (this.isTransitionStale(tabId, revision, requestId)) {
+        return false
+      }
     }
 
     await this.projectRoute(targetTab.route)
@@ -117,6 +125,18 @@ export class TabNavigationService {
 
     window.ftElectron?.tabs?.presented?.(tabId, revision)
     return true
+  }
+
+  async captureLeavingTabPreview(tabId) {
+    if (typeof window.ftElectron?.tabs?.capturePreview !== 'function') {
+      return
+    }
+
+    try {
+      await window.ftElectron.tabs.capturePreview(tabId)
+    } catch {
+      // A failed snapshot just leaves the previously cached preview in place.
+    }
   }
 
   isTransitionStale(tabId, revision, requestId) {
