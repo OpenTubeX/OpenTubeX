@@ -19,6 +19,8 @@ const IpcChannels = {
   OPEN_URL: 'open-url',
   CHANGE_VIEW: 'change-view',
   SHOW_TOAST: 'show-toast',
+  SUBSCRIPTION_AUTO_REFRESH_ACQUIRE: 'subscription-auto-refresh-acquire',
+  SUBSCRIPTION_AUTO_REFRESH_RELEASE: 'subscription-auto-refresh-release',
 
   // Tab management
   TABS_GET_STATE: 'tabs-get-state',

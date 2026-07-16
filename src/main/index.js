@@ -98,6 +98,8 @@ function runApp() {
   const closeConfirmedWindowIds = new Set()
   let quitPromptInProgress = null
   let isQuitConfirmed = false
+  /** @type {import('electron').WebContents | null} */
+  let subscriptionAutoRefreshOwner = null
 
   /**
    * @param {string} url
@@ -2048,6 +2050,33 @@ function runApp() {
       } else if (isOpenTubeXUrl(window.webContents.getURL())) {
         window.webContents.send(IpcChannels.SHOW_TOAST, message, time)
       }
+    }
+  })
+
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event) => {
+    const manager = TabManager.getFromWebContents(event.sender)
+    const tabId = TabManager.getTabIdFromWebContents(event.sender)
+
+    if (
+      !manager ||
+      !tabId ||
+      manager.activeTabId !== tabId ||
+      !isOpenTubeXUrl(event.senderFrame.url)
+    ) {
+      return false
+    }
+
+    if (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.isDestroyed()) {
+      return false
+    }
+
+    subscriptionAutoRefreshOwner = event.sender
+    return true
+  })
+
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event) => {
+    if (subscriptionAutoRefreshOwner?.id === event.sender.id) {
+      subscriptionAutoRefreshOwner = null
     }
   })
 

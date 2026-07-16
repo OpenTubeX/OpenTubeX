@@ -463,10 +463,12 @@ const subscriptionAutoRefreshTimers = {
 }
 const initializedSubscriptionAutoRefreshTimers = new Set()
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
+const SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL = 1000
 const SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let refreshOverdueSubscriptionFeedsPromise = null
+let removeSubscriptionAutoRefreshActiveChangedListener = null
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
 
@@ -539,6 +541,13 @@ onMounted(async () => {
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
+  if (process.env.IS_ELECTRON) {
+    removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
+      if (isActive) {
+        refreshOverdueSubscriptionFeeds()
+      }
+    })
+  }
 })
 
 onBeforeUnmount(() => {
@@ -553,6 +562,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('auxclick', handleAuxClick)
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
+  removeSubscriptionAutoRefreshActiveChangedListener?.()
 })
 
 watch(historyRetentionDays, scheduleHistoryCleanup)
@@ -601,8 +611,9 @@ watch([
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {number} [scheduledTimestamp]
  */
-function scheduleSubscriptionTabAutoRefresh(tab) {
+function scheduleSubscriptionTabAutoRefresh(tab, scheduledTimestamp) {
   clearSubscriptionTabAutoRefreshTimer(tab)
 
   const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
@@ -621,9 +632,11 @@ function scheduleSubscriptionTabAutoRefresh(tab) {
   }
 
   const now = Date.now()
-  const storedTimestamp = initializedSubscriptionAutoRefreshTimers.has(tab)
-    ? null
-    : getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
+  const storedTimestamp = scheduledTimestamp ?? (
+    initializedSubscriptionAutoRefreshTimers.has(tab)
+      ? null
+      : getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
+  )
   const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
 
   initializedSubscriptionAutoRefreshTimers.add(tab)
@@ -638,8 +651,10 @@ function scheduleSubscriptionTabAutoRefresh(tab) {
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
 async function refreshSubscriptionFeedAutomatically(tab) {
-  if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
-    scheduleSubscriptionTabAutoRefresh(tab)
+  const now = Date.now()
+  const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
+  if (storedTimestamp !== null && storedTimestamp > now) {
+    scheduleSubscriptionTabAutoRefresh(tab, storedTimestamp)
     return
   }
 
@@ -648,12 +663,45 @@ async function refreshSubscriptionFeedAutomatically(tab) {
     return
   }
 
-  await getSubscriptionTabRefreshHandler(tab)({
-    t,
-    showStartToast: true
-  })
+  let acquiredRefreshLock = false
+  if (process.env.IS_ELECTRON) {
+    if (!await window.ftElectron.tabs.isActive()) {
+      return
+    }
 
-  scheduleSubscriptionTabAutoRefresh(tab)
+    acquiredRefreshLock = await window.ftElectron.subscriptionAutoRefresh.acquire()
+    if (!acquiredRefreshLock) {
+      scheduleSubscriptionTabAutoRefreshLockRetry(tab)
+      return
+    }
+  }
+
+  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  setSubscriptionTabNextAutoRefreshTimestamp(tab, Date.now() + interval)
+
+  try {
+    await getSubscriptionTabRefreshHandler(tab)({
+      t,
+      showStartToast: true
+    })
+  } finally {
+    if (acquiredRefreshLock) {
+      await window.ftElectron.subscriptionAutoRefresh.release()
+    }
+
+    scheduleSubscriptionTabAutoRefresh(tab)
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function scheduleSubscriptionTabAutoRefreshLockRetry(tab) {
+  clearSubscriptionTabAutoRefreshTimer(tab)
+  subscriptionAutoRefreshTimers[tab] = setTimeout(
+    () => refreshSubscriptionFeedAutomatically(tab),
+    SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL
+  )
 }
 
 function refreshOverdueSubscriptionFeeds() {

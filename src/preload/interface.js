@@ -301,6 +301,24 @@ export default {
     ipcRenderer.send(IpcChannels.SHOW_TOAST, message, time)
   },
 
+  subscriptionAutoRefresh: {
+    /**
+     * Atomically claim ownership of the subscription auto refresh.
+     * @returns {Promise<boolean>}
+     */
+    acquire: () => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE)
+    },
+
+    /**
+     * Release ownership of the subscription auto refresh.
+     * @returns {Promise<void>}
+     */
+    release: () => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE)
+    }
+  },
+
   /**
    * @param {(message: string, time: number | null) => void} handler
    * @returns {() => void}
