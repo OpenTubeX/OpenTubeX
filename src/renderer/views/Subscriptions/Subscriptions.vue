@@ -148,7 +148,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
@@ -199,13 +199,37 @@ const subscriptionFeedRefreshInProgress = computed(() => {
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
 const currentTab = ref('videos')
 
-watch(currentTab, (value) => {
+const tabScrollPositions = {
+  videos: 0,
+  shorts: 0,
+  live: 0,
+  community: 0
+}
+
+let isMounted = false
+
+onMounted(() => {
+  isMounted = true
+})
+
+watch(currentTab, async (value, previousValue) => {
   if (value !== null) {
   // Save last used tab, restore when view mounted again
     sessionStorage.setItem('Subscriptions/currentTab', value)
   } else {
     sessionStorage.removeItem('Subscriptions/currentTab')
   }
+
+  if (!isMounted) {
+    return
+  }
+
+  if (previousValue !== null) {
+    tabScrollPositions[previousValue] = window.scrollY
+  }
+
+  await nextTick()
+  window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
 })
 
 const visibleTabs = computed(() => {
