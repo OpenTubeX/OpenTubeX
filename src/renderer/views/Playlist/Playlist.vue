@@ -208,10 +208,14 @@ import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../help
 import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
 import { getThumbnailSizeStyles } from '../../constants/thumbnailSize'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
+import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { tabId } = useTabContext()
+const playlistCacheTabId = tabId ?? 'web'
+const setTabTitle = useTabTitle()
 
 const isLoading = ref(true)
 const playlistTitle = ref('')
@@ -920,7 +924,7 @@ function updatePageTitle() {
     }
   }
 
-  store.commit('setAppTitle', titleText)
+  setTabTitle(titleText)
 }
 
 /**
@@ -976,22 +980,53 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-onBeforeRouteLeave((to) => {
+// Cache the playlist only when transitioning to one of its videos, so returning
+// from the watch page can reuse it without a refetch.
+function cachePlaylistForWatchTransition(to) {
   if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
     store.commit('setCachedPlaylist', {
-      id: playlistId.value,
-      title: playlistTitle.value,
-      channelName: channelName.value,
-      channelId: channelId.value,
-      items: sortedPlaylistItems.value,
-      continuationData: continuationData.value
-        ? extractLocalCacheablePlaylistContinuation(continuationData.value)
-        : null,
+      tabId: playlistCacheTabId,
+      value: {
+        id: playlistId.value,
+        title: playlistTitle.value,
+        channelName: channelName.value,
+        channelId: channelId.value,
+        items: sortedPlaylistItems.value,
+        continuationData: continuationData.value
+          ? extractLocalCacheablePlaylistContinuation(continuationData.value)
+          : null,
+      }
     })
   }
+}
 
-  removeToBeDeletedVideosSometimes()
+// A query-only router.replace (e.g. updating the search query) keeps us on this
+// same playlist route and must not flush pending deletions before the undo
+// window elapses.
+function isDepartureFromThisPlaylist(to) {
+  return to.path !== `/playlist/${playlistId.value}`
+}
+
+useTabLifecycle({
+  beforeNavigate: ({ to }) => {
+    cachePlaylistForWatchTransition(to)
+
+    if (isDepartureFromThisPlaylist(to)) {
+      removeToBeDeletedVideosSometimes()
+    }
+  },
+  beforeDispose: removeToBeDeletedVideosSometimes
 })
+
+// Fallback for browser navigation (web build) where no logical tab context
+// exists, so useTabLifecycle is a no-op. vue-router only runs leave guards on
+// actual route-record departures, so query-only replaces are already excluded.
+if (!tabId) {
+  onBeforeRouteLeave((to) => {
+    cachePlaylistForWatchTransition(to)
+    removeToBeDeletedVideosSometimes()
+  })
+}
 </script>
 
 <style scoped src="./Playlist.scss" lang="scss" />

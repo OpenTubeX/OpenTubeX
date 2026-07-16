@@ -9,38 +9,15 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
   document.body.dataset.systemTheme = shouldUseDarkColors ? 'dark' : 'light'
 })
 
-// Force update the window title whenever the page title changes
-// as Electron doesn't do it when the back button is pressed, probably a bug.
-// It doesn't even fire the `page-title-updated` in the main process.
-
-function getTitleForCurrentRoute(title) {
-  const trimmedTitle = title.trim()
-  if (
-    window.location.hash.startsWith('#/watch/') &&
-    (trimmedTitle.length === 0 || trimmedTitle === 'OpenTubeX')
-  ) {
-    return window.location.hash.slice(1)
-  }
-
-  return title
-}
-
-const titleMutationObserver = new MutationObserver((mutations) => {
-  const title = mutations[0].addedNodes[0].textContent
-  ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, getTitleForCurrentRoute(title))
-})
-document.addEventListener('DOMContentLoaded', () => {
-  titleMutationObserver.observe(document.querySelector('title'), { childList: true })
-}, { once: true })
-
 let currentUpdateSearchInputTextListener
 
 export default {
   /**
    * @param {string} title
+   * @param {string} tabId
    */
-  setWindowTitle: (title) => {
-    ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, getTitleForCurrentRoute(title))
+  setWindowTitle: (title, tabId) => {
+    ipcRenderer.send(IpcChannels.SET_WINDOW_TITLE, { title, tabId })
   },
 
   /**
@@ -110,14 +87,16 @@ export default {
 
   // Allows programmatic toggling of picture-in-picture mode without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
-  requestPiP: () => {
-    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE).catch()
+  requestPiP: (tabId) => {
+    // Fire-and-forget: swallow rejection so it never surfaces as an unhandled rejection.
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, tabId).catch(() => {})
   },
 
   // Allows programmatic toggling of fullscreen without accompanying user interaction.
   // See: https://developer.mozilla.org/en-US/docs/Web/Security/User_activation#transient_activation
-  requestFullscreen: () => {
-    webFrame.executeJavaScript('document.querySelector("video.player")?.ui.getControls().toggleFullScreen()', true).catch()
+  requestFullscreen: (tabId) => {
+    // Fire-and-forget: swallow rejection so it never surfaces as an unhandled rejection.
+    ipcRenderer.invoke(IpcChannels.TABS_REQUEST_FULLSCREEN, tabId).catch(() => {})
   },
 
   /**
@@ -275,22 +254,36 @@ export default {
   },
 
   /**
-   * @param {(route: string) => void} handler
+   * @param {(route: string, tabId?: string) => void} handler
+   * @returns {() => void}
    */
   handleChangeView: (handler) => {
-    ipcRenderer.on(IpcChannels.CHANGE_VIEW, (_, route) => {
-      handler(route)
-    })
+    const listener = (_event, payload) => {
+      if (typeof payload === 'string') {
+        handler(payload)
+      } else {
+        handler(payload?.route, payload?.tabId)
+      }
+    }
+    ipcRenderer.on(IpcChannels.CHANGE_VIEW, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.CHANGE_VIEW, listener)
   },
 
   /**
-   * @param {(url: string) => void} handler
+   * @param {(url: string, tabId?: string) => void} handler
+   * @returns {() => void}
    */
   handleOpenUrl: (handler) => {
-    ipcRenderer.on(IpcChannels.OPEN_URL, (_, url) => {
-      handler(url)
-    })
+    const listener = (_event, payload) => {
+      if (typeof payload === 'string') {
+        handler(payload)
+      } else {
+        handler(payload?.url, payload?.tabId)
+      }
+    }
+    ipcRenderer.on(IpcChannels.OPEN_URL, listener)
     ipcRenderer.send(IpcChannels.APP_READY)
+    return () => ipcRenderer.removeListener(IpcChannels.OPEN_URL, listener)
   },
 
   /**
@@ -304,10 +297,11 @@ export default {
   subscriptionAutoRefresh: {
     /**
      * Atomically claim ownership of the subscription auto refresh.
+     * @param {string} tabId
      * @returns {Promise<boolean>}
      */
-    acquire: () => {
-      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE)
+    acquire: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, tabId)
     },
 
     /**
@@ -320,18 +314,20 @@ export default {
 
     /**
      * Publish subscription refresh progress to every renderer.
+     * @param {string} tabId
      * @param {number} percentage
      */
-    setProgress: (percentage) => {
-      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, percentage)
+    setProgress: (tabId, percentage) => {
+      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS, tabId, percentage)
     },
 
     /**
      * Release ownership of the subscription auto refresh.
+     * @param {string} tabId
      * @returns {Promise<void>}
      */
-    release: () => {
-      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE)
+    release: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, tabId)
     },
 
     /**
@@ -450,6 +446,10 @@ export default {
 
   // Tab management API
   tabs: {
+    rendererReady: () => {
+      ipcRenderer.send(IpcChannels.TABS_RENDERER_READY)
+    },
+
     /**
      * Get the current tab state
      * @returns {Promise<{tabs: Array<{id: string, url: string, title: string, isActive: boolean}>, activeTabId: string|null}>}
@@ -482,11 +482,12 @@ export default {
     },
 
     /**
-     * Check whether this renderer owns the active tab.
+     * Check whether a logical tab is selected in this window.
+     * @param {string} [tabId]
      * @returns {Promise<boolean>}
      */
-    isActive: () => {
-      return ipcRenderer.invoke(IpcChannels.TABS_IS_ACTIVE)
+    isActive: (tabId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_IS_ACTIVE, tabId)
     },
 
     /**
@@ -544,11 +545,10 @@ export default {
     },
 
     /**
-     * Ask the main process to refresh this tab's cached thumbnail preview.
-     * Useful when renderer-only UI changes without navigation/loading events.
-     * @param {{ delayMs?: number }} [options]
+     * Ask the main process to refresh a tab's cached thumbnail preview.
+     * @param {{ tabId: string, delayMs?: number }} options
      */
-    requestPreviewRefresh: (options = {}) => {
+    requestPreviewRefresh: (options) => {
       ipcRenderer.send(IpcChannels.TABS_REQUEST_PREVIEW_REFRESH, options)
     },
 
@@ -561,34 +561,69 @@ export default {
     },
 
     /**
-     * Reload the active tab
+     * Complete preparation and logically reload one tab.
+     * @param {string} tabId
      */
-    reload: () => {
-      ipcRenderer.send(IpcChannels.TABS_RELOAD)
+    reload: (tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_RELOAD, tabId)
     },
 
     /**
-     * Listen for reload request from main (e.g. menu "Reload Tab")
-     * @param {() => void} handler
+     * Listen for reload requests from main (e.g. menu "Reload Tab").
+     * @param {(tabId: string) => void} handler
+     * @returns {() => void}
      */
     onRequestReload: (handler) => {
-      ipcRenderer.on(IpcChannels.TABS_REQUEST_RELOAD, handler)
+      const listener = (_event, tabId) => handler(tabId)
+      ipcRenderer.on(IpcChannels.TABS_REQUEST_RELOAD, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_REQUEST_RELOAD, listener)
     },
 
     /**
-     * Set playback state for the current tab (used to show play indicator)
-     * @param {'playing' | 'paused' | 'none'} state - The current playback state
+     * Set playback state for a logical tab.
+     * @param {'playing' | 'paused' | 'none'} state
+     * @param {string} tabId
      */
-    setPlaybackState: (state) => {
-      ipcRenderer.send(IpcChannels.TABS_SET_PLAYBACK_STATE, state)
+    setPlaybackState: (state, tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_PLAYBACK_STATE, state, tabId)
     },
 
     /**
-     * Set loading state for client-side tab navigation.
+     * Publish a logical tab title.
+     * @param {string} title
+     * @param {string} tabId
+     */
+    updateTitle: (title, tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_UPDATE_TITLE, title, tabId)
+    },
+
+    /**
+     * Set loading state for a logical tab.
      * @param {boolean} isLoading
+     * @param {string} tabId
      */
-    setLoading: (isLoading) => {
-      ipcRenderer.send(IpcChannels.TABS_SET_LOADING, isLoading === true)
+    setLoading: (isLoading, tabId) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_LOADING, isLoading === true, tabId)
+    },
+
+    /**
+     * Update the main-owned current URL for a logical tab.
+     * @param {{tabId: string, route: object, url?: string}} payload
+     */
+    updateRoute: (payload) => {
+      ipcRenderer.send(IpcChannels.TABS_UPDATE_ROUTE, payload)
+    },
+
+    mountReady: (tabId, mountRevision) => {
+      ipcRenderer.send(IpcChannels.TABS_MOUNT_READY, { tabId, mountRevision })
+    },
+
+    mountFailed: (tabId, mountRevision) => {
+      ipcRenderer.send(IpcChannels.TABS_MOUNT_FAILED, { tabId, mountRevision })
+    },
+
+    presented: (tabId, selectionRevision) => {
+      ipcRenderer.send(IpcChannels.TABS_PRESENTED, { tabId, selectionRevision })
     },
 
     /**
@@ -601,50 +636,62 @@ export default {
 
     /**
      * Track which tab-related surface the next context menu should target.
-     * @param {{ tabId: string | null, isTabBar: boolean }} payload
+     * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' }} payload
      */
     setContextMenuTab: (payload) => {
       ipcRenderer.send(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, payload)
     },
 
     /**
-     * Listen for tab state updates
+     * Listen for tab state updates.
      * @param {(state: {tabs: Array, activeTabId: string|null}) => void} handler
+     * @returns {() => void}
      */
     onStateUpdated: (handler) => {
-      ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, (_, state) => {
-        handler(state)
-      })
+      const listener = (_event, state) => handler(state)
+      ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_STATE_UPDATED, listener)
     },
 
     /**
-     * Listen for exit fullscreen notification (when tab becomes inactive)
-     * @param {() => void} handler
-     * @returns {() => void} Function to remove the listener
+     * Listen for exit fullscreen notification for a logical tab.
+     * @param {(tabId: string) => void} handler
+     * @param {string} [tabId]
+     * @returns {() => void}
      */
-    onExitFullscreen: (handler) => {
-      const listener = () => {
-        handler()
+    onExitFullscreen: (handler, tabId) => {
+      const listener = (_event, targetTabId) => {
+        if (tabId == null || targetTabId === tabId) {
+          handler(targetTabId)
+        }
       }
       ipcRenderer.on(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
-      return () => {
-        ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
-      }
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_EXIT_FULLSCREEN, listener)
     },
 
     /**
-     * Listen for active tab changes (notifies this tab when it becomes active or inactive)
-     * @param {(isActive: boolean) => void} handler
-     * @returns {() => void} Function to remove the listener
+     * Listen for selected-tab changes.
+     * @param {(isActive: boolean, activeTabId: string, revision: number) => void} handler
+     * @param {string} [tabId]
+     * @returns {() => void}
      */
-    onActiveChanged: (handler) => {
-      const listener = (_event, isActive) => {
-        handler(isActive)
+    onActiveChanged: (handler, tabId) => {
+      const listener = (_event, activeTabId, revision) => {
+        handler(tabId == null ? true : activeTabId === tabId, activeTabId, revision)
       }
       ipcRenderer.on(IpcChannels.TABS_ACTIVE_CHANGED, listener)
-      return () => {
-        ipcRenderer.removeListener(IpcChannels.TABS_ACTIVE_CHANGED, listener)
-      }
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_ACTIVE_CHANGED, listener)
+    },
+
+    /**
+     * Listen for native Back/Forward commands.
+     * @param {(payload: {tabId: string, offset: number}) => void} handler
+     * @returns {() => void}
+     */
+    onGoHistory: (handler) => {
+      const listener = (_event, payload) => handler(payload)
+      ipcRenderer.on(IpcChannels.TABS_GO_HISTORY, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_GO_HISTORY, listener)
     }
   }
 }

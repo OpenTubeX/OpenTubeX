@@ -127,7 +127,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -143,14 +143,21 @@ import { debounce, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath
 import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
 import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
+const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
 
 const showSearchContainer = ref(true)
-/** @type {import('vue').ShallowRef<string[]>} */
-const navigationHistoryDropdownOptions = shallowRef([])
+const logicalHistoryState = computed(() => {
+  const tabId = store.getters.getPresentedTabId
+  return store.getters.getTabHistoryState(tabId)
+})
+const navigationHistoryDropdownOptions = computed(() => {
+  return process.env.IS_ELECTRON ? logicalHistoryState.value.options : []
+})
 /** @type {import('vue').ShallowRef<string[]>} */
 const searchSuggestionsDataList = shallowRef([])
 const lastSuggestionQuery = ref('')
@@ -223,8 +230,16 @@ const forwardText = computed(() => {
  * @param {number} offset
  */
 function goToOffset(offset) {
-  // no point navigating to the current route
-  if (offset !== 0) {
+  if (offset === 0) {
+    return
+  }
+
+  if (process.env.IS_ELECTRON) {
+    const tabId = store.getters.getPresentedTabId
+    if (tabId) {
+      navigation.go(tabId, offset)
+    }
+  } else {
     router.go(offset)
   }
 }
@@ -233,22 +248,14 @@ function goToOffset(offset) {
  * @param {number} [offset]
  */
 function historyBack(offset) {
-  if (offset != null) {
-    goToOffset(offset)
-  } else {
-    router.back()
-  }
+  goToOffset(offset ?? -1)
 }
 
 /**
  * @param {number} [offset]
  */
 function historyForward(offset) {
-  if (offset != null) {
-    goToOffset(offset)
-  } else {
-    router.forward()
-  }
+  goToOffset(offset ?? 1)
 }
 
 const newWindowText = computed(() => {
@@ -326,55 +333,22 @@ const activeDataListProperties = computed(() => {
   return properties
 })
 
-const isArrowBackwardDisabled = ref(true)
-const isArrowForwardDisabled = ref(true)
-
-if (process.env.IS_ELECTRON || 'navigation' in window) {
-  watch(route, () => {
-    setNavigationHistoryDropdownOptions()
-
-    isArrowForwardDisabled.value = !window.navigation.canGoForward
-    isArrowBackwardDisabled.value = !window.navigation.canGoBack
-  }, { deep: true })
-} else {
-  // If the Navigation API isn't supported (Firefox and Safari)
-  // keep the back and forwards buttons always enabled
-  isArrowBackwardDisabled.value = false
-  isArrowForwardDisabled.value = false
-}
-
-let navigationHistoryDropdownActiveEntry = null
-let isLoadingNavigationHistory = false
-let pendingNavigationHistoryLabel = null
-
-async function setNavigationHistoryDropdownOptions() {
+const isArrowBackwardDisabled = computed(() => {
   if (process.env.IS_ELECTRON) {
-    isLoadingNavigationHistory = true
-    const dropdownOptions = await window.ftElectron.getNavigationHistory()
-
-    const activeEntry = dropdownOptions.find(option => option.active)
-
-    if (pendingNavigationHistoryLabel) {
-      activeEntry.label = pendingNavigationHistoryLabel
-    }
-
-    navigationHistoryDropdownOptions.value = dropdownOptions
-    navigationHistoryDropdownActiveEntry = activeEntry
-    isLoadingNavigationHistory = false
+    return !logicalHistoryState.value.canGoBack
   }
-}
 
-/** @type {import('vue').ComputedRef<string>} */
-const appTitle = computed(() => store.getters.getAppTitle)
+  // Reading the route makes this computed refresh after browser navigation.
+  const hasCurrentRoute = typeof route.fullPath === 'string'
+  return hasCurrentRoute && 'navigation' in window ? !window.navigation.canGoBack : false
+})
+const isArrowForwardDisabled = computed(() => {
+  if (process.env.IS_ELECTRON) {
+    return !logicalHistoryState.value.canGoForward
+  }
 
-watch(appTitle, (value) => {
-  nextTick(() => {
-    if (isLoadingNavigationHistory) {
-      pendingNavigationHistoryLabel = value
-    } else if (navigationHistoryDropdownActiveEntry) {
-      navigationHistoryDropdownActiveEntry.label = value
-    }
-  })
+  const hasCurrentRoute = typeof route.fullPath === 'string'
+  return hasCurrentRoute && 'navigation' in window ? !window.navigation.canGoForward : false
 })
 
 function toggleSideNav() {

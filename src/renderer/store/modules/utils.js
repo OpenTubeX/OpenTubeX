@@ -19,7 +19,7 @@ const state = {
     sports: null,
     podcasts: null
   },
-  cachedPlaylist: null,
+  cachedPlaylists: {},
   deArrowCache: {},
   showProgressBar: false,
   showAddToPlaylistPrompt: false,
@@ -84,8 +84,8 @@ const getters = {
     return state.trendingCache
   },
 
-  getCachedPlaylist(state) {
-    return state.cachedPlaylist
+  getCachedPlaylist: (state) => (tabId = 'web') => {
+    return state.cachedPlaylists[tabId] ?? null
   },
 
   getSearchSettings(state) {
@@ -736,8 +736,12 @@ const mutations = {
     state.trendingCache[page] = null
   },
 
-  setCachedPlaylist(state, value) {
-    state.cachedPlaylist = value
+  setCachedPlaylist(state, { tabId = 'web', value }) {
+    if (value == null) {
+      delete state.cachedPlaylists[tabId]
+    } else {
+      state.cachedPlaylists[tabId] = value
+    }
   },
 
   setSearchFilterValueChanged (state, value) {

@@ -595,7 +595,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, isTabBar: boolean }} payload
+ * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab(payload)
@@ -611,7 +611,10 @@ function handleContextMenuPointerDown(event) {
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
   const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({ tabId, isTabBar })
+  updateContextMenuTab({
+    tabId,
+    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : 'content'
+  })
 }
 
 /**
@@ -624,13 +627,15 @@ function handleContextMenuEvent(event) {
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
   const isTabBar = event.target.closest('.tabBar') != null
-  updateContextMenuTab({ tabId, isTabBar })
+  updateContextMenuTab({
+    tabId,
+    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : 'content'
+  })
 }
 
 // ===== Lifecycle =====
 onMounted(() => {
   if (isElectron) {
-    store.dispatch('initializeTabs')
     document.addEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.addEventListener('contextmenu', handleContextMenuEvent, true)
     removeActiveChangedListener = window.ftElectron.tabs.onActiveChanged(() => {
@@ -663,7 +668,7 @@ onUnmounted(() => {
   if (isElectron) {
     document.removeEventListener('pointerdown', handleContextMenuPointerDown, true)
     document.removeEventListener('contextmenu', handleContextMenuEvent, true)
-    updateContextMenuTab({ tabId: null, isTabBar: false })
+    updateContextMenuTab({ tabId: null, surface: 'content' })
     removeActiveChangedListener?.()
     removeActiveChangedListener = null
   }

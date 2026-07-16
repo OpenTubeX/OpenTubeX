@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import store from '../../../store/index'
 
@@ -8,17 +8,20 @@ import store from '../../../store/index'
  * @param {{
  *   getUi: () => import('shaka-player').ui.Overlay | null,
  *   props: { format: string },
- *   video: import('vue').Ref<HTMLVideoElement | null>
+ *   video: import('vue').Ref<HTMLVideoElement | null>,
+ *   tabId?: string | null,
+ *   isTabPresented?: import('vue').ComputedRef<boolean> | null
  * }} options
  */
-export function useAutoPictureInPicture({ getUi, props, video }) {
-  const isActiveTab = ref(!process.env.IS_ELECTRON)
+export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isTabPresented = null }) {
+  const isActiveTab = computed(() => {
+    return !process.env.IS_ELECTRON || isTabPresented?.value === true
+  })
   const autoPictureInPictureOnTabChange = computed(() => store.getters.getAutoPictureInPictureOnTabChange)
 
   let autoPipActive = false
-  let tabVisible = !document.hidden
-  /** @type {(() => void) | null} */
-  let activeTabChangedCleanup = null
+  let tabVisible = isActiveTab.value && !document.hidden
+  let stopActiveTabWatch = null
 
   function shouldAutoPipNow() {
     if (!autoPictureInPictureOnTabChange.value || props.format === 'audio') return false
@@ -31,7 +34,7 @@ export function useAutoPictureInPicture({ getUi, props, video }) {
 
   function triggerPipToggle() {
     if (process.env.IS_ELECTRON && window.ftElectron?.requestPiP) {
-      window.ftElectron.requestPiP()
+      window.ftElectron.requestPiP(tabId)
       return true
     }
 
@@ -70,37 +73,18 @@ export function useAutoPictureInPicture({ getUi, props, video }) {
     }
   }
 
-  function handleDocumentVisibilityChange() {
-    tabVisible = !document.hidden
+  function updateTabVisibility() {
+    tabVisible = isActiveTab.value && !document.hidden
     updateAutoPip()
   }
 
-  async function initializeActiveTab() {
-    if (!process.env.IS_ELECTRON || !window.ftElectron?.tabs?.isActive) return
-
-    try {
-      const active = await window.ftElectron.tabs.isActive()
-      isActiveTab.value = active
-      tabVisible = active
-    } catch (error) {
-      console.error('Failed to get active tab state for video autoplay:', error)
-    }
+  function initializeActiveTab() {
+    updateTabVisibility()
   }
 
   function setupAutoPictureInPicture() {
-    document.addEventListener('visibilitychange', handleDocumentVisibilityChange)
-
-    if (!process.env.IS_ELECTRON || !window.ftElectron?.tabs?.onActiveChanged) return
-
-    try {
-      activeTabChangedCleanup = window.ftElectron.tabs.onActiveChanged((active) => {
-        isActiveTab.value = active
-        tabVisible = active
-        updateAutoPip()
-      })
-    } catch (error) {
-      console.error('Failed to set up active tab listener for auto PiP:', error)
-    }
+    document.addEventListener('visibilitychange', updateTabVisibility)
+    stopActiveTabWatch = watch(isActiveTab, updateTabVisibility)
   }
 
   function resetAutoPictureInPictureOwnership() {
@@ -108,12 +92,9 @@ export function useAutoPictureInPicture({ getUi, props, video }) {
   }
 
   function teardownAutoPictureInPicture() {
-    document.removeEventListener('visibilitychange', handleDocumentVisibilityChange)
-
-    if (activeTabChangedCleanup) {
-      activeTabChangedCleanup()
-      activeTabChangedCleanup = null
-    }
+    document.removeEventListener('visibilitychange', updateTabVisibility)
+    stopActiveTabWatch?.()
+    stopActiveTabWatch = null
   }
 
   watch(autoPictureInPictureOnTabChange, updateAutoPip)

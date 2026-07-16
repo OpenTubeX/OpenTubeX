@@ -16,154 +16,160 @@ import Watch from '../views/Watch/Watch.vue'
 import Hashtag from '../views/Hashtag/Hashtag.vue'
 import Post from '../views/Post.vue'
 
+export const routes = [
+  {
+    path: '/',
+    name: 'default',
+    meta: {
+      title: 'Subscriptions',
+      hasResizableThumbnails: true
+    },
+    component: Subscriptions
+  },
+  {
+    path: '/subscriptions',
+    name: 'subscriptions',
+    meta: {
+      title: 'Subscriptions',
+      hasResizableThumbnails: true
+    },
+    component: Subscriptions
+  },
+  {
+    path: '/subscribedchannels',
+    name: 'subscribedChannels',
+    meta: {
+      title: 'Channels'
+    },
+    component: SubscribedChannels
+  },
+  ...(process.env.SUPPORTS_LOCAL_API
+    ? [{
+        path: '/trending',
+        name: 'trending',
+        meta: {
+          title: 'Trending',
+          hasResizableThumbnails: true
+        },
+        component: Trending
+      }]
+    : []),
+  {
+    path: '/popular',
+    name: 'popular',
+    meta: {
+      title: 'Most Popular',
+      hasResizableThumbnails: true
+    },
+    component: Popular
+  },
+  {
+    path: '/userplaylists',
+    name: 'userPlaylists',
+    meta: {
+      title: 'Your Playlists',
+      hasResizableThumbnails: true
+    },
+    component: UserPlaylists
+  },
+  {
+    path: '/history',
+    name: 'history',
+    meta: {
+      title: 'History',
+      hasResizableThumbnails: true
+    },
+    component: History
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    meta: {
+      title: 'Stats'
+    },
+    component: Stats
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    meta: {
+      title: 'Settings'
+    },
+    component: Settings
+  },
+  {
+    path: '/about',
+    name: 'about',
+    meta: {
+      title: 'About'
+    },
+    component: About
+  },
+  {
+    path: '/settings/profile',
+    name: 'profileSettings',
+    meta: {
+      title: 'Profile Settings'
+    },
+    component: ProfileSettings
+  },
+  {
+    path: '/search/:query',
+    meta: {
+      title: 'Search Results',
+      hasResizableThumbnails: true
+    },
+    component: SearchPage
+  },
+  {
+    path: '/playlist/:id',
+    meta: {
+      title: 'Playlist',
+      hasResizableThumbnails: true
+    },
+    component: Playlist
+  },
+  {
+    path: '/channel/:id/:currentTab?',
+    meta: {
+      title: 'Channel',
+      hasResizableThumbnails: true
+    },
+    component: Channel
+  },
+  {
+    path: '/watch/:id',
+    meta: {
+      title: 'Watch'
+    },
+    component: Watch
+  },
+  {
+    path: '/hashtag/:hashtag',
+    meta: {
+      title: 'Hashtag',
+      hasResizableThumbnails: true
+    },
+    component: Hashtag
+  },
+  {
+    path: '/post/:id',
+    meta: {
+      title: 'Post',
+    },
+    component: Post
+  }
+]
+
 const router = createRouter({
   history: createWebHashHistory(),
-  routes: [
-    {
-      path: '/',
-      name: 'default',
-      meta: {
-        title: 'Subscriptions',
-        hasResizableThumbnails: true
-      },
-      component: Subscriptions
-    },
-    {
-      path: '/subscriptions',
-      name: 'subscriptions',
-      meta: {
-        title: 'Subscriptions',
-        hasResizableThumbnails: true
-      },
-      component: Subscriptions
-    },
-    {
-      path: '/subscribedchannels',
-      name: 'subscribedChannels',
-      meta: {
-        title: 'Channels'
-      },
-      component: SubscribedChannels
-    },
-    ...(process.env.SUPPORTS_LOCAL_API
-      ? [{
-          path: '/trending',
-          name: 'trending',
-          meta: {
-            title: 'Trending',
-            hasResizableThumbnails: true
-          },
-          component: Trending
-        }]
-      : []),
-    {
-      path: '/popular',
-      name: 'popular',
-      meta: {
-        title: 'Most Popular',
-        hasResizableThumbnails: true
-      },
-      component: Popular
-    },
-    {
-      path: '/userplaylists',
-      name: 'userPlaylists',
-      meta: {
-        title: 'Your Playlists',
-        hasResizableThumbnails: true
-      },
-      component: UserPlaylists
-    },
-    {
-      path: '/history',
-      name: 'history',
-      meta: {
-        title: 'History',
-        hasResizableThumbnails: true
-      },
-      component: History
-    },
-    {
-      path: '/stats',
-      name: 'stats',
-      meta: {
-        title: 'Stats'
-      },
-      component: Stats
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      meta: {
-        title: 'Settings'
-      },
-      component: Settings
-    },
-    {
-      path: '/about',
-      name: 'about',
-      meta: {
-        title: 'About'
-      },
-      component: About
-    },
-    {
-      path: '/settings/profile',
-      name: 'profileSettings',
-      meta: {
-        title: 'Profile Settings'
-      },
-      component: ProfileSettings
-    },
-    {
-      path: '/search/:query',
-      meta: {
-        title: 'Search Results',
-        hasResizableThumbnails: true
-      },
-      component: SearchPage
-    },
-    {
-      path: '/playlist/:id',
-      meta: {
-        title: 'Playlist',
-        hasResizableThumbnails: true
-      },
-      component: Playlist
-    },
-    {
-      path: '/channel/:id/:currentTab?',
-      meta: {
-        title: 'Channel',
-        hasResizableThumbnails: true
-      },
-      component: Channel
-    },
-    {
-      path: '/watch/:id',
-      meta: {
-        title: 'Watch'
-      },
-      component: Watch
-    },
-    {
-      path: '/hashtag/:hashtag',
-      meta: {
-        title: 'Hashtag',
-        hasResizableThumbnails: true
-      },
-      component: Hashtag
-    },
-    {
-      path: '/post/:id',
-      meta: {
-        title: 'Post',
-      },
-      component: Post
-    }
-  ],
+  routes,
   scrollBehavior(to, from, savedPosition) {
-    return new Promise((resolve, reject) => {
+    if (process.env.IS_ELECTRON) {
+      return false
+    }
+
+    return new Promise((resolve) => {
       setTimeout(() => {
         if (savedPosition !== null) {
           resolve(savedPosition)
@@ -174,5 +180,9 @@ const router = createRouter({
     })
   }
 })
+
+export function resolveRouteComponent(resolvedRoute) {
+  return resolvedRoute.matched.at(-1)?.components?.default ?? null
+}
 
 export default router

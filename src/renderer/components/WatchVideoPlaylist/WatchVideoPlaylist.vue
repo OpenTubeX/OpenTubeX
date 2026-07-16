@@ -188,6 +188,8 @@ import {
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
+import { useTabContext } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
 const props = defineProps({
   playlistId: {
@@ -216,6 +218,8 @@ const emit = defineEmits(['pause-player'])
 
 const { locale, t } = useI18n()
 const router = useRouter()
+const { tabId } = useTabContext()
+const playlistCacheTabId = tabId ?? 'web'
 
 const isLoading = ref(false)
 const shuffleEnabled = ref(false)
@@ -437,7 +441,7 @@ watch(storedReversePlaylist, (newVal) => {
 onMounted(() => {
   reversePlaylist.value = storedReversePlaylist.value
 
-  const cachedPlaylist = store.getters.getCachedPlaylist
+  const cachedPlaylist = store.getters.getCachedPlaylist(playlistCacheTabId)
 
   if (cachedPlaylist?.id === props.playlistId) {
     loadCachedPlaylistInformation(cachedPlaylist)
@@ -446,8 +450,10 @@ onMounted(() => {
   }
 
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.setActionHandler('previoustrack', playPreviousVideo)
-    navigator.mediaSession.setActionHandler('nexttrack', playNextVideo)
+    tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {
+      previoustrack: playPreviousVideo,
+      nexttrack: playNextVideo
+    })
   }
 
   window.addEventListener('resize', calculateWindowWidth)
@@ -455,8 +461,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.setActionHandler('previoustrack', null)
-    navigator.mediaSession.setActionHandler('nexttrack', null)
+    tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {})
   }
 
   window.removeEventListener('resize', calculateWindowWidth)
@@ -740,7 +745,7 @@ function playPreviousVideo() {
 async function loadCachedPlaylistInformation(cachedPlaylist) {
   isLoading.value = true
   getPlaylistInfoRun = true
-  store.commit('setCachedPlaylist', null)
+  store.commit('setCachedPlaylist', { tabId: playlistCacheTabId, value: null })
 
   playlistTitle.value = cachedPlaylist.title
   channelName.value = cachedPlaylist.channelName

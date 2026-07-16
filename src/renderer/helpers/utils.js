@@ -1,6 +1,7 @@
 import { nextTick } from 'vue'
 import i18n from '../i18n/index'
 import router from '../router/index'
+import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
@@ -302,17 +303,15 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         query,
         makeActive,
         inheritColorFromOpener: true,
+        openerTabId: getTabNavigationService().getPresentedTabId(),
         preloadInBackground: !makeActive && path.startsWith('/watch/')
       })
     } else if (doCreateNewWindow) {
       // Open in new window
       window.ftElectron.openInNewWindow(path, query, searchQueryText)
     } else {
-      // Navigate in current tab
-      router.push({
-        path,
-        query
-      })
+      // Navigate in the presented logical tab.
+      getTabNavigationService().pushPresented({ path, query })
     }
   } else {
     router.push({

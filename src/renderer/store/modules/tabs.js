@@ -1,195 +1,417 @@
-/**
- * Vuex module for managing tab state in the renderer
- */
+import packageDetails from '../../../../package.json'
+
+const MAX_LOGICAL_HISTORY_ENTRIES = 100
+const NAV_HISTORY_DISPLAY_LIMIT = 15
+const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 
 const state = {
   tabs: [],
   activeTabId: null,
+  presentedTabId: null,
+  mainPresentedTabId: null,
+  selectionRevision: 0,
+  transitionRevision: 0,
+  transitionTargetTabId: null,
+  containerIds: [],
   tabBarScrollPosition: 0,
-  currentWatchTimestamp: null
+  currentWatchTimestamps: {}
 }
 
 const getters = {
   getTabs: (state) => state.tabs,
   getActiveTabId: (state) => state.activeTabId,
-  getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId),
+  getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId) ?? null,
+  getPresentedTabId: (state) => state.presentedTabId,
+  getPresentedTab: (state) => state.tabs.find(tab => tab.id === state.presentedTabId) ?? null,
+  getTabById: (state) => (tabId) => state.tabs.find(tab => tab.id === tabId) ?? null,
   getTabCount: (state) => state.tabs.length,
+  getTabContainerIds: (state) => state.containerIds,
   getTabBarScrollPosition: (state) => state.tabBarScrollPosition,
-  getCurrentWatchTimestamp: (state) => state.currentWatchTimestamp
+  getCurrentWatchTimestamp: (state) => state.currentWatchTimestamps[state.activeTabId] ?? null,
+  getWatchTimestamp: (state) => (tabId) => state.currentWatchTimestamps[tabId] ?? null,
+  getTabHistoryState: (state) => (tabId) => {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    if (!tab) {
+      return { canGoBack: false, canGoForward: false, options: [] }
+    }
+
+    const historyLength = tab.history.length
+    let end
+    if (tab.historyIndex < HALF_NAV_HISTORY_DISPLAY_LIMIT) {
+      end = Math.min(historyLength - 1, NAV_HISTORY_DISPLAY_LIMIT - 1)
+    } else if (historyLength - tab.historyIndex < HALF_NAV_HISTORY_DISPLAY_LIMIT + 1) {
+      end = historyLength - 1
+    } else {
+      end = tab.historyIndex + HALF_NAV_HISTORY_DISPLAY_LIMIT
+    }
+
+    const options = []
+    for (let index = end; index >= Math.max(0, end + 1 - NAV_HISTORY_DISPLAY_LIMIT); index--) {
+      const entry = tab.history[index]
+      options.push({
+        label: entry.title || entry.route.fullPath,
+        value: index - tab.historyIndex,
+        active: index === tab.historyIndex
+      })
+    }
+
+    return {
+      canGoBack: tab.historyIndex > 0,
+      canGoForward: tab.historyIndex < historyLength - 1,
+      options
+    }
+  }
 }
 
 const mutations = {
-  setTabsState(state, { tabs, activeTabId, tabBarScrollPosition }) {
-    state.tabs = tabs
-    state.activeTabId = activeTabId
-    if (tabBarScrollPosition != null) {
-      state.tabBarScrollPosition = tabBarScrollPosition
+  setTabsState(state, payload = {}) {
+    const previousTabsById = new Map(state.tabs.map(tab => [tab.id, tab]))
+    const incomingTabs = Array.isArray(payload.tabs) ? payload.tabs : []
+    const incomingIds = new Set(incomingTabs.map(tab => tab.id))
+
+    state.containerIds = state.containerIds.filter(tabId => incomingIds.has(tabId))
+    for (const tab of incomingTabs) {
+      if (!state.containerIds.includes(tab.id)) {
+        state.containerIds.push(tab.id)
+      }
+    }
+
+    state.tabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    state.activeTabId = payload.activeTabId ?? null
+    state.mainPresentedTabId = payload.presentedTabId ?? null
+    state.selectionRevision = Number.isInteger(payload.selectionRevision)
+      ? payload.selectionRevision
+      : state.selectionRevision
+
+    if (payload.tabBarScrollPosition != null) {
+      state.tabBarScrollPosition = payload.tabBarScrollPosition
+    }
+
+    for (const tabId of Object.keys(state.currentWatchTimestamps)) {
+      if (!incomingIds.has(tabId)) {
+        delete state.currentWatchTimestamps[tabId]
+      }
     }
   },
-  setCurrentWatchTimestamp(state, value) {
-    state.currentWatchTimestamp = value
+
+  setPresentedTab(state, tabId) {
+    state.presentedTabId = tabId
+  },
+
+  setTabTransition(state, { revision, tabId }) {
+    state.transitionRevision = revision
+    state.transitionTargetTabId = tabId
+  },
+
+  setTabNavigation(state, { tabId, route, history, historyIndex }) {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    if (!tab) {
+      return
+    }
+
+    tab.route = normalizeRoute(route)
+    tab.history = history.map(normalizeHistoryEntry).slice(-MAX_LOGICAL_HISTORY_ENTRIES)
+    tab.historyIndex = Math.max(0, Math.min(historyIndex, tab.history.length - 1))
+  },
+
+  prepareTabReloadRoute(state, { tabId, route }) {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    if (!tab) {
+      return
+    }
+
+    tab.pendingReloadRoute = normalizeRoute(route)
+    const entry = tab.history[tab.historyIndex]
+    if (entry) {
+      entry.route = cloneRoute(tab.pendingReloadRoute)
+    }
+  },
+
+  applyPendingReloadRoute(state, tabId) {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    if (tab?.pendingReloadRoute) {
+      tab.route = tab.pendingReloadRoute
+      tab.pendingReloadRoute = null
+    }
+  },
+
+  setHistoryEntryScroll(state, { tabId, historyIndex, scroll }) {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    const entry = tab?.history[historyIndex]
+    if (entry) {
+      entry.scroll = normalizeScroll(scroll)
+    }
+  },
+
+  setTabContentTitle(state, { tabId, title }) {
+    const tab = state.tabs.find(candidate => candidate.id === tabId)
+    if (!tab) {
+      return
+    }
+
+    tab.contentTitle = title
+    const entry = tab.history[tab.historyIndex]
+    if (entry) {
+      entry.title = title || entry.route.fullPath
+    }
+  },
+
+  setCurrentWatchTimestamp(state, payload) {
+    const tabId = typeof payload === 'object' ? payload.tabId : state.activeTabId
+    const value = typeof payload === 'object' ? payload.value : payload
+    if (!tabId) {
+      return
+    }
+
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      state.currentWatchTimestamps[tabId] = value
+    } else {
+      delete state.currentWatchTimestamps[tabId]
+    }
   }
 }
 
 const actions = {
-  /**
-   * Initialize tab state from main process
-   */
   async initializeTabs({ commit }) {
-    if (!process.env.IS_ELECTRON) return
+    if (!process.env.IS_ELECTRON) return () => {}
 
-    const state = await window.ftElectron.tabs.getState()
-    if (state) {
-      commit('setTabsState', state)
-    }
-
-    // Listen for state updates from main process
-    window.ftElectron.tabs.onStateUpdated((newState) => {
+    const removeStateListener = window.ftElectron.tabs.onStateUpdated((newState) => {
       commit('setTabsState', newState)
     })
+
+    const tabState = await window.ftElectron.tabs.getState()
+    if (tabState) {
+      commit('setTabsState', tabState)
+    }
+
+    return removeStateListener
   },
 
-  /**
-   * Create a new tab
-   * @param {object} _context - Vuex action context
-   * @param {object} [options] - Tab creation options
-   * @param {string} [options.url] - Full URL
-   * @param {string} [options.route] - Hash route
-   * @param {object} [options.query] - Query params
-   * @param {boolean} [options.makeActive=true] - Whether to activate
-   * @param {boolean} [options.inheritColorFromOpener=false] - Whether to inherit the opener tab color
-   */
-  async createTab(_context, options = {}) {
+  async createTab({ rootGetters }, options = {}) {
     if (!process.env.IS_ELECTRON) return null
 
-    const tab = await window.ftElectron.tabs.create(options)
-    return tab
+    const tabOptions = options.route || options.url
+      ? options
+      : { ...options, route: '/' + rootGetters.getLandingPage }
+
+    return await window.ftElectron.tabs.create(tabOptions)
   },
 
-  /**
-   * Activate a tab
-   * @param {string} tabId
-   */
-  activateTab({ commit }, tabId) {
+  activateTab(_context, tabId) {
     if (!process.env.IS_ELECTRON) return
-
     window.ftElectron.tabs.activate(tabId)
   },
 
-  /**
-   * Close a tab
-   * @param {object} _context - Vuex action context
-   * @param {string} tabId
-   * @returns {Promise<boolean>} Whether there are remaining tabs
-   */
   async closeTab(_context, tabId) {
     if (!process.env.IS_ELECTRON) return false
-
     const result = await window.ftElectron.tabs.close(tabId)
     return result?.hasRemainingTabs ?? false
   },
 
-  /**
-   * Close the current active tab
-   */
   async closeActiveTab({ state, dispatch }) {
-    if (state.activeTabId) {
-      return await dispatch('closeTab', state.activeTabId)
-    }
-    return false
+    return state.activeTabId ? await dispatch('closeTab', state.activeTabId) : false
   },
 
-  /**
-   * Duplicate a tab
-   * @param {object} _context - Vuex action context
-   * @param {string} tabId
-   */
   async duplicateTab(_context, tabId) {
     if (!process.env.IS_ELECTRON) return null
-
     return await window.ftElectron.tabs.duplicate(tabId)
   },
 
-  /**
-   * Move a tab to a new position
-   * @param {object} _context - Vuex action context
-   * @param {{ tabId: string, toIndex: number }} payload
-   */
   moveTab(_context, { tabId, toIndex }) {
-    if (!process.env.IS_ELECTRON) return
-
-    window.ftElectron.tabs.move(tabId, toIndex)
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.tabs.move(tabId, toIndex)
+    }
   },
 
-  /**
-   * Pin or unpin a tab.
-   * @param {object} _context - Vuex action context
-   * @param {{ tabId: string, isPinned: boolean }} payload
-   */
   setTabPinned(_context, { tabId, isPinned }) {
-    if (!process.env.IS_ELECTRON) return
-
-    window.ftElectron.tabs.setPinned(tabId, isPinned)
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.tabs.setPinned(tabId, isPinned)
+    }
   },
 
-  /**
-   * Set a tab color.
-   * @param {object} _context - Vuex action context
-   * @param {{ tabId: string, color: 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | null }} payload
-   */
   setTabColor(_context, { tabId, color }) {
-    if (!process.env.IS_ELECTRON) return
-
-    window.ftElectron.tabs.setColor(tabId, color)
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.tabs.setColor(tabId, color)
+    }
   },
 
-  /**
-   * Restore the last closed tab
-   */
-  async restoreClosedTab(_context) {
+  async restoreClosedTab() {
     if (!process.env.IS_ELECTRON) return null
-
     return await window.ftElectron.tabs.restoreClosed()
   },
 
-  /**
-   * Reload a tab
-   */
-  reloadTab(_context) {
-    if (!process.env.IS_ELECTRON) return
-
-    window.ftElectron.tabs.reload()
+  reloadTab(_context, tabId) {
+    if (process.env.IS_ELECTRON && tabId) {
+      window.ftElectron.tabs.reload(tabId)
+    }
   },
 
-  /**
-   * Reload the current active tab
-   */
-  reloadActiveTab({ dispatch }) {
-    if (!process.env.IS_ELECTRON) return
-
-    dispatch('reloadTab')
+  reloadActiveTab({ state, dispatch }) {
+    if (state.activeTabId) {
+      dispatch('reloadTab', state.activeTabId)
+    }
   },
 
-  /**
-   * Go to next tab
-   */
   nextTab({ state }) {
     if (!process.env.IS_ELECTRON || state.tabs.length <= 1) return
-
     const currentIndex = state.tabs.findIndex(tab => tab.id === state.activeTabId)
-    const nextIndex = (currentIndex + 1) % state.tabs.length
-    window.ftElectron.tabs.activate(state.tabs[nextIndex].id)
+    window.ftElectron.tabs.activate(state.tabs[(currentIndex + 1) % state.tabs.length].id)
   },
 
-  /**
-   * Go to previous tab
-   */
   prevTab({ state }) {
     if (!process.env.IS_ELECTRON || state.tabs.length <= 1) return
-
     const currentIndex = state.tabs.findIndex(tab => tab.id === state.activeTabId)
-    const prevIndex = (currentIndex - 1 + state.tabs.length) % state.tabs.length
-    window.ftElectron.tabs.activate(state.tabs[prevIndex].id)
+    window.ftElectron.tabs.activate(state.tabs[(currentIndex - 1 + state.tabs.length) % state.tabs.length].id)
+  }
+}
+
+function reconcileTab(previous, incoming) {
+  const incomingRoute = normalizeRoute(incoming.route ?? routeFromUrl(incoming.url))
+  if (!previous) {
+    return createRuntimeTab(incoming, incomingRoute)
+  }
+
+  let history = previous.history
+  let historyIndex = previous.historyIndex
+  let route = previous.route
+
+  if (incoming.loadState === 'unloaded' && previous.loadState !== 'unloaded') {
+    const currentEntry = normalizeHistoryEntry(history[historyIndex] ?? { route })
+    history = [currentEntry]
+    historyIndex = 0
+    route = currentEntry.route
+  }
+
+  return {
+    ...previous,
+    ...incoming,
+    route,
+    history,
+    historyIndex,
+    contentTitle: previous.contentTitle,
+    refreshKey: incoming.refreshKey ?? previous.refreshKey ?? 0
+  }
+}
+
+function createRuntimeTab(incoming, route) {
+  const title = stripDocumentTitle(incoming.title || route.fullPath)
+  return {
+    ...incoming,
+    route,
+    history: [{ route: cloneRoute(route), title, scroll: { left: 0, top: 0 } }],
+    historyIndex: 0,
+    pendingReloadRoute: null,
+    contentTitle: title,
+    refreshKey: incoming.refreshKey ?? 0
+  }
+}
+
+export function normalizeRoute(route) {
+  const path = typeof route?.path === 'string' && route.path.length > 0
+    ? route.path
+    : '/'
+  const query = normalizeQuery(route?.query)
+  const hash = typeof route?.hash === 'string' ? route.hash : ''
+  const fullPath = typeof route?.fullPath === 'string' && route.fullPath.length > 0
+    ? route.fullPath
+    : buildFullPath(path, query, hash)
+
+  return {
+    name: typeof route?.name === 'string' ? route.name : null,
+    path: path.startsWith('/') ? path : `/${path}`,
+    params: normalizeQuery(route?.params),
+    query,
+    hash,
+    fullPath
+  }
+}
+
+export function cloneRoute(route) {
+  const normalized = normalizeRoute(route)
+  return {
+    ...normalized,
+    params: { ...normalized.params },
+    query: cloneQuery(normalized.query)
+  }
+}
+
+function normalizeHistoryEntry(entry) {
+  return {
+    route: cloneRoute(entry?.route),
+    title: typeof entry?.title === 'string' ? entry.title : entry?.route?.fullPath || '/',
+    scroll: normalizeScroll(entry?.scroll)
+  }
+}
+
+function normalizeScroll(scroll) {
+  return {
+    left: Number.isFinite(scroll?.left) ? scroll.left : 0,
+    top: Number.isFinite(scroll?.top) ? scroll.top : 0
+  }
+}
+
+function normalizeQuery(query) {
+  if (!query || typeof query !== 'object') {
+    return {}
+  }
+
+  return Object.fromEntries(
+    Object.entries(query)
+      .filter(([, value]) => value != null)
+      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
+  )
+}
+
+function cloneQuery(query) {
+  return Object.fromEntries(
+    Object.entries(query).map(([key, value]) => [key, Array.isArray(value) ? [...value] : value])
+  )
+}
+
+function buildFullPath(path, query, hash) {
+  const search = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      search.append(key, item)
+    }
+  }
+  const queryString = search.toString()
+  return `${path.startsWith('/') ? path : `/${path}`}${queryString ? `?${queryString}` : ''}${hash}`
+}
+
+function stripDocumentTitle(title) {
+  const suffix = ` - ${packageDetails.productName}`
+  if (title === packageDetails.productName) {
+    return ''
+  }
+  return title.endsWith(suffix) ? title.slice(0, -suffix.length) : title
+}
+
+function searchParamsToQuery(searchParams) {
+  const query = {}
+  for (const [key, value] of searchParams) {
+    if (key in query) {
+      const existing = query[key]
+      query[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+    } else {
+      query[key] = value
+    }
+  }
+  return query
+}
+
+function routeFromUrl(url) {
+  try {
+    const parsed = new URL(url)
+    const hashRoute = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
+    const routeUrl = new URL(hashRoute || '/', parsed.origin)
+    return normalizeRoute({
+      path: routeUrl.pathname,
+      query: searchParamsToQuery(routeUrl.searchParams),
+      hash: routeUrl.hash
+    })
+  } catch {
+    return normalizeRoute({ path: '/' })
   }
 }
 

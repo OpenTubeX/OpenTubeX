@@ -55,16 +55,18 @@
   z-index: 1;
 }
 
+/* Applies both while entering the overlay (class present) and while leaving it
+   (class already removed), so the sidebar reflow on tab switches doesn't animate. */
+.watchSideNavTransitionDisabled :deep(.sideNav) {
+  transition: none;
+}
+
 @media only screen and (width > 680px) {
   .watchSideNavOverlay :deep(.sideNav) {
     position: fixed;
     inline-size: 200px;
     transform: translateX(-100%);
     transition-property: transform;
-  }
-
-  .watchSideNavOverlay.watchSideNavTransitionDisabled :deep(.sideNav) {
-    transition: none;
   }
 
   .watchSideNavOverlay.isLocaleRightToLeft :deep(.sideNav) {

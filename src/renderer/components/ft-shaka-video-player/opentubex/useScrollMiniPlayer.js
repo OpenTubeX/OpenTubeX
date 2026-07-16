@@ -41,11 +41,12 @@ const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
  *   container: import('vue').Ref<HTMLDivElement | null>,
  *   fullWindowEnabled: import('vue').Ref<boolean>,
  *   getUi: () => import('shaka-player').ui.Overlay | null,
+ *   isActiveTab: import('vue').ComputedRef<boolean>,
  *   props: { format: string, videoId: string },
  *   video: import('vue').Ref<HTMLVideoElement | null>
  * }} options
  */
-export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, props, video }) {
+export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isActiveTab, props, video }) {
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerActive = ref(false)
@@ -342,6 +343,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, props
   }
 
   function canUseScrollMiniPlayer() {
+    if (!isActiveTab.value) return false
     if (!scrollMiniPlayerEnabled.value) return false
     if (props.format === 'audio') return false
     if (fullWindowEnabled.value) return false

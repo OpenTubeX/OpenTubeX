@@ -75,6 +75,10 @@ import store from '../../store/index'
 
 import { KeyboardShortcuts } from '../../../constants'
 import { isHistoryEntryWatched } from '../../helpers/history'
+import { useTabContext } from '../../tabs/TabContext'
+
+const { tabId } = useTabContext()
+const subscriptionLimitStorageKey = tabId ? `Subscriptions/${tabId}/dataLimit` : 'subscriptionLimit'
 
 const props = defineProps({
   isLoading: {
@@ -105,7 +109,7 @@ const props = defineProps({
 
 const emit = defineEmits(['refresh'])
 
-const subscriptionLimit = sessionStorage.getItem('subscriptionLimit')
+const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
 
@@ -192,7 +196,7 @@ const filteredVideoList = computed(() => {
 
 function increaseLimit() {
   dataLimit.value += props.initialDataLimit
-  sessionStorage.setItem('subscriptionLimit', dataLimit.value.toFixed(0))
+  sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
 }
 
 /**

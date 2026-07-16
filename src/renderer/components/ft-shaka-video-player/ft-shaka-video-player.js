@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
+import { useTabContext } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
@@ -290,6 +292,8 @@ export default defineComponent({
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
+    const { tabId, isTabPresented } = useTabContext()
+    const mediaTabId = tabId ?? 'web'
 
     /** @type {shaka.Player|null} */
     let player = null
@@ -310,6 +314,7 @@ export default defineComponent({
       isPaused: () => video.value?.paused ?? true,
       onExpired: () => showToast(t('Video.Player.Sleep Timer.Timer ended')),
       pausePlayback: () => video.value?.pause(),
+      tabId,
     })
 
     /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
@@ -371,7 +376,12 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
-    const startInFullwindow = props.startInFullwindow
+    // The setFullWindow listener is only attached once the shaka UI is built. An
+    // early isActiveTab tick can run applyPendingPresentationModes before then, so
+    // gate the full-window request on the listener being ready to avoid consuming
+    // (and dropping) the startup flag while nothing is listening for the event.
+    let fullWindowListenerReady = false
+    let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
     let exitFullscreenCleanup = null
@@ -425,11 +435,27 @@ export default defineComponent({
       getUi: () => ui,
       props,
       video,
+      tabId,
+      isTabPresented,
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
     const autoplayVideos = computed(() => {
       return store.getters.getAutoplayVideos && isActiveTab.value
+    })
+
+    watch(isActiveTab, (active) => {
+      if (active) {
+        nextTick(applyPendingPresentationModes)
+        // An already-scrolled tab that was inactive never got to reevaluate its
+        // scroll position, so restore the mini-player state now that it is active.
+        updateScrollMiniPlayer()
+      } else {
+        handleTemporaryPlaybackRateFocusLoss()
+        if (scrollMiniPlayerActive.value) {
+          deactivateScrollMiniPlayer()
+        }
+      }
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -2141,6 +2167,10 @@ export default defineComponent({
         ui.configure(uiConfig.value)
       }
 
+      // Shaka recreates its media-session handlers on configure. Re-apply the
+      // logical-tab owner handlers so an inactive player cannot take them over.
+      registerMediaSessionHandlers()
+
       // Shaka recreates the controls on configure, but its quality badge is not populated
       // until the next player or submenu event.
       if (hasLoaded.value) {
@@ -2860,21 +2890,44 @@ export default defineComponent({
 
     // #endregion player locales
 
-    // #region power save blocker
-
-    function startPowerSaveBlocker() {
-      if (process.env.IS_ELECTRON) {
-        window.ftElectron.startPowerSaveBlocker()
+    function registerMediaSessionHandlers() {
+      if (!('mediaSession' in navigator)) {
+        return
       }
-    }
 
-    function stopPowerSaveBlocker() {
-      if (process.env.IS_ELECTRON) {
-        window.ftElectron.stopPowerSaveBlocker()
-      }
+      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {
+        play: () => video.value?.play(),
+        pause: () => video.value?.pause(),
+        stop: () => {
+          const videoElement = video.value
+          if (!videoElement) return
+          videoElement.pause()
+          if (Number.isFinite(videoElement.duration)) {
+            videoElement.currentTime = 0
+          }
+        },
+        seekbackward: (details = {}) => {
+          seekBySeconds(-(details.seekOffset ?? defaultSkipInterval.value), false, true)
+        },
+        seekforward: (details = {}) => {
+          seekBySeconds(details.seekOffset ?? defaultSkipInterval.value, false, true)
+        },
+        seekto: (details = {}) => {
+          const videoElement = video.value
+          if (!videoElement || !Number.isFinite(details.seekTime)) return
+          if (details.fastSeek === true && typeof videoElement.fastSeek === 'function') {
+            videoElement.fastSeek(details.seekTime)
+          } else {
+            videoElement.currentTime = details.seekTime
+          }
+        },
+        enterpictureinpicture: () => {
+          if (props.format !== 'audio' && ui?.getControls?.().isPiPAllowed()) {
+            ui.getControls().togglePiP()
+          }
+        }
+      })
     }
-
-    // #endregion power save blocker
 
     // #region video event handlers
 
@@ -2941,15 +2994,12 @@ export default defineComponent({
       syncPlayPauseControlIcons()
 
       sleepTimer.resumeCountdown()
-      startPowerSaveBlocker()
       startSponsorBlockHighlightLabelCountdown()
 
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'playing'
-      }
+      tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('playing')
+        window.ftElectron.tabs.setPlaybackState('playing', tabId)
       }
 
       updateAutoPip()
@@ -2964,15 +3014,12 @@ export default defineComponent({
       syncPlayPauseControlIcons()
 
       sleepTimer.pauseCountdown()
-      stopPowerSaveBlocker()
       pauseSponsorBlockHighlightLabelCountdown()
 
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'paused'
-      }
+      tabMediaCoordinator.setPlaybackState(mediaTabId, 'paused')
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('paused')
+        window.ftElectron.tabs.setPlaybackState('paused', tabId)
       }
 
       updateAutoPip()
@@ -2991,15 +3038,12 @@ export default defineComponent({
       sleepTimer.pauseCountdown()
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
 
-      stopPowerSaveBlocker()
       pauseSponsorBlockHighlightLabelCountdown()
 
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'none'
-      }
+      tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('none')
+        window.ftElectron.tabs.setPlaybackState('none', tabId)
       }
 
       updateAutoPip()
@@ -3011,12 +3055,35 @@ export default defineComponent({
       emit('ended', sleepTimerEnded)
     }
 
-    function handleCanPlay() {
-      // PiP can only be activated once the video's readState and video track are populated
-      if (startInPip && props.format !== 'audio' && ui.getControls().isPiPAllowed() && process.env.IS_ELECTRON) {
-        startInPip = false
-        window.ftElectron.requestPiP()
+    function applyPendingPresentationModes() {
+      if (!isActiveTab.value || !ui) {
+        return
       }
+
+      if (startInFullwindow && fullWindowListenerReady) {
+        startInFullwindow = false
+        events.dispatchEvent(new CustomEvent('setFullWindow', { detail: true }))
+      }
+
+      if (startInFullscreen && hasLoaded.value && process.env.IS_ELECTRON) {
+        startInFullscreen = false
+        window.ftElectron.requestFullscreen(tabId)
+      }
+
+      if (
+        startInPip &&
+        props.format !== 'audio' &&
+        ui.getControls().isPiPAllowed() &&
+        process.env.IS_ELECTRON
+      ) {
+        startInPip = false
+        window.ftElectron.requestPiP(tabId)
+      }
+    }
+
+    function handleCanPlay() {
+      // PiP can only be activated once the video's readyState and video track are populated.
+      applyPendingPresentationModes()
 
       // Re-evaluate auto-PiP now that PiP is actually allowed (the video was possibly
       // in a hidden tab / scrolled out of view while still loading).
@@ -3178,12 +3245,14 @@ export default defineComponent({
       container,
       fullWindowEnabled,
       getUi: () => ui,
+      isActiveTab,
       props,
       video,
     })
 
     const ambientModeVisible = computed(() => {
-      return ambientMode.value &&
+      return isActiveTab.value &&
+        ambientMode.value &&
         props.format !== 'audio' &&
         props.vrProjection !== 'EQUIRECTANGULAR' &&
         !fullWindowEnabled.value &&
@@ -3332,7 +3401,7 @@ export default defineComponent({
         return
       }
 
-      window.ftElectron.tabs.requestPreviewRefresh({ delayMs })
+      window.ftElectron.tabs.requestPreviewRefresh({ tabId, delayMs })
     }
 
     function clearSabrBackoffTimer({ refreshPreview = false } = {}) {
@@ -4155,17 +4224,16 @@ export default defineComponent({
         fullWindowEnabled.value = event.detail
 
         if (fullWindowEnabled.value) {
+          document.body.dataset.playerFullWindowOwner = mediaTabId
           document.body.classList.add('playerFullWindow')
-        } else {
+        } else if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
+          delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
         }
       })
 
-      if (startInFullwindow) {
-        events.dispatchEvent(new CustomEvent('setFullWindow', {
-          detail: true
-        }))
-      }
+      fullWindowListenerReady = true
+      applyPendingPresentationModes()
 
       /**
        * @implements {shaka.extern.IUIElement.Factory}
@@ -5289,7 +5357,7 @@ export default defineComponent({
      * @param {KeyboardEvent} event
      */
     function keyboardShortcutKeyupHandler(event) {
-      if (!isSpaceKey(event)) {
+      if (!isActiveTab.value || !isSpaceKey(event)) {
         return
       }
 
@@ -5326,7 +5394,7 @@ export default defineComponent({
      * @param {KeyboardEvent} event
      */
     function keyboardShortcutHandler(event) {
-      if (!player) {
+      if (!player || !isActiveTab.value) {
         return
       }
 
@@ -5671,10 +5739,10 @@ export default defineComponent({
 
         emit('error', error)
 
-        stopPowerSaveBlocker()
+        tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
-        if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'none'
+        if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+          window.ftElectron.tabs.setPlaybackState('none', tabId)
         }
       }
     }
@@ -5812,6 +5880,10 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      if (!isActiveTab.value) {
+        return
+      }
+
       if (isNativeFullscreenActive() && scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       } else if (!isNativeFullscreenActive()) {
@@ -5848,6 +5920,9 @@ export default defineComponent({
      */
     function handlePlaybackRateMenuClick(event) {
       const target = event.target
+      if (!isActiveTab.value || !(target instanceof Element) || !container.value?.contains(target)) {
+        return
+      }
       const playbackRatesContainer = target.closest('.shaka-playback-rates')
 
       if (playbackRatesContainer) {
@@ -5871,6 +5946,9 @@ export default defineComponent({
      */
     function handleQualityMenuClick(event) {
       const target = event.target
+      if (!isActiveTab.value || !(target instanceof Element) || !container.value?.contains(target)) {
+        return
+      }
       const resolutionsContainer = target.closest('.shaka-resolutions')
 
       if (resolutionsContainer) {
@@ -6016,7 +6094,7 @@ export default defineComponent({
       // Only set up after UI is fully initialized
       if (process.env.IS_ELECTRON && ui && window.ftElectron?.tabs?.onExitFullscreen) {
         try {
-          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitFullscreenHandler)
+          exitFullscreenCleanup = window.ftElectron.tabs.onExitFullscreen(exitFullscreenHandler, tabId)
         } catch (error) {
           console.error('Failed to set up exit fullscreen listener:', error)
         }
@@ -6069,8 +6147,6 @@ export default defineComponent({
       if (useSponsorBlock.value && (sponsorSkips.value.seekBar.length > 0 || !props.videoGenreIsMusic)) {
         setupSponsorBlock()
       }
-
-      window.addEventListener('beforeunload', stopPowerSaveBlocker)
 
       // shaka-player doesn't start with the cursor hidden, so hide it here for instances in which the
       // cursor is in the video player area when the video first loads
@@ -6263,10 +6339,7 @@ export default defineComponent({
         createChapterMarkers()
       }
 
-      if (startInFullscreen && process.env.IS_ELECTRON) {
-        startInFullscreen = false
-        window.ftElectron.requestFullscreen()
-      }
+      applyPendingPresentationModes()
 
       if (props.resumePlaybackAfterSabrReload) {
         video.value?.play()
@@ -6453,7 +6526,10 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       hasLoaded.value = false
-      document.body.classList.remove('playerFullWindow')
+      if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
+        delete document.body.dataset.playerFullWindowOwner
+        document.body.classList.remove('playerFullWindow')
+      }
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.removeEventListener('keyup', keyboardShortcutKeyupHandler)
@@ -6502,16 +6578,12 @@ export default defineComponent({
 
       cleanUpCustomPlayerControls()
 
-      stopPowerSaveBlocker()
-      window.removeEventListener('beforeunload', stopPowerSaveBlocker)
-
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'none'
-      }
+      tabMediaCoordinator.setActionHandlers(mediaTabId, 'player', {})
+      tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
       // Clear tab playback state indicator when player is destroyed
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('none')
+        window.ftElectron.tabs.setPlaybackState('none', tabId)
       }
 
       skippedSponsorBlockSegments.value.forEach(segment => clearTimeout(segment.timeoutId))

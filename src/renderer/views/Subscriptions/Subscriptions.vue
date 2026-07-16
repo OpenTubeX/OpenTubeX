@@ -161,8 +161,11 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
+import { useTabContext } from '../../tabs/TabContext'
 
 const isElectron = process.env.IS_ELECTRON
+const { tabId, isTabPresented } = useTabContext()
+const currentTabStorageKey = tabId ? `Subscriptions/${tabId}/currentTab` : 'Subscriptions/currentTab'
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {
@@ -217,12 +220,12 @@ onMounted(() => {
 watch(currentTab, async (value, previousValue) => {
   if (value !== null) {
   // Save last used tab, restore when view mounted again
-    sessionStorage.setItem('Subscriptions/currentTab', value)
+    sessionStorage.setItem(currentTabStorageKey, value)
   } else {
-    sessionStorage.removeItem('Subscriptions/currentTab')
+    sessionStorage.removeItem(currentTabStorageKey)
   }
 
-  if (!isMounted) {
+  if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
     return
   }
 
@@ -270,7 +273,7 @@ if (visibleTabs.value.length === 0) {
   currentTab.value = null
 } else {
   // Restore currentTab
-  const lastCurrentTabId = sessionStorage.getItem('Subscriptions/currentTab')
+  const lastCurrentTabId = sessionStorage.getItem(currentTabStorageKey)
   if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {
