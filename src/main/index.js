@@ -2071,14 +2071,46 @@ function runApp() {
     }
 
     subscriptionAutoRefreshOwner = event.sender
+    const owner = event.sender
+    owner.once('destroyed', () => {
+      if (subscriptionAutoRefreshOwner?.id === owner.id) {
+        subscriptionAutoRefreshOwner = null
+        broadcastSubscriptionAutoRefreshState(false)
+      }
+    })
+    broadcastSubscriptionAutoRefreshState(true)
     return true
+  })
+
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return false
+    }
+
+    return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.isDestroyed()
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event) => {
     if (subscriptionAutoRefreshOwner?.id === event.sender.id) {
       subscriptionAutoRefreshOwner = null
+      broadcastSubscriptionAutoRefreshState(false)
     }
   })
+
+  function broadcastSubscriptionAutoRefreshState(inProgress) {
+    for (const window of BrowserWindow.getAllWindows()) {
+      const manager = TabManager.getForWindow(window.id)
+      if (manager) {
+        for (const tab of manager.tabs.values()) {
+          if (!tab.view.webContents.isDestroyed() && isOpenTubeXUrl(tab.view.webContents.getURL())) {
+            tab.view.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, inProgress)
+          }
+        }
+      } else if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, inProgress)
+      }
+    }
+  }
 
   ipcMain.on(IpcChannels.SET_WINDOW_TITLE, (event, title) => {
     if (isOpenTubeXUrl(event.senderFrame.url) && typeof title === 'string') {

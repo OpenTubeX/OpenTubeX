@@ -244,11 +244,14 @@ async function loadPostsForSubscriptionsFromRemote() {
   attemptedFetch.value = true
   errorChannels.value = []
   try {
-    postList.value = await refreshSubscriptionPostsFromRemote({
+    const refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,
       errorChannels: errorChannels.value
     })
-    lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
+    if (refreshedPosts !== null) {
+      postList.value = refreshedPosts
+      lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
+    }
   } finally {
     isLoading.value = false
   }

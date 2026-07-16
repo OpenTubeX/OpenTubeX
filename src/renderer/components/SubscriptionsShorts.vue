@@ -234,11 +234,14 @@ async function loadVideosForSubscriptionsFromRemote() {
   errorChannels.value = []
 
   try {
-    videoList.value = await refreshSubscriptionShortsFromRemote({
+    const refreshedVideos = await refreshSubscriptionShortsFromRemote({
       t,
       errorChannels: errorChannels.value
     })
-    lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionShortsLastRefreshTimestamp
+    if (refreshedVideos !== null) {
+      videoList.value = refreshedVideos
+      lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionShortsLastRefreshTimestamp
+    }
   } finally {
     isLoading.value = false
   }

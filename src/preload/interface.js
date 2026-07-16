@@ -311,11 +311,34 @@ export default {
     },
 
     /**
+     * Check whether a renderer currently owns the subscription refresh.
+     * @returns {Promise<boolean>}
+     */
+    isInProgress: () => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE)
+    },
+
+    /**
      * Release ownership of the subscription auto refresh.
      * @returns {Promise<void>}
      */
     release: () => {
       return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE)
+    },
+
+    /**
+     * Listen for app-wide subscription refresh ownership changes.
+     * @param {(inProgress: boolean) => void} handler
+     * @returns {() => void}
+     */
+    onStateChanged: (handler) => {
+      const listener = (_event, inProgress) => {
+        handler(inProgress)
+      }
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED, listener)
+      }
     }
   },
 

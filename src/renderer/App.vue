@@ -268,7 +268,11 @@ import {
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
-  refreshSubscriptionVideosFromRemote
+  refreshSubscriptionVideosFromRemote,
+  SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
+  SUBSCRIPTION_REFRESH_FINISHED_EVENT,
+  SUBSCRIPTION_REFRESH_LOCK_NAME,
+  SUBSCRIPTION_REFRESH_STARTED_EVENT
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { getTabAccentColor } from './constants/tabColors'
@@ -417,17 +421,8 @@ const subscriptionLiveAutoRefreshInterval = computed(() => store.getters.getSubs
 /** @type {import('vue').ComputedRef<string>} */
 const subscriptionPostsAutoRefreshInterval = computed(() => store.getters.getSubscriptionPostsAutoRefreshInterval)
 
-/** @type {import('vue').ComputedRef<number | null>} */
-const subscriptionFeedLastRefreshTimestamp = computed(() => store.getters.getSubscriptionFeedLastRefreshTimestamp)
-
-/** @type {import('vue').ComputedRef<number | null>} */
-const subscriptionShortsLastRefreshTimestamp = computed(() => store.getters.getSubscriptionShortsLastRefreshTimestamp)
-
-/** @type {import('vue').ComputedRef<number | null>} */
-const subscriptionLiveLastRefreshTimestamp = computed(() => store.getters.getSubscriptionLiveLastRefreshTimestamp)
-
-/** @type {import('vue').ComputedRef<number | null>} */
-const subscriptionPostsLastRefreshTimestamp = computed(() => store.getters.getSubscriptionPostsLastRefreshTimestamp)
+/** @type {import('vue').ComputedRef<string | null>} */
+const activeSubscriptionProfileId = computed(() => store.getters.getActiveProfile?._id ?? null)
 
 /** @type {import('vue').ComputedRef<string>} */
 const historyRetentionDays = computed(() => store.getters.getHistoryRetentionDays)
@@ -461,14 +456,20 @@ const subscriptionAutoRefreshTimers = {
   live: null,
   posts: null
 }
-const initializedSubscriptionAutoRefreshTimers = new Set()
 const HISTORY_CLEANUP_INTERVAL = 60 * 60 * 1000
+const SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL = 60 * 1000
 const SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL = 1000
-const SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
+const LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.'
+const SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.completed.'
+const SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX = 'opentubex.subscriptionAutoRefresh.deadline.'
+const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.inProgress'
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
-let refreshOverdueSubscriptionFeedsPromise = null
 let removeSubscriptionAutoRefreshActiveChangedListener = null
+let removeSubscriptionAutoRefreshStateChangedListener = null
+const pendingSubscriptionAutoRefreshes = []
+const pendingSubscriptionAutoRefreshKeys = new Set()
+let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
 
@@ -541,12 +542,24 @@ onMounted(async () => {
   document.addEventListener('dragstart', handleDragStart)
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
+  window.addEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.addEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
+  window.addEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
+  window.addEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
+  document.addEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   if (process.env.IS_ELECTRON) {
+    removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged((inProgress) => {
+      store.commit('setSubscriptionFeedRefreshInProgress', inProgress)
+    })
+    synchronizeSubscriptionRefreshInProgress()
     removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
       if (isActive) {
+        synchronizeSubscriptionRefreshInProgress()
         refreshOverdueSubscriptionFeeds()
       }
     })
+  } else {
+    synchronizeSubscriptionRefreshInProgress()
   }
 })
 
@@ -562,7 +575,13 @@ onBeforeUnmount(() => {
   document.removeEventListener('auxclick', handleAuxClick)
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
+  window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
+  document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
+  removeSubscriptionAutoRefreshStateChangedListener?.()
 })
 
 watch(historyRetentionDays, scheduleHistoryCleanup)
@@ -581,157 +600,219 @@ function scheduleHistoryCleanup(days) {
   }, HISTORY_CLEANUP_INTERVAL)
 }
 
-watch([
-  dataReady,
-  subscriptionFeedAutoRefreshInterval,
-  subscriptionFeedLastRefreshTimestamp,
-  hideSubscriptionsVideos
-], () => scheduleSubscriptionTabAutoRefresh('videos'))
+watch([dataReady, activeSubscriptionProfileId], ([ready, profileId]) => {
+  clearSubscriptionFeedAutoRefreshTimer()
+  if (ready && profileId) {
+    migrateLegacySubscriptionAutoRefreshDeadlines()
+    synchronizeSubscriptionAutoRefreshProfile(profileId)
+  }
+})
 
-watch([
-  dataReady,
-  subscriptionShortsAutoRefreshInterval,
-  subscriptionShortsLastRefreshTimestamp,
-  hideSubscriptionsShorts
-], () => scheduleSubscriptionTabAutoRefresh('shorts'))
+watch([subscriptionFeedAutoRefreshInterval, hideSubscriptionsVideos], () => {
+  resetSubscriptionTabAutoRefreshForAllProfiles('videos')
+})
 
-watch([
-  dataReady,
-  subscriptionLiveAutoRefreshInterval,
-  subscriptionLiveLastRefreshTimestamp,
-  hideSubscriptionsLive
-], () => scheduleSubscriptionTabAutoRefresh('live'))
+watch([subscriptionShortsAutoRefreshInterval, hideSubscriptionsShorts], () => {
+  resetSubscriptionTabAutoRefreshForAllProfiles('shorts')
+})
 
-watch([
-  dataReady,
-  subscriptionPostsAutoRefreshInterval,
-  subscriptionPostsLastRefreshTimestamp,
-  hideSubscriptionsPosts
-], () => scheduleSubscriptionTabAutoRefresh('posts'))
+watch([subscriptionLiveAutoRefreshInterval, hideSubscriptionsLive], () => {
+  resetSubscriptionTabAutoRefreshForAllProfiles('live')
+})
+
+watch([subscriptionPostsAutoRefreshInterval, hideSubscriptionsPosts], () => {
+  resetSubscriptionTabAutoRefreshForAllProfiles('posts')
+})
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- * @param {number} [scheduledTimestamp]
  */
-function scheduleSubscriptionTabAutoRefresh(tab, scheduledTimestamp) {
-  clearSubscriptionTabAutoRefreshTimer(tab)
-
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+function resetSubscriptionTabAutoRefreshForAllProfiles(tab) {
   if (!dataReady.value) {
     return
   }
 
-  if (
-    isSubscriptionTabHidden(tab) ||
-    Number.isNaN(interval) ||
-    interval <= 0
-  ) {
-    initializedSubscriptionAutoRefreshTimers.add(tab)
-    setSubscriptionTabNextAutoRefreshTimestamp(tab, null)
-    return
+  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  const enabled = isSubscriptionTabAutoRefreshEnabled(tab)
+  const timestamp = enabled ? Date.now() + interval : null
+
+  for (const profile of store.getters.getProfileList) {
+    setStoredSubscriptionTabNextAutoRefreshTimestamp(profile._id, tab, timestamp)
   }
 
-  const now = Date.now()
-  const storedTimestamp = scheduledTimestamp ?? (
-    initializedSubscriptionAutoRefreshTimers.has(tab)
-      ? null
-      : getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
-  )
-  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
-
-  initializedSubscriptionAutoRefreshTimers.add(tab)
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, nextAutoRefreshTimestamp)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(
-    () => refreshSubscriptionFeedAutomatically(tab),
-    Math.max(0, nextAutoRefreshTimestamp - now)
-  )
+  const profileId = activeSubscriptionProfileId.value
+  if (profileId) {
+    scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
+  }
 }
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
+ * @param {number | null} [scheduledTimestamp]
  */
-async function refreshSubscriptionFeedAutomatically(tab) {
-  const now = Date.now()
-  const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(tab)
-  if (storedTimestamp !== null && storedTimestamp > now) {
-    scheduleSubscriptionTabAutoRefresh(tab, storedTimestamp)
+function scheduleSubscriptionTabAutoRefresh(tab, profileId, scheduledTimestamp) {
+  clearSubscriptionTabAutoRefreshTimer(tab)
+
+  if (!dataReady.value || profileId !== activeSubscriptionProfileId.value) {
     return
   }
 
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    scheduleSubscriptionTabAutoRefresh(tab)
+  if (!isSubscriptionTabAutoRefreshEnabled(tab)) {
+    setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, null)
     return
-  }
-
-  let acquiredRefreshLock = false
-  if (process.env.IS_ELECTRON) {
-    if (!await window.ftElectron.tabs.isActive()) {
-      return
-    }
-
-    acquiredRefreshLock = await window.ftElectron.subscriptionAutoRefresh.acquire()
-    if (!acquiredRefreshLock) {
-      scheduleSubscriptionTabAutoRefreshLockRetry(tab)
-      return
-    }
   }
 
   const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
-  setSubscriptionTabNextAutoRefreshTimestamp(tab, Date.now() + interval)
+  const now = Date.now()
+  const storedTimestamp = scheduledTimestamp === undefined
+    ? getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+    : scheduledTimestamp
+  const nextAutoRefreshTimestamp = storedTimestamp ?? now + interval
 
+  setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, nextAutoRefreshTimestamp)
+  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
+    subscriptionAutoRefreshTimers[tab] = null
+    enqueueSubscriptionAutoRefresh(tab, profileId)
+  }, Math.max(0, nextAutoRefreshTimestamp - now))
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
+ */
+function enqueueSubscriptionAutoRefresh(tab, profileId) {
+  const key = `${profileId}:${tab}`
+  if (pendingSubscriptionAutoRefreshKeys.has(key)) {
+    return
+  }
+
+  pendingSubscriptionAutoRefreshKeys.add(key)
+  pendingSubscriptionAutoRefreshes.push({ tab, profileId, key })
+  processPendingSubscriptionAutoRefreshes()
+}
+
+async function processPendingSubscriptionAutoRefreshes() {
+  if (processingSubscriptionAutoRefreshes) {
+    return
+  }
+
+  processingSubscriptionAutoRefreshes = true
   try {
-    await getSubscriptionTabRefreshHandler(tab)({
-      t,
-      showStartToast: true
-    })
-  } finally {
-    if (acquiredRefreshLock) {
-      await window.ftElectron.subscriptionAutoRefresh.release()
-    }
+    while (pendingSubscriptionAutoRefreshes.length > 0) {
+      const { tab, profileId, key } = pendingSubscriptionAutoRefreshes.shift()
 
-    scheduleSubscriptionTabAutoRefresh(tab)
+      try {
+        if (
+          profileId !== activeSubscriptionProfileId.value ||
+          !isSubscriptionTabAutoRefreshEnabled(tab) ||
+          navigator.onLine === false ||
+          document.hidden
+        ) {
+          continue
+        }
+
+        if (process.env.IS_ELECTRON && !await window.ftElectron.tabs.isActive()) {
+          continue
+        }
+
+        const storedTimestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+        if (storedTimestamp !== null && storedTimestamp > Date.now()) {
+          scheduleSubscriptionTabAutoRefresh(tab, profileId, storedTimestamp)
+          continue
+        }
+
+        const result = await getSubscriptionTabRefreshHandler(tab)({
+          t,
+          showStartToast: true
+        })
+
+        if (result === null) {
+          scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+        }
+      } catch (error) {
+        console.error(`Failed to auto refresh subscription ${tab}`, error)
+        scheduleSubscriptionTabAutoRefreshRetry(
+          tab,
+          profileId,
+          SUBSCRIPTION_AUTO_REFRESH_FAILURE_RETRY_INTERVAL
+        )
+      } finally {
+        pendingSubscriptionAutoRefreshKeys.delete(key)
+      }
+    }
+  } finally {
+    processingSubscriptionAutoRefreshes = false
   }
 }
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
  */
-function scheduleSubscriptionTabAutoRefreshLockRetry(tab) {
+function scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId) {
+  scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
+ * @param {number} delay
+ */
+function scheduleSubscriptionTabAutoRefreshRetry(tab, profileId, delay) {
+  if (profileId !== activeSubscriptionProfileId.value) {
+    return
+  }
+
   clearSubscriptionTabAutoRefreshTimer(tab)
-  subscriptionAutoRefreshTimers[tab] = setTimeout(
-    () => refreshSubscriptionFeedAutomatically(tab),
-    SUBSCRIPTION_AUTO_REFRESH_LOCK_RETRY_INTERVAL
-  )
+  subscriptionAutoRefreshTimers[tab] = setTimeout(() => {
+    subscriptionAutoRefreshTimers[tab] = null
+    enqueueSubscriptionAutoRefresh(tab, profileId)
+  }, delay)
 }
 
 function refreshOverdueSubscriptionFeeds() {
-  if (!dataReady.value) {
+  const profileId = activeSubscriptionProfileId.value
+  if (!dataReady.value || !profileId) {
     return
   }
-
-  refreshOverdueSubscriptionFeedsPromise ??= refreshOverdueSubscriptionFeedsImmediately()
-    .finally(() => {
-      refreshOverdueSubscriptionFeedsPromise = null
-    })
-}
-
-async function refreshOverdueSubscriptionFeedsImmediately() {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return
-  }
-
-  const now = Date.now()
 
   for (const tab of subscriptionAutoRefreshTabs) {
-    const nextAutoRefreshTimestamp = getSubscriptionTabNextAutoRefreshTimestamp(tab)
-
-    if (
-      nextAutoRefreshTimestamp !== null &&
-      nextAutoRefreshTimestamp <= now &&
-      isSubscriptionTabAutoRefreshEnabled(tab)
-    ) {
-      await refreshSubscriptionFeedAutomatically(tab)
+    const timestamp = getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab)
+    if (timestamp !== null && timestamp <= Date.now() && isSubscriptionTabAutoRefreshEnabled(tab)) {
+      enqueueSubscriptionAutoRefresh(tab, profileId)
+    } else {
+      scheduleSubscriptionTabAutoRefresh(tab, profileId, timestamp)
     }
+  }
+}
+
+function handleSubscriptionAutoRefreshVisibilityChange() {
+  if (!document.hidden) {
+    synchronizeSubscriptionRefreshInProgress()
+    refreshOverdueSubscriptionFeeds()
+  }
+}
+
+async function synchronizeSubscriptionRefreshInProgress() {
+  try {
+    let inProgress
+    if (process.env.IS_ELECTRON) {
+      inProgress = await window.ftElectron.subscriptionAutoRefresh.isInProgress()
+    } else if (navigator.locks) {
+      const { held } = await navigator.locks.query()
+      inProgress = held.some(lock => lock.name === SUBSCRIPTION_REFRESH_LOCK_NAME)
+      if (!inProgress) {
+        localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
+      }
+    } else {
+      inProgress = false
+      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
+    }
+
+    store.commit('setSubscriptionFeedRefreshInProgress', inProgress)
+  } catch {
+    // Live start/finish events still keep the common path synchronized.
   }
 }
 
@@ -770,22 +851,6 @@ function getSubscriptionTabRefreshHandler(tab) {
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
-function getSubscriptionTabNextAutoRefreshTimestamp(tab) {
-  switch (tab) {
-    case 'shorts':
-      return store.getters.getSubscriptionShortsNextAutoRefreshTimestamp
-    case 'live':
-      return store.getters.getSubscriptionLiveNextAutoRefreshTimestamp
-    case 'posts':
-      return store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
-    default:
-      return store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
-  }
-}
-
-/**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
- */
 function isSubscriptionTabAutoRefreshEnabled(tab) {
   const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
 
@@ -815,11 +880,22 @@ function isSubscriptionTabHidden(tab) {
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
  * @param {number | null} timestamp
  */
-function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
-  storeSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
+function setSubscriptionTabNextAutoRefreshTimestamp(tab, profileId, timestamp) {
+  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp)
 
+  if (profileId === activeSubscriptionProfileId.value) {
+    commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp)
+  }
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {number | null} timestamp
+ */
+function commitSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
   switch (tab) {
     case 'shorts':
       store.commit('setSubscriptionShortsNextAutoRefreshTimestamp', timestamp)
@@ -837,10 +913,39 @@ function setSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
 
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {number | null} timestamp
  */
-function getStoredSubscriptionTabNextAutoRefreshTimestamp(tab) {
+function commitSubscriptionTabLastRefreshTimestamp(tab, timestamp) {
+  switch (tab) {
+    case 'shorts':
+      store.commit('setSubscriptionShortsLastRefreshTimestamp', timestamp)
+      break
+    case 'live':
+      store.commit('setSubscriptionLiveLastRefreshTimestamp', timestamp)
+      break
+    case 'posts':
+      store.commit('setSubscriptionPostsLastRefreshTimestamp', timestamp)
+      break
+    default:
+      store.commit('setSubscriptionFeedLastRefreshTimestamp', timestamp)
+  }
+}
+
+/**
+ * @param {string} prefix
+ * @param {string} profileId
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function getSubscriptionAutoRefreshStorageKey(prefix, profileId, tab) {
+  return `${prefix}${encodeURIComponent(profileId)}/${tab}`
+}
+
+/**
+ * @param {string} key
+ */
+function getStoredSubscriptionAutoRefreshTimestamp(key) {
   try {
-    const timestamp = Number(localStorage.getItem(`${SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`))
+    const timestamp = Number(localStorage.getItem(key))
     return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
   } catch {
     return null
@@ -848,12 +953,11 @@ function getStoredSubscriptionTabNextAutoRefreshTimestamp(tab) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} key
  * @param {number | null} timestamp
  */
-function storeSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
+function setStoredSubscriptionAutoRefreshTimestamp(key, timestamp) {
   try {
-    const key = `${SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
     if (timestamp === null) {
       localStorage.removeItem(key)
     } else {
@@ -861,6 +965,202 @@ function storeSubscriptionTabNextAutoRefreshTimestamp(tab, timestamp) {
     }
   } catch {
     // Auto refresh still works for the current session when storage is unavailable.
+  }
+}
+
+/**
+ * @param {string} profileId
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function getStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab) {
+  const key = getSubscriptionAutoRefreshStorageKey(
+    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
+    profileId,
+    tab
+  )
+  const timestamp = getStoredSubscriptionAutoRefreshTimestamp(key)
+  return timestamp
+}
+
+function migrateLegacySubscriptionAutoRefreshDeadlines() {
+  for (const tab of subscriptionAutoRefreshTabs) {
+    const legacyKey = `${LEGACY_SUBSCRIPTION_AUTO_REFRESH_STORAGE_KEY_PREFIX}${tab}`
+    const legacyTimestamp = getStoredSubscriptionAutoRefreshTimestamp(legacyKey)
+    if (legacyTimestamp === null) {
+      continue
+    }
+
+    for (const profile of store.getters.getProfileList) {
+      const profileKey = getSubscriptionAutoRefreshStorageKey(
+        SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
+        profile._id,
+        tab
+      )
+      if (getStoredSubscriptionAutoRefreshTimestamp(profileKey) === null) {
+        setStoredSubscriptionAutoRefreshTimestamp(profileKey, legacyTimestamp)
+      }
+    }
+
+    setStoredSubscriptionAutoRefreshTimestamp(legacyKey, null)
+  }
+}
+
+/**
+ * @param {string} profileId
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {number | null} timestamp
+ */
+function setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, timestamp) {
+  setStoredSubscriptionAutoRefreshTimestamp(
+    getSubscriptionAutoRefreshStorageKey(
+      SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX,
+      profileId,
+      tab
+    ),
+    timestamp
+  )
+}
+
+/**
+ * @param {string} profileId
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab) {
+  return getStoredSubscriptionAutoRefreshTimestamp(
+    getSubscriptionAutoRefreshStorageKey(
+      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
+      profileId,
+      tab
+    )
+  )
+}
+
+/**
+ * @param {string} profileId
+ */
+function synchronizeSubscriptionAutoRefreshProfile(profileId) {
+  for (const tab of subscriptionAutoRefreshTabs) {
+    commitSubscriptionTabLastRefreshTimestamp(
+      tab,
+      getStoredSubscriptionTabLastRefreshTimestamp(profileId, tab)
+    )
+    scheduleSubscriptionTabAutoRefresh(tab, profileId)
+  }
+}
+
+/**
+ * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, timestamp: number}>} event
+ */
+function handleSubscriptionRefreshCompleted(event) {
+  const { tab, profileId, timestamp } = event.detail
+  if (!subscriptionAutoRefreshTabs.includes(tab) || typeof profileId !== 'string') {
+    return
+  }
+
+  setStoredSubscriptionAutoRefreshTimestamp(
+    getSubscriptionAutoRefreshStorageKey(
+      SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX,
+      profileId,
+      tab
+    ),
+    timestamp
+  )
+
+  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  const nextTimestamp = isSubscriptionTabAutoRefreshEnabled(tab) ? timestamp + interval : null
+  setStoredSubscriptionTabNextAutoRefreshTimestamp(profileId, tab, nextTimestamp)
+
+  if (profileId === activeSubscriptionProfileId.value) {
+    commitSubscriptionTabLastRefreshTimestamp(tab, timestamp)
+    scheduleSubscriptionTabAutoRefresh(tab, profileId, nextTimestamp)
+  }
+}
+
+/**
+ * @param {CustomEvent<{tab: string, profileId: string}>} event
+ */
+function handleSubscriptionRefreshStarted(event) {
+  if (!process.env.IS_ELECTRON) {
+    try {
+      localStorage.setItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY, JSON.stringify(event.detail))
+    } catch {
+      // The owner still has its renderer-local progress state.
+    }
+  }
+  store.commit('setSubscriptionFeedRefreshInProgress', true)
+}
+
+function handleSubscriptionRefreshFinished() {
+  if (!process.env.IS_ELECTRON) {
+    try {
+      localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
+    } catch {
+      // The owner still clears its renderer-local progress state.
+    }
+  }
+  store.commit('setSubscriptionFeedRefreshInProgress', false)
+}
+
+/**
+ * @param {StorageEvent} event
+ */
+function handleSubscriptionAutoRefreshStorage(event) {
+  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
+    store.commit('setSubscriptionFeedRefreshInProgress', event.newValue !== null)
+    return
+  }
+
+  const deadline = parseSubscriptionAutoRefreshStorageKey(
+    event.key,
+    SUBSCRIPTION_AUTO_REFRESH_DEADLINE_STORAGE_KEY_PREFIX
+  )
+  if (deadline && deadline.profileId === activeSubscriptionProfileId.value) {
+    const timestamp = Number(event.newValue)
+    if (event.newValue === null || !Number.isFinite(timestamp) || timestamp <= 0) {
+      clearSubscriptionTabAutoRefreshTimer(deadline.tab)
+      commitSubscriptionTabNextAutoRefreshTimestamp(deadline.tab, null)
+    } else {
+      scheduleSubscriptionTabAutoRefresh(deadline.tab, deadline.profileId, timestamp)
+    }
+    return
+  }
+
+  const completion = parseSubscriptionAutoRefreshStorageKey(
+    event.key,
+    SUBSCRIPTION_AUTO_REFRESH_COMPLETION_STORAGE_KEY_PREFIX
+  )
+  if (completion && completion.profileId === activeSubscriptionProfileId.value) {
+    const timestamp = Number(event.newValue)
+    commitSubscriptionTabLastRefreshTimestamp(
+      completion.tab,
+      Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null
+    )
+  }
+}
+
+/**
+ * @param {string | null} key
+ * @param {string} prefix
+ * @returns {{profileId: string, tab: 'videos' | 'shorts' | 'live' | 'posts'} | null}
+ */
+function parseSubscriptionAutoRefreshStorageKey(key, prefix) {
+  if (!key?.startsWith(prefix)) {
+    return null
+  }
+
+  const separatorIndex = key.lastIndexOf('/')
+  const tab = key.slice(separatorIndex + 1)
+  if (separatorIndex < prefix.length || !subscriptionAutoRefreshTabs.includes(tab)) {
+    return null
+  }
+
+  try {
+    return {
+      profileId: decodeURIComponent(key.slice(prefix.length, separatorIndex)),
+      tab
+    }
+  } catch {
+    return null
   }
 }
 

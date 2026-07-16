@@ -14,11 +14,76 @@ import {
 } from './utils'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
+export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
+export const SUBSCRIPTION_REFRESH_FINISHED_EVENT = 'opentubex-subscription-refresh-finished'
+export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
+export const SUBSCRIPTION_REFRESH_STARTED_EVENT = 'opentubex-subscription-refresh-started'
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
+
+/**
+ * @template T
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
+ * @param {() => Promise<T>} refresh
+ * @returns {Promise<T | null>}
+ */
+async function withSubscriptionRefreshLock(tab, profileId, refresh) {
+  if (store.getters.getSubscriptionFeedRefreshInProgress) {
+    return null
+  }
+
+  const runRefresh = async () => {
+    window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_STARTED_EVENT, {
+      detail: { tab, profileId }
+    }))
+
+    try {
+      return await refresh()
+    } finally {
+      window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_FINISHED_EVENT, {
+        detail: { tab, profileId }
+      }))
+    }
+  }
+
+  if (process.env.IS_ELECTRON) {
+    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire()
+    if (!acquired) {
+      return null
+    }
+
+    try {
+      return await runRefresh()
+    } finally {
+      await window.ftElectron.subscriptionAutoRefresh.release()
+    }
+  }
+
+  if (navigator.locks) {
+    return navigator.locks.request(
+      SUBSCRIPTION_REFRESH_LOCK_NAME,
+      { ifAvailable: true },
+      lock => lock ? runRefresh() : null
+    )
+  }
+
+  return runRefresh()
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ * @param {string} profileId
+ */
+function completeSubscriptionRefresh(tab, profileId) {
+  const timestamp = Date.now()
+  window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, {
+    detail: { tab, profileId, timestamp }
+  }))
+}
 
 async function fetchSubscriptionsInBatches(channels, fetchChannel) {
   const results = []
@@ -234,18 +299,23 @@ export async function parseYouTubeRSSFeed(rssString, channelId) {
  *  errorChannels?: any[]
  * }} options
  */
-export async function refreshSubscriptionVideosFromRemote({
+export function refreshSubscriptionVideosFromRemote(options) {
+  const activeProfile = store.getters.getActiveProfile
+  return withSubscriptionRefreshLock(
+    'videos',
+    activeProfile._id,
+    () => refreshSubscriptionVideosFromRemoteUnlocked(options, activeProfile)
+  )
+}
+
+async function refreshSubscriptionVideosFromRemoteUnlocked({
   t,
   showStartToast = false,
   errorChannels = []
-}) {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return []
-  }
-
-  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+}, activeProfile) {
+  const activeSubscriptionList = activeProfile.subscriptions
   if (activeSubscriptionList.length === 0) {
-    store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('videos', activeProfile._id)
     return []
   }
 
@@ -305,7 +375,7 @@ export async function refreshSubscriptionVideosFromRemote({
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
-    store.commit('setSubscriptionFeedLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('videos', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
@@ -321,18 +391,23 @@ export async function refreshSubscriptionVideosFromRemote({
  *  errorChannels?: any[]
  * }} options
  */
-export async function refreshSubscriptionShortsFromRemote({
+export function refreshSubscriptionShortsFromRemote(options) {
+  const activeProfile = store.getters.getActiveProfile
+  return withSubscriptionRefreshLock(
+    'shorts',
+    activeProfile._id,
+    () => refreshSubscriptionShortsFromRemoteUnlocked(options, activeProfile)
+  )
+}
+
+async function refreshSubscriptionShortsFromRemoteUnlocked({
   t,
   showStartToast = false,
   errorChannels = []
-}) {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return []
-  }
-
-  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+}, activeProfile) {
+  const activeSubscriptionList = activeProfile.subscriptions
   if (activeSubscriptionList.length === 0) {
-    store.commit('setSubscriptionShortsLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
   }
 
@@ -378,7 +453,7 @@ export async function refreshSubscriptionShortsFromRemote({
     }))).flat()
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
-    store.commit('setSubscriptionShortsLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('shorts', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
@@ -394,18 +469,23 @@ export async function refreshSubscriptionShortsFromRemote({
  *  errorChannels?: any[]
  * }} options
  */
-export async function refreshSubscriptionLiveFromRemote({
+export function refreshSubscriptionLiveFromRemote(options) {
+  const activeProfile = store.getters.getActiveProfile
+  return withSubscriptionRefreshLock(
+    'live',
+    activeProfile._id,
+    () => refreshSubscriptionLiveFromRemoteUnlocked(options, activeProfile)
+  )
+}
+
+async function refreshSubscriptionLiveFromRemoteUnlocked({
   t,
   showStartToast = false,
   errorChannels = []
-}) {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return []
-  }
-
-  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+}, activeProfile) {
+  const activeSubscriptionList = activeProfile.subscriptions
   if (activeSubscriptionList.length === 0) {
-    store.commit('setSubscriptionLiveLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('live', activeProfile._id)
     return []
   }
 
@@ -465,7 +545,7 @@ export async function refreshSubscriptionLiveFromRemote({
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
-    store.commit('setSubscriptionLiveLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('live', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
@@ -481,18 +561,23 @@ export async function refreshSubscriptionLiveFromRemote({
  *  errorChannels?: any[]
  * }} options
  */
-export async function refreshSubscriptionPostsFromRemote({
+export function refreshSubscriptionPostsFromRemote(options) {
+  const activeProfile = store.getters.getActiveProfile
+  return withSubscriptionRefreshLock(
+    'posts',
+    activeProfile._id,
+    () => refreshSubscriptionPostsFromRemoteUnlocked(options, activeProfile)
+  )
+}
+
+async function refreshSubscriptionPostsFromRemoteUnlocked({
   t,
   showStartToast = false,
   errorChannels = []
-}) {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return []
-  }
-
-  const activeSubscriptionList = store.getters.getActiveProfile.subscriptions
+}, activeProfile) {
+  const activeSubscriptionList = activeProfile.subscriptions
   if (activeSubscriptionList.length === 0) {
-    store.commit('setSubscriptionPostsLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('posts', activeProfile._id)
     return []
   }
 
@@ -556,7 +641,7 @@ export async function refreshSubscriptionPostsFromRemote({
     })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
-    store.commit('setSubscriptionPostsLastRefreshTimestamp', Date.now())
+    completeSubscriptionRefresh('posts', activeProfile._id)
 
     return filteredPosts
   } finally {
