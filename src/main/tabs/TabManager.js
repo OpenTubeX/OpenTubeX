@@ -1,58 +1,60 @@
-/**
- * TabManager - Manages tabs for a single BrowserWindow using WebContentsView
- */
-import { WebContentsView, ipcMain, app } from 'electron'
+import { BrowserWindow, ipcMain, app, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
 import { saveTabSession, clearTabSession } from './TabSessionStore.js'
+import { TabRendererBridge } from './TabRendererBridge.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
 const tabManagers = new Map()
 
-const isX11 = process.platform === 'linux' && process.env.XDG_SESSION_TYPE === 'x11'
 const DEFAULT_NEW_TAB_POSITION = 'afterCurrent'
 const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
 const TAB_PREVIEW_MAX_WIDTH = 360
 const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
-const TAB_PREVIEW_POST_ACTIVATION_REFRESH_DELAY_MS = 2000
-const TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS = 150
-const TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID = 'opentubex-tab-preview-hide-style'
+const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
+const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
 const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.png$/i
-const TAB_LOADING_SOURCE_NAVIGATION = 'navigation'
+const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
+const transferringTabIds = new Set()
+const TAB_LOADING_SOURCE_MOUNT = 'mount'
 const TAB_LOADING_SOURCE_RENDERER = 'renderer'
+
+/**
+ * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
+ */
 
 /**
  * @typedef {object} TabInfo
  * @property {string} id
  * @property {string} url
+ * @property {{name?: string | null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}} route
  * @property {string} title
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
  * @property {boolean} isPinned
- * @property {boolean} isLoading Cached aggregate loading state for the tab bar.
- * @property {Set<string>} loadingSources Active main-process and renderer-process loading sources.
+ * @property {boolean} isLoading
+ * @property {Set<string>} loadingSources
  * @property {string | null} color
  * @property {string | null} previewDataUrl
  * @property {number} previewCapturedAt
  * @property {string | null} previewFileName
  * @property {ReturnType<typeof setTimeout> | null} previewCaptureTimeoutId
- * @property {boolean} previewCaptureAllowInactive
  * @property {Promise<string | null> | null} previewCapturePromise
- * @property {WebContentsView} view
- * @property {boolean} hasStartedLoading
+ * @property {TabLoadState} loadState
  * @property {boolean} preloadInBackground
+ * @property {boolean} pendingActivation
+ * @property {number} mountRevision
+ * @property {number} refreshKey
  */
 
 export class TabManager {
-  static _isX11 = isX11
-
   /**
    * @param {unknown} value
    * @returns {'end' | 'afterCurrent'}
@@ -98,11 +100,7 @@ export class TabManager {
     }
 
     const match = dataUrl.match(/^data:image\/png;base64,([A-Za-z0-9+/=]+)$/)
-    if (!match) {
-      return null
-    }
-
-    return Buffer.from(match[1], 'base64')
+    return match ? Buffer.from(match[1], 'base64') : null
   }
 
   /**
@@ -127,164 +125,51 @@ export class TabManager {
   }
 
   /**
-   * @param {import('electron').BrowserWindow} browserWindow
-   * @param {string} rootAppUrl
-   * @param {string} preloadPath
-   * @param {string} [backgroundColor='#212121']
-   * @param {string} [sessionId] - Stable id used to persist this window's tab session. Generated if omitted.
+   * @returns {Promise<string>}
    */
-  constructor(browserWindow, rootAppUrl, preloadPath, backgroundColor = '#212121', sessionId) {
-    /** @type {import('electron').BrowserWindow} */
-    this.browserWindow = browserWindow
-    /** @type {string} */
-    this.rootAppUrl = rootAppUrl
-    /** @type {string} */
-    this.preloadPath = preloadPath
-    /** @type {string} */
-    this.backgroundColor = backgroundColor
-    /** @type {string} */
-    this.sessionId = sessionId || randomUUID()
-    /** @type {Map<string, TabInfo>} */
-    this.tabs = new Map()
-    /** @type {string|null} */
-    this.activeTabId = null
-    /** @type {Array<{ url: string, title?: string, isPinned?: boolean, color?: string | null }>} */
-    this.closedTabs = [] // For restore closed tab functionality
-    /** @type {number} */
-    this.tabBarScrollPosition = 0
-    /** @type {string | null} */
-    this.contextMenuTabId = null
-    /** @type {boolean} */
-    this.contextMenuOnTabBar = false
-    /** @type {boolean} */
-    this._sessionPersistenceDisabled = false
-    /** @type {Set<string>} */
-    this._attachedTabIds = new Set()
-    /** @type {string|null} */
-    this._visibleTabId = null
-    /** @type {number} */
-    this._activationToken = 0
-
-    tabManagers.set(browserWindow.id, this)
-
-    // Update view bounds when window resizes or fullscreen state changes.
-    // On X11, entering/leaving fullscreen from a WebContentsView may not
-    // reliably trigger a resize event, so we listen explicitly.
-    this.browserWindow.on('resize', () => this._updateActiveViewBounds())
-    this.browserWindow.on('enter-full-screen', () => this._updateActiveViewBounds())
-    this.browserWindow.on('leave-full-screen', () => this._updateActiveViewBounds())
-    this.browserWindow.on('enter-html-full-screen', () => this._updateActiveViewBounds())
-    this.browserWindow.on('leave-html-full-screen', () => this._updateActiveViewBounds())
-
-    // Clean up when window closes
-    this.browserWindow.on('closed', () => {
-      tabManagers.delete(browserWindow.id)
-    })
-  }
-
-  /**
-   * Get TabManager for a window
-   * @param {number} windowId
-   * @returns {TabManager|undefined}
-   */
-  static getForWindow(windowId) {
-    return tabManagers.get(windowId)
-  }
-
-  /**
-   * Get TabManager from a webContents
-   * @param {import('electron').WebContents} webContents
-   * @returns {TabManager|undefined}
-   */
-  static getFromWebContents(webContents) {
-    for (const manager of tabManagers.values()) {
-      for (const tab of manager.tabs.values()) {
-        if (tab.view.webContents.id === webContents.id) {
-          return manager
-        }
-      }
+  static async getStoredLandingRoute() {
+    try {
+      const value = (await baseHandlers.settings._findOne('landingPage'))?.value
+      return normalizeRoutePath(typeof value === 'string' && value.length > 0 ? value : 'subscriptions')
+    } catch (error) {
+      console.error('Failed to load landing page preference:', error)
+      return '/subscriptions'
     }
-    return undefined
   }
 
   /**
-   * Get tab ID from webContents
-   * @param {import('electron').WebContents} webContents
-   * @returns {string|undefined}
-   */
-  static getTabIdFromWebContents(webContents) {
-    for (const manager of tabManagers.values()) {
-      for (const [tabId, tab] of manager.tabs.entries()) {
-        if (tab.view.webContents.id === webContents.id) {
-          return tabId
-        }
-      }
-    }
-    return undefined
-  }
-
-  /**
-   * Get a tab from webContents.
-   * @param {import('electron').WebContents} webContents
-   * @returns {{ manager: TabManager, tabId: string, tab: TabInfo }|null}
-   */
-  static getTabFromWebContents(webContents) {
-    for (const manager of tabManagers.values()) {
-      for (const [tabId, tab] of manager.tabs.entries()) {
-        if (tab.view.webContents.id === webContents.id) {
-          return { manager, tabId, tab }
-        }
-      }
-    }
-    return null
-  }
-
-  /**
-   * @param {string} tabId
-   * @returns {TabManager|undefined}
-   */
-  static getManagerForTabId(tabId) {
-    for (const manager of tabManagers.values()) {
-      if (manager.tabs.has(tabId)) {
-        return manager
-      }
-    }
-    return undefined
-  }
-
-  /**
-   * Derive a readable placeholder tab title from a tab URL before the page sets one.
    * @param {string} url
    * @returns {string}
    */
   static formatDefaultTabTitle(url) {
+    const route = TabManager.getOpenTubeXRoute(url)
+    return route || '/'
+  }
+
+  /**
+   * @param {string} url
+   * @returns {string}
+   */
+  static getOpenTubeXRoute(url) {
+    return TabManager.getRouteFromUrl(url).fullPath
+  }
+
+  /**
+   * @param {string} url
+   * @returns {{name: null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}}
+   */
+  static getRouteFromUrl(url) {
     try {
-      const parsed = URL.parse(url)
-      if (!parsed) {
-        return url
-      }
-
-      if (parsed.hash) {
-        const route = parsed.hash.startsWith('#')
-          ? parsed.hash.slice(1)
-          : parsed.hash
-        if (route.length > 0) {
-          return route
-        }
-      }
-
-      if (isOpenTubeXUrl(parsed)) {
-        return '/'
-      }
-
-      const path = `${parsed.pathname || '/'}${parsed.search || ''}`
-      if (path !== '/') {
-        return path
-      }
-
-      return parsed.host ? `${parsed.host}${path}` : url
+      const parsed = new URL(url)
+      const rawHash = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
+      const hashUrl = new URL(rawHash || '/', 'https://opentubex.invalid')
+      return normalizeRoute({
+        path: hashUrl.pathname,
+        query: Object.fromEntries(hashUrl.searchParams),
+        hash: hashUrl.hash
+      })
     } catch {
-      return url
+      return normalizeRoute({ path: '/' })
     }
   }
 
@@ -298,9 +183,7 @@ export class TabManager {
       return null
     }
 
-    const route = parsed.hash.startsWith('#')
-      ? parsed.hash.slice(1)
-      : parsed.hash
+    const route = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash
     const appVideoId = route.match(/^\/watch\/(?<videoId>[^/?#]+)/)?.groups?.videoId
     if (TabManager.isValidVideoId(appVideoId)) {
       return appVideoId
@@ -340,13 +223,10 @@ export class TabManager {
    */
   static getVideoThumbnailUrl(url) {
     const videoId = TabManager.getVideoIdFromUrl(url)
-    return videoId == null
-      ? null
-      : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
+    return videoId == null ? null : `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`
   }
 
   /**
-   * Whether a page title is the app bootstrap default, not page-specific content.
    * @param {string} title
    * @returns {boolean}
    */
@@ -360,8 +240,6 @@ export class TabManager {
   }
 
   /**
-   * Keep a meaningful tab title during page load when the renderer briefly
-   * resets document.title to the bare product name.
    * @param {string | undefined} currentTitle
    * @param {string} newTitle
    * @returns {string}
@@ -383,9 +261,230 @@ export class TabManager {
   }
 
   /**
+   * @param {number} windowId
+   * @returns {TabManager|undefined}
+   */
+  static getForWindow(windowId) {
+    return tabManagers.get(windowId)
+  }
+
+  /**
+   * Resolve the manager from the BrowserWindow's one shared renderer.
+   * @param {import('electron').WebContents} webContents
+   * @returns {TabManager|undefined}
+   */
+  static getFromWebContents(webContents) {
+    const browserWindow = BrowserWindow.fromWebContents(webContents)
+    return browserWindow ? tabManagers.get(browserWindow.id) : undefined
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabManager|undefined}
+   */
+  static getManagerForTabId(tabId) {
+    for (const manager of tabManagers.values()) {
+      if (manager.tabs.has(tabId)) {
+        return manager
+      }
+    }
+    return undefined
+  }
+
+  /**
+   * @param {number} excludeWindowId
+   * @returns {Array<{ windowId: number, label: string }>}
+   */
+  static listMoveTargets(excludeWindowId) {
+    const candidates = Array.from(tabManagers.values())
+      .filter(manager => !manager.browserWindow.isDestroyed() && manager.browserWindow.id !== excludeWindowId)
+      .sort((a, b) => a.browserWindow.id - b.browserWindow.id)
+
+    const baseTitle = (manager) => manager.browserWindow.getTitle().trim() || app.getName()
+    const counts = new Map()
+    for (const manager of candidates) {
+      const title = baseTitle(manager)
+      counts.set(title, (counts.get(title) || 0) + 1)
+    }
+
+    const indexByTitle = new Map()
+    return candidates.map(manager => {
+      const title = baseTitle(manager)
+      let label = title
+      if ((counts.get(title) ?? 1) > 1) {
+        const index = (indexByTitle.get(title) || 0) + 1
+        indexByTitle.set(title, index)
+        label = `${title} (${index})`
+      }
+      return { windowId: manager.browserWindow.id, label }
+    })
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} targetWindowId
+   */
+  static async moveTabToWindow(tabId, targetWindowId) {
+    if (transferringTabIds.has(tabId)) {
+      return false
+    }
+
+    const source = TabManager.getManagerForTabId(tabId)
+    const target = TabManager.getForWindow(targetWindowId)
+    if (!source || !target || source.browserWindow.id === targetWindowId) {
+      return false
+    }
+    if (source.browserWindow.isDestroyed() || target.browserWindow.isDestroyed()) {
+      return false
+    }
+
+    transferringTabIds.add(tabId)
+    try {
+      const snapshot = source.createTransferSnapshot(tabId)
+      if (!snapshot) {
+        return false
+      }
+
+      const stagedTab = target.adoptTransferredTab(snapshot)
+      const mounted = await target.waitForTabMount(
+        stagedTab.id,
+        stagedTab.mountRevision,
+        TAB_TRANSFER_MOUNT_TIMEOUT_MS
+      )
+
+      if (
+        !mounted ||
+        source.browserWindow.isDestroyed() ||
+        target.browserWindow.isDestroyed() ||
+        !source.tabs.has(tabId)
+      ) {
+        target.removeStagedTransferredTab(tabId)
+        return false
+      }
+
+      const detached = source.detachTabForTransfer(tabId)
+      if (!detached) {
+        target.removeStagedTransferredTab(tabId)
+        return false
+      }
+
+      stagedTab.isTransferStaged = false
+      target.activateTab(tabId)
+      target.browserWindow.focus()
+      if (source.tabs.size === 0) {
+        source.browserWindow.close()
+      }
+      return true
+    } catch (error) {
+      console.error('Failed to move tab to another window:', error)
+      target.removeStagedTransferredTab(tabId)
+      return false
+    } finally {
+      transferringTabIds.delete(tabId)
+    }
+  }
+
+  /**
+   * @param {import('electron').BrowserWindow} browserWindow
+   * @param {string} rootAppUrl
+   * @param {string} _preloadPath
+   * @param {string} [_backgroundColor='#212121']
+   * @param {string} [sessionId]
+   */
+  constructor(browserWindow, rootAppUrl, _preloadPath, _backgroundColor = '#212121', sessionId) {
+    this.browserWindow = browserWindow
+    this.rootAppUrl = rootAppUrl
+    this.sessionId = sessionId || randomUUID()
+    /** @type {Map<string, TabInfo>} */
+    this.tabs = new Map()
+    /** @type {string|null} */
+    this.activeTabId = null
+    /** @type {string|null} */
+    this.presentedTabId = null
+    this.selectionRevision = 0
+    /** @type {Array<{ url: string, title?: string, isPinned?: boolean, color?: string | null }>} */
+    this.closedTabs = []
+    this.tabBarScrollPosition = 0
+    this.contextMenuTabId = null
+    this.contextMenuSurface = 'content'
+    this._sessionPersistenceDisabled = false
+    this._pendingTabMountWaiters = new Map()
+    this._deferredCloseTabIds = new Set()
+    this._deferredUnloadTabIds = new Set()
+    this.bridge = new TabRendererBridge(browserWindow)
+    this._initialPresentationResolved = false
+    this._initialPresentationPromise = new Promise(resolve => {
+      this._resolveInitialPresentation = resolve
+    })
+
+    tabManagers.set(browserWindow.id, this)
+    this._installWindowOpenHandler()
+
+    browserWindow.on('closed', () => {
+      tabManagers.delete(browserWindow.id)
+      for (const waiters of this._pendingTabMountWaiters.values()) {
+        for (const waiter of waiters) {
+          clearTimeout(waiter.timeoutId)
+          waiter.resolve(false)
+        }
+      }
+      this._pendingTabMountWaiters.clear()
+    })
+  }
+
+  _installWindowOpenHandler() {
+    this.browserWindow.webContents.setWindowOpenHandler((details) => {
+      const parsedUrl = URL.parse(details.url)
+      const currentUrl = this.browserWindow.webContents.getURL()
+
+      if (parsedUrl !== null && isOpenTubeXUrl(currentUrl)) {
+        if (isOpenTubeXUrl(parsedUrl)) {
+          this.createTabWithPreferenceFromOpener({
+            url: details.url,
+            makeActive: true
+          }, this.presentedTabId ?? this.activeTabId).catch(error => {
+            console.error('Failed to open window.open URL in a new tab:', error)
+          })
+        } else if (
+          parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:' ||
+          parsedUrl.protocol === 'mailto:' || parsedUrl.protocol === 'tel:'
+        ) {
+          shell.openExternal(details.url)
+        }
+      }
+
+      return { action: 'deny' }
+    })
+  }
+
+  markRendererReady() {
+    this.bridge.markReady()
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {number} [timeoutMs]
+   * @returns {Promise<boolean>}
+   */
+  async waitForInitialPresentation(timeoutMs = 8000) {
+    if (this._initialPresentationResolved) {
+      return true
+    }
+
+    let timeoutId
+    const timedOut = new Promise(resolve => {
+      timeoutId = setTimeout(() => resolve(false), timeoutMs)
+    })
+    const presented = this._initialPresentationPromise.then(() => true)
+    const result = await Promise.race([presented, timedOut])
+    clearTimeout(timeoutId)
+    return result
+  }
+
+  /**
    * @param {TabInfo} tab
    * @param {string} title
-   * @returns {boolean} Whether the tab title changed
+   * @returns {boolean}
    */
   applyTabTitle(tab, title) {
     const nextTitle = TabManager.resolveTabTitle(tab.title, title)
@@ -394,7 +493,6 @@ export class TabManager {
     }
 
     tab.title = nextTitle
-
     if (this.activeTabId === tab.id) {
       this.browserWindow.setTitle(nextTitle)
     }
@@ -405,334 +503,39 @@ export class TabManager {
   }
 
   /**
-   * The renderer can miss early title mutation forwarding while a tab is
-   * created or switched quickly. Pull the settled DOM title after navigation.
-   * @param {TabInfo} tab
+   * @param {string | undefined} url
+   * @param {string | undefined} route
+   * @param {object | undefined} query
+   * @returns {{url: string, route: ReturnType<typeof normalizeRoute>}}
    */
-  scheduleDocumentTitleSync(tab) {
-    for (const delay of [0, 50, 250, 1000]) {
-      setTimeout(() => {
-        this.syncDocumentTitle(tab).catch(() => {})
-      }, delay)
+  _resolveTabLocation(url, route, query) {
+    if (url) {
+      return {
+        url,
+        route: TabManager.getRouteFromUrl(url)
+      }
+    }
+
+    const normalizedRoute = normalizeRoute({
+      path: normalizeRoutePath(route || '/'),
+      query
+    })
+
+    return {
+      url: this._urlFromRoute(normalizedRoute),
+      route: normalizedRoute
     }
   }
 
   /**
-   * @param {TabInfo} tab
-   * @returns {Promise<void>}
+   * @param {ReturnType<typeof normalizeRoute>} route
+   * @returns {string}
    */
-  async syncDocumentTitle(tab) {
-    const webContents = tab.view.webContents
-    if (!tab.hasStartedLoading || webContents.isDestroyed()) {
-      return
-    }
-
-    const title = await webContents.executeJavaScript('document.title', true)
-    if (typeof title === 'string') {
-      this.applyTabTitle(tab, title)
-    }
+  _urlFromRoute(route) {
+    return `${this.rootAppUrl}#${route.fullPath}`
   }
 
   /**
-   * Other windows for "move tab to window", with disambiguated labels.
-   * @param {number} excludeWindowId
-   * @returns {Array<{ windowId: number, label: string }>}
-   */
-  static listMoveTargets(excludeWindowId) {
-    const candidates = Array.from(tabManagers.values())
-      .filter(m => !m.browserWindow.isDestroyed() && m.browserWindow.id !== excludeWindowId)
-      .sort((a, b) => a.browserWindow.id - b.browserWindow.id)
-
-    const baseTitle = (m) => {
-      const t = m.browserWindow.getTitle()
-      return (t && t.trim()) ? t : app.getName()
-    }
-
-    const counts = new Map()
-    for (const m of candidates) {
-      const t = baseTitle(m)
-      counts.set(t, (counts.get(t) || 0) + 1)
-    }
-
-    const indexByTitle = new Map()
-    return candidates.map(m => {
-      const t = baseTitle(m)
-      const n = counts.get(t) ?? 1
-      let label = t
-      if (n > 1) {
-        const i = (indexByTitle.get(t) || 0) + 1
-        indexByTitle.set(t, i)
-        label = `${t} (${i})`
-      }
-      return { windowId: m.browserWindow.id, label }
-    })
-  }
-
-  /**
-   * Ask every other loaded OpenTubeX tab to leave PiP before a new tab enters it.
-   * @param {import('electron').WebContents} ownerWebContents
-   * @returns {Promise<void>}
-   */
-  static async clearPictureInPictureFromOtherTabs(ownerWebContents) {
-    const cleanupPromises = []
-
-    for (const manager of tabManagers.values()) {
-      for (const tab of manager.tabs.values()) {
-        const webContents = tab.view.webContents
-        if (webContents.id === ownerWebContents.id || webContents.isDestroyed()) {
-          continue
-        }
-
-        try {
-          if (tab.hasStartedLoading && isOpenTubeXUrl(webContents.getURL())) {
-            cleanupPromises.push(
-              webContents.executeJavaScript(`
-                (async () => {
-                  const video = document.querySelector('video.player')
-                  const controls = video?.ui?.getControls?.()
-                  const mightBeInPip = document.pictureInPictureElement || controls?.isPiPEnabled?.()
-
-                  if (document.pictureInPictureElement && document.exitPictureInPicture) {
-                    try {
-                      await document.exitPictureInPicture()
-                    } catch {}
-                  }
-
-                  if (mightBeInPip && video) {
-                    video.dispatchEvent(new Event('leavepictureinpicture'))
-                  }
-                })()
-              `, true).catch(error => {
-                console.error('Error clearing PiP in replaced tab:', error)
-              })
-            )
-          }
-        } catch (error) {
-          console.error('Error preparing PiP cleanup for replaced tab:', error)
-        }
-      }
-    }
-
-    await Promise.all(cleanupPromises)
-  }
-
-  /**
-   * @param {string} tabId
-   * @param {number} targetWindowId
-   */
-  static moveTabToWindow(tabId, targetWindowId) {
-    const source = TabManager.getManagerForTabId(tabId)
-    const target = TabManager.getForWindow(targetWindowId)
-    if (!source || !target || source.browserWindow.id === targetWindowId) {
-      return
-    }
-    if (source.browserWindow.isDestroyed() || target.browserWindow.isDestroyed()) {
-      return
-    }
-
-    const tabInfo = source.detachTabForTransfer(tabId)
-    if (!tabInfo) {
-      return
-    }
-
-    target.adoptTransferredTab(tabInfo)
-
-    if (source.tabs.size === 0) {
-      source.browserWindow.close()
-    }
-  }
-
-  /**
-   * Create a WebContentsView and attach the standard tab event handlers.
-   * @returns {WebContentsView}
-   */
-  _createTabView() {
-    // Create WebContentsView with same webPreferences as main window
-    const view = new WebContentsView({
-      webPreferences: {
-        webSecurity: false,
-        backgroundThrottling: false, // Keep audio playing in background tabs
-        preload: this.preloadPath
-      }
-    })
-
-    // Set background color to match theme and prevent white flash
-    view.setBackgroundColor(this.backgroundColor)
-
-    // Set initial bounds immediately to prevent flash
-    const bounds = this.browserWindow.getContentBounds()
-    view.setBounds({
-      x: 0,
-      y: 0,
-      width: bounds.width,
-      height: bounds.height
-    })
-
-    // Set up window.open handler for this tab (lookup manager so moved tabs open in the right window)
-    view.webContents.setWindowOpenHandler((details) => {
-      const tabContext = TabManager.getTabFromWebContents(view.webContents)
-      if (!tabContext) {
-        return { action: 'deny' }
-      }
-
-      const { manager: mgr, tabId } = tabContext
-      const parsedUrl = URL.parse(details.url)
-
-      if (parsedUrl !== null && isOpenTubeXUrl(view.webContents.getURL())) {
-        if (isOpenTubeXUrl(parsedUrl)) {
-          mgr.createTabWithPreferenceFromOpener(
-            {
-              url: details.url,
-              makeActive: true
-            },
-            tabId
-          ).catch(error => {
-            console.error('Failed to open window.open URL in a new tab:', error)
-          })
-        } else if (
-          parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:' ||
-          parsedUrl.protocol === 'mailto:' || parsedUrl.protocol === 'tel:'
-        ) {
-          const { shell } = require('electron')
-          shell.openExternal(details.url)
-        }
-      }
-
-      return { action: 'deny' }
-    })
-
-    // Update view bounds when this tab enters or leaves HTML fullscreen.
-    // On X11, the BrowserWindow fullscreen events may not fire reliably for
-    // WebContentsView children, so we also listen on the individual webContents.
-    view.webContents.on('enter-html-full-screen', () => {
-      TabManager.getFromWebContents(view.webContents)?._updateActiveViewBounds()
-    })
-    view.webContents.on('leave-html-full-screen', () => {
-      TabManager.getFromWebContents(view.webContents)?._updateActiveViewBounds()
-    })
-
-    view.webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
-      if (isInPlace || !isMainFrame) {
-        return
-      }
-
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr._setTabNavigationLoading(tabInfo, true)
-        mgr._setTabLoading(tabInfo, false)
-      }
-    })
-
-    view.webContents.on('did-start-loading', () => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr._setTabNavigationLoading(tabInfo, true)
-      }
-    })
-
-    view.webContents.on('did-stop-loading', () => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr._setTabNavigationLoading(tabInfo, false)
-      }
-    })
-
-    // Listen for title updates
-    view.webContents.on('page-title-updated', (_, title) => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr.applyTabTitle(tabInfo, title)
-      }
-    })
-
-    view.webContents.on('did-finish-load', () => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr._setTabNavigationLoading(tabInfo, false)
-        mgr._scheduleTabPreviewRefresh(tabInfo)
-        mgr.scheduleDocumentTitleSync(tabInfo)
-      }
-    })
-
-    view.webContents.on('did-fail-load', () => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        mgr._setTabNavigationLoading(tabInfo, false)
-      }
-    })
-
-    // Listen for navigation to update URL
-    view.webContents.on('did-navigate-in-page', (_, url) => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        tabInfo.url = url
-        mgr.scheduleDocumentTitleSync(tabInfo)
-        mgr._scheduleTabPreviewRefresh(tabInfo)
-        mgr._saveSession()
-      }
-    })
-
-    view.webContents.on('did-navigate', (_, url) => {
-      const mgr = TabManager.getFromWebContents(view.webContents)
-      const tid = TabManager.getTabIdFromWebContents(view.webContents)
-      if (!mgr || !tid) {
-        return
-      }
-      const tabInfo = mgr.tabs.get(tid)
-      if (tabInfo) {
-        tabInfo.url = url
-        mgr.scheduleDocumentTitleSync(tabInfo)
-        mgr._scheduleTabPreviewRefresh(tabInfo)
-        mgr._saveSession()
-      }
-    })
-
-    return view
-  }
-
-  /**
-   * Insert a tab while preserving the invariant that all pinned tabs stay
-   * before all unpinned tabs.
    * @param {string} tabId
    * @param {TabInfo} tabInfo
    * @param {number} preferredIndex
@@ -753,39 +556,578 @@ export class TabManager {
   }
 
   /**
+   * @param {object} [options]
+   * @returns {TabInfo}
+   */
+  createTab(options = {}) {
+    const {
+      id = randomUUID(),
+      url,
+      route,
+      query,
+      title,
+      isPinned = false,
+      color = null,
+      previewDataUrl = null,
+      previewCapturedAt = 0,
+      previewFileName = null,
+      makeActive = true,
+      openPosition = DEFAULT_NEW_TAB_POSITION,
+      lazyLoad = false,
+      isUnloaded = false,
+      preloadInBackground = false
+    } = options
+
+    const location = this._resolveTabLocation(url, route, query)
+    const startsUnloaded = (Boolean(lazyLoad) || Boolean(isUnloaded)) && !makeActive && !preloadInBackground
+    const shouldMount = !startsUnloaded
+    const restoredPreviewDataUrl = typeof previewDataUrl === 'string' && previewDataUrl.startsWith('data:image/png;base64,')
+      ? previewDataUrl
+      : null
+    const restoredPreviewFileName = TabManager.normalizePreviewFileName(previewFileName)
+    const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
+      ? previewCapturedAt
+      : 0
+
+    /** @type {TabInfo} */
+    const tabInfo = {
+      id,
+      url: location.url,
+      route: location.route,
+      title: title || TabManager.formatDefaultTabTitle(location.url),
+      lastActiveAt: Date.now(),
+      isPlaying: false,
+      isPinned: Boolean(isPinned),
+      isLoading: shouldMount,
+      loadingSources: new Set(shouldMount ? [TAB_LOADING_SOURCE_MOUNT] : []),
+      color: TabManager.normalizeTabColor(color),
+      previewDataUrl: restoredPreviewDataUrl,
+      previewCapturedAt: restoredPreviewCapturedAt,
+      previewFileName: restoredPreviewFileName,
+      previewCaptureTimeoutId: null,
+      previewCapturePromise: null,
+      loadState: startsUnloaded ? 'unloaded' : 'mounting',
+      preloadInBackground: Boolean(preloadInBackground),
+      pendingActivation: false,
+      mountRevision: shouldMount ? 1 : 0,
+      refreshKey: 0
+    }
+
+    let preferredIndex = this.tabs.size
+    if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
+      const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
+      if (activeTabIndex !== -1) {
+        preferredIndex = activeTabIndex + 1
+      }
+    }
+
+    this._insertTabEntry(id, tabInfo, preferredIndex)
+
+    if (makeActive) {
+      if (this.activeTabId == null) {
+        this.activateTab(id)
+      } else {
+        // Match the current completion-order behavior: newly-created active tabs
+        // join the strip immediately but become selected when their first mount
+        // reports ready.
+        tabInfo.pendingActivation = true
+        tabInfo.preloadInBackground = true
+        this._broadcastStateUpdate()
+        this._saveSession()
+      }
+    } else {
+      this._broadcastStateUpdate()
+      this._saveSession()
+    }
+
+    return tabInfo
+  }
+
+  /**
+   * @param {object} [options]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreference(options = {}) {
+    const openPosition = options.openPosition == null
+      ? await TabManager.getStoredNewTabPosition()
+      : TabManager.normalizeNewTabPosition(options.openPosition)
+    const tabOptions = options.url || options.route
+      ? options
+      : { ...options, route: await TabManager.getStoredLandingRoute() }
+
+    return this.createTab({ ...tabOptions, openPosition })
+  }
+
+  /**
+   * @param {object} [options]
+   * @param {string | undefined | null} [openerTabId=this.activeTabId]
+   * @returns {Promise<TabInfo>}
+   */
+  async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
+    return this.createTabWithPreference(this._withOpenerTabColor(options, openerTabId))
+  }
+
+  /**
+   * @param {object} options
+   * @param {string | undefined | null} openerTabId
+   * @returns {object}
+   */
+  _withOpenerTabColor(options, openerTabId) {
+    if (Object.hasOwn(options, 'color')) {
+      return options
+    }
+
+    const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
+    return openerColor == null ? options : { ...options, color: openerColor }
+  }
+
+  /**
+   * @param {string} tabId
+   */
+  activateTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (
+      !tab ||
+      tab.isTransferStaged === true ||
+      this._deferredCloseTabIds.has(tabId) ||
+      this._deferredUnloadTabIds.has(tabId)
+    ) {
+      return
+    }
+
+    const previousActiveId = this.activeTabId
+    if (previousActiveId === tabId && tab.pendingActivation !== true) {
+      return
+    }
+
+    const outgoingTabId = this.presentedTabId ?? previousActiveId
+    if (outgoingTabId && outgoingTabId !== tabId) {
+      this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, outgoingTabId)
+    }
+
+    if (tab.loadState === 'unloaded') {
+      tab.loadState = 'mounting'
+      tab.mountRevision += 1
+      this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    }
+
+    tab.pendingActivation = false
+    tab.preloadInBackground = false
+    tab.lastActiveAt = Date.now()
+    this.activeTabId = tabId
+    this.selectionRevision += 1
+    this.browserWindow.setTitle(tab.title)
+    this.bridge.send(IpcChannels.TABS_ACTIVE_CHANGED, tabId, this.selectionRevision)
+    this._broadcastStateUpdate()
+    this._saveSession()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   * @param {number} [timeoutMs]
+   * @returns {Promise<boolean>}
+   */
+  waitForTabMount(tabId, mountRevision, timeoutMs = TAB_TRANSFER_MOUNT_TIMEOUT_MS) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.mountRevision !== mountRevision) {
+      return Promise.resolve(false)
+    }
+    if (tab.loadState === 'loaded') {
+      return Promise.resolve(true)
+    }
+
+    return new Promise(resolve => {
+      const waiter = {
+        mountRevision,
+        resolve,
+        timeoutId: setTimeout(() => {
+          const waiters = this._pendingTabMountWaiters.get(tabId)
+          waiters?.delete(waiter)
+          if (waiters?.size === 0) {
+            this._pendingTabMountWaiters.delete(tabId)
+          }
+          resolve(false)
+        }, timeoutMs)
+      }
+
+      let waiters = this._pendingTabMountWaiters.get(tabId)
+      if (!waiters) {
+        waiters = new Set()
+        this._pendingTabMountWaiters.set(tabId, waiters)
+      }
+      waiters.add(waiter)
+    })
+  }
+
+  _resolveTabMountWaiters(tabId, mountRevision, succeeded) {
+    const waiters = this._pendingTabMountWaiters.get(tabId)
+    if (!waiters) {
+      return
+    }
+
+    for (const waiter of waiters) {
+      if (waiter.mountRevision <= mountRevision) {
+        waiters.delete(waiter)
+        clearTimeout(waiter.timeoutId)
+        waiter.resolve(succeeded && waiter.mountRevision === mountRevision)
+      }
+    }
+    if (waiters.size === 0) {
+      this._pendingTabMountWaiters.delete(tabId)
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   */
+  markTabMounted(tabId, mountRevision) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || mountRevision !== tab.mountRevision) {
+      this._resolveTabMountWaiters(tabId, mountRevision, false)
+      return
+    }
+
+    tab.loadState = 'loaded'
+    tab.preloadInBackground = false
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
+    this._resolveTabMountWaiters(tabId, mountRevision, true)
+
+    if (tab.pendingActivation) {
+      this.activateTab(tabId)
+    } else {
+      this._broadcastStateUpdate()
+    }
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} mountRevision
+   */
+  markTabMountFailed(tabId, mountRevision) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || mountRevision !== tab.mountRevision) {
+      this._resolveTabMountWaiters(tabId, mountRevision, false)
+      return
+    }
+
+    tab.loadState = 'unloaded'
+    tab.preloadInBackground = false
+    tab.pendingActivation = false
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, false)
+    this._resolveTabMountWaiters(tabId, mountRevision, false)
+    this._broadcastStateUpdate()
+    this._saveSession()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {number} selectionRevision
+   */
+  markTabPresented(tabId, selectionRevision) {
+    if (
+      selectionRevision !== this.selectionRevision ||
+      tabId !== this.activeTabId ||
+      !this.tabs.has(tabId)
+    ) {
+      return
+    }
+
+    this.presentedTabId = tabId
+    if (!this._initialPresentationResolved) {
+      this._initialPresentationResolved = true
+      this._resolveInitialPresentation()
+    }
+
+    for (const deferredTabId of [...this._deferredCloseTabIds]) {
+      if (deferredTabId !== tabId) {
+        this._deferredCloseTabIds.delete(deferredTabId)
+        this.closeTab(deferredTabId)
+      }
+    }
+    for (const deferredTabId of [...this._deferredUnloadTabIds]) {
+      if (deferredTabId !== tabId) {
+        this._deferredUnloadTabIds.delete(deferredTabId)
+        this.unloadTab(deferredTabId).catch(error => {
+          console.error('Failed to finish deferred tab unload:', error)
+        })
+      }
+    }
+
+    const tab = this.tabs.get(tabId)
+    this._scheduleTabPreviewRefresh(tab)
+    this._broadcastStateUpdate()
+  }
+
+  _getNeighborTabId(tabId) {
+    const orderedTabIds = Array.from(this.tabs.keys())
+    const tabIndex = orderedTabIds.indexOf(tabId)
+    if (tabIndex === -1) {
+      return null
+    }
+
+    const candidates = [
+      ...orderedTabIds.slice(0, tabIndex).reverse(),
+      ...orderedTabIds.slice(tabIndex + 1)
+    ]
+    return candidates.find(candidateId => this.tabs.get(candidateId)?.isTransferStaged !== true) ?? null
+  }
+
+  _prepareNeighborActivation(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab || tab.isTransferStaged === true) {
+      return false
+    }
+
+    // A rapid second close/unload can otherwise select a tab that is still
+    // marked for deferred disposal and leave the window with no selectable tab.
+    this._deferredCloseTabIds.delete(tabId)
+    this._deferredUnloadTabIds.delete(tabId)
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {boolean}
+   */
+  closeTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return this.tabs.size > 0
+    }
+    if (tab.isTransferStaged === true) {
+      return true
+    }
+
+    // Keep the currently composited subtree alive until its replacement has
+    // mounted and been presented. Removing it immediately would expose the
+    // BrowserWindow background during lazy activation.
+    if (this.presentedTabId === tabId && this.tabs.size > 1) {
+      if (this._deferredCloseTabIds.has(tabId)) {
+        return true
+      }
+
+      const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
+        ? this.activeTabId
+        : this._getNeighborTabId(tabId)
+      if (nextTabId) {
+        this._deferredCloseTabIds.add(tabId)
+        this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+        if (this.activeTabId === tabId) {
+          this.activeTabId = null
+          if (this._prepareNeighborActivation(nextTabId)) {
+            this.activateTab(nextTabId)
+          }
+        }
+        return true
+      }
+      return true
+    }
+
+    if (this.activeTabId === tabId) {
+      if (this.browserWindow.isFullScreen()) {
+        this.browserWindow.setFullScreen(false)
+      }
+      this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+    }
+
+    this._clearTabPreviewRefresh(tab)
+    this.closedTabs.push({
+      url: tab.url,
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color
+    })
+    if (this.closedTabs.length > 10) {
+      this.closedTabs.shift()
+    }
+
+    const nextTabId = this.activeTabId === tabId
+      ? this._getNeighborTabId(tabId)
+      : null
+
+    this.tabs.delete(tabId)
+    this._deferredCloseTabIds.delete(tabId)
+    this._deferredUnloadTabIds.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
+    }
+
+    this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
+      console.error('Failed to delete closed tab preview:', error)
+    })
+
+    if (nextTabId) {
+      this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
+      this.selectionRevision += 1
+      this._broadcastStateUpdate()
+      this._saveSession()
+    } else {
+      this._broadcastStateUpdate()
+      this._saveSession()
+    }
+
+    return this.tabs.size > 0
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabInfo|null}
+   */
+  duplicateTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return null
+
+    return this.createTab({
+      url: tab.url,
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      makeActive: true
+    })
+  }
+
+  /**
+   * @returns {TabInfo|null}
+   */
+  restoreClosedTab() {
+    const closedTab = this.closedTabs.pop()
+    if (!closedTab) return null
+
+    return this.createTab({
+      url: closedTab.url,
+      title: closedTab.title,
+      isPinned: closedTab.isPinned,
+      color: closedTab.color,
+      makeActive: true
+    })
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} isPinned
+   * @returns {boolean}
+   */
+  setTabPinned(tabId, isPinned) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextPinned = Boolean(isPinned)
+    if (tab.isPinned === nextPinned) {
+      return false
+    }
+
+    tab.isPinned = nextPinned
+    const entries = Array.from(this.tabs.entries()).filter(([id]) => id !== tabId)
+    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
+    entries.splice(pinnedCount, 0, [tabId, tab])
+    this.tabs = new Map(entries)
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return true
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {string | null} color
+   * @returns {boolean}
+   */
+  setTabColor(tabId, color) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return false
+
+    const nextColor = TabManager.normalizeTabColor(color)
+    if (tab.color === nextColor) {
+      return false
+    }
+
+    tab.color = nextColor
+    this._broadcastStateUpdate()
+    this._saveSession()
+    return true
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {Set<string>}
+   */
+  _getTabLoadingSources(tab) {
+    if (!(tab.loadingSources instanceof Set)) {
+      tab.loadingSources = new Set()
+    }
+    return tab.loadingSources
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @returns {boolean}
+   */
+  _getTabLoadingState(tab) {
+    return this._getTabLoadingSources(tab).size > 0 || tab.loadState === 'mounting'
+  }
+
+  /**
+   * @param {TabInfo} tab
+   */
+  _syncTabLoadingState(tab) {
+    const nextLoading = this._getTabLoadingState(tab)
+    if (tab.isLoading === nextLoading) {
+      return
+    }
+
+    tab.isLoading = nextLoading
+    this._broadcastStateUpdate()
+    if (!nextLoading) {
+      this._scheduleTabPreviewRefresh(tab)
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {string} source
+   * @param {boolean} isLoading
+   */
+  _setTabLoadingSource(tab, source, isLoading) {
+    const loadingSources = this._getTabLoadingSources(tab)
+    if (isLoading) {
+      loadingSources.add(source)
+    } else {
+      loadingSources.delete(source)
+    }
+    this._syncTabLoadingState(tab)
+  }
+
+  /**
    * @param {TabInfo} tab
    * @param {number} [delay]
-   * @param {{allowInactive?: boolean}} [options]
    */
-  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS, { allowInactive = false } = {}) {
-    const effectiveAllowInactive = allowInactive || tab.previewCaptureAllowInactive === true
+  _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
     this._clearTabPreviewRefresh(tab)
-    tab.previewCaptureAllowInactive = effectiveAllowInactive
+    if (this.presentedTabId !== tab.id) {
+      return
+    }
 
     tab.previewCaptureTimeoutId = setTimeout(() => {
       tab.previewCaptureTimeoutId = null
+      if (this.presentedTabId !== tab.id) {
+        return
+      }
       if (this._getTabLoadingState(tab)) {
-        this._scheduleTabPreviewRefresh(tab, delay, { allowInactive: effectiveAllowInactive })
+        this._scheduleTabPreviewRefresh(tab, delay)
         return
       }
-
-      const isActive = this.activeTabId === tab.id
-      if (!isActive && !effectiveAllowInactive) {
-        tab.previewCaptureAllowInactive = false
-        return
-      }
-
-      const refreshPromise = isActive
-        ? this._refreshTabPreview(tab)
-        : this._refreshInactiveTabPreview(tab)
-
-      refreshPromise.catch(error => {
+      this._refreshTabPreview(tab).catch(error => {
         console.error('Failed to refresh tab preview:', error)
-      })
-      refreshPromise.then(() => {
-        tab.previewCaptureAllowInactive = false
-      }, () => {
-        tab.previewCaptureAllowInactive = false
       })
     }, delay)
   }
@@ -798,7 +1140,6 @@ export class TabManager {
       clearTimeout(tab.previewCaptureTimeoutId)
       tab.previewCaptureTimeoutId = null
     }
-    tab.previewCaptureAllowInactive = false
   }
 
   /**
@@ -807,11 +1148,9 @@ export class TabManager {
    */
   _getTabPreviewFilePath(fileName) {
     const normalizedFileName = TabManager.normalizePreviewFileName(fileName)
-    if (normalizedFileName == null) {
-      return null
-    }
-
-    return join(TabManager.getTabPreviewCacheDirectory(), normalizedFileName)
+    return normalizedFileName == null
+      ? null
+      : join(TabManager.getTabPreviewCacheDirectory(), normalizedFileName)
   }
 
   /**
@@ -827,11 +1166,8 @@ export class TabManager {
 
     const fileName = TabManager.normalizePreviewFileName(tab.previewFileName) ?? randomUUID() + '.png'
     const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
-    const filePath = join(cacheDirectory, fileName)
-
     await mkdir(cacheDirectory, { recursive: true })
-    await writeFile(filePath, buffer)
-
+    await writeFile(join(cacheDirectory, fileName), buffer)
     tab.previewFileName = fileName
   }
 
@@ -847,9 +1183,7 @@ export class TabManager {
 
     try {
       const buffer = await readFile(filePath)
-      return buffer.length > 0
-        ? TabManager.tabPreviewBufferToDataUrl(buffer)
-        : null
+      return buffer.length > 0 ? TabManager.tabPreviewBufferToDataUrl(buffer) : null
     } catch (error) {
       if (error?.code !== 'ENOENT') {
         console.error('Failed to load tab preview:', error)
@@ -868,11 +1202,9 @@ export class TabManager {
     }
 
     const dataUrl = await this._loadTabPreviewDataUrl(tab.previewFileName)
-    if (dataUrl == null) {
-      return null
+    if (dataUrl != null) {
+      tab.previewDataUrl = dataUrl
     }
-
-    tab.previewDataUrl = dataUrl
     return dataUrl
   }
 
@@ -896,79 +1228,25 @@ export class TabManager {
   }
 
   /**
-   * @param {TabInfo} tab
-   * @returns {Set<string>}
+   * @param {string} tabId
+   * @returns {Promise<string | null>}
    */
-  _getTabLoadingSources(tab) {
-    if (!(tab.loadingSources instanceof Set)) {
-      tab.loadingSources = new Set()
+  async captureTabPreview(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) {
+      return null
     }
 
-    return tab.loadingSources
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @returns {boolean}
-   */
-  _getTabLoadingState(tab) {
-    const loadingSources = this._getTabLoadingSources(tab)
-    return loadingSources.size > 0 || (
-      tab.hasStartedLoading &&
-      !tab.view.webContents.isDestroyed() &&
-      tab.view.webContents.isLoading()
-    )
-  }
-
-  /**
-   * @param {TabInfo} tab
-   */
-  _syncTabLoadingState(tab) {
-    const wasLoading = tab.isLoading
-    const nextLoading = this._getTabLoadingState(tab)
-    if (wasLoading === nextLoading) {
-      return
+    const cachedPreview = await this._getCachedTabPreviewDataUrl(tab)
+    if (
+      tab.id !== this.presentedTabId ||
+      this.browserWindow.webContents.isDestroyed() ||
+      this._getTabLoadingState(tab)
+    ) {
+      return cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
     }
 
-    tab.isLoading = nextLoading
-    this._broadcastStateUpdate()
-
-    if (wasLoading && !nextLoading && tab.previewCaptureTimeoutId == null) {
-      this._scheduleTabPreviewRefresh(tab)
-    }
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @param {string} source
-   * @param {boolean} isLoading
-   */
-  _setTabLoadingSource(tab, source, isLoading) {
-    const loadingSources = this._getTabLoadingSources(tab)
-
-    if (isLoading) {
-      loadingSources.add(source)
-    } else {
-      loadingSources.delete(source)
-    }
-
-    this._syncTabLoadingState(tab)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @param {boolean} isLoading
-   */
-  _setTabLoading(tab, isLoading) {
-    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_RENDERER, isLoading)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @param {boolean} isLoading
-   */
-  _setTabNavigationLoading(tab, isLoading) {
-    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_NAVIGATION, isLoading)
+    return await this._refreshTabPreview(tab) ?? cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
   }
 
   /**
@@ -976,8 +1254,11 @@ export class TabManager {
    * @returns {Promise<string | null>}
    */
   async _refreshTabPreview(tab) {
-    if (this._getTabLoadingState(tab)) {
-      this._scheduleTabPreviewRefresh(tab)
+    if (
+      tab.id !== this.presentedTabId ||
+      this.browserWindow.webContents.isDestroyed() ||
+      this._getTabLoadingState(tab)
+    ) {
       return await this._getCachedTabPreviewDataUrl(tab)
     }
 
@@ -986,18 +1267,40 @@ export class TabManager {
     }
 
     tab.previewCapturePromise = (async () => {
-      const dataUrl = await this._captureTabPreviewDataUrl(tab)
-      if (dataUrl == null) {
-        return await this._getCachedTabPreviewDataUrl(tab)
-      }
+      try {
+        await this._setTabPreviewCaptureMode(true)
+        const image = await this.browserWindow.webContents.capturePage()
+        if (image.isEmpty()) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
 
-      tab.previewDataUrl = dataUrl
-      tab.previewCapturedAt = Date.now()
-      await this._persistTabPreview(tab, dataUrl).catch(error => {
-        console.error('Failed to persist tab preview:', error)
-      })
-      await this._saveSession()
-      return dataUrl
+        const contentBounds = await this._getTabPreviewContentBounds()
+        const contentImage = contentBounds == null ? image : this._cropTabPreviewToContent(image, contentBounds)
+        if (contentImage == null || contentImage.isEmpty()) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
+
+        const { width, height } = contentImage.getSize()
+        const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
+        const preview = ratio < 1
+          ? contentImage.resize({
+              width: Math.max(1, Math.round(width * ratio)),
+              height: Math.max(1, Math.round(height * ratio)),
+              quality: 'good'
+            })
+          : contentImage
+        const dataUrl = preview.toDataURL()
+        tab.previewDataUrl = dataUrl
+        tab.previewCapturedAt = Date.now()
+        await this._persistTabPreview(tab, dataUrl)
+        await this._saveSession()
+        return dataUrl
+      } catch (error) {
+        console.error('Failed to capture tab preview:', error)
+        return await this._getCachedTabPreviewDataUrl(tab)
+      } finally {
+        await this._setTabPreviewCaptureMode(false)
+      }
     })()
 
     try {
@@ -1008,109 +1311,11 @@ export class TabManager {
   }
 
   /**
-   * Refresh an inactive tab's preview. Reattach it behind the active tab so
-   * Chromium paints a capturable frame, including when background video
-   * startup left the view attached but occluded.
-   * @param {TabInfo} tab
-   * @returns {Promise<string | null>}
-   */
-  async _refreshInactiveTabPreview(tab) {
-    if (
-      this.activeTabId === tab.id ||
-      !tab.hasStartedLoading ||
-      tab.view.webContents.isDestroyed()
-    ) {
-      return await this._getCachedTabPreviewDataUrl(tab)
-    }
-
-    const wasAttached = this._attachedTabIds.has(tab.id)
-    if (wasAttached) {
-      this._detachView(tab)
-    }
-
-    this._attachBackgroundTab(tab)
-    if (!this._attachedTabIds.has(tab.id)) {
-      return await this._getCachedTabPreviewDataUrl(tab)
-    }
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, TAB_PREVIEW_BACKGROUND_PAINT_DELAY_MS))
-      return await this._refreshTabPreview(tab)
-    } finally {
-      if (!wasAttached && this.activeTabId !== tab.id && this._attachedTabIds.has(tab.id)) {
-        this._detachView(tab)
-      }
-    }
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @returns {Promise<string | null>}
-   */
-  async _captureTabPreviewDataUrl(tab) {
-    if (
-      !tab.hasStartedLoading ||
-      tab.view.webContents.isDestroyed() ||
-      this._getTabLoadingState(tab) ||
-      !this._attachedTabIds.has(tab.id)
-    ) {
-      return null
-    }
-
-    const webContents = tab.view.webContents
-
-    try {
-      await this._setTabPreviewCaptureMode(webContents, true)
-
-      const image = await webContents.capturePage()
-      if (image.isEmpty()) {
-        return null
-      }
-
-      const contentBounds = await this._getTabPreviewContentBounds(webContents)
-      if (contentBounds == null) {
-        return null
-      }
-
-      const contentImage = this._cropTabPreviewToContent(image, contentBounds)
-      if (contentImage == null || contentImage.isEmpty()) {
-        return null
-      }
-
-      const { width, height } = contentImage.getSize()
-      if (width <= 0 || height <= 0) {
-        return null
-      }
-
-      const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
-      const preview = ratio < 1
-        ? contentImage.resize({
-            width: Math.max(1, Math.round(width * ratio)),
-            height: Math.max(1, Math.round(height * ratio)),
-            quality: 'good'
-          })
-        : contentImage
-
-      return preview.toDataURL()
-    } catch (error) {
-      console.error('Failed to capture tab preview:', error)
-      return null
-    } finally {
-      await this._setTabPreviewCaptureMode(webContents, false)
-    }
-  }
-
-  /**
-   * @param {import('electron').WebContents} webContents
    * @returns {Promise<{contentTop: number, viewportHeight: number} | null>}
    */
-  async _getTabPreviewContentBounds(webContents) {
-    if (webContents.isDestroyed()) {
-      return null
-    }
-
+  async _getTabPreviewContentBounds() {
     try {
-      const bounds = await webContents.executeJavaScript(`
+      return await this.browserWindow.webContents.executeJavaScript(`
         (() => {
           const viewportHeight = Math.max(
             window.visualViewport?.height || 0,
@@ -1121,29 +1326,9 @@ export class TabManager {
           const contentTop = tabBar instanceof HTMLElement
             ? Math.min(viewportHeight, Math.max(0, tabBar.getBoundingClientRect().bottom))
             : 0
-
           return { contentTop, viewportHeight }
         })()
       `, true)
-
-      if (bounds == null || typeof bounds !== 'object') {
-        return null
-      }
-
-      const contentTop = Number(bounds.contentTop)
-      const viewportHeight = Number(bounds.viewportHeight)
-      if (
-        !Number.isFinite(contentTop) ||
-        !Number.isFinite(viewportHeight) ||
-        viewportHeight <= 0
-      ) {
-        return null
-      }
-
-      return {
-        contentTop: Math.max(0, contentTop),
-        viewportHeight
-      }
     } catch {
       return null
     }
@@ -1167,754 +1352,163 @@ export class TabManager {
     const scaleY = height / contentBounds.viewportHeight
     const cropY = Math.min(height, Math.max(0, Math.ceil(contentBounds.contentTop * scaleY)))
     const cropHeight = height - cropY
-
-    if (cropHeight <= 0) {
-      return null
-    }
-
-    return image.crop({
-      x: 0,
-      y: cropY,
-      width,
-      height: cropHeight
-    })
+    return cropHeight <= 0
+      ? null
+      : image.crop({ x: 0, y: cropY, width, height: cropHeight })
   }
 
   /**
-   * Hide tab tooltip UI inside the captured renderer so previews do not
-   * recursively include another preview tooltip.
-   * @param {import('electron').WebContents} webContents
    * @param {boolean} enabled
-   * @returns {Promise<void>}
    */
-  async _setTabPreviewCaptureMode(webContents, enabled) {
-    if (webContents.isDestroyed()) {
+  async _setTabPreviewCaptureMode(enabled) {
+    if (this.browserWindow.webContents.isDestroyed()) {
       return
     }
 
     const script = enabled
       ? `
         (() => {
-          const styleId = ${JSON.stringify(TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID)}
-          let style = document.getElementById(styleId)
+          let style = document.getElementById(${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)})
           if (!style) {
             style = document.createElement('style')
-            style.id = styleId
-            style.textContent = '.tabTooltip { visibility: hidden !important; }'
-            document.documentElement.append(style)
+            style.id = ${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)}
+            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} .tabTooltip, html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
+            document.head.appendChild(style)
           }
+          document.documentElement.classList.add(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})
+          return new Promise(resolve => requestAnimationFrame(() => resolve(true)))
         })()
       `
-      : `
-        (() => {
-          document.getElementById(${JSON.stringify(TAB_PREVIEW_TOOLTIP_HIDE_STYLE_ID)})?.remove()
-        })()
-      `
+      : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`
 
     try {
-      await webContents.executeJavaScript(script, true)
-      if (enabled) {
-        await new Promise(resolve => setTimeout(resolve, 50))
-      }
+      await this.browserWindow.webContents.executeJavaScript(script, true)
     } catch {
-      // The renderer may be navigating or already torn down; the caller can
-      // still try capturePage and fall back to the cached preview.
+      // The shared renderer may be navigating or shutting down.
     }
   }
 
   /**
-   * Create a new tab
-   * @param {object} options
-   * @param {string} [options.url] - Full URL to load
-   * @param {string} [options.route] - Hash route (e.g., '/watch/xyz')
-   * @param {object} [options.query] - Query params for the route
-   * @param {string} [options.title] - Initial tab title
-   * @param {boolean} [options.isPinned=false] - Whether the tab is pinned
-   * @param {string | null} [options.color=null] - Semantic tab color key
-   * @param {string | null} [options.previewDataUrl=null] - Restored thumbnail data URL
-   * @param {number} [options.previewCapturedAt=0] - Thumbnail capture timestamp
-   * @param {string | null} [options.previewFileName=null] - Cached thumbnail file name
-   * @param {boolean} [options.makeActive=true] - Whether to activate the tab immediately
-   * @param {'end' | 'afterCurrent'} [options.openPosition='end'] - Where to insert the tab
-   * @param {boolean} [options.lazyLoad=false] - Whether to defer loading until activation
-   * @param {boolean} [options.preloadInBackground=false] - Whether to attach an inactive tab while it loads
-   * @returns {TabInfo}
-   */
-  createTab({ url, route, query, title, isPinned = false, color = null, previewDataUrl = null, previewCapturedAt = 0, previewFileName = null, makeActive = true, openPosition = DEFAULT_NEW_TAB_POSITION, lazyLoad = false, preloadInBackground = false } = {}) {
-    const id = randomUUID()
-
-    // Determine the URL to load
-    let loadUrl = this.rootAppUrl
-    if (url) {
-      loadUrl = url
-    } else if (route) {
-      loadUrl = this.rootAppUrl
-      if (route.startsWith('/')) {
-        loadUrl += '#' + route
-      } else {
-        loadUrl += '#/' + route
-      }
-      if (query && Object.keys(query).length > 0) {
-        loadUrl += '?' + new URLSearchParams(query).toString()
-      }
-    }
-
-    const view = this._createTabView()
-    const restoredPreviewDataUrl = typeof previewDataUrl === 'string' && previewDataUrl.startsWith('data:image/png;base64,')
-      ? previewDataUrl
-      : null
-    const restoredPreviewFileName = TabManager.normalizePreviewFileName(previewFileName)
-    const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
-      ? previewCapturedAt
-      : 0
-
-    const tabInfo = {
-      id,
-      url: loadUrl,
-      title: title || TabManager.formatDefaultTabTitle(loadUrl),
-      lastActiveAt: Date.now(),
-      isPlaying: false,
-      isPinned: Boolean(isPinned),
-      isLoading: false,
-      loadingSources: new Set(),
-      color: TabManager.normalizeTabColor(color),
-      previewDataUrl: restoredPreviewDataUrl,
-      previewCapturedAt: restoredPreviewCapturedAt,
-      previewFileName: restoredPreviewFileName,
-      previewCaptureTimeoutId: null,
-      previewCaptureAllowInactive: false,
-      previewCapturePromise: null,
-      view,
-      hasStartedLoading: false,
-      preloadInBackground: Boolean(preloadInBackground)
-    }
-
-    let preferredIndex = this.tabs.size
-    if (TabManager.normalizeNewTabPosition(openPosition) === 'afterCurrent' && this.activeTabId != null) {
-      const entries = Array.from(this.tabs.entries())
-      const activeTabIndex = entries.findIndex(([tabId]) => tabId === this.activeTabId)
-
-      if (activeTabIndex !== -1) {
-        preferredIndex = activeTabIndex + 1
-      }
-    }
-
-    this._insertTabEntry(id, tabInfo, preferredIndex)
-
-    if (!makeActive && preloadInBackground) {
-      this._attachBackgroundTab(tabInfo)
-    }
-
-    if (!lazyLoad || makeActive) {
-      this._startTabLoad(tabInfo)
-    }
-
-    // When opening a new tab while another one is already active, keep the
-    // current tab visible until the new tab has finished loading. This avoids
-    // the window flashing the background color while the new tab bootstraps.
-    if (makeActive) {
-      if (this.activeTabId == null) {
-        // Initial tab for this window – activate immediately so that
-        // createWindow's startup logic can wait on did-finish-load.
-        this.activateTab(id)
-      } else {
-        const activateWhenReady = () => {
-          // Clean up both listeners in case did-fail-load fires instead
-          view.webContents.removeListener('did-finish-load', activateWhenReady)
-          view.webContents.removeListener('did-fail-load', activateWhenReady)
-          // Force activation since we know the tab has finished loading
-          this.activateTab(id, true)
-        }
-
-        view.webContents.once('did-finish-load', activateWhenReady)
-        view.webContents.once('did-fail-load', activateWhenReady)
-      }
-    }
-
-    this._broadcastStateUpdate()
-    this._saveSession()
-
-    return tabInfo
-  }
-
-  /**
-   * Start loading a tab if it was restored lazily.
-   * @param {TabInfo} tab
-   */
-  _startTabLoad(tab) {
-    if (tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
-      return
-    }
-
-    tab.hasStartedLoading = true
-    this._setTabNavigationLoading(tab, true)
-    tab.view.webContents.loadURL(tab.url).catch(error => {
-      console.error(`Failed to load tab URL ${tab.url}:`, error)
-      this._setTabNavigationLoading(tab, false)
-    })
-  }
-
-  /**
-   * Create a new tab using the user's preferred insertion position unless overridden.
-   * @param {object} options
-   * @param {string} [options.url]
-   * @param {string} [options.route]
-   * @param {object} [options.query]
-   * @param {string} [options.title]
-   * @param {boolean} [options.isPinned=false]
-   * @param {string | null} [options.color=null]
-   * @param {boolean} [options.makeActive=true]
-   * @param {'end' | 'afterCurrent'} [options.openPosition]
-   * @param {boolean} [options.lazyLoad=false]
-   * @param {boolean} [options.preloadInBackground=false]
-   * @returns {Promise<TabInfo>}
-   */
-  async createTabWithPreference(options = {}) {
-    const openPosition = options.openPosition == null
-      ? await TabManager.getStoredNewTabPosition()
-      : TabManager.normalizeNewTabPosition(options.openPosition)
-
-    return this.createTab({
-      ...options,
-      openPosition
-    })
-  }
-
-  /**
-   * Create a new tab using the user's preferred insertion position, inheriting
-   * the opener tab's color when the caller did not provide one.
-   * @param {object} [options]
-   * @param {string | undefined | null} [openerTabId=this.activeTabId]
-   * @returns {Promise<TabInfo>}
-   */
-  async createTabWithPreferenceFromOpener(options = {}, openerTabId = this.activeTabId) {
-    return this.createTabWithPreference(this._withOpenerTabColor(options, openerTabId))
-  }
-
-  /**
-   * Apply opener tab color to tab creation options unless the caller already
-   * supplied a color.
-   * @param {object} options
-   * @param {string | undefined | null} openerTabId
-   * @returns {object}
-   */
-  _withOpenerTabColor(options, openerTabId) {
-    if (Object.hasOwn(options, 'color')) {
-      return options
-    }
-
-    const openerColor = TabManager.normalizeTabColor(this.tabs.get(openerTabId)?.color)
-    if (openerColor == null) {
-      return options
-    }
-
-    return {
-      ...options,
-      color: openerColor
-    }
-  }
-
-  /**
-   * Activate a tab
-   * @param {string} tabId
-   * @param {boolean} [forceImmediate=false] - If true, skip loading check and activate immediately
-   */
-  activateTab(tabId, forceImmediate = false) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) return
-
-    // Keep track of the previously active tab so we can update state before
-    // swapping views. This ensures renderers know which tab is active by the
-    // time their view becomes visible, preventing a brief flash where the old
-    // tab still appears active in the tab bar.
-    const previousActiveId = this.activeTabId
-    const previousVisibleId = this._visibleTabId ?? previousActiveId
-    const activationToken = ++this._activationToken
-
-    // Exit fullscreen on the previous tab before switching
-    if (previousActiveId && previousActiveId !== tabId) {
-      const previousTab = this.tabs.get(previousActiveId)
-      if (previousTab && !previousTab.view.webContents.isDestroyed()) {
-        try {
-          const url = previousTab.view.webContents.getURL()
-          if (url && isOpenTubeXUrl(url)) {
-            previousTab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
-          }
-        } catch (error) {
-          // Silently ignore errors if webContents is not ready
-          console.error('Error sending exit fullscreen message:', error)
-        }
-      }
-    }
-
-    // Update tab state *before* changing the visible WebContentsView so that
-    // all renderers (including the one we are about to show) can update their
-    // UI to reflect the new active tab without a visible flicker.
-    tab.lastActiveAt = Date.now()
-    this.activeTabId = tabId
-
-    // Update window title to match tab title
-    this.browserWindow.setTitle(tab.title)
-
-    const isSwitchingToDifferentTab = previousActiveId && previousActiveId !== tabId
-    const shouldWaitForInitialLoad = !forceImmediate && !tab.hasStartedLoading && isSwitchingToDifferentTab
-    if (shouldWaitForInitialLoad) {
-      const activateWhenReady = () => {
-        // Clean up both listeners in case did-fail-load fires instead
-        tab.view.webContents.removeListener('did-finish-load', activateWhenReady)
-        tab.view.webContents.removeListener('did-fail-load', activateWhenReady)
-
-        // Only activate if this tab is still the active tab (user might have switched away)
-        if (this.activeTabId === tab.id) {
-          this._finishTabActivation(tab, previousVisibleId, activationToken)
-        }
-      }
-
-      tab.view.webContents.once('did-finish-load', activateWhenReady)
-      tab.view.webContents.once('did-fail-load', activateWhenReady)
-    }
-
-    this._startTabLoad(tab)
-
-    this._broadcastStateUpdate()
-    this._saveSession()
-
-    if (shouldWaitForInitialLoad) {
-      return
-    }
-
-    // If forceImmediate is true, we know the tab has finished loading (e.g., from did-finish-load)
-    // so skip the loading check and activate immediately
-    if (forceImmediate) {
-      this._finishTabActivation(tab, previousVisibleId, activationToken)
-      return
-    }
-
-    // Check if the tab is still loading. If so, and there's a previous active tab,
-    // wait for it to finish loading before showing it to prevent flashing.
-    // This is especially important for tabs restored from session that haven't been shown yet.
-    const isTabLoading = tab.view.webContents.isLoading()
-
-    // If tab is loading and we're switching from another tab, keep the previous tab
-    // visible until the new tab finishes loading to prevent flashing
-    if (isTabLoading && isSwitchingToDifferentTab) {
-      const activateWhenReady = () => {
-        // Clean up both listeners in case did-fail-load fires instead
-        tab.view.webContents.removeListener('did-finish-load', activateWhenReady)
-        tab.view.webContents.removeListener('did-fail-load', activateWhenReady)
-
-        // Only activate if this tab is still the active tab (user might have switched away)
-        if (this.activeTabId === tab.id) {
-          this._finishTabActivation(tab, previousVisibleId, activationToken)
-        }
-      }
-
-      tab.view.webContents.once('did-finish-load', activateWhenReady)
-      tab.view.webContents.once('did-fail-load', activateWhenReady)
-      return
-    }
-
-    // Tab is ready or no previous tab to hide - activate immediately
-    this._finishTabActivation(tab, previousVisibleId, activationToken)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   * @param {string|null} previousVisibleId
-   * @param {number} activationToken
-   * @private
-   */
-  _finishTabActivation(tab, previousVisibleId, activationToken) {
-    this._doActivateTab(tab, previousVisibleId, activationToken).catch(error => {
-      console.error('Failed to finish tab activation:', error)
-    })
-  }
-
-  /**
-   * Internal method to actually perform the tab activation (show/hide views).
-   * If another tab is visible, refresh its preview after the visible tab swap
-   * so preview capture does not block opening or activating tabs.
-   * @param {TabInfo} tab
-   * @param {string|null} previousVisibleId
-   * @param {number} activationToken
-   * @private
-   */
-  async _doActivateTab(tab, previousVisibleId, activationToken) {
-    if (
-      activationToken !== this._activationToken ||
-      this.activeTabId !== tab.id ||
-      !this.tabs.has(tab.id)
-    ) {
-      return
-    }
-
-    // Hide current visible tab
-    if (previousVisibleId && previousVisibleId !== tab.id) {
-      const currentTab = this.tabs.get(previousVisibleId)
-      if (currentTab) {
-        this._detachView(currentTab)
-        if (this._visibleTabId === currentTab.id) {
-          this._visibleTabId = null
-        }
-
-        if (!currentTab.view.webContents.isDestroyed()) {
-          try {
-            currentTab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, false)
-          } catch (error) {
-            console.error('Error sending tab inactive notification:', error)
-          }
-        }
-
-        this._scheduleTabPreviewRefresh(
-          currentTab,
-          TAB_PREVIEW_POST_ACTIVATION_REFRESH_DELAY_MS,
-          { allowInactive: true }
-        )
-      }
-    }
-
-    if (
-      activationToken !== this._activationToken ||
-      this.activeTabId !== tab.id ||
-      !this.tabs.has(tab.id) ||
-      tab.view.webContents.isDestroyed()
-    ) {
-      return
-    }
-
-    // Set bounds BEFORE adding the view to prevent flash
-    const bounds = this.browserWindow.getContentBounds()
-    tab.view.setBounds({
-      x: 0,
-      y: 0,
-      width: bounds.width,
-      height: bounds.height
-    })
-
-    // Show new active tab
-    this._detachView(tab)
-    this._attachView(tab)
-    this._visibleTabId = tab.id
-    tab.view.webContents.focus()
-
-    if (!tab.view.webContents.isDestroyed()) {
-      try {
-        tab.view.webContents.send(IpcChannels.TABS_ACTIVE_CHANGED, true)
-      } catch (error) {
-        console.error('Error sending tab active notification:', error)
-      }
-    }
-
-    this._scheduleTabPreviewRefresh(tab)
-  }
-
-  /**
-   * Close a tab
-   * @param {string} tabId
-   */
-  closeTab(tabId) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) return
-
-    // Exit fullscreen on the tab being closed if it's the active tab
-    if (this.activeTabId === tabId) {
-      // Exit BrowserWindow fullscreen directly
-      if (this.browserWindow.isFullScreen()) {
-        this.browserWindow.setFullScreen(false)
-      }
-
-      // Also send IPC message to exit video player fullscreen
-      if (!tab.view.webContents.isDestroyed()) {
-        try {
-          const url = tab.view.webContents.getURL()
-          if (url && isOpenTubeXUrl(url)) {
-            tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
-          }
-        } catch (error) {
-          // Silently ignore errors if webContents is not ready
-          console.error('Error sending exit fullscreen message:', error)
-        }
-      }
-    }
-
-    this._clearTabPreviewRefresh(tab)
-
-    // Store URL and visual metadata for potential restore.
-    this.closedTabs.push({
-      url: tab.url,
-      title: tab.title,
-      isPinned: tab.isPinned,
-      color: tab.color
-    })
-    if (this.closedTabs.length > 10) {
-      this.closedTabs.shift()
-    }
-
-    // Get ordered tabs BEFORE deleting to find the previous tab
-    const orderedTabs = Array.from(this.tabs.entries())
-    const closedTabIndex = orderedTabs.findIndex(([id]) => id === tabId)
-    let tabToActivate = null
-
-    // If we closed the active tab, determine which tab to activate
-    if (this.activeTabId === tabId && closedTabIndex !== -1) {
-      if (closedTabIndex > 0) {
-        // Not the first tab - activate the previous tab
-        tabToActivate = orderedTabs[closedTabIndex - 1][1]
-      } else if (orderedTabs.length > 1) {
-        // First tab - activate the next tab (which becomes first after deletion)
-        tabToActivate = orderedTabs[1][1]
-      }
-    }
-
-    this._detachView(tab)
-
-    // Destroy the webContents
-    tab.view.webContents.close()
-    this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
-      console.error('Failed to delete closed tab preview:', error)
-    })
-
-    this.tabs.delete(tabId)
-
-    // Activate the determined tab
-    if (tabToActivate) {
-      this.activeTabId = null
-      this.activateTab(tabToActivate.id)
-    } else if (this.activeTabId === tabId) {
-      this.activeTabId = null
-    }
-
-    this._broadcastStateUpdate()
-    this._saveSession()
-
-    // Return whether there are tabs remaining
-    return this.tabs.size > 0
-  }
-
-  /**
-   * Duplicate a tab
-   * @param {string} tabId
-   * @returns {TabInfo|null}
-   */
-  duplicateTab(tabId) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) return null
-
-    return this.createTab({
-      url: tab.url,
-      title: tab.title,
-      isPinned: tab.isPinned,
-      color: tab.color,
-      makeActive: true
-    })
-  }
-
-  /**
-   * Restore the last closed tab
-   * @returns {TabInfo|null}
-   */
-  restoreClosedTab() {
-    const closedTab = this.closedTabs.pop()
-    if (!closedTab) return null
-
-    return this.createTab({
-      url: closedTab.url,
-      title: closedTab.title,
-      isPinned: closedTab.isPinned,
-      color: closedTab.color,
-      makeActive: true
-    })
-  }
-
-  /**
-   * Pin or unpin a tab and move it to the matching tab group.
-   * @param {string} tabId
-   * @param {boolean} isPinned
-   * @returns {boolean} Whether the tab changed
-   */
-  setTabPinned(tabId, isPinned) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) return false
-
-    const nextPinned = Boolean(isPinned)
-    if (tab.isPinned === nextPinned) {
-      return false
-    }
-
-    tab.isPinned = nextPinned
-
-    const entries = Array.from(this.tabs.entries()).filter(([id]) => id !== tabId)
-    const pinnedCount = entries.filter(([, candidate]) => candidate.isPinned).length
-    entries.splice(pinnedCount, 0, [tabId, tab])
-    this.tabs = new Map(entries)
-
-    this._broadcastStateUpdate()
-    this._saveSession()
-
-    return true
-  }
-
-  /**
-   * Set a tab's semantic color key.
-   * @param {string} tabId
-   * @param {string | null} color
-   * @returns {boolean} Whether the tab changed
-   */
-  setTabColor(tabId, color) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) return false
-
-    const nextColor = TabManager.normalizeTabColor(color)
-    if (tab.color === nextColor) {
-      return false
-    }
-
-    tab.color = nextColor
-
-    this._broadcastStateUpdate()
-    this._saveSession()
-
-    return true
-  }
-
-  /**
-   * Capture a small thumbnail of a tab if its webContents can provide one.
-   * @param {string} tabId
-   * @returns {Promise<string | null>} Data URL or fallback image URL for the thumbnail, or null.
-   */
-  async captureTabPreview(tabId) {
-    const tab = this.tabs.get(tabId)
-    if (!tab) {
-      return null
-    }
-
-    const canCaptureLive = tab.hasStartedLoading &&
-      !tab.view.webContents.isDestroyed()
-
-    const cachedPreview = await this._getCachedTabPreviewDataUrl(tab)
-    if (this._getTabLoadingState(tab)) {
-      this._scheduleTabPreviewRefresh(tab)
-      return cachedPreview ?? TabManager.getVideoThumbnailUrl(tab.url)
-    }
-
-    if (cachedPreview != null) {
-      return cachedPreview
-    }
-
-    if (canCaptureLive) {
-      const preview = this.activeTabId === tab.id
-        ? await this._refreshTabPreview(tab)
-        : await this._refreshInactiveTabPreview(tab)
-      return preview ?? TabManager.getVideoThumbnailUrl(tab.url)
-    }
-
-    return TabManager.getVideoThumbnailUrl(tab.url)
-  }
-
-  /**
-   * Ask the renderer to prepare (e.g. save watch timestamp) and reload; used by menu.
-   * The renderer will send TABS_RELOAD when ready, which triggers reloadTab().
    * @param {string | null} [tabId]
    */
-  requestReload(tabId = this.activeTabId) {
-    if (!tabId) return
-
-    const tab = this.tabs.get(tabId)
-    if (!tab || tab.view.webContents.isDestroyed()) return
-
-    tab.view.webContents.send(IpcChannels.TABS_REQUEST_RELOAD)
+  requestReload(tabId = this.presentedTabId ?? this.activeTabId) {
+    if (!tabId || !this.tabs.has(tabId)) {
+      return
+    }
+    this.bridge.send(IpcChannels.TABS_REQUEST_RELOAD, tabId)
   }
 
   /**
-   * Reload a tab
+   * Renderer acknowledgement that preparation for a logical reload completed.
    * @param {string | null} [tabId]
    */
   reloadTab(tabId = this.activeTabId) {
     if (!tabId) return
 
     const tab = this.tabs.get(tabId)
-    if (!tab || tab.view.webContents.isDestroyed()) return
+    if (!tab) return
 
-    tab.view.webContents.reload()
+    tab.loadState = 'mounting'
+    tab.preloadInBackground = tab.id !== this.activeTabId
+    tab.mountRevision += 1
+    tab.refreshKey += 1
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    this._broadcastStateUpdate()
   }
 
   /**
-   * Load an unloaded tab without activating it.
    * @param {string} tabId
-   * @returns {boolean} Whether the tab started loading
+   * @returns {boolean}
    */
   loadTab(tabId) {
     const tab = this.tabs.get(tabId)
-    if (!tab || tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
+    if (!tab || tab.loadState !== 'unloaded') {
       return false
     }
 
-    this._startTabLoad(tab)
+    tab.loadState = 'mounting'
+    tab.preloadInBackground = true
+    tab.mountRevision += 1
+    this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
+    this._broadcastStateUpdate()
     return true
   }
 
   /**
-   * Unload a tab's renderer while keeping its URL and title in the tab strip.
    * @param {string} tabId
-   * @returns {Promise<boolean>} Whether the tab was unloaded
+   * @returns {Promise<boolean>}
    */
   async unloadTab(tabId) {
     const tab = this.tabs.get(tabId)
-    if (!tab || !tab.hasStartedLoading || tab.view.webContents.isDestroyed()) {
+    if (!tab || tab.loadState === 'unloaded' || tab.loadState === 'unloading') {
       return false
     }
 
-    this._clearTabPreviewRefresh(tab)
-    await this._refreshTabPreview(tab).catch(error => {
-      console.error('Failed to refresh preview before unloading tab:', error)
-    })
-    this._clearTabPreviewRefresh(tab)
+    if (tab.id === this.presentedTabId && this.tabs.size > 1) {
+      if (this._deferredUnloadTabIds.has(tabId)) {
+        return true
+      }
 
-    const wasActive = this.activeTabId === tabId
-    let tabToActivate = null
+      await this._refreshTabPreview(tab).catch(error => {
+        console.error('Failed to refresh preview before unloading tab:', error)
+      })
 
-    if (wasActive) {
-      const orderedTabs = Array.from(this.tabs.entries())
-      const unloadedTabIndex = orderedTabs.findIndex(([id]) => id === tabId)
+      const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
+        ? this.activeTabId
+        : this._getNeighborTabId(tabId)
+      if (nextTabId) {
+        this._deferredUnloadTabIds.add(tabId)
+        this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
+        if (this.activeTabId === tabId) {
+          this.activeTabId = null
+          if (this._prepareNeighborActivation(nextTabId)) {
+            this.activateTab(nextTabId)
+          }
+        }
+        return true
+      }
+      return true
+    }
 
-      if (unloadedTabIndex > 0) {
-        tabToActivate = orderedTabs[unloadedTabIndex - 1][1]
-      } else if (orderedTabs.length > 1) {
-        tabToActivate = orderedTabs[1][1]
-      } else {
+    if (tab.id === this.presentedTabId) {
+      await this._refreshTabPreview(tab).catch(error => {
+        console.error('Failed to refresh preview before unloading tab:', error)
+      })
+    }
+
+    if (tab.id === this.activeTabId) {
+      if (this.tabs.size <= 1) {
+        return false
+      }
+
+      const nextTabId = this._getNeighborTabId(tabId)
+      if (!nextTabId) {
         return false
       }
 
       this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
     }
 
-    this._detachView(tab)
-
-    const previousView = tab.view
-    tab.view = this._createTabView()
-    tab.hasStartedLoading = false
-    tab.isPlaying = false
-    tab.isLoading = false
-    tab.loadingSources = new Set()
-    tab.previewCaptureAllowInactive = false
+    tab.loadState = 'unloaded'
     tab.preloadInBackground = false
-
-    if (!previousView.webContents.isDestroyed()) {
-      previousView.webContents.close({ waitForBeforeUnload: false })
+    tab.pendingActivation = false
+    tab.isPlaying = false
+    tab.loadingSources = new Set()
+    tab.isLoading = false
+    tab.refreshKey += 1
+    this._deferredUnloadTabIds.delete(tabId)
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
     }
-
-    if (tabToActivate) {
-      this.activateTab(tabToActivate.id)
-    } else {
-      this._broadcastStateUpdate()
-      this._saveSession()
-    }
-
+    this._broadcastStateUpdate()
+    this._saveSession()
     return true
   }
 
   /**
-   * Move a tab to a new position
    * @param {string} tabId
    * @param {number} toIndex
    */
@@ -1935,260 +1529,233 @@ export class TabManager {
     }
 
     entries.splice(targetIndex, 0, entry)
-
     this.tabs = new Map(entries)
     this._broadcastStateUpdate()
     this._saveSession()
   }
 
   /**
-   * Remove a tab from this window without destroying its webContents (for cross-window transfer).
+   * Create the main-owned portion of a logical tab for staged recreation in
+   * another renderer process. Runtime history/player state cannot be moved as a
+   * DOM tree, but all persisted metadata and the cached preview stay intact.
    * @param {string} tabId
-   * @returns {TabInfo|null}
+   * @returns {object|null}
    */
-  detachTabForTransfer(tabId) {
+  createTransferSnapshot(tabId) {
     const tab = this.tabs.get(tabId)
     if (!tab) {
       return null
     }
 
-    if (this.activeTabId === tabId) {
-      if (this.browserWindow.isFullScreen()) {
-        this.browserWindow.setFullScreen(false)
-      }
-
-      if (!tab.view.webContents.isDestroyed()) {
-        try {
-          const url = tab.view.webContents.getURL()
-          if (url && isOpenTubeXUrl(url)) {
-            tab.view.webContents.send(IpcChannels.TABS_EXIT_FULLSCREEN)
-          }
-        } catch (error) {
-          console.error('Error sending exit fullscreen message:', error)
-        }
-      }
+    return {
+      id: tab.id,
+      url: tab.url,
+      route: cloneRoute(tab.route),
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color,
+      previewDataUrl: tab.previewDataUrl,
+      previewCapturedAt: tab.previewCapturedAt,
+      previewFileName: tab.previewFileName
     }
+  }
+
+  /**
+   * @param {string} tabId
+   * @returns {TabInfo|null}
+   */
+  detachTabForTransfer(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return null
 
     this._clearTabPreviewRefresh(tab)
+    const nextTabId = this.activeTabId === tabId
+      ? this._getNeighborTabId(tabId)
+      : null
 
-    const orderedTabs = Array.from(this.tabs.entries())
-    const detachedIndex = orderedTabs.findIndex(([id]) => id === tabId)
-    let tabToActivate = null
-
-    if (this.activeTabId === tabId && detachedIndex !== -1) {
-      if (detachedIndex > 0) {
-        tabToActivate = orderedTabs[detachedIndex - 1][1]
-      } else if (orderedTabs.length > 1) {
-        tabToActivate = orderedTabs[1][1]
-      }
-    }
-
-    this._detachView(tab)
-
-    const entries = orderedTabs.filter(([id]) => id !== tabId)
-    this.tabs = new Map(entries)
-
+    this.tabs.delete(tabId)
+    this._deferredCloseTabIds.delete(tabId)
+    this._deferredUnloadTabIds.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
     if (this.contextMenuTabId === tabId) {
       this.contextMenuTabId = null
     }
-
-    if (tabToActivate) {
-      this.activeTabId = null
-      this.activateTab(tabToActivate.id)
-    } else if (this.activeTabId === tabId) {
-      this.activeTabId = null
+    if (this.presentedTabId === tabId) {
+      this.presentedTabId = null
     }
 
-    this._broadcastStateUpdate()
-    this._saveSession()
+    if (nextTabId) {
+      this.activeTabId = null
+      if (this._prepareNeighborActivation(nextTabId)) {
+        this.activateTab(nextTabId)
+      }
+    } else if (this.activeTabId === tabId) {
+      this.activeTabId = null
+      this.selectionRevision += 1
+      this._broadcastStateUpdate()
+      this._saveSession()
+    } else {
+      this._broadcastStateUpdate()
+      this._saveSession()
+    }
 
     return tab
   }
 
   /**
-   * Attach a tab transferred from another window after the current tab and activate it.
-   * @param {TabInfo} tabInfo
+   * Stage a transferred tab in this window and mount it in the background. The
+   * source remains authoritative until the destination acknowledges the mount.
+   * @param {object} snapshot
+   * @returns {TabInfo}
    */
-  adoptTransferredTab(tabInfo) {
+  adoptTransferredTab(snapshot) {
+    if (this.tabs.has(snapshot.id)) {
+      throw new Error(`Cannot adopt duplicate tab ID ${snapshot.id}`)
+    }
+
+    /** @type {TabInfo} */
+    const tabInfo = {
+      id: snapshot.id,
+      url: snapshot.url,
+      route: cloneRoute(snapshot.route),
+      title: snapshot.title,
+      lastActiveAt: Date.now(),
+      isPlaying: false,
+      isPinned: snapshot.isPinned === true,
+      isLoading: true,
+      loadingSources: new Set([TAB_LOADING_SOURCE_MOUNT]),
+      color: TabManager.normalizeTabColor(snapshot.color),
+      previewDataUrl: snapshot.previewDataUrl ?? null,
+      previewCapturedAt: snapshot.previewCapturedAt ?? 0,
+      previewFileName: TabManager.normalizePreviewFileName(snapshot.previewFileName),
+      previewCaptureTimeoutId: null,
+      previewCapturePromise: null,
+      loadState: 'mounting',
+      preloadInBackground: true,
+      pendingActivation: false,
+      mountRevision: 1,
+      refreshKey: 0,
+      isTransferStaged: true
+    }
+
     const activeTabIndex = Array.from(this.tabs.keys()).indexOf(this.activeTabId)
     const preferredIndex = activeTabIndex === -1 ? this.tabs.size : activeTabIndex + 1
-
     this._insertTabEntry(tabInfo.id, tabInfo, preferredIndex)
-    tabInfo.view.setBackgroundColor(this.backgroundColor)
-    this.activateTab(tabInfo.id)
-    this.browserWindow.focus()
+    this._broadcastStateUpdate()
+    return tabInfo
   }
 
   /**
-   * Get current tab state for renderer
+   * Roll back a destination-side transfer without touching the shared preview
+   * file, which is still owned by the source tab.
+   * @param {string} tabId
+   */
+  removeStagedTransferredTab(tabId) {
+    const tab = this.tabs.get(tabId)
+    if (!tab?.isTransferStaged) {
+      return
+    }
+
+    this._clearTabPreviewRefresh(tab)
+    this.tabs.delete(tabId)
+    this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
+    if (this.contextMenuTabId === tabId) {
+      this.contextMenuTabId = null
+    }
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {object} route
+   * @param {string | undefined} [url]
+   */
+  updateTabRoute(tabId, route, url) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+
+    tab.route = normalizeRoute(route)
+    tab.url = url || this._urlFromRoute(tab.route)
+    this._scheduleTabPreviewRefresh(tab)
+    this._saveSession()
+    this._broadcastStateUpdate()
+  }
+
+  /**
+   * @param {string} tabId
+   * @param {boolean} isLoading
+   */
+  setTabLoading(tabId, isLoading) {
+    const tab = this.tabs.get(tabId)
+    if (tab) {
+      this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_RENDERER, isLoading)
+    }
+  }
+
+  /**
    * @returns {object}
    */
   getState() {
-    const tabs = Array.from(this.tabs.values()).map(tab => {
-      const isActive = tab.id === this.activeTabId
-
-      return {
-        id: tab.id,
-        url: tab.url,
-        title: tab.title,
-        isActive,
-        // Lazy-restored tabs should look idle until the user activates them.
-        isUnloaded: !tab.hasStartedLoading,
-        isLoading: this._getTabLoadingState(tab),
-        isPlaying: tab.isPlaying || false,
-        isPinned: tab.isPinned || false,
-        color: TabManager.normalizeTabColor(tab.color)
-      }
-    })
+    const tabs = Array.from(this.tabs.values()).map(tab => ({
+      id: tab.id,
+      url: tab.url,
+      route: cloneRoute(tab.route),
+      title: tab.title,
+      isActive: tab.id === this.activeTabId,
+      isUnloaded: tab.loadState === 'unloaded',
+      isLoading: this._getTabLoadingState(tab),
+      isPlaying: tab.isPlaying || false,
+      isPinned: tab.isPinned || false,
+      color: TabManager.normalizeTabColor(tab.color),
+      loadState: tab.loadState,
+      preloadInBackground: tab.preloadInBackground,
+      pendingActivation: tab.pendingActivation,
+      mountRevision: tab.mountRevision,
+      refreshKey: tab.refreshKey
+    }))
 
     return {
       tabs,
       activeTabId: this.activeTabId,
+      presentedTabId: this.presentedTabId,
+      selectionRevision: this.selectionRevision,
       tabBarScrollPosition: this.tabBarScrollPosition
     }
   }
 
   /**
-   * Get the active tab's webContents
    * @returns {import('electron').WebContents|null}
    */
   getActiveWebContents() {
-    if (!this.activeTabId) return null
-    const tab = this.tabs.get(this.activeTabId)
-    return tab ? tab.view.webContents : null
+    return this.browserWindow.webContents.isDestroyed() ? null : this.browserWindow.webContents
   }
 
-  /**
-   * Update the active view bounds to match the window content area.
-   * On X11, window manager fullscreen transitions are asynchronous so the
-   * content bounds may not be final when this is first called. A deferred
-   * second pass ensures the view is correctly sized once the transition
-   * settles.
-   */
-  _updateActiveViewBounds() {
-    if (!this.activeTabId) return
-    const tab = this.tabs.get(this.activeTabId)
-    if (!tab) return
-
-    const applyBounds = () => {
-      if (tab.view.webContents.isDestroyed()) return
-      const bounds = this.browserWindow.getContentBounds()
-      tab.view.setBounds({
-        x: 0,
-        y: 0,
-        width: bounds.width,
-        height: bounds.height
-      })
-    }
-
-    applyBounds()
-
-    if (TabManager._isX11) {
-      if (this._boundsUpdateTimer) {
-        clearTimeout(this._boundsUpdateTimer)
-      }
-      this._boundsUpdateTimer = setTimeout(() => {
-        this._boundsUpdateTimer = null
-        applyBounds()
-      }, 100)
-    }
-  }
-
-  /**
-   * @param {TabInfo} tab
-   */
-  _attachView(tab) {
-    if (tab.view.webContents.isDestroyed()) {
-      return
-    }
-
-    const bounds = this.browserWindow.getContentBounds()
-    tab.view.setBounds({
-      x: 0,
-      y: 0,
-      width: bounds.width,
-      height: bounds.height
-    })
-    this.browserWindow.contentView.addChildView(tab.view)
-    this._attachedTabIds.add(tab.id)
-  }
-
-  /**
-   * @param {TabInfo} tab
-   */
-  _detachView(tab) {
-    if (!this._attachedTabIds.has(tab.id)) {
-      return
-    }
-
-    try {
-      this.browserWindow.contentView.removeChildView(tab.view)
-    } catch (error) {
-      console.error('Error detaching tab view:', error)
-    } finally {
-      this._attachedTabIds.delete(tab.id)
-    }
-  }
-
-  /**
-   * Attach an inactive tab behind the current active tab so its renderer can
-   * initialize media work without stealing focus.
-   * @param {TabInfo} tab
-   */
-  _attachBackgroundTab(tab) {
-    if (this.activeTabId === tab.id || this._attachedTabIds.has(tab.id)) {
-      return
-    }
-
-    const visibleTabId = this._visibleTabId ?? this.activeTabId
-    const visibleTab = visibleTabId ? this.tabs.get(visibleTabId) : null
-
-    this._attachView(tab)
-
-    if (visibleTab && visibleTab.id !== tab.id && !visibleTab.view.webContents.isDestroyed()) {
-      this._detachView(visibleTab)
-      this._attachView(visibleTab)
-      visibleTab.view.webContents.focus()
-    }
-  }
-
-  /**
-   * Broadcast state update to all tabs in this window
-   */
   _broadcastStateUpdate() {
-    const state = this.getState()
-    for (const tab of this.tabs.values()) {
-      if (tab.hasStartedLoading && isOpenTubeXUrl(tab.view.webContents.getURL())) {
-        tab.view.webContents.send(IpcChannels.TABS_STATE_UPDATED, state)
-      }
-    }
+    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState())
   }
 
-  /**
-   * Save session to persistent storage. Each window persists its state
-   * under its own stable sessionId so multiple open windows can be
-   * restored on the next launch.
-   */
   async _saveSession() {
     if (this._sessionPersistenceDisabled) return
 
-    const tabs = Array.from(this.tabs.values()).map(tab => {
-      const tabData = {
-        id: tab.id,
-        url: tab.url,
-        title: tab.title,
-        isPinned: tab.isPinned,
-        color: TabManager.normalizeTabColor(tab.color)
-      }
+    const tabs = Array.from(this.tabs.values())
+      .filter(tab => tab.isTransferStaged !== true)
+      .map(tab => {
+        const tabData = {
+          id: tab.id,
+          url: tab.url,
+          title: tab.title,
+          isPinned: tab.isPinned,
+          color: TabManager.normalizeTabColor(tab.color)
+        }
 
-      const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
-      if (previewFileName != null && tab.previewCapturedAt > 0) {
-        tabData.previewFileName = previewFileName
-        tabData.previewCapturedAt = tab.previewCapturedAt
-      }
+        const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
+        if (previewFileName != null && tab.previewCapturedAt > 0) {
+          tabData.previewFileName = previewFileName
+          tabData.previewCapturedAt = tab.previewCapturedAt
+        }
 
-      return tabData
-    })
+        return tabData
+      })
 
     await saveTabSession(this.sessionId, {
       tabs,
@@ -2197,10 +1764,6 @@ export class TabManager {
     })
   }
 
-  /**
-   * @returns {import('./TabSessionStore').TabSessionBounds | undefined}
-   * @private
-   */
   _getCurrentBounds() {
     const win = this.browserWindow
     if (!win || win.isDestroyed()) return undefined
@@ -2216,29 +1779,20 @@ export class TabManager {
     }
   }
 
-  /**
-   * Forget this window's persisted session. Used when a window is closed
-   * by the user while the app keeps running, so we don't resurrect it on
-   * the next launch.
-   */
   async clearSession() {
-    // Setting the flag synchronously before awaiting the clear ensures that
-    // any later `_saveSession` call (e.g. from a trailing webContents event)
-    // short-circuits instead of re-creating the record we're about to remove.
-    // NeDB serializes writes per datastore, so an already-in-flight save will
-    // land before this clear and still be erased by it.
     this._sessionPersistenceDisabled = true
-    await Promise.all(Array.from(this.tabs.values(), tab => this._deleteTabPreviewFile(tab.previewFileName)))
+    await Promise.all(
+      Array.from(this.tabs.values())
+        .filter(tab => tab.isTransferStaged !== true)
+        .map(tab => this._deleteTabPreviewFile(tab.previewFileName))
+    )
     await clearTabSession(this.sessionId)
   }
 
   /**
-   * Restore tabs from previously loaded session data. The caller is
-   * responsible for loading the data (e.g. via loadAllTabSessions) and
-   * deciding which window should own which session.
    * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean }} [options]
-   * @returns {Promise<boolean>} Whether any tabs were restored
+   * @returns {Promise<boolean>}
    */
   async restoreFromData(sessionData, { loadInactiveTabs = false } = {}) {
     if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
@@ -2249,44 +1803,115 @@ export class TabManager {
       const makeActive = tabData.id === sessionData.activeTabId
       const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
       const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
-      const previewDataUrl = previewFileName == null
-        ? null
-        : await this._loadTabPreviewDataUrl(previewFileName)
-      const previewCapturedAt = previewFileName != null && Number.isFinite(tabData.previewCapturedAt)
-        ? tabData.previewCapturedAt
-        : 0
+      const previewDataUrl = await this._loadTabPreviewDataUrl(previewFileName)
 
       this.createTab({
+        id: typeof tabData.id === 'string' ? tabData.id : undefined,
         url: tabData.url,
         title: hasSavedTitle ? tabData.title : undefined,
         isPinned: tabData.isPinned === true,
         color: tabData.color,
         previewDataUrl,
-        previewCapturedAt,
+        previewCapturedAt: previewDataUrl != null && Number.isFinite(tabData.previewCapturedAt)
+          ? tabData.previewCapturedAt
+          : 0,
         previewFileName,
         makeActive,
         openPosition: 'end',
-        lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle
+        lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle,
+        preloadInBackground: loadInactiveTabs && !makeActive
       })
     }
 
-    return true
+    if (!this.activeTabId) {
+      const firstTabId = this.tabs.keys().next().value
+      if (firstTabId) {
+        this.activateTab(firstTabId)
+      }
+    }
+
+    return this.tabs.size > 0
   }
 
   /**
-   * Navigate all tabs to handle deep link
    * @param {string} url
    */
   navigateActiveTabTo(url) {
-    const activeTab = this.tabs.get(this.activeTabId)
-    if (activeTab && isOpenTubeXUrl(activeTab.view.webContents.getURL())) {
-      activeTab.view.webContents.send(IpcChannels.OPEN_URL, url)
-    }
+    if (!this.activeTabId) return
+    this.bridge.send(IpcChannels.OPEN_URL, { tabId: this.activeTabId, url })
+  }
+
+  /**
+   * @param {number} offset
+   */
+  navigateHistory(offset) {
+    const tabId = this.presentedTabId ?? this.activeTabId
+    if (!tabId) return
+    this.bridge.send(IpcChannels.TABS_GO_HISTORY, { tabId, offset })
   }
 }
 
 /**
- * Set up IPC handlers for tabs
+ * @param {string} route
+ * @returns {string}
+ */
+function normalizeRoutePath(route) {
+  if (typeof route !== 'string' || route.trim().length === 0) {
+    return '/'
+  }
+  return route.startsWith('/') ? route : `/${route}`
+}
+
+/**
+ * @param {object | undefined | null} query
+ * @returns {Record<string, string>}
+ */
+function normalizeQuery(query) {
+  if (!query || typeof query !== 'object') {
+    return {}
+  }
+
+  return Object.fromEntries(
+    Object.entries(query)
+      .filter(([, value]) => value != null)
+      .map(([key, value]) => [key, Array.isArray(value) ? value.map(String) : String(value)])
+  )
+}
+
+/**
+ * @param {object} route
+ * @returns {{name: string | null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}}
+ */
+function normalizeRoute(route) {
+  const path = normalizeRoutePath(route?.path)
+  const query = normalizeQuery(route?.query)
+  const hash = typeof route?.hash === 'string' ? route.hash : ''
+  const searchParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      searchParams.append(key, item)
+    }
+  }
+  const search = searchParams.toString()
+  return {
+    name: typeof route?.name === 'string' ? route.name : null,
+    path,
+    params: normalizeQuery(route?.params),
+    query,
+    hash,
+    fullPath: `${path}${search.length > 0 ? `?${search}` : ''}${hash}`
+  }
+}
+
+/**
+ * @param {ReturnType<typeof normalizeRoute>} route
+ * @returns {ReturnType<typeof normalizeRoute>}
+ */
+function cloneRoute(route) {
+  return normalizeRoute(route)
+}
+
+/**
  * @param {object} [options]
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
  * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
@@ -2297,57 +1922,64 @@ export function setupTabsIPC(options = {}) {
     markWindowCloseConfirmed = () => {}
   } = options
 
-  // Get tab state
+  const getManager = event => TabManager.getFromWebContents(event.sender)
+
+  ipcMain.on(IpcChannels.TABS_RENDERER_READY, (event) => {
+    getManager(event)?.markRendererReady()
+  })
+
   ipcMain.handle(IpcChannels.TABS_GET_STATE, (event) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      return manager.getState()
-    }
-    return null
+    return getManager(event)?.getState() ?? null
   })
 
-  // Create new tab
   ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {
-    const tabContext = TabManager.getTabFromWebContents(event.sender)
-    if (tabContext) {
-      const {
-        inheritColorFromOpener = false,
-        ...tabOptions
-      } = options != null && typeof options === 'object' ? options : {}
+    const manager = getManager(event)
+    if (!manager) return null
 
-      const tab = inheritColorFromOpener === true
-        ? await tabContext.manager.createTabWithPreferenceFromOpener(tabOptions, tabContext.tabId)
-        : await tabContext.manager.createTabWithPreference(tabOptions)
+    const {
+      inheritColorFromOpener = false,
+      openerTabId,
+      ...tabOptions
+    } = options != null && typeof options === 'object' ? options : {}
 
-      return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
+    const tab = inheritColorFromOpener === true
+      ? await manager.createTabWithPreferenceFromOpener(
+          tabOptions,
+          typeof openerTabId === 'string' ? openerTabId : manager.presentedTabId ?? manager.activeTabId
+        )
+      : await manager.createTabWithPreference(tabOptions)
+
+    return {
+      id: tab.id,
+      url: tab.url,
+      route: cloneRoute(tab.route),
+      title: tab.title,
+      isPinned: tab.isPinned,
+      color: tab.color
     }
-    return null
   })
 
-  // Activate tab
   ipcMain.on(IpcChannels.TABS_ACTIVATE, (event, tabId) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+    const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
       manager.activateTab(tabId)
     }
   })
 
-  ipcMain.handle(IpcChannels.TABS_IS_ACTIVE, (event) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tabId = TabManager.getTabIdFromWebContents(event.sender)
-    return manager != null && tabId != null && manager.activeTabId === tabId
+  ipcMain.handle(IpcChannels.TABS_IS_ACTIVE, (event, tabId) => {
+    const manager = getManager(event)
+    if (!manager) return false
+    return typeof tabId === 'string' ? manager.activeTabId === tabId : manager.activeTabId != null
   })
 
-  // Close tab
   ipcMain.handle(IpcChannels.TABS_CLOSE, async (event, tabId) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+    const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
       if (manager.tabs.size === 1 && !await confirmCloseWindow(manager.browserWindow)) {
         return { hasRemainingTabs: true }
       }
 
       const hasRemainingTabs = manager.closeTab(tabId)
-      // Close the window if no tabs remain
       if (!hasRemainingTabs) {
         markWindowCloseConfirmed(manager.browserWindow)
         manager.browserWindow.close()
@@ -2357,166 +1989,179 @@ export function setupTabsIPC(options = {}) {
     return { hasRemainingTabs: false }
   })
 
-  // Duplicate tab
   ipcMain.handle(IpcChannels.TABS_DUPLICATE, (event, tabId) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager && typeof tabId === 'string') {
-      const tab = manager.duplicateTab(tabId)
-      if (tab) {
-        return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
-      }
-    }
-    return null
+    const manager = getManager(event)
+    const tab = manager && typeof tabId === 'string' ? manager.duplicateTab(tabId) : null
+    return tab
+      ? { id: tab.id, url: tab.url, route: cloneRoute(tab.route), title: tab.title, isPinned: tab.isPinned, color: tab.color }
+      : null
   })
 
-  // Move tab
   ipcMain.on(IpcChannels.TABS_MOVE, (event, tabId, toIndex) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+    const manager = getManager(event)
     if (manager && typeof tabId === 'string' && typeof toIndex === 'number') {
       manager.moveTab(tabId, toIndex)
     }
   })
 
   ipcMain.on(IpcChannels.TABS_SET_PINNED, (event, tabId, isPinned) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+    const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
       manager.setTabPinned(tabId, isPinned === true)
     }
   })
 
   ipcMain.on(IpcChannels.TABS_SET_COLOR, (event, tabId, color) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+    const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
       manager.setTabColor(tabId, color)
     }
   })
 
   ipcMain.handle(IpcChannels.TABS_CAPTURE_PREVIEW, (event, tabId) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager && typeof tabId === 'string') {
-      return manager.captureTabPreview(tabId)
-    }
-    return null
+    const manager = getManager(event)
+    return manager && typeof tabId === 'string' ? manager.captureTabPreview(tabId) : null
   })
 
   ipcMain.on(IpcChannels.TABS_REQUEST_PREVIEW_REFRESH, (event, options = {}) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tabId = TabManager.getTabIdFromWebContents(event.sender)
-    if (!manager || !tabId) {
+    const manager = getManager(event)
+    const tabId = typeof options?.tabId === 'string' ? options.tabId : null
+    const tab = tabId ? manager?.tabs.get(tabId) : null
+    if (!manager || !tab) {
       return
     }
 
-    const tab = manager.tabs.get(tabId)
-    if (!tab) {
-      return
-    }
-
-    const delayMs = Number.isFinite(options?.delayMs)
+    const delayMs = Number.isFinite(options.delayMs)
       ? Math.max(0, Math.min(5000, options.delayMs))
       : TAB_PREVIEW_REFRESH_DELAY_MS
-
     manager._scheduleTabPreviewRefresh(tab, delayMs)
   })
 
-  // Restore closed tab
   ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, (event) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      const tab = manager.restoreClosedTab()
-      if (tab) {
-        return { id: tab.id, url: tab.url, title: tab.title, isPinned: tab.isPinned, color: tab.color }
-      }
-    }
-    return null
+    const manager = getManager(event)
+    const tab = manager?.restoreClosedTab()
+    return tab
+      ? { id: tab.id, url: tab.url, route: cloneRoute(tab.route), title: tab.title, isPinned: tab.isPinned, color: tab.color }
+      : null
   })
 
-  // Reload tab
-  ipcMain.on(IpcChannels.TABS_RELOAD, (event) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      const tabId = TabManager.getTabIdFromWebContents(event.sender)
+  ipcMain.on(IpcChannels.TABS_RELOAD, (event, tabId) => {
+    const manager = getManager(event)
+    if (manager && typeof tabId === 'string') {
       manager.reloadTab(tabId)
     }
   })
 
-  // Update tab title (called from renderer when page title changes)
-  ipcMain.on(IpcChannels.TABS_UPDATE_TITLE, (event, title) => {
-    if (typeof title !== 'string') return
-
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tabId = TabManager.getTabIdFromWebContents(event.sender)
-
-    if (manager && tabId) {
-      const tab = manager.tabs.get(tabId)
-      if (tab) {
-        tab.title = title
-        // Update window title if this is the active tab
-        if (manager.activeTabId === tabId) {
-          manager.browserWindow.setTitle(title)
-        }
-        manager._broadcastStateUpdate()
-        manager._saveSession()
-      }
+  ipcMain.on(IpcChannels.TABS_UPDATE_TITLE, (event, title, tabId) => {
+    const manager = getManager(event)
+    const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
+    if (manager && tab && typeof title === 'string') {
+      manager.applyTabTitle(tab, title)
     }
   })
 
-  // Update tab bar scroll position (keeps scroll in sync across all tab renderers)
-  ipcMain.on(IpcChannels.TABS_SET_TAB_BAR_SCROLL, (event, position) => {
-    if (typeof position !== 'number') return
+  ipcMain.on(IpcChannels.TABS_UPDATE_ROUTE, (event, payload) => {
+    const manager = getManager(event)
+    if (
+      manager &&
+      typeof payload?.tabId === 'string' &&
+      typeof payload?.route?.path === 'string'
+    ) {
+      manager.updateTabRoute(payload.tabId, payload.route, payload.url)
+    }
+  })
 
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
+  ipcMain.on(IpcChannels.TABS_SET_TAB_BAR_SCROLL, (event, position) => {
+    const manager = getManager(event)
+    if (manager && typeof position === 'number') {
       manager.tabBarScrollPosition = position
     }
   })
 
-  // Track which tab the shared Electron context menu should act on.
   ipcMain.on(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, (event, payload) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    if (manager) {
-      manager.contextMenuTabId = typeof payload?.tabId === 'string' && manager.tabs.has(payload.tabId)
-        ? payload.tabId
-        : null
-      manager.contextMenuOnTabBar = payload?.isTabBar === true
+    const manager = getManager(event)
+    if (!manager) return
+
+    manager.contextMenuTabId = typeof payload?.tabId === 'string' && manager.tabs.has(payload.tabId)
+      ? payload.tabId
+      : null
+    manager.contextMenuSurface = ['tab', 'tabBar', 'content'].includes(payload?.surface)
+      ? payload.surface
+      : payload?.isTabBar === true ? 'tabBar' : 'content'
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_PLAYBACK_STATE, (event, playbackState, tabId) => {
+    const manager = getManager(event)
+    const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
+    if (manager && tab && typeof playbackState === 'string') {
+      tab.isPlaying = playbackState === 'playing'
+      manager._broadcastStateUpdate()
     }
   })
 
-  // Update tab playback state (called from renderer when video plays/pauses/ends)
-  ipcMain.on(IpcChannels.TABS_SET_PLAYBACK_STATE, (event, playbackState) => {
-    if (typeof playbackState !== 'string') return
-
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tabId = TabManager.getTabIdFromWebContents(event.sender)
-
-    if (manager && tabId) {
-      const tab = manager.tabs.get(tabId)
-      if (tab) {
-        tab.isPlaying = playbackState === 'playing'
-        // Broadcast state update but don't save to session (isPlaying is ephemeral)
-        manager._broadcastStateUpdate()
-      }
+  ipcMain.on(IpcChannels.TABS_SET_LOADING, (event, isLoading, tabId) => {
+    const manager = getManager(event)
+    if (manager && typeof tabId === 'string') {
+      manager.setTabLoading(tabId, isLoading === true)
     }
   })
 
-  ipcMain.on(IpcChannels.TABS_SET_LOADING, (event, isLoading) => {
-    const manager = TabManager.getFromWebContents(event.sender)
-    const tabId = TabManager.getTabIdFromWebContents(event.sender)
-
-    if (manager && tabId) {
-      const tab = manager.tabs.get(tabId)
-      if (tab) {
-        manager._setTabLoading(tab, isLoading === true)
-      }
+  ipcMain.on(IpcChannels.TABS_MOUNT_READY, (event, payload) => {
+    const manager = getManager(event)
+    if (manager && typeof payload?.tabId === 'string' && Number.isInteger(payload?.mountRevision)) {
+      manager.markTabMounted(payload.tabId, payload.mountRevision)
     }
   })
 
-  ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event) => {
-    await TabManager.clearPictureInPictureFromOtherTabs(event.sender)
+  ipcMain.on(IpcChannels.TABS_MOUNT_FAILED, (event, payload) => {
+    const manager = getManager(event)
+    if (manager && typeof payload?.tabId === 'string' && Number.isInteger(payload?.mountRevision)) {
+      manager.markTabMountFailed(payload.tabId, payload.mountRevision)
+    }
+  })
 
-    return event.sender.executeJavaScript(
-      'document.querySelector("video.player")?.ui.getControls().togglePiP()',
-      true
-    )
+  ipcMain.on(IpcChannels.TABS_PRESENTED, (event, payload) => {
+    const manager = getManager(event)
+    if (manager && typeof payload?.tabId === 'string' && Number.isInteger(payload?.selectionRevision)) {
+      manager.markTabPresented(payload.tabId, payload.selectionRevision)
+    }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event, tabId) => {
+    const manager = getManager(event)
+    if (!manager || typeof tabId !== 'string' || !manager.tabs.has(tabId)) {
+      return false
+    }
+
+    return manager.browserWindow.webContents.executeJavaScript(`
+      (async () => {
+        const root = Array.from(document.querySelectorAll('[data-tab-id]'))
+          .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
+        const target = root?.querySelector('video.player')
+        if (!target?.ui?.getControls) return false
+
+        if (document.pictureInPictureElement && document.pictureInPictureElement !== target) {
+          try { await document.exitPictureInPicture() } catch {}
+        }
+
+        target.ui.getControls().togglePiP()
+        return true
+      })()
+    `, true)
+  })
+
+  ipcMain.handle(IpcChannels.TABS_REQUEST_FULLSCREEN, (event, tabId) => {
+    const manager = getManager(event)
+    if (!manager || typeof tabId !== 'string' || !manager.tabs.has(tabId)) {
+      return false
+    }
+
+    return manager.browserWindow.webContents.executeJavaScript(`
+      Array.from(document.querySelectorAll('[data-tab-id]'))
+        .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
+        ?.querySelector('video.player')
+        ?.ui?.getControls?.().toggleFullScreen()
+    `, true)
   })
 }
 

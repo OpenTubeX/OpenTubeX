@@ -175,7 +175,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -208,10 +208,14 @@ import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../help
 import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
 import { getThumbnailSizeStyles } from '../../constants/thumbnailSize'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
+import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { tabId } = useTabContext()
+const playlistCacheTabId = tabId ?? 'web'
+const setTabTitle = useTabTitle()
 
 const isLoading = ref(true)
 const playlistTitle = ref('')
@@ -920,7 +924,7 @@ function updatePageTitle() {
     }
   }
 
-  store.commit('setAppTitle', titleText)
+  setTabTitle(titleText)
 }
 
 /**
@@ -976,21 +980,27 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-onBeforeRouteLeave((to) => {
-  if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
-    store.commit('setCachedPlaylist', {
-      id: playlistId.value,
-      title: playlistTitle.value,
-      channelName: channelName.value,
-      channelId: channelId.value,
-      items: sortedPlaylistItems.value,
-      continuationData: continuationData.value
-        ? extractLocalCacheablePlaylistContinuation(continuationData.value)
-        : null,
-    })
-  }
+useTabLifecycle({
+  beforeNavigate: ({ to }) => {
+    if (!isLoading.value && to.path.startsWith('/watch') && to.query.playlistId === playlistId.value) {
+      store.commit('setCachedPlaylist', {
+        tabId: playlistCacheTabId,
+        value: {
+          id: playlistId.value,
+          title: playlistTitle.value,
+          channelName: channelName.value,
+          channelId: channelId.value,
+          items: sortedPlaylistItems.value,
+          continuationData: continuationData.value
+            ? extractLocalCacheablePlaylistContinuation(continuationData.value)
+            : null,
+        }
+      })
+    }
 
-  removeToBeDeletedVideosSometimes()
+    removeToBeDeletedVideosSometimes()
+  },
+  beforeDispose: removeToBeDeletedVideosSometimes
 })
 </script>
 

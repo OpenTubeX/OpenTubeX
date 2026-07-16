@@ -229,7 +229,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -241,6 +241,10 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import store from '../../store'
 
 import { formatNumber, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
+import { useTabContext } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+
+const { tabId } = useTabContext()
 
 const props = defineProps({
   id: {
@@ -588,18 +592,24 @@ function handleExternalPlayer() {
   }
 }
 
-onMounted(() => {
-  if (process.env.IS_ELECTRON || 'mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: props.title,
-      artist: props.channelName,
-      artwork: [{
-        src: props.videoThumbnail,
-        sizes: '128x128',
-        type: 'img/png'
-      }]
-    })
-  }
+watch(
+  () => [props.title, props.channelName, props.videoThumbnail],
+  ([title, artist, artworkSrc]) => {
+    if ('mediaSession' in navigator && typeof MediaMetadata === 'function') {
+      tabMediaCoordinator.setMetadata(tabId ?? 'web', new MediaMetadata({
+        title,
+        artist,
+        artwork: artworkSrc
+          ? [{ src: artworkSrc, sizes: '128x128', type: 'img/png' }]
+          : []
+      }))
+    }
+  },
+  { immediate: true }
+)
+
+onBeforeUnmount(() => {
+  tabMediaCoordinator.setMetadata(tabId ?? 'web', null)
 })
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)

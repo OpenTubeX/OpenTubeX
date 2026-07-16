@@ -164,12 +164,15 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
+import { useTabContext } from '../../tabs/TabContext'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { tabId } = useTabContext()
+const dataLimitStorageKey = tabId ? `History/${tabId}/dataLimit` : 'History/dataLimit'
 
-const oldDataLimit = sessionStorage.getItem('History/dataLimit')
+const oldDataLimit = sessionStorage.getItem(dataLimitStorageKey)
 const dataLimit = ref(oldDataLimit !== null ? parseInt(oldDataLimit) : 100)
 
 const searchDataLimit = ref(100)
@@ -301,7 +304,7 @@ function increaseLimit() {
     filterHistory()
   } else {
     dataLimit.value += 100
-    sessionStorage.setItem('History/dataLimit', dataLimit.value.toFixed(0))
+    sessionStorage.setItem(dataLimitStorageKey, dataLimit.value.toFixed(0))
   }
 }
 

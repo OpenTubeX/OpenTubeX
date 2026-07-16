@@ -47,7 +47,15 @@
           @click="handleUpdateBannerClick"
         />
       </div>
+      <template v-if="isElectron">
+        <TabContent
+          v-for="tab in tabContainers"
+          :key="tab.id"
+          :tab="tab"
+        />
+      </template>
       <RouterView
+        v-else
         v-slot="{ Component }"
         class="routerView"
       >
@@ -241,14 +249,15 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { Marked } from 'marked'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { routerKey, useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
 import TabBar from './components/TabBar/TabBar.vue'
+import TabContent from './components/TabContent/TabContent.vue'
 import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
@@ -277,6 +286,8 @@ import {
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { getTabAccentColor } from './constants/tabColors'
+import { getTabNavigationService } from './tabs/TabNavigationService'
+import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 
 const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
 const LOCAL_REPOSITORY = 'opentubex/opentubex'
@@ -328,7 +339,21 @@ const releaseNotesMarkdown = new Marked({
 
 const route = useRoute()
 const router = useRouter()
+const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
+const isElectron = process.env.IS_ELECTRON
+if (isElectron) {
+  provide(routerKey, navigation.createPresentedRouterFacade())
+}
 const { locale, t } = useI18n()
+
+const tabContainers = computed(() => {
+  return store.getters.getTabContainerIds
+    .map(tabId => store.getters.getTabById(tabId))
+    .filter(Boolean)
+})
+const activeTabId = computed(() => store.getters.getActiveTabId)
+const presentedTabId = computed(() => store.getters.getPresentedTabId)
+const selectionRevision = computed(() => store.state.tabs.selectionRevision)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
@@ -475,11 +500,15 @@ let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
+let removeTabsStateListener = null
+let removeReloadRequestListener = null
+let removeOpenUrlListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
 let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
+const findbarStateByTabId = new Map()
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
 const findbarStatus = computed(() => {
@@ -499,6 +528,11 @@ const tabSwitcherSelectedTabId = computed(() => {
 })
 
 onMounted(async () => {
+  if (isElectron) {
+    removeTabsStateListener = await store.dispatch('initializeTabs')
+    window.ftElectron.tabs.rendererReady()
+  }
+
   await store.dispatch('grabUserSettings')
 
   updateTheme()
@@ -524,9 +558,9 @@ onMounted(async () => {
       store.dispatch('setupListenersToSyncWindows')
       document.addEventListener('click', handleClick)
       document.addEventListener('auxclick', handleAuxClick)
-      enableOpenUrl()
+      removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
-      window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
+      removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
     }
 
     dataReady.value = true
@@ -538,8 +572,13 @@ onMounted(async () => {
 
   await router.isReady()
 
-  if (route.path === '/') {
-    router.replace({ path: landingPage.value })
+  if (isElectron) {
+    const activeTab = store.getters.getActiveTab
+    if (activeTab?.route.path === '/') {
+      await navigation.replace(activeTab.id, { path: landingPage.value })
+    }
+  } else if (route.path === '/') {
+    await router.replace({ path: landingPage.value })
   }
 
   setWindowTitle()
@@ -592,6 +631,46 @@ onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
   removeSubscriptionAutoRefreshStateChangedListener?.()
+  removeTabsStateListener?.()
+  removeReloadRequestListener?.()
+  removeOpenUrlListener?.()
+})
+
+watch([activeTabId, selectionRevision], ([tabId, revision]) => {
+  if (isElectron && tabId) {
+    navigation.requestPresentation(tabId, revision)
+  }
+}, { immediate: true })
+
+watch(presentedTabId, async (tabId, previousTabId) => {
+  if (!isElectron || tabId === previousTabId) {
+    return
+  }
+
+  if (previousTabId) {
+    findbarStateByTabId.set(previousTabId, {
+      visible: findbarVisible.value,
+      query: findbarQuery.value,
+      matchIndex: Math.max(0, findbarMatchIndex.value - 1)
+    })
+  }
+
+  clearFindbarHighlights()
+  const state = findbarStateByTabId.get(tabId) ?? {
+    visible: false,
+    query: '',
+    matchIndex: 0
+  }
+  findbarVisible.value = state.visible
+  findbarQuery.value = state.query
+  findbarMatchIndex.value = 0
+  findbarMatchCount.value = 0
+
+  if (state.visible && state.query.trim().length > 0) {
+    await nextTick()
+    highlightFindbarMatches(state.query.trim())
+    selectFindbarMatch(state.matchIndex)
+  }
 })
 
 watch(historyRetentionDays, scheduleHistoryCleanup)
@@ -1584,7 +1663,7 @@ function highlightFindbarMatches(query) {
   clearFindbarHighlights()
 
   const walker = document.createTreeWalker(
-    document.body,
+    tabRuntimeRegistry.getRoot(presentedTabId.value) ?? document.body,
     NodeFilter.SHOW_TEXT,
     {
       acceptNode: (node) => {
@@ -1895,17 +1974,22 @@ function getTabSwitcherItemStyle(tab) {
   }
 }
 
-function prepareAndReloadTab() {
-  if (route.path.startsWith('/watch/')) {
-    const timestamp = store.getters.getCurrentWatchTimestamp
+async function prepareAndReloadTab(tabId = activeTabId.value) {
+  const tab = store.getters.getTabById(tabId)
+  if (!tab) {
+    return
+  }
+
+  if (tab.route.path.startsWith('/watch/')) {
+    const timestamp = store.getters.getWatchTimestamp(tabId)
     if (typeof timestamp === 'number' && timestamp > 0) {
-      router.replace({
-        path: route.path,
-        query: { ...route.query, oneTimeTimestamp: Math.floor(timestamp) }
+      navigation.prepareReload(tabId, {
+        path: tab.route.path,
+        query: { ...tab.route.query, oneTimeTimestamp: Math.floor(timestamp) }
       })
     }
   }
-  store.dispatch('reloadActiveTab')
+  store.dispatch('reloadTab', tabId)
 }
 
 function handleMouseDown() {
@@ -2005,10 +2089,21 @@ function handleLinkClick(event) {
   }
 }
 
-async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewTab = false, isMiddleClick = false } = {}) {
+async function handleYoutubeLink(href, {
+  doCreateNewWindow = false,
+  doCreateNewTab = false,
+  isMiddleClick = false,
+  tabId = null
+} = {}) {
   const result = await store.dispatch('getYoutubeUrlInfo', href)
   // Middle clicks should open tabs in background (not make them active)
   const makeActive = !isMiddleClick
+  const openPath = (options) => {
+    if (isElectron && tabId && !options.doCreateNewWindow && !options.doCreateNewTab) {
+      return navigation.push(tabId, { path: options.path, query: options.query })
+    }
+    return openInternalPath(options)
+  }
 
   switch (result.urlType) {
     case 'video': {
@@ -2022,7 +2117,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
         query.playlistId = playlistId
       }
 
-      openInternalPath({
+      openPath({
         path: `/watch/${videoId}`,
         query,
         doCreateNewWindow,
@@ -2035,7 +2130,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
     case 'playlist': {
       const { playlistId, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/playlist/${playlistId}`,
         query,
         doCreateNewWindow,
@@ -2048,7 +2143,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
     case 'search': {
       const { searchQuery, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/search/${encodeURIComponent(searchQuery)}`,
         query,
         doCreateNewWindow,
@@ -2061,7 +2156,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
 
     case 'hashtag': {
       const { hashtag } = result
-      openInternalPath({
+      openPath({
         path: `/hashtag/${encodeURIComponent(hashtag)}`,
         doCreateNewWindow,
         doCreateNewTab,
@@ -2073,7 +2168,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
     case 'post': {
       const { postId, query } = result
 
-      openInternalPath({
+      openPath({
         path: `/post/${postId}`,
         query,
         doCreateNewWindow,
@@ -2086,7 +2181,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
     case 'channel': {
       const { channelId, subPath, url } = result
 
-      openInternalPath({
+      openPath({
         path: `/channel/${channelId}/${subPath}`,
         doCreateNewWindow,
         doCreateNewTab,
@@ -2102,7 +2197,7 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
     case 'subscriptions':
     case 'history':
     case 'userplaylists':
-      openInternalPath({
+      openPath({
         path: `/${result.urlType}`,
         doCreateNewWindow,
         doCreateNewTab,
@@ -2123,9 +2218,9 @@ async function handleYoutubeLink(href, { doCreateNewWindow = false, doCreateNewT
 }
 
 function enableOpenUrl() {
-  window.ftElectron.handleOpenUrl((url) => {
+  return window.ftElectron.handleOpenUrl((url, tabId) => {
     if (url) {
-      handleYoutubeLink(url)
+      handleYoutubeLink(url, { tabId })
     }
   })
 }
@@ -2146,7 +2241,13 @@ const windowTitle = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<string>} */
-const appTitle = computed(() => store.getters.getAppTitle)
+const appTitle = computed(() => {
+  if (isElectron) {
+    const tab = store.getters.getTabById(presentedTabId.value)
+    return tab?.contentTitle ?? ''
+  }
+  return store.getters.getAppTitle
+})
 
 function publishAppTitle(value) {
   if (value.length > 0) {
@@ -2155,8 +2256,8 @@ function publishAppTitle(value) {
     document.title = packageDetails.productName
   }
 
-  if (process.env.IS_ELECTRON) {
-    window.ftElectron.setWindowTitle(document.title)
+  if (isElectron && presentedTabId.value) {
+    window.ftElectron.setWindowTitle(document.title, presentedTabId.value)
   }
 }
 
@@ -2165,7 +2266,14 @@ watch(appTitle, publishAppTitle)
 watch(windowTitle, setWindowTitle)
 
 function setWindowTitle() {
-  if (windowTitle.value !== null) {
+  if (windowTitle.value === null) {
+    return
+  }
+
+  const titleTabId = store.state.tabs.transitionTargetTabId ?? presentedTabId.value
+  if (isElectron && titleTabId) {
+    navigation.setTitle(titleTabId, windowTitle.value)
+  } else {
     store.commit('setAppTitle', windowTitle.value)
     publishAppTitle(windowTitle.value)
   }

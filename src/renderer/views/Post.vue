@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -40,11 +40,13 @@ import store from '../store/index'
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { copyToClipboard, showToast } from '../helpers/utils'
+import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
 
 const router = useRouter()
 const route = useRoute()
+const setTabTitle = useTabTitle()
 
 const id = ref('')
 const authorId = ref('')
@@ -61,21 +63,25 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
-onMounted(async () => {
+watch(() => route.params.id, loadPost, { immediate: true })
+
+async function loadPost() {
   id.value = route.params.id
   authorId.value = route.query.authorId
+  post.value = null
+  isLoading.value = true
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
     await loadDataInvidiousAsync()
   } else {
     await loadDataLocalAsync()
   }
-})
+}
 
 function updateTitleAndRoute() {
   const titlePrefix = 'Community Post'
   const title = post.value.author ? `${titlePrefix} | ${post.value.author}` : titlePrefix
-  store.commit('setAppTitle', title)
+  setTabTitle(title)
   isLoading.value = false
 
   // If the authorId is missing from the URL we should add it,

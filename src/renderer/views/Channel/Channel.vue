@@ -329,10 +329,12 @@ import {
   parseLocalPlaylistVideo,
   parseChannelHomeTab
 } from '../../helpers/api/local'
+import { useTabTitle } from '../../tabs/TabContext'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const setTabTitle = useTabTitle()
 
 let skipRouteChangeWatcherOnce = false
 let autoRefreshOnSortByChangeEnabled = false
@@ -711,7 +713,7 @@ async function getChannelLocal() {
       channelName.value = channelName
       thumbnailUrl.value = channelThumbnailUrl
 
-      store.commit('setAppTitle', channelName_)
+      setTabTitle(channelName_)
 
       store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId: id.value })
 
@@ -759,7 +761,7 @@ async function getChannelLocal() {
     }
     tags.value = tags_
 
-    store.commit('setAppTitle', channelName_)
+    setTabTitle(channelName_)
 
     if (subscriberText) {
       const subCount_ = parseLocalSubscriberCount(subscriberText)
@@ -974,7 +976,7 @@ async function getChannelInfoInvidious() {
     const channelName_ = response.author
     const channelId = response.authorId
     channelName.value = channelName_
-    store.commit('setAppTitle', channelName_)
+    setTabTitle(channelName_)
     id.value = channelId
     isFamilyFriendly.value = response.isFamilyFriendly
     subCount.value = response.subCount

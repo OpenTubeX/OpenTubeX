@@ -1,6 +1,6 @@
 import { defineComponent } from 'vue'
-import { isNavigationFailure, NavigationFailureType } from 'vue-router'
-import { mapActions, mapMutations } from 'vuex'
+import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
+import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
@@ -46,6 +46,7 @@ import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
 import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
+import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 
 /**
  * @typedef {{
@@ -82,24 +83,23 @@ export default defineComponent({
     'watch-video-recommendations': WatchVideoRecommendations,
     'ft-age-restricted': FtAgeRestricted
   },
-  beforeRouteLeave: async function (to, from, next) {
-    this.$store.commit('tabs/setCurrentWatchTimestamp', null)
-    await this.handleRouteChange()
-    window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
-    window.removeEventListener('beforeunload', this.flushWatchTime)
-    document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
-    document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
-
-    if (this.$refs.player) {
-      await this.destroyPlayer()
-    }
-
-    next()
-  },
   setup: function () {
     const { t, locale } = useI18n()
+    const tabRoute = useRoute()
+    const tabRouter = useRouter()
+    const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
+    const setTabTitle = useTabTitle()
 
-    return { t, currentLocale: locale }
+    return {
+      t,
+      currentLocale: locale,
+      tabId,
+      isTabPresented,
+      tabLifecycle,
+      tabRoute,
+      tabRouter,
+      setTabTitle
+    }
   },
   data: function () {
     return {
@@ -340,7 +340,7 @@ export default defineComponent({
       return JSON.parse(this.$store.getters.getForbiddenTitles.toLowerCase())
     },
     isUserPlaylistRequested: function () {
-      return this.$route.query.playlistType === 'user'
+      return this.tabRoute.query.playlistType === 'user'
     },
     userPlaylistsReady: function () {
       return this.$store.getters.getPlaylistsReady
@@ -403,7 +403,7 @@ export default defineComponent({
     }
   },
   watch: {
-    async $route() {
+    async 'tabRoute.fullPath'() {
       await this.reloadView()
     },
     userPlaylistsReady() {
@@ -424,7 +424,7 @@ export default defineComponent({
     },
   },
   created: function () {
-    this.videoId = this.$route.params.id
+    this.videoId = this.tabRoute.params.id
     this.activeFormat = this.defaultVideoFormat
     // So that the value for this session remains unchanged even if setting changed
     this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
@@ -435,9 +435,51 @@ export default defineComponent({
     this.initializeVideoQuality()
   },
   mounted: function () {
+    this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
+      activate: this.activateWatchRuntime,
+      deactivate: this.deactivateWatchRuntime,
+      beforeNavigate: this.cleanupWatchRuntime,
+      beforeReload: this.cleanupWatchRuntime,
+      beforeDispose: this.cleanupWatchRuntime
+    })
     this.onMountedDependOnLocalStateLoading()
   },
+  beforeUnmount: function () {
+    this.deactivateWatchRuntime()
+    this.removeTabLifecycle?.()
+    this.removeTabLifecycle = null
+  },
   methods: {
+    activateWatchRuntime() {
+      if (process.env.IS_ELECTRON && !this.isTabPresented) {
+        return
+      }
+
+      document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
+      document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
+      document.addEventListener('keydown', this.resetAutoplayInterruptionTimeout)
+      document.addEventListener('click', this.resetAutoplayInterruptionTimeout)
+      this.resetAutoplayInterruptionTimeout()
+    },
+
+    deactivateWatchRuntime() {
+      document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
+      document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
+      this.abortAutoplayCountdown(true)
+    },
+
+    async cleanupWatchRuntime() {
+      this.$store.commit('setCurrentWatchTimestamp', { tabId: this.tabId, value: null })
+      await this.handleRouteChange()
+      window.removeEventListener('beforeunload', this.handleWatchProgressAutoSave)
+      window.removeEventListener('beforeunload', this.flushWatchTime)
+      this.deactivateWatchRuntime()
+
+      if (this.$refs.player) {
+        await this.destroyPlayer()
+      }
+    },
+
     async reloadView({ preserveTitle = false } = {}) {
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
@@ -450,7 +492,7 @@ export default defineComponent({
 
       // react to route changes...
       const previousVideoId = this.videoId
-      this.videoId = this.$route.params.id
+      this.videoId = this.tabRoute.params.id
       const videoIdChanged = this.videoId !== previousVideoId
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
@@ -480,7 +522,7 @@ export default defineComponent({
     },
 
     getRoutePlaceholderTitle: function () {
-      return this.$route.fullPath
+      return this.tabRoute.fullPath
     },
 
     resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
@@ -561,14 +603,11 @@ export default defineComponent({
         this.getVideoInformationLocal()
       }
 
-      document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
-      document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
-      document.addEventListener('keydown', this.resetAutoplayInterruptionTimeout)
-      document.addEventListener('click', this.resetAutoplayInterruptionTimeout)
-
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)
       window.addEventListener('beforeunload', this.flushWatchTime)
-      this.resetAutoplayInterruptionTimeout()
+      if (!process.env.IS_ELECTRON) {
+        this.activateWatchRuntime()
+      }
     },
 
     setViewingModeOnFirstLoad: function () {
@@ -1533,6 +1572,10 @@ export default defineComponent({
     handleTimeUpdate: function (currentSeconds) {
       this.updateCurrentTime(currentSeconds)
       this.updateCurrentChapter(currentSeconds)
+      this.$store.commit('setCurrentWatchTimestamp', {
+        tabId: this.tabId,
+        value: currentSeconds
+      })
     },
 
     addToHistory: function (watchProgress, isWatched = isHistoryEntryWatched(this.historyEntry)) {
@@ -1774,13 +1817,13 @@ export default defineComponent({
     },
 
     checkIfPlaylist: function () {
-      if (this.$route.query == null) {
+      if (this.tabRoute.query == null) {
         this.watchingPlaylist = false
         return
       }
 
-      this.playlistId = this.$route.query.playlistId
-      this.playlistItemId = this.$route.query.playlistItemId
+      this.playlistId = this.tabRoute.query.playlistId
+      this.playlistItemId = this.tabRoute.query.playlistItemId
 
       if (this.playlistId == null || this.playlistId.length === 0) {
         this.playlistType = ''
@@ -1799,7 +1842,7 @@ export default defineComponent({
 
       // Still possible to be a user playlist from history
       // (but user playlist could be already removed)
-      this.playlistType = this.$route.query.playlistType
+      this.playlistType = this.tabRoute.query.playlistType
       if (this.playlistType !== 'user') {
         // Remote playlist
         this.playlistItemId = null
@@ -1819,10 +1862,10 @@ export default defineComponent({
     },
 
     checkIfTimestamp: function () {
-      const oneTimeTimestamp = parseInt(this.$route.query.oneTimeTimestamp)
+      const oneTimeTimestamp = parseInt(this.tabRoute.query.oneTimeTimestamp)
       this.oneTimeTimestamp = isNaN(oneTimeTimestamp) || oneTimeTimestamp < 0 ? null : oneTimeTimestamp
 
-      const timestamp = parseInt(this.$route.query.timestamp)
+      const timestamp = parseInt(this.tabRoute.query.timestamp)
       this.timestamp = isNaN(timestamp) || timestamp < 0 ? null : timestamp
     },
 
@@ -1900,6 +1943,9 @@ export default defineComponent({
 
     handleVideoEnded: function () {
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
+      if (process.env.IS_ELECTRON && !this.isTabPresented) {
+        return
+      }
       if (!this.autoplayEnabled) {
         return
       }
@@ -1938,7 +1984,7 @@ export default defineComponent({
           if (this.watchingPlaylist) {
             this.$refs.watchVideoPlaylist.playNextVideo()
           } else {
-            this.$router.push({
+            this.tabRouter.push({
               path: `/watch/${nextVideoId}`
             })
             showToast(this.t('Playing Next Video'))
@@ -1967,7 +2013,7 @@ export default defineComponent({
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
       } else if (!this.hideRecommendedVideos && this.nextRecommendedVideo) {
-        this.$router.push({
+        this.tabRouter.push({
           path: `/watch/${this.nextRecommendedVideo.videoId}`
         })
         showToast(this.t('Playing Next Video'))
@@ -2353,7 +2399,7 @@ export default defineComponent({
     },
 
     updateTitle: function () {
-      this.setAppTitle(this.videoTitle || this.getRoutePlaceholderTitle())
+      this.setTabTitle(this.videoTitle || this.getRoutePlaceholderTitle())
     },
 
     isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {
@@ -2552,9 +2598,9 @@ export default defineComponent({
       if (timestamp > 0) {
         // Reload at the middle should restart at current timestamp
         try {
-          await this.$router.replace({
-            path: this.$route.path,
-            query: { ...this.$route.query, oneTimeTimestamp: timestamp },
+          await this.tabRouter.replace({
+            path: this.tabRoute.path,
+            query: { ...this.tabRoute.query, oneTimeTimestamp: timestamp },
           })
         } catch (failure) {
           if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
@@ -2577,10 +2623,6 @@ export default defineComponent({
       'updateLastViewedPlaylist',
       'updatePlaylistLastPlayedAt',
       'updateSubscriptionDetails',
-    ]),
-
-    ...mapMutations([
-      'setAppTitle'
     ])
   }
 })

@@ -63,9 +63,11 @@ import { copyToClipboard, showToast } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
+import { useTabTitle } from '../../tabs/TabContext'
 const { t } = useI18n()
 
 const route = useRoute()
+const setTabTitle = useTabTitle()
 
 const hashtag = ref('')
 const hashtagContinuationData = shallowRef(null)
@@ -114,7 +116,7 @@ async function getHashtag() {
   } else {
     await getInvidiousHashtag()
   }
-  store.commit('setAppTitle', `#${hashtag.value}`)
+  setTabTitle(`#${hashtag.value}`)
 }
 
 /**

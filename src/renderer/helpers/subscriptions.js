@@ -52,7 +52,9 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
   }
 
   if (process.env.IS_ELECTRON) {
-    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire()
+    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire(
+      store.getters.getActiveTabId
+    )
     if (!acquired) {
       return null
     }

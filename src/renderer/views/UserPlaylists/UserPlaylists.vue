@@ -113,10 +113,13 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { useTabContext } from '../../tabs/TabContext'
 
 const { locale, t } = useI18n()
+const { tabId } = useTabContext()
+const dataLimitStorageKey = tabId ? `UserPlaylists/${tabId}/dataLimit` : 'UserPlaylists/dataLimit'
 
-const sessionDataLimit = sessionStorage.getItem('UserPlaylists/dataLimit')
+const sessionDataLimit = sessionStorage.getItem(dataLimitStorageKey)
 
 const dataLimit = ref(sessionDataLimit !== null ? parseInt(sessionDataLimit) : 100)
 const searchDataLimit = ref(100)
@@ -318,7 +321,7 @@ function increaseLimit() {
     filterPlaylist()
   } else {
     dataLimit.value += 100
-    sessionStorage.setItem('UserPlaylists/dataLimit', dataLimit.value.toFixed(0))
+    sessionStorage.setItem(dataLimitStorageKey, dataLimit.value.toFixed(0))
   }
 }
 

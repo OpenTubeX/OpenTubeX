@@ -1,6 +1,6 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
-const SLEEP_TIMER_STORAGE_KEY = 'OpenTubeX/sleepTimer'
+const SLEEP_TIMER_STORAGE_KEY_PREFIX = 'OpenTubeX/sleepTimer'
 const SLEEP_TIMER_UPDATE_INTERVAL_MS = 1000
 
 export const SLEEP_TIMER_DURATIONS_MINUTES = [5, 10, 15, 20, 30, 45, 60]
@@ -23,9 +23,10 @@ export function formatSleepTimerRemaining(remainingMs) {
 }
 
 /**
- * @param {{ getVideoId: () => string, isPaused: () => boolean, onExpired: () => void, pausePlayback: () => void }} options
+ * @param {{ getVideoId: () => string, isPaused: () => boolean, onExpired: () => void, pausePlayback: () => void, tabId?: string | null }} options
  */
-export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback }) {
+export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback, tabId = null }) {
+  const storageKey = tabId ? `${SLEEP_TIMER_STORAGE_KEY_PREFIX}/${tabId}` : SLEEP_TIMER_STORAGE_KEY_PREFIX
   /** @type {import('vue').Ref<'duration' | 'end-of-video' | null>} */
   const mode = ref(null)
   const durationMinutes = ref(null)
@@ -51,7 +52,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback }
   }
 
   function clearStoredTimer() {
-    sessionStorage.removeItem(SLEEP_TIMER_STORAGE_KEY)
+    sessionStorage.removeItem(storageKey)
   }
 
   function resetState() {
@@ -90,7 +91,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback }
   }
 
   function storeDurationTimer() {
-    sessionStorage.setItem(SLEEP_TIMER_STORAGE_KEY, JSON.stringify({
+    sessionStorage.setItem(storageKey, JSON.stringify({
       mode: mode.value,
       durationMinutes: durationMinutes.value,
       remainingMs: remainingMs.value,
@@ -152,7 +153,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback }
     remainingMs.value = 0
     targetVideoId = videoId
 
-    sessionStorage.setItem(SLEEP_TIMER_STORAGE_KEY, JSON.stringify({
+    sessionStorage.setItem(storageKey, JSON.stringify({
       mode: mode.value,
       videoId,
     }))
@@ -179,7 +180,7 @@ export function useSleepTimer({ getVideoId, isPaused, onExpired, pausePlayback }
     let storedTimer
 
     try {
-      storedTimer = JSON.parse(sessionStorage.getItem(SLEEP_TIMER_STORAGE_KEY))
+      storedTimer = JSON.parse(sessionStorage.getItem(storageKey))
     } catch {
       clearStoredTimer()
       return

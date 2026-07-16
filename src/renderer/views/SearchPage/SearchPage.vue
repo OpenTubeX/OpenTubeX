@@ -61,9 +61,11 @@ import {
 } from '../../helpers/api/local'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
+import { useTabTitle } from '../../tabs/TabContext'
 
 const { t } = useI18n()
 const route = useRoute()
+const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
 const apiUsed = ref('local')
@@ -114,13 +116,13 @@ watch(route, () => {
 
   query.value = query_
 
-  store.commit('setAppTitle', processedQuery.value)
+  setTabTitle(processedQuery.value)
   checkSearchCache(payload)
 }, { deep: true })
 
 onMounted(() => {
   query.value = route.params.query
-  store.commit('setAppTitle', processedQuery.value)
+  setTabTitle(processedQuery.value)
 
   let features = route.query.features
   // if page gets refreshed and there's only one feature then it will be a string
