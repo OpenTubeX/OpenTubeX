@@ -1,0 +1,47 @@
+.commentReplyBranch {
+  position: relative;
+}
+
+.commentReplyBranch:not(.commentReplyBranchRoot)::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  pointer-events: none;
+}
+
+.commentReplyBranch:not(.commentReplyBranchRoot):last-child::before {
+  inset-block-end: auto;
+  block-size: 30px;
+}
+
+.commentReplyConnector {
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 30px;
+  inset-inline-start: 0;
+  inline-size: 15px;
+  block-size: 15px;
+  border-block-end: 1px solid var(--comment-thread-line-color);
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  border-end-start-radius: 12px;
+  pointer-events: none;
+}
+
+.commentReplyContent {
+  position: relative;
+  display: flow-root;
+}
+
+.commentReplyChildStem {
+  position: absolute;
+  inset-block: 75px 0;
+  inset-inline-start: 45px;
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  pointer-events: none;
+}
+
+.commentReplyChildren {
+  margin-inline-start: 45px;
+}

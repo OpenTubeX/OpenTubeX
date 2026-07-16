@@ -72,7 +72,8 @@
         v-for="(comment, index) in commentData"
         :id="'comment' + index"
         :key="comment.id"
-        class="comment"
+        class="comment commentThread"
+        :class="{ commentThreadExpanded: comment.showReplies }"
       >
         <component
           :is="enableChannelLinks ? 'router-link' : 'div'"
@@ -182,7 +183,7 @@
             />
           </span>
           <span
-            v-if="comment.numReplies > 0"
+            v-if="comment.numReplies > 0 && !comment.showReplies"
             class="commentMoreReplies"
             role="button"
             tabindex="0"
@@ -199,115 +200,20 @@
           v-if="comment.showReplies"
           class="commentReplies"
         >
-          <div
-            v-for="(reply, replyIndex) in comment.replies"
-            :id="'comment' + index + '-' + replyIndex"
-            :key="replyIndex"
-            class="comment"
-          >
-            <component
-              :is="enableChannelLinks ? 'router-link' : 'div'"
-              :to="`/channel/${reply.authorLink}`"
-              tabindex="-1"
-            >
-              <!-- Hide comment photo only if it isn't the video uploader -->
-              <div
-                v-if="hideCommentPhotos && !reply.isOwner"
-                class="commentThumbnailHidden"
-                dir="auto"
-              >
-                {{ reply.author.substring(1, 2) }}
-              </div>
-              <img
-                v-else
-                :src="reply.authorThumb"
-                alt=""
-                class="commentThumbnail"
-              >
-            </component>
-            <p class="commentAuthorWrapper">
-              <component
-                :is="enableChannelLinks ? 'router-link' : 'span'"
-                class="commentAuthor"
-                dir="auto"
-                :class="{
-                  commentOwner: reply.isOwner
-                }"
-                :to="`/channel/${reply.authorLink}`"
-              >
-                {{ reply.author }}
-              </component>
-              <img
-                v-if="reply.isMember"
-                :src="reply.memberIconUrl"
-                class="commentMemberIcon"
-                alt=""
-              >
-              <img
-                v-if="isSubscribedToChannel(reply.authorId)"
-                :title="$t('Comments.Subscribed')"
-                :aria-label="$t('Comments.Subscribed')"
-                class="commentSubscribedIcon"
-                alt=""
-              >
-              <span class="commentDate">
-                {{ reply.time }}
-              </span>
-              <button
-                type="button"
-                class="commentCopyLink"
-                :title="$t('Comments.Copy YouTube Link')"
-                :aria-label="$t('Comments.Copy YouTube Link')"
-                @click="copyCommentYoutubeLink(reply.id)"
-              >
-                <FontAwesomeIcon
-                  :icon="['fas', 'link']"
-                />
-              </button>
-            </p>
-            <FtTimestampCatcher
-              class="commentText"
-              :input-html="reply.text"
-              @timestamp-event="onTimestamp"
-            />
-            <p class="commentLikeCount">
-              <template
-                v-if="!hideCommentLikes"
-              >
-                <FontAwesomeIcon
-                  v-if="!hideCommentLikes"
-                  :icon="['fas', 'thumbs-up']"
-                />
-                {{ reply.likes }}
-              </template>
-              <span
-                v-if="reply.isHearted"
-                class="commentHeartBadge"
-              >
-                <img
-                  :src="channelThumbnail"
-                  :title="$t('Comments.Hearted')"
-                  :aria-label="$t('Comments.Hearted')"
-                  class="commentHeartBadgeImg"
-                  alt=""
-                >
-                <FontAwesomeIcon
-                  :icon="['fas', 'heart']"
-                  class="commentHeartBadgeWhite"
-                />
-                <FontAwesomeIcon
-                  :icon="['fas', 'heart']"
-                  class="commentHeartBadgeRed"
-                />
-              </span>
-            </p>
-            <p
-              v-if="reply.numReplies > 0"
-              class="commentMoreReplies"
-            >
-              {{ $t('Comments.View {replyCount} replies', { replyCount: reply.numReplies }, reply.numReplies) }}
-            </p>
-          </div>
+          <CommentReply
+            v-for="node in replyTrees[index]"
+            :key="node.reply.id"
+            :node="node"
+            :thread-index="index"
+            root-level
+            :enable-channel-links="enableChannelLinks"
+            :hide-comment-likes="hideCommentLikes"
+            :hide-comment-photos="hideCommentPhotos"
+            :subscribed-channel-ids="subscribedChannelIds"
+            :channel-thumbnail="channelThumbnail"
+            @copy-youtube-link="copyCommentYoutubeLink"
+            @timestamp-event="onTimestamp"
+          />
           <div
             v-if="comment.hasReplyToken"
             class="showMoreReplies"
@@ -318,6 +224,17 @@
             @keydown.enter.prevent="getCommentReplies(index)"
           >
             <span>{{ $t("Comments.Show More Replies") }}</span>
+          </div>
+          <div
+            v-if="comment.numReplies > 0"
+            class="hideReplies"
+            role="button"
+            tabindex="0"
+            @click="toggleCommentReplies(index)"
+            @keydown.space.prevent="toggleCommentReplies(index)"
+            @keydown.enter.prevent="toggleCommentReplies(index)"
+          >
+            <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
           </div>
         </div>
       </div>
@@ -372,6 +289,7 @@ import { computed, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
+import CommentReply from './CommentReply.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
@@ -437,6 +355,82 @@ const nextPageToken = shallowRef(null)
 // we need to react to new replies and showReplies being toggled
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
+
+const replyTrees = computed(() => commentData.value.map(buildReplyTree))
+
+function normalizeCommentAuthor(author) {
+  return String(author).trim().replace(/^@/, '').toLowerCase()
+}
+
+/**
+ * YouTube represents replies to replies as a leading channel mention rather
+ * than exposing their parent comment ID through the comments APIs.
+ *
+ * @param {string} html
+ * @returns {{ channelId: string, author: string } | null}
+ */
+function getLeadingMention(html) {
+  const document = new DOMParser().parseFromString(html, 'text/html')
+  const firstContentNode = Array.from(document.body.childNodes).find((node) => {
+    return node.nodeType !== 3 || node.textContent.trim() !== ''
+  })
+
+  if (firstContentNode?.nodeName !== 'A') {
+    return null
+  }
+
+  const href = firstContentNode.getAttribute('href') ?? ''
+  const channelId = /\/channel\/([^/?#]+)/.exec(href)?.[1] ?? ''
+
+  return {
+    channelId,
+    author: normalizeCommentAuthor(firstContentNode.textContent)
+  }
+}
+
+/**
+ * @param {Comment} comment
+ * @param {{ channelId: string, author: string }} mention
+ */
+function commentMatchesMention(comment, mention) {
+  const channelIds = [comment.authorId, comment.authorLink].filter(Boolean)
+
+  return (mention.channelId !== '' && channelIds.includes(mention.channelId)) ||
+    normalizeCommentAuthor(comment.author) === mention.author
+}
+
+/**
+ * @param {Comment} comment
+ */
+function buildReplyTree(comment) {
+  const roots = []
+  const previousNodes = []
+
+  comment.replies.forEach((reply, index) => {
+    const node = { reply, index, children: [] }
+    const mention = getLeadingMention(reply.text)
+    let parent = null
+
+    if (mention && !commentMatchesMention(comment, mention)) {
+      for (let previousIndex = previousNodes.length - 1; previousIndex >= 0; previousIndex--) {
+        if (commentMatchesMention(previousNodes[previousIndex].reply, mention)) {
+          parent = previousNodes[previousIndex]
+          break
+        }
+      }
+    }
+
+    if (parent) {
+      parent.children.push(node)
+    } else {
+      roots.push(node)
+    }
+
+    previousNodes.push(node)
+  })
+
+  return roots
+}
 
 /** @type {import('youtubei.js').YT.Comments | undefined} */
 let localCommentsInstance

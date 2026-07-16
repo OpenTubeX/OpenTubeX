@@ -58,6 +58,22 @@
   padding: 15px;
 }
 
+.commentThread {
+  position: relative;
+
+  --comment-thread-line-color: color-mix(in srgb, var(--tertiary-text-color) 55%, var(--card-bg-color));
+}
+
+.commentThreadExpanded::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset-block: 75px 44px;
+  inset-inline-start: 45px;
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  pointer-events: none;
+}
+
 .commentTitleAction {
   font-size: 13px;
   text-decoration: underline;
@@ -224,12 +240,38 @@
 }
 
 .commentReplies {
+  clear: both;
   margin-inline-start: 30px;
+}
+
+.hideReplies::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 3px;
+  inset-inline-start: 0;
+  inline-size: 15px;
+  block-size: 15px;
+  border-block-end: 1px solid var(--comment-thread-line-color);
+  border-inline-start: 1px solid var(--comment-thread-line-color);
+  border-end-start-radius: 12px;
+  pointer-events: none;
 }
 
 .showMoreReplies {
   margin-inline-start: 30px;
   font-size: 15px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.hideReplies {
+  position: relative;
+  padding-block: 8px;
+  padding-inline-start: 30px;
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--title-color);
   cursor: pointer;
   text-decoration: underline;
 }
