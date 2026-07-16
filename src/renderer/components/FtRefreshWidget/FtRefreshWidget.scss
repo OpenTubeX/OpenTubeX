@@ -33,7 +33,95 @@
 }
 
 .nextAutoRefreshTimestamp {
-  text-align: end;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  .lastRefreshTimestamp {
+    text-align: end;
+  }
+}
+
+.nextAutoRefreshCountdown {
+  display: block;
+  flex: 0 0 20px;
+  inline-size: 20px;
+  block-size: 20px;
+
+  svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+}
+
+.countdownTrack {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2px;
+  opacity: 0.25;
+}
+
+.countdownProgress {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-dasharray: 43.9823;
+  transform: rotate(-90deg);
+  transform-origin: 9px 9px;
+  animation: countdown-ring var(--countdown-duration) linear forwards;
+}
+
+.countdownHourglassOutline {
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.25px;
+}
+
+.countdownHourglassUpper,
+.countdownHourglassLower {
+  fill: currentcolor;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.countdownHourglassUpper {
+  animation: countdown-hourglass-upper var(--countdown-duration) linear forwards;
+}
+
+.countdownHourglassLower {
+  animation: countdown-hourglass-lower var(--countdown-duration) linear forwards;
+}
+
+@keyframes countdown-ring {
+  from {
+    stroke-dashoffset: var(--countdown-start-offset);
+  }
+
+  to {
+    stroke-dashoffset: 43.9823;
+  }
+}
+
+@keyframes countdown-hourglass-upper {
+  from {
+    transform: scaleY(var(--countdown-start-scale));
+  }
+
+  to {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes countdown-hourglass-lower {
+  from {
+    transform: scaleY(var(--countdown-elapsed-start-scale));
+  }
+
+  to {
+    transform: scaleY(1);
+  }
 }
 
 .floatingRefreshSection.embedded {

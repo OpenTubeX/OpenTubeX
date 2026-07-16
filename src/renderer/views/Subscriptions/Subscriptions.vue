@@ -21,6 +21,8 @@
             :last-refresh-timestamp="currentTabPanel.lastRefreshTimestamp"
             :next-auto-refresh-timestamp="currentTabPanel.nextAutoRefreshTimestamp"
             :next-auto-refresh-tooltip="currentTabPanel.nextAutoRefreshTooltip"
+            :next-auto-refresh-at="currentAutoRefresh.timestamp"
+            :auto-refresh-interval="currentAutoRefresh.interval"
             :title="currentTabPanel.refreshTitle"
             @click="refreshCurrentTab"
           />
@@ -313,6 +315,37 @@ const currentTabPanel = computed(() => {
       return communityPanel.value
     default:
       return null
+  }
+})
+
+const currentAutoRefresh = computed(() => {
+  let timestamp
+  let interval
+
+  switch (currentTab.value) {
+    case 'videos':
+      timestamp = store.getters.getSubscriptionFeedNextAutoRefreshTimestamp
+      interval = store.getters.getSubscriptionFeedAutoRefreshInterval
+      break
+    case 'shorts':
+      timestamp = store.getters.getSubscriptionShortsNextAutoRefreshTimestamp
+      interval = store.getters.getSubscriptionShortsAutoRefreshInterval
+      break
+    case 'live':
+      timestamp = store.getters.getSubscriptionLiveNextAutoRefreshTimestamp
+      interval = store.getters.getSubscriptionLiveAutoRefreshInterval
+      break
+    case 'community':
+      timestamp = store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
+      interval = store.getters.getSubscriptionPostsAutoRefreshInterval
+      break
+    default:
+      return { timestamp: 0, interval: 0 }
+  }
+
+  return {
+    timestamp: Number(timestamp) || 0,
+    interval: Number.parseInt(interval, 10) || 0
   }
 })
 
