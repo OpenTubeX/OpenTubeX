@@ -480,8 +480,17 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       return
     }
 
+    // Size the placeholder to the container's actual in-flow height so switching
+    // the player to fixed positioning does not change the document height. The
+    // max-based layout height can overshoot the real rendered height (e.g. for
+    // non-16:9 videos), which would shift content below and jump the scroll up.
+    const measuredHeight = playerContainer.offsetHeight
+    const placeholderHeight = measuredHeight >= SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT
+      ? measuredHeight
+      : layoutHeight
+
     lastKnownInlinePlayerHeight = layoutHeight
-    scrollMiniPlaceholderHeight.value = layoutHeight
+    scrollMiniPlaceholderHeight.value = placeholderHeight
 
     const savedRect = getSavedScrollMiniPlayerRect()
     scrollMiniPlayerActive.value = true
