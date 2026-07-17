@@ -88,6 +88,12 @@ const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z'
 
+// Shaka's UI element registries (Controls/OverflowMenu/ContextMenu) are
+// process-global and shared by every live player instance. Track how many
+// players currently rely on the custom element factories so the shared registry
+// is only reset once the last one unmounts (see cleanUpCustomPlayerControls).
+let liveCustomControlPlayers = 0
+
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
@@ -304,6 +310,11 @@ export default defineComponent({
     // Set when a UI reconfigure is requested while the player is not loaded, so
     // it can be flushed once loading finishes (see configureUI).
     let pendingUiReconfigure = false
+
+    // Whether this instance registered its custom control factories into the
+    // shared global registry, so teardown decrements the live-player count
+    // exactly once (see cleanUpCustomPlayerControls).
+    let registeredCustomControls = false
 
     const events = new EventTarget()
 
@@ -4736,6 +4747,23 @@ export default defineComponent({
       removeCopyVideoUrlContext?.()
       removeCopyVideoUrlContext = null
 
+      if (!registeredCustomControls) {
+        return
+      }
+      registeredCustomControls = false
+      liveCustomControlPlayers--
+
+      // Shaka's element registries are process-global and shared across every
+      // live player. Resetting the custom factories (to shaka defaults / null)
+      // while another player is still mounted would make that player's next
+      // ui.configure() build its control panel against a null factory and throw
+      // — Shaka's control-panel loop only guards `registry.has(name)`, not a
+      // null value — which takes down the whole tab. Only reset once this was
+      // the last player relying on the shared registry.
+      if (liveCustomControlPlayers > 0) {
+        return
+      }
+
       class DefaultCaptionSelectionFactory {
         create(rootElement, controls) {
           return new shaka.ui.TextSelection(rootElement, controls)
@@ -6172,6 +6200,9 @@ export default defineComponent({
       registerSkipButtons()
       registerPlaybackAdjustedTime()
       registerQuickPlaybackRateBar()
+
+      registeredCustomControls = true
+      liveCustomControlPlayers++
 
       if (ui.isMobile()) {
         onlyUseOverFlowMenu.value = true
