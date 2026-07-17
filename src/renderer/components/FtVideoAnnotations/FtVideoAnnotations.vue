@@ -101,8 +101,6 @@ import { useI18n } from 'vue-i18n'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 
-const END_SCREEN_ELEMENT_SCALE = 0.8
-
 const props = defineProps({
   annotations: {
     type: Array,
@@ -134,15 +132,12 @@ const buttonLabel = computed(() => {
 })
 
 function getAnnotationStyle(annotation) {
-  const elementScale = annotation.type === 'CHANNEL' ? 1 : END_SCREEN_ELEMENT_SCALE
-
   return {
     insetInlineStart: `${annotation.left * 100}%`,
     top: `${annotation.top * 100}%`,
-    width: `${annotation.width * elementScale * 100}%`,
+    width: `${annotation.width * 100}%`,
     aspectRatio: annotation.aspectRatio,
-    '--channel-avatar-size': `${annotation.width * 100}cqw`,
-    '--channel-avatar-hover-scale': Math.min(1, 0.12 / annotation.width)
+    '--channel-avatar-size': `${annotation.width * 100}cqw`
   }
 }
 </script>

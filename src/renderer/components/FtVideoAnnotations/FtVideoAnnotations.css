@@ -111,7 +111,6 @@
   background: #000;
   box-shadow: 0 2px 8px rgb(0 0 0 / 55%);
   pointer-events: auto;
-  transform: scale(var(--channel-avatar-hover-scale));
   transition: box-shadow 120ms ease;
 }
 
@@ -122,19 +121,19 @@
 }
 
 .channelHovercard {
-  --hovercard-padding: min(2.2cqw, 24px);
+  --hovercard-padding: clamp(12px, 2.2cqw, 24px);
 
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-end: 0;
+  inset-inline-end: calc(-1 * var(--hovercard-padding));
   z-index: 4;
   display: block;
   visibility: hidden;
   box-sizing: border-box;
   inline-size: 45cqw;
-  min-block-size: 17cqw;
+  min-block-size: max(17cqw, calc(var(--channel-avatar-size) + 2 * var(--hovercard-padding)));
   padding-block: var(--hovercard-padding);
-  padding-inline: var(--hovercard-padding) calc(var(--channel-avatar-size) + var(--hovercard-padding));
+  padding-inline: var(--hovercard-padding) calc(var(--channel-avatar-size) + 2 * var(--hovercard-padding));
   border: 1px solid rgb(0 0 0 / 25%);
   border-radius: min(0.7cqw, 8px);
   background: #fff;
@@ -147,8 +146,8 @@
 }
 
 .channelAnnotationAlignStart .channelHovercard {
-  inset-inline: 0 auto;
-  padding-inline: calc(var(--channel-avatar-size) + var(--hovercard-padding)) var(--hovercard-padding);
+  inset-inline: calc(-1 * var(--hovercard-padding)) auto;
+  padding-inline: calc(var(--channel-avatar-size) + 2 * var(--hovercard-padding)) var(--hovercard-padding);
 }
 
 .channelAnnotation:hover .channelHovercard,
