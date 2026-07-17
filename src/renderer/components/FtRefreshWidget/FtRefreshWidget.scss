@@ -68,9 +68,10 @@
   stroke-width: 2px;
   stroke-linecap: round;
   stroke-dasharray: 43.9823;
+  stroke-dashoffset: var(--countdown-offset);
   transform: rotate(-90deg);
   transform-origin: 9px 9px;
-  animation: countdown-ring var(--countdown-duration) linear forwards;
+  transition: stroke-dashoffset 1s linear;
 }
 
 .countdownHourglassOutline {
@@ -82,45 +83,24 @@
 .countdownHourglassUpper,
 .countdownHourglassLower {
   fill: currentcolor;
-  transform-box: fill-box;
-  transform-origin: center bottom;
 }
 
-.countdownHourglassUpper {
-  animation: countdown-hourglass-upper var(--countdown-duration) linear forwards;
+.countdownHourglass {
+  transform-box: view-box;
+  transform-origin: 9px 9px;
 }
 
-.countdownHourglassLower {
-  animation: countdown-hourglass-lower var(--countdown-duration) linear forwards;
+.nextAutoRefreshCountdown:not(.finalMinute) .countdownHourglass {
+  animation: countdown-hourglass-spin 1s ease-in-out;
 }
 
-@keyframes countdown-ring {
-  from {
-    stroke-dashoffset: var(--countdown-start-offset);
-  }
+.nextAutoRefreshCountdown.finalMinute .countdownHourglass {
+  animation: countdown-hourglass-spin 1s linear infinite;
+}
 
+@keyframes countdown-hourglass-spin {
   to {
-    stroke-dashoffset: 43.9823;
-  }
-}
-
-@keyframes countdown-hourglass-upper {
-  from {
-    transform: scaleY(var(--countdown-start-scale));
-  }
-
-  to {
-    transform: scaleY(0);
-  }
-}
-
-@keyframes countdown-hourglass-lower {
-  from {
-    transform: scaleY(var(--countdown-elapsed-start-scale));
-  }
-
-  to {
-    transform: scaleY(1);
+    transform: rotate(360deg);
   }
 }
 

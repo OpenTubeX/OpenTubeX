@@ -17,8 +17,9 @@
       >
         <span
           v-if="nextAutoRefreshAt && autoRefreshInterval"
-          :key="countdownAnimationKey"
+          :key="countdownSpinKey"
           class="nextAutoRefreshCountdown"
+          :class="{ finalMinute: isFinalMinute }"
           :style="countdownStyle"
           aria-hidden="true"
         >
@@ -35,18 +36,20 @@
               cy="9"
               r="7"
             />
-            <path
-              class="countdownHourglassOutline"
-              d="M7 5h4M7 13h4M7.5 5c0 2 .5 2.75 1.5 4-1 1.25-1.5 2-1.5 4M10.5 5c0 2-.5 2.75-1.5 4 1 1.25 1.5 2 1.5 4"
-            />
-            <path
-              class="countdownHourglassUpper"
-              d="m7.75 6.5 1.25 2.25 1.25-2.25Z"
-            />
-            <path
-              class="countdownHourglassLower"
-              d="m9 9.25-1.25 2.25h2.5Z"
-            />
+            <g class="countdownHourglass">
+              <path
+                class="countdownHourglassOutline"
+                d="M7 5h4M7 13h4M7.5 5c0 2 .5 2.75 1.5 4-1 1.25-1.5 2-1.5 4M10.5 5c0 2-.5 2.75-1.5 4 1 1.25 1.5 2 1.5 4"
+              />
+              <path
+                class="countdownHourglassUpper"
+                d="m7.75 6.5 1.25 2.25 1.25-2.25Z"
+              />
+              <path
+                class="countdownHourglassLower"
+                d="m9 9.25-1.25 2.25h2.5Z"
+              />
+            </g>
           </svg>
         </span>
         <p class="lastRefreshTimestamp">
@@ -67,7 +70,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -113,21 +116,43 @@ const props = defineProps({
 const { t } = useI18n()
 
 const COUNTDOWN_CIRCUMFERENCE = 2 * Math.PI * 7
+const FINAL_MINUTE_MS = 60 * 1000
+const now = ref(Date.now())
+let countdownTicker = null
 
-const countdownAnimationKey = computed(() => {
-  return `${props.nextAutoRefreshAt}-${props.autoRefreshInterval}`
+const remaining = computed(() => {
+  return Math.max(props.nextAutoRefreshAt - now.value, 0)
+})
+
+const countdownSpinKey = computed(() => {
+  const remainingMinutes = Math.ceil(remaining.value / FINAL_MINUTE_MS)
+  return `${props.nextAutoRefreshAt}-${props.autoRefreshInterval}-${remainingMinutes}`
+})
+
+const isFinalMinute = computed(() => {
+  return remaining.value <= FINAL_MINUTE_MS
 })
 
 const countdownStyle = computed(() => {
-  const remaining = Math.max(props.nextAutoRefreshAt - Date.now(), 0)
-  const progress = Math.min(remaining / props.autoRefreshInterval, 1)
+  const progress = Math.min(remaining.value / props.autoRefreshInterval, 1)
 
   return {
-    '--countdown-duration': `${remaining}ms`,
-    '--countdown-start-offset': COUNTDOWN_CIRCUMFERENCE * (1 - progress),
-    '--countdown-start-scale': progress,
-    '--countdown-elapsed-start-scale': 1 - progress
+    '--countdown-offset': COUNTDOWN_CIRCUMFERENCE * (1 - progress)
   }
+})
+
+function updateCountdown() {
+  now.value = Date.now()
+}
+
+onMounted(() => {
+  countdownTicker = setInterval(updateCountdown, 1000)
+  document.addEventListener('visibilitychange', updateCountdown)
+})
+
+onBeforeUnmount(() => {
+  clearInterval(countdownTicker)
+  document.removeEventListener('visibilitychange', updateCountdown)
 })
 
 const refreshFeedButtonTitle = computed(() => {
