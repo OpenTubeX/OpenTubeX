@@ -71,11 +71,6 @@ const UNAVAILABLE_VIDEO_THUMBNAILS = {
   dark: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video_dark_theme.png'
 }
 
-// How long to wait after an automatic fallback off DASH before trying to climb back
-// to it, and how many times to try before giving up and staying on the lower format.
-const DASH_RECOVERY_DELAY_MS = 5000
-const MAX_DASH_RECOVERY_ATTEMPTS = 2
-
 export default defineComponent({
   name: 'Watch',
   components: {
@@ -212,15 +207,6 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
-
-      // After an error forces an automatic fallback off the modern (DASH) format down
-      // to legacy/audio, we try to climb back up to DASH on our own so the user doesn't
-      // have to reload the whole tab to get HD back. Capped so a genuinely broken DASH
-      // stream can't flap forever.
-      /** @type {ReturnType<typeof setTimeout>|null} */
-      dashRecoveryTimeout: null,
-      dashRecoveryAttempts: 0,
-      dashRecoveryInProgress: false,
       /** @type {number|null} */
       watchTimeLastTick: null,
       /** @type {Record<string, number>} */
@@ -492,8 +478,6 @@ export default defineComponent({
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
       this.abortAutoplayCountdown(true)
-      clearTimeout(this.dashRecoveryTimeout)
-      this.dashRecoveryTimeout = null
     },
 
     async cleanupWatchRuntime() {
@@ -533,7 +517,6 @@ export default defineComponent({
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
-      this.cancelDashRecovery()
       this.activeFormat = this.defaultVideoFormat
 
       this.checkIfTimestamp()
@@ -1602,16 +1585,6 @@ export default defineComponent({
     },
 
     handleTimeUpdate: function (currentSeconds) {
-      // DASH is playing again: an automatic recovery succeeded (or DASH simply works),
-      // so clear the pending recovery state and allow fresh attempts for future errors.
-      if (this.activeFormat === 'dash' && (this.dashRecoveryInProgress || this.dashRecoveryAttempts > 0)) {
-        if (this.dashRecoveryInProgress) {
-          this.showTabToast(this.t('Change Format.Restored higher quality formats'))
-        }
-        this.dashRecoveryInProgress = false
-        this.dashRecoveryAttempts = 0
-      }
-
       this.updateCurrentTime(currentSeconds)
       this.updateCurrentChapter(currentSeconds)
       this.$store.commit('setCurrentWatchTimestamp', {
@@ -1912,9 +1885,6 @@ export default defineComponent({
     },
 
     handleFormatChange: function (format) {
-      // The user picked a format explicitly, so don't second-guess them by auto-recovering.
-      this.cancelDashRecovery()
-
       switch (format) {
         case 'dash':
           this.enableDashFormat()
@@ -2165,48 +2135,7 @@ export default defineComponent({
             this.enableDashFormat()
             break
         }
-
-        // If the error knocked us off DASH, try to climb back up automatically so the
-        // user gets HD back without having to reload the whole tab.
-        this.scheduleDashRecovery()
       }
-    },
-
-    // After an automatic fallback landed us on a lower format, attempt to switch back
-    // to DASH (a lightweight in-player reload, not a full tab reload). Bounded so a
-    // genuinely broken DASH stream settles on the working format instead of flapping.
-    scheduleDashRecovery: function () {
-      clearTimeout(this.dashRecoveryTimeout)
-      this.dashRecoveryTimeout = null
-
-      if (
-        this.activeFormat === 'dash' ||
-        this.manifestSrc === null ||
-        this.isLive ||
-        this.isPostLiveDvr ||
-        this.dashRecoveryAttempts >= MAX_DASH_RECOVERY_ATTEMPTS
-      ) {
-        return
-      }
-
-      this.dashRecoveryTimeout = setTimeout(() => {
-        this.dashRecoveryTimeout = null
-
-        if (this.activeFormat === 'dash' || this.manifestSrc === null || this.isLive || this.isPostLiveDvr) {
-          return
-        }
-
-        this.dashRecoveryAttempts++
-        this.dashRecoveryInProgress = true
-        this.enableDashFormat()
-      }, DASH_RECOVERY_DELAY_MS)
-    },
-
-    cancelDashRecovery: function () {
-      clearTimeout(this.dashRecoveryTimeout)
-      this.dashRecoveryTimeout = null
-      this.dashRecoveryInProgress = false
-      this.dashRecoveryAttempts = 0
     },
 
     /**

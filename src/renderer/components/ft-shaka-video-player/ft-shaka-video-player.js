@@ -5843,21 +5843,23 @@ export default defineComponent({
         return
       }
 
-      // Player lifecycle interruptions are not format failures: a load aborted by a
-      // reload/unload/destroy, or the player being torn down mid-operation. Reacting
-      // to them by walking the format fallback chain needlessly drops the video down
-      // to the legacy formats (360p). These races became far more common with per-tab
-      // players (mount/unmount/reconfigure while switching tabs, SABR reloads), so just
-      // log and ignore them and let the current format keep (re)loading.
+      // Aborts and lifecycle interruptions are not format failures: a load/request
+      // cancelled by a reload/unload/destroy, or the player torn down mid-operation.
+      // Reacting to them by walking the format fallback chain needlessly drops the
+      // video down to the legacy formats (360p). These races became far more common
+      // with per-tab players (mount/unmount/reconfigure while switching tabs) and are
+      // routine during SABR reloads, where in-flight requests deliberately abort
+      // themselves (SabrSchemePlugin raises OPERATION_ABORTED, tagged NETWORK, once a
+      // reload is requested). Match on the code regardless of category and just log
+      // and ignore them so the current format keeps (re)loading / the reload proceeds.
       if (
-        error.category === ErrorCategory.PLAYER &&
-        (error.code === ErrorCode.LOAD_INTERRUPTED ||
-          error.code === ErrorCode.OPERATION_ABORTED ||
-          error.code === ErrorCode.OBJECT_DESTROYED ||
-          error.code === ErrorCode.CONTENT_NOT_LOADED ||
-          error.code === ErrorCode.PRELOAD_DESTROYED)
+        error.code === ErrorCode.OPERATION_ABORTED ||
+        error.code === ErrorCode.LOAD_INTERRUPTED ||
+        error.code === ErrorCode.OBJECT_DESTROYED ||
+        error.code === ErrorCode.CONTENT_NOT_LOADED ||
+        error.code === ErrorCode.PRELOAD_DESTROYED
       ) {
-        console.warn(`Ignoring player lifecycle interruption (code ${error.code}) in ${context}`)
+        console.warn(`Ignoring player abort/interruption (code ${error.code}) in ${context}`)
         return
       }
 
