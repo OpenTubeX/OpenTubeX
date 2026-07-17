@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue'
-import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
@@ -52,6 +52,7 @@ import { useTabToast } from '../../composables/useTabToast'
 
 /**
  * @typedef {{
+ *   scheme: string,
  *   url: string,
  *   poToken: string,
  *   ustreamerConfig: string,
@@ -66,6 +67,7 @@ import { useTabToast } from '../../composables/useTabToast'
 
 const MANIFEST_TYPE_DASH = 'application/dash+xml'
 const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
+let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
   dark: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video_dark_theme.png'
@@ -207,6 +209,7 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
+      sabrErrorRecoveryAttemptedForCurrentVideo: false,
       /** @type {number|null} */
       watchTimeLastTick: null,
       /** @type {Record<string, number>} */
@@ -508,6 +511,7 @@ export default defineComponent({
       const videoIdChanged = this.videoId !== previousVideoId
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
+        this.sabrErrorRecoveryAttemptedForCurrentVideo = false
       }
       this.ipBlockDetectedInCurrentChain = false
       this.resetVideoState({
@@ -2108,6 +2112,22 @@ export default defineComponent({
         }
       }
 
+      if (
+        this.activeFormat === 'dash' &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.sabrErrorRecoveryAttemptedForCurrentVideo
+      ) {
+        // A SABR playback session may no longer be reusable after a critical
+        // error. Refetch it once in-place before giving up HD and falling back
+        // to the legacy 360p stream.
+        this.sabrErrorRecoveryAttemptedForCurrentVideo = true
+        await this.onPlayerReloadRequested(
+          this.$refs.player?.getSabrReloadState(),
+          'Refreshing SABR stream after playback error'
+        )
+        return
+      }
+
       if (this.isLive || this.isPostLiveDvr) {
         // live streams don't have legacy formats, so only switch between dash and audio
 
@@ -2162,8 +2182,13 @@ export default defineComponent({
       const url = new URL(videoInfo.streaming_data.server_abr_streaming_url)
       url.searchParams.set('alr', 'yes')
       url.searchParams.set('cpn', videoInfo.cpn)
+      // Shaka's scheme registry is renderer-global. Each retained tab therefore
+      // needs its own scheme so one SABR player cannot replace or unregister
+      // another player's request handler.
+      const scheme = `sabr${nextSabrSchemeId++}`
 
       this.sabrData = {
+        scheme,
         url: url.toString(),
         poToken,
         ustreamerConfig: videoInfo.player_config.media_common_config.media_ustreamer_request_config.video_playback_ustreamer_config,
@@ -2172,6 +2197,7 @@ export default defineComponent({
 
       /** @type {import('../../helpers/player/SabrManifestParser').SabrManifest} */
       const sabrManifest = {
+        scheme,
         // Different formats have different durations and
         // use of slightly longer duration in PresentationTimeline causes player to stuck at the end
         duration: Math.min(...videoInfo.streaming_data.adaptive_formats.map(f => f.approx_duration_ms)) / 1000,
@@ -2599,7 +2625,7 @@ export default defineComponent({
       this.startNextVideoInPip = uiState.startNextVideoInPip
     },
 
-    async onPlayerReloadRequested(payload) {
+    async onPlayerReloadRequested(payload, toastMessage = 'Reloading player according to SABR request') {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
       this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       const playbackRate = Number(payload?.playbackRate)
@@ -2607,22 +2633,21 @@ export default defineComponent({
         ? playbackRate
         : this.currentPlaybackRate
       this.preserveTitleOnNextReload = true
-      this.showTabToast('Reloading player according to SABR request')
+      this.showTabToast(toastMessage)
 
       const timestamp = this.getTimestamp()
       if (timestamp > 0) {
         // Reload at the middle should restart at current timestamp
-        try {
-          await this.tabRouter.replace({
-            path: this.tabRoute.path,
-            query: { ...this.tabRoute.query, oneTimeTimestamp: timestamp },
-          })
-        } catch (failure) {
-          if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
-            // Already on route with same timestamp, allow reloadView to run instead
-          } else {
-            throw failure
-          }
+        const reloadLocation = {
+          path: this.tabRoute.path,
+          query: { ...this.tabRoute.query, oneTimeTimestamp: timestamp },
+        }
+
+        if (this.tabRouter.resolve(reloadLocation).fullPath !== this.tabRoute.fullPath) {
+          // The route watcher owns this reload. Calling reloadView here as well
+          // races two metadata requests and two player teardowns.
+          await this.tabRouter.replace(reloadLocation)
+          return
         }
       }
       await this.reloadView({ preserveTitle: true })

@@ -647,7 +647,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     requestNumber: 0,
   }
 
-  shaka.net.NetworkingEngine.registerScheme('sabr', (uri, request, requestType, _progressUpdated, headersReceived, _config) => {
+  shaka.net.NetworkingEngine.registerScheme(sabrData.scheme, (uri, request, requestType, _progressUpdated, headersReceived, _config) => {
     // lazily fetch it as the variable is only set after setupSabrScheme is called
     // but it will definitely exist when we receive a request here.
     const player = getPlayer()
@@ -848,8 +848,12 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     return op
   })
 
+  let cleanedUp = false
   const cleanup = () => {
-    shaka.net.NetworkingEngine.unregisterScheme('sabr')
+    if (cleanedUp) return
+    cleanedUp = true
+
+    shaka.net.NetworkingEngine.unregisterScheme(sabrData.scheme)
     initDataCache.clear()
   }
 

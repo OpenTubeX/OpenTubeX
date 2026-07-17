@@ -4,6 +4,7 @@ import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
 
 /**
  * @typedef {{
+ *   scheme: string,
  *   duration: number,
  *   formats: {
  *     itag: number,
@@ -186,12 +187,19 @@ class SabrManifestParser {
             hasVoiceBoostAudio,
             presentationTimeline,
             networkingEngine,
-            fakeVideoFormatId
+            fakeVideoFormatId,
+            manifestData.scheme
           )
         )
       } else if (!this._config.disableVideo) {
         videoStreams.push(
-          /** @__NOINLINE__ */ createVideoStream(format, currentId++, presentationTimeline, networkingEngine)
+          /** @__NOINLINE__ */ createVideoStream(
+            format,
+            currentId++,
+            presentationTimeline,
+            networkingEngine,
+            manifestData.scheme
+          )
         )
       }
     }
@@ -297,6 +305,7 @@ function buildFormatId(format) {
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
  * @param {string | undefined} fakeVideoFormatId
+ * @param {string} scheme
  */
 function createAudioStream(
   format,
@@ -305,7 +314,8 @@ function createAudioStream(
   hasVoiceBoostAudio,
   presentationTimeline,
   networkingEngine,
-  fakeVideoFormatId
+  fakeVideoFormatId,
+  scheme
 ) {
   const roles = []
 
@@ -372,6 +382,7 @@ function createAudioStream(
         stream,
         presentationTimeline,
         networkingEngine,
+        scheme,
         fakeVideoFormatId
       )
     },
@@ -404,8 +415,9 @@ function createAudioStream(
  * @param {number} id
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
  */
-function createVideoStream(format, id, presentationTimeline, networkingEngine) {
+function createVideoStream(format, id, presentationTimeline, networkingEngine, scheme) {
   const colorGamut = format.colorPrimaries === 'BT2020' ? 'rec2020' : 'srgb'
 
   let hdr = 'SDR'
@@ -436,7 +448,7 @@ function createVideoStream(format, id, presentationTimeline, networkingEngine) {
       // shaka-player sometimes calls the create function even when the segment index already exists
       if (stream.segmentIndex) { return }
 
-      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine)
+      stream.segmentIndex = await createMediaSegmentIndex(format, stream, presentationTimeline, networkingEngine, scheme)
     },
     closeSegmentIndex: () => {
       if (stream.segmentIndex) {
@@ -627,6 +639,7 @@ function createImageStreams(storyboards, presentationTimeline, currentId) {
  * @param {shaka.extern.Stream} stream
  * @param {shaka.media.PresentationTimeline} presentationTimeline
  * @param {shaka.net.NetworkingEngine} networkingEngine
+ * @param {string} scheme
  * @param {string | undefined} fakeVideoFormatId
  */
 async function createMediaSegmentIndex(
@@ -634,9 +647,10 @@ async function createMediaSegmentIndex(
   stream,
   presentationTimeline,
   networkingEngine,
+  scheme,
   fakeVideoFormatId = undefined
 ) {
-  let url = `sabr:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
+  let url = `${scheme}:${stream.type}?formatId=${encodeURIComponent(stream.originalId)}`
 
   if (fakeVideoFormatId) {
     url += `&videoFormatId=${encodeURIComponent(fakeVideoFormatId)}`

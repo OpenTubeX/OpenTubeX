@@ -3558,14 +3558,9 @@ export default defineComponent({
         startSabrBackoffTimer(backoffMs)
       })
       sabrStream.onReloadOnce(() => {
-        const captionIndex = player?.getTextTracks().findIndex(caption => caption.active) ?? -1
         sabrAbortController.abort()
         clearSabrBackoffTimer()
-        emit('player-reload-requested', {
-          wasPlaying: !video.value?.paused,
-          captionIndex: captionIndex >= 0 ? captionIndex : null,
-          playbackRate: getCurrentPlaybackRate()
-        })
+        emit('player-reload-requested', getSabrReloadState())
       })
     }
 
@@ -3577,10 +3572,11 @@ export default defineComponent({
     function requestFilter(type, request, _context) {
       if (type === RequestType.SEGMENT) {
         const url = new URL(request.uris[0])
+        const isSabrRequest = props.sabrData && url.protocol === `${props.sabrData.scheme}:`
 
         // only when we aren't proxying through Invidious,
         // it doesn't like the range param and makes get requests to youtube anyway
-        if (url.protocol !== 'sabr:' && url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
+        if (!isSabrRequest && url.hostname.endsWith('.googlevideo.com') && url.pathname === '/videoplayback') {
           request.method = 'POST'
           request.body = new Uint8Array([0x78, 0]) // protobuf: { 15: 0 } (no idea what it means but this is what YouTube uses)
 
@@ -3599,7 +3595,7 @@ export default defineComponent({
       if (type === RequestType.SEGMENT) {
         const url = new URL(response.uri)
 
-        if (url.protocol === 'sabr:') {
+        if (props.sabrData && url.protocol === `${props.sabrData.scheme}:`) {
           return
         }
 
@@ -6768,6 +6764,16 @@ export default defineComponent({
       video.value.currentTime = time
     }
 
+    function getSabrReloadState() {
+      const captionIndex = player?.getTextTracks().findIndex(caption => caption.active) ?? -1
+
+      return {
+        wasPlaying: !video.value?.paused,
+        captionIndex: captionIndex >= 0 ? captionIndex : null,
+        playbackRate: getCurrentPlaybackRate()
+      }
+    }
+
     /**
      * Vue's lifecycle hooks are synchonous, so if we destroy the player in {@linkcode onBeforeUnmount},
      * it won't be finished in time, as the player destruction is asynchronous.
@@ -6826,6 +6832,7 @@ export default defineComponent({
       pause,
       getCurrentTime,
       setCurrentTime,
+      getSabrReloadState,
       destroyPlayer
     })
 
