@@ -11,7 +11,7 @@ import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
 import { CaptionToggleButton } from './player-components/CaptionToggleButton'
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
-import { CopyVideoUrlButton } from './player-components/CopyVideoUrlButton'
+import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton } from './player-components/LoopButton'
@@ -4412,6 +4412,9 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_sleep_timer', new SleepTimerFactory())
     }
 
+    /** @type {(() => void) | null} */
+    let removeCopyVideoUrlContext = null
+
     function registerContextMenuButtons() {
       /**
        * @returns {number}
@@ -4485,13 +4488,26 @@ export default defineComponent({
 
         create(rootElement, controls) {
           return new CopyVideoUrlButton(
-            () => getVideoUrl(this.backend, this.includeTimestamp),
-            () => getCopyLabel(this.backend, this.includeTimestamp),
-            () => getCopySuccessMessage(this.backend, this.includeTimestamp),
+            this.backend,
+            this.includeTimestamp,
             rootElement,
             controls
           )
         }
+      }
+
+      // The button factory is registered on shaka's renderer-global element
+      // registry, so it can't close over this instance's state. Expose this
+      // instance's URL/label resolvers keyed by its own `Controls` object, which
+      // the button resolves at click time (see CopyVideoUrlButton).
+      const controls = ui?.getControls()
+      if (controls) {
+        removeCopyVideoUrlContext?.()
+        removeCopyVideoUrlContext = setCopyVideoUrlContext(controls, {
+          getVideoUrl,
+          getLabel: getCopyLabel,
+          getSuccessMessage: getCopySuccessMessage
+        })
       }
 
       /**
@@ -4691,6 +4707,9 @@ export default defineComponent({
      * (e.g. {@linkcode events}, {@linkcode fullWindowEnabled}) can get garbage collected
      */
     function cleanUpCustomPlayerControls() {
+      removeCopyVideoUrlContext?.()
+      removeCopyVideoUrlContext = null
+
       class DefaultCaptionSelectionFactory {
         create(rootElement, controls) {
           return new shaka.ui.TextSelection(rootElement, controls)
