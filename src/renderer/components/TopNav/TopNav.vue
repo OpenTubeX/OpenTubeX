@@ -127,7 +127,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -365,6 +365,29 @@ function showSearchFilters() {
 const searchContainer = useTemplateRef('searchContainer')
 const searchInput = useTemplateRef('searchInput')
 
+// The search bar renders once for the whole window and is shared by every
+// logical tab, so its text has to be persisted per tab to stay independent.
+// Mirror the live input value here since FtInput doesn't expose a getter.
+const searchTextByTabId = new Map()
+let currentSearchText = ''
+
+if (process.env.IS_ELECTRON) {
+  const presentedTabId = computed(() => store.getters.getPresentedTabId)
+
+  watch(presentedTabId, (tabId, previousTabId) => {
+    // Skip the initial null -> id transition during startup so we don't clobber
+    // text that was pre-filled for this tab (e.g. a search carried into a new
+    // window). Only real tab switches save and restore per-tab text.
+    if (previousTabId == null) {
+      return
+    }
+
+    searchTextByTabId.set(previousTabId, currentSearchText)
+    updateSearchInputText(tabId != null ? searchTextByTabId.get(tabId) ?? '' : '')
+    clearLastSuggestionQuery()
+  })
+}
+
 /** @type {import('vue').ComputedRef<any>} */
 const searchSettings = computed(() => store.getters.getSearchSettings)
 
@@ -523,6 +546,7 @@ function clearLastSuggestionQuery() {
  * @param {string} text
  */
 function updateSearchInputText(text) {
+  currentSearchText = text
   searchInput.value?.setText(text)
 }
 
@@ -530,6 +554,8 @@ function updateSearchInputText(text) {
  * @param {string} query
  */
 function getSearchSuggestionsDebounce(query) {
+  currentSearchText = query
+
   if (query === lastSuggestionQuery.value) {
     return
   }
