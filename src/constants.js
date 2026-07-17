@@ -53,6 +53,7 @@ const IpcChannels = {
   TABS_GO_HISTORY: 'tabs-go-history',
   TABS_SET_PLAYBACK_STATE: 'tabs-set-playback-state',
   TABS_REQUEST_PICTURE_IN_PICTURE: 'tabs-request-picture-in-picture',
+  WINDOW_MINIMIZED_STATE: 'window-minimized-state',
   TABS_REQUEST_FULLSCREEN: 'tabs-request-fullscreen',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',
   TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',

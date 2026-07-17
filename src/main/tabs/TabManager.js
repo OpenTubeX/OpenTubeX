@@ -2263,7 +2263,7 @@ export function setupTabsIPC(options = {}) {
 
     return manager.browserWindow.webContents.executeJavaScript(`
       (async () => {
-        const root = Array.from(document.querySelectorAll('[data-tab-id]'))
+        const root = Array.from(document.querySelectorAll('.tabContent[data-tab-id]'))
           .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
         const target = root?.querySelector('video.player')
         if (!target?.ui?.getControls) return false
@@ -2285,7 +2285,7 @@ export function setupTabsIPC(options = {}) {
     }
 
     return manager.browserWindow.webContents.executeJavaScript(`
-      Array.from(document.querySelectorAll('[data-tab-id]'))
+      Array.from(document.querySelectorAll('.tabContent[data-tab-id]'))
         .find(element => element.dataset.tabId === ${JSON.stringify(tabId)})
         ?.querySelector('video.player')
         ?.ui?.getControls?.().toggleFullScreen()

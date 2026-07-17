@@ -100,6 +100,18 @@ export default {
   },
 
   /**
+   * Listen for native window minimize/restore, which the renderer can't reliably
+   * detect on its own (notably on Wayland).
+   * @param {(minimized: boolean) => void} handler
+   * @returns {() => void} unsubscribe
+   */
+  handleWindowMinimizedState: (handler) => {
+    const listener = (_, minimized) => handler(minimized)
+    ipcRenderer.on(IpcChannels.WINDOW_MINIMIZED_STATE, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.WINDOW_MINIMIZED_STATE, listener)
+  },
+
+  /**
    * @param {string} key
    * @returns {Promise<ArrayBuffer>}
    */

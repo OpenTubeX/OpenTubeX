@@ -162,7 +162,8 @@ export const defaultSideEffectsTriggerId = settingId =>
 const state = {
   autoplayPlaylists: true,
   autoplayVideos: true,
-  autoPictureInPictureOnTabChange: false,
+  // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'
+  autoPictureInPictureTriggers: [],
   scrollMiniPlayerEnabled: true,
   scrollMiniPlayerSavedRect: '',
   avoidTranslation: 'disabled',
@@ -563,22 +564,29 @@ const customActions = {
         }
       }
 
-      const legacyAutoPipEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureMode')
-      const hasTabPipSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureOnTabChange')
+      const legacyAutoPipModeEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureMode')
+      const legacyAutoPipTabEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureOnTabChange')
+      const hasPipTriggersSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureTriggers')
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
 
-      if (legacyAutoPipEntry && (!hasTabPipSetting || !hasScrollMiniSetting)) {
-        const mode = legacyAutoPipEntry.value
+      // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.
+      // The old behavior fired on both in-app tab changes and window minimize, so preserve both.
+      if (!hasPipTriggersSetting) {
+        let tabChangeEnabled = null
 
-        if (!hasTabPipSetting) {
-          const tabValue = mode === 'tab' || mode === 'both'
-          await dispatch('updateAutoPictureInPictureOnTabChange', tabValue)
+        if (legacyAutoPipTabEntry) {
+          tabChangeEnabled = legacyAutoPipTabEntry.value === true
+        } else if (legacyAutoPipModeEntry) {
+          tabChangeEnabled = legacyAutoPipModeEntry.value === 'tab' || legacyAutoPipModeEntry.value === 'both'
         }
 
-        if (!hasScrollMiniSetting) {
-          const scrollValue = mode !== 'never'
-          await dispatch('updateScrollMiniPlayerEnabled', scrollValue)
+        if (tabChangeEnabled !== null) {
+          await dispatch('updateAutoPictureInPictureTriggers', tabChangeEnabled ? ['tab', 'minimize'] : [])
         }
+      }
+
+      if (legacyAutoPipModeEntry && !hasScrollMiniSetting) {
+        await dispatch('updateScrollMiniPlayerEnabled', legacyAutoPipModeEntry.value !== 'never')
       }
 
       for (const _id of settingsWithSideEffects) {

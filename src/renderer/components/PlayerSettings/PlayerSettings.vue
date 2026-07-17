@@ -108,12 +108,6 @@
           @change="updateShowPlaybackRateAdjustedTimestamp"
         />
         <FtToggleSwitch
-          :label="t('Settings.Player Settings.Auto Picture in Picture on Tab Change')"
-          :compact="true"
-          :default-value="autoPictureInPictureOnTabChange"
-          @change="updateAutoPictureInPictureOnTabChange"
-        />
-        <FtToggleSwitch
           :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
           :compact="true"
           :default-value="scrollMiniPlayerEnabled"
@@ -128,6 +122,16 @@
         />
       </div>
     </div>
+    <FtFlexBox>
+      <FtCheckboxList
+        v-model="autoPictureInPictureTriggers"
+        :title="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
+        :labels="autoPictureInPictureTriggerLabels"
+        :values="AUTO_PIP_TRIGGER_VALUES"
+        :disabled-values="isLinuxWayland ? ['minimize'] : []"
+        :tooltips="isLinuxWayland ? { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') } : {}"
+      />
+    </FtFlexBox>
     <FtFlexBox>
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Viewing Mode.Default Viewing Mode')"
@@ -591,6 +595,7 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -869,15 +874,28 @@ function updateDefaultViewingMode(value) {
   store.dispatch('updateDefaultViewingMode', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const autoPictureInPictureOnTabChange = computed(() => store.getters.getAutoPictureInPictureOnTabChange)
+const AUTO_PIP_TRIGGER_VALUES = ['tab', 'minimize', 'blur']
 
-/**
- * @param {boolean} value
- */
-function updateAutoPictureInPictureOnTabChange(value) {
-  store.dispatch('updateAutoPictureInPictureOnTabChange', value)
+// The 'minimize' window event doesn't fire on Wayland, so the minimize trigger can't work there.
+// https://github.com/electron/electron/issues/51766
+const isLinuxWayland = ref(false)
+if (process.env.IS_ELECTRON && process.platform === 'linux') {
+  onMounted(async () => {
+    isLinuxWayland.value = await window.ftElectron.isWaylandPlatform()
+  })
 }
+
+const autoPictureInPictureTriggerLabels = computed(() => [
+  t('Settings.Player Settings.Auto Picture in Picture.On Tab Change'),
+  t('Settings.Player Settings.Auto Picture in Picture.On Window Minimize'),
+  t('Settings.Player Settings.Auto Picture in Picture.On Window Hide')
+])
+
+/** @type {import('vue').WritableComputedRef<string[]>} */
+const autoPictureInPictureTriggers = computed({
+  get: () => store.getters.getAutoPictureInPictureTriggers,
+  set: (value) => store.dispatch('updateAutoPictureInPictureTriggers', value)
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)

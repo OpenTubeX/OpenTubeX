@@ -1499,6 +1499,20 @@ function runApp() {
       sessionData?.sessionId
     )
 
+    // Forward the native window minimized state to the renderer. The renderer can't
+    // reliably detect minimize on its own (`document.hidden` doesn't fire on Wayland),
+    // so the auto Picture-in-Picture feature relies on these events instead.
+    const sendMinimizedState = (minimized) => {
+      if (!newWindow.isDestroyed() && !newWindow.webContents.isDestroyed()) {
+        newWindow.webContents.send(IpcChannels.WINDOW_MINIMIZED_STATE, minimized)
+      }
+    }
+    newWindow.on('minimize', () => sendMinimizedState(true))
+    newWindow.on('restore', () => sendMinimizedState(false))
+    // Cover minimize-to-tray (and app hide), where the window is hidden rather than minimized.
+    newWindow.on('hide', () => sendMinimizedState(true))
+    newWindow.on('show', () => sendMinimizedState(false))
+
     if (isTrayOnMinimizeSupported) {
       function manageTray(window, removeWindow = false) {
         if (tray) {

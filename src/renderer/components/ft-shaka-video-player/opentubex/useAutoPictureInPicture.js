@@ -17,19 +17,36 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   const isActiveTab = computed(() => {
     return !process.env.IS_ELECTRON || isTabPresented?.value === true
   })
-  const autoPictureInPictureOnTabChange = computed(() => store.getters.getAutoPictureInPictureOnTabChange)
+  const autoPictureInPictureTriggers = computed(() => store.getters.getAutoPictureInPictureTriggers)
+
+  const triggerOnTabChange = computed(() => autoPictureInPictureTriggers.value.includes('tab'))
+  const triggerOnMinimize = computed(() => autoPictureInPictureTriggers.value.includes('minimize'))
+  const triggerOnBlur = computed(() => autoPictureInPictureTriggers.value.includes('blur'))
+  const autoPipEnabled = computed(() => autoPictureInPictureTriggers.value.length > 0)
 
   let autoPipActive = false
-  let tabVisible = isActiveTab.value && !document.hidden
+  // In Electron the minimized state is driven by native window events (see setup below),
+  // because `document.hidden` doesn't fire on minimize on Wayland. On the web we fall back
+  // to `document.hidden`, which also covers browser-tab switches.
+  let windowMinimized = process.env.IS_ELECTRON ? false : document.hidden
+  let windowFocused = document.hasFocus()
   let stopActiveTabWatch = null
+  let removeMinimizedListener = null
 
   function shouldAutoPipNow() {
-    if (!autoPictureInPictureOnTabChange.value || props.format === 'audio') return false
+    if (!autoPipEnabled.value || props.format === 'audio') return false
 
     const videoElement = video.value
     if (!videoElement || videoElement.ended || (videoElement.paused && !autoPipActive)) return false
 
-    return !tabVisible
+    // An in-app tab change is handled by the 'tab' trigger. Window minimize / blur only
+    // apply while this is the presented tab, so background tabs don't spuriously enter PiP.
+    const active = isActiveTab.value
+    const tabHidden = triggerOnTabChange.value && !active
+    const minimized = active && triggerOnMinimize.value && windowMinimized
+    const blurred = active && triggerOnBlur.value && !windowFocused
+
+    return tabHidden || minimized || blurred
   }
 
   function triggerPipToggle() {
@@ -73,18 +90,39 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     }
   }
 
-  function updateTabVisibility() {
-    tabVisible = isActiveTab.value && !document.hidden
+  function refreshFocusState() {
+    windowFocused = document.hasFocus()
+    updateAutoPip()
+  }
+
+  function refreshVisibilityState() {
+    windowMinimized = document.hidden
+    windowFocused = document.hasFocus()
+    updateAutoPip()
+  }
+
+  function handleMinimizedState(minimized) {
+    windowMinimized = minimized
     updateAutoPip()
   }
 
   function initializeActiveTab() {
-    updateTabVisibility()
+    windowFocused = document.hasFocus()
+    if (!process.env.IS_ELECTRON) {
+      windowMinimized = document.hidden
+    }
+    updateAutoPip()
   }
 
   function setupAutoPictureInPicture() {
-    document.addEventListener('visibilitychange', updateTabVisibility)
-    stopActiveTabWatch = watch(isActiveTab, updateTabVisibility)
+    if (process.env.IS_ELECTRON) {
+      removeMinimizedListener = window.ftElectron?.handleWindowMinimizedState?.(handleMinimizedState) ?? null
+    } else {
+      document.addEventListener('visibilitychange', refreshVisibilityState)
+    }
+    window.addEventListener('focus', refreshFocusState)
+    window.addEventListener('blur', refreshFocusState)
+    stopActiveTabWatch = watch(isActiveTab, updateAutoPip)
   }
 
   function resetAutoPictureInPictureOwnership() {
@@ -92,12 +130,19 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   }
 
   function teardownAutoPictureInPicture() {
-    document.removeEventListener('visibilitychange', updateTabVisibility)
+    if (process.env.IS_ELECTRON) {
+      removeMinimizedListener?.()
+      removeMinimizedListener = null
+    } else {
+      document.removeEventListener('visibilitychange', refreshVisibilityState)
+    }
+    window.removeEventListener('focus', refreshFocusState)
+    window.removeEventListener('blur', refreshFocusState)
     stopActiveTabWatch?.()
     stopActiveTabWatch = null
   }
 
-  watch(autoPictureInPictureOnTabChange, updateAutoPip)
+  watch(autoPictureInPictureTriggers, updateAutoPip)
 
   return {
     initializeActiveTab,

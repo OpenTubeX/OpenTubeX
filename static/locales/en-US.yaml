@@ -563,7 +563,12 @@ Settings:
       Full Window (Always On): Full Window (Always On)
       Full Screen (Always On): Full Screen (Always On)
       Tooltip: Most default viewing modes are only applied at the start of each watch session. Changes made during the session persist until it ends. Always-on viewing modes are applied whenever you switch to a new video, regardless of any viewing mode changes made when viewing the previous video.
-    Auto Picture in Picture on Tab Change: Automatically enter picture-in-picture when switching tabs
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatically enter Picture-in-Picture
+      On Tab Change: When switching tabs
+      On Window Minimize: When minimizing the window
+      On Window Hide: When the window loses focus or is switched away
+      Wayland Minimize Unsupported: Wayland does not report window minimize to apps, so this trigger is unavailable. Use "When the window loses focus or is switched away" instead, which also covers minimizing.
     Scroll Mini Player:
       Scroll Mini Player: Scroll mini player
       When Scrolling Down: Keep a mini player on screen when scrolling down
