@@ -77,7 +77,7 @@ import { KeyboardShortcuts } from '../../../constants'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabContext } from '../../tabs/TabContext'
 
-const { tabId } = useTabContext()
+const { tabId, isTabPresented } = useTabContext()
 const subscriptionLimitStorageKey = tabId ? `Subscriptions/${tabId}/dataLimit` : 'subscriptionLimit'
 
 const props = defineProps({
@@ -203,6 +203,12 @@ function increaseLimit() {
  * @param {KeyboardEvent} event
  */
 function keyboardShortcutHandler(event) {
+  // Tabs stay mounted while not presented, so this document-level listener would
+  // otherwise refresh the subscriptions of a background tab. Only handle the
+  // shortcut when this tab is the one currently on screen.
+  if (isTabPresented && !isTabPresented.value) {
+    return
+  }
   if (document.activeElement.classList.contains('ft-input')) {
     return
   }
