@@ -168,15 +168,31 @@
     </div>
     <Transition name="fade">
       <div
-        v-if="showTemporaryPlaybackRateIndicator || showValueChangePopup"
+        v-if="showTemporaryPlaybackRateIndicator || silenceSkippingActive || showValueChangePopup"
         class="valueChangePopup"
-        :class="{ 'invert-content-order': showTemporaryPlaybackRateIndicator || invertValueChangeContentOrder }"
+        :class="{
+          'invert-content-order':
+            showTemporaryPlaybackRateIndicator || silenceSkippingActive || invertValueChangeContentOrder
+        }"
       >
         <font-awesome-icon
-          v-if="showTemporaryPlaybackRateIndicator || valueChangeIcon"
-          :icon="['fas', showTemporaryPlaybackRateIndicator ? 'forward' : valueChangeIcon]"
+          v-if="showTemporaryPlaybackRateIndicator || silenceSkippingActive || valueChangeIcon"
+          :icon="[
+            'fas',
+            showTemporaryPlaybackRateIndicator
+              ? 'forward'
+              : silenceSkippingActive
+                ? 'forward-fast'
+                : valueChangeIcon
+          ]"
         />
-        <span>{{ showTemporaryPlaybackRateIndicator ? temporaryPlaybackRateIndicatorMessage : valueChangeMessage }}</span>
+        <span>{{
+          showTemporaryPlaybackRateIndicator
+            ? temporaryPlaybackRateIndicatorMessage
+            : silenceSkippingActive
+              ? silenceSkippingIndicatorMessage
+              : valueChangeMessage
+        }}</span>
       </div>
     </Transition>
     <div

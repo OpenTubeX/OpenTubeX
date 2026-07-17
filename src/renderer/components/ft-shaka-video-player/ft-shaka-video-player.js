@@ -15,7 +15,6 @@ import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton } from './player-components/LoopButton'
-import { PlaybackRateSelection } from './player-components/PlaybackRateSelection'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
@@ -501,6 +500,11 @@ export default defineComponent({
       enabled: silenceSkippingEnabled,
       isLive,
       video,
+    })
+
+    const silenceSkippingIndicatorMessage = computed(() => {
+      const rate = silenceSkipping.accelerationRate.value
+      return rate === null ? '' : `${Number.parseFloat(rate.toFixed(2))}x`
     })
 
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
@@ -4091,24 +4095,6 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('captions', new CaptionSelectionFactory())
     }
 
-    function registerPlaybackRateSelection() {
-      /** @implements {shaka.extern.IUIElement.Factory} */
-      class PlaybackRateSelectionFactory {
-        create(rootElement, controls) {
-          return new PlaybackRateSelection(
-            getCurrentPlaybackRate,
-            events,
-            rootElement,
-            controls
-          )
-        }
-      }
-
-      const factory = new PlaybackRateSelectionFactory()
-      shakaControls.registerElement('playback_rate', factory)
-      shakaOverflowMenu.registerElement('playback_rate', factory)
-    }
-
     function toggleCaptions() {
       const textTracks = player.getTextTracks()
 
@@ -4779,16 +4765,6 @@ export default defineComponent({
       const defaultCaptionSelectionFactory = new DefaultCaptionSelectionFactory()
       shakaControls.registerElement('captions', defaultCaptionSelectionFactory)
       shakaOverflowMenu.registerElement('captions', defaultCaptionSelectionFactory)
-
-      class DefaultPlaybackRateSelectionFactory {
-        create(rootElement, controls) {
-          return new shaka.ui.PlaybackRateSelection(rootElement, controls)
-        }
-      }
-
-      const defaultPlaybackRateSelectionFactory = new DefaultPlaybackRateSelectionFactory()
-      shakaControls.registerElement('playback_rate', defaultPlaybackRateSelectionFactory)
-      shakaOverflowMenu.registerElement('playback_rate', defaultPlaybackRateSelectionFactory)
 
       shakaControls.registerElement('ft_audio_tracks', null)
       shakaOverflowMenu.registerElement('ft_audio_tracks', null)
@@ -6190,7 +6166,6 @@ export default defineComponent({
       registerScreenshotButton()
       registerAudioTrackSelection()
       registerCaptionSelection()
-      registerPlaybackRateSelection()
       registerCaptionToggleButton()
       registerChapterOverlayButton()
       registerAutoplayToggle()
@@ -6970,6 +6945,8 @@ export default defineComponent({
       invertValueChangeContentOrder,
       showTemporaryPlaybackRateIndicator,
       temporaryPlaybackRateIndicatorMessage,
+      silenceSkippingActive: silenceSkipping.isAccelerating,
+      silenceSkippingIndicatorMessage,
 
       scrollMiniPlayerActive,
       scrollMiniPlaceholderHeight,

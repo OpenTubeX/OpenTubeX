@@ -213,6 +213,16 @@
   justify-content: flex-start;
 }
 
+:deep(.shaka-playbackrate-button .shaka-current-selection-span) {
+  box-sizing: border-box;
+  inline-size: 6ch;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 :deep(.shaka-overflow-menu-button > .shaka-ui-icon) {
   transform: rotate(0deg);
   transform-origin: center;

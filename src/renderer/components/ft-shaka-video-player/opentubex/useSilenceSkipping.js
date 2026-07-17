@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const ANALYSER_FFT_SIZE = 1024
 const FALLBACK_THRESHOLD_DB = -40
@@ -41,7 +41,9 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   let destroyed = false
   let suspended = false
   let isSilent = false
-  let isAccelerating = false
+  const isAccelerating = ref(false)
+  /** @type {import('vue').Ref<number | null>} */
+  const accelerationRate = ref(null)
   let lastSampleTime = 0
   let silenceDuration = 0
   let dynamicThresholdDb = FALLBACK_THRESHOLD_DB
@@ -88,11 +90,12 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     silenceDuration = 0
     isSilent = false
 
-    if (isAccelerating && normalPlaybackRate !== null) {
+    if (isAccelerating.value && normalPlaybackRate !== null) {
       setControlledPlaybackRate(normalPlaybackRate)
     }
 
-    isAccelerating = false
+    isAccelerating.value = false
+    accelerationRate.value = null
     restoreGain()
   }
 
@@ -146,7 +149,8 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   }
 
   function enterSilence() {
-    isAccelerating = true
+    isAccelerating.value = true
+    accelerationRate.value = getSilencePlaybackRate()
 
     if (gain) {
       const now = gain.context.currentTime
@@ -160,7 +164,8 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
       setControlledPlaybackRate(normalPlaybackRate)
     }
 
-    isAccelerating = false
+    isAccelerating.value = false
+    accelerationRate.value = null
     silenceDuration = 0
     restoreGain()
   }
@@ -192,7 +197,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
       silenceDuration += elapsed
 
       if (silenceDuration >= SILENCE_HOLD_MS) {
-        if (!isAccelerating) {
+        if (!isAccelerating.value) {
           enterSilence()
         }
 
@@ -201,7 +206,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
         const silenceRate = getSilencePlaybackRate()
         setControlledPlaybackRate(baseRate + (silenceRate - baseRate) * progress)
       }
-    } else if (isAccelerating) {
+    } else if (isAccelerating.value) {
       exitSilence()
     } else {
       silenceDuration = 0
@@ -290,8 +295,9 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     }
     normalPlaybackRate = rate
 
-    if (isAccelerating) {
-      isAccelerating = false
+    if (isAccelerating.value) {
+      isAccelerating.value = false
+      accelerationRate.value = null
       silenceDuration = 0
       restoreGain()
     }
@@ -371,8 +377,10 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   })
 
   return {
+    accelerationRate,
     getNormalPlaybackRate,
     handlePlaybackRateChange,
+    isAccelerating,
     resume,
     suspend,
   }
