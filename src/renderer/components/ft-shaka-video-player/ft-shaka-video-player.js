@@ -2201,8 +2201,15 @@ export default defineComponent({
     function handleChaptersOverlayOutsideClick(event) {
       const target = event.target
 
-      if (!showChaptersOverlay.value ||
-        (target instanceof Node && chapterOverlay.value?.contains(target))) {
+      if (!showChaptersOverlay.value || !(target instanceof Element)) {
+        return
+      }
+
+      // Keep the overlay open when interacting with the overlay itself or any
+      // player control (play/pause, volume, playback speed, seek bar, menus, etc.).
+      // Only dismiss it when clicking the bare video surface next to the overlay.
+      if (chapterOverlay.value?.contains(target) ||
+        target.closest('.shaka-bottom-controls, .shaka-top-controls, .shaka-big-buttons-container, .shaka-settings-menu, .shaka-overflow-menu, .shaka-sub-menu, .shaka-context-menu')) {
         return
       }
 

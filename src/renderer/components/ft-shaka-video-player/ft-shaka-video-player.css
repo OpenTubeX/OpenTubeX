@@ -381,13 +381,18 @@
   }
 }
 
+/*
+  Lift the controls container above other overlays while a menu is open. It has
+  to clear the chapters overlay (z-index: 4) too, otherwise the settings/overflow
+  menu (which lives inside the controls container) renders behind it.
+*/
 :deep(.shaka-controls-container:has(
   .shaka-overflow-menu:not(.shaka-hidden),
   .shaka-settings-menu:not(.shaka-hidden),
   .shaka-sub-menu:not(.shaka-hidden),
   .shaka-context-menu:not(.shaka-hidden)
 )) {
-  z-index: 3;
+  z-index: 5;
 }
 
 .sixteenByNine {
