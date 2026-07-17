@@ -212,6 +212,7 @@
             :subscribed-channel-ids="subscribedChannelIds"
             :channel-thumbnail="channelThumbnail"
             @copy-youtube-link="copyCommentYoutubeLink"
+            @get-more-replies="getCommentReplies(index, $event)"
             @timestamp-event="onTimestamp"
           />
           <div
@@ -359,7 +360,11 @@ const commentCount = ref(props.initialCommentCount)
 const replyTrees = computed(() => commentData.value.map(buildReplyTree))
 
 function normalizeCommentAuthor(author) {
-  return String(author).trim().replace(/^@/, '').toLowerCase()
+  return String(author)
+    .replaceAll(/[\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, '')
+    .trim()
+    .replace(/^@/, '')
+    .toLowerCase()
 }
 
 /**
@@ -367,42 +372,64 @@ function normalizeCommentAuthor(author) {
  * than exposing their parent comment ID through the comments APIs.
  *
  * @param {string} html
- * @returns {{ channelId: string, author: string } | null}
+ * @returns {{ channelId: string, handle: string, author: string } | null}
  */
 function getLeadingMention(html) {
   const document = new DOMParser().parseFromString(html, 'text/html')
-  const firstContentNode = Array.from(document.body.childNodes).find((node) => {
-    return node.nodeType !== 3 || node.textContent.trim() !== ''
-  })
+  const firstAnchor = document.body.querySelector('a')
 
-  if (firstContentNode?.nodeName !== 'A') {
+  if (!firstAnchor) {
     return null
   }
 
-  const href = firstContentNode.getAttribute('href') ?? ''
+  const precedingContent = document.createRange()
+  precedingContent.setStart(document.body, 0)
+  precedingContent.setEndBefore(firstAnchor)
+
+  if (normalizeCommentAuthor(precedingContent.toString()) !== '') {
+    return null
+  }
+
+  const href = firstAnchor.getAttribute('href') ?? ''
   const channelId = /\/channel\/([^/?#]+)/.exec(href)?.[1] ?? ''
+  // Mentions can link via a handle URL (`/@handle`) rather than `/channel/…`,
+  // in which case the anchor text is often the display name, not the handle
+  const handle = /\/@([^/?#]+)/.exec(href)?.[1] ?? ''
 
   return {
     channelId,
-    author: normalizeCommentAuthor(firstContentNode.textContent)
+    handle: normalizeCommentAuthor(handle),
+    author: normalizeCommentAuthor(firstAnchor.textContent)
   }
 }
 
 /**
  * @param {Comment} comment
- * @param {{ channelId: string, author: string }} mention
+ * @param {{ channelId: string, handle: string, author: string }} mention
  */
 function commentMatchesMention(comment, mention) {
   const channelIds = [comment.authorId, comment.authorLink].filter(Boolean)
+  const author = normalizeCommentAuthor(comment.author)
 
   return (mention.channelId !== '' && channelIds.includes(mention.channelId)) ||
-    normalizeCommentAuthor(comment.author) === mention.author
+    (mention.handle !== '' && author === mention.handle) ||
+    author === mention.author
 }
 
 /**
  * @param {Comment} comment
  */
 function buildReplyTree(comment) {
+  if (comment.dataType === 'local') {
+    return comment.replies.map((reply, index) => {
+      return {
+        reply,
+        index,
+        children: buildReplyTree(reply)
+      }
+    })
+  }
+
   const roots = []
   const previousNodes = []
 
@@ -704,8 +731,9 @@ function toggleCommentReplies(index) {
 
 /**
  * @param {number} index
+ * @param {string | null} commentId
  */
-function getCommentReplies(index) {
+function getCommentReplies(index, commentId = null) {
   if (!process.env.SUPPORTS_LOCAL_API || commentData.value[index].dataType === 'invidious') {
     if (!props.isPostComments) {
       getCommentRepliesInvidious(index)
@@ -713,12 +741,60 @@ function getCommentReplies(index) {
       getPostCommentRepliesInvidious(index)
     }
   } else {
-    getCommentRepliesLocal(index)
+    getCommentRepliesLocal(index, commentId)
   }
 }
 
-/** @type {Map<string, (import('youtubei.js').YTNodes.CommentThread | string)>} */
+/** @type {Map<string, (import('youtubei.js').YTNodes.CommentThread | import('youtubei.js').Misc.CommentsContinuation | string)>} */
 const replyTokens = new Map()
+
+/**
+ * @param {import('youtubei.js').YTNodes.CommentThread} commentThread
+ * @param {boolean} showReplies
+ * @returns {import('../../helpers/api/local').LocalComment | null}
+ */
+function parseLocalCommentThread(commentThread, showReplies = true) {
+  if (!commentThread.comment) {
+    return null
+  }
+
+  const { replyToken, ...comment } = parseLocalComment(commentThread.comment, commentThread)
+  comment.replies = (commentThread.replies ?? [])
+    .map(reply => parseLocalCommentThread(reply))
+    .filter(Boolean)
+  comment.showReplies = showReplies && comment.replies.length > 0
+
+  const hasReplyToken = commentThread.has_replies &&
+    (!commentThread.replies || commentThread.has_continuation)
+
+  comment.hasReplyToken = hasReplyToken
+  if (hasReplyToken) {
+    replyTokens.set(comment.id, commentThread)
+  } else {
+    replyTokens.delete(comment.id)
+  }
+
+  return comment
+}
+
+/**
+ * @param {Comment} comment
+ * @param {string | null} commentId
+ */
+function findComment(comment, commentId) {
+  if (commentId === null || comment.id === commentId) {
+    return comment
+  }
+
+  for (const reply of comment.replies) {
+    const match = findComment(reply, commentId)
+    if (match) {
+      return match
+    }
+  }
+
+  return null
+}
 
 /**
  * @param {boolean | undefined} more
@@ -752,18 +828,8 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     setLocalCommentCount(comments)
 
     const parsedComments = comments.contents
-      .map(commentThread => {
-        // Use destructuring to create a new object without the replyToken
-        const { replyToken, ...comment } = parseLocalComment(commentThread.comment, commentThread)
-
-        if (comment.hasReplyToken) {
-          replyTokens.set(comment.id, replyToken)
-        } else {
-          replyTokens.delete(comment.id)
-        }
-
-        return comment
-      })
+      .map(commentThread => parseLocalCommentThread(commentThread, false))
+      .filter(Boolean)
 
     if (more) {
       commentData.value = commentData.value.concat(parsedComments)
@@ -811,31 +877,42 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
 
 /**
  * @param {number} index
+ * @param {string | null} commentId
  */
-async function getCommentRepliesLocal(index) {
+async function getCommentRepliesLocal(index, commentId = null) {
   showToast(t('Comments.Getting comment replies, please wait'))
 
   try {
-    const comment = commentData.value[index]
-    /** @type {import('youtubei.js').YTNodes.CommentThread} */
-    const commentThread = replyTokens.get(comment.id)
+    const comment = findComment(commentData.value[index], commentId)
+    const continuation = comment && replyTokens.get(comment.id)
 
-    if (commentThread == null) {
-      replyTokens.delete(comment.id)
-      comment.hasReplyToken = false
+    if (!comment || continuation == null || typeof continuation === 'string') {
+      if (comment) {
+        replyTokens.delete(comment.id)
+        comment.hasReplyToken = false
+      }
       return
     }
 
-    if (comment.replies.length > 0) {
-      await commentThread.getContinuation()
-      comment.replies = comment.replies.concat(commentThread.replies.map(reply => parseLocalComment(reply)))
+    let replyThreads
+    let nextContinuation
+    if ('getReplies' in continuation && !continuation.replies) {
+      await continuation.getReplies()
+      replyThreads = continuation.replies ?? []
+      nextContinuation = continuation.has_continuation ? continuation : null
     } else {
-      await commentThread.getReplies()
-      comment.replies = commentThread.replies.map(reply => parseLocalComment(reply))
+      const response = await continuation.getContinuation()
+      replyThreads = response.replies
+      nextContinuation = response.has_continuation ? response : null
     }
 
-    if (commentThread.has_continuation) {
-      replyTokens.set(comment.id, commentThread)
+    const parsedReplies = replyThreads
+      .map(reply => parseLocalCommentThread(reply))
+      .filter(Boolean)
+    comment.replies = comment.replies.concat(parsedReplies)
+
+    if (nextContinuation) {
+      replyTokens.set(comment.id, nextContinuation)
       comment.hasReplyToken = true
     } else {
       replyTokens.delete(comment.id)

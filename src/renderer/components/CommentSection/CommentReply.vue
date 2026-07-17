@@ -100,12 +100,17 @@
           />
         </span>
       </p>
-      <p
-        v-if="reply.numReplies > 0"
-        class="commentMoreReplies"
+      <div
+        v-if="reply.dataType === 'local' && reply.hasReplyToken"
+        class="showMoreReplies"
+        role="button"
+        tabindex="0"
+        @click="emit('get-more-replies', reply.id)"
+        @keydown.space.prevent="emit('get-more-replies', reply.id)"
+        @keydown.enter.prevent="emit('get-more-replies', reply.id)"
       >
-        {{ $t('Comments.View {replyCount} replies', { replyCount: reply.numReplies }, reply.numReplies) }}
-      </p>
+        <span>{{ $t("Comments.Show More Replies") }}</span>
+      </div>
     </div>
     <div
       v-if="node.children.length > 0"
@@ -122,6 +127,7 @@
         :subscribed-channel-ids="subscribedChannelIds"
         :channel-thumbnail="channelThumbnail"
         @copy-youtube-link="emit('copy-youtube-link', $event)"
+        @get-more-replies="emit('get-more-replies', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
       />
     </div>
@@ -170,7 +176,7 @@ const props = defineProps({
 
 const reply = props.node.reply
 
-const emit = defineEmits(['copy-youtube-link', 'timestamp-event'])
+const emit = defineEmits(['copy-youtube-link', 'get-more-replies', 'timestamp-event'])
 </script>
 
 <style scoped src="./CommentSection.css" />

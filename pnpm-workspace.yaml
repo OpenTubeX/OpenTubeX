@@ -15,3 +15,6 @@ overrides:
 
 minimumReleaseAgeExclude:
   - "youtubei.js"
+
+patchedDependencies:
+  youtubei.js@17.2.0: patches/youtubei.js@17.2.0.patch

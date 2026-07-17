@@ -1,0 +1,319 @@
+diff --git a/dist/src/parser/classes/comments/CommentReplies.d.ts b/dist/src/parser/classes/comments/CommentReplies.d.ts
+index 3a48b70d187b2f854452d56ce292d2548b660f27..4b5ea214f8ae2a208b0d00191473012e4d4aaa75 100644
+--- a/dist/src/parser/classes/comments/CommentReplies.d.ts
++++ b/dist/src/parser/classes/comments/CommentReplies.d.ts
+@@ -1,10 +1,14 @@
+ import Button from '../Button.js';
+ import Thumbnail from '../misc/Thumbnail.js';
++import CommentView from './CommentView.js';
++import CommentThread from './CommentThread.js';
++import ContinuationItem from '../ContinuationItem.js';
+ import { YTNode, type ObservedArray } from '../../helpers.js';
+ import type { RawNode } from '../../index.js';
+ export default class CommentReplies extends YTNode {
+     static type: string;
+-    contents: ObservedArray<YTNode>;
++    contents: ObservedArray<CommentView | ContinuationItem>;
++    sub_threads: ObservedArray<CommentThread | ContinuationItem>;
+     view_replies: Button | null;
+     hide_replies: Button | null;
+     view_replies_creator_thumbnail: Thumbnail[];
+diff --git a/dist/src/parser/classes/comments/CommentReplies.js b/dist/src/parser/classes/comments/CommentReplies.js
+index cd38089513284b36593cf86ece10ccdb18aae514..ca8acc24b6fa049a8915839ab4f228d0ee83844d 100644
+--- a/dist/src/parser/classes/comments/CommentReplies.js
++++ b/dist/src/parser/classes/comments/CommentReplies.js
+@@ -1,17 +1,22 @@
+ import { Parser } from '../../index.js';
+ import Button from '../Button.js';
+ import Thumbnail from '../misc/Thumbnail.js';
++import CommentView from './CommentView.js';
++import CommentThread from './CommentThread.js';
++import ContinuationItem from '../ContinuationItem.js';
+ import { YTNode } from '../../helpers.js';
+ export default class CommentReplies extends YTNode {
+     static type = 'CommentReplies';
+     contents;
++    sub_threads;
+     view_replies;
+     hide_replies;
+     view_replies_creator_thumbnail;
+     has_channel_owner_replied;
+     constructor(data) {
+         super();
+-        this.contents = Parser.parseArray(data.contents);
++        this.contents = Parser.parseArray(data.contents, [CommentView, ContinuationItem]);
++        this.sub_threads = Parser.parseArray(data.subThreads, [CommentThread, ContinuationItem]);
+         this.view_replies = Parser.parseItem(data.viewReplies, Button);
+         this.hide_replies = Parser.parseItem(data.hideReplies, Button);
+         this.view_replies_creator_thumbnail = Thumbnail.fromResponse(data.viewRepliesCreatorThumbnail);
+diff --git a/dist/src/parser/classes/comments/CommentThread.d.ts b/dist/src/parser/classes/comments/CommentThread.d.ts
+index e9ccfbfbe315019155fead17581ac87b0b9209ab..dea406b3b228455134d852c9a9713a5f97d5d1b9 100644
+--- a/dist/src/parser/classes/comments/CommentThread.d.ts
++++ b/dist/src/parser/classes/comments/CommentThread.d.ts
+@@ -4,16 +4,19 @@ import { YTNode } from '../../helpers.js';
+ import type { RawNode } from '../../index.js';
+ import type Actions from '../../../core/Actions.js';
+ import type { ObservedArray } from '../../helpers.js';
++import CommentsContinuation from '../misc/CommentsContinuation.js';
+ export default class CommentThread extends YTNode {
+     #private;
+     static type: string;
+     comment: CommentView | null;
+-    replies?: ObservedArray<CommentView>;
++    replies?: ObservedArray<CommentThread>;
+     comment_replies_data: CommentReplies | null;
+     is_moderated_elq_comment: boolean;
+     has_replies: boolean;
++    rendering_priority?: 'RENDERING_PRIORITY_UNKNOWN' | 'RENDERING_PRIORITY_PINNED_COMMENT' | 'RENDERING_PRIORITY_LINKED_COMMENT' | 'RENDERING_PRIORITY_REALTIME_COMMENT' | 'RENDERING_PRIORITY_COMMUNITY_GUIDELINES_BELOW_HEADER' | 'RENDERING_PRIORITY_FAN_COMMUNITY_SETUP_CARD' | 'RENDERING_PRIORITY_COMMENT_HEADER';
+     constructor(data: RawNode);
+     get has_continuation(): boolean;
++    get is_prepopulated(): boolean;
+     /**
+      * Retrieves replies to this comment thread.
+      */
+@@ -21,6 +24,7 @@ export default class CommentThread extends YTNode {
+     /**
+      * Retrieves next batch of replies.
+      */
+-    getContinuation(): Promise<CommentThread>;
++    getContinuation(): Promise<CommentsContinuation>;
+     setActions(actions: Actions): void;
++    processRepliesData(): void;
+ }
+diff --git a/dist/src/parser/classes/comments/CommentThread.js b/dist/src/parser/classes/comments/CommentThread.js
+index 48205eb74eb64f588e1ddcbfc631fc6a5d111acd..032e114cc02f949e41a69c6b3a57d96a8d6ec042 100644
+--- a/dist/src/parser/classes/comments/CommentThread.js
++++ b/dist/src/parser/classes/comments/CommentThread.js
+@@ -3,6 +3,8 @@ import Button from '../Button.js';
+ import ContinuationItem from '../ContinuationItem.js';
+ import CommentView from './CommentView.js';
+ import CommentReplies from './CommentReplies.js';
++import CommentsContinuation from '../misc/CommentsContinuation.js';
++import AppendContinuationItemsAction from '../actions/AppendContinuationItemsAction.js';
+ import { InnertubeError } from '../../../utils/Utils.js';
+ import { observe, YTNode } from '../../helpers.js';
+ export default class CommentThread extends YTNode {
+@@ -12,6 +14,7 @@ export default class CommentThread extends YTNode {
+     comment_replies_data;
+     is_moderated_elq_comment;
+     has_replies;
++    rendering_priority;
+     #actions;
+     #continuation;
+     constructor(data) {
+@@ -19,29 +22,43 @@ export default class CommentThread extends YTNode {
+         this.comment = Parser.parseItem(data.commentViewModel, CommentView);
+         this.comment_replies_data = Parser.parseItem(data.replies, CommentReplies);
+         this.is_moderated_elq_comment = data.isModeratedElqComment;
++        this.rendering_priority = data.renderingPriority;
+         this.has_replies = !!this.comment_replies_data;
+     }
+     get has_continuation() {
+         if (!this.replies)
+-            throw new InnertubeError('Cannot determine if there is a continuation because this thread\'s replies have not been loaded.');
++            throw new InnertubeError('Cannot determine if there is a continuation because this comment thread\'s replies have not been loaded');
+         return !!this.#continuation;
+     }
++    /**
++     * Indicates whether this comment thread has prepopulated reply data.
++     */
++    get is_prepopulated() {
++        return !!this.comment_replies_data && this.comment_replies_data.sub_threads[0]?.is(CommentThread);
++    }
+     /**
+      * Retrieves replies to this comment thread.
+      */
+     async getReplies() {
+         if (!this.#actions)
+-            throw new InnertubeError('Actions instance not set for this thread.');
++            throw new InnertubeError('Actions instance not set for this comment thread');
+         if (!this.comment_replies_data)
+-            throw new InnertubeError('This comment has no replies.', this);
+-        const continuation = this.comment_replies_data.contents?.firstOfType(ContinuationItem);
+-        if (!continuation)
+-            throw new InnertubeError('Replies continuation not found.');
+-        const response = await continuation.endpoint.call(this.#actions, { parse: true });
+-        if (!response.on_response_received_endpoints_memo)
+-            throw new InnertubeError('Unexpected response.', response);
+-        this.replies = this.#getPatchedReplies(response.on_response_received_endpoints_memo);
+-        this.#continuation = response.on_response_received_endpoints_memo.getType(ContinuationItem)[0];
++            throw new InnertubeError('This comment thread has no replies', this);
++        if (!this.is_prepopulated) {
++            const continuation = this.comment_replies_data.sub_threads.firstOfType(ContinuationItem);
++            if (!continuation)
++                throw new InnertubeError('Replies continuation item not found');
++            let endpoint = continuation.endpoint;
++            if (continuation.button)
++                endpoint = continuation.button.endpoint;
++            const response = await endpoint.call(this.#actions, { parse: true });
++            if (!response.on_response_received_endpoints)
++                throw new InnertubeError('Unexpected response', response);
++            const appendContinuationItemsNode = response.on_response_received_endpoints.firstOfType(AppendContinuationItemsAction);
++            if (appendContinuationItemsNode) {
++                this.#processList(appendContinuationItemsNode.contents.as(CommentThread, ContinuationItem));
++            }
++        }
+         return this;
+     }
+     /**
+@@ -49,29 +66,42 @@ export default class CommentThread extends YTNode {
+      */
+     async getContinuation() {
+         if (!this.replies)
+-            throw new InnertubeError('Cannot retrieve continuation because this thread\'s replies have not been loaded.');
++            throw new InnertubeError('Cannot retrieve continuation because this comment thread\'s replies have not been loaded');
+         if (!this.#continuation)
+-            throw new InnertubeError('Continuation not found.');
++            throw new InnertubeError('No continuation item found');
+         if (!this.#actions)
+-            throw new InnertubeError('Actions instance not set for this thread.');
+-        const load_more_button = this.#continuation.button?.as(Button);
+-        if (!load_more_button)
+-            throw new InnertubeError('"Load more" button not found.');
+-        const response = await load_more_button.endpoint.call(this.#actions, { parse: true });
+-        if (!response.on_response_received_endpoints_memo)
+-            throw new InnertubeError('Unexpected response.', response);
+-        this.replies = this.#getPatchedReplies(response.on_response_received_endpoints_memo);
+-        this.#continuation = response.on_response_received_endpoints_memo.getType(ContinuationItem)[0];
+-        return this;
++            throw new InnertubeError('Actions instance not set for this comment thread');
++        const loadMoreButton = this.#continuation.button?.as(Button);
++        if (!loadMoreButton)
++            throw new InnertubeError('Cannot retrieve continuation because the "Load more" button is missing');
++        const response = await loadMoreButton.endpoint.call(this.#actions, { parse: true });
++        return new CommentsContinuation(this.#actions, response);
+     }
+     setActions(actions) {
+         this.#actions = actions;
+     }
+-    #getPatchedReplies(data) {
+-        return observe(data.getType(CommentView).map((comment) => {
+-            comment.setActions(this.#actions);
+-            return comment;
+-        }));
++    /**
++     * Processes prepopulated reply data.
++     */
++    processRepliesData() {
++        if (this.is_prepopulated && !this.replies) {
++            this.#processList(this.comment_replies_data.sub_threads);
++        }
++    }
++    #processList(contents) {
++        if (!this.#actions)
++            throw new InnertubeError('Actions instance not set for this comment thread');
++        this.replies = observe([]);
++        for (const item of contents) {
++            if (item.is(CommentThread)) {
++                item.setActions(this.#actions);
++                item.processRepliesData();
++                this.replies.push(item);
++            }
++            else if (item.is(ContinuationItem)) {
++                this.#continuation = item;
++            }
++        }
+     }
+ }
+ //# sourceMappingURL=CommentThread.js.map
+\ No newline at end of file
+diff --git a/dist/src/parser/classes/misc/CommentsContinuation.d.ts b/dist/src/parser/classes/misc/CommentsContinuation.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..c7507258a5755e01d0e102808cb0f343c6f84162
+--- /dev/null
++++ b/dist/src/parser/classes/misc/CommentsContinuation.d.ts
+@@ -0,0 +1,11 @@
++import { type ObservedArray } from '../../helpers.js';
++import CommentThread from '../comments/CommentThread.js';
++import type { Actions } from '../../../core/index.js';
++import type { INextResponse } from '../../types/index.js';
++export default class CommentsContinuation {
++    #private;
++    replies: ObservedArray<CommentThread>;
++    constructor(actions: Actions, data: INextResponse);
++    get has_continuation(): boolean;
++    getContinuation(): Promise<CommentsContinuation>;
++}
+diff --git a/dist/src/parser/classes/misc/CommentsContinuation.js b/dist/src/parser/classes/misc/CommentsContinuation.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..6da4ff1594a76624a036032f35d04b6d10104dfb
+--- /dev/null
++++ b/dist/src/parser/classes/misc/CommentsContinuation.js
+@@ -0,0 +1,41 @@
++import { InnertubeError } from '../../../utils/Utils.js';
++import { observe } from '../../helpers.js';
++import AppendContinuationItemsAction from '../actions/AppendContinuationItemsAction.js';
++import CommentThread from '../comments/CommentThread.js';
++import ContinuationItem from '../ContinuationItem.js';
++export default class CommentsContinuation {
++    replies = observe([]);
++    #actions;
++    #nextContinuationItem;
++    constructor(actions, data) {
++        this.#actions = actions;
++        if (!data.on_response_received_endpoints || !data.on_response_received_endpoints_memo) {
++            throw new InnertubeError('Invalid response received for comments continuation', data);
++        }
++        const appendContinuationItemsNode = data.on_response_received_endpoints.firstOfType(AppendContinuationItemsAction);
++        if (appendContinuationItemsNode) {
++            for (const item of appendContinuationItemsNode.contents) {
++                if (item.is(CommentThread)) {
++                    item.setActions(this.#actions);
++                    item.processRepliesData();
++                    this.replies.push(item);
++                }
++                else if (item.is(ContinuationItem)) {
++                    this.#nextContinuationItem = item;
++                }
++            }
++        }
++    }
++    get has_continuation() {
++        return !!this.#nextContinuationItem;
++    }
++    async getContinuation() {
++        if (!this.#nextContinuationItem)
++            throw new InnertubeError('No continuation item found');
++        const loadMoreButton = this.#nextContinuationItem.button;
++        if (!loadMoreButton)
++            throw new InnertubeError('"Load more" button not found in continuation item');
++        const response = await loadMoreButton.endpoint.call(this.#actions, { parse: true });
++        return new CommentsContinuation(this.#actions, response);
++    }
++}
+diff --git a/dist/src/parser/misc.d.ts b/dist/src/parser/misc.d.ts
+index 63694582be6e8f82bd6179f2399f60b92647b0e6..dc23649e22e28af9f88c940db68ce93e1f9c7b98 100644
+--- a/dist/src/parser/misc.d.ts
++++ b/dist/src/parser/misc.d.ts
+@@ -3,6 +3,7 @@ export { default as AccessibilityData } from './classes/misc/AccessibilityData.j
+ export { default as Author } from './classes/misc/Author.js';
+ export { default as ChildElement } from './classes/misc/ChildElement.js';
+ export { default as CommandContext } from './classes/misc/CommandContext.js';
++export { default as CommentsContinuation } from './classes/misc/CommentsContinuation.js';
+ export { default as EmojiRun } from './classes/misc/EmojiRun.js';
+ export { default as Format } from './classes/misc/Format.js';
+ export { default as RendererContext } from './classes/misc/RendererContext.js';
+diff --git a/dist/src/parser/misc.js b/dist/src/parser/misc.js
+index f8108b8403fbd6e8322823953f64685efc8b3e2c..32f4f0f928411c9674b23b8a148e06dd8450275f 100644
+--- a/dist/src/parser/misc.js
++++ b/dist/src/parser/misc.js
+@@ -5,6 +5,7 @@ export { default as AccessibilityData } from './classes/misc/AccessibilityData.j
+ export { default as Author } from './classes/misc/Author.js';
+ export { default as ChildElement } from './classes/misc/ChildElement.js';
+ export { default as CommandContext } from './classes/misc/CommandContext.js';
++export { default as CommentsContinuation } from './classes/misc/CommentsContinuation.js';
+ export { default as EmojiRun } from './classes/misc/EmojiRun.js';
+ export { default as Format } from './classes/misc/Format.js';
+ export { default as RendererContext } from './classes/misc/RendererContext.js';
+diff --git a/dist/src/parser/youtube/Comments.js b/dist/src/parser/youtube/Comments.js
+index 8b6d412c79178ed9786c6ab143a6f0822c3b13c3..101063c7c348d941814b4122b36f6eb411e65bec 100644
+--- a/dist/src/parser/youtube/Comments.js
++++ b/dist/src/parser/youtube/Comments.js
+@@ -27,6 +27,7 @@ export default class Comments {
+             if (thread.comment)
+                 thread.comment.setActions(this.#actions);
+             thread.setActions(this.#actions);
++            thread.processRepliesData();
+             return thread;
+         }));
+         this.#continuation = body_node?.contents?.firstOfType(ContinuationItem);
