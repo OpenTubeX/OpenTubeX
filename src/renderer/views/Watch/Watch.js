@@ -22,7 +22,8 @@ import {
   extractNumberFromString,
   formatDurationAsTimestamp,
   formatNumber,
-  showToast
+  showToast,
+  showToastOnAllTabs
 } from '../../helpers/utils'
 import {
   getLocalVideoInfo,
@@ -211,6 +212,13 @@ export default defineComponent({
     }
   },
   computed: {
+    // Background tabs stay mounted and keep loading, so automatic toasts (API
+    // fallbacks, IP block recovery, reloads) would otherwise pop up in whatever
+    // tab is currently presented. Suppress them unless this tab is the one on
+    // screen; the persistent error/loading UI still reflects the outcome.
+    suppressBackgroundToasts: function () {
+      return process.env.IS_ELECTRON && !this.isTabPresented
+    },
     historyEntry: function () {
       return this.$store.getters.getHistoryCacheById[this.videoId]
     },
@@ -1069,10 +1077,12 @@ export default defineComponent({
             }
           } else {
             // video might be region locked or something else. This leads to no formats being available
-            showToast(
-              this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
-              7000
-            )
+            if (!this.suppressBackgroundToasts) {
+              showToast(
+                this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
+                7000
+              )
+            }
             this.handleVideoEnded()
             return
           }
@@ -1141,11 +1151,13 @@ export default defineComponent({
       } catch (err) {
         console.error(err)
         if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
-          const errorMessage = this.t('Local API Error (Click to copy)')
-          showToast(`${errorMessage}: ${err}`, 10000, () => {
-            copyToClipboard(err)
-          })
-          showToast(this.t('Falling back to Invidious API'))
+          if (!this.suppressBackgroundToasts) {
+            const errorMessage = this.t('Local API Error (Click to copy)')
+            showToast(`${errorMessage}: ${err}`, 10000, () => {
+              copyToClipboard(err)
+            })
+            showToast(this.t('Falling back to Invidious API'))
+          }
           this.getVideoInformationInvidious()
         } else {
           const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -1342,11 +1354,13 @@ export default defineComponent({
         .catch(async err => {
           console.error(err)
           if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
-            const errorMessage = this.t('Invidious API Error (Click to copy)')
-            showToast(`${errorMessage}: ${err}`, 10000, () => {
-              copyToClipboard(err)
-            })
-            showToast(this.t('Falling back to Local API'))
+            if (!this.suppressBackgroundToasts) {
+              const errorMessage = this.t('Invidious API Error (Click to copy)')
+              showToast(`${errorMessage}: ${err}`, 10000, () => {
+                copyToClipboard(err)
+              })
+              showToast(this.t('Falling back to Local API'))
+            }
             this.getVideoInformationLocal()
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -1380,22 +1394,27 @@ export default defineComponent({
 
       this.ipBlockRecoveryAttemptedForCurrentVideo = true
       const longToastDurationMs = 10000
-      showToast(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
+      // IP block recovery affects the whole app (network level), so surface it on
+      // every tab like the subscription refresh toasts.
+      showToastOnAllTabs(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
 
       try {
         const result = await window.ftElectron.executeIpBlockRecoveryScript(scriptPath)
         if (result?.exitCode !== 0) {
           const exitCode = result?.exitCode == null ? 'unknown' : `${result.exitCode}`
-          showToast(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs)
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs)
         } else {
-          showToast(this.t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs)
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs)
         }
       } catch (error) {
         console.error('IP block recovery script failed:', error)
-        showToast(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
+        showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
       }
 
-      showToast(this.t('Settings.Proxy Settings.Reloading video after IP block recovery'), longToastDurationMs)
+      // The reload only affects this tab's video, so keep it scoped.
+      if (!this.suppressBackgroundToasts) {
+        showToast(this.t('Settings.Proxy Settings.Reloading video after IP block recovery'), longToastDurationMs)
+      }
       await this.reloadView()
       return true
     },
@@ -2600,7 +2619,9 @@ export default defineComponent({
         ? playbackRate
         : this.currentPlaybackRate
       this.preserveTitleOnNextReload = true
-      showToast('Reloading player according to SABR request')
+      if (!this.suppressBackgroundToasts) {
+        showToast('Reloading player according to SABR request')
+      }
 
       const timestamp = this.getTimestamp()
       if (timestamp > 0) {
