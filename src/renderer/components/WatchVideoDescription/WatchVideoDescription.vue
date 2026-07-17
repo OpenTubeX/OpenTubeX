@@ -56,10 +56,12 @@
 <script setup>
 import autolinker from 'autolinker'
 
-import { onMounted, ref, computed, useTemplateRef } from 'vue'
+import { onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+
+import { useTabContext } from '../../tabs/TabContext'
 
 const props = defineProps({
   description: {
@@ -143,6 +145,9 @@ function collapseDescription() {
   showFullDescription.value = false
 }
 
+const { isTabPresented } = useTabContext()
+let hasMeasured = false
+
 /**
  * Returns true when description content does not overflow description container
  * Useful for hiding description expansion/contraction controls
@@ -152,13 +157,37 @@ function isShortDescription() {
   return descriptionElem?.clientHeight >= descriptionElem?.scrollHeight
 }
 
-onMounted(() => {
-  // To verify whether or not the description is too short for displaying
-  // description controls, we need to check the description's dimensions.
-  // The only way to make this work is to check on mount.
+// To verify whether or not the description is too short for displaying
+// description controls, we need to check the description's dimensions.
+// A tab can mount while it isn't the one on screen (background preload, session
+// restore), in which case it is `display: none` and every dimension reads 0,
+// which would misdetect the description as short and leave it permanently
+// expanded with no collapse control. Only measure once the element has a real
+// layout, retrying when the tab is first presented.
+function measureDescription() {
+  if (hasMeasured) {
+    return
+  }
+
+  const descriptionElem = descriptionContainer.value?.$el
+  if (!descriptionElem || (descriptionElem.clientHeight === 0 && descriptionElem.scrollHeight === 0)) {
+    return
+  }
+
   showFullDescription.value = isShortDescription()
   showControls.value = !showFullDescription.value
-})
+  hasMeasured = true
+}
+
+onMounted(measureDescription)
+
+if (isTabPresented) {
+  watch(isTabPresented, (presented) => {
+    if (presented) {
+      nextTick(measureDescription)
+    }
+  })
+}
 
 /**
  * @param {string} descriptionText
