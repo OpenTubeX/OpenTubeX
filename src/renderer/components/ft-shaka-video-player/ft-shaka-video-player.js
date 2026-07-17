@@ -5825,15 +5825,10 @@ export default defineComponent({
         return
       }
 
-      // Aborts and lifecycle interruptions are not format failures: a load/request
-      // cancelled by a reload/unload/destroy, or the player torn down mid-operation.
-      // Reacting to them by walking the format fallback chain needlessly drops the
-      // video down to the legacy formats (360p). These races became far more common
-      // with per-tab players (mount/unmount/reconfigure while switching tabs) and are
-      // routine during SABR reloads, where in-flight requests deliberately abort
-      // themselves (SabrSchemePlugin raises OPERATION_ABORTED, tagged NETWORK, once a
-      // reload is requested). Match on the code regardless of category and just log
-      // and ignore them so the current format keeps (re)loading / the reload proceeds.
+      // Recoverable network errors, including routine SABR request aborts, return
+      // above. Any remaining abort or lifecycle interruption is still not evidence
+      // that the current format failed: loads are also cancelled during
+      // reload/unload/destroy. Ignore these codes instead of dropping to legacy.
       if (
         error.code === ErrorCode.OPERATION_ABORTED ||
         error.code === ErrorCode.LOAD_INTERRUPTED ||
