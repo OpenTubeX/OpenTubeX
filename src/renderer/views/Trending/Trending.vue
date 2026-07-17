@@ -121,11 +121,13 @@ import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vu
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
-import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
+import { copyToClipboard, getRelativeTimeFromDate } from '../../helpers/utils'
+import { useTabToast } from '../../composables/useTabToast'
 import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
 
 const { t } = useI18n()
+const showTabToast = useTabToast()
 
 const isElectron = process.env.IS_ELECTRON
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
@@ -205,7 +207,7 @@ async function getTrendingInfoLocal() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
+    showTabToast(`${errorMessage}: ${error}`, 10000, () => {
       copyToClipboard(error)
     })
     isLoading.value[currentTab.value] = false

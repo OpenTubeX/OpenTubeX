@@ -209,6 +209,7 @@ import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback
 import { getThumbnailSizeStyles } from '../../constants/thumbnailSize'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
+import { useTabToast } from '../../composables/useTabToast'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -216,6 +217,7 @@ const router = useRouter()
 const { tabId } = useTabContext()
 const playlistCacheTabId = tabId ?? 'web'
 const setTabTitle = useTabTitle()
+const showTabToast = useTabToast()
 
 const isLoading = ref(true)
 const playlistTitle = ref('')
@@ -446,7 +448,7 @@ function getPlaylistInfo() {
     if (selectedUserPlaylist.value != null) {
       parseUserPlaylist(selectedUserPlaylist.value)
     } else {
-      showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'))
+      showTabToast(t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'))
     }
   } else {
     if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -650,7 +652,7 @@ function getPlaylistItemsWithDuration() {
 
   // Show notice if not already shown before returning playlist items
   if (anyVideoMissingDuration && !alreadyShownNotice) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'), 5000)
+    showTabToast(t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'), 5000)
     alreadyShownNotice = true
   }
 
