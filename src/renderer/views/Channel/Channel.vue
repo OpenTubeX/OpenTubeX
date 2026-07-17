@@ -2376,7 +2376,10 @@ async function handleTabChange(tab) {
     skipRouteChangeWatcherOnce = true
 
     try {
-      await router.replace({ path: `/channel/${id.value}/${tab}` })
+      await router.replace({
+        path: `/channel/${id.value}/${tab}`,
+        state: { skipTabRouteLoading: true }
+      })
     } catch (failure) {
       skipRouteChangeWatcherOnce = false
 

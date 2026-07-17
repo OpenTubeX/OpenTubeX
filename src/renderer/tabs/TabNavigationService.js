@@ -260,7 +260,9 @@ export class TabNavigationService {
     }
 
     this.saveScroll(tabId)
-    const loadingToken = this.startRouteLoading(tabId)
+    const loadingToken = location?.state?.skipTabRouteLoading === true
+      ? null
+      : this.startRouteLoading(tabId)
 
     try {
       const componentChanged = getDeepestRouteComponent(from) !== getDeepestRouteComponent(to)
@@ -321,7 +323,9 @@ export class TabNavigationService {
 
       await tabLifecycleService.run(tabId, 'afterNavigate', { to, from })
     } finally {
-      this.finishRouteLoading(tabId, loadingToken)
+      if (loadingToken !== null) {
+        this.finishRouteLoading(tabId, loadingToken)
+      }
     }
   }
 
