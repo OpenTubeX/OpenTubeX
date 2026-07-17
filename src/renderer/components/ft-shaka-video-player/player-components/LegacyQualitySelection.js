@@ -78,6 +78,11 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
 
   /** @private */
   updateResolutionSelection_() {
+    // Always keep the name/aria labels populated, even before a format is active
+    // (e.g. when shaka recreates the controls on a format fallback before
+    // `setLegacyFormat` fires), so the button never renders as an icon without a label.
+    this.updateLocalisedStrings_()
+
     if (!this.activeLegacyFormat_) {
       return
     }
@@ -88,31 +93,29 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
     if (previousSpan) {
       previousSpan.classList.remove('shaka-chosen-item')
 
-      const button = previousSpan.parentElement
-      button.ariaSelected = 'false'
+      const previousButton = previousSpan.parentElement
+      previousButton.ariaSelected = 'false'
       this._checkmarkIcon.remove()
     }
 
     // current selection
 
     const index = this.legacyFormats_.indexOf(this.activeLegacyFormat_)
-
     const button = this.menu.querySelectorAll('.legacy-resolution')[index]
-    const span = button.querySelector('span')
 
-    button.ariaSelected = 'true'
+    if (button) {
+      const span = button.querySelector('span')
 
-    span.classList.add('shaka-chosen-item')
+      button.ariaSelected = 'true'
+      span.classList.add('shaka-chosen-item')
+      button.appendChild(this._checkmarkIcon)
+      button.focus()
+    }
 
-    button.appendChild(this._checkmarkIcon)
-
-    this.currentSelection.textContent = span.textContent
-
-    this.button.setAttribute('shaka-status', span.textContent)
-
-    button.focus()
-
-    this.updateLocalisedStrings_()
+    // Derive the status text from the active format directly so it stays correct
+    // even if the format isn't found in the rendered list.
+    this.currentSelection.textContent = this.activeLegacyFormat_.qualityLabel
+    this.button.setAttribute('shaka-status', this.activeLegacyFormat_.qualityLabel)
   }
 
   /** @private */
