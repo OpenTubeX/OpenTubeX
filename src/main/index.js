@@ -453,6 +453,15 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
+          label: 'New Tab',
+          visible: isTabBarContextMenu && contextMenuTab == null,
+          click: () => {
+            manager?.createTabWithPreference({ makeActive: true }).catch(error => {
+              console.error('Failed to create a new tab from the tab bar context menu:', error)
+            })
+          }
+        },
+        {
           label: 'Reopen Closed Tab',
           visible: isTabBarContextMenu,
           enabled: manager?.closedTabs.length > 0,
