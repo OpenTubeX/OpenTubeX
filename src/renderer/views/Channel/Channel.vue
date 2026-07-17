@@ -19,7 +19,7 @@
       :current-tab="currentTab"
       :query="lastSearchQuery"
       class="card channelDetails"
-      @change-tab="changeTab"
+      @change-tab="handleTabChange"
       @search="newSearchWithStatePersist"
       @subscribed="handleSubscription"
     />
@@ -2353,6 +2353,35 @@ function handleFetchMore() {
     default:
       console.error(currentTab.value)
   }
+}
+
+/**
+ * Handles a user-initiated tab change from the tab bar.
+ * Pushes the selected tab into the route so it becomes part of the
+ * navigation history. That way navigating into an item (e.g. a playlist)
+ * and pressing back returns to the correct tab instead of the default one.
+ * @param {string} tab
+ */
+async function handleTabChange(tab) {
+  if (tab !== currentTab.value) {
+    // skip the route change watcher so we don't reload the whole channel,
+    // we already have the data and only need to switch the visible tab
+    skipRouteChangeWatcherOnce = true
+
+    try {
+      await router.push({ path: `/channel/${id.value}/${tab}` })
+    } catch (failure) {
+      skipRouteChangeWatcherOnce = false
+
+      if (!isNavigationFailure(failure, NavigationFailureType.duplicated)) {
+        throw failure
+      }
+    }
+
+    skipRouteChangeWatcherOnce = false
+  }
+
+  changeTab(tab)
 }
 
 function changeTab(tab) {

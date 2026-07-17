@@ -119,6 +119,7 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 
 import store from '../../store/index'
+import { useTabContext } from '../../tabs/TabContext'
 
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { getLocalTrending } from '../../helpers/api/local'
@@ -154,8 +155,17 @@ const trendingCache = computed(() => {
 const isLoading = ref({ gaming: false, sports: false, podcasts: false })
 const shownResults = shallowRef([])
 
+const { tabId } = useTabContext()
+const currentTabStorageKey = tabId ? `Trending/${tabId}/currentTab` : 'Trending/currentTab'
+
 /** @type {import('vue').Ref<'gaming' | 'sports' | 'podcasts'>} */
 const currentTab = ref('gaming')
+
+// Restore last used tab so navigating into a video and back returns here
+const lastCurrentTabId = sessionStorage.getItem(currentTabStorageKey)
+if (lastCurrentTabId !== null && Object.hasOwn(isLoading.value, lastCurrentTabId)) {
+  currentTab.value = lastCurrentTabId
+}
 
 const cacheEntry = trendingCache.value[currentTab.value]
 
@@ -240,6 +250,9 @@ function changeTab(tab) {
   }
 
   currentTab.value = tab
+
+  // Save last used tab, restored when the view is mounted again
+  sessionStorage.setItem(currentTabStorageKey, tab)
 
   const cacheEntry = trendingCache.value[currentTab.value]
 
