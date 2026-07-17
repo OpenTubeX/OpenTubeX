@@ -446,7 +446,10 @@ export default defineComponent({
 
     watch(isActiveTab, (active) => {
       if (active) {
-        nextTick(applyPendingPresentationModes)
+        nextTick(() => {
+          applyPendingPresentationModes()
+          remeasureControlPanelWidth()
+        })
         // An already-scrolled tab that was inactive never got to reevaluate its
         // scroll position, so restore the mini-player state now that it is active.
         updateScrollMiniPlayer()
@@ -2824,9 +2827,30 @@ export default defineComponent({
 
     /** @type {ResizeObserverCallback} */
     function resized(entries) {
-      onlyUseOverFlowMenu.value = entries[0].contentBoxSize[0].inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+      const inlineSize = entries[0].contentBoxSize[0].inlineSize
+      // Ignore measurements taken while the tab is hidden (an ancestor is
+      // display:none, so the inline size collapses to 0). Treating that as
+      // "narrow" would wrongly fold the whole control bar into the overflow
+      // menu, and it would stay collapsed once the tab is presented again.
+      if (inlineSize === 0) {
+        return
+      }
+      onlyUseOverFlowMenu.value = inlineSize <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
       rememberInlinePlayerLayoutHeight()
       repairScrollMiniPlaceholderHeight()
+    }
+
+    // Remeasure the control bar layout once the tab becomes presented. A player
+    // that mounted in a background tab could not measure its real width, and the
+    // ResizeObserver does not always fire for an ancestor display:none toggle.
+    function remeasureControlPanelWidth() {
+      if (!ui || ui.isMobile()) {
+        return
+      }
+      const width = container.value?.getBoundingClientRect().width ?? 0
+      if (width > 0) {
+        onlyUseOverFlowMenu.value = width <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+      }
     }
 
     // #endregion UI config
@@ -6075,7 +6099,12 @@ export default defineComponent({
       if (ui.isMobile()) {
         onlyUseOverFlowMenu.value = true
       } else {
-        onlyUseOverFlowMenu.value = container.value.getBoundingClientRect().width <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+        const initialWidth = container.value.getBoundingClientRect().width
+        // A zero width means the player mounted in a non-presented tab (an
+        // ancestor is display:none), not that the player is actually narrow.
+        // Default to the full control bar; the resize/presentation remeasure
+        // decides the real layout once the tab is visible.
+        onlyUseOverFlowMenu.value = initialWidth > 0 && initialWidth <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
 
         containerResizeObserver = new ResizeObserver(resized)
         containerResizeObserver.observe(container.value)
