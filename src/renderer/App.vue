@@ -192,6 +192,7 @@
     <div
       v-if="tabSwitcherVisible"
       class="tabSwitcherOverlay"
+      data-tab-preview-overlay
       @mousedown.prevent
       @wheel.prevent="handleTabSwitcherWheel"
     >
