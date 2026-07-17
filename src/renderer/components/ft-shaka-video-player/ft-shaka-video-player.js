@@ -4347,7 +4347,7 @@ export default defineComponent({
       class LegacyQualitySelectionFactory {
         create(rootElement, controls) {
           return new LegacyQualitySelection(
-            activeLegacyFormat.value,
+            () => activeLegacyFormat.value,
             props.legacyFormats,
             events,
             rootElement,
