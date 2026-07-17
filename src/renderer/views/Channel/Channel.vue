@@ -2365,9 +2365,8 @@ function handleFetchMore() {
 
 /**
  * Handles a user-initiated tab change from the tab bar.
- * Pushes the selected tab into the route so it becomes part of the
- * navigation history. That way navigating into an item (e.g. a playlist)
- * and pressing back returns to the correct tab instead of the default one.
+ * Replaces the current route so the selected tab is preserved without
+ * adding every tab change to the navigation history.
  * @param {string} tab
  */
 async function handleTabChange(tab) {
@@ -2377,7 +2376,7 @@ async function handleTabChange(tab) {
     skipRouteChangeWatcherOnce = true
 
     try {
-      await router.push({ path: `/channel/${id.value}/${tab}` })
+      await router.replace({ path: `/channel/${id.value}/${tab}` })
     } catch (failure) {
       skipRouteChangeWatcherOnce = false
 
