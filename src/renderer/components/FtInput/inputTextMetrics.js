@@ -23,7 +23,10 @@ export function getInputTextAscentOffset(text) {
   const metricsContext = getContext()
   if (metricsContext == null) return 0
 
-  referenceAscent ??= metricsContext.measureText('Ag').actualBoundingBoxAscent
+  // Use the primary font's declared ascent as the reference so ordinary text
+  // (including tall Latin ascenders like l/h/k, which exceed cap height) never
+  // reports an offset. Only glyphs rendered by a taller fallback font do.
+  referenceAscent ??= metricsContext.measureText('Ag').fontBoundingBoxAscent
   const textAscent = metricsContext.measureText(text).actualBoundingBoxAscent
 
   return Math.max(0, Math.min(4, Math.round(textAscent - referenceAscent)))
