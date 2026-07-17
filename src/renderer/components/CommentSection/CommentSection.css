@@ -1,6 +1,10 @@
 .card {
   padding-block: 0;
   padding-inline: 16px;
+
+  /* Contain the floated header actions so they don't spill outside the card,
+     e.g. in the empty state where the message is shorter than the sort select */
+  display: flow-root;
 }
 
 .getCommentsTitle,

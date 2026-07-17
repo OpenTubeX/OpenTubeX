@@ -43,10 +43,10 @@
     <div
       v-if="showComments && !isLoading"
       class="commentHeaderActions"
-      :class="{ commentHeaderActionsEmpty: commentData.length === 0 || !showSortBy }"
+      :class="{ commentHeaderActionsEmpty: !showSortBy }"
     >
       <FtSelect
-        v-if="commentData.length > 0 && showSortBy"
+        v-if="showSortBy"
         :placeholder="$t('Global.Sort By')"
         :value="currentSortValue"
         :select-names="sortNames"
@@ -61,7 +61,7 @@
         :padding="8"
         :use-shadow="false"
         class="reloadComments"
-        :class="{ reloadCommentsAligned: commentData.length > 0 && showSortBy }"
+        :class="{ reloadCommentsAligned: showSortBy }"
         @click="reloadCommentData"
       />
     </div>
