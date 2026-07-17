@@ -3022,6 +3022,8 @@ export default defineComponent({
         return
       }
 
+      flushPendingMusicPlaybackRateToast()
+
       syncPlayPauseControlIcons()
 
       sleepTimer.resumeCountdown()
@@ -4799,6 +4801,7 @@ export default defineComponent({
 
     let playbackRateUserSet = normalizePlaybackRate(props.sabrReloadPlaybackRate) !== null
     let musicPlaybackRateToastShown = false
+    let pendingMusicPlaybackRateToast = false
 
     /** @type {Map<string, number>} */
     const temporaryPlaybackRateHoldTimeouts = new Map()
@@ -4877,6 +4880,17 @@ export default defineComponent({
         return
       }
 
+      // Defer the toast until the video is actually played in this tab, so it
+      // doesn't pop up in whatever tab happened to be open when the video loaded.
+      pendingMusicPlaybackRateToast = true
+    }
+
+    function flushPendingMusicPlaybackRateToast() {
+      if (!pendingMusicPlaybackRateToast || musicPlaybackRateToastShown || playbackRateUserSet) {
+        return
+      }
+
+      pendingMusicPlaybackRateToast = false
       showToast(t('Video.Player.MusicPlaybackRateOverride'))
       musicPlaybackRateToastShown = true
     }
