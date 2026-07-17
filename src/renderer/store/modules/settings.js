@@ -228,6 +228,7 @@ const state = {
   hideHeaderLogo: false,
   hidePlaylists: false,
   hidePopularVideos: false,
+  hideProfileSelectorInHeader: false,
   hideRecommendedVideos: false,
   hideSearchBar: false,
   hideSideBarOnWatchPages: true,

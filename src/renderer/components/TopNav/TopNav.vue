@@ -120,7 +120,7 @@
     </div>
     <div class="side profiles">
       <FtThumbnailSizeControl v-if="showThumbnailSizeControl" />
-      <FtProfileSelector />
+      <FtProfileSelector v-if="!hideProfileSelectorInHeader" />
     </div>
   </nav>
 </template>
@@ -166,6 +166,8 @@ const lastSuggestionQuery = ref('')
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideProfileSelectorInHeader = computed(() => store.getters.getHideProfileSelectorInHeader)
 const useWatchSideNavOverlay = computed(() => {
   return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
 })

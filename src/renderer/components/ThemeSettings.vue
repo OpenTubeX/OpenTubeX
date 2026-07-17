@@ -23,6 +23,12 @@
           :default-value="disableSmoothScrollingToggleValue"
           @change="handleRestartPrompt"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Thumbnail Size Button in Header')"
+          compact
+          :default-value="showThumbnailSizeButtonInHeader"
+          @change="updateShowThumbnailSizeButtonInHeader"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -42,6 +48,13 @@
           compact
           :default-value="hideHeaderLogo"
           @change="updateHideHeaderLogo"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Hide Profile Selector in Header')"
+          :tooltip="$t('Tooltips.Theme Settings.Hide Profile Selector in Header')"
+          compact
+          :default-value="hideProfileSelectorInHeader"
+          @change="updateHideProfileSelectorInHeader"
         />
       </div>
     </div>
@@ -69,12 +82,6 @@
           value-extension="%"
           @input="previewThumbnailSize"
           @change="updateThumbnailSize"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Show Thumbnail Size Button in Header')"
-          compact
-          :default-value="showThumbnailSizeButtonInHeader"
-          @change="updateShowThumbnailSizeButtonInHeader"
         />
       </div>
     </FtFlexBox>
@@ -307,6 +314,18 @@ const hideHeaderLogo = computed(() => {
  */
 function updateHideHeaderLogo(value) {
   store.dispatch('updateHideHeaderLogo', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideProfileSelectorInHeader = computed(() => {
+  return store.getters.getHideProfileSelectorInHeader
+})
+
+/**
+ * @param {boolean} value
+ */
+function updateHideProfileSelectorInHeader(value) {
+  store.dispatch('updateHideProfileSelectorInHeader', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
