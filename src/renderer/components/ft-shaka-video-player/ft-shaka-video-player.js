@@ -301,6 +301,10 @@ export default defineComponent({
     /** @type {shaka.ui.Overlay|null} */
     let ui = null
 
+    // Set when a UI reconfigure is requested while the player is not loaded, so
+    // it can be flushed once loading finishes (see configureUI).
+    let pendingUiReconfigure = false
+
     const events = new EventTarget()
 
     /** @type {import('vue').Ref<HTMLDivElement | null>} */
@@ -2109,6 +2113,19 @@ export default defineComponent({
      * @param {boolean} firstTime
      */
     function configureUI(firstTime = false) {
+      // Shaka rebuilds every control element on configure, and several of them
+      // dereference the attached player immediately (e.g. the playback rate
+      // selection reads player.getPlaybackRate()). While the player is detached
+      // or mid-(re)load — the async mount gap, a format switch, or a SABR reload
+      // (LOAD_INTERRUPTED) — that rebuild throws synchronously. Because these
+      // reconfigures run inside Vue reactive effects, the exception reaches the
+      // tab's error boundary and takes the whole tab down. Defer any non-initial
+      // reconfigure until the player is loaded again, then flush it once.
+      if (!firstTime && (!player || !hasLoaded.value)) {
+        pendingUiReconfigure = true
+        return
+      }
+
       if (firstTime) {
         /** @type {shaka.extern.UIConfiguration} */
         const firstTimeConfig = {
@@ -2624,6 +2641,15 @@ export default defineComponent({
 
     watch(uiConfig, (newValue, oldValue) => {
       if (newValue !== oldValue && ui) {
+        configureUI()
+      }
+    })
+
+    // Reapply any reconfigure that was deferred while the player was unloaded,
+    // now that it is loaded again and rebuilding the controls is safe.
+    watch(hasLoaded, (loaded) => {
+      if (loaded && pendingUiReconfigure && ui && player) {
+        pendingUiReconfigure = false
         configureUI()
       }
     })
