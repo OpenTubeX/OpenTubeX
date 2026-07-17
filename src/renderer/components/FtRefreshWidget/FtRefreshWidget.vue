@@ -17,9 +17,8 @@
       >
         <span
           v-if="nextAutoRefreshAt && autoRefreshInterval"
-          :key="countdownSpinKey"
           class="nextAutoRefreshCountdown"
-          :class="{ finalMinute: isFinalMinute }"
+          :class="{ finalMinute: isFinalMinute, spinHourglass }"
           :style="countdownStyle"
           aria-hidden="true"
         >
@@ -36,7 +35,10 @@
               cy="9"
               r="7"
             />
-            <g class="countdownHourglass">
+            <g
+              class="countdownHourglass"
+              @animationend="stopHourglassSpin"
+            >
               <path
                 class="countdownHourglassOutline"
                 d="M7 5h4M7 13h4M7.5 5c0 2 .5 2.75 1.5 4-1 1.25-1.5 2-1.5 4M10.5 5c0 2-.5 2.75-1.5 4 1 1.25 1.5 2 1.5 4"
@@ -70,7 +72,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -118,20 +120,31 @@ const { t } = useI18n()
 const COUNTDOWN_CIRCUMFERENCE = 2 * Math.PI * 7
 const FINAL_MINUTE_MS = 60 * 1000
 const now = ref(Date.now())
+const spinHourglass = ref(false)
 let countdownTicker = null
 
 const remaining = computed(() => {
   return Math.max(props.nextAutoRefreshAt - now.value, 0)
 })
 
-const countdownSpinKey = computed(() => {
-  const remainingMinutes = Math.ceil(remaining.value / FINAL_MINUTE_MS)
-  return `${props.nextAutoRefreshAt}-${props.autoRefreshInterval}-${remainingMinutes}`
+const remainingMinutes = computed(() => {
+  return Math.ceil(remaining.value / FINAL_MINUTE_MS)
 })
 
 const isFinalMinute = computed(() => {
   return remaining.value <= FINAL_MINUTE_MS
 })
+
+watch(
+  () => [props.nextAutoRefreshAt, props.autoRefreshInterval, remainingMinutes.value],
+  ([timestamp, interval, minutes], [previousTimestamp, previousInterval, previousMinutes]) => {
+    if (timestamp !== previousTimestamp || interval !== previousInterval) {
+      spinHourglass.value = false
+    } else if (minutes < previousMinutes && minutes > 1) {
+      spinHourglass.value = true
+    }
+  }
+)
 
 const countdownStyle = computed(() => {
   const progress = Math.min(remaining.value / props.autoRefreshInterval, 1)
@@ -143,6 +156,10 @@ const countdownStyle = computed(() => {
 
 function updateCountdown() {
   now.value = Date.now()
+}
+
+function stopHourglassSpin() {
+  spinHourglass.value = false
 }
 
 onMounted(() => {

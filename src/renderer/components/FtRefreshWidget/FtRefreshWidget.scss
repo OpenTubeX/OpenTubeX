@@ -90,12 +90,12 @@
   transform-origin: 9px 9px;
 }
 
-.nextAutoRefreshCountdown:not(.finalMinute) .countdownHourglass {
-  animation: countdown-hourglass-spin 1s ease-in-out;
-}
-
 .nextAutoRefreshCountdown.finalMinute .countdownHourglass {
   animation: countdown-hourglass-spin 1s linear infinite;
+}
+
+.nextAutoRefreshCountdown.spinHourglass:not(.finalMinute) .countdownHourglass {
+  animation: countdown-hourglass-spin 1s ease-in-out;
 }
 
 @keyframes countdown-hourglass-spin {
