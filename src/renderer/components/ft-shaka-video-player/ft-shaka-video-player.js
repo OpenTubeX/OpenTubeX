@@ -2199,6 +2199,10 @@ export default defineComponent({
 
         ui.configure(firstTimeConfig)
       } else {
+        // Another player mounted after us may have overwritten our factories
+        // in shaka's shared element registries, which this configure call
+        // rebuilds every control element from.
+        reRegisterOwnElements()
         ui.configure(uiConfig.value)
       }
 
@@ -4064,6 +4068,32 @@ export default defineComponent({
 
     const { ContextMenu: shakaContextMenu, Controls: shakaControls, OverflowMenu: shakaOverflowMenu } = shaka.ui
 
+    /**
+     * Shaka's element registries are process-global, so a player that mounts
+     * later overwrites this player's factories with ones bound to its own
+     * component instance. Remember our registrations so they can be re-applied
+     * before our own `ui.configure()` calls, which rebuild every control
+     * element from the registries.
+     * @type {[typeof shakaControls | typeof shakaOverflowMenu | typeof shakaContextMenu, string, shaka.extern.IUIElement.Factory][]}
+     */
+    const ownElementRegistrations = []
+
+    /**
+     * @param {typeof shakaControls | typeof shakaOverflowMenu | typeof shakaContextMenu} registry
+     * @param {string} name
+     * @param {shaka.extern.IUIElement.Factory} factory
+     */
+    function registerOwnElement(registry, name, factory) {
+      ownElementRegistrations.push([registry, name, factory])
+      registry.registerElement(name, factory)
+    }
+
+    function reRegisterOwnElements() {
+      for (const [registry, name, factory] of ownElementRegistrations) {
+        registry.registerElement(name, factory)
+      }
+    }
+
     function registerAudioTrackSelection() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class AudioTrackSelectionFactory {
@@ -4072,8 +4102,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
-      shakaOverflowMenu.registerElement('ft_audio_tracks', new AudioTrackSelectionFactory())
+      registerOwnElement(shakaControls, 'ft_audio_tracks', new AudioTrackSelectionFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_audio_tracks', new AudioTrackSelectionFactory())
     }
 
     function registerCaptionSelection() {
@@ -4091,8 +4121,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('captions', new CaptionSelectionFactory())
-      shakaOverflowMenu.registerElement('captions', new CaptionSelectionFactory())
+      registerOwnElement(shakaControls, 'captions', new CaptionSelectionFactory())
+      registerOwnElement(shakaOverflowMenu, 'captions', new CaptionSelectionFactory())
     }
 
     function toggleCaptions() {
@@ -4120,7 +4150,7 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_caption_toggle', new CaptionToggleButtonFactory())
+      registerOwnElement(shakaControls, 'ft_caption_toggle', new CaptionToggleButtonFactory())
     }
 
     function registerChapterOverlayButton() {
@@ -4148,8 +4178,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_chapters', new ChapterOverlayButtonFactory())
-      shakaOverflowMenu.registerElement('ft_chapters', new ChapterOverlayButtonFactory())
+      registerOwnElement(shakaControls, 'ft_chapters', new ChapterOverlayButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_chapters', new ChapterOverlayButtonFactory())
     }
 
     async function loadChapterThumbnails() {
@@ -4245,8 +4275,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_autoplay_toggle', new AutoplayToggleFactory())
-      shakaOverflowMenu.registerElement('ft_autoplay_toggle', new AutoplayToggleFactory())
+      registerOwnElement(shakaControls, 'ft_autoplay_toggle', new AutoplayToggleFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_autoplay_toggle', new AutoplayToggleFactory())
     }
 
     function registerTheatreModeButton() {
@@ -4263,8 +4293,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_theatre_mode', new TheatreModeButtonFactory())
-      shakaOverflowMenu.registerElement('ft_theatre_mode', new TheatreModeButtonFactory())
+      registerOwnElement(shakaControls, 'ft_theatre_mode', new TheatreModeButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_theatre_mode', new TheatreModeButtonFactory())
     }
 
     function registerFullWindowButton() {
@@ -4296,8 +4326,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_full_window', new FullWindowButtonFactory())
-      shakaOverflowMenu.registerElement('ft_full_window', new FullWindowButtonFactory())
+      registerOwnElement(shakaControls, 'ft_full_window', new FullWindowButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_full_window', new FullWindowButtonFactory())
     }
 
     function registerLegacyQualitySelection() {
@@ -4349,8 +4379,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_legacy_quality', new LegacyQualitySelectionFactory())
-      shakaOverflowMenu.registerElement('ft_legacy_quality', new LegacyQualitySelectionFactory())
+      registerOwnElement(shakaControls, 'ft_legacy_quality', new LegacyQualitySelectionFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_legacy_quality', new LegacyQualitySelectionFactory())
     }
 
     function registerStatsButton() {
@@ -4371,7 +4401,7 @@ export default defineComponent({
         }
       }
 
-      shakaContextMenu.registerElement('ft_stats', new StatsButtonFactory())
+      registerOwnElement(shakaContextMenu, 'ft_stats', new StatsButtonFactory())
     }
 
     function registerAmbientModeButton() {
@@ -4390,7 +4420,7 @@ export default defineComponent({
         }
       }
 
-      shakaOverflowMenu.registerElement('ft_ambient_mode', new AmbientModeButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_ambient_mode', new AmbientModeButtonFactory())
     }
 
     function registerSkipSilenceButton() {
@@ -4407,7 +4437,7 @@ export default defineComponent({
         }
       }
 
-      shakaOverflowMenu.registerElement('ft_skip_silence', new SkipSilenceButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_skip_silence', new SkipSilenceButtonFactory())
     }
 
     function registerSleepTimer() {
@@ -4428,7 +4458,7 @@ export default defineComponent({
         }
       }
 
-      shakaOverflowMenu.registerElement('ft_sleep_timer', new SleepTimerFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_sleep_timer', new SleepTimerFactory())
     }
 
     /** @type {(() => void) | null} */
@@ -4541,12 +4571,12 @@ export default defineComponent({
         }
       }
 
-      shakaContextMenu.registerElement('ft_copy_youtube_video_url', new CopyVideoUrlButtonFactory('youtube', false))
-      shakaContextMenu.registerElement('ft_copy_youtube_video_url_at_current_time', new CopyVideoUrlButtonFactory('youtube', true))
-      shakaContextMenu.registerElement('ft_copy_invidious_video_url', new CopyVideoUrlButtonFactory('invidious', false))
-      shakaContextMenu.registerElement('ft_copy_invidious_video_url_at_current_time', new CopyVideoUrlButtonFactory('invidious', true))
-      shakaContextMenu.registerElement('ft_loop', new LoopButtonFactory())
-      shakaOverflowMenu.registerElement('ft_loop', new LoopButtonFactory())
+      registerOwnElement(shakaContextMenu, 'ft_copy_youtube_video_url', new CopyVideoUrlButtonFactory('youtube', false))
+      registerOwnElement(shakaContextMenu, 'ft_copy_youtube_video_url_at_current_time', new CopyVideoUrlButtonFactory('youtube', true))
+      registerOwnElement(shakaContextMenu, 'ft_copy_invidious_video_url', new CopyVideoUrlButtonFactory('invidious', false))
+      registerOwnElement(shakaContextMenu, 'ft_copy_invidious_video_url_at_current_time', new CopyVideoUrlButtonFactory('invidious', true))
+      registerOwnElement(shakaContextMenu, 'ft_loop', new LoopButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_loop', new LoopButtonFactory())
     }
 
     function registerScreenshotButton() {
@@ -4563,8 +4593,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_screenshot', new ScreenshotButtonFactory())
-      shakaOverflowMenu.registerElement('ft_screenshot', new ScreenshotButtonFactory())
+      registerOwnElement(shakaControls, 'ft_screenshot', new ScreenshotButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_screenshot', new ScreenshotButtonFactory())
     }
 
     function registerSponsorBlockSubmissionButtons() {
@@ -4618,11 +4648,11 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_sponsorblock_start', new SponsorBlockStartButtonFactory())
-      shakaControls.registerElement('ft_sponsorblock_end', new SponsorBlockEndButtonFactory())
-      shakaControls.registerElement('ft_sponsorblock_open_menu', new SponsorBlockOpenMenuButtonFactory())
-      shakaControls.registerElement('ft_sponsorblock_cancel', new SponsorBlockCancelButtonFactory())
-      shakaControls.registerElement('ft_sponsorblock_clear', new SponsorBlockClearButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_start', new SponsorBlockStartButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_end', new SponsorBlockEndButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_open_menu', new SponsorBlockOpenMenuButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_cancel', new SponsorBlockCancelButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_clear', new SponsorBlockClearButtonFactory())
 
       updateSponsorBlockSubmissionState()
     }
@@ -4638,7 +4668,7 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_sponsorblock_highlight', new SponsorBlockHighlightButtonFactory())
+      registerOwnElement(shakaControls, 'ft_sponsorblock_highlight', new SponsorBlockHighlightButtonFactory())
       updateSponsorBlockHighlightState()
     }
 
@@ -4654,8 +4684,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_skip_next', new SkipNextButtonFactory())
-      shakaOverflowMenu.registerElement('ft_skip_next', new SkipNextButtonFactory())
+      registerOwnElement(shakaControls, 'ft_skip_next', new SkipNextButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_skip_next', new SkipNextButtonFactory())
 
       // skip to previous video button
       events.addEventListener('previousVideo', () => {
@@ -4668,8 +4698,8 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_skip_previous', new SkipPreviousButtonFactory())
-      shakaOverflowMenu.registerElement('ft_skip_previous', new SkipPreviousButtonFactory())
+      registerOwnElement(shakaControls, 'ft_skip_previous', new SkipPreviousButtonFactory())
+      registerOwnElement(shakaOverflowMenu, 'ft_skip_previous', new SkipPreviousButtonFactory())
     }
 
     function registerPlaybackAdjustedTime() {
@@ -4685,7 +4715,7 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_playback_adjusted_time', new PlaybackAdjustedTimeFactory())
+      registerOwnElement(shakaControls, 'ft_playback_adjusted_time', new PlaybackAdjustedTimeFactory())
     }
 
     function registerQuickPlaybackRateBar() {
@@ -4724,7 +4754,7 @@ export default defineComponent({
         }
       }
 
-      shakaControls.registerElement('ft_quick_playback_rate_bar', new QuickPlaybackRateBarFactory())
+      registerOwnElement(shakaControls, 'ft_quick_playback_rate_bar', new QuickPlaybackRateBarFactory())
     }
 
     /**
