@@ -5815,6 +5815,24 @@ export default defineComponent({
         return
       }
 
+      // Player lifecycle interruptions are not format failures: a load aborted by a
+      // reload/unload/destroy, or the player being torn down mid-operation. Reacting
+      // to them by walking the format fallback chain needlessly drops the video down
+      // to the legacy formats (360p). These races became far more common with per-tab
+      // players (mount/unmount/reconfigure while switching tabs, SABR reloads), so just
+      // log and ignore them and let the current format keep (re)loading.
+      if (
+        error.category === ErrorCategory.PLAYER &&
+        (error.code === ErrorCode.LOAD_INTERRUPTED ||
+          error.code === ErrorCode.OPERATION_ABORTED ||
+          error.code === ErrorCode.OBJECT_DESTROYED ||
+          error.code === ErrorCode.CONTENT_NOT_LOADED ||
+          error.code === ErrorCode.PRELOAD_DESTROYED)
+      ) {
+        console.warn(`Ignoring player lifecycle interruption (code ${error.code}) in ${context}`)
+        return
+      }
+
       logShakaError(error, context, props.videoId, details)
 
       // text related errors aren't serious (captions and seek bar thumbnails), so we should just log them
