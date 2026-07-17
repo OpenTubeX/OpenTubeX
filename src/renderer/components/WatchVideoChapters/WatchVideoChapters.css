@@ -4,6 +4,7 @@
   flex-direction: column;
   min-block-size: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-color: rgb(255 255 255 / 45%) transparent;
 }
 
