@@ -43,7 +43,17 @@ export class SkipSilenceButton extends shaka.ui.Element {
 
     /** @private */
     this.currentState_ = document.createElement('span')
-    this.currentState_.classList.add('shaka-current-selection-span')
+    this.currentState_.classList.add('shaka-current-selection-span', 'ft-skip-silence-state')
+
+    /** @private */
+    this.currentStateValue_ = document.createElement('span')
+    this.currentState_.appendChild(this.currentStateValue_)
+
+    /** @private */
+    this.currentStateSizer_ = document.createElement('span')
+    this.currentStateSizer_.classList.add('ft-skip-silence-state-sizer')
+    this.currentStateSizer_.ariaHidden = 'true'
+    this.currentState_.appendChild(this.currentStateSizer_)
     label.appendChild(this.currentState_)
 
     this.button_.appendChild(label)
@@ -83,9 +93,12 @@ export class SkipSilenceButton extends shaka.ui.Element {
   /** @private */
   updateLocalisedStrings_() {
     const label = i18n.global.t('Settings.Player Settings.Fast-Forward Through Silence')
+    const enabledLabel = this.localization.resolve('ON')
+    const disabledLabel = this.localization.resolve('OFF')
 
     this.nameSpan_.textContent = label
-    this.currentState_.textContent = this.localization.resolve(this.skipSilence_.value ? 'ON' : 'OFF')
+    this.currentStateValue_.textContent = this.skipSilence_.value ? enabledLabel : disabledLabel
+    this.currentStateSizer_.textContent = this.skipSilence_.value ? disabledLabel : enabledLabel
     this.button_.ariaLabel = label
   }
 

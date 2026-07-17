@@ -6,7 +6,8 @@ const HYSTERESIS_DB = 3
 const LOOKAHEAD_SECONDS = 0.06
 const MAX_HISTORY_SAMPLES = 600
 const MIN_HISTORY_SAMPLES = 60
-const SILENCE_HOLD_MS = 500
+const SILENCE_HOLD_MS = 700
+const SPEECH_PEAK_THRESHOLD_DB = -35
 const SPEED_RAMP_MS = 200
 
 /**
@@ -21,14 +22,14 @@ const SPEED_RAMP_MS = 200
 export function useSilenceSkipping({ enabled, isLive, video }) {
   /** @type {AudioContext | null} */
   let audioContext = null
-  /** @type {AnalyserNode | null} */
-  let analyser = null
+  /** @type {AnalyserNode[]} */
+  const analysers = []
   /** @type {DelayNode | null} */
   let delay = null
   /** @type {GainNode | null} */
   let gain = null
-  /** @type {Float32Array | null} */
-  let samples = null
+  /** @type {Float32Array[]} */
+  const sampleBuffers = []
   /** @type {number | null} */
   let animationFrame = null
   /** @type {number | null} */
@@ -131,16 +132,35 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     dynamicThresholdDb = Math.min(-20, Math.max(-60, noiseFloor + 3))
   }
 
-  function getVolumeDb() {
-    analyser.getFloatTimeDomainData(samples)
+  function getAudioLevels() {
+    let peak = 0
+    let rootMeanSquare = 0
 
-    let sumOfSquares = 0
-    for (const sample of samples) {
-      sumOfSquares += sample * sample
+    for (const [index, analyser] of analysers.entries()) {
+      const samples = sampleBuffers[index]
+      analyser.getFloatTimeDomainData(samples)
+
+      let sumOfSquares = 0
+      for (const sample of samples) {
+        peak = Math.max(peak, Math.abs(sample))
+        sumOfSquares += sample * sample
+      }
+
+      rootMeanSquare = Math.max(
+        rootMeanSquare,
+        Math.sqrt(sumOfSquares / samples.length)
+      )
     }
 
-    const rootMeanSquare = Math.sqrt(sumOfSquares / samples.length)
-    return rootMeanSquare === 0 ? -100 : 20 * Math.log10(rootMeanSquare)
+    // MediaElementAudioSourceNode applies the element's volume before analysis.
+    // Normalize levels so silence detection behaves the same at every user volume.
+    const volumeAdjustmentDb = -20 * Math.log10(video.value?.volume ?? 1)
+    return {
+      peakDb: peak === 0 ? -100 : 20 * Math.log10(peak) + volumeAdjustmentDb,
+      volumeDb: rootMeanSquare === 0
+        ? -100
+        : 20 * Math.log10(rootMeanSquare) + volumeAdjustmentDb,
+    }
   }
 
   function getSilencePlaybackRate() {
@@ -173,7 +193,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   function analyse() {
     animationFrame = null
 
-    if (!shouldRun() || !analyser || !samples) {
+    if (!shouldRun() || analysers.length === 0) {
       stop()
       return
     }
@@ -182,14 +202,18 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     const elapsed = lastSampleTime === 0 ? 0 : Math.min(now - lastSampleTime, 100)
     lastSampleTime = now
 
-    const volumeDb = getVolumeDb()
+    const { peakDb, volumeDb } = getAudioLevels()
     updateDynamicThreshold(volumeDb)
 
+    // Room tone can sit above the adaptive RMS threshold while quiet speech
+    // has recurring peaks. Treat either low measure as a silence candidate,
+    // but require both to recover before leaving silence.
+    const containsSpeechPeak = peakDb >= SPEECH_PEAK_THRESHOLD_DB
     if (isSilent) {
-      if (volumeDb > dynamicThresholdDb + HYSTERESIS_DB) {
+      if (containsSpeechPeak && volumeDb > dynamicThresholdDb + HYSTERESIS_DB) {
         isSilent = false
       }
-    } else if (volumeDb < dynamicThresholdDb) {
+    } else if (!containsSpeechPeak || volumeDb < dynamicThresholdDb) {
       isSilent = true
     }
 
@@ -216,7 +240,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   }
 
   async function setupGraph() {
-    if (analyser) {
+    if (analysers.length > 0) {
       return
     }
 
@@ -232,18 +256,27 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     }
 
     const source = audioContext.createMediaElementSource(videoElement)
-    analyser = audioContext.createAnalyser()
-    analyser.fftSize = ANALYSER_FFT_SIZE
-    analyser.smoothingTimeConstant = 0
+    const splitter = audioContext.createChannelSplitter(2)
+    const analysisSink = audioContext.createGain()
+    analysisSink.gain.value = 0
     delay = audioContext.createDelay(1)
     gain = audioContext.createGain()
 
-    source.connect(analyser)
-    analyser.connect(delay)
+    source.connect(delay)
     delay.connect(gain)
     gain.connect(audioContext.destination)
 
-    samples = new Float32Array(analyser.fftSize)
+    source.connect(splitter)
+    for (let channel = 0; channel < splitter.numberOfOutputs; channel++) {
+      const analyser = audioContext.createAnalyser()
+      analyser.fftSize = ANALYSER_FFT_SIZE
+      analyser.smoothingTimeConstant = 0
+      splitter.connect(analyser, channel)
+      analyser.connect(analysisSink)
+      analysers.push(analyser)
+      sampleBuffers.push(new Float32Array(analyser.fftSize))
+    }
+    analysisSink.connect(audioContext.destination)
   }
 
   async function start() {
@@ -256,20 +289,20 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     try {
       graphSetupPromise ??= setupGraph()
       await graphSetupPromise
-      if (!analyser) {
+      if (analysers.length === 0) {
         graphSetupPromise = null
         return
       }
       await audioContext?.resume()
     } catch (error) {
-      if (!analyser && audioContext?.state !== 'running') {
+      if (analysers.length === 0 && audioContext?.state !== 'running') {
         graphSetupPromise = null
       }
       console.warn('Unable to analyse audio for silence skipping', error)
       return
     }
 
-    if (!shouldRun() || !analyser || animationFrame !== null) {
+    if (!shouldRun() || analysers.length === 0 || animationFrame !== null) {
       return
     }
 

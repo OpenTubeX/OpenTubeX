@@ -379,6 +379,18 @@
   padding: 0;
 }
 
+:deep(.ft-skip-silence-state) {
+  display: inline-grid;
+}
+
+:deep(.ft-skip-silence-state > span) {
+  grid-area: 1 / 1;
+}
+
+:deep(.ft-skip-silence-state-sizer) {
+  visibility: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :deep(.shaka-overflow-menu-button > .shaka-ui-icon),
   :deep(.ft-caption-toggle-icon),
