@@ -1,5 +1,6 @@
 <template>
   <FtPrompt
+    v-if="isTabPresented !== false"
     :autosize="true"
     theme="collaboratorsPrompt"
     @click="emit('close')"
@@ -66,6 +67,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 
 import store from '../../store'
+import { useTabContext } from '../../tabs/TabContext'
 
 defineProps({
   collaborators: {
@@ -77,6 +79,7 @@ defineProps({
 const emit = defineEmits(['close'])
 
 const { t } = useI18n()
+const { isTabPresented } = useTabContext()
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
