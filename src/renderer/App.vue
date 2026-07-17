@@ -226,6 +226,13 @@
               :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
               draggable="false"
             >
+            <img
+              v-else-if="getTabPreviewFallbackUrl(tab)"
+              :src="getTabPreviewFallbackUrl(tab)"
+              :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
+              class="tabSwitcherPreviewAvatar"
+              draggable="false"
+            >
             <span
               v-else
               class="tabSwitcherPreviewFallback"
@@ -288,6 +295,7 @@ import { translateWindowTitle } from './helpers/strings'
 import { getTabAccentColor } from './constants/tabColors'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
+import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
 
 const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
 const LOCAL_REPOSITORY = 'opentubex/opentubex'

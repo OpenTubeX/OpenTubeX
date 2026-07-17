@@ -262,6 +262,13 @@
   object-fit: cover;
 }
 
+.tabSwitcherPreview .tabSwitcherPreviewAvatar {
+  inline-size: 80px;
+  block-size: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .tabSwitcherPreviewFallback {
   display: flex;
   align-items: center;
@@ -329,6 +336,11 @@
 
   .tabSwitcherPreview {
     block-size: 86px;
+  }
+
+  .tabSwitcherPreview .tabSwitcherPreviewAvatar {
+    inline-size: 62px;
+    block-size: 62px;
   }
 }
 

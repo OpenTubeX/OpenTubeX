@@ -71,6 +71,13 @@
             :alt="tooltipPreviewAlt"
             draggable="false"
           >
+          <img
+            v-else-if="channelThumbnailUrl"
+            :src="channelThumbnailUrl"
+            :alt="tooltipPreviewAlt"
+            class="tabTooltipPreviewAvatar"
+            draggable="false"
+          >
           <div
             v-else
             class="tabTooltipPreviewFallback"
@@ -92,6 +99,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 import { getTabAccentColor } from '../../constants/tabColors'
+import { getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
 
 const props = defineProps({
   tab: {
@@ -184,6 +192,10 @@ const displayTitle = computed(() => {
 
 const tooltipId = computed(() => `tab-tooltip-${props.tab.id}`)
 const tooltipPreviewAlt = computed(() => `${displayTitle.value} preview`)
+
+// When a tab points at a channel page and no screenshot has been captured yet,
+// fall back to the channel's profile picture (cached by the Channel view).
+const channelThumbnailUrl = computed(() => getTabPreviewFallbackUrl(props.tab))
 
 function handleClick() {
   emit('activate', props.tab.id)
@@ -616,6 +628,14 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+}
+
+.tabTooltipPreview .tabTooltipPreviewAvatar {
+  inline-size: auto;
+  block-size: 72%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .tabTooltipPreviewFallback {

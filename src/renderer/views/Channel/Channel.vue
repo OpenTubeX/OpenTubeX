@@ -368,6 +368,14 @@ const relatedChannels = shallowRef([])
 const isArtistTopicChannel = ref(false)
 const isFamilyFriendly = ref(false)
 
+// Cache the resolved profile picture so tab previews can fall back to it when no
+// screenshot has been captured for this channel's tab yet.
+watch(thumbnailUrl, (thumbnail) => {
+  if (id.value && thumbnail) {
+    store.commit('setChannelThumbnail', { channelId: id.value, thumbnail })
+  }
+})
+
 const errorMessage = ref('')
 const showSearchBar = ref(true)
 const showShareMenu = ref(true)

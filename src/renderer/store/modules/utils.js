@@ -8,6 +8,11 @@ import {
   replaceFilenameForbiddenChars,
   searchFiltersMatch,
 } from '../../helpers/utils'
+import {
+  CHANNEL_THUMBNAIL_CACHE_LIMIT,
+  loadChannelThumbnailCache,
+  persistChannelThumbnailCache,
+} from '../../helpers/channelThumbnailStorage'
 
 const state = {
   isSideNavOpen: false,
@@ -21,6 +26,7 @@ const state = {
   },
   cachedPlaylists: {},
   deArrowCache: {},
+  channelThumbnailCache: loadChannelThumbnailCache(),
   showProgressBar: false,
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
@@ -74,6 +80,10 @@ const getters = {
 
   getDeArrowCache: (state) => {
     return state.deArrowCache
+  },
+
+  getChannelThumbnail: (state) => (channelId) => {
+    return state.channelThumbnailCache[channelId] ?? null
   },
 
   getPopularCache(state) {
@@ -652,6 +662,25 @@ const mutations = {
 
   addThumbnailToDeArrowCache (state, payload) {
     state.deArrowCache[payload.videoId] = payload
+  },
+
+  setChannelThumbnail (state, { channelId, thumbnail }) {
+    if (!channelId || !thumbnail) {
+      return
+    }
+
+    const cache = state.channelThumbnailCache
+    if (cache[channelId] === thumbnail) {
+      return
+    }
+
+    const keys = Object.keys(cache)
+    if (!(channelId in cache) && keys.length >= CHANNEL_THUMBNAIL_CACHE_LIMIT) {
+      delete cache[keys[0]]
+    }
+
+    cache[channelId] = thumbnail
+    persistChannelThumbnailCache(cache)
   },
 
   removeFromSessionSearchHistory (state, query) {
