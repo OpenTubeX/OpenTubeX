@@ -16,7 +16,7 @@ import { FullWindowButton } from './player-components/FullWindowButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { LoopButton } from './player-components/LoopButton'
 import { PlaybackRateSelection } from './player-components/PlaybackRateSelection'
-import { QuickPlaybackRateBar } from './player-components/QuickPlaybackRateBar'
+import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { SleepTimer } from './player-components/SleepTimer'
@@ -4448,6 +4448,9 @@ export default defineComponent({
     /** @type {(() => void) | null} */
     let removeCopyVideoUrlContext = null
 
+    /** @type {(() => void) | null} */
+    let removeQuickPlaybackRateBarContext = null
+
     function registerContextMenuButtons() {
       /**
        * @returns {number}
@@ -4717,17 +4720,21 @@ export default defineComponent({
         emit('save-channel-playback-speed')
       })
 
+      const controls = ui?.getControls()
+      if (controls) {
+        removeQuickPlaybackRateBarContext?.()
+        removeQuickPlaybackRateBarContext = setQuickPlaybackRateBarContext(controls, {
+          getPlaybackRateOptions: () => quickPlaybackSpeedBarOptions.value,
+          getSavedChannelPlaybackRate: () => savedChannelPlaybackRate.value,
+          getCanSaveChannelPlaybackSpeed: () => canManuallySaveChannelPlaybackRate.value,
+          events
+        })
+      }
+
       /** @implements {shaka.extern.IUIElement.Factory} */
       class QuickPlaybackRateBarFactory {
         create(rootElement, controls) {
-          return new QuickPlaybackRateBar(
-            () => quickPlaybackSpeedBarOptions.value,
-            () => savedChannelPlaybackRate.value,
-            () => canManuallySaveChannelPlaybackRate.value,
-            events,
-            rootElement,
-            controls
-          )
+          return new QuickPlaybackRateBar(rootElement, controls)
         }
       }
 
@@ -4742,6 +4749,9 @@ export default defineComponent({
     function cleanUpCustomPlayerControls() {
       removeCopyVideoUrlContext?.()
       removeCopyVideoUrlContext = null
+
+      removeQuickPlaybackRateBarContext?.()
+      removeQuickPlaybackRateBarContext = null
 
       if (!registeredCustomControls) {
         return
