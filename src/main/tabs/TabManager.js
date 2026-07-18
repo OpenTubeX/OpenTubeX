@@ -445,6 +445,7 @@ export class TabManager {
     this.tabBarScrollPosition = 0
     this.contextMenuTabId = null
     this.contextMenuSurface = 'content'
+    this.contextMenuSubscriptionFeedTab = null
     this._sessionPersistenceDisabled = false
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
@@ -2298,9 +2299,13 @@ export function setupTabsIPC(options = {}) {
     manager.contextMenuTabId = typeof payload?.tabId === 'string' && manager.tabs.has(payload.tabId)
       ? payload.tabId
       : null
-    manager.contextMenuSurface = ['tab', 'tabBar', 'content'].includes(payload?.surface)
+    manager.contextMenuSurface = ['tab', 'tabBar', 'content', 'subscriptionFeedTab'].includes(payload?.surface)
       ? payload.surface
       : payload?.isTabBar === true ? 'tabBar' : 'content'
+    manager.contextMenuSubscriptionFeedTab = manager.contextMenuSurface === 'subscriptionFeedTab' &&
+      ['videos', 'shorts', 'live', 'posts', 'all'].includes(payload?.feedTab)
+      ? payload.feedTab
+      : null
   })
 
   ipcMain.on(IpcChannels.TABS_SET_PLAYBACK_STATE, (event, playbackState, tabId) => {

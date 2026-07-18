@@ -41,6 +41,7 @@
               role="tab"
               :aria-selected="currentTab === 'videos'"
               aria-controls="subscriptionsPanel"
+              data-subscription-feed-tab="videos"
               :tabindex="currentTab === 'videos' ? 0 : -1"
               :class="{ selectedTab: currentTab === 'videos' }"
               @click="changeTab('videos')"
@@ -65,6 +66,7 @@
               role="tab"
               :aria-selected="currentTab === 'shorts'"
               aria-controls="subscriptionsPanel"
+              data-subscription-feed-tab="shorts"
               :tabindex="currentTab === 'shorts' ? 0 : -1"
               :class="{ selectedTab: currentTab === 'shorts' }"
               @click="changeTab('shorts')"
@@ -89,6 +91,7 @@
               role="tab"
               :aria-selected="currentTab === 'live'"
               aria-controls="subscriptionsPanel"
+              data-subscription-feed-tab="live"
               :tabindex="currentTab === 'live' ? 0 : -1"
               :class="{ selectedTab: currentTab === 'live' }"
               @click="changeTab('live')"
@@ -113,6 +116,7 @@
               role="tab"
               :aria-selected="currentTab === 'community'"
               aria-controls="subscriptionsPanel"
+              data-subscription-feed-tab="posts"
               :tabindex="currentTab === 'community' ? 0 : -1"
               :class="{ selectedTab: currentTab === 'community' }"
               @click="changeTab('community')"
@@ -137,6 +141,7 @@
               role="tab"
               :aria-selected="currentTab === 'new'"
               aria-controls="subscriptionsPanel"
+              data-subscription-feed-tab="all"
               :tabindex="currentTab === 'new' ? 0 : -1"
               :class="{ selectedTab: currentTab === 'new' }"
               @click="changeTab('new')"
@@ -208,17 +213,28 @@
           settingsSection: $t('Settings.Distraction Free Settings.Distraction Free Settings')
         }) }}
       </p>
+      <FtPrompt
+        v-if="showAllFeedsRefreshWarning"
+        :label="$t('Subscriptions.New Feed Refresh Warning Title')"
+        :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size })]"
+        :option-names="[$t('Yes'), $t('No')]"
+        :option-values="['refresh', 'cancel']"
+        autosize
+        @click="handleAllFeedsRefreshWarning"
+      />
     </FtCard>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtPrompt from '../../components/FtPrompt/FtPrompt.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import SubscriptionsNew from '../../components/SubscriptionsNew.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
@@ -228,9 +244,23 @@ import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
+import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
+import {
+  refreshSubscriptionLiveFromRemote,
+  refreshSubscriptionPostsFromRemote,
+  refreshSubscriptionShortsFromRemote,
+  refreshSubscriptionVideosFromRemote
+} from '../../helpers/subscriptions'
 
 const isElectron = process.env.IS_ELECTRON
 const { tabId, isTabPresented } = useTabContext()
+const { t } = useI18n()
+const {
+  activeSubscriptionIds: allFeedsActiveSubscriptionIds,
+  handleRefreshWarning: handleAllFeedsRefreshWarning,
+  refresh: refreshAllFeeds,
+  showRefreshWarning: showAllFeedsRefreshWarning
+} = useRefreshAllSubscriptionFeeds()
 const currentTabStorageKey = tabId ? `Subscriptions/${tabId}/currentTab` : 'Subscriptions/currentTab'
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -306,9 +336,18 @@ const tabScrollPositions = {
 }
 
 let isMounted = false
+let removeFeedReloadRequestListener = null
 
 onMounted(() => {
   isMounted = true
+
+  if (isElectron) {
+    removeFeedReloadRequestListener = window.ftElectron.subscriptionFeeds.onRequestReload(handleFeedReloadRequest)
+  }
+})
+
+onBeforeUnmount(() => {
+  removeFeedReloadRequestListener?.()
 })
 
 watch(currentTab, async (value, previousValue) => {
@@ -548,6 +587,38 @@ function focusTab(event, focusedTab) {
 
 function refreshCurrentTab() {
   currentTabPanel.value?.refresh()
+}
+
+/**
+ * @param {{tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}} payload
+ */
+async function handleFeedReloadRequest(payload) {
+  if (payload?.tabId !== tabId || subscriptionFeedRefreshInProgress.value) {
+    return
+  }
+
+  const viewTab = payload.feedTab === 'posts'
+    ? 'community'
+    : payload.feedTab === 'all' ? 'new' : payload.feedTab
+  if (viewTab === currentTab.value) {
+    refreshCurrentTab()
+    return
+  }
+
+  if (payload.feedTab === 'all') {
+    refreshAllFeeds()
+    return
+  }
+
+  const options = { t, errorChannels: [] }
+  const refreshers = {
+    videos: refreshSubscriptionVideosFromRemote,
+    shorts: refreshSubscriptionShortsFromRemote,
+    live: refreshSubscriptionLiveFromRemote,
+    posts: refreshSubscriptionPostsFromRemote
+  }
+
+  await refreshers[payload.feedTab]?.(options)
 }
 </script>
 

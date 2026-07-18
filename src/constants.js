@@ -24,6 +24,7 @@ const IpcChannels = {
   SUBSCRIPTION_AUTO_REFRESH_RELEASE: 'subscription-auto-refresh-release',
   SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS: 'subscription-auto-refresh-set-progress',
   SUBSCRIPTION_AUTO_REFRESH_STATE_CHANGED: 'subscription-auto-refresh-state-changed',
+  SUBSCRIPTION_FEED_REQUEST_RELOAD: 'subscription-feed-request-reload',
 
   // Tab management
   TABS_GET_STATE: 'tabs-get-state',

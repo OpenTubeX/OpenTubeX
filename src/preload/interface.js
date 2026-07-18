@@ -359,6 +359,19 @@ export default {
     }
   },
 
+  subscriptionFeeds: {
+    /**
+     * Listen for a reload requested from a subscription feed tab's context menu.
+     * @param {(payload: {tabId: string, feedTab: 'videos' | 'shorts' | 'live' | 'posts' | 'all'}) => void} handler
+     * @returns {() => void}
+     */
+    onRequestReload: (handler) => {
+      const listener = (_event, payload) => handler(payload)
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, listener)
+    }
+  },
+
   /**
    * @param {(message: string, time: number | null) => void} handler
    * @returns {() => void}
@@ -666,7 +679,7 @@ export default {
 
     /**
      * Track which tab-related surface the next context menu should target.
-     * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' }} payload
+     * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
      */
     setContextMenuTab: (payload) => {
       ipcRenderer.send(IpcChannels.TABS_SET_CONTEXT_MENU_TAB, payload)

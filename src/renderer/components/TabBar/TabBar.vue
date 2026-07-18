@@ -595,7 +595,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' }} payload
+ * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab(payload)
@@ -610,10 +610,12 @@ function handleContextMenuPointerDown(event) {
   }
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
   const isTabBar = event.target.closest('.tabBar') != null
   updateContextMenuTab({
     tabId,
-    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : 'content'
+    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
+    feedTab
   })
 }
 
@@ -626,10 +628,12 @@ function handleContextMenuEvent(event) {
   }
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
   const isTabBar = event.target.closest('.tabBar') != null
   updateContextMenuTab({
     tabId,
-    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : 'content'
+    surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
+    feedTab
   })
 }
 

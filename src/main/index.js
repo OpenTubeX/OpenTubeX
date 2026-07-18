@@ -288,6 +288,16 @@ function runApp() {
         : undefined
       const isContextMenuTabUnloaded = contextMenuTab?.loadState === 'unloaded'
       const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuSurface === 'tabBar'
+      const subscriptionFeedTab = manager?.contextMenuSurface === 'subscriptionFeedTab'
+        ? manager.contextMenuSubscriptionFeedTab
+        : null
+      const subscriptionFeedLabels = {
+        videos: 'Videos',
+        shorts: 'Shorts',
+        live: 'Live',
+        posts: 'Posts',
+        all: 'All Feeds'
+      }
       const contextMenuTabRoute = contextMenuTab ? getOpenTubeXRouteFromUrl(contextMenuTab.url) : null
       const contextMenuTabYouTubeUrl = isShareableOpenTubeXRoute(contextMenuTabRoute)
         ? transformOpenTubeXRouteUrl(contextMenuTabRoute, true)
@@ -317,6 +327,22 @@ function runApp() {
       }
 
       return [
+        {
+          label: `Reload ${subscriptionFeedLabels[subscriptionFeedTab] ?? 'Feed'}`,
+          visible: subscriptionFeedTab != null,
+          click: () => {
+            if (!manager || !subscriptionFeedTab || !manager.presentedTabId) return
+
+            manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, {
+              tabId: manager.presentedTabId,
+              feedTab: subscriptionFeedTab
+            })
+          }
+        },
+        {
+          type: 'separator',
+          visible: subscriptionFeedTab != null
+        },
         {
           label: 'Close Tab',
           visible: contextMenuTab != null,
