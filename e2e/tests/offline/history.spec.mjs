@@ -62,7 +62,9 @@ test.describe('watch history', () => {
     await expect(toggle).not.toBeChecked()
     await expect(watchedIndicator).toHaveCount(0)
 
-    await toggle.check()
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Show Watched Indicators' })
+      .click()
 
     await expect(watchedIndicator).toHaveText('Watched')
   })
