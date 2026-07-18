@@ -317,6 +317,7 @@ import {
   copyToClipboard,
   formatDurationAsTimestamp,
   formatNumber,
+  getCachedOembedTitle,
   getOembedTitle,
   getRelativeTimeFromDate,
   openExternalLink,
@@ -1094,11 +1095,16 @@ function parseVideoData() {
   title.value = props.data.title
 
   if (store.getters.getAvoidTranslation === 'entire_app' && id.value) {
-    getOembedTitle(id.value).then((oembedTitle) => {
-      if (oembedTitle) {
-        title.value = oembedTitle
-      }
-    })
+    const cachedTitle = getCachedOembedTitle(id.value)
+    if (cachedTitle !== null) {
+      title.value = cachedTitle
+    } else {
+      getOembedTitle(id.value).then((oembedTitle) => {
+        if (oembedTitle) {
+          title.value = oembedTitle
+        }
+      })
+    }
   }
 
   channelName.value = props.data.author ?? null

@@ -1152,16 +1152,47 @@ export function throttle(func, wait) {
   }
 }
 
+const oembedTitleCache = new Map()
+const oembedTitleRequests = new Map()
+
+/**
+ * @param {string} videoId
+ * @returns {string | null}
+ */
+export function getCachedOembedTitle(videoId) {
+  return oembedTitleCache.get(videoId) ?? null
+}
+
 /**
  * @param {string} videoId
  * @returns {Promise<string | null>}
  */
 export async function getOembedTitle(videoId) {
-  try {
-    const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
-    return oembedInfo.title
-  } catch (error) {
-    console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
-    return null
+  const cachedTitle = getCachedOembedTitle(videoId)
+  if (cachedTitle !== null) {
+    return cachedTitle
   }
+
+  if (oembedTitleRequests.has(videoId)) {
+    return oembedTitleRequests.get(videoId)
+  }
+
+  const request = (async () => {
+    try {
+      const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
+      if (typeof oembedInfo.title === 'string' && oembedInfo.title.length > 0) {
+        oembedTitleCache.set(videoId, oembedInfo.title)
+        return oembedInfo.title
+      }
+    } catch (error) {
+      console.error(`Failed to fetch oEmbed info for ${videoId}: ${error}`)
+    } finally {
+      oembedTitleRequests.delete(videoId)
+    }
+
+    return null
+  })()
+
+  oembedTitleRequests.set(videoId, request)
+  return request
 }
