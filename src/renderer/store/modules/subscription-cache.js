@@ -2,6 +2,16 @@ import {
   DBSubscriptionCacheHandlers,
 } from '../../../datastores/handlers/index'
 
+/**
+ * Electron datastore payloads are converted to plain JSON before crossing IPC,
+ * which serializes dates as ISO strings.
+ * @param {Date | number | string} timestamp
+ * @returns {Date}
+ */
+function toDate(timestamp) {
+  return timestamp instanceof Date ? timestamp : new Date(timestamp)
+}
+
 const state = {
   videoCache: {},
   liveCache: {},
@@ -68,19 +78,19 @@ const actions = {
         let hasData = false
 
         if (Array.isArray(dataEntry.videos)) {
-          videos[channelId] = { videos: dataEntry.videos, timestamp: dataEntry.videosTimestamp }
+          videos[channelId] = { videos: dataEntry.videos, timestamp: toDate(dataEntry.videosTimestamp) }
           hasData = true
         }
         if (Array.isArray(dataEntry.liveStreams)) {
-          liveStreams[channelId] = { videos: dataEntry.liveStreams, timestamp: dataEntry.liveStreamsTimestamp }
+          liveStreams[channelId] = { videos: dataEntry.liveStreams, timestamp: toDate(dataEntry.liveStreamsTimestamp) }
           hasData = true
         }
         if (Array.isArray(dataEntry.shorts)) {
-          shorts[channelId] = { videos: dataEntry.shorts, timestamp: dataEntry.shortsTimestamp }
+          shorts[channelId] = { videos: dataEntry.shorts, timestamp: toDate(dataEntry.shortsTimestamp) }
           hasData = true
         }
         if (Array.isArray(dataEntry.communityPosts)) {
-          communityPosts[channelId] = { posts: dataEntry.communityPosts, timestamp: dataEntry.communityPostsTimestamp }
+          communityPosts[channelId] = { posts: dataEntry.communityPosts, timestamp: toDate(dataEntry.communityPostsTimestamp) }
           hasData = true
         }
 
@@ -167,14 +177,14 @@ const mutations = {
     const existingObject = state.videoCache[channelId]
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
-    newObject.timestamp = timestamp
+    newObject.timestamp = toDate(timestamp)
     state.videoCache[channelId] = newObject
   },
   updateShortsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.shortsCache[channelId]
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
-    newObject.timestamp = timestamp
+    newObject.timestamp = toDate(timestamp)
     state.shortsCache[channelId] = newObject
   },
   updateShortsCacheWithChannelPageShorts(state, { channelId, entries }) {
@@ -206,14 +216,14 @@ const mutations = {
     const existingObject = state.liveCache[channelId]
     const newObject = existingObject ?? { videos: null }
     if (entries != null) { newObject.videos = entries }
-    newObject.timestamp = timestamp
+    newObject.timestamp = toDate(timestamp)
     state.liveCache[channelId] = newObject
   },
   updatePostsCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {
     const existingObject = state.postsCache[channelId]
     const newObject = existingObject ?? { posts: null }
     if (entries != null) { newObject.posts = entries }
-    newObject.timestamp = timestamp
+    newObject.timestamp = toDate(timestamp)
     state.postsCache[channelId] = newObject
   },
 
