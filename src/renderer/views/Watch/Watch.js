@@ -1576,7 +1576,7 @@ export default defineComponent({
           .map(({ description, segment: [startSeconds, endSeconds] }) => {
             return {
               title: description.trim(),
-              timestamp: formatDurationAsTimestamp(startSeconds),
+              timestamp: formatDurationAsTimestamp(Math.round(startSeconds)),
               startSeconds,
               endSeconds
             }
