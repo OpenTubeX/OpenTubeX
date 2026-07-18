@@ -27,6 +27,15 @@
         :use-channels-hidden-preference="false"
       />
     </section>
+    <FtPrompt
+      v-if="showRefreshWarning"
+      :label="$t('Subscriptions.New Feed Refresh Warning Title')"
+      :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: activeSubscriptionIds.size })]"
+      :option-names="[$t('Yes'), $t('No')]"
+      :option-values="['refresh', 'cancel']"
+      autosize
+      @click="handleRefreshWarning"
+    />
   </SubscriptionsTabUi>
 </template>
 
@@ -35,12 +44,12 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
+import FtPrompt from './FtPrompt/FtPrompt.vue'
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
 import { isHistoryEntryWatched } from '../helpers/history'
-import { getRelativeTimeFromDate } from '../helpers/utils'
 import {
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
@@ -49,9 +58,11 @@ import {
 } from '../helpers/subscriptions'
 
 const { t } = useI18n()
+const LARGE_SUBSCRIPTION_COUNT = 125
 const isRefreshing = ref(false)
 const attemptedFetch = ref(false)
 const errorChannels = ref([])
+const showRefreshWarning = ref(false)
 
 const activeSubscriptionIds = computed(() => {
   return new Set(store.getters.getActiveProfile.subscriptions.map(channel => channel.id))
@@ -120,22 +131,20 @@ const isLoading = computed(() => {
 
 const hasNewContent = computed(() => newContent.value.length > 0)
 
-const lastRefreshTimestamp = computed(() => {
-  const timestamps = enabledFeeds.value.flatMap(({ cache }) => {
-    return Object.entries(cache)
-      .filter(([channelId]) => activeSubscriptionIds.value.has(channelId))
-      .map(([, cacheEntry]) => cacheEntry.timestamp?.getTime())
-      .filter(timestamp => Number.isFinite(timestamp))
-  })
-
-  return timestamps.length === 0 ? '' : getRelativeTimeFromDate(Math.min(...timestamps), true)
-})
-
-async function refresh() {
+function refresh() {
   if (isRefreshing.value || store.getters.getSubscriptionFeedRefreshInProgress) {
     return
   }
 
+  if (!store.getters.getUseRssFeeds && activeSubscriptionIds.value.size > LARGE_SUBSCRIPTION_COUNT) {
+    showRefreshWarning.value = true
+    return
+  }
+
+  refreshAllFeeds()
+}
+
+async function refreshAllFeeds() {
   isRefreshing.value = true
   attemptedFetch.value = true
   errorChannels.value = []
@@ -149,10 +158,18 @@ async function refresh() {
   }
 }
 
+function handleRefreshWarning(action) {
+  showRefreshWarning.value = false
+
+  if (action === 'refresh') {
+    refreshAllFeeds()
+  }
+}
+
 defineExpose({
   refresh,
   isLoading,
-  lastRefreshTimestamp,
+  lastRefreshTimestamp: '',
   nextAutoRefreshTimestamp: '',
   nextAutoRefreshTooltip: '',
   refreshTitle: computed(() => t('Subscriptions.New Content')),

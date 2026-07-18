@@ -185,6 +185,8 @@ Subscriptions:
   Refreshing Subscription Live Streams: Refreshing subscription live streams
   Refreshing Subscription Posts: Refreshing subscription posts
   New Content: New content
+  New Feed Refresh Warning Title: Refresh all subscription feeds?
+  New Feed Refresh Warning: Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
   New Since Last Refresh: New since last refresh
   Mark All as Seen: Mark all as seen
   No New Content: There is no new content.
