@@ -85,8 +85,10 @@ jobs:
       run: xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
       shell: bash
 
+    # Upload on flaky-but-green runs too, so first-attempt failures
+    # (e.g. YouTube bot checks before the fixture fallback) can be inspected.
     - name: Upload Playwright report
-      if: failure()
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
       with:
         name: playwright-report

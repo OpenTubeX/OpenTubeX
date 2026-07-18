@@ -25,6 +25,25 @@ const SHARED_RESOURCE_PATTERNS = [
   /\/sw\.js_data/
 ]
 
+/**
+ * Innertube `params` values are base64 protobufs that can contain a few
+ * session-variable bytes (e.g. the channel tab probes). Reduce them to
+ * their printable content (the stable discriminator, like "shorts") so
+ * recorded and replayed requests produce the same fixture key.
+ */
+function normalizeParams(value) {
+  if (typeof value !== 'string') {
+    return value
+  }
+  try {
+    const decoded = Buffer.from(decodeURIComponent(value), 'base64')
+    const printable = decoded.toString('latin1').match(/[\x20-\x7e]{3,}/g)
+    return printable ? printable.join('.') : value
+  } catch {
+    return value
+  }
+}
+
 function stableStringify(value) {
   if (Array.isArray(value)) {
     return `[${value.map(stableStringify).join(',')}]`
@@ -52,7 +71,9 @@ export function fixtureKey(url, postData) {
     }
   }
   const normalized = Object.fromEntries(
-    Object.entries(body).filter(([key]) => !VOLATILE_BODY_KEYS.has(key))
+    Object.entries(body)
+      .filter(([key]) => !VOLATILE_BODY_KEYS.has(key))
+      .map(([key, value]) => [key, key === 'params' ? normalizeParams(value) : value])
   )
   const hash = crypto.createHash('sha1').update(stableStringify(normalized)).digest('hex').slice(0, 12)
   return `${endpoint}-${hash}`
@@ -152,14 +173,19 @@ export async function setupInnertube(page, testInfo) {
         return route.fallback()
       }
 
-      const response = await route.fetch()
-      // Read the body before fulfilling; ignore races with test teardown -
-      // recording must never fail the test itself.
+      // Recording must never fail the test itself: late background
+      // requests can race test teardown, so tolerate disposed contexts.
+      let response
+      try {
+        response = await route.fetch()
+      } catch {
+        return route.abort().catch(() => {})
+      }
       let body = null
       if (response.ok()) {
         body = await response.body().catch(() => null)
       }
-      await route.fulfill({ response })
+      await route.fulfill({ response }).catch(() => {})
 
       if (body) {
         if (isSharedResource(url)) {

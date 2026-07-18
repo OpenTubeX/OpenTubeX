@@ -72,11 +72,24 @@ export async function launchApp(userDataDir) {
 
   // The E2E build lives in its own directory so a running `pnpm dev`
   // (which rebuilds dist/ in development mode) can't clobber it.
-  const electronApp = await electron.launch({
+  const launchOptions = {
     args: [path.join(repoRoot, 'dist-e2e', 'main.js'), '--ozone-platform=x11', '--mute-audio'],
     cwd: repoRoot,
     env
-  })
+  }
+
+  let electronApp
+  try {
+    electronApp = await electron.launch(launchOptions)
+  } catch (error) {
+    // ETXTBSY is a transient Linux race when parallel workers spawn the
+    // Electron binary at the same moment - retry once.
+    if (!String(error.message).includes('ETXTBSY')) {
+      throw error
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    electronApp = await electron.launch(launchOptions)
+  }
 
   const page = await electronApp.firstWindow()
 
