@@ -192,14 +192,7 @@ const filteredVideoList = computed(() => {
     })
   }
 
-  if (!showNewSubscriptionFeedIndicators.value) {
-    return videoList
-  }
-
-  return [
-    ...videoList.filter(entry => entry.isNewInSubscriptionFeed === true),
-    ...videoList.filter(entry => entry.isNewInSubscriptionFeed !== true)
-  ]
+  return videoList
 })
 
 const displayNewSubscriptionFeedIndicator = computed(() => {
