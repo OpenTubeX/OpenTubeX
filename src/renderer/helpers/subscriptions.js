@@ -28,6 +28,7 @@ const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
+const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 
 /**
  * Marks the leading entries before the first entry shared with the previous
@@ -124,6 +125,26 @@ function setSubscriptionRefreshProgress(percentage) {
   }))
 }
 
+async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
+  const results = new Array(channels.length)
+  let nextIndex = 0
+
+  const fetchNext = async () => {
+    while (nextIndex < channels.length) {
+      const index = nextIndex++
+      results[index] = await fetchChannel(channels[index])
+
+      // Let input and navigation tasks run between parsing/cache updates.
+      await new Promise(resolve => setTimeout(resolve, 0))
+    }
+  }
+
+  const workerCount = Math.min(SUBSCRIPTION_FETCH_CONCURRENCY, channels.length)
+  await Promise.all(Array.from({ length: workerCount }, fetchNext))
+
+  return results.flat()
+}
+
 async function fetchSubscriptionsInBatches(channels, fetchChannel) {
   const results = []
 
@@ -133,8 +154,7 @@ async function fetchSubscriptionsInBatches(channels, fetchChannel) {
     }
 
     const batch = channels.slice(index, index + SUBSCRIPTION_FETCH_BATCH_SIZE)
-    const batchResults = await Promise.all(batch.map(fetchChannel))
-    results.push(...batchResults.flat())
+    results.push(...await fetchSubscriptionsConcurrently(batch, fetchChannel))
   }
 
   return results
