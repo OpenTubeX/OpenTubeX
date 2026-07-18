@@ -480,6 +480,10 @@ export default defineComponent({
         // scroll position, so restore the mini-player state now that it is active.
         updateScrollMiniPlayer()
       } else {
+        if (controlPanelLayoutFrame !== null) {
+          cancelAnimationFrame(controlPanelLayoutFrame)
+          controlPanelLayoutFrame = null
+        }
         handleTemporaryPlaybackRateFocusLoss()
         if (scrollMiniPlayerActive.value) {
           deactivateScrollMiniPlayer()
@@ -2839,6 +2843,13 @@ export default defineComponent({
 
     /** @param {HTMLElement} controlPanel */
     function scheduleControlPanelLayout(controlPanel) {
+      // Background tabs remain mounted but are hidden with display:none. Do not
+      // let their zero-size control bars enter a resize/mutation feedback loop.
+      // The active-tab watcher schedules a fresh measurement when presented.
+      if (!isActiveTab.value) {
+        return
+      }
+
       if (controlPanelLayoutFrame !== null) {
         cancelAnimationFrame(controlPanelLayoutFrame)
       }
@@ -2914,6 +2925,11 @@ export default defineComponent({
       const width = container.value?.getBoundingClientRect().width ?? 0
       if (width > 0) {
         onlyUseOverFlowMenu.value = width <= USE_OVERFLOW_MENU_WIDTH_THRESHOLD
+
+        const controlPanel = container.value?.querySelector('.shaka-controls-button-panel')
+        if (controlPanel instanceof HTMLElement) {
+          scheduleControlPanelLayout(controlPanel)
+        }
       }
     }
 

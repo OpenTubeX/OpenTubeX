@@ -34,3 +34,20 @@ test('playback speed is isolated per tab', async ({ page, innertube }) => {
   await expect(firstVideo).toBeVisible()
   expect(await firstVideo.evaluate((el) => el.playbackRate)).toBe(1)
 })
+
+// Regression: measuring the hidden player's control bar could enter a
+// resize/mutation loop and make the renderer stop processing all input.
+test('switching away from a playing video keeps the renderer responsive', async ({ page, innertube }) => {
+  test.skip(!innertube.playback, 'needs real media streams')
+  test.slow()
+
+  await openVideoInActiveTab(page, VIDEO_ONE)
+
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+  await page.keyboard.press('Control+t')
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+  await page.locator(sel.tabs).first().click()
+  await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+})
