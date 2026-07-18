@@ -5,11 +5,15 @@ test.describe('tab bar', () => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+    await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
+    await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
   })
 
   test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
     await page.keyboard.press('Control+t')
     await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
+    await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
 
     await page.keyboard.press('Control+w')
     await expect(page.locator(sel.tabs)).toHaveCount(1)
@@ -70,6 +74,19 @@ test.describe('tab bar', () => {
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+  })
+})
+
+test.describe('localized tab titles', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+
+  test('new subscription tabs use the loaded locale', async ({ page }) => {
+    await expect(page.locator(sel.activeTab)).toContainText('Abos')
+
+    await page.keyboard.press('Control+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.activeTab)).toContainText('Abos')
+    await expect(page.locator(sel.activeTab)).not.toContainText(/\/subscriptions|Subscriptions\.Subscriptions/)
   })
 })
 

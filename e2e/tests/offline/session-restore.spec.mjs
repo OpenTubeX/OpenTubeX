@@ -10,7 +10,7 @@ const STALE_WATCH_URL = 'app://bundle/index.html#/watch/jNQXAC9IVRw?oneTimeTimes
 
 test.use({
   seed: {
-    settings: { startupBehavior: 'loadLastActiveTab' },
+    settings: { currentLocale: 'de-DE', startupBehavior: 'loadLastActiveTab' },
     tabSessions: [
       {
         _id: 'e2e-window-session',
@@ -19,12 +19,12 @@ test.use({
             {
               id: SETTINGS_TAB_ID,
               url: 'app://bundle/index.html#/settings',
-              title: 'Settings'
+              title: 'Einstellungen'
             },
             {
               id: HISTORY_TAB_ID,
               url: 'app://bundle/index.html#/history',
-              title: 'History'
+              title: 'Verlauf'
             },
             {
               id: WATCH_TAB_ID,
@@ -54,8 +54,8 @@ async function readSavedSession(userDataDir) {
 test('restores tab order, titles, active route, and lazy state across restarts', async ({ app, page }) => {
   const tabs = page.locator(sel.tabs)
   await expect(tabs).toHaveCount(3)
-  await expect(tabs.nth(0)).toContainText('Settings')
-  await expect(tabs.nth(1)).toContainText('History')
+  await expect(tabs.nth(0)).toContainText('Einstellungen')
+  await expect(tabs.nth(1)).toContainText('Verlauf')
   await expect(tabs.nth(2)).toContainText('Saved video')
   await expect(tabs.nth(1)).toHaveClass(/active/)
   await expect(tabs.nth(0)).toHaveClass(/unloaded/)
@@ -72,11 +72,15 @@ test('restores tab order, titles, active route, and lazy state across restarts',
   await tabs.nth(0).click()
   await expect(page).toHaveURL(/#\/settings/)
   await expect(tabs.nth(0)).toHaveClass(/active/)
+  await expect(tabs.nth(0)).toContainText('Einstellungen')
 
   ;({ page } = await app.relaunch())
   const restoredTabs = page.locator(sel.tabs)
   await expect(restoredTabs).toHaveCount(3)
   await expect(restoredTabs.nth(0)).toHaveClass(/active/)
+  await expect(restoredTabs.nth(0)).toContainText('Einstellungen')
+  await expect(restoredTabs.nth(1)).toContainText('Verlauf')
+  await expect(restoredTabs.filter({ hasText: /Settings\.Settings|History\.History/ })).toHaveCount(0)
   await expect(page).toHaveURL(/#\/settings/)
   await expect(restoredTabs.nth(1)).toHaveClass(/unloaded/)
   await expect(restoredTabs.nth(2)).toHaveClass(/unloaded/)

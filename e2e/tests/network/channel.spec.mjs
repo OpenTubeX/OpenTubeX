@@ -21,6 +21,8 @@ test.describe('channel page', () => {
     await videosTab.click()
     await expect(videosTab).toHaveAttribute('aria-selected', 'true')
     await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg\/videos/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
     expect(await page.evaluate(() => history.length)).toBe(historyLength)
 
     await page.locator(sel.backButton).click()
