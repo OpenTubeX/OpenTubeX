@@ -54,6 +54,36 @@ test.describe('watch history', () => {
   })
 })
 
+test.describe('history cleanup', () => {
+  test.use({
+    seed: {
+      history: [
+        historyEntry('rrrrrrrrrrr', 'Recent video', Date.now() - 1000),
+        historyEntry('ooooooooooo', 'Old video', Date.now() - 100 * 86_400_000)
+      ]
+    }
+  })
+
+  test('deletes only entries older than the selected cutoff', async ({ app, page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('Recent video')).toBeVisible()
+    await expect(page.getByText('Old video')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+    await page.locator('.cleanupPromptContent select').selectOption('30')
+    await page.getByRole('button', { name: 'Delete', exact: true }).click()
+
+    await expect(page.getByText('Old video')).toBeHidden()
+    await expect(page.getByText('Recent video')).toBeVisible()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return records.filter((record) => record._id === 'ooooooooooo').at(-1)?.$$deleted
+    }).toBe(true)
+  })
+})
+
 test.describe('legacy watch history', () => {
   const timeWatched = Date.now() - 1000
 
