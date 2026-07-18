@@ -314,6 +314,13 @@
   position: relative;
 }
 
+:deep(.shaka-tooltips-on > .shaka-mute-button:hover::after),
+:deep(.shaka-tooltips-on > .shaka-mute-button:focus-visible::after),
+:deep(.shaka-tooltips-on > .shaka-mute-button:active::after) {
+  left: 0;
+  transform: none;
+}
+
 :deep(.ft-mute-toggle-slash) {
   position: absolute;
   inset-block-start: 50%;
