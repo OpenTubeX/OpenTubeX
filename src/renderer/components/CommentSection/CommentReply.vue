@@ -58,6 +58,9 @@
         >
         <span class="commentDate">
           {{ reply.time }}
+          <template v-if="reply.isEdited">
+            {{ $t("Comments.Edited") }}
+          </template>
         </span>
         <button
           type="button"

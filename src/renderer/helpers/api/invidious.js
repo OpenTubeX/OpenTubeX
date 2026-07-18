@@ -446,6 +446,7 @@ export async function invidiousGetVideoInformation(videoId) {
  * @property {boolean} isMember
  * @property {string} memberIconUrl
  * @property {string} time
+ * @property {boolean} isEdited
  */
 /** @typedef {{commentCount: number, videoId: string, continuation: string?, comments: InvidiousComment[]}} InvidiousCommentResponse */
 
@@ -631,7 +632,8 @@ function parseInvidiousCommentData(response) {
       isHearted: comment.creatorHeart !== undefined,
       isMember: comment.isSponsor,
       memberIconUrl: youtubeImageUrlToInvidious(comment.sponsorIconUrl),
-      time: getRelativeTimeFromDate(comment.published * 1000, false)
+      time: getRelativeTimeFromDate(comment.published * 1000, false),
+      isEdited: comment.isEdited
     }
   })
 }

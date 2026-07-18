@@ -187,6 +187,9 @@
           >
           <span class="commentDate">
             {{ comment.time }}
+            <template v-if="comment.isEdited">
+              {{ $t("Comments.Edited") }}
+            </template>
           </span>
           <button
             type="button"

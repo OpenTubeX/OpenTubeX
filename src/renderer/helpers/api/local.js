@@ -2184,6 +2184,7 @@ export function mapLocalLegacyFormat(format) {
  * @property {LocalComment[]} replies
  * @property {string} memberIconUrl
  * @property {string} time
+ * @property {boolean} isEdited
  * @property {number} likes
  * @property {number} numReplies
  */
@@ -2224,6 +2225,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     replies: [],
     memberIconUrl: comment.is_member ? comment.member_badge.url : '',
     time: getRelativeTimeFromDate(calculatePublishedDate(comment.published_time.replace('(edited)', '').trim()), false),
+    isEdited: comment.published_time.includes('(edited)'),
     likes: comment.like_count,
     numReplies: parseLocalSubscriberCount(comment.reply_count)
   }
