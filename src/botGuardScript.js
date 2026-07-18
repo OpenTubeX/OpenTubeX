@@ -64,7 +64,7 @@ export default async function (videoId, context) {
   const webPoSignalOutput = []
   const botGuardResponse = await botGuard.snapshot({ webPoSignalOutput }, 10_000)
 
-  const integrityTokenResponse = await fetch(buildURL('GenerateIT', true), {
+  const integrityTokenResponse = await fetch(buildURL('GenerateIT', false), {
     method: 'POST',
     headers: {
       'content-type': 'application/json+protobuf',
@@ -76,11 +76,18 @@ export default async function (videoId, context) {
 
   const response = await integrityTokenResponse.json()
 
-  if (typeof response[0] !== 'string') {
+  const [integrityToken, estimatedTtlSecs, mintRefreshThreshold, websafeFallbackToken] = response
+
+  if (typeof integrityToken !== 'string') {
     throw new Error('Could not get integrity token')
   }
 
-  const integrityTokenBasedMinter = await BG.WebPoMinter.create({ integrityToken: response[0] }, webPoSignalOutput)
+  const integrityTokenBasedMinter = await BG.WebPoMinter.create({
+    integrityToken,
+    estimatedTtlSecs,
+    mintRefreshThreshold,
+    websafeFallbackToken
+  }, webPoSignalOutput)
 
   return await integrityTokenBasedMinter.mintAsWebsafeString(videoId)
 }
