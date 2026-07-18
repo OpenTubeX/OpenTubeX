@@ -287,10 +287,11 @@ export async function openExternalLink(url) {
  * @param {boolean} [params.doCreateNewWindow] set to true to open a new window (Shift+click)
  * @param {boolean} [params.doCreateNewTab] set to true to open in a new tab (Ctrl/Cmd+click or middle-click)
  * @param {boolean} [params.makeActive=true] set to false to open tab in background (only used when doCreateNewTab is true)
+ * @param {string} [params.title] initial title for a newly created tab
  * @param {object} [params.query] the query params to use (optional)
  * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, searchQueryText = null }) {
+export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, title = undefined, searchQueryText = null }) {
   if (process.env.IS_ELECTRON) {
     if (doCreateNewTab) {
       // Open in new tab
@@ -301,6 +302,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       window.ftElectron.tabs.create({
         route,
         query,
+        title,
         makeActive,
         inheritColorFromOpener: true,
         openerTabId: getTabNavigationService().getPresentedTabId(),

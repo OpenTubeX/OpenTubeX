@@ -959,6 +959,7 @@ function handleChannelLinkClick(event) {
 
   openInternalPath({
     path: `/channel/${channelId.value}`,
+    title: channelName.value,
     doCreateNewWindow: event.shiftKey,
     doCreateNewTab: !event.shiftKey,
     makeActive: false

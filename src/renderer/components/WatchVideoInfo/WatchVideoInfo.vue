@@ -107,6 +107,8 @@
             <component
               :is="enableChannelLinks ? 'RouterLink' : 'div'"
               :to="`/channel/${channelId}`"
+              @click="handleChannelLinkClick"
+              @auxclick="handleChannelLinkClick"
             >
               <img
                 :src="channelThumbnail"
@@ -126,6 +128,8 @@
                 :class="enableChannelLinks ? '' : 'initialCursor'"
                 class="channelName"
                 dir="auto"
+                @click="handleChannelLinkClick"
+                @auxclick="handleChannelLinkClick"
               >
                 {{ channelName }}
               </component>
@@ -240,7 +244,7 @@ import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 
 import store from '../../store'
 
-import { formatNumber, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
+import { formatNumber, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
@@ -706,6 +710,27 @@ function removeFromQuickBookmarkPlaylist() {
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
+
+function handleChannelLinkClick(event) {
+  if (!USING_ELECTRON || !enableChannelLinks.value) {
+    return
+  }
+
+  const isMiddleClick = event.type === 'auxclick' && event.button === 1
+  const isModifiedClick = event.type === 'click' && (event.ctrlKey || event.metaKey)
+  if (!isMiddleClick && !isModifiedClick) {
+    return
+  }
+
+  event.preventDefault()
+  openInternalPath({
+    path: `/channel/${props.channelId}`,
+    title: props.channelName,
+    doCreateNewWindow: event.shiftKey,
+    doCreateNewTab: !event.shiftKey,
+    makeActive: !isMiddleClick
+  })
+}
 </script>
 
 <style scoped src="./WatchVideoInfo.css" />
