@@ -42,8 +42,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/d4d3cb45-b227-4521-a88b-2ff14051d0a6" />
 <br><img height="150" alt="image" src="https://github.com/user-attachments/assets/982ef08a-7f53-4efb-9ebc-c49328e306b9" />
 
-- Chapter tooltips on seekbar
+- Improved chapter tooltips on the seekbar and chapter display as an overlay
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/c6bed647-e872-458d-a4d6-2be58f4c17a0" />
+<img width="198" height="87" alt="image" src="https://github.com/user-attachments/assets/cc653a3c-84b1-4541-8225-067d2c16a68e" />
+<br />
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/b95e76fd-c5a7-44f2-b1ed-9a0733ecf016" />
 
 - Option to prevent title/description translations by YouTube
 <img width="259" height="156" alt="image" src="https://github.com/user-attachments/assets/4713b8eb-9933-45cb-81ca-8db950ebec71" />
@@ -97,14 +100,14 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="246" height="226" alt="image" src="https://github.com/user-attachments/assets/31dfc690-b8a3-4ffd-994e-a53e59d0e71f" />
 
 - Watch time statistics with daily and weekly charts
-<img width="1762" height="546" alt="image" src="https://github.com/user-attachments/assets/61942468-a351-4a8c-813e-a7504828121f" />
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/61942468-a351-4a8c-813e-a7504828121f" />
 
 - Configurable extra thumbnail action button
 <img width="261" height="175" alt="image" src="https://github.com/user-attachments/assets/2d7d7549-db79-4d9d-9063-77124d3a9750" />
 <img width="94" height="43" alt="image" src="https://github.com/user-attachments/assets/1f74350c-11cc-4515-8e0e-9abedcebaa71" />
 
 - Additional video metadata, including AI-generated content labels, collaborators, categories, relative publication dates and comment counts
-<img width="510" height="330" alt="image" src="https://github.com/user-attachments/assets/90cfb4b3-1d26-438d-86de-c1be2e8858ce" />
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/90cfb4b3-1d26-438d-86de-c1be2e8858ce" />
 <br />
 <img width="488" height="142" alt="image" src="https://github.com/user-attachments/assets/ceaa25b3-2157-4904-80ad-619426862c1d" />
 <br />
@@ -118,8 +121,40 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - Import subscriptions and watch history from [LibreTube](https://github.com/libre-tube/LibreTube)
 
 - Optional confirmation before closing the app
-<img width="457" height="237" alt="image" src="https://github.com/user-attachments/assets/a5e37f65-62ba-4fce-bc43-d408f7f17ce7" />
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/a5e37f65-62ba-4fce-bc43-d408f7f17ce7" />
 
+- Transcript panel
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/f69a2074-746d-4afe-bee5-9828040f048e" />
+
+- Fast-forward through silence (needs to be enabled via Player settings)
+<img width="264" height="59" alt="image" src="https://github.com/user-attachments/assets/7886468c-0f08-4ebb-9cfd-2ce07a4230f5" />
+
+- Support for YouTube end-screen annotations
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/53bee38f-6221-4463-b474-d9e5f6781d2a" />
+
+- Ambient Mode for the player
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/3d14f6a5-0ded-4247-9a89-ba71e005b2c3" />
+
+- Configurable thumbnail sizes
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/47f102b3-5884-4219-85ce-552e631bf67c" />
+
+- Sleep timer
+<img width="242" height="48" alt="image" src="https://github.com/user-attachments/assets/54fcc8cf-4bc4-49f7-b803-0340c9c218c6" />
+<br />
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/15440d77-f504-4982-a026-957ed13a07a9" />
+
+- Automatic history retention cleanup and manual deletion of old entries
+<img width="552" height="90" alt="image" src="https://github.com/user-attachments/assets/4e91ec53-38e3-43cd-9262-af6a3a1589e7" />
+<br />
+<img height="200" alt="image" src="https://github.com/user-attachments/assets/a7130fc6-d440-4857-a73e-f8d020c5c543" />
+
+- Hold the left mouse button or <kbd>Space</kbd> to temporarily double the playback speed
+<img width="292" height="35" alt="image" src="https://github.com/user-attachments/assets/1cebcba6-4337-4f3b-b98d-b44eba883544" />
+<br />
+<img width="183" height="97" alt="image" src="https://github.com/user-attachments/assets/d978403f-f61f-4768-9bb5-5669d898a72e" />
+
+- Caption appearance controls and a preferred caption language setting
+<img height="250" alt="image" src="https://github.com/user-attachments/assets/0098caa1-ccd6-40d5-bcb8-5daed8e0e15a" />
 
 ## Screenshots
 | The main OpenTubeX window                                                                         |
