@@ -71,6 +71,14 @@ export class TabNavigationService {
       return false
     }
 
+    const resolvedTargetRoute = this.resolve(targetTab.route)
+    const translatedTitle = typeof resolvedTargetRoute.meta?.title === 'string'
+      ? translateWindowTitle(resolvedTargetRoute.meta.title)
+      : null
+    if (translatedTitle !== null) {
+      this.setTitle(tabId, translatedTitle)
+    }
+
     if (targetTab.loadState === 'mounting') {
       const mounted = await Promise.race([
         tabRuntimeRegistry.waitForMount(tabId, targetTab.mountRevision),
