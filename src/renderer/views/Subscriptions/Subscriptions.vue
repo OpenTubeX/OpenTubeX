@@ -27,108 +27,120 @@
             @click="refreshCurrentTab"
           />
         </div>
-        <FtFlexBox
-          class="tabs"
-          role="tablist"
-          :aria-label="$t('Subscriptions.Subscriptions Tabs')"
-        >
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="!hideSubscriptionsVideos"
-            ref="videosTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'videos'"
-            aria-controls="subscriptionsPanel"
-            :tabindex="currentTab === 'videos' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'videos' }"
-            @click="changeTab('videos')"
-            @keydown.space.enter.prevent="changeTab('videos')"
-            @keydown.left.right="focusTab($event, 'videos')"
+        <div class="tabsRow">
+          <FtFlexBox
+            class="tabs"
+            role="tablist"
+            :aria-label="$t('Subscriptions.Subscriptions Tabs')"
           >
-            <FontAwesomeIcon
-              :icon="['fa', 'video']"
-              class="subscriptionIcon"
-            />
-            {{ $t("Global.Videos") }}
-            <FtLoader
-              v-if="refreshingFeedTab === 'videos'"
-              class="tabLoadingIndicator"
-            />
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="!hideSubscriptionsShorts"
-            ref="shortsTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'shorts'"
-            aria-controls="subscriptionsPanel"
-            :tabindex="currentTab === 'shorts' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'shorts' }"
-            @click="changeTab('shorts')"
-            @keydown.space.enter.prevent="changeTab('shorts')"
-            @keydown.left.right="focusTab($event, 'shorts')"
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="!hideSubscriptionsVideos"
+              ref="videosTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'videos'"
+              aria-controls="subscriptionsPanel"
+              :tabindex="currentTab === 'videos' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'videos' }"
+              @click="changeTab('videos')"
+              @keydown.space.enter.prevent="changeTab('videos')"
+              @keydown.left.right="focusTab($event, 'videos')"
+            >
+              <FontAwesomeIcon
+                :icon="['fa', 'video']"
+                class="subscriptionIcon"
+              />
+              {{ $t("Global.Videos") }}
+              <FtLoader
+                v-if="refreshingFeedTab === 'videos'"
+                class="tabLoadingIndicator"
+              />
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="!hideSubscriptionsShorts"
+              ref="shortsTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'shorts'"
+              aria-controls="subscriptionsPanel"
+              :tabindex="currentTab === 'shorts' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'shorts' }"
+              @click="changeTab('shorts')"
+              @keydown.space.enter.prevent="changeTab('shorts')"
+              @keydown.left.right="focusTab($event, 'shorts')"
+            >
+              <FontAwesomeIcon
+                :icon="['fa', 'clapperboard']"
+                class="subscriptionIcon"
+              />
+              {{ $t("Global.Shorts") }}
+              <FtLoader
+                v-if="refreshingFeedTab === 'shorts'"
+                class="tabLoadingIndicator"
+              />
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="!hideSubscriptionsLive"
+              ref="liveTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'live'"
+              aria-controls="subscriptionsPanel"
+              :tabindex="currentTab === 'live' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'live' }"
+              @click="changeTab('live')"
+              @keydown.space.enter.prevent="changeTab('live')"
+              @keydown.left.right="focusTab($event, 'live')"
+            >
+              <FontAwesomeIcon
+                :icon="['fa', 'tower-broadcast']"
+                class="subscriptionIcon"
+              />
+              {{ $t("Global.Live") }}
+              <FtLoader
+                v-if="refreshingFeedTab === 'live'"
+                class="tabLoadingIndicator"
+              />
+            </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('community')"
+              ref="communityTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'community'"
+              aria-controls="subscriptionsPanel"
+              :tabindex="currentTab === 'community' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'community' }"
+              @click="changeTab('community')"
+              @keydown.space.enter.prevent="changeTab('community')"
+              @keydown.left.right="focusTab($event, 'community')"
+            >
+              <FontAwesomeIcon
+                :icon="['fa', 'message']"
+                class="subscriptionIcon"
+              />
+              {{ $t("Global.Posts") }}
+              <FtLoader
+                v-if="refreshingFeedTab === 'posts'"
+                class="tabLoadingIndicator"
+              />
+            </div>
+          </FtFlexBox>
+          <button
+            v-if="currentTab !== null && tabHasNewContent(currentTab)"
+            class="markAllSeenButton"
+            type="button"
+            :disabled="markingSeenTab !== null || subscriptionFeedRefreshInProgress"
+            @click="markAllAsSeen(currentTab)"
           >
-            <FontAwesomeIcon
-              :icon="['fa', 'clapperboard']"
-              class="subscriptionIcon"
-            />
-            {{ $t("Global.Shorts") }}
-            <FtLoader
-              v-if="refreshingFeedTab === 'shorts'"
-              class="tabLoadingIndicator"
-            />
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="!hideSubscriptionsLive"
-            ref="liveTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'live'"
-            aria-controls="subscriptionsPanel"
-            :tabindex="currentTab === 'live' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'live' }"
-            @click="changeTab('live')"
-            @keydown.space.enter.prevent="changeTab('live')"
-            @keydown.left.right="focusTab($event, 'live')"
-          >
-            <FontAwesomeIcon
-              :icon="['fa', 'tower-broadcast']"
-              class="subscriptionIcon"
-            />
-            {{ $t("Global.Live") }}
-            <FtLoader
-              v-if="refreshingFeedTab === 'live'"
-              class="tabLoadingIndicator"
-            />
-          </div>
-          <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
-          <div
-            v-if="visibleTabs.includes('community')"
-            ref="communityTab"
-            class="tab"
-            role="tab"
-            :aria-selected="currentTab === 'community'"
-            aria-controls="subscriptionsPanel"
-            :tabindex="currentTab === 'community' ? 0 : -1"
-            :class="{ selectedTab: currentTab === 'community' }"
-            @click="changeTab('community')"
-            @keydown.space.enter.prevent="changeTab('community')"
-            @keydown.left.right="focusTab($event, 'community')"
-          >
-            <FontAwesomeIcon
-              :icon="['fa', 'message']"
-              class="subscriptionIcon"
-            />
-            {{ $t("Global.Posts") }}
-            <FtLoader
-              v-if="refreshingFeedTab === 'posts'"
-              class="tabLoadingIndicator"
-            />
-          </div>
-        </FtFlexBox>
+            <FontAwesomeIcon :icon="['fas', 'check']" />
+            {{ $t('Subscriptions.Mark All as Seen') }}
+          </button>
+        </div>
         <div
           v-if="currentTabRefreshing"
           class="tabsProgressBar"
@@ -357,6 +369,57 @@ const currentTabPanel = computed(() => {
       return null
   }
 })
+
+const showNewSubscriptionFeedIndicators = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators
+})
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'community'} tab
+ */
+function tabHasNewContent(tab) {
+  if (!showNewSubscriptionFeedIndicators.value) {
+    return false
+  }
+
+  const cache = tab === 'videos'
+    ? store.getters.getVideoCache
+    : tab === 'shorts'
+      ? store.getters.getShortsCache
+      : tab === 'live'
+        ? store.getters.getLiveCache
+        : store.getters.getPostsCache
+  const entriesKey = tab === 'community' ? 'posts' : 'videos'
+
+  return activeSubscriptionList.value.some(channel => {
+    return cache[channel.id]?.[entriesKey]?.some(entry => entry.isNewInSubscriptionFeed === true)
+  })
+}
+
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
+const markingSeenTab = ref(null)
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'community'} tab
+ */
+async function markAllAsSeen(tab) {
+  if (markingSeenTab.value !== null) {
+    return
+  }
+
+  markingSeenTab.value = tab
+  try {
+    await store.dispatch(
+      'markSubscriptionEntriesAsSeen',
+      {
+        tab: tab === 'community' ? 'posts' : tab,
+        channelIds: activeSubscriptionList.value.map(channel => channel.id)
+      }
+    )
+  } finally {
+    markingSeenTab.value = null
+  }
+}
 
 const currentAutoRefresh = computed(() => {
   let timestamp

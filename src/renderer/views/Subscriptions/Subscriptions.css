@@ -40,6 +40,32 @@
   margin: 0;
 }
 
+.markAllSeenButton {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--primary-color);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.85em;
+  gap: 6px;
+  padding-block: 5px;
+  padding-inline: 7px;
+  white-space: nowrap;
+}
+
+.markAllSeenButton:hover,
+.markAllSeenButton:focus-visible {
+  background-color: var(--side-nav-hover-color);
+}
+
+.markAllSeenButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .headerRefreshWidget {
   min-inline-size: min(100%, 360px);
 }
@@ -48,11 +74,19 @@
   color: var(--tertiary-text-color);
 }
 
+.tabsRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 10px -3px;
+}
+
 .tabs {
-  inline-size: 100%;
+  inline-size: auto;
   justify-content: flex-start;
   gap: 4px 10px;
-  margin-block: 10px -3px;
+  margin-block: 0;
   color: var(--tertiary-text-color);
 }
 

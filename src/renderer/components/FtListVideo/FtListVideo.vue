@@ -945,8 +945,10 @@ const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 const shouldShowCollaboratorsButton = computed(() => !!props.data.hasCollaborators && channelName.value !== null)
 
 function handleWatchPageLinkClick(event) {
+  markSubscriptionVideoAsSeen()
+
   if (externalPlayerIsDefaultViewingMode.value) {
-    handleExternalPlayer()
+    openInExternalPlayer()
     return
   }
 
@@ -1038,7 +1040,18 @@ function toggleDeArrow() {
   }
 }
 
+function markSubscriptionVideoAsSeen() {
+  if (props.data.isNewInSubscriptionFeed === true && id.value) {
+    store.dispatch('markSubscriptionVideoAsSeen', id.value)
+  }
+}
+
 function handleExternalPlayer() {
+  markSubscriptionVideoAsSeen()
+  openInExternalPlayer()
+}
+
+function openInExternalPlayer() {
   emit('pause-player')
 
   const payload = {
