@@ -13,6 +13,13 @@
   align-items: center;
 }
 
+.toggleOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+}
+
 @media only screen and (width <= 800px) {
   .optionsRow {
     /* Switch to 2 rows from 2 columns */

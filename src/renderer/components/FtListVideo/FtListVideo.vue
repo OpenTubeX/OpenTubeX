@@ -377,6 +377,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
+  },
   alwaysShowAddToPlaylistButton: {
     type: Boolean,
     default: false,
@@ -765,7 +769,9 @@ const thumbnail = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 
-const addWatchedStyle = computed(() => isWatched.value && !inHistory.value)
+const addWatchedStyle = computed(() => {
+  return isWatched.value && (!inHistory.value || props.showWatchedStyleInHistory)
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)

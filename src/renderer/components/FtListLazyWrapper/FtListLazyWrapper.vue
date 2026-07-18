@@ -24,6 +24,7 @@
         :playlist-type="playlistType"
         :playlist-item-id="playlistItemId"
         :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
+        :show-watched-style-in-history="showWatchedStyleInHistory"
         :always-show-add-to-playlist-button="alwaysShowAddToPlaylistButton"
         :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
         :can-move-video-up="canMoveVideoUp"
@@ -99,6 +100,10 @@ const props = defineProps({
   showVideoWithLastViewedPlaylist: {
     type: Boolean,
     default: false
+  },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
   },
   useChannelsHiddenPreference: {
     type: Boolean,

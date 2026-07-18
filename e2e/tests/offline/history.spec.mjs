@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
-function historyEntry(videoId, title, timeWatched) {
+function historyEntry(videoId, title, timeWatched, isWatched = false) {
   return {
     _id: videoId,
     videoId,
@@ -15,7 +15,7 @@ function historyEntry(videoId, title, timeWatched) {
     viewCount: 1234,
     lengthSeconds: 60,
     watchProgress: 10,
-    isWatched: false,
+    isWatched,
     timeWatched,
     isLive: false,
     type: 'video'
@@ -25,7 +25,7 @@ function historyEntry(videoId, title, timeWatched) {
 test.use({
   seed: {
     history: [
-      historyEntry('aaaaaaaaaaa', 'First test video', Date.now() - 1000),
+      historyEntry('aaaaaaaaaaa', 'First test video', Date.now() - 1000, true),
       historyEntry('bbbbbbbbbbb', 'Second test video', Date.now() - 2000)
     ]
   }
@@ -51,6 +51,20 @@ test.describe('watch history', () => {
 
     await expect(page.getByText('Second test video')).toBeVisible()
     await expect(page.getByText('First test video')).toBeHidden()
+  })
+
+  test('shows watched indicators only while the history toggle is enabled', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const watchedIndicator = page.locator('.videoWatched')
+    const toggle = page.getByRole('checkbox', { name: 'Show Watched Indicators' })
+
+    await expect(toggle).not.toBeChecked()
+    await expect(watchedIndicator).toHaveCount(0)
+
+    await toggle.check()
+
+    await expect(watchedIndicator).toHaveText('Watched')
   })
 })
 

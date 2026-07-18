@@ -16,6 +16,7 @@
         :first-screen="!renderAllItemsLazily && index < 16"
         :layout="displayValue"
         :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
+        :show-watched-style-in-history="showWatchedStyleInHistory"
         :use-channels-hidden-preference="useChannelsHiddenPreference"
         :use-hide-upcoming-premieres-preference="useHideUpcomingPremieresPreference"
         :hide-forbidden-titles="hideForbiddenTitles"
@@ -94,6 +95,10 @@ const props = defineProps({
   showVideoWithLastViewedPlaylist: {
     type: Boolean,
     default: false
+  },
+  showWatchedStyleInHistory: {
+    type: Boolean,
+    default: false,
   },
   useChannelsHiddenPreference: {
     type: Boolean,
