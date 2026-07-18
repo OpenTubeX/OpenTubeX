@@ -131,7 +131,7 @@
             </div>
           </FtFlexBox>
           <button
-            v-if="currentTab !== null && tabHasNewContent(currentTab)"
+            v-if="currentTabHasVisibleNewContent"
             class="markAllSeenButton"
             type="button"
             :disabled="markingSeenTab !== null || subscriptionFeedRefreshInProgress"
@@ -374,27 +374,9 @@ const showNewSubscriptionFeedIndicators = computed(() => {
   return store.getters.getShowNewSubscriptionFeedIndicators
 })
 
-/**
- * @param {'videos' | 'shorts' | 'live' | 'community'} tab
- */
-function tabHasNewContent(tab) {
-  if (!showNewSubscriptionFeedIndicators.value) {
-    return false
-  }
-
-  const cache = tab === 'videos'
-    ? store.getters.getVideoCache
-    : tab === 'shorts'
-      ? store.getters.getShortsCache
-      : tab === 'live'
-        ? store.getters.getLiveCache
-        : store.getters.getPostsCache
-  const entriesKey = tab === 'community' ? 'posts' : 'videos'
-
-  return activeSubscriptionList.value.some(channel => {
-    return cache[channel.id]?.[entriesKey]?.some(entry => entry.isNewInSubscriptionFeed === true)
-  })
-}
+const currentTabHasVisibleNewContent = computed(() => {
+  return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasVisibleNewContent === true
+})
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
 const markingSeenTab = ref(null)

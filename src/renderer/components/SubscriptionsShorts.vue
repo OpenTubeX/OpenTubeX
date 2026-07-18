@@ -1,5 +1,6 @@
 <template>
   <SubscriptionsTabUi
+    ref="tabUi"
     :is-loading="isLoading"
     :video-list="videoList"
     :error-channels="errorChannels"
@@ -9,7 +10,7 @@
 </template>
 
 <script setup>
-import { computed, shallowRef, ref, watch, onBeforeUnmount, onMounted } from 'vue'
+import { computed, shallowRef, ref, watch, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -23,6 +24,7 @@ import {
 import { getRelativeTimeFromDate } from '../helpers/utils'
 
 const { locale, t } = useI18n()
+const tabUi = useTemplateRef('tabUi')
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
@@ -96,6 +98,8 @@ const lastShortRefreshTimestamp = computed(() => {
 const refreshTitle = computed(() => {
   return t('Global.Shorts')
 })
+
+const hasVisibleNewContent = computed(() => tabUi.value?.hasVisibleNewContent === true)
 
 const nextAutoRefreshTimestamp = computed(() => {
   const timestamp = store.getters.getSubscriptionShortsNextAutoRefreshTimestamp
@@ -253,6 +257,7 @@ defineExpose({
   lastRefreshTimestamp: lastShortRefreshTimestamp,
   nextAutoRefreshTimestamp,
   nextAutoRefreshTooltip,
-  refreshTitle
+  refreshTitle,
+  hasVisibleNewContent
 })
 </script>

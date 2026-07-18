@@ -121,6 +121,10 @@ const activeVideoList = computed(() => {
   }
 })
 
+const hasVisibleNewContent = computed(() => {
+  return activeVideoList.value.some(entry => entry.isNewInSubscriptionFeed === true)
+})
+
 const activeProfileHasSubscriptions = computed(() => {
   return store.getters.getActiveProfile.subscriptions.length > 0
 })
@@ -234,6 +238,8 @@ onBeforeUnmount(() => {
 function refresh() {
   emit('refresh')
 }
+
+defineExpose({ hasVisibleNewContent })
 </script>
 
 <style scoped src="./SubscriptionsTabUi.css" />
