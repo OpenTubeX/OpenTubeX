@@ -368,6 +368,15 @@ const relatedChannels = shallowRef([])
 const isArtistTopicChannel = ref(false)
 const isFamilyFriendly = ref(false)
 
+// Publish the resolved name only after channel loading finishes. This keeps a
+// late tab-mount or route projection from restoring the route placeholder and
+// also covers error responses that fall back to cached subscription details.
+watch([channelName, isLoading], ([name, loading]) => {
+  if (!loading && typeof name === 'string' && name.length > 0) {
+    setTabTitle(name)
+  }
+})
+
 // Cache the resolved profile picture so tab previews can fall back to it when no
 // screenshot has been captured for this channel's tab yet.
 watch(thumbnailUrl, (thumbnail) => {
@@ -724,10 +733,8 @@ async function getChannelLocal() {
       channelName_ = ageGate.channel_title
       channelThumbnailUrl = ageGate.avatar[0].url
 
-      channelName.value = channelName
+      channelName.value = channelName_
       thumbnailUrl.value = channelThumbnailUrl
-
-      setTabTitle(channelName_)
 
       store.dispatch('updateSubscriptionDetails', { channelThumbnailUrl, channelName: channelName_, channelId: id.value })
 
@@ -771,8 +778,6 @@ async function getChannelLocal() {
       tags_ = Array.from(new Set(tags_))
     }
     tags.value = tags_
-
-    setTabTitle(channelName_)
 
     if (subscriberText) {
       const subCount_ = parseLocalSubscriberCount(subscriberText)
@@ -987,7 +992,6 @@ async function getChannelInfoInvidious() {
     const channelName_ = response.author
     const channelId = response.authorId
     channelName.value = channelName_
-    setTabTitle(channelName_)
     id.value = channelId
     isFamilyFriendly.value = response.isFamilyFriendly
     subCount.value = response.subCount
