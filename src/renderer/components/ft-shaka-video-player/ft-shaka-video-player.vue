@@ -22,6 +22,12 @@
       aria-hidden="true"
     />
     <div
+      v-if="fullWindowEnabled"
+      class="fullWindowPlaceholder"
+      :style="{ height: `${fullWindowPlaceholderHeight}px` }"
+      aria-hidden="true"
+    />
+    <div
       v-if="scrollMiniPlayerActive"
       ref="scrollMiniPlaceholder"
       class="scrollMiniPlaceholder"

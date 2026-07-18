@@ -391,6 +391,7 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    const fullWindowPlaceholderHeight = ref(0)
     /** @type {Animation|null} */
     let fullWindowAnimation = null
     // The setFullWindow listener is only attached once the shaka UI is built. An
@@ -4311,7 +4312,7 @@ export default defineComponent({
         const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
         if (event.detail) {
-          window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+          fullWindowPlaceholderHeight.value = playerContainer.getBoundingClientRect().height
         }
 
         fullWindowEnabled.value = event.detail
@@ -6941,6 +6942,7 @@ export default defineComponent({
       copyChapterTimestamp,
 
       fullWindowEnabled,
+      fullWindowPlaceholderHeight,
       forceAspectRatio,
 
       showStats,
