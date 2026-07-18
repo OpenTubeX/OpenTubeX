@@ -614,7 +614,6 @@ const { t } = useI18n()
 
 const DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS = Object.freeze([
   { speed: 0.5, name: '' },
-  { speed: 0.75, name: '' },
   { speed: 1, name: '' },
   { speed: 1.25, name: '' },
   { speed: 1.5, name: '' },
@@ -623,7 +622,6 @@ const DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS = Object.freeze([
   { speed: 2.25, name: '' },
   { speed: 2.5, name: '' },
   { speed: 3, name: '' },
-  { speed: 3.5, name: '' },
 ])
 
 const QUICK_PLAYBACK_SPEED_DRAG_THRESHOLD_PX = 5

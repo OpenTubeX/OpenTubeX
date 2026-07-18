@@ -344,7 +344,7 @@ const state = {
   autoUpdateChannelPlaybackSpeeds: false,
   channelPlaybackSpeeds: '{}',
   useQuickPlaybackSpeedBar: false,
-  quickPlaybackSpeedBarOptions: '[{"speed":0.5,"name":""},{"speed":0.75,"name":""},{"speed":1,"name":""},{"speed":1.25,"name":""},{"speed":1.5,"name":""},{"speed":1.75,"name":""},{"speed":2,"name":""},{"speed":2.25,"name":""},{"speed":2.5,"name":""},{"speed":3,"name":""},{"speed":3.5,"name":""}]',
+  quickPlaybackSpeedBarOptions: '[{"speed":0.5,"name":""},{"speed":1,"name":""},{"speed":1.25,"name":""},{"speed":1.5,"name":""},{"speed":1.75,"name":""},{"speed":2,"name":""},{"speed":2.25,"name":""},{"speed":2.5,"name":""},{"speed":3,"name":""}]',
   rememberVideoQualityPerChannel: false,
   autoUpdateChannelVideoQualities: false,
   channelVideoQualities: '{}',
