@@ -151,6 +151,7 @@
           class="h3Title"
           dir="auto"
         >
+          <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
           {{ displayTitle }}
         </h3>
       </RouterLink>
@@ -309,6 +310,7 @@ import { useRoute } from 'vue-router'
 
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -796,6 +798,10 @@ const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getS
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showDistractionFreeTitles = computed(() => store.getters.getShowDistractionFreeTitles)
+
+const showNewSubscriptionFeedIndicator = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators && props.data.isNewInSubscriptionFeed === true
+})
 
 /** @type {import('vue').ComputedRef<string>} */
 const displayTitle = computed(() => {

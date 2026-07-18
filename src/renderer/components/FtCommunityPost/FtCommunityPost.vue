@@ -34,6 +34,7 @@
         class="authorName"
         dir="auto"
       >
+        <FtNewContentDot v-if="showNewSubscriptionFeedIndicator" />
         <router-link
           v-if="authorId && enableChannelLinks"
           :to="`/channel/${authorId}`"
@@ -168,6 +169,7 @@ import { computed, onMounted, useTemplateRef } from 'vue'
 import FtListVideo from '../FtListVideo/FtListVideo.vue'
 import FtListPlaylist from '../FtListPlaylist/FtListPlaylist.vue'
 import FtCommunityPoll from '../FtCommunityPoll/FtCommunityPoll.vue'
+import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
@@ -216,6 +218,10 @@ const hideVideo = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
+
+const showNewSubscriptionFeedIndicator = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators && props.data.isNewInSubscriptionFeed === true
+})
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
