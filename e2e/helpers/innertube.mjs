@@ -200,13 +200,20 @@ export async function setupInnertube(page, testInfo) {
     })
   }
 
-  return { record, replay }
+  return {
+    record,
+    replay,
+    // Media playback needs real googlevideo.com streams and is impossible
+    // in replay mode. Live tests detect the app's explicit IP-block error
+    // and skip only the affected playback assertion.
+    playback: !replay
+  }
 }
 
 /**
  * App test extended with an `innertube` fixture. Reference it in network
- * tests to get record/replay behaviour, and check `innertube.replay` to
- * skip assertions that need real media streams.
+ * tests to get record/replay behaviour; gate playback assertions on
+ * `innertube.playback` and data-hydration assertions on `innertube.replay`.
  */
 export const test = baseAppTest.extend({
   innertube: [async ({ app }, use, testInfo) => {

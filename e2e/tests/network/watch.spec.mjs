@@ -1,10 +1,9 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
+import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
-
-const activeTab = '.tabContent[aria-hidden="false"]'
 
 async function openVideo(page) {
   await page.locator(sel.searchInput).fill(VIDEO_URL)
@@ -21,26 +20,21 @@ test.describe('watch page', () => {
   })
 
   test('playback starts', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'needs real media streams')
+    test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
 
-    const video = page.locator(`${activeTab} video`)
-    await expect(video).toBeVisible({ timeout: 30_000 })
+    const video = await waitForPlaybackOrSkip(test, page)
     await expect
-      .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 45_000 })
+      .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 30_000 })
       .toBeGreaterThan(1)
   })
 
   // Regression: playback speed controls stopped working (1c958d468)
   test('keyboard shortcuts change the playback rate', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'needs real media streams')
+    test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
 
-    const video = page.locator(`${activeTab} video`)
-    await expect(video).toBeVisible({ timeout: 30_000 })
-    await expect
-      .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 45_000 })
-      .toBeGreaterThan(0)
+    const video = await waitForPlaybackOrSkip(test, page)
 
     await page.locator('body').press('p')
     await expect.poll(async () => await video.evaluate((el) => el.playbackRate)).toBeGreaterThan(1)

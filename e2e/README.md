@@ -40,9 +40,15 @@ replays recorded fixtures instead: Innertube requests are answered from
 
 Media streams (googlevideo.com) are not recorded, and full watch-page
 hydration needs the real API, so those assertions are guarded with
-`test.skip(innertube.replay, ...)` / `if (!innertube.replay)`. Replay mode
+`test.skip(...)` on `innertube.playback` / `innertube.replay`. Replay mode
 is a smoke layer: it still verifies search results, the channel page, and
 navigation against recorded Innertube data.
+
+Playback tests wait for either media playback or the app's explicit IP-block
+error. GitHub-hosted runners are commonly blocked from streaming media; in
+that case only the playback-dependent test is skipped with a clear reason.
+Other watch-page assertions continue against the live API, while unexpected
+player failures still fail normally.
 
 To (re-)record fixtures after YouTube-facing changes or for new tests:
 
