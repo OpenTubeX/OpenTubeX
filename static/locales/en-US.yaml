@@ -183,6 +183,7 @@ Subscriptions:
   Refreshing Subscription Shorts: Refreshing subscription shorts
   Refreshing Subscription Live Streams: Refreshing subscription live streams
   Refreshing Subscription Posts: Refreshing subscription posts
+  New Content: New
 More: More
 Channels:
   Channels: Channels
@@ -695,6 +696,7 @@ Settings:
     Subscription Settings: Subscription
     Fetch Feeds from RSS: Fetch Feeds from RSS
     Fetch Feed on Startup: Fetch Feed on Startup
+    Show New Content Indicators: Show New Content Indicators
     Auto Refresh Interval: Auto Refresh Interval
     Videos Auto Refresh Interval: Videos Auto Refresh Interval
     Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
@@ -1413,6 +1415,7 @@ Tooltips:
       but doesn't provide certain information like video duration, live status or posts
     Fetch Feed on Startup: When enabled, OpenTubeX will automatically fetch
       your subscription feed on startup and when a new window is opened.
+    Show New Content Indicators: Shows a small labeled line separating subscription feed items that were not present during the previous fetch.
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Theme Settings:
     Hide Profile Selector in Header: Hides the profile selector from the top bar. The profile selector will be shown at the top of the Subscribed Channels page instead.

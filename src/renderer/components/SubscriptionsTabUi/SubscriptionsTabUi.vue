@@ -44,6 +44,7 @@
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
+      :show-new-subscription-feed-indicator="displayNewSubscriptionFeedIndicator"
     />
     <FtAutoLoadNextPageWrapper
       v-if="activeVideoList.length > 0 && videoList.length > dataLimit"
@@ -155,20 +156,20 @@ const onlyShowLatestFromChannelNumber = computed(() => {
   return store.getters.getOnlyShowLatestFromChannelNumber
 })
 
-const filteredVideoList = computed(() => {
-  if (props.isCommunity) {
-    return props.videoList
-  }
+const showNewSubscriptionFeedIndicators = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators
+})
 
+const filteredVideoList = computed(() => {
   let videoList = props.videoList
 
-  if (hideWatchedSubs.value) {
+  if (!props.isCommunity && hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
       return !isHistoryEntryWatched(historyCacheById.value[video.videoId])
     })
   }
 
-  if (onlyShowLatestFromChannel.value) {
+  if (!props.isCommunity && onlyShowLatestFromChannel.value) {
     const authors = new Map()
     videoList = videoList.filter((video) => {
       if (!video.authorId) {
@@ -191,7 +192,26 @@ const filteredVideoList = computed(() => {
     })
   }
 
-  return videoList
+  if (!showNewSubscriptionFeedIndicators.value) {
+    return videoList
+  }
+
+  return [
+    ...videoList.filter(entry => entry.isNewInSubscriptionFeed === true),
+    ...videoList.filter(entry => entry.isNewInSubscriptionFeed !== true)
+  ]
+})
+
+const displayNewSubscriptionFeedIndicator = computed(() => {
+  if (!showNewSubscriptionFeedIndicators.value || activeVideoList.value.length === 0) {
+    return false
+  }
+
+  const includesPreviouslyFetchedEntry = activeVideoList.value.some(entry => {
+    return entry.isNewInSubscriptionFeed !== true
+  })
+
+  return includesPreviouslyFetchedEntry || activeVideoList.value.length === filteredVideoList.value.length
 })
 
 function increaseLimit() {

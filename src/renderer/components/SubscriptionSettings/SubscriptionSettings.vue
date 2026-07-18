@@ -47,19 +47,6 @@
           :icon="['fas', 'clock']"
           @change="updateSubscriptionPostsAutoRefreshInterval"
         />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
-          :default-value="useRssFeeds"
-          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
-          compact
-          @change="updateUseRssFeeds"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
-          :default-value="unsubscriptionPopupStatus"
-          compact
-          @change="updateUnsubscriptionPopupStatus"
-        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -79,6 +66,26 @@
             @change="updateOnlyShowLatestFromChannelNumber"
           />
         </div>
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
+          :default-value="useRssFeeds"
+          :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
+          compact
+          @change="updateUseRssFeeds"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
+          :default-value="showNewSubscriptionFeedIndicators"
+          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
+          compact
+          @change="updateShowNewSubscriptionFeedIndicators"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
+          :default-value="unsubscriptionPopupStatus"
+          compact
+          @change="updateUnsubscriptionPopupStatus"
+        />
       </div>
     </div>
   </FtSettingsSection>
@@ -175,6 +182,16 @@ const useRssFeeds = computed(() => store.getters.getUseRssFeeds)
  */
 function updateUseRssFeeds(value) {
   store.dispatch('updateUseRssFeeds', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showNewSubscriptionFeedIndicators = computed(() => store.getters.getShowNewSubscriptionFeedIndicators)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowNewSubscriptionFeedIndicators(value) {
+  store.dispatch('updateShowNewSubscriptionFeedIndicators', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

@@ -30,6 +30,25 @@ const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 
 /**
+ * Marks entries which were absent from the previous successful channel fetch.
+ * A missing cache is treated as the initial fetch, so existing content is not
+ * presented as newly published when a subscription is first loaded.
+ * @param {object[]} entries
+ * @param {object[] | null | undefined} previousEntries
+ * @param {'videoId' | 'postId'} idKey
+ */
+export function markNewSubscriptionEntries(entries, previousEntries, idKey) {
+  const previousIds = Array.isArray(previousEntries)
+    ? new Set(previousEntries.map(entry => entry[idKey]))
+    : null
+
+  return entries.map(entry => ({
+    ...entry,
+    isNewInSubscriptionFeed: previousIds?.has(entry[idKey]) === false
+  }))
+}
+
+/**
  * @template T
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  * @param {string} profileId
@@ -369,6 +388,11 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        videos = markNewSubscriptionEntries(
+          videos,
+          store.getters.getVideoCache[channel.id]?.videos,
+          'videoId'
+        )
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
           videos
@@ -450,6 +474,11 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        videos = markNewSubscriptionEntries(
+          videos,
+          store.getters.getShortsCache[channel.id]?.videos,
+          'videoId'
+        )
         await store.dispatch('updateSubscriptionShortsCacheByChannel', {
           channelId: channel.id,
           videos
@@ -535,6 +564,11 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        videos = markNewSubscriptionEntries(
+          videos,
+          store.getters.getLiveCache[channel.id]?.videos,
+          'videoId'
+        )
         await store.dispatch('updateSubscriptionLiveCacheByChannel', {
           channelId: channel.id,
           videos
@@ -616,6 +650,11 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       channelCount++
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
+      posts = markNewSubscriptionEntries(
+        posts,
+        store.getters.getPostsCache[channel.id]?.posts,
+        'postId'
+      )
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
         channelId: channel.id,
         posts
