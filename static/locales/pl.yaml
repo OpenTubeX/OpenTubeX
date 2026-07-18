@@ -38,6 +38,7 @@ Global:
     Watching Count: 1 oglądający | {count} oglądających
     Like Count: Jedno polubienie | {count} polubie(ń/nia)
     Comment Count: Jeden komentarz | {count} komentarz(e/y)
+  Ambient Mode: Tryb otoczenia (ambientowy)
 Search / Go to URL: 'Szukaj / Przejdź do adresu URL'
   # In Filter Button
 Search Filters:
@@ -97,6 +98,11 @@ Subscriptions:
   Subscriptions Tabs: Karty subskrypcji
   Load More Posts: Załaduj więcej wpisów
   Empty Posts: Zasubskrybowane przez Ciebie kanały nie mają żadnych wpisów.
+  Refreshing Subscription Videos: Odświeżanie subskrypcji Filmów
+  Refreshing Subscription Shorts: Odświeżanie subskrypcji Shortów
+  Refreshing Subscription Live Streams: Odświeżanie subskrypcji transmisji na żywo
+  Refreshing Subscription Posts: Odświeżanie subskrypcji wpisów
+  New Content: Nowe
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -197,6 +203,18 @@ History:
   Case Sensitive Search: Rozróżniaj wielkość liter
   DateOldestHistory: Daty obejrzenia (od najdawniejszej)
   DateNewestHistory: Daty obejrzenia (od najświeższej)
+  Delete Old History: Usuwaj starą historię
+  Select History Age: Wybierz, jak stary musi być wpis, aby został usunięty.
+  Delete Entries Older Than: Usuwaj wpisy starsze niż
+  Number of Days: Liczba dni
+  History Cleanup Warning: Spowoduje to trwałe usunięcie pasujących wpisów w historii oglądania.
+  1 Day: 1 dzień
+  1 Week: 1 tydzień
+  1 Month: 1 miesiąc
+  3 Months: 3 miesiące
+  1 Year: 1 rok
+  Custom: Własny okres
+  History Older Than Days Removed: Historia oglądania starsza niż {days} dni została usunięta
 Settings:
   # On Settings Page
   Settings: 'Ustawienia'
@@ -386,6 +404,10 @@ Settings:
     Disable Smooth Scrolling: Wyłącz płynne przewijanie
     Hide Side Bar Labels: Schowaj etykiety paska bocznego
     Hide OpenTubeX Header Logo: Schowaj logo OpenTubeX z paska górnego
+    Hide Side Bar on Watch Pages: Ukryj pasek boczny na stronie odtwarzacza
+    Thumbnail Size: Rozmiar miniatury
+    Show Thumbnail Size Button in Header: Pokaż przycisk rozmiaru miniatury w nagłówku
+    Hide Profile Selector in Header: Ukryj selektor profilu w nagłówku
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -472,6 +494,32 @@ Settings:
     Edit Playback Speed Name: Edytuj nazwę prędkości odtwarzania
     Use Automatic Playback Speed Name: Użyj automatycznej nazwy prędkości odtwarzania
     Reorder Playback Speed: Przeciągnij, aby zmienić prędkość odtwarzania
+    Caption Appearance:
+      Caption Appearance: Wygląd napisów
+      Captions: Napisy
+      Preferred Language: Preferowany język napisów
+      Application Language: Język aplikacji
+      Enable Translations: Włącz automatyczne tłumaczenie napisów
+      Text Color: Kolor tekstu
+      Background Color: Kolor tła
+      Background Opacity: Przezroczystość tła
+      Font Size: Rozmiar czcionki
+      Vertical Position: Pozycja pionowa
+      Edge Color: Kolor krawędzi
+      Anchor:
+        Anchor: Położenie
+        Top Left: Górny lewy
+        Top Center: Górny środek
+        Top Right: Górny prawy
+        Bottom Left: Dolny lewy
+        Bottom Center: Dolny środek
+        Bottom Right: Dolny prawy
+      Edge Style:
+        Edge Style: Styl krawędzi
+        None: Żaden
+        Outline: Kontur
+        Drop Shadow: Rzucający cień
+      Reset: Zresetuj wygląd napisów
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -560,8 +608,8 @@ Settings:
     Settings Tooltip: Ustawień specyficznych dla systemu operacyjnego/użytkownika lub eksperymentalnych nie można eksportować ani importować (np. proxy, odtwarzacz zewnętrzny, folder zrzutów ekranu...)
     All settings have been successfully imported: Wszystkie ustawienia zostały pomyślnie zaimportowane
     All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
-    Unknown setting key: Nieznany klucz ustawień
-    Non-transferable setting key: Nieprzenoszalny klucz ustawień
+    Unknown setting key: 'Nieznany klucz ustawień: {key}'
+    Non-transferable setting key: 'Nieprzenoszalny klucz ustawień: {key}'
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
@@ -1300,3 +1348,38 @@ Previous match: Poprzednie trafienie
 Next match: Następne trafienie
 Close find bar: Zamknij pasek wyszukiwania
 No matches: Brak dopasowań
+Stats:
+  Stats: Statystyki
+  Watch time summary: Podsumowanie czasu oglądania
+  Today: Dzisiaj
+  This week: W tym tygodniu
+  Total watch time: Całkowity czas oglądania
+  Daily average: Średnia dzienna
+  So far today: Do tej pory dzisiaj
+  Since: Od {day}
+  All recorded time: Cały zarejestrowany czas
+  Per calendar day: Na każdy dzień kalendarzowy
+  Day by day: Dzień po dniu
+  Highest: 'Największy: {duration}'
+  Week by week: Tydzień po tygodniu
+  Last 14 days: Ostatnie 14 dni
+  Last 8 weeks: Ostatnie 8 tygodni
+  Daily chart aria: Dzienny czas oglądania w ciągu ostatnich 14 dni
+  Weekly chart aria: Tygodniowy czas oglądania w ciągu ostatnich 8 tygodni
+  No data: Czas oglądania będzie wyświetlany tutaj, jak zaczniesz oglądać filmy.
+  Estimate note: Czas oglądania sprzed tej aktualizacji jest szacowany na podstawie zapisanego postępu odtwarzania.
+  Adjust imported watch time: Dostosuj zaimportowany czas oglądania
+  Imported watch time: Zaimportowany czas oglądania
+  Imported watch time explanation: Wybierz prędkość odtwarzania, z której zazwyczaj korzystasz. Zaimportowany czas trwania filmów zostanie podzielony przez tę prędkość, aby oszacować rzeczywisty czas spędzony na oglądaniu.
+  Playback speed: Prędkość odtwarzania
+  Channel speed note: Zamiast tego używane będą zapisane prędkości odtwarzania kanałów, jeśli są dostępne.
+  Apply playback speed: Zastosuj prędkość odtwarzania
+  Imported watch time adjusted: Zaimportowany czas oglądania został dostosowany
+  Reset statistics: Zresetuj statystyki
+  Reset: Zresetuj
+  Reset confirmation: Czy na pewno chcesz zresetować wszystkie statystyki oglądania? Tej czynności nie można cofnąć.
+  Reset success: Statystyki oglądania zostały zresetowane
+  Less than a minute: < 1 min
+  Minutes: '{minutes} min'
+  Hours: '{hours} hr'
+  Hours and minutes: '{hours} hr {minutes} min'
