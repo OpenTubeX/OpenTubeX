@@ -954,7 +954,7 @@ export default defineComponent({
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
      * but Vue 2 doesn't support reactivity on Maps, so we have to use an array instead
-     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean}[]>}
+     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, unskipTime: number|null}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
     const promptSponsorBlockSegments = ref([])
@@ -1217,9 +1217,9 @@ export default defineComponent({
     }
 
     /**
-     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
+     * @param {{ uuid: string, translatedCategory: string, color: string, isHighlight?: boolean, unskipTime?: number }} toast
      */
-    function upsertSkippedSponsorBlockToast({ uuid, translatedCategory, color }) {
+    function upsertSkippedSponsorBlockToast({ uuid, translatedCategory, color, isHighlight = false, unskipTime }) {
       const hideAt = Date.now() + sponsorBlockSkippedToastDurationMs.value
       const existingSkip = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
 
@@ -1231,6 +1231,8 @@ export default defineComponent({
         existingSkip.hideAt = hideAt
         existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
         existingSkip.countdownPaused = false
+        existingSkip.isHighlight = isHighlight
+        existingSkip.unskipTime = unskipTime ?? null
         existingSkip.timeoutId = setTimeout(() => {
           removeSponsorBlockToast(uuid)
         }, sponsorBlockSkippedToastDurationMs.value)
@@ -1245,6 +1247,8 @@ export default defineComponent({
         hideAt,
         hideRemainingMs: sponsorBlockSkippedToastDurationMs.value,
         countdownPaused: false,
+        isHighlight,
+        unskipTime: unskipTime ?? null,
         timeoutId: setTimeout(() => {
           removeSponsorBlockToast(uuid)
         }, sponsorBlockSkippedToastDurationMs.value)
@@ -1448,6 +1452,7 @@ export default defineComponent({
         return false
       }
 
+      const unskipTime = video.value.currentTime
       const seekRange = player.seekRange()
       const targetTime = Math.min(
         Math.max(segment.startTime, seekRange.start),
@@ -1456,6 +1461,17 @@ export default defineComponent({
       video.value.currentTime = targetTime
       sponsorBlockCurrentTime.value = targetTime
       updateSponsorBlockHighlightState(targetTime)
+
+      if (sponsorBlockShowSkippedToast.value) {
+        upsertSkippedSponsorBlockToast({
+          uuid: segment.uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category),
+          isHighlight: true,
+          unskipTime
+        })
+      }
+
       showOverlayControls()
       return true
     }
@@ -1699,7 +1715,24 @@ export default defineComponent({
      */
     function unskipSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-      if (!segment || isSponsorBlockPointSegment(segment)) {
+      if (!segment) {
+        return
+      }
+
+      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+
+      if (isSponsorBlockPointSegment(segment)) {
+        if (toastEntry?.isHighlight && toastEntry.unskipTime !== null && canSeek()) {
+          const seekRange = player.seekRange()
+          const targetTime = Math.min(
+            Math.max(toastEntry.unskipTime, seekRange.start),
+            seekRange.end
+          )
+          video.value.currentTime = targetTime
+          sponsorBlockCurrentTime.value = targetTime
+          removeSponsorBlockToast(uuid)
+          updateSponsorBlockHighlightState(targetTime)
+        }
         return
       }
 
@@ -1716,7 +1749,6 @@ export default defineComponent({
 
       // Update the toast entry to show it's been unskipped
       // Keep showing it for the duration of the segment (no timeout)
-      const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
       if (toastEntry) {
         clearTimeout(toastEntry.timeoutId)
         toastEntry.unskipped = true

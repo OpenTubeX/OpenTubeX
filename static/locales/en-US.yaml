@@ -1241,6 +1241,7 @@ Video:
       SkipPrompt: Skip {segmentCategory} segment?
       SkipPromptAction: Skip
       SkipToHighlight: Skip to Highlight?
+      SkippedToHighlight: Skipped to Highlight
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
   Watch:

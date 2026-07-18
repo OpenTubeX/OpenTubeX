@@ -330,7 +330,7 @@
           </div>
         </div>
         <div
-          v-for="{ uuid, translatedCategory, color, unskipped } in skippedSponsorBlockSegments"
+          v-for="{ uuid, translatedCategory, color, unskipped, isHighlight } in skippedSponsorBlockSegments"
           :key="uuid"
           class="skippedSegment"
           @mouseenter="pauseSponsorBlockToastCountdown(uuid)"
@@ -346,7 +346,9 @@
                 :style="{ color }"
               />
               <span class="skippedSegmentText">
-                {{ $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
+                {{ isHighlight
+                  ? $t('Video.Player.SponsorBlock.SkippedToHighlight')
+                  : $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
               </span>
             </div>
             <div class="skippedSegmentHeaderActions">
