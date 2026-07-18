@@ -40,7 +40,7 @@
 
     .playlistInfoContainer {
       position: sticky;
-      margin-block: -35px 16px;
+      margin-block: 0 16px;
       inset-block-start: calc(var(--top-bar-push-down-adjustment-default) + var(--top-bar-push-down-adjustment-edit-mode) + var(--top-bar-push-down-adjustment-no-description) + var(--top-bar-push-down-adjustment-one-or-fewer));
       padding-block: 0;
       margin-inline: auto;
