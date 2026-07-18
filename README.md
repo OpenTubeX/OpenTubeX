@@ -28,6 +28,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 ## Extra features compared to FreeTube
 
+[View the extra features on the OpenTubeX website](https://opentubex.org/extra-features/), or expand the list below.
+
+<details>
+<summary>Show extra features</summary>
+
 - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
  <img height="150" alt="image" src="https://github.com/user-attachments/assets/8fb28196-cf5a-4bb8-baa5-b911cb37262f" />
@@ -155,6 +160,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Caption appearance controls and a preferred caption language setting
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/0098caa1-ccd6-40d5-bcb8-5daed8e0e15a" />
+
+</details>
 
 ## Screenshots
 | The main OpenTubeX window                                                                         |
