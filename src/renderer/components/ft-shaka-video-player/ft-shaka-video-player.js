@@ -2783,6 +2783,13 @@ export default defineComponent({
       let contentWidth = 0
       let crossesPanelEdge = false
       const controlPanelBounds = controlPanel.getBoundingClientRect()
+      // Full-window transitions scale the player container. Keep margins in
+      // the same visual coordinate space as the bounding rectangles so a
+      // measurement during the animation does not leave the compact layout
+      // enabled after the transition.
+      const inlineScale = controlPanel.clientWidth > 0
+        ? controlPanelBounds.width / controlPanel.clientWidth
+        : 1
 
       for (const child of controlPanel.children) {
         if (!(child instanceof HTMLElement)) {
@@ -2799,12 +2806,12 @@ export default defineComponent({
           childBounds.right > controlPanelBounds.right + 1
 
         contentWidth += childBounds.width +
-          (Number.parseFloat(style.marginLeft) || 0) +
-          (Number.parseFloat(style.marginRight) || 0)
+          ((Number.parseFloat(style.marginLeft) || 0) * inlineScale) +
+          ((Number.parseFloat(style.marginRight) || 0) * inlineScale)
       }
 
       return crossesPanelEdge ||
-        contentWidth > controlPanel.clientWidth + 1
+        contentWidth > controlPanelBounds.width + inlineScale
     }
 
     /**
