@@ -163,6 +163,9 @@ export default defineComponent({
       captions: [],
       currentTime: 0,
       showTranscript: false,
+      fullscreenCommentsOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenCommentsTarget: null,
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
       autoplayNextRecommendedVideo: false,
@@ -468,6 +471,13 @@ export default defineComponent({
     }
   },
   methods: {
+    handleFullscreenCommentsChange({ open, target }) {
+      this.fullscreenCommentsTarget = target
+      this.fullscreenCommentsOpen = open && target !== null
+    },
+    closeFullscreenComments() {
+      this.$refs.player?.closeFullscreenComments()
+    },
     async toggleTheatreMode() {
       const layout = this.$refs.videoLayout
       const elements = [

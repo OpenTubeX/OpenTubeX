@@ -264,6 +264,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    commentsAvailable: {
+      type: Boolean,
+      default: false
+    },
     resumePlaybackAfterSabrReload: {
       type: Boolean,
       default: false
@@ -295,6 +299,7 @@ export default defineComponent({
     'skip-to-prev',
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
+    'fullscreen-comments-change',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -338,6 +343,9 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const chapterOverlay = ref(null)
     const showChaptersOverlay = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenCommentsOverlay = ref(null)
+    const showFullscreenComments = ref(false)
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -4186,6 +4194,26 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_chapters', new ChapterOverlayButtonFactory())
     }
 
+    function setFullscreenComments(shouldOpen) {
+      const open = Boolean(shouldOpen && props.commentsAvailable && isNativeFullscreenActive())
+      showFullscreenComments.value = open
+      events.dispatchEvent(new CustomEvent('setFullscreenComments', { detail: open }))
+      emit('fullscreen-comments-change', {
+        open,
+        target: fullscreenCommentsOverlay.value
+      })
+    }
+
+    function closeFullscreenComments() {
+      setFullscreenComments(false)
+    }
+
+    watch(() => props.commentsAvailable, available => {
+      if (!available && showFullscreenComments.value) {
+        closeFullscreenComments()
+      }
+    })
+
     async function loadChapterThumbnails() {
       chapterThumbnails.value = []
 
@@ -6071,6 +6099,7 @@ export default defineComponent({
       if (isNativeFullscreenActive() && scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       } else if (!isNativeFullscreenActive()) {
+        closeFullscreenComments()
         updateScrollMiniPlayer()
       }
 
@@ -6718,6 +6747,7 @@ export default defineComponent({
     onBeforeUnmount(() => {
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
+      closeFullscreenComments()
       if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
         delete document.body.dataset.playerFullWindowOwner
         document.body.classList.remove('playerFullWindow')
@@ -6883,6 +6913,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      closeFullscreenComments,
       destroyPlayer
     })
 
@@ -6940,6 +6971,10 @@ export default defineComponent({
       handleChaptersOverlayOutsideClick,
       selectOverlayChapter,
       copyChapterTimestamp,
+      fullscreenCommentsOverlay,
+      showFullscreenComments,
+      closeFullscreenComments,
+      setFullscreenComments,
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,

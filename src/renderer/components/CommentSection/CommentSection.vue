@@ -1,9 +1,61 @@
 <template>
   <FtCard
     class="card"
+    :class="{ fullscreenCommentCard: fullscreenOverlay }"
   >
+    <header
+      v-if="fullscreenOverlay"
+      class="fullscreenCommentHeader"
+    >
+      <h3>{{ commentsTitle }}</h3>
+      <div
+        class="fullscreenCommentActions"
+        @focusout="handleFullscreenActionsFocusout"
+        @keydown.esc.stop.prevent="sortMenuOpen = false"
+      >
+        <button
+          v-if="showSortBy"
+          type="button"
+          class="fullscreenCommentAction"
+          :class="{ active: sortMenuOpen }"
+          :aria-label="$t('Global.Sort By')"
+          :title="$t('Global.Sort By')"
+          :aria-expanded="String(sortMenuOpen)"
+          @click="sortMenuOpen = !sortMenuOpen"
+        >
+          <FontAwesomeIcon :icon="['fas', 'arrow-down-short-wide']" />
+        </button>
+        <button
+          type="button"
+          class="fullscreenCommentAction"
+          :aria-label="$t('Comments.Hide Comments')"
+          :title="$t('Comments.Hide Comments')"
+          @click="emit('close-comments')"
+        >
+          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+        </button>
+        <div
+          v-if="sortMenuOpen"
+          class="fullscreenSortMenu"
+        >
+          <button
+            v-for="(name, index) in sortNames"
+            :key="sortValues[index]"
+            type="button"
+            :class="{ selected: currentSortValue === sortValues[index] }"
+            @click="handleSortChange(sortValues[index])"
+          >
+            <span>{{ name }}</span>
+            <FontAwesomeIcon
+              v-if="currentSortValue === sortValues[index]"
+              :icon="['fas', 'check']"
+            />
+          </button>
+        </div>
+      </div>
+    </header>
     <h3
-      v-if="commentData.length > 0 && !isLoading && showComments"
+      v-if="!fullscreenOverlay && commentData.length > 0 && !isLoading && showComments"
       class="commentsTitle"
     >
       <span>{{ commentsTitle }}</span>
@@ -41,7 +93,7 @@
       {{ $t("Comments.Click to View Comments") }}
     </h4>
     <div
-      v-if="showComments && !isLoading"
+      v-if="!fullscreenOverlay && showComments && !isLoading"
       class="commentHeaderActions"
       :class="{ commentHeaderActionsEmpty: !showSortBy }"
     >
@@ -344,6 +396,10 @@ const props = defineProps({
   initialCommentCount: {
     type: Number,
     default: null,
+  },
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false,
   }
 })
 
@@ -543,11 +599,19 @@ const sortValues = [
 ]
 
 const sortNewest = ref(false)
+const sortMenuOpen = ref(false)
 
 const currentSortValue = computed(() => sortNewest.value ? 'newest' : 'top')
 
-function handleSortChange() {
-  sortNewest.value = !sortNewest.value
+function handleSortChange(value) {
+  const newest = value === 'newest'
+  sortMenuOpen.value = false
+
+  if (sortNewest.value === newest) {
+    return
+  }
+
+  sortNewest.value = newest
   commentData.value = []
   nextPageToken.value = null
   getCommentData()
@@ -561,7 +625,13 @@ function reloadCommentData() {
   getCommentData({ preserveSort: true })
 }
 
-const emit = defineEmits(['timestamp-event'])
+function handleFullscreenActionsFocusout(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    sortMenuOpen.value = false
+  }
+}
+
+const emit = defineEmits(['timestamp-event', 'close-comments'])
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 

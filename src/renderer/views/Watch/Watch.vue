@@ -55,6 +55,7 @@
           :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :comments-available="!isLive && !hideComments"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
@@ -76,6 +77,7 @@
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
           @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
+          @fullscreen-comments-change="handleFullscreenCommentsChange"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -197,15 +199,22 @@
         :class="{ theatreWatchVideo: useTheatreMode }"
         @timestamp-event="changeTimestamp"
       />
-      <CommentSection
-        v-if="!isLoading && !isLive && !hideComments"
-        :id="videoId"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        :channel-thumbnail="channelThumbnail"
-        :channel-name="channelName"
-        @timestamp-event="changeTimestamp"
-      />
+      <Teleport
+        :to="fullscreenCommentsTarget || 'body'"
+        :disabled="!fullscreenCommentsOpen"
+      >
+        <CommentSection
+          v-if="!isLoading && !isLive && !hideComments"
+          :id="videoId"
+          class="watchVideo"
+          :class="{ theatreWatchVideo: useTheatreMode }"
+          :channel-thumbnail="channelThumbnail"
+          :channel-name="channelName"
+          :fullscreen-overlay="fullscreenCommentsOpen"
+          @close-comments="closeFullscreenComments"
+          @timestamp-event="changeTimestamp"
+        />
+      </Teleport>
     </div>
     <div
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"

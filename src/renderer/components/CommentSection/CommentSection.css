@@ -7,6 +7,96 @@
   display: flow-root;
 }
 
+.fullscreenCommentCard {
+  padding-block: 0;
+  padding-inline: 0;
+  overflow: visible;
+  color: #fff;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.fullscreenCommentHeader {
+  position: sticky;
+  z-index: 2;
+  inset-block-start: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 14px;
+  padding-inline: 16px;
+  background-color: var(--card-bg-color);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.fullscreenCommentHeader h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.fullscreenCommentActions {
+  position: relative;
+  display: flex;
+  gap: 4px;
+}
+
+.fullscreenCommentAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.fullscreenCommentAction:hover,
+.fullscreenCommentAction:focus-visible,
+.fullscreenCommentAction.active {
+  background-color: var(--side-nav-hover-color);
+}
+
+.fullscreenSortMenu {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 40px;
+  display: flex;
+  flex-direction: column;
+  inline-size: 260px;
+  max-inline-size: calc(40vw - 48px);
+  padding: 6px;
+  background-color: rgb(12 12 12 / 82%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(14px);
+}
+
+.fullscreenSortMenu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.fullscreenSortMenu button:hover,
+.fullscreenSortMenu button:focus-visible,
+.fullscreenSortMenu .selected {
+  background-color: var(--side-nav-hover-color);
+}
+
 .getCommentsTitle,
 .commentsTitle,
 .getMoreComments {

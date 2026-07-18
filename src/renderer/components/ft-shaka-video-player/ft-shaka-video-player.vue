@@ -70,6 +70,19 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <button
+        v-if="commentsAvailable"
+        type="button"
+        class="fullscreenCommentsToggle shaka-no-propagation"
+        :class="{ open: showFullscreenComments }"
+        :aria-label="$t('Comments.Comments')"
+        :title="$t('Comments.Comments')"
+        :aria-expanded="String(showFullscreenComments)"
+        @click.stop="setFullscreenComments(!showFullscreenComments)"
+        @dblclick.stop
+      >
+        <FontAwesomeIcon :icon="['fas', 'comment']" />
+      </button>
       <!--
       VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
       This intentionally doesn't use the "useVrMode" computed prop,
@@ -132,6 +145,20 @@
           />
         </aside>
       </Transition>
+      <aside
+        ref="fullscreenCommentsOverlay"
+        class="fullscreenCommentsOverlay shaka-no-propagation"
+        :class="{ open: showFullscreenComments }"
+        role="dialog"
+        :aria-label="$t('Comments.Comments')"
+        :aria-hidden="String(!showFullscreenComments)"
+        :inert="!showFullscreenComments"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenComments"
+      />
       <div
         v-if="showStats"
         class="stats"

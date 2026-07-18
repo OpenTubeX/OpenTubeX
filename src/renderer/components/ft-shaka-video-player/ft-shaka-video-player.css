@@ -928,6 +928,84 @@
   display: block;
 }
 
+.fullscreenCommentsToggle {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  inset-inline-end: 24px;
+  inset-block-end: 82px;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  padding: 0;
+  color: #fff;
+  background-color: rgb(0 0 0 / 65%);
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), background-color 150ms ease;
+}
+
+.fullscreenCommentsToggle:hover,
+.fullscreenCommentsToggle:focus-visible,
+.fullscreenCommentsToggle.open {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.ftVideoPlayer:fullscreen .fullscreenCommentsToggle {
+  display: flex;
+}
+
+.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fullscreenCommentsOverlay {
+  position: absolute;
+  z-index: 3;
+  inset-block: 16px;
+  inset-inline-end: 16px;
+  display: flex;
+  flex-direction: column;
+  inline-size: min(440px, 40vw);
+  overflow: hidden auto;
+  user-select: text;
+  color: #fff;
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(100% + 24px));
+  transition: transform 250ms ease, opacity 200ms ease;
+}
+
+.fullscreenCommentsOverlay.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.fullscreenCommentsOverlay :deep(.watchVideo) {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fullscreenCommentsOverlay,
+  .fullscreenCommentsToggle {
+    transition: none;
+  }
+}
+
 .ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
   position: relative;
