@@ -30,21 +30,24 @@ const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 
 /**
- * Marks entries which were absent from the previous successful channel fetch.
- * A missing cache is treated as the initial fetch, so existing content is not
- * presented as newly published when a subscription is first loaded.
+ * Marks the leading entries before the first entry shared with the previous
+ * successful channel fetch. Missing caches and responses without any overlap
+ * are ambiguous, so their entries are not presented as newly published.
  * @param {object[]} entries
  * @param {object[] | null | undefined} previousEntries
  * @param {'videoId' | 'postId'} idKey
  */
 export function markNewSubscriptionEntries(entries, previousEntries, idKey) {
   const previousIds = Array.isArray(previousEntries)
-    ? new Set(previousEntries.map(entry => entry[idKey]))
+    ? new Set(previousEntries.map(entry => entry[idKey]).filter(id => id != null))
     : null
+  const firstPreviouslyFetchedIndex = previousIds?.size > 0
+    ? entries.findIndex(entry => previousIds.has(entry[idKey]))
+    : -1
 
-  return entries.map(entry => ({
+  return entries.map((entry, index) => ({
     ...entry,
-    isNewInSubscriptionFeed: previousIds?.has(entry[idKey]) === false
+    isNewInSubscriptionFeed: firstPreviouslyFetchedIndex > 0 && index < firstPreviouslyFetchedIndex
   }))
 }
 

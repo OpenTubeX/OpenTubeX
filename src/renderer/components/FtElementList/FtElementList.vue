@@ -182,7 +182,7 @@ const newSubscriptionEntriesEndIndex = computed(() => {
     return -1
   }
 
-  return firstPreviouslyFetchedIndex.value === -1 ? props.data.length - 1 : firstPreviouslyFetchedIndex.value - 1
+  return firstPreviouslyFetchedIndex.value > 0 ? firstPreviouslyFetchedIndex.value - 1 : -1
 })
 
 const firstPreviouslyFetchedIndex = computed(() => {
