@@ -5,7 +5,7 @@
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
-      :key="`${dataType || result.type}-${result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title}-${result.playlistItemId || index}-${result.lastUpdatedAt || 0}`"
+      :key="getResultKey(result, index)"
       appearance="result"
       :data="result"
       :data-type="dataType || result.type"
@@ -54,6 +54,10 @@ const props = defineProps({
   dataType: {
     type: String,
     default: null,
+  },
+  stableItemKeys: {
+    type: Boolean,
+    default: false
   },
   renderAllItemsLazily: {
     type: Boolean,
@@ -149,6 +153,14 @@ const displayValue = computed(() => {
 
 /** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
+
+function getResultKey(result, index) {
+  const type = props.dataType || result.type
+  const id = result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title
+  const occurrence = props.stableItemKeys ? '' : result.playlistItemId || index
+
+  return `${type}-${id}-${occurrence}-${result.lastUpdatedAt || 0}`
+}
 
 /**
  * @param {string} videoId

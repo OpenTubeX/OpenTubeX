@@ -56,6 +56,7 @@ Global:
   Shorts: Shorts
   Live: Live
   Posts: Posts
+  New: New
   Sort By: Sort By
   Counts:
     Video Count: 1 video | {count} videos
@@ -183,10 +184,10 @@ Subscriptions:
   Refreshing Subscription Shorts: Refreshing subscription shorts
   Refreshing Subscription Live Streams: Refreshing subscription live streams
   Refreshing Subscription Posts: Refreshing subscription posts
+  New Content: New content
   New Since Last Refresh: New since last refresh
   Mark All as Seen: Mark all as seen
-  Only Show New: Only show new
-  No New Content: There is no new content in this feed.
+  No New Content: There is no new content.
 More: More
 Channels:
   Channels: Channels
@@ -700,6 +701,7 @@ Settings:
     Subscription Settings: Subscription
     Fetch Feeds from RSS: Fetch Feeds from RSS
     Fetch Feed on Startup: Fetch Feed on Startup
+    Show New Content Feed: Show New Content Feed
     Show New Content Indicators: Show New Content Indicators
     Auto Refresh Interval: Auto Refresh Interval
     Videos Auto Refresh Interval: Videos Auto Refresh Interval
@@ -1422,6 +1424,7 @@ Tooltips:
       but doesn't provide certain information like video duration, live status or posts
     Fetch Feed on Startup: When enabled, OpenTubeX will automatically fetch
       your subscription feed on startup and when a new window is opened.
+    Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Theme Settings:

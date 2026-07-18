@@ -18,7 +18,7 @@
       </FtFlexBox>
     </div>
     <FtFlexBox
-      v-if="!displayIsLoading && activeVideoList.length === 0"
+      v-if="!displayIsLoading && activeVideoList.length === 0 && !hasAdditionalContent"
     >
       <p
         v-if="!activeProfileHasSubscriptions"
@@ -45,14 +45,17 @@
         {{ isCommunity ? $t("Subscriptions.Empty Posts") : $t("Subscriptions.Empty Channels") }}
       </p>
     </FtFlexBox>
+    <slot name="before-list" />
     <FtElementList
       v-if="activeVideoList.length > 0"
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
+      :stable-item-keys="stableItemKeys"
     />
+    <slot />
     <FtAutoLoadNextPageWrapper
-      v-if="activeVideoList.length > 0 && videoList.length > dataLimit"
+      v-if="activeVideoList.length > 0 && filteredVideoList.length > dataLimit"
       @load-next-page="increaseLimit"
     >
       <FtFlexBox>
@@ -115,6 +118,14 @@ const props = defineProps({
   onlyShowNew: {
     type: Boolean,
     default: false
+  },
+  stableItemKeys: {
+    type: Boolean,
+    default: false
+  },
+  hasAdditionalContent: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -172,19 +183,22 @@ const filteredVideoList = computed(() => {
   let videoList = props.videoList
 
   if (props.onlyShowNew) {
-    videoList = videoList.filter(entry => entry.isNewInSubscriptionFeed === true)
+    videoList = videoList.filter(entry => {
+      return entry.isNewInSubscriptionFeed === true &&
+        (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
+    })
   }
 
   if (!props.isCommunity && hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
-      return !isHistoryEntryWatched(historyCacheById.value[video.videoId])
+      return video.videoId == null || !isHistoryEntryWatched(historyCacheById.value[video.videoId])
     })
   }
 
   if (!props.isCommunity && onlyShowLatestFromChannel.value) {
     const authors = new Map()
     videoList = videoList.filter((video) => {
-      if (!video.authorId) {
+      if (!video.videoId || !video.authorId) {
         return true
       }
 

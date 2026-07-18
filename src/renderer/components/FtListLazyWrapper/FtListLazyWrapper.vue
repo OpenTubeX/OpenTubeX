@@ -11,7 +11,7 @@
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
     :draggable="isDraggable"
-    :data-new-subscription-entry-rendered="visible && data.isNewInSubscriptionFeed === true ? '' : undefined"
+    :data-new-subscription-entry-rendered="visible && isNewSubscriptionEntry ? '' : undefined"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
     <template
@@ -75,6 +75,7 @@ import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
 import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
 
 import store from '../../store/index'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import { isRssUpcomingPremiere } from '../../helpers/subscriptions'
 
 const props = defineProps({
@@ -189,6 +190,11 @@ const draggableEventHandlers = {
 /** @type {import('vue').ComputedRef<'video' | 'shortVideo' | 'channel' | 'playlist' | 'community'>} */
 const finalDataType = computed(() => {
   return props.data.type ?? props.dataType
+})
+
+const isNewSubscriptionEntry = computed(() => {
+  return props.data.isNewInSubscriptionFeed === true &&
+    (props.data.videoId == null || !isHistoryEntryWatched(store.getters.getHistoryCacheById[props.data.videoId]))
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

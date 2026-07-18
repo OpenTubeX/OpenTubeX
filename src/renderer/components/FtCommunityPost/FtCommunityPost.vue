@@ -220,7 +220,9 @@ const hideVideo = computed(() => {
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
 
 const showNewSubscriptionFeedIndicator = computed(() => {
-  return store.getters.getShowNewSubscriptionFeedIndicators && props.data.isNewInSubscriptionFeed === true
+  return store.getters.getShowNewSubscriptionFeedIndicators &&
+    props.data.isNewInSubscriptionFeed === true &&
+    props.data.hideNewSubscriptionFeedIndicator !== true
 })
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */

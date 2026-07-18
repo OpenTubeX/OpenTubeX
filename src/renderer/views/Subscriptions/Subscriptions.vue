@@ -129,15 +129,27 @@
                 class="tabLoadingIndicator"
               />
             </div>
+            <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
+            <div
+              v-if="visibleTabs.includes('new')"
+              ref="newTab"
+              class="tab"
+              role="tab"
+              :aria-selected="currentTab === 'new'"
+              aria-controls="subscriptionsPanel"
+              :tabindex="currentTab === 'new' ? 0 : -1"
+              :class="{ selectedTab: currentTab === 'new' }"
+              @click="changeTab('new')"
+              @keydown.space.enter.prevent="changeTab('new')"
+              @keydown.left.right="focusTab($event, 'new')"
+            >
+              <FontAwesomeIcon
+                :icon="['fa', 'fire']"
+                class="subscriptionIcon"
+              />
+              {{ $t("Global.New") }}
+            </div>
           </FtFlexBox>
-          <FtToggleSwitch
-            v-if="showNewSubscriptionFeedIndicators && currentTab !== null"
-            class="onlyShowNewToggle"
-            :label="$t('Subscriptions.Only Show New')"
-            :default-value="onlyShowNew"
-            compact
-            @change="onlyShowNew = $event"
-          />
           <button
             v-if="currentTabHasVisibleNewContent"
             class="markAllSeenButton"
@@ -158,30 +170,37 @@
       <SubscriptionsVideos
         v-if="currentTab === 'videos'"
         id="subscriptionsPanel"
+        key="subscriptions-videos"
         ref="videosPanel"
         role="tabpanel"
-        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsShorts
         v-else-if="currentTab === 'shorts'"
         id="subscriptionsPanel"
+        key="subscriptions-shorts"
         ref="shortsPanel"
         role="tabpanel"
-        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsLive
         v-else-if="currentTab === 'live'"
         id="subscriptionsPanel"
+        key="subscriptions-live"
         ref="livePanel"
         role="tabpanel"
-        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsPosts
         v-else-if="currentTab === 'community'"
         id="subscriptionsPanel"
+        key="subscriptions-community"
         ref="communityPanel"
         role="tabpanel"
-        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
+      />
+      <SubscriptionsNew
+        v-else-if="currentTab === 'new'"
+        id="subscriptionsPanel"
+        key="subscriptions-new"
+        ref="newPanel"
+        role="tabpanel"
       />
       <p v-else>
         {{ $t("Subscriptions.All Subscription Tabs Hidden", {
@@ -201,7 +220,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
-import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
+import SubscriptionsNew from '../../components/SubscriptionsNew.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
@@ -234,6 +253,14 @@ const hideSubscriptionsCommunity = computed(() => {
   return store.getters.getHideSubscriptionsCommunity
 })
 
+const showNewSubscriptionFeedIndicators = computed(() => {
+  return store.getters.getShowNewSubscriptionFeedIndicators
+})
+
+const showNewSubscriptionFeed = computed(() => {
+  return store.getters.getShowNewSubscriptionFeed
+})
+
 const activeSubscriptionList = computed(() => {
   return store.getters.getActiveProfile.subscriptions
 })
@@ -254,6 +281,10 @@ const refreshingFeedTab = computed(() => {
 })
 
 const currentTabRefreshing = computed(() => {
+  if (currentTab.value === 'new') {
+    return refreshingFeedTab.value !== null
+  }
+
   const currentFeedTab = currentTab.value === 'community' ? 'posts' : currentTab.value
   return refreshingFeedTab.value !== null && refreshingFeedTab.value === currentFeedTab
 })
@@ -263,15 +294,15 @@ const refreshProgressPercentage = computed(() => {
   return store.getters.getProgressBarPercentage
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
 const currentTab = ref('videos')
-const onlyShowNew = ref(false)
 
 const tabScrollPositions = {
   videos: 0,
   shorts: 0,
   live: 0,
-  community: 0
+  community: 0,
+  new: 0
 }
 
 let isMounted = false
@@ -301,7 +332,7 @@ watch(currentTab, async (value, previousValue) => {
 })
 
 const visibleTabs = computed(() => {
-  /** @type {('videos' | 'shorts' | 'live' | 'community')[]} */
+  /** @type {('videos' | 'shorts' | 'live' | 'community' | 'new')[]} */
   const tabs = []
 
   if (!hideSubscriptionsVideos.value) {
@@ -319,6 +350,10 @@ const visibleTabs = computed(() => {
   // community does not support rss
   if (!hideSubscriptionsCommunity.value && !useRssFeeds.value) {
     tabs.push('community')
+  }
+
+  if (showNewSubscriptionFeed.value && tabs.length > 0) {
+    tabs.push('new')
   }
 
   return tabs
@@ -345,7 +380,7 @@ if (visibleTabs.value.length === 0) {
 }
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 function changeTab(tab) {
   if (tab === currentTab.value) {
@@ -364,10 +399,12 @@ const videosTab = useTemplateRef('videosTab')
 const liveTab = useTemplateRef('liveTab')
 const shortsTab = useTemplateRef('shortsTab')
 const communityTab = useTemplateRef('communityTab')
+const newTab = useTemplateRef('newTab')
 const videosPanel = useTemplateRef('videosPanel')
 const livePanel = useTemplateRef('livePanel')
 const shortsPanel = useTemplateRef('shortsPanel')
 const communityPanel = useTemplateRef('communityPanel')
+const newPanel = useTemplateRef('newPanel')
 
 const currentTabPanel = computed(() => {
   switch (currentTab.value) {
@@ -379,24 +416,26 @@ const currentTabPanel = computed(() => {
       return shortsPanel.value
     case 'community':
       return communityPanel.value
+    case 'new':
+      return newPanel.value
     default:
       return null
   }
 })
 
-const showNewSubscriptionFeedIndicators = computed(() => {
-  return store.getters.getShowNewSubscriptionFeedIndicators
-})
-
 const currentTabHasVisibleNewContent = computed(() => {
+  if (currentTab.value === 'new') {
+    return showNewSubscriptionFeed.value && currentTabPanel.value?.hasVisibleNewContent === true
+  }
+
   return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasVisibleNewContent === true
 })
 
-/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
+/** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
 const markingSeenTab = ref(null)
 
 /**
- * @param {'videos' | 'shorts' | 'live' | 'community'} tab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 async function markAllAsSeen(tab) {
   if (markingSeenTab.value !== null) {
@@ -405,13 +444,19 @@ async function markAllAsSeen(tab) {
 
   markingSeenTab.value = tab
   try {
-    await store.dispatch(
-      'markSubscriptionEntriesAsSeen',
-      {
-        tab: tab === 'community' ? 'posts' : tab,
-        channelIds: activeSubscriptionList.value.map(channel => channel.id)
-      }
-    )
+    const feedTabs = tab === 'new'
+      ? visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
+      : [tab]
+
+    for (const feedTab of feedTabs) {
+      await store.dispatch(
+        'markSubscriptionEntriesAsSeen',
+        {
+          tab: feedTab === 'community' ? 'posts' : feedTab,
+          channelIds: activeSubscriptionList.value.map(channel => channel.id)
+        }
+      )
+    }
   } finally {
     markingSeenTab.value = null
   }
@@ -450,7 +495,7 @@ const currentAutoRefresh = computed(() => {
 
 /**
  * @param {KeyboardEvent} event
- * @param {'videos' | 'shorts' | 'live' | 'community'} focusedTab
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} focusedTab
  */
 function focusTab(event, focusedTab) {
   if (event.altKey) {
@@ -492,6 +537,9 @@ function focusTab(event, focusedTab) {
       break
     case 'community':
       communityTab.value?.focus()
+      break
+    case 'new':
+      newTab.value?.focus()
       break
   }
 

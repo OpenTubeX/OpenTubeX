@@ -12,6 +12,7 @@ import {
   showToast,
   showToastOnAllTabs
 } from './utils'
+import { isHistoryEntryWatched } from './history'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
@@ -29,27 +30,52 @@ const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
+// Scraped relative publication dates are approximate, so allow a small amount
+// of rounding around the previous fetch without admitting genuinely old items.
+const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
- * Marks the leading entries before the first entry shared with the previous
- * successful channel fetch. Missing caches and responses without any overlap
- * are ambiguous, so their entries are not presented as newly published.
+ * Marks unwatched leading entries which were plausibly published since the
+ * previous successful channel fetch. Missing caches, old reordered entries,
+ * and responses without overlap are not presented as newly published.
  * @param {object[]} entries
  * @param {object[] | null | undefined} previousEntries
  * @param {'videoId' | 'postId'} idKey
+ * @param {Date | number | string | null | undefined} previousFetchTimestamp
+ * @param {Record<string, object>} [historyById]
  */
-export function markNewSubscriptionEntries(entries, previousEntries, idKey) {
+export function markNewSubscriptionEntries(
+  entries,
+  previousEntries,
+  idKey,
+  previousFetchTimestamp,
+  historyById = {}
+) {
   const previousIds = Array.isArray(previousEntries)
     ? new Set(previousEntries.map(entry => entry[idKey]).filter(id => id != null))
     : null
   const firstPreviouslyFetchedIndex = previousIds?.size > 0
     ? entries.findIndex(entry => previousIds.has(entry[idKey]))
     : -1
+  const previousFetchTime = previousFetchTimestamp == null
+    ? Number.NaN
+    : new Date(previousFetchTimestamp).getTime()
 
-  return entries.map((entry, index) => ({
-    ...entry,
-    isNewInSubscriptionFeed: firstPreviouslyFetchedIndex > 0 && index < firstPreviouslyFetchedIndex
-  }))
+  return entries.map((entry, index) => {
+    const publishedTime = Number(entry.published ?? entry.publishedTime)
+    const isPlausiblyRecent = Number.isFinite(previousFetchTime) &&
+      Number.isFinite(publishedTime) &&
+      publishedTime >= previousFetchTime - NEW_CONTENT_PUBLICATION_TOLERANCE_MS
+    const isWatched = idKey === 'videoId' && isHistoryEntryWatched(historyById?.[entry[idKey]])
+
+    return {
+      ...entry,
+      isNewInSubscriptionFeed: firstPreviouslyFetchedIndex > 0 &&
+        index < firstPreviouslyFetchedIndex &&
+        isPlausiblyRecent &&
+        !isWatched
+    }
+  })
 }
 
 /**
@@ -411,10 +437,13 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        const previousCache = store.getters.getVideoCache[channel.id]
         videos = markNewSubscriptionEntries(
           videos,
-          store.getters.getVideoCache[channel.id]?.videos,
-          'videoId'
+          previousCache?.videos,
+          'videoId',
+          previousCache?.timestamp,
+          store.getters.getHistoryCacheById
         )
         await store.dispatch('updateSubscriptionVideosCacheByChannel', {
           channelId: channel.id,
@@ -497,10 +526,13 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        const previousCache = store.getters.getShortsCache[channel.id]
         videos = markNewSubscriptionEntries(
           videos,
-          store.getters.getShortsCache[channel.id]?.videos,
-          'videoId'
+          previousCache?.videos,
+          'videoId',
+          previousCache?.timestamp,
+          store.getters.getHistoryCacheById
         )
         await store.dispatch('updateSubscriptionShortsCacheByChannel', {
           channelId: channel.id,
@@ -587,10 +619,13 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       if (videos != null) {
+        const previousCache = store.getters.getLiveCache[channel.id]
         videos = markNewSubscriptionEntries(
           videos,
-          store.getters.getLiveCache[channel.id]?.videos,
-          'videoId'
+          previousCache?.videos,
+          'videoId',
+          previousCache?.timestamp,
+          store.getters.getHistoryCacheById
         )
         await store.dispatch('updateSubscriptionLiveCacheByChannel', {
           channelId: channel.id,
@@ -673,10 +708,12 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       channelCount++
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
+      const previousCache = store.getters.getPostsCache[channel.id]
       posts = markNewSubscriptionEntries(
         posts,
-        store.getters.getPostsCache[channel.id]?.posts,
-        'postId'
+        previousCache?.posts,
+        'postId',
+        previousCache?.timestamp
       )
       await store.dispatch('updateSubscriptionPostsCacheByChannel', {
         channelId: channel.id,

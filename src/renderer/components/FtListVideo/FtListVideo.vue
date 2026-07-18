@@ -801,7 +801,10 @@ const saveVideoHistoryWithLastViewedPlaylist = computed(() => store.getters.getS
 const showDistractionFreeTitles = computed(() => store.getters.getShowDistractionFreeTitles)
 
 const showNewSubscriptionFeedIndicator = computed(() => {
-  return store.getters.getShowNewSubscriptionFeedIndicators && props.data.isNewInSubscriptionFeed === true
+  return store.getters.getShowNewSubscriptionFeedIndicators &&
+    props.data.isNewInSubscriptionFeed === true &&
+    props.data.hideNewSubscriptionFeedIndicator !== true &&
+    !isHistoryEntryWatched(historyEntry.value)
 })
 
 /** @type {import('vue').ComputedRef<string>} */

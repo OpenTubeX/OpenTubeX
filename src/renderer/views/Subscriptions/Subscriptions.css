@@ -66,10 +66,6 @@
   opacity: 0.5;
 }
 
-.onlyShowNewToggle :deep(.switch-label) {
-  padding-block: 5px;
-}
-
 .headerRefreshWidget {
   min-inline-size: min(100%, 360px);
 }

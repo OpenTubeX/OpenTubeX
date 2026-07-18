@@ -74,6 +74,13 @@
           @change="updateUseRssFeeds"
         />
         <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show New Content Feed')"
+          :default-value="showNewSubscriptionFeed"
+          :tooltip="$t('Tooltips.Subscription Settings.Show New Content Feed')"
+          compact
+          @change="updateShowNewSubscriptionFeed"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
           :default-value="showNewSubscriptionFeedIndicators"
           :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
@@ -186,6 +193,16 @@ function updateUseRssFeeds(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showNewSubscriptionFeedIndicators = computed(() => store.getters.getShowNewSubscriptionFeedIndicators)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showNewSubscriptionFeed = computed(() => store.getters.getShowNewSubscriptionFeed)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowNewSubscriptionFeed(value) {
+  store.dispatch('updateShowNewSubscriptionFeed', value)
+}
 
 /**
  * @param {boolean} value
