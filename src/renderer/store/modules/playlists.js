@@ -1,5 +1,6 @@
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { deepCopy } from '../../helpers/utils'
 
 function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
@@ -237,7 +238,8 @@ const actions = {
       if (payload.length === 0) {
         // Not using `addPlaylists` to ensure required attributes with dynamic values added
         state.defaultPlaylists.forEach(playlist => {
-          dispatch('addPlaylist', playlist)
+          // Deep copy so `addPlaylist` doesn't mutate the defaults template in state
+          dispatch('addPlaylist', deepCopy(playlist))
         })
       } else {
         const dateNow = Date.now()
