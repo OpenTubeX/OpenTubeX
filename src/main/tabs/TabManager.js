@@ -948,7 +948,7 @@ export class TabManager {
     }
   }
 
-  _getNeighborTabId(tabId) {
+  _getNeighborTabId(tabId, loadedOnly = false) {
     const orderedTabIds = Array.from(this.tabs.keys())
     const tabIndex = orderedTabIds.indexOf(tabId)
     if (tabIndex === -1) {
@@ -964,6 +964,7 @@ export class TabManager {
     // window with no selectable tab.
     return candidates.find(candidateId =>
       this.tabs.get(candidateId)?.isTransferStaged !== true &&
+      (!loadedOnly || this.tabs.get(candidateId)?.loadState === 'loaded') &&
       !this._deferredCloseTabIds.has(candidateId) &&
       !this._deferredUnloadTabIds.has(candidateId)
     ) ?? null
@@ -1627,7 +1628,7 @@ export class TabManager {
 
       const nextTabId = this.activeTabId !== tabId && this.tabs.has(this.activeTabId)
         ? this.activeTabId
-        : this._getNeighborTabId(tabId)
+        : this._getNeighborTabId(tabId, true)
       if (nextTabId) {
         this._deferredUnloadTabIds.add(tabId)
         this.bridge.send(IpcChannels.TABS_EXIT_FULLSCREEN, tabId)
@@ -1653,7 +1654,7 @@ export class TabManager {
         return false
       }
 
-      const nextTabId = this._getNeighborTabId(tabId)
+      const nextTabId = this._getNeighborTabId(tabId, true)
       if (!nextTabId) {
         return false
       }
