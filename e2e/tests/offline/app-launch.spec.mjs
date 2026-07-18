@@ -20,3 +20,12 @@ test.describe('app launch', () => {
     expect(errors).toEqual([])
   })
 })
+
+test.describe('startup arguments', () => {
+  test.use({ launchArgs: ['not-a-url.txt', '--unknown-option'] })
+
+  test('ignores non-URL startup arguments', async ({ page }) => {
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+})

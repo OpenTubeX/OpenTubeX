@@ -54,5 +54,19 @@ test.describe('watch page', () => {
 
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
     expect(await page.locator('.comment').count()).toBeGreaterThan(0)
+
+    // Exercise reply loading and its continuation path, not only the initial
+    // top-level comment batch (8bcf0b58d).
+    const replyToggle = page.locator('.commentMoreReplies').first()
+    await expect(replyToggle).toBeVisible()
+    await replyToggle.click()
+    const replies = page.locator('.commentReplyBranch')
+    await expect(replies.first()).toBeVisible({ timeout: 30_000 })
+
+    const showMoreReplies = page.locator('.showMoreReplies').first()
+    await expect(showMoreReplies).toBeVisible()
+    const replyCount = await replies.count()
+    await showMoreReplies.click()
+    await expect.poll(async () => await replies.count()).toBeGreaterThan(replyCount)
   })
 })

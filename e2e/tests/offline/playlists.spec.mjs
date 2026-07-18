@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo } from '../../helpers/app.mjs'
 
 test.describe('playlist creation', () => {
@@ -15,7 +18,20 @@ test.describe('playlist creation', () => {
 test.describe('seeded playlists', () => {
   test.use({
     seed: {
+      settings: {
+        hideUpcomingPremieres: true,
+        quickBookmarkTargetPlaylistId: 'favorites'
+      },
       playlists: [
+        {
+          _id: 'favorites',
+          playlistName: 'Favorites',
+          protected: true,
+          description: 'Quick bookmark target',
+          videos: [],
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        },
         {
           _id: 'e2eseeded',
           playlistName: 'My seeded playlist',
@@ -31,6 +47,18 @@ test.describe('seeded playlists', () => {
               published: Date.now() - 86_400_000,
               timeAdded: Date.now(),
               playlistItemId: 'e2e-item-1',
+              type: 'video'
+            },
+            {
+              videoId: 'ddddddddddd',
+              title: 'Upcoming seeded premiere',
+              author: 'Test Channel',
+              authorId: 'UC-test-channel-id',
+              lengthSeconds: 120,
+              published: Date.now() + 86_400_000,
+              premiereDate: new Date(Date.now() + 86_400_000).toISOString(),
+              timeAdded: Date.now(),
+              playlistItemId: 'e2e-item-2',
               type: 'video'
             }
           ],
@@ -48,5 +76,36 @@ test.describe('seeded playlists', () => {
     await page.getByText('My seeded playlist').click()
     await expect(page).toHaveURL(/#\/playlist\//)
     await expect(page.getByText('Seeded video one')).toBeVisible()
+    // Local playlists intentionally ignore the global hide-upcoming setting.
+    await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('playlist edits and deletion persist across restarts', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+
+    await page.getByTitle('Edit Playlist Info').click()
+    await page.locator('.playlistStats input').fill('Renamed seeded playlist')
+    await page.locator('.descriptionInput input').fill('Updated through E2E')
+    await page.getByTitle('Save Changes').click()
+
+    await expect(page.locator('.playlistTitle')).toHaveText('Renamed seeded playlist')
+    await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Renamed seeded playlist').click()
+    await expect(page.locator('.playlistDescription')).toHaveText('Updated through E2E')
+
+    await page.getByTitle('Delete Playlist').click()
+    await page.getByRole('button', { name: 'Yes, Delete' }).click()
+    await expect(page).toHaveURL(/#\/user[Pp]laylists/)
+    await expect(page.getByText('Renamed seeded playlist')).toHaveCount(0)
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return records.filter((record) => record._id === 'e2eseeded').at(-1)?.$$deleted
+    }).toBe(true)
   })
 })

@@ -72,3 +72,46 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
   })
 })
+
+test.describe('background tab shortcuts', () => {
+  test.use({
+    seed: {
+      settings: { fetchSubscriptionsAutomatically: false },
+      profiles: [
+        {
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: [
+            {
+              id: 'UC-test-subscription',
+              name: 'Test subscription',
+              thumbnail: ''
+            }
+          ]
+        }
+      ]
+    }
+  })
+
+  // Regression: the document-level subscriptions listener refreshed a hidden
+  // tab when R was pressed in a different tab (d20ff948f).
+  test('R does not refresh subscriptions in a background tab', async ({ page }) => {
+    await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
+
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'settings')
+
+    const externalRequests = []
+    page.on('request', (request) => {
+      if (/^https?:/.test(request.url())) {
+        externalRequests.push(request.url())
+      }
+    })
+
+    await page.locator('body').press('r')
+    await page.waitForTimeout(500)
+    expect(externalRequests).toEqual([])
+  })
+})

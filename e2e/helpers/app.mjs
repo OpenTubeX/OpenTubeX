@@ -39,6 +39,7 @@ function toNedbFile(docs) {
  * @param {object[]} [seed.history] history.db documents
  * @param {object[]} [seed.playlists] playlists.db documents
  * @param {object[]} [seed.profiles] profiles.db documents
+ * @param {object[]} [seed.tabSessions] tab-session.db documents
  */
 export async function createUserDataDir(seed = {}) {
   const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
@@ -47,8 +48,14 @@ export async function createUserDataDir(seed = {}) {
   const settingsDocs = Object.entries(settings).map(([_id, value]) => ({ _id, value }))
   await writeFile(path.join(userDataDir, 'settings.db'), toNedbFile(settingsDocs))
 
-  for (const store of ['history', 'playlists', 'profiles', 'search-history']) {
-    const docs = seed[store === 'search-history' ? 'searchHistory' : store]
+  const seededStores = {
+    history: seed.history,
+    playlists: seed.playlists,
+    profiles: seed.profiles,
+    'search-history': seed.searchHistory,
+    'tab-session': seed.tabSessions
+  }
+  for (const [store, docs] of Object.entries(seededStores)) {
     if (docs?.length) {
       await writeFile(path.join(userDataDir, `${store}.db`), toNedbFile(docs))
     }
@@ -60,7 +67,7 @@ export async function createUserDataDir(seed = {}) {
 /**
  * Launches the packed app (dist/main.js) against the given userData directory.
  */
-export async function launchApp(userDataDir) {
+export async function launchApp(userDataDir, extraArgs = []) {
   // Force X11 so the app renders on the xvfb display instead of escaping
   // to the user's real Wayland session.
   const env = {
@@ -73,7 +80,12 @@ export async function launchApp(userDataDir) {
   // The E2E build lives in its own directory so a running `pnpm dev`
   // (which rebuilds dist/ in development mode) can't clobber it.
   const launchOptions = {
-    args: [path.join(repoRoot, 'dist-e2e', 'main.js'), '--ozone-platform=x11', '--mute-audio'],
+    args: [
+      path.join(repoRoot, 'dist-e2e', 'main.js'),
+      ...extraArgs,
+      '--ozone-platform=x11',
+      '--mute-audio'
+    ],
     cwd: repoRoot,
     env
   }
@@ -147,14 +159,15 @@ export async function waitForAppReady(page) {
  */
 export const test = base.extend({
   seed: [{}, { option: true }],
+  launchArgs: [[], { option: true }],
 
-  app: async ({ seed }, use, testInfo) => {
+  app: async ({ seed, launchArgs }, use, testInfo) => {
     const userDataDir = await createUserDataDir(seed)
-    const { electronApp, page } = await launchApp(userDataDir)
+    const { electronApp, page } = await launchApp(userDataDir, launchArgs)
 
     const relaunch = async () => {
       await electronApp.close()
-      const next = await launchApp(userDataDir)
+      const next = await launchApp(userDataDir, launchArgs)
       appHandle.electronApp = next.electronApp
       appHandle.page = next.page
       return next

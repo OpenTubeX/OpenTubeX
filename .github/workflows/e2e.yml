@@ -4,16 +4,16 @@ on:
   pull_request:
     branches: [ master, development, '**-RC' ]
   schedule:
-    # Nightly network suite against the real YouTube servers
+    # Nightly full suite, including network tests against the real YouTube servers
     - cron: '30 3 * * *'
   workflow_dispatch:
     inputs:
       project:
         description: 'Playwright project to run'
         required: false
-        default: 'network'
+        default: 'all'
         type: choice
-        options: [ offline, network ]
+        options: [ all, offline, network ]
 
 permissions: {}
 
@@ -71,18 +71,21 @@ jobs:
       id: project
       shell: bash
       run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          echo "project=offline" >> "$GITHUB_OUTPUT"
-        elif [ "${{ github.event_name }}" = "schedule" ]; then
-          echo "project=network" >> "$GITHUB_OUTPUT"
-        else
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           echo "project=${{ inputs.project }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "project=all" >> "$GITHUB_OUTPUT"
         fi
 
     # The network project talks to the real YouTube servers on the first
     # attempt and automatically falls back to recorded fixtures on retry.
     - name: Run E2E tests
-      run: xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
+      run: |
+        if [ "${{ steps.project.outputs.project }}" = "all" ]; then
+          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e
+        else
+          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
+        fi
       shell: bash
 
     # Upload on flaky-but-green runs too, so first-attempt failures

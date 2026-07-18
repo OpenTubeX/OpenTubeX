@@ -67,7 +67,10 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 
 `.github/workflows/e2e.yml`:
 
-- **Pull requests** → offline suite (blocking).
-- **Nightly / manual dispatch** → network suite with the fixture fallback.
+- **Pull requests** → full offline and network suites (blocking).
+- **Nightly** → full offline and network suites.
+- **Manual dispatch** → all suites by default, or an individual suite.
+
+Network tests use the fixture fallback on retry.
 
 On failure the Playwright HTML report and traces are uploaded as artifacts.
