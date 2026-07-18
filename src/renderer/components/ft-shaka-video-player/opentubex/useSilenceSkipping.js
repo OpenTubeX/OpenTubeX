@@ -1,6 +1,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const ANALYSER_FFT_SIZE = 1024
+const AUDIBLE_PEAK_THRESHOLD_DB = -25
 const FALLBACK_THRESHOLD_DB = -40
 const HYSTERESIS_DB = 3
 const LOOKAHEAD_SECONDS = 0.06
@@ -129,7 +130,9 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     samplesUntilThresholdUpdate = 30
     const sortedHistory = [...volumeHistory].sort((a, b) => a - b)
     const noiseFloor = sortedHistory[Math.floor(sortedHistory.length * 0.15)]
-    dynamicThresholdDb = Math.min(-20, Math.max(-60, noiseFloor + 3))
+    // Cap at -30 dB: in loud videos the 15th percentile is quiet-but-audible
+    // content (e.g. a musical breakdown), not an actual noise floor.
+    dynamicThresholdDb = Math.min(-30, Math.max(-60, noiseFloor + 3))
   }
 
   function getAudioLevels() {
@@ -207,13 +210,16 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
 
     // Room tone can sit above the adaptive RMS threshold while quiet speech
     // has recurring peaks. Treat either low measure as a silence candidate,
-    // but require both to recover before leaving silence.
+    // but require both to recover before leaving silence. A strong peak means
+    // clearly audible content (e.g. quiet music with percussive transients
+    // whose RMS dips below the threshold), so it always blocks silence.
+    const containsAudiblePeak = peakDb >= AUDIBLE_PEAK_THRESHOLD_DB
     const containsSpeechPeak = peakDb >= SPEECH_PEAK_THRESHOLD_DB
     if (isSilent) {
-      if (containsSpeechPeak && volumeDb > dynamicThresholdDb + HYSTERESIS_DB) {
+      if (containsAudiblePeak || (containsSpeechPeak && volumeDb > dynamicThresholdDb + HYSTERESIS_DB)) {
         isSilent = false
       }
-    } else if (!containsSpeechPeak || volumeDb < dynamicThresholdDb) {
+    } else if (!containsAudiblePeak && (!containsSpeechPeak || volumeDb < dynamicThresholdDb)) {
       isSilent = true
     }
 
