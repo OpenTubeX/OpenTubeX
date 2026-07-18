@@ -1299,9 +1299,21 @@ function handleSubscriptionAutoRefreshStorage(event) {
  * @param {{inProgress: boolean, percentage: number, tab?: string | null}} state
  */
 function applySubscriptionAutoRefreshState(state) {
+  const wasInProgress = store.getters.getSubscriptionFeedRefreshInProgress
+  const previousTab = store.getters.getSubscriptionFeedRefreshTab
+  const nextTab = state.inProgress ? state.tab ?? null : null
+  let percentage = normalizeSubscriptionRefreshProgress(state.percentage)
+
+  // The refresh owner updates progress locally before the main process broadcasts
+  // it to every renderer. An older broadcast can therefore arrive after a newer
+  // local update, so keep progress monotonic for the duration of this refresh.
+  if (state.inProgress && wasInProgress && nextTab === previousTab) {
+    percentage = Math.max(store.getters.getProgressBarPercentage, percentage)
+  }
+
   store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
-  store.commit('setSubscriptionFeedRefreshTab', state.inProgress ? state.tab ?? null : null)
-  store.commit('setProgressBarPercentage', normalizeSubscriptionRefreshProgress(state.percentage))
+  store.commit('setSubscriptionFeedRefreshTab', nextTab)
+  store.commit('setProgressBarPercentage', percentage)
 }
 
 /**
