@@ -2311,6 +2311,13 @@ function setWindowTitle() {
 
   const titleTabId = store.state.tabs.transitionTargetTabId ?? presentedTabId.value
   if (isElectron && titleTabId) {
+    // During startup the shared router briefly sits on its initial route while
+    // the restored tab's own route hasn't been projected yet. Only attribute
+    // the router's title to the tab when it is actually on this route.
+    const tab = store.getters.getTabById(titleTabId)
+    if (tab && tab.route.fullPath !== route.fullPath) {
+      return
+    }
     navigation.setTitle(titleTabId, windowTitle.value)
   } else {
     store.commit('setAppTitle', windowTitle.value)
