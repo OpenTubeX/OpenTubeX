@@ -1,5 +1,19 @@
 import i18n from '../i18n/index'
 
+const WINDOW_TITLE_TRANSLATION_KEYS = {
+  Subscriptions: 'Subscriptions.Subscriptions',
+  Channels: 'Channels.Title',
+  Trending: 'Trending.Trending',
+  'Most Popular': 'Most Popular',
+  'Your Playlists': 'User Playlists.Your Playlists',
+  History: 'History.History',
+  Stats: 'Stats.Stats',
+  Settings: 'Settings.Settings',
+  About: 'About.About',
+  'Profile Settings': 'Profile.Profile Settings',
+  Playlist: 'Playlist.Playlist'
+}
+
 /**
  * This will return true if a string is null, undefined or empty.
  * @param {string|null|undefined} _string the string to process
@@ -30,32 +44,21 @@ export function isKeyboardEventKeyPrintableChar(eventKey) {
  * @param {string} title
  */
 export function translateWindowTitle(title) {
-  switch (title) {
-    case 'Subscriptions':
-      return i18n.global.t('Subscriptions.Subscriptions')
-    case 'Channels':
-      return i18n.global.t('Channels.Title')
-    case 'Trending':
-      return i18n.global.t('Trending.Trending')
-    case 'Most Popular':
-      return i18n.global.t('Most Popular')
-    case 'Your Playlists':
-      return i18n.global.t('User Playlists.Your Playlists')
-    case 'History':
-      return i18n.global.t('History.History')
-    case 'Stats':
-      return i18n.global.t('Stats.Stats')
-    case 'Settings':
-      return i18n.global.t('Settings.Settings')
-    case 'About':
-      return i18n.global.t('About.About')
-    case 'Profile Settings':
-      return i18n.global.t('Profile.Profile Settings')
-    case 'Playlist':
-      return i18n.global.t('Playlist.Playlist')
-    default:
-      return null
+  const translationKey = WINDOW_TITLE_TRANSLATION_KEYS[title]
+
+  if (!translationKey) {
+    return null
   }
+
+  // Locale messages load asynchronously during startup. Returning null keeps
+  // the restored tab title intact until its translation is available.
+  const locale = i18n.global.locale.value
+  if (!i18n.global.te(translationKey, locale)) {
+    return null
+  }
+
+  // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
+  return i18n.global.t(translationKey)
 }
 
 /**

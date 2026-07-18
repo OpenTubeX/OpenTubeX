@@ -2279,7 +2279,7 @@ const windowTitle = computed(() => {
     !routePath.startsWith('/playlist/') &&
     !routePath.startsWith('/search/')
   ) {
-    return translateWindowTitle(route.meta.title) ?? ''
+    return translateWindowTitle(route.meta.title)
   } else {
     return null
   }

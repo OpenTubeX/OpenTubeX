@@ -71,11 +71,6 @@ export class TabNavigationService {
       return false
     }
 
-    const resolvedTargetRoute = this.resolve(targetTab.route)
-    if (typeof resolvedTargetRoute.name === 'string') {
-      this.setTitle(tabId, routeTitle(resolvedTargetRoute))
-    }
-
     if (targetTab.loadState === 'mounting') {
       const mounted = await Promise.race([
         tabRuntimeRegistry.waitForMount(tabId, targetTab.mountRevision),
