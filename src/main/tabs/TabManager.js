@@ -174,6 +174,33 @@ export class TabManager {
   }
 
   /**
+   * `oneTimeTimestamp` is only meant to be consumed once by the Watch view
+   * (e.g. after a SABR player reload). If it survives into a persisted tab
+   * session, restoring the tab jumps to the stale reload position instead of
+   * the newer watch progress saved in the history database.
+   * @param {string} url
+   * @returns {string}
+   */
+  static stripOneTimeTimestampFromUrl(url) {
+    if (typeof url !== 'string' || !url.includes('oneTimeTimestamp=')) {
+      return url
+    }
+
+    const hashIndex = url.indexOf('#')
+    if (hashIndex === -1) {
+      return url
+    }
+
+    const route = TabManager.getRouteFromUrl(url)
+    if (!('oneTimeTimestamp' in route.query)) {
+      return url
+    }
+
+    delete route.query.oneTimeTimestamp
+    return url.slice(0, hashIndex + 1) + normalizeRoute(route).fullPath
+  }
+
+  /**
    * @param {string} url
    * @returns {string | null}
    */
@@ -1848,7 +1875,7 @@ export class TabManager {
       .map(tab => {
         const tabData = {
           id: tab.id,
-          url: tab.url,
+          url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color)
@@ -1913,7 +1940,8 @@ export class TabManager {
 
       this.createTab({
         id: typeof tabData.id === 'string' ? tabData.id : undefined,
-        url: tabData.url,
+        // Strip here as well to heal sessions persisted before the strip on save existed
+        url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
         title: hasSavedTitle ? tabData.title : undefined,
         isPinned: tabData.isPinned === true,
         color: tabData.color,
