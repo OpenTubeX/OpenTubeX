@@ -1,8 +1,12 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
 
 // The official Blender channel.
 const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
+const CHANNEL_ID = 'UCSMOQeBJ2RAnuFungnQOxLg'
 
 test.describe('channel page', () => {
   test('shows channel info and videos', async ({ page }) => {
@@ -27,5 +31,30 @@ test.describe('channel page', () => {
 
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/subscriptions/)
+  })
+
+  test('subscribing writes the channel to the profile and back out again', async ({ app, page }) => {
+    await page.locator(sel.searchInput).fill(CHANNEL_URL)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
+
+    const readSubscriptions = async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const main = records.filter((record) => record._id === 'allChannels').at(-1)
+      return main?.subscriptions?.map((channel) => channel.id) ?? []
+    }
+
+    const subscribeButton = page.locator('.ftSubscribeButton .subscribeButton').first()
+    await expect(subscribeButton).toHaveText(/^\s*Subscribe/)
+    await subscribeButton.click()
+
+    await expect(subscribeButton).toHaveText(/^\s*Unsubscribe/)
+    await expect.poll(readSubscriptions).toContain(CHANNEL_ID)
+
+    // Unsubscribing is immediate (no confirmation popup by default).
+    await subscribeButton.click()
+    await expect(subscribeButton).toHaveText(/^\s*Subscribe/)
+    await expect.poll(readSubscriptions).not.toContain(CHANNEL_ID)
   })
 })

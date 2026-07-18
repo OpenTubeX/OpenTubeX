@@ -39,7 +39,10 @@ function toNedbFile(docs) {
  * @param {object[]} [seed.history] history.db documents
  * @param {object[]} [seed.playlists] playlists.db documents
  * @param {object[]} [seed.profiles] profiles.db documents
+ * @param {object[]} [seed.searchHistory] search-history.db documents
+ * @param {object[]} [seed.subscriptionCache] subscription-cache.db documents
  * @param {object[]} [seed.tabSessions] tab-session.db documents
+ * @param {object[]} [seed.watchStats] watch-stats.db documents
  */
 export async function createUserDataDir(seed = {}) {
   const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
@@ -53,7 +56,9 @@ export async function createUserDataDir(seed = {}) {
     playlists: seed.playlists,
     profiles: seed.profiles,
     'search-history': seed.searchHistory,
-    'tab-session': seed.tabSessions
+    'subscription-cache': seed.subscriptionCache,
+    'tab-session': seed.tabSessions,
+    'watch-stats': seed.watchStats
   }
   for (const [store, docs] of Object.entries(seededStores)) {
     if (docs?.length) {
@@ -108,14 +113,17 @@ export async function launchApp(userDataDir, extraArgs = []) {
   // Fail fast if dist-e2e contains a development build (it would load the
   // dev server on localhost instead of the bundled files). A transient
   // chrome-error page can appear under heavy parallel load - reload once.
+  // waitUntil: 'commit' — under heavy parallel load reaching the full 'load'
+  // state can take longer than the timeout even though the right URL is
+  // already committed; waitForAppReady below covers actual usability.
   try {
-    await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000 })
+    await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000, waitUntil: 'commit' })
   } catch {
     if (page.url().startsWith('chrome-error://')) {
       await page.reload().catch(() => {})
     }
     try {
-      await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000 })
+      await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000, waitUntil: 'commit' })
     } catch {
       const url = page.url()
       await electronApp.close().catch(() => {})
@@ -166,7 +174,13 @@ export const test = base.extend({
     const { electronApp, page } = await launchApp(userDataDir, launchArgs)
 
     const relaunch = async () => {
-      await electronApp.close()
+      // Wait until the old process has fully exited, otherwise it still owns
+      // the single-instance lock for this userData dir and the new instance
+      // immediately exits again.
+      const oldProcess = appHandle.electronApp.process()
+      const exited = new Promise((resolve) => oldProcess.once('exit', resolve))
+      await appHandle.electronApp.close()
+      await exited
       const next = await launchApp(userDataDir, launchArgs)
       appHandle.electronApp = next.electronApp
       appHandle.page = next.page

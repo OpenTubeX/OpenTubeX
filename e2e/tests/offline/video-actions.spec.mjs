@@ -1,0 +1,88 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
+import { test, expect, goTo } from '../../helpers/app.mjs'
+
+function historyEntry(videoId, title) {
+  return {
+    _id: videoId,
+    videoId,
+    title,
+    author: 'Test Channel',
+    authorId: 'UC-test-channel-id',
+    published: Date.now() - 86_400_000,
+    description: '',
+    viewCount: 1234,
+    lengthSeconds: 60,
+    watchProgress: 10,
+    isWatched: false,
+    timeWatched: Date.now() - 1000,
+    isLive: false,
+    type: 'video'
+  }
+}
+
+test.use({
+  seed: {
+    settings: { quickBookmarkTargetPlaylistId: 'favorites' },
+    playlists: [
+      {
+        _id: 'favorites',
+        playlistName: 'Favorites',
+        protected: true,
+        description: '',
+        videos: [],
+        createdAt: Date.now() - 86_400_000,
+        lastUpdatedAt: Date.now() - 86_400_000
+      }
+    ],
+    history: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')]
+  }
+})
+
+async function readPlaylist(app, id) {
+  const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+  const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+  return records.filter((record) => record._id === id).at(-1)
+}
+
+test.describe('list video actions', () => {
+  test('quick bookmark saves the video to the target playlist', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.quickBookmarkVideoIcon').click()
+
+    // The icon flips to its bookmarked state once the video is saved.
+    await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
+
+    await expect.poll(async () => {
+      const favorites = await readPlaylist(app, 'favorites')
+      return favorites?.videos?.map((entry) => entry.videoId)
+    }).toEqual(['eeeeeeeeeee'])
+  })
+
+  test('the options dropdown toggles watched status and removes the entry', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Mark As Watched' }).click()
+
+    // The same dropdown entry becomes the removal action once watched.
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Remove From History' }).click()
+
+    await expect(page.getByText('Bookmarkable video')).toBeHidden()
+    await expect(page.getByText('Your history list is currently empty.')).toBeVisible()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return records.filter((record) => record._id === 'eeeeeeeeeee').at(-1)?.$$deleted
+    }).toBe(true)
+  })
+})

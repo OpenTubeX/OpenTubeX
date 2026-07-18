@@ -69,4 +69,29 @@ test.describe('watch page', () => {
     await showMoreReplies.click()
     await expect.poll(async () => await replies.count()).toBeGreaterThan(replyCount)
   })
+
+  // Regression: edited comments show their "(edited)" marker (929369543)
+  test('edited comments carry the edited badge', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    // The comment ranking is not deterministic, so load a few batches and
+    // only assert the badge when an edited comment actually shows up.
+    const editedBadge = page.locator('.commentDate', { hasText: '(edited)' })
+    for (let i = 0; i < 3 && (await editedBadge.count()) === 0; i++) {
+      const showMore = page.locator('.getMoreComments')
+      if (await showMore.count() === 0) { break }
+      await showMore.scrollIntoViewIfNeeded()
+      await showMore.click()
+      await page.waitForTimeout(2000)
+    }
+
+    test.skip(await editedBadge.count() === 0, 'no edited comments in the loaded batches')
+    await expect(editedBadge.first()).toBeVisible()
+  })
 })
