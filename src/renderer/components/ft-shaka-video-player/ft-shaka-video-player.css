@@ -379,15 +379,15 @@
   padding: 0;
 }
 
-:deep(.ft-skip-silence-state) {
+:deep(.ft-toggle-state) {
   display: inline-grid;
 }
 
-:deep(.ft-skip-silence-state > span) {
+:deep(.ft-toggle-state > span) {
   grid-area: 1 / 1;
 }
 
-:deep(.ft-skip-silence-state-sizer) {
+:deep(.ft-toggle-state-sizer) {
   visibility: hidden;
 }
 

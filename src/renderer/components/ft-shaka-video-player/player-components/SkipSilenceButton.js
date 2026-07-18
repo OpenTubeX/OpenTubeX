@@ -43,7 +43,7 @@ export class SkipSilenceButton extends shaka.ui.Element {
 
     /** @private */
     this.currentState_ = document.createElement('span')
-    this.currentState_.classList.add('shaka-current-selection-span', 'ft-skip-silence-state')
+    this.currentState_.classList.add('shaka-current-selection-span', 'ft-toggle-state')
 
     /** @private */
     this.currentStateValue_ = document.createElement('span')
@@ -51,7 +51,7 @@ export class SkipSilenceButton extends shaka.ui.Element {
 
     /** @private */
     this.currentStateSizer_ = document.createElement('span')
-    this.currentStateSizer_.classList.add('ft-skip-silence-state-sizer')
+    this.currentStateSizer_.classList.add('ft-toggle-state-sizer')
     this.currentStateSizer_.ariaHidden = 'true'
     this.currentState_.appendChild(this.currentStateSizer_)
     label.appendChild(this.currentState_)
