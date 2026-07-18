@@ -127,15 +127,26 @@ export class FtPlaybackAdjustedTime extends shaka.ui.Element {
     const adjustedLeft = this.buildTimeString_(Math.max(0, adjustedPosition))
     const adjustedRight = this.buildTimeString_(Math.max(0, adjustedDuration))
     const leftText = this.showProgress_ ? adjustedLeft : `-${adjustedLeft}`
+    const text = `(${leftText} / ${adjustedRight})`
 
-    this.timeElement_.textContent = `(${leftText} / ${adjustedRight})`
-    this.timeElement_.classList.remove('shaka-hidden')
+    if (this.timeElement_.textContent !== text) {
+      this.timeElement_.textContent = text
+    }
+
+    if (this.timeElement_.classList.contains('shaka-hidden')) {
+      this.timeElement_.classList.remove('shaka-hidden')
+    }
   }
 
   /** @private */
   hide_() {
-    this.timeElement_.textContent = ''
-    this.timeElement_.classList.add('shaka-hidden')
+    if (this.timeElement_.textContent !== '') {
+      this.timeElement_.textContent = ''
+    }
+
+    if (!this.timeElement_.classList.contains('shaka-hidden')) {
+      this.timeElement_.classList.add('shaka-hidden')
+    }
   }
 
   /**
