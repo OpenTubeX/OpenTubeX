@@ -310,15 +310,16 @@ export default {
     /**
      * Atomically claim ownership of the subscription auto refresh.
      * @param {string} tabId
+     * @param {'videos' | 'shorts' | 'live' | 'posts'} feedTab
      * @returns {Promise<boolean>}
      */
-    acquire: (tabId) => {
-      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, tabId)
+    acquire: (tabId, feedTab) => {
+      return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, tabId, feedTab)
     },
 
     /**
      * Check whether a renderer currently owns the subscription refresh.
-     * @returns {Promise<{inProgress: boolean, percentage: number}>}
+     * @returns {Promise<{inProgress: boolean, percentage: number, tab: string | null}>}
      */
     isInProgress: () => {
       return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE)

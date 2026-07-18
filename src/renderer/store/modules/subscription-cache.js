@@ -10,6 +10,7 @@ const state = {
 
   subscriptionCacheReady: false,
   subscriptionFeedRefreshInProgress: false,
+  subscriptionFeedRefreshTab: null,
   subscriptionFeedLastRefreshTimestamp: null,
   subscriptionFeedNextAutoRefreshTimestamp: null,
   subscriptionShortsLastRefreshTimestamp: null,
@@ -23,6 +24,7 @@ const state = {
 const getters = {
   getSubscriptionCacheReady: (state) => state.subscriptionCacheReady,
   getSubscriptionFeedRefreshInProgress: (state) => state.subscriptionFeedRefreshInProgress,
+  getSubscriptionFeedRefreshTab: (state) => state.subscriptionFeedRefreshTab,
   getSubscriptionFeedLastRefreshTimestamp: (state) => state.subscriptionFeedLastRefreshTimestamp,
   getSubscriptionFeedNextAutoRefreshTimestamp: (state) => state.subscriptionFeedNextAutoRefreshTimestamp,
   getSubscriptionShortsLastRefreshTimestamp: (state) => state.subscriptionShortsLastRefreshTimestamp,
@@ -243,6 +245,9 @@ const mutations = {
   },
   setSubscriptionFeedRefreshInProgress(state, payload) {
     state.subscriptionFeedRefreshInProgress = payload
+  },
+  setSubscriptionFeedRefreshTab(state, payload) {
+    state.subscriptionFeedRefreshTab = payload
   },
   setSubscriptionFeedLastRefreshTimestamp(state, payload) {
     state.subscriptionFeedLastRefreshTimestamp = payload

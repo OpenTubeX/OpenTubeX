@@ -20,6 +20,10 @@ export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
 export const SUBSCRIPTION_REFRESH_PROGRESS_EVENT = 'opentubex-subscription-refresh-progress'
 export const SUBSCRIPTION_REFRESH_STARTED_EVENT = 'opentubex-subscription-refresh-started'
 
+// The tab id the Electron refresh lock was acquired with. Progress reports to the
+// main process must use this id, as the active tab may change during the refresh.
+let electronRefreshOwnerTabId = null
+
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
@@ -53,14 +57,16 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
 
   if (process.env.IS_ELECTRON) {
     const ownerTabId = store.getters.getActiveTabId
-    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire(ownerTabId)
+    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire(ownerTabId, tab)
     if (!acquired) {
       return null
     }
 
+    electronRefreshOwnerTabId = ownerTabId
     try {
       return await runRefresh()
     } finally {
+      electronRefreshOwnerTabId = null
       await window.ftElectron.subscriptionAutoRefresh.release(ownerTabId)
     }
   }
@@ -92,7 +98,7 @@ function completeSubscriptionRefresh(tab, profileId) {
  */
 function setSubscriptionRefreshProgress(percentage) {
   window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, {
-    detail: { percentage }
+    detail: { percentage, ownerTabId: electronRefreshOwnerTabId }
   }))
 }
 
@@ -331,7 +337,6 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   }
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
-  store.commit('setShowProgressBar', true)
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
@@ -390,7 +395,6 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
-    store.commit('setShowProgressBar', false)
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
 }
@@ -423,7 +427,6 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   }
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
-  store.commit('setShowProgressBar', true)
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
@@ -468,7 +471,6 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
-    store.commit('setShowProgressBar', false)
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
 }
@@ -501,7 +503,6 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   }
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
-  store.commit('setShowProgressBar', true)
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
@@ -560,7 +561,6 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
     return updateVideoListAfterProcessing(videoListFromRemote)
   } finally {
-    store.commit('setShowProgressBar', false)
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
 }
@@ -593,7 +593,6 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   }
 
   store.commit('setSubscriptionFeedRefreshInProgress', true)
-  store.commit('setShowProgressBar', true)
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
@@ -656,7 +655,6 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
     return filteredPosts
   } finally {
-    store.commit('setShowProgressBar', false)
     store.commit('setSubscriptionFeedRefreshInProgress', false)
   }
 }

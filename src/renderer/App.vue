@@ -444,8 +444,17 @@ const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
 
+const presentedRoutePath = computed(() => {
+  if (isElectron) {
+    return store.getters.getTabById(presentedTabId.value)?.route.path ?? ''
+  }
+  return route.path
+})
+
 const showProgressBar = computed(() => {
-  return localProgressBarVisible.value || subscriptionRefreshInProgress.value
+  // The Subscriptions view shows its own progress bar below the tab bar
+  return localProgressBarVisible.value ||
+    (subscriptionRefreshInProgress.value && presentedRoutePath.value !== '/subscriptions')
 })
 
 const landingPage = computed(() => '/' + store.getters.getLandingPage)
@@ -905,15 +914,18 @@ async function synchronizeSubscriptionRefreshInProgress() {
       if (!inProgress) {
         localStorage.removeItem(SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY)
       }
+      const progressState = inProgress ? getStoredSubscriptionRefreshProgressState() : null
       state = {
         inProgress,
-        percentage: inProgress ? getStoredSubscriptionRefreshProgress() : 0
+        percentage: progressState?.percentage ?? 0,
+        tab: progressState?.tab ?? null
       }
     } else {
       const progressState = getStoredSubscriptionRefreshProgressState()
       state = {
         inProgress: progressState !== null,
-        percentage: progressState?.percentage ?? 0
+        percentage: progressState?.percentage ?? 0,
+        tab: progressState?.tab ?? null
       }
     }
 
@@ -1197,18 +1209,21 @@ function handleSubscriptionRefreshStarted(event) {
       // The owner still has its renderer-local progress state.
     }
   }
-  applySubscriptionAutoRefreshState({ inProgress: true, percentage: 0 })
+  applySubscriptionAutoRefreshState({ inProgress: true, percentage: 0, tab: event.detail.tab })
 }
 
 /**
- * @param {CustomEvent<{percentage: number}>} event
+ * @param {CustomEvent<{percentage: number, ownerTabId?: string | null}>} event
  */
 function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
   store.commit('setProgressBarPercentage', percentage)
 
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.subscriptionAutoRefresh.setProgress(store.getters.getActiveTabId, percentage)
+    window.ftElectron.subscriptionAutoRefresh.setProgress(
+      event.detail.ownerTabId ?? store.getters.getActiveTabId,
+      percentage
+    )
     return
   }
 
@@ -1242,7 +1257,8 @@ function handleSubscriptionAutoRefreshStorage(event) {
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({
       inProgress: state !== null,
-      percentage: state?.percentage ?? 0
+      percentage: state?.percentage ?? 0,
+      tab: state?.tab ?? null
     })
     return
   }
@@ -1276,10 +1292,11 @@ function handleSubscriptionAutoRefreshStorage(event) {
 }
 
 /**
- * @param {{inProgress: boolean, percentage: number}} state
+ * @param {{inProgress: boolean, percentage: number, tab?: string | null}} state
  */
 function applySubscriptionAutoRefreshState(state) {
   store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
+  store.commit('setSubscriptionFeedRefreshTab', state.inProgress ? state.tab ?? null : null)
   store.commit('setProgressBarPercentage', normalizeSubscriptionRefreshProgress(state.percentage))
 }
 
@@ -1288,10 +1305,6 @@ function applySubscriptionAutoRefreshState(state) {
  */
 function normalizeSubscriptionRefreshProgress(percentage) {
   return Number.isFinite(percentage) ? Math.min(100, Math.max(0, percentage)) : 0
-}
-
-function getStoredSubscriptionRefreshProgress() {
-  return getStoredSubscriptionRefreshProgressState()?.percentage ?? 0
 }
 
 function getStoredSubscriptionRefreshProgressState() {
@@ -1306,7 +1319,7 @@ function getStoredSubscriptionRefreshProgressState() {
 
 /**
  * @param {string | null} value
- * @returns {{percentage: number} | null}
+ * @returns {{percentage: number, tab?: string} | null}
  */
 function getSubscriptionRefreshProgressState(value) {
   if (value === null) {

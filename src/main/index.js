@@ -2065,7 +2065,7 @@ function runApp() {
     }
   })
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId) => {
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
     const manager = TabManager.getFromWebContents(event.sender)
 
     if (
@@ -2082,7 +2082,11 @@ function runApp() {
     }
 
     const owner = event.sender
-    subscriptionAutoRefreshOwner = { webContents: owner, tabId }
+    subscriptionAutoRefreshOwner = {
+      webContents: owner,
+      tabId,
+      feedTab: typeof feedTab === 'string' ? feedTab : null
+    }
     subscriptionAutoRefreshProgress = 0
     owner.once('destroyed', () => {
       if (subscriptionAutoRefreshOwner?.webContents.id === owner.id) {
@@ -2097,12 +2101,13 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_GET_STATE, (event) => {
     if (!isOpenTubeXUrl(event.senderFrame.url)) {
-      return { inProgress: false, percentage: 0 }
+      return { inProgress: false, percentage: 0, tab: null }
     }
 
     return {
       inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
-      percentage: subscriptionAutoRefreshProgress
+      percentage: subscriptionAutoRefreshProgress,
+      tab: subscriptionAutoRefreshOwner?.feedTab ?? null
     }
   })
 
@@ -2133,7 +2138,8 @@ function runApp() {
   function broadcastSubscriptionAutoRefreshState() {
     const state = {
       inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
-      percentage: subscriptionAutoRefreshProgress
+      percentage: subscriptionAutoRefreshProgress,
+      tab: subscriptionAutoRefreshOwner?.feedTab ?? null
     }
 
     for (const window of BrowserWindow.getAllWindows()) {

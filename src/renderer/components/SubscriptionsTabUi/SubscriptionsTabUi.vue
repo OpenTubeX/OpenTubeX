@@ -1,7 +1,7 @@
 <template>
   <div>
     <FtLoader
-      v-if="displayIsLoading"
+      v-if="displayIsLoading && activeVideoList.length === 0"
     />
     <div
       v-if="!displayIsLoading && errorChannels.length !== 0"
@@ -40,13 +40,13 @@
       </p>
     </FtFlexBox>
     <FtElementList
-      v-if="!displayIsLoading && activeVideoList.length > 0"
+      v-if="activeVideoList.length > 0"
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
     />
     <FtAutoLoadNextPageWrapper
-      v-if="!displayIsLoading && videoList.length > dataLimit"
+      v-if="activeVideoList.length > 0 && videoList.length > dataLimit"
       @load-next-page="increaseLimit"
     >
       <FtFlexBox>

@@ -51,6 +51,10 @@
               class="subscriptionIcon"
             />
             {{ $t("Global.Videos") }}
+            <FtLoader
+              v-if="refreshingFeedTab === 'videos'"
+              class="tabLoadingIndicator"
+            />
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -71,6 +75,10 @@
               class="subscriptionIcon"
             />
             {{ $t("Global.Shorts") }}
+            <FtLoader
+              v-if="refreshingFeedTab === 'shorts'"
+              class="tabLoadingIndicator"
+            />
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -91,6 +99,10 @@
               class="subscriptionIcon"
             />
             {{ $t("Global.Live") }}
+            <FtLoader
+              v-if="refreshingFeedTab === 'live'"
+              class="tabLoadingIndicator"
+            />
           </div>
           <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
           <div
@@ -111,8 +123,17 @@
               class="subscriptionIcon"
             />
             {{ $t("Global.Posts") }}
+            <FtLoader
+              v-if="refreshingFeedTab === 'posts'"
+              class="tabLoadingIndicator"
+            />
           </div>
         </FtFlexBox>
+        <div
+          v-if="currentTabRefreshing"
+          class="tabsProgressBar"
+          :style="{ inlineSize: refreshProgressPercentage + '%' }"
+        />
       </div>
       <SubscriptionsVideos
         v-if="currentTab === 'videos'"
@@ -153,6 +174,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
+import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
@@ -199,6 +221,21 @@ const useRssFeeds = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionFeedRefreshInProgress = computed(() => {
   return store.getters.getSubscriptionFeedRefreshInProgress
+})
+
+/** @type {import('vue').ComputedRef<'videos' | 'shorts' | 'live' | 'posts' | null>} */
+const refreshingFeedTab = computed(() => {
+  return subscriptionFeedRefreshInProgress.value ? store.getters.getSubscriptionFeedRefreshTab : null
+})
+
+const currentTabRefreshing = computed(() => {
+  const currentFeedTab = currentTab.value === 'community' ? 'posts' : currentTab.value
+  return refreshingFeedTab.value !== null && refreshingFeedTab.value === currentFeedTab
+})
+
+/** @type {import('vue').ComputedRef<number>} */
+const refreshProgressPercentage = computed(() => {
+  return store.getters.getProgressBarPercentage
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */

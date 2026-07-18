@@ -81,8 +81,28 @@
   font-weight: bold;
 }
 
+.tabsProgressBar {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  block-size: 3px;
+  background-color: var(--primary-color);
+}
+
 .subscriptionIcon {
   color: var(--primary-color);
+}
+
+.tab .tabLoadingIndicator {
+  display: inline-flex;
+  inline-size: auto;
+  block-size: auto;
+}
+
+.tab .tabLoadingIndicator :deep(.spinner) {
+  inline-size: 16px;
+  block-size: 16px;
+  margin: 0;
 }
 
 @media only screen and (width <= 680px) {
