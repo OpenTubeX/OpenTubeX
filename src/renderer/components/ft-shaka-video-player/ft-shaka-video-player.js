@@ -3037,6 +3037,8 @@ export default defineComponent({
 
     function syncPlayPauseControlIcons() {
       const video_ = video.value
+      if (!video_) return
+
       const nextState = video_.ended && video_.duration ? 'replay' : video_.paused ? 'play' : 'pause'
 
       window.requestAnimationFrame(() => {
