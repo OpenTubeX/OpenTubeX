@@ -454,6 +454,7 @@ export class TabManager {
     // other's content and toggle capture mode out from under one another.
     /** @type {Promise<void>} */
     this._previewCaptureLock = Promise.resolve()
+    this._previewCapturePaused = false
     this.bridge = new TabRendererBridge(browserWindow)
     this._initialPresentationResolved = false
     this._initialPresentationPromise = new Promise(resolve => {
@@ -1203,7 +1204,7 @@ export class TabManager {
    */
   _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
     this._clearTabPreviewRefresh(tab)
-    if (this.presentedTabId !== tab.id) {
+    if (this._previewCapturePaused || this.presentedTabId !== tab.id) {
       return
     }
 
@@ -1340,6 +1341,43 @@ export class TabManager {
   }
 
   /**
+   * @param {string[]} tabIds
+   * @returns {Promise<Record<string, string | null>>}
+   */
+  async getCachedTabPreviews(tabIds) {
+    const previews = await Promise.all(tabIds.map(async tabId => {
+      const tab = this.tabs.get(tabId)
+      const preview = tab == null
+        ? null
+        : await this._getCachedTabPreviewDataUrl(tab) ?? TabManager.getVideoThumbnailUrl(tab.url)
+      return [tabId, preview]
+    }))
+    return Object.fromEntries(previews)
+  }
+
+  /**
+   * @param {boolean} paused
+   */
+  setPreviewCapturePaused(paused) {
+    if (this._previewCapturePaused === paused) {
+      return
+    }
+
+    this._previewCapturePaused = paused
+    if (paused) {
+      for (const tab of this.tabs.values()) {
+        this._clearTabPreviewRefresh(tab)
+      }
+      return
+    }
+
+    const presentedTab = this.presentedTabId == null ? null : this.tabs.get(this.presentedTabId)
+    if (presentedTab != null && !this._getTabLoadingState(presentedTab)) {
+      this._scheduleTabPreviewRefresh(presentedTab)
+    }
+  }
+
+  /**
    * @param {TabInfo} tab
    * @returns {Promise<string | null>}
    */
@@ -1385,6 +1423,7 @@ export class TabManager {
     try {
       // Presentation and window state may have changed while waiting for the lock.
       if (
+        this._previewCapturePaused ||
         tab.id !== this.presentedTabId ||
         this.browserWindow.webContents.isDestroyed() ||
         this._getTabLoadingState(tab)
@@ -2177,6 +2216,23 @@ export function setupTabsIPC(options = {}) {
   ipcMain.handle(IpcChannels.TABS_CAPTURE_PREVIEW, (event, tabId) => {
     const manager = getManager(event)
     return manager && typeof tabId === 'string' ? manager.captureTabPreview(tabId) : null
+  })
+
+  ipcMain.handle(IpcChannels.TABS_GET_CACHED_PREVIEWS, (event, tabIds) => {
+    const manager = getManager(event)
+    if (!manager) {
+      return {}
+    }
+
+    const validTabIds = Array.isArray(tabIds)
+      ? tabIds.filter(tabId => typeof tabId === 'string' && manager.tabs.has(tabId))
+      : []
+    return manager.getCachedTabPreviews(validTabIds)
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_PREVIEW_CAPTURE_PAUSED, (event, paused) => {
+    const manager = getManager(event)
+    manager?.setPreviewCapturePaused(paused === true)
   })
 
   ipcMain.on(IpcChannels.TABS_REQUEST_PREVIEW_REFRESH, (event, options = {}) => {

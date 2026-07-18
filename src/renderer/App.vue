@@ -228,14 +228,14 @@
               draggable="false"
             >
             <img
-              v-else-if="getTabPreviewFallbackUrl(tab)"
+              v-else-if="!tabSwitcherPreviewPending[tab.id] && getTabPreviewFallbackUrl(tab)"
               :src="getTabPreviewFallbackUrl(tab)"
               :alt="`${formatTabSwitcherTitle(tab.title)} preview`"
               class="tabSwitcherPreviewAvatar"
               draggable="false"
             >
             <span
-              v-else
+              v-else-if="!tabSwitcherPreviewPending[tab.id]"
               class="tabSwitcherPreviewFallback"
               aria-hidden="true"
             >
@@ -501,6 +501,7 @@ const findbarInputRef = useTemplateRef('findbarInputRef')
 const tabSwitcherVisible = ref(false)
 const tabSwitcherSelectedIndex = ref(-1)
 const tabSwitcherPreviewUrls = ref({})
+const tabSwitcherPreviewPending = ref({})
 const tabSwitcherPointerActive = ref(false)
 const tabSwitcherRef = useTemplateRef('tabSwitcherRef')
 const subscriptionAutoRefreshTimers = {
@@ -632,6 +633,9 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (isElectron) {
+    window.ftElectron.tabs.setPreviewCapturePaused(false)
+  }
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
   clearInterval(historyCleanupTimer)
@@ -1847,6 +1851,7 @@ function cycleTabSwitcher(direction) {
     tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
     tabSwitcherPreviewUrls.value = {}
     tabSwitcherPointerActive.value = false
+    window.ftElectron.tabs.setPreviewCapturePaused(true)
     tabSwitcherVisible.value = true
     scrollTabSwitcherSelectionIntoView()
     loadTabSwitcherPreviews()
@@ -1872,29 +1877,28 @@ function wrapTabSwitcherIndex(index, length) {
 function loadTabSwitcherPreviews() {
   if (
     !process.env.IS_ELECTRON ||
-    typeof window.ftElectron?.tabs?.capturePreview !== 'function'
+    typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function'
   ) {
     return
   }
 
   const requestId = ++tabSwitcherPreviewRequestId
-  for (const tab of tabSwitcherTabs.value) {
-    window.ftElectron.tabs.capturePreview(tab.id).then((dataUrl) => {
-      if (
-        requestId !== tabSwitcherPreviewRequestId ||
-        !tabSwitcherVisible.value ||
-        typeof dataUrl !== 'string' ||
-        dataUrl.length === 0
-      ) {
-        return
-      }
+  const tabIds = tabSwitcherTabs.value.map(tab => tab.id)
+  tabSwitcherPreviewPending.value = Object.fromEntries(tabIds.map(tabId => [tabId, true]))
 
-      tabSwitcherPreviewUrls.value = {
-        ...tabSwitcherPreviewUrls.value,
-        [tab.id]: dataUrl
-      }
-    }).catch(() => {})
-  }
+  window.ftElectron.tabs.getCachedPreviews(tabIds).then((previews) => {
+    if (requestId !== tabSwitcherPreviewRequestId || !tabSwitcherVisible.value) {
+      return
+    }
+
+    tabSwitcherPreviewUrls.value = Object.fromEntries(
+      Object.entries(previews).filter(([, dataUrl]) => typeof dataUrl === 'string' && dataUrl.length > 0)
+    )
+  }).catch(() => {}).finally(() => {
+    if (requestId === tabSwitcherPreviewRequestId && tabSwitcherVisible.value) {
+      tabSwitcherPreviewPending.value = {}
+    }
+  })
 }
 
 /**
@@ -1971,8 +1975,10 @@ function cancelTabSwitcher() {
   tabSwitcherVisible.value = false
   tabSwitcherSelectedIndex.value = -1
   tabSwitcherPreviewUrls.value = {}
+  tabSwitcherPreviewPending.value = {}
   tabSwitcherPointerActive.value = false
   tabSwitcherPreviewRequestId++
+  window.ftElectron.tabs.setPreviewCapturePaused(false)
 }
 
 /**

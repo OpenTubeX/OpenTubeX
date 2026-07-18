@@ -558,6 +558,23 @@ export default {
     },
 
     /**
+     * Read cached thumbnail previews without triggering a new page capture.
+     * @param {string[]} tabIds
+     * @returns {Promise<Record<string, string | null>>}
+     */
+    getCachedPreviews: (tabIds) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_GET_CACHED_PREVIEWS, tabIds)
+    },
+
+    /**
+     * Pause background page captures while preview UI is visible.
+     * @param {boolean} paused
+     */
+    setPreviewCapturePaused: (paused) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_PREVIEW_CAPTURE_PAUSED, paused)
+    },
+
+    /**
      * Ask the main process to refresh a tab's cached thumbnail preview.
      * @param {{ tabId: string, delayMs?: number }} options
      */
