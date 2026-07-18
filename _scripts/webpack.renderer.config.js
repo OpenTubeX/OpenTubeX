@@ -178,7 +178,7 @@ const config = {
           : [
               {
                 from: path.join(__dirname, '../node_modules/shaka-player/ui/locales', `{${SHAKA_LOCALES_TO_BE_BUNDLED.join(',')}}.json`).replaceAll('\\', '/'),
-                to: path.join(__dirname, '../dist/static/shaka-player-locales'),
+                to: 'static/shaka-player-locales',
                 context: path.join(__dirname, '../node_modules/shaka-player/ui/locales'),
                 transform: {
                   transformer: (input) => {

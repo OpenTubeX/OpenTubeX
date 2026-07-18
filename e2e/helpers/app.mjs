@@ -1,0 +1,200 @@
+import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { test as base, expect, _electron as electron } from '@playwright/test'
+
+export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
+
+// Settings that keep tests deterministic and stop the app from phoning home
+// for things unrelated to the functionality under test.
+const BASE_SETTINGS = {
+  backendPreference: 'local',
+  backendFallback: false,
+  checkForUpdates: false,
+  checkForBlogPosts: false,
+  externalLinkHandling: 'doNothing',
+  confirmCloseApp: false,
+  // Desktop-sized window so the responsive layout doesn't collapse into
+  // its mobile variant (which hides the search bar, among other things).
+  bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+}
+
+/**
+ * Serializes documents in the newline-delimited JSON format used by nedb.
+ *
+ * @param {object[]} docs
+ */
+function toNedbFile(docs) {
+  return docs.map((doc) => JSON.stringify(doc)).join('\n') + '\n'
+}
+
+/**
+ * Creates an isolated userData directory, optionally seeded with
+ * settings and datastore documents.
+ *
+ * @param {object} [seed]
+ * @param {Record<string, unknown>} [seed.settings] additional settings.db entries ({ settingId: value })
+ * @param {object[]} [seed.history] history.db documents
+ * @param {object[]} [seed.playlists] playlists.db documents
+ * @param {object[]} [seed.profiles] profiles.db documents
+ */
+export async function createUserDataDir(seed = {}) {
+  const userDataDir = await mkdtemp(path.join(tmpdir(), 'opentubex-e2e-'))
+
+  const settings = { ...BASE_SETTINGS, ...seed.settings }
+  const settingsDocs = Object.entries(settings).map(([_id, value]) => ({ _id, value }))
+  await writeFile(path.join(userDataDir, 'settings.db'), toNedbFile(settingsDocs))
+
+  for (const store of ['history', 'playlists', 'profiles', 'search-history']) {
+    const docs = seed[store === 'search-history' ? 'searchHistory' : store]
+    if (docs?.length) {
+      await writeFile(path.join(userDataDir, `${store}.db`), toNedbFile(docs))
+    }
+  }
+
+  return userDataDir
+}
+
+/**
+ * Launches the packed app (dist/main.js) against the given userData directory.
+ */
+export async function launchApp(userDataDir) {
+  // Force X11 so the app renders on the xvfb display instead of escaping
+  // to the user's real Wayland session.
+  const env = {
+    ...process.env,
+    OPENTUBEX_E2E_USER_DATA_DIR: userDataDir,
+    ELECTRON_OZONE_PLATFORM_HINT: 'x11'
+  }
+  delete env.WAYLAND_DISPLAY
+
+  // The E2E build lives in its own directory so a running `pnpm dev`
+  // (which rebuilds dist/ in development mode) can't clobber it.
+  const electronApp = await electron.launch({
+    args: [path.join(repoRoot, 'dist-e2e', 'main.js'), '--ozone-platform=x11', '--mute-audio'],
+    cwd: repoRoot,
+    env
+  })
+
+  const page = await electronApp.firstWindow()
+
+  // Fail fast if dist-e2e contains a development build (it would load the
+  // dev server on localhost instead of the bundled files). A transient
+  // chrome-error page can appear under heavy parallel load - reload once.
+  try {
+    await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000 })
+  } catch {
+    if (page.url().startsWith('chrome-error://')) {
+      await page.reload().catch(() => {})
+    }
+    try {
+      await page.waitForURL(/^app:\/\/bundle/, { timeout: 15_000 })
+    } catch {
+      const url = page.url()
+      await electronApp.close().catch(() => {})
+      throw new Error(
+        `Unexpected app URL ${url} — dist-e2e must contain a production build, run "pnpm run test:e2e:pack"`
+      )
+    }
+  }
+
+  // Safety guard: if the userData override ever stops working, abort
+  // instead of silently running tests against the user's real profile.
+  const actualUserData = await electronApp.evaluate(({ app }) => app.getPath('userData'))
+  if (actualUserData !== userDataDir) {
+    await electronApp.close().catch(() => {})
+    throw new Error(
+      `E2E userData isolation failed: expected ${userDataDir}, got ${actualUserData}. ` +
+      'Did you run "pnpm run test:e2e:pack" after changing src/main?'
+    )
+  }
+
+  await waitForAppReady(page)
+
+  return { electronApp, page }
+}
+
+/**
+ * Waits until the renderer has booted far enough to interact with.
+ */
+export async function waitForAppReady(page) {
+  // The top nav is rendered once Vue has mounted and the locale has loaded.
+  await expect(page.locator('.topNav')).toBeVisible({ timeout: 30_000 })
+  await expect(page.locator('.tabBar')).toBeVisible()
+}
+
+/**
+ * Base test with an `app` fixture that provides a freshly launched,
+ * isolated app instance per test.
+ *
+ * Customize seeding per test file with:
+ *   test.use({ seed: { settings: { ... }, history: [ ... ] } })
+ */
+export const test = base.extend({
+  seed: [{}, { option: true }],
+
+  app: async ({ seed }, use, testInfo) => {
+    const userDataDir = await createUserDataDir(seed)
+    const { electronApp, page } = await launchApp(userDataDir)
+
+    const relaunch = async () => {
+      await electronApp.close()
+      const next = await launchApp(userDataDir)
+      appHandle.electronApp = next.electronApp
+      appHandle.page = next.page
+      return next
+    }
+
+    const appHandle = { electronApp, page, userDataDir, relaunch }
+
+    try {
+      await use(appHandle)
+    } finally {
+      if (testInfo.status !== testInfo.expectedStatus) {
+        const screenshotPath = testInfo.outputPath('failure.png')
+        await mkdir(path.dirname(screenshotPath), { recursive: true })
+        await appHandle.page.screenshot({ path: screenshotPath }).catch(() => {})
+        testInfo.attachments.push({ name: 'failure', path: screenshotPath, contentType: 'image/png' })
+      }
+      await appHandle.electronApp.close().catch(() => {})
+      await rm(userDataDir, { recursive: true, force: true })
+    }
+  },
+
+  // Convenience: `page` resolves to the app's window.
+  page: async ({ app }, use) => {
+    await use(app.page)
+  }
+})
+
+export { expect }
+
+/**
+ * Navigates via the side nav. Some routes appear twice in the side nav
+ * (regular entry + "more options" flyout), so this clicks the first one.
+ */
+export async function goTo(page, route) {
+  const visibleLink = () => page.locator(`${sel.sideNavLink(route)}:visible`).first()
+  if (await visibleLink().count() === 0) {
+    // Entry lives in the "More" flyout in the collapsed side nav.
+    await page.locator('.sideNav .moreOptionNav').click()
+  }
+  await visibleLink().click()
+  await expect(page).toHaveURL(new RegExp(`#/${route}`))
+}
+
+/** Common locators, kept in one place so selector changes only hit here. */
+export const sel = {
+  searchInput: '.topNav .searchInput input.ft-input',
+  sideNavLink: (route) => `.sideNav a[href="#/${route}"]`,
+  tabs: '.tabBar .tab',
+  activeTab: '.tabBar .tab.active',
+  newTabButton: '.tabBar .newTabButton',
+  // Keyboard accelerators (Alt+Arrow) are handled by the Electron menu and
+  // don't fire from synthesized input, so tests click these buttons instead.
+  backButton: '.topNav button[title^="Back"]',
+  forwardButton: '.topNav button[title^="Forward"]',
+  video: 'video'
+}

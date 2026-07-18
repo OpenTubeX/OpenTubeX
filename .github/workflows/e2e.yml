@@ -1,0 +1,96 @@
+name: E2E Tests
+
+on:
+  pull_request:
+    branches: [ master, development, '**-RC' ]
+  schedule:
+    # Nightly network suite against the real YouTube servers
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Playwright project to run'
+        required: false
+        default: 'network'
+        type: choice
+        options: [ offline, network ]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+      with:
+        persist-credentials: false
+
+    - name: Use Node.js 24.x
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #v7.0.0
+      with:
+        node-version: 24.x
+        package-manager-cache: false
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 #v6.0.9
+      with:
+        version: 11
+        cache: false
+
+    - name: Get pnpm cache directory
+      id: cache_dir
+      shell: bash
+      run: |
+        {
+          echo 'cache_dir<<EOF'
+          pnpm store path
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Restore pnpm cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
+      with:
+        key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
+        path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+    - run: pnpm run ci
+      shell: bash
+
+    - run: pnpm run test:e2e:pack
+      shell: bash
+
+    - name: Determine test project
+      id: project
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "project=offline" >> "$GITHUB_OUTPUT"
+        elif [ "${{ github.event_name }}" = "schedule" ]; then
+          echo "project=network" >> "$GITHUB_OUTPUT"
+        else
+          echo "project=${{ inputs.project }}" >> "$GITHUB_OUTPUT"
+        fi
+
+    # The network project talks to the real YouTube servers on the first
+    # attempt and automatically falls back to recorded fixtures on retry.
+    - name: Run E2E tests
+      run: xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
+      shell: bash
+
+    - name: Upload Playwright report
+      if: failure()
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 #v5.0.0
+      with:
+        name: playwright-report
+        path: |
+          e2e/report/
+          e2e/results/
+        retention-days: 14

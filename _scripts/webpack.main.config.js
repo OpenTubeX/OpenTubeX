@@ -71,7 +71,7 @@ if (!isDevMode) {
       patterns: [
         {
           from: path.join(__dirname, '../static'),
-          to: path.join(__dirname, '../dist/static'),
+          to: 'static',
           globOptions: {
             dot: true,
             ignore: ['**/.*', '**/locales/**', '**/pwabuilder-sw.js', '**/manifest.json', '**/dashFiles/**', '**/storyboards/**'],

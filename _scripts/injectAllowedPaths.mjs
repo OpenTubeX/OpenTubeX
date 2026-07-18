@@ -9,7 +9,8 @@
 import { closeSync, ftruncateSync, openSync, readFileSync, readdirSync, writeSync } from 'fs'
 import { join, relative, resolve } from 'path'
 
-const distDirectory = resolve(import.meta.dirname, '..', 'dist')
+// Optionally pass a different dist directory name (e.g. "dist-e2e" for the E2E build)
+const distDirectory = resolve(import.meta.dirname, '..', process.argv[2] ?? 'dist')
 const webDirectory = join(distDirectory, 'web')
 
 const paths = readdirSync(distDirectory, {

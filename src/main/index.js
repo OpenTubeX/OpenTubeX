@@ -4,6 +4,7 @@ import {
   nativeTheme, net, protocol, clipboard,
   Tray
 } from 'electron'
+import './e2eUserDataOverride'
 import path from 'path'
 import cp from 'child_process'
 import { load as loadYaml } from 'js-yaml'

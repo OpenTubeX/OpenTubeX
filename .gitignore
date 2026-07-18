@@ -30,3 +30,8 @@ debug/
 lefthook-local.yml
 
 locale-errors.json
+
+# E2E test output
+e2e/results/
+e2e/report/
+dist-e2e/
