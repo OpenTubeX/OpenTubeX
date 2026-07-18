@@ -100,7 +100,7 @@ const refreshTitle = computed(() => {
   return t('Global.Live')
 })
 
-const hasVisibleNewContent = computed(() => tabUi.value?.hasVisibleNewContent === true)
+const hasNewContent = computed(() => tabUi.value?.hasNewContent === true)
 
 const nextAutoRefreshTimestamp = computed(() => {
   const timestamp = store.getters.getSubscriptionLiveNextAutoRefreshTimestamp
@@ -259,6 +259,6 @@ defineExpose({
   nextAutoRefreshTimestamp,
   nextAutoRefreshTooltip,
   refreshTitle,
-  hasVisibleNewContent
+  hasNewContent
 })
 </script>

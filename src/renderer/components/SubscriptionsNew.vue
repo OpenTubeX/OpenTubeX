@@ -1,12 +1,12 @@
 <template>
   <SubscriptionsTabUi
-    ref="tabUi"
     :is-loading="isLoading"
     :video-list="newMedia"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :only-show-new="true"
     :has-additional-content="newPosts.length > 0"
+    :track-global-refresh="false"
     stable-item-keys
     @refresh="refresh"
   >
@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
@@ -49,7 +49,6 @@ import {
 } from '../helpers/subscriptions'
 
 const { t } = useI18n()
-const tabUi = useTemplateRef('tabUi')
 const isRefreshing = ref(false)
 const attemptedFetch = ref(false)
 const errorChannels = ref([])
@@ -119,7 +118,7 @@ const isLoading = computed(() => {
   return !store.getters.getSubscriptionCacheReady || isRefreshing.value
 })
 
-const hasVisibleNewContent = computed(() => tabUi.value?.hasVisibleNewContent === true)
+const hasNewContent = computed(() => newContent.value.length > 0)
 
 const lastRefreshTimestamp = computed(() => {
   const timestamps = enabledFeeds.value.flatMap(({ cache }) => {
@@ -157,7 +156,7 @@ defineExpose({
   nextAutoRefreshTimestamp: '',
   nextAutoRefreshTooltip: '',
   refreshTitle: computed(() => t('Subscriptions.New Content')),
-  hasVisibleNewContent
+  hasNewContent
 })
 </script>
 

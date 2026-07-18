@@ -151,7 +151,7 @@
             </div>
           </FtFlexBox>
           <button
-            v-if="currentTabHasVisibleNewContent"
+            v-if="currentTabHasNewContent"
             class="markAllSeenButton"
             type="button"
             :disabled="markingSeenTab !== null || subscriptionFeedRefreshInProgress"
@@ -423,12 +423,12 @@ const currentTabPanel = computed(() => {
   }
 })
 
-const currentTabHasVisibleNewContent = computed(() => {
+const currentTabHasNewContent = computed(() => {
   if (currentTab.value === 'new') {
-    return showNewSubscriptionFeed.value && currentTabPanel.value?.hasVisibleNewContent === true
+    return showNewSubscriptionFeed.value && currentTabPanel.value?.hasNewContent === true
   }
 
-  return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasVisibleNewContent === true
+  return showNewSubscriptionFeedIndicators.value && currentTabPanel.value?.hasNewContent === true
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */

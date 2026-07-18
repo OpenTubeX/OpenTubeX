@@ -1,5 +1,5 @@
 <template>
-  <div ref="tabUiRoot">
+  <div>
     <FtLoader
       v-if="displayIsLoading && activeVideoList.length === 0"
     />
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -87,7 +87,6 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
-const tabUiRoot = useTemplateRef('tabUiRoot')
 const subscriptionLimitStorageKey = tabId ? `Subscriptions/${tabId}/dataLimit` : 'subscriptionLimit'
 
 const props = defineProps({
@@ -119,6 +118,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  trackGlobalRefresh: {
+    type: Boolean,
+    default: true
+  },
   stableItemKeys: {
     type: Boolean,
     default: false
@@ -134,8 +137,6 @@ const emit = defineEmits(['refresh'])
 const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
-const hasVisibleNewContent = ref(false)
-let renderedNewContentObserver = null
 
 const activeVideoList = computed(() => {
   if (filteredVideoList.value.length < dataLimit.value) {
@@ -155,7 +156,7 @@ const subscriptionFeedRefreshInProgress = computed(() => {
 })
 
 const displayIsLoading = computed(() => {
-  return props.isLoading || subscriptionFeedRefreshInProgress.value
+  return props.isLoading || (props.trackGlobalRefresh && subscriptionFeedRefreshInProgress.value)
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -221,6 +222,13 @@ const filteredVideoList = computed(() => {
   return videoList
 })
 
+const hasNewContent = computed(() => {
+  return filteredVideoList.value.some(entry => {
+    return entry.isNewInSubscriptionFeed === true &&
+      (entry.videoId == null || !isHistoryEntryWatched(historyCacheById.value[entry.videoId]))
+  })
+})
+
 function increaseLimit() {
   dataLimit.value += props.initialDataLimit
   sessionStorage.setItem(subscriptionLimitStorageKey, dataLimit.value.toFixed(0))
@@ -256,31 +264,17 @@ function keyboardShortcutHandler(event) {
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
-
-  renderedNewContentObserver = new MutationObserver(updateHasVisibleNewContent)
-  renderedNewContentObserver.observe(tabUiRoot.value, {
-    attributes: true,
-    attributeFilter: ['data-new-subscription-entry-rendered'],
-    childList: true,
-    subtree: true
-  })
-  updateHasVisibleNewContent()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keyboardShortcutHandler)
-  renderedNewContentObserver?.disconnect()
 })
-
-function updateHasVisibleNewContent() {
-  hasVisibleNewContent.value = tabUiRoot.value?.querySelector('[data-new-subscription-entry-rendered]') != null
-}
 
 function refresh() {
   emit('refresh')
 }
 
-defineExpose({ hasVisibleNewContent })
+defineExpose({ hasNewContent })
 </script>
 
 <style scoped src="./SubscriptionsTabUi.css" />

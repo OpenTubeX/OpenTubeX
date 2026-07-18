@@ -127,7 +127,7 @@ const refreshTitle = computed(() => {
   return t('Global.Videos')
 })
 
-const hasVisibleNewContent = computed(() => tabUi.value?.hasVisibleNewContent === true)
+const hasNewContent = computed(() => tabUi.value?.hasNewContent === true)
 
 /**
  * @param {number} remainingMs
@@ -258,6 +258,6 @@ defineExpose({
   nextAutoRefreshTimestamp: nextVideoAutoRefreshTimestamp,
   nextAutoRefreshTooltip: nextVideoAutoRefreshTooltip,
   refreshTitle,
-  hasVisibleNewContent
+  hasNewContent
 })
 </script>

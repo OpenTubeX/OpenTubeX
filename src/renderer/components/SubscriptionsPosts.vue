@@ -99,7 +99,7 @@ const refreshTitle = computed(() => {
   return t('Global.Posts')
 })
 
-const hasVisibleNewContent = computed(() => tabUi.value?.hasVisibleNewContent === true)
+const hasNewContent = computed(() => tabUi.value?.hasNewContent === true)
 
 const nextAutoRefreshTimestamp = computed(() => {
   const timestamp = store.getters.getSubscriptionPostsNextAutoRefreshTimestamp
@@ -268,6 +268,6 @@ defineExpose({
   nextAutoRefreshTimestamp,
   nextAutoRefreshTooltip,
   refreshTitle,
-  hasVisibleNewContent
+  hasNewContent
 })
 </script>
