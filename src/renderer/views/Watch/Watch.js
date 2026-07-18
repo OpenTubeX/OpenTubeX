@@ -67,6 +67,7 @@ import { useTabToast } from '../../composables/useTabToast'
 
 const MANIFEST_TYPE_DASH = 'application/dash+xml'
 const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
+const THEATRE_MODE_ANIMATION_DURATION = 400
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -431,6 +432,7 @@ export default defineComponent({
     },
   },
   created: function () {
+    this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
     this.activeFormat = this.defaultVideoFormat
     // So that the value for this session remains unchanged even if setting changed
@@ -452,6 +454,7 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
+    this.theatreModeAnimations.forEach(animation => animation.cancel())
     this.deactivateWatchRuntime()
     // When a logical-tab lifecycle is registered, its beforeDispose hook drives
     // cleanupWatchRuntime before this component unmounts. Without one (e.g. the
@@ -465,6 +468,55 @@ export default defineComponent({
     }
   },
   methods: {
+    async toggleTheatreMode() {
+      const layout = this.$refs.videoLayout
+      const elements = [
+        layout.querySelector('.videoPlayer'),
+        layout.querySelector('.infoArea'),
+        layout.querySelector('.sidebarArea')
+      ].filter(element => element !== null)
+
+      this.theatreModeAnimations.forEach(animation => animation.cancel())
+      this.theatreModeAnimations = []
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.useTheatreMode = !this.useTheatreMode
+        return
+      }
+
+      const previousRects = elements.map(element => element.getBoundingClientRect())
+      this.useTheatreMode = !this.useTheatreMode
+      await this.$nextTick()
+
+      this.theatreModeAnimations = elements.map((element, index) => {
+        const previousRect = previousRects[index]
+        const nextRect = element.getBoundingClientRect()
+        const translateX = previousRect.left - nextRect.left
+        const translateY = previousRect.top - nextRect.top
+        const isVideoPlayer = element.classList.contains('videoPlayer')
+        const scaleX = isVideoPlayer ? previousRect.width / nextRect.width : 1
+        const scaleY = isVideoPlayer ? previousRect.height / nextRect.height : 1
+        const animation = element.animate([
+          {
+            transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
+            transformOrigin: 'top left'
+          },
+          {
+            transform: 'none',
+            transformOrigin: 'top left'
+          }
+        ], {
+          duration: THEATRE_MODE_ANIMATION_DURATION,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        })
+
+        animation.addEventListener('finish', () => {
+          this.theatreModeAnimations = this.theatreModeAnimations.filter(item => item !== animation)
+        })
+        return animation
+      })
+    },
+
     activateWatchRuntime() {
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
         return

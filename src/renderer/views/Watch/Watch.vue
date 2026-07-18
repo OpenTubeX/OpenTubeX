@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="videoLayout"
     class="videoLayout"
     :class="{
       ambientModeActive,
@@ -64,7 +65,7 @@
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
           @pause="handleVideoPause"
-          @toggle-theatre-mode="useTheatreMode = !useTheatreMode"
+          @toggle-theatre-mode="toggleTheatreMode"
           @toggle-autoplay="toggleAutoplay"
           @playback-rate-updated="updatePlaybackRate"
           @playback-rate-user-set="handlePlaybackRateUserSet"

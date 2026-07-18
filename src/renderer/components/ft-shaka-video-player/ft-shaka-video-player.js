@@ -75,6 +75,7 @@ const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
+const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
@@ -390,6 +391,8 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    /** @type {Animation|null} */
+    let fullWindowAnimation = null
     // The setFullWindow listener is only attached once the shaka UI is built. An
     // early isActiveTab tick can run applyPendingPresentationModes before then, so
     // gate the full-window request on the listener being ready to avoid consuming
@@ -4298,7 +4301,15 @@ export default defineComponent({
     }
 
     function registerFullWindowButton() {
-      events.addEventListener('setFullWindow', (/** @type {CustomEvent} */ event) => {
+      events.addEventListener('setFullWindow', async (/** @type {CustomEvent} */ event) => {
+        fullWindowAnimation?.cancel()
+        fullWindowAnimation = null
+
+        const playerContainer = container.value
+        const shouldAnimate = playerContainer !== null &&
+          !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+
         if (event.detail) {
           window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
         }
@@ -4312,6 +4323,33 @@ export default defineComponent({
           delete document.body.dataset.playerFullWindowOwner
           document.body.classList.remove('playerFullWindow')
         }
+
+        if (previousRect === null) {
+          return
+        }
+
+        await nextTick()
+        const nextRect = playerContainer.getBoundingClientRect()
+        const animation = playerContainer.animate([
+          {
+            transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
+            transformOrigin: 'top left'
+          },
+          {
+            transform: 'none',
+            transformOrigin: 'top left'
+          }
+        ], {
+          duration: FULL_WINDOW_ANIMATION_DURATION_MS,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        })
+
+        fullWindowAnimation = animation
+        animation.addEventListener('finish', () => {
+          if (fullWindowAnimation === animation) {
+            fullWindowAnimation = null
+          }
+        })
       })
 
       fullWindowListenerReady = true
@@ -6677,6 +6715,7 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
+      fullWindowAnimation?.cancel()
       hasLoaded.value = false
       if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
         delete document.body.dataset.playerFullWindowOwner
