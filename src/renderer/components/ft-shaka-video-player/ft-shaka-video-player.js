@@ -2842,25 +2842,6 @@ export default defineComponent({
       })
     }
 
-    /** @param {MutationRecord} mutation */
-    function isHighlightLabelCollapseMutation(mutation) {
-      if (mutation.type !== 'attributes' ||
-        mutation.attributeName !== 'class' ||
-        !(mutation.target instanceof HTMLElement) ||
-        !mutation.target.classList.contains('ft-shaka-highlight-button')) {
-        return false
-      }
-
-      const previousClasses = new Set(mutation.oldValue?.split(/\s+/).filter(Boolean))
-      previousClasses.delete('ft-shaka-highlight-button-collapsed')
-
-      const currentClasses = new Set(mutation.target.classList)
-      currentClasses.delete('ft-shaka-highlight-button-collapsed')
-
-      return previousClasses.size === currentClasses.size &&
-        [...previousClasses].every(className => currentClasses.has(className))
-    }
-
     function setupAdaptiveControlPanelLayout() {
       controlPanelResizeObserver?.disconnect()
       controlPanelMutationObserver?.disconnect()
@@ -2886,15 +2867,12 @@ export default defineComponent({
       controlPanelResizeObserver.observe(controlPanel)
 
       controlPanelMutationObserver = new MutationObserver(mutations => {
-        if (mutations.some(mutation => {
-          return mutation.target !== controlPanel && !isHighlightLabelCollapseMutation(mutation)
-        })) {
+        if (mutations.some(mutation => mutation.target !== controlPanel)) {
           scheduleControlPanelLayout(controlPanel)
         }
       })
       controlPanelMutationObserver.observe(controlPanel, {
         attributeFilter: ['class'],
-        attributeOldValue: true,
         attributes: true,
         characterData: true,
         childList: true,

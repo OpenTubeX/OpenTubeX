@@ -1092,8 +1092,8 @@
   gap: 0;
 }
 
-:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button),
-:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button-label) {
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button:not(.ft-shaka-highlight-button-collapsed)),
+:deep(.shaka-controls-button-panel.ft-controls-measuring .ft-shaka-highlight-button:not(.ft-shaka-highlight-button-collapsed) .ft-shaka-highlight-button-label) {
   transition: none;
 }
 
