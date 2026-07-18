@@ -34,7 +34,7 @@
           {{ publishedDateText }}
         </span>
         <template
-          v-if="publishedTimeAgo"
+          v-if="publishedTimeAgo && !isPremiereInProgress"
         >
           <span class="seperator">•</span><span class="publishedTimeAgo">{{ publishedTimeAgo }}</span>
         </template>
@@ -467,8 +467,12 @@ const publishedTimeAgo = computed(() => {
   return getRelativeTimeFromDate(props.published)
 })
 
+const isPremiereInProgress = computed(() => {
+  return props.isLive && !props.isLiveContent
+})
+
 const publishedString = computed(() => {
-  if (props.isLive) {
+  if (props.isLive && props.isLiveContent) {
     return t('Video.Started streaming on')
   } else if (props.isLiveContent && !props.isLive) {
     return t('Video.Streamed on')
@@ -478,6 +482,10 @@ const publishedString = computed(() => {
 })
 
 const publishedDateText = computed(() => {
+  if (isPremiereInProgress.value) {
+    return t('Video.Premiere started', { timeAgo: publishedTimeAgo.value })
+  }
+
   return `${publishedString.value} ${dateString.value}`
 })
 

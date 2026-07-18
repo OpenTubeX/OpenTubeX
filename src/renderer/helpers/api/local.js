@@ -1505,6 +1505,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       published,
       lengthSeconds: isLive ? '' : Utils.timeToSeconds(video.duration.text),
       isUpcoming: video.is_upcoming,
+      isPremiere: video.is_premiere,
       premiereDate: video.upcoming,
       liveNow: isLive
     }
@@ -1565,6 +1566,7 @@ export function parseLocalListVideo(item, channelId, channelName) {
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
       liveNow: video.is_live,
+      isPremiere: video.is_premiere,
       isUpcoming: video.is_upcoming || video.is_premiere,
       premiereDate: video.upcoming,
       is4k: video.is_4k,
@@ -1656,6 +1658,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
       let publishedText
       let lengthSeconds = ''
       let liveNow = false
+      let isPremiere = false
       let isUpcoming = false
       let premiereDate
 
@@ -1683,8 +1686,12 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         .find(part => part.text?.text && predicate(part.text.text))?.text?.text
 
       if (thumbnailBottomOverlayView) {
-        if (thumbnailBottomOverlayView.badges.some(badge => badge.badge_style === 'THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE')) {
+        const liveBadge = thumbnailBottomOverlayView.badges
+          .find(badge => badge.badge_style === 'THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE')
+
+        if (liveBadge) {
           liveNow = true
+          isPremiere = liveBadge.text?.toLowerCase() === 'premiere'
         } else if (thumbnailBottomOverlayView.badges.some(badge => badge.text?.toLowerCase() === 'upcoming')) {
           isUpcoming = true
 
@@ -1765,6 +1772,7 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         published: calculatePublishedDate(publishedText, liveNow, isUpcoming, premiereDate),
         lengthSeconds,
         liveNow,
+        isPremiere,
         isUpcoming,
         premiereDate
       }
@@ -1924,6 +1932,7 @@ export function parseLocalWatchNextVideo(video) {
       published,
       lengthSeconds: isNaN(video.duration.seconds) ? '' : video.duration.seconds,
       liveNow: video.is_live,
+      isPremiere: video.is_premiere,
       isUpcoming: video.is_premiere
     }
   }

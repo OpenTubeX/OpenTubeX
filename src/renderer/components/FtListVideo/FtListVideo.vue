@@ -43,7 +43,7 @@
           upcoming: isUpcoming
         }"
       >
-        {{ isLive ? t("Video.Live") : (isUpcoming ? t("Video.Upcoming") : displayDuration) }}
+        {{ displayDurationLabel }}
       </div>
       <FtIconButton
         v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
@@ -431,6 +431,7 @@ const duration = ref('')
 const description = ref('')
 const published = ref(undefined)
 const isLive = ref(false)
+const isPremiere = ref(false)
 const is4k = ref(false)
 const is8k = ref(false)
 const isNew = ref(false)
@@ -827,6 +828,14 @@ const displayDuration = computed(() => {
   return duration.value
 })
 
+const displayDurationLabel = computed(() => {
+  if (isPremiere.value) return t('Video.Premiere')
+  if (isLive.value) return t('Video.Live')
+  if (isUpcoming.value) return t('Video.Upcoming')
+
+  return displayDuration.value
+})
+
 /** @type {import('vue').ComputedRef<{ playlistId: string | undefined, playlistType: string | undefined, playlistItemId: string | undefined } | undefined>} */
 const playlistIdTypePairFinal = computed(() => {
   if (props.playlistId) {
@@ -1146,6 +1155,8 @@ function parseVideoData() {
 
   description.value = props.data.description
   isLive.value = props.data.liveNow || props.data.lengthSeconds === undefined
+  isPremiere.value = props.data.isPremiere === true ||
+    (isLive.value && props.data.premiereTimestamp > 0)
   isUpcoming.value = props.data.isUpcoming || props.data.premiere
   is4k.value = props.data.is4k
   is8k.value = props.data.is8k

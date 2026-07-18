@@ -973,6 +973,8 @@ function normalizeManyInvidiousVideosAttributes(videos, fallbackAuthorId = null)
  */
 function normalizeOneInvidiousVideoAttributes(video, fallbackAuthorId = null) {
   if (video.authorId === '') video.authorId = fallbackAuthorId
+
+  video.isPremiere = video.liveNow && video.premiereTimestamp > 0
 }
 
 /**

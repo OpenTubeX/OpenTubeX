@@ -1093,6 +1093,7 @@ Video:
   Starting soon, please refresh the page to check again: Starting soon, please refresh
     the page to check again
   # As in a Live Video
+  Premiere: Premiere
   Premieres: Premieres
   Upcoming: Upcoming
   Unlisted: Unlisted
@@ -1117,6 +1118,7 @@ Video:
   Published:
     In less than a minute: In less than a minute
   Published on: Published on
+  Premiere started: Premiere in progress. Started {timeAgo}
   Streamed on: Streamed on
   Started streaming on: Started streaming on
   DeArrow:

@@ -867,6 +867,10 @@ export default defineComponent({
         this.isUnlisted = !!result.basic_info.is_unlisted
         this.hasAiGeneratedContent = result.primary_info?.badges.some(badge => badge.label === 'AI') ?? false
 
+        if (this.isLive && !this.isLiveContent) {
+          this.videoPublished = result.basic_info.start_timestamp.getTime()
+        }
+
         const subCount = !result.secondary_info.owner.subscriber_count.isEmpty() ? parseLocalSubscriberCount(result.secondary_info.owner.subscriber_count.text) : NaN
 
         if (!isNaN(subCount)) {

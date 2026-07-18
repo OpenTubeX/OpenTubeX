@@ -48,6 +48,10 @@ test.use({
         _id: CHANNEL_A,
         videos: [
           feedVideo('aaaaaaaaaa1', 'Video A newer', CHANNEL_A, now - 1 * HOUR),
+          feedVideo('aaaaaaaaaa4', 'Running premiere video', CHANNEL_A, now - 2 * HOUR, {
+            isPremiere: true,
+            liveNow: true
+          }),
           feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
           feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 24 * HOUR, {
             isUpcoming: true,
@@ -73,12 +77,17 @@ test.describe('subscriptions feed from cache', () => {
 
     await expect(page.getByText('Video B newest')).toBeVisible()
     await expect(page.getByText('Video A newer')).toBeVisible()
+    await expect(page.getByText('Running premiere video')).toBeVisible()
     await expect(page.getByText('Video A older')).toBeVisible()
+
+    const runningPremiere = page.locator('.ft-list-video').filter({ hasText: 'Running premiere video' })
+    await expect(runningPremiere.locator('.videoDuration')).toHaveText('Premiere')
 
     const titles = page.locator('.ft-list-video .title, [class*="videoTitle"]')
     await expect(titles.nth(0)).toContainText('Video B newest')
     await expect(titles.nth(1)).toContainText('Video A newer')
-    await expect(titles.nth(2)).toContainText('Video A older')
+    await expect(titles.nth(2)).toContainText('Running premiere video')
+    await expect(titles.nth(3)).toContainText('Video A older')
 
     // The subscription feed honours the hide-upcoming-premieres setting.
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
