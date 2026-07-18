@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tabUiRoot">
     <FtLoader
       v-if="displayIsLoading && activeVideoList.length === 0"
     />
@@ -25,6 +25,12 @@
         class="message"
       >
         {{ $t("Subscriptions['Your Subscription list is currently empty. Start adding subscriptions to see them here.']") }}
+      </p>
+      <p
+        v-else-if="onlyShowNew"
+        class="message"
+      >
+        {{ $t("Subscriptions.No New Content") }}
       </p>
       <p
         v-else-if="!fetchSubscriptionsAutomatically && !attemptedFetch"
@@ -62,7 +68,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 import FtAutoLoadNextPageWrapper from '../FtAutoLoadNextPageWrapper.vue'
 import FtButton from '../FtButton/FtButton.vue'
@@ -78,6 +84,7 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
+const tabUiRoot = useTemplateRef('tabUiRoot')
 const subscriptionLimitStorageKey = tabId ? `Subscriptions/${tabId}/dataLimit` : 'subscriptionLimit'
 
 const props = defineProps({
@@ -104,6 +111,10 @@ const props = defineProps({
   initialDataLimit: {
     type: Number,
     default: 100
+  },
+  onlyShowNew: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -112,6 +123,8 @@ const emit = defineEmits(['refresh'])
 const subscriptionLimit = sessionStorage.getItem(subscriptionLimitStorageKey)
 
 const dataLimit = ref(subscriptionLimit !== null ? parseInt(subscriptionLimit) : props.initialDataLimit)
+const hasVisibleNewContent = ref(false)
+let renderedNewContentObserver = null
 
 const activeVideoList = computed(() => {
   if (filteredVideoList.value.length < dataLimit.value) {
@@ -119,10 +132,6 @@ const activeVideoList = computed(() => {
   } else {
     return filteredVideoList.value.slice(0, dataLimit.value)
   }
-})
-
-const hasVisibleNewContent = computed(() => {
-  return activeVideoList.value.some(entry => entry.isNewInSubscriptionFeed === true)
 })
 
 const activeProfileHasSubscriptions = computed(() => {
@@ -161,6 +170,10 @@ const onlyShowLatestFromChannelNumber = computed(() => {
 
 const filteredVideoList = computed(() => {
   let videoList = props.videoList
+
+  if (props.onlyShowNew) {
+    videoList = videoList.filter(entry => entry.isNewInSubscriptionFeed === true)
+  }
 
   if (!props.isCommunity && hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {
@@ -229,11 +242,25 @@ function keyboardShortcutHandler(event) {
 
 onMounted(() => {
   document.addEventListener('keydown', keyboardShortcutHandler)
+
+  renderedNewContentObserver = new MutationObserver(updateHasVisibleNewContent)
+  renderedNewContentObserver.observe(tabUiRoot.value, {
+    attributes: true,
+    attributeFilter: ['data-new-subscription-entry-rendered'],
+    childList: true,
+    subtree: true
+  })
+  updateHasVisibleNewContent()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', keyboardShortcutHandler)
+  renderedNewContentObserver?.disconnect()
 })
+
+function updateHasVisibleNewContent() {
+  hasVisibleNewContent.value = tabUiRoot.value?.querySelector('[data-new-subscription-entry-rendered]') != null
+}
 
 function refresh() {
   emit('refresh')

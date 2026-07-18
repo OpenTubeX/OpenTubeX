@@ -130,6 +130,14 @@
               />
             </div>
           </FtFlexBox>
+          <FtToggleSwitch
+            v-if="showNewSubscriptionFeedIndicators && currentTab !== null"
+            class="onlyShowNewToggle"
+            :label="$t('Subscriptions.Only Show New')"
+            :default-value="onlyShowNew"
+            compact
+            @change="onlyShowNew = $event"
+          />
           <button
             v-if="currentTabHasVisibleNewContent"
             class="markAllSeenButton"
@@ -152,24 +160,28 @@
         id="subscriptionsPanel"
         ref="videosPanel"
         role="tabpanel"
+        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsShorts
         v-else-if="currentTab === 'shorts'"
         id="subscriptionsPanel"
         ref="shortsPanel"
         role="tabpanel"
+        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsLive
         v-else-if="currentTab === 'live'"
         id="subscriptionsPanel"
         ref="livePanel"
         role="tabpanel"
+        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <SubscriptionsPosts
         v-else-if="currentTab === 'community'"
         id="subscriptionsPanel"
         ref="communityPanel"
         role="tabpanel"
+        :only-show-new="showNewSubscriptionFeedIndicators && onlyShowNew"
       />
       <p v-else>
         {{ $t("Subscriptions.All Subscription Tabs Hidden", {
@@ -189,6 +201,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
+import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
@@ -252,6 +265,7 @@ const refreshProgressPercentage = computed(() => {
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | null>} */
 const currentTab = ref('videos')
+const onlyShowNew = ref(false)
 
 const tabScrollPositions = {
   videos: 0,

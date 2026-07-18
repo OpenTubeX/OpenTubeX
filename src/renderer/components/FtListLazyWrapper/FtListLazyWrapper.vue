@@ -11,6 +11,7 @@
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
     :draggable="isDraggable"
+    :data-new-subscription-entry-rendered="visible && data.isNewInSubscriptionFeed === true ? '' : undefined"
     v-on="isDraggable ? draggableEventHandlers : {}"
   >
     <template

@@ -7,6 +7,7 @@
     :attempted-fetch="attemptedFetch"
     :is-community="true"
     :initial-data-limit="20"
+    :only-show-new="onlyShowNew"
     @refresh="loadPostsForSubscriptionsFromRemote"
   />
 </template>
@@ -24,6 +25,13 @@ import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+
+defineProps({
+  onlyShowNew: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const isLoading = ref(true)
 const postList = shallowRef([])

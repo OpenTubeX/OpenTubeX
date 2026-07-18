@@ -5,6 +5,7 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
+    :only-show-new="onlyShowNew"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
 </template>
@@ -25,6 +26,13 @@ import { getRelativeTimeFromDate } from '../helpers/utils'
 
 const { locale, t } = useI18n()
 const tabUi = useTemplateRef('tabUi')
+
+defineProps({
+  onlyShowNew: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
