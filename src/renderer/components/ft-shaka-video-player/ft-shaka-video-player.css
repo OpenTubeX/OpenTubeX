@@ -417,6 +417,11 @@
   z-index: 5;
 }
 
+:deep(.shaka-context-menu) {
+  background-color: rgb(12 12 12 / 52%);
+  backdrop-filter: blur(14px);
+}
+
 .sixteenByNine {
   aspect-ratio: 16 / 9;
 }
