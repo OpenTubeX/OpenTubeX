@@ -122,12 +122,13 @@
               class="channelThumbnail"
               alt=""
             >
-            <p
+            <RouterLink
               class="channelName"
               dir="auto"
+              :to="`/channel/${superChat.author.id}`"
             >
               {{ superChat.author.name }}
-            </p>
+            </RouterLink>
             <p
               class="donationAmount"
               dir="auto"
@@ -166,12 +167,13 @@
                 class="channelThumbnail"
                 alt=""
               >
-              <p
+              <RouterLink
                 class="channelName"
                 dir="auto"
+                :to="`/channel/${comment.author.id}`"
               >
                 {{ comment.author.name }}
-              </p>
+              </RouterLink>
               <p
                 class="donationAmount"
                 dir="auto"
@@ -197,16 +199,18 @@
             <p
               class="chatContent"
             >
-              <bdi
+              <RouterLink
                 class="channelName"
                 :class="{
                   member: comment.author.isMember,
                   moderator: comment.author.isModerator,
                   owner: comment.author.isOwner
                 }"
+                dir="auto"
+                :to="`/channel/${comment.author.id}`"
               >
                 {{ comment.author.name }}
-              </bdi>
+              </RouterLink>
               <span
                 v-if="comment.author.badge"
                 class="badge"
@@ -296,6 +300,7 @@ const superChatComments = shallowReactive([])
 const superChat = ref({
   id: '',
   author: {
+    id: '',
     name: '',
     thumbnailUrl: ''
   },
@@ -479,6 +484,7 @@ function parseLiveChatComment(comment) {
     id: comment.id,
     message: autolinker.link(parseLocalTextRuns(comment.message.runs, 20)),
     author: {
+      id: comment.author.id,
       name: comment.author.name,
       thumbnailUrl: comment.author.thumbnails.at(-1).url,
       isOwner: comment.author.id === props.channelId,
@@ -505,6 +511,7 @@ function parseLiveChatSuperChat(superChat) {
     id: superChat.id,
     message: autolinker.link(parseLocalTextRuns(superChat.message.runs, 20)),
     author: {
+      id: superChat.author.id,
       name: superChat.author.name.text,
       thumbnailUrl: superChat.author.thumbnails[0].url
     },
