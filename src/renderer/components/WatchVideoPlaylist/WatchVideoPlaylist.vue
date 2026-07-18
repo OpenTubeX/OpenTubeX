@@ -125,6 +125,18 @@
             :icon="['fas', 'exchange-alt']"
           />
         </button>
+        <button
+          v-if="userPlaylistWatchedVideoCount > 0"
+          class="playlistButton"
+          :aria-label="t('User Playlists.Remove Watched Videos')"
+          :title="t('User Playlists.Remove Watched Videos')"
+          @click="showRemoveWatchedVideosPrompt = true"
+        >
+          <FontAwesomeIcon
+            class="playlistIcon"
+            :icon="['fas', 'eye-slash']"
+          />
+        </button>
       </div>
       <TransitionGroup
         v-if="!isLoading"
@@ -150,6 +162,7 @@
           :is-current-video="currentVideoIndexZeroBased === index"
           :can-move-video-up="index > 0 && canMoveVideos"
           :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
+          :can-remove-from-playlist="isUserPlaylist"
           :dragged-video="draggedVideo"
           :is-sort-order-custom="isSortOrderCustom"
           :is-video-dragging="isVideoDragging"
@@ -160,9 +173,18 @@
           @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
           @move-video-up="moveVideoUp"
           @move-video-down="moveVideoDown"
+          @remove-from-playlist="removeVideoFromPlaylist"
           @pause-player="pausePlayer"
         />
       </TransitionGroup>
+      <FtPrompt
+        v-if="showRemoveWatchedVideosPrompt"
+        :label="removeWatchedVideosPromptLabel"
+        :option-names="removeWatchedVideosPromptOptionNames"
+        :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"
+        is-first-option-destructive
+        @click="handleRemoveWatchedVideosPromptAnswer"
+      />
     </div>
   </FtCard>
 </template>
@@ -176,6 +198,7 @@ import { useRouter } from 'vue-router'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtListVideoNumbered from '../FtListVideoNumbered/FtListVideoNumbered.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
@@ -187,6 +210,7 @@ import {
   untilEndOfLocalPlayList,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
+import { isHistoryEntryWatched } from '../../helpers/history'
 import { getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -225,6 +249,7 @@ const isLoading = ref(false)
 const shuffleEnabled = ref(false)
 const loopEnabled = ref(false)
 const reversePlaylist = ref(false)
+const showRemoveWatchedVideosPrompt = ref(false)
 const channelId = ref('')
 const channelName = ref('')
 const playlistTitle = ref('')
@@ -281,6 +306,30 @@ const selectedUserPlaylistVideoCount = computed(() => selectedUserPlaylist.value
 
 /** @type {import('vue').ComputedRef<number | undefined>} */
 const selectedUserPlaylistLastUpdatedAt = computed(() => selectedUserPlaylist.value?.lastUpdatedAt)
+
+const userPlaylistWatchedVideoCount = computed(() => {
+  if (!isUserPlaylist.value) { return 0 }
+
+  const historyCacheById = store.getters.getHistoryCacheById
+  return selectedUserPlaylist.value?.videos.reduce((count, video) => {
+    return isHistoryEntryWatched(historyCacheById[video.videoId]) ? count + 1 : count
+  }, 0) ?? 0
+})
+
+const removeWatchedVideosPromptLabel = computed(() => {
+  return t(
+    'User Playlists.Are you sure you want to remove {playlistItemCount} watched videos from this playlist? This cannot be undone',
+    { playlistItemCount: userPlaylistWatchedVideoCount.value },
+    userPlaylistWatchedVideoCount.value
+  )
+})
+
+const removeWatchedVideosPromptOptionNames = computed(() => [
+  t('Yes, Delete'),
+  t('Cancel')
+])
+
+const REMOVE_WATCHED_VIDEOS_PROMPT_VALUES = ['delete', 'cancel']
 
 const currentVideoIndexZeroBased = computed(() => {
   return findIndexOfCurrentVideoInPlaylist(playlistItems.value)
@@ -612,6 +661,53 @@ function moveVideoUp(videoId, playlistItemId) {
 
 function moveVideoDown(videoId, playlistItemId) {
   moveVideo(videoId, playlistItemId, 1)
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ */
+async function removeVideoFromPlaylist(videoId, playlistItemId) {
+  try {
+    await store.dispatch('removeVideo', {
+      _id: props.playlistId,
+      videoId,
+      playlistItemId,
+    })
+    showToast(t('User Playlists.SinglePlaylistView.Toast.Video has been removed'))
+  } catch (error) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
+    console.error(error)
+  }
+}
+
+/** @param {'delete' | 'cancel' | null} option */
+async function handleRemoveWatchedVideosPromptAnswer(option) {
+  showRemoveWatchedVideosPrompt.value = false
+  if (option !== 'delete' || selectedUserPlaylist.value == null) { return }
+
+  const historyCacheById = store.getters.getHistoryCacheById
+  const playlistItemIds = selectedUserPlaylist.value.videos
+    .filter((video) => isHistoryEntryWatched(historyCacheById[video.videoId]))
+    .map((video) => video.playlistItemId)
+
+  if (playlistItemIds.length === 0) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    return
+  }
+
+  try {
+    await store.dispatch('removeVideos', {
+      _id: props.playlistId,
+      playlistItemIds,
+    })
+    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+      videoCount: playlistItemIds.length
+    }, playlistItemIds.length))
+  } catch (error) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    console.error(error)
+  }
 }
 
 /** @param {VideoData} video */
