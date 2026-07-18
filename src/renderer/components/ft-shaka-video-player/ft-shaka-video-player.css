@@ -968,7 +968,7 @@
 .fullscreenCommentsOverlay {
   position: absolute;
   z-index: 3;
-  inset-block: 16px;
+  inset-block: 16px 61px;
   inset-inline-end: 16px;
   display: flex;
   flex-direction: column;
