@@ -237,20 +237,21 @@ export class TabNavigationService {
     const to = this.resolve(location, from)
     const route = serializeResolvedRoute(to)
     const sameRoute = route.fullPath === tab.route.fullPath
+    const preserveContentTitle = location?.state?.skipTabRouteLoading === true
 
     if (mode === 'push' && sameRoute) {
       return
     }
 
     const previousTitle = tab.contentTitle || tab.title || ''
-    if (!sameRoute) {
+    if (!sameRoute && !preserveContentTitle) {
       // Clear the previous page's title as soon as navigation starts. Dynamic
       // pages replace this route placeholder once their content has loaded.
       this.setTitle(tabId, to.fullPath)
     }
 
     this.saveScroll(tabId)
-    const loadingToken = location?.state?.skipTabRouteLoading === true
+    const loadingToken = preserveContentTitle
       ? null
       : this.startRouteLoading(tabId)
     let navigationCommitted = false
@@ -315,7 +316,7 @@ export class TabNavigationService {
 
       await tabLifecycleService.run(tabId, 'afterNavigate', { to, from })
     } finally {
-      if (!navigationCommitted && !sameRoute) {
+      if (!navigationCommitted && !sameRoute && !preserveContentTitle) {
         this.setTitle(tabId, previousTitle)
       }
       if (loadingToken !== null) {
