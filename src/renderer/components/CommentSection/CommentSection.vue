@@ -28,6 +28,15 @@
         <button
           type="button"
           class="fullscreenCommentAction"
+          :aria-label="$t('Comments.Reload Comments')"
+          :title="$t('Comments.Reload Comments')"
+          @click="reloadCommentData"
+        >
+          <FontAwesomeIcon :icon="['fas', 'sync']" />
+        </button>
+        <button
+          type="button"
+          class="fullscreenCommentAction"
           :aria-label="$t('Comments.Hide Comments')"
           :title="$t('Comments.Hide Comments')"
           @click="emit('close-comments')"
