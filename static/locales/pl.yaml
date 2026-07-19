@@ -549,6 +549,10 @@ Settings:
     Videos Auto Refresh Interval: Interwał odświeżania filmów
     Shorts Auto Refresh Interval: Interwał odświeżania filmów short
     Live Auto Refresh Interval: Interwał odświeżania transmisji na żywo
+    Fetch Feed on Startup: Pobierz subskrypcje przy uruchomieniu
+    Show New Content Feed: Pokaż zakładkę z nowymi subskrypcjami
+    Show New Content Indicators: Pokaż wskaźniki nowych treści
+    Posts Auto Refresh Interval: Interwał odświeżania wpisów
   Privacy Settings:
     Watch history has been cleared: Historia oglądania została wyczyszczona
     Are you sure you want to remove your entire watch history?: Jesteś pewny/a, że chcesz usunąć całą historię oglądania?
@@ -577,6 +581,11 @@ Settings:
       Tooltip: Automatyczny – zapisuje przy każdym zamknięciu strony odtwarzania, po zakończeniu odtwarzania oraz gdy wystąpi błąd (np. ograniczenie przesyłu, wygaśnięcie sesji odtwarzania). Półautomatyczny – podobny do automatycznego, ale bez zapisu przy zamknięciu strony oraz z możliwością ręcznego zapisu postępu przyciskiem „Zapisz postęp odtwarzania”, umieszczonym pod odtwarzaczem.
     Automatic History Retention: Przechowywanie historii (dni)
     Automatic History Retention Placeholder: Pozostaw puste, aby zachować na zawsze
+    Automatic History Retention Tooltip: Pozostaw puste, aby historia została zachowana na zawsze. Wpisanie liczby usuwa starsze wpisy teraz i automatycznie, gdy aplikacja jest otwierana.
+    History Retention Saved: Tryb zachowywania historii został zapisany
+    Invalid History Retention Days: Wprowadź liczbę całkowitą dni większą od zera
+    Enable Watch Statistics: Włącz statystyki oglądania
+    Week Starts On: Tydzień zaczyna się w
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
     Unknown data key: Nieznany klucz danych
@@ -630,6 +639,7 @@ Settings:
     All settings have been successfully exported: Wszystkie ustawienia zostały pomyślnie wyeksportowane
     Unknown setting key: 'Nieznany klucz ustawień: {key}'
     Non-transferable setting key: 'Nieprzenoszalny klucz ustawień: {key}'
+    Setting object has insufficient data, skipping item: Obiekt ustawień ma niewystarczające dane, pominięto element
   Distraction Free Settings:
     Distraction Free Settings: Skupienie uwagi
     Hide Live Chat: Schowaj czat na żywo
@@ -855,6 +865,7 @@ Channel:
   Courses:
     Courses: Kursy
     This channel does not currently have any courses: Na tym kanale nie ma obecnie żadnych kursów
+  View All: Oglądaj wszystko
 Video:
   Mark As Watched: 'Oznacz jako obejrzany'
   Remove From History: 'Usuń z historii'
@@ -1003,12 +1014,30 @@ Video:
       SkipToastUnskip: Anuluj pominięcie
       SkipToastReskip: Wznów pominięcie
       SkipToHighlight: Przeskocz do „Ważny moment”
+      SkippedToHighlight: Przeskoczono do "Ważny moment"
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
       Play: Odtwarzaj
       Pause: Pauza
       Drag Handle: Przesuń mini odtwarzacz
+    Caption Appearance:
+      Options: Opcje
+      Title: Wygląd napisów
+      Sample: Napisy wyglądają tak
+    Sleep Timer:
+      Sleep Timer: Wyłącznik czasowy
+      Off: Wyłączony
+      Minutes: '{minutes} minut'
+      End of video: Koniec filmu
+      Remaining: '{time} pozostało'
+      Cancel timer: Anuluj timer
+      Timer ended: Wyłącznik czasowy zakończony
+    MusicPlaybackRateOverride: Wykryto wideo z muzyką, odtwarzanie z prędkością 1x
+    Hide Annotations: Ukryj adnotacje
+    Show Annotations: Pokaż adnotacje
+    Hide: Ukryj
+    Show: Pokaż
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1033,6 +1062,25 @@ Video:
   AI: SI
   AI-generated content: Treści generowane przez SI
   Collaborators: Współautorzy
+  Transcript:
+    Title: Transkrypcja
+    Search: Wyszukaj transkrypcję
+    Language: Język transkrypcji
+    Copy: Kopiuj
+    Save: Zapisz
+    Show: Pokaż transkrypcję
+    Hide: Ukryj transkrypcję
+    Close: Zamknij transkrypcję
+    Copied: Transkrypcja skopiowana do schowka
+    Saved: Transkrypcja została zapisana
+    Save Error: Nie można zapisać transkrypcji
+    Text File: Plik tekstowy
+    Unavailable: Transkrypcja tego filmu nie jest dostępna.
+    Load Error: Nie udało się wczytać transkrypcji.
+    Empty: Ten transkrypt nie zawiera żadnego tekstu.
+    No Results: Żadne segmenty transkrypcji nie pasują do Twojego wyszukiwania.
+  Premiere: Premiera
+  Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1079,6 +1127,7 @@ Share:
   Invidious Channel URL copied to clipboard: Skopiowano URL kanału na Invidious do schowka
   Share Channel: Podziel się kanałem
   Share Post: Podziel się wpisem
+  Timestamp Link Copied: Link sygnatury czasowej skopiowany do schowka
 Mini Player: 'Mini odtwarzacz'
 Comments:
   Comments: 'Komentarze'
@@ -1104,6 +1153,7 @@ Comments:
   Reload Comments: Przeładuj komentarze
   Copy YouTube Link: Skopiuj odnośnik do YouTube
   YouTube comment link copied to clipboard: Odnośnik do komentarza YouTube został skopiowany do schowka
+  Edited: (edytowane)
 Up Next: 'Następne'
 
 # Toast Messages
@@ -1172,6 +1222,9 @@ Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Po włączeniu OpenTubeX będzie używać RSS zamiast domyślnej metody pobierania subskrypcji. RSS jest szybszy i zapobiega blokadzie IP, ale nie dostarcza informacji, takich jak czas trwania filmu, status transmisji na żywo, czy wpisy
     Auto Refresh Interval: Jak często OpenTubeX automatycznie odświeża subskrypcje, w czasie działania aplikacji.
+    Fetch Feed on Startup: Jeśli włączone, OpenTubeX będzie automatycznie pobierał subskrypcje po uruchomieniu, lub otwarciu nowego okna.
+    Show New Content Feed: Pokazuje nową zakładkę zawierającą subskrypcje, których nie było podczas poprzedniego odświeżania.
+    Show New Content Indicators: Pokazuje małą kropkę obok subskrypcji, które nie były obecne podczas poprzedniego odświeżania.
   General Settings:
     Fallback to Non-Preferred Backend on Failure: Po włączeniu, kiedy Twój preferowany API napotka problem, OpenTubeX automatycznie spróbuje użyć niepreferowanego API jako metody zapasowej.
     Preferred API Backend: Wybierz back-end , który OpenTubeX użyje do uzyskiwania danych. Lokalne API jest wbudowanym ekstraktorem. API Invidious wymaga połączenia z serwerem Invidious.
@@ -1198,6 +1251,10 @@ Tooltips:
     Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
     Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do szybkości odtwarzania.
     Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
+    Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
+    Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania ciszy w menu ustawień odtwarzacza.
+    Hold to Double Playback Speed: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo podwoić aktualną prędkość odtwarzania.
+    Ambient Mode: Rzutuje kolory odtwarzanego wideo na obszar wokół odtwarzacza.
   External Player Settings:
     Ignore Warnings: Nie pokazuj ostrzeżeń o nieobsługiwanych akcjach przez zewnętrzny odtwarzacz (n.p. odwracanie playlist, itp.).
     External Player: Wybranie zewnętrznego odtwarzacza spowoduje wyświetlenie na miniaturkach ikony, która otworzy film (playlistę, jeśli są obsługiwane) w zewnętrznym odtwarzaczu. Uwaga! Ustawienia Invidious nie mają wpływu na zewnętrzny odtwarzacz.
@@ -1217,6 +1274,8 @@ Tooltips:
     UseDeArrowThumbnails: Zastąp miniaturki filmów miniaturkami z DeArrow.
   Proxy Settings:
     IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
+  Theme Settings:
+    Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
@@ -1244,6 +1303,9 @@ Clipboard:
 Chapters:
   Chapters: Rozdziały
   Key Moments: Kluczowe momenty
+  Open Chapters: Otwórz rozdziały
+  Close Chapters: Zamknij rozdziały
+  Copy Timestamp Link: Kopiuj odnośnik w {timestamp}
 Preferences: Preferencje
 Ok: Ok
 Hashtag:
@@ -1309,6 +1371,7 @@ KeyboardShortcutPrompt:
       General: Aplikacja: Ogólne
       Search and Page: 'Aplikacja: wyszukiwanie i strony'
       Window and View: 'Aplikacja: Okno i widok'
+      Tabs: Aplikacja: Karty
   New Window: Otwórz nowe okno
   Navigate to Settings: Przejdź do strony Ustawień
   Navigate to History: Przejdź do strony Historii
@@ -1415,3 +1478,6 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} hr'
   Hours and minutes: '{hours} hr {minutes} min'
+Use Vertical Tabs: Używaj pionowych kart
+Use Horizontal Tabs: Używaj poziomych kart
+Resize Tab Bar: Zmień rozmiar paska kart
