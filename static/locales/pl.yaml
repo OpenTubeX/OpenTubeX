@@ -39,6 +39,7 @@ Global:
     Like Count: Jedno polubienie | {count} polubie(ń/nia)
     Comment Count: Jeden komentarz | {count} komentarz(e/y)
   Ambient Mode: Tryb otoczenia (ambientowy)
+  New: Nowe
 Search / Go to URL: 'Szukaj / Przejdź do adresu URL'
   # In Filter Button
 Search Filters:
@@ -103,6 +104,11 @@ Subscriptions:
   Refreshing Subscription Live Streams: Odświeżanie subskrypcji transmisji na żywo
   Refreshing Subscription Posts: Odświeżanie subskrypcji wpisów
   New Content: Nowe
+  New Feed Refresh Warning Title: Odświeżyć wszystkie subskrypcje?
+  New Feed Refresh Warning: Odświeżanie wszystkich typów treści bez RSS dla {count} subskrypcji może zająć dużo czasu. Czy chcesz kontynuować?
+  New Since Last Refresh: Nowości od ostatniego odświeżenia
+  Mark All as Seen: Oznacz wszystkie jako widziane
+  No New Content: Brak nowych treści.
 Trending:
   Trending: 'Na czasie'
   Trending Tabs: Karty „Na czasie”
@@ -1287,6 +1293,8 @@ KeyboardShortcutPrompt:
     App:
       Situational: 'Aplikacja: Kontekstowe'
       General: Aplikacja: Ogólne
+      Search and Page: 'Aplikacja: wyszukiwanie i strony'
+      Window and View: 'Aplikacja: Okno i widok'
   New Window: Otwórz nowe okno
   Navigate to Settings: Przejdź do strony Ustawień
   Navigate to History: Przejdź do strony Historii
@@ -1331,6 +1339,16 @@ KeyboardShortcutPrompt:
   Skip to Previous Video: Odtwórz poprzedni film z playlisty lub z rekomendowanych filmów
   Toggle Normal Playback Speed: Przełączaj się między prędkością 1x a poprzednią prędkością odtwarzania
   Tab Switcher: Przełącznik kart
+  New Tab: Utwórz nową kartę
+  Close Tab: Zamknij bieżącą kartę
+  Reload Tab: Przeładuj bieżącą kartę
+  Reopen Closed Tab: Otwórz ponownie ostatnią zamkniętą kartę
+  Next Tab: Przejdź do następnej karty
+  Previous Tab: Przejdź do poprzedniej karty
+  Switch to Tab: Przejdź do karty 1–9
+  Find in Page: Znajdź tekst na bieżącej stronie
+  Find Next Match: Przejdź do następnego dopasowania
+  Find Previous Match: Przejdź do poprzedniego dopasowania
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
