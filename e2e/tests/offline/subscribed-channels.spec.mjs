@@ -6,10 +6,7 @@ import { test, expect, goTo } from '../../helpers/app.mjs'
 test.use({
   seed: {
     settings: {
-      unsubscriptionPopupStatus: true,
-      // Boot fresh after relaunches: session restore keeps the router and
-      // URL hash out of sync, which breaks post-restart navigation.
-      startupBehavior: 'emptySession'
+      unsubscriptionPopupStatus: true
     },
     profiles: [
       {

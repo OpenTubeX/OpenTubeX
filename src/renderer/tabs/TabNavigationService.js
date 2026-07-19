@@ -471,6 +471,11 @@ export class TabNavigationService {
   }
 
   async projectRoute(route) {
+    // A restored tab can mount before Vue Router finishes reading the initial
+    // hash. Projecting during that startup navigation leaves the logical route
+    // updated while the browser URL is later reset to the initial `#/`.
+    await this.router.isReady()
+
     const resolved = this.resolve(route)
     if (this.router.currentRoute.value.fullPath !== resolved.fullPath) {
       await this.router.replace({

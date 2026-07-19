@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
 const SETTINGS_TAB_ID = 'e2e-settings-tab'
 const HISTORY_TAB_ID = 'e2e-history-tab'
@@ -84,4 +84,7 @@ test('restores tab order, titles, active route, and lazy state across restarts',
   await expect(page).toHaveURL(/#\/settings/)
   await expect(restoredTabs.nth(1)).toHaveClass(/unloaded/)
   await expect(restoredTabs.nth(2)).toHaveClass(/unloaded/)
+
+  await goTo(page, 'history')
+  await expect(restoredTabs.nth(0)).toHaveClass(/active/)
 })
