@@ -63,6 +63,10 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
+const subscriptionCacheReady = computed(() => {
+  return store.getters.getSubscriptionCacheReady
+})
+
 async function loadPost() {
   id.value = route.params.id
   authorId.value = route.query.authorId
@@ -140,4 +144,9 @@ async function loadDataInvidiousAsync() {
 // loadPost resets the route-derived state (id, authorId, post, isLoading)
 // before loading either backend.
 watch(() => route.params.id, loadPost, { immediate: true })
+watch([() => route.params.id, subscriptionCacheReady], ([postId, cacheReady]) => {
+  if (cacheReady) {
+    store.dispatch('markSubscriptionPostAsSeen', postId)
+  }
+}, { immediate: true })
 </script>

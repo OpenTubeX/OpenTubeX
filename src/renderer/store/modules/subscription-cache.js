@@ -249,6 +249,30 @@ const actions = {
     }))
   },
 
+  async markSubscriptionPostAsSeen({ commit, state }, postId) {
+    await Promise.all(Object.entries(state.postsCache).map(async ([channelId, cacheEntry]) => {
+      const entry = cacheEntry?.posts?.find(post => post.postId === postId)
+      if (entry?.isNewInSubscriptionFeed !== true) {
+        return
+      }
+
+      const seenEntries = cacheEntry.posts.map(post => post.postId === postId
+        ? { ...post, isNewInSubscriptionFeed: false }
+        : post)
+
+      try {
+        await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(
+          channelId,
+          seenEntries,
+          cacheEntry.timestamp
+        )
+        commit('markSubscriptionPostAsSeenByChannel', { channelId, postId })
+      } catch (errMessage) {
+        console.error(errMessage)
+      }
+    }))
+  },
+
   async clearSubscriptionsCacheForManyChannels({ commit }, channelIds) {
     try {
       await DBSubscriptionCacheHandlers.deleteMultipleChannels(channelIds)
@@ -269,6 +293,14 @@ const actions = {
 }
 
 const mutations = {
+  markSubscriptionPostAsSeenByChannel(state, { channelId, postId }) {
+    const entry = state.postsCache[channelId]?.posts?.find(post => post.postId === postId)
+
+    if (entry) {
+      entry.isNewInSubscriptionFeed = false
+    }
+  },
+
   markSubscriptionVideoAsSeenByChannel(state, { tab, channelId, videoId }) {
     const cacheEntry = tab === 'videos'
       ? state.videoCache[channelId]

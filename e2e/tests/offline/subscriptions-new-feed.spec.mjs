@@ -155,6 +155,21 @@ test.describe('new feed settings and seen state', () => {
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(relaunched.page.getByText('There is no new content.')).toBeVisible()
   })
+
+  test('persists a post as seen when its comments are opened', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const newPost = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+    await expect(newPost).toBeVisible()
+    await newPost.locator('.commentsLink').click()
+    await expect(page).toHaveURL(/#\/post\/new-post-1/)
+
+    const relaunched = await app.relaunch()
+    await goTo(relaunched.page, 'subscriptions')
+    await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
+    await expect(relaunched.page.getByText('New community post', { exact: true })).toHaveCount(0)
+  })
 })
 
 test.describe('independent new feed setting', () => {
