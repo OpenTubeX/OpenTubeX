@@ -162,6 +162,20 @@
 .playlistItemsWrapper {
   overflow-y: auto;
   block-size: 360px;
+  min-block-size: 180px;
+  resize: vertical;
+}
+
+.playlistItemsWrapper::-webkit-resizer {
+  background:
+    linear-gradient(
+      135deg,
+      transparent 0 55%,
+      var(--tertiary-text-color) 55% 61%,
+      transparent 61% 70%,
+      var(--tertiary-text-color) 70% 76%,
+      transparent 76%
+    ) var(--card-bg-color);
 }
 
 .playlistItem {

@@ -275,7 +275,7 @@
         :playlist-type="playlistType"
         :video-id="videoId"
         :playlist-item-id="playlistItemId"
-        class="watchVideoSideBar watchVideoPlaylist"
+        class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
         @pause-player="pausePlayer"
       />
