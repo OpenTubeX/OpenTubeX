@@ -1,7 +1,7 @@
 <template>
   <div
     class="trendingPage"
-    :class="{ hasTabBar: isElectron }"
+    :class="{ hasTabBar: hasHorizontalTabBar }"
   >
     <FtCard
       class="card"
@@ -130,6 +130,10 @@ const { t } = useI18n()
 const showTabToast = useTabToast()
 
 const isElectron = process.env.IS_ELECTRON
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hasHorizontalTabBar = computed(() => isElectron && !store.getters.getUseVerticalTabBar)
+
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
   return store.getters.getBackendPreference

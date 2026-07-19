@@ -134,7 +134,17 @@
   flex-direction: column;
   block-size: 100%;
   overflow: hidden auto;
-  scrollbar-width: thin;
+  overscroll-behavior: contain;
+
+  /* `auto` re-enables the themed ::-webkit-scrollbar styling (any other value
+     makes Chromium fall back to its native scrollbar) */
+  scrollbar-width: auto;
+}
+
+/* Same themed scrollbar as the main view, just narrower */
+.tabBar.vertical .tabsContainer::-webkit-scrollbar {
+  display: block;
+  inline-size: 10px;
 }
 
 /* The handle draws the divider line itself, so the hover highlight is always

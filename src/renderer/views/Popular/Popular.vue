@@ -1,7 +1,7 @@
 <template>
   <div
     class="popularPage"
-    :class="{ hasTabBar: isElectron }"
+    :class="{ hasTabBar: hasHorizontalTabBar }"
   >
     <ft-card
       class="card"
@@ -54,6 +54,9 @@ import { KeyboardShortcuts } from '../../../constants'
 const { t } = useI18n()
 
 const isElectron = process.env.IS_ELECTRON
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hasHorizontalTabBar = computed(() => isElectron && !store.getters.getUseVerticalTabBar)
 
 const isLoading = ref(false)
 

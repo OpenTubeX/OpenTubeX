@@ -446,6 +446,7 @@ export class TabManager {
     this.contextMenuTabId = null
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
+    this.contextMenuTabBarVertical = false
     this._sessionPersistenceDisabled = false
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
@@ -1485,22 +1486,41 @@ export class TabManager {
   }
 
   /**
-   * @returns {Promise<{contentTop: number, viewportHeight: number} | null>}
+   * @returns {Promise<{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number} | null>}
    */
   async _getTabPreviewContentBounds() {
     try {
       return await this.browserWindow.webContents.executeJavaScript(`
         (() => {
+          const viewportWidth = Math.max(
+            window.visualViewport?.width || 0,
+            window.innerWidth || 0,
+            document.documentElement?.clientWidth || 0
+          )
           const viewportHeight = Math.max(
             window.visualViewport?.height || 0,
             window.innerHeight || 0,
             document.documentElement?.clientHeight || 0
           )
           const tabBar = document.querySelector('.tabBar')
-          const contentTop = tabBar instanceof HTMLElement
-            ? Math.min(viewportHeight, Math.max(0, tabBar.getBoundingClientRect().bottom))
-            : 0
-          return { contentTop, viewportHeight }
+          let contentTop = 0
+          let contentLeft = 0
+          let contentRight = viewportWidth
+          if (tabBar instanceof HTMLElement) {
+            const rect = tabBar.getBoundingClientRect()
+            if (tabBar.classList.contains('vertical')) {
+              // Full-height side column: crop it off horizontally. It sits at
+              // whichever inline edge matches the text direction.
+              if (rect.left <= viewportWidth - rect.right) {
+                contentLeft = Math.min(viewportWidth, Math.max(0, rect.right))
+              } else {
+                contentRight = Math.min(viewportWidth, Math.max(0, rect.left))
+              }
+            } else {
+              contentTop = Math.min(viewportHeight, Math.max(0, rect.bottom))
+            }
+          }
+          return { contentTop, contentLeft, contentRight, viewportWidth, viewportHeight }
         })()
       `, true)
     } catch {
@@ -1510,25 +1530,32 @@ export class TabManager {
 
   /**
    * @param {import('electron').NativeImage} image
-   * @param {{contentTop: number, viewportHeight: number}} contentBounds
+   * @param {{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number}} contentBounds
    * @returns {import('electron').NativeImage | null}
    */
   _cropTabPreviewToContent(image, contentBounds) {
-    if (contentBounds.contentTop <= 0) {
+    const { contentTop = 0, contentLeft = 0, viewportWidth, viewportHeight } = contentBounds
+    const contentRight = contentBounds.contentRight ?? viewportWidth
+
+    if (contentTop <= 0 && contentLeft <= 0 && contentRight >= viewportWidth) {
       return image
     }
 
     const { width, height } = image.getSize()
-    if (width <= 0 || height <= 0 || contentBounds.viewportHeight <= 0) {
+    if (width <= 0 || height <= 0 || viewportWidth <= 0 || viewportHeight <= 0) {
       return null
     }
 
-    const scaleY = height / contentBounds.viewportHeight
-    const cropY = Math.min(height, Math.max(0, Math.ceil(contentBounds.contentTop * scaleY)))
+    const scaleX = width / viewportWidth
+    const scaleY = height / viewportHeight
+    const cropX = Math.min(width, Math.max(0, Math.ceil(contentLeft * scaleX)))
+    const cropRight = Math.min(width, Math.max(0, Math.floor(contentRight * scaleX)))
+    const cropY = Math.min(height, Math.max(0, Math.ceil(contentTop * scaleY)))
+    const cropWidth = cropRight - cropX
     const cropHeight = height - cropY
-    return cropHeight <= 0
+    return cropWidth <= 0 || cropHeight <= 0
       ? null
-      : image.crop({ x: 0, y: cropY, width, height: cropHeight })
+      : image.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight })
   }
 
   /**
@@ -2306,6 +2333,7 @@ export function setupTabsIPC(options = {}) {
       ['videos', 'shorts', 'live', 'posts', 'all'].includes(payload?.feedTab)
       ? payload.feedTab
       : null
+    manager.contextMenuTabBarVertical = payload?.verticalLayout === true
   })
 
   ipcMain.on(IpcChannels.TABS_SET_PLAYBACK_STATE, (event, playbackState, tabId) => {

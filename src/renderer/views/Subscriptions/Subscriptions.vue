@@ -1,7 +1,7 @@
 <template>
   <div
     class="subscriptionsPage"
-    :class="{ hasTabBar: isElectron }"
+    :class="{ hasTabBar: hasHorizontalTabBar }"
   >
     <FtCard class="card">
       <div class="subscriptionsHeader">
@@ -260,6 +260,10 @@ import {
 } from '../../helpers/subscriptions'
 
 const isElectron = process.env.IS_ELECTRON
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hasHorizontalTabBar = computed(() => isElectron && !store.getters.getUseVerticalTabBar)
+
 const { tabId, isTabPresented } = useTabContext()
 const { t } = useI18n()
 const {

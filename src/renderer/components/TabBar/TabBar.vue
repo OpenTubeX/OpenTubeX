@@ -690,7 +690,7 @@ function createNewTab() {
  * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
  */
 function updateContextMenuTab(payload) {
-  window.ftElectron.tabs.setContextMenuTab(payload)
+  window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
 }
 
 /**

@@ -16,10 +16,12 @@
   }
 }
 
+/* Matches only the horizontal tab bar: the vertical layout sits beside the
+   content, so it doesn't add to the top chrome height. */
 @mixin has-tab-bar {
   @at-root {
-    .app:has(.tabBar) &,
-    .app:has(.tabBar)#{&} {
+    .app:has(.tabBar):not(.verticalTabs) &,
+    .app:has(.tabBar):not(.verticalTabs)#{&} {
       @content;
     }
   }

@@ -405,14 +405,14 @@ function runApp() {
           visible: contextMenuTab != null,
           submenu: [
             {
-              label: 'To the Left',
+              label: manager?.contextMenuTabBarVertical ? 'To the Top' : 'To the Left',
               enabled: contextMenuTabIndex > 0,
               click: () => {
                 closeContextMenuTabs(contextMenuTabIds.slice(0, contextMenuTabIndex))
               }
             },
             {
-              label: 'To the Right',
+              label: manager?.contextMenuTabBarVertical ? 'To the Bottom' : 'To the Right',
               enabled: contextMenuTabIndex < contextMenuTabIds.length - 1,
               click: () => {
                 closeContextMenuTabs(contextMenuTabIds.slice(contextMenuTabIndex + 1))
