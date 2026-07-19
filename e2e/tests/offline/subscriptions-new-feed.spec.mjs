@@ -142,7 +142,10 @@ test.describe('new feed settings and seen state', () => {
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
 
     await page.locator('[data-subscription-feed-tab="all"]').click()
-    await expect(page.locator('.ft-list-video').filter({ hasText: 'New video' })).toHaveClass(/list/)
+    const newVideoCard = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await expect(newVideoCard).toHaveClass(/list/)
 
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
@@ -181,6 +184,7 @@ test.describe('independent new feed setting', () => {
         showNewSubscriptionFeedIndicators: true
       },
       profiles: [profile()],
+      history: watchedHistory,
       subscriptionCache: populatedCache
     }
   })

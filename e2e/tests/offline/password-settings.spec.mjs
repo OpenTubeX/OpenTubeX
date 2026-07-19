@@ -6,8 +6,9 @@ test.describe('password protected settings', () => {
     await goTo(page, 'settings')
 
     // Set a password. The settings page stays unlocked for this visit.
+    await page.getByRole('link', { name: 'Password', exact: true }).click()
     await page.getByPlaceholder('Set a password to prevent access to settings').fill('hunter2')
-    await page.getByRole('button', { name: 'Set Password', exact: true }).click()
+    await page.getByRole('button', { name: /^Set password$/i }).click()
     await page.waitForTimeout(1000)
 
     // After a restart the settings page asks for the password.
@@ -29,7 +30,8 @@ test.describe('password protected settings', () => {
     await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeVisible()
 
     // Removing the password unlocks settings permanently.
-    await page.getByRole('button', { name: 'Remove Password' }).click()
+    await page.getByRole('link', { name: 'Password', exact: true }).click()
+    await page.getByRole('button', { name: /^Remove password$/i }).click()
     await page.waitForTimeout(1000)
     ;({ page } = await app.relaunch())
     await goTo(page, 'settings')

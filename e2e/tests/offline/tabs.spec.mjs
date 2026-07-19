@@ -104,7 +104,9 @@ test.describe('subscription feed tabs', () => {
   })
 
   test('uses the last selected feed for newly opened subscription tabs', async ({ page }) => {
-    const feedTab = (tab) => page.locator(`[data-subscription-feed-tab="${tab}"]`)
+    const feedTab = (tab) => page
+      .locator('.tabContent[aria-hidden="false"]')
+      .locator(`[data-subscription-feed-tab="${tab}"]`)
 
     await feedTab('shorts').click()
     await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')

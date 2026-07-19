@@ -45,7 +45,7 @@ test.describe('subscribed channels', () => {
     const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
     await alpha.getByRole('button', { name: 'Unsubscribe' }).click()
 
-    await expect(page.getByText('Are you sure you want to unsubscribe from "Alpha Channel"?')).toBeVisible()
+    await expect(page.getByRole('dialog', { name: /unsubscribe from.*Alpha Channel/i })).toBeVisible()
     await page.getByRole('button', { name: 'Yes', exact: true }).click()
 
     await expect(alpha).toHaveCount(0)
