@@ -21,6 +21,7 @@
           :class="{ finalMinute: isFinalMinute, spinHourglass }"
           :style="countdownStyle"
           aria-hidden="true"
+          @click="spinHourglassOnce"
         >
           <svg viewBox="0 0 18 18">
             <circle
@@ -160,6 +161,10 @@ function updateCountdown() {
 
 function stopHourglassSpin() {
   spinHourglass.value = false
+}
+
+function spinHourglassOnce() {
+  spinHourglass.value = true
 }
 
 onMounted(() => {
