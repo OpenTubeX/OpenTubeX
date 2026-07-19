@@ -10,7 +10,7 @@
       :class="applyHiddenLabels"
     >
       <div
-        v-if="indicatorStyle"
+        v-show="indicatorStyle"
         class="activeIndicator"
         :style="indicatorStyle"
         aria-hidden="true"
