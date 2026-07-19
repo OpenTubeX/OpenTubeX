@@ -81,6 +81,7 @@ Height adjust for profile list so it won't cover navbar.  */
 .profileListTitle {
   position: absolute;
   margin: 0;
+  inset-block-start: 20px;
   inset-inline-start: 10px;
 }
 
