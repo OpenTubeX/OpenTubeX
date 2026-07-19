@@ -5,9 +5,16 @@
     role="navigation"
   >
     <div
+      ref="innerRef"
       class="inner"
       :class="applyHiddenLabels"
     >
+      <div
+        v-if="indicatorStyle"
+        class="activeIndicator"
+        :style="indicatorStyle"
+        aria-hidden="true"
+      />
       <router-link
         class="navOption topNavOption mobileShow "
         role="button"
@@ -245,8 +252,9 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
@@ -377,6 +385,58 @@ const settingsTitle = computed(() => {
     t('Settings.Settings'),
     KeyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS
   )
+})
+
+// ===== Sliding active-route indicator =====
+const route = useRoute()
+const innerRef = useTemplateRef('innerRef')
+/** @type {import('vue').Ref<Record<string, string> | null>} */
+const indicatorStyle = ref(null)
+
+let remeasureTimeoutId = null
+
+function updateIndicator() {
+  const inner = innerRef.value
+  // Skip hidden matches (e.g. links inside the collapsed "More" menu)
+  const active = inner == null
+    ? null
+    : Array.from(inner.querySelectorAll('.navOption.router-link-active, .navChannel.router-link-active'))
+        .find((el) => el instanceof HTMLElement && el.offsetParent !== null)
+
+  if (!(active instanceof HTMLElement)) {
+    indicatorStyle.value = null
+    return
+  }
+
+  indicatorStyle.value = {
+    transform: `translateY(${active.offsetTop}px)`,
+    blockSize: `${active.offsetHeight}px`
+  }
+}
+
+/**
+ * Re-measure once the side nav's 150ms width transition has finished,
+ * as expanding/collapsing reflows the nav entries.
+ */
+function updateIndicatorAfterResize() {
+  clearTimeout(remeasureTimeoutId)
+  remeasureTimeoutId = setTimeout(updateIndicator, 200)
+}
+
+watch(() => route.fullPath, () => nextTick(updateIndicator))
+watch([isOpen, hideText, activeSubscriptions], () => {
+  nextTick(updateIndicator)
+  updateIndicatorAfterResize()
+})
+
+onMounted(() => {
+  updateIndicator()
+  window.addEventListener('resize', updateIndicatorAfterResize)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(remeasureTimeoutId)
+  window.removeEventListener('resize', updateIndicatorAfterResize)
 })
 </script>
 

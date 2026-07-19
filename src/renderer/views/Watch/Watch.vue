@@ -5,19 +5,19 @@
     :class="{
       ambientModeActive,
       isLoading,
-      useTheatreMode: useTheatreMode && !isLoading,
+      useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
       noSidebar: !theatrePossible
     }"
   >
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <div
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       class="videoArea"
     >
       <div class="videoAreaMargin">
+        <div
+          v-if="isLoading"
+          class="videoPlayer videoPlayerPlaceholder ft-shimmer"
+        />
         <ft-shaka-video-player
           v-if="!isLoading && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
           ref="player"
@@ -151,6 +151,17 @@
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       class="infoArea"
     >
+      <div
+        v-if="isLoading"
+        class="watchVideo infoSkeleton"
+        aria-hidden="true"
+      >
+        <div class="skeletonLine skeletonTitle ft-shimmer" />
+        <div class="skeletonInfoRow">
+          <div class="skeletonAvatar ft-shimmer" />
+          <div class="skeletonLine skeletonChannel ft-shimmer" />
+        </div>
+      </div>
       <watch-video-info
         v-if="!isLoading"
         :id="videoId"
@@ -220,6 +231,23 @@
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       class="sidebarArea"
     >
+      <div
+        v-if="isLoading && !hideRecommendedVideos"
+        class="recommendationsSkeleton"
+        aria-hidden="true"
+      >
+        <div
+          v-for="n in 5"
+          :key="n"
+          class="skeletonRecommendation"
+        >
+          <div class="skeletonRecommendationThumbnail ft-shimmer" />
+          <div class="skeletonRecommendationDetails">
+            <div class="skeletonLine ft-shimmer" />
+            <div class="skeletonLine short ft-shimmer" />
+          </div>
+        </div>
+      </div>
       <watch-video-transcript
         v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
         :captions="captions"

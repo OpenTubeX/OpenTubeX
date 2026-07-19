@@ -22,6 +22,45 @@
   white-space: initial;
 }
 
+.subscribeButton.justToggled {
+  animation: subscribe-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.subscribeButton.justToggled :deep(svg) {
+  animation: subscribe-check-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes subscribe-pop {
+  0% {
+    transform: scale(0.96);
+  }
+
+  55% {
+    transform: scale(1.03);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes subscribe-check-pop {
+  from {
+    transform: scale(0);
+  }
+}
+
+.profile-dropdown-enter-active,
+.profile-dropdown-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.profile-dropdown-enter-from,
+.profile-dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 .subscribeButton,
 .profileDropdownToggle {
   align-self: center;

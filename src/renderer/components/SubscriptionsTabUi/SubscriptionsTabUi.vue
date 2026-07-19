@@ -1,7 +1,10 @@
 <template>
   <div>
     <FtLoader
-      v-if="displayIsLoading && activeVideoList.length === 0"
+      v-if="displayIsLoading && activeVideoList.length === 0 && isCommunity"
+    />
+    <FtSkeletonGrid
+      v-if="displayIsLoading && activeVideoList.length === 0 && !isCommunity"
     />
     <div
       v-if="!displayIsLoading && errorChannels.length !== 0"
@@ -79,6 +82,7 @@ import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import FtSkeletonGrid from '../FtSkeletonGrid/FtSkeletonGrid.vue'
 
 import store from '../../store/index'
 

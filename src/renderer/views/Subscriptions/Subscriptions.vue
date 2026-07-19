@@ -29,10 +29,17 @@
         </div>
         <div class="tabsRow">
           <FtFlexBox
+            ref="tabsContainerRef"
             class="tabs"
             role="tablist"
             :aria-label="$t('Subscriptions.Subscriptions Tabs')"
           >
+            <div
+              v-if="tabsIndicatorStyle"
+              class="tabsIndicator"
+              :style="tabsIndicatorStyle"
+              aria-hidden="true"
+            />
             <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
             <div
               v-if="!hideSubscriptionsVideos"
@@ -620,6 +627,68 @@ async function handleFeedReloadRequest(payload) {
 
   await refreshers[payload.feedTab]?.(options)
 }
+
+// ===== Sliding feed tab indicator =====
+const tabsContainerRef = useTemplateRef('tabsContainerRef')
+/** @type {import('vue').Ref<Record<string, string> | null>} */
+const tabsIndicatorStyle = ref(null)
+let tabsResizeObserver = null
+// Place the indicator without animating when it was last measured while
+// hidden (e.g. in a background browser tab, where all offsets read 0),
+// otherwise it visibly flies in from the stale position.
+let tabsIndicatorWasHidden = true
+
+function updateTabsIndicator() {
+  const container = tabsContainerRef.value?.$el
+  const selected = container?.querySelector('.tab.selectedTab')
+
+  if (!(selected instanceof HTMLElement)) {
+    tabsIndicatorStyle.value = null
+    tabsIndicatorWasHidden = true
+    return
+  }
+
+  if (selected.getClientRects().length === 0) {
+    tabsIndicatorWasHidden = true
+    return
+  }
+
+  // Physical values to match the physical offset measurements (RTL-safe).
+  // The indicator sits just below the tab, like the old selectedTab border
+  // (which extended past the box through its -3px margin).
+  const style = {
+    left: `${selected.offsetLeft}px`,
+    top: `${selected.offsetTop + selected.offsetHeight}px`,
+    width: `${selected.offsetWidth}px`
+  }
+
+  if (tabsIndicatorWasHidden) {
+    style.transition = 'none'
+    tabsIndicatorWasHidden = false
+  }
+
+  tabsIndicatorStyle.value = style
+}
+
+watch([currentTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
+
+onMounted(() => {
+  if (typeof ResizeObserver === 'function') {
+    // Tab widths shift on hover (bold text) and when the per-tab loader
+    // appears, which also resizes the container
+    tabsResizeObserver = new ResizeObserver(() => updateTabsIndicator())
+
+    if (tabsContainerRef.value?.$el instanceof HTMLElement) {
+      tabsResizeObserver.observe(tabsContainerRef.value.$el)
+    }
+  }
+
+  nextTick(updateTabsIndicator)
+})
+
+onBeforeUnmount(() => {
+  tabsResizeObserver?.disconnect()
+})
 </script>
 
 <style scoped src="./Subscriptions.css" />

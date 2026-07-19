@@ -1,10 +1,13 @@
 <template>
-  <div class="toast-holder">
+  <TransitionGroup
+    tag="div"
+    name="toast"
+    class="toast-holder"
+  >
     <div
       v-for="toast in toasts"
       :key="toast.id"
       class="toast"
-      :class="{ closed: !toast.isOpen, open: toast.isOpen }"
       tabindex="0"
       role="status"
       @click="performAction(toast)"
@@ -15,11 +18,11 @@
         {{ toast.message }}
       </p>
     </div>
-  </div>
+  </TransitionGroup>
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, reactive } from 'vue'
+import { onBeforeUnmount, onMounted, reactive } from 'vue'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 
 let idCounter = 0
@@ -29,7 +32,6 @@ let removeShowToastListener = null
  * @typedef Toast
  * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
  * @property {Function | null} action
- * @property {boolean} isOpen
  * @property {NodeJS.Timeout | number} timeout
  * @property {NodeJS.Timeout | number} interval
  * @property {number} id
@@ -49,7 +51,6 @@ function open({ detail: { message, time, action, abortSignal } }) {
     id,
     message,
     action,
-    isOpen: false,
     timeout: 0,
     interval: 0
   }
@@ -74,36 +75,17 @@ function open({ detail: { message, time, action, abortSignal } }) {
     }, updateDelay)
   }
 
-  toast.timeout = setTimeout(close, time, toast)
+  toast.timeout = setTimeout(remove, time, toast)
   if (abortSignal != null) {
     abortSignal.addEventListener('abort', () => {
-      close(toast)
+      remove(toast)
     })
   }
-
-  nextTick(() => {
-    // We need to locate the object in the array so we get the reactive proxy,
-    // as modifying the original object won't trigger reactive effects such as updating the DOM
-    const toast = toasts.find(t => t.id === id)
-
-    if (toast) {
-      toast.isOpen = true
-    }
-  })
 
   if (toasts.length > 4) {
     remove(toasts[0])
   }
   toasts.push(toast)
-}
-
-/**
- * @param {Toast} toast
- */
-function close(toast) {
-  setTimeout(remove, 300, toast)
-
-  toast.isOpen = false
 }
 
 /**

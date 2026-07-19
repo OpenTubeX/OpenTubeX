@@ -5,6 +5,7 @@ import store from './store/index'
 import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
+import { installViewTransitions } from './helpers/viewTransitions'
 import { library } from './fontawesome-minimal'
 // import the styles
 import '@fortawesome/fontawesome-svg-core/styles.css'
@@ -297,6 +298,8 @@ app
   .use(router)
   .use(store)
   .use(i18n)
+
+installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 

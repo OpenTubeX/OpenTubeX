@@ -3,7 +3,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { mapActions } from 'vuex'
 import shaka from 'shaka-player'
 import { Utils, YTNodes } from 'youtubei.js'
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-video-player.vue'
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
@@ -78,7 +77,6 @@ const UNAVAILABLE_VIDEO_THUMBNAILS = {
 export default defineComponent({
   name: 'Watch',
   components: {
-    'ft-loader': FtLoader,
     'ft-shaka-video-player': FtShakaVideoPlayer,
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,

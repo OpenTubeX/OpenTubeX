@@ -64,7 +64,6 @@
   align-items: start;
   display: grid;
 
-  &.isLoading,
   &.noSidebar {
     @include single-column-template;
   }
@@ -217,5 +216,81 @@
     .infoArea {
       scroll-margin-block-start: 76px;
     }
+  }
+}
+
+.videoPlayerPlaceholder {
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+}
+
+.skeletonLine {
+  block-size: 14px;
+  border-radius: 4px;
+}
+
+.infoSkeleton {
+  padding: 16px;
+  border-radius: 5px;
+  background-color: var(--card-bg-color);
+  box-sizing: border-box;
+
+  .skeletonTitle {
+    inline-size: 60%;
+    block-size: 22px;
+    margin-block-end: 20px;
+  }
+
+  .skeletonInfoRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .skeletonAvatar {
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .skeletonChannel {
+    inline-size: 150px;
+  }
+}
+
+.recommendationsSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block: 0 16px;
+  margin-inline: 8px;
+
+  .skeletonRecommendation {
+    display: flex;
+    gap: 8px;
+  }
+
+  .skeletonRecommendationThumbnail {
+    aspect-ratio: 16 / 9;
+    inline-size: 163px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+
+  .skeletonRecommendationDetails {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .skeletonLine {
+    block-size: 12px;
+    inline-size: 90%;
+  }
+
+  .skeletonLine.short {
+    inline-size: 60%;
   }
 }

@@ -2128,11 +2128,59 @@ a:visited {
     transition: none !important;
     animation: none !important;
   }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* thumbnail-to-player morph (only runs for navigations
+   wrapped by helpers/viewTransitions.js).
+
+   The player is only named while a morph is running: view-transition-name
+   forces a stacking context, which would otherwise trap the player's
+   full-window mode below the info/sidebar areas. */
+:root.viewTransitionMorphActive .videoPlayer {
+  view-transition-name: video-morph;
+}
+
+::view-transition-group(video-morph) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
 }
 
 ::-webkit-scrollbar {
   inline-size: auto;
   block-size: auto;
+}
+
+/* shared shimmer for skeleton loading placeholders */
+.ft-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--card-bg-color) 25%,
+    var(--secondary-card-bg-color) 37%,
+    var(--card-bg-color) 63%
+  );
+  background-size: 400% 100%;
+  animation: ft-shimmer 1.4s ease infinite;
+}
+
+@keyframes ft-shimmer {
+  from {
+    background-position: 100% 50%;
+  }
+
+  to {
+    background-position: 0% 50%;
+  }
 }
 
 ::-webkit-scrollbar-thumb {

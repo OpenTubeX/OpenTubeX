@@ -332,6 +332,7 @@ import {
 import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock.js'
+import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -974,6 +975,12 @@ function handleWatchPageLinkClick(event) {
       doCreateNewTab: !event.shiftKey,
       makeActive: false
     })
+    return
+  }
+
+  // Plain left click navigates in this tab: morph the thumbnail into the player
+  if (event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+    requestWatchPageViewTransition(event.currentTarget)
   }
 }
 

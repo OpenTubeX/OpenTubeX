@@ -10,10 +10,12 @@
       <FtButton
         :label="subscribedText"
         :no-border="true"
+        :icon="isSubscribed ? ['fas', 'check'] : null"
         class="subscribeButton"
         :class="{
           hasProfileDropdownToggle: isProfileDropdownEnabled,
-          dropdownOpened: isProfileDropdownOpen
+          dropdownOpened: isProfileDropdownOpen,
+          justToggled: justToggled
         }"
         background-color="var(--primary-color)"
         text-color="var(--text-with-main-color)"
@@ -43,56 +45,58 @@
         />
       </FtButton>
     </div>
-    <div
-      v-if="isProfileDropdownOpen"
-      tabindex="-1"
-      class="profileDropdown"
-    >
-      <ul
-        class="profileList"
+    <Transition name="profile-dropdown">
+      <div
+        v-if="isProfileDropdownOpen"
+        tabindex="-1"
+        class="profileDropdown"
       >
-        <li
-          v-for="(profile, index) in profileDisplayList"
-          :key="index"
-          class="profile"
-          :class="{
-            subscribed: isProfileSubscribed(profile)
-          }"
-          :aria-labelledby="id + '-' + index"
-          :aria-selected="isActiveProfile(profile)"
-          :aria-checked="isProfileSubscribed(profile)"
-          tabindex="0"
-          role="checkbox"
-          @click.stop.prevent="handleSubscription(profile)"
-          @keydown.space.stop.prevent="handleSubscription(profile)"
+        <ul
+          class="profileList"
         >
-          <div
-            class="colorOption"
-            :style="{ background: profile.bgColor, color: profile.textColor }"
+          <li
+            v-for="(profile, index) in profileDisplayList"
+            :key="index"
+            class="profile"
+            :class="{
+              subscribed: isProfileSubscribed(profile)
+            }"
+            :aria-labelledby="id + '-' + index"
+            :aria-selected="isActiveProfile(profile)"
+            :aria-checked="isProfileSubscribed(profile)"
+            tabindex="0"
+            role="checkbox"
+            @click.stop.prevent="handleSubscription(profile)"
+            @keydown.space.stop.prevent="handleSubscription(profile)"
           >
             <div
-              class="initial"
+              class="colorOption"
+              :style="{ background: profile.bgColor, color: profile.textColor }"
+            >
+              <div
+                class="initial"
+                dir="auto"
+              >
+                {{ isProfileSubscribed(profile) ? $t('checkmark') : profileInitials[profile._id] }}
+              </div>
+            </div>
+            <p
+              :id="id + '-' + index"
+              class="profileName"
               dir="auto"
             >
-              {{ isProfileSubscribed(profile) ? $t('checkmark') : profileInitials[profile._id] }}
-            </div>
-          </div>
-          <p
-            :id="id + '-' + index"
-            class="profileName"
-            dir="auto"
-          >
-            {{ profile.name }}
-          </p>
-        </li>
-      </ul>
-    </div>
+              {{ profile.name }}
+            </p>
+          </li>
+        </ul>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -198,6 +202,23 @@ const isProfileDropdownEnabled = computed(() => {
 const isProfileDropdownOpen = ref(false)
 /** @type {import('vue').ShallowRef<Profile | null>} */
 const showUnsubscribePopupForProfile = shallowRef(null)
+
+const isSubscribed = computed(() => isProfileSubscribed(activeProfile.value))
+
+const justToggled = ref(false)
+let justToggledTimeoutId = null
+
+watch(isSubscribed, () => {
+  clearTimeout(justToggledTimeoutId)
+  justToggled.value = true
+  justToggledTimeoutId = setTimeout(() => {
+    justToggled.value = false
+  }, 400)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(justToggledTimeoutId)
+})
 
 /**
  * @param {Profile} profile

@@ -19,25 +19,31 @@
   overflow-y: auto;
   background-color: rgb(0 0 0 / 70%);
   color: #fff;
-  opacity: 0;
   border-radius: 20px;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .message {
   margin: auto;
 }
 
-.open {
-  pointer-events: auto;
-  visibility: visible;
-  opacity: 1;
-  transition: visibility 0s linear 0s, opacity 300ms;
+.toast-enter-active {
+  transition: opacity 300ms, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.closed {
-  visibility: hidden;
+.toast-leave-active {
+  transition: opacity 300ms, transform 300ms ease-in;
   pointer-events: none;
+}
+
+.toast-enter-from,
+.toast-leave-to {
   opacity: 0;
-  transition: visibility 0s linear 300ms, opacity 300ms;
+  transform: translateY(15px) scale(0.95);
+}
+
+/* stack reflow when a toast is removed */
+.toast-move {
+  transition: transform 300ms ease;
 }

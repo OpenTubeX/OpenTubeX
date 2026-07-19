@@ -1,4 +1,5 @@
 .prompt {
+  animation: prompt-backdrop-enter 150ms ease-out;
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
@@ -16,8 +17,22 @@
 }
 
 .promptCard {
+  animation: prompt-card-enter 150ms ease-out;
   overflow-y: scroll;
   max-block-size: 95%;
+}
+
+@keyframes prompt-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes prompt-card-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
 }
 
 .promptCard.autosize {

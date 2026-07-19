@@ -1,6 +1,8 @@
 <template>
-  <div
+  <TransitionGroup
     ref="gridElement"
+    tag="div"
+    name="feed"
     :class="{
       grid: grid,
       list: !grid,
@@ -9,7 +11,7 @@
     :style="gridStyle"
   >
     <slot />
-  </div>
+  </TransitionGroup>
 </template>
 
 <script setup>
@@ -42,7 +44,7 @@ onMounted(() => {
     gridWidth.value = entry.contentRect.width
   })
 
-  resizeObserver.observe(gridElement.value)
+  resizeObserver.observe(gridElement.value.$el)
 })
 
 onBeforeUnmount(() => {

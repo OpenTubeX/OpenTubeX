@@ -1,0 +1,38 @@
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonCard.listCard {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.skeletonThumbnail {
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+  border-radius: 5px;
+}
+
+.listCard .skeletonThumbnail {
+  inline-size: 262px;
+  flex-shrink: 0;
+}
+
+.skeletonDetails {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeletonLine {
+  block-size: 14px;
+  border-radius: 4px;
+  inline-size: 90%;
+}
+
+.skeletonLine.short {
+  inline-size: 60%;
+}
