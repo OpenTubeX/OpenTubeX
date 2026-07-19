@@ -7,9 +7,11 @@
       isLocaleRightToLeft: isLocaleRightToLeft,
       isSideNavOpen: isSideNavOpen,
       hideLabelsSideBar: hideLabelsSideBar && !isSideNavOpen,
+      verticalTabs: useVerticalTabBar,
       watchSideNavOverlay: useWatchSideNavOverlay,
       watchSideNavTransitionDisabled
     }"
+    :style="appStyle"
   >
     <TabBar
       :inert="isAnyPromptOpen"
@@ -369,6 +371,17 @@ const isSideNavOpen = computed(() => store.getters.getIsSideNavOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLabelsSideBar = computed(() => store.getters.getHideLabelsSideBar)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useVerticalTabBar = computed(() => isElectron && store.getters.getUseVerticalTabBar)
+
+const appStyle = computed(() => {
+  if (!useVerticalTabBar.value) {
+    return undefined
+  }
+
+  return { '--vertical-tab-bar-width': `${store.getters.getVerticalTabBarWidth}px` }
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const useWatchSideNavOverlay = computed(() => {

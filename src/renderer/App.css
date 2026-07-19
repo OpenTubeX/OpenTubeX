@@ -364,3 +364,24 @@
     display: none;
   }
 }
+
+/* Vertical tab bar layout: the tab bar is a fixed column on the inline-start
+   side, so content shifts over and vertical offsets return to top-nav only. */
+.app.verticalTabs {
+  padding-inline-start: var(--vertical-tab-bar-width, 220px);
+}
+
+.app.verticalTabs .sideNavBackdrop {
+  inset-block-start: 60px;
+}
+
+@media only screen and (width > 680px) {
+  .app.verticalTabs :deep(.sideNav) {
+    block-size: calc(100vh - 60px);
+    inset-block-start: 60px;
+  }
+
+  .watchSideNavOverlay.verticalTabs :deep(.sideNav) {
+    inset-inline-start: var(--vertical-tab-bar-width, 220px);
+  }
+}

@@ -118,6 +118,10 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  vertical: {
+    type: Boolean,
+    default: false
+  },
   isDragging: {
     type: Boolean,
     default: false
@@ -143,6 +147,7 @@ const props = defineProps({
 const emit = defineEmits(['activate', 'close', 'middleClick'])
 
 const TOOLTIP_MAX_WIDTH_PX = 340
+const TOOLTIP_ESTIMATED_HEIGHT_PX = 240
 const TOOLTIP_MARGIN_PX = 8
 const TOOLTIP_OFFSET_PX = 6
 const TOOLTIP_SHOW_DELAY_MS = 80
@@ -166,11 +171,13 @@ const tabClasses = computed(() => ({
   colored: tabColor.value != null,
   dragging: props.isDragging,
   settling: props.isSettling,
-  noTransition: props.suppressTransition
+  noTransition: props.suppressTransition,
+  vertical: props.vertical
 }))
 
 const tabStyle = computed(() => {
-  const transform = props.offset !== 0 ? `translate3d(${props.offset}px, 0, 0)` : ''
+  const translation = props.vertical ? `0, ${props.offset}px` : `${props.offset}px, 0`
+  const transform = props.offset !== 0 ? `translate3d(${translation}, 0)` : ''
   /** @type {Record<string, string | undefined>} */
   const style = {
     transform: transform || undefined,
@@ -302,6 +309,22 @@ function updateTooltipPosition() {
     TOOLTIP_MAX_WIDTH_PX,
     Math.max(120, window.innerWidth - TOOLTIP_MARGIN_PX * 2)
   )
+
+  if (props.vertical) {
+    // Place the tooltip beside the tab, keeping it inside the viewport.
+    const top = Math.max(
+      TOOLTIP_MARGIN_PX,
+      Math.min(window.innerHeight - TOOLTIP_ESTIMATED_HEIGHT_PX, rect.top)
+    )
+
+    tooltipStyle.value = {
+      inlineSize: `${Math.round(tooltipWidth)}px`,
+      insetInlineStart: `${Math.round(rect.right + TOOLTIP_OFFSET_PX)}px`,
+      insetBlockStart: `${Math.round(top)}px`
+    }
+    return
+  }
+
   const left = Math.max(
     TOOLTIP_MARGIN_PX,
     Math.min(
@@ -403,6 +426,32 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 
 .tab.noTransition {
   transition: background-color 0.15s ease;
+}
+
+.tab.vertical {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: none;
+  border-radius: 6px;
+  border-block-end: 1px solid transparent;
+}
+
+.tab.vertical.active {
+  border-color: var(--tab-border-color, var(--tertiary-text-color));
+}
+
+.tab.vertical::after {
+  display: none;
+}
+
+.tab.vertical.colored {
+  box-shadow: inset 2px 0 0 var(--tab-accent-color);
+}
+
+.tab.vertical.pinned {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: none;
 }
 
 .tab::after {

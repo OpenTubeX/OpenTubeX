@@ -48,6 +48,11 @@
   }
 }
 
+/* The vertical tab bar sits beside the content instead of above it */
+.app.verticalTabs .topNav {
+  inset-block-start: 0;
+}
+
 .menuButton {
   @media only screen and (width <= 680px) {
     display: none;
@@ -152,7 +157,8 @@
     }
   }
 
-  .navNewWindowButton {
+  .navNewWindowButton,
+  .navTabLayoutButton {
     @media only screen and (width <= 680px) {
       display: none;
     }
@@ -251,5 +257,11 @@
 .app:has(.tabBar) .middle .searchContainer {
   @media only screen and (width <= 680px) {
     inset-block-start: 92px;
+  }
+}
+
+.app.verticalTabs .middle .searchContainer {
+  @media only screen and (width <= 680px) {
+    inset-block-start: 60px;
   }
 }

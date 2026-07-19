@@ -99,3 +99,68 @@
 .newTabIcon {
   font-size: 12px;
 }
+
+/* ===== Vertical layout: fixed column on the inline-start side ===== */
+
+.tabBar.vertical {
+  flex-direction: column;
+  align-items: stretch;
+
+  /* Let the resize handle straddle the divider border */
+  overflow: visible;
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--vertical-tab-bar-width, 220px);
+  block-size: auto;
+  min-block-size: 0;
+
+  /* No bottom padding: the new-tab button reaches the screen edge, so clicks
+     at the very bottom still land on it */
+  padding-block: 4px 0;
+  border-block-end: 0;
+}
+
+.tabBar.vertical .newTabButton {
+  padding-block-end: 10px;
+}
+
+.tabBar.vertical .tabsViewport {
+  flex: 1;
+  min-block-size: 0;
+}
+
+.tabBar.vertical .tabsContainer {
+  flex-direction: column;
+  block-size: 100%;
+  overflow: hidden auto;
+  scrollbar-width: thin;
+}
+
+/* The handle draws the divider line itself, so the hover highlight is always
+   centered on it. It straddles the bar's edge: half inside, half outside. */
+.tabBarResizeHandle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: -2.5px;
+  inline-size: 5px;
+  cursor: col-resize;
+  z-index: 1;
+  -webkit-app-region: no-drag;
+  background: linear-gradient(
+    to right,
+    transparent 2px,
+    var(--tertiary-text-color) 2px 3px,
+    transparent 3px
+  );
+}
+
+.tabBarResizeHandle:hover,
+.tab-bar-resizing .tabBarResizeHandle {
+  background: linear-gradient(
+    to right,
+    transparent 1px,
+    color-mix(in srgb, var(--primary-text-color) 45%, transparent) 1px 4px,
+    transparent 4px
+  );
+}

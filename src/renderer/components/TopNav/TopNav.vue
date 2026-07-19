@@ -64,6 +64,18 @@
           :icon="['fas', 'clone']"
         />
       </button>
+      <button
+        v-if="isElectron"
+        class="navTabLayoutButton navButton"
+        :aria-label="tabLayoutText"
+        :title="tabLayoutText"
+        @click="toggleVerticalTabBar"
+      >
+        <FontAwesomeIcon
+          class="navIcon"
+          :icon="tabLayoutIcon"
+        />
+      </button>
       <RouterLink
         v-if="!hideHeaderLogo"
         class="logo"
@@ -266,6 +278,24 @@ const newWindowText = computed(() => {
     KeyboardShortcuts.APP.GENERAL.NEW_WINDOW
   )
 })
+
+const isElectron = process.env.IS_ELECTRON
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useVerticalTabBar = computed(() => store.getters.getUseVerticalTabBar)
+
+const tabLayoutText = computed(() => {
+  return useVerticalTabBar.value ? t('Use Horizontal Tabs') : t('Use Vertical Tabs')
+})
+
+// Show the layout the button switches to
+const tabLayoutIcon = computed(() => {
+  return useVerticalTabBar.value ? ['fac', 'horizontal-tabs'] : ['fac', 'vertical-tabs']
+})
+
+function toggleVerticalTabBar() {
+  store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+}
 
 function createNewWindow() {
   // In the Electron build, use the dedicated IPC-based helper so that a real

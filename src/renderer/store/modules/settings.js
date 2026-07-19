@@ -251,6 +251,8 @@ const state = {
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
   startupBehavior: 'loadLastActiveTab',
+  useVerticalTabBar: false,
+  verticalTabBarWidth: 220,
   listType: 'grid',
   maxVideoPlaybackRate: 3,
   onlyShowLatestFromChannel: false,

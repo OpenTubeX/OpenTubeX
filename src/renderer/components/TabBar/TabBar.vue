@@ -1,7 +1,9 @@
 <template>
   <div
     v-if="isElectron"
+    ref="tabBarRef"
     class="tabBar"
+    :class="{ vertical }"
   >
     <div
       ref="tabsViewportRef"
@@ -12,7 +14,7 @@
         ref="dropZoneRef"
         class="tabsContainer"
         @scroll="handleScroll"
-        @wheel.prevent="handleWheel"
+        @wheel="handleWheel"
         @pointerdown="handleTabContainerPointerDown"
         @mousedown.middle="handleTabListMiddleMouseDown"
         @auxclick="handleTabListAuxClick"
@@ -22,6 +24,7 @@
           :key="tab.id"
           :tab="tab"
           :index="index"
+          :vertical="vertical"
           :offset="tabOffsets[tab.id] || 0"
           :is-dragging="draggingTabId === tab.id"
           :is-settling="isSettling && draggingTabId === tab.id"
@@ -35,7 +38,7 @@
         />
       </div>
       <div
-        v-show="showScrollbar"
+        v-show="showScrollbar && !vertical"
         ref="scrollbarRef"
         class="tabsScrollbar"
         @pointerdown="handleScrollbarTrackPointerDown"
@@ -58,6 +61,16 @@
         class="newTabIcon"
       />
     </button>
+    <div
+      v-if="vertical"
+      class="tabBarResizeHandle"
+      role="separator"
+      aria-orientation="vertical"
+      :aria-label="t('Resize Tab Bar')"
+      :title="t('Resize Tab Bar')"
+      @pointerdown="handleResizePointerDown"
+      @dblclick="resetTabBarWidth"
+    />
   </div>
 </template>
 
@@ -78,6 +91,9 @@ const isElectron = process.env.IS_ELECTRON
 /** @type {import('vue').ComputedRef<Array<{id: string, url: string, title: string, isActive: boolean, isPinned?: boolean, color?: string | null}>>} */
 const tabs = computed(() => store.getters.getTabs)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const vertical = computed(() => store.getters.getUseVerticalTabBar)
+
 const newTabTooltip = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('New Tab'),
@@ -85,6 +101,7 @@ const newTabTooltip = computed(() => {
   )
 })
 
+const tabBarRef = useTemplateRef('tabBarRef')
 const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
 const scrollbarRef = useTemplateRef('scrollbarRef')
@@ -103,14 +120,17 @@ const isSettling = ref(false)
 const suppressTransitions = ref(false)
 
 /**
+ * Drag positions are measured along the tab bar's main axis:
+ * horizontal (clientX/scrollLeft) normally, vertical (clientY/scrollTop)
+ * when the vertical tab bar layout is enabled.
  * @typedef {object} DragSession
  * @property {string} tabId
  * @property {number} sourceIndex
  * @property {number} targetIndex
- * @property {number} pointerStartX
- * @property {number} pointerCurrentX
- * @property {number} scrollStartLeft
- * @property {Array<{id: string, left: number, width: number}>} rects
+ * @property {number} pointerStart
+ * @property {number} pointerCurrent
+ * @property {number} scrollStart
+ * @property {Array<{id: string, start: number, size: number}>} rects
  * @property {number} gap
  * @property {boolean} started
  * @property {boolean} moved
@@ -120,6 +140,20 @@ const suppressTransitions = ref(false)
 /** @type {DragSession | null} */
 let dragSession = null
 let settleTimeoutId = null
+
+/**
+ * @param {PointerEvent | MouseEvent} event
+ */
+function pointerAxisPosition(event) {
+  return vertical.value ? event.clientY : event.clientX
+}
+
+/**
+ * @param {HTMLElement} container
+ */
+function containerScrollPosition(container) {
+  return vertical.value ? container.scrollTop : container.scrollLeft
+}
 
 /**
  * Begin tracking a potential drag from a tab.
@@ -149,23 +183,23 @@ function handleTabContainerPointerDown(event) {
   if (tabEls.length === 0) return
 
   const containerRect = container.getBoundingClientRect()
-  const containerScrollLeft = container.scrollLeft
+  const containerScroll = containerScrollPosition(container)
 
-  // Layout left = position within the scrollable content (so it stays
+  // Layout start = position within the scrollable content (so it stays
   // consistent regardless of the current scroll offset).
   const rects = tabEls.map(el => {
     const rect = el.getBoundingClientRect()
     return {
       id: el.dataset.tabId,
-      left: rect.left - containerRect.left + containerScrollLeft,
-      width: rect.width
+      start: (vertical.value ? rect.top - containerRect.top : rect.left - containerRect.left) + containerScroll,
+      size: vertical.value ? rect.height : rect.width
     }
   })
 
   // Compute the gap between adjacent tabs (matches the .tabsContainer gap)
   let gap = 0
   if (rects.length > 1) {
-    gap = rects[1].left - (rects[0].left + rects[0].width)
+    gap = rects[1].start - (rects[0].start + rects[0].size)
   }
 
   finishSettle(true)
@@ -174,9 +208,9 @@ function handleTabContainerPointerDown(event) {
     tabId,
     sourceIndex,
     targetIndex: sourceIndex,
-    pointerStartX: event.clientX,
-    pointerCurrentX: event.clientX,
-    scrollStartLeft: containerScrollLeft,
+    pointerStart: pointerAxisPosition(event),
+    pointerCurrent: pointerAxisPosition(event),
+    scrollStart: containerScroll,
     rects,
     gap,
     started: false,
@@ -195,12 +229,12 @@ function handleTabContainerPointerDown(event) {
 function handleDragPointerMove(event) {
   if (!dragSession) return
 
-  dragSession.pointerCurrentX = event.clientX
+  dragSession.pointerCurrent = pointerAxisPosition(event)
 
-  const pointerDx = event.clientX - dragSession.pointerStartX
+  const pointerDelta = dragSession.pointerCurrent - dragSession.pointerStart
 
   if (!dragSession.started) {
-    if (Math.abs(pointerDx) < DRAG_THRESHOLD_PX) return
+    if (Math.abs(pointerDelta) < DRAG_THRESHOLD_PX) return
     dragSession.started = true
     draggingTabId.value = dragSession.tabId
     closeTooltipsSignal.value++
@@ -220,10 +254,10 @@ function updateActiveDragPosition() {
   const container = dropZoneRef.value
   if (!container) return
 
-  const dx = dragSession.pointerCurrentX -
-    dragSession.pointerStartX +
-    container.scrollLeft -
-    dragSession.scrollStartLeft
+  const delta = dragSession.pointerCurrent -
+    dragSession.pointerStart +
+    containerScrollPosition(container) -
+    dragSession.scrollStart
 
   const { rects, sourceIndex, gap } = dragSession
   const sourceRect = rects[sourceIndex]
@@ -234,8 +268,8 @@ function updateActiveDragPosition() {
 
   // Clamp so the dragged tab's center can sweep across its allowed group.
   // Pinned tabs stay in the pinned group; unpinned tabs stay after it.
-  let minLeft = rects[0].left - sourceRect.width / 2
-  let maxLeft = lastRect.left + lastRect.width - sourceRect.width / 2
+  let minStart = rects[0].start - sourceRect.size / 2
+  let maxStart = lastRect.start + lastRect.size - sourceRect.size / 2
 
   if (isSourcePinned) {
     const pinnedRects = rects.filter(rect => {
@@ -244,21 +278,21 @@ function updateActiveDragPosition() {
     const lastPinnedRect = pinnedRects[pinnedRects.length - 1]
 
     if (pinnedRects[0] && lastPinnedRect) {
-      minLeft = pinnedRects[0].left - sourceRect.width / 2
-      maxLeft = lastPinnedRect.left + lastPinnedRect.width - sourceRect.width / 2
+      minStart = pinnedRects[0].start - sourceRect.size / 2
+      maxStart = lastPinnedRect.start + lastPinnedRect.size - sourceRect.size / 2
     }
   } else {
     const firstUnpinnedIndex = tabsList.findIndex(tab => tab.isPinned !== true)
     const firstUnpinnedRect = firstUnpinnedIndex >= 0 ? rects[firstUnpinnedIndex] : rects[0]
 
     if (firstUnpinnedRect) {
-      minLeft = firstUnpinnedRect.left - sourceRect.width / 2
+      minStart = firstUnpinnedRect.start - sourceRect.size / 2
     }
   }
 
-  const newLeft = Math.max(minLeft, Math.min(maxLeft, sourceRect.left + dx))
-  const draggedOffset = newLeft - sourceRect.left
-  const draggedCenter = newLeft + sourceRect.width / 2
+  const newStart = Math.max(minStart, Math.min(maxStart, sourceRect.start + delta))
+  const draggedOffset = newStart - sourceRect.start
+  const draggedCenter = newStart + sourceRect.size / 2
 
   dragSession.draggedOffset = draggedOffset
 
@@ -267,7 +301,7 @@ function updateActiveDragPosition() {
   let targetIndex = sourceIndex
   for (let i = 0; i < rects.length; i++) {
     if (i === sourceIndex) continue
-    const center = rects[i].left + rects[i].width / 2
+    const center = rects[i].start + rects[i].size / 2
     if (i < sourceIndex && draggedCenter < center) {
       targetIndex = Math.min(targetIndex, i)
     } else if (i > sourceIndex && draggedCenter > center) {
@@ -310,7 +344,7 @@ function clampTargetIndexForPinnedGroup(tabId, targetIndex) {
  * Build the offset map for every tab given the proposed reorder.
  * The dragged tab gets the user's pointer offset; all other tabs animate
  * to the slot they would occupy in the reordered layout.
- * @param {Array<{id: string, left: number, width: number}>} rects
+ * @param {Array<{id: string, start: number, size: number}>} rects
  * @param {number} sourceIndex
  * @param {number} targetIndex
  * @param {number} gap
@@ -329,18 +363,18 @@ function computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset) {
   const [src] = order.splice(sourceIndex, 1)
   order.splice(targetIndex, 0, src)
 
-  let cursor = rects[0].left
+  let cursor = rects[0].start
   for (const idx of order) {
     const rect = rects[idx]
     if (idx === sourceIndex) {
       offsets[rect.id] = draggedOffset
     } else {
-      const delta = cursor - rect.left
+      const delta = cursor - rect.start
       if (delta !== 0) {
         offsets[rect.id] = delta
       }
     }
-    cursor += rect.width + gap
+    cursor += rect.size + gap
   }
 
   return offsets
@@ -385,7 +419,7 @@ function handleDragPointerUp() {
 /**
  * Compute offsets that place every tab (including the dragged one)
  * exactly where it will live after the reorder commits.
- * @param {Array<{id: string, left: number, width: number}>} rects
+ * @param {Array<{id: string, start: number, size: number}>} rects
  * @param {number} sourceIndex
  * @param {number} targetIndex
  * @param {number} gap
@@ -405,13 +439,13 @@ function computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset
   const [src] = order.splice(sourceIndex, 1)
   order.splice(targetIndex, 0, src)
 
-  let cursor = rects[0].left
+  let cursor = rects[0].start
   for (const idx of order) {
     if (idx === sourceIndex) {
-      offsets[rects[idx].id] = cursor - rects[idx].left
+      offsets[rects[idx].id] = cursor - rects[idx].start
       break
     }
-    cursor += rects[idx].width + gap
+    cursor += rects[idx].size + gap
   }
 
   return offsets
@@ -538,6 +572,64 @@ function suppressNextClick() {
   setTimeout(() => {
     window.removeEventListener('click', handler, true)
   }, 200)
+}
+
+// ===== Vertical tab bar resizing =====
+const MIN_VERTICAL_TAB_BAR_WIDTH = 150
+const MAX_VERTICAL_TAB_BAR_WIDTH = 400
+const DEFAULT_VERTICAL_TAB_BAR_WIDTH = 220
+
+let isResizingTabBar = false
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleResizePointerDown(event) {
+  if (event.button !== 0) return
+
+  event.preventDefault()
+  isResizingTabBar = true
+  document.body.classList.add('tab-bar-resizing')
+  window.addEventListener('pointermove', handleResizePointerMove)
+  window.addEventListener('pointerup', handleResizePointerUp)
+  window.addEventListener('pointercancel', handleResizePointerUp)
+}
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleResizePointerMove(event) {
+  const bar = tabBarRef.value
+  if (!bar) return
+
+  const rect = bar.getBoundingClientRect()
+  const isRtl = getComputedStyle(bar).direction === 'rtl'
+  const width = isRtl ? rect.right - event.clientX : event.clientX - rect.left
+  const clampedWidth = Math.round(
+    Math.max(MIN_VERTICAL_TAB_BAR_WIDTH, Math.min(MAX_VERTICAL_TAB_BAR_WIDTH, width))
+  )
+
+  // Apply live via the mutation; the pointerup handler persists the result.
+  store.commit('setVerticalTabBarWidth', clampedWidth)
+}
+
+function handleResizePointerUp() {
+  stopTabBarResize()
+  store.dispatch('updateVerticalTabBarWidth', store.getters.getVerticalTabBarWidth)
+}
+
+function stopTabBarResize() {
+  if (!isResizingTabBar) return
+
+  isResizingTabBar = false
+  document.body.classList.remove('tab-bar-resizing')
+  window.removeEventListener('pointermove', handleResizePointerMove)
+  window.removeEventListener('pointerup', handleResizePointerUp)
+  window.removeEventListener('pointercancel', handleResizePointerUp)
+}
+
+function resetTabBarWidth() {
+  store.dispatch('updateVerticalTabBarWidth', DEFAULT_VERTICAL_TAB_BAR_WIDTH)
 }
 
 // ===== Tab actions =====
@@ -683,6 +775,7 @@ onUnmounted(() => {
     settleTimeoutId = null
   }
 
+  stopTabBarResize()
   stopScrollbarThumbDrag()
   cancelScrollAnimation()
   resizeObserver?.disconnect()
@@ -751,6 +844,14 @@ function updateScrollbar() {
     return
   }
 
+  // The vertical layout scrolls natively, so the custom scrollbar stays hidden.
+  if (vertical.value) {
+    showScrollbar.value = false
+    scrollbarThumbWidth.value = 0
+    scrollbarThumbOffset.value = 0
+    return
+  }
+
   const maxScroll = container.scrollWidth - container.clientWidth
 
   if (maxScroll <= 1) {
@@ -781,8 +882,13 @@ function updateScrollbar() {
  * @param {WheelEvent} event
  */
 function handleWheel(event) {
+  // The vertical layout relies on the container's native vertical scrolling.
+  if (vertical.value) return
+
   const container = dropZoneRef.value
   if (!container) return
+
+  event.preventDefault()
 
   const delta = event.deltaY || event.deltaX
   const maxScroll = container.scrollWidth - container.clientWidth
@@ -908,7 +1014,7 @@ function handleWindowResize() {
 // Apply scroll position received from main process state broadcasts.
 // This keeps all tab renderers' tab bars at the same scroll offset.
 watch(tabBarScrollPosition, (newPosition) => {
-  if (newPosition == null) return
+  if (newPosition == null || vertical.value) return
 
   nextTick(() => {
     const container = dropZoneRef.value
@@ -930,6 +1036,14 @@ watch(tabs, () => {
     updateScrollbar()
   })
 }, { deep: true })
+
+watch(vertical, () => {
+  cancelScrollAnimation()
+  scrollTarget = null
+  nextTick(() => {
+    updateScrollbar()
+  })
+})
 </script>
 
 <style scoped src="./TabBar.css" />
@@ -938,6 +1052,12 @@ watch(tabs, () => {
 body.tab-bar-grabbing,
 body.tab-bar-grabbing * {
   cursor: grabbing !important;
+  user-select: none !important;
+}
+
+body.tab-bar-resizing,
+body.tab-bar-resizing * {
+  cursor: col-resize !important;
   user-select: none !important;
 }
 </style>
