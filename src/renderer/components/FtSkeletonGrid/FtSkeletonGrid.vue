@@ -3,6 +3,7 @@
     :grid="displayValue !== 'list'"
     :thumbnail-size="thumbnailSize"
     aria-hidden="true"
+    data-tab-loading-indicator
   >
     <div
       v-for="n in count"

@@ -17,6 +17,7 @@
         <div
           v-if="isLoading"
           class="videoPlayer videoPlayerPlaceholder ft-shimmer"
+          data-tab-loading-indicator
         />
         <ft-shaka-video-player
           v-if="!isLoading && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
