@@ -29,6 +29,7 @@ Global:
   Videos: Videos
   Shorts: Shorts
   Live: Live
+  New: Neu
   Posts: Beiträge
   Sort By: Sortieren nach
 
@@ -104,6 +105,12 @@ Subscriptions:
   Refreshing Subscription Shorts: Abo-Shorts werden aktualisiert
   Refreshing Subscription Live Streams: Abo-Livestreams werden aktualisiert
   Refreshing Subscription Posts: Abo-Beiträge werden aktualisiert
+  New Content: Neue Inhalte
+  New Feed Refresh Warning Title: Alle Abo-Feeds aktualisieren?
+  New Feed Refresh Warning: Das Aktualisieren aller Inhaltstypen ohne RSS für {count} Abos kann lange dauern. Möchtest du fortfahren?
+  New Since Last Refresh: Neu seit der letzten Aktualisierung
+  Mark All as Seen: Alle als gesehen markieren
+  No New Content: Es gibt keine neuen Inhalte.
 Trending:
   Trending: Trends
   Trending Tabs: Trends-Tabs
@@ -202,6 +209,7 @@ History:
   Search bar placeholder: Im Verlauf suchen
   Empty Search Message: Es gibt keine Videos in deinem Verlauf, die deiner Suche entsprechen
   Case Sensitive Search: Groß- und Kleinschreibung bei der Suche beachten
+  Show Watched Indicators: Markierungen für angesehene Videos anzeigen
   DateOldestHistory: Wiedergabedatum (älteste)
   DateNewestHistory: Wiedergabedatum (neueste)
   Delete Old History: Alten Verlauf löschen
@@ -406,6 +414,7 @@ Settings:
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
     Hide OpenTubeX Header Logo: OpenTubeX-Titellogo ausblenden
+    Hide Profile Selector in Header: Profilauswahl in der Kopfzeile ausblenden
     Hide Side Bar on Watch Pages: Seitenleiste auf den Wiedergabeseiten ausblenden
   Player Settings:
     Player Settings: Video-Player
@@ -508,8 +517,16 @@ Settings:
       Picture in Picture: Bild im Bild
       External Player: Externer Player ({externalPlayerName})
       Full Screen: Vollbild
+      Full Window (Always On): Vollständiges Fenster (immer aktiv)
+      Full Screen (Always On): Vollbild (immer aktiv)
+      Tooltip: Die meisten Standard-Ansichtsmodi werden nur zu Beginn jeder Wiedergabesitzung angewendet. Änderungen während der Sitzung bleiben bis zu deren Ende erhalten. Immer aktive Ansichtsmodi werden bei jedem Wechsel zu einem neuen Video angewendet, unabhängig von Ansichtsmodus-Änderungen beim vorherigen Video.
       Default Viewing Mode: Standard-Ansichtsmodus
-    Auto Picture in Picture on Tab Change: Bild im Bild automatisch aktivieren, wenn der Tab gewechselt wird
+    Auto Picture in Picture:
+      Auto Picture in Picture: Bild im Bild automatisch aktivieren
+      On Tab Change: Beim Wechseln des Tabs
+      On Window Minimize: Beim Minimieren des Fensters
+      On Window Hide: Wenn das Fenster den Fokus verliert oder gewechselt wird
+      Wayland Minimize Unsupported: Wayland meldet das Minimieren von Fenstern nicht an Anwendungen, daher ist dieser Auslöser nicht verfügbar. Verwende stattdessen „Wenn das Fenster den Fokus verliert oder gewechselt wird“, was das Minimieren ebenfalls abdeckt.
     Scroll Mini Player:
       Scroll Mini Player: Scroll mini player
       When Scrolling Down: Einen Mini Player auf dem Bildschirm anzeigen beim runterscrollen
@@ -526,6 +543,8 @@ Settings:
     Subscription Settings: Abo
     Fetch Feeds from RSS: Abos via RSS abrufen
     Fetch Feed on Startup: Feed beim Start abrufen
+    Show New Content Feed: Feed mit neuen Inhalten anzeigen
+    Show New Content Indicators: Markierungen für neue Inhalte anzeigen
     Confirm Before Unsubscribing: Unbeabsichtigtes Deabonnieren verhindern
 
     'Limit the number of videos displayed for each channel': Anzahl der für jeden Kanal angezeigten Videos begrenzen
@@ -882,6 +901,7 @@ Video:
   Published:
     In less than a minute: In weniger als einer Minute
   Published on: Veröffentlicht am
+  Premiere started: Premiere läuft. Gestartet {timeAgo}
 
 #& Videos
   Video has been removed from your history: Video wurde aus deinem Verlauf entfernt
@@ -929,6 +949,7 @@ Video:
     OpeningTemplate: '{videoOrPlaylist} wird in {externalPlayer} geöffnet ...'
     playlist: Playlist
     video: Video
+  Premiere: Premiere
   Premieres: Premiere
   Show Super Chat Comment: Super-Chat-Kommentar anzeigen
   Scroll to Bottom: Nach unten scrollen
@@ -1018,6 +1039,7 @@ Video:
       StartTimeLabel: Segmentstartzeit
       TimeDivider: bis
       SkipToHighlight: Zum Highlight springen?
+      SkippedToHighlight: Zum Highlight gesprungen
       SkipToastUnskip: Nicht überspringen
       SkipToastReskip: Nochmal überspringen
       SkipPrompt: '{segmentCategory} Segment überspringen?'
@@ -1218,6 +1240,8 @@ Tooltips:
   Subscription Settings:
     Fetch Feeds from RSS: Wenn aktiviert, verwendet OpenTubeX RSS anstelle der Standardmethode, um deinen Abo-Feed abzurufen. RSS ist schneller und verhindert die IP-Sperren, liefert aber bestimmte Informationen wie Videodauer, den Live-Status oder Beiträge nicht
     Fetch Feed on Startup: Wenn aktiviert, ruft OpenTubeX deine Abos automatisch beim Start und beim Öffnen eines neuen Fensters ab.
+    Show New Content Feed: Zeigt eine Registerkarte „Neu“ mit Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
+    Show New Content Indicators: Zeigt einen kleinen Punkt neben Abo-Feed-Einträgen an, die beim vorherigen Abruf noch nicht vorhanden waren.
     Auto Refresh Interval: Wie oft OpenTubeX automatisch deine Abos aktualisiert während die Anwendung geöffnet ist.
   Player Settings:
     Enable Caption Translations: Wenn aktiviert, bevorzugen die Untertitel-Schaltfläche und das Tastenkürzel C eine automatisch übersetzte Spur in der bevorzugten Untertitelsprache, wenn das Video keine passende Originalspur bereitstellt.
@@ -1232,6 +1256,8 @@ Tooltips:
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
+  Theme Settings:
+    Hide Profile Selector in Header: Blendet die Profilauswahl in der oberen Leiste aus. Die Profilauswahl wird stattdessen oben auf der Seite „Abonnierte Kanäle“ angezeigt.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).
