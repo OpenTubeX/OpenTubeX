@@ -123,6 +123,14 @@ watch(
       acknowledgedMountRevision = mountRevision
       tabRuntimeRegistry.markMounted(props.tab.id, mountRevision)
       window.ftElectron?.tabs?.mountReady?.(props.tab.id, mountRevision)
+      // Mount readiness can race the initial active-tab watcher. Retry now that
+      // the runtime is guaranteed to exist so the tab cannot remain hidden.
+      if (
+        store.getters.getActiveTabId === props.tab.id &&
+        store.getters.getPresentedTabId !== props.tab.id
+      ) {
+        navigation.requestPresentation(props.tab.id, store.state.tabs.selectionRevision)
+      }
     }
     scheduleLoaderUpdate()
   },
