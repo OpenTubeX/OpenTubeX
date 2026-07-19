@@ -232,6 +232,37 @@
       class="sidebarArea"
     >
       <div
+        v-if="isLoading && watchingPlaylist"
+        class="playlistSkeleton watchVideoSideBar watchVideoPlaylist"
+        aria-hidden="true"
+      >
+        <div class="skeletonLine skeletonPlaylistTitle ft-shimmer" />
+        <div class="skeletonLine skeletonPlaylistMeta ft-shimmer" />
+        <div class="skeletonPlaylistProgress ft-shimmer" />
+        <div class="skeletonPlaylistButtons">
+          <div
+            v-for="n in 3"
+            :key="n"
+            class="skeletonPlaylistButton ft-shimmer"
+          />
+        </div>
+        <div class="skeletonPlaylistItems">
+          <div
+            v-for="n in 4"
+            :key="n"
+            class="skeletonPlaylistItem"
+          >
+            <div class="skeletonPlaylistIndex ft-shimmer" />
+            <div class="skeletonPlaylistThumbnail ft-shimmer" />
+            <div class="skeletonPlaylistDetails">
+              <div class="skeletonPlaylistDetailLine ft-shimmer" />
+              <div class="skeletonPlaylistDetailLine short ft-shimmer" />
+              <div class="skeletonPlaylistDetailLine shorter ft-shimmer" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
         v-if="isLoading && !hideRecommendedVideos"
         class="recommendationsSkeleton"
         aria-hidden="true"

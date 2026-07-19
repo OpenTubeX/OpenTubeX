@@ -265,12 +265,102 @@
   }
 }
 
+.playlistSkeleton {
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-block: 20px 16px;
+  padding-inline: 16px;
+  border-radius: 5px;
+  background-color: var(--card-bg-color);
+
+  .skeletonPlaylistTitle {
+    inline-size: 45%;
+    block-size: 18px;
+    margin-block-end: 8px;
+  }
+
+  .skeletonPlaylistMeta {
+    inline-size: 28%;
+    block-size: 12px;
+    margin-block-end: 12px;
+  }
+
+  .skeletonPlaylistProgress {
+    inline-size: 100%;
+    block-size: 6px;
+    border-radius: 3px;
+    margin-block-end: 14px;
+  }
+
+  .skeletonPlaylistButtons {
+    display: flex;
+    gap: 14px;
+    margin-block-end: 12px;
+  }
+
+  .skeletonPlaylistButton {
+    inline-size: 20px;
+    block-size: 20px;
+    border-radius: 50%;
+  }
+
+  .skeletonPlaylistItems {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .skeletonPlaylistItem {
+    display: grid;
+    grid-template-columns: 18px 128px 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .skeletonPlaylistIndex {
+    inline-size: 10px;
+    block-size: 12px;
+    border-radius: 3px;
+    justify-self: center;
+  }
+
+  .skeletonPlaylistThumbnail {
+    aspect-ratio: 16 / 9;
+    inline-size: 128px;
+    border-radius: 3px;
+  }
+
+  .skeletonPlaylistDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .skeletonPlaylistDetailLine {
+    block-size: 11px;
+    inline-size: 92%;
+    border-radius: 4px;
+  }
+
+  .skeletonPlaylistDetailLine.short {
+    inline-size: 70%;
+  }
+
+  .skeletonPlaylistDetailLine.shorter {
+    inline-size: 50%;
+  }
+}
+
 .recommendationsSkeleton {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-block: 0 16px;
   margin-inline: 8px;
+  padding-block: 16px;
+  padding-inline: 16px;
+  background-color: var(--card-bg-color);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 
   .skeletonRecommendation {
     display: flex;
