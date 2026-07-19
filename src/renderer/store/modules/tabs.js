@@ -301,12 +301,41 @@ function createRuntimeTab(incoming, route) {
   return {
     ...incoming,
     route,
-    history: [{ route: cloneRoute(route), title, scroll: { left: 0, top: 0 } }],
-    historyIndex: 0,
+    ...restoredHistoryState(incoming, route, title),
     pendingReloadRoute: null,
     contentTitle: title,
     refreshKey: incoming.refreshKey ?? 0
   }
+}
+
+/**
+ * Seed a new runtime tab's back/forward history from a persisted history
+ * (restored tab sessions), falling back to a single entry for the current
+ * route. The tab's live route and title stay authoritative for the current
+ * entry, as persisted history can lag slightly behind them.
+ */
+function restoredHistoryState(incoming, route, title) {
+  if (!Array.isArray(incoming.history) || incoming.history.length === 0) {
+    return {
+      history: [{ route: cloneRoute(route), title, scroll: { left: 0, top: 0 } }],
+      historyIndex: 0
+    }
+  }
+
+  const history = incoming.history.map(normalizeHistoryEntry)
+  const historyIndex = Number.isInteger(incoming.historyIndex)
+    ? Math.max(0, Math.min(incoming.historyIndex, history.length - 1))
+    : history.length - 1
+
+  const currentEntry = history[historyIndex]
+  if (currentEntry.route.fullPath !== route.fullPath) {
+    currentEntry.route = cloneRoute(route)
+  }
+  if (title) {
+    currentEntry.title = title
+  }
+
+  return { history, historyIndex }
 }
 
 export function normalizeRoute(route) {

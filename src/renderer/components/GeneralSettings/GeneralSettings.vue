@@ -25,6 +25,14 @@
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
         />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Remember Tab Navigation History')"
+          :default-value="rememberTabNavigationHistory"
+          :compact="true"
+          :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
+          @change="updateRememberTabNavigationHistory"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -313,6 +321,16 @@ const openDeepLinksInNewWindow = computed(() => store.getters.getOpenDeepLinksIn
  */
 function updateOpenDeepLinksInNewWindow(value) {
   store.dispatch('updateOpenDeepLinksInNewWindow', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const rememberTabNavigationHistory = computed(() => store.getters.getRememberTabNavigationHistory)
+
+/**
+ * @param {boolean} value
+ */
+function updateRememberTabNavigationHistory(value) {
+  store.dispatch('updateRememberTabNavigationHistory', value)
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API

@@ -49,6 +49,7 @@ const IpcChannels = {
   TABS_MOUNT_FAILED: 'tabs-mount-failed',
   TABS_PRESENTED: 'tabs-presented',
   TABS_UPDATE_ROUTE: 'tabs-update-route',
+  TABS_UPDATE_NAV_HISTORY: 'tabs-update-nav-history',
   TABS_UPDATE_TITLE: 'tabs-update-title',
   TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
   TABS_ACTIVE_CHANGED: 'tabs-active-changed',

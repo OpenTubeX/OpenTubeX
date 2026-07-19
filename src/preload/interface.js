@@ -755,6 +755,16 @@ export default {
       ipcRenderer.send(IpcChannels.TABS_UPDATE_ROUTE, payload)
     },
 
+    /**
+     * Sync a logical tab's back/forward history to the main process
+     * so it can be persisted with the tab session. Pass `history: null`
+     * to clear any previously synced history.
+     * @param {{tabId: string, history: object[] | null, historyIndex?: number}} payload
+     */
+    updateNavigationHistory: (payload) => {
+      ipcRenderer.send(IpcChannels.TABS_UPDATE_NAV_HISTORY, payload)
+    },
+
     mountReady: (tabId, mountRevision) => {
       ipcRenderer.send(IpcChannels.TABS_MOUNT_READY, { tabId, mountRevision })
     },

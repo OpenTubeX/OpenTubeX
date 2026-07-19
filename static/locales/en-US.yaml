@@ -353,6 +353,7 @@ Settings:
     Enable Search Suggestions: Enable Search Suggestions
     Open Deep Links In New Window: Open URLs Passed to OpenTubeX in a New Window
     Minimize to system tray: Minimize to system tray
+    Remember Tab Navigation History: Remember Tab Navigation History
     Auto Load Next Page:
       Label: Auto Load Next Page
       Tooltip: Load additional pages and comments automatically.
@@ -1413,6 +1414,8 @@ Tooltips:
       By default OpenTubeX will open the clicked link in your default browser.
     Open Deep Links In New Window: URLs passed to OpenTubeX, such as by redirect
       browser extensions or command line arguments, are opened in a new window.
+    Remember Tab Navigation History: Each tab's back and forward navigation history
+      is saved and restored when OpenTubeX restarts.
   Proxy Settings:
     IP Block Recovery Script Path: Script file path to run when an IP block is detected. OpenTubeX waits for it to finish, then reloads the video. If fallback is enabled, it runs only when fallback also fails.
   Player Settings:

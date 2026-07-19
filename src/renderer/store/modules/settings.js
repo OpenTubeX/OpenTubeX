@@ -3,6 +3,7 @@ import allLocales from '../../../../static/locales/activeLocales.json'
 import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
 import { DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 
@@ -279,6 +280,7 @@ const state = {
   // Empty means history is retained indefinitely.
   historyRetentionDays: '',
   rememberSearchHistory: true,
+  rememberTabNavigationHistory: false,
   // 'auto', 'semi-auto', 'never'
   watchedProgressSavingMode: 'auto',
   saveVideoHistoryWithLastViewedPlaylist: true,
@@ -489,6 +491,14 @@ const sideEffectHandlers = {
 
     if (state.defaultPlayback !== correctedDefaultPlaybackRate) {
       dispatch('updateDefaultPlayback', correctedDefaultPlaybackRate)
+    }
+  },
+
+  rememberTabNavigationHistory: (_, value) => {
+    // Sync (or clear) the histories of already-open tabs right away,
+    // so toggling doesn't require a navigation in every tab first.
+    if (process.env.IS_ELECTRON) {
+      getTabNavigationService().publishAllHistories(value === true)
     }
   },
 }

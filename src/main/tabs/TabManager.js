@@ -25,6 +25,7 @@ const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
 const transferringTabIds = new Set()
 const TAB_LOADING_SOURCE_MOUNT = 'mount'
 const TAB_LOADING_SOURCE_RENDERER = 'renderer'
+const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
 
 /**
  * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
@@ -52,6 +53,15 @@ const TAB_LOADING_SOURCE_RENDERER = 'renderer'
  * @property {boolean} pendingActivation
  * @property {number} mountRevision
  * @property {number} refreshKey
+ * @property {NavigationHistoryEntry[] | null} navigationHistory
+ * @property {number} navigationHistoryIndex
+ */
+
+/**
+ * @typedef {object} NavigationHistoryEntry
+ * @property {ReturnType<typeof normalizeRoute>} route
+ * @property {string} title
+ * @property {{left: number, top: number}} scroll
  */
 
 export class TabManager {
@@ -134,6 +144,63 @@ export class TabManager {
     } catch (error) {
       console.error('Failed to load landing page preference:', error)
       return '/subscriptions'
+    }
+  }
+
+  /**
+   * @returns {Promise<boolean>}
+   */
+  static async getStoredRememberTabNavigationHistory() {
+    try {
+      return (await baseHandlers.settings._findOne('rememberTabNavigationHistory'))?.value === true
+    } catch (error) {
+      console.error('Failed to load tab navigation history preference:', error)
+      return false
+    }
+  }
+
+  /**
+   * Validate and normalize a renderer-provided or persisted back/forward
+   * history so only well-formed entries reach the session store and state
+   * broadcasts. Returns null when there is nothing usable to keep.
+   * @param {unknown} history
+   * @param {unknown} historyIndex
+   * @returns {{history: NavigationHistoryEntry[], historyIndex: number} | null}
+   */
+  static sanitizeNavigationHistory(history, historyIndex) {
+    if (!Array.isArray(history) || history.length === 0) {
+      return null
+    }
+
+    const entries = history
+      .filter(entry => typeof entry?.route?.path === 'string')
+      .map(entry => {
+        const route = normalizeRoute(entry.route)
+        // `oneTimeTimestamp` must not survive persistence (see stripOneTimeTimestampFromUrl)
+        if ('oneTimeTimestamp' in route.query) {
+          delete route.query.oneTimeTimestamp
+        }
+        return {
+          route: normalizeRoute(route),
+          title: typeof entry.title === 'string' ? entry.title : route.fullPath,
+          scroll: {
+            left: Number.isFinite(entry.scroll?.left) ? entry.scroll.left : 0,
+            top: Number.isFinite(entry.scroll?.top) ? entry.scroll.top : 0
+          }
+        }
+      })
+
+    if (entries.length === 0) {
+      return null
+    }
+
+    const removedCount = entries.length - Math.min(entries.length, MAX_PERSISTED_NAV_HISTORY_ENTRIES)
+    const cappedEntries = entries.slice(-MAX_PERSISTED_NAV_HISTORY_ENTRIES)
+    const index = Number.isInteger(historyIndex) ? historyIndex - removedCount : cappedEntries.length - 1
+
+    return {
+      history: cappedEntries,
+      historyIndex: Math.max(0, Math.min(index, cappedEntries.length - 1))
     }
   }
 
@@ -627,7 +694,9 @@ export class TabManager {
       openPosition = DEFAULT_NEW_TAB_POSITION,
       lazyLoad = false,
       isUnloaded = false,
-      preloadInBackground = false
+      preloadInBackground = false,
+      history = null,
+      historyIndex = null
     } = options
 
     // Only trusted callers (session restore, transfers) supply an id; renderer
@@ -648,6 +717,7 @@ export class TabManager {
     const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
       ? previewCapturedAt
       : 0
+    const restoredNavigationHistory = TabManager.sanitizeNavigationHistory(history, historyIndex)
 
     /** @type {TabInfo} */
     const tabInfo = {
@@ -670,7 +740,9 @@ export class TabManager {
       preloadInBackground: Boolean(preloadInBackground),
       pendingActivation: false,
       mountRevision: shouldMount ? 1 : 0,
-      refreshKey: 0
+      refreshKey: 0,
+      navigationHistory: restoredNavigationHistory?.history ?? null,
+      navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0
     }
 
     let preferredIndex = this.tabs.size
@@ -1883,6 +1955,23 @@ export class TabManager {
   }
 
   /**
+   * Store the renderer-owned back/forward history for persistence with the
+   * tab session. A null history clears it (persistence setting disabled).
+   * @param {string} tabId
+   * @param {object[] | null} history
+   * @param {number | null} historyIndex
+   */
+  updateTabNavigationHistory(tabId, history, historyIndex) {
+    const tab = this.tabs.get(tabId)
+    if (!tab) return
+
+    const sanitized = TabManager.sanitizeNavigationHistory(history, historyIndex)
+    tab.navigationHistory = sanitized?.history ?? null
+    tab.navigationHistoryIndex = sanitized?.historyIndex ?? 0
+    this._saveSession()
+  }
+
+  /**
    * @param {string} tabId
    * @param {boolean} isLoading
    */
@@ -1899,6 +1988,10 @@ export class TabManager {
   getState() {
     const tabs = Array.from(this.tabs.values()).map(tab => ({
       id: tab.id,
+      // The renderer only consumes this when it first learns about a tab
+      // (e.g. session restore); afterwards it owns the live history.
+      history: tab.navigationHistory,
+      historyIndex: tab.navigationHistory != null ? tab.navigationHistoryIndex : undefined,
       url: tab.url,
       route: cloneRoute(tab.route),
       title: tab.title,
@@ -1955,6 +2048,11 @@ export class TabManager {
           tabData.previewCapturedAt = tab.previewCapturedAt
         }
 
+        if (tab.navigationHistory != null) {
+          tabData.history = tab.navigationHistory
+          tabData.historyIndex = tab.navigationHistoryIndex
+        }
+
         return tabData
       })
 
@@ -1991,7 +2089,7 @@ export class TabManager {
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
@@ -1999,6 +2097,8 @@ export class TabManager {
     if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
       return false
     }
+
+    const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
 
     for (const tabData of sessionData.tabs) {
       const makeActive = tabData.id === sessionData.activeTabId
@@ -2018,6 +2118,8 @@ export class TabManager {
           ? tabData.previewCapturedAt
           : 0,
         previewFileName,
+        history: restoreNavigationHistory ? tabData.history : null,
+        historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
         makeActive,
         openPosition: 'end',
         lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle,
@@ -2309,6 +2411,13 @@ export function setupTabsIPC(options = {}) {
       typeof payload?.route?.path === 'string'
     ) {
       manager.updateTabRoute(payload.tabId, payload.route, payload.url)
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_UPDATE_NAV_HISTORY, (event, payload) => {
+    const manager = getManager(event)
+    if (manager && typeof payload?.tabId === 'string') {
+      manager.updateTabNavigationHistory(payload.tabId, payload.history, payload.historyIndex)
     }
   })
 

@@ -276,6 +276,7 @@ Settings:
       Tooltip: Zusätzliche Seiten und Kommentare automatisch laden.
     Open Deep Links In New Window: An OpenTubeX übergebene URLs in einem neuen Fenster öffnen
     Minimize to system tray: In die Systemleiste minimieren
+    Remember Tab Navigation History: Tab-Navigationsverlauf merken
     Confirm Before Closing App: Bestätigen vor dem Beenden von OpenTubeX
     New Tab Position:
       New Tab Position: Neuer Tab Position
@@ -1259,6 +1260,7 @@ Tooltips:
     Region for Trending: Die Trendregion erlaubt es dir auszuwählen, aus welchem Land die Trends angezeigt werden sollen.
     External Link Handling: "Wähle das Standardverhalten, wenn ein Link angeklickt wird, der nicht in OpenTubeX geöffnet werden kann.\nStandardmäßig wird OpenTubeX den angeklickten Link in deinem Standardbrowser öffnen.\n"
     Open Deep Links In New Window: URLs, die an OpenTubeX übergeben werden, z. B. durch Redirect-Browser-Erweiterungen oder Befehlszeilenargumente, werden in einem neuen Fenster geöffnet.
+    Remember Tab Navigation History: Der Vor- und Zurück-Navigationsverlauf jedes Tabs wird gespeichert und beim Neustart von OpenTubeX wiederhergestellt.
     Avoid translation: |
       YouTubes automatische Übersetzung für Titel, Beschreibung und Kapitel eines Videos deaktivieren.
       Zu viele Anfragen, wie Videotitel in Listen abfragen kann die Zuverlässigkeit der

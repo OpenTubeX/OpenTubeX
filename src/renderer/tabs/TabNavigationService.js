@@ -441,7 +441,33 @@ export class TabNavigationService {
       route: cloneRoute(route),
       url: urlFromRoute(route)
     })
+    this.publishHistory(tabId)
     window.ftElectron?.tabs?.requestPreviewRefresh?.({ tabId })
+  }
+
+  /**
+   * Sync a tab's back/forward history to the main process so it can be
+   * persisted with the tab session. When persistence is disabled this
+   * clears any history the main process still holds for the tab.
+   */
+  publishHistory(tabId, enabled = this.store.getters.getRememberTabNavigationHistory === true) {
+    const tab = this.store.getters.getTabById(tabId)
+    if (!tab) {
+      return
+    }
+
+    // Clone into plain objects: reactive store objects break IPC transfer.
+    window.ftElectron?.tabs?.updateNavigationHistory?.({
+      tabId,
+      history: enabled ? tab.history.map(cloneHistoryEntry) : null,
+      historyIndex: enabled ? tab.historyIndex : null
+    })
+  }
+
+  publishAllHistories(enabled) {
+    for (const tab of this.store.getters.getTabs) {
+      this.publishHistory(tab.id, enabled)
+    }
   }
 
   async projectRoute(route) {
