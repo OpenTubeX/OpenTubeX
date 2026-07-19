@@ -35,9 +35,10 @@ const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
- * Marks unwatched leading entries which were plausibly published since the
- * previous successful channel fetch. Missing caches, old reordered entries,
- * and responses without overlap are not presented as newly published.
+ * Keeps previously-new entries marked and marks unwatched leading entries
+ * which were plausibly published since the previous successful channel fetch.
+ * Missing caches, old reordered entries, and responses without overlap are not
+ * presented as newly published.
  * @param {object[]} entries
  * @param {object[] | null | undefined} previousEntries
  * @param {'videoId' | 'postId'} idKey
@@ -51,11 +52,13 @@ export function markNewSubscriptionEntries(
   previousFetchTimestamp,
   historyById = {}
 ) {
-  const previousIds = Array.isArray(previousEntries)
-    ? new Set(previousEntries.map(entry => entry[idKey]).filter(id => id != null))
+  const previousEntriesById = Array.isArray(previousEntries)
+    ? new Map(previousEntries
+        .filter(entry => entry[idKey] != null)
+        .map(entry => [entry[idKey], entry]))
     : null
-  const firstPreviouslyFetchedIndex = previousIds?.size > 0
-    ? entries.findIndex(entry => previousIds.has(entry[idKey]))
+  const firstPreviouslyFetchedIndex = previousEntriesById?.size > 0
+    ? entries.findIndex(entry => previousEntriesById.has(entry[idKey]))
     : -1
   const previousFetchTime = previousFetchTimestamp == null
     ? Number.NaN
@@ -67,13 +70,15 @@ export function markNewSubscriptionEntries(
       Number.isFinite(publishedTime) &&
       publishedTime >= previousFetchTime - NEW_CONTENT_PUBLICATION_TOLERANCE_MS
     const isWatched = idKey === 'videoId' && isHistoryEntryWatched(historyById?.[entry[idKey]])
+    const wasPreviouslyNew = previousEntriesById?.get(entry[idKey])
+      ?.isNewInSubscriptionFeed === true
+    const isNewlyFetched = firstPreviouslyFetchedIndex > 0 &&
+      index < firstPreviouslyFetchedIndex &&
+      isPlausiblyRecent
 
     return {
       ...entry,
-      isNewInSubscriptionFeed: firstPreviouslyFetchedIndex > 0 &&
-        index < firstPreviouslyFetchedIndex &&
-        isPlausiblyRecent &&
-        !isWatched
+      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || isNewlyFetched)
     }
   })
 }
