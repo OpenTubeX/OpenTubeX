@@ -13,7 +13,7 @@ Toggle Developer Tools: 'Włącz/wyłącz narzędzia deweloperskie'
 Actual size: 'Rzeczywisty rozmiar'
 Zoom in: 'Powiększ'
 Zoom out: 'Zmniejsz'
-Toggle fullscreen: 'Przełącz na cały ekran'
+Toggle fullscreen: 'Przełącz na pełny ekran'
 Window: 'Okno'
 Minimize: 'Zminimalizuj'
 Close: 'Zamknij'
@@ -472,7 +472,10 @@ Settings:
       Picture in Picture: Obraz w obrazie
       External Player: Zewnętrzny odtwarzacz ({externalPlayerName})
       Default Viewing Mode: Domyślny tryb odtwarzania
-      Full Screen: Cały ekran
+      Full Screen: Pełny ekran
+      Full Window (Always On): Pełne okno (zawsze włączone)
+      Full Screen (Always On): Pełny ekran (zawsze włączony)
+      Tooltip: Większość domyślnych trybów oglądania jest stosowana tylko na początku każdej sesji oglądania. Zmiany wprowadzone w trakcie sesji są zachowywane do jej zakończenia. Tryby oglądania „zawsze włączony” są stosowane za każdym razem, gdy przełączasz się na nowy film, niezależnie od zmian trybu oglądania dokonanych podczas oglądania poprzedniego filmu.
     Auto Picture in Picture on Tab Change: Automatycznie włączaj obraz w obrazie podczas przełączania kart
     Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do szybkości odtwarzania
     Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do szybkości odtwarzania
@@ -526,6 +529,15 @@ Settings:
         Outline: Kontur
         Drop Shadow: Rzucający cień
       Reset: Zresetuj wygląd napisów
+    Auto Picture in Picture:
+      Auto Picture in Picture: Automatycznie przejdź w tryb obraz w obrazie
+      On Tab Change: Podczas przełączania kart
+      On Window Minimize: Podczas minimalizowania okna
+      On Window Hide: Gdy okno traci skupienie lub jest przełączane
+      Wayland Minimize Unsupported: Wayland nie zgłasza aplikacjom minimalizacji okna, więc ten wyzwalacz jest niedostępny. Zamiast tego użyj opcji „Gdy okno traci skupienie lub jest przełączane”, która obejmuje również minimalizowanie.
+    Fast-Forward Through Silence: Szybkie przewijanie poprzez ciszę
+    Show Fast-Forward Through Silence Toggle: Pokaż przełącznik szybkiego przewijania poprzez ciszę
+    Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -563,6 +575,8 @@ Settings:
         Never: Nie zapisuj
         Auto: Automatyczny
       Tooltip: Automatyczny – zapisuje przy każdym zamknięciu strony odtwarzania, po zakończeniu odtwarzania oraz gdy wystąpi błąd (np. ograniczenie przesyłu, wygaśnięcie sesji odtwarzania). Półautomatyczny – podobny do automatycznego, ale bez zapisu przy zamknięciu strony oraz z możliwością ręcznego zapisu postępu przyciskiem „Zapisz postęp odtwarzania”, umieszczonym pod odtwarzaczem.
+    Automatic History Retention: Przechowywanie historii (dni)
+    Automatic History Retention Placeholder: Pozostaw puste, aby zachować na zawsze
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
     Unknown data key: Nieznany klucz danych
