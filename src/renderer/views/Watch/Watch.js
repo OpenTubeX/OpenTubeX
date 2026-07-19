@@ -1457,27 +1457,36 @@ export default defineComponent({
       }
 
       const scriptPath = this.videoIpBlockScriptPath.trim()
-      if (scriptPath.length === 0 || typeof window.ftElectron?.executeIpBlockRecoveryScript !== 'function') {
+      if (
+        scriptPath.length === 0 ||
+        typeof window.ftElectron?.startIpBlockRecoveryScript !== 'function' ||
+        typeof window.ftElectron?.executeIpBlockRecoveryScript !== 'function'
+      ) {
         return false
       }
 
       this.ipBlockRecoveryAttemptedForCurrentVideo = true
       const longToastDurationMs = 10000
-      // IP block recovery affects the whole app (network level), so surface it on
-      // every tab like the subscription refresh toasts.
-      showToastOnAllTabs(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
+      const startedRecovery = await window.ftElectron.startIpBlockRecoveryScript(scriptPath)
+      if (startedRecovery) {
+        // IP block recovery affects the whole app (network level), so surface it
+        // globally once, from the tab that atomically started the shared run.
+        showToastOnAllTabs(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
+      }
 
       try {
         const result = await window.ftElectron.executeIpBlockRecoveryScript(scriptPath)
-        if (result?.exitCode !== 0) {
+        if (startedRecovery && result?.exitCode !== 0) {
           const exitCode = result?.exitCode == null ? 'unknown' : `${result.exitCode}`
           showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs)
-        } else {
+        } else if (startedRecovery) {
           showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs)
         }
       } catch (error) {
         console.error('IP block recovery script failed:', error)
-        showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
+        if (startedRecovery) {
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
+        }
       }
 
       // The reload only affects this tab's video, so keep it scoped.

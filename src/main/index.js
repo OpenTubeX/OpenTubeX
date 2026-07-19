@@ -2507,24 +2507,57 @@ function runApp() {
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
 
+  /**
+   * @param {string} scriptPath
+   * @returns {boolean} whether a new run was started
+   */
+  function startIpBlockRecoveryScript(scriptPath) {
+    if (ipBlockRecoveryScriptPromise != null) {
+      return false
+    }
+
+    ipBlockRecoveryScriptPromise = executeIpBlockRecoveryScript(scriptPath)
+      .finally(() => {
+        setTimeout(() => {
+          ipBlockRecoveryScriptPromise = null
+        }, ipBlockRecoveryScriptCooldownMs)
+      })
+
+    // The execute handler still observes and forwards the rejection. Attaching a
+    // handler here prevents a fast spawn failure from becoming unhandled before
+    // the renderer has time to invoke it.
+    ipBlockRecoveryScriptPromise.catch(() => {})
+    return true
+  }
+
+  /**
+   * @param {import('electron').IpcMainInvokeEvent} event
+   * @param {unknown} scriptPath
+   * @returns {scriptPath is string}
+   */
+  function isValidIpBlockRecoveryRequest(event, scriptPath) {
+    return isOpenTubeXUrl(event.senderFrame.url) &&
+      typeof scriptPath === 'string' &&
+      scriptPath.trim().length > 0
+  }
+
+  ipcMain.handle(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT, (event, scriptPath) => {
+    if (!isValidIpBlockRecoveryRequest(event, scriptPath)) {
+      return false
+    }
+
+    return startIpBlockRecoveryScript(scriptPath)
+  })
+
   ipcMain.handle(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, async (event, scriptPath) => {
     if (
-      !isOpenTubeXUrl(event.senderFrame.url) ||
-      typeof scriptPath !== 'string' ||
-      scriptPath.trim().length === 0
+      !isValidIpBlockRecoveryRequest(event, scriptPath)
     ) {
       return
     }
 
     try {
-      if (ipBlockRecoveryScriptPromise == null) {
-        ipBlockRecoveryScriptPromise = executeIpBlockRecoveryScript(scriptPath)
-          .finally(() => {
-            setTimeout(() => {
-              ipBlockRecoveryScriptPromise = null
-            }, ipBlockRecoveryScriptCooldownMs)
-          })
-      }
+      startIpBlockRecoveryScript(scriptPath)
 
       return await ipBlockRecoveryScriptPromise
     } catch (error) {

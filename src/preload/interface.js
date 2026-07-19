@@ -158,6 +158,15 @@ export default {
   },
 
   /**
+   * Atomically starts the shared IP block recovery run.
+   * @param {string} scriptPath
+   * @returns {Promise<boolean>} whether this caller started the run
+   */
+  startIpBlockRecoveryScript: async (scriptPath) => {
+    return await ipcRenderer.invoke(IpcChannels.START_IP_BLOCK_RECOVERY_SCRIPT, scriptPath)
+  },
+
+  /**
    * @param {string} scriptPath
    * @returns {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }>}
    */
