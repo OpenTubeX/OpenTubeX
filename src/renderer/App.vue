@@ -2333,7 +2333,11 @@ function publishAppTitle(value) {
 
 watch(appTitle, publishAppTitle)
 
-watch(windowTitle, setWindowTitle)
+// Also watch the route: the title string alone can stay identical across a
+// route change (e.g. '/' and '/subscriptions' share the same title), which
+// would leave a tab's placeholder title in place when the route-match guard
+// in setWindowTitle deferred an earlier update.
+watch([windowTitle, () => route.fullPath], setWindowTitle)
 
 function setWindowTitle() {
   if (windowTitle.value === null) {
