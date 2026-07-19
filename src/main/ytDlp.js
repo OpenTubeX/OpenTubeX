@@ -61,18 +61,20 @@ function getManagedBinaryPath(binaryName) {
  * @param {'ytDlpSource' | 'ytDlpFfmpegSource'} sourceSettingId
  * @param {'ytDlpPath' | 'ytDlpFfmpegPath'} pathSettingId
  * @param {'yt-dlp' | 'ffmpeg'} binaryName
+ * @param {'system' | 'managed'} [sourceOverride]
+ * @param {string} [pathOverride]
  * @returns {Promise<{ source: 'system' | 'managed', executable: string }>}
  */
-async function resolveExecutable(sourceSettingId, pathSettingId, binaryName) {
+async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sourceOverride, pathOverride) {
   /** @type {'system' | 'managed'} */
-  const source = (await settings._findOne(sourceSettingId))?.value === 'managed' ? 'managed' : 'system'
+  const source = sourceOverride ?? ((await settings._findOne(sourceSettingId))?.value === 'managed' ? 'managed' : 'system')
 
   if (source === 'managed') {
     return { source, executable: getManagedBinaryPath(binaryName) }
   }
 
   /** @type {string} */
-  const customPath = (await settings._findOne(pathSettingId))?.value || ''
+  const customPath = pathOverride ?? ((await settings._findOne(pathSettingId))?.value || '')
 
   return { source, executable: customPath === '' ? binaryName : customPath }
 }
@@ -337,22 +339,44 @@ async function getBinaryInfo(resolved, getVersion) {
 
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {{
+ *   ytDlpSource: 'system' | 'managed',
+ *   ytDlpPath: string,
+ *   ffmpegSource: 'system' | 'managed',
+ *   ffmpegPath: string
+ * } | undefined} [options]
  * @returns {Promise<{ ytDlp: YtDlpBinaryInfo, ffmpeg: YtDlpBinaryInfo } | null>}
  */
-export async function handleYtDlpGetInfo(event) {
+export async function handleYtDlpGetInfo(event, options) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
     return null
   }
 
-  return {
-    ytDlp: await getBinaryInfo(
-      await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp'),
+  if (options !== undefined && (
+    options === null ||
+    typeof options !== 'object' ||
+    (options.ytDlpSource !== 'system' && options.ytDlpSource !== 'managed') ||
+    typeof options.ytDlpPath !== 'string' ||
+    (options.ffmpegSource !== 'system' && options.ffmpegSource !== 'managed') ||
+    typeof options.ffmpegPath !== 'string'
+  )) {
+    return null
+  }
+
+  const [ytDlp, ffmpeg] = await Promise.all([
+    getBinaryInfo(
+      await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
       getYtDlpVersion
     ),
-    ffmpeg: await getBinaryInfo(
-      await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg'),
+    getBinaryInfo(
+      await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
       getFfmpegVersion
     )
+  ])
+
+  return {
+    ytDlp,
+    ffmpeg
   }
 }
 

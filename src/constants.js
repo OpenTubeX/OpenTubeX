@@ -101,6 +101,7 @@ const IpcChannels = {
   YT_DLP_CANCEL_DOWNLOAD: 'yt-dlp-cancel-download',
   YT_DLP_DOWNLOAD_STATUS: 'yt-dlp-download-status',
   YT_DLP_CHOOSE_DOWNLOAD_FOLDER: 'yt-dlp-choose-download-folder',
+  YT_DLP_CHOOSE_EXECUTABLE: 'yt-dlp-choose-executable',
   YT_DLP_GET_INFO: 'yt-dlp-get-info',
   YT_DLP_DOWNLOAD_BINARY: 'yt-dlp-download-binary',
   YT_DLP_BINARY_DOWNLOAD_PROGRESS: 'yt-dlp-binary-download-progress'

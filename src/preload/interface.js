@@ -241,13 +241,27 @@ export default {
   },
 
   /**
+   * @param {string} currentPath
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseExecutable: (currentPath) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, currentPath)
+  },
+
+  /**
+   * @param {{
+   *   ytDlpSource: 'system' | 'managed',
+   *   ytDlpPath: string,
+   *   ffmpegSource: 'system' | 'managed',
+   *   ffmpegPath: string
+   * } | undefined} [options]
    * @returns {Promise<{
    *   ytDlp: import('../main/ytDlp').YtDlpBinaryInfo,
    *   ffmpeg: import('../main/ytDlp').YtDlpBinaryInfo
    * } | null>}
    */
-  ytDlpGetInfo: () => {
-    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_INFO)
+  ytDlpGetInfo: (options) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_INFO, options)
   },
 
   /**

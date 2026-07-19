@@ -2664,6 +2664,44 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD_BINARY, handleYtDlpDownloadBinary)
 
+  ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_EXECUTABLE, async (event, currentPath) => {
+    if (
+      !isOpenTubeXUrl(event.senderFrame.url) ||
+      (currentPath != null && typeof currentPath !== 'string')
+    ) {
+      return
+    }
+
+    if (typeof currentPath !== 'string' || currentPath.length === 0) {
+      currentPath = app.getPath('home')
+    }
+
+    /** @type {import('electron').FileFilter[]} */
+    const filters = process.platform === 'win32'
+      ? [
+          { name: 'Executable Files', extensions: ['exe'] },
+          { name: 'All Files', extensions: ['*'] }
+        ]
+      : [{ name: 'All Files', extensions: ['*'] }]
+
+    const dialogOptions = {
+      defaultPath: currentPath,
+      properties: ['openFile'],
+      filters
+    }
+
+    const window = BrowserWindow.fromWebContents(event.sender)
+    const result = window
+      ? await dialog.showOpenDialog(window, dialogOptions)
+      : await dialog.showOpenDialog(dialogOptions)
+
+    if (result.canceled || result.filePaths.length === 0) {
+      return undefined
+    }
+
+    return result.filePaths[0]
+  })
+
   ipcMain.handle(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, async (event, currentPath) => {
     if (
       !isOpenTubeXUrl(event.senderFrame.url) ||

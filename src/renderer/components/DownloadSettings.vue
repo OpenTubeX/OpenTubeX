@@ -4,6 +4,7 @@
   >
     <FtFlexBox>
       <FtSelect
+        class="sourceSelect"
         :placeholder="t('Settings.Download Settings.yt-dlp Source')"
         :value="ytDlpSource"
         :select-names="sourceNames"
@@ -13,6 +14,7 @@
         @change="updateYtDlpSource"
       />
       <FtSelect
+        class="sourceSelect"
         :placeholder="t('Settings.Download Settings.FFmpeg Source')"
         :value="ytDlpFfmpegSource"
         :select-names="sourceNames"
@@ -22,52 +24,64 @@
         @change="updateYtDlpFfmpegSource"
       />
     </FtFlexBox>
-    <template v-if="binariesInfo !== null">
-      <FtFlexBox>
-        <p
-          v-if="!binariesInfo.ytDlp.available"
-          class="ytDlpStatus ytDlpWarning"
-        >
-          <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
-          {{ ytDlpSource === 'managed'
-            ? t('Settings.Download Settings.Managed Not Downloaded')
-            : t('Settings.Download Settings.System yt-dlp Missing Warning') }}
-        </p>
-        <p
-          v-else
-          class="ytDlpStatus"
-        >
-          {{ t('Settings.Download Settings.Detected Version Template', { version: binariesInfo.ytDlp.version }) }}
-        </p>
-      </FtFlexBox>
-      <FtFlexBox>
-        <p
-          v-if="!binariesInfo.ffmpeg.available"
-          class="ytDlpStatus ytDlpWarning"
-        >
-          <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
-          {{ ytDlpFfmpegSource === 'managed'
-            ? t('Settings.Download Settings.FFmpeg Managed Not Downloaded')
-            : t('Settings.Download Settings.System FFmpeg Missing Warning') }}
-        </p>
-        <p
-          v-else
-          class="ytDlpStatus"
-        >
-          {{ t('Settings.Download Settings.Detected FFmpeg Version Template', { version: binariesInfo.ffmpeg.version }) }}
-        </p>
-      </FtFlexBox>
-    </template>
+    <FtFlexBox>
+      <p
+        v-if="ytDlpInfo === null"
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.Download Settings.Checking yt-dlp') }}
+      </p>
+      <p
+        v-else-if="!ytDlpInfo.available"
+        class="ytDlpStatus ytDlpWarning"
+      >
+        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        {{ ytDlpSource === 'managed'
+          ? t('Settings.Download Settings.Managed Not Downloaded')
+          : t('Settings.Download Settings.System yt-dlp Missing Warning') }}
+      </p>
+      <p
+        v-else
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.Download Settings.Detected Version Template', { version: ytDlpInfo.version }) }}
+      </p>
+    </FtFlexBox>
+    <FtFlexBox>
+      <p
+        v-if="ffmpegInfo === null"
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.Download Settings.Checking FFmpeg') }}
+      </p>
+      <p
+        v-else-if="!ffmpegInfo.available"
+        class="ytDlpStatus ytDlpWarning"
+      >
+        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        {{ ytDlpFfmpegSource === 'managed'
+          ? t('Settings.Download Settings.FFmpeg Managed Not Downloaded')
+          : t('Settings.Download Settings.System FFmpeg Missing Warning') }}
+      </p>
+      <p
+        v-else
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.Download Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
+      </p>
+    </FtFlexBox>
     <FtFlexBox v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'">
       <FtButton
         v-if="ytDlpSource === 'managed'"
         :label="ytDlpBinaryDownloadInProgress
           ? t('Settings.Download Settings.Downloading yt-dlp')
-          : (binariesInfo?.ytDlp.available
-            ? t('Settings.Download Settings.Update yt-dlp')
-            : t('Settings.Download Settings.Download yt-dlp'))"
+          : (ytDlpInfo === null
+            ? t('Settings.Download Settings.Checking yt-dlp')
+            : ytDlpInfo.available
+              ? t('Settings.Download Settings.Update yt-dlp')
+              : t('Settings.Download Settings.Download yt-dlp'))"
         :icon="['fas', 'download']"
-        :disabled="ytDlpBinaryDownloadInProgress"
+        :disabled="ytDlpBinaryDownloadInProgress || ytDlpInfo === null"
         :text-color="null"
         :background-color="null"
         @click="downloadBinary('yt-dlp')"
@@ -76,11 +90,13 @@
         v-if="ytDlpFfmpegSource === 'managed'"
         :label="ffmpegBinaryDownloadInProgress
           ? t('Settings.Download Settings.Downloading FFmpeg')
-          : (binariesInfo?.ffmpeg.available
-            ? t('Settings.Download Settings.Update FFmpeg')
-            : t('Settings.Download Settings.Download FFmpeg'))"
+          : (ffmpegInfo === null
+            ? t('Settings.Download Settings.Checking FFmpeg')
+            : ffmpegInfo.available
+              ? t('Settings.Download Settings.Update FFmpeg')
+              : t('Settings.Download Settings.Download FFmpeg'))"
         :icon="['fas', 'download']"
-        :disabled="ffmpegBinaryDownloadInProgress"
+        :disabled="ffmpegBinaryDownloadInProgress || ffmpegInfo === null"
         :text-color="null"
         :background-color="null"
         @click="downloadBinary('ffmpeg')"
@@ -101,36 +117,36 @@
       <FtInput
         v-if="ytDlpSource === 'system'"
         :placeholder="t('Settings.Download Settings.yt-dlp Executable Path')"
-        :show-action-button="false"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
         :show-label="true"
         :value="ytDlpPath"
         :tooltip="t('Tooltips.Download Settings.yt-dlp Executable Path')"
         @input="updateYtDlpPath"
+        @click="chooseExecutablePath('yt-dlp')"
       />
       <FtInput
         v-if="ytDlpFfmpegSource === 'system'"
         :placeholder="t('Settings.Download Settings.FFmpeg Executable Path')"
-        :show-action-button="false"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
         :show-label="true"
         :value="ytDlpFfmpegPath"
         :tooltip="t('Tooltips.Download Settings.FFmpeg Executable Path')"
         @input="updateYtDlpFfmpegPath"
+        @click="chooseExecutablePath('ffmpeg')"
       />
       <FtInput
         :placeholder="t('Settings.Download Settings.Download Folder')"
-        :show-action-button="false"
+        :show-action-button="true"
+        :allow-action-button-when-empty="true"
+        :force-action-button-icon-name="['fas', 'folder-open']"
         :show-label="true"
         :value="ytDlpDownloadFolderPath"
         :tooltip="t('Tooltips.Download Settings.Download Folder')"
         @input="updateYtDlpDownloadFolderPath"
-      />
-    </FtFlexBox>
-    <FtFlexBox>
-      <FtButton
-        :label="t('Settings.Download Settings.Choose Download Folder')"
-        :icon="['fas', 'folder-open']"
-        :text-color="null"
-        :background-color="null"
         @click="chooseDownloadFolder"
       />
     </FtFlexBox>
@@ -181,13 +197,32 @@ const ytDlpFfmpegPath = computed(() => store.getters.getYtDlpFfmpegPath)
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
 
+/** @typedef {import('../../main/ytDlp').YtDlpBinaryInfo} BinaryInfo */
+
 /**
- * @type {import('vue').Ref<{
- *   ytDlp: import('../../main/ytDlp').YtDlpBinaryInfo,
- *   ffmpeg: import('../../main/ytDlp').YtDlpBinaryInfo
- * } | null>}
+ * @type {import('vue').Ref<Record<'ytDlp' | 'ffmpeg', {
+ *   managed: BinaryInfo | null,
+ *   system: { path: string, info: BinaryInfo } | null
+ * }>>}
  */
-const binariesInfo = ref(null)
+const binariesInfoCache = ref({
+  ytDlp: { managed: null, system: null },
+  ffmpeg: { managed: null, system: null }
+})
+
+/** @type {import('vue').ComputedRef<BinaryInfo | null>} */
+const ytDlpInfo = computed(() => ytDlpSource.value === 'managed'
+  ? binariesInfoCache.value.ytDlp.managed
+  : binariesInfoCache.value.ytDlp.system?.path === ytDlpPath.value
+    ? binariesInfoCache.value.ytDlp.system.info
+    : null)
+
+/** @type {import('vue').ComputedRef<BinaryInfo | null>} */
+const ffmpegInfo = computed(() => ytDlpFfmpegSource.value === 'managed'
+  ? binariesInfoCache.value.ffmpeg.managed
+  : binariesInfoCache.value.ffmpeg.system?.path === ytDlpFfmpegPath.value
+    ? binariesInfoCache.value.ffmpeg.system.info
+    : null)
 
 const ytDlpBinaryDownloadInProgress = ref(false)
 const ffmpegBinaryDownloadInProgress = ref(false)
@@ -195,8 +230,45 @@ const ffmpegBinaryDownloadInProgress = ref(false)
 /** @type {import('vue').Ref<{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null } | null>} */
 const binaryDownloadProgress = ref(null)
 
+let systemInfoRequestId = 0
+let managedInfoRequestId = 0
+let refreshTimeout = null
+
+async function refreshSystemBinariesInfo() {
+  const requestId = ++systemInfoRequestId
+  const ytDlpSystemPath = ytDlpPath.value
+  const ffmpegSystemPath = ytDlpFfmpegPath.value
+
+  const info = await window.ftElectron.ytDlpGetInfo({
+    ytDlpSource: 'system',
+    ytDlpPath: ytDlpSystemPath,
+    ffmpegSource: 'system',
+    ffmpegPath: ffmpegSystemPath
+  })
+
+  if (requestId === systemInfoRequestId && info !== null) {
+    binariesInfoCache.value.ytDlp.system = { path: ytDlpSystemPath, info: info.ytDlp }
+    binariesInfoCache.value.ffmpeg.system = { path: ffmpegSystemPath, info: info.ffmpeg }
+  }
+}
+
+async function refreshManagedBinariesInfo() {
+  const requestId = ++managedInfoRequestId
+  const info = await window.ftElectron.ytDlpGetInfo({
+    ytDlpSource: 'managed',
+    ytDlpPath: '',
+    ffmpegSource: 'managed',
+    ffmpegPath: ''
+  })
+
+  if (requestId === managedInfoRequestId && info !== null) {
+    binariesInfoCache.value.ytDlp.managed = info.ytDlp
+    binariesInfoCache.value.ffmpeg.managed = info.ffmpeg
+  }
+}
+
 async function refreshBinariesInfo() {
-  binariesInfo.value = await window.ftElectron.ytDlpGetInfo()
+  await Promise.all([refreshSystemBinariesInfo(), refreshManagedBinariesInfo()])
 }
 
 onMounted(() => {
@@ -208,16 +280,18 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(refreshTimeout)
+  systemInfoRequestId++
+  managedInfoRequestId++
   window.ftElectron.setYtDlpBinaryDownloadProgressListener(null)
 })
 
-let refreshTimeout = null
-
-// re-check availability when the sources or the custom paths change,
-// debounced as the paths are updated on every keystroke
-watch([ytDlpSource, ytDlpPath, ytDlpFfmpegSource, ytDlpFfmpegPath], () => {
+// Re-check path-dependent system binaries after edits. Source switches use
+// the already cached status for that source and therefore do not flicker.
+watch([ytDlpPath, ytDlpFfmpegPath], () => {
   clearTimeout(refreshTimeout)
-  refreshTimeout = setTimeout(refreshBinariesInfo, 500)
+  systemInfoRequestId++
+  refreshTimeout = setTimeout(refreshSystemBinariesInfo, 500)
 })
 
 /**
@@ -276,9 +350,12 @@ async function downloadBinary(binary) {
         : t('Settings.Download Settings.FFmpeg Download Error Template', { error }))
     }
   } finally {
-    inProgress.value = false
     binaryDownloadProgress.value = null
-    await refreshBinariesInfo()
+    try {
+      await refreshManagedBinariesInfo()
+    } finally {
+      inProgress.value = false
+    }
   }
 }
 
@@ -289,9 +366,25 @@ async function chooseDownloadFolder() {
     store.dispatch('updateYtDlpDownloadFolderPath', path)
   }
 }
+
+/**
+ * @param {'yt-dlp' | 'ffmpeg'} binary
+ */
+async function chooseExecutablePath(binary) {
+  const currentPath = binary === 'yt-dlp' ? ytDlpPath.value : ytDlpFfmpegPath.value
+  const path = await window.ftElectron.ytDlpChooseExecutable(currentPath)
+
+  if (typeof path === 'string' && path.length > 0) {
+    store.dispatch(binary === 'yt-dlp' ? 'updateYtDlpPath' : 'updateYtDlpFfmpegPath', path)
+  }
+}
 </script>
 
 <style scoped>
+.sourceSelect {
+  inline-size: 250px;
+}
+
 .ytDlpStatus {
   margin-block: 0;
 }
@@ -333,6 +426,12 @@ async function chooseDownloadFolder() {
 
   100% {
     opacity: 1;
+  }
+}
+
+@media only screen and (width <= 800px) {
+  .sourceSelect {
+    inline-size: calc(100% - 28px);
   }
 }
 </style>

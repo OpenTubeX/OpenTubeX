@@ -678,6 +678,7 @@ Settings:
     System yt-dlp Missing Warning: yt-dlp was not found on your system. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
     Download yt-dlp: Download yt-dlp
     Update yt-dlp: Update yt-dlp
+    Checking yt-dlp: Checking yt-dlp…
     Downloading yt-dlp: Downloading yt-dlp…
     yt-dlp Downloaded Template: yt-dlp {version} has been downloaded
     yt-dlp Download Error Template: 'Downloading yt-dlp failed: {error}'
@@ -687,6 +688,7 @@ Settings:
     System FFmpeg Missing Warning: FFmpeg was not found on your system. It is required for merging video and audio and for audio conversion. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
     Download FFmpeg: Download FFmpeg
     Update FFmpeg: Update FFmpeg
+    Checking FFmpeg: Checking FFmpeg…
     Downloading FFmpeg: Downloading FFmpeg…
     FFmpeg Downloaded Template: FFmpeg {version} has been downloaded
     FFmpeg Download Error Template: 'Downloading FFmpeg failed: {error}'
