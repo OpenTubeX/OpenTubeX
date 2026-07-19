@@ -140,7 +140,7 @@ function getThumbnailStyle(thumbnail) {
 const observeVisibilityOptions = {
   callback: (isVisible, _entry) => {
     if (isVisible) {
-      scrollToCurrentChapter()
+      scrollToCurrentChapter(true)
     }
   },
   intersection: {
@@ -183,7 +183,10 @@ function navigateChapters(direction) {
   chapterRows[newIndex].querySelector('.chapterSeek')?.focus()
 }
 
-function scrollToCurrentChapter() {
+/**
+ * @param {boolean} [alignToTop]
+ */
+function scrollToCurrentChapter(alignToTop = false) {
   const container = chaptersWrapper.value
   const currentItem = container?.children[currentIndex.value]
 
@@ -194,7 +197,7 @@ function scrollToCurrentChapter() {
   const containerRect = container.getBoundingClientRect()
   const currentItemRect = currentItem.getBoundingClientRect()
 
-  if (currentItemRect.top < containerRect.top) {
+  if (alignToTop || currentItemRect.top < containerRect.top) {
     container.scrollTop += currentItemRect.top - containerRect.top
   } else if (currentItemRect.bottom > containerRect.bottom) {
     container.scrollTop += currentItemRect.bottom - containerRect.bottom
