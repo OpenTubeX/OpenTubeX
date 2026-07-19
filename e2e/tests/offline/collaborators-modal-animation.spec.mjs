@@ -1,0 +1,143 @@
+import { test, expect, goTo } from '../../helpers/app.mjs'
+
+const now = Date.now()
+const HOUR = 3600000
+
+const CHANNEL_A = 'UCaaaaaaaaaaaaaaaaaaaaaa'
+
+function feedVideo (videoId, title, published, extra = {}) {
+  return {
+    videoId,
+    title,
+    author: 'Channel A',
+    authorId: CHANNEL_A,
+    published,
+    viewCount: 1000,
+    lengthSeconds: 120,
+    liveNow: false,
+    isUpcoming: false,
+    type: 'video',
+    ...extra
+  }
+}
+
+const collaborators = [
+  { id: CHANNEL_A, name: 'Channel A', thumbnail: '', subtitle: '' },
+  { id: 'UCcccccccccccccccccccccc', name: 'Channel C', thumbnail: '', subtitle: '' },
+  { id: 'UCdddddddddddddddddddddd', name: 'Channel D', thumbnail: '', subtitle: '' }
+]
+
+test.use({
+  seed: {
+    settings: {
+      fetchSubscriptionsAutomatically: false
+    },
+    profiles: [
+      {
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [
+          { id: CHANNEL_A, name: 'Channel A', thumbnail: '' }
+        ]
+      }
+    ],
+    subscriptionCache: [
+      {
+        _id: CHANNEL_A,
+        videos: [
+          feedVideo('aaaaaaaaaa1', 'Collab video', now - 1 * HOUR, {
+            author: 'Channel A and 2 more',
+            hasCollaborators: true,
+            collaborators
+          }),
+          ...Array.from({ length: 11 }, (_, i) =>
+            feedVideo(`aaaaaaaaa${i.toString(16)}2`, `Filler video ${i}`, now - (i + 2) * HOUR)
+          )
+        ],
+        videosTimestamp: new Date(now - 2 * HOUR).toISOString()
+      }
+    ]
+  }
+})
+
+function defineCase () {
+  test('opening the collaborators prompt does not animate the feed behind it', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Collab video')).toBeVisible()
+    await expect(page.getByText('Filler video 9')).toBeAttached()
+
+    // Watch for the TransitionGroup FLIP/enter classes appearing on any feed
+    // item, and record item positions to detect layout shifts.
+    await page.evaluate(() => {
+      window.__animClasses = []
+      window.__rectsBefore = [...document.querySelectorAll('.ft-list-video')]
+        .map((el) => el.getBoundingClientRect().toJSON())
+
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          const classList = mutation.target.classList
+          for (const cls of ['feed-move', 'feed-enter-active', 'feed-enter-from']) {
+            if (classList.contains(cls)) {
+              window.__animClasses.push(cls)
+            }
+          }
+        }
+      })
+      observer.observe(document.querySelector('.app'), {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      })
+    })
+
+    await page.click('.collaboratorChannelButton')
+    await expect(page.locator('.prompt')).toBeVisible()
+
+    // Give any 300ms feed transition time to run.
+    await page.waitForTimeout(600)
+
+    const { animClasses, rectsBefore, rectsAfter } = await page.evaluate(() => ({
+      animClasses: window.__animClasses,
+      rectsBefore: window.__rectsBefore,
+      rectsAfter: [...document.querySelectorAll('.ft-list-video')]
+        .map((el) => el.getBoundingClientRect().toJSON())
+    }))
+
+    // Sub-pixel deltas from scrollbar-width compensation rounding are fine;
+    // anything visible is not.
+    const shifted = rectsBefore
+      .map((rect, i) => {
+        const after = rectsAfter[i] || rect
+
+        return {
+          i,
+          dx: after.x - rect.x,
+          dy: after.y - rect.y,
+          dw: after.width - rect.width
+        }
+      })
+      .filter(({ dx, dy, dw }) => Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5 || Math.abs(dw) > 0.5)
+
+    expect(animClasses, 'feed transition classes fired while opening the prompt').toEqual([])
+    expect(shifted, `items shifted: ${JSON.stringify(shifted.slice(0, 3))}`).toEqual([])
+  })
+}
+
+test.describe('at 100% display scale', () => {
+  defineCase()
+})
+
+// Fractional display scaling makes scrollbar-width measurements inexact,
+// which must still not cause a visible feed animation.
+test.describe('at 125% display scale', () => {
+  test.use({ launchArgs: ['--force-device-scale-factor=1.25'] })
+  defineCase()
+})
+
+test.describe('at 150% display scale', () => {
+  test.use({ launchArgs: ['--force-device-scale-factor=1.5'] })
+  defineCase()
+})

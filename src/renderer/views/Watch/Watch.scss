@@ -64,10 +64,6 @@
   align-items: start;
   display: grid;
 
-  &.noSidebar {
-    @include single-column-template;
-  }
-
   .videoArea {
     grid-area: video;
 
@@ -209,6 +205,12 @@
   }
 
   @media only screen and (width <= 1050px) {
+    @include single-column-template;
+  }
+
+  // must come after the theatre-mode media queries so an absent sidebar
+  // always collapses the layout to a single full-width column
+  &.noSidebar {
     @include single-column-template;
   }
 
