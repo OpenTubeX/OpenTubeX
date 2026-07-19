@@ -475,13 +475,14 @@ function handleThumbnailPreferenceChange(value) {
   store.dispatch('updateThumbnailPreference', value)
 }
 
-const EXTRA_THUMBNAIL_ACTION_VALUES = ['', 'history', 'copyYoutube', 'openYoutube']
+const EXTRA_THUMBNAIL_ACTION_VALUES = ['', 'history', 'copyYoutube', 'openYoutube', ...(process.env.IS_ELECTRON ? ['download'] : [])]
 
 const extraThumbnailActionNames = computed(() => [
   t('Settings.General Settings.Extra Thumbnail Action Button.None'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
-  t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube')
+  t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube'),
+  ...(process.env.IS_ELECTRON ? [t('Downloads.Download Video')] : [])
 ])
 
 /** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube'>} */

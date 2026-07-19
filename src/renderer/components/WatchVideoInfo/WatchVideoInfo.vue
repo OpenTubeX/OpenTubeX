@@ -205,6 +205,13 @@
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
+            v-if="USING_ELECTRON && !isUpcoming"
+            :title="t('Downloads.Download Video')"
+            :icon="['fas', 'download']"
+            theme="secondary"
+            @click="showDownloadPrompt = true"
+          />
+          <FtIconButton
             v-if="USING_ELECTRON && externalPlayer !== ''"
             :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
             :icon="['fas', 'external-link-alt']"
@@ -228,6 +235,12 @@
         </span>
       </div>
     </div>
+    <WatchVideoDownloadPrompt
+      v-if="showDownloadPrompt"
+      :video-id="id"
+      :title="title"
+      @close="showDownloadPrompt = false"
+    />
   </FtCard>
 </template>
 
@@ -241,6 +254,7 @@ import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPromp
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store'
 
@@ -377,6 +391,7 @@ const USING_ELECTRON = process.env.IS_ELECTRON
 const { locale, t } = useI18n()
 
 const showCollaboratorsPrompt = ref(false)
+const showDownloadPrompt = ref(false)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)

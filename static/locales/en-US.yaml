@@ -667,6 +667,34 @@ Settings:
     Players:
       None:
         Name: None
+  Download Settings:
+    Download Settings: Downloads
+    yt-dlp Source: yt-dlp Source
+    Sources:
+      System: System (PATH or custom path)
+      Managed: Managed by OpenTubeX
+    Detected Version Template: 'Detected yt-dlp version: {version}'
+    Managed Not Downloaded: yt-dlp has not been downloaded yet. Click the button below to download it.
+    System yt-dlp Missing Warning: yt-dlp was not found on your system. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
+    Download yt-dlp: Download yt-dlp
+    Update yt-dlp: Update yt-dlp
+    Downloading yt-dlp: Downloading yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} has been downloaded
+    yt-dlp Download Error Template: 'Downloading yt-dlp failed: {error}'
+    FFmpeg Source: FFmpeg Source
+    Detected FFmpeg Version Template: 'Detected FFmpeg version: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg has not been downloaded yet. Click the button below to download it.
+    System FFmpeg Missing Warning: FFmpeg was not found on your system. It is required for merging video and audio and for audio conversion. Install it, set a custom path below, or switch the source to "Managed by OpenTubeX".
+    Download FFmpeg: Download FFmpeg
+    Update FFmpeg: Update FFmpeg
+    Downloading FFmpeg: Downloading FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} has been downloaded
+    FFmpeg Download Error Template: 'Downloading FFmpeg failed: {error}'
+    yt-dlp Executable Path: yt-dlp Executable Path
+    FFmpeg Executable Path: FFmpeg Executable Path
+    Download Folder: Download Folder
+    Choose Download Folder: Choose Download Folder
+    Templates Hint: Custom download templates can be created and managed in the download prompt, which is located beneath the video player.
   Privacy Settings:
     Privacy Settings: Privacy
     Remember History: Remember Watch History
@@ -1417,6 +1445,17 @@ Tooltips:
       Custom arguments will still be passed on.
     Custom External Player Arguments: Any custom command line arguments you want to be passed on to the external player.
     DefaultCustomArgumentsTemplate: "(Default: '{defaultCustomArguments}')"
+  Download Settings:
+    yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download
+      and manage its own copy of yt-dlp, which is stored in the user data directory.
+    FFmpeg Source: OpenTubeX can either use the FFmpeg installed on your system or download
+      and manage its own static FFmpeg build, which is stored in the user data directory.
+    yt-dlp Executable Path: By default, OpenTubeX will assume that yt-dlp can be found via
+      the PATH environment variable. If needed, a custom path can be set here.
+    FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams
+      and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
+      via the PATH environment variable. If needed, a custom path can be set here.
+    Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
   Distraction Free Settings:
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
@@ -1570,3 +1609,28 @@ KeyboardShortcutPrompt:
   End: Seek to the end of the video
   Skip to Next Video: Skip to the next video in a playlist or next recommended video
   Skip to Previous Video: Skip to the previous video in a playlist
+Downloads:
+  Download: Download
+  Download Video: Download Video
+  Download Type: Download Type
+  Custom yt-dlp Arguments: Custom yt-dlp Arguments
+  Template Name: Template Name
+  Save Template: Save Template
+  Delete Template: Delete Template
+  Template Saved: 'Saved download template "{name}"'
+  Choose Folder: Change
+  System Downloads Folder: System Downloads Folder
+  Processing: Processing…
+  Download Complete: Download complete
+  Download Cancelled: Download cancelled
+  Download Failed: Download failed
+  Cancel Download: Cancel Download
+  yt-dlp Not Found: yt-dlp was not found. Install it or set its path in the Download Settings.
+  Download Complete Template: 'Download of "{title}" has finished'
+  Download Failed Template: 'Download of "{title}" has failed'
+  Templates:
+    Video Best: Video - Best Quality
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - Best Quality
+    Audio Format: Audio - {format}
+    Custom Arguments: Custom yt-dlp Arguments

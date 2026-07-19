@@ -10,6 +10,7 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
 })
 
 let currentUpdateSearchInputTextListener
+let currentYtDlpBinaryDownloadProgressListener
 
 export default {
   /**
@@ -200,6 +201,80 @@ export default {
       (event, externalPlayer, unsupportedActions, isPlaylist) => {
         handler(externalPlayer, unsupportedActions, isPlaylist)
       })
+  },
+
+  /**
+   * @param {import('../main/ytDlp').YtDlpDownloadPayload} payload
+   * @returns {Promise<{ id: number } | { error: string } | null>}
+   */
+  ytDlpDownload: (payload) => {
+    // require the user to have interacted with the page recently
+    if (navigator.userActivation.isActive) {
+      return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD, payload)
+    }
+
+    return Promise.resolve(null)
+  },
+
+  /**
+   * @param {number} id
+   */
+  ytDlpCancelDownload: (id) => {
+    ipcRenderer.send(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, id)
+  },
+
+  /**
+   * @param {(status: import('../main/ytDlp').YtDlpDownloadStatus) => void} handler
+   */
+  handleYtDlpDownloadStatus: (handler) => {
+    ipcRenderer.on(IpcChannels.YT_DLP_DOWNLOAD_STATUS, (event, status) => {
+      handler(status)
+    })
+  },
+
+  /**
+   * @param {string | undefined} currentPath
+   * @returns {Promise<string | undefined>}
+   */
+  ytDlpChooseDownloadFolder: (currentPath) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CHOOSE_DOWNLOAD_FOLDER, currentPath)
+  },
+
+  /**
+   * @returns {Promise<{
+   *   ytDlp: import('../main/ytDlp').YtDlpBinaryInfo,
+   *   ffmpeg: import('../main/ytDlp').YtDlpBinaryInfo
+   * } | null>}
+   */
+  ytDlpGetInfo: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_INFO)
+  },
+
+  /**
+   * @param {'yt-dlp' | 'ffmpeg'} binary
+   * @returns {Promise<{ version: string } | { error: string } | null>}
+   */
+  ytDlpDownloadBinary: (binary) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD_BINARY, binary)
+  },
+
+  /**
+   * Only one listener can be active at a time, pass null to remove it again
+   * @param {((progress: { binary: 'yt-dlp' | 'ffmpeg', percent: number | null }) => void) | null} handler
+   */
+  setYtDlpBinaryDownloadProgressListener: (handler) => {
+    if (currentYtDlpBinaryDownloadProgressListener) {
+      ipcRenderer.off(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, currentYtDlpBinaryDownloadProgressListener)
+      currentYtDlpBinaryDownloadProgressListener = undefined
+    }
+
+    if (handler) {
+      currentYtDlpBinaryDownloadProgressListener = (_, progress) => {
+        handler(progress)
+      }
+
+      ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, currentYtDlpBinaryDownloadProgressListener)
+    }
   },
 
   /**

@@ -1,6 +1,7 @@
 import { createStore } from 'vuex'
 // import createPersistedState from 'vuex-persistedstate'
 
+import downloads from './modules/downloads'
 import history from './modules/history'
 import invidious from './modules/invidious'
 import playlists from './modules/playlists'
@@ -15,6 +16,7 @@ import watchStats from './modules/watch-stats'
 
 export default createStore({
   modules: {
+    downloads,
     history,
     invidious,
     playlists,

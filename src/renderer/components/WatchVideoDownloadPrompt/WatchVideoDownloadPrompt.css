@@ -1,0 +1,76 @@
+.downloadPromptContent {
+  inline-size: min(500px, 75vw);
+}
+
+.downloadVideoTitle {
+  font-weight: bold;
+  overflow-wrap: anywhere;
+}
+
+.downloadTypeSelect,
+.customArgsInput {
+  inline-size: 100%;
+  max-inline-size: 500px;
+}
+
+.templateArgs {
+  overflow-wrap: anywhere;
+}
+
+.downloadFolderRow {
+  overflow-wrap: anywhere;
+}
+
+.chooseFolderButton {
+  background: none;
+  border: 0;
+  color: var(--accent-color);
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.downloadProgressBarTrack {
+  background-color: #9e9e9e;
+  block-size: 8px;
+  border-radius: 4px;
+  margin-block: 20px 10px;
+  margin-inline: auto;
+  max-inline-size: 500px;
+  overflow: hidden;
+}
+
+.downloadProgressBarFill {
+  background-color: var(--accent-color);
+  block-size: 100%;
+  border-radius: 4px;
+  transition: inline-size 0.3s ease;
+}
+
+.downloadProgressBarFill.indeterminate {
+  animation: download-progress-indeterminate 1.5s ease-in-out infinite;
+  inline-size: 100% !important;
+}
+
+.downloadErrorDetails {
+  color: var(--destructive-color);
+  font-family: monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+@keyframes download-progress-indeterminate {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

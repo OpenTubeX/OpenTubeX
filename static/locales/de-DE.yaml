@@ -748,6 +748,34 @@ Settings:
       None:
         Name: Keine
     Ignore Default Arguments: Standardargumente ignorieren
+  Download Settings:
+    Download Settings: Downloads
+    yt-dlp Source: yt-dlp-Quelle
+    Sources:
+      System: System (PATH oder benutzerdefinierter Pfad)
+      Managed: Von OpenTubeX verwaltet
+    Detected Version Template: 'Erkannte yt-dlp-Version: {version}'
+    Managed Not Downloaded: yt-dlp wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es herunterzuladen.
+    System yt-dlp Missing Warning: yt-dlp wurde auf deinem System nicht gefunden. Installiere es, lege unten einen benutzerdefinierten Pfad fest oder wechsle die Quelle auf „Von OpenTubeX verwaltet“.
+    Download yt-dlp: yt-dlp herunterladen
+    Update yt-dlp: yt-dlp aktualisieren
+    Downloading yt-dlp: yt-dlp wird heruntergeladen…
+    yt-dlp Downloaded Template: yt-dlp {version} wurde heruntergeladen
+    yt-dlp Download Error Template: 'Herunterladen von yt-dlp fehlgeschlagen: {error}'
+    FFmpeg Source: FFmpeg-Quelle
+    Detected FFmpeg Version Template: 'Erkannte FFmpeg-Version: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es herunterzuladen.
+    System FFmpeg Missing Warning: FFmpeg wurde auf deinem System nicht gefunden. Es wird zum Zusammenführen von Video und Audio sowie zur Audiokonvertierung benötigt. Installiere es, lege unten einen benutzerdefinierten Pfad fest oder wechsle die Quelle auf „Von OpenTubeX verwaltet“.
+    Download FFmpeg: FFmpeg herunterladen
+    Update FFmpeg: FFmpeg aktualisieren
+    Downloading FFmpeg: FFmpeg wird heruntergeladen…
+    FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
+    FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
+    yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
+    FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
+    Download Folder: Download-Ordner
+    Choose Download Folder: Download-Ordner auswählen
+    Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
   Parental Control Settings:
     Parental Control Settings: Kindersicherung
     Hide Unsubscribe Button: Schaltfläche „Deabonnieren“ ausblenden
@@ -1265,6 +1293,12 @@ Tooltips:
     External Player: Wenn du einen externen Video-Player auswählst, wird auf dem Vorschaubild ein Symbol angezeigt, mit dem du das Video (die Playlist, falls unterstützt) im externen Video-Player öffnen kannst. Achtung, die Einstellungen von Invidious wirken sich nicht auf externe Video-Player aus.
     DefaultCustomArgumentsTemplate: '(Standardwert: „{defaultCustomArguments}“)'
     Ignore Default Arguments: Schicke keine Standardargumente an den externen Video-Player außer der Video-URL (z.B. Abspiel-Geschwindigkeit, Playlist-URL etc.). Besondere Argumente werden weiterhin weitergeleitet.
+  Download Settings:
+    yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
+    FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
+    yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
+    FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
+    Download Folder: Videos werden in diesem Ordner gespeichert. Leer lassen, um den Downloads-Ordner deines Systems zu verwenden.
   Experimental Settings:
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
   Distraction Free Settings:
@@ -1475,3 +1509,28 @@ Stats:
   Minutes: '{minutes} min'
   Hours: '{hours} h'
   Hours and minutes: '{hours} h {minutes} min'
+Downloads:
+  Download: Herunterladen
+  Download Video: Video herunterladen
+  Download Type: Download-Typ
+  Custom yt-dlp Arguments: Benutzerdefinierte yt-dlp-Argumente
+  Template Name: Vorlagenname
+  Save Template: Vorlage speichern
+  Delete Template: Vorlage löschen
+  Template Saved: Download-Vorlage „{name}“ gespeichert
+  Choose Folder: Ändern
+  System Downloads Folder: Downloads-Ordner des Systems
+  Processing: Verarbeitung läuft…
+  Download Complete: Download abgeschlossen
+  Download Cancelled: Download abgebrochen
+  Download Failed: Download fehlgeschlagen
+  Cancel Download: Download abbrechen
+  yt-dlp Not Found: yt-dlp wurde nicht gefunden. Installiere es oder lege den Pfad in den Download-Einstellungen fest.
+  Download Complete Template: Download von „{title}“ ist abgeschlossen
+  Download Failed Template: Download von „{title}“ ist fehlgeschlagen
+  Templates:
+    Video Best: Video - Beste Qualität
+    Video Resolution: Video - {resolution}
+    Audio Best: Audio - Beste Qualität
+    Audio Format: Audio - {format}
+    Custom Arguments: Benutzerdefinierte yt-dlp-Argumente

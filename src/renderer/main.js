@@ -338,4 +338,18 @@ if (process.env.IS_ELECTRON) {
       showToast(i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }))
     }
   )
+
+  window.ftElectron.handleYtDlpDownloadStatus((download) => {
+    store.commit('upsertYtDlpDownload', download)
+
+    if (download.status === 'completed') {
+      showToast(i18n.global.t('Downloads.Download Complete Template', { title: download.title }))
+    } else if (download.status === 'failed') {
+      showToast(
+        download.errorMessage === 'ENOENT'
+          ? i18n.global.t('Downloads.yt-dlp Not Found')
+          : i18n.global.t('Downloads.Download Failed Template', { title: download.title })
+      )
+    }
+  })
 }

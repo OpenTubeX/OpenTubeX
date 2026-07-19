@@ -299,6 +299,12 @@
         &nbsp;
       </div>
     </div>
+    <WatchVideoDownloadPrompt
+      v-if="showDownloadPrompt"
+      :video-id="id"
+      :title="title"
+      @close="showDownloadPrompt = false"
+    />
   </div>
 </template>
 
@@ -311,6 +317,7 @@ import { useRoute } from 'vue-router'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -441,6 +448,7 @@ const isVr360 = ref(false)
 const is3D = ref(false)
 const hasCaptions = ref(false)
 const isUpcoming = ref(false)
+const showDownloadPrompt = ref(false)
 const isPremium = ref(false)
 const hideViews = ref(false)
 const deArrowTogglePinned = ref(false)
@@ -506,6 +514,13 @@ const extraThumbnailActionButton = computed(() => {
         title: t('Video.Open in YouTube'),
         icon: ['fab', 'youtube']
       }
+    case 'download':
+      return process.env.IS_ELECTRON
+        ? {
+            title: t('Downloads.Download Video'),
+            icon: ['fas', 'download']
+          }
+        : null
     default:
       return null
   }
@@ -559,7 +574,13 @@ const dropdownOptions = computed(() => {
         ? t('Video.Remove From History')
         : t('Video.Mark As Watched'),
       value: 'history'
-    }
+    },
+    ...(process.env.IS_ELECTRON && !isUpcoming.value
+      ? [{
+          label: t('Downloads.Download Video'),
+          value: 'download'
+        }]
+      : [])
   ]
   if (!hideSharingActions.value) {
     options.push(
@@ -738,6 +759,9 @@ function handleOptionsClick(option) {
       break
     case 'unhideChannel':
       unhideChannel(channelName.value, channelId.value)
+      break
+    case 'download':
+      showDownloadPrompt.value = true
       break
   }
 }
