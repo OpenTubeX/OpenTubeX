@@ -143,13 +143,16 @@ const mutations = {
     }
   },
 
-  setTabContentTitle(state, { tabId, title }) {
+  setTabContentTitle(state, { tabId, title, skipHistoryEntry = false }) {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
     if (!tab) {
       return
     }
 
     tab.contentTitle = title
+    if (skipHistoryEntry) {
+      return
+    }
     const entry = tab.history[tab.historyIndex]
     if (entry) {
       entry.title = title || entry.route.fullPath

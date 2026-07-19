@@ -247,7 +247,9 @@ export class TabNavigationService {
     if (!sameRoute && !preserveContentTitle) {
       // Clear the previous page's title as soon as navigation starts. Dynamic
       // pages replace this route placeholder once their content has loaded.
-      this.setTitle(tabId, to.fullPath)
+      // historyIndex still points at the outgoing entry here, so don't let the
+      // placeholder overwrite that entry's title.
+      this.setTitle(tabId, to.fullPath, { skipHistoryEntry: true })
     }
 
     this.saveScroll(tabId)
@@ -317,7 +319,7 @@ export class TabNavigationService {
       await tabLifecycleService.run(tabId, 'afterNavigate', { to, from })
     } finally {
       if (!navigationCommitted && !sameRoute && !preserveContentTitle) {
-        this.setTitle(tabId, previousTitle)
+        this.setTitle(tabId, previousTitle, { skipHistoryEntry: true })
       }
       if (loadingToken !== null) {
         this.finishRouteLoading(tabId, loadingToken)
@@ -413,12 +415,12 @@ export class TabNavigationService {
     window.scrollTo({ left: scroll.left, top: scroll.top, behavior: 'instant' })
   }
 
-  setTitle(tabId, title) {
+  setTitle(tabId, title, { skipHistoryEntry = false } = {}) {
     if (typeof title !== 'string') {
       return
     }
 
-    this.store.commit('setTabContentTitle', { tabId, title })
+    this.store.commit('setTabContentTitle', { tabId, title, skipHistoryEntry })
     window.ftElectron?.tabs?.updateTitle?.(formatDocumentTitle(title), tabId)
 
     if (this.store.getters.getPresentedTabId === tabId) {
