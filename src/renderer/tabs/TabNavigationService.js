@@ -241,12 +241,6 @@ export class TabNavigationService {
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
 
     if (mode === 'push' && sameRoute) {
-      // The logical tab state can be restored before Vue Router has projected
-      // it into the shared browser URL. A same-route click must repair that
-      // mismatch instead of returning while the address still points at `/`.
-      if (this.getPresentedTabId() === tabId) {
-        await this.projectRoute(route)
-      }
       return
     }
 
