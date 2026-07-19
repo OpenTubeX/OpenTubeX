@@ -88,7 +88,49 @@ export function installViewTransitions(router) {
   })
 }
 
+/**
+ * Run a logical-tab navigation inside the pending thumbnail view transition.
+ * Electron renders tab content from store state before synchronising Vue Router,
+ * so its transition has to wrap that state update rather than a router guard.
+ *
+ * @param {() => Promise<void> | void} update
+ * @returns {Promise<void>}
+ */
+export async function runPendingViewTransition(update) {
+  if (
+    typeof document === 'undefined' ||
+    typeof document.startViewTransition !== 'function' ||
+    navigationRequestedAt === 0 ||
+    Date.now() - navigationRequestedAt > 1000
+  ) {
+    cleanupMorphSource()
+    await update()
+    return
+  }
+
+  navigationRequestedAt = 0
+  const source = morphSourceElement
+  morphSourceElement = null
+  document.documentElement.classList.add('viewTransitionMorphActive')
+
+  const cleanup = () => {
+    document.documentElement.classList.remove('viewTransitionMorphActive')
+    if (source) {
+      source.style.viewTransitionName = ''
+    }
+  }
+
+  const transition = document.startViewTransition(async () => {
+    await update()
+    await nextTick()
+  })
+
+  transition.finished.then(cleanup, cleanup)
+  await transition.updateCallbackDone
+}
+
 function cleanupMorphSource() {
+  navigationRequestedAt = 0
   if (morphSourceElement) {
     morphSourceElement.style.viewTransitionName = ''
     morphSourceElement = null

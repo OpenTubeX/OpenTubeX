@@ -3,6 +3,7 @@ import { START_LOCATION } from 'vue-router'
 
 import packageDetails from '../../../package.json'
 import { translateWindowTitle } from '../helpers/strings'
+import { runPendingViewTransition } from '../helpers/viewTransitions'
 import { cloneRoute, normalizeRoute } from '../store/modules/tabs'
 import { tabLifecycleService } from './TabLifecycleService'
 import { tabMediaCoordinator } from './TabMediaCoordinator'
@@ -297,19 +298,28 @@ export class TabNavigationService {
         historyIndex = history.length - 1
       }
 
-      this.store.commit('setTabNavigation', { tabId, route, history, historyIndex })
-      navigationCommitted = true
-      if (typeof to.name === 'string') {
-        this.setTitle(tabId, routeTitle(to))
-      }
-      this.publishRoute(tabId, route)
+      const isPresented = this.store.getters.getPresentedTabId === tabId
+      const applyNavigation = async () => {
+        this.store.commit('setTabNavigation', { tabId, route, history, historyIndex })
+        navigationCommitted = true
+        if (typeof to.name === 'string') {
+          this.setTitle(tabId, routeTitle(to))
+        }
+        this.publishRoute(tabId, route)
 
-      if (this.store.getters.getPresentedTabId === tabId) {
-        await this.projectRoute(route)
+        if (isPresented) {
+          await this.projectRoute(route)
+        }
+      }
+
+      if (isPresented) {
+        await runPendingViewTransition(applyNavigation)
         await nextTick()
         await nextAnimationFrame()
         this.restoreScroll(tabId)
         this.projectTitle(tabId)
+      } else {
+        await applyNavigation()
       }
 
       for (const hook of this.afterEachHooksByTabId.get(tabId) ?? []) {
