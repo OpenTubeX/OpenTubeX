@@ -261,7 +261,7 @@ const {
   refresh: refreshAllFeeds,
   showRefreshWarning: showAllFeedsRefreshWarning
 } = useRefreshAllSubscriptionFeeds()
-const currentTabStorageKey = tabId ? `Subscriptions/${tabId}/currentTab` : 'Subscriptions/currentTab'
+const currentTabStorageKey = 'Subscriptions/currentTab'
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {
@@ -352,10 +352,10 @@ onBeforeUnmount(() => {
 
 watch(currentTab, async (value, previousValue) => {
   if (value !== null) {
-  // Save last used tab, restore when view mounted again
-    sessionStorage.setItem(currentTabStorageKey, value)
+    // Use the last selected feed when opening another subscription view
+    localStorage.setItem(currentTabStorageKey, value)
   } else {
-    sessionStorage.removeItem(currentTabStorageKey)
+    localStorage.removeItem(currentTabStorageKey)
   }
 
   if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
@@ -410,7 +410,7 @@ if (visibleTabs.value.length === 0) {
   currentTab.value = null
 } else {
   // Restore currentTab
-  const lastCurrentTabId = sessionStorage.getItem(currentTabStorageKey)
+  const lastCurrentTabId = localStorage.getItem(currentTabStorageKey)
   if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {

@@ -90,6 +90,38 @@ test.describe('localized tab titles', () => {
   })
 })
 
+test.describe('subscription feed tabs', () => {
+  test.use({
+    seed: {
+      settings: {
+        hideSubscriptionsVideos: false,
+        hideSubscriptionsShorts: false,
+        hideSubscriptionsLive: false,
+        hideSubscriptionsCommunity: false,
+        useRssFeeds: false
+      }
+    }
+  })
+
+  test('uses the last selected feed for newly opened subscription tabs', async ({ page }) => {
+    const feedTab = (tab) => page.locator(`[data-subscription-feed-tab="${tab}"]`)
+
+    await feedTab('shorts').click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await page.locator(sel.newTabButton).click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await feedTab('live').click()
+    await page.locator(sel.tabs).first().click()
+    await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
+
+    await goTo(page, 'settings')
+    await goTo(page, 'subscriptions')
+    await expect(feedTab('live')).toHaveAttribute('aria-selected', 'true')
+  })
+})
+
 test.describe('background tab shortcuts', () => {
   test.use({
     seed: {
