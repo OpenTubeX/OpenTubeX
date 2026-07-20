@@ -371,6 +371,10 @@
   padding-inline-start: var(--vertical-tab-bar-width, 220px);
 }
 
+.app.verticalTabs :deep(.progressBar) {
+  inset-inline-start: var(--vertical-tab-bar-width, 220px);
+}
+
 .app.verticalTabs .sideNavBackdrop {
   inset-block-start: 60px;
 }

@@ -2,7 +2,11 @@
   position: fixed;
   block-size: 3px;
   inset-block-end: 0;
-  inset-inline-start: 0;
-  background-color: var(--primary-color);
+  inset-inline: 0;
   z-index: 4;
+}
+
+.progressBarFill {
+  block-size: 100%;
+  background-color: var(--primary-color);
 }
