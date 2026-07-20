@@ -1096,6 +1096,11 @@
   transition: inset-inline-end 250ms ease;
 }
 
+:deep(.shaka-spinner-container),
+.countdownOverlay {
+  transition: inset-inline-end 250ms ease;
+}
+
 :deep(.shaka-text-container),
 :deep(.shaka-speech-to-text-container) {
   /* Keep shaka's caption raise animation alongside the panel push. */
@@ -2044,6 +2049,8 @@
 .ftVideoPlayer.presentationModeChanging .player,
 .ftVideoPlayer.presentationModeChanging .chapterOverlay,
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
+.ftVideoPlayer.presentationModeChanging .countdownOverlay,
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-text-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-speech-to-text-container) {
   transition: none !important;
@@ -2066,6 +2073,14 @@
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-controls-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-controls-container),
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-controls-container),
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .countdownOverlay,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .countdownOverlay,
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .countdownOverlay,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .countdownOverlay,
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-text-container),
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-text-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-text-container),
