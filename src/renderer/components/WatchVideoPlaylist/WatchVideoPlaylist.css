@@ -166,6 +166,41 @@
   resize: vertical;
 }
 
+.fullscreenPlaylist {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  block-size: auto;
+  min-block-size: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.fullscreenPlaylistContent {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.fullscreenPlaylist .playlistHeader {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+}
+
+.fullscreenPlaylist .playlistItemsWrapper {
+  flex: 1 1 auto;
+  block-size: 0;
+  min-block-size: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgb(255 255 255 / 45%) transparent;
+  resize: none;
+}
+
 .playlistItemsWrapper::-webkit-resizer {
   background:
     linear-gradient(
@@ -201,6 +236,32 @@
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
   transition: background 0.2s ease-in;
+}
+
+.fullscreenPlaylist .playlistItem {
+  align-items: start;
+}
+
+.fullscreenPlaylist .playlistItem:not(:last-child) {
+  margin-block-end: 2px;
+}
+
+.fullscreenPlaylist .playlistItem :deep(.ft-list-item) {
+  padding-block: 4px;
+}
+
+.fullscreenPlaylist .playlistItem :deep(.title) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.fullscreenPlaylist .playlistItem :deep(.infoLine) {
+  margin-block-start: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .videoInfo {

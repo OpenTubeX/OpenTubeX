@@ -82,6 +82,7 @@
           @player-reload-requested="onPlayerReloadRequested"
           @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
           @fullscreen-comments-change="handleFullscreenCommentsChange"
+          @fullscreen-playlist-change="handleFullscreenPlaylistChange"
           @add-to-playlist="addCurrentVideoToPlaylist"
           @chapters-overlay-change="handleChaptersOverlayChange"
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
@@ -333,19 +334,25 @@
         class="watchVideoSideBar watchVideoPlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
       />
-      <watch-video-playlist
-        v-if="watchingPlaylist"
-        v-show="!isLoading"
-        ref="watchVideoPlaylist"
-        :watch-view-loading="isLoading"
-        :playlist-id="playlistId"
-        :playlist-type="playlistType"
-        :video-id="videoId"
-        :playlist-item-id="playlistItemId"
-        class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
-        :class="{ theatrePlaylist: useTheatreMode }"
-        @pause-player="pausePlayer"
-      />
+      <Teleport
+        :to="fullscreenPlaylistTarget || 'body'"
+        :disabled="!fullscreenPlaylistOpen"
+      >
+        <watch-video-playlist
+          v-if="watchingPlaylist"
+          v-show="!isLoading"
+          ref="watchVideoPlaylist"
+          :watch-view-loading="isLoading"
+          :playlist-id="playlistId"
+          :playlist-type="playlistType"
+          :video-id="videoId"
+          :playlist-item-id="playlistItemId"
+          :fullscreen-overlay="fullscreenPlaylistOpen"
+          class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
+          :class="{ theatrePlaylist: useTheatreMode }"
+          @pause-player="pausePlayer"
+        />
+      </Teleport>
       <watch-video-recommendations
         v-if="!isLoading && !hideRecommendedVideos"
         :data="recommendedVideos"

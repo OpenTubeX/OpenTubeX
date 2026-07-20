@@ -1,142 +1,148 @@
 <template>
-  <FtCard class="relative">
+  <FtCard
+    class="relative"
+    :class="{ fullscreenPlaylist: fullscreenOverlay }"
+  >
     <FtLoader
       v-if="isLoading"
     />
     <div
       v-else
+      :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
     >
-      <h3
-        class="playlistTitle"
-        :title="playlistTitle"
-      >
-        <RouterLink
-          class="playlistTitleLink"
-          dir="auto"
-          :to="playlistPageLinkTo"
+      <div class="playlistHeader">
+        <h3
+          class="playlistTitle"
+          :title="playlistTitle"
         >
-          {{ playlistTitle }}
-        </RouterLink>
-      </h3>
-      <template
-        v-if="channelName !== ''"
-      >
-        <RouterLink
-          v-if="channelId"
-          class="channelName"
-          dir="auto"
-          :to="`/channel/${channelId}`"
+          <RouterLink
+            class="playlistTitleLink"
+            dir="auto"
+            :to="playlistPageLinkTo"
+          >
+            {{ playlistTitle }}
+          </RouterLink>
+        </h3>
+        <template
+          v-if="channelName !== ''"
         >
-          {{ channelName }} -
-        </RouterLink>
-        <bdi
-          v-else
-          class="channelName"
+          <RouterLink
+            v-if="channelId"
+            class="channelName"
+            dir="auto"
+            :to="`/channel/${channelId}`"
+          >
+            {{ channelName }} -
+          </RouterLink>
+          <bdi
+            v-else
+            class="channelName"
+          >
+            {{ channelName }} -
+          </bdi>
+        </template>
+        <span
+          class="playlistIndex"
         >
-          {{ channelName }} -
-        </bdi>
-      </template>
-      <span
-        class="playlistIndex"
-      >
-        <label for="playlistProgressBar">
-          {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
-        </label>
+          <label for="playlistProgressBar">
+            {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
+          </label>
 
-        <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
-        <div
-          v-if="!shuffleEnabled && !reversePlaylist"
-          class="playlistProgressBarContainer"
-          @mouseenter="showProgressBarPreview = true"
-          @mouseleave="showProgressBarPreview = false"
-          @mousemove="updateProgressBarPreview"
-        >
+          <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
           <div
-            ref="playlistProgressBar"
-            class="playlistProgressBar"
-            :class="{ expanded: showProgressBarPreview }"
-            @click="handleProgressBarClick"
+            v-if="!shuffleEnabled && !reversePlaylist"
+            class="playlistProgressBarContainer"
+            @mouseenter="showProgressBarPreview = true"
+            @mouseleave="showProgressBarPreview = false"
+            @mousemove="updateProgressBarPreview"
           >
             <div
-              class="playlistProgressBarFill"
-              :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
-            />
-            <div
-              v-if="showProgressBarPreview"
-              class="progressBarPreview"
-              :style="{ left: previewPosition + '%', transform: `translateX(${ previewTransformXPercentage }%)` }"
+              ref="playlistProgressBar"
+              class="playlistProgressBar"
+              :class="{ expanded: showProgressBarPreview }"
+              @click="handleProgressBarClick"
             >
-              <div class="previewTooltip">
-                <img
-                  v-if="previewVideoThumbnail"
-                  :src="previewVideoThumbnail"
-                  alt=""
-                  class="previewThumbnail"
-                >
-                <div class="previewText">
-                  {{ previewVideoIndex }} / {{ playlistVideoCount }}
+              <div
+                class="playlistProgressBarFill"
+                :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
+              />
+              <div
+                v-if="showProgressBarPreview"
+                class="progressBarPreview"
+                :style="{ left: previewPosition + '%', transform: `translateX(${ previewTransformXPercentage }%)` }"
+              >
+                <div class="previewTooltip">
+                  <img
+                    v-if="previewVideoThumbnail"
+                    :src="previewVideoThumbnail"
+                    alt=""
+                    class="previewThumbnail"
+                  >
+                  <div class="previewText">
+                    {{ previewVideoIndex }} / {{ playlistVideoCount }}
+                  </div>
+                  <div
+                    class="previewVideoTitle"
+                    dir="auto"
+                  >{{ previewVideoTitle }}</div>
                 </div>
-                <div
-                  class="previewVideoTitle"
-                  dir="auto"
-                >{{ previewVideoTitle }}</div>
               </div>
             </div>
           </div>
+        </span>
+        <div class="playlistButtons">
+          <button
+            class="playlistButton"
+            :class="{ playlistButtonActive: loopEnabled }"
+            :aria-label="t('Video.Loop Playlist')"
+            :aria-pressed="loopEnabled"
+            :title="t('Video.Loop Playlist')"
+            @click="toggleLoop"
+          >
+            <FontAwesomeIcon
+              class="playlistIcon"
+              :icon="['fas', 'retweet']"
+            />
+          </button>
+          <button
+            class="playlistButton"
+            :class="{ playlistButtonActive: shuffleEnabled }"
+            :aria-label="t('Video.Shuffle Playlist')"
+            :aria-pressed="shuffleEnabled"
+            :title="t('Video.Shuffle Playlist')"
+            @click="toggleShuffle"
+          >
+            <FontAwesomeIcon
+              class="playlistIcon"
+              :icon="['fas', 'random']"
+            />
+          </button>
+          <button
+            class="playlistButton"
+            :class="{ playlistButtonActive: reversePlaylist }"
+            :aria-label="t('Video.Reverse Playlist')"
+            :aria-pressed="reversePlaylist"
+            :title="t('Video.Reverse Playlist')"
+            @click="toggleReversePlaylist"
+          >
+            <FontAwesomeIcon
+              class="playlistIcon"
+              :icon="['fas', 'exchange-alt']"
+            />
+          </button>
+          <button
+            v-if="userPlaylistWatchedVideoCount > 0"
+            class="playlistButton"
+            :aria-label="t('User Playlists.Remove Watched Videos')"
+            :title="t('User Playlists.Remove Watched Videos')"
+            @click="showRemoveWatchedVideosPrompt = true"
+          >
+            <FontAwesomeIcon
+              class="playlistIcon"
+              :icon="['fas', 'eye-slash']"
+            />
+          </button>
         </div>
-      </span>
-      <div class="playlistButtons">
-        <button
-          class="playlistButton"
-          :class="{ playlistButtonActive: loopEnabled }"
-          :aria-label="t('Video.Loop Playlist')"
-          :aria-pressed="loopEnabled"
-          :title="t('Video.Loop Playlist')"
-          @click="toggleLoop"
-        >
-          <FontAwesomeIcon
-            class="playlistIcon"
-            :icon="['fas', 'retweet']"
-          />
-        </button>
-        <button
-          class="playlistButton"
-          :class="{ playlistButtonActive: shuffleEnabled }"
-          :aria-label="t('Video.Shuffle Playlist')"
-          :aria-pressed="shuffleEnabled"
-          :title="t('Video.Shuffle Playlist')"
-          @click="toggleShuffle"
-        >
-          <FontAwesomeIcon
-            class="playlistIcon"
-            :icon="['fas', 'random']"
-          />
-        </button>
-        <button
-          class="playlistButton"
-          :class="{ playlistButtonActive: reversePlaylist }"
-          :aria-label="t('Video.Reverse Playlist')"
-          :aria-pressed="reversePlaylist"
-          :title="t('Video.Reverse Playlist')"
-          @click="toggleReversePlaylist"
-        >
-          <FontAwesomeIcon
-            class="playlistIcon"
-            :icon="['fas', 'exchange-alt']"
-          />
-        </button>
-        <button
-          v-if="userPlaylistWatchedVideoCount > 0"
-          class="playlistButton"
-          :aria-label="t('User Playlists.Remove Watched Videos')"
-          :title="t('User Playlists.Remove Watched Videos')"
-          @click="showRemoveWatchedVideosPrompt = true"
-        >
-          <FontAwesomeIcon
-            class="playlistIcon"
-            :icon="['fas', 'eye-slash']"
-          />
-        </button>
       </div>
       <TransitionGroup
         v-if="!isLoading"
@@ -235,6 +241,10 @@ const props = defineProps({
   watchViewLoading: {
     type: Boolean,
     required: true,
+  },
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -985,6 +995,19 @@ function shufflePlaylistItems() {
 
 const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
 
+function getScrollTop() {
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+  return container?.scrollTop ?? 0
+}
+
+/** @param {number} scrollTop */
+function setScrollTop(scrollTop) {
+  const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+  if (container != null) {
+    container.scrollTop = scrollTop
+  }
+}
+
 /**
  * @param {number} index
  */
@@ -1063,6 +1086,8 @@ const shouldStopDueToPlaylistEnd = computed(() => {
 })
 
 defineExpose({
+  getScrollTop,
+  setScrollTop,
   playNextVideo,
   playPreviousVideo,
   nextVideo,

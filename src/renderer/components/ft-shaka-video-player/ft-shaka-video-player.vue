@@ -42,6 +42,7 @@
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
         fullscreenCommentsOpen: showFullscreenComments,
+        fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
         presentationModeChanging
       }"
@@ -146,11 +147,23 @@
         </div>
       </Transition>
       <div
-        v-if="commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction"
+        v-if="watchingPlaylist || commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
       >
+        <button
+          v-if="watchingPlaylist"
+          type="button"
+          class="fullscreenAction fullscreenPlaylistToggle"
+          :class="{ open: showFullscreenPlaylist }"
+          :aria-label="$t('Playlist.Playlist')"
+          :title="$t('Playlist.Playlist')"
+          :aria-expanded="String(showFullscreenPlaylist)"
+          @click="setFullscreenPlaylist(!showFullscreenPlaylist)"
+        >
+          <FontAwesomeIcon :icon="['fas', 'list']" />
+        </button>
         <button
           v-if="commentsAvailable"
           type="button"
@@ -258,6 +271,34 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenComments"
       />
+      <aside
+        ref="fullscreenPlaylistOverlay"
+        class="fullscreenPlaylistOverlay shaka-no-propagation"
+        :class="{ open: showFullscreenPlaylist }"
+        role="dialog"
+        :aria-label="$t('Playlist.Playlist')"
+        :aria-hidden="String(!showFullscreenPlaylist)"
+        :inert="!showFullscreenPlaylist"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenPlaylist"
+      >
+        <button
+          type="button"
+          class="fullscreenPlaylistClose"
+          :aria-label="$t('Playlist.Close Playlist')"
+          :title="$t('Playlist.Close Playlist')"
+          @click="closeFullscreenPlaylist"
+        >
+          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+        </button>
+        <div
+          ref="fullscreenPlaylistTarget"
+          class="fullscreenPlaylistTarget"
+        />
+      </aside>
       <div
         v-if="showStats"
         class="stats"

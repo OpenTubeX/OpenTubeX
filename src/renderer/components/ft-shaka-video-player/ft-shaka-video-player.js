@@ -310,6 +310,7 @@ export default defineComponent({
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
     'fullscreen-comments-change',
+    'fullscreen-playlist-change',
     'add-to-playlist',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
@@ -427,6 +428,11 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenCommentsOverlay = ref(null)
     const showFullscreenComments = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenPlaylistOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenPlaylistTarget = ref(null)
+    const showFullscreenPlaylist = ref(false)
     const chapterThumbnails = ref([])
     const currentChapterTitle = computed(() => {
       return props.chapters[props.currentChapterIndex]?.title ?? t('Chapters.Chapters')
@@ -4338,15 +4344,38 @@ export default defineComponent({
       setFullscreenComments(false)
     }
 
+    function setFullscreenPlaylist(shouldOpen) {
+      const open = Boolean(
+        shouldOpen && props.watchingPlaylist &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
+      showFullscreenPlaylist.value = open
+      emit('fullscreen-playlist-change', {
+        open,
+        target: fullscreenPlaylistTarget.value
+      })
+    }
+
+    function closeFullscreenPlaylist() {
+      setFullscreenPlaylist(false)
+    }
+
     watch(() => props.commentsAvailable, available => {
       if (!available && showFullscreenComments.value) {
         closeFullscreenComments()
       }
     })
 
+    watch(() => props.watchingPlaylist, watching => {
+      if (!watching && showFullscreenPlaylist.value) {
+        closeFullscreenPlaylist()
+      }
+    })
+
     watch(fullWindowEnabled, enabled => {
       if (!enabled && !isNativeFullscreenActive()) {
         closeFullscreenComments()
+        closeFullscreenPlaylist()
       }
     })
 
@@ -6250,6 +6279,7 @@ export default defineComponent({
       } else if (!isNativeFullscreenActive()) {
         if (!fullWindowEnabled.value) {
           closeFullscreenComments()
+          closeFullscreenPlaylist()
         }
         updateScrollMiniPlayer()
       }
@@ -6899,6 +6929,7 @@ export default defineComponent({
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       closeFullscreenComments()
+      closeFullscreenPlaylist()
       if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
         delete document.body.dataset.playerFullWindowOwner
         document.body.classList.remove('playerFullWindow')
@@ -7065,6 +7096,7 @@ export default defineComponent({
       setCurrentTime,
       getSabrReloadState,
       closeFullscreenComments,
+      closeFullscreenPlaylist,
       closeChaptersOverlay,
       copyChapterTimestamp,
       destroyPlayer
@@ -7130,6 +7162,11 @@ export default defineComponent({
       showFullscreenComments,
       closeFullscreenComments,
       setFullscreenComments,
+      fullscreenPlaylistOverlay,
+      fullscreenPlaylistTarget,
+      showFullscreenPlaylist,
+      closeFullscreenPlaylist,
+      setFullscreenPlaylist,
       showFullscreenShareAction,
       showFullscreenPlaylistAction,
       getShareTimestamp,

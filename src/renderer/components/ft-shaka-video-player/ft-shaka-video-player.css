@@ -262,7 +262,8 @@
     inset-block-start 250ms ease, inset-block-end 250ms ease;
 }
 
-.ftVideoPlayer.fullscreenCommentsOpen .chapterOverlay {
+.ftVideoPlayer.fullscreenCommentsOpen .chapterOverlay,
+.ftVideoPlayer.fullscreenPlaylistOpen .chapterOverlay {
   inset-block-start: calc(50% + 6px);
 }
 
@@ -1131,6 +1132,7 @@
   inset-inline-end: 24px;
   inset-block-end: 82px;
   align-items: center;
+  gap: 4px;
   padding: 4px;
   color: #fff;
   background-color: rgb(0 0 0 / 25%);
@@ -1193,7 +1195,8 @@
   pointer-events: auto;
 }
 
-.fullscreenCommentsOverlay {
+.fullscreenCommentsOverlay,
+.fullscreenPlaylistOverlay {
   position: absolute;
   z-index: 3;
   inset-block: 12px;
@@ -1220,7 +1223,8 @@
   nested backdrop-filters: with the blur on the panel itself, the sort menu's
   own backdrop-filter inside it would stop working.
 */
-.fullscreenCommentsOverlay::before {
+.fullscreenCommentsOverlay::before,
+.fullscreenPlaylistOverlay::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -1230,17 +1234,47 @@
 }
 
 /* Suppressed during presentation mode switches; see the block near the end of the file. */
-.ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay {
+.ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenPlaylistOverlay {
   transition: none !important;
 }
 
 /* When the chapters panel is open as well, comments takes the top half. */
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenCommentsOverlay,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsOverlay {
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenPlaylistOverlay,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsOverlay,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenPlaylistOverlay {
   inset-block-end: calc(50% + 6px);
 }
 
-.fullscreenCommentsOverlay.open {
+/* Comments and playlist share the dock when chapters is closed. */
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenCommentsOverlay {
+  inset-block-end: calc(50% + 6px);
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenPlaylistOverlay {
+  inset-block-start: calc(50% + 6px);
+}
+
+/* With all three panels open, divide the dock into equal thirds. */
+.ftVideoPlayer.presentationModeChanging .chapterOverlay {
+  transition: none !important;
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenCommentsOverlay {
+  inset-block-end: calc(66.666% + 6px);
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenPlaylistOverlay {
+  inset-block: calc(33.333% + 6px);
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .chapterOverlay {
+  inset-block-start: calc(66.666% + 6px);
+}
+
+.fullscreenCommentsOverlay.open,
+.fullscreenPlaylistOverlay.open {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
@@ -1252,6 +1286,58 @@
   margin: 0;
   border-radius: 0;
   box-shadow: none;
+}
+
+.fullscreenPlaylistClose {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  display: grid;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: #fff;
+  background-color: rgb(0 0 0 / 45%);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.fullscreenPlaylistClose:hover,
+.fullscreenPlaylistClose:focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenPlaylistTarget {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.fullscreenPlaylistTarget :deep(.watchVideoPlaylist) {
+  box-sizing: border-box;
+  block-size: 100%;
+  margin: 0;
+  padding-block-start: 12px;
+  overflow: hidden;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenPlaylistTarget :deep(.playlistTitle) {
+  padding-inline-end: 36px;
+}
+
+.fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
+  block-size: auto;
+  min-block-size: 0;
+  resize: none;
 }
 
 /*
@@ -1280,6 +1366,7 @@
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen .ambientFullscreenCanvas,
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .ambientFullscreenCanvas,
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen .ambientFullscreenCanvas {
   opacity: 0.42;
 }
@@ -1301,8 +1388,10 @@
 
 /* Keep the floating fullscreen actions next to the video instead of under the panel. */
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen .fullscreenActions,
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .fullscreenActions,
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenActions,
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenActions,
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .fullscreenActions,
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
 }
@@ -2239,7 +2328,6 @@
   watch page sidebar on fullscreen/full window exit.
 */
 .ftVideoPlayer.presentationModeChanging .player,
-.ftVideoPlayer.presentationModeChanging .chapterOverlay,
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
 .ftVideoPlayer.presentationModeChanging .countdownOverlay,
@@ -2255,31 +2343,43 @@
   higher-specificity .player rules follow the scroll mini player ones.
 */
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen .player,
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .player,
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen .player,
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen .player,
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .player,
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen .player {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-controls-container),
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-controls-container),
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-controls-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-controls-container),
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-controls-container),
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-spinner-container),
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-spinner-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-spinner-container),
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-spinner-container),
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-spinner-container),
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen .countdownOverlay,
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .countdownOverlay,
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen .countdownOverlay,
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen .countdownOverlay,
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .countdownOverlay,
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen .countdownOverlay,
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-text-container),
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-text-container),
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-text-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-text-container),
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-text-container),
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-text-container),
 .ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-speech-to-text-container),
 .ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-speech-to-text-container),
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-speech-to-text-container),
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-speech-to-text-container) {
   inline-size: auto;
   inset-inline-end: var(--side-panel-width);

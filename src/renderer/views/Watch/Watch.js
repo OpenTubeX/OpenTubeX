@@ -170,6 +170,9 @@ export default defineComponent({
       fullscreenCommentsOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenCommentsTarget: null,
+      fullscreenPlaylistOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenPlaylistTarget: null,
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
       autoplayNextRecommendedVideo: false,
@@ -482,6 +485,14 @@ export default defineComponent({
     },
     closeFullscreenComments() {
       this.$refs.player?.closeFullscreenComments()
+    },
+    handleFullscreenPlaylistChange({ open, target }) {
+      const playlistScrollTop = this.$refs.watchVideoPlaylist?.getScrollTop() ?? 0
+      this.fullscreenPlaylistTarget = target
+      this.fullscreenPlaylistOpen = open && target !== null
+      this.$nextTick(() => {
+        this.$refs.watchVideoPlaylist?.setScrollTop(playlistScrollTop)
+      })
     },
     addCurrentVideoToPlaylist() {
       const videoData = {
