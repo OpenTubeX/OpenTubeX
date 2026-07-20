@@ -74,6 +74,7 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
+const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
 const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
@@ -1751,7 +1752,8 @@ export default defineComponent({
       // Check if we've left any unskipped segments - if so, re-enable auto-skip for them
       for (const uuid of sponsorBlockDoNotSkipSegments) {
         const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
-        if (segment && !isSponsorBlockPointSegment(segment) && (currentTime < segment.startTime || currentTime >= segment.endTime)) {
+        if (segment && !isSponsorBlockPointSegment(segment) &&
+          (currentTime < segment.startTime - SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS || currentTime >= segment.endTime)) {
           sponsorBlockDoNotSkipSegments.delete(uuid)
           removeSponsorBlockToast(uuid)
         }
