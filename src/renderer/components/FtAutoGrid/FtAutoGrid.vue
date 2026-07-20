@@ -5,6 +5,7 @@
     name="feed"
     :move-class="suppressMoveTransition ? 'feed-move-suppressed' : undefined"
     :class="{
+      autoGrid: true,
       grid: grid,
       list: !grid,
       thumbnailSizeReady: grid && gridWidth > 0

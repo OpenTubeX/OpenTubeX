@@ -50,7 +50,6 @@
     </FtFlexBox>
     <slot name="before-list" />
     <FtElementList
-      v-if="activeVideoList.length > 0"
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"

@@ -1,5 +1,6 @@
 <template>
   <SubscriptionsTabUi
+    class="newFeed"
     :is-loading="isLoading"
     :video-list="newMedia"
     :error-channels="errorChannels"
@@ -15,18 +16,20 @@
         {{ $t('Global.Videos') }}
       </h3>
     </template>
-    <section
-      v-if="newPosts.length > 0"
-      class="postsSection"
-    >
-      <h3>{{ $t('Global.Posts') }}</h3>
-      <FtElementList
-        :data="newPosts"
-        display="list"
-        stable-item-keys
-        :use-channels-hidden-preference="false"
-      />
-    </section>
+    <Transition name="new-feed-section">
+      <section
+        v-if="newPosts.length > 0"
+        class="postsSection"
+      >
+        <h3>{{ $t('Global.Posts') }}</h3>
+        <FtElementList
+          :data="newPosts"
+          display="list"
+          stable-item-keys
+          :use-channels-hidden-preference="false"
+        />
+      </section>
+    </Transition>
     <FtPrompt
       v-if="showRefreshWarning"
       :label="$t('Subscriptions.New Feed Refresh Warning Title')"
@@ -122,5 +125,30 @@ defineExpose({
 <style scoped>
 .postsSection {
   margin-block-start: 32px;
+}
+
+.newFeed :deep(.autoGrid) {
+  position: relative;
+}
+
+.newFeed :deep(.feed-leave-active) {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.newFeed :deep(.feed-leave-to) {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
+}
+
+.new-feed-section-leave-active {
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.new-feed-section-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
 }
 </style>
