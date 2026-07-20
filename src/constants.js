@@ -206,7 +206,7 @@ const SyncEvents = {
   to have them reflect on the [keyboard shortcut reference webpage](https://docs.freetubeapp.io/usage/keyboard-shortcuts).
   Please also update the [keyboard shortcut modal](src/renderer/components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue)
 */
-const KeyboardShortcuts = {
+const DefaultKeyboardShortcuts = {
   APP: {
     GENERAL: {
       SHOW_SHORTCUTS: 'shift+?',
@@ -241,8 +241,8 @@ const KeyboardShortcuts = {
       NEW_TAB: 'ctrl+T',
       CLOSE_TAB: 'ctrl+W',
       RELOAD_TAB: 'ctrl+R',
-      NEXT_TAB: 'ctrl+tab',
-      PREV_TAB: 'ctrl+shift+tab',
+      NEXT_TAB: 'control+tab',
+      PREV_TAB: 'control+shift+tab',
       RESTORE_CLOSED_TAB: 'ctrl+shift+T',
       SWITCH_TO_TAB: 'ctrl+1-9',
     },
@@ -274,6 +274,7 @@ const KeyboardShortcuts = {
       INCREASE_VIDEO_SPEED: 'p',
       INCREASE_VIDEO_SPEED_ALT: '>',
       TOGGLE_NORMAL_PLAYBACK_SPEED: 'g',
+      TOGGLE_SKIP_SILENCE: '',
       SKIP_N_TENTHS: '0..9',
       LAST_CHAPTER: 'ctrl+arrowleft',
       NEXT_CHAPTER: 'ctrl+arrowright',
@@ -285,6 +286,162 @@ const KeyboardShortcuts = {
       SKIP_TO_PREV: 'shift+p'
     }
   },
+}
+
+const KeyboardShortcuts = getConfiguredKeyboardShortcuts()
+
+/**
+ * Builds a complete shortcut dictionary from the defaults and a partial set
+ * of user overrides. Unknown entries are ignored so stale settings cannot add
+ * actions that the current app does not support.
+ * @param {string | object} [overrides]
+ * @returns {typeof DefaultKeyboardShortcuts}
+ */
+function getConfiguredKeyboardShortcuts(overrides = {}) {
+  const parsedOverrides = parseKeyboardShortcutOverrides(overrides)
+  const editableOverrides = filterEditableKeyboardShortcutOverrides(
+    DefaultKeyboardShortcuts,
+    parsedOverrides
+  )
+
+  return mergeKeyboardShortcutOverrides(DefaultKeyboardShortcuts, editableOverrides)
+}
+
+/**
+ * Removes overrides for range shortcuts, which represent multiple keys and
+ * cannot be replaced by recording one keyboard event.
+ * @param {string | object} overrides
+ * @returns {string}
+ */
+function sanitizeKeyboardShortcutOverrides(overrides) {
+  return JSON.stringify(filterEditableKeyboardShortcutOverrides(
+    DefaultKeyboardShortcuts,
+    parseKeyboardShortcutOverrides(overrides)
+  ))
+}
+
+/**
+ * @param {string} shortcut
+ * @returns {boolean}
+ */
+function isKeyboardShortcutRange(shortcut) {
+  return /^\d(?:\.\.|-)\d$/.test(shortcut.split('+').at(-1))
+}
+
+/**
+ * @param {string | object} overrides
+ * @returns {object}
+ */
+function parseKeyboardShortcutOverrides(overrides) {
+  if (typeof overrides === 'string') {
+    try {
+      const parsedOverrides = JSON.parse(overrides)
+      return parsedOverrides && typeof parsedOverrides === 'object' ? parsedOverrides : {}
+    } catch {
+      return {}
+    }
+  }
+
+  return overrides && typeof overrides === 'object' ? overrides : {}
+}
+
+/**
+ * @param {object | string} defaults
+ * @param {unknown} overrides
+ * @returns {object | string | undefined}
+ */
+function filterEditableKeyboardShortcutOverrides(defaults, overrides) {
+  if (typeof defaults === 'string') {
+    if (isKeyboardShortcutRange(defaults)) {
+      return undefined
+    }
+    return typeof overrides === 'string' ? overrides : undefined
+  }
+
+  const overrideDictionary = overrides && typeof overrides === 'object' ? overrides : {}
+  return Object.fromEntries(Object.entries(defaults)
+    .map(([key, value]) => [
+      key,
+      filterEditableKeyboardShortcutOverrides(value, overrideDictionary[key])
+    ])
+    .filter(([_key, value]) => value !== undefined && (
+      typeof value === 'string' || Object.keys(value).length > 0
+    )))
+}
+
+/**
+ * @param {object | string} defaults
+ * @param {unknown} overrides
+ * @returns {object | string}
+ */
+function mergeKeyboardShortcutOverrides(defaults, overrides) {
+  if (typeof defaults === 'string') {
+    return typeof overrides === 'string' ? overrides : defaults
+  }
+
+  const overrideDictionary = overrides && typeof overrides === 'object' ? overrides : {}
+  return Object.fromEntries(Object.entries(defaults).map(([key, value]) => [
+    key,
+    mergeKeyboardShortcutOverrides(value, overrideDictionary[key])
+  ]))
+}
+
+/**
+ * Applies persisted overrides to the live dictionary used by renderer code.
+ * Keeping the object identity stable means existing imports see edits without
+ * requiring an app restart.
+ * @param {string | object} overrides
+ */
+function applyKeyboardShortcutOverrides(overrides) {
+  replaceKeyboardShortcutDictionary(
+    KeyboardShortcuts,
+    getConfiguredKeyboardShortcuts(overrides)
+  )
+}
+
+/**
+ * @param {object} target
+ * @param {object} source
+ */
+function replaceKeyboardShortcutDictionary(target, source) {
+  for (const [key, value] of Object.entries(source)) {
+    if (typeof value === 'string') {
+      target[key] = value
+    } else {
+      replaceKeyboardShortcutDictionary(target[key], value)
+    }
+  }
+}
+
+/**
+ * Converts the app's portable shortcut format to Electron's accelerator
+ * syntax. Empty and range-based shortcuts cannot be native accelerators.
+ * @param {string} shortcut
+ * @returns {string | undefined}
+ */
+function getElectronAccelerator(shortcut) {
+  if (!shortcut || /^\d(?:\.\.|-)\d$/.test(shortcut.split('+').at(-1))) {
+    return undefined
+  }
+
+  const electronKeys = {
+    alt: 'Alt',
+    arrowdown: 'Down',
+    arrowleft: 'Left',
+    arrowright: 'Right',
+    arrowup: 'Up',
+    cmd: 'Cmd',
+    control: 'Ctrl',
+    ctrl: 'CmdOrCtrl',
+    enter: 'Enter',
+    plus: 'Plus',
+    shift: 'Shift',
+  }
+
+  return shortcut
+    .split('+')
+    .map(key => electronKeys[key.toLowerCase()] ?? key)
+    .join('+')
 }
 
 /**
@@ -367,7 +524,13 @@ export {
   IpcChannels,
   DBActions,
   SyncEvents,
+  DefaultKeyboardShortcuts,
   KeyboardShortcuts,
+  applyKeyboardShortcutOverrides,
+  getConfiguredKeyboardShortcuts,
+  getElectronAccelerator,
+  isKeyboardShortcutRange,
+  sanitizeKeyboardShortcutOverrides,
   PlayerIcons,
   SPONSORBLOCK_ICON_VIEWBOX,
   UnsupportedPlayerActions,

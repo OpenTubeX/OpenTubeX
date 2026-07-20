@@ -1,6 +1,11 @@
 import i18n, { loadLocale } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
-import { MAIN_PROFILE_ID, SyncEvents } from '../../../constants'
+import {
+  applyKeyboardShortcutOverrides,
+  MAIN_PROFILE_ID,
+  sanitizeKeyboardShortcutOverrides,
+  SyncEvents,
+} from '../../../constants'
 import { DBSettingHandlers } from '../../../datastores/handlers/index'
 import { hashPassword } from '../../helpers/passwords'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -352,6 +357,7 @@ const state = {
   skipSilence: false,
   showSkipSilenceButton: false,
   holdToDoublePlaybackSpeed: true,
+  keyboardShortcuts: '{}',
   rememberPlaybackSpeedPerChannel: false,
   autoUpdateChannelPlaybackSpeeds: false,
   channelPlaybackSpeeds: '{}',
@@ -395,6 +401,10 @@ const state = {
 }
 
 const sideEffectHandlers = {
+  keyboardShortcuts: (_store, value) => {
+    applyKeyboardShortcutOverrides(value)
+  },
+
   reducedMotion: (store, value) => {
     setReducedMotionPreference(value)
   },
@@ -595,6 +605,14 @@ const customActions = {
 
         if (mutationIds.includes(defaultMutationId(_id))) {
           commit(defaultMutationId(_id), value)
+        }
+      }
+
+      const keyboardShortcutsEntry = userSettings.find(entry => entry._id === 'keyboardShortcuts')
+      if (keyboardShortcutsEntry) {
+        const sanitizedShortcuts = sanitizeKeyboardShortcutOverrides(keyboardShortcutsEntry.value)
+        if (sanitizedShortcuts !== keyboardShortcutsEntry.value) {
+          await dispatch('updateKeyboardShortcuts', sanitizedShortcuts)
         }
       }
 

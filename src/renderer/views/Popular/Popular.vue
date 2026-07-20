@@ -50,6 +50,7 @@ import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 
 const { t } = useI18n()
 
@@ -113,13 +114,11 @@ function keyboardShortcutHandler(event) {
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
   if (event.repeat) { return }
 
-  switch (event.key.toLowerCase()) {
-    case 'f5':
-    case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!isLoading.value) {
-        fetchPopularInfo()
-      }
-      break
+  if (
+    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
+    !isLoading.value
+  ) {
+    fetchPopularInfo()
   }
 }
 

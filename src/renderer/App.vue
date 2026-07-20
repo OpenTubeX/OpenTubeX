@@ -282,6 +282,8 @@ import { vSaferHtml } from './directives/vSaferHtml.js'
 import store from './store/index'
 
 import packageDetails from '../../package.json'
+import { KeyboardShortcuts } from '../constants'
+import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   refreshSubscriptionLiveFromRemote,
@@ -1512,9 +1514,9 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
-  const ctrlOrCmdPressed = isCtrlOrCmdPressed(event)
+  const shortcuts = KeyboardShortcuts.APP.GENERAL
 
-  if (ctrlOrCmdPressed && (event.key === 'f' || event.key === 'F') && !event.shiftKey) {
+  if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {
     event.preventDefault()
     openFindbar()
     return
@@ -1542,7 +1544,8 @@ function handleKeyboardShortcuts(event) {
     return
   }
 
-  if (event.shiftKey && event.key === '?' && !isTypingTarget(event.target)) {
+  if (matchesKeyboardShortcut(event, shortcuts.SHOW_SHORTCUTS) && !isTypingTarget(event.target)) {
+    event.preventDefault()
     store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
   }
 
@@ -1553,7 +1556,7 @@ function handleKeyboardShortcuts(event) {
   // Tab keyboard shortcuts (Electron only)
   if (process.env.IS_ELECTRON) {
     // Ctrl+1..9: Switch to tab by number
-    if (ctrlOrCmdPressed && event.key >= '1' && event.key <= '9' && !event.shiftKey) {
+    if (matchesKeyboardShortcut(event, shortcuts.SWITCH_TO_TAB)) {
       if (!isTypingTarget(event.target)) {
         const index = parseInt(event.key, 10) - 1
         const tabs = store.state.tabs.tabs
@@ -1566,21 +1569,21 @@ function handleKeyboardShortcuts(event) {
     }
 
     // Ctrl+T: New tab
-    if (ctrlOrCmdPressed && (event.key === 't' || event.key === 'T') && !event.shiftKey) {
+    if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
       event.preventDefault()
       store.dispatch('createTab', { makeActive: true })
       return
     }
 
     // Ctrl+Shift+T: Restore closed tab
-    if (ctrlOrCmdPressed && event.shiftKey && (event.key === 't' || event.key === 'T')) {
+    if (matchesKeyboardShortcut(event, shortcuts.RESTORE_CLOSED_TAB)) {
       event.preventDefault()
       store.dispatch('restoreClosedTab')
       return
     }
 
     // Ctrl+W: Close tab (handled in menu, but also here for robustness)
-    if (ctrlOrCmdPressed && (event.key === 'w' || event.key === 'W') && !event.shiftKey) {
+    if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
       event.preventDefault()
       store.dispatch('closeActiveTab').then((hasRemainingTabs) => {
         if (!hasRemainingTabs) {
@@ -1591,21 +1594,21 @@ function handleKeyboardShortcuts(event) {
     }
 
     // Ctrl+Tab: Next tab
-    if (event.ctrlKey && event.key === 'Tab' && !event.shiftKey) {
+    if (matchesKeyboardShortcut(event, shortcuts.NEXT_TAB)) {
       event.preventDefault()
       cycleTabSwitcher(1)
       return
     }
 
     // Ctrl+Shift+Tab: Previous tab
-    if (event.ctrlKey && event.shiftKey && event.key === 'Tab') {
+    if (matchesKeyboardShortcut(event, shortcuts.PREV_TAB)) {
       event.preventDefault()
       cycleTabSwitcher(-1)
       return
     }
 
     // Ctrl+R: Reload tab (unless the current view handles refresh itself)
-    if (ctrlOrCmdPressed && (event.key === 'r' || event.key === 'R') && !event.shiftKey) {
+    if (matchesKeyboardShortcut(event, shortcuts.RELOAD_TAB)) {
       if (route.path.startsWith('/subscriptions')) {
         event.preventDefault()
         return
@@ -1614,15 +1617,6 @@ function handleKeyboardShortcuts(event) {
       prepareAndReloadTab()
     }
   }
-}
-
-/**
- * @param {KeyboardEvent} event
- * @returns {boolean}
- */
-function isCtrlOrCmdPressed(event) {
-  return (process.platform !== 'darwin' && event.ctrlKey) ||
-    (process.platform === 'darwin' && event.metaKey)
 }
 
 /**
@@ -1642,18 +1636,24 @@ function isTypingTarget(target) {
  * @returns {boolean}
  */
 function handleFindbarNavigationShortcut(event) {
-  const isFindNavigationShortcut = (
-    isCtrlOrCmdPressed(event) && (event.key === 'g' || event.key === 'G') && !event.altKey
-  ) || (
-    event.key === 'F3' && !event.ctrlKey && !event.metaKey && !event.altKey
-  )
+  const shortcuts = KeyboardShortcuts.APP.GENERAL
+  const isNextShortcut = [
+    shortcuts.FIND_NEXT,
+    shortcuts.FIND_NEXT_ALT,
+    shortcuts.FIND_NEXT_ALT_ENTER,
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
+  const isPreviousShortcut = [
+    shortcuts.FIND_PREVIOUS,
+    shortcuts.FIND_PREVIOUS_ALT,
+    shortcuts.FIND_PREVIOUS_ALT_ENTER,
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
 
-  if (!isFindNavigationShortcut) {
+  if (!isNextShortcut && !isPreviousShortcut) {
     return false
   }
 
   event.preventDefault()
-  findInPage(event.shiftKey)
+  findInPage(isPreviousShortcut)
   return true
 }
 

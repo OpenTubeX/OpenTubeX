@@ -263,9 +263,12 @@ import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
-import { KeyboardShortcuts } from '../../../constants'
+import { getConfiguredKeyboardShortcuts } from '../../../constants'
 
 const { locale, t } = useI18n()
+const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+).APP.GENERAL)
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 
@@ -371,8 +374,8 @@ const applyHiddenLabels = computed(() => {
 
 const historyTitle = computed(() => {
   const shortcut = process.platform === 'darwin'
-    ? KeyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY_MAC
-    : KeyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY
+    ? appKeyboardShortcuts.value.NAVIGATE_TO_HISTORY_MAC
+    : appKeyboardShortcuts.value.NAVIGATE_TO_HISTORY
 
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('History.History'),
@@ -383,7 +386,7 @@ const historyTitle = computed(() => {
 const settingsTitle = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Settings.Settings'),
-    KeyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS
+    appKeyboardShortcuts.value.NAVIGATE_TO_SETTINGS
   )
 })
 

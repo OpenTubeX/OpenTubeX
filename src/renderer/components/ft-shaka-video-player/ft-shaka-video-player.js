@@ -54,6 +54,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
@@ -109,16 +110,16 @@ const NORMAL_PLAYBACK_RATE = 1
   See: https://github.com/shaka-project/shaka-player/blob/main/ui/locales/en.json
 */
 const shakaControlKeysToShortcuts = {
-  MUTE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
-  UNMUTE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
-  PLAY: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
-  PAUSE: KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
-  PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  ENTER_PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  EXIT_PICTURE_IN_PICTURE: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
-  CAPTIONS: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS,
-  FULL_SCREEN: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN,
-  EXIT_FULL_SCREEN: KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN
+  MUTE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
+  UNMUTE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE,
+  PLAY: () => KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
+  PAUSE: () => KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY,
+  PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  ENTER_PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  EXIT_PICTURE_IN_PICTURE: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE,
+  CAPTIONS: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS,
+  FULL_SCREEN: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN,
+  EXIT_FULL_SCREEN: () => KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN
 }
 
 /** @type {Map<string, string>} */
@@ -607,7 +608,7 @@ export default defineComponent({
     })
 
     const silenceSkippingEnabled = computed(() => {
-      return showSkipSilenceButton.value && skipSilence.value
+      return skipSilence.value
     })
 
     const silenceSkipping = useSilenceSkipping({
@@ -3083,7 +3084,7 @@ export default defineComponent({
       }
 
       const shakaControlKeysToShortcutLocalizations = new Map()
-      Object.entries(shakaControlKeysToShortcuts).forEach(([shakaControlKey, shortcut]) => {
+      Object.entries(shakaControlKeysToShortcuts).forEach(([shakaControlKey, getShortcut]) => {
         const originalLocalization = originalShakaControlLocalizations.get(shakaLocale).get(shakaControlKey)
         if (originalLocalization === '') {
           // e.g., A Shaka localization key in shakaControlKeysToShortcuts has fallen out of date and need to be updated
@@ -3093,7 +3094,7 @@ export default defineComponent({
 
         const localizationWithShortcut = addKeyboardShortcutToActionTitle(
           originalLocalization,
-          shortcut
+          getShortcut()
         )
 
         shakaControlKeysToShortcutLocalizations.set(shakaControlKey, localizationWithShortcut)
@@ -3105,6 +3106,7 @@ export default defineComponent({
     }
 
     watch(locale, setLocale)
+    watch(() => store.getters.getKeyboardShortcuts, () => setLocale(locale.value))
 
     // #endregion player locales
 
@@ -5643,22 +5645,6 @@ export default defineComponent({
     // #region keyboard shortcuts
 
     /**
-     * determines whether the jump to the previous or next chapter
-     * with the the keyboard shortcuts, should be done
-     * first it checks whether there are any chapters (the array is also empty if chapters are hidden)
-     * it also checks that the approprate combination was used ALT/OPTION on macOS and CTRL everywhere else
-     * @param {KeyboardEvent} event the keyboard event
-     * @param {string} direction the direction of the jump either previous or next
-     */
-    function canChapterJump(event, direction) {
-      const currentChapter = props.currentChapterIndex
-      return props.chapters.length > 0 &&
-        (direction === 'previous' ? currentChapter > 0 : props.chapters.length - 1 !== currentChapter) &&
-        ((process.platform !== 'darwin' && event.ctrlKey) ||
-          (process.platform === 'darwin' && event.metaKey))
-    }
-
-    /**
      * @param {number} step
      */
     function frameByFrame(step) {
@@ -5770,12 +5756,14 @@ export default defineComponent({
         return
       }
 
-      if (isEditableTarget(event.target) || isEditableTarget(document.activeElement) || event.altKey) {
+      if (isEditableTarget(event.target) || isEditableTarget(document.activeElement)) {
         return
       }
 
+      const matches = shortcut => matchesKeyboardShortcut(event, shortcut)
+
       // exit fullscreen and/or fullwindow if keyboard shortcut modal is opened
-      if (event.shiftKey && event.key === '?') {
+      if (matches(KeyboardShortcuts.APP.GENERAL.SHOW_SHORTCUTS)) {
         event.preventDefault()
 
         if (ui.getControls().isFullScreenEnabled()) {
@@ -5791,43 +5779,46 @@ export default defineComponent({
         return
       }
 
-      // allow chapter jump keyboard shortcuts
-      if (event.ctrlKey && (process.platform === 'darwin' || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight'))) {
-        return
-      }
-
       // allow copying text
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
         return
       }
 
       // allow focusing on search bar without affecting the playback
-      if ((process.platform === 'darwin' && event.metaKey) && event.key.toLowerCase() === 'l') {
+      const searchShortcuts = KeyboardShortcuts.APP.GENERAL
+      if ([
+        searchShortcuts.FOCUS_SEARCH,
+        searchShortcuts.FOCUS_SEARCH_ALT,
+        searchShortcuts.FOCUS_SEARCH_ALT_MAC,
+        searchShortcuts.FOCUS_SEARCH_ALT_SLASH,
+      ].some(matches)) {
         return
       }
 
       const video_ = video.value
 
       // Skip to next video in playlist or recommended
-      if (event.shiftKey && event.key.toLowerCase() === 'n') {
+      if (matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SKIP_TO_NEXT)) {
+        event.preventDefault()
         emit('skip-to-next')
         return
       }
 
       // Skip to previous video in playlist
-      if (event.shiftKey && event.key.toLowerCase() === 'p') {
+      if (matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SKIP_TO_PREV)) {
+        event.preventDefault()
         emit('skip-to-prev')
         return
       }
 
-      switch (event.key.toLowerCase()) {
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN:
+      switch (true) {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLSCREEN):
           // Toggle full screen
           event.preventDefault()
           togglePlayerFullScreen()
           blurTooltipButtons()
           break
-        case 'escape':
+        case event.key.toLowerCase() === 'escape':
           // Exit full window
           if (fullWindowEnabled.value) {
             event.preventDefault()
@@ -5837,7 +5828,7 @@ export default defineComponent({
             }))
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW):
           // Toggle full window mode
           event.preventDefault()
           events.dispatchEvent(new CustomEvent('setFullWindow', {
@@ -5845,7 +5836,7 @@ export default defineComponent({
           }))
           blurTooltipButtons()
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.THEATRE_MODE):
           // Toggle theatre mode
           if (props.theatrePossible) {
             event.preventDefault()
@@ -5856,19 +5847,25 @@ export default defineComponent({
           }
           blurTooltipButtons()
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE:
-          // Toggle mute only if metakey is not pressed
-          if (!event.metaKey) {
-            event.preventDefault()
-            const isMuted = !video_.muted
-            video_.muted = isMuted
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.MUTE): {
+          event.preventDefault()
+          const isMuted = !video_.muted
+          video_.muted = isMuted
 
-            const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
-            const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
-            showValueChange(message, messageIcon)
-          }
+          const messageIcon = isMuted ? 'volume-mute' : 'volume-high'
+          const message = isMuted ? '0%' : `${Math.round(video_.volume * 100)}%`
+          showValueChange(message, messageIcon)
           blurTooltipButtons()
           break
+        }
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE):
+          event.preventDefault()
+          updateSkipSilence(!skipSilence.value)
+          break
+      }
+
+      if (event.defaultPrevented) {
+        return
       }
 
       if (!hasLoaded.value) {
@@ -5880,9 +5877,8 @@ export default defineComponent({
         return
       }
 
-      switch (event.key.toLowerCase()) {
-        case ' ':
-        case 'spacebar': // older browsers might return spacebar instead of a space character
+      switch (true) {
+        case isSpaceKey(event) && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey:
           event.preventDefault()
           if (holdToDoublePlaybackSpeed.value) {
             startTemporaryPlaybackRateHold(TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE)
@@ -5891,110 +5887,100 @@ export default defineComponent({
             blurTooltipButtons()
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.PLAY):
           // Toggle Play/Pause
           event.preventDefault()
           video_.paused ? video_.play() : video_.pause()
           blurTooltipButtons()
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND: {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_REWIND): {
           // Rewind by 2x the time-skip interval (in seconds)
           event.preventDefault()
           const largeRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
           seekBySeconds(-defaultSkipInterval.value * largeRewindMultiplier * 2, false, true)
           break
         }
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD: {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LARGE_FAST_FORWARD): {
           // Fast-Forward by 2x the time-skip interval (in seconds)
           event.preventDefault()
           const largeFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
           seekBySeconds(defaultSkipInterval.value * largeFastForwardMultiplier * 2, false, true)
           break
         }
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED:
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.DECREASE_VIDEO_SPEED_ALT):
           // Decrease playback rate by user configured interval
           event.preventDefault()
           changePlayBackRate(-videoPlaybackRateInterval.value)
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED:
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.INCREASE_VIDEO_SPEED_ALT):
           // Increase playback rate by user configured interval
           event.preventDefault()
           changePlayBackRate(videoPlaybackRateInterval.value)
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_NORMAL_PLAYBACK_SPEED):
           // Toggle between 1x and the previous playback speed
           event.preventDefault()
           toggleNormalPlaybackRate()
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS: {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.CAPTIONS): {
           // Toggle caption/subtitles
           if (toggleCaptions()) {
             event.preventDefault()
           }
           break
         }
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VOLUME_UP:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VOLUME_UP):
           // Increase volume
           event.preventDefault()
           changeVolume(0.05)
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VOLUME_DOWN:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VOLUME_DOWN):
           // Decrease Volume
           event.preventDefault()
           changeVolume(-0.05)
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_REWIND:
-          if (event.shiftKey) {
-            break
-          }
-          event.preventDefault()
-          if (canChapterJump(event, 'previous')) {
-            // Jump to the previous chapter
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_CHAPTER):
+          if (props.chapters.length > 0 && props.currentChapterIndex > 0) {
+            event.preventDefault()
             video_.currentTime = props.chapters[props.currentChapterIndex - 1].startSeconds
             showOverlayControls()
-          } else {
-            // Rewind by the time-skip interval (in seconds)
-            const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
-            seekBySeconds(-defaultSkipInterval.value * smallRewindMultiplier, false, true)
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_FAST_FORWARD:
-          if (event.shiftKey) {
-            break
-          }
-          event.preventDefault()
-          if (canChapterJump(event, 'next')) {
-            // Jump to the next chapter
-            video_.currentTime = (props.chapters[props.currentChapterIndex + 1].startSeconds)
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_CHAPTER):
+          if (props.chapters.length > 0 && props.currentChapterIndex < props.chapters.length - 1) {
+            event.preventDefault()
+            video_.currentTime = props.chapters[props.currentChapterIndex + 1].startSeconds
             showOverlayControls()
-          } else {
-            // Fast-Forward by the time-skip interval (in seconds)
-            const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
-            seekBySeconds(defaultSkipInterval.value * smallFastForwardMultiplier, false, true)
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_REWIND): {
+          event.preventDefault()
+          // Rewind by the time-skip interval (in seconds)
+          const smallRewindMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          seekBySeconds(-defaultSkipInterval.value * smallRewindMultiplier, false, true)
+          break
+        }
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SMALL_FAST_FORWARD): {
+          event.preventDefault()
+          // Fast-Forward by the time-skip interval (in seconds)
+          const smallFastForwardMultiplier = seekIntervalMultiplyByPlaybackRate.value ? getCurrentPlaybackRate() : 1
+          seekBySeconds(defaultSkipInterval.value * smallFastForwardMultiplier, false, true)
+          break
+        }
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.PICTURE_IN_PICTURE):
           // Toggle picture in picture
           if (props.format !== 'audio') {
             const controls = ui.getControls()
             if (controls.isPiPAllowed()) {
+              event.preventDefault()
               controls.togglePiP()
             }
           }
           blurTooltipButtons()
           break
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9': {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.SKIP_N_TENTHS): {
           // Jump to percentage in the video
           if (canSeek()) {
             event.preventDefault()
@@ -6010,22 +5996,21 @@ export default defineComponent({
           }
           break
         }
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_FRAME:
-          // `⌘+,` is for settings in MacOS
-          if (!event.metaKey && video_.paused) {
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.LAST_FRAME):
+          if (video_.paused) {
             event.preventDefault()
             // Return to previous frame
             frameByFrame(-1)
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_FRAME:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.NEXT_FRAME):
           if (video_.paused) {
             event.preventDefault()
             // Advance to next frame
             frameByFrame(1)
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.STATS:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.STATS):
           // Toggle stats display
           event.preventDefault()
 
@@ -6033,7 +6018,7 @@ export default defineComponent({
             detail: !showStats.value
           }))
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.HOME:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.HOME):
           // Jump to beginning of video
           if (canSeek()) {
             event.preventDefault()
@@ -6043,7 +6028,7 @@ export default defineComponent({
             showOverlayControls()
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.END:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.END):
           // Jump to end of video
           if (canSeek()) {
             event.preventDefault()
@@ -6053,7 +6038,7 @@ export default defineComponent({
             showOverlayControls()
           }
           break
-        case KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT:
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.TAKE_SCREENSHOT):
           if (enableScreenshot.value && props.format !== 'audio') {
             event.preventDefault()
             // Take screenshot

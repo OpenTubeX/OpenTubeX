@@ -1013,6 +1013,8 @@ function getIndividualLocalizedShortcut(shortcut) {
       return i18n.global.t('Keys.alt')
     case 'ctrl':
       return i18n.global.t('Keys.ctrl')
+    case 'control':
+      return i18n.global.t('Keys.ctrl')
     case 'shift':
       return i18n.global.t('Keys.shift')
     case 'enter':
@@ -1040,6 +1042,8 @@ function getMacIconForShortcut(shortcut) {
     case 'cmd':
     case 'ctrl':
       return '⌘'
+    case 'control':
+      return '⌃'
     case 'shift':
       return '⇧'
     case 'enter':
@@ -1082,6 +1086,10 @@ export function getLocalizedShortcut(shortcut) {
  * @returns {string} the localized action title with keyboard shortcut
  */
 export function addKeyboardShortcutToActionTitle(actionTitle, shortcut) {
+  if (!shortcut) {
+    return actionTitle
+  }
+
   return i18n.global.t('KeyboardShortcutTemplate', {
     label: actionTitle,
     shortcut
@@ -1098,7 +1106,9 @@ export function localizeAndAddKeyboardShortcutToActionTitle(localizedActionTitle
   if (!Array.isArray(sometimesManyUnlocalizedShortcuts)) {
     unlocalizedShortcuts = [unlocalizedShortcuts]
   }
-  const localizedShortcuts = unlocalizedShortcuts.map((s) => getLocalizedShortcut(s))
+  const localizedShortcuts = unlocalizedShortcuts
+    .filter(Boolean)
+    .map((s) => getLocalizedShortcut(s))
   const shortcutLabelSeparator = i18n.global.t('shortcutLabelSeparator')
   return addKeyboardShortcutToActionTitle(localizedActionTitle, localizedShortcuts.join(shortcutLabelSeparator))
 }

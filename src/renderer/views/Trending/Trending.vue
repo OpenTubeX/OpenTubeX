@@ -125,6 +125,7 @@ import { copyToClipboard, getRelativeTimeFromDate } from '../../helpers/utils'
 import { useTabToast } from '../../composables/useTabToast'
 import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 
 const { t } = useI18n()
 const showTabToast = useTabToast()
@@ -281,13 +282,11 @@ function keyboardShortcutHandler(event) {
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
   if (event.repeat) { return }
 
-  switch (event.key.toLowerCase()) {
-    case 'f5':
-    case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!isLoading.value[currentTab.value]) {
-        getTrendingInfo(true)
-      }
-      break
+  if (
+    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
+    !isLoading.value[currentTab.value]
+  ) {
+    getTrendingInfo(true)
   }
 }
 

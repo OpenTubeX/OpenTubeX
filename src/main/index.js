@@ -13,7 +13,8 @@ import {
   IpcChannels,
   DBActions,
   SyncEvents,
-  KeyboardShortcuts,
+  getConfiguredKeyboardShortcuts,
+  getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
 } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
@@ -2852,6 +2853,7 @@ function runApp() {
             case 'hideTrendingVideos':
             case 'hidePopularVideos':
             case 'hidePlaylists':
+            case 'keyboardShortcuts':
               await setMenu()
               break
             case 'hideToTrayOnMinimize':
@@ -3631,6 +3633,8 @@ function runApp() {
 
   async function setMenu() {
     const sidenavSettings = baseHandlers.settings._findSidenavSettings()
+    const keyboardShortcutsSetting = await baseHandlers.settings._findOne('keyboardShortcuts')
+    const keyboardShortcuts = getConfiguredKeyboardShortcuts(keyboardShortcutsSetting?.value)
     const hideTrendingVideos = (await sidenavSettings.hideTrendingVideos)?.value
     const hidePopularVideos = (await sidenavSettings.hidePopularVideos)?.value
     const hidePlaylists = (await sidenavSettings.hidePlaylists)?.value
@@ -3659,7 +3663,7 @@ function runApp() {
         submenu: [
           {
             label: 'New Window',
-            accelerator: 'CmdOrCtrl+N',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
             click: (_menuItem, _browserWindow, _event) => {
               createWindow({
                 replaceMainWindow: false,
@@ -3671,7 +3675,7 @@ function runApp() {
           { type: 'separator' },
           {
             label: 'Preferences',
-            accelerator: 'CmdOrCtrl+,',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/settings', browserWindow)
             },
@@ -3703,8 +3707,11 @@ function runApp() {
       {
         label: 'View',
         submenu: [
-          { role: 'toggledevtools' },
-          { role: 'toggledevtools', accelerator: 'f12', visible: false },
+          {
+            label: 'Toggle Developer Tools',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.TOGGLE_DEVTOOLS),
+            click: (_menuItem, browserWindow) => browserWindow?.webContents.toggleDevTools()
+          },
           {
             label: 'Enter Inspect Element Mode',
             accelerator: 'CmdOrCtrl+Shift+C',
@@ -3733,19 +3740,41 @@ function runApp() {
             }
           },
           { type: 'separator' },
-          { role: 'resetzoom' },
-          { role: 'resetzoom', accelerator: 'CmdOrCtrl+num0', visible: false },
-          { role: 'zoomin', accelerator: 'CmdOrCtrl+Plus' },
-          { role: 'zoomin', accelerator: 'CmdOrCtrl+=', visible: false },
-          { role: 'zoomin', accelerator: 'CmdOrCtrl+numadd', visible: false },
-          { role: 'zoomout' },
-          { role: 'zoomout', accelerator: 'CmdOrCtrl+numsub', visible: false },
+          {
+            label: 'Actual Size',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESET_ZOOM),
+            click: (_menuItem, browserWindow) => browserWindow?.webContents.setZoomLevel(0)
+          },
+          {
+            label: 'Zoom In',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_IN),
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() + 0.5)
+              }
+            }
+          },
+          {
+            label: 'Zoom Out',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_OUT),
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow) {
+                browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() - 0.5)
+              }
+            }
+          },
           { type: 'separator' },
-          { role: 'togglefullscreen' },
+          {
+            label: 'Toggle Full Screen',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.FULLSCREEN),
+            click: (_menuItem, browserWindow) => {
+              browserWindow?.setFullScreen(!browserWindow.isFullScreen())
+            }
+          },
           { type: 'separator' },
           {
             label: 'Back',
-            accelerator: 'Alt+Left',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow == null) { return }
 
@@ -3757,7 +3786,7 @@ function runApp() {
             ? [
                 {
                   label: 'Back',
-                  accelerator: KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC,
+                  accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
                     if (browserWindow == null) { return }
 
@@ -3769,7 +3798,7 @@ function runApp() {
             : []),
           {
             label: 'Forward',
-            accelerator: 'Alt+Right',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD),
             click: (_menuItem, browserWindow, _event) => {
               if (browserWindow == null) { return }
 
@@ -3781,7 +3810,7 @@ function runApp() {
             ? [
                 {
                   label: 'Forward',
-                  accelerator: KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC,
+                  accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
                     if (browserWindow == null) { return }
 
@@ -3833,9 +3862,9 @@ function runApp() {
           },
           {
             label: 'History',
-            // MacOS: Command + Y
-            // Other OS: Ctrl + H
-            accelerator: process.platform === 'darwin' ? 'Cmd+Y' : 'Ctrl+H',
+            accelerator: getElectronAccelerator(process.platform === 'darwin'
+              ? keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY_MAC
+              : keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY),
             click: (_menuItem, browserWindow, _event) => {
               navigateTo('/history', browserWindow)
             },
@@ -3855,7 +3884,7 @@ function runApp() {
         submenu: [
           {
             label: 'New Tab',
-            accelerator: 'CmdOrCtrl+T',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3869,7 +3898,7 @@ function runApp() {
           },
           {
             label: 'Close Tab',
-            accelerator: 'CmdOrCtrl+W',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3886,7 +3915,7 @@ function runApp() {
           },
           {
             label: 'Reload Tab',
-            accelerator: 'CmdOrCtrl+R',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RELOAD_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3898,7 +3927,7 @@ function runApp() {
           },
           {
             label: 'Reopen Closed Tab',
-            accelerator: 'CmdOrCtrl+Shift+T',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3911,7 +3940,7 @@ function runApp() {
           { type: 'separator' },
           {
             label: 'Next Tab',
-            accelerator: 'Ctrl+Tab',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEXT_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3926,7 +3955,7 @@ function runApp() {
           },
           {
             label: 'Previous Tab',
-            accelerator: 'Ctrl+Shift+Tab',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.PREV_TAB),
             click: (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
@@ -3944,8 +3973,16 @@ function runApp() {
       {
         role: 'window',
         submenu: [
-          { role: 'minimize' },
-          { role: 'close' }
+          {
+            label: 'Minimize',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.MINIMIZE_WINDOW),
+            click: (_menuItem, browserWindow) => browserWindow?.minimize()
+          },
+          {
+            label: 'Close Window',
+            accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_WINDOW),
+            click: (_menuItem, browserWindow) => browserWindow?.close()
+          }
         ]
       },
       ...process.platform === 'darwin'

@@ -88,6 +88,7 @@ import store from '../../store/index'
 
 import { KeyboardShortcuts } from '../../../constants'
 import { isHistoryEntryWatched } from '../../helpers/history'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
@@ -255,14 +256,13 @@ function keyboardShortcutHandler(event) {
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/repeat
   if (event.repeat) { return }
 
-  switch (event.key.toLowerCase()) {
-    case 'f5':
-    case KeyboardShortcuts.APP.SITUATIONAL.REFRESH:
-      if (!displayIsLoading.value && activeProfileHasSubscriptions.value) {
-        event.preventDefault()
-        refresh()
-      }
-      break
+  if (
+    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
+    !displayIsLoading.value &&
+    activeProfileHasSubscriptions.value
+  ) {
+    event.preventDefault()
+    refresh()
   }
 }
 

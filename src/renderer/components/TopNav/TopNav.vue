@@ -109,6 +109,7 @@
           show-data-when-empty
           @input="getSearchSuggestionsDebounce"
           @click="goToSearch"
+          @keydown="handleSearchKeyboardShortcut"
           @clear="clearLastSuggestionQuery"
           @remove="removeSearchHistoryEntryInDbAndCache"
         >
@@ -150,7 +151,8 @@ import FtThumbnailSizeControl from '../FtThumbnailSizeControl/FtThumbnailSizeCon
 
 import store from '../../store/index'
 
-import { KeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
+import { getConfiguredKeyboardShortcuts, MOBILE_WIDTH_THRESHOLD, SEARCH_RESULTS_DISPLAY_LIMIT } from '../../../constants'
+import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { debounce, localizeAndAddKeyboardShortcutToActionTitle, openInternalPath } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 import { clearLocalSearchSuggestionsSession, getLocalSearchSuggestions } from '../../helpers/api/local'
@@ -158,6 +160,9 @@ import { getInvidiousSearchSuggestions } from '../../helpers/api/invidious'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 
 const { t } = useI18n()
+const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+).APP.GENERAL)
 const router = useRouter()
 const route = useRoute()
 const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
@@ -215,10 +220,10 @@ const navigationHistoryAddendum = computed(() => {
 const backwardText = computed(() => {
   const shortcuts = process.platform === 'darwin'
     ? [
-        KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD,
-        KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC
+        appKeyboardShortcuts.value.HISTORY_BACKWARD,
+        appKeyboardShortcuts.value.HISTORY_BACKWARD_ALT_MAC
       ]
-    : KeyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD
+    : appKeyboardShortcuts.value.HISTORY_BACKWARD
 
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Back'),
@@ -229,10 +234,10 @@ const backwardText = computed(() => {
 const forwardText = computed(() => {
   const shortcuts = process.platform === 'darwin'
     ? [
-        KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD,
-        KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC
+        appKeyboardShortcuts.value.HISTORY_FORWARD,
+        appKeyboardShortcuts.value.HISTORY_FORWARD_ALT_MAC
       ]
-    : KeyboardShortcuts.APP.GENERAL.HISTORY_FORWARD
+    : appKeyboardShortcuts.value.HISTORY_FORWARD
 
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Forward'),
@@ -275,7 +280,7 @@ function historyForward(offset) {
 const newWindowText = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('Open New Window'),
-    KeyboardShortcuts.APP.GENERAL.NEW_WINDOW
+    appKeyboardShortcuts.value.NEW_WINDOW
   )
 })
 
@@ -426,13 +431,15 @@ const searchSettings = computed(() => store.getters.getSearchSettings)
 /**
  * @param {string} queryText
  * @param {object} options
- * @param {MouseEvent} options.event
+ * @param {MouseEvent | KeyboardEvent} options.event
  */
 function goToSearch(queryText, { event }) {
-  const doCreateNewWindow = event && event.shiftKey
+  const doCreateNewWindow = event instanceof KeyboardEvent
+    ? matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
+    : event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
-  const doCreateNewTab = ctrlOrCmdPressed
+  const doCreateNewTab = ctrlOrCmdPressed && !doCreateNewWindow
 
   if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
     searchContainer.value.blur()
@@ -570,6 +577,19 @@ function goToSearch(queryText, { event }) {
   })
 }
 
+/**
+ * @param {KeyboardEvent} event
+ */
+function handleSearchKeyboardShortcut(event) {
+  if (
+    event.key !== 'Enter' &&
+    matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
+  ) {
+    event.preventDefault()
+    goToSearch(currentSearchText, { event })
+  }
+}
+
 function clearLastSuggestionQuery() {
   lastSuggestionQuery.value = ''
 }
@@ -657,23 +677,21 @@ function toggleSearchContainer() {
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
-  const ctrlOrCommandPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
-    (process.platform === 'darwin' && event.metaKey)
-
   const target = event.target
   const isTypingInInput = target.tagName === 'INPUT' ||
     target.tagName === 'TEXTAREA' ||
     target.isContentEditable
-
-  const isSlashKey = event.key === '/' && !event.ctrlKey && !event.altKey && !event.metaKey && !event.shiftKey
+  const shortcuts = appKeyboardShortcuts.value
+  const focusSearchShortcut = [
+    shortcuts.FOCUS_SEARCH,
+    shortcuts.FOCUS_SEARCH_ALT,
+    ...process.platform === 'darwin' ? [shortcuts.FOCUS_SEARCH_ALT_MAC] : [],
+  ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
+  const slashShortcut = matchesKeyboardShortcut(event, shortcuts.FOCUS_SEARCH_ALT_SLASH)
 
   if (
     !hideSearchBar.value &&
-    (
-      (ctrlOrCommandPressed && (event.key === 'L' || event.key === 'l')) ||
-      (event.altKey && (event.key === 'D' || event.key === 'd' || (process.platform === 'darwin' && event.key === '∂'))) ||
-      (isSlashKey && !isTypingInInput)
-    )
+    (focusSearchShortcut || (slashShortcut && !isTypingInInput))
   ) {
     event.preventDefault()
 

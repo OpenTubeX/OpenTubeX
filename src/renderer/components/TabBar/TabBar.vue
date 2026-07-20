@@ -80,11 +80,14 @@ import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch 
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
-import { KeyboardShortcuts } from '../../../constants'
+import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import SortableTab from './SortableTab.vue'
 
 const { t } = useI18n()
+const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+).APP.GENERAL)
 
 const isElectron = process.env.IS_ELECTRON
 
@@ -97,7 +100,7 @@ const vertical = computed(() => store.getters.getUseVerticalTabBar)
 const newTabTooltip = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('New Tab'),
-    KeyboardShortcuts.APP.GENERAL.NEW_TAB
+    appKeyboardShortcuts.value.NEW_TAB
   )
 })
 

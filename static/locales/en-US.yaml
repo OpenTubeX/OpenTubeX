@@ -1564,6 +1564,16 @@ Keys:
   arrowup: Up Arrow
 KeyboardShortcutPrompt:
   Keyboard Shortcuts: Keyboard Shortcuts
+  Edit Hint: Select a shortcut, then press a new key combination. Press Backspace or Delete to unassign it.
+  Change Shortcut: 'Change shortcut for {action}'
+  Press Shortcut: Press shortcut…
+  Unassigned: Unassigned
+  Reset to Defaults: Reset to defaults
+  Shortcut Already Assigned: Shortcut already assigned
+  Shortcut Conflict: '{shortcut} is already assigned to {actions}. Do you want to reassign it?'
+  Reserved Shortcut Conflict: '{shortcut} is reserved for {actions} and cannot be reassigned.'
+  Reassign: Reassign
+  Undo: Undo
   Sections:
     Video:
       Playback: Video: Playback
@@ -1601,6 +1611,7 @@ KeyboardShortcutPrompt:
   Decrease Video Speed: 'Decrease video speed based on Video Playback Rate Interval'
   Increase Video Speed: 'Increase video speed based on Video Playback Rate Interval'
   Toggle Normal Playback Speed: Toggle between 1x speed and the previous playback speed
+  Toggle Fast-Forward Through Silence: Toggle fast-forward through silence
   Full Window: Toggle full window
   Theatre Mode: Toggle theater mode
   Take Screenshot: Take screenshot

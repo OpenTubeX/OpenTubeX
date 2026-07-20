@@ -1,7 +1,9 @@
 import shaka from 'shaka-player'
 import { watch } from 'vue'
 
+import { KeyboardShortcuts } from '../../../../constants'
 import i18n from '../../../i18n/index'
+import { addKeyboardShortcutToActionTitle } from '../../../helpers/utils'
 
 export class SkipSilenceButton extends shaka.ui.Element {
   /**
@@ -92,7 +94,11 @@ export class SkipSilenceButton extends shaka.ui.Element {
 
   /** @private */
   updateLocalisedStrings_() {
-    const label = i18n.global.t('Settings.Player Settings.Fast-Forward Through Silence')
+    const baseLabel = i18n.global.t('Settings.Player Settings.Fast-Forward Through Silence')
+    const shortcut = KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE
+    const label = shortcut
+      ? addKeyboardShortcutToActionTitle(baseLabel, shortcut)
+      : baseLabel
     const enabledLabel = this.localization.resolve('ON')
     const disabledLabel = this.localization.resolve('OFF')
 

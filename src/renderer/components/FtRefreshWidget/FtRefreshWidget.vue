@@ -78,7 +78,8 @@ import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
-import { KeyboardShortcuts } from '../../../constants'
+import store from '../../store/index'
+import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { addKeyboardShortcutToActionTitle } from '../../helpers/utils'
 
 const props = defineProps({
@@ -117,6 +118,9 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const refreshShortcut = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+).APP.SITUATIONAL.REFRESH)
 
 const COUNTDOWN_CIRCUMFERENCE = 2 * Math.PI * 7
 const FINAL_MINUTE_MS = 60 * 1000
@@ -180,7 +184,7 @@ onBeforeUnmount(() => {
 const refreshFeedButtonTitle = computed(() => {
   return addKeyboardShortcutToActionTitle(
     t('Feed.Refresh Feed', { subscriptionName: props.title }),
-    KeyboardShortcuts.APP.SITUATIONAL.REFRESH
+    refreshShortcut.value
   )
 })
 

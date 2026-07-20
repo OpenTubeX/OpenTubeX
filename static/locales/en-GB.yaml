@@ -761,8 +761,10 @@ Channel:
     This channel does not currently have any courses: This channel does not currently have any courses
 Video:
   Mark As Watched: 'Mark As Watched'
+  Unmark As Watched: 'Unmark As Watched'
   Remove From History: 'Remove From History'
   Video has been marked as watched: 'Video has been marked as watched'
+  Video has been unmarked as watched: 'Video has been unmarked as watched'
   Video has been removed from your history: 'Video has been removed from your history'
   Open in YouTube: 'Open in YouTube'
   Copy YouTube Link: 'Copy YouTube Link'

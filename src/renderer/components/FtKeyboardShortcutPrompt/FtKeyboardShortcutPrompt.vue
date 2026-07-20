@@ -1,6 +1,7 @@
 <template>
   <FtPrompt
     :label="$t('KeyboardShortcutPrompt.Keyboard Shortcuts')"
+    :inert="pendingShortcutConflict !== null"
     @click="hideKeyboardShortcutPrompt"
   >
     <template #label="{ labelId }">
@@ -16,6 +17,10 @@
         />
       </div>
     </template>
+
+    <p class="editHint">
+      {{ $t('KeyboardShortcutPrompt.Edit Hint') }}
+    </p>
 
     <div class="shortcutColumns">
       <div
@@ -34,62 +39,159 @@
           </h3>
           <div class="labelsAndShortcuts">
             <div
-              v-for="[label, shortcut] in shortcutSection.shortcutDictionary"
-              :key="label"
+              v-for="shortcut in shortcutSection.shortcutDictionary"
+              :key="shortcut.label"
               class="labelAndShortcut"
             >
               <p
                 class="label"
               >
-                {{ label }}
+                {{ shortcut.label }}
               </p>
-              <p class="shortcut">
-                {{ shortcut }}
-              </p>
+              <div class="shortcut">
+                <template
+                  v-for="binding in shortcut.bindings"
+                  :key="binding.path"
+                >
+                  <button
+                    v-if="binding.editable"
+                    type="button"
+                    class="shortcutButton"
+                    :class="{ recording: recordingShortcutPath === binding.path }"
+                    :data-shortcut-path="binding.path"
+                    :aria-label="$t('KeyboardShortcutPrompt.Change Shortcut', { action: shortcut.label })"
+                    @click.stop="beginShortcutRecording(binding)"
+                    @keydown="handleShortcutKeydown($event, binding)"
+                    @blur="stopShortcutRecording(binding)"
+                  >
+                    {{ getShortcutButtonLabel(binding) }}
+                  </button>
+                  <span
+                    v-else
+                    class="shortcutValue"
+                  >
+                    {{ getShortcutButtonLabel(binding) }}
+                  </span>
+                </template>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="shortcutActions">
+      <FtButton
+        :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
+        :text-color="null"
+        :background-color="null"
+        @click="resetKeyboardShortcuts"
+      />
+    </div>
   </FtPrompt>
+
+  <FtPrompt
+    v-if="pendingShortcutConflict"
+    :label="$t('KeyboardShortcutPrompt.Shortcut Already Assigned')"
+    :extra-labels="[shortcutConflictMessage]"
+    :option-names="shortcutConflictOptionNames"
+    :option-values="shortcutConflictOptionValues"
+    :is-first-option-destructive="shortcutConflictCanBeReassigned"
+    @click="resolveShortcutConflict"
+  />
 </template>
 
 <script setup>
 
-import { computed } from 'vue'
-import { KeyboardShortcuts } from '../../../constants'
+import { computed, nextTick, ref } from 'vue'
+import {
+  DefaultKeyboardShortcuts,
+  getConfiguredKeyboardShortcuts,
+  isKeyboardShortcutRange,
+} from '../../../constants'
 import { getLocalizedShortcut } from '../../helpers/utils'
+import {
+  keyboardShortcutFromEvent,
+  keyboardShortcutsOverlap,
+} from '../../helpers/keyboardShortcuts'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import store from '../../store/index'
 import { useI18n } from 'vue-i18n'
+import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 const { t } = useI18n()
+const isMac = process.platform === 'darwin'
+const recordingShortcutPath = ref('')
+const pendingShortcutConflict = ref(null)
+
+const configuredKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
+  store.getters.getKeyboardShortcuts
+))
+
+const shortcutConflictMessage = computed(() => {
+  if (!pendingShortcutConflict.value) {
+    return ''
+  }
+
+  const actionLabels = [...new Set(
+    pendingShortcutConflict.value.conflicts.map(conflict => conflict.label)
+  )].join(', ')
+
+  const messageParams = {
+    shortcut: getLocalizedShortcut(pendingShortcutConflict.value.shortcut),
+    actions: actionLabels,
+  }
+
+  return shortcutConflictCanBeReassigned.value
+    ? t('KeyboardShortcutPrompt.Shortcut Conflict', messageParams)
+    : t('KeyboardShortcutPrompt.Reserved Shortcut Conflict', messageParams)
+})
+
+const shortcutConflictCanBeReassigned = computed(() =>
+  pendingShortcutConflict.value?.conflicts.every(conflict => conflict.editable) ?? false
+)
+
+const shortcutConflictOptionNames = computed(() => shortcutConflictCanBeReassigned.value
+  ? [t('KeyboardShortcutPrompt.Reassign'), t('KeyboardShortcutPrompt.Undo')]
+  : [t('KeyboardShortcutPrompt.Undo')]
+)
+
+const shortcutConflictOptionValues = computed(() => shortcutConflictCanBeReassigned.value
+  ? [true, false]
+  : [false]
+)
 
 const generalPlayerShortcuts = computed(() =>
-  getLocalizedShortcutNamesAndValues(KeyboardShortcuts.VIDEO_PLAYER.GENERAL)
+  getLocalizedShortcutNamesAndValues(
+    configuredKeyboardShortcuts.value.VIDEO_PLAYER.GENERAL,
+    ['VIDEO_PLAYER', 'GENERAL']
+  )
 )
 
 const playbackPlayerShortcuts = computed(() =>
-  getLocalizedShortcutNamesAndValues(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK)
+  getLocalizedShortcutNamesAndValues(
+    configuredKeyboardShortcuts.value.VIDEO_PLAYER.PLAYBACK,
+    ['VIDEO_PLAYER', 'PLAYBACK']
+  )
 )
 
 const generalAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
-  KeyboardShortcuts.APP.GENERAL,
+  configuredKeyboardShortcuts.value.APP.GENERAL,
+  ['APP', 'GENERAL'],
   [
     'SHOW_SHORTCUTS',
     'HISTORY_BACKWARD',
     'HISTORY_FORWARD',
-    'HISTORY_BACKWARD_ALT_MAC',
-    'HISTORY_FORWARD_ALT_MAC',
+    ...isMac ? ['HISTORY_BACKWARD_ALT_MAC', 'HISTORY_FORWARD_ALT_MAC'] : [],
     'NAVIGATE_TO_SETTINGS',
-    'NAVIGATE_TO_HISTORY',
-    'NAVIGATE_TO_HISTORY_MAC',
+    isMac ? 'NAVIGATE_TO_HISTORY_MAC' : 'NAVIGATE_TO_HISTORY',
   ]
 ))
 
 const tabAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
-  KeyboardShortcuts.APP.GENERAL,
+  configuredKeyboardShortcuts.value.APP.GENERAL,
+  ['APP', 'GENERAL'],
   [
     'NEW_TAB',
     'CLOSE_TAB',
@@ -103,7 +205,8 @@ const tabAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
 
 const searchAndPageAppShortcuts = computed(() => [
   ...getLocalizedShortcutNamesAndValues(
-    KeyboardShortcuts.APP.GENERAL,
+    configuredKeyboardShortcuts.value.APP.GENERAL,
+    ['APP', 'GENERAL'],
     [
       'FOCUS_SEARCH',
       'FOCUS_SEARCH_ALT',
@@ -118,14 +221,19 @@ const searchAndPageAppShortcuts = computed(() => [
       'FIND_PREVIOUS_ALT_ENTER',
     ]
   ),
-  ...getLocalizedShortcutNamesAndValues(KeyboardShortcuts.APP.SITUATIONAL)
+  ...getLocalizedShortcutNamesAndValues(
+    configuredKeyboardShortcuts.value.APP.SITUATIONAL,
+    ['APP', 'SITUATIONAL']
+  )
 ])
 
 const windowAndViewAppShortcuts = computed(() => getLocalizedShortcutNamesAndValues(
-  KeyboardShortcuts.APP.GENERAL,
+  configuredKeyboardShortcuts.value.APP.GENERAL,
+  ['APP', 'GENERAL'],
   [
     'NEW_WINDOW',
     'MINIMIZE_WINDOW',
+    'CLOSE_WINDOW',
     'TOGGLE_DEVTOOLS',
     'RESET_ZOOM',
     'ZOOM_IN',
@@ -171,23 +279,19 @@ const shortcutColumns = computed(() => [
   ]
 ])
 
-const isMac = process.platform === 'darwin'
-
 const localizedShortcutNameToShortcutsMappings = computed(() => {
   return [
     [t('KeyboardShortcutPrompt.Show Keyboard Shortcuts'), ['SHOW_SHORTCUTS']],
     [t('KeyboardShortcutPrompt.History Backward'), [
       'HISTORY_BACKWARD',
-      ...isMac ? ['HISTORY_BACKWARD_ALT_MAC'] : [],
+      'HISTORY_BACKWARD_ALT_MAC',
     ]],
     [t('KeyboardShortcutPrompt.History Forward'), [
       'HISTORY_FORWARD',
-      ...isMac ? ['HISTORY_FORWARD_ALT_MAC'] : [],
+      'HISTORY_FORWARD_ALT_MAC',
     ]],
     [t('KeyboardShortcutPrompt.Navigate to Settings'), ['NAVIGATE_TO_SETTINGS']],
-    [t('KeyboardShortcutPrompt.Navigate to History'), [
-      isMac ? 'NAVIGATE_TO_HISTORY_MAC' : 'NAVIGATE_TO_HISTORY',
-    ]],
+    [t('KeyboardShortcutPrompt.Navigate to History'), ['NAVIGATE_TO_HISTORY', 'NAVIGATE_TO_HISTORY_MAC']],
     [t('KeyboardShortcutPrompt.New Window'), ['NEW_WINDOW']],
     [t('KeyboardShortcutPrompt.New Tab'), ['NEW_TAB']],
     [t('KeyboardShortcutPrompt.Close Tab'), ['CLOSE_TAB']],
@@ -197,6 +301,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Previous Tab'), ['PREV_TAB']],
     [t('KeyboardShortcutPrompt.Switch to Tab'), ['SWITCH_TO_TAB']],
     [t('KeyboardShortcutPrompt.Minimize Window'), ['MINIMIZE_WINDOW']],
+    [t('KeyboardShortcutPrompt.Close Window'), ['CLOSE_WINDOW']],
     [t('KeyboardShortcutPrompt.Toggle Developer Tools'), ['TOGGLE_DEVTOOLS']],
     [t('KeyboardShortcutPrompt.Reset Zoom'), ['RESET_ZOOM']],
     [t('KeyboardShortcutPrompt.Zoom In'), ['ZOOM_IN']],
@@ -204,6 +309,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Focus Search'), [
       'FOCUS_SEARCH',
       'FOCUS_SEARCH_ALT',
+      'FOCUS_SEARCH_ALT_MAC',
       'FOCUS_SEARCH_ALT_SLASH',
     ]],
     [t('KeyboardShortcutPrompt.Search in New Window'), ['SEARCH_IN_NEW_WINDOW']],
@@ -232,6 +338,7 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
     [t('KeyboardShortcutPrompt.Decrease Video Speed'), ['DECREASE_VIDEO_SPEED', 'DECREASE_VIDEO_SPEED_ALT']],
     [t('KeyboardShortcutPrompt.Increase Video Speed'), ['INCREASE_VIDEO_SPEED', 'INCREASE_VIDEO_SPEED_ALT']],
     [t('KeyboardShortcutPrompt.Toggle Normal Playback Speed'), ['TOGGLE_NORMAL_PLAYBACK_SPEED']],
+    [t('KeyboardShortcutPrompt.Toggle Fast-Forward Through Silence'), ['TOGGLE_SKIP_SILENCE']],
     [t('KeyboardShortcutPrompt.Home'), ['HOME']],
     [t('KeyboardShortcutPrompt.End'), ['END']],
     [t('KeyboardShortcutPrompt.Skip by Tenths'), ['SKIP_N_TENTHS']],
@@ -248,9 +355,8 @@ function hideKeyboardShortcutPrompt() {
   store.dispatch('hideKeyboardShortcutPrompt')
 }
 
-function getLocalizedShortcutNamesAndValues(dictionary, includedShortcutCodes = Object.keys(dictionary)) {
+function getLocalizedShortcutNamesAndValues(dictionary, dictionaryPath, includedShortcutCodes = Object.keys(dictionary)) {
   const shortcutNameToShortcutsMappings = localizedShortcutNameToShortcutsMappings.value
-  const shortcutLabelSeparator = t('shortcutLabelSeparator')
   const includedShortcutCodeSet = new Set(includedShortcutCodes)
 
   return shortcutNameToShortcutsMappings
@@ -259,12 +365,209 @@ function getLocalizedShortcutNamesAndValues(dictionary, includedShortcutCodes = 
         includedShortcutCodeSet.has(shortcutCode) && Object.hasOwn(dictionary, shortcutCode)
       )
     )
-    .map(([localizedShortcutName, shortcutCodes]) => {
-      const localizedShortcuts = shortcutCodes
+    .map(([localizedShortcutName, shortcutCodes]) => ({
+      label: localizedShortcutName,
+      bindings: shortcutCodes
         .filter(code => includedShortcutCodeSet.has(code) && Object.hasOwn(dictionary, code))
-        .map(code => getLocalizedShortcut(dictionary[code]))
-      return [localizedShortcutName, localizedShortcuts.join(shortcutLabelSeparator)]
+        .map(code => ({
+          code,
+          path: [...dictionaryPath, code].join('.'),
+          shortcut: dictionary[code],
+          dictionaryPath,
+          editable: !isKeyboardShortcutRange(getNestedValue(
+            DefaultKeyboardShortcuts,
+            [...dictionaryPath, code]
+          )),
+        }))
+    }))
+}
+
+function getShortcutButtonLabel(binding) {
+  if (recordingShortcutPath.value === binding.path) {
+    return t('KeyboardShortcutPrompt.Press Shortcut')
+  }
+
+  return binding.shortcut
+    ? getLocalizedShortcut(binding.shortcut)
+    : t('KeyboardShortcutPrompt.Unassigned')
+}
+
+function beginShortcutRecording(binding) {
+  recordingShortcutPath.value = binding.path
+}
+
+function stopShortcutRecording(binding) {
+  if (recordingShortcutPath.value === binding.path) {
+    recordingShortcutPath.value = ''
+  }
+}
+
+function handleShortcutKeydown(event, binding) {
+  if (recordingShortcutPath.value !== binding.path) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (event.key === 'Escape') {
+    recordingShortcutPath.value = ''
+    event.currentTarget.blur()
+    return
+  }
+
+  if (event.key === 'Backspace' || event.key === 'Delete') {
+    saveKeyboardShortcut(binding, '')
+    event.currentTarget.blur()
+    return
+  }
+
+  const shortcut = keyboardShortcutFromEvent(event)
+  if (shortcut !== null) {
+    saveKeyboardShortcut(binding, shortcut)
+    event.currentTarget.blur()
+  }
+}
+
+function saveKeyboardShortcut(binding, shortcut) {
+  if (shortcut === binding.shortcut) {
+    recordingShortcutPath.value = ''
+    return
+  }
+
+  const conflicts = findShortcutConflicts(binding, shortcut)
+  if (conflicts.length > 0) {
+    recordingShortcutPath.value = ''
+    pendingShortcutConflict.value = { binding, shortcut, conflicts }
+    return
+  }
+
+  applyKeyboardShortcut(binding, shortcut)
+}
+
+function resolveShortcutConflict(reassign) {
+  const pendingConflict = pendingShortcutConflict.value
+  pendingShortcutConflict.value = null
+
+  if (reassign && pendingConflict) {
+    applyKeyboardShortcut(
+      pendingConflict.binding,
+      pendingConflict.shortcut,
+      pendingConflict.conflicts
+    )
+  }
+
+  if (pendingConflict) {
+    nextTick(() => {
+      const shortcutButton = Array.from(document.querySelectorAll('.shortcutButton'))
+        .find(button => button.dataset.shortcutPath === pendingConflict.binding.path)
+      shortcutButton?.focus()
     })
+  }
+}
+
+function applyKeyboardShortcut(binding, shortcut, conflicts = []) {
+  const overrides = getKeyboardShortcutOverrides()
+
+  for (const conflict of conflicts) {
+    setNestedValue(overrides, conflict.path.split('.'), '')
+  }
+
+  const defaultValue = getNestedValue(DefaultKeyboardShortcuts, [...binding.dictionaryPath, binding.code])
+
+  if (shortcut === defaultValue) {
+    deleteNestedValue(overrides, [...binding.dictionaryPath, binding.code])
+  } else {
+    setNestedValue(overrides, [...binding.dictionaryPath, binding.code], shortcut)
+  }
+
+  recordingShortcutPath.value = ''
+  store.dispatch('updateKeyboardShortcuts', JSON.stringify(overrides))
+}
+
+function findShortcutConflicts(binding, shortcut) {
+  if (!shortcut) {
+    return []
+  }
+
+  return getAllKeyboardShortcutBindings(configuredKeyboardShortcuts.value)
+    .filter(candidate =>
+      candidate.path !== binding.path &&
+      keyboardShortcutsOverlap(candidate.shortcut, shortcut)
+    )
+    .map(candidate => ({
+      ...candidate,
+      label: getShortcutActionLabel(candidate.code),
+    }))
+}
+
+function getAllKeyboardShortcutBindings(dictionary, dictionaryPath = []) {
+  return Object.entries(dictionary).flatMap(([code, value]) => {
+    const path = [...dictionaryPath, code]
+    if (typeof value === 'string') {
+      return [{
+        code,
+        path: path.join('.'),
+        shortcut: value,
+        editable: !isKeyboardShortcutRange(getNestedValue(DefaultKeyboardShortcuts, path)),
+      }]
+    }
+    return getAllKeyboardShortcutBindings(value, path)
+  })
+}
+
+function getShortcutActionLabel(code) {
+  return localizedShortcutNameToShortcutsMappings.value
+    .find(([_label, shortcutCodes]) => shortcutCodes.includes(code))?.[0] ?? code
+}
+
+function resetKeyboardShortcuts() {
+  recordingShortcutPath.value = ''
+  pendingShortcutConflict.value = null
+  store.dispatch('updateKeyboardShortcuts', '{}')
+}
+
+function getKeyboardShortcutOverrides() {
+  try {
+    const overrides = JSON.parse(store.getters.getKeyboardShortcuts)
+    return overrides && typeof overrides === 'object' ? overrides : {}
+  } catch {
+    return {}
+  }
+}
+
+function getNestedValue(dictionary, path) {
+  return path.reduce((value, key) => value[key], dictionary)
+}
+
+function setNestedValue(dictionary, path, value) {
+  const lastKey = path.at(-1)
+  const parent = path.slice(0, -1).reduce((current, key) => {
+    current[key] ??= {}
+    return current[key]
+  }, dictionary)
+  parent[lastKey] = value
+}
+
+function deleteNestedValue(dictionary, path) {
+  const parents = [dictionary]
+  let current = dictionary
+
+  for (const key of path.slice(0, -1)) {
+    if (!current[key]) {
+      return
+    }
+    current = current[key]
+    parents.push(current)
+  }
+
+  delete current[path.at(-1)]
+
+  for (let index = parents.length - 1; index > 0; index--) {
+    if (Object.keys(parents[index]).length === 0) {
+      delete parents[index - 1][path[index - 1]]
+    }
+  }
 }
 
 </script>

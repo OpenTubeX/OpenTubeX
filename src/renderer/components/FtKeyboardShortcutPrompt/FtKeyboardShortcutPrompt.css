@@ -30,6 +30,11 @@ h3 {
   text-align: center;
 }
 
+.editHint {
+  margin-block: 0 1.5em;
+  text-align: center;
+}
+
 .shortcutColumns,
 .shortcutColumn {
   display: flex;
@@ -73,16 +78,54 @@ h3 {
 
 .label {
   display: table-cell;
+  margin-block: 0;
   padding-inline-end: 2em;
   inline-size: 300px;
   min-inline-size: 300px;
+  vertical-align: middle;
 }
 
 .shortcut {
   font-family: monospace;
   display: table-cell;
   vertical-align: middle;
+}
+
+.shortcutButton {
+  padding-block: 0.35em;
+  padding-inline: 0.6em;
+  border: 1px solid var(--primary-shadow-color);
+  border-radius: 4px;
+  color: var(--primary-text-color);
+  background: var(--card-bg-color);
+  font: inherit;
   text-transform: capitalize;
+  cursor: pointer;
+}
+
+.shortcutValue {
+  display: inline-block;
+  padding-block: 0.35em;
+  padding-inline: 0.6em;
+  text-transform: capitalize;
+}
+
+.shortcutButton + .shortcutButton {
+  margin-inline-start: 0.4em;
+}
+
+.shortcutButton:hover,
+.shortcutButton:focus-visible,
+.shortcutButton.recording {
+  border-color: var(--accent-color);
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
+}
+
+.shortcutActions {
+  display: flex;
+  justify-content: center;
+  margin-block-start: 2em;
 }
 
 :deep(.promptCard) {

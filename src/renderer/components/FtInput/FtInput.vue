@@ -203,7 +203,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['clear', 'click', 'input', 'remove'])
+const emit = defineEmits(['clear', 'click', 'input', 'keydown', 'remove'])
 
 const id = useId()
 
@@ -417,7 +417,12 @@ function handleRemoveClick(index) {
  * @param {KeyboardEvent} event
  */
 function handleKeyDown(event) {
-// Update Input box value if enter key was pressed and option selected
+  emit('keydown', event)
+  if (event.defaultPrevented) {
+    return
+  }
+
+  // Update Input box value if enter key was pressed and option selected
   if (event.key === 'Enter' && !event.isComposing) {
     if (removeButtonSelectedIndex.value !== -1) {
       handleRemoveClick(removeButtonSelectedIndex.value)
