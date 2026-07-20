@@ -60,6 +60,24 @@ test.describe('watch history', () => {
     await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
     await expect(watchedIndicator).toHaveText('Watched')
   })
+
+  test('marks every history entry as watched', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const markAllButton = page.getByRole('button', { name: 'Mark All As Watched' })
+    await markAllButton.click()
+
+    await expect(markAllButton).toBeDisabled()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const latestRecords = Object.values(Object.fromEntries(
+        records.filter(record => record.videoId).map(record => [record.videoId, record])
+      ))
+      return latestRecords.every(record => record.isWatched === true)
+    }).toBe(true)
+  })
 })
 
 test.describe('history cleanup', () => {

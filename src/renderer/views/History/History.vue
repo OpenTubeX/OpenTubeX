@@ -11,15 +11,28 @@
           />
           {{ t('History.History') }}
         </h2>
-        <FtButton
+        <div
           v-if="historyCacheSorted.length > 0"
-          class="cleanupButton"
-          :label="t('History.Delete Old History')"
-          :icon="['fas', 'trash']"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
-          @click="showHistoryCleanupPrompt = true"
-        />
+          class="headingActions"
+        >
+          <FtButton
+            class="historyActionButton"
+            :label="t('History.Mark All As Watched')"
+            :icon="['fas', 'eye']"
+            :disabled="!hasUnwatchedHistory"
+            background-color="var(--primary-color)"
+            text-color="var(--text-with-main-color)"
+            @click="markAllAsWatched"
+          />
+          <FtButton
+            class="historyActionButton"
+            :label="t('History.Delete Old History')"
+            :icon="['fas', 'trash']"
+            text-color="var(--destructive-text-color)"
+            background-color="var(--destructive-color)"
+            @click="showHistoryCleanupPrompt = true"
+          />
+        </div>
       </div>
       <FtInput
         v-show="fullData.length > 1"
@@ -253,6 +266,18 @@ const historyCacheSorted = computed(() => {
     return historySorted
   }
 })
+
+const hasUnwatchedHistory = computed(() => {
+  return historyCacheSorted.value.some(record => record.isWatched !== true)
+})
+
+async function markAllAsWatched() {
+  const markedCount = await store.dispatch('markAllHistoryAsWatched')
+
+  if (markedCount > 0) {
+    showToast(t('History.All History Marked as Watched'))
+  }
+}
 
 const fullData = computed(() => {
   if (historyCacheSorted.value.length < dataLimit.value) {

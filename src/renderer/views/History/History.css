@@ -41,7 +41,14 @@
   gap: 12px;
 }
 
-.cleanupButton {
+.headingActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.historyActionButton {
   min-inline-size: 0;
   padding-block: 6px;
   padding-inline: 10px;

@@ -322,6 +322,8 @@ History:
   Empty Search Message: There are no videos in your history that match your search
   Search bar placeholder: "Search in History"
   Case Sensitive Search: Case Sensitive Search
+  Mark All As Watched: Mark All As Watched
+  All History Marked as Watched: All videos in your history have been marked as watched
   DateOldestHistory: Date Watched (Oldest)
   DateNewestHistory: Date Watched (Newest)
   Delete Old History: Delete Old History

@@ -85,6 +85,25 @@ const actions = {
     }
   },
 
+  async markAllHistoryAsWatched({ dispatch, state }) {
+    let markedCount = 0
+    const records = state.historyCacheSorted.map(record => {
+      if (record.isWatched === true) {
+        return record
+      }
+
+      markedCount++
+      return { ...record, isWatched: true }
+    })
+
+    if (markedCount > 0) {
+      const recordsById = new Map(records.map(record => [record.videoId, record]))
+      await dispatch('overwriteHistory', recordsById)
+    }
+
+    return markedCount
+  },
+
   async removeFromHistory({ commit }, videoId) {
     try {
       await DBHistoryHandlers.delete(videoId)
