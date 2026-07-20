@@ -63,7 +63,10 @@
         </div>
       </div>
     </header>
-    <div class="commentsContentWrapper">
+    <div
+      ref="commentsContentWrapper"
+      class="commentsContentWrapper"
+    >
       <h3
         v-if="!fullscreenOverlay && commentData.length > 0 && !isLoading && showComments"
         class="commentsTitle"
@@ -352,7 +355,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, shallowRef, watch } from 'vue'
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -426,6 +429,22 @@ const nextPageToken = shallowRef(null)
 // we need to react to new replies and showReplies being toggled
 const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
+const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
+let fullscreenScrollTop = 0
+
+watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
+  if (wasFullscreenOverlay) {
+    fullscreenScrollTop = commentsContentWrapper.value?.scrollTop ?? 0
+  }
+
+  if (fullscreenOverlay) {
+    nextTick(() => {
+      if (commentsContentWrapper.value != null) {
+        commentsContentWrapper.value.scrollTop = fullscreenScrollTop
+      }
+    })
+  }
+})
 
 const replyTrees = computed(() => commentData.value.map(buildReplyTree))
 

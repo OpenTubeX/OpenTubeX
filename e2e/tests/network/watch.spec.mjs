@@ -70,6 +70,33 @@ test.describe('watch page', () => {
     await expect.poll(async () => await replies.count()).toBeGreaterThan(replyCount)
   })
 
+  test('fullscreen comments dock preserves its scroll position', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await page.locator('body').press('f')
+    const player = page.locator('.ftVideoPlayer')
+    await expect.poll(async () => player.evaluate((element) => document.fullscreenElement === element)).toBe(true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollHeight)).toBeGreaterThan(500)
+    await comments.evaluate((element) => { element.scrollTop = 300 })
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
+
+    await page.locator('.fullscreenCommentHeader .fullscreenCommentAction').last().click()
+    await expect(page.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+    await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
+  })
+
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
