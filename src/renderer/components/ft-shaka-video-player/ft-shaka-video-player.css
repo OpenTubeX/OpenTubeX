@@ -241,6 +241,26 @@
   page sidebar instead. When the comments panel is open too, chapters takes
   the bottom half.
 */
+:is(.chapterOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay) {
+  /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
+     every app theme because their background is the video, not the app page. */
+  --primary-text-color: #cdd6f4;
+  --secondary-text-color: #bac2de;
+  --tertiary-text-color: #a6adc8;
+  --title-color: #cdd6f4;
+  --bg-color: #1e1e2e;
+  --card-bg-color: #181825;
+  --secondary-card-bg-color: #1e1e2e;
+  --scrollbar-color: #313244;
+  --scrollbar-color-hover: #3d4051;
+  --side-nav-hover-color: #11111b;
+  --side-nav-hover-text-color: #cdd6f4;
+  --side-nav-active-color: #11111b;
+  --side-nav-active-text-color: #cdd6f4;
+  --accent-color: #b4befe;
+  --accent-color-hover: #cdd6f4;
+}
+
 .chapterOverlay {
   position: absolute;
   z-index: 4;
