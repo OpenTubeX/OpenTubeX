@@ -1391,12 +1391,18 @@ export default defineComponent({
 
     /**
      * @param {boolean} unskipped
+     * @param {string} uuid
      * @returns {string}
      */
-    function getSponsorBlockToastActionLabel(unskipped) {
+    function getSponsorBlockToastActionLabel(unskipped, uuid) {
       const actionLabel = unskipped
         ? t('Video.Player.SponsorBlock.SkipToastReskip')
         : t('Video.Player.SponsorBlock.SkipToastUnskip')
+
+      const activeToast = getActiveSponsorBlockToast()
+      if (getActivePromptSponsorBlockToast() || activeSponsorBlockHighlightSegment.value || activeToast?.uuid !== uuid) {
+        return actionLabel
+      }
 
       return addKeyboardShortcutToActionTitle(
         actionLabel,
@@ -1413,9 +1419,14 @@ export default defineComponent({
     }
 
     /**
+     * @param {string} uuid
      * @returns {string}
      */
-    function getSponsorBlockPromptActionLabel() {
+    function getSponsorBlockPromptActionLabel(uuid) {
+      if (getActivePromptSponsorBlockToast()?.uuid !== uuid) {
+        return t('Video.Player.SponsorBlock.SkipPromptAction')
+      }
+
       return addKeyboardShortcutToActionTitle(
         t('Video.Player.SponsorBlock.SkipPromptAction'),
         t('Keys.enter')

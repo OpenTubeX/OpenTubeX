@@ -462,10 +462,10 @@
           <div class="skippedSegmentActions">
             <button
               class="unskipButton"
-              :title="getSponsorBlockPromptActionLabel()"
+              :title="getSponsorBlockPromptActionLabel(uuid)"
               @click.stop.prevent="skipPromptSponsorBlockSegment(uuid)"
             >
-              {{ getSponsorBlockPromptActionLabel() }}
+              {{ getSponsorBlockPromptActionLabel(uuid) }}
             </button>
           </div>
         </div>
@@ -514,18 +514,18 @@
             <button
               v-if="unskipped"
               class="unskipButton"
-              :title="getSponsorBlockToastActionLabel(true)"
+              :title="getSponsorBlockToastActionLabel(true, uuid)"
               @click.stop.prevent="redoSkipSponsorBlockSegment(uuid)"
             >
-              {{ getSponsorBlockToastActionLabel(true) }}
+              {{ getSponsorBlockToastActionLabel(true, uuid) }}
             </button>
             <button
               v-else
               class="unskipButton"
-              :title="getSponsorBlockToastActionLabel(false)"
+              :title="getSponsorBlockToastActionLabel(false, uuid)"
               @click.stop.prevent="unskipSponsorBlockSegment(uuid)"
             >
-              {{ getSponsorBlockToastActionLabel(false) }}
+              {{ getSponsorBlockToastActionLabel(false, uuid) }}
             </button>
           </div>
         </div>
