@@ -16,9 +16,7 @@ jobs:
     runs-on: ubuntu-slim
 
     permissions:
-      contents: write
       pull-requests: write
-
     steps:
     - name: Disable auto-merge until admin approval
       shell: bash
