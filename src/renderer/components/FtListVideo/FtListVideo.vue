@@ -500,9 +500,9 @@ const extraThumbnailActionButton = computed(() => {
     case 'history':
       return {
         title: isWatched.value
-          ? t('Video.Remove From History')
+          ? t('Video.Unmark As Watched')
           : t('Video.Mark As Watched'),
-        icon: isWatched.value ? ['fas', 'history'] : ['fas', 'eye']
+        icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
       }
     case 'copyYoutube':
       return {
@@ -571,10 +571,16 @@ const dropdownOptions = computed(() => {
   const options = [
     {
       label: isWatched.value
-        ? t('Video.Remove From History')
+        ? t('Video.Unmark As Watched')
         : t('Video.Mark As Watched'),
       value: 'history'
     },
+    ...historyEntryExists.value
+      ? [{
+          label: t('Video.Remove From History'),
+          value: 'removeHistory'
+        }]
+      : [],
     ...(process.env.IS_ELECTRON && !isUpcoming.value
       ? [{
           label: t('Downloads.Download Video'),
@@ -703,10 +709,13 @@ function handleOptionsClick(option) {
   switch (option) {
     case 'history':
       if (isWatched.value) {
-        removeFromWatched()
+        unmarkAsWatched()
       } else {
         markAsWatched()
       }
+      break
+    case 'removeHistory':
+      removeFromHistory()
       break
     case 'copyYoutube': {
       let videoUrl = `https://youtu.be/${id.value}`
@@ -1261,7 +1270,16 @@ function markAsWatched() {
   }
 }
 
-function removeFromWatched() {
+function unmarkAsWatched() {
+  store.dispatch('updateHistory', {
+    ...historyEntry.value,
+    isWatched: false,
+  })
+
+  showToast(t('Video.Video has been unmarked as watched'))
+}
+
+function removeFromHistory() {
   store.dispatch('removeFromHistory', id.value)
 
   showToast(t('Video.Video has been removed from your history'))

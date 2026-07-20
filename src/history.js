@@ -14,8 +14,8 @@ export function isHistoryEntryWatched(historyEntry) {
     return false
   }
 
-  if (historyEntry.isWatched === true) {
-    return true
+  if (typeof historyEntry.isWatched === 'boolean') {
+    return historyEntry.isWatched
   }
 
   return hasReachedWatchedThreshold(historyEntry.watchProgress, historyEntry.lengthSeconds)

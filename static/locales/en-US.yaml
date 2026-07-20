@@ -1102,8 +1102,10 @@ Video:
   Private: Private videos cannot be watched in OpenTubeX as they require Google login and ownership of the video.
   More Options: More Options
   Mark As Watched: Mark As Watched
+  Unmark As Watched: Unmark As Watched
   Remove From History: Remove From History
   Video has been marked as watched: Video has been marked as watched
+  Video has been unmarked as watched: Video has been unmarked as watched
   Video has been removed from your history: Video has been removed from your history
   Save Watched Progress: Save Watched Progress
   Watched Progress Saved: Watched Progress Saved

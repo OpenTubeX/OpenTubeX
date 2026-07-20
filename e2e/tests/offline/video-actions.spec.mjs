@@ -63,7 +63,7 @@ test.describe('list video actions', () => {
     }).toEqual(['eeeeeeeeeee'])
   })
 
-  test('the options dropdown toggles watched status and removes the entry', async ({ app, page }) => {
+  test('the options dropdown toggles watched status separately from removing history', async ({ app, page }) => {
     await goTo(page, 'history')
 
     const video = page.locator('.ft-list-video').first()
@@ -71,7 +71,20 @@ test.describe('list video actions', () => {
     await video.locator('.optionsButton').click()
     await page.getByRole('option', { name: 'Mark As Watched' }).click()
 
-    // The same dropdown entry becomes the removal action once watched.
+    // The watched action changes independently and keeps the history entry.
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toBeVisible()
+    await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
+    await page.getByRole('option', { name: 'Unmark As Watched' }).click()
+
+    await expect(page.getByText('Bookmarkable video')).toBeVisible()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      return records.filter((record) => record._id === 'eeeeeeeeeee').at(-1)?.isWatched
+    }).toBe(false)
+
     await video.hover()
     await video.locator('.optionsButton').click()
     await page.getByRole('option', { name: 'Remove From History' }).click()
