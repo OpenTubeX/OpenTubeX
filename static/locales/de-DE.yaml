@@ -1427,6 +1427,7 @@ KeyboardShortcutPrompt:
   Press Shortcut: Tastenkombination drücken…
   Unassigned: Nicht zugewiesen
   Reset to Defaults: Auf Standardwerte zurücksetzen
+  Reset Shortcut: 'Tastenkombination für {action} zurücksetzen'
   Shortcut Already Assigned: Tastenkombination bereits zugewiesen
   Shortcut Conflict: '{shortcut} ist bereits für {actions} belegt. Möchtest du die Tastenkombination neu zuweisen?'
   Reserved Shortcut Conflict: '{shortcut} ist für {actions} reserviert und kann nicht neu zugewiesen werden.'
