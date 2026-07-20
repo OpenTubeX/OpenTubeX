@@ -94,7 +94,7 @@ Subscriptions:
   Load More Videos: Załaduj więcej filmów
   Error Channels: Kanały z błędami
   Disabled Automatic Fetching: Wyłączyłeś automatyczne pobieranie subskrypcji. Odśwież subskrypcje, by je zobaczyć.
-  Empty Channels: Twoje subskrypcje nie mają obecnie żadnych filmów.
+  Empty Channels: Twoje zasubskrybowane kanały nie mają obecnie żadnych filmów.
   All Subscription Tabs Hidden: Wszystkie karty subskrypcji są pochowane. Aby je zobaczyć, proszę odznaczyć ich ukrycie w podgrupie „{subsection}” grupy „{settingsSection}”.
   Subscriptions Tabs: Karty subskrypcji
   Load More Posts: Załaduj więcej wpisów
@@ -464,7 +464,7 @@ Settings:
         Empty File Name: Pusta nazwa pliku
       Enable: Włącz zrzuty ekranu
       Mode: Tryb - zrzut ekranu
-    Enter Fullscreen on Display Rotate: Przyłącz na cały ekran przy obrocie wyświetlacza
+    Enter Fullscreen on Display Rotate: Przyłącz na pełny ekran przy obrocie wyświetlacza
     Skip by Scrolling Over Video Player: Przewijaj film kółkiem myszy na obszarze odtwarzacza
     Autoplay Interruption Timer: Czas do przerwania autoodtwarzania
     Default Viewing Mode:
@@ -1381,7 +1381,7 @@ KeyboardShortcutPrompt:
   History Forward: Dalej o jedną stronę
   Refresh: Wczytaj ponownie subskrypcje z nową zawartością
   History Backward: Wróć o jedną stronę
-  Fullscreen: Przełącz na cały ekran
+  Fullscreen: Przełącz na pełny ekran
   Picture in Picture: Przełącz na tryb obraz w obrazie
   Decrease Video Speed: Zwolnij odtwarzanie filmu o wartość przeskoku w wyborze prędkości odtwarzania filmu
   Full Window: Przełącz na pełne okno
