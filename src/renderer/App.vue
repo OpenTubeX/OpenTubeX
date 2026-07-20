@@ -565,7 +565,7 @@ const tabSwitcherSelectedTabId = computed(() => {
 
 /**
  * Falls back to OpenTubeX-managed download tools when the configured system
- * executables are unavailable, or restores a missing managed executable.
+ * executables are unavailable and updates every selected managed executable.
  */
 async function initializeManagedDownloadTools() {
   if (!isElectron) {
@@ -579,6 +579,8 @@ async function initializeManagedDownloadTools() {
 
   /** @type {('yt-dlp' | 'ffmpeg')[]} */
   const missingBinaries = []
+  /** @type {('yt-dlp' | 'ffmpeg')[]} */
+  const binariesToUpdate = []
 
   if (!info.ytDlp.available) {
     missingBinaries.push('yt-dlp')
@@ -586,7 +588,14 @@ async function initializeManagedDownloadTools() {
   if (!info.ffmpeg.available) {
     missingBinaries.push('ffmpeg')
   }
-  if (missingBinaries.length === 0) {
+
+  if (store.getters.getYtDlpSource === 'managed' || missingBinaries.includes('yt-dlp')) {
+    binariesToUpdate.push('yt-dlp')
+  }
+  if (store.getters.getYtDlpFfmpegSource === 'managed' || missingBinaries.includes('ffmpeg')) {
+    binariesToUpdate.push('ffmpeg')
+  }
+  if (binariesToUpdate.length === 0) {
     return
   }
 
@@ -599,24 +608,38 @@ async function initializeManagedDownloadTools() {
   }
   await Promise.all(settingUpdates)
 
-  const tools = missingBinaries.join(' and ')
-  showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools }))
-  store.commit('setProgressBarPercentage', 0)
-  store.commit('setShowProgressBar', true)
+  let downloadStarted = missingBinaries.length > 0
+  if (downloadStarted) {
+    const missingTools = missingBinaries.join(' and ')
+    showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }))
+    store.commit('setProgressBarPercentage', 0)
+    store.commit('setShowProgressBar', true)
+  }
 
-  const progressByBinary = Object.fromEntries(missingBinaries.map(binary => [binary, 0]))
-  const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent }) => {
-    if (!(binary in progressByBinary) || percent === null) {
+  const progressByBinary = {}
+  const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
+    if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
       return
     }
 
-    progressByBinary[binary] = percent
-    const total = Object.values(progressByBinary).reduce((sum, value) => sum + value, 0)
-    store.commit('setProgressBarPercentage', total / missingBinaries.length)
+    if (!downloadStarted) {
+      downloadStarted = true
+      showToast(t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }))
+      store.commit('setProgressBarPercentage', 0)
+      store.commit('setShowProgressBar', true)
+    }
+
+    progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
+    const percentages = Object.values(progressByBinary)
+    const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
+    store.commit('setProgressBarPercentage', Math.max(
+      store.getters.getProgressBarPercentage,
+      combinedPercentage
+    ))
   })
 
   try {
-    const results = await Promise.all(missingBinaries.map(async binary => {
+    const results = await Promise.all(binariesToUpdate.map(async binary => {
       try {
         return { binary, result: await window.ftElectron.ytDlpDownloadBinary(binary) }
       } catch (error) {
@@ -624,18 +647,28 @@ async function initializeManagedDownloadTools() {
       }
     }))
     const failures = results.filter(({ result }) => result === null || 'error' in result)
+    const updatedBinaries = results
+      .filter(({ result }) => result !== null && 'version' in result && result.updated)
+      .map(({ binary }) => binary)
 
-    if (failures.length === 0) {
+    if (failures.length === 0 && updatedBinaries.length > 0) {
       store.commit('setProgressBarPercentage', 100)
-      showToast(t('Settings.Download Settings.Managed Tools Download Finished Template', { tools }))
+      const updatedTools = updatedBinaries.join(' and ')
+      showToast(missingBinaries.length > 0
+        ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
+        : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }))
     } else {
-      const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-      showToast(t('Settings.Download Settings.Managed Tools Download Error Template', { errors }))
+      if (failures.length > 0) {
+        const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
+        showToast(t('Settings.Download Settings.Managed Tools Download Error Template', { errors }))
+      }
     }
   } finally {
     removeProgressListener()
-    store.commit('setShowProgressBar', false)
-    store.commit('setProgressBarPercentage', 0)
+    if (downloadStarted) {
+      store.commit('setShowProgressBar', false)
+      store.commit('setProgressBarPercentage', 0)
+    }
   }
 }
 

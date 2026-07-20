@@ -230,6 +230,7 @@ const ffmpegBinaryDownloadInProgress = ref(false)
 /** @type {import('vue').Ref<{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean } | null>} */
 const binaryDownloadProgress = ref(null)
 const activeBinaryDownloads = new Set()
+const binaryDownloadPercentages = new Map()
 
 let systemInfoRequestId = 0
 let managedInfoRequestId = 0
@@ -272,6 +273,27 @@ async function refreshBinariesInfo() {
   await Promise.all([refreshSystemBinariesInfo(), refreshManagedBinariesInfo()])
 }
 
+/**
+ * Keeps the combined progress for concurrent downloads monotonic.
+ * @param {{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean }} progress
+ */
+function updateBinaryDownloadProgress(progress) {
+  const previousBinaryPercentage = binaryDownloadPercentages.get(progress.binary) ?? 0
+  if (progress.percent !== null) {
+    binaryDownloadPercentages.set(progress.binary, Math.max(previousBinaryPercentage, progress.percent))
+  } else if (!binaryDownloadPercentages.has(progress.binary)) {
+    binaryDownloadPercentages.set(progress.binary, 0)
+  }
+
+  const percentages = [...binaryDownloadPercentages.values()]
+  const combinedPercentage = percentages.reduce((sum, percent) => sum + percent, 0) / percentages.length
+  const displayedPercentage = binaryDownloadProgress.value?.percent ?? 0
+  binaryDownloadProgress.value = {
+    ...progress,
+    percent: Math.max(displayedPercentage, combinedPercentage)
+  }
+}
+
 onMounted(() => {
   refreshBinariesInfo()
 
@@ -283,11 +305,15 @@ onMounted(() => {
 
     if (progress.inProgress) {
       activeBinaryDownloads.add(progress.binary)
-      binaryDownloadProgress.value = progress
+      updateBinaryDownloadProgress(progress)
     } else {
+      if (activeBinaryDownloads.has(progress.binary)) {
+        updateBinaryDownloadProgress(progress)
+      }
       activeBinaryDownloads.delete(progress.binary)
       if (activeBinaryDownloads.size === 0) {
         binaryDownloadProgress.value = null
+        binaryDownloadPercentages.clear()
       }
       refreshManagedBinariesInfo()
     }
@@ -299,6 +325,7 @@ onBeforeUnmount(() => {
   systemInfoRequestId++
   managedInfoRequestId++
   activeBinaryDownloads.clear()
+  binaryDownloadPercentages.clear()
   window.ftElectron.setYtDlpBinaryDownloadProgressListener(null)
 })
 
@@ -356,9 +383,17 @@ async function downloadBinary(binary) {
     const result = await window.ftElectron.ytDlpDownloadBinary(binary)
 
     if (result != null && 'version' in result) {
-      showToast(binary === 'yt-dlp'
-        ? t('Settings.Download Settings.yt-dlp Downloaded Template', { version: result.version })
-        : t('Settings.Download Settings.FFmpeg Downloaded Template', { version: result.version }))
+      if (result.updated) {
+        showToast(binary === 'yt-dlp'
+          ? t('Settings.Download Settings.yt-dlp Downloaded Template', { version: result.version })
+          : t('Settings.Download Settings.FFmpeg Downloaded Template', { version: result.version }))
+      } else {
+        const tool = binary === 'yt-dlp' ? 'yt-dlp' : 'FFmpeg'
+        showToast(t('Settings.Download Settings.Managed Tool Already Current Template', {
+          tool,
+          version: result.version
+        }))
+      }
     } else {
       const error = result?.error ?? ''
       showToast(binary === 'yt-dlp'
@@ -366,7 +401,10 @@ async function downloadBinary(binary) {
         : t('Settings.Download Settings.FFmpeg Download Error Template', { error }))
     }
   } finally {
-    binaryDownloadProgress.value = null
+    if (activeBinaryDownloads.size === 0) {
+      binaryDownloadProgress.value = null
+      binaryDownloadPercentages.clear()
+    }
     try {
       await refreshManagedBinariesInfo()
     } finally {

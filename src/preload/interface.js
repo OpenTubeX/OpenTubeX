@@ -273,7 +273,7 @@ export default {
 
   /**
    * @param {'yt-dlp' | 'ffmpeg'} binary
-   * @returns {Promise<{ version: string } | { error: string } | null>}
+   * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
    */
   ytDlpDownloadBinary: (binary) => {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_DOWNLOAD_BINARY, binary)

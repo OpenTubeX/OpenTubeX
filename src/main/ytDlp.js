@@ -1,6 +1,6 @@
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { chmod, mkdir, rename, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
@@ -113,16 +113,38 @@ async function getFfmpegVersion(executable) {
  */
 
 /**
+ * @typedef BinaryDownloadValidators
+ * @property {string | null} etag
+ * @property {string | null} lastModified
+ */
+
+/**
  * @param {string} url
  * @param {BinaryDownloadProgressCallback | undefined} onProgress
- * @returns {Promise<Buffer>}
+ * @param {(() => void) | undefined} onDownloadStart
+ * @param {BinaryDownloadValidators | null} validators
+ * @returns {Promise<{ data: Buffer | null, validators: BinaryDownloadValidators }>}
  */
-async function downloadFile(url, onProgress) {
-  const response = await fetch(url)
+async function downloadFile(url, onProgress, onDownloadStart, validators) {
+  const headers = {}
+  if (validators?.etag) {
+    headers['If-None-Match'] = validators.etag
+  }
+  if (validators?.lastModified) {
+    headers['If-Modified-Since'] = validators.lastModified
+  }
+
+  const response = await fetch(url, { headers })
+
+  if (response.status === 304) {
+    return { data: null, validators }
+  }
 
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}`)
   }
+
+  onDownloadStart?.()
 
   const contentLength = parseInt(response.headers.get('content-length')) || 0
 
@@ -147,7 +169,41 @@ async function downloadFile(url, onProgress) {
     }
   }
 
-  return Buffer.concat(chunks)
+  return {
+    data: Buffer.concat(chunks),
+    validators: {
+      etag: response.headers.get('etag'),
+      lastModified: response.headers.get('last-modified')
+    }
+  }
+}
+
+/**
+ * @param {string} binaryPath
+ * @returns {Promise<BinaryDownloadValidators | null>}
+ */
+async function readDownloadValidators(binaryPath) {
+  if (!existsSync(binaryPath)) {
+    return null
+  }
+
+  try {
+    const validators = JSON.parse(await readFile(`${binaryPath}.download.json`, 'utf8'))
+    return {
+      etag: typeof validators.etag === 'string' ? validators.etag : null,
+      lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {string} binaryPath
+ * @param {BinaryDownloadValidators} validators
+ */
+async function writeDownloadValidators(binaryPath, validators) {
+  await writeFile(`${binaryPath}.download.json`, JSON.stringify(validators))
 }
 
 /**
@@ -235,9 +291,10 @@ async function installBinary(data, destinationPath) {
 /**
  * Downloads the latest yt-dlp release into the user data directory
  * @param {BinaryDownloadProgressCallback} [onProgress]
- * @returns {Promise<{ version: string } | { error: string }>}
+ * @param {() => void} [onDownloadStart]
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
  */
-async function downloadManagedYtDlp(onProgress) {
+async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   let assetName
   switch (process.platform) {
     case 'win32':
@@ -251,14 +308,19 @@ async function downloadManagedYtDlp(onProgress) {
   }
 
   const managedPath = getManagedBinaryPath('yt-dlp')
+  let download
 
   try {
-    const data = await downloadFile(
+    download = await downloadFile(
       `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${assetName}`,
-      onProgress
+      onProgress,
+      onDownloadStart,
+      await readDownloadValidators(managedPath)
     )
 
-    await installBinary(data, managedPath)
+    if (download.data !== null) {
+      await installBinary(download.data, managedPath)
+    }
   } catch (error) {
     return { error: error.message }
   }
@@ -269,15 +331,24 @@ async function downloadManagedYtDlp(onProgress) {
     return { error: 'The downloaded yt-dlp binary does not work on this system' }
   }
 
-  return { version }
+  if (download.data !== null) {
+    try {
+      await writeDownloadValidators(managedPath, download.validators)
+    } catch (error) {
+      console.warn('Could not save yt-dlp download metadata', error)
+    }
+  }
+
+  return { version, updated: download.data !== null }
 }
 
 /**
  * Downloads an up-to-date FFmpeg build into the user data directory
  * @param {BinaryDownloadProgressCallback} [onProgress]
- * @returns {Promise<{ version: string } | { error: string }>}
+ * @param {() => void} [onDownloadStart]
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
  */
-async function downloadManagedFfmpeg(onProgress) {
+async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   let url
   /** @type {(name: string) => boolean} */
   let matches
@@ -297,11 +368,14 @@ async function downloadManagedFfmpeg(onProgress) {
   }
 
   const managedPath = getManagedBinaryPath('ffmpeg')
+  let download
 
   try {
-    const data = await downloadFile(url, onProgress)
+    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath))
 
-    await installBinary(extractZipEntry(data, matches), managedPath)
+    if (download.data !== null) {
+      await installBinary(extractZipEntry(download.data, matches), managedPath)
+    }
   } catch (error) {
     return { error: error.message }
   }
@@ -312,7 +386,15 @@ async function downloadManagedFfmpeg(onProgress) {
     return { error: 'The downloaded FFmpeg binary does not work on this system' }
   }
 
-  return { version }
+  if (download.data !== null) {
+    try {
+      await writeDownloadValidators(managedPath, download.validators)
+    } catch (error) {
+      console.warn('Could not save FFmpeg download metadata', error)
+    }
+  }
+
+  return { version, updated: download.data !== null }
 }
 
 /**
@@ -383,7 +465,7 @@ export async function handleYtDlpGetInfo(event, options) {
 /**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {'yt-dlp' | 'ffmpeg'} binary
- * @returns {Promise<{ version: string } | { error: string } | null>}
+ * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
  */
 export async function handleYtDlpDownloadBinary(event, binary) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
@@ -419,16 +501,14 @@ export async function handleYtDlpDownloadBinary(event, binary) {
     sendProgress(percent, true)
   }
 
-  sendProgress(0, true)
-
   let result
   try {
     result = binary === 'yt-dlp'
-      ? await downloadManagedYtDlp(onProgress)
-      : await downloadManagedFfmpeg(onProgress)
+      ? await downloadManagedYtDlp(onProgress, () => sendProgress(0, true))
+      : await downloadManagedFfmpeg(onProgress, () => sendProgress(0, true))
     return result
   } finally {
-    sendProgress(result != null && 'version' in result ? 100 : null, false)
+    sendProgress(result != null && 'version' in result && result.updated ? 100 : null, false)
   }
 }
 
