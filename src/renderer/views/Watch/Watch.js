@@ -23,6 +23,8 @@ import {
   extractNumberFromString,
   formatDurationAsTimestamp,
   formatNumber,
+  getCachedOembedTitle,
+  getOembedTitle,
   showToast,
   showToastOnAllTabs
 } from '../../helpers/utils'
@@ -2144,10 +2146,31 @@ export default defineComponent({
       }, nextVideoInterval * 1000)
 
       if (nextVideoInterval > 0) {
+        const autoplayVideo = { ...nextVideo }
+
+        if (this.$store.getters.getAvoidTranslation === 'entire_app') {
+          const cachedTitle = getCachedOembedTitle(nextVideo.videoId)
+          if (cachedTitle !== null) {
+            autoplayVideo.title = cachedTitle
+          } else {
+            getOembedTitle(nextVideo.videoId).then((title) => {
+              if (title && this.autoplayCountdown?.video?.videoId === nextVideo.videoId) {
+                this.autoplayCountdown = {
+                  ...this.autoplayCountdown,
+                  video: {
+                    ...this.autoplayCountdown.video,
+                    title
+                  }
+                }
+              }
+            })
+          }
+        }
+
         const countdownEndsAt = Date.now() + (nextVideoInterval * 1000)
         this.autoplayCountdown = {
           remainingSeconds: nextVideoInterval,
-          video: nextVideo
+          video: autoplayVideo
         }
         this.playNextCountDownIntervalId = setInterval(() => {
           const remainingSeconds = Math.max(1, Math.ceil((countdownEndsAt - Date.now()) / 1000))

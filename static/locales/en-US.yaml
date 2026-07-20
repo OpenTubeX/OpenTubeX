@@ -380,7 +380,7 @@ Settings:
       Avoid translation: Keep original text
       Disabled: Disabled
       Watch Only: Video UI Only
-      Entire App: Entire App (may be unsafe)
+      Entire App: Entire App
     Preferred API Backend:
       Preferred API Backend: Preferred API Backend
       Local API: Local API
