@@ -159,6 +159,26 @@ export async function waitForAppReady(page) {
 }
 
 /**
+ * Toggles player fullscreen and waits for the Fullscreen API state.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {boolean} fullscreen
+ */
+export async function setPlayerFullscreen(page, fullscreen) {
+  const player = page.locator('.ftVideoPlayer')
+  const isFullscreen = await player.evaluate((element) => document.fullscreenElement === element)
+
+  if (isFullscreen !== fullscreen) {
+    await page.evaluate(() => document.activeElement?.blur())
+    await page.keyboard.press('f')
+  }
+
+  await expect.poll(
+    async () => player.evaluate((element) => document.fullscreenElement === element)
+  ).toBe(fullscreen)
+}
+
+/**
  * Base test with an `app` fixture that provides a freshly launched,
  * isolated app instance per test.
  *

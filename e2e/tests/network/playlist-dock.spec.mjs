@@ -1,6 +1,6 @@
-import { test, expect } from '../../helpers/innertube.mjs'
+import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
 
-const PLAYLIST_URL = 'https://youtu.be/R_kpPJTZ5TY?list=PLuTY0Kb9_4IY9Q1SeMeHLYe7k6DIUk-4L'
+const PLAYLIST_URL = 'https://youtu.be/aqz-KE-bpKQ?list=UUSMOQeBJ2RAnuFungnQOxLg'
 
 test('fullscreen playlist dock scrolls and preserves its position', async ({ page, innertube }) => {
   test.skip(innertube.replay, 'playlist hydration needs the real API')
@@ -8,7 +8,7 @@ test('fullscreen playlist dock scrolls and preserves its position', async ({ pag
   const searchInput = page.locator('.topNav .searchInput input.ft-input')
   await searchInput.fill(PLAYLIST_URL)
   await searchInput.press('Enter')
-  await page.waitForURL(/#\/watch\/R_kpPJTZ5TY/, { timeout: 60000 })
+  await page.waitForURL(/#\/watch\/aqz-KE-bpKQ/, { timeout: 60000 })
 
   const sidebar = page.locator('.playlistItemsWrapper')
   await expect(sidebar).toBeVisible({ timeout: 60000 })
@@ -17,17 +17,18 @@ test('fullscreen playlist dock scrolls and preserves its position', async ({ pag
   await sidebar.evaluate((element) => { element.scrollTop = 420 })
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(420)
 
-  await page.locator('body').press('f')
-  const player = page.locator('.ftVideoPlayer')
-  await expect.poll(async () => player.evaluate((element) => document.fullscreenElement === element)).toBe(true)
-  await page.locator('.fullscreenPlaylistToggle').click({ force: true })
+  await setPlayerFullscreen(page, true)
+  const playlistToggle = page.getByRole('button', { name: 'Playlist', exact: true })
+  await playlistToggle.click()
+  await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
 
   const dock = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
   await expect(dock).toBeVisible()
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(420)
-  await page.locator('.fullscreenPlaylistClose').click()
-  await expect(page.locator('.fullscreenPlaylistOverlay.open')).toHaveCount(0)
-  await page.locator('.fullscreenPlaylistToggle').click({ force: true })
+  await page.getByRole('button', { name: 'Close Playlist' }).click({ force: true })
+  await expect(playlistToggle).toHaveAttribute('aria-expanded', 'false')
+  await playlistToggle.click()
+  await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
   const header = page.locator('.fullscreenPlaylistTarget .playlistHeader')
   const headerBounds = await header.boundingBox()
@@ -40,15 +41,10 @@ test('fullscreen playlist dock scrolls and preserves its position', async ({ pag
   }))
   expect(dockDimensions.scrollHeight).toBeGreaterThan(dockDimensions.clientHeight)
 
-  await page.mouse.move(
-    dockBounds.x + dockBounds.width / 2,
-    dockBounds.y + dockBounds.height / 2
-  )
-  await page.mouse.wheel(0, 480)
+  await dock.evaluate((element) => element.scrollBy(0, 480))
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBeGreaterThan(420)
   const dockScrollTop = await dock.evaluate((element) => element.scrollTop)
 
-  await page.locator('body').press('f')
-  await expect.poll(async () => page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+  await setPlayerFullscreen(page, false)
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)
 })

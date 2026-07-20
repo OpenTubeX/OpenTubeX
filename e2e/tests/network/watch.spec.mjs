@@ -1,5 +1,5 @@
 import { sel } from '../../helpers/app.mjs'
-import { test, expect } from '../../helpers/innertube.mjs'
+import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
 import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
@@ -79,9 +79,7 @@ test.describe('watch page', () => {
     await loadComments.click()
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
 
-    await page.locator('body').press('f')
-    const player = page.locator('.ftVideoPlayer')
-    await expect.poll(async () => player.evaluate((element) => document.fullscreenElement === element)).toBe(true)
+    await setPlayerFullscreen(page, true)
     await page.locator('.fullscreenCommentsToggle').click({ force: true })
 
     const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')

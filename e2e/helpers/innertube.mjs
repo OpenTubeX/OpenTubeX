@@ -4,7 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gzipSync, gunzipSync } from 'node:zlib'
 
-import { test as baseAppTest, expect } from './app.mjs'
+import { test as baseAppTest, expect, setPlayerFullscreen } from './app.mjs'
 
 const fixturesRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'innertube')
 
@@ -222,4 +222,4 @@ export const test = baseAppTest.extend({
   }, { auto: true }]
 })
 
-export { expect }
+export { expect, setPlayerFullscreen }
