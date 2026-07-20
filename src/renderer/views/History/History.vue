@@ -22,7 +22,7 @@
             :disabled="!hasUnwatchedHistory"
             background-color="var(--primary-color)"
             text-color="var(--text-with-main-color)"
-            @click="markAllAsWatched"
+            @click="showMarkAllPrompt = true"
           />
           <FtButton
             class="historyActionButton"
@@ -103,6 +103,13 @@
           />
         </FtFlexBox>
       </FtAutoLoadNextPageWrapper>
+      <FtPrompt
+        v-if="showMarkAllPrompt"
+        :label="t('History.Mark All As Watched Confirmation')"
+        :option-names="markAllPromptNames"
+        :option-values="MARK_ALL_PROMPT_VALUES"
+        @click="handleMarkAllPrompt"
+      />
       <FtPrompt
         v-if="showHistoryCleanupPrompt"
         autosize
@@ -199,7 +206,14 @@ const query = ref('')
 const activeData = ref([])
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
+const showMarkAllPrompt = ref(false)
 const showHistoryCleanupPrompt = ref(false)
+
+const MARK_ALL_PROMPT_VALUES = ['confirm', 'cancel']
+const markAllPromptNames = computed(() => [
+  t('History.Mark All As Watched'),
+  t('Cancel')
+])
 
 const HISTORY_CLEANUP_PERIOD_VALUES = ['1', '7', '30', '90', '365', 'custom']
 const historyCleanupPeriodNames = computed(() => [
@@ -276,6 +290,14 @@ async function markAllAsWatched() {
 
   if (markedCount > 0) {
     showToast(t('History.All History Marked as Watched'))
+  }
+}
+
+function handleMarkAllPrompt(value) {
+  showMarkAllPrompt.value = false
+
+  if (value === 'confirm') {
+    markAllAsWatched()
   }
 }
 
