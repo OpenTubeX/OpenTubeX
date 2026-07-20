@@ -120,9 +120,6 @@ export class TabNavigationService {
     tabMediaCoordinator.setPresented(tabId)
     this.projectTitle(tabId)
 
-    // Reset the shared window scroll before Vue reveals the target container.
-    // The second restore below handles offsets that need the target's full height.
-    this.restoreScroll(tabId)
     await nextTick()
     await nextAnimationFrame()
     this.restoreScroll(tabId)

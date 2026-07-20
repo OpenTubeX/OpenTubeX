@@ -378,9 +378,6 @@ watch(currentTab, async (value, previousValue) => {
   }
 
   await nextTick()
-  if (isElectron && isTabPresented?.value !== true) {
-    return
-  }
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
 })
 
