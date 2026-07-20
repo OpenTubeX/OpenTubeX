@@ -26,12 +26,11 @@
         >
           {{ reply.author.substring(1, 2) }}
         </div>
-        <img
+        <FtRetryImage
           v-else
           :src="reply.authorThumb"
-          alt=""
           class="commentThumbnail"
-        >
+        />
       </component>
       <p class="commentAuthorWrapper">
         <component
@@ -141,6 +140,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 
 const props = defineProps({
   node: {

@@ -153,12 +153,11 @@
             >
               {{ comment.author.substring(1, 2) }}
             </div>
-            <img
+            <FtRetryImage
               v-else
               :src="comment.authorThumb"
-              alt=""
               class="commentThumbnail"
-            >
+            />
           </component>
           <p
             v-if="comment.isPinned"
@@ -362,6 +361,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import CommentReply from './CommentReply.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import FtRetryImage from '../FtRetryImage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
