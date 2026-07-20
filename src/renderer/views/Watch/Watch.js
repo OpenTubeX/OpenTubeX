@@ -178,6 +178,10 @@ export default defineComponent({
       fullscreenPlaylistOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenPlaylistTarget: null,
+      playlistScrollPositions: {
+        sidebar: null,
+        fullscreen: null,
+      },
       /** @type {'EQUIRECTANGULAR' | 'EQUIRECTANGULAR_THREED_TOP_BOTTOM' | 'MESH'| null} */
       vrProjection: null,
       autoplayNextRecommendedVideo: false,
@@ -493,11 +497,20 @@ export default defineComponent({
       this.$refs.player?.closeFullscreenComments()
     },
     handleFullscreenPlaylistChange({ open, target }) {
-      const playlistScrollTop = this.$refs.watchVideoPlaylist?.getScrollTop() ?? 0
+      const playlist = this.$refs.watchVideoPlaylist
+      const sourceLayout = this.fullscreenPlaylistOpen ? 'fullscreen' : 'sidebar'
+      const destinationLayout = open && target !== null ? 'fullscreen' : 'sidebar'
+
+      this.playlistScrollPositions[sourceLayout] = playlist?.getScrollTop() ?? 0
       this.fullscreenPlaylistTarget = target
       this.fullscreenPlaylistOpen = open && target !== null
       this.$nextTick(() => {
-        this.$refs.watchVideoPlaylist?.setScrollTop(playlistScrollTop)
+        const scrollTop = this.playlistScrollPositions[destinationLayout]
+        if (scrollTop == null) {
+          playlist?.centerCurrentVideo()
+        } else {
+          playlist?.setScrollTop(scrollTop)
+        }
       })
     },
     addCurrentVideoToPlaylist() {
@@ -1961,6 +1974,9 @@ export default defineComponent({
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
       if (!this.videoPlayerLoaded && !this.isUpcoming) {
         this.videoPlayerLoaded = true
+        this.playlistScrollPositions.sidebar = null
+        this.playlistScrollPositions.fullscreen = null
+        this.$refs.watchVideoPlaylist?.centerCurrentVideo()
 
         if (this.rememberHistory) {
           if (this.timestamp) {

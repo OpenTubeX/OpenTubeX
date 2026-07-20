@@ -470,12 +470,12 @@ watch(() => props.playlistItemId, () => {
 })
 
 watch(
-  [isLoading, () => props.watchViewLoading],
+  [isLoading, () => props.watchViewLoading, currentVideoIndexZeroBased],
   ([playlistLoading, watchViewLoading]) => {
     if (!playlistLoading && !watchViewLoading) {
       // Wait until both the watch view and playlist items are visible before
-      // measuring them. Either one can finish loading first.
-      nextTick(scrollToCurrentVideo)
+      // measuring them. The current index also changes when playback advances.
+      centerCurrentVideo()
     }
   },
   { flush: 'post' }
@@ -1018,8 +1018,10 @@ function scrollToVideo(index) {
     const currentVideoItemEl = container.children[index]
 
     if (currentVideoItemEl != null) {
-      const itemOffset = currentVideoItemEl.offsetTop - container.offsetTop
-      const centeredOffset = (container.clientHeight - currentVideoItemEl.offsetHeight) / 2
+      const containerRect = container.getBoundingClientRect()
+      const itemRect = currentVideoItemEl.getBoundingClientRect()
+      const itemOffset = itemRect.top - containerRect.top - container.clientTop + container.scrollTop
+      const centeredOffset = (container.clientHeight - itemRect.height) / 2
 
       container.scrollTop = Math.max(0, itemOffset - centeredOffset)
     }
@@ -1028,6 +1030,15 @@ function scrollToVideo(index) {
 
 function scrollToCurrentVideo() {
   scrollToVideo(currentVideoIndexZeroBased.value)
+}
+
+function centerCurrentVideo() {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      scrollToCurrentVideo()
+      requestAnimationFrame(scrollToCurrentVideo)
+    })
+  })
 }
 
 function pausePlayer() {
@@ -1086,6 +1097,7 @@ const shouldStopDueToPlaylistEnd = computed(() => {
 })
 
 defineExpose({
+  centerCurrentVideo,
   getScrollTop,
   setScrollTop,
   playNextVideo,
