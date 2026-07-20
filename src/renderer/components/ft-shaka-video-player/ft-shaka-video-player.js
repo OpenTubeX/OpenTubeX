@@ -66,6 +66,7 @@ import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
+import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
@@ -125,6 +126,7 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
+    FtShareButton,
     FtVideoAnnotations,
     WatchVideoChapters
   },
@@ -301,6 +303,7 @@ export default defineComponent({
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
     'fullscreen-comments-change',
+    'add-to-playlist',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
   ],
@@ -381,6 +384,17 @@ export default defineComponent({
         ? props.playlistId
         : ''
     })
+    const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
+    const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
+
+    function getShareTimestamp() {
+      const currentTime = Math.floor(video.value?.currentTime ?? 0)
+      return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+    }
+
+    function addToPlaylist() {
+      emit('add-to-playlist')
+    }
 
     const hasLoaded = ref(false)
     const annotationCurrentTime = ref(0)
@@ -7062,6 +7076,10 @@ export default defineComponent({
       showFullscreenComments,
       closeFullscreenComments,
       setFullscreenComments,
+      showFullscreenShareAction,
+      showFullscreenPlaylistAction,
+      getShareTimestamp,
+      addToPlaylist,
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,

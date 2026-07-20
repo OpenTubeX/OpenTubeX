@@ -932,48 +932,71 @@
   display: block;
 }
 
-.fullscreenCommentsToggle {
+.fullscreenActions {
   display: none;
   position: absolute;
   z-index: 2;
   inset-inline-end: 24px;
   inset-block-end: 82px;
   align-items: center;
-  justify-content: center;
-  inline-size: 44px;
-  block-size: 44px;
-  padding: 0;
+  padding: 4px;
   color: #fff;
-  background-color: rgb(0 0 0 / 65%);
-  backdrop-filter: blur(8px);
-  border: 0;
-  border-radius: 50%;
+  background-color: rgb(0 0 0 / 25%);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 24px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
-  cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), background-color 150ms ease,
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
     inset-inline-end 250ms ease;
 }
 
-.fullscreenCommentsToggle:hover,
-.fullscreenCommentsToggle:focus-visible,
-.fullscreenCommentsToggle.open {
-  background-color: rgb(0 0 0 / 35%);
+.fullscreenAction,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0 !important;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 20px !important;
+  transition: background-color 150ms ease;
+}
+
+.fullscreenAction:hover,
+.fullscreenAction:focus-visible,
+.fullscreenAction.open,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 18%);
+}
+
+.fullscreenActions:has(:focus-visible) {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Suppressed during presentation mode switches; see the block near the end of the file. */
-.ftVideoPlayer.presentationModeChanging .fullscreenCommentsToggle {
+.ftVideoPlayer.presentationModeChanging .fullscreenActions {
   transition: none !important;
 }
 
-.ftVideoPlayer:fullscreen .fullscreenCommentsToggle,
-.ftVideoPlayer.fullWindow .fullscreenCommentsToggle {
+.ftVideoPlayer:fullscreen .fullscreenActions,
+.ftVideoPlayer.fullWindow .fullscreenActions {
   display: flex;
 }
 
-.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle,
-.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle {
+.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions {
   opacity: 1;
   pointer-events: auto;
 }
@@ -1079,11 +1102,11 @@
   transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
-/* Keep the floating comments toggle next to the video instead of under the panel. */
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .fullscreenCommentsToggle,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenCommentsToggle,
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenCommentsToggle,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsToggle {
+/* Keep the floating fullscreen actions next to the video instead of under the panel. */
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .fullscreenActions,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenActions,
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenActions,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
 }
 

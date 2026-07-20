@@ -1,5 +1,5 @@
 <template>
-  <Teleport to=".app">
+  <Teleport :to="teleportTarget">
     <div
       class="prompt"
       :class="{ lockScroll }"
@@ -111,6 +111,7 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 
 const id = useId()
+const teleportTarget = document.fullscreenElement ?? '.app'
 
 const promptCard = useTemplateRef('promptCard')
 

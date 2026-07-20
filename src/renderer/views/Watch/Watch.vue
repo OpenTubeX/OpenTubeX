@@ -79,6 +79,7 @@
           @player-reload-requested="onPlayerReloadRequested"
           @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
           @fullscreen-comments-change="handleFullscreenCommentsChange"
+          @add-to-playlist="addCurrentVideoToPlaylist"
           @chapters-overlay-change="handleChaptersOverlayChange"
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
         />

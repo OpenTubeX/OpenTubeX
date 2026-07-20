@@ -77,19 +77,43 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
-      <button
-        v-if="commentsAvailable"
-        type="button"
-        class="fullscreenCommentsToggle shaka-no-propagation"
-        :class="{ open: showFullscreenComments }"
-        :aria-label="$t('Comments.Comments')"
-        :title="$t('Comments.Comments')"
-        :aria-expanded="String(showFullscreenComments)"
-        @click.stop="setFullscreenComments(!showFullscreenComments)"
+      <div
+        v-if="commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction"
+        class="fullscreenActions shaka-no-propagation"
+        @click.stop
         @dblclick.stop
       >
-        <FontAwesomeIcon :icon="['fas', 'comment']" />
-      </button>
+        <button
+          v-if="commentsAvailable"
+          type="button"
+          class="fullscreenAction fullscreenCommentsToggle"
+          :class="{ open: showFullscreenComments }"
+          :aria-label="$t('Comments.Comments')"
+          :title="$t('Comments.Comments')"
+          :aria-expanded="String(showFullscreenComments)"
+          @click="setFullscreenComments(!showFullscreenComments)"
+        >
+          <FontAwesomeIcon :icon="['fas', 'comment']" />
+        </button>
+        <FtShareButton
+          v-if="showFullscreenShareAction"
+          :id="videoId"
+          class="fullscreenShareAction"
+          :playlist-id="playlistId"
+          :get-timestamp="getShareTimestamp"
+          dropdown-position-y="top"
+        />
+        <button
+          v-if="showFullscreenPlaylistAction"
+          type="button"
+          class="fullscreenAction fullscreenPlaylistAction"
+          :aria-label="$t('User Playlists.Add to Playlist')"
+          :title="$t('User Playlists.Add to Playlist')"
+          @click="addToPlaylist"
+        >
+          <FontAwesomeIcon :icon="['fas', 'plus']" />
+        </button>
+      </div>
       <!--
       VR playback is only possible for VR videos with "EQUIRECTANGULAR" projection
       This intentionally doesn't use the "useVrMode" computed prop,
