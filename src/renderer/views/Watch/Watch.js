@@ -337,7 +337,13 @@ export default defineComponent({
     },
     theatrePossible: function () {
       return this.showTranscript || !this.hideRecommendedVideos ||
-        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist
+        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist ||
+        this.videoChapters.length > 0
+    },
+    hasSidebarContent: function () {
+      return this.showTranscript || this.showSidebarChapters ||
+        !this.hideRecommendedVideos || (!this.hideLiveChat && this.isLive) ||
+        this.watchingPlaylist
     },
     autoplayPossible: function () {
       return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
@@ -427,6 +433,11 @@ export default defineComponent({
     },
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
+    },
+    theatrePossible(possible) {
+      if (this.isLoading && this.defaultViewingMode === 'theatre') {
+        this.useTheatreMode = possible
+      }
     },
     enableWatchStats(enabled) {
       if (!enabled) {
