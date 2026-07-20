@@ -865,7 +865,7 @@ Channel:
   Courses:
     Courses: Kursy
     This channel does not currently have any courses: Na tym kanale nie ma obecnie żadnych kursów
-  View All: Oglądaj wszystko
+  View All: Wyświetl wszystko
 Video:
   Mark As Watched: 'Oznacz jako obejrzany'
   Remove From History: 'Usuń z historii'
@@ -1014,7 +1014,7 @@ Video:
       SkipToastUnskip: Anuluj pominięcie
       SkipToastReskip: Wznów pominięcie
       SkipToHighlight: Przeskocz do „Ważny moment”
-      SkippedToHighlight: Przeskoczono do "Ważny moment"
+      SkippedToHighlight: Przeskoczono do „Ważny moment”
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1028,7 +1028,7 @@ Video:
     Sleep Timer:
       Sleep Timer: Wyłącznik czasowy
       Off: Wyłączony
-      Minutes: '{minutes} minut'
+      Minutes: '{minutes} min'
       End of video: Koniec filmu
       Remaining: '{time} pozostało'
       Cancel timer: Anuluj timer
@@ -1127,7 +1127,7 @@ Share:
   Invidious Channel URL copied to clipboard: Skopiowano URL kanału na Invidious do schowka
   Share Channel: Podziel się kanałem
   Share Post: Podziel się wpisem
-  Timestamp Link Copied: Link sygnatury czasowej skopiowany do schowka
+  Timestamp Link Copied: Odnośnik ze znacznikiem czasu skopiowany do schowka
 Mini Player: 'Mini odtwarzacz'
 Comments:
   Comments: 'Komentarze'
