@@ -800,10 +800,10 @@ export default defineComponent({
         const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
 
         if (avoidTranslation) {
-          this.videoTitle = result.basic_info.title?.trim()
+          this.videoTitle = result.basic_info.title?.trim() ?? ''
         } else {
           // extract localised title first and fall back to the not localised one
-          this.videoTitle = result.primary_info?.title.text?.trim() ?? result.basic_info.title?.trim()
+          this.videoTitle = result.primary_info?.title?.text?.trim() ?? result.basic_info.title?.trim() ?? ''
         }
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
@@ -827,13 +827,15 @@ export default defineComponent({
         this.initializePlaybackRate()
         this.initializeVideoQuality()
 
-        if (result.page[0].microformat?.publish_date) {
+        let published
+        if (result.page[0]?.microformat?.publish_date) {
           // `result.page[0].microformat.publish_date` example value: `2023-08-12T08:59:59-07:00`
-          this.videoPublished = Date.parse(result.page[0].microformat.publish_date)
+          published = Date.parse(result.page[0].microformat.publish_date)
         } else {
           // text date Jan 1, 2000, not as accurate but better than nothing
-          this.videoPublished = Date.parse(result.primary_info.published)
+          published = Date.parse(result.primary_info?.published)
         }
+        this.videoPublished = Number.isFinite(published) ? published : 0
 
         if (avoidTranslation) {
           this.videoDescription = result.basic_info.short_description

@@ -467,15 +467,24 @@ const parsedViewCount = computed(() => {
   return t('Global.Counts.View Count', { count: formatNumber(props.viewCount) }, props.viewCount)
 })
 
+const validPublishedDate = computed(() => {
+  if (!Number.isFinite(props.published) || props.published <= 0) return null
+
+  const date = new Date(props.published)
+  return Number.isNaN(date.getTime()) ? null : date
+})
+
 const dateString = computed(() => {
+  if (!validPublishedDate.value) return ''
+
   const formatter = new Intl.DateTimeFormat([locale.value, 'en'], { dateStyle: 'medium' })
-  const localeDateString = formatter.format(props.published)
+  const localeDateString = formatter.format(validPublishedDate.value)
   // replace spaces with no break spaces to make the date act as a single entity while wrapping
   return localeDateString.replaceAll(' ', '\u00A0')
 })
 
 const publishedTimeAgo = computed(() => {
-  if (!locale.value || !props.published || props.published > Date.now()) {
+  if (!locale.value || !validPublishedDate.value || props.published > Date.now()) {
     return ''
   }
 
@@ -499,6 +508,10 @@ const publishedString = computed(() => {
 const publishedDateText = computed(() => {
   if (isPremiereInProgress.value) {
     return t('Video.Premiere started', { timeAgo: publishedTimeAgo.value })
+  }
+
+  if (!dateString.value) {
+    return ''
   }
 
   return `${publishedString.value} ${dateString.value}`

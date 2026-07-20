@@ -37,7 +37,7 @@ async function fixture(dir, name) {
   }
 }
 
-async function mockBlockedVideo({ app, page, beforePlayerResponse }) {
+async function mockBlockedVideo({ app, page, beforePlayerResponse, omitVideoMetadata = false }) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('generate-po-token')
     ipcMain.handle('generate-po-token', () => 'test-po-token')
@@ -92,6 +92,18 @@ async function mockBlockedVideo({ app, page, beforePlayerResponse }) {
         if (files.length > 0) body = await fixture(fixtureDir, files[0])
       }
       if (body) {
+        if (omitVideoMetadata && url.includes('/youtubei/v1/next')) {
+          const json = JSON.parse(body.toString())
+          const primaryInfo = json.contents?.twoColumnWatchNextResults?.results?.results?.contents
+            ?.find((entry) => entry.videoPrimaryInfoRenderer)?.videoPrimaryInfoRenderer
+          if (primaryInfo) {
+            delete primaryInfo.title
+            delete primaryInfo.dateText
+            delete primaryInfo.relativeDateText
+          }
+          delete json.playerOverlays?.playerOverlayRenderer?.videoDetails?.playerOverlayVideoDetailsRenderer?.title
+          body = Buffer.from(JSON.stringify(json))
+        }
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }
       return route.abort()
@@ -112,42 +124,29 @@ function captureRenderErrors(page) {
 
 function expectNoRenderErrors(errors) {
   const renderErrors = errors.filter((error) =>
-    error.includes('emitsOptions') || error.includes('failed to render')
+    error.includes('emitsOptions') ||
+    error.includes('failed to render') ||
+    error.includes('Invalid time value')
   )
   expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
 }
 
 test('watch page IP-block error does not break later navigation', async ({ app, page }) => {
   const errors = captureRenderErrors(page)
-  await mockBlockedVideo({ app, page })
-
-  await goTo(page, 'history')
-  await page.getByText('Blocked test video').click()
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
-  await expect(page.locator('.errorMessage')).toContainText('blocked')
-
-  await page.locator('.topNav a[href="#/subscriptions"]').evaluate((link) => link.click())
-  await expect(page).toHaveURL(/#\/subscriptions/)
-  await expect(page.locator('.subscriptionsPage')).toBeVisible()
-
-  expectNoRenderErrors(errors)
-})
-
-test('leaving a watch page while video metadata is loading keeps navigation responsive', async ({ app, page }) => {
-  const errors = captureRenderErrors(page)
+  let pausePlayerResponses = false
   let releasePlayerResponse
   let notifyPlayerRequested
-  let playerResponseIsReleased = false
   const playerResponseReleased = new Promise((resolve) => { releasePlayerResponse = resolve })
   const playerRequested = new Promise((resolve) => { notifyPlayerRequested = resolve })
-
   await mockBlockedVideo({
     app,
     page,
+    omitVideoMetadata: true,
     beforePlayerResponse: async () => {
-      notifyPlayerRequested()
-      await playerResponseReleased
+      if (pausePlayerResponses) {
+        notifyPlayerRequested()
+        await playerResponseReleased
+      }
     }
   })
 
@@ -155,20 +154,26 @@ test('leaving a watch page while video metadata is loading keeps navigation resp
     await goTo(page, 'history')
     await page.getByText('Blocked test video').click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-    await playerRequested
+    await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.errorMessage')).toContainText('blocked')
 
-    await page.locator('.topNav a[href="#/subscriptions"]').evaluate((link) => link.click())
-    playerResponseIsReleased = true
-    releasePlayerResponse()
-    await expect(page).toHaveURL(/#\/subscriptions/)
-    await expect(page.locator('.subscriptionsPage')).toBeVisible()
-
+    const tabs = page.locator('.tabBar .tab')
     await page.locator('.newTabButton').click()
-    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await expect(tabs).toHaveCount(2)
+    await tabs.first().click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    pausePlayerResponses = true
+    await page.keyboard.press('Control+R')
+    await playerRequested
+    await tabs.nth(1).click()
+    releasePlayerResponse()
+
+    await expect(tabs.nth(1)).toHaveClass(/active/)
     await expect(page.locator('.tabContent[aria-hidden="false"] .subscriptionsPage')).toBeVisible()
     await page.waitForTimeout(100)
     expectNoRenderErrors(errors)
   } finally {
-    if (!playerResponseIsReleased) releasePlayerResponse()
+    releasePlayerResponse()
   }
 })
