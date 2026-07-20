@@ -34,23 +34,30 @@
       :style="{ height: `${scrollMiniPlaceholderHeight}px` }"
       aria-hidden="true"
     />
-    <!-- The capture listener dismisses the focused dialog; its keyboard equivalent is Escape on the dialog. -->
-    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
     <div
       ref="container"
       class="ftVideoPlayer shaka-video-container"
       :class="{
         fullWindow: fullWindowEnabled,
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
-        scrollMiniPlayer: scrollMiniPlayerActive
+        scrollMiniPlayer: scrollMiniPlayerActive,
+        fullscreenCommentsOpen: showFullscreenComments,
+        chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
+        presentationModeChanging
       }"
       :style="[captionCssVariables, scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined]"
       @mouseenter="handleScrollMiniPlayerEnter"
       @mouseleave="handleScrollMiniPlayerLeave"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"
-      @click.capture="handleChaptersOverlayOutsideClick"
     >
+      <!-- Ambient glow surface for fullscreen, where the host-level canvases are not rendered. -->
+      <canvas
+        v-show="ambientModeVisible"
+        ref="ambientFullscreenCanvas"
+        class="ambientFullscreenCanvas"
+        aria-hidden="true"
+      />
       <!-- eslint-disable-next-line vuejs-accessibility/media-has-caption -->
       <video
         ref="video"
@@ -109,7 +116,7 @@
       </div>
       <Transition name="chapter-slide">
         <aside
-          v-if="showChaptersOverlay && chapters.length > 0"
+          v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
           ref="chapterOverlay"
           class="chapterOverlay shaka-no-propagation"
           role="dialog"

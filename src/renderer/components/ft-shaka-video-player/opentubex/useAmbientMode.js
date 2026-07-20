@@ -17,6 +17,8 @@ export function useAmbientMode({ enabled, video }) {
   const ambientCanvas = ref(null)
   /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
   const ambientLayoutCanvas = ref(null)
+  /** @type {import('vue').Ref<HTMLCanvasElement | null>} */
+  const ambientFullscreenCanvas = ref(null)
 
   /** @type {number|null} */
   let frameInterval = null
@@ -55,11 +57,12 @@ export function useAmbientMode({ enabled, video }) {
       lastVideoTime = videoElement.currentTime
       blendTicksRemaining = wasInitialized ? Math.max(0, blendTicksRemaining - 1) : 0
 
-      const layoutCanvas = ambientLayoutCanvas.value
-      const layoutContext = layoutCanvas?.getContext('2d')
-      if (layoutCanvas && layoutContext) {
-        layoutContext.clearRect(0, 0, layoutCanvas.width, layoutCanvas.height)
-        layoutContext.drawImage(canvas, 0, 0, layoutCanvas.width, layoutCanvas.height)
+      for (const mirrorCanvas of [ambientLayoutCanvas.value, ambientFullscreenCanvas.value]) {
+        const mirrorContext = mirrorCanvas?.getContext('2d')
+        if (mirrorCanvas && mirrorContext) {
+          mirrorContext.clearRect(0, 0, mirrorCanvas.width, mirrorCanvas.height)
+          mirrorContext.drawImage(canvas, 0, 0, mirrorCanvas.width, mirrorCanvas.height)
+        }
       }
     } catch (error) {
       if (!hasLoggedRenderError) {
@@ -107,9 +110,11 @@ export function useAmbientMode({ enabled, video }) {
     canvas.width = AMBIENT_FRAME_WIDTH
     canvas.height = AMBIENT_FRAME_HEIGHT
 
-    if (ambientLayoutCanvas.value) {
-      ambientLayoutCanvas.value.width = AMBIENT_FRAME_WIDTH
-      ambientLayoutCanvas.value.height = AMBIENT_FRAME_HEIGHT
+    for (const mirrorCanvas of [ambientLayoutCanvas.value, ambientFullscreenCanvas.value]) {
+      if (mirrorCanvas) {
+        mirrorCanvas.width = AMBIENT_FRAME_WIDTH
+        mirrorCanvas.height = AMBIENT_FRAME_HEIGHT
+      }
     }
 
     if (enabled.value) {
@@ -121,6 +126,7 @@ export function useAmbientMode({ enabled, video }) {
 
   return {
     ambientCanvas,
+    ambientFullscreenCanvas,
     ambientLayoutCanvas,
   }
 }

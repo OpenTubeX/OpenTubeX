@@ -79,6 +79,8 @@
           @player-reload-requested="onPlayerReloadRequested"
           @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
           @fullscreen-comments-change="handleFullscreenCommentsChange"
+          @chapters-overlay-change="handleChaptersOverlayChange"
+          @chapter-thumbnails-change="handleChapterThumbnailsChange"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -280,6 +282,35 @@
           </div>
         </div>
       </div>
+      <transition name="chapters-panel">
+        <div
+          v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
+          class="watchVideoSideBar watchVideoChaptersPanel"
+        >
+          <div class="chaptersPanelHeader">
+            <h3 class="chaptersPanelTitle">
+              {{ videoChaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
+            </h3>
+            <button
+              type="button"
+              class="chaptersPanelClose"
+              :aria-label="$t('Chapters.Close Chapters')"
+              :title="$t('Chapters.Close Chapters')"
+              @click="closeSidebarChapters"
+            >
+              <font-awesome-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <watch-video-chapters
+            :chapters="videoChapters"
+            :chapter-thumbnails="videoChapterThumbnails"
+            :current-chapter-index="videoCurrentChapterIndex"
+            :fallback-thumbnail="thumbnail"
+            @copy-timestamp="copyChapterTimestamp"
+            @timestamp-event="changeTimestamp"
+          />
+        </div>
+      </transition>
       <watch-video-transcript
         v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
         :captions="captions"

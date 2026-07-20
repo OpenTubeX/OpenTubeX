@@ -7,6 +7,7 @@ import FtShakaVideoPlayer from '../../components/ft-shaka-video-player/ft-shaka-
 import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
+import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
 import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
@@ -81,6 +82,7 @@ export default defineComponent({
     'watch-video-info': WatchVideoInfo,
     'watch-video-description': WatchVideoDescription,
     'watch-video-transcript': WatchVideoTranscript,
+    'watch-video-chapters': WatchVideoChapters,
     CommentSection,
     'watch-video-live-chat': WatchVideoLiveChat,
     'watch-video-playlist': WatchVideoPlaylist,
@@ -162,6 +164,8 @@ export default defineComponent({
       captions: [],
       currentTime: 0,
       showTranscript: false,
+      showSidebarChapters: false,
+      videoChapterThumbnails: [],
       fullscreenCommentsOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenCommentsTarget: null,
@@ -477,6 +481,18 @@ export default defineComponent({
     closeFullscreenComments() {
       this.$refs.player?.closeFullscreenComments()
     },
+    handleChaptersOverlayChange(open) {
+      this.showSidebarChapters = open
+    },
+    handleChapterThumbnailsChange(thumbnails) {
+      this.videoChapterThumbnails = thumbnails
+    },
+    closeSidebarChapters() {
+      this.$refs.player?.closeChaptersOverlay()
+    },
+    copyChapterTimestamp(startSeconds) {
+      this.$refs.player?.copyChapterTimestamp(startSeconds)
+    },
     async toggleTheatreMode() {
       const layout = this.$refs.videoLayout
       const elements = [
@@ -645,6 +661,8 @@ export default defineComponent({
       this.captions = []
       this.currentTime = 0
       this.showTranscript = false
+      this.showSidebarChapters = false
+      this.videoChapterThumbnails = []
       this.vrProjection = null
       this.recommendedVideos = []
       this.playabilityStatus = ''

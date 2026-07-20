@@ -162,10 +162,131 @@
 
   .watchVideoPlaylist,
   .watchVideoTranscript,
+  .watchVideoChaptersPanel,
   .watchVideoSidebar,
   .theatrePlaylist {
     margin-block: 0 16px;
     margin-inline: 8px;
+  }
+
+  /*
+    Sidebar counterpart of the player's fullscreen chapters panel, themed like
+    the other sidebar cards. The chapters list component is styled for the
+    dark player overlay, so its colors are mapped to theme variables here.
+  */
+  .watchVideoChaptersPanel {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 0;
+    overflow: hidden;
+    background-color: var(--card-bg-color);
+    color: var(--primary-text-color);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+
+    :deep(.chaptersWrapper) {
+      max-block-size: 480px;
+      scrollbar-color: var(--scrollbar-color) transparent;
+    }
+
+    :deep(.chapter) {
+      border-block-end: 1px solid var(--side-nav-hover-color);
+      background-color: transparent;
+    }
+
+    :deep(.chapter:hover),
+    :deep(.chapter:focus-within) {
+      background-color: color-mix(in srgb, var(--side-nav-hover-color) 60%, transparent);
+    }
+
+    :deep(.chapter.current),
+    :deep(.chapter.current:hover),
+    :deep(.chapter.current:focus-within) {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    :deep(.chapterSeek),
+    :deep(.copyTimestamp) {
+      color: inherit;
+    }
+
+    :deep(.copyTimestamp:hover),
+    :deep(.copyTimestamp:focus-visible) {
+      background-color: var(--side-nav-hover-color);
+    }
+
+    :deep(.chapterThumbnail) {
+      background-color: var(--secondary-card-bg-color);
+    }
+
+    :deep(.chapterTimestamp) {
+      background-color: var(--secondary-card-bg-color);
+      color: var(--secondary-text-color);
+    }
+  }
+
+  &.ambientModeActive .watchVideoChaptersPanel {
+    background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
+  }
+
+  /*
+    Collapse animation for the sidebar chapters panel, so the cards below
+    shift smoothly. 540px covers the header plus the list's 480px cap.
+  */
+  .chapters-panel-enter-active,
+  .chapters-panel-leave-active {
+    transition: opacity 250ms ease, max-block-size 250ms ease, margin-block-end 250ms ease;
+  }
+
+  .chapters-panel-enter-from,
+  .chapters-panel-leave-to {
+    max-block-size: 0;
+    margin-block-end: 0;
+    opacity: 0;
+  }
+
+  .chapters-panel-enter-to,
+  .chapters-panel-leave-from {
+    max-block-size: 540px;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapters-panel-enter-active,
+    .chapters-panel-leave-active {
+      transition: none;
+    }
+  }
+
+  .chaptersPanelHeader {
+    display: flex;
+    flex: 0 0 46px;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 16px 8px;
+    border-block-end: 1px solid var(--side-nav-hover-color);
+  }
+
+  .chaptersPanelTitle {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  .chaptersPanelClose {
+    display: grid;
+    place-items: center;
+    inline-size: 36px;
+    block-size: 36px;
+    border: 0;
+    border-radius: 50%;
+    background-color: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 18px;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--side-nav-hover-color);
+    }
   }
 
   .watchVideoSidebar,

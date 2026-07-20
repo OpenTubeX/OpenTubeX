@@ -63,287 +63,289 @@
         </div>
       </div>
     </header>
-    <h3
-      v-if="!fullscreenOverlay && commentData.length > 0 && !isLoading && showComments"
-      class="commentsTitle"
-    >
-      <span>{{ commentsTitle }}</span>
-      <span
-        class="commentTitleAction"
+    <div class="commentsContentWrapper">
+      <h3
+        v-if="!fullscreenOverlay && commentData.length > 0 && !isLoading && showComments"
+        class="commentsTitle"
+      >
+        <span>{{ commentsTitle }}</span>
+        <span
+          class="commentTitleAction"
+          role="button"
+          tabindex="0"
+          @click="showComments = false"
+          @keydown.space.prevent="showComments = false"
+          @keydown.enter.prevent="showComments = false"
+        >
+          {{ $t("Comments.Hide Comments") }}
+        </span>
+      </h3>
+      <h4
+        v-if="canPerformInitialCommentLoading"
+        class="getCommentsTitle"
         role="button"
         tabindex="0"
-        @click="showComments = false"
-        @keydown.space.prevent="showComments = false"
-        @keydown.enter.prevent="showComments = false"
+        @click="getCommentData"
+        @keydown.space.prevent="getCommentData"
+        @keydown.enter.prevent="getCommentData"
       >
-        {{ $t("Comments.Hide Comments") }}
-      </span>
-    </h3>
-    <h4
-      v-if="canPerformInitialCommentLoading"
-      class="getCommentsTitle"
-      role="button"
-      tabindex="0"
-      @click="getCommentData"
-      @keydown.space.prevent="getCommentData"
-      @keydown.enter.prevent="getCommentData"
-    >
-      {{ $t("Comments.Click to View Comments") }}
-    </h4>
-    <h4
-      v-if="commentData.length > 0 && !isLoading && !showComments"
-      class="getCommentsTitle"
-      role="button"
-      tabindex="0"
-      @click="showComments = true"
-      @keydown.space.prevent="showComments = true"
-      @keydown.enter.prevent="showComments = true"
-    >
-      {{ $t("Comments.Click to View Comments") }}
-    </h4>
-    <div
-      v-if="!fullscreenOverlay && showComments && !isLoading"
-      class="commentHeaderActions"
-      :class="{ commentHeaderActionsEmpty: !showSortBy }"
-    >
-      <FtSelect
-        v-if="showSortBy"
-        :placeholder="$t('Global.Sort By')"
-        :value="currentSortValue"
-        :select-names="sortNames"
-        :select-values="sortValues"
-        :icon="['fas', 'arrow-down-short-wide']"
-        @change="handleSortChange"
-      />
-      <FtIconButton
-        :title="$t('Comments.Reload Comments')"
-        :icon="['fas', 'sync']"
-        :size="12"
-        :padding="8"
-        :use-shadow="false"
-        class="reloadComments"
-        :class="{ reloadCommentsAligned: showSortBy }"
-        @click="reloadCommentData"
-      />
-    </div>
-    <div
-      v-if="commentData.length > 0 && showComments"
-    >
+        {{ $t("Comments.Click to View Comments") }}
+      </h4>
+      <h4
+        v-if="commentData.length > 0 && !isLoading && !showComments"
+        class="getCommentsTitle"
+        role="button"
+        tabindex="0"
+        @click="showComments = true"
+        @keydown.space.prevent="showComments = true"
+        @keydown.enter.prevent="showComments = true"
+      >
+        {{ $t("Comments.Click to View Comments") }}
+      </h4>
       <div
-        v-for="(comment, index) in commentData"
-        :id="'comment' + index"
-        :key="comment.id"
-        class="comment commentThread"
-        :class="{ commentThreadExpanded: comment.showReplies }"
+        v-if="!fullscreenOverlay && showComments && !isLoading"
+        class="commentHeaderActions"
+        :class="{ commentHeaderActionsEmpty: !showSortBy }"
       >
-        <component
-          :is="enableChannelLinks ? 'router-link' : 'div'"
-          :to="`/channel/${comment.authorLink}`"
-          tabindex="-1"
-        >
-          <!-- Hide comment photo only if it isn't the video uploader -->
-          <div
-            v-if="hideCommentPhotos && !comment.isOwner"
-            class="commentThumbnailHidden"
-            dir="auto"
-          >
-            {{ comment.author.substring(1, 2) }}
-          </div>
-          <img
-            v-else
-            :src="comment.authorThumb"
-            alt=""
-            class="commentThumbnail"
-          >
-        </component>
-        <p
-          v-if="comment.isPinned"
-          class="commentPinned"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'thumbtack']"
-          />
-          {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
-        </p>
-        <p
-          class="commentAuthorWrapper"
+        <FtSelect
+          v-if="showSortBy"
+          :placeholder="$t('Global.Sort By')"
+          :value="currentSortValue"
+          :select-names="sortNames"
+          :select-values="sortValues"
+          :icon="['fas', 'arrow-down-short-wide']"
+          @change="handleSortChange"
+        />
+        <FtIconButton
+          :title="$t('Comments.Reload Comments')"
+          :icon="['fas', 'sync']"
+          :size="12"
+          :padding="8"
+          :use-shadow="false"
+          class="reloadComments"
+          :class="{ reloadCommentsAligned: showSortBy }"
+          @click="reloadCommentData"
+        />
+      </div>
+      <div
+        v-if="commentData.length > 0 && showComments"
+      >
+        <div
+          v-for="(comment, index) in commentData"
+          :id="'comment' + index"
+          :key="comment.id"
+          class="comment commentThread"
+          :class="{ commentThreadExpanded: comment.showReplies }"
         >
           <component
-            :is="enableChannelLinks ? 'router-link' : 'span'"
-            class="commentAuthor"
-            dir="auto"
-            :class="{
-              commentOwner: comment.isOwner
-            }"
+            :is="enableChannelLinks ? 'router-link' : 'div'"
             :to="`/channel/${comment.authorLink}`"
+            tabindex="-1"
           >
-            {{ comment.author }}
-          </component>
-          <img
-            v-if="comment.isMember"
-            :src="comment.memberIconUrl"
-            :title="$t('Comments.Member')"
-            :aria-label="$t('Comments.Member')"
-            class="commentMemberIcon"
-            alt=""
-          >
-          <img
-            v-if="isSubscribedToChannel(comment.authorId)"
-            :title="$t('Comments.Subscribed')"
-            :aria-label="$t('Comments.Subscribed')"
-            class="commentSubscribedIcon"
-            alt=""
-          >
-          <span class="commentDate">
-            {{ comment.time }}
-            <template v-if="comment.isEdited">
-              {{ $t("Comments.Edited") }}
-            </template>
-          </span>
-          <button
-            type="button"
-            class="commentCopyLink"
-            :title="$t('Comments.Copy YouTube Link')"
-            :aria-label="$t('Comments.Copy YouTube Link')"
-            @click="copyCommentYoutubeLink(comment.id)"
-          >
-            <FontAwesomeIcon
-              :icon="['fas', 'link']"
-            />
-          </button>
-        </p>
-        <FtTimestampCatcher
-          class="commentText"
-          :input-html="comment.text"
-          @timestamp-event="onTimestamp"
-        />
-        <p class="commentLikeCount">
-          <template
-            v-if="!hideCommentLikes"
-          >
-            <FontAwesomeIcon
-              :icon="['fas', 'thumbs-up']"
-            />
-            {{ comment.likes }}
-          </template>
-          <span
-            v-if="comment.isHearted"
-            class="commentHeartBadge"
-          >
+            <!-- Hide comment photo only if it isn't the video uploader -->
+            <div
+              v-if="hideCommentPhotos && !comment.isOwner"
+              class="commentThumbnailHidden"
+              dir="auto"
+            >
+              {{ comment.author.substring(1, 2) }}
+            </div>
             <img
-              :src="channelThumbnail"
-              :title="$t('Comments.Hearted')"
-              :aria-label="$t('Comments.Hearted')"
-              class="commentHeartBadgeImg"
+              v-else
+              :src="comment.authorThumb"
+              alt=""
+              class="commentThumbnail"
+            >
+          </component>
+          <p
+            v-if="comment.isPinned"
+            class="commentPinned"
+          >
+            <FontAwesomeIcon
+              :icon="['fas', 'thumbtack']"
+            />
+            {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
+          </p>
+          <p
+            class="commentAuthorWrapper"
+          >
+            <component
+              :is="enableChannelLinks ? 'router-link' : 'span'"
+              class="commentAuthor"
+              dir="auto"
+              :class="{
+                commentOwner: comment.isOwner
+              }"
+              :to="`/channel/${comment.authorLink}`"
+            >
+              {{ comment.author }}
+            </component>
+            <img
+              v-if="comment.isMember"
+              :src="comment.memberIconUrl"
+              :title="$t('Comments.Member')"
+              :aria-label="$t('Comments.Member')"
+              class="commentMemberIcon"
               alt=""
             >
-            <FontAwesomeIcon
-              :icon="['fas', 'heart']"
-              class="commentHeartBadgeWhite"
-            />
-            <FontAwesomeIcon
-              :icon="['fas', 'heart']"
-              class="commentHeartBadgeRed"
-            />
-          </span>
-          <span
-            v-if="comment.numReplies > 0 && !comment.showReplies"
-            class="commentMoreReplies"
-            role="button"
-            tabindex="0"
-            @click="toggleCommentReplies(index)"
-            @keydown.space.prevent="toggleCommentReplies(index)"
-            @keydown.enter.prevent="toggleCommentReplies(index)"
-          >
-            <span>
-              {{ toggleCommentRepliesLinkText(comment) }}
+            <img
+              v-if="isSubscribedToChannel(comment.authorId)"
+              :title="$t('Comments.Subscribed')"
+              :aria-label="$t('Comments.Subscribed')"
+              class="commentSubscribedIcon"
+              alt=""
+            >
+            <span class="commentDate">
+              {{ comment.time }}
+              <template v-if="comment.isEdited">
+                {{ $t("Comments.Edited") }}
+              </template>
             </span>
-          </span>
-        </p>
-        <div
-          v-if="comment.showReplies"
-          class="commentReplies"
-        >
-          <CommentReply
-            v-for="node in replyTrees[index]"
-            :key="node.reply.id"
-            :node="node"
-            :thread-index="index"
-            root-level
-            :enable-channel-links="enableChannelLinks"
-            :hide-comment-likes="hideCommentLikes"
-            :hide-comment-photos="hideCommentPhotos"
-            :subscribed-channel-ids="subscribedChannelIds"
-            :channel-thumbnail="channelThumbnail"
-            @copy-youtube-link="copyCommentYoutubeLink"
-            @get-more-replies="getCommentReplies(index, $event)"
+            <button
+              type="button"
+              class="commentCopyLink"
+              :title="$t('Comments.Copy YouTube Link')"
+              :aria-label="$t('Comments.Copy YouTube Link')"
+              @click="copyCommentYoutubeLink(comment.id)"
+            >
+              <FontAwesomeIcon
+                :icon="['fas', 'link']"
+              />
+            </button>
+          </p>
+          <FtTimestampCatcher
+            class="commentText"
+            :input-html="comment.text"
             @timestamp-event="onTimestamp"
           />
+          <p class="commentLikeCount">
+            <template
+              v-if="!hideCommentLikes"
+            >
+              <FontAwesomeIcon
+                :icon="['fas', 'thumbs-up']"
+              />
+              {{ comment.likes }}
+            </template>
+            <span
+              v-if="comment.isHearted"
+              class="commentHeartBadge"
+            >
+              <img
+                :src="channelThumbnail"
+                :title="$t('Comments.Hearted')"
+                :aria-label="$t('Comments.Hearted')"
+                class="commentHeartBadgeImg"
+                alt=""
+              >
+              <FontAwesomeIcon
+                :icon="['fas', 'heart']"
+                class="commentHeartBadgeWhite"
+              />
+              <FontAwesomeIcon
+                :icon="['fas', 'heart']"
+                class="commentHeartBadgeRed"
+              />
+            </span>
+            <span
+              v-if="comment.numReplies > 0 && !comment.showReplies"
+              class="commentMoreReplies"
+              role="button"
+              tabindex="0"
+              @click="toggleCommentReplies(index)"
+              @keydown.space.prevent="toggleCommentReplies(index)"
+              @keydown.enter.prevent="toggleCommentReplies(index)"
+            >
+              <span>
+                {{ toggleCommentRepliesLinkText(comment) }}
+              </span>
+            </span>
+          </p>
           <div
-            v-if="comment.hasReplyToken"
-            class="showMoreReplies"
-            role="button"
-            tabindex="0"
-            @click="getCommentReplies(index)"
-            @keydown.space.prevent="getCommentReplies(index)"
-            @keydown.enter.prevent="getCommentReplies(index)"
+            v-if="comment.showReplies"
+            class="commentReplies"
           >
-            <span>{{ $t("Comments.Show More Replies") }}</span>
-          </div>
-          <div
-            v-if="comment.numReplies > 0"
-            class="hideReplies"
-            role="button"
-            tabindex="0"
-            @click="toggleCommentReplies(index)"
-            @keydown.space.prevent="toggleCommentReplies(index)"
-            @keydown.enter.prevent="toggleCommentReplies(index)"
-          >
-            <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+            <CommentReply
+              v-for="node in replyTrees[index]"
+              :key="node.reply.id"
+              :node="node"
+              :thread-index="index"
+              root-level
+              :enable-channel-links="enableChannelLinks"
+              :hide-comment-likes="hideCommentLikes"
+              :hide-comment-photos="hideCommentPhotos"
+              :subscribed-channel-ids="subscribedChannelIds"
+              :channel-thumbnail="channelThumbnail"
+              @copy-youtube-link="copyCommentYoutubeLink"
+              @get-more-replies="getCommentReplies(index, $event)"
+              @timestamp-event="onTimestamp"
+            />
+            <div
+              v-if="comment.hasReplyToken"
+              class="showMoreReplies"
+              role="button"
+              tabindex="0"
+              @click="getCommentReplies(index)"
+              @keydown.space.prevent="getCommentReplies(index)"
+              @keydown.enter.prevent="getCommentReplies(index)"
+            >
+              <span>{{ $t("Comments.Show More Replies") }}</span>
+            </div>
+            <div
+              v-if="comment.numReplies > 0"
+              class="hideReplies"
+              role="button"
+              tabindex="0"
+              @click="toggleCommentReplies(index)"
+              @keydown.space.prevent="toggleCommentReplies(index)"
+              @keydown.enter.prevent="toggleCommentReplies(index)"
+            >
+              <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      v-else-if="showComments && !isLoading"
-    >
-      <h3
-        v-if="isPostComments"
-        class="noCommentMsg"
+      <div
+        v-else-if="showComments && !isLoading"
       >
-        {{ $t("Comments.There are no comments available for this post") }}
-      </h3>
-      <h3
-        v-else
-        class="noCommentMsg"
+        <h3
+          v-if="isPostComments"
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.There are no comments available for this post") }}
+        </h3>
+        <h3
+          v-else
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.There are no comments available for this video") }}
+        </h3>
+      </div>
+      <FtSpinner
+        v-if="shouldShowAutoLoadMoreCommentsSpinner"
+        label="Loading more comments"
+      />
+      <h4
+        v-else-if="canPerformMoreCommentLoading"
+        class="getMoreComments"
+        role="button"
+        tabindex="0"
+        @click="getMoreComments"
+        @keydown.space.prevent="getMoreComments"
+        @keydown.enter.prevent="getMoreComments"
       >
-        {{ $t("Comments.There are no comments available for this video") }}
-      </h3>
-    </div>
-    <FtSpinner
-      v-if="shouldShowAutoLoadMoreCommentsSpinner"
-      label="Loading more comments"
-    />
-    <h4
-      v-else-if="canPerformMoreCommentLoading"
-      class="getMoreComments"
-      role="button"
-      tabindex="0"
-      @click="getMoreComments"
-      @keydown.space.prevent="getMoreComments"
-      @keydown.enter.prevent="getMoreComments"
-    >
-      {{ $t("Comments.Load More Comments") }}
-    </h4>
-    <FtLoader
-      v-if="isLoading"
-    />
-    <div
-      v-observe-visibility="observeVisibilityOptions"
-    >
+        {{ $t("Comments.Load More Comments") }}
+      </h4>
+      <FtLoader
+        v-if="isLoading"
+      />
+      <div
+        v-observe-visibility="observeVisibilityOptions"
+      >
       <!--
         Dummy element to be observed by Intersection Observer
       -->
+      </div>
     </div>
   </FtCard>
 </template>

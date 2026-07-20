@@ -7,31 +7,51 @@
   display: flow-root;
 }
 
+.commentsContentWrapper {
+  /* Contain the floated header actions, like the flow-root on .card */
+  display: flow-root;
+}
+
 .fullscreenCommentCard {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
   padding-block: 0;
   padding-inline: 0;
-  overflow: visible;
+  overflow: hidden;
   color: #fff;
   background-color: transparent;
   box-shadow: none;
 }
 
+/* Scroll the content below the fixed header, so it cuts off at the header edge. */
+.fullscreenCommentCard .commentsContentWrapper {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgb(255 255 255 / 45%) transparent;
+}
+
+/* Matches the chapter overlay header in the video player. */
 .fullscreenCommentHeader {
-  position: sticky;
+  position: relative;
   z-index: 2;
-  inset-block-start: 0;
   display: flex;
+  box-sizing: border-box;
+  block-size: 46px;
+  flex: 0 0 46px;
   align-items: center;
   justify-content: space-between;
-  padding-block: 14px;
-  padding-inline: 16px;
-  background-color: var(--card-bg-color);
+  padding-block: 0;
+  padding-inline: 14px 8px;
+  background-color: rgb(20 20 20 / 52%);
   border-block-end: 1px solid rgb(255 255 255 / 10%);
 }
 
 .fullscreenCommentHeader h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .fullscreenCommentActions {
@@ -47,17 +67,18 @@
   inline-size: 36px;
   block-size: 36px;
   padding: 0;
-  color: inherit;
-  background: transparent;
+  color: #fff;
+  background-color: rgb(0 0 0 / 45%);
   border: 0;
   border-radius: 50%;
   cursor: pointer;
+  font-size: 18px;
 }
 
 .fullscreenCommentAction:hover,
 .fullscreenCommentAction:focus-visible,
 .fullscreenCommentAction.active {
-  background-color: var(--side-nav-hover-color);
+  background-color: rgb(255 255 255 / 20%);
 }
 
 .fullscreenSortMenu {
@@ -70,11 +91,11 @@
   inline-size: 260px;
   max-inline-size: calc(40vw - 48px);
   padding: 6px;
-  background-color: rgb(12 12 12 / 82%);
+  background-color: rgb(12 12 12 / 62%);
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 10px;
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px) saturate(1.05);
 }
 
 .fullscreenSortMenu button {

@@ -5,6 +5,9 @@
 
 /* stylelint-disable liberty/use-logical-spec */
 .ftVideoPlayer {
+  /* Width reserved for a docked side panel (chapters / fullscreen comments). */
+  --side-panel-width: clamp(260px, 40%, 440px);
+
   display: flex;
   position: relative;
 
@@ -24,6 +27,9 @@
 
 .player {
   width: 100%;
+
+  /* Animates the push when a docked side panel opens. */
+  transition: inline-size 250ms ease;
 }
 
 .vrCanvas {
@@ -36,21 +42,36 @@
   pointer-events: none;
 }
 
+/*
+  Docked chapters side panel, only shown in fullscreen and full window mode:
+  the video is pushed aside to make room (see the panel push rules near the
+  end of this file). Outside of those modes the chapters appear in the watch
+  page sidebar instead. When the comments panel is open too, chapters takes
+  the bottom half.
+*/
 .chapterOverlay {
   position: absolute;
   z-index: 4;
-  inset-block: 0 61px;
-  inset-inline-end: 0;
+  inset-block: 12px;
+  inset-inline-end: 12px;
   display: flex;
   flex-direction: column;
-  inline-size: min(480px, 82%);
+  inline-size: calc(var(--side-panel-width) - 24px);
   min-block-size: 0;
   overflow: hidden;
   background-color: rgb(12 12 12 / 62%);
-  box-shadow: -8px 0 24px rgb(0 0 0 / 35%);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
   backdrop-filter: blur(14px);
   color: #fff;
   user-select: auto;
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    inset-block-start 250ms ease, inset-block-end 250ms ease;
+}
+
+.ftVideoPlayer.fullscreenCommentsOpen .chapterOverlay {
+  inset-block-start: calc(50% + 6px);
 }
 
 .chapter-slide-enter-active,
@@ -58,14 +79,15 @@
   transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* The docked panel keeps a 12px margin, so slide a bit further to leave no sliver. */
 .chapter-slide-enter-from,
 .chapter-slide-leave-to {
-  transform: translateX(100%);
+  transform: translateX(calc(100% + 24px));
 }
 
 .chapter-slide-enter-from:dir(rtl),
 .chapter-slide-leave-to:dir(rtl) {
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% - 24px));
 }
 
 .chapterOverlayHeader {
@@ -191,12 +213,6 @@
 :deep(.shaka-overflow-menu .ft-chapters-current-title),
 :deep(.shaka-overflow-menu .ft-chapters-chevron) {
   display: none;
-}
-
-@media only screen and (width <= 680px) {
-  .chapterOverlay {
-    inline-size: 90%;
-  }
 }
 
 :deep(.shaka-bottom-controls) {
@@ -947,7 +963,8 @@
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), background-color 150ms ease;
+  transition: opacity 600ms cubic-bezier(0.4, 0, 0.6, 1), background-color 150ms ease,
+    inset-inline-end 250ms ease;
 }
 
 .fullscreenCommentsToggle:hover,
@@ -956,11 +973,18 @@
   background-color: rgb(255 255 255 / 20%);
 }
 
-.ftVideoPlayer:fullscreen .fullscreenCommentsToggle {
+/* Suppressed during presentation mode switches; see the block near the end of the file. */
+.ftVideoPlayer.presentationModeChanging .fullscreenCommentsToggle {
+  transition: none !important;
+}
+
+.ftVideoPlayer:fullscreen .fullscreenCommentsToggle,
+.ftVideoPlayer.fullWindow .fullscreenCommentsToggle {
   display: flex;
 }
 
-.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle {
+.ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle,
+.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenCommentsToggle {
   opacity: 1;
   pointer-events: auto;
 }
@@ -968,23 +992,48 @@
 .fullscreenCommentsOverlay {
   position: absolute;
   z-index: 3;
-  inset-block: 16px 61px;
-  inset-inline-end: 16px;
+  inset-block: 12px;
+  inset-inline-end: 12px;
   display: flex;
   flex-direction: column;
-  inline-size: min(440px, 40vw);
-  overflow: hidden auto;
+  inline-size: calc(var(--side-panel-width) - 24px);
+  overflow: hidden;
   user-select: text;
   color: #fff;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: 12px;
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
-  backdrop-filter: blur(14px);
   opacity: 0;
   pointer-events: none;
   transform: translateX(calc(100% + 24px));
-  transition: transform 250ms ease, opacity 200ms ease;
+  transition: transform 250ms ease, opacity 200ms ease,
+    inset-block-start 250ms ease, inset-block-end 250ms ease;
+}
+
+/*
+  The glass blur lives on a pseudo-element because Chromium does not apply
+  nested backdrop-filters: with the blur on the panel itself, the sort menu's
+  own backdrop-filter inside it would stop working.
+*/
+.fullscreenCommentsOverlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(14px);
+  pointer-events: none;
+}
+
+/* Suppressed during presentation mode switches; see the block near the end of the file. */
+.ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay {
+  transition: none !important;
+}
+
+/* When the chapters panel is open as well, comments takes the top half. */
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenCommentsOverlay,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsOverlay {
+  inset-block-end: calc(50% + 6px);
 }
 
 .fullscreenCommentsOverlay.open {
@@ -994,26 +1043,86 @@
 }
 
 .fullscreenCommentsOverlay :deep(.watchVideo) {
+  flex: 1 1 auto;
+  min-block-size: 0;
   margin: 0;
   border-radius: 0;
   box-shadow: none;
 }
 
+/*
+  Ambient glow surface used in fullscreen and full window mode, where the
+  host-level canvases are not visible. It sits behind the video and shines
+  around it (and through the translucent side panels): always in full window
+  mode, in fullscreen only while a side panel is open.
+*/
+.ambientFullscreenCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  filter: blur(clamp(24px, 4vw, 52px)) saturate(1.05);
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+/* Suppressed during presentation mode switches; see the block near the end of the file. */
+.ftVideoPlayer.presentationModeChanging .ambientFullscreenCanvas {
+  transition: none !important;
+}
+
+.ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .ambientFullscreenCanvas,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .ambientFullscreenCanvas {
+  opacity: 0.42;
+}
+
+:deep(.shaka-controls-container) {
+  transition: inset-inline-end 250ms ease;
+}
+
+:deep(.shaka-text-container),
+:deep(.shaka-speech-to-text-container) {
+  /* Keep shaka's caption raise animation alongside the panel push. */
+  transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
+}
+
+/* Keep the floating comments toggle next to the video instead of under the panel. */
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .fullscreenCommentsToggle,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenCommentsToggle,
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenCommentsToggle,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsToggle {
+  inset-inline-end: calc(var(--side-panel-width) + 24px);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .player,
   .fullscreenCommentsOverlay,
-  .fullscreenCommentsToggle {
+  .fullscreenCommentsToggle,
+  .ambientFullscreenCanvas,
+  .chapterOverlay,
+  :deep(.shaka-controls-container),
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container) {
     transition: none;
   }
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),
-.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child),
+.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button),
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child) {
   position: relative;
   overflow: visible;
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
-.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before {
+.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button)::before {
   /*
     Shaka keeps the bottom controls at 98% width, so the outer edges can reach
     the container click handler instead of the nearest edge button.
@@ -1022,11 +1131,13 @@
   position: absolute;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before {
+.ftVideoPlayer:fullscreen :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-controls-button-panel > .shaka-play-button:first-child)::before {
   inset: -8px -8px -8px -2vw;
 }
 
-.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before {
+.ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button)::before,
+.ftVideoPlayer.fullWindow :deep(.shaka-fullscreen-button)::before {
   inset: -8px -2vw -8px -8px;
 }
 
@@ -1922,6 +2033,50 @@
 :global(body.scroll-mini-player-grabbing *) {
   cursor: grabbing !important;
   user-select: none !important;
+}
+
+/*
+  While the player switches presentation mode (fullscreen or the animated
+  full window toggle), the side panel transitions would combine with the
+  container resize into odd motion, so they are turned off for the switch.
+  This also removes the chapter panel's slide-out when it moves back to the
+  watch page sidebar on fullscreen/full window exit.
+*/
+.ftVideoPlayer.presentationModeChanging .player,
+.ftVideoPlayer.presentationModeChanging .chapterOverlay,
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-text-container),
+.ftVideoPlayer.presentationModeChanging :deep(.shaka-speech-to-text-container) {
+  transition: none !important;
+}
+
+/*
+  Side panel push: like YouTube, an open chapters/comments panel in fullscreen
+  (or full window) pushes the video and the player controls/captions area
+  aside instead of covering it. Kept at the end of the file so the
+  higher-specificity .player rules follow the scroll mini player ones.
+*/
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .player,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .player,
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .player,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .player {
+  inline-size: calc(100% - var(--side-panel-width));
+}
+
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-controls-container),
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-controls-container),
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-controls-container),
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-text-container),
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-text-container),
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-text-container),
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-text-container),
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-speech-to-text-container),
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-speech-to-text-container) {
+  inline-size: auto;
+  inset-inline-end: var(--side-panel-width);
 }
 
 /* stylelint-enable liberty/use-logical-spec */

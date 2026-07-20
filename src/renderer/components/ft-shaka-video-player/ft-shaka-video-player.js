@@ -300,6 +300,8 @@ export default defineComponent({
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
     'fullscreen-comments-change',
+    'chapters-overlay-change',
+    'chapter-thumbnails-change',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -343,6 +345,29 @@ export default defineComponent({
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const chapterOverlay = ref(null)
     const showChaptersOverlay = ref(false)
+    // Reactive mirror of the native fullscreen state, so the template can
+    // decide where the chapters render (in-player panel vs the watch sidebar).
+    const isFullscreen = ref(false)
+
+    // While switching presentation mode (fullscreen/full window) the side
+    // panel transitions would run on top of the container resize and produce
+    // odd combined motion, so they are suppressed for the switch duration.
+    const presentationModeChanging = ref(false)
+    /** @type {number|null} */
+    let presentationModeChangingTimeout = null
+
+    function suppressPanelTransitions(duration) {
+      presentationModeChanging.value = true
+
+      if (presentationModeChangingTimeout !== null) {
+        clearTimeout(presentationModeChangingTimeout)
+      }
+
+      presentationModeChangingTimeout = window.setTimeout(() => {
+        presentationModeChangingTimeout = null
+        presentationModeChanging.value = false
+      }, duration)
+    }
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenCommentsOverlay = ref(null)
     const showFullscreenComments = ref(false)
@@ -2283,29 +2308,6 @@ export default defineComponent({
     }
 
     /**
-     * @param {MouseEvent} event
-     */
-    function handleChaptersOverlayOutsideClick(event) {
-      const target = event.target
-
-      if (!showChaptersOverlay.value || !(target instanceof Element)) {
-        return
-      }
-
-      // Keep the overlay open when interacting with the overlay itself or any
-      // player control (play/pause, volume, playback speed, seek bar, menus, etc.).
-      // Only dismiss it when clicking the bare video surface next to the overlay.
-      if (chapterOverlay.value?.contains(target) ||
-        target.closest('.shaka-bottom-controls, .shaka-top-controls, .shaka-big-buttons-container, .shaka-settings-menu, .shaka-overflow-menu, .shaka-sub-menu, .shaka-context-menu')) {
-        return
-      }
-
-      event.preventDefault()
-      event.stopPropagation()
-      closeChaptersOverlay()
-    }
-
-    /**
      * @param {number} startSeconds
      */
     function copyChapterTimestamp(startSeconds) {
@@ -3402,11 +3404,10 @@ export default defineComponent({
         ambientMode.value &&
         props.format !== 'audio' &&
         props.vrProjection !== 'EQUIRECTANGULAR' &&
-        !fullWindowEnabled.value &&
         !scrollMiniPlayerActive.value
     })
 
-    const { ambientCanvas, ambientLayoutCanvas } = useAmbientMode({
+    const { ambientCanvas, ambientFullscreenCanvas, ambientLayoutCanvas } = useAmbientMode({
       enabled: ambientModeVisible,
       video,
     })
@@ -4252,7 +4253,10 @@ export default defineComponent({
     }
 
     function setFullscreenComments(shouldOpen) {
-      const open = Boolean(shouldOpen && props.commentsAvailable && isNativeFullscreenActive())
+      const open = Boolean(
+        shouldOpen && props.commentsAvailable &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
       showFullscreenComments.value = open
       events.dispatchEvent(new CustomEvent('setFullscreenComments', { detail: open }))
       emit('fullscreen-comments-change', {
@@ -4269,6 +4273,22 @@ export default defineComponent({
       if (!available && showFullscreenComments.value) {
         closeFullscreenComments()
       }
+    })
+
+    watch(fullWindowEnabled, enabled => {
+      if (!enabled && !isNativeFullscreenActive()) {
+        closeFullscreenComments()
+      }
+    })
+
+    // Outside of fullscreen the chapters are shown in the watch page sidebar,
+    // so the parent needs the open state and the storyboard-derived thumbnails.
+    watch(showChaptersOverlay, (open) => {
+      emit('chapters-overlay-change', open)
+    })
+
+    watch(chapterThumbnails, (thumbnails) => {
+      emit('chapter-thumbnails-change', thumbnails)
     })
 
     async function loadChapterThumbnails() {
@@ -4390,6 +4410,7 @@ export default defineComponent({
       events.addEventListener('setFullWindow', async (/** @type {CustomEvent} */ event) => {
         fullWindowAnimation?.cancel()
         fullWindowAnimation = null
+        suppressPanelTransitions(FULL_WINDOW_ANIMATION_DURATION_MS + 50)
 
         const playerContainer = container.value
         const shouldAnimate = playerContainer !== null &&
@@ -6149,6 +6170,9 @@ export default defineComponent({
     }
 
     function fullscreenChangeHandler() {
+      isFullscreen.value = isNativeFullscreenActive()
+      suppressPanelTransitions(100)
+
       if (!isActiveTab.value) {
         return
       }
@@ -6156,7 +6180,9 @@ export default defineComponent({
       if (isNativeFullscreenActive() && scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       } else if (!isNativeFullscreenActive()) {
-        closeFullscreenComments()
+        if (!fullWindowEnabled.value) {
+          closeFullscreenComments()
+        }
         updateScrollMiniPlayer()
       }
 
@@ -6971,6 +6997,8 @@ export default defineComponent({
       setCurrentTime,
       getSabrReloadState,
       closeFullscreenComments,
+      closeChaptersOverlay,
+      copyChapterTimestamp,
       destroyPlayer
     })
 
@@ -7013,6 +7041,7 @@ export default defineComponent({
 
     return {
       ambientCanvas,
+      ambientFullscreenCanvas,
       ambientLayoutCanvas,
       ambientModeVisible,
       captionCssVariables,
@@ -7023,9 +7052,10 @@ export default defineComponent({
       vrCanvas,
       chapterOverlay,
       showChaptersOverlay,
+      isFullscreen,
+      presentationModeChanging,
       chapterThumbnails,
       closeChaptersOverlay,
-      handleChaptersOverlayOutsideClick,
       selectOverlayChapter,
       copyChapterTimestamp,
       fullscreenCommentsOverlay,
