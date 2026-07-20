@@ -1577,6 +1577,7 @@ KeyboardShortcutPrompt:
   Change Shortcut: 'Change shortcut for {action}'
   Press Shortcut: Press shortcut…
   Unassigned: Unassigned
+  Reset Shortcut: 'Reset shortcut for {action}'
   Reset to Defaults: Reset to defaults
   Shortcut Already Assigned: Shortcut already assigned
   Shortcut Conflict: '{shortcut} is already assigned to {actions}. Do you want to reassign it?'

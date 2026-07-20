@@ -53,24 +53,40 @@
                   v-for="binding in shortcut.bindings"
                   :key="binding.path"
                 >
-                  <button
-                    v-if="binding.editable"
-                    type="button"
-                    class="shortcutButton"
-                    :class="{ recording: recordingShortcutPath === binding.path }"
-                    :data-shortcut-path="binding.path"
-                    :aria-label="$t('KeyboardShortcutPrompt.Change Shortcut', { action: shortcut.label })"
-                    @click.stop="beginShortcutRecording(binding)"
-                    @keydown="handleShortcutKeydown($event, binding)"
-                    @blur="stopShortcutRecording(binding)"
-                  >
-                    {{ getShortcutButtonLabel(binding) }}
-                  </button>
-                  <span
-                    v-else
-                    class="shortcutValue"
-                  >
-                    {{ getShortcutButtonLabel(binding) }}
+                  <span class="shortcutBinding">
+                    <button
+                      v-if="binding.editable"
+                      type="button"
+                      class="shortcutButton"
+                      :class="{
+                        modified: binding.modified,
+                        recording: recordingShortcutPath === binding.path
+                      }"
+                      :data-shortcut-path="binding.path"
+                      :aria-label="$t('KeyboardShortcutPrompt.Change Shortcut', { action: shortcut.label })"
+                      @click.stop="beginShortcutRecording(binding)"
+                      @keydown="handleShortcutKeydown($event, binding)"
+                      @blur="stopShortcutRecording(binding)"
+                    >
+                      {{ getShortcutButtonLabel(binding) }}
+                    </button>
+                    <span
+                      v-else
+                      class="shortcutValue"
+                    >
+                      {{ getShortcutButtonLabel(binding) }}
+                    </span>
+                    <FtIconButton
+                      v-if="binding.modified"
+                      class="resetShortcutButton"
+                      :title="$t('KeyboardShortcutPrompt.Reset Shortcut', { action: shortcut.label })"
+                      :icon="['fas', 'undo']"
+                      :padding="6"
+                      :size="14"
+                      :use-shadow="false"
+                      theme="base-no-default"
+                      @click="resetKeyboardShortcut(binding)"
+                    />
                   </span>
                 </template>
               </div>
@@ -369,16 +385,21 @@ function getLocalizedShortcutNamesAndValues(dictionary, dictionaryPath, included
       label: localizedShortcutName,
       bindings: shortcutCodes
         .filter(code => includedShortcutCodeSet.has(code) && Object.hasOwn(dictionary, code))
-        .map(code => ({
-          code,
-          path: [...dictionaryPath, code].join('.'),
-          shortcut: dictionary[code],
-          dictionaryPath,
-          editable: !isKeyboardShortcutRange(getNestedValue(
+        .map((code) => {
+          const defaultShortcut = getNestedValue(
             DefaultKeyboardShortcuts,
             [...dictionaryPath, code]
-          )),
-        }))
+          )
+
+          return {
+            code,
+            path: [...dictionaryPath, code].join('.'),
+            shortcut: dictionary[code],
+            dictionaryPath,
+            editable: !isKeyboardShortcutRange(defaultShortcut),
+            modified: dictionary[code] !== defaultShortcut,
+          }
+        })
     }))
 }
 
@@ -430,19 +451,27 @@ function handleShortcutKeydown(event, binding) {
 }
 
 function saveKeyboardShortcut(binding, shortcut) {
-  if (shortcut === binding.shortcut) {
+  const defaultShortcut = getNestedValue(
+    DefaultKeyboardShortcuts,
+    [...binding.dictionaryPath, binding.code]
+  )
+  const normalizedShortcut = keyboardShortcutsOverlap(shortcut, defaultShortcut)
+    ? defaultShortcut
+    : shortcut
+
+  if (normalizedShortcut === binding.shortcut) {
     recordingShortcutPath.value = ''
     return
   }
 
-  const conflicts = findShortcutConflicts(binding, shortcut)
+  const conflicts = findShortcutConflicts(binding, normalizedShortcut)
   if (conflicts.length > 0) {
     recordingShortcutPath.value = ''
-    pendingShortcutConflict.value = { binding, shortcut, conflicts }
+    pendingShortcutConflict.value = { binding, shortcut: normalizedShortcut, conflicts }
     return
   }
 
-  applyKeyboardShortcut(binding, shortcut)
+  applyKeyboardShortcut(binding, normalizedShortcut)
 }
 
 function resolveShortcutConflict(reassign) {
@@ -485,7 +514,7 @@ function applyKeyboardShortcut(binding, shortcut, conflicts = []) {
   store.dispatch('updateKeyboardShortcuts', JSON.stringify(overrides))
 }
 
-function findShortcutConflicts(binding, shortcut) {
+function findShortcutConflicts(binding, shortcut, ignoreDefaultBindings = false) {
   if (!shortcut) {
     return []
   }
@@ -493,7 +522,11 @@ function findShortcutConflicts(binding, shortcut) {
   return getAllKeyboardShortcutBindings(configuredKeyboardShortcuts.value)
     .filter(candidate =>
       candidate.path !== binding.path &&
-      keyboardShortcutsOverlap(candidate.shortcut, shortcut)
+      keyboardShortcutsOverlap(candidate.shortcut, shortcut) &&
+      (!ignoreDefaultBindings || !keyboardShortcutsOverlap(
+        getNestedValue(DefaultKeyboardShortcuts, candidate.path.split('.')),
+        shortcut
+      ))
     )
     .map(candidate => ({
       ...candidate,
@@ -525,6 +558,22 @@ function resetKeyboardShortcuts() {
   recordingShortcutPath.value = ''
   pendingShortcutConflict.value = null
   store.dispatch('updateKeyboardShortcuts', '{}')
+}
+
+function resetKeyboardShortcut(binding) {
+  const defaultShortcut = getNestedValue(
+    DefaultKeyboardShortcuts,
+    [...binding.dictionaryPath, binding.code]
+  )
+  const conflicts = findShortcutConflicts(binding, defaultShortcut, true)
+
+  recordingShortcutPath.value = ''
+  if (conflicts.length > 0) {
+    pendingShortcutConflict.value = { binding, shortcut: defaultShortcut, conflicts }
+    return
+  }
+
+  applyKeyboardShortcut(binding, defaultShortcut)
 }
 
 function getKeyboardShortcutOverrides() {

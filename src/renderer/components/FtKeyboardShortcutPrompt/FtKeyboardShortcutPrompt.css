@@ -91,6 +91,16 @@ h3 {
   vertical-align: middle;
 }
 
+.shortcutBinding {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+.shortcutBinding + .shortcutBinding {
+  margin-inline-start: 0.4em;
+}
+
 .shortcutButton {
   padding-block: 0.35em;
   padding-inline: 0.6em;
@@ -110,16 +120,22 @@ h3 {
   text-transform: capitalize;
 }
 
-.shortcutButton + .shortcutButton {
-  margin-inline-start: 0.4em;
+.shortcutButton:hover,
+.shortcutButton:focus-visible,
+.shortcutButton.recording,
+.shortcutButton.modified {
+  border-color: var(--accent-color);
 }
 
 .shortcutButton:hover,
 .shortcutButton:focus-visible,
 .shortcutButton.recording {
-  border-color: var(--accent-color);
   outline: 2px solid var(--accent-color);
   outline-offset: 1px;
+}
+
+.resetShortcutButton {
+  color: var(--accent-color);
 }
 
 .shortcutActions {
