@@ -133,22 +133,24 @@ defineExpose({
 
 .newFeed :deep(.feed-leave-active) {
   position: absolute;
+  top: var(--feed-leave-top);
+  left: var(--feed-leave-left);
   z-index: 1;
+  width: var(--feed-leave-width);
+  height: var(--feed-leave-height);
   pointer-events: none;
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition: opacity 200ms ease;
 }
 
 .newFeed :deep(.feed-leave-to) {
   opacity: 0;
-  transform: translateY(-10px) scale(0.96);
 }
 
 .new-feed-section-leave-active {
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition: opacity 200ms ease;
 }
 
 .new-feed-section-leave-to {
   opacity: 0;
-  transform: translateY(-10px) scale(0.96);
 }
 </style>

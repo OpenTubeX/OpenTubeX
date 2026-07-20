@@ -11,6 +11,7 @@
       thumbnailSizeReady: grid && gridWidth > 0
     }"
     :style="gridStyle"
+    @before-leave="captureLeavingItemLayout"
   >
     <slot />
   </TransitionGroup>
@@ -46,6 +47,16 @@ let suppressResetTimeout = null
 const gridStyle = computed(() => {
   return getThumbnailSizeStyles(props.thumbnailSize, gridWidth.value)
 })
+
+function captureLeavingItemLayout(element) {
+  const itemRect = element.getBoundingClientRect()
+  const gridRect = gridElement.value.$el.getBoundingClientRect()
+
+  element.style.setProperty('--feed-leave-width', `${itemRect.width}px`)
+  element.style.setProperty('--feed-leave-height', `${itemRect.height}px`)
+  element.style.setProperty('--feed-leave-left', `${itemRect.left - gridRect.left}px`)
+  element.style.setProperty('--feed-leave-top', `${itemRect.top - gridRect.top}px`)
+}
 
 let resizeObserver = null
 
