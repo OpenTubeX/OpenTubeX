@@ -450,25 +450,17 @@ watch(() => props.playlistItemId, () => {
   prevVideoBeforeDeletion = null
 })
 
-watch(() => props.watchViewLoading, (newVal, oldVal) => {
-  // If watch view is loaded after this component loaded
-  if (oldVal && !newVal) {
-    // Scroll after watch view loaded, otherwise doesn't work
-    // Mainly for Local API
-    // `nextTick` is required (tested via reloading)
-    nextTick(scrollToCurrentVideo)
-  }
-})
-
-watch(isLoading, (newVal, oldVal) => {
-  // This component is loaded/rendered before watch view loaded
-  if (oldVal && !newVal) {
-    // Scroll after this component loaded, otherwise doesn't work
-    // Mainly for Invidious API
-    // `nextTick` is required (tested via reloading)
-    nextTick(scrollToCurrentVideo)
-  }
-})
+watch(
+  [isLoading, () => props.watchViewLoading],
+  ([playlistLoading, watchViewLoading]) => {
+    if (!playlistLoading && !watchViewLoading) {
+      // Wait until both the watch view and playlist items are visible before
+      // measuring them. Either one can finish loading first.
+      nextTick(scrollToCurrentVideo)
+    }
+  },
+  { flush: 'post' }
+)
 
 watch(() => props.playlistId, () => {
   reversePlaylist.value = storedReversePlaylist.value
@@ -994,8 +986,10 @@ function scrollToVideo(index) {
     const currentVideoItemEl = container.children[index]
 
     if (currentVideoItemEl != null) {
-      // Watch view can be ready sooner than this component
-      container.scrollTop = currentVideoItemEl.offsetTop - container.offsetTop
+      const itemOffset = currentVideoItemEl.offsetTop - container.offsetTop
+      const centeredOffset = (container.clientHeight - currentVideoItemEl.offsetHeight) / 2
+
+      container.scrollTop = Math.max(0, itemOffset - centeredOffset)
     }
   }
 }
