@@ -609,12 +609,33 @@ async function initializeManagedDownloadTools() {
   await Promise.all(settingUpdates)
 
   let downloadStarted = missingBinaries.length > 0
+  let toolProgressPercentage = 0
+
+  function showToolProgress() {
+    if (subscriptionRefreshInProgress.value) {
+      return
+    }
+    store.commit('setProgressBarPercentage', toolProgressPercentage)
+    store.commit('setShowProgressBar', true)
+  }
+
   if (downloadStarted) {
     const missingTools = missingBinaries.join(' and ')
     showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }))
-    store.commit('setProgressBarPercentage', 0)
-    store.commit('setShowProgressBar', true)
+    showToolProgress()
   }
+
+  const stopWatchingSubscriptionRefresh = watch(subscriptionRefreshInProgress, inProgress => {
+    if (!downloadStarted) {
+      return
+    }
+
+    if (inProgress) {
+      store.commit('setShowProgressBar', false)
+    } else {
+      showToolProgress()
+    }
+  })
 
   const progressByBinary = {}
   const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
@@ -625,17 +646,16 @@ async function initializeManagedDownloadTools() {
     if (!downloadStarted) {
       downloadStarted = true
       showToast(t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }))
-      store.commit('setProgressBarPercentage', 0)
-      store.commit('setShowProgressBar', true)
+      showToolProgress()
     }
 
     progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
     const percentages = Object.values(progressByBinary)
     const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
-    store.commit('setProgressBarPercentage', Math.max(
-      store.getters.getProgressBarPercentage,
-      combinedPercentage
-    ))
+    toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
+    if (!subscriptionRefreshInProgress.value) {
+      store.commit('setProgressBarPercentage', toolProgressPercentage)
+    }
   })
 
   try {
@@ -652,7 +672,10 @@ async function initializeManagedDownloadTools() {
       .map(({ binary }) => binary)
 
     if (failures.length === 0 && updatedBinaries.length > 0) {
-      store.commit('setProgressBarPercentage', 100)
+      toolProgressPercentage = 100
+      if (!subscriptionRefreshInProgress.value) {
+        store.commit('setProgressBarPercentage', toolProgressPercentage)
+      }
       const updatedTools = updatedBinaries.join(' and ')
       showToast(missingBinaries.length > 0
         ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
@@ -664,10 +687,13 @@ async function initializeManagedDownloadTools() {
       }
     }
   } finally {
+    stopWatchingSubscriptionRefresh()
     removeProgressListener()
     if (downloadStarted) {
       store.commit('setShowProgressBar', false)
-      store.commit('setProgressBarPercentage', 0)
+      if (!subscriptionRefreshInProgress.value) {
+        store.commit('setProgressBarPercentage', 0)
+      }
     }
   }
 }
