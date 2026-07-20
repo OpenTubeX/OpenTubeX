@@ -53,6 +53,17 @@ test.describe('tab bar', () => {
     await expect(searchInput).toHaveValue('second tab query')
   })
 
+  test('loading a search tab fills the search bar from its route', async ({ page }) => {
+    const searchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/search/loaded%20tab%20query',
+      makeActive: false
+    }))
+
+    await page.locator(`.tab[data-tab-id="${searchTab.id}"]`).click()
+
+    await expect(page.locator(sel.searchInput)).toHaveValue('loaded tab query')
+  })
+
   test('closing the active tab activates a remaining tab', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()

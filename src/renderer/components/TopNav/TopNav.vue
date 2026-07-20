@@ -408,19 +408,48 @@ const searchInput = useTemplateRef('searchInput')
 const searchTextByTabId = new Map()
 let currentSearchText = ''
 
+/**
+ * @param {string} tabId
+ * @returns {string}
+ */
+function getSearchTextForTab(tabId) {
+  if (searchTextByTabId.has(tabId)) {
+    return searchTextByTabId.get(tabId) ?? ''
+  }
+
+  const path = store.getters.getTabById(tabId)?.route.path ?? ''
+  const encodedQuery = path.match(/^\/search\/(.+)$/)?.[1]
+  if (encodedQuery == null) {
+    return ''
+  }
+
+  try {
+    return decodeURIComponent(encodedQuery)
+  } catch {
+    return encodedQuery
+  }
+}
+
 if (process.env.IS_ELECTRON) {
   const presentedTabId = computed(() => store.getters.getPresentedTabId)
 
   watch(presentedTabId, (tabId, previousTabId) => {
     // Skip the initial null -> id transition during startup so we don't clobber
     // text that was pre-filled for this tab (e.g. a search carried into a new
-    // window). Only real tab switches save and restore per-tab text.
+    // window). A search route is the exception: restored tabs have no cached
+    // input text, so hydrate it from the route itself.
     if (previousTabId == null) {
+      if (tabId != null) {
+        const searchText = getSearchTextForTab(tabId)
+        if (searchText.length > 0) {
+          updateSearchInputText(searchText)
+        }
+      }
       return
     }
 
     searchTextByTabId.set(previousTabId, currentSearchText)
-    updateSearchInputText(tabId != null ? searchTextByTabId.get(tabId) ?? '' : '')
+    updateSearchInputText(tabId != null ? getSearchTextForTab(tabId) : '')
     clearLastSuggestionQuery()
   })
 }
@@ -734,6 +763,12 @@ onMounted(() => {
 
   if (process.env.IS_ELECTRON) {
     window.addEventListener('keydown', handleKeyboardShortcuts)
+
+    const tabId = store.getters.getPresentedTabId
+    const searchText = tabId != null ? getSearchTextForTab(tabId) : ''
+    if (currentSearchText.length === 0 && searchText.length > 0) {
+      updateSearchInputText(searchText)
+    }
 
     window.ftElectron.handleUpdateSearchInputText((searchQueryText) => {
       if (searchQueryText) {
