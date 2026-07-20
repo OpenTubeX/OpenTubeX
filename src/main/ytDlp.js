@@ -398,6 +398,16 @@ export async function handleYtDlpDownloadBinary(event, binary) {
 
   let lastSent = 0
 
+  /**
+   * @param {number | null} percent
+   * @param {boolean} inProgress
+   */
+  function sendProgress(percent, inProgress) {
+    if (!webContents.isDestroyed()) {
+      webContents.send(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, { binary, percent, inProgress })
+    }
+  }
+
   /** @type {BinaryDownloadProgressCallback} */
   function onProgress(percent) {
     const now = Date.now()
@@ -406,14 +416,20 @@ export async function handleYtDlpDownloadBinary(event, binary) {
     }
     lastSent = now
 
-    if (!webContents.isDestroyed()) {
-      webContents.send(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, { binary, percent })
-    }
+    sendProgress(percent, true)
   }
 
-  return binary === 'yt-dlp'
-    ? await downloadManagedYtDlp(onProgress)
-    : await downloadManagedFfmpeg(onProgress)
+  sendProgress(0, true)
+
+  let result
+  try {
+    result = binary === 'yt-dlp'
+      ? await downloadManagedYtDlp(onProgress)
+      : await downloadManagedFfmpeg(onProgress)
+    return result
+  } finally {
+    sendProgress(result != null && 'version' in result ? 100 : null, false)
+  }
 }
 
 /**

@@ -11,6 +11,13 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
 
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
+const ytDlpBinaryDownloadProgressListeners = new Set()
+
+ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
+  for (const listener of ytDlpBinaryDownloadProgressListeners) {
+    listener(progress)
+  }
+})
 
 export default {
   /**
@@ -274,21 +281,28 @@ export default {
 
   /**
    * Only one listener can be active at a time, pass null to remove it again
-   * @param {((progress: { binary: 'yt-dlp' | 'ffmpeg', percent: number | null }) => void) | null} handler
+   * @param {((progress: { binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean }) => void) | null} handler
    */
   setYtDlpBinaryDownloadProgressListener: (handler) => {
     if (currentYtDlpBinaryDownloadProgressListener) {
-      ipcRenderer.off(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, currentYtDlpBinaryDownloadProgressListener)
+      ytDlpBinaryDownloadProgressListeners.delete(currentYtDlpBinaryDownloadProgressListener)
       currentYtDlpBinaryDownloadProgressListener = undefined
     }
 
     if (handler) {
-      currentYtDlpBinaryDownloadProgressListener = (_, progress) => {
-        handler(progress)
-      }
-
-      ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, currentYtDlpBinaryDownloadProgressListener)
+      currentYtDlpBinaryDownloadProgressListener = handler
+      ytDlpBinaryDownloadProgressListeners.add(handler)
     }
+  },
+
+  /**
+   * Adds a binary download progress listener without replacing other listeners
+   * @param {(progress: { binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean }) => void} handler
+   * @returns {() => void}
+   */
+  addYtDlpBinaryDownloadProgressListener: (handler) => {
+    ytDlpBinaryDownloadProgressListeners.add(handler)
+    return () => ytDlpBinaryDownloadProgressListeners.delete(handler)
   },
 
   /**

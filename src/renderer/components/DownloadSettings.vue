@@ -227,8 +227,9 @@ const ffmpegInfo = computed(() => ytDlpFfmpegSource.value === 'managed'
 const ytDlpBinaryDownloadInProgress = ref(false)
 const ffmpegBinaryDownloadInProgress = ref(false)
 
-/** @type {import('vue').Ref<{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null } | null>} */
+/** @type {import('vue').Ref<{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean } | null>} */
 const binaryDownloadProgress = ref(null)
+const activeBinaryDownloads = new Set()
 
 let systemInfoRequestId = 0
 let managedInfoRequestId = 0
@@ -275,7 +276,21 @@ onMounted(() => {
   refreshBinariesInfo()
 
   window.ftElectron.setYtDlpBinaryDownloadProgressListener((progress) => {
-    binaryDownloadProgress.value = progress
+    const inProgress = progress.binary === 'yt-dlp'
+      ? ytDlpBinaryDownloadInProgress
+      : ffmpegBinaryDownloadInProgress
+    inProgress.value = progress.inProgress
+
+    if (progress.inProgress) {
+      activeBinaryDownloads.add(progress.binary)
+      binaryDownloadProgress.value = progress
+    } else {
+      activeBinaryDownloads.delete(progress.binary)
+      if (activeBinaryDownloads.size === 0) {
+        binaryDownloadProgress.value = null
+      }
+      refreshManagedBinariesInfo()
+    }
   })
 })
 
@@ -283,6 +298,7 @@ onBeforeUnmount(() => {
   clearTimeout(refreshTimeout)
   systemInfoRequestId++
   managedInfoRequestId++
+  activeBinaryDownloads.clear()
   window.ftElectron.setYtDlpBinaryDownloadProgressListener(null)
 })
 
@@ -392,6 +408,9 @@ async function chooseExecutablePath(binary) {
 .ytDlpWarning {
   color: var(--destructive-color);
   font-weight: bold;
+  inline-size: 100%;
+  padding-block: 8px;
+  text-align: center;
 }
 
 .binaryProgressBarTrack {
