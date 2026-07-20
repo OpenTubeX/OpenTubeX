@@ -1211,6 +1211,8 @@ Video:
     Audio Tracks: Audio Tracks
     Autoplay is off: Autoplay is off
     Autoplay is on: Autoplay is on
+    Up next in {seconds}: Up next in {seconds}
+    Play now: Play now
     MusicPlaybackRateOverride: Detected music video, playing back at 1x
     Normal: Normal
     Set Default: Set Default

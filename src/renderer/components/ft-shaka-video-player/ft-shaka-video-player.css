@@ -32,6 +32,198 @@
   transition: inline-size 250ms ease;
 }
 
+.autoplayCountdownOverlay {
+  position: absolute;
+  z-index: 13;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  padding: 20px;
+  overflow: auto;
+  color: #fff;
+  background-color: #000;
+}
+
+.autoplayCountdownCard {
+  display: flex;
+  flex-direction: column;
+  inline-size: min(440px, 65%);
+  max-block-size: 100%;
+}
+
+.autoplayCountdownHeading {
+  margin: 0 0 12px;
+  color: rgb(255 255 255 / 70%);
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.autoplayThumbnailWrapper {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #151515;
+  border-radius: 8px;
+}
+
+.autoplayThumbnail {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.autoplayDuration {
+  position: absolute;
+  inset-inline-end: 4px;
+  inset-block-end: 4px;
+  padding: 2px 4px;
+  color: #fff;
+  background-color: rgb(0 0 0 / 80%);
+  border-radius: 3px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.autoplayTitle {
+  display: -webkit-box;
+  margin-block-start: 12px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.autoplayAuthor {
+  margin-block-start: 4px;
+  overflow: hidden;
+  color: rgb(255 255 255 / 62%);
+  font-size: 14px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.autoplayActions {
+  display: flex;
+  gap: 8px;
+  margin-block-start: 14px;
+}
+
+.autoplayButton {
+  flex: 1;
+  min-block-size: 36px;
+  padding: 8px 14px;
+  color: #fff;
+  background-color: #252525;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.autoplayButton:hover,
+.autoplayButton:focus-visible {
+  background-color: #3a3a3a;
+}
+
+.autoplayPlayNow {
+  background-color: #5a5a5a;
+}
+
+.autoplayPlayNow:hover,
+.autoplayPlayNow:focus-visible {
+  background-color: #707070;
+}
+
+.autoplayCountdownCard.compact {
+  display: grid;
+  grid-template:
+    'heading heading' auto
+    'thumbnail title' auto
+    'thumbnail author' 1fr
+    'thumbnail actions' auto /
+    minmax(120px, 1.4fr) minmax(160px, 1fr);
+  gap: 0 14px;
+  inline-size: min(680px, 92%);
+}
+
+.autoplayCountdownCard.compact .autoplayCountdownHeading {
+  grid-area: heading;
+}
+
+.autoplayCountdownCard.compact .autoplayThumbnailWrapper {
+  grid-area: thumbnail;
+}
+
+.autoplayCountdownCard.compact .autoplayTitle {
+  grid-area: title;
+  margin-block-start: 0;
+}
+
+.autoplayCountdownCard.compact .autoplayAuthor {
+  grid-area: author;
+}
+
+.autoplayCountdownCard.compact .autoplayActions {
+  grid-area: actions;
+  margin-block-start: 10px;
+}
+
+.autoplayCountdownCard.compact .autoplayButton {
+  min-block-size: 32px;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.autoplayCountdownCard.compact.tiny {
+  grid-template-columns: minmax(80px, 1fr) minmax(112px, 1fr);
+  gap: 0 8px;
+  inline-size: 100%;
+}
+
+.autoplayCountdownCard.compact.tiny .autoplayCountdownHeading {
+  margin-block-end: 6px;
+  font-size: 12px;
+}
+
+.autoplayCountdownCard.compact.tiny .autoplayTitle {
+  font-size: 13px;
+}
+
+.autoplayCountdownCard.compact.tiny .autoplayAuthor {
+  display: none;
+}
+
+.autoplayCountdownCard.compact.tiny .autoplayActions {
+  gap: 4px;
+  margin-block-start: 6px;
+}
+
+.autoplayCountdownCard.compact.tiny .autoplayButton {
+  min-block-size: 26px;
+  padding: 3px;
+  font-size: 9px;
+}
+
+@media only screen and (width <= 600px) {
+  .autoplayCountdownOverlay {
+    padding: 16px;
+  }
+
+  .autoplayCountdownCard {
+    inline-size: min(100%, 360px);
+  }
+}
+
 .vrCanvas {
   position: absolute;
   inset: 0;

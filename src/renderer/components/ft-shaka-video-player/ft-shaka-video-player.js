@@ -68,6 +68,7 @@ import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
+import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 /** @typedef {import('../../helpers/sponsorblock').SponsorBlockCategory} SponsorBlockCategory */
 
@@ -215,6 +216,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    autoplayCountdown: {
+      type: Object,
+      default: null
+    },
     watchingPlaylist: {
       type: Boolean,
       default: false
@@ -292,6 +297,8 @@ export default defineComponent({
     'timeupdate',
     'terminal-outro-started',
     'toggle-autoplay',
+    'autoplay-cancel',
+    'autoplay-play-now',
     'toggle-theatre-mode',
     'playback-rate-updated',
     'playback-rate-user-set',
@@ -311,6 +318,51 @@ export default defineComponent({
     const { locale, t } = useI18n()
     const { tabId, isTabPresented } = useTabContext()
     const mediaTabId = tabId ?? 'web'
+
+    const autoplayNextVideo = computed(() => props.autoplayCountdown?.video ?? null)
+    const autoplayThumbnail = computed(() => {
+      const videoId = autoplayNextVideo.value?.videoId
+      if (!videoId) {
+        return thumbnailPlaceholder
+      }
+
+      if (store.getters.getThumbnailPreference === 'hidden') {
+        return thumbnailPlaceholder
+      }
+
+      const baseUrl = store.getters.getBackendPreference === 'invidious'
+        ? store.getters.getCurrentInvidiousInstanceUrl
+        : 'https://i.ytimg.com'
+      let thumbnailName = 'mqdefault.jpg'
+
+      switch (store.getters.getThumbnailPreference) {
+        case 'start':
+          thumbnailName = 'mq1.jpg'
+          break
+        case 'middle':
+          thumbnailName = 'mq2.jpg'
+          break
+        case 'end':
+          thumbnailName = 'mq3.jpg'
+          break
+      }
+
+      return `${baseUrl}/vi/${videoId}/${thumbnailName}`
+    })
+    const autoplayDuration = computed(() => {
+      const lengthSeconds = Number(autoplayNextVideo.value?.lengthSeconds)
+      return Number.isFinite(lengthSeconds) && lengthSeconds > 0
+        ? formatDurationAsTimestamp(lengthSeconds)
+        : ''
+    })
+
+    function cancelAutoplayCountdown() {
+      emit('autoplay-cancel')
+    }
+
+    function playAutoplayVideoNow() {
+      emit('autoplay-play-now')
+    }
 
     /** @type {shaka.Player|null} */
     let player = null
@@ -3509,6 +3561,8 @@ export default defineComponent({
 
     const playerWidth = computed(() => Math.round(pipWindowWidth.value ?? videoElementWidth.value))
     const playerHeight = computed(() => Math.round(pipWindowHeight.value ?? videoElementHeight.value))
+    const compactAutoplayLayout = computed(() => playerHeight.value > 0 && playerHeight.value <= 440)
+    const tinyAutoplayLayout = computed(() => playerWidth.value > 0 && playerWidth.value <= 360)
 
     // #endregion video event handlers
 
@@ -7129,6 +7183,13 @@ export default defineComponent({
       translateSponsorBlockCategory,
 
       showOfflineMessage,
+      autoplayNextVideo,
+      autoplayThumbnail,
+      autoplayDuration,
+      compactAutoplayLayout,
+      tinyAutoplayLayout,
+      cancelAutoplayCountdown,
+      playAutoplayVideoNow,
       showCountdownOverlay,
       countdownTimeLabel,
       countdownAriaLabel,

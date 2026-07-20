@@ -77,6 +77,74 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <Transition name="fade">
+        <div
+          v-if="autoplayCountdown"
+          class="autoplayCountdownOverlay shaka-no-propagation"
+          role="dialog"
+          :aria-label="$t('Up Next')"
+          @click.stop
+          @dblclick.stop
+          @pointerdown.stop
+        >
+          <div
+            class="autoplayCountdownCard"
+            :class="{
+              compact: compactAutoplayLayout,
+              tiny: tinyAutoplayLayout
+            }"
+          >
+            <p
+              class="autoplayCountdownHeading"
+              aria-live="polite"
+            >
+              {{ $t('Video.Player.Up next in {seconds}', { seconds: autoplayCountdown.remainingSeconds }) }}
+            </p>
+            <div class="autoplayThumbnailWrapper">
+              <img
+                class="autoplayThumbnail"
+                :src="autoplayThumbnail"
+                alt=""
+              >
+              <span
+                v-if="autoplayDuration"
+                class="autoplayDuration"
+              >
+                {{ autoplayDuration }}
+              </span>
+            </div>
+            <div
+              class="autoplayTitle"
+              dir="auto"
+            >
+              {{ autoplayNextVideo?.title }}
+            </div>
+            <div
+              v-if="autoplayNextVideo?.author"
+              class="autoplayAuthor"
+              dir="auto"
+            >
+              {{ autoplayNextVideo.author }}
+            </div>
+            <div class="autoplayActions">
+              <button
+                type="button"
+                class="autoplayButton autoplayCancel"
+                @click="cancelAutoplayCountdown"
+              >
+                {{ $t('Cancel') }}
+              </button>
+              <button
+                type="button"
+                class="autoplayButton autoplayPlayNow"
+                @click="playAutoplayVideoNow"
+              >
+                {{ $t('Video.Player.Play now') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
       <div
         v-if="commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction"
         class="fullscreenActions shaka-no-propagation"

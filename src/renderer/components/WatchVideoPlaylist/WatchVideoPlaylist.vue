@@ -352,6 +352,15 @@ const videoIsLastPlaylistItem = computed(() => {
 
 const videoIsNotPlaylistItem = computed(() => videoIndexInPlaylistItems.value === -1)
 
+const nextVideo = computed(() => {
+  const targetList = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
+  const targetVideoIndex = (videoIsNotPlaylistItem.value || videoIsLastPlaylistItem.value)
+    ? 0
+    : videoIndexInPlaylistItems.value + 1
+
+  return targetList[targetVideoIndex] ?? null
+})
+
 const playlistPageLinkTo = computed(() => ({
   path: `/playlist/${props.playlistId}`,
   query: {
@@ -1056,6 +1065,7 @@ const shouldStopDueToPlaylistEnd = computed(() => {
 defineExpose({
   playNextVideo,
   playPreviousVideo,
+  nextVideo,
   shouldStopDueToPlaylistEnd,
   getState: () => ({
     index: reversePlaylist.value

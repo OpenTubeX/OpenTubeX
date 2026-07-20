@@ -186,6 +186,7 @@ export default defineComponent({
       oneTimeTimestamp: null,
       playNextTimeout: null,
       playNextCountDownIntervalId: null,
+      autoplayCountdown: null,
       blockVideoAutoplay: false,
       autoplayInterruptionTimeout: null,
       playabilityStatus: '',
@@ -2107,42 +2108,52 @@ export default defineComponent({
         return
       }
 
-      let nextVideoId = null
-      if (!this.watchingPlaylist) {
-        nextVideoId = this.nextRecommendedVideo?.videoId
-        if (!nextVideoId) {
-          return
-        }
+      const nextVideo = this.watchingPlaylist
+        ? this.$refs.watchVideoPlaylist?.nextVideo
+        : this.nextRecommendedVideo
+
+      if (!nextVideo?.videoId) {
+        return
       }
 
       const nextVideoInterval = this.defaultInterval
       this.playNextTimeout = setTimeout(() => {
-        const player = this.$refs.player
-
-        if (player?.isPaused()) {
-          if (this.watchingPlaylist) {
-            this.$refs.watchVideoPlaylist.playNextVideo()
-          } else {
-            this.tabRouter.push({
-              path: `/watch/${nextVideoId}`
-            })
-            showToast(this.t('Playing Next Video'))
-          }
-        }
-        this.playNextTimeout = null
+        this.playNextVideoNow(false)
       }, nextVideoInterval * 1000)
 
       if (nextVideoInterval > 0) {
-        // No countdown for 0s interval
-        showToast(
-          ({ remainingMs }) => {
-            const countDownTimeLeftInSecond = remainingMs / 1000
-            return this.t('Playing Next Video Interval', { nextVideoInterval: countDownTimeLeftInSecond }, countDownTimeLeftInSecond)
-          },
-          // So that we don't see last countdown text like 0/N
-          nextVideoInterval * 1000,
-          this.abortAutoplayCountdown,
-        )
+        const countdownEndsAt = Date.now() + (nextVideoInterval * 1000)
+        this.autoplayCountdown = {
+          remainingSeconds: nextVideoInterval,
+          video: nextVideo
+        }
+        this.playNextCountDownIntervalId = setInterval(() => {
+          const remainingSeconds = Math.max(1, Math.ceil((countdownEndsAt - Date.now()) / 1000))
+          this.autoplayCountdown = {
+            ...this.autoplayCountdown,
+            remainingSeconds
+          }
+        }, 250)
+      }
+    },
+
+    playNextVideoNow: function (forcePlayback = true) {
+      const player = this.$refs.player
+      const nextVideoId = this.autoplayCountdown?.video?.videoId ?? this.nextRecommendedVideo?.videoId
+
+      this.abortAutoplayCountdown(true)
+
+      if (!forcePlayback && !player?.isPaused()) {
+        return
+      }
+
+      if (this.watchingPlaylist) {
+        this.$refs.watchVideoPlaylist?.playNextVideo()
+      } else if (nextVideoId) {
+        this.tabRouter.push({
+          path: `/watch/${nextVideoId}`
+        })
+        showToast(this.t('Playing Next Video'))
       }
     },
 
@@ -2168,6 +2179,8 @@ export default defineComponent({
       clearTimeout(this.playNextTimeout)
       clearInterval(this.playNextCountDownIntervalId)
       this.playNextTimeout = null
+      this.playNextCountDownIntervalId = null
+      this.autoplayCountdown = null
 
       if (!hideToast) {
         showToast(this.t('Canceled next video autoplay'))
