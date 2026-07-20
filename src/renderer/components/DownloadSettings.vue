@@ -4,6 +4,17 @@
   >
     <FtFlexBox>
       <FtSelect
+        v-if="ytDlpSource === 'managed'"
+        class="sourceSelect"
+        :placeholder="t('Settings.Download Settings.yt-dlp Channel')"
+        :value="ytDlpChannel"
+        :select-names="CHANNEL_NAMES"
+        :select-values="CHANNEL_VALUES"
+        :tooltip="t('Tooltips.Download Settings.yt-dlp Channel')"
+        :icon="['fas', 'download']"
+        @change="updateYtDlpChannel"
+      />
+      <FtSelect
         class="sourceSelect"
         :placeholder="t('Settings.Download Settings.yt-dlp Source')"
         :value="ytDlpSource"
@@ -176,6 +187,8 @@ import { showToast } from '../helpers/utils'
 const { t } = useI18n()
 
 const SOURCE_VALUES = ['system', 'managed']
+const CHANNEL_NAMES = ['Stable', 'Nightly', 'Master']
+const CHANNEL_VALUES = ['stable', 'nightly', 'master']
 
 const sourceNames = computed(() => [
   t('Settings.Download Settings.Sources.System'),
@@ -184,6 +197,9 @@ const sourceNames = computed(() => [
 
 /** @type {import('vue').ComputedRef<'system' | 'managed'>} */
 const ytDlpSource = computed(() => store.getters.getYtDlpSource)
+
+/** @type {import('vue').ComputedRef<'stable' | 'nightly' | 'master'>} */
+const ytDlpChannel = computed(() => store.getters.getYtDlpChannel)
 
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpPath = computed(() => store.getters.getYtDlpPath)
@@ -342,6 +358,13 @@ watch([ytDlpPath, ytDlpFfmpegPath], () => {
  */
 function updateYtDlpSource(value) {
   store.dispatch('updateYtDlpSource', value)
+}
+
+/**
+ * @param {'stable' | 'nightly' | 'master'} value
+ */
+function updateYtDlpChannel(value) {
+  store.dispatch('updateYtDlpChannel', value)
 }
 
 /**

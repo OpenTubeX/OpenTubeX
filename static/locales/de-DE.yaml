@@ -751,6 +751,7 @@ Settings:
   Download Settings:
     Download Settings: Downloads
     yt-dlp Source: yt-dlp-Quelle
+    yt-dlp Channel: yt-dlp-Kanal
     Sources:
       System: System (PATH oder benutzerdefinierter Pfad)
       Managed: Von OpenTubeX verwaltet
@@ -1296,6 +1297,7 @@ Tooltips:
     Ignore Default Arguments: Schicke keine Standardargumente an den externen Video-Player außer der Video-URL (z.B. Abspiel-Geschwindigkeit, Playlist-URL etc.). Besondere Argumente werden weiterhin weitergeleitet.
   Download Settings:
     yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
+    yt-dlp Channel: Wähle aus, welchen yt-dlp-Veröffentlichungskanal OpenTubeX herunterlädt und verwaltet. Für die meisten Benutzer wird „Stable“ empfohlen.
     FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.

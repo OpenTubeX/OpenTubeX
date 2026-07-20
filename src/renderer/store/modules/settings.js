@@ -212,6 +212,7 @@ const state = {
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
   ytDlpSource: 'system',
+  ytDlpChannel: 'stable',
   ytDlpPath: '',
   ytDlpFfmpegSource: 'system',
   ytDlpFfmpegPath: '',
@@ -539,6 +540,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'showAddedExternalPlayerCustomArgs',
   // DownloadSettings
   'ytDlpSource',
+  'ytDlpChannel',
   'ytDlpPath',
   'ytDlpFfmpegSource',
   'ytDlpFfmpegPath',

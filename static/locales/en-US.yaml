@@ -678,6 +678,7 @@ Settings:
   Download Settings:
     Download Settings: Downloads
     yt-dlp Source: yt-dlp Source
+    yt-dlp Channel: yt-dlp Channel
     Sources:
       System: System (PATH or custom path)
       Managed: Managed by OpenTubeX
@@ -1471,6 +1472,8 @@ Tooltips:
   Download Settings:
     yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download
       and manage its own copy of yt-dlp, which is stored in the user data directory.
+    yt-dlp Channel: Select which yt-dlp release channel OpenTubeX downloads and manages.
+      Stable is recommended for most users.
     FFmpeg Source: OpenTubeX can either use the FFmpeg installed on your system or download
       and manage its own static FFmpeg build, which is stored in the user data directory.
     yt-dlp Executable Path: By default, OpenTubeX will assume that yt-dlp can be found via

@@ -37,6 +37,11 @@ const execFileAsync = promisify(execFile)
 const ID_REGEX = /^[\w-]{11}$/
 const QUALITY_REGEX = /^\d{3,4}$/
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
+const YT_DLP_RELEASE_REPOSITORIES = {
+  stable: 'yt-dlp/yt-dlp',
+  nightly: 'yt-dlp/yt-dlp-nightly-builds',
+  master: 'yt-dlp/yt-dlp-master-builds'
+}
 const PROGRESS_REGEX = /^\[download\]\s+(\d+(?:\.\d+)?)%(?:.*?\bat\s+(\S+))?(?:.*?\bETA\s+(\S+))?/
 const DESTINATION_REGEX = /^\[(?:download|ExtractAudio)\] Destination: (.+)$/
 const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
@@ -116,6 +121,7 @@ async function getFfmpegVersion(executable) {
  * @typedef BinaryDownloadValidators
  * @property {string | null} etag
  * @property {string | null} lastModified
+ * @property {'stable' | 'nightly' | 'master'} [channel]
  */
 
 /**
@@ -180,18 +186,23 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
 
 /**
  * @param {string} binaryPath
+ * @param {'stable' | 'nightly' | 'master'} [channel]
  * @returns {Promise<BinaryDownloadValidators | null>}
  */
-async function readDownloadValidators(binaryPath) {
+async function readDownloadValidators(binaryPath, channel) {
   if (!existsSync(binaryPath)) {
     return null
   }
 
   try {
     const validators = JSON.parse(await readFile(`${binaryPath}.download.json`, 'utf8'))
+    if (channel !== undefined && (validators.channel ?? 'stable') !== channel) {
+      return null
+    }
     return {
       etag: typeof validators.etag === 'string' ? validators.etag : null,
-      lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null
+      lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null,
+      ...(channel === undefined ? {} : { channel })
     }
   } catch {
     return null
@@ -201,9 +212,13 @@ async function readDownloadValidators(binaryPath) {
 /**
  * @param {string} binaryPath
  * @param {BinaryDownloadValidators} validators
+ * @param {'stable' | 'nightly' | 'master'} [channel]
  */
-async function writeDownloadValidators(binaryPath, validators) {
-  await writeFile(`${binaryPath}.download.json`, JSON.stringify(validators))
+async function writeDownloadValidators(binaryPath, validators, channel) {
+  await writeFile(`${binaryPath}.download.json`, JSON.stringify({
+    ...validators,
+    ...(channel === undefined ? {} : { channel })
+  }))
 }
 
 /**
@@ -295,6 +310,8 @@ async function installBinary(data, destinationPath) {
  * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
  */
 async function downloadManagedYtDlp(onProgress, onDownloadStart) {
+  const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
+  const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
   let assetName
   switch (process.platform) {
     case 'win32':
@@ -312,10 +329,10 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
 
   try {
     download = await downloadFile(
-      `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${assetName}`,
+      `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`,
       onProgress,
       onDownloadStart,
-      await readDownloadValidators(managedPath)
+      await readDownloadValidators(managedPath, channel)
     )
 
     if (download.data !== null) {
@@ -333,7 +350,7 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
 
   if (download.data !== null) {
     try {
-      await writeDownloadValidators(managedPath, download.validators)
+      await writeDownloadValidators(managedPath, download.validators, channel)
     } catch (error) {
       console.warn('Could not save yt-dlp download metadata', error)
     }
