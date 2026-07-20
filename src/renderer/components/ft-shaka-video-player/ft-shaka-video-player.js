@@ -242,6 +242,18 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    startWithChapters: {
+      type: Boolean,
+      default: false
+    },
+    startWithFullscreenComments: {
+      type: Boolean,
+      default: false
+    },
+    startWithFullscreenPlaylist: {
+      type: Boolean,
+      default: false
+    },
     channelId: {
       type: String,
       default: ''
@@ -510,6 +522,9 @@ export default defineComponent({
     let startInFullwindow = props.startInFullwindow
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
+    let restoreChapters = props.startWithChapters
+    let restoreFullscreenComments = props.startWithFullscreenComments
+    let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
     let exitFullscreenCleanup = null
 
     /** @type {number|null} */
@@ -4378,6 +4393,29 @@ export default defineComponent({
       setFullscreenPlaylist(false)
     }
 
+    function restoreDockedPanels() {
+      if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
+        return
+      }
+
+      if (restoreChapters) {
+        restoreChapters = false
+        events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
+          detail: props.chapters.length > 0
+        }))
+      }
+
+      if (restoreFullscreenComments) {
+        restoreFullscreenComments = false
+        setFullscreenComments(true)
+      }
+
+      if (restoreFullscreenPlaylist) {
+        restoreFullscreenPlaylist = false
+        setFullscreenPlaylist(true)
+      }
+    }
+
     watch(() => props.commentsAvailable, available => {
       if (!available && showFullscreenComments.value) {
         closeFullscreenComments()
@@ -4537,6 +4575,10 @@ export default defineComponent({
         }
 
         fullWindowEnabled.value = event.detail
+
+        if (fullWindowEnabled.value) {
+          restoreDockedPanels()
+        }
 
         if (fullWindowEnabled.value) {
           document.body.dataset.playerFullWindowOwner = mediaTabId
@@ -6275,8 +6317,11 @@ export default defineComponent({
         return
       }
 
-      if (isNativeFullscreenActive() && scrollMiniPlayerActive.value) {
-        deactivateScrollMiniPlayer()
+      if (isNativeFullscreenActive()) {
+        if (scrollMiniPlayerActive.value) {
+          deactivateScrollMiniPlayer()
+        }
+        restoreDockedPanels()
       } else if (!isNativeFullscreenActive()) {
         if (!fullWindowEnabled.value) {
           closeFullscreenComments()
@@ -7042,12 +7087,26 @@ export default defineComponent({
      * it won't be finished in time, as the player destruction is asynchronous.
      * To workaround that we destroy the player first and wait for it to finish before we unmount this component.
      *
-     * @returns {Promise<{ startNextVideoInFullscreen: boolean, startNextVideoInFullwindow: boolean, startNextVideoInPip: boolean }>}
+     * @returns {Promise<{
+     *   startNextVideoInFullscreen: boolean,
+     *   startNextVideoInFullwindow: boolean,
+     *   startNextVideoInPip: boolean,
+     *   startNextVideoWithChapters: boolean,
+     *   startNextVideoWithFullscreenComments: boolean,
+     *   startNextVideoWithFullscreenPlaylist: boolean
+     * }>}
      */
     async function destroyPlayer() {
       ignoreErrors = true
 
-      let uiState = { startNextVideoInFullscreen: false, startNextVideoInFullwindow: false, startNextVideoInPip: false }
+      let uiState = {
+        startNextVideoInFullscreen: false,
+        startNextVideoInFullwindow: false,
+        startNextVideoInPip: false,
+        startNextVideoWithChapters: false,
+        startNextVideoWithFullscreenComments: false,
+        startNextVideoWithFullscreenPlaylist: false
+      }
 
       if (ui) {
         if (ui.getControls()) {
@@ -7056,7 +7115,10 @@ export default defineComponent({
           uiState = {
             startNextVideoInFullscreen: controls.isFullScreenEnabled(),
             startNextVideoInFullwindow: fullWindowEnabled.value,
-            startNextVideoInPip: controls.isPiPEnabled()
+            startNextVideoInPip: controls.isPiPEnabled(),
+            startNextVideoWithChapters: showChaptersOverlay.value,
+            startNextVideoWithFullscreenComments: showFullscreenComments.value,
+            startNextVideoWithFullscreenPlaylist: showFullscreenPlaylist.value
           }
         }
 

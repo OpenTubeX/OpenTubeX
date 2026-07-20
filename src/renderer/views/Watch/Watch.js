@@ -115,6 +115,9 @@ export default defineComponent({
       startNextVideoInFullscreen: false,
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
+      startNextVideoWithChapters: false,
+      startNextVideoWithFullscreenComments: false,
+      startNextVideoWithFullscreenPlaylist: false,
       isLoading: true,
       firstLoad: true,
       useTheatreMode: false,
@@ -2817,6 +2820,9 @@ export default defineComponent({
       this.startNextVideoInFullscreen = uiState.startNextVideoInFullscreen
       this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
       this.startNextVideoInPip = uiState.startNextVideoInPip
+      this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
+      this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
+      this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
     },
 
     async onPlayerReloadRequested(payload, toastMessage = 'Reloading player according to SABR request') {
