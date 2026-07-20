@@ -32,28 +32,20 @@
         @clear="() => handleQueryChange('')"
       />
       <div
+        v-if="fullData.length > 1"
         class="optionsRow"
       >
         <div
-          v-if="fullData.length > 0"
           class="toggleOptions"
         >
           <FtToggleSwitch
-            v-if="fullData.length > 1"
             :label="t('History.Case Sensitive Search')"
             :compact="true"
             :default-value="doCaseSensitiveSearch"
             @change="doCaseSensitiveSearch = !doCaseSensitiveSearch"
           />
-          <FtToggleSwitch
-            :label="t('History.Show Watched Indicators')"
-            :compact="true"
-            :default-value="showWatchedIndicators"
-            @change="showWatchedIndicators = $event"
-          />
         </div>
         <FtSelect
-          v-if="fullData.length > 1"
           class="sortSelect"
           :placeholder="t('Global.Sort By')"
           :value="sortBy"
@@ -81,7 +73,7 @@
         v-if="activeData.length > 0"
         :data="activeData"
         :show-video-with-last-viewed-playlist="true"
-        :show-watched-style-in-history="showWatchedIndicators"
+        :show-watched-style-in-history="true"
         :use-channels-hidden-preference="false"
         :hide-forbidden-titles="false"
       />
@@ -195,7 +187,6 @@ const activeData = ref([])
 const historyCleanupPeriod = ref('30')
 const customHistoryCleanupDays = ref('')
 const showHistoryCleanupPrompt = ref(false)
-const showWatchedIndicators = ref(false)
 
 const HISTORY_CLEANUP_PERIOD_VALUES = ['1', '7', '30', '90', '365', 'custom']
 const historyCleanupPeriodNames = computed(() => [

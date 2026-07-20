@@ -53,19 +53,11 @@ test.describe('watch history', () => {
     await expect(page.getByText('First test video')).toBeHidden()
   })
 
-  test('shows watched indicators only while the history toggle is enabled', async ({ page }) => {
+  test('always shows watched indicators', async ({ page }) => {
     await goTo(page, 'history')
 
     const watchedIndicator = page.locator('.videoWatched')
-    const toggle = page.getByRole('checkbox', { name: 'Show Watched Indicators' })
-
-    await expect(toggle).not.toBeChecked()
-    await expect(watchedIndicator).toHaveCount(0)
-
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Show Watched Indicators' })
-      .click()
-
+    await expect(page.getByRole('checkbox', { name: 'Show Watched Indicators' })).toHaveCount(0)
     await expect(watchedIndicator).toHaveText('Watched')
   })
 })
