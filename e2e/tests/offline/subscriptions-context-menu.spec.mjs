@@ -27,6 +27,24 @@ test.use({
   }
 })
 
+async function getCapturedReloadLabel(electronApp, menuIndex) {
+  try {
+    return await electronApp.evaluate((_, index) => {
+      const menu = globalThis.__subscriptionContextMenus[index]
+      const reloadItem = menu && menu.find(item => item.label && item.label.startsWith('Reload'))
+      return reloadItem && reloadItem.label
+    }, menuIndex)
+  } catch (error) {
+    // Creating a native context menu can briefly replace Playwright's main-
+    // process execution context. Treat that window like an absent menu so
+    // expect.poll retries, while preserving all other evaluation failures.
+    if (!String(error.message).includes('Execution context was destroyed')) {
+      throw error
+    }
+    return undefined
+  }
+}
+
 test('subscription tabs expose feed-specific reload actions', async ({ app, page }) => {
   await goTo(page, 'subscriptions')
 
@@ -49,13 +67,7 @@ test('subscription tabs expose feed-specific reload actions', async ({ app, page
   for (const [index, { feedTab, label }] of feedTabs.entries()) {
     await page.locator(`[data-subscription-feed-tab="${feedTab}"]`).click({ button: 'right' })
 
-    await expect.poll(async () => {
-      return await app.electronApp.evaluate((_, menuIndex) => {
-        const menu = globalThis.__subscriptionContextMenus[menuIndex]
-        const reloadItem = menu && menu.find(item => item.label && item.label.startsWith('Reload'))
-        return reloadItem && reloadItem.label
-      }, index)
-    }).toBe(label)
+    await expect.poll(() => getCapturedReloadLabel(app.electronApp, index)).toBe(label)
   }
 
   // Unmount Subscriptions so invoking the captured actions only exercises the
