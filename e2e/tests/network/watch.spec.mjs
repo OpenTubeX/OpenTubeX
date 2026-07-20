@@ -73,6 +73,7 @@ test.describe('watch page', () => {
   test('fullscreen comments dock preserves its scroll position', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
 
     const loadComments = page.locator('.getCommentsTitle')
     await loadComments.scrollIntoViewIfNeeded()

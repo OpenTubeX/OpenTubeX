@@ -1,4 +1,5 @@
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
+import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 const PLAYLIST_URL = 'https://youtu.be/aqz-KE-bpKQ?list=UUSMOQeBJ2RAnuFungnQOxLg'
 
@@ -13,6 +14,7 @@ test('fullscreen playlist dock scrolls and preserves its position', async ({ pag
   const sidebar = page.locator('.playlistItemsWrapper')
   await expect(sidebar).toBeVisible({ timeout: 60000 })
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollHeight)).toBeGreaterThan(1000)
+  await waitForPlaybackOrSkip(test, page)
 
   await sidebar.evaluate((element) => { element.scrollTop = 420 })
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(420)

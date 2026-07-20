@@ -99,9 +99,10 @@ export async function launchApp(userDataDir, extraArgs = []) {
   try {
     electronApp = await electron.launch(launchOptions)
   } catch (error) {
-    // ETXTBSY is a transient Linux race when parallel workers spawn the
-    // Electron binary at the same moment - retry once.
-    if (!String(error.message).includes('ETXTBSY')) {
+    // Concurrent Linux launches can transiently fail with ETXTBSY or a
+    // startup SIGTRAP. Retry those process-launch failures once.
+    const message = String(error.message)
+    if (!['ETXTBSY', 'SIGTRAP', 'Process failed to launch'].some(value => message.includes(value))) {
       throw error
     }
     await new Promise((resolve) => setTimeout(resolve, 1000))

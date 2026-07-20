@@ -69,6 +69,11 @@ function defineCase () {
     await expect(page.getByText('Collab video')).toBeVisible()
     await expect(page.getByText('Filler video 9')).toBeAttached()
 
+    // Let the feed's initial 300ms enter transition and grid sizing settle
+    // before observing changes caused specifically by opening the prompt.
+    await page.waitForTimeout(350)
+    await expect(page.locator('.feed-enter-active, .feed-enter-from, .feed-move')).toHaveCount(0)
+
     // Watch for the TransitionGroup FLIP/enter classes appearing on any feed
     // item, and record item positions to detect layout shifts.
     await page.evaluate(() => {
