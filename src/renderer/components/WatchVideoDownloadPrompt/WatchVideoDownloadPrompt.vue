@@ -36,8 +36,9 @@
               @input="(value) => customArgs = value"
             />
           </FtFlexBox>
-          <FtFlexBox>
+          <FtFlexBox class="templateNameRow">
             <FtInput
+              class="templateNameInput"
               :placeholder="t('Downloads.Template Name')"
               :show-action-button="false"
               :show-label="true"

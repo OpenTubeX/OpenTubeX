@@ -8,9 +8,18 @@
 }
 
 .downloadTypeSelect,
-.customArgsInput {
+.customArgsInput,
+.templateNameInput {
   inline-size: 100%;
   max-inline-size: 500px;
+}
+
+.customArgsInput {
+  margin-block-start: 10px;
+}
+
+.templateNameRow {
+  align-items: center;
 }
 
 .templateArgs {
