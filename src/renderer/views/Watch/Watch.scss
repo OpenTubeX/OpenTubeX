@@ -218,10 +218,6 @@
       background-color: var(--secondary-card-bg-color);
     }
 
-    :deep(.chapterTimestamp) {
-      background-color: var(--secondary-card-bg-color);
-      color: var(--secondary-text-color);
-    }
   }
 
   &.ambientModeActive .watchVideoChaptersPanel {
