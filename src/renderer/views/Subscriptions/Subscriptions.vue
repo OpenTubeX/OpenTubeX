@@ -250,7 +250,7 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import {
   refreshSubscriptionLiveFromRemote,
@@ -347,7 +347,18 @@ const tabScrollPositions = {
 }
 
 let isMounted = false
+// Presentation becomes ready only after the app-level tab scroll has been restored.
+let isTabScrollReady = !isElectron
 let removeFeedReloadRequestListener = null
+
+useTabLifecycle({
+  activate() {
+    isTabScrollReady = true
+  },
+  deactivate() {
+    isTabScrollReady = false
+  }
+})
 
 onMounted(() => {
   isMounted = true
@@ -369,7 +380,7 @@ watch(currentTab, async (value, previousValue) => {
     localStorage.removeItem(currentTabStorageKey)
   }
 
-  if (!isMounted || (isElectron && isTabPresented?.value !== true)) {
+  if (!isMounted || !isTabScrollReady || (isElectron && isTabPresented?.value !== true)) {
     return
   }
 
@@ -378,6 +389,9 @@ watch(currentTab, async (value, previousValue) => {
   }
 
   await nextTick()
+  if (!isTabScrollReady || (isElectron && isTabPresented?.value !== true)) {
+    return
+  }
   window.scrollTo(0, value === null ? 0 : tabScrollPositions[value])
 })
 
