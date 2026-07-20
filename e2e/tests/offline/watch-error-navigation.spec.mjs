@@ -37,13 +37,7 @@ async function fixture(dir, name) {
   }
 }
 
-test('watch page IP-block error does not break later navigation', async ({ app, page }) => {
-  const errors = []
-  page.on('pageerror', (error) => errors.push(`pageerror: ${error}`))
-  page.on('console', (msg) => {
-    if (msg.type() === 'error') errors.push(`console: ${msg.text()}`)
-  })
-
+async function mockBlockedVideo({ app, page, beforePlayerResponse }) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('generate-po-token')
     ipcMain.handle('generate-po-token', () => 'test-po-token')
@@ -77,6 +71,7 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
     }
 
     if (url.includes('/youtubei/v1/player')) {
+      await beforePlayerResponse?.()
       const files = await readdir(fixtureDir)
       const body = await fixture(fixtureDir, files.find((file) => file.startsWith('player-')))
       const json = JSON.parse(body.toString())
@@ -104,6 +99,27 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
 
     return route.fallback()
   })
+}
+
+function captureRenderErrors(page) {
+  const errors = []
+  page.on('pageerror', (error) => errors.push(`pageerror: ${error}`))
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(`console: ${msg.text()}`)
+  })
+  return errors
+}
+
+function expectNoRenderErrors(errors) {
+  const renderErrors = errors.filter((error) =>
+    error.includes('emitsOptions') || error.includes('failed to render')
+  )
+  expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
+}
+
+test('watch page IP-block error does not break later navigation', async ({ app, page }) => {
+  const errors = captureRenderErrors(page)
+  await mockBlockedVideo({ app, page })
 
   await goTo(page, 'history')
   await page.getByText('Blocked test video').click()
@@ -115,8 +131,44 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
   await expect(page).toHaveURL(/#\/subscriptions/)
   await expect(page.locator('.subscriptionsPage')).toBeVisible()
 
-  const renderErrors = errors.filter((error) =>
-    error.includes('emitsOptions') || error.includes('failed to render')
-  )
-  expect(renderErrors, `Renderer errors:\n${errors.join('\n')}`).toEqual([])
+  expectNoRenderErrors(errors)
+})
+
+test('leaving a watch page while video metadata is loading keeps navigation responsive', async ({ app, page }) => {
+  const errors = captureRenderErrors(page)
+  let releasePlayerResponse
+  let notifyPlayerRequested
+  let playerResponseIsReleased = false
+  const playerResponseReleased = new Promise((resolve) => { releasePlayerResponse = resolve })
+  const playerRequested = new Promise((resolve) => { notifyPlayerRequested = resolve })
+
+  await mockBlockedVideo({
+    app,
+    page,
+    beforePlayerResponse: async () => {
+      notifyPlayerRequested()
+      await playerResponseReleased
+    }
+  })
+
+  try {
+    await goTo(page, 'history')
+    await page.getByText('Blocked test video').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await playerRequested
+
+    await page.locator('.topNav a[href="#/subscriptions"]').evaluate((link) => link.click())
+    playerResponseIsReleased = true
+    releasePlayerResponse()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await expect(page.locator('.subscriptionsPage')).toBeVisible()
+
+    await page.locator('.newTabButton').click()
+    await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+    await expect(page.locator('.tabContent[aria-hidden="false"] .subscriptionsPage')).toBeVisible()
+    await page.waitForTimeout(100)
+    expectNoRenderErrors(errors)
+  } finally {
+    if (!playerResponseIsReleased) releasePlayerResponse()
+  }
 })

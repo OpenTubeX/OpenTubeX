@@ -212,11 +212,11 @@
         @timestamp-event="changeTimestamp"
       />
       <Teleport
+        v-if="!isLoading && !isLive && !hideComments"
         :to="fullscreenCommentsTarget || 'body'"
         :disabled="!fullscreenCommentsOpen"
       >
         <CommentSection
-          v-if="!isLoading && !isLive && !hideComments"
           :id="videoId"
           class="watchVideo"
           :class="{ theatreWatchVideo: useTheatreMode }"
