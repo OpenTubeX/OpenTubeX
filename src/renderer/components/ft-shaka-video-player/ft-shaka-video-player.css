@@ -1939,7 +1939,8 @@
 
 .ftVideoPlayer:fullscreen :deep(.theatre-button),
 .ftVideoPlayer:fullscreen :deep(.full-window-button),
-.fullWindow :deep(.theatre-button) {
+.fullWindow :deep(.theatre-button),
+.theatreUnavailable :deep(.theatre-button) {
   display: none;
 }
 

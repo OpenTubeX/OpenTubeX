@@ -338,12 +338,7 @@ export default defineComponent({
     theatrePossible: function () {
       return this.showTranscript || !this.hideRecommendedVideos ||
         (!this.hideLiveChat && this.isLive) || this.watchingPlaylist ||
-        this.videoChapters.length > 0
-    },
-    hasSidebarContent: function () {
-      return this.showTranscript || this.showSidebarChapters ||
-        !this.hideRecommendedVideos || (!this.hideLiveChat && this.isLive) ||
-        this.watchingPlaylist
+        this.showSidebarChapters
     },
     autoplayPossible: function () {
       return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
@@ -434,11 +429,6 @@ export default defineComponent({
     userPlaylistsReady() {
       this.onMountedDependOnLocalStateLoading()
     },
-    theatrePossible(possible) {
-      if (this.isLoading && this.defaultViewingMode === 'theatre') {
-        this.useTheatreMode = possible
-      }
-    },
     enableWatchStats(enabled) {
       if (!enabled) {
         this.clearPendingWatchTime()
@@ -521,7 +511,14 @@ export default defineComponent({
       this.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
     },
     handleChaptersOverlayChange(open) {
+      const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&
+        this.defaultViewingMode === 'theatre'
+
       this.showSidebarChapters = open
+
+      if (shouldUseDefaultTheatreMode) {
+        this.useTheatreMode = true
+      }
     },
     handleChapterThumbnailsChange(thumbnails) {
       this.videoChapterThumbnails = thumbnails

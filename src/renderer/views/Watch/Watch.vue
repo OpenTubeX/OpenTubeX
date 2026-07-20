@@ -6,7 +6,7 @@
       ambientModeActive,
       isLoading,
       useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
-      noSidebar: !hasSidebarContent
+      noSidebar: !theatrePossible
     }"
   >
     <div

@@ -1,7 +1,10 @@
 <template>
   <div
     class="ftVideoPlayerHost"
-    :class="{ ambientWideLayout: theatrePossible && !useTheatreMode }"
+    :class="{
+      ambientWideLayout: theatrePossible && !useTheatreMode,
+      theatreUnavailable: !theatrePossible
+    }"
   >
     <canvas
       v-show="ambientModeVisible"
