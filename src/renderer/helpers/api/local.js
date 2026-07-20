@@ -2251,7 +2251,7 @@ export function parseLocalComment(comment, commentThread = undefined) {
     authorLink: comment.author.id,
     author: comment.author.name,
     authorId: comment.author.id,
-    authorThumb: comment.author.best_thumbnail.url,
+    authorThumb: comment.author.best_thumbnail?.url ?? '',
     isPinned: comment.is_pinned,
     isOwner: !!comment.author_is_channel_owner,
     isMember: !!comment.is_member,

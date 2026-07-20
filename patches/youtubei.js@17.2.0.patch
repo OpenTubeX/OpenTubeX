@@ -1,3 +1,20 @@
+diff --git a/dist/src/parser/classes/comments/CommentView.js b/dist/src/parser/classes/comments/CommentView.js
+--- a/dist/src/parser/classes/comments/CommentView.js
++++ b/dist/src/parser/classes/comments/CommentView.js
+@@ -77,10 +77,11 @@ export default class CommentView extends YTNode {
+                     a11y: comment.author.A11y
+                 };
+             }
++            const avatar = comment.avatar;
+             this.author = new Author({
+                 simpleText: comment.author.displayName,
+-                navigationEndpoint: comment.avatar.endpoint
+-            }, comment.author, comment.avatar.image, comment.author.channelId);
++                navigationEndpoint: avatar?.endpoint
++            }, comment.author, avatar?.image, comment.author.channelId);
+         }
+         if (toolbar_state) {
+             this.is_hearted = toolbar_state.heartState === 'TOOLBAR_HEART_STATE_HEARTED';
 diff --git a/dist/src/parser/classes/comments/CommentReplies.d.ts b/dist/src/parser/classes/comments/CommentReplies.d.ts
 index 3a48b70d187b2f854452d56ce292d2548b660f27..4b5ea214f8ae2a208b0d00191473012e4d4aaa75 100644
 --- a/dist/src/parser/classes/comments/CommentReplies.d.ts

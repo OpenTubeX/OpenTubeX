@@ -9,7 +9,7 @@ overrides:
   yauzl: '>=3.3.1'
 
 patchedDependencies:
-  youtubei.js@17.2.0: 3193def499b087f28e0c3b617ff87e80694c58fa46e255cec6b7dcbb15516e09
+  youtubei.js@17.2.0: 5062fcdebe048b48ccd6a8a1e9dd8797c1b9ae83f7fc11add8f8928b4d4f0c83
 
 importers:
 
@@ -80,7 +80,7 @@ importers:
         version: 4.1.0(vue@3.5.39)
       youtubei.js:
         specifier: ^17.2.0
-        version: 17.2.0(patch_hash=3193def499b087f28e0c3b617ff87e80694c58fa46e255cec6b7dcbb15516e09)
+        version: 17.2.0(patch_hash=5062fcdebe048b48ccd6a8a1e9dd8797c1b9ae83f7fc11add8f8928b4d4f0c83)
     devDependencies:
       '@babel/core':
         specifier: ^8.0.1
@@ -10646,7 +10646,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@17.2.0(patch_hash=3193def499b087f28e0c3b617ff87e80694c58fa46e255cec6b7dcbb15516e09):
+  youtubei.js@17.2.0(patch_hash=5062fcdebe048b48ccd6a8a1e9dd8797c1b9ae83f7fc11add8f8928b4d4f0c83):
     dependencies:
       '@bufbuild/protobuf': 2.1.0
       fflate: 0.8.3
