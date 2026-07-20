@@ -272,6 +272,11 @@
   transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Keep the outgoing panel in its three-way slot until its slide completes. */
+.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen .chapterOverlay.chapter-slide-leave-active {
+  inset-block-start: calc(66.666% + 6px);
+}
+
 /* The docked panel keeps a 12px margin, so slide a bit further to leave no sliver. */
 .chapter-slide-enter-from,
 .chapter-slide-leave-to {
@@ -1247,12 +1252,15 @@
   inset-block-end: calc(50% + 6px);
 }
 
-/* Comments and playlist share the dock when chapters is closed. */
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenCommentsOverlay {
+/*
+  Prepare the closed panel in its eventual slot before it slides in. This keeps
+  its entrance horizontal while the panel that is already open resizes.
+*/
+.ftVideoPlayer.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenCommentsOverlay {
   inset-block-end: calc(50% + 6px);
 }
 
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenPlaylistOverlay {
+.ftVideoPlayer.fullscreenCommentsOpen:not(.chaptersOverlayOpen) .fullscreenPlaylistOverlay {
   inset-block-start: calc(50% + 6px);
 }
 
@@ -1261,11 +1269,11 @@
   transition: none !important;
 }
 
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenCommentsOverlay {
+.ftVideoPlayer.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenCommentsOverlay {
   inset-block-end: calc(66.666% + 6px);
 }
 
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenPlaylistOverlay {
+.ftVideoPlayer.fullscreenCommentsOpen.chaptersOverlayOpen .fullscreenPlaylistOverlay {
   inset-block: calc(33.333% + 6px);
 }
 
