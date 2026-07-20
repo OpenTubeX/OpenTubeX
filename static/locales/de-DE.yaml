@@ -21,6 +21,9 @@ Close: Schließen
 Close Tab: Tab schließen
 Back: Zurück
 Forward: Vorwärts
+Use Vertical Tabs: Vertikale Tabs verwenden
+Use Horizontal Tabs: Horizontale Tabs verwenden
+Resize Tab Bar: Größe der Tableiste ändern
 
 # Global
 # Anything shared among components / views should be put here
@@ -209,6 +212,9 @@ History:
   Search bar placeholder: Im Verlauf suchen
   Empty Search Message: Es gibt keine Videos in deinem Verlauf, die deiner Suche entsprechen
   Case Sensitive Search: Groß- und Kleinschreibung bei der Suche beachten
+  Mark All As Watched: Alle als angesehen markieren
+  Mark All As Watched Confirmation: Möchtest du wirklich alle Videos in deinem Verlauf als angesehen markieren?
+  All History Marked as Watched: Alle Videos in deinem Verlauf wurden als angesehen markiert
   DateOldestHistory: Wiedergabedatum (älteste)
   DateNewestHistory: Wiedergabedatum (neueste)
   Delete Old History: Alten Verlauf löschen
@@ -277,6 +283,11 @@ Settings:
     Minimize to system tray: In die Systemleiste minimieren
     Remember Tab Navigation History: Tab-Navigationsverlauf merken
     Confirm Before Closing App: Bestätigen vor dem Beenden von OpenTubeX
+    Reduced Motion:
+      Reduced Motion: Bewegungen reduzieren
+      System: System
+      Force On: Immer aktiviert
+      Force Off: Immer deaktiviert
     New Tab Position:
       New Tab Position: Neuer Tab Position
       At the end: Am Ende
@@ -760,6 +771,7 @@ Settings:
     System yt-dlp Missing Warning: yt-dlp wurde auf deinem System nicht gefunden. Installiere es, lege unten einen benutzerdefinierten Pfad fest oder wechsle die Quelle auf „Von OpenTubeX verwaltet“.
     Download yt-dlp: yt-dlp herunterladen
     Update yt-dlp: yt-dlp aktualisieren
+    Checking yt-dlp: yt-dlp wird überprüft…
     Downloading yt-dlp: yt-dlp wird heruntergeladen…
     yt-dlp Downloaded Template: yt-dlp {version} wurde heruntergeladen
     yt-dlp Download Error Template: 'Herunterladen von yt-dlp fehlgeschlagen: {error}'
@@ -769,9 +781,16 @@ Settings:
     System FFmpeg Missing Warning: FFmpeg wurde auf deinem System nicht gefunden. Es wird zum Zusammenführen von Video und Audio sowie zur Audiokonvertierung benötigt. Installiere es, lege unten einen benutzerdefinierten Pfad fest oder wechsle die Quelle auf „Von OpenTubeX verwaltet“.
     Download FFmpeg: FFmpeg herunterladen
     Update FFmpeg: FFmpeg aktualisieren
+    Checking FFmpeg: FFmpeg wird überprüft…
     Downloading FFmpeg: FFmpeg wird heruntergeladen…
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
+    Managed Tools Download Started Template: 'Für das Herunterladen von Videos erforderliche Tools wurden nicht gefunden: {tools}. Verwaltete Kopien werden heruntergeladen…'
+    Managed Tools Download Finished Template: 'Herunterladen von {tools} abgeschlossen'
+    Managed Tools Update Started Template: 'Für {tools} wurde ein Update gefunden. Es wird heruntergeladen…'
+    Managed Tools Update Finished Template: 'Aktualisierung von {tools} abgeschlossen'
+    Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
+    Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
     Download Folder: Download-Ordner
@@ -935,8 +954,10 @@ Video:
 #& Videos
   Video has been removed from your history: Video wurde aus deinem Verlauf entfernt
   Video has been marked as watched: Video wurde als angesehen markiert
+  Video has been unmarked as watched: Video wurde als nicht angesehen markiert
   Remove From History: Aus dem Verlauf entfernen
   Mark As Watched: Als angesehen markieren
+  Unmark As Watched: Als nicht angesehen markieren
   Autoplay: Automatische Wiedergabe
   Previous: Vorheriges
   Next: Weiter
@@ -1001,6 +1022,8 @@ Video:
       Cancel timer: Timer abbrechen
       Timer ended: Einschlaftimer abgelaufen
     Audio Tracks: Audiospuren
+    Up next in {seconds}: Als Nächstes in {seconds}
+    Play now: Jetzt abspielen
     Normal: Normal
     Set Default: Standard setzen
     Theatre Mode: Kinomodus
@@ -1111,6 +1134,7 @@ Video:
   Collaborators: Collab-Partner
 Playlist:
   #& About
+  Close Playlist: Playlist schließen
   View Full Playlist: Vollständige Playlist ansehen
   Last Updated On: Zuletzt aktualisiert am
   Playlist: Playlist
@@ -1398,6 +1422,16 @@ Description:
   Video Category: 'Video-Kategorie:'
 KeyboardShortcutPrompt:
   Keyboard Shortcuts: Tastenkombinationen
+  Edit Hint: Wähle einen Kurzbefehl aus und drücke dann eine neue Tastenkombination. Drücke die Rücktaste oder Entf, um die Zuweisung aufzuheben.
+  Change Shortcut: 'Tastenkombination für {action} ändern'
+  Press Shortcut: Tastenkombination drücken…
+  Unassigned: Nicht zugewiesen
+  Reset to Defaults: Auf Standardwerte zurücksetzen
+  Shortcut Already Assigned: Tastenkombination bereits zugewiesen
+  Shortcut Conflict: '{shortcut} ist bereits für {actions} belegt. Möchtest du die Tastenkombination neu zuweisen?'
+  Reserved Shortcut Conflict: '{shortcut} ist für {actions} reserviert und kann nicht neu zugewiesen werden.'
+  Reassign: Neu zuweisen
+  Undo: Rückgängig
   Sections:
     Video:
       Playback: 'Video: Wiedergabe'
@@ -1446,6 +1480,7 @@ KeyboardShortcutPrompt:
   Skip by Tenths: Prozentuales Überspringen des Videos (3 Sprünge bis 30% der Dauer)
   Next Frame: Nächstes Bild (bei pausierter Wiedergabe)
   Small Rewind: X Sekunden zurückspulen, basierend auf dem Rückspulintervall und der aktuellen Wiedergabegeschwindigkeit
+  Toggle Fast-Forward Through Silence: Vorspulen von Stille umschalten
   End: Zum Ende des Videos springen
   Home: Zum Anfang des Videos springen
   Skip to Next Video: Zum nächsten Video in der Playlist bzw. nächsten empfohlenen Video springen
