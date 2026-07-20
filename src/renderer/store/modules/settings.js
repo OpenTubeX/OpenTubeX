@@ -6,6 +6,7 @@ import { hashPassword } from '../../helpers/passwords'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
+import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -385,6 +386,7 @@ const state = {
 
   // The settings below have side effects
   currentLocale: 'system',
+  reducedMotion: 'system',
   defaultInvidiousInstance: '',
   defaultVolume: 1,
   uiScale: 100,
@@ -393,6 +395,10 @@ const state = {
 }
 
 const sideEffectHandlers = {
+  reducedMotion: (store, value) => {
+    setReducedMotionPreference(value)
+  },
+
   currentLocale: async ({ dispatch }, value) => {
     const fallbackLocale = 'en-US'
 

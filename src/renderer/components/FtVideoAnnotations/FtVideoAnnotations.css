@@ -219,11 +219,3 @@
 :global(.scrollMiniPlayer) .videoAnnotations {
   display: none;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .annotation,
-  .channelAvatarLink,
-  .channelHovercard {
-    transition: none;
-  }
-}

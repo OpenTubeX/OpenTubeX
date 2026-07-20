@@ -137,6 +137,14 @@
         @change="updateCurrentLocale"
       />
       <FtSelect
+        :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
+        :value="reducedMotion"
+        :select-names="reducedMotionNames"
+        :select-values="REDUCED_MOTION_VALUES"
+        :icon="['fas', 'gauge']"
+        @change="updateReducedMotion"
+      />
+      <FtSelect
         v-if="SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
@@ -528,6 +536,24 @@ const currentLocale = computed(() => store.getters.getCurrentLocale)
  */
 function updateCurrentLocale(value) {
   store.dispatch('updateCurrentLocale', value)
+}
+
+const REDUCED_MOTION_VALUES = ['system', 'on', 'off']
+
+const reducedMotionNames = computed(() => [
+  t('Settings.General Settings.Reduced Motion.System'),
+  t('Settings.General Settings.Reduced Motion.Force On'),
+  t('Settings.General Settings.Reduced Motion.Force Off')
+])
+
+/** @type {import('vue').ComputedRef<'system' | 'on' | 'off'>} */
+const reducedMotion = computed(() => store.getters.getReducedMotion)
+
+/**
+ * @param {'system' | 'on' | 'off'} value
+ */
+function updateReducedMotion(value) {
+  store.dispatch('updateReducedMotion', value)
 }
 
 /** @type {import('vue').ComputedRef<'disabled' | 'watch_only' | 'entire_app'>} */

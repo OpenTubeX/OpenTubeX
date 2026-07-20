@@ -414,18 +414,6 @@
   visibility: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :deep(.shaka-overflow-menu-button > .shaka-ui-icon),
-  :deep(.ft-caption-toggle-icon),
-  :deep(.ft-caption-toggle-slash),
-  :deep(.ft-play-pause-morph-icon > path),
-  :deep(.ft-mute-toggle-slash),
-  :deep(.ft-autoplay-switch),
-  :deep(.ft-autoplay-switch > .ft-autoplay-switch-thumb) {
-    transition: none;
-  }
-}
-
 /*
   Lift the controls container above other overlays while a menu is open. It has
   to clear the chapters overlay (z-index: 4) too, otherwise the settings/overflow
@@ -1097,19 +1085,6 @@
 .ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenCommentsToggle,
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsToggle {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .player,
-  .fullscreenCommentsOverlay,
-  .fullscreenCommentsToggle,
-  .ambientFullscreenCanvas,
-  .chapterOverlay,
-  :deep(.shaka-controls-container),
-  :deep(.shaka-text-container),
-  :deep(.shaka-speech-to-text-container) {
-    transition: none;
-  }
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),

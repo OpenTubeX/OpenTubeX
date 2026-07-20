@@ -250,13 +250,6 @@
     opacity: 1;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .chapters-panel-enter-active,
-    .chapters-panel-leave-active {
-      transition: none;
-    }
-  }
-
   .chaptersPanelHeader {
     display: flex;
     flex: 0 0 46px;

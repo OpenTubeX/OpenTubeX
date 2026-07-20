@@ -214,6 +214,11 @@ Settings:
     Enable Search Suggestions: 'Enable search suggestions'
     Default Landing Page: 'Default landing page'
     Locale Preference: 'Language preference'
+    Reduced Motion:
+      Reduced Motion: Reduced Motion
+      System: System
+      Force On: Force on
+      Force Off: Force off
     Preferred API Backend:
       Preferred API Backend: 'Preferred API backend'
       Local API: 'Local API'

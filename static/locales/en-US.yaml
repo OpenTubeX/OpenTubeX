@@ -368,6 +368,11 @@ Settings:
       Load last active tab: Load last active tab
       Start with an empty session: Start with an empty session
     Locale Preference: Locale Preference
+    Reduced Motion:
+      Reduced Motion: Reduced Motion
+      System: System
+      Force On: Force on
+      Force Off: Force off
     System Default: System Default
     Avoid translation:
       Avoid translation: Keep original text

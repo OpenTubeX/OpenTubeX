@@ -14,6 +14,7 @@ import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPl
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import {
   buildChaptersVttFile,
@@ -504,7 +505,7 @@ export default defineComponent({
       this.theatreModeAnimations.forEach(animation => animation.cancel())
       this.theatreModeAnimations = []
 
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (isReducedMotionEnabled()) {
         this.useTheatreMode = !this.useTheatreMode
         return
       }

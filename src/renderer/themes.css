@@ -2123,18 +2123,19 @@ a:visited {
 
 /* stylelint-enable no-descending-specificity */
 
-@media (prefers-reduced-motion) {
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
-
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
-  }
+/* stylelint-disable no-descending-specificity */
+:root[data-reduced-motion='reduce'],
+:root[data-reduced-motion='reduce'] * {
+  transition: none !important;
+  animation: none !important;
 }
+
+:root[data-reduced-motion='reduce']::view-transition-group(*),
+:root[data-reduced-motion='reduce']::view-transition-old(*),
+:root[data-reduced-motion='reduce']::view-transition-new(*) {
+  animation: none !important;
+}
+/* stylelint-enable no-descending-specificity */
 
 /* thumbnail-to-player morph (only runs for navigations
    wrapped by helpers/viewTransitions.js).

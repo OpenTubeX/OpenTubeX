@@ -49,6 +49,7 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
+import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
@@ -4413,8 +4414,7 @@ export default defineComponent({
         suppressPanelTransitions(FULL_WINDOW_ANIMATION_DURATION_MS + 50)
 
         const playerContainer = container.value
-        const shouldAnimate = playerContainer !== null &&
-          !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        const shouldAnimate = playerContainer !== null && !isReducedMotionEnabled()
         const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
         if (event.detail) {
