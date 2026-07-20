@@ -44,6 +44,13 @@ const config = {
     path: path.join(__dirname, '../dist'),
     filename: '[name].js',
   },
+  // The renderer is loaded from the local Electron package, so Webpack's
+  // 250 kB web-delivery budget is not representative. Keep a realistic limit
+  // so unexpected bundle growth still produces a warning.
+  performance: {
+    maxAssetSize: 4 * 1024 * 1024,
+    maxEntrypointSize: 4 * 1024 * 1024
+  },
   module: {
     rules: [
       {
