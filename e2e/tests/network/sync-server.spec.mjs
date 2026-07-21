@@ -298,4 +298,108 @@ test.describe('OpenTubeX sync server', () => {
     expect(plaintextResponse.status).toBe(409)
   })
 
+  test('uses advertised history optimizations without rewriting unchanged local data', async ({ app, page }) => {
+    const username = `opentubex-fast-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const bulkRequests = []
+    const historyPageSizes = []
+
+    await page.route('**/v1/capabilities', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 })
+    }))
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
+      if (url.pathname.endsWith('/watch_history/')) {
+        historyPageSizes.push(url.searchParams.get('page_size'))
+      }
+    })
+
+    await goTo(page, 'settings')
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    expect(bulkRequests).toEqual(expect.arrayContaining([
+      '/v1/subscriptions/bulk',
+      '/v1/watch_history/bulk'
+    ]))
+    expect(historyPageSizes).toContain('1000')
+
+    const historyPath = path.join(app.userDataDir, 'history.db')
+    const settingsPath = path.join(app.userDataDir, 'settings.db')
+    const historyLinesAfterFirstSync = (await readFile(historyPath, 'utf8')).trim().split('\n').length
+    const firstSyncAt = latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+    bulkRequests.length = 0
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect.poll(async () => {
+      return latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+    }).toBeGreaterThan(firstSyncAt)
+
+    expect(bulkRequests).not.toContain('/v1/watch_history/bulk')
+    expect((await readFile(historyPath, 'utf8')).trim().split('\n')).toHaveLength(
+      historyLinesAfterFirstSync
+    )
+
+    const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+    const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: settings.syncServerToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanupResponse.ok).toBe(true)
+  })
+
+  test('uses concurrent legacy writes when bulk sync is not advertised', async ({ page }) => {
+    const username = `opentubex-legacy-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    let activeSubscriptionWrites = 0
+    let maxConcurrentSubscriptionWrites = 0
+    const bulkRequests = []
+    const historyPageSizes = []
+
+    await page.route('**/v1/capabilities', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ encrypted_sync: 0 })
+    }))
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (url.pathname.endsWith('/bulk')) bulkRequests.push(url.pathname)
+      if (url.pathname.endsWith('/watch_history/')) {
+        historyPageSizes.push(url.searchParams.get('page_size'))
+      }
+    })
+    await page.route('**/v1/subscriptions/', async route => {
+      if (route.request().method() === 'PUT') {
+        activeSubscriptionWrites++
+        maxConcurrentSubscriptionWrites = Math.max(
+          maxConcurrentSubscriptionWrites,
+          activeSubscriptionWrites
+        )
+        await new Promise(resolve => setTimeout(resolve, 150))
+        activeSubscriptionWrites--
+      }
+      await route.continue()
+    })
+
+    await goTo(page, 'settings')
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    expect(maxConcurrentSubscriptionWrites).toBeGreaterThan(1)
+    expect(bulkRequests).toEqual([])
+    expect(historyPageSizes).toContain(null)
+  })
 })

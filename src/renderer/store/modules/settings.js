@@ -728,6 +728,10 @@ const customActions = {
             commit('updateRecordLastViewedPlaylistIdInHistoryCache', data)
             break
 
+          case SyncEvents.HISTORY.APPLY_SYNC_CHANGES:
+            commit('applyHistorySyncChanges', data)
+            break
+
           case SyncEvents.GENERAL.DELETE:
             commit('removeFromHistoryCacheById', data)
             break

@@ -123,6 +123,21 @@ class History {
     await db.history.insertAsync(migratedRecords)
   }
 
+  static async applySyncChanges({ insertions, updates, deletions }) {
+    const migratedInsertions = insertions.map(migrateLegacyHistoryRecord)
+    const migratedUpdates = updates.map(migrateLegacyHistoryRecord)
+
+    if (deletions.length > 0) {
+      await db.history.removeAsync({ videoId: { $in: deletions } }, { multi: true })
+    }
+    for (const record of migratedUpdates) {
+      await db.history.updateAsync({ videoId: record.videoId }, record, { upsert: true })
+    }
+    if (migratedInsertions.length > 0) {
+      await db.history.insertAsync(migratedInsertions)
+    }
+  }
+
   static migrateWatchedStatus() {
     this.migrationPromise ??= this._migrateWatchedStatus()
     return this.migrationPromise

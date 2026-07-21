@@ -85,6 +85,20 @@ const actions = {
     }
   },
 
+  async applyHistorySyncChanges({ commit }, changes) {
+    try {
+      const migratedChanges = {
+        insertions: changes.insertions.map(migrateLegacyHistoryRecord),
+        updates: changes.updates.map(migrateLegacyHistoryRecord),
+        deletions: changes.deletions,
+      }
+      await DBHistoryHandlers.applySyncChanges(migratedChanges)
+      commit('applyHistorySyncChanges', migratedChanges)
+    } catch (errMessage) {
+      console.error(errMessage)
+    }
+  },
+
   async markAllHistoryAsWatched({ dispatch, state }) {
     let markedCount = 0
     const records = state.historyCacheSorted.map(record => {
@@ -225,6 +239,23 @@ const mutations = {
 
     for (const videoId of videoIds) {
       delete state.historyCacheById[videoId]
+    }
+  },
+
+  applyHistorySyncChanges(state, { insertions, updates, deletions }) {
+    const upserts = [...insertions, ...updates]
+    const changedIds = new Set([...deletions, ...upserts.map(record => record.videoId)])
+
+    state.historyCacheSorted = state.historyCacheSorted
+      .filter(record => !changedIds.has(record.videoId))
+      .concat(upserts)
+      .sort((a, b) => b.timeWatched - a.timeWatched)
+
+    for (const videoId of deletions) {
+      delete state.historyCacheById[videoId]
+    }
+    for (const record of upserts) {
+      state.historyCacheById[record.videoId] = record
     }
   }
 }

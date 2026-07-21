@@ -44,6 +44,10 @@ class History {
     return dbHistory(DBActions.GENERAL.OVERWRITE, records)
   }
 
+  static applySyncChanges(changes) {
+    return dbHistory(DBActions.HISTORY.APPLY_SYNC_CHANGES, changes)
+  }
+
   static updateWatchProgress(videoId, watchProgress) {
     return dbHistory(
       DBActions.HISTORY.UPDATE_WATCH_PROGRESS,

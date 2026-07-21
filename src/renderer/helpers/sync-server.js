@@ -2,8 +2,9 @@ import { MAIN_PROFILE_ID } from '../../constants'
 import { deepCopy } from './utils'
 import { generateRandomUniqueId } from './playlists'
 
-const HISTORY_PAGE_SIZE = 50
+const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
+const LEGACY_SYNC_CONCURRENCY = 4
 const REQUEST_TIMEOUT_MS = 20_000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
@@ -44,6 +45,7 @@ export class SyncServerClient {
     this.serverUrl = normalizeSyncServerUrl(serverUrl)
     this.token = token
     this.apiPrefix = null
+    this.capabilitiesPromise = null
   }
 
   async request(path, options = {}) {
@@ -95,14 +97,19 @@ export class SyncServerClient {
     return this.request('/health')
   }
 
+  getCapabilities() {
+    this.capabilitiesPromise ??= this.request('/v1/capabilities')
+    return this.capabilitiesPromise
+  }
+
   async supportsEncryptedSync() {
-    try {
-      const capabilities = await this.request('/v1/capabilities')
-      return capabilities?.encrypted_sync === 1
-    } catch (error) {
-      if (error.status === 404) return false
-      throw error
-    }
+    const capabilities = await this.getCapabilities()
+    return capabilities.encrypted_sync === 1
+  }
+
+  async supportsBulkSync() {
+    const capabilities = await this.getCapabilities()
+    return capabilities.bulk_sync === 1
   }
 
   getEncryptedSync() {
@@ -212,17 +219,24 @@ export class SyncServerClient {
 
   async getWatchHistory() {
     const history = []
+    const capabilities = await this.getCapabilities()
+    const pageSize = Number.isInteger(capabilities.history_page_size)
+      ? capabilities.history_page_size
+      : LEGACY_HISTORY_PAGE_SIZE
+    const pageSizeQuery = capabilities.history_page_size ? `&page_size=${pageSize}` : ''
 
     for (let page = 1; ; page++) {
       let entries
       try {
-        entries = await this.apiRequest(`/watch_history/?page=${page}&order=added_date_desc`)
+        entries = await this.apiRequest(
+          `/watch_history/?page=${page}&order=added_date_desc${pageSizeQuery}`
+        )
       } catch (error) {
         if (error.status === 404) return null
         throw error
       }
       history.push(...entries)
-      if (entries.length < HISTORY_PAGE_SIZE) {
+      if (entries.length < pageSize) {
         return history
       }
     }
@@ -265,21 +279,32 @@ function mapBy(items, getId) {
   return new Map(items.map(item => [getId(item), item]))
 }
 
-async function uploadInChunks(items, uploadBulk, uploadSingle) {
+async function uploadInChunks(items, supportsBulk, uploadBulk, uploadSingle) {
   if (items.length === 0) return
 
-  try {
+  if (supportsBulk) {
     for (let index = 0; index < items.length; index += BULK_SYNC_CHUNK_SIZE) {
       await uploadBulk(items.slice(index, index + BULK_SYNC_CHUNK_SIZE))
     }
     return
-  } catch (error) {
-    if (error.status !== 404) throw error
   }
 
   // Older LibreTube-compatible servers do not expose bulk endpoints.
-  for (const item of items) {
-    await uploadSingle(item)
+  for (let index = 0; index < items.length; index += LEGACY_SYNC_CONCURRENCY) {
+    const chunk = items.slice(index, index + LEGACY_SYNC_CONCURRENCY)
+    const results = await Promise.allSettled(chunk.map(uploadSingle))
+
+    for (let resultIndex = 0; resultIndex < results.length; resultIndex++) {
+      const result = results[resultIndex]
+      if (result.status === 'fulfilled') continue
+
+      const status = result.reason?.status
+      const retryable = status === 409 || status === 423 || status === 429 || status >= 500
+      if (!retryable) throw result.reason
+
+      // Some legacy SQLite servers reject concurrent writes instead of queuing them.
+      await uploadSingle(chunk[resultIndex])
+    }
   }
 }
 
@@ -425,6 +450,7 @@ export async function syncSubscriptions(client, store, previousIds = []) {
     .map(id => channelToRemote(localById.get(id)))
   await uploadInChunks(
     subscriptionsToAdd,
+    await client.supportsBulkSync(),
     channels => client.subscribeBulk(channels),
     channel => client.subscribe(channel)
   )
@@ -637,21 +663,34 @@ function historyToLocal(entry) {
   }
 }
 
+function historyStateEquals(localPayload, remote) {
+  return localPayload.metadata.added_date === remote.metadata.added_date &&
+    localPayload.metadata.watched_state === remote.metadata.watched_state &&
+    localPayload.metadata.position_millis === remote.metadata.position_millis
+}
+
 export async function syncHistory(client, store, previousIds = []) {
   const localHistory = store.state.history.historyCacheSorted
   const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
-  const unsyncableLocalHistory = localHistory.filter(record => historyToRemote(record) === null)
   const localById = mapBy(syncableLocalHistory, record => record.videoId)
   const remoteHistory = await client.getWatchHistory()
   if (remoteHistory === null) return null
   const remoteById = mapBy(remoteHistory, entry => entry.video.id)
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds)
-  const mergedHistory = [...unsyncableLocalHistory]
   const historyToUpload = []
+  const localInsertions = []
+  const localUpdates = []
+  const localDeletions = []
 
   for (const id of remoteById.keys()) {
     if (!mergedIds.has(id)) {
       await client.deleteWatchHistory(id)
+    }
+  }
+
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id)) {
+      localDeletions.push(id)
     }
   }
 
@@ -660,23 +699,34 @@ export async function syncHistory(client, store, previousIds = []) {
     const remote = remoteById.get(id)
     const useLocal = local && (!remote || local.timeWatched >= remote.metadata.added_date)
     const merged = useLocal ? local : historyToLocal(remote)
-    const remotePayload = historyToRemote(merged)
+    const localPayload = local ? historyToRemote(local) : null
 
-    if (useLocal && remotePayload) {
-      historyToUpload.push(remotePayload)
+    if (useLocal && localPayload && (
+      !remote ||
+      local.timeWatched > remote.metadata.added_date ||
+      !historyStateEquals(localPayload, remote)
+    )) {
+      historyToUpload.push(localPayload)
+    } else if (!useLocal) {
+      if (local) localUpdates.push(merged)
+      else localInsertions.push(merged)
     }
-    mergedHistory.push(merged)
   }
 
   await uploadInChunks(
     historyToUpload,
+    await client.supportsBulkSync(),
     entries => client.putWatchHistoryBulk(entries),
     entry => client.putWatchHistory(entry)
   )
 
-  await store.dispatch('overwriteHistory', new Map(
-    mergedHistory.map(record => [record.videoId, record])
-  ))
+  if (localInsertions.length > 0 || localUpdates.length > 0 || localDeletions.length > 0) {
+    await store.dispatch('applyHistorySyncChanges', {
+      insertions: localInsertions,
+      updates: localUpdates,
+      deletions: localDeletions,
+    })
+  }
 
   return Array.from(mergedIds)
 }
