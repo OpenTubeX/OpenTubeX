@@ -817,6 +817,10 @@ Settings:
     Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
     Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
     yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
+    FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
+    Download Folder: 'Pobierane pliki zapisuj do:'
+    Choose Download Folder: Wybierz folder pobierania
+    Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
 About:
   #On About page
   About: 'O projekcie'
