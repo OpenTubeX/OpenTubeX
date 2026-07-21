@@ -209,11 +209,11 @@ const listType = computed(() => {
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
   if (!props.hideForbiddenTitles) { return [] }
-  return JSON.parse(store.getters.getForbiddenTitles)
+  return store.getters.getForbiddenTitlesParsed
 })
 
 const hideVideo = computed(() => {
-  return forbiddenTitles.value.some((text) => props.data.postContent.content.title?.toLowerCase().includes(text.toLowerCase()))
+  return forbiddenTitles.value.some((text) => props.data.postContent.content.title?.toLowerCase().includes(text))
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

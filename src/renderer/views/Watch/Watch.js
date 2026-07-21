@@ -377,16 +377,10 @@ export default defineComponent({
       return this.sponsorBlockAutoSkipTemporarilyDisabled || this.isSponsorBlockChannelWhitelisted
     },
     channelsHidden() {
-      return JSON.parse(this.$store.getters.getChannelsHidden).map((ch) => {
-        // Legacy support
-        if (typeof ch === 'string') {
-          return { name: ch, preferredName: '', icon: '' }
-        }
-        return ch
-      })
+      return this.$store.getters.getChannelsHiddenParsed
     },
     forbiddenTitles() {
-      return JSON.parse(this.$store.getters.getForbiddenTitles.toLowerCase())
+      return this.$store.getters.getForbiddenTitlesParsed
     },
     isUserPlaylistRequested: function () {
       return this.tabRoute.query.playlistType === 'user'

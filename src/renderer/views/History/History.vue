@@ -302,14 +302,15 @@ function handleMarkAllPrompt(value) {
 }
 
 const fullData = computed(() => {
-  if (historyCacheSorted.value.length < dataLimit.value) {
-    return historyCacheSorted.value
-  } else {
-    return historyCacheSorted.value.slice(0, dataLimit.value)
-  }
+  // Always copy, so that structural changes (added/removed/reordered entries)
+  // produce a new array and trigger the watcher below without it having to
+  // deep watch every record. In-place record field updates (e.g. watch
+  // progress) don't affect the filtering, the list items react to those
+  // themselves.
+  return historyCacheSorted.value.slice(0, dataLimit.value)
 })
 
-watch(fullData, filterHistory, { deep: true })
+watch(fullData, filterHistory)
 watch(doCaseSensitiveSearch, () => {
   filterHistory()
   saveStateInRouter()

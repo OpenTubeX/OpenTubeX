@@ -553,7 +553,7 @@ const progressPercentage = computed(() => {
 })
 
 /** @type {import('vue').ComputedRef<any[]>} */
-const hiddenChannels = computed(() => JSON.parse(store.getters.getChannelsHidden))
+const hiddenChannels = computed(() => store.getters.getChannelsHiddenParsed)
 
 const playlistSharable = computed(() => {
   // `playlistId` can be undefined
@@ -658,7 +658,7 @@ const dropdownOptions = computed(() => {
   }
 
   if (channelId.value !== null && !inSubscriptions.value) {
-    const channelShouldBeHidden = hiddenChannels.value.some(c => c.name === channelId.value)
+    const channelShouldBeHidden = store.getters.getChannelsHiddenNames.has(channelId.value)
 
     options.push(
       {

@@ -627,6 +627,29 @@ const customState = {
 }
 
 const customGetters = {
+  // These parsed variants are cached by Vuex,
+  // so that list items don't each have to parse the JSON strings themselves
+
+  getChannelsHiddenParsed: (state) => {
+    return JSON.parse(state.channelsHidden).map((ch) => {
+      // Legacy support
+      if (typeof ch === 'string') {
+        return { name: ch, preferredName: '', icon: '' }
+      }
+      return ch
+    })
+  },
+
+  /** Set of the `name` values in `channelsHidden` for cheap exact-match lookups */
+  getChannelsHiddenNames: (_state, getters) => {
+    return new Set(getters.getChannelsHiddenParsed.map((ch) => ch.name))
+  },
+
+  /** Lowercased for case-insensitive matching */
+  getForbiddenTitlesParsed: (state) => {
+    return JSON.parse(state.forbiddenTitles).map((title) => title.toLowerCase())
+  },
+
   getTransferableSettings: (state) => {
     const transferableSettings = {}
     for (const [key, value] of Object.entries(state)) {

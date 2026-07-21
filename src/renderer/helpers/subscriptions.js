@@ -753,7 +753,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
 
     postListFromRemote.sort((a, b) => b.publishedTime - a.publishedTime)
 
-    const forbiddenTitles = JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
+    const forbiddenTitles = store.getters.getForbiddenTitlesParsed
     const filteredPosts = postListFromRemote.filter(post => {
       return !forbiddenTitles.some(text => post.author.toLowerCase().includes(text))
     })

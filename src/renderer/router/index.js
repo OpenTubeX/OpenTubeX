@@ -1,20 +1,28 @@
+import { defineAsyncComponent } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
-import ProfileSettings from '../views/ProfileSettings/ProfileSettings.vue'
 import Trending from '../views/Trending/Trending.vue'
 import Popular from '../views/Popular/Popular.vue'
 import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
 import History from '../views/History/History.vue'
-import Stats from '../views/Stats/Stats.vue'
-import Settings from '../views/Settings/Settings.vue'
-import About from '../views/About/About.vue'
 import SearchPage from '../views/SearchPage/SearchPage.vue'
 import Playlist from '../views/Playlist/Playlist.vue'
 import Channel from '../views/Channel/Channel.vue'
-import Watch from '../views/Watch/Watch.vue'
 import Hashtag from '../views/Hashtag/Hashtag.vue'
 import Post from '../views/Post.vue'
+
+// Loaded lazily to keep the startup bundle small, most notably the Watch view
+// pulls in shaka-player and googlevideo.
+// The tab system renders route components directly via `resolveRouteComponent`
+// instead of `RouterView` resolving them during navigation, so they must be
+// wrapped in `defineAsyncComponent` rather than passing the raw import function
+// to `component`.
+const Watch = defineAsyncComponent(() => import('../views/Watch/Watch.vue'))
+const Settings = defineAsyncComponent(() => import('../views/Settings/Settings.vue'))
+const ProfileSettings = defineAsyncComponent(() => import('../views/ProfileSettings/ProfileSettings.vue'))
+const About = defineAsyncComponent(() => import('../views/About/About.vue'))
+const Stats = defineAsyncComponent(() => import('../views/Stats/Stats.vue'))
 
 export const routes = [
   {

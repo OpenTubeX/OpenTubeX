@@ -20,7 +20,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { getRelativeTimeFromDate } from '../helpers/utils'
+import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
 
 const { locale, t } = useI18n()
@@ -110,10 +110,7 @@ const nextAutoRefreshTimestamp = computed(() => {
     return ''
   }
 
-  return new Intl.DateTimeFormat([locale.value, 'en'], {
-    dateStyle: 'short',
-    timeStyle: 'short'
-  }).format(timestamp)
+  return getCachedShortDateTimeFormat(locale.value).format(timestamp)
 })
 
 const nextAutoRefreshTooltip = computed(() => {
@@ -126,10 +123,7 @@ const nextAutoRefreshTooltip = computed(() => {
 
   const relativeTime = getRelativeTimeValue(timestamp - now.value)
 
-  return new Intl.RelativeTimeFormat([locale.value, 'en'], { numeric: 'auto' }).format(
-    relativeTime.value,
-    relativeTime.unit
-  )
+  return getCachedRelativeTimeFormat(locale.value, 'auto').format(relativeTime.value, relativeTime.unit)
 })
 
 /**
@@ -151,11 +145,14 @@ function getRelativeTimeValue(remainingMs) {
   return { value: direction * Math.round(absRemainingMinutes / 60), unit: 'hour' }
 }
 
-watch(activeSubscriptionList, () => {
+// Watching the channel ids instead of deep watching the subscription list,
+// avoids traversing every channel object on unrelated changes
+// and firing on channel name/thumbnail updates
+watch(() => activeSubscriptionList.value.map((channel) => channel.id).join(','), () => {
   lastRemoteRefreshSuccessTimestamp.value = null
   isLoading.value = true
   loadPostsFromCacheSometimes()
-}, { deep: true })
+})
 
 watch(
   () => store.getters.getSubscriptionPostsLastRefreshTimestamp,
@@ -224,7 +221,7 @@ function loadPostsFromCacheSometimes() {
 
 /** @type {import('vue').ComputedRef<string[]>} */
 const forbiddenTitles = computed(() => {
-  return JSON.parse(store.getters.getForbiddenTitles.toLowerCase())
+  return store.getters.getForbiddenTitlesParsed
 })
 
 function loadPostsFromCacheForAllActiveProfileChannels() {

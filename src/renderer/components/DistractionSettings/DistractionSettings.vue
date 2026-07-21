@@ -671,15 +671,7 @@ function handleAddedChannelsHidden() {
 }
 
 /** @type {import('vue').ComputedRef<any[]>} */
-const channelsHidden = computed(() => {
-  return JSON.parse(store.getters.getChannelsHidden).map((ch) => {
-    // Legacy support
-    if (typeof ch === 'string') {
-      return { name: ch, preferredName: '', icon: '' }
-    }
-    return ch
-  })
-})
+const channelsHidden = computed(() => store.getters.getChannelsHiddenParsed)
 
 /**
  * @param {any[]} value

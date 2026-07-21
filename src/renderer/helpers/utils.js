@@ -800,6 +800,47 @@ export function getTodayDateStrLocalTimezone() {
   return timeNowStr.split('T')[0]
 }
 
+// Constructing Intl formatters is expensive and some of them are used once per list item,
+// so cache them per locale + options
+
+/** @type {Map<string, Intl.RelativeTimeFormat>} */
+const relativeTimeFormatCache = new Map()
+
+/**
+ * @param {string} locale
+ * @param {Intl.RelativeTimeFormatOptions['numeric']} numeric
+ * @returns {Intl.RelativeTimeFormat}
+ */
+export function getCachedRelativeTimeFormat(locale, numeric = 'always') {
+  const key = `${locale}|${numeric}`
+  let formatter = relativeTimeFormatCache.get(key)
+
+  if (!formatter) {
+    formatter = new Intl.RelativeTimeFormat([locale, 'en'], { numeric })
+    relativeTimeFormatCache.set(key, formatter)
+  }
+
+  return formatter
+}
+
+/** @type {Map<string, Intl.DateTimeFormat>} */
+const shortDateTimeFormatCache = new Map()
+
+/**
+ * @param {string} locale
+ * @returns {Intl.DateTimeFormat}
+ */
+export function getCachedShortDateTimeFormat(locale) {
+  let formatter = shortDateTimeFormatCache.get(locale)
+
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat([locale, 'en'], { dateStyle: 'short', timeStyle: 'short' })
+    shortDateTimeFormatCache.set(locale, formatter)
+  }
+
+  return formatter
+}
+
 /**
  *
  * @param {number} date
@@ -859,7 +900,7 @@ export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayM
 
   // Using `Math.ceil` so that -1.x days ago displayed as 1 day ago
   // Notice that the value is turned to negative to be displayed as "ago"
-  return new Intl.RelativeTimeFormat([i18n.global.locale.value, 'en']).format(Math.ceil(-timeDiffFromNow), timeUnit)
+  return getCachedRelativeTimeFormat(i18n.global.locale.value).format(Math.ceil(-timeDiffFromNow), timeUnit)
 }
 
 /**
