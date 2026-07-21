@@ -809,6 +809,14 @@ Settings:
     Checking FFmpeg: Sprawdzanie FFmpeg…
     Downloading FFmpeg: Pobieranie FFmpeg…
     FFmpeg Downloaded Template: FFmpeg {version} zostało pobrane
+    FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
+    Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
+    Managed Tools Download Finished Template: Zakończono pobieranie {tools}
+    Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
+    Managed Tools Update Finished Template: Zakończono aktualizację {tools}
+    Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
+    Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
+    yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
 About:
   #On About page
   About: 'O projekcie'
