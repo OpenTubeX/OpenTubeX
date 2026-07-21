@@ -20,7 +20,7 @@
         tabindex="-1"
       >
         <div
-          v-if="hideCommentPhotos && !reply.isOwner"
+          v-if="!reply.authorThumb || (hideCommentPhotos && !reply.isOwner)"
           class="commentThumbnailHidden"
           dir="auto"
         >

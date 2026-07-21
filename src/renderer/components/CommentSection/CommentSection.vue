@@ -147,7 +147,7 @@
           >
             <!-- Hide comment photo only if it isn't the video uploader -->
             <div
-              v-if="hideCommentPhotos && !comment.isOwner"
+              v-if="!comment.authorThumb || (hideCommentPhotos && !comment.isOwner)"
               class="commentThumbnailHidden"
               dir="auto"
             >
