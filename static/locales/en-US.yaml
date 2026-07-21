@@ -875,7 +875,7 @@ Settings:
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
     Sync Settings: Sync
-    Privacy Passphrase: Privacy passphrase (enhanced privacy servers)
+    Privacy Passphrase: Privacy passphrase
     Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
     Enhanced Privacy Enabled: Enhanced privacy is enabled. The server stores only encrypted sync data.
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
