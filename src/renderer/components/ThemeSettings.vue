@@ -8,12 +8,14 @@
           :label="$t('Settings.Theme Settings.Match Top Bar with Main Color')"
           compact
           :default-value="barColor"
+          setting-key="barColor"
           @change="updateBarColor"
         />
         <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Expand Side Bar by Default')"
           compact
           :default-value="expandSideBar"
+          setting-key="expandSideBar"
           @change="handleExpandSideBar"
         />
         <FtToggleSwitch
@@ -27,6 +29,7 @@
           :label="$t('Settings.Theme Settings.Show Thumbnail Size Button in Header')"
           compact
           :default-value="showThumbnailSizeButtonInHeader"
+          setting-key="showThumbnailSizeButtonInHeader"
           @change="updateShowThumbnailSizeButtonInHeader"
         />
       </div>
@@ -35,18 +38,21 @@
           :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
           compact
           :default-value="hideLabelsSideBar"
+          setting-key="hideLabelsSideBar"
           @change="updateHideLabelsSideBar"
         />
         <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide Side Bar on Watch Pages')"
           compact
           :default-value="hideSideBarOnWatchPages"
+          setting-key="hideSideBarOnWatchPages"
           @change="updateHideSideBarOnWatchPages"
         />
         <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide OpenTubeX Header Logo')"
           compact
           :default-value="hideHeaderLogo"
+          setting-key="hideHeaderLogo"
           @change="updateHideHeaderLogo"
         />
         <FtToggleSwitch
@@ -54,6 +60,7 @@
           :tooltip="$t('Tooltips.Theme Settings.Hide Profile Selector in Header')"
           compact
           :default-value="hideProfileSelectorInHeader"
+          setting-key="hideProfileSelectorInHeader"
           @change="updateHideProfileSelectorInHeader"
         />
       </div>

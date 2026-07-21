@@ -8,18 +8,21 @@
           :label="$t('Settings.Parental Control Settings.Hide Unsubscribe Button')"
           compact
           :default-value="hideUnsubscribeButton"
+          setting-key="hideUnsubscribeButton"
           @change="updateHideUnsubscribeButton"
         />
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Show Family Friendly Only')"
           compact
           :default-value="showFamilyFriendlyOnly"
+          setting-key="showFamilyFriendlyOnly"
           @change="updateShowFamilyFriendlyOnly"
         />
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Disable Channel Links')"
           compact
           :default-value="disableChannelLinks"
+          setting-key="disableChannelLinks"
           @change="updateDisableChannelLinks"
         />
       </div>
@@ -28,12 +31,14 @@
           :label="$t('Settings.Parental Control Settings.Hide Search Bar')"
           compact
           :default-value="hideSearchBar"
+          setting-key="hideSearchBar"
           @change="updateHideSearchBar"
         />
         <FtToggleSwitch
           :label="$t('Settings.Parental Control Settings.Hide Uploader on Watch page')"
           compact
           :default-value="hideUploader"
+          setting-key="hideUploader"
           @change="updateHideUploader"
         />
       </div>

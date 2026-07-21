@@ -2,6 +2,7 @@
   <div class="pure-checkbox filter">
     <h3 class="checkboxTitle">
       {{ title }}
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </h3>
     <template
       v-for="(label, index) in labels"
@@ -35,6 +36,7 @@
 import { useId } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const id = useId()
 
@@ -62,6 +64,10 @@ const props = defineProps({
   tooltips: {
     type: Object,
     default: () => ({})
+  },
+  settingKey: {
+    type: String,
+    default: ''
   },
 })
 

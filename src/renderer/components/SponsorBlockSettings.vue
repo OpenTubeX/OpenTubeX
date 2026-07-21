@@ -34,6 +34,7 @@
         <FtToggleSwitch
           :label="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
           :default-value="sponsorBlockShowSkippedToast"
+          setting-key="sponsorBlockShowSkippedToast"
           @change="handleUpdateSponsorBlockShowSkippedToast"
         />
         <FtToggleSwitch
@@ -45,6 +46,7 @@
         <FtSlider
           :label="$t('Settings.SponsorBlock Settings.Skip notification timeout')"
           :default-value="sponsorBlockSkippedToastDuration"
+          setting-key="sponsorBlockSkippedToastDuration"
           :min-value="2"
           :max-value="15"
           :step="1"
@@ -59,6 +61,7 @@
           :show-action-button="false"
           :show-label="true"
           :value="sponsorBlockUrl"
+          setting-key="sponsorBlockUrl"
           @input="handleUpdateSponsorBlockUrl"
         />
       </FtFlexBox>
@@ -72,6 +75,7 @@
             :show-label="true"
             :tooltip="$t('Settings.SponsorBlock Settings.SponsorBlock Private User ID Tooltip')"
             :value="sponsorBlockUserId"
+            setting-key="sponsorBlockUserId"
             @input="handleUpdateSponsorBlockUserId"
           />
           <div
@@ -125,6 +129,7 @@
           :show-action-button="false"
           :show-label="true"
           :value="deArrowThumbnailGeneratorUrl"
+          setting-key="deArrowThumbnailGeneratorUrl"
           @input="handleUpdateDeArrowThumbnailGeneratorUrl"
         />
       </FtFlexBox>

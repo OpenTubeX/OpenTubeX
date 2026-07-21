@@ -358,6 +358,7 @@ const state = {
   syncServerSyncPlaybackSpeeds: true,
   syncServerSyncProfiles: true,
   syncServerSyncSettings: true,
+  syncServerSettingsExcluded: [],
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
   useProxy: false,
@@ -580,6 +581,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSyncPlaybackSpeeds',
   'syncServerSyncProfiles',
   'syncServerSyncSettings',
+  'syncServerSettingsExcluded',
   'syncServerLastSyncAt',
   'syncServerSnapshot',
 
@@ -588,6 +590,34 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'backendPreference',
   'proxyVideos',
 ])
+
+export const NON_SYNCABLE_SETTINGS = new Set([
+  ...NON_TRANSFERABLE_SETTINGS,
+  // Updating is tied to the installed application and operating system.
+  'checkForUpdates',
+  // Window coordinates are only valid for the display they were saved on.
+  'scrollMiniPlayerSavedRect',
+  'uiScale',
+  'verticalTabBarWidth',
+  // Synced through its dedicated collection when enabled.
+  'channelPlaybackSpeeds',
+])
+
+export function isSettingSyncable(settingKey) {
+  return Object.prototype.hasOwnProperty.call(state, settingKey) &&
+    !NON_SYNCABLE_SETTINGS.has(settingKey)
+}
+
+export function isSettingSyncEnabled(settings, settingKey) {
+  const excluded = Array.isArray(settings.syncServerSettingsExcluded)
+    ? settings.syncServerSettingsExcluded
+    : []
+  return isSettingSyncable(settingKey) && !excluded.includes(settingKey)
+}
+
+export function getSyncableSettingKeys(settings) {
+  return Object.keys(state).filter(settingKey => isSettingSyncEnabled(settings, settingKey))
+}
 
 const customState = {
 }

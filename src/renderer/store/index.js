@@ -6,7 +6,7 @@ import history from './modules/history'
 import invidious from './modules/invidious'
 import playlists from './modules/playlists'
 import profiles from './modules/profiles'
-import settings from './modules/settings'
+import settings, { isSettingSyncEnabled, isSettingSyncable } from './modules/settings'
 import searchHistory from './modules/search-history'
 import subscriptionCache from './modules/subscription-cache'
 import utils from './modules/utils'
@@ -14,7 +14,6 @@ import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
 import syncServer from './modules/sync-server'
-import { SYNCABLE_SETTINGS } from '../helpers/sync-server'
 
 const SYNC_TRIGGER_ACTIONS = new Set([
   'addChannelToProfiles',
@@ -49,8 +48,12 @@ function syncOnLocalChanges(store) {
       const setting = action.type.startsWith('update')
         ? action.type.charAt(6).toLowerCase() + action.type.slice(7)
         : ''
-      if (SYNC_TRIGGER_ACTIONS.has(action.type) || SYNCABLE_SETTINGS.has(setting)) {
-        store.dispatch('scheduleSyncServer', SYNCABLE_SETTINGS.has(setting) ? 'settings' : 'data')
+      const syncableSetting = isSettingSyncable(setting)
+      if (SYNC_TRIGGER_ACTIONS.has(action.type) || syncableSetting) {
+        const syncEnabled = isSettingSyncEnabled(store.state.settings, setting)
+        if (!syncableSetting || syncEnabled) {
+          store.dispatch('scheduleSyncServer', syncableSetting ? 'settings' : 'data')
+        }
       }
     },
   })

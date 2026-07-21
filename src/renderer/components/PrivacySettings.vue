@@ -8,6 +8,7 @@
           :label="$t('Settings.Privacy Settings.Remember History')"
           compact
           :default-value="rememberHistory"
+          setting-key="rememberHistory"
           @change="handleRememberHistory"
         />
       </div>
@@ -17,6 +18,7 @@
           compact
           :disabled="!rememberHistory"
           :default-value="enableWatchStats"
+          setting-key="enableWatchStats"
           @change="updateEnableWatchStats"
         />
       </div>
@@ -25,6 +27,7 @@
           :label="$t('Settings.Privacy Settings.Remember Search History')"
           compact
           :default-value="rememberSearchHistory"
+          setting-key="rememberSearchHistory"
           @change="updateRememberSearchHistory"
         />
       </div>
@@ -34,6 +37,7 @@
           compact
           :disabled="!rememberHistory"
           :default-value="saveVideoHistoryWithLastViewedPlaylist"
+          setting-key="saveVideoHistoryWithLastViewedPlaylist"
           @change="updateSaveVideoHistoryWithLastViewedPlaylist"
         />
       </div>
@@ -45,6 +49,7 @@
         :label="$t('Settings.Privacy Settings.Automatic History Retention')"
         input-type="number"
         :value="historyRetentionDaysInput"
+        setting-key="historyRetentionDays"
         :show-label="true"
         :allow-action-button-when-empty="true"
         :force-action-button-icon-name="['fas', 'check']"
@@ -59,6 +64,7 @@
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
         :value="statsWeekStartsOn"
+        setting-key="statsWeekStartsOn"
         :select-names="weekStartNames"
         :select-values="WEEK_START_VALUES"
         :icon="['fas', 'chart-line']"

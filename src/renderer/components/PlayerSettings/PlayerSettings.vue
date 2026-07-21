@@ -24,18 +24,21 @@
           :compact="true"
           :disabled="videoSkipMouseScroll"
           :default-value="videoVolumeMouseScroll"
+          setting-key="videoVolumeMouseScroll"
           @change="updateVideoVolumeMouseScroll"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Remember Volume')"
           :compact="true"
           :default-value="rememberVolume"
+          setting-key="rememberVolume"
           @change="updateRememberVolume"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Show Fast-Forward Through Silence Toggle')"
           :compact="true"
           :default-value="showSkipSilenceButton"
+          setting-key="showSkipSilenceButton"
           :tooltip="t('Tooltips.Player Settings.Show Fast-Forward Through Silence Toggle')"
           @change="updateShowSkipSilenceButton"
         />
@@ -51,6 +54,7 @@
           :label="t('Settings.Player Settings.Scroll Playback Rate Over Video Player')"
           :compact="true"
           :default-value="videoPlaybackRateMouseScroll"
+          setting-key="videoPlaybackRateMouseScroll"
           :tooltip="t('Tooltips.Player Settings.Scroll Playback Rate Over Video Player')"
           @change="updateVideoPlaybackRateMouseScroll"
         />
@@ -59,6 +63,7 @@
           :compact="true"
           :disabled="videoVolumeMouseScroll"
           :default-value="videoSkipMouseScroll"
+          setting-key="videoSkipMouseScroll"
           :tooltip="t('Tooltips.Player Settings.Skip by Scrolling Over Video Player')"
           @change="updateVideoSkipMouseScroll"
         />
@@ -98,12 +103,14 @@
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"
           :default-value="displayVideoPlayButton"
+          setting-key="displayVideoPlayButton"
           @change="updateDisplayVideoPlayButton"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Enter Fullscreen on Display Rotate')"
           :compact="true"
           :default-value="enterFullscreenOnDisplayRotate"
+          setting-key="enterFullscreenOnDisplayRotate"
           @change="updateEnterFullscreenOnDisplayRotate"
         />
         <FtToggleSwitch
@@ -118,6 +125,7 @@
           :label="t('Settings.Player Settings.Scroll Mini Player.When Scrolling Down')"
           :compact="true"
           :default-value="scrollMiniPlayerEnabled"
+          setting-key="scrollMiniPlayerEnabled"
           @change="updateScrollMiniPlayerEnabled"
         />
         <FtToggleSwitch
@@ -137,6 +145,7 @@
         :labels="autoPictureInPictureTriggerLabels"
         :values="AUTO_PIP_TRIGGER_VALUES"
         :disabled-values="isLinuxWayland ? ['minimize'] : []"
+        setting-key="autoPictureInPictureTriggers"
         :tooltips="isLinuxWayland ? { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') } : {}"
       />
     </FtFlexBox>
@@ -214,6 +223,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Default Volume')"
         :default-value="defaultVolume"
+        setting-key="defaultVolume"
         :min-value="0"
         :max-value="100"
         :step="1"
@@ -256,6 +266,7 @@
         :label="t('Settings.Player Settings.Auto Update Channel Playback Speed')"
         :compact="true"
         :default-value="autoUpdateChannelPlaybackSpeeds"
+        setting-key="autoUpdateChannelPlaybackSpeeds"
         @change="updateAutoUpdateChannelPlaybackSpeeds"
       />
     </FtFlexBox>
@@ -279,6 +290,7 @@
         :label="t('Settings.Player Settings.Auto Update Channel Video Quality')"
         :compact="true"
         :default-value="autoUpdateChannelVideoQualities"
+        setting-key="autoUpdateChannelVideoQualities"
         @change="updateAutoUpdateChannelVideoQualities"
       />
     </FtFlexBox>
@@ -302,15 +314,16 @@
       <FtButton
         :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
         :icon="['fas', 'sliders-h']"
-        setting-key="quickPlaybackSpeedBarOptions"
         @click="showQuickPlaybackSpeedBarManager = true"
       />
+      <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
     </FtFlexBox>
     <br>
     <FtFlexBox>
       <FtToggleSwitch
         :label="t('Settings.Player Settings.Screenshot.Enable')"
         :default-value="enableScreenshot"
+        setting-key="enableScreenshot"
         @change="updateEnableScreenshot"
       />
     </FtFlexBox>
@@ -319,6 +332,7 @@
         <FtSelect
           :placeholder="t('Settings.Player Settings.Screenshot.Mode')"
           :value="screenshotMode"
+          setting-key="screenshotMode"
           :select-names="screenshotModeNames"
           :select-values="screenshotModeValues"
           :icon="['fas', 'expand']"
@@ -329,6 +343,7 @@
         <FtSelect
           :placeholder="t('Settings.Player Settings.Screenshot.Format Label')"
           :value="screenshotFormat"
+          setting-key="screenshotFormat"
           :select-names="SCREENSHOT_FORMAT_NAMES"
           :select-values="SCREENSHOT_FORMAT_VALUES"
           :icon="['fas', 'file-image']"
@@ -337,6 +352,7 @@
         <FtSlider
           :label="t('Settings.Player Settings.Screenshot.Quality Label')"
           :default-value="screenshotQuality"
+          setting-key="screenshotQuality"
           :min-value="0"
           :max-value="100"
           :step="1"
@@ -620,6 +636,7 @@ import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'

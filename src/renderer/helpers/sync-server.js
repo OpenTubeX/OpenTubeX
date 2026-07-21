@@ -1,4 +1,5 @@
 import { MAIN_PROFILE_ID } from '../../constants'
+import { getSyncableSettingKeys } from '../store/modules/settings'
 import { deepCopy } from './utils'
 import { generateRandomUniqueId } from './playlists'
 
@@ -11,77 +12,6 @@ const ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS = 15_000
 const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
-
-export const SYNCABLE_SETTINGS = new Set([
-  'ambientMode',
-  'autoplayPlaylists',
-  'autoplayVideos',
-  'avoidTranslation',
-  'baseTheme',
-  'blurThumbnails',
-  'channelsHidden',
-  'currentLocale',
-  'defaultAutoplayInterruptionIntervalHours',
-  'defaultCaptionSettings',
-  'defaultInterval',
-  'defaultPlayback',
-  'defaultQuality',
-  'defaultSkipInterval',
-  'defaultViewingMode',
-  'defaultVideoFormat',
-  'enableCaptionTranslations',
-  'enableSubtitlesByDefault',
-  'forbiddenTitles',
-  'hideComments',
-  'hideLiveChat',
-  'hideLiveStreams',
-  'hideRecommendedVideos',
-  'hideSubscriptionsCommunity',
-  'hideSubscriptionsLive',
-  'hideSubscriptionsShorts',
-  'hideWatchedSubs',
-  'holdToDoublePlaybackSpeed',
-  'keyboardShortcuts',
-  'landingPage',
-  'listType',
-  'mainColor',
-  'maxVideoPlaybackRate',
-  'onlyShowLatestFromChannel',
-  'onlyShowLatestFromChannelNumber',
-  'playNextVideo',
-  'preferredCaptionLocale',
-  'quickPlaybackSpeedBarOptions',
-  'reducedMotion',
-  'region',
-  'rememberPlaybackSpeedPerChannel',
-  'rememberVideoQualityPerChannel',
-  'secColor',
-  'seekIntervalMultiplyByPlaybackRate',
-  'showDistractionFreeTitles',
-  'showPlaybackRateAdjustedTimestamp',
-  'skipSilence',
-  'sponsorBlockChannelWhitelist',
-  'sponsorBlockEnableSubmission',
-  'sponsorBlockFiller',
-  'sponsorBlockHighlight',
-  'sponsorBlockHook',
-  'sponsorBlockInteraction',
-  'sponsorBlockIntro',
-  'sponsorBlockMusicOffTopic',
-  'sponsorBlockOutro',
-  'sponsorBlockRecap',
-  'sponsorBlockSelfPromo',
-  'sponsorBlockSponsor',
-  'thumbnailPreference',
-  'thumbnailSize',
-  'useDeArrowThumbnails',
-  'useDeArrowTitles',
-  'useQuickPlaybackSpeedBar',
-  'useReturnYouTubeDislikes',
-  'useSponsorBlock',
-  'videoPlaybackRateInterval',
-  'watchedProgressSavingMode',
-])
 
 export class SyncServerError extends Error {
   constructor(message, status = null) {
@@ -1035,7 +965,7 @@ export async function syncSettings(client, store, previous = {}) {
   const merged = {}
   const now = Date.now()
 
-  for (const key of SYNCABLE_SETTINGS) {
+  for (const key of getSyncableSettingKeys(store.state.settings)) {
     const value = deepCopy(store.state.settings[key])
     const old = previous[key]
     const remoteEntry = remote[key]

@@ -36,13 +36,25 @@ test.describe('synced setting indicators', () => {
     }
   })
 
-  test('marks settings included in account sync', async ({ page }) => {
+  test('allows account sync to be disabled per setting', async ({ page }) => {
     await goTo(page, 'settings')
 
     const syncedLabel = page.locator('label').filter({ hasText: 'Default Landing Page' })
-    await expect(syncedLabel.getByTitle('Synced with your account')).toBeVisible()
+    const syncButton = syncedLabel.getByRole('button', { name: 'Stop syncing this setting' })
+    await expect(syncButton).toBeVisible()
+    await syncButton.click()
+    await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+
+    await page.reload()
+    await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
+
+    const toggle = page.getByRole('checkbox', { name: /Auto load next page/i })
+    await page.locator('label').filter({ hasText: 'Auto load next page' })
+      .getByRole('button', { name: 'Stop syncing this setting' })
+      .click()
+    await expect(toggle).not.toBeChecked()
 
     const localOnlyLabel = page.locator('label').filter({ hasText: 'Check for Updates' })
-    await expect(localOnlyLabel.getByTitle('Synced with your account')).toHaveCount(0)
+    await expect(localOnlyLabel.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
   })
 })

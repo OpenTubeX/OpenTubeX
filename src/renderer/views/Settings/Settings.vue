@@ -30,13 +30,14 @@
             v-if="USING_ELECTRON"
             :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
             :icon="['fas', 'keyboard']"
-            setting-key="keyboardShortcuts"
             @click="showKeyboardShortcutPrompt"
           />
+          <FtSyncedSettingIndicator setting-key="keyboardShortcuts" />
           <FtToggleSwitch
             class="settingsToggle"
             :label="t('Settings.Sort Settings Sections (A-Z)')"
             :default-value="settingsSectionSortEnabled"
+            setting-key="settingsSectionSortEnabled"
             @change="updateSettingsSectionSortEnabled"
           />
         </div>
@@ -85,6 +86,7 @@ import PasswordSettings from '../../components/PasswordSettings/PasswordSettings
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
+import FtSyncedSettingIndicator from '../../components/FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 
 import store from '../../store/index'

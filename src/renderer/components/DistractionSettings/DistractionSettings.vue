@@ -13,18 +13,21 @@
           :label="t('Settings.Distraction Free Settings.Hide Video Views')"
           :compact="true"
           :default-value="hideVideoViews"
+          setting-key="hideVideoViews"
           @change="updateHideVideoViews"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Subscribers')"
           :compact="true"
           :default-value="hideChannelSubscriptions"
+          setting-key="hideChannelSubscriptions"
           @change="updateHideChannelSubscriptions"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Sharing Actions')"
           :compact="true"
           :default-value="hideSharingActions"
+          setting-key="hideSharingActions"
           @change="updateHideSharingActions"
         />
         <FtToggleSwitch
@@ -48,6 +51,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Upcoming Premieres')"
           :compact="true"
           :default-value="hideUpcomingPremieres"
+          setting-key="hideUpcomingPremieres"
           @change="updateHideUpcomingPremieres"
         />
         <FtToggleSwitch
@@ -106,6 +110,7 @@
           :compact="true"
           :disabled="disableHideTrendingVideos"
           :default-value="hideTrendingVideos"
+          setting-key="hideTrendingVideos"
           @change="updateHideTrendingVideos"
         />
         <FtToggleSwitch
@@ -113,6 +118,7 @@
           :compact="true"
           :disabled="disableHidePopularVideos"
           :default-value="disableHidePopularVideos || hidePopularVideos"
+          setting-key="hidePopularVideos"
           @change="updateHidePopularVideos"
         />
       </div>
@@ -121,12 +127,14 @@
           :label="t('Settings.Distraction Free Settings.Hide Playlists')"
           :compact="true"
           :default-value="hidePlaylists"
+          setting-key="hidePlaylists"
           @change="updateHidePlaylists"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Active Subscriptions')"
           :compact="true"
           :default-value="hideActiveSubscriptions"
+          setting-key="hideActiveSubscriptions"
           @change="updateHideActiveSubscriptions"
         />
       </div>
@@ -142,6 +150,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Subscriptions Videos')"
           :compact="true"
           :default-value="hideSubscriptionsVideos"
+          setting-key="hideSubscriptionsVideos"
           @change="updateHideSubscriptionsVideos"
         />
         <FtToggleSwitch
@@ -182,24 +191,28 @@
           :label="t('Settings.Distraction Free Settings.Hide Channel Home')"
           :compact="true"
           :default-value="hideChannelHome"
+          setting-key="hideChannelHome"
           @change="updateHideChannelHome"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Shorts')"
           :compact="true"
           :default-value="hideChannelShorts"
+          setting-key="hideChannelShorts"
           @change="updateHideChannelShorts"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Playlists')"
           :compact="true"
           :default-value="hideChannelPlaylists"
+          setting-key="hideChannelPlaylists"
           @change="updateHideChannelPlaylists"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Podcasts')"
           :compact="true"
           :default-value="hideChannelPodcasts"
+          setting-key="hideChannelPodcasts"
           @change="updateHideChannelPodcasts"
         />
       </div>
@@ -208,24 +221,28 @@
           :label="t('Settings.Distraction Free Settings.Hide Channel Posts')"
           :compact="true"
           :default-value="hideChannelCommunity"
+          setting-key="hideChannelCommunity"
           @change="updateHideChannelCommunity"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Featured Channels')"
           :compact="true"
           :default-value="hideFeaturedChannels"
+          setting-key="hideFeaturedChannels"
           @change="updateHideFeaturedChannels"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Releases')"
           :compact="true"
           :default-value="hideChannelReleases"
+          setting-key="hideChannelReleases"
           @change="updateHideChannelReleases"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Courses')"
           :compact="true"
           :default-value="hideChannelCourses"
+          setting-key="hideChannelCourses"
           @change="updateHideChannelCourses"
         />
       </div>
@@ -241,24 +258,28 @@
           :label="t('Settings.Distraction Free Settings.Hide Video Likes And Dislikes')"
           :compact="true"
           :default-value="hideVideoLikesAndDislikes"
+          setting-key="hideVideoLikesAndDislikes"
           @change="updateHideVideoLikesAndDislikes"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Chapters')"
           :compact="true"
           :default-value="hideChapters"
+          setting-key="hideChapters"
           @change="updateHideChapters"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Video Description')"
           :compact="true"
           :default-value="hideVideoDescription"
+          setting-key="hideVideoDescription"
           @change="updateHideVideoDescription"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comment Likes')"
           :compact="true"
           :default-value="hideCommentLikes"
+          setting-key="hideCommentLikes"
           @change="updateHideCommentLikes"
         />
       </div>
@@ -288,6 +309,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Profile Pictures in Comments')"
           :compact="true"
           :default-value="hideCommentPhotos"
+          setting-key="hideCommentPhotos"
           @change="updateHideCommentPhotos"
         />
       </div>

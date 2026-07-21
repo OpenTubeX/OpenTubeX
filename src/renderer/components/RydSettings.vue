@@ -19,6 +19,7 @@
         :show-label="true"
         :data-list="returnYoutubeDislikesInstances"
         :value="returnYoutubeDislikesUrl"
+        setting-key="returnYouTubeDislikesUrl"
         @input="handleUpdateReturnYouTubeDislikesUrl"
       />
     </FtFlexBox>

@@ -7,6 +7,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feed on Startup')"
           :default-value="fetchSubscriptionsAutomatically"
+          setting-key="fetchSubscriptionsAutomatically"
           :tooltip="$t('Tooltips.Subscription Settings.Fetch Feed on Startup')"
           compact
           @change="updateFetchSubscriptionsAutomatically"
@@ -14,6 +15,7 @@
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
           :value="subscriptionFeedAutoRefreshInterval"
+          setting-key="subscriptionFeedAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="subscriptionFeedAutoRefreshIntervalValues"
           :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
@@ -23,6 +25,7 @@
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Shorts Auto Refresh Interval')"
           :value="subscriptionShortsAutoRefreshInterval"
+          setting-key="subscriptionShortsAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="subscriptionFeedAutoRefreshIntervalValues"
           :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
@@ -32,6 +35,7 @@
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Live Auto Refresh Interval')"
           :value="subscriptionLiveAutoRefreshInterval"
+          setting-key="subscriptionLiveAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="subscriptionFeedAutoRefreshIntervalValues"
           :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
@@ -41,6 +45,7 @@
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Posts Auto Refresh Interval')"
           :value="subscriptionPostsAutoRefreshInterval"
+          setting-key="subscriptionPostsAutoRefreshInterval"
           :select-names="subscriptionFeedAutoRefreshIntervalNames"
           :select-values="subscriptionFeedAutoRefreshIntervalValues"
           :tooltip="$t('Tooltips.Subscription Settings.Auto Refresh Interval')"
@@ -71,6 +76,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Fetch Feeds from RSS')"
           :default-value="useRssFeeds"
+          setting-key="useRssFeeds"
           :tooltip="$t('Tooltips.Subscription Settings.Fetch Feeds from RSS')"
           compact
           @change="updateUseRssFeeds"
@@ -78,6 +84,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Feed')"
           :default-value="showNewSubscriptionFeed"
+          setting-key="showNewSubscriptionFeed"
           :tooltip="$t('Tooltips.Subscription Settings.Show New Content Feed')"
           compact
           @change="updateShowNewSubscriptionFeed"
@@ -85,6 +92,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
           :default-value="showNewSubscriptionFeedIndicators"
+          setting-key="showNewSubscriptionFeedIndicators"
           :tooltip="$t('Tooltips.Subscription Settings.Show New Content Indicators')"
           compact
           @change="updateShowNewSubscriptionFeedIndicators"
@@ -92,6 +100,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Confirm Before Unsubscribing')"
           :default-value="unsubscriptionPopupStatus"
+          setting-key="unsubscriptionPopupStatus"
           compact
           @change="updateUnsubscriptionPopupStatus"
         />

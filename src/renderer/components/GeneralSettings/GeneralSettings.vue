@@ -21,6 +21,7 @@
         <FtToggleSwitch
           :label="t('Settings.General Settings.Auto Load Next Page.Label')"
           :default-value="generalAutoLoadMorePaginatedItemsEnabled"
+          setting-key="generalAutoLoadMorePaginatedItemsEnabled"
           :compact="true"
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
@@ -29,6 +30,7 @@
           v-if="USING_ELECTRON"
           :label="t('Settings.General Settings.Remember Tab Navigation History')"
           :default-value="rememberTabNavigationHistory"
+          setting-key="rememberTabNavigationHistory"
           :compact="true"
           :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
           @change="updateRememberTabNavigationHistory"
@@ -38,6 +40,7 @@
         <FtToggleSwitch
           :label="t('Settings.General Settings.Enable Search Suggestions')"
           :default-value="enableSearchSuggestions"
+          setting-key="enableSearchSuggestions"
           :compact="true"
           @change="updateEnableSearchSuggestions"
         />
@@ -60,6 +63,7 @@
           v-if="USING_ELECTRON"
           :label="t('Settings.General Settings.Confirm Before Closing App')"
           :default-value="confirmCloseApp"
+          setting-key="confirmCloseApp"
           :compact="true"
           @change="updateConfirmCloseApp"
         />
@@ -88,6 +92,7 @@
         v-if="USING_ELECTRON"
         :placeholder="t('Settings.General Settings.New Tab Position.New Tab Position')"
         :value="newTabPosition"
+        setting-key="newTabPosition"
         :select-names="newTabPositionNames"
         :select-values="NEW_TAB_POSITION_VALUES"
         :icon="['fas', 'plus']"
@@ -97,6 +102,7 @@
         v-if="USING_ELECTRON"
         :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
         :value="startupBehavior"
+        setting-key="startupBehavior"
         :select-names="startupBehaviorNames"
         :select-values="STARTUP_BEHAVIOR_VALUES"
         :tooltip="t('Tooltips.General Settings.Startup Behavior')"
@@ -125,6 +131,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
         :value="extraThumbnailAction"
+        setting-key="extraThumbnailAction"
         :select-names="extraThumbnailActionNames"
         :select-values="EXTRA_THUMBNAIL_ACTION_VALUES"
         :icon="['fas', 'ellipsis-v']"
@@ -190,6 +197,7 @@
           :show-action-button="false"
           :show-label="true"
           :value="currentInvidiousInstance"
+          setting-key="defaultInvidiousInstance"
           :data-list="invidiousInstancesList"
           :tooltip="t('Tooltips.General Settings.Invidious Instance')"
           @input="handleInvidiousInstanceInput"
