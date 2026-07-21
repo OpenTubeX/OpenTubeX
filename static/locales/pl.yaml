@@ -221,6 +221,9 @@ History:
   1 Year: 1 rok
   Custom: Własny okres
   History Older Than Days Removed: Historia oglądania starsza niż {days} dni została usunięta
+  Mark All As Watched: Oznacz wszystkie jako obejrzane
+  Mark All As Watched Confirmation: Czy na pewno chcesz oznaczyć wszystkie filmy w historii jako obejrzane?
+  All History Marked as Watched: Wszystkie filmy w Twojej historii zostały oznaczone jako obejrzane
 Settings:
   # On Settings Page
   Settings: 'Ustawienia'
@@ -290,6 +293,7 @@ Settings:
       Mark as Watched: Oznacz jako obejrzany
       Copy YouTube Link: Skopiuj odnośnik do YouTube
       Open in YouTube: Otwórz na stronie YouTube
+    Remember Tab Navigation History: Zapamiętaj historię przeglądania na każdej karcie
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -464,7 +468,7 @@ Settings:
         Empty File Name: Pusta nazwa pliku
       Enable: Włącz zrzuty ekranu
       Mode: Tryb - zrzut ekranu
-    Enter Fullscreen on Display Rotate: Przyłącz na pełny ekran przy obrocie wyświetlacza
+    Enter Fullscreen on Display Rotate: Przełącz na pełny ekran przy obrocie wyświetlacza
     Skip by Scrolling Over Video Player: Przewijaj film kółkiem myszy na obszarze odtwarzacza
     Autoplay Interruption Timer: Czas do przerwania autoodtwarzania
     Default Viewing Mode:
@@ -775,6 +779,8 @@ Settings:
     Return YouTube Dislike Settings: Wyświetlanie łapek w dół z YouTube
     Enable Return YouTube Dislike: Włącz wyświetlanie łapek w dół z YouTube
     Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
+  Download Settings:
+    Download Settings: Pobieranie
 About:
   #On About page
   About: 'O projekcie'
@@ -1153,7 +1159,7 @@ Comments:
   Reload Comments: Przeładuj komentarze
   Copy YouTube Link: Skopiuj odnośnik do YouTube
   YouTube comment link copied to clipboard: Odnośnik do komentarza YouTube został skopiowany do schowka
-  Edited: (edytowane)
+  Edited: (edytowano)
 Up Next: 'Następne'
 
 # Toast Messages
@@ -1252,7 +1258,7 @@ Tooltips:
     Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do szybkości odtwarzania.
     Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
     Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
-    Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania ciszy w menu ustawień odtwarzacza.
+    Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania przez ciszę w menu ustawień odtwarzacza.
     Hold to Double Playback Speed: Przytrzymaj klawisz spacji lub lewy przycisk myszy nad odtwarzaczem, aby tymczasowo podwoić aktualną prędkość odtwarzania.
     Ambient Mode: Rzutuje kolory odtwarzanego wideo na obszar wokół odtwarzacza.
   External Player Settings:
@@ -1305,7 +1311,7 @@ Chapters:
   Key Moments: Kluczowe momenty
   Open Chapters: Otwórz rozdziały
   Close Chapters: Zamknij rozdziały
-  Copy Timestamp Link: Kopiuj odnośnik w {timestamp}
+  Copy Timestamp Link: Kopiuj odnośnik do {timestamp}
 Preferences: Preferencje
 Ok: Ok
 Hashtag:
