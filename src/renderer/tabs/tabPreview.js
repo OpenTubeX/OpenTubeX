@@ -34,7 +34,7 @@ const PAGE_ICONS = [
   [/^\/channel(?:\/|$)/, ['fas', 'circle-user']],
   [/^\/hashtag(?:\/|$)/, ['fas', 'hashtag']],
   [/^\/post(?:\/|$)/, ['fas', 'comment']],
-  [/^\/watch(?:\/|$)/, ['fas', 'play']],
+  [/^\/watch(?:\/|$)/, ['fas', 'clapperboard']],
 ]
 
 export function getTabPageIcon(tab) {

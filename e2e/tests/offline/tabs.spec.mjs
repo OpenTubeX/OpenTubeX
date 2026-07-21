@@ -18,6 +18,17 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
   })
 
+  test('uses a distinct page icon for watch tabs', async ({ page }) => {
+    const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/watch/jNQXAC9IVRw',
+      makeActive: false
+    }))
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+
+    await expect(tab.locator('[data-icon="clapperboard"]')).toBeVisible()
+    await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
+  })
+
   test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
     await page.keyboard.press('Control+t')
     await expect(page.locator(sel.tabs)).toHaveCount(2)
