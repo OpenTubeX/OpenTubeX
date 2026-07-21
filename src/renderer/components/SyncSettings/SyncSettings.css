@@ -2,6 +2,9 @@
 .connectionStatus,
 .lastSync,
 .compatibilityWarning,
+.privacyStatus,
+.privacyWarning,
+.privacyHint,
 .error {
   text-align: center;
 }
@@ -22,6 +25,25 @@
 .lastSync,
 .compatibilityWarning {
   margin-block: 0.5rem;
+}
+
+.privacyStatus,
+.privacyWarning {
+  margin-block: 0.5rem;
+}
+
+.privacyHint {
+  color: var(--secondary-text-color);
+  margin-block: 0.5rem;
+}
+
+.privacyStatus {
+  color: var(--success-color, #2e7d32);
+}
+
+.privacyWarning {
+  color: var(--error-color, #c62828);
+  font-weight: 600;
 }
 
 .compatibilityWarning {

@@ -31,7 +31,23 @@
         @input="password = $event"
         @keydown.enter="authenticate('login')"
       />
+      <FtInput
+        v-if="!connected"
+        :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
+        :show-action-button="false"
+        :value="privacyPassphrase"
+        input-type="password"
+        show-label
+        @input="privacyPassphrase = $event"
+        @keydown.enter="authenticate('login')"
+      />
     </FtFlexBox>
+    <p
+      v-if="!connected"
+      class="privacyHint"
+    >
+      {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
+    </p>
 
     <FtLoader v-if="busy" />
     <p
@@ -45,6 +61,19 @@
     <template v-if="connected">
       <p class="connectionStatus">
         {{ t('Settings.Sync Settings.Connected as', { username: savedUsername }) }}
+      </p>
+      <p
+        v-if="privacyMode === 'enhanced'"
+        class="privacyStatus"
+      >
+        {{ t('Settings.Sync Settings.Enhanced Privacy Enabled') }}
+      </p>
+      <p
+        v-else-if="privacyMode === 'legacy'"
+        class="privacyWarning"
+        role="alert"
+      >
+        {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
       </p>
       <FtFlexBox class="toggles">
         <FtToggleSwitch
@@ -200,6 +229,7 @@ const syncServerInstances = [
 const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(store.getters.getSyncServerUsername)
 const password = ref('')
+const privacyPassphrase = ref('')
 const localError = ref('')
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
@@ -219,6 +249,7 @@ const historySupported = computed(() => store.getters.getSyncServerHistorySuppor
 const playbackSpeedsSupported = computed(
   () => store.getters.getSyncServerPlaybackSpeedsSupported
 )
+const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
   if (!timestamp) return ''
@@ -237,10 +268,12 @@ async function authenticate(mode) {
       serverUrl: serverUrl.value,
       username: username.value,
       password: password.value,
+      privacyPassphrase: privacyPassphrase.value,
     })
     serverUrl.value = store.getters.getSyncServerUrl
     username.value = store.getters.getSyncServerUsername
     password.value = ''
+    privacyPassphrase.value = ''
     showToast(t('Settings.Sync Settings.Sync completed'))
   } catch (error) {
     localError.value = error.message

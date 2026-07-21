@@ -95,6 +95,27 @@ export class SyncServerClient {
     return this.request('/health')
   }
 
+  async supportsEncryptedSync() {
+    try {
+      const capabilities = await this.request('/v1/capabilities')
+      return capabilities?.encrypted_sync === 1
+    } catch (error) {
+      if (error.status === 404) return false
+      throw error
+    }
+  }
+
+  getEncryptedSync() {
+    return this.request('/v1/encrypted_sync')
+  }
+
+  putEncryptedSync(revision, payload) {
+    return this.request('/v1/encrypted_sync', {
+      method: 'PUT',
+      body: { revision, payload },
+    })
+  }
+
   async apiRequest(path, options = {}) {
     if (this.apiPrefix !== null) {
       return this.request(`${this.apiPrefix}${path}`, options)
@@ -132,6 +153,10 @@ export class SyncServerClient {
     return this.apiRequest('/subscriptions/')
   }
 
+  getSubscriptionGroups() {
+    return this.apiRequest('/subscriptions/groups/')
+  }
+
   subscribe(channel) {
     return this.apiRequest('/subscriptions/', { method: 'PUT', body: channel })
   }
@@ -146,6 +171,10 @@ export class SyncServerClient {
 
   getPlaylists() {
     return this.apiRequest('/playlists/')
+  }
+
+  getPlaylistBookmarks() {
+    return this.apiRequest('/playlist_bookmarks/')
   }
 
   getPlaylist(playlistId) {

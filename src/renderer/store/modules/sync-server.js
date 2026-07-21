@@ -6,6 +6,14 @@ import {
   syncPlaylists,
   syncSubscriptions,
 } from '../../helpers/sync-server'
+import {
+  EncryptedSyncAdapter,
+  decryptSyncDocument,
+  encryptSyncDocument,
+  getPrivacySalt,
+  loadLegacySyncDocument,
+  preparePrivacyKey,
+} from '../../helpers/sync-server-privacy'
 
 const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000
 
@@ -47,7 +55,9 @@ function withSyncLock(callback) {
 async function runSync(context) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
-  const client = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
+  const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
+  let client = networkClient
+  let encryptedSync = null
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
@@ -57,6 +67,23 @@ async function runSync(context) {
   commit('setSyncServerError', '')
 
   try {
+    if (settings.syncServerPrivacyMode === 'enhanced') {
+      if (!settings.syncServerPrivacyKey) {
+        throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')
+      }
+      const remote = await networkClient.getEncryptedSync()
+      const document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+      // Older v1 enhanced servers did not report legacy_data. Prefer the
+      // lossless migration path when the field is absent.
+      const migrateLegacyData = !remote.payload && remote.legacy_data !== false
+      client = migrateLegacyData ? networkClient : new EncryptedSyncAdapter(document)
+      encryptedSync = {
+        revision: remote.revision,
+        salt: remote.payload ? getPrivacySalt(remote.payload) : settings.syncServerPrivacySalt,
+        migrateLegacyData,
+      }
+    }
+
     if (settings.syncServerSyncSubscriptions) {
       next.subscriptions = await syncSubscriptions(client, store, previous.subscriptions)
       result.subscriptions = next.subscriptions.length
@@ -86,6 +113,18 @@ async function runSync(context) {
       }
     }
 
+    if (encryptedSync) {
+      const document = encryptedSync.migrateLegacyData
+        ? await loadLegacySyncDocument(networkClient)
+        : client.document
+      const payload = await encryptSyncDocument(
+        document,
+        settings.syncServerPrivacyKey,
+        encryptedSync.salt
+      )
+      await networkClient.putEncryptedSync(encryptedSync.revision, payload)
+    }
+
     const lastSyncAt = Date.now()
     await Promise.all([
       dispatch('updateSyncServerSnapshot', JSON.stringify(next), { root: true }),
@@ -102,7 +141,10 @@ async function runSync(context) {
 }
 
 const actions = {
-  async authenticateSyncServer({ dispatch }, { mode, serverUrl, username, password }) {
+  async authenticateSyncServer(
+    { dispatch },
+    { mode, serverUrl, username, password, privacyPassphrase }
+  ) {
     if (mode !== 'login' && mode !== 'register') {
       throw new Error('Invalid authentication mode')
     }
@@ -114,7 +156,26 @@ const actions = {
     }
 
     const client = new SyncServerClient(normalizedUrl)
+    const privacySupported = await client.supportsEncryptedSync()
+    if (privacySupported && !privacyPassphrase) {
+      throw new Error('A privacy passphrase is required by this server')
+    }
+    if (privacySupported && privacyPassphrase.length < 12) {
+      throw new Error('The privacy passphrase must be at least 12 characters')
+    }
+    if (privacySupported && privacyPassphrase === password) {
+      throw new Error('The privacy passphrase must be different from the account password')
+    }
     const token = await client.authenticate(mode, trimmedUsername, password)
+    let privacyKey = ''
+    let privacySalt = ''
+
+    if (privacySupported) {
+      const remote = await client.getEncryptedSync()
+      const privacy = await preparePrivacyKey(remote.payload, privacyPassphrase)
+      privacyKey = privacy.key
+      privacySalt = privacy.salt
+    }
 
     // Keep writes to the shared settings datastore ordered. In particular,
     // the URL must be committed before the token enables the initial sync.
@@ -122,6 +183,9 @@ const actions = {
     await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
     await dispatch('updateSyncServerSnapshot', '{}', { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    await dispatch('updateSyncServerPrivacyMode', privacySupported ? 'enhanced' : 'legacy', { root: true })
+    await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
+    await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
     await dispatch('updateSyncServerToken', token, { root: true })
 
     await dispatch('startSyncServerAutoSync')
@@ -133,6 +197,9 @@ const actions = {
     await dispatch('updateSyncServerUsername', '', { root: true })
     await dispatch('updateSyncServerSnapshot', '{}', { root: true })
     await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    await dispatch('updateSyncServerPrivacyMode', 'unknown', { root: true })
+    await dispatch('updateSyncServerPrivacyKey', '', { root: true })
+    await dispatch('updateSyncServerPrivacySalt', '', { root: true })
     await dispatch('updateSyncServerToken', '', { root: true })
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
@@ -180,8 +247,28 @@ const actions = {
     return activeSyncPromise
   },
 
-  async initializeSyncServer({ dispatch, rootState }) {
+  async initializeSyncServer({ commit, dispatch, rootState }) {
     if (!rootState.settings.syncServerToken) return
+
+    try {
+      const client = new SyncServerClient(
+        rootState.settings.syncServerUrl,
+        rootState.settings.syncServerToken
+      )
+      const privacySupported = await client.supportsEncryptedSync()
+      const privacyMode = privacySupported ? 'enhanced' : 'legacy'
+      await dispatch('updateSyncServerPrivacyMode', privacyMode, { root: true })
+      if (privacySupported && !rootState.settings.syncServerPrivacyKey) {
+        commit(
+          'setSyncServerError',
+          'Reconnect and enter your privacy passphrase to enable enhanced privacy'
+        )
+        return
+      }
+    } catch (error) {
+      commit('setSyncServerError', error.message)
+      return
+    }
 
     await dispatch('startSyncServerAutoSync')
     if (rootState.settings.syncServerAutoSync) {

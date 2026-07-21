@@ -53,7 +53,7 @@ test.describe('OpenTubeX sync server', () => {
         title: 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)',
         author: 'Rick Astley',
         authorId: channelId,
-        published: Date.now() - 60_000,
+        published: Date.now() - 60000,
         description: '',
         lengthSeconds: 213,
         watchProgress: 45,
@@ -67,6 +67,9 @@ test.describe('OpenTubeX sync server', () => {
 
   test('pushes local data and pulls remote changes', async ({ app, page }) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const capabilitiesResponse = await fetch(`${syncServerUrl}/v1/capabilities`)
+    const enhancedPrivacy = capabilitiesResponse.ok &&
+      (await capabilitiesResponse.json()).encrypted_sync === 1
     const bulkRequests = []
     page.on('request', request => {
       const pathname = new URL(request.url()).pathname
@@ -79,13 +82,22 @@ test.describe('OpenTubeX sync server', () => {
     await serverUrlInput.fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
+    if (enhancedPrivacy) {
+      await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    }
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
-    expect(bulkRequests).toEqual(expect.arrayContaining([
-      '/v1/subscriptions/bulk',
-      '/v1/watch_history/bulk'
-    ]))
+    if (enhancedPrivacy) {
+      await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
+      expect(bulkRequests).toEqual([])
+    } else {
+      await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
+      expect(bulkRequests).toEqual(expect.arrayContaining([
+        '/v1/subscriptions/bulk',
+        '/v1/watch_history/bulk'
+      ]))
+    }
     await expect(serverUrlInput).toHaveValue(syncServerUrl.replace(/\/$/, ''))
 
     const settingsPath = path.join(app.userDataDir, 'settings.db')
@@ -96,71 +108,84 @@ test.describe('OpenTubeX sync server', () => {
 
     const settings = latestSettings(await readFile(settingsPath, 'utf8'))
     expect(settings.syncServerUrl).toBe(syncServerUrl.replace(/\/$/, ''))
+    expect(settings.syncServerPrivacyMode).toBe(enhancedPrivacy ? 'enhanced' : 'legacy')
+    expect(Boolean(settings.syncServerPrivacyKey)).toBe(enhancedPrivacy)
     const headers = {
       Authorization: settings.syncServerToken,
       'Content-Type': 'application/json'
     }
     const versionedSubscriptionsResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, { headers })
     const apiPrefix = versionedSubscriptionsResponse.status === 404 ? '' : '/v1'
-    const subscriptionsResponse = apiPrefix
-      ? versionedSubscriptionsResponse
-      : await fetch(`${syncServerUrl}/subscriptions/`, { headers })
-    expect(await subscriptionsResponse.json()).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: channelId }),
-      expect.objectContaining({ id: secondChannelId })
-    ]))
+    if (enhancedPrivacy) {
+      expect(versionedSubscriptionsResponse.status).toBe(409)
+      const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, { headers })
+      const encryptedDocument = await encryptedResponse.json()
+      expect(encryptedDocument.revision).toBeGreaterThan(0)
+      expect(encryptedDocument.payload).not.toContain(channelId)
+      expect(encryptedDocument.payload).not.toContain('Synced playlist')
+      expect(encryptedDocument.payload).not.toContain('dQw4w9WgXcQ')
+    } else {
+      const subscriptionsResponse = apiPrefix
+        ? versionedSubscriptionsResponse
+        : await fetch(`${syncServerUrl}/subscriptions/`, { headers })
+      const subscriptions = await subscriptionsResponse.json()
+      expect(subscriptions).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id: channelId }),
+        expect.objectContaining({ id: secondChannelId })
+      ]))
 
-    const playlistsResponse = await fetch(`${syncServerUrl}${apiPrefix}/playlists/`, { headers })
-    expect(await playlistsResponse.json()).toEqual(expect.arrayContaining([
-      expect.objectContaining({ title: 'Synced playlist' })
-    ]))
+      const playlistsResponse = await fetch(`${syncServerUrl}${apiPrefix}/playlists/`, { headers })
+      expect(await playlistsResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({ title: 'Synced playlist' })
+      ]))
 
-    const historyResponse = await fetch(`${syncServerUrl}${apiPrefix}/watch_history/?page=1`, { headers })
-    expect(historyResponse.ok).toBe(true)
-    expect(await historyResponse.json()).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        video: expect.objectContaining({
-          id: 'dQw4w9WgXcQ',
-          uploader: expect.objectContaining({
-            avatar: 'https://yt3.googleusercontent.com/ytc/default'
+      const historyResponse = await fetch(`${syncServerUrl}${apiPrefix}/watch_history/?page=1`, { headers })
+      expect(historyResponse.ok).toBe(true)
+      expect(await historyResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          video: expect.objectContaining({
+            id: 'dQw4w9WgXcQ',
+            uploader: expect.objectContaining({
+              avatar: 'https://yt3.googleusercontent.com/ytc/default'
+            })
           })
         })
-      })
-    ]))
+      ]))
 
-    const playbackSpeedsResponse = await fetch(
-      `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
-      { headers }
-    )
-    expect(playbackSpeedsResponse.ok).toBe(true)
-    expect(await playbackSpeedsResponse.json()).toEqual(expect.arrayContaining([
-      { channel_id: channelId, playback_speed: 1.5 }
-    ]))
+      const playbackSpeedsResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
+        { headers }
+      )
+      expect(playbackSpeedsResponse.ok).toBe(true)
+      expect(await playbackSpeedsResponse.json()).toEqual(expect.arrayContaining([
+        { channel_id: channelId, playback_speed: 1.5 }
+      ]))
 
-    const putPlaybackSpeedResponse = await fetch(
-      `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
-      {
+      const putPlaybackSpeedResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ channel_id: remoteChannelId, playback_speed: 2 })
+        }
+      )
+      expect(putPlaybackSpeedResponse.ok).toBe(true)
+
+      const addRemoteResponse = await fetch(`${syncServerUrl}${apiPrefix}/subscriptions/`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify({ channel_id: remoteChannelId, playback_speed: 2 })
-      }
-    )
-    expect(putPlaybackSpeedResponse.ok).toBe(true)
-
-    const addRemoteResponse = await fetch(`${syncServerUrl}${apiPrefix}/subscriptions/`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({
-        id: remoteChannelId,
-        name: 'Google for Developers',
-        avatar: 'https://i.ytimg.com/vi/7V-fIGMDsmE/hqdefault.jpg',
-        verified: false
+        body: JSON.stringify({
+          id: remoteChannelId,
+          name: 'Google for Developers',
+          avatar: 'https://i.ytimg.com/vi/7V-fIGMDsmE/hqdefault.jpg',
+          verified: false
+        })
       })
-    })
-    expect(addRemoteResponse.ok).toBe(true)
+      expect(addRemoteResponse.ok).toBe(true)
+    }
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    await expect.poll(async () => {
+    if (!enhancedPrivacy) await expect.poll(async () => {
       const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
       const records = contents.trim().split('\n').map(line => JSON.parse(line))
       return records
@@ -172,7 +197,7 @@ test.describe('OpenTubeX sync server', () => {
       id: remoteChannelId,
       thumbnail: null
     }))
-    await expect.poll(async () => {
+    if (!enhancedPrivacy) await expect.poll(async () => {
       const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
       return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
     }).toEqual({
@@ -204,4 +229,73 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
   })
+
+  test('migrates existing plaintext data before locking the account', async ({ app, page }) => {
+    const capabilitiesResponse = await fetch(`${syncServerUrl}/v1/capabilities`)
+    const enhancedPrivacy = capabilitiesResponse.ok &&
+      (await capabilitiesResponse.json()).encrypted_sync === 1
+    test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
+
+    const username = `opentubex-migration-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const password = 'local-test-password'
+    const registerResponse = await fetch(`${syncServerUrl}/v1/account/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: username, password })
+    })
+    expect(registerResponse.ok).toBe(true)
+    const { jwt } = await registerResponse.json()
+    const headers = {
+      Authorization: jwt,
+      'Content-Type': 'application/json'
+    }
+    const legacySubscriptionResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        id: remoteChannelId,
+        name: 'Google for Developers',
+        avatar: 'https://yt3.googleusercontent.com/ytc/default',
+        verified: false
+      })
+    })
+    expect(legacySubscriptionResponse.ok).toBe(true)
+
+    await goTo(page, 'settings')
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill(password)
+    await syncSection.getByLabel(/Privacy passphrase/).fill('migration-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records
+        .filter(record => record._id === 'allChannels' && !record.$$deleted)
+        .at(-1)
+        ?.subscriptions
+        .some(channel => channel.id === remoteChannelId)
+    }).toBe(true)
+
+    const settings = latestSettings(
+      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    )
+    const migratedHeaders = { Authorization: settings.syncServerToken }
+    const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, {
+      headers: migratedHeaders
+    })
+    const encryptedDocument = await encryptedResponse.json()
+    expect(encryptedDocument.legacy_data).toBe(false)
+    expect(encryptedDocument.payload).not.toContain(remoteChannelId)
+
+    const plaintextResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
+      headers: migratedHeaders
+    })
+    expect(plaintextResponse.status).toBe(409)
+  })
+
 })
