@@ -120,6 +120,13 @@ export class SyncServerClient {
     return response.jwt
   }
 
+  deleteAccount(password) {
+    return this.apiRequest('/account/delete', {
+      method: 'DELETE',
+      body: { password },
+    })
+  }
+
   getSubscriptions() {
     return this.apiRequest('/subscriptions/')
   }

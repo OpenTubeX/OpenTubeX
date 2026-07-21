@@ -882,6 +882,12 @@ Settings:
     Log In: Log in
     Register: Register
     Disconnect: Disconnect
+    Delete Account: Delete sync account
+    Delete Account Confirmation: Delete sync account?
+    Delete Account Warning: This permanently deletes your sync account and all data stored on this server. Your local OpenTubeX data will not be deleted.
+    Confirm Delete Account: Delete account
+    Password Required: Password is required
+    Account Deleted: Sync account deleted
     Connected as: 'Connected as {username}'
     Automatic Sync: Sync automatically every five minutes
     Sync Now: Sync now

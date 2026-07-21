@@ -117,16 +117,41 @@ const actions = {
 
   async disconnectSyncServer({ commit, dispatch }) {
     await dispatch('stopSyncServerAutoSync')
-    await Promise.all([
-      dispatch('updateSyncServerUsername', '', { root: true }),
-      dispatch('updateSyncServerToken', '', { root: true }),
-      dispatch('updateSyncServerSnapshot', '{}', { root: true }),
-      dispatch('updateSyncServerLastSyncAt', 0, { root: true }),
-    ])
+    await dispatch('updateSyncServerUsername', '', { root: true })
+    await dispatch('updateSyncServerSnapshot', '{}', { root: true })
+    await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    await dispatch('updateSyncServerToken', '', { root: true })
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
     commit('setSyncServerStatus', 'idle')
+  },
+
+  async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
+    if (!rootState.settings.syncServerToken) {
+      throw new Error('Connect to a sync server first')
+    }
+    if (!password) {
+      throw new Error('Password is required')
+    }
+
+    commit('setSyncServerStatus', 'syncing')
+    commit('setSyncServerError', '')
+    await dispatch('stopSyncServerAutoSync')
+
+    try {
+      const client = new SyncServerClient(
+        rootState.settings.syncServerUrl,
+        rootState.settings.syncServerToken
+      )
+      await client.deleteAccount(password)
+      await dispatch('disconnectSyncServer')
+    } catch (error) {
+      commit('setSyncServerError', error.message)
+      commit('setSyncServerStatus', 'error')
+      await dispatch('startSyncServerAutoSync')
+      throw error
+    }
   },
 
   syncWithSyncServer(context) {

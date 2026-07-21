@@ -141,5 +141,29 @@ test.describe('LibreTube sync server', () => {
       id: remoteChannelId,
       thumbnail: null
     }))
+
+    await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
+    const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })
+    const deleteAccountPassword = deleteAccountPrompt.getByLabel('Password')
+    await deleteAccountPassword.fill('wrong-password')
+    await deleteAccountPrompt.getByRole('button', { name: 'Delete account' }).click()
+    await expect(deleteAccountPrompt.getByRole('alert')).toBeVisible()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+
+    await deleteAccountPassword.fill('local-test-password')
+    await deleteAccountPrompt.getByRole('button', { name: 'Delete account' }).click()
+    await expect(deleteAccountPrompt).toBeHidden()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeVisible()
+
+    const deletedAccountLoginResponse = await fetch(`${syncServerUrl}${apiPrefix}/account/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: username, password: 'local-test-password' })
+    })
+    expect(deletedAccountLoginResponse.ok).toBe(false)
+
+    expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
+    expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
+    expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
   })
 })

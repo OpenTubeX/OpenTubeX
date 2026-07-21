@@ -94,6 +94,13 @@
           :icon="['fas', 'right-from-bracket']"
           @click="disconnect"
         />
+        <FtButton
+          :label="t('Settings.Sync Settings.Delete Account')"
+          text-color="var(--destructive-text-color)"
+          background-color="var(--destructive-color)"
+          :icon="['fas', 'trash']"
+          @click="showDeleteAccountPrompt = true"
+        />
       </FtFlexBox>
     </template>
     <FtFlexBox
@@ -111,6 +118,47 @@
         @click="authenticate('register')"
       />
     </FtFlexBox>
+    <FtPrompt
+      v-if="showDeleteAccountPrompt"
+      :label="t('Settings.Sync Settings.Delete Account Confirmation')"
+      theme="readable-width"
+      @click="closeDeleteAccountPrompt"
+    >
+      <div class="deleteAccountContent">
+        <p class="deleteAccountWarning">
+          {{ t('Settings.Sync Settings.Delete Account Warning') }}
+        </p>
+        <FtInput
+          :placeholder="t('Settings.Sync Settings.Password')"
+          :show-action-button="false"
+          :value="deleteAccountPassword"
+          input-type="password"
+          show-label
+          @input="deleteAccountPassword = $event"
+          @keydown.enter="deleteAccount"
+        />
+        <p
+          v-if="deleteAccountError"
+          class="error"
+          role="alert"
+        >
+          {{ deleteAccountError }}
+        </p>
+        <FtFlexBox class="actions">
+          <FtButton
+            :label="t('Settings.Sync Settings.Confirm Delete Account')"
+            text-color="var(--destructive-text-color)"
+            background-color="var(--destructive-color)"
+            :icon="['fas', 'trash']"
+            @click="deleteAccount"
+          />
+          <FtButton
+            :label="t('Cancel')"
+            @click="closeDeleteAccountPrompt"
+          />
+        </FtFlexBox>
+      </div>
+    </FtPrompt>
   </FtSettingsSection>
 </template>
 
@@ -122,6 +170,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
@@ -134,6 +183,9 @@ const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(store.getters.getSyncServerUsername)
 const password = ref('')
 const localError = ref('')
+const showDeleteAccountPrompt = ref(false)
+const deleteAccountPassword = ref('')
+const deleteAccountError = ref('')
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
@@ -191,6 +243,30 @@ async function disconnect() {
 
 function setAutoSync(enabled) {
   store.dispatch('setSyncServerAutoSync', enabled)
+}
+
+function closeDeleteAccountPrompt() {
+  if (busy.value) return
+  showDeleteAccountPrompt.value = false
+  deleteAccountPassword.value = ''
+  deleteAccountError.value = ''
+}
+
+async function deleteAccount() {
+  if (busy.value) return
+  deleteAccountError.value = ''
+  if (!deleteAccountPassword.value) {
+    deleteAccountError.value = t('Settings.Sync Settings.Password Required')
+    return
+  }
+
+  try {
+    await store.dispatch('deleteSyncServerAccount', deleteAccountPassword.value)
+    closeDeleteAccountPrompt()
+    showToast(t('Settings.Sync Settings.Account Deleted'))
+  } catch (error) {
+    deleteAccountError.value = error.message
+  }
 }
 </script>
 

@@ -54,3 +54,19 @@
 .actions {
   justify-content: center;
 }
+
+.deleteAccountWarning {
+  margin-inline: auto;
+  max-inline-size: 38rem;
+  text-align: center;
+}
+
+.deleteAccountContent {
+  box-sizing: border-box;
+  padding-inline: 1rem;
+}
+
+.deleteAccountContent :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+  margin-inline: auto;
+}
