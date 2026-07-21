@@ -24,6 +24,8 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    env:
+      OPENTUBEX_SYNC_SERVER_URL: https://sync.d3sox.me
 
     permissions:
       contents: read

@@ -163,7 +163,7 @@ test.describe('background tab shortcuts', () => {
     await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
 
     await page.locator(sel.newTabButton).click()
-    await goTo(page, 'settings')
+    await goTo(page, 'history')
 
     const externalRequests = []
     page.on('request', (request) => {
