@@ -203,7 +203,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['clear', 'click', 'input', 'keydown', 'remove'])
+const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'])
 
 const id = useId()
 
@@ -488,6 +488,7 @@ function handleInputBlur() {
   if (!searchState.isPointerInList) {
     searchState.showOptions = false
   }
+  emit('blur', inputData.value)
 }
 
 function handleFocus() {

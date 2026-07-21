@@ -12,12 +12,13 @@
         :disabled="connected"
         show-label
         @input="serverUrl = $event"
+        @blur="saveServerUrl"
       />
       <FtInput
         :placeholder="t('Settings.Sync Settings.Username')"
         :show-action-button="false"
         :value="username"
-        :disabled="connected"
+        :disabled="connected || serverCredentialsDisabled"
         show-label
         @input="username = $event"
       />
@@ -26,16 +27,18 @@
         :placeholder="t('Settings.Sync Settings.Password')"
         :show-action-button="false"
         :value="password"
+        :disabled="serverCredentialsDisabled"
         input-type="password"
         show-label
         @input="password = $event"
         @keydown.enter="authenticate('login')"
       />
       <FtInput
-        v-if="!connected"
+        v-if="!connected && serverPrivacySupported !== false"
         :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
         :show-action-button="false"
         :value="privacyPassphrase"
+        :disabled="serverCredentialsDisabled"
         input-type="password"
         show-label
         @input="privacyPassphrase = $event"
@@ -43,14 +46,28 @@
       />
     </FtFlexBox>
     <p
-      v-if="!connected"
+      v-if="!connected && serverPrivacySupported !== false"
       class="privacyHint"
     >
       {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
     </p>
+    <p
+      v-if="!connected && serverCheckStatus === 'checking'"
+      class="serverCheckStatus"
+      aria-live="polite"
+    >
+      {{ t('Settings.Sync Settings.Checking Server') }}
+    </p>
+    <p
+      v-if="!connected && serverPrivacySupported === false"
+      class="privacyWarning"
+      role="status"
+    >
+      {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
+    </p>
 
     <div
-      v-if="syncProgress"
+      v-if="busy && syncProgress"
       class="syncProgress"
       aria-live="polite"
     >
@@ -179,11 +196,13 @@
       <FtButton
         :label="t('Settings.Sync Settings.Log In')"
         :icon="['fas', 'right-to-bracket']"
+        :disabled="serverCredentialsDisabled"
         @click="authenticate('login')"
       />
       <FtButton
         :label="t('Settings.Sync Settings.Register')"
         :icon="['fas', 'user-plus']"
+        :disabled="serverCredentialsDisabled"
         @click="authenticate('register')"
       />
     </FtFlexBox>
@@ -232,7 +251,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
@@ -244,6 +263,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
+import { SyncServerClient, normalizeSyncServerUrl } from '../../helpers/sync-server'
 import { showToast } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
@@ -257,6 +277,9 @@ const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(store.getters.getSyncServerUsername)
 const password = ref('')
 const privacyPassphrase = ref('')
+const serverPrivacySupported = ref(null)
+const serverCheckStatus = ref('idle')
+const serverCheckError = ref('')
 const localError = ref('')
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
@@ -264,6 +287,9 @@ const deleteAccountError = ref('')
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
+const serverCredentialsDisabled = computed(() => (
+  !connected.value && serverCheckStatus.value !== 'valid'
+))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
 const syncProgress = computed(() => store.getters.getSyncServerProgress)
@@ -280,7 +306,9 @@ const syncProgressLabel = computed(() => {
   }
   return labels[syncProgress.value.stage]
 })
-const errorMessage = computed(() => localError.value || store.getters.getSyncServerError)
+const errorMessage = computed(() => (
+  localError.value || serverCheckError.value || store.getters.getSyncServerError
+))
 const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
@@ -300,8 +328,50 @@ const lastSyncLabel = computed(() => {
   }).format(timestamp)
 })
 
+let serverCheckTimer = null
+let serverCheckSequence = 0
+
+watch(serverUrl, value => {
+  clearTimeout(serverCheckTimer)
+  const sequence = ++serverCheckSequence
+  serverPrivacySupported.value = null
+  serverCheckStatus.value = 'idle'
+  serverCheckError.value = ''
+  if (connected.value || !value.trim()) return
+
+  serverCheckTimer = setTimeout(async () => {
+    serverCheckStatus.value = 'checking'
+    try {
+      const capabilities = await new SyncServerClient(value).getCapabilities()
+      if (sequence !== serverCheckSequence) return
+      serverPrivacySupported.value = capabilities.encrypted_sync === 1
+      serverCheckStatus.value = 'valid'
+    } catch {
+      if (sequence !== serverCheckSequence) return
+      serverCheckStatus.value = 'error'
+      serverCheckError.value = t('Settings.Sync Settings.Server Unavailable')
+    }
+  }, 400)
+}, { immediate: true })
+
+onBeforeUnmount(() => clearTimeout(serverCheckTimer))
+
+async function saveServerUrl() {
+  if (connected.value || !serverUrl.value.trim()) return
+
+  try {
+    const normalizedUrl = normalizeSyncServerUrl(serverUrl.value)
+    serverUrl.value = normalizedUrl
+    serverCheckError.value = ''
+    await store.dispatch('updateSyncServerUrl', normalizedUrl)
+  } catch {
+    serverCheckStatus.value = 'error'
+    serverCheckError.value = t('Settings.Sync Settings.Server Unavailable')
+  }
+}
+
 async function authenticate(mode) {
-  if (busy.value) return
+  if (busy.value || serverCredentialsDisabled.value) return
   localError.value = ''
   try {
     await store.dispatch('authenticateSyncServer', {

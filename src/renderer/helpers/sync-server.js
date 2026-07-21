@@ -101,7 +101,13 @@ export class SyncServerClient {
   }
 
   getCapabilities() {
-    this.capabilitiesPromise ??= this.request('/v1/capabilities')
+    this.capabilitiesPromise ??= this.health().then(response => {
+      // Existing LibreTube servers return the plain text "OK". A structured
+      // health response advertises the optional OpenTubeX extensions.
+      if (!response || typeof response !== 'object' || Array.isArray(response)) return {}
+      const capabilities = response.capabilities
+      return capabilities && typeof capabilities === 'object' ? capabilities : {}
+    })
     return this.capabilitiesPromise
   }
 

@@ -172,9 +172,11 @@ async function runSync(context) {
       ])
     })
     commit('setSyncServerLastResult', result)
+    commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'success')
     return result
   } catch (error) {
+    commit('setSyncServerProgress', null)
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
     throw error

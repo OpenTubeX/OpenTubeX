@@ -15,6 +15,13 @@ function latestSettings(contents) {
     .map(record => [record._id, record.value]))
 }
 
+async function getSyncCapabilities() {
+  const response = await fetch(`${syncServerUrl}/health`)
+  if (!response.ok) return {}
+  const health = await response.json()
+  return health.capabilities ?? {}
+}
+
 test.describe('OpenTubeX sync server', () => {
   test.skip(!syncServerUrl, 'Set OPENTUBEX_SYNC_SERVER_URL to run the local sync-server test')
 
@@ -67,9 +74,7 @@ test.describe('OpenTubeX sync server', () => {
 
   test('pushes local data and pulls remote changes', async ({ app, page }) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
-    const capabilitiesResponse = await fetch(`${syncServerUrl}/v1/capabilities`)
-    const enhancedPrivacy = capabilitiesResponse.ok &&
-      (await capabilitiesResponse.json()).encrypted_sync === 1
+    const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
     const bulkRequests = []
     page.on('request', request => {
       const pathname = new URL(request.url()).pathname
@@ -231,9 +236,7 @@ test.describe('OpenTubeX sync server', () => {
   })
 
   test('migrates existing plaintext data before locking the account', async ({ app, page }) => {
-    const capabilitiesResponse = await fetch(`${syncServerUrl}/v1/capabilities`)
-    const enhancedPrivacy = capabilitiesResponse.ok &&
-      (await capabilitiesResponse.json()).encrypted_sync === 1
+    const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
     test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
 
     const username = `opentubex-migration-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -329,9 +332,12 @@ test.describe('OpenTubeX sync server', () => {
     const bulkRequests = []
     const historyPageSizes = []
 
-    await page.route('**/v1/capabilities', route => route.fulfill({
+    await page.route('**/health', route => route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify({ encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 })
+      body: JSON.stringify({
+        status: 'ok',
+        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      })
     }))
     page.on('request', request => {
       const url = new URL(request.url())
@@ -350,6 +356,7 @@ test.describe('OpenTubeX sync server', () => {
 
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
     expect(bulkRequests).toEqual(expect.arrayContaining([
       '/v1/subscriptions/bulk',
       '/v1/watch_history/bulk'
@@ -384,16 +391,16 @@ test.describe('OpenTubeX sync server', () => {
     expect(cleanupResponse.ok).toBe(true)
   })
 
-  test('uses concurrent legacy writes when bulk sync is not advertised', async ({ page }) => {
+  test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {
     const username = `opentubex-legacy-${Date.now()}-${Math.random().toString(16).slice(2)}`
     let activeSubscriptionWrites = 0
     let maxConcurrentSubscriptionWrites = 0
     const bulkRequests = []
     const historyPageSizes = []
 
-    await page.route('**/v1/capabilities', route => route.fulfill({
-      contentType: 'application/json',
-      body: JSON.stringify({ encrypted_sync: 0 })
+    await page.route('**/health', route => route.fulfill({
+      contentType: 'text/plain',
+      body: 'OK'
     }))
     page.on('request', request => {
       const url = new URL(request.url())
@@ -417,7 +424,25 @@ test.describe('OpenTubeX sync server', () => {
 
     await goTo(page, 'settings')
     const syncSection = page.locator('[data-section="sync"]')
-    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    const serverUrlInput = syncSection.getByLabel('Server URL')
+    await page.route('https://not-a-sync-server.invalid/**', route => route.abort())
+    await serverUrlInput.fill('https://not-a-sync-server.invalid')
+    await serverUrlInput.press('Tab')
+    await expect(syncSection.getByText(/Unable to connect to this sync server/)).toBeVisible()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    await expect(syncSection.getByLabel('Password')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
+
+    await serverUrlInput.fill(`${syncServerUrl}/`)
+    await serverUrlInput.press('Tab')
+    await expect(serverUrlInput).toHaveValue(syncServerUrl)
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      return latestSettings(contents).syncServerUrl
+    }).toBe(syncServerUrl)
+    await expect(syncSection.getByLabel(/Privacy passphrase/)).toBeHidden()
+    await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
     await syncSection.getByRole('button', { name: 'Register' }).click()

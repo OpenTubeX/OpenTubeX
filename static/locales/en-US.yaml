@@ -881,6 +881,8 @@ Settings:
     Enhanced Privacy Unsupported: Warning — this server does not support enhanced privacy. Synced data is visible to its operator.
     Description: Synchronize subscriptions, playlists, watch history, and channel playback speeds with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.
     Server URL: Server URL
+    Checking Server: Checking sync server…
+    Server Unavailable: Unable to connect to this sync server. Check the URL and try again.
     Username: Username
     Password: Password
     Log In: Log in
