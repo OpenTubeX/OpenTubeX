@@ -104,6 +104,8 @@ function runApp() {
   /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
   let subscriptionAutoRefreshOwner = null
   let subscriptionAutoRefreshProgress = 0
+  /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
+  let ipBlockRecoveryScriptPromise = null
 
   /**
    * @param {string} url
@@ -2097,19 +2099,33 @@ function runApp() {
     }
   })
 
-  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, (event, tabId, feedTab) => {
-    const manager = TabManager.getFromWebContents(event.sender)
+  ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
+    const canAcquire = () => {
+      const manager = TabManager.getFromWebContents(event.sender)
+      return manager != null &&
+        typeof tabId === 'string' &&
+        manager.activeTabId === tabId &&
+        !event.sender.isDestroyed() &&
+        isOpenTubeXUrl(event.senderFrame.url)
+    }
 
-    if (
-      !manager ||
-      typeof tabId !== 'string' ||
-      manager.activeTabId !== tabId ||
-      !isOpenTubeXUrl(event.senderFrame.url)
-    ) {
+    if (!canAcquire()) {
       return false
     }
 
-    if (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.webContents.isDestroyed()) {
+    const activeIpBlockRecovery = ipBlockRecoveryScriptPromise
+    if (activeIpBlockRecovery != null) {
+      try {
+        await activeIpBlockRecovery
+      } catch {
+        // Refresh after the recovery attempt finishes, even when it failed.
+      }
+    }
+
+    if (
+      !canAcquire() ||
+      (subscriptionAutoRefreshOwner && !subscriptionAutoRefreshOwner.webContents.isDestroyed())
+    ) {
       return false
     }
 
@@ -2508,9 +2524,6 @@ function runApp() {
   }
 
   const ipBlockRecoveryScriptCooldownMs = 10_000
-
-  /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
-  let ipBlockRecoveryScriptPromise = null
 
   /**
    * @param {string} scriptPath
