@@ -13,6 +13,23 @@ async function openVideoInActiveTab(page, url) {
   return waitForPlaybackOrSkip(test, page)
 }
 
+async function setWindowMinimized(electronApp, minimized) {
+  await electronApp.evaluate(({ BrowserWindow }, shouldMinimize) => {
+    const window = BrowserWindow.getAllWindows()[0]
+    if (shouldMinimize) {
+      window.minimize()
+    } else {
+      window.restore()
+    }
+  }, minimized)
+}
+
+async function expectPictureInPicture(video, active) {
+  await expect.poll(
+    () => video.evaluate((element) => document.pictureInPictureElement === element)
+  ).toBe(active)
+}
+
 // Regression: quick playback speed state leaked between tabs (021b06197)
 test('playback speed is isolated per tab', async ({ page, innertube }) => {
   test.skip(!innertube.playback, 'needs real media streams')
@@ -50,4 +67,49 @@ test('switching away from a playing video keeps the renderer responsive', async 
   await expect(page.locator(sel.tabs)).toHaveCount(3)
   await page.locator(sel.tabs).first().click()
   await expect(page.locator(`${activeTab} .videoTitle`)).toBeVisible()
+})
+
+test.describe('automatic picture-in-picture', () => {
+  test.use({
+    seed: {
+      settings: {
+        autoPictureInPictureTriggers: ['tab', 'minimize', 'blur']
+      }
+    }
+  })
+
+  // Regression: the blur emitted while minimizing kept the blur trigger active
+  // after restore, so the automatically opened PiP window never closed (#265).
+  test('exits PiP after restoring a minimized window', async ({ app, page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    test.slow()
+
+    const video = await openVideoInActiveTab(page, VIDEO_ONE)
+
+    await setWindowMinimized(app.electronApp, true)
+    await expectPictureInPicture(video, true)
+
+    await setWindowMinimized(app.electronApp, false)
+    await expectPictureInPicture(video, false)
+  })
+
+  // Regression: play events from an inactive logical tab were rejected even
+  // when that tab's video was still presented in the native PiP window (#266).
+  test('resumes PiP playback from an inactive tab while minimized', async ({ app, page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    test.slow()
+
+    const video = await openVideoInActiveTab(page, VIDEO_ONE)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expectPictureInPicture(video, true)
+
+    await setWindowMinimized(app.electronApp, true)
+    await video.evaluate((element) => element.pause())
+    await expect.poll(() => video.evaluate((element) => element.paused)).toBe(true)
+
+    await video.evaluate((element) => element.play())
+    await expect.poll(() => video.evaluate((element) => element.paused)).toBe(false)
+  })
 })

@@ -21,7 +21,8 @@ test.describe('tab bar', () => {
   test('uses a distinct page icon for watch tabs', async ({ page }) => {
     const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/watch/jNQXAC9IVRw',
-      makeActive: false
+      makeActive: false,
+      lazyLoad: true
     }))
     const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
 
