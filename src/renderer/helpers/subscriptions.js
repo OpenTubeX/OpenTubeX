@@ -162,6 +162,10 @@ async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
 
   const fetchNext = async () => {
     while (nextIndex < channels.length) {
+      if (process.env.IS_ELECTRON) {
+        await window.ftElectron.waitForIpBlockRecoveryScript()
+      }
+
       const index = nextIndex++
       results[index] = await fetchChannel(channels[index])
 
@@ -468,7 +472,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
     }
 
     const videoListFromRemote = useRss
-      ? (await Promise.all(activeSubscriptionList.map(fetchChannel))).flat()
+      ? await fetchSubscriptionsConcurrently(activeSubscriptionList, fetchChannel)
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
@@ -518,7 +522,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   let channelCount = 0
 
   try {
-    const videoListFromRemote = (await Promise.all(activeSubscriptionList.map(async (channel) => {
+    const videoListFromRemote = await fetchSubscriptionsConcurrently(activeSubscriptionList, async (channel) => {
       let videos, name
 
       if (!process.env.SUPPORTS_LOCAL_API || store.getters.getBackendPreference === 'invidious') {
@@ -553,7 +557,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
       }
 
       return videos ?? store.getters.getShortsCache[channel.id]?.videos ?? []
-    }))).flat()
+    })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
     completeSubscriptionRefresh('shorts', activeProfile._id)
@@ -650,7 +654,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
     }
 
     const videoListFromRemote = useRss
-      ? (await Promise.all(activeSubscriptionList.map(fetchChannel))).flat()
+      ? await fetchSubscriptionsConcurrently(activeSubscriptionList, fetchChannel)
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)

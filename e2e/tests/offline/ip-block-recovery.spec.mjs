@@ -18,7 +18,10 @@ test('subscription refresh waits for an active IP block recovery', async ({ app,
     const tabId = store.getters.getActiveTabId
     const started = await window.ftElectron.startIpBlockRecoveryScript(recoveryScriptPath)
     const startedAt = performance.now()
-    const acquired = await window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos')
+    const [acquired] = await Promise.all([
+      window.ftElectron.subscriptionAutoRefresh.acquire(tabId, 'videos'),
+      window.ftElectron.waitForIpBlockRecoveryScript()
+    ])
     const elapsed = performance.now() - startedAt
 
     if (acquired) {

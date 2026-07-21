@@ -2593,6 +2593,18 @@ function runApp() {
     }
   })
 
+  ipcMain.handle(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT, async (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    try {
+      await ipBlockRecoveryScriptPromise
+    } catch {
+      // Resume subscription fetching after the recovery attempt finishes.
+    }
+  })
+
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
 

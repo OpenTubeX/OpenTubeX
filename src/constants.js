@@ -97,6 +97,7 @@ const IpcChannels = {
   WRITE_TO_DEFAULT_FOLDER: 'write-to-default-folder',
   START_IP_BLOCK_RECOVERY_SCRIPT: 'start-ip-block-recovery-script',
   EXECUTE_IP_BLOCK_RECOVERY_SCRIPT: 'execute-ip-block-recovery-script',
+  WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT: 'wait-for-ip-block-recovery-script',
 
   OPEN_IN_EXTERNAL_PLAYER: 'open-in-external-player',
   OPEN_IN_EXTERNAL_PLAYER_RESULT: 'open-in-external-player-result',

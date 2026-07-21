@@ -182,6 +182,14 @@ export default {
     return await ipcRenderer.invoke(IpcChannels.EXECUTE_IP_BLOCK_RECOVERY_SCRIPT, scriptPath)
   },
 
+  /**
+   * Waits for the active IP block recovery run, if any.
+   * @returns {Promise<void>}
+   */
+  waitForIpBlockRecoveryScript: async () => {
+    await ipcRenderer.invoke(IpcChannels.WAIT_FOR_IP_BLOCK_RECOVERY_SCRIPT)
+  },
+
   relaunch: () => {
     ipcRenderer.send(IpcChannels.RELAUNCH_REQUEST)
   },
