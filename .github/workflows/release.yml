@@ -587,6 +587,40 @@ jobs:
           --ref "$GITHUB_REF_NAME" \
           -f "releaseTag=$TAG"
 
+  trigger-rpm-update:
+    name: Trigger RPM repository update
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - name: Resolve release tag
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+    - name: Trigger RPM repository workflow
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        TAG: ${{ steps.release.outputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh api repos/OpenTubeX/rpm/dispatches \
+          --method POST \
+          -f event_type=opentubex-release \
+          -f "client_payload[tag]=$TAG"
+
   trigger-apt-update:
     name: Trigger APT repository update
     needs: build
