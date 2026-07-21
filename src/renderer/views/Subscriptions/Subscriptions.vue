@@ -251,6 +251,7 @@ import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import {
   refreshSubscriptionLiveFromRemote,
@@ -344,6 +345,41 @@ const tabScrollPositions = {
   live: 0,
   community: 0,
   new: 0
+}
+
+const subscriptionRefreshTimestamps = computed(() => [
+  store.getters.getSubscriptionFeedLastRefreshTimestamp,
+  store.getters.getSubscriptionShortsLastRefreshTimestamp,
+  store.getters.getSubscriptionLiveLastRefreshTimestamp,
+  store.getters.getSubscriptionPostsLastRefreshTimestamp
+])
+
+watch(subscriptionRefreshTimestamps, (timestamps, previousTimestamps) => {
+  const feedTabs = ['videos', 'shorts', 'live', 'community']
+
+  timestamps.forEach((timestamp, index) => {
+    if (timestamp && timestamp !== previousTimestamps[index]) {
+      resetScrollAfterRefresh(feedTabs[index])
+    }
+  })
+})
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'community'} refreshedTab
+ */
+function resetScrollAfterRefresh(refreshedTab) {
+  tabScrollPositions[refreshedTab] = 0
+  tabScrollPositions.new = 0
+
+  if (currentTab.value !== refreshedTab && currentTab.value !== 'new') {
+    return
+  }
+
+  if (isElectron && tabId) {
+    getTabNavigationService().resetScroll(tabId)
+  } else {
+    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  }
 }
 
 let isMounted = false

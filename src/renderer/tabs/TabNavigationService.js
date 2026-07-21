@@ -425,6 +425,24 @@ export class TabNavigationService {
     window.scrollTo({ left: scroll.left, top: scroll.top, behavior: 'instant' })
   }
 
+  resetScroll(tabId) {
+    const tab = this.store.getters.getTabById(tabId)
+    if (!tab) {
+      return
+    }
+
+    this.store.commit('setHistoryEntryScroll', {
+      tabId,
+      historyIndex: tab.historyIndex,
+      scroll: { left: 0, top: 0 }
+    })
+    this.publishHistory(tabId)
+
+    if (this.store.getters.getPresentedTabId === tabId) {
+      window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+    }
+  }
+
   setTitle(tabId, title, { skipHistoryEntry = false } = {}) {
     if (typeof title !== 'string') {
       return
