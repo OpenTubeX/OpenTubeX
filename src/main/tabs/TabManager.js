@@ -515,6 +515,8 @@ export class TabManager {
     this.closedTabs = []
     this.tabBarScrollPosition = 0
     this.contextMenuTabId = null
+    /** @type {string[]} */
+    this.contextMenuSelectedTabIds = []
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuTabBarVertical = false
@@ -2567,6 +2569,17 @@ export function setupTabsIPC(options = {}) {
     manager.contextMenuTabId = typeof payload?.tabId === 'string' && manager.tabs.has(payload.tabId)
       ? payload.tabId
       : null
+    manager.contextMenuSelectedTabIds = Array.isArray(payload?.selectedTabIds)
+      ? Array.from(new Set(payload.selectedTabIds.filter(tabId => {
+          return typeof tabId === 'string' && manager.tabs.has(tabId)
+        })))
+      : []
+    if (
+      manager.contextMenuTabId &&
+      !manager.contextMenuSelectedTabIds.includes(manager.contextMenuTabId)
+    ) {
+      manager.contextMenuSelectedTabIds = [manager.contextMenuTabId]
+    }
     manager.contextMenuSurface = ['tab', 'tabBar', 'content', 'subscriptionFeedTab'].includes(payload?.surface)
       ? payload.surface
       : payload?.isTabBar === true ? 'tabBar' : 'content'

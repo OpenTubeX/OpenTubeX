@@ -56,6 +56,29 @@ test.describe('tab bar', () => {
     await expect(page).toHaveURL(/#\/history/)
   })
 
+  test('selects multiple tabs with modifier clicks', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(1)).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+
+    await tabs.nth(3).click({ modifiers: ['Shift'] })
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(3)).toHaveAttribute('aria-pressed', 'true')
+
+    await tabs.nth(1).click()
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(0)
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)

@@ -32,6 +32,7 @@
           :disable-tooltips="draggingTabId != null"
           :close-tooltips-signal="closeTooltipsSignal"
           :show-icon="showTabIcons"
+          :is-selected="selectedTabIds.has(tab.id)"
           :close-label="t('Close Tab')"
           @activate="handleActivate"
           @close="closeTab"
@@ -111,6 +112,10 @@ const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
 const scrollbarRef = useTemplateRef('scrollbarRef')
 const closeTooltipsSignal = ref(0)
+/** @type {import('vue').Ref<Set<string>>} */
+const selectedTabIds = ref(new Set())
+/** @type {string | null} */
+let selectionAnchorId = null
 
 // ===== Drag and drop state =====
 const DRAG_THRESHOLD_PX = 5
@@ -174,7 +179,10 @@ function handleTabContainerPointerDown(event) {
   if (target.closest('.closeButton')) return
 
   const tabEl = target.closest('.tab[data-tab-id]')
-  if (!(tabEl instanceof HTMLElement)) return
+  if (!(tabEl instanceof HTMLElement)) {
+    clearTabSelection()
+    return
+  }
 
   const container = dropZoneRef.value
   if (!container) return
@@ -639,10 +647,44 @@ function resetTabBarWidth() {
 
 // ===== Tab actions =====
 /**
+ * @param {MouseEvent} event
  * @param {string} tabId
  */
-function handleActivate(tabId) {
+function handleActivate(event, tabId) {
+  if (event.shiftKey) {
+    const anchorId = selectionAnchorId ?? store.getters.getActiveTabId ?? tabId
+    const anchorIndex = tabs.value.findIndex(tab => tab.id === anchorId)
+    const targetIndex = tabs.value.findIndex(tab => tab.id === tabId)
+    if (anchorIndex !== -1 && targetIndex !== -1) {
+      const [start, end] = [anchorIndex, targetIndex].sort((a, b) => a - b)
+      selectedTabIds.value = new Set(tabs.value.slice(start, end + 1).map(tab => tab.id))
+      return
+    }
+  }
+
+  if (event.ctrlKey || event.metaKey) {
+    const nextSelection = new Set(selectedTabIds.value)
+    if (nextSelection.size === 0) {
+      const activeTabId = store.getters.getActiveTabId
+      if (activeTabId) nextSelection.add(activeTabId)
+    }
+    if (nextSelection.has(tabId)) {
+      nextSelection.delete(tabId)
+    } else {
+      nextSelection.add(tabId)
+    }
+    selectedTabIds.value = nextSelection
+    selectionAnchorId = tabId
+    return
+  }
+
+  clearTabSelection()
+  selectionAnchorId = tabId
   store.dispatch('activateTab', tabId)
+}
+
+function clearTabSelection() {
+  selectedTabIds.value = new Set()
 }
 
 /**
@@ -692,7 +734,7 @@ function createNewTab() {
 
 // ===== Context menu =====
 /**
- * @param {{ tabId: string | null, surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
+ * @param {{ tabId: string | null, selectedTabIds?: string[], surface: 'tab' | 'tabBar' | 'content' | 'subscriptionFeedTab', feedTab?: 'videos' | 'shorts' | 'live' | 'posts' | 'all' | null }} payload
  */
 function updateContextMenuTab(payload) {
   window.ftElectron.tabs.setContextMenuTab({ ...payload, verticalLayout: vertical.value })
@@ -707,10 +749,12 @@ function handleContextMenuPointerDown(event) {
   }
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
   const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
   const isTabBar = event.target.closest('.tabBar') != null
   updateContextMenuTab({
     tabId,
+    selectedTabIds: contextMenuSelectedTabIds,
     surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
     feedTab
   })
@@ -725,13 +769,31 @@ function handleContextMenuEvent(event) {
   }
 
   const tabId = event.target.closest('.tab[data-tab-id]')?.dataset.tabId ?? null
+  const contextMenuSelectedTabIds = getContextMenuSelectedTabIds(tabId)
   const feedTab = event.target.closest('[data-subscription-feed-tab]')?.dataset.subscriptionFeedTab ?? null
   const isTabBar = event.target.closest('.tabBar') != null
   updateContextMenuTab({
     tabId,
+    selectedTabIds: contextMenuSelectedTabIds,
     surface: tabId ? 'tab' : isTabBar ? 'tabBar' : feedTab ? 'subscriptionFeedTab' : 'content',
     feedTab
   })
+}
+
+/**
+ * Preserve a multi-selection only when its context menu is opened from one of
+ * the selected tabs. Right-clicking elsewhere starts a new single-tab target.
+ * @param {string | null} tabId
+ * @returns {string[]}
+ */
+function getContextMenuSelectedTabIds(tabId) {
+  if (!tabId) return []
+  if (selectedTabIds.value.size > 1 && selectedTabIds.value.has(tabId)) {
+    return tabs.value.filter(tab => selectedTabIds.value.has(tab.id)).map(tab => tab.id)
+  }
+  clearTabSelection()
+  selectionAnchorId = tabId
+  return [tabId]
 }
 
 // ===== Lifecycle =====
@@ -741,6 +803,7 @@ onMounted(() => {
     document.addEventListener('contextmenu', handleContextMenuEvent, true)
     removeActiveChangedListener = window.ftElectron.tabs.onActiveChanged(() => {
       closeTooltipsSignal.value++
+      clearTabSelection()
     })
   }
 
@@ -1048,6 +1111,17 @@ watch(vertical, () => {
   nextTick(() => {
     updateScrollbar()
   })
+})
+
+watch(tabs, (nextTabs) => {
+  const currentIds = new Set(nextTabs.map(tab => tab.id))
+  const nextSelection = new Set([...selectedTabIds.value].filter(tabId => currentIds.has(tabId)))
+  if (nextSelection.size !== selectedTabIds.value.size) {
+    selectedTabIds.value = nextSelection
+  }
+  if (selectionAnchorId && !currentIds.has(selectionAnchorId)) {
+    selectionAnchorId = null
+  }
 })
 </script>
 

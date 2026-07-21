@@ -295,6 +295,14 @@ function runApp() {
       const contextMenuTab = manager?.contextMenuTabId != null
         ? manager.tabs.get(manager.contextMenuTabId)
         : undefined
+      const contextMenuTabs = contextMenuTab && manager
+        ? (manager.contextMenuSelectedTabIds.length > 0
+            ? manager.contextMenuSelectedTabIds
+            : [contextMenuTab.id])
+            .map(tabId => manager.tabs.get(tabId))
+            .filter(Boolean)
+        : []
+      const isBulkTabAction = contextMenuTabs.length > 1
       const isContextMenuTabUnloaded = contextMenuTab?.loadState === 'unloaded'
       const isTabBarContextMenu = contextMenuTab != null || manager?.contextMenuSurface === 'tabBar'
       const subscriptionFeedTab = manager?.contextMenuSurface === 'subscriptionFeedTab'
@@ -307,10 +315,12 @@ function runApp() {
         posts: 'Posts',
         all: 'All Feeds'
       }
-      const contextMenuTabRoute = contextMenuTab ? getOpenTubeXRouteFromUrl(contextMenuTab.url) : null
-      const contextMenuTabYouTubeUrl = isShareableOpenTubeXRoute(contextMenuTabRoute)
-        ? transformOpenTubeXRouteUrl(contextMenuTabRoute, true)
-        : undefined
+      const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
+        const route = getOpenTubeXRouteFromUrl(tab.url)
+        return isShareableOpenTubeXRoute(route)
+          ? transformOpenTubeXRouteUrl(route, true)
+          : null
+      })
       const pageUrl = parameters.pageURL || ''
       const isInAppUrl = isOpenTubeXUrl(pageUrl) && parameters.linkURL.split('#')[0] === pageUrl.split('#')[0]
 
@@ -321,17 +331,61 @@ function runApp() {
         ? Array.from(manager.tabs.keys())
         : []
       const contextMenuTabIndex = contextMenuTabIds.indexOf(contextMenuTab?.id)
-      const contextMenuTabGroupIds = contextMenuTab != null && manager != null
-        ? Array.from(manager.tabs.values())
-            .filter(tab => tab.isPinned === contextMenuTab.isPinned)
+      const selectedTabIndexes = contextMenuTabs
+        .map(tab => contextMenuTabIds.indexOf(tab.id))
+        .filter(index => index !== -1)
+      const firstSelectedTabIndex = selectedTabIndexes.length > 0
+        ? Math.min(...selectedTabIndexes)
+        : contextMenuTabIndex
+      const lastSelectedTabIndex = selectedTabIndexes.length > 0
+        ? Math.max(...selectedTabIndexes)
+        : contextMenuTabIndex
+      const allSelectedTabsPinned = contextMenuTabs.every(tab => tab.isPinned === true)
+      const selectedTabIdSet = new Set(contextMenuTabs.map(tab => tab.id))
+      const canMoveContextMenuTabsTo = (toEnd) => {
+        return [true, false].some(isPinned => {
+          const groupIds = Array.from(manager?.tabs.values() ?? [])
+            .filter(tab => tab.isPinned === isPinned)
             .map(tab => tab.id)
-        : []
-      const contextMenuTabGroupIndex = contextMenuTabGroupIds.indexOf(contextMenuTab?.id)
-      const closeContextMenuTabs = (tabIds) => {
+          const selectedGroupIds = groupIds.filter(tabId => selectedTabIdSet.has(tabId))
+          if (selectedGroupIds.length === 0) return false
+
+          const destinationIds = toEnd
+            ? groupIds.slice(-selectedGroupIds.length)
+            : groupIds.slice(0, selectedGroupIds.length)
+          return destinationIds.some((tabId, index) => tabId !== selectedGroupIds[index])
+        })
+      }
+      const canMoveContextMenuTabsToBeginning = canMoveContextMenuTabsTo(false)
+      const canMoveContextMenuTabsToEnd = canMoveContextMenuTabsTo(true)
+      const selectedTabColor = contextMenuTabs.every(tab => tab.color === contextMenuTabs[0]?.color)
+        ? contextMenuTabs[0]?.color ?? null
+        : undefined
+      const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
+      const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
+      const closeContextMenuTabs = async (tabIds) => {
         if (!manager) return
 
-        for (const tabId of tabIds) {
-          manager.closeTab(tabId)
+        const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
+        const isLastWindow = BrowserWindow.getAllWindows().length === 1
+        if (
+          existingTabIds.length === manager.tabs.size &&
+          isLastWindow &&
+          !await confirmCloseApp(manager.browserWindow)
+        ) {
+          return
+        }
+
+        // Close the presented tab last so its replacement can be shown before
+        // the composited subtree is removed.
+        existingTabIds.sort((a, b) => Number(a === manager.presentedTabId) - Number(b === manager.presentedTabId))
+        let hasRemainingTabs = true
+        for (const tabId of existingTabIds) {
+          hasRemainingTabs = manager.closeTab(tabId)
+        }
+        if (!hasRemainingTabs) {
+          if (isLastWindow) closeConfirmedWindowIds.add(manager.browserWindow.id)
+          manager.browserWindow.close()
         }
       }
 
@@ -353,54 +407,55 @@ function runApp() {
           visible: subscriptionFeedTab != null
         },
         {
-          label: 'Close Tab',
+          label: isBulkTabAction ? `Close ${contextMenuTabs.length} Tabs` : 'Close Tab',
           visible: contextMenuTab != null,
           click: async () => {
             if (!manager || !contextMenuTab) return
 
-            const isLastWindow = BrowserWindow.getAllWindows().length === 1
-            if (manager.tabs.size === 1 && isLastWindow && !await confirmCloseApp(manager.browserWindow)) {
-              return
-            }
-
-            const hasRemainingTabs = manager.closeTab(contextMenuTab.id)
-            if (!hasRemainingTabs) {
-              if (isLastWindow) {
-                closeConfirmedWindowIds.add(manager.browserWindow.id)
-              }
-              manager.browserWindow.close()
-            }
+            await closeContextMenuTabs(contextMenuTabs.map(tab => tab.id))
           }
         },
         {
-          label: 'Duplicate Tab',
+          label: isBulkTabAction ? `Duplicate ${contextMenuTabs.length} Tabs` : 'Duplicate Tab',
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            manager.duplicateTab(contextMenuTab.id)
+            for (const tab of contextMenuTabs) manager.duplicateTab(tab.id)
           }
         },
         {
-          label: 'Move Tab',
+          label: isBulkTabAction ? 'Move Tabs' : 'Move Tab',
           visible: contextMenuTab != null,
           submenu: [
             {
               label: 'To Beginning',
-              enabled: contextMenuTabGroupIndex > 0,
+              enabled: canMoveContextMenuTabsToBeginning,
               click: () => {
                 if (!manager || !contextMenuTab) return
 
-                manager.moveTab(contextMenuTab.id, 0)
+                if (isBulkTabAction) {
+                  for (const tab of [...contextMenuTabs].reverse()) {
+                    manager.moveTab(tab.id, 0)
+                  }
+                } else {
+                  manager.moveTab(contextMenuTab.id, 0)
+                }
               }
             },
             {
               label: 'To End',
-              enabled: contextMenuTabGroupIndex < contextMenuTabGroupIds.length - 1,
+              enabled: canMoveContextMenuTabsToEnd,
               click: () => {
                 if (!manager || !contextMenuTab) return
 
-                manager.moveTab(contextMenuTab.id, manager.tabs.size)
+                if (isBulkTabAction) {
+                  for (const tab of contextMenuTabs) {
+                    manager.moveTab(tab.id, manager.tabs.size)
+                  }
+                } else {
+                  manager.moveTab(contextMenuTab.id, manager.tabs.size)
+                }
               }
             }
           ]
@@ -415,23 +470,24 @@ function runApp() {
           submenu: [
             {
               label: manager?.contextMenuTabBarVertical ? 'To the Top' : 'To the Left',
-              enabled: contextMenuTabIndex > 0,
+              enabled: firstSelectedTabIndex > 0,
               click: () => {
-                closeContextMenuTabs(contextMenuTabIds.slice(0, contextMenuTabIndex))
+                closeContextMenuTabs(contextMenuTabIds.slice(0, firstSelectedTabIndex))
               }
             },
             {
               label: manager?.contextMenuTabBarVertical ? 'To the Bottom' : 'To the Right',
-              enabled: contextMenuTabIndex < contextMenuTabIds.length - 1,
+              enabled: lastSelectedTabIndex < contextMenuTabIds.length - 1,
               click: () => {
-                closeContextMenuTabs(contextMenuTabIds.slice(contextMenuTabIndex + 1))
+                closeContextMenuTabs(contextMenuTabIds.slice(lastSelectedTabIndex + 1))
               }
             },
             {
               label: 'Other Tabs',
-              enabled: contextMenuTabIds.length > 1,
+              enabled: contextMenuTabIds.length > contextMenuTabs.length,
               click: () => {
-                closeContextMenuTabs(contextMenuTabIds.filter(tabId => tabId !== contextMenuTab?.id))
+                const selectedIds = new Set(contextMenuTabs.map(tab => tab.id))
+                closeContextMenuTabs(contextMenuTabIds.filter(tabId => !selectedIds.has(tabId)))
               }
             }
           ]
@@ -441,25 +497,29 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
-          label: 'Copy YouTube Link',
-          visible: contextMenuTabYouTubeUrl != null,
+          label: isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link',
+          visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean),
           click: () => {
-            if (!contextMenuTabYouTubeUrl) return
+            if (!contextMenuTabYouTubeUrls.every(Boolean)) return
 
-            clipboard.writeText(contextMenuTabYouTubeUrl)
+            clipboard.writeText(contextMenuTabYouTubeUrls.join('\n'))
           }
         },
         {
           type: 'separator',
-          visible: contextMenuTabYouTubeUrl != null
+          visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean)
         },
         {
-          label: contextMenuTab?.isPinned === true ? 'Unpin Tab' : 'Pin Tab',
+          label: allSelectedTabsPinned
+            ? isBulkTabAction ? 'Unpin Tabs' : 'Unpin Tab'
+            : isBulkTabAction ? 'Pin Tabs' : 'Pin Tab',
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            manager.setTabPinned(contextMenuTab.id, contextMenuTab.isPinned !== true)
+            for (const tab of contextMenuTabs) {
+              manager.setTabPinned(tab.id, !allSelectedTabsPinned)
+            }
           }
         },
         {
@@ -476,11 +536,11 @@ function runApp() {
           ].map(({ label, color }) => ({
             label,
             type: 'radio',
-            checked: (contextMenuTab?.color ?? null) === color,
+            checked: selectedTabColor === color,
             click: () => {
               if (!manager || !contextMenuTab) return
 
-              manager.setTabColor(contextMenuTab.id, color)
+              for (const tab of contextMenuTabs) manager.setTabColor(tab.id, color)
             }
           }))
         },
@@ -499,40 +559,54 @@ function runApp() {
         },
         {
           label: 'Reopen Closed Tab',
-          visible: isTabBarContextMenu,
+          visible: isTabBarContextMenu && contextMenuTab == null,
           enabled: manager?.closedTabs.length > 0,
           click: () => {
             manager?.restoreClosedTab()
           }
         },
         {
-          label: 'Reload Tab',
+          label: isBulkTabAction ? 'Reload Tabs' : 'Reload Tab',
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            manager.requestReload(contextMenuTab.id)
+            for (const tab of contextMenuTabs) manager.requestReload(tab.id)
           }
         },
         {
-          label: isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab',
-          visible: contextMenuTab != null,
-          enabled: contextMenuTab != null && (
-            isContextMenuTabUnloaded ||
-            (contextMenuTab.loadState !== 'unloaded' &&
-              (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1))
-          ),
+          label: 'Load Tabs',
+          visible: contextMenuTab != null && isBulkTabAction,
+          enabled: hasSelectedUnloadedTab,
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            if (isContextMenuTabUnloaded) {
+            for (const tab of contextMenuTabs) manager.loadTab(tab.id)
+          }
+        },
+        {
+          label: isBulkTabAction ? 'Unload Tabs' : isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab',
+          visible: contextMenuTab != null,
+          enabled: isBulkTabAction
+            ? hasSelectedLoadedTab
+            : contextMenuTab != null && (
+              isContextMenuTabUnloaded ||
+                (contextMenuTab.loadState !== 'unloaded' &&
+                  (contextMenuTab.id !== manager?.activeTabId || (manager?.tabs.size ?? 0) > 1))
+            ),
+          click: async () => {
+            if (!manager || !contextMenuTab) return
+
+            if (!isBulkTabAction && isContextMenuTabUnloaded) {
               manager.loadTab(contextMenuTab.id)
               return
             }
 
-            manager.unloadTab(contextMenuTab.id).catch(error => {
-              console.error('Failed to unload tab:', error)
-            })
+            for (const tab of contextMenuTabs) {
+              await manager.unloadTab(tab.id).catch(error => {
+                console.error('Failed to unload tab:', error)
+              })
+            }
           }
         },
         {
@@ -540,15 +614,17 @@ function runApp() {
           visible: contextMenuTab != null && moveTargets.length > 0
         },
         {
-          label: 'Move Tab to Window',
+          label: isBulkTabAction ? 'Move Tabs to Window' : 'Move Tab to Window',
           visible: contextMenuTab != null && moveTargets.length > 0,
           submenu: moveTargets.map(({ windowId, label }) => ({
             label,
-            click: () => {
+            click: async () => {
               if (!contextMenuTab) {
                 return
               }
-              TabManager.moveTabToWindow(contextMenuTab.id, windowId)
+              for (const tab of contextMenuTabs) {
+                await TabManager.moveTabToWindow(tab.id, windowId)
+              }
             }
           }))
         },

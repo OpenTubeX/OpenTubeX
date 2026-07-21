@@ -8,6 +8,7 @@
     :style="tabStyle"
     :aria-label="displayTitle"
     :aria-describedby="isTooltipVisible ? tooltipId : undefined"
+    :aria-pressed="isSelected"
     role="button"
     tabindex="-1"
     @click="handleClick"
@@ -158,6 +159,10 @@ const props = defineProps({
   showIcon: {
     type: Boolean,
     default: true
+  },
+  isSelected: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -186,6 +191,7 @@ const tabClasses = computed(() => ({
   playing: props.tab.isPlaying,
   pinned: props.tab.isPinned,
   colored: tabColor.value != null,
+  selected: props.isSelected,
   dragging: props.isDragging,
   settling: props.isSettling,
   noTransition: props.suppressTransition,
@@ -223,8 +229,8 @@ const channelThumbnailUrl = computed(() => getTabPreviewFallbackUrl(props.tab))
 const tabAvatarUrl = computed(() => getTabAvatarUrl(props.tab))
 const tabPageIcon = computed(() => getTabPageIcon(props.tab))
 
-function handleClick() {
-  emit('activate', props.tab.id)
+function handleClick(event) {
+  emit('activate', event, props.tab.id)
 }
 
 /**
@@ -491,6 +497,16 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 .tab.active {
   background-color: var(--tab-active-color, var(--card-bg-color));
   border-color: var(--tab-border-color, var(--tertiary-text-color));
+}
+
+.tab.selected {
+  background-color: color-mix(in srgb, var(--accent-color) 22%, var(--card-bg-color));
+  outline: 2px solid var(--accent-color, var(--primary-text-color));
+  outline-offset: -2px;
+}
+
+.tab.selected:hover {
+  background-color: color-mix(in srgb, var(--accent-color) 28%, var(--card-bg-color));
 }
 
 .tab.colored {
