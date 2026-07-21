@@ -479,10 +479,6 @@ function isSegmentPassed(segment) {
   padding-inline: 8px;
 }
 
-.sponsorBlockOption + .sponsorBlockOption {
-  border-inline-start: 1px solid var(--side-nav-hover-color);
-}
-
 .sponsorBlockToggle {
   position: relative;
   display: block;
