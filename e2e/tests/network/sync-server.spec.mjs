@@ -28,6 +28,7 @@ test.describe('OpenTubeX sync server', () => {
   test.use({
     seed: {
       settings: {
+        baseTheme: 'dark',
         channelPlaybackSpeeds: JSON.stringify({ [channelId]: 1.5 })
       },
       profiles: [{
@@ -43,6 +44,16 @@ test.describe('OpenTubeX sync server', () => {
           id: secondChannelId,
           name: 'PewDiePie',
           thumbnail: 'https://yt3.googleusercontent.com/ytc/default'
+        }]
+      }, {
+        _id: 'music-profile',
+        name: 'Music',
+        bgColor: '#123456',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: channelId,
+          name: 'Rick Astley',
+          thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
         }]
       }],
       playlists: [{
@@ -124,11 +135,30 @@ test.describe('OpenTubeX sync server', () => {
     if (enhancedPrivacy) {
       expect(versionedSubscriptionsResponse.status).toBe(409)
       const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, { headers })
-      const encryptedDocument = await encryptedResponse.json()
-      expect(encryptedDocument.revision).toBeGreaterThan(0)
-      expect(encryptedDocument.payload).not.toContain(channelId)
-      expect(encryptedDocument.payload).not.toContain('Synced playlist')
-      expect(encryptedDocument.payload).not.toContain('dQw4w9WgXcQ')
+      const encryptedManifest = await encryptedResponse.json()
+      expect(encryptedManifest.collections.map(entry => entry.collection)).toEqual(
+        expect.arrayContaining([
+          'subscriptions',
+          'playlists',
+          'history',
+          'playbackSpeeds',
+          'profiles',
+          'settings'
+        ])
+      )
+      for (const { collection, revision } of encryptedManifest.collections) {
+        expect(revision).toBeGreaterThan(0)
+        const collectionResponse = await fetch(
+          `${syncServerUrl}/v1/encrypted_sync/${collection}`,
+          { headers }
+        )
+        const encryptedCollection = await collectionResponse.json()
+        expect(encryptedCollection.payload).not.toContain(channelId)
+        expect(encryptedCollection.payload).not.toContain('Synced playlist')
+        expect(encryptedCollection.payload).not.toContain('dQw4w9WgXcQ')
+        expect(encryptedCollection.payload).not.toContain('Music')
+        expect(encryptedCollection.payload).not.toContain('dark')
+      }
     } else {
       const subscriptionsResponse = apiPrefix
         ? versionedSubscriptionsResponse
@@ -164,6 +194,18 @@ test.describe('OpenTubeX sync server', () => {
       expect(playbackSpeedsResponse.ok).toBe(true)
       expect(await playbackSpeedsResponse.json()).toEqual(expect.arrayContaining([
         { channel_id: channelId, playback_speed: 1.5 }
+      ]))
+
+      const profilesResponse = await fetch(
+        `${syncServerUrl}${apiPrefix}/subscriptions/groups/`,
+        { headers }
+      )
+      expect(profilesResponse.ok).toBe(true)
+      expect(await profilesResponse.json()).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          group: expect.objectContaining({ title: 'Music' }),
+          channels: expect.arrayContaining([expect.objectContaining({ id: channelId })])
+        })
       ]))
 
       const putPlaybackSpeedResponse = await fetch(
@@ -275,7 +317,7 @@ test.describe('OpenTubeX sync server', () => {
     page.on('response', response => {
       const request = response.request()
       const url = new URL(request.url())
-      if (request.method() === 'PUT' && url.pathname === '/v1/encrypted_sync') {
+      if (request.method() === 'PUT' && url.pathname.startsWith('/v1/encrypted_sync/')) {
         encryptedUploadResponses.push(response)
       }
     })
@@ -299,6 +341,8 @@ test.describe('OpenTubeX sync server', () => {
         ?.subscriptions
         .some(channel => channel.id === remoteChannelId)
     }).toBe(true)
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
 
     const settings = latestSettings(
       await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
@@ -307,19 +351,27 @@ test.describe('OpenTubeX sync server', () => {
     const encryptedResponse = await fetch(`${syncServerUrl}/v1/encrypted_sync`, {
       headers: migratedHeaders
     })
-    const encryptedDocument = await encryptedResponse.json()
-    expect(encryptedDocument.legacy_data).toBe(false)
-    expect(encryptedDocument.payload).not.toContain(remoteChannelId)
-    const envelope = JSON.parse(encryptedDocument.payload)
+    const encryptedManifest = await encryptedResponse.json()
+    expect(encryptedManifest.legacy_data).toBe(false)
+    const subscriptionsResponse = await fetch(
+      `${syncServerUrl}/v1/encrypted_sync/subscriptions`,
+      { headers: migratedHeaders }
+    )
+    const encryptedSubscriptions = await subscriptionsResponse.json()
+    expect(encryptedSubscriptions.payload).not.toContain(remoteChannelId)
+    const envelope = JSON.parse(encryptedSubscriptions.payload)
     expect(envelope.compression).toEqual({ name: 'gzip' })
     expect(envelope).not.toHaveProperty('payload_length')
     expect(legacyHistoryDownloads).toBe(1)
-    expect(encryptedUploadResponses).toHaveLength(1)
-    expect(await encryptedUploadResponses[0].json()).toEqual({
-      revision: 1,
-      payload: null,
-      legacy_data: false
-    })
+    expect(encryptedUploadResponses).toHaveLength(7)
+    const encryptedUploadBodies = await Promise.all(
+      encryptedUploadResponses.map(response => response.json())
+    )
+    expect(encryptedUploadBodies).toEqual(expect.arrayContaining([
+      { collection: 'subscriptions', revision: 1, payload: null },
+      { collection: 'profiles', revision: 1, payload: null },
+      { collection: 'settings', revision: 1, payload: null }
+    ]))
 
     const plaintextResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
       headers: migratedHeaders

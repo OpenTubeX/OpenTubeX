@@ -12,6 +12,77 @@ const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
 
+export const SYNCABLE_SETTINGS = new Set([
+  'ambientMode',
+  'autoplayPlaylists',
+  'autoplayVideos',
+  'avoidTranslation',
+  'baseTheme',
+  'blurThumbnails',
+  'channelsHidden',
+  'currentLocale',
+  'defaultAutoplayInterruptionIntervalHours',
+  'defaultCaptionSettings',
+  'defaultInterval',
+  'defaultPlayback',
+  'defaultQuality',
+  'defaultSkipInterval',
+  'defaultViewingMode',
+  'defaultVideoFormat',
+  'enableCaptionTranslations',
+  'enableSubtitlesByDefault',
+  'forbiddenTitles',
+  'hideComments',
+  'hideLiveChat',
+  'hideLiveStreams',
+  'hideRecommendedVideos',
+  'hideSubscriptionsCommunity',
+  'hideSubscriptionsLive',
+  'hideSubscriptionsShorts',
+  'hideWatchedSubs',
+  'holdToDoublePlaybackSpeed',
+  'keyboardShortcuts',
+  'landingPage',
+  'listType',
+  'mainColor',
+  'maxVideoPlaybackRate',
+  'onlyShowLatestFromChannel',
+  'onlyShowLatestFromChannelNumber',
+  'playNextVideo',
+  'preferredCaptionLocale',
+  'quickPlaybackSpeedBarOptions',
+  'reducedMotion',
+  'region',
+  'rememberPlaybackSpeedPerChannel',
+  'rememberVideoQualityPerChannel',
+  'secColor',
+  'seekIntervalMultiplyByPlaybackRate',
+  'showDistractionFreeTitles',
+  'showPlaybackRateAdjustedTimestamp',
+  'skipSilence',
+  'sponsorBlockChannelWhitelist',
+  'sponsorBlockEnableSubmission',
+  'sponsorBlockFiller',
+  'sponsorBlockHighlight',
+  'sponsorBlockHook',
+  'sponsorBlockInteraction',
+  'sponsorBlockIntro',
+  'sponsorBlockMusicOffTopic',
+  'sponsorBlockOutro',
+  'sponsorBlockRecap',
+  'sponsorBlockSelfPromo',
+  'sponsorBlockSponsor',
+  'thumbnailPreference',
+  'thumbnailSize',
+  'useDeArrowThumbnails',
+  'useDeArrowTitles',
+  'useQuickPlaybackSpeedBar',
+  'useReturnYouTubeDislikes',
+  'useSponsorBlock',
+  'videoPlaybackRateInterval',
+  'watchedProgressSavingMode',
+])
+
 export class SyncServerError extends Error {
   constructor(message, status = null) {
     super(message)
@@ -121,11 +192,18 @@ export class SyncServerClient {
     return capabilities.bulk_sync === 1
   }
 
-  getEncryptedSync() {
+  getEncryptedSyncManifest() {
     return this.request('/v1/encrypted_sync', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
-  putEncryptedSync(revision, payload) {
+  getEncryptedSyncCollection(collection) {
+    return this.request(
+      `/v1/encrypted_sync/${encodeURIComponent(collection)}`,
+      { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS }
+    )
+  }
+
+  putEncryptedSyncCollection(collection, revision, payload) {
     const timeoutMs = Math.min(
       MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
       Math.max(
@@ -134,7 +212,7 @@ export class SyncServerClient {
           Math.ceil(payload.length / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
       )
     )
-    return this.request('/v1/encrypted_sync', {
+    return this.request(`/v1/encrypted_sync/${encodeURIComponent(collection)}`, {
       method: 'PUT',
       body: { revision, payload },
       timeoutMs,
@@ -178,8 +256,44 @@ export class SyncServerClient {
     return this.apiRequest('/subscriptions/')
   }
 
-  getSubscriptionGroups() {
-    return this.apiRequest('/subscriptions/groups/')
+  async getSubscriptionGroups() {
+    try {
+      return await this.apiRequest('/subscriptions/groups/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+
+  createSubscriptionGroup(group) {
+    return this.apiRequest('/subscriptions/groups/', { method: 'POST', body: group })
+  }
+
+  updateSubscriptionGroup(groupId, group) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'PATCH',
+      body: group,
+    })
+  }
+
+  deleteSubscriptionGroup(groupId) {
+    return this.apiRequest(`/subscriptions/groups/${encodeURIComponent(groupId)}`, {
+      method: 'DELETE',
+    })
+  }
+
+  addSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'PUT' }
+    )
+  }
+
+  removeSubscriptionGroupChannel(groupId, channelId) {
+    return this.apiRequest(
+      `/subscriptions/groups/${encodeURIComponent(groupId)}/channels/${encodeURIComponent(channelId)}`,
+      { method: 'DELETE' }
+    )
   }
 
   subscribe(channel) {
@@ -747,4 +861,149 @@ export async function syncHistory(client, store, previousIds = []) {
   }
 
   return Array.from(mergedIds)
+}
+
+function profileMetadata(profile) {
+  return {
+    title: profile.name,
+    bgColor: profile.bgColor,
+    textColor: profile.textColor,
+  }
+}
+
+function remoteProfileMetadata(group, fallback = {}) {
+  return {
+    title: group.title,
+    bgColor: group.bg_color ?? fallback.bgColor ?? '#000000',
+    textColor: group.text_color ?? fallback.textColor ?? '#FFFFFF',
+  }
+}
+
+export async function syncProfiles(client, store, previous = {}) {
+  const profiles = store.state.profiles.profileList
+  const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID)
+  const localById = mapBy(localProfiles, profile => profile._id)
+  const remoteGroups = await client.getSubscriptionGroups()
+  if (remoteGroups === null) return null
+  const localIdByRemoteId = new Map(Object.entries(previous).map(([localId, snapshot]) => {
+    return [snapshot.remoteId ?? localId, localId]
+  }))
+  const remoteById = new Map(remoteGroups.map(entry => {
+    const remoteId = entry.group.id
+    const localId = entry.group.local_id ?? localIdByRemoteId.get(remoteId) ?? remoteId
+    return [localId, { ...entry, remoteId }]
+  }))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous))
+  const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
+  const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
+  const next = {}
+
+  for (const [id, remote] of remoteById) {
+    if (!mergedIds.has(id)) await client.deleteSubscriptionGroup(remote.remoteId)
+  }
+  for (const id of localById.keys()) {
+    if (!mergedIds.has(id)) await store.dispatch('removeProfile', id)
+  }
+
+  for (const id of mergedIds) {
+    const local = localById.get(id)
+    let remote = remoteById.get(id)
+    const localMetadata = local ? profileMetadata(local) : null
+    const oldMetadata = previous[id]?.metadata
+    const remoteMetadata = remote
+      ? remoteProfileMetadata(remote.group, oldMetadata ?? localMetadata)
+      : null
+    const localChanged = localMetadata && !metadataEquals(localMetadata, oldMetadata)
+    const remoteChanged = remoteMetadata && !metadataEquals(remoteMetadata, oldMetadata)
+    const metadata = remoteChanged && !localChanged ? remoteMetadata : localMetadata ?? remoteMetadata
+    let remoteId = remote?.remoteId ?? id
+
+    const groupPayload = {
+      id,
+      local_id: id,
+      title: metadata.title,
+      bg_color: metadata.bgColor,
+      text_color: metadata.textColor,
+    }
+    if (!remote) {
+      const created = await client.createSubscriptionGroup(groupPayload)
+      remoteId = created?.id ?? id
+      remote = { group: { ...groupPayload, id: remoteId }, channels: [], remoteId }
+    } else if (!metadataEquals(metadata, remoteMetadata)) {
+      await client.updateSubscriptionGroup(remoteId, groupPayload)
+    }
+
+    const localChannelIds = local?.subscriptions.map(channel => channel.id) ?? []
+    const remoteChannelIds = remote.channels.map(channel => channel.id)
+    const mergedChannelIds = mergeIds(localChannelIds, remoteChannelIds, previous[id]?.channels)
+    for (const channelId of remoteChannelIds) {
+      if (!mergedChannelIds.has(channelId)) {
+        await client.removeSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+    for (const channelId of mergedChannelIds) {
+      if (!remoteChannelIds.includes(channelId)) {
+        await client.addSubscriptionGroupChannel(remoteId, channelId)
+      }
+    }
+
+    const mergedSubscriptions = Array.from(mergedChannelIds)
+      .map(channelId => subscriptionsById.get(channelId))
+      .filter(Boolean)
+    const mergedProfile = {
+      _id: id,
+      name: metadata.title,
+      bgColor: metadata.bgColor,
+      textColor: metadata.textColor,
+      subscriptions: mergedSubscriptions,
+    }
+    if (!local || !metadataEquals(local, mergedProfile)) {
+      await store.dispatch('updateProfile', mergedProfile)
+    }
+
+    next[id] = {
+      remoteId,
+      metadata,
+      channels: Array.from(mergedChannelIds),
+    }
+  }
+
+  return next
+}
+
+function settingUpdater(key) {
+  return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
+}
+
+export async function syncSettings(client, store, previous = {}) {
+  const remoteEntries = await client.getSettings()
+  const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))
+  const merged = {}
+  const now = Date.now()
+
+  for (const key of SYNCABLE_SETTINGS) {
+    const value = deepCopy(store.state.settings[key])
+    const old = previous[key]
+    const remoteEntry = remote[key]
+    const localChanged = old !== undefined && !metadataEquals(value, old.value)
+    let entry
+
+    if (!old && remoteEntry) {
+      entry = remoteEntry
+    } else if (localChanged && (!remoteEntry || now >= remoteEntry.updatedAt)) {
+      entry = { key, value, updatedAt: now }
+    } else if (remoteEntry && (!old || remoteEntry.updatedAt > old.updatedAt)) {
+      entry = remoteEntry
+    } else {
+      entry = old ?? { key, value, updatedAt: now }
+    }
+
+    merged[key] = entry
+    if (!metadataEquals(value, entry.value)) {
+      await store.dispatch(settingUpdater(key), deepCopy(entry.value))
+    }
+  }
+
+  await client.putSettings(Object.values(merged))
+  return merged
 }

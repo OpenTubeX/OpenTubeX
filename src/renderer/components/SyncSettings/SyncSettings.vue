@@ -150,6 +150,19 @@
           compact
           @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Sync Settings.Profiles')"
+          :default-value="syncProfilesEnabled"
+          compact
+          @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
+        />
+        <FtToggleSwitch
+          v-if="privacyMode === 'enhanced'"
+          :label="t('Settings.Sync Settings.Settings')"
+          :default-value="syncSettingsEnabled"
+          compact
+          @change="store.dispatch('updateSyncServerSyncSettings', $event)"
+        />
       </FtFlexBox>
       <p
         v-if="lastSyncLabel"
@@ -301,6 +314,8 @@ const syncProgressLabel = computed(() => {
     playlists: t('Settings.Sync Settings.Syncing playlists'),
     history: t('Settings.Sync Settings.Syncing history'),
     playbackSpeeds: t('Settings.Sync Settings.Syncing playback speeds'),
+    profiles: t('Settings.Sync Settings.Syncing profiles'),
+    settings: t('Settings.Sync Settings.Syncing settings'),
     upload: t('Settings.Sync Settings.Uploading encrypted data'),
     finishing: t('Settings.Sync Settings.Finishing sync'),
   }
@@ -314,6 +329,8 @@ const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncS
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
 const syncPlaybackSpeedsEnabled = computed(() => store.getters.getSyncServerSyncPlaybackSpeeds)
+const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
+const syncSettingsEnabled = computed(() => store.getters.getSyncServerSyncSettings)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
 const playbackSpeedsSupported = computed(
   () => store.getters.getSyncServerPlaybackSpeedsSupported

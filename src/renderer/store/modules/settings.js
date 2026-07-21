@@ -356,6 +356,8 @@ const state = {
   syncServerSyncPlaylists: true,
   syncServerSyncHistory: true,
   syncServerSyncPlaybackSpeeds: true,
+  syncServerSyncProfiles: true,
+  syncServerSyncSettings: true,
   syncServerLastSyncAt: 0,
   syncServerSnapshot: '{}',
   useProxy: false,
@@ -576,6 +578,8 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'syncServerSyncPlaylists',
   'syncServerSyncHistory',
   'syncServerSyncPlaybackSpeeds',
+  'syncServerSyncProfiles',
+  'syncServerSyncSettings',
   'syncServerLastSyncAt',
   'syncServerSnapshot',
 

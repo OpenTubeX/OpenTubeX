@@ -4,21 +4,35 @@ import {
   syncChannelPlaybackSpeeds,
   syncHistory,
   syncPlaylists,
+  syncProfiles,
+  syncSettings,
   syncSubscriptions,
 } from '../../helpers/sync-server'
 import {
   EncryptedSyncAdapter,
+  createEmptySyncDocument,
   decryptSyncDocument,
   encryptSyncDocument,
-  getPrivacySalt,
   loadLegacySyncDocument,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
 
 const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000
+const EVENT_SYNC_DEBOUNCE_MS = 1500
+const ENCRYPTED_SYNC_RETRIES = 3
+const LEGACY_ENCRYPTED_COLLECTIONS = [
+  'subscriptions',
+  'playlists',
+  'history',
+  'playbackSpeeds',
+  'profiles',
+  'playlistBookmarks',
+]
 
 let activeSyncPromise = null
 let autoSyncTimer = null
+let eventSyncTimer = null
+let lifecycleSyncStarted = false
 
 const state = {
   syncServerStatus: 'idle',
@@ -59,7 +73,7 @@ async function runSync(context) {
   const settings = rootState.settings
   const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
   let client = networkClient
-  let encryptedSync = null
+  let encryptedCollections = null
   const previous = parseSnapshot(settings.syncServerSnapshot)
   const next = { ...previous }
   const result = {}
@@ -70,6 +84,10 @@ async function runSync(context) {
     ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncPlaybackSpeeds ? ['playbackSpeeds'] : []),
+    ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
+    ...(settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncSettings
+      ? ['settings']
+      : []),
     ...(settings.syncServerPrivacyMode === 'enhanced' ? ['upload'] : []),
     'finishing',
   ]
@@ -93,74 +111,160 @@ async function runSync(context) {
   commit('setSyncServerProgress', { stage: stages[0], percentage: 0 })
   commit('setSyncServerError', '')
 
+  async function applyCollection(collection, targetClient) {
+    switch (collection) {
+      case 'subscriptions':
+        next.subscriptions = await syncSubscriptions(targetClient, store, previous.subscriptions)
+        result.subscriptions = next.subscriptions.length
+        break
+      case 'playlists':
+        next.playlists = await syncPlaylists(targetClient, store, previous.playlists)
+        result.playlists = Object.keys(next.playlists).length
+        break
+      case 'history': {
+        const history = await syncHistory(targetClient, store, previous.history)
+        if (history !== null) {
+          commit('setSyncServerHistorySupported', true)
+          next.history = history
+          result.history = history.length
+        } else {
+          commit('setSyncServerHistorySupported', false)
+        }
+        break
+      }
+      case 'playbackSpeeds': {
+        const speeds = await syncChannelPlaybackSpeeds(
+          targetClient,
+          store,
+          previous.playbackSpeeds
+        )
+        if (speeds !== null) {
+          commit('setSyncServerPlaybackSpeedsSupported', true)
+          next.playbackSpeeds = speeds
+          result.playbackSpeeds = Object.keys(speeds).length
+        } else {
+          commit('setSyncServerPlaybackSpeedsSupported', false)
+        }
+        break
+      }
+      case 'profiles':
+        {
+          const profiles = await syncProfiles(targetClient, store, previous.profiles)
+          if (profiles !== null) {
+            next.profiles = profiles
+            result.profiles = Object.keys(profiles).length
+          }
+        }
+        break
+      case 'settings':
+        next.settings = await syncSettings(targetClient, store, previous.settings)
+        result.settings = Object.keys(next.settings).length
+        break
+    }
+  }
+
   try {
     if (settings.syncServerPrivacyMode === 'enhanced') {
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')
       }
-      const { remote, document } = await runStage('download', async () => {
-        const remote = await networkClient.getEncryptedSync()
-        let document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
-        // Older v1 enhanced servers did not report legacy_data. Prefer the
-        // lossless migration path when the field is absent.
-        const migrateLegacyData = !remote.payload && remote.legacy_data !== false
-        if (migrateLegacyData) {
-          document = await loadLegacySyncDocument(networkClient)
-        }
-        return { remote, document }
+      const enabledCollections = stages.filter(stage => ![
+        'download',
+        'upload',
+        'finishing',
+      ].includes(stage))
+      const {
+        document,
+        original,
+        remote,
+        uploadCollections,
+      } = await runStage('download', async () => {
+        const manifest = await networkClient.getEncryptedSyncManifest()
+        const legacy = manifest.legacy_data
+          ? await loadLegacySyncDocument(networkClient)
+          : createEmptySyncDocument()
+        const uploadCollections = manifest.legacy_data
+          ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
+          : enabledCollections
+        const document = createEmptySyncDocument()
+        const original = {}
+        const entries = await Promise.all(uploadCollections.map(async collection => {
+          const response = await networkClient.getEncryptedSyncCollection(collection)
+          const data = response.payload
+            ? await decryptSyncDocument(response.payload, settings.syncServerPrivacyKey)
+            : legacy[collection]
+          document[collection] = data ?? document[collection]
+          original[collection] = structuredClone(document[collection])
+          return [collection, response]
+        }))
+        return { document, original, remote: Object.fromEntries(entries), uploadCollections }
       })
       client = new EncryptedSyncAdapter(document)
-      encryptedSync = {
-        revision: remote.revision,
-        salt: remote.payload ? getPrivacySalt(remote.payload) : settings.syncServerPrivacySalt,
+      encryptedCollections = {
+        original,
+        remote,
+        enabled: enabledCollections,
+        upload: uploadCollections,
       }
     }
 
-    if (settings.syncServerSyncSubscriptions) {
-      next.subscriptions = await runStage('subscriptions', () => {
-        return syncSubscriptions(client, store, previous.subscriptions)
-      })
-      result.subscriptions = next.subscriptions.length
-    }
-    if (settings.syncServerSyncPlaylists) {
-      next.playlists = await runStage('playlists', () => {
-        return syncPlaylists(client, store, previous.playlists)
-      })
-      result.playlists = Object.keys(next.playlists).length
-    }
-    if (settings.syncServerSyncHistory) {
-      const history = await runStage('history', () => {
-        return syncHistory(client, store, previous.history)
-      })
-      if (history !== null) {
-        commit('setSyncServerHistorySupported', true)
-        next.history = history
-        result.history = history.length
-      } else {
-        commit('setSyncServerHistorySupported', false)
-      }
-    }
-    if (settings.syncServerSyncPlaybackSpeeds) {
-      const speeds = await runStage('playbackSpeeds', () => {
-        return syncChannelPlaybackSpeeds(client, store, previous.playbackSpeeds)
-      })
-      if (speeds !== null) {
-        commit('setSyncServerPlaybackSpeedsSupported', true)
-        next.playbackSpeeds = speeds
-        result.playbackSpeeds = Object.keys(speeds).length
-      } else {
-        commit('setSyncServerPlaybackSpeedsSupported', false)
-      }
+    const collections = encryptedCollections?.enabled ?? stages.filter(stage => ![
+      'download',
+      'upload',
+      'finishing',
+      'settings',
+    ].includes(stage))
+    for (const collection of collections) {
+      await runStage(collection, () => applyCollection(collection, client))
     }
 
-    if (encryptedSync) {
+    if (encryptedCollections) {
       await runStage('upload', async () => {
-        const payload = await encryptSyncDocument(
-          client.document,
-          settings.syncServerPrivacyKey,
-          encryptedSync.salt
-        )
-        await networkClient.putEncryptedSync(encryptedSync.revision, payload)
+        for (const collection of encryptedCollections.upload) {
+          let revision = encryptedCollections.remote[collection].revision
+          let data = client.document[collection]
+          if (revision > 0 &&
+              JSON.stringify(data) === JSON.stringify(encryptedCollections.original[collection])) {
+            continue
+          }
+          for (let attempt = 0; attempt < ENCRYPTED_SYNC_RETRIES; attempt++) {
+            const payload = await encryptSyncDocument(
+              data,
+              settings.syncServerPrivacyKey,
+              settings.syncServerPrivacySalt
+            )
+            try {
+              await networkClient.putEncryptedSyncCollection(collection, revision, payload)
+              break
+            } catch (error) {
+              if (error.status !== 409 || attempt === ENCRYPTED_SYNC_RETRIES - 1) throw error
+              const remote = await networkClient.getEncryptedSyncCollection(collection)
+              const retryDocument = createEmptySyncDocument()
+              const remoteData = await decryptSyncDocument(
+                remote.payload,
+                settings.syncServerPrivacyKey
+              )
+              if (collection === 'playlistBookmarks') {
+                const bookmarks = new Map(remoteData.map(entry => [entry.playlist.id, entry]))
+                for (const entry of data) bookmarks.set(entry.playlist.id, entry)
+                revision = remote.revision
+                data = Array.from(bookmarks.values())
+                continue
+              }
+              retryDocument[collection] = remoteData
+              retryDocument.subscriptions = client.document.subscriptions
+              const retryClient = new EncryptedSyncAdapter(retryDocument)
+              if (collection === 'settings') {
+                next.settings = await syncSettings(retryClient, store, next.settings)
+                result.settings = Object.keys(next.settings).length
+              } else {
+                await applyCollection(collection, retryClient)
+              }
+              revision = remote.revision
+              data = retryClient.document[collection]
+            }
+          }
+        }
       })
     }
 
@@ -214,8 +318,12 @@ const actions = {
     let privacySalt = ''
 
     if (privacySupported) {
-      const remote = await client.getEncryptedSync()
-      const privacy = await preparePrivacyKey(remote.payload, privacyPassphrase)
+      const manifest = await client.getEncryptedSyncManifest()
+      const firstCollection = manifest.collections[0]?.collection
+      const remote = firstCollection
+        ? await client.getEncryptedSyncCollection(firstCollection)
+        : null
+      const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
       privacyKey = privacy.key
       privacySalt = privacy.salt
     }
@@ -316,6 +424,13 @@ const actions = {
     }
 
     await dispatch('startSyncServerAutoSync')
+    if (!lifecycleSyncStarted && typeof window !== 'undefined') {
+      lifecycleSyncStarted = true
+      window.addEventListener('online', () => dispatch('scheduleSyncServer'))
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') dispatch('scheduleSyncServer')
+      })
+    }
     if (rootState.settings.syncServerAutoSync) {
       await dispatch('syncWithSyncServer')
     }
@@ -335,7 +450,25 @@ const actions = {
 
   stopSyncServerAutoSync() {
     clearInterval(autoSyncTimer)
+    clearTimeout(eventSyncTimer)
     autoSyncTimer = null
+    eventSyncTimer = null
+  },
+
+  scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
+    if (!rootState.settings.syncServerAutoSync ||
+        !rootState.settings.syncServerToken ||
+        (reason === 'settings' && rootState.settings.syncServerPrivacyMode !== 'enhanced') ||
+        rootState.syncServer.syncServerStatus === 'syncing') {
+      return
+    }
+    clearTimeout(eventSyncTimer)
+    eventSyncTimer = setTimeout(() => {
+      eventSyncTimer = null
+      dispatch('syncWithSyncServer').catch(error => {
+        console.error('Sync server event sync failed', error)
+      })
+    }, EVENT_SYNC_DEBOUNCE_MS)
   },
 
   async setSyncServerAutoSync({ dispatch }, enabled) {

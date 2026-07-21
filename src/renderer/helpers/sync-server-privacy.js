@@ -112,9 +112,9 @@ async function decryptWithKey(payload, key) {
         plaintext.slice(COMPRESSED_LENGTH_BYTES, COMPRESSED_LENGTH_BYTES + compressedLength)
       )
     }
-    const document = JSON.parse(new TextDecoder().decode(documentBytes))
-    if (document.version !== PRIVACY_VERSION) throw new Error()
-    return document
+    const collection = JSON.parse(new TextDecoder().decode(documentBytes))
+    if (collection.version !== PRIVACY_VERSION || !('data' in collection)) throw new Error()
+    return collection.data
   } catch {
     throw new Error('Incorrect privacy passphrase or corrupted sync data')
   }
@@ -134,14 +134,14 @@ export async function preparePrivacyKey(payload, passphrase) {
 }
 
 export async function decryptSyncDocument(payload, exportedKey) {
-  if (!payload) return createEmptySyncDocument()
+  if (!payload) return null
   return decryptWithKey(payload, await importPrivacyKey(exportedKey))
 }
 
-export async function encryptSyncDocument(document, exportedKey, salt) {
+export async function encryptSyncDocument(data, exportedKey, salt) {
   const key = await importPrivacyKey(exportedKey)
   const iv = crypto.getRandomValues(new Uint8Array(12))
-  const encoded = new TextEncoder().encode(JSON.stringify(document))
+  const encoded = new TextEncoder().encode(JSON.stringify({ version: PRIVACY_VERSION, data }))
   const compressed = typeof globalThis.CompressionStream === 'function'
     ? await compressBytes(encoded)
     : null
@@ -190,6 +190,8 @@ export function createEmptySyncDocument() {
     playbackSpeeds: [],
     subscriptionGroups: [],
     playlistBookmarks: [],
+    profiles: [],
+    settings: [],
   }
 }
 
@@ -213,8 +215,9 @@ export async function loadLegacySyncDocument(client) {
     playlists,
     history: history ?? [],
     playbackSpeeds: playbackSpeeds ?? [],
-    subscriptionGroups,
+    profiles: subscriptionGroups,
     playlistBookmarks,
+    settings: [],
   }
 }
 
@@ -225,6 +228,8 @@ export class EncryptedSyncAdapter {
     this.document.playlists ??= []
     this.document.history ??= []
     this.document.playbackSpeeds ??= []
+    this.document.profiles ??= []
+    this.document.settings ??= []
   }
 
   async getSubscriptions() { return structuredClone(this.document.subscriptions) }
@@ -292,4 +297,39 @@ export class EncryptedSyncAdapter {
     this.document.playbackSpeeds = this.document.playbackSpeeds
       .filter(entry => entry.channel_id !== id)
   }
+
+  async getSubscriptionGroups() { return structuredClone(this.document.profiles) }
+
+  async createSubscriptionGroup(group) {
+    const created = { ...structuredClone(group), id: group.id }
+    this.document.profiles.push({ group: created, channels: [] })
+    return structuredClone(created)
+  }
+
+  async updateSubscriptionGroup(id, group) {
+    const entry = this.document.profiles.find(entry => entry.group.id === id)
+    entry.group = { ...entry.group, ...structuredClone(group), id }
+  }
+
+  async deleteSubscriptionGroup(id) {
+    this.document.profiles = this.document.profiles.filter(entry => entry.group.id !== id)
+  }
+
+  async addSubscriptionGroupChannel(groupId, channelId) {
+    const entry = this.document.profiles.find(entry => entry.group.id === groupId)
+    const channel = this.document.subscriptions.find(channel => channel.id === channelId) ?? {
+      id: channelId,
+    }
+    if (!entry.channels.some(item => item.id === channelId)) {
+      entry.channels.push(structuredClone(channel))
+    }
+  }
+
+  async removeSubscriptionGroupChannel(groupId, channelId) {
+    const entry = this.document.profiles.find(entry => entry.group.id === groupId)
+    entry.channels = entry.channels.filter(channel => channel.id !== channelId)
+  }
+
+  async getSettings() { return structuredClone(this.document.settings) }
+  async putSettings(settings) { this.document.settings = structuredClone(settings) }
 }
