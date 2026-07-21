@@ -354,7 +354,7 @@ export default defineComponent({
     theatrePossible: function () {
       return this.showTranscript || !this.hideRecommendedVideos ||
         (!this.hideLiveChat && this.isLive) || this.watchingPlaylist ||
-        this.showSidebarChapters
+        this.showSidebarChapters || this.showSidebarSponsorBlock
     },
     autoplayPossible: function () {
       return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||

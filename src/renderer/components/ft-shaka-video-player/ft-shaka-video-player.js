@@ -2391,9 +2391,8 @@ export default defineComponent({
         removeFromArrayIfExists(elementList, 'ft_screenshot')
       }
 
-      // Keep the control mounted for videos with chapters so it can become
-      // available when their sidebar panel opens.
-      if (!props.theatrePossible && props.chapters.length === 0) {
+      // Keep the control mounted when a panel can make theatre mode available.
+      if (!props.theatrePossible && props.chapters.length === 0 && !useSponsorBlock.value) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_theatre_mode')
       }
 
