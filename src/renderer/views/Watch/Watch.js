@@ -8,6 +8,7 @@ import WatchVideoInfo from '../../components/WatchVideoInfo/WatchVideoInfo.vue'
 import WatchVideoDescription from '../../components/WatchVideoDescription/WatchVideoDescription.vue'
 import WatchVideoTranscript from '../../components/WatchVideoTranscript/WatchVideoTranscript.vue'
 import WatchVideoChapters from '../../components/WatchVideoChapters/WatchVideoChapters.vue'
+import WatchVideoSponsorBlock from '../../components/WatchVideoSponsorBlock/WatchVideoSponsorBlock.vue'
 import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
@@ -86,6 +87,7 @@ export default defineComponent({
     'watch-video-description': WatchVideoDescription,
     'watch-video-transcript': WatchVideoTranscript,
     'watch-video-chapters': WatchVideoChapters,
+    'watch-video-sponsor-block': WatchVideoSponsorBlock,
     CommentSection,
     'watch-video-live-chat': WatchVideoLiveChat,
     'watch-video-playlist': WatchVideoPlaylist,
@@ -171,6 +173,11 @@ export default defineComponent({
       currentTime: 0,
       showTranscript: false,
       showSidebarChapters: false,
+      showSidebarSponsorBlock: false,
+      sponsorBlockInfoLoading: false,
+      sponsorBlockInfoPendingUuid: null,
+      sponsorBlockInfoSegments: [],
+      sponsorBlockInfoSubmissionEnabled: false,
       videoChapterThumbnails: [],
       fullscreenCommentsOpen: false,
       /** @type {HTMLElement|null} */
@@ -540,6 +547,28 @@ export default defineComponent({
     },
     handleChapterThumbnailsChange(thumbnails) {
       this.videoChapterThumbnails = thumbnails
+    },
+    handleSponsorBlockInfoChange({ open, loading, pendingUuid, segments, submissionEnabled }) {
+      this.showSidebarSponsorBlock = open
+      this.sponsorBlockInfoLoading = loading
+      this.sponsorBlockInfoPendingUuid = pendingUuid
+      this.sponsorBlockInfoSegments = segments
+      this.sponsorBlockInfoSubmissionEnabled = submissionEnabled
+    },
+    closeSidebarSponsorBlock() {
+      this.$refs.player?.closeSponsorBlockInfo()
+    },
+    toggleSponsorBlockInfo() {
+      this.$refs.player?.toggleSponsorBlockInfo()
+    },
+    refreshSponsorBlockInfo() {
+      this.$refs.player?.refreshSponsorBlockInfo()
+    },
+    voteOnSponsorBlockInfoSegment(uuid, vote) {
+      this.$refs.player?.voteOnSponsorBlockInfoSegment(uuid, vote)
+    },
+    skipSponsorBlockInfoSegment(uuid) {
+      this.$refs.player?.skipSponsorBlockInfoSegment(uuid)
     },
     closeSidebarChapters() {
       this.$refs.player?.closeChaptersOverlay()
@@ -2698,8 +2727,8 @@ export default defineComponent({
       }
     },
 
-    handleSponsorBlockAutoSkipToggle: function() {
-      this.sponsorBlockAutoSkipTemporarilyDisabled = !this.sponsorBlockAutoSkipTemporarilyDisabled
+    handleSponsorBlockAutoSkipToggle: function(enabled) {
+      this.sponsorBlockAutoSkipTemporarilyDisabled = !enabled
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {

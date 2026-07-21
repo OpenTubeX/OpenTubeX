@@ -60,10 +60,11 @@ export function logShakaError(error, context, videoId, details) {
 /**
  * @param {string} videoId
  * @param {SponsorBlockCategory[]} categories
+ * @param {import('../sponsorblock').SponsorBlockActionType[]} [actionTypes]
  */
-export async function getSponsorBlockSegments(videoId, categories) {
-  const actionTypes = categories.includes('poi_highlight') ? ['skip', 'poi'] : ['skip']
-  const segments = await sponsorBlockSkipSegments(videoId, categories, actionTypes)
+export async function getSponsorBlockSegments(videoId, categories, actionTypes) {
+  const requestedActionTypes = actionTypes ?? (categories.includes('poi_highlight') ? ['skip', 'poi'] : ['skip'])
+  const segments = await sponsorBlockSkipSegments(videoId, categories, requestedActionTypes)
 
   if (segments.length === 0) {
     return {
@@ -76,13 +77,24 @@ export async function getSponsorBlockSegments(videoId, categories) {
     return accumulator + segment.videoDuration
   }, 0) / segments.length
 
-  const mappedSegments = segments.map(({ category, segment: [startTime, endTime], UUID, actionType }) => {
+  const mappedSegments = segments.map(({
+    category,
+    segment: [startTime, endTime],
+    UUID,
+    actionType,
+    description,
+    locked,
+    votes,
+  }) => {
     return {
       uuid: UUID,
       category,
       actionType,
+      description,
+      locked,
       startTime,
-      endTime
+      endTime,
+      votes,
     }
   })
 

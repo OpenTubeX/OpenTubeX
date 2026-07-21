@@ -1073,6 +1073,8 @@ Video:
       InvalidStartTime: Gib eine gültige Segmentstartzeit ein.
       NoSegmentsToSubmit: Erstelle mindestens ein vollständiges Segment, bevor du es absendest.
       NowAction: (Jetzt)
+      CloseInfoPanel: SponsorBlock-Informationen schließen
+      OpenInfoPanel: SponsorBlock-Informationen öffnen
       OpenSubmissionMenu: Einreichungsmenü öffnen
       PreviewRequired: Bitte sieh dir jedes Segment vor dem Absenden an.
       PreviewSegment: Vorschau
@@ -1096,6 +1098,21 @@ Video:
       SkipToastReskip: Nochmal überspringen
       SkipPrompt: '{segmentCategory} Segment überspringen?'
       SkipPromptAction: Überspringen
+      InfoPanelTitle: SponsorBlock
+      InfoPanelLoading: Segmente werden geladen…
+      InfoPanelHasSegments: Dieses Video enthält Segmente in der Datenbank.
+      InfoPanelNoSegments: Für dieses Video wurden keine Segmente gefunden.
+      RefreshSegments: Segmente aktualisieren
+      AutoSkipEnabled: Segmente automatisch überspringen
+      AutoSkipOn: An
+      AutoSkipOff: Aus
+      SkipSegment: Segment überspringen
+      CloseSegmentActions: Segmentaktionen schließen
+      FullVideo: Ganzes Video
+      LockedSegment: Gesperrtes Segment
+      UpvoteSegment: Segment positiv bewerten
+      DownvoteSegment: Segment negativ bewerten
+      VoteFailed: SponsorBlock-Bewertung konnte nicht übermittelt werden.
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
     Exit Full Window: Vollständiges Fenster beenden
     Hide Stats: Statistiken ausblenden

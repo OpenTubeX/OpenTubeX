@@ -189,11 +189,10 @@
           />
           <FtIconButton
             v-if="useSponsorBlock && !isUpcoming"
-            :title="sponsorBlockToggleTitle"
+            :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
-            :overlay-icon="sponsorBlockAutoSkipDisabled ? ['fas', 'slash'] : null"
-            :theme="sponsorBlockAutoSkipDisabled ? 'destructive' : 'base'"
-            @click="toggleSponsorBlockAutoSkip"
+            :theme="sponsorBlockPanelOpen ? 'secondary' : 'base'"
+            @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
             v-if="!isLive && !isUpcoming"
@@ -366,7 +365,7 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
-  sponsorBlockAutoSkipDisabled: {
+  sponsorBlockPanelOpen: {
     type: Boolean,
     default: false
   },
@@ -382,7 +381,7 @@ const emit = defineEmits([
   'save-watched-progress',
   'save-channel-playback-speed',
   'save-channel-video-quality',
-  'toggle-sponsorblock-autoskip',
+  'toggle-sponsorblock-info',
   'toggle-transcript',
 ])
 
@@ -584,15 +583,9 @@ function saveChannelVideoQualityManually() {
 /** @type {import('vue').ComputedRef<boolean>} */
 const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
 
-const sponsorBlockToggleTitle = computed(() => {
-  return props.sponsorBlockAutoSkipDisabled
-    ? t('Video.Player.SponsorBlock.EnableAutoSkipTemporarily')
-    : t('Video.Player.SponsorBlock.DisableAutoSkipTemporarily')
-})
-
-function toggleSponsorBlockAutoSkip() {
-  emit('toggle-sponsorblock-autoskip')
-}
+const sponsorBlockInfoTitle = computed(() => props.sponsorBlockPanelOpen
+  ? t('Video.Player.SponsorBlock.CloseInfoPanel')
+  : t('Video.Player.SponsorBlock.OpenInfoPanel'))
 
 /** @type {import('vue').ComputedRef<string>} */
 const externalPlayer = computed(() => store.getters.getExternalPlayer)

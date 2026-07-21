@@ -1282,6 +1282,8 @@ Video:
       InvalidStartTime: Enter a valid segment start time.
       NoSegmentsToSubmit: Create at least one complete segment before submitting.
       NowAction: (Now)
+      CloseInfoPanel: Close SponsorBlock info
+      OpenInfoPanel: Open SponsorBlock info
       OpenSubmissionMenu: Open Submission Menu
       PreviewRequired: Please preview every segment before submitting.
       PreviewSegment: Preview
@@ -1305,6 +1307,21 @@ Video:
       SkippedToHighlight: Skipped to Highlight
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
+      InfoPanelTitle: SponsorBlock
+      InfoPanelLoading: Loading segments…
+      InfoPanelHasSegments: This video has segments in the database.
+      InfoPanelNoSegments: No segments were found for this video.
+      RefreshSegments: Refresh segments
+      AutoSkipEnabled: Automatically skip segments
+      AutoSkipOn: 'On'
+      AutoSkipOff: 'Off'
+      SkipSegment: Skip segment
+      CloseSegmentActions: Close segment actions
+      FullVideo: Full Video
+      LockedSegment: Locked segment
+      UpvoteSegment: Upvote segment
+      DownvoteSegment: Downvote segment
+      VoteFailed: Failed to submit SponsorBlock vote.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Remaining SABR backoff time: {remindingTimeSeconds}s'

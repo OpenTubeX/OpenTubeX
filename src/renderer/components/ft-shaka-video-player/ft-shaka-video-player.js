@@ -55,6 +55,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
@@ -79,6 +80,19 @@ const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MAX_DELAY_MS = 40000
+const SPONSORBLOCK_CATEGORIES = Object.freeze([
+  'sponsor',
+  'selfpromo',
+  'interaction',
+  'intro',
+  'outro',
+  'preview',
+  'hook',
+  'music_offtopic',
+  'filler',
+  'poi_highlight',
+])
+const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'poi'])
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 
@@ -328,6 +342,7 @@ export default defineComponent({
     'add-to-playlist',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
+    'sponsorblock-info-change',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -933,6 +948,10 @@ export default defineComponent({
       return store.getters.getSponsorBlockShowSkippedToast
     })
 
+    const sponsorBlockEnableSubmission = computed(() => {
+      return store.getters.getSponsorBlockEnableSubmission
+    })
+
     /** @type {import('vue').ComputedRef<number>} */
     const sponsorBlockSkippedToastDuration = computed(() => {
       return store.getters.getSponsorBlockSkippedToastDuration
@@ -954,18 +973,6 @@ export default defineComponent({
       }
 
       /** @type {SponsorBlockCategory[]} */
-      const sponsorCategories = ['sponsor',
-        'selfpromo',
-        'interaction',
-        'intro',
-        'outro',
-        'preview',
-        'hook',
-        'music_offtopic',
-        'filler',
-        'poi_highlight'
-      ]
-
       /** @type {Set<SponsorBlockCategory>} */
       const autoSkip = new Set()
 
@@ -984,7 +991,7 @@ export default defineComponent({
         }} */
       const categoryData = {}
 
-      sponsorCategories.forEach(x => {
+      SPONSORBLOCK_CATEGORIES.forEach(x => {
         let sponsorVal = {}
         switch (x) {
           case 'sponsor':
@@ -1057,6 +1064,11 @@ export default defineComponent({
      * }[]}
      */
     let sponsorBlockSegments = []
+    const sponsorBlockInfoSegments = ref([])
+    const sponsorBlockInfoOpen = ref(false)
+    const sponsorBlockInfoLoading = ref(false)
+    const sponsorBlockVotePending = ref(null)
+    const sponsorBlockUserVotes = reactive({})
     let terminalSponsorBlockOutroStarted = false
     let sponsorBlockAverageVideoDuration = 0
     const hasSponsorBlockMusicOfftopicSegment = ref(false)
@@ -1115,6 +1127,10 @@ export default defineComponent({
       isLive,
       onSubmittedSegments: (submittedSegments) => {
         sponsorBlockSegments = sponsorBlockSegments.concat(submittedSegments).sort((a, b) => a.startTime - b.startTime)
+        sponsorBlockInfoSegments.value = sponsorBlockInfoSegments.value
+          .concat(submittedSegments.map(segment => ({ ...segment, locked: 0, votes: 0 })))
+          .sort((a, b) => a.startTime - b.startTime)
+        emitSponsorBlockInfoState()
         refreshSponsorBlockMarkers()
       },
       props,
@@ -1161,8 +1177,7 @@ export default defineComponent({
         !useSponsorBlock.value ||
         !isRecentVideoForSponsorBlockRefetch() ||
         props.videoId === '' ||
-        sponsorSkips.value.seekBar.length === 0 ||
-        sponsorBlockSegments.length > 0
+        sponsorBlockInfoSegments.value.length > 0
       ) {
         return
       }
@@ -1174,7 +1189,7 @@ export default defineComponent({
       sponsorBlockNotFoundRefetchTimeout = setTimeout(() => {
         sponsorBlockNotFoundRefetchTimeout = null
 
-        if (!ui || !player || props.videoId !== videoId || sponsorBlockSegments.length > 0) {
+        if (!ui || !player || props.videoId !== videoId || sponsorBlockInfoSegments.value.length > 0) {
           return
         }
 
@@ -1186,7 +1201,11 @@ export default defineComponent({
       let segments, averageDuration
 
       try {
-        ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
+        ({ segments, averageDuration } = await getSponsorBlockSegments(
+          props.videoId,
+          SPONSORBLOCK_CATEGORIES,
+          SPONSORBLOCK_INFO_ACTION_TYPES
+        ))
       } catch (e) {
         console.error(e)
         return
@@ -1197,7 +1216,10 @@ export default defineComponent({
       }
 
       if (segments.length > 0) {
-        sponsorBlockSegments = segments
+        sponsorBlockInfoSegments.value = segments
+        sponsorBlockSegments = segments.filter(segment => {
+          return ['skip', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+        })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
         refreshSponsorBlockMarkers()
@@ -1209,28 +1231,11 @@ export default defineComponent({
       } else {
         scheduleSponsorBlockNotFoundRefetch()
       }
-    }
-
-    async function getHasSponsorBlockMusicOfftopicSegment() {
-      if (props.videoId === '') {
-        return false
-      }
-
-      if (sponsorSkips.value.seekBar.includes('music_offtopic')) {
-        return sponsorBlockSegments.some(segment => segment.category === 'music_offtopic')
-      }
-
-      try {
-        const { segments } = await getSponsorBlockSegments(props.videoId, ['music_offtopic'])
-        return segments.length > 0
-      } catch (e) {
-        console.error(e)
-        return false
-      }
+      emitSponsorBlockInfoState()
     }
 
     async function setupSponsorBlock() {
-      let segments = []
+      let segments
       let averageDuration = 0
       let refetchWhenNotFound = false
 
@@ -1240,20 +1245,28 @@ export default defineComponent({
       sponsorBlockDoNotSkipSegments = new Set()
       sponsorBlockDismissedPromptSegments = new Set()
       sponsorBlockSegments = []
+      sponsorBlockInfoSegments.value = []
       terminalSponsorBlockOutroStarted = false
       sponsorBlockAverageVideoDuration = 0
       hasSponsorBlockMusicOfftopicSegment.value = false
       activeSponsorBlockHighlightSegment.value = null
       updateSponsorBlockHighlightState(0)
 
-      if (sponsorSkips.value.seekBar.length > 0) {
-        try {
-          ({ segments, averageDuration } = await getSponsorBlockSegments(props.videoId, sponsorSkips.value.seekBar))
-          refetchWhenNotFound = segments.length === 0
-        } catch (e) {
-          console.error(e)
-          segments = []
-        }
+      sponsorBlockInfoLoading.value = true
+      emitSponsorBlockInfoState()
+      try {
+        ({ segments, averageDuration } = await getSponsorBlockSegments(
+          props.videoId,
+          SPONSORBLOCK_CATEGORIES,
+          SPONSORBLOCK_INFO_ACTION_TYPES
+        ))
+        refetchWhenNotFound = segments.length === 0
+      } catch (e) {
+        console.error(e)
+        segments = []
+      } finally {
+        sponsorBlockInfoLoading.value = false
+        emitSponsorBlockInfoState()
       }
 
       // check if the component is already getting destroyed
@@ -1265,23 +1278,145 @@ export default defineComponent({
       clearSponsorBlockMarkers()
 
       if (segments.length > 0) {
-        sponsorBlockSegments = segments
+        sponsorBlockInfoSegments.value = segments
+        sponsorBlockSegments = segments.filter(segment => {
+          return ['skip', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+        })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
       } else if (refetchWhenNotFound) {
         scheduleSponsorBlockNotFoundRefetch()
       }
 
-      if (!hasSponsorBlockMusicOfftopicSegment.value && await getHasSponsorBlockMusicOfftopicSegment()) {
-        hasSponsorBlockMusicOfftopicSegment.value = true
-      }
+      emitSponsorBlockInfoState()
 
       refreshSponsorBlockMarkers()
-      if (segments.length > 0 && canSeek()) {
+      if (sponsorBlockSegments.length > 0 && canSeek()) {
         const currentTime = video.value?.currentTime ?? 0
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
       }
+    }
+
+    async function refreshSponsorBlockInfo() {
+      await setupSponsorBlock()
+    }
+
+    function emitSponsorBlockInfoState() {
+      const detail = {
+        open: sponsorBlockInfoOpen.value,
+        loading: sponsorBlockInfoLoading.value,
+        submissionEnabled: sponsorBlockEnableSubmission.value,
+        pendingUuid: sponsorBlockVotePending.value,
+        segments: sponsorBlockInfoSegments.value.map(segment => ({
+          ...segment,
+          color: getSponsorBlockInfoSegmentColor(segment.category),
+          timeLabel: formatSponsorBlockInfoSegmentTime(segment),
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          userVote: sponsorBlockUserVotes[segment.uuid] ?? null,
+        }))
+      }
+
+      emit('sponsorblock-info-change', detail)
+      events.dispatchEvent(new CustomEvent('sponsorBlockInfoStateChanged', { detail }))
+    }
+
+    function toggleSponsorBlockInfo() {
+      sponsorBlockInfoOpen.value = !sponsorBlockInfoOpen.value
+      ui?.getControls().hideSettingsMenus()
+      showOverlayControls()
+      emitSponsorBlockInfoState()
+    }
+
+    function closeSponsorBlockInfo() {
+      sponsorBlockInfoOpen.value = false
+      emitSponsorBlockInfoState()
+    }
+
+    function getSponsorBlockInfoSegmentColor(category) {
+      return getSponsorBlockToastColor(category)
+    }
+
+    function formatSponsorBlockInfoTimestamp(seconds) {
+      const safeSeconds = Number.isFinite(seconds) ? Math.max(seconds, 0) : 0
+      const totalMilliseconds = Math.round(safeSeconds * 1000)
+      const milliseconds = String(totalMilliseconds % 1000).padStart(3, '0')
+      const totalSeconds = Math.floor(totalMilliseconds / 1000)
+      const secondsPart = String(totalSeconds % 60).padStart(2, '0')
+      const totalMinutes = Math.floor(totalSeconds / 60)
+      const minutesPart = totalMinutes % 60
+      const hours = Math.floor(totalMinutes / 60)
+
+      return hours > 0
+        ? `${hours}:${String(minutesPart).padStart(2, '0')}:${secondsPart}.${milliseconds}`
+        : `${minutesPart}:${secondsPart}.${milliseconds}`
+    }
+
+    function formatSponsorBlockInfoSegmentTime(segment) {
+      if (segment.actionType === 'full') {
+        return t('Video.Player.SponsorBlock.FullVideo')
+      }
+
+      const start = formatSponsorBlockInfoTimestamp(segment.startTime)
+      return isSponsorBlockPointSegment(segment)
+        ? start
+        : `${start} ${t('Video.Player.SponsorBlock.TimeDivider')} ${formatSponsorBlockInfoTimestamp(segment.endTime)}`
+    }
+
+    function getSponsorBlockVoteContribution(vote) {
+      if (vote === 1) return 1
+      if (vote === 0) return -1
+      return 0
+    }
+
+    async function voteOnSponsorBlockInfoSegment(uuid, vote) {
+      if (!sponsorBlockEnableSubmission.value || sponsorBlockVotePending.value !== null) {
+        return
+      }
+
+      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
+      if (!segment) {
+        return
+      }
+
+      const previousVote = sponsorBlockUserVotes[segment.uuid]
+      const nextVote = previousVote === vote ? null : vote
+      const type = nextVote === null ? 20 : nextVote
+      sponsorBlockVotePending.value = segment.uuid
+      emitSponsorBlockInfoState()
+
+      try {
+        await voteOnSponsorBlockSegment(props.videoId, segment.uuid, type)
+        const currentVotes = Number.isFinite(segment.votes) ? segment.votes : 0
+        segment.votes = currentVotes - getSponsorBlockVoteContribution(previousVote) +
+          getSponsorBlockVoteContribution(nextVote)
+
+        if (nextVote === null) {
+          delete sponsorBlockUserVotes[segment.uuid]
+        } else {
+          sponsorBlockUserVotes[segment.uuid] = nextVote
+        }
+      } catch (error) {
+        console.error(error)
+        showToast(t('Video.Player.SponsorBlock.VoteFailed'))
+      } finally {
+        sponsorBlockVotePending.value = null
+        emitSponsorBlockInfoState()
+      }
+    }
+
+    function skipSponsorBlockInfoSegment(uuid) {
+      const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
+      if (!segment || !canSeek()) {
+        return
+      }
+
+      const seekRange = player.seekRange()
+      video.value.currentTime = Math.min(
+        Math.max(getSponsorBlockSegmentSkipTarget(segment), seekRange.start),
+        seekRange.end
+      )
+      showOverlayControls()
     }
 
     function startSponsorBlockToastTimer() {
@@ -2840,11 +2975,20 @@ export default defineComponent({
 
     watch(() => props.videoId, () => {
       closeChaptersOverlay()
+      closeSponsorBlockInfo()
       resetSponsorBlockHighlightLabel()
       loadSponsorBlockDrafts()
       sponsorBlockSubmissionError.value = ''
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
+
+    watch(useSponsorBlock, enabled => {
+      if (!enabled) {
+        closeSponsorBlockInfo()
+      }
+    })
+
+    watch(sponsorBlockEnableSubmission, () => emitSponsorBlockInfoState())
 
     watch(sponsorBlockDraftSegmentsByVideoId, () => {
       loadSponsorBlockDrafts()
@@ -6591,7 +6735,7 @@ export default defineComponent({
         forceAspectRatio.value = firstFormat.width / firstFormat.height < 1.5
       }
 
-      if (useSponsorBlock.value && (sponsorSkips.value.seekBar.length > 0 || !props.videoGenreIsMusic)) {
+      if (useSponsorBlock.value) {
         setupSponsorBlock()
       }
 
@@ -7161,6 +7305,11 @@ export default defineComponent({
       closeFullscreenComments,
       closeFullscreenPlaylist,
       closeChaptersOverlay,
+      toggleSponsorBlockInfo,
+      closeSponsorBlockInfo,
+      refreshSponsorBlockInfo,
+      skipSponsorBlockInfoSegment,
+      voteOnSponsorBlockInfoSegment,
       copyChapterTimestamp,
       destroyPlayer
     })

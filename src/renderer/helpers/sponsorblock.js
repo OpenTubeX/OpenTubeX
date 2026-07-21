@@ -193,3 +193,32 @@ export async function submitSponsorBlockSegments(videoId, videoDuration, segment
     throw error
   }
 }
+
+/**
+ * @param {string} videoId
+ * @param {string} uuid
+ * @param {0|1|20} type
+ */
+export async function voteOnSponsorBlockSegment(videoId, uuid, type) {
+  const userID = await getOrCreateSponsorBlockUserId()
+  const searchParams = new URLSearchParams({
+    UUID: uuid,
+    videoID: videoId,
+    userID,
+    type: String(type)
+  })
+  const requestUrl = `${store.getters.getSponsorBlockUrl}/api/voteOnSponsorTime?${searchParams}`
+
+  try {
+    const response = await fetch(requestUrl, { method: 'POST' })
+
+    if (!response.ok) {
+      const error = new Error(await response.text())
+      error.name = `SponsorBlockVoteError:${response.status}`
+      throw error
+    }
+  } catch (error) {
+    console.error('failed to vote on SponsorBlock segment', requestUrl, error)
+    throw error
+  }
+}

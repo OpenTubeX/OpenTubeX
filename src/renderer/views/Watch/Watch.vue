@@ -89,6 +89,7 @@
           @add-to-playlist="addCurrentVideoToPlaylist"
           @chapters-overlay-change="handleChaptersOverlayChange"
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
+          @sponsorblock-info-change="handleSponsorBlockInfoChange"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -200,7 +201,7 @@
         :is-unlisted="isUnlisted"
         :has-ai-generated-content="hasAiGeneratedContent"
         :can-save-watched-progress="canSaveWatchProgress"
-        :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+        :sponsor-block-panel-open="showSidebarSponsorBlock"
         :transcript-open="showTranscript"
         class="watchVideo"
         :class="{ theatreWatchVideo: useTheatreMode }"
@@ -209,7 +210,7 @@
         @save-watched-progress="handleWatchProgressManualSave"
         @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
         @save-channel-video-quality="handleChannelVideoQualityManualSave"
-        @toggle-sponsorblock-autoskip="handleSponsorBlockAutoSkipToggle"
+        @toggle-sponsorblock-info="toggleSponsorBlockInfo"
         @toggle-transcript="showTranscript = !showTranscript"
       />
       <watch-video-description
@@ -318,6 +319,23 @@
             @timestamp-event="changeTimestamp"
           />
         </div>
+      </transition>
+      <transition name="sponsorblock-panel">
+        <watch-video-sponsor-block
+          v-if="showSidebarSponsorBlock && !isLoading"
+          class="watchVideoSideBar watchVideoSponsorBlock"
+          :loading="sponsorBlockInfoLoading"
+          :pending-uuid="sponsorBlockInfoPendingUuid"
+          :segments="sponsorBlockInfoSegments"
+          :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+          :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :current-time="currentTime"
+          @close="closeSidebarSponsorBlock"
+          @refresh="refreshSponsorBlockInfo"
+          @skip="skipSponsorBlockInfoSegment"
+          @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+          @vote="voteOnSponsorBlockInfoSegment"
+        />
       </transition>
       <watch-video-transcript
         v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
