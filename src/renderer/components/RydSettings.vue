@@ -6,6 +6,7 @@
       <FtToggleSwitch
         :label="$t('Settings.Return YouTube Dislike Settings.Enable Return YouTube Dislike')"
         :default-value="useReturnYoutubeDislikes"
+        setting-key="useReturnYouTubeDislikes"
         @change="handleUpdateUseReturnYoutubeDislike"
       />
     </FtFlexBox>

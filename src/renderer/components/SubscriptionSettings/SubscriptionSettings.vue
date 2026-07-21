@@ -52,6 +52,7 @@
         <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Limit the number of videos displayed for each channel')"
           :default-value="onlyShowLatestFromChannel"
+          setting-key="onlyShowLatestFromChannel"
           compact
           @change="updateOnlyShowLatestFromChannel"
         />
@@ -59,6 +60,7 @@
           <FtSlider
             :label="$t('Settings.Subscription Settings.To')"
             :default-value="onlyShowLatestFromChannelNumber"
+            setting-key="onlyShowLatestFromChannelNumber"
             :disabled="!onlyShowLatestFromChannel"
             :min-value="1"
             :max-value="30"

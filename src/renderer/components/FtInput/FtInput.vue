@@ -19,6 +19,7 @@
       :class="{ disabled }"
     >
       {{ label || placeholder }}
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"
@@ -124,6 +125,7 @@ import { computed, reactive, ref, shallowRef, useId, useTemplateRef, watch } fro
 import { useI18n } from 'vue-i18n'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import store from '../../store/index'
 
@@ -200,6 +202,10 @@ const props = defineProps({
   allowActionButtonWhenEmpty: {
     type: Boolean,
     default: false
+  },
+  settingKey: {
+    type: String,
+    default: ''
   }
 })
 

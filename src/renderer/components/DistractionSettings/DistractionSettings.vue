@@ -30,6 +30,7 @@
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Videos on Watch')"
           :default-value="hideWatchedSubs"
+          setting-key="hideWatchedSubs"
           :compact="true"
           :tooltip="t('Tooltips.Distraction Free Settings.Hide Videos on Watch')"
           @change="updateHideWatchedSubs"
@@ -40,6 +41,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Live Streams')"
           :compact="true"
           :default-value="hideLiveStreams"
+          setting-key="hideLiveStreams"
           @change="updateHideLiveStreams"
         />
         <FtToggleSwitch
@@ -52,6 +54,7 @@
           :label="t('Settings.Distraction Free Settings.Display Titles Without Excessive Capitalisation')"
           :compact="true"
           :default-value="showDistractionFreeTitles"
+          setting-key="showDistractionFreeTitles"
           @change="updateShowDistractionFreeTitles"
         />
       </div>
@@ -60,6 +63,7 @@
     <FtFlexBox>
       <FtInputTags
         :disabled="channelHiderDisabled"
+        setting-key="channelsHidden"
         :disabled-msg="t('Settings.Distraction Free Settings.Hide Channels Disabled Message')"
         :label="t('Settings.Distraction Free Settings.Hide Channels')"
         :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Channels Placeholder')"
@@ -79,6 +83,7 @@
     <FtFlexBox class="containingTextFlexBox">
       <FtInputTags
         :label="t('Settings.Distraction Free Settings.Hide Videos, Playlists and Channels Containing Text')"
+        setting-key="forbiddenTitles"
         :tag-name-placeholder="t('Settings.Distraction Free Settings.Hide Videos, Playlists and Channels Containing Text Placeholder')"
         :show-tags="showAddedForbiddenTitles"
         :tag-list="forbiddenTitles"
@@ -143,6 +148,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Subscriptions Shorts')"
           :compact="true"
           :default-value="hideSubscriptionsShorts"
+          setting-key="hideSubscriptionsShorts"
           @change="updateHideSubscriptionsShorts"
         />
       </div>
@@ -152,6 +158,7 @@
           :compact="true"
           :disabled="hideLiveStreams"
           :default-value="hideLiveStreams || hideSubscriptionsLive"
+          setting-key="hideSubscriptionsLive"
           :tooltip="hideLiveStreams ? hideSubscriptionsLiveTooltip : ''"
           v-on="!hideLiveStreams ? { change: updateHideSubscriptionsLive } : {}"
         />
@@ -159,6 +166,7 @@
           :label="t('Settings.Distraction Free Settings.Hide Subscriptions Posts')"
           :compact="true"
           :default-value="hideSubscriptionsCommunity"
+          setting-key="hideSubscriptionsCommunity"
           @change="updateHideSubscriptionsCommunity"
         />
       </div>
@@ -259,18 +267,21 @@
           :label="t('Settings.Distraction Free Settings.Hide Live Chat')"
           :compact="true"
           :default-value="hideLiveChat"
+          setting-key="hideLiveChat"
           @change="updateHideLiveChat"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
           :compact="true"
           :default-value="hideRecommendedVideos"
+          setting-key="hideRecommendedVideos"
           @change="handleHideRecommendedVideos"
         />
         <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Comments')"
           :compact="true"
           :default-value="hideComments"
+          setting-key="hideComments"
           @change="updateHideComments"
         />
         <FtToggleSwitch

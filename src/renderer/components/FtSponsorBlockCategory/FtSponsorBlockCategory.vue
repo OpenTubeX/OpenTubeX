@@ -10,6 +10,7 @@
       :describe-by-id="id"
       :placeholder="$t('Settings.SponsorBlock Settings.Category Color')"
       :value="sponsorBlockValues.color"
+      :setting-key="settingKey"
       :select-names="colorNames"
       :select-values="COLOR_VALUES"
       :icon="['fas', 'palette']"
@@ -21,6 +22,7 @@
       :describe-by-id="id"
       :placeholder="$t('Settings.SponsorBlock Settings.Skip Options.Skip Option')"
       :value="sponsorBlockValues.skip"
+      :setting-key="settingKey"
       :select-names="skipNames"
       :select-values="selectableSkipValues"
       :icon="['fas', 'forward']"
@@ -138,6 +140,22 @@ const translatedCategoryName = computed(() => {
     default:
       return ''
   }
+})
+
+const settingKey = computed(() => {
+  const suffixes = {
+    sponsor: 'Sponsor',
+    'self-promotion': 'SelfPromo',
+    interaction: 'Interaction',
+    intro: 'Intro',
+    outro: 'Outro',
+    recap: 'Recap',
+    hook: 'Hook',
+    'music offtopic': 'MusicOffTopic',
+    filler: 'Filler',
+    highlight: 'Highlight'
+  }
+  return `sponsorBlock${suffixes[props.categoryName]}`
 })
 
 /**

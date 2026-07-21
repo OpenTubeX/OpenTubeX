@@ -16,6 +16,7 @@
           :label="t('Settings.Player Settings.Turn on Subtitles by Default')"
           :compact="true"
           :default-value="enableSubtitlesByDefault"
+          setting-key="enableSubtitlesByDefault"
           @change="updateEnableSubtitlesByDefault"
         />
         <FtToggleSwitch
@@ -42,6 +43,7 @@
           :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
           :compact="true"
           :default-value="holdToDoublePlaybackSpeed"
+          setting-key="holdToDoublePlaybackSpeed"
           :tooltip="t('Tooltips.Player Settings.Hold to Double Playback Speed')"
           @change="updateHoldToDoublePlaybackSpeed"
         />
@@ -64,6 +66,7 @@
           :label="t('Settings.Player Settings.Multiply Seek Interval by Playback Rate')"
           :compact="true"
           :default-value="seekIntervalMultiplyByPlaybackRate"
+          setting-key="seekIntervalMultiplyByPlaybackRate"
           :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
           @change="updateSeekIntervalMultiplyByPlaybackRate"
         />
@@ -74,18 +77,21 @@
           :compact="true"
           :disabled="hideRecommendedVideos"
           :default-value="playNextVideo"
+          setting-key="playNextVideo"
           @change="updatePlayNextVideo"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Autoplay Playlists')"
           :compact="true"
           :default-value="autoplayPlaylists"
+          setting-key="autoplayPlaylists"
           @change="updateAutoplayPlaylists"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Autoplay Videos')"
           :compact="true"
           :default-value="autoplayVideos"
+          setting-key="autoplayVideos"
           @change="updateAutoplayVideos"
         />
         <FtToggleSwitch
@@ -104,6 +110,7 @@
           :label="t('Settings.Player Settings.Show Playback Rate Adjusted Timestamp')"
           :compact="true"
           :default-value="showPlaybackRateAdjustedTimestamp"
+          setting-key="showPlaybackRateAdjustedTimestamp"
           :tooltip="t('Tooltips.Player Settings.Show Playback Rate Adjusted Timestamp')"
           @change="updateShowPlaybackRateAdjustedTimestamp"
         />
@@ -117,6 +124,7 @@
           :label="t('Global.Ambient Mode')"
           :compact="true"
           :default-value="ambientMode"
+          setting-key="ambientMode"
           :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
           @change="updateAmbientMode"
         />
@@ -136,6 +144,7 @@
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Viewing Mode.Default Viewing Mode')"
         :value="defaultViewingMode"
+        setting-key="defaultViewingMode"
         :select-names="viewingModeNames"
         :select-values="viewingModeValues"
         :tooltip="t('Settings.Player Settings.Default Viewing Mode.Tooltip')"
@@ -145,6 +154,7 @@
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Video Format.Default Video Format')"
         :value="defaultVideoFormat"
+        setting-key="defaultVideoFormat"
         :select-names="formatNames"
         :select-values="FORMAT_VALUES"
         :tooltip="t('Tooltips.Player Settings.Default Video Format')"
@@ -154,6 +164,7 @@
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Quality.Default Quality')"
         :value="defaultQuality"
+        setting-key="defaultQuality"
         :select-names="qualityNames"
         :select-values="QUALITY_VALUES"
         :icon="['fas', 'photo-film']"
@@ -162,6 +173,7 @@
       <FtSelect
         :placeholder="t('Settings.Player Settings.Video Playback Rate Interval')"
         :value="videoPlaybackRateIntervalString"
+        setting-key="videoPlaybackRateInterval"
         :select-names="PLAYBACK_RATE_INTERVAL_VALUES"
         :select-values="PLAYBACK_RATE_INTERVAL_VALUES"
         :icon="['fas', 'gauge']"
@@ -172,6 +184,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Next Video Interval')"
         :default-value="defaultInterval"
+        setting-key="defaultInterval"
         :min-value="0"
         :max-value="60"
         :step="1"
@@ -181,6 +194,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Autoplay Interruption Timer')"
         :default-value="defaultAutoplayInterruptionIntervalHours"
+        setting-key="defaultAutoplayInterruptionIntervalHours"
         :min-value="1"
         :max-value="12"
         :step="1"
@@ -190,6 +204,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Fast-Forward / Rewind Interval')"
         :default-value="defaultSkipInterval"
+        setting-key="defaultSkipInterval"
         :min-value="1"
         :max-value="70"
         :step="1"
@@ -210,6 +225,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Default Playback Rate')"
         :default-value="defaultPlayback"
+        setting-key="defaultPlayback"
         :min-value="videoPlaybackRateInterval"
         :max-value="maxVideoPlaybackRate"
         :step="videoPlaybackRateInterval"
@@ -219,6 +235,7 @@
       <FtSlider
         :label="t('Settings.Player Settings.Max Video Playback Rate')"
         :default-value="maxVideoPlaybackRate"
+        setting-key="maxVideoPlaybackRate"
         :min-value="2"
         :max-value="10"
         :step="1"
@@ -231,6 +248,7 @@
         :label="t('Settings.Player Settings.Remember Playback Speed Per Channel')"
         :compact="true"
         :default-value="rememberPlaybackSpeedPerChannel"
+        setting-key="rememberPlaybackSpeedPerChannel"
         @change="updateRememberPlaybackSpeedPerChannel"
       />
       <FtToggleSwitch
@@ -253,6 +271,7 @@
         :label="t('Settings.Player Settings.Remember Video Quality Per Channel')"
         :compact="true"
         :default-value="rememberVideoQualityPerChannel"
+        setting-key="rememberVideoQualityPerChannel"
         @change="updateRememberVideoQualityPerChannel"
       />
       <FtToggleSwitch
@@ -276,12 +295,14 @@
         :label="t('Settings.Player Settings.Use Quick Playback Speed Bar')"
         :compact="true"
         :default-value="useQuickPlaybackSpeedBar"
+        setting-key="useQuickPlaybackSpeedBar"
         :tooltip="t('Tooltips.Player Settings.Use Quick Playback Speed Bar')"
         @change="updateUseQuickPlaybackSpeedBar"
       />
       <FtButton
         :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
         :icon="['fas', 'sliders-h']"
+        setting-key="quickPlaybackSpeedBarOptions"
         @click="showQuickPlaybackSpeedBarManager = true"
       />
     </FtFlexBox>

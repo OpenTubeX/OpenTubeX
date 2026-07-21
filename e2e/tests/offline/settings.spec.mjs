@@ -1,4 +1,4 @@
-import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('settings page renders its sections', async ({ page }) => {
@@ -22,5 +22,27 @@ test.describe('settings', () => {
     ;({ page } = await app.relaunch())
     await goTo(page, 'settings')
     await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeChecked()
+  })
+})
+
+test.describe('synced setting indicators', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerAutoSync: false,
+        syncServerSyncSettings: true,
+        syncServerToken: 'e2e-sync-token'
+      }
+    }
+  })
+
+  test('marks settings included in account sync', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const syncedLabel = page.locator('label').filter({ hasText: 'Default Landing Page' })
+    await expect(syncedLabel.getByTitle('Synced with your account')).toBeVisible()
+
+    const localOnlyLabel = page.locator('label').filter({ hasText: 'Check for Updates' })
+    await expect(localOnlyLabel.getByTitle('Synced with your account')).toHaveCount(0)
   })
 })

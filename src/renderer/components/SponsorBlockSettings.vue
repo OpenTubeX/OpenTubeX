@@ -6,17 +6,20 @@
       <FtToggleSwitch
         :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
         :default-value="useSponsorBlock"
+        setting-key="useSponsorBlock"
         @change="handleUpdateSponsorBlock"
       />
       <FtToggleSwitch
         :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
         :default-value="useDeArrowTitles"
+        setting-key="useDeArrowTitles"
         :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
         @change="handleUpdateUseDeArrowTitles"
       />
       <FtToggleSwitch
         :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
         :default-value="useDeArrowThumbnails"
+        setting-key="useDeArrowThumbnails"
         :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
         @change="handleUpdateUseDeArrowThumbnails"
       />
@@ -36,6 +39,7 @@
         <FtToggleSwitch
           :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock Submission')"
           :default-value="sponsorBlockEnableSubmission"
+          setting-key="sponsorBlockEnableSubmission"
           @change="handleUpdateSponsorBlockEnableSubmission"
         />
         <FtSlider

@@ -30,6 +30,7 @@
             v-if="USING_ELECTRON"
             :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
             :icon="['fas', 'keyboard']"
+            setting-key="keyboardShortcuts"
             @click="showKeyboardShortcutPrompt"
           />
           <FtToggleSwitch

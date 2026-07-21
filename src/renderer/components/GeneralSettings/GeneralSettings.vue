@@ -78,6 +78,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Default Landing Page')"
         :value="landingPage"
+        setting-key="landingPage"
         :select-names="defaultPageNames"
         :select-values="defaultPageValues"
         :icon="['fas', 'location-dot']"
@@ -105,6 +106,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Video View Type.Video View Type')"
         :value="listType"
+        setting-key="listType"
         :select-names="viewTypeNames"
         :select-values="VIEW_TYPE_VALUES"
         :icon="listType === 'grid' ? ['fas', 'grip'] : ['fas', 'list']"
@@ -113,6 +115,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Thumbnail Preference.Thumbnail Preference')"
         :value="thumbnailPreference"
+        setting-key="thumbnailPreference"
         :select-names="thumbnailTypeNames"
         :select-values="THUMBNAIL_TYPE_VALUES"
         :tooltip="t('Tooltips.General Settings.Thumbnail Preference')"
@@ -130,6 +133,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Locale Preference')"
         :value="currentLocale"
+        setting-key="currentLocale"
         :select-names="localeNames"
         :select-values="LOCALE_VALUES"
         :icon="['fas', 'language']"
@@ -139,6 +143,7 @@
       <FtSelect
         :placeholder="t('Settings.General Settings.Reduced Motion.Reduced Motion')"
         :value="reducedMotion"
+        setting-key="reducedMotion"
         :select-names="reducedMotionNames"
         :select-values="REDUCED_MOTION_VALUES"
         :icon="['fas', 'gauge']"
@@ -148,6 +153,7 @@
         v-if="SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
+        setting-key="avoidTranslation"
         :select-names="avoidTranslationNames"
         :select-values="AVOID_TRANSLATION_VALUES"
         :tooltip="t('Tooltips.General Settings.Avoid translation')"
@@ -158,6 +164,7 @@
         v-if="regionDataLoaded"
         :placeholder="t('Settings.General Settings.Region for Trending')"
         :value="region"
+        setting-key="region"
         :select-names="regionNames"
         :select-values="regionValues"
         :icon="['fas', 'globe']"

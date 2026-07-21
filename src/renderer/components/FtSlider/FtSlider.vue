@@ -17,6 +17,7 @@
     >
     <span class="label">
       {{ $t('Display Label', {label: label, value: displayLabel}) }}
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </span>
     <FtTooltip
       v-if="tooltip !== ''"
@@ -30,6 +31,7 @@
 import { computed, ref, useId, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({
   label: {
@@ -61,6 +63,10 @@ const props = defineProps({
     default: false
   },
   tooltip: {
+    type: String,
+    default: ''
+  },
+  settingKey: {
     type: String,
     default: ''
   }

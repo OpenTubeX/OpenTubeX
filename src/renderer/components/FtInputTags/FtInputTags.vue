@@ -13,6 +13,7 @@
       :disabled="disabled"
       :placeholder="tagNamePlaceholder"
       :label="label"
+      :setting-key="settingKey"
       :min-input-length="minInputLength"
       :show-label="true"
       :tooltip="tooltip"
@@ -134,6 +135,10 @@ const props = defineProps({
   findTagInfo: {
     type: Function,
     default: (_) => ({ preferredName: '', icon: '' }),
+  },
+  settingKey: {
+    type: String,
+    default: ''
   }
 })
 

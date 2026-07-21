@@ -68,6 +68,7 @@
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Save Watched Progress')"
         :value="watchedProgressSavingMode"
+        setting-key="watchedProgressSavingMode"
         :select-names="watchedProgressSavingModeNames"
         :select-values="WATCHED_PROGRESS_SAVING_MODE_VALUES"
         :icon="['fas', 'bars-progress']"

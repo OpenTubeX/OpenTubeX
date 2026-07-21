@@ -76,6 +76,7 @@
         <FtSlider
           :label="t('Settings.Theme Settings.Thumbnail Size')"
           :default-value="thumbnailSize"
+          setting-key="thumbnailSize"
           :min-value="MIN_THUMBNAIL_SIZE"
           :max-value="MAX_THUMBNAIL_SIZE"
           :step="THUMBNAIL_SIZE_STEP"
@@ -90,6 +91,7 @@
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
         :value="baseTheme"
+        setting-key="baseTheme"
         :select-names="baseThemeNames"
         :select-values="BASE_THEME_VALUES"
         :icon="['fas', 'palette']"
@@ -98,6 +100,7 @@
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
+        setting-key="mainColor"
         :select-names="colorNames"
         :select-values="COLOR_VALUES"
         :disabled="!areColorThemesEnabled"
@@ -108,6 +111,7 @@
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Secondary Color Theme')"
         :value="secColor"
+        setting-key="secColor"
         :select-names="colorNames"
         :select-values="COLOR_VALUES"
         :disabled="!areColorThemesEnabled"

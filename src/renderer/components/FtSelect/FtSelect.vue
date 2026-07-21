@@ -40,6 +40,7 @@
       />
       <span class="select-label-text">
         {{ placeholder }}
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
       </span>
     </label>
     <FtTooltip
@@ -55,6 +56,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useId } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 defineProps({
   placeholder: {
@@ -96,6 +98,10 @@ defineProps({
   isLocaleSelector: {
     type: Boolean,
     default: false
+  },
+  settingKey: {
+    type: String,
+    default: ''
   }
 })
 

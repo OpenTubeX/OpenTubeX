@@ -23,6 +23,7 @@
     >
       <span class="switch-label-text">
         {{ label }}
+        <FtSyncedSettingIndicator :setting-key="settingKey" />
       </span>
       <FtTooltip
         v-if="tooltip !== ''"
@@ -39,6 +40,7 @@
 import { ref, useId, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({
   label: {
@@ -68,6 +70,10 @@ const props = defineProps({
   tooltipAllowNewlines: {
     type: Boolean,
     default: false,
+  },
+  settingKey: {
+    type: String,
+    default: ''
   },
 })
 

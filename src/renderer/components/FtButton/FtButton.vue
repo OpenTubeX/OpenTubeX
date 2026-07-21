@@ -14,12 +14,15 @@
         :icon="icon"
       />
       {{ label }}
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </slot>
   </button>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 defineProps({
   label: {
@@ -37,6 +40,10 @@ defineProps({
   icon: {
     type: Array,
     default: null
+  },
+  settingKey: {
+    type: String,
+    default: ''
   }
 })
 

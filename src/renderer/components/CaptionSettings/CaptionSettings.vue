@@ -14,6 +14,7 @@
           <FtSelect
             :placeholder="t('Settings.Player Settings.Caption Appearance.Preferred Language')"
             :value="preferredCaptionLocale"
+            setting-key="preferredCaptionLocale"
             :select-names="captionLocaleNames"
             :select-values="CAPTION_LOCALE_VALUES"
             :icon="['fas', 'language']"
@@ -26,12 +27,16 @@
             :label="t('Settings.Player Settings.Caption Appearance.Enable Translations')"
             :compact="true"
             :default-value="enableCaptionTranslations"
+            setting-key="enableCaptionTranslations"
             :tooltip="t('Tooltips.Player Settings.Enable Caption Translations')"
             @change="updateEnableCaptionTranslations"
           />
         </div>
         <label class="captionControl captionColorControl">
-          <span>{{ t('Settings.Player Settings.Caption Appearance.Text Color') }}</span>
+          <span>
+            {{ t('Settings.Player Settings.Caption Appearance.Text Color') }}
+            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+          </span>
           <input
             type="color"
             :value="captionSettings.textColor"
@@ -39,7 +44,10 @@
           >
         </label>
         <label class="captionControl captionColorControl">
-          <span>{{ t('Settings.Player Settings.Caption Appearance.Background Color') }}</span>
+          <span>
+            {{ t('Settings.Player Settings.Caption Appearance.Background Color') }}
+            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+          </span>
           <input
             type="color"
             :value="captionSettings.backgroundColor"
@@ -50,6 +58,7 @@
           <FtSlider
             :label="t('Settings.Player Settings.Caption Appearance.Background Opacity')"
             :default-value="Math.round(captionSettings.backgroundOpacity * 100)"
+            setting-key="defaultCaptionSettings"
             :min-value="0"
             :max-value="100"
             :step="5"
@@ -61,6 +70,7 @@
           <FtSlider
             :label="t('Settings.Player Settings.Caption Appearance.Font Size')"
             :default-value="Math.round(captionSettings.fontScale * 100)"
+            setting-key="defaultCaptionSettings"
             :min-value="50"
             :max-value="200"
             :step="10"
@@ -72,6 +82,7 @@
           <FtSelect
             :placeholder="t('Settings.Player Settings.Caption Appearance.Anchor.Anchor')"
             :value="captionSettings.anchor"
+            setting-key="defaultCaptionSettings"
             :select-names="captionAnchorNames"
             :select-values="CAPTION_ANCHORS"
             :icon="['fas', 'border-all']"
@@ -82,6 +93,7 @@
           <FtSlider
             :label="t('Settings.Player Settings.Caption Appearance.Vertical Position')"
             :default-value="Math.round(captionSettings.verticalPosition * 100)"
+            setting-key="defaultCaptionSettings"
             :min-value="0"
             :max-value="50"
             :step="1"
@@ -93,6 +105,7 @@
           <FtSelect
             :placeholder="t('Settings.Player Settings.Caption Appearance.Edge Style.Edge Style')"
             :value="captionSettings.edgeStyle"
+            setting-key="defaultCaptionSettings"
             :select-names="captionEdgeStyleNames"
             :select-values="CAPTION_EDGE_STYLES"
             :icon="['fas', 'palette']"
@@ -103,7 +116,10 @@
           v-if="captionSettings.edgeStyle !== 'none'"
           class="captionControl captionColorControl"
         >
-          <span>{{ t('Settings.Player Settings.Caption Appearance.Edge Color') }}</span>
+          <span>
+            {{ t('Settings.Player Settings.Caption Appearance.Edge Color') }}
+            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+          </span>
           <input
             type="color"
             :value="captionSettings.edgeColor"
@@ -131,6 +147,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 import {
   CAPTION_ANCHORS,
