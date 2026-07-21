@@ -16,7 +16,12 @@
 }
 
 .description {
-  margin-block: 0.25rem 0.75rem;
+  box-sizing: border-box;
+  line-height: 1.4;
+  margin-block: 0.25rem 1rem;
+  margin-inline: auto;
+  max-inline-size: calc(88ch + 2.5rem);
+  padding-inline: 1.25rem;
 }
 
 .connectionStatus {
