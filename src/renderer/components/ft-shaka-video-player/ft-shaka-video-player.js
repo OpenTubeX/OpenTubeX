@@ -4536,6 +4536,11 @@ export default defineComponent({
       setFullscreenPlaylist(false)
     }
 
+    function rememberDockedPanels() {
+      restoreFullscreenComments = showFullscreenComments.value
+      restoreFullscreenPlaylist = showFullscreenPlaylist.value
+    }
+
     function restoreDockedPanels() {
       if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
         return
@@ -4573,6 +4578,7 @@ export default defineComponent({
 
     watch(fullWindowEnabled, enabled => {
       if (!enabled && !isNativeFullscreenActive()) {
+        rememberDockedPanels()
         closeFullscreenComments()
         closeFullscreenPlaylist()
       }
@@ -6467,6 +6473,7 @@ export default defineComponent({
         restoreDockedPanels()
       } else if (!isNativeFullscreenActive()) {
         if (!fullWindowEnabled.value) {
+          rememberDockedPanels()
           closeFullscreenComments()
           closeFullscreenPlaylist()
         }

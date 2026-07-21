@@ -3,7 +3,7 @@ import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 const PLAYLIST_URL = 'https://youtu.be/aqz-KE-bpKQ?list=UUSMOQeBJ2RAnuFungnQOxLg'
 
-test('fullscreen playlist dock centers initially and preserves each layout position', async ({ page, innertube }) => {
+test('fullscreen playlist dock preserves its active state and each layout position', async ({ page, innertube }) => {
   test.skip(innertube.replay, 'playlist hydration needs the real API')
 
   const searchInput = page.locator('.topNav .searchInput input.ft-input')
@@ -59,4 +59,9 @@ test('fullscreen playlist dock centers initially and preserves each layout posit
     const restoredScrollTop = await sidebar.evaluate((element) => element.scrollTop)
     return Math.abs(restoredScrollTop - sidebarScrollTop)
   }).toBeLessThan(150)
+
+  await setPlayerFullscreen(page, true)
+  await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
+  await expect(dock).toBeVisible()
+  await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)
 })

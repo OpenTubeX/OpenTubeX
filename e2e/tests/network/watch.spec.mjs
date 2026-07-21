@@ -70,7 +70,7 @@ test.describe('watch page', () => {
     await expect.poll(async () => await replies.count()).toBeGreaterThan(replyCount)
   })
 
-  test('fullscreen comments dock preserves its scroll position', async ({ page, innertube }) => {
+  test('fullscreen comments dock preserves its active state and scroll position', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
@@ -93,6 +93,11 @@ test.describe('watch page', () => {
     await expect(page.locator('.fullscreenCommentsOverlay.open')).toHaveCount(0)
     await page.locator('.fullscreenCommentsToggle').click({ force: true })
     await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
+
+    await setPlayerFullscreen(page, false)
+    await setPlayerFullscreen(page, true)
+    await expect(page.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
   })
 
