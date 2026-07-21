@@ -486,12 +486,12 @@ Settings:
       Full Screen (Always On): Pełny ekran (zawsze włączony)
       Tooltip: Większość domyślnych trybów oglądania jest stosowana tylko na początku każdej sesji oglądania. Zmiany wprowadzone w trakcie sesji są zachowywane do jej zakończenia. Tryby oglądania „zawsze włączony” są stosowane za każdym razem, gdy przełączasz się na nowy film, niezależnie od zmian trybu oglądania dokonanych podczas oglądania poprzedniego filmu.
     Auto Picture in Picture on Tab Change: Automatycznie włączaj obraz w obrazie podczas przełączania kart
-    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do szybkości odtwarzania
-    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do szybkości odtwarzania
+    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do prędkości odtwarzania
+    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do prędkości odtwarzania
     Remember Volume: Zapamiętaj głośność odtwarzania
     Remember Playback Speed Per Channel: Pamiętaj prędkość odtwarzania na każdym kanale
     Auto Update Channel Playback Speed: Zapamiętuj automatycznie przy każdej zmianie
-    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru szybkości odtwarzania
+    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru prędkości odtwarzania
     Manage Channel Playback Speeds: Zarządzaj zapisanymi prędkościami odtwarzania
     Channel Playback Speed Manager: Menedżer zarządzania prędkościami odtwarzania
     No Saved Playback Speeds: Brak zapisanych prędkości odtwarzania
@@ -504,8 +504,8 @@ Settings:
     Scroll Mini Player:
       Scroll Mini Player: Mini odtwarzacz podczas przewijania
       When Scrolling Down: Utrzymuj mini odtwarzacz na widoku podczas przewijania w dół
-    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru szybkości odtwarzania
-    Quick Playback Speed Bar Manager: Pasek wyboru szybkości odtwarzania
+    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru prędkości odtwarzania
+    Quick Playback Speed Bar Manager: Pasek wyboru prędkości odtwarzania
     Add Playback Speed: Dodaj prędkość odtwarzania
     Reset Quick Playback Speed Bar: Przywróć ustawienia domyślne
     Playback Speed Name: Nazwa
@@ -863,6 +863,7 @@ Settings:
     Sync completed: Synchronizacja zakończona
     Data Loss Confirmation: Potwierdzić synchronizację z ryzykiem utraty danych?
     Data Loss Warning: Stan serwera spowoduje usunięcie {deleted} z {previous} wcześniej zsynchronizowanych elementów {collection}. Może to wskazywać na nieudaną migrację serwera lub jego reset. Kontynuuj tylko wtedy, gdy usunięcie jest celowe i masz kopię zapasową.
+    Confirm Data Loss: Usuń i kontynuuj
 About:
   #On About page
   About: 'O projekcie'
@@ -1103,6 +1104,9 @@ Video:
       SkipToastReskip: Wznów pominięcie
       SkipToHighlight: Przeskocz do „Ważny moment”
       SkippedToHighlight: Przeskoczono do „Ważny moment”
+      CloseInfoPanel: Zamknij panel SponsorBlock
+      OpenInfoPanel: Otwórz panel SponsorBlock
+      InfoPanelTitle: SponsorBlock
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1126,6 +1130,8 @@ Video:
     Show Annotations: Pokaż adnotacje
     Hide: Ukryj
     Show: Pokaż
+    Up next in {seconds}: Następny za {seconds}
+    Play now: Odtwórz teraz
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1169,6 +1175,8 @@ Video:
     No Results: Żadne segmenty transkrypcji nie pasują do Twojego wyszukiwania.
   Premiere: Premiera
   Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
+  Unmark As Watched: Oznacz jako nieobejrzany
+  Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1337,7 +1345,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Użyj kółka myszy, by przewijać film tak jak w MPV.
     Use Quick Playback Speed Bar: Wyświetla pasek szybkiego wyboru prędkości odtwarzania po prawej stronie odtwarzacza. Jeśli włączona jest funkcja ręcznego zapisywania prędkości odtwarzania dla poszczególnych kanałów, pasek zawiera również przycisk do zapisywania prędkości dla bieżącego kanału.
     Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
-    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do szybkości odtwarzania.
+    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do prędkości odtwarzania.
     Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
     Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
     Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania przez ciszę w menu ustawień odtwarzacza.
