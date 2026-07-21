@@ -1258,7 +1258,7 @@ function markAsWatched() {
     lengthSeconds: props.data.lengthSeconds,
     watchProgress: historyEntry.value?.watchProgress ?? 0,
     isWatched: true,
-    timeWatched: Date.now(),
+    timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,
     type: 'video'
   }

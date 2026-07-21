@@ -61,6 +61,27 @@ test.describe('watch history', () => {
     await expect(watchedIndicator).toHaveText('Watched')
   })
 
+  test('keeps an existing entry in place when toggling watched status', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const videos = page.locator('.ft-list-video')
+    const secondVideo = videos.filter({ hasText: 'Second test video' })
+
+    await secondVideo.hover()
+    await secondVideo.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Mark As Watched' }).click()
+
+    await expect(videos.nth(0)).toContainText('First test video')
+    await expect(videos.nth(1)).toContainText('Second test video')
+
+    await secondVideo.hover()
+    await secondVideo.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Unmark As Watched' }).click()
+
+    await expect(videos.nth(0)).toContainText('First test video')
+    await expect(videos.nth(1)).toContainText('Second test video')
+  })
+
   test('marks every history entry as watched', async ({ app, page }) => {
     await goTo(page, 'history')
 

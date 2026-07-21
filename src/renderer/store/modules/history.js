@@ -187,8 +187,17 @@ const mutations = {
     })
 
     if (i !== -1) {
-      // Already in cache
-      // Must be hoisted to top, remove it and then unshift it
+      const currentRecord = state.historyCacheSorted[i]
+
+      // Watched-status and other metadata-only updates keep their current position.
+      // A newer timeWatched means the video was watched again and should become the
+      // most recent history entry.
+      if (record.timeWatched === currentRecord.timeWatched) {
+        state.historyCacheSorted.splice(i, 1, record)
+        state.historyCacheById[record.videoId] = record
+        return
+      }
+
       state.historyCacheSorted.splice(i, 1)
     }
 
