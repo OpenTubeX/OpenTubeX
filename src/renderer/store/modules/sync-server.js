@@ -446,6 +446,8 @@ const actions = {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
     if (!activeSyncPromise) {
+      clearTimeout(eventSyncTimer)
+      eventSyncTimer = null
       activeSyncPromise = withSyncLock(() => runSync(context, options)).finally(() => {
         activeSyncPromise = null
       })
