@@ -2071,7 +2071,6 @@ export class TabManager {
       bounds: this._getCurrentBounds(),
       updatedAt: this.sessionUpdatedAt
     })
-    this.bridge.send(IpcChannels.TABS_SYNC_SESSION_UPDATED)
   }
 
   /**

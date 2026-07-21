@@ -46,7 +46,6 @@ const IpcChannels = {
   TABS_RELOAD: 'tabs-reload',
   TABS_REQUEST_RELOAD: 'tabs-request-reload',
   TABS_STATE_UPDATED: 'tabs-state-updated',
-  TABS_SYNC_SESSION_UPDATED: 'tabs-sync-session-updated',
   TABS_RENDERER_READY: 'tabs-renderer-ready',
   TABS_MOUNT_READY: 'tabs-mount-ready',
   TABS_MOUNT_FAILED: 'tabs-mount-failed',

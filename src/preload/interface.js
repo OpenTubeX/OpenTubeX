@@ -844,17 +844,6 @@ export default {
     },
 
     /**
-     * Listen for persisted changes that should trigger automatic session sync.
-     * @param {() => void} handler
-     * @returns {() => void}
-     */
-    onSyncSessionUpdated: (handler) => {
-      const listener = () => handler()
-      ipcRenderer.on(IpcChannels.TABS_SYNC_SESSION_UPDATED, listener)
-      return () => ipcRenderer.removeListener(IpcChannels.TABS_SYNC_SESSION_UPDATED, listener)
-    },
-
-    /**
      * Listen for exit fullscreen notification for a logical tab.
      * @param {(tabId: string) => void} handler
      * @param {string} [tabId]
