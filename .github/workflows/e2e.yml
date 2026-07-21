@@ -25,7 +25,7 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
     env:
-      OPENTUBEX_SYNC_SERVER_URL: https://sync.d3sox.me
+      OPENTUBEX_SYNC_SERVER_URL: http://127.0.0.1:8080
 
     permissions:
       contents: read
@@ -79,6 +79,11 @@ jobs:
           echo "project=all" >> "$GITHUB_OUTPUT"
         fi
 
+    - name: Start sync server
+      if: ${{ steps.project.outputs.project != 'offline' }}
+      run: docker compose -f e2e/sync-server/compose.yml up -d --wait --pull always
+      shell: bash
+
     # The network project talks to the real YouTube servers on the first
     # attempt and automatically falls back to recorded fixtures on retry.
     - name: Run E2E tests
@@ -88,6 +93,11 @@ jobs:
         else
           xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
         fi
+      shell: bash
+
+    - name: Stop sync server
+      if: ${{ always() && steps.project.outputs.project != 'offline' }}
+      run: docker compose -f e2e/sync-server/compose.yml down -v
       shell: bash
 
     # Upload on flaky-but-green runs too, so first-attempt failures
