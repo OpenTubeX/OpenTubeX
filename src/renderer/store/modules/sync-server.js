@@ -22,6 +22,7 @@ let autoSyncTimer = null
 
 const state = {
   syncServerStatus: 'idle',
+  syncServerProgress: null,
   syncServerError: '',
   syncServerLastResult: null,
   syncServerHistorySupported: null,
@@ -30,6 +31,7 @@ const state = {
 
 const getters = {
   getSyncServerStatus: state => state.syncServerStatus,
+  getSyncServerProgress: state => state.syncServerProgress,
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
@@ -62,8 +64,33 @@ async function runSync(context) {
   const next = { ...previous }
   const result = {}
   const store = { state: rootState, dispatch }
+  const stages = [
+    ...(settings.syncServerPrivacyMode === 'enhanced' ? ['download'] : []),
+    ...(settings.syncServerSyncSubscriptions ? ['subscriptions'] : []),
+    ...(settings.syncServerSyncPlaylists ? ['playlists'] : []),
+    ...(settings.syncServerSyncHistory ? ['history'] : []),
+    ...(settings.syncServerSyncPlaybackSpeeds ? ['playbackSpeeds'] : []),
+    ...(settings.syncServerPrivacyMode === 'enhanced' ? ['upload'] : []),
+    'finishing',
+  ]
+  let completedStages = 0
+
+  async function runStage(stage, callback) {
+    commit('setSyncServerProgress', {
+      stage,
+      percentage: Math.round((completedStages / stages.length) * 100),
+    })
+    const value = await callback()
+    completedStages++
+    commit('setSyncServerProgress', {
+      stage,
+      percentage: Math.round((completedStages / stages.length) * 100),
+    })
+    return value
+  }
 
   commit('setSyncServerStatus', 'syncing')
+  commit('setSyncServerProgress', { stage: stages[0], percentage: 0 })
   commit('setSyncServerError', '')
 
   try {
@@ -71,8 +98,11 @@ async function runSync(context) {
       if (!settings.syncServerPrivacyKey) {
         throw new Error('Reconnect and enter your privacy passphrase to enable enhanced privacy')
       }
-      const remote = await networkClient.getEncryptedSync()
-      const document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+      const { remote, document } = await runStage('download', async () => {
+        const remote = await networkClient.getEncryptedSync()
+        const document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+        return { remote, document }
+      })
       // Older v1 enhanced servers did not report legacy_data. Prefer the
       // lossless migration path when the field is absent.
       const migrateLegacyData = !remote.payload && remote.legacy_data !== false
@@ -85,15 +115,21 @@ async function runSync(context) {
     }
 
     if (settings.syncServerSyncSubscriptions) {
-      next.subscriptions = await syncSubscriptions(client, store, previous.subscriptions)
+      next.subscriptions = await runStage('subscriptions', () => {
+        return syncSubscriptions(client, store, previous.subscriptions)
+      })
       result.subscriptions = next.subscriptions.length
     }
     if (settings.syncServerSyncPlaylists) {
-      next.playlists = await syncPlaylists(client, store, previous.playlists)
+      next.playlists = await runStage('playlists', () => {
+        return syncPlaylists(client, store, previous.playlists)
+      })
       result.playlists = Object.keys(next.playlists).length
     }
     if (settings.syncServerSyncHistory) {
-      const history = await syncHistory(client, store, previous.history)
+      const history = await runStage('history', () => {
+        return syncHistory(client, store, previous.history)
+      })
       if (history !== null) {
         commit('setSyncServerHistorySupported', true)
         next.history = history
@@ -103,7 +139,9 @@ async function runSync(context) {
       }
     }
     if (settings.syncServerSyncPlaybackSpeeds) {
-      const speeds = await syncChannelPlaybackSpeeds(client, store, previous.playbackSpeeds)
+      const speeds = await runStage('playbackSpeeds', () => {
+        return syncChannelPlaybackSpeeds(client, store, previous.playbackSpeeds)
+      })
       if (speeds !== null) {
         commit('setSyncServerPlaybackSpeedsSupported', true)
         next.playbackSpeeds = speeds
@@ -114,22 +152,26 @@ async function runSync(context) {
     }
 
     if (encryptedSync) {
-      const document = encryptedSync.migrateLegacyData
-        ? await loadLegacySyncDocument(networkClient)
-        : client.document
-      const payload = await encryptSyncDocument(
-        document,
-        settings.syncServerPrivacyKey,
-        encryptedSync.salt
-      )
-      await networkClient.putEncryptedSync(encryptedSync.revision, payload)
+      await runStage('upload', async () => {
+        const document = encryptedSync.migrateLegacyData
+          ? await loadLegacySyncDocument(networkClient)
+          : client.document
+        const payload = await encryptSyncDocument(
+          document,
+          settings.syncServerPrivacyKey,
+          encryptedSync.salt
+        )
+        await networkClient.putEncryptedSync(encryptedSync.revision, payload)
+      })
     }
 
-    const lastSyncAt = Date.now()
-    await Promise.all([
-      dispatch('updateSyncServerSnapshot', JSON.stringify(next), { root: true }),
-      dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
-    ])
+    await runStage('finishing', async () => {
+      const lastSyncAt = Date.now()
+      await Promise.all([
+        dispatch('updateSyncServerSnapshot', JSON.stringify(next), { root: true }),
+        dispatch('updateSyncServerLastSyncAt', lastSyncAt, { root: true }),
+      ])
+    })
     commit('setSyncServerLastResult', result)
     commit('setSyncServerStatus', 'success')
     return result
@@ -205,6 +247,7 @@ const actions = {
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
     commit('setSyncServerPlaybackSpeedsSupported', null)
+    commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'idle')
   },
 
@@ -217,6 +260,7 @@ const actions = {
     }
 
     commit('setSyncServerStatus', 'syncing')
+    commit('setSyncServerProgress', null)
     commit('setSyncServerError', '')
     await dispatch('stopSyncServerAutoSync')
 
@@ -302,6 +346,9 @@ const actions = {
 const mutations = {
   setSyncServerStatus(state, status) {
     state.syncServerStatus = status
+  },
+  setSyncServerProgress(state, progress) {
+    state.syncServerProgress = progress
   },
   setSyncServerError(state, error) {
     state.syncServerError = error

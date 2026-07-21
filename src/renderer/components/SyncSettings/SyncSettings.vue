@@ -49,7 +49,34 @@
       {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
     </p>
 
-    <FtLoader v-if="busy" />
+    <div
+      v-if="syncProgress"
+      class="syncProgress"
+      aria-live="polite"
+    >
+      <div class="syncProgressLabel">
+        <span>{{ syncProgressLabel }}</span>
+        <span>
+          {{ t('Settings.Sync Settings.Sync progress percentage', {
+            percentage: syncProgress.percentage,
+          }) }}
+        </span>
+      </div>
+      <div
+        class="syncProgressTrack"
+        role="progressbar"
+        :aria-label="syncProgressLabel"
+        :aria-valuenow="syncProgress.percentage"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div
+          class="syncProgressFill"
+          :style="{ inlineSize: `${syncProgress.percentage}%` }"
+        />
+      </div>
+    </div>
+    <FtLoader v-else-if="busy" />
     <p
       v-if="errorMessage"
       class="error"
@@ -239,6 +266,20 @@ const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
+const syncProgress = computed(() => store.getters.getSyncServerProgress)
+const syncProgressLabel = computed(() => {
+  if (!syncProgress.value) return ''
+  const labels = {
+    download: t('Settings.Sync Settings.Downloading encrypted data'),
+    subscriptions: t('Settings.Sync Settings.Syncing subscriptions'),
+    playlists: t('Settings.Sync Settings.Syncing playlists'),
+    history: t('Settings.Sync Settings.Syncing history'),
+    playbackSpeeds: t('Settings.Sync Settings.Syncing playback speeds'),
+    upload: t('Settings.Sync Settings.Uploading encrypted data'),
+    finishing: t('Settings.Sync Settings.Finishing sync'),
+  }
+  return labels[syncProgress.value.stage]
+})
 const errorMessage = computed(() => localError.value || store.getters.getSyncServerError)
 const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
