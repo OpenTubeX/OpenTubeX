@@ -28,6 +28,8 @@ const IpcChannels = {
 
   // Tab management
   TABS_GET_STATE: 'tabs-get-state',
+  TABS_GET_SYNC_SESSIONS: 'tabs-get-sync-sessions',
+  TABS_APPLY_SYNC_SESSIONS: 'tabs-apply-sync-sessions',
   TABS_CREATE: 'tabs-create',
   TABS_CLOSE: 'tabs-close',
   TABS_ACTIVATE: 'tabs-activate',
@@ -44,6 +46,7 @@ const IpcChannels = {
   TABS_RELOAD: 'tabs-reload',
   TABS_REQUEST_RELOAD: 'tabs-request-reload',
   TABS_STATE_UPDATED: 'tabs-state-updated',
+  TABS_SYNC_SESSION_UPDATED: 'tabs-sync-session-updated',
   TABS_RENDERER_READY: 'tabs-renderer-ready',
   TABS_MOUNT_READY: 'tabs-mount-ready',
   TABS_MOUNT_FAILED: 'tabs-mount-failed',

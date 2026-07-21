@@ -597,6 +597,23 @@ export default {
     },
 
     /**
+     * Get all open windows as portable session snapshots for encrypted sync.
+     * @returns {Promise<Array>}
+     */
+    getSyncSessions: () => {
+      return ipcRenderer.invoke(IpcChannels.TABS_GET_SYNC_SESSIONS)
+    },
+
+    /**
+     * Apply portable session snapshots received through encrypted sync.
+     * @param {Array} sessions
+     * @returns {Promise<boolean>}
+     */
+    applySyncSessions: (sessions) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_APPLY_SYNC_SESSIONS, sessions)
+    },
+
+    /**
      * Create a new tab
      * @param {object} options
      * @param {string} [options.url] - Full URL to load
@@ -816,6 +833,17 @@ export default {
       const listener = (_event, state) => handler(state)
       ipcRenderer.on(IpcChannels.TABS_STATE_UPDATED, listener)
       return () => ipcRenderer.removeListener(IpcChannels.TABS_STATE_UPDATED, listener)
+    },
+
+    /**
+     * Listen for persisted changes that should trigger automatic session sync.
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onSyncSessionUpdated: (handler) => {
+      const listener = () => handler()
+      ipcRenderer.on(IpcChannels.TABS_SYNC_SESSION_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_SYNC_SESSION_UPDATED, listener)
     },
 
     /**

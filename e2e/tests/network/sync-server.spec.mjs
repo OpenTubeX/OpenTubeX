@@ -106,6 +106,7 @@ test.describe('OpenTubeX sync server', () => {
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
     if (enhancedPrivacy) {
       await expect(syncSection.getByText(/Enhanced privacy is enabled/)).toBeVisible()
+      await expect(syncSection.getByLabel('Open tabs and session')).toBeVisible()
       expect(bulkRequests).toEqual([])
     } else {
       await expect(syncSection.getByText(/does not support enhanced privacy/)).toBeVisible()
@@ -143,6 +144,7 @@ test.describe('OpenTubeX sync server', () => {
           'history',
           'playbackSpeeds',
           'profiles',
+          'sessions',
           'settings'
         ])
       )
@@ -158,6 +160,7 @@ test.describe('OpenTubeX sync server', () => {
         expect(encryptedCollection.payload).not.toContain('dQw4w9WgXcQ')
         expect(encryptedCollection.payload).not.toContain('Music')
         expect(encryptedCollection.payload).not.toContain('dark')
+        expect(encryptedCollection.payload).not.toContain('app://')
       }
     } else {
       const subscriptionsResponse = apiPrefix
@@ -363,7 +366,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(envelope.compression).toEqual({ name: 'gzip' })
     expect(envelope).not.toHaveProperty('payload_length')
     expect(legacyHistoryDownloads).toBe(1)
-    expect(encryptedUploadResponses).toHaveLength(7)
+    expect(encryptedUploadResponses).toHaveLength(8)
     const encryptedUploadBodies = await Promise.all(
       encryptedUploadResponses.map(response => response.json())
     )

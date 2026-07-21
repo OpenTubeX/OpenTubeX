@@ -22,6 +22,7 @@ import * as baseHandlers from '../../datastores/handlers/base.js'
  * @property {Array<{id: string, url: string, title: string, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>} tabs
  * @property {string} activeTabId
  * @property {TabSessionBounds} [bounds]
+ * @property {number} [updatedAt]
  */
 
 /**
@@ -78,4 +79,17 @@ export async function clearAllTabSessions() {
   } catch (err) {
     console.error('Failed to clear all tab sessions:', err)
   }
+}
+
+/**
+ * Replace every persisted session with a synced, device-independent snapshot.
+ * Window bounds and preview cache references are intentionally local-only.
+ * @param {PersistedTabSession[]} sessions
+ * @returns {Promise<void>}
+ */
+export async function replaceAllTabSessions(sessions) {
+  await clearAllTabSessions()
+  await Promise.all(sessions.map(({ sessionId, ...session }) => (
+    saveTabSession(sessionId, session)
+  )))
 }

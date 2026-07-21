@@ -4,7 +4,11 @@ import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
-import { saveTabSession, clearTabSession } from './TabSessionStore.js'
+import {
+  clearTabSession,
+  replaceAllTabSessions,
+  saveTabSession
+} from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
@@ -515,6 +519,7 @@ export class TabManager {
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuTabBarVertical = false
     this._sessionPersistenceDisabled = false
+    this.sessionUpdatedAt = 0
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
     this._deferredUnloadTabIds = new Set()
@@ -2032,6 +2037,8 @@ export class TabManager {
   async _saveSession() {
     if (this._sessionPersistenceDisabled) return
 
+    this.sessionUpdatedAt = Date.now()
+
     const tabs = Array.from(this.tabs.values())
       .filter(tab => tab.isTransferStaged !== true)
       .map(tab => {
@@ -2061,8 +2068,65 @@ export class TabManager {
     await saveTabSession(this.sessionId, {
       tabs,
       activeTabId: this.activeTabId,
-      bounds: this._getCurrentBounds()
+      bounds: this._getCurrentBounds(),
+      updatedAt: this.sessionUpdatedAt
     })
+    this.bridge.send(IpcChannels.TABS_SYNC_SESSION_UPDATED)
+  }
+
+  /**
+   * Return the portable session state used by encrypted sync.
+   * @returns {object}
+   */
+  getSyncSession() {
+    const state = this.getState()
+    return {
+      sessionId: this.sessionId,
+      tabs: state.tabs.map(tab => ({
+        id: tab.id,
+        url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
+        title: tab.title,
+        isPinned: tab.isPinned,
+        color: tab.color,
+        isUnloaded: tab.isUnloaded,
+        ...(tab.history != null && {
+          history: tab.history,
+          historyIndex: tab.historyIndex
+        })
+      })),
+      activeTabId: state.activeTabId,
+      updatedAt: this.sessionUpdatedAt
+    }
+  }
+
+  /**
+   * Replace this window's live tabs with a synced session.
+   * @param {object} sessionData
+   * @returns {Promise<boolean>}
+   */
+  async replaceFromSyncData(sessionData) {
+    this._sessionPersistenceDisabled = true
+    try {
+      for (const tab of this.tabs.values()) {
+        this._clearTabPreviewRefresh(tab)
+        this._resolveTabMountWaiters(tab.id, Number.MAX_SAFE_INTEGER, false)
+      }
+      this.tabs.clear()
+      this.activeTabId = null
+      this.presentedTabId = null
+      this.closedTabs = []
+      this._deferredCloseTabIds.clear()
+      this._deferredUnloadTabIds.clear()
+      this.selectionRevision += 1
+      this._broadcastStateUpdate()
+      this.sessionId = sessionData.sessionId
+      this.sessionUpdatedAt = Number.isFinite(sessionData.updatedAt)
+        ? sessionData.updatedAt
+        : Date.now()
+      return await this.restoreFromData(sessionData, { restoreTabLoadState: true })
+    } finally {
+      this._sessionPersistenceDisabled = false
+    }
   }
 
   _getCurrentBounds() {
@@ -2100,48 +2164,60 @@ export class TabManager {
       return false
     }
 
-    const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
-
-    for (const tabData of sessionData.tabs) {
-      const makeActive = tabData.id === sessionData.activeTabId
-      const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
-      const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
-      const previewDataUrl = await this._loadTabPreviewDataUrl(previewFileName)
-      const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
-      const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
-        (restoreTabLoadState && tabData.isUnloaded === true) ||
-        (!loadInBackground && hasSavedTitle)
-      )
-
-      this.createTab({
-        id: typeof tabData.id === 'string' ? tabData.id : undefined,
-        // Strip here as well to heal sessions persisted before the strip on save existed
-        url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
-        title: hasSavedTitle ? tabData.title : undefined,
-        isPinned: tabData.isPinned === true,
-        color: tabData.color,
-        previewDataUrl,
-        previewCapturedAt: previewDataUrl != null && Number.isFinite(tabData.previewCapturedAt)
-          ? tabData.previewCapturedAt
-          : 0,
-        previewFileName,
-        history: restoreNavigationHistory ? tabData.history : null,
-        historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
-        makeActive,
-        openPosition: 'end',
-        lazyLoad: restoreAsUnloaded,
-        preloadInBackground: loadInBackground && !makeActive
-      })
+    if (Number.isFinite(sessionData.updatedAt)) {
+      this.sessionUpdatedAt = sessionData.updatedAt
     }
 
-    if (!this.activeTabId) {
-      const firstTabId = this.tabs.keys().next().value
-      if (firstTabId) {
-        this.activateTab(firstTabId)
+    const preserveUpdatedAt = Number.isFinite(sessionData.updatedAt)
+    const persistenceWasDisabled = this._sessionPersistenceDisabled
+    if (preserveUpdatedAt) this._sessionPersistenceDisabled = true
+
+    try {
+      const restoreNavigationHistory = await TabManager.getStoredRememberTabNavigationHistory()
+
+      for (const tabData of sessionData.tabs) {
+        const makeActive = tabData.id === sessionData.activeTabId
+        const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
+        const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
+        const previewDataUrl = await this._loadTabPreviewDataUrl(previewFileName)
+        const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
+        const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
+          (restoreTabLoadState && tabData.isUnloaded === true) ||
+          (!loadInBackground && hasSavedTitle)
+        )
+
+        this.createTab({
+          id: typeof tabData.id === 'string' ? tabData.id : undefined,
+          // Strip here as well to heal sessions persisted before the strip on save existed
+          url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
+          title: hasSavedTitle ? tabData.title : undefined,
+          isPinned: tabData.isPinned === true,
+          color: tabData.color,
+          previewDataUrl,
+          previewCapturedAt: previewDataUrl != null && Number.isFinite(tabData.previewCapturedAt)
+            ? tabData.previewCapturedAt
+            : 0,
+          previewFileName,
+          history: restoreNavigationHistory ? tabData.history : null,
+          historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+          makeActive,
+          openPosition: 'end',
+          lazyLoad: restoreAsUnloaded,
+          preloadInBackground: loadInBackground && !makeActive
+        })
       }
-    }
 
-    return this.tabs.size > 0
+      if (!this.activeTabId) {
+        const firstTabId = this.tabs.keys().next().value
+        if (firstTabId) {
+          this.activateTab(firstTabId)
+        }
+      }
+
+      return this.tabs.size > 0
+    } finally {
+      this._sessionPersistenceDisabled = persistenceWasDisabled
+    }
   }
 
   /**
@@ -2261,6 +2337,56 @@ export function setupTabsIPC(options = {}) {
 
   ipcMain.handle(IpcChannels.TABS_GET_STATE, (event) => {
     return getManager(event)?.getState() ?? null
+  })
+
+  ipcMain.handle(IpcChannels.TABS_GET_SYNC_SESSIONS, () => {
+    return Array.from(tabManagers.values(), manager => manager.getSyncSession())
+  })
+
+  ipcMain.handle(IpcChannels.TABS_APPLY_SYNC_SESSIONS, async (event, sessions) => {
+    const manager = getManager(event)
+    if (!manager || !Array.isArray(sessions) || sessions.length === 0) return false
+
+    const validSessions = sessions.filter(session => (
+      session &&
+      typeof session.sessionId === 'string' &&
+      session.sessionId.length > 0 &&
+      Array.isArray(session.tabs) &&
+      session.tabs.length > 0 &&
+      session.tabs.every(tab => tab && typeof tab.url === 'string')
+    ))
+    if (validSessions.length === 0) return false
+
+    const liveManagers = Array.from(tabManagers.values())
+    const remaining = new Map(validSessions.map(session => [session.sessionId, session]))
+    const assignments = new Map()
+
+    for (const liveManager of liveManagers) {
+      const matching = remaining.get(liveManager.sessionId)
+      if (matching) {
+        assignments.set(liveManager, matching)
+        remaining.delete(liveManager.sessionId)
+      }
+    }
+    if (!assignments.has(manager) && remaining.size > 0) {
+      const first = remaining.values().next().value
+      assignments.set(manager, first)
+      remaining.delete(first.sessionId)
+    }
+
+    for (const [liveManager, session] of assignments) {
+      await liveManager.replaceFromSyncData(session)
+    }
+    const localBounds = new Map(Array.from(assignments, ([liveManager, session]) => (
+      [session.sessionId, liveManager._getCurrentBounds()]
+    )))
+    await replaceAllTabSessions(validSessions.map(session => ({
+      ...session,
+      ...(localBounds.get(session.sessionId) && {
+        bounds: localBounds.get(session.sessionId)
+      })
+    })))
+    return true
   })
 
   ipcMain.handle(IpcChannels.TABS_CREATE, async (event, options) => {

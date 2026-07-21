@@ -959,6 +959,45 @@ function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
 
+function latestSessionUpdate(sessions) {
+  return sessions.reduce((latest, session) => (
+    Number.isFinite(session.updatedAt) ? Math.max(latest, session.updatedAt) : latest
+  ), 0)
+}
+
+export async function syncSessions(client, previous = null) {
+  const tabs = window.ftElectron?.tabs
+  if (typeof tabs?.getSyncSessions !== 'function' ||
+      typeof tabs?.applySyncSessions !== 'function') {
+    return null
+  }
+
+  const local = await tabs.getSyncSessions()
+  const remote = await client.getSessions()
+  const localChanged = previous !== null && !metadataEquals(local, previous)
+  const remoteChanged = previous !== null && !metadataEquals(remote, previous)
+  let merged
+
+  if (previous === null) {
+    merged = remote.length > 0 ? remote : local
+  } else if (remoteChanged && !localChanged) {
+    merged = remote
+  } else if (remoteChanged && localChanged &&
+      latestSessionUpdate(remote) > latestSessionUpdate(local)) {
+    merged = remote
+  } else {
+    merged = local
+  }
+
+  if (!metadataEquals(remote, merged)) {
+    await client.putSessions(merged)
+  }
+  if (!metadataEquals(local, merged) && merged.length > 0) {
+    await tabs.applySyncSessions(merged)
+  }
+  return merged
+}
+
 export async function syncSettings(client, store, previous = {}) {
   const remoteEntries = await client.getSettings()
   const remote = Object.fromEntries(remoteEntries.map(entry => [entry.key, entry]))

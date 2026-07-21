@@ -175,11 +175,14 @@ const mutations = {
 }
 
 const actions = {
-  async initializeTabs({ commit }) {
+  async initializeTabs({ commit, dispatch }) {
     if (!process.env.IS_ELECTRON) return () => {}
 
     const removeStateListener = window.ftElectron.tabs.onStateUpdated((newState) => {
       commit('setTabsState', newState)
+    })
+    const removeSyncSessionListener = window.ftElectron.tabs.onSyncSessionUpdated(() => {
+      dispatch('scheduleSyncServer', 'sessions', { root: true })
     })
 
     const tabState = await window.ftElectron.tabs.getState()
@@ -187,7 +190,10 @@ const actions = {
       commit('setTabsState', tabState)
     }
 
-    return removeStateListener
+    return () => {
+      removeStateListener()
+      removeSyncSessionListener()
+    }
   },
 
   async createTab({ rootGetters }, options = {}) {

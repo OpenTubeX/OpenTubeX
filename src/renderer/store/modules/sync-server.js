@@ -6,6 +6,7 @@ import {
   syncHistory,
   syncPlaylists,
   syncProfiles,
+  syncSessions,
   syncSettings,
   syncSubscriptions,
 } from '../../helpers/sync-server'
@@ -87,6 +88,11 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     ...(settings.syncServerSyncHistory ? ['history'] : []),
     ...(settings.syncServerSyncPlaybackSpeeds ? ['playbackSpeeds'] : []),
     ...(settings.syncServerSyncProfiles ? ['profiles'] : []),
+    ...(process.env.IS_ELECTRON &&
+      settings.syncServerPrivacyMode === 'enhanced' &&
+      settings.syncServerSyncSessions
+      ? ['sessions']
+      : []),
     ...(settings.syncServerPrivacyMode === 'enhanced' && settings.syncServerSyncSettings
       ? ['settings']
       : []),
@@ -183,6 +189,17 @@ async function runSync(context, { allowDataLoss = false } = {}) {
         next.settings = await syncSettings(targetClient, store, previous.settings)
         result.settings = Object.keys(next.settings).length
         break
+      case 'sessions': {
+        const sessions = await syncSessions(
+          targetClient,
+          Object.prototype.hasOwnProperty.call(previous, 'sessions') ? previous.sessions : null
+        )
+        if (sessions !== null) {
+          next.sessions = sessions
+          result.sessions = sessions.reduce((count, session) => count + session.tabs.length, 0)
+        }
+        break
+      }
     }
   }
 
@@ -495,6 +512,10 @@ const actions = {
     if (!rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         (reason === 'settings' && rootState.settings.syncServerPrivacyMode !== 'enhanced') ||
+        (reason === 'sessions' && (
+          rootState.settings.syncServerPrivacyMode !== 'enhanced' ||
+          !rootState.settings.syncServerSyncSessions
+        )) ||
         rootState.syncServer.syncServerStatus === 'syncing') {
       return
     }

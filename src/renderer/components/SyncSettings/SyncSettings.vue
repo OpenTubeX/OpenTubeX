@@ -162,6 +162,14 @@
           @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
         />
         <FtToggleSwitch
+          v-if="sessionsSupported"
+          :label="t('Settings.Sync Settings.Open Tabs')"
+          :default-value="syncSessionsEnabled"
+          :disabled="busy"
+          compact
+          @change="store.dispatch('updateSyncServerSyncSessions', $event)"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Sync Settings.Settings')"
           :default-value="syncSettingsEnabled"
           :disabled="busy || settingsSupported === false"
@@ -369,6 +377,7 @@ const syncProgressLabel = computed(() => {
     history: t('Settings.Sync Settings.Syncing history'),
     playbackSpeeds: t('Settings.Sync Settings.Syncing playback speeds'),
     profiles: t('Settings.Sync Settings.Syncing profiles'),
+    sessions: t('Settings.Sync Settings.Syncing open tabs'),
     settings: t('Settings.Sync Settings.Syncing settings'),
     upload: t('Settings.Sync Settings.Uploading encrypted data'),
     finishing: t('Settings.Sync Settings.Finishing sync'),
@@ -384,6 +393,7 @@ const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlayl
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
 const syncPlaybackSpeedsEnabled = computed(() => store.getters.getSyncServerSyncPlaybackSpeeds)
 const syncProfilesEnabled = computed(() => store.getters.getSyncServerSyncProfiles)
+const syncSessionsEnabled = computed(() => store.getters.getSyncServerSyncSessions)
 const syncSettingsEnabled = computed(() => store.getters.getSyncServerSyncSettings)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
 const playbackSpeedsSupported = computed(
@@ -391,6 +401,9 @@ const playbackSpeedsSupported = computed(
 )
 const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
 const settingsSupported = computed(() => privacyMode.value === 'enhanced')
+const sessionsSupported = computed(() => (
+  process.env.IS_ELECTRON && privacyMode.value === 'enhanced'
+))
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
   if (!timestamp) return ''
