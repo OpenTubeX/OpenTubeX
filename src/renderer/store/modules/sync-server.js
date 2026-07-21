@@ -12,6 +12,7 @@ import {
 import {
   EncryptedSyncAdapter,
   createEmptySyncDocument,
+  decryptLegacySyncDocument,
   decryptSyncDocument,
   encryptSyncDocument,
   loadLegacySyncDocument,
@@ -206,7 +207,10 @@ async function runSync(context, { allowDataLoss = false } = {}) {
           ? await networkClient.getLegacyEncryptedSync()
           : null
         const legacy = legacyEncrypted?.payload
-          ? await decryptSyncDocument(legacyEncrypted.payload, settings.syncServerPrivacyKey)
+          ? await decryptLegacySyncDocument(
+              legacyEncrypted.payload,
+              settings.syncServerPrivacyKey
+            )
           : manifest.legacy_data
             ? await loadLegacySyncDocument(networkClient)
             : createEmptySyncDocument()

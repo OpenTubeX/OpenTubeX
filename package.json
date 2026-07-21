@@ -56,6 +56,7 @@
     "test:e2e": "playwright test -c e2e/playwright.config.mjs",
     "test:e2e:offline": "playwright test -c e2e/playwright.config.mjs --project=offline",
     "test:e2e:network": "playwright test -c e2e/playwright.config.mjs --project=network",
+    "test:unit": "node --test tests/unit/*.test.mjs",
     "ci": "pnpm install --frozen-lockfile"
   },
   "dependencies": {

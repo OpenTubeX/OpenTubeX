@@ -4,6 +4,14 @@ const PADDING_BLOCK_BYTES = 64 * 1024
 const COMPRESSED_LENGTH_BYTES = 4
 const ADDITIONAL_DATA = new TextEncoder().encode('OpenTubeX encrypted sync v1')
 const GZIP_COMPRESSION = 'gzip'
+const LEGACY_DOCUMENT_COLLECTIONS = [
+  'subscriptions',
+  'playlists',
+  'history',
+  'playbackSpeeds',
+  'subscriptionGroups',
+  'playlistBookmarks',
+]
 
 async function transformBytes(bytes, TransformStream) {
   const stream = new globalThis.Blob([bytes])
@@ -86,7 +94,7 @@ function parseEnvelope(payload) {
   }
 }
 
-async function decryptWithKey(payload, key) {
+async function decryptWithKey(payload, key, { allowLegacyDocument = false } = {}) {
   const envelope = parseEnvelope(payload)
   try {
     const plaintext = new Uint8Array(await crypto.subtle.decrypt(
@@ -112,9 +120,15 @@ async function decryptWithKey(payload, key) {
         plaintext.slice(COMPRESSED_LENGTH_BYTES, COMPRESSED_LENGTH_BYTES + compressedLength)
       )
     }
-    const collection = JSON.parse(new TextDecoder().decode(documentBytes))
-    if (collection.version !== PRIVACY_VERSION || !('data' in collection)) throw new Error()
-    return collection.data
+    const document = JSON.parse(new TextDecoder().decode(documentBytes))
+    if (document.version !== PRIVACY_VERSION) throw new Error()
+    if ('data' in document) return document.data
+    if (allowLegacyDocument && LEGACY_DOCUMENT_COLLECTIONS.some(collection => (
+      Array.isArray(document[collection])
+    ))) {
+      return document
+    }
+    throw new Error()
   } catch {
     throw new Error('Incorrect privacy passphrase or corrupted sync data')
   }
@@ -125,7 +139,7 @@ export async function preparePrivacyKey(payload, passphrase) {
     ? base64ToBytes(parseEnvelope(payload).kdf.salt)
     : crypto.getRandomValues(new Uint8Array(16))
   const key = await derivePrivacyKey(passphrase, salt)
-  if (payload) await decryptWithKey(payload, key)
+  if (payload) await decryptWithKey(payload, key, { allowLegacyDocument: true })
   const rawKey = await crypto.subtle.exportKey('raw', key)
   return {
     key: bytesToBase64(new Uint8Array(rawKey)),
@@ -136,6 +150,15 @@ export async function preparePrivacyKey(payload, passphrase) {
 export async function decryptSyncDocument(payload, exportedKey) {
   if (!payload) return null
   return decryptWithKey(payload, await importPrivacyKey(exportedKey))
+}
+
+export async function decryptLegacySyncDocument(payload, exportedKey) {
+  if (!payload) return null
+  return decryptWithKey(
+    payload,
+    await importPrivacyKey(exportedKey),
+    { allowLegacyDocument: true }
+  )
 }
 
 export async function encryptSyncDocument(data, exportedKey, salt) {
