@@ -908,6 +908,10 @@ export default defineComponent({
         this.channelId = result.basic_info.channel_id ?? result.secondary_info.owner?.author.id ?? primaryCollaborator?.id ?? ''
         this.channelName = result.basic_info.author ?? result.secondary_info.owner?.author.name ?? primaryCollaborator?.name ?? ''
         this.channelThumbnail = primaryCollaborator?.thumbnail ?? result.secondary_info.owner?.author?.best_thumbnail?.url ?? ''
+        this.$store.commit('setVideoAvatar', {
+          videoId: this.videoId,
+          avatar: this.channelThumbnail
+        })
 
         this.videoCategory = result.basic_info.category ?? ''
         this.videoGenreIsMusic = this.videoCategory === 'Music'
@@ -1401,6 +1405,10 @@ export default defineComponent({
           this.channelCollaborators = []
           const channelThumb = result.authorThumbnails[1]
           this.channelThumbnail = channelThumb ? youtubeImageUrlToInvidious(channelThumb.url, this.currentInvidiousInstanceUrl) : ''
+          this.$store.commit('setVideoAvatar', {
+            videoId: this.videoId,
+            avatar: this.channelThumbnail
+          })
           this.updateSubscriptionDetails({
             channelThumbnailUrl: channelThumb?.url,
             channelName: result.author,

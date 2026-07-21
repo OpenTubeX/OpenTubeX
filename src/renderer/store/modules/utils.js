@@ -10,8 +10,11 @@ import {
 } from '../../helpers/utils'
 import {
   CHANNEL_THUMBNAIL_CACHE_LIMIT,
+  VIDEO_AVATAR_CACHE_LIMIT,
   loadChannelThumbnailCache,
+  loadVideoAvatarCache,
   persistChannelThumbnailCache,
+  persistVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
 
 const state = {
@@ -27,6 +30,7 @@ const state = {
   cachedPlaylists: {},
   deArrowCache: {},
   channelThumbnailCache: loadChannelThumbnailCache(),
+  videoAvatarCache: loadVideoAvatarCache(),
   showProgressBar: false,
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
@@ -84,6 +88,10 @@ const getters = {
 
   getChannelThumbnail: (state) => (channelId) => {
     return state.channelThumbnailCache[channelId] ?? null
+  },
+
+  getVideoAvatar: (state) => (videoId) => {
+    return state.videoAvatarCache[videoId] ?? null
   },
 
   getPopularCache(state) {
@@ -681,6 +689,21 @@ const mutations = {
 
     cache[channelId] = thumbnail
     persistChannelThumbnailCache(cache)
+  },
+
+  setVideoAvatar (state, { videoId, avatar }) {
+    if (!videoId || !avatar) return
+
+    const cache = state.videoAvatarCache
+    if (cache[videoId] === avatar) return
+
+    const keys = Object.keys(cache)
+    if (!(videoId in cache) && keys.length >= VIDEO_AVATAR_CACHE_LIMIT) {
+      delete cache[keys[0]]
+    }
+
+    cache[videoId] = avatar
+    persistVideoAvatarCache(cache)
   },
 
   removeFromSessionSearchHistory (state, query) {

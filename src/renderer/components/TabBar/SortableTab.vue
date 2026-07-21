@@ -31,13 +31,26 @@
         class="loadingDot"
         aria-hidden="true"
       />
+      <img
+        v-else-if="showIcon && tabAvatarUrl"
+        :src="tabAvatarUrl"
+        class="tabAvatar"
+        alt=""
+        draggable="false"
+      >
       <FontAwesomeIcon
-        v-else-if="tab.isPlaying"
+        v-else-if="showIcon && tabPageIcon"
+        :icon="tabPageIcon"
+        class="tabPageIcon"
+        aria-hidden="true"
+      />
+      <FontAwesomeIcon
+        v-if="!tab.isLoading && tab.isPlaying"
         :icon="['fas', 'play']"
         class="playingIcon"
         aria-hidden="true"
       />
-      {{ displayTitle }}
+      <span class="tabTitleText">{{ displayTitle }}</span>
     </span>
     <button
       class="closeButton"
@@ -99,7 +112,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 import { getTabAccentColor } from '../../constants/tabColors'
-import { getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
+import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
 
 const props = defineProps({
   tab: {
@@ -141,6 +154,10 @@ const props = defineProps({
   closeTooltipsSignal: {
     type: Number,
     default: 0
+  },
+  showIcon: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -203,6 +220,8 @@ const tooltipPreviewAlt = computed(() => `${displayTitle.value} preview`)
 // When a tab points at a channel page and no screenshot has been captured yet,
 // fall back to the channel's profile picture (cached by the Channel view).
 const channelThumbnailUrl = computed(() => getTabPreviewFallbackUrl(props.tab))
+const tabAvatarUrl = computed(() => getTabAvatarUrl(props.tab))
+const tabPageIcon = computed(() => getTabPageIcon(props.tab))
 
 function handleClick() {
   emit('activate', props.tab.id)
@@ -522,6 +541,9 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 }
 
 .tabTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex: 1;
   block-size: 16px;
   overflow: hidden;
@@ -530,6 +552,28 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   font-size: 12px;
   line-height: 16px;
   color: var(--primary-text-color);
+}
+
+.tabAvatar {
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.tabPageIcon {
+  inline-size: 13px;
+  font-size: 12px;
+  color: var(--secondary-text-color);
+  flex-shrink: 0;
+}
+
+.tabTitleText {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tab.pinned .tabTitle {

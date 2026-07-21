@@ -31,6 +31,7 @@
           :suppress-transition="suppressTransitions"
           :disable-tooltips="draggingTabId != null"
           :close-tooltips-signal="closeTooltipsSignal"
+          :show-icon="showTabIcons"
           :close-label="t('Close Tab')"
           @activate="handleActivate"
           @close="closeTab"
@@ -96,6 +97,7 @@ const tabs = computed(() => store.getters.getTabs)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const vertical = computed(() => store.getters.getUseVerticalTabBar)
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
 
 const newTabTooltip = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(

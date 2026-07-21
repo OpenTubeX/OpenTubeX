@@ -266,6 +266,7 @@ const state = {
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
   startupBehavior: 'loadLastActiveTab',
+  showTabIcons: true,
   useVerticalTabBar: false,
   verticalTabBarWidth: 220,
   listType: 'grid',

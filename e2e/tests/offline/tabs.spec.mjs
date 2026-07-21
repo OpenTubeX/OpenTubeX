@@ -7,6 +7,15 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
     await expect(page.locator(sel.tabs).nth(1)).toContainText('Subscriptions')
     await expect(page.locator(sel.tabs).nth(1)).not.toContainText('/subscriptions')
+    await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="rss"]')).toBeVisible()
+  })
+
+  test('uses the matching app icon when the route changes', async ({ page }) => {
+    await goTo(page, 'settings')
+    await expect(page.locator(sel.activeTab).locator('[data-icon="sliders"]')).toBeVisible()
+
+    await goTo(page, 'history')
+    await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
   })
 
   test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
@@ -85,6 +94,14 @@ test.describe('tab bar', () => {
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+  })
+})
+
+test.describe('tab icons disabled', () => {
+  test.use({ seed: { settings: { showTabIcons: false } } })
+
+  test('hides page icons', async ({ page }) => {
+    await expect(page.locator(sel.activeTab).locator('.tabPageIcon, .tabAvatar')).toHaveCount(0)
   })
 })
 

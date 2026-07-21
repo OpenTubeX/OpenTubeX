@@ -17,6 +17,7 @@ test.describe('watch page', () => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
 
   test('playback starts', async ({ page, innertube }) => {

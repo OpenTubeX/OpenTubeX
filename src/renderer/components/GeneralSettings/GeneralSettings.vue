@@ -67,6 +67,14 @@
           :compact="true"
           @change="updateConfirmCloseApp"
         />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Show Tab Icons')"
+          :default-value="showTabIcons"
+          setting-key="showTabIcons"
+          :compact="true"
+          @change="updateShowTabIcons"
+        />
       </div>
     </div>
     <div class="switchGrid">
@@ -354,6 +362,16 @@ const rememberTabNavigationHistory = computed(() => store.getters.getRememberTab
  */
 function updateRememberTabNavigationHistory(value) {
   store.dispatch('updateRememberTabNavigationHistory', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabIcons(value) {
+  store.dispatch('updateShowTabIcons', value)
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API
