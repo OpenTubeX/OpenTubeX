@@ -167,6 +167,7 @@ export const defaultSideEffectsTriggerId = settingId =>
 /*****/
 
 const state = {
+  autoOpenChapters: false,
   autoplayPlaylists: true,
   autoplayVideos: true,
   // Combinable triggers for automatically entering Picture-in-Picture: 'tab', 'minimize', 'blur'

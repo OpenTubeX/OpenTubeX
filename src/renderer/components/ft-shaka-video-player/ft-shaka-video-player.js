@@ -236,6 +236,10 @@ export default defineComponent({
       type: Object,
       default: null
     },
+    autoOpenChapters: {
+      type: Boolean,
+      default: false
+    },
     watchingPlaylist: {
       type: Boolean,
       default: false
@@ -6646,6 +6650,19 @@ export default defineComponent({
 
       registerTheatreModeButton()
       registerFullWindowButton()
+
+      if (
+        props.autoOpenChapters &&
+        props.chapters.length > 0 &&
+        !startInFullscreen &&
+        !isNativeFullscreenActive() &&
+        !fullWindowEnabled.value
+      ) {
+        events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
+          detail: true
+        }))
+      }
+
       registerLegacyQualitySelection()
       registerContextMenuButtons()
       registerStatsButton()

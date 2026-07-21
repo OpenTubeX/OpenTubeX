@@ -298,6 +298,9 @@ export default defineComponent({
     defaultViewingMode: function () {
       return this.$store.getters.getDefaultViewingMode
     },
+    autoOpenChapters: function () {
+      return this.$store.getters.getAutoOpenChapters
+    },
     preferredCaptionLocale: function () {
       return this.$store.getters.getPreferredCaptionLocale || this.currentLocale
     },

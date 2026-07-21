@@ -100,6 +100,13 @@
           @change="updateAutoplayVideos"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Automatically Open Chapters')"
+          :compact="true"
+          :default-value="autoOpenChapters"
+          setting-key="autoOpenChapters"
+          @change="updateAutoOpenChapters"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Display Play Button In Video Player')"
           :compact="true"
           :default-value="displayVideoPlayButton"
@@ -800,6 +807,16 @@ const autoplayVideos = computed(() => store.getters.getAutoplayVideos)
  */
 function updateAutoplayVideos(value) {
   store.dispatch('updateAutoplayVideos', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const autoOpenChapters = computed(() => store.getters.getAutoOpenChapters)
+
+/**
+ * @param {boolean} value
+ */
+function updateAutoOpenChapters(value) {
+  store.dispatch('updateAutoOpenChapters', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
