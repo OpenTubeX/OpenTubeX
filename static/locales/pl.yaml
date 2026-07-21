@@ -828,6 +828,17 @@ Settings:
     Enhanced Privacy Enabled: Włączono rozszerzoną prywatność. Serwer przechowuje tylko zaszyfrowane dane synchronizacji.
     Enhanced Privacy Unsupported: Ostrzeżenie — ten serwer nie obsługuje rozszerzonej prywatności. Zsynchronizowane dane są widoczne dla jego operatora.
     Password: Hasło
+    Log In: Zaloguj się
+    Register: Rejestracja
+    Disconnect: Rozłącz
+    Delete Account: Usuń konto synchronizacji
+    Delete Account Confirmation: Usunąć konto synchronizacji?
+    Delete Account Warning: To trwale usunie Twoje konto synchronizacji i wszystkie dane przechowywane na tym serwerze. Twoje lokalne dane OpenTubeX nie zostaną usunięte.
+    Confirm Delete Account: Usuwanie konta
+    Password Required: Hasło jest wymagane
+    Account Deleted: Konto synchronizacji zostało usunięte
+    Connected as: Połączono jako {username}
+    Automatic Sync: Synchronizuj automatycznie po dokonaniu zmian i co pięć minut
 About:
   #On About page
   About: 'O projekcie'
