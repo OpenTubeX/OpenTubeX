@@ -47,11 +47,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/d4d3cb45-b227-4521-a88b-2ff14051d0a6" />
 <br><img height="150" alt="image" src="https://github.com/user-attachments/assets/982ef08a-7f53-4efb-9ebc-c49328e306b9" />
 
-- Improved chapter tooltips on the seekbar and chapter display as an overlay
+- Improved chapter tooltips on the seekbar and chapter display in the sidebar
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/c6bed647-e872-458d-a4d6-2be58f4c17a0" />
 <img width="198" height="87" alt="image" src="https://github.com/user-attachments/assets/cc653a3c-84b1-4541-8225-067d2c16a68e" />
 <br />
-<img height="250" alt="image" src="https://github.com/user-attachments/assets/b95e76fd-c5a7-44f2-b1ed-9a0733ecf016" />
+<img width="587" height="344" alt="image" src="https://github.com/user-attachments/assets/e4986fdc-97f8-406f-8e0d-33cf8bbd31a2" />
 
 - Option to prevent title/description translations by YouTube
 <img width="259" height="156" alt="image" src="https://github.com/user-attachments/assets/4713b8eb-9933-45cb-81ca-8db950ebec71" />
@@ -61,8 +61,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - In-page search with <kbd>Ctrl</kbd> / <kbd>Cmd</kbd> + <kbd>F</kbd>, including previous and next match navigation
 <img width="742" height="181" alt="image" src="https://github.com/user-attachments/assets/b4f651f1-321f-4b83-a392-67367b677497" />
 
-- SponsorBlock auto-skip temporary toggle under video player
-<img width="234" height="72" alt="image" src="https://github.com/user-attachments/assets/d5f300c7-8ba3-400d-ad21-1491638c348d" />
+- SponsorBlock side panel with segment details, a temporary auto-skip toggle and channel whitelisting
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/c62bf50f-aeb7-47fb-9639-63547ac6538d" />
 
 - Improved SponsorBlock tooltips with unskip/reskip/prompt to skip feature
 <img width="330" height="86" alt="image" src="https://github.com/user-attachments/assets/299af609-e7f7-4b0d-802e-4062009fc77c" />
@@ -75,14 +75,16 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Experimental SponsorBlock submission
 
-- Tabs like in a web browser, including pinning, colors, thumbnail previews, duplication, unloading, reordering, moving tabs between windows, bulk closing, copying YouTube links and configurable session restoration
+- Tabs like in a web browser, including horizontal and vertical layouts, pinning, colors, thumbnail previews, duplication, unloading, reordering, moving tabs between windows, bulk closing, copying YouTube links and configurable session restoration
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/2ddbedea-5997-4a3c-af9e-6a36d3a21d04" />
+<br />
+<img width="516" height="129" alt="image" src="https://github.com/user-attachments/assets/486f0119-ca74-40ec-835a-dd6f53cf1f56" />
 
 - Option to define a script to run when YouTube blocked your IP. It will automatically run it and reload the video after it has finished
 <img width="500" alt="image" src="https://github.com/user-attachments/assets/2946401c-8e01-4048-9638-621289e31956" />
 
-- Auto Picture-in-Picture and scroll mini-player options
-<img width="477" height="73" alt="image" src="https://github.com/user-attachments/assets/ec0c130a-5af1-46d4-a970-1728a2f14472" />
+- Auto Picture-in-Picture when switching tabs, minimizing or switching windows, plus a scroll mini-player option
+<img width="436" height="157" alt="image" src="https://github.com/user-attachments/assets/4c1f1f7b-7614-41c8-abd3-5c5179d75cee" />
 <br />
 <img width="400" height="211" alt="617132918-af4e2dc6-2eb6-49c4-bf95-92656237627a" src="https://github.com/user-attachments/assets/74411434-6ec6-4394-801f-2676074a742e" />
 
@@ -101,8 +103,9 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Player shortcut <kbd>G</kbd> to toggle between 1x and the last playback speed
 
-- Auto refresh subscriptions options
+- Persistent subscription auto-refresh timers, a visual refresh indicator and feed items that stay visible while refreshing
 <img width="246" height="226" alt="image" src="https://github.com/user-attachments/assets/31dfc690-b8a3-4ffd-994e-a53e59d0e71f" />
+<img width="252" height="32" alt="image" src="https://github.com/user-attachments/assets/8c0d1f81-870e-4572-b2dd-65f0f5b3a705" />
 
 - Watch time statistics with daily and weekly charts
 <img height="200" alt="image" src="https://github.com/user-attachments/assets/61942468-a351-4a8c-813e-a7504828121f" />
@@ -118,10 +121,14 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <br />
 <img width="447" height="158" alt="image" src="https://github.com/user-attachments/assets/36674aa1-e6e9-4332-9018-0357667291c5" />
 
-- Reorder playlist items during playback and remember the reverse state of each playlist
+- Reorder or remove playlist items during playback and remember the reverse state of each playlist
 
-- Reload comments and copy direct YouTube links to comments
+- Nested comment reply threads, edited-comment indicators, comment reloading and direct YouTube links to comments
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/a3737645-e3c3-40e1-bc1b-a55e13ca44b1" />
+<br />
 <img width="597" height="132" alt="image" src="https://github.com/user-attachments/assets/81b94e05-e389-43c8-b01a-39f1d53f4932" />
+<br />
+<img width="129" height="22" alt="image" src="https://github.com/user-attachments/assets/a34dc28c-2103-454b-9e24-4e7f6df5b494" />
 
 - Import subscriptions and watch history from [LibreTube](https://github.com/libre-tube/LibreTube)
 
@@ -160,6 +167,38 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Caption appearance controls and a preferred caption language setting
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/0098caa1-ccd6-40d5-bcb8-5daed8e0e15a" />
+
+- Download videos with yt-dlp
+<img width="510" height="273" alt="image" src="https://github.com/user-attachments/assets/cbc33197-d6df-4619-a040-c28fb8a3ba42" />
+
+- Full-screen docks for comments, playlists and chapters
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/1cb48073-f523-455d-9926-c96a95fdc959" />
+
+- Customizable keyboard shortcuts
+<img width="432" height="82" alt="image" src="https://github.com/user-attachments/assets/5e21ef42-245b-4ea1-93fb-ef9d7c542d66" />
+
+- Experimental support for rewinding live streams and premieres
+
+- Indicators for newly fetched subscription content and an optional separate new-content feed
+<img width="287" height="85" alt="image" src="https://github.com/user-attachments/assets/ba61cf09-a515-4410-8597-095d5644d34b" />
+<img width="294" height="109" alt="image" src="https://github.com/user-attachments/assets/84d221e2-c56e-44e9-ad70-af0a23323549" />
+<br />
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/384bb44c-baf1-4b08-95cf-33af9b579ea4" />
+
+- Autoplay preview with the next video and countdown displayed on the player
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/4765609c-aa89-4620-8918-1525cba44bd6" />
+
+- UI animations with an option to force-enable or disable them independently of system settings
+<img width="298" height="167" alt="image" src="https://github.com/user-attachments/assets/673693fb-0ec2-430b-acb8-2d0b7ea06473" />
+
+- Premiere indicators in video lists and metadata
+<img width="78" height="25" alt="image" src="https://github.com/user-attachments/assets/2724bb10-dea8-4162-8a7e-30521ce3b87b" />
+<img width="277" height="27" alt="image" src="https://github.com/user-attachments/assets/5b8ce731-99b6-4940-8416-77e114fe976e" />
+
+- Resizable playlist card while watching a video
+<img height="350" alt="image" src="https://github.com/user-attachments/assets/3677e5cc-484c-46a8-bea7-63dea841d719" />
+
+- Open a chatter's channel by clicking their handle in live chat
 
 </details>
 
