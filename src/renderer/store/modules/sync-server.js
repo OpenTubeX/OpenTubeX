@@ -1,6 +1,7 @@
 import {
   SyncServerClient,
   normalizeSyncServerUrl,
+  syncChannelPlaybackSpeeds,
   syncHistory,
   syncPlaylists,
   syncSubscriptions,
@@ -16,6 +17,7 @@ const state = {
   syncServerError: '',
   syncServerLastResult: null,
   syncServerHistorySupported: null,
+  syncServerPlaybackSpeedsSupported: null,
 }
 
 const getters = {
@@ -23,6 +25,7 @@ const getters = {
   getSyncServerError: state => state.syncServerError,
   getSyncServerLastResult: state => state.syncServerLastResult,
   getSyncServerHistorySupported: state => state.syncServerHistorySupported,
+  getSyncServerPlaybackSpeedsSupported: state => state.syncServerPlaybackSpeedsSupported,
 }
 
 function parseSnapshot(value) {
@@ -70,6 +73,16 @@ async function runSync(context) {
         result.history = history.length
       } else {
         commit('setSyncServerHistorySupported', false)
+      }
+    }
+    if (settings.syncServerSyncPlaybackSpeeds) {
+      const speeds = await syncChannelPlaybackSpeeds(client, store, previous.playbackSpeeds)
+      if (speeds !== null) {
+        commit('setSyncServerPlaybackSpeedsSupported', true)
+        next.playbackSpeeds = speeds
+        result.playbackSpeeds = Object.keys(speeds).length
+      } else {
+        commit('setSyncServerPlaybackSpeedsSupported', false)
       }
     }
 
@@ -124,6 +137,7 @@ const actions = {
     commit('setSyncServerError', '')
     commit('setSyncServerLastResult', null)
     commit('setSyncServerHistorySupported', null)
+    commit('setSyncServerPlaybackSpeedsSupported', null)
     commit('setSyncServerStatus', 'idle')
   },
 
@@ -210,6 +224,9 @@ const mutations = {
   },
   setSyncServerHistorySupported(state, supported) {
     state.syncServerHistorySupported = supported
+  },
+  setSyncServerPlaybackSpeedsSupported(state, supported) {
+    state.syncServerPlaybackSpeedsSupported = supported
   },
 }
 

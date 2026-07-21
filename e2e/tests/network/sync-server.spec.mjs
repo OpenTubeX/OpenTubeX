@@ -15,11 +15,14 @@ function latestSettings(contents) {
     .map(record => [record._id, record.value]))
 }
 
-test.describe('LibreTube sync server', () => {
+test.describe('OpenTubeX sync server', () => {
   test.skip(!syncServerUrl, 'Set OPENTUBEX_SYNC_SERVER_URL to run the local sync-server test')
 
   test.use({
     seed: {
+      settings: {
+        channelPlaybackSpeeds: JSON.stringify({ [channelId]: 1.5 })
+      },
       profiles: [{
         _id: 'allChannels',
         name: 'All Channels',
@@ -116,6 +119,25 @@ test.describe('LibreTube sync server', () => {
       })
     ]))
 
+    const playbackSpeedsResponse = await fetch(
+      `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
+      { headers }
+    )
+    expect(playbackSpeedsResponse.ok).toBe(true)
+    expect(await playbackSpeedsResponse.json()).toEqual(expect.arrayContaining([
+      { channel_id: channelId, playback_speed: 1.5 }
+    ]))
+
+    const putPlaybackSpeedResponse = await fetch(
+      `${syncServerUrl}${apiPrefix}/channel_playback_speeds/`,
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ channel_id: remoteChannelId, playback_speed: 2 })
+      }
+    )
+    expect(putPlaybackSpeedResponse.ok).toBe(true)
+
     const addRemoteResponse = await fetch(`${syncServerUrl}${apiPrefix}/subscriptions/`, {
       method: 'PUT',
       headers,
@@ -141,6 +163,13 @@ test.describe('LibreTube sync server', () => {
       id: remoteChannelId,
       thumbnail: null
     }))
+    await expect.poll(async () => {
+      const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
+      return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
+    }).toEqual({
+      [channelId]: 1.5,
+      [remoteChannelId]: 2
+    })
 
     await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
     const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })

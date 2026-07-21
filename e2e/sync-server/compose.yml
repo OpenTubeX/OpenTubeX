@@ -1,6 +1,6 @@
 services:
   sync-server:
-    image: ghcr.io/libre-tube/sync-server:latest-sqlite
+    image: ghcr.io/opentubex/sync-server:latest-sqlite
     environment:
       DATABASE_URL: ./data/db.sqlite
       SECRET_KEY: opentubex-local-sync-server-test-secret

@@ -875,7 +875,7 @@ Settings:
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
     Sync Settings: Sync
-    Description: Synchronize subscriptions, playlists, and watch history with a LibreTube sync server.
+    Description: Synchronize subscriptions, playlists, watch history, and channel playback speeds with an OpenTubeX sync server.
     Server URL: Server URL
     Username: Username
     Password: Password
@@ -890,9 +890,11 @@ Settings:
     Account Deleted: Sync account deleted
     Connected as: 'Connected as {username}'
     Automatic Sync: Sync automatically every five minutes
+    Channel Playback Speeds: Channel playback speeds
     Sync Now: Sync now
     Last synced: 'Last synced: {date}'
     History not supported: This server version does not support watch history syncing.
+    Playback speeds not supported: This server version does not support channel playback speed syncing.
     Sync completed: Sync completed
   Proxy Settings:
     Proxy Settings: Proxy

@@ -70,6 +70,12 @@
           compact
           @change="store.dispatch('updateSyncServerSyncHistory', $event)"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Sync Settings.Channel Playback Speeds')"
+          :default-value="syncPlaybackSpeedsEnabled"
+          compact
+          @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
+        />
       </FtFlexBox>
       <p
         v-if="lastSyncLabel"
@@ -82,6 +88,12 @@
         class="compatibilityWarning"
       >
         {{ t('Settings.Sync Settings.History not supported') }}
+      </p>
+      <p
+        v-if="playbackSpeedsSupported === false && syncPlaybackSpeedsEnabled"
+        class="compatibilityWarning"
+      >
+        {{ t('Settings.Sync Settings.Playback speeds not supported') }}
       </p>
       <FtFlexBox class="actions">
         <FtButton
@@ -196,7 +208,11 @@ const autoSync = computed(() => store.getters.getSyncServerAutoSync)
 const syncSubscriptionsEnabled = computed(() => store.getters.getSyncServerSyncSubscriptions)
 const syncPlaylistsEnabled = computed(() => store.getters.getSyncServerSyncPlaylists)
 const syncHistoryEnabled = computed(() => store.getters.getSyncServerSyncHistory)
+const syncPlaybackSpeedsEnabled = computed(() => store.getters.getSyncServerSyncPlaybackSpeeds)
 const historySupported = computed(() => store.getters.getSyncServerHistorySupported)
+const playbackSpeedsSupported = computed(
+  () => store.getters.getSyncServerPlaybackSpeedsSupported
+)
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
   if (!timestamp) return ''

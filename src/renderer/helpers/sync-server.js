@@ -201,6 +201,26 @@ export class SyncServerClient {
   deleteWatchHistory(videoId) {
     return this.apiRequest(`/watch_history/${encodeURIComponent(videoId)}`, { method: 'DELETE' })
   }
+
+  async getChannelPlaybackSpeeds() {
+    try {
+      return await this.apiRequest('/channel_playback_speeds/')
+    } catch (error) {
+      if (error.status === 404) return null
+      throw error
+    }
+  }
+
+  putChannelPlaybackSpeed(speed) {
+    return this.apiRequest('/channel_playback_speeds/', { method: 'PUT', body: speed })
+  }
+
+  deleteChannelPlaybackSpeed(channelId) {
+    return this.apiRequest(
+      `/channel_playback_speeds/${encodeURIComponent(channelId)}`,
+      { method: 'DELETE' }
+    )
+  }
 }
 
 function mapBy(items, getId) {
@@ -367,6 +387,60 @@ export async function syncSubscriptions(client, store, previousIds = []) {
   }
 
   return Array.from(mergedIds)
+}
+
+function parseChannelPlaybackSpeeds(value) {
+  try {
+    const speeds = JSON.parse(value)
+    return Object.fromEntries(Object.entries(speeds).filter(([, speed]) => {
+      return Number.isFinite(speed) && speed > 0.07
+    }))
+  } catch {
+    return {}
+  }
+}
+
+export async function syncChannelPlaybackSpeeds(client, store, previous = {}) {
+  const local = parseChannelPlaybackSpeeds(store.state.settings.channelPlaybackSpeeds)
+  const remoteEntries = await client.getChannelPlaybackSpeeds()
+  if (remoteEntries === null) return null
+
+  const remote = Object.fromEntries(remoteEntries.map(entry => {
+    return [entry.channel_id, entry.playback_speed]
+  }))
+  const mergedIds = mergeIds(Object.keys(local), Object.keys(remote), Object.keys(previous))
+  const merged = {}
+
+  for (const channelId of Object.keys(remote)) {
+    if (!mergedIds.has(channelId)) {
+      await client.deleteChannelPlaybackSpeed(channelId)
+    }
+  }
+
+  for (const channelId of mergedIds) {
+    const localSpeed = local[channelId]
+    const remoteSpeed = remote[channelId]
+    const previousSpeed = previous[channelId]
+    const localChanged = localSpeed !== previousSpeed
+    const remoteChanged = remoteSpeed !== previousSpeed
+    const speed = remoteSpeed !== undefined && remoteChanged && !localChanged
+      ? remoteSpeed
+      : localSpeed ?? remoteSpeed
+
+    merged[channelId] = speed
+    if (remoteSpeed !== speed) {
+      await client.putChannelPlaybackSpeed({
+        channel_id: channelId,
+        playback_speed: speed,
+      })
+    }
+  }
+
+  if (!metadataEquals(local, merged)) {
+    await store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(merged))
+  }
+
+  return merged
 }
 
 export async function syncPlaylists(client, store, previous = {}) {
