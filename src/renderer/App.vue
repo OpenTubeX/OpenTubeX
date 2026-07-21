@@ -1640,7 +1640,7 @@ function handleUpdateBannerClick(response) {
 }
 
 function openDownloadsPage() {
-  openExternalLink('https://github.com/OpenTubeX/OpenTubeX/releases')
+  openExternalLink('https://opentubex.org/downloads/')
   showReleaseNotes.value = false
   showUpdatesBanner.value = false
 }
