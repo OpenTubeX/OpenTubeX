@@ -297,8 +297,8 @@ Settings:
     Reduced Motion:
       Reduced Motion: Ogranicz animacje
       System: systemowe
-      Force On: wymuś włączone
-      Force Off: wymuś wyłączone
+      Force On: wymuś włączenie
+      Force Off: wymuś wyłączenie
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -798,7 +798,7 @@ Settings:
     Update yt-dlp: Zaktualizuj yt-dlp
     Checking yt-dlp: Sprawdzanie yt-dlp…
     Downloading yt-dlp: Pobieranie yt-dlp…
-    yt-dlp Downloaded Template: yt-dlp {version} zostało pobrane
+    yt-dlp Downloaded Template: Pobrano yt-dlp w wersji {version}
     yt-dlp Download Error Template: 'Pobieranie yt-dlp nie powiodło się: {error}'
     FFmpeg Source: Źródło FFmpeg
     Detected FFmpeg Version Template: 'Wykryta wersja FFmpeg: {version}'
@@ -808,7 +808,7 @@ Settings:
     Update FFmpeg: Zaktualizuj FFmpeg
     Checking FFmpeg: Sprawdzanie FFmpeg…
     Downloading FFmpeg: Pobieranie FFmpeg…
-    FFmpeg Downloaded Template: FFmpeg {version} zostało pobrane
+    FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
     FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
     Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
     Managed Tools Download Finished Template: Zakończono pobieranie {tools}
@@ -821,6 +821,8 @@ Settings:
     Download Folder: 'Pobierane pliki zapisuj do:'
     Choose Download Folder: Wybierz folder pobierania
     Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+  Sync Settings:
+    Sync Settings: Synchronizuj
 About:
   #On About page
   About: 'O projekcie'
