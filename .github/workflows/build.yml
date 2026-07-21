@@ -31,7 +31,6 @@ on:
       - '.github/issue-labeler.yml'
       - '.github/pr-labeler.yml'
       - '.github/pull.yml'
-      - '.github/workflows/aur.yml'
       - '.github/workflows/autoMerge.yml'
       - '.github/workflows/calibreapp-image-actions.yml'
       - '.github/workflows/codeql.yml'

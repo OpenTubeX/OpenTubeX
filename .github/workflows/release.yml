@@ -553,12 +553,11 @@ jobs:
           -f "releaseTag=$TAG"
 
   trigger-aur-update:
-    name: Trigger AUR update
+    name: Trigger AUR repository update
     needs: build
     runs-on: ubuntu-latest
 
     permissions:
-      actions: write
       contents: read
 
     steps:
@@ -574,18 +573,18 @@ jobs:
         tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-    - name: Trigger AUR update workflow
+    - name: Trigger AUR repository workflow
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
         TAG: ${{ steps.release.outputs.tag }}
       shell: bash
       run: |
         set -euo pipefail
 
-        gh workflow run aur.yml \
-          --repo "$GITHUB_REPOSITORY" \
-          --ref "$GITHUB_REF_NAME" \
-          -f "releaseTag=$TAG"
+        gh api repos/OpenTubeX/aur/dispatches \
+          --method POST \
+          -f event_type=opentubex-release \
+          -f "client_payload[tag]=$TAG"
 
   trigger-rpm-update:
     name: Trigger RPM repository update
