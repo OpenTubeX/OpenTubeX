@@ -596,8 +596,8 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   display: inline-block;
   inline-size: 6px;
   block-size: 6px;
+  flex: 0 0 6px;
   border-radius: 50%;
-  margin-inline-end: 6px;
   background-color: var(--accent-color, var(--primary-text-color));
   animation: tab-loading-pulse 0.9s ease-in-out infinite;
   vertical-align: middle;
