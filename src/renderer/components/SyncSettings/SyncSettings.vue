@@ -7,6 +7,7 @@
       <FtInput
         :placeholder="t('Settings.Sync Settings.Server URL')"
         :show-action-button="false"
+        :data-list="syncServerInstances"
         :value="serverUrl"
         :disabled="connected"
         show-label
@@ -190,6 +191,11 @@ import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
+
+const syncServerInstances = [
+  'https://sync.d3sox.me',
+  'https://sync.libretube.dev'
+]
 
 const serverUrl = ref(store.getters.getSyncServerUrl)
 const username = ref(store.getters.getSyncServerUsername)
