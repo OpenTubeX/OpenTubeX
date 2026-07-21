@@ -129,30 +129,35 @@
         <FtToggleSwitch
           :label="t('Subscriptions.Subscriptions')"
           :default-value="syncSubscriptionsEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncSubscriptions', $event)"
         />
         <FtToggleSwitch
           :label="t('Playlists')"
           :default-value="syncPlaylistsEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncPlaylists', $event)"
         />
         <FtToggleSwitch
           :label="t('History.History')"
           :default-value="syncHistoryEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncHistory', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.Sync Settings.Channel Playback Speeds')"
           :default-value="syncPlaybackSpeedsEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.Sync Settings.Profiles')"
           :default-value="syncProfilesEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
         />
@@ -160,6 +165,7 @@
           v-if="privacyMode === 'enhanced'"
           :label="t('Settings.Sync Settings.Settings')"
           :default-value="syncSettingsEnabled"
+          :disabled="busy"
           compact
           @change="store.dispatch('updateSyncServerSyncSettings', $event)"
         />
@@ -186,11 +192,13 @@
         <FtButton
           :label="t('Settings.Sync Settings.Sync Now')"
           :icon="['fas', 'sync']"
+          :disabled="busy"
           @click="syncNow"
         />
         <FtButton
           :label="t('Settings.Sync Settings.Disconnect')"
           :icon="['fas', 'right-from-bracket']"
+          :disabled="busy"
           @click="disconnect"
         />
         <FtButton
@@ -198,6 +206,7 @@
           text-color="var(--destructive-text-color)"
           background-color="var(--destructive-color)"
           :icon="['fas', 'trash']"
+          :disabled="busy"
           @click="showDeleteAccountPrompt = true"
         />
       </FtFlexBox>
