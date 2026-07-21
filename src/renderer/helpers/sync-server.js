@@ -3,6 +3,7 @@ import { deepCopy } from './utils'
 import { generateRandomUniqueId } from './playlists'
 
 const HISTORY_PAGE_SIZE = 50
+const BULK_SYNC_CHUNK_SIZE = 100
 const REQUEST_TIMEOUT_MS = 20_000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
@@ -135,6 +136,10 @@ export class SyncServerClient {
     return this.apiRequest('/subscriptions/', { method: 'PUT', body: channel })
   }
 
+  subscribeBulk(channels) {
+    return this.apiRequest('/subscriptions/bulk', { method: 'PUT', body: channels })
+  }
+
   unsubscribe(channelId) {
     return this.apiRequest(`/subscriptions/${encodeURIComponent(channelId)}`, { method: 'DELETE' })
   }
@@ -198,6 +203,10 @@ export class SyncServerClient {
     return this.apiRequest('/watch_history/', { method: 'PUT', body: entry })
   }
 
+  putWatchHistoryBulk(entries) {
+    return this.apiRequest('/watch_history/bulk', { method: 'PUT', body: entries })
+  }
+
   deleteWatchHistory(videoId) {
     return this.apiRequest(`/watch_history/${encodeURIComponent(videoId)}`, { method: 'DELETE' })
   }
@@ -225,6 +234,24 @@ export class SyncServerClient {
 
 function mapBy(items, getId) {
   return new Map(items.map(item => [getId(item), item]))
+}
+
+async function uploadInChunks(items, uploadBulk, uploadSingle) {
+  if (items.length === 0) return
+
+  try {
+    for (let index = 0; index < items.length; index += BULK_SYNC_CHUNK_SIZE) {
+      await uploadBulk(items.slice(index, index + BULK_SYNC_CHUNK_SIZE))
+    }
+    return
+  } catch (error) {
+    if (error.status !== 404) throw error
+  }
+
+  // Older LibreTube-compatible servers do not expose bulk endpoints.
+  for (const item of items) {
+    await uploadSingle(item)
+  }
 }
 
 function mergeIds(localIds, remoteIds, previousIds = []) {
@@ -364,11 +391,14 @@ export async function syncSubscriptions(client, store, previousIds = []) {
       await client.unsubscribe(id)
     }
   }
-  for (const id of mergedIds) {
-    if (!remoteById.has(id)) {
-      await client.subscribe(channelToRemote(localById.get(id)))
-    }
-  }
+  const subscriptionsToAdd = Array.from(mergedIds)
+    .filter(id => !remoteById.has(id))
+    .map(id => channelToRemote(localById.get(id)))
+  await uploadInChunks(
+    subscriptionsToAdd,
+    channels => client.subscribeBulk(channels),
+    channel => client.subscribe(channel)
+  )
 
   const mergedSubscriptions = Array.from(mergedIds).map(id => {
     return localById.get(id) ?? channelToLocal(remoteById.get(id))
@@ -588,6 +618,7 @@ export async function syncHistory(client, store, previousIds = []) {
   const remoteById = mapBy(remoteHistory, entry => entry.video.id)
   const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds)
   const mergedHistory = [...unsyncableLocalHistory]
+  const historyToUpload = []
 
   for (const id of remoteById.keys()) {
     if (!mergedIds.has(id)) {
@@ -603,10 +634,16 @@ export async function syncHistory(client, store, previousIds = []) {
     const remotePayload = historyToRemote(merged)
 
     if (useLocal && remotePayload) {
-      await client.putWatchHistory(remotePayload)
+      historyToUpload.push(remotePayload)
     }
     mergedHistory.push(merged)
   }
+
+  await uploadInChunks(
+    historyToUpload,
+    entries => client.putWatchHistoryBulk(entries),
+    entry => client.putWatchHistory(entry)
+  )
 
   await store.dispatch('overwriteHistory', new Map(
     mergedHistory.map(record => [record.videoId, record])

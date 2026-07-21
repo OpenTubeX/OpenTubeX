@@ -67,6 +67,11 @@ test.describe('OpenTubeX sync server', () => {
 
   test('pushes local data and pulls remote changes', async ({ app, page }) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
+    const bulkRequests = []
+    page.on('request', request => {
+      const pathname = new URL(request.url()).pathname
+      if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
+    })
 
     await goTo(page, 'settings')
     const syncSection = page.locator('[data-section="sync"]')
@@ -77,6 +82,10 @@ test.describe('OpenTubeX sync server', () => {
     await syncSection.getByRole('button', { name: 'Register' }).click()
     await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
     await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    expect(bulkRequests).toEqual(expect.arrayContaining([
+      '/v1/subscriptions/bulk',
+      '/v1/watch_history/bulk'
+    ]))
     await expect(serverUrlInput).toHaveValue(syncServerUrl.replace(/\/$/, ''))
 
     const settingsPath = path.join(app.userDataDir, 'settings.db')

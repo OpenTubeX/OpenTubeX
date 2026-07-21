@@ -875,7 +875,7 @@ Settings:
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
     Sync Settings: Sync
-    Description: Synchronize subscriptions, playlists, watch history, and channel playback speeds with an OpenTubeX sync server.
+    Description: Synchronize subscriptions, playlists, watch history, and channel playback speeds with an OpenTubeX or LibreTube sync server. LibreTube servers may not support every sync feature.
     Server URL: Server URL
     Username: Username
     Password: Password
