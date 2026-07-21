@@ -143,14 +143,14 @@
         <FtToggleSwitch
           :label="t('History.History')"
           :default-value="syncHistoryEnabled"
-          :disabled="busy"
+          :disabled="busy || historySupported === false"
           compact
           @change="store.dispatch('updateSyncServerSyncHistory', $event)"
         />
         <FtToggleSwitch
           :label="t('Settings.Sync Settings.Channel Playback Speeds')"
           :default-value="syncPlaybackSpeedsEnabled"
-          :disabled="busy"
+          :disabled="busy || playbackSpeedsSupported === false"
           compact
           @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
         />
@@ -162,10 +162,9 @@
           @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
         />
         <FtToggleSwitch
-          v-if="privacyMode === 'enhanced'"
           :label="t('Settings.Sync Settings.Settings')"
           :default-value="syncSettingsEnabled"
-          :disabled="busy"
+          :disabled="busy || settingsSupported === false"
           compact
           @change="store.dispatch('updateSyncServerSyncSettings', $event)"
         />
@@ -177,16 +176,28 @@
         {{ t('Settings.Sync Settings.Last synced', { date: lastSyncLabel }) }}
       </p>
       <p
-        v-if="historySupported === false && syncHistoryEnabled"
+        v-if="historySupported === false"
         class="compatibilityWarning"
       >
         {{ t('Settings.Sync Settings.History not supported') }}
       </p>
       <p
-        v-if="playbackSpeedsSupported === false && syncPlaybackSpeedsEnabled"
+        v-if="playbackSpeedsSupported === false && settingsSupported"
         class="compatibilityWarning"
       >
         {{ t('Settings.Sync Settings.Playback speeds not supported') }}
+      </p>
+      <p
+        v-else-if="playbackSpeedsSupported === false"
+        class="compatibilityWarning"
+      >
+        {{ t('Settings.Sync Settings.Playback speeds and settings not supported') }}
+      </p>
+      <p
+        v-else-if="settingsSupported === false"
+        class="compatibilityWarning"
+      >
+        {{ t('Settings.Sync Settings.Settings not supported') }}
       </p>
       <FtFlexBox class="actions">
         <FtButton
@@ -379,6 +390,7 @@ const playbackSpeedsSupported = computed(
   () => store.getters.getSyncServerPlaybackSpeedsSupported
 )
 const privacyMode = computed(() => store.getters.getSyncServerPrivacyMode)
+const settingsSupported = computed(() => privacyMode.value === 'enhanced')
 const lastSyncLabel = computed(() => {
   const timestamp = store.getters.getSyncServerLastSyncAt
   if (!timestamp) return ''

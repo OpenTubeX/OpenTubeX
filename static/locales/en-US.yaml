@@ -915,6 +915,8 @@ Settings:
     Last synced: 'Last synced: {date}'
     History not supported: This server version does not support watch history syncing.
     Playback speeds not supported: This server version does not support channel playback speed syncing.
+    Playback speeds and settings not supported: This server version does not support channel playback speed or settings syncing.
+    Settings not supported: This server version does not support settings syncing.
     Sync completed: Sync completed
     Data Loss Confirmation: Confirm destructive sync?
     Data Loss Warning: 'The server state would delete {deleted} of {previous} previously synced {collection} items. This can indicate a failed server migration or reset. Continue only if this deletion is intentional and you have a backup.'
