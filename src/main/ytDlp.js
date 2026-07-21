@@ -17,6 +17,7 @@ const execFileAsync = promisify(execFile)
  * @property {string} [title] only used for display purposes in the renderer
  * @property {'video' | 'audio' | 'custom'} mode
  * @property {string} [quality] maximum video resolution e.g. '1080'
+ * @property {string} [videoFormat] e.g. 'mp4'
  * @property {string} [audioFormat] e.g. 'mp3'
  * @property {string} [customArgs] additional yt-dlp command line arguments
  */
@@ -36,6 +37,7 @@ const execFileAsync = promisify(execFile)
 
 const ID_REGEX = /^[\w-]{11}$/
 const QUALITY_REGEX = /^\d{3,4}$/
+const VIDEO_FORMATS = ['mp4']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 const YT_DLP_RELEASE_REPOSITORIES = {
   stable: 'yt-dlp/yt-dlp',
@@ -589,9 +591,12 @@ export async function handleYtDlpDownload(event, payload) {
       if (typeof payload.quality === 'string' && QUALITY_REGEX.test(payload.quality)) {
         args.push('-S', `res:${payload.quality}`)
       }
+      if (typeof payload.videoFormat === 'string' && VIDEO_FORMATS.includes(payload.videoFormat)) {
+        args.push('--merge-output-format', payload.videoFormat, '--remux-video', payload.videoFormat)
+      }
       break
     case 'audio':
-      args.push('--extract-audio')
+      args.push('--extract-audio', '--embed-thumbnail', '--embed-metadata')
       if (typeof payload.audioFormat === 'string' && AUDIO_FORMATS.includes(payload.audioFormat)) {
         args.push('--audio-format', payload.audioFormat)
       }

@@ -166,9 +166,13 @@ const { t } = useI18n()
 
 const DEFAULT_TEMPLATES = [
   { value: 'video:best', mode: 'video' },
+  { value: 'video:best:mp4', mode: 'video', videoFormat: 'mp4' },
   { value: 'video:1080', mode: 'video', quality: '1080' },
+  { value: 'video:1080:mp4', mode: 'video', quality: '1080', videoFormat: 'mp4' },
   { value: 'video:720', mode: 'video', quality: '720' },
+  { value: 'video:720:mp4', mode: 'video', quality: '720', videoFormat: 'mp4' },
   { value: 'video:480', mode: 'video', quality: '480' },
+  { value: 'video:480:mp4', mode: 'video', quality: '480', videoFormat: 'mp4' },
   { value: 'audio:best', mode: 'audio' },
   { value: 'audio:mp3', mode: 'audio', audioFormat: 'mp3' }
 ]
@@ -214,9 +218,13 @@ const selectedCustomTemplate = computed(() => {
 
 const defaultTemplateNames = computed(() => [
   t('Downloads.Templates.Video Best'),
+  `${t('Downloads.Templates.Video Best')} (MP4)`,
   t('Downloads.Templates.Video Resolution', { resolution: '1080p' }),
+  `${t('Downloads.Templates.Video Resolution', { resolution: '1080p' })} (MP4)`,
   t('Downloads.Templates.Video Resolution', { resolution: '720p' }),
+  `${t('Downloads.Templates.Video Resolution', { resolution: '720p' })} (MP4)`,
   t('Downloads.Templates.Video Resolution', { resolution: '480p' }),
+  `${t('Downloads.Templates.Video Resolution', { resolution: '480p' })} (MP4)`,
   t('Downloads.Templates.Audio Best'),
   t('Downloads.Templates.Audio Format', { format: 'MP3' })
 ])
@@ -298,6 +306,7 @@ async function startDownload() {
   if (defaultTemplate !== undefined) {
     payload.mode = defaultTemplate.mode
     if (defaultTemplate.quality) { payload.quality = defaultTemplate.quality }
+    if (defaultTemplate.videoFormat) { payload.videoFormat = defaultTemplate.videoFormat }
     if (defaultTemplate.audioFormat) { payload.audioFormat = defaultTemplate.audioFormat }
   } else if (selectedCustomTemplate.value !== undefined) {
     payload.mode = 'custom'
