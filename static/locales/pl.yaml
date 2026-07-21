@@ -861,6 +861,8 @@ Settings:
     Playback speeds and settings not supported: Ta wersja serwera nie obsługuje prędkości odtwarzania kanałów ani synchronizacji ustawień.
     Settings not supported: Ta wersja serwera nie obsługuje synchronizacji ustawień.
     Sync completed: Synchronizacja zakończona
+    Data Loss Confirmation: Potwierdzić synchronizację z ryzykiem utraty danych?
+    Data Loss Warning: Stan serwera spowoduje usunięcie {deleted} z {previous} wcześniej zsynchronizowanych elementów {collection}. Może to wskazywać na nieudaną migrację serwera lub jego reset. Kontynuuj tylko wtedy, gdy usunięcie jest celowe i masz kopię zapasową.
 About:
   #On About page
   About: 'O projekcie'
