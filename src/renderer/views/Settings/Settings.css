@@ -1,4 +1,6 @@
 .settingsPage {
+  container-name: settings-page;
+  container-type: inline-size;
   display: flex;
   gap: 20px;
 }
@@ -31,7 +33,7 @@
   scroll-margin-top: 24vh;
 }
 
-@media only screen and (width >= 1015px) {
+@container settings-page (width > 1015px) {
   .section + .section {
     padding-block-start: 20px;
   }
@@ -42,20 +44,18 @@
   }
 }
 
-@media only screen and (width <= 1200px) {
+@container settings-page (width <= 1200px) {
   .settingsSections,
   .switchRow {
     max-inline-size: 100%;
   }
 }
 
-@media only screen and (width <= 1015px) {
+.settingsPage.mobileSettings {
   /* Needed to overcome routerView styling for margin-block */
-  .settingsPage.settingsPage {
-    margin-block: 0;
-    flex-direction: column;
-    gap: 10px;
-  }
+  margin-block: 0;
+  flex-direction: column;
+  gap: 10px;
 
   .switchRow,
   .settingsSections {

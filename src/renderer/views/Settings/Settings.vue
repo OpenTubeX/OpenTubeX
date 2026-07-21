@@ -1,5 +1,9 @@
 <template>
-  <div class="settingsPage">
+  <div
+    ref="settingsPageRef"
+    class="settingsPage"
+    :class="{ mobileSettings: !isInDesktopView }"
+  >
     <template v-if="unlocked">
       <div v-show="settingsSectionTypeOpenInMobile != null">
         <button
@@ -17,6 +21,7 @@
       <FtSettingsMenu
         v-show="isInDesktopView || settingsSectionTypeOpenInMobile == null"
         ref="menuRef"
+        :class="{ mobileSettingsMenu: !isInDesktopView }"
         :settings-sections="settingsSectionComponents"
         :active-section="activeSection"
         @navigate-to-section="navigateToSection"
@@ -97,6 +102,7 @@ import store from '../../store/index'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SETTINGS_MOBILE_WIDTH_THRESHOLD = 1015
+const SETTINGS_DESKTOP_WIDTH_THRESHOLD = SETTINGS_MOBILE_WIDTH_THRESHOLD + 20
 
 const { locale, t } = useI18n()
 
@@ -259,7 +265,7 @@ function handleUnlock() {
 
 onBeforeUnmount(() => {
   document.removeEventListener('scroll', markScrolledToSectionAsActive)
-  window.removeEventListener('resize', handleResize)
+  settingsResizeObserver?.disconnect()
 })
 
 function showKeyboardShortcutPrompt() {
@@ -275,7 +281,10 @@ function updateSettingsSectionSortEnabled(value) {
 
 function handleMounted() {
   handleResize()
-  window.addEventListener('resize', handleResize)
+  settingsResizeObserver = new ResizeObserver(([entry]) => {
+    handleResize(entry.contentRect.width)
+  })
+  settingsResizeObserver.observe(settingsPageRef.value)
   document.addEventListener('scroll', markScrolledToSectionAsActive)
 
   // mark first section as active before any scrolling has taken place
@@ -283,6 +292,9 @@ function handleMounted() {
 }
 
 const sectionRefs = useTemplateRef('sectionRefs')
+const settingsPageRef = useTemplateRef('settingsPageRef')
+let settingsResizeObserver = null
+let hasMeasuredSettingsWidth = false
 
 /**
  * @param {string} sectionType
@@ -340,9 +352,18 @@ function markScrolledToSectionAsActive() {
   }
 }
 
-function handleResize() {
+function handleResize(width = settingsPageRef.value?.clientWidth ?? window.innerWidth) {
   const wasNotInDesktopView = !isInDesktopView.value
-  isInDesktopView.value = window.innerWidth > SETTINGS_MOBILE_WIDTH_THRESHOLD
+
+  if (!hasMeasuredSettingsWidth) {
+    isInDesktopView.value = width > SETTINGS_MOBILE_WIDTH_THRESHOLD
+    hasMeasuredSettingsWidth = true
+  } else if (isInDesktopView.value) {
+    isInDesktopView.value = width > SETTINGS_MOBILE_WIDTH_THRESHOLD
+  } else {
+    // Avoid a scrollbar-induced feedback loop at the layout breakpoint.
+    isInDesktopView.value = width > SETTINGS_DESKTOP_WIDTH_THRESHOLD
+  }
 
   // navigate to section that was open in mobile or desktop view, if any
   if (isInDesktopView.value && wasNotInDesktopView && settingsSectionTypeOpenInMobile.value != null) {

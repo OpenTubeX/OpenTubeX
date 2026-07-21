@@ -57,11 +57,9 @@
   border-block-end: 4px solid transparent;
 }
 
-@media only screen and (width >= 1015px) {
-  .settingsMenu {
-    margin-block: 0;
-    font-size: 16px;
-  }
+.settingsMenu:not(.mobileSettingsMenu) {
+  margin-block: 0;
+  font-size: 16px;
 
   .header {
     margin-block-start: 10px;
@@ -84,15 +82,13 @@
 }
 
 /* overall mobile breakpoint; large text */
-@media only screen and (width <= 1015px) {
-  .settingsMenu {
-    inline-size: fit-content;
-    margin-inline: auto;
-    position: relative;
-    inset-block-start: 0;
-    font-size: 30px;
-    max-block-size: 1100px;
-  }
+.settingsMenu.mobileSettingsMenu {
+  inline-size: fit-content;
+  margin-inline: auto;
+  position: relative;
+  inset-block-start: 0;
+  font-size: 30px;
+  max-block-size: 1100px;
 
   .titleIcon {
     inline-size: 30px;
@@ -116,19 +112,34 @@
 }
 
 /* small height or width mobile breakpoint; intermediary text */
-@media only screen and (width <= 1015px) and (height <= 830px),
-  only screen and (width <= 500px) {
-  .settingsMenu {
+@media only screen and (height <= 830px) {
+  .settingsMenu.mobileSettingsMenu {
     font-size: 25px;
-  }
 
-  .titleIcon {
-    inline-size: 25px;
-    block-size: 25px;
-    margin-inline-end: 5px;
-  }
+    .titleIcon {
+      inline-size: 25px;
+      block-size: 25px;
+      margin-inline-end: 5px;
+    }
 
-  .header {
+    .header {
+      font-size: 25px;
+    }
+  }
+}
+
+@container settings-page (width <= 500px) {
+  .settingsMenu.mobileSettingsMenu {
     font-size: 25px;
+
+    .titleIcon {
+      inline-size: 25px;
+      block-size: 25px;
+      margin-inline-end: 5px;
+    }
+
+    .header {
+      font-size: 25px;
+    }
   }
 }

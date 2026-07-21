@@ -1,7 +1,7 @@
 .settingsSection {
   margin-block: 0;
 
-  @media only screen and (width <= 800px) {
+  @container settings-page (width <= 800px) {
     inline-size: 100%;
   }
 }
@@ -24,7 +24,7 @@
   }
 
   > :deep(div:not(:last-child, .ft-flex-box)) {
-    @media only screen and (width <= 800px) {
+    @container settings-page (width <= 800px) {
       margin-block-end: 20px;
     }
   }
@@ -47,7 +47,7 @@
   grid-template-columns: auto auto;
   justify-content: space-evenly;
 
-  @media only screen and (width <= 680px) {
+  @container settings-page (width <= 680px) {
     grid-template-columns: auto;
   }
 }
@@ -72,19 +72,19 @@
   text-align: center;
 }
 
-@media only screen and (width <= 460px) {
+@container settings-page (width <= 460px) {
   :deep(.settingsFlexStart460px) {
     justify-content: flex-start;
   }
 }
 
-@media only screen and (width <= 500px) {
+@container settings-page (width <= 500px) {
   :deep(.settingsFlexStart500px) {
     justify-content: flex-start;
   }
 }
 
-@media only screen and (width <= 680px) {
+@container settings-page (width <= 680px) {
   .settingsSection {
     > :deep(div .text.bottom) {
       inset-inline-start: -85px;
