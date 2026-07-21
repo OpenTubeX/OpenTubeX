@@ -3,6 +3,7 @@
     ref="gridElement"
     tag="div"
     name="feed"
+    :appear="appear"
     :move-class="suppressMoveTransition ? 'feed-move-suppressed' : undefined"
     :class="{
       autoGrid: true,
@@ -23,6 +24,10 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { DEFAULT_THUMBNAIL_SIZE, getThumbnailSizeStyles } from '../../constants/thumbnailSize'
 
 const props = defineProps({
+  appear: {
+    type: Boolean,
+    default: false
+  },
   grid: {
     type: Boolean,
     required: true

@@ -101,8 +101,9 @@
           aria-labelledby="homeTab"
         />
         <FtElementList
-          v-show="currentTab === 'videos'"
+          v-if="currentTab === 'videos'"
           id="videoPanel"
+          appear
           :data="filteredVideos"
           :use-channels-hidden-preference="false"
           role="tabpanel"
@@ -131,8 +132,9 @@
           </p>
         </FtFlexBox>
         <FtElementList
-          v-show="currentTab === 'live'"
+          v-if="currentTab === 'live'"
           id="livePanel"
+          appear
           :data="filteredLive"
           :use-channels-hidden-preference="false"
           role="tabpanel"

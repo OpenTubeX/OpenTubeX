@@ -1,5 +1,6 @@
 <template>
   <FtAutoGrid
+    :appear="appear"
     :grid="displayValue !== 'list'"
     :thumbnail-size="thumbnailSize"
   >
@@ -47,6 +48,10 @@ import FtListLazyWrapper from '../FtListLazyWrapper/FtListLazyWrapper.vue'
 import store from '../../store/index'
 
 const props = defineProps({
+  appear: {
+    type: Boolean,
+    default: false
+  },
   data: {
     type: Array,
     required: true
