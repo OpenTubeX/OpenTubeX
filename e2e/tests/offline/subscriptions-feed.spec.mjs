@@ -29,7 +29,8 @@ test.use({
   seed: {
     settings: {
       fetchSubscriptionsAutomatically: false,
-      hideUpcomingPremieres: true
+      hideUpcomingPremieres: true,
+      thumbnailSize: 180
     },
     profiles: [
       {
@@ -72,6 +73,33 @@ test.use({
 })
 
 test.describe('subscriptions feed from cache', () => {
+  test('does not animate cards while calculating the initial grid size', async ({ page }) => {
+    await page.evaluate(() => {
+      window.__subscriptionFeedMoveClasses = []
+
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.target.classList.contains('feed-move')) {
+            window.__subscriptionFeedMoveClasses.push(mutation.target.className)
+          }
+        }
+      })
+
+      observer.observe(document.querySelector('.app'), {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class']
+      })
+    })
+
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Video A older')).toBeVisible()
+    await page.waitForTimeout(350)
+
+    const moveClasses = await page.evaluate(() => window.__subscriptionFeedMoveClasses)
+    expect(moveClasses).toEqual([])
+  })
+
   test('renders the cached feed offline, newest first across channels', async ({ page }) => {
     await goTo(page, 'subscriptions')
 

@@ -36,7 +36,8 @@ const props = defineProps({
 const gridElement = useTemplateRef('gridElement')
 const gridWidth = ref(0)
 
-// While the container itself is resizing (window resize, or a modal's
+// While the container itself is being sized or resized (initial layout,
+// window resize, or a modal's
 // scrollbar compensation nudging the layout by a fraction of a pixel at
 // fractional display scales), the FLIP move transition must not run —
 // it should only animate actual list changes. 'feed-move-suppressed' has
@@ -62,7 +63,7 @@ let resizeObserver = null
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => {
-    if (gridWidth.value !== 0 && entry.contentRect.width !== gridWidth.value) {
+    if (entry.contentRect.width !== gridWidth.value) {
       suppressMoveTransition.value = true
       clearTimeout(suppressResetTimeout)
       suppressResetTimeout = setTimeout(() => {
