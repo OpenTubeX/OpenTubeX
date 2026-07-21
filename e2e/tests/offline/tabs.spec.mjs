@@ -95,6 +95,48 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.activeTab)).toHaveCount(1)
   })
 
+  // Regression: removing a logical tab left its detached video presented in
+  // the native PiP window (#268). A canvas stream keeps this independent of
+  // external media servers while exercising Chromium's real PiP API.
+  test('exits PiP when its source tab is closed', async ({ page }) => {
+    const sourceTab = page.locator('.tabContent[aria-hidden="false"]')
+    await sourceTab.evaluate(async (root) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 180
+      canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height)
+
+      const video = document.createElement('video')
+      video.className = 'pipTestVideo'
+      video.muted = true
+      video.srcObject = canvas.captureStream(5)
+
+      const button = document.createElement('button')
+      button.className = 'pipTestButton'
+      button.textContent = 'Enter PiP'
+      button.addEventListener('click', () => video.requestPictureInPicture(), { once: true })
+
+      root.append(canvas, video, button)
+      await video.play()
+    })
+
+    const video = page.locator('.pipTestVideo')
+    await sourceTab.locator('.pipTestButton').click()
+    await expect.poll(() => video.evaluate(
+      (element) => document.pictureInPictureElement === element
+    )).toBe(true)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect.poll(() => video.evaluate(
+      (element) => document.pictureInPictureElement === element
+    )).toBe(true)
+
+    await page.locator(sel.tabs).first().locator('.closeButton').click()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
+  })
+
   // Regression: selected tab was lost when navigating back (3f498ec59)
   test('history back keeps the current tab selected', async ({ page }) => {
     await page.locator(sel.newTabButton).click()

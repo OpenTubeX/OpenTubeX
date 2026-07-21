@@ -90,14 +90,43 @@ let previousRefreshKey = props.tab.refreshKey ?? 0
 // the unload watcher and onBeforeUnmount can both fire for one instance. Reset
 // when the tab mounts again so a subsequent mount receives one notification.
 let disposalNotified = false
+let pictureInPictureExitRequested = false
+
+async function disposeMountedContent() {
+  const pictureInPictureElement = document.pictureInPictureElement
+  let exitPictureInPicture = Promise.resolve()
+  if (
+    !pictureInPictureExitRequested &&
+    pictureInPictureElement &&
+    tabContentRef.value?.contains(pictureInPictureElement)
+  ) {
+    pictureInPictureExitRequested = true
+    try {
+      exitPictureInPicture = document.exitPictureInPicture().catch(error => {
+        console.error(`Failed to exit Picture-in-Picture for logical tab ${props.tab.id}:`, error)
+      }).finally(() => {
+        pictureInPictureExitRequested = false
+      })
+    } catch (error) {
+      pictureInPictureExitRequested = false
+      console.error(`Failed to exit Picture-in-Picture for logical tab ${props.tab.id}:`, error)
+    }
+  }
+
+  const notifyBeforeDispose = disposalNotified
+    ? Promise.resolve()
+    : tabLifecycleService.run(props.tab.id, 'beforeDispose')
+
+  disposalNotified = true
+  await Promise.all([exitPictureInPicture, notifyBeforeDispose])
+}
 
 watch(
   () => [shouldMount.value, props.tab.mountRevision, props.tab.refreshKey],
   async ([mount, mountRevision, refreshKey]) => {
     if (!mount) {
       if (initialized.value && !disposalNotified) {
-        disposalNotified = true
-        await tabLifecycleService.run(props.tab.id, 'beforeDispose')
+        await disposeMountedContent()
         initialized.value = false
       }
       navigation.setLoadingSource(props.tab.id, TAB_LOADER_LOADING_SOURCE, false)
@@ -118,6 +147,7 @@ watch(
 
     initialized.value = true
     disposalNotified = false
+    pictureInPictureExitRequested = false
     await nextTick()
     if (mountRevision > acknowledgedMountRevision) {
       acknowledgedMountRevision = mountRevision
@@ -164,12 +194,9 @@ onErrorCaptured((error) => {
 })
 
 onBeforeUnmount(() => {
-  if (!disposalNotified) {
-    disposalNotified = true
-    tabLifecycleService.run(props.tab.id, 'beforeDispose').catch(error => {
-      console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
-    })
-  }
+  disposeMountedContent().catch(error => {
+    console.error(`Failed to dispose logical tab ${props.tab.id}:`, error)
+  })
   loaderObserver?.disconnect()
   loaderObserver = null
   if (loaderAnimationFrameId != null) {
