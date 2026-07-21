@@ -1731,6 +1731,8 @@ Downloads:
   Delete Template: Delete Template
   Template Saved: 'Saved download template "{name}"'
   Choose Folder: Change
+  Select Folder: Choose Folder
+  Folder Required: Choose a download folder to enable downloads.
   System Downloads Folder: System Downloads Folder
   Processing: Processing…
   Download Complete: Download complete

@@ -78,7 +78,7 @@
             class="chooseFolderButton"
             @click="chooseDownloadFolder"
           >
-            {{ t('Downloads.Choose Folder') }}
+            {{ downloadFolderRequired ? t('Downloads.Select Folder') : t('Downloads.Choose Folder') }}
           </button>
         </p>
 
@@ -86,6 +86,7 @@
           <FtButton
             :label="t('Downloads.Download')"
             :icon="['fas', 'download']"
+            :disabled="downloadFolderRequired"
             @click="startDownload"
           />
           <FtButton
@@ -280,10 +281,13 @@ function deleteTemplate() {
 
 /** @type {import('vue').ComputedRef<string>} */
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
+const downloadFolderRequired = computed(() => window.ftElectron.isFlatpak && downloadFolderPath.value === '')
 
 const downloadFolderDisplay = computed(() => {
   return downloadFolderPath.value === ''
-    ? t('Downloads.System Downloads Folder')
+    ? downloadFolderRequired.value
+      ? t('Downloads.Folder Required')
+      : t('Downloads.System Downloads Folder')
     : downloadFolderPath.value
 })
 

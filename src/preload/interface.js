@@ -20,6 +20,8 @@ ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
 })
 
 export default {
+  isFlatpak: process.env.FLATPAK_ID !== undefined,
+
   /**
    * @param {string} title
    * @param {string} tabId
