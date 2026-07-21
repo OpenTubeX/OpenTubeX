@@ -472,19 +472,20 @@ function updateNewTabPosition(value) {
   store.dispatch('updateNewTabPosition', value)
 }
 
-const STARTUP_BEHAVIOR_VALUES = ['loadAllTabs', 'loadLastActiveTab', 'emptySession']
+const STARTUP_BEHAVIOR_VALUES = ['loadAllTabs', 'restoreTabLoadState', 'loadLastActiveTab', 'emptySession']
 
 const startupBehaviorNames = computed(() => [
   t('Settings.General Settings.Startup Behavior.Load all tabs'),
+  t('Settings.General Settings.Startup Behavior.Load previously loaded tabs'),
   t('Settings.General Settings.Startup Behavior.Load last active tab'),
   t('Settings.General Settings.Startup Behavior.Start with an empty session')
 ])
 
-/** @type {import('vue').ComputedRef<'loadAllTabs' | 'loadLastActiveTab' | 'emptySession'>} */
+/** @type {import('vue').ComputedRef<'loadAllTabs' | 'restoreTabLoadState' | 'loadLastActiveTab' | 'emptySession'>} */
 const startupBehavior = computed(() => store.getters.getStartupBehavior)
 
 /**
- * @param {'loadAllTabs' | 'loadLastActiveTab' | 'emptySession'} value
+ * @param {'loadAllTabs' | 'restoreTabLoadState' | 'loadLastActiveTab' | 'emptySession'} value
  */
 function updateStartupBehavior(value) {
   store.dispatch('updateStartupBehavior', value)

@@ -1704,6 +1704,7 @@ export class TabManager {
     tab.mountRevision += 1
     this._setTabLoadingSource(tab, TAB_LOADING_SOURCE_MOUNT, true)
     this._broadcastStateUpdate()
+    this._saveSession()
     return true
   }
 
@@ -2039,7 +2040,8 @@ export class TabManager {
           url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
           title: tab.title,
           isPinned: tab.isPinned,
-          color: TabManager.normalizeTabColor(tab.color)
+          color: TabManager.normalizeTabColor(tab.color),
+          isUnloaded: tab.loadState === 'unloaded'
         }
 
         const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
@@ -2089,11 +2091,11 @@ export class TabManager {
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
-   * @param {{ loadInactiveTabs?: boolean }} [options]
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
-  async restoreFromData(sessionData, { loadInactiveTabs = false } = {}) {
+  async restoreFromData(sessionData, { loadInactiveTabs = false, restoreTabLoadState = false } = {}) {
     if (!sessionData || !Array.isArray(sessionData.tabs) || sessionData.tabs.length === 0) {
       return false
     }
@@ -2105,6 +2107,11 @@ export class TabManager {
       const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
       const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
       const previewDataUrl = await this._loadTabPreviewDataUrl(previewFileName)
+      const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
+      const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
+        (restoreTabLoadState && tabData.isUnloaded === true) ||
+        (!loadInBackground && hasSavedTitle)
+      )
 
       this.createTab({
         id: typeof tabData.id === 'string' ? tabData.id : undefined,
@@ -2122,8 +2129,8 @@ export class TabManager {
         historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
         makeActive,
         openPosition: 'end',
-        lazyLoad: !loadInactiveTabs && !makeActive && hasSavedTitle,
-        preloadInBackground: loadInactiveTabs && !makeActive
+        lazyLoad: restoreAsUnloaded,
+        preloadInBackground: loadInBackground && !makeActive
       })
     }
 

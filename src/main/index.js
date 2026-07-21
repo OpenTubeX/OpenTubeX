@@ -97,7 +97,12 @@ function runApp() {
   let backendFallback = true
   const DEFAULT_CONFIRM_CLOSE_APP = true
   const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
-  const VALID_STARTUP_BEHAVIORS = new Set(['loadAllTabs', 'loadLastActiveTab', 'emptySession'])
+  const VALID_STARTUP_BEHAVIORS = new Set([
+    'loadAllTabs',
+    'restoreTabLoadState',
+    'loadLastActiveTab',
+    'emptySession'
+  ])
   const closeConfirmedWindowIds = new Set()
   let quitPromptInProgress = null
   let isQuitConfirmed = false
@@ -1204,14 +1209,16 @@ function runApp() {
     } else {
       firstWindow = await createWindow({
         sessionData: savedSessions[0],
-        loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
+        loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs',
+        restoreTabLoadStateOnRestore: startupBehavior === 'restoreTabLoadState'
       })
       for (let i = 1; i < savedSessions.length; i++) {
         await createWindow({
           replaceMainWindow: false,
           showWindowNow: true,
           sessionData: savedSessions[i],
-          loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs'
+          loadInactiveTabsOnRestore: startupBehavior === 'loadAllTabs',
+          restoreTabLoadStateOnRestore: startupBehavior === 'restoreTabLoadState'
         })
       }
     }
@@ -1386,7 +1393,8 @@ function runApp() {
       windowStartupUrl = null,
       searchQueryText = null,
       sessionData = null,
-      loadInactiveTabsOnRestore = false
+      loadInactiveTabsOnRestore = false,
+      restoreTabLoadStateOnRestore = false
     } = { }) {
     // Syncing new window background to theme choice.
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then((setting) => {
@@ -1653,7 +1661,8 @@ function runApp() {
       let sessionRestored = false
       if (!windowStartupUrl) {
         sessionRestored = await tabManager.restoreFromData(sessionData, {
-          loadInactiveTabs: loadInactiveTabsOnRestore
+          loadInactiveTabs: loadInactiveTabsOnRestore,
+          restoreTabLoadState: restoreTabLoadStateOnRestore
         })
       }
 

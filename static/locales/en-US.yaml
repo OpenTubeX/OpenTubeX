@@ -368,6 +368,7 @@ Settings:
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs
+      Load previously loaded tabs: Load previously loaded tabs
       Load last active tab: Load last active tab
       Start with an empty session: Start with an empty session
     Locale Preference: Locale Preference
@@ -1491,6 +1492,7 @@ Tooltips:
     Startup Behavior: |
       Choose what OpenTubeX does when it starts.
       Load all tabs restores every saved tab immediately, but background tabs will not autoplay videos.
+      Load previously loaded tabs reloads the tabs that were loaded when OpenTubeX closed and keeps the others unloaded.
       Load last active tab restores the previous session with the other tabs opened but unloaded; they load when you click them.
       Start with an empty session skips the saved tabs and opens a fresh window.
     Invidious Instance: The Invidious instance that OpenTubeX will connect to for API
