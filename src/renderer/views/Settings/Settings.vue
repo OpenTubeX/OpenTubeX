@@ -26,13 +26,17 @@
         class="settingsContent"
       >
         <div class="switchRow">
-          <FtButton
+          <div
             v-if="USING_ELECTRON"
-            :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-            :icon="['fas', 'keyboard']"
-            @click="showKeyboardShortcutPrompt"
-          />
-          <FtSyncedSettingIndicator setting-key="keyboardShortcuts" />
+            class="settingButtonWithSync"
+          >
+            <FtButton
+              :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+              :icon="['fas', 'keyboard']"
+              @click="showKeyboardShortcutPrompt"
+            />
+            <FtSyncedSettingIndicator setting-key="keyboardShortcuts" />
+          </div>
           <FtToggleSwitch
             class="settingsToggle"
             :label="t('Settings.Sort Settings Sections (A-Z)')"

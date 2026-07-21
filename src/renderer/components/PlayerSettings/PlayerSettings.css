@@ -53,6 +53,11 @@
   word-break: break-all;
 }
 
+.settingButtonWithSync {
+  display: inline-flex;
+  align-items: center;
+}
+
 .quickPlaybackSpeedList {
   display: flex;
   flex-direction: column;

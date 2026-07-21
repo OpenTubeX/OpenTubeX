@@ -311,12 +311,14 @@
         :tooltip="t('Tooltips.Player Settings.Use Quick Playback Speed Bar')"
         @change="updateUseQuickPlaybackSpeedBar"
       />
-      <FtButton
-        :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
-        :icon="['fas', 'sliders-h']"
-        @click="showQuickPlaybackSpeedBarManager = true"
-      />
-      <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
+      <div class="settingButtonWithSync">
+        <FtButton
+          :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
+          :icon="['fas', 'sliders-h']"
+          @click="showQuickPlaybackSpeedBarManager = true"
+        />
+        <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
+      </div>
     </FtFlexBox>
     <br>
     <FtFlexBox>
