@@ -66,9 +66,15 @@ test.describe('watch page', () => {
 
     const showMoreReplies = page.locator('.showMoreReplies').first()
     await expect(showMoreReplies).toBeVisible()
-    const replyCount = await replies.count()
-    await showMoreReplies.click()
-    await expect.poll(async () => await replies.count()).toBeGreaterThan(replyCount)
+    const [continuationResponse] = await Promise.all([
+      page.waitForResponse((response) => (
+        response.request().method() === 'POST' &&
+        response.url().includes('/youtubei/v1/next')
+      )),
+      showMoreReplies.click()
+    ])
+    expect(continuationResponse.ok()).toBe(true)
+    await expect(replies.first()).toBeVisible()
   })
 
   test('fullscreen comments dock preserves its active state and scroll position', async ({ page, innertube }) => {
