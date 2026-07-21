@@ -591,7 +591,8 @@ export default defineComponent({
       const elements = [
         layout.querySelector('.videoPlayer'),
         layout.querySelector('.infoArea'),
-        layout.querySelector('.sidebarArea')
+        layout.querySelector('.sidebarArea'),
+        layout.querySelector('.commentsArea')
       ].filter(element => element !== null)
 
       this.theatreModeAnimations.forEach(animation => animation.cancel())

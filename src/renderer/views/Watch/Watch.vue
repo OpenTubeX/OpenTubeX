@@ -222,22 +222,6 @@
         :class="{ theatreWatchVideo: useTheatreMode }"
         @timestamp-event="changeTimestamp"
       />
-      <Teleport
-        :to="fullscreenCommentsTarget || 'body'"
-        :disabled="!fullscreenCommentsOpen"
-      >
-        <CommentSection
-          v-if="!isLoading && !isLive && !hideComments"
-          :id="videoId"
-          class="watchVideo"
-          :class="{ theatreWatchVideo: useTheatreMode }"
-          :channel-thumbnail="channelThumbnail"
-          :channel-name="channelName"
-          :fullscreen-overlay="fullscreenCommentsOpen"
-          @close-comments="closeFullscreenComments"
-          @timestamp-event="changeTimestamp"
-        />
-      </Teleport>
     </div>
     <div
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
@@ -388,6 +372,27 @@
         }"
         @pause-player="pausePlayer"
       />
+    </div>
+    <div
+      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      class="commentsArea"
+    >
+      <Teleport
+        :to="fullscreenCommentsTarget || 'body'"
+        :disabled="!fullscreenCommentsOpen"
+      >
+        <CommentSection
+          v-if="!isLoading && !isLive && !hideComments"
+          :id="videoId"
+          class="watchVideo"
+          :class="{ theatreWatchVideo: useTheatreMode }"
+          :channel-thumbnail="channelThumbnail"
+          :channel-name="channelName"
+          :fullscreen-overlay="fullscreenCommentsOpen"
+          @close-comments="closeFullscreenComments"
+          @timestamp-event="changeTimestamp"
+        />
+      </Teleport>
     </div>
   </div>
 </template>

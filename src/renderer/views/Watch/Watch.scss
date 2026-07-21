@@ -1,13 +1,13 @@
 @mixin dual-column-template {
-  grid-template: 'video video sidebar' 0fr 'info info sidebar' auto 'info info sidebar' 1fr / 1fr 1fr 1fr;
+  grid-template: 'video video sidebar' 0fr 'info info sidebar' auto 'comments comments sidebar' 1fr / 1fr 1fr 1fr;
 }
 
 @mixin theatre-mode-template {
-  grid-template: 'video video video' auto 'info info sidebar' auto 'info info sidebar' auto / 1fr 1fr 1fr;
+  grid-template: 'video video video' auto 'info info sidebar' auto 'comments comments sidebar' auto / 1fr 1fr 1fr;
 }
 
 @mixin single-column-template {
-  grid-template: 'video' auto 'info' auto 'sidebar' auto / auto;
+  grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / auto;
 }
 
 .ageRestricted {
@@ -133,6 +133,12 @@
 
   .infoArea {
     grid-area: info;
+    position: relative;
+    z-index: 2;
+  }
+
+  .commentsArea {
+    grid-area: comments;
     position: relative;
     z-index: 2;
   }
