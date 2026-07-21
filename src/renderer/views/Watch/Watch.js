@@ -363,6 +363,16 @@ export default defineComponent({
     hideChapters: function () {
       return this.$store.getters.getHideChapters
     },
+    sponsorBlockChannelWhitelist: function () {
+      const whitelist = this.$store.getters.getSponsorBlockChannelWhitelist
+      return Array.isArray(whitelist) ? whitelist : []
+    },
+    isSponsorBlockChannelWhitelisted: function () {
+      return Boolean(this.channelId) && this.sponsorBlockChannelWhitelist.includes(this.channelId)
+    },
+    sponsorBlockAutoSkipDisabled: function () {
+      return this.sponsorBlockAutoSkipTemporarilyDisabled || this.isSponsorBlockChannelWhitelisted
+    },
     channelsHidden() {
       return JSON.parse(this.$store.getters.getChannelsHidden).map((ch) => {
         // Legacy support
@@ -2729,6 +2739,21 @@ export default defineComponent({
 
     handleSponsorBlockAutoSkipToggle: function(enabled) {
       this.sponsorBlockAutoSkipTemporarilyDisabled = !enabled
+    },
+
+    handleSponsorBlockChannelWhitelistToggle: function(whitelisted) {
+      if (!this.channelId) {
+        return
+      }
+
+      const whitelist = new Set(this.sponsorBlockChannelWhitelist)
+      if (whitelisted) {
+        whitelist.add(this.channelId)
+      } else {
+        whitelist.delete(this.channelId)
+      }
+
+      this.$store.dispatch('updateSponsorBlockChannelWhitelist', [...whitelist])
     },
 
     updateLocalPlaylistLastPlayedAtSometimes() {

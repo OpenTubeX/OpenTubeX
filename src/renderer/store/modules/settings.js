@@ -298,6 +298,7 @@ const state = {
   sponsorBlockUserId: '',
   sponsorBlockGeneratedUserId: '',
   sponsorBlockDraftSegmentsByVideoId: {},
+  sponsorBlockChannelWhitelist: [],
   sponsorBlockUrl: 'https://sponsor.ajay.app',
   sponsorBlockSponsor: {
     color: 'Green',

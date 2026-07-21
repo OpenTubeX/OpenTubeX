@@ -1106,6 +1106,9 @@ Video:
       AutoSkipEnabled: Segmente automatisch überspringen
       AutoSkipOn: An
       AutoSkipOff: Aus
+      WhitelistChannel: Kanal zur Ausnahmeliste hinzufügen
+      ChannelWhitelisted: Auf Ausnahmeliste
+      RemoveChannelFromWhitelist: Kanal von der Ausnahmeliste entfernen
       SkipSegment: Segment überspringen
       CloseSegmentActions: Segmentaktionen schließen
       FullVideo: Ganzes Video

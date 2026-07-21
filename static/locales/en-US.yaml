@@ -1315,6 +1315,9 @@ Video:
       AutoSkipEnabled: Automatically skip segments
       AutoSkipOn: 'On'
       AutoSkipOff: 'Off'
+      WhitelistChannel: Whitelist channel
+      ChannelWhitelisted: Whitelisted
+      RemoveChannelFromWhitelist: Remove channel from whitelist
       SkipSegment: Skip segment
       CloseSegmentActions: Close segment actions
       FullVideo: Full Video

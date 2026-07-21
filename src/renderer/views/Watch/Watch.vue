@@ -59,7 +59,7 @@
           :current-playback-rate="currentPlaybackRate"
           :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"
-          :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
           :comments-available="!isLive && !hideComments"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
@@ -329,11 +329,14 @@
           :segments="sponsorBlockInfoSegments"
           :submission-enabled="sponsorBlockInfoSubmissionEnabled"
           :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+          :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+          :can-whitelist-channel="Boolean(channelId)"
           :current-time="currentTime"
           @close="closeSidebarSponsorBlock"
           @refresh="refreshSponsorBlockInfo"
           @skip="skipSponsorBlockInfoSegment"
           @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+          @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
           @vote="voteOnSponsorBlockInfoSegment"
         />
       </transition>

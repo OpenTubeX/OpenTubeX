@@ -132,31 +132,72 @@
       </div>
     </div>
     <footer class="sponsorBlockFooter">
-      <label class="sponsorBlockAutoSkip">
-        <input
-          class="sponsorBlockAutoSkipInput"
-          type="checkbox"
-          :checked="!autoSkipDisabled"
-          :aria-label="$t('Video.Player.SponsorBlock.AutoSkipEnabled')"
-          @change="$emit('auto-skip-change', $event.target.checked)"
-        >
-        <span
-          class="sponsorBlockAutoSkipTrack"
-          aria-hidden="true"
-        >
-          <span class="sponsorBlockAutoSkipThumb">
-            <font-awesome-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
-          </span>
-        </span>
-      </label>
-      <span class="sponsorBlockAutoSkipLabel">
-        {{ $t('Video.Player.SponsorBlock.AutoSkipEnabled') }}
-        <span class="sponsorBlockAutoSkipState">
-          {{ autoSkipDisabled
-            ? $t('Video.Player.SponsorBlock.AutoSkipOff')
-            : $t('Video.Player.SponsorBlock.AutoSkipOn') }}
-        </span>
-      </span>
+      <div class="sponsorBlockFooterOptions">
+        <div class="sponsorBlockOption">
+          <label
+            class="sponsorBlockToggle"
+            :class="{ disabled: channelWhitelisted }"
+          >
+            <input
+              id="sponsorBlockAutoSkip"
+              class="sponsorBlockToggleInput"
+              type="checkbox"
+              :checked="!autoSkipDisabled"
+              :disabled="channelWhitelisted"
+              :aria-label="$t('Video.Player.SponsorBlock.AutoSkipEnabled')"
+              @change="$emit('auto-skip-change', $event.target.checked)"
+            >
+            <span
+              class="sponsorBlockToggleTrack"
+              aria-hidden="true"
+            >
+              <span class="sponsorBlockToggleThumb">
+                <font-awesome-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
+              </span>
+            </span>
+          </label>
+          <label
+            for="sponsorBlockAutoSkip"
+            class="sponsorBlockOptionLabel"
+            :class="{ muted: channelWhitelisted }"
+          >
+            {{ $t('Video.Player.SponsorBlock.AutoSkipEnabled') }}
+            <span class="sponsorBlockOptionState">
+              {{ autoSkipDisabled
+                ? $t('Video.Player.SponsorBlock.AutoSkipOff')
+                : $t('Video.Player.SponsorBlock.AutoSkipOn') }}
+            </span>
+          </label>
+        </div>
+        <div class="sponsorBlockOption">
+          <button
+            type="button"
+            class="sponsorBlockWhitelistButton"
+            :class="{ active: channelWhitelisted }"
+            :disabled="!canWhitelistChannel"
+            :aria-pressed="String(channelWhitelisted)"
+            :aria-label="channelWhitelisted
+              ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
+              : $t('Video.Player.SponsorBlock.WhitelistChannel')"
+            :title="channelWhitelisted
+              ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
+              : $t('Video.Player.SponsorBlock.WhitelistChannel')"
+            @click="$emit('channel-whitelist-change', !channelWhitelisted)"
+          >
+            <span
+              class="sponsorBlockWhitelistBadge"
+              aria-hidden="true"
+            >
+              <font-awesome-icon :icon="['fas', channelWhitelisted ? 'check' : 'plus']" />
+            </span>
+            <span class="sponsorBlockWhitelistLabel">
+              {{ channelWhitelisted
+                ? $t('Video.Player.SponsorBlock.ChannelWhitelisted')
+                : $t('Video.Player.SponsorBlock.WhitelistChannel') }}
+            </span>
+          </button>
+        </div>
+      </div>
     </footer>
   </section>
 </template>
@@ -166,6 +207,8 @@ import { ref } from 'vue'
 
 const props = defineProps({
   autoSkipDisabled: Boolean,
+  canWhitelistChannel: Boolean,
+  channelWhitelisted: Boolean,
   currentTime: {
     type: Number,
     default: 0
@@ -182,7 +225,7 @@ const props = defineProps({
   submissionEnabled: Boolean
 })
 
-defineEmits(['auto-skip-change', 'close', 'refresh', 'skip', 'vote'])
+defineEmits(['auto-skip-change', 'channel-whitelist-change', 'close', 'refresh', 'skip', 'vote'])
 
 const selectedUuid = ref(null)
 
@@ -420,7 +463,27 @@ function isSegmentPassed(segment) {
   padding-inline: 14px;
 }
 
-.sponsorBlockAutoSkip {
+.sponsorBlockFooterOptions {
+  display: flex;
+  inline-size: 100%;
+}
+
+.sponsorBlockOption {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-inline-size: 0;
+  padding-inline: 8px;
+}
+
+.sponsorBlockOption + .sponsorBlockOption {
+  border-inline-start: 1px solid var(--side-nav-hover-color);
+}
+
+.sponsorBlockToggle {
   position: relative;
   display: block;
   inline-size: 44px;
@@ -428,35 +491,111 @@ function isSegmentPassed(segment) {
   cursor: pointer;
 }
 
-.sponsorBlockAutoSkipLabel {
+.sponsorBlockToggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.sponsorBlockOptionLabel {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 2px;
+  cursor: pointer;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
 }
 
-.sponsorBlockAutoSkipState {
+.sponsorBlockOptionLabel.muted {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.sponsorBlockOptionState {
   color: var(--secondary-text-color);
   font-size: 11px;
   font-weight: 600;
 }
 
-.sponsorBlockAutoSkipState::before {
-  content: '·';
-  margin-inline-end: 5px;
+.sponsorBlockWhitelistButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding-block: 8px;
+  padding-inline: 10px 12px;
+  color: var(--primary-text-color);
+  background-color: var(--secondary-card-bg-color);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: start;
+  transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-.sponsorBlockAutoSkipInput {
+.sponsorBlockWhitelistButton:hover:not(:disabled),
+.sponsorBlockWhitelistButton:focus-visible:not(:disabled) {
+  border-color: var(--accent-color);
+}
+
+.sponsorBlockWhitelistButton:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.sponsorBlockWhitelistButton.active {
+  background-color: color-mix(in srgb, #00a846 14%, var(--card-bg-color));
+  border-color: #00a846;
+}
+
+.sponsorBlockWhitelistButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.sponsorBlockWhitelistBadge {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  color: var(--secondary-text-color);
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  font-size: 13px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.sponsorBlockWhitelistButton.active .sponsorBlockWhitelistBadge {
+  color: #fff;
+  background-color: #00a846;
+}
+
+.sponsorBlockWhitelistLabel {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 0;
+  min-block-size: 2.5em;
+  overflow-wrap: break-word;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.sponsorBlockToggleInput {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
   opacity: 0;
 }
 
-.sponsorBlockAutoSkipTrack {
+.sponsorBlockToggleTrack {
   position: relative;
   display: block;
   inline-size: 44px;
@@ -467,7 +606,7 @@ function isSegmentPassed(segment) {
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 
-.sponsorBlockAutoSkipThumb {
+.sponsorBlockToggleThumb {
   position: absolute;
   inset-block-start: 2px;
   inset-inline-start: 2px;
@@ -483,17 +622,17 @@ function isSegmentPassed(segment) {
   transition: transform 160ms ease;
 }
 
-.sponsorBlockAutoSkipInput:checked + .sponsorBlockAutoSkipTrack {
+.sponsorBlockToggleInput:checked + .sponsorBlockToggleTrack {
   background-color: #00a846;
   border-color: #00c853;
 }
 
-.sponsorBlockAutoSkipInput:checked + .sponsorBlockAutoSkipTrack .sponsorBlockAutoSkipThumb {
+.sponsorBlockToggleInput:checked + .sponsorBlockToggleTrack .sponsorBlockToggleThumb {
   color: #007732;
   transform: translateX(calc(20px * var(--horizontal-directionality-coefficient)));
 }
 
-.sponsorBlockAutoSkipInput:focus-visible + .sponsorBlockAutoSkipTrack {
+.sponsorBlockToggleInput:focus-visible + .sponsorBlockToggleTrack {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
