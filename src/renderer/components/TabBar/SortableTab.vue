@@ -31,6 +31,12 @@
         class="loadingDot"
         aria-hidden="true"
       />
+      <FontAwesomeIcon
+        v-else-if="tab.isPlaying"
+        :icon="['fas', 'play']"
+        class="playingIcon"
+        aria-hidden="true"
+      />
       <img
         v-else-if="showIcon && tabAvatarUrl"
         :src="tabAvatarUrl"
@@ -42,12 +48,6 @@
         v-else-if="showIcon && tabPageIcon"
         :icon="tabPageIcon"
         class="tabPageIcon"
-        aria-hidden="true"
-      />
-      <FontAwesomeIcon
-        v-if="!tab.isLoading && tab.isPlaying"
-        :icon="['fas', 'play']"
-        class="playingIcon"
         aria-hidden="true"
       />
       <span class="tabTitleText">{{ displayTitle }}</span>
@@ -622,7 +622,6 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 
 .playingIcon {
   font-size: 8px;
-  margin-inline-end: 6px;
   color: var(--accent-color, var(--primary-text-color));
   flex-shrink: 0;
 }
