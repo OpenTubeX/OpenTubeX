@@ -827,6 +827,7 @@ Settings:
     Privacy Passphrase: Hasło dostępu
     Enhanced Privacy Enabled: Włączono rozszerzoną prywatność. Serwer przechowuje tylko zaszyfrowane dane synchronizacji.
     Enhanced Privacy Unsupported: Ostrzeżenie — ten serwer nie obsługuje rozszerzonej prywatności. Zsynchronizowane dane są widoczne dla jego operatora.
+    Password: Hasło
 About:
   #On About page
   About: 'O projekcie'
