@@ -294,6 +294,11 @@ Settings:
       Copy YouTube Link: Skopiuj odnośnik do YouTube
       Open in YouTube: Otwórz na stronie YouTube
     Remember Tab Navigation History: Zapamiętaj historię przeglądania na każdej karcie
+    Reduced Motion:
+      Reduced Motion: Ogranicz animacje
+      System: systemowe
+      Force On: wymuś włączone
+      Force Off: wymuś wyłączone
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -781,6 +786,29 @@ Settings:
     Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
   Download Settings:
     Download Settings: Pobieranie
+    yt-dlp Source: Źródło yt-dlp
+    yt-dlp Channel: Kanał wersji yt-dlp
+    Sources:
+      System: System (PATH lub ścieżka niestandardowa)
+      Managed: Zarządzane przez OpenTubeX
+    Detected Version Template: 'Wykryta wersja yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System yt-dlp Missing Warning: W twoim systemie nie znaleziono yt-dlp. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download yt-dlp: Pobierz yt-dlp
+    Update yt-dlp: Zaktualizuj yt-dlp
+    Checking yt-dlp: Sprawdzanie yt-dlp…
+    Downloading yt-dlp: Pobieranie yt-dlp…
+    yt-dlp Downloaded Template: yt-dlp {version} zostało pobrane
+    yt-dlp Download Error Template: 'Pobieranie yt-dlp nie powiodło się: {error}'
+    FFmpeg Source: Źródło FFmpeg
+    Detected FFmpeg Version Template: 'Wykryta wersja FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System FFmpeg Missing Warning: FFmpeg nie został znaleziony w Twoim systemie. Jest on wymagany do scalania wideo i dźwięku oraz do konwersji audio. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download FFmpeg: Pobierz FFmpeg
+    Update FFmpeg: Zaktualizuj FFmpeg
+    Checking FFmpeg: Sprawdzanie FFmpeg…
+    Downloading FFmpeg: Pobieranie FFmpeg…
+    FFmpeg Downloaded Template: FFmpeg {version} zostało pobrane
 About:
   #On About page
   About: 'O projekcie'
