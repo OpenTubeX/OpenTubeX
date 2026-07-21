@@ -3382,7 +3382,8 @@ export default defineComponent({
     }
 
     function handlePlay() {
-      if (process.env.IS_ELECTRON && !isActiveTab.value) {
+      const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
+      if (process.env.IS_ELECTRON && !isActiveTab.value && !isCurrentPictureInPictureVideo) {
         video.value.pause()
         return
       }

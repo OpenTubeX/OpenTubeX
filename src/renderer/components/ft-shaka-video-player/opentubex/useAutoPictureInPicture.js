@@ -103,6 +103,12 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
 
   function handleMinimizedState(minimized) {
     windowMinimized = minimized
+    // Restoring/showing the app makes its document the active application surface.
+    // Keep the stale blur emitted while minimizing (or while PiP had focus) from
+    // holding an automatically opened PiP window open forever.
+    if (!minimized) {
+      windowFocused = true
+    }
     updateAutoPip()
   }
 
