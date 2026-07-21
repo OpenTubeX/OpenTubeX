@@ -13,6 +13,7 @@ import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
+import syncServer from './modules/sync-server'
 
 export default createStore({
   modules: {
@@ -28,6 +29,7 @@ export default createStore({
     player,
     tabs,
     watchStats,
+    syncServer,
   },
 
   // Detects unsafe changes to the store state e.g. outside of mutations

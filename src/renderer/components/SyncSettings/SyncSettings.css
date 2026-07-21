@@ -1,0 +1,56 @@
+.description,
+.connectionStatus,
+.lastSync,
+.compatibilityWarning,
+.error {
+  text-align: center;
+}
+
+.description,
+.lastSync {
+  color: var(--secondary-text-color);
+}
+
+.description {
+  margin-block: 0.25rem 0.75rem;
+}
+
+.connectionStatus {
+  margin-block: 0.75rem 0.5rem;
+}
+
+.lastSync,
+.compatibilityWarning {
+  margin-block: 0.5rem;
+}
+
+.compatibilityWarning {
+  color: var(--secondary-text-color);
+  font-style: italic;
+}
+
+.error {
+  color: var(--error-color, #c62828);
+  overflow-wrap: anywhere;
+}
+
+.fields {
+  align-items: center;
+  flex-direction: column;
+}
+
+.toggles {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+  margin-block: 0.25rem 0.75rem;
+  place-items: center;
+}
+
+.fields :deep(.ft-input-component) {
+  inline-size: min(100%, 32rem);
+}
+
+.actions {
+  justify-content: center;
+}

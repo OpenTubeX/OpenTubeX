@@ -1,0 +1,15 @@
+services:
+  sync-server:
+    image: ghcr.io/libre-tube/sync-server:latest-sqlite
+    environment:
+      DATABASE_URL: ./data/db.sqlite
+      SECRET_KEY: opentubex-local-sync-server-test-secret
+      ALLOW_REGISTRATION: "true"
+      VALIDATE_SUBMITTED_METADATA: "false"
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - sync-server-data:/app/data
+
+volumes:
+  sync-server-data:

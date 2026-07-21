@@ -73,6 +73,7 @@ import DownloadSettings from '../../components/DownloadSettings.vue'
 import SubscriptionSettings from '../../components/SubscriptionSettings/SubscriptionSettings.vue'
 import PrivacySettings from '../../components/PrivacySettings.vue'
 import DataSettings from '../../components/DataSettings/DataSettings.vue'
+import SyncSettings from '../../components/SyncSettings/SyncSettings.vue'
 import DistractionSettings from '../../components/DistractionSettings/DistractionSettings.vue'
 import ProxySettings from '../../components/ProxySettings/ProxySettings.vue'
 import SponsorBlockSettings from '../../components/SponsorBlockSettings.vue'
@@ -162,6 +163,12 @@ const settingsComponentsData = computed(() => {
       title: t('Settings.Data Settings.Data Settings'),
       icon: ['fas', 'database'],
       component: DataSettings
+    },
+    {
+      type: 'sync',
+      title: t('Settings.Sync Settings.Sync Settings'),
+      icon: ['fas', 'sync'],
+      component: SyncSettings
     },
     ...(process.env.IS_ELECTRON
       ? [

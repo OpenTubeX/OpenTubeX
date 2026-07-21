@@ -720,8 +720,10 @@ onMounted(async () => {
   })
 
   store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async () => {
-    store.dispatch('grabHistory')
-    store.dispatch('grabAllPlaylists')
+    const syncDataReady = Promise.all([
+      store.dispatch('grabHistory'),
+      store.dispatch('grabAllPlaylists'),
+    ])
     store.dispatch('grabAllSubscriptions')
     store.dispatch('grabSearchHistoryEntries')
 
@@ -733,6 +735,11 @@ onMounted(async () => {
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
     }
+
+    await syncDataReady
+    store.dispatch('initializeSyncServer').catch(error => {
+      console.error('Initial sync server sync failed', error)
+    })
 
     dataReady.value = true
 
@@ -792,6 +799,7 @@ onBeforeUnmount(() => {
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
   clearInterval(historyCleanupTimer)
+  store.dispatch('stopSyncServerAutoSync')
   document.removeEventListener('keydown', handleKeyboardShortcuts)
   document.removeEventListener('keyup', handleKeyboardShortcutKeyup)
   document.removeEventListener('mousedown', handleMouseDown)
