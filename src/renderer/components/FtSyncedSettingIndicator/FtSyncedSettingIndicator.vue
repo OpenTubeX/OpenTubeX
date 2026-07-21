@@ -14,6 +14,19 @@
   >
     <FontAwesomeIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
   </span>
+  <span
+    v-if="showReset"
+    class="changedSettingIndicator"
+    role="button"
+    tabindex="0"
+    :aria-label="resetLabel"
+    :title="resetLabel"
+    @click.prevent.stop="resetToDefault"
+    @keydown.enter.prevent.stop="resetToDefault"
+    @keydown.space.prevent.stop="resetToDefault"
+  >
+    <FontAwesomeIcon :icon="['fas', 'undo']" />
+  </span>
 </template>
 
 <script setup>
@@ -21,7 +34,11 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { isSettingSyncEnabled, isSettingSyncable } from '../../store/modules/settings'
+import {
+  DEFAULT_SETTINGS,
+  isSettingSyncEnabled,
+  isSettingSyncable
+} from '../../store/modules/settings'
 import store from '../../store/index'
 
 const props = defineProps({
@@ -44,9 +61,35 @@ const isSynced = computed(() => {
   return isSettingSyncEnabled(store.state.settings, props.settingKey)
 })
 
+const showReset = computed(() => {
+  return store.state.settings.highlightChangedSettings === true &&
+    props.settingKey !== 'highlightChangedSettings' &&
+    Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, props.settingKey) &&
+    !settingsValuesEqual(store.state.settings[props.settingKey], DEFAULT_SETTINGS[props.settingKey])
+})
+
 const label = computed(() => isSynced.value
   ? t('Settings.Sync Settings.Disable Setting Sync')
   : t('Settings.Sync Settings.Enable Setting Sync'))
+
+const resetLabel = computed(() => t('Settings.Reset Setting to Default'))
+
+function settingsValuesEqual(currentValue, defaultValue) {
+  if (Object.is(currentValue, defaultValue)) {
+    return true
+  }
+
+  if (typeof currentValue !== 'object' || currentValue === null ||
+      typeof defaultValue !== 'object' || defaultValue === null) {
+    return false
+  }
+
+  return JSON.stringify(currentValue) === JSON.stringify(defaultValue)
+}
+
+function resetToDefault() {
+  store.dispatch('resetSettingToDefault', props.settingKey)
+}
 
 async function toggleSync() {
   const excluded = Array.isArray(store.state.settings.syncServerSettingsExcluded)
@@ -63,7 +106,8 @@ async function toggleSync() {
 </script>
 
 <style scoped>
-.syncedSettingIndicator {
+.syncedSettingIndicator,
+.changedSettingIndicator {
   padding: 0;
   border: 0;
   color: inherit;
@@ -76,10 +120,16 @@ async function toggleSync() {
 }
 
 .syncedSettingIndicator:hover,
-.syncedSettingIndicator:focus-visible {
+.syncedSettingIndicator:focus-visible,
+.changedSettingIndicator:hover,
+.changedSettingIndicator:focus-visible {
   color: var(--primary-color);
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
+}
+
+.changedSettingIndicator {
+  color: var(--primary-color);
 }
 
 .syncDisabled {

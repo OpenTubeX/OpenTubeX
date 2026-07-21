@@ -49,6 +49,13 @@
             setting-key="settingsSectionSortEnabled"
             @change="updateSettingsSectionSortEnabled"
           />
+          <FtToggleSwitch
+            class="settingsToggle"
+            :label="t('Settings.Highlight Changed Settings')"
+            :default-value="highlightChangedSettings"
+            setting-key="highlightChangedSettings"
+            @change="updateHighlightChangedSettings"
+          />
         </div>
         <div class="settingsSections">
           <component
@@ -115,6 +122,7 @@ const activeSection = ref(null)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
+const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
 
 const settingsComponentsData = computed(() => {
   return [
@@ -280,6 +288,13 @@ function showKeyboardShortcutPrompt() {
  */
 function updateSettingsSectionSortEnabled(value) {
   store.dispatch('updateSettingsSectionSortEnabled', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateHighlightChangedSettings(value) {
+  store.dispatch('updateHighlightChangedSettings', value)
 }
 
 function handleMounted() {

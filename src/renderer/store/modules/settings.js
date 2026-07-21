@@ -394,6 +394,7 @@ const state = {
   screenshotFolderPath: '',
   screenshotFilenamePattern: '%Y%M%D-%H%N%S',
   settingsSectionSortEnabled: false,
+  highlightChangedSettings: false,
   fetchSubscriptionsAutomatically: true,
   showNewSubscriptionFeed: true,
   showNewSubscriptionFeedIndicators: false,
@@ -420,6 +421,10 @@ const state = {
   userPlaylistsSortBy: 'latest_played_first',
   userHistorySortBy: 'latest_played_first',
 }
+
+// Keep a snapshot separate from Vuex's reactive state so settings can reliably
+// be compared with and restored to their original values.
+export const DEFAULT_SETTINGS = Object.freeze(structuredClone(state))
 
 const sideEffectHandlers = {
   keyboardShortcuts: (_store, value) => {
@@ -664,6 +669,14 @@ const customGetters = {
 const customMutations = {}
 
 const customActions = {
+  resetSettingToDefault: ({ dispatch }, settingKey) => {
+    if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
+      return
+    }
+
+    return dispatch(defaultUpdaterId(settingKey), structuredClone(DEFAULT_SETTINGS[settingKey]))
+  },
+
   updateSettingsPassword: async ({ commit }, value) => {
     try {
       const hashedPassword = await hashPassword(value)

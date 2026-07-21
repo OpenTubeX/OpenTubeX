@@ -13,9 +13,22 @@
 
 .switchRow {
   display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-inline-end: auto;
   align-items: center;
   margin-block-end: 5px;
+}
+
+:deep(.switch-ctn:has(.changedSettingIndicator)),
+:deep(.select:has(.changedSettingIndicator)),
+:deep(.ft-input-component:has(.changedSettingIndicator)),
+:deep(.pure-material-slider:has(.changedSettingIndicator)),
+:deep(.pure-checkbox:has(.changedSettingIndicator)),
+:deep(.inputTags:has(.changedSettingIndicator)),
+:deep(.sponsorBlockCategory:has(.changedSettingIndicator)) {
+  border-inline-start: 3px solid var(--primary-color);
+  padding-inline-start: 9px;
 }
 
 .settingsToggle {

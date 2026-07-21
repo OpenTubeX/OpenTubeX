@@ -38,6 +38,27 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeChecked()
   })
+
+  test('highlights changed settings and resets them to defaults', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const autoLoadToggle = page.getByRole('checkbox', { name: /Auto Load Next Page/i })
+    await page.locator('label.switch-label').filter({ hasText: 'Auto Load Next Page' }).click()
+    await expect(autoLoadToggle).toBeChecked()
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Highlight settings changed from defaults' })
+      .click()
+
+    const autoLoadSetting = page.locator('.switch-ctn').filter({ has: autoLoadToggle })
+    const resetButton = autoLoadSetting.getByRole('button', { name: 'Reset this setting to its default' })
+    await expect(resetButton).toBeVisible()
+    await expect(autoLoadSetting).toHaveCSS('border-left-width', '3px')
+
+    await resetButton.click()
+    await expect(autoLoadToggle).not.toBeChecked()
+    await expect(resetButton).toHaveCount(0)
+  })
 })
 
 test.describe('synced setting indicators', () => {

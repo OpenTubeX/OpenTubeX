@@ -627,6 +627,8 @@ Settings:
     Password Settings: Password
     Set Password: Set password
   Sort Settings Sections (A-Z): Sort settings sections (A-Z)
+  Highlight Changed Settings: Highlight settings changed from defaults
+  Reset Setting to Default: Reset this setting to its default
   Return to Settings Menu: Return to Settings Menu
 About:
   #On About page
