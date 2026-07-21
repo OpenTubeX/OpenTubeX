@@ -791,7 +791,7 @@
 
 .skippedSegmentsWrapper {
   position: absolute;
-  right: 2%;
+  inset-inline-end: 2%;
   bottom: max(15%, calc(46px + 2.5% + 3%)); /* 46px + 2.5% is the height of the controls */
   display: flex;
   flex-direction: column;
@@ -799,6 +799,7 @@
   align-items: flex-end;
   pointer-events: none;
   z-index: 3;
+  transition: inset-inline-end 250ms ease;
 }
 
 .skippedSegment {
@@ -1209,6 +1210,10 @@
   transition: none !important;
 }
 
+.ftVideoPlayer.presentationModeChanging .skippedSegmentsWrapper {
+  transition: none !important;
+}
+
 .ftVideoPlayer:fullscreen .fullscreenActions,
 .ftVideoPlayer.fullWindow .fullscreenActions {
   display: flex;
@@ -1422,6 +1427,16 @@
 .ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .fullscreenActions,
 .ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
+}
+
+/* Keep SponsorBlock notices inside the video area when a dock is open. */
+.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .skippedSegmentsWrapper,
+.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .skippedSegmentsWrapper,
+.ftVideoPlayer:fullscreen.chaptersOverlayOpen .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow.chaptersOverlayOpen .skippedSegmentsWrapper {
+  inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 
 .ftVideoPlayer:fullscreen :deep(.shaka-fullscreen-button),
