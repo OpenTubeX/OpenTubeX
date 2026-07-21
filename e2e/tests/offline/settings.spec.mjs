@@ -7,6 +7,21 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsMenu, .ftSettingsMenu, [class*="settings"]').first()).toBeVisible()
   })
 
+  test('the current section persists in the URL', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
+    await playerSectionLink.click()
+    await expect(page).toHaveURL(/#\/settings#player$/)
+
+    await page.reload()
+    await expect(playerSectionLink).toHaveClass(/active/)
+
+    const playerScrollPosition = await page.evaluate(() => window.scrollY)
+    await page.mouse.wheel(0, 1200)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(playerScrollPosition)
+  })
+
   test('a toggled setting persists across restarts', async ({ app }) => {
     let page = app.page
     await goTo(page, 'settings')

@@ -239,6 +239,7 @@ export class TabNavigationService {
     const route = serializeResolvedRoute(to)
     const sameRoute = route.fullPath === tab.route.fullPath
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
+    const preserveScroll = location?.state?.preserveScroll === true
 
     if (mode === 'push' && sameRoute) {
       return
@@ -283,7 +284,9 @@ export class TabNavigationService {
         history[historyIndex] = {
           route: cloneRoute(route),
           title: history[historyIndex]?.title || routeTitle(to),
-          scroll: sameRoute ? { ...history[historyIndex]?.scroll } : { left: 0, top: 0 }
+          scroll: sameRoute || preserveScroll
+            ? { ...history[historyIndex]?.scroll }
+            : { left: 0, top: 0 }
         }
       } else {
         history = tab.history.slice(0, tab.historyIndex + 1).map(cloneHistoryEntry)
@@ -316,7 +319,9 @@ export class TabNavigationService {
         await runPendingViewTransition(applyNavigation)
         await nextTick()
         await nextAnimationFrame()
-        this.restoreScroll(tabId)
+        if (!preserveScroll) {
+          this.restoreScroll(tabId)
+        }
         this.projectTitle(tabId)
       } else {
         await applyNavigation()

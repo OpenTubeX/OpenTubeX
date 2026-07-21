@@ -74,6 +74,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vue'
 import ThemeSettings from '../../components/ThemeSettings.vue'
@@ -105,6 +106,8 @@ const SETTINGS_MOBILE_WIDTH_THRESHOLD = 1015
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = SETTINGS_MOBILE_WIDTH_THRESHOLD + 20
 
 const { locale, t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const isInDesktopView = ref(true)
 const settingsSectionTypeOpenInMobile = ref(null)
@@ -287,8 +290,18 @@ function handleMounted() {
   settingsResizeObserver.observe(settingsPageRef.value)
   document.addEventListener('scroll', markScrolledToSectionAsActive)
 
-  // mark first section as active before any scrolling has taken place
-  activeSection.value = settingsSectionComponents.value[0].type
+  const sectionFromHash = route.hash.slice(1)
+  const initialSection = settingsSectionComponents.value.some(({ type }) => type === sectionFromHash)
+    ? sectionFromHash
+    : settingsSectionComponents.value[0].type
+
+  activeSection.value = initialSection
+
+  if (sectionFromHash === initialSection) {
+    navigateToSection(initialSection, false)
+  } else if (isInDesktopView.value) {
+    updateSectionHash(initialSection)
+  }
 }
 
 const sectionRefs = useTemplateRef('sectionRefs')
@@ -298,8 +311,13 @@ let hasMeasuredSettingsWidth = false
 
 /**
  * @param {string} sectionType
+ * @param {boolean} updateHash
  */
-function navigateToSection(sectionType) {
+function navigateToSection(sectionType, updateHash = true) {
+  if (updateHash) {
+    updateSectionHash(sectionType)
+  }
+
   if (isInDesktopView.value) {
     nextTick(() => {
       const sectionElement = sectionRefs.value.find(sectionRef => {
@@ -317,11 +335,29 @@ function navigateToSection(sectionType) {
   }
 }
 
+/**
+ * @param {string | null} sectionType
+ */
+function updateSectionHash(sectionType) {
+  const hash = sectionType == null ? '' : `#${sectionType}`
+
+  if (route.hash !== hash) {
+    router.replace({
+      hash,
+      state: {
+        preserveScroll: true,
+        skipTabRouteLoading: true
+      }
+    })
+  }
+}
+
 const menuRef = useTemplateRef('menuRef')
 
 function returnToSettingsMenu() {
   const openSection = settingsSectionTypeOpenInMobile.value
   settingsSectionTypeOpenInMobile.value = null
+  updateSectionHash(null)
 
   // focus the corresponding Settings Menu title
   nextTick(() => {
@@ -346,7 +382,11 @@ function markScrolledToSectionAsActive() {
     const sectionTop = sectionElement.offsetTop
 
     if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-      activeSection.value = sectionElement.dataset.section
+      const sectionType = sectionElement.dataset.section
+      if (activeSection.value !== sectionType) {
+        activeSection.value = sectionType
+        updateSectionHash(sectionType)
+      }
       break
     }
   }
