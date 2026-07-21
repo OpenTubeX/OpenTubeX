@@ -220,6 +220,35 @@
       />
     </FtFlexBox>
     <FtPrompt
+      v-if="dataLossWarning"
+      :label="t('Settings.Sync Settings.Data Loss Confirmation')"
+      theme="readable-width"
+      @click="dataLossWarning = null"
+    >
+      <div class="deleteAccountContent">
+        <p class="deleteAccountWarning">
+          {{ t('Settings.Sync Settings.Data Loss Warning', {
+            deleted: dataLossWarning.deleted,
+            previous: dataLossWarning.previous,
+            collection: dataLossWarning.collection,
+          }) }}
+        </p>
+        <FtFlexBox class="actions">
+          <FtButton
+            :label="t('Settings.Sync Settings.Confirm Data Loss')"
+            text-color="var(--destructive-text-color)"
+            background-color="var(--destructive-color)"
+            :icon="['fas', 'triangle-exclamation']"
+            @click="confirmDataLossSync"
+          />
+          <FtButton
+            :label="t('Cancel')"
+            @click="dataLossWarning = null"
+          />
+        </FtFlexBox>
+      </div>
+    </FtPrompt>
+    <FtPrompt
       v-if="showDeleteAccountPrompt"
       :label="t('Settings.Sync Settings.Delete Account Confirmation')"
       theme="readable-width"
@@ -276,7 +305,11 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
-import { SyncServerClient, normalizeSyncServerUrl } from '../../helpers/sync-server'
+import {
+  SyncServerClient,
+  SyncServerDataLossError,
+  normalizeSyncServerUrl,
+} from '../../helpers/sync-server'
 import { showToast } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
@@ -297,6 +330,7 @@ const localError = ref('')
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
+const dataLossWarning = ref(null)
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
@@ -413,6 +447,22 @@ async function syncNow() {
   localError.value = ''
   try {
     await store.dispatch('syncWithSyncServer')
+    showToast(t('Settings.Sync Settings.Sync completed'))
+  } catch (error) {
+    if (error instanceof SyncServerDataLossError) {
+      dataLossWarning.value = error
+      return
+    }
+    localError.value = error.message
+  }
+}
+
+async function confirmDataLossSync() {
+  if (busy.value) return
+  dataLossWarning.value = null
+  localError.value = ''
+  try {
+    await store.dispatch('syncWithSyncServer', { allowDataLoss: true })
     showToast(t('Settings.Sync Settings.Sync completed'))
   } catch (error) {
     localError.value = error.message

@@ -443,6 +443,74 @@ test.describe('OpenTubeX sync server', () => {
     expect(cleanupResponse.ok).toBe(true)
   })
 
+  test('requires confirmation before an empty remote deletes local data', async ({ app, page }) => {
+    const username = `opentubex-reset-guard-${Date.now()}-${Math.random().toString(16).slice(2)}`
+
+    await page.route('**/health', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ok',
+        capabilities: { encrypted_sync: 0, bulk_sync: 1, history_page_size: 1000 }
+      })
+    }))
+    await page.route('**/v1/subscriptions/', route => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({ contentType: 'application/json', body: '[]' })
+      }
+      return route.continue()
+    })
+
+    await goTo(page, 'settings')
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    const warning = page.getByRole('dialog', { name: 'Confirm destructive sync?' })
+    await expect(warning).toBeVisible()
+    await expect(warning).toContainText('2 of 2 previously synced subscriptions')
+
+    const profiles = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+    expect(profiles).toContain(channelId)
+    expect(profiles).toContain(secondChannelId)
+    await warning.getByRole('button', { name: 'Cancel' }).click()
+
+    await expect.poll(async () => {
+      const currentSettings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return currentSettings.syncServerAutoSync
+    }).toBe(false)
+
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(warning).toBeVisible()
+    await warning.getByRole('button', { name: 'Delete and continue' }).click()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      return records
+        .filter(record => record._id === 'allChannels' && !record.$$deleted)
+        .at(-1)
+        ?.subscriptions.length
+    }).toBe(0)
+
+    const settings = latestSettings(
+      await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+    )
+    const cleanupResponse = await fetch(`${syncServerUrl}/v1/account/delete`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: settings.syncServerToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: 'local-test-password' })
+    })
+    expect(cleanupResponse.ok).toBe(true)
+  })
+
   test('supports legacy servers without a capabilities endpoint', async ({ app, page }) => {
     const username = `opentubex-legacy-${Date.now()}-${Math.random().toString(16).slice(2)}`
     let activeSubscriptionWrites = 0

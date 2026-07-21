@@ -91,6 +91,18 @@ export class SyncServerError extends Error {
   }
 }
 
+export class SyncServerDataLossError extends Error {
+  constructor(collection, deleted, previous) {
+    super(
+      `Sync stopped because it would delete ${deleted} of ${previous} previously synced ${collection} items`
+    )
+    this.name = 'SyncServerDataLossError'
+    this.collection = collection
+    this.deleted = deleted
+    this.previous = previous
+  }
+}
+
 export function normalizeSyncServerUrl(value) {
   let url
   try {
@@ -201,6 +213,10 @@ export class SyncServerClient {
       `/v1/encrypted_sync/${encodeURIComponent(collection)}`,
       { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS }
     )
+  }
+
+  getLegacyEncryptedSync() {
+    return this.request('/v1/encrypted_sync/legacy', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
   putEncryptedSyncCollection(collection, revision, payload) {
@@ -440,13 +456,18 @@ async function uploadInChunks(items, supportsBulk, uploadBulk, uploadSingle) {
   }
 }
 
-function mergeIds(localIds, remoteIds, previousIds = []) {
+export function mergeIds(
+  localIds,
+  remoteIds,
+  previousIds = [],
+  { allowDataLoss = false, collection = 'data' } = {}
+) {
   const local = new Set(localIds)
   const remote = new Set(remoteIds)
   const previous = new Set(previousIds)
   const allIds = new Set([...local, ...remote, ...previous])
 
-  return new Set(Array.from(allIds).filter(id => {
+  const merged = new Set(Array.from(allIds).filter(id => {
     if (!previous.has(id)) {
       return local.has(id) || remote.has(id)
     }
@@ -454,6 +475,18 @@ function mergeIds(localIds, remoteIds, previousIds = []) {
     // Once both sides have seen an item, a deletion on either side wins.
     return local.has(id) && remote.has(id)
   }))
+  const deleted = Array.from(previous).filter(id => !merged.has(id)).length
+  const oneSideWasEmptied = previous.size > 0 && (
+    (local.size === 0 && remote.size > 0) ||
+    (remote.size === 0 && local.size > 0)
+  )
+  const isMassDeletion = deleted >= 10 && deleted / previous.size >= 0.5
+
+  if (!allowDataLoss && deleted > 0 && (oneSideWasEmptied || isMassDeletion)) {
+    throw new SyncServerDataLossError(collection, deleted, previous.size)
+  }
+
+  return merged
 }
 
 function normalizeChannelAvatar(avatar) {
@@ -560,7 +593,7 @@ function isSameLocalPlaylist(playlist, metadata, videos) {
     playlist.videos.every((video, index) => video.videoId === videos[index].videoId)
 }
 
-export async function syncSubscriptions(client, store, previousIds = []) {
+export async function syncSubscriptions(client, store, previousIds = [], options = {}) {
   const profiles = store.state.profiles.profileList
   const mainProfile = profiles.find(profile => profile._id === MAIN_PROFILE_ID) ?? profiles[0]
   const localSubscriptions = mainProfile.subscriptions.map(channel => ({
@@ -570,7 +603,10 @@ export async function syncSubscriptions(client, store, previousIds = []) {
   const localById = mapBy(localSubscriptions, channel => channel.id)
   const remoteSubscriptions = await client.getSubscriptions()
   const remoteById = mapBy(remoteSubscriptions, channel => channel.id)
-  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'subscriptions',
+  })
 
   for (const id of remoteById.keys()) {
     if (!mergedIds.has(id)) {
@@ -617,7 +653,7 @@ function parseChannelPlaybackSpeeds(value) {
   }
 }
 
-export async function syncChannelPlaybackSpeeds(client, store, previous = {}) {
+export async function syncChannelPlaybackSpeeds(client, store, previous = {}, options = {}) {
   const local = parseChannelPlaybackSpeeds(store.state.settings.channelPlaybackSpeeds)
   const remoteEntries = await client.getChannelPlaybackSpeeds()
   if (remoteEntries === null) return null
@@ -625,7 +661,10 @@ export async function syncChannelPlaybackSpeeds(client, store, previous = {}) {
   const remote = Object.fromEntries(remoteEntries.map(entry => {
     return [entry.channel_id, entry.playback_speed]
   }))
-  const mergedIds = mergeIds(Object.keys(local), Object.keys(remote), Object.keys(previous))
+  const mergedIds = mergeIds(Object.keys(local), Object.keys(remote), Object.keys(previous), {
+    ...options,
+    collection: 'channel playback speeds',
+  })
   const merged = {}
 
   for (const channelId of Object.keys(remote)) {
@@ -660,7 +699,7 @@ export async function syncChannelPlaybackSpeeds(client, store, previous = {}) {
   return merged
 }
 
-export async function syncPlaylists(client, store, previous = {}) {
+export async function syncPlaylists(client, store, previous = {}, options = {}) {
   const localPlaylists = store.state.playlists.playlists
   const localById = mapBy(localPlaylists, playlist => playlist._id)
   const remotePlaylistHeaders = await client.getPlaylists()
@@ -675,7 +714,10 @@ export async function syncPlaylists(client, store, previous = {}) {
     const localId = localIdByRemoteId.get(remoteId) ?? remoteId
     return [localId, { ...entry, remoteId }]
   }))
-  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'playlists',
+  })
   const nextSnapshot = {}
 
   for (const [id, remote] of remoteById) {
@@ -715,7 +757,8 @@ export async function syncPlaylists(client, store, previous = {}) {
     const mergedVideoIds = mergeIds(
       localVideosById.keys(),
       remoteVideosById.keys(),
-      previous[id]?.videos
+      previous[id]?.videos,
+      { ...options, collection: `videos in playlist ${metadata.title}` }
     )
     const remoteVideosToAdd = Array.from(mergedVideoIds)
       .filter(videoId => !remoteVideosById.has(videoId))
@@ -801,14 +844,17 @@ function historyStateEquals(localPayload, remote) {
     localPayload.metadata.position_millis === remote.metadata.position_millis
 }
 
-export async function syncHistory(client, store, previousIds = []) {
+export async function syncHistory(client, store, previousIds = [], options = {}) {
   const localHistory = store.state.history.historyCacheSorted
   const syncableLocalHistory = localHistory.filter(record => historyToRemote(record) !== null)
   const localById = mapBy(syncableLocalHistory, record => record.videoId)
   const remoteHistory = await client.getWatchHistory()
   if (remoteHistory === null) return null
   const remoteById = mapBy(remoteHistory, entry => entry.video.id)
-  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds)
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), previousIds, {
+    ...options,
+    collection: 'history',
+  })
   const historyToUpload = []
   const localInsertions = []
   const localUpdates = []
@@ -879,7 +925,7 @@ function remoteProfileMetadata(group, fallback = {}) {
   }
 }
 
-export async function syncProfiles(client, store, previous = {}) {
+export async function syncProfiles(client, store, previous = {}, options = {}) {
   const profiles = store.state.profiles.profileList
   const localProfiles = profiles.filter(profile => profile._id !== MAIN_PROFILE_ID)
   const localById = mapBy(localProfiles, profile => profile._id)
@@ -893,7 +939,10 @@ export async function syncProfiles(client, store, previous = {}) {
     const localId = entry.group.local_id ?? localIdByRemoteId.get(remoteId) ?? remoteId
     return [localId, { ...entry, remoteId }]
   }))
-  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous))
+  const mergedIds = mergeIds(localById.keys(), remoteById.keys(), Object.keys(previous), {
+    ...options,
+    collection: 'profiles',
+  })
   const mainSubscriptions = profiles.find(profile => profile._id === MAIN_PROFILE_ID)?.subscriptions ?? []
   const subscriptionsById = mapBy(mainSubscriptions, channel => channel.id)
   const next = {}
@@ -935,7 +984,12 @@ export async function syncProfiles(client, store, previous = {}) {
 
     const localChannelIds = local?.subscriptions.map(channel => channel.id) ?? []
     const remoteChannelIds = remote.channels.map(channel => channel.id)
-    const mergedChannelIds = mergeIds(localChannelIds, remoteChannelIds, previous[id]?.channels)
+    const mergedChannelIds = mergeIds(
+      localChannelIds,
+      remoteChannelIds,
+      previous[id]?.channels,
+      { ...options, collection: `channels in profile ${metadata.title}` }
+    )
     for (const channelId of remoteChannelIds) {
       if (!mergedChannelIds.has(channelId)) {
         await client.removeSubscriptionGroupChannel(remoteId, channelId)

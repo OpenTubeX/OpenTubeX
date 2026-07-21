@@ -1,5 +1,6 @@
 import {
   SyncServerClient,
+  SyncServerDataLossError,
   normalizeSyncServerUrl,
   syncChannelPlaybackSpeeds,
   syncHistory,
@@ -68,7 +69,7 @@ function withSyncLock(callback) {
   return callback()
 }
 
-async function runSync(context) {
+async function runSync(context, { allowDataLoss = false } = {}) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
   const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
@@ -114,15 +115,30 @@ async function runSync(context) {
   async function applyCollection(collection, targetClient) {
     switch (collection) {
       case 'subscriptions':
-        next.subscriptions = await syncSubscriptions(targetClient, store, previous.subscriptions)
+        next.subscriptions = await syncSubscriptions(
+          targetClient,
+          store,
+          previous.subscriptions,
+          { allowDataLoss }
+        )
         result.subscriptions = next.subscriptions.length
         break
       case 'playlists':
-        next.playlists = await syncPlaylists(targetClient, store, previous.playlists)
+        next.playlists = await syncPlaylists(
+          targetClient,
+          store,
+          previous.playlists,
+          { allowDataLoss }
+        )
         result.playlists = Object.keys(next.playlists).length
         break
       case 'history': {
-        const history = await syncHistory(targetClient, store, previous.history)
+        const history = await syncHistory(
+          targetClient,
+          store,
+          previous.history,
+          { allowDataLoss }
+        )
         if (history !== null) {
           commit('setSyncServerHistorySupported', true)
           next.history = history
@@ -136,7 +152,8 @@ async function runSync(context) {
         const speeds = await syncChannelPlaybackSpeeds(
           targetClient,
           store,
-          previous.playbackSpeeds
+          previous.playbackSpeeds,
+          { allowDataLoss }
         )
         if (speeds !== null) {
           commit('setSyncServerPlaybackSpeedsSupported', true)
@@ -149,7 +166,12 @@ async function runSync(context) {
       }
       case 'profiles':
         {
-          const profiles = await syncProfiles(targetClient, store, previous.profiles)
+          const profiles = await syncProfiles(
+            targetClient,
+            store,
+            previous.profiles,
+            { allowDataLoss }
+          )
           if (profiles !== null) {
             next.profiles = profiles
             result.profiles = Object.keys(profiles).length
@@ -180,10 +202,15 @@ async function runSync(context) {
         uploadCollections,
       } = await runStage('download', async () => {
         const manifest = await networkClient.getEncryptedSyncManifest()
-        const legacy = manifest.legacy_data
-          ? await loadLegacySyncDocument(networkClient)
-          : createEmptySyncDocument()
-        const uploadCollections = manifest.legacy_data
+        const legacyEncrypted = manifest.legacy_encrypted_data
+          ? await networkClient.getLegacyEncryptedSync()
+          : null
+        const legacy = legacyEncrypted?.payload
+          ? await decryptSyncDocument(legacyEncrypted.payload, settings.syncServerPrivacyKey)
+          : manifest.legacy_data
+            ? await loadLegacySyncDocument(networkClient)
+            : createEmptySyncDocument()
+        const uploadCollections = manifest.legacy_data || legacyEncrypted?.payload
           ? Array.from(new Set([...enabledCollections, ...LEGACY_ENCRYPTED_COLLECTIONS]))
           : enabledCollections
         const document = createEmptySyncDocument()
@@ -280,6 +307,9 @@ async function runSync(context) {
     commit('setSyncServerStatus', 'success')
     return result
   } catch (error) {
+    if (error instanceof SyncServerDataLossError) {
+      await dispatch('setSyncServerAutoSync', false)
+    }
     commit('setSyncServerProgress', null)
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
@@ -322,7 +352,9 @@ const actions = {
       const firstCollection = manifest.collections[0]?.collection
       const remote = firstCollection
         ? await client.getEncryptedSyncCollection(firstCollection)
-        : null
+        : manifest.legacy_encrypted_data
+          ? await client.getLegacyEncryptedSync()
+          : null
       const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
       privacyKey = privacy.key
       privacySalt = privacy.salt
@@ -388,12 +420,12 @@ const actions = {
     }
   },
 
-  syncWithSyncServer(context) {
+  syncWithSyncServer(context, options = {}) {
     if (!context.rootState.settings.syncServerToken) {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
     if (!activeSyncPromise) {
-      activeSyncPromise = withSyncLock(() => runSync(context)).finally(() => {
+      activeSyncPromise = withSyncLock(() => runSync(context, options)).finally(() => {
         activeSyncPromise = null
       })
     }
