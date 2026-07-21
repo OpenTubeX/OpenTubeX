@@ -823,6 +823,10 @@ Settings:
     Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
   Sync Settings:
     Sync Settings: Synchronizuj
+    Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
+    Privacy Passphrase: Hasło dostępu
+    Enhanced Privacy Enabled: Włączono rozszerzoną prywatność. Serwer przechowuje tylko zaszyfrowane dane synchronizacji.
+    Enhanced Privacy Unsupported: Ostrzeżenie — ten serwer nie obsługuje rozszerzonej prywatności. Zsynchronizowane dane są widoczne dla jego operatora.
 About:
   #On About page
   About: 'O projekcie'
