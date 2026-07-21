@@ -126,6 +126,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  refreshTab: {
+    type: String,
+    default: null
+  },
   stableItemKeys: {
     type: Boolean,
     default: false
@@ -159,8 +163,16 @@ const subscriptionFeedRefreshInProgress = computed(() => {
   return store.getters.getSubscriptionFeedRefreshInProgress
 })
 
+const subscriptionFeedRefreshTab = computed(() => {
+  return store.getters.getSubscriptionFeedRefreshTab
+})
+
 const displayIsLoading = computed(() => {
-  return props.isLoading || (props.trackGlobalRefresh && subscriptionFeedRefreshInProgress.value)
+  const isRelevantGlobalRefresh = props.trackGlobalRefresh &&
+    subscriptionFeedRefreshInProgress.value &&
+    (props.refreshTab === null || subscriptionFeedRefreshTab.value === props.refreshTab)
+
+  return props.isLoading || isRelevantGlobalRefresh
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

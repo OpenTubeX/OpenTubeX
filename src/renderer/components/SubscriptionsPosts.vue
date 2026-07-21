@@ -5,6 +5,7 @@
     :video-list="postList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
+    refresh-tab="posts"
     :is-community="true"
     :initial-data-limit="20"
     @refresh="loadPostsForSubscriptionsFromRemote"
@@ -240,10 +241,6 @@ function loadPostsFromCacheForAllActiveProfileChannels() {
 }
 
 async function loadPostsForSubscriptionsFromRemote() {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return
-  }
-
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []

@@ -5,6 +5,7 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
+    refresh-tab="live"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
 </template>
@@ -230,10 +231,6 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
 }
 
 async function loadVideosForSubscriptionsFromRemote() {
-  if (store.getters.getSubscriptionFeedRefreshInProgress) {
-    return
-  }
-
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
