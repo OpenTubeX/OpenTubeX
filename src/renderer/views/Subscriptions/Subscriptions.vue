@@ -367,7 +367,7 @@ watch(subscriptionRefreshTimestamps, (timestamps, previousTimestamps) => {
 /**
  * @param {'videos' | 'shorts' | 'live' | 'community'} refreshedTab
  */
-function resetScrollAfterRefresh(refreshedTab) {
+async function resetScrollAfterRefresh(refreshedTab) {
   tabScrollPositions[refreshedTab] = 0
   tabScrollPositions.new = 0
 
@@ -380,6 +380,25 @@ function resetScrollAfterRefresh(refreshedTab) {
   } else {
     window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
   }
+
+  // The completion event is dispatched before the refreshed array reaches
+  // this view. Correct the scroll again after Vue and browser scroll anchoring
+  // have applied the new list layout.
+  await nextTick()
+  await nextAnimationFrame()
+  await nextAnimationFrame()
+
+  if (
+    isMounted &&
+    (currentTab.value === refreshedTab || currentTab.value === 'new') &&
+    (!isElectron || isTabPresented?.value === true)
+  ) {
+    window.scrollTo({ left: 0, top: 0, behavior: 'instant' })
+  }
+}
+
+function nextAnimationFrame() {
+  return new Promise(resolve => window.requestAnimationFrame(() => resolve()))
 }
 
 let isMounted = false
@@ -394,6 +413,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isMounted = false
   removeFeedReloadRequestListener?.()
 })
 

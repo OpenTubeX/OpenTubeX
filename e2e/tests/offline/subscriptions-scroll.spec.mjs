@@ -89,3 +89,24 @@ test('a background feed refresh resets its logical tab scroll across restart', a
   await expect(relaunched.page.getByText('Feed video 00')).toBeVisible()
   await expect.poll(() => relaunched.page.evaluate(() => window.scrollY)).toBe(0)
 })
+
+test('a visible feed stays at the top while refreshed content is applied', async ({ page }) => {
+  await expect(page.getByText('Feed video 00')).toBeVisible()
+  await page.evaluate(() => window.scrollTo(0, 600))
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
+
+  const displacedScroll = await page.evaluate(async () => {
+    window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {
+      detail: { tab: 'videos', profileId: 'allChannels', timestamp: Date.now() }
+    }))
+
+    // Browser scroll anchoring can adjust the offset during the next layout
+    // frame, after the completion handler's immediate reset.
+    await new Promise(resolve => window.requestAnimationFrame(resolve))
+    window.scrollTo(0, 300)
+    return window.scrollY
+  })
+
+  expect(displacedScroll).toBe(300)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0)
+})
