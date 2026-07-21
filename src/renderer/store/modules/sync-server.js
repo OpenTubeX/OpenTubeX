@@ -100,17 +100,19 @@ async function runSync(context) {
       }
       const { remote, document } = await runStage('download', async () => {
         const remote = await networkClient.getEncryptedSync()
-        const document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+        let document = await decryptSyncDocument(remote.payload, settings.syncServerPrivacyKey)
+        // Older v1 enhanced servers did not report legacy_data. Prefer the
+        // lossless migration path when the field is absent.
+        const migrateLegacyData = !remote.payload && remote.legacy_data !== false
+        if (migrateLegacyData) {
+          document = await loadLegacySyncDocument(networkClient)
+        }
         return { remote, document }
       })
-      // Older v1 enhanced servers did not report legacy_data. Prefer the
-      // lossless migration path when the field is absent.
-      const migrateLegacyData = !remote.payload && remote.legacy_data !== false
-      client = migrateLegacyData ? networkClient : new EncryptedSyncAdapter(document)
+      client = new EncryptedSyncAdapter(document)
       encryptedSync = {
         revision: remote.revision,
         salt: remote.payload ? getPrivacySalt(remote.payload) : settings.syncServerPrivacySalt,
-        migrateLegacyData,
       }
     }
 
@@ -153,11 +155,8 @@ async function runSync(context) {
 
     if (encryptedSync) {
       await runStage('upload', async () => {
-        const document = encryptedSync.migrateLegacyData
-          ? await loadLegacySyncDocument(networkClient)
-          : client.document
         const payload = await encryptSyncDocument(
-          document,
+          client.document,
           settings.syncServerPrivacyKey,
           encryptedSync.salt
         )

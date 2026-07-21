@@ -1,7 +1,27 @@
 const PRIVACY_VERSION = 1
 const PBKDF2_ITERATIONS = 600_000
 const PADDING_BLOCK_BYTES = 64 * 1024
+const COMPRESSED_LENGTH_BYTES = 4
 const ADDITIONAL_DATA = new TextEncoder().encode('OpenTubeX encrypted sync v1')
+const GZIP_COMPRESSION = 'gzip'
+
+async function transformBytes(bytes, TransformStream) {
+  const stream = new globalThis.Blob([bytes])
+    .stream()
+    .pipeThrough(new TransformStream(GZIP_COMPRESSION))
+  return new Uint8Array(await new globalThis.Response(stream).arrayBuffer())
+}
+
+function compressBytes(bytes) {
+  return transformBytes(bytes, globalThis.CompressionStream)
+}
+
+function decompressBytes(bytes) {
+  if (typeof globalThis.DecompressionStream !== 'function') {
+    throw new Error('Compressed encrypted sync data is not supported by this app version')
+  }
+  return transformBytes(bytes, globalThis.DecompressionStream)
+}
 
 function bytesToBase64(bytes) {
   let binary = ''
@@ -49,11 +69,15 @@ async function derivePrivacyKey(passphrase, salt) {
 function parseEnvelope(payload) {
   try {
     const envelope = JSON.parse(payload)
+    const compressed = envelope.compression != null
     if (envelope.version !== PRIVACY_VERSION ||
         envelope.kdf?.name !== 'PBKDF2' ||
         envelope.kdf?.hash !== 'SHA-256' ||
         envelope.kdf?.iterations !== PBKDF2_ITERATIONS ||
-        envelope.cipher?.name !== 'AES-GCM') {
+        envelope.cipher?.name !== 'AES-GCM' ||
+        (compressed && (
+          envelope.compression.name !== GZIP_COMPRESSION
+        ))) {
       throw new Error()
     }
     return envelope
@@ -65,7 +89,7 @@ function parseEnvelope(payload) {
 async function decryptWithKey(payload, key) {
   const envelope = parseEnvelope(payload)
   try {
-    const plaintext = await crypto.subtle.decrypt(
+    const plaintext = new Uint8Array(await crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
         iv: base64ToBytes(envelope.cipher.iv),
@@ -73,8 +97,22 @@ async function decryptWithKey(payload, key) {
       },
       key,
       base64ToBytes(envelope.ciphertext)
-    )
-    const document = JSON.parse(new TextDecoder().decode(plaintext))
+    ))
+    let documentBytes = plaintext
+    if (envelope.compression) {
+      const compressedLength = new DataView(
+        plaintext.buffer,
+        plaintext.byteOffset,
+        COMPRESSED_LENGTH_BYTES
+      ).getUint32(0)
+      if (compressedLength <= 0 || compressedLength > plaintext.length - COMPRESSED_LENGTH_BYTES) {
+        throw new Error()
+      }
+      documentBytes = await decompressBytes(
+        plaintext.slice(COMPRESSED_LENGTH_BYTES, COMPRESSED_LENGTH_BYTES + compressedLength)
+      )
+    }
+    const document = JSON.parse(new TextDecoder().decode(documentBytes))
     if (document.version !== PRIVACY_VERSION) throw new Error()
     return document
   } catch {
@@ -104,10 +142,20 @@ export async function encryptSyncDocument(document, exportedKey, salt) {
   const key = await importPrivacyKey(exportedKey)
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const encoded = new TextEncoder().encode(JSON.stringify(document))
-  const paddedLength = Math.ceil(encoded.length / PADDING_BLOCK_BYTES) * PADDING_BLOCK_BYTES
+  const compressed = typeof globalThis.CompressionStream === 'function'
+    ? await compressBytes(encoded)
+    : null
+  const payload = compressed ?? encoded
+  const payloadOffset = compressed ? COMPRESSED_LENGTH_BYTES : 0
+  const paddedLength = Math.ceil(
+    (payloadOffset + payload.length) / PADDING_BLOCK_BYTES
+  ) * PADDING_BLOCK_BYTES
   const plaintext = new Uint8Array(Math.max(PADDING_BLOCK_BYTES, paddedLength))
   plaintext.fill(0x20)
-  plaintext.set(encoded)
+  if (compressed) {
+    new DataView(plaintext.buffer).setUint32(0, compressed.length)
+  }
+  plaintext.set(payload, payloadOffset)
   const ciphertext = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv, additionalData: ADDITIONAL_DATA },
     key,
@@ -122,6 +170,9 @@ export async function encryptSyncDocument(document, exportedKey, salt) {
       salt,
     },
     cipher: { name: 'AES-GCM', iv: bytesToBase64(iv) },
+    ...(compressed && {
+      compression: { name: GZIP_COMPRESSION },
+    }),
     ciphertext: bytesToBase64(new Uint8Array(ciphertext)),
   })
 }

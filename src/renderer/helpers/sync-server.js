@@ -6,6 +6,9 @@ const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
 const LEGACY_SYNC_CONCURRENCY = 4
 const REQUEST_TIMEOUT_MS = 20_000
+const ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND = 128 * 1024
+const ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS = 15_000
+const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
 
@@ -48,9 +51,9 @@ export class SyncServerClient {
     this.capabilitiesPromise = null
   }
 
-  async request(path, options = {}) {
+  async request(path, { timeoutMs = REQUEST_TIMEOUT_MS, ...options } = {}) {
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
     const headers = { Accept: 'application/json', ...options.headers }
 
     if (options.body != null) {
@@ -113,13 +116,22 @@ export class SyncServerClient {
   }
 
   getEncryptedSync() {
-    return this.request('/v1/encrypted_sync')
+    return this.request('/v1/encrypted_sync', { timeoutMs: MAX_ENCRYPTED_SYNC_TIMEOUT_MS })
   }
 
   putEncryptedSync(revision, payload) {
+    const timeoutMs = Math.min(
+      MAX_ENCRYPTED_SYNC_TIMEOUT_MS,
+      Math.max(
+        REQUEST_TIMEOUT_MS,
+        ENCRYPTED_SYNC_TIMEOUT_OVERHEAD_MS +
+          Math.ceil(payload.length / ENCRYPTED_SYNC_MIN_BYTES_PER_SECOND) * 1000
+      )
+    )
     return this.request('/v1/encrypted_sync', {
       method: 'PUT',
       body: { revision, payload },
+      timeoutMs,
     })
   }
 

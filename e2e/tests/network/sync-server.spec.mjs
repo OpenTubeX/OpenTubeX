@@ -261,6 +261,22 @@ test.describe('OpenTubeX sync server', () => {
     })
     expect(legacySubscriptionResponse.ok).toBe(true)
 
+    let legacyHistoryDownloads = 0
+    const encryptedUploadResponses = []
+    page.on('request', request => {
+      const url = new URL(request.url())
+      if (request.method() === 'GET' && url.pathname.endsWith('/watch_history/')) {
+        legacyHistoryDownloads++
+      }
+    })
+    page.on('response', response => {
+      const request = response.request()
+      const url = new URL(request.url())
+      if (request.method() === 'PUT' && url.pathname === '/v1/encrypted_sync') {
+        encryptedUploadResponses.push(response)
+      }
+    })
+
     await goTo(page, 'settings')
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
@@ -291,6 +307,16 @@ test.describe('OpenTubeX sync server', () => {
     const encryptedDocument = await encryptedResponse.json()
     expect(encryptedDocument.legacy_data).toBe(false)
     expect(encryptedDocument.payload).not.toContain(remoteChannelId)
+    const envelope = JSON.parse(encryptedDocument.payload)
+    expect(envelope.compression).toEqual({ name: 'gzip' })
+    expect(envelope).not.toHaveProperty('payload_length')
+    expect(legacyHistoryDownloads).toBe(1)
+    expect(encryptedUploadResponses).toHaveLength(1)
+    expect(await encryptedUploadResponses[0].json()).toEqual({
+      revision: 1,
+      payload: null,
+      legacy_data: false
+    })
 
     const plaintextResponse = await fetch(`${syncServerUrl}/v1/subscriptions/`, {
       headers: migratedHeaders
