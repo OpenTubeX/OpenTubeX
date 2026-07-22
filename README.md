@@ -277,11 +277,13 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
 * Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
-* Fedora / Enterprise Linux: [RPM repository](https://rpm.opentubex.org/)
+* Fedora / Enterprise Linux: [COPR repository](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/) or [RPM repository](https://rpm.opentubex.org/)
 * Flatpak: [Download](https://flatpak.opentubex.org/) and [Source Code](https://github.com/OpenTubeX/flatpak)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-bin/)
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/opentubex.svg)](https://repology.org/project/opentubex/versions)
+<br />
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/)
 
 #### Automated Builds (Nightly / Weekly)
 > [!WARNING]
