@@ -866,7 +866,7 @@ Settings:
     Data Loss Confirmation: Potwierdzić synchronizację z ryzykiem utraty danych?
     Data Loss Warning: Stan serwera spowoduje usunięcie {deleted} z {previous} wcześniej zsynchronizowanych elementów {collection}. Może to wskazywać na nieudaną migrację serwera lub jego reset. Kontynuuj tylko wtedy, gdy usunięcie jest celowe i masz kopię zapasową.
     Confirm Data Loss: Usuń i kontynuuj
-    Description: Synchronizuj subskrypcje, profile, playlisty, historię oglądania, preferencje odtwarzania, otwarte karty i przenośne ustawienia z serwerem synchronizacji OpenTubeX lub LibreTube. Serwery LibreTube mogą nie obsługiwać wszystkich funkcji synchronizacji.
+    Description: Synchronizuj subskrypcje, profile, playlisty, historię oglądania, ustawienia i otwarte karty z serwerem synchronizacji OpenTubeX lub LibreTube. Serwery LibreTube mogą nie obsługiwać wszystkich funkcji synchronizacji.
     Server URL: Adres URL serwera
     Checking Server: Sprawdzanie serwera synchronizacji…
     Server Unavailable: Nie można połączyć się z tym serwerem synchronizacji. Sprawdź adres URL i spróbuj ponownie.
