@@ -256,6 +256,9 @@ test.describe('watch page', () => {
 
     await setPlayerFullscreen(page, false)
     await expect(page.locator('.infoArea .videoTitle')).toBeVisible()
+    const inlineDescription = page.locator('.infoArea .videoDescription')
+    await expect(inlineDescription).not.toHaveClass(/alwaysExpanded/)
+    await expect(inlineDescription.locator('.descriptionCloseButton, .descriptionStatus')).not.toHaveCount(0)
     await setPlayerFullscreen(page, true)
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
 

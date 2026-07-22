@@ -174,7 +174,7 @@ function isShortDescription() {
 // expanded with no collapse control. Only measure once the element has a real
 // layout, retrying when the tab is first presented.
 function measureDescription() {
-  if (hasMeasured) {
+  if (hasMeasured || props.alwaysExpanded) {
     return
   }
 
@@ -189,6 +189,12 @@ function measureDescription() {
 }
 
 onMounted(measureDescription)
+
+watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
+  if (!alwaysExpanded && wasAlwaysExpanded) {
+    nextTick(measureDescription)
+  }
+})
 
 if (isTabPresented) {
   watch(isTabPresented, (presented) => {

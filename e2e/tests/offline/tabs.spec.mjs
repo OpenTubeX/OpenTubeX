@@ -192,6 +192,32 @@ test.describe('closed tabs', () => {
     await page.locator(sel.forwardButton).click()
     await expect(page).toHaveURL(/#\/history/)
   })
+
+  test.describe('with navigation history disabled after closing', () => {
+    test.use({ seed: { settings: { rememberTabNavigationHistory: true } } })
+
+    test('does not persist restored history across a relaunch', async ({ app }) => {
+      let page = app.page
+      await goTo(page, 'settings')
+      await goTo(page, 'history')
+      await page.locator(sel.newTabButton).click()
+      await page.locator(sel.tabs).first().click()
+      await page.keyboard.press('Control+w')
+
+      await goTo(page, 'settings')
+      const rememberHistory = page.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
+      await expect(rememberHistory).toBeChecked()
+      await page.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
+      await expect(rememberHistory).not.toBeChecked()
+
+      await page.keyboard.press('Control+Shift+t')
+      await expect(page).toHaveURL(/#\/history/)
+
+      ;({ page } = await app.relaunch())
+      await expect(page).toHaveURL(/#\/history/)
+      await expect(page.locator(sel.backButton)).toBeDisabled()
+    })
+  })
 })
 
 test.describe('tab icons disabled', () => {

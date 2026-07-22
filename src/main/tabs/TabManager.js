@@ -1115,8 +1115,7 @@ export class TabManager {
       isPinned: tab.isPinned,
       color: tab.color,
       history: tab.navigationHistory,
-      historyIndex: tab.navigationHistoryIndex,
-      persistHistory: tab.persistNavigationHistory
+      historyIndex: tab.navigationHistoryIndex
     })
     if (this.closedTabs.length > 10) {
       this.closedTabs.shift()
@@ -1177,9 +1176,9 @@ export class TabManager {
   }
 
   /**
-   * @returns {TabInfo|null}
+   * @returns {Promise<TabInfo|null>}
    */
-  restoreClosedTab() {
+  async restoreClosedTab() {
     const closedTab = this.closedTabs.pop()
     if (!closedTab) return null
 
@@ -1190,7 +1189,7 @@ export class TabManager {
       color: closedTab.color,
       history: closedTab.history,
       historyIndex: closedTab.historyIndex,
-      persistHistory: closedTab.persistHistory,
+      persistHistory: await TabManager.getStoredRememberTabNavigationHistory(),
       makeActive: true
     })
   }
@@ -2528,9 +2527,9 @@ export function setupTabsIPC(options = {}) {
     manager._scheduleTabPreviewRefresh(tab, delayMs)
   })
 
-  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, (event) => {
+  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, async (event) => {
     const manager = getManager(event)
-    const tab = manager?.restoreClosedTab()
+    const tab = await manager?.restoreClosedTab()
     return tab
       ? { id: tab.id, url: tab.url, route: cloneRoute(tab.route), title: tab.title, isPinned: tab.isPinned, color: tab.color }
       : null
