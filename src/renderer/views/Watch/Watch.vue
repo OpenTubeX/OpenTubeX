@@ -70,6 +70,7 @@
           :quick-bookmark-enabled="isQuickBookmarkEnabled"
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
+          :quick-bookmark-icon="quickBookmarkIcon"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"

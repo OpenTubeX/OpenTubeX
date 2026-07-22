@@ -120,4 +120,21 @@ test.describe('seeded playlists', () => {
       return records.filter((record) => record._id === 'e2eseeded').at(-1)?.$$deleted
     }).toBe(true)
   })
+
+  test('a custom quick bookmark icon persists across restarts', async ({ app, page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Favorites').click()
+
+    await page.getByTitle('Edit Playlist Info').click()
+    await page.getByRole('button', { name: 'Watch later' }).click()
+    await page.getByTitle('Save Changes').click()
+
+    const quickBookmarkButton = page.getByTitle('Quick Bookmark Enabled')
+    await expect(quickBookmarkButton.locator('[data-icon="clock"]')).toBeVisible()
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'userplaylists')
+    await page.getByText('Favorites').click()
+    await expect(page.getByTitle('Quick Bookmark Enabled').locator('[data-icon="clock"]')).toBeVisible()
+  })
 })

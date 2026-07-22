@@ -31,6 +31,7 @@ test.use({
         playlistName: 'Favorites',
         protected: true,
         description: '',
+        quickBookmarkIcon: 'clock',
         videos: [],
         createdAt: Date.now() - 86_400_000,
         lastUpdatedAt: Date.now() - 86_400_000
@@ -64,6 +65,7 @@ test.describe('list video actions', () => {
 
     const video = page.locator('.ft-list-video').first()
     await video.hover()
+    await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
     await video.locator('.quickBookmarkVideoIcon').click()
 
     // The icon flips to its bookmarked state once the video is saved.

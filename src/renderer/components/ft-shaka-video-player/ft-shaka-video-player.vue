@@ -243,7 +243,7 @@
           :title="quickBookmarkTitle"
           @click="toggleQuickBookmark"
         >
-          <FontAwesomeIcon :icon="quickBookmarked ? ['fas', 'check'] : ['fas', 'bookmark']" />
+          <FontAwesomeIcon :icon="quickBookmarked ? ['fas', 'check'] : quickBookmarkIcon" />
         </button>
       </div>
       <!--

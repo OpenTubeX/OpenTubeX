@@ -85,7 +85,7 @@
         <FtIconButton
           v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
           :title="quickBookmarkIconText"
-          :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
+          :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : quickBookmarkIcon"
           class="quickBookmarkVideoIcon"
           :class="{
             bookmarked: isInQuickBookmarkPlaylist,
@@ -946,6 +946,7 @@ const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playli
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isInQuickBookmarkPlaylist = computed(() => {

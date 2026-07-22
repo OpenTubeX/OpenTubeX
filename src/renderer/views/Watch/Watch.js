@@ -268,6 +268,9 @@ export default defineComponent({
     quickBookmarkPlaylist: function () {
       return this.$store.getters.getQuickBookmarkPlaylist
     },
+    quickBookmarkIcon: function () {
+      return this.$store.getters.getQuickBookmarkIcon
+    },
     isQuickBookmarkEnabled: function () {
       return this.quickBookmarkPlaylist != null
     },

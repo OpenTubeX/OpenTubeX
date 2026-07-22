@@ -95,6 +95,10 @@
       @input="(input) => newDescription = input"
       @keydown.enter="savePlaylistInfo"
     />
+    <FtQuickBookmarkIconPicker
+      v-if="editMode"
+      v-model="newQuickBookmarkIcon"
+    />
     <p
       v-else
       class="playlistDescription"
@@ -148,7 +152,7 @@
           <FtIconButton
             v-if="!editMode && isUserPlaylist"
             :title="markedAsQuickBookmarkTarget ? $t('User Playlists.Quick Bookmark Enabled') : $t('User Playlists.Enable Quick Bookmark With This Playlist')"
-            :icon="markedAsQuickBookmarkTarget ? ['fas', 'bookmark'] : ['far', 'bookmark']"
+            :icon="markedAsQuickBookmarkTarget ? quickBookmarkIcon : ['far', 'bookmark']"
             :disabled="markedAsQuickBookmarkTarget"
             :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
             @disabled-click="handleQuickBookmarkEnabledDisabledClick"
@@ -267,6 +271,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 
 import store from '../../store/index'
@@ -281,6 +286,7 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { isHistoryEntryWatched } from '../../helpers/history'
+import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -382,6 +388,7 @@ const showRemoveDuplicateVideosPrompt = ref(false)
 const showExportPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
+const newQuickBookmarkIcon = ref('bookmark')
 
 if (props.videoCount > 0) {
   query.value = props.searchQueryText
@@ -513,6 +520,7 @@ const sharePlaylistButtonVisible = computed(() => {
 const quickBookmarkPlaylist = computed(() => {
   return store.getters.getQuickBookmarkPlaylist
 })
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
   return selectedUserPlaylist.value &&
@@ -592,6 +600,7 @@ async function savePlaylistInfo() {
     playlistName: newTitle.value,
     protected: selectedUserPlaylist.value.protected,
     description: newDescription.value,
+    quickBookmarkIcon: newQuickBookmarkIcon.value,
     videos: deepCopy(selectedUserPlaylist.value.videos),
     _id: props.id,
   }
@@ -611,6 +620,7 @@ const playlistTitleInput = useTemplateRef('playlistTitleInput')
 function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
+  newQuickBookmarkIcon.value = getQuickBookmarkIconName(selectedUserPlaylist.value)
   editMode.value = true
 
   emit('enter-edit-mode')

@@ -1,5 +1,6 @@
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
+import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
 import { deepCopy } from '../../helpers/utils'
 
 function generateRandomPlaylistId() {
@@ -98,6 +99,9 @@ const getters = {
     }
 
     return state.playlists.find((playlist) => playlist._id === playlistId)
+  },
+  getQuickBookmarkIcon(state, getters) {
+    return ['fas', getQuickBookmarkIconName(getters.getQuickBookmarkPlaylist)]
   }
 }
 

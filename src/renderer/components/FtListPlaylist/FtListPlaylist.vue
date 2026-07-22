@@ -77,7 +77,7 @@
       >
         <FtIconButton
           :title="markedAsQuickBookmarkTarget ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist')"
-          :icon="markedAsQuickBookmarkTarget ? ['fas', 'bookmark'] : ['far', 'bookmark']"
+          :icon="markedAsQuickBookmarkTarget ? quickBookmarkIcon : ['far', 'bookmark']"
           :disabled="markedAsQuickBookmarkTarget"
           :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
           :size="16"
@@ -224,6 +224,7 @@ function parseUserData() {
 
 /** @type {import('vue').ComputedRef<string | null>} */
 const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const markedAsQuickBookmarkTarget = computed(() => {
   // Only user playlists can be target

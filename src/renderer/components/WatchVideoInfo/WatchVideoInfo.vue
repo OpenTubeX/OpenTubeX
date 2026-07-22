@@ -161,7 +161,7 @@
           <FtIconButton
             v-if="isQuickBookmarkEnabled && !hidePlaylistActions"
             :title="quickBookmarkIconText"
-            :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
+            :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : quickBookmarkIcon"
             class="quickBookmarkVideoIcon"
             :class="{
               bookmarked: isInQuickBookmarkPlaylist,
@@ -678,6 +678,7 @@ function togglePlaylistPrompt() {
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
+const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
 const isInQuickBookmarkPlaylist = computed(() => {
   if (!isQuickBookmarkEnabled.value) { return false }

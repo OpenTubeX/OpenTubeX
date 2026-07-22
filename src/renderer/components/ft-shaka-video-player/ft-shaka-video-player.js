@@ -353,6 +353,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    quickBookmarkIcon: {
+      type: Array,
+      default: () => ['fas', 'bookmark']
+    },
     resumePlaybackAfterSabrReload: {
       type: Boolean,
       default: false
