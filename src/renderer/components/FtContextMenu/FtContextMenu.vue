@@ -1,119 +1,124 @@
 <template>
-  <Transition name="context-menu">
-    <div
-      v-if="isOpen"
-      ref="menuRef"
-      class="contextMenu"
-      :class="{ submenusOpenStart }"
-      :style="menuStyle"
-      role="menu"
-      :aria-label="t('Context Menu.Context Menu')"
-      @contextmenu.prevent
-      @pointerdown.stop
-    >
-      <template
-        v-for="(item, index) in items"
-        :key="item.actionId ?? `separator-${index}`"
+  <Teleport
+    :to="fullscreenTarget || 'body'"
+    :disabled="fullscreenTarget === null"
+  >
+    <Transition name="context-menu">
+      <div
+        v-if="isOpen"
+        ref="menuRef"
+        class="contextMenu"
+        :class="{ submenusOpenStart }"
+        :style="menuStyle"
+        role="menu"
+        :aria-label="t('Context Menu.Context Menu')"
+        @contextmenu.prevent
+        @pointerdown.stop
       >
-        <div
-          v-if="item.type === 'separator'"
-          class="separator"
-          role="separator"
-        />
-        <div
-          v-else-if="item.submenu"
-          class="submenuContainer"
+        <template
+          v-for="(item, index) in items"
+          :key="item.actionId ?? `separator-${index}`"
         >
+          <div
+            v-if="item.type === 'separator'"
+            class="separator"
+            role="separator"
+          />
+          <div
+            v-else-if="item.submenu"
+            class="submenuContainer"
+          >
+            <button
+              class="menuItem"
+              :class="{ disabled: !item.enabled }"
+              type="button"
+              role="menuitem"
+              :disabled="!item.enabled"
+              aria-haspopup="menu"
+              @pointerdown.prevent
+            >
+              <span
+                class="itemIcon"
+                aria-hidden="true"
+              >
+                <FontAwesomeIcon :icon="getItemIcon(item)" />
+              </span>
+              <span>{{ translateLabel(item.label) }}</span>
+              <span
+                class="submenuArrow"
+                aria-hidden="true"
+              />
+            </button>
+            <div
+              class="submenu"
+              role="menu"
+            >
+              <template
+                v-for="(child, childIndex) in item.submenu"
+                :key="child.actionId ?? `separator-${childIndex}`"
+              >
+                <div
+                  v-if="child.type === 'separator'"
+                  class="separator"
+                  role="separator"
+                />
+                <button
+                  v-else
+                  class="menuItem"
+                  :class="{ disabled: !child.enabled }"
+                  type="button"
+                  :role="child.type === 'radio' ? 'menuitemradio' : 'menuitem'"
+                  :aria-checked="child.type === 'radio' ? child.checked : undefined"
+                  :disabled="!child.enabled"
+                  @pointerdown.prevent
+                  @click="execute(child)"
+                >
+                  <span
+                    class="itemIcon"
+                    :class="getItemIconClass(child)"
+                    aria-hidden="true"
+                  >
+                    <FontAwesomeIcon :icon="getItemIcon(child, item.label)" />
+                    <FontAwesomeIcon
+                      v-if="child.checked"
+                      class="checkedMark"
+                      :icon="['fas', 'check']"
+                    />
+                  </span>
+                  <span>{{ translateLabel(child.label) }}</span>
+                </button>
+              </template>
+            </div>
+          </div>
           <button
+            v-else
             class="menuItem"
             :class="{ disabled: !item.enabled }"
             type="button"
-            role="menuitem"
+            :role="item.type === 'radio' ? 'menuitemradio' : 'menuitem'"
+            :aria-checked="item.type === 'radio' ? item.checked : undefined"
             :disabled="!item.enabled"
-            aria-haspopup="menu"
             @pointerdown.prevent
+            @click="execute(item)"
           >
             <span
               class="itemIcon"
+              :class="getItemIconClass(item)"
               aria-hidden="true"
             >
               <FontAwesomeIcon :icon="getItemIcon(item)" />
+              <FontAwesomeIcon
+                v-if="item.checked"
+                class="checkedMark"
+                :icon="['fas', 'check']"
+              />
             </span>
             <span>{{ translateLabel(item.label) }}</span>
-            <span
-              class="submenuArrow"
-              aria-hidden="true"
-            />
           </button>
-          <div
-            class="submenu"
-            role="menu"
-          >
-            <template
-              v-for="(child, childIndex) in item.submenu"
-              :key="child.actionId ?? `separator-${childIndex}`"
-            >
-              <div
-                v-if="child.type === 'separator'"
-                class="separator"
-                role="separator"
-              />
-              <button
-                v-else
-                class="menuItem"
-                :class="{ disabled: !child.enabled }"
-                type="button"
-                :role="child.type === 'radio' ? 'menuitemradio' : 'menuitem'"
-                :aria-checked="child.type === 'radio' ? child.checked : undefined"
-                :disabled="!child.enabled"
-                @pointerdown.prevent
-                @click="execute(child)"
-              >
-                <span
-                  class="itemIcon"
-                  :class="getItemIconClass(child)"
-                  aria-hidden="true"
-                >
-                  <FontAwesomeIcon :icon="getItemIcon(child, item.label)" />
-                  <FontAwesomeIcon
-                    v-if="child.checked"
-                    class="checkedMark"
-                    :icon="['fas', 'check']"
-                  />
-                </span>
-                <span>{{ translateLabel(child.label) }}</span>
-              </button>
-            </template>
-          </div>
-        </div>
-        <button
-          v-else
-          class="menuItem"
-          :class="{ disabled: !item.enabled }"
-          type="button"
-          :role="item.type === 'radio' ? 'menuitemradio' : 'menuitem'"
-          :aria-checked="item.type === 'radio' ? item.checked : undefined"
-          :disabled="!item.enabled"
-          @pointerdown.prevent
-          @click="execute(item)"
-        >
-          <span
-            class="itemIcon"
-            :class="getItemIconClass(item)"
-            aria-hidden="true"
-          >
-            <FontAwesomeIcon :icon="getItemIcon(item)" />
-            <FontAwesomeIcon
-              v-if="item.checked"
-              class="checkedMark"
-              :icon="['fas', 'check']"
-            />
-          </span>
-          <span>{{ translateLabel(item.label) }}</span>
-        </button>
-      </template>
-    </div>
-  </Transition>
+        </template>
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup>
@@ -123,6 +128,7 @@ import { useI18n } from 'vue-i18n'
 
 const { t, te } = useI18n()
 const menuRef = useTemplateRef('menuRef')
+const fullscreenTarget = ref(null)
 const isOpen = ref(false)
 const items = ref([])
 const sessionId = ref(null)
@@ -135,6 +141,10 @@ const menuStyle = computed(() => ({
   insetInlineStart: `${position.value.x}px`,
   insetBlockStart: `${position.value.y}px`
 }))
+
+function updateFullscreenTarget() {
+  fullscreenTarget.value = document.fullscreenElement
+}
 
 const itemIcons = {
   'Close Tab': ['fas', 'xmark'],
@@ -309,14 +319,17 @@ function handleKeydown(event) {
 onMounted(() => {
   document.addEventListener('contextmenu', open)
   document.addEventListener('pointerdown', close, true)
+  document.addEventListener('fullscreenchange', updateFullscreenTarget)
   window.addEventListener('blur', close)
   window.addEventListener('resize', close)
   window.addEventListener('keydown', handleKeydown, true)
+  updateFullscreenTarget()
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('contextmenu', open)
   document.removeEventListener('pointerdown', close, true)
+  document.removeEventListener('fullscreenchange', updateFullscreenTarget)
   window.removeEventListener('blur', close)
   window.removeEventListener('resize', close)
   window.removeEventListener('keydown', handleKeydown, true)

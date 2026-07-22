@@ -692,7 +692,8 @@ function runApp() {
         }
       }
 
-      const textShortEnoughForSearch = parameters.selectionText.trim().length <= SEARCH_CHAR_LIMIT
+      const selectionText = parameters.selectionText.trim()
+      const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
 
       return [
         {
@@ -722,21 +723,20 @@ function runApp() {
         // NOT link with no customized link text
         // NOT link for timestamp
         {
-          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Tab' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Tab` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
             !parameters.isEditable &&
             (parameters.linkURL != null && !parameters.linkURL.includes(parameters.selectionText) && !(/(\d{1,2}:)*\d{1,2}:\d{2}/.test(parameters.linkText))) &&
-            parameters.selectionText.trim().length > 0
+            selectionText.length > 0
           ),
           click: () => {
-            const queryText = parameters.selectionText.trim()
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
               manager.createTabWithPreferenceFromOpener(
                 {
-                  route: `/search/${encodeURIComponent(queryText)}`,
+                  route: `/search/${encodeURIComponent(selectionText)}`,
                   makeActive: true
                 },
                 manager.contextMenuTabId ?? manager.presentedTabId ?? manager.activeTabId
@@ -747,20 +747,19 @@ function runApp() {
           }
         },
         {
-          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Window' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Window` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
             !parameters.isEditable &&
             (parameters.linkURL != null && !parameters.linkURL.includes(parameters.selectionText) && !(/(\d{1,2}:)*\d{1,2}:\d{2}/.test(parameters.linkText))) &&
-            parameters.selectionText.trim().length > 0
+            selectionText.length > 0
           ),
           click: () => {
-            const queryText = parameters.selectionText.trim()
             createWindow({
               replaceMainWindow: false,
-              windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(queryText)}`,
-              searchQueryText: queryText,
+              windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
+              searchQueryText: selectionText,
               showWindowNow: true,
             })
           }
