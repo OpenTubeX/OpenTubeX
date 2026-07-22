@@ -14,45 +14,56 @@ import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
 import syncServer from './modules/sync-server'
-
-const SYNC_TRIGGER_ACTIONS = new Set([
-  'addChannelToProfiles',
-  'addPlaylist',
-  'addPlaylists',
-  'addVideo',
-  'addVideos',
-  'createProfile',
-  'markAllHistoryAsWatched',
-  'overwriteHistory',
-  'removeAllHistory',
-  'removeAllPlaylists',
-  'removeAllVideos',
-  'removeChannelFromProfiles',
-  'removeFromHistory',
-  'removeHistoryOlderThan',
-  'removePlaylist',
-  'removePlaylists',
-  'removeProfile',
-  'removeVideo',
-  'removeVideos',
-  'updateHistory',
-  'updateChannelPlaybackSpeeds',
-  'updatePlaylist',
-  'updateProfile',
-  'updateWatchProgress',
-])
+import {
+  SYNC_ACTION_REASONS,
+  SYNC_MUTATION_REASONS,
+} from '../helpers/sync-server-scheduling'
 
 function syncOnLocalChanges(store) {
+  const revisions = new Map()
+  const actionRevisions = new WeakMap()
+  const settingValues = new Map(Object.entries(store.state.settings).map(([key, value]) => {
+    return [key, JSON.stringify(value)]
+  }))
+
+  const incrementRevision = reason => {
+    revisions.set(reason, (revisions.get(reason) ?? 0) + 1)
+  }
+
+  store.subscribe((mutation, state) => {
+    const reason = SYNC_MUTATION_REASONS.get(mutation.type)
+    if (reason) incrementRevision(reason)
+
+    if (mutation.type.startsWith('set')) {
+      const setting = mutation.type.charAt(3).toLowerCase() + mutation.type.slice(4)
+      if (isSettingSyncable(setting)) {
+        const value = JSON.stringify(state.settings[setting])
+        if (settingValues.get(setting) !== value) incrementRevision('settings')
+        settingValues.set(setting, value)
+      }
+    }
+  })
+
   store.subscribeAction({
+    before: action => {
+      const setting = action.type.startsWith('update')
+        ? action.type.charAt(6).toLowerCase() + action.type.slice(7)
+        : ''
+      const reason = isSettingSyncable(setting)
+        ? 'settings'
+        : SYNC_ACTION_REASONS.get(action.type)
+      if (reason) actionRevisions.set(action, revisions.get(reason) ?? 0)
+    },
     after: action => {
       const setting = action.type.startsWith('update')
         ? action.type.charAt(6).toLowerCase() + action.type.slice(7)
         : ''
       const syncableSetting = isSettingSyncable(setting)
-      if (SYNC_TRIGGER_ACTIONS.has(action.type) || syncableSetting) {
+      const reason = syncableSetting ? 'settings' : SYNC_ACTION_REASONS.get(action.type)
+      if (reason && (revisions.get(reason) ?? 0) !== actionRevisions.get(action)) {
         const syncEnabled = isSettingSyncEnabled(store.state.settings, setting)
         if (!syncableSetting || syncEnabled) {
-          store.dispatch('scheduleSyncServer', syncableSetting ? 'settings' : 'data')
+          store.dispatch('scheduleSyncServer', reason)
         }
       }
     },

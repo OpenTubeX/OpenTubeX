@@ -19,8 +19,12 @@ import {
   loadLegacySyncDocument,
   preparePrivacyKey,
 } from '../../helpers/sync-server-privacy'
+import {
+  AUTO_SYNC_INTERVAL_MS,
+  isRecentSync,
+  isSyncReasonEnabled,
+} from '../../helpers/sync-server-scheduling'
 
-const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000
 const EVENT_SYNC_DEBOUNCE_MS = 1500
 const ENCRYPTED_SYNC_RETRIES = 3
 const LEGACY_ENCRYPTED_COLLECTIONS = [
@@ -446,10 +450,21 @@ const actions = {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
     if (!activeSyncPromise) {
+      let syncStarted = false
       clearTimeout(eventSyncTimer)
       eventSyncTimer = null
-      activeSyncPromise = withSyncLock(() => runSync(context, options)).finally(() => {
+      activeSyncPromise = withSyncLock(() => {
+        if (options.skipIfRecent &&
+            isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
+          return null
+        }
+        syncStarted = true
+        return runSync(context, options)
+      }).finally(() => {
         activeSyncPromise = null
+        context.dispatch(syncStarted
+          ? 'restartSyncServerAutoSync'
+          : 'startSyncServerAutoSync')
       })
     }
     return activeSyncPromise
@@ -481,30 +496,42 @@ const actions = {
     await dispatch('startSyncServerAutoSync')
     if (!lifecycleSyncStarted && typeof window !== 'undefined') {
       lifecycleSyncStarted = true
-      window.addEventListener('online', () => dispatch('scheduleSyncServer'))
+      window.addEventListener('online', () => dispatch('scheduleSyncServer', 'automatic'))
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') dispatch('scheduleSyncServer')
+        if (document.visibilityState === 'visible') {
+          dispatch('scheduleSyncServer', 'automatic')
+        }
       })
     }
     if (rootState.settings.syncServerAutoSync) {
-      await dispatch('syncWithSyncServer')
+      await dispatch('syncWithSyncServer', { skipIfRecent: true })
     }
   },
 
   startSyncServerAutoSync({ dispatch, rootState }) {
-    if (autoSyncTimer || !rootState.settings.syncServerAutoSync || !rootState.settings.syncServerToken) {
+    if (autoSyncTimer ||
+        !rootState.settings.syncServerAutoSync ||
+        !rootState.settings.syncServerToken ||
+        !isSyncReasonEnabled(rootState.settings, 'automatic')) {
       return
     }
 
-    autoSyncTimer = setInterval(() => {
-      dispatch('syncWithSyncServer').catch(error => {
+    autoSyncTimer = setTimeout(() => {
+      autoSyncTimer = null
+      dispatch('syncWithSyncServer', { skipIfRecent: true }).catch(error => {
         console.error('Sync server automatic sync failed', error)
       })
     }, AUTO_SYNC_INTERVAL_MS)
   },
 
+  restartSyncServerAutoSync({ dispatch }) {
+    clearTimeout(autoSyncTimer)
+    autoSyncTimer = null
+    return dispatch('startSyncServerAutoSync')
+  },
+
   stopSyncServerAutoSync() {
-    clearInterval(autoSyncTimer)
+    clearTimeout(autoSyncTimer)
     clearTimeout(eventSyncTimer)
     autoSyncTimer = null
     eventSyncTimer = null
@@ -513,18 +540,16 @@ const actions = {
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
     if (!rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
-        (reason === 'settings' && rootState.settings.syncServerPrivacyMode !== 'enhanced') ||
-        (reason === 'sessions' && (
-          rootState.settings.syncServerPrivacyMode !== 'enhanced' ||
-          !rootState.settings.syncServerSyncSessions
-        )) ||
+        !isSyncReasonEnabled(rootState.settings, reason) ||
         rootState.syncServer.syncServerStatus === 'syncing') {
       return
     }
     clearTimeout(eventSyncTimer)
     eventSyncTimer = setTimeout(() => {
       eventSyncTimer = null
-      dispatch('syncWithSyncServer').catch(error => {
+      dispatch('syncWithSyncServer', {
+        skipIfRecent: reason === 'automatic',
+      }).catch(error => {
         console.error('Sync server event sync failed', error)
       })
     }, EVENT_SYNC_DEBOUNCE_MS)
