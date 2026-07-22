@@ -183,7 +183,7 @@
           <FontAwesomeIcon :icon="['fas', 'comment']" />
         </button>
         <button
-          v-if="useSponsorBlock"
+          v-if="useSponsorBlock && !isUpcoming"
           type="button"
           class="fullscreenAction fullscreenSponsorBlockToggle"
           :class="{ open: showFullscreenSponsorBlock }"
@@ -199,7 +199,7 @@
           <FontAwesomeIcon :icon="['fas', 'shield-halved']" />
         </button>
         <button
-          v-if="!isLive"
+          v-if="!isLive && !isUpcoming"
           type="button"
           class="fullscreenAction fullscreenTranscriptToggle"
           :class="{ open: showFullscreenTranscript }"
