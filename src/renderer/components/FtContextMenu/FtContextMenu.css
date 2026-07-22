@@ -1,0 +1,161 @@
+.contextMenu,
+.submenu {
+  inline-size: max-content;
+  max-inline-size: min(360px, calc(100vw - 16px));
+  padding: 5px;
+  color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--card-bg-color) 96%, var(--bg-color));
+  border: 1px solid color-mix(in srgb, var(--tertiary-text-color) 55%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
+}
+
+.contextMenu {
+  position: fixed;
+  z-index: 20000;
+}
+
+.menuItem {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  inline-size: 100%;
+  min-block-size: 32px;
+  padding-block: 5px;
+  padding-inline: 7px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  font: inherit;
+  text-align: start;
+  cursor: default;
+}
+
+.menuItem > span:nth-child(2):last-child {
+  grid-column: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuItem.disabled {
+  color: var(--tertiary-text-color);
+  background: transparent;
+  opacity: 0.7;
+}
+
+.itemIcon {
+  position: relative;
+  grid-column: 1;
+  display: grid;
+  place-items: center;
+  inline-size: 16px;
+  color: var(--secondary-text-color);
+  font-size: 14px;
+  text-align: center;
+}
+
+.menuItem:hover .itemIcon:not(.colorIcon),
+.menuItem:focus-visible .itemIcon:not(.colorIcon),
+.submenuContainer:hover > .menuItem .itemIcon:not(.colorIcon) {
+  color: inherit;
+}
+
+.checkedMark {
+  position: absolute;
+  inset-block-end: -5px;
+  inset-inline-end: -5px;
+  padding: 1px;
+  color: var(--primary-color);
+  background-color: var(--card-bg-color);
+  border-radius: 50%;
+  font-size: 8px;
+}
+
+.color-red {
+  color: #e53935;
+}
+
+.color-orange {
+  color: #fb8c00;
+}
+
+.color-yellow {
+  color: #fdd835;
+}
+
+.color-green {
+  color: #43a047;
+}
+
+.color-blue {
+  color: #1e88e5;
+}
+
+.color-purple {
+  color: #8e24aa;
+}
+
+.separator {
+  block-size: 1px;
+  margin-block: 4px;
+  margin-inline: 7px;
+  background-color: color-mix(in srgb, var(--tertiary-text-color) 45%, transparent);
+}
+
+.submenuContainer {
+  position: relative;
+}
+
+.submenuContainer > .menuItem {
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+}
+
+.submenuContainer > .menuItem > span:nth-child(2) {
+  grid-column: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.submenuArrow {
+  grid-column: 3;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.submenuArrow::before {
+  content: '›';
+}
+
+.submenu {
+  position: absolute;
+  inset-block-start: -5px;
+  inset-inline-start: calc(100% - 2px);
+  display: none;
+}
+
+.submenusOpenStart .submenu,
+:global(.isLocaleRightToLeft) .submenu {
+  inset-inline: auto calc(100% - 2px);
+}
+
+.submenuContainer:hover > .submenu,
+.submenuContainer:focus-within > .submenu {
+  display: block;
+}
+
+.menuItem:focus-visible {
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  outline: 2px solid var(--primary-text-color);
+  outline-offset: -2px;
+}
+
+.menuItem:hover,
+.submenuContainer:hover > .menuItem {
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+}

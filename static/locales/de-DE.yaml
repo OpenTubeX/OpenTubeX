@@ -1533,6 +1533,65 @@ Previous match: Vorheriger Treffer
 Next match: Nächster Treffer
 Close find bar: Suchleiste schließen
 No matches: Keine Treffer
+Context Menu:
+  Context Menu: Kontextmenü
+  Cut: Ausschneiden
+  Copy: Kopieren
+  Paste: Einfügen
+  Select All: Alles auswählen
+  Save Image As…: Bild speichern unter…
+  Copy Image: Bild kopieren
+  Copy Image Address: Bildadresse kopieren
+  Reload Videos: Videos neu laden
+  Reload Shorts: Shorts neu laden
+  Reload Live: Live neu laden
+  Reload Posts: Beiträge neu laden
+  Reload All Feeds: Alle Feeds neu laden
+  Close Tab: Tab schließen
+  Close Multiple Tabs: '{count} Tabs schließen'
+  Duplicate Tab: Tab duplizieren
+  Duplicate Multiple Tabs: '{count} Tabs duplizieren'
+  Move Tab: Tab verschieben
+  Move Tabs: Tabs verschieben
+  To Beginning: An den Anfang
+  To End: Ans Ende
+  Close Tabs: Tabs schließen
+  To the Top: Oberhalb
+  To the Left: Links davon
+  To the Bottom: Unterhalb
+  To the Right: Rechts davon
+  Other Tabs: Andere Tabs
+  Copy YouTube Link: YouTube-Link kopieren
+  Copy YouTube Links: YouTube-Links kopieren
+  Pin Tab: Tab anheften
+  Pin Tabs: Tabs anheften
+  Unpin Tab: Tab lösen
+  Unpin Tabs: Tabs lösen
+  Tab Color: Tab-Farbe
+  Default: Standard
+  Red: Rot
+  Orange: Orange
+  Yellow: Gelb
+  Green: Grün
+  Blue: Blau
+  Purple: Violett
+  New Tab: Neuer Tab
+  Reopen Closed Tab: Geschlossenen Tab wieder öffnen
+  Reload Tab: Tab neu laden
+  Reload Tabs: Tabs neu laden
+  Load Tab: Tab laden
+  Load Tabs: Tabs laden
+  Unload Tab: Tab entladen
+  Unload Tabs: Tabs entladen
+  Move Tab to Window: Tab in Fenster verschieben
+  Move Tabs to Window: Tabs in Fenster verschieben
+  Open in a New Tab: In neuem Tab öffnen
+  Open in a New Window: In neuem Fenster öffnen
+  Copy Link: Link kopieren
+  Copy Invidious Link: Invidious-Link kopieren
+  Search Selection in New Tab: '"{selection}" in einem neuen Tab suchen'
+  Search Selection in New Window: '"{selection}" in einem neuen Fenster suchen'
+  Selection Too Long: 'Auswahl ist zu lang für die Suche (> {count} Zeichen)'
 Stats:
   Stats: Statistik
   Watch time summary: Übersicht der Wiedergabezeit

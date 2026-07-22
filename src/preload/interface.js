@@ -494,6 +494,27 @@ export default {
     }
   },
 
+  contextMenu: {
+    /**
+     * Build the custom context menu for the element under the pointer.
+     * @param {object} parameters
+     * @returns {Promise<{sessionId: number, items: Array}>}
+     */
+    open: (parameters) => {
+      return ipcRenderer.invoke(IpcChannels.CONTEXT_MENU_OPEN, parameters)
+    },
+
+    /**
+     * Run an action from the currently open custom context menu.
+     * @param {number} sessionId
+     * @param {string} actionId
+     * @returns {Promise<void>}
+     */
+    execute: (sessionId, actionId) => {
+      return ipcRenderer.invoke(IpcChannels.CONTEXT_MENU_EXECUTE, { sessionId, actionId })
+    }
+  },
+
   /**
    * @param {(message: string, time: number | null) => void} handler
    * @returns {() => void}

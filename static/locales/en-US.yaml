@@ -1441,6 +1441,66 @@ Clipboard:
   Copy failed: Copy to clipboard failed
   Cannot access clipboard without a secure connection: Cannot access clipboard without a secure connection
 
+Context Menu:
+  Context Menu: Context menu
+  Cut: Cut
+  Copy: Copy
+  Paste: Paste
+  Select All: Select All
+  Save Image As…: Save Image As…
+  Copy Image: Copy Image
+  Copy Image Address: Copy Image Address
+  Reload Videos: Reload Videos
+  Reload Shorts: Reload Shorts
+  Reload Live: Reload Live
+  Reload Posts: Reload Posts
+  Reload All Feeds: Reload All Feeds
+  Close Tab: Close Tab
+  Close Multiple Tabs: Close {count} Tabs
+  Duplicate Tab: Duplicate Tab
+  Duplicate Multiple Tabs: Duplicate {count} Tabs
+  Move Tab: Move Tab
+  Move Tabs: Move Tabs
+  To Beginning: To Beginning
+  To End: To End
+  Close Tabs: Close Tabs
+  To the Top: To the Top
+  To the Left: To the Left
+  To the Bottom: To the Bottom
+  To the Right: To the Right
+  Other Tabs: Other Tabs
+  Copy YouTube Link: Copy YouTube Link
+  Copy YouTube Links: Copy YouTube Links
+  Pin Tab: Pin Tab
+  Pin Tabs: Pin Tabs
+  Unpin Tab: Unpin Tab
+  Unpin Tabs: Unpin Tabs
+  Tab Color: Tab Color
+  Default: Default
+  Red: Red
+  Orange: Orange
+  Yellow: Yellow
+  Green: Green
+  Blue: Blue
+  Purple: Purple
+  New Tab: New Tab
+  Reopen Closed Tab: Reopen Closed Tab
+  Reload Tab: Reload Tab
+  Reload Tabs: Reload Tabs
+  Load Tab: Load Tab
+  Load Tabs: Load Tabs
+  Unload Tab: Unload Tab
+  Unload Tabs: Unload Tabs
+  Move Tab to Window: Move Tab to Window
+  Move Tabs to Window: Move Tabs to Window
+  Open in a New Tab: Open in a New Tab
+  Open in a New Window: Open in a New Window
+  Copy Link: Copy Link
+  Copy Invidious Link: Copy Invidious Link
+  Search Selection in New Tab: 'Search "{selection}" in a New Tab'
+  Search Selection in New Window: 'Search "{selection}" in a New Window'
+  Selection Too Long: 'Selection is too long for search (> {count} characters)'
+
 Chapters:
   Chapters: Chapters
   Key Moments: Key Moments

@@ -122,6 +122,7 @@
     <FtCreatePlaylistPrompt
       v-if="showCreatePlaylistPrompt"
     />
+    <FtContextMenu v-if="isElectron" />
     <FtToast />
     <FtProgressBar
       v-if="showProgressBar"
@@ -277,6 +278,7 @@ import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPl
 import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
 import FtKeyboardShortcutPrompt from './components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
 import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
+import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
