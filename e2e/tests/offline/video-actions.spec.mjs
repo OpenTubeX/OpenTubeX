@@ -47,6 +47,18 @@ async function readPlaylist(app, id) {
 }
 
 test.describe('list video actions', () => {
+  test('the options dropdown shows an icon for each action', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+
+    const actions = page.getByRole('option')
+    await expect(actions).not.toHaveCount(0)
+    await expect(actions.locator('.optionIconColumn svg')).toHaveCount(await actions.count())
+  })
+
   test('quick bookmark saves the video to the target playlist', async ({ app, page }) => {
     await goTo(page, 'history')
 
