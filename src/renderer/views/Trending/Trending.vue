@@ -100,6 +100,8 @@
         />
         <FtElementList
           v-else
+          :key="currentTab"
+          appear
           :data="shownResults"
         />
       </div>

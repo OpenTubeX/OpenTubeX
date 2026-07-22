@@ -1,0 +1,28 @@
+name: Schedule Nightly
+
+on:
+  schedule:
+    - cron: '15 2 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  dispatch:
+    name: Build development nightly
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+      contents: read
+
+    steps:
+    - name: Dispatch development build
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh workflow run build.yml \
+          --repo "$GITHUB_REPOSITORY" \
+          --ref development \
+          -f publishNightly=true

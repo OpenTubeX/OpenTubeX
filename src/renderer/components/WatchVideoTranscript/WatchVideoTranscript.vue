@@ -166,6 +166,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
+import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 
 import {
   copyToClipboard,
@@ -211,6 +212,7 @@ const segmentList = useTemplateRef('segmentList')
 
 /** @type {AbortController|null} */
 let loadController = null
+let hasAlignedActiveSegment = false
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase())
 const filteredSegments = computed(() => {
@@ -247,6 +249,7 @@ watch(
   async ([captions]) => {
     loadController?.abort()
     loadController = null
+    hasAlignedActiveSegment = false
     segments.value = []
     isLoading.value = false
     loadFailed.value = false
@@ -310,10 +313,13 @@ watch(activeSegmentIndex, async (index) => {
     return
   }
 
-  list.scrollTo({
-    top: activeSegment.offsetTop - list.clientHeight / 2 + activeSegment.clientHeight / 2,
-    behavior: 'smooth'
-  })
+  const top = activeSegment.offsetTop - list.clientHeight / 2 + activeSegment.clientHeight / 2
+  if (!hasAlignedActiveSegment) {
+    list.scrollTop = getTranscriptPreScrollTop(list.scrollTop, top, list.clientHeight)
+  }
+
+  list.scrollTo({ top, behavior: 'smooth' })
+  hasAlignedActiveSegment = true
 })
 
 onBeforeUnmount(() => loadController?.abort())
