@@ -107,6 +107,73 @@ test.describe('watch page', () => {
     expect(scrollCall.distance).toBeLessThanOrEqual(scrollCall.clientHeight)
   })
 
+  test('closing the only sidebar chapter panel keeps it beside the description', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    await page.evaluate(async () => {
+      const layout = document.querySelector('.videoLayout')
+      const app = document.querySelector('#app')?.__vue_app__
+      const findWatchView = (vnode) => {
+        if (vnode?.component?.refs?.videoLayout === layout) {
+          return vnode.component.proxy
+        }
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) {
+            return match
+          }
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) {
+              return match
+            }
+          }
+        }
+        return null
+      }
+      const watchView = findWatchView(app?._container?._vnode)
+      if (!watchView) {
+        throw new Error('Unable to access the watch view')
+      }
+
+      await watchView.$store.dispatch('updateHideRecommendedVideos', true)
+      watchView.useTheatreMode = true
+      watchView.videoChapters = [{ title: 'Test chapter', timestamp: '0:00', startSeconds: 0 }]
+      watchView.showSidebarChapters = true
+      await watchView.$nextTick()
+    })
+
+    const layout = page.locator('.videoLayout')
+    const panel = page.locator('.watchVideoChaptersPanel')
+    await expect(layout).toHaveClass(/useTheatreMode/)
+    await expect(panel).toBeVisible()
+
+    await panel.getByRole('button', { name: 'Close Chapters' }).click()
+    await expect(panel).toHaveClass(/chapters-panel-leave-active/)
+
+    const leavingLayout = await page.evaluate(() => {
+      const layoutElement = document.querySelector('.videoLayout')
+      const infoElement = document.querySelector('.infoArea')
+      const panelElement = document.querySelector('.watchVideoChaptersPanel')
+      const infoBounds = infoElement.getBoundingClientRect()
+      const panelBounds = panelElement.getBoundingClientRect()
+
+      return {
+        noSidebar: layoutElement.classList.contains('noSidebar'),
+        infoRight: infoBounds.right,
+        panelLeft: panelBounds.left
+      }
+    })
+    expect(leavingLayout.noSidebar).toBe(false)
+    expect(leavingLayout.panelLeft).toBeGreaterThanOrEqual(leavingLayout.infoRight - 1)
+
+    await expect(panel).toHaveCount(0)
+    await expect(layout).toHaveClass(/noSidebar/)
+  })
+
   test('comments load on request', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)

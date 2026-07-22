@@ -638,6 +638,9 @@ export default defineComponent({
       const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&
         this.defaultViewingMode === 'theatre'
 
+      if (!open && this.showSidebarChapters) {
+        this.sidebarPanelLeaving = true
+      }
       this.showSidebarChapters = open
 
       if (shouldUseDefaultTheatreMode) {
@@ -706,6 +709,9 @@ export default defineComponent({
       this.$refs.player?.skipSponsorBlockInfoSegment(uuid)
     },
     closeSidebarChapters() {
+      if (this.showSidebarChapters) {
+        this.sidebarPanelLeaving = true
+      }
       this.showSidebarChapters = false
     },
     copyChapterTimestamp(startSeconds) {

@@ -239,6 +239,7 @@
   */
   .chapters-panel-enter-active,
   .chapters-panel-leave-active {
+    overflow: hidden;
     transition: opacity 250ms ease, max-block-size 250ms ease, margin-block-end 250ms ease;
   }
 

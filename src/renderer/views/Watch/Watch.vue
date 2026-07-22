@@ -298,7 +298,12 @@
           </div>
         </div>
       </div>
-      <transition name="chapters-panel">
+      <transition
+        name="chapters-panel"
+        @before-leave="handleSidebarPanelBeforeLeave"
+        @after-leave="handleSidebarPanelAfterLeave"
+        @leave-cancelled="handleSidebarPanelAfterLeave"
+      >
         <div
           v-if="showSidebarChapters && !isLoading && videoChapters.length > 0"
           class="watchVideoSideBar watchVideoChaptersPanel"
