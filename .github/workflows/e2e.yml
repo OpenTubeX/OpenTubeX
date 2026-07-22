@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   e2e:
+    if: ${{ github.event_name != 'pull_request' || github.head_ref != 'weblate-translations' }}
     runs-on: ubuntu-latest
     env:
       OPENTUBEX_SYNC_SERVER_URL: http://127.0.0.1:8080
