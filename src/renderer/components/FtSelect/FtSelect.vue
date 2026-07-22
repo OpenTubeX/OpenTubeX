@@ -46,15 +46,14 @@
         />
       </span>
     </label>
-    <FtTooltip
-      v-if="tooltip !== ''"
-      class="selectTooltip"
-      :tooltip="tooltip"
-    />
     <span
       v-if="tooltip !== ''"
-      class="selectSyncIndicator"
+      class="selectIndicators"
     >
+      <FtTooltip
+        class="selectTooltip"
+        :tooltip="tooltip"
+      />
       <FtSyncedSettingIndicator :setting-key="settingKey" />
     </span>
   </div>

@@ -28,7 +28,7 @@
 }
 
 .select.containsTooltip {
-  margin-inline-end: 54px;
+  margin-inline-end: 70px;
 }
 
 .select-text {
@@ -81,20 +81,19 @@
   cursor: not-allowed;
 }
 
-.selectTooltip {
+.selectIndicators {
+  align-items: center;
+  display: flex;
+  gap: 6px;
   position: absolute;
-  inset-block-start: 12px;
+  inset-block-start: 50%;
   inset-inline-start: calc(100% + 8px);
+  transform: translateY(-50%);
+  white-space: nowrap;
 }
 
-.selectSyncIndicator {
-  position: absolute;
-  inset-block-start: 12px;
-  inset-inline-start: calc(100% + 34px);
-}
-
-.selectSyncIndicator :deep(.syncedSettingIndicator),
-.selectSyncIndicator :deep(.changedSettingIndicator) {
+.selectIndicators :deep(.syncedSettingIndicator),
+.selectIndicators :deep(.changedSettingIndicator) {
   margin-inline-start: 0;
 }
 
