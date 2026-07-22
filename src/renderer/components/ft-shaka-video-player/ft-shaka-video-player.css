@@ -332,6 +332,10 @@
   inline-size: calc(var(--side-panel-width) - 24px);
   min-block-size: 0;
   overflow: hidden;
+
+  /* Scope per-frame style/layout/paint work to the panel while its insets
+     animate, so a resizing dock cannot invalidate its siblings. */
+  contain: layout paint;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid var(--side-nav-hover-color);
   border-radius: 12px;
@@ -1334,10 +1338,16 @@
   border-radius: 12px;
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+
+  /* Scope per-frame style/layout/paint work to the panel while its insets
+     animate, so a resizing dock cannot invalidate its siblings. */
+  contain: layout paint;
   transform: translateX(calc(100% + 24px));
   transition: transform 250ms ease, opacity 200ms ease,
-    inset-block-start 250ms ease, inset-block-end 250ms ease;
+    inset-block-start 250ms ease, inset-block-end 250ms ease,
+    visibility 0s 250ms;
 }
 
 /*
@@ -1377,8 +1387,10 @@
 .fullscreenCommentsOverlay.open,
 .fullscreenPlaylistOverlay.open {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
+  transition-delay: 0s;
 }
 
 .fullscreenCommentsOverlay :deep(.watchVideo) {

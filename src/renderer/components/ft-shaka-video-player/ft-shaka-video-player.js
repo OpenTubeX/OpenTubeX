@@ -580,18 +580,6 @@ export default defineComponent({
       return openDocks
     }
 
-    function getFullscreenDockElement(dock) {
-      switch (dock) {
-        case 'metadata': return fullscreenMetadataOverlay.value
-        case 'transcript': return fullscreenTranscriptOverlay.value
-        case 'sponsorBlock': return fullscreenSponsorBlockOverlay.value
-        case 'comments': return fullscreenCommentsOverlay.value
-        case 'playlist': return fullscreenPlaylistOverlay.value
-        case 'chapters': return chapterOverlay.value
-        default: return null
-      }
-    }
-
     function fullscreenDockStyle(dock) {
       const openDocks = getFullscreenOpenDocks(dock)
       const index = openDocks.indexOf(dock)
@@ -745,6 +733,7 @@ export default defineComponent({
     }
 
     let reorderingFullscreenDock = null
+    let reorderingFullscreenDockBounds = null
 
     function handleFullscreenDockReorderPointerDown(event, dock) {
       const target = event.target instanceof Element ? event.target : null
@@ -759,6 +748,7 @@ export default defineComponent({
 
       fullscreenDockReordering.value = true
       reorderingFullscreenDock = dock
+      reorderingFullscreenDockBounds = container.value.getBoundingClientRect()
       window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
       window.addEventListener('pointerup', stopFullscreenDockReorder)
       window.addEventListener('pointercancel', stopFullscreenDockReorder)
@@ -769,12 +759,25 @@ export default defineComponent({
       const openDocks = getFullscreenOpenDocks()
       const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
       const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
-      let insertionIndex = otherDocks.findIndex(dock => {
-        const bounds = getFullscreenDockElement(dock)?.getBoundingClientRect()
-        return bounds && event.clientY < bounds.top + bounds.height / 2
-      })
-      if (insertionIndex === -1) {
-        insertionIndex = otherDocks.length
+      // Hit-test against the target layout derived from the dock weights.
+      // Measuring the panels while they animate towards their new slots would
+      // force a layout pass per pointer move and oscillate around the pointer.
+      const bounds = reorderingFullscreenDockBounds
+      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      let insertionIndex = otherDocks.length
+      let weightBefore = 0
+      let otherIndex = 0
+      for (const dock of openDocks) {
+        if (dock !== reorderingFullscreenDock) {
+          const midpoint = bounds.top +
+            (weightBefore + fullscreenDockWeights[dock] / 2) / totalWeight * bounds.height
+          if (event.clientY < midpoint) {
+            insertionIndex = otherIndex
+            break
+          }
+          otherIndex++
+        }
+        weightBefore += fullscreenDockWeights[dock]
       }
       if (insertionIndex === currentIndex) {
         return
@@ -794,6 +797,7 @@ export default defineComponent({
     function stopFullscreenDockReorder() {
       fullscreenDockReordering.value = false
       reorderingFullscreenDock = null
+      reorderingFullscreenDockBounds = null
       window.removeEventListener('pointermove', handleFullscreenDockReorderPointerMove)
       window.removeEventListener('pointerup', stopFullscreenDockReorder)
       window.removeEventListener('pointercancel', stopFullscreenDockReorder)
