@@ -35,10 +35,13 @@
         <span
           class="queueDragHandle"
           draggable="true"
+          tabindex="0"
           :aria-label="t('Video.Drag to Reorder Queue', { title: item.title })"
           :title="t('Video.Drag to Reorder Queue', { title: item.title })"
           @dragstart="startDrag($event, item.queueItemId)"
           @dragend="endDrag"
+          @keydown.up.prevent="move(item.queueItemId, -1)"
+          @keydown.down.prevent="move(item.queueItemId, 1)"
         >
           <FontAwesomeIcon :icon="['fas', 'fa-bars']" />
         </span>
