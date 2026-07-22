@@ -357,6 +357,11 @@
   color: var(--title-color);
 }
 
+.commentMoreRepliesSpinner {
+  margin-inline-start: 5px;
+  vertical-align: middle;
+}
+
 .commentReplies {
   clear: both;
   margin-inline-start: 30px;

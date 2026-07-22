@@ -7,6 +7,7 @@
 }
 
 .inline {
+  display: inline-flex;
   inline-size: auto;
   padding-block: 0;
 }

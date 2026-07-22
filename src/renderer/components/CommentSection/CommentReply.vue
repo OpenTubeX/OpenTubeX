@@ -103,7 +103,18 @@
         </span>
       </p>
       <div
-        v-if="reply.dataType === 'local' && reply.hasReplyToken"
+        v-if="loadingReplyIds.has(reply.id)"
+        class="showMoreReplies"
+      >
+        <FtSpinner
+          inline
+          size="18px"
+          border-width="2px"
+          :label="$t('Comments.Getting comment replies, please wait')"
+        />
+      </div>
+      <div
+        v-else-if="reply.dataType === 'local' && reply.hasReplyToken"
         class="showMoreReplies"
         role="button"
         tabindex="0"
@@ -128,6 +139,7 @@
         :hide-comment-photos="hideCommentPhotos"
         :subscribed-channel-ids="subscribedChannelIds"
         :channel-thumbnail="channelThumbnail"
+        :loading-reply-ids="loadingReplyIds"
         @copy-youtube-link="emit('copy-youtube-link', $event)"
         @get-more-replies="emit('get-more-replies', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
@@ -141,6 +153,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import FtRetryImage from '../FtRetryImage.vue'
+import FtSpinner from '../FtSpinner/FtSpinner.vue'
 
 const props = defineProps({
   node: {
@@ -173,6 +186,10 @@ const props = defineProps({
   },
   channelThumbnail: {
     type: String,
+    required: true
+  },
+  loadingReplyIds: {
+    type: Set,
     required: true
   }
 })

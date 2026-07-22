@@ -10,7 +10,7 @@
       -->
     </div>
     <FtSpinner
-      v-if="generalAutoLoadMorePaginatedItemsEnabled"
+      v-if="loading || generalAutoLoadMorePaginatedItemsEnabled"
       label="Loading more"
     />
     <slot v-else />
@@ -22,6 +22,13 @@ import { computed } from 'vue'
 
 import FtSpinner from './FtSpinner/FtSpinner.vue'
 import store from '../store/index'
+
+defineProps({
+  loading: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const emit = defineEmits(['load-next-page'])
 

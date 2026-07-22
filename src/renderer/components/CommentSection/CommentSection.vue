@@ -252,8 +252,16 @@
                 class="commentHeartBadgeRed"
               />
             </span>
+            <FtSpinner
+              v-if="comment.numReplies > 0 && !comment.showReplies && isReplyLoading(comment.id)"
+              class="commentMoreRepliesSpinner"
+              inline
+              size="18px"
+              border-width="2px"
+              :label="$t('Comments.Getting comment replies, please wait')"
+            />
             <span
-              v-if="comment.numReplies > 0 && !comment.showReplies"
+              v-else-if="comment.numReplies > 0 && !comment.showReplies"
               class="commentMoreReplies"
               role="button"
               tabindex="0"
@@ -281,12 +289,24 @@
               :hide-comment-photos="hideCommentPhotos"
               :subscribed-channel-ids="subscribedChannelIds"
               :channel-thumbnail="channelThumbnail"
+              :loading-reply-ids="loadingReplyIds"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
               @timestamp-event="onTimestamp"
             />
             <div
-              v-if="comment.hasReplyToken"
+              v-if="isReplyLoading(comment.id)"
+              class="showMoreReplies"
+            >
+              <FtSpinner
+                inline
+                size="18px"
+                border-width="2px"
+                :label="$t('Comments.Getting comment replies, please wait')"
+              />
+            </div>
+            <div
+              v-else-if="comment.hasReplyToken"
               class="showMoreReplies"
               role="button"
               tabindex="0"
@@ -425,6 +445,7 @@ const props = defineProps({
 
 const isLoading = ref(false)
 const isLoadingMoreComments = ref(false)
+const loadingReplyIds = ref(new Set())
 const showComments = ref(false)
 const nextPageToken = shallowRef(null)
 
@@ -592,11 +613,11 @@ const canPerformMoreCommentLoading = computed(() => {
 })
 
 const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
-  return generalAutoLoadMorePaginatedItemsEnabled.value &&
-    commentData.value.length > 0 &&
+  return commentData.value.length > 0 &&
     !isLoading.value &&
     showComments.value &&
-    (isLoadingMoreComments.value || !!nextPageToken.value)
+    (isLoadingMoreComments.value ||
+      (generalAutoLoadMorePaginatedItemsEnabled.value && !!nextPageToken.value))
 })
 
 const observeVisibilityOptions = computed(() => {
@@ -878,16 +899,33 @@ function toggleCommentReplies(index) {
  * @param {number} index
  * @param {string | null} commentId
  */
-function getCommentReplies(index, commentId = null) {
-  if (!process.env.SUPPORTS_LOCAL_API || commentData.value[index].dataType === 'invidious') {
-    if (!props.isPostComments) {
-      getCommentRepliesInvidious(index)
-    } else {
-      getPostCommentRepliesInvidious(index)
-    }
-  } else {
-    getCommentRepliesLocal(index, commentId)
+async function getCommentReplies(index, commentId = null) {
+  const replyId = commentId ?? commentData.value[index].id
+  if (loadingReplyIds.value.has(replyId)) {
+    return
   }
+
+  loadingReplyIds.value = new Set(loadingReplyIds.value).add(replyId)
+
+  try {
+    if (!process.env.SUPPORTS_LOCAL_API || commentData.value[index].dataType === 'invidious') {
+      if (!props.isPostComments) {
+        await getCommentRepliesInvidious(index)
+      } else {
+        await getPostCommentRepliesInvidious(index)
+      }
+    } else {
+      await getCommentRepliesLocal(index, commentId)
+    }
+  } finally {
+    const nextLoadingReplyIds = new Set(loadingReplyIds.value)
+    nextLoadingReplyIds.delete(replyId)
+    loadingReplyIds.value = nextLoadingReplyIds
+  }
+}
+
+function isReplyLoading(commentId) {
+  return loadingReplyIds.value.has(commentId)
 }
 
 /** @type {Map<string, (import('youtubei.js').YTNodes.CommentThread | import('youtubei.js').Misc.CommentsContinuation | string)>} */
@@ -1037,8 +1075,6 @@ async function getCommentDataLocal(more = false, preserveSort = false, silentRet
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
-  showToast(t('Comments.Getting comment replies, please wait'))
-
   try {
     const comment = findComment(commentData.value[index], commentId)
     const continuation = comment && replyTokens.get(comment.id)
@@ -1150,8 +1186,6 @@ async function getCommentDataInvidious() {
  * @param {number} index
  */
 async function getCommentRepliesInvidious(index) {
-  showToast(t('Comments.Getting comment replies, please wait'))
-
   const comment = commentData.value[index]
   const replyToken = replyTokens.get(comment.id)
 
@@ -1219,8 +1253,6 @@ function getPostCommentsInvidious() {
 }
 
 async function getPostCommentRepliesInvidious(index) {
-  showToast(t('Comments.Getting comment replies, please wait'))
-
   const comment = commentData.value[index]
   const replyToken = replyTokens.get(comment.id)
 

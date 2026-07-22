@@ -19,6 +19,7 @@
         :data="shownResults"
       />
       <FtAutoLoadNextPageWrapper
+        :loading="isLoadingMore"
         @load-next-page="nextPage"
       >
         <div
@@ -68,6 +69,7 @@ const route = useRoute()
 const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
+const isLoadingMore = ref(false)
 const apiUsed = ref('local')
 const searchSettings = ref({})
 const searchPage = ref(1)
@@ -332,7 +334,11 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
   }
 }
 
-function nextPage() {
+async function nextPage() {
+  if (isLoadingMore.value) {
+    return
+  }
+
   const payload = {
     query: processedQuery.value,
     searchSettings: searchSettings.value,
@@ -343,14 +349,22 @@ function nextPage() {
 
   if (apiUsed.value === 'local') {
     if (nextPageRef.value !== null) {
-      showToast(t('Search Filters["Fetching results. Please wait"]'))
-      getNextpageLocal(payload)
+      isLoadingMore.value = true
+      try {
+        await getNextpageLocal(payload)
+      } finally {
+        isLoadingMore.value = false
+      }
     } else {
       showToast(t('Search Filters.There are no more results for this search'))
     }
   } else {
-    showToast(t('Search Filters["Fetching results. Please wait"]'))
-    performSearchInvidious(payload)
+    isLoadingMore.value = true
+    try {
+      await performSearchInvidious(payload)
+    } finally {
+      isLoadingMore.value = false
+    }
   }
 }
 
