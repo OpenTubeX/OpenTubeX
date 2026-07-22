@@ -84,7 +84,7 @@ const apiUsed = ref('local')
 const pageNumber = ref(1)
 const isLoading = ref(true)
 const isLoadingMore = ref(false)
-const hasMoreResults = ref(true)
+const hasMoreResults = ref(false)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
@@ -113,7 +113,7 @@ function resetData() {
   apiUsed.value = 'local'
   pageNumber.value = 1
   isLoadingMore.value = false
-  hasMoreResults.value = true
+  hasMoreResults.value = false
 }
 
 async function getHashtag() {
