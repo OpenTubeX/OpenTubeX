@@ -3,6 +3,11 @@
   position: relative;
 }
 
+.selectTooltip {
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
+
 body[dir='rtl'] .ft-input-component.search.showClearTextButton .inputAction {
   inset-inline-end: -30px;
 }
@@ -230,6 +235,25 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   overflow-wrap: break-word;
   box-shadow: 0 0 10px var(--scrollbar-color-hover);
   background-color: var(--search-bar-color);
+}
+
+.search .list {
+  max-block-size: min(50vh, 20rem);
+  overflow-y: scroll;
+  scrollbar-color: var(--scrollbar-color-hover) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+}
+
+.search .list::-webkit-scrollbar {
+  display: block;
+  inline-size: 10px;
+}
+
+.search .list::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-color-hover);
+  border: 2px solid var(--search-bar-color);
+  border-radius: 6px;
 }
 
 .list li {

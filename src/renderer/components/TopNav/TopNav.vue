@@ -362,8 +362,8 @@ const activeDataListProperties = computed(() => {
 
   for (let i = 0; i < activeDataList.value.length; i++) {
     properties.push(i < searchHistoryEntriesCount
-      ? { isRemoveable: true, iconName: 'clock-rotate-left' }
-      : { isRemoveable: false, iconName: 'magnifying-glass' }
+      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left' }
+      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass' }
     )
   }
 
@@ -393,7 +393,12 @@ function toggleSideNav() {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const searchFilterValueChanged = computed(() => store.getters.getSearchFilterValueChanged)
+const searchFilterTabId = computed(() => process.env.IS_ELECTRON
+  ? (store.getters.getPresentedTabId ?? 'web')
+  : 'web')
+const searchFilterValueChanged = computed(() => {
+  return store.getters.getSearchFilterValueChanged(searchFilterTabId.value)
+})
 
 function showSearchFilters() {
   store.dispatch('showSearchFilters')
@@ -455,14 +460,15 @@ if (process.env.IS_ELECTRON) {
 }
 
 /** @type {import('vue').ComputedRef<any>} */
-const searchSettings = computed(() => store.getters.getSearchSettings)
+const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
 
 /**
  * @param {string} queryText
  * @param {object} options
  * @param {MouseEvent | KeyboardEvent} options.event
+ * @param {number} [options.dataListIndex]
  */
-function goToSearch(queryText, { event }) {
+function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewWindow = event instanceof KeyboardEvent
     ? matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
     : event && event.shiftKey
@@ -478,6 +484,28 @@ function goToSearch(queryText, { event }) {
   }
 
   clearLocalSearchSuggestionsSession()
+
+  const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
+    ? store.getters.getSearchHistoryEntryWithId(queryText)
+    : null
+  const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
+
+  if (selectedSearchSettings != null) {
+    const tabId = searchFilterTabId.value
+    store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
+    store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
+    store.commit('setSearchType', { tabId, value: selectedSearchSettings.type })
+    store.commit('setSearchDuration', { tabId, value: selectedSearchSettings.duration })
+    store.commit('setSearchFeatures', { tabId, value: [...selectedSearchSettings.features] })
+    store.commit('setSearchFilterValueChanged', {
+      tabId,
+      value: selectedSearchSettings.prioritize !== 'relevance' ||
+      selectedSearchSettings.time !== '' ||
+      selectedSearchSettings.type !== 'all' ||
+      selectedSearchSettings.duration !== '' ||
+      selectedSearchSettings.features.length > 0
+    })
+  }
 
   store.dispatch('getYoutubeUrlInfo', queryText).then((result) => {
     switch (result.urlType) {
@@ -582,15 +610,16 @@ function goToSearch(queryText, { event }) {
 
       case 'invalid_url':
       default: {
+        const settings = selectedSearchSettings ?? searchSettings.value
         openInternalPath({
           path: `/search/${encodeURIComponent(queryText)}`,
           query: {
-            prioritize: searchSettings.value.prioritize,
-            time: searchSettings.value.time,
-            type: searchSettings.value.type,
-            duration: searchSettings.value.duration,
+            prioritize: settings.prioritize,
+            time: settings.time,
+            type: settings.type,
+            duration: settings.duration,
             // Array proxy cannot be cloned during IPC call
-            features: [...searchSettings.value.features],
+            features: [...settings.features],
           },
           doCreateNewWindow,
           doCreateNewTab,

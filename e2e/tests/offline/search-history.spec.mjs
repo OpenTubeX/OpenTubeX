@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const now = Date.now()
 
@@ -11,7 +11,17 @@ test.use({
     // keeps this offline and isolates the search history behaviour.
     settings: { enableSearchSuggestions: false },
     searchHistory: [
-      { _id: 'android tutorial', lastUpdatedAt: now - 1000 },
+      {
+        _id: 'android tutorial',
+        lastUpdatedAt: now - 1000,
+        searchSettings: {
+          prioritize: 'popularity',
+          time: 'today',
+          type: 'video',
+          duration: 'three_to_twenty_mins',
+          features: ['hd', 'subtitles']
+        }
+      },
       { _id: 'baking bread', lastUpdatedAt: now - 2000 }
     ]
   }
@@ -33,6 +43,73 @@ test.describe('search history suggestions', () => {
 
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
+  })
+
+  test('selecting a recent search restores its filters', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    await suggestions(page).first().click()
+
+    await expect.poll(() => page.evaluate(() => {
+      const params = new URLSearchParams(location.hash.split('?')[1])
+      return {
+        prioritize: params.get('prioritize'),
+        time: params.get('time'),
+        type: params.get('type'),
+        duration: params.get('duration'),
+        features: params.getAll('features')
+      }
+    })).toEqual({
+      prioritize: 'popularity',
+      time: 'today',
+      type: 'video',
+      duration: 'three_to_twenty_mins',
+      features: ['hd', 'subtitles']
+    })
+  })
+
+  test('back navigation restores the active search filters', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    await suggestions(page).first().click()
+    await expect(page.locator('.navFilterButton')).toHaveClass(/filterChanged/)
+
+    await goTo(page, 'history')
+    await page.locator('.navFilterButton').click()
+    await page.locator('.clearFilterButton').click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(page.locator('.navFilterButton')).not.toHaveClass(/filterChanged/)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
+    await expect(page.locator('.navFilterButton')).toHaveClass(/filterChanged/)
+
+    await page.locator('.navFilterButton').click()
+    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="video"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="three_to_twenty_mins"]')).toBeChecked()
+  })
+
+  test('a search saves its active filters', async ({ app, page }) => {
+    await page.locator('.navFilterButton').click()
+    await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await page.locator('.searchRadio', { hasText: 'Duration' }).getByText('3 - 20 minutes', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.searchInput).fill('daily news')
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'search-history.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const record = records.filter((entry) => entry._id === 'daily news').at(-1)
+      return record && record.searchSettings
+    }).toEqual({
+      prioritize: 'relevance',
+      time: 'today',
+      type: 'all',
+      duration: 'three_to_twenty_mins',
+      features: []
+    })
   })
 
   test('a recent search can be removed and stays removed', async ({ app, page }) => {

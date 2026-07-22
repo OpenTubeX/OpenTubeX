@@ -3,6 +3,7 @@ import Autolinker from 'autolinker'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
 
 import { PlayerCache } from './PlayerCache'
+import { loadSearchContinuation } from '../search-continuation'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -363,12 +364,15 @@ export async function getLocalSearchResults(query, filters, safetyMode) {
  * @param {YT.Search | SerializedContinuation} continuationData
  */
 export async function getLocalSearchContinuation(continuationData) {
-  let response
+  const response = await loadSearchContinuation(() => continuationData instanceof YT.Search
+    ? continuationData.getContinuation()
+    : getLocalCachedFeedContinuation('search', continuationData))
 
-  if (continuationData instanceof YT.Search) {
-    response = await continuationData.getContinuation()
-  } else {
-    response = await getLocalCachedFeedContinuation('search', continuationData)
+  if (response === null) {
+    return {
+      results: [],
+      continuationData: null
+    }
   }
 
   return handleSearchResponse(response)

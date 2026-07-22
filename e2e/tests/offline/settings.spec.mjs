@@ -22,6 +22,18 @@ test.describe('settings', () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(playerScrollPosition)
   })
 
+  test('configures the watched percentage threshold', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+
+    const threshold = page.getByRole('slider', { name: /Watched Percentage Threshold/ })
+    await expect(threshold).toHaveValue('90')
+    await threshold.fill('0')
+    await expect(threshold).toHaveValue('0')
+    await threshold.fill('100')
+    await expect(threshold).toHaveValue('100')
+  })
+
   test('a toggled setting persists across restarts', async ({ app }) => {
     let page = app.page
     await goTo(page, 'settings')
@@ -92,5 +104,44 @@ test.describe('synced setting indicators', () => {
 
     const localOnlyLabel = page.locator('label').filter({ hasText: 'Check for Updates' })
     await expect(localOnlyLabel.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
+  })
+
+  test('spaces setting sync and help icons', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Highlight settings changed from defaults' })
+      .click()
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+
+    const slider = page.locator('label.pure-material-slider')
+      .filter({ hasText: 'Watched Percentage Threshold' })
+    const input = page.locator('label.selectLabel')
+      .filter({ hasText: 'Automatic History Retention' })
+    const select = page.locator('.select')
+      .filter({ hasText: 'Save Watched Progress' })
+    await select.locator('select').selectOption('never')
+
+    for (const setting of [slider, input, select]) {
+      const [syncBox, helpBox] = await Promise.all([
+        setting.locator('.syncedSettingIndicator').boundingBox(),
+        setting.locator('.selectTooltip').boundingBox()
+      ])
+
+      expect(syncBox).not.toBeNull()
+      expect(helpBox).not.toBeNull()
+      expect(syncBox.x - helpBox.x - helpBox.width).toBeGreaterThanOrEqual(6)
+    }
+
+    const [syncBox, resetBox] = await Promise.all([
+      select.locator('.syncedSettingIndicator').boundingBox(),
+      select.locator('.changedSettingIndicator').boundingBox()
+    ])
+    const helpBox = await select.locator('.selectTooltip').boundingBox()
+    expect(syncBox).not.toBeNull()
+    expect(resetBox).not.toBeNull()
+    expect(helpBox).not.toBeNull()
+    expect(Math.abs(helpBox.y + helpBox.height / 2 - syncBox.y - syncBox.height / 2)).toBeLessThanOrEqual(1)
+    expect(Math.abs(syncBox.y - resetBox.y)).toBeLessThanOrEqual(1)
+    expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
   })
 })

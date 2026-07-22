@@ -62,13 +62,24 @@
               :class="{
                 listItemDivider: option.type === 'divider',
                 listItem: option.type !== 'divider',
+                hasIcon: option.icon,
                 active: option.active
               }"
               @click="handleDropdownClick(option.value)"
               @keydown.enter="handleDropdownClick(option.value)"
               @keydown.space="handleDropdownClick(option.value)"
             >
-              {{ option.type === 'divider' ? '' : option.label }}
+              <template v-if="option.type !== 'divider'">
+                <div
+                  v-if="option.icon || option.active"
+                  class="optionIconColumn"
+                >
+                  <FontAwesomeIcon
+                    :icon="option.active ? ['fas', 'check'] : option.icon"
+                  />
+                </div>
+                <span>{{ option.label }}</span>
+              </template>
             </li>
           </ul>
         </slot>
@@ -103,19 +114,22 @@
               :class="{
                 listItemDivider: option.type === 'divider',
                 listItem: option.type !== 'divider',
+                hasIcon: option.icon,
                 active: option.active
               }"
               @click="handleDropdownClick(option.value)"
               @keydown.enter="handleDropdownClick(option.value)"
               @keydown.space="handleDropdownClick(option.value)"
             >
-              <div class="checkmarkColumn">
+              <div
+                v-if="option.icon || option.active"
+                class="optionIconColumn"
+              >
                 <FontAwesomeIcon
-                  v-if="option.active"
-                  :icon="['fas', 'check']"
+                  :icon="option.active ? ['fas', 'check'] : option.icon"
                 />
               </div>
-              {{ option.type === 'divider' ? '' : option.label }}
+              <span v-if="option.type !== 'divider'">{{ option.label }}</span>
             </li>
           </ul>
         </slot>
@@ -180,6 +194,7 @@ const props = defineProps({
     // - type: ('labelValue'|'divider', default to 'labelValue' for less typing)
     // - label: String (if type === 'labelValue')
     // - value: String (if type === 'labelValue')
+    // - (OPTIONAL) icon: FontAwesome IconDefinition tuple (if type === 'labelValue')
     // - (OPTIONAL) active: Number (if type === 'labelValue')
     type: Array,
     default: () => []

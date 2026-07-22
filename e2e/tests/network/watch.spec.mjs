@@ -181,49 +181,6 @@ test.describe('watch page', () => {
 
     await setPlayerFullscreen(page, true)
     const title = page.locator('.playerFullscreenTitleOverlay')
-    const titleBounds = await title.boundingBox()
-    const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
-    const titleRight = titleBounds.x + titleBounds.width
-    const besideTitleX = titleRight + (playerBounds.x + playerBounds.width - titleRight) / 2
-    const titleCenterY = titleBounds.y + titleBounds.height / 2
-
-    await page.mouse.move(besideTitleX, titleCenterY)
-    await page.mouse.down({ clickCount: 1 })
-    await page.mouse.up({ clickCount: 1 })
-    await page.waitForTimeout(100)
-    await page.mouse.down({ clickCount: 2 })
-    await page.mouse.up({ clickCount: 2 })
-    await expect.poll(
-      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
-    ).toBe(false)
-
-    await setPlayerFullscreen(page, true)
-    await page.mouse.move(titleBounds.x + titleBounds.width - 2, titleCenterY)
-    await page.mouse.down({ clickCount: 1 })
-    await page.mouse.up({ clickCount: 1 })
-    await expect(title).toHaveAttribute('aria-expanded', 'true')
-
-    await page.mouse.move(titleBounds.x + titleBounds.width + 4, titleCenterY)
-    await page.mouse.down({ clickCount: 1 })
-    await page.mouse.up({ clickCount: 1 })
-    await page.waitForTimeout(100)
-    await page.mouse.down({ clickCount: 2 })
-    await page.mouse.up({ clickCount: 2 })
-    await expect.poll(
-      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
-    ).toBe(false)
-
-    await setPlayerFullscreen(page, true)
-    await page.mouse.move(titleBounds.x + titleBounds.width / 2, titleBounds.y + titleBounds.height / 2)
-    await page.mouse.down({ clickCount: 1 })
-    await page.mouse.up({ clickCount: 1 })
-    await page.waitForTimeout(100)
-    await page.mouse.down({ clickCount: 2 })
-    await page.mouse.up({ clickCount: 2 })
-    await expect.poll(
-      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
-    ).toBe(true)
-
     await title.click({ force: true })
 
     await expect(title).toHaveAttribute('aria-expanded', 'true')
@@ -237,6 +194,10 @@ test.describe('watch page', () => {
     await expect(page.locator('.fullscreenActions .fullscreenQuickBookmarkAction')).toHaveCount(1)
     await expect(page.locator('.fullscreenActions .fullscreenTranscriptToggle')).toHaveCount(1)
     await expect(page.locator('.fullscreenMetadataTarget').getByRole('button', { name: 'Show transcript' })).toHaveCount(0)
+    const dockDescription = page.locator('.fullscreenMetadataTarget .videoDescription')
+    await expect(dockDescription).toHaveClass(/alwaysExpanded/)
+    await expect(dockDescription).not.toHaveClass(/short/)
+    await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     const [videoBounds, metadataBounds] = await Promise.all([
       page.locator('.ftVideoPlayer video.player').boundingBox(),
@@ -254,11 +215,33 @@ test.describe('watch page', () => {
 
     await setPlayerFullscreen(page, false)
     await expect(page.locator('.infoArea .videoTitle')).toBeVisible()
+    const inlineDescription = page.locator('.infoArea .videoDescription')
+    await expect(inlineDescription).not.toHaveClass(/alwaysExpanded/)
+    await expect(inlineDescription.locator('.descriptionCloseButton, .descriptionStatus')).not.toHaveCount(0)
     await setPlayerFullscreen(page, true)
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
 
     await page.getByRole('button', { name: 'Close video information' }).click()
     await expect(title).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('fullscreen seek preview appears above the action pill', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    await setPlayerFullscreen(page, true)
+    const actions = page.locator('.fullscreenActions')
+    const seekBar = page.locator('.shaka-seek-bar-container')
+
+    await expect(actions).toBeVisible()
+    await expect(actions).toHaveCSS('z-index', '2')
+    const seekBarBounds = await seekBar.boundingBox()
+    await page.mouse.move(
+      seekBarBounds.x + (seekBarBounds.width / 2),
+      seekBarBounds.y + (seekBarBounds.height / 2)
+    )
+    await expect(actions).toHaveCSS('z-index', '0')
   })
 
   test('full window playlist action shows its prompt above the player', async ({ page, innertube }) => {

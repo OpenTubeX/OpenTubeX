@@ -31,7 +31,8 @@
       </FtFlexBox>
 
       <FtAutoLoadNextPageWrapper
-        v-if="showFetchMoreButton"
+        v-if="hasMoreResults"
+        :loading="isLoadingMore"
         @load-next-page="handleFetchMore"
       >
         <div
@@ -45,6 +46,13 @@
           <FontAwesomeIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
         </div>
       </FtAutoLoadNextPageWrapper>
+      <p
+        v-else-if="videos.length > 0"
+        class="message paginationStatus"
+        role="status"
+      >
+        {{ $t("Search Filters.There are no more results for this search") }}
+      </p>
     </FtCard>
   </div>
 </template>
@@ -60,7 +68,6 @@ import store from '../../store/index'
 import { useRoute } from 'vue-router'
 import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
 import { copyToClipboard, showToast } from '../../helpers/utils'
-import { isNullOrEmpty } from '../../helpers/strings'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
@@ -76,6 +83,8 @@ const videos = shallowRef([])
 const apiUsed = ref('local')
 const pageNumber = ref(1)
 const isLoading = ref(true)
+const isLoadingMore = ref(false)
+const hasMoreResults = ref(false)
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
@@ -85,10 +94,6 @@ const backendPreference = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => {
   return store.getters.getBackendFallback
-})
-
-const showFetchMoreButton = computed(() => {
-  return !isNullOrEmpty(hashtagContinuationData.value) || apiUsed.value === 'invidious'
 })
 
 onMounted(() => {
@@ -107,6 +112,8 @@ function resetData() {
   videos.value = []
   apiUsed.value = 'local'
   pageNumber.value = 1
+  isLoadingMore.value = false
+  hasMoreResults.value = false
 }
 
 async function getHashtag() {
@@ -128,6 +135,7 @@ async function getInvidiousHashtag(page = 1) {
     isLoading.value = false
     apiUsed.value = 'invidious'
     videos.value = videos.value.concat(fetchedVideos)
+    hasMoreResults.value = fetchedVideos.length > 0
     pageNumber.value += 1
   } catch (error) {
     console.error(error)
@@ -151,6 +159,7 @@ async function getLocalHashtag() {
     videos.value = hashtagData.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     apiUsed.value = 'local'
     hashtagContinuationData.value = hashtagData.has_continuation ? hashtagData : null
+    hasMoreResults.value = hashtagContinuationData.value !== null
     isLoading.value = false
   } catch (error) {
     console.error(error)
@@ -173,6 +182,7 @@ async function getLocalHashtagMore() {
     const continuation = await hashtagContinuationData.value.getContinuation()
     const newVideos = continuation.videos.map((video) => parseLocalListVideo(video)).filter(_ => _)
     hashtagContinuationData.value = continuation.has_continuation ? continuation : null
+    hasMoreResults.value = hashtagContinuationData.value !== null
     videos.value = videos.value.concat(newVideos)
   } catch (error) {
     console.error(error)
@@ -190,11 +200,20 @@ async function getLocalHashtagMore() {
   }
 }
 
-function handleFetchMore() {
-  if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
-    getLocalHashtagMore()
-  } else if (apiUsed.value === 'invidious') {
-    getInvidiousHashtag(pageNumber.value)
+async function handleFetchMore() {
+  if (isLoadingMore.value) {
+    return
+  }
+
+  isLoadingMore.value = true
+  try {
+    if (process.env.SUPPORTS_LOCAL_API && apiUsed.value === 'local') {
+      await getLocalHashtagMore()
+    } else if (apiUsed.value === 'invidious') {
+      await getInvidiousHashtag(pageNumber.value)
+    }
+  } finally {
+    isLoadingMore.value = false
   }
 }
 </script>

@@ -30,6 +30,7 @@
           :captions="captions"
           :storyboard-src="videoStoryboardSrc"
           :annotations="videoAnnotations"
+          :hide-annotations="hideEndScreenAnnotations"
           :format="activeFormat"
           :thumbnail="thumbnail"
           :video-id="videoId"
@@ -238,6 +239,7 @@
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :license="license"
+          :always-expanded="fullscreenMetadataOpen"
           class="watchVideo"
           :class="{ theatreWatchVideo: useTheatreMode }"
           @timestamp-event="changeTimestamp"
@@ -385,6 +387,11 @@
         :channel-id="channelId"
         class="watchVideoSideBar watchVideoPlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
+      />
+      <watch-video-queue
+        v-if="$store.getters.getWatchQueueLength > 0"
+        class="watchVideoSideBar watchVideoQueue"
+        @pause-player="pausePlayer"
       />
       <Teleport
         :to="fullscreenPlaylistTarget || 'body'"

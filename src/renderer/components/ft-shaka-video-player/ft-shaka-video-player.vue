@@ -257,6 +257,7 @@
         class="vrCanvas"
       />
       <FtVideoAnnotations
+        v-if="!hideAnnotations"
         :annotations="annotations"
         :current-time="annotationCurrentTime"
       />

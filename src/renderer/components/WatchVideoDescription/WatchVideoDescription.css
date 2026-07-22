@@ -50,7 +50,7 @@
   margin-block-start: 1em;
 }
 
-.videoDescription:not(.short) .description {
+.videoDescription:not(.short, .alwaysExpanded) .description {
   padding-inline-end: 48px;
 }
 

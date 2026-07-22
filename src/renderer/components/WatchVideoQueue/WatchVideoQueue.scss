@@ -1,0 +1,132 @@
+.watchQueue {
+  padding-block-start: 16px;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-block-end: 12px;
+  border-block-end: 1px solid var(--side-nav-hover-color);
+}
+
+.queueTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.queueCount {
+  color: var(--secondary-text-color);
+  font-size: 13px;
+}
+
+.clearQueue {
+  border: 0;
+  background: transparent;
+  color: var(--link-color);
+  cursor: pointer;
+  font: inherit;
+}
+
+.queueItems {
+  max-block-size: 480px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.queueItem {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  border-block-end: 1px solid var(--side-nav-hover-color);
+}
+
+.queueItem-move {
+  transition: transform 200ms ease;
+}
+
+.queueItem.dragging {
+  opacity: 0.35;
+}
+
+.queueDragHandle {
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 50%;
+  color: var(--secondary-text-color);
+  cursor: grab;
+
+  &:hover {
+    background-color: var(--side-nav-hover-color);
+    color: var(--primary-text-color);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.queueVideo {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.queueThumbnail {
+  aspect-ratio: 16 / 9;
+  inline-size: 112px;
+  object-fit: cover;
+}
+
+.queueDetails {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.queueVideoTitle,
+.queueAuthor {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queueAuthor {
+  color: var(--secondary-text-color);
+  font-size: 13px;
+}
+
+.queueActions {
+  display: flex;
+  flex-direction: column;
+
+  button {
+    display: grid;
+    place-items: center;
+    inline-size: 30px;
+    block-size: 30px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background-color: var(--side-nav-hover-color);
+      color: var(--primary-text-color);
+    }
+  }
+}

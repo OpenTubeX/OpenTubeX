@@ -97,6 +97,34 @@ test.describe('tab bar', () => {
     await expect(searchInput).toHaveValue('second tab query')
   })
 
+  test('search filters are independent per tab', async ({ page }) => {
+    const filterButton = page.locator('.navFilterButton')
+
+    await filterButton.click()
+    await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(filterButton).toHaveClass(/filterChanged/)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(filterButton).not.toHaveClass(/filterChanged/)
+
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
+    await page.locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).first().click()
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="relevance"]')).toBeChecked()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).nth(1).click()
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
+  })
+
   test('loading a search tab fills the search bar from its route', async ({ page }) => {
     const searchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/search/loaded%20tab%20query',
@@ -171,6 +199,52 @@ test.describe('tab bar', () => {
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+  })
+})
+
+test.describe('closed tabs', () => {
+  test('restoring a closed tab restores its navigation history', async ({ page }) => {
+    await goTo(page, 'settings')
+    await goTo(page, 'history')
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click()
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await page.keyboard.press('Control+Shift+t')
+
+    await expect(page).toHaveURL(/#\/history/)
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/settings/)
+    await page.locator(sel.forwardButton).click()
+    await expect(page).toHaveURL(/#\/history/)
+  })
+
+  test.describe('with navigation history disabled after closing', () => {
+    test.use({ seed: { settings: { rememberTabNavigationHistory: true } } })
+
+    test('does not persist restored history across a relaunch', async ({ app }) => {
+      let page = app.page
+      await goTo(page, 'settings')
+      await goTo(page, 'history')
+      await page.locator(sel.newTabButton).click()
+      await page.locator(sel.tabs).first().click()
+      await page.keyboard.press('Control+w')
+
+      await goTo(page, 'settings')
+      const rememberHistory = page.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
+      await expect(rememberHistory).toBeChecked()
+      await page.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
+      await expect(rememberHistory).not.toBeChecked()
+
+      await page.keyboard.press('Control+Shift+t')
+      await expect(page).toHaveURL(/#\/history/)
+
+      ;({ page } = await app.relaunch())
+      await expect(page).toHaveURL(/#\/history/)
+      await expect(page.locator(sel.backButton)).toBeDisabled()
+    })
   })
 })
 

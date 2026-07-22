@@ -729,6 +729,8 @@ Settings:
     Week Starts On: Week Starts On
     Remember Search History: Remember Search History
     Save Watched Progress: Save Watched Progress
+    Watched Percentage Threshold: Watched Percentage Threshold
+    Watched Percentage Threshold Tooltip: Videos are marked as watched after reaching the selected percentage and having no more than 2 minutes remaining. At 0%, they are marked when playback begins. At 100%, they are marked when playback ends.
     Watched Progress Saving Mode:
       Modes:
         Auto: Auto
@@ -793,6 +795,7 @@ Settings:
     Hide Sharing Actions: Hide Sharing Actions
     Hide Videos on Watch: Hide Videos on Watch
     Hide Chapters: Hide Chapters
+    Hide End-Screen Annotations: Hide End-Screen Annotations
     Hide Channels: Hide Videos From Channels
     Hide Channels Disabled Message: Some channels were blocked using ID and weren't processed. Feature is blocked while those IDs are updating
     Hide Channels Placeholder: Channel ID
@@ -1142,6 +1145,15 @@ Channel:
     Hide Answers: Hide Answers
     Video hidden by OpenTubeX: Video hidden by OpenTubeX
 Video:
+  Queue: Queue
+  Play Next: Play Next
+  Add to Queue: Add to Queue
+  Added to Play Next: Video will play next
+  Added to Queue: Video added to queue
+  Clear Queue: Clear Queue
+  Queue Video Count: '{count} video | {count} videos'
+  Remove from Queue: 'Remove {title} from queue'
+  Drag to Reorder Queue: 'Drag {title} to reorder queue'
   Metadata: Video information
   Close Metadata: Close video information
   Transcript:

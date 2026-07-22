@@ -479,9 +479,8 @@ export class TabNavigationService {
   }
 
   /**
-   * Sync a tab's back/forward history to the main process so it can be
-   * persisted with the tab session. When persistence is disabled this
-   * clears any history the main process still holds for the tab.
+   * Sync a tab's back/forward history to the main process for closed-tab
+   * restoration, and mark whether it should also persist across restarts.
    */
   publishHistory(tabId, enabled = this.store.getters.getRememberTabNavigationHistory === true) {
     const tab = this.store.getters.getTabById(tabId)
@@ -492,8 +491,9 @@ export class TabNavigationService {
     // Clone into plain objects: reactive store objects break IPC transfer.
     window.ftElectron?.tabs?.updateNavigationHistory?.({
       tabId,
-      history: enabled ? tab.history.map(cloneHistoryEntry) : null,
-      historyIndex: enabled ? tab.historyIndex : null
+      history: tab.history.map(cloneHistoryEntry),
+      historyIndex: tab.historyIndex,
+      persistHistory: enabled
     })
   }
 

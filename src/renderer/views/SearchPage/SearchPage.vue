@@ -19,6 +19,7 @@
         :data="shownResults"
       />
       <FtAutoLoadNextPageWrapper
+        v-if="hasMoreResults"
         :loading="isLoadingMore"
         @load-next-page="nextPage"
       >
@@ -33,6 +34,13 @@
           <FontAwesomeIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
         </div>
       </FtAutoLoadNextPageWrapper>
+      <p
+        v-else
+        class="searchStatus"
+        role="status"
+      >
+        {{ exhaustedSearchMessage }}
+      </p>
     </FtCard>
   </div>
 </template>
@@ -62,14 +70,17 @@ import {
 } from '../../helpers/api/local'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
-import { useTabTitle } from '../../tabs/TabContext'
+import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 
 const { t } = useI18n()
 const route = useRoute()
+const { tabId: injectedTabId } = useTabContext()
+const tabId = injectedTabId ?? 'web'
 const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
 const isLoadingMore = ref(false)
+const hasMoreResults = ref(true)
 const apiUsed = ref('local')
 const searchSettings = ref({})
 const searchPage = ref(1)
@@ -79,6 +90,9 @@ const shownResults = shallowRef([])
 
 const query = ref('')
 const processedQuery = computed(() => query.value.trim())
+const exhaustedSearchMessage = computed(() => shownResults.value.length === 0
+  ? t('Channel.Your search results have returned 0 results')
+  : t('Search Filters.There are no more results for this search'))
 
 /** @type {import('vue').ComputedRef<any[]>} */
 const sessionSearchHistory = computed(() => store.getters.getSessionSearchHistory)
@@ -94,6 +108,22 @@ const showFamilyFriendlyOnly = computed(() => store.getters.getShowFamilyFriendl
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
+
+function restoreActiveSearchFilters(settings) {
+  store.commit('setSearchPrioritize', { tabId, value: settings.prioritize })
+  store.commit('setSearchTime', { tabId, value: settings.time })
+  store.commit('setSearchType', { tabId, value: settings.type })
+  store.commit('setSearchDuration', { tabId, value: settings.duration })
+  store.commit('setSearchFeatures', { tabId, value: [...settings.features] })
+  store.commit('setSearchFilterValueChanged', {
+    tabId,
+    value: settings.prioritize !== 'relevance' ||
+    settings.time !== '' ||
+    settings.type !== 'all' ||
+    settings.duration !== '' ||
+    settings.features.length > 0
+  })
+}
 
 watch(route, () => {
   const query_ = route.params.query.trim()
@@ -117,6 +147,7 @@ watch(route, () => {
   }
 
   query.value = query_
+  restoreActiveSearchFilters(searchSettings)
 
   setTabTitle(processedQuery.value)
   checkSearchCache(payload)
@@ -139,6 +170,7 @@ onMounted(() => {
     duration: route.query.duration,
     features: features ?? [],
   }
+  restoreActiveSearchFilters(searchSettings.value)
 
   const payload = {
     query: processedQuery.value,
@@ -149,10 +181,17 @@ onMounted(() => {
   checkSearchCache(payload)
 })
 
-function updateSearchHistoryEntry() {
+function updateSearchHistoryEntry(searchSettings) {
   const persistentSearchHistoryPayload = {
     _id: processedQuery.value,
-    lastUpdatedAt: Date.now()
+    lastUpdatedAt: Date.now(),
+    searchSettings: {
+      prioritize: searchSettings.prioritize,
+      time: searchSettings.time,
+      type: searchSettings.type,
+      duration: searchSettings.duration,
+      features: [...searchSettings.features]
+    }
   }
 
   store.dispatch('updateSearchHistoryEntry', persistentSearchHistoryPayload)
@@ -175,6 +214,7 @@ function checkSearchCache(payload) {
   } else {
     // Show loading effect coz there will be network request(s)
     isLoading.value = true
+    hasMoreResults.value = true
     searchSettings.value = payload.searchSettings
 
     switch (backendPreference.value) {
@@ -188,7 +228,7 @@ function checkSearchCache(payload) {
   }
 
   if (rememberSearchHistory.value) {
-    updateSearchHistoryEntry()
+    updateSearchHistoryEntry(payload.searchSettings)
   }
 }
 
@@ -206,6 +246,7 @@ async function performSearchLocal(payload) {
 
     shownResults.value = results
     nextPageRef.value = continuationData
+    hasMoreResults.value = results.length > 0 && continuationData != null
 
     isLoading.value = false
 
@@ -214,6 +255,7 @@ async function performSearchLocal(payload) {
       data: shownResults.value,
       searchSettings: searchSettings.value,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
+      hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
     }
 
@@ -241,20 +283,18 @@ async function getNextpageLocal(payload) {
   try {
     const { results, continuationData } = await getLocalSearchContinuation(payload.options.nextPageRef)
 
-    if (results.length === 0) {
-      return
-    }
+    nextPageRef.value = continuationData
+    hasMoreResults.value = results.length > 0 && continuationData != null
 
     apiUsed.value = 'local'
 
     shownResults.value = shownResults.value.concat(results)
-    nextPageRef.value = continuationData
-
     const historyPayload = {
       query: payload.query,
       data: shownResults.value,
       searchSettings: searchSettings.value,
       nextPageRef: nextPageRef.value ? extractLocalCacheableSearchContinuation(nextPageRef.value) : null,
+      hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
     }
 
@@ -293,6 +333,8 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       return
     }
 
+    hasMoreResults.value = results.length > 0
+
     apiUsed.value = 'invidious'
 
     if (searchPage.value !== 1) {
@@ -310,6 +352,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
       data: shownResults.value,
       searchSettings: searchSettings.value,
       searchPage: searchPage.value,
+      hasMoreResults: hasMoreResults.value,
       apiUsed: apiUsed.value
     }
 
@@ -373,10 +416,10 @@ function replaceShownResults(history) {
   shownResults.value = history.data
   searchSettings.value = history.searchSettings
   apiUsed.value = history.apiUsed
-
-  if (history.nextPageRef != null) {
-    nextPageRef.value = history.nextPageRef
-  }
+  nextPageRef.value = history.nextPageRef ?? null
+  hasMoreResults.value = history.hasMoreResults ?? (
+    history.apiUsed === 'local' ? nextPageRef.value !== null : true
+  )
 
   if (typeof (history.searchPage) !== 'undefined') {
     searchPage.value = history.searchPage

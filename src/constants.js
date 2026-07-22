@@ -523,8 +523,8 @@ const SEARCH_RESULTS_DISPLAY_LIMIT = 14
 // max # of search history results we show when mixed with YT search suggestions
 const MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT = 4
 
-// A video is considered watched once no more than the smaller of 10% or 2 minutes remains
-const WATCHED_MAX_REMAINING_FRACTION = 0.1
+// Percentage of a video's duration that must be played before it is considered watched
+const DEFAULT_WATCHED_PERCENTAGE_THRESHOLD = 90
 const WATCHED_MAX_REMAINING_SECONDS = 120
 
 export {
@@ -547,6 +547,6 @@ export {
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,
-  WATCHED_MAX_REMAINING_FRACTION,
+  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   WATCHED_MAX_REMAINING_SECONDS,
 }

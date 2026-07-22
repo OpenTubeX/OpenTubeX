@@ -59,6 +59,7 @@ const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
  * @property {number} refreshKey
  * @property {NavigationHistoryEntry[] | null} navigationHistory
  * @property {number} navigationHistoryIndex
+ * @property {boolean} persistNavigationHistory
  */
 
 /**
@@ -703,7 +704,8 @@ export class TabManager {
       isUnloaded = false,
       preloadInBackground = false,
       history = null,
-      historyIndex = null
+      historyIndex = null,
+      persistHistory = history != null
     } = options
 
     // Only trusted callers (session restore, transfers) supply an id; renderer
@@ -749,7 +751,8 @@ export class TabManager {
       mountRevision: shouldMount ? 1 : 0,
       refreshKey: 0,
       navigationHistory: restoredNavigationHistory?.history ?? null,
-      navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0
+      navigationHistoryIndex: restoredNavigationHistory?.historyIndex ?? 0,
+      persistNavigationHistory: Boolean(persistHistory) && restoredNavigationHistory != null
     }
 
     let preferredIndex = this.tabs.size
@@ -1110,7 +1113,9 @@ export class TabManager {
       url: tab.url,
       title: tab.title,
       isPinned: tab.isPinned,
-      color: tab.color
+      color: tab.color,
+      history: tab.navigationHistory,
+      historyIndex: tab.navigationHistoryIndex
     })
     if (this.closedTabs.length > 10) {
       this.closedTabs.shift()
@@ -1171,9 +1176,9 @@ export class TabManager {
   }
 
   /**
-   * @returns {TabInfo|null}
+   * @returns {Promise<TabInfo|null>}
    */
-  restoreClosedTab() {
+  async restoreClosedTab() {
     const closedTab = this.closedTabs.pop()
     if (!closedTab) return null
 
@@ -1182,6 +1187,9 @@ export class TabManager {
       title: closedTab.title,
       isPinned: closedTab.isPinned,
       color: closedTab.color,
+      history: closedTab.history,
+      historyIndex: closedTab.historyIndex,
+      persistHistory: await TabManager.getStoredRememberTabNavigationHistory(),
       makeActive: true
     })
   }
@@ -1968,14 +1976,18 @@ export class TabManager {
    * @param {string} tabId
    * @param {object[] | null} history
    * @param {number | null} historyIndex
+   * @param {boolean} persistHistory
    */
-  updateTabNavigationHistory(tabId, history, historyIndex) {
+  updateTabNavigationHistory(tabId, history, historyIndex, persistHistory) {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
     const sanitized = TabManager.sanitizeNavigationHistory(history, historyIndex)
     tab.navigationHistory = sanitized?.history ?? null
     tab.navigationHistoryIndex = sanitized?.historyIndex ?? 0
+    if (typeof persistHistory === 'boolean') {
+      tab.persistNavigationHistory = persistHistory && sanitized != null
+    }
     this._saveSession()
   }
 
@@ -2059,7 +2071,7 @@ export class TabManager {
           tabData.previewCapturedAt = tab.previewCapturedAt
         }
 
-        if (tab.navigationHistory != null) {
+        if (tab.persistNavigationHistory && tab.navigationHistory != null) {
           tabData.history = tab.navigationHistory
           tabData.historyIndex = tab.navigationHistoryIndex
         }
@@ -2090,7 +2102,7 @@ export class TabManager {
         isPinned: tab.isPinned,
         color: tab.color,
         isUnloaded: tab.isUnloaded,
-        ...(tab.history != null && {
+        ...(this.tabs.get(tab.id)?.persistNavigationHistory && tab.history != null && {
           history: tab.history,
           historyIndex: tab.historyIndex
         })
@@ -2201,6 +2213,7 @@ export class TabManager {
           previewFileName,
           history: restoreNavigationHistory ? tabData.history : null,
           historyIndex: restoreNavigationHistory ? tabData.historyIndex : null,
+          persistHistory: restoreNavigationHistory,
           makeActive,
           openPosition: 'end',
           lazyLoad: restoreAsUnloaded,
@@ -2514,9 +2527,9 @@ export function setupTabsIPC(options = {}) {
     manager._scheduleTabPreviewRefresh(tab, delayMs)
   })
 
-  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, (event) => {
+  ipcMain.handle(IpcChannels.TABS_RESTORE_CLOSED, async (event) => {
     const manager = getManager(event)
-    const tab = manager?.restoreClosedTab()
+    const tab = await manager?.restoreClosedTab()
     return tab
       ? { id: tab.id, url: tab.url, route: cloneRoute(tab.route), title: tab.title, isPinned: tab.isPinned, color: tab.color }
       : null
@@ -2551,7 +2564,12 @@ export function setupTabsIPC(options = {}) {
   ipcMain.on(IpcChannels.TABS_UPDATE_NAV_HISTORY, (event, payload) => {
     const manager = getManager(event)
     if (manager && typeof payload?.tabId === 'string') {
-      manager.updateTabNavigationHistory(payload.tabId, payload.history, payload.historyIndex)
+      manager.updateTabNavigationHistory(
+        payload.tabId,
+        payload.history,
+        payload.historyIndex,
+        payload.persistHistory
+      )
     }
   })
 

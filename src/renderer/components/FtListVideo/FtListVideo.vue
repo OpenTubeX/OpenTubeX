@@ -570,21 +570,37 @@ const showInvidiousShareOptions = computed(() => backendPreference.value === 'in
 const dropdownOptions = computed(() => {
   const options = [
     {
+      label: t('Video.Play Next'),
+      value: 'playNext',
+      icon: ['fas', 'step-forward']
+    },
+    {
+      label: t('Video.Add to Queue'),
+      value: 'addToQueue',
+      icon: ['fas', 'bars-progress']
+    },
+    {
+      type: 'divider'
+    },
+    {
       label: isWatched.value
         ? t('Video.Unmark As Watched')
         : t('Video.Mark As Watched'),
-      value: 'history'
+      value: 'history',
+      icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
     },
     ...historyEntryExists.value
       ? [{
           label: t('Video.Remove From History'),
-          value: 'removeHistory'
+          value: 'removeHistory',
+          icon: ['fas', 'trash']
         }]
       : [],
     ...(process.env.IS_ELECTRON && !isUpcoming.value
       ? [{
           label: t('Downloads.Download Video'),
-          value: 'download'
+          value: 'download',
+          icon: ['fas', 'download']
         }]
       : [])
   ]
@@ -595,16 +611,19 @@ const dropdownOptions = computed(() => {
       },
       {
         label: t('Video.Copy YouTube Link'),
-        value: 'copyYoutube'
+        value: 'copyYoutube',
+        icon: ['fas', 'link']
       },
       {
         label: t('Video.Copy YouTube Embedded Player Link'),
-        value: 'copyYoutubeEmbed'
+        value: 'copyYoutubeEmbed',
+        icon: ['fas', 'display']
       },
       ...showInvidiousShareOptions.value
         ? [{
             label: t('Video.Copy Invidious Link'),
-            value: 'copyInvidious'
+            value: 'copyInvidious',
+            icon: ['fas', 'link']
           }]
         : [],
       {
@@ -612,16 +631,19 @@ const dropdownOptions = computed(() => {
       },
       {
         label: t('Video.Open in YouTube'),
-        value: 'openYoutube'
+        value: 'openYoutube',
+        icon: ['fab', 'youtube']
       },
       {
         label: t('Video.Open YouTube Embedded Player'),
-        value: 'openYoutubeEmbed'
+        value: 'openYoutubeEmbed',
+        icon: ['fas', 'display']
       },
       ...showInvidiousShareOptions.value
         ? [{
             label: t('Video.Open in Invidious'),
-            value: 'openInvidious'
+            value: 'openInvidious',
+            icon: ['fas', 'external-link-alt']
           }]
         : [],
     )
@@ -632,12 +654,14 @@ const dropdownOptions = computed(() => {
         },
         {
           label: t('Video.Copy YouTube Channel Link'),
-          value: 'copyYoutubeChannel'
+          value: 'copyYoutubeChannel',
+          icon: ['fas', 'link']
         },
         ...showInvidiousShareOptions.value
           ? [{
               label: t('Video.Copy Invidious Channel Link'),
-              value: 'copyInvidiousChannel'
+              value: 'copyInvidiousChannel',
+              icon: ['fas', 'link']
             }]
           : [],
         {
@@ -645,12 +669,14 @@ const dropdownOptions = computed(() => {
         },
         {
           label: t('Video.Open Channel in YouTube'),
-          value: 'openYoutubeChannel'
+          value: 'openYoutubeChannel',
+          icon: ['fab', 'youtube']
         },
         ...showInvidiousShareOptions.value
           ? [{
               label: t('Video.Open Channel in Invidious'),
-              value: 'openInvidiousChannel'
+              value: 'openInvidiousChannel',
+              icon: ['fas', 'external-link-alt']
             }]
           : [],
       )
@@ -668,11 +694,13 @@ const dropdownOptions = computed(() => {
       channelShouldBeHidden
         ? {
             label: t('Video.Unhide Channel'),
-            value: 'unhideChannel'
+            value: 'unhideChannel',
+            icon: ['fas', 'user-check']
           }
         : {
             label: t('Video.Hide Channel'),
-            value: 'hideChannel'
+            value: 'hideChannel',
+            icon: ['fas', 'user-lock']
           }
     )
   }
@@ -707,6 +735,12 @@ function getInvidiousChannelUrl() {
  */
 function handleOptionsClick(option) {
   switch (option) {
+    case 'playNext':
+      addToWatchQueue(true)
+      break
+    case 'addToQueue':
+      addToWatchQueue(false)
+      break
     case 'history':
       if (isWatched.value) {
         unmarkAsWatched()
@@ -773,6 +807,16 @@ function handleOptionsClick(option) {
       showDownloadPrompt.value = true
       break
   }
+}
+
+function addToWatchQueue(playNext) {
+  store.commit('addVideoToWatchQueue', {
+    video: deepCopy(props.data),
+    playNext
+  })
+  showToast(playNext
+    ? t('Video.Added to Play Next')
+    : t('Video.Added to Queue'))
 }
 
 const thumbnail = computed(() => {

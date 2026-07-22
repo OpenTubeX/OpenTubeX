@@ -19,13 +19,13 @@
       :class="{ disabled }"
     >
       {{ label || placeholder }}
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"
         position="bottom"
         :tooltip="tooltip"
       />
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </label>
     <button
       v-if="showClearTextButton"
@@ -274,8 +274,9 @@ updateVisibleDataList()
 
 /**
  * @param {KeyboardEvent | MouseEvent} [event]
+ * @param {number} [dataListIndex]
  */
-function handleClick(event) {
+function handleClick(event, dataListIndex = searchState.keyboardSelectedOptionIndex) {
   const selectedValue = searchStateKeyboardSelectedOptionValue.value
   const query = (selectedValue != null && selectedValue !== '') ? selectedValue : inputData.value
   inputData.value = query
@@ -291,7 +292,7 @@ function handleClick(event) {
   removeButtonSelectedIndex.value = -1
 
   emit('input', query)
-  emit('click', query, { event })
+  emit('click', query, { event, dataListIndex })
 }
 
 /**
@@ -399,7 +400,7 @@ function handleOptionClick(index) {
   searchState.isPointerInList = false
   inputData.value = visibleDataList.value[index]
   emit('input', inputData.value)
-  handleClick()
+  handleClick(undefined, index)
 }
 
 function resetSelectedOption() {

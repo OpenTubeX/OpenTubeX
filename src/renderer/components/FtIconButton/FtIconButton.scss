@@ -164,17 +164,6 @@
     padding: 0;
   }
 
-  :has(.active) {
-    .checkmarkColumn {
-      min-inline-size: 12px;
-    }
-
-    .listItem {
-      display: flex;
-      gap: 6px;
-    }
-  }
-
   .listItem {
     cursor: pointer;
     margin: 0;
@@ -194,8 +183,6 @@
 
     &.active {
       font-weight: 600;
-      display: flex;
-      gap: 6px;
     }
 
     &:active {
@@ -212,5 +199,20 @@
     // Too "visible" with current color
     opacity: 0.5;
     inline-size: 95%;
+  }
+
+  .listItem.hasIcon,
+  .listItem.active {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    text-align: start;
+  }
+
+  .optionIconColumn {
+    display: inline-flex;
+    inline-size: 1em;
+    justify-content: center;
+    min-inline-size: 1em;
   }
 }

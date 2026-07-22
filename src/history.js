@@ -1,9 +1,9 @@
 import {
-  WATCHED_MAX_REMAINING_FRACTION,
+  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   WATCHED_MAX_REMAINING_SECONDS,
-} from './constants'
+} from './constants.js'
 
-export { WATCHED_MAX_REMAINING_FRACTION, WATCHED_MAX_REMAINING_SECONDS }
+export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
 
 /**
  * @param {object | undefined} historyEntry
@@ -24,20 +24,31 @@ export function isHistoryEntryWatched(historyEntry) {
 /**
  * @param {number} watchProgress
  * @param {number} lengthSeconds
+ * @param {number} watchedPercentageThreshold
  * @returns {boolean}
  */
-export function hasReachedWatchedThreshold(watchProgress, lengthSeconds) {
+export function hasReachedWatchedThreshold(
+  watchProgress,
+  lengthSeconds,
+  watchedPercentageThreshold = DEFAULT_WATCHED_PERCENTAGE_THRESHOLD
+) {
   if (!Number.isFinite(watchProgress) || !Number.isFinite(lengthSeconds) || lengthSeconds <= 0) {
     return false
   }
 
-  const remainingSeconds = Math.max(lengthSeconds - watchProgress, 0)
-  const allowedRemainingSeconds = Math.min(
-    lengthSeconds * WATCHED_MAX_REMAINING_FRACTION,
-    WATCHED_MAX_REMAINING_SECONDS
-  )
+  const threshold = Number.isFinite(watchedPercentageThreshold) &&
+    watchedPercentageThreshold >= 0 && watchedPercentageThreshold <= 100
+    ? watchedPercentageThreshold
+    : DEFAULT_WATCHED_PERCENTAGE_THRESHOLD
 
-  return remainingSeconds <= allowedRemainingSeconds
+  const hasReachedPercentage = watchProgress / lengthSeconds * 100 >= threshold
+  if (threshold === 0 || threshold === 100) {
+    return hasReachedPercentage
+  }
+
+  const isWithinLastTwoMinutes = lengthSeconds - watchProgress <= WATCHED_MAX_REMAINING_SECONDS
+
+  return hasReachedPercentage && isWithinLastTwoMinutes
 }
 
 /**

@@ -2,6 +2,7 @@ import i18n, { loadLocale } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import {
   applyKeyboardShortcutOverrides,
+  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   MAIN_PROFILE_ID,
   sanitizeKeyboardShortcutOverrides,
   SyncEvents,
@@ -233,6 +234,7 @@ const state = {
   hideCommentLikes: false,
   hideCommentPhotos: false,
   hideComments: false,
+  hideEndScreenAnnotations: false,
   hideFeaturedChannels: false,
   channelsHidden: '[]',
   forbiddenTitles: '[]',
@@ -292,6 +294,7 @@ const state = {
   rememberTabNavigationHistory: false,
   // 'auto', 'semi-auto', 'never'
   watchedProgressSavingMode: 'auto',
+  watchedPercentageThreshold: DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   saveVideoHistoryWithLastViewedPlaylist: true,
   showFamilyFriendlyOnly: false,
   sponsorBlockShowSkippedToast: true,

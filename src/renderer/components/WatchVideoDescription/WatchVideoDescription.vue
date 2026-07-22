@@ -1,10 +1,14 @@
 <template>
   <FtCard
     v-if="shownDescription.length > 0"
-    :class="{ videoDescription: true, short: !showFullDescription }"
+    :class="{
+      videoDescription: true,
+      short: !isExpanded,
+      alwaysExpanded
+    }"
   >
     <FtIconButton
-      v-if="showControls && showFullDescription"
+      v-if="showControls && isExpanded && !alwaysExpanded"
       class="descriptionCloseButton"
       :title="$t('Description.Collapse Description')"
       :icon="['fas', 'xmark']"
@@ -15,7 +19,7 @@
       @click="collapseDescription"
     />
     <span
-      v-if="showControls && !showFullDescription"
+      v-if="showControls && !isExpanded && !alwaysExpanded"
       class="descriptionStatus"
       role="button"
       tabindex="0"
@@ -34,13 +38,13 @@
       @click="expandDescriptionWithClick"
     />
     <bdi
-      v-if="license && showFullDescription"
+      v-if="license && isExpanded"
       class="license"
     >
       {{ license }}
     </bdi>
     <span
-      v-if="showControls && showFullDescription"
+      v-if="showControls && isExpanded && !alwaysExpanded"
       class="descriptionStatus"
       role="button"
       tabindex="0"
@@ -75,6 +79,10 @@ const props = defineProps({
   license: {
     type: String,
     default: null,
+  },
+  alwaysExpanded: {
+    type: Boolean,
+    default: false,
   }
 })
 
@@ -84,6 +92,7 @@ let shownDescription = ''
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
 const showControls = ref(false)
+const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
 
 if (props.descriptionHtml !== '') {
   const parsed = parseDescriptionHtml(props.descriptionHtml)
@@ -111,7 +120,7 @@ const processedShownDescription = computed(() => {
 })
 
 const linkTabIndex = computed(() => {
-  return showFullDescription.value ? '0' : '-1'
+  return isExpanded.value ? '0' : '-1'
 })
 
 /**
@@ -126,7 +135,7 @@ function onTimestamp(timestamp) {
  */
 function expandDescriptionWithClick(e) {
   // Ignore link clicks
-  if (e.target.tagName === 'A') { return }
+  if (props.alwaysExpanded || e.target.tagName === 'A') { return }
 
   expandDescription()
 }
@@ -165,7 +174,7 @@ function isShortDescription() {
 // expanded with no collapse control. Only measure once the element has a real
 // layout, retrying when the tab is first presented.
 function measureDescription() {
-  if (hasMeasured) {
+  if (hasMeasured || props.alwaysExpanded) {
     return
   }
 
@@ -180,6 +189,12 @@ function measureDescription() {
 }
 
 onMounted(measureDescription)
+
+watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
+  if (!alwaysExpanded && wasAlwaysExpanded) {
+    nextTick(measureDescription)
+  }
+})
 
 if (isTabPresented) {
   watch(isTabPresented, (presented) => {

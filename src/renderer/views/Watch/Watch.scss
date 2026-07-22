@@ -161,12 +161,14 @@
     .infoArea :deep(.watchVideoInfo.ft-card),
     .sidebarArea :deep(.transcriptCard.ft-card),
     .sidebarArea :deep(.watchVideoPlaylist.ft-card),
+    .sidebarArea :deep(.watchVideoQueue.ft-card),
     .sidebarArea :deep(.watchVideoRecommendations.ft-card) {
       background-color: color-mix(in srgb, var(--card-bg-color) 78%, transparent);
     }
   }
 
   .watchVideoPlaylist,
+  .watchVideoQueue,
   .watchVideoTranscript,
   .watchVideoChaptersPanel,
   .watchVideoSponsorBlock,

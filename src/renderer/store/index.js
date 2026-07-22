@@ -13,6 +13,7 @@ import utils from './modules/utils'
 import player from './modules/player'
 import tabs from './modules/tabs'
 import watchStats from './modules/watch-stats'
+import watchQueue from './modules/watch-queue'
 import syncServer from './modules/sync-server'
 import {
   SYNC_ACTION_REASONS,
@@ -84,6 +85,7 @@ export default createStore({
     player,
     tabs,
     watchStats,
+    watchQueue,
     syncServer,
   },
 

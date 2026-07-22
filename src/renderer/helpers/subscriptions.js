@@ -14,6 +14,7 @@ import {
 } from './utils'
 import { isHistoryEntryWatched } from './history'
 import { getValidSubscriptionChannels } from './subscription-channels'
+import { mapConcurrently } from './concurrent-map'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
@@ -158,25 +159,22 @@ function setSubscriptionRefreshProgress(percentage) {
 }
 
 async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
-  const results = new Array(channels.length)
-  let nextIndex = 0
-
-  const fetchNext = async () => {
-    while (nextIndex < channels.length) {
+  const results = await mapConcurrently(
+    channels,
+    SUBSCRIPTION_FETCH_CONCURRENCY,
+    async channel => {
       if (process.env.IS_ELECTRON) {
         await window.ftElectron.waitForIpBlockRecoveryScript()
       }
 
-      const index = nextIndex++
-      results[index] = await fetchChannel(channels[index])
+      const result = await fetchChannel(channel)
 
       // Let input and navigation tasks run between parsing/cache updates.
       await new Promise(resolve => setTimeout(resolve, 0))
-    }
-  }
 
-  const workerCount = Math.min(SUBSCRIPTION_FETCH_CONCURRENCY, channels.length)
-  await Promise.all(Array.from({ length: workerCount }, fetchNext))
+      return result
+    }
+  )
 
   return results.flat()
 }
