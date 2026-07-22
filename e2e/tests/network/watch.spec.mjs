@@ -135,6 +135,8 @@ test.describe('watch page', () => {
     await expect(page.locator('.fullscreenActions .fullscreenShareAction')).toHaveCount(1)
     await expect(page.locator('.fullscreenActions .fullscreenPlaylistAction')).toHaveCount(1)
     await expect(page.locator('.fullscreenActions .fullscreenQuickBookmarkAction')).toHaveCount(1)
+    await expect(page.locator('.fullscreenActions .fullscreenTranscriptToggle')).toHaveCount(1)
+    await expect(page.locator('.fullscreenMetadataTarget').getByRole('button', { name: 'Show transcript' })).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     const [videoBounds, metadataBounds] = await Promise.all([
       page.locator('.ftVideoPlayer video.player').boundingBox(),
@@ -142,7 +144,7 @@ test.describe('watch page', () => {
     ])
     expect(videoBounds.x + videoBounds.width).toBeLessThanOrEqual(metadataBounds.x + 1)
 
-    await page.getByRole('button', { name: 'Show transcript' }).click()
+    await page.locator('.fullscreenActions').getByRole('button', { name: 'Show transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegment').first()).toBeVisible({ timeout: 30_000 })

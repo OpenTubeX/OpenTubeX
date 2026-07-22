@@ -292,6 +292,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    transcriptOpen: {
+      type: Boolean,
+      default: false
+    },
     videoGenreIsMusic: {
       type: Boolean,
       default: false
@@ -366,6 +370,7 @@ export default defineComponent({
     'fullscreen-sponsorblock-change',
     'fullscreen-comments-change',
     'fullscreen-playlist-change',
+    'toggle-transcript',
     'add-to-playlist',
     'toggle-quick-bookmark',
     'chapters-overlay-change',
@@ -4686,6 +4691,15 @@ export default defineComponent({
       closeFullscreenTranscript()
     }
 
+    function toggleFullscreenTranscript() {
+      const shouldOpen = !showFullscreenTranscript.value
+
+      if (shouldOpen !== props.transcriptOpen) {
+        emit('toggle-transcript')
+      }
+      setFullscreenTranscript(shouldOpen)
+    }
+
     function setFullscreenSponsorBlock(shouldOpen) {
       const open = Boolean(
         shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
@@ -4699,6 +4713,15 @@ export default defineComponent({
 
     function closeFullscreenSponsorBlock() {
       setFullscreenSponsorBlock(false)
+    }
+
+    function toggleFullscreenSponsorBlock() {
+      const shouldOpen = !showFullscreenSponsorBlock.value
+
+      if (shouldOpen !== sponsorBlockInfoOpen.value) {
+        toggleSponsorBlockInfo()
+      }
+      setFullscreenSponsorBlock(shouldOpen)
     }
 
     function setFullscreenPlaylist(shouldOpen) {
@@ -7622,10 +7645,12 @@ export default defineComponent({
       showFullscreenTranscript,
       closeFullscreenTranscript,
       dismissFullscreenTranscript,
+      toggleFullscreenTranscript,
       fullscreenSponsorBlockOverlay,
       fullscreenSponsorBlockTarget,
       showFullscreenSponsorBlock,
       closeFullscreenSponsorBlock,
+      toggleFullscreenSponsorBlock,
       fullscreenCommentsOverlay,
       showFullscreenComments,
       closeFullscreenComments,
@@ -7637,6 +7662,7 @@ export default defineComponent({
       setFullscreenPlaylist,
       showFullscreenShareAction,
       showFullscreenPlaylistAction,
+      useSponsorBlock,
       getShareTimestamp,
       addToPlaylist,
       toggleQuickBookmark,
