@@ -124,6 +124,49 @@ test.describe('watch page', () => {
 
     await setPlayerFullscreen(page, true)
     const title = page.locator('.playerFullscreenTitleOverlay')
+    const titleBounds = await title.boundingBox()
+    const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
+    const titleRight = titleBounds.x + titleBounds.width
+    const besideTitleX = titleRight + (playerBounds.x + playerBounds.width - titleRight) / 2
+    const titleCenterY = titleBounds.y + titleBounds.height / 2
+
+    await page.mouse.move(besideTitleX, titleCenterY)
+    await page.mouse.down({ clickCount: 1 })
+    await page.mouse.up({ clickCount: 1 })
+    await page.waitForTimeout(100)
+    await page.mouse.down({ clickCount: 2 })
+    await page.mouse.up({ clickCount: 2 })
+    await expect.poll(
+      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
+    ).toBe(false)
+
+    await setPlayerFullscreen(page, true)
+    await page.mouse.move(titleBounds.x + titleBounds.width - 2, titleCenterY)
+    await page.mouse.down({ clickCount: 1 })
+    await page.mouse.up({ clickCount: 1 })
+    await expect(title).toHaveAttribute('aria-expanded', 'true')
+
+    await page.mouse.move(titleBounds.x + titleBounds.width + 4, titleCenterY)
+    await page.mouse.down({ clickCount: 1 })
+    await page.mouse.up({ clickCount: 1 })
+    await page.waitForTimeout(100)
+    await page.mouse.down({ clickCount: 2 })
+    await page.mouse.up({ clickCount: 2 })
+    await expect.poll(
+      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
+    ).toBe(false)
+
+    await setPlayerFullscreen(page, true)
+    await page.mouse.move(titleBounds.x + titleBounds.width / 2, titleBounds.y + titleBounds.height / 2)
+    await page.mouse.down({ clickCount: 1 })
+    await page.mouse.up({ clickCount: 1 })
+    await page.waitForTimeout(100)
+    await page.mouse.down({ clickCount: 2 })
+    await page.mouse.up({ clickCount: 2 })
+    await expect.poll(
+      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
+    ).toBe(true)
+
     await title.click({ force: true })
 
     await expect(title).toHaveAttribute('aria-expanded', 'true')
