@@ -96,17 +96,21 @@ export async function launchApp(userDataDir, extraArgs = []) {
   }
 
   let electronApp
-  try {
-    electronApp = await electron.launch(launchOptions)
-  } catch (error) {
-    // Concurrent Linux launches can transiently fail with ETXTBSY or a
-    // startup SIGTRAP. Retry those process-launch failures once.
-    const message = String(error.message)
-    if (!['ETXTBSY', 'SIGTRAP', 'Process failed to launch'].some(value => message.includes(value))) {
-      throw error
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      electronApp = await electron.launch(launchOptions)
+      break
+    } catch (error) {
+      // Concurrent Linux launches can transiently fail with ETXTBSY, a
+      // startup SIGTRAP, or no diagnostic beyond the launch failure.
+      const message = String(error.message)
+      const isTransient = ['ETXTBSY', 'SIGTRAP', 'Process failed to launch']
+        .some(value => message.includes(value))
+      if (!isTransient || attempt === 2) {
+        throw error
+      }
+      await new Promise((resolve) => setTimeout(resolve, (attempt + 1) * 1000))
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    electronApp = await electron.launch(launchOptions)
   }
 
   const page = await electronApp.firstWindow()
