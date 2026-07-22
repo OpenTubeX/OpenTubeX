@@ -28,7 +28,7 @@
         <RouterLink
           class="queueVideo"
           :to="`/watch/${item.videoId}`"
-          @click="playQueuedVideo(item.queueItemId)"
+          @click="playQueuedVideo(item.queueItemId, $event)"
         >
           <img
             class="queueThumbnail"
@@ -99,7 +99,11 @@ function thumbnailUrl(videoId) {
   return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
 }
 
-function playQueuedVideo(queueItemId) {
+function playQueuedVideo(queueItemId, event) {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+
   emit('pause-player')
   remove(queueItemId)
 }

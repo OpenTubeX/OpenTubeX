@@ -200,19 +200,19 @@
     opacity: 0.5;
     inline-size: 95%;
   }
-}
 
-.listItem.hasIcon,
-.listItem.active {
-  align-items: center;
-  display: flex;
-  gap: 8px;
-  text-align: start;
-}
+  .listItem.hasIcon,
+  .listItem.active {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    text-align: start;
+  }
 
-.optionIconColumn {
-  display: inline-flex;
-  inline-size: 1em;
-  justify-content: center;
-  min-inline-size: 1em;
+  .optionIconColumn {
+    display: inline-flex;
+    inline-size: 1em;
+    justify-content: center;
+    min-inline-size: 1em;
+  }
 }
