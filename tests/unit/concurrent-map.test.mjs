@@ -3,6 +3,15 @@ import test from 'node:test'
 
 import { mapConcurrently } from '../../src/renderer/helpers/concurrent-map.js'
 
+test('rejects invalid concurrency', async () => {
+  for (const concurrency of [0, -1, 1.5, Number.NaN]) {
+    await assert.rejects(
+      mapConcurrently([], concurrency, async item => item),
+      new RangeError('concurrency must be a positive integer')
+    )
+  }
+})
+
 test('reserves each item before the mapper awaits', async () => {
   let releaseMappers
   const mapperGate = new Promise(resolve => {

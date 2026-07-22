@@ -4,8 +4,13 @@
  * @param {number} concurrency
  * @param {(item: T, index: number) => Promise<U>} mapper
  * @returns {Promise<U[]>}
+ * @throws {RangeError} If concurrency is not a positive integer
  */
 export async function mapConcurrently(items, concurrency, mapper) {
+  if (!Number.isInteger(concurrency) || concurrency < 1) {
+    throw new RangeError('concurrency must be a positive integer')
+  }
+
   const results = new Array(items.length)
   let nextIndex = 0
 
