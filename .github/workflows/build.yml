@@ -41,6 +41,7 @@ on:
       - '.github/workflows/label-issue.yml'
       - '.github/workflows/label-pr.yml'
       - '.github/workflows/linter.yml'
+      - '.github/workflows/nightly.yml'
       - '.github/workflows/no-response.yml'
       - '.github/workflows/release.yml'
       - '.github/workflows/remove-outdated-labels.yml'
@@ -48,6 +49,12 @@ on:
       - '.github/workflows/updateSite.yml'
 
   workflow_dispatch:
+    inputs:
+      publishNightly:
+        description: Publish and distribute this development build as a nightly release
+        required: false
+        default: false
+        type: boolean
 
 permissions: {}
 
@@ -425,3 +432,94 @@ jobs:
       with:
         key: ${{ steps.restore_cache.outputs.cache-primary-key }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
+
+  publish-nightly:
+    name: Publish nightly release
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.publishNightly && github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: write
+
+    steps:
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+      with:
+        persist-credentials: false
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      with:
+        pattern: opentubex*
+        path: artifacts
+
+    - name: Prepare release assets
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir release-assets
+
+        for artifact_directory in artifacts/*; do
+          artifact_name="$(basename "$artifact_directory")"
+          mapfile -t files < <(find "$artifact_directory" -type f -print)
+
+          if (( ${#files[@]} != 1 )); then
+            echo "Expected one file in $artifact_directory, found ${#files[@]}" >&2
+            exit 1
+          fi
+
+          cp "${files[0]}" "release-assets/$artifact_name"
+        done
+
+    - name: Create nightly release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        base_version="$(jq --raw-output .version package.json)"
+        version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
+        tag="v${version}"
+
+        gh release create "$tag" release-assets/* \
+          --prerelease \
+          --target "$GITHUB_SHA" \
+          --title "OpenTubeX ${version}" \
+          --notes "Automated development build from commit ${GITHUB_SHA}."
+
+        {
+          echo "tag=$tag"
+          echo "version=$version"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Trigger nightly package repositories
+      env:
+        GH_TOKEN: ${{ secrets.PUSH_TOKEN }}
+        TAG: ${{ steps.release.outputs.tag }}
+        VERSION: ${{ steps.release.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        for repository in apt rpm flatpak snap; do
+          gh api "repos/OpenTubeX/${repository}/dispatches" \
+            --method POST \
+            -f event_type=opentubex-nightly \
+            -f "client_payload[tag]=$TAG" \
+            -f "client_payload[version]=$VERSION"
+        done
+
+    - name: Remove expired nightly releases
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        gh release list --limit 100 --json createdAt,isPrerelease,tagName \
+          --jq '[.[] | select(.isPrerelease and (.tagName | test("^v[0-9]+\\.[0-9]+\\.[0-9]+-nightly-[0-9]+$")))] | sort_by(.createdAt) | reverse | .[30:] | .[].tagName' \
+          | while IFS= read -r tag; do
+              gh release delete "$tag" --cleanup-tag --yes
+            done
