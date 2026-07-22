@@ -35,9 +35,9 @@
   inset-inline-start: 0;
   inline-size: 14px;
   block-size: 14px;
-  margin-block-start: -9px;
   border: 2px solid var(--primary-text-color);
   text-align: center;
+  transform: translateY(-50%);
   transition: all 0.4s ease;
 }
 
@@ -47,11 +47,11 @@
   background-color: var(--primary-text-color);
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-start: 4px;
-  inline-size: 10px;
-  block-size: 10px;
-  margin-block-start: -5px;
-  transform: scale(0);
+  inset-inline-start: 0;
+  inline-size: 18px;
+  block-size: 18px;
+  clip-path: circle(5px at center);
+  transform: translateY(-50%) scale(0);
   transform-origin: 50%;
   transition: transform 200ms ease-out;
 }
@@ -73,7 +73,7 @@
   background-color: var(--primary-color);
 }
 
-.pure-radiobutton input[type='radio']:checked + label::after { transform: scale(1); }
+.pure-radiobutton input[type='radio']:checked + label::after { transform: translateY(-50%) scale(1); }
 
 .pure-radiobutton input[type='radio'] + label::before,
 .pure-radiobutton input[type='radio'] + label::after { border-radius: 50%; }
