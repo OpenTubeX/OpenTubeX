@@ -2712,6 +2712,44 @@ export default defineComponent({
       }
     }
 
+    let fullscreenTitleClickPending = false
+
+    /**
+     * Remember that a potential double-click began on the title because opening
+     * its metadata dock can move the title before the second click lands.
+     * @param {MouseEvent} event
+     */
+    function rememberFullscreenTitleClick(event) {
+      if (event.detail === 1) {
+        fullscreenTitleClickPending = true
+      }
+    }
+
+    /**
+     * Keep a double-click that began on the fullscreen title from reaching
+     * Shaka's fullscreen toggle after the metadata layout moves its target.
+     * @param {MouseEvent} event
+     */
+    function handleControlsContainerDoubleClick(event) {
+      if (!fullscreenTitleClickPending) {
+        return
+      }
+
+      fullscreenTitleClickPending = false
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+
+    /**
+     * Clear a previous title click when a new click gesture starts elsewhere.
+     * @param {MouseEvent} event
+     */
+    function handleFullscreenTitleMouseDown(event) {
+      if (event.detail === 1 && event.target !== fullscreenTitleOverlay) {
+        fullscreenTitleClickPending = false
+      }
+    }
+
     /**
      * Only start click-and-hold playback from the non-interactive player surface.
      * @param {EventTarget | null} target
@@ -3015,10 +3053,14 @@ export default defineComponent({
       controlsContainer.removeEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.removeEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.removeEventListener('click', handleTemporaryPlaybackRateClick, true)
+      controlsContainer.removeEventListener('mousedown', handleFullscreenTitleMouseDown, true)
+      controlsContainer.removeEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
       controlsContainer.addEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.addEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.addEventListener('click', handleTemporaryPlaybackRateClick, true)
+      controlsContainer.addEventListener('mousedown', handleFullscreenTitleMouseDown, true)
+      controlsContainer.addEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
       if (!useVrMode.value) {
         if (videoVolumeMouseScroll.value || videoSkipMouseScroll.value || videoPlaybackRateMouseScroll.value) {
@@ -3043,6 +3085,9 @@ export default defineComponent({
 
       const toggleFullscreenMetadata = (event) => {
         event.stopPropagation()
+        if (event instanceof MouseEvent) {
+          rememberFullscreenTitleClick(event)
+        }
         setFullscreenMetadata(!showFullscreenMetadata.value)
       }
       fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
