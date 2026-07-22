@@ -174,6 +174,26 @@ test.describe('tab bar', () => {
   })
 })
 
+test.describe('closed tabs', () => {
+  test('restoring a closed tab restores its navigation history', async ({ page }) => {
+    await goTo(page, 'settings')
+    await goTo(page, 'history')
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click()
+    await expect(page).toHaveURL(/#\/history/)
+
+    await page.keyboard.press('Control+w')
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await page.keyboard.press('Control+Shift+t')
+
+    await expect(page).toHaveURL(/#\/history/)
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/settings/)
+    await page.locator(sel.forwardButton).click()
+    await expect(page).toHaveURL(/#\/history/)
+  })
+})
+
 test.describe('tab icons disabled', () => {
   test.use({ seed: { settings: { showTabIcons: false } } })
 
