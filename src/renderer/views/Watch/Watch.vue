@@ -238,6 +238,7 @@
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :license="license"
+          :always-expanded="fullscreenMetadataOpen"
           class="watchVideo"
           :class="{ theatreWatchVideo: useTheatreMode }"
           @timestamp-event="changeTimestamp"

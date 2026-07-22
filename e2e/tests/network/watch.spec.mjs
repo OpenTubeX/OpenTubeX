@@ -224,8 +224,6 @@ test.describe('watch page', () => {
       async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
     ).toBe(true)
 
-    await title.click({ force: true })
-
     await expect(title).toHaveAttribute('aria-expanded', 'true')
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText(CAPTIONED_VIDEO.title)
@@ -237,6 +235,10 @@ test.describe('watch page', () => {
     await expect(page.locator('.fullscreenActions .fullscreenQuickBookmarkAction')).toHaveCount(1)
     await expect(page.locator('.fullscreenActions .fullscreenTranscriptToggle')).toHaveCount(1)
     await expect(page.locator('.fullscreenMetadataTarget').getByRole('button', { name: 'Show transcript' })).toHaveCount(0)
+    const dockDescription = page.locator('.fullscreenMetadataTarget .videoDescription')
+    await expect(dockDescription).toHaveClass(/alwaysExpanded/)
+    await expect(dockDescription).not.toHaveClass(/short/)
+    await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     const [videoBounds, metadataBounds] = await Promise.all([
       page.locator('.ftVideoPlayer video.player').boundingBox(),
