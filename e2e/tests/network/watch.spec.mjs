@@ -129,6 +129,12 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'true')
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText(CAPTIONED_VIDEO.title)
+    await expect(page.locator('.fullscreenMetadataTarget .shareButton')).toHaveCount(0)
+    await expect(page.locator('.fullscreenMetadataTarget .quickBookmarkVideoIcon')).toHaveCount(0)
+    await expect(page.locator('.fullscreenMetadataTarget').getByRole('button', { name: 'Add to playlist' })).toHaveCount(0)
+    await expect(page.locator('.fullscreenActions .fullscreenShareAction')).toHaveCount(1)
+    await expect(page.locator('.fullscreenActions .fullscreenPlaylistAction')).toHaveCount(1)
+    await expect(page.locator('.fullscreenActions .fullscreenQuickBookmarkAction')).toHaveCount(1)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     const [videoBounds, metadataBounds] = await Promise.all([
       page.locator('.ftVideoPlayer video.player').boundingBox(),

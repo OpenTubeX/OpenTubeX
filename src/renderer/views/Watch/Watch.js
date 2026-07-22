@@ -263,6 +263,25 @@ export default defineComponent({
     historyEntryExists: function () {
       return typeof this.historyEntry !== 'undefined'
     },
+    quickBookmarkPlaylist: function () {
+      return this.$store.getters.getQuickBookmarkPlaylist
+    },
+    isQuickBookmarkEnabled: function () {
+      return this.quickBookmarkPlaylist != null
+    },
+    isCurrentVideoQuickBookmarked: function () {
+      return this.quickBookmarkPlaylist?.videos.some(video => video.videoId === this.videoId) ?? false
+    },
+    quickBookmarkIconText: function () {
+      if (!this.isQuickBookmarkEnabled) { return '' }
+
+      const translationProperties = {
+        playlistName: this.quickBookmarkPlaylist.playlistName
+      }
+      return this.isCurrentVideoQuickBookmarked
+        ? this.$t('User Playlists.Remove from Favorites', translationProperties)
+        : this.$t('User Playlists.Add to Favorites', translationProperties)
+    },
     rememberHistory: function () {
       return this.$store.getters.getRememberHistory
     },
@@ -575,6 +594,32 @@ export default defineComponent({
       }
 
       this.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
+    },
+    toggleCurrentVideoQuickBookmarked() {
+      if (!this.isQuickBookmarkEnabled) { return }
+
+      if (this.isCurrentVideoQuickBookmarked) {
+        this.$store.dispatch('removeVideo', {
+          _id: this.quickBookmarkPlaylist._id,
+          videoId: this.videoId
+        })
+        showToast(this.$t('Video.Video has been removed from your saved list'))
+        return
+      }
+
+      this.$store.dispatch('addVideo', {
+        _id: this.quickBookmarkPlaylist._id,
+        videoData: {
+          videoId: this.videoId,
+          title: this.videoTitle,
+          author: this.channelName,
+          authorId: this.channelId,
+          lengthSeconds: this.videoLengthSeconds,
+          published: this.videoPublished,
+          premiereDate: this.premiereDate
+        }
+      })
+      showToast(this.$t('Video.Video has been saved'))
     },
     handleChaptersOverlayChange(open) {
       const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&

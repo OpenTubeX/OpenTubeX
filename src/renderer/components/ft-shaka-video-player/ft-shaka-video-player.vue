@@ -153,7 +153,7 @@
         </div>
       </Transition>
       <div
-        v-if="watchingPlaylist || commentsAvailable || showFullscreenPlaylistAction"
+        v-if="watchingPlaylist || commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction || quickBookmarkEnabled"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
@@ -182,6 +182,14 @@
         >
           <FontAwesomeIcon :icon="['fas', 'comment']" />
         </button>
+        <FtShareButton
+          v-if="showFullscreenShareAction"
+          :id="videoId"
+          class="fullscreenShareAction"
+          :playlist-id="playlistId"
+          :get-timestamp="getShareTimestamp"
+          dropdown-position-y="top"
+        />
         <button
           v-if="showFullscreenPlaylistAction"
           type="button"
@@ -191,6 +199,17 @@
           @click="addToPlaylist"
         >
           <FontAwesomeIcon :icon="['fas', 'plus']" />
+        </button>
+        <button
+          v-if="quickBookmarkEnabled"
+          type="button"
+          class="fullscreenAction fullscreenQuickBookmarkAction"
+          :class="{ open: quickBookmarked }"
+          :aria-label="quickBookmarkTitle"
+          :title="quickBookmarkTitle"
+          @click="toggleQuickBookmark"
+        >
+          <FontAwesomeIcon :icon="quickBookmarked ? ['fas', 'check'] : ['fas', 'bookmark']" />
         </button>
       </div>
       <!--

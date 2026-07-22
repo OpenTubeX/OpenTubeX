@@ -68,6 +68,7 @@ import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
+import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -142,6 +143,7 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
+    FtShareButton,
     FtVideoAnnotations,
     WatchVideoChapters
   },
@@ -314,6 +316,18 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    quickBookmarkEnabled: {
+      type: Boolean,
+      default: false
+    },
+    quickBookmarked: {
+      type: Boolean,
+      default: false
+    },
+    quickBookmarkTitle: {
+      type: String,
+      default: ''
+    },
     resumePlaybackAfterSabrReload: {
       type: Boolean,
       default: false
@@ -353,6 +367,7 @@ export default defineComponent({
     'fullscreen-comments-change',
     'fullscreen-playlist-change',
     'add-to-playlist',
+    'toggle-quick-bookmark',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
     'sponsorblock-info-change',
@@ -501,6 +516,7 @@ export default defineComponent({
         ? props.playlistId
         : ''
     })
+    const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
 
     const fullscreenDockOrder = ['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters']
@@ -534,8 +550,17 @@ export default defineComponent({
       }
     }
 
+    function getShareTimestamp() {
+      const currentTime = Math.floor(video.value?.currentTime ?? 0)
+      return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+    }
+
     function addToPlaylist() {
       emit('add-to-playlist')
+    }
+
+    function toggleQuickBookmark() {
+      emit('toggle-quick-bookmark')
     }
 
     const hasLoaded = ref(false)
@@ -7610,8 +7635,11 @@ export default defineComponent({
       showFullscreenPlaylist,
       closeFullscreenPlaylist,
       setFullscreenPlaylist,
+      showFullscreenShareAction,
       showFullscreenPlaylistAction,
+      getShareTimestamp,
       addToPlaylist,
+      toggleQuickBookmark,
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,

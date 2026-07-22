@@ -152,14 +152,14 @@
       <div class="videoOptions">
         <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="showPlaylists && !isUpcoming"
+            v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
             :title="t('User Playlists.Add to Playlist')"
             :icon="['fas', 'plus']"
             theme="base"
             @click="togglePlaylistPrompt"
           />
           <FtIconButton
-            v-if="isQuickBookmarkEnabled"
+            v-if="isQuickBookmarkEnabled && !hidePlaylistActions"
             :title="quickBookmarkIconText"
             :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
             class="quickBookmarkVideoIcon"
@@ -226,7 +226,7 @@
             @click="changeFormat"
           />
           <FtShareButton
-            v-if="!hideSharingActions"
+            v-if="!hideSharingActions && !hideShareButton"
             :id="id"
             :get-timestamp="getTimestamp"
             :playlist-id="playlistId"
@@ -370,6 +370,14 @@ const props = defineProps({
     default: false
   },
   transcriptOpen: {
+    type: Boolean,
+    default: false
+  },
+  hideShareButton: {
+    type: Boolean,
+    default: false
+  },
+  hidePlaylistActions: {
     type: Boolean,
     default: false
   },

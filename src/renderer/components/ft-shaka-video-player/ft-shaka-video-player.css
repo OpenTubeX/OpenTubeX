@@ -1194,7 +1194,8 @@
     inset-inline-end 250ms ease;
 }
 
-.fullscreenAction {
+.fullscreenAction,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1213,7 +1214,10 @@
 
 .fullscreenAction:hover,
 .fullscreenAction:focus-visible,
-.fullscreenAction.open {
+.fullscreenAction.open,
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed) {
   color: #fff;
   background-color: rgb(255 255 255 / 18%);
 }
