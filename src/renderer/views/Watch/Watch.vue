@@ -58,6 +58,7 @@
           :channel-id="channelId"
           :published="videoPublished"
           :is-live="isLive"
+          :is-upcoming="isUpcoming"
           :transcript-open="showTranscript"
           :video-genre-is-music="videoGenreIsMusic"
           :current-playback-rate="currentPlaybackRate"

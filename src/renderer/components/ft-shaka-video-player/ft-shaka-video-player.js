@@ -293,6 +293,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isUpcoming: {
+      type: Boolean,
+      default: false
+    },
     transcriptOpen: {
       type: Boolean,
       default: false
