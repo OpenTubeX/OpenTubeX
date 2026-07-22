@@ -16,6 +16,9 @@
 }
 
 .transcriptTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0;
 }
 
@@ -24,15 +27,76 @@
   justify-content: flex-end;
 }
 
-.transcriptHeaderActions {
-  gap: 8px;
-}
-
 .transcriptActions :deep(.btn) {
   min-inline-size: auto;
 }
 
+.transcriptHeaderActions {
+  position: relative;
+  gap: 8px;
+}
+
+.transcriptHeaderAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  color: inherit;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.transcriptHeaderAction:hover,
+.transcriptHeaderAction:focus-visible,
+.transcriptHeaderAction.active {
+  color: var(--side-nav-hover-text-color);
+  background-color: var(--side-nav-hover-color);
+}
+
+.transcriptLanguageMenu {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 40px;
+  display: flex;
+  flex-direction: column;
+  inline-size: 260px;
+  max-inline-size: calc(100vw - 48px);
+  padding: 6px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-color);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+}
+
+.transcriptLanguageMenu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.transcriptLanguageMenu button:hover,
+.transcriptLanguageMenu button:focus-visible,
+.transcriptLanguageMenu .selected {
+  background-color: var(--side-nav-hover-color);
+}
+
 .transcriptControls {
+  display: flex;
   align-items: flex-end;
   gap: 16px;
   margin-block: 16px;

@@ -6,192 +6,217 @@
     <FtLoader
       v-if="isLoading"
     />
-    <div
-      v-else
-      :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
-    >
-      <div class="playlistHeader">
+    <template v-else>
+      <header
+        v-if="fullscreenOverlay"
+        class="playlistDockHeader"
+      >
+        <FontAwesomeIcon :icon="['fas', 'list']" />
         <h3
-          class="playlistTitle"
+          dir="auto"
           :title="playlistTitle"
         >
-          <RouterLink
-            class="playlistTitleLink"
-            dir="auto"
-            :to="playlistPageLinkTo"
-          >
-            {{ playlistTitle }}
-          </RouterLink>
+          {{ playlistTitle }}
         </h3>
-        <template
-          v-if="channelName !== ''"
+        <button
+          type="button"
+          class="playlistDockClose"
+          :aria-label="t('Playlist.Close Playlist')"
+          :title="t('Playlist.Close Playlist')"
+          @click="emit('close')"
         >
-          <RouterLink
-            v-if="channelId"
-            class="channelName"
-            dir="auto"
-            :to="`/channel/${channelId}`"
-          >
-            {{ channelName }} -
-          </RouterLink>
-          <bdi
-            v-else
-            class="channelName"
-          >
-            {{ channelName }} -
-          </bdi>
-        </template>
-        <span
-          class="playlistIndex"
-        >
-          <label for="playlistProgressBar">
-            {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
-          </label>
-
-          <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
+          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+        </button>
+      </header>
+      <div :class="{ fullscreenPlaylistContent: fullscreenOverlay }">
+        <div class="playlistHeader">
           <div
-            v-if="!shuffleEnabled && !reversePlaylist"
-            class="playlistProgressBarContainer"
-            @mouseenter="showProgressBarPreview = true"
-            @mouseleave="showProgressBarPreview = false"
-            @mousemove="updateProgressBarPreview"
+            v-if="!fullscreenOverlay"
+            class="playlistTitleRow"
           >
+            <h3
+              class="playlistTitle"
+              :title="playlistTitle"
+            >
+              <RouterLink
+                class="playlistTitleLink"
+                dir="auto"
+                :to="playlistPageLinkTo"
+              >
+                {{ playlistTitle }}
+              </RouterLink>
+            </h3>
+          </div>
+          <template
+            v-if="channelName !== ''"
+          >
+            <RouterLink
+              v-if="channelId"
+              class="channelName"
+              dir="auto"
+              :to="`/channel/${channelId}`"
+            >
+              {{ channelName }} -
+            </RouterLink>
+            <bdi
+              v-else
+              class="channelName"
+            >
+              {{ channelName }} -
+            </bdi>
+          </template>
+          <span
+            class="playlistIndex"
+          >
+            <label for="playlistProgressBar">
+              {{ currentVideoIndexOneBased }} / {{ playlistVideoCount }}
+            </label>
+
+            <!-- eslint-disable vuejs-accessibility/mouse-events-have-key-events, vuejs-accessibility/click-events-have-key-events -->
             <div
-              ref="playlistProgressBar"
-              class="playlistProgressBar"
-              :class="{ expanded: showProgressBarPreview }"
-              @click="handleProgressBarClick"
+              v-if="!shuffleEnabled && !reversePlaylist"
+              class="playlistProgressBarContainer"
+              @mouseenter="showProgressBarPreview = true"
+              @mouseleave="showProgressBarPreview = false"
+              @mousemove="updateProgressBarPreview"
             >
               <div
-                class="playlistProgressBarFill"
-                :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
-              />
-              <div
-                v-if="showProgressBarPreview"
-                class="progressBarPreview"
-                :style="{ left: previewPosition + '%', transform: `translateX(${ previewTransformXPercentage }%)` }"
+                ref="playlistProgressBar"
+                class="playlistProgressBar"
+                :class="{ expanded: showProgressBarPreview }"
+                @click="handleProgressBarClick"
               >
-                <div class="previewTooltip">
-                  <img
-                    v-if="previewVideoThumbnail"
-                    :src="previewVideoThumbnail"
-                    alt=""
-                    class="previewThumbnail"
-                  >
-                  <div class="previewText">
-                    {{ previewVideoIndex }} / {{ playlistVideoCount }}
+                <div
+                  class="playlistProgressBarFill"
+                  :style="{ width: (currentVideoIndexOneBased / playlistVideoCount) * 100 + '%' }"
+                />
+                <div
+                  v-if="showProgressBarPreview"
+                  class="progressBarPreview"
+                  :style="{ left: previewPosition + '%', transform: `translateX(${ previewTransformXPercentage }%)` }"
+                >
+                  <div class="previewTooltip">
+                    <img
+                      v-if="previewVideoThumbnail"
+                      :src="previewVideoThumbnail"
+                      alt=""
+                      class="previewThumbnail"
+                    >
+                    <div class="previewText">
+                      {{ previewVideoIndex }} / {{ playlistVideoCount }}
+                    </div>
+                    <div
+                      class="previewVideoTitle"
+                      dir="auto"
+                    >{{ previewVideoTitle }}</div>
                   </div>
-                  <div
-                    class="previewVideoTitle"
-                    dir="auto"
-                  >{{ previewVideoTitle }}</div>
                 </div>
               </div>
             </div>
+          </span>
+          <div class="playlistButtons">
+            <button
+              class="playlistButton"
+              :class="{ playlistButtonActive: loopEnabled }"
+              :aria-label="t('Video.Loop Playlist')"
+              :aria-pressed="loopEnabled"
+              :title="t('Video.Loop Playlist')"
+              @click="toggleLoop"
+            >
+              <FontAwesomeIcon
+                class="playlistIcon"
+                :icon="['fas', 'retweet']"
+              />
+            </button>
+            <button
+              class="playlistButton"
+              :class="{ playlistButtonActive: shuffleEnabled }"
+              :aria-label="t('Video.Shuffle Playlist')"
+              :aria-pressed="shuffleEnabled"
+              :title="t('Video.Shuffle Playlist')"
+              @click="toggleShuffle"
+            >
+              <FontAwesomeIcon
+                class="playlistIcon"
+                :icon="['fas', 'random']"
+              />
+            </button>
+            <button
+              class="playlistButton"
+              :class="{ playlistButtonActive: reversePlaylist }"
+              :aria-label="t('Video.Reverse Playlist')"
+              :aria-pressed="reversePlaylist"
+              :title="t('Video.Reverse Playlist')"
+              @click="toggleReversePlaylist"
+            >
+              <FontAwesomeIcon
+                class="playlistIcon"
+                :icon="['fas', 'exchange-alt']"
+              />
+            </button>
+            <button
+              v-if="userPlaylistWatchedVideoCount > 0"
+              class="playlistButton"
+              :aria-label="t('User Playlists.Remove Watched Videos')"
+              :title="t('User Playlists.Remove Watched Videos')"
+              @click="showRemoveWatchedVideosPrompt = true"
+            >
+              <FontAwesomeIcon
+                class="playlistIcon"
+                :icon="['fas', 'eye-slash']"
+              />
+            </button>
           </div>
-        </span>
-        <div class="playlistButtons">
-          <button
-            class="playlistButton"
-            :class="{ playlistButtonActive: loopEnabled }"
-            :aria-label="t('Video.Loop Playlist')"
-            :aria-pressed="loopEnabled"
-            :title="t('Video.Loop Playlist')"
-            @click="toggleLoop"
-          >
-            <FontAwesomeIcon
-              class="playlistIcon"
-              :icon="['fas', 'retweet']"
-            />
-          </button>
-          <button
-            class="playlistButton"
-            :class="{ playlistButtonActive: shuffleEnabled }"
-            :aria-label="t('Video.Shuffle Playlist')"
-            :aria-pressed="shuffleEnabled"
-            :title="t('Video.Shuffle Playlist')"
-            @click="toggleShuffle"
-          >
-            <FontAwesomeIcon
-              class="playlistIcon"
-              :icon="['fas', 'random']"
-            />
-          </button>
-          <button
-            class="playlistButton"
-            :class="{ playlistButtonActive: reversePlaylist }"
-            :aria-label="t('Video.Reverse Playlist')"
-            :aria-pressed="reversePlaylist"
-            :title="t('Video.Reverse Playlist')"
-            @click="toggleReversePlaylist"
-          >
-            <FontAwesomeIcon
-              class="playlistIcon"
-              :icon="['fas', 'exchange-alt']"
-            />
-          </button>
-          <button
-            v-if="userPlaylistWatchedVideoCount > 0"
-            class="playlistButton"
-            :aria-label="t('User Playlists.Remove Watched Videos')"
-            :title="t('User Playlists.Remove Watched Videos')"
-            @click="showRemoveWatchedVideosPrompt = true"
-          >
-            <FontAwesomeIcon
-              class="playlistIcon"
-              :icon="['fas', 'eye-slash']"
-            />
-          </button>
         </div>
-      </div>
-      <TransitionGroup
-        v-if="!isLoading"
-        ref="playlistItemsWrapper"
-        name="playlistItem"
-        tag="div"
-        class="playlistItemsWrapper"
-      >
-        <FtListVideoNumbered
-          v-for="(item, index) in playlistItems"
-          :key="item.playlistItemId || item.videoId"
-          ref="playlistItem"
-          class="playlistItem"
-          :data="item"
-          :playlist-id="playlistId"
-          :playlist-type="playlistType"
-          :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
-          :playlist-item-id="item.playlistItemId"
-          :playlist-reverse="reversePlaylist"
-          :playlist-shuffle="shuffleEnabled"
-          :playlist-loop="loopEnabled"
-          :video-index="index"
-          :is-current-video="currentVideoIndexZeroBased === index"
-          :can-move-video-up="index > 0 && canMoveVideos"
-          :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
-          :can-remove-from-playlist="isUserPlaylist"
-          :dragged-video="draggedVideo"
-          :is-sort-order-custom="isSortOrderCustom"
-          :is-video-dragging="isVideoDragging"
-          appearance="watchPlaylistItem"
-          :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
-          @drag-video="setDraggedVideo"
-          @drag-video-end="onDragVideoEnd"
-          @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
-          @move-video-up="moveVideoUp"
-          @move-video-down="moveVideoDown"
-          @remove-from-playlist="removeVideoFromPlaylist"
-          @pause-player="pausePlayer"
+        <TransitionGroup
+          v-if="!isLoading"
+          ref="playlistItemsWrapper"
+          name="playlistItem"
+          tag="div"
+          class="playlistItemsWrapper"
+        >
+          <FtListVideoNumbered
+            v-for="(item, index) in playlistItems"
+            :key="item.playlistItemId || item.videoId"
+            ref="playlistItem"
+            class="playlistItem"
+            :data="item"
+            :playlist-id="playlistId"
+            :playlist-type="playlistType"
+            :playlist-index="reversePlaylist ? playlistItems.length - index - 1 : index"
+            :playlist-item-id="item.playlistItemId"
+            :playlist-reverse="reversePlaylist"
+            :playlist-shuffle="shuffleEnabled"
+            :playlist-loop="loopEnabled"
+            :video-index="index"
+            :is-current-video="currentVideoIndexZeroBased === index"
+            :can-move-video-up="index > 0 && canMoveVideos"
+            :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
+            :can-remove-from-playlist="isUserPlaylist"
+            :dragged-video="draggedVideo"
+            :is-sort-order-custom="isSortOrderCustom"
+            :is-video-dragging="isVideoDragging"
+            appearance="watchPlaylistItem"
+            :initial-visible-state="index < (currentVideoIndexZeroBased + 4) && index > (currentVideoIndexZeroBased - 4)"
+            @drag-video="setDraggedVideo"
+            @drag-video-end="onDragVideoEnd"
+            @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
+            @move-video-up="moveVideoUp"
+            @move-video-down="moveVideoDown"
+            @remove-from-playlist="removeVideoFromPlaylist"
+            @pause-player="pausePlayer"
+          />
+        </TransitionGroup>
+        <FtPrompt
+          v-if="showRemoveWatchedVideosPrompt"
+          :label="removeWatchedVideosPromptLabel"
+          :option-names="removeWatchedVideosPromptOptionNames"
+          :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"
+          is-first-option-destructive
+          @click="handleRemoveWatchedVideosPromptAnswer"
         />
-      </TransitionGroup>
-      <FtPrompt
-        v-if="showRemoveWatchedVideosPrompt"
-        :label="removeWatchedVideosPromptLabel"
-        :option-names="removeWatchedVideosPromptOptionNames"
-        :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"
-        is-first-option-destructive
-        @click="handleRemoveWatchedVideosPromptAnswer"
-      />
-    </div>
+      </div>
+    </template>
   </FtCard>
 </template>
 
@@ -248,7 +273,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['pause-player'])
+const emit = defineEmits(['close', 'pause-player'])
 
 const { locale, t } = useI18n()
 const router = useRouter()

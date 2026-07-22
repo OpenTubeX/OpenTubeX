@@ -4,6 +4,10 @@
   white-space: nowrap;
 }
 
+.playlistTitleRow {
+  min-inline-size: 0;
+}
+
 .playlistTitleLink,
 .channelName {
   text-decoration: none;
@@ -174,7 +178,8 @@
   flex-direction: column;
   block-size: auto;
   min-block-size: 0;
-  margin: 0;
+  margin: 0 !important;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -183,12 +188,63 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-block-size: 0;
+  box-sizing: border-box;
+  padding-block: 8px 16px;
+  padding-inline: 16px;
+  overflow-x: hidden;
 }
 
 .fullscreenPlaylist .playlistHeader {
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
+}
+
+.playlistDockHeader {
+  display: flex;
+  flex: 0 0 52px;
+  box-sizing: border-box;
+  inline-size: 100%;
+  align-items: center;
+  gap: 9px;
+  margin-inline: 0;
+  padding-inline: 16px 8px;
+  background-color: rgb(20 20 20 / 52%);
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+}
+
+.playlistDockClose {
+  display: grid;
+  flex: 0 0 36px;
+  place-items: center;
+  inline-size: 36px;
+  block-size: 36px;
+  margin-inline-start: auto;
+  padding: 0;
+  color: #fff;
+  background-color: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.playlistDockClose:hover,
+.playlistDockClose:focus-visible {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.playlistDockHeader h3 {
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fullscreenPlaylist :is(.channelName, .playlistIndex) {
+  inset-block-end: 0;
 }
 
 .fullscreenPlaylist .playlistItemsWrapper {

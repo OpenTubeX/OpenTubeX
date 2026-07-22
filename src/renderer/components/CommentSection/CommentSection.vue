@@ -7,7 +7,10 @@
       v-if="fullscreenOverlay"
       class="fullscreenCommentHeader"
     >
-      <h3>{{ commentsTitle }}</h3>
+      <h3>
+        <FontAwesomeIcon :icon="['fas', 'comment']" />
+        {{ commentsTitle }}
+      </h3>
       <div
         class="fullscreenCommentActions"
         @focusout="handleFullscreenActionsFocusout"

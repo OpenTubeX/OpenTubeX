@@ -1142,6 +1142,8 @@ Channel:
     Hide Answers: Hide Answers
     Video hidden by OpenTubeX: Video hidden by OpenTubeX
 Video:
+  Metadata: Video information
+  Close Metadata: Close video information
   Transcript:
     Title: Transcript
     Search: Search transcript

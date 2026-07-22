@@ -44,6 +44,9 @@
         fullWindow: fullWindowEnabled,
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        fullscreenMetadataOpen: showFullscreenMetadata,
+        fullscreenTranscriptOpen: showFullscreenTranscript,
+        fullscreenSponsorBlockOpen: showFullscreenSponsorBlock,
         fullscreenCommentsOpen: showFullscreenComments,
         fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
@@ -150,7 +153,7 @@
         </div>
       </Transition>
       <div
-        v-if="watchingPlaylist || commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction"
+        v-if="watchingPlaylist || commentsAvailable || showFullscreenPlaylistAction"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
@@ -179,14 +182,6 @@
         >
           <FontAwesomeIcon :icon="['fas', 'comment']" />
         </button>
-        <FtShareButton
-          v-if="showFullscreenShareAction"
-          :id="videoId"
-          class="fullscreenShareAction"
-          :playlist-id="playlistId"
-          :get-timestamp="getShareTimestamp"
-          dropdown-position-y="top"
-        />
         <button
           v-if="showFullscreenPlaylistAction"
           type="button"
@@ -227,6 +222,7 @@
           v-if="showChaptersOverlay && (isFullscreen || fullWindowEnabled) && chapters.length > 0"
           ref="chapterOverlay"
           class="chapterOverlay shaka-no-propagation"
+          :style="fullscreenDockStyle('chapters')"
           role="dialog"
           tabindex="-1"
           :aria-label="$t('Chapters.Chapters')"
@@ -238,6 +234,13 @@
         >
           <header class="chapterOverlayHeader">
             <h2 class="chapterOverlayTitle">
+              <svg
+                class="chapterOverlayTitleIcon"
+                viewBox="0 -960 960 960"
+                aria-hidden="true"
+              >
+                <path d="m400-200-182 91q-20 10-39-1.5T160-145v-495q0-33 23.5-56.5T240-720h320q33 0 56.5 23.5T640-640v495q0 23-19 34.5t-39 1.5l-182-91Zm360-40q-17 0-28.5-11.5T720-280v-520H320q-17 0-28.5-11.5T280-840q0-17 11.5-28.5T320-880h400q33 0 56.5 23.5T800-800v520q0 17-11.5 28.5T760-240Z" />
+              </svg>
               {{ chaptersKind === 'keyMoments' ? $t('Chapters.Key Moments') : $t('Chapters.Chapters') }}
             </h2>
             <button
@@ -261,9 +264,88 @@
         </aside>
       </Transition>
       <aside
+        ref="fullscreenMetadataOverlay"
+        class="fullscreenMetadataOverlay shaka-no-propagation"
+        :class="{ open: showFullscreenMetadata }"
+        :style="fullscreenDockStyle('metadata')"
+        role="dialog"
+        :aria-label="$t('Video.Metadata', 'Video information')"
+        :aria-hidden="String(!showFullscreenMetadata)"
+        :inert="!showFullscreenMetadata"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenMetadata"
+      >
+        <header class="fullscreenMetadataHeader">
+          <h2 class="fullscreenDockHeading">
+            <FontAwesomeIcon
+              class="fullscreenDockHeadingIcon"
+              :icon="['fas', 'info-circle']"
+            />
+            {{ $t('Video.Metadata', 'Video information') }}
+          </h2>
+          <button
+            type="button"
+            class="fullscreenMetadataClose"
+            :aria-label="$t('Video.Close Metadata', 'Close video information')"
+            :title="$t('Video.Close Metadata', 'Close video information')"
+            @click="closeFullscreenMetadata"
+          >
+            <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          </button>
+        </header>
+        <div
+          ref="fullscreenMetadataTarget"
+          class="fullscreenMetadataTarget"
+        />
+      </aside>
+      <aside
+        ref="fullscreenTranscriptOverlay"
+        class="fullscreenTranscriptOverlay shaka-no-propagation"
+        :class="{ open: showFullscreenTranscript }"
+        :style="fullscreenDockStyle('transcript')"
+        role="dialog"
+        :aria-label="$t('Video.Transcript.Title')"
+        :aria-hidden="String(!showFullscreenTranscript)"
+        :inert="!showFullscreenTranscript"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenTranscript"
+      >
+        <div
+          ref="fullscreenTranscriptTarget"
+          class="fullscreenTranscriptTarget"
+        />
+      </aside>
+      <aside
+        ref="fullscreenSponsorBlockOverlay"
+        class="fullscreenSponsorBlockOverlay shaka-no-propagation"
+        :class="{ open: showFullscreenSponsorBlock }"
+        :style="fullscreenDockStyle('sponsorBlock')"
+        role="dialog"
+        :aria-label="$t('Video.Player.SponsorBlock.InfoPanelTitle')"
+        :aria-hidden="String(!showFullscreenSponsorBlock)"
+        :inert="!showFullscreenSponsorBlock"
+        @click.stop
+        @dblclick.stop
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenSponsorBlock"
+      >
+        <div
+          ref="fullscreenSponsorBlockTarget"
+          class="fullscreenSponsorBlockTarget"
+        />
+      </aside>
+      <aside
         ref="fullscreenCommentsOverlay"
         class="fullscreenCommentsOverlay shaka-no-propagation"
         :class="{ open: showFullscreenComments }"
+        :style="fullscreenDockStyle('comments')"
         role="dialog"
         :aria-label="$t('Comments.Comments')"
         :aria-hidden="String(!showFullscreenComments)"
@@ -278,6 +360,7 @@
         ref="fullscreenPlaylistOverlay"
         class="fullscreenPlaylistOverlay shaka-no-propagation"
         :class="{ open: showFullscreenPlaylist }"
+        :style="fullscreenDockStyle('playlist')"
         role="dialog"
         :aria-label="$t('Playlist.Playlist')"
         :aria-hidden="String(!showFullscreenPlaylist)"
@@ -288,15 +371,6 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenPlaylist"
       >
-        <button
-          type="button"
-          class="fullscreenPlaylistClose"
-          :aria-label="$t('Playlist.Close Playlist')"
-          :title="$t('Playlist.Close Playlist')"
-          @click="closeFullscreenPlaylist"
-        >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
-        </button>
         <div
           ref="fullscreenPlaylistTarget"
           class="fullscreenPlaylistTarget"

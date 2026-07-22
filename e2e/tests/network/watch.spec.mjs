@@ -108,6 +108,41 @@ test.describe('watch page', () => {
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
   })
 
+  test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    await setPlayerFullscreen(page, true)
+    const title = page.locator('.playerFullscreenTitleOverlay')
+    await title.click({ force: true })
+
+    await expect(title).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText('Me at the zoo')
+    await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
+    const [videoBounds, metadataBounds] = await Promise.all([
+      page.locator('.ftVideoPlayer video.player').boundingBox(),
+      page.locator('.fullscreenMetadataOverlay.open').boundingBox()
+    ])
+    expect(videoBounds.x + videoBounds.width).toBeLessThanOrEqual(metadataBounds.x + 1)
+
+    await page.getByRole('button', { name: 'Show transcript' }).click()
+    await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
+    await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
+    await expect(page.locator('.fullscreenTranscriptTarget .transcriptActions .iconButton')).toHaveCount(2)
+    await page.getByRole('button', { name: 'Close transcript' }).click()
+    await expect(page.locator('.fullscreenTranscriptOverlay.open')).toHaveCount(0)
+
+    await setPlayerFullscreen(page, false)
+    await expect(page.locator('.infoArea .videoTitle')).toBeVisible()
+    await setPlayerFullscreen(page, true)
+    await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Close video information' }).click()
+    await expect(title).toHaveAttribute('aria-expanded', 'false')
+  })
+
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')

@@ -51,6 +51,7 @@
           :start-in-fullwindow="startNextVideoInFullwindow"
           :start-in-pip="startNextVideoInPip"
           :start-with-chapters="startNextVideoWithChapters"
+          :start-with-fullscreen-metadata="startNextVideoWithFullscreenMetadata"
           :start-with-fullscreen-comments="startNextVideoWithFullscreenComments"
           :start-with-fullscreen-playlist="startNextVideoWithFullscreenPlaylist"
           :channel-id="channelId"
@@ -85,6 +86,9 @@
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
           @resume-playback-after-sabr-reload-done="onResumePlaybackAfterSabrReloadDone"
+          @fullscreen-metadata-change="handleFullscreenMetadataChange"
+          @fullscreen-transcript-change="handleFullscreenTranscriptChange"
+          @fullscreen-sponsorblock-change="handleFullscreenSponsorBlockChange"
           @fullscreen-comments-change="handleFullscreenCommentsChange"
           @fullscreen-playlist-change="handleFullscreenPlaylistChange"
           @add-to-playlist="addCurrentVideoToPlaylist"
@@ -175,54 +179,59 @@
           <div class="skeletonLine skeletonChannel ft-shimmer" />
         </div>
       </div>
-      <watch-video-info
-        v-if="!isLoading"
-        :id="videoId"
-        :title="videoTitle"
-        :channel-id="channelId"
-        :channel-name="channelName"
-        :channel-thumbnail="channelThumbnail"
-        :channel-collaborators="channelCollaborators"
-        :published="videoPublished"
-        :premiere-date="premiereDate"
-        :subscription-count-text="channelSubscriptionCountText"
-        :like-count="videoLikeCount"
-        :dislike-count="videoDislikeCount"
-        :category="videoCategory"
-        :view-count="videoViewCount"
-        :get-timestamp="getTimestamp"
-        :is-live-content="isLiveContent"
-        :is-live="isLive"
-        :is-upcoming="isUpcoming"
-        :playlist-id="playlistId"
-        :get-playlist-state="getPlaylistState"
-        :length-seconds="videoLengthSeconds"
-        :video-thumbnail="thumbnail"
-        :in-user-playlist="!!selectedUserPlaylist"
-        :is-unlisted="isUnlisted"
-        :has-ai-generated-content="hasAiGeneratedContent"
-        :can-save-watched-progress="canSaveWatchProgress"
-        :sponsor-block-panel-open="showSidebarSponsorBlock"
-        :transcript-open="showTranscript"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @change-format="handleFormatChange"
-        @pause-player="pausePlayer"
-        @save-watched-progress="handleWatchProgressManualSave"
-        @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
-        @save-channel-video-quality="handleChannelVideoQualityManualSave"
-        @toggle-sponsorblock-info="toggleSponsorBlockInfo"
-        @toggle-transcript="showTranscript = !showTranscript"
-      />
-      <watch-video-description
-        v-if="!isLoading && !hideVideoDescription"
-        :description="videoDescription"
-        :description-html="videoDescriptionHtml"
-        :license="license"
-        class="watchVideo"
-        :class="{ theatreWatchVideo: useTheatreMode }"
-        @timestamp-event="changeTimestamp"
-      />
+      <Teleport
+        :to="fullscreenMetadataTarget || 'body'"
+        :disabled="!fullscreenMetadataOpen"
+      >
+        <watch-video-info
+          v-if="!isLoading"
+          :id="videoId"
+          :title="videoTitle"
+          :channel-id="channelId"
+          :channel-name="channelName"
+          :channel-thumbnail="channelThumbnail"
+          :channel-collaborators="channelCollaborators"
+          :published="videoPublished"
+          :premiere-date="premiereDate"
+          :subscription-count-text="channelSubscriptionCountText"
+          :like-count="videoLikeCount"
+          :dislike-count="videoDislikeCount"
+          :category="videoCategory"
+          :view-count="videoViewCount"
+          :get-timestamp="getTimestamp"
+          :is-live-content="isLiveContent"
+          :is-live="isLive"
+          :is-upcoming="isUpcoming"
+          :playlist-id="playlistId"
+          :get-playlist-state="getPlaylistState"
+          :length-seconds="videoLengthSeconds"
+          :video-thumbnail="thumbnail"
+          :in-user-playlist="!!selectedUserPlaylist"
+          :is-unlisted="isUnlisted"
+          :has-ai-generated-content="hasAiGeneratedContent"
+          :can-save-watched-progress="canSaveWatchProgress"
+          :sponsor-block-panel-open="showSidebarSponsorBlock"
+          :transcript-open="showTranscript"
+          class="watchVideo"
+          :class="{ theatreWatchVideo: useTheatreMode }"
+          @change-format="handleFormatChange"
+          @pause-player="pausePlayer"
+          @save-watched-progress="handleWatchProgressManualSave"
+          @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+          @save-channel-video-quality="handleChannelVideoQualityManualSave"
+          @toggle-sponsorblock-info="toggleSponsorBlockInfo"
+          @toggle-transcript="toggleTranscript"
+        />
+        <watch-video-description
+          v-if="!isLoading && !hideVideoDescription"
+          :description="videoDescription"
+          :description-html="videoDescriptionHtml"
+          :license="license"
+          class="watchVideo"
+          :class="{ theatreWatchVideo: useTheatreMode }"
+          @timestamp-event="changeTimestamp"
+        />
+      </Teleport>
     </div>
     <div
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
@@ -305,36 +314,47 @@
           />
         </div>
       </transition>
-      <transition name="sponsorblock-panel">
-        <watch-video-sponsor-block
-          v-if="showSidebarSponsorBlock && !isLoading"
-          class="watchVideoSideBar watchVideoSponsorBlock"
-          :loading="sponsorBlockInfoLoading"
-          :pending-uuid="sponsorBlockInfoPendingUuid"
-          :segments="sponsorBlockInfoSegments"
-          :submission-enabled="sponsorBlockInfoSubmissionEnabled"
-          :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
-          :channel-whitelisted="isSponsorBlockChannelWhitelisted"
-          :can-whitelist-channel="Boolean(channelId)"
+      <Teleport
+        :to="fullscreenSponsorBlockTarget || 'body'"
+        :disabled="!fullscreenSponsorBlockOpen"
+      >
+        <transition name="sponsorblock-panel">
+          <watch-video-sponsor-block
+            v-if="showSidebarSponsorBlock && !isLoading"
+            class="watchVideoSideBar watchVideoSponsorBlock"
+            :loading="sponsorBlockInfoLoading"
+            :pending-uuid="sponsorBlockInfoPendingUuid"
+            :segments="sponsorBlockInfoSegments"
+            :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+            :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+            :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+            :can-whitelist-channel="Boolean(channelId)"
+            :current-time="currentTime"
+            @close="closeSidebarSponsorBlock"
+            @refresh="refreshSponsorBlockInfo"
+            @skip="skipSponsorBlockInfoSegment"
+            @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+            @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+            @vote="voteOnSponsorBlockInfoSegment"
+          />
+        </transition>
+      </Teleport>
+      <Teleport
+        :to="fullscreenTranscriptTarget || 'body'"
+        :disabled="!fullscreenTranscriptOpen"
+      >
+        <watch-video-transcript
+          v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+          :captions="captions"
           :current-time="currentTime"
-          @close="closeSidebarSponsorBlock"
-          @refresh="refreshSponsorBlockInfo"
-          @skip="skipSponsorBlockInfoSegment"
-          @auto-skip-change="handleSponsorBlockAutoSkipToggle"
-          @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
-          @vote="voteOnSponsorBlockInfoSegment"
+          :preferred-caption-index="preferredTranscriptCaptionIndex"
+          :video-title="videoTitle"
+          :fullscreen-overlay="fullscreenTranscriptOpen"
+          class="watchVideoSideBar watchVideoTranscript"
+          @close="closeTranscript"
+          @timestamp-event="playTranscriptSegment"
         />
-      </transition>
-      <watch-video-transcript
-        v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
-        :captions="captions"
-        :current-time="currentTime"
-        :preferred-caption-index="preferredTranscriptCaptionIndex"
-        :video-title="videoTitle"
-        class="watchVideoSideBar watchVideoTranscript"
-        @close="showTranscript = false"
-        @timestamp-event="playTranscriptSegment"
-      />
+      </Teleport>
       <watch-video-live-chat
         v-if="!isLoading && !hideLiveChat && (isLive || isUpcoming)"
         :live-chat="liveChat"
@@ -359,6 +379,7 @@
           :fullscreen-overlay="fullscreenPlaylistOpen"
           class="watchVideoSideBar watchVideoPlaylist resizablePlaylist"
           :class="{ theatrePlaylist: useTheatreMode }"
+          @close="closeFullscreenPlaylist"
           @pause-player="pausePlayer"
         />
       </Teleport>

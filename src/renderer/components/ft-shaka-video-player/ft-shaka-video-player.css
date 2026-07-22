@@ -239,9 +239,9 @@
   the video is pushed aside to make room (see the panel push rules near the
   end of this file). Outside of those modes the chapters appear in the watch
   page sidebar instead. When the comments panel is open too, chapters takes
-  the bottom half.
+  the available height is shared with the other open docks.
 */
-:is(.chapterOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay) {
+:is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay) {
   /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
      every app theme because their background is the video, not the app page. */
   --primary-text-color: #cdd6f4;
@@ -253,12 +253,11 @@
   --secondary-card-bg-color: #1e1e2e;
   --scrollbar-color: #313244;
   --scrollbar-color-hover: #3d4051;
+  --side-nav-color: #181825;
   --side-nav-hover-color: #11111b;
   --side-nav-hover-text-color: #cdd6f4;
   --side-nav-active-color: #11111b;
   --side-nav-active-text-color: #cdd6f4;
-  --accent-color: #b4befe;
-  --accent-color-hover: #cdd6f4;
 }
 
 .chapterOverlay {
@@ -282,19 +281,9 @@
     inset-block-start 250ms ease, inset-block-end 250ms ease;
 }
 
-.ftVideoPlayer.fullscreenCommentsOpen .chapterOverlay,
-.ftVideoPlayer.fullscreenPlaylistOpen .chapterOverlay {
-  inset-block-start: calc(50% + 6px);
-}
-
 .chapter-slide-enter-active,
 .chapter-slide-leave-active {
   transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Keep the outgoing panel in its three-way slot until its slide completes. */
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen .chapterOverlay.chapter-slide-leave-active {
-  inset-block-start: calc(66.666% + 6px);
 }
 
 /* The docked panel keeps a 12px margin, so slide a bit further to leave no sliver. */
@@ -310,7 +299,7 @@
 
 .chapterOverlayHeader {
   display: flex;
-  flex: 0 0 46px;
+  flex: 0 0 52px;
   align-items: center;
   justify-content: space-between;
   padding-inline: 14px 8px;
@@ -319,8 +308,19 @@
 }
 
 .chapterOverlayTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
+}
+
+.chapterOverlayTitleIcon {
+  display: block;
+  flex: 0 0 22px;
+  inline-size: 22px;
+  block-size: 22px;
+  fill: currentcolor;
 }
 
 .chapterOverlayClose {
@@ -330,7 +330,7 @@
   block-size: 36px;
   border: 0;
   border-radius: 50%;
-  background-color: rgb(0 0 0 / 45%);
+  background-color: transparent;
   color: #fff;
   cursor: pointer;
   font-size: 18px;
@@ -1124,22 +1124,44 @@
   display: none;
   opacity: 0;
   position: absolute;
+  z-index: 4;
   margin: 0;
   top: 5px;
   left: 5px;
+  box-sizing: border-box;
+  inline-size: fit-content;
+  block-size: auto;
   max-width: calc(100% - 10px);
-  font-size: xx-large;
+  font-size: 28px;
   line-height: 1.3;
-  color: #fff;
-  font-weight: normal;
-  background-color: rgb(0 0 0 / 50%);
-  border-radius: 5px;
+  color: #fff !important;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: start;
+  text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
+  background-color: transparent;
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer !important;
+  pointer-events: auto !important;
   text-overflow: ellipsis;
   text-wrap: nowrap;
   overflow: hidden;
 
   /* copied from .shaka-scrim-container */
-  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s;
+  transition: opacity cubic-bezier(0.4, 0, 0.6, 1) 0.6s,
+    background-color 150ms ease;
+}
+
+:deep(.playerFullscreenTitleOverlay:hover),
+:deep(.playerFullscreenTitleOverlay:focus-visible) {
+  background-color: rgb(255 255 255 / 14%);
+}
+
+:deep(.playerFullscreenTitleOverlay:focus-visible) {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 :deep(.playerFullscreenTitleOverlay:dir(rtl)) {
@@ -1172,8 +1194,7 @@
     inset-inline-end 250ms ease;
 }
 
-.fullscreenAction,
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton) {
+.fullscreenAction {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1192,10 +1213,7 @@
 
 .fullscreenAction:hover,
 .fullscreenAction:focus-visible,
-.fullscreenAction.open,
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed) {
+.fullscreenAction.open {
   color: #fff;
   background-color: rgb(255 255 255 / 18%);
 }
@@ -1225,6 +1243,9 @@
   pointer-events: auto;
 }
 
+.fullscreenMetadataOverlay,
+.fullscreenTranscriptOverlay,
+.fullscreenSponsorBlockOverlay,
 .fullscreenCommentsOverlay,
 .fullscreenPlaylistOverlay {
   position: absolute;
@@ -1253,6 +1274,9 @@
   nested backdrop-filters: with the blur on the panel itself, the sort menu's
   own backdrop-filter inside it would stop working.
 */
+.fullscreenMetadataOverlay::before,
+.fullscreenTranscriptOverlay::before,
+.fullscreenSponsorBlockOverlay::before,
 .fullscreenCommentsOverlay::before,
 .fullscreenPlaylistOverlay::before {
   content: '';
@@ -1264,48 +1288,21 @@
 }
 
 /* Suppressed during presentation mode switches; see the block near the end of the file. */
+.ftVideoPlayer.presentationModeChanging .fullscreenMetadataOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenTranscriptOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenSponsorBlockOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenPlaylistOverlay {
   transition: none !important;
 }
 
-/* When the chapters panel is open as well, comments takes the top half. */
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenCommentsOverlay,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenPlaylistOverlay,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenCommentsOverlay,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenPlaylistOverlay {
-  inset-block-end: calc(50% + 6px);
-}
-
-/*
-  Prepare the closed panel in its eventual slot before it slides in. This keeps
-  its entrance horizontal while the panel that is already open resizes.
-*/
-.ftVideoPlayer.fullscreenPlaylistOpen:not(.chaptersOverlayOpen) .fullscreenCommentsOverlay {
-  inset-block-end: calc(50% + 6px);
-}
-
-.ftVideoPlayer.fullscreenCommentsOpen:not(.chaptersOverlayOpen) .fullscreenPlaylistOverlay {
-  inset-block-start: calc(50% + 6px);
-}
-
-/* With all three panels open, divide the dock into equal thirds. */
 .ftVideoPlayer.presentationModeChanging .chapterOverlay {
   transition: none !important;
 }
 
-.ftVideoPlayer.fullscreenPlaylistOpen.chaptersOverlayOpen .fullscreenCommentsOverlay {
-  inset-block-end: calc(66.666% + 6px);
-}
-
-.ftVideoPlayer.fullscreenCommentsOpen.chaptersOverlayOpen .fullscreenPlaylistOverlay {
-  inset-block: calc(33.333% + 6px);
-}
-
-.ftVideoPlayer.fullscreenCommentsOpen.fullscreenPlaylistOpen.chaptersOverlayOpen .chapterOverlay {
-  inset-block-start: calc(66.666% + 6px);
-}
-
+.fullscreenMetadataOverlay.open,
+.fullscreenTranscriptOverlay.open,
+.fullscreenSponsorBlockOverlay.open,
 .fullscreenCommentsOverlay.open,
 .fullscreenPlaylistOverlay.open {
   opacity: 1;
@@ -1321,27 +1318,301 @@
   box-shadow: none;
 }
 
-.fullscreenPlaylistClose {
-  position: absolute;
-  z-index: 5;
-  inset-block-start: 8px;
-  inset-inline-end: 8px;
+.fullscreenMetadataHeader {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.fullscreenMetadataHeader h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.fullscreenDockHeading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.fullscreenDockHeadingIcon {
+  display: block;
+  flex: 0 0 18px;
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.fullscreenMetadataClose {
   display: grid;
   place-items: center;
   inline-size: 36px;
   block-size: 36px;
   padding: 0;
   color: #fff;
-  background-color: rgb(0 0 0 / 45%);
+  background-color: transparent;
   border: 0;
   border-radius: 50%;
   cursor: pointer;
   font-size: 18px;
 }
 
-.fullscreenPlaylistClose:hover,
-.fullscreenPlaylistClose:focus-visible {
+.fullscreenMetadataClose:hover,
+.fullscreenMetadataClose:focus-visible {
   background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenMetadataTarget {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+  max-inline-size: 100%;
+  overflow: hidden;
+}
+
+.fullscreenMetadataTarget :deep(.watchVideo) {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  margin: 0;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenMetadataTarget :deep(.videoDescription) {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  max-block-size: none;
+  overflow: hidden auto;
+}
+
+.fullscreenMetadataTarget :deep(.watchVideoInfo) {
+  padding-block-end: 4px;
+}
+
+.fullscreenMetadataTarget :deep(.videoDescription.short) {
+  flex: 0 0 auto;
+}
+
+/* A stacked metadata dock can be shorter than its non-description content.
+   Scroll the complete dock in that state so every section remains reachable. */
+.ftVideoPlayer.fullscreenMetadataOpen:is(
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+) .fullscreenMetadataTarget {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.ftVideoPlayer.fullscreenMetadataOpen:is(
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+) .fullscreenMetadataTarget :deep(.watchVideoInfo),
+  .ftVideoPlayer.fullscreenMetadataOpen:is(
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+) .fullscreenMetadataTarget :deep(.videoDescription) {
+  flex: 0 0 auto;
+}
+
+.ftVideoPlayer.fullscreenMetadataOpen:is(
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+) .fullscreenMetadataTarget :deep(.videoDescription) {
+  overflow: visible;
+}
+
+.fullscreenMetadataTarget :deep(.videoMetrics),
+.fullscreenMetadataTarget :deep(.videoButtons) {
+  align-items: flex-start;
+  flex-direction: column;
+  inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.videoOptions),
+.fullscreenMetadataTarget :deep(.videoOptionsMobileRow) {
+  max-inline-size: 100%;
+  flex-wrap: wrap;
+}
+
+.fullscreenMetadataTarget :deep(.datePublishedAndViewCount),
+.fullscreenMetadataTarget :deep(.profileRow) {
+  max-inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.datePublishedAndViewCount) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 5px;
+}
+
+.fullscreenMetadataTarget :deep(.datePublishedAndViewCount .seperator) {
+  display: none;
+}
+
+.fullscreenMetadataTarget :deep(.publishedTimeAgo::before),
+.fullscreenMetadataTarget :deep(.videoViews::before),
+.fullscreenMetadataTarget :deep(.videoCategory::before) {
+  content: '•';
+  margin-inline-end: 5px;
+}
+
+.fullscreenMetadataTarget :deep(.profileRow) {
+  flex-wrap: wrap;
+  margin-block: 6px;
+}
+
+.fullscreenMetadataTarget :deep(.publishedDate),
+.fullscreenMetadataTarget :deep(.videoCategory strong) {
+  white-space: nowrap;
+}
+
+.fullscreenMetadataTarget :deep(.likeBarContainer) {
+  display: flex;
+  justify-content: flex-start;
+  inline-size: 100%;
+}
+
+.fullscreenMetadataTarget :deep(.likeSection) {
+  inline-size: min(210px, 100%);
+  max-inline-size: 100%;
+  margin-inline: 0;
+  text-align: start;
+}
+
+.fullscreenMetadataTarget :deep(.likeCounts) {
+  justify-content: flex-start;
+}
+
+.fullscreenMetadataTarget :deep(.shareButton .iconDropdown) {
+  color: var(--primary-text-color);
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenMetadataTarget :deep(.shareButton .youtubeLogo) {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.fullscreenTranscriptTarget,
+.fullscreenSponsorBlockTarget {
+  position: absolute;
+  inset: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.fullscreenTranscriptOverlay .fullscreenTranscriptTarget :deep(.watchVideoTranscript),
+.fullscreenSponsorBlockOverlay .fullscreenSponsorBlockTarget :deep(.watchVideoSponsorBlock) {
+  box-sizing: border-box;
+  block-size: 100%;
+  max-block-size: none;
+  margin: 0;
+  overflow: hidden;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.fullscreenTranscriptTarget :deep(.watchVideoTranscript) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeader),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeader) {
+  flex: 0 0 52px;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button) {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0 !important;
+  color: #fff;
+  background-color: transparent;
+  border-radius: 50%;
+  font-size: 18px !important;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction:hover),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction:focus-visible),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderAction.active),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:hover),
+.fullscreenTranscriptTarget :deep(.transcriptHeaderActions .iconButton:focus-visible),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:hover:not(:disabled)),
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockHeaderActions button:focus-visible:not(:disabled)) {
+  color: #fff;
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls) {
+  display: flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin-block: 16px;
+  padding-inline: 16px;
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input) {
+  color: var(--primary-text-color);
+  background-color: rgb(255 255 255 / 8%);
+  border: 1px solid rgb(255 255 255 / 12%);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input::placeholder) {
+  color: var(--tertiary-text-color);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptControls .ft-input:focus) {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-color) 18%, transparent);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptLanguageMenu) {
+  background-color: rgb(12 12 12 / 62%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+
+.fullscreenTranscriptTarget :deep(.transcriptSegments) {
+  flex: 1 1 auto;
+  max-block-size: none;
+  padding-inline: 8px;
+}
+
+/* Hide the pre-component playlist close control if it survives a hot reload. */
+.fullscreenPlaylistClose {
+  display: none;
 }
 
 .fullscreenPlaylistTarget {
@@ -1355,7 +1626,7 @@
   box-sizing: border-box;
   block-size: 100%;
   margin: 0;
-  padding-block-start: 12px;
+  padding-block-start: 0;
   overflow: hidden;
   color: #fff;
   background-color: transparent;
@@ -1363,14 +1634,36 @@
   box-shadow: none;
 }
 
-.fullscreenPlaylistTarget :deep(.playlistTitle) {
-  padding-inline-end: 36px;
-}
-
 .fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
   block-size: auto;
   min-block-size: 0;
   resize: none;
+}
+
+/* Like metadata, a stacked playlist needs a whole-panel scroller when its
+   fixed information block leaves no height for the video list. */
+.ftVideoPlayer.fullscreenPlaylistOpen:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .chaptersOverlayOpen
+) .fullscreenPlaylistTarget :deep(.fullscreenPlaylistContent) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.ftVideoPlayer.fullscreenPlaylistOpen:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .chaptersOverlayOpen
+) .fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
+  flex: 0 0 auto;
+  block-size: auto;
+  overflow: visible;
 }
 
 /*
@@ -1398,9 +1691,7 @@
 }
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .ambientFullscreenCanvas {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
   opacity: 0.42;
 }
 
@@ -1420,22 +1711,14 @@
 }
 
 /* Keep the floating fullscreen actions next to the video instead of under the panel. */
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .fullscreenActions,
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .fullscreenActions,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .fullscreenActions,
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .fullscreenActions,
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .fullscreenActions,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .fullscreenActions {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
 }
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .skippedSegmentsWrapper,
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .skippedSegmentsWrapper,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .skippedSegmentsWrapper {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 
@@ -2381,50 +2664,30 @@
 }
 
 /*
-  Side panel push: like YouTube, an open chapters/comments panel in fullscreen
+  Side panel push: like YouTube, an open dock in fullscreen
   (or full window) pushes the video and the player controls/captions area
   aside instead of covering it. Kept at the end of the file so the
   higher-specificity .player rules follow the scroll mini player ones.
 */
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .player,
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .player,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .player,
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .player,
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .player,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .player {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-controls-container),
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-controls-container),
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-controls-container),
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-controls-container),
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-controls-container),
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-controls-container),
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-spinner-container),
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen .countdownOverlay,
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen .countdownOverlay,
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen .countdownOverlay,
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen .countdownOverlay,
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen .countdownOverlay,
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen .countdownOverlay,
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-text-container),
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-text-container),
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-text-container),
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-text-container),
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-text-container),
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-text-container),
-.ftVideoPlayer:fullscreen.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
-.ftVideoPlayer:fullscreen.fullscreenPlaylistOpen :deep(.shaka-speech-to-text-container),
-.ftVideoPlayer:fullscreen.chaptersOverlayOpen :deep(.shaka-speech-to-text-container),
-.ftVideoPlayer.fullWindow.fullscreenCommentsOpen :deep(.shaka-speech-to-text-container),
-.ftVideoPlayer.fullWindow.fullscreenPlaylistOpen :deep(.shaka-speech-to-text-container),
-.ftVideoPlayer.fullWindow.chaptersOverlayOpen :deep(.shaka-speech-to-text-container) {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+  :deep(.shaka-controls-container),
+  :deep(.shaka-spinner-container),
+  .countdownOverlay,
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container)
+),
+  .ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+  :deep(.shaka-controls-container),
+  :deep(.shaka-spinner-container),
+  .countdownOverlay,
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container)
+) {
   inline-size: auto;
   inset-inline-end: var(--side-panel-width);
 }

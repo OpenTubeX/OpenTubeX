@@ -1,28 +1,33 @@
 <template>
-  <TransitionGroup
-    tag="div"
-    name="toast"
-    class="toast-holder"
+  <Teleport
+    :to="fullscreenTarget || 'body'"
+    :disabled="fullscreenTarget === null"
   >
-    <div
-      v-for="toast in toasts"
-      :key="toast.id"
-      class="toast"
-      tabindex="0"
-      role="status"
-      @click="performAction(toast)"
-      @keydown.enter.prevent="performAction(toast)"
-      @keydown.space.prevent="performAction(toast)"
+    <TransitionGroup
+      tag="div"
+      name="toast"
+      class="toast-holder"
     >
-      <p class="message">
-        {{ toast.message }}
-      </p>
-    </div>
-  </TransitionGroup>
+      <div
+        v-for="toast in toasts"
+        :key="toast.id"
+        class="toast"
+        tabindex="0"
+        role="status"
+        @click="performAction(toast)"
+        @keydown.enter.prevent="performAction(toast)"
+        @keydown.space.prevent="performAction(toast)"
+      >
+        <p class="message">
+          {{ toast.message }}
+        </p>
+      </div>
+    </TransitionGroup>
+  </Teleport>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, reactive } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 
 let idCounter = 0
@@ -39,6 +44,12 @@ let removeShowToastListener = null
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
+/** @type {import('vue').Ref<Element|null>} */
+const fullscreenTarget = ref(null)
+
+function updateFullscreenTarget() {
+  fullscreenTarget.value = document.fullscreenElement
+}
 
 /**
  * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null }>} event
@@ -119,6 +130,8 @@ function cleanup(toast) {
 
 onMounted(() => {
   ToastEventBus.addEventListener('toast-open', open)
+  document.addEventListener('fullscreenchange', updateFullscreenTarget)
+  updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
     removeShowToastListener = window.ftElectron.handleShowToast(showToast)
@@ -127,6 +140,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
+  document.removeEventListener('fullscreenchange', updateFullscreenTarget)
   removeShowToastListener?.()
   toasts.forEach(cleanup)
 })

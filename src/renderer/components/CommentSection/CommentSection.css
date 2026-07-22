@@ -39,8 +39,8 @@
   z-index: 2;
   display: flex;
   box-sizing: border-box;
-  block-size: 46px;
-  flex: 0 0 46px;
+  block-size: 52px;
+  flex: 0 0 52px;
   align-items: center;
   justify-content: space-between;
   padding-block: 0;
@@ -50,8 +50,11 @@
 }
 
 .fullscreenCommentHeader h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .fullscreenCommentActions {
@@ -68,7 +71,7 @@
   block-size: 36px;
   padding: 0;
   color: #fff;
-  background-color: rgb(0 0 0 / 45%);
+  background-color: transparent;
   border: 0;
   border-radius: 50%;
   cursor: pointer;

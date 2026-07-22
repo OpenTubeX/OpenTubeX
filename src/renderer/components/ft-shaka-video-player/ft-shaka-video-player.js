@@ -68,7 +68,6 @@ import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
-import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -143,7 +142,6 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
-    FtShareButton,
     FtVideoAnnotations,
     WatchVideoChapters
   },
@@ -264,6 +262,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    startWithFullscreenMetadata: {
+      type: Boolean,
+      default: false
+    },
     startWithFullscreenComments: {
       type: Boolean,
       default: false
@@ -341,6 +343,9 @@ export default defineComponent({
     'skip-to-prev',
     'player-reload-requested',
     'resume-playback-after-sabr-reload-done',
+    'fullscreen-metadata-change',
+    'fullscreen-transcript-change',
+    'fullscreen-sponsorblock-change',
     'fullscreen-comments-change',
     'fullscreen-playlist-change',
     'add-to-playlist',
@@ -445,6 +450,8 @@ export default defineComponent({
     const presentationModeChanging = ref(false)
     /** @type {number|null} */
     let presentationModeChangingTimeout = null
+    /** @type {HTMLElement|null} */
+    let fullscreenTitleOverlay = null
 
     function suppressPanelTransitions(duration) {
       presentationModeChanging.value = true
@@ -458,6 +465,21 @@ export default defineComponent({
         presentationModeChanging.value = false
       }, duration)
     }
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenMetadataOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenMetadataTarget = ref(null)
+    const showFullscreenMetadata = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenTranscriptOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenTranscriptTarget = ref(null)
+    const showFullscreenTranscript = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenSponsorBlockOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenSponsorBlockTarget = ref(null)
+    const showFullscreenSponsorBlock = ref(false)
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenCommentsOverlay = ref(null)
     const showFullscreenComments = ref(false)
@@ -475,12 +497,37 @@ export default defineComponent({
         ? props.playlistId
         : ''
     })
-    const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
 
-    function getShareTimestamp() {
-      const currentTime = Math.floor(video.value?.currentTime ?? 0)
-      return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+    const fullscreenDockOrder = ['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters']
+
+    function fullscreenDockStyle(dock) {
+      const openDocks = fullscreenDockOrder.filter(name => {
+        switch (name) {
+          case 'metadata': return showFullscreenMetadata.value
+          case 'transcript': return showFullscreenTranscript.value
+          case 'sponsorBlock': return showFullscreenSponsorBlock.value
+          case 'comments': return showFullscreenComments.value
+          case 'playlist': return showFullscreenPlaylist.value
+          case 'chapters': return showChaptersOverlay.value && props.chapters.length > 0
+          default: return false
+        }
+      })
+
+      // Keep a closed dock in the slot it will enter so its transition stays
+      // horizontal while the currently open docks resize around it.
+      if (!openDocks.includes(dock)) {
+        openDocks.push(dock)
+        openDocks.sort((a, b) => fullscreenDockOrder.indexOf(a) - fullscreenDockOrder.indexOf(b))
+      }
+
+      const count = openDocks.length
+      const index = openDocks.indexOf(dock)
+
+      return {
+        insetBlockStart: index === 0 ? '12px' : `calc(${index * 100 / count}% + 6px)`,
+        insetBlockEnd: index === count - 1 ? '12px' : `calc(${(count - index - 1) * 100 / count}% + 6px)`,
+      }
     }
 
     function addToPlaylist() {
@@ -542,6 +589,9 @@ export default defineComponent({
     let startInFullscreen = props.startInFullscreen
     let startInPip = props.startInPip
     let restoreChapters = props.startWithChapters
+    let restoreFullscreenMetadata = props.startWithFullscreenMetadata
+    let restoreFullscreenTranscript = false
+    let restoreFullscreenSponsorBlock = false
     let restoreFullscreenComments = props.startWithFullscreenComments
     let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
     let exitFullscreenCleanup = null
@@ -1327,6 +1377,9 @@ export default defineComponent({
 
     function toggleSponsorBlockInfo() {
       sponsorBlockInfoOpen.value = !sponsorBlockInfoOpen.value
+      if (!sponsorBlockInfoOpen.value) {
+        restoreFullscreenSponsorBlock = false
+      }
       ui?.getControls().hideSettingsMenus()
       showOverlayControls()
       emitSponsorBlockInfoState()
@@ -1334,6 +1387,7 @@ export default defineComponent({
 
     function closeSponsorBlockInfo() {
       sponsorBlockInfoOpen.value = false
+      restoreFullscreenSponsorBlock = false
       emitSponsorBlockInfoState()
     }
 
@@ -2924,10 +2978,28 @@ export default defineComponent({
 
       // title overlay when the video is fullscreened
       // placing this inside the controls container so that we can fade it in and out at the same time as the controls
-      const fullscreenTitleOverlay = document.createElement('h1')
+      fullscreenTitleOverlay = document.createElement('h1')
       fullscreenTitleOverlay.textContent = props.title
-      fullscreenTitleOverlay.className = 'playerFullscreenTitleOverlay'
+      fullscreenTitleOverlay.className = 'playerFullscreenTitleOverlay shaka-no-propagation'
       fullscreenTitleOverlay.dir = 'auto'
+      fullscreenTitleOverlay.role = 'button'
+      fullscreenTitleOverlay.tabIndex = 0
+      fullscreenTitleOverlay.ariaLabel = `${t('Video.Metadata', 'Video information')}: ${props.title}`
+      fullscreenTitleOverlay.ariaExpanded = String(showFullscreenMetadata.value)
+
+      const toggleFullscreenMetadata = (event) => {
+        event.stopPropagation()
+        setFullscreenMetadata(!showFullscreenMetadata.value)
+      }
+      fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
+      fullscreenTitleOverlay.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+          return
+        }
+
+        event.preventDefault()
+        toggleFullscreenMetadata(event)
+      })
       controlsContainer.appendChild(fullscreenTitleOverlay)
 
       if (hasLoaded.value && props.chapters.length > 0) {
@@ -4525,6 +4597,59 @@ export default defineComponent({
       setFullscreenComments(false)
     }
 
+    function setFullscreenMetadata(shouldOpen) {
+      const open = Boolean(
+        shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
+      showFullscreenMetadata.value = open
+      if (fullscreenTitleOverlay) {
+        fullscreenTitleOverlay.ariaExpanded = String(open)
+      }
+      emit('fullscreen-metadata-change', {
+        open,
+        target: fullscreenMetadataTarget.value
+      })
+    }
+
+    function closeFullscreenMetadata() {
+      setFullscreenMetadata(false)
+    }
+
+    function setFullscreenTranscript(shouldOpen) {
+      const open = Boolean(
+        shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
+      showFullscreenTranscript.value = open
+      emit('fullscreen-transcript-change', {
+        open,
+        target: fullscreenTranscriptTarget.value
+      })
+    }
+
+    function closeFullscreenTranscript() {
+      setFullscreenTranscript(false)
+    }
+
+    function dismissFullscreenTranscript() {
+      restoreFullscreenTranscript = false
+      closeFullscreenTranscript()
+    }
+
+    function setFullscreenSponsorBlock(shouldOpen) {
+      const open = Boolean(
+        shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
+      showFullscreenSponsorBlock.value = open
+      emit('fullscreen-sponsorblock-change', {
+        open,
+        target: fullscreenSponsorBlockTarget.value
+      })
+    }
+
+    function closeFullscreenSponsorBlock() {
+      setFullscreenSponsorBlock(false)
+    }
+
     function setFullscreenPlaylist(shouldOpen) {
       const open = Boolean(
         shouldOpen && props.watchingPlaylist &&
@@ -4542,6 +4667,9 @@ export default defineComponent({
     }
 
     function rememberDockedPanels() {
+      restoreFullscreenMetadata = showFullscreenMetadata.value
+      restoreFullscreenTranscript = showFullscreenTranscript.value
+      restoreFullscreenSponsorBlock = showFullscreenSponsorBlock.value
       restoreFullscreenComments = showFullscreenComments.value
       restoreFullscreenPlaylist = showFullscreenPlaylist.value
     }
@@ -4563,6 +4691,21 @@ export default defineComponent({
         setFullscreenComments(true)
       }
 
+      if (restoreFullscreenMetadata) {
+        restoreFullscreenMetadata = false
+        setFullscreenMetadata(true)
+      }
+
+      if (restoreFullscreenTranscript) {
+        restoreFullscreenTranscript = false
+        setFullscreenTranscript(true)
+      }
+
+      if (restoreFullscreenSponsorBlock) {
+        restoreFullscreenSponsorBlock = false
+        setFullscreenSponsorBlock(true)
+      }
+
       if (restoreFullscreenPlaylist) {
         restoreFullscreenPlaylist = false
         setFullscreenPlaylist(true)
@@ -4581,9 +4724,19 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.title, title => {
+      if (fullscreenTitleOverlay) {
+        fullscreenTitleOverlay.textContent = title
+        fullscreenTitleOverlay.ariaLabel = `${t('Video.Metadata', 'Video information')}: ${title}`
+      }
+    })
+
     watch(fullWindowEnabled, enabled => {
       if (!enabled && !isNativeFullscreenActive()) {
         rememberDockedPanels()
+        closeFullscreenMetadata()
+        closeFullscreenTranscript()
+        closeFullscreenSponsorBlock()
         closeFullscreenComments()
         closeFullscreenPlaylist()
       }
@@ -6479,6 +6632,9 @@ export default defineComponent({
       } else if (!isNativeFullscreenActive()) {
         if (!fullWindowEnabled.value) {
           rememberDockedPanels()
+          closeFullscreenMetadata()
+          closeFullscreenTranscript()
+          closeFullscreenSponsorBlock()
           closeFullscreenComments()
           closeFullscreenPlaylist()
         }
@@ -7142,6 +7298,9 @@ export default defineComponent({
     onBeforeUnmount(() => {
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
+      closeFullscreenMetadata()
+      closeFullscreenTranscript()
+      closeFullscreenSponsorBlock()
       closeFullscreenComments()
       closeFullscreenPlaylist()
       if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
@@ -7260,6 +7419,7 @@ export default defineComponent({
      *   startNextVideoInFullwindow: boolean,
      *   startNextVideoInPip: boolean,
      *   startNextVideoWithChapters: boolean,
+     *   startNextVideoWithFullscreenMetadata: boolean,
      *   startNextVideoWithFullscreenComments: boolean,
      *   startNextVideoWithFullscreenPlaylist: boolean
      * }>}
@@ -7272,6 +7432,7 @@ export default defineComponent({
         startNextVideoInFullwindow: false,
         startNextVideoInPip: false,
         startNextVideoWithChapters: false,
+        startNextVideoWithFullscreenMetadata: false,
         startNextVideoWithFullscreenComments: false,
         startNextVideoWithFullscreenPlaylist: false
       }
@@ -7285,6 +7446,7 @@ export default defineComponent({
             startNextVideoInFullwindow: fullWindowEnabled.value,
             startNextVideoInPip: controls.isPiPEnabled(),
             startNextVideoWithChapters: showChaptersOverlay.value,
+            startNextVideoWithFullscreenMetadata: showFullscreenMetadata.value,
             startNextVideoWithFullscreenComments: showFullscreenComments.value,
             startNextVideoWithFullscreenPlaylist: showFullscreenPlaylist.value
           }
@@ -7326,6 +7488,12 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      closeFullscreenMetadata,
+      setFullscreenTranscript,
+      closeFullscreenTranscript,
+      dismissFullscreenTranscript,
+      setFullscreenSponsorBlock,
+      closeFullscreenSponsorBlock,
       closeFullscreenComments,
       closeFullscreenPlaylist,
       closeChaptersOverlay,
@@ -7394,6 +7562,20 @@ export default defineComponent({
       closeChaptersOverlay,
       selectOverlayChapter,
       copyChapterTimestamp,
+      fullscreenDockStyle,
+      fullscreenMetadataOverlay,
+      fullscreenMetadataTarget,
+      showFullscreenMetadata,
+      closeFullscreenMetadata,
+      fullscreenTranscriptOverlay,
+      fullscreenTranscriptTarget,
+      showFullscreenTranscript,
+      closeFullscreenTranscript,
+      dismissFullscreenTranscript,
+      fullscreenSponsorBlockOverlay,
+      fullscreenSponsorBlockTarget,
+      showFullscreenSponsorBlock,
+      closeFullscreenSponsorBlock,
       fullscreenCommentsOverlay,
       showFullscreenComments,
       closeFullscreenComments,
@@ -7403,9 +7585,7 @@ export default defineComponent({
       showFullscreenPlaylist,
       closeFullscreenPlaylist,
       setFullscreenPlaylist,
-      showFullscreenShareAction,
       showFullscreenPlaylistAction,
-      getShareTimestamp,
       addToPlaylist,
 
       fullWindowEnabled,

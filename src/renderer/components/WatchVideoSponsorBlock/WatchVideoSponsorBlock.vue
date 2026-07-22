@@ -280,7 +280,7 @@ function isSegmentPassed(segment) {
 
 .sponsorBlockShield {
   color: #ff3636;
-  font-size: 29px;
+  font-size: 20px;
 }
 
 .sponsorBlockHeaderActions button {

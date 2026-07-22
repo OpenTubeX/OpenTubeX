@@ -120,6 +120,7 @@ export default defineComponent({
       startNextVideoInFullwindow: false,
       startNextVideoInPip: false,
       startNextVideoWithChapters: false,
+      startNextVideoWithFullscreenMetadata: false,
       startNextVideoWithFullscreenComments: false,
       startNextVideoWithFullscreenPlaylist: false,
       isLoading: true,
@@ -179,6 +180,15 @@ export default defineComponent({
       sponsorBlockInfoSegments: [],
       sponsorBlockInfoSubmissionEnabled: false,
       videoChapterThumbnails: [],
+      fullscreenMetadataOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenMetadataTarget: null,
+      fullscreenTranscriptOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenTranscriptTarget: null,
+      fullscreenSponsorBlockOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenSponsorBlockTarget: null,
       fullscreenCommentsOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenCommentsTarget: null,
@@ -503,6 +513,29 @@ export default defineComponent({
     }
   },
   methods: {
+    handleFullscreenMetadataChange({ open, target }) {
+      this.fullscreenMetadataTarget = target
+      this.fullscreenMetadataOpen = open && target !== null
+
+      if (this.fullscreenMetadataOpen) {
+        this.$nextTick(() => {
+          if (this.showTranscript && !this.fullscreenTranscriptOpen) {
+            this.$refs.player?.setFullscreenTranscript(true)
+          }
+          if (this.showSidebarSponsorBlock && !this.fullscreenSponsorBlockOpen) {
+            this.$refs.player?.setFullscreenSponsorBlock(true)
+          }
+        })
+      }
+    },
+    handleFullscreenTranscriptChange({ open, target }) {
+      this.fullscreenTranscriptTarget = target
+      this.fullscreenTranscriptOpen = open && target !== null
+    },
+    handleFullscreenSponsorBlockChange({ open, target }) {
+      this.fullscreenSponsorBlockTarget = target
+      this.fullscreenSponsorBlockOpen = open && target !== null
+    },
     handleFullscreenCommentsChange({ open, target }) {
       this.fullscreenCommentsTarget = target
       this.fullscreenCommentsOpen = open && target !== null
@@ -561,12 +594,33 @@ export default defineComponent({
       this.sponsorBlockInfoPendingUuid = pendingUuid
       this.sponsorBlockInfoSegments = segments
       this.sponsorBlockInfoSubmissionEnabled = submissionEnabled
+
+      if (open && this.fullscreenMetadataOpen && !this.fullscreenSponsorBlockOpen) {
+        this.$nextTick(() => this.$refs.player?.setFullscreenSponsorBlock(true))
+      } else if (!open && this.fullscreenSponsorBlockOpen) {
+        this.$refs.player?.closeFullscreenSponsorBlock()
+      }
     },
     closeSidebarSponsorBlock() {
       this.$refs.player?.closeSponsorBlockInfo()
     },
     toggleSponsorBlockInfo() {
       this.$refs.player?.toggleSponsorBlockInfo()
+    },
+    toggleTranscript() {
+      this.showTranscript = !this.showTranscript
+      if (this.showTranscript && this.fullscreenMetadataOpen) {
+        this.$nextTick(() => this.$refs.player?.setFullscreenTranscript(true))
+      } else if (!this.showTranscript) {
+        this.$refs.player?.dismissFullscreenTranscript()
+      }
+    },
+    closeTranscript() {
+      this.showTranscript = false
+      this.$refs.player?.dismissFullscreenTranscript()
+    },
+    closeFullscreenPlaylist() {
+      this.$refs.player?.closeFullscreenPlaylist()
     },
     refreshSponsorBlockInfo() {
       this.$refs.player?.refreshSponsorBlockInfo()
@@ -2920,6 +2974,7 @@ export default defineComponent({
       this.startNextVideoInFullwindow = uiState.startNextVideoInFullwindow
       this.startNextVideoInPip = uiState.startNextVideoInPip
       this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
+      this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
       this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
       this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
     },

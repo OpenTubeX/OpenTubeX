@@ -2,23 +2,73 @@
   <FtCard class="transcriptCard">
     <div class="transcriptHeader">
       <h3 class="transcriptTitle">
+        <FontAwesomeIcon
+          v-if="fullscreenOverlay"
+          :icon="['fas', 'file-lines']"
+        />
         {{ t('Video.Transcript.Title') }}
       </h3>
-      <div class="transcriptHeaderActions">
+      <div
+        class="transcriptHeaderActions"
+        @focusout="handleHeaderActionsFocusout"
+        @keydown.esc.stop.prevent="languageMenuOpen = false"
+      >
+        <button
+          v-if="fullscreenOverlay"
+          type="button"
+          class="transcriptHeaderAction"
+          :class="{ active: searchOpen }"
+          :title="t('Video.Transcript.Search')"
+          :aria-label="t('Video.Transcript.Search')"
+          :aria-expanded="String(searchOpen)"
+          @click="toggleTranscriptSearch"
+        >
+          <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
+        </button>
+        <button
+          v-if="fullscreenOverlay && captions.length > 1"
+          type="button"
+          class="transcriptHeaderAction"
+          :class="{ active: languageMenuOpen }"
+          :title="t('Video.Transcript.Language')"
+          :aria-label="t('Video.Transcript.Language')"
+          :aria-expanded="String(languageMenuOpen)"
+          @click="languageMenuOpen = !languageMenuOpen"
+        >
+          <FontAwesomeIcon :icon="['fas', 'language']" />
+        </button>
         <div
           v-if="segments.length > 0"
           class="transcriptActions"
         >
-          <FtButton
-            :label="t('Video.Transcript.Copy')"
-            :icon="['fas', 'copy']"
-            @click="copyTranscript"
-          />
-          <FtButton
-            :label="t('Video.Transcript.Save')"
-            :icon="['fas', 'download']"
-            @click="saveTranscript"
-          />
+          <template v-if="fullscreenOverlay">
+            <FtIconButton
+              :title="t('Video.Transcript.Copy')"
+              :icon="['fas', 'copy']"
+              theme="base-no-default"
+              :use-shadow="false"
+              @click="copyTranscript"
+            />
+            <FtIconButton
+              :title="t('Video.Transcript.Save')"
+              :icon="['fas', 'download']"
+              theme="base-no-default"
+              :use-shadow="false"
+              @click="saveTranscript"
+            />
+          </template>
+          <template v-else>
+            <FtButton
+              :label="t('Video.Transcript.Copy')"
+              :icon="['fas', 'copy']"
+              @click="copyTranscript"
+            />
+            <FtButton
+              :label="t('Video.Transcript.Save')"
+              :icon="['fas', 'download']"
+              @click="saveTranscript"
+            />
+          </template>
         </div>
         <FtIconButton
           :title="t('Video.Transcript.Close')"
@@ -27,11 +77,29 @@
           :use-shadow="false"
           @click="emit('close')"
         />
+        <div
+          v-if="languageMenuOpen"
+          class="transcriptLanguageMenu"
+        >
+          <button
+            v-for="(caption, index) in captions"
+            :key="index"
+            type="button"
+            :class="{ selected: selectedCaptionIndex === String(index) }"
+            @click="selectCaptionLanguage(index)"
+          >
+            <span>{{ caption.label }}</span>
+            <FontAwesomeIcon
+              v-if="selectedCaptionIndex === String(index)"
+              :icon="['fas', 'check']"
+            />
+          </button>
+        </div>
       </div>
     </div>
 
     <div
-      v-if="captions.length > 0"
+      v-if="captions.length > 0 && (!fullscreenOverlay || searchOpen)"
       class="transcriptControls"
     >
       <FtInput
@@ -43,7 +111,7 @@
         @clear="searchQuery = ''"
       />
       <FtSelect
-        v-if="captions.length > 1"
+        v-if="!fullscreenOverlay && captions.length > 1"
         :value="selectedCaptionIndex"
         :select-names="captions.map(caption => caption.label)"
         :select-values="captions.map((caption, index) => String(index))"
@@ -88,6 +156,7 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -121,6 +190,10 @@ const props = defineProps({
   videoTitle: {
     type: String,
     default: ''
+  },
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -128,6 +201,8 @@ const emit = defineEmits(['close', 'timestamp-event'])
 const { t } = useI18n()
 
 const selectedCaptionIndex = ref(String(props.preferredCaptionIndex))
+const languageMenuOpen = ref(false)
+const searchOpen = ref(false)
 const searchQuery = ref('')
 const segments = ref([])
 const isLoading = ref(false)
@@ -217,6 +292,12 @@ watch(() => props.preferredCaptionIndex, (index) => {
   selectedCaptionIndex.value = String(index)
 })
 
+watch(() => props.fullscreenOverlay, () => {
+  searchOpen.value = false
+  searchQuery.value = ''
+  languageMenuOpen.value = false
+})
+
 watch(activeSegmentIndex, async (index) => {
   if (index < 0 || normalizedSearchQuery.value !== '') {
     return
@@ -239,6 +320,24 @@ onBeforeUnmount(() => loadController?.abort())
 
 function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
+}
+
+function toggleTranscriptSearch() {
+  searchOpen.value = !searchOpen.value
+  if (!searchOpen.value) {
+    searchQuery.value = ''
+  }
+}
+
+function selectCaptionLanguage(index) {
+  selectedCaptionIndex.value = String(index)
+  languageMenuOpen.value = false
+}
+
+function handleHeaderActionsFocusout(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    languageMenuOpen.value = false
+  }
 }
 
 function transcriptText() {

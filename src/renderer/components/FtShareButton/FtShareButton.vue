@@ -1,6 +1,7 @@
 <template>
   <FtIconButton
     ref="iconButton"
+    class="shareButton"
     :title="shareTitle"
     theme="secondary"
     :size="size"
