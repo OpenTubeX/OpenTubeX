@@ -366,11 +366,19 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value)
     scrollMiniPlayerRect.value = clamped
     scrollMiniResizeCorner.value = getResizeHandleCorner(clamped, getViewportInsets())
-    setSavedScrollMiniPlayerRect(clamped)
 
     if (persist) {
+      // Drag and bounce frames can be interrupted, so only remember settled positions.
+      setSavedScrollMiniPlayerRect(clamped)
       store.dispatch('updateScrollMiniPlayerSavedRect', serializeScrollMiniPlayerSavedRect(clamped))
     }
+  }
+
+  function cancelScrollMiniPlayerBounce() {
+    if (!scrollMiniBounceCancel) return
+
+    scrollMiniBounceCancel()
+    scrollMiniBounceCancel = null
   }
 
   function loadScrollMiniPlayerSavedRectFromSettings() {
@@ -525,10 +533,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     clearScrollMiniVolumeHideTimeout()
     scrollMiniVolumeExpanded.value = false
 
-    if (scrollMiniBounceCancel) {
-      scrollMiniBounceCancel()
-      scrollMiniBounceCancel = null
-    }
+    cancelScrollMiniPlayerBounce()
   }
 
   function updateScrollMiniPlayer() {
@@ -735,6 +740,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     event.preventDefault()
     event.stopPropagation()
+    cancelScrollMiniPlayerBounce()
 
     scrollMiniPointerSession = {
       type: 'drag',
@@ -755,6 +761,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     event.preventDefault()
     event.stopPropagation()
+    cancelScrollMiniPlayerBounce()
 
     scrollMiniPointerSession = {
       type: 'resize',
@@ -779,10 +786,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     clearScrollMiniPlayPauseHideTimeout()
     clearScrollMiniVolumeHideTimeout()
 
-    if (scrollMiniBounceCancel) {
-      scrollMiniBounceCancel()
-      scrollMiniBounceCancel = null
-    }
+    cancelScrollMiniPlayerBounce()
 
     endScrollMiniPointerSession()
     window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)
