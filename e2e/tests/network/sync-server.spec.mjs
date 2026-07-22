@@ -55,6 +55,16 @@ test.describe('OpenTubeX sync server', () => {
           name: 'Rick Astley',
           thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg'
         }]
+      }, {
+        _id: 'creators-profile',
+        name: 'Creators',
+        bgColor: '#654321',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: secondChannelId,
+          name: 'PewDiePie',
+          thumbnail: 'https://yt3.googleusercontent.com/ytc/default'
+        }]
       }],
       playlists: [{
         _id: 'sync-playlist',
@@ -83,7 +93,7 @@ test.describe('OpenTubeX sync server', () => {
     }
   })
 
-  test('pushes local data and pulls remote changes', async ({ app, page }) => {
+  test('pushes local data from multiple profiles and pulls remote changes', async ({ app, page }) => {
     const username = `opentubex-${Date.now()}-${Math.random().toString(16).slice(2)}`
     const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
     const bulkRequests = []
@@ -159,6 +169,7 @@ test.describe('OpenTubeX sync server', () => {
         expect(encryptedCollection.payload).not.toContain('Synced playlist')
         expect(encryptedCollection.payload).not.toContain('dQw4w9WgXcQ')
         expect(encryptedCollection.payload).not.toContain('Music')
+        expect(encryptedCollection.payload).not.toContain('Creators')
         expect(encryptedCollection.payload).not.toContain('dark')
         expect(encryptedCollection.payload).not.toContain('app://')
       }
@@ -208,6 +219,10 @@ test.describe('OpenTubeX sync server', () => {
         expect.objectContaining({
           group: expect.objectContaining({ title: 'Music' }),
           channels: expect.arrayContaining([expect.objectContaining({ id: channelId })])
+        }),
+        expect.objectContaining({
+          group: expect.objectContaining({ title: 'Creators' }),
+          channels: expect.arrayContaining([expect.objectContaining({ id: secondChannelId })])
         })
       ]))
 
