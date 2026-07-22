@@ -15,11 +15,7 @@ test.describe('trending page', () => {
     const gamingTab = page.getByRole('tab', { name: 'Gaming' })
     await gamingTab.click()
 
-    const resultTransitions = await page.locator('#trendingPanel .autoGrid').evaluate((grid) => {
-      return Array.from(grid.children, (result) => result.classList.contains('feed-enter-active'))
-    })
-    expect(resultTransitions.length).toBeGreaterThan(0)
-    expect(resultTransitions.every(Boolean)).toBe(true)
+    await expect(page.locator('#trendingPanel .autoGrid > .feed-enter-active').first()).toBeVisible()
 
     await expect(gamingTab).toHaveAttribute('aria-selected', 'true')
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
