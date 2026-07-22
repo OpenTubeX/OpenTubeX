@@ -447,7 +447,6 @@ async function saveServerUrl() {
   try {
     const normalizedUrl = normalizeSyncServerUrl(serverUrl.value)
     serverUrl.value = normalizedUrl
-    serverCheckError.value = ''
     await store.dispatch('updateSyncServerUrl', normalizedUrl)
   } catch {
     serverCheckStatus.value = 'error'
