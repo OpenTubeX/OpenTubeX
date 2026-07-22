@@ -1361,6 +1361,7 @@ Tooltips:
     Startup Behavior: |
       Wybierz, co OpenTubeX zrobi po uruchomieniu:
       Opcja „Załaduj wszystkie karty” ładuje do pamięci wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
+      Opcja „Załaduj wcześniej załadowane karty” ładuje karty, które były załadowane w momencie zamknięcia OpenTubeX, i pozostawia pozostałe karty niezaładowane.
       Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
       Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
   Player Settings:
