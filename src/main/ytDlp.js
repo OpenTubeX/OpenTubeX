@@ -4,7 +4,7 @@ import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
@@ -52,6 +52,46 @@ let downloadCounter = 0
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
+const windowsShownOnce = new WeakSet()
+
+/**
+ * Keep first-launch executable checks and downloads from competing with the
+ * renderer before its BrowserWindow has been presented.
+ * @param {import('electron').WebContents} webContents
+ * @returns {Promise<boolean>}
+ */
+async function waitForFirstWindowShow(webContents) {
+  const browserWindow = BrowserWindow.fromWebContents(webContents)
+  if (browserWindow === null || browserWindow.isDestroyed()) {
+    return false
+  }
+  if (windowsShownOnce.has(browserWindow)) {
+    return true
+  }
+
+  if (browserWindow.isVisible()) {
+    windowsShownOnce.add(browserWindow)
+    return true
+  }
+
+  await new Promise(resolve => {
+    const finish = () => {
+      browserWindow.removeListener('show', finish)
+      browserWindow.removeListener('closed', finish)
+      resolve()
+    }
+
+    browserWindow.once('show', finish)
+    browserWindow.once('closed', finish)
+  })
+
+  if (!browserWindow.isDestroyed()) {
+    windowsShownOnce.add(browserWindow)
+    return true
+  }
+
+  return false
+}
 
 function getManagedBinariesDirectory() {
   return join(app.getPath('userData'), 'yt-dlp')
@@ -461,6 +501,10 @@ export async function handleYtDlpGetInfo(event, options) {
     (options.ffmpegSource !== 'system' && options.ffmpegSource !== 'managed') ||
     typeof options.ffmpegPath !== 'string'
   )) {
+    return null
+  }
+
+  if (!await waitForFirstWindowShow(event.sender)) {
     return null
   }
 
