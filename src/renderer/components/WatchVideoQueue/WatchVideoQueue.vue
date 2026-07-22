@@ -29,9 +29,8 @@
         :key="item.queueItemId"
         class="queueItem"
         :class="{ dragging: draggedQueueItemId === item.queueItemId }"
-        @dragenter="moveDraggedItemThrottled(item.queueItemId)"
         @dragover.prevent
-        @drop.prevent="endDrag"
+        @drop.prevent="dropDraggedItem(item.queueItemId)"
       >
         <span
           class="queueDragHandle"
@@ -86,7 +85,6 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import store from '../../store/index'
-import { throttle } from '../../helpers/utils'
 
 const emit = defineEmits(['pause-player'])
 const { t } = useI18n()
@@ -140,7 +138,10 @@ function moveDraggedItem(queueItemId) {
   move(draggedItemId, targetIndex - draggedIndex)
 }
 
-const moveDraggedItemThrottled = throttle(moveDraggedItem, 100)
+function dropDraggedItem(queueItemId) {
+  moveDraggedItem(queueItemId)
+  endDrag()
+}
 
 function endDrag() {
   draggedQueueItemId.value = null
