@@ -39,11 +39,38 @@
 
 .queueItem {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   padding-block: 8px;
   border-block-end: 1px solid var(--side-nav-hover-color);
+}
+
+.queueItem-move {
+  transition: transform 200ms ease;
+}
+
+.queueItem.dragging {
+  opacity: 0.35;
+}
+
+.queueDragHandle {
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: 50%;
+  color: var(--secondary-text-color);
+  cursor: grab;
+
+  &:hover {
+    background-color: var(--side-nav-hover-color);
+    color: var(--primary-text-color);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .queueVideo {
@@ -96,15 +123,10 @@
     color: var(--secondary-text-color);
     cursor: pointer;
 
-    &:hover:not(:disabled),
+    &:hover,
     &:focus-visible {
       background-color: var(--side-nav-hover-color);
       color: var(--primary-text-color);
-    }
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.3;
     }
   }
 }

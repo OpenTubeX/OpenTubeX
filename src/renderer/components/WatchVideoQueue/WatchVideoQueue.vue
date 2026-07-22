@@ -19,12 +19,30 @@
         {{ t('Video.Clear Queue') }}
       </button>
     </header>
-    <ol class="queueItems">
+    <TransitionGroup
+      name="queueItem"
+      tag="ol"
+      class="queueItems"
+    >
       <li
-        v-for="(item, index) in items"
+        v-for="item in items"
         :key="item.queueItemId"
         class="queueItem"
+        :class="{ dragging: draggedQueueItemId === item.queueItemId }"
+        @dragenter="moveDraggedItemThrottled(item.queueItemId)"
+        @dragover.prevent
+        @drop.prevent="endDrag"
       >
+        <span
+          class="queueDragHandle"
+          draggable="true"
+          :aria-label="t('Video.Drag to Reorder Queue', { title: item.title })"
+          :title="t('Video.Drag to Reorder Queue', { title: item.title })"
+          @dragstart="startDrag($event, item.queueItemId)"
+          @dragend="endDrag"
+        >
+          <FontAwesomeIcon :icon="['fas', 'fa-bars']" />
+        </span>
         <RouterLink
           class="queueVideo"
           :to="`/watch/${item.videoId}`"
@@ -49,24 +67,6 @@
         <div class="queueActions">
           <button
             type="button"
-            :disabled="index === 0"
-            :aria-label="t('Video.Move Up in Queue', { title: item.title })"
-            :title="t('Video.Move Up in Queue', { title: item.title })"
-            @click="move(item.queueItemId, -1)"
-          >
-            <FontAwesomeIcon :icon="['fas', 'arrow-up']" />
-          </button>
-          <button
-            type="button"
-            :disabled="index === items.length - 1"
-            :aria-label="t('Video.Move Down in Queue', { title: item.title })"
-            :title="t('Video.Move Down in Queue', { title: item.title })"
-            @click="move(item.queueItemId, 1)"
-          >
-            <FontAwesomeIcon :icon="['fas', 'arrow-down']" />
-          </button>
-          <button
-            type="button"
             :aria-label="t('Video.Remove from Queue', { title: item.title })"
             :title="t('Video.Remove from Queue', { title: item.title })"
             @click="remove(item.queueItemId)"
@@ -75,17 +75,18 @@
           </button>
         </div>
       </li>
-    </ol>
+    </TransitionGroup>
   </FtCard>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import store from '../../store/index'
+import { throttle } from '../../helpers/utils'
 
 const emit = defineEmits(['pause-player'])
 const { t } = useI18n()
@@ -93,6 +94,7 @@ const { t } = useI18n()
 const items = computed(() => store.getters.getWatchQueue)
 const backendPreference = computed(() => store.getters.getBackendPreference)
 const invidiousUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+const draggedQueueItemId = ref(null)
 
 function thumbnailUrl(videoId) {
   const baseUrl = backendPreference.value === 'invidious' ? invidiousUrl.value : 'https://i.ytimg.com'
@@ -110,6 +112,38 @@ function playQueuedVideo(queueItemId, event) {
 
 function move(queueItemId, offset) {
   store.commit('moveVideoInWatchQueue', { queueItemId, offset })
+}
+
+function startDrag(event, queueItemId) {
+  draggedQueueItemId.value = queueItemId
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/plain', String(queueItemId))
+
+  const queueItem = event.currentTarget.closest('.queueItem')
+  if (queueItem) {
+    event.dataTransfer.setDragImage(queueItem, 12, 12)
+  }
+}
+
+function moveDraggedItem(queueItemId) {
+  const draggedItemId = draggedQueueItemId.value
+  if (draggedItemId == null || draggedItemId === queueItemId) {
+    return
+  }
+
+  const draggedIndex = items.value.findIndex(item => item.queueItemId === draggedItemId)
+  const targetIndex = items.value.findIndex(item => item.queueItemId === queueItemId)
+  if (draggedIndex === -1 || targetIndex === -1) {
+    return
+  }
+
+  move(draggedItemId, targetIndex - draggedIndex)
+}
+
+const moveDraggedItemThrottled = throttle(moveDraggedItem, 100)
+
+function endDrag() {
+  draggedQueueItemId.value = null
 }
 
 function remove(queueItemId) {

@@ -50,17 +50,19 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
 
   const queue = page.locator('.watchQueue')
   await expect(queue).toBeVisible()
+  await expect(queue.locator('.queueDragHandle svg')).toHaveCount(3)
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video three',
     'Queue video one',
     'Queue video two'
   ])
 
-  await queue.getByRole('button', { name: 'Move Queue video three down in queue' }).click()
+  const queueItems = queue.locator('.queueItem')
+  await queueItems.nth(0).locator('.queueDragHandle').dragTo(queueItems.nth(2))
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
-    'Queue video three',
-    'Queue video two'
+    'Queue video two',
+    'Queue video three'
   ])
 
   await queue.getByRole('button', { name: 'Remove Queue video three from queue' }).click()

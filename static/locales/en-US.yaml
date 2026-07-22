@@ -1149,9 +1149,8 @@ Video:
   Added to Queue: Video added to queue
   Clear Queue: Clear Queue
   Queue Video Count: '{count} video | {count} videos'
-  Move Up in Queue: 'Move {title} up in queue'
-  Move Down in Queue: 'Move {title} down in queue'
   Remove from Queue: 'Remove {title} from queue'
+  Drag to Reorder Queue: 'Drag {title} to reorder queue'
   Metadata: Video information
   Close Metadata: Close video information
   Transcript:
