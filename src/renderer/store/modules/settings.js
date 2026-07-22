@@ -233,6 +233,7 @@ const state = {
   hideCommentLikes: false,
   hideCommentPhotos: false,
   hideComments: false,
+  hideEndScreenAnnotations: false,
   hideFeaturedChannels: false,
   channelsHidden: '[]',
   forbiddenTitles: '[]',

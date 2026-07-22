@@ -30,6 +30,7 @@
           :captions="captions"
           :storyboard-src="videoStoryboardSrc"
           :annotations="videoAnnotations"
+          :hide-annotations="hideEndScreenAnnotations"
           :format="activeFormat"
           :thumbnail="thumbnail"
           :video-id="videoId"

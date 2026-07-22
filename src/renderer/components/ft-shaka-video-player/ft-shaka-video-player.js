@@ -200,6 +200,10 @@ export default defineComponent({
       type: Array,
       default: () => []
     },
+    hideAnnotations: {
+      type: Boolean,
+      default: false
+    },
     videoId: {
       type: String,
       default: ''

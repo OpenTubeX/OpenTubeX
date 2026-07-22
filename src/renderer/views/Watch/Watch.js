@@ -372,6 +372,9 @@ export default defineComponent({
     hideRecommendedVideos: function () {
       return this.$store.getters.getHideRecommendedVideos
     },
+    hideEndScreenAnnotations: function () {
+      return this.$store.getters.getHideEndScreenAnnotations
+    },
     hideLiveChat: function () {
       return this.$store.getters.getHideLiveChat
     },

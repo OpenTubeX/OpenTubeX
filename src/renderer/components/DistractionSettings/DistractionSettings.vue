@@ -269,6 +269,13 @@
           @change="updateHideChapters"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide End-Screen Annotations')"
+          :compact="true"
+          :default-value="hideEndScreenAnnotations"
+          setting-key="hideEndScreenAnnotations"
+          @change="updateHideEndScreenAnnotations"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Video Description')"
           :compact="true"
           :default-value="hideVideoDescription"
@@ -523,6 +530,16 @@ const hideChapters = computed(() => store.getters.getHideChapters)
  */
 function updateHideChapters(value) {
   store.dispatch('updateHideChapters', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideEndScreenAnnotations = computed(() => store.getters.getHideEndScreenAnnotations)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideEndScreenAnnotations(value) {
+  store.dispatch('updateHideEndScreenAnnotations', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

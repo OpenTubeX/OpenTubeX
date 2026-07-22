@@ -1,10 +1,11 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 test.describe('distraction and appearance settings', () => {
   test.use({
     seed: {
       settings: {
         baseTheme: 'dark',
+        hideEndScreenAnnotations: true,
         hideTrendingVideos: true,
         hideProfileSelectorInHeader: true
       }
@@ -20,6 +21,9 @@ test.describe('distraction and appearance settings', () => {
 
     // The base theme is applied as a class on <body>.
     await expect(page.locator('body')).toHaveClass(/dark/)
+
+    await goTo(page, 'settings')
+    await expect(page.getByRole('checkbox', { name: 'Hide End-Screen Annotations' })).toBeChecked()
   })
 })
 
