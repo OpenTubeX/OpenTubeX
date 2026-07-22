@@ -58,21 +58,26 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
   ])
 
   const queueItems = queue.locator('.queueItem')
-  await queueItems.nth(0).locator('.queueDragHandle').dragTo(queueItems.nth(2))
+  const queueItem = title => queueItems.filter({ hasText: title })
+  const draggedItem = queueItem('Queue video three').locator('.queueDragHandle')
+  const dataTransfer = await page.evaluateHandle(() => new DataTransfer())
+  await draggedItem.dispatchEvent('dragstart', { dataTransfer })
+  await queueItem('Queue video two').dispatchEvent('drop', { dataTransfer })
+  await draggedItem.dispatchEvent('dragend', { dataTransfer })
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video two',
     'Queue video three'
   ])
 
-  const thirdDragHandle = queue.locator('.queueItem').nth(2).locator('.queueDragHandle')
+  const thirdDragHandle = queueItem('Queue video three').locator('.queueDragHandle')
   await thirdDragHandle.press('ArrowUp')
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video three',
     'Queue video two'
   ])
-  await queue.locator('.queueItem').nth(1).locator('.queueDragHandle').press('ArrowDown')
+  await queueItem('Queue video three').locator('.queueDragHandle').press('ArrowDown')
   await expect(queue.locator('.queueVideoTitle')).toHaveText([
     'Queue video one',
     'Queue video two',
