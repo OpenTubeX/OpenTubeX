@@ -104,7 +104,6 @@ const TEMPORARY_PLAYBACK_RATE_MULTIPLIER = 2
 const TEMPORARY_PLAYBACK_RATE_HOLD_DELAY_MS = 625
 const TEMPORARY_PLAYBACK_RATE_KEYBOARD_SOURCE = 'keyboard'
 const TEMPORARY_PLAYBACK_RATE_POINTER_SOURCE = 'pointer'
-const PLAYER_SURFACE_CLICK_DELAY_MS = 180
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 const PLAY_MORPH_PATH = 'M8 6 11.5 8.1 11.5 15.9 8 18ZM11.5 8.1 18 12 18 12 11.5 15.9Z'
 
@@ -2414,7 +2413,6 @@ export default defineComponent({
       /** @type {shaka.extern.UIConfiguration} */
       const uiConfig = {
         controlPanelElements: controlPanelElements,
-        topControlPanelElements: [],
         overflowMenuButtons: [],
         contextMenuElements: contextMenuElements.value,
 
@@ -2707,95 +2705,6 @@ export default defineComponent({
 
         showValueChange(`${getDefaultPlaybackRateForVideo()}x`)
       }
-    }
-
-    /** @type {ReturnType<typeof setTimeout> | null} */
-    let playerSurfaceClickTimeout = null
-    let fullscreenTitleClickPending = false
-
-    function cancelPlayerSurfaceClick() {
-      clearTimeout(playerSurfaceClickTimeout)
-      playerSurfaceClickTimeout = null
-    }
-
-    /**
-     * Remember that a potential double-click began on the title because opening
-     * its metadata dock can move the title before the second click lands.
-     * @param {MouseEvent} event
-     */
-    function rememberFullscreenTitleClick(event) {
-      if (event.detail !== 1) {
-        return
-      }
-
-      fullscreenTitleClickPending = true
-    }
-
-    /**
-     * Do not let a double click that began on the fullscreen title reach
-     * Shaka's fullscreen toggle, even if the metadata layout moved its target.
-     * @param {MouseEvent} event
-     */
-    function handleControlsContainerDoubleClick(event) {
-      cancelPlayerSurfaceClick()
-
-      if (!fullscreenTitleClickPending) {
-        return
-      }
-
-      fullscreenTitleClickPending = false
-      event.preventDefault()
-      event.stopImmediatePropagation()
-    }
-
-    /**
-     * Cancel before the second click completes so playback cannot change while
-     * the fullscreen gesture is still in progress.
-     * @param {MouseEvent} event
-     */
-    function handlePlayerSurfaceMouseDown(event) {
-      if (event.detail === 1 && event.target !== fullscreenTitleOverlay) {
-        fullscreenTitleClickPending = false
-      }
-
-      if (event.detail > 1 && isPlayerSurfaceTarget(event.target)) {
-        cancelPlayerSurfaceClick()
-      }
-    }
-
-    /**
-     * Delay mouse playback toggles until the browser has ruled out a double
-     * click. Shaka otherwise toggles playback for each click before handling
-     * the subsequent dblclick as a fullscreen request.
-     * @param {MouseEvent} event
-     */
-    function handlePlayerSurfaceClick(event) {
-      if (event.detail === 0 || event.ctrlKey || event.metaKey || !isPlayerSurfaceTarget(event.target)) {
-        return
-      }
-
-      // Let Shaka consume the click to close its context menu. Intercepting it
-      // here would bypass that guard and incorrectly toggle playback instead.
-      if (container.value?.querySelector('.shaka-context-menu:not(.shaka-hidden)')) {
-        cancelPlayerSurfaceClick()
-        return
-      }
-
-      event.stopImmediatePropagation()
-      cancelPlayerSurfaceClick()
-
-      if (event.detail > 1) {
-        return
-      }
-
-      playerSurfaceClickTimeout = setTimeout(() => {
-        playerSurfaceClickTimeout = null
-
-        if (player && hasLoaded.value && video.value) {
-          video.value.paused ? video.value.play() : video.value.pause()
-          blurTooltipButtons()
-        }
-      }, PLAYER_SURFACE_CLICK_DELAY_MS)
     }
 
     /**
@@ -3101,16 +3010,10 @@ export default defineComponent({
       controlsContainer.removeEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.removeEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.removeEventListener('click', handleTemporaryPlaybackRateClick, true)
-      controlsContainer.removeEventListener('mousedown', handlePlayerSurfaceMouseDown, true)
-      controlsContainer.removeEventListener('click', handlePlayerSurfaceClick, true)
-      controlsContainer.removeEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
       controlsContainer.addEventListener('pointerdown', handleTemporaryPlaybackRatePointerDown, true)
       controlsContainer.addEventListener('pointerleave', handleTemporaryPlaybackRatePointerLeave)
       controlsContainer.addEventListener('click', handleTemporaryPlaybackRateClick, true)
-      controlsContainer.addEventListener('mousedown', handlePlayerSurfaceMouseDown, true)
-      controlsContainer.addEventListener('click', handlePlayerSurfaceClick, true)
-      controlsContainer.addEventListener('dblclick', handleControlsContainerDoubleClick, true)
 
       if (!useVrMode.value) {
         if (videoVolumeMouseScroll.value || videoSkipMouseScroll.value || videoPlaybackRateMouseScroll.value) {
@@ -3135,9 +3038,6 @@ export default defineComponent({
 
       const toggleFullscreenMetadata = (event) => {
         event.stopPropagation()
-        if (event instanceof MouseEvent) {
-          rememberFullscreenTitleClick(event)
-        }
         setFullscreenMetadata(!showFullscreenMetadata.value)
       }
       fullscreenTitleOverlay.addEventListener('click', toggleFullscreenMetadata)
@@ -6281,7 +6181,6 @@ export default defineComponent({
 
     function handleTemporaryPlaybackRateFocusLoss() {
       cancelTemporaryPlaybackRateHolds()
-      cancelPlayerSurfaceClick()
       temporaryPlaybackRatePointerId = null
       temporaryPlaybackRatePointerCancelled = false
       suppressTemporaryPlaybackRateClick = false
@@ -7497,7 +7396,6 @@ export default defineComponent({
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
 
       cancelTemporaryPlaybackRateHolds()
-      cancelPlayerSurfaceClick()
 
       // Clean up IPC listener for exit fullscreen
       if (exitFullscreenCleanup) {
