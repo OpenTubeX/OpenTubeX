@@ -1,9 +1,8 @@
 import {
   DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
-  WATCHED_MAX_REMAINING_SECONDS,
 } from './constants.js'
 
-export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
+export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD }
 
 /**
  * @param {object | undefined} historyEntry
@@ -41,14 +40,7 @@ export function hasReachedWatchedThreshold(
     ? watchedPercentageThreshold
     : DEFAULT_WATCHED_PERCENTAGE_THRESHOLD
 
-  const hasReachedPercentage = watchProgress / lengthSeconds * 100 >= threshold
-  if (threshold === 0 || threshold === 100) {
-    return hasReachedPercentage
-  }
-
-  const isWithinLastTwoMinutes = lengthSeconds - watchProgress <= WATCHED_MAX_REMAINING_SECONDS
-
-  return hasReachedPercentage && isWithinLastTwoMinutes
+  return watchProgress / lengthSeconds * 100 >= threshold
 }
 
 /**
