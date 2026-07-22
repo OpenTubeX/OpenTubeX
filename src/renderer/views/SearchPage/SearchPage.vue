@@ -272,7 +272,7 @@ async function performSearchLocal(payload) {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast(t('Falling back to Invidious API'))
-      performSearchInvidious(payload)
+      await performSearchInvidious(payload)
     } else {
       isLoading.value = false
     }
@@ -311,7 +311,7 @@ async function getNextpageLocal(payload) {
 
     if (backendPreference.value === 'local' && backendFallback.value) {
       showToast(t('Falling back to Invidious API'))
-      performSearchInvidious(payload)
+      await performSearchInvidious(payload)
     } else {
       isLoading.value = false
     }
@@ -369,7 +369,7 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
       showToast(t('Falling back to Local API'))
-      performSearchLocal(payload)
+      await performSearchLocal(payload)
     } else {
       isLoading.value = false
       // TODO: Show toast with error message
