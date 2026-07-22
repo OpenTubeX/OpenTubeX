@@ -107,6 +107,21 @@ const showFamilyFriendlyOnly = computed(() => store.getters.getShowFamilyFriendl
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
 
+function restoreActiveSearchFilters(settings) {
+  store.commit('setSearchPrioritize', settings.prioritize)
+  store.commit('setSearchTime', settings.time)
+  store.commit('setSearchType', settings.type)
+  store.commit('setSearchDuration', settings.duration)
+  store.commit('setSearchFeatures', [...settings.features])
+  store.commit('setSearchFilterValueChanged',
+    settings.prioritize !== 'relevance' ||
+    settings.time !== '' ||
+    settings.type !== 'all' ||
+    settings.duration !== '' ||
+    settings.features.length > 0
+  )
+}
+
 watch(route, () => {
   const query_ = route.params.query.trim()
   let features = route.query.features
@@ -129,6 +144,7 @@ watch(route, () => {
   }
 
   query.value = query_
+  restoreActiveSearchFilters(searchSettings)
 
   setTabTitle(processedQuery.value)
   checkSearchCache(payload)
@@ -151,6 +167,7 @@ onMounted(() => {
     duration: route.query.duration,
     features: features ?? [],
   }
+  restoreActiveSearchFilters(searchSettings.value)
 
   const payload = {
     query: processedQuery.value,

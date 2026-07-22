@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const now = Date.now()
 
@@ -65,6 +65,28 @@ test.describe('search history suggestions', () => {
       duration: 'three_to_twenty_mins',
       features: ['hd', 'subtitles']
     })
+  })
+
+  test('back navigation restores the active search filters', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    await suggestions(page).first().click()
+    await expect(page.locator('.navFilterButton')).toHaveClass(/filterChanged/)
+
+    await goTo(page, 'history')
+    await page.locator('.navFilterButton').click()
+    await page.locator('.clearFilterButton').click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(page.locator('.navFilterButton')).not.toHaveClass(/filterChanged/)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
+    await expect(page.locator('.navFilterButton')).toHaveClass(/filterChanged/)
+
+    await page.locator('.navFilterButton').click()
+    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="video"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="three_to_twenty_mins"]')).toBeChecked()
   })
 
   test('a search saves its active filters', async ({ app, page }) => {
