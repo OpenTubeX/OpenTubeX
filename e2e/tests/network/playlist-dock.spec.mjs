@@ -18,6 +18,12 @@ test('fullscreen playlist dock preserves its active state and each layout positi
 
   await sidebar.evaluate((element) => { element.scrollTop = 420 })
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(420)
+  await page.locator('.videoLayout').evaluate((element) => {
+    const watchView = element.__vueParentComponent.proxy
+    watchView.videoPlayerLoaded = false
+    watchView.handleVideoLoaded()
+  })
+  await expect.poll(async () => sidebar.evaluate((element) => element.scrollTop)).toBe(420)
 
   await setPlayerFullscreen(page, true)
   const sidebarScrollTop = await sidebar.evaluate((element) => element.scrollTop)
