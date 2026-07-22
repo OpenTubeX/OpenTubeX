@@ -26,6 +26,12 @@
   color: var(--primary-color);
 }
 
+.searchStatus {
+  color: var(--tertiary-text-color);
+  margin-block: 32px 16px;
+  text-align: center;
+}
+
 @media only screen and (width <= 680px) {
   .card {
     inline-size: 100%;

@@ -717,12 +717,14 @@ const mutations = {
 
     if (sameSearch !== -1) {
       state.sessionSearchHistory[sameSearch].data = payload.data
-      if (payload.nextPageRef) {
-        // Local API
+      if (Object.hasOwn(payload, 'nextPageRef')) {
         state.sessionSearchHistory[sameSearch].nextPageRef = payload.nextPageRef
-      } else if (payload.searchPage) {
-        // Invidious API
+      }
+      if (Object.hasOwn(payload, 'searchPage')) {
         state.sessionSearchHistory[sameSearch].searchPage = payload.searchPage
+      }
+      if (Object.hasOwn(payload, 'hasMoreResults')) {
+        state.sessionSearchHistory[sameSearch].hasMoreResults = payload.hasMoreResults
       }
     } else {
       state.sessionSearchHistory.push(payload)
