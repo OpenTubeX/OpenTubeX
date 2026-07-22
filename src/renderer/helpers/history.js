@@ -2,6 +2,6 @@ export {
   hasReachedWatchedThreshold,
   isHistoryEntryWatched,
   migrateLegacyHistoryRecord,
-  WATCHED_MAX_REMAINING_FRACTION,
+  DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   WATCHED_MAX_REMAINING_SECONDS,
 } from '../../history'

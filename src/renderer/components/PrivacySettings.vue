@@ -61,6 +61,21 @@
     </FtFlexBox>
     <br>
     <FtFlexBox>
+      <FtSlider
+        :label="$t('Settings.Privacy Settings.Watched Percentage Threshold')"
+        :default-value="watchedPercentageThreshold"
+        setting-key="watchedPercentageThreshold"
+        :min-value="0"
+        :max-value="100"
+        :step="1"
+        value-extension="%"
+        :disabled="!rememberHistory"
+        :tooltip="$t('Settings.Privacy Settings.Watched Percentage Threshold Tooltip')"
+        @change="updateWatchedPercentageThreshold"
+      />
+    </FtFlexBox>
+    <br>
+    <FtFlexBox>
       <FtSelect
         :placeholder="$t('Settings.Privacy Settings.Week Starts On')"
         :value="statsWeekStartsOn"
@@ -159,6 +174,7 @@ import FtInput from './FtInput/FtInput.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
+import FtSlider from './FtSlider/FtSlider.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../store/index'
@@ -291,6 +307,16 @@ const watchedProgressSavingMode = computed(() => store.getters.getWatchedProgres
  */
 function updateWatchedProgressSavingMode(value) {
   store.dispatch('updateWatchedProgressSavingMode', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
+
+/**
+ * @param {number} value
+ */
+function updateWatchedPercentageThreshold(value) {
+  store.dispatch('updateWatchedPercentageThreshold', value)
 }
 
 const showSearchCachePrompt = ref(false)

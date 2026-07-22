@@ -17,13 +17,13 @@
     >
     <span class="label">
       {{ $t('Display Label', {label: label, value: displayLabel}) }}
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </span>
     <FtTooltip
       v-if="tooltip !== ''"
       class="selectTooltip"
       :tooltip="tooltip"
     />
+    <FtSyncedSettingIndicator :setting-key="settingKey" />
   </label>
 </template>
 

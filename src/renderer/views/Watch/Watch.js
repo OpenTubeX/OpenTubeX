@@ -300,6 +300,9 @@ export default defineComponent({
     watchedProgressSavingEnabled: function () {
       return this.$store.getters.getWatchedProgressSavingMode !== 'never'
     },
+    watchedPercentageThreshold: function () {
+      return this.$store.getters.getWatchedPercentageThreshold
+    },
     autosaveWatchedProgress: function () {
       return this.$store.getters.getWatchedProgressSavingMode === 'auto'
     },
@@ -1980,7 +1983,11 @@ export default defineComponent({
         return
       }
 
-      if (isFinished || hasReachedWatchedThreshold(currentSeconds, this.videoLengthSeconds)) {
+      if (isFinished || hasReachedWatchedThreshold(
+        currentSeconds,
+        this.videoLengthSeconds,
+        this.watchedPercentageThreshold
+      )) {
         const watchProgress = this.watchedProgressSavingEnabled
           ? currentSeconds
           : (this.historyEntry?.watchProgress ?? 0)

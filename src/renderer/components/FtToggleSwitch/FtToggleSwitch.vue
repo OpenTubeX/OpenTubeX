@@ -23,7 +23,6 @@
     >
       <span class="switch-label-text">
         {{ label }}
-        <FtSyncedSettingIndicator :setting-key="settingKey" />
       </span>
       <FtTooltip
         v-if="tooltip !== ''"
@@ -32,6 +31,7 @@
         :tooltip="tooltip"
         :allow-newlines="tooltipAllowNewlines"
       />
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </label>
   </div>
 </template>

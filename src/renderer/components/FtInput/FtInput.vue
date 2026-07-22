@@ -19,13 +19,13 @@
       :class="{ disabled }"
     >
       {{ label || placeholder }}
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"
         position="bottom"
         :tooltip="tooltip"
       />
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
     </label>
     <button
       v-if="showClearTextButton"

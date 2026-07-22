@@ -3,6 +3,11 @@
   position: relative;
 }
 
+.selectTooltip {
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
+
 body[dir='rtl'] .ft-input-component.search.showClearTextButton .inputAction {
   inset-inline-end: -30px;
 }

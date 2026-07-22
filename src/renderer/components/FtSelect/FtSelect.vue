@@ -40,7 +40,10 @@
       />
       <span class="select-label-text">
         {{ placeholder }}
-        <FtSyncedSettingIndicator :setting-key="settingKey" />
+        <FtSyncedSettingIndicator
+          v-if="tooltip === ''"
+          :setting-key="settingKey"
+        />
       </span>
     </label>
     <FtTooltip
@@ -48,6 +51,12 @@
       class="selectTooltip"
       :tooltip="tooltip"
     />
+    <span
+      v-if="tooltip !== ''"
+      class="selectSyncIndicator"
+    >
+      <FtSyncedSettingIndicator :setting-key="settingKey" />
+    </span>
   </div>
 </template>
 

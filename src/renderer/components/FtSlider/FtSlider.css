@@ -32,6 +32,12 @@
   display: inline-block;
   margin-block-end: 36px;
 }
+
+.selectTooltip {
+  margin-inline-start: 6px;
+  vertical-align: middle;
+}
+
 /* stylelint-disable-next-line a11y/no-outline-none */
 .input:focus {
   outline: none;

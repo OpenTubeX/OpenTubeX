@@ -28,7 +28,7 @@
 }
 
 .select.containsTooltip {
-  margin-inline-end: 28px;
+  margin-inline-end: 54px;
 }
 
 .select-text {
@@ -85,6 +85,17 @@
   position: absolute;
   inset-block-start: 12px;
   inset-inline-start: calc(100% + 8px);
+}
+
+.selectSyncIndicator {
+  position: absolute;
+  inset-block-start: 12px;
+  inset-inline-start: calc(100% + 34px);
+}
+
+.selectSyncIndicator :deep(.syncedSettingIndicator),
+.selectSyncIndicator :deep(.changedSettingIndicator) {
+  margin-inline-start: 0;
 }
 
 
