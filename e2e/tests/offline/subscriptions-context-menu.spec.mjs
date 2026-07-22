@@ -66,6 +66,24 @@ test('subscription tabs expose feed-specific reload actions', async ({ page }) =
   await page.evaluate(() => window.__removeSubscriptionFeedReloadListener())
 })
 
+test('disabled context menu actions cannot execute through IPC', async ({ page }) => {
+  const searchInput = page.locator('.searchInput input')
+  await searchInput.fill('selection')
+  await searchInput.selectText()
+
+  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+    isEditable: true,
+    editFlags: { canCut: false }
+  }))
+  const cut = contextMenu.items.find(item => item.label === 'Cut')
+
+  expect(cut.enabled).toBe(false)
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: cut.actionId })
+  await expect(searchInput).toHaveValue('selection')
+})
+
 test.describe('German locale', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 

@@ -838,7 +838,8 @@ function runApp() {
       if (item.type === 'separator') return { type: 'separator' }
 
       const actionId = `${actionPrefix}-${index}`
-      if (typeof item.click === 'function') actions.set(actionId, () => item.click(item))
+      const hasAction = item.enabled !== false && typeof item.click === 'function'
+      if (hasAction) actions.set(actionId, () => item.click(item))
 
       const submenu = Array.isArray(item.submenu)
         ? serializeContextMenuItems(item.submenu, actions, actionId)
@@ -849,7 +850,7 @@ function runApp() {
         label: String(item.label ?? ''),
         enabled: item.enabled !== false,
         checked: item.checked === true,
-        actionId: typeof item.click === 'function' ? actionId : undefined,
+        actionId: hasAction ? actionId : undefined,
         submenu
       }
     })
