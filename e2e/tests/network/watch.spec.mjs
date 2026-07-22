@@ -288,17 +288,163 @@ test.describe('watch page', () => {
     await expect(dockDescription).not.toHaveClass(/short/)
     await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
-    const [videoBounds, metadataBounds] = await Promise.all([
-      page.locator('.ftVideoPlayer video.player').boundingBox(),
-      page.locator('.fullscreenMetadataOverlay.open').boundingBox()
-    ])
-    expect(videoBounds.x + videoBounds.width).toBeLessThanOrEqual(metadataBounds.x + 1)
-
+    await expect(page.locator('.fullscreenMetadataHeader')).not.toHaveCSS('cursor', 'grab')
+    const playerVideo = page.locator('.ftVideoPlayer video.player')
+    const metadataDock = page.locator('.fullscreenMetadataOverlay.open')
+    await expect.poll(async () => {
+      const [currentVideoBounds, currentMetadataBounds] = await Promise.all([
+        playerVideo.boundingBox(),
+        metadataDock.boundingBox()
+      ])
+      return currentVideoBounds.x + currentVideoBounds.width - currentMetadataBounds.x
+    }).toBeLessThanOrEqual(1)
     await page.locator('.fullscreenActions').getByRole('button', { name: 'Show transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
+    await expect(page.locator('.fullscreenMetadataHeader')).toHaveCSS('cursor', 'grab')
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegment').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptActions .iconButton')).toHaveCount(2)
+
+    const transcriptDock = page.locator('.fullscreenTranscriptOverlay.open')
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return Math.abs(metadataBox.height - transcriptBox.height)
+    }).toBeLessThan(5)
+    const [stackedMetadataBounds, transcriptBounds] = await Promise.all([
+      metadataDock.boundingBox(),
+      transcriptDock.boundingBox()
+    ])
+    const resizeHandle = metadataDock.locator('.fullscreenDockResizeHandle')
+    const resizeHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      resizeHandleBounds.x + resizeHandleBounds.width / 2,
+      resizeHandleBounds.y + resizeHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.locator('.ftVideoPlayer').evaluate(element => element.classList.add('no-cursor'))
+    await expect(page.locator('.ftVideoPlayer')).toHaveCSS('cursor', 'row-resize')
+    await expect(metadataDock).toHaveCSS('transition-duration', '0s')
+    await page.mouse.move(resizeHandleBounds.x + resizeHandleBounds.width / 2, resizeHandleBounds.y + 100)
+    await page.mouse.up()
+    await page.locator('.ftVideoPlayer').evaluate(element => element.classList.remove('no-cursor'))
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeGreaterThan(stackedMetadataBounds.height + 60)
+    await expect.poll(async () => (await transcriptDock.boundingBox()).height)
+      .toBeLessThan(transcriptBounds.height - 60)
+
+    const resizedMetadataHeight = (await metadataDock.boundingBox()).height
+    await resizeHandle.press('ArrowUp')
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeLessThan(resizedMetadataHeight)
+
+    const [currentHandleBounds, fullscreenPlayerBounds] = await Promise.all([
+      resizeHandle.boundingBox(),
+      page.locator('.ftVideoPlayer').boundingBox()
+    ])
+    await page.mouse.move(
+      currentHandleBounds.x + currentHandleBounds.width / 2,
+      currentHandleBounds.y + currentHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      currentHandleBounds.x + currentHandleBounds.width / 2,
+      fullscreenPlayerBounds.y + fullscreenPlayerBounds.height - 1
+    )
+    await page.mouse.up()
+    await expect.poll(async () => (await transcriptDock.boundingBox()).height)
+      .toBeGreaterThanOrEqual(360)
+
+    const fullscreenPlayer = page.locator('.ftVideoPlayer')
+    await fullscreenPlayer.evaluate(element => {
+      Object.defineProperty(element, 'clientHeight', { configurable: true, value: 700 })
+    })
+    await expect.poll(async () => fullscreenPlayer.evaluate(element => element.clientHeight)).toBe(700)
+    const denseStackMetadataHeight = (await metadataDock.boundingBox()).height
+    const denseStackHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      denseStackHandleBounds.x + denseStackHandleBounds.width / 2,
+      denseStackHandleBounds.y + denseStackHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      denseStackHandleBounds.x + denseStackHandleBounds.width / 2,
+      denseStackHandleBounds.y + 60
+    )
+    await page.mouse.up()
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeGreaterThan(denseStackMetadataHeight + 20)
+    await resizeHandle.dblclick({ force: true })
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return Math.abs(metadataBox.height - transcriptBox.height)
+    }).toBeLessThan(5)
+    await fullscreenPlayer.evaluate(element => { delete element.clientHeight })
+    await expect.poll(async () => fullscreenPlayer.evaluate(element => element.clientHeight)).toBeGreaterThan(700)
+
+    const metadataHeader = metadataDock.locator('.fullscreenMetadataHeader')
+    const transcriptHeader = transcriptDock.locator('.transcriptHeader')
+    const expandedMetadataHeight = (await metadataDock.boundingBox()).height
+    await metadataHeader.dblclick({ position: { x: 30, y: 26 } })
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeGreaterThanOrEqual(60)
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeLessThan(61)
+    await metadataHeader.dblclick({ position: { x: 30, y: 26 } })
+    await expect.poll(async () => Math.abs((await metadataDock.boundingBox()).height - expandedMetadataHeight))
+      .toBeLessThan(2)
+
+    const [metadataHeaderBounds, transcriptHeaderBounds] = await Promise.all([
+      metadataHeader.boundingBox(),
+      transcriptHeader.boundingBox()
+    ])
+    await page.mouse.move(
+      transcriptHeaderBounds.x + 30,
+      transcriptHeaderBounds.y + transcriptHeaderBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      metadataHeaderBounds.x + 30,
+      metadataHeaderBounds.y + 10,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return transcriptBox.y < metadataBox.y
+    }).toBe(true)
+
+    const [reorderedMetadataBounds, reorderedTranscriptHeaderBounds] = await Promise.all([
+      metadataDock.boundingBox(),
+      transcriptHeader.boundingBox()
+    ])
+    await page.mouse.move(
+      reorderedTranscriptHeaderBounds.x + 30,
+      reorderedTranscriptHeaderBounds.y + reorderedTranscriptHeaderBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      reorderedMetadataBounds.x + 30,
+      reorderedMetadataBounds.y + reorderedMetadataBounds.height - 10,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return metadataBox.y < transcriptBox.y
+    }).toBe(true)
+
     await page.getByRole('button', { name: 'Close transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toHaveCount(0)
 

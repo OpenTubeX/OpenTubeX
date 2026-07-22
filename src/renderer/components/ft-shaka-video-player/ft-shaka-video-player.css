@@ -260,6 +260,68 @@
   --side-nav-active-text-color: #cdd6f4;
 }
 
+.fullscreenDockResizeHandle {
+  position: absolute;
+  z-index: 5;
+  inset-inline: 10px;
+  inset-block-end: 0;
+  block-size: 10px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.fullscreenDockResizeHandle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-start: 50%;
+  inline-size: 42px;
+  block-size: 3px;
+  background-color: rgb(255 255 255 / 42%);
+  border-radius: 999px;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 150ms ease;
+}
+
+.fullscreenDockResizeHandle:is(:hover, :focus-visible, :active)::after {
+  opacity: 1;
+}
+
+.fullscreenDockReorderable :is(.chapterOverlayHeader, .fullscreenMetadataHeader),
+.fullscreenDockReorderable :deep(.transcriptHeader),
+.fullscreenDockReorderable :deep(.sponsorBlockHeader),
+.fullscreenDockReorderable :deep(.fullscreenCommentHeader),
+.fullscreenDockReorderable :deep(.playlistDockHeader) {
+  cursor: grab !important;
+}
+
+/* Dock positions must track the pointer directly while their divider moves. */
+.ftVideoPlayer.fullscreenDockResizing :is(
+  .chapterOverlay,
+  .fullscreenMetadataOverlay,
+  .fullscreenTranscriptOverlay,
+  .fullscreenSponsorBlockOverlay,
+  .fullscreenCommentsOverlay,
+  .fullscreenPlaylistOverlay
+) {
+  transition: none !important;
+}
+
+/* Shaka normally hides every cursor after its controls time out. */
+.ftVideoPlayer.fullscreenDockResizing,
+.ftVideoPlayer.fullscreenDockResizing :deep(*) {
+  cursor: row-resize !important;
+}
+
+.ftVideoPlayer.fullscreenDockReordering,
+.ftVideoPlayer.fullscreenDockReordering :deep(*) {
+  cursor: grabbing !important;
+}
+
 .chapterOverlay {
   position: absolute;
   z-index: 4;
