@@ -1,4 +1,12 @@
 /* stylelint-disable no-descending-specificity */
+.pure-radiobutton {
+  --radio-dot-offset: calc(-50% - 0.5px);
+}
+
+.pure-radiobutton:dir(rtl) {
+  --radio-dot-offset: calc(50% + 0.5px);
+}
+
 .pure-radiobutton input[type='radio'] {
   border: 0;
   clip-path: circle(0);
@@ -47,11 +55,10 @@
   background-color: var(--primary-text-color);
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-start: 0;
-  inline-size: 18px;
-  block-size: 18px;
-  clip-path: circle(5px at center);
-  transform: translateY(-50%) scale(0);
+  inset-inline-start: 9px;
+  inline-size: 10px;
+  block-size: 10px;
+  transform: translate(var(--radio-dot-offset), -50%) scale(0);
   transform-origin: 50%;
   transition: transform 200ms ease-out;
 }
@@ -73,7 +80,9 @@
   background-color: var(--primary-color);
 }
 
-.pure-radiobutton input[type='radio']:checked + label::after { transform: translateY(-50%) scale(1); }
+.pure-radiobutton input[type='radio']:checked + label::after {
+  transform: translate(var(--radio-dot-offset), -50%) scale(1);
+}
 
 .pure-radiobutton input[type='radio'] + label::before,
 .pure-radiobutton input[type='radio'] + label::after { border-radius: 50%; }
