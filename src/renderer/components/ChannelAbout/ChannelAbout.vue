@@ -124,10 +124,13 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
+import { useTabContext } from '../../tabs/TabContext'
 
 import { formatNumber } from '../../helpers/utils'
 
 const { locale } = useI18n()
+const { tabId: injectedTabId } = useTabContext()
+const tabId = injectedTabId ?? 'web'
 
 const props = defineProps({
   description: {
@@ -172,7 +175,7 @@ const hideSearchBar = computed(() => {
 
 /** @type {import('vue').ComputedRef<{ sortBy: string, time: string, type: string, duration: string, features: string[] }>} */
 const searchSettings = computed(() => {
-  return store.getters.getSearchSettings
+  return store.getters.getSearchSettings(tabId)
 })
 
 const formattedJoined = computed(() => {

@@ -393,7 +393,12 @@ function toggleSideNav() {
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
-const searchFilterValueChanged = computed(() => store.getters.getSearchFilterValueChanged)
+const searchFilterTabId = computed(() => process.env.IS_ELECTRON
+  ? (store.getters.getPresentedTabId ?? 'web')
+  : 'web')
+const searchFilterValueChanged = computed(() => {
+  return store.getters.getSearchFilterValueChanged(searchFilterTabId.value)
+})
 
 function showSearchFilters() {
   store.dispatch('showSearchFilters')
@@ -455,7 +460,7 @@ if (process.env.IS_ELECTRON) {
 }
 
 /** @type {import('vue').ComputedRef<any>} */
-const searchSettings = computed(() => store.getters.getSearchSettings)
+const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
 
 /**
  * @param {string} queryText
@@ -486,18 +491,20 @@ function goToSearch(queryText, { event, dataListIndex }) {
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
   if (selectedSearchSettings != null) {
-    store.commit('setSearchPrioritize', selectedSearchSettings.prioritize)
-    store.commit('setSearchTime', selectedSearchSettings.time)
-    store.commit('setSearchType', selectedSearchSettings.type)
-    store.commit('setSearchDuration', selectedSearchSettings.duration)
-    store.commit('setSearchFeatures', [...selectedSearchSettings.features])
-    store.commit('setSearchFilterValueChanged',
-      selectedSearchSettings.prioritize !== 'relevance' ||
+    const tabId = searchFilterTabId.value
+    store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
+    store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
+    store.commit('setSearchType', { tabId, value: selectedSearchSettings.type })
+    store.commit('setSearchDuration', { tabId, value: selectedSearchSettings.duration })
+    store.commit('setSearchFeatures', { tabId, value: [...selectedSearchSettings.features] })
+    store.commit('setSearchFilterValueChanged', {
+      tabId,
+      value: selectedSearchSettings.prioritize !== 'relevance' ||
       selectedSearchSettings.time !== '' ||
       selectedSearchSettings.type !== 'all' ||
       selectedSearchSettings.duration !== '' ||
       selectedSearchSettings.features.length > 0
-    )
+    })
   }
 
   store.dispatch('getYoutubeUrlInfo', queryText).then((result) => {

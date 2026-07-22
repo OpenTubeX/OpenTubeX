@@ -70,10 +70,12 @@ import {
 } from '../../helpers/api/local'
 import { getInvidiousSearchResults } from '../../helpers/api/invidious'
 import { SEARCH_CHAR_LIMIT } from '../../../constants'
-import { useTabTitle } from '../../tabs/TabContext'
+import { useTabContext, useTabTitle } from '../../tabs/TabContext'
 
 const { t } = useI18n()
 const route = useRoute()
+const { tabId: injectedTabId } = useTabContext()
+const tabId = injectedTabId ?? 'web'
 const setTabTitle = useTabTitle()
 
 const isLoading = ref(false)
@@ -108,18 +110,19 @@ const showFamilyFriendlyOnly = computed(() => store.getters.getShowFamilyFriendl
 const rememberSearchHistory = computed(() => store.getters.getRememberSearchHistory)
 
 function restoreActiveSearchFilters(settings) {
-  store.commit('setSearchPrioritize', settings.prioritize)
-  store.commit('setSearchTime', settings.time)
-  store.commit('setSearchType', settings.type)
-  store.commit('setSearchDuration', settings.duration)
-  store.commit('setSearchFeatures', [...settings.features])
-  store.commit('setSearchFilterValueChanged',
-    settings.prioritize !== 'relevance' ||
+  store.commit('setSearchPrioritize', { tabId, value: settings.prioritize })
+  store.commit('setSearchTime', { tabId, value: settings.time })
+  store.commit('setSearchType', { tabId, value: settings.type })
+  store.commit('setSearchDuration', { tabId, value: settings.duration })
+  store.commit('setSearchFeatures', { tabId, value: [...settings.features] })
+  store.commit('setSearchFilterValueChanged', {
+    tabId,
+    value: settings.prioritize !== 'relevance' ||
     settings.time !== '' ||
     settings.type !== 'all' ||
     settings.duration !== '' ||
     settings.features.length > 0
-  )
+  })
 }
 
 watch(route, () => {

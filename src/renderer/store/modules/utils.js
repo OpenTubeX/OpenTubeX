@@ -17,6 +17,17 @@ import {
   persistVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
 
+function getOrCreateSearchSettings(state, tabId) {
+  state.searchSettingsByTabId[tabId] ??= {
+    prioritize: 'relevance',
+    time: '',
+    type: 'all',
+    duration: '',
+    features: [],
+  }
+  return state.searchSettingsByTabId[tabId]
+}
+
 const state = {
   isSideNavOpen: false,
   outlinesHidden: true,
@@ -36,20 +47,14 @@ const state = {
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
   showSearchFilters: false,
-  searchFilterValueChanged: false,
+  searchFilterValueChangedByTabId: {},
   progressBarPercentage: 0,
   toBeAddedToPlaylistVideoList: [],
   newPlaylistDefaultProperties: {},
   newPlaylistVideoObject: [],
   regionNames: [],
   regionValues: [],
-  searchSettings: {
-    prioritize: 'relevance',
-    time: '',
-    type: 'all',
-    duration: '',
-    features: [],
-  },
+  searchSettingsByTabId: {},
   externalPlayerNames: [],
   externalPlayerValues: [],
   externalPlayerCmdArguments: {},
@@ -106,12 +111,18 @@ const getters = {
     return state.cachedPlaylists[tabId] ?? null
   },
 
-  getSearchSettings(state) {
-    return state.searchSettings
+  getSearchSettings: (state) => (tabId = 'web') => {
+    return state.searchSettingsByTabId[tabId] ?? {
+      prioritize: 'relevance',
+      time: '',
+      type: 'all',
+      duration: '',
+      features: [],
+    }
   },
 
-  getSearchFilterValueChanged(state) {
-    return state.searchFilterValueChanged
+  getSearchFilterValueChanged: (state) => (tabId = 'web') => {
+    return state.searchFilterValueChangedByTabId[tabId] ?? false
   },
 
   getIsKeyboardShortcutPromptShown(state) {
@@ -798,28 +809,28 @@ const mutations = {
     }
   },
 
-  setSearchFilterValueChanged (state, value) {
-    state.searchFilterValueChanged = value
+  setSearchFilterValueChanged (state, { tabId = 'web', value }) {
+    state.searchFilterValueChangedByTabId[tabId] = value
   },
 
-  setSearchPrioritize (state, value) {
-    state.searchSettings.prioritize = value
+  setSearchPrioritize (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).prioritize = value
   },
 
-  setSearchTime (state, value) {
-    state.searchSettings.time = value
+  setSearchTime (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).time = value
   },
 
-  setSearchType (state, value) {
-    state.searchSettings.type = value
+  setSearchType (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).type = value
   },
 
-  setSearchDuration (state, value) {
-    state.searchSettings.duration = value
+  setSearchDuration (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).duration = value
   },
 
-  setSearchFeatures (state, value) {
-    state.searchSettings.features = value
+  setSearchFeatures (state, { tabId = 'web', value }) {
+    getOrCreateSearchSettings(state, tabId).features = value
   },
 
   setRegionNames (state, value) {

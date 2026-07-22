@@ -97,6 +97,34 @@ test.describe('tab bar', () => {
     await expect(searchInput).toHaveValue('second tab query')
   })
 
+  test('search filters are independent per tab', async ({ page }) => {
+    const filterButton = page.locator('.navFilterButton')
+
+    await filterButton.click()
+    await page.locator('.searchRadio', { hasText: 'Time' }).getByText('Today', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(filterButton).toHaveClass(/filterChanged/)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(filterButton).not.toHaveClass(/filterChanged/)
+
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
+    await page.locator('.searchRadio', { hasText: 'Prioritize' }).getByText('Popularity', { exact: true }).click()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).first().click()
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="today"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="relevance"]')).toBeChecked()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+
+    await page.locator(sel.tabs).nth(1).click()
+    await filterButton.click()
+    await expect(page.locator('input[type="radio"][value="popularity"]')).toBeChecked()
+    await expect(page.locator('input[type="radio"][value="today"]')).not.toBeChecked()
+  })
+
   test('loading a search tab fills the search bar from its route', async ({ page }) => {
     const searchTab = await page.evaluate(() => window.ftElectron.tabs.create({
       route: '/search/loaded%20tab%20query',

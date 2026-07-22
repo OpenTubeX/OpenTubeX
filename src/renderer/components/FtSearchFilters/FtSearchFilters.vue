@@ -86,6 +86,7 @@ import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import store from '../../store/index'
 
 const { t } = useI18n()
+const tabId = process.env.IS_ELECTRON ? (store.getters.getPresentedTabId ?? 'web') : 'web'
 
 const PRIORITIZE_VALUES = [
   'relevance',
@@ -180,13 +181,13 @@ const featureLabels = computed(() => [
   t('Search Filters.Features.Location'),
 ])
 
-const searchSettings = store.getters.getSearchSettings
+const searchSettings = store.getters.getSearchSettings(tabId)
 
 /** @type {import('vue').Ref<'relevance' | 'popularity'>} */
 const prioritizeValue = ref(searchSettings.prioritize)
 
 watch(prioritizeValue, (value) => {
-  store.commit('setSearchPrioritize', value)
+  store.commit('setSearchPrioritize', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'' | 'today' | 'week' | 'month' | 'year'>} */
@@ -197,7 +198,7 @@ watch(timeValue, (value) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchTime', value)
+  store.commit('setSearchTime', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'all' | 'video' | 'shorts' | 'channel' | 'playlist' | 'movie'>} */
@@ -218,7 +219,7 @@ watch(typeValue, (value) => {
     }
   }
 
-  store.commit('setSearchType', value)
+  store.commit('setSearchType', { tabId, value })
 })
 
 /** @type {import('vue').Ref<'' | 'under_three_mins' | 'three_to_twenty_mins' | 'over_twenty_mins'>} */
@@ -229,7 +230,7 @@ watch(durationValue, (value) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchDuration', value)
+  store.commit('setSearchDuration', { tabId, value })
 })
 
 /** @type {import('vue').Ref<('hd' | 'subtitles' | 'creative_commons' | '3d' | 'live' | '4k' | '360' | 'location' | 'hdr' | 'vr180')[]>} */
@@ -240,7 +241,7 @@ watch(featuresValue, (values) => {
     typeValue.value = 'all'
   }
 
-  store.commit('setSearchFeatures', [...values])
+  store.commit('setSearchFeatures', { tabId, value: [...values] })
 }, { deep: true })
 
 const searchFilterValueChanged = computed(() => {
@@ -252,7 +253,7 @@ const searchFilterValueChanged = computed(() => {
 })
 
 watch(searchFilterValueChanged, (value) => {
-  store.commit('setSearchFilterValueChanged', value)
+  store.commit('setSearchFilterValueChanged', { tabId, value })
 })
 
 function hideSearchFilters() {
