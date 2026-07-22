@@ -96,9 +96,18 @@ const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'p
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
-const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 52
+const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
+const FULLSCREEN_DOCK_COLLAPSED_HEIGHT = 60
 const FULLSCREEN_DOCK_OUTER_INSET = 12
 const FULLSCREEN_DOCK_GAP = 12
+const FULLSCREEN_DOCK_HEADER_SELECTOR = [
+  '.chapterOverlayHeader',
+  '.fullscreenMetadataHeader',
+  '.transcriptHeader',
+  '.sponsorBlockHeader',
+  '.fullscreenCommentHeader',
+  '.playlistDockHeader',
+].join(', ')
 
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
@@ -536,9 +545,11 @@ export default defineComponent({
     const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
 
-    const fullscreenDockOrder = ['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters']
+    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters'])
     const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
+    const fullscreenDockCollapsedState = Object.fromEntries(fullscreenDockOrder.map(dock => [dock, null]))
     const fullscreenDockResizing = ref(false)
+    const fullscreenDockReordering = ref(false)
     let resizingFullscreenDock = null
     let resizingFullscreenDockWeightBefore = 0
     let resizingFullscreenDockTotalWeight = 0
@@ -569,6 +580,18 @@ export default defineComponent({
       return openDocks
     }
 
+    function getFullscreenDockElement(dock) {
+      switch (dock) {
+        case 'metadata': return fullscreenMetadataOverlay.value
+        case 'transcript': return fullscreenTranscriptOverlay.value
+        case 'sponsorBlock': return fullscreenSponsorBlockOverlay.value
+        case 'comments': return fullscreenCommentsOverlay.value
+        case 'playlist': return fullscreenPlaylistOverlay.value
+        case 'chapters': return chapterOverlay.value
+        default: return null
+      }
+    }
+
     function fullscreenDockStyle(dock) {
       const openDocks = getFullscreenOpenDocks(dock)
       const index = openDocks.indexOf(dock)
@@ -590,10 +613,52 @@ export default defineComponent({
       return index >= 0 && index < openDocks.length - 1
     }
 
+    function fullscreenDockCanReorder(dock) {
+      const openDocks = getFullscreenOpenDocks()
+      return openDocks.length > 1 && openDocks.includes(dock)
+    }
+
     function resetFullscreenDockHeights() {
       for (const dock of fullscreenDockOrder) {
         fullscreenDockWeights[dock] = 1
+        fullscreenDockCollapsedState[dock] = null
       }
+    }
+
+    function handleFullscreenDockHeaderDoubleClick(event, dock) {
+      const target = event.target instanceof Element ? event.target : null
+      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
+      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
+      const openDocks = getFullscreenOpenDocks()
+      const index = openDocks.indexOf(dock)
+      if (!header || interactiveTarget || !event.currentTarget.contains(header) || openDocks.length < 2) {
+        return
+      }
+
+      const savedState = fullscreenDockCollapsedState[dock]
+      const neighbor = savedState && openDocks.includes(savedState.neighbor)
+        ? savedState.neighbor
+        : openDocks[index + 1] ?? openDocks[index - 1]
+      if (savedState) {
+        const restoredWeight = savedState.weight
+        fullscreenDockWeights[neighbor] -= restoredWeight - fullscreenDockWeights[dock]
+        fullscreenDockWeights[dock] = restoredWeight
+        fullscreenDockCollapsedState[dock] = null
+      } else {
+        const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
+        const panelChrome = index === 0 || index === openDocks.length - 1
+          ? FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
+          : FULLSCREEN_DOCK_GAP
+        const collapsedWeight = (FULLSCREEN_DOCK_COLLAPSED_HEIGHT + panelChrome) /
+          container.value.clientHeight * totalWeight
+        fullscreenDockCollapsedState[dock] = {
+          neighbor,
+          weight: fullscreenDockWeights[dock],
+        }
+        fullscreenDockWeights[neighbor] += fullscreenDockWeights[dock] - collapsedWeight
+        fullscreenDockWeights[dock] = collapsedWeight
+      }
+      event.preventDefault()
     }
 
     function setFullscreenDockBoundary(dock, firstWeight) {
@@ -607,9 +672,10 @@ export default defineComponent({
       const pairWeight = fullscreenDockWeights[dock] + fullscreenDockWeights[nextDock]
       const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
       // Only enforce the comfortable minimum when every open dock can have
-      // it. Dense stacks keep just their header height so dividers stay useful.
+      // it. Dense stacks keep the full header plus a small content sliver so
+      // dividers stay useful without clipping the header.
       const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-      const preferredMinimumFits = container.value.clientHeight >=
+      const preferredMinimumFits = openDocks.length === 2 && container.value.clientHeight >=
         openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
         FULLSCREEN_DOCK_OUTER_INSET * 2 +
         FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
@@ -624,6 +690,8 @@ export default defineComponent({
       const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
       fullscreenDockWeights[dock] = clampedWeight
       fullscreenDockWeights[nextDock] = pairWeight - clampedWeight
+      fullscreenDockCollapsedState[dock] = null
+      fullscreenDockCollapsedState[nextDock] = null
     }
 
     function handleFullscreenDockResizePointerDown(event, dock) {
@@ -675,6 +743,63 @@ export default defineComponent({
       setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
       event.preventDefault()
     }
+
+    let reorderingFullscreenDock = null
+
+    function handleFullscreenDockReorderPointerDown(event, dock) {
+      const target = event.target instanceof Element ? event.target : null
+      const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
+      const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
+      if (
+        event.button !== 0 || !fullscreenDockCanReorder(dock) || !header ||
+        interactiveTarget || !event.currentTarget.contains(header)
+      ) {
+        return
+      }
+
+      fullscreenDockReordering.value = true
+      reorderingFullscreenDock = dock
+      window.addEventListener('pointermove', handleFullscreenDockReorderPointerMove)
+      window.addEventListener('pointerup', stopFullscreenDockReorder)
+      window.addEventListener('pointercancel', stopFullscreenDockReorder)
+      event.preventDefault()
+    }
+
+    function handleFullscreenDockReorderPointerMove(event) {
+      const openDocks = getFullscreenOpenDocks()
+      const currentIndex = openDocks.indexOf(reorderingFullscreenDock)
+      const otherDocks = openDocks.filter(dock => dock !== reorderingFullscreenDock)
+      let insertionIndex = otherDocks.findIndex(dock => {
+        const bounds = getFullscreenDockElement(dock)?.getBoundingClientRect()
+        return bounds && event.clientY < bounds.top + bounds.height / 2
+      })
+      if (insertionIndex === -1) {
+        insertionIndex = otherDocks.length
+      }
+      if (insertionIndex === currentIndex) {
+        return
+      }
+
+      const orderIndex = fullscreenDockOrder.indexOf(reorderingFullscreenDock)
+      fullscreenDockOrder.splice(orderIndex, 1)
+      if (insertionIndex === otherDocks.length) {
+        const lastOpenIndex = fullscreenDockOrder.indexOf(otherDocks.at(-1))
+        fullscreenDockOrder.splice(lastOpenIndex + 1, 0, reorderingFullscreenDock)
+      } else {
+        const nextOpenIndex = fullscreenDockOrder.indexOf(otherDocks[insertionIndex])
+        fullscreenDockOrder.splice(nextOpenIndex, 0, reorderingFullscreenDock)
+      }
+    }
+
+    function stopFullscreenDockReorder() {
+      fullscreenDockReordering.value = false
+      reorderingFullscreenDock = null
+      window.removeEventListener('pointermove', handleFullscreenDockReorderPointerMove)
+      window.removeEventListener('pointerup', stopFullscreenDockReorder)
+      window.removeEventListener('pointercancel', stopFullscreenDockReorder)
+    }
+
+    onUnmounted(stopFullscreenDockReorder)
 
     function getShareTimestamp() {
       const currentTime = Math.floor(video.value?.currentTime ?? 0)
@@ -7804,10 +7929,14 @@ export default defineComponent({
       copyChapterTimestamp,
       fullscreenDockStyle,
       fullscreenDockCanResize,
+      fullscreenDockCanReorder,
       fullscreenDockResizing,
+      fullscreenDockReordering,
       resetFullscreenDockHeights,
+      handleFullscreenDockHeaderDoubleClick,
       handleFullscreenDockResizePointerDown,
       handleFullscreenDockResizeKeydown,
+      handleFullscreenDockReorderPointerDown,
       fullscreenMetadataOverlay,
       fullscreenMetadataTarget,
       showFullscreenMetadata,

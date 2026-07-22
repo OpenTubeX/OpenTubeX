@@ -291,6 +291,14 @@
   opacity: 1;
 }
 
+.fullscreenDockReorderable :is(.chapterOverlayHeader, .fullscreenMetadataHeader),
+.fullscreenDockReorderable :deep(.transcriptHeader),
+.fullscreenDockReorderable :deep(.sponsorBlockHeader),
+.fullscreenDockReorderable :deep(.fullscreenCommentHeader),
+.fullscreenDockReorderable :deep(.playlistDockHeader) {
+  cursor: grab !important;
+}
+
 /* Dock positions must track the pointer directly while their divider moves. */
 .ftVideoPlayer.fullscreenDockResizing :is(
   .chapterOverlay,
@@ -307,6 +315,11 @@
 .ftVideoPlayer.fullscreenDockResizing,
 .ftVideoPlayer.fullscreenDockResizing :deep(*) {
   cursor: row-resize !important;
+}
+
+.ftVideoPlayer.fullscreenDockReordering,
+.ftVideoPlayer.fullscreenDockReordering :deep(*) {
+  cursor: grabbing !important;
 }
 
 .chapterOverlay {

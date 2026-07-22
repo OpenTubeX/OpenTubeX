@@ -288,6 +288,7 @@ test.describe('watch page', () => {
     await expect(dockDescription).not.toHaveClass(/short/)
     await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
+    await expect(page.locator('.fullscreenMetadataHeader')).not.toHaveCSS('cursor', 'grab')
     const playerVideo = page.locator('.ftVideoPlayer video.player')
     const metadataDock = page.locator('.fullscreenMetadataOverlay.open')
     await expect.poll(async () => {
@@ -299,6 +300,7 @@ test.describe('watch page', () => {
     }).toBeLessThanOrEqual(1)
     await page.locator('.fullscreenActions').getByRole('button', { name: 'Show transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
+    await expect(page.locator('.fullscreenMetadataHeader')).toHaveCSS('cursor', 'grab')
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegment').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptActions .iconButton')).toHaveCount(2)
@@ -373,7 +375,7 @@ test.describe('watch page', () => {
     )
     await page.mouse.up()
     await expect.poll(async () => (await metadataDock.boundingBox()).height)
-      .toBeGreaterThan(denseStackMetadataHeight + 40)
+      .toBeGreaterThan(denseStackMetadataHeight + 20)
     await resizeHandle.dblclick({ force: true })
     await expect.poll(async () => {
       const [metadataBox, transcriptBox] = await Promise.all([
@@ -384,6 +386,64 @@ test.describe('watch page', () => {
     }).toBeLessThan(5)
     await fullscreenPlayer.evaluate(element => { delete element.clientHeight })
     await expect.poll(async () => fullscreenPlayer.evaluate(element => element.clientHeight)).toBeGreaterThan(700)
+
+    const metadataHeader = metadataDock.locator('.fullscreenMetadataHeader')
+    const transcriptHeader = transcriptDock.locator('.transcriptHeader')
+    const expandedMetadataHeight = (await metadataDock.boundingBox()).height
+    await metadataHeader.dblclick({ position: { x: 30, y: 26 } })
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeGreaterThanOrEqual(60)
+    await expect.poll(async () => (await metadataDock.boundingBox()).height)
+      .toBeLessThan(61)
+    await metadataHeader.dblclick({ position: { x: 30, y: 26 } })
+    await expect.poll(async () => Math.abs((await metadataDock.boundingBox()).height - expandedMetadataHeight))
+      .toBeLessThan(2)
+
+    const [metadataHeaderBounds, transcriptHeaderBounds] = await Promise.all([
+      metadataHeader.boundingBox(),
+      transcriptHeader.boundingBox()
+    ])
+    await page.mouse.move(
+      transcriptHeaderBounds.x + 30,
+      transcriptHeaderBounds.y + transcriptHeaderBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      metadataHeaderBounds.x + 30,
+      metadataHeaderBounds.y + 10,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return transcriptBox.y < metadataBox.y
+    }).toBe(true)
+
+    const [reorderedMetadataBounds, reorderedTranscriptHeaderBounds] = await Promise.all([
+      metadataDock.boundingBox(),
+      transcriptHeader.boundingBox()
+    ])
+    await page.mouse.move(
+      reorderedTranscriptHeaderBounds.x + 30,
+      reorderedTranscriptHeaderBounds.y + reorderedTranscriptHeaderBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      reorderedMetadataBounds.x + 30,
+      reorderedMetadataBounds.y + reorderedMetadataBounds.height - 10,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+    await expect.poll(async () => {
+      const [metadataBox, transcriptBox] = await Promise.all([
+        metadataDock.boundingBox(),
+        transcriptDock.boundingBox()
+      ])
+      return metadataBox.y < transcriptBox.y
+    }).toBe(true)
 
     await page.getByRole('button', { name: 'Close transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toHaveCount(0)
