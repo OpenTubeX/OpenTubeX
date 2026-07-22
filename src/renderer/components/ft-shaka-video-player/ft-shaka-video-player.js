@@ -2417,6 +2417,7 @@ export default defineComponent({
       /** @type {shaka.extern.UIConfiguration} */
       const uiConfig = {
         controlPanelElements: controlPanelElements,
+        topControlPanelElements: [],
         overflowMenuButtons: [],
         contextMenuElements: contextMenuElements.value,
 

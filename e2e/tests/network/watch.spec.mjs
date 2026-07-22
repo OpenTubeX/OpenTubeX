@@ -248,6 +248,18 @@ test.describe('watch page', () => {
 
     await setPlayerFullscreen(page, true)
     const title = page.locator('.playerFullscreenTitleOverlay')
+    const titleBounds = await title.boundingBox()
+    const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
+    const titleRight = titleBounds.x + titleBounds.width
+    const besideTitleX = titleRight + (playerBounds.x + playerBounds.width - titleRight) / 2
+    const titleCenterY = titleBounds.y + titleBounds.height / 2
+
+    await page.mouse.dblclick(besideTitleX, titleCenterY)
+    await expect.poll(
+      async () => page.locator('.ftVideoPlayer').evaluate((element) => document.fullscreenElement === element)
+    ).toBe(false)
+
+    await setPlayerFullscreen(page, true)
     await title.click({ force: true })
 
     await expect(title).toHaveAttribute('aria-expanded', 'true')
