@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
 test.describe('playlist creation', () => {
   test('a playlist can be created through the UI', async ({ page }) => {
@@ -78,6 +78,17 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Seeded video one')).toBeVisible()
     // Local playlists intentionally ignore the global hide-upcoming setting.
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
+  })
+
+  test('keeps the playlist title when switching tabs', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+    await expect(page.locator(sel.activeTab)).toContainText('My seeded playlist')
+
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click()
+
+    await expect(page.locator(sel.activeTab)).toContainText('My seeded playlist')
   })
 
   test('playlist edits and deletion persist across restarts', async ({ app, page }) => {
