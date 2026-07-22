@@ -253,21 +253,22 @@
     opacity: 1;
   }
 
-  .sponsorblock-panel-enter-active,
-  .sponsorblock-panel-leave-active {
+  .sidebar-panel-enter-active,
+  .sidebar-panel-leave-active {
+    overflow: hidden;
     transition: opacity 250ms ease, max-block-size 250ms ease, margin-block-end 250ms ease;
   }
 
-  .sponsorblock-panel-enter-from,
-  .sponsorblock-panel-leave-to {
+  .sidebar-panel-enter-from,
+  .sidebar-panel-leave-to {
     max-block-size: 0;
     margin-block-end: 0;
     opacity: 0;
   }
 
-  .sponsorblock-panel-enter-to,
-  .sponsorblock-panel-leave-from {
-    max-block-size: 500px;
+  .sidebar-panel-enter-to,
+  .sidebar-panel-leave-from {
+    max-block-size: 700px;
     opacity: 1;
   }
 

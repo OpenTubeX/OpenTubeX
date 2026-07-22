@@ -175,6 +175,7 @@ export default defineComponent({
       showTranscript: false,
       showSidebarChapters: false,
       showSidebarSponsorBlock: false,
+      sidebarPanelLeaving: false,
       sponsorBlockInfoLoading: false,
       sponsorBlockInfoPendingUuid: null,
       sponsorBlockInfoSegments: [],
@@ -589,6 +590,9 @@ export default defineComponent({
       this.videoChapterThumbnails = thumbnails
     },
     handleSponsorBlockInfoChange({ open, loading, pendingUuid, segments, submissionEnabled }) {
+      if (!open && this.showSidebarSponsorBlock) {
+        this.sidebarPanelLeaving = true
+      }
       this.showSidebarSponsorBlock = open
       this.sponsorBlockInfoLoading = loading
       this.sponsorBlockInfoPendingUuid = pendingUuid
@@ -608,6 +612,9 @@ export default defineComponent({
       this.$refs.player?.toggleSponsorBlockInfo()
     },
     toggleTranscript() {
+      if (this.showTranscript) {
+        this.sidebarPanelLeaving = true
+      }
       this.showTranscript = !this.showTranscript
       if (this.showTranscript && this.fullscreenMetadataOpen) {
         this.$nextTick(() => this.$refs.player?.setFullscreenTranscript(true))
@@ -616,8 +623,17 @@ export default defineComponent({
       }
     },
     closeTranscript() {
+      if (this.showTranscript) {
+        this.sidebarPanelLeaving = true
+      }
       this.showTranscript = false
       this.$refs.player?.dismissFullscreenTranscript()
+    },
+    handleSidebarPanelBeforeLeave() {
+      this.sidebarPanelLeaving = true
+    },
+    handleSidebarPanelAfterLeave() {
+      this.sidebarPanelLeaving = false
     },
     closeFullscreenPlaylist() {
       this.$refs.player?.closeFullscreenPlaylist()

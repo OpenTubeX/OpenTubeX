@@ -6,7 +6,7 @@
       ambientModeActive,
       isLoading,
       useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
-      noSidebar: !theatrePossible
+      noSidebar: !theatrePossible && !sidebarPanelLeaving
     }"
   >
     <div
@@ -318,7 +318,12 @@
         :to="fullscreenSponsorBlockTarget || 'body'"
         :disabled="!fullscreenSponsorBlockOpen"
       >
-        <transition name="sponsorblock-panel">
+        <transition
+          name="sidebar-panel"
+          @before-leave="handleSidebarPanelBeforeLeave"
+          @after-leave="handleSidebarPanelAfterLeave"
+          @leave-cancelled="handleSidebarPanelAfterLeave"
+        >
           <watch-video-sponsor-block
             v-if="showSidebarSponsorBlock && !isLoading"
             class="watchVideoSideBar watchVideoSponsorBlock"
@@ -343,17 +348,24 @@
         :to="fullscreenTranscriptTarget || 'body'"
         :disabled="!fullscreenTranscriptOpen"
       >
-        <watch-video-transcript
-          v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
-          :captions="captions"
-          :current-time="currentTime"
-          :preferred-caption-index="preferredTranscriptCaptionIndex"
-          :video-title="videoTitle"
-          :fullscreen-overlay="fullscreenTranscriptOpen"
-          class="watchVideoSideBar watchVideoTranscript"
-          @close="closeTranscript"
-          @timestamp-event="playTranscriptSegment"
-        />
+        <transition
+          name="sidebar-panel"
+          @before-leave="handleSidebarPanelBeforeLeave"
+          @after-leave="handleSidebarPanelAfterLeave"
+          @leave-cancelled="handleSidebarPanelAfterLeave"
+        >
+          <watch-video-transcript
+            v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+            :captions="captions"
+            :current-time="currentTime"
+            :preferred-caption-index="preferredTranscriptCaptionIndex"
+            :video-title="videoTitle"
+            :fullscreen-overlay="fullscreenTranscriptOpen"
+            class="watchVideoSideBar watchVideoTranscript"
+            @close="closeTranscript"
+            @timestamp-event="playTranscriptSegment"
+          />
+        </transition>
       </Teleport>
       <watch-video-live-chat
         v-if="!isLoading && !hideLiveChat && (isLive || isUpcoming)"

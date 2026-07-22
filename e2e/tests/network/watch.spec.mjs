@@ -4,12 +4,17 @@ import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
+const CAPTIONED_VIDEO = {
+  id: 'Xf-uUy5pdUI',
+  title: 'What’s It Like to Be Killed by Nature’s Most Brutal Predator',
+  url: 'https://www.youtube.com/watch?v=Xf-uUy5pdUI'
+}
 
-async function openVideo(page) {
-  await page.locator(sel.searchInput).fill(VIDEO_URL)
+async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zoo', url: VIDEO_URL }) {
+  await page.locator(sel.searchInput).fill(video.url)
   await page.locator(sel.searchInput).press('Enter')
-  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
-  await expect(page.locator('.videoTitle')).toContainText('Me at the zoo', { timeout: 30_000 })
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${video.id}`))
+  await expect(page.locator('.videoTitle')).toContainText(video.title, { timeout: 30_000 })
 }
 
 test.describe('watch page', () => {
@@ -110,7 +115,11 @@ test.describe('watch page', () => {
 
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
-    await openVideo(page)
+    await page.route(/\/api\/timedtext/, route => route.fulfill({
+      body: 'WEBVTT\n\n00:00:00.000 --> 00:00:02.000\nTest transcript line.\n',
+      contentType: 'text/vtt'
+    }))
+    await openVideo(page, CAPTIONED_VIDEO)
     await waitForPlaybackOrSkip(test, page)
 
     await setPlayerFullscreen(page, true)
@@ -119,7 +128,7 @@ test.describe('watch page', () => {
 
     await expect(title).toHaveAttribute('aria-expanded', 'true')
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
-    await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText('Me at the zoo')
+    await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText(CAPTIONED_VIDEO.title)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     const [videoBounds, metadataBounds] = await Promise.all([
       page.locator('.ftVideoPlayer video.player').boundingBox(),
@@ -130,6 +139,7 @@ test.describe('watch page', () => {
     await page.getByRole('button', { name: 'Show transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
+    await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegment').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptActions .iconButton')).toHaveCount(2)
     await page.getByRole('button', { name: 'Close transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toHaveCount(0)
