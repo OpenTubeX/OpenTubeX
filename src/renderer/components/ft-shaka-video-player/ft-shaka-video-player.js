@@ -238,6 +238,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    sidebarChaptersOpen: {
+      type: Boolean,
+      default: false
+    },
     watchingPlaylist: {
       type: Boolean,
       default: false
@@ -595,6 +599,7 @@ export default defineComponent({
     let restoreFullscreenComments = props.startWithFullscreenComments
     let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
     let exitFullscreenCleanup = null
+    let syncingChapterOverlayButton = false
 
     /** @type {number|null} */
     let restoreCaptionIndex = props.sabrReloadCaptionIndex
@@ -2596,6 +2601,16 @@ export default defineComponent({
       }))
     }
 
+    function syncChapterOverlayButton() {
+      syncingChapterOverlayButton = true
+      events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
+        detail: isNativeFullscreenActive() || fullWindowEnabled.value
+          ? showChaptersOverlay.value
+          : props.sidebarChaptersOpen
+      }))
+      syncingChapterOverlayButton = false
+    }
+
     /**
      * @param {number} startSeconds
      */
@@ -4553,7 +4568,16 @@ export default defineComponent({
 
     function registerChapterOverlayButton() {
       events.addEventListener('setChaptersOverlay', (/** @type {CustomEvent} */ event) => {
+        if (syncingChapterOverlayButton) {
+          return
+        }
+
         const shouldOpen = event.detail && props.chapters.length > 0
+
+        if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
+          emit('chapters-overlay-change', shouldOpen)
+          return
+        }
 
         showChaptersOverlay.value = shouldOpen
 
@@ -4568,7 +4592,9 @@ export default defineComponent({
         create(rootElement, controls) {
           return new ChapterOverlayButton(
             currentChapterTitle,
-            showChaptersOverlay.value,
+            isNativeFullscreenActive() || fullWindowEnabled.value
+              ? showChaptersOverlay.value
+              : props.sidebarChaptersOpen,
             events,
             rootElement,
             controls
@@ -4724,6 +4750,12 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.sidebarChaptersOpen, () => {
+      if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {
+        syncChapterOverlayButton()
+      }
+    })
+
     watch(() => props.title, title => {
       if (fullscreenTitleOverlay) {
         fullscreenTitleOverlay.textContent = title
@@ -4740,12 +4772,6 @@ export default defineComponent({
         closeFullscreenComments()
         closeFullscreenPlaylist()
       }
-    })
-
-    // Outside of fullscreen the chapters are shown in the watch page sidebar,
-    // so the parent needs the open state and the storyboard-derived thumbnails.
-    watch(showChaptersOverlay, (open) => {
-      emit('chapters-overlay-change', open)
     })
 
     watch(chapterThumbnails, (thumbnails) => {
@@ -4882,6 +4908,7 @@ export default defineComponent({
         }
 
         fullWindowEnabled.value = event.detail
+        syncChapterOverlayButton()
 
         if (fullWindowEnabled.value) {
           restoreDockedPanels()
@@ -6619,6 +6646,7 @@ export default defineComponent({
     function fullscreenChangeHandler() {
       isFullscreen.value = isNativeFullscreenActive()
       suppressPanelTransitions(100)
+      syncChapterOverlayButton()
 
       if (!isActiveTab.value) {
         return
@@ -6810,13 +6838,10 @@ export default defineComponent({
       if (
         props.autoOpenChapters &&
         props.chapters.length > 0 &&
-        !startInFullscreen &&
         !isNativeFullscreenActive() &&
         !fullWindowEnabled.value
       ) {
-        events.dispatchEvent(new CustomEvent('setChaptersOverlay', {
-          detail: true
-        }))
+        emit('chapters-overlay-change', true)
       }
 
       registerLegacyQualitySelection()

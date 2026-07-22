@@ -45,6 +45,7 @@
           :autoplay-enabled="autoplayEnabled"
           :autoplay-countdown="autoplayCountdown"
           :auto-open-chapters="autoOpenChapters"
+          :sidebar-chapters-open="showSidebarChapters"
           :watching-playlist="watchingPlaylist"
           :vr-projection="vrProjection"
           :start-in-fullscreen="startNextVideoInFullscreen"

@@ -648,7 +648,7 @@ export default defineComponent({
       this.$refs.player?.skipSponsorBlockInfoSegment(uuid)
     },
     closeSidebarChapters() {
-      this.$refs.player?.closeChaptersOverlay()
+      this.showSidebarChapters = false
     },
     copyChapterTimestamp(startSeconds) {
       this.$refs.player?.copyChapterTimestamp(startSeconds)
