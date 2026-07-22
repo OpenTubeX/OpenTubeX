@@ -1241,6 +1241,11 @@
   display: flex;
 }
 
+/* Let Shaka's seek preview pass in front of the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) .fullscreenActions {
+  z-index: 0;
+}
+
 .ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
 .ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions {
   opacity: 1;

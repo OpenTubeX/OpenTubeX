@@ -225,6 +225,25 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('fullscreen seek preview appears above the action pill', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    await setPlayerFullscreen(page, true)
+    const actions = page.locator('.fullscreenActions')
+    const seekBar = page.locator('.shaka-seek-bar-container')
+
+    await expect(actions).toBeVisible()
+    await expect(actions).toHaveCSS('z-index', '2')
+    const seekBarBounds = await seekBar.boundingBox()
+    await page.mouse.move(
+      seekBarBounds.x + (seekBarBounds.width / 2),
+      seekBarBounds.y + (seekBarBounds.height / 2)
+    )
+    await expect(actions).toHaveCSS('z-index', '0')
+  })
+
   test('full window playlist action shows its prompt above the player', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
