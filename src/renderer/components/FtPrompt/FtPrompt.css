@@ -16,6 +16,10 @@
   justify-content: center;
 }
 
+:global(body.playerFullWindow .prompt) {
+  z-index: 1001;
+}
+
 .promptCard {
   animation: prompt-card-enter 150ms ease-out;
   overflow-y: scroll;

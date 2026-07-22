@@ -12,6 +12,10 @@
   pointer-events: none;
 }
 
+:global(body.playerFullWindow .toast-holder) {
+  z-index: 1002;
+}
+
 .toast {
   padding: 10px;
   margin: 5px;

@@ -159,6 +159,25 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'false')
   })
 
+  test('full window playlist action shows its prompt above the player', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    await page.locator('.full-window-button').click({ force: true })
+    await expect(page.locator('.ftVideoPlayer.fullWindow')).toBeVisible()
+    await page.locator('.fullscreenPlaylistAction').click({ force: true })
+
+    const prompt = page.locator('.prompt')
+    await expect(prompt.getByText('Select a playlist to add your video to')).toBeVisible()
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
+
+    await page.locator('.fullscreenQuickBookmarkAction').click({ force: true })
+    const toastHolder = page.locator('.toast-holder')
+    await expect(toastHolder.locator('.toast')).toBeVisible()
+    expect(await toastHolder.evaluate(element => Number(getComputedStyle(element).zIndex))).toBeGreaterThan(1000)
+  })
+
   // Regression: edited comments show their "(edited)" marker (929369543)
   test('edited comments carry the edited badge', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
