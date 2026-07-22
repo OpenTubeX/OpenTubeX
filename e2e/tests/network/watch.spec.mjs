@@ -10,6 +10,19 @@ const CAPTIONED_VIDEO = {
   url: 'https://www.youtube.com/watch?v=Xf-uUy5pdUI'
 }
 
+function longTranscript() {
+  const timestamp = (seconds) => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor(seconds % 3600 / 60)
+    const remainingSeconds = seconds % 60
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}.000`
+  }
+
+  return `WEBVTT\n\n${Array.from({ length: 5000 }, (_, index) => (
+    `${timestamp(index)} --> ${timestamp(index + 1)}\nTranscript line ${index}.`
+  )).join('\n\n')}\n`
+}
+
 async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zoo', url: VIDEO_URL }) {
   await page.locator(sel.searchInput).fill(video.url)
   await page.locator(sel.searchInput).press('Enter')
@@ -48,6 +61,50 @@ test.describe('watch page', () => {
 
     await page.locator('body').press('o')
     await expect.poll(async () => await video.evaluate((el) => el.playbackRate)).toBeLessThan(raisedRate)
+  })
+
+  test('long transcripts quickly align with the current cue', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await page.route(/\/api\/timedtext/, route => route.fulfill({
+      body: longTranscript(),
+      contentType: 'text/vtt'
+    }))
+    await openVideo(page, CAPTIONED_VIDEO)
+    await waitForPlaybackOrSkip(test, page)
+
+    const video = page.locator('video.player')
+    const targetTime = await video.evaluate((element) => {
+      element.pause()
+      const time = Math.min(3600, Math.floor(element.duration / 2))
+      element.currentTime = time
+      element.dispatchEvent(new Event('timeupdate'))
+      return time
+    })
+    expect(targetTime).toBeGreaterThan(100)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeGreaterThan(100)
+    await page.evaluate(() => {
+      const nativeScrollTo = Element.prototype.scrollTo
+      window.transcriptScrollCalls = []
+      Element.prototype.scrollTo = function (...args) {
+        if (this.classList.contains('transcriptSegments')) {
+          window.transcriptScrollCalls.push({
+            behavior: args[0]?.behavior,
+            distance: Math.abs(args[0]?.top - this.scrollTop),
+            clientHeight: this.clientHeight
+          })
+        }
+        return nativeScrollTo.apply(this, args)
+      }
+    })
+
+    await page.getByRole('button', { name: 'Show transcript' }).click()
+    const activeSegment = page.locator('.transcriptSegment[aria-current="true"]')
+    await expect(activeSegment).toBeVisible({ timeout: 30_000 })
+    expect(Number(await activeSegment.getAttribute('data-segment-index'))).toBeGreaterThan(100)
+    await expect.poll(() => page.evaluate(() => window.transcriptScrollCalls[0])).toBeTruthy()
+    const scrollCall = await page.evaluate(() => window.transcriptScrollCalls[0])
+    expect(scrollCall.behavior).toBe('smooth')
+    expect(scrollCall.distance).toBeLessThanOrEqual(scrollCall.clientHeight)
   })
 
   test('comments load on request', async ({ page, innertube }) => {
