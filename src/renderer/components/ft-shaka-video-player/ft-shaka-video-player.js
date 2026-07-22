@@ -95,6 +95,10 @@ const SPONSORBLOCK_CATEGORIES = Object.freeze([
 const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'poi'])
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
+const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
+const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 52
+const FULLSCREEN_DOCK_OUTER_INSET = 12
+const FULLSCREEN_DOCK_GAP = 12
 
 // The UTF-8 characters "h", "t", "t", and "p".
 const HTTP_IN_HEX = 0x68747470
@@ -533,34 +537,143 @@ export default defineComponent({
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
 
     const fullscreenDockOrder = ['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters']
+    const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
+    const fullscreenDockResizing = ref(false)
+    let resizingFullscreenDock = null
+    let resizingFullscreenDockWeightBefore = 0
+    let resizingFullscreenDockTotalWeight = 0
+    let resizingFullscreenDockBounds = null
 
-    function fullscreenDockStyle(dock) {
-      const openDocks = fullscreenDockOrder.filter(name => {
-        switch (name) {
-          case 'metadata': return showFullscreenMetadata.value
-          case 'transcript': return showFullscreenTranscript.value
-          case 'sponsorBlock': return showFullscreenSponsorBlock.value
-          case 'comments': return showFullscreenComments.value
-          case 'playlist': return showFullscreenPlaylist.value
-          case 'chapters': return showChaptersOverlay.value && props.chapters.length > 0
-          default: return false
-        }
-      })
+    function isFullscreenDockOpen(dock) {
+      switch (dock) {
+        case 'metadata': return showFullscreenMetadata.value
+        case 'transcript': return showFullscreenTranscript.value
+        case 'sponsorBlock': return showFullscreenSponsorBlock.value
+        case 'comments': return showFullscreenComments.value
+        case 'playlist': return showFullscreenPlaylist.value
+        case 'chapters': return showChaptersOverlay.value && props.chapters.length > 0
+        default: return false
+      }
+    }
+
+    function getFullscreenOpenDocks(includeDock) {
+      const openDocks = fullscreenDockOrder.filter(isFullscreenDockOpen)
 
       // Keep a closed dock in the slot it will enter so its transition stays
       // horizontal while the currently open docks resize around it.
-      if (!openDocks.includes(dock)) {
-        openDocks.push(dock)
+      if (includeDock && !openDocks.includes(includeDock)) {
+        openDocks.push(includeDock)
         openDocks.sort((a, b) => fullscreenDockOrder.indexOf(a) - fullscreenDockOrder.indexOf(b))
       }
 
-      const count = openDocks.length
+      return openDocks
+    }
+
+    function fullscreenDockStyle(dock) {
+      const openDocks = getFullscreenOpenDocks(dock)
       const index = openDocks.indexOf(dock)
+      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      const weightBefore = openDocks
+        .slice(0, index)
+        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      const weightAfter = totalWeight - weightBefore - fullscreenDockWeights[dock]
 
       return {
-        insetBlockStart: index === 0 ? '12px' : `calc(${index * 100 / count}% + 6px)`,
-        insetBlockEnd: index === count - 1 ? '12px' : `calc(${(count - index - 1) * 100 / count}% + 6px)`,
+        insetBlockStart: index === 0 ? '12px' : `calc(${weightBefore * 100 / totalWeight}% + 6px)`,
+        insetBlockEnd: index === openDocks.length - 1 ? '12px' : `calc(${weightAfter * 100 / totalWeight}% + 6px)`,
       }
+    }
+
+    function fullscreenDockCanResize(dock) {
+      const openDocks = getFullscreenOpenDocks()
+      const index = openDocks.indexOf(dock)
+      return index >= 0 && index < openDocks.length - 1
+    }
+
+    function resetFullscreenDockHeights() {
+      for (const dock of fullscreenDockOrder) {
+        fullscreenDockWeights[dock] = 1
+      }
+    }
+
+    function setFullscreenDockBoundary(dock, firstWeight) {
+      const openDocks = getFullscreenOpenDocks()
+      const index = openDocks.indexOf(dock)
+      const nextDock = openDocks[index + 1]
+      if (!nextDock) {
+        return
+      }
+
+      const pairWeight = fullscreenDockWeights[dock] + fullscreenDockWeights[nextDock]
+      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      // Only enforce the comfortable minimum when every open dock can have
+      // it. Dense stacks keep just their header height so dividers stay useful.
+      const panelChrome = FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
+      const preferredMinimumFits = container.value.clientHeight >=
+        openDocks.length * FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT +
+        FULLSCREEN_DOCK_OUTER_INSET * 2 +
+        FULLSCREEN_DOCK_GAP * (openDocks.length - 1)
+      const minimumHeight = preferredMinimumFits
+        ? FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT
+        : FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT
+      const minimumShare = minimumHeight + panelChrome
+      const minimumWeight = Math.min(
+        pairWeight / 2,
+        minimumShare / container.value.clientHeight * totalWeight
+      )
+      const clampedWeight = Math.min(pairWeight - minimumWeight, Math.max(minimumWeight, firstWeight))
+      fullscreenDockWeights[dock] = clampedWeight
+      fullscreenDockWeights[nextDock] = pairWeight - clampedWeight
+    }
+
+    function handleFullscreenDockResizePointerDown(event, dock) {
+      if (event.button !== 0 || !fullscreenDockCanResize(dock)) {
+        return
+      }
+
+      const openDocks = getFullscreenOpenDocks()
+      const index = openDocks.indexOf(dock)
+      fullscreenDockResizing.value = true
+      resizingFullscreenDock = dock
+      resizingFullscreenDockWeightBefore = openDocks
+        .slice(0, index)
+        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      resizingFullscreenDockTotalWeight = openDocks
+        .reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      resizingFullscreenDockBounds = container.value.getBoundingClientRect()
+      window.addEventListener('pointermove', handleFullscreenDockResizePointerMove)
+      window.addEventListener('pointerup', stopFullscreenDockResize)
+      window.addEventListener('pointercancel', stopFullscreenDockResize)
+      event.preventDefault()
+    }
+
+    function handleFullscreenDockResizePointerMove(event) {
+      const pointerWeight = (event.clientY - resizingFullscreenDockBounds.top) /
+        resizingFullscreenDockBounds.height * resizingFullscreenDockTotalWeight
+      setFullscreenDockBoundary(resizingFullscreenDock, pointerWeight - resizingFullscreenDockWeightBefore)
+    }
+
+    function stopFullscreenDockResize() {
+      fullscreenDockResizing.value = false
+      resizingFullscreenDock = null
+      resizingFullscreenDockBounds = null
+      window.removeEventListener('pointermove', handleFullscreenDockResizePointerMove)
+      window.removeEventListener('pointerup', stopFullscreenDockResize)
+      window.removeEventListener('pointercancel', stopFullscreenDockResize)
+    }
+
+    onUnmounted(stopFullscreenDockResize)
+
+    function handleFullscreenDockResizeKeydown(event, dock) {
+      if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+        return
+      }
+
+      const openDocks = getFullscreenOpenDocks()
+      const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
+      const movement = (event.key === 'ArrowUp' ? -20 : 20) / container.value.clientHeight * totalWeight
+      setFullscreenDockBoundary(dock, fullscreenDockWeights[dock] + movement)
+      event.preventDefault()
     }
 
     function getShareTimestamp() {
@@ -7690,6 +7803,11 @@ export default defineComponent({
       selectOverlayChapter,
       copyChapterTimestamp,
       fullscreenDockStyle,
+      fullscreenDockCanResize,
+      fullscreenDockResizing,
+      resetFullscreenDockHeights,
+      handleFullscreenDockResizePointerDown,
+      handleFullscreenDockResizeKeydown,
       fullscreenMetadataOverlay,
       fullscreenMetadataTarget,
       showFullscreenMetadata,

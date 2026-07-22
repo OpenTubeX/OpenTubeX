@@ -50,6 +50,7 @@
         fullscreenCommentsOpen: showFullscreenComments,
         fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
+        fullscreenDockResizing,
         presentationModeChanging
       }"
       :style="[captionCssVariables, scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined]"
@@ -284,6 +285,16 @@
           @wheel.stop
           @keydown.esc.stop.prevent="closeChaptersOverlay"
         >
+          <button
+            v-if="fullscreenDockCanResize('chapters')"
+            type="button"
+            class="fullscreenDockResizeHandle"
+            :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+            :title="$t('Video.Player.Resize dock', 'Resize dock')"
+            @pointerdown="handleFullscreenDockResizePointerDown($event, 'chapters')"
+            @keydown="handleFullscreenDockResizeKeydown($event, 'chapters')"
+            @dblclick.stop.prevent="resetFullscreenDockHeights"
+          />
           <header class="chapterOverlayHeader">
             <h2 class="chapterOverlayTitle">
               <svg
@@ -330,6 +341,16 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenMetadata"
       >
+        <button
+          v-if="fullscreenDockCanResize('metadata')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'metadata')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'metadata')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
         <header class="fullscreenMetadataHeader">
           <h2 class="fullscreenDockHeading">
             <FontAwesomeIcon
@@ -368,6 +389,16 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenTranscript"
       >
+        <button
+          v-if="fullscreenDockCanResize('transcript')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'transcript')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'transcript')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
         <div
           ref="fullscreenTranscriptTarget"
           class="fullscreenTranscriptTarget"
@@ -388,6 +419,16 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenSponsorBlock"
       >
+        <button
+          v-if="fullscreenDockCanResize('sponsorBlock')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'sponsorBlock')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'sponsorBlock')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
         <div
           ref="fullscreenSponsorBlockTarget"
           class="fullscreenSponsorBlockTarget"
@@ -407,7 +448,18 @@
         @pointerdown.stop
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenComments"
-      />
+      >
+        <button
+          v-if="fullscreenDockCanResize('comments')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'comments')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'comments')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
+      </aside>
       <aside
         ref="fullscreenPlaylistOverlay"
         class="fullscreenPlaylistOverlay shaka-no-propagation"
@@ -423,6 +475,16 @@
         @wheel.stop
         @keydown.esc.stop.prevent="closeFullscreenPlaylist"
       >
+        <button
+          v-if="fullscreenDockCanResize('playlist')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'playlist')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'playlist')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
         <div
           ref="fullscreenPlaylistTarget"
           class="fullscreenPlaylistTarget"
