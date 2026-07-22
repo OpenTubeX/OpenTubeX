@@ -570,6 +570,17 @@ const showInvidiousShareOptions = computed(() => backendPreference.value === 'in
 const dropdownOptions = computed(() => {
   const options = [
     {
+      label: t('Video.Play Next'),
+      value: 'playNext'
+    },
+    {
+      label: t('Video.Add to Queue'),
+      value: 'addToQueue'
+    },
+    {
+      type: 'divider'
+    },
+    {
       label: isWatched.value
         ? t('Video.Unmark As Watched')
         : t('Video.Mark As Watched'),
@@ -707,6 +718,12 @@ function getInvidiousChannelUrl() {
  */
 function handleOptionsClick(option) {
   switch (option) {
+    case 'playNext':
+      addToWatchQueue(true)
+      break
+    case 'addToQueue':
+      addToWatchQueue(false)
+      break
     case 'history':
       if (isWatched.value) {
         unmarkAsWatched()
@@ -773,6 +790,16 @@ function handleOptionsClick(option) {
       showDownloadPrompt.value = true
       break
   }
+}
+
+function addToWatchQueue(playNext) {
+  store.commit('addVideoToWatchQueue', {
+    video: deepCopy(props.data),
+    playNext
+  })
+  showToast(playNext
+    ? t('Video.Added to Play Next')
+    : t('Video.Added to Queue'))
 }
 
 const thumbnail = computed(() => {

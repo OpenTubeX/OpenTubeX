@@ -387,6 +387,11 @@
         class="watchVideoSideBar watchVideoPlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
       />
+      <watch-video-queue
+        v-if="$store.getters.getWatchQueueLength > 0"
+        class="watchVideoSideBar watchVideoQueue"
+        @pause-player="pausePlayer"
+      />
       <Teleport
         :to="fullscreenPlaylistTarget || 'body'"
         :disabled="!fullscreenPlaylistOpen"

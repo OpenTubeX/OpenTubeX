@@ -12,6 +12,7 @@ import WatchVideoSponsorBlock from '../../components/WatchVideoSponsorBlock/Watc
 import CommentSection from '../../components/CommentSection/CommentSection.vue'
 import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLiveChat.vue'
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
+import WatchVideoQueue from '../../components/WatchVideoQueue/WatchVideoQueue.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
@@ -91,6 +92,7 @@ export default defineComponent({
     CommentSection,
     'watch-video-live-chat': WatchVideoLiveChat,
     'watch-video-playlist': WatchVideoPlaylist,
+    'watch-video-queue': WatchVideoQueue,
     'watch-video-recommendations': WatchVideoRecommendations,
     'ft-age-restricted': FtAgeRestricted
   },
@@ -352,7 +354,11 @@ export default defineComponent({
       return this.$store.getters.getDefaultVideoFormat
     },
     autoplayEnabled: function () {
+      if (this.nextQueuedVideo) { return true }
       return this.watchingPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
+    },
+    nextQueuedVideo: function () {
+      return this.$store.getters.getNextQueuedVideo
     },
     thumbnailPreference: function () {
       return this.$store.getters.getThumbnailPreference
@@ -386,11 +392,12 @@ export default defineComponent({
     },
     theatrePossible: function () {
       return this.showTranscript || !this.hideRecommendedVideos ||
-        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist ||
+        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
     autoplayPossible: function () {
-      return (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
+      return !!this.nextQueuedVideo ||
+      (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
       (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
     },
     hideChapters: function () {
@@ -2285,6 +2292,9 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
         return
       }
+      if (this.playNextQueuedVideo()) {
+        return
+      }
       if (!this.autoplayEnabled) {
         return
       }
@@ -2380,6 +2390,9 @@ export default defineComponent({
     // Skip to the next video if in a playlist
     // else next recommended video if autoplay enabled
     handleSkipToNext: function () {
+      if (this.playNextQueuedVideo()) {
+        return
+      }
       if (this.watchingPlaylist) {
         this.$refs.watchVideoPlaylist?.playNextVideo()
       } else if (!this.hideRecommendedVideos && this.nextRecommendedVideo) {
@@ -2388,6 +2401,18 @@ export default defineComponent({
         })
         showToast(this.t('Playing Next Video'))
       }
+    },
+
+    playNextQueuedVideo: function () {
+      const nextVideo = this.nextQueuedVideo
+      if (!nextVideo?.videoId) {
+        return false
+      }
+
+      this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
+      this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
+      showToast(this.t('Playing Next Video'))
+      return true
     },
 
     // Skip to the previous video in a playlist
