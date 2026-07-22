@@ -362,8 +362,8 @@ const activeDataListProperties = computed(() => {
 
   for (let i = 0; i < activeDataList.value.length; i++) {
     properties.push(i < searchHistoryEntriesCount
-      ? { isRemoveable: true, iconName: 'clock-rotate-left' }
-      : { isRemoveable: false, iconName: 'magnifying-glass' }
+      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left' }
+      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass' }
     )
   }
 
@@ -461,8 +461,9 @@ const searchSettings = computed(() => store.getters.getSearchSettings)
  * @param {string} queryText
  * @param {object} options
  * @param {MouseEvent | KeyboardEvent} options.event
+ * @param {number} [options.dataListIndex]
  */
-function goToSearch(queryText, { event }) {
+function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewWindow = event instanceof KeyboardEvent
     ? matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
     : event && event.shiftKey
@@ -478,6 +479,26 @@ function goToSearch(queryText, { event }) {
   }
 
   clearLocalSearchSuggestionsSession()
+
+  const selectedSearchHistoryEntry = activeDataListProperties.value[dataListIndex]?.isSearchHistory
+    ? store.getters.getSearchHistoryEntryWithId(queryText)
+    : null
+  const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
+
+  if (selectedSearchSettings != null) {
+    store.commit('setSearchPrioritize', selectedSearchSettings.prioritize)
+    store.commit('setSearchTime', selectedSearchSettings.time)
+    store.commit('setSearchType', selectedSearchSettings.type)
+    store.commit('setSearchDuration', selectedSearchSettings.duration)
+    store.commit('setSearchFeatures', [...selectedSearchSettings.features])
+    store.commit('setSearchFilterValueChanged',
+      selectedSearchSettings.prioritize !== 'relevance' ||
+      selectedSearchSettings.time !== '' ||
+      selectedSearchSettings.type !== 'all' ||
+      selectedSearchSettings.duration !== '' ||
+      selectedSearchSettings.features.length > 0
+    )
+  }
 
   store.dispatch('getYoutubeUrlInfo', queryText).then((result) => {
     switch (result.urlType) {
@@ -582,15 +603,16 @@ function goToSearch(queryText, { event }) {
 
       case 'invalid_url':
       default: {
+        const settings = selectedSearchSettings ?? searchSettings.value
         openInternalPath({
           path: `/search/${encodeURIComponent(queryText)}`,
           query: {
-            prioritize: searchSettings.value.prioritize,
-            time: searchSettings.value.time,
-            type: searchSettings.value.type,
-            duration: searchSettings.value.duration,
+            prioritize: settings.prioritize,
+            time: settings.time,
+            type: settings.type,
+            duration: settings.duration,
             // Array proxy cannot be cloned during IPC call
-            features: [...searchSettings.value.features],
+            features: [...settings.features],
           },
           doCreateNewWindow,
           doCreateNewTab,

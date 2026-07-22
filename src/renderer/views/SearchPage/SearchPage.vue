@@ -149,10 +149,17 @@ onMounted(() => {
   checkSearchCache(payload)
 })
 
-function updateSearchHistoryEntry() {
+function updateSearchHistoryEntry(searchSettings) {
   const persistentSearchHistoryPayload = {
     _id: processedQuery.value,
-    lastUpdatedAt: Date.now()
+    lastUpdatedAt: Date.now(),
+    searchSettings: {
+      prioritize: searchSettings.prioritize,
+      time: searchSettings.time,
+      type: searchSettings.type,
+      duration: searchSettings.duration,
+      features: [...searchSettings.features]
+    }
   }
 
   store.dispatch('updateSearchHistoryEntry', persistentSearchHistoryPayload)
@@ -188,7 +195,7 @@ function checkSearchCache(payload) {
   }
 
   if (rememberSearchHistory.value) {
-    updateSearchHistoryEntry()
+    updateSearchHistoryEntry(payload.searchSettings)
   }
 }
 
