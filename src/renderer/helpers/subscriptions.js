@@ -13,6 +13,7 @@ import {
   showToastOnAllTabs
 } from './utils'
 import { isHistoryEntryWatched } from './history'
+import { getValidSubscriptionChannels } from './subscription-channels'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
@@ -407,7 +408,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = activeProfile.subscriptions
+  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
   if (activeSubscriptionList.length === 0) {
     completeSubscriptionRefresh('videos', activeProfile._id)
     return []
@@ -505,7 +506,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = activeProfile.subscriptions
+  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
   if (activeSubscriptionList.length === 0) {
     completeSubscriptionRefresh('shorts', activeProfile._id)
     return []
@@ -589,7 +590,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = activeProfile.subscriptions
+  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
   if (activeSubscriptionList.length === 0) {
     completeSubscriptionRefresh('live', activeProfile._id)
     return []
@@ -687,7 +688,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   showStartToast = false,
   errorChannels = []
 }, activeProfile) {
-  const activeSubscriptionList = activeProfile.subscriptions
+  const activeSubscriptionList = getValidSubscriptionChannels(activeProfile.subscriptions)
   if (activeSubscriptionList.length === 0) {
     completeSubscriptionRefresh('posts', activeProfile._id)
     return []
