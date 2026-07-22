@@ -188,14 +188,14 @@
             @click="saveChannelVideoQualityManually"
           />
           <FtIconButton
-            v-if="useSponsorBlock && !isUpcoming"
+            v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
             :title="sponsorBlockInfoTitle"
             :icon="['fas', 'shield-halved']"
             :theme="sponsorBlockPanelOpen ? 'secondary' : 'base'"
             @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
-            v-if="!isLive && !isUpcoming"
+            v-if="!isLive && !isUpcoming && !hideFullscreenDockActions"
             :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
             :icon="['fas', 'file-lines']"
             :theme="transcriptOpen ? 'secondary' : 'base'"
@@ -378,6 +378,10 @@ const props = defineProps({
     default: false
   },
   hidePlaylistActions: {
+    type: Boolean,
+    default: false
+  },
+  hideFullscreenDockActions: {
     type: Boolean,
     default: false
   },

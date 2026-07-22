@@ -76,7 +76,7 @@ export class TabNavigationService {
     const translatedTitle = typeof resolvedTargetRoute.meta?.title === 'string'
       ? translateWindowTitle(resolvedTargetRoute.meta.title)
       : null
-    if (translatedTitle !== null) {
+    if (translatedTitle !== null && resolvedTargetRoute.meta?.hasDynamicTitle !== true) {
       this.setTitle(tabId, translatedTitle)
     }
 

@@ -153,7 +153,7 @@
         </div>
       </Transition>
       <div
-        v-if="watchingPlaylist || commentsAvailable || showFullscreenShareAction || showFullscreenPlaylistAction || quickBookmarkEnabled"
+        v-if="watchingPlaylist || commentsAvailable || useSponsorBlock || !isLive || showFullscreenShareAction || showFullscreenPlaylistAction || quickBookmarkEnabled"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
@@ -181,6 +181,38 @@
           @click="setFullscreenComments(!showFullscreenComments)"
         >
           <FontAwesomeIcon :icon="['fas', 'comment']" />
+        </button>
+        <button
+          v-if="useSponsorBlock && !isUpcoming"
+          type="button"
+          class="fullscreenAction fullscreenSponsorBlockToggle"
+          :class="{ open: showFullscreenSponsorBlock }"
+          :aria-label="showFullscreenSponsorBlock
+            ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+            : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+          :title="showFullscreenSponsorBlock
+            ? $t('Video.Player.SponsorBlock.CloseInfoPanel')
+            : $t('Video.Player.SponsorBlock.OpenInfoPanel')"
+          :aria-expanded="String(showFullscreenSponsorBlock)"
+          @click="toggleFullscreenSponsorBlock"
+        >
+          <FontAwesomeIcon :icon="['fas', 'shield-halved']" />
+        </button>
+        <button
+          v-if="!isLive && !isUpcoming"
+          type="button"
+          class="fullscreenAction fullscreenTranscriptToggle"
+          :class="{ open: showFullscreenTranscript }"
+          :aria-label="showFullscreenTranscript
+            ? $t('Video.Transcript.Hide')
+            : $t('Video.Transcript.Show')"
+          :title="showFullscreenTranscript
+            ? $t('Video.Transcript.Hide')
+            : $t('Video.Transcript.Show')"
+          :aria-expanded="String(showFullscreenTranscript)"
+          @click="toggleFullscreenTranscript"
+        >
+          <FontAwesomeIcon :icon="['fas', 'file-lines']" />
         </button>
         <FtShareButton
           v-if="showFullscreenShareAction"

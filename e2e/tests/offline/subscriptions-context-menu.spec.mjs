@@ -27,33 +27,14 @@ test.use({
   }
 })
 
-async function getCapturedReloadLabel(electronApp, menuIndex) {
-  try {
-    return await electronApp.evaluate((_, index) => {
-      const menu = globalThis.__subscriptionContextMenus[index]
-      const reloadItem = menu && menu.find(item => item.label && item.label.startsWith('Reload'))
-      return reloadItem && reloadItem.label
-    }, menuIndex)
-  } catch (error) {
-    // Creating a native context menu can briefly replace Playwright's main-
-    // process execution context. Treat that window like an absent menu so
-    // expect.poll retries, while preserving all other evaluation failures.
-    if (!String(error.message).includes('Execution context was destroyed')) {
-      throw error
-    }
-    return undefined
-  }
-}
-
-test('subscription tabs expose feed-specific reload actions', async ({ app, page }) => {
+test('subscription tabs expose feed-specific reload actions', async ({ page }) => {
   await goTo(page, 'subscriptions')
 
-  await app.electronApp.evaluate(({ Menu }) => {
-    globalThis.__subscriptionContextMenus = []
-    Menu.buildFromTemplate = (template) => {
-      globalThis.__subscriptionContextMenus.push(template)
-      return { popup () {} }
-    }
+  await page.evaluate(() => {
+    window.__subscriptionFeedReloadRequests = []
+    window.__removeSubscriptionFeedReloadListener = window.ftElectron.subscriptionFeeds.onRequestReload((payload) => {
+      window.__subscriptionFeedReloadRequests.push(payload)
+    })
   })
 
   const feedTabs = [
@@ -66,28 +47,13 @@ test('subscription tabs expose feed-specific reload actions', async ({ app, page
 
   for (const [index, { feedTab, label }] of feedTabs.entries()) {
     await page.locator(`[data-subscription-feed-tab="${feedTab}"]`).click({ button: 'right' })
+    const menu = page.getByRole('menu', { name: 'Context menu' })
+    await expect(menu).toBeVisible()
+    await menu.getByRole('menuitem', { name: label }).click()
 
-    await expect.poll(() => getCapturedReloadLabel(app.electronApp, index)).toBe(label)
-  }
-
-  // Unmount Subscriptions so invoking the captured actions only exercises the
-  // context-menu IPC path instead of starting real network refreshes offline.
-  await goTo(page, 'history')
-  await expect(page.locator('[data-subscription-feed-tab]')).toHaveCount(0)
-
-  await page.evaluate(() => {
-    window.__subscriptionFeedReloadRequests = []
-    window.__removeSubscriptionFeedReloadListener = window.ftElectron.subscriptionFeeds.onRequestReload((payload) => {
-      window.__subscriptionFeedReloadRequests.push(payload)
-    })
-  })
-
-  for (let index = 0; index < feedTabs.length; index++) {
-    await app.electronApp.evaluate((_, menuIndex) => {
-      globalThis.__subscriptionContextMenus[menuIndex]
-        .find(item => item.label && item.label.startsWith('Reload'))
-        .click()
-    }, index)
+    await expect.poll(async () => {
+      return await page.evaluate(() => window.__subscriptionFeedReloadRequests.length)
+    }).toBe(index + 1)
   }
 
   await expect.poll(async () => {
@@ -98,4 +64,40 @@ test('subscription tabs expose feed-specific reload actions', async ({ app, page
   })))
 
   await page.evaluate(() => window.__removeSubscriptionFeedReloadListener())
+})
+
+test('disabled context menu actions cannot execute through IPC', async ({ page }) => {
+  const searchInput = page.locator('.searchInput input')
+  await searchInput.fill('selection')
+  await searchInput.selectText()
+
+  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+    isEditable: true,
+    editFlags: { canCut: false }
+  }))
+  const cut = contextMenu.items.find(item => item.label === 'Cut')
+
+  expect(cut.enabled).toBe(false)
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: cut.actionId })
+  await expect(searchInput).toHaveValue('selection')
+})
+
+test.describe('German locale', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+
+  test('translates custom context menu actions', async ({ page }) => {
+    const searchInput = page.locator('.searchInput input')
+    await searchInput.fill('Auswahl')
+    await searchInput.selectText()
+    await searchInput.click({ button: 'right' })
+
+    const menu = page.getByRole('menu', { name: 'Kontextmenü' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Einfügen' })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Alles auswählen' })).toBeVisible()
+    await menu.getByRole('menuitem', { name: 'Ausschneiden' }).click()
+    await expect(searchInput).toHaveValue('')
+  })
 })

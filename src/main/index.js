@@ -24,8 +24,6 @@ import asyncFs from 'fs/promises'
 import { promisify } from 'util'
 import { brotliDecompress } from 'zlib'
 
-import contextMenu from 'electron-context-menu'
-
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { handleYtDlpCancelDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo } from './ytDlp'
@@ -283,7 +281,7 @@ function runApp() {
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
-  /** @type {import('electron-context-menu').Options} */
+  /** @type {Record<string, Function | boolean>} */
   const contextMenuOptions = {
     showSearchWithGoogle: false,
     showSaveImageAs: true,
@@ -694,11 +692,12 @@ function runApp() {
         }
       }
 
-      const textShortEnoughForSearch = parameters.selectionText.trim().length <= SEARCH_CHAR_LIMIT
+      const selectionText = parameters.selectionText.trim()
+      const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
 
       return [
         {
-          label: 'Copy Lin&k',
+          label: 'Copy Link',
           visible: visible && !isInAppUrl,
           click: () => {
             copy(parameters.linkURL)
@@ -724,21 +723,20 @@ function runApp() {
         // NOT link with no customized link text
         // NOT link for timestamp
         {
-          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Tab' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Tab` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
             !parameters.isEditable &&
             (parameters.linkURL != null && !parameters.linkURL.includes(parameters.selectionText) && !(/(\d{1,2}:)*\d{1,2}:\d{2}/.test(parameters.linkText))) &&
-            parameters.selectionText.trim().length > 0
+            selectionText.length > 0
           ),
           click: () => {
-            const queryText = parameters.selectionText.trim()
             const manager = TabManager.getFromWebContents(webContents)
             if (manager) {
               manager.createTabWithPreferenceFromOpener(
                 {
-                  route: `/search/${encodeURIComponent(queryText)}`,
+                  route: `/search/${encodeURIComponent(selectionText)}`,
                   makeActive: true
                 },
                 manager.contextMenuTabId ?? manager.presentedTabId ?? manager.activeTabId
@@ -749,20 +747,19 @@ function runApp() {
           }
         },
         {
-          label: textShortEnoughForSearch ? 'Search "{selection}" in a New Window' : `"{selection}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Window` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
             !parameters.isEditable &&
             (parameters.linkURL != null && !parameters.linkURL.includes(parameters.selectionText) && !(/(\d{1,2}:)*\d{1,2}:\d{2}/.test(parameters.linkText))) &&
-            parameters.selectionText.trim().length > 0
+            selectionText.length > 0
           ),
           click: () => {
-            const queryText = parameters.selectionText.trim()
             createWindow({
               replaceMainWindow: false,
-              windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(queryText)}`,
-              searchQueryText: queryText,
+              windowStartupUrl: `${ROOT_APP_URL}#/search/${encodeURIComponent(selectionText)}`,
+              searchQueryText: selectionText,
               showWindowNow: true,
             })
           }
@@ -770,6 +767,145 @@ function runApp() {
       ]
     },
   }
+
+  let contextMenuSessionId = 0
+  /** @type {Map<number, { sessionId: number, actions: Map<string, Function> }>} */
+  const contextMenuSessions = new Map()
+
+  function createDefaultContextMenuActions(parameters, webContents) {
+    const hasSelection = parameters.selectionText.length > 0
+    const can = action => parameters.editFlags[`can${action}`] === true
+
+    return {
+      separator: () => ({ type: 'separator' }),
+      cut: () => ({
+        label: 'Cut',
+        visible: parameters.isEditable,
+        enabled: can('Cut') && hasSelection,
+        click: () => webContents.cut()
+      }),
+      copy: () => ({
+        label: 'Copy',
+        visible: parameters.isEditable || hasSelection,
+        enabled: can('Copy') && hasSelection,
+        click: () => webContents.copy()
+      }),
+      paste: () => ({
+        label: 'Paste',
+        visible: parameters.isEditable,
+        enabled: can('Paste'),
+        click: () => webContents.paste()
+      }),
+      selectAll: () => ({
+        label: 'Select All',
+        click: () => webContents.selectAll()
+      }),
+      saveImageAs: () => ({
+        label: 'Save Image As…',
+        visible: parameters.mediaType === 'image',
+        click: () => webContents.downloadURL(parameters.srcURL)
+      }),
+      copyImage: () => ({
+        label: 'Copy Image',
+        visible: parameters.mediaType === 'image',
+        click: () => webContents.copyImageAt(parameters.x, parameters.y)
+      }),
+      copyImageAddress: () => ({
+        label: 'Copy Image Address',
+        visible: parameters.mediaType === 'image',
+        click: () => clipboard.writeText(parameters.srcURL)
+      })
+    }
+  }
+
+  function removeUnusedContextMenuItems(items) {
+    const visibleItems = items.filter(item => item && item.visible !== false)
+    const cleanedItems = []
+
+    for (const item of visibleItems) {
+      if (item.type === 'separator' && (cleanedItems.length === 0 || cleanedItems.at(-1).type === 'separator')) {
+        continue
+      }
+      cleanedItems.push(item)
+    }
+
+    if (cleanedItems.at(-1)?.type === 'separator') cleanedItems.pop()
+    return cleanedItems
+  }
+
+  function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
+    return removeUnusedContextMenuItems(items).map((item, index) => {
+      if (item.type === 'separator') return { type: 'separator' }
+
+      const actionId = `${actionPrefix}-${index}`
+      const hasAction = item.enabled !== false && typeof item.click === 'function'
+      if (hasAction) actions.set(actionId, () => item.click(item))
+
+      const submenu = Array.isArray(item.submenu)
+        ? serializeContextMenuItems(item.submenu, actions, actionId)
+        : undefined
+
+      return {
+        type: item.type ?? 'normal',
+        label: String(item.label ?? ''),
+        enabled: item.enabled !== false,
+        checked: item.checked === true,
+        actionId: hasAction ? actionId : undefined,
+        submenu
+      }
+    })
+  }
+
+  ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, (event, rawParameters = {}) => {
+    const webContents = event.sender
+    const parameters = {
+      x: Number.isFinite(rawParameters.x) ? rawParameters.x : 0,
+      y: Number.isFinite(rawParameters.y) ? rawParameters.y : 0,
+      pageURL: typeof rawParameters.pageURL === 'string' ? rawParameters.pageURL : '',
+      linkURL: typeof rawParameters.linkURL === 'string' ? rawParameters.linkURL : '',
+      linkText: typeof rawParameters.linkText === 'string' ? rawParameters.linkText : '',
+      srcURL: typeof rawParameters.srcURL === 'string' ? rawParameters.srcURL : '',
+      mediaType: ['image', 'video'].includes(rawParameters.mediaType) ? rawParameters.mediaType : 'none',
+      selectionText: typeof rawParameters.selectionText === 'string' ? rawParameters.selectionText : '',
+      isEditable: rawParameters.isEditable === true,
+      editFlags: {
+        canCut: rawParameters.editFlags?.canCut === true,
+        canCopy: rawParameters.editFlags?.canCopy === true,
+        canPaste: rawParameters.editFlags?.canPaste === true,
+        canSelectAll: rawParameters.editFlags?.canSelectAll === true
+      }
+    }
+    const defaultActions = createDefaultContextMenuActions(parameters, webContents)
+    const defaultItems = [
+      defaultActions.cut(),
+      defaultActions.copy(),
+      defaultActions.paste(),
+      defaultActions.separator(),
+      defaultActions.saveImageAs(),
+      defaultActions.copyImage(),
+      defaultActions.copyImageAddress(),
+      defaultActions.separator()
+    ]
+    const items = [
+      ...contextMenuOptions.prepend(defaultActions, parameters, webContents),
+      ...defaultItems,
+      ...contextMenuOptions.append(defaultActions, parameters, webContents)
+    ]
+    const actions = new Map()
+    const sessionId = ++contextMenuSessionId
+    const serializedItems = serializeContextMenuItems(items, actions)
+
+    contextMenuSessions.set(webContents.id, { sessionId, actions })
+    return { sessionId, items: serializedItems }
+  })
+
+  ipcMain.handle(IpcChannels.CONTEXT_MENU_EXECUTE, async (event, payload) => {
+    const session = contextMenuSessions.get(event.sender.id)
+    if (!session || payload?.sessionId !== session.sessionId) return
+
+    const action = session.actions.get(payload?.actionId)
+    if (action) await action()
+  })
 
   if (process.platform === 'win32') {
     app.setUserTasks([
@@ -3647,8 +3783,6 @@ function runApp() {
   })
 
   app.on('web-contents-created', (_, webContents) => {
-    contextMenu({ ...contextMenuOptions, window: webContents })
-
     // When a main-frame document starts loading, the previous renderer is gone.
     // Drop its readiness entry so sendOpenUrlToWebContents queues messages until
     // the new renderer signals APP_READY again, instead of delivering to a
@@ -3660,6 +3794,7 @@ function runApp() {
     })
 
     webContents.once('destroyed', () => {
+      contextMenuSessions.delete(webContents.id)
       pendingOpenUrlsByWebContentsId.delete(webContents.id)
       openUrlReadyWebContentsIds.delete(webContents.id)
       invidiousAuthorizations.delete(webContents.id)

@@ -133,6 +133,7 @@ export const routes = [
     path: '/playlist/:id',
     meta: {
       title: 'Playlist',
+      hasDynamicTitle: true,
       hasResizableThumbnails: true
     },
     component: Playlist

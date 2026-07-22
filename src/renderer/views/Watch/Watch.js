@@ -827,6 +827,8 @@ export default defineComponent({
     resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
       const previousVideoTitle = this.videoTitle
 
+      this.playlistScrollPositions.sidebar = null
+      this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
       this.isFamilyFriendly = false
       this.isLive = false
@@ -2134,9 +2136,6 @@ export default defineComponent({
       // Check isUpcoming to avoid marking upcoming videos as watched if the user has only watched the trailer
       if (!this.videoPlayerLoaded && !this.isUpcoming) {
         this.videoPlayerLoaded = true
-        this.playlistScrollPositions.sidebar = null
-        this.playlistScrollPositions.fullscreen = null
-        this.$refs.watchVideoPlaylist?.centerCurrentVideo()
 
         if (this.rememberHistory) {
           if (this.timestamp) {

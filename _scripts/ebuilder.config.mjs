@@ -58,6 +58,15 @@ export default {
   // https://github.com/jordansissel/fpm/issues/1503
   // https://github.com/jgraph/drawio-desktop/issues/259
   rpm: {
+    depends: [
+      'gtk3',
+      'libnotify',
+      'nss',
+      '(libXtst or libXtst6)',
+      'xdg-utils',
+      'at-spi2-core',
+      '(libuuid or libuuid1)'
+    ],
     fpm: ['--rpm-rpmbuild-define=_build_id_links none']
   },
   deb: {

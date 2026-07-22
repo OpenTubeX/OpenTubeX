@@ -35,9 +35,9 @@
   inset-inline-start: 0;
   inline-size: 14px;
   block-size: 14px;
-  margin-block-start: -9px;
   border: 2px solid var(--primary-text-color);
   text-align: center;
+  transform: translateY(-50%);
   transition: all 0.4s ease;
 }
 
@@ -50,11 +50,10 @@
   background-color: transparent;
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-start: 4px;
+  inset-inline-start: 3px;
   inline-size: 8px;
   block-size: 3px;
-  margin-block-start: -4px;
-  transform: rotate(-45deg) scale(0);
+  transform: translateY(calc(-50% - 0.5px)) rotate(-45deg) scale(0);
   transform-origin: 50%;
   transition: transform 200ms ease-out;
 }
@@ -72,7 +71,7 @@ input[type='checkbox']:disabled + label .checkboxLabelText { opacity: 0.4; }
 
 .pure-checkbox input[type='checkbox']:checked + label::after {
   content: '';
-  transform: rotate(-45deg) scale(1);
+  transform: translateY(calc(-50% - 0.5px)) rotate(-45deg) scale(1);
   transition: transform 200ms ease-out;
 }
 

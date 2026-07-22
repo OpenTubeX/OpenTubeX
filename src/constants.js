@@ -63,6 +63,8 @@ const IpcChannels = {
   TABS_REQUEST_FULLSCREEN: 'tabs-request-fullscreen',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',
   TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',
+  CONTEXT_MENU_OPEN: 'context-menu-open',
+  CONTEXT_MENU_EXECUTE: 'context-menu-execute',
   CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',
