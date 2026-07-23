@@ -1111,3 +1111,8 @@ Autoplay Interruption Timer: Автоигра отменена из-за {autopl
 shortcutLabelSeparator: ｜
 Compact side navigation: Свернуть боковую панель
 Expand side navigation: Развернуть боковую панель
+New Tab: Новая вкладка
+Close Tab: Закрыть вкладку
+Close Confirmation:
+  Title: Выйти из OpenTubeX?
+  Message: Вы уверены что хотите выйти из OpenTubeX?
