@@ -2232,7 +2232,10 @@ async function saveStateInRouter(query) {
   let location
 
   if (query === '') {
-    location = { path: `/channel/${id.value}` }
+    location = {
+      path: `/channel/${id.value}`,
+      state: { skipTabRouteLoading: true }
+    }
   } else {
     location = {
       path: `/channel/${id.value}`,
@@ -2241,7 +2244,8 @@ async function saveStateInRouter(query) {
       },
       query: {
         searchQueryText: query,
-      }
+      },
+      state: { skipTabRouteLoading: true }
     }
   }
 

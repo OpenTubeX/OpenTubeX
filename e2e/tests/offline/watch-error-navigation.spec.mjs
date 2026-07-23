@@ -3,7 +3,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
-import { goTo, repoRoot, test, expect } from '../../helpers/app.mjs'
+import { goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
@@ -37,7 +37,13 @@ async function fixture(dir, name) {
   }
 }
 
-async function mockBlockedVideo({ app, page, beforePlayerResponse, omitVideoMetadata = false }) {
+async function mockBlockedVideo({
+  app,
+  page,
+  beforePlayerResponse,
+  beforeNextResponse,
+  omitVideoMetadata = false
+}) {
   await app.electronApp.evaluate(({ ipcMain }) => {
     ipcMain.removeHandler('generate-po-token')
     ipcMain.handle('generate-po-token', () => 'test-po-token')
@@ -84,6 +90,9 @@ async function mockBlockedVideo({ app, page, beforePlayerResponse, omitVideoMeta
     }
 
     if (url.includes('/youtubei/v1/')) {
+      if (url.includes('/youtubei/v1/next')) {
+        await beforeNextResponse?.()
+      }
       const key = fixtureKey(url, request.postData())
       let body = await fixture(fixtureDir, `${key}.0.json.gz`)
       if (!body) {
@@ -175,5 +184,41 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
     expectNoRenderErrors(errors)
   } finally {
     releasePlayerResponse()
+  }
+})
+
+test('a late video response cannot replace the title after going back', async ({ app, page }) => {
+  let releaseMetadataResponse
+  let notifyMetadataRequested
+  const metadataResponseReleased = new Promise((resolve) => { releaseMetadataResponse = resolve })
+  const metadataRequested = new Promise((resolve) => { notifyMetadataRequested = resolve })
+  await mockBlockedVideo({
+    app,
+    page,
+    beforeNextResponse: async () => {
+      notifyMetadataRequested()
+      await metadataResponseReleased
+    }
+  })
+
+  try {
+    await goTo(page, 'history')
+    await page.getByText('Blocked test video').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await metadataRequested
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/history/)
+    await expect(page.locator('.tabBar .tab.active')).toContainText('History')
+
+    const metadataResponse = page.waitForResponse((response) =>
+      response.url().includes('/youtubei/v1/next')
+    )
+    releaseMetadataResponse()
+    await metadataResponse
+    await expect(page.locator('.tabBar .tab.active')).toContainText('History')
+    await expect(page.locator('.tabBar .tab.active')).not.toContainText('Me at the zoo')
+  } finally {
+    releaseMetadataResponse()
   }
 })
