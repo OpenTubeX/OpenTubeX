@@ -1,0 +1,27 @@
+diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
+index 15a75205adac5ae9c14227791bcd307d5687b67c..029945705b77301479e1d09e9e08748d1e298a56 100644
+--- a/dist/shaka-player.ui-es2021.js
++++ b/dist/shaka-player.ui-es2021.js
+@@ -1733,7 +1733,7 @@ break;case a.g.shortcuts.captions.toLowerCase():if(!a.ib)break;a.j.Ua().some(k=>
+ (d=a.j.sa(),e=d.end-d.start,e>0&&nI(a,d.start+parseInt(b.key,10)/10*e))}}}function nI(a,b,c=!1){c&&"fastSeek"in a.A?a.A.fastSeek(b):a.A.currentTime=b;mI(a)}function UJ(a,b){if(!(a.l&&a.l.isLinear()||a.j.yc())){var c=a.j.getVideoTracks().find(d=>d.active);c&&c.frameRate&&(a.A.paused||a.A.pause(),mI(a),c=1/c.frameRate,b=a.$b()+c*b,b>=0&&b<=a.j.sa().end&&a.A.currentTime!==b&&nI(a,b))}}
+ function RJ(a,b){var c=a.T.filter(e=>!e.classList.contains("shaka-hidden"));if(c.length){var d=c[0];if(d.childNodes.length){for(c=d.firstElementChild;c&&c.classList.contains("shaka-hidden");)c=c.nextElementSibling;for(d=d.lastElementChild;d&&d.classList.contains("shaka-hidden");)d=d.previousElementSibling;const e=document.activeElement;a.Ha.has("Shift")?e==c&&(b.preventDefault(),d.focus()):e==d&&(b.preventDefault(),c.focus())}}}
+ var X=class extends ta{constructor(a,b,c,d,e){super();this.Aa=!0;this.g=e;this.C=new fv(c,a,this.g.castReceiverAppId,this.g.castAndroidReceiverCompatible);this.Va=null;this.Oa=!0;this.A=this.C.sd();this.o=c;this.j=this.C.Lb();this.Ka=a;this.m=b;this.kd=d;this.M=this.C.Zb();this.Nb=this.j.wc();this.Nb.setCustomPlayer(this.j);this.l=this.M.getCurrentAd();this.ua=[];this.H=[];this.D=null;this.W=!1;this.T=[];this.Db=[];this.ib=null;this.Tc=[];this.Eb=!1;this.U=new I(()=>{this.g.showUIAlways||this.g.showUIAlwaysOnAudioOnly&&
+-this.j.yc()||(this.m.classList.add("no-cursor"),this.Eb=!1,uJ(this))});this.gb=new I(()=>{this.g.showUIAlways||this.g.showUIAlwaysOnAudioOnly&&this.j.yc()||this.g.menuOpenUntilUserClosesIt&&this.Hb()||(this.h.removeAttribute("shown"),pJ(this),qJ(this),this.Ba&&this.Ba.Ie(),this.R.Y(this.g.closeMenusDelay))});this.R=new I(()=>{for(const f of this.T)V(f,!1);this.g.enableTooltips&&this.I.classList.add("shaka-tooltips-on");this.g.enableTooltips&&this.L.classList.add("shaka-tooltips-on")});this.Z=new I(()=>
++this.j.yc()||(this.m.classList.add("no-cursor"),this.Eb=!1,uJ(this))});this.gb=new I(()=>{this.g.showUIAlways||this.g.showUIAlwaysOnAudioOnly&&this.j.yc()||this.g.menuOpenUntilUserClosesIt&&(this.Hb()||this.rh())||(this.h.removeAttribute("shown"),pJ(this),qJ(this),this.Ba&&this.Ba.Ie(),this.R.Y(this.g.closeMenusDelay))});this.R=new I(()=>{for(const f of this.T)V(f,!1);this.g.enableTooltips&&this.I.classList.add("shaka-tooltips-on");this.g.enableTooltips&&this.L.classList.add("shaka-tooltips-on")});this.Z=new I(()=>
+ {this.Th()});this.Fb=new I(()=>{this.Fa()&&mI(this)});this.ba=this.S=null;this.J=[];this.ia=jJ();this.i=new nc;this.B=null;this.configure(this.g);rJ(this);this.Ha=new Set;vJ(this);this.Fb.va(this.g.refreshTickInSeconds);this.i.u(this.ia,"locale-updated",()=>{yJ(this)});this.i.u(this.ia,"locale-changed",f=>{f=f.locales[0];this.M.setLocale(f);this.m.setAttribute("lang",f);yJ(this)});this.M.setContainers(this.F,this.G);this.i.u(this.j,"textchanged",()=>{qJ(this);const f=this.j.Ua().find(g=>g.active);
+ f&&(this.ib=f)});this.i.N(this.j,["trackschanged","manifestupdated","loaded"],()=>{this.j.wd()&&yJ(this)});this.i.u(this.j,"unloading",f=>{this.l||(f=f.isSwitchingContent||!1,this.ua=[],this.ib=null,this.Mb()&&!f&&zJ(this),this.yd()&&!f&&this.Fc(),this.H.length&&(this.H=[],this.dispatchEvent(new C("chaptersupdated"))))});this.na=new oI(this)}async destroy(a=!1){document.pictureInPictureElement==this.o&&await document.exitPictureInPicture();this.i?.release();this.i=null;this.U?.stop();this.U=null;
+ this.gb?.stop();this.gb=null;this.R?.stop();this.R=null;this.Z?.stop();this.Z=null;this.Fb?.stop();this.Fb=null;this.B?.release();this.B=null;BJ(this);this.h&&(this.m.removeChild(this.h),this.h=null);this.C&&(await this.C.destroy(a),this.C=null);this.K&&(this.m.removeChild(this.K),this.K=null);this.F&&(this.m.removeChild(this.F),this.F=null);this.G&&(this.m.removeChild(this.G),this.G=null);this.Ka&&(await this.Ka.destroy(),this.Ka=null);this.ia=this.A=this.o=this.j=null;this.Ha.clear();this.na&&(this.na.release(),
+diff --git a/ui/controls.js b/ui/controls.js
+index b525e966d69c8e891adf54b7349b36add9b5e8b5..e85a973f83a55de978fcc1963bd423067eb97086 100644
+--- a/ui/controls.js
++++ b/ui/controls.js
+@@ -258,7 +258,8 @@ shaka.ui.Controls = class extends shaka.util.FakeEventTarget {
+         return;
+       }
+       if (this.config_.menuOpenUntilUserClosesIt &&
+-          this.anySettingsMenusAreOpen()) {
++          (this.anySettingsMenusAreOpen() ||
++           this.anyContextMenusAreOpen())) {
+         return;
+       }
+       this.controlsContainer_.removeAttribute('shown');

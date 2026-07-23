@@ -9,6 +9,7 @@ overrides:
   yauzl: '>=3.3.1'
 
 patchedDependencies:
+  shaka-player@5.1.12: d7a625baee43220165232606838fe34de9c31643a38f4d8b81cb37f6b14a420c
   youtubei.js@17.2.0: 5062fcdebe048b48ccd6a8a1e9dd8797c1b9ae83f7fc11add8f8928b4d4f0c83
 
 importers:
@@ -53,7 +54,7 @@ importers:
         version: 0.11.10
       shaka-player:
         specifier: ^5.1.12
-        version: 5.1.12
+        version: 5.1.12(patch_hash=d7a625baee43220165232606838fe34de9c31643a38f4d8b81cb37f6b14a420c)
       swiper:
         specifier: ^14.0.5
         version: 14.0.5
@@ -9738,7 +9739,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shaka-player@5.1.12: {}
+  shaka-player@5.1.12(patch_hash=d7a625baee43220165232606838fe34de9c31643a38f4d8b81cb37f6b14a420c): {}
 
   shallow-clone@3.0.1:
     dependencies:
