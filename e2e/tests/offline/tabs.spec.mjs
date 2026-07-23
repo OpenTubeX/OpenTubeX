@@ -79,6 +79,34 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click({ button: 'right' })
+
+    const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+    await closeTabs.hover()
+
+    const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+
+    const parentBox = await closeTabs.boundingBox()
+    const submenuBox = await submenu.boundingBox()
+    expect(parentBox).not.toBeNull()
+    expect(submenuBox).not.toBeNull()
+
+    await page.mouse.move(
+      parentBox.x + parentBox.width * 0.75,
+      parentBox.y + parentBox.height / 2
+    )
+    await page.mouse.move(
+      submenuBox.x + submenuBox.width / 2,
+      submenuBox.y + submenuBox.height * 0.8,
+      { steps: 10 }
+    )
+
+    await expect(submenu).toBeVisible()
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)

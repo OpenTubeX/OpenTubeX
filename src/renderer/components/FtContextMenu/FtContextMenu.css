@@ -158,11 +158,26 @@
   transition: opacity 100ms ease, transform 100ms ease, visibility 0s linear 100ms;
 }
 
+.submenu::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 100%;
+  inline-size: 48px;
+  clip-path: polygon(0 16px, 100% 0, 100% 100%);
+  content: '';
+}
+
 .submenusOpenStart .submenu,
 :global(.isLocaleRightToLeft) .submenu {
   inset-inline: auto calc(100% - 2px);
   transform: translateX(4px) scale(0.98);
   transform-origin: top right;
+}
+
+.submenusOpenStart .submenu::before,
+:global(.isLocaleRightToLeft) .submenu::before {
+  inset-inline: 100% auto;
+  clip-path: polygon(0 0, 0 100%, 100% 16px);
 }
 
 .submenuContainer:hover > .submenu,
