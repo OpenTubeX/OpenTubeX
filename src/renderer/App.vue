@@ -1788,12 +1788,10 @@ function handleFindbarNavigationShortcut(event) {
   const isNextShortcut = [
     shortcuts.FIND_NEXT,
     shortcuts.FIND_NEXT_ALT,
-    shortcuts.FIND_NEXT_ALT_ENTER,
   ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
   const isPreviousShortcut = [
     shortcuts.FIND_PREVIOUS,
     shortcuts.FIND_PREVIOUS_ALT,
-    shortcuts.FIND_PREVIOUS_ALT_ENTER,
   ].some(shortcut => matchesKeyboardShortcut(event, shortcut))
 
   if (!isNextShortcut && !isPreviousShortcut) {
