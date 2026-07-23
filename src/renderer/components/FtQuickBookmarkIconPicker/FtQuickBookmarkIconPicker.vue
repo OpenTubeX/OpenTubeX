@@ -21,7 +21,6 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { QUICK_BOOKMARK_ICONS } from '../../helpers/quickBookmarkIcons'
@@ -36,14 +35,14 @@ defineProps({
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 
-const iconLabels = computed(() => ({
-  bookmark: t('User Playlists.Quick Bookmark Icons.bookmark'),
-  clock: t('User Playlists.Quick Bookmark Icons.clock'),
-  heart: t('User Playlists.Quick Bookmark Icons.heart'),
-  list: t('User Playlists.Quick Bookmark Icons.list'),
-  play: t('User Playlists.Quick Bookmark Icons.play'),
-  film: t('User Playlists.Quick Bookmark Icons.film'),
-}))
+const iconLabels = {
+  bookmark: 'Bookmark',
+  clock: 'Watch later',
+  heart: 'Favorite',
+  list: 'List',
+  play: 'Play',
+  film: 'Film',
+}
 </script>
 
 <style scoped>
