@@ -92,6 +92,11 @@
   z-index: 2;
 }
 
+.selectIndicators:hover,
+.selectIndicators:focus-within {
+  z-index: 3;
+}
+
 .selectIndicators :deep(.syncedSettingIndicator),
 .selectIndicators :deep(.changedSettingIndicator) {
   margin-inline-start: 0;

@@ -224,4 +224,52 @@ test.describe('synced setting indicators', () => {
       return element !== null && element.closest('[role="tooltip"]') !== null
     }, overlapPoint)).toBe(true)
   })
+
+  test('renders select tooltips above neighboring setting indicators', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Highlight settings changed from defaults' })
+      .click()
+
+    const startupSelect = page.locator('.select').filter({ hasText: 'On Startup' })
+    await startupSelect.locator('select').selectOption('restoreTabLoadState')
+
+    const tooltipText = startupSelect.locator('.selectTooltip .text')
+    await startupSelect.locator('.selectTooltip button').hover()
+    await expect(tooltipText).toBeVisible()
+
+    const thumbnailIndicators = page.locator('.select')
+      .filter({ hasText: 'Thumbnail Preference' })
+      .locator('.selectIndicators')
+    const [tooltipBox, indicatorsBox] = await Promise.all([
+      tooltipText.boundingBox(),
+      thumbnailIndicators.boundingBox()
+    ])
+    expect(tooltipBox).not.toBeNull()
+    expect(indicatorsBox).not.toBeNull()
+
+    const overlapLeft = Math.max(tooltipBox.x, indicatorsBox.x)
+    const overlapRight = Math.min(
+      tooltipBox.x + tooltipBox.width,
+      indicatorsBox.x + indicatorsBox.width
+    )
+    const overlapTop = Math.max(tooltipBox.y, indicatorsBox.y)
+    const overlapBottom = Math.min(
+      tooltipBox.y + tooltipBox.height,
+      indicatorsBox.y + indicatorsBox.height
+    )
+    expect(overlapLeft).toBeLessThan(overlapRight)
+    expect(overlapTop).toBeLessThan(overlapBottom)
+
+    await tooltipText.evaluate(element => {
+      element.style.pointerEvents = 'auto'
+    })
+    await expect.poll(() => page.evaluate(({ x, y }) => {
+      const element = document.elementFromPoint(x, y)
+      return element !== null && element.closest('[role="tooltip"]') !== null
+    }, {
+      x: (overlapLeft + overlapRight) / 2,
+      y: (overlapTop + overlapBottom) / 2
+    })).toBe(true)
+  })
 })
