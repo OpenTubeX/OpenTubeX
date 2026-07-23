@@ -297,6 +297,58 @@ test.describe('localized tab titles', () => {
   })
 })
 
+test.describe('RTL context menus', () => {
+  test.use({ seed: { settings: { currentLocale: 'ar' } } })
+
+  test('positions the menu at the physical pointer coordinates', async ({ page }) => {
+    const targetBox = await page.locator(sel.searchInput).boundingBox()
+    expect(targetBox).not.toBeNull()
+
+    const pointer = {
+      x: targetBox.x + targetBox.width / 2,
+      y: targetBox.y + targetBox.height / 2
+    }
+    await page.mouse.click(pointer.x, pointer.y, { button: 'right' })
+
+    const menu = page.locator('.contextMenu')
+    await expect(menu).toBeVisible()
+    await expect(menu).toHaveCSS('transform', 'none')
+
+    const menuBox = await menu.boundingBox()
+    const viewport = await page.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight
+    }))
+    expect(menuBox).not.toBeNull()
+    expect(menuBox.x).toBeCloseTo(
+      Math.max(8, Math.min(pointer.x - menuBox.width, viewport.width - menuBox.width - 8)),
+      0
+    )
+    expect(menuBox.y).toBeCloseTo(
+      Math.max(8, Math.min(pointer.y, viewport.height - menuBox.height - 8)),
+      0
+    )
+
+    await page.keyboard.press('Escape')
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click({ button: 'right' })
+
+    const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+    await closeTabs.hover()
+
+    const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+
+    const parentBox = await closeTabs.boundingBox()
+    const submenuBox = await submenu.boundingBox()
+    expect(parentBox).not.toBeNull()
+    expect(submenuBox).not.toBeNull()
+    expect(submenuBox.x + submenuBox.width / 2).toBeLessThan(
+      parentBox.x + parentBox.width / 2
+    )
+  })
+})
+
 test.describe('subscription feed tabs', () => {
   test.use({
     seed: {

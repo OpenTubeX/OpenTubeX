@@ -146,10 +146,13 @@
   content: '›';
 }
 
+/* Submenu placement follows physical pointer coordinates in both text directions. */
+/* stylelint-disable liberty/use-logical-spec */
 .submenu {
   position: absolute;
   inset-block-start: -5px;
-  inset-inline-start: calc(100% - 2px);
+  right: auto;
+  left: calc(100% - 2px);
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -161,24 +164,26 @@
 .submenu::before {
   position: absolute;
   inset-block: 0;
-  inset-inline-end: 100%;
+  right: 100%;
+  left: auto;
   inline-size: 48px;
   clip-path: polygon(0 16px, 100% 0, 100% 100%);
   content: '';
 }
 
-.submenusOpenStart .submenu,
-:global(body[dir='rtl'] .submenu) {
-  inset-inline: auto calc(100% - 2px);
+.submenusOpenStart .submenu {
+  right: calc(100% - 2px);
+  left: auto;
   transform: translateX(4px) scale(0.98);
   transform-origin: top right;
 }
 
-.submenusOpenStart .submenu::before,
-:global(body[dir='rtl'] .submenu::before) {
-  inset-inline: 100% auto;
+.submenusOpenStart .submenu::before {
+  right: auto;
+  left: 100%;
   clip-path: polygon(0 0, 0 100%, 100% 16px);
 }
+/* stylelint-enable liberty/use-logical-spec */
 
 .submenuContainer:hover > .submenu,
 .submenuContainer:focus-within > .submenu {

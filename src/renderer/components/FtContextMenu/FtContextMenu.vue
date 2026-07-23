@@ -138,8 +138,8 @@ const verticalTabLayout = ref(false)
 let openRequest = 0
 
 const menuStyle = computed(() => ({
-  insetInlineStart: `${position.value.x}px`,
-  insetBlockStart: `${position.value.y}px`
+  left: `${position.value.x}px`,
+  top: `${position.value.y}px`
 }))
 
 function updateFullscreenTarget() {
@@ -266,10 +266,14 @@ async function open(event) {
   isOpen.value = true
   await nextTick()
 
-  const rect = menuRef.value.getBoundingClientRect()
+  const menuWidth = menuRef.value.offsetWidth
+  const menuHeight = menuRef.value.offsetHeight
+  const x = document.body.dir === 'rtl'
+    ? event.clientX - menuWidth
+    : event.clientX
   position.value = {
-    x: Math.max(8, Math.min(event.clientX, window.innerWidth - rect.width - 8)),
-    y: Math.max(8, Math.min(event.clientY, window.innerHeight - rect.height - 8))
+    x: Math.max(8, Math.min(x, window.innerWidth - menuWidth - 8)),
+    y: Math.max(8, Math.min(event.clientY, window.innerHeight - menuHeight - 8))
   }
 }
 
