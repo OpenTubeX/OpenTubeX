@@ -222,6 +222,11 @@ test.describe('new feed display filters', () => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+    await expect(page.getByText(/Posts feed last updated:/)).toBeVisible()
+    await expect(page.getByText('Forbidden post', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
     await expect(page.getByText('There is no new content.')).toBeVisible()

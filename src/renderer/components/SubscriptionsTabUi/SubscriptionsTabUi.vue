@@ -207,13 +207,12 @@ const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
 const filteredVideoList = computed(() => {
   let videoList = props.videoList
 
-  if (!props.isCommunity) {
-    videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
-      hideLiveStreams: hideLiveStreams.value,
-      hideUpcomingPremieres: hideUpcomingPremieres.value,
-      forbiddenTitles: forbiddenTitles.value
-    }))
-  }
+  // Subscription feeds intentionally ignore the general hidden-channel list.
+  videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
+    hideLiveStreams: hideLiveStreams.value,
+    hideUpcomingPremieres: hideUpcomingPremieres.value,
+    forbiddenTitles: forbiddenTitles.value
+  }))
 
   if (props.onlyShowNew) {
     videoList = videoList.filter(entry => {

@@ -219,11 +219,6 @@ function loadPostsFromCacheSometimes() {
   isLoading.value = false
 }
 
-/** @type {import('vue').ComputedRef<string[]>} */
-const forbiddenTitles = computed(() => {
-  return store.getters.getForbiddenTitlesParsed
-})
-
 function loadPostsFromCacheForAllActiveProfileChannels() {
   const postList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
     return cacheEntry.posts
@@ -233,7 +228,7 @@ function loadPostsFromCacheForAllActiveProfileChannels() {
     return b.publishedTime - a.publishedTime
   })
 
-  postList.value = postList_.filter(post => !forbiddenTitles.value.some(text => post.author.toLowerCase().includes(text)))
+  postList.value = postList_
   isLoading.value = false
 }
 

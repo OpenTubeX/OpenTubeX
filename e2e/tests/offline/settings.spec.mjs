@@ -185,7 +185,7 @@ test.describe('synced setting indicators', () => {
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
 
     const tooltipText = select.locator('.selectTooltip .text')
-    await select.locator('.selectTooltip button').hover()
+    await select.locator('.selectTooltip button').focus()
     await expect(tooltipText).toBeVisible()
 
     const [tooltipTextBox, sectionBox] = await Promise.all([
@@ -236,7 +236,7 @@ test.describe('synced setting indicators', () => {
     await startupSelect.locator('select').selectOption('restoreTabLoadState')
 
     const tooltipText = startupSelect.locator('.selectTooltip .text')
-    await startupSelect.locator('.selectTooltip button').hover()
+    await startupSelect.locator('.selectTooltip button').focus()
     await expect(tooltipText).toBeVisible()
 
     const thumbnailIndicators = page.locator('.select')
