@@ -2493,8 +2493,9 @@ export function setupTabsIPC(options = {}) {
 
   ipcMain.on(IpcChannels.TABS_REORDER, (event, tabIds) => {
     const manager = getManager(event)
-    if (manager && Array.isArray(tabIds) && tabIds.every(tabId => typeof tabId === 'string')) {
-      manager.reorderTabs(tabIds)
+    const normalizedTabIds = Array.isArray(tabIds) ? Array.from(tabIds) : null
+    if (manager && normalizedTabIds?.every(tabId => typeof tabId === 'string')) {
+      manager.reorderTabs(normalizedTabIds)
     }
   })
 

@@ -5,16 +5,17 @@
  * @returns {Map<string, {isPinned?: boolean}> | null}
  */
 export function buildReorderedTabMap(tabs, tabIds) {
+  const normalizedTabIds = Array.from(tabIds)
   if (
-    tabIds.length !== tabs.size ||
-    new Set(tabIds).size !== tabIds.length ||
-    tabIds.some(tabId => !tabs.has(tabId))
+    normalizedTabIds.length !== tabs.size ||
+    new Set(normalizedTabIds).size !== normalizedTabIds.length ||
+    !normalizedTabIds.every(tabId => typeof tabId === 'string' && tabs.has(tabId))
   ) {
     return null
   }
 
   let foundUnpinnedTab = false
-  for (const tabId of tabIds) {
+  for (const tabId of normalizedTabIds) {
     const tab = tabs.get(tabId)
     if (tab.isPinned) {
       if (foundUnpinnedTab) return null
@@ -23,9 +24,9 @@ export function buildReorderedTabMap(tabs, tabIds) {
     }
   }
 
-  if (Array.from(tabs.keys()).every((tabId, index) => tabId === tabIds[index])) {
+  if (Array.from(tabs.keys()).every((tabId, index) => tabId === normalizedTabIds[index])) {
     return tabs
   }
 
-  return new Map(tabIds.map(tabId => [tabId, tabs.get(tabId)]))
+  return new Map(normalizedTabIds.map(tabId => [tabId, tabs.get(tabId)]))
 }

@@ -13,11 +13,15 @@ function createTabs() {
 
 test('rejects incomplete, duplicate, unknown, and interleaved tab orders', () => {
   const tabs = createTabs()
+  const sparseTabIds = ['pinned', 'first', 'second']
+  delete sparseTabIds[1]
 
   assert.equal(buildReorderedTabMap(tabs, ['pinned', 'first']), null)
   assert.equal(buildReorderedTabMap(tabs, ['pinned', 'first', 'first']), null)
   assert.equal(buildReorderedTabMap(tabs, ['pinned', 'first', 'unknown']), null)
   assert.equal(buildReorderedTabMap(tabs, ['first', 'pinned', 'second']), null)
+  assert.equal(buildReorderedTabMap(tabs, ['pinned', 1, 'second']), null)
+  assert.equal(buildReorderedTabMap(tabs, sparseTabIds), null)
 })
 
 test('returns the existing map for a no-op tab order', () => {
