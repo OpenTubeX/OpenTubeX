@@ -116,6 +116,7 @@ test.describe('synced setting indicators', () => {
   test.use({
     seed: {
       settings: {
+        reducedMotion: 'on',
         syncServerAutoSync: false,
         syncServerSyncSettings: true,
         syncServerToken: 'e2e-sync-token'

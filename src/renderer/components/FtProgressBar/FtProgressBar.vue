@@ -3,6 +3,7 @@
     class="progressBar"
   >
     <div
+      v-show="progressBarPercentage > 0"
       class="progressBarFill"
       :style="{ inlineSize: progressBarPercentage + '%' }"
     />
