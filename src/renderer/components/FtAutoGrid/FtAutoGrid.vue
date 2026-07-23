@@ -22,6 +22,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 
 import { DEFAULT_THUMBNAIL_SIZE, getThumbnailSizeStyles } from '../../constants/thumbnailSize'
+import { measureStableGridWidth } from './gridWidth'
 
 const props = defineProps({
   appear: {
@@ -65,10 +66,19 @@ function captureLeavingItemLayout(element) {
 }
 
 let resizeObserver = null
+let observedScrollbarWidth = 0
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => {
-    if (entry.contentRect.width !== gridWidth.value) {
+    const measurement = measureStableGridWidth(
+      entry.contentRect.width,
+      observedScrollbarWidth,
+      window.innerWidth,
+      document.documentElement.clientWidth
+    )
+    observedScrollbarWidth = measurement.scrollbarWidth
+
+    if (measurement.gridWidth !== gridWidth.value) {
       suppressMoveTransition.value = true
       clearTimeout(suppressResetTimeout)
       suppressResetTimeout = setTimeout(() => {
@@ -76,7 +86,7 @@ onMounted(() => {
       }, 100)
     }
 
-    gridWidth.value = entry.contentRect.width
+    gridWidth.value = measurement.gridWidth
   })
 
   resizeObserver.observe(gridElement.value.$el)
