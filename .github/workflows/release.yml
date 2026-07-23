@@ -61,19 +61,19 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     # Do not restore the pnpm cache, to avoid cache poisoning affecting releases
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #v7.0.0
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ matrix.node-version }}
         package-manager-cache: false
 
     - name: Install pnpm
-      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 #v6.0.9
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
       with:
         version: 11
         cache: false
@@ -163,360 +163,115 @@ jobs:
         docker run --rm -v "$PWD":/work -w /work -e UPINFO ghcr.io/pkgforge-dev/archlinux:latest \
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
-    - name: Upload Linux .zip x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
+    - name: Resolve release tag
+      id: release
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.zip
-        asset_content_type: application/zip
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .tag_name)"
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-    - name: Upload Linux .7z x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
+    - name: Prepare release assets
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-x64-portable.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.7z
-        asset_content_type: application/x-7z-compressed
+        RUNTIME: ${{ matrix.runtime }}
+        VERSION: ${{ steps.getPackageInfo.outputs.version }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir release-assets
 
-    - name: Upload Linux .zip ARMv7l Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
+        case "$RUNTIME" in
+          linux-x64)
+            cp "build/opentubex-${VERSION}.zip" \
+              "release-assets/opentubex-${VERSION}-beta-linux-x64-portable.zip"
+            cp "build/opentubex-${VERSION}.7z" \
+              "release-assets/opentubex-${VERSION}-beta-linux-x64-portable.7z"
+            cp "build/opentubex_${VERSION}_amd64.deb" \
+              "release-assets/opentubex_${VERSION}_beta_amd64.deb"
+            cp "build/opentubex-${VERSION}-amd64.AppImage" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.AppImage"
+            cp "build/opentubex-${VERSION}-amd64.AppImage.zsync" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.AppImage.zsync"
+            cp "build/opentubex-${VERSION}.x86_64.rpm" \
+              "release-assets/opentubex-${VERSION}-beta.amd64.rpm"
+            cp "build/opentubex-${VERSION}.pacman" \
+              "release-assets/opentubex-${VERSION}-beta-amd64.pacman"
+            ;;
+          linux-armv7l)
+            cp "build/opentubex-${VERSION}-armv7l.zip" \
+              "release-assets/opentubex-${VERSION}-beta-linux-armv7l-portable.zip"
+            cp "build/opentubex-${VERSION}-armv7l.7z" \
+              "release-assets/opentubex-${VERSION}-beta-linux-armv7l-portable.7z"
+            cp "build/opentubex_${VERSION}_armv7l.deb" \
+              "release-assets/opentubex_${VERSION}_beta_armv7l.deb"
+            cp "build/OpenTubeX-${VERSION}-armv7l.AppImage" \
+              "release-assets/opentubex-${VERSION}-beta-armv7l.AppImage"
+            cp "build/OpenTubeX-${VERSION}-armv7l.AppImage.zsync" \
+              "release-assets/opentubex-${VERSION}-beta-armv7l.AppImage.zsync"
+            ;;
+          linux-arm64)
+            cp "build/opentubex-${VERSION}-arm64.zip" \
+              "release-assets/opentubex-${VERSION}-beta-linux-arm64-portable.zip"
+            cp "build/opentubex-${VERSION}-arm64.7z" \
+              "release-assets/opentubex-${VERSION}-beta-linux-arm64-portable.7z"
+            cp "build/opentubex_${VERSION}_arm64.deb" \
+              "release-assets/opentubex_${VERSION}_beta_arm64.deb"
+            cp "build/opentubex-${VERSION}-arm64.AppImage" \
+              "release-assets/opentubex-${VERSION}-beta-arm64.AppImage"
+            cp "build/opentubex-${VERSION}-arm64.AppImage.zsync" \
+              "release-assets/opentubex-${VERSION}-beta-arm64.AppImage.zsync"
+            cp "build/opentubex-${VERSION}.aarch64.rpm" \
+              "release-assets/opentubex-${VERSION}-beta.arm64.rpm"
+            ;;
+          win-x64)
+            cp "build/opentubex Setup ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-setup-x64.exe"
+            cp "build/OpenTubeX ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.exe"
+            cp "build/opentubex-${VERSION}-win.zip" \
+              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.zip"
+            cp "build/opentubex-${VERSION}-win.7z" \
+              "release-assets/opentubex-${VERSION}-beta-win-x64-portable.7z"
+            ;;
+          win-arm64)
+            cp "build/opentubex Setup ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-setup-arm64.exe"
+            cp "build/OpenTubeX ${VERSION}.exe" \
+              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.exe"
+            cp "build/opentubex-${VERSION}-arm64-win.zip" \
+              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.zip"
+            cp "build/opentubex-${VERSION}-arm64-win.7z" \
+              "release-assets/opentubex-${VERSION}-beta-win-arm64-portable.7z"
+            ;;
+          osx-x64)
+            cp "build/opentubex-${VERSION}.dmg" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.dmg"
+            cp "build/opentubex-${VERSION}-mac.zip" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.zip"
+            cp "build/opentubex-${VERSION}-mac.7z" \
+              "release-assets/opentubex-${VERSION}-beta-mac-x64.7z"
+            ;;
+          osx-arm64)
+            cp "build/opentubex-${VERSION}-arm64.dmg" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.dmg"
+            cp "build/opentubex-${VERSION}-arm64-mac.zip" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.zip"
+            cp "build/opentubex-${VERSION}-arm64-mac.7z" \
+              "release-assets/opentubex-${VERSION}-beta-mac-arm64.7z"
+            ;;
+        esac
+
+    - name: Upload release assets
+      uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ github.token }}
       with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-armv7l-portable.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-armv7l.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux .7z ARMv7l Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-armv7l-portable.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-armv7l.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Linux .zip ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.zip
-        asset_content_type: application/zip
-
-    - name: Upload Linux .7z ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-linux-arm64-portable.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Linux .deb x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_amd64.deb
-        asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_amd64.deb
-        asset_content_type: application/vnd.debian.binary-package
-
-    - name: Upload Linux .deb ARMv7l Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_armv7l.deb
-        asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_armv7l.deb
-        asset_content_type: application/vnd.debian.binary-package
-
-    - name: Upload Linux .deb ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex_${{ steps.getPackageInfo.outputs.version }}_beta_arm64.deb
-        asset_path: build/opentubex_${{ steps.getPackageInfo.outputs.version }}_arm64.deb
-        asset_content_type: application/vnd.debian.binary-package
-
-    - name: Upload AppImage x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-amd64.AppImage
-        asset_content_type: application/vnd.appimage
-
-    - name: Upload AppImage .zsync x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.AppImage.zsync
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-amd64.AppImage.zsync
-        asset_content_type: application/x-zsync
-
-    - name: Upload AppImage ARMv7l Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-armv7l.AppImage
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-armv7l.AppImage
-        asset_content_type: application/vnd.appimage
-
-    - name: Upload AppImage .zsync ARMv7l Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-armv7l.AppImage.zsync
-        asset_path: build/OpenTubeX-${{ steps.getPackageInfo.outputs.version }}-armv7l.AppImage.zsync
-        asset_content_type: application/x-zsync
-
-    - name: Upload AppImage ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage
-        asset_content_type: application/vnd.appimage
-
-    - name: Upload AppImage .zsync ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-arm64.AppImage.zsync
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.AppImage.zsync
-        asset_content_type: application/x-zsync
-
-    - name: Upload Linux .rpm x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta.amd64.rpm
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.x86_64.rpm
-        asset_content_type: application/x-rpm
-
-      # rpm are not built for armv7l
-
-    - name: Upload Linux .rpm ARM64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta.arm64.rpm
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.aarch64.rpm
-        asset_content_type: application/x-rpm
-
-    - name: Upload Pacman .pacman x64 Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-amd64.pacman
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.pacman
-        asset_content_type: application/x-zstd-compressed-tar
-
-    - name: Upload Windows x64 .exe Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-setup-x64.exe
-        asset_path: build/opentubex Setup ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
-
-    - name: Upload Windows x64 portable Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.exe
-        asset_path: build/OpenTubeX ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
-
-    - name: Upload Windows x64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-win.zip
-        asset_content_type: application/zip
-
-    - name: Upload Windows x64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-x64-portable.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-win.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Windows arm64 .exe Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-setup-arm64.exe
-        asset_path: build/opentubex Setup ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
-
-    - name: Upload Windows arm64 portable Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.exe
-        asset_path: build/OpenTubeX ${{ steps.getPackageInfo.outputs.version }}.exe
-        asset_content_type: application/x-ms-dos-executable
-
-    - name: Upload Windows arm64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-win.zip
-        asset_content_type: application/zip
-
-    - name: Upload Windows arm64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-win-arm64-portable.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-win.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Mac x64 .dmg Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.dmg
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}.dmg
-        asset_content_type: application/x-apple-diskimage
-
-    - name: Upload Mac x64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-mac.zip
-        asset_content_type: application/zip
-
-    - name: Upload Mac x64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-x64.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-mac.7z
-        asset_content_type: application/x-7z-compressed
-
-    - name: Upload Mac arm64 .dmg Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.dmg
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64.dmg
-        asset_content_type: application/x-apple-diskimage
-
-    - name: Upload Mac arm64 .zip Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.zip
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.zip
-        asset_content_type: application/x-apple-diskimage
-
-    - name: Upload Mac arm64 .7z Release
-      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 #v1.0.2
-      if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/OpenTubeX/OpenTubeX/releases/${{ inputs.releaseId }}/assets{?name,label}
-        asset_name: opentubex-${{ steps.getPackageInfo.outputs.version }}-beta-mac-arm64.7z
-        asset_path: build/opentubex-${{ steps.getPackageInfo.outputs.version }}-arm64-mac.7z
-        asset_content_type: application/x-7z-compressed
-
+        tag_name: ${{ steps.release.outputs.tag }}
+        files: release-assets/*
+        fail_on_unmatched_files: true
   trigger-flatpak:
     name: Trigger Flatpak build
     needs: build

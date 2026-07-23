@@ -108,18 +108,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 #v7.0.0
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version: ${{ matrix.node-version }}
         package-manager-cache: false
 
     - name: Install pnpm
-      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 #v6.0.9
+      uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
       with:
         version: 11
         cache: false
@@ -136,7 +136,7 @@ jobs:
 
     - name: Restore pnpm cache
       id: restore_cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         key: ${{ format('node-cache-{0}-{1}-pnpm-{2}', runner.os, runner.arch, hashFiles('pnpm-lock.yaml')) }}
         path: ${{ steps.cache_dir.outputs.cache_dir }}
@@ -221,91 +221,91 @@ jobs:
           sh _scripts/package-anylinux-appimage.sh "build/opentubex_${VERSION}_arm64.deb"
 
     - name: Upload Linux .zip x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.zip
 
     - name: Upload Linux .7z x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-x64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.7z
 
     - name: Upload Linux .zip ARMv7l Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-armv7l-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.zip
 
     - name: Upload Linux .7z ARMv7l Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-armv7l-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.7z
 
     - name: Upload Linux .zip ARM64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.zip
 
     - name: Upload Linux .7z ARM64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-linux-arm64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.7z
 
     - name: Upload .deb x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_amd64.deb
 
     - name: Upload .deb ARMv7l Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       with:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_armv7l.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_armv7l.deb
 
     - name: Upload .deb ARM64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
         path: build/opentubex_${{ steps.versionNumber.outputs.version }}_arm64.deb
 
     - name: Upload AppImage x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-amd64.AppImage
 
     - name: Upload AppImage ARMv7l Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-armv7l.AppImage
         path: build/OpenTubeX-${{ steps.versionNumber.outputs.version }}-armv7l.AppImage
 
     - name: Upload AppImage ARM64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.AppImage
 
     - name: Upload .rpm x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}.amd64.rpm
@@ -314,119 +314,119 @@ jobs:
     # rpm are not built for armv7l
 
     - name: Upload .rpm ARM64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}.arm64.rpm
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.aarch64.rpm
 
     - name: Upload Pacman .pacman x64 Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-amd64.pacman
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.pacman
 
     - name: Upload Windows x64 .exe Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-x64.exe
         path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows x64 Portable Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.exe
         path: build/opentubex ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows x64 .zip Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.zip
 
     - name: Upload Windows x64 .7z Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-x64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-win.7z
 
     - name: Upload Windows arm64 .exe Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-setup-arm64.exe
         path: build/opentubex Setup ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows arm64 Portable Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.exe
         path: build/opentubex ${{ steps.versionNumber.outputs.version }}.exe
 
     - name: Upload Windows arm64 .zip Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.zip
 
     - name: Upload Windows arm64 .7z Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'windows') && startsWith(matrix.runtime, 'win-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-win-arm64-portable.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-win.7z
 
     - name: Upload Mac x64 .dmg Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.dmg
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}.dmg
 
     - name: Upload Mac x64 .zip Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.zip
 
     - name: Upload Mac x64 .7z Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-x64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-x64.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-mac.7z
 
     - name: Upload Mac arm64 .dmg Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.dmg
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64.dmg
 
     - name: Upload Mac arm64 .zip Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.zip
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.zip
 
     - name: Upload Mac arm64 .7z Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a #v7.0.1
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: startsWith(matrix.os, 'macos') && startsWith(matrix.runtime, 'osx-arm64')
       with:
         name: opentubex-${{ steps.versionNumber.outputs.version }}-mac-arm64.7z
         path: build/opentubex-${{ steps.versionNumber.outputs.version }}-arm64-mac.7z
 
     - name: Save pnpm cache
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 #v6.1.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       # Only save the cache if we weren't able to restore an existing one above
       if: steps.restore_cache.outputs.cache-primary-key != steps.restore_cache.outputs.cache-matched-key
       with:
@@ -444,12 +444,12 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 #v7.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     - name: Download build artifacts
-      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         pattern: opentubex*
         path: artifacts
