@@ -18,4 +18,5 @@ minimumReleaseAgeExclude:
   - "youtubei.js"
 
 patchedDependencies:
+  shaka-player@5.1.12: patches/shaka-player@5.1.12.patch
   youtubei.js@17.2.0: patches/youtubei.js@17.2.0.patch

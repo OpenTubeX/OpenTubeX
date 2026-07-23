@@ -48,6 +48,21 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
+  test('keeps the context menu open when the pointer leaves a playing video', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    await waitForPlaybackOrSkip(test, page)
+    await page.locator('.ftVideoPlayer').click({ button: 'right' })
+
+    const contextMenu = page.locator('.shaka-context-menu')
+    await expect(contextMenu).toBeVisible()
+
+    await page.mouse.move(0, 0)
+    await page.waitForTimeout(3500)
+    await expect(contextMenu).toBeVisible()
+  })
+
   // Regression: playback speed controls stopped working (1c958d468)
   test('keyboard shortcuts change the playback rate', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
