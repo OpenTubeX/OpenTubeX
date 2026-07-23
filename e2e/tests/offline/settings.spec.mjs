@@ -34,6 +34,23 @@ test.describe('settings', () => {
     await expect(threshold).toHaveValue('100')
   })
 
+  test('links the public sync server privacy policy', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    const privacyPolicy = syncSection.getByRole('link', {
+      name: 'Privacy policy for this server'
+    })
+
+    await expect(privacyPolicy).toHaveAttribute(
+      'href',
+      'https://github.com/OpenTubeX/sync-server/blob/main/PRIVACY.md'
+    )
+
+    await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
+    await expect(privacyPolicy).toHaveCount(0)
+  })
+
   test('a toggled setting persists across restarts', async ({ app }) => {
     let page = app.page
     await goTo(page, 'settings')

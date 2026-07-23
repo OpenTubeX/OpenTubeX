@@ -46,6 +46,14 @@
       />
     </FtFlexBox>
     <p
+      v-if="privacyPolicyUrl"
+      class="privacyPolicy"
+    >
+      <a :href="privacyPolicyUrl">
+        {{ t('Settings.Sync Settings.Privacy Policy') }}
+      </a>
+    </p>
+    <p
       v-if="!connected && serverPrivacySupported !== false"
       class="privacyHint"
     >
@@ -342,8 +350,11 @@ import { showToast } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
 
+const OPENTUBEX_SYNC_SERVER_URL = 'https://sync.d3sox.me'
+const OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL =
+  'https://github.com/OpenTubeX/sync-server/blob/main/PRIVACY.md'
 const syncServerInstances = [
-  'https://sync.d3sox.me',
+  OPENTUBEX_SYNC_SERVER_URL,
   'https://sync.libretube.dev'
 ]
 
@@ -362,6 +373,15 @@ const dataLossWarning = ref(null)
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
+const privacyPolicyUrl = computed(() => {
+  try {
+    return normalizeSyncServerUrl(serverUrl.value) === OPENTUBEX_SYNC_SERVER_URL
+      ? OPENTUBEX_SYNC_SERVER_PRIVACY_POLICY_URL
+      : null
+  } catch {
+    return null
+  }
+})
 const serverCredentialsDisabled = computed(() => (
   !connected.value && serverCheckStatus.value !== 'valid'
 ))

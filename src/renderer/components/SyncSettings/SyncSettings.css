@@ -5,6 +5,7 @@
 .privacyStatus,
 .privacyWarning,
 .privacyHint,
+.privacyPolicy,
 .serverCheckStatus,
 .error {
   text-align: center;
@@ -88,6 +89,10 @@
 
 .privacyHint {
   color: var(--secondary-text-color);
+  margin-block: 0.5rem;
+}
+
+.privacyPolicy {
   margin-block: 0.5rem;
 }
 
