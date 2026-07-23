@@ -1,12 +1,35 @@
 .progressBar {
   position: fixed;
-  block-size: 3px;
+  box-sizing: border-box;
+  block-size: 6px;
+  padding-block: 1px;
   inset-block-end: 0;
   inset-inline: 0;
   z-index: 4;
+  background-color: color-mix(in srgb, var(--bg-color) 75%, #000);
+  box-shadow: 0 -1px 3px rgb(0 0 0 / 65%);
+  pointer-events: none;
 }
 
 .progressBarFill {
+  position: relative;
   block-size: 100%;
   background-color: var(--primary-color);
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--primary-color) 45%, #fff),
+    var(--primary-color) 55%,
+    color-mix(in srgb, var(--primary-color) 75%, #000)
+  );
+  box-shadow: 0 -2px 8px color-mix(in srgb, var(--primary-color) 70%, transparent);
+}
+
+.progressBarFill::after {
+  position: absolute;
+  inset-block: -1px;
+  inset-inline-end: 0;
+  inline-size: 6px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--primary-color) 55%, #fff);
+  box-shadow: 0 0 8px 2px color-mix(in srgb, var(--primary-color) 75%, transparent);
+  content: '';
 }
