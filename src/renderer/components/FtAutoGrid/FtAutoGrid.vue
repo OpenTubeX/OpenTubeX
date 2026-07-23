@@ -67,16 +67,22 @@ function captureLeavingItemLayout(element) {
 
 let resizeObserver = null
 let observedScrollbarWidth = 0
+let observedViewportWidth = null
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(([entry]) => {
+    const scrollbarCompensated = document.body.style.overflow === 'hidden' &&
+      document.body.style.paddingInlineEnd !== ''
     const measurement = measureStableGridWidth(
       entry.contentRect.width,
       observedScrollbarWidth,
+      observedViewportWidth,
       window.innerWidth,
-      document.documentElement.clientWidth
+      document.documentElement.clientWidth,
+      scrollbarCompensated
     )
     observedScrollbarWidth = measurement.scrollbarWidth
+    observedViewportWidth = measurement.viewportWidth
 
     if (measurement.gridWidth !== gridWidth.value) {
       suppressMoveTransition.value = true
