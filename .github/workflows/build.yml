@@ -482,12 +482,15 @@ jobs:
         base_version="$(jq --raw-output .version package.json)"
         version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
         tag="v${version}"
+        printf -v notes \
+          '> [!WARNING]\n> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\nAutomated development build from commit `%s`.' \
+          "$GITHUB_SHA"
 
         gh release create "$tag" release-assets/* \
           --prerelease \
           --target "$GITHUB_SHA" \
-          --title "OpenTubeX ${version}" \
-          --notes "Automated development build from commit ${GITHUB_SHA}."
+          --title "v${version}" \
+          --notes "$notes"
 
         {
           echo "tag=$tag"
