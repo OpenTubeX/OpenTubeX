@@ -198,17 +198,13 @@ function handleTabContainerPointerDown(event) {
     return
   }
 
-  const pendingTabOrder = finishSettle(true)
+  finishSettle(true)
 
   const container = dropZoneRef.value
   if (!container) return
 
   const tabId = tabEl.dataset.tabId
-  const currentTabs = tabs.value
-  const currentTabsById = new Map(currentTabs.map(tab => [tab.id, tab]))
-  const tabsList = pendingTabOrder
-    ? pendingTabOrder.map(tabId => currentTabsById.get(tabId)).filter(Boolean)
-    : currentTabs
+  const tabsList = tabs.value
   const sourceIndex = tabsList.findIndex(t => t.id === tabId)
   if (sourceIndex === -1) return
   const tabIds = getDraggedTabIds(tabsList, selectedTabIds.value, tabId)
@@ -221,7 +217,7 @@ function handleTabContainerPointerDown(event) {
 
   // Layout start = position within the scrollable content (so it stays
   // consistent regardless of the current scroll offset).
-  const measuredRects = tabEls.map(el => {
+  const rects = tabEls.map(el => {
     const rect = el.getBoundingClientRect()
     return {
       id: el.dataset.tabId,
@@ -229,9 +225,6 @@ function handleTabContainerPointerDown(event) {
       size: vertical.value ? rect.height : rect.width
     }
   })
-  const measuredRectById = new Map(measuredRects.map(rect => [rect.id, rect]))
-  const rects = tabsList.map(tab => measuredRectById.get(tab.id)).filter(Boolean)
-  if (rects.length !== tabsList.length) return
 
   // Compute the gap between adjacent tabs (matches the .tabsContainer gap)
   let gap = 0
@@ -524,7 +517,6 @@ function cleanupDragListeners() {
  * If a settle animation is currently in progress, finish it immediately so a
  * new drag starts from a clean state.
  * @param {boolean} cancel
- * @returns {string[] | null}
  */
 function finishSettle(cancel) {
   if (settleTimeoutId != null) {
@@ -533,14 +525,6 @@ function finishSettle(cancel) {
   }
   const pendingReorder = pendingSettleReorder
   pendingSettleReorder = null
-  const pendingTabOrder = pendingReorder
-    ? buildCurrentShiftedTabIds(
-        tabs.value,
-        pendingReorder.tabIds,
-        pendingReorder.indexShift,
-        pendingReorder.isPinned
-      )
-    : null
   if (cancel) {
     suppressTransitions.value = true
     tabOffsets.value = {}
@@ -557,7 +541,6 @@ function finishSettle(cancel) {
   if (pendingReorder) {
     commitReorder(pendingReorder, !cancel)
   }
-  return pendingTabOrder
 }
 
 /**
