@@ -17,8 +17,17 @@ export function useTabContext() {
 
 export function useTabTitle() {
   const { tabId } = useTabContext()
+  let isMounted = true
+
+  onBeforeUnmount(() => {
+    isMounted = false
+  })
 
   return (title) => {
+    if (!isMounted) {
+      return
+    }
+
     if (process.env.IS_ELECTRON && tabId) {
       getTabNavigationService().setTitle(tabId, title)
     } else {

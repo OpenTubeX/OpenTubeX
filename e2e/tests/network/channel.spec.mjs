@@ -21,6 +21,23 @@ test.describe('channel page', () => {
     // new history entry for every tab selection (796650405, 912e5ea6e).
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
     const historyLength = await page.evaluate(() => history.length)
+
+    const channelSearch = page.locator('.channelSearch input')
+    await channelSearch.fill('animation')
+    await channelSearch.press('Enter')
+    await expect(page).toHaveURL(/searchQueryText=animation/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
+
+    await page.locator('.channelSearch .clearInputTextButton').click()
+    await expect(page).not.toHaveURL(/searchQueryText=/)
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.activeTab)).toContainText('Blender')
+    await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
+
     const videosTab = page.getByRole('tab', { name: 'Videos' })
     await videosTab.click()
     await expect(videosTab).toHaveAttribute('aria-selected', 'true')
