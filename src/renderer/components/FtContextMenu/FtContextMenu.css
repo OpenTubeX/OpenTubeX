@@ -168,14 +168,14 @@
 }
 
 .submenusOpenStart .submenu,
-:global(.isLocaleRightToLeft) .submenu {
+:global(body[dir='rtl'] .submenu) {
   inset-inline: auto calc(100% - 2px);
   transform: translateX(4px) scale(0.98);
   transform-origin: top right;
 }
 
 .submenusOpenStart .submenu::before,
-:global(.isLocaleRightToLeft) .submenu::before {
+:global(body[dir='rtl'] .submenu::before) {
   inset-inline: 100% auto;
   clip-path: polygon(0 0, 0 100%, 100% 16px);
 }
