@@ -211,8 +211,11 @@ test('a late video response cannot replace the title after going back', async ({
     await expect(page).toHaveURL(/#\/history/)
     await expect(page.locator('.tabBar .tab.active')).toContainText('History')
 
+    const metadataResponse = page.waitForResponse((response) =>
+      response.url().includes('/youtubei/v1/next')
+    )
     releaseMetadataResponse()
-    await page.waitForTimeout(100)
+    await metadataResponse
     await expect(page.locator('.tabBar .tab.active')).toContainText('History')
     await expect(page.locator('.tabBar .tab.active')).not.toContainText('Me at the zoo')
   } finally {
