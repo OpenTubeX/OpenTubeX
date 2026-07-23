@@ -1,0 +1,22 @@
+import { test, expect, goTo } from '../../helpers/app.mjs'
+
+test('about page shows the bundled runtime versions', async ({ app, page }) => {
+  const expectedVersions = await app.electronApp.evaluate(() => ({
+    Electron: process.versions.electron,
+    Chromium: process.versions.chrome,
+    'Node.js': process.versions.node,
+    V8: process.versions.v8
+  }))
+
+  await goTo(page, 'about')
+
+  const versionRows = page.locator('.runtimeVersion')
+  const expectedEntries = Object.entries(expectedVersions)
+  await expect(versionRows).toHaveCount(expectedEntries.length)
+
+  for (const [index, [runtime, version]] of expectedEntries.entries()) {
+    const row = versionRows.nth(index)
+    await expect(row.locator('dt')).toHaveText(runtime)
+    await expect(row.locator('dd')).toHaveText(version)
+  }
+})

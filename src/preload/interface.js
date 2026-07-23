@@ -21,6 +21,12 @@ ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
 
 export default {
   isFlatpak: process.env.FLATPAK_ID !== undefined,
+  runtimeVersions: Object.freeze({
+    electron: process.versions.electron,
+    chromium: process.versions.chrome,
+    node: process.versions.node,
+    v8: process.versions.v8
+  }),
 
   /**
    * @param {string} title
