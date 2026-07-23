@@ -10,8 +10,13 @@ test('about page shows the bundled runtime versions', async ({ app, page }) => {
 
   await goTo(page, 'about')
 
-  const versionList = page.locator('.runtimeVersions')
-  for (const [runtime, version] of Object.entries(expectedVersions)) {
-    await expect(versionList).toContainText(`${runtime}${version}`)
+  const versionRows = page.locator('.runtimeVersion')
+  const expectedEntries = Object.entries(expectedVersions)
+  await expect(versionRows).toHaveCount(expectedEntries.length)
+
+  for (const [index, [runtime, version]] of expectedEntries.entries()) {
+    const row = versionRows.nth(index)
+    await expect(row.locator('dt')).toHaveText(runtime)
+    await expect(row.locator('dd')).toHaveText(version)
   }
 })
