@@ -34,6 +34,28 @@ test.describe('settings', () => {
     await expect(threshold).toHaveValue('100')
   })
 
+  test('keeps the watched progress mode when history is toggled', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+
+    const rememberHistoryLabel = page.locator('label.switch-label')
+      .filter({ hasText: 'Remember Watch History' })
+    const rememberHistory = page.getByRole('checkbox', { name: 'Remember Watch History' })
+    const watchedProgressMode = page.locator('.select')
+      .filter({ hasText: 'Save Watched Progress' })
+      .locator('select')
+
+    await expect(rememberHistory).toBeChecked()
+    await watchedProgressMode.selectOption('semi-auto')
+    await rememberHistoryLabel.click()
+    await expect(rememberHistory).not.toBeChecked()
+    await expect(watchedProgressMode).toHaveValue('semi-auto')
+
+    await rememberHistoryLabel.click()
+    await expect(rememberHistory).toBeChecked()
+    await expect(watchedProgressMode).toHaveValue('semi-auto')
+  })
+
   test('links the public sync server privacy policy', async ({ page }) => {
     await goTo(page, 'settings')
 

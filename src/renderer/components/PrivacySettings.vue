@@ -233,10 +233,6 @@ function updateStatsWeekStartsOn(value) {
  * @param {boolean} value
  */
 function handleRememberHistory(value) {
-  if (!value) {
-    store.dispatch('updateWatchedProgressSavingMode', 'never')
-  }
-
   store.dispatch('updateRememberHistory', value)
 }
 
