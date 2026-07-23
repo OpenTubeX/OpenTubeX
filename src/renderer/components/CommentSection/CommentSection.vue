@@ -616,8 +616,7 @@ const shouldShowAutoLoadMoreCommentsSpinner = computed(() => {
   return commentData.value.length > 0 &&
     !isLoading.value &&
     showComments.value &&
-    (isLoadingMoreComments.value ||
-      (generalAutoLoadMorePaginatedItemsEnabled.value && !!nextPageToken.value))
+    isLoadingMoreComments.value
 })
 
 const observeVisibilityOptions = computed(() => {

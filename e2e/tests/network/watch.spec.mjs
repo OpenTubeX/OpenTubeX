@@ -185,6 +185,12 @@ test.describe('watch page', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
     expect(await page.locator('.comment').count()).toBeGreaterThan(0)
 
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    await expect(page.getByLabel('Loading more comments')).toHaveCount(0)
+
     // Exercise reply loading and its continuation path, not only the initial
     // top-level comment batch (8bcf0b58d).
     const replyToggle = page.locator('.commentMoreReplies').first()
