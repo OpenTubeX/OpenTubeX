@@ -1225,7 +1225,7 @@ Comments:
   View {replyCount} replies from {channelName} and others: '{replyCount} Antworten von {channelName} und anderen ansehen'
   Copy YouTube Link: YouTube-Link kopieren
   Reload Comments: Kommentare neu laden
-  YouTube comment link copied to clipboard: YouTube-Link in die Zwischenablage kopiert
+  YouTube comment link copied to clipboard: YouTube Kommentar-Link in die Zwischenablage kopiert
 Up Next: Nächster Titel
 
 # Toast Messages
@@ -1329,7 +1329,7 @@ Tooltips:
     Show Fast-Forward Through Silence Toggle: Zeigt im Einstellungsmenü des Players einen Ein-/Aus-Schalter zum Vorspulen von Stille an.
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
-    Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus um eine feste Lautstärke beim Start jedes Videos zu setzen.
+    Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.
   Theme Settings:
     Hide Profile Selector in Header: Blendet die Profilauswahl in der oberen Leiste aus. Die Profilauswahl wird stattdessen oben auf der Seite „Abonnierte Kanäle“ angezeigt.
   External Player Settings:

@@ -279,6 +279,7 @@ Settings:
       Load all tabs: Załaduj wszystkie karty
       Load last active tab: Załaduj tylko aktywną kartę
       Start with an empty session: Uruchom nową sesję
+      Load previously loaded tabs: Załaduj poprzednio załadowane karty
     Avoid translation:
       Avoid translation: Zachowaj oryginalny tekst
       Disabled: Wyłączone
@@ -294,6 +295,12 @@ Settings:
       Copy YouTube Link: Skopiuj odnośnik do YouTube
       Open in YouTube: Otwórz na stronie YouTube
     Remember Tab Navigation History: Zapamiętaj historię przeglądania na każdej karcie
+    Reduced Motion:
+      Reduced Motion: Ogranicz animacje
+      System: systemowe
+      Force On: wymuś włączenie
+      Force Off: wymuś wyłączenie
+    Show Tab Icons: Pokaż ikony kart
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -481,12 +488,12 @@ Settings:
       Full Screen (Always On): Pełny ekran (zawsze włączony)
       Tooltip: Większość domyślnych trybów oglądania jest stosowana tylko na początku każdej sesji oglądania. Zmiany wprowadzone w trakcie sesji są zachowywane do jej zakończenia. Tryby oglądania „zawsze włączony” są stosowane za każdym razem, gdy przełączasz się na nowy film, niezależnie od zmian trybu oglądania dokonanych podczas oglądania poprzedniego filmu.
     Auto Picture in Picture on Tab Change: Automatycznie włączaj obraz w obrazie podczas przełączania kart
-    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do szybkości odtwarzania
-    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do szybkości odtwarzania
+    Multiply Seek Interval by Playback Rate: Dostosuj interwał przewijania do prędkości odtwarzania
+    Show Playback Rate Adjusted Timestamp: Pokaż znacznik czasu dostosowany do prędkości odtwarzania
     Remember Volume: Zapamiętaj głośność odtwarzania
     Remember Playback Speed Per Channel: Pamiętaj prędkość odtwarzania na każdym kanale
     Auto Update Channel Playback Speed: Zapamiętuj automatycznie przy każdej zmianie
-    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru szybkości odtwarzania
+    Use Quick Playback Speed Bar: Wyświetl podręczny pasek wyboru prędkości odtwarzania
     Manage Channel Playback Speeds: Zarządzaj zapisanymi prędkościami odtwarzania
     Channel Playback Speed Manager: Menedżer zarządzania prędkościami odtwarzania
     No Saved Playback Speeds: Brak zapisanych prędkości odtwarzania
@@ -499,8 +506,8 @@ Settings:
     Scroll Mini Player:
       Scroll Mini Player: Mini odtwarzacz podczas przewijania
       When Scrolling Down: Utrzymuj mini odtwarzacz na widoku podczas przewijania w dół
-    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru szybkości odtwarzania
-    Quick Playback Speed Bar Manager: Pasek wyboru szybkości odtwarzania
+    Customize Quick Playback Speed Bar: Dostosuj pasek wyboru prędkości odtwarzania
+    Quick Playback Speed Bar Manager: Pasek wyboru prędkości odtwarzania
     Add Playback Speed: Dodaj prędkość odtwarzania
     Reset Quick Playback Speed Bar: Przywróć ustawienia domyślne
     Playback Speed Name: Nazwa
@@ -781,6 +788,93 @@ Settings:
     Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
   Download Settings:
     Download Settings: Pobieranie
+    yt-dlp Source: Źródło yt-dlp
+    yt-dlp Channel: Kanał wersji yt-dlp
+    Sources:
+      System: System (PATH lub ścieżka niestandardowa)
+      Managed: Zarządzane przez OpenTubeX
+    Detected Version Template: 'Wykryta wersja yt-dlp: {version}'
+    Managed Not Downloaded: yt-dlp nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System yt-dlp Missing Warning: W twoim systemie nie znaleziono yt-dlp. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download yt-dlp: Pobierz yt-dlp
+    Update yt-dlp: Zaktualizuj yt-dlp
+    Checking yt-dlp: Sprawdzanie yt-dlp…
+    Downloading yt-dlp: Pobieranie yt-dlp…
+    yt-dlp Downloaded Template: Pobrano yt-dlp w wersji {version}
+    yt-dlp Download Error Template: 'Pobieranie yt-dlp nie powiodło się: {error}'
+    FFmpeg Source: Źródło FFmpeg
+    Detected FFmpeg Version Template: 'Wykryta wersja FFmpeg: {version}'
+    FFmpeg Managed Not Downloaded: FFmpeg nie został jeszcze pobrany. Kliknij przycisk poniżej, aby go pobrać.
+    System FFmpeg Missing Warning: FFmpeg nie został znaleziony w Twoim systemie. Jest on wymagany do scalania wideo i dźwięku oraz do konwersji audio. Zainstaluj go, ustaw poniżej niestandardową ścieżkę lub zmień źródło na „Zarządzane przez OpenTubeX”.
+    Download FFmpeg: Pobierz FFmpeg
+    Update FFmpeg: Zaktualizuj FFmpeg
+    Checking FFmpeg: Sprawdzanie FFmpeg…
+    Downloading FFmpeg: Pobieranie FFmpeg…
+    FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
+    FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
+    Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
+    Managed Tools Download Finished Template: Zakończono pobieranie {tools}
+    Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
+    Managed Tools Update Finished Template: Zakończono aktualizację {tools}
+    Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
+    Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
+    yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
+    FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
+    Download Folder: 'Pobierane pliki zapisuj do:'
+    Choose Download Folder: Wybierz folder pobierania
+    Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+  Sync Settings:
+    Sync Settings: Synchronizacja
+    Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
+    Privacy Passphrase: Hasło dostępu
+    Enhanced Privacy Enabled: Włączono rozszerzoną prywatność. Serwer przechowuje tylko zaszyfrowane dane synchronizacji.
+    Enhanced Privacy Unsupported: Ostrzeżenie — ten serwer nie obsługuje rozszerzonej prywatności. Zsynchronizowane dane są widoczne dla jego operatora.
+    Password: Hasło
+    Log In: Zaloguj się
+    Register: Rejestracja
+    Disconnect: Rozłącz
+    Delete Account: Usuń konto synchronizacji
+    Delete Account Confirmation: Usunąć konto synchronizacji?
+    Delete Account Warning: To trwale usunie Twoje konto synchronizacji i wszystkie dane przechowywane na tym serwerze. Twoje lokalne dane OpenTubeX nie zostaną usunięte.
+    Confirm Delete Account: Usuwanie konta
+    Password Required: Hasło jest wymagane
+    Account Deleted: Konto synchronizacji zostało usunięte
+    Connected as: Połączono jako {username}
+    Automatic Sync: Synchronizuj automatycznie po dokonaniu zmian i co pięć minut
+    Channel Playback Speeds: Prędkości odtwarzania poszczególnych kanałów
+    Profiles: Profile
+    Settings: Ustawienia
+    Disable Setting Sync: Zatrzymaj synchronizację tego ustawienia
+    Enable Setting Sync: Zsynchronizuj to ustawienie
+    Sync Now: Zsynchronizuj teraz
+    Downloading encrypted data: Pobieranie zaszyfrowanych danych synchronizacji…
+    Syncing subscriptions: Synchronizowanie subskrypcji…
+    Syncing playlists: Synchronizowanie playlist…
+    Syncing history: Synchronizowanie historii oglądania…
+    Syncing playback speeds: Synchronizowanie prędkości odtwarzania kanałów…
+    Syncing profiles: Synchronizowanie profili…
+    Syncing settings: Synchronizowanie ustawień…
+    Uploading encrypted data: Przesyłanie zaszyfrowanych danych synchronizacji…
+    Finishing sync: Kończenie synchronizacji…
+    Sync progress percentage: '{percentage}%'
+    Last synced: 'Ostatnia synchronizacja: {date}'
+    History not supported: Ta wersja serwera nie obsługuje synchronizacji historii oglądania.
+    Playback speeds not supported: Ta wersja serwera nie obsługuje synchronizacji prędkości odtwarzania kanałów.
+    Playback speeds and settings not supported: Ta wersja serwera nie obsługuje prędkości odtwarzania kanałów ani synchronizacji ustawień.
+    Settings not supported: Ta wersja serwera nie obsługuje synchronizacji ustawień.
+    Sync completed: Synchronizacja zakończona
+    Data Loss Confirmation: Potwierdzić synchronizację z ryzykiem utraty danych?
+    Data Loss Warning: Stan serwera spowoduje usunięcie {deleted} z {previous} wcześniej zsynchronizowanych elementów {collection}. Może to wskazywać na nieudaną migrację serwera lub jego reset. Kontynuuj tylko wtedy, gdy usunięcie jest celowe i masz kopię zapasową.
+    Confirm Data Loss: Usuń i kontynuuj
+    Description: Synchronizuj subskrypcje, profile, playlisty, historię oglądania, ustawienia i otwarte karty z serwerem synchronizacji OpenTubeX lub LibreTube. Serwery LibreTube mogą nie obsługiwać wszystkich funkcji synchronizacji.
+    Server URL: Adres URL serwera
+    Checking Server: Sprawdzanie serwera synchronizacji…
+    Server Unavailable: Nie można połączyć się z tym serwerem synchronizacji. Sprawdź adres URL i spróbuj ponownie.
+    Username: Nazwa użytkownika
+    Open Tabs: Otwarte karty i sesję
+    Syncing open tabs: Synchronizowanie otwartych kart i sesji…
+  Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
+  Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
 About:
   #On About page
   About: 'O projekcie'
@@ -1021,6 +1115,23 @@ Video:
       SkipToastReskip: Wznów pominięcie
       SkipToHighlight: Przeskocz do „Ważny moment”
       SkippedToHighlight: Przeskoczono do „Ważny moment”
+      CloseInfoPanel: Zamknij panel SponsorBlock
+      OpenInfoPanel: Otwórz panel SponsorBlock
+      InfoPanelTitle: SponsorBlock
+      InfoPanelLoading: Ładowanie segmentów…
+      InfoPanelHasSegments: Ten film ma segmenty w bazie danych.
+      InfoPanelNoSegments: Nie znaleziono żadnych segmentów dla tego filmu.
+      RefreshSegments: Odśwież segmenty
+      AutoSkipEnabled: Automatyczne pomijanie segmentów
+      AutoSkipOn: włączone
+      AutoSkipOff: wyłączone
+      WhitelistChannel: Dodaj kanał do białej listy
+      ChannelWhitelisted: Dodano do białej listy
+      RemoveChannelFromWhitelist: Usuń kanał z białej listy
+      SkipSegment: Pomiń segment
+      CloseSegmentActions: Zamknij działania segmentu
+      FullVideo: Cały film
+      LockedSegment: Zablokowany segment
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1044,6 +1155,8 @@ Video:
     Show Annotations: Pokaż adnotacje
     Hide: Ukryj
     Show: Pokaż
+    Up next in {seconds}: Następny za {seconds}
+    Play now: Odtwórz teraz
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1087,6 +1200,8 @@ Video:
     No Results: Żadne segmenty transkrypcji nie pasują do Twojego wyszukiwania.
   Premiere: Premiera
   Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
+  Unmark As Watched: Oznacz jako nieobejrzany
+  Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1246,6 +1361,7 @@ Tooltips:
     Startup Behavior: |
       Wybierz, co OpenTubeX zrobi po uruchomieniu:
       Opcja „Załaduj wszystkie karty” ładuje do pamięci wszystkie zapisane karty (zwiększa czas uruchomienia i użycie zasobów przy dużej liczbie kart).
+      Opcja „Załaduj wcześniej załadowane karty” ładuje karty, które były załadowane w momencie zamknięcia OpenTubeX, i pozostawia pozostałe karty niezaładowane.
       Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
       Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
   Player Settings:
@@ -1255,7 +1371,7 @@ Tooltips:
     Skip by Scrolling Over Video Player: Użyj kółka myszy, by przewijać film tak jak w MPV.
     Use Quick Playback Speed Bar: Wyświetla pasek szybkiego wyboru prędkości odtwarzania po prawej stronie odtwarzacza. Jeśli włączona jest funkcja ręcznego zapisywania prędkości odtwarzania dla poszczególnych kanałów, pasek zawiera również przycisk do zapisywania prędkości dla bieżącego kanału.
     Multiply Seek Interval by Playback Rate: Jeśli włączone, interwały przewijania (klawisze strzałek i J/L) są mnożone przez aktualną prędkość odtwarzania. Jeśli wyłączone, interwały przewijania pozostają stałe, niezależnie od prędkości odtwarzania.
-    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do szybkości odtwarzania.
+    Show Playback Rate Adjusted Timestamp: Jeśli włączone, a prędkość odtwarzania jest inna niż 1x, odtwarzacz wyświetla w nawiasach po normalnym wyświetlaniu znaczników czasu znaczniki czasu dostosowane do prędkości odtwarzania.
     Default Volume: Wyłączone, gdy opcja zapamiętywania głośności na kanale jest włączona. Wyłącz zapamiętywanie głośności na kanale, aby ustawić stałą głośność początkową dla każdego filmu.
     Enable Caption Translations: Po włączeniu, przycisk napisów i skrót C będą preferować automatycznie przetłumaczoną ścieżkę w preferowanym języku napisów, jeśli film nie zawiera pasującej oryginalnej ścieżki.
     Show Fast-Forward Through Silence Toggle: Pokazuje przełącznik szybkiego przewijania przez ciszę w menu ustawień odtwarzacza.
