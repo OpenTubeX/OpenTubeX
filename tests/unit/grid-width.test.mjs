@@ -15,11 +15,12 @@ test('remembers scrollbar width after the document stops overflowing', () => {
   )
 
   assert.deepEqual(overflowing, {
-    gridWidth: 1640,
+    gridWidth: 1656,
     scrollbarWidth: 16
   })
   assert.deepEqual(fitting, {
     gridWidth: 1656,
     scrollbarWidth: 16
   })
+  assert.equal(overflowing.gridWidth, fitting.gridWidth)
 })

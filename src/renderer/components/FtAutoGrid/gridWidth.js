@@ -4,13 +4,15 @@ export function measureStableGridWidth(
   viewportWidth,
   documentWidth
 ) {
+  const currentScrollbarWidth = viewportWidth - documentWidth
   const scrollbarWidth = Math.max(
     observedScrollbarWidth,
-    viewportWidth - documentWidth
+    currentScrollbarWidth
   )
+  const widthAdjustment = scrollbarWidth - currentScrollbarWidth
 
   return {
-    gridWidth: Math.max(0, gridWidth - scrollbarWidth),
+    gridWidth: Math.max(0, gridWidth - widthAdjustment),
     scrollbarWidth
   }
 }
