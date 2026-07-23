@@ -483,7 +483,7 @@ jobs:
         version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
         tag="v${version}"
         printf -v notes \
-          '> [!WARNING]\n> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\nAutomated development build from commit `%s`.' \
+          '> [!WARNING]\n> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\nAutomated development build from commit %s.' \
           "$GITHUB_SHA"
 
         gh release create "$tag" release-assets/* \
