@@ -276,6 +276,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 
 * [GitHub Releases](https://github.com/OpenTubeX/OpenTubeX/releases)
 * [OpenTubeX Website](https://opentubex.org/downloads/)
+* Windows: [WinGet](https://github.com/microsoft/winget-pkgs/tree/master/manifests/o/OpenTubeX/OpenTubeX) (`winget install OpenTubeX.OpenTubeX`)
 * Debian / Ubuntu: [APT repository](https://apt.opentubex.org/)
 * Fedora / Enterprise Linux: [COPR repository](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/) or [RPM repository](https://rpm.opentubex.org/)
 * openSUSE: [RPM repository](https://rpm.opentubex.org/)
@@ -286,7 +287,7 @@ RedirectTube, doesn’t automatically open YouTube links in OpenTubeX (although 
 <br />
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/d3sox/opentubex/package/opentubex/)
 
-#### Automated Builds (Nightly / Weekly)
+#### Automated Builds (Nightly / Daily)
 > [!WARNING]
 > Use these builds at your own risk. These are pre-release versions and are only intended for people that want to test changes early and are willing to accept that things could break from one build to another. 
 
@@ -298,7 +299,11 @@ The first build with a green check mark is the latest build.
 > You will need to have a GitHub account to download these builds.
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
 
-* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/)
+* Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/)
+* Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/)
+* openSUSE: [RPM nightly repository](https://rpm.opentubex.org/)
+* Flatpak: [Nightly branch](https://flatpak.opentubex.org/) (`org.opentubex.OpenTubeX//nightly`)
+* Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 
 ## Contributing
 Thank you very much to the people and projects that make OpenTubeX possible!
