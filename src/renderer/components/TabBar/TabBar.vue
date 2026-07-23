@@ -86,6 +86,7 @@ import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import SortableTab from './SortableTab.vue'
 import {
+  buildCurrentShiftedTabIds,
   buildShiftedTabIds,
   computeTabOffsets,
   getDraggedTabIds,
@@ -144,7 +145,9 @@ const suppressTransitions = ref(false)
  * @typedef {object} DragSession
  * @property {string} tabId
  * @property {string[]} tabIds
+ * @property {Array<{id: string, isPinned?: boolean}>} tabs
  * @property {number} sourceIndex
+ * @property {number} indexShift
  * @property {string[]} reorderedTabIds
  * @property {number} pointerStart
  * @property {number} pointerCurrent
@@ -159,6 +162,8 @@ const suppressTransitions = ref(false)
 /** @type {DragSession | null} */
 let dragSession = null
 let settleTimeoutId = null
+/** @type {{tabIds: string[], indexShift: number, isPinned: boolean} | null} */
+let pendingSettleReorder = null
 
 /**
  * @param {PointerEvent | MouseEvent} event
@@ -193,6 +198,8 @@ function handleTabContainerPointerDown(event) {
     return
   }
 
+  finishSettle(true)
+
   const container = dropZoneRef.value
   if (!container) return
 
@@ -225,12 +232,12 @@ function handleTabContainerPointerDown(event) {
     gap = rects[1].start - (rects[0].start + rects[0].size)
   }
 
-  finishSettle(true)
-
   dragSession = {
     tabId,
     tabIds,
+    tabs: tabsList.map(tab => ({ id: tab.id, isPinned: tab.isPinned })),
     sourceIndex,
+    indexShift: 0,
     reorderedTabIds: tabsList.map(tab => tab.id),
     pointerStart: pointerAxisPosition(event),
     pointerCurrent: pointerAxisPosition(event),
@@ -292,9 +299,8 @@ function updateActiveDragPosition() {
     containerScrollPosition(container) -
     dragSession.scrollStart
 
-  const { rects, sourceIndex, gap } = dragSession
+  const { rects, sourceIndex, gap, tabs: tabsList } = dragSession
   const sourceRect = rects[sourceIndex]
-  const tabsList = tabs.value
   const sourceTab = tabsList[sourceIndex]
   const isSourcePinned = sourceTab?.isPinned === true
   const pinnedCount = tabsList.filter(tab => tab.isPinned === true).length
@@ -306,6 +312,16 @@ function updateActiveDragPosition() {
   const lastDraggedRect = draggedRects[draggedRects.length - 1]
   const firstGroupRect = rects[groupStartIndex]
   const lastGroupRect = rects[groupEndIndex]
+  if (
+    !sourceRect ||
+    !sourceTab ||
+    !firstDraggedRect ||
+    !lastDraggedRect ||
+    !firstGroupRect ||
+    !lastGroupRect
+  ) {
+    return
+  }
   const minOffset = firstGroupRect.start - firstDraggedRect.start
   const maxOffset = lastGroupRect.start + lastGroupRect.size -
     lastDraggedRect.start - lastDraggedRect.size
@@ -328,6 +344,7 @@ function updateActiveDragPosition() {
     indexShift
   )
 
+  dragSession.indexShift = indexShift
   dragSession.reorderedTabIds = reorderedTabIds
   tabOffsets.value = computeTabOffsets(
     rects,
@@ -343,7 +360,16 @@ function handleDragPointerUp() {
 
   if (!dragSession) return
 
-  const { started, moved, tabIds, rects, gap, reorderedTabIds } = dragSession
+  const {
+    started,
+    moved,
+    tabIds,
+    tabs: tabsSnapshot,
+    indexShift,
+    rects,
+    gap,
+    reorderedTabIds
+  } = dragSession
 
   if (started && moved) {
     suppressNextClick()
@@ -367,9 +393,19 @@ function handleDragPointerUp() {
   settlingTabIds.value = new Set(tabIds)
   isSettling.value = true
 
+  const sourceTab = tabsSnapshot.find(tab => tab.id === dragSession.tabId)
+  pendingSettleReorder = {
+    tabIds,
+    indexShift,
+    isPinned: sourceTab?.isPinned === true
+  }
   settleTimeoutId = window.setTimeout(() => {
     settleTimeoutId = null
-    commitReorder(reorderedTabIds)
+    const pendingReorder = pendingSettleReorder
+    pendingSettleReorder = null
+    if (pendingReorder) {
+      commitReorder(pendingReorder)
+    }
   }, SETTLE_DURATION_MS)
 
   dragSession = null
@@ -378,9 +414,16 @@ function handleDragPointerUp() {
 /**
  * Commit the reorder to the store, then reset transforms without animating
  * (so the elements don't jump from their offset positions back to 0).
- * @param {string[]} reorderedTabIds
+ * @param {{tabIds: string[], indexShift: number, isPinned: boolean}} pendingReorder
+ * @param {boolean} [cleanupVisuals]
  */
-async function commitReorder(reorderedTabIds) {
+async function commitReorder(pendingReorder, cleanupVisuals = true) {
+  const reorderedTabIds = buildCurrentShiftedTabIds(
+    tabs.value,
+    pendingReorder.tabIds,
+    pendingReorder.indexShift,
+    pendingReorder.isPinned
+  )
   if (!tabOrderMatches(reorderedTabIds)) {
     suppressTransitions.value = true
     const reordered = waitForTabOrder(reorderedTabIds)
@@ -388,9 +431,11 @@ async function commitReorder(reorderedTabIds) {
     await reordered
   }
 
-  tabOffsets.value = {}
-  isSettling.value = false
-  settlingTabIds.value = new Set()
+  if (cleanupVisuals) {
+    tabOffsets.value = {}
+    isSettling.value = false
+    settlingTabIds.value = new Set()
+  }
 
   nextTick(() => {
     requestAnimationFrame(() => {
@@ -478,15 +523,23 @@ function finishSettle(cancel) {
     clearTimeout(settleTimeoutId)
     settleTimeoutId = null
   }
+  const pendingReorder = pendingSettleReorder
+  pendingSettleReorder = null
   if (cancel) {
     suppressTransitions.value = true
     tabOffsets.value = {}
     isSettling.value = false
-    nextTick(() => {
-      requestAnimationFrame(() => {
-        suppressTransitions.value = false
+    settlingTabIds.value = new Set()
+    if (!pendingReorder) {
+      nextTick(() => {
+        requestAnimationFrame(() => {
+          suppressTransitions.value = false
+        })
       })
-    })
+    }
+  }
+  if (pendingReorder) {
+    commitReorder(pendingReorder, !cancel)
   }
 }
 
@@ -762,6 +815,7 @@ onUnmounted(() => {
     clearTimeout(settleTimeoutId)
     settleTimeoutId = null
   }
+  pendingSettleReorder = null
 
   stopTabBarResize()
   stopScrollbarThumbDrag()

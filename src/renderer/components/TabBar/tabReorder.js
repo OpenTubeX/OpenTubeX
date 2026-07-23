@@ -45,6 +45,39 @@ export function buildShiftedTabIds(tabIds, draggedTabIds, indexShift) {
 }
 
 /**
+ * Rebuild a pending drag against the current tab set. Tabs opened or closed
+ * during the settle animation remain present and the shift is clamped again
+ * to the current pinned or unpinned group.
+ * @param {Array<{id: string, isPinned?: boolean}>} tabs
+ * @param {string[]} draggedTabIds
+ * @param {number} indexShift
+ * @param {boolean} isPinned
+ * @returns {string[]}
+ */
+export function buildCurrentShiftedTabIds(tabs, draggedTabIds, indexShift, isPinned) {
+  const tabIds = tabs.map(tab => tab.id)
+  const draggedTabIdSet = new Set(draggedTabIds)
+  const currentDraggedTabIds = tabs
+    .filter(tab => {
+      return draggedTabIdSet.has(tab.id) && (tab.isPinned === true) === isPinned
+    })
+    .map(tab => tab.id)
+  if (currentDraggedTabIds.length === 0) {
+    return tabIds
+  }
+
+  const draggedIndexes = currentDraggedTabIds.map(tabId => tabIds.indexOf(tabId))
+  const pinnedCount = tabs.filter(tab => tab.isPinned === true).length
+  const groupStartIndex = isPinned ? 0 : pinnedCount
+  const groupEndIndex = isPinned ? pinnedCount - 1 : tabs.length - 1
+  const minShift = groupStartIndex - Math.min(...draggedIndexes)
+  const maxShift = groupEndIndex - Math.max(...draggedIndexes)
+  const clampedShift = Math.max(minShift, Math.min(maxShift, indexShift))
+
+  return buildShiftedTabIds(tabIds, currentDraggedTabIds, clampedShift)
+}
+
+/**
  * Convert the source tab's dragged center into a shared positional shift for
  * all dragged tabs, retaining their spacing and the pinned boundary.
  * @param {Array<{id: string, start: number, size: number}>} rects

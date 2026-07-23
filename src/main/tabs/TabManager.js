@@ -10,6 +10,7 @@ import {
   saveTabSession
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
+import { buildReorderedTabMap } from './tabOrder.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
@@ -1828,30 +1829,10 @@ export class TabManager {
    * @param {string[]} tabIds
    */
   reorderTabs(tabIds) {
-    const currentEntries = Array.from(this.tabs.entries())
-    if (
-      tabIds.length !== currentEntries.length ||
-      new Set(tabIds).size !== tabIds.length ||
-      tabIds.some(tabId => !this.tabs.has(tabId))
-    ) {
-      return
-    }
+    const reorderedTabs = buildReorderedTabMap(this.tabs, tabIds)
+    if (reorderedTabs == null || reorderedTabs === this.tabs) return
 
-    let foundUnpinnedTab = false
-    for (const tabId of tabIds) {
-      const tab = this.tabs.get(tabId)
-      if (tab.isPinned) {
-        if (foundUnpinnedTab) return
-      } else {
-        foundUnpinnedTab = true
-      }
-    }
-
-    if (currentEntries.every(([tabId], index) => tabId === tabIds[index])) {
-      return
-    }
-
-    this.tabs = new Map(tabIds.map(tabId => [tabId, this.tabs.get(tabId)]))
+    this.tabs = reorderedTabs
     this._broadcastStateUpdate()
     this._saveSession()
   }

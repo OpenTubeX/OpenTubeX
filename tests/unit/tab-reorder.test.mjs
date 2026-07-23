@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  buildCurrentShiftedTabIds,
   buildShiftedTabIds,
   computeTabOffsets,
   getDraggedTabIds,
@@ -64,4 +65,34 @@ test('computes offsets for the final spacing-preserving order', () => {
     e: -102,
     d: 102
   })
+})
+
+test('reconciles a pending drag with tabs opened or closed while settling', () => {
+  assert.deepEqual(
+    buildCurrentShiftedTabIds(
+      [...tabs, { id: 'f' }],
+      ['b', 'd'],
+      1,
+      false
+    ),
+    ['a', 'c', 'b', 'e', 'd', 'f']
+  )
+  assert.deepEqual(
+    buildCurrentShiftedTabIds(
+      tabs.filter(tab => tab.id !== 'd'),
+      ['b', 'd'],
+      1,
+      false
+    ),
+    ['a', 'c', 'b', 'e']
+  )
+  assert.deepEqual(
+    buildCurrentShiftedTabIds(
+      [{ id: 'p', isPinned: true }, ...tabs],
+      ['b', 'd'],
+      -10,
+      false
+    ),
+    ['p', 'a', 'b', 'c', 'd', 'e']
+  )
 })

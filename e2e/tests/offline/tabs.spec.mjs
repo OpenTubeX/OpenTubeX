@@ -122,6 +122,59 @@ test.describe('tab bar', () => {
     }).toEqual(result.reorderedIds)
   })
 
+  test('commits a completed drop before a new pointerdown cancels settling', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(1).click()
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+      const sourceRect = tabs[3].getBoundingClientRect()
+      const targetRect = tabs[2].getBoundingClientRect()
+      tabs[3].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2 - 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+
+      const interruptRect = tabs[0].getBoundingClientRect()
+      tabs[0].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: interruptRect.left + interruptRect.width / 2,
+        clientY: interruptRect.top + interruptRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    })
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[1],
+      originalIds[0],
+      originalIds[3],
+      originalIds[2]
+    ])
+  })
+
   test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click({ button: 'right' })
