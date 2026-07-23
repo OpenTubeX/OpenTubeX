@@ -89,7 +89,7 @@
   inset-block-start: 50%;
   inset-inline-start: calc(100% + 8px);
   transform: translateY(-50%);
-  white-space: nowrap;
+  z-index: 2;
 }
 
 .selectIndicators :deep(.syncedSettingIndicator),

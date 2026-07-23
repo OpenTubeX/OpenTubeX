@@ -182,5 +182,46 @@ test.describe('synced setting indicators', () => {
     expect(Math.abs(helpBox.y + helpBox.height / 2 - syncBox.y - syncBox.height / 2)).toBeLessThanOrEqual(1)
     expect(Math.abs(syncBox.y - resetBox.y)).toBeLessThanOrEqual(1)
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
+
+    const tooltipText = select.locator('.selectTooltip .text')
+    await select.locator('.selectTooltip button').hover()
+    await expect(tooltipText).toBeVisible()
+
+    const [tooltipTextBox, sectionBox] = await Promise.all([
+      tooltipText.boundingBox(),
+      select.locator('xpath=ancestor::*[@data-section="privacy"]').boundingBox()
+    ])
+    expect(tooltipTextBox).not.toBeNull()
+    expect(sectionBox).not.toBeNull()
+    expect(tooltipTextBox.width).toBeLessThan(sectionBox.width / 2)
+
+    const removePlaylistsButton = page.getByRole('button', { name: 'Remove All Playlists' })
+    const removePlaylistsButtonBox = await removePlaylistsButton.boundingBox()
+    expect(removePlaylistsButtonBox).not.toBeNull()
+
+    const overlapLeft = Math.max(tooltipTextBox.x, removePlaylistsButtonBox.x)
+    const overlapRight = Math.min(
+      tooltipTextBox.x + tooltipTextBox.width,
+      removePlaylistsButtonBox.x + removePlaylistsButtonBox.width
+    )
+    const overlapTop = Math.max(tooltipTextBox.y, removePlaylistsButtonBox.y)
+    const overlapBottom = Math.min(
+      tooltipTextBox.y + tooltipTextBox.height,
+      removePlaylistsButtonBox.y + removePlaylistsButtonBox.height
+    )
+    expect(overlapLeft).toBeLessThan(overlapRight)
+    expect(overlapTop).toBeLessThan(overlapBottom)
+
+    const overlapPoint = {
+      x: (overlapLeft + overlapRight) / 2,
+      y: (overlapTop + overlapBottom) / 2
+    }
+    await tooltipText.evaluate(element => {
+      element.style.pointerEvents = 'auto'
+    })
+    await expect.poll(() => page.evaluate(({ x, y }) => {
+      const element = document.elementFromPoint(x, y)
+      return element !== null && element.closest('[role="tooltip"]') !== null
+    }, overlapPoint)).toBe(true)
   })
 })
