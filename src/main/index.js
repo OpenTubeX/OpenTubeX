@@ -2880,7 +2880,9 @@ function runApp() {
     for (const [key, value] of Object.entries(query ?? {})) {
       if (Array.isArray(value)) {
         for (const item of value) {
-          searchParams.append(key, String(item))
+          if (item !== null && item !== undefined) {
+            searchParams.append(key, String(item))
+          }
         }
       } else if (value !== null && value !== undefined) {
         searchParams.set(key, String(value))

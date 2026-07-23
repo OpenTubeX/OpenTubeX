@@ -22,6 +22,7 @@ test('keeps contextual app shortcuts fixed', () => {
   }
 
   const shortcuts = getConfiguredKeyboardShortcuts(overrides)
+  const persistedShortcuts = getConfiguredKeyboardShortcuts(JSON.stringify(overrides))
   assert.equal(shortcuts.APP.GENERAL.FOCUS_SEARCH, 'ctrl+k')
   assert.equal(shortcuts.APP.GENERAL.FOCUS_SEARCH_ALT_SLASH, '/')
   assert.equal(shortcuts.APP.GENERAL.SEARCH_IN_NEW_WINDOW, 'shift+enter')
@@ -29,12 +30,18 @@ test('keeps contextual app shortcuts fixed', () => {
   assert.equal(shortcuts.APP.GENERAL.FIND_PREVIOUS_ALT_ENTER, 'shift+enter')
   assert.equal(shortcuts.APP.GENERAL.NEXT_TAB, 'control+tab')
   assert.equal(shortcuts.APP.GENERAL.PREV_TAB, 'control+shift+tab')
+  assert.deepEqual(persistedShortcuts, shortcuts)
 
-  assert.deepEqual(JSON.parse(sanitizeKeyboardShortcutOverrides(overrides)), {
+  const sanitizedOverrides = {
     APP: {
       GENERAL: {
         FOCUS_SEARCH: 'ctrl+k',
       }
     }
-  })
+  }
+  assert.deepEqual(JSON.parse(sanitizeKeyboardShortcutOverrides(overrides)), sanitizedOverrides)
+  assert.deepEqual(
+    JSON.parse(sanitizeKeyboardShortcutOverrides(JSON.stringify(overrides))),
+    sanitizedOverrides
+  )
 })
