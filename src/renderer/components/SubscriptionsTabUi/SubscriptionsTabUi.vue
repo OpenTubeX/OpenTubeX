@@ -48,7 +48,10 @@
         {{ isCommunity ? $t("Subscriptions.Empty Posts") : $t("Subscriptions.Empty Channels") }}
       </p>
     </FtFlexBox>
-    <slot name="before-list" />
+    <slot
+      name="before-list"
+      :has-visible-content="activeVideoList.length > 0"
+    />
     <FtElementList
       :data="activeVideoList"
       :use-channels-hidden-preference="false"
@@ -88,6 +91,7 @@ import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { useTabContext } from '../../tabs/TabContext'
 
 const { tabId, isTabPresented } = useTabContext()
@@ -196,8 +200,20 @@ const onlyShowLatestFromChannelNumber = computed(() => {
   return store.getters.getOnlyShowLatestFromChannelNumber
 })
 
+const hideLiveStreams = computed(() => store.getters.getHideLiveStreams)
+const hideUpcomingPremieres = computed(() => store.getters.getHideUpcomingPremieres)
+const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
+
 const filteredVideoList = computed(() => {
   let videoList = props.videoList
+
+  if (!props.isCommunity) {
+    videoList = videoList.filter(video => !isVideoHiddenByPreferences(video, {
+      hideLiveStreams: hideLiveStreams.value,
+      hideUpcomingPremieres: hideUpcomingPremieres.value,
+      forbiddenTitles: forbiddenTitles.value
+    }))
+  }
 
   if (props.onlyShowNew) {
     videoList = videoList.filter(entry => {

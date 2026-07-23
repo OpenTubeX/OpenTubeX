@@ -1,5 +1,6 @@
 <template>
   <SubscriptionsTabUi
+    ref="tabUi"
     class="newFeed"
     :is-loading="isLoading"
     :video-list="newMedia"
@@ -11,8 +12,8 @@
     stable-item-keys
     @refresh="refresh"
   >
-    <template #before-list>
-      <h3 v-if="newMedia.length > 0">
+    <template #before-list="{ hasVisibleContent }">
+      <h3 v-if="hasVisibleContent">
         {{ $t('Global.Videos') }}
       </h3>
     </template>
@@ -43,7 +44,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtElementList from './FtElementList/FtElementList.vue'
@@ -56,6 +57,7 @@ import { useRefreshAllSubscriptionFeeds } from '../composables/useRefreshAllSubs
 import { isHistoryEntryWatched } from '../helpers/history'
 
 const { t } = useI18n()
+const tabUi = useTemplateRef('tabUi')
 const {
   activeSubscriptionIds,
   attemptedFetch,
@@ -103,13 +105,21 @@ const newContent = computed(() => {
 })
 
 const newMedia = computed(() => newContent.value.filter(entry => entry.videoId != null))
-const newPosts = computed(() => newContent.value.filter(entry => entry.postId != null))
+const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
+const newPosts = computed(() => newContent.value.filter(entry => {
+  const lowerCaseAuthor = entry.author?.toLowerCase()
+
+  return entry.postId != null &&
+    !forbiddenTitles.value.some(text => lowerCaseAuthor?.includes(text))
+}))
 
 const isLoading = computed(() => {
   return !store.getters.getSubscriptionCacheReady || isRefreshing.value
 })
 
-const hasNewContent = computed(() => newContent.value.length > 0)
+const hasNewContent = computed(() => {
+  return newPosts.value.length > 0 || tabUi.value?.hasNewContent === true
+})
 
 defineExpose({
   refresh,

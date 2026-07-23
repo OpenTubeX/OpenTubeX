@@ -175,6 +175,62 @@ test.describe('new feed settings and seen state', () => {
   })
 })
 
+test.describe('new feed display filters', () => {
+  const hiddenPremiere = video('hidden-premiere', 'Hidden premiere', now + HOUR, {
+    isNewInSubscriptionFeed: true,
+    isUpcoming: true,
+    premiereDate: new Date(now + HOUR).toISOString()
+  })
+  const forbiddenVideo = video('forbidden-video', 'Blocked title', now - HOUR, {
+    isNewInSubscriptionFeed: true
+  })
+  const hiddenLive = video('hidden-live', 'Hidden live stream', now, {
+    isNewInSubscriptionFeed: true,
+    liveNow: true
+  })
+  const forbiddenPost = {
+    ...post('forbidden-post', 'Forbidden post', now),
+    author: 'Blocked channel'
+  }
+  const hiddenCache = [{
+    _id: CHANNEL_ID,
+    videos: [hiddenPremiere, forbiddenVideo],
+    videosTimestamp: new Date(now).toISOString(),
+    shorts: [],
+    shortsTimestamp: new Date(now).toISOString(),
+    liveStreams: [hiddenLive],
+    liveStreamsTimestamp: new Date(now).toISOString(),
+    communityPosts: [forbiddenPost],
+    communityPostsTimestamp: new Date(now).toISOString()
+  }]
+
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        forbiddenTitles: JSON.stringify(['Blocked']),
+        hideLiveStreams: true,
+        hideUpcomingPremieres: true,
+        showNewSubscriptionFeedIndicators: true
+      },
+      profiles: [profile()],
+      subscriptionCache: hiddenCache
+    }
+  })
+
+  test('does not advertise new content hidden by display preferences', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(page.getByText('There is no new content.')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Posts', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+  })
+})
+
 test.describe('independent new feed setting', () => {
   test.use({
     seed: {
@@ -220,7 +276,9 @@ test.describe('large new feed refresh', () => {
     await page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
 
-    await page.locator('.headerRefreshWidget .refreshButton').click()
+    const refreshNewContent = page.getByRole('button', { name: /Refresh New content/ })
+    await expect(refreshNewContent).toBeVisible()
+    await refreshNewContent.click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toBeVisible()
     await expect(page.getByText(/126 subscriptions can take a long time/)).toBeVisible()
 
