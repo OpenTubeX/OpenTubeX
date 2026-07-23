@@ -295,6 +295,15 @@ const DefaultKeyboardShortcuts = {
   },
 }
 
+const NonEditableKeyboardShortcutPaths = new Set([
+  'APP.GENERAL.FOCUS_SEARCH_ALT_SLASH',
+  'APP.GENERAL.SEARCH_IN_NEW_WINDOW',
+  'APP.GENERAL.FIND_NEXT_ALT_ENTER',
+  'APP.GENERAL.FIND_PREVIOUS_ALT_ENTER',
+  'APP.GENERAL.NEXT_TAB',
+  'APP.GENERAL.PREV_TAB',
+])
+
 const KeyboardShortcuts = getConfiguredKeyboardShortcuts()
 
 /**
@@ -315,8 +324,8 @@ function getConfiguredKeyboardShortcuts(overrides = {}) {
 }
 
 /**
- * Removes overrides for range shortcuts, which represent multiple keys and
- * cannot be replaced by recording one keyboard event.
+ * Removes overrides for reserved shortcuts and ranges, which represent
+ * multiple keys and cannot be replaced by recording one keyboard event.
  * @param {string | object} overrides
  * @returns {string}
  */
@@ -333,6 +342,16 @@ function sanitizeKeyboardShortcutOverrides(overrides) {
  */
 function isKeyboardShortcutRange(shortcut) {
   return /^\d(?:\.\.|-)\d$/.test(shortcut.split('+').at(-1))
+}
+
+/**
+ * @param {string[]} path
+ * @param {string} shortcut
+ * @returns {boolean}
+ */
+function isKeyboardShortcutEditable(path, shortcut) {
+  return !NonEditableKeyboardShortcutPaths.has(path.join('.')) &&
+    !isKeyboardShortcutRange(shortcut)
 }
 
 /**
@@ -357,9 +376,9 @@ function parseKeyboardShortcutOverrides(overrides) {
  * @param {unknown} overrides
  * @returns {object | string | undefined}
  */
-function filterEditableKeyboardShortcutOverrides(defaults, overrides) {
+function filterEditableKeyboardShortcutOverrides(defaults, overrides, path = []) {
   if (typeof defaults === 'string') {
-    if (isKeyboardShortcutRange(defaults)) {
+    if (!isKeyboardShortcutEditable(path, defaults)) {
       return undefined
     }
     return typeof overrides === 'string' ? overrides : undefined
@@ -369,7 +388,7 @@ function filterEditableKeyboardShortcutOverrides(defaults, overrides) {
   return Object.fromEntries(Object.entries(defaults)
     .map(([key, value]) => [
       key,
-      filterEditableKeyboardShortcutOverrides(value, overrideDictionary[key])
+      filterEditableKeyboardShortcutOverrides(value, overrideDictionary[key], [...path, key])
     ])
     .filter(([_key, value]) => value !== undefined && (
       typeof value === 'string' || Object.keys(value).length > 0
@@ -536,6 +555,7 @@ export {
   applyKeyboardShortcutOverrides,
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
+  isKeyboardShortcutEditable,
   isKeyboardShortcutRange,
   sanitizeKeyboardShortcutOverrides,
   PlayerIcons,

@@ -123,7 +123,7 @@ import { computed, nextTick, ref } from 'vue'
 import {
   DefaultKeyboardShortcuts,
   getConfiguredKeyboardShortcuts,
-  isKeyboardShortcutRange,
+  isKeyboardShortcutEditable,
 } from '../../../constants'
 import { getLocalizedShortcut } from '../../helpers/utils'
 import {
@@ -396,7 +396,7 @@ function getLocalizedShortcutNamesAndValues(dictionary, dictionaryPath, included
             path: [...dictionaryPath, code].join('.'),
             shortcut: dictionary[code],
             dictionaryPath,
-            editable: !isKeyboardShortcutRange(defaultShortcut),
+            editable: isKeyboardShortcutEditable([...dictionaryPath, code], defaultShortcut),
             modified: dictionary[code] !== defaultShortcut,
           }
         })
@@ -542,7 +542,10 @@ function getAllKeyboardShortcutBindings(dictionary, dictionaryPath = []) {
         code,
         path: path.join('.'),
         shortcut: value,
-        editable: !isKeyboardShortcutRange(getNestedValue(DefaultKeyboardShortcuts, path)),
+        editable: isKeyboardShortcutEditable(
+          path,
+          getNestedValue(DefaultKeyboardShortcuts, path)
+        ),
       }]
     }
     return getAllKeyboardShortcutBindings(value, path)

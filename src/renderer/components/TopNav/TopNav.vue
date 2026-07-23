@@ -109,7 +109,6 @@
           show-data-when-empty
           @input="getSearchSuggestionsDebounce"
           @click="goToSearch"
-          @keydown="handleSearchKeyboardShortcut"
           @clear="clearLastSuggestionQuery"
           @remove="removeSearchHistoryEntryInDbAndCache"
         >
@@ -469,9 +468,7 @@ const searchSettings = computed(() => store.getters.getSearchSettings(searchFilt
  * @param {number} [options.dataListIndex]
  */
 function goToSearch(queryText, { event, dataListIndex }) {
-  const doCreateNewWindow = event instanceof KeyboardEvent
-    ? matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
-    : event && event.shiftKey
+  const doCreateNewWindow = event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
   const doCreateNewTab = ctrlOrCmdPressed && !doCreateNewWindow
@@ -633,19 +630,6 @@ function goToSearch(queryText, { event, dataListIndex }) {
       updateSearchInputText('')
     }
   })
-}
-
-/**
- * @param {KeyboardEvent} event
- */
-function handleSearchKeyboardShortcut(event) {
-  if (
-    event.key !== 'Enter' &&
-    matchesKeyboardShortcut(event, appKeyboardShortcuts.value.SEARCH_IN_NEW_WINDOW)
-  ) {
-    event.preventDefault()
-    goToSearch(currentSearchText, { event })
-  }
 }
 
 function clearLastSuggestionQuery() {

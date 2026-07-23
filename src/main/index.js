@@ -2876,11 +2876,20 @@ function runApp() {
       path = `/${path}`
     }
 
-    let windowStartupUrl = `${ROOT_APP_URL}#${path}`
-
-    if (query) {
-      windowStartupUrl += '?' + new URLSearchParams(query).toString()
+    const searchParams = new URLSearchParams()
+    for (const [key, value] of Object.entries(query ?? {})) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item !== null && item !== undefined) {
+            searchParams.append(key, String(item))
+          }
+        }
+      } else if (value !== null && value !== undefined) {
+        searchParams.set(key, String(value))
+      }
     }
+    const search = searchParams.toString()
+    const windowStartupUrl = `${ROOT_APP_URL}#${path}${search.length > 0 ? `?${search}` : ''}`
 
     createWindow({
       replaceMainWindow: false,
