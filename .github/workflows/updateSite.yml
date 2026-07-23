@@ -32,7 +32,7 @@ jobs:
           tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
         fi
 
-        version="${tag# v}"
+        version="${tag#v}"
         version="${version%-beta}"
 
         {
