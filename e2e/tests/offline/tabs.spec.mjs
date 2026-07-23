@@ -79,6 +79,49 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('applies a complete tab reorder in one state update', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const result = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const initialIds = initialState.tabs.map(tab => tab.id)
+      const reorderedIds = [...initialIds.slice(1), initialIds[0]]
+
+      return await new Promise((resolve, reject) => {
+        const changedOrders = []
+        const timeoutId = window.setTimeout(() => {
+          removeListener()
+          reject(new Error('Timed out waiting for atomic tab reorder'))
+        }, 5000)
+        const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+          const order = state.tabs.map(tab => tab.id)
+          if (order.every((tabId, index) => tabId === initialIds[index])) return
+
+          const key = order.join(',')
+          if (!changedOrders.includes(key)) {
+            changedOrders.push(key)
+          }
+          if (order.every((tabId, index) => tabId === reorderedIds[index])) {
+            window.clearTimeout(timeoutId)
+            removeListener()
+            resolve({ changedOrders, reorderedIds })
+          }
+        })
+
+        window.ftElectron.tabs.reorder(reorderedIds)
+      })
+    })
+
+    expect(result.changedOrders).toHaveLength(1)
+    await expect.poll(() => {
+      return page.locator(sel.tabs).evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual(result.reorderedIds)
+  })
+
   test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click({ button: 'right' })

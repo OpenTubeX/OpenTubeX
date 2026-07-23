@@ -26,10 +26,10 @@
           :index="index"
           :vertical="vertical"
           :offset="tabOffsets[tab.id] || 0"
-          :is-dragging="draggingTabId === tab.id"
-          :is-settling="isSettling && draggingTabId === tab.id"
+          :is-dragging="draggingTabIds.has(tab.id)"
+          :is-settling="isSettling && settlingTabIds.has(tab.id)"
           :suppress-transition="suppressTransitions"
-          :disable-tooltips="draggingTabId != null"
+          :disable-tooltips="draggingTabIds.size > 0"
           :close-tooltips-signal="closeTooltipsSignal"
           :show-icon="showTabIcons"
           :is-selected="selectedTabIds.has(tab.id)"
@@ -85,6 +85,12 @@ import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import SortableTab from './SortableTab.vue'
+import {
+  buildShiftedTabIds,
+  computeTabOffsets,
+  getDraggedTabIds,
+  getTabIndexShift
+} from './tabReorder'
 
 const { t } = useI18n()
 const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
@@ -122,8 +128,10 @@ const DRAG_THRESHOLD_PX = 5
 const SETTLE_DURATION_MS = 180
 const REORDER_STATE_UPDATE_TIMEOUT_MS = 300
 
-/** @type {import('vue').Ref<string | null>} */
-const draggingTabId = ref(null)
+/** @type {import('vue').Ref<Set<string>>} */
+const draggingTabIds = ref(new Set())
+/** @type {import('vue').Ref<Set<string>>} */
+const settlingTabIds = ref(new Set())
 /** @type {import('vue').Ref<Record<string, number>>} */
 const tabOffsets = ref({})
 const isSettling = ref(false)
@@ -135,8 +143,9 @@ const suppressTransitions = ref(false)
  * when the vertical tab bar layout is enabled.
  * @typedef {object} DragSession
  * @property {string} tabId
+ * @property {string[]} tabIds
  * @property {number} sourceIndex
- * @property {number} targetIndex
+ * @property {string[]} reorderedTabIds
  * @property {number} pointerStart
  * @property {number} pointerCurrent
  * @property {number} scrollStart
@@ -191,6 +200,7 @@ function handleTabContainerPointerDown(event) {
   const tabsList = tabs.value
   const sourceIndex = tabsList.findIndex(t => t.id === tabId)
   if (sourceIndex === -1) return
+  const tabIds = getDraggedTabIds(tabsList, selectedTabIds.value, tabId)
 
   const tabEls = Array.from(container.querySelectorAll('.tab[data-tab-id]'))
   if (tabEls.length === 0) return
@@ -219,8 +229,9 @@ function handleTabContainerPointerDown(event) {
 
   dragSession = {
     tabId,
+    tabIds,
     sourceIndex,
-    targetIndex: sourceIndex,
+    reorderedTabIds: tabsList.map(tab => tab.id),
     pointerStart: pointerAxisPosition(event),
     pointerCurrent: pointerAxisPosition(event),
     scrollStart: containerScroll,
@@ -249,7 +260,16 @@ function handleDragPointerMove(event) {
   if (!dragSession.started) {
     if (Math.abs(pointerDelta) < DRAG_THRESHOLD_PX) return
     dragSession.started = true
-    draggingTabId.value = dragSession.tabId
+    if (
+      !selectedTabIds.value.has(dragSession.tabId) ||
+      selectedTabIds.value.size !== dragSession.tabIds.length
+    ) {
+      selectedTabIds.value = dragSession.tabIds.length > 1
+        ? new Set(dragSession.tabIds)
+        : new Set()
+      selectionAnchorId = dragSession.tabId
+    }
+    draggingTabIds.value = new Set(dragSession.tabIds)
     closeTooltipsSignal.value++
     document.body.classList.add('tab-bar-grabbing')
   }
@@ -274,123 +294,48 @@ function updateActiveDragPosition() {
 
   const { rects, sourceIndex, gap } = dragSession
   const sourceRect = rects[sourceIndex]
-  const lastRect = rects[rects.length - 1]
   const tabsList = tabs.value
   const sourceTab = tabsList[sourceIndex]
   const isSourcePinned = sourceTab?.isPinned === true
-
-  // Clamp so the dragged tab's center can sweep across its allowed group.
-  // Pinned tabs stay in the pinned group; unpinned tabs stay after it.
-  let minStart = rects[0].start - sourceRect.size / 2
-  let maxStart = lastRect.start + lastRect.size - sourceRect.size / 2
-
-  if (isSourcePinned) {
-    const pinnedRects = rects.filter(rect => {
-      return tabsList.find(tab => tab.id === rect.id)?.isPinned === true
-    })
-    const lastPinnedRect = pinnedRects[pinnedRects.length - 1]
-
-    if (pinnedRects[0] && lastPinnedRect) {
-      minStart = pinnedRects[0].start - sourceRect.size / 2
-      maxStart = lastPinnedRect.start + lastPinnedRect.size - sourceRect.size / 2
-    }
-  } else {
-    const firstUnpinnedIndex = tabsList.findIndex(tab => tab.isPinned !== true)
-    const firstUnpinnedRect = firstUnpinnedIndex >= 0 ? rects[firstUnpinnedIndex] : rects[0]
-
-    if (firstUnpinnedRect) {
-      minStart = firstUnpinnedRect.start - sourceRect.size / 2
-    }
-  }
-
-  const newStart = Math.max(minStart, Math.min(maxStart, sourceRect.start + delta))
-  const draggedOffset = newStart - sourceRect.start
-  const draggedCenter = newStart + sourceRect.size / 2
+  const pinnedCount = tabsList.filter(tab => tab.isPinned === true).length
+  const groupStartIndex = isSourcePinned ? 0 : pinnedCount
+  const groupEndIndex = isSourcePinned ? pinnedCount - 1 : tabsList.length - 1
+  const draggedTabIdSet = new Set(dragSession.tabIds)
+  const draggedRects = rects.filter(rect => draggedTabIdSet.has(rect.id))
+  const firstDraggedRect = draggedRects[0]
+  const lastDraggedRect = draggedRects[draggedRects.length - 1]
+  const firstGroupRect = rects[groupStartIndex]
+  const lastGroupRect = rects[groupEndIndex]
+  const minOffset = firstGroupRect.start - firstDraggedRect.start
+  const maxOffset = lastGroupRect.start + lastGroupRect.size -
+    lastDraggedRect.start - lastDraggedRect.size
+  const draggedOffset = Math.max(minOffset, Math.min(maxOffset, delta))
+  const intendedDraggedCenter = sourceRect.start + delta + sourceRect.size / 2
 
   dragSession.draggedOffset = draggedOffset
 
-  // Determine the target slot by comparing the dragged tab's center
-  // against the centers of the other (stationary, original layout) tabs.
-  let targetIndex = sourceIndex
-  for (let i = 0; i < rects.length; i++) {
-    if (i === sourceIndex) continue
-    const center = rects[i].start + rects[i].size / 2
-    if (i < sourceIndex && draggedCenter < center) {
-      targetIndex = Math.min(targetIndex, i)
-    } else if (i > sourceIndex && draggedCenter > center) {
-      targetIndex = Math.max(targetIndex, i)
-    }
-  }
+  const indexShift = getTabIndexShift(
+    rects,
+    draggedTabIdSet,
+    sourceIndex,
+    intendedDraggedCenter,
+    groupStartIndex,
+    groupEndIndex
+  )
+  const reorderedTabIds = buildShiftedTabIds(
+    tabsList.map(tab => tab.id),
+    dragSession.tabIds,
+    indexShift
+  )
 
-  targetIndex = clampTargetIndexForPinnedGroup(dragSession.tabId, targetIndex)
-
-  dragSession.targetIndex = targetIndex
-
-  tabOffsets.value = computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
-}
-
-/**
- * Keep drag targets in the same group the main process will enforce.
- * @param {string} tabId
- * @param {number} targetIndex
- * @returns {number}
- */
-function clampTargetIndexForPinnedGroup(tabId, targetIndex) {
-  const tabsList = tabs.value
-  const sourceTab = tabsList.find(tab => tab.id === tabId)
-  if (!sourceTab) {
-    return targetIndex
-  }
-
-  const pinnedCountWithoutSource = tabsList.filter(tab => {
-    return tab.id !== tabId && tab.isPinned === true
-  }).length
-
-  if (sourceTab.isPinned === true) {
-    return Math.min(targetIndex, pinnedCountWithoutSource)
-  }
-
-  return Math.max(targetIndex, pinnedCountWithoutSource)
-}
-
-/**
- * Build the offset map for every tab given the proposed reorder.
- * The dragged tab gets the user's pointer offset; all other tabs animate
- * to the slot they would occupy in the reordered layout.
- * @param {Array<{id: string, start: number, size: number}>} rects
- * @param {number} sourceIndex
- * @param {number} targetIndex
- * @param {number} gap
- * @param {number} draggedOffset
- * @returns {Record<string, number>}
- */
-function computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset) {
-  const offsets = {}
-
-  if (sourceIndex === targetIndex) {
-    offsets[rects[sourceIndex].id] = draggedOffset
-    return offsets
-  }
-
-  const order = rects.map((_, i) => i)
-  const [src] = order.splice(sourceIndex, 1)
-  order.splice(targetIndex, 0, src)
-
-  let cursor = rects[0].start
-  for (const idx of order) {
-    const rect = rects[idx]
-    if (idx === sourceIndex) {
-      offsets[rect.id] = draggedOffset
-    } else {
-      const delta = cursor - rect.start
-      if (delta !== 0) {
-        offsets[rect.id] = delta
-      }
-    }
-    cursor += rect.size + gap
-  }
-
-  return offsets
+  dragSession.reorderedTabIds = reorderedTabIds
+  tabOffsets.value = computeTabOffsets(
+    rects,
+    reorderedTabIds,
+    gap,
+    draggedTabIdSet,
+    draggedOffset
+  )
 }
 
 function handleDragPointerUp() {
@@ -398,7 +343,7 @@ function handleDragPointerUp() {
 
   if (!dragSession) return
 
-  const { sourceIndex, targetIndex, started, moved, tabId, rects, gap, draggedOffset } = dragSession
+  const { started, moved, tabIds, rects, gap, reorderedTabIds } = dragSession
 
   if (started && moved) {
     suppressNextClick()
@@ -415,72 +360,37 @@ function handleDragPointerUp() {
   // Snap the dragged tab to its final slot with an animation, then commit
   // the reorder once the snap finishes. Other tabs are already shifted to
   // their target positions via offsets, so they'll stay put through the swap.
-  const snapOffsets = computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
+  const snapOffsets = computeTabOffsets(rects, reorderedTabIds, gap)
 
   tabOffsets.value = snapOffsets
-  draggingTabId.value = null
+  draggingTabIds.value = new Set()
+  settlingTabIds.value = new Set(tabIds)
   isSettling.value = true
 
   settleTimeoutId = window.setTimeout(() => {
     settleTimeoutId = null
-    commitReorder(tabId, sourceIndex, targetIndex)
+    commitReorder(reorderedTabIds)
   }, SETTLE_DURATION_MS)
 
   dragSession = null
 }
 
 /**
- * Compute offsets that place every tab (including the dragged one)
- * exactly where it will live after the reorder commits.
- * @param {Array<{id: string, start: number, size: number}>} rects
- * @param {number} sourceIndex
- * @param {number} targetIndex
- * @param {number} gap
- * @param {number} draggedOffset
- * @returns {Record<string, number>}
- */
-function computeFinalOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset) {
-  if (sourceIndex === targetIndex) {
-    // Dragged tab returns to its origin; other tabs already at 0.
-    return {}
-  }
-
-  const offsets = computeOffsets(rects, sourceIndex, targetIndex, gap, draggedOffset)
-
-  // Replace the dragged tab's pointer-following offset with the snap-to-slot offset.
-  const order = rects.map((_, i) => i)
-  const [src] = order.splice(sourceIndex, 1)
-  order.splice(targetIndex, 0, src)
-
-  let cursor = rects[0].start
-  for (const idx of order) {
-    if (idx === sourceIndex) {
-      offsets[rects[idx].id] = cursor - rects[idx].start
-      break
-    }
-    cursor += rects[idx].size + gap
-  }
-
-  return offsets
-}
-
-/**
  * Commit the reorder to the store, then reset transforms without animating
  * (so the elements don't jump from their offset positions back to 0).
- * @param {string} tabId
- * @param {number} sourceIndex
- * @param {number} targetIndex
+ * @param {string[]} reorderedTabIds
  */
-async function commitReorder(tabId, sourceIndex, targetIndex) {
-  if (sourceIndex !== targetIndex) {
+async function commitReorder(reorderedTabIds) {
+  if (!tabOrderMatches(reorderedTabIds)) {
     suppressTransitions.value = true
-    const reordered = waitForTabIndex(tabId, targetIndex)
-    store.dispatch('moveTab', { tabId, toIndex: targetIndex })
+    const reordered = waitForTabOrder(reorderedTabIds)
+    store.dispatch('reorderTabs', reorderedTabIds)
     await reordered
   }
 
   tabOffsets.value = {}
   isSettling.value = false
+  settlingTabIds.value = new Set()
 
   nextTick(() => {
     requestAnimationFrame(() => {
@@ -491,19 +401,18 @@ async function commitReorder(tabId, sourceIndex, targetIndex) {
 
 /**
  * Wait until the main-process tab state update reaches the renderer.
- * @param {string} tabId
- * @param {number} targetIndex
+ * @param {string[]} tabIds
  * @returns {Promise<void>}
  */
-function waitForTabIndex(tabId, targetIndex) {
-  if (tabs.value.findIndex(tab => tab.id === tabId) === targetIndex) {
+function waitForTabOrder(tabIds) {
+  if (tabOrderMatches(tabIds)) {
     return Promise.resolve()
   }
 
   return new Promise((resolve) => {
     let timeoutId = null
     const stop = watch(tabs, (newTabs) => {
-      if (newTabs.findIndex(tab => tab.id === tabId) === targetIndex) {
+      if (newTabs.map(tab => tab.id).every((tabId, index) => tabId === tabIds[index])) {
         cleanup()
       }
     })
@@ -520,6 +429,15 @@ function waitForTabIndex(tabId, targetIndex) {
   })
 }
 
+/**
+ * @param {string[]} tabIds
+ * @returns {boolean}
+ */
+function tabOrderMatches(tabIds) {
+  return tabs.value.length === tabIds.length &&
+    tabs.value.every((tab, index) => tab.id === tabIds[index])
+}
+
 function handleDragPointerCancel() {
   cleanupDragListeners()
   document.body.classList.remove('tab-bar-grabbing')
@@ -530,12 +448,14 @@ function handleDragPointerCancel() {
     // Animate the dragged tab back to its slot; other offsets are already
     // shifted toward the proposed target, so animate them back to 0 too.
     tabOffsets.value = {}
-    draggingTabId.value = null
+    draggingTabIds.value = new Set()
+    settlingTabIds.value = new Set(dragSession.tabIds)
     isSettling.value = true
 
     settleTimeoutId = window.setTimeout(() => {
       settleTimeoutId = null
       isSettling.value = false
+      settlingTabIds.value = new Set()
     }, SETTLE_DURATION_MS)
   }
 

@@ -1824,6 +1824,39 @@ export class TabManager {
   }
 
   /**
+   * Apply a complete tab order in one state update.
+   * @param {string[]} tabIds
+   */
+  reorderTabs(tabIds) {
+    const currentEntries = Array.from(this.tabs.entries())
+    if (
+      tabIds.length !== currentEntries.length ||
+      new Set(tabIds).size !== tabIds.length ||
+      tabIds.some(tabId => !this.tabs.has(tabId))
+    ) {
+      return
+    }
+
+    let foundUnpinnedTab = false
+    for (const tabId of tabIds) {
+      const tab = this.tabs.get(tabId)
+      if (tab.isPinned) {
+        if (foundUnpinnedTab) return
+      } else {
+        foundUnpinnedTab = true
+      }
+    }
+
+    if (currentEntries.every(([tabId], index) => tabId === tabIds[index])) {
+      return
+    }
+
+    this.tabs = new Map(tabIds.map(tabId => [tabId, this.tabs.get(tabId)]))
+    this._broadcastStateUpdate()
+    this._saveSession()
+  }
+
+  /**
    * Create the main-owned portion of a logical tab for staged recreation in
    * another renderer process. Runtime history/player state cannot be moved as a
    * DOM tree, but all persisted metadata and the cached preview stay intact.
@@ -2474,6 +2507,13 @@ export function setupTabsIPC(options = {}) {
     const manager = getManager(event)
     if (manager && typeof tabId === 'string' && typeof toIndex === 'number') {
       manager.moveTab(tabId, toIndex)
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_REORDER, (event, tabIds) => {
+    const manager = getManager(event)
+    if (manager && Array.isArray(tabIds) && tabIds.every(tabId => typeof tabId === 'string')) {
+      manager.reorderTabs(tabIds)
     }
   })
 
