@@ -286,6 +286,7 @@ import store from './store/index'
 import packageDetails from '../../package.json'
 import { KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
+import { findUpdateRelease } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   refreshSubscriptionLiveFromRemote,
@@ -1599,14 +1600,23 @@ async function checkForNewUpdates() {
     return
   }
 
-  try {
-    const response = await fetch('https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=1')
-    const json = await response.json()
+  const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=100'
 
-    const tagName = json[0].tag_name
+  try {
+    const response = await fetch(releasesUrl)
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status}`)
+    }
+
+    const release = findUpdateRelease(await response.json(), packageDetails.version)
+    if (release === null) {
+      return
+    }
+
+    const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
 
-    let changelog = json[0].body
+    let changelog = release.body
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234
@@ -1616,21 +1626,11 @@ async function checkForNewUpdates() {
     changelog = `${changelog}`
 
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
-    changeLogTitle.value = json[0].name
+    changeLogTitle.value = release.name
     latestVersionNumber.value = versionNumber
-
-    const appVersion = packageDetails.version.split('.')
-    const latestVersion = versionNumber.split('.')
-
-    if (parseInt(appVersion[0]) < parseInt(latestVersion[0])) {
-      showUpdatesBanner.value = true
-    } else if (parseInt(appVersion[1]) < parseInt(latestVersion[1])) {
-      showUpdatesBanner.value = true
-    } else if (parseInt(appVersion[2]) < parseInt(latestVersion[2]) && parseInt(appVersion[1]) <= parseInt(latestVersion[1])) {
-      showUpdatesBanner.value = true
-    }
+    showUpdatesBanner.value = true
   } catch (error) {
-    console.error('errored while checking for updates', 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=1', error)
+    console.error('errored while checking for updates', releasesUrl, error)
   }
 }
 
