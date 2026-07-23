@@ -16,7 +16,28 @@
 .version {
   text-align: center;
   font-size: 2em;
-  margin-block-end: 1em;
+}
+
+.runtimeVersions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  justify-content: center;
+  margin-block: 8px 2em;
+  margin-inline: 0;
+}
+
+.runtimeVersion {
+  display: flex;
+  gap: 4px;
+}
+
+.runtimeVersion dt {
+  font-weight: bold;
+}
+
+.runtimeVersion dd {
+  margin-inline-start: 0;
 }
 
 .about-chunks {

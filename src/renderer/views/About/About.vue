@@ -13,6 +13,19 @@
         <div class="version">
           {{ versionNumber }} {{ $t("About.Beta") }}
         </div>
+        <dl
+          v-if="runtimeVersions"
+          class="runtimeVersions"
+        >
+          <div
+            v-for="runtime in runtimeVersions"
+            :key="runtime.name"
+            class="runtimeVersion"
+          >
+            <dt>{{ runtime.name }}</dt>
+            <dd>{{ runtime.version }}</dd>
+          </div>
+        </dl>
       </section>
       <section class="about-chunks">
         <figure
@@ -51,6 +64,14 @@ import packageDetails from '../../../../package.json'
 const { t } = useI18n()
 
 const versionNumber = `v${packageDetails.version}`
+const runtimeVersions = process.env.IS_ELECTRON
+  ? [
+      { name: 'Electron', version: window.ftElectron.runtimeVersions.electron },
+      { name: 'Chromium', version: window.ftElectron.runtimeVersions.chromium },
+      { name: 'Node.js', version: window.ftElectron.runtimeVersions.node },
+      { name: 'V8', version: window.ftElectron.runtimeVersions.v8 }
+    ]
+  : null
 
 const chunks = computed(() => [
   {
