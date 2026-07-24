@@ -200,6 +200,41 @@ test.describe('watch page', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
     expect(await page.locator('.comment').count()).toBeGreaterThan(0)
 
+    const commentsWrapper = page.locator('.commentsContentWrapper')
+    const commentHeader = page.locator('.commentHeader')
+    const commentTitle = commentHeader.locator('.commentsTitle')
+    const commentActions = commentHeader.locator('.commentHeaderActions')
+    const commentSort = commentActions.locator('.select')
+    const reloadComments = commentActions.locator('.reloadComments')
+
+    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '700px' })
+    await expect.poll(async () => {
+      const [titleBox, actionsBox] = await Promise.all([
+        commentTitle.boundingBox(),
+        commentActions.boundingBox()
+      ])
+      return actionsBox.y < titleBox.y + titleBox.height
+    }).toBe(true)
+
+    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '480px' })
+    await expect.poll(async () => {
+      const [headerBox, titleBox, actionsBox, sortBox, reloadBox] = await Promise.all([
+        commentHeader.boundingBox(),
+        commentTitle.boundingBox(),
+        commentActions.boundingBox(),
+        commentSort.boundingBox(),
+        reloadComments.boundingBox()
+      ])
+      return (
+        actionsBox.y >= titleBox.y + titleBox.height &&
+        Math.abs(actionsBox.width - headerBox.width) <= 1 &&
+        sortBox.x >= headerBox.x &&
+        reloadBox.x + reloadBox.width <= headerBox.x + headerBox.width
+      )
+    }).toBe(true)
+    await reloadComments.click({ trial: true })
+    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '' })
+
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)

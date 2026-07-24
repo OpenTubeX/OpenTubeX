@@ -2,14 +2,15 @@
   padding-block: 0;
   padding-inline: 16px;
 
-  /* Contain the floated header actions so they don't spill outside the card,
-     e.g. in the empty state where the message is shorter than the sort select */
+  /* Contain floated comment content inside the card. */
   display: flow-root;
 }
 
 .commentsContentWrapper {
-  /* Contain the floated header actions, like the flow-root on .card */
+  /* Contain floated comment avatars inside the comments area. */
   display: flow-root;
+  container-name: comments;
+  container-type: inline-size;
 }
 
 .fullscreenCommentCard {
@@ -143,13 +144,25 @@
 .commentsTitle {
   padding-block: 1em;
   display: inline-block;
+  flex: 0 0 auto;
+  max-inline-size: 100%;
+}
+
+.commentHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  column-gap: 16px;
 }
 
 .commentHeaderActions {
-  float: inline-end;
   display: flex;
+  min-inline-size: 0;
   align-items: flex-start;
+  justify-content: flex-end;
   gap: 8px;
+  margin-inline-start: auto;
 }
 
 .commentHeaderActionsEmpty {
@@ -157,10 +170,15 @@
   margin-inline-end: 8px;
 }
 
-@media only screen and (width <= 1000px) {
+@container comments (width <= 520px) {
   .commentHeaderActions {
-    float: none;
-    justify-content: flex-end;
+    flex: 1 0 100%;
+  }
+
+  .commentHeaderActions :deep(.select) {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    inline-size: auto;
   }
 }
 
