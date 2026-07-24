@@ -377,7 +377,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -455,10 +455,6 @@ const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 let fullscreenScrollTop = 0
-let missingAvatarRetryTimeoutId
-let hasRetriedMissingAvatars = false
-
-const MISSING_AVATAR_RETRY_DELAY_MS = 3000
 
 watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
   if (wasFullscreenOverlay) {
@@ -791,42 +787,7 @@ function copyCommentYoutubeLink(commentId) {
   })
 }
 
-/**
- * @param {Comment} comment
- */
-function commentHasMissingAvatar(comment) {
-  return !comment.authorThumb || comment.replies.some(commentHasMissingAvatar)
-}
-
-function resetMissingAvatarRetry() {
-  clearTimeout(missingAvatarRetryTimeoutId)
-  missingAvatarRetryTimeoutId = undefined
-  hasRetriedMissingAvatars = false
-}
-
-function scheduleMissingAvatarRetry() {
-  if (hasRetriedMissingAvatars || missingAvatarRetryTimeoutId !== undefined) {
-    return
-  }
-
-  const commentVideoId = props.id
-  missingAvatarRetryTimeoutId = setTimeout(() => {
-    missingAvatarRetryTimeoutId = undefined
-
-    if (props.id !== commentVideoId) {
-      return
-    }
-
-    hasRetriedMissingAvatars = true
-    localCommentsInstance = undefined
-    getCommentDataLocal(false, true, true)
-  }, MISSING_AVATAR_RETRY_DELAY_MS)
-}
-
-onBeforeUnmount(() => clearTimeout(missingAvatarRetryTimeoutId))
-
 function getCommentData({ preserveSort = false } = {}) {
-  resetMissingAvatarRetry()
   isLoading.value = true
 
   if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -981,9 +942,8 @@ function findComment(comment, commentId) {
 /**
  * @param {boolean | undefined} more
  * @param {boolean} preserveSort
- * @param {boolean} silentRetry
  */
-async function getCommentDataLocal(more = false, preserveSort = false, silentRetry = false) {
+async function getCommentDataLocal(more = false, preserveSort = false) {
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
@@ -1020,21 +980,10 @@ async function getCommentDataLocal(more = false, preserveSort = false, silentRet
       commentData.value = parsedComments
     }
 
-    if (!more && !silentRetry && parsedComments.some(commentHasMissingAvatar)) {
-      scheduleMissingAvatarRetry()
-    }
-
     nextPageToken.value = comments.has_continuation ? comments : null
-    if (!silentRetry) {
-      isLoading.value = false
-    }
+    isLoading.value = false
     showComments.value = true
   } catch (err) {
-    if (silentRetry) {
-      console.error(err)
-      return
-    }
-
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
     if (err.message.includes('Comments page did not have any content')) {

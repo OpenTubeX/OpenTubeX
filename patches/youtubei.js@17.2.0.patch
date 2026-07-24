@@ -1,20 +1,3 @@
-diff --git a/dist/src/parser/classes/comments/CommentView.js b/dist/src/parser/classes/comments/CommentView.js
---- a/dist/src/parser/classes/comments/CommentView.js
-+++ b/dist/src/parser/classes/comments/CommentView.js
-@@ -77,10 +77,11 @@ export default class CommentView extends YTNode {
-                     a11y: comment.author.A11y
-                 };
-             }
-+            const avatar = comment.avatar;
-             this.author = new Author({
-                 simpleText: comment.author.displayName,
--                navigationEndpoint: comment.avatar.endpoint
--            }, comment.author, comment.avatar.image, comment.author.channelId);
-+                navigationEndpoint: avatar?.endpoint
-+            }, comment.author, avatar?.image, comment.author.channelId);
-         }
-         if (toolbar_state) {
-             this.is_hearted = toolbar_state.heartState === 'TOOLBAR_HEART_STATE_HEARTED';
 diff --git a/dist/src/parser/classes/comments/CommentReplies.d.ts b/dist/src/parser/classes/comments/CommentReplies.d.ts
 index 3a48b70d187b2f854452d56ce292d2548b660f27..4b5ea214f8ae2a208b0d00191473012e4d4aaa75 100644
 --- a/dist/src/parser/classes/comments/CommentReplies.d.ts
@@ -234,6 +217,30 @@ index 48205eb74eb64f588e1ddcbfc631fc6a5d111acd..032e114cc02f949e41a69c6b3a57d96a
  }
  //# sourceMappingURL=CommentThread.js.map
 \ No newline at end of file
+diff --git a/dist/src/parser/classes/comments/CommentView.js b/dist/src/parser/classes/comments/CommentView.js
+index 727d2d1624c7921c34c8c696a71ab8ba3c670be0..80565b13743a23b611225b7ad532685092c6759f 100644
+--- a/dist/src/parser/classes/comments/CommentView.js
++++ b/dist/src/parser/classes/comments/CommentView.js
+@@ -77,10 +77,17 @@ export default class CommentView extends YTNode {
+                     a11y: comment.author.A11y
+                 };
+             }
++            const avatar = comment.avatar;
++            // YouTube intermittently omits the avatar view model entity from the
++            // comment mutations, but `author.avatarThumbnailUrl` is always
++            // present. Fall back to it so author avatars don't go missing.
++            const avatar_image = avatar?.image ?? (comment.author.avatarThumbnailUrl
++                ? { sources: [{ url: comment.author.avatarThumbnailUrl }] }
++                : undefined);
+             this.author = new Author({
+                 simpleText: comment.author.displayName,
+-                navigationEndpoint: comment.avatar.endpoint
+-            }, comment.author, comment.avatar.image, comment.author.channelId);
++                navigationEndpoint: avatar?.endpoint
++            }, comment.author, avatar_image, comment.author.channelId);
+         }
+         if (toolbar_state) {
+             this.is_hearted = toolbar_state.heartState === 'TOOLBAR_HEART_STATE_HEARTED';
 diff --git a/dist/src/parser/classes/misc/CommentsContinuation.d.ts b/dist/src/parser/classes/misc/CommentsContinuation.d.ts
 new file mode 100644
 index 0000000000000000000000000000000000000000..c7507258a5755e01d0e102808cb0f343c6f84162
