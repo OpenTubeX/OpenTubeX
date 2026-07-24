@@ -20,6 +20,12 @@
   margin-inline: 10px;
 }
 
+.app > .routerView {
+  min-inline-size: 0;
+  container-name: route;
+  container-type: inline-size;
+}
+
 .banner {
   inline-size: 85%;
   margin-block: 40px 0;

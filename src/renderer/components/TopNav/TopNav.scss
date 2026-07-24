@@ -51,6 +51,11 @@
 /* The vertical tab bar sits beside the content instead of above it */
 .app.verticalTabs .topNav {
   inset-block-start: 0;
+
+  @media only screen and (width <= 680px) {
+    inset-inline-start: var(--vertical-tab-bar-width, 220px);
+    inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
+  }
 }
 
 .menuButton {

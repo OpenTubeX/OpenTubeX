@@ -30,6 +30,14 @@ async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zo
   await expect(page.locator('.videoTitle')).toContainText(video.title, { timeout: 30_000 })
 }
 
+async function setWindowWidth(app, width) {
+  await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const bounds = browserWindow.getBounds()
+    browserWindow.setBounds({ ...bounds, width: targetWidth })
+  }, width)
+}
+
 test.describe('watch page', () => {
   test('shows video metadata', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
@@ -189,7 +197,7 @@ test.describe('watch page', () => {
     await expect(layout).toHaveClass(/noSidebar/)
   })
 
-  test('comments load on request', async ({ page, innertube }) => {
+  test('comments load on request', async ({ app, page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
 
@@ -200,32 +208,44 @@ test.describe('watch page', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
     expect(await page.locator('.comment').count()).toBeGreaterThan(0)
 
-    const commentsWrapper = page.locator('.commentsContentWrapper')
     const commentHeader = page.locator('.commentHeader')
     const commentTitle = commentHeader.locator('.commentsTitle')
     const commentActions = commentHeader.locator('.commentHeaderActions')
     const commentSort = commentActions.locator('.select')
     const reloadComments = commentActions.locator('.reloadComments')
 
-    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '700px' })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseVerticalTabBar', true)
+      store.commit('setVerticalTabBarWidth', 180)
+    })
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await setWindowWidth(app, 660)
     await expect.poll(async () => {
-      const [titleBox, actionsBox] = await Promise.all([
-        commentTitle.boundingBox(),
-        commentActions.boundingBox()
-      ])
-      return actionsBox.y < titleBox.y + titleBox.height
-    }).toBe(true)
-
-    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '480px' })
-    await expect.poll(async () => {
-      const [headerBox, titleBox, actionsBox, sortBox, reloadBox] = await Promise.all([
+      const [
+        tabBarBox,
+        topNavBox,
+        routeBox,
+        headerBox,
+        titleBox,
+        actionsBox,
+        sortBox,
+        reloadBox
+      ] = await Promise.all([
+        page.locator('.tabBar.vertical').boundingBox(),
+        page.locator('.topNav').boundingBox(),
+        page.locator('.app > .routerView').boundingBox(),
         commentHeader.boundingBox(),
         commentTitle.boundingBox(),
         commentActions.boundingBox(),
         commentSort.boundingBox(),
         reloadComments.boundingBox()
       ])
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
       return (
+        topNavBox.x >= tabBarBox.x + tabBarBox.width - 1 &&
+        topNavBox.x + topNavBox.width <= viewportWidth + 1 &&
+        routeBox.x + routeBox.width <= viewportWidth + 1 &&
         actionsBox.y >= titleBox.y + titleBox.height &&
         Math.abs(actionsBox.width - headerBox.width) <= 1 &&
         sortBox.x >= headerBox.x &&
@@ -233,7 +253,28 @@ test.describe('watch page', () => {
       )
     }).toBe(true)
     await reloadComments.click({ trial: true })
-    await commentsWrapper.evaluate((element) => { element.style.inlineSize = '' })
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseVerticalTabBar', false)
+    })
+    await expect(page.locator('.app')).not.toHaveClass(/verticalTabs/)
+    await expect.poll(async () => {
+      const [topNavBox, routeBox, titleBox, actionsBox] = await Promise.all([
+        page.locator('.topNav').boundingBox(),
+        page.locator('.app > .routerView').boundingBox(),
+        commentTitle.boundingBox(),
+        commentActions.boundingBox()
+      ])
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
+      return (
+        topNavBox.x <= 1 &&
+        topNavBox.x + topNavBox.width <= viewportWidth + 1 &&
+        routeBox.x + routeBox.width <= viewportWidth + 1 &&
+        actionsBox.y < titleBox.y + titleBox.height
+      )
+    }).toBe(true)
+    await setWindowWidth(app, 1600)
 
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
