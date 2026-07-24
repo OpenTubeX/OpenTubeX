@@ -490,18 +490,27 @@ test.describe('watch page', () => {
     const actions = page.locator('.fullscreenActions')
     const seekBar = page.locator('.shaka-seek-bar-container')
     const fullscreenButton = page.locator('.shaka-fullscreen-button')
+    await actions.evaluate((element) => {
+      const sponsorBlockNotice = element.cloneNode(false)
+      sponsorBlockNotice.className = 'skippedSegmentsWrapper'
+      element.parentElement.append(sponsorBlockNotice)
+    })
+    const sponsorBlockNotice = page.locator('.skippedSegmentsWrapper')
 
     await expect(actions).toBeVisible()
     await expect(actions).toHaveCSS('z-index', '2')
+    await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     await fullscreenButton.hover()
     await expect(fullscreenButton).toHaveClass(/shaka-tooltip/)
     await expect(actions).toHaveCSS('z-index', '0')
+    await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     const seekBarBounds = await seekBar.boundingBox()
     await page.mouse.move(
       seekBarBounds.x + (seekBarBounds.width / 2),
       seekBarBounds.y + (seekBarBounds.height / 2)
     )
     await expect(actions).toHaveCSS('z-index', '0')
+    await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
   })
 
   test('full window playlist action shows its prompt above the player', async ({ page, innertube }) => {
