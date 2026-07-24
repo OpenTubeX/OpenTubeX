@@ -120,26 +120,40 @@ function playlistThumbnail(playlist) {
   return `${origin}/vi/${playlist.videos[0].videoId}/mqdefault.jpg`
 }
 
+// Playlists with an in-flight add/remove. Guards against a second activation
+// reading the same stale `containedIds` before the first write commits, which
+// would otherwise persist a duplicate entry.
+const pendingIds = new Set()
+
 /**
  * @param {object} playlist
  */
-function togglePlaylist(playlist) {
-  if (containedIds.value.has(playlist._id)) {
-    store.dispatch('removeVideo', {
-      _id: playlist._id,
-      // Remove all playlist items with the same videoId
-      videoId: props.videoData.videoId,
-    })
+async function togglePlaylist(playlist) {
+  if (pendingIds.has(playlist._id)) {
+    return
+  }
 
-    showToast(t('Video.Video has been removed from {playlistName}', { playlistName: playlist.playlistName }))
-  } else {
-    store.dispatch('addVideo', {
-      _id: playlist._id,
-      // The action mutates the passed object, so hand it a copy
-      videoData: { ...props.videoData },
-    })
+  pendingIds.add(playlist._id)
+  try {
+    if (containedIds.value.has(playlist._id)) {
+      await store.dispatch('removeVideo', {
+        _id: playlist._id,
+        // Remove all playlist items with the same videoId
+        videoId: props.videoData.videoId,
+      })
 
-    showToast(t('Video.Video has been saved to {playlistName}', { playlistName: playlist.playlistName }))
+      showToast(t('Video.Video has been removed from {playlistName}', { playlistName: playlist.playlistName }))
+    } else {
+      await store.dispatch('addVideo', {
+        _id: playlist._id,
+        // The action mutates the passed object, so hand it a copy
+        videoData: { ...props.videoData },
+      })
+
+      showToast(t('Video.Video has been saved to {playlistName}', { playlistName: playlist.playlistName }))
+    }
+  } finally {
+    pendingIds.delete(playlist._id)
   }
 }
 

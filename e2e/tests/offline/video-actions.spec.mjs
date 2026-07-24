@@ -112,6 +112,25 @@ test.describe('list video actions', () => {
     }).toBe(0)
   })
 
+  test('rapidly clicking a playlist row does not add duplicate entries', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+
+    const favoritesRow = video.locator('.addToPlaylistIcon .iconDropdown .playlistRow', { hasText: 'Favorites' })
+
+    // Two activations before the first write can commit must still only add one entry
+    await favoritesRow.dblclick()
+
+    await expect(favoritesRow.locator('[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
+    await expect.poll(async () => {
+      const favorites = await readPlaylist(app, 'favorites')
+      return favorites?.videos?.length
+    }).toBe(1)
+  })
+
   test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
     await goTo(page, 'history')
 
