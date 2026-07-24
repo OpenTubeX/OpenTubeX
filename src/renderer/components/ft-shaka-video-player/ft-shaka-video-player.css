@@ -1307,8 +1307,11 @@
   display: flex;
 }
 
-/* Let Shaka's seek preview pass in front of the fullscreen action pill. */
-.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) .fullscreenActions {
+/* Let Shaka's seek preview and control tooltips pass in front of the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) .fullscreenActions,
+  .ftVideoPlayer:has(:deep(
+    .shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)
+  )) .fullscreenActions {
   z-index: 0;
 }
 

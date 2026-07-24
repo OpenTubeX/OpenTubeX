@@ -481,7 +481,7 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'false')
   })
 
-  test('fullscreen seek preview appears above the action pill', async ({ page, innertube }) => {
+  test('fullscreen player overlays appear above the action pill', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
@@ -489,9 +489,13 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     const actions = page.locator('.fullscreenActions')
     const seekBar = page.locator('.shaka-seek-bar-container')
+    const fullscreenButton = page.locator('.shaka-fullscreen-button')
 
     await expect(actions).toBeVisible()
     await expect(actions).toHaveCSS('z-index', '2')
+    await fullscreenButton.hover()
+    await expect(fullscreenButton).toHaveClass(/shaka-tooltip/)
+    await expect(actions).toHaveCSS('z-index', '0')
     const seekBarBounds = await seekBar.boundingBox()
     await page.mouse.move(
       seekBarBounds.x + (seekBarBounds.width / 2),
