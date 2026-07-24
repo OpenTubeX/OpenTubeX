@@ -412,6 +412,11 @@ $watched-transition-duration: 0.5s;
     opacity: $thumbnail-overlay-opacity;
   }
 
+  // The container opacity would make an open dropdown (e.g. add to playlist) see-through
+  :deep(.playlistIcons:has(.iconDropdown)) {
+    opacity: 1;
+  }
+
   @media (hover: hover) {
     &:hover .quickBookmarkVideoIcon:not(.alwaysVisible),
     &:hover .extraThumbnailActionIcon,
@@ -439,6 +444,11 @@ $watched-transition-duration: 0.5s;
     .optionsButton {
       opacity: 0;
       transition: visibility 0s, opacity 0.2s linear;
+    }
+
+    // Keep visible while the dropdown is open, even if the pointer leaves the video
+    :deep(.addToPlaylistIcon:has(.iconDropdown)) {
+      opacity: 1;
     }
   }
 }

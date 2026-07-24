@@ -1288,6 +1288,11 @@
   background-color: rgb(255 255 255 / 18%);
 }
 
+/* Reads as a cut-out of the white quick bookmark icon against the dark actions pill */
+.fullscreenAction .quickBookmarkCheck {
+  color: #000;
+}
+
 .fullscreenActions:has(:focus-visible) {
   opacity: 1;
   pointer-events: auto;

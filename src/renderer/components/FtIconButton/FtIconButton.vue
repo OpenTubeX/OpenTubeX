@@ -29,7 +29,11 @@
         class="icon"
       >
         <FontAwesomeIcon :icon="icon" />
-        <FontAwesomeIcon :icon="overlayIcon" />
+        <FontAwesomeIcon
+          class="overlayIcon"
+          :icon="overlayIcon"
+          transform="shrink-7 up-1"
+        />
       </FontAwesomeLayers>
       <FontAwesomeIcon
         v-else

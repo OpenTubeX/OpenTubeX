@@ -107,12 +107,17 @@ async function createNewPlaylist() {
   // It is still possible to attempt to create via pressing enter
   if (playlistPersistenceDisabled.value) { return }
 
+  // Copy any videos handed over by the opener (e.g. the add to playlist dropdown),
+  // as they get processed in place and must not be reactive store state
+  const initialVideos = (store.getters.getNewPlaylistVideoObject.videos ?? [])
+    .map((video) => ({ ...video }))
+
   const playlistObject = {
     playlistName: playlistName.value,
     protected: false,
     description: '',
     quickBookmarkIcon: quickBookmarkIcon.value,
-    videos: [],
+    videos: initialVideos,
   }
 
   try {

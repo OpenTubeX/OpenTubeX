@@ -154,14 +154,17 @@
           <FtIconButton
             v-if="showPlaylists && !isUpcoming && !hidePlaylistActions"
             :title="t('User Playlists.Add to Playlist')"
-            :icon="['fas', 'plus']"
+            :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
             theme="base"
-            @click="togglePlaylistPrompt"
-          />
+            force-dropdown
+          >
+            <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+          </FtIconButton>
           <FtIconButton
             v-if="isQuickBookmarkEnabled && !hidePlaylistActions"
             :title="quickBookmarkIconText"
-            :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : quickBookmarkIcon"
+            :icon="quickBookmarkIcon"
+            :overlay-icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : null"
             class="quickBookmarkVideoIcon"
             :class="{
               bookmarked: isInQuickBookmarkPlaylist,
@@ -248,6 +251,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -658,22 +662,19 @@ onBeforeUnmount(() => {
 })
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(props.id))
 
-function togglePlaylistPrompt() {
-  const videoData = {
-    videoId: props.id,
-    title: props.title,
-    author: props.channelName,
-    authorId: props.channelId,
-    description: props.description,
-    viewCount: props.viewCount,
-    lengthSeconds: props.lengthSeconds,
-    published: props.published,
-    premiereDate: props.premiereDate
-  }
-
-  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
-}
+const addToPlaylistVideoData = computed(() => ({
+  videoId: props.id,
+  title: props.title,
+  author: props.channelName,
+  authorId: props.channelId,
+  description: props.description,
+  viewCount: props.viewCount,
+  lengthSeconds: props.lengthSeconds,
+  published: props.published,
+  premiereDate: props.premiereDate
+}))
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
@@ -736,8 +737,7 @@ function addToQuickBookmarkPlaylist() {
     videoData,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
+  showToast(t('Video.Video has been saved to {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
 }
 
 function removeFromQuickBookmarkPlaylist() {
@@ -747,8 +747,7 @@ function removeFromQuickBookmarkPlaylist() {
     videoId: props.id,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
+  showToast(t('Video.Video has been removed from {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

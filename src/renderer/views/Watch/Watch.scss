@@ -135,6 +135,12 @@
     grid-area: info;
     position: relative;
     z-index: 2;
+
+    // Raise the area above its sibling cards while an icon button dropdown
+    // (e.g. add to playlist) is open, so the dropdown isn't painted underneath them
+    &:has(.iconDropdown) {
+      z-index: 3;
+    }
   }
 
   .commentsArea {
@@ -147,6 +153,10 @@
     grid-area: sidebar;
     position: relative;
     z-index: 2;
+
+    &:has(.iconDropdown) {
+      z-index: 3;
+    }
 
     @media only screen and (width >= 1051px) {
       min-inline-size: 380px;

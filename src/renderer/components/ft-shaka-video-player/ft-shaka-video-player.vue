@@ -228,11 +228,12 @@
           v-if="showFullscreenPlaylistAction"
           type="button"
           class="fullscreenAction fullscreenPlaylistAction"
+          :class="{ open: isInAnyPlaylist }"
           :aria-label="$t('User Playlists.Add to Playlist')"
           :title="$t('User Playlists.Add to Playlist')"
           @click="addToPlaylist"
         >
-          <FontAwesomeIcon :icon="['fas', 'plus']" />
+          <FontAwesomeIcon :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']" />
         </button>
         <button
           v-if="quickBookmarkEnabled"
@@ -243,7 +244,18 @@
           :title="quickBookmarkTitle"
           @click="toggleQuickBookmark"
         >
-          <FontAwesomeIcon :icon="quickBookmarked ? ['fas', 'check'] : quickBookmarkIcon" />
+          <FontAwesomeLayers v-if="quickBookmarked">
+            <FontAwesomeIcon :icon="quickBookmarkIcon" />
+            <FontAwesomeIcon
+              class="quickBookmarkCheck"
+              :icon="['fas', 'check']"
+              transform="shrink-7 up-1"
+            />
+          </FontAwesomeLayers>
+          <FontAwesomeIcon
+            v-else
+            :icon="quickBookmarkIcon"
+          />
         </button>
       </div>
       <!--

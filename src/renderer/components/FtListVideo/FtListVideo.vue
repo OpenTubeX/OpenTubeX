@@ -75,17 +75,21 @@
         <FtIconButton
           v-if="showPlaylists"
           :title="t('User Playlists.Add to Playlist')"
-          :icon="['fas', 'plus']"
+          :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
           class="addToPlaylistIcon"
           :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
           :padding="playlistIconPadding"
           :size="playlistIconSize"
-          @click="togglePlaylistPrompt"
-        />
+          force-dropdown
+          dropdown-position-x="left"
+        >
+          <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+        </FtIconButton>
         <FtIconButton
           v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
           :title="quickBookmarkIconText"
-          :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : quickBookmarkIcon"
+          :icon="quickBookmarkIcon"
+          :overlay-icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : null"
           class="quickBookmarkVideoIcon"
           :class="{
             bookmarked: isInQuickBookmarkPlaylist,
@@ -314,6 +318,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
+import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
@@ -944,6 +949,7 @@ const playlistTypeFinal = computed(() => playlistIdTypePairFinal.value?.playlist
 const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistItemId)
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(id.value))
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
@@ -1330,22 +1336,18 @@ function removeFromHistory() {
   showToast(t('Video.Video has been removed from your history'))
 }
 
-function togglePlaylistPrompt() {
-  const videoData = {
-    videoId: id.value,
-    title: title.value,
-    author: channelName.value,
-    authorId: channelId.value,
-    description: description.value,
-    viewCount: viewCount.value,
-    lengthSeconds: props.data.lengthSeconds,
-    published: published.value,
-    premiereDate: props.data.premiereDate,
-    premiereTimestamp: props.data.premiereTimestamp,
-  }
-
-  store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
-}
+const addToPlaylistVideoData = computed(() => ({
+  videoId: id.value,
+  title: title.value,
+  author: channelName.value,
+  authorId: channelId.value,
+  description: description.value,
+  viewCount: viewCount.value,
+  lengthSeconds: props.data.lengthSeconds,
+  published: published.value,
+  premiereDate: props.data.premiereDate,
+  premiereTimestamp: props.data.premiereTimestamp,
+}))
 
 /**
  * @param {string} channelName
@@ -1399,8 +1401,7 @@ function addToQuickBookmarkPlaylist() {
     videoData,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
+  showToast(t('Video.Video has been saved to {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
 }
 
 function removeFromQuickBookmarkPlaylist() {
@@ -1410,8 +1411,7 @@ function removeFromQuickBookmarkPlaylist() {
     videoId: id.value,
   })
 
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
+  showToast(t('Video.Video has been removed from {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
 }
 
 function moveVideoUp() {

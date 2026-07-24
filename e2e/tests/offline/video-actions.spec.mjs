@@ -35,6 +35,15 @@ test.use({
         videos: [],
         createdAt: Date.now() - 86_400_000,
         lastUpdatedAt: Date.now() - 86_400_000
+      },
+      {
+        _id: 'saved-videos',
+        playlistName: 'Saved videos',
+        protected: false,
+        description: '',
+        videos: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')],
+        createdAt: Date.now() - 86_400_000,
+        lastUpdatedAt: Date.now() - 86_400_000
       }
     ],
     history: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')]
@@ -60,6 +69,68 @@ test.describe('list video actions', () => {
     await expect(actions.locator('.optionIconColumn svg')).toHaveCount(await actions.count())
   })
 
+  test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await expect(video.locator('.addToPlaylistIcon [data-prefix="fac"][data-icon="playlist-check"]')).toBeVisible()
+  })
+
+  test('add to playlist dropdown shows membership and toggles it', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+
+    const dropdown = video.locator('.addToPlaylistIcon .iconDropdown')
+    const favoritesRow = dropdown.locator('.playlistRow', { hasText: 'Favorites' })
+    const savedVideosRow = dropdown.locator('.playlistRow', { hasText: 'Saved videos' })
+
+    // The video is seeded into "Saved videos" but not "Favorites"
+    await expect(savedVideosRow.locator('[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
+    await expect(favoritesRow.locator('[data-prefix="far"][data-icon="bookmark"]')).toBeVisible()
+    await expect(favoritesRow.locator('.playlistThumbnail')).toBeVisible()
+
+    // Clicking a row adds the video, keeps the dropdown open and names the playlist in the toast
+    await favoritesRow.click()
+    await expect(favoritesRow.locator('[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
+    await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
+    await expect.poll(async () => {
+      const favorites = await readPlaylist(app, 'favorites')
+      return favorites?.videos?.map((entry) => entry.videoId)
+    }).toEqual(['eeeeeeeeeee'])
+
+    // Clicking it again removes the video
+    await favoritesRow.click()
+    await expect(favoritesRow.locator('[data-prefix="far"][data-icon="bookmark"]')).toBeVisible()
+    await expect(page.locator('.toast .message', { hasText: 'Video has been removed from Favorites' })).toBeVisible()
+    await expect.poll(async () => {
+      const favorites = await readPlaylist(app, 'favorites')
+      return favorites?.videos?.length
+    }).toBe(0)
+  })
+
+  test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+    await video.locator('.addToPlaylistIcon .createRow').click()
+
+    await page.locator('.playlistNameInput input').fill('Cool clips')
+    await page.getByRole('button', { name: 'Create', exact: true }).click()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
+      const records = contents.trim().split('\n').map((line) => JSON.parse(line))
+      const created = records.filter((record) => record.playlistName === 'Cool clips').at(-1)
+      return created?.videos?.map((entry) => entry.videoId)
+    }).toEqual(['eeeeeeeeeee'])
+  })
+
   test('quick bookmark saves the video to the target playlist', async ({ app, page }) => {
     await goTo(page, 'history')
 
@@ -68,8 +139,11 @@ test.describe('list video actions', () => {
     await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
     await video.locator('.quickBookmarkVideoIcon').click()
 
-    // The icon flips to its bookmarked state once the video is saved.
+    // Once saved, the button keeps the configured icon and overlays a checkmark on it.
     await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
+    await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
+    await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon[data-icon="check"]')).toBeVisible()
+    await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
 
     await expect.poll(async () => {
       const favorites = await readPlaylist(app, 'favorites')

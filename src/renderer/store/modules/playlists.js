@@ -88,6 +88,9 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
+  getPlaylistVideoIds: (state) => new Set(
+    state.playlists.flatMap(playlist => playlist.videos.map(video => video.videoId))
+  ),
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
