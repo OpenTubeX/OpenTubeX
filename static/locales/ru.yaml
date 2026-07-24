@@ -38,6 +38,8 @@ Global:
     Channel Count: 1 канал | {count} канала(ов)
     Comment Count: 1 комментарий | {count} комментариев
     Like Count: 1 лайк | {count} лайков
+  Ambient Mode: Режим амбиентной подсветки
+  New: Новое
 Search / Go to URL: 'Поиск / Перейти по адресу'
   # In Filter Button
 Search Filters:
@@ -1116,3 +1118,27 @@ Close Tab: Закрыть вкладку
 Close Confirmation:
   Title: Выйти из OpenTubeX?
   Message: Вы уверены что хотите выйти из OpenTubeX?
+  Quit: Выйти
+  Never Ask Again: Больше не спрашивать
+Use Vertical Tabs: Использовать вертикальные вкладки
+Use Horizontal Tabs: Использовать горизонтальные вкладки
+Find in page: Найти на странице
+Previous match: Предидущий результат
+Next match: Следующий результат
+Close find bar: Закрыть панель поиска
+No matches: Результатов не найдено
+Downloads:
+  Download: Скачать
+  Download Video: Скачать видео
+  Download Type: Формат скачивания
+  Custom yt-dlp Arguments: Пользовательские аргументы yt-dlp
+Stats:
+  Stats: Статистика
+  Today: Сегодня
+  This week: На этой неделе
+  Total watch time: Общее время просмотра
+  Daily average: Среднее по дням
+  So far today: За сегодня
+  Since: Начиная с
+  All recorded time: За все время
+  Per calendar day: За календарный день
