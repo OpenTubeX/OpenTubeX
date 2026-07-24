@@ -581,7 +581,15 @@ test.describe('watch page', () => {
     await expect(actions).toHaveCSS('z-index', '2')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     await fullscreenButton.hover()
-    await expect(fullscreenButton).toHaveClass(/shaka-tooltip/)
+    // The Shaka tooltip is a hover-only ::after pseudo-element whose content is
+    // pulled from the button's aria-label. Assert it actually renders (rather
+    // than only checking the static capability class) so a tooltip
+    // rendering/config regression fails the test; the z-index checks below then
+    // confirm it sits above the action dock.
+    await expect.poll(() => fullscreenButton.evaluate((element) => {
+      const { content } = getComputedStyle(element, '::after')
+      return content !== 'none' && content !== 'normal' && content !== ''
+    })).toBe(true)
     await expect(actions).toHaveCSS('z-index', '0')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     const seekBarBounds = await seekBar.boundingBox()
