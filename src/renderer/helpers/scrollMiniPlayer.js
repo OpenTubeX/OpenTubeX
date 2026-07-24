@@ -107,9 +107,11 @@ export function serializeScrollMiniPlayerSavedRect(rect) {
  */
 export function getViewportInsets() {
   let topInset = MARGIN
+  let leftInset = MARGIN
 
   const topNav = document.querySelector('.topNav')
   const tabBar = document.querySelector('.tabBar')
+  const verticalTabBar = document.querySelector('.tabBar.vertical')
 
   if (topNav) {
     const rect = topNav.getBoundingClientRect()
@@ -119,9 +121,15 @@ export function getViewportInsets() {
     topInset = Math.max(topInset, rect.bottom + MARGIN)
   }
 
+  // Keep clear of the fixed vertical tab bar column on the inline-start side
+  if (verticalTabBar) {
+    const rect = verticalTabBar.getBoundingClientRect()
+    leftInset = Math.max(leftInset, rect.right + MARGIN)
+  }
+
   return {
     top: topInset,
-    left: MARGIN,
+    left: leftInset,
     right: MARGIN,
     bottom: MARGIN,
   }
@@ -188,6 +196,10 @@ export function getDockFromRect(rect, insets) {
  * @returns {Record<string, string>}
  */
 export function scrollMiniPlayerRectToStyle(rect) {
+  // Overlays (e.g. the SponsorBlock skip notice) are sized for a full-size
+  // player, so scale them down with the mini player to keep them inside it.
+  const scale = Math.max(0.6, Math.min(1, rect.width / DEFAULT_WIDTH))
+
   return {
     position: 'fixed',
     left: `${rect.left}px`,
@@ -195,6 +207,7 @@ export function scrollMiniPlayerRectToStyle(rect) {
     width: `${rect.width}px`,
     height: `${rect.height}px`,
     zIndex: '150',
+    '--scroll-mini-scale': `${scale}`,
   }
 }
 
