@@ -3,136 +3,138 @@
     class="topNav"
     :class="{ topNavBarColor: barColor }"
   >
-    <div class="side">
-      <button
-        class="menuButton navButton"
-        :aria-label="expandCollapseSideBarLabel"
-        :title="expandCollapseSideBarLabel"
-        @click="toggleSideNav"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'bars']"
-        />
-      </button>
-      <FtIconButton
-        class="navIconButton"
-        :disabled="isArrowBackwardDisabled"
-        :class="{ arrowDisabled: isArrowBackwardDisabled }"
-        :icon="['fas', 'arrow-left']"
-        :theme="null"
-        :size="20"
-        :use-shadow="false"
-        dropdown-position-x="right"
-        :dropdown-options="navigationHistoryDropdownOptions"
-        open-on-right-or-long-click
-        :title="backwardText"
-        @click="historyBack"
-      />
-      <FtIconButton
-        class="navIconButton"
-        :disabled="isArrowForwardDisabled"
-        :class="{ arrowDisabled: isArrowForwardDisabled }"
-        :icon="['fas', 'arrow-right']"
-        :theme="null"
-        :size="20"
-        :use-shadow="false"
-        dropdown-position-x="right"
-        :dropdown-options="navigationHistoryDropdownOptions"
-        open-on-right-or-long-click
-        :title="forwardText"
-        @click="historyForward"
-      />
-      <button
-        v-if="!hideSearchBar"
-        class="navSearchButton navButton"
-        @click="toggleSearchContainer"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'search']"
-        />
-      </button>
-      <button
-        class="navNewWindowButton navButton"
-        :aria-label="t('Open New Window')"
-        :title="newWindowText"
-        @click="createNewWindow"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="['fas', 'clone']"
-        />
-      </button>
-      <button
-        v-if="isElectron"
-        class="navTabLayoutButton navButton"
-        :aria-label="tabLayoutText"
-        :title="tabLayoutText"
-        @click="toggleVerticalTabBar"
-      >
-        <FontAwesomeIcon
-          class="navIcon"
-          :icon="tabLayoutIcon"
-        />
-      </button>
-      <RouterLink
-        v-if="!hideHeaderLogo"
-        class="logo"
-        dir="ltr"
-        :title="headerLogoTitle"
-        :to="landingPage"
-      >
-        <div
-          class="logoIcon"
-        />
-        <div
-          class="logoText"
-        />
-      </RouterLink>
-    </div>
-    <div class="middle">
-      <div
-        v-if="!hideSearchBar"
-        v-show="showSearchContainer"
-        ref="searchContainer"
-        class="searchContainer"
-      >
-        <FtInput
-          ref="searchInput"
-          :placeholder="t('Search / Go to URL')"
-          class="searchInput"
-          is-search
-          :data-list="activeDataList"
-          :data-list-properties="activeDataListProperties"
-          show-clear-text-button
-          show-data-when-empty
-          @input="getSearchSuggestionsDebounce"
-          @click="goToSearch"
-          @clear="clearLastSuggestionQuery"
-          @remove="removeSearchHistoryEntryInDbAndCache"
+    <div class="topNavInner">
+      <div class="side">
+        <button
+          class="menuButton navButton"
+          :aria-label="expandCollapseSideBarLabel"
+          :title="expandCollapseSideBarLabel"
+          @click="toggleSideNav"
         >
-          <template #extraAction>
-            <button
-              type="button"
-              class="navFilterButton navButton"
-              :class="{ filterChanged: searchFilterValueChanged }"
-              :aria-label="t('Search Filters.Search Filters')"
-              :title="t('Search Filters.Search Filters')"
-              @click="showSearchFilters"
-            >
-              <FontAwesomeIcon
-                class="navIcon"
-                :icon="['fas', 'filter']"
-              />
-            </button>
-          </template>
-        </FtInput>
+          <FontAwesomeIcon
+            class="navIcon"
+            :icon="['fas', 'bars']"
+          />
+        </button>
+        <FtIconButton
+          class="navIconButton"
+          :disabled="isArrowBackwardDisabled"
+          :class="{ arrowDisabled: isArrowBackwardDisabled }"
+          :icon="['fas', 'arrow-left']"
+          :theme="null"
+          :size="20"
+          :use-shadow="false"
+          dropdown-position-x="right"
+          :dropdown-options="navigationHistoryDropdownOptions"
+          open-on-right-or-long-click
+          :title="backwardText"
+          @click="historyBack"
+        />
+        <FtIconButton
+          class="navIconButton"
+          :disabled="isArrowForwardDisabled"
+          :class="{ arrowDisabled: isArrowForwardDisabled }"
+          :icon="['fas', 'arrow-right']"
+          :theme="null"
+          :size="20"
+          :use-shadow="false"
+          dropdown-position-x="right"
+          :dropdown-options="navigationHistoryDropdownOptions"
+          open-on-right-or-long-click
+          :title="forwardText"
+          @click="historyForward"
+        />
+        <button
+          v-if="!hideSearchBar"
+          class="navSearchButton navButton"
+          @click="toggleSearchContainer"
+        >
+          <FontAwesomeIcon
+            class="navIcon"
+            :icon="['fas', 'search']"
+          />
+        </button>
+        <button
+          class="navNewWindowButton navButton"
+          :aria-label="t('Open New Window')"
+          :title="newWindowText"
+          @click="createNewWindow"
+        >
+          <FontAwesomeIcon
+            class="navIcon"
+            :icon="['fas', 'clone']"
+          />
+        </button>
+        <button
+          v-if="isElectron"
+          class="navTabLayoutButton navButton"
+          :aria-label="tabLayoutText"
+          :title="tabLayoutText"
+          @click="toggleVerticalTabBar"
+        >
+          <FontAwesomeIcon
+            class="navIcon"
+            :icon="tabLayoutIcon"
+          />
+        </button>
+        <RouterLink
+          v-if="!hideHeaderLogo"
+          class="logo"
+          dir="ltr"
+          :title="headerLogoTitle"
+          :to="landingPage"
+        >
+          <div
+            class="logoIcon"
+          />
+          <div
+            class="logoText"
+          />
+        </RouterLink>
       </div>
-    </div>
-    <div class="side profiles">
-      <FtThumbnailSizeControl v-if="showThumbnailSizeControl" />
-      <FtProfileSelector v-if="!hideProfileSelectorInHeader" />
+      <div class="middle">
+        <div
+          v-if="!hideSearchBar"
+          v-show="showSearchContainer"
+          ref="searchContainer"
+          class="searchContainer"
+        >
+          <FtInput
+            ref="searchInput"
+            :placeholder="t('Search / Go to URL')"
+            class="searchInput"
+            is-search
+            :data-list="activeDataList"
+            :data-list-properties="activeDataListProperties"
+            show-clear-text-button
+            show-data-when-empty
+            @input="getSearchSuggestionsDebounce"
+            @click="goToSearch"
+            @clear="clearLastSuggestionQuery"
+            @remove="removeSearchHistoryEntryInDbAndCache"
+          >
+            <template #extraAction>
+              <button
+                type="button"
+                class="navFilterButton navButton"
+                :class="{ filterChanged: searchFilterValueChanged }"
+                :aria-label="t('Search Filters.Search Filters')"
+                :title="t('Search Filters.Search Filters')"
+                @click="showSearchFilters"
+              >
+                <FontAwesomeIcon
+                  class="navIcon"
+                  :icon="['fas', 'filter']"
+                />
+              </button>
+            </template>
+          </FtInput>
+        </div>
+      </div>
+      <div class="side profiles">
+        <FtThumbnailSizeControl v-if="showThumbnailSizeControl" />
+        <FtProfileSelector v-if="!hideProfileSelectorInHeader" />
+      </div>
     </div>
   </nav>
 </template>

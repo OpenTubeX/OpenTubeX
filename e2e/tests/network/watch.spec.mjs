@@ -226,6 +226,7 @@ test.describe('watch page', () => {
         tabBarBox,
         topNavBox,
         routeBox,
+        sideNavBox,
         headerBox,
         titleBox,
         actionsBox,
@@ -235,6 +236,7 @@ test.describe('watch page', () => {
         page.locator('.tabBar.vertical').boundingBox(),
         page.locator('.topNav').boundingBox(),
         page.locator('.app > .routerView').boundingBox(),
+        page.locator('.sideNav').boundingBox(),
         commentHeader.boundingBox(),
         commentTitle.boundingBox(),
         commentActions.boundingBox(),
@@ -246,6 +248,8 @@ test.describe('watch page', () => {
         topNavBox.x >= tabBarBox.x + tabBarBox.width - 1 &&
         topNavBox.x + topNavBox.width <= viewportWidth + 1 &&
         routeBox.x + routeBox.width <= viewportWidth + 1 &&
+        sideNavBox.x >= tabBarBox.x + tabBarBox.width - 1 &&
+        sideNavBox.x + sideNavBox.width <= viewportWidth + 1 &&
         actionsBox.y >= titleBox.y + titleBox.height &&
         Math.abs(actionsBox.width - headerBox.width) <= 1 &&
         sortBox.x >= headerBox.x &&
