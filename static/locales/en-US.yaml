@@ -1199,6 +1199,8 @@ Video:
   Video has been saved to {playlistName}: Video has been saved to {playlistName}
   Video has been removed from your saved list: Video has been removed from your saved list
   Video has been removed from {playlistName}: Video has been removed from {playlistName}
+  There was a problem saving the video to {playlistName}: There was a problem saving the video to {playlistName}
+  There was a problem removing the video from {playlistName}: There was a problem removing the video from {playlistName}
   Failed to load collaborators: Failed to load collaborators
   Open in YouTube: Open in YouTube
   Copy YouTube Link: Copy YouTube Link

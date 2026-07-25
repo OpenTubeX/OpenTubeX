@@ -135,22 +135,28 @@ async function togglePlaylist(playlist) {
 
   pendingIds.add(playlist._id)
   try {
+    const playlistName = playlist.playlistName
+
     if (containedIds.value.has(playlist._id)) {
-      await store.dispatch('removeVideo', {
+      const removed = await store.dispatch('removeVideo', {
         _id: playlist._id,
         // Remove all playlist items with the same videoId
         videoId: props.videoData.videoId,
       })
 
-      showToast(t('Video.Video has been removed from {playlistName}', { playlistName: playlist.playlistName }))
+      showToast(removed
+        ? t('Video.Video has been removed from {playlistName}', { playlistName })
+        : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
     } else {
-      await store.dispatch('addVideo', {
+      const saved = await store.dispatch('addVideo', {
         _id: playlist._id,
         // The action mutates the passed object, so hand it a copy
         videoData: { ...props.videoData },
       })
 
-      showToast(t('Video.Video has been saved to {playlistName}', { playlistName: playlist.playlistName }))
+      showToast(saved
+        ? t('Video.Video has been saved to {playlistName}', { playlistName })
+        : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
     }
   } finally {
     pendingIds.delete(playlist._id)

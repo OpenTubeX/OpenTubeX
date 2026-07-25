@@ -189,8 +189,12 @@ const actions = {
 
       payload.lastUpdatedAt = lastUpdatedAt
       commit('addVideo', payload)
+
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+
+      return false
     }
   },
 
@@ -425,8 +429,12 @@ const actions = {
       payload.lastUpdatedAt = lastUpdatedAt
 
       commit('removeVideo', payload)
+
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+
+      return false
     }
   },
 
