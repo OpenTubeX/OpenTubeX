@@ -619,7 +619,10 @@ export default defineComponent({
           _id: this.quickBookmarkPlaylist._id,
           videoId: this.videoId
         })
-        showToast(this.$t('Video.Video has been removed from your saved list'))
+        showToast({
+          message: this.$t('Video.Video has been removed from your saved list'),
+          image: this.thumbnail
+        })
         return
       }
 
@@ -635,7 +638,10 @@ export default defineComponent({
           premiereDate: this.premiereDate
         }
       })
-      showToast(this.$t('Video.Video has been saved'))
+      showToast({
+        message: this.$t('Video.Video has been saved'),
+        image: this.thumbnail
+      })
     },
     handleChaptersOverlayChange(open) {
       const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&

@@ -233,7 +233,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, deepCopy, showToast, throttle } from '../../helpers/utils'
+import { copyToClipboard, deepCopy, getVideoThumbnailUrl, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -710,7 +710,10 @@ async function removeVideoFromPlaylist(videoId, playlistItemId) {
       videoId,
       playlistItemId,
     })
-    showToast(t('User Playlists.SinglePlaylistView.Toast.Video has been removed'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.Video has been removed'),
+      image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value)
+    })
   } catch (error) {
     showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
     console.error(error)

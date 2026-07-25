@@ -191,15 +191,49 @@ function secondsToVttTimestamp(seconds) {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
 }
 
+/**
+ * Builds a medium-quality thumbnail URL for a video, honouring the current backend.
+ * Handy for toasts that reference a single video by id.
+ * @param {string} videoId
+ * @param {'local' | 'invidious'} backendPreference
+ * @param {string} currentInvidiousInstanceUrl
+ * @returns {string}
+ */
+export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl) {
+  const baseUrl = backendPreference === 'invidious'
+    ? currentInvidiousInstanceUrl
+    : 'https://i.ytimg.com'
+
+  return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
+}
+
 export const ToastEventBus = new EventTarget()
 
 /**
- * @param {string | (({elapsedMs: number, remainingMs: number}) => string)} message
+ * @typedef {object} ToastOptions
+ * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
+ * @property {number} [time]
+ * @property {Function} [action]
+ * @property {AbortSignal} [abortSignal]
+ * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
+ */
+
+/**
+ * @param {string | (({elapsedMs: number, remainingMs: number}) => string) | ToastOptions} message
+ *   the message to display, or an options object for more control (e.g. to show an image)
  * @param {number} time
  * @param {Function} action
  * @param {AbortSignal} abortSignal
  */
 export function showToast(message, time = null, action = null, abortSignal = null) {
+  let image = null
+
+  // Allow calling with a single options object while staying backwards compatible
+  // with the positional (message, time, action, abortSignal) signature
+  if (message !== null && typeof message === 'object') {
+    ({ message, time = null, action = null, abortSignal = null, image = null } = message)
+  }
+
   // Sometimes caller just pass user setting based value in and it can be zero
   if (time === 0) {
     console.warn('showToast called with time: 0', { message, time, action, abortSignal })
@@ -212,6 +246,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
       time,
       action,
       abortSignal,
+      image,
     }
   }))
 }

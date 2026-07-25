@@ -200,6 +200,7 @@ import {
   debounce,
   extractNumberFromString,
   getIconForSortPreference,
+  getVideoThumbnailUrl,
   showToast,
   deepCopy,
   throttle,
@@ -874,16 +875,17 @@ function removeVideoFromPlaylist(videoId, playlistItemId) {
           removeToBeDeletedVideosSometimes()
         }, timeoutMs)
 
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Video has been removed. Click here to undo."]'),
-          timeoutMs,
-          () => {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Video has been removed. Click here to undo."]'),
+          time: timeoutMs,
+          action: () => {
             clearTimeout(actualRemoveVideosTimeout)
             toBeDeletedPlaylistItemIds.value = []
             undoToastAbortController = null
           },
-          undoToastAbortController.signal,
-        )
+          abortSignal: undoToastAbortController.signal,
+          image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value),
+        })
       }
     }
   } catch (e) {

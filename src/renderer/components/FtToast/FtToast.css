@@ -1,14 +1,13 @@
 .toast-holder {
   position: fixed;
-  inset-inline-start: 50vw;
-  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient)), 0);
-  inset-block-end: 50px;
+  inset-inline-start: 24px;
+  inset-block-end: 24px;
 
   /* Higher than any prompt */
   z-index: 300;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   pointer-events: none;
 }
 
@@ -17,19 +16,51 @@
 }
 
 .toast {
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-inline-size: 400px;
+  padding-block: 12px;
+  padding-inline: 18px;
   margin: 5px;
-  text-align: center;
+  text-align: start;
   overflow-y: auto;
-  background-color: rgb(0 0 0 / 70%);
+  background-color: rgb(28 28 28 / 92%);
   color: #fff;
-  border-radius: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+
+  /* Many toasts are clickable, so keep the click affordance until a drag starts */
   cursor: pointer;
   pointer-events: auto;
+  user-select: none;
+
+  /* Let the component own horizontal drag gestures instead of the browser */
+  touch-action: pan-y;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+/* Follow the pointer instantly while dragging */
+.toast.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+/* Tighten the leading padding so the thumbnail sits closer to the edge */
+.toast.hasImage {
+  padding-inline-start: 10px;
+}
+
+.image {
+  flex-shrink: 0;
+  inline-size: 64px;
+  block-size: 36px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .message {
-  margin: auto;
+  margin: 0;
 }
 
 .toast-enter-active {
@@ -37,6 +68,9 @@
 }
 
 .toast-leave-active {
+  /* Taken out of flow (pinned via position: fixed in the before-leave hook) so
+     the ones above animate up to fill the gap (via .toast-move) instead of
+     jumping once it is finally removed */
   transition: opacity 300ms, transform 300ms ease-in;
   pointer-events: none;
 }
@@ -45,6 +79,11 @@
 .toast-leave-to {
   opacity: 0;
   transform: translateY(15px) scale(0.95);
+}
+
+/* When dismissed by a leftward swipe, continue sliding off to the left */
+.toast-slot.dismiss-left.toast-leave-to {
+  transform: translateX(-110%);
 }
 
 /* stack reflow when a toast is removed */
