@@ -1261,7 +1261,8 @@
 }
 
 .fullscreenAction,
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton) {
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1283,7 +1284,11 @@
 .fullscreenAction.open,
 .fullscreenActions :deep(.fullscreenShareAction > .iconButton:hover),
 .fullscreenActions :deep(.fullscreenShareAction > .iconButton:focus-visible),
-.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed) {
+.fullscreenActions :deep(.fullscreenShareAction > .iconButton.pressed),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:hover),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton:focus-visible),
+.fullscreenActions :deep(.fullscreenPlaylistAction.open > .iconButton),
+.fullscreenActions :deep(.fullscreenPlaylistAction > .iconButton.pressed) {
   color: #fff;
   background-color: rgb(255 255 255 / 18%);
 }

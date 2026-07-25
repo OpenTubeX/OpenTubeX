@@ -69,6 +69,8 @@ import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import WatchVideoChapters from '../WatchVideoChapters/WatchVideoChapters.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -157,6 +159,8 @@ export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
     FtShareButton,
+    FtIconButton,
+    FtAddToPlaylistDropdown,
     FtVideoAnnotations,
     WatchVideoChapters
   },
@@ -301,6 +305,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    playlistVideoData: {
+      type: Object,
+      default: null
+    },
     published: {
       type: Number,
       default: 0
@@ -396,7 +404,6 @@ export default defineComponent({
     'fullscreen-comments-change',
     'fullscreen-playlist-change',
     'toggle-transcript',
-    'add-to-playlist',
     'toggle-quick-bookmark',
     'chapters-overlay-change',
     'chapter-thumbnails-change',
@@ -813,10 +820,6 @@ export default defineComponent({
     function getShareTimestamp() {
       const currentTime = Math.floor(video.value?.currentTime ?? 0)
       return Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
-    }
-
-    function addToPlaylist() {
-      emit('add-to-playlist')
     }
 
     function toggleQuickBookmark() {
@@ -7975,7 +7978,6 @@ export default defineComponent({
       isInAnyPlaylist,
       useSponsorBlock,
       getShareTimestamp,
-      addToPlaylist,
       toggleQuickBookmark,
 
       fullWindowEnabled,

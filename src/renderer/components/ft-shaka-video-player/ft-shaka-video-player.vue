@@ -224,17 +224,19 @@
           :get-timestamp="getShareTimestamp"
           dropdown-position-y="top"
         />
-        <button
-          v-if="showFullscreenPlaylistAction"
-          type="button"
-          class="fullscreenAction fullscreenPlaylistAction"
+        <FtIconButton
+          v-if="showFullscreenPlaylistAction && playlistVideoData"
+          class="fullscreenPlaylistAction"
           :class="{ open: isInAnyPlaylist }"
-          :aria-label="$t('User Playlists.Add to Playlist')"
           :title="$t('User Playlists.Add to Playlist')"
-          @click="addToPlaylist"
+          :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+          :use-shadow="false"
+          force-dropdown
+          dropdown-position-x="left"
+          dropdown-position-y="top"
         >
-          <FontAwesomeIcon :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']" />
-        </button>
+          <FtAddToPlaylistDropdown :video-data="playlistVideoData" />
+        </FtIconButton>
         <button
           v-if="quickBookmarkEnabled"
           type="button"

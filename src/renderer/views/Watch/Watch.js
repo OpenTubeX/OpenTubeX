@@ -259,6 +259,19 @@ export default defineComponent({
     }
   },
   computed: {
+    addToPlaylistVideoData: function () {
+      return {
+        videoId: this.videoId,
+        title: this.videoTitle,
+        author: this.channelName,
+        authorId: this.channelId,
+        description: this.videoDescription,
+        viewCount: this.videoViewCount,
+        lengthSeconds: this.videoLengthSeconds,
+        published: this.videoPublished,
+        premiereDate: this.premiereDate
+      }
+    },
     historyEntry: function () {
       return this.$store.getters.getHistoryCacheById[this.videoId]
     },
@@ -595,21 +608,6 @@ export default defineComponent({
           playlist?.setScrollTop(scrollTop)
         }
       })
-    },
-    addCurrentVideoToPlaylist() {
-      const videoData = {
-        videoId: this.videoId,
-        title: this.videoTitle,
-        author: this.channelName,
-        authorId: this.channelId,
-        description: this.videoDescription,
-        viewCount: this.videoViewCount,
-        lengthSeconds: this.videoLengthSeconds,
-        published: this.videoPublished,
-        premiereDate: this.premiereDate
-      }
-
-      this.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
     },
     toggleCurrentVideoQuickBookmarked() {
       if (!this.isQuickBookmarkEnabled) { return }

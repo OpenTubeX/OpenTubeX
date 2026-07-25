@@ -500,18 +500,21 @@ test.describe('watch page', () => {
     await expect(actions).toHaveCSS('z-index', '0')
   })
 
-  test('full window playlist action shows its prompt above the player', async ({ page, innertube }) => {
+  test('full window playlist action shows its popover above the player', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
     await page.locator('.full-window-button').click({ force: true })
     await expect(page.locator('.ftVideoPlayer.fullWindow')).toBeVisible()
-    await page.locator('.fullscreenPlaylistAction').click({ force: true })
+    await page.locator('.fullscreenPlaylistAction .iconButton').click({ force: true })
 
-    const prompt = page.locator('.prompt')
-    await expect(prompt.getByText('Select a playlist to add your video to')).toBeVisible()
-    await prompt.getByRole('button', { name: 'Cancel' }).click()
+    const popover = page.locator('.fullscreenPlaylistAction .iconDropdown')
+    await expect(popover.locator('.dropdownHeader')).toBeVisible()
+    await expect(popover.locator('.playlistRow').first()).toBeVisible()
+    // Dismiss the popover before continuing
+    await page.keyboard.press('Escape')
+    await expect(popover).toHaveCount(0)
 
     await page.locator('.fullscreenQuickBookmarkAction').click({ force: true })
     const toastHolder = page.locator('.toast-holder')
