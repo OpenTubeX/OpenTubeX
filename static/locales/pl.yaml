@@ -1136,6 +1136,9 @@ Video:
       CloseSegmentActions: Zamknij działania segmentu
       FullVideo: Cały film
       LockedSegment: Zablokowany segment
+      DownvoteSegment: Głos w dół dla segmentu
+      UpvoteSegment: Głos w górę dla segmentu
+      VoteFailed: Nie udało się przesłać głosu do SponsorBlock.
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1161,6 +1164,7 @@ Video:
     Show: Pokaż
     Up next in {seconds}: Następny za {seconds}
     Play now: Odtwórz teraz
+    Resize dock: Zmień rozmiar doku
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1213,6 +1217,10 @@ Video:
   Added to Queue: Wideo dodane do kolejki
   Clear Queue: Wyczyść kolejkę
   Remove from Queue: Usuń {title} z kolejki
+  Queue Video Count: '{count} wideo | {count}'
+  Drag to Reorder Queue: Przeciągnij {title}, aby zmienić kolejność w kolejce
+  Metadata: Informacje o wideo
+  Close Metadata: Zamknij informacje o wideo
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1234,6 +1242,7 @@ Playlist:
     VideoDurationAscending: Czasu trwania (od najkrótszych)
     PublishedNewest: Daty publikacji (od najświeższej)
     PublishedOldest: Daty publikacji (od najdawniejszej)
+  Close Playlist: Zamknij listę odtwarzania
 Change Format:
   Change Media Formats: 'Zmień formaty wideo'
   Use Dash Formats: 'Użyj formatów DASH'
@@ -1375,6 +1384,7 @@ Tooltips:
       Opcja „Załaduj wcześniej załadowane karty” ładuje karty, które były załadowane w momencie zamknięcia OpenTubeX, i pozostawia pozostałe karty niezaładowane.
       Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
       Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
+    Remember Tab Navigation History: Historia nawigacji wstecz i do przodu dla każdej karty jest zapisywana i przywracana po ponownym uruchomieniu OpenTubeX.
   Player Settings:
     Default Video Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
@@ -1409,6 +1419,13 @@ Tooltips:
     IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
   Theme Settings:
     Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
+  Download Settings:
+    yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
+    yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
+    FFmpeg Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet FFmpeg lub pobrać i zarządzać własną statyczną kompilacją FFmpeg, która jest przechowywana w katalogu danych użytkownika.
+    yt-dlp Executable Path: Domyślnie OpenTubeX zakłada, że yt-dlp można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
+    FFmpeg Executable Path: FFmpeg jest wymagany do łączenia oddzielnych strumieni wideo i audio oraz do konwersji audio. Domyślnie OpenTubeX zakłada, że FFmpeg można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
+    Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
@@ -1559,6 +1576,18 @@ KeyboardShortcutPrompt:
   Find in Page: Znajdź tekst na bieżącej stronie
   Find Next Match: Przejdź do następnego dopasowania
   Find Previous Match: Przejdź do poprzedniego dopasowania
+  Edit Hint: Wybierz skrót, a następnie naciśnij nową kombinację klawiszy. Naciśnij Backspace lub Delete, aby usunąć przypisanie.
+  Change Shortcut: Zmień skrót dla {action}
+  Press Shortcut: Naciśnij skrót klawiszowy…
+  Unassigned: Nieprzypisany
+  Reset Shortcut: Zresetuj skrót dla {action}
+  Reset to Defaults: Przywróć ustawienia domyślne
+  Shortcut Already Assigned: Skrót jest już przypisany
+  Shortcut Conflict: '{shortcut} jest już przypisany do {actions}. Czy chcesz go ponownie przypisać?'
+  Reserved Shortcut Conflict: '{shortcut} jest zarezerwowany dla {actions} i nie można go ponownie przypisać.'
+  Reassign: Przypisz ponownie
+  Undo: Cofnij
+  Toggle Fast-Forward Through Silence: Przełączanie szybkiego przewijania przez ciszę
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
@@ -1614,3 +1643,74 @@ Stats:
 Use Vertical Tabs: Używaj pionowych kart
 Use Horizontal Tabs: Używaj poziomych kart
 Resize Tab Bar: Zmień rozmiar paska kart
+Context Menu:
+  Context Menu: Menu kontekstowe
+  Cut: Wytnij
+  Copy: Kopiuj
+  Paste: Wklej
+  Select All: Zaznacz wszystko
+  Save Image As…: Zapisz obraz jako…
+  Copy Image: Kopiuj obraz
+  Copy Image Address: Kopiuj adres do obrazu
+  Reload Videos: Załaduj ponownie filmy
+  Reload Shorts: Załaduj ponownie shorty
+  Reload Live: Załaduj ponownie transmisje na żywo
+  Reload Posts: Załaduj ponownie wpisy
+  Reload All Feeds: Załaduj ponownie wszystkie subskrypcje
+  Close Tab: Zamknij kartę
+  Close Multiple Tabs: Zamknij {count} kart(y)
+  Duplicate Tab: Duplikuj kartę
+  Duplicate Multiple Tabs: Duplikuj {count} kart(y)
+  Move Tab: Przenieś kartę
+  Move Tabs: Przenieś karty
+  To Beginning: Na początek
+  To End: Na koniec
+  Close Tabs: Zamknij karty
+  To the Top: Na górę
+  To the Left: W lewo
+  To the Bottom: Na dół
+  To the Right: W prawo
+  Other Tabs: Pozostałe karty
+  Copy YouTube Link: Kopiuj odnośnik do YouTube
+  Copy YouTube Links: Kopiuj odnośniki do YouTube
+  Pin Tab: Przypnij kartę
+  Pin Tabs: Przypnij karty
+  Unpin Tab: Odepnij kartę
+  Unpin Tabs: Odepnij karty
+  Tab Color: Kolor karty
+  Default: Domyślny
+  Red: Czerwony
+  Orange: Pomarańczowy
+  Yellow: Żółty
+  Green: Zielony
+  Blue: Niebieski
+  Purple: Fioletowy
+  New Tab: Nowa karta
+  Reopen Closed Tab: Otwórz ponownie zamkniętą kartę
+  Reload Tab: Załaduj ponownie kartę
+  Reload Tabs: Załaduj ponownie karty
+  Load Tab: Załaduj kartę
+  Load Tabs: Załaduj karty
+  Unload Tab: Uśpij kartę
+  Unload Tabs: Uśpij karty
+  Move Tab to Window: Przenieś kartę do nowego okna
+  Move Tabs to Window: Przenieś karty do nowego okna
+  Open in a New Tab: Otwórz w nowej karcie
+  Open in a New Window: Otwórz w nowym oknie
+  Copy Link: Kopiuj odnośnik
+  Copy Invidious Link: Kopiuj odnośnik do Invidious
+  Search Selection in New Tab: Wyszukaj „{selection}” w nowej karcie
+  Search Selection in New Window: Wyszukaj „{selection}” w nowym oknie
+  Selection Too Long: Zaznaczona fraza jest za długa do wyszukiwania (> {count} znaków)
+Downloads:
+  Download: Pobierz
+  Download Video: Pobierz wideo
+  Download Type: Typ pobierania
+  Custom yt-dlp Arguments: Niestandardowe argumenty dla yt-dlp
+  Template Name: Nazwa szablonu
+  Save Template: Zapisz szablon
+  Delete Template: Usuń szablon
+  Template Saved: Zapisano szablon pobierania „{name}”
+  Choose Folder: Zmień
+  Select Folder: Wybierz Folder
+  Folder Required: Wybierz folder pobierania, aby umożliwić pobieranie.
