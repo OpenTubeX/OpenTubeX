@@ -1727,3 +1727,5 @@ Downloads:
     Video Best: Wideo - najlepsza jakość
     Video Resolution: Wideo - {resolution}
     Audio Best: Dźwięk - najlepsza jakość
+    Audio Format: Dźwięk - {format}
+    Custom Arguments: Niestandardowe argumenty dla yt-dlp
