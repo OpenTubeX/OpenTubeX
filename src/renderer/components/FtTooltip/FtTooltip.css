@@ -71,17 +71,18 @@
 
 .button:focus + .text.bottom,
 .button:hover + .text.bottom,
+.button:focus + .text.bottom-left,
 .button:hover + .text.bottom-left,
 .button:focus + .text.top,
 .button:hover + .text.top {
-  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient)), 0);
+  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient) + var(--ft-tooltip-shift-x, 0px)), 0);
 }
 
 .button:focus + .text.left,
 .button:hover + .text.left,
 .button:focus + .text.right,
 .button:hover + .text.right {
-  transform: translate(0, -50%);
+  transform: translate(var(--ft-tooltip-shift-x, 0), -50%);
 }
 
 .text.allowNewlines {
