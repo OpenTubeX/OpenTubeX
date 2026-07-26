@@ -199,6 +199,7 @@ User Playlists:
   The playlist has been successfully exported: Lista odtwarzania została pomyślnie wyeksportowana
   TotalTimePlaylist: 'Całkowita długość: {duration}'
   Export list of URLs: Eksportuj listę adresów URL
+  Quick Bookmark Icon: Ikona szybkiej zakładki
 History:
   # On History Page
   History: 'Historia'
@@ -547,6 +548,7 @@ Settings:
     Fast-Forward Through Silence: Szybkie przewijanie poprzez ciszę
     Show Fast-Forward Through Silence Toggle: Pokaż przełącznik szybkiego przewijania poprzez ciszę
     Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
+    Automatically Open Chapters: Automatycznie otwieraj rozdziały
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -595,6 +597,8 @@ Settings:
     Invalid History Retention Days: Wprowadź liczbę całkowitą dni większą od zera
     Enable Watch Statistics: Włącz statystyki oglądania
     Week Starts On: Tydzień zaczyna się w
+    Watched Percentage Threshold: Próg procentowy „obejrzanych”
+    Watched Percentage Threshold Tooltip: Filmy są oznaczane jako obejrzane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one oznaczane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one oznaczane po zakończeniu odtwarzania.
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
     Unknown data key: Nieznany klucz danych
@@ -697,6 +701,7 @@ Settings:
     Hide Channel Courses: Schowaj kartę kanału „Kursy”
     Hide Channel Posts: Schowaj kartę kanału „Wpisy”
     Hide Subscriptions Posts: Schowaj wpisy z subskrypcji
+    Hide End-Screen Annotations: Ukryj adnotacje na ekranie końcowym
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
   Proxy Settings:
     Your Info: O Tobie
@@ -871,6 +876,7 @@ Settings:
     Username: Nazwa użytkownika
     Open Tabs: Otwarte karty i sesję
     Syncing open tabs: Synchronizowanie otwartych kart i sesji…
+    Privacy Policy: Polityka prywatności dla tego serwera
   Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
   Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
 About:
@@ -1200,6 +1206,13 @@ Video:
   Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
   Unmark As Watched: Oznacz jako nieobejrzany
   Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
+  Queue: Kolejka
+  Play Next: Odtwórz następny
+  Add to Queue: Dodaj do kolejki
+  Added to Play Next: Wideo zostanie odtworzone jako następne
+  Added to Queue: Wideo dodane do kolejki
+  Clear Queue: Wyczyść kolejkę
+  Remove from Queue: Usuń {title} z kolejki
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
