@@ -5,6 +5,7 @@ import {
   getViewportInsets,
   getViewportWidth,
   snapScrollMiniPlayerToEdge,
+  clampScrollMiniPlayerRect,
   parseScrollMiniPlayerSavedRect,
   serializeScrollMiniPlayerSavedRect,
   MARGIN
@@ -16,10 +17,10 @@ import {
  * @param {number} options.clientWidth usable width (excludes the scrollbar)
  * @param {number} [options.scrollbarWidth]
  */
-function stubViewport({ verticalTabBarRect = null, clientWidth, scrollbarWidth = 0 }) {
+function stubViewport ({ verticalTabBarRect = null, clientWidth, scrollbarWidth = 0 }) {
   global.window = { innerWidth: clientWidth + scrollbarWidth, innerHeight: 800 }
   global.document = {
-    querySelector(selector) {
+    querySelector (selector) {
       if (selector === '.tabBar.vertical' && verticalTabBarRect) {
         return { getBoundingClientRect: () => verticalTabBarRect }
       }
@@ -94,22 +95,54 @@ test('the left dock edge follows the tab rail width', () => {
   assert.equal(snapped.left, 400 + MARGIN)
 })
 
-test('a saved rect survives being restored before the viewport is laid out', () => {
-  const saved = serializeScrollMiniPlayerSavedRect({
-    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
-  })
+// Fits the 800px-tall stub viewport, so activation must preserve it verbatim.
+const SAVED_RECT = { left: 1000, top: 400, width: 520, height: 292, dock: 'right' }
+
+test('parsing a saved rect round-trips it without consulting the viewport', () => {
+  const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
 
   // Restoring runs while the tab is still loading, so the viewport can be
-  // unsized. Clamping here used to shrink the player and pin it bottom-left.
+  // unsized. Clamping here used to shrink the rect and pin it bottom-left, so
+  // the parsed result must not vary with the viewport.
   stubViewport({ clientWidth: 0 })
-  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), {
-    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
-  })
+  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), SAVED_RECT)
 
   stubViewport({ clientWidth: 300 })
-  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), {
-    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
-  })
+  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), SAVED_RECT)
+})
+
+test('restoring while unsized then activating keeps the saved position and size', () => {
+  const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
+
+  // The restore/activation sequence: parse while the tab is still loading...
+  stubViewport({ clientWidth: 0 })
+  const restored = parseScrollMiniPlayerSavedRect(saved)
+
+  // ...then activation clamps it, once layout has settled.
+  stubViewport({ clientWidth: 1585, scrollbarWidth: 15 })
+  const activated = clampScrollMiniPlayerRect(restored)
+
+  assert.equal(activated.width, SAVED_RECT.width)
+  assert.equal(activated.left, SAVED_RECT.left)
+  assert.equal(activated.top, SAVED_RECT.top)
+  assert.equal(activated.dock, 'right')
+})
+
+test('a restored rect that no longer fits is pulled back into view on activation', () => {
+  const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
+
+  stubViewport({ clientWidth: 0 })
+  const restored = parseScrollMiniPlayerSavedRect(saved)
+
+  // Saved against a wide window, reopened in a narrow one.
+  stubViewport({ clientWidth: 600 })
+  const activated = clampScrollMiniPlayerRect(restored)
+
+  assert.ok(activated.left >= MARGIN, `left ${activated.left} should clear the margin`)
+  assert.ok(
+    activated.left + activated.width <= 600 - MARGIN,
+    `right edge ${activated.left + activated.width} should stay inside the viewport`
+  )
 })
 
 test('a malformed saved rect is rejected', () => {
