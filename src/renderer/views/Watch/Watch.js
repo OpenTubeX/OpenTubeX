@@ -259,14 +259,14 @@ export default defineComponent({
     }
   },
   computed: {
+    // `description` and `viewCount` are intentionally left out,
+    // the store drops them from playlist entries as undesired attributes
     addToPlaylistVideoData: function () {
       return {
         videoId: this.videoId,
         title: this.videoTitle,
         author: this.channelName,
         authorId: this.channelId,
-        description: this.videoDescription,
-        viewCount: this.videoViewCount,
         lengthSeconds: this.videoLengthSeconds,
         published: this.videoPublished,
         premiereDate: this.premiereDate

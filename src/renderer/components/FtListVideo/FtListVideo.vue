@@ -1336,13 +1336,13 @@ function removeFromHistory() {
   showToast(t('Video.Video has been removed from your history'))
 }
 
+// `description` and `viewCount` are intentionally left out,
+// the store drops them from playlist entries as undesired attributes
 const addToPlaylistVideoData = computed(() => ({
   videoId: id.value,
   title: title.value,
   author: channelName.value,
   authorId: channelId.value,
-  description: description.value,
-  viewCount: viewCount.value,
   lengthSeconds: props.data.lengthSeconds,
   published: published.value,
   premiereDate: props.data.premiereDate,

@@ -120,20 +120,17 @@ function playlistThumbnail(playlist) {
   return `${origin}/vi/${playlist.videos[0].videoId}/mqdefault.jpg`
 }
 
-// Playlists with an in-flight add/remove. Guards against a second activation
-// reading the same stale `containedIds` before the first write commits, which
-// would otherwise persist a duplicate entry.
-const pendingIds = new Set()
-
 /**
  * @param {object} playlist
  */
 async function togglePlaylist(playlist) {
-  if (pendingIds.has(playlist._id)) {
+  const pendingKey = `${playlist._id}:${props.videoData.videoId}`
+
+  if (pendingToggles.has(pendingKey)) {
     return
   }
 
-  pendingIds.add(playlist._id)
+  pendingToggles.add(pendingKey)
   try {
     const playlistName = playlist.playlistName
 
@@ -159,7 +156,7 @@ async function togglePlaylist(playlist) {
         : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
     }
   } finally {
-    pendingIds.delete(playlist._id)
+    pendingToggles.delete(pendingKey)
   }
 }
 
@@ -170,6 +167,19 @@ function openCreatePlaylistPrompt() {
     videos: [{ ...props.videoData }],
   })
 }
+</script>
+
+<script>
+/**
+ * `playlistId:videoId` pairs with an in-flight add/remove. Guards against a second
+ * activation reading the same stale `containedIds` before the first write commits,
+ * which would otherwise persist a duplicate entry.
+ *
+ * Module scoped on purpose: closing and reopening the dropdown remounts this
+ * component, and the same video can have another playlist control mounted
+ * elsewhere, so a per-instance set would not catch either case.
+ */
+const pendingToggles = new Set()
 </script>
 
 <style scoped lang="scss" src="./FtAddToPlaylistDropdown.scss" />
