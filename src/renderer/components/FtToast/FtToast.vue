@@ -183,7 +183,8 @@ function onPointerDown(toast, event) {
   toast.dragStartX = event.clientX
   toast.dragOffset = 0
 
-  // Freeze auto-dismiss while the user is interacting with the toast
+  // Hold off auto-dismiss so the toast can't vanish mid-drag. The deadline in
+  // `expiresAt` keeps running, so this can't be used to keep a toast alive.
   clearTimeout(toast.timeout)
 
   event.currentTarget.setPointerCapture(event.pointerId)
