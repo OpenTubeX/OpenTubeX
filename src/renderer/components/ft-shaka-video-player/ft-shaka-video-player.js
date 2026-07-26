@@ -964,6 +964,13 @@ export default defineComponent({
       }
     })
 
+    // Keep the theatre mode button's icon/label in sync when theatre mode is
+    // toggled programmatically (e.g. a side panel opening forces the default
+    // theatre mode), not just when the user clicks the button itself.
+    watch(() => props.useTheatreMode, (value) => {
+      events.dispatchEvent(new CustomEvent('syncTheatreMode', { detail: value }))
+    })
+
     /** @type {import('vue').ComputedRef<boolean>} */
     const displayVideoPlayButton = computed(() => {
       return store.getters.getDisplayVideoPlayButton
