@@ -86,6 +86,11 @@ test.describe('seeded playlists', () => {
     await expect(page.locator(sel.activeTab)).toContainText('My seeded playlist')
 
     await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    // Wait for the new tab to settle on its landing page before switching back.
+    // Clicking while its title is still resolving races the tab bar re-render,
+    // and the switch can be lost on a loaded machine.
+    await expect(page.locator(sel.activeTab)).toContainText('Subscriptions')
     await expect(page.locator(sel.activeTab)).not.toContainText('My seeded playlist')
     await page.locator(sel.tabs).filter({ hasText: 'My seeded playlist' }).click()
 
