@@ -3,6 +3,23 @@ import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 const now = Date.now()
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 
+/**
+ * Scroll to an exact offset. The feed fills in lazily, so on a loaded machine
+ * the document can still be too short when we scroll, which silently clamps the
+ * offset and fails the assertion. Wait for enough scrollable height first.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {number} top
+ */
+async function scrollFeedTo(page, top) {
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight))
+    .toBeGreaterThanOrEqual(top)
+
+  await page.evaluate((offset) => window.scrollTo(0, offset), top)
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(top)
+}
+
 const videos = Array.from({ length: 80 }, (_, index) => ({
   videoId: `video${String(index).padStart(6, '0')}`,
   title: `Feed video ${String(index).padStart(2, '0')}`,
@@ -43,8 +60,7 @@ test.use({
 
 test('a background feed refresh resets its logical tab scroll across restart', async ({ app, page }) => {
   await expect(page.getByText('Feed video 00')).toBeVisible()
-  await page.evaluate(() => window.scrollTo(0, 600))
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
+  await scrollFeedTo(page, 600)
 
   const subscriptionsTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
   await page.locator(sel.newTabButton).click()
@@ -92,8 +108,7 @@ test('a background feed refresh resets its logical tab scroll across restart', a
 
 test('a visible feed stays at the top while refreshed content is applied', async ({ page }) => {
   await expect(page.getByText('Feed video 00')).toBeVisible()
-  await page.evaluate(() => window.scrollTo(0, 600))
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(600)
+  await scrollFeedTo(page, 600)
 
   const displacedScroll = await page.evaluate(async () => {
     window.dispatchEvent(new CustomEvent('opentubex-subscription-refresh-completed', {

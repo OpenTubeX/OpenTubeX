@@ -67,7 +67,10 @@
 }
 
 .headerRefreshWidget {
-  min-inline-size: min(100%, 360px);
+  /* Size to its content so the title row positions the whole widget: tucked to
+     the inline-end while it fits beside the title, and flush to the inline-start
+     once it wraps onto its own line. */
+  max-inline-size: 100%;
 }
 
 .message {
@@ -162,10 +165,6 @@
 
   .pageTitle {
     inline-size: 100%;
-  }
-
-  .headerRefreshWidget {
-    min-inline-size: 100%;
   }
 
   .tabs {

@@ -8,11 +8,8 @@
 }
 
 .topNav {
-  align-content: center;
-  align-items: center;
   background-color: var(--card-bg-color);
   box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
-  display: flex;
   block-size: 60px;
   inset-inline: 0;
   line-height: 60px;
@@ -21,10 +18,10 @@
   inline-size: 100%;
   z-index: 4;
 
-  @media only screen and (width >= 961px) {
-    display: grid;
-    grid-template-columns: 1fr 440px 1fr;
-  }
+  /* Query container so the centered layout responds to the top nav's own width
+     (which shrinks beside the vertical tab bar) instead of the viewport, and so
+     the fixed mobile search bar is positioned relative to the top nav. */
+  container: top-nav / inline-size;
 
   @include top-nav-is-colored {
     background-color: var(--primary-color);
@@ -36,6 +33,19 @@
     &:has(+ .sideNav + .routerView .floatingRefreshSection) {
       box-shadow: none;
     }
+  }
+}
+
+.topNavInner {
+  align-content: center;
+  align-items: center;
+  display: flex;
+  block-size: 100%;
+  inline-size: 100%;
+
+  @container top-nav (width >= 961px) {
+    display: grid;
+    grid-template-columns: 1fr 440px 1fr;
   }
 }
 
@@ -51,6 +61,11 @@
 /* The vertical tab bar sits beside the content instead of above it */
 .app.verticalTabs .topNav {
   inset-block-start: 0;
+
+  @media only screen and (width <= 680px) {
+    inset-inline-start: var(--vertical-tab-bar-width, 220px);
+    inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
+  }
 }
 
 .menuButton {
@@ -253,7 +268,8 @@
   }
 }
 
-/* Adjust search container position when tab bar is present (mobile) */
+/* The fixed mobile search bar is positioned against the viewport, so it needs
+   the same vertical/horizontal offsets as the top nav when a tab bar is present. */
 .app:has(.tabBar) .middle .searchContainer {
   @media only screen and (width <= 680px) {
     inset-block-start: 92px;
@@ -263,5 +279,7 @@
 .app.verticalTabs .middle .searchContainer {
   @media only screen and (width <= 680px) {
     inset-block-start: 60px;
+    inset-inline-start: var(--vertical-tab-bar-width, 220px);
   }
 }
+

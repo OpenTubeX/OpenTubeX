@@ -70,22 +70,51 @@
       ref="commentsContentWrapper"
       class="commentsContentWrapper"
     >
-      <h3
-        v-if="!fullscreenOverlay && commentData.length > 0 && !isLoading && showComments"
-        class="commentsTitle"
+      <div
+        v-if="!fullscreenOverlay && showComments && !isLoading"
+        class="commentHeader"
       >
-        <span>{{ commentsTitle }}</span>
-        <span
-          class="commentTitleAction"
-          role="button"
-          tabindex="0"
-          @click="showComments = false"
-          @keydown.space.prevent="showComments = false"
-          @keydown.enter.prevent="showComments = false"
+        <h3
+          v-if="commentData.length > 0"
+          class="commentsTitle"
         >
-          {{ $t("Comments.Hide Comments") }}
-        </span>
-      </h3>
+          <span>{{ commentsTitle }}</span>
+          <span
+            class="commentTitleAction"
+            role="button"
+            tabindex="0"
+            @click="showComments = false"
+            @keydown.space.prevent="showComments = false"
+            @keydown.enter.prevent="showComments = false"
+          >
+            {{ $t("Comments.Hide Comments") }}
+          </span>
+        </h3>
+        <div
+          class="commentHeaderActions"
+          :class="{ commentHeaderActionsEmpty: !showSortBy }"
+        >
+          <FtSelect
+            v-if="showSortBy"
+            :placeholder="$t('Global.Sort By')"
+            :value="currentSortValue"
+            :select-names="sortNames"
+            :select-values="sortValues"
+            :icon="['fas', 'arrow-down-short-wide']"
+            @change="handleSortChange"
+          />
+          <FtIconButton
+            :title="$t('Comments.Reload Comments')"
+            :icon="['fas', 'sync']"
+            :size="12"
+            :padding="8"
+            :use-shadow="false"
+            class="reloadComments"
+            :class="{ reloadCommentsAligned: showSortBy }"
+            @click="reloadCommentData"
+          />
+        </div>
+      </div>
       <h4
         v-if="canPerformInitialCommentLoading"
         class="getCommentsTitle"
@@ -108,31 +137,6 @@
       >
         {{ $t("Comments.Click to View Comments") }}
       </h4>
-      <div
-        v-if="!fullscreenOverlay && showComments && !isLoading"
-        class="commentHeaderActions"
-        :class="{ commentHeaderActionsEmpty: !showSortBy }"
-      >
-        <FtSelect
-          v-if="showSortBy"
-          :placeholder="$t('Global.Sort By')"
-          :value="currentSortValue"
-          :select-names="sortNames"
-          :select-values="sortValues"
-          :icon="['fas', 'arrow-down-short-wide']"
-          @change="handleSortChange"
-        />
-        <FtIconButton
-          :title="$t('Comments.Reload Comments')"
-          :icon="['fas', 'sync']"
-          :size="12"
-          :padding="8"
-          :use-shadow="false"
-          class="reloadComments"
-          :class="{ reloadCommentsAligned: showSortBy }"
-          @click="reloadCommentData"
-        />
-      </div>
       <div
         v-if="commentData.length > 0 && showComments"
       >

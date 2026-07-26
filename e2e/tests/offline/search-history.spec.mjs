@@ -135,3 +135,52 @@ test.describe('search history suggestions', () => {
     await expect(suggestions(page).first()).toContainText('baking bread')
   })
 })
+
+test.describe('search suggestion remove button layout', () => {
+  test('the remove control stays compact in a narrow dropdown', async ({ app, page }) => {
+    // Squeeze the search dropdown by shrinking the window and adding the vertical
+    // tab column, so the suggestion text has to truncate. The remove button must
+    // stay clear of the text instead of covering it (2nd screenshot bug).
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const browserWindow = BrowserWindow.getAllWindows()[0]
+      const bounds = browserWindow.getBounds()
+      browserWindow.setBounds({ ...bounds, width: 760 })
+    })
+    await page.locator(sel.searchInput).click()
+    await expect(suggestions(page)).toHaveCount(2)
+
+    // Narrow the middle column further; the input keeps focus so the dropdown
+    // stays open.
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseVerticalTabBar', true)
+      store.commit('setVerticalTabBarWidth', 300)
+    })
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    const entry = suggestions(page).first()
+    const removeButton = entry.locator('.removeButton')
+    await entry.hover()
+
+    // The remove control is a compact icon (~26px) rather than the wider
+    // "Remove" word (~47px), so it no longer eats into the suggestion text.
+    await expect.poll(async () => {
+      const removeBox = await removeButton.boundingBox()
+      return removeBox.width
+    }).toBeLessThan(40)
+  })
+
+  test('the leading icon is vertically centered in its row', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    const entry = suggestions(page).first()
+    await expect(entry).toBeVisible()
+    const icon = entry.locator('.searchResultIcon')
+
+    await expect.poll(async () => {
+      const [rowBox, iconBox] = await Promise.all([entry.boundingBox(), icon.boundingBox()])
+      const rowCenter = rowBox.y + rowBox.height / 2
+      const iconCenter = iconBox.y + iconBox.height / 2
+      return Math.abs(rowCenter - iconCenter)
+    }).toBeLessThanOrEqual(1.5)
+  })
+})

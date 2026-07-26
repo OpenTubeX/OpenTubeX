@@ -570,12 +570,24 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     updateScrollMiniPlayer()
   }
 
-  function handleScrollMiniWindowResize() {
-    if (scrollMiniPlayerActive.value) {
-      const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
-      applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
-    }
+  /**
+   * Re-dock to the current insets. Needed whenever the usable area changes
+   * (window resize, or the vertical tab bar being toggled/resized), otherwise
+   * the player is stranded mid-screen at its old edge.
+   */
+  function resnapScrollMiniPlayerToEdge() {
+    if (!scrollMiniPlayerActive.value) return
+    // Only a drag/resize is positioning the player; a volume session must not
+    // block re-docking, since its pointer-up path never snaps.
+    if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return
 
+    cancelScrollMiniPlayerBounce()
+    const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
+    applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
+  }
+
+  function handleScrollMiniWindowResize() {
+    resnapScrollMiniPlayerToEdge()
     updateScrollMiniPlayer()
   }
 
@@ -817,6 +829,14 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   watch(scrollMiniPlayerEnabled, updateScrollMiniPlayer)
   watch(fullWindowEnabled, updateScrollMiniPlayer)
+
+  // Toggling or resizing the vertical tab bar changes the usable area without
+  // firing a window resize, so re-dock explicitly (after the DOM updates, so the
+  // rail's new bounds are measurable).
+  watch(
+    () => [store.getters.getUseVerticalTabBar, store.getters.getVerticalTabBarWidth],
+    () => { nextTick(resnapScrollMiniPlayerToEdge) }
+  )
 
   return {
     deactivateScrollMiniPlayer,

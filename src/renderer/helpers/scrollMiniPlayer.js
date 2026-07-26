@@ -68,21 +68,25 @@ export function parseScrollMiniPlayerSavedRect(value) {
 
     if (
       parsed == null ||
-      typeof parsed.left !== 'number' ||
-      typeof parsed.top !== 'number' ||
-      typeof parsed.width !== 'number' ||
-      typeof parsed.height !== 'number'
+      !Number.isFinite(parsed.left) ||
+      !Number.isFinite(parsed.top) ||
+      !Number.isFinite(parsed.width) ||
+      !Number.isFinite(parsed.height)
     ) {
       return null
     }
 
-    return clampScrollMiniPlayerRect({
+    // Deliberately not clamped here: restoring runs while the tab is still
+    // loading, when the viewport can be unsized or mid-layout. Clamping against
+    // that would shrink the rect and pin it to a corner, permanently losing the
+    // saved size/position. The caller clamps on activation, once layout settled.
+    return {
       left: parsed.left,
       top: parsed.top,
       width: parsed.width,
       height: parsed.height,
       dock: parsed.dock === 'left' ? 'left' : 'right',
-    })
+    }
   } catch {
     return null
   }
@@ -103,13 +107,27 @@ export function serializeScrollMiniPlayerSavedRect(rect) {
 }
 
 /**
+ * Usable viewport width. `window.innerWidth` includes the vertical scrollbar,
+ * which would otherwise eat the inline-end margin (the mini player only shows
+ * while the page is scrolled, so the scrollbar is always there).
+ *
+ * @returns {number}
+ */
+export function getViewportWidth() {
+  return document.documentElement.clientWidth || window.innerWidth
+}
+
+/**
  * @returns {{ top: number, left: number, right: number, bottom: number }}
  */
 export function getViewportInsets() {
   let topInset = MARGIN
+  let leftInset = MARGIN
+  let rightInset = MARGIN
 
   const topNav = document.querySelector('.topNav')
   const tabBar = document.querySelector('.tabBar')
+  const verticalTabBar = document.querySelector('.tabBar.vertical')
 
   if (topNav) {
     const rect = topNav.getBoundingClientRect()
@@ -119,10 +137,23 @@ export function getViewportInsets() {
     topInset = Math.max(topInset, rect.bottom + MARGIN)
   }
 
+  // Keep clear of the fixed vertical tab bar column. It sits on the inline-start
+  // side, which is the right edge under RTL, so derive the physical side from
+  // its bounds rather than assuming the left.
+  if (verticalTabBar) {
+    const rect = verticalTabBar.getBoundingClientRect()
+    const viewportWidth = getViewportWidth()
+    if (rect.left <= viewportWidth - rect.right) {
+      leftInset = Math.max(leftInset, rect.right + MARGIN)
+    } else {
+      rightInset = Math.max(rightInset, viewportWidth - rect.left + MARGIN)
+    }
+  }
+
   return {
     top: topInset,
-    left: MARGIN,
-    right: MARGIN,
+    left: leftInset,
+    right: rightInset,
     bottom: MARGIN,
   }
 }
@@ -137,7 +168,7 @@ export function getDefaultScrollMiniPlayerRect(aspectRatio = DEFAULT_ASPECT_RATI
   const height = getHeightForAspectRatio(width, aspectRatio)
 
   return {
-    left: window.innerWidth - width - insets.right,
+    left: getViewportWidth() - width - insets.right,
     top: window.innerHeight - height - insets.bottom,
     width,
     height,
@@ -152,7 +183,7 @@ export function getDefaultScrollMiniPlayerRect(aspectRatio = DEFAULT_ASPECT_RATI
  */
 export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO) {
   const insets = getViewportInsets()
-  const maxWidth = Math.min(MAX_WIDTH, window.innerWidth - insets.left - insets.right)
+  const maxWidth = Math.min(MAX_WIDTH, getViewportWidth() - insets.left - insets.right)
   const maxHeight = window.innerHeight - insets.top - insets.bottom
   const normalizedAspectRatio = normalizeAspectRatio(aspectRatio)
 
@@ -163,7 +194,7 @@ export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RAT
     width = getWidthForAspectRatio(height, normalizedAspectRatio)
   }
 
-  const maxLeft = window.innerWidth - insets.right - width
+  const maxLeft = getViewportWidth() - insets.right - width
   const maxTop = window.innerHeight - insets.bottom - height
   const left = Math.min(Math.max(rect.left, insets.left), maxLeft)
   const top = Math.min(Math.max(rect.top, insets.top), maxTop)
@@ -179,7 +210,7 @@ export function clampScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RAT
  */
 export function getDockFromRect(rect, insets) {
   const leftDist = rect.left - insets.left
-  const rightDist = window.innerWidth - insets.right - (rect.left + rect.width)
+  const rightDist = getViewportWidth() - insets.right - (rect.left + rect.width)
   return leftDist <= rightDist ? 'left' : 'right'
 }
 
@@ -188,6 +219,10 @@ export function getDockFromRect(rect, insets) {
  * @returns {Record<string, string>}
  */
 export function scrollMiniPlayerRectToStyle(rect) {
+  // Overlays (e.g. the SponsorBlock skip notice) are sized for a full-size
+  // player, so scale them down with the mini player to keep them inside it.
+  const scale = Math.max(0.6, Math.min(1, rect.width / DEFAULT_WIDTH))
+
   return {
     position: 'fixed',
     left: `${rect.left}px`,
@@ -195,6 +230,7 @@ export function scrollMiniPlayerRectToStyle(rect) {
     width: `${rect.width}px`,
     height: `${rect.height}px`,
     zIndex: '150',
+    '--scroll-mini-scale': `${scale}`,
   }
 }
 
@@ -214,7 +250,7 @@ export function getAnchorVisibleRatio(element, layoutHeight) {
   const visibleTop = Math.max(rect.top, 0)
   const visibleBottom = Math.min(bottom, window.innerHeight)
   const visibleLeft = Math.max(rect.left, 0)
-  const visibleRight = Math.min(rect.right, window.innerWidth)
+  const visibleRight = Math.min(rect.right, getViewportWidth())
 
   const visibleWidth = Math.max(0, visibleRight - visibleLeft)
   const visibleHeight = Math.max(0, visibleBottom - visibleTop)
@@ -237,7 +273,7 @@ export function getAnchorVisibleRatio(element, layoutHeight) {
  */
 export function shouldBounceScrollMiniPlayerToEdge(rect, insets) {
   const leftEdge = insets.left
-  const rightEdge = window.innerWidth - insets.right - rect.width
+  const rightEdge = getViewportWidth() - insets.right - rect.width
   const nearLeft = rect.left - leftEdge <= EDGE_SNAP
   const nearRight = rightEdge - rect.left <= EDGE_SNAP
   return !nearLeft && !nearRight
@@ -252,7 +288,7 @@ export function snapScrollMiniPlayerToEdge(rect, insets) {
   const dock = rect.dock
   const left = dock === 'left'
     ? insets.left
-    : window.innerWidth - insets.right - rect.width
+    : getViewportWidth() - insets.right - rect.width
 
   return { ...rect, left, dock }
 }
@@ -364,7 +400,7 @@ export function getResizeHandleCorner(rect, insets) {
  */
 export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointerY, insets, aspectRatio = DEFAULT_ASPECT_RATIO) {
   const dock = getDockFromRect(rect, insets)
-  const maxWidth = Math.min(MAX_WIDTH, window.innerWidth - insets.left - insets.right)
+  const maxWidth = Math.min(MAX_WIDTH, getViewportWidth() - insets.left - insets.right)
   const maxHeight = window.innerHeight - insets.top - insets.bottom
   const normalizedAspectRatio = normalizeAspectRatio(aspectRatio)
 
@@ -383,7 +419,7 @@ export function resizeScrollMiniPlayerFromCorner(rect, corner, pointerX, pointer
     width = getWidthForAspectRatio(height, normalizedAspectRatio)
   }
 
-  const left = dock === 'left' ? insets.left : window.innerWidth - insets.right - width
+  const left = dock === 'left' ? insets.left : getViewportWidth() - insets.right - width
   let top
 
   if (corner.startsWith('top')) {

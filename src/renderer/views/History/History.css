@@ -11,6 +11,9 @@
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 1fr;
   align-items: center;
+
+  /* Keep the sort select from sticking to the video grid below it */
+  margin-block-end: 16px;
 }
 
 .toggleOptions {

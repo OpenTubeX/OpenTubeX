@@ -868,6 +868,17 @@
   transition: inset-inline-end 250ms ease;
 }
 
+/* Scale the SponsorBlock skip notice down with the mini player so it stays
+   inside it instead of overflowing at small sizes. */
+.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper {
+  transform: scale(var(--scroll-mini-scale, 1));
+  transform-origin: bottom right;
+}
+
+.ftVideoPlayer.scrollMiniPlayer .skippedSegmentsWrapper:where(:dir(rtl)) {
+  transform-origin: bottom left;
+}
+
 .skippedSegment {
   display: flex;
   flex-direction: column;
@@ -1307,8 +1318,11 @@
   display: flex;
 }
 
-/* Let Shaka's seek preview pass in front of the fullscreen action pill. */
-.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) .fullscreenActions {
+/* Let Shaka's seek preview and control tooltips pass in front of the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
+  .ftVideoPlayer:has(:deep(
+    .shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)
+  )) .fullscreenActions {
   z-index: 0;
 }
 
