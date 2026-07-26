@@ -459,15 +459,32 @@ class Playlists {
     return db.playlists.updateAsync({ _id: playlist._id }, { $set: playlist }, { upsert: true })
   }
 
-  static upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
-    return db.playlists.updateAsync(
-      { _id },
+  /**
+   * Adds a single video to a playlist, unless an entry with the same video id
+   * is already there.
+   *
+   * Every window writes through this one datastore, so it is the only place
+   * that can order two of them adding the same video at the same time.
+   * `upsertVideosByPlaylistId` is the bulk path and still allows duplicates.
+   *
+   * @returns {Promise<boolean>} whether the video was added
+   */
+  static async upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
+    const { numAffected } = await db.playlists.updateAsync(
+      // Not `{ 'videos.videoId': { $ne: videoData.videoId } }`: against an array
+      // that matches whenever any other entry differs, so it lets duplicates
+      // through, and it rejects the first video as an empty array matches nothing
+      { _id, $not: { videos: { $elemMatch: { videoId: videoData.videoId } } } },
       {
         $push: { videos: videoData },
         $set: { lastUpdatedAt }
       },
-      { upsert: true }
+      // Must not upsert: the selector deliberately misses when the video is
+      // already there, which would otherwise insert a malformed playlist
+      { upsert: false }
     )
+
+    return numAffected > 0
   }
 
   static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {

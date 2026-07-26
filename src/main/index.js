@@ -3403,14 +3403,21 @@ function runApp() {
           )
           return null
 
-        case DBActions.PLAYLISTS.UPSERT_VIDEO:
-          await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)
-          syncOtherWindows(
-            IpcChannels.SYNC_PLAYLISTS,
-            event,
-            { event: SyncEvents.PLAYLISTS.UPSERT_VIDEO, data }
-          )
-          return null
+        case DBActions.PLAYLISTS.UPSERT_VIDEO: {
+          const added = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)
+
+          // The video was already in the playlist, so nothing was written and
+          // the other windows have nothing to apply
+          if (added) {
+            syncOtherWindows(
+              IpcChannels.SYNC_PLAYLISTS,
+              event,
+              { event: SyncEvents.PLAYLISTS.UPSERT_VIDEO, data }
+            )
+          }
+
+          return added
+        }
 
         case DBActions.PLAYLISTS.UPSERT_VIDEOS:
           await baseHandlers.playlists.upsertVideosByPlaylistId(data._id, data.lastUpdatedAt, data.videos)

@@ -18,9 +18,9 @@ function generateRandomPlaylistId() {
  * Callers share the pending promise rather than getting an early result, so they
  * all report the outcome the write actually had.
  *
- * This is per renderer, so it does not cover the same video being added from two
- * windows at once - the datastore appends unconditionally and the IPC layer
- * discards the result, so closing that gap needs changes to the sync contract.
+ * This only saves a redundant write within one window. Two windows racing is
+ * caught by `upsertVideoByPlaylistId`, which refuses to add a video the playlist
+ * already has and reports back whether it wrote anything.
  *
  * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
  */
@@ -236,11 +236,16 @@ const actions = {
 
         const lastUpdatedAt = Date.now()
 
-        await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+        const added = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
 
-        payload.lastUpdatedAt = lastUpdatedAt
-        commit('addVideo', payload)
+        // Nothing was written because another window got there first. Committing
+        // anyway would show the video twice once that window's sync event lands
+        if (added) {
+          payload.lastUpdatedAt = lastUpdatedAt
+          commit('addVideo', payload)
+        }
 
+        // Either way the video is now in the playlist
         return true
       } catch (errMessage) {
         console.error(errMessage)
