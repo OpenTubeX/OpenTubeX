@@ -24,6 +24,7 @@
           @click="onClick(toast)"
           @keydown.enter.prevent="performAction(toast)"
           @keydown.space.prevent="performAction(toast)"
+          @keydown.esc.prevent="dismiss(toast)"
           @pointerdown="onPointerDown(toast, $event)"
           @pointermove="onPointerMove(toast, $event)"
           @pointerup="onPointerUp(toast)"
@@ -144,6 +145,19 @@ function performAction(toast) {
 }
 
 /**
+ * Dismisses a toast without running its action, for users who want it out of
+ * the way. Flags it for the slide-left leave animation, then removes it on the
+ * next tick so the `dismiss-left` class is rendered before the leave starts.
+ * Removing promptly (rather than after a timeout) lets the toasts above start
+ * animating into the freed space without any delay.
+ * @param {Toast} toast
+ */
+function dismiss(toast) {
+  toast.dismissing = true
+  nextTick(() => remove(toast))
+}
+
+/**
  * Runs the toast action on click, unless the pointer was dragged (in which case
  * the click is the tail end of a drag gesture and should be ignored).
  * @param {Toast} toast
@@ -199,12 +213,7 @@ function onPointerUp(toast) {
   toast.dragging = false
 
   if (toast.dragOffset < -DRAG_DISMISS_THRESHOLD) {
-    // Flag the toast for the slide-left leave animation, then remove it on the
-    // next tick so the `dismiss-left` class is rendered before the leave starts.
-    // Removing promptly (rather than after a timeout) lets the toasts above
-    // start animating down into the freed space without any delay.
-    toast.dismissing = true
-    nextTick(() => remove(toast))
+    dismiss(toast)
   } else {
     // Snap back into place and resume the auto-dismiss countdown for whatever
     // is left of the original lifetime. Keeping the deadline absolute matters
