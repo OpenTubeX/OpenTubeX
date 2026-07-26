@@ -8,16 +8,23 @@ function generateRandomPlaylistId() {
 }
 
 /**
- * `playlistId:videoId` pairs with an in-flight `addVideo` write.
+ * In-flight `addVideo` writes, keyed by `playlistId:videoId`.
  *
  * The toggle style controls (add to playlist popover, quick bookmark button) all
  * derive their state from the store, which only updates once the write commits.
  * A second activation during that window - including from a different control
  * for the same video - would otherwise append a duplicate entry.
  *
+ * Callers share the pending promise rather than getting an early result, so they
+ * all report the outcome the write actually had.
+ *
+ * This is per renderer, so it does not cover the same video being added from two
+ * windows at once - the datastore appends unconditionally and the IPC layer
+ * discards the result, so closing that gap needs changes to the sync contract.
+ *
  * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
  */
-const pendingVideoAdds = new Set()
+const pendingVideoAdds = new Map()
 
 function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
@@ -189,35 +196,41 @@ const actions = {
     }
   },
 
-  async addVideo({ commit }, payload) {
+  addVideo({ commit }, payload) {
     const { _id, videoData } = payload
     const pendingKey = `${_id}:${videoData.videoId}`
 
-    // Another activation is already adding this video, treat it as a no-op
-    // instead of appending a second copy
-    if (pendingVideoAdds.has(pendingKey)) {
-      return true
+    // Another activation is already adding this video, wait on that write
+    // instead of issuing a second one
+    const pending = pendingVideoAdds.get(pendingKey)
+    if (pending != null) {
+      return pending
     }
 
-    pendingVideoAdds.add(pendingKey)
-    try {
-      processToBeAddedPlaylistVideo(videoData)
+    const promise = (async () => {
+      try {
+        processToBeAddedPlaylistVideo(videoData)
 
-      const lastUpdatedAt = Date.now()
+        const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+        await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
 
-      payload.lastUpdatedAt = lastUpdatedAt
-      commit('addVideo', payload)
+        payload.lastUpdatedAt = lastUpdatedAt
+        commit('addVideo', payload)
 
-      return true
-    } catch (errMessage) {
-      console.error(errMessage)
+        return true
+      } catch (errMessage) {
+        console.error(errMessage)
 
-      return false
-    } finally {
-      pendingVideoAdds.delete(pendingKey)
-    }
+        return false
+      } finally {
+        pendingVideoAdds.delete(pendingKey)
+      }
+    })()
+
+    pendingVideoAdds.set(pendingKey, promise)
+
+    return promise
   },
 
   async addVideos({ commit }, payload) {
