@@ -678,7 +678,7 @@ function togglePlaylistPrompt() {
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
 const quickBookmarkThumbnail = computed(() => {
-  return getVideoThumbnailUrl(props.id, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl)
+  return getVideoThumbnailUrl(props.id, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
 })
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)

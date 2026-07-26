@@ -60,7 +60,7 @@ let removeShowToastListener = null
  * @property {NodeJS.Timeout | number} timeout
  * @property {NodeJS.Timeout | number} interval
  * @property {number} id
- * @property {number} time resolved display duration in ms, used to reschedule auto-dismiss after a drag
+ * @property {number} expiresAt timestamp the toast is due to auto-dismiss at, used to reschedule after a drag
  * @property {boolean} dragging
  * @property {boolean} pointerMoved whether the pointer moved enough to count as a drag (suppresses the click action)
  * @property {number} dragOffset current horizontal (leftward, <= 0) drag offset in px
@@ -96,7 +96,7 @@ function open({ detail: { message, time, action, abortSignal, image } }) {
     image: image ?? null,
     timeout: 0,
     interval: 0,
-    time,
+    expiresAt: Date.now() + time,
     dragging: false,
     pointerMoved: false,
     dragOffset: 0,
@@ -206,9 +206,12 @@ function onPointerUp(toast) {
     toast.dismissing = true
     nextTick(() => remove(toast))
   } else {
-    // Snap back into place and resume the auto-dismiss countdown
+    // Snap back into place and resume the auto-dismiss countdown for whatever
+    // is left of the original lifetime. Keeping the deadline absolute matters
+    // for toasts whose action expires on its own schedule (e.g. the playlist
+    // undo toast), which must not stay clickable after that deadline passes.
     toast.dragOffset = 0
-    toast.timeout = setTimeout(remove, toast.time, toast)
+    toast.timeout = setTimeout(remove, Math.max(0, toast.expiresAt - Date.now()), toast)
   }
 }
 

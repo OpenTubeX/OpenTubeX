@@ -192,19 +192,35 @@ function secondsToVttTimestamp(seconds) {
 }
 
 /**
- * Builds a medium-quality thumbnail URL for a video, honouring the current backend.
- * Handy for toasts that reference a single video by id.
+ * Builds a medium-quality thumbnail URL for a video, honouring the current backend
+ * and the user's thumbnail preference. Handy for toasts that reference a single
+ * video by id. Returns null when thumbnails are hidden, so callers can omit the
+ * image entirely rather than showing a meaningless placeholder.
  * @param {string} videoId
  * @param {'local' | 'invidious'} backendPreference
  * @param {string} currentInvidiousInstanceUrl
- * @returns {string}
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @returns {string | null}
  */
-export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl) {
+export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '') {
+  if (thumbnailPreference === 'hidden') {
+    return null
+  }
+
   const baseUrl = backendPreference === 'invidious'
     ? currentInvidiousInstanceUrl
     : 'https://i.ytimg.com'
 
-  return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
+  switch (thumbnailPreference) {
+    case 'start':
+      return `${baseUrl}/vi/${videoId}/mq1.jpg`
+    case 'middle':
+      return `${baseUrl}/vi/${videoId}/mq2.jpg`
+    case 'end':
+      return `${baseUrl}/vi/${videoId}/mq3.jpg`
+    default:
+      return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
+  }
 }
 
 export const ToastEventBus = new EventTarget()

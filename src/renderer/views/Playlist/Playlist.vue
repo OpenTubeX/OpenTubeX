@@ -264,6 +264,8 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
+
 /** @type {import('vue').ComputedRef<string>} */
 const userPlaylistSortOrder = computed(() => store.getters.getUserPlaylistSortOrder)
 
@@ -884,7 +886,7 @@ function removeVideoFromPlaylist(videoId, playlistItemId) {
             undoToastAbortController = null
           },
           abortSignal: undoToastAbortController.signal,
-          image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value),
+          image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
         })
       }
     }
