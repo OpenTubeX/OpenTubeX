@@ -85,6 +85,7 @@
       <FtElementList
         v-if="activeData.length > 0"
         :data="activeData"
+        :stable-item-keys="true"
         :show-video-with-last-viewed-playlist="true"
         :show-watched-style-in-history="true"
         :use-channels-hidden-preference="false"
