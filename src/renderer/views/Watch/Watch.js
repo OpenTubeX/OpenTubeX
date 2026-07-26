@@ -609,19 +609,23 @@ export default defineComponent({
         }
       })
     },
-    toggleCurrentVideoQuickBookmarked() {
+    async toggleCurrentVideoQuickBookmarked() {
       if (!this.isQuickBookmarkEnabled) { return }
 
+      const playlistName = this.quickBookmarkPlaylist.playlistName
+
       if (this.isCurrentVideoQuickBookmarked) {
-        this.$store.dispatch('removeVideo', {
+        const removed = await this.$store.dispatch('removeVideo', {
           _id: this.quickBookmarkPlaylist._id,
           videoId: this.videoId
         })
-        showToast(this.$t('Video.Video has been removed from {playlistName}', { playlistName: this.quickBookmarkPlaylist.playlistName }))
+        showToast(removed
+          ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
+          : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
         return
       }
 
-      this.$store.dispatch('addVideo', {
+      const saved = await this.$store.dispatch('addVideo', {
         _id: this.quickBookmarkPlaylist._id,
         videoData: {
           videoId: this.videoId,
@@ -633,7 +637,9 @@ export default defineComponent({
           premiereDate: this.premiereDate
         }
       })
-      showToast(this.$t('Video.Video has been saved to {playlistName}', { playlistName: this.quickBookmarkPlaylist.playlistName }))
+      showToast(saved
+        ? this.$t('Video.Video has been saved to {playlistName}', { playlistName })
+        : this.$t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
     },
     handleChaptersOverlayChange(open) {
       const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&

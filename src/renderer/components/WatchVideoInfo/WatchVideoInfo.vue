@@ -721,7 +721,7 @@ function toggleQuickBookmarked() {
   }
 }
 
-function addToQuickBookmarkPlaylist() {
+async function addToQuickBookmarkPlaylist() {
   const videoData = {
     videoId: props.id,
     title: props.title,
@@ -732,22 +732,30 @@ function addToQuickBookmarkPlaylist() {
     premiereDate: props.premiereDate
   }
 
-  store.dispatch('addVideo', {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const saved = await store.dispatch('addVideo', {
     _id: quickBookmarkPlaylist.value._id,
     videoData,
   })
 
-  showToast(t('Video.Video has been saved to {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
+  showToast(saved
+    ? t('Video.Video has been saved to {playlistName}', { playlistName })
+    : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
 }
 
-function removeFromQuickBookmarkPlaylist() {
-  store.dispatch('removeVideo', {
+async function removeFromQuickBookmarkPlaylist() {
+  const playlistName = quickBookmarkPlaylist.value.playlistName
+
+  const removed = await store.dispatch('removeVideo', {
     _id: quickBookmarkPlaylist.value._id,
     // Remove all playlist items with same videoId
     videoId: props.id,
   })
 
-  showToast(t('Video.Video has been removed from {playlistName}', { playlistName: quickBookmarkPlaylist.value.playlistName }))
+  showToast(removed
+    ? t('Video.Video has been removed from {playlistName}', { playlistName })
+    : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
