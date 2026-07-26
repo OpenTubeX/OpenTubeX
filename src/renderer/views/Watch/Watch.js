@@ -127,6 +127,11 @@ export default defineComponent({
       startNextVideoWithFullscreenPlaylist: false,
       isLoading: true,
       firstLoad: true,
+      // Whether this tab has ever been presented. A watch tab opened in the
+      // background briefly attempts to autoplay and is force-paused, which would
+      // otherwise persist a ~1 second resume point for a video the user never
+      // actually watched. We only save watch progress once the tab is presented.
+      hasBeenPresented: false,
       useTheatreMode: false,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
@@ -492,6 +497,14 @@ export default defineComponent({
     }
   },
   watch: {
+    isTabPresented: {
+      immediate: true,
+      handler(presented) {
+        if (presented) {
+          this.hasBeenPresented = true
+        }
+      }
+    },
     async 'tabRoute.fullPath'() {
       await this.reloadView()
     },
@@ -2094,6 +2107,10 @@ export default defineComponent({
     },
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
+      // A background tab force-pauses its brief autoplay attempt, which would
+      // otherwise save a spurious ~1 second resume point. Only persist progress
+      // for tabs the user has actually presented.
+      if (process.env.IS_ELECTRON && !this.hasBeenPresented) { return }
       if (!this.$refs.player?.hasLoaded) { return }
 
       const currentTime = this.getWatchedProgress()
