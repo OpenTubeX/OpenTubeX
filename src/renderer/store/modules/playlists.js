@@ -30,6 +30,28 @@ function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
 }
 
+/** Attributes playlist entries are not meant to carry, even with `null` values */
+const UNDESIRED_VIDEO_ATTRIBUTES = [
+  'authorUrl',
+  'description',
+  'index',
+  'liveNow',
+  'videoThumbnails',
+  'viewCount',
+]
+
+/**
+ * Mutates the given video, so it must be a copy the caller owns.
+ * @param {any} videoData
+ */
+function removeUndesiredVideoAttributes(videoData) {
+  for (const attrName of UNDESIRED_VIDEO_ATTRIBUTES) {
+    if (typeof videoData[attrName] !== 'undefined') {
+      delete videoData[attrName]
+    }
+  }
+}
+
 /*
 *  Function to find the first playlist with 0 videos, or otherwise the most recently accessed.
 *  This is a good default quick bookmark target if one needs to be set.
@@ -210,6 +232,7 @@ const actions = {
     const promise = (async () => {
       try {
         processToBeAddedPlaylistVideo(videoData)
+        removeUndesiredVideoAttributes(videoData)
 
         const lastUpdatedAt = Date.now()
 
@@ -252,19 +275,7 @@ const actions = {
         if (videoData.type == null) {
           videoData.type = 'video'
         }
-        // Undesired attributes, even with `null` values
-        [
-          'authorUrl',
-          'description',
-          'index',
-          'liveNow',
-          'videoThumbnails',
-          'viewCount',
-        ].forEach(attrName => {
-          if (typeof videoData[attrName] !== 'undefined') {
-            delete videoData[attrName]
-          }
-        })
+        removeUndesiredVideoAttributes(videoData)
 
         return videoData
       })
