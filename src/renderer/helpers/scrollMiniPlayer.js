@@ -68,21 +68,25 @@ export function parseScrollMiniPlayerSavedRect(value) {
 
     if (
       parsed == null ||
-      typeof parsed.left !== 'number' ||
-      typeof parsed.top !== 'number' ||
-      typeof parsed.width !== 'number' ||
-      typeof parsed.height !== 'number'
+      !Number.isFinite(parsed.left) ||
+      !Number.isFinite(parsed.top) ||
+      !Number.isFinite(parsed.width) ||
+      !Number.isFinite(parsed.height)
     ) {
       return null
     }
 
-    return clampScrollMiniPlayerRect({
+    // Deliberately not clamped here: restoring runs while the tab is still
+    // loading, when the viewport can be unsized or mid-layout. Clamping against
+    // that would shrink the rect and pin it to a corner, permanently losing the
+    // saved size/position. The caller clamps on activation, once layout settled.
+    return {
       left: parsed.left,
       top: parsed.top,
       width: parsed.width,
       height: parsed.height,
       dock: parsed.dock === 'left' ? 'left' : 'right',
-    })
+    }
   } catch {
     return null
   }

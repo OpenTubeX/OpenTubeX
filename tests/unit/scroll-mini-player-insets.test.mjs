@@ -5,6 +5,8 @@ import {
   getViewportInsets,
   getViewportWidth,
   snapScrollMiniPlayerToEdge,
+  parseScrollMiniPlayerSavedRect,
+  serializeScrollMiniPlayerSavedRect,
   MARGIN
 } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
@@ -90,4 +92,34 @@ test('the left dock edge follows the tab rail width', () => {
 
   // Regression: widening the rail used to strand the player at its old edge.
   assert.equal(snapped.left, 400 + MARGIN)
+})
+
+test('a saved rect survives being restored before the viewport is laid out', () => {
+  const saved = serializeScrollMiniPlayerSavedRect({
+    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
+  })
+
+  // Restoring runs while the tab is still loading, so the viewport can be
+  // unsized. Clamping here used to shrink the player and pin it bottom-left.
+  stubViewport({ clientWidth: 0 })
+  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), {
+    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
+  })
+
+  stubViewport({ clientWidth: 300 })
+  assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), {
+    left: 1000, top: 500, width: 520, height: 292, dock: 'right'
+  })
+})
+
+test('a malformed saved rect is rejected', () => {
+  stubViewport({ clientWidth: 1585 })
+
+  assert.equal(parseScrollMiniPlayerSavedRect(''), null)
+  assert.equal(parseScrollMiniPlayerSavedRect('not json'), null)
+  assert.equal(parseScrollMiniPlayerSavedRect(JSON.stringify({ left: 1 })), null)
+  assert.equal(
+    parseScrollMiniPlayerSavedRect(JSON.stringify({ left: NaN, top: 0, width: 1, height: 1 })),
+    null
+  )
 })
