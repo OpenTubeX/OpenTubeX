@@ -124,39 +124,30 @@ function playlistThumbnail(playlist) {
  * @param {object} playlist
  */
 async function togglePlaylist(playlist) {
-  const pendingKey = `${playlist._id}:${props.videoData.videoId}`
+  const playlistName = playlist.playlistName
 
-  if (pendingToggles.has(pendingKey)) {
-    return
-  }
+  if (containedIds.value.has(playlist._id)) {
+    const removed = await store.dispatch('removeVideo', {
+      _id: playlist._id,
+      // Remove all playlist items with the same videoId
+      videoId: props.videoData.videoId,
+    })
 
-  pendingToggles.add(pendingKey)
-  try {
-    const playlistName = playlist.playlistName
+    showToast(removed
+      ? t('Video.Video has been removed from {playlistName}', { playlistName })
+      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
+  } else {
+    // Concurrent activations are collapsed by the store, so a rapid second
+    // click (or the quick bookmark button) cannot append a duplicate entry
+    const saved = await store.dispatch('addVideo', {
+      _id: playlist._id,
+      // The action mutates the passed object, so hand it a copy
+      videoData: { ...props.videoData },
+    })
 
-    if (containedIds.value.has(playlist._id)) {
-      const removed = await store.dispatch('removeVideo', {
-        _id: playlist._id,
-        // Remove all playlist items with the same videoId
-        videoId: props.videoData.videoId,
-      })
-
-      showToast(removed
-        ? t('Video.Video has been removed from {playlistName}', { playlistName })
-        : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
-    } else {
-      const saved = await store.dispatch('addVideo', {
-        _id: playlist._id,
-        // The action mutates the passed object, so hand it a copy
-        videoData: { ...props.videoData },
-      })
-
-      showToast(saved
-        ? t('Video.Video has been saved to {playlistName}', { playlistName })
-        : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
-    }
-  } finally {
-    pendingToggles.delete(pendingKey)
+    showToast(saved
+      ? t('Video.Video has been saved to {playlistName}', { playlistName })
+      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
   }
 }
 
@@ -167,19 +158,6 @@ function openCreatePlaylistPrompt() {
     videos: [{ ...props.videoData }],
   })
 }
-</script>
-
-<script>
-/**
- * `playlistId:videoId` pairs with an in-flight add/remove. Guards against a second
- * activation reading the same stale `containedIds` before the first write commits,
- * which would otherwise persist a duplicate entry.
- *
- * Module scoped on purpose: closing and reopening the dropdown remounts this
- * component, and the same video can have another playlist control mounted
- * elsewhere, so a per-instance set would not catch either case.
- */
-const pendingToggles = new Set()
 </script>
 
 <style scoped lang="scss" src="./FtAddToPlaylistDropdown.scss" />

@@ -7,6 +7,18 @@ function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
 }
 
+/**
+ * `playlistId:videoId` pairs with an in-flight `addVideo` write.
+ *
+ * The toggle style controls (add to playlist popover, quick bookmark button) all
+ * derive their state from the store, which only updates once the write commits.
+ * A second activation during that window - including from a different control
+ * for the same video - would otherwise append a duplicate entry.
+ *
+ * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
+ */
+const pendingVideoAdds = new Set()
+
 function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
 }
@@ -178,9 +190,17 @@ const actions = {
   },
 
   async addVideo({ commit }, payload) {
-    try {
-      const { _id, videoData } = payload
+    const { _id, videoData } = payload
+    const pendingKey = `${_id}:${videoData.videoId}`
 
+    // Another activation is already adding this video, treat it as a no-op
+    // instead of appending a second copy
+    if (pendingVideoAdds.has(pendingKey)) {
+      return true
+    }
+
+    pendingVideoAdds.add(pendingKey)
+    try {
       processToBeAddedPlaylistVideo(videoData)
 
       const lastUpdatedAt = Date.now()
@@ -195,6 +215,8 @@ const actions = {
       console.error(errMessage)
 
       return false
+    } finally {
+      pendingVideoAdds.delete(pendingKey)
     }
   },
 

@@ -131,6 +131,34 @@ test.describe('list video actions', () => {
     }).toBe(1)
   })
 
+  test('the dropdown and quick bookmark cannot both add the same video', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+
+    const favoritesRow = video.locator('.addToPlaylistIcon .iconDropdown .playlistRow', { hasText: 'Favorites' })
+    await expect(favoritesRow).toBeVisible()
+
+    // "Favorites" is also the quick bookmark target, so activating both controls
+    // in the same tick races two adds against the same playlist
+    await page.evaluate(() => {
+      const listVideo = document.querySelector('.ft-list-video')
+      const row = [...listVideo.querySelectorAll('.addToPlaylistIcon .iconDropdown .playlistRow')]
+        .find((element) => element.textContent.includes('Favorites'))
+
+      row.click()
+      listVideo.querySelector('.quickBookmarkVideoIcon .iconButton').click()
+    })
+
+    await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
+    await expect.poll(async () => {
+      const favorites = await readPlaylist(app, 'favorites')
+      return favorites?.videos?.length
+    }).toBe(1)
+  })
+
   test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
     await goTo(page, 'history')
 
