@@ -369,6 +369,10 @@ export default defineComponent({
     thumbnailPreference: function () {
       return this.$store.getters.getThumbnailPreference
     },
+    /** Thumbnail to show in toasts about this video, omitted when thumbnails are hidden */
+    toastThumbnail: function () {
+      return this.thumbnailPreference === 'hidden' ? null : this.thumbnail
+    },
     autoplayNextRecommendedVideoByDefault: function () {
       return this.$store.getters.getPlayNextVideo
     },
@@ -619,7 +623,10 @@ export default defineComponent({
           _id: this.quickBookmarkPlaylist._id,
           videoId: this.videoId
         })
-        showToast(this.$t('Video.Video has been removed from your saved list'))
+        showToast({
+          message: this.$t('Video.Video has been removed from your saved list'),
+          image: this.toastThumbnail
+        })
         return
       }
 
@@ -635,7 +642,10 @@ export default defineComponent({
           premiereDate: this.premiereDate
         }
       })
-      showToast(this.$t('Video.Video has been saved'))
+      showToast({
+        message: this.$t('Video.Video has been saved'),
+        image: this.toastThumbnail
+      })
     },
     handleChaptersOverlayChange(open) {
       const shouldUseDefaultTheatreMode = open && !this.theatrePossible &&

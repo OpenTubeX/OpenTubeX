@@ -257,7 +257,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 
 import store from '../../store'
 
-import { formatNumber, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
+import { formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
@@ -677,6 +677,10 @@ function togglePlaylistPrompt() {
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
+const quickBookmarkThumbnail = computed(() => {
+  return getVideoThumbnailUrl(props.id, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
+})
+
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
@@ -737,7 +741,10 @@ function addToQuickBookmarkPlaylist() {
   })
 
   // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
+  showToast({
+    message: t('Video.Video has been saved'),
+    image: quickBookmarkThumbnail.value,
+  })
 }
 
 function removeFromQuickBookmarkPlaylist() {
@@ -748,7 +755,10 @@ function removeFromQuickBookmarkPlaylist() {
   })
 
   // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
+  showToast({
+    message: t('Video.Video has been removed from your saved list'),
+    image: quickBookmarkThumbnail.value
+  })
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

@@ -118,7 +118,8 @@ import {
   debounce,
   showToast,
   ctrlFHandler,
-  getIconForSortPreference
+  getIconForSortPreference,
+  getVideoThumbnailUrl
 } from '../../helpers/utils'
 
 const { locale, t } = useI18n()
@@ -180,6 +181,12 @@ const title = computed(() => {
 })
 
 const selectedPlaylistCount = computed(() => selectedPlaylistIdList.value.length)
+
+const backendPreference = computed(() => store.getters.getBackendPreference)
+
+const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
 /** @type {import('vue').ComputedRef<{ videoId: string, [key: string]: any }[]>} */
 const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
@@ -395,9 +402,15 @@ function addSelectedToPlaylists() {
     addedPlaylistIds.add(playlist._id)
   })
 
-  showToast(t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-    playlistCount: addedPlaylistIds.size,
-  }, addedPlaylistIds.size))
+  showToast({
+    message: t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
+      playlistCount: addedPlaylistIds.size,
+    }, addedPlaylistIds.size),
+    // Show the thumbnail when a single video was added
+    image: toBeAddedToPlaylistVideoList_.length === 1
+      ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
+      : null,
+  })
 
   hide()
 }
