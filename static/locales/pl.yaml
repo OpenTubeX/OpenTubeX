@@ -1714,3 +1714,16 @@ Downloads:
   Choose Folder: Zmień
   Select Folder: Wybierz Folder
   Folder Required: Wybierz folder pobierania, aby umożliwić pobieranie.
+  System Downloads Folder: Systemowy folder pobierania
+  Processing: Przetwarzanie…
+  Download Complete: Pobieranie zakończone
+  Download Cancelled: Pobieranie anulowane
+  Download Failed: Pobieranie nie powiodło się
+  Cancel Download: Anuluj pobieranie
+  yt-dlp Not Found: Nie znaleziono yt-dlp. Zainstaluj go lub ustaw jego ścieżkę w ustawieniach pobierania.
+  Download Complete Template: Pobieranie „{title}” zostało zakończone
+  Download Failed Template: Pobieranie „{title}” nie powiodło się
+  Templates:
+    Video Best: Wideo - najlepsza jakość
+    Video Resolution: Wideo - {resolution}
+    Audio Best: Dźwięk - najlepsza jakość
