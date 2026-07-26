@@ -576,7 +576,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
    * the player is stranded mid-screen at its old edge.
    */
   function resnapScrollMiniPlayerToEdge() {
-    if (!scrollMiniPlayerActive.value || scrollMiniPointerSession) return
+    if (!scrollMiniPlayerActive.value) return
+    // Only a drag/resize is positioning the player; a volume session must not
+    // block re-docking, since its pointer-up path never snaps.
+    if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return
 
     cancelScrollMiniPlayerBounce()
     const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
