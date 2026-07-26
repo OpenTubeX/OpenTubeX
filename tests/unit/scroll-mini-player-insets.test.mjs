@@ -95,8 +95,9 @@ test('the left dock edge follows the tab rail width', () => {
   assert.equal(snapped.left, 400 + MARGIN)
 })
 
-// Fits the 800px-tall stub viewport, so activation must preserve it verbatim.
-const SAVED_RECT = { left: 1000, top: 400, width: 520, height: 292, dock: 'right' }
+// Exactly 16:9 and fits the 800px-tall stub viewport, so activation must
+// preserve it verbatim (including the height, which is derived from the width).
+const SAVED_RECT = { left: 1000, top: 400, width: 512, height: 288, dock: 'right' }
 
 test('parsing a saved rect round-trips it without consulting the viewport', () => {
   const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
@@ -123,6 +124,7 @@ test('restoring while unsized then activating keeps the saved position and size'
   const activated = clampScrollMiniPlayerRect(restored)
 
   assert.equal(activated.width, SAVED_RECT.width)
+  assert.equal(activated.height, SAVED_RECT.height)
   assert.equal(activated.left, SAVED_RECT.left)
   assert.equal(activated.top, SAVED_RECT.top)
   assert.equal(activated.dock, 'right')
