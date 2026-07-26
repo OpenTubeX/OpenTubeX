@@ -127,6 +127,13 @@ export default defineComponent({
       startNextVideoWithFullscreenPlaylist: false,
       isLoading: true,
       firstLoad: true,
+      // Whether this tab has been presented while showing the current video. A
+      // watch tab loading a video in the background briefly attempts to autoplay
+      // and is force-paused, which would otherwise persist a ~1 second resume
+      // point for a video the user never actually watched. We only save watch
+      // progress once the tab is presented, and re-evaluate this per video
+      // because the instance is reused across same-tab navigation.
+      hasBeenPresented: false,
       useTheatreMode: false,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
@@ -496,6 +503,14 @@ export default defineComponent({
     }
   },
   watch: {
+    isTabPresented: {
+      immediate: true,
+      handler() {
+        if (this.isCurrentlyPresented()) {
+          this.hasBeenPresented = true
+        }
+      }
+    },
     async 'tabRoute.fullPath'() {
       await this.reloadView()
     },
@@ -836,6 +851,10 @@ export default defineComponent({
 
       this.firstLoad = true
       this.videoPlayerLoaded = false
+      // Re-evaluate per video: this instance is reused across same-tab
+      // navigation, so a tab that was presented for the previous video must not
+      // keep that state while it loads the next one in the background.
+      this.hasBeenPresented = this.isCurrentlyPresented()
       this.activeFormat = this.defaultVideoFormat
 
       this.checkIfTimestamp()
@@ -2102,8 +2121,23 @@ export default defineComponent({
         })
       }))
     },
+    /**
+     * Whether this tab is currently the presented one. Without a logical-tab
+     * context (the web build) there is nothing to hide behind, so treat the view
+     * as presented.
+     *
+     * @returns {boolean}
+     */
+    isCurrentlyPresented() {
+      return this.isTabPresented == null || this.isTabPresented === true
+    },
+
     _saveWatchProgress() {
       if (!this.canSaveWatchProgress) { return }
+      // A background tab force-pauses its brief autoplay attempt, which would
+      // otherwise save a spurious ~1 second resume point. Only persist progress
+      // for tabs the user has actually presented.
+      if (process.env.IS_ELECTRON && !this.hasBeenPresented) { return }
       if (!this.$refs.player?.hasLoaded) { return }
 
       const currentTime = this.getWatchedProgress()
