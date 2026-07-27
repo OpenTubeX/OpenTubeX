@@ -1776,6 +1776,7 @@ KeyboardShortcutPrompt:
   Next Tab: Switch to the next tab
   Previous Tab: Switch to the previous tab
   Switch to Tab: Switch to tab 1–9
+  Toggle Tab Orientation: Switch between horizontal and vertical tabs
   Navigate to Settings: Navigate to the Settings page
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content
