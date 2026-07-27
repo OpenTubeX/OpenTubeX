@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, waitForAppReady } from '../../helpers/app.mjs'
+import { DBActions } from '../../../src/constants.js'
 
 function historyEntry(videoId, title) {
   return {
@@ -162,6 +163,47 @@ test.describe('list video actions', () => {
       const favorites = await readPlaylist(app, 'favorites')
       return favorites?.videos?.length
     }).toBe(1)
+  })
+
+  test('two windows adding the same video only store it once', async ({ app, page }) => {
+    const [secondWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      page.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(secondWindow)
+
+    // Issue the add both windows' playlist controls make, rather than clicking
+    // them: a click is a toggle, so whichever window has already been told about
+    // the other's write would remove the video instead of racing to add it.
+    const addFromWindow = (window, playlistItemId) => window.evaluate(
+      ([action, playlistItemId]) => window.ftElectron.dbPlaylists(action, {
+        _id: 'favorites',
+        lastUpdatedAt: Date.now(),
+        videoData: {
+          videoId: 'eeeeeeeeeee',
+          playlistItemId,
+          title: 'Bookmarkable video',
+          author: 'Test Channel',
+          authorId: 'UC-test-channel-id',
+          lengthSeconds: 60,
+          published: Date.now(),
+          timeAdded: Date.now(),
+          type: 'video'
+        }
+      }),
+      [DBActions.PLAYLISTS.UPSERT_VIDEO, playlistItemId]
+    )
+
+    const written = await Promise.all([
+      addFromWindow(page, 'from-first-window'),
+      addFromWindow(secondWindow, 'from-second-window')
+    ])
+
+    // Exactly one of them wrote, and the other was told it did not
+    expect(written.filter(Boolean)).toHaveLength(1)
+
+    const favorites = await readPlaylist(app, 'favorites')
+    expect(favorites.videos.map((entry) => entry.videoId)).toEqual(['eeeeeeeeeee'])
   })
 
   test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
