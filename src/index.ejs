@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html>
+<!-- data-overlayscrollbars-initialize keeps the native scrollbars hidden until
+     OverlayScrollbars takes over, so they don't flash during startup -->
+<html data-overlayscrollbars-initialize>
 
   <head>
     <meta charset="utf-8" />
@@ -11,7 +13,7 @@
     <title></title>
   </head>
 
-  <body>
+  <body data-overlayscrollbars-initialize>
     <div id="app"></div>
     <% if (process.env.IS_ELECTRON) { %>
     <iframe

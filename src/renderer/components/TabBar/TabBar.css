@@ -31,13 +31,13 @@
   display: flex;
   min-inline-size: 0;
   overflow: auto hidden;
+
+  /* The horizontal layout draws its own scrollbar below (.tabsScrollbar). The
+     vertical one gets overlay scrollbars from v-overlay-scrollbars instead,
+     which hides the native ones itself. */
   scrollbar-width: none;
   gap: 2px;
   -webkit-app-region: no-drag;
-}
-
-.tabsContainer::-webkit-scrollbar {
-  display: none;
 }
 
 .tabsScrollbar {
@@ -135,16 +135,6 @@
   block-size: 100%;
   overflow: hidden auto;
   overscroll-behavior: contain;
-
-  /* `auto` re-enables the themed ::-webkit-scrollbar styling (any other value
-     makes Chromium fall back to its native scrollbar) */
-  scrollbar-width: auto;
-}
-
-/* Same themed scrollbar as the main view, just narrower */
-.tabBar.vertical .tabsContainer::-webkit-scrollbar {
-  display: block;
-  inline-size: 10px;
 }
 
 /* The handle draws the divider line itself, so the hover highlight is always

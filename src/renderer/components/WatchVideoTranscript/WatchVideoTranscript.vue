@@ -131,6 +131,7 @@
     <div
       v-else
       ref="segmentList"
+      v-overlay-scrollbars
       class="transcriptSegments"
       role="list"
       :aria-label="t('Video.Transcript.Title')"

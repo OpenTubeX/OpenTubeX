@@ -46,6 +46,22 @@ test.describe('watch page', () => {
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
 
+  test('the sidebar panels use overlay scrollbars', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    // The description and the comments both scroll; their scrollbars must float
+    // above the content rather than narrowing it.
+    for (const selector of ['.videoDescription', '.commentsContentWrapper']) {
+      const panel = page.locator(selector)
+      await expect(panel).toBeVisible({ timeout: 30_000 })
+      await expect(panel.locator('> .os-scrollbar-vertical')).toHaveCount(1)
+      expect(
+        await panel.evaluate((element) => element.clientWidth === element.offsetWidth)
+      ).toBe(true)
+    }
+  })
+
   test('playback starts', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)

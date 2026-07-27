@@ -432,6 +432,7 @@ Settings:
     UI Scale: UI Scale
     Thumbnail Size: Thumbnail Size
     Show Thumbnail Size Button in Header: Show Thumbnail Size Button in Header
+    Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
     Hide Profile Selector in Header: Hide Profile Selector in Header
@@ -1657,6 +1658,7 @@ Tooltips:
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Theme Settings:
     Hide Profile Selector in Header: Hides the profile selector from the top bar. The profile selector will be shown at the top of the Subscribed Channels page instead.
+    Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
   SponsorBlock Settings:

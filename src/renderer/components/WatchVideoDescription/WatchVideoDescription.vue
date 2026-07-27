@@ -1,6 +1,7 @@
 <template>
   <FtCard
     v-if="shownDescription.length > 0"
+    v-overlay-scrollbars
     :class="{
       videoDescription: true,
       short: !isExpanded,

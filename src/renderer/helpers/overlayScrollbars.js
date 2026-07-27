@@ -1,0 +1,100 @@
+import { watch } from 'vue'
+import { OverlayScrollbars } from 'overlayscrollbars'
+
+import store from '../store/index'
+
+/*
+ * Chromium's own overlay scrollbars can't be styled and fade out when idle,
+ * so we hide the native ones and draw our own instead. The look is themed in
+ * themes.css via the library's --os-* custom properties.
+ */
+
+/**
+ * Every live instance and how it was set up, so the "Always Show Scrollbars"
+ * switch can rebuild them.
+ *
+ * @type {Map<import('overlayscrollbars').OverlayScrollbars, HTMLElement | object>}
+ */
+const instances = new Map()
+
+function scrollbarOptions() {
+  return {
+    scrollbars: {
+      // 'move' hides the scrollbars once the pointer has been still for
+      // `autoHideDelay` and brings them back as soon as it moves again.
+      autoHide: store.getters.getAlwaysShowScrollbars ? 'never' : 'move',
+      // Matches how the native scrollbars behaved: clicking the track jumps
+      // straight to that position instead of paging towards it.
+      clickScroll: true
+    }
+  }
+}
+
+/**
+ * @param {HTMLElement | object} initialization the target element, or a full
+ * initialization object when the caller wants to pick the scrolling element
+ */
+function create(initialization) {
+  const instance = OverlayScrollbars(initialization, scrollbarOptions())
+  instances.set(instance, initialization)
+  instance.on('destroyed', () => instances.delete(instance))
+  return instance
+}
+
+/**
+ * Replaces the main window's scrollbars. `window.scrollTo`, `window.scrollY`
+ * and the document's scroll events keep working when the body is the target.
+ */
+export function initializeAppScrollbars() {
+  create(document.body)
+
+  // Rebuilt rather than reconfigured: switching `autoHide` on a live instance
+  // leaves its already scheduled hide behind, so the scrollbars disappear again
+  // a second after being switched to "always show".
+  watch(() => store.getters.getAlwaysShowScrollbars, () => {
+    for (const [instance, initialization] of [...instances]) {
+      instance.destroy()
+      create(initialization)
+    }
+  })
+}
+
+/**
+ * @param {HTMLElement} element
+ * @param {boolean} enabled
+ */
+function toggleOverlayScrollbars(element, enabled) {
+  const instance = OverlayScrollbars(element)
+
+  if (enabled && !instance) {
+    // Reusing the element as the viewport keeps it the scrolling element, so
+    // existing scrollTop/scrollLeft handling and CSS carry on working.
+    create({ target: element, elements: { viewport: element } })
+  } else if (!enabled && instance) {
+    instance.destroy()
+  }
+}
+
+/**
+ * `v-overlay-scrollbars` - does the same for a nested scroll container.
+ * Pass `false` to leave the native scrollbars alone, for containers that only
+ * scroll in some layouts.
+ *
+ * Surviving a `<Teleport>` is fine, but note that the library restores the
+ * scroll offset the container had before the move, where a native scroll
+ * container would have been reset to the top. Containers that recompute their
+ * own scroll position after moving (the watch page playlist) can't use this.
+ */
+export const overlayScrollbarsDirective = {
+  mounted(element, binding) {
+    toggleOverlayScrollbars(element, binding.value !== false)
+  },
+
+  updated(element, binding) {
+    toggleOverlayScrollbars(element, binding.value !== false)
+  },
+
+  unmounted(element) {
+    toggleOverlayScrollbars(element, false)
+  }
+}

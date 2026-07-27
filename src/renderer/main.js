@@ -13,8 +13,10 @@ import {
   facPlaylistCheck,
   facVerticalTabs
 } from './customIcons'
+import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 // import the styles
 import '@fortawesome/fontawesome-svg-core/styles.css'
+import 'overlayscrollbars/styles/overlayscrollbars.css'
 
 import { register as registerSwiper } from 'swiper/element'
 
@@ -322,6 +324,7 @@ app
   .component('FontAwesomeIcon', FontAwesomeIcon)
   .component('FontAwesomeLayers', FontAwesomeLayers)
   .directive('observe-visibility', ObserveVisibility)
+  .directive('overlay-scrollbars', overlayScrollbarsDirective)
 
   .use(router)
   .use(store)
@@ -333,6 +336,7 @@ const tabNavigation = initializeTabNavigationService(router, store)
 
 router.isReady().then(() => {
   app.mount('#app')
+  initializeAppScrollbars()
 })
 
 // to avoid accessing electron api from web app build

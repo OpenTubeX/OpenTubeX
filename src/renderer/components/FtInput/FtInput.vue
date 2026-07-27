@@ -80,6 +80,7 @@
     <div class="options">
       <ul
         v-if="showOptions"
+        v-overlay-scrollbars
         class="list"
         @mouseenter="searchState.isPointerInList = true"
         @mouseleave="searchState.isPointerInList = false"
