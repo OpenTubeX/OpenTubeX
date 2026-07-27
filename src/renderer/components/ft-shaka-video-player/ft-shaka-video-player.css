@@ -32,6 +32,10 @@
   transition: inline-size 250ms ease;
 }
 
+.ftVideoPlayer :deep(.videoAnnotations) {
+  transition: inset-inline-end 250ms ease;
+}
+
 .autoplayCountdownOverlay {
   position: absolute;
   z-index: 13;
@@ -2867,6 +2871,7 @@
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
 .ftVideoPlayer.presentationModeChanging .countdownOverlay,
+.ftVideoPlayer.presentationModeChanging :deep(.videoAnnotations),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-text-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-speech-to-text-container) {
   transition: none !important;
@@ -2887,6 +2892,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
@@ -2894,6 +2900,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ) {
