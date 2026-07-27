@@ -146,6 +146,8 @@ test.describe('settings', () => {
       }))
     }
 
+    const dismissDragDistance = 120
+
     await positionSelect.selectOption('bottom-left')
     await expect(holder).toHaveClass(/position-bottom-left/)
     let toast = await showToast('Left toast')
@@ -153,10 +155,10 @@ test.describe('settings', () => {
     let viewport = await viewportSize()
     expect(bounds.x).toBeLessThan(50)
     expect(bounds.y + bounds.height).toBeGreaterThan(viewport.height - 50)
-    await dragToast(toast, 100)
+    await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
-    await dragToast(toast, -100)
+    await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
@@ -167,12 +169,12 @@ test.describe('settings', () => {
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
     expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
-    await dragToast(toast, -100)
+    await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     toast = await showToast('Center toast dragged right')
-    await dragToast(toast, 100)
+    await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
@@ -182,10 +184,10 @@ test.describe('settings', () => {
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
     expect(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 50)
-    await dragToast(toast, -100)
+    await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
-    await dragToast(toast, 100)
+    await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
@@ -195,7 +197,7 @@ test.describe('settings', () => {
     bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
     expect(bounds.y).toBeLessThan(50)
-    await dragToast(toast, -100)
+    await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
@@ -206,7 +208,7 @@ test.describe('settings', () => {
     viewport = await viewportSize()
     expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
     expect(bounds.y).toBeLessThan(50)
-    await dragToast(toast, 100)
+    await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
@@ -217,7 +219,7 @@ test.describe('settings', () => {
     viewport = await viewportSize()
     expect(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 50)
     expect(bounds.y).toBeLessThan(50)
-    await dragToast(toast, 100)
+    await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
   })
