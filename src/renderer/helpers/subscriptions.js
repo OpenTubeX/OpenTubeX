@@ -31,13 +31,14 @@ let electronRefreshOwnerTabId = null
 
 /**
  * Cancellation state of the refresh this renderer is running, if any.
- * @type {{ cancelled: boolean } | null}
+ * @type {{ cancelled: boolean, tab: string, profileId: string } | null}
  */
 let activeRefresh = null
 
 // Incremented on every cancellation request, so that a cancellation is not
 // missed when it arrives between two feed refreshes.
 let cancelCount = 0
+const cancelCountsByRefresh = new Map()
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
@@ -54,6 +55,8 @@ export function cancelSubscriptionRefresh() {
 
   if (activeRefresh !== null) {
     activeRefresh.cancelled = true
+    const key = `${activeRefresh.profileId}:${activeRefresh.tab}`
+    cancelCountsByRefresh.set(key, (cancelCountsByRefresh.get(key) ?? 0) + 1)
   }
 }
 
@@ -79,7 +82,11 @@ export function requestSubscriptionRefreshCancellation() {
  * Lets callers that refresh several feeds in a row notice a cancellation that
  * happened between two feeds, when no refresh was running.
  */
-export function getSubscriptionRefreshCancelCount() {
+export function getSubscriptionRefreshCancelCount(tab, profileId) {
+  if (tab && profileId) {
+    return cancelCountsByRefresh.get(`${profileId}:${tab}`) ?? 0
+  }
+
   return cancelCount
 }
 
@@ -103,7 +110,7 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
     window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_STARTED_EVENT, {
       detail: { tab, profileId }
     }))
-    activeRefresh = { cancelled: false }
+    activeRefresh = { cancelled: false, tab, profileId }
 
     try {
       return await refresh()

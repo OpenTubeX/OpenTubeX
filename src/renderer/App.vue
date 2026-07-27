@@ -1019,14 +1019,14 @@ async function processPendingSubscriptionAutoRefreshes() {
           continue
         }
 
-        const cancelCountAtStart = getSubscriptionRefreshCancelCount()
+        const cancelCountAtStart = getSubscriptionRefreshCancelCount(tab, profileId)
         const result = await getSubscriptionTabRefreshHandler(tab)({
           t,
           showStartToast: true
         })
 
         if (result === null) {
-          if (getSubscriptionRefreshCancelCount() === cancelCountAtStart) {
+          if (getSubscriptionRefreshCancelCount(tab, profileId) === cancelCountAtStart) {
             scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
           } else {
             scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
