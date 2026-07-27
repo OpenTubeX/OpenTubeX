@@ -169,11 +169,6 @@
 }
 
 @media only screen and (width > 680px) {
-  ::-webkit-scrollbar {
-    inline-size: 10px;
-    block-size: 10px;
-  }
-
   .expanded {
     inline-size: 200px;
   }

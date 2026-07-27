@@ -12,6 +12,7 @@
     >
       <div
         ref="dropZoneRef"
+        v-overlay-scrollbars="vertical"
         class="tabsContainer"
         @scroll="handleScroll"
         @wheel="handleWheel"

@@ -68,6 +68,7 @@
     </header>
     <div
       ref="commentsContentWrapper"
+      v-overlay-scrollbars
       class="commentsContentWrapper"
     >
       <div

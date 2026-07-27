@@ -18,7 +18,10 @@
     >
       {{ $t("Description.Expand Description") }}
     </span>
-    <div class="descriptionScroll">
+    <div
+      v-overlay-scrollbars
+      class="descriptionScroll"
+    >
       <FtTimestampCatcher
         ref="descriptionContainer"
         class="description"

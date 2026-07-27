@@ -24,7 +24,9 @@ test('shows every saved search in a scrollable list', async ({ page }) => {
   await expect(suggestions.last()).toContainText(entries.at(-1)._id)
   await expect(list).toHaveCSS('overflow-y', 'scroll')
   await expect.poll(() => list.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+  // The scrollbar is an overlay one, so it floats above the suggestions
+  // instead of narrowing them.
   await expect.poll(() => list.evaluate(element => {
-    return getComputedStyle(element, '::-webkit-scrollbar').inlineSize
-  })).toBe('10px')
+    return element.clientWidth === element.offsetWidth
+  })).toBe(true)
 })

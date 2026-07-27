@@ -32,6 +32,14 @@
           setting-key="showThumbnailSizeButtonInHeader"
           @change="updateShowThumbnailSizeButtonInHeader"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
+          :tooltip="$t('Tooltips.Theme Settings.Always Show Scrollbars')"
+          compact
+          :default-value="alwaysShowScrollbars"
+          setting-key="alwaysShowScrollbars"
+          @change="updateAlwaysShowScrollbars"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -313,6 +321,18 @@ const hideLabelsSideBar = computed(() => {
  */
 function updateHideLabelsSideBar(value) {
   store.dispatch('updateHideLabelsSideBar', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const alwaysShowScrollbars = computed(() => {
+  return store.getters.getAlwaysShowScrollbars
+})
+
+/**
+ * @param {boolean} value
+ */
+function updateAlwaysShowScrollbars(value) {
+  store.dispatch('updateAlwaysShowScrollbars', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

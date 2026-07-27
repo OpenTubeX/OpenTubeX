@@ -6,6 +6,7 @@
   >
     <div
       ref="innerRef"
+      v-overlay-scrollbars
       class="inner"
       :class="applyHiddenLabels"
     >
