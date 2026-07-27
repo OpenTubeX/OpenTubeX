@@ -233,7 +233,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, deepCopy, getVideoThumbnailUrl, showToast, throttle } from '../../helpers/utils'
+import { deepCopy, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -611,27 +611,27 @@ function getPlaylistInfoWithDelay() {
 function toggleLoop() {
   if (loopEnabled.value) {
     loopEnabled.value = false
-    showToast(t('Loop is now disabled'))
+    showToast({ message: t('Loop is now disabled'), icon: ['fas', 'retweet'] })
   } else {
     loopEnabled.value = true
-    showToast(t('Loop is now enabled'))
+    showToast({ message: t('Loop is now enabled'), icon: ['fas', 'retweet'] })
   }
 }
 
 function toggleShuffle() {
   if (shuffleEnabled.value) {
     shuffleEnabled.value = false
-    showToast(t('Shuffle is now disabled'))
+    showToast({ message: t('Shuffle is now disabled'), icon: ['fas', 'random'] })
   } else {
     shuffleEnabled.value = true
-    showToast(t('Shuffle is now enabled'))
+    showToast({ message: t('Shuffle is now enabled'), icon: ['fas', 'random'] })
     shufflePlaylistItems()
   }
 }
 
 function toggleReversePlaylist() {
   isLoading.value = true
-  showToast(t('The playlist has been reversed'))
+  showToast({ message: t('The playlist has been reversed'), icon: ['fas', 'exchange-alt'] })
 
   reversePlaylist.value = !reversePlaylist.value
   persistReversePlaylistState()
@@ -683,7 +683,10 @@ async function persistPlaylistOrder(items) {
   try {
     await store.dispatch('updatePlaylist', playlist)
   } catch (error) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(error)
   }
 }
@@ -728,10 +731,14 @@ async function removeVideoFromPlaylist(videoId, playlistItemId) {
     })
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast.Video has been removed'),
-      image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
+      image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+      icon: ['fas', 'trash'],
     })
   } catch (error) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(error)
   }
 }
@@ -747,7 +754,10 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
     .map((video) => video.playlistItemId)
 
   if (playlistItemIds.length === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -756,11 +766,17 @@ async function handleRemoveWatchedVideosPromptAnswer(option) {
       _id: props.playlistId,
       playlistItemIds,
     })
-    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-      videoCount: playlistItemIds.length
-    }, playlistItemIds.length))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+        videoCount: playlistItemIds.length
+      }, playlistItemIds.length),
+      icon: ['fas', 'trash'],
+    })
   } catch (error) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(error)
   }
 }
@@ -822,7 +838,7 @@ function playNextVideo() {
     let doShufflePlaylistItems = false
 
     if (videoIsLastPlaylistItem.value && !loopEnabled.value) {
-      showToast(t('The playlist has ended. Enable loop to continue playing'))
+      showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
       return
     }
     // loopEnabled = true
@@ -832,7 +848,7 @@ function playNextVideo() {
 
     router.push(routerPushPayload)
 
-    showToast(t('Playing Next Video'))
+    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
 
     if (doShufflePlaylistItems) {
       shufflePlaylistItems()
@@ -841,17 +857,17 @@ function playNextVideo() {
     const stopDueToLoopDisabled = videoIsLastPlaylistItem.value && !loopEnabled.value
 
     if (stopDueToLoopDisabled) {
-      showToast(t('The playlist has ended. Enable loop to continue playing'))
+      showToast({ message: t('The playlist has ended. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
       return
     }
 
     router.push(routerPushPayload)
-    showToast(t('Playing Next Video'))
+    showToast({ message: t('Playing Next Video'), icon: ['fas', 'step-forward'] })
   }
 }
 
 function playPreviousVideo() {
-  showToast(t('Playing Previous Video'))
+  showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
 
   let videoIndex = videoIndexInPlaylistItems.value
 
@@ -952,11 +968,9 @@ async function getPlaylistInformationLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getPlaylistInformationInvidious()
     } else {
       isLoading.value = false
@@ -980,11 +994,9 @@ async function getPlaylistInformationInvidious() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getPlaylistInformationLocal()
     } else {
       isLoading.value = false

@@ -122,11 +122,17 @@ async function createNewPlaylist() {
 
   try {
     await store.dispatch('addPlaylist', playlistObject)
-    showToast(t('User Playlists.CreatePlaylistPrompt.Toast["Playlist {playlistName} has been successfully created."]', {
-      playlistName: playlistName.value,
-    }))
+    showToast({
+      message: t('User Playlists.CreatePlaylistPrompt.Toast["Playlist {playlistName} has been successfully created."]', {
+        playlistName: playlistName.value,
+      }),
+      icon: ['fac', 'playlist-check'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]'))
+    showToast({
+      message: t('User Playlists.CreatePlaylistPrompt.Toast["There was an issue with creating the playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   } finally {
     hideCreatePlaylistPrompt()

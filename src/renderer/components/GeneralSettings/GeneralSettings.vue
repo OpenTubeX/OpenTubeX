@@ -688,12 +688,12 @@ function handleSetDefaultInstanceClick() {
   store.dispatch('updateDefaultInvidiousInstance', instance)
 
   const message = t('Default Invidious instance has been set to {instance}', { instance })
-  showToast(message)
+  showToast({ message: message, icon: ['fas', 'check'] })
 }
 
 function handleClearDefaultInstanceClick() {
   store.dispatch('updateDefaultInvidiousInstance', '')
-  showToast(t('Default Invidious instance has been cleared'))
+  showToast({ message: t('Default Invidious instance has been cleared'), icon: ['fas', 'trash'] })
 }
 </script>
 

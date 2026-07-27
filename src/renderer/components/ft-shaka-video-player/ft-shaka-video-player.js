@@ -485,7 +485,7 @@ export default defineComponent({
     const sleepTimer = useSleepTimer({
       getVideoId: () => props.videoId,
       isPaused: () => video.value?.paused ?? true,
-      onExpired: () => showToast(t('Video.Player.Sleep Timer.Timer ended')),
+      onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'] }),
       pausePlayback: () => video.value?.pause(),
       tabId,
     })
@@ -1756,7 +1756,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error)
-        showToast(t('Video.Player.SponsorBlock.VoteFailed'))
+        showToast({ message: t('Video.Player.SponsorBlock.VoteFailed'), icon: ['fas', 'circle-exclamation'] })
       } finally {
         sponsorBlockVotePending.value = null
         emitSponsorBlockInfoState()
@@ -4775,7 +4775,7 @@ export default defineComponent({
             })
           } catch (err) {
             console.error(`Parse failed: ${err.message}`)
-            showToast(t('Screenshot Error', { error: err.message }))
+            showToast({ message: t('Screenshot Error', { error: err.message }), icon: ['fas', 'circle-exclamation'] })
             canvas.remove()
             return
           }
@@ -4794,19 +4794,19 @@ export default defineComponent({
             )
 
             if (saved) {
-              showToast(t('Screenshot Success'))
+              showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })
             }
           } else {
             const arrayBuffer = await blob.arrayBuffer()
 
             if (await window.ftElectron.writeToDefaultFolder(filenameWithExtension, arrayBuffer)) {
-              showToast(t('Screenshot Success'))
+              showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })
             }
           }
         }
       } catch (error) {
         console.error(error)
-        showToast(t('Screenshot Error', { error }))
+        showToast({ message: t('Screenshot Error', { error }), icon: ['fas', 'circle-exclamation'] })
       } finally {
         canvas.remove()
 
@@ -5971,7 +5971,7 @@ export default defineComponent({
       }
 
       pendingMusicPlaybackRateToast = false
-      showToast(t('Video.Player.MusicPlaybackRateOverride'))
+      showToast({ message: t('Video.Player.MusicPlaybackRateOverride'), icon: ['fas', 'gauge'] })
       musicPlaybackRateToastShown = true
     }
 

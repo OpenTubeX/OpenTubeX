@@ -324,7 +324,10 @@ async function handlePickVideoIpBlockRecoveryScriptPath() {
     }
   } catch (error) {
     console.error('Failed to select IP block recovery script:', error)
-    showToast(t('Settings.Proxy Settings.Failed to select IP block recovery script'))
+    showToast({
+      message: t('Settings.Proxy Settings.Failed to select IP block recovery script'),
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 }
 
@@ -366,7 +369,10 @@ async function testProxy() {
     dataAvailable.value = true
   } catch (error) {
     console.error('errored while testing proxy:', error)
-    showToast(t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'))
+    showToast({
+      message: t('Settings.Proxy Settings["Error getting network information. Is your proxy configured properly?"]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     dataAvailable.value = false
   } finally {
     if (!useProxy.value) {

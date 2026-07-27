@@ -245,7 +245,7 @@ async function deleteOldHistory() {
 
   await store.dispatch('removeHistoryOlderThan', days)
   closeHistoryCleanupPrompt()
-  showToast(t('History.History Older Than Days Removed', { days }))
+  showToast({ message: t('History.History Older Than Days Removed', { days }), icon: ['fas', 'trash'] })
 }
 
 const HISTORY_SORT_BY_VALUES = {
@@ -290,7 +290,7 @@ async function markAllAsWatched() {
   const markedCount = await store.dispatch('markAllHistoryAsWatched')
 
   if (markedCount > 0) {
-    showToast(t('History.All History Marked as Watched'))
+    showToast({ message: t('History.All History Marked as Watched'), icon: ['fas', 'eye'] })
   }
 }
 
