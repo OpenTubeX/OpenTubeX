@@ -2705,6 +2705,13 @@
   background: rgb(0 0 0 / 75%);
 }
 
+.scrollMiniPlayPause,
+.scrollMiniDragHandle,
+.scrollMiniResizeHandle {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
 .scrollMiniPlayPause {
   position: absolute;
   top: 50%;
@@ -2723,11 +2730,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1;
-  transition: opacity 0.15s ease;
 }
 
-.scrollMiniPlayPause.isHidden {
+.scrollMiniPlayPause.isHidden,
+.scrollMiniDragHandle.isHidden,
+.scrollMiniResizeHandle.isHidden {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s ease 0.35s;
