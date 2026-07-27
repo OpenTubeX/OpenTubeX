@@ -1,18 +1,19 @@
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
 /**
- * Leaves three tabs open with the middle one active and returns their ids in
+ * Leaves three tabs open with the requested one active and returns their ids in
  * tab bar order.
  * @param {import('@playwright/test').Page} page
+ * @param {number} activeIndex
  * @returns {Promise<string[]>}
  */
-async function openThreeTabsAndActivateMiddle(page) {
+async function openThreeTabsAndActivate(page, activeIndex) {
   await page.locator(sel.newTabButton).click()
   await page.locator(sel.newTabButton).click()
   await expect(page.locator(sel.tabs)).toHaveCount(3)
 
-  await page.locator(sel.tabs).nth(1).click()
-  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+  await page.locator(sel.tabs).nth(activeIndex).click()
+  await expect(page.locator(sel.tabs).nth(activeIndex)).toHaveClass(/active/)
 
   return await page.locator(sel.tabs).evaluateAll(
     (tabs) => tabs.map((tab) => tab.dataset.tabId)
@@ -387,10 +388,17 @@ test.describe('tab bar', () => {
   })
 
   test('closing the active tab selects the previous tab by default', async ({ page }) => {
-    const tabIds = await openThreeTabsAndActivateMiddle(page)
+    const tabIds = await openThreeTabsAndActivate(page, 1)
 
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  test('falls back to the next tab when there is no previous tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
 
   // Regression: removing a logical tab left its detached video presented in
@@ -499,10 +507,17 @@ test.describe('tab close focus set to the next tab', () => {
   test.use({ seed: { settings: { tabCloseFocus: 'nextTab' } } })
 
   test('closing the active tab selects the next tab', async ({ page }) => {
-    const tabIds = await openThreeTabsAndActivateMiddle(page)
+    const tabIds = await openThreeTabsAndActivate(page, 1)
 
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+  })
+
+  test('falls back to the previous tab when there is no next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 2)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
 })
 

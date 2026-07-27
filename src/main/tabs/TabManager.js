@@ -2387,13 +2387,15 @@ function cloneRoute(route) {
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
  * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
  */
-export function setupTabsIPC(options = {}) {
+export async function setupTabsIPC(options = {}) {
   const {
     confirmCloseWindow = () => true,
     markWindowCloseConfirmed = () => {}
   } = options
 
-  TabManager.refreshStoredTabCloseFocus()
+  // Loaded before the first window exists, so a tab can never be closed while
+  // the preference still holds its default.
+  await TabManager.refreshStoredTabCloseFocus()
 
   const getManager = event => TabManager.getFromWebContents(event.sender)
 

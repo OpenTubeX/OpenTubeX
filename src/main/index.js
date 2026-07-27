@@ -1387,7 +1387,7 @@ function runApp() {
     }
 
     // Setup tab IPC handlers
-    setupTabsIPC({
+    await setupTabsIPC({
       confirmCloseWindow: (browserWindow) => {
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
         return isLastWindow ? confirmCloseApp(browserWindow) : true
