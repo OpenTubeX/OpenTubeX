@@ -125,20 +125,25 @@ function restoreActiveSearchFilters(settings) {
   })
 }
 
-watch(route, () => {
-  const query_ = route.params.query.trim()
+function getRouteSearchSettings() {
   let features = route.query.features
   // if page gets refreshed and there's only one feature then it will be a string
   if (typeof features === 'string') {
     features = [features]
   }
-  const searchSettings = {
-    prioritize: route.query.prioritize,
-    time: route.query.time,
-    type: route.query.type,
-    duration: route.query.duration,
+
+  return {
+    prioritize: route.query.prioritize ?? 'relevance',
+    time: route.query.time ?? '',
+    type: route.query.type ?? 'all',
+    duration: route.query.duration ?? '',
     features: features ?? [],
   }
+}
+
+watch(route, () => {
+  const query_ = route.params.query.trim()
+  const searchSettings = getRouteSearchSettings()
 
   const payload = {
     query: query_,
@@ -157,19 +162,7 @@ onMounted(() => {
   query.value = route.params.query
   setTabTitle(processedQuery.value)
 
-  let features = route.query.features
-  // if page gets refreshed and there's only one feature then it will be a string
-  if (typeof features === 'string') {
-    features = [features]
-  }
-
-  searchSettings.value = {
-    prioritize: route.query.prioritize,
-    time: route.query.time,
-    type: route.query.type,
-    duration: route.query.duration,
-    features: features ?? [],
-  }
+  searchSettings.value = getRouteSearchSettings()
   restoreActiveSearchFilters(searchSettings.value)
 
   const payload = {
