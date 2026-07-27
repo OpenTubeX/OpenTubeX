@@ -35,7 +35,7 @@
         @change="updateYtDlpFfmpegSource"
       />
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox class="binaryStatusStart">
       <p
         v-if="ytDlpInfo === null"
         class="ytDlpStatus"
@@ -58,7 +58,7 @@
         {{ t('Settings.Download Settings.Detected Version Template', { version: ytDlpInfo.version }) }}
       </p>
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox class="binaryStatusEnd">
       <p
         v-if="ffmpegInfo === null"
         class="ytDlpStatus"
@@ -124,7 +124,7 @@
         />
       </div>
     </div>
-    <FtFlexBox class="settingsFlexStart460px">
+    <FtFlexBox class="downloadPathInputs settingsFlexStart460px">
       <FtInput
         v-if="ytDlpSource === 'system'"
         :placeholder="t('Settings.Download Settings.yt-dlp Executable Path')"
@@ -460,6 +460,23 @@ async function chooseExecutablePath(binary) {
 <style scoped>
 .sourceSelect {
   inline-size: 250px;
+}
+
+.downloadPathInputs {
+  column-gap: 12px;
+}
+
+.downloadPathInputs :deep(.ft-input-component) {
+  inline-size: 340px;
+  max-inline-size: 100%;
+}
+
+.binaryStatusStart {
+  margin-block-start: 8px;
+}
+
+.binaryStatusEnd {
+  margin-block-end: 8px;
 }
 
 .ytDlpStatus {

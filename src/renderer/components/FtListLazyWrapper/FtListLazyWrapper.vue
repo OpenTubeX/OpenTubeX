@@ -74,7 +74,7 @@ import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
 import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
 
 import store from '../../store/index'
-import { isRssUpcomingPremiere } from '../../helpers/subscriptions'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 
 const props = defineProps({
   data: {
@@ -218,16 +218,6 @@ const forbiddenTitles = computed(() => {
   return store.getters.getForbiddenTitlesParsed
 })
 
-/**
- * @param {{
- *  liveNow?: boolean,
- *  isUpcoming?: boolean,
- * }} video
- */
-function shouldHideLiveStreamVideo(video) {
-  return hideLiveStreams.value && (video.liveNow || video.isUpcoming)
-}
-
 const showResult = computed(() => {
   const dataType = finalDataType.value
 
@@ -236,33 +226,12 @@ const showResult = computed(() => {
   }
 
   if (dataType === 'video' || dataType === 'shortVideo') {
-    if (shouldHideLiveStreamVideo(props.data)) {
-      // hide livestreams
-      return false
-    }
-
-    if (hideUpcomingPremieres.value &&
-        // Observed for premieres in Local API Channels.
-        (props.data.premiereDate != null ||
-          // Invidious API
-          // `premiereTimestamp` only available on premiered videos
-          // https://docs.invidious.io/api/common_types/#videoobject
-          props.data.premiereTimestamp != null ||
-          isRssUpcomingPremiere(props.data))) {
-      // hide upcoming
-      return false
-    }
-
-    const lowerCaseAuthor = props.data.author?.toLowerCase()
-
-    if (channelsHiddenNames.value.has(props.data.authorId) || channelsHiddenNames.value.has(props.data.author) || (forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text)))) {
-      // hide videos by author
-      return false
-    }
-
-    const lowerCaseTitle = props.data.title?.toLowerCase()
-
-    if (forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) {
+    if (isVideoHiddenByPreferences(props.data, {
+      hideLiveStreams: hideLiveStreams.value,
+      hideUpcomingPremieres: hideUpcomingPremieres.value,
+      hiddenChannelNames: channelsHiddenNames.value,
+      forbiddenTitles: forbiddenTitles.value
+    })) {
       return false
     }
   } else if (dataType === 'channel') {

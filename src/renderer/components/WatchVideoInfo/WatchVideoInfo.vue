@@ -261,7 +261,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 
 import store from '../../store'
 
-import { formatNumber, getRelativeTimeFromDate, openInternalPath, showToast } from '../../helpers/utils'
+import { formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
@@ -678,6 +678,10 @@ const addToPlaylistVideoData = computed(() => ({
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
 
+const quickBookmarkThumbnail = computed(() => {
+  return getVideoThumbnailUrl(props.id, store.getters.getBackendPreference, store.getters.getCurrentInvidiousInstanceUrl, store.getters.getThumbnailPreference)
+})
+
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
 
@@ -739,9 +743,12 @@ async function addToQuickBookmarkPlaylist() {
     videoData,
   })
 
-  showToast(saved
-    ? t('Video.Video has been saved to {playlistName}', { playlistName })
-    : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
+  showToast({
+    message: saved
+      ? t('Video.Video has been saved to {playlistName}', { playlistName })
+      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
+    image: quickBookmarkThumbnail.value,
+  })
 }
 
 async function removeFromQuickBookmarkPlaylist() {
@@ -753,9 +760,12 @@ async function removeFromQuickBookmarkPlaylist() {
     videoId: props.id,
   })
 
-  showToast(removed
-    ? t('Video.Video has been removed from {playlistName}', { playlistName })
-    : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
+  showToast({
+    message: removed
+      ? t('Video.Video has been removed from {playlistName}', { playlistName })
+      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+    image: quickBookmarkThumbnail.value
+  })
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)

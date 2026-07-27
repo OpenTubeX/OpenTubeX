@@ -107,10 +107,11 @@
             :class="{ removeButtonSelected: removeButtonSelectedIndex === index }"
             role="button"
             :aria-label="t('Search Bar.Remove')"
+            :title="t('Search Bar.Remove')"
             href="javascript:void(0)"
             @click.prevent.stop="handleRemoveClick(index)"
           >
-            {{ t('Search Bar.Remove') }}
+            <FontAwesomeIcon :icon="['fas', 'xmark']" />
           </a>
         </li>
         <!-- skipped -->

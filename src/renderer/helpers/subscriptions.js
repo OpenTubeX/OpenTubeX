@@ -258,6 +258,48 @@ export function isRssUpcomingPremiere(video) {
 }
 
 /**
+ * @param {object} video
+ * @param {{
+ *  hideLiveStreams?: boolean,
+ *  hideUpcomingPremieres?: boolean,
+ *  hiddenChannelNames?: Set<string>,
+ *  forbiddenTitles?: string[],
+ * }} preferences
+ */
+export function isVideoHiddenByPreferences(video, {
+  hideLiveStreams = false,
+  hideUpcomingPremieres = false,
+  hiddenChannelNames = new Set(),
+  forbiddenTitles = []
+} = {}) {
+  if (hideLiveStreams && (video.liveNow || video.isUpcoming)) {
+    return true
+  }
+
+  if (
+    hideUpcomingPremieres &&
+    (
+      video.premiereDate != null ||
+      video.premiereTimestamp != null ||
+      isRssUpcomingPremiere(video)
+    )
+  ) {
+    return true
+  }
+
+  if (hiddenChannelNames.has(video.authorId) || hiddenChannelNames.has(video.author)) {
+    return true
+  }
+
+  const lowerCaseAuthor = video.author?.toLowerCase()
+  const lowerCaseTitle = video.title?.toLowerCase()
+
+  return forbiddenTitles.some(text =>
+    lowerCaseAuthor?.includes(text) || lowerCaseTitle?.includes(text)
+  )
+}
+
+/**
  * @param {string} videoId
  */
 async function fetchRssVideoUpcomingInfo(videoId) {

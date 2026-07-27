@@ -710,6 +710,14 @@ export default {
     },
 
     /**
+     * Apply a complete tab order atomically.
+     * @param {string[]} tabIds
+     */
+    reorder: (tabIds) => {
+      ipcRenderer.send(IpcChannels.TABS_REORDER, tabIds)
+    },
+
+    /**
      * Pin or unpin a tab.
      * @param {string} tabId
      * @param {boolean} isPinned

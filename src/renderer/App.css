@@ -20,6 +20,12 @@
   margin-inline: 10px;
 }
 
+.app > .routerView {
+  min-inline-size: 0;
+  container-name: route;
+  container-type: inline-size;
+}
+
 .banner {
   inline-size: 85%;
   margin-block: 40px 0;
@@ -363,6 +369,12 @@
   .sideNavBackdrop {
     display: none;
   }
+
+  /* The fixed top nav is taller when a tab bar is present, so restore the gap
+     between it and the page content (the .flexBox rule above shrinks it). */
+  .app:has(.tabBar) .routerView {
+    margin-block-start: 68px;
+  }
 }
 
 /* Vertical tab bar layout: the tab bar is a fixed column on the inline-start
@@ -387,5 +399,13 @@
 
   .watchSideNavOverlay.verticalTabs :deep(.sideNav) {
     inset-inline-start: var(--vertical-tab-bar-width, 220px);
+  }
+}
+
+/* The mobile bottom nav is fixed, so shift it past the vertical tab column */
+@media only screen and (width <= 680px) {
+  .app.verticalTabs :deep(.sideNav) {
+    inset-inline-start: var(--vertical-tab-bar-width, 220px);
+    inline-size: calc(100% - var(--vertical-tab-bar-width, 220px));
   }
 }

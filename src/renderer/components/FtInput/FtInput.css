@@ -261,17 +261,22 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   justify-content: space-between;
   padding-block: 0;
   line-height: 2rem;
-  padding-inline: 15px;
+  padding-inline: 15px 4px;
 }
 
 .optionWrapper {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   overflow: hidden;
+  flex: 1;
+  min-inline-size: 0;
 }
 
-.optionWrapper span {
+.optionWrapper span,
+.optionWrapper bdi {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .searchResultIcon {
@@ -279,18 +284,24 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   padding-inline-end: 10px;
   inline-size: 16px;
   block-size: 16px;
+  flex-shrink: 0;
 }
 
 .removeButton {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-inline-start: 8px;
+  padding-block: 6px;
+  padding-inline: 8px 0;
   text-decoration: none;
-  float: inline-end;
-  font-size: 13px;
+  font-size: 14px;
+  opacity: 0.65;
 }
 
 .removeButton:hover,
 .removeButtonSelected {
-  text-decoration: underline;
-  font-weight: bold;
+  opacity: 1;
 }
 
 .hover {

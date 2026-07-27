@@ -35,6 +35,7 @@ const IpcChannels = {
   TABS_ACTIVATE: 'tabs-activate',
   TABS_DUPLICATE: 'tabs-duplicate',
   TABS_MOVE: 'tabs-move',
+  TABS_REORDER: 'tabs-reorder',
   TABS_SET_PINNED: 'tabs-set-pinned',
   TABS_SET_COLOR: 'tabs-set-color',
   TABS_SET_LOADING: 'tabs-set-loading',

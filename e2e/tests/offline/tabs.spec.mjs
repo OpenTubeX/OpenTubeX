@@ -79,6 +79,199 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('applies a complete tab reorder in one state update', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const result = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const initialIds = initialState.tabs.map(tab => tab.id)
+      const reorderedIds = [...initialIds.slice(1), initialIds[0]]
+
+      return await new Promise((resolve, reject) => {
+        const changedOrders = []
+        const timeoutId = window.setTimeout(() => {
+          removeListener()
+          reject(new Error('Timed out waiting for atomic tab reorder'))
+        }, 5000)
+        const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+          const order = state.tabs.map(tab => tab.id)
+          if (order.every((tabId, index) => tabId === initialIds[index])) return
+
+          const key = order.join(',')
+          if (!changedOrders.includes(key)) {
+            changedOrders.push(key)
+          }
+          if (order.every((tabId, index) => tabId === reorderedIds[index])) {
+            window.clearTimeout(timeoutId)
+            removeListener()
+            resolve({ changedOrders, reorderedIds })
+          }
+        })
+
+        window.ftElectron.tabs.reorder(reorderedIds)
+      })
+    })
+
+    expect(result.changedOrders).toHaveLength(1)
+    await expect.poll(() => {
+      return page.locator(sel.tabs).evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual(result.reorderedIds)
+  })
+
+  test('commits a completed drop before a new pointerdown cancels settling', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(1).click()
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+      const sourceRect = tabs[3].getBoundingClientRect()
+      const targetRect = tabs[2].getBoundingClientRect()
+      tabs[3].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: sourceRect.left + sourceRect.width / 2,
+        clientY: sourceRect.top + sourceRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        buttons: 1,
+        clientX: targetRect.left + targetRect.width / 2 - 2,
+        clientY: targetRect.top + targetRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+
+      const interruptRect = tabs[0].getBoundingClientRect()
+      tabs[0].dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        clientX: interruptRect.left + interruptRect.width / 2,
+        clientY: interruptRect.top + interruptRect.height / 2
+      }))
+      window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+    })
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[1],
+      originalIds[0],
+      originalIds[3],
+      originalIds[2]
+    ])
+  })
+
+  test('drags all selected tabs together from the selected tab under the pointer', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(2).click()
+    await expect(tabs.nth(2)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(2)
+
+    const sourceBox = await tabs.nth(3).boundingBox()
+    const targetBox = await tabs.first().boundingBox()
+    expect(sourceBox).not.toBeNull()
+    expect(targetBox).not.toBeNull()
+
+    await page.mouse.move(
+      sourceBox.x + sourceBox.width / 2,
+      sourceBox.y + sourceBox.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      targetBox.x + targetBox.width / 2,
+      targetBox.y + targetBox.height / 2,
+      { steps: 5 }
+    )
+    await page.mouse.up()
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[2],
+      originalIds[3],
+      originalIds[0],
+      originalIds[1],
+      originalIds[4]
+    ])
+  })
+
+  test('keeps consecutive selected drags aligned while the first drop settles', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    const originalIds = await tabs.evaluateAll(elements => {
+      return elements.map(element => element.dataset.tabId)
+    })
+    await tabs.nth(2).click()
+    await expect(tabs.nth(2)).toHaveClass(/active/)
+    await tabs.nth(3).click({ modifiers: ['Control'] })
+
+    await page.evaluate(() => {
+      const tabs = Array.from(document.querySelectorAll('.tabBar .tab'))
+
+      function drag(source, target) {
+        const sourceRect = source.getBoundingClientRect()
+        const targetRect = target.getBoundingClientRect()
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+          bubbles: true,
+          button: 0,
+          clientX: sourceRect.left + sourceRect.width / 2,
+          clientY: sourceRect.top + sourceRect.height / 2
+        }))
+        window.dispatchEvent(new PointerEvent('pointermove', {
+          bubbles: true,
+          buttons: 1,
+          clientX: targetRect.left + targetRect.width / 2,
+          clientY: targetRect.top + targetRect.height / 2
+        }))
+        window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }))
+      }
+
+      drag(tabs[3], tabs[0])
+      drag(tabs[2], tabs[4])
+    })
+
+    await expect.poll(() => {
+      return tabs.evaluateAll(elements => {
+        return elements.map(element => element.dataset.tabId)
+      })
+    }).toEqual([
+      originalIds[0],
+      originalIds[1],
+      originalIds[4],
+      originalIds[2],
+      originalIds[3]
+    ])
+  })
+
   test('keeps a submenu open while moving toward it diagonally', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click({ button: 'right' })

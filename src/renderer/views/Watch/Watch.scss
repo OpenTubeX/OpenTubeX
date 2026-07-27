@@ -7,7 +7,7 @@
 }
 
 @mixin single-column-template {
-  grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / auto;
+  grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / minmax(0, 1fr);
 }
 
 .ageRestricted {
@@ -16,7 +16,7 @@
   display: inline-block;
   max-inline-size: calc(80vh * 1.78);
 
-  @media only screen and (width >= 1051px) {
+  @container route (width >= 1051px) {
     inline-size: 300%;
   }
 }
@@ -158,7 +158,7 @@
       z-index: 3;
     }
 
-    @media only screen and (width >= 1051px) {
+    @container route (width >= 1051px) {
       min-inline-size: 380px;
     }
 
@@ -327,7 +327,7 @@
       margin-block: auto;
     }
 
-    @media (width <= 768px) {
+    @container route (width <= 768px) {
       block-size: auto;
     }
   }
@@ -341,23 +341,23 @@
     margin-block: 0 16px;
     margin-inline: 0;
 
-    @media only screen and (width >= 1051px) {
+    @container route (width >= 1051px) {
       margin-block: 0 16px;
       margin-inline: 8px;
     }
   }
 
-  @media only screen and (width <= 1350px) {
+  @container route (width <= 1350px) {
     @include theatre-mode-template;
   }
 
-  @media only screen and (width >= 1051px) {
+  @container route (width >= 1051px) {
     &.useTheatreMode {
       @include theatre-mode-template;
     }
   }
 
-  @media only screen and (width <= 1050px) {
+  @container route (width <= 1050px) {
     @include single-column-template;
   }
 
@@ -367,7 +367,7 @@
     @include single-column-template;
   }
 
-  @media only screen and (width >= 1051px) {
+  @container route (width >= 1051px) {
     .infoArea {
       scroll-margin-block-start: 76px;
     }

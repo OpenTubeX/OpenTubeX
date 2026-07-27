@@ -819,9 +819,12 @@ function addToWatchQueue(playNext) {
     video: deepCopy(props.data),
     playNext
   })
-  showToast(playNext
-    ? t('Video.Added to Play Next')
-    : t('Video.Added to Queue'))
+  showToast({
+    message: playNext
+      ? t('Video.Added to Play Next')
+      : t('Video.Added to Queue'),
+    image: thumbnail.value
+  })
 }
 
 const thumbnail = computed(() => {
@@ -1316,9 +1319,10 @@ function markAsWatched() {
 
   store.dispatch('updateHistory', videoData)
 
-  if (!historyEntryExists.value) {
-    showToast(t('Video.Video has been marked as watched'))
-  }
+  showToast({
+    message: t('Video.Video has been marked as watched'),
+    image: thumbnail.value
+  })
 }
 
 function unmarkAsWatched() {
@@ -1327,13 +1331,19 @@ function unmarkAsWatched() {
     isWatched: false,
   })
 
-  showToast(t('Video.Video has been unmarked as watched'))
+  showToast({
+    message: t('Video.Video has been unmarked as watched'),
+    image: thumbnail.value
+  })
 }
 
 function removeFromHistory() {
   store.dispatch('removeFromHistory', id.value)
 
-  showToast(t('Video.Video has been removed from your history'))
+  showToast({
+    message: t('Video.Video has been removed from your history'),
+    image: thumbnail.value
+  })
 }
 
 // `description` and `viewCount` are intentionally left out,
@@ -1403,9 +1413,12 @@ async function addToQuickBookmarkPlaylist() {
     videoData,
   })
 
-  showToast(saved
-    ? t('Video.Video has been saved to {playlistName}', { playlistName })
-    : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
+  showToast({
+    message: saved
+      ? t('Video.Video has been saved to {playlistName}', { playlistName })
+      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
+    image: thumbnail.value,
+  })
 }
 
 async function removeFromQuickBookmarkPlaylist() {
@@ -1417,9 +1430,12 @@ async function removeFromQuickBookmarkPlaylist() {
     videoId: id.value,
   })
 
-  showToast(removed
-    ? t('Video.Video has been removed from {playlistName}', { playlistName })
-    : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
+  showToast({
+    message: removed
+      ? t('Video.Video has been removed from {playlistName}', { playlistName })
+      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+    image: thumbnail.value
+  })
 }
 
 function moveVideoUp() {

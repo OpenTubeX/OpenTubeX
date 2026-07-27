@@ -58,6 +58,14 @@ export class TheatreModeButton extends shaka.ui.Element {
       this.updateLocalisedStrings_()
     })
 
+    // Fired when theatre mode changes without a button click (e.g. a side panel
+    // opening forces the default theatre mode), keeping the icon/label correct.
+    this.eventManager.listen(events, 'syncTheatreMode', (/** @type {CustomEvent} */event) => {
+      this.theatreModeEnabled_ = event.detail
+
+      this.updateLocalisedStrings_()
+    })
+
     this.eventManager.listen(events, 'localeChanged', () => {
       this.updateLocalisedStrings_()
     })

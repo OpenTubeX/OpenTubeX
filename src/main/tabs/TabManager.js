@@ -10,6 +10,7 @@ import {
   saveTabSession
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
+import { buildReorderedTabMap } from './tabOrder.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
@@ -1824,6 +1825,19 @@ export class TabManager {
   }
 
   /**
+   * Apply a complete tab order in one state update.
+   * @param {string[]} tabIds
+   */
+  reorderTabs(tabIds) {
+    const reorderedTabs = buildReorderedTabMap(this.tabs, tabIds)
+    if (reorderedTabs == null || reorderedTabs === this.tabs) return
+
+    this.tabs = reorderedTabs
+    this._broadcastStateUpdate()
+    this._saveSession()
+  }
+
+  /**
    * Create the main-owned portion of a logical tab for staged recreation in
    * another renderer process. Runtime history/player state cannot be moved as a
    * DOM tree, but all persisted metadata and the cached preview stay intact.
@@ -2474,6 +2488,14 @@ export function setupTabsIPC(options = {}) {
     const manager = getManager(event)
     if (manager && typeof tabId === 'string' && typeof toIndex === 'number') {
       manager.moveTab(tabId, toIndex)
+    }
+  })
+
+  ipcMain.on(IpcChannels.TABS_REORDER, (event, tabIds) => {
+    const manager = getManager(event)
+    const normalizedTabIds = Array.isArray(tabIds) ? Array.from(tabIds) : null
+    if (manager && normalizedTabIds?.every(tabId => typeof tabId === 'string')) {
+      manager.reorderTabs(normalizedTabIds)
     }
   })
 

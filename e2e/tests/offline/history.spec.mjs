@@ -42,6 +42,21 @@ test.describe('watch history', () => {
     await expect(titles.first()).toContainText('First test video')
   })
 
+  test('the sort options row keeps a gap above the video grid', async ({ page }) => {
+    await goTo(page, 'history')
+    await expect(page.getByText('First test video')).toBeVisible()
+
+    const optionsRow = page.locator('.optionsRow')
+    const firstVideo = page.locator('.ft-list-video, [class*="ft-list-video"]').first()
+    await expect.poll(async () => {
+      const [optionsBox, videoBox] = await Promise.all([
+        optionsRow.boundingBox(),
+        firstVideo.boundingBox()
+      ])
+      return videoBox.y - (optionsBox.y + optionsBox.height)
+    }).toBeGreaterThanOrEqual(10)
+  })
+
   test('history search filters entries', async ({ page }) => {
     await goTo(page, 'history')
     await expect(page.getByText('First test video')).toBeVisible()

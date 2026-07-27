@@ -227,6 +227,12 @@ const actions = {
     }
   },
 
+  reorderTabs(_context, tabIds) {
+    if (process.env.IS_ELECTRON) {
+      window.ftElectron.tabs.reorder(tabIds)
+    }
+  },
+
   setTabPinned(_context, { tabId, isPinned }) {
     if (process.env.IS_ELECTRON) {
       window.ftElectron.tabs.setPinned(tabId, isPinned)

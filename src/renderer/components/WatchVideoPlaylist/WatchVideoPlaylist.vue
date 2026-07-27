@@ -233,7 +233,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, deepCopy, showToast, throttle } from '../../helpers/utils'
+import { copyToClipboard, deepCopy, getVideoThumbnailUrl, showToast, throttle } from '../../helpers/utils'
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
@@ -277,8 +277,12 @@ const emit = defineEmits(['close', 'pause-player'])
 
 const { locale, t } = useI18n()
 const router = useRouter()
-const { tabId } = useTabContext()
+const { tabId, isTabPresented } = useTabContext()
 const playlistCacheTabId = tabId ?? 'web'
+
+// Set when centering is attempted while the tab is hidden (e.g. opened in a
+// background tab): the list has no layout yet, so we retry once it is presented.
+const needsInitialCenter = ref(false)
 
 const isLoading = ref(false)
 const shuffleEnabled = ref(false)
@@ -309,6 +313,8 @@ const backendFallback = computed(() => store.getters.getBackendFallback)
 
 /** @type {import('vue').ComputedRef<string>} */
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
+
+const thumbnailPreference = computed(() => store.getters.getThumbnailPreference)
 
 const isUserPlaylist = computed(() => props.playlistType === 'user')
 
@@ -505,6 +511,16 @@ watch(
   },
   { flush: 'post' }
 )
+
+// A playlist opened in a background tab centers while hidden, so it lands at the
+// top. Re-center the current video the first time the tab is presented.
+if (isTabPresented != null) {
+  watch(isTabPresented, (presented) => {
+    if (presented && needsInitialCenter.value) {
+      centerCurrentVideo()
+    }
+  })
+}
 
 watch(() => props.playlistId, () => {
   reversePlaylist.value = storedReversePlaylist.value
@@ -710,7 +726,10 @@ async function removeVideoFromPlaylist(videoId, playlistItemId) {
       videoId,
       playlistItemId,
     })
-    showToast(t('User Playlists.SinglePlaylistView.Toast.Video has been removed'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.Video has been removed'),
+      image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
+    })
   } catch (error) {
     showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
     console.error(error)
@@ -1036,32 +1055,47 @@ function setScrollTop(scrollTop) {
 /**
  * @param {number} index
  */
+/**
+ * @param {number} index
+ * @returns {boolean} whether the scroll could actually be applied. It cannot
+ * when the tab is hidden (`display: none`), because the list then has no layout.
+ */
 function scrollToVideo(index) {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
 
-  if (container != null) {
-    const currentVideoItemEl = container.children[index]
-
-    if (currentVideoItemEl != null) {
-      const containerRect = container.getBoundingClientRect()
-      const itemRect = currentVideoItemEl.getBoundingClientRect()
-      const itemOffset = itemRect.top - containerRect.top - container.clientTop + container.scrollTop
-      const centeredOffset = (container.clientHeight - itemRect.height) / 2
-
-      container.scrollTop = Math.max(0, itemOffset - centeredOffset)
-    }
+  if (container == null || container.clientHeight === 0) {
+    return false
   }
+
+  const currentVideoItemEl = container.children[index]
+
+  if (currentVideoItemEl == null) {
+    return false
+  }
+
+  const containerRect = container.getBoundingClientRect()
+  const itemRect = currentVideoItemEl.getBoundingClientRect()
+  const itemOffset = itemRect.top - containerRect.top - container.clientTop + container.scrollTop
+  const centeredOffset = (container.clientHeight - itemRect.height) / 2
+
+  container.scrollTop = Math.max(0, itemOffset - centeredOffset)
+  return true
 }
 
 function scrollToCurrentVideo() {
-  scrollToVideo(currentVideoIndexZeroBased.value)
+  return scrollToVideo(currentVideoIndexZeroBased.value)
 }
 
 function centerCurrentVideo() {
   nextTick(() => {
     requestAnimationFrame(() => {
-      scrollToCurrentVideo()
-      requestAnimationFrame(scrollToCurrentVideo)
+      if (scrollToCurrentVideo()) {
+        needsInitialCenter.value = false
+        requestAnimationFrame(scrollToCurrentVideo)
+      } else {
+        // The tab is still hidden; retry once it becomes presented.
+        needsInitialCenter.value = true
+      }
     })
   })
 }
