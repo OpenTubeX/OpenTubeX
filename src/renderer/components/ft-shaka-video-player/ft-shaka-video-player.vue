@@ -988,7 +988,10 @@
         </div>
         <div
           class="scrollMiniDragHandle"
-          :class="{ 'scrollMiniDragHandle-onLightBg': scrollMiniDragHandleOnLightBg }"
+          :class="{
+            isHidden: !scrollMiniPlayPauseVisible,
+            'scrollMiniDragHandle-onLightBg': scrollMiniDragHandleOnLightBg
+          }"
           :title="$t('Video.Player.Scroll Mini Player.Drag Handle')"
           @pointerdown.stop="handleScrollMiniDragPointerDown"
           @mousedown.stop.prevent
@@ -997,7 +1000,10 @@
           class="scrollMiniResizeHandle"
           :class="[
             `scrollMiniResizeHandle-${scrollMiniResizeCorner}`,
-            { 'scrollMiniResizeHandle-onLightBg': scrollMiniResizeHandleOnLightBg }
+            {
+              isHidden: !scrollMiniPlayPauseVisible,
+              'scrollMiniResizeHandle-onLightBg': scrollMiniResizeHandleOnLightBg
+            }
           ]"
           @pointerdown.stop="handleScrollMiniResizePointerDown"
           @mousedown.stop.prevent
