@@ -1,10 +1,11 @@
 // https://docs.fontawesome.com/apis/javascript/plugins
 // As FontAwesome doesn't provide types for the plugins entrypoint the types are manually applied to each export
 
-import { register, Layers, ReplaceElements } from '@fortawesome/fontawesome-svg-core/plugins'
+import { register, Layers, PowerTransforms, ReplaceElements } from '@fortawesome/fontawesome-svg-core/plugins'
 
 // the `icon` function is inside the ReplaceElements plugin
-const api = register([Layers, ReplaceElements])
+// PowerTransforms is needed for the `transform` prop on FontAwesomeIcon (e.g. the quick bookmark check overlay)
+const api = register([Layers, PowerTransforms, ReplaceElements])
 
 /** @type {import('@fortawesome/fontawesome-svg-core').Library} */
 export const library = api.library

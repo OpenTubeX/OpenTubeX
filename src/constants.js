@@ -543,6 +543,18 @@ const SEARCH_RESULTS_DISPLAY_LIMIT = 14
 // max # of search history results we show when mixed with YT search suggestions
 const MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT = 4
 
+/**
+ * Outcome of adding a single video to a playlist. A write that affected nothing
+ * is ambiguous on its own: the video may already be there, or the playlist may
+ * have been deleted (possibly by another window), which callers must not report
+ * as a successful save.
+ */
+const PlaylistVideoAddResult = {
+  ADDED: 'added',
+  ALREADY_PRESENT: 'already-present',
+  PLAYLIST_MISSING: 'playlist-missing',
+}
+
 // Percentage of a video's duration that must be played before it is considered watched
 const DEFAULT_WATCHED_PERCENTAGE_THRESHOLD = 90
 const WATCHED_MAX_REMAINING_SECONDS = 120
@@ -551,6 +563,7 @@ export {
   IpcChannels,
   DBActions,
   SyncEvents,
+  PlaylistVideoAddResult,
   DefaultKeyboardShortcuts,
   KeyboardShortcuts,
   applyKeyboardShortcutOverrides,

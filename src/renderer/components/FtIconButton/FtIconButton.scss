@@ -31,6 +31,10 @@
       &.pressed {
         background-color: var(--side-nav-hover-color);
         color: var(--side-nav-hover-text-color);
+
+        .overlayIcon {
+          color: var(--side-nav-hover-color);
+        }
       }
 
       &.active {
@@ -121,6 +125,11 @@
   inline-size: 1em;
 
   --fa-width: 1em;
+}
+
+/* Overlay icons read as a cut-out of the main icon by matching the button background */
+.iconButton .overlayIcon {
+  color: var(--card-bg-color);
 }
 
 .disabled {

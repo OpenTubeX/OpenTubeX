@@ -266,6 +266,19 @@ export default defineComponent({
     }
   },
   computed: {
+    // `description` and `viewCount` are intentionally left out,
+    // the store drops them from playlist entries as undesired attributes
+    addToPlaylistVideoData: function () {
+      return {
+        videoId: this.videoId,
+        title: this.videoTitle,
+        author: this.channelName,
+        authorId: this.channelId,
+        lengthSeconds: this.videoLengthSeconds,
+        published: this.videoPublished,
+        premiereDate: this.premiereDate
+      }
+    },
     historyEntry: function () {
       return this.$store.getters.getHistoryCacheById[this.videoId]
     },
@@ -615,37 +628,26 @@ export default defineComponent({
         }
       })
     },
-    addCurrentVideoToPlaylist() {
-      const videoData = {
-        videoId: this.videoId,
-        title: this.videoTitle,
-        author: this.channelName,
-        authorId: this.channelId,
-        description: this.videoDescription,
-        viewCount: this.videoViewCount,
-        lengthSeconds: this.videoLengthSeconds,
-        published: this.videoPublished,
-        premiereDate: this.premiereDate
-      }
-
-      this.$store.dispatch('showAddToPlaylistPromptForManyVideos', { videos: [videoData] })
-    },
-    toggleCurrentVideoQuickBookmarked() {
+    async toggleCurrentVideoQuickBookmarked() {
       if (!this.isQuickBookmarkEnabled) { return }
 
+      const playlistName = this.quickBookmarkPlaylist.playlistName
+
       if (this.isCurrentVideoQuickBookmarked) {
-        this.$store.dispatch('removeVideo', {
+        const removed = await this.$store.dispatch('removeVideo', {
           _id: this.quickBookmarkPlaylist._id,
           videoId: this.videoId
         })
         showToast({
-          message: this.$t('Video.Video has been removed from your saved list'),
+          message: removed
+            ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
+            : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
           image: this.toastThumbnail
         })
         return
       }
 
-      this.$store.dispatch('addVideo', {
+      const saved = await this.$store.dispatch('addVideo', {
         _id: this.quickBookmarkPlaylist._id,
         videoData: {
           videoId: this.videoId,
@@ -658,7 +660,9 @@ export default defineComponent({
         }
       })
       showToast({
-        message: this.$t('Video.Video has been saved'),
+        message: saved
+          ? this.$t('Video.Video has been saved to {playlistName}', { playlistName })
+          : this.$t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
         image: this.toastThumbnail
       })
     },

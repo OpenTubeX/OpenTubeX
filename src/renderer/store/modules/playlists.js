@@ -1,3 +1,4 @@
+import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
@@ -7,8 +8,49 @@ function generateRandomPlaylistId() {
   return `ft-playlist--${generateRandomUniqueId()}`
 }
 
+/**
+ * In-flight `addVideo` writes, keyed by `playlistId:videoId`.
+ *
+ * The toggle style controls (add to playlist popover, quick bookmark button) all
+ * derive their state from the store, which only updates once the write commits.
+ * A second activation during that window - including from a different control
+ * for the same video - would otherwise append a duplicate entry.
+ *
+ * Callers share the pending promise rather than getting an early result, so they
+ * all report the outcome the write actually had.
+ *
+ * This only saves a redundant write within one window. Two windows racing is
+ * caught by `upsertVideoByPlaylistId`, which refuses to add a video the playlist
+ * already has and reports back whether it wrote anything.
+ *
+ * Bulk adds go through `addVideos`, which intentionally still allows duplicates.
+ */
+const pendingVideoAdds = new Map()
+
 function generateRandomPlaylistName() {
   return `Playlist ${new Date().toISOString()}-${Math.floor(Math.random() * 10000)}`
+}
+
+/** Attributes playlist entries are not meant to carry, even with `null` values */
+const UNDESIRED_VIDEO_ATTRIBUTES = [
+  'authorUrl',
+  'description',
+  'index',
+  'liveNow',
+  'videoThumbnails',
+  'viewCount',
+]
+
+/**
+ * Mutates the given video, so it must be a copy the caller owns.
+ * @param {any} videoData
+ */
+function removeUndesiredVideoAttributes(videoData) {
+  for (const attrName of UNDESIRED_VIDEO_ATTRIBUTES) {
+    if (typeof videoData[attrName] !== 'undefined') {
+      delete videoData[attrName]
+    }
+  }
 }
 
 /*
@@ -88,6 +130,9 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
+  getPlaylistVideoIds: (state) => new Set(
+    state.playlists.flatMap(playlist => playlist.videos.map(video => video.videoId))
+  ),
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
@@ -174,21 +219,48 @@ const actions = {
     }
   },
 
-  async addVideo({ commit }, payload) {
-    try {
-      const { _id, videoData } = payload
+  addVideo({ commit }, payload) {
+    const { _id, videoData } = payload
+    const pendingKey = `${_id}:${videoData.videoId}`
 
-      processToBeAddedPlaylistVideo(videoData)
-
-      const lastUpdatedAt = Date.now()
-
-      await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
-
-      payload.lastUpdatedAt = lastUpdatedAt
-      commit('addVideo', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
+    // Another activation is already adding this video, wait on that write
+    // instead of issuing a second one
+    const pending = pendingVideoAdds.get(pendingKey)
+    if (pending != null) {
+      return pending
     }
+
+    const promise = (async () => {
+      try {
+        processToBeAddedPlaylistVideo(videoData)
+        removeUndesiredVideoAttributes(videoData)
+
+        const lastUpdatedAt = Date.now()
+
+        const result = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+
+        if (result === PlaylistVideoAddResult.ADDED) {
+          payload.lastUpdatedAt = lastUpdatedAt
+          commit('addVideo', payload)
+        }
+
+        // ALREADY_PRESENT means another window got there first, so the video is
+        // in the playlist and its sync event brings it into our state. Committing
+        // as well would show it twice. PLAYLIST_MISSING is a genuine failure:
+        // the playlist is gone, so the caller must not report a saved video.
+        return result !== PlaylistVideoAddResult.PLAYLIST_MISSING
+      } catch (errMessage) {
+        console.error(errMessage)
+
+        return false
+      } finally {
+        pendingVideoAdds.delete(pendingKey)
+      }
+    })()
+
+    pendingVideoAdds.set(pendingKey, promise)
+
+    return promise
   },
 
   async addVideos({ commit }, payload) {
@@ -210,19 +282,7 @@ const actions = {
         if (videoData.type == null) {
           videoData.type = 'video'
         }
-        // Undesired attributes, even with `null` values
-        [
-          'authorUrl',
-          'description',
-          'index',
-          'liveNow',
-          'videoThumbnails',
-          'viewCount',
-        ].forEach(attrName => {
-          if (typeof videoData[attrName] !== 'undefined') {
-            delete videoData[attrName]
-          }
-        })
+        removeUndesiredVideoAttributes(videoData)
 
         return videoData
       })
@@ -422,8 +482,12 @@ const actions = {
       payload.lastUpdatedAt = lastUpdatedAt
 
       commit('removeVideo', payload)
+
+      return true
     } catch (errMessage) {
       console.error(errMessage)
+
+      return false
     }
   },
 

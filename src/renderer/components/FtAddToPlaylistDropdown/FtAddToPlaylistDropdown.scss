@@ -1,0 +1,88 @@
+.addToPlaylistDropdown {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 200px;
+}
+
+.dropdownHeader {
+  border-block-end: 1px solid var(--tertiary-text-color);
+  font-size: 13px;
+  font-weight: bold;
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 10px;
+  text-align: start;
+}
+
+.playlistList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  max-block-size: 300px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.playlistRow {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 0;
+  padding-block: 8px;
+  padding-inline: 10px;
+  text-align: start;
+  transition: background 0.2s ease-out;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+    transition: background 0.2s ease-in;
+  }
+
+  &:active {
+    background-color: var(--side-nav-active-color);
+    color: var(--side-nav-active-text-color);
+    transition: background 0.1s ease-in;
+  }
+}
+
+.playlistThumbnail {
+  block-size: 27px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  inline-size: 48px;
+  object-fit: cover;
+}
+
+.playlistDetails {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.playlistName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-inline-size: 240px;
+}
+
+.videoCount {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.createRow {
+  background: none;
+  border: 0;
+  border-block-start: 1px solid var(--tertiary-text-color);
+  color: inherit;
+  font: inherit;
+  gap: 8px;
+  justify-content: flex-start;
+}

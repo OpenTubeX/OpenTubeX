@@ -7,7 +7,12 @@ import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
 import { library } from './fontawesome-minimal'
-import { facHorizontalTabs, facVerticalTabs } from './customIcons'
+import {
+  facHorizontalTabs,
+  facPlaylistAdd,
+  facPlaylistCheck,
+  facVerticalTabs
+} from './customIcons'
 // import the styles
 import '@fortawesome/fontawesome-svg-core/styles.css'
 
@@ -289,7 +294,7 @@ library.add(
   faWifi,
   faXmark,
 
-  // solid icons
+  // regular icons
   farBookmark,
   farDotCircle,
 
@@ -302,6 +307,8 @@ library.add(
 
   // custom icons
   facHorizontalTabs,
+  facPlaylistAdd,
+  facPlaylistCheck,
   facVerticalTabs,
 )
 

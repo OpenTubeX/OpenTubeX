@@ -224,16 +224,19 @@
           :get-timestamp="getShareTimestamp"
           dropdown-position-y="top"
         />
-        <button
-          v-if="showFullscreenPlaylistAction"
-          type="button"
-          class="fullscreenAction fullscreenPlaylistAction"
-          :aria-label="$t('User Playlists.Add to Playlist')"
+        <FtIconButton
+          v-if="showFullscreenPlaylistAction && playlistVideoData"
+          class="fullscreenPlaylistAction"
+          :class="{ open: isInAnyPlaylist }"
           :title="$t('User Playlists.Add to Playlist')"
-          @click="addToPlaylist"
+          :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+          :use-shadow="false"
+          force-dropdown
+          dropdown-position-x="left"
+          dropdown-position-y="top"
         >
-          <FontAwesomeIcon :icon="['fas', 'plus']" />
-        </button>
+          <FtAddToPlaylistDropdown :video-data="playlistVideoData" />
+        </FtIconButton>
         <button
           v-if="quickBookmarkEnabled"
           type="button"
@@ -243,7 +246,18 @@
           :title="quickBookmarkTitle"
           @click="toggleQuickBookmark"
         >
-          <FontAwesomeIcon :icon="quickBookmarked ? ['fas', 'check'] : quickBookmarkIcon" />
+          <FontAwesomeLayers v-if="quickBookmarked">
+            <FontAwesomeIcon :icon="quickBookmarkIcon" />
+            <FontAwesomeIcon
+              class="quickBookmarkCheck"
+              :icon="['fas', 'check']"
+              transform="shrink-7 up-1"
+            />
+          </FontAwesomeLayers>
+          <FontAwesomeIcon
+            v-else
+            :icon="quickBookmarkIcon"
+          />
         </button>
       </div>
       <!--
