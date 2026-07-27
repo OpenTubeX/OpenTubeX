@@ -290,6 +290,7 @@ import { findUpdateRelease } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   cancelSubscriptionRefresh,
+  getSubscriptionRefreshCancelCount,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
@@ -1018,13 +1019,18 @@ async function processPendingSubscriptionAutoRefreshes() {
           continue
         }
 
+        const cancelCountAtStart = getSubscriptionRefreshCancelCount()
         const result = await getSubscriptionTabRefreshHandler(tab)({
           t,
           showStartToast: true
         })
 
         if (result === null) {
-          scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          if (getSubscriptionRefreshCancelCount() === cancelCountAtStart) {
+            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          } else {
+            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
+          }
         }
       } catch (error) {
         console.error(`Failed to auto refresh subscription ${tab}`, error)
@@ -1157,8 +1163,15 @@ function getSubscriptionTabRefreshHandler(tab) {
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
+function getSubscriptionTabAutoRefreshInterval(tab) {
+  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
 function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  const interval = getSubscriptionTabAutoRefreshInterval(tab)
 
   return (
     dataReady.value &&
