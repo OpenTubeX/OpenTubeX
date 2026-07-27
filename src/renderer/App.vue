@@ -627,7 +627,10 @@ async function initializeManagedDownloadTools() {
 
   if (downloadStarted) {
     const missingTools = missingBinaries.join(' and ')
-    showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }))
+    showToast({
+      message: t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }),
+      icon: ['fas', 'download'],
+    })
     showToolProgress()
   }
 
@@ -651,7 +654,10 @@ async function initializeManagedDownloadTools() {
 
     if (!downloadStarted) {
       downloadStarted = true
-      showToast(t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }))
+      showToast({
+        message: t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }),
+        icon: ['fas', 'download'],
+      })
       showToolProgress()
     }
 
@@ -683,13 +689,19 @@ async function initializeManagedDownloadTools() {
         store.commit('setProgressBarPercentage', toolProgressPercentage)
       }
       const updatedTools = updatedBinaries.join(' and ')
-      showToast(missingBinaries.length > 0
-        ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-        : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }))
+      showToast({
+        message: missingBinaries.length > 0
+          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
+          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
+        icon: ['fas', 'check'],
+      })
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast(t('Settings.Download Settings.Managed Tools Download Error Template', { errors }))
+        showToast({
+          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
+          icon: ['fas', 'circle-exclamation'],
+        })
       }
     }
   } finally {
@@ -2307,7 +2319,10 @@ function handleLinkClick(event) {
     })
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
-    showToast(t('External link opening has been disabled in the general settings'))
+    showToast({
+      message: t('External link opening has been disabled in the general settings'),
+      icon: ['fas', 'link-slash'],
+    })
   } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
     // Storing the URL is necessary as
     // there is no other way to pass the URL to click callback
@@ -2442,7 +2457,10 @@ async function handleYoutubeLink(href, {
 
     default: {
       // Unknown URL type
-      showToast(t('Unknown YouTube url type, cannot be opened in app'))
+      showToast({
+        message: t('Unknown YouTube url type, cannot be opened in app'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   }
 }

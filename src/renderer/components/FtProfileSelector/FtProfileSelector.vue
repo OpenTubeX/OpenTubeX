@@ -203,7 +203,10 @@ function setActiveProfile(event) {
     if (targetProfile) {
       store.commit('setActiveProfile', profileId)
 
-      showToast(t('Profile.{profile} is now the active profile', { profile: translateProfileName(targetProfile) }))
+      showToast({
+        message: t('Profile.{profile} is now the active profile', { profile: translateProfileName(targetProfile) }),
+        icon: ['fas', 'user-check'],
+      })
     }
   }
 

@@ -292,12 +292,12 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import {
-  copyToClipboard,
   extractNumberFromString,
-  showToast,
   getChannelPlaylistId,
   getIconForSortPreference,
-  removeFromArrayIfExists
+  removeFromArrayIfExists,
+  showApiErrorToast,
+  showToast,
 } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
 import {
@@ -869,11 +869,9 @@ async function getChannelLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -913,11 +911,9 @@ async function getChannelAboutLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -973,9 +969,7 @@ function getChannelHomeLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1070,12 +1064,10 @@ async function getChannelInfoInvidious() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getChannelLocal()
     } else {
       isLoading.value = false
@@ -1187,11 +1179,9 @@ async function getChannelVideosLocal() {
 
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1223,9 +1213,7 @@ async function getChannelVideosLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1263,9 +1251,7 @@ async function channelInvidiousVideos(sortByChanged = false) {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1332,11 +1318,9 @@ async function getChannelShortsLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1364,9 +1348,7 @@ async function getChannelShortsLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1408,9 +1390,7 @@ async function channelInvidiousShorts(sortByChanged = false) {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1475,11 +1455,9 @@ async function getChannelLiveLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getChannelInfoInvidious()
     } else {
       isLoading.value = false
@@ -1499,9 +1477,7 @@ async function getChannelLiveLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1539,9 +1515,7 @@ async function channelInvidiousLive(sortByChanged) {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1607,11 +1581,9 @@ async function getChannelPlaylistsLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getPlaylistsInvidious()
     } else {
       isLoading.value = false
@@ -1632,9 +1604,7 @@ async function getChannelPlaylistsLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1649,11 +1619,9 @@ async function getPlaylistsInvidious() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getChannelPlaylistsLocal()
     } else {
       isLoading.value = false
@@ -1671,9 +1639,7 @@ async function getPlaylistsInvidiousMore() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1711,12 +1677,10 @@ async function getChannelReleasesLocal() {
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       channelInvidiousReleases()
     } else {
       isLoading.value = false
@@ -1748,9 +1712,7 @@ async function getChannelReleasesLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1765,11 +1727,9 @@ async function channelInvidiousReleases() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getChannelReleasesLocal()
     } else {
       isLoading.value = false
@@ -1786,9 +1746,7 @@ async function channelInvidiousReleasesMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1814,11 +1772,9 @@ async function getChannelPodcastsLocal() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       channelInvidiousPodcasts()
     } else {
       isLoading.value = false
@@ -1839,9 +1795,7 @@ async function getChannelPodcastsLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1857,12 +1811,10 @@ async function channelInvidiousPodcasts() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getChannelPodcastsLocal()
     } else {
       isLoading.value = false
@@ -1879,9 +1831,7 @@ async function channelInvidiousPodcastsMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1908,12 +1858,10 @@ async function getChannelCoursesLocal() {
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       channelInvidiousCourses()
     } else {
       isLoading.value = false
@@ -1934,9 +1882,7 @@ async function getChannelCoursesLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -1952,12 +1898,10 @@ async function channelInvidiousCourses() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getChannelCoursesLocal()
     } else {
       isLoading.value = false
@@ -1974,9 +1918,7 @@ async function channelInvidiousCoursesMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -2019,12 +1961,10 @@ async function getCommunityPostsLocal() {
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getCommunityPostsInvidious()
     } else {
       isLoading.value = false
@@ -2052,9 +1992,7 @@ async function getCommunityPostsLocalMore() {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 
@@ -2080,12 +2018,10 @@ async function getCommunityPostsInvidious() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       getCommunityPostsLocal()
     }
   }
@@ -2107,7 +2043,11 @@ async function searchChannelLocal() {
 
     if (isNewSearch) {
       if (!channelInstance.has_search) {
-        showToast(t('Channel.This channel does not allow searching'), 5000)
+        showToast({
+          message: t('Channel.This channel does not allow searching'),
+          time: 5000,
+          icon: ['fas', 'search'],
+        })
         showSearchBar.value = false
         return
       }
@@ -2142,13 +2082,11 @@ async function searchChannelLocal() {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
 
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (isNewSearch) {
       if (backendPreference.value === 'local' && backendFallback.value) {
-        showToast(t('Falling back to Invidious API'))
+        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
         searchChannelInvidious()
       } else {
         isLoading.value = false
@@ -2173,12 +2111,10 @@ async function searchChannelInvidious() {
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       searchChannelLocal()
     } else {
       isLoading.value = false

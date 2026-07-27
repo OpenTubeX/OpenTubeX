@@ -67,7 +67,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import store from '../../store/index'
 import { useRoute } from 'vue-router'
 import { getHashtagLocal, parseLocalListVideo } from '../../helpers/api/local'
-import { copyToClipboard, showToast } from '../../helpers/utils'
+import { showApiErrorToast, showToast } from '../../helpers/utils'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
 import { useTabTitle } from '../../tabs/TabContext'
@@ -140,11 +140,9 @@ async function getInvidiousHashtag(page = 1) {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       resetData()
       getLocalHashtag()
     } else {
@@ -164,11 +162,9 @@ async function getLocalHashtag() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       resetData()
       getInvidiousHashtag()
     } else {
@@ -187,11 +183,9 @@ async function getLocalHashtagMore() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       resetData()
       getInvidiousHashtag()
     } else {

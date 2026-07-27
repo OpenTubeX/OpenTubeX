@@ -373,7 +373,10 @@ function addSelectedToPlaylists() {
   const addedPlaylistIds = new Set()
 
   if (selectedPlaylistIdList.value.length === 0) {
-    showToast(t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'))
+    showToast({
+      message: t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -410,6 +413,7 @@ function addSelectedToPlaylists() {
     image: toBeAddedToPlaylistVideoList_.length === 1
       ? getVideoThumbnailUrl(toBeAddedToPlaylistVideoList_[0].videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value)
       : null,
+    icon: ['fac', 'playlist-check'],
   })
 
   hide()

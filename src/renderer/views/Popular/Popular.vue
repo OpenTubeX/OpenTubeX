@@ -47,7 +47,7 @@ import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vu
 import store from '../../store/index'
 
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
-import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
+import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
@@ -97,9 +97,7 @@ async function fetchPopularInfo() {
   } catch (err) {
     isLoading.value = false
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
   }
 }
 

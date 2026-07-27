@@ -38,6 +38,12 @@
             alt=""
             draggable="false"
           >
+          <FontAwesomeIcon
+            v-else-if="toast.icon"
+            :icon="toast.icon"
+            class="icon"
+            fixed-width
+          />
           <p class="message">
             {{ toast.message }}
           </p>
@@ -48,6 +54,7 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
@@ -60,6 +67,7 @@ let removeShowToastListener = null
  * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
  * @property {Function | null} action
  * @property {string | null} image
+ * @property {[string, string] | null} icon
  * @property {NodeJS.Timeout | number} timeout
  * @property {NodeJS.Timeout | number} interval
  * @property {number} id
@@ -86,9 +94,9 @@ function updateFullscreenTarget() {
 }
 
 /**
- * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null }>} event
+ * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null }>} event
  */
-function open({ detail: { message, time, action, abortSignal, image } }) {
+function open({ detail: { message, time, action, abortSignal, image, icon } }) {
   const id = idCounter++
 
   time ||= 3000
@@ -99,6 +107,7 @@ function open({ detail: { message, time, action, abortSignal, image } }) {
     message,
     action,
     image: image ?? null,
+    icon: icon ?? null,
     timeout: 0,
     interval: 0,
     expiresAt: Date.now() + time,
@@ -294,7 +303,9 @@ onMounted(() => {
   updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
-    removeShowToastListener = window.ftElectron.handleShowToast(showToast)
+    removeShowToastListener = window.ftElectron.handleShowToast((message, time, icon) => {
+      showToast({ message, time, icon })
+    })
   }
 })
 

@@ -39,7 +39,7 @@ import store from '../store/index'
 
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { getLocalCommunityPost } from '../helpers/api/local'
-import { copyToClipboard, showToast } from '../helpers/utils'
+import { showApiErrorToast, showToast } from '../helpers/utils'
 import { useTabTitle } from '../tabs/TabContext'
 
 const { t } = useI18n()
@@ -107,11 +107,9 @@ async function loadDataLocalAsync() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       await loadDataInvidiousAsync()
     } else {
       isLoading.value = false
@@ -127,12 +125,10 @@ async function loadDataInvidiousAsync() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       await loadDataLocalAsync()
     } else {
       isLoading.value = false

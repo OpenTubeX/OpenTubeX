@@ -355,7 +355,7 @@ async function applyHistoricalAdjustment() {
   if (!adjusted) { return }
 
   showHistoricalAdjustment.value = false
-  showToast(t('Stats.Imported watch time adjusted'))
+  showToast({ message: t('Stats.Imported watch time adjusted'), icon: ['fas', 'chart-line'] })
 }
 
 /**
@@ -366,7 +366,7 @@ async function handleResetStats(option) {
   if (option !== 'reset') { return }
 
   await store.dispatch('clearWatchStats')
-  showToast(t('Stats.Reset success'))
+  showToast({ message: t('Stats.Reset success'), icon: ['fas', 'undo'] })
 }
 
 function toDateKey(date) {

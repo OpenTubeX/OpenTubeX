@@ -256,7 +256,7 @@ function handleSubscription(profile) {
       profileIds
     })
 
-    showToast(t('Channel.Added channel to your subscriptions'))
+    showToast({ message: t('Channel.Added channel to your subscriptions'), icon: ['fas', 'rss'] })
     emit('subscribed')
   }
 
@@ -312,10 +312,13 @@ function handleUnsubscription(profile) {
 
   store.dispatch('removeChannelFromProfiles', { channelId: props.channelId, profileIds })
 
-  showToast(t('Channel.Channel has been removed from your subscriptions'))
+  showToast({ message: t('Channel.Channel has been removed from your subscriptions'), icon: ['fas', 'trash'] })
 
   if (profile._id === MAIN_PROFILE_ID && profileIds.length > 1) {
-    showToast(t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }))
+    showToast({
+      message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }),
+      icon: ['fas', 'trash'],
+    })
   }
 }
 
