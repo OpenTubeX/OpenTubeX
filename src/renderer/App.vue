@@ -289,10 +289,12 @@ import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { findUpdateRelease } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
+  cancelSubscriptionRefresh,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote,
+  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
   SUBSCRIPTION_REFRESH_LOCK_NAME,
@@ -538,6 +540,7 @@ const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAu
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
+let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
@@ -783,6 +786,9 @@ onMounted(async () => {
     removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
       applySubscriptionAutoRefreshState
     )
+    removeSubscriptionAutoRefreshCancelListener = window.ftElectron.subscriptionAutoRefresh.onCancelRequested(
+      cancelSubscriptionRefresh
+    )
     synchronizeSubscriptionRefreshInProgress()
     removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
       if (isActive) {
@@ -818,6 +824,7 @@ onBeforeUnmount(() => {
   window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
+  removeSubscriptionAutoRefreshCancelListener?.()
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
@@ -1421,6 +1428,13 @@ function handleSubscriptionRefreshFinished() {
  * @param {StorageEvent} event
  */
 function handleSubscriptionAutoRefreshStorage(event) {
+  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
+    if (event.newValue !== null) {
+      cancelSubscriptionRefresh()
+    }
+    return
+  }
+
   if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({

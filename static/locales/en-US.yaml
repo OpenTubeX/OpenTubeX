@@ -208,6 +208,7 @@ Trending:
   Trending Tabs: Trending Tabs
 Most Popular: Most Popular
 Feed:
+  Cancel Refresh: Cancel refresh
   Feed Last Updated: '{feedName} feed last updated: {date}'
   Next Auto Refresh: 'Next auto refresh: {date}'
   Refresh Feed: Refresh {subscriptionName}
@@ -1470,6 +1471,7 @@ Context Menu:
   Save Image As…: Save Image As…
   Copy Image: Copy Image
   Copy Image Address: Copy Image Address
+  Cancel Refresh: Cancel Refresh
   Reload Videos: Reload Videos
   Reload Shorts: Reload Shorts
   Reload Live: Reload Live
