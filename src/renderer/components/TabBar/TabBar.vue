@@ -119,8 +119,7 @@ const tabsViewportRef = useTemplateRef('tabsViewportRef')
 const dropZoneRef = useTemplateRef('dropZoneRef')
 const scrollbarRef = useTemplateRef('scrollbarRef')
 const closeTooltipsSignal = ref(0)
-/** @type {import('vue').Ref<Set<string>>} */
-const selectedTabIds = ref(new Set())
+const selectedTabIds = computed(() => new Set(store.getters.getSelectedTabIds))
 /** @type {string | null} */
 let selectionAnchorId = null
 
@@ -278,9 +277,7 @@ function handleDragPointerMove(event) {
       !selectedTabIds.value.has(dragSession.tabId) ||
       selectedTabIds.value.size !== dragSession.tabIds.length
     ) {
-      selectedTabIds.value = dragSession.tabIds.length > 1
-        ? new Set(dragSession.tabIds)
-        : new Set()
+      setTabSelection(dragSession.tabIds.length > 1 ? dragSession.tabIds : [])
       selectionAnchorId = dragSession.tabId
     }
     draggingTabIds.value = new Set(dragSession.tabIds)
@@ -647,7 +644,7 @@ function handleActivate(event, tabId) {
     const targetIndex = tabs.value.findIndex(tab => tab.id === tabId)
     if (anchorIndex !== -1 && targetIndex !== -1) {
       const [start, end] = [anchorIndex, targetIndex].sort((a, b) => a - b)
-      selectedTabIds.value = new Set(tabs.value.slice(start, end + 1).map(tab => tab.id))
+      setTabSelection(tabs.value.slice(start, end + 1).map(tab => tab.id))
       return
     }
   }
@@ -663,7 +660,7 @@ function handleActivate(event, tabId) {
     } else {
       nextSelection.add(tabId)
     }
-    selectedTabIds.value = nextSelection
+    setTabSelection([...nextSelection])
     selectionAnchorId = tabId
     return
   }
@@ -674,7 +671,14 @@ function handleActivate(event, tabId) {
 }
 
 function clearTabSelection() {
-  selectedTabIds.value = new Set()
+  setTabSelection([])
+}
+
+/**
+ * @param {string[]} tabIds
+ */
+function setTabSelection(tabIds) {
+  store.dispatch('setTabSelection', tabIds)
 }
 
 /**
@@ -1108,7 +1112,7 @@ watch(tabs, (nextTabs) => {
   const currentIds = new Set(nextTabs.map(tab => tab.id))
   const nextSelection = new Set([...selectedTabIds.value].filter(tabId => currentIds.has(tabId)))
   if (nextSelection.size !== selectedTabIds.value.size) {
-    selectedTabIds.value = nextSelection
+    setTabSelection([...nextSelection])
   }
   if (selectionAnchorId && !currentIds.has(selectionAnchorId)) {
     selectionAnchorId = null
