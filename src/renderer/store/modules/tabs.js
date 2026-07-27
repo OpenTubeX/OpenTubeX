@@ -7,6 +7,7 @@ const HALF_NAV_HISTORY_DISPLAY_LIMIT = Math.trunc(NAV_HISTORY_DISPLAY_LIMIT / 2)
 const state = {
   tabs: [],
   activeTabId: null,
+  selectedTabIds: [],
   presentedTabId: null,
   mainPresentedTabId: null,
   selectionRevision: 0,
@@ -21,6 +22,7 @@ const getters = {
   getTabs: (state) => state.tabs,
   getActiveTabId: (state) => state.activeTabId,
   getActiveTab: (state) => state.tabs.find(tab => tab.id === state.activeTabId) ?? null,
+  getSelectedTabIds: (state) => state.selectedTabIds,
   getPresentedTabId: (state) => state.presentedTabId,
   getPresentedTab: (state) => state.tabs.find(tab => tab.id === state.presentedTabId) ?? null,
   getTabById: (state) => (tabId) => state.tabs.find(tab => tab.id === tabId) ?? null,
@@ -77,6 +79,7 @@ const mutations = {
     }
 
     state.tabs = incomingTabs.map(tab => reconcileTab(previousTabsById.get(tab.id), tab))
+    state.selectedTabIds = state.selectedTabIds.filter(tabId => incomingIds.has(tabId))
     state.activeTabId = payload.activeTabId ?? null
     state.mainPresentedTabId = payload.presentedTabId ?? null
     state.selectionRevision = Number.isInteger(payload.selectionRevision)
@@ -96,6 +99,11 @@ const mutations = {
 
   setPresentedTab(state, tabId) {
     state.presentedTabId = tabId
+  },
+
+  setSelectedTabIds(state, tabIds) {
+    const existingIds = new Set(state.tabs.map(tab => tab.id))
+    state.selectedTabIds = Array.from(new Set(tabIds.filter(tabId => existingIds.has(tabId))))
   },
 
   setTabTransition(state, { revision, tabId }) {
@@ -204,6 +212,12 @@ const actions = {
   activateTab(_context, tabId) {
     if (!process.env.IS_ELECTRON) return
     window.ftElectron.tabs.activate(tabId)
+  },
+
+  setTabSelection({ commit }, tabIds) {
+    if (!process.env.IS_ELECTRON) return
+    commit('setSelectedTabIds', tabIds)
+    window.ftElectron.tabs.setSelected(tabIds)
   },
 
   async closeTab(_context, tabId) {

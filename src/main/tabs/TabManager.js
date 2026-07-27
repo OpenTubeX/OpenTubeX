@@ -552,6 +552,8 @@ export class TabManager {
     this.contextMenuTabId = null
     /** @type {string[]} */
     this.contextMenuSelectedTabIds = []
+    /** @type {string[]} */
+    this.selectedTabIds = []
     this.contextMenuSurface = 'content'
     this.contextMenuSubscriptionFeedTab = null
     this.contextMenuTabBarVertical = false
@@ -1163,6 +1165,7 @@ export class TabManager {
       : null
 
     this.tabs.delete(tabId)
+    this.selectedTabIds = this.selectedTabIds.filter(selectedTabId => selectedTabId !== tabId)
     this._deferredCloseTabIds.delete(tabId)
     this._deferredUnloadTabIds.delete(tabId)
     this._resolveTabMountWaiters(tabId, Number.MAX_SAFE_INTEGER, false)
@@ -2491,6 +2494,17 @@ export async function setupTabsIPC(options = {}) {
     if (manager && typeof tabId === 'string') {
       manager.activateTab(tabId)
     }
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_SELECTED, (event, tabIds) => {
+    const manager = getManager(event)
+    if (!manager) return
+
+    manager.selectedTabIds = Array.isArray(tabIds)
+      ? Array.from(new Set(tabIds.filter(tabId => {
+          return typeof tabId === 'string' && manager.tabs.has(tabId)
+        })))
+      : []
   })
 
   ipcMain.handle(IpcChannels.TABS_IS_ACTIVE, (event, tabId) => {

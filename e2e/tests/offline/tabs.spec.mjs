@@ -124,6 +124,37 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('applies close and reload shortcuts to the selected tabs', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    let tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+
+    const beforeReload = await page.evaluate(() => window.ftElectron.tabs.getState())
+    const selectedIds = [beforeReload.tabs[0].id, beforeReload.tabs[2].id]
+    const unselectedId = beforeReload.tabs[1].id
+    const refreshKeys = Object.fromEntries(
+      beforeReload.tabs.map(tab => [tab.id, tab.refreshKey])
+    )
+
+    await page.keyboard.press('Control+r')
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return Object.fromEntries(state.tabs.map(tab => [tab.id, tab.refreshKey]))
+    }).toEqual({
+      [selectedIds[0]]: refreshKeys[selectedIds[0]] + 1,
+      [unselectedId]: refreshKeys[unselectedId],
+      [selectedIds[1]]: refreshKeys[selectedIds[1]] + 1
+    })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveAttribute('data-tab-id', unselectedId)
+  })
+
   test('applies a complete tab reorder in one state update', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
@@ -673,6 +704,21 @@ test.describe('background tab shortcuts', () => {
         }
       ]
     }
+  })
+
+  test('Ctrl+R refreshes the current feed on an active subscriptions tab', async ({ page }) => {
+    await expect(page.getByText(/disabled automatic subscription fetching/i)).toBeVisible()
+    await page.route(/^https?:\/\//, (route) => route.abort())
+
+    const externalRequests = []
+    page.on('request', (request) => {
+      if (/^https?:/.test(request.url())) {
+        externalRequests.push(request.url())
+      }
+    })
+
+    await page.keyboard.press('Control+r')
+    await expect.poll(() => externalRequests.length).toBeGreaterThan(0)
   })
 
   // Regression: the document-level subscriptions listener refreshed a hidden
