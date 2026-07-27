@@ -387,7 +387,7 @@ test.describe('watch page', () => {
     const dockDescription = page.locator('.fullscreenMetadataTarget .videoDescription')
     await expect(dockDescription).toHaveClass(/alwaysExpanded/)
     await expect(dockDescription).not.toHaveClass(/short/)
-    await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
+    await expect(dockDescription.locator('.descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     await expect(page.locator('.fullscreenMetadataHeader')).not.toHaveCSS('cursor', 'grab')
     const playerVideo = page.locator('.ftVideoPlayer video.player')
@@ -553,7 +553,7 @@ test.describe('watch page', () => {
     await expect(page.locator('.infoArea .videoTitle')).toBeVisible()
     const inlineDescription = page.locator('.infoArea .videoDescription')
     await expect(inlineDescription).not.toHaveClass(/alwaysExpanded/)
-    await expect(inlineDescription.locator('.descriptionCloseButton, .descriptionStatus')).not.toHaveCount(0)
+    await expect(inlineDescription.locator('.descriptionStatus')).not.toHaveCount(0)
     await setPlayerFullscreen(page, true)
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
 
