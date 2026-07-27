@@ -86,6 +86,24 @@
           @change="playlistSortBy = $event"
         />
       </div>
+      <div
+        v-if="currentTab === 'search'"
+        class="channelSearchFilters"
+        role="group"
+        :aria-label="$t('Channel.Search Result Types')"
+      >
+        <button
+          v-for="filter in availableChannelSearchFilters"
+          :key="filter.value"
+          type="button"
+          class="channelSearchFilter"
+          :class="{ selected: channelSearchFilter === filter.value }"
+          :aria-pressed="channelSearchFilter === filter.value"
+          @click="channelSearchFilter = filter.value"
+        >
+          {{ filter.label }}
+        </button>
+      </div>
       <FtLoader
         v-if="isCurrentTabLoading"
       />
@@ -226,11 +244,12 @@
         </FtFlexBox>
         <FtElementList
           v-show="currentTab === 'search'"
-          :data="searchResults"
+          class="channelSearchResults"
+          :data="filteredSearchResults"
           :use-channels-hidden-preference="false"
         />
         <FtFlexBox
-          v-if="currentTab === 'search' && !isSearchTabLoading && searchResults.length === 0"
+          v-if="currentTab === 'search' && !isSearchTabLoading && filteredSearchResults.length === 0"
         >
           <p class="message">
             {{ $t("Channel.Your search results have returned 0 results") }}
@@ -332,6 +351,12 @@ import {
   parseChannelHomeTab
 } from '../../helpers/api/local'
 import { useTabTitle } from '../../tabs/TabContext'
+import {
+  CHANNEL_SEARCH_FILTERS,
+  filterChannelSearchResults,
+  getInvidiousChannelSearchResultType,
+  getLocalChannelSearchResultType,
+} from './channel-search'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -2031,6 +2056,48 @@ let searchPage = 1
 const lastSearchQuery = ref('')
 const searchResults = shallowRef([])
 const searchContinuationData = shallowRef(null)
+const channelSearchFilter = ref(CHANNEL_SEARCH_FILTERS.ALL)
+
+const filteredSearchResults = computed(() => {
+  return filterChannelSearchResults(searchResults.value, channelSearchFilter.value)
+})
+
+const availableChannelSearchFilters = computed(() => {
+  const filters = [{
+    value: CHANNEL_SEARCH_FILTERS.ALL,
+    label: t('Channel.All Results'),
+  }]
+
+  if (channelTabs.value.includes('videos')) {
+    filters.push({
+      value: CHANNEL_SEARCH_FILTERS.VIDEOS,
+      label: t('Global.Videos'),
+    })
+  }
+
+  if (channelTabs.value.includes('shorts') && !hideChannelShorts.value) {
+    filters.push({
+      value: CHANNEL_SEARCH_FILTERS.SHORTS,
+      label: t('Global.Shorts'),
+    })
+  }
+
+  if (channelTabs.value.includes('live')) {
+    filters.push({
+      value: CHANNEL_SEARCH_FILTERS.LIVE,
+      label: t('Global.Live'),
+    })
+  }
+
+  if (channelTabs.value.includes('playlists') && !hideChannelPlaylists.value) {
+    filters.push({
+      value: CHANNEL_SEARCH_FILTERS.PLAYLISTS,
+      label: t('Channel.Playlists.Playlists'),
+    })
+  }
+
+  return filters
+})
 
 async function searchChannelLocal() {
   const isNewSearch = searchContinuationData.value === null
@@ -2063,10 +2130,18 @@ async function searchChannelLocal() {
       .flatMap(itemSection => itemSection.contents)
       .filter(item => item.type === 'Video' || (!hideChannelPlaylists.value && item.type === 'Playlist'))
       .map(item => {
+        const channelSearchResultType = getLocalChannelSearchResultType(item)
+
         if (item.type === 'Video') {
-          return parseLocalListVideo(item)
+          return {
+            ...parseLocalListVideo(item),
+            channelSearchResultType,
+          }
         } else {
-          return parseLocalListPlaylist(item, id.value, channelName.value)
+          return {
+            ...parseLocalListPlaylist(item, id.value, channelName.value),
+            channelSearchResultType,
+          }
         }
       })
 
@@ -2098,11 +2173,15 @@ async function searchChannelLocal() {
 async function searchChannelInvidious() {
   try {
     const response = await searchInvidiousChannel(id.value, lastSearchQuery.value, searchPage)
+    const typedResponse = response.map(item => ({
+      ...item,
+      channelSearchResultType: getInvidiousChannelSearchResultType(item),
+    }))
 
     if (hideChannelPlaylists.value) {
-      searchResults.value = searchResults.value.concat(response.filter(item => item.type !== 'playlist'))
+      searchResults.value = searchResults.value.concat(typedResponse.filter(item => item.type !== 'playlist'))
     } else {
-      searchResults.value = searchResults.value.concat(response)
+      searchResults.value = searchResults.value.concat(typedResponse)
     }
 
     isSearchTabLoading.value = false
@@ -2136,6 +2215,7 @@ function newSearch(query) {
   isSearchTabLoading.value = true
   searchPage = 1
   searchResults.value = []
+  channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL
   changeTab('search')
 
   if (process.env.SUPPORTS_LOCAL_API && apiUsed === 'local') {
@@ -2159,6 +2239,7 @@ function clearSearch() {
   isSearchTabLoading.value = false
   searchPage = 1
   searchResults.value = []
+  channelSearchFilter.value = CHANNEL_SEARCH_FILTERS.ALL
   changeTab(currentOrFirstTab(undefined))
 }
 

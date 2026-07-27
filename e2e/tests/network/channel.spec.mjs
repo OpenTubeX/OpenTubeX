@@ -29,6 +29,20 @@ test.describe('channel page', () => {
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
     await expect(page.locator(sel.activeTab)).not.toContainText('/channel/')
 
+    const searchTypeFilters = page.getByRole('group', { name: 'Search result types' })
+    const allResultsFilter = searchTypeFilters.getByRole('button', { name: 'All' })
+    const playlistResultsFilter = searchTypeFilters.getByRole('button', { name: 'Playlists' })
+    const videoResults = page.locator('.channelSearchResults .ft-list-video:not(:has(.videoCountContainer))')
+    const playlistResults = page.locator('.channelSearchResults .ft-list-video:has(.videoCountContainer)')
+    await expect(allResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults.first()).toBeVisible()
+    await expect(playlistResults.first()).toBeVisible()
+
+    await playlistResultsFilter.click()
+    await expect(playlistResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults).toHaveCount(0)
+    await expect(playlistResults.first()).toBeVisible()
+
     await page.locator('.channelSearch .clearInputTextButton').click()
     await expect(page).not.toHaveURL(/searchQueryText=/)
     await expect(page.locator(sel.activeTab)).toContainText('Blender')
