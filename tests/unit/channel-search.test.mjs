@@ -27,7 +27,14 @@ test('classifies local channel search results by content type', () => {
   assert.equal(
     getLocalChannelSearchResultType({
       type: 'Video',
-      duration: { seconds: 30 },
+      duration: { seconds: 180 },
+    }),
+    CHANNEL_SEARCH_FILTERS.SHORTS
+  )
+  assert.equal(
+    getLocalChannelSearchResultType({
+      type: 'Video',
+      duration: { seconds: 181 },
     }),
     CHANNEL_SEARCH_FILTERS.VIDEOS
   )
@@ -44,6 +51,10 @@ test('classifies the content types exposed by Invidious channel search', () => {
   )
   assert.equal(
     getInvidiousChannelSearchResultType({ type: 'video', lengthSeconds: 30 }),
+    CHANNEL_SEARCH_FILTERS.SHORTS
+  )
+  assert.equal(
+    getInvidiousChannelSearchResultType({ type: 'video', lengthSeconds: 181 }),
     CHANNEL_SEARCH_FILTERS.VIDEOS
   )
 })

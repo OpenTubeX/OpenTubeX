@@ -31,12 +31,18 @@ test.describe('channel page', () => {
 
     const searchTypeFilters = page.getByRole('group', { name: 'Search result types' })
     const allResultsFilter = searchTypeFilters.getByRole('button', { name: 'All' })
+    const shortsResultsFilter = searchTypeFilters.getByRole('button', { name: 'Shorts' })
     const playlistResultsFilter = searchTypeFilters.getByRole('button', { name: 'Playlists' })
     const videoResults = page.locator('.channelSearchResults .ft-list-video:not(:has(.videoCountContainer))')
     const playlistResults = page.locator('.channelSearchResults .ft-list-video:has(.videoCountContainer)')
     await expect(allResultsFilter).toHaveAttribute('aria-pressed', 'true')
     await expect(videoResults.first()).toBeVisible()
     await expect(playlistResults.first()).toBeVisible()
+
+    await shortsResultsFilter.click()
+    await expect(shortsResultsFilter).toHaveAttribute('aria-pressed', 'true')
+    await expect(videoResults.first()).toBeVisible()
+    await expect(playlistResults).toHaveCount(0)
 
     await playlistResultsFilter.click()
     await expect(playlistResultsFilter).toHaveAttribute('aria-pressed', 'true')

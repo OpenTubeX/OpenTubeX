@@ -6,6 +6,8 @@ export const CHANNEL_SEARCH_FILTERS = {
   PLAYLISTS: 'playlists',
 }
 
+const YOUTUBE_SHORT_MAX_DURATION_SECONDS = 180
+
 /**
  * @param {{
  *   type: string,
@@ -16,6 +18,7 @@ export const CHANNEL_SEARCH_FILTERS = {
  *   is_live?: boolean,
  *   is_upcoming?: boolean,
  *   is_premiere?: boolean,
+ *   duration?: { seconds?: number },
  * }} item
  * @returns {'videos' | 'shorts' | 'live' | 'playlists'}
  */
@@ -33,6 +36,13 @@ export function getLocalChannelSearchResultType(item) {
     return CHANNEL_SEARCH_FILTERS.SHORTS
   }
 
+  // YouTube also considers aspect ratio and upload date, but channel search
+  // does not expose those fields. Duration is the best available fallback.
+  if (item.duration?.seconds > 0 &&
+      item.duration.seconds <= YOUTUBE_SHORT_MAX_DURATION_SECONDS) {
+    return CHANNEL_SEARCH_FILTERS.SHORTS
+  }
+
   return CHANNEL_SEARCH_FILTERS.VIDEOS
 }
 
@@ -41,8 +51,9 @@ export function getLocalChannelSearchResultType(item) {
  *   type: string,
  *   liveNow?: boolean,
  *   isUpcoming?: boolean,
+ *   lengthSeconds?: number,
  * }} item
- * @returns {'videos' | 'live' | 'playlists'}
+ * @returns {'videos' | 'shorts' | 'live' | 'playlists'}
  */
 export function getInvidiousChannelSearchResultType(item) {
   if (item.type === 'playlist') {
@@ -51,6 +62,11 @@ export function getInvidiousChannelSearchResultType(item) {
 
   if (item.liveNow || item.isUpcoming) {
     return CHANNEL_SEARCH_FILTERS.LIVE
+  }
+
+  if (item.lengthSeconds > 0 &&
+      item.lengthSeconds <= YOUTUBE_SHORT_MAX_DURATION_SECONDS) {
+    return CHANNEL_SEARCH_FILTERS.SHORTS
   }
 
   return CHANNEL_SEARCH_FILTERS.VIDEOS
