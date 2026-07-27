@@ -235,6 +235,10 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   overflow-wrap: break-word;
   box-shadow: 0 0 10px var(--scrollbar-color-hover);
   background-color: var(--search-bar-color);
+
+  /* The handle crosses hovered rows because this is an overlay scrollbar.
+     Match the row highlight instead of drawing a darker stripe through it. */
+  --scrollbar-color: var(--scrollbar-color-hover);
 }
 
 .search .list {
@@ -247,7 +251,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   justify-content: space-between;
   padding-block: 0;
   line-height: 2rem;
-  padding-inline: 15px 4px;
+  padding-inline: 15px 10px;
 }
 
 .optionWrapper {

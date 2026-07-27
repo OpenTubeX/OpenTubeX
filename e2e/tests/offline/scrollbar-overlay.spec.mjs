@@ -68,6 +68,20 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   })
 
+  test('dragging the page handle scrolls the document', async ({ page }) => {
+    await goTo(page, 'settings')
+    await expect.poll(() => pageOverflows(page)).toBe(true)
+
+    const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
+    const box = await handle.boundingBox()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 100, { steps: 10 })
+    await page.mouse.up()
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
+
   test.describe('a nested scroll container', () => {
     const now = Date.now()
     test.use({

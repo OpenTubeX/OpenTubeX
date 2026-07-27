@@ -21,8 +21,8 @@ OverlayScrollbars.plugin(ClickScrollPlugin)
  */
 const instances = new Map()
 
-function scrollbarOptions() {
-  return {
+function scrollbarOptions(initialization) {
+  const options = {
     scrollbars: {
       // 'move' hides the scrollbars once the pointer has been still for
       // `autoHideDelay` and brings them back as soon as it moves again.
@@ -32,6 +32,17 @@ function scrollbarOptions() {
       clickScroll: true
     }
   }
+
+  if (initialization === document.body) {
+    // The page viewport is always a normal block-flow body. Avoid repeatedly
+    // reading all flow-related computed styles while long feeds are changing;
+    // only direction can change at runtime.
+    options.update = {
+      flowDirectionStyles: () => ({ direction: document.documentElement.dir })
+    }
+  }
+
+  return options
 }
 
 /**
@@ -39,10 +50,88 @@ function scrollbarOptions() {
  * initialization object when the caller wants to pick the scrolling element
  */
 function create(initialization) {
-  const instance = OverlayScrollbars(initialization, scrollbarOptions())
+  const instance = OverlayScrollbars(initialization, scrollbarOptions(initialization))
   instances.set(instance, initialization)
   instance.on('destroyed', () => instances.delete(instance))
+
+  if (initialization === document.body) {
+    optimizeBodyScrollbarDrag(instance)
+  }
+
   return instance
+}
+
+/**
+ * OverlayScrollbars applies every pointermove directly while a handle is
+ * dragged. Mouse input can arrive faster than Chromium can paint a long video
+ * feed, making the handle trail the pointer. Coalesce the page scrollbar's
+ * moves to one native scroll per animation frame.
+ *
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ */
+function optimizeBodyScrollbarDrag(instance) {
+  const { handle, track } = instance.elements().scrollbarVertical
+
+  const onPointerDown = (event) => {
+    if (event.button !== 0 || !event.isPrimary) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+
+    const pointerId = event.pointerId
+    const startClientY = event.clientY
+    const startScrollY = window.scrollY
+    const scrollRange = instance.state().overflowAmount.y
+    const trackRange = track.clientHeight - handle.clientHeight
+    let clientY = startClientY
+    let frame = null
+
+    if (trackRange <= 0 || scrollRange <= 0) {
+      return
+    }
+
+    const applyDrag = () => {
+      frame = null
+      window.scrollTo(0, startScrollY + (clientY - startClientY) / trackRange * scrollRange)
+    }
+
+    const onPointerMove = (moveEvent) => {
+      if (moveEvent.pointerId !== pointerId) {
+        return
+      }
+
+      moveEvent.preventDefault()
+      moveEvent.stopPropagation()
+      clientY = moveEvent.clientY
+      frame ??= requestAnimationFrame(applyDrag)
+    }
+
+    const finish = (finishEvent) => {
+      if (finishEvent.pointerId !== pointerId) {
+        return
+      }
+
+      finishEvent.stopPropagation()
+      handle.removeEventListener('pointermove', onPointerMove)
+      handle.removeEventListener('pointerup', finish)
+      handle.removeEventListener('pointercancel', finish)
+
+      if (frame !== null) {
+        cancelAnimationFrame(frame)
+        applyDrag()
+      }
+    }
+
+    handle.addEventListener('pointermove', onPointerMove)
+    handle.addEventListener('pointerup', finish)
+    handle.addEventListener('pointercancel', finish)
+    handle.setPointerCapture(pointerId)
+  }
+
+  handle.addEventListener('pointerdown', onPointerDown)
+  instance.on('destroyed', () => handle.removeEventListener('pointerdown', onPointerDown))
 }
 
 /**

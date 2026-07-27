@@ -1417,8 +1417,9 @@
   transition-delay: 0s;
 }
 
-.fullscreenCommentsOverlay :deep(.watchVideo) {
+.ftVideoPlayer.fullscreenCommentsOpen .fullscreenCommentsOverlay :deep(.watchVideo) {
   flex: 1 1 auto;
+  block-size: 100%;
   min-block-size: 0;
   margin: 0;
   border-radius: 0;
@@ -1478,7 +1479,10 @@
   flex-direction: column;
   min-block-size: 0;
   max-inline-size: 100%;
-  overflow: hidden;
+  overflow: hidden auto;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .fullscreenMetadataTarget :deep(.watchVideo) {
@@ -1491,59 +1495,19 @@
   box-shadow: none;
 }
 
+.fullscreenMetadataTarget :deep(.watchVideoInfo),
 .fullscreenMetadataTarget :deep(.videoDescription) {
-  flex: 1 1 auto;
-  min-block-size: 0;
-  max-block-size: none;
-  overflow: hidden auto;
+  flex: 0 0 auto;
 }
 
 .fullscreenMetadataTarget :deep(.watchVideoInfo) {
   padding-block-end: 4px;
 }
 
-.fullscreenMetadataTarget :deep(.videoDescription.short) {
-  flex: 0 0 auto;
-}
-
-/* A stacked metadata dock can be shorter than its non-description content.
-   Scroll the complete dock in that state so every section remains reachable. */
-.ftVideoPlayer.fullscreenMetadataOpen:is(
-  .fullscreenTranscriptOpen,
-  .fullscreenSponsorBlockOpen,
-  .fullscreenCommentsOpen,
-  .fullscreenPlaylistOpen,
-  .chaptersOverlayOpen
-) .fullscreenMetadataTarget {
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.ftVideoPlayer.fullscreenMetadataOpen:is(
-  .fullscreenTranscriptOpen,
-  .fullscreenSponsorBlockOpen,
-  .fullscreenCommentsOpen,
-  .fullscreenPlaylistOpen,
-  .chaptersOverlayOpen
-) .fullscreenMetadataTarget :deep(.watchVideoInfo),
-  .ftVideoPlayer.fullscreenMetadataOpen:is(
-  .fullscreenTranscriptOpen,
-  .fullscreenSponsorBlockOpen,
-  .fullscreenCommentsOpen,
-  .fullscreenPlaylistOpen,
-  .chaptersOverlayOpen
-) .fullscreenMetadataTarget :deep(.videoDescription) {
-  flex: 0 0 auto;
-}
-
-.ftVideoPlayer.fullscreenMetadataOpen:is(
-  .fullscreenTranscriptOpen,
-  .fullscreenSponsorBlockOpen,
-  .fullscreenCommentsOpen,
-  .fullscreenPlaylistOpen,
-  .chaptersOverlayOpen
-) .fullscreenMetadataTarget :deep(.videoDescription) {
+.fullscreenMetadataTarget :deep(.videoDescription),
+.fullscreenMetadataTarget :deep(.descriptionScroll) {
   overflow: visible;
+  max-block-size: none;
 }
 
 .fullscreenMetadataTarget :deep(.videoMetrics),
@@ -1715,6 +1679,24 @@
   flex: 1 1 auto;
   max-block-size: none;
   padding-inline: 8px;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+.fullscreenSponsorBlockTarget :deep(.sponsorBlockContent) {
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
+}
+
+:is(
+  .chapterOverlay,
+  .fullscreenMetadataTarget,
+  .fullscreenTranscriptTarget,
+  .fullscreenSponsorBlockTarget,
+  .fullscreenCommentsOverlay
+) :deep(.os-scrollbar-vertical) {
+  --os-padding-axis: 0;
 }
 
 /* Hide the pre-component playlist close control if it survives a hot reload. */

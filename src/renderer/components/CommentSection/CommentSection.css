@@ -38,6 +38,12 @@
   --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
+/* A zero-height target can sit exactly on the clipped edge of a short dock and
+   stop intersecting even though the "Load More" row is visible. */
+.commentAutoLoadSentinel {
+  min-block-size: 1px;
+}
+
 /* Matches the chapter overlay header in the video player. */
 .fullscreenCommentHeader {
   position: relative;

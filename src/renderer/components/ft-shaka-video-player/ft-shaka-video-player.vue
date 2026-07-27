@@ -394,6 +394,7 @@
         </header>
         <div
           ref="fullscreenMetadataTarget"
+          v-overlay-scrollbars
           class="fullscreenMetadataTarget"
         />
       </aside>

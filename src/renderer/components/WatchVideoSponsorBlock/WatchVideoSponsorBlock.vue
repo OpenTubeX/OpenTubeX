@@ -33,172 +33,179 @@
         </button>
       </div>
     </header>
-    <p class="sponsorBlockSubtitle">
-      {{ loading
-        ? $t('Video.Player.SponsorBlock.InfoPanelLoading')
-        : segments.length > 0
-          ? $t('Video.Player.SponsorBlock.InfoPanelHasSegments')
-          : $t('Video.Player.SponsorBlock.InfoPanelNoSegments') }}
-    </p>
     <div
-      v-if="loading && segments.length === 0"
-      class="sponsorBlockLoading"
-      role="status"
-    >
-      <font-awesome-icon
-        :icon="['fas', 'sync']"
-        spin
-      />
-    </div>
-    <div
-      v-else
-      class="sponsorBlockSegments"
+      v-overlay-scrollbars
+      class="sponsorBlockContent"
     >
       <div
-        v-for="segment in segments"
-        :key="segment.uuid"
-        class="sponsorBlockSegment"
-        :class="{
-          passed: isSegmentPassed(segment),
-          selected: selectedUuid === segment.uuid
-        }"
+        class="sponsorBlockSubtitle"
       >
-        <button
-          type="button"
-          class="sponsorBlockSegmentSummary"
-          :aria-expanded="String(selectedUuid === segment.uuid)"
-          @click="selectSegment(segment.uuid)"
-        >
-          <span
-            class="sponsorBlockDot"
-            :style="{ backgroundColor: segment.color }"
-          />
-          <span class="sponsorBlockCategory">
-            {{ segment.description || segment.translatedCategory }}
-            <font-awesome-icon
-              v-if="segment.locked"
-              class="sponsorBlockLocked"
-              :icon="['fas', 'lock']"
-              :title="$t('Video.Player.SponsorBlock.LockedSegment')"
-            />
-          </span>
-          <span class="sponsorBlockTime">{{ segment.timeLabel }}</span>
-        </button>
+        {{ loading
+          ? $t('Video.Player.SponsorBlock.InfoPanelLoading')
+          : segments.length > 0
+            ? $t('Video.Player.SponsorBlock.InfoPanelHasSegments')
+            : $t('Video.Player.SponsorBlock.InfoPanelNoSegments') }}
+      </div>
+      <div
+        v-if="loading && segments.length === 0"
+        class="sponsorBlockLoading"
+        role="status"
+      >
+        <font-awesome-icon
+          :icon="['fas', 'sync']"
+          spin
+        />
+      </div>
+      <div
+        v-else
+        class="sponsorBlockSegments"
+      >
         <div
-          v-if="selectedUuid === segment.uuid"
-          class="sponsorBlockVoteActions"
+          v-for="segment in segments"
+          :key="segment.uuid"
+          class="sponsorBlockSegment"
+          :class="{
+            passed: isSegmentPassed(segment),
+            selected: selectedUuid === segment.uuid
+          }"
         >
           <button
             type="button"
-            class="sponsorBlockCollapseActions"
-            :aria-label="$t('Video.Player.SponsorBlock.CloseSegmentActions')"
-            :title="$t('Video.Player.SponsorBlock.CloseSegmentActions')"
+            class="sponsorBlockSegmentSummary"
+            :aria-expanded="String(selectedUuid === segment.uuid)"
             @click="selectSegment(segment.uuid)"
-          />
-          <button
-            v-if="submissionEnabled"
-            type="button"
-            class="sponsorBlockVoteButton"
-            :class="{ active: segment.userVote === 1 }"
-            :disabled="pendingUuid !== null"
-            :aria-label="$t('Video.Player.SponsorBlock.UpvoteSegment')"
-            :title="$t('Video.Player.SponsorBlock.UpvoteSegment')"
-            @click="$emit('vote', segment.uuid, 1)"
           >
-            <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+            <span
+              class="sponsorBlockDot"
+              :style="{ backgroundColor: segment.color }"
+            />
+            <span class="sponsorBlockCategory">
+              {{ segment.description || segment.translatedCategory }}
+              <font-awesome-icon
+                v-if="segment.locked"
+                class="sponsorBlockLocked"
+                :icon="['fas', 'lock']"
+                :title="$t('Video.Player.SponsorBlock.LockedSegment')"
+              />
+            </span>
+            <span class="sponsorBlockTime">{{ segment.timeLabel }}</span>
           </button>
-          <button
-            v-if="submissionEnabled"
-            type="button"
-            class="sponsorBlockVoteButton"
-            :class="{ active: segment.userVote === 0 }"
-            :disabled="pendingUuid !== null"
-            :aria-label="$t('Video.Player.SponsorBlock.DownvoteSegment')"
-            :title="$t('Video.Player.SponsorBlock.DownvoteSegment')"
-            @click="$emit('vote', segment.uuid, 0)"
+          <div
+            v-if="selectedUuid === segment.uuid"
+            class="sponsorBlockVoteActions"
           >
-            <font-awesome-icon :icon="['fas', 'thumbs-down']" />
-          </button>
-          <button
-            type="button"
-            class="sponsorBlockVoteButton sponsorBlockSkipButton"
-            :aria-label="$t('Video.Player.SponsorBlock.SkipSegment')"
-            :title="$t('Video.Player.SponsorBlock.SkipSegment')"
-            @click="$emit('skip', segment.uuid)"
-          >
-            <font-awesome-icon :icon="['fas', 'forward-fast']" />
-          </button>
+            <button
+              type="button"
+              class="sponsorBlockCollapseActions"
+              :aria-label="$t('Video.Player.SponsorBlock.CloseSegmentActions')"
+              :title="$t('Video.Player.SponsorBlock.CloseSegmentActions')"
+              @click="selectSegment(segment.uuid)"
+            />
+            <button
+              v-if="submissionEnabled"
+              type="button"
+              class="sponsorBlockVoteButton"
+              :class="{ active: segment.userVote === 1 }"
+              :disabled="pendingUuid !== null"
+              :aria-label="$t('Video.Player.SponsorBlock.UpvoteSegment')"
+              :title="$t('Video.Player.SponsorBlock.UpvoteSegment')"
+              @click="$emit('vote', segment.uuid, 1)"
+            >
+              <font-awesome-icon :icon="['fas', 'thumbs-up']" />
+            </button>
+            <button
+              v-if="submissionEnabled"
+              type="button"
+              class="sponsorBlockVoteButton"
+              :class="{ active: segment.userVote === 0 }"
+              :disabled="pendingUuid !== null"
+              :aria-label="$t('Video.Player.SponsorBlock.DownvoteSegment')"
+              :title="$t('Video.Player.SponsorBlock.DownvoteSegment')"
+              @click="$emit('vote', segment.uuid, 0)"
+            >
+              <font-awesome-icon :icon="['fas', 'thumbs-down']" />
+            </button>
+            <button
+              type="button"
+              class="sponsorBlockVoteButton sponsorBlockSkipButton"
+              :aria-label="$t('Video.Player.SponsorBlock.SkipSegment')"
+              :title="$t('Video.Player.SponsorBlock.SkipSegment')"
+              @click="$emit('skip', segment.uuid)"
+            >
+              <font-awesome-icon :icon="['fas', 'forward-fast']" />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <footer class="sponsorBlockFooter">
-      <div class="sponsorBlockFooterOptions">
-        <div class="sponsorBlockOption">
-          <label
-            class="sponsorBlockToggle"
-            :class="{ disabled: channelWhitelisted }"
-          >
-            <input
-              id="sponsorBlockAutoSkip"
-              class="sponsorBlockToggleInput"
-              type="checkbox"
-              :checked="!autoSkipDisabled"
-              :disabled="channelWhitelisted"
-              :aria-label="$t('Video.Player.SponsorBlock.AutoSkipEnabled')"
-              @change="$emit('auto-skip-change', $event.target.checked)"
+      <footer class="sponsorBlockFooter">
+        <div class="sponsorBlockFooterOptions">
+          <div class="sponsorBlockOption">
+            <label
+              class="sponsorBlockToggle"
+              :class="{ disabled: channelWhitelisted }"
             >
-            <span
-              class="sponsorBlockToggleTrack"
-              aria-hidden="true"
-            >
-              <span class="sponsorBlockToggleThumb">
-                <font-awesome-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
+              <input
+                id="sponsorBlockAutoSkip"
+                class="sponsorBlockToggleInput"
+                type="checkbox"
+                :checked="!autoSkipDisabled"
+                :disabled="channelWhitelisted"
+                :aria-label="$t('Video.Player.SponsorBlock.AutoSkipEnabled')"
+                @change="$emit('auto-skip-change', $event.target.checked)"
+              >
+              <span
+                class="sponsorBlockToggleTrack"
+                aria-hidden="true"
+              >
+                <span class="sponsorBlockToggleThumb">
+                  <font-awesome-icon :icon="['fas', autoSkipDisabled ? 'pause' : 'forward-fast']" />
+                </span>
               </span>
-            </span>
-          </label>
-          <label
-            for="sponsorBlockAutoSkip"
-            class="sponsorBlockOptionLabel"
-            :class="{ muted: channelWhitelisted }"
-          >
-            {{ $t('Video.Player.SponsorBlock.AutoSkipEnabled') }}
-            <span class="sponsorBlockOptionState">
-              {{ autoSkipDisabled
-                ? $t('Video.Player.SponsorBlock.AutoSkipOff')
-                : $t('Video.Player.SponsorBlock.AutoSkipOn') }}
-            </span>
-          </label>
-        </div>
-        <div class="sponsorBlockOption">
-          <button
-            type="button"
-            class="sponsorBlockWhitelistButton"
-            :class="{ active: channelWhitelisted }"
-            :disabled="!canWhitelistChannel"
-            :aria-pressed="String(channelWhitelisted)"
-            :aria-label="channelWhitelisted
-              ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
-              : $t('Video.Player.SponsorBlock.WhitelistChannel')"
-            :title="channelWhitelisted
-              ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
-              : $t('Video.Player.SponsorBlock.WhitelistChannel')"
-            @click="$emit('channel-whitelist-change', !channelWhitelisted)"
-          >
-            <span
-              class="sponsorBlockWhitelistBadge"
-              aria-hidden="true"
+            </label>
+            <label
+              for="sponsorBlockAutoSkip"
+              class="sponsorBlockOptionLabel"
+              :class="{ muted: channelWhitelisted }"
             >
-              <font-awesome-icon :icon="['fas', channelWhitelisted ? 'check' : 'plus']" />
-            </span>
-            <span class="sponsorBlockWhitelistLabel">
-              {{ channelWhitelisted
-                ? $t('Video.Player.SponsorBlock.ChannelWhitelisted')
-                : $t('Video.Player.SponsorBlock.WhitelistChannel') }}
-            </span>
-          </button>
+              {{ $t('Video.Player.SponsorBlock.AutoSkipEnabled') }}
+              <span class="sponsorBlockOptionState">
+                {{ autoSkipDisabled
+                  ? $t('Video.Player.SponsorBlock.AutoSkipOff')
+                  : $t('Video.Player.SponsorBlock.AutoSkipOn') }}
+              </span>
+            </label>
+          </div>
+          <div class="sponsorBlockOption">
+            <button
+              type="button"
+              class="sponsorBlockWhitelistButton"
+              :class="{ active: channelWhitelisted }"
+              :disabled="!canWhitelistChannel"
+              :aria-pressed="String(channelWhitelisted)"
+              :aria-label="channelWhitelisted
+                ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
+                : $t('Video.Player.SponsorBlock.WhitelistChannel')"
+              :title="channelWhitelisted
+                ? $t('Video.Player.SponsorBlock.RemoveChannelFromWhitelist')
+                : $t('Video.Player.SponsorBlock.WhitelistChannel')"
+              @click="$emit('channel-whitelist-change', !channelWhitelisted)"
+            >
+              <span
+                class="sponsorBlockWhitelistBadge"
+                aria-hidden="true"
+              >
+                <font-awesome-icon :icon="['fas', channelWhitelisted ? 'check' : 'plus']" />
+              </span>
+              <span class="sponsorBlockWhitelistLabel">
+                {{ channelWhitelisted
+                  ? $t('Video.Player.SponsorBlock.ChannelWhitelisted')
+                  : $t('Video.Player.SponsorBlock.WhitelistChannel') }}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   </section>
 </template>
 
@@ -324,11 +331,15 @@ function isSegmentPassed(segment) {
   font-size: 22px;
 }
 
-.sponsorBlockSegments {
+.sponsorBlockContent {
+  flex: 1 1 auto;
   min-block-size: 0;
+  overflow-y: auto;
+}
+
+.sponsorBlockSegments {
   padding-block: 4px 10px;
   padding-inline: 8px;
-  overflow-y: auto;
 }
 
 .sponsorBlockSegment {

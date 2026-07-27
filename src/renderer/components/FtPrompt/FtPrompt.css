@@ -22,7 +22,7 @@
 
 .promptCard {
   animation: prompt-card-enter 150ms ease-out;
-  overflow-y: scroll;
+  overflow-y: auto;
   max-block-size: 95%;
 }
 
