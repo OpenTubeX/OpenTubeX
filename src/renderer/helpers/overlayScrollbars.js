@@ -1,7 +1,11 @@
 import { watch } from 'vue'
-import { OverlayScrollbars } from 'overlayscrollbars'
+import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 
 import store from '../store/index'
+
+// Kept out of the core bundle by the library, so `clickScroll` below silently
+// does nothing unless it is registered.
+OverlayScrollbars.plugin(ClickScrollPlugin)
 
 /*
  * Chromium's own overlay scrollbars can't be styled and fade out when idle,
@@ -67,10 +71,14 @@ function toggleOverlayScrollbars(element, enabled) {
   const instance = OverlayScrollbars(element)
 
   if (enabled && !instance) {
+    // Hides the native scrollbars for the moment before the library takes over,
+    // the same way index.ejs does it for the page itself.
+    element.setAttribute('data-overlayscrollbars-initialize', '')
     // Reusing the element as the viewport keeps it the scrolling element, so
     // existing scrollTop/scrollLeft handling and CSS carry on working.
     create({ target: element, elements: { viewport: element } })
   } else if (!enabled && instance) {
+    element.removeAttribute('data-overlayscrollbars-initialize')
     instance.destroy()
   }
 }

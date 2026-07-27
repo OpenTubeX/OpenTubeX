@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
@@ -9,11 +9,14 @@ test.describe('overlay scrollbars', () => {
 
     // A classic scrollbar shrinks clientWidth below the viewport width, an
     // overlay one floats above the content and leaves the layout untouched.
-    const { clientWidth, innerWidth } = await page.evaluate(() => ({
+    // Only meaningful while the page actually overflows.
+    const { clientWidth, innerWidth, overflows } = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
-      innerWidth: window.innerWidth
+      innerWidth: window.innerWidth,
+      overflows: document.documentElement.scrollHeight > window.innerHeight
     }))
 
+    expect(overflows).toBe(true)
     expect(clientWidth).toBe(innerWidth)
   })
 
@@ -43,11 +46,51 @@ test.describe('overlay scrollbars', () => {
     )
   })
 
-  test('nested scroll containers scroll themselves, so scrollTop keeps working', async ({ page }) => {
-    const sideNavInner = page.locator('.sideNav .inner')
+  test('clicking the track jumps to that position', async ({ page }) => {
+    await goTo(page, 'settings')
+    // Needs the ClickScrollPlugin to be registered; without it the library
+    // ignores clickScroll and the track does nothing.
+    const track = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-track`)
+    const box = await track.boundingBox()
 
-    await expect(sideNavInner).toHaveCSS('overflow-y', 'auto')
-    expect(await sideNavInner.evaluate(element => element.clientWidth === element.offsetWidth)).toBe(true)
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height - 20)
+    await page.mouse.down()
+    await page.mouse.up()
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  })
+
+  test.describe('a nested scroll container', () => {
+    const now = Date.now()
+    test.use({
+      seed: {
+        settings: { enableSearchSuggestions: false },
+        searchHistory: Array.from({ length: 25 }, (_, index) => ({
+          _id: `search ${index + 1}`,
+          lastUpdatedAt: now - index
+        }))
+      }
+    })
+
+    test('stays the scrolling element, so scrollTop keeps working', async ({ page }) => {
+      await page.locator(sel.searchInput).click()
+      const list = page.locator('.topNav .searchContainer .options .list')
+      await expect(list).toBeVisible()
+
+      const measurements = await list.evaluate((element) => {
+        const overflows = element.scrollHeight > element.clientHeight
+        element.scrollTop = 120
+        return {
+          overflows,
+          noLayoutCost: element.clientWidth === element.offsetWidth,
+          scrollTop: element.scrollTop
+        }
+      })
+
+      expect(measurements.overflows).toBe(true)
+      expect(measurements.noLayoutCost).toBe(true)
+      expect(measurements.scrollTop).toBe(120)
+    })
   })
 
   test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page }) => {
