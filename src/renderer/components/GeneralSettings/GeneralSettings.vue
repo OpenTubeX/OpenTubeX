@@ -282,6 +282,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
+import { TOAST_POSITION_VALUES } from '../../constants/toastPosition'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 
@@ -625,15 +626,6 @@ const reducedMotion = computed(() => store.getters.getReducedMotion)
 function updateReducedMotion(value) {
   store.dispatch('updateReducedMotion', value)
 }
-
-const TOAST_POSITION_VALUES = [
-  'bottom-left',
-  'bottom-center',
-  'bottom-right',
-  'top-left',
-  'top-center',
-  'top-right'
-]
 
 const toastPositionNames = computed(() => [
   t('Settings.General Settings.Toast Position.Bottom Left'),

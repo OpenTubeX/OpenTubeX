@@ -56,6 +56,7 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { TOAST_POSITION_VALUES } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 
@@ -81,14 +82,6 @@ let removeShowToastListener = null
 
 /** Distance in px a toast must be dragged before it slides away instead of snapping back */
 const DRAG_DISMISS_THRESHOLD = 80
-const TOAST_POSITIONS = new Set([
-  'bottom-left',
-  'bottom-center',
-  'bottom-right',
-  'top-left',
-  'top-center',
-  'top-right'
-])
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
@@ -97,7 +90,7 @@ const fullscreenTarget = ref(null)
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => {
   const position = store.getters.getToastPosition
-  return TOAST_POSITIONS.has(position) ? position : 'bottom-left'
+  return TOAST_POSITION_VALUES.includes(position) ? position : 'bottom-left'
 })
 
 function updateFullscreenTarget() {
