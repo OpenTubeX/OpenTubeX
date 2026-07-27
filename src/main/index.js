@@ -1387,7 +1387,7 @@ function runApp() {
     }
 
     // Setup tab IPC handlers
-    setupTabsIPC({
+    await setupTabsIPC({
       confirmCloseWindow: (browserWindow) => {
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
         return isLastWindow ? confirmCloseApp(browserWindow) : true
@@ -3114,6 +3114,9 @@ function runApp() {
             case 'hidePlaylists':
             case 'keyboardShortcuts':
               await setMenu()
+              break
+            case 'tabCloseFocus':
+              TabManager.setTabCloseFocus(data.value)
               break
             case 'hideToTrayOnMinimize':
               if (isTrayOnMinimizeSupported) {
