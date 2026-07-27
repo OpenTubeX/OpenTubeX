@@ -54,6 +54,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { resolveSponsorBlockEnterTarget } from '../../helpers/player/sponsorBlockShortcut'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -1908,7 +1909,7 @@ export default defineComponent({
         : t('Video.Player.SponsorBlock.SkipToastUnskip')
 
       const activeToast = getActiveSponsorBlockToast()
-      if (getActivePromptSponsorBlockToast() || activeSponsorBlockHighlightSegment.value || activeToast?.uuid !== uuid) {
+      if (getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
         return actionLabel
       }
 
@@ -2097,26 +2098,23 @@ export default defineComponent({
 
     function toggleActiveSponsorBlockSkipState() {
       const promptToastEntry = getActivePromptSponsorBlockToast()
-      if (promptToastEntry) {
-        return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
-      }
-
-      if (activeSponsorBlockHighlightSegment.value) {
-        return skipToSponsorBlockHighlight()
-      }
-
       const toastEntry = getActiveSponsorBlockToast()
-      if (!toastEntry) {
-        return false
-      }
 
-      if (toastEntry.unskipped) {
-        redoSkipSponsorBlockSegment(toastEntry.uuid)
-      } else {
-        unskipSponsorBlockSegment(toastEntry.uuid)
+      switch (resolveSponsorBlockEnterTarget(!!promptToastEntry, !!toastEntry, !!activeSponsorBlockHighlightSegment.value)) {
+        case 'prompt':
+          return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
+        case 'toast':
+          if (toastEntry.unskipped) {
+            redoSkipSponsorBlockSegment(toastEntry.uuid)
+          } else {
+            unskipSponsorBlockSegment(toastEntry.uuid)
+          }
+          return true
+        case 'highlight':
+          return skipToSponsorBlockHighlight()
+        default:
+          return false
       }
-
-      return true
     }
 
     /**
@@ -2183,10 +2181,25 @@ export default defineComponent({
       events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', {
         detail: {
           visible: nextHighlightSegment !== null,
-          labelVisible: sponsorBlockHighlightLabelVisible
+          labelVisible: sponsorBlockHighlightLabelVisible,
+          shortcutAvailable: resolveSponsorBlockEnterTarget(
+            !!getActivePromptSponsorBlockToast(),
+            !!getActiveSponsorBlockToast(),
+            nextHighlightSegment !== null
+          ) === 'highlight'
         }
       }))
     }
+
+    // the highlight button only advertises the Enter shortcut while no toast is claiming it
+    watch(
+      () => skippedSponsorBlockSegments.value.length > 0 || promptSponsorBlockSegments.value.length > 0,
+      () => {
+        if (activeSponsorBlockHighlightSegment.value) {
+          updateSponsorBlockHighlightState()
+        }
+      }
+    )
 
     function pauseSponsorBlockHighlightLabelCountdown() {
       if (sponsorBlockHighlightLabelStartedAt === null) {

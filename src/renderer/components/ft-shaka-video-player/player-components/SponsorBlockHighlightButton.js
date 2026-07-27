@@ -29,6 +29,9 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
     this.button_.appendChild(this.nameSpan_)
     this.parent.appendChild(this.button_)
 
+    /** @private */
+    this.shortcutAvailable_ = true
+
     this.eventManager.listen(this.button_, 'click', () => {
       events.dispatchEvent(new CustomEvent('skipToSponsorBlockHighlight'))
     })
@@ -46,11 +49,11 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
 
   /** @private */
   updateLocalisedStrings_() {
-    const label = addKeyboardShortcutToActionTitle(
-      i18n.global.t('Video.Player.SponsorBlock.SkipToHighlight'),
-      i18n.global.t('Keys.enter')
-    )
-    const tooltipLabel = i18n.global.t('Video.Player.SponsorBlock.SkipToHighlight').replace(/\?$/, '')
+    const name = i18n.global.t('Video.Player.SponsorBlock.SkipToHighlight')
+    const label = this.shortcutAvailable_
+      ? addKeyboardShortcutToActionTitle(name, i18n.global.t('Keys.enter'))
+      : name
+    const tooltipLabel = name.replace(/\?$/, '')
 
     this.nameSpan_.textContent = label
     this.button_.ariaLabel = tooltipLabel
@@ -58,9 +61,14 @@ export class SponsorBlockHighlightButton extends shaka.ui.Element {
 
   /**
    * @private
-   * @param {{ visible: boolean, labelVisible: boolean }} state
+   * @param {{ visible: boolean, labelVisible: boolean, shortcutAvailable: boolean }} state
    */
   updateVisibility_(state) {
+    if (state.shortcutAvailable !== this.shortcutAvailable_) {
+      this.shortcutAvailable_ = state.shortcutAvailable
+      this.updateLocalisedStrings_()
+    }
+
     this.button_.classList.toggle('ft-shaka-highlight-button-collapsed', !state.labelVisible)
 
     if (state.visible) {
