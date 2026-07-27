@@ -3,20 +3,23 @@ import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
 
+/** The assertions below only mean anything once there is something to scroll. */
+const pageOverflows = (page) => page.evaluate(
+  () => document.documentElement.scrollHeight > window.innerHeight
+)
+
 test.describe('overlay scrollbars', () => {
   test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
     await goTo(page, 'settings')
+    await expect.poll(() => pageOverflows(page)).toBe(true)
 
     // A classic scrollbar shrinks clientWidth below the viewport width, an
     // overlay one floats above the content and leaves the layout untouched.
-    // Only meaningful while the page actually overflows.
-    const { clientWidth, innerWidth, overflows } = await page.evaluate(() => ({
+    const { clientWidth, innerWidth } = await page.evaluate(() => ({
       clientWidth: document.documentElement.clientWidth,
-      innerWidth: window.innerWidth,
-      overflows: document.documentElement.scrollHeight > window.innerHeight
+      innerWidth: window.innerWidth
     }))
 
-    expect(overflows).toBe(true)
     expect(clientWidth).toBe(innerWidth)
   })
 
@@ -48,6 +51,11 @@ test.describe('overlay scrollbars', () => {
 
   test('clicking the track jumps to that position', async ({ page }) => {
     await goTo(page, 'settings')
+    // Otherwise there is nothing to scroll and the assertion below would fail
+    // whether or not click scrolling works.
+    await expect.poll(() => pageOverflows(page)).toBe(true)
+    expect(await page.evaluate(() => window.scrollY)).toBe(0)
+
     // Needs the ClickScrollPlugin to be registered; without it the library
     // ignores clickScroll and the track does nothing.
     const track = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-track`)
