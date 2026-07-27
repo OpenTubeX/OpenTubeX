@@ -867,8 +867,6 @@ function playNextVideo() {
 }
 
 function playPreviousVideo() {
-  showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
-
   let videoIndex = videoIndexInPlaylistItems.value
 
   /*
@@ -893,6 +891,8 @@ function playPreviousVideo() {
   if (!targetPlaylistItem?.videoId) {
     return
   }
+
+  showToast({ message: t('Playing Previous Video'), icon: ['fas', 'step-backward'] })
 
   router.push(
     {
