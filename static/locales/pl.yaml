@@ -200,6 +200,7 @@ User Playlists:
   TotalTimePlaylist: 'Całkowita długość: {duration}'
   Export list of URLs: Eksportuj listę adresów URL
   Quick Bookmark Icon: Ikona szybkiej zakładki
+  Save to: Zapisz do…
 History:
   # On History Page
   History: 'Historia'
@@ -300,6 +301,8 @@ Settings:
       Force On: wymuś włączenie
       Force Off: wymuś wyłączenie
     Show Tab Icons: Pokaż ikony kart
+    Tab Close Focus:
+      Tab Close Focus: Po zamknięciu karty
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -1476,6 +1479,7 @@ Feed:
   Refresh Feed: Odśwież „{subscriptionName}”
   Feed Last Updated: 'Ostatnia aktualizacja „{feedName}”: {date}'
   Next Auto Refresh: 'Następne odświeżenie: {date}'
+  Cancel Refresh: Anuluj odświeżanie
 Moments Ago: chwilę temu
 Yes, Delete: Tak, usuń
 Search character limit: Zapytanie przekroczyło limit {searchCharacterLimit} znaków
