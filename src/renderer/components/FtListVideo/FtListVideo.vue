@@ -619,24 +619,14 @@ const dropdownOptions = computed(() => {
         icon: ['fas', 'link']
       },
       {
-        label: t('Video.Copy YouTube Embedded Player Link'),
-        value: 'copyYoutubeEmbed',
-        icon: ['fas', 'display']
-      },
-      ...showInvidiousShareOptions.value
-        ? [{
-            label: t('Video.Copy Invidious Link'),
-            value: 'copyInvidious',
-            icon: ['fas', 'link']
-          }]
-        : [],
-      {
-        type: 'divider'
-      },
-      {
         label: t('Video.Open in YouTube'),
         value: 'openYoutube',
         icon: ['fab', 'youtube']
+      },
+      {
+        label: t('Video.Copy YouTube Embedded Player Link'),
+        value: 'copyYoutubeEmbed',
+        icon: ['fas', 'display']
       },
       {
         label: t('Video.Open YouTube Embedded Player'),
@@ -644,11 +634,21 @@ const dropdownOptions = computed(() => {
         icon: ['fas', 'display']
       },
       ...showInvidiousShareOptions.value
-        ? [{
-            label: t('Video.Open in Invidious'),
-            value: 'openInvidious',
-            icon: ['fas', 'external-link-alt']
-          }]
+        ? [
+            {
+              type: 'divider'
+            },
+            {
+              label: t('Video.Copy Invidious Link'),
+              value: 'copyInvidious',
+              icon: ['fas', 'link']
+            },
+            {
+              label: t('Video.Open in Invidious'),
+              value: 'openInvidious',
+              icon: ['fas', 'external-link-alt']
+            }
+          ]
         : [],
     )
     if (channelId.value !== null) {
@@ -661,24 +661,27 @@ const dropdownOptions = computed(() => {
           value: 'copyYoutubeChannel',
           icon: ['fas', 'link']
         },
-        ...showInvidiousShareOptions.value
-          ? [{
-              label: t('Video.Copy Invidious Channel Link'),
-              value: 'copyInvidiousChannel',
-              icon: ['fas', 'link']
-            }]
-          : [],
         {
           label: t('Video.Open Channel in YouTube'),
           value: 'openYoutubeChannel',
           icon: ['fab', 'youtube']
         },
         ...showInvidiousShareOptions.value
-          ? [{
-              label: t('Video.Open Channel in Invidious'),
-              value: 'openInvidiousChannel',
-              icon: ['fas', 'external-link-alt']
-            }]
+          ? [
+              {
+                type: 'divider'
+              },
+              {
+                label: t('Video.Copy Invidious Channel Link'),
+                value: 'copyInvidiousChannel',
+                icon: ['fas', 'link']
+              },
+              {
+                label: t('Video.Open Channel in Invidious'),
+                value: 'openInvidiousChannel',
+                icon: ['fas', 'external-link-alt']
+              }
+            ]
           : [],
       )
     }
