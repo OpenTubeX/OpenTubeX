@@ -1717,9 +1717,9 @@ function handleKeyboardShortcuts(event) {
     }
 
     // F1: Toggle between horizontal and vertical tabs
-    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION)) {
+    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
       event.preventDefault()
-      store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+      toggleTabOrientation()
       return
     }
 
@@ -1772,6 +1772,19 @@ function handleKeyboardShortcuts(event) {
       prepareAndReloadTab()
     }
   }
+}
+
+/**
+ * The setting is only committed to the store once it has been persisted, so
+ * consecutive presses are queued to keep every one of them from negating the
+ * same stale value.
+ */
+let pendingTabOrientationUpdate = Promise.resolve()
+
+function toggleTabOrientation() {
+  pendingTabOrientationUpdate = pendingTabOrientationUpdate.then(() =>
+    store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+  )
 }
 
 /**

@@ -104,6 +104,49 @@ test.describe('tab orientation shortcut', () => {
     await page.keyboard.press('F1')
     await expect(app).not.toHaveClass(/verticalTabs/)
   })
+
+  test('presses in quick succession are not swallowed by the pending write', async ({ page }) => {
+    const app = page.locator('.app')
+
+    // The setting is only committed once persisted, so two presses that beat
+    // the write have to queue up instead of both negating the same value —
+    // otherwise they collapse into a single toggle and the layout flips.
+    await page.evaluate(() => {
+      for (let i = 0; i < 2; i++) {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', code: 'F1', bubbles: true }))
+      }
+    })
+
+    // Give both writes time to land before checking that they cancelled out.
+    await page.waitForTimeout(500)
+    await expect(app).not.toHaveClass(/verticalTabs/)
+  })
+})
+
+test.describe('tab orientation shortcut rebound to a printable key', () => {
+  test.use({
+    seed: {
+      settings: {
+        keyboardShortcuts: JSON.stringify({ APP: { GENERAL: { TOGGLE_TAB_ORIENTATION: 'v' } } })
+      }
+    }
+  })
+
+  test('typing the key in the search bar does not toggle the layout', async ({ page }) => {
+    const app = page.locator('.app')
+    const searchInput = page.locator(sel.searchInput)
+
+    await searchInput.click()
+    await searchInput.type('vv')
+
+    await expect(searchInput).toHaveValue('vv')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+
+    // Outside a text field the rebound key still works.
+    await page.locator('.app').click()
+    await page.keyboard.press('v')
+    await expect(app).toHaveClass(/verticalTabs/)
+  })
 })
 
 test.describe('narrow layout top padding', () => {
