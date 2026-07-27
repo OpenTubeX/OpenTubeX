@@ -476,6 +476,8 @@ test.describe('watch page', () => {
       element.append(annotations)
     })
     const annotations = page.locator('[data-test-annotations]')
+    await expect(annotations).toHaveCSS('transition-property', 'inset-inline-end')
+    await expect(annotations).toHaveCSS('transition-duration', '0.25s')
     await expect.poll(async () => {
       const [videoBounds, annotationBounds] = await Promise.all([
         playerVideo.boundingBox(),
