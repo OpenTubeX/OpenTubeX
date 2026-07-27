@@ -2075,7 +2075,11 @@ const availableChannelSearchFilters = computed(() => {
     })
   }
 
-  if (channelTabs.value.includes('shorts') && !hideChannelShorts.value) {
+  const hasShortResults = searchResults.value.some(result => {
+    return result.channelSearchResultType === CHANNEL_SEARCH_FILTERS.SHORTS
+  })
+
+  if (hasShortResults && !hideChannelShorts.value) {
     filters.push({
       value: CHANNEL_SEARCH_FILTERS.SHORTS,
       label: t('Global.Shorts'),

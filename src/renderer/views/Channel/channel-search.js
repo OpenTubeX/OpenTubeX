@@ -16,7 +16,6 @@ export const CHANNEL_SEARCH_FILTERS = {
  *   is_live?: boolean,
  *   is_upcoming?: boolean,
  *   is_premiere?: boolean,
- *   duration?: { seconds?: number },
  * }} item
  * @returns {'videos' | 'shorts' | 'live' | 'playlists'}
  */
@@ -34,12 +33,6 @@ export function getLocalChannelSearchResultType(item) {
     return CHANNEL_SEARCH_FILTERS.SHORTS
   }
 
-  // Channel search does not expose YouTube's Shorts classification. Duration
-  // is the only content signal shared by the local and Invidious responses.
-  if (item.duration?.seconds > 0 && item.duration.seconds <= 180) {
-    return CHANNEL_SEARCH_FILTERS.SHORTS
-  }
-
   return CHANNEL_SEARCH_FILTERS.VIDEOS
 }
 
@@ -48,9 +41,8 @@ export function getLocalChannelSearchResultType(item) {
  *   type: string,
  *   liveNow?: boolean,
  *   isUpcoming?: boolean,
- *   lengthSeconds?: number,
  * }} item
- * @returns {'videos' | 'shorts' | 'live' | 'playlists'}
+ * @returns {'videos' | 'live' | 'playlists'}
  */
 export function getInvidiousChannelSearchResultType(item) {
   if (item.type === 'playlist') {
@@ -59,10 +51,6 @@ export function getInvidiousChannelSearchResultType(item) {
 
   if (item.liveNow || item.isUpcoming) {
     return CHANNEL_SEARCH_FILTERS.LIVE
-  }
-
-  if (item.lengthSeconds > 0 && item.lengthSeconds <= 180) {
-    return CHANNEL_SEARCH_FILTERS.SHORTS
   }
 
   return CHANNEL_SEARCH_FILTERS.VIDEOS
