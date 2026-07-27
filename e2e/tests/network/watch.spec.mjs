@@ -338,6 +338,43 @@ test.describe('watch page', () => {
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
   })
 
+  test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    const commentCards = page.locator('.fullscreenCommentsOverlay .comment')
+    await expect(comments).toBeVisible()
+
+    await page.addStyleTag({
+      content: `
+        .fullscreenCommentsOverlay .comment { display: none; }
+        .fullscreenCommentsOverlay .commentAutoLoadSentinel { min-height: 1px; }
+      `
+    })
+    await page.route(/\/youtubei\/v1\/next/, async (route) => {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await route.continue()
+    })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    const initialCommentCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
+    const repeatedLoadCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(repeatedLoadCount)
+  })
+
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({
