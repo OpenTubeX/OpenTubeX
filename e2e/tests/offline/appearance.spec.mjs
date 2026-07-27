@@ -65,7 +65,11 @@ test.describe('UI roundness', () => {
 
     await goTo(page, 'settings')
     const roundnessSlider = page.getByRole('slider', { name: /UI Roundness/ })
+    const toggleSwitch = page.locator('label.switch-label').first()
+    const toggleTrackRadius = () => toggleSwitch.evaluate((element) =>
+      getComputedStyle(element, '::before').borderRadius)
     await expect(roundnessSlider).toHaveValue('0')
+    expect(await toggleTrackRadius()).toBe('8px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '0px')
     await expect(page.getByRole('button').first()).toHaveCSS('border-radius', '0px')
 
@@ -80,6 +84,7 @@ test.describe('UI roundness', () => {
     await page.keyboard.press('Escape')
     await roundnessSlider.fill('150')
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
+    expect(await toggleTrackRadius()).toBe('8px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
 
     ;({ page } = await app.relaunch())
