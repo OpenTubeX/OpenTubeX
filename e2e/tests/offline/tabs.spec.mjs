@@ -1,5 +1,26 @@
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
+/**
+ * Returns the box of an element that has stopped moving. Menus and submenus
+ * animate in, so measuring right after they become visible yields coordinates
+ * that are still a few pixels off their resting place.
+ * @param {import('@playwright/test').Locator} locator
+ * @returns {Promise<{ x: number, y: number, width: number, height: number }>}
+ */
+async function boundingBoxWhenSettled(locator) {
+  let previous = null
+
+  await expect.poll(async () => {
+    const box = await locator.boundingBox()
+    const current = box && `${box.x},${box.y},${box.width},${box.height}`
+    const settled = current !== null && current === previous
+    previous = current
+    return settled
+  }).toBe(true)
+
+  return await locator.boundingBox()
+}
+
 test.describe('tab bar', () => {
   test('new tab button opens a tab and activates it', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
@@ -282,10 +303,11 @@ test.describe('tab bar', () => {
     const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
     await expect(submenu).toBeVisible()
 
-    const parentBox = await closeTabs.boundingBox()
-    const submenuBox = await submenu.boundingBox()
-    expect(parentBox).not.toBeNull()
-    expect(submenuBox).not.toBeNull()
+    // The path below only clears the safe triangle by a couple of pixels, so it
+    // has to be built from where the submenu comes to rest rather than from
+    // where it is mid-animation.
+    const parentBox = await boundingBoxWhenSettled(closeTabs)
+    const submenuBox = await boundingBoxWhenSettled(submenu)
 
     await page.mouse.move(
       parentBox.x + parentBox.width * 0.75,
