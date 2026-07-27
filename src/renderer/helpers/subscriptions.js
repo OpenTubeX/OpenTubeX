@@ -7,6 +7,7 @@ import {
 } from './api/invidious'
 import { getLocalChannelCommunity, getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
 import {
+  fetchWithTimeout,
   getChannelPlaylistId,
   showApiErrorToast,
   showToast,
@@ -46,6 +47,7 @@ const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
 const RSS_ENRICHMENT_CONCURRENCY = 3
+const RSS_ENRICHMENT_TIMEOUT_MS = 15_000
 
 /**
  * Stops the refresh running in this renderer after the channels that are
@@ -382,7 +384,14 @@ function fetchRssVideoUpcomingInfo(videoId) {
  */
 async function fetchRssVideoUpcomingInfoUncached(videoId) {
   try {
-    const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`)
+    // Bounded because the enrichment workers await these one at a time: a
+    // request that never settles would hold its worker forever, leaving the
+    // channel's feed permanently unresolved. A timeout counts as a failed
+    // lookup, so it is not cached and the next refresh tries again.
+    const response = await fetchWithTimeout(
+      RSS_ENRICHMENT_TIMEOUT_MS,
+      `https://www.youtube.com/watch?v=${videoId}`
+    )
 
     if (!response.ok) {
       return { isUpcoming: false, failed: true }
