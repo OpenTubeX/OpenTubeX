@@ -303,6 +303,8 @@ Settings:
     Show Tab Icons: Pokaż ikony kart
     Tab Close Focus:
       Tab Close Focus: Po zamknięciu karty
+      Previous tab: Przełącz na poprzednią kartę
+      Next tab: Przełącz na następną kartę
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -1224,6 +1226,10 @@ Video:
   Drag to Reorder Queue: Przeciągnij {title}, aby zmienić kolejność w kolejce
   Metadata: Informacje o wideo
   Close Metadata: Zamknij informacje o wideo
+  Video has been saved to {playlistName}: Film został zapisany na liście odtwarzania {playlistName}
+  Video has been removed from {playlistName}: Film został usunięty z listy odtwarzania {playlistName}
+  There was a problem saving the video to {playlistName}: Wystąpił problem z zapisaniem filmu na liście odtwarzania {playlistName}
+  There was a problem removing the video from {playlistName}: Wystąpił problem podczas usuwania filmu z listy odtwarzania {playlistName}
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1592,6 +1598,7 @@ KeyboardShortcutPrompt:
   Reassign: Przypisz ponownie
   Undo: Cofnij
   Toggle Fast-Forward Through Silence: Przełączanie szybkiego przewijania przez ciszę
+  Toggle Tab Orientation: Przełączanie między kartami poziomymi i pionowymi
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
@@ -1706,6 +1713,7 @@ Context Menu:
   Search Selection in New Tab: Wyszukaj „{selection}” w nowej karcie
   Search Selection in New Window: Wyszukaj „{selection}” w nowym oknie
   Selection Too Long: Zaznaczona fraza jest za długa do wyszukiwania (> {count} znaków)
+  Cancel Refresh: Anuluj odświeżanie
 Downloads:
   Download: Pobierz
   Download Video: Pobierz wideo
