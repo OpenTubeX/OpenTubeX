@@ -29,7 +29,7 @@
   inset-block: -1px;
   inset-inline-end: 0;
   inline-size: 6px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background-color: color-mix(in srgb, var(--primary-color) 55%, #fff);
   box-shadow: 0 0 8px 2px color-mix(in srgb, var(--primary-color) 75%, transparent);
   content: '';

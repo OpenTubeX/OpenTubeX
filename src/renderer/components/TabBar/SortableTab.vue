@@ -432,7 +432,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   padding-inline: 10px;
   padding-block: 6px;
   background-color: var(--tab-surface-color, var(--bg-color));
-  border-radius: 6px 6px 0 0;
+  border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
   cursor: pointer;
   block-size: 31px;
   min-inline-size: 100px;
@@ -454,10 +454,10 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 }
 
 .tab.vertical {
-  inline-size: 100%;
+  inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   border-block-end: 1px solid transparent;
 }
 
@@ -474,7 +474,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 }
 
 .tab.vertical.pinned {
-  inline-size: 100%;
+  inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;
 }
@@ -650,7 +650,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   border: 0;
   cursor: pointer;
   padding: 2px;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   color: var(--tertiary-text-color);
   opacity: 0;
   transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
@@ -698,7 +698,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   z-index: 10000;
   padding: 8px;
   border: 1px solid var(--tertiary-text-color);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   box-shadow: 0 8px 26px rgb(0 0 0 / 32%);
   color: var(--primary-text-color);
@@ -727,7 +727,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   aspect-ratio: 16 / 9;
   inline-size: 100%;
   overflow: hidden;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--secondary-card-bg-color);
 }
 

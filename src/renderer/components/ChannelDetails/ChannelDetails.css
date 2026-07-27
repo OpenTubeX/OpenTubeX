@@ -1,5 +1,6 @@
 .bannerContainer {
   background: center / cover no-repeat var(--banner-url, transparent);
+  border-radius: calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness)) 0 0;
   block-size: 13vw;
   min-block-size: 110px;
   max-block-size: 32vh;
@@ -16,6 +17,7 @@
 .infoContainer {
   position: relative;
   background-color: var(--card-bg-color);
+  border-radius: 0 0 calc(8px * var(--ui-roundness)) calc(8px * var(--ui-roundness));
   margin-block-start: 10px;
   padding-block: 0;
   padding-inline: 16px;

@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
-async function setWindowWidth(app, width) {
+async function setWindowWidth (app, width) {
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
     const bounds = browserWindow.getBounds()
@@ -11,7 +11,7 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
-async function enableVerticalTabBar(page, width) {
+async function enableVerticalTabBar (page, width) {
   await page.evaluate((tabBarWidth) => {
     const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
     store.commit('setUseVerticalTabBar', true)
@@ -54,6 +54,64 @@ test.describe('default appearance', () => {
     await expect(page.locator(sel.sideNavLink('trending'))).not.toHaveCount(0)
     await expect(page.locator('.topNav .profiles .colorOption').first()).toBeVisible()
     await expect(page.locator('body')).toHaveClass(/system/)
+  })
+})
+
+test.describe('UI roundness', () => {
+  test.use({ seed: { settings: { uiRoundness: 0 } } })
+
+  test('applies to controls, cards, popovers, and modals', async ({ app, page }) => {
+    await expect(page.locator('body')).toHaveCSS('--ui-roundness', '0')
+
+    await goTo(page, 'settings')
+    const roundnessSlider = page.getByRole('slider', { name: /UI Roundness/ })
+    await expect(roundnessSlider).toHaveValue('0')
+    await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '0px')
+    await expect(page.getByRole('button').first()).toHaveCSS('border-radius', '0px')
+
+    await page.locator('.settingsMenu [data-section="data"]').click()
+    await page.getByRole('button', { name: 'Export Subscriptions' }).click()
+    await expect(page.getByRole('dialog')).toHaveCSS('border-radius', '0px')
+
+    await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
+    await page.locator(sel.tabs).first().click({ button: 'right' })
+    await expect(page.getByRole('menu', { name: 'Context menu' })).toHaveCSS('border-radius', '0px')
+
+    await page.keyboard.press('Escape')
+    await roundnessSlider.fill('150')
+    await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
+    await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'settings')
+    await expect(page.getByRole('slider', { name: /UI Roundness/ })).toHaveValue('150')
+  })
+})
+
+test.describe('rounded feed page headers', () => {
+  test.use({
+    seed: {
+      settings: {
+        uiRoundness: 200,
+        backendPreference: 'invidious',
+        backendFallback: true,
+        fetchSubscriptionsAutomatically: false
+      }
+    }
+  })
+
+  test('preserves scaled card corners on feed pages', async ({ page }) => {
+    const pages = [
+      { route: 'subscriptions', header: '.subscriptionsHeader' },
+      { route: 'trending', header: '.pageHeader' },
+      { route: 'popular', header: '.pageHeader' }
+    ]
+
+    for (const { route, header } of pages) {
+      await goTo(page, route)
+      await expect(page.locator(header)).toHaveCSS('border-top-left-radius', '16px')
+      await expect(page.locator(header)).toHaveCSS('border-top-right-radius', '16px')
+    }
   })
 })
 
@@ -103,6 +161,13 @@ test.describe('tab orientation shortcut', () => {
 
     await page.keyboard.press('F1')
     await expect(app).toHaveClass(/verticalTabs/)
+    await expect.poll(async () => {
+      return page.locator('.tab.vertical.active').evaluate((tab) => {
+        const tabEnd = tab.getBoundingClientRect().right
+        const viewportEnd = tab.parentElement.getBoundingClientRect().right
+        return viewportEnd - tabEnd
+      })
+    }).toBeGreaterThanOrEqual(1)
 
     await page.keyboard.press('F1')
     await expect(app).not.toHaveClass(/verticalTabs/)

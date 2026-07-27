@@ -1632,12 +1632,22 @@ const secColor = computed(() => store.getters.getSecColor)
 
 watch(secColor, updateTheme)
 
+/** @type {import('vue').ComputedRef<number>} */
+const uiRoundness = computed(() => store.getters.getUiRoundness)
+
+watch(uiRoundness, updateUiRoundness)
+
 function updateTheme() {
   document.body.className = `${baseTheme.value || 'system'} main${mainColor.value || 'Red'} sec${secColor.value || 'Blue'}`
   document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
+function updateUiRoundness() {
+  document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
+}
+
 updateTheme()
+updateUiRoundness()
 
 const showUpdatesBanner = ref(false)
 const latestVersionNumber = ref('')

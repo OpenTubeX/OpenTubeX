@@ -9,6 +9,8 @@ const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
 const CHANNEL_ID = 'UCSMOQeBJ2RAnuFungnQOxLg'
 
 test.describe('channel page', () => {
+  test.use({ seed: { settings: { uiRoundness: 200 } } })
+
   test('shows channel info and videos', async ({ page }) => {
     await page.locator(sel.searchInput).fill(CHANNEL_URL)
     await page.locator(sel.searchInput).press('Enter')
@@ -16,6 +18,11 @@ test.describe('channel page', () => {
     await expect(page).toHaveURL(/#\/channel\/UCSMOQeBJ2RAnuFungnQOxLg/)
     await expect(page.getByText('Blender').first()).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.ft-list-video').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('body')).toHaveCSS('--ui-roundness', '2')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-left-radius', '16px')
+    await expect(page.locator('.channelDetails .bannerContainer')).toHaveCSS('border-top-right-radius', '16px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-left-radius', '16px')
+    await expect(page.locator('.channelDetails .infoContainer')).toHaveCSS('border-bottom-right-radius', '16px')
 
     // Channel tab changes must update the route and title without creating a
     // new history entry for every tab selection (796650405, 912e5ea6e).

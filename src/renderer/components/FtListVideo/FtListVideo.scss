@@ -59,7 +59,7 @@
   margin-inline: 2px;
   background-color: var(--secondary-card-bg-color);
   font-size: 10px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   display: inline-block;
   font-weight: 500;
   white-space-collapse: collapse;

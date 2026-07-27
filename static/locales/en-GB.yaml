@@ -377,6 +377,7 @@ Settings:
     Secondary Color Theme: 'Secondary colour theme'
         #* Main Color Theme
     UI Scale: UI Scale
+    UI Roundness: UI Roundness
     Disable Smooth Scrolling: Disable smooth scrolling
     Expand Side Bar by Default: Expand side bar by default
     Hide Side Bar Labels: Hide side bar labels

@@ -30,8 +30,8 @@
   /* paint above the nav entries' hover/active backgrounds */
   z-index: 1;
   inline-size: 3px;
-  border-start-end-radius: 999px;
-  border-end-end-radius: 999px;
+  border-start-end-radius: calc(999px * var(--ui-roundness));
+  border-end-end-radius: calc(999px * var(--ui-roundness));
   background-color: var(--primary-color);
   pointer-events: none;
   transition: transform 200ms ease, block-size 200ms ease;

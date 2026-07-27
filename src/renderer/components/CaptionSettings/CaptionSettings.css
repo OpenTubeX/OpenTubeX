@@ -3,7 +3,7 @@
   box-sizing: border-box;
   min-block-size: 120px;
   margin-block-end: 1rem;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background: linear-gradient(135deg, #576574, #222f3e);
   font-size: calc(20px * var(--caption-font-scale));
   overflow: hidden;
@@ -66,7 +66,7 @@
   min-block-size: 76px;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
 }
 
@@ -93,7 +93,7 @@
   block-size: 36px;
   padding: 2px;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   background: transparent;
   cursor: pointer;
 }

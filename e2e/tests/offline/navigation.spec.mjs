@@ -26,4 +26,17 @@ test.describe('side nav navigation', () => {
     await page.locator(sel.forwardButton).click()
     await expect(page).toHaveURL(/#\/settings/)
   })
+
+  test('navigation history popout shows page icons and a drop shadow', async ({ page }) => {
+    await goTo(page, 'history')
+    await goTo(page, 'settings')
+
+    await page.locator(sel.backButton).click({ button: 'right' })
+
+    const popout = page.locator('.topNav .iconDropdown')
+    await expect(popout).toBeVisible()
+    await expect(popout.locator('[role="option"]')).toHaveCount(3)
+    await expect(popout.locator('[role="option"] svg')).toHaveCount(3)
+    await expect(popout).not.toHaveCSS('box-shadow', 'none')
+  })
 })

@@ -99,6 +99,17 @@
           @input="previewThumbnailSize"
           @change="updateThumbnailSize"
         />
+        <FtSlider
+          :label="t('Settings.Theme Settings.UI Roundness')"
+          :default-value="uiRoundness"
+          setting-key="uiRoundness"
+          :min-value="0"
+          :max-value="200"
+          :step="5"
+          value-extension="%"
+          @input="previewUiRoundness"
+          @change="updateUiRoundness"
+        />
       </div>
     </FtFlexBox>
     <br>
@@ -383,6 +394,7 @@ function updateUiScale(value) {
 
 /** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
+const uiRoundness = computed(() => store.getters.getUiRoundness)
 
 /**
  * @param {number} value
@@ -396,6 +408,20 @@ function previewThumbnailSize(value) {
  */
 function updateThumbnailSize(value) {
   store.dispatch('updateThumbnailSize', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewUiRoundness(value) {
+  store.commit('setUiRoundness', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateUiRoundness(value) {
+  store.dispatch('updateUiRoundness', value)
 }
 
 /** @type {boolean} */

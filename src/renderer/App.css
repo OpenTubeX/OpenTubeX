@@ -126,7 +126,7 @@
   color: var(--primary-text-color);
   background-color: color-mix(in srgb, var(--bg-color) 94%, #000);
   border: 1px solid var(--tertiary-text-color);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 12px 32px rgb(0 0 0 / 32%);
 }
 
@@ -145,7 +145,7 @@
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
   border: 1px solid var(--tertiary-text-color);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   outline: none;
 }
 
@@ -173,7 +173,7 @@
   color: var(--primary-text-color);
   background-color: transparent;
   border: 0;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   cursor: pointer;
 }
 
@@ -223,7 +223,7 @@
   padding: 12px;
   background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
   border: 1px solid var(--tertiary-text-color);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 16px 40px rgb(0 0 0 / 38%);
 }
 
@@ -236,7 +236,7 @@
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;
   text-align: start;
   transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
@@ -259,7 +259,7 @@
   block-size: 112px;
   overflow: hidden;
   background-color: color-mix(in srgb, var(--bg-color) 84%, #000);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
 }
 
 .tabSwitcherPreview img {

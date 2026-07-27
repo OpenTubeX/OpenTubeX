@@ -49,7 +49,7 @@
 .syncProgressTrack {
   background-color: var(--side-nav-color);
   block-size: 0.4rem;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   overflow: hidden;
 }
 

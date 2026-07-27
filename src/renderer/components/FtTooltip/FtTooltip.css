@@ -9,7 +9,7 @@
 
 .text {
   background-color: color-mix(in srgb, var(--primary-text-color) 80%, transparent);
-  border-radius: 20px;
+  border-radius: calc(20px * var(--ui-roundness));
   color: var(--card-bg-color);
   font-size: 1rem;
   line-height: 120%;
