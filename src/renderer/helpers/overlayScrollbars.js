@@ -78,7 +78,7 @@ function optimizeBodyScrollbarDrag(instance) {
     }
 
     event.preventDefault()
-    event.stopPropagation()
+    event.stopImmediatePropagation()
 
     const pointerId = event.pointerId
     const startClientY = event.clientY
@@ -94,7 +94,7 @@ function optimizeBodyScrollbarDrag(instance) {
 
     const applyDrag = () => {
       frame = null
-      window.scrollTo(0, startScrollY + (clientY - startClientY) / trackRange * scrollRange)
+      window.scrollTo(window.scrollX, startScrollY + (clientY - startClientY) / trackRange * scrollRange)
     }
 
     const onPointerMove = (moveEvent) => {
@@ -130,8 +130,8 @@ function optimizeBodyScrollbarDrag(instance) {
     handle.setPointerCapture(pointerId)
   }
 
-  handle.addEventListener('pointerdown', onPointerDown)
-  instance.on('destroyed', () => handle.removeEventListener('pointerdown', onPointerDown))
+  handle.addEventListener('pointerdown', onPointerDown, true)
+  instance.on('destroyed', () => handle.removeEventListener('pointerdown', onPointerDown, true))
 }
 
 /**
