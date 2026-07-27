@@ -79,6 +79,7 @@ test.describe('rounded action popovers', () => {
 test.describe('list video actions', () => {
   test('the options dropdown shows readable single-column actions with icons', async ({ page }) => {
     await goTo(page, 'history')
+    await page.setViewportSize({ width: 1200, height: 360 })
 
     const video = page.locator('.ft-list-video').first()
     await video.hover()
@@ -97,6 +98,12 @@ test.describe('list video actions', () => {
     })).toBe(true)
     const actionRows = await actions.evaluateAll((items) => items.map((item) => item.offsetTop))
     expect(new Set(actionRows).size).toBe(actionRows.length)
+
+    const dropdownBounds = await dropdown.boundingBox()
+    expect(dropdownBounds.y).toBeGreaterThanOrEqual(0)
+    expect(dropdownBounds.y + dropdownBounds.height).toBeLessThanOrEqual(360)
+    expect(await dropdown.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
+    await expect(actions.last()).toBeVisible()
   })
 
   test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {

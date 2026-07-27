@@ -241,6 +241,8 @@ $watched-transition-duration: 0.5s;
       :deep(.iconDropdown) {
         inline-size: min(320px, calc(100vw - 16px));
         font-size: 14px;
+        max-block-size: calc(100vh - 16px);
+        overflow: hidden auto;
         box-shadow:
           0 16px 40px rgb(0 0 0 / 55%),
           0 3px 10px rgb(0 0 0 / 45%);

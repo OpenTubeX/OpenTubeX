@@ -265,6 +265,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
       // then focus it so we can hide it automatically when it loses focus
       nextTick(() => {
         dropdown.value?.focus()
+        keepDropdownInViewport()
       })
     }
   } else {
@@ -293,6 +294,21 @@ function handleIconPointerDown(event) {
       }, { once: true })
     }, LONG_CLICK_BOUNDARY_MS)
   }
+}
+
+function keepDropdownInViewport() {
+  if (dropdown.value == null) {
+    return
+  }
+
+  const viewportMargin = 8
+  dropdown.value.style.removeProperty('transform')
+
+  const rect = dropdown.value.getBoundingClientRect()
+  const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
+  const offsetY = Math.max(viewportMargin - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
+
+  dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
 }
 
 function preventButtonClickAfterLongPress() {
