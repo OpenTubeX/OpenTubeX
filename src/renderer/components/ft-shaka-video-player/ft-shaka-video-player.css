@@ -2887,6 +2887,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
@@ -2894,6 +2895,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ) {
