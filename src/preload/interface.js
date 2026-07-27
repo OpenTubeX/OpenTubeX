@@ -446,6 +446,28 @@ export default {
     },
 
     /**
+     * Ask the renderer that owns the subscription refresh to cancel it.
+     */
+    cancel: () => {
+      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL)
+    },
+
+    /**
+     * Listen for cancellation requests from other windows.
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onCancelRequested: (handler) => {
+      const listener = () => {
+        handler()
+      }
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, listener)
+      }
+    },
+
+    /**
      * Check whether a renderer currently owns the subscription refresh.
      * @returns {Promise<{inProgress: boolean, percentage: number, tab: string | null}>}
      */

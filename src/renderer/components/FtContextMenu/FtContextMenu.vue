@@ -16,7 +16,7 @@
         @pointerdown.stop
       >
         <template
-          v-for="(item, index) in items"
+          v-for="(item, index) in displayedItems"
           :key="item.actionId ?? `separator-${index}`"
         >
           <div
@@ -126,6 +126,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import store from '../../store/index'
+
 const { t, te } = useI18n()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)
@@ -142,11 +144,26 @@ const menuStyle = computed(() => ({
   top: `${position.value.y}px`
 }))
 
+/**
+ * Entries with a refreshing label follow the refresh state while the menu is
+ * open, as the refresh can end (or be started elsewhere) in the meantime.
+ */
+const displayedItems = computed(() => {
+  if (!store.getters.getSubscriptionFeedRefreshInProgress) {
+    return items.value
+  }
+
+  return items.value.map(item => item.refreshingLabel
+    ? { ...item, label: item.refreshingLabel }
+    : item)
+})
+
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
 }
 
 const itemIcons = {
+  'Cancel Refresh': ['fas', 'xmark'],
   'Close Tab': ['fas', 'xmark'],
   'Close Tabs': ['fas', 'rectangle-xmark'],
   'Copy Image': ['fas', 'images'],
