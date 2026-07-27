@@ -7,13 +7,14 @@
       tag="div"
       name="toast"
       class="toast-holder"
+      :class="`position-${toastPosition}`"
       @before-leave="onBeforeLeave"
     >
       <div
         v-for="toast in toasts"
         :key="toast.id"
         class="toast-slot"
-        :class="{ 'dismiss-left': toast.dismissing }"
+        :class="toast.dismissDirection && `dismiss-${toast.dismissDirection}`"
       >
         <div
           class="toast"
@@ -47,8 +48,9 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { showToast, ToastEventBus } from '../../helpers/utils'
+import store from '../../store'
 
 let idCounter = 0
 let removeShowToastListener = null
@@ -64,8 +66,8 @@ let removeShowToastListener = null
  * @property {number} expiresAt timestamp the toast is due to auto-dismiss at, used to reschedule after a drag
  * @property {boolean} dragging
  * @property {boolean} pointerMoved whether the pointer moved enough to count as a drag (suppresses the click action)
- * @property {number} dragOffset current horizontal (leftward, <= 0) drag offset in px
- * @property {boolean} dismissing whether the toast is being swiped off to the left (picks the slide-left leave animation)
+ * @property {number} dragOffset current horizontal drag offset in px
+ * @property {'left' | 'right' | null} dismissDirection side through which the toast is being dismissed
  * @property {number} [dragStartX] pointer x position where the current drag started
  */
 
@@ -76,6 +78,8 @@ const DRAG_DISMISS_THRESHOLD = 80
 const toasts = reactive([])
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
+/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
+const toastPosition = computed(() => store.getters.getToastPosition)
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
@@ -101,7 +105,7 @@ function open({ detail: { message, time, action, abortSignal, image } }) {
     dragging: false,
     pointerMoved: false,
     dragOffset: 0,
-    dismissing: false
+    dismissDirection: null
   }
   let elapsed = 0
   const updateDelay = 1000
@@ -146,14 +150,14 @@ function performAction(toast) {
 
 /**
  * Dismisses a toast without running its action, for users who want it out of
- * the way. Flags it for the slide-left leave animation, then removes it on the
- * next tick so the `dismiss-left` class is rendered before the leave starts.
+ * the way. Flags it for the appropriate horizontal leave animation, then removes
+ * it on the next tick so the dismiss class is rendered before the leave starts.
  * Removing promptly (rather than after a timeout) lets the toasts above start
  * animating into the freed space without any delay.
  * @param {Toast} toast
  */
-function dismiss(toast) {
-  toast.dismissing = true
+function dismiss(toast, direction = toastPosition.value.endsWith('right') ? 'right' : 'left') {
+  toast.dismissDirection = direction
   nextTick(() => remove(toast))
 }
 
@@ -197,10 +201,17 @@ function onPointerDown(toast, event) {
 function onPointerMove(toast, event) {
   if (!toast.dragging) { return }
 
-  // Only allow dragging towards the left; ignore any rightward movement
-  toast.dragOffset = Math.min(0, event.clientX - toast.dragStartX)
+  const offset = event.clientX - toast.dragStartX
 
-  if (toast.dragOffset < -5) {
+  if (toastPosition.value.endsWith('left')) {
+    toast.dragOffset = Math.min(0, offset)
+  } else if (toastPosition.value.endsWith('right')) {
+    toast.dragOffset = Math.max(0, offset)
+  } else {
+    toast.dragOffset = offset
+  }
+
+  if (Math.abs(offset) > 5) {
     toast.pointerMoved = true
   }
 }
@@ -213,8 +224,8 @@ function onPointerUp(toast) {
 
   toast.dragging = false
 
-  if (toast.dragOffset < -DRAG_DISMISS_THRESHOLD) {
-    dismiss(toast)
+  if (Math.abs(toast.dragOffset) > DRAG_DISMISS_THRESHOLD) {
+    dismiss(toast, toast.dragOffset < 0 ? 'left' : 'right')
   } else {
     // Snap back into place and resume the auto-dismiss countdown for whatever
     // is left of the original lifetime. Keeping the deadline absolute matters
@@ -252,7 +263,7 @@ function dragStyle(toast) {
 
   return {
     transform: `translateX(${toast.dragOffset}px)`,
-    opacity: Math.max(0, 1 + toast.dragOffset / 200)
+    opacity: Math.max(0, 1 - Math.abs(toast.dragOffset) / 200)
   }
 }
 

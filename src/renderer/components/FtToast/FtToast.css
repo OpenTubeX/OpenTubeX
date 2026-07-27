@@ -1,15 +1,47 @@
 .toast-holder {
   position: fixed;
-  inset-inline-start: 24px;
-  inset-block-end: 24px;
 
   /* Higher than any prompt */
   z-index: 300;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   pointer-events: none;
 }
+
+.toast-holder.position-bottom-left,
+.toast-holder.position-bottom-center,
+.toast-holder.position-bottom-right {
+  inset-block-end: 24px;
+}
+
+.toast-holder.position-top-left,
+.toast-holder.position-top-center,
+.toast-holder.position-top-right {
+  inset-block-start: 24px;
+  flex-direction: column-reverse;
+}
+
+/* These settings name physical screen edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.toast-holder.position-bottom-left,
+.toast-holder.position-top-left {
+  left: 24px;
+  align-items: flex-start;
+}
+
+.toast-holder.position-bottom-center,
+.toast-holder.position-top-center {
+  left: 50%;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.toast-holder.position-bottom-right,
+.toast-holder.position-top-right {
+  right: 24px;
+  align-items: flex-end;
+}
+/* stylelint-enable liberty/use-logical-spec */
 
 :global(body.playerFullWindow .toast-holder) {
   z-index: 1002;
@@ -78,15 +110,41 @@
   pointer-events: none;
 }
 
-.toast-enter-from,
-.toast-leave-to {
+.position-bottom-center .toast-enter-from,
+.position-bottom-center .toast-leave-to {
   opacity: 0;
   transform: translateY(15px) scale(0.95);
 }
 
-/* When dismissed by a leftward swipe, continue sliding off to the left */
+.position-top-center .toast-enter-from,
+.position-top-center .toast-leave-to {
+  opacity: 0;
+  transform: translateY(-15px) scale(0.95);
+}
+
+.position-bottom-left .toast-enter-from,
+.position-bottom-left .toast-leave-to,
+.position-top-left .toast-enter-from,
+.position-top-left .toast-leave-to {
+  opacity: 0;
+  transform: translateX(-15px) scale(0.95);
+}
+
+.position-bottom-right .toast-enter-from,
+.position-bottom-right .toast-leave-to,
+.position-top-right .toast-enter-from,
+.position-top-right .toast-leave-to {
+  opacity: 0;
+  transform: translateX(15px) scale(0.95);
+}
+
+/* When dismissed by a swipe, continue sliding off through that side */
 .toast-slot.dismiss-left.toast-leave-to {
   transform: translateX(-110%);
+}
+
+.toast-slot.dismiss-right.toast-leave-to {
+  transform: translateX(110%);
 }
 
 /* stack reflow when a toast is removed */

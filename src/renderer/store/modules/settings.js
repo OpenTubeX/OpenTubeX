@@ -349,6 +349,7 @@ const state = {
   thumbnailPreference: '',
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   showThumbnailSizeButtonInHeader: true,
+  toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,
   syncServerUrl: 'https://sync.d3sox.me',

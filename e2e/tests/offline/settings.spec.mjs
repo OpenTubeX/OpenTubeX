@@ -110,6 +110,116 @@ test.describe('settings', () => {
     await expect(autoLoadToggle).not.toBeChecked()
     await expect(resetButton).toHaveCount(0)
   })
+
+  test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const positionSelect = page.locator('.select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
+    const holder = page.locator('.toast-holder')
+
+    async function showToast (message) {
+      await page.evaluate((text) => {
+        window.ftElectron.showToastOnAllTabs(text, 10000)
+      }, message)
+
+      const toast = holder.locator('.toast', { hasText: message })
+      await expect(toast).toBeVisible()
+      return toast
+    }
+
+    async function dragToast (toast, distance) {
+      const bounds = await toast.boundingBox()
+      const x = bounds.x + bounds.width / 2
+      const y = bounds.y + bounds.height / 2
+
+      await page.mouse.move(x, y)
+      await page.mouse.down()
+      await page.mouse.move(x + distance, y, { steps: 5 })
+    }
+
+    function viewportSize () {
+      return page.evaluate(() => ({
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight
+      }))
+    }
+
+    await positionSelect.selectOption('bottom-left')
+    await expect(holder).toHaveClass(/position-bottom-left/)
+    let toast = await showToast('Left toast')
+    let bounds = await toast.boundingBox()
+    let viewport = await viewportSize()
+    expect(bounds.x).toBeLessThan(50)
+    expect(bounds.y + bounds.height).toBeGreaterThan(viewport.height - 50)
+    await dragToast(toast, 100)
+    await page.mouse.up()
+    await expect(toast).toBeVisible()
+    await dragToast(toast, -100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    await positionSelect.selectOption('bottom-center')
+    await expect(holder).toHaveClass(/position-bottom-center/)
+    toast = await showToast('Center toast dragged left')
+    bounds = await toast.boundingBox()
+    viewport = await viewportSize()
+    expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
+    await dragToast(toast, -100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    toast = await showToast('Center toast dragged right')
+    await dragToast(toast, 100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    await positionSelect.selectOption('bottom-right')
+    await expect(holder).toHaveClass(/position-bottom-right/)
+    toast = await showToast('Right toast')
+    bounds = await toast.boundingBox()
+    viewport = await viewportSize()
+    expect(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 50)
+    await dragToast(toast, -100)
+    await page.mouse.up()
+    await expect(toast).toBeVisible()
+    await dragToast(toast, 100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    await positionSelect.selectOption('top-left')
+    await expect(holder).toHaveClass(/position-top-left/)
+    toast = await showToast('Top left toast')
+    bounds = await toast.boundingBox()
+    expect(bounds.x).toBeLessThan(50)
+    expect(bounds.y).toBeLessThan(50)
+    await dragToast(toast, -100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    await positionSelect.selectOption('top-center')
+    await expect(holder).toHaveClass(/position-top-center/)
+    toast = await showToast('Top center toast')
+    bounds = await toast.boundingBox()
+    viewport = await viewportSize()
+    expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
+    expect(bounds.y).toBeLessThan(50)
+    await dragToast(toast, 100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+
+    await positionSelect.selectOption('top-right')
+    await expect(holder).toHaveClass(/position-top-right/)
+    toast = await showToast('Top right toast')
+    bounds = await toast.boundingBox()
+    viewport = await viewportSize()
+    expect(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 50)
+    expect(bounds.y).toBeLessThan(50)
+    await dragToast(toast, 100)
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+  })
 })
 
 test.describe('synced setting indicators', () => {
