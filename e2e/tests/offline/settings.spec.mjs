@@ -162,6 +162,7 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('bottom-center')
     await expect(holder).toHaveClass(/position-bottom-center/)
+    await expect(holder).toHaveCSS('transform', 'none')
     toast = await showToast('Center toast dragged left')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
@@ -219,6 +220,20 @@ test.describe('settings', () => {
     await dragToast(toast, 100)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
+  })
+})
+
+test.describe('invalid toast position', () => {
+  test.use({ seed: { settings: { toastPosition: 'unsupported' } } })
+
+  test('falls back to bottom left', async ({ page }) => {
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Fallback toast', 10000)
+    })
+
+    const holder = page.locator('.toast-holder')
+    await expect(holder.locator('.toast', { hasText: 'Fallback toast' })).toBeVisible()
+    await expect(holder).toHaveClass(/position-bottom-left/)
   })
 })
 

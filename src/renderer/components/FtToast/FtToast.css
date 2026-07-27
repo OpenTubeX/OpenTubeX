@@ -31,9 +31,9 @@
 
 .toast-holder.position-bottom-center,
 .toast-holder.position-top-center {
-  left: 50%;
+  right: 0;
+  left: 0;
   align-items: center;
-  transform: translateX(-50%);
 }
 
 .toast-holder.position-bottom-right,

@@ -81,13 +81,24 @@ let removeShowToastListener = null
 
 /** Distance in px a toast must be dragged before it slides away instead of snapping back */
 const DRAG_DISMISS_THRESHOLD = 80
+const TOAST_POSITIONS = new Set([
+  'bottom-left',
+  'bottom-center',
+  'bottom-right',
+  'top-left',
+  'top-center',
+  'top-right'
+])
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
-const toastPosition = computed(() => store.getters.getToastPosition)
+const toastPosition = computed(() => {
+  const position = store.getters.getToastPosition
+  return TOAST_POSITIONS.has(position) ? position : 'bottom-left'
+})
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
