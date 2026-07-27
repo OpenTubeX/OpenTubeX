@@ -1287,8 +1287,24 @@ export function throttle(func, wait) {
   }
 }
 
+// Every list item of every feed can add an entry, so the cache is capped and
+// evicts the oldest titles first rather than growing for the whole session.
+const OEMBED_TITLE_CACHE_LIMIT = 500
 const oembedTitleCache = new Map()
 const oembedTitleRequests = new Map()
+
+/**
+ * @param {string} videoId
+ * @param {string} title
+ */
+function cacheOembedTitle(videoId, title) {
+  if (oembedTitleCache.size >= OEMBED_TITLE_CACHE_LIMIT) {
+    // Map iterates in insertion order, so the first key is the oldest one.
+    oembedTitleCache.delete(oembedTitleCache.keys().next().value)
+  }
+
+  oembedTitleCache.set(videoId, title)
+}
 
 /**
  * @param {string} videoId
@@ -1316,7 +1332,7 @@ export async function getOembedTitle(videoId) {
     try {
       const oembedInfo = await (await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}`)).json()
       if (typeof oembedInfo.title === 'string' && oembedInfo.title.length > 0) {
-        oembedTitleCache.set(videoId, oembedInfo.title)
+        cacheOembedTitle(videoId, oembedInfo.title)
         return oembedInfo.title
       }
     } catch (error) {

@@ -45,6 +45,7 @@ const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
+const RSS_ENRICHMENT_CONCURRENCY = 3
 
 /**
  * Stops the refresh running in this renderer after the channels that are
@@ -338,14 +339,53 @@ export function isVideoHiddenByPreferences(video, {
 }
 
 /**
+ * Video ids already known not to be premieres. Each lookup downloads a full
+ * watch page and every refresh re-parses the same RSS entries, so without this
+ * the same new uploads would be fetched again on every refresh. Only negative
+ * results are cached: a video that isn't a premiere never becomes one, whereas
+ * an upcoming premiere does eventually go live.
+ * @type {Set<string>}
+ */
+const rssNonPremiereVideoIds = new Set()
+/** @type {Map<string, Promise<{ isUpcoming: boolean, premiereDate?: Date }>>} */
+const rssUpcomingInfoRequests = new Map()
+
+/**
  * @param {string} videoId
  */
-async function fetchRssVideoUpcomingInfo(videoId) {
+function fetchRssVideoUpcomingInfo(videoId) {
+  if (rssNonPremiereVideoIds.has(videoId)) {
+    return Promise.resolve({ isUpcoming: false })
+  }
+
+  const inFlight = rssUpcomingInfoRequests.get(videoId)
+  if (inFlight !== undefined) {
+    return inFlight
+  }
+
+  const request = fetchRssVideoUpcomingInfoUncached(videoId).then((info) => {
+    // A failed lookup says nothing about the video, so let the next refresh retry.
+    if (!info.isUpcoming && !info.failed) {
+      rssNonPremiereVideoIds.add(videoId)
+    }
+    return info
+  }).finally(() => {
+    rssUpcomingInfoRequests.delete(videoId)
+  })
+
+  rssUpcomingInfoRequests.set(videoId, request)
+  return request
+}
+
+/**
+ * @param {string} videoId
+ */
+async function fetchRssVideoUpcomingInfoUncached(videoId) {
   try {
     const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`)
 
     if (!response.ok) {
-      return { isUpcoming: false }
+      return { isUpcoming: false, failed: true }
     }
 
     const html = await response.text()
@@ -365,7 +405,7 @@ async function fetchRssVideoUpcomingInfo(videoId) {
       premiereDate
     }
   } catch {
-    return { isUpcoming: false }
+    return { isUpcoming: false, failed: true }
   }
 }
 
@@ -456,7 +496,9 @@ export async function parseYouTubeRSSFeed(rssString, channelId) {
 
     return {
       name: channelName,
-      videos: await Promise.all(videos.map(video => enrichRssVideoIfNeeded(video)))
+      // Enrichment downloads a watch page per candidate, so cap how many of them
+      // a single channel can have in flight at once.
+      videos: await mapConcurrently(videos, RSS_ENRICHMENT_CONCURRENCY, enrichRssVideoIfNeeded)
     }
   } catch {
     return {

@@ -130,9 +130,20 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
-  getPlaylistVideoIds: (state) => new Set(
-    state.playlists.flatMap(playlist => playlist.videos.map(video => video.videoId))
-  ),
+  // Every list item reads this, and it is rebuilt on any playlist change, so
+  // fill the set directly instead of allocating an intermediate array per
+  // playlist plus one flattened array holding every video id.
+  getPlaylistVideoIds: (state) => {
+    const videoIds = new Set()
+
+    for (const playlist of state.playlists) {
+      for (const video of playlist.videos) {
+        videoIds.add(video.videoId)
+      }
+    }
+
+    return videoIds
+  },
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },

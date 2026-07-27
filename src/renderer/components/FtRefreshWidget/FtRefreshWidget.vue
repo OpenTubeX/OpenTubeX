@@ -176,13 +176,44 @@ function spinHourglassOnce() {
   spinHourglass.value = true
 }
 
-onMounted(() => {
+// Only the countdown ring needs a per-second tick. Tabs stay mounted while not
+// presented, so leaving the timer running would churn reactivity once a second
+// per open feed tab even when no countdown is on screen.
+const countdownVisible = computed(() => props.nextAutoRefreshAt > 0 && props.autoRefreshInterval > 0)
+
+function startCountdownTicker() {
+  if (countdownTicker !== null) {
+    return
+  }
+
+  updateCountdown()
   countdownTicker = setInterval(updateCountdown, 1000)
+}
+
+function stopCountdownTicker() {
+  if (countdownTicker !== null) {
+    clearInterval(countdownTicker)
+    countdownTicker = null
+  }
+}
+
+watch(countdownVisible, (visible) => {
+  if (visible) {
+    startCountdownTicker()
+  } else {
+    stopCountdownTicker()
+  }
+})
+
+onMounted(() => {
+  if (countdownVisible.value) {
+    startCountdownTicker()
+  }
   document.addEventListener('visibilitychange', updateCountdown)
 })
 
 onBeforeUnmount(() => {
-  clearInterval(countdownTicker)
+  stopCountdownTicker()
   document.removeEventListener('visibilitychange', updateCountdown)
 })
 

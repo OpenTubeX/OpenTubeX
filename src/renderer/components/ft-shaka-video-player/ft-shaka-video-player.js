@@ -3178,7 +3178,9 @@ export default defineComponent({
     function handleSeekBarMouseMove(event) {
       if (!container.value || !player) return
 
-      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      // The listener is bound to the seek bar container itself, so there is no
+      // need to look it up again on every one of these very frequent events.
+      const seekBarContainer = event.currentTarget
       if (!seekBarContainer) return
 
       if (props.chapters.length === 0) {
@@ -3292,7 +3294,7 @@ export default defineComponent({
     function handleSponsorBlockSeekBarMouseMove(event) {
       if (!container.value || !player) return
 
-      const seekBarContainer = container.value.querySelector('.shaka-seek-bar-container')
+      const seekBarContainer = event.currentTarget
       const thumbnailTime = seekBarContainer?.querySelector('.shaka-player-ui-thumbnail-time')
       if (!seekBarContainer || !thumbnailTime) return
 

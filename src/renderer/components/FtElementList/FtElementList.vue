@@ -3,6 +3,7 @@
     :appear="appear"
     :grid="displayValue !== 'list'"
     :thumbnail-size="thumbnailSize"
+    :item-count="data.length"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
