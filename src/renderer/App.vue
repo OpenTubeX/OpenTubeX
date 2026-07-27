@@ -295,6 +295,7 @@ import {
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote,
   SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
+  SUBSCRIPTION_REFRESH_CANCELLED_EVENT,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
   SUBSCRIPTION_REFRESH_LOCK_NAME,
@@ -547,6 +548,7 @@ let removeReloadRequestListener = null
 let removeOpenUrlListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
+const cancelledSubscriptionAutoRefreshKeys = new Set()
 let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
@@ -789,6 +791,7 @@ onMounted(async () => {
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
   window.addEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.addEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
   window.addEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.addEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
   window.addEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
@@ -830,6 +833,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
   window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
   window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
   window.removeEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
@@ -1018,15 +1022,22 @@ async function processPendingSubscriptionAutoRefreshes() {
           continue
         }
 
+        cancelledSubscriptionAutoRefreshKeys.delete(key)
         const result = await getSubscriptionTabRefreshHandler(tab)({
           t,
           showStartToast: true
         })
+        const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
 
         if (result === null) {
-          scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          if (wasCancelled) {
+            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
+          } else {
+            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          }
         }
       } catch (error) {
+        cancelledSubscriptionAutoRefreshKeys.delete(key)
         console.error(`Failed to auto refresh subscription ${tab}`, error)
         scheduleSubscriptionTabAutoRefreshRetry(
           tab,
@@ -1157,8 +1168,15 @@ function getSubscriptionTabRefreshHandler(tab) {
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
+function getSubscriptionTabAutoRefreshInterval(tab) {
+  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
 function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  const interval = getSubscriptionTabAutoRefreshInterval(tab)
 
   return (
     dataReady.value &&
@@ -1352,6 +1370,21 @@ function synchronizeSubscriptionAutoRefreshProfile(profileId) {
     )
     scheduleSubscriptionTabAutoRefresh(tab, profileId)
   }
+}
+
+/**
+ * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string}>} event
+ */
+function handleSubscriptionRefreshCancelled(event) {
+  const { tab, profileId } = event.detail
+  if (
+    profileId !== activeSubscriptionProfileId.value ||
+    !subscriptionAutoRefreshTabs.includes(tab)
+  ) {
+    return
+  }
+
+  cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
 }
 
 /**

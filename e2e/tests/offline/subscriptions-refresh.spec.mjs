@@ -188,3 +188,39 @@ test.describe('cancelling a subscription feed refresh', () => {
     await expect(menu.getByRole('menuitem', { name: 'Cancel Refresh' })).toHaveCount(0)
   })
 })
+
+test.describe('cancelling an automatic subscription feed refresh', () => {
+  const channelCount = 12
+
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        subscriptionFeedAutoRefreshInterval: '5000'
+      },
+      profiles: [profileWith(channelCount)],
+      subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index))
+    }
+  })
+
+  test('resets the timer instead of immediately refreshing again', async ({ page }) => {
+    let requestCount = 0
+    await routeFeeds(page, () => {
+      requestCount++
+      return 4_000
+    })
+    await goTo(page, 'subscriptions')
+
+    const cancelRefresh = page.getByRole('button', { name: 'Cancel refresh' })
+    await expect(cancelRefresh).toBeVisible({ timeout: 10_000 })
+    await cancelRefresh.click()
+
+    await expect(page.locator('.tabsProgressBar')).toHaveCount(0, { timeout: 20_000 })
+    const requestCountAfterCancel = requestCount
+    await page.waitForTimeout(2_000)
+
+    expect(requestCountAfterCancel).toBeGreaterThan(0)
+    expect(requestCount).toBe(requestCountAfterCancel)
+    await expect(cancelRefresh).toHaveCount(0)
+  })
+})
