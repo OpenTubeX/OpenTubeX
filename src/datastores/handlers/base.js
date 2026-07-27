@@ -1,4 +1,5 @@
 import * as db from '../index'
+import { PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 
 class Settings {
@@ -467,7 +468,7 @@ class Playlists {
    * that can order two of them adding the same video at the same time.
    * `upsertVideosByPlaylistId` is the bulk path and still allows duplicates.
    *
-   * @returns {Promise<boolean>} whether the video was added
+   * @returns {Promise<'added' | 'already-present' | 'playlist-missing'>}
    */
   static async upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData) {
     const { numAffected } = await db.playlists.updateAsync(
@@ -484,7 +485,18 @@ class Playlists {
       { upsert: false }
     )
 
-    return numAffected > 0
+    if (numAffected > 0) {
+      return PlaylistVideoAddResult.ADDED
+    }
+
+    // Nothing was written, which means the video is already in the playlist, or
+    // the playlist is gone (another window may have deleted it). Only the former
+    // leaves the caller with what it asked for, so the two must be told apart.
+    const playlist = await db.playlists.findOneAsync({ _id })
+
+    return playlist == null
+      ? PlaylistVideoAddResult.PLAYLIST_MISSING
+      : PlaylistVideoAddResult.ALREADY_PRESENT
   }
 
   static upsertVideosByPlaylistId(_id, lastUpdatedAt, videos) {

@@ -13,6 +13,7 @@ import {
   IpcChannels,
   DBActions,
   SyncEvents,
+  PlaylistVideoAddResult,
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
@@ -3404,11 +3405,11 @@ function runApp() {
           return null
 
         case DBActions.PLAYLISTS.UPSERT_VIDEO: {
-          const added = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)
+          const result = await baseHandlers.playlists.upsertVideoByPlaylistId(data._id, data.lastUpdatedAt, data.videoData)
 
-          // The video was already in the playlist, so nothing was written and
-          // the other windows have nothing to apply
-          if (added) {
+          // Nothing was written when the video is already in the playlist or the
+          // playlist is gone, so the other windows have nothing to apply
+          if (result === PlaylistVideoAddResult.ADDED) {
             syncOtherWindows(
               IpcChannels.SYNC_PLAYLISTS,
               event,
@@ -3416,7 +3417,7 @@ function runApp() {
             )
           }
 
-          return added
+          return result
         }
 
         case DBActions.PLAYLISTS.UPSERT_VIDEOS:

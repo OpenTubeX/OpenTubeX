@@ -1,3 +1,4 @@
+import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
@@ -236,17 +237,18 @@ const actions = {
 
         const lastUpdatedAt = Date.now()
 
-        const added = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
+        const result = await DBPlaylistHandlers.upsertVideoByPlaylistId(_id, lastUpdatedAt, videoData)
 
-        // Nothing was written because another window got there first. Committing
-        // anyway would show the video twice once that window's sync event lands
-        if (added) {
+        if (result === PlaylistVideoAddResult.ADDED) {
           payload.lastUpdatedAt = lastUpdatedAt
           commit('addVideo', payload)
         }
 
-        // Either way the video is now in the playlist
-        return true
+        // ALREADY_PRESENT means another window got there first, so the video is
+        // in the playlist and its sync event brings it into our state. Committing
+        // as well would show it twice. PLAYLIST_MISSING is a genuine failure:
+        // the playlist is gone, so the caller must not report a saved video.
+        return result !== PlaylistVideoAddResult.PLAYLIST_MISSING
       } catch (errMessage) {
         console.error(errMessage)
 

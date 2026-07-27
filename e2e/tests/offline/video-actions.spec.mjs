@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, waitForAppReady } from '../../helpers/app.mjs'
-import { DBActions } from '../../../src/constants.js'
+import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
 function historyEntry(videoId, title) {
   return {
@@ -199,11 +199,36 @@ test.describe('list video actions', () => {
       addFromWindow(secondWindow, 'from-second-window')
     ])
 
-    // Exactly one of them wrote, and the other was told it did not
-    expect(written.filter(Boolean)).toHaveLength(1)
+    // Exactly one of them wrote, and the other was told the video was already there
+    expect(written.filter((result) => result === PlaylistVideoAddResult.ADDED)).toHaveLength(1)
+    expect(written.filter((result) => result === PlaylistVideoAddResult.ALREADY_PRESENT)).toHaveLength(1)
 
     const favorites = await readPlaylist(app, 'favorites')
     expect(favorites.videos.map((entry) => entry.videoId)).toEqual(['eeeeeeeeeee'])
+  })
+
+  test('adding to a playlist that no longer exists is not reported as saved', async ({ page }) => {
+    await goTo(page, 'history')
+
+    // A write that changes nothing is ambiguous, so a deleted playlist has to be
+    // told apart from the video already being there
+    const result = await page.evaluate((action) => window.ftElectron.dbPlaylists(action, {
+      _id: 'playlist-deleted-in-another-window',
+      lastUpdatedAt: Date.now(),
+      videoData: {
+        videoId: 'eeeeeeeeeee',
+        playlistItemId: 'orphaned',
+        title: 'Bookmarkable video',
+        author: 'Test Channel',
+        authorId: 'UC-test-channel-id',
+        lengthSeconds: 60,
+        published: Date.now(),
+        timeAdded: Date.now(),
+        type: 'video'
+      }
+    }), DBActions.PLAYLISTS.UPSERT_VIDEO)
+
+    expect(result).toBe(PlaylistVideoAddResult.PLAYLIST_MISSING)
   })
 
   test('creating a playlist from the dropdown puts the video in it', async ({ app, page }) => {
