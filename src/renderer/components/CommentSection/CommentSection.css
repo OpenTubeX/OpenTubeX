@@ -128,6 +128,10 @@
   margin: 0;
 }
 
+.commentAutoLoadSentinel {
+  min-block-size: 1px;
+}
+
 .getCommentsTitle {
   padding-block: 8px;
   text-align: center;
