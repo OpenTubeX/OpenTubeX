@@ -80,6 +80,12 @@ const THEATRE_MODE_ANIMATION_DURATION = 400
 // where the refreshed stream fails again before it ever settles.
 const MAX_SABR_ERROR_RECOVERIES = 3
 const SABR_ERROR_RECOVERY_SETTLE_SECONDS = 30
+// timeupdate fires about four times a second, so a natural tick stays well
+// under a second even at the fastest playback rate, while the smallest seek
+// shortcut jumps 5s. Anything above this is a seek and must not count as played
+// content, otherwise seeking around a broken stream would keep handing it fresh
+// recovery attempts.
+const SABR_ERROR_RECOVERY_MAX_TICK_SECONDS = 2
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -265,7 +271,8 @@ export default defineComponent({
       ipBlockRecoveryAttemptedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
       /** @type {number|null} */
-      sabrErrorRecoveryResumedAtSeconds: null,
+      sabrErrorRecoveryLastSeconds: null,
+      sabrErrorRecoveryPlayedSeconds: 0,
       /** @type {number|null} */
       watchTimeLastTick: null,
       /** @type {Record<string, number>} */
@@ -856,7 +863,8 @@ export default defineComponent({
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
         this.sabrErrorRecoveryAttempts = 0
-        this.sabrErrorRecoveryResumedAtSeconds = null
+        this.sabrErrorRecoveryLastSeconds = null
+        this.sabrErrorRecoveryPlayedSeconds = 0
       }
       this.ipBlockDetectedInCurrentChain = false
       this.resetVideoState({
@@ -1984,13 +1992,20 @@ export default defineComponent({
       // Once the refreshed stream has actually played a stretch of content it
       // has proven itself, so refill the budget: a later, unrelated SABR
       // failure gets its own refetch instead of dropping straight to legacy
-      // 360p. Seeking backwards past the marker just rebases it.
-      if (this.sabrErrorRecoveryResumedAtSeconds !== null) {
-        if (currentSeconds < this.sabrErrorRecoveryResumedAtSeconds) {
-          this.sabrErrorRecoveryResumedAtSeconds = currentSeconds
-        } else if (currentSeconds - this.sabrErrorRecoveryResumedAtSeconds > SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
-          this.sabrErrorRecoveryAttempts = 0
-          this.sabrErrorRecoveryResumedAtSeconds = null
+      // 360p. Only natural playback ticks count towards that, so seeking around
+      // a stream that never plays can't keep the budget topped up.
+      if (this.sabrErrorRecoveryLastSeconds !== null) {
+        const elapsed = currentSeconds - this.sabrErrorRecoveryLastSeconds
+        this.sabrErrorRecoveryLastSeconds = currentSeconds
+
+        if (elapsed > 0 && elapsed <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS) {
+          this.sabrErrorRecoveryPlayedSeconds += elapsed
+
+          if (this.sabrErrorRecoveryPlayedSeconds >= SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
+            this.sabrErrorRecoveryAttempts = 0
+            this.sabrErrorRecoveryLastSeconds = null
+            this.sabrErrorRecoveryPlayedSeconds = 0
+          }
         }
       }
 
@@ -2608,8 +2623,9 @@ export default defineComponent({
         // the legacy 360p stream.
         this.sabrErrorRecoveryAttempts++
         // The reload resumes here, so this is the baseline the refreshed stream
-        // has to play past before the refetch budget refills.
-        this.sabrErrorRecoveryResumedAtSeconds = this.getTimestamp()
+        // starts accumulating played content from before the budget refills.
+        this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
+        this.sabrErrorRecoveryPlayedSeconds = 0
         await this.onPlayerReloadRequested(
           this.$refs.player?.getSabrReloadState(),
           'Refreshing SABR stream after playback error'

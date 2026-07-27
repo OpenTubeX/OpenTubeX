@@ -105,7 +105,7 @@ async function mockWatchPage(app, page) {
  * stays offline and deterministic.
  *
  * @param {import('@playwright/test').Page} page
- * @param {Array<{ error: true } | { playTo: number }>} script
+ * @param {Array<{ error: true } | { playFor: number } | { seekTo: number }>} script
  */
 function driveWatchView(page, script) {
   return page.evaluate(async (steps) => {
@@ -157,12 +157,23 @@ function driveWatchView(page, script) {
       data: ['https://example.invalid/sabr', 500]
     })
 
+    // The real player emits timeupdate straight off the video element, roughly
+    // four times a second, so playback is replayed here at that granularity.
+    const TICK_SECONDS = 0.25
+    let position = 0
+
     const formats = []
     for (const step of steps) {
       if (step.error) {
         await watchView.handlePlayerError(criticalError())
+      } else if (step.seekTo !== undefined) {
+        position = step.seekTo
+        watchView.handleTimeUpdate(position)
       } else {
-        watchView.handleTimeUpdate(step.playTo)
+        for (let played = 0; played < step.playFor; played += TICK_SECONDS) {
+          position += TICK_SECONDS
+          watchView.handleTimeUpdate(position)
+        }
       }
       formats.push(watchView.activeFormat)
     }
@@ -181,8 +192,7 @@ test('a second SABR failure after successful playback refetches instead of dropp
   const result = await driveWatchView(page, [
     { error: true },
     // The refreshed stream plays well past the settle threshold.
-    { playTo: 10 },
-    { playTo: 120 },
+    { playFor: 60 },
     // An unrelated failure much later in the same video.
     { error: true }
   ])
@@ -211,4 +221,27 @@ test('SABR failures that never settle stop refetching and fall back to legacy', 
 
   expect(result.reloads).toHaveLength(3)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
+})
+
+test('seeking around a stream that never plays does not refill the budget', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  // Each failure is followed by a long seek rather than real playback, so the
+  // budget must still run out instead of being topped up by the position jump.
+  const result = await driveWatchView(page, [
+    { error: true },
+    { seekTo: 300 },
+    { error: true },
+    { seekTo: 900 },
+    { error: true },
+    { seekTo: 60 },
+    { error: true }
+  ])
+
+  expect(result.reloads).toHaveLength(3)
+  expect(result.finalFormat).toBe('legacy')
 })
