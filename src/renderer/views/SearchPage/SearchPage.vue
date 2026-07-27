@@ -59,8 +59,8 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import store from '../../store'
 
 import {
-  copyToClipboard,
   searchFiltersMatch,
+  showApiErrorToast,
   showToast,
 } from '../../helpers/utils'
 import {
@@ -200,7 +200,10 @@ function updateSearchHistoryEntry(searchSettings) {
 function checkSearchCache(payload) {
   if (payload.query.length > SEARCH_CHAR_LIMIT) {
     console.warn(`Search character limit is: ${SEARCH_CHAR_LIMIT}`)
-    showToast(t('Search character limit', { searchCharacterLimit: SEARCH_CHAR_LIMIT }))
+    showToast({
+      message: t('Search character limit', { searchCharacterLimit: SEARCH_CHAR_LIMIT }),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -266,12 +269,10 @@ async function performSearchLocal(payload) {
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       await performSearchInvidious(payload)
     } else {
       isLoading.value = false
@@ -305,12 +306,10 @@ async function getNextpageLocal(payload) {
     console.error(err)
 
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (backendPreference.value === 'local' && backendFallback.value) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       await performSearchInvidious(payload)
     } else {
       isLoading.value = false
@@ -363,12 +362,10 @@ async function performSearchInvidious(payload, options = { resetSearchPage: fals
     console.error(err)
 
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'invidious' && backendFallback.value) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       await performSearchLocal(payload)
     } else {
       isLoading.value = false
@@ -399,7 +396,7 @@ async function nextPage() {
         isLoadingMore.value = false
       }
     } else {
-      showToast(t('Search Filters.There are no more results for this search'))
+      showToast({ message: t('Search Filters.There are no more results for this search'), icon: ['fas', 'search'] })
     }
   } else {
     isLoadingMore.value = true

@@ -21,12 +21,12 @@ import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
-  copyToClipboard,
   extractNumberFromString,
   formatDurationAsTimestamp,
   formatNumber,
   getCachedOembedTitle,
   getOembedTitle,
+  showApiErrorToast,
   showToast,
   showToastOnAllTabs
 } from '../../helpers/utils'
@@ -642,7 +642,8 @@ export default defineComponent({
           message: removed
             ? this.$t('Video.Video has been removed from {playlistName}', { playlistName })
             : this.$t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
-          image: this.toastThumbnail
+          image: this.toastThumbnail,
+          icon: ['fas', 'trash'],
         })
         return
       }
@@ -663,7 +664,8 @@ export default defineComponent({
         message: saved
           ? this.$t('Video.Video has been saved to {playlistName}', { playlistName })
           : this.$t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
-        image: this.toastThumbnail
+        image: this.toastThumbnail,
+        icon: ['fas', 'bookmark'],
       })
     },
     handleChaptersOverlayChange(open) {
@@ -1439,10 +1441,11 @@ export default defineComponent({
             }
           } else {
             // video might be region locked or something else. This leads to no formats being available
-            this.showTabToast(
-              this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
-              7000
-            )
+            this.showTabToast({
+              message: this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
+              time: 7000,
+              icon: ['fas', 'circle-exclamation'],
+            })
             this.handleVideoEnded()
             return
           }
@@ -1512,10 +1515,8 @@ export default defineComponent({
         console.error(err)
         if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
           const errorMessage = this.t('Local API Error (Click to copy)')
-          this.showTabToast(`${errorMessage}: ${err}`, 10000, () => {
-            copyToClipboard(err)
-          })
-          this.showTabToast(this.t('Falling back to Invidious API'))
+          showApiErrorToast(errorMessage, err, this.showTabToast)
+          this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           this.getVideoInformationInvidious()
         } else {
           const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -1717,10 +1718,8 @@ export default defineComponent({
           console.error(err)
           if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
             const errorMessage = this.t('Invidious API Error (Click to copy)')
-            this.showTabToast(`${errorMessage}: ${err}`, 10000, () => {
-              copyToClipboard(err)
-            })
-            this.showTabToast(this.t('Falling back to Local API'))
+            showApiErrorToast(errorMessage, err, this.showTabToast)
+            this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
             this.getVideoInformationLocal()
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -1762,26 +1761,30 @@ export default defineComponent({
       if (startedRecovery) {
         // IP block recovery affects the whole app (network level), so surface it
         // globally once, from the tab that atomically started the shared run.
-        showToastOnAllTabs(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs)
+        showToastOnAllTabs(this.t('Settings.Proxy Settings.Running IP block recovery script'), longToastDurationMs, ['fas', 'shield-halved'])
       }
 
       try {
         const result = await window.ftElectron.executeIpBlockRecoveryScript(scriptPath)
         if (startedRecovery && result?.exitCode !== 0) {
           const exitCode = result?.exitCode == null ? 'unknown' : `${result.exitCode}`
-          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs)
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode }), longToastDurationMs, ['fas', 'circle-exclamation'])
         } else if (startedRecovery) {
-          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs)
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script finished'), longToastDurationMs, ['fas', 'check'])
         }
       } catch (error) {
         console.error('IP block recovery script failed:', error)
         if (startedRecovery) {
-          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs)
+          showToastOnAllTabs(this.t('Settings.Proxy Settings.IP block recovery script failed', { exitCode: 'unknown' }), longToastDurationMs, ['fas', 'circle-exclamation'])
         }
       }
 
       // The reload only affects this tab's video, so keep it scoped.
-      this.showTabToast(this.t('Settings.Proxy Settings.Reloading video after IP block recovery'), longToastDurationMs)
+      this.showTabToast({
+        message: this.t('Settings.Proxy Settings.Reloading video after IP block recovery'),
+        time: longToastDurationMs,
+        icon: ['fas', 'sync'],
+      })
       await this.reloadView()
       return true
     },
@@ -2041,7 +2044,7 @@ export default defineComponent({
     handleWatchProgressManualSave() {
       // Should be called by manual action, settings should be checked in UI
       this._saveWatchProgress()
-      showToast(this.t('Video.Watched Progress Saved'))
+      showToast({ message: this.t('Video.Watched Progress Saved'), icon: ['fas', 'save'] })
     },
     handleChannelPlaybackSpeedManualSave() {
       // Should be called by manual action, settings should be checked in UI
@@ -2051,7 +2054,7 @@ export default defineComponent({
       }
 
       this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
-      showToast(this.t('Video.Channel Playback Speed Saved'))
+      showToast({ message: this.t('Video.Channel Playback Speed Saved'), icon: ['fas', 'gauge'] })
     },
     handleChannelVideoQualityManualSave() {
       // Should be called by manual action, settings should be checked in UI
@@ -2061,7 +2064,7 @@ export default defineComponent({
       }
 
       if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
-        showToast(this.t('Video.Channel Video Quality Saved'))
+        showToast({ message: this.t('Video.Channel Video Quality Saved'), icon: ['fas', 'film'] })
       }
     },
     handleWatchProgressAutoSave() {
@@ -2302,7 +2305,10 @@ export default defineComponent({
       }
 
       if (this.manifestSrc === null) {
-        showToast(this.t('Change Format.Dash formats are not available for this video'))
+        showToast({
+          message: this.t('Change Format.Dash formats are not available for this video'),
+          icon: ['fas', 'circle-exclamation'],
+        })
         return
       }
 
@@ -2315,7 +2321,10 @@ export default defineComponent({
       }
 
       if (this.isLive || this.isPostLiveDvr || this.legacyFormats.length === 0) {
-        showToast(this.t('Change Format.Legacy formats are not available for this video'))
+        showToast({
+          message: this.t('Change Format.Legacy formats are not available for this video'),
+          icon: ['fas', 'circle-exclamation'],
+        })
         return
       }
 
@@ -2332,7 +2341,10 @@ export default defineComponent({
         // The WEB HLS manifests only contain combined audio and video files, so we can't do audio only
         // The IOS HLS manifests have audio-only streams
           this.manifestMimeType === MANIFEST_TYPE_HLS && !this.manifestSrc.includes('/demuxed/1'))) {
-        showToast(this.t('Change Format.Audio formats are not available for this video'))
+        showToast({
+          message: this.t('Change Format.Audio formats are not available for this video'),
+          icon: ['fas', 'circle-exclamation'],
+        })
         return
       }
 
@@ -2367,13 +2379,15 @@ export default defineComponent({
       }
 
       if (this.blockVideoAutoplay) {
-        showToast(this.t('Autoplay Interruption Timer',
-          this.defaultAutoplayInterruptionIntervalHours,
-          {
-            autoplayInterruptionIntervalHours: this.defaultAutoplayInterruptionIntervalHours
-          }),
-        3_600_000
-        )
+        showToast({
+          message: this.t('Autoplay Interruption Timer',
+            this.defaultAutoplayInterruptionIntervalHours,
+            {
+              autoplayInterruptionIntervalHours: this.defaultAutoplayInterruptionIntervalHours
+            }),
+          time: 3_600_000,
+          icon: ['fas', 'clock'],
+        })
         this.resetAutoplayInterruptionTimeout()
         return
       }
@@ -2450,7 +2464,7 @@ export default defineComponent({
         this.tabRouter.push({
           path: `/watch/${nextVideoId}`
         })
-        showToast(this.t('Playing Next Video'))
+        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
     },
 
@@ -2466,7 +2480,7 @@ export default defineComponent({
         this.tabRouter.push({
           path: `/watch/${this.nextRecommendedVideo.videoId}`
         })
-        showToast(this.t('Playing Next Video'))
+        showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       }
     },
 
@@ -2478,7 +2492,7 @@ export default defineComponent({
 
       this.$store.commit('removeVideoFromWatchQueue', nextVideo.queueItemId)
       this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
-      showToast(this.t('Playing Next Video'))
+      showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
     },
 
@@ -2495,7 +2509,7 @@ export default defineComponent({
       this.autoplayCountdown = null
 
       if (!hideToast) {
-        showToast(this.t('Canceled next video autoplay'))
+        showToast({ message: this.t('Canceled next video autoplay'), icon: ['fas', 'times-circle'] })
       }
     },
 
@@ -3139,7 +3153,7 @@ export default defineComponent({
         ? playbackRate
         : this.currentPlaybackRate
       this.preserveTitleOnNextReload = true
-      this.showTabToast(toastMessage)
+      this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 
       const timestamp = this.getTimestamp()
       if (timestamp > 0) {

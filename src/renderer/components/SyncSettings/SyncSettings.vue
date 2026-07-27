@@ -489,7 +489,7 @@ async function authenticate(mode) {
     username.value = store.getters.getSyncServerUsername
     password.value = ''
     privacyPassphrase.value = ''
-    showToast(t('Settings.Sync Settings.Sync completed'))
+    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
   } catch (error) {
     localError.value = error.message
   }
@@ -500,7 +500,7 @@ async function syncNow() {
   localError.value = ''
   try {
     await store.dispatch('syncWithSyncServer')
-    showToast(t('Settings.Sync Settings.Sync completed'))
+    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
   } catch (error) {
     if (error instanceof SyncServerDataLossError) {
       dataLossWarning.value = error
@@ -516,7 +516,7 @@ async function confirmDataLossSync() {
   localError.value = ''
   try {
     await store.dispatch('syncWithSyncServer', { allowDataLoss: true })
-    showToast(t('Settings.Sync Settings.Sync completed'))
+    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
   } catch (error) {
     localError.value = error.message
   }
@@ -549,7 +549,7 @@ async function deleteAccount() {
   try {
     await store.dispatch('deleteSyncServerAccount', deleteAccountPassword.value)
     closeDeleteAccountPrompt()
-    showToast(t('Settings.Sync Settings.Account Deleted'))
+    showToast({ message: t('Settings.Sync Settings.Account Deleted'), icon: ['fas', 'trash'] })
   } catch (error) {
     deleteAccountError.value = error.message
   }

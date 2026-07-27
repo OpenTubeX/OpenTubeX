@@ -451,7 +451,10 @@ function getPlaylistInfo() {
     if (selectedUserPlaylist.value != null) {
       parseUserPlaylist(selectedUserPlaylist.value)
     } else {
-      showTabToast(t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'))
+      showTabToast({
+        message: t('User Playlists.SinglePlaylistView.Toast.This playlist does not exist'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   } else {
     if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
@@ -655,7 +658,11 @@ function getPlaylistItemsWithDuration() {
 
   // Show notice if not already shown before returning playlist items
   if (anyVideoMissingDuration && !alreadyShownNotice) {
-    showTabToast(t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'), 5000)
+    showTabToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist has a video with a duration error'),
+      time: 5000,
+      icon: ['fas', 'circle-exclamation'],
+    })
     alreadyShownNotice = true
   }
 
@@ -730,7 +737,10 @@ function moveVideoUp(videoId, playlistItemId) {
   })
 
   if (index === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -748,7 +758,10 @@ function moveVideoUp(videoId, playlistItemId) {
     store.dispatch('updatePlaylist', playlist)
     playlistItems.value = playlistItems_
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -765,7 +778,10 @@ function moveVideoDown(videoId, playlistItemId) {
   })
 
   if (index + 1 >= playlistItems_.length) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -783,7 +799,10 @@ function moveVideoDown(videoId, playlistItemId) {
     store.dispatch('updatePlaylist', playlist)
     playlistItems.value = playlistItems_
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -811,7 +830,10 @@ function onDragVideoEnd() {
       store.dispatch('updatePlaylist', playlist)
       playlistItems.value = tempShownPlaylistItems.value
     } catch (e) {
-      showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+        icon: ['fas', 'circle-exclamation'],
+      })
       console.error(e)
     }
   }
@@ -887,11 +909,15 @@ function removeVideoFromPlaylist(videoId, playlistItemId) {
           },
           abortSignal: undoToastAbortController.signal,
           image: getVideoThumbnailUrl(videoId, backendPreference.value, currentInvidiousInstanceUrl.value, thumbnailPreference.value),
+          icon: ['fas', 'trash'],
         })
       }
     }
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }

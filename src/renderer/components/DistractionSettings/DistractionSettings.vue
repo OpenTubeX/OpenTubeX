@@ -729,15 +729,24 @@ onMounted(() => {
 })
 
 function handleInvalidChannel() {
-  showToast(t('Settings.Distraction Free Settings.Hide Channels Invalid'))
+  showToast({
+    message: t('Settings.Distraction Free Settings.Hide Channels Invalid'),
+    icon: ['fas', 'circle-exclamation'],
+  })
 }
 
 function handleChannelAPIError() {
-  showToast(t('Settings.Distraction Free Settings.Hide Channels API Error'))
+  showToast({
+    message: t('Settings.Distraction Free Settings.Hide Channels API Error'),
+    icon: ['fas', 'circle-exclamation'],
+  })
 }
 
 function handleChannelsExists() {
-  showToast(t('Settings.Distraction Free Settings.Hide Channels Already Exists'))
+  showToast({
+    message: t('Settings.Distraction Free Settings.Hide Channels Already Exists'),
+    icon: ['fas', 'circle-exclamation'],
+  })
 }
 
 /**

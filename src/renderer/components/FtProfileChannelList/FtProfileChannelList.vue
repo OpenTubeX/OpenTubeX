@@ -194,7 +194,7 @@ const deletePromptMessage = computed(() => {
 
 function displayDeletePrompt() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     showDeletePrompt.value = true
   }
@@ -223,7 +223,7 @@ function handleDeletePromptClick(value) {
         }
       })
 
-      showToast(t('Profile.Profile has been updated'))
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
       selectNone()
     } else {
       /** @type {Profile} */
@@ -234,7 +234,7 @@ function handleDeletePromptClick(value) {
 
       store.dispatch('updateProfile', profile)
 
-      showToast(t('Profile.Profile has been updated'))
+      showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
       selectNone()
     }
   }

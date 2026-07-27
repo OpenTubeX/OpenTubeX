@@ -234,7 +234,10 @@ const markedAsQuickBookmarkTarget = computed(() => {
 })
 
 function handleQuickBookmarkEnabledDisabledClick() {
-  showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'))
+  showToast({
+    message: t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'),
+    icon: ['fas', 'bookmark'],
+  })
 }
 
 async function enableQuickBookmarkForThisPlaylist() {
@@ -243,23 +246,28 @@ async function enableQuickBookmarkForThisPlaylist() {
   store.dispatch('updateQuickBookmarkTargetPlaylistId', playlistId)
 
   if (currentQuickBookmarkTargetPlaylist != null) {
-    showToast(
-      t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
         oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,
       }),
-      5000,
-      () => {
+      time: 5000,
+      action: () => {
         store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName,
           }),
-          5000,
-        )
+          time: 5000,
+          icon: ['fas', 'undo'],
+        })
       },
-    )
+      icon: ['fas', 'bookmark'],
+    })
   } else {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'),
+      icon: ['fas', 'bookmark'],
+    })
   }
 }
 

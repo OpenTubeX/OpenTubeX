@@ -578,8 +578,13 @@ function handlePlaylistNameInput(input) {
 
 function toggleCopyVideosPrompt(force = false) {
   if (props.moreVideoDataAvailable && !isUserPlaylist.value && !force) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Some videos in the playlist are not loaded yet. Click here to copy anyway."]'), 5000, () => {
-      toggleCopyVideosPrompt(true)
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Some videos in the playlist are not loaded yet. Click here to copy anyway."]'),
+      time: 5000,
+      action: () => {
+        toggleCopyVideosPrompt(true)
+      },
+      icon: ['fas', 'copy'],
     })
     return
   }
@@ -606,9 +611,15 @@ async function savePlaylistInfo() {
   }
   try {
     await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Playlist has been updated."]'),
+      icon: ['fas', 'check'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   } finally {
     exitEditMode()
@@ -631,11 +642,14 @@ function enterEditMode() {
 }
 
 function handleQuickBookmarkEnabledDisabledClick() {
-  showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'))
+  showToast({
+    message: t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'),
+    icon: ['fas', 'bookmark'],
+  })
 }
 
 function handlePlaylistDeleteDisabledClick() {
-  showToast(playlistDeletionDisabledLabel.value)
+  showToast({ message: playlistDeletionDisabledLabel.value, icon: ['fas', 'circle-exclamation'] })
 }
 
 const EXPORT_VALUES = [
@@ -700,11 +714,14 @@ async function exportAsFreeTubeDatabase() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -735,11 +752,14 @@ async function exportAsYouTubeCsv() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -764,11 +784,14 @@ async function exportAsListOfUrls() {
     )
 
     if (response) {
-      showToast(t('User Playlists.The playlist has been successfully exported'))
+      showToast({
+        message: t('User Playlists.The playlist has been successfully exported'),
+        icon: ['fas', 'file-download'],
+      })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -830,7 +853,10 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
 
   const removedVideosCount = userPlaylistDuplicateItemCount.value
   if (removedVideosCount === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -843,11 +869,17 @@ async function handleRemoveDuplicateVideosPromptAnswer(option) {
   }
   try {
     await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-      videoCount: removedVideosCount
-    }, removedVideosCount))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+        videoCount: removedVideosCount
+      }, removedVideosCount),
+      icon: ['fas', 'trash'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -867,7 +899,10 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
   const removedVideosCount = selectedUserPlaylist.value.videos.length - videosToWatch.length
 
   if (removedVideosCount === 0) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There were no videos to remove."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -880,11 +915,17 @@ async function handleRemoveVideosOnWatchPromptAnswer(option) {
   }
   try {
     await store.dispatch('updatePlaylist', playlist)
-    showToast(t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
-      videoCount: removedVideosCount
-    }, removedVideosCount))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.{videoCount} video(s) have been removed', {
+        videoCount: removedVideosCount
+      }, removedVideosCount),
+      icon: ['fas', 'trash'],
+    })
   } catch (e) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     console.error(e)
   }
 }
@@ -899,7 +940,10 @@ function handleDeletePlaylistPromptAnswer(option) {
   if (option !== 'delete') { return }
 
   if (selectedUserPlaylist.value.protected) {
-    showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is protected and cannot be removed."]'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is protected and cannot be removed."]'),
+      icon: ['fas', 'circle-exclamation'],
+    })
   } else {
     store.dispatch('removePlaylist', props.id)
     router.push(
@@ -907,9 +951,12 @@ function handleDeletePlaylistPromptAnswer(option) {
         path: '/userPlaylists'
       }
     )
-    showToast(t('User Playlists.SinglePlaylistView.Toast["Playlist {playlistName} has been deleted."]', {
-      playlistName: props.title
-    }))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["Playlist {playlistName} has been deleted."]', {
+        playlistName: props.title
+      }),
+      icon: ['fas', 'trash'],
+    })
   }
 }
 
@@ -918,23 +965,28 @@ function enableQuickBookmarkForThisPlaylist() {
 
   store.dispatch('updateQuickBookmarkTargetPlaylistId', props.id)
   if (currentQuickBookmarkTargetPlaylist != null) {
-    showToast(
-      t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
         oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
       }),
-      5000,
-      () => {
+      time: 5000,
+      action: () => {
         store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
+        showToast({
+          message: t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
             oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
           }),
-          5000,
-        )
+          time: 5000,
+          icon: ['fas', 'undo'],
+        })
       },
-    )
+      icon: ['fas', 'bookmark'],
+    })
   } else {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'))
+    showToast({
+      message: t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'),
+      icon: ['fas', 'bookmark'],
+    })
   }
 }
 
