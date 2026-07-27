@@ -388,7 +388,6 @@ test.describe('watch page', () => {
     await page.addStyleTag({
       content: `
         .fullscreenCommentsOverlay .comment { display: none; }
-        .fullscreenCommentsOverlay .commentAutoLoadSentinel { min-height: 1px; }
       `
     })
     await page.route(/\/youtubei\/v1\/next/, async (route) => {
