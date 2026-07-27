@@ -124,6 +124,22 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('clears multi-selection when a shortcut activates another tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+    const tabs = page.locator(sel.tabs)
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(2)
+
+    await page.keyboard.press('Control+2')
+    await expect(tabs.nth(1)).toHaveClass(/active/)
+    await expect(page.locator(`${sel.tabs}[aria-pressed="true"]`)).toHaveCount(0)
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(2)
+    const remainingTabIds = await tabs.evaluateAll(elements => elements.map(tab => tab.dataset.tabId))
+    expect(remainingTabIds).toEqual([tabIds[0], tabIds[2]])
+  })
+
   test('applies close and reload shortcuts to the selected tabs', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()
