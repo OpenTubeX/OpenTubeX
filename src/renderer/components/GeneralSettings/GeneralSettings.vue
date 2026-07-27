@@ -282,7 +282,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
-import { TOAST_POSITION_VALUES } from '../../constants/toastPosition'
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../constants/toastPosition'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 
@@ -637,7 +637,7 @@ const toastPositionNames = computed(() => [
 ])
 
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
-const toastPosition = computed(() => store.getters.getToastPosition)
+const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
 
 /**
  * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value

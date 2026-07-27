@@ -227,6 +227,13 @@ test.describe('invalid toast position', () => {
   test.use({ seed: { settings: { toastPosition: 'unsupported' } } })
 
   test('falls back to bottom left', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const positionSelect = page.locator('.select')
+      .filter({ hasText: 'Toast Position' })
+      .locator('select')
+    await expect(positionSelect).toHaveValue('bottom-left')
+
     await page.evaluate(() => {
       window.ftElectron.showToastOnAllTabs('Fallback toast', 10000)
     })

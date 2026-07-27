@@ -56,7 +56,7 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
-import { TOAST_POSITION_VALUES } from '../../constants/toastPosition'
+import { normalizeToastPosition } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 
@@ -89,8 +89,7 @@ const toasts = reactive([])
 const fullscreenTarget = ref(null)
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => {
-  const position = store.getters.getToastPosition
-  return TOAST_POSITION_VALUES.includes(position) ? position : 'bottom-left'
+  return normalizeToastPosition(store.getters.getToastPosition)
 })
 
 function updateFullscreenTarget() {
