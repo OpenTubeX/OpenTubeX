@@ -66,15 +66,13 @@ test.describe('watch page', () => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
 
-    // The description and the comments both scroll; their scrollbars must float
-    // above the content rather than narrowing it.
-    for (const selector of ['.videoDescription', '.commentsContentWrapper']) {
-      const panel = page.locator(selector)
-      await expect(panel).toBeVisible({ timeout: 30_000 })
-      await expect(panel.locator('> .os-scrollbar-vertical')).toHaveCount(1)
-      expect(
-        await panel.evaluate((element) => element.clientWidth === element.offsetWidth)
-      ).toBe(true)
+    // Whether these overflow depends on the video, so assert that the directive
+    // took hold rather than measuring widths: the panel stays the scrolling
+    // element and gets its own overlay scrollbars.
+    for (const selector of ['.descriptionScroll', '.commentsContentWrapper']) {
+      await expect(page.locator(selector)).toBeVisible({ timeout: 30_000 })
+      await expect(page.locator(`${selector}[data-overlayscrollbars-viewport]`)).toHaveCount(1)
+      await expect(page.locator(`${selector} > .os-scrollbar-vertical`)).toHaveCount(1)
     }
   })
 

@@ -1,7 +1,6 @@
 <template>
   <FtCard
     v-if="shownDescription.length > 0"
-    v-overlay-scrollbars
     :class="{
       videoDescription: true,
       short: !isExpanded,
@@ -19,7 +18,10 @@
     >
       {{ $t("Description.Expand Description") }}
     </span>
-    <div class="descriptionScroll">
+    <div
+      v-overlay-scrollbars
+      class="descriptionScroll"
+    >
       <FtTimestampCatcher
         ref="descriptionContainer"
         class="description"
