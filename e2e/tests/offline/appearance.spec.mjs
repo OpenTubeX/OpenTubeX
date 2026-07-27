@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 async function setWindowWidth(app, width) {
@@ -105,7 +108,7 @@ test.describe('tab orientation shortcut', () => {
     await expect(app).not.toHaveClass(/verticalTabs/)
   })
 
-  test('presses in quick succession are not swallowed by the pending write', async ({ page }) => {
+  test('presses in quick succession are not swallowed by the pending write', async ({ app: appHandle, page }) => {
     const app = page.locator('.app')
 
     // The setting is only committed once persisted, so two presses that beat
@@ -117,8 +120,13 @@ test.describe('tab orientation shortcut', () => {
       }
     })
 
-    // Give both writes time to land before checking that they cancelled out.
-    await page.waitForTimeout(500)
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(appHandle.userDataDir, 'settings.db'), 'utf8')
+      return Object.fromEntries(contents.trim().split('\n')
+        .map(line => JSON.parse(line))
+        .map(record => [record._id, record.value]))
+        .useVerticalTabBar
+    }).toBe(false)
     await expect(app).not.toHaveClass(/verticalTabs/)
   })
 })
