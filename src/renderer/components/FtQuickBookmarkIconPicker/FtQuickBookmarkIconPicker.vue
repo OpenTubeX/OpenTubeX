@@ -68,7 +68,7 @@ const iconLabels = {
   align-items: center;
   background: var(--card-bg-color);
   border: 2px solid transparent;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   color: var(--primary-text-color);
   cursor: pointer;
   display: flex;

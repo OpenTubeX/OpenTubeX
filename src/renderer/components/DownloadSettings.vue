@@ -503,7 +503,7 @@ async function chooseExecutablePath(binary) {
 .binaryProgressBarTrack {
   background-color: #9e9e9e;
   block-size: 8px;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   margin-block: 10px;
   margin-inline: auto;
   max-inline-size: 500px;
@@ -513,7 +513,7 @@ async function chooseExecutablePath(binary) {
 .binaryProgressBarFill {
   background-color: var(--accent-color);
   block-size: 100%;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   transition: inline-size 0.3s ease;
 }
 

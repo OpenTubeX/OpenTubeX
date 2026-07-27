@@ -71,7 +71,7 @@
       class="commentsContentWrapper"
     >
       <div
-        v-if="!fullscreenOverlay && showComments && !isLoading"
+        v-if="!fullscreenOverlay && showComments && !isLoading && commentData.length > 0"
         class="commentHeader"
       >
         <h3
@@ -336,6 +336,7 @@
       </div>
       <div
         v-else-if="showComments && !isLoading"
+        class="noComments"
       >
         <h3
           v-if="isPostComments"
@@ -349,6 +350,30 @@
         >
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
+        <div
+          v-if="!fullscreenOverlay"
+          class="noCommentActions"
+        >
+          <FtSelect
+            v-if="showSortBy"
+            :placeholder="$t('Global.Sort By')"
+            :value="currentSortValue"
+            :select-names="sortNames"
+            :select-values="sortValues"
+            :icon="['fas', 'arrow-down-short-wide']"
+            @change="handleSortChange"
+          />
+          <FtIconButton
+            :title="$t('Comments.Reload Comments')"
+            :icon="['fas', 'sync']"
+            :size="12"
+            :padding="8"
+            :use-shadow="false"
+            class="reloadComments"
+            :class="{ reloadCommentsAligned: showSortBy }"
+            @click="reloadCommentData"
+          />
+        </div>
       </div>
       <FtSpinner
         v-if="shouldShowAutoLoadMoreCommentsSpinner"

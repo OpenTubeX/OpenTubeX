@@ -14,6 +14,7 @@
 
 .sectionBody {
   background-color: var(--card-bg-color);
+  border-radius: calc(8px * var(--ui-roundness));
   padding-block: 10px;
 
   > :deep(div) {

@@ -25,7 +25,7 @@
   block-size: 15px;
   border-block-end: 1px solid var(--comment-thread-line-color);
   border-inline-start: 1px solid var(--comment-thread-line-color);
-  border-end-start-radius: 12px;
+  border-end-start-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
 }
 

@@ -57,6 +57,25 @@ async function readPlaylist(app, id) {
   return records.filter((record) => record._id === id).at(-1)
 }
 
+test.describe('rounded action popovers', () => {
+  test.use({
+    seed: {
+      ...SEED,
+      settings: { ...SEED.settings, uiRoundness: 0 }
+    }
+  })
+
+  test('applies UI roundness to icon-button dropdowns', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+
+    await expect(video.locator('.addToPlaylistIcon .iconDropdown')).toHaveCSS('border-radius', '0px')
+  })
+})
+
 test.describe('list video actions', () => {
   test('the options dropdown shows an icon for each action', async ({ page }) => {
     await goTo(page, 'history')
@@ -66,8 +85,20 @@ test.describe('list video actions', () => {
     await video.locator('.optionsButton').click()
 
     const actions = page.getByRole('option')
+    const dropdown = video.locator('.optionsButton .iconDropdown')
     await expect(actions).not.toHaveCount(0)
     await expect(actions.locator('.optionIconColumn svg')).toHaveCount(await actions.count())
+    await expect(dropdown).toHaveCSS('font-size', '14px')
+    await expect(dropdown).not.toHaveCSS('box-shadow', 'none')
+    await expect(actions.first()).toHaveCSS('text-align', 'center')
+    await expect(actions.first()).toHaveCSS('justify-content', 'center')
+    expect(await actions.locator('span').evaluateAll((labels) => {
+      return labels.every((label) => label.scrollWidth <= label.clientWidth)
+    })).toBe(true)
+    const actionRows = await actions.evaluateAll((items) => items.map((item) => item.offsetTop))
+    expect(actionRows[0]).toBe(actionRows[1])
+    expect(new Set(actionRows.slice(2, 5)).size).toBe(1)
+    expect(actionRows.at(-3)).toBe(actionRows.at(-2))
   })
 
   test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {
@@ -261,10 +292,11 @@ test.describe('list video actions', () => {
     await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
     await video.locator('.quickBookmarkVideoIcon').click()
 
-    // Once saved, the button keeps the configured icon and overlays a checkmark on it.
+    // Once saved, the button keeps the configured icon and indicates state with color.
     await expect(video.locator('.quickBookmarkVideoIcon.bookmarked')).toBeVisible()
     await expect(video.locator('.quickBookmarkVideoIcon [data-icon="clock"]')).toBeVisible()
-    await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon[data-icon="check"]')).toBeVisible()
+    await expect(video.locator('.quickBookmarkVideoIcon .overlayIcon')).toHaveCount(0)
+    await expect(video.locator('.quickBookmarkVideoIcon .iconButton')).toHaveCSS('color', 'rgb(110, 170, 115)')
     await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
 
     await expect.poll(async () => {

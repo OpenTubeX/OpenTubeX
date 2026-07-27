@@ -29,7 +29,7 @@
 .summaryCard,
 .chartCard {
   border: 1px solid color-mix(in srgb, var(--tertiary-text-color) 18%, transparent);
-  border-radius: 18px;
+  border-radius: calc(18px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   box-shadow: 0 8px 30px rgb(0 0 0 / 7%);
 }
@@ -101,7 +101,7 @@
 .chartScale {
   padding-block: 7px;
   padding-inline: 10px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   color: var(--tertiary-text-color);
   background-color: color-mix(in srgb, var(--primary-color) 9%, transparent);
   font-size: 0.75rem;
@@ -170,7 +170,7 @@
   padding-block: 7px;
   padding-inline: 10px;
   border: 1px solid color-mix(in srgb, var(--primary-text-color) 20%, transparent);
-  border-radius: 9px;
+  border-radius: calc(9px * var(--ui-roundness));
   color: var(--card-bg-color);
   background-color: color-mix(in srgb, var(--primary-text-color) 94%, transparent);
   box-shadow: 0 6px 18px rgb(0 0 0 / 24%);
@@ -251,7 +251,7 @@
 }
 
 .barTarget:focus-visible {
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 0 0 2px var(--primary-color);
   outline: none;
 }
@@ -263,14 +263,14 @@
   min-block-size: 0;
   align-items: flex-end;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background-color: color-mix(in srgb, var(--tertiary-text-color) 8%, transparent);
 }
 
 .bar {
   inline-size: 100%;
   block-size: var(--bar-height);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background: linear-gradient(to top, var(--primary-color), color-mix(in srgb, var(--primary-color) 55%, rgb(255 255 255)));
   transition: block-size 300ms ease;
 }
@@ -368,7 +368,7 @@
   padding-block: 6px;
   padding-inline: 9px;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: calc(7px * var(--ui-roundness));
   color: var(--tertiary-text-color);
   background-color: transparent;
   cursor: pointer;
@@ -406,7 +406,7 @@
 
   .summaryCard,
   .chartCard {
-    border-radius: 14px;
+    border-radius: calc(14px * var(--ui-roundness));
     padding-block: 16px;
     padding-inline: 16px;
   }

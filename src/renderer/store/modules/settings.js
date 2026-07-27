@@ -348,6 +348,7 @@ const state = {
   },
   thumbnailPreference: '',
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
+  uiRoundness: 100,
   showThumbnailSizeButtonInHeader: true,
   extraThumbnailAction: '',
   blurThumbnails: false,

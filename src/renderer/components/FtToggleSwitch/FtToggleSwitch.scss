@@ -42,7 +42,7 @@
 
   &::before {
     background-color: #9e9e9e;
-    border-radius: 8px;
+    border-radius: calc(8px * var(--ui-roundness));
     block-size: 14px;
     inset-inline-start: 1px;
     inline-size: 34px;

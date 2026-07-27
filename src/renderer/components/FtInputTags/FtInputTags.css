@@ -2,7 +2,7 @@
   position: relative;
   background-color: var(--bg-color);
   padding: 20px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   display: block;
   inline-size: 60%;
 }
@@ -23,7 +23,7 @@
   list-style: none;
   background-color: var(--card-bg-color);
   margin: 5px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   display: flex;
   float: inline-start;
 }

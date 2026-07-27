@@ -55,7 +55,7 @@
   display: block;
   align-self: center;
   inline-size: 100px;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background-color: rgb(255 255 255 / 8%);
   background-position: center;
   background-repeat: no-repeat;
@@ -87,7 +87,7 @@
 .chapterTimestamp {
   padding-block: 4px;
   padding-inline: 6px;
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   background-color: rgb(36 76 119 / 88%);
   color: #55b6ff;
   font-size: 13px;

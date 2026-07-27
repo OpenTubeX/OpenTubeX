@@ -30,7 +30,7 @@
   overflow-y: auto;
   background-color: rgb(28 28 28 / 92%);
   color: #fff;
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
 
   /* Many toasts are clickable, so keep the click affordance until a drag starts */
@@ -59,7 +59,7 @@
   inline-size: 64px;
   block-size: 36px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
 }
 
 .icon {

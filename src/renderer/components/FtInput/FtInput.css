@@ -112,7 +112,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   font-size: 16px;
   block-size: 45px;
   color: var(--secondary-text-color);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--search-bar-color);
 }
 
@@ -231,7 +231,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   padding-block: 5px;
   padding-inline: 0;
   z-index: 10;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness));
   overflow-wrap: break-word;
   box-shadow: 0 0 10px var(--scrollbar-color-hover);
   background-color: var(--search-bar-color);
@@ -253,7 +253,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 .search .list::-webkit-scrollbar-thumb {
   background: var(--scrollbar-color-hover);
   border: 2px solid var(--search-bar-color);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
 }
 
 .list li {

@@ -14,7 +14,7 @@
   align-items: center;
   gap: 5px;
   border: 0;
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   padding-block: 5px;
   padding-inline: 8px;
   background: rgb(0 0 0 / 72%);
@@ -36,7 +36,7 @@
   display: block;
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 65%);
-  border-radius: clamp(3px, 0.7cqw, 9px);
+  border-radius: clamp(calc(3px * var(--ui-roundness)), calc(0.7cqw * var(--ui-roundness)), calc(9px * var(--ui-roundness)));
   background: #000;
   box-shadow: 0 2px 8px rgb(0 0 0 / 55%);
   color: #fff;
@@ -85,7 +85,7 @@
   position: absolute;
   inset-block-end: clamp(3px, 0.55cqw, 8px);
   inset-inline-end: clamp(3px, 0.55cqw, 8px);
-  border-radius: 2px;
+  border-radius: calc(2px * var(--ui-roundness));
   padding-block: 2px;
   padding-inline: 4px;
   background: rgb(0 0 0 / 78%);
@@ -135,7 +135,7 @@
   padding-block: var(--hovercard-padding);
   padding-inline: var(--hovercard-padding) calc(var(--channel-avatar-size) + 2 * var(--hovercard-padding));
   border: 1px solid rgb(0 0 0 / 25%);
-  border-radius: min(0.7cqw, 8px);
+  border-radius: min(calc(0.7cqw * var(--ui-roundness)), calc(8px * var(--ui-roundness)));
   background: #fff;
   box-shadow: 0 4px 18px rgb(0 0 0 / 55%);
   color: #282828;

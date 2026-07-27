@@ -164,7 +164,6 @@
             v-if="isQuickBookmarkEnabled && !hidePlaylistActions"
             :title="quickBookmarkIconText"
             :icon="quickBookmarkIcon"
-            :overlay-icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : null"
             class="quickBookmarkVideoIcon"
             :class="{
               bookmarked: isInQuickBookmarkPlaylist,

@@ -55,7 +55,7 @@
 .input::-webkit-slider-runnable-track {
   margin-block: 17px;
   margin-inline: 0;
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   inline-size: 100%;
   block-size: 2px;
   background-color: var(--accent-color-opacity4);
@@ -102,7 +102,7 @@
 .input::-moz-range-track {
   margin-block: 0;
   margin: 17px;
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   inline-size: 100%;
   block-size: 2px;
   background-color: var(--accent-color-opacity4);
@@ -120,7 +120,7 @@
 }
 
 .input::-moz-range-progress {
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   block-size: 2px;
   background-color: var(--accent-color);
 }
