@@ -30,7 +30,7 @@
   font-style: italic;
   padding-block: 5px;
   padding-inline: 7px;
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   text-decoration: none;
 }
 

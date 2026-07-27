@@ -51,7 +51,7 @@
 
 .playlistThumbnail {
   block-size: 27px;
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   flex-shrink: 0;
   inline-size: 48px;
   object-fit: cover;

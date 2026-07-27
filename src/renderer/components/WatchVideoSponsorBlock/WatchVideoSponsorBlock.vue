@@ -257,7 +257,7 @@ function isSegmentPassed(segment) {
   overflow: hidden;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 
@@ -343,7 +343,7 @@ function isSegmentPassed(segment) {
 }
 
 .sponsorBlockSegment {
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
 }
 
 .sponsorBlockSegment:hover,
@@ -435,7 +435,7 @@ function isSegmentPassed(segment) {
   color: inherit;
   background-color: var(--secondary-card-bg-color);
   border: 0;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   cursor: pointer;
 }
 
@@ -537,7 +537,7 @@ function isSegmentPassed(segment) {
   color: var(--primary-text-color);
   background-color: var(--secondary-card-bg-color);
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
@@ -573,7 +573,7 @@ function isSegmentPassed(segment) {
   block-size: 30px;
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   font-size: 13px;
   transition: background-color 160ms ease, color 160ms ease;
 }
@@ -609,7 +609,7 @@ function isSegmentPassed(segment) {
   block-size: 24px;
   background-color: var(--secondary-card-bg-color);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   transition: background-color 160ms ease, border-color 160ms ease;
 }
 

@@ -32,6 +32,10 @@
   transition: inline-size 250ms ease;
 }
 
+.ftVideoPlayer :deep(.videoAnnotations) {
+  transition: inset-inline-end 250ms ease;
+}
+
 .autoplayCountdownOverlay {
   position: absolute;
   z-index: 13;
@@ -65,7 +69,7 @@
   inline-size: 100%;
   aspect-ratio: 16 / 9;
   background-color: #151515;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
 }
 
 .autoplayThumbnail {
@@ -82,7 +86,7 @@
   padding: 2px 4px;
   color: #fff;
   background-color: rgb(0 0 0 / 80%);
-  border-radius: 3px;
+  border-radius: calc(3px * var(--ui-roundness));
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
@@ -123,7 +127,7 @@
   color: #fff;
   background-color: #252525;
   border: 0;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -281,7 +285,7 @@
   inline-size: 42px;
   block-size: 3px;
   background-color: rgb(255 255 255 / 42%);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   opacity: 0;
   transform: translate(-50%, -50%);
   transition: opacity 150ms ease;
@@ -338,7 +342,7 @@
   contain: layout paint;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
   backdrop-filter: blur(14px);
   color: #fff;
@@ -431,7 +435,7 @@
   position: absolute;
   inset-block: 8px;
   inset-inline: 0;
-  border-radius: 18px;
+  border-radius: calc(18px * var(--ui-roundness));
   background-color: rgb(0 0 0 / 16%);
   content: '';
   pointer-events: none;
@@ -564,7 +568,7 @@
   inset-inline-start: 50%;
   inline-size: 26px;
   block-size: 2.5px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background-color: currentcolor;
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
@@ -627,7 +631,7 @@
   inset-inline-start: 50%;
   inline-size: 26px;
   block-size: 2.5px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background-color: currentcolor;
   pointer-events: none;
   transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
@@ -653,7 +657,7 @@
   inline-size: 36px;
   block-size: 18px;
   padding: 1px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background-color: #424242;
   transition: background-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -726,7 +730,7 @@
   left: 5px;
   top: 5px;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   line-height: 1.4em;
   background-color: rgb(0 0 0 / 70%);
   color: #fff;
@@ -746,7 +750,7 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 10px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   font-size: 1.1em;
   background-color: rgb(0 0 0 / 60%);
   color: #fff;
@@ -785,7 +789,7 @@
   background-color: #000;
   color: #fff;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
 }
 
 .offlineIcon {
@@ -888,7 +892,7 @@
   min-width: min(320px, calc(100vw - 32px));
   padding: 10px 12px;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   background-color: rgb(33 37 43 / 96%);
   box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
   color: #fff;
@@ -915,7 +919,7 @@
   box-sizing: border-box;
   padding: 10px 12px 12px;
   border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   background-color: rgb(24 24 24 / 96%);
   color: #fff;
   box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
@@ -960,7 +964,7 @@
 .sponsorBlockSubmissionClose {
   width: 24px;
   height: 24px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   cursor: pointer;
 }
 
@@ -1011,7 +1015,7 @@
   min-height: 30px;
   padding: 4px 8px;
   border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   background-color: rgb(0 0 0 / 35%);
   color: inherit;
 }
@@ -1105,7 +1109,7 @@
 .skippedSegmentTimer {
   min-width: 42px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   background-color: rgb(255 255 255 / 10%);
   color: rgb(255 255 255 / 88%);
   font-size: 12px;
@@ -1122,7 +1126,7 @@
   padding: 0;
   border-width: 0;
   border-style: none;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background-color: transparent;
   color: rgb(255 255 255 / 70%);
   cursor: pointer;
@@ -1144,7 +1148,7 @@
   padding: 6px 10px;
   border-width: 0;
   border-style: none;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   background-color: rgb(255 255 255 / 10%);
   color: #fff;
   font-size: 13px;
@@ -1218,7 +1222,7 @@
   text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
   background-color: transparent;
   border: 0;
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-roundness));
   padding: 8px 12px;
   cursor: pointer !important;
   pointer-events: auto !important;
@@ -1263,7 +1267,7 @@
   background-color: rgb(0 0 0 / 25%);
   backdrop-filter: blur(6px);
   border: 1px solid rgb(255 255 255 / 8%);
-  border-radius: 24px;
+  border-radius: calc(24px * var(--ui-roundness));
   box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
   opacity: 0;
   pointer-events: none;
@@ -1304,9 +1308,8 @@
   background-color: rgb(255 255 255 / 18%);
 }
 
-/* Reads as a cut-out of the white quick bookmark icon against the dark actions pill */
-.fullscreenAction .quickBookmarkCheck {
-  color: #000;
+.fullscreenAction.fullscreenQuickBookmarkAction.open {
+  color: var(--favorite-icon-color);
 }
 
 .fullscreenActions:has(:focus-visible) {
@@ -1359,7 +1362,7 @@
   color: #fff;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid var(--side-nav-hover-color);
-  border-radius: 12px;
+  border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 8px 30px rgb(0 0 0 / 45%);
   opacity: 0;
   visibility: hidden;
@@ -1577,7 +1580,7 @@
   color: var(--primary-text-color);
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
   backdrop-filter: blur(14px) saturate(1.05);
 }
@@ -2092,7 +2095,7 @@
   min-height: 28px;
   padding: 0 6px;
   border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background: rgb(0 0 0 / 22%);
   color: rgb(255 255 255 / 92%);
   font-size: 10px;
@@ -2224,7 +2227,7 @@
   min-width: 0;
   min-height: 34px;
   padding: 6px 8px;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   font-size: 13px;
 }
 
@@ -2258,7 +2261,7 @@
   width: 38px;
   height: 26px;
   min-height: 26px !important;
-  border-radius: 6px !important;
+  border-radius: calc(6px * var(--ui-roundness)) !important;
 }
 
 :deep(.ft-caption-color-swatch:focus-visible),
@@ -2272,7 +2275,7 @@
   margin-top: 4px;
   padding: 10px;
   border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   background: rgb(18 18 18 / 96%);
   box-shadow: 0 5px 18px rgb(0 0 0 / 35%);
   cursor: default;
@@ -2311,7 +2314,7 @@
   height: 30px;
   padding-inline: 8px;
   border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   outline: 0;
   background: rgb(255 255 255 / 8%);
   color: #fff;
@@ -2342,7 +2345,7 @@
 :deep(.ft-caption-appearance-controls input[type='range']::-webkit-slider-runnable-track) {
   width: 100%;
   height: 2px;
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   background-color: var(--accent-color-opacity4);
 }
 
@@ -2373,13 +2376,13 @@
 :deep(.ft-caption-appearance-controls input[type='range']::-moz-range-track) {
   width: 100%;
   height: 2px;
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   background-color: var(--accent-color-opacity4);
 }
 
 :deep(.ft-caption-appearance-controls input[type='range']::-moz-range-progress) {
   height: 2px;
-  border-radius: 1px;
+  border-radius: calc(1px * var(--ui-roundness));
   background-color: var(--accent-color);
 }
 
@@ -2413,7 +2416,7 @@
   min-height: 28px;
   padding: 3px 4px 3px 8px;
   border: 0;
-  border-radius: 6px;
+  border-radius: calc(6px * var(--ui-roundness));
   background: transparent;
   color: #fff;
   color-scheme: dark;
@@ -2479,7 +2482,7 @@
   padding: 6px 12px;
   overflow: hidden;
   background-color: rgb(27 27 27 / 67%);
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   color: #fff;
   font-size: 13px;
   font-weight: bold;
@@ -2583,7 +2586,7 @@
 
 .ftVideoPlayer.scrollMiniPlayer {
   box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   overflow: visible;
   touch-action: none;
   isolation: isolate;
@@ -2591,7 +2594,7 @@
 
 .ftVideoPlayer.scrollMiniPlayer > .player,
 .ftVideoPlayer.scrollMiniPlayer > .vrCanvas {
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
 }
 
 .ftVideoPlayer.scrollMiniPlayer :deep(.shaka-bottom-controls),
@@ -2655,7 +2658,7 @@
   transform: translateX(-50%);
   width: 36px;
   height: 4px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background: rgb(255 255 255 / 70%);
   box-shadow: 0 0 3px rgb(0 0 0 / 45%);
 }
@@ -2727,7 +2730,7 @@
   align-items: center;
   gap: 0;
   padding: 4px 6px;
-  border-radius: 999px;
+  border-radius: calc(999px * var(--ui-roundness));
   background: rgb(0 0 0 / 55%);
   color: #fff;
   z-index: 3;
@@ -2849,6 +2852,7 @@
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-controls-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-spinner-container),
 .ftVideoPlayer.presentationModeChanging .countdownOverlay,
+.ftVideoPlayer.presentationModeChanging :deep(.videoAnnotations),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-text-container),
 .ftVideoPlayer.presentationModeChanging :deep(.shaka-speech-to-text-container) {
   transition: none !important;
@@ -2869,6 +2873,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
@@ -2876,6 +2881,7 @@
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
+  :deep(.videoAnnotations),
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ) {

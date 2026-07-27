@@ -521,6 +521,27 @@ test.describe('watch page', () => {
       ])
       return currentVideoBounds.x + currentVideoBounds.width - currentMetadataBounds.x
     }).toBeLessThanOrEqual(1)
+    await page.locator('.ftVideoPlayer').evaluate((element) => {
+      const annotations = document.createElement('div')
+      annotations.className = 'videoAnnotations'
+      annotations.dataset.testAnnotations = ''
+      annotations.style.position = 'absolute'
+      annotations.style.insetBlock = '0'
+      annotations.style.insetInlineStart = '0'
+      element.append(annotations)
+    })
+    const annotations = page.locator('[data-test-annotations]')
+    await expect(annotations).toHaveCSS('transition-property', 'inset-inline-end')
+    await expect(annotations).toHaveCSS('transition-duration', '0.25s')
+    await expect.poll(async () => {
+      const [videoBounds, annotationBounds] = await Promise.all([
+        playerVideo.boundingBox(),
+        annotations.boundingBox()
+      ])
+      return Math.abs(
+        videoBounds.x + videoBounds.width - annotationBounds.x - annotationBounds.width
+      )
+    }).toBeLessThanOrEqual(1)
     await page.locator('.fullscreenActions').getByRole('button', { name: 'Show transcript' }).click()
     await expect(page.locator('.fullscreenTranscriptOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenMetadataHeader')).toHaveCSS('cursor', 'grab')

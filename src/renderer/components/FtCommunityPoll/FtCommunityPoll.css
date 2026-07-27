@@ -34,7 +34,7 @@
   display: flex;
   align-items: center;
   padding-block: 5px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   border-style: solid;
   border-width: 1px;
   padding-inline-start: 10px;

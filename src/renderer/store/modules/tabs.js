@@ -1,4 +1,5 @@
 import packageDetails from '../../../../package.json'
+import { getTabPageIcon } from '../../tabs/tabPageIcon'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
 const NAV_HISTORY_DISPLAY_LIMIT = 15
@@ -53,7 +54,8 @@ const getters = {
       options.push({
         label: entry.title || entry.route.fullPath,
         value: index - tab.historyIndex,
-        active: index === tab.historyIndex
+        active: index === tab.historyIndex,
+        icon: getTabPageIcon(entry)
       })
     }
 

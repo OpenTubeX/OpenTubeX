@@ -38,12 +38,6 @@
   --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
-/* A zero-height target can sit exactly on the clipped edge of a short dock and
-   stop intersecting even though the "Load More" row is visible. */
-.commentAutoLoadSentinel {
-  min-block-size: 1px;
-}
-
 /* Matches the chapter overlay header in the video player. */
 .fullscreenCommentHeader {
   position: relative;
@@ -107,7 +101,7 @@
   padding: 6px;
   background-color: rgb(12 12 12 / 62%);
   border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
   backdrop-filter: blur(14px) saturate(1.05);
 }
@@ -122,7 +116,7 @@
   text-align: start;
   background: transparent;
   border: 0;
-  border-radius: 8px;
+  border-radius: calc(8px * var(--ui-roundness));
   cursor: pointer;
 }
 
@@ -138,6 +132,10 @@
   margin: 0;
 }
 
+.commentAutoLoadSentinel {
+  min-block-size: 1px;
+}
+
 .getCommentsTitle {
   padding-block: 8px;
   text-align: center;
@@ -147,8 +145,30 @@
 }
 
 .noCommentMsg {
-  padding-block: 1em;
+  flex: 1 1 auto;
+  margin: 0;
   text-align: center;
+}
+
+.noComments {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 8px;
+}
+
+.noCommentActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.noCommentActions :deep(.select) {
+  margin-block-start: 20px;
 }
 
 .commentsTitle {
@@ -198,6 +218,10 @@
 
 .reloadCommentsAligned {
   margin-block-start: 39px;
+}
+
+.noCommentActions .reloadCommentsAligned {
+  margin-block-start: 29px;
 }
 
 .comment {
@@ -259,7 +283,7 @@
 
 .commentOwner {
   background-color: var(--secondary-card-bg-color);
-  border-radius: 10px;
+  border-radius: calc(10px * var(--ui-roundness));
   padding-inline: 10px;
 }
 
@@ -405,7 +429,7 @@
   block-size: 15px;
   border-block-end: 1px solid var(--comment-thread-line-color);
   border-inline-start: 1px solid var(--comment-thread-line-color);
-  border-end-start-radius: 12px;
+  border-end-start-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
 }
 

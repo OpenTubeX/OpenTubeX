@@ -120,7 +120,7 @@
   margin-inline: 5%;
   margin-block: 25px 10px;
   background-color: var(--primary-color);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   position: relative;
 }
 
@@ -129,7 +129,7 @@
   inline-size: 100%;
   block-size: 55px;
   background-color: var(--primary-color-hover);
-  border-radius: 5px 5px 0 0;
+  border-radius: calc(5px * var(--ui-roundness)) calc(5px * var(--ui-roundness)) 0 0;
 }
 
 .openedSuperChat .superChatMessage {

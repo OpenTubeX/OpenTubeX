@@ -89,7 +89,6 @@
           v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
           :title="quickBookmarkIconText"
           :icon="quickBookmarkIcon"
-          :overlay-icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : null"
           class="quickBookmarkVideoIcon"
           :class="{
             bookmarked: isInQuickBookmarkPlaylist,
@@ -669,9 +668,6 @@ const dropdownOptions = computed(() => {
               icon: ['fas', 'link']
             }]
           : [],
-        {
-          type: 'divider'
-        },
         {
           label: t('Video.Open Channel in YouTube'),
           value: 'openYoutubeChannel',

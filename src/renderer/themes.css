@@ -4,6 +4,8 @@ body {
   color: var(--primary-text-color);
   background-color: var(--bg-color);
 
+  --ui-roundness: 1;
+
   /*
     This works because CSS variables are just a find and replace and
     are replaced before the expressions are evaluated
@@ -161,7 +163,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --primary-shadow-color: rgb(200 200 200 / 75%);
   --title-color: #3f7ac6;
   --bg-color: #f1f1f1;
-  --favorite-icon-color: #0c0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #fff;
   --secondary-card-bg-color: #eee;
   --scrollbar-color: #ccc;
@@ -181,7 +183,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #999;
   --title-color: #eee;
   --bg-color: #212121;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #303030;
   --secondary-card-bg-color: rgb(0 0 0 / 75%);
   --scrollbar-color: #414141;
@@ -200,7 +202,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #eee;
   --title-color: #eee;
   --bg-color: #000;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #000;
   --secondary-card-bg-color: rgb(0 0 0 / 75%);
   --scrollbar-color: #515151;
@@ -219,7 +221,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #eee;
   --title-color: #eee;
   --bg-color: #2b2f3a;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #2e3440;
   --secondary-card-bg-color: rgb(59 66 82 / 75%);
   --scrollbar-color: #4b566a;
@@ -238,7 +240,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #ffff;
   --title-color: #000;
   --bg-color: #ff008a;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #de1c85;
   --secondary-card-bg-color: rgb(0 0 0 / 75%);
   --scrollbar-color: #fff;
@@ -279,7 +281,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #5a285a;
   --title-color: #185eb4;
   --bg-color: #ffeadd;
-  --favorite-icon-color: #760278;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #ffd1dc;
   --secondary-card-bg-color: #fff;
   --scrollbar-color: #f5c8d3;
@@ -300,7 +302,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #a6adc8;
   --title-color: #cdd6f4;
   --bg-color: #1e1e2e;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #181825;
   --secondary-card-bg-color: #1e1e2e;
   --scrollbar-color: #313244;
@@ -319,7 +321,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #e5e8f3;
   --title-color: #bd93f9;
   --bg-color: #282a36;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #33353f;
   --secondary-card-bg-color: #282a36;
   --scrollbar-color: #44475a;
@@ -338,7 +340,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #ddd6c3;
   --title-color: #fdf6e3;
   --bg-color: #002b36;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #204b56;
   --secondary-card-bg-color: #102b36;
   --scrollbar-color: #608b96;
@@ -357,7 +359,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #204b56;
   --title-color: #002b36;
   --bg-color: #fdf6e3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #eee8d5;
   --secondary-card-bg-color: #fdf6e3;
   --scrollbar-color: #a9a895;
@@ -376,7 +378,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d5c4a1;
   --title-color: #ebdbb2;
   --bg-color: #282828;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #504945;
   --secondary-card-bg-color: #3c3836;
   --scrollbar-color: #665c54;
@@ -395,7 +397,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #282828;
   --title-color: #3c3836;
   --bg-color: #fbf1c7;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #ebdbb2;
   --secondary-card-bg-color: #d5c4a1;
   --scrollbar-color: #bdae93;
@@ -414,7 +416,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #a5adce;
   --title-color: #c6d0f5;
   --bg-color: #303446;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #292c3c;
   --secondary-card-bg-color: #303446;
   --scrollbar-color: #414559;
@@ -433,7 +435,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #272e33;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #1e2326;
   --secondary-card-bg-color: #272e33;
   --scrollbar-color: #394146;
@@ -452,7 +454,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #2d353b;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #232a2e;
   --secondary-card-bg-color: #2d353b;
   --scrollbar-color: #3f484e;
@@ -471,7 +473,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #d3c6aa;
   --title-color: #d3c6aa;
   --bg-color: #333c43;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #293136;
   --secondary-card-bg-color: #333c43;
   --scrollbar-color: #454f56;
@@ -490,7 +492,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #fffbef;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #f2efdf;
   --secondary-card-bg-color: #fffbef;
   --scrollbar-color: #d8d5c5;
@@ -509,7 +511,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #fdf6e3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #efe8d4;
   --secondary-card-bg-color: #fdf6e3;
   --scrollbar-color: #d0ccb7;
@@ -528,7 +530,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #3c4a52;
   --title-color: #3c4a52;
   --bg-color: #f3ead3;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #eee8ce;
   --secondary-card-bg-color: #f3ead3;
   --scrollbar-color: #c8c3aa;
@@ -547,7 +549,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --tertiary-text-color: #6c6f85;
   --title-color: #4c4f69;
   --bg-color: #eff1f5;
-  --favorite-icon-color: #0f0;
+  --favorite-icon-color: #6eaa73;
   --card-bg-color: #e6e9ef;
   --secondary-card-bg-color: #eff1f5;
   --scrollbar-color: #ccd0da;
@@ -2168,7 +2170,7 @@ body .os-scrollbar {
   --os-padding-perpendicular: 2px;
   --os-padding-axis: 2px;
   --os-handle-interactive-area-offset: 4px;
-  --os-handle-border-radius: 6px;
+  --os-handle-border-radius: calc(6px * var(--ui-roundness));
   --os-handle-bg: var(--scrollbar-color);
   --os-handle-bg-hover: var(--scrollbar-color-hover);
   --os-handle-bg-active: var(--scrollbar-color-hover);
@@ -2195,4 +2197,3 @@ body .os-scrollbar {
     background-position: 0% 50%;
   }
 }
-

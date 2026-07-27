@@ -24,7 +24,7 @@
 .premiereDate {
   align-items: center;
   background-color: rgb(0 0 0 / 80%);
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   inset-block-end: 12px;
   color: #fff;
   display: flex;
@@ -96,7 +96,7 @@
         align-items: center;
         gap: 20px;
         padding: 10px;
-        border-radius: 20px;
+        border-radius: calc(20px * var(--ui-roundness));
         background-color: rgb(0 0 0 / 90%);
         color: #fff;
       }
@@ -385,12 +385,12 @@
 
 .skeletonLine {
   block-size: 14px;
-  border-radius: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
 }
 
 .infoSkeleton {
   padding: 16px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
   box-sizing: border-box;
 
@@ -423,7 +423,7 @@
   overflow: hidden;
   padding-block: 20px 16px;
   padding-inline: 16px;
-  border-radius: 5px;
+  border-radius: calc(5px * var(--ui-roundness));
   background-color: var(--card-bg-color);
 
   .skeletonPlaylistTitle {
@@ -441,7 +441,7 @@
   .skeletonPlaylistProgress {
     inline-size: 100%;
     block-size: 6px;
-    border-radius: 3px;
+    border-radius: calc(3px * var(--ui-roundness));
     margin-block-end: 14px;
   }
 
@@ -473,14 +473,14 @@
   .skeletonPlaylistIndex {
     inline-size: 10px;
     block-size: 12px;
-    border-radius: 3px;
+    border-radius: calc(3px * var(--ui-roundness));
     justify-self: center;
   }
 
   .skeletonPlaylistThumbnail {
     aspect-ratio: 16 / 9;
     inline-size: 128px;
-    border-radius: 3px;
+    border-radius: calc(3px * var(--ui-roundness));
   }
 
   .skeletonPlaylistDetails {
@@ -492,7 +492,7 @@
   .skeletonPlaylistDetailLine {
     block-size: 11px;
     inline-size: 92%;
-    border-radius: 4px;
+    border-radius: calc(4px * var(--ui-roundness));
   }
 
   .skeletonPlaylistDetailLine.short {
@@ -523,7 +523,7 @@
   .skeletonRecommendationThumbnail {
     aspect-ratio: 16 / 9;
     inline-size: 163px;
-    border-radius: 5px;
+    border-radius: calc(5px * var(--ui-roundness));
     flex-shrink: 0;
   }
 

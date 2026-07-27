@@ -141,6 +141,7 @@
 
 .iconDropdown {
   background-color: var(--side-nav-color);
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 50%);
   color: var(--secondary-text-color);
   display: inline;
@@ -150,6 +151,7 @@
   text-align: center;
   user-select: none;
   z-index: 3;
+  overflow: hidden;
 
   &.left {
     inset-inline-end: calc(50% - 10px);

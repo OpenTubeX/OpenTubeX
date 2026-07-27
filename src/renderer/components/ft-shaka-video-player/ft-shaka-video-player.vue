@@ -246,18 +246,7 @@
           :title="quickBookmarkTitle"
           @click="toggleQuickBookmark"
         >
-          <FontAwesomeLayers v-if="quickBookmarked">
-            <FontAwesomeIcon :icon="quickBookmarkIcon" />
-            <FontAwesomeIcon
-              class="quickBookmarkCheck"
-              :icon="['fas', 'check']"
-              transform="shrink-7 up-1"
-            />
-          </FontAwesomeLayers>
-          <FontAwesomeIcon
-            v-else
-            :icon="quickBookmarkIcon"
-          />
+          <FontAwesomeIcon :icon="quickBookmarkIcon" />
         </button>
       </div>
       <!--
