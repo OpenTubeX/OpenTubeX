@@ -144,7 +144,7 @@
 
 <script setup>
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
@@ -238,6 +238,17 @@ if (props.dropdownModalOnMobile) {
 
 const dropdown = useTemplateRef('dropdown')
 
+watch(dropdownShown, (shown) => {
+  if (shown && !useModal.value) {
+    window.addEventListener('resize', keepDropdownInViewport)
+    window.addEventListener('scroll', keepDropdownInViewport, { capture: true, passive: true })
+  } else {
+    removeDropdownViewportListeners()
+  }
+})
+
+onBeforeUnmount(removeDropdownViewportListeners)
+
 /**
  * @param {PointerEvent | null} e
  * @param {boolean} isRightOrLongClick
@@ -309,6 +320,11 @@ function keepDropdownInViewport() {
   const offsetY = Math.max(viewportMargin - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
 
   dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
+}
+
+function removeDropdownViewportListeners() {
+  window.removeEventListener('resize', keepDropdownInViewport)
+  window.removeEventListener('scroll', keepDropdownInViewport, true)
 }
 
 function preventButtonClickAfterLongPress() {
