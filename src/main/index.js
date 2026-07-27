@@ -3115,6 +3115,9 @@ function runApp() {
             case 'keyboardShortcuts':
               await setMenu()
               break
+            case 'tabCloseFocus':
+              TabManager.setTabCloseFocus(data.value)
+              break
             case 'hideToTrayOnMinimize':
               if (isTrayOnMinimizeSupported) {
                 trayOnMinimize = data.value

@@ -369,6 +369,10 @@ Settings:
       New Tab Position: New Tab Position
       At the end: At the end
       After current tab: After current tab
+    Tab Close Focus:
+      Tab Close Focus: After Closing a Tab
+      Previous tab: Select the previous tab
+      Next tab: Select the next tab
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs

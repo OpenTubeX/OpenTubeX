@@ -1,5 +1,24 @@
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
+/**
+ * Leaves three tabs open with the middle one active and returns their ids in
+ * tab bar order.
+ * @param {import('@playwright/test').Page} page
+ * @returns {Promise<string[]>}
+ */
+async function openThreeTabsAndActivateMiddle(page) {
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+
+  await page.locator(sel.tabs).nth(1).click()
+  await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+
+  return await page.locator(sel.tabs).evaluateAll(
+    (tabs) => tabs.map((tab) => tab.dataset.tabId)
+  )
+}
+
 test.describe('tab bar', () => {
   test('new tab button opens a tab and activates it', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
@@ -367,6 +386,13 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.activeTab)).toHaveCount(1)
   })
 
+  test('closing the active tab selects the previous tab by default', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivateMiddle(page)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
   // Regression: removing a logical tab left its detached video presented in
   // the native PiP window (#268). A canvas stream keeps this independent of
   // external media servers while exercising Chromium's real PiP API.
@@ -466,6 +492,17 @@ test.describe('closed tabs', () => {
       await expect(page).toHaveURL(/#\/history/)
       await expect(page.locator(sel.backButton)).toBeDisabled()
     })
+  })
+})
+
+test.describe('tab close focus set to the next tab', () => {
+  test.use({ seed: { settings: { tabCloseFocus: 'nextTab' } } })
+
+  test('closing the active tab selects the next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivateMiddle(page)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
   })
 })
 
