@@ -2,6 +2,7 @@
   <div
     ref="chaptersWrapper"
     v-observe-visibility="observeVisibilityOptions"
+    v-overlay-scrollbars
     class="chaptersWrapper"
     :class="{ compact }"
     role="list"

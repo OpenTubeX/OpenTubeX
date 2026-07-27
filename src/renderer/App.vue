@@ -1809,7 +1809,7 @@ function handleKeyboardShortcuts(event) {
     // Ctrl+W: Close tab (handled in menu, but also here for robustness)
     if (matchesKeyboardShortcut(event, shortcuts.CLOSE_TAB)) {
       event.preventDefault()
-      store.dispatch('closeActiveTab').then((hasRemainingTabs) => {
+      closeShortcutTabs().then((hasRemainingTabs) => {
         if (!hasRemainingTabs) {
           window.close()
         }
@@ -1833,12 +1833,15 @@ function handleKeyboardShortcuts(event) {
 
     // Ctrl+R: Reload tab (unless the current view handles refresh itself)
     if (matchesKeyboardShortcut(event, shortcuts.RELOAD_TAB)) {
-      if (route.path.startsWith('/subscriptions')) {
+      const tabIds = getShortcutTabIds()
+      if (tabIds.length === 1 && route.path.startsWith('/subscriptions')) {
         event.preventDefault()
         return
       }
       event.preventDefault()
-      prepareAndReloadTab()
+      for (const tabId of tabIds) {
+        prepareAndReloadTab(tabId)
+      }
     }
   }
 }
@@ -2280,6 +2283,26 @@ async function prepareAndReloadTab(tabId = activeTabId.value) {
     }
   }
   store.dispatch('reloadTab', tabId)
+}
+
+function getShortcutTabIds() {
+  const selectedTabIds = store.getters.getSelectedTabIds
+  return selectedTabIds.length > 1
+    ? [...selectedTabIds]
+    : activeTabId.value ? [activeTabId.value] : []
+}
+
+async function closeShortcutTabs() {
+  const tabIds = getShortcutTabIds()
+  const activeId = activeTabId.value
+  tabIds.sort((a, b) => Number(a === activeId) - Number(b === activeId))
+
+  let hasRemainingTabs = true
+  for (const tabId of tabIds) {
+    hasRemainingTabs = await store.dispatch('closeTab', tabId)
+    if (!hasRemainingTabs) break
+  }
+  return hasRemainingTabs
 }
 
 function handleMouseDown() {

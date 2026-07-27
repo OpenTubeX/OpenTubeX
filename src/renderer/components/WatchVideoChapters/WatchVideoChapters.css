@@ -5,7 +5,11 @@
   min-block-size: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: rgb(255 255 255 / 45%) transparent;
+
+  /* Light handle for the chapter overlay above the video. Watch.scss puts the
+     theme's colour back for the regular sidebar. */
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .chapter {

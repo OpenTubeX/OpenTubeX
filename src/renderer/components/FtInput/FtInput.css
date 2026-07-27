@@ -240,20 +240,6 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 .search .list {
   max-block-size: min(50vh, 20rem);
   overflow-y: scroll;
-  scrollbar-color: var(--scrollbar-color-hover) transparent;
-  scrollbar-gutter: stable;
-  scrollbar-width: auto;
-}
-
-.search .list::-webkit-scrollbar {
-  display: block;
-  inline-size: 10px;
-}
-
-.search .list::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-color-hover);
-  border: 2px solid var(--search-bar-color);
-  border-radius: calc(6px * var(--ui-roundness));
 }
 
 .list li {

@@ -62,6 +62,20 @@ test.describe('watch page', () => {
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
 
+  test('the sidebar panels use overlay scrollbars', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    // Whether these overflow depends on the video, so assert that the directive
+    // took hold rather than measuring widths: the panel stays the scrolling
+    // element and gets its own overlay scrollbars.
+    for (const selector of ['.descriptionScroll', '.commentsContentWrapper']) {
+      await expect(page.locator(selector)).toBeVisible({ timeout: 30_000 })
+      await expect(page.locator(`${selector}[data-overlayscrollbars-viewport]`)).toHaveCount(1)
+      await expect(page.locator(`${selector} > .os-scrollbar-vertical`)).toHaveCount(1)
+    }
+  })
+
   test('playback starts', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)

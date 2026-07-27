@@ -2159,9 +2159,21 @@ a:visited {
   animation-duration: 200ms;
 }
 
-::-webkit-scrollbar {
-  inline-size: auto;
-  block-size: auto;
+/* Scrollbars are drawn by OverlayScrollbars (see helpers/overlayScrollbars.js)
+   so they float above the content instead of taking up layout space. The
+   library resets every --os-* variable on `.os-scrollbar` itself, so these have
+   to be set on the same element rather than inherited from `body`. */
+body .os-scrollbar {
+  box-sizing: border-box;
+
+  --os-size: 10px;
+  --os-padding-perpendicular: 2px;
+  --os-padding-axis: 2px;
+  --os-handle-interactive-area-offset: 4px;
+  --os-handle-border-radius: calc(6px * var(--ui-roundness));
+  --os-handle-bg: var(--scrollbar-color);
+  --os-handle-bg-hover: var(--scrollbar-color-hover);
+  --os-handle-bg-active: var(--scrollbar-color-hover);
 }
 
 /* shared shimmer for skeleton loading placeholders */
@@ -2184,20 +2196,4 @@ a:visited {
   to {
     background-position: 0% 50%;
   }
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-color);
-  border-radius: calc(6px * var(--ui-roundness));
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  border: 0;
-}
-
-::-webkit-scrollbar-thumb:hover,
-::-webkit-scrollbar-thumb:focus {
-  background: var(--scrollbar-color-hover);
 }

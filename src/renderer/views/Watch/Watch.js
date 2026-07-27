@@ -74,6 +74,18 @@ import { useTabToast } from '../../composables/useTabToast'
 const MANIFEST_TYPE_DASH = 'application/dash+xml'
 const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
 const THEATRE_MODE_ANIMATION_DURATION = 400
+// A SABR session can go stale more than once during a long video, so the
+// refetch budget is per incident rather than per video: it refills once the
+// refreshed stream has played this many seconds, and only bounds reload loops
+// where the refreshed stream fails again before it ever settles.
+const MAX_SABR_ERROR_RECOVERIES = 3
+const SABR_ERROR_RECOVERY_SETTLE_SECONDS = 30
+// timeupdate fires about four times a second, so a natural tick stays well
+// under a second even at the fastest playback rate, while the smallest seek
+// shortcut jumps 5s. Anything above this is a seek and must not count as played
+// content, otherwise seeking around a broken stream would keep handing it fresh
+// recovery attempts.
+const SABR_ERROR_RECOVERY_MAX_TICK_SECONDS = 2
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -257,7 +269,10 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
-      sabrErrorRecoveryAttemptedForCurrentVideo: false,
+      sabrErrorRecoveryAttempts: 0,
+      /** @type {number|null} */
+      sabrErrorRecoveryLastSeconds: null,
+      sabrErrorRecoveryPlayedSeconds: 0,
       /** @type {number|null} */
       watchTimeLastTick: null,
       /** @type {Record<string, number>} */
@@ -847,7 +862,9 @@ export default defineComponent({
       const videoIdChanged = this.videoId !== previousVideoId
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
-        this.sabrErrorRecoveryAttemptedForCurrentVideo = false
+        this.sabrErrorRecoveryAttempts = 0
+        this.sabrErrorRecoveryLastSeconds = null
+        this.sabrErrorRecoveryPlayedSeconds = 0
       }
       this.ipBlockDetectedInCurrentChain = false
       this.resetVideoState({
@@ -1500,10 +1517,15 @@ export default defineComponent({
               this.manifestSrc = await this.createLocalDashManifest(result)
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
+              // Neither a SABR streaming URL nor playable adaptive format URLs,
+              // so the only thing left is the 360p legacy stream. This is a
+              // silent quality drop, so make it identifiable in the logs.
+              console.error(`No SABR or adaptive stream URLs for ${this.videoId}, falling back to the legacy formats...`)
               this.manifestSrc = null
               this.enableLegacyFormat()
             }
           } else {
+            console.error(`No adaptive formats for ${this.videoId}, falling back to the legacy formats...`)
             this.manifestSrc = null
             this.enableLegacyFormat()
           }
@@ -1967,6 +1989,26 @@ export default defineComponent({
     },
 
     handleTimeUpdate: function (currentSeconds) {
+      // Once the refreshed stream has actually played a stretch of content it
+      // has proven itself, so refill the budget: a later, unrelated SABR
+      // failure gets its own refetch instead of dropping straight to legacy
+      // 360p. Only natural playback ticks count towards that, so seeking around
+      // a stream that never plays can't keep the budget topped up.
+      if (this.sabrErrorRecoveryLastSeconds !== null) {
+        const elapsed = currentSeconds - this.sabrErrorRecoveryLastSeconds
+        this.sabrErrorRecoveryLastSeconds = currentSeconds
+
+        if (elapsed > 0 && elapsed <= SABR_ERROR_RECOVERY_MAX_TICK_SECONDS) {
+          this.sabrErrorRecoveryPlayedSeconds += elapsed
+
+          if (this.sabrErrorRecoveryPlayedSeconds >= SABR_ERROR_RECOVERY_SETTLE_SECONDS) {
+            this.sabrErrorRecoveryAttempts = 0
+            this.sabrErrorRecoveryLastSeconds = null
+            this.sabrErrorRecoveryPlayedSeconds = 0
+          }
+        }
+      }
+
       this.updateCurrentTime(currentSeconds)
       this.updateCurrentChapter(currentSeconds)
       this.$store.commit('setCurrentWatchTimestamp', {
@@ -2574,12 +2616,16 @@ export default defineComponent({
       if (
         this.activeFormat === 'dash' &&
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
-        !this.sabrErrorRecoveryAttemptedForCurrentVideo
+        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES
       ) {
         // A SABR playback session may no longer be reusable after a critical
-        // error. Refetch it once in-place before giving up HD and falling back
-        // to the legacy 360p stream.
-        this.sabrErrorRecoveryAttemptedForCurrentVideo = true
+        // error. Refetch it in-place before giving up HD and falling back to
+        // the legacy 360p stream.
+        this.sabrErrorRecoveryAttempts++
+        // The reload resumes here, so this is the baseline the refreshed stream
+        // starts accumulating played content from before the budget refills.
+        this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
+        this.sabrErrorRecoveryPlayedSeconds = 0
         await this.onPlayerReloadRequested(
           this.$refs.player?.getSabrReloadState(),
           'Refreshing SABR stream after playback error'

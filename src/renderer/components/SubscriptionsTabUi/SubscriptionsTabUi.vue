@@ -283,7 +283,14 @@ function keyboardShortcutHandler(event) {
   if (event.repeat) { return }
 
   if (
-    matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) &&
+    (
+      matchesKeyboardShortcut(event, KeyboardShortcuts.APP.SITUATIONAL.REFRESH) ||
+      (
+        process.env.IS_ELECTRON &&
+        store.getters.getSelectedTabIds.length <= 1 &&
+        matchesKeyboardShortcut(event, KeyboardShortcuts.APP.GENERAL.RELOAD_TAB)
+      )
+    ) &&
     !displayIsLoading.value &&
     activeProfileHasSubscriptions.value
   ) {

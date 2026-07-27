@@ -6,7 +6,6 @@
 
 .descriptionScroll {
   overflow-y: auto;
-  scrollbar-gutter: stable;
   max-block-size: 20lh;
 
   /* stretch into the card's inline padding so the scrollbar stays anchored to the card edge */

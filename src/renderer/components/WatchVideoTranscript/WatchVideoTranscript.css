@@ -120,7 +120,6 @@
   position: relative;
   max-block-size: 420px;
   overflow-y: auto;
-  scrollbar-gutter: stable;
 }
 
 .transcriptSegment {

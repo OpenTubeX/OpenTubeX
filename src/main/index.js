@@ -4213,7 +4213,15 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.activeTabId) {
-                  const hasRemainingTabs = tabManager.closeTab(tabManager.activeTabId)
+                  const tabIds = tabManager.selectedTabIds.length > 1
+                    ? [...tabManager.selectedTabIds]
+                    : [tabManager.activeTabId]
+                  tabIds.sort((a, b) => Number(a === tabManager.activeTabId) - Number(b === tabManager.activeTabId))
+                  let hasRemainingTabs = true
+                  for (const tabId of tabIds) {
+                    hasRemainingTabs = tabManager.closeTab(tabId)
+                    if (!hasRemainingTabs) break
+                  }
                   if (!hasRemainingTabs) {
                     browserWindow.close()
                   }
@@ -4230,7 +4238,12 @@ function runApp() {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
-                  tabManager.requestReload()
+                  const tabIds = tabManager.selectedTabIds.length > 1
+                    ? tabManager.selectedTabIds
+                    : [tabManager.activeTabId]
+                  for (const tabId of tabIds) {
+                    tabManager.requestReload(tabId)
+                  }
                 }
               }
             }

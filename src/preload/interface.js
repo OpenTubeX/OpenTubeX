@@ -809,6 +809,15 @@ export default {
     },
 
     /**
+     * Keep the main process aware of the tab bar's multi-selection so native
+     * menu shortcuts can target the same tabs.
+     * @param {string[]} tabIds
+     */
+    setSelected: (tabIds) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_SELECTED, tabIds)
+    },
+
+    /**
      * Listen for reload requests from main (e.g. menu "Reload Tab").
      * @param {(tabId: string) => void} handler
      * @returns {() => void}

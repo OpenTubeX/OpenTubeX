@@ -168,6 +168,7 @@ export const defaultSideEffectsTriggerId = settingId =>
 /*****/
 
 const state = {
+  alwaysShowScrollbars: false,
   autoOpenChapters: false,
   autoplayPlaylists: true,
   autoplayVideos: true,
