@@ -241,35 +241,39 @@ $watched-transition-duration: 0.5s;
       :deep(.iconDropdown) {
         inline-size: min(320px, calc(100vw - 16px));
         font-size: 14px;
+        max-block-size: calc(100vh - 16px);
+        overflow: hidden auto;
         box-shadow:
           0 16px 40px rgb(0 0 0 / 55%),
           0 3px 10px rgb(0 0 0 / 45%);
       }
 
       :deep(.iconDropdown .list) {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
       }
 
       :deep(.iconDropdown .listItem) {
         box-sizing: border-box;
-        flex: 1 1 100px;
-        justify-content: center;
-        white-space: normal;
+        justify-content: flex-start;
+        min-inline-size: 0;
+        white-space: nowrap;
       }
 
       :deep(.iconDropdown .listItem.hasIcon),
       :deep(.iconDropdown .listItem.active) {
         display: flex;
-        text-align: center;
+        text-align: start;
       }
 
       :deep(.iconDropdown .listItem > span) {
-        text-align: center;
+        overflow: hidden;
+        text-align: start;
+        text-overflow: ellipsis;
       }
 
       :deep(.iconDropdown .listItemDivider) {
-        flex: 0 0 calc(100% - 14px);
+        grid-column: 1 / -1;
       }
     }
 

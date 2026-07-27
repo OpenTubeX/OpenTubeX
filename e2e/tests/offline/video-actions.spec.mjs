@@ -77,8 +77,9 @@ test.describe('rounded action popovers', () => {
 })
 
 test.describe('list video actions', () => {
-  test('the options dropdown shows an icon for each action', async ({ page }) => {
+  test('the options dropdown shows readable single-column actions with icons', async ({ page }) => {
     await goTo(page, 'history')
+    await page.setViewportSize({ width: 1200, height: 360 })
 
     const video = page.locator('.ft-list-video').first()
     await video.hover()
@@ -90,15 +91,25 @@ test.describe('list video actions', () => {
     await expect(actions.locator('.optionIconColumn svg')).toHaveCount(await actions.count())
     await expect(dropdown).toHaveCSS('font-size', '14px')
     await expect(dropdown).not.toHaveCSS('box-shadow', 'none')
-    await expect(actions.first()).toHaveCSS('text-align', 'center')
-    await expect(actions.first()).toHaveCSS('justify-content', 'center')
+    await expect(actions.first()).toHaveCSS('text-align', 'start')
+    await expect(actions.first()).toHaveCSS('justify-content', 'flex-start')
     expect(await actions.locator('span').evaluateAll((labels) => {
       return labels.every((label) => label.scrollWidth <= label.clientWidth)
     })).toBe(true)
     const actionRows = await actions.evaluateAll((items) => items.map((item) => item.offsetTop))
-    expect(actionRows[0]).toBe(actionRows[1])
-    expect(new Set(actionRows.slice(2, 5)).size).toBe(1)
-    expect(actionRows.at(-3)).toBe(actionRows.at(-2))
+    expect(new Set(actionRows).size).toBe(actionRows.length)
+
+    const dropdownBounds = await dropdown.boundingBox()
+    expect(dropdownBounds.y).toBeGreaterThanOrEqual(0)
+    expect(dropdownBounds.y + dropdownBounds.height).toBeLessThanOrEqual(360)
+    expect(await dropdown.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
+    await expect(actions.last()).toBeVisible()
+
+    await page.setViewportSize({ width: 1000, height: 300 })
+    await expect.poll(async () => {
+      const bounds = await dropdown.boundingBox()
+      return bounds.y >= 0 && bounds.y + bounds.height <= 300
+    }).toBe(true)
   })
 
   test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {

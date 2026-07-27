@@ -144,7 +144,7 @@
 
 <script setup>
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
@@ -224,6 +224,7 @@ const useModal = ref(false)
 
 let blockLeftClick = false
 let longPressTimer = null
+let dropdownViewportUpdateFrame = null
 
 if (props.dropdownModalOnMobile) {
   onMounted(() => {
@@ -237,6 +238,17 @@ if (props.dropdownModalOnMobile) {
 }
 
 const dropdown = useTemplateRef('dropdown')
+
+watch(dropdownShown, (shown) => {
+  if (shown && !useModal.value) {
+    window.addEventListener('resize', scheduleDropdownViewportUpdate)
+    window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
+  } else {
+    removeDropdownViewportListeners()
+  }
+})
+
+onBeforeUnmount(removeDropdownViewportListeners)
 
 /**
  * @param {PointerEvent | null} e
@@ -265,6 +277,7 @@ function handleIconClick(e, isRightOrLongClick = false) {
       // then focus it so we can hide it automatically when it loses focus
       nextTick(() => {
         dropdown.value?.focus()
+        keepDropdownInViewport()
       })
     }
   } else {
@@ -292,6 +305,42 @@ function handleIconPointerDown(event) {
         window.removeEventListener('pointerup', preventButtonClickAfterLongPress)
       }, { once: true })
     }, LONG_CLICK_BOUNDARY_MS)
+  }
+}
+
+function keepDropdownInViewport() {
+  if (dropdown.value == null) {
+    return
+  }
+
+  const viewportMargin = 8
+  dropdown.value.style.removeProperty('transform')
+
+  const rect = dropdown.value.getBoundingClientRect()
+  const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
+  const offsetY = Math.max(viewportMargin - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
+
+  dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
+}
+
+function scheduleDropdownViewportUpdate() {
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+  }
+
+  dropdownViewportUpdateFrame = requestAnimationFrame(() => {
+    dropdownViewportUpdateFrame = null
+    keepDropdownInViewport()
+  })
+}
+
+function removeDropdownViewportListeners() {
+  window.removeEventListener('resize', scheduleDropdownViewportUpdate)
+  window.removeEventListener('scroll', scheduleDropdownViewportUpdate, true)
+
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+    dropdownViewportUpdateFrame = null
   }
 }
 
