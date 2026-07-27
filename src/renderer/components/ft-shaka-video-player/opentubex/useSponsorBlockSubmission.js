@@ -395,7 +395,7 @@ export function useSponsorBlockSubmission({
     if (clampedEndTime <= draft.startTime) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeAfterStart')
       sponsorBlockSubmissionError.value = errorMessage
-      showToast(errorMessage)
+      showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
       return
     }
 
@@ -474,14 +474,14 @@ export function useSponsorBlockSubmission({
     if (startTime == null) {
       const errorMessage = t('Video.Player.SponsorBlock.InvalidStartTime')
       sponsorBlockSubmissionError.value = errorMessage
-      showToast(errorMessage)
+      showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
       return false
     }
 
     if (!isPointCategory && endTime != null && endTime <= startTime) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeAfterStart')
       sponsorBlockSubmissionError.value = errorMessage
-      showToast(errorMessage)
+      showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
       return false
     }
 
@@ -489,7 +489,7 @@ export function useSponsorBlockSubmission({
     if (currentDuration != null && (isPointCategory ? startTime : endTime) > currentDuration) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeBeforeVideoEnd')
       sponsorBlockSubmissionError.value = errorMessage
-      showToast(errorMessage)
+      showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
       return false
     }
 
@@ -678,7 +678,7 @@ export function useSponsorBlockSubmission({
 
     if (sponsorBlockHasIncompleteDraft.value) {
       sponsorBlockSubmissionError.value = t('Video.Player.SponsorBlock.CompleteSegmentsBeforeSubmitting')
-      showToast(sponsorBlockSubmissionError.value)
+      showToast({ message: sponsorBlockSubmissionError.value, icon: ['fas', 'circle-exclamation'] })
       return
     }
 
@@ -690,7 +690,7 @@ export function useSponsorBlockSubmission({
 
     if (sponsorBlockDraftSegments.value.some(segment => sponsorBlockDraftRequiresPreview(segment) && !segment.previewed)) {
       sponsorBlockSubmissionError.value = t('Video.Player.SponsorBlock.PreviewRequired')
-      showToast(sponsorBlockSubmissionError.value)
+      showToast({ message: sponsorBlockSubmissionError.value, icon: ['fas', 'circle-exclamation'] })
       return
     }
 
@@ -699,7 +699,7 @@ export function useSponsorBlockSubmission({
       const duplicateKey = `${segment.startTime}-${segment.endTime}-${segment.category}`
       if (duplicateKeySet.has(duplicateKey)) {
         sponsorBlockSubmissionError.value = t('Video.Player.SponsorBlock.DuplicateSegments')
-        showToast(sponsorBlockSubmissionError.value)
+        showToast({ message: sponsorBlockSubmissionError.value, icon: ['fas', 'circle-exclamation'] })
         return
       }
 
@@ -734,10 +734,10 @@ export function useSponsorBlockSubmission({
       pruneSponsorBlockDraftEditValues()
       closeSponsorBlockSubmissionMenu()
       await persistSponsorBlockDrafts()
-      showToast(t('Video.Player.SponsorBlock.SubmissionSuccess'))
+      showToast({ message: t('Video.Player.SponsorBlock.SubmissionSuccess'), icon: ['fas', 'check'] })
     } catch (error) {
       sponsorBlockSubmissionError.value = getSponsorBlockSubmitErrorMessage(error)
-      showToast(sponsorBlockSubmissionError.value, 5000)
+      showToast({ message: sponsorBlockSubmissionError.value, time: 5000, icon: ['fas', 'circle-exclamation'] })
     } finally {
       sponsorBlockSubmissionPending.value = false
     }

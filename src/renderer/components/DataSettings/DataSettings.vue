@@ -191,11 +191,11 @@ async function promptAndWriteToFile(
     )
 
     if (response) {
-      showToast(successMessage)
+      showToast({ message: successMessage, icon: ['fas', 'check'] })
     }
   } catch (error) {
     const message = t('Settings.Data Settings.Unable to write file')
-    showToast(`${message}: ${error}`)
+    showToast({ message: `${message}: ${error}`, icon: ['fas', 'circle-exclamation'] })
   }
 }
 
@@ -208,7 +208,7 @@ function parseImportedJson(content, invalidMessage) {
     return JSON.parse(content)
   } catch (error) {
     console.error('Unable to parse imported JSON file', error)
-    showToast(invalidMessage)
+    showToast({ message: invalidMessage, icon: ['fas', 'circle-exclamation'] })
     return null
   }
 }
@@ -258,7 +258,7 @@ async function importSubscriptions() {
     )
   } catch (err) {
     const message = t('Settings.Data Settings.Unable to read file')
-    showToast(`${message}: ${err}`)
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -296,7 +296,10 @@ async function importSubscriptions() {
         importYouTubeSubscriptions(jsonContent)
         break
       default:
-        showToast(t('Settings.Data Settings.Invalid subscriptions file'))
+        showToast({
+          message: t('Settings.Data Settings.Invalid subscriptions file'),
+          icon: ['fas', 'circle-exclamation'],
+        })
     }
   }
 }
@@ -384,7 +387,7 @@ function importFreeTubeSubscriptions(textDecode) {
     Object.keys(profileData).forEach((key) => {
       if (!requiredKeys.includes(key)) {
         const message = t('Settings.Data Settings.Unknown data key')
-        showToast(`${message}: ${key}`)
+        showToast({ message: `${message}: ${key}`, icon: ['fas', 'circle-exclamation'] })
       } else {
         profileObject[key] = profileData[key]
       }
@@ -392,7 +395,7 @@ function importFreeTubeSubscriptions(textDecode) {
 
     if (Object.keys(profileObject).length < requiredKeys.length) {
       const message = t('Settings.Data Settings.Profile object has insufficient data, skipping item')
-      showToast(message)
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     } else {
       if (profileObject._id === MAIN_PROFILE_ID) {
         primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(profileObject.subscriptions)
@@ -437,7 +440,10 @@ function importFreeTubeSubscriptions(textDecode) {
     }
   })
 
-  showToast(t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions and profiles have been successfully imported'),
+    icon: ['fas', 'rss'],
+  })
 }
 
 /**
@@ -481,7 +487,10 @@ function importCsvYouTubeSubscriptions(textDecode) { // first row = header, last
 
   primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
   store.dispatch('updateProfile', primaryProfile.value)
-  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'rss'],
+  })
   store.commit('setShowProgressBar', false)
 }
 
@@ -499,7 +508,7 @@ function importYouTubeSubscriptions(textDecode) {
     const snippet = channel.snippet
     if (typeof snippet === 'undefined') {
       const message = t('Settings.Data Settings.Invalid subscriptions file')
-      showToast(message)
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       throw new Error('Unable to find channel data')
     }
 
@@ -520,7 +529,10 @@ function importYouTubeSubscriptions(textDecode) {
 
   primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
   store.dispatch('updateProfile', primaryProfile.value)
-  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'rss'],
+  })
   store.commit('setShowProgressBar', false)
 }
 
@@ -548,7 +560,7 @@ function importOpmlYouTubeSubscriptions(data) {
       xmlDom = htmlDom
     } catch {
       const message = t('Settings.Data Settings.Invalid subscriptions file')
-      showToast(`${message}: ${err}`)
+      showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
       return
     }
   }
@@ -556,7 +568,7 @@ function importOpmlYouTubeSubscriptions(data) {
   const feedData = xmlDom.querySelectorAll('body outline[xmlUrl]')
   if (feedData.length === 0) {
     const message = t('Settings.Data Settings.Invalid subscriptions file')
-    showToast(message)
+    showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -597,7 +609,10 @@ function importOpmlYouTubeSubscriptions(data) {
 
   primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(subscriptions)
   store.dispatch('updateProfile', primaryProfile.value)
-  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'rss'],
+  })
   store.commit('setShowProgressBar', false)
 }
 
@@ -608,7 +623,7 @@ function importLibreTubeSubscriptions(libreTubeSubscriptions) {
   const subscriptions = convertLibreTubeSubscriptions(libreTubeSubscriptions)
 
   if (subscriptions.length === 0) {
-    showToast(t('Settings.Data Settings.Invalid subscriptions file'))
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -635,7 +650,10 @@ function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
 
   primaryProfile.value.subscriptions = primaryProfile.value.subscriptions.concat(newSubscriptions)
   store.dispatch('updateProfile', primaryProfile.value)
-  showToast(t('Settings.Data Settings.All subscriptions have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All subscriptions have been successfully imported'),
+    icon: ['fas', 'rss'],
+  })
   store.commit('setShowProgressBar', false)
 }
 
@@ -644,7 +662,7 @@ function mergeSubscriptionsIntoPrimaryProfile(subscriptions) {
  */
 function importNewPipeSubscriptions(newPipeData) {
   if (typeof newPipeData.subscriptions === 'undefined') {
-    showToast(t('Settings.Data Settings.Invalid subscriptions file'))
+    showToast({ message: t('Settings.Data Settings.Invalid subscriptions file'), icon: ['fas', 'circle-exclamation'] })
 
     return
   }
@@ -887,7 +905,7 @@ async function importWatchHistory() {
     )
   } catch (err) {
     const message = t('Settings.Data Settings.Unable to read file')
-    showToast(`${message}: ${err}`)
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -910,7 +928,7 @@ async function importWatchHistory() {
     } else if (Array.isArray(jsonContent)) {
       importYouTubeWatchHistory(jsonContent)
     } else {
-      showToast(t('Settings.Data Settings.Invalid history file'))
+      showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
     }
   }
 }
@@ -964,7 +982,7 @@ async function importFreeTubeWatchHistory(textDecode) {
       if (requiredKeys.includes(key) || optionalKeys.includes(key)) {
         historyObject[key] = historyData[key]
       } else if (!ignoredKeys.includes(key)) {
-        showToast(`Unknown data key: ${key}`)
+        showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
       }
       // Else do not import the key
     })
@@ -972,7 +990,10 @@ async function importFreeTubeWatchHistory(textDecode) {
     const historyObjectKeysSet = new Set(Object.keys(historyObject))
     const missingKeys = requiredKeys.filter(x => !historyObjectKeysSet.has(x))
     if (missingKeys.length > 0) {
-      showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      showToast({
+        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+        icon: ['fas', 'circle-exclamation'],
+      })
       console.error('Missing Keys: ', missingKeys, historyData)
     } else {
       // FreeTube history export does not have this data if the video was marked as watched manually, setting default value
@@ -984,7 +1005,10 @@ async function importFreeTubeWatchHistory(textDecode) {
 
   await store.dispatch('overwriteHistory', historyItems)
 
-  showToast(t('Settings.Data Settings.All watched history has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
 }
 
 /**
@@ -992,7 +1016,7 @@ async function importFreeTubeWatchHistory(textDecode) {
  */
 async function importLibreTubeWatchHistory(backupData) {
   if (backupData.watchHistory.length === 0) {
-    showToast(t('Settings.Data Settings.Invalid history file'))
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -1007,17 +1031,23 @@ async function importLibreTubeWatchHistory(backupData) {
   )
 
   if (importedCount === 0) {
-    showToast(t('Settings.Data Settings.Invalid history file'))
+    showToast({ message: t('Settings.Data Settings.Invalid history file'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
   if (skippedCount > 0) {
-    showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+    showToast({
+      message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 
   await store.dispatch('overwriteHistory', convertedHistoryItems)
 
-  showToast(t('Settings.Data Settings.All watched history has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
 }
 
 /**
@@ -1083,7 +1113,7 @@ async function importYouTubeWatchHistory(historyData) {
 
     Object.keys(element).forEach((key) => {
       if (!knownKeys.includes(key)) {
-        showToast(`Unknown data key: ${key}`)
+        showToast({ message: `Unknown data key: ${key}`, icon: ['fas', 'circle-exclamation'] })
       } else {
         const mapping = keyMapping[key]
 
@@ -1096,7 +1126,10 @@ async function importYouTubeWatchHistory(historyData) {
     })
 
     if (Object.keys(historyObject).length < keyMapping.length - 1) {
-      showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      showToast({
+        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     } else {
       // YouTube history export does not have this data, setting some defaults.
       historyObject.type = 'video'
@@ -1113,7 +1146,10 @@ async function importYouTubeWatchHistory(historyData) {
 
   await store.dispatch('overwriteHistory', historyItems)
 
-  showToast(t('Settings.Data Settings.All watched history has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All watched history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
 }
 
 const showExportWatchHistoryPrompt = ref(false)
@@ -1203,7 +1239,7 @@ async function importPlaylists() {
     )
   } catch (err) {
     const message = t('Settings.Data Settings.Unable to read file')
-    showToast(`${message}: ${err}`)
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -1287,7 +1323,7 @@ async function importPlaylists() {
     Object.keys(playlistData).forEach((key) => {
       if (!knownKeys.includes(key)) {
         const message = `${t('Settings.Data Settings.Unknown data key')}: ${key}`
-        showToast(message)
+        showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       } else if (key === 'videos') {
         const videoArray = []
         playlistData.videos.forEach((video) => {
@@ -1317,7 +1353,7 @@ async function importPlaylists() {
 
     if (countRequiredKeysPresent !== requiredKeys.length) {
       const message = t('Settings.Data Settings.Playlist insufficient data', { playlist: playlistData.playlistName })
-      showToast(message)
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       return
     }
 
@@ -1398,7 +1434,10 @@ async function importPlaylists() {
     store.dispatch('addPlaylists', newPlaylists)
   }
 
-  showToast(t('Settings.Data Settings.All playlists has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All playlists has been successfully imported'),
+    icon: ['fas', 'bookmark'],
+  })
 }
 
 async function exportPlaylists() {
@@ -1442,7 +1481,7 @@ async function importSearchHistory() {
     )
   } catch (err) {
     const message = t('Settings.Data Settings.Unable to read file')
-    showToast(`${message}: ${err}`)
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -1472,7 +1511,10 @@ async function importFreeTubeSearchHistory(textDecode) {
     const entry = JSON.parse(rawEntry)
 
     if (typeof entry._id !== 'string' || typeof entry.lastUpdatedAt !== 'number') {
-      showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+      showToast({
+        message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+        icon: ['fas', 'circle-exclamation'],
+      })
       console.error('Missing keys:', entry)
     } else {
       const existingEntry = historyItems.get(entry._id)
@@ -1495,7 +1537,10 @@ async function importFreeTubeSearchHistory(textDecode) {
 
   await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
 
-  showToast(t('Settings.Data Settings.All search history has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All search history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
 }
 
 /**
@@ -1518,7 +1563,10 @@ async function importYouTubeSearchHistory(historyData) {
         const lastUpdatedAt = Date.parse(entry.time)
 
         if (!query || typeof query !== 'string' || query.length === 0 || isNaN(lastUpdatedAt)) {
-          showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+          showToast({
+            message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+            icon: ['fas', 'circle-exclamation'],
+          })
           console.error('Missing keys:', entry)
         } else {
           const existingEntry = historyItems.get(query)
@@ -1529,7 +1577,10 @@ async function importYouTubeSearchHistory(historyData) {
         }
       } catch (error) {
         console.error(error)
-        showToast(t('Settings.Data Settings.History object has insufficient data, skipping item'))
+        showToast({
+          message: t('Settings.Data Settings.History object has insufficient data, skipping item'),
+          icon: ['fas', 'circle-exclamation'],
+        })
       }
     }
   }
@@ -1538,7 +1589,10 @@ async function importYouTubeSearchHistory(historyData) {
 
   await store.dispatch('overwriteSearchHistory', newSearchHistoryEntries)
 
-  showToast(t('Settings.Data Settings.All search history has been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All search history has been successfully imported'),
+    icon: ['fas', 'history'],
+  })
 }
 
 const showExportSearchHistoryPrompt = ref(false)
@@ -1628,7 +1682,7 @@ async function importSettings() {
     )
   } catch (err) {
     const message = t('Settings.Data Settings.Unable to read file')
-    showToast(`${message}: ${err}`)
+    showToast({ message: `${message}: ${err}`, icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -1645,7 +1699,10 @@ async function importSettings() {
       content.split('\n').map((rawEntry) => {
         const entry = JSON.parse(rawEntry)
         if (typeof entry._id !== 'string' || !Object.hasOwn(entry, 'value')) {
-          showToast(t('Settings.Data Settings.Setting object has insufficient data, skipping item'))
+          showToast({
+            message: t('Settings.Data Settings.Setting object has insufficient data, skipping item'),
+            icon: ['fas', 'circle-exclamation'],
+          })
           console.error('Missing keys:', entry)
           return []
         }
@@ -1660,13 +1717,13 @@ async function importSettings() {
   for (const [importedKey, importedValue] of Object.entries(importedSettings)) {
     if (!Object.hasOwn(currentSettings, importedKey)) {
       const message = t('Settings.Data Settings.Unknown setting key', { key: importedKey })
-      showToast(message)
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       continue
     }
 
     if (NON_TRANSFERABLE_SETTINGS.has(importedKey)) {
       const message = t('Settings.Data Settings.Non-transferable setting key', { key: importedKey })
-      showToast(message)
+      showToast({ message: message, icon: ['fas', 'circle-exclamation'] })
       continue
     }
 
@@ -1681,7 +1738,10 @@ async function importSettings() {
     await store.dispatch(updaterId, importedValue)
   }
 
-  showToast(t('Settings.Data Settings.All settings have been successfully imported'))
+  showToast({
+    message: t('Settings.Data Settings.All settings have been successfully imported'),
+    icon: ['fas', 'sliders-h'],
+  })
 }
 
 async function exportSettings() {

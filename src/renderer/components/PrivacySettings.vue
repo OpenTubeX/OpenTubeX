@@ -256,7 +256,10 @@ function parseDays(value, allowEmpty = false) {
 async function saveHistoryRetention() {
   const days = parseDays(historyRetentionDaysInput.value, true)
   if (days === null) {
-    showToast(t('Settings.Privacy Settings.Invalid History Retention Days'))
+    showToast({
+      message: t('Settings.Privacy Settings.Invalid History Retention Days'),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
@@ -265,7 +268,7 @@ async function saveHistoryRetention() {
   if (days !== '') {
     await store.dispatch('removeHistoryOlderThan', days)
   }
-  showToast(t('Settings.Privacy Settings.History Retention Saved'))
+  showToast({ message: t('Settings.Privacy Settings.History Retention Saved'), icon: ['fas', 'check'] })
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -327,7 +330,10 @@ function handleSearchCache(option) {
 
   store.dispatch('clearSessionSearchHistory')
   store.dispatch('removeAllSearchHistoryEntries')
-  showToast(t('Settings.Privacy Settings.Search history and cache have been cleared'))
+  showToast({
+    message: t('Settings.Privacy Settings.Search history and cache have been cleared'),
+    icon: ['fas', 'trash'],
+  })
 }
 
 const showRemoveHistoryPrompt = ref(false)
@@ -341,7 +347,7 @@ function handleRemoveHistory(option) {
   if (option !== 'delete') { return }
 
   store.dispatch('removeAllHistory')
-  showToast(t('Settings.Privacy Settings.Watch history has been cleared'))
+  showToast({ message: t('Settings.Privacy Settings.Watch history has been cleared'), icon: ['fas', 'trash'] })
 }
 
 const showRemoveSubscriptionsPrompt = ref(false)
@@ -388,6 +394,6 @@ function handleRemovePlaylists(option) {
 
   store.dispatch('removeAllPlaylists')
   store.dispatch('updateQuickBookmarkTargetPlaylistId', 'favorites')
-  showToast(t('Settings.Privacy Settings.All playlists have been removed'))
+  showToast({ message: t('Settings.Privacy Settings.All playlists have been removed'), icon: ['fas', 'trash'] })
 }
 </script>

@@ -123,7 +123,7 @@ import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vu
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
-import { copyToClipboard, getRelativeTimeFromDate } from '../../helpers/utils'
+import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useTabToast } from '../../composables/useTabToast'
 import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
@@ -214,9 +214,7 @@ async function getTrendingInfoLocal() {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Local API Error (Click to copy)')
-    showTabToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error, showTabToast)
     isLoading.value[currentTab.value] = false
   }
 }

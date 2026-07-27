@@ -823,7 +823,8 @@ function addToWatchQueue(playNext) {
     message: playNext
       ? t('Video.Added to Play Next')
       : t('Video.Added to Queue'),
-    image: thumbnail.value
+    image: toastThumbnail.value,
+    icon: ['fas', 'list'],
   })
 }
 
@@ -854,6 +855,10 @@ const thumbnail = computed(() => {
       return `${baseUrl}/vi/${id.value}/mqdefault.jpg`
   }
 })
+
+// The placeholder is fine in the list, but in a toast it would just be a grey
+// box in place of the toast's fallback icon, so leave the image out instead
+const toastThumbnail = computed(() => thumbnailPreference.value === 'hidden' ? null : thumbnail.value)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
@@ -1211,7 +1216,7 @@ async function openCollaboratorsPrompt() {
     }
   } catch (error) {
     console.error(`Failed to fetch collaborators for ${id.value}`, error)
-    showToast(t('Video.Failed to load collaborators'))
+    showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
   } finally {
     isFetchingCollaborators.value = false
   }
@@ -1321,7 +1326,8 @@ function markAsWatched() {
 
   showToast({
     message: t('Video.Video has been marked as watched'),
-    image: thumbnail.value
+    image: toastThumbnail.value,
+    icon: ['fas', 'eye'],
   })
 }
 
@@ -1333,7 +1339,8 @@ function unmarkAsWatched() {
 
   showToast({
     message: t('Video.Video has been unmarked as watched'),
-    image: thumbnail.value
+    image: toastThumbnail.value,
+    icon: ['fas', 'eye-slash'],
   })
 }
 
@@ -1342,7 +1349,8 @@ function removeFromHistory() {
 
   showToast({
     message: t('Video.Video has been removed from your history'),
-    image: thumbnail.value
+    image: toastThumbnail.value,
+    icon: ['fas', 'trash'],
   })
 }
 
@@ -1368,7 +1376,7 @@ function hideChannel(channelName, channelId) {
 
   store.dispatch('updateChannelsHidden', JSON.stringify(newHiddenChannels))
 
-  showToast(t('Channel Hidden', { channel: channelName }))
+  showToast({ message: t('Channel Hidden', { channel: channelName }), icon: ['fas', 'eye-slash'] })
 }
 
 /**
@@ -1378,7 +1386,7 @@ function hideChannel(channelName, channelId) {
 function unhideChannel(channelName, channelId) {
   store.dispatch('updateChannelsHidden', JSON.stringify(hiddenChannels.value.filter(c => c.name !== channelId)))
 
-  showToast(t('Channel Unhidden', { channel: channelName }))
+  showToast({ message: t('Channel Unhidden', { channel: channelName }), icon: ['fas', 'eye'] })
 }
 
 function toggleQuickBookmarked() {
@@ -1417,7 +1425,8 @@ async function addToQuickBookmarkPlaylist() {
     message: saved
       ? t('Video.Video has been saved to {playlistName}', { playlistName })
       : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
-    image: thumbnail.value,
+    image: toastThumbnail.value,
+    icon: ['fas', 'bookmark'],
   })
 }
 
@@ -1434,7 +1443,8 @@ async function removeFromQuickBookmarkPlaylist() {
     message: removed
       ? t('Video.Video has been removed from {playlistName}', { playlistName })
       : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
-    image: thumbnail.value
+    image: toastThumbnail.value,
+    icon: ['fas', 'trash'],
   })
 }
 

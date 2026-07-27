@@ -395,7 +395,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
 
-import { copyToClipboard, formatNumber, showToast } from '../../helpers/utils'
+import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -807,7 +807,7 @@ function getCommentData({ preserveSort = false } = {}) {
 
 function getMoreComments() {
   if (commentData.value.length === 0 || nextPageToken.value == null) {
-    showToast(t('Comments.There are no more comments for this video'))
+    showToast({ message: t('Comments.There are no more comments for this video'), icon: ['fas', 'comment'] })
   } else {
     isLoadingMoreComments.value = true
     let commentLoadPromise
@@ -1005,12 +1005,10 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
 
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendFallback.value && backendPreference.value === 'local') {
       localCommentsInstance = undefined
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       if (props.isPostComments) {
         return getPostCommentsInvidious()
       } else {
@@ -1068,11 +1066,9 @@ async function getCommentRepliesLocal(index, commentId = null) {
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
     if (backendFallback.value && backendPreference.value === 'local') {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       getCommentDataInvidious()
     } else {
       isLoading.value = false
@@ -1121,12 +1117,10 @@ async function getCommentDataInvidious() {
 
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       return getCommentDataLocal()
     } else {
       isLoading.value = false
@@ -1159,9 +1153,7 @@ async function getCommentRepliesInvidious(index) {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     isLoading.value = false
   }
 }
@@ -1191,12 +1183,10 @@ function getPostCommentsInvidious() {
   }).catch((err) => {
     console.error(err)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${err}`, 10000, () => {
-      copyToClipboard(err)
-    })
+    showApiErrorToast(errorMessage, err)
 
     if (process.env.SUPPORTS_LOCAL_API && backendFallback.value && backendPreference.value === 'invidious') {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       return getCommentDataLocal()
     } else {
       isLoading.value = false
@@ -1229,9 +1219,7 @@ async function getPostCommentRepliesInvidious(index) {
   } catch (error) {
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
-    showToast(`${errorMessage}: ${error}`, 10000, () => {
-      copyToClipboard(error)
-    })
+    showApiErrorToast(errorMessage, error)
     isLoading.value = false
   }
 }

@@ -289,10 +289,12 @@ import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { findUpdateRelease } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
+  cancelSubscriptionRefresh,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote,
+  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
   SUBSCRIPTION_REFRESH_LOCK_NAME,
@@ -538,6 +540,7 @@ const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAu
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
+let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
@@ -624,7 +627,10 @@ async function initializeManagedDownloadTools() {
 
   if (downloadStarted) {
     const missingTools = missingBinaries.join(' and ')
-    showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }))
+    showToast({
+      message: t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }),
+      icon: ['fas', 'download'],
+    })
     showToolProgress()
   }
 
@@ -648,7 +654,10 @@ async function initializeManagedDownloadTools() {
 
     if (!downloadStarted) {
       downloadStarted = true
-      showToast(t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }))
+      showToast({
+        message: t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }),
+        icon: ['fas', 'download'],
+      })
       showToolProgress()
     }
 
@@ -680,13 +689,19 @@ async function initializeManagedDownloadTools() {
         store.commit('setProgressBarPercentage', toolProgressPercentage)
       }
       const updatedTools = updatedBinaries.join(' and ')
-      showToast(missingBinaries.length > 0
-        ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-        : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }))
+      showToast({
+        message: missingBinaries.length > 0
+          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
+          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
+        icon: ['fas', 'check'],
+      })
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast(t('Settings.Download Settings.Managed Tools Download Error Template', { errors }))
+        showToast({
+          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
+          icon: ['fas', 'circle-exclamation'],
+        })
       }
     }
   } finally {
@@ -783,6 +798,9 @@ onMounted(async () => {
     removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
       applySubscriptionAutoRefreshState
     )
+    removeSubscriptionAutoRefreshCancelListener = window.ftElectron.subscriptionAutoRefresh.onCancelRequested(
+      cancelSubscriptionRefresh
+    )
     synchronizeSubscriptionRefreshInProgress()
     removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
       if (isActive) {
@@ -818,6 +836,7 @@ onBeforeUnmount(() => {
   window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
+  removeSubscriptionAutoRefreshCancelListener?.()
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
@@ -1421,6 +1440,13 @@ function handleSubscriptionRefreshFinished() {
  * @param {StorageEvent} event
  */
 function handleSubscriptionAutoRefreshStorage(event) {
+  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
+    if (event.newValue !== null) {
+      cancelSubscriptionRefresh()
+    }
+    return
+  }
+
   if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({
@@ -2313,7 +2339,10 @@ function handleLinkClick(event) {
     })
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
-    showToast(t('External link opening has been disabled in the general settings'))
+    showToast({
+      message: t('External link opening has been disabled in the general settings'),
+      icon: ['fas', 'link-slash'],
+    })
   } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
     // Storing the URL is necessary as
     // there is no other way to pass the URL to click callback
@@ -2448,7 +2477,10 @@ async function handleYoutubeLink(href, {
 
     default: {
       // Unknown URL type
-      showToast(t('Unknown YouTube url type, cannot be opened in app'))
+      showToast({
+        message: t('Unknown YouTube url type, cannot be opened in app'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   }
 }

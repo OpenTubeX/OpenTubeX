@@ -225,6 +225,9 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
 
 export const ToastEventBus = new EventTarget()
 
+/** Icon shown on toasts that report a failure */
+const ERROR_TOAST_ICON = ['fas', 'circle-exclamation']
+
 /**
  * @typedef {object} ToastOptions
  * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
@@ -232,22 +235,25 @@ export const ToastEventBus = new EventTarget()
  * @property {Function} [action]
  * @property {AbortSignal} [abortSignal]
  * @property {string} [image] optional image URL (e.g. a video thumbnail) shown alongside the message
+ * @property {[string, string]} [icon] optional Font Awesome icon (e.g. `['fas', 'trash']`) shown
+ *   alongside the message, ignored when an image is given
  */
 
 /**
  * @param {string | (({elapsedMs: number, remainingMs: number}) => string) | ToastOptions} message
- *   the message to display, or an options object for more control (e.g. to show an image)
+ *   the message to display, or an options object for more control (e.g. to show an image or icon)
  * @param {number} time
  * @param {Function} action
  * @param {AbortSignal} abortSignal
  */
 export function showToast(message, time = null, action = null, abortSignal = null) {
   let image = null
+  let icon = null
 
   // Allow calling with a single options object while staying backwards compatible
   // with the positional (message, time, action, abortSignal) signature
   if (message !== null && typeof message === 'object') {
-    ({ message, time = null, action = null, abortSignal = null, image = null } = message)
+    ({ message, time = null, action = null, abortSignal = null, image = null, icon = null } = message)
   }
 
   // Sometimes caller just pass user setting based value in and it can be zero
@@ -263,6 +269,7 @@ export function showToast(message, time = null, action = null, abortSignal = nul
       action,
       abortSignal,
       image,
+      icon,
     }
   }))
 }
@@ -271,12 +278,13 @@ export function showToast(message, time = null, action = null, abortSignal = nul
  * Shows a non-interactive toast in every tab.
  * @param {string} message
  * @param {number} time
+ * @param {[string, string] | null} icon optional Font Awesome icon shown alongside the message
  */
-export function showToastOnAllTabs(message, time = null) {
+export function showToastOnAllTabs(message, time = null, icon = null) {
   if (process.env.IS_ELECTRON) {
-    window.ftElectron.showToastOnAllTabs(message, time)
+    window.ftElectron.showToastOnAllTabs(message, time, icon)
   } else {
-    showToast(message, time)
+    showToast({ message, time, icon })
   }
 }
 
@@ -303,7 +311,7 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       }
 
       if (messageOnSuccess !== null) {
-        showToast(messageOnSuccess)
+        showToast({ message: messageOnSuccess, icon: ['fas', 'copy'] })
       }
     } catch (error) {
       if (content instanceof Blob) {
@@ -311,15 +319,40 @@ export async function copyToClipboard(content, { messageOnSuccess = null, messag
       } else {
         console.error(`Failed to copy ${content} to clipboard`, error)
       }
-      if (messageOnError !== null) {
-        showToast(`${messageOnError}: ${error}`, 5000)
-      } else {
-        showToast(`${i18n.global.t('Clipboard.Copy failed')}: ${error}`, 5000)
-      }
+      showToast({
+        message: messageOnError !== null
+          ? `${messageOnError}: ${error}`
+          : `${i18n.global.t('Clipboard.Copy failed')}: ${error}`,
+        time: 5000,
+        icon: ERROR_TOAST_ICON,
+      })
     }
   } else {
-    showToast(i18n.global.t('Clipboard.Cannot access clipboard without a secure connection'), 5000)
+    showToast({
+      message: i18n.global.t('Clipboard.Cannot access clipboard without a secure connection'),
+      time: 5000,
+      icon: ERROR_TOAST_ICON,
+    })
   }
+}
+
+/**
+ * Shows an error toast for a failed request, which copies the error to the
+ * clipboard when clicked.
+ * @param {string} message the message describing what failed
+ * @param {Error | string} error the error to report and make copyable
+ * @param {(options: ToastOptions) => void} [show] toast function to use,
+ *   e.g. the tab-scoped one from {@link import('../composables/useTabToast').useTabToast}
+ */
+export function showApiErrorToast(message, error, show = showToast) {
+  show({
+    message: `${message}: ${error}`,
+    time: 10000,
+    action: () => {
+      copyToClipboard(error)
+    },
+    icon: ERROR_TOAST_ICON,
+  })
 }
 
 /**

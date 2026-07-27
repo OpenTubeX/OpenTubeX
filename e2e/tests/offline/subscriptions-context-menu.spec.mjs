@@ -28,6 +28,8 @@ test.use({
 })
 
 test('subscription tabs expose feed-specific reload actions', async ({ page }) => {
+  // The reload actions start real refreshes, which fail immediately offline
+  await page.route(/^https?:\/\//, (route) => route.abort())
   await goTo(page, 'subscriptions')
 
   await page.evaluate(() => {
@@ -46,6 +48,9 @@ test('subscription tabs expose feed-specific reload actions', async ({ page }) =
   ]
 
   for (const [index, { feedTab, label }] of feedTabs.entries()) {
+    // While a refresh is running the entry cancels it instead of reloading
+    await expect(page.locator('.tabLoadingIndicator')).toHaveCount(0, { timeout: 30_000 })
+
     await page.locator(`[data-subscription-feed-tab="${feedTab}"]`).click({ button: 'right' })
     const menu = page.getByRole('menu', { name: 'Context menu' })
     await expect(menu).toBeVisible()

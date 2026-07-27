@@ -62,6 +62,12 @@
   border-radius: 6px;
 }
 
+.icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  opacity: 0.85;
+}
+
 .message {
   margin: 0;
 }

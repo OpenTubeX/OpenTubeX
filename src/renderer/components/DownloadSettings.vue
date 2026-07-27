@@ -407,21 +407,30 @@ async function downloadBinary(binary) {
 
     if (result != null && 'version' in result) {
       if (result.updated) {
-        showToast(binary === 'yt-dlp'
-          ? t('Settings.Download Settings.yt-dlp Downloaded Template', { version: result.version })
-          : t('Settings.Download Settings.FFmpeg Downloaded Template', { version: result.version }))
+        showToast({
+          message: binary === 'yt-dlp'
+            ? t('Settings.Download Settings.yt-dlp Downloaded Template', { version: result.version })
+            : t('Settings.Download Settings.FFmpeg Downloaded Template', { version: result.version }),
+          icon: ['fas', 'download'],
+        })
       } else {
         const tool = binary === 'yt-dlp' ? 'yt-dlp' : 'FFmpeg'
-        showToast(t('Settings.Download Settings.Managed Tool Already Current Template', {
-          tool,
-          version: result.version
-        }))
+        showToast({
+          message: t('Settings.Download Settings.Managed Tool Already Current Template', {
+            tool,
+            version: result.version
+          }),
+          icon: ['fas', 'check'],
+        })
       }
     } else {
       const error = result?.error ?? ''
-      showToast(binary === 'yt-dlp'
-        ? t('Settings.Download Settings.yt-dlp Download Error Template', { error })
-        : t('Settings.Download Settings.FFmpeg Download Error Template', { error }))
+      showToast({
+        message: binary === 'yt-dlp'
+          ? t('Settings.Download Settings.yt-dlp Download Error Template', { error })
+          : t('Settings.Download Settings.FFmpeg Download Error Template', { error }),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   } finally {
     if (activeBinaryDownloads.size === 0) {

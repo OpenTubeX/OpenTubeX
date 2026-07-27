@@ -220,7 +220,7 @@ function handleProfileFilterChange(profileId) {
 
 function addChannelsToProfile() {
   if (selected.size === 0) {
-    showToast(t('Profile.No channel(s) have been selected'))
+    showToast({ message: t('Profile.No channel(s) have been selected'), icon: ['fas', 'circle-exclamation'] })
   } else {
     const profileId = profileIdList.value[filteredProfileIndex.value]
     const subscriptions = profileList.value
@@ -232,7 +232,7 @@ function addChannelsToProfile() {
     profile.subscriptions.push(...deepCopy(subscriptions))
 
     store.dispatch('updateProfile', profile)
-    showToast(t('Profile.Profile has been updated'))
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
     selectNone()
   }
 }

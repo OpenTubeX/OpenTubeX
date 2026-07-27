@@ -1811,6 +1811,108 @@
   transition: inset-inline-end 250ms ease;
 }
 
+/*
+  Buffering indicator, a Material style arc that grows and shrinks as it spins.
+  shaka's own markup is reused: its fixed half arc <path> is dropped and the
+  <circle> underneath it is animated instead, which gets us round stroke caps
+  for free. The fade in is delayed so that the short buffers you get while
+  seeking don't flash a spinner.
+*/
+:deep(.shaka-spinner-container) {
+  animation: ft-buffer-spinner-appear 150ms ease-out 400ms both;
+}
+
+:deep(.shaka-spinner) {
+  position: relative;
+
+  /* Maps shaka's 38 unit viewBox to exactly 1.5px per unit, so the track below lines up. */
+  inline-size: 57px;
+  block-size: 57px;
+
+  /* Keeps the arc legible over bright or busy frames. */
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 65%)) drop-shadow(0 0 6px rgb(0 0 0 / 45%));
+}
+
+/* Track, so the circle still reads where the arc has shrunk away. */
+:deep(.shaka-spinner)::before {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  inset: 1.5px;
+  border: 6px solid rgb(255 255 255 / 20%);
+  border-radius: 50%;
+}
+
+:deep(.shaka-spinner) > svg {
+  inline-size: 100%;
+  block-size: 100%;
+  transform-origin: center;
+  animation: ft-buffer-spinner-spin 1.8s linear infinite;
+}
+
+/* shaka's fixed half arc, replaced by the animated circle below */
+:deep(.shaka-spinner) svg path {
+  display: none;
+}
+
+:deep(.shaka-spinner) svg circle {
+  stroke: #fff;
+  stroke-opacity: 1;
+  stroke-width: 4;
+  stroke-linecap: round;
+  animation: ft-buffer-spinner-dash 1.4s ease-in-out infinite;
+}
+
+@keyframes ft-buffer-spinner-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ft-buffer-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* The circle's circumference is 2 * pi * r, with shaka's r of 16 units. */
+@keyframes ft-buffer-spinner-dash {
+  0% {
+    stroke-dasharray: 1 100.5;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 75 100.5;
+    stroke-dashoffset: -20;
+  }
+
+  100% {
+    stroke-dasharray: 1 100.5;
+    stroke-dashoffset: -99.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.shaka-spinner-container) {
+    animation: none;
+  }
+
+  :deep(.shaka-spinner) > svg {
+    animation-duration: 3s;
+  }
+
+  :deep(.shaka-spinner) svg circle {
+    animation-duration: 2.8s;
+  }
+}
+
 :deep(.shaka-text-container),
 :deep(.shaka-speech-to-text-container) {
   /* Keep shaka's caption raise animation alongside the panel push. */

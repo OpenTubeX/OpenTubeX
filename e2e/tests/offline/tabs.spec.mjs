@@ -9,16 +9,20 @@ import { test, expect, sel, goTo } from '../../helpers/app.mjs'
  */
 async function boundingBoxWhenSettled(locator) {
   let previous = null
+  let settledBox = null
 
   await expect.poll(async () => {
     const box = await locator.boundingBox()
     const current = box && `${box.x},${box.y},${box.width},${box.height}`
     const settled = current !== null && current === previous
     previous = current
+    if (settled) {
+      settledBox = box
+    }
     return settled
   }).toBe(true)
 
-  return await locator.boundingBox()
+  return settledBox
 }
 
 /**
