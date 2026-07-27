@@ -362,7 +362,10 @@ if (process.env.IS_ELECTRON) {
         ? i18n.global.t('Video.External Player.playlist')
         : i18n.global.t('Video.External Player.video')
 
-      showToast(i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }))
+      showToast({
+        message: i18n.global.t('Video.External Player.OpeningTemplate', { videoOrPlaylist, externalPlayer }),
+        icon: ['fas', 'external-link-alt'],
+      })
     }
   )
 
@@ -370,13 +373,17 @@ if (process.env.IS_ELECTRON) {
     store.commit('upsertYtDlpDownload', download)
 
     if (download.status === 'completed') {
-      showToast(i18n.global.t('Downloads.Download Complete Template', { title: download.title }))
+      showToast({
+        message: i18n.global.t('Downloads.Download Complete Template', { title: download.title }),
+        icon: ['fas', 'download'],
+      })
     } else if (download.status === 'failed') {
-      showToast(
-        download.errorMessage === 'ENOENT'
+      showToast({
+        message: download.errorMessage === 'ENOENT'
           ? i18n.global.t('Downloads.yt-dlp Not Found')
-          : i18n.global.t('Downloads.Download Failed Template', { title: download.title })
-      )
+          : i18n.global.t('Downloads.Download Failed Template', { title: download.title }),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   })
 }

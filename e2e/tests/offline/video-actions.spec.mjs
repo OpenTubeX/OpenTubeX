@@ -23,33 +23,33 @@ function historyEntry(videoId, title) {
   }
 }
 
-test.use({
-  seed: {
-    settings: { quickBookmarkTargetPlaylistId: 'favorites' },
-    playlists: [
-      {
-        _id: 'favorites',
-        playlistName: 'Favorites',
-        protected: true,
-        description: '',
-        quickBookmarkIcon: 'clock',
-        videos: [],
-        createdAt: Date.now() - 86_400_000,
-        lastUpdatedAt: Date.now() - 86_400_000
-      },
-      {
-        _id: 'saved-videos',
-        playlistName: 'Saved videos',
-        protected: false,
-        description: '',
-        videos: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')],
-        createdAt: Date.now() - 86_400_000,
-        lastUpdatedAt: Date.now() - 86_400_000
-      }
-    ],
-    history: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')]
-  }
-})
+const SEED = {
+  settings: { quickBookmarkTargetPlaylistId: 'favorites' },
+  playlists: [
+    {
+      _id: 'favorites',
+      playlistName: 'Favorites',
+      protected: true,
+      description: '',
+      quickBookmarkIcon: 'clock',
+      videos: [],
+      createdAt: Date.now() - 86_400_000,
+      lastUpdatedAt: Date.now() - 86_400_000
+    },
+    {
+      _id: 'saved-videos',
+      playlistName: 'Saved videos',
+      protected: false,
+      description: '',
+      videos: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')],
+      createdAt: Date.now() - 86_400_000,
+      lastUpdatedAt: Date.now() - 86_400_000
+    }
+  ],
+  history: [historyEntry('eeeeeeeeeee', 'Bookmarkable video')]
+}
+
+test.use({ seed: SEED })
 
 async function readPlaylist(app, id) {
   const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
@@ -98,6 +98,9 @@ test.describe('list video actions', () => {
     await favoritesRow.click()
     await expect(favoritesRow.locator('[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
     await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
+
+    // The toast shows the video's thumbnail, not just the message
+    await expect(page.locator('.toast.hasImage .image')).toHaveAttribute('src', /eeeeeeeeeee/)
     await expect.poll(async () => {
       const favorites = await readPlaylist(app, 'favorites')
       return favorites?.videos?.map((entry) => entry.videoId)
@@ -304,5 +307,39 @@ test.describe('list video actions', () => {
       const records = contents.trim().split('\n').map((line) => JSON.parse(line))
       return records.filter((record) => record._id === 'eeeeeeeeeee').at(-1)?.$$deleted
     }).toBe(true)
+  })
+})
+
+test.describe('toast icons', () => {
+  test.use({
+    seed: {
+      ...SEED,
+      settings: { ...SEED.settings, thumbnailPreference: 'hidden' }
+    }
+  })
+
+  test('falls back to an icon when the video has no thumbnail', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+
+    const favoritesRow = video.locator('.addToPlaylistIcon .iconDropdown .playlistRow', { hasText: 'Favorites' })
+    await favoritesRow.click()
+
+    await expect(page.locator('.toast .message', { hasText: 'Video has been saved to Favorites' })).toBeVisible()
+    await expect(page.locator('.toast .image')).toBeHidden()
+    await expect(page.locator('.toast .icon[data-prefix="fas"][data-icon="bookmark"]')).toBeVisible()
+  })
+
+  test('shows a fitting icon on toasts that have no thumbnail at all', async ({ page }) => {
+    await goTo(page, 'history')
+
+    await page.getByRole('button', { name: 'Mark All As Watched' }).click()
+    await page.getByRole('button', { name: 'Mark All As Watched', exact: true }).last().click()
+
+    await expect(page.locator('.toast .message', { hasText: 'All videos in your history have been marked as watched' })).toBeVisible()
+    await expect(page.locator('.toast .icon[data-prefix="fas"][data-icon="eye"]')).toBeVisible()
   })
 })

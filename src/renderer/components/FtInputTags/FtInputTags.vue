@@ -163,12 +163,15 @@ async function updateTags(text) {
   const trimmedText = text.trim()
 
   if (props.minInputLength > trimmedText.length) {
-    showToast(t('Trimmed input must be at least N characters long', { length: props.minInputLength }, props.minInputLength))
+    showToast({
+      message: t('Trimmed input must be at least N characters long', { length: props.minInputLength }, props.minInputLength),
+      icon: ['fas', 'circle-exclamation'],
+    })
     return
   }
 
   if (props.tagList.includes(trimmedText)) {
-    showToast(t('Tag already exists', { tagName: trimmedText }))
+    showToast({ message: t('Tag already exists', { tagName: trimmedText }), icon: ['fas', 'circle-exclamation'] })
     return
   }
 

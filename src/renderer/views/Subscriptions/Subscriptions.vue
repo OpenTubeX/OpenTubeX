@@ -24,7 +24,9 @@
             :next-auto-refresh-at="currentAutoRefresh.timestamp"
             :auto-refresh-interval="currentAutoRefresh.interval"
             :title="currentTabPanel.refreshTitle"
+            :refresh-in-progress="subscriptionFeedRefreshInProgress"
             @click="refreshCurrentTab"
+            @cancel="cancelRefresh"
           />
         </div>
         <div class="tabsRow">
@@ -254,6 +256,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { useRefreshAllSubscriptionFeeds } from '../../composables/useRefreshAllSubscriptionFeeds'
 import {
+  requestSubscriptionRefreshCancellation,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
@@ -654,6 +657,11 @@ function focusTab(event, focusedTab) {
 
 function refreshCurrentTab() {
   currentTabPanel.value?.refresh()
+}
+
+function cancelRefresh() {
+  // The refresh may be owned by another window, so it is cancelled everywhere
+  requestSubscriptionRefreshCancellation()
 }
 
 /**

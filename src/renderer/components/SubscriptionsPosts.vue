@@ -20,6 +20,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
 
@@ -221,7 +222,7 @@ function loadPostsFromCacheSometimes() {
 
 function loadPostsFromCacheForAllActiveProfileChannels() {
   const postList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    return cacheEntry.posts
+    return cacheEntry.posts ?? []
   })
 
   postList_.sort((a, b) => {
@@ -232,10 +233,25 @@ function loadPostsFromCacheForAllActiveProfileChannels() {
   isLoading.value = false
 }
 
+// Show the channels that have been fetched so far, instead of waiting for the
+// whole refresh to finish
+useSubscriptionChannelUpdates('posts', () => {
+  if (subscriptionCacheReady.value) {
+    loadPostsFromCacheForAllActiveProfileChannels()
+  }
+})
+
 async function loadPostsForSubscriptionsFromRemote() {
   isLoading.value = true
   attemptedFetch.value = true
   errorChannels.value = []
+
+  // Whatever is cached is shown right away, the refresh then replaces it
+  // channel by channel
+  if (subscriptionCacheReady.value && cacheEntriesForAllActiveProfileChannels.value.length > 0) {
+    loadPostsFromCacheForAllActiveProfileChannels()
+  }
+
   try {
     const refreshedPosts = await refreshSubscriptionPostsFromRemote({
       t,

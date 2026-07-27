@@ -2,8 +2,15 @@
   position: relative;
   display: flex;
   flex-direction: column;
+}
+
+.descriptionScroll {
   overflow-y: auto;
   max-block-size: 20lh;
+
+  /* stretch into the card's inline padding so the scrollbar stays anchored to the card edge */
+  margin-inline: -16px;
+  padding-inline: 16px;
 }
 
 .description {
@@ -19,15 +26,6 @@
   text-decoration: underline;
   cursor: pointer;
   color: var(--title-color);
-}
-
-.descriptionCloseButton {
-  position: sticky;
-  inset-block-start: 8px;
-  align-self: flex-end;
-  margin-block-end: -36px;
-  margin-inline-end: -16px;
-  z-index: 1;
 }
 
 .videoDescription.short {
@@ -49,10 +47,6 @@
   margin-block-start: 1em;
 }
 
-.videoDescription:not(.short, .alwaysExpanded) .description {
-  padding-inline-end: 48px;
-}
-
 .videoDescription.short .descriptionStatus:dir(rtl) {
   background: linear-gradient(270deg, transparent 0%, var(--card-bg-color) 25%);
 }
@@ -63,5 +57,7 @@
 }
 
 .license {
+  /* bdi is inline by default, block keeps the margins now that it isn't a flex item */
+  display: block;
   margin-block: 1em;
 }

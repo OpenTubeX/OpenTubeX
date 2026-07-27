@@ -208,6 +208,7 @@ Trending:
   Trending Tabs: Trending Tabs
 Most Popular: Most Popular
 Feed:
+  Cancel Refresh: Cancel refresh
   Feed Last Updated: '{feedName} feed last updated: {date}'
   Next Auto Refresh: 'Next auto refresh: {date}'
   Refresh Feed: Refresh {subscriptionName}
@@ -369,6 +370,10 @@ Settings:
       New Tab Position: New Tab Position
       At the end: At the end
       After current tab: After current tab
+    Tab Close Focus:
+      Tab Close Focus: After Closing a Tab
+      Previous tab: Select the previous tab
+      Next tab: Select the next tab
     Startup Behavior:
       Startup Behavior: On Startup
       Load all tabs: Load all tabs
@@ -1471,6 +1476,7 @@ Context Menu:
   Save Image As…: Save Image As…
   Copy Image: Copy Image
   Copy Image Address: Copy Image Address
+  Cancel Refresh: Cancel Refresh
   Reload Videos: Reload Videos
   Reload Shorts: Reload Shorts
   Reload Live: Reload Live
@@ -1764,6 +1770,7 @@ KeyboardShortcutPrompt:
   Next Tab: Switch to the next tab
   Previous Tab: Switch to the previous tab
   Switch to Tab: Switch to tab 1–9
+  Toggle Tab Orientation: Switch between horizontal and vertical tabs
   Navigate to Settings: Navigate to the Settings page
   Navigate to History: Navigate to the History page
   Refresh: Refresh feed with latest content

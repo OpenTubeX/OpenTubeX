@@ -197,7 +197,7 @@ const editOrCreateProfileNameLabel = computed(() => {
 
 function saveProfile() {
   if (profileName.value === '') {
-    showToast(t('Profile.Your profile name cannot be empty'))
+    showToast({ message: t('Profile.Your profile name cannot be empty'), icon: ['fas', 'circle-exclamation'] })
     return
   }
 
@@ -214,17 +214,20 @@ function saveProfile() {
 
   if (props.isNew) {
     store.dispatch('createProfile', profile)
-    showToast(t('Profile.Profile has been created'))
+    showToast({ message: t('Profile.Profile has been created'), icon: ['fas', 'user-plus'] })
     emit('new-profile-created')
   } else {
     store.dispatch('updateProfile', profile)
-    showToast(t('Profile.Profile has been updated'))
+    showToast({ message: t('Profile.Profile has been updated'), icon: ['fas', 'user-check'] })
   }
 }
 
 function setDefaultProfile() {
   store.dispatch('updateDefaultProfile', profileId.value)
-  showToast(t('Profile.Your default profile has been set to {profile}', { profile: translatedProfileName.value }))
+  showToast({
+    message: t('Profile.Your default profile has been set to {profile}', { profile: translatedProfileName.value }),
+    icon: ['fas', 'user-check'],
+  })
 }
 
 const DELETE_PROMPT_VALUES = ['delete', 'cancel']
@@ -254,11 +257,17 @@ function handleDeletePrompt(response) {
 
     store.dispatch('removeProfile', profileId.value)
 
-    showToast(t('Profile.Removed {profile} from your profiles', { profile: translatedProfileName.value }))
+    showToast({
+      message: t('Profile.Removed {profile} from your profiles', { profile: translatedProfileName.value }),
+      icon: ['fas', 'trash'],
+    })
 
     if (defaultProfile.value === profileId.value) {
       store.dispatch('updateDefaultProfile', MAIN_PROFILE_ID)
-      showToast(t('Profile.Your default profile has been changed to your primary profile'))
+      showToast({
+        message: t('Profile.Your default profile has been changed to your primary profile'),
+        icon: ['fas', 'user-check'],
+      })
     }
 
     emit('profile-deleted')

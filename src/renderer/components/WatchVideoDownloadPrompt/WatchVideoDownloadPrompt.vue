@@ -264,7 +264,7 @@ function saveTemplate() {
   store.dispatch('updateYtDlpSelectedTemplate', `template:${name}`)
 
   newTemplateName.value = ''
-  showToast(t('Downloads.Template Saved', { name }))
+  showToast({ message: t('Downloads.Template Saved', { name }), icon: ['fas', 'save'] })
 }
 
 function deleteTemplate() {
@@ -326,7 +326,7 @@ async function startDownload() {
     downloadId.value = result.id
   } else if (result != null && 'error' in result) {
     // downloading the managed yt-dlp binary failed
-    showToast(t('Downloads.Download Failed'))
+    showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })
   }
 }
 

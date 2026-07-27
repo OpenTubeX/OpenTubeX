@@ -269,6 +269,7 @@ const state = {
   showDistractionFreeTitles: false,
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
+  tabCloseFocus: 'previousTab',
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
   useVerticalTabBar: false,
@@ -475,7 +476,7 @@ const sideEffectHandlers = {
         // Translating this string isn't necessary
         // because the user will always see it in the default locale
         // (in this case, English (US))
-        showToast(`Locale not found, defaulting to ${fallbackLocale}`)
+        showToast({ message: `Locale not found, defaulting to ${fallbackLocale}`, icon: ['fas', 'circle-exclamation'] })
       }
     }
 

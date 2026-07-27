@@ -54,6 +54,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -485,7 +486,7 @@ export default defineComponent({
     const sleepTimer = useSleepTimer({
       getVideoId: () => props.videoId,
       isPaused: () => video.value?.paused ?? true,
-      onExpired: () => showToast(t('Video.Player.Sleep Timer.Timer ended')),
+      onExpired: () => showToast({ message: t('Video.Player.Sleep Timer.Timer ended'), icon: ['fas', 'clock'] }),
       pausePlayback: () => video.value?.pause(),
       tabId,
     })
@@ -1756,7 +1757,7 @@ export default defineComponent({
         }
       } catch (error) {
         console.error(error)
-        showToast(t('Video.Player.SponsorBlock.VoteFailed'))
+        showToast({ message: t('Video.Player.SponsorBlock.VoteFailed'), icon: ['fas', 'circle-exclamation'] })
       } finally {
         sponsorBlockVotePending.value = null
         emitSponsorBlockInfoState()
@@ -1908,7 +1909,7 @@ export default defineComponent({
         : t('Video.Player.SponsorBlock.SkipToastUnskip')
 
       const activeToast = getActiveSponsorBlockToast()
-      if (getActivePromptSponsorBlockToast() || activeSponsorBlockHighlightSegment.value || activeToast?.uuid !== uuid) {
+      if (getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
         return actionLabel
       }
 
@@ -2097,26 +2098,39 @@ export default defineComponent({
 
     function toggleActiveSponsorBlockSkipState() {
       const promptToastEntry = getActivePromptSponsorBlockToast()
-      if (promptToastEntry) {
-        return skipPromptSponsorBlockSegment(promptToastEntry.uuid)
-      }
-
-      if (activeSponsorBlockHighlightSegment.value) {
-        return skipToSponsorBlockHighlight()
-      }
-
       const toastEntry = getActiveSponsorBlockToast()
-      if (!toastEntry) {
-        return false
+
+      const targets = resolveSponsorBlockEnterTargets(
+        !!promptToastEntry,
+        !!toastEntry,
+        !!activeSponsorBlockHighlightSegment.value
+      )
+
+      // a target can turn out to be a no-op (e.g. a toast whose segment vanished on a SponsorBlock
+      // refresh), so fall through to the next one instead of swallowing the key press
+      for (const target of targets) {
+        let handled = false
+
+        switch (target) {
+          case 'prompt':
+            handled = skipPromptSponsorBlockSegment(promptToastEntry.uuid)
+            break
+          case 'toast':
+            handled = toastEntry.unskipped
+              ? redoSkipSponsorBlockSegment(toastEntry.uuid)
+              : unskipSponsorBlockSegment(toastEntry.uuid)
+            break
+          case 'highlight':
+            handled = skipToSponsorBlockHighlight()
+            break
+        }
+
+        if (handled) {
+          return true
+        }
       }
 
-      if (toastEntry.unskipped) {
-        redoSkipSponsorBlockSegment(toastEntry.uuid)
-      } else {
-        unskipSponsorBlockSegment(toastEntry.uuid)
-      }
-
-      return true
+      return false
     }
 
     /**
@@ -2183,10 +2197,25 @@ export default defineComponent({
       events.dispatchEvent(new CustomEvent('sponsorBlockHighlightStateChanged', {
         detail: {
           visible: nextHighlightSegment !== null,
-          labelVisible: sponsorBlockHighlightLabelVisible
+          labelVisible: sponsorBlockHighlightLabelVisible,
+          shortcutAvailable: resolveSponsorBlockEnterTarget(
+            !!getActivePromptSponsorBlockToast(),
+            !!getActiveSponsorBlockToast(),
+            nextHighlightSegment !== null
+          ) === 'highlight'
         }
       }))
     }
+
+    // the highlight button only advertises the Enter shortcut while no toast is claiming it
+    watch(
+      () => skippedSponsorBlockSegments.value.length > 0 || promptSponsorBlockSegments.value.length > 0,
+      () => {
+        if (activeSponsorBlockHighlightSegment.value) {
+          updateSponsorBlockHighlightState()
+        }
+      }
+    )
 
     function pauseSponsorBlockHighlightLabelCountdown() {
       if (sponsorBlockHighlightLabelStartedAt === null) {
@@ -2332,28 +2361,31 @@ export default defineComponent({
      * Unskips a SponsorBlock segment by seeking back to its start time
      * and preventing it from being auto-skipped again until the user leaves the segment.
      * @param {string} uuid - The UUID of the segment to unskip
+     * @returns {boolean} whether anything was actually unskipped
      */
     function unskipSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
       if (!segment) {
-        return
+        return false
       }
 
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
 
       if (isSponsorBlockPointSegment(segment)) {
-        if (toastEntry?.isHighlight && toastEntry.unskipTime !== null && canSeek()) {
-          const seekRange = player.seekRange()
-          const targetTime = Math.min(
-            Math.max(toastEntry.unskipTime, seekRange.start),
-            seekRange.end
-          )
-          video.value.currentTime = targetTime
-          sponsorBlockCurrentTime.value = targetTime
-          removeSponsorBlockToast(uuid)
-          updateSponsorBlockHighlightState(targetTime)
+        if (!toastEntry?.isHighlight || toastEntry.unskipTime === null || !canSeek()) {
+          return false
         }
-        return
+
+        const seekRange = player.seekRange()
+        const targetTime = Math.min(
+          Math.max(toastEntry.unskipTime, seekRange.start),
+          seekRange.end
+        )
+        video.value.currentTime = targetTime
+        sponsorBlockCurrentTime.value = targetTime
+        removeSponsorBlockToast(uuid)
+        updateSponsorBlockHighlightState(targetTime)
+        return true
       }
 
       sponsorBlockDoNotSkipSegments.add(uuid)
@@ -2377,17 +2409,20 @@ export default defineComponent({
         toastEntry.countdownPaused = false
         toastEntry.timeoutId = 0
       }
+
+      return true
     }
 
     /**
      * Re-skips a SponsorBlock segment that was previously unskipped,
      * seeking to the end of the segment and restoring auto-skip behavior.
      * @param {string} uuid - The UUID of the segment to re-skip
+     * @returns {boolean} whether anything was actually re-skipped
      */
     function redoSkipSponsorBlockSegment(uuid) {
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
       if (!segment || isSponsorBlockPointSegment(segment)) {
-        return
+        return false
       }
 
       sponsorBlockDoNotSkipSegments.delete(uuid)
@@ -2410,6 +2445,8 @@ export default defineComponent({
           color: toastEntry.color
         })
       }
+
+      return true
     }
 
     // #endregion SponsorBlock
@@ -4775,7 +4812,7 @@ export default defineComponent({
             })
           } catch (err) {
             console.error(`Parse failed: ${err.message}`)
-            showToast(t('Screenshot Error', { error: err.message }))
+            showToast({ message: t('Screenshot Error', { error: err.message }), icon: ['fas', 'circle-exclamation'] })
             canvas.remove()
             return
           }
@@ -4794,19 +4831,19 @@ export default defineComponent({
             )
 
             if (saved) {
-              showToast(t('Screenshot Success'))
+              showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })
             }
           } else {
             const arrayBuffer = await blob.arrayBuffer()
 
             if (await window.ftElectron.writeToDefaultFolder(filenameWithExtension, arrayBuffer)) {
-              showToast(t('Screenshot Success'))
+              showToast({ message: t('Screenshot Success'), icon: ['fas', 'file-image'] })
             }
           }
         }
       } catch (error) {
         console.error(error)
-        showToast(t('Screenshot Error', { error }))
+        showToast({ message: t('Screenshot Error', { error }), icon: ['fas', 'circle-exclamation'] })
       } finally {
         canvas.remove()
 
@@ -5971,7 +6008,7 @@ export default defineComponent({
       }
 
       pendingMusicPlaybackRateToast = false
-      showToast(t('Video.Player.MusicPlaybackRateOverride'))
+      showToast({ message: t('Video.Player.MusicPlaybackRateOverride'), icon: ['fas', 'gauge'] })
       musicPlaybackRateToastShown = true
     }
 

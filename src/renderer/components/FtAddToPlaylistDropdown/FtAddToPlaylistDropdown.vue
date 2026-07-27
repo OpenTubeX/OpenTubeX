@@ -55,7 +55,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
-import { showToast } from '../../helpers/utils'
+import { getVideoThumbnailUrl, showToast } from '../../helpers/utils'
 
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -93,6 +93,15 @@ const playlists = computed(() => {
   rows.push(...playlistsById.values())
 
   return rows
+})
+
+const videoThumbnail = computed(() => {
+  return getVideoThumbnailUrl(
+    props.videoData.videoId,
+    store.getters.getBackendPreference,
+    store.getters.getCurrentInvidiousInstanceUrl,
+    store.getters.getThumbnailPreference
+  )
 })
 
 const containedIds = computed(() => {
@@ -133,9 +142,13 @@ async function togglePlaylist(playlist) {
       videoId: props.videoData.videoId,
     })
 
-    showToast(removed
-      ? t('Video.Video has been removed from {playlistName}', { playlistName })
-      : t('Video.There was a problem removing the video from {playlistName}', { playlistName }))
+    showToast({
+      message: removed
+        ? t('Video.Video has been removed from {playlistName}', { playlistName })
+        : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
+      image: videoThumbnail.value,
+      icon: ['fas', 'trash'],
+    })
   } else {
     // Concurrent activations are collapsed by the store, so a rapid second
     // click (or the quick bookmark button) cannot append a duplicate entry
@@ -145,9 +158,13 @@ async function togglePlaylist(playlist) {
       videoData: { ...props.videoData },
     })
 
-    showToast(saved
-      ? t('Video.Video has been saved to {playlistName}', { playlistName })
-      : t('Video.There was a problem saving the video to {playlistName}', { playlistName }))
+    showToast({
+      message: saved
+        ? t('Video.Video has been saved to {playlistName}', { playlistName })
+        : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
+      image: videoThumbnail.value,
+      icon: ['fas', 'bookmark'],
+    })
   }
 }
 

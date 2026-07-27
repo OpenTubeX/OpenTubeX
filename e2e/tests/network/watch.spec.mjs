@@ -30,6 +30,22 @@ async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zo
   await expect(page.locator('.videoTitle')).toContainText(video.title, { timeout: 30_000 })
 }
 
+async function openCaptionedVideoOrSkip(page) {
+  await page.locator(sel.searchInput).fill(CAPTIONED_VIDEO.url)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${CAPTIONED_VIDEO.id}`))
+
+  const title = page.locator('.videoTitle')
+  const errorMessage = page.locator('.errorMessage')
+  try {
+    await expect(title).toContainText(CAPTIONED_VIDEO.title, { timeout: 30_000 })
+  } catch (error) {
+    const unavailable = await errorMessage.isVisible() || (await title.textContent())?.trim() === ''
+    test.skip(unavailable, 'captioned test video did not hydrate from the live API')
+    throw error
+  }
+}
+
 async function setWindowWidth(app, width) {
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
@@ -108,7 +124,7 @@ test.describe('watch page', () => {
       body: longTranscript(),
       contentType: 'text/vtt'
     }))
-    await openVideo(page, CAPTIONED_VIDEO)
+    await openCaptionedVideoOrSkip(page)
     await waitForPlaybackOrSkip(test, page)
 
     const video = page.locator('video.player')
@@ -354,13 +370,50 @@ test.describe('watch page', () => {
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
   })
 
+  test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    const commentCards = page.locator('.fullscreenCommentsOverlay .comment')
+    await expect(comments).toBeVisible()
+
+    await page.addStyleTag({
+      content: `
+        .fullscreenCommentsOverlay .comment { display: none; }
+        .fullscreenCommentsOverlay .commentAutoLoadSentinel { min-height: 1px; }
+      `
+    })
+    await page.route(/\/youtubei\/v1\/next/, async (route) => {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await route.continue()
+    })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    const initialCommentCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
+    const repeatedLoadCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(repeatedLoadCount)
+  })
+
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({
       body: 'WEBVTT\n\n00:00:00.000 --> 00:00:02.000\nTest transcript line.\n',
       contentType: 'text/vtt'
     }))
-    await openVideo(page, CAPTIONED_VIDEO)
+    await openCaptionedVideoOrSkip(page)
     await waitForPlaybackOrSkip(test, page)
 
     await setPlayerFullscreen(page, true)
@@ -403,7 +456,7 @@ test.describe('watch page', () => {
     const dockDescription = page.locator('.fullscreenMetadataTarget .videoDescription')
     await expect(dockDescription).toHaveClass(/alwaysExpanded/)
     await expect(dockDescription).not.toHaveClass(/short/)
-    await expect(dockDescription.locator('.descriptionCloseButton, .descriptionStatus')).toHaveCount(0)
+    await expect(dockDescription.locator('.descriptionStatus')).toHaveCount(0)
     await expect(page.locator('.infoArea .videoTitle')).toHaveCount(0)
     await expect(page.locator('.fullscreenMetadataHeader')).not.toHaveCSS('cursor', 'grab')
     const playerVideo = page.locator('.ftVideoPlayer video.player')
@@ -569,7 +622,7 @@ test.describe('watch page', () => {
     await expect(page.locator('.infoArea .videoTitle')).toBeVisible()
     const inlineDescription = page.locator('.infoArea .videoDescription')
     await expect(inlineDescription).not.toHaveClass(/alwaysExpanded/)
-    await expect(inlineDescription.locator('.descriptionCloseButton, .descriptionStatus')).not.toHaveCount(0)
+    await expect(inlineDescription.locator('.descriptionStatus')).not.toHaveCount(0)
     await setPlayerFullscreen(page, true)
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
 

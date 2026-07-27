@@ -748,6 +748,7 @@ async function addToQuickBookmarkPlaylist() {
       ? t('Video.Video has been saved to {playlistName}', { playlistName })
       : t('Video.There was a problem saving the video to {playlistName}', { playlistName }),
     image: quickBookmarkThumbnail.value,
+    icon: ['fas', 'bookmark'],
   })
 }
 
@@ -764,7 +765,8 @@ async function removeFromQuickBookmarkPlaylist() {
     message: removed
       ? t('Video.Video has been removed from {playlistName}', { playlistName })
       : t('Video.There was a problem removing the video from {playlistName}', { playlistName }),
-    image: quickBookmarkThumbnail.value
+    image: quickBookmarkThumbnail.value,
+    icon: ['fas', 'trash'],
   })
 }
 

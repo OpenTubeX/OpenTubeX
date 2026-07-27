@@ -18,6 +18,11 @@ const tabManagers = new Map()
 
 const DEFAULT_NEW_TAB_POSITION = 'afterCurrent'
 const VALID_NEW_TAB_POSITIONS = new Set(['end', 'afterCurrent'])
+const DEFAULT_TAB_CLOSE_FOCUS = 'previousTab'
+const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
+// Closing a tab has to pick the replacement synchronously, so the preference is
+// cached here instead of being read from the settings store on every close.
+let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
 const TAB_PREVIEW_MAX_WIDTH = 360
 const TAB_PREVIEW_MAX_HEIGHT = 220
@@ -79,6 +84,34 @@ export class TabManager {
     return VALID_NEW_TAB_POSITIONS.has(value)
       ? value
       : DEFAULT_NEW_TAB_POSITION
+  }
+
+  /**
+   * @param {unknown} value
+   * @returns {'previousTab' | 'nextTab'}
+   */
+  static normalizeTabCloseFocus(value) {
+    return VALID_TAB_CLOSE_FOCUS.has(value)
+      ? value
+      : DEFAULT_TAB_CLOSE_FOCUS
+  }
+
+  /**
+   * @param {unknown} value
+   */
+  static setTabCloseFocus(value) {
+    tabCloseFocus = TabManager.normalizeTabCloseFocus(value)
+  }
+
+  /**
+   * @returns {Promise<void>}
+   */
+  static async refreshStoredTabCloseFocus() {
+    try {
+      TabManager.setTabCloseFocus((await baseHandlers.settings._findOne('tabCloseFocus'))?.value)
+    } catch (error) {
+      console.error('Failed to load tab close focus preference:', error)
+    }
   }
 
   /**
@@ -1040,10 +1073,13 @@ export class TabManager {
       return null
     }
 
-    const candidates = [
-      ...orderedTabIds.slice(0, tabIndex).reverse(),
-      ...orderedTabIds.slice(tabIndex + 1)
-    ]
+    const previousTabIds = orderedTabIds.slice(0, tabIndex).reverse()
+    const nextTabIds = orderedTabIds.slice(tabIndex + 1)
+    // The preferred side wins, the other one is the fallback when that side has
+    // no selectable tab left.
+    const candidates = tabCloseFocus === 'nextTab'
+      ? [...nextTabIds, ...previousTabIds]
+      : [...previousTabIds, ...nextTabIds]
     // A tab already queued for deferred close/unload must never be selected as
     // the replacement, otherwise a rapid second close/unload would leave the
     // window with no selectable tab.
@@ -2351,11 +2387,15 @@ function cloneRoute(route) {
  * @param {(browserWindow: import('electron').BrowserWindow) => boolean | Promise<boolean>} [options.confirmCloseWindow]
  * @param {(browserWindow: import('electron').BrowserWindow) => void} [options.markWindowCloseConfirmed]
  */
-export function setupTabsIPC(options = {}) {
+export async function setupTabsIPC(options = {}) {
   const {
     confirmCloseWindow = () => true,
     markWindowCloseConfirmed = () => {}
   } = options
+
+  // Loaded before the first window exists, so a tab can never be closed while
+  // the preference still holds its default.
+  await TabManager.refreshStoredTabCloseFocus()
 
   const getManager = event => TabManager.getFromWebContents(event.sender)
 

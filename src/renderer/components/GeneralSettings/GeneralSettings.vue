@@ -108,6 +108,16 @@
       />
       <FtSelect
         v-if="USING_ELECTRON"
+        :placeholder="t('Settings.General Settings.Tab Close Focus.Tab Close Focus')"
+        :value="tabCloseFocus"
+        setting-key="tabCloseFocus"
+        :select-names="tabCloseFocusNames"
+        :select-values="TAB_CLOSE_FOCUS_VALUES"
+        :icon="['fas', 'xmark']"
+        @change="updateTabCloseFocus"
+      />
+      <FtSelect
+        v-if="USING_ELECTRON"
         :placeholder="t('Settings.General Settings.Startup Behavior.Startup Behavior')"
         :value="startupBehavior"
         setting-key="startupBehavior"
@@ -472,6 +482,23 @@ function updateNewTabPosition(value) {
   store.dispatch('updateNewTabPosition', value)
 }
 
+const TAB_CLOSE_FOCUS_VALUES = ['previousTab', 'nextTab']
+
+const tabCloseFocusNames = computed(() => [
+  t('Settings.General Settings.Tab Close Focus.Previous tab'),
+  t('Settings.General Settings.Tab Close Focus.Next tab')
+])
+
+/** @type {import('vue').ComputedRef<'previousTab' | 'nextTab'>} */
+const tabCloseFocus = computed(() => store.getters.getTabCloseFocus)
+
+/**
+ * @param {'previousTab' | 'nextTab'} value
+ */
+function updateTabCloseFocus(value) {
+  store.dispatch('updateTabCloseFocus', value)
+}
+
 const STARTUP_BEHAVIOR_VALUES = ['loadAllTabs', 'restoreTabLoadState', 'loadLastActiveTab', 'emptySession']
 
 const startupBehaviorNames = computed(() => [
@@ -688,12 +715,12 @@ function handleSetDefaultInstanceClick() {
   store.dispatch('updateDefaultInvidiousInstance', instance)
 
   const message = t('Default Invidious instance has been set to {instance}', { instance })
-  showToast(message)
+  showToast({ message: message, icon: ['fas', 'check'] })
 }
 
 function handleClearDefaultInstanceClick() {
   store.dispatch('updateDefaultInvidiousInstance', '')
-  showToast(t('Default Invidious instance has been cleared'))
+  showToast({ message: t('Default Invidious instance has been cleared'), icon: ['fas', 'trash'] })
 }
 </script>
 

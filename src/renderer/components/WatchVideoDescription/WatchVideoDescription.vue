@@ -8,17 +8,6 @@
       alwaysExpanded
     }"
   >
-    <FtIconButton
-      v-if="showControls && isExpanded && !alwaysExpanded"
-      class="descriptionCloseButton"
-      :title="$t('Description.Collapse Description')"
-      :icon="['fas', 'xmark']"
-      theme="base-no-default"
-      :use-shadow="false"
-      :padding="8"
-      :size="18"
-      @click="collapseDescription"
-    />
     <span
       v-if="showControls && !isExpanded && !alwaysExpanded"
       class="descriptionStatus"
@@ -30,20 +19,22 @@
     >
       {{ $t("Description.Expand Description") }}
     </span>
-    <FtTimestampCatcher
-      ref="descriptionContainer"
-      class="description"
-      :input-html="processedShownDescription"
-      :link-tab-index="linkTabIndex"
-      @timestamp-event="onTimestamp"
-      @click="expandDescriptionWithClick"
-    />
-    <bdi
-      v-if="license && isExpanded"
-      class="license"
-    >
-      {{ license }}
-    </bdi>
+    <div class="descriptionScroll">
+      <FtTimestampCatcher
+        ref="descriptionContainer"
+        class="description"
+        :input-html="processedShownDescription"
+        :link-tab-index="linkTabIndex"
+        @timestamp-event="onTimestamp"
+        @click="expandDescriptionWithClick"
+      />
+      <bdi
+        v-if="license && isExpanded"
+        class="license"
+      >
+        {{ license }}
+      </bdi>
+    </div>
     <span
       v-if="showControls && isExpanded && !alwaysExpanded"
       class="descriptionStatus"
@@ -63,7 +54,6 @@ import autolinker from 'autolinker'
 
 import { onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import FtCard from '../ft-card/ft-card.vue'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import { useTabContext } from '../../tabs/TabContext'

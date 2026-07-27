@@ -20,6 +20,7 @@ const IpcChannels = {
   CHANGE_VIEW: 'change-view',
   SHOW_TOAST: 'show-toast',
   SUBSCRIPTION_AUTO_REFRESH_ACQUIRE: 'subscription-auto-refresh-acquire',
+  SUBSCRIPTION_AUTO_REFRESH_CANCEL: 'subscription-auto-refresh-cancel',
   SUBSCRIPTION_AUTO_REFRESH_GET_STATE: 'subscription-auto-refresh-get-state',
   SUBSCRIPTION_AUTO_REFRESH_RELEASE: 'subscription-auto-refresh-release',
   SUBSCRIPTION_AUTO_REFRESH_SET_PROGRESS: 'subscription-auto-refresh-set-progress',
@@ -253,6 +254,7 @@ const DefaultKeyboardShortcuts = {
       PREV_TAB: 'control+shift+tab',
       RESTORE_CLOSED_TAB: 'ctrl+shift+T',
       SWITCH_TO_TAB: 'ctrl+1-9',
+      TOGGLE_TAB_ORIENTATION: 'f1',
     },
     SITUATIONAL: {
       REFRESH: 'r'

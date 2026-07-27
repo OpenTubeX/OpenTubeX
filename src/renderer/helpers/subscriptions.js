@@ -7,82 +7,94 @@ import {
 } from './api/invidious'
 import { getLocalChannelCommunity, getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
 import {
-  copyToClipboard,
   getChannelPlaylistId,
+  showApiErrorToast,
   showToast,
-  showToastOnAllTabs
+  showToastOnAllTabs,
 } from './utils'
-import { isHistoryEntryWatched } from './history'
 import { getValidSubscriptionChannels } from './subscription-channels'
+import { reconcileFetchedSubscriptionEntries } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
+export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
+export const SUBSCRIPTION_REFRESH_CANCELLED_EVENT = 'opentubex-subscription-refresh-cancelled'
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
 export const SUBSCRIPTION_REFRESH_FINISHED_EVENT = 'opentubex-subscription-refresh-finished'
 export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
 export const SUBSCRIPTION_REFRESH_PROGRESS_EVENT = 'opentubex-subscription-refresh-progress'
 export const SUBSCRIPTION_REFRESH_STARTED_EVENT = 'opentubex-subscription-refresh-started'
+export const SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY = 'opentubex.subscriptionAutoRefresh.cancel'
 
 // The tab id the Electron refresh lock was acquired with. Progress reports to the
 // main process must use this id, as the active tab may change during the refresh.
 let electronRefreshOwnerTabId = null
+
+/**
+ * Cancellation state of the refresh this renderer is running, if any.
+ * @type {{ cancelled: boolean, tab: string, profileId: string } | null}
+ */
+let activeRefresh = null
+
+// Incremented on every cancellation request, so that a cancellation is not
+// missed when it arrives between two feed refreshes.
+let cancelCount = 0
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
 const SUBSCRIPTION_FETCH_BATCH_SIZE = 80
 const SUBSCRIPTION_FETCH_BATCH_DELAY_MS = 2000
 const SUBSCRIPTION_FETCH_CONCURRENCY = 8
-// Scraped relative publication dates are approximate, so allow a small amount
-// of rounding around the previous fetch without admitting genuinely old items.
-const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
- * Keeps previously-new entries marked and marks unwatched leading entries
- * which were plausibly published since the previous successful channel fetch.
- * Missing caches, old reordered entries, and responses without overlap are not
- * presented as newly published.
- * @param {object[]} entries
- * @param {object[] | null | undefined} previousEntries
- * @param {'videoId' | 'postId'} idKey
- * @param {Date | number | string | null | undefined} previousFetchTimestamp
- * @param {Record<string, object>} [historyById]
+ * Stops the refresh running in this renderer after the channels that are
+ * currently being fetched. Already fetched channels stay cached.
  */
-export function markNewSubscriptionEntries(
-  entries,
-  previousEntries,
-  idKey,
-  previousFetchTimestamp,
-  historyById = {}
-) {
-  const previousEntriesById = Array.isArray(previousEntries)
-    ? new Map(previousEntries
-        .filter(entry => entry[idKey] != null)
-        .map(entry => [entry[idKey], entry]))
-    : null
-  const firstPreviouslyFetchedIndex = previousEntriesById?.size > 0
-    ? entries.findIndex(entry => previousEntriesById.has(entry[idKey]))
-    : -1
-  const previousFetchTime = previousFetchTimestamp == null
-    ? Number.NaN
-    : new Date(previousFetchTimestamp).getTime()
+export function cancelSubscriptionRefresh() {
+  cancelCount++
+  markActiveSubscriptionRefreshCancelled()
+}
 
-  return entries.map((entry, index) => {
-    const publishedTime = Number(entry.published ?? entry.publishedTime)
-    const isPlausiblyRecent = Number.isFinite(previousFetchTime) &&
-      Number.isFinite(publishedTime) &&
-      publishedTime >= previousFetchTime - NEW_CONTENT_PUBLICATION_TOLERANCE_MS
-    const isWatched = idKey === 'videoId' && isHistoryEntryWatched(historyById?.[entry[idKey]])
-    const wasPreviouslyNew = previousEntriesById?.get(entry[idKey])
-      ?.isNewInSubscriptionFeed === true
-    const isNewlyFetched = firstPreviouslyFetchedIndex > 0 &&
-      index < firstPreviouslyFetchedIndex &&
-      isPlausiblyRecent
+function markActiveSubscriptionRefreshCancelled() {
+  if (activeRefresh !== null && !activeRefresh.cancelled) {
+    activeRefresh.cancelled = true
+    window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, {
+      detail: {
+        tab: activeRefresh.tab,
+        profileId: activeRefresh.profileId
+      }
+    }))
+  }
+}
 
-    return {
-      ...entry,
-      isNewInSubscriptionFeed: !isWatched && (wasPreviouslyNew || isNewlyFetched)
-    }
-  })
+/**
+ * Cancels the refresh wherever it is running, as another window may own it.
+ */
+export function requestSubscriptionRefreshCancellation() {
+  cancelSubscriptionRefresh()
+
+  if (process.env.IS_ELECTRON) {
+    window.ftElectron.subscriptionAutoRefresh.cancel()
+    return
+  }
+
+  try {
+    localStorage.setItem(SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY, `${Date.now()}-${cancelCount}`)
+  } catch {
+    // Only the refresh of this browser tab can be cancelled then.
+  }
+}
+
+/**
+ * Lets callers that refresh several feeds in a row notice a cancellation that
+ * happened between two feeds, when no refresh was running.
+ */
+export function getSubscriptionRefreshCancelCount() {
+  return cancelCount
+}
+
+function isRefreshCancelled() {
+  return activeRefresh?.cancelled === true
 }
 
 /**
@@ -97,14 +109,21 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
     return null
   }
 
+  const cancelCountAtStart = cancelCount
   const runRefresh = async () => {
+    activeRefresh = { cancelled: false, tab, profileId }
     window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_STARTED_EVENT, {
       detail: { tab, profileId }
     }))
 
+    if (cancelCount !== cancelCountAtStart) {
+      markActiveSubscriptionRefreshCancelled()
+    }
+
     try {
       return await refresh()
     } finally {
+      activeRefresh = null
       window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_FINISHED_EVENT, {
         detail: { tab, profileId }
       }))
@@ -158,11 +177,28 @@ function setSubscriptionRefreshProgress(percentage) {
   }))
 }
 
+/**
+ * Lets the feed views render the channels that have been fetched so far,
+ * instead of waiting for the whole refresh to finish.
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
+function notifySubscriptionChannelRefreshed(tab) {
+  window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CHANNEL_EVENT, {
+    detail: { tab }
+  }))
+}
+
 async function fetchSubscriptionsConcurrently(channels, fetchChannel) {
   const results = await mapConcurrently(
     channels,
     SUBSCRIPTION_FETCH_CONCURRENCY,
     async channel => {
+      // Channels that haven't started yet are skipped, the ones in flight
+      // still finish and are cached.
+      if (isRefreshCancelled()) {
+        return []
+      }
+
       if (process.env.IS_ELECTRON) {
         await window.ftElectron.waitForIpBlockRecoveryScript()
       }
@@ -183,6 +219,10 @@ async function fetchSubscriptionsInBatches(channels, fetchChannel) {
   const results = []
 
   for (let index = 0; index < channels.length; index += SUBSCRIPTION_FETCH_BATCH_SIZE) {
+    if (isRefreshCancelled()) {
+      break
+    }
+
     if (index > 0) {
       await new Promise(resolve => setTimeout(resolve, SUBSCRIPTION_FETCH_BATCH_DELAY_MS))
     }
@@ -204,9 +244,7 @@ export function showSubscriptionFetchError(channel, error, title) {
   const message = `${channelLabel}: ${error}`
 
   console.error(`Failed to fetch subscription channel ${channelLabel}`, error)
-  showToast(`${title}: ${message}`, 10000, () => {
-    copyToClipboard(message)
-  })
+  showApiErrorToast(title, message)
 }
 
 /**
@@ -458,7 +496,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION)
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
   const subscriptionUpdates = []
@@ -488,7 +526,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
 
       if (videos != null) {
         const previousCache = store.getters.getVideoCache[channel.id]
-        videos = markNewSubscriptionEntries(
+        videos = reconcileFetchedSubscriptionEntries(
           videos,
           previousCache?.videos,
           'videoId',
@@ -499,6 +537,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        notifySubscriptionChannelRefreshed('videos')
       }
 
       if (name || thumbnailUrl) {
@@ -517,6 +556,11 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+
+    if (isRefreshCancelled()) {
+      return null
+    }
+
     completeSubscriptionRefresh('videos', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
@@ -556,7 +600,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION)
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
   const subscriptionUpdates = []
@@ -577,7 +621,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
 
       if (videos != null) {
         const previousCache = store.getters.getShortsCache[channel.id]
-        videos = markNewSubscriptionEntries(
+        videos = reconcileFetchedSubscriptionEntries(
           videos,
           previousCache?.videos,
           'videoId',
@@ -588,6 +632,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        notifySubscriptionChannelRefreshed('shorts')
       }
 
       if (name) {
@@ -601,6 +646,11 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
     })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+
+    if (isRefreshCancelled()) {
+      return null
+    }
+
     completeSubscriptionRefresh('shorts', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
@@ -640,7 +690,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION)
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
   const subscriptionUpdates = []
@@ -670,7 +720,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
 
       if (videos != null) {
         const previousCache = store.getters.getLiveCache[channel.id]
-        videos = markNewSubscriptionEntries(
+        videos = reconcileFetchedSubscriptionEntries(
           videos,
           previousCache?.videos,
           'videoId',
@@ -681,6 +731,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
           channelId: channel.id,
           videos
         })
+        notifySubscriptionChannelRefreshed('live')
       }
 
       if (name || thumbnailUrl) {
@@ -699,6 +750,11 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
       : await fetchSubscriptionsInBatches(activeSubscriptionList, fetchChannel)
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+
+    if (isRefreshCancelled()) {
+      return null
+    }
+
     completeSubscriptionRefresh('live', activeProfile._id)
 
     return updateVideoListAfterProcessing(videoListFromRemote)
@@ -738,7 +794,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   setSubscriptionRefreshProgress(0)
 
   if (showStartToast) {
-    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION)
+    showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
   const subscriptionUpdates = []
@@ -759,7 +815,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
       setSubscriptionRefreshProgress((channelCount / activeSubscriptionList.length) * 100)
 
       const previousCache = store.getters.getPostsCache[channel.id]
-      posts = markNewSubscriptionEntries(
+      posts = reconcileFetchedSubscriptionEntries(
         posts,
         previousCache?.posts,
         'postId',
@@ -769,6 +825,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
         channelId: channel.id,
         posts
       })
+      notifySubscriptionChannelRefreshed('posts')
 
       const channelPost = posts.find(post => post.authorId === channel.id)
       if (channelPost) {
@@ -800,6 +857,11 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
     })
 
     store.dispatch('batchUpdateSubscriptionDetails', subscriptionUpdates)
+
+    if (isRefreshCancelled()) {
+      return null
+    }
+
     completeSubscriptionRefresh('posts', activeProfile._id)
 
     return filteredPosts
@@ -822,7 +884,7 @@ async function getChannelPostsLocal(channel, t, errorChannels) {
     showSubscriptionFetchError(channel, err, t('Local API Error (Click to copy)'))
 
     if (store.getters.getBackendPreference === 'local' && store.getters.getBackendFallback) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       return await getChannelPostsInvidious(channel, t, errorChannels)
     }
 
@@ -843,7 +905,7 @@ async function getChannelPostsInvidious(channel, t, errorChannels) {
       store.getters.getBackendPreference === 'invidious' &&
       store.getters.getBackendFallback
     ) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       return await getChannelPostsLocal(channel, t, errorChannels)
     }
 
@@ -869,7 +931,7 @@ async function getChannelVideosLocalScraper(channel, t, errorChannels, failedAtt
         return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showToast(t('Falling back to Invidious API'))
+          showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -914,7 +976,7 @@ async function getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempt
         return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showToast(t('Falling back to Invidious API'))
+          showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -947,7 +1009,7 @@ async function getChannelVideosInvidiousScraper(channel, t, errorChannels, faile
         return await getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showToast(t('Falling back to Local API'))
+          showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelVideosLocalScraper(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -988,7 +1050,7 @@ async function getChannelVideosInvidiousRSS(channel, t, errorChannels, failedAtt
         return await getChannelVideosInvidiousScraper(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showToast(t('Falling back to Local API'))
+          showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelVideosLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1029,7 +1091,7 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
     showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
 
     if (failedAttempts === 0 && store.getters.getBackendFallback) {
-      showToast(t('Falling back to Invidious API'))
+      showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       return await getChannelShortsInvidious(channel, t, errorChannels, failedAttempts + 1)
     }
 
@@ -1062,7 +1124,7 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
     showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
 
     if (failedAttempts === 0 && process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-      showToast(t('Falling back to Local API'))
+      showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
       return await getChannelShortsLocal(channel, t, errorChannels, failedAttempts + 1)
     }
 
@@ -1088,7 +1150,7 @@ async function getChannelLiveLocal(channel, t, errorChannels, failedAttempts = 0
         return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showToast(t('Falling back to Invidious API'))
+          showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1133,7 +1195,7 @@ async function getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts 
         return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (store.getters.getBackendFallback) {
-          showToast(t('Falling back to Invidious API'))
+          showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1166,7 +1228,7 @@ async function getChannelLiveInvidious(channel, t, errorChannels, failedAttempts
         return await getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showToast(t('Falling back to Local API'))
+          showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelLiveLocal(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }
@@ -1207,7 +1269,7 @@ async function getChannelLiveInvidiousRSS(channel, t, errorChannels, failedAttem
         return await getChannelLiveInvidious(channel, t, errorChannels, failedAttempts + 1)
       case 1:
         if (process.env.SUPPORTS_LOCAL_API && store.getters.getBackendFallback) {
-          showToast(t('Falling back to Local API'))
+          showToast({ message: t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
           return await getChannelLiveLocalRSS(channel, t, errorChannels, failedAttempts + 1)
         }
         return { videos: null }

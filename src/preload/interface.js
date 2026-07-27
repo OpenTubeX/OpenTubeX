@@ -429,9 +429,10 @@ export default {
   /**
    * @param {string} message
    * @param {number | null} time
+   * @param {[string, string] | null} icon
    */
-  showToastOnAllTabs: (message, time) => {
-    ipcRenderer.send(IpcChannels.SHOW_TOAST, message, time)
+  showToastOnAllTabs: (message, time, icon = null) => {
+    ipcRenderer.send(IpcChannels.SHOW_TOAST, message, time, icon)
   },
 
   subscriptionAutoRefresh: {
@@ -443,6 +444,28 @@ export default {
      */
     acquire: (tabId, feedTab) => {
       return ipcRenderer.invoke(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, tabId, feedTab)
+    },
+
+    /**
+     * Ask the renderer that owns the subscription refresh to cancel it.
+     */
+    cancel: () => {
+      ipcRenderer.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL)
+    },
+
+    /**
+     * Listen for cancellation requests from other windows.
+     * @param {() => void} handler
+     * @returns {() => void}
+     */
+    onCancelRequested: (handler) => {
+      const listener = () => {
+        handler()
+      }
+      ipcRenderer.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, listener)
+      return () => {
+        ipcRenderer.removeListener(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, listener)
+      }
     },
 
     /**
@@ -522,12 +545,12 @@ export default {
   },
 
   /**
-   * @param {(message: string, time: number | null) => void} handler
+   * @param {(message: string, time: number | null, icon: [string, string] | null) => void} handler
    * @returns {() => void}
    */
   handleShowToast: (handler) => {
-    const listener = (_, message, time) => {
-      handler(message, time)
+    const listener = (_, message, time, icon) => {
+      handler(message, time, icon)
     }
 
     ipcRenderer.on(IpcChannels.SHOW_TOAST, listener)

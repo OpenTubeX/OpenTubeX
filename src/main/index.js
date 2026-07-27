@@ -390,10 +390,19 @@ function runApp() {
 
       return [
         {
+          // While a refresh runs, the same entry cancels it
           label: `Reload ${subscriptionFeedLabels[subscriptionFeedTab] ?? 'Feed'}`,
+          refreshingLabel: 'Cancel Refresh',
           visible: subscriptionFeedTab != null,
           click: () => {
-            if (!manager || !subscriptionFeedTab || !manager.presentedTabId) return
+            if (!manager || !subscriptionFeedTab) return
+
+            if (isSubscriptionAutoRefreshInProgress()) {
+              requestSubscriptionAutoRefreshCancellation()
+              return
+            }
+
+            if (!manager.presentedTabId) return
 
             manager.bridge.send(IpcChannels.SUBSCRIPTION_FEED_REQUEST_RELOAD, {
               tabId: manager.presentedTabId,
@@ -849,6 +858,9 @@ function runApp() {
       return {
         type: item.type ?? 'normal',
         label: String(item.label ?? ''),
+        // Shown instead of the label while a subscription refresh is running,
+        // so that an open menu doesn't go stale when the refresh ends
+        refreshingLabel: item.refreshingLabel != null ? String(item.refreshingLabel) : undefined,
         enabled: item.enabled !== false,
         checked: item.checked === true,
         actionId: hasAction ? actionId : undefined,
@@ -1387,7 +1399,7 @@ function runApp() {
     }
 
     // Setup tab IPC handlers
-    setupTabsIPC({
+    await setupTabsIPC({
       confirmCloseWindow: (browserWindow) => {
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
         return isLastWindow ? confirmCloseApp(browserWindow) : true
@@ -2305,18 +2317,19 @@ function runApp() {
     openPendingUrlForReadyWebContents(event)
   })
 
-  ipcMain.on(IpcChannels.SHOW_TOAST, (event, message, time) => {
+  ipcMain.on(IpcChannels.SHOW_TOAST, (event, message, time, icon) => {
     if (
       !isOpenTubeXUrl(event.senderFrame.url) ||
       typeof message !== 'string' ||
-      (time !== null && typeof time !== 'number')
+      (time !== null && typeof time !== 'number') ||
+      (icon != null && (!Array.isArray(icon) || icon.length !== 2 || icon.some(part => typeof part !== 'string')))
     ) {
       return
     }
 
     for (const window of BrowserWindow.getAllWindows()) {
       if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
-        window.webContents.send(IpcChannels.SHOW_TOAST, message, time)
+        window.webContents.send(IpcChannels.SHOW_TOAST, message, time, icon ?? null)
       }
     }
   })
@@ -2375,7 +2388,7 @@ function runApp() {
     }
 
     return {
-      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
+      inProgress: isSubscriptionAutoRefreshInProgress(),
       percentage: subscriptionAutoRefreshProgress,
       tab: subscriptionAutoRefreshOwner?.feedTab ?? null
     }
@@ -2394,6 +2407,26 @@ function runApp() {
     broadcastSubscriptionAutoRefreshState()
   })
 
+  ipcMain.on(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL, (event) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    requestSubscriptionAutoRefreshCancellation()
+  })
+
+  function isSubscriptionAutoRefreshInProgress() {
+    return subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed()
+  }
+
+  // Any window may ask for the cancellation, only the one running the refresh
+  // can carry it out
+  function requestSubscriptionAutoRefreshCancellation() {
+    if (isSubscriptionAutoRefreshInProgress()) {
+      subscriptionAutoRefreshOwner.webContents.send(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_CANCEL)
+    }
+  }
+
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_RELEASE, (event, tabId) => {
     if (
       subscriptionAutoRefreshOwner?.webContents.id === event.sender.id &&
@@ -2407,7 +2440,7 @@ function runApp() {
 
   function broadcastSubscriptionAutoRefreshState() {
     const state = {
-      inProgress: subscriptionAutoRefreshOwner !== null && !subscriptionAutoRefreshOwner.webContents.isDestroyed(),
+      inProgress: isSubscriptionAutoRefreshInProgress(),
       percentage: subscriptionAutoRefreshProgress,
       tab: subscriptionAutoRefreshOwner?.feedTab ?? null
     }
@@ -3114,6 +3147,9 @@ function runApp() {
             case 'hidePlaylists':
             case 'keyboardShortcuts':
               await setMenu()
+              break
+            case 'tabCloseFocus':
+              TabManager.setTabCloseFocus(data.value)
               break
             case 'hideToTrayOnMinimize':
               if (isTrayOnMinimizeSupported) {

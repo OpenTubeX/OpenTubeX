@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 async function setWindowWidth(app, width) {
@@ -90,6 +93,67 @@ test.describe('top nav beside the vertical tab bar', () => {
         searchBox.x + searchBox.width <= viewportWidth + 1
       )
     }).toBe(true)
+  })
+})
+
+test.describe('tab orientation shortcut', () => {
+  test('F1 switches between horizontal and vertical tabs', async ({ page }) => {
+    const app = page.locator('.app')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+
+    await page.keyboard.press('F1')
+    await expect(app).toHaveClass(/verticalTabs/)
+
+    await page.keyboard.press('F1')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+  })
+
+  test('presses in quick succession are not swallowed by the pending write', async ({ app: appHandle, page }) => {
+    const app = page.locator('.app')
+
+    // The setting is only committed once persisted, so two presses that beat
+    // the write have to queue up instead of both negating the same value —
+    // otherwise they collapse into a single toggle and the layout flips.
+    await page.evaluate(() => {
+      for (let i = 0; i < 2; i++) {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', code: 'F1', bubbles: true }))
+      }
+    })
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(appHandle.userDataDir, 'settings.db'), 'utf8')
+      return Object.fromEntries(contents.trim().split('\n')
+        .map(line => JSON.parse(line))
+        .map(record => [record._id, record.value]))
+        .useVerticalTabBar
+    }).toBe(false)
+    await expect(app).not.toHaveClass(/verticalTabs/)
+  })
+})
+
+test.describe('tab orientation shortcut rebound to a printable key', () => {
+  test.use({
+    seed: {
+      settings: {
+        keyboardShortcuts: JSON.stringify({ APP: { GENERAL: { TOGGLE_TAB_ORIENTATION: 'v' } } })
+      }
+    }
+  })
+
+  test('typing the key in the search bar does not toggle the layout', async ({ page }) => {
+    const app = page.locator('.app')
+    const searchInput = page.locator(sel.searchInput)
+
+    await searchInput.click()
+    await searchInput.type('vv')
+
+    await expect(searchInput).toHaveValue('vv')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+
+    // Outside a text field the rebound key still works.
+    await page.locator('.app').click()
+    await page.keyboard.press('v')
+    await expect(app).toHaveClass(/verticalTabs/)
   })
 })
 

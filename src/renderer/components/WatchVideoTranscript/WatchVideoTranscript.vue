@@ -375,11 +375,15 @@ async function saveTranscript() {
     )
 
     if (saved) {
-      showToast(t('Video.Transcript.Saved'))
+      showToast({ message: t('Video.Transcript.Saved'), icon: ['fas', 'save'] })
     }
   } catch (error) {
     console.error('Unable to save transcript', error)
-    showToast(`${t('Video.Transcript.Save Error')}: ${error}`, 5000)
+    showToast({
+      message: `${t('Video.Transcript.Save Error')}: ${error}`,
+      time: 5000,
+      icon: ['fas', 'circle-exclamation'],
+    })
   }
 }
 

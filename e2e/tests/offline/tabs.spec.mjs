@@ -1,5 +1,50 @@
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
+/**
+ * Returns the box of an element that has stopped moving. Menus and submenus
+ * animate in, so measuring right after they become visible yields coordinates
+ * that are still a few pixels off their resting place.
+ * @param {import('@playwright/test').Locator} locator
+ * @returns {Promise<{ x: number, y: number, width: number, height: number }>}
+ */
+async function boundingBoxWhenSettled(locator) {
+  let previous = null
+  let settledBox = null
+
+  await expect.poll(async () => {
+    const box = await locator.boundingBox()
+    const current = box && `${box.x},${box.y},${box.width},${box.height}`
+    const settled = current !== null && current === previous
+    previous = current
+    if (settled) {
+      settledBox = box
+    }
+    return settled
+  }).toBe(true)
+
+  return settledBox
+}
+
+/**
+ * Leaves three tabs open with the requested one active and returns their ids in
+ * tab bar order.
+ * @param {import('@playwright/test').Page} page
+ * @param {number} activeIndex
+ * @returns {Promise<string[]>}
+ */
+async function openThreeTabsAndActivate(page, activeIndex) {
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.newTabButton).click()
+  await expect(page.locator(sel.tabs)).toHaveCount(3)
+
+  await page.locator(sel.tabs).nth(activeIndex).click()
+  await expect(page.locator(sel.tabs).nth(activeIndex)).toHaveClass(/active/)
+
+  return await page.locator(sel.tabs).evaluateAll(
+    (tabs) => tabs.map((tab) => tab.dataset.tabId)
+  )
+}
+
 test.describe('tab bar', () => {
   test('new tab button opens a tab and activates it', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
@@ -282,10 +327,10 @@ test.describe('tab bar', () => {
     const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
     await expect(submenu).toBeVisible()
 
-    const parentBox = await closeTabs.boundingBox()
-    const submenuBox = await submenu.boundingBox()
-    expect(parentBox).not.toBeNull()
-    expect(submenuBox).not.toBeNull()
+    // Build the path from the settled submenu and keep it comfortably inside
+    // the safe triangle so device-pixel rounding cannot close the submenu.
+    const parentBox = await boundingBoxWhenSettled(closeTabs)
+    const submenuBox = await boundingBoxWhenSettled(submenu)
 
     await page.mouse.move(
       parentBox.x + parentBox.width * 0.75,
@@ -293,7 +338,7 @@ test.describe('tab bar', () => {
     )
     await page.mouse.move(
       submenuBox.x + submenuBox.width / 2,
-      submenuBox.y + submenuBox.height * 0.8,
+      submenuBox.y + submenuBox.height * 0.65,
       { steps: 10 }
     )
 
@@ -365,6 +410,20 @@ test.describe('tab bar', () => {
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page.locator(sel.activeTab)).toHaveCount(1)
+  })
+
+  test('closing the active tab selects the previous tab by default', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[0])
+  })
+
+  test('falls back to the next tab when there is no previous tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 0)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
 
   // Regression: removing a logical tab left its detached video presented in
@@ -466,6 +525,24 @@ test.describe('closed tabs', () => {
       await expect(page).toHaveURL(/#\/history/)
       await expect(page.locator(sel.backButton)).toBeDisabled()
     })
+  })
+})
+
+test.describe('tab close focus set to the next tab', () => {
+  test.use({ seed: { settings: { tabCloseFocus: 'nextTab' } } })
+
+  test('closing the active tab selects the next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 1)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[2])
+  })
+
+  test('falls back to the previous tab when there is no next tab', async ({ page }) => {
+    const tabIds = await openThreeTabsAndActivate(page, 2)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
 })
 

@@ -289,10 +289,13 @@ import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { findUpdateRelease } from './helpers/releaseUpdates'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
+  cancelSubscriptionRefresh,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
   refreshSubscriptionVideosFromRemote,
+  SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY,
+  SUBSCRIPTION_REFRESH_CANCELLED_EVENT,
   SUBSCRIPTION_REFRESH_COMPLETED_EVENT,
   SUBSCRIPTION_REFRESH_FINISHED_EVENT,
   SUBSCRIPTION_REFRESH_LOCK_NAME,
@@ -538,12 +541,14 @@ const SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY = 'opentubex.subscriptionAu
 let historyCleanupTimer = null
 const subscriptionAutoRefreshTabs = ['videos', 'shorts', 'live', 'posts']
 let removeSubscriptionAutoRefreshActiveChangedListener = null
+let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeOpenUrlListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
+const cancelledSubscriptionAutoRefreshKeys = new Set()
 let processingSubscriptionAutoRefreshes = false
 let tabSwitcherPreviewRequestId = 0
 let findbarMatches = []
@@ -624,7 +629,10 @@ async function initializeManagedDownloadTools() {
 
   if (downloadStarted) {
     const missingTools = missingBinaries.join(' and ')
-    showToast(t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }))
+    showToast({
+      message: t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }),
+      icon: ['fas', 'download'],
+    })
     showToolProgress()
   }
 
@@ -648,7 +656,10 @@ async function initializeManagedDownloadTools() {
 
     if (!downloadStarted) {
       downloadStarted = true
-      showToast(t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }))
+      showToast({
+        message: t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }),
+        icon: ['fas', 'download'],
+      })
       showToolProgress()
     }
 
@@ -680,13 +691,19 @@ async function initializeManagedDownloadTools() {
         store.commit('setProgressBarPercentage', toolProgressPercentage)
       }
       const updatedTools = updatedBinaries.join(' and ')
-      showToast(missingBinaries.length > 0
-        ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
-        : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }))
+      showToast({
+        message: missingBinaries.length > 0
+          ? t('Settings.Download Settings.Managed Tools Download Finished Template', { tools: updatedTools })
+          : t('Settings.Download Settings.Managed Tools Update Finished Template', { tools: updatedTools }),
+        icon: ['fas', 'check'],
+      })
     } else {
       if (failures.length > 0) {
         const errors = failures.map(({ binary, result }) => `${binary}: ${result?.error ?? ''}`).join('; ')
-        showToast(t('Settings.Download Settings.Managed Tools Download Error Template', { errors }))
+        showToast({
+          message: t('Settings.Download Settings.Managed Tools Download Error Template', { errors }),
+          icon: ['fas', 'circle-exclamation'],
+        })
       }
     }
   } finally {
@@ -774,6 +791,7 @@ onMounted(async () => {
   window.addEventListener('blur', cancelTabSwitcher)
   window.addEventListener('online', refreshOverdueSubscriptionFeeds)
   window.addEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.addEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
   window.addEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.addEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
   window.addEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
@@ -782,6 +800,9 @@ onMounted(async () => {
   if (process.env.IS_ELECTRON) {
     removeSubscriptionAutoRefreshStateChangedListener = window.ftElectron.subscriptionAutoRefresh.onStateChanged(
       applySubscriptionAutoRefreshState
+    )
+    removeSubscriptionAutoRefreshCancelListener = window.ftElectron.subscriptionAutoRefresh.onCancelRequested(
+      cancelSubscriptionRefresh
     )
     synchronizeSubscriptionRefreshInProgress()
     removeSubscriptionAutoRefreshActiveChangedListener = window.ftElectron.tabs.onActiveChanged((isActive) => {
@@ -812,12 +833,14 @@ onBeforeUnmount(() => {
   window.removeEventListener('blur', cancelTabSwitcher)
   window.removeEventListener('online', refreshOverdueSubscriptionFeeds)
   window.removeEventListener('storage', handleSubscriptionAutoRefreshStorage)
+  window.removeEventListener(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, handleSubscriptionRefreshCancelled)
   window.removeEventListener(SUBSCRIPTION_REFRESH_COMPLETED_EVENT, handleSubscriptionRefreshCompleted)
   window.removeEventListener(SUBSCRIPTION_REFRESH_FINISHED_EVENT, handleSubscriptionRefreshFinished)
   window.removeEventListener(SUBSCRIPTION_REFRESH_PROGRESS_EVENT, handleSubscriptionRefreshProgress)
   window.removeEventListener(SUBSCRIPTION_REFRESH_STARTED_EVENT, handleSubscriptionRefreshStarted)
   document.removeEventListener('visibilitychange', handleSubscriptionAutoRefreshVisibilityChange)
   removeSubscriptionAutoRefreshActiveChangedListener?.()
+  removeSubscriptionAutoRefreshCancelListener?.()
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
@@ -999,15 +1022,22 @@ async function processPendingSubscriptionAutoRefreshes() {
           continue
         }
 
+        cancelledSubscriptionAutoRefreshKeys.delete(key)
         const result = await getSubscriptionTabRefreshHandler(tab)({
           t,
           showStartToast: true
         })
+        const wasCancelled = cancelledSubscriptionAutoRefreshKeys.delete(key)
 
         if (result === null) {
-          scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          if (wasCancelled) {
+            scheduleSubscriptionTabAutoRefresh(tab, profileId, Date.now() + getSubscriptionTabAutoRefreshInterval(tab))
+          } else {
+            scheduleSubscriptionTabAutoRefreshLockRetry(tab, profileId)
+          }
         }
       } catch (error) {
+        cancelledSubscriptionAutoRefreshKeys.delete(key)
         console.error(`Failed to auto refresh subscription ${tab}`, error)
         scheduleSubscriptionTabAutoRefreshRetry(
           tab,
@@ -1138,8 +1168,15 @@ function getSubscriptionTabRefreshHandler(tab) {
 /**
  * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
  */
+function getSubscriptionTabAutoRefreshInterval(tab) {
+  return parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+}
+
+/**
+ * @param {'videos' | 'shorts' | 'live' | 'posts'} tab
+ */
 function isSubscriptionTabAutoRefreshEnabled(tab) {
-  const interval = parseInt(getSubscriptionAutoRefreshInterval(tab).value, 10)
+  const interval = getSubscriptionTabAutoRefreshInterval(tab)
 
   return (
     dataReady.value &&
@@ -1336,6 +1373,21 @@ function synchronizeSubscriptionAutoRefreshProfile(profileId) {
 }
 
 /**
+ * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string}>} event
+ */
+function handleSubscriptionRefreshCancelled(event) {
+  const { tab, profileId } = event.detail
+  if (
+    profileId !== activeSubscriptionProfileId.value ||
+    !subscriptionAutoRefreshTabs.includes(tab)
+  ) {
+    return
+  }
+
+  cancelledSubscriptionAutoRefreshKeys.add(`${profileId}:${tab}`)
+}
+
+/**
  * @param {CustomEvent<{tab: 'videos' | 'shorts' | 'live' | 'posts', profileId: string, timestamp: number}>} event
  */
 function handleSubscriptionRefreshCompleted(event) {
@@ -1421,6 +1473,13 @@ function handleSubscriptionRefreshFinished() {
  * @param {StorageEvent} event
  */
 function handleSubscriptionAutoRefreshStorage(event) {
+  if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_REFRESH_CANCEL_STORAGE_KEY) {
+    if (event.newValue !== null) {
+      cancelSubscriptionRefresh()
+    }
+    return
+  }
+
   if (!process.env.IS_ELECTRON && event.key === SUBSCRIPTION_AUTO_REFRESH_PROGRESS_STORAGE_KEY) {
     const state = getSubscriptionRefreshProgressState(event.newValue)
     applySubscriptionAutoRefreshState({
@@ -1716,6 +1775,13 @@ function handleKeyboardShortcuts(event) {
       }
     }
 
+    // F1: Toggle between horizontal and vertical tabs
+    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION) && !isTypingTarget(event.target)) {
+      event.preventDefault()
+      toggleTabOrientation()
+      return
+    }
+
     // Ctrl+T: New tab
     if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
       event.preventDefault()
@@ -1765,6 +1831,19 @@ function handleKeyboardShortcuts(event) {
       prepareAndReloadTab()
     }
   }
+}
+
+/**
+ * The setting is only committed to the store once it has been persisted, so
+ * consecutive presses are queued to keep every one of them from negating the
+ * same stale value.
+ */
+let pendingTabOrientationUpdate = Promise.resolve()
+
+function toggleTabOrientation() {
+  pendingTabOrientationUpdate = pendingTabOrientationUpdate.then(() =>
+    store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+  )
 }
 
 /**
@@ -2293,7 +2372,10 @@ function handleLinkClick(event) {
     })
   } else if (externalLinkHandling.value === 'doNothing') {
     // Let user know opening external link is disabled via setting
-    showToast(t('External link opening has been disabled in the general settings'))
+    showToast({
+      message: t('External link opening has been disabled in the general settings'),
+      icon: ['fas', 'link-slash'],
+    })
   } else if (externalLinkHandling.value === 'openLinkAfterPrompt') {
     // Storing the URL is necessary as
     // there is no other way to pass the URL to click callback
@@ -2428,7 +2510,10 @@ async function handleYoutubeLink(href, {
 
     default: {
       // Unknown URL type
-      showToast(t('Unknown YouTube url type, cannot be opened in app'))
+      showToast({
+        message: t('Unknown YouTube url type, cannot be opened in app'),
+        icon: ['fas', 'circle-exclamation'],
+      })
     }
   }
 }
