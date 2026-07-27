@@ -106,9 +106,10 @@ test.describe('list video actions', () => {
     await expect(actions.last()).toBeVisible()
 
     await page.setViewportSize({ width: 1000, height: 300 })
-    const resizedDropdownBounds = await dropdown.boundingBox()
-    expect(resizedDropdownBounds.y).toBeGreaterThanOrEqual(0)
-    expect(resizedDropdownBounds.y + resizedDropdownBounds.height).toBeLessThanOrEqual(300)
+    await expect.poll(async () => {
+      const bounds = await dropdown.boundingBox()
+      return bounds.y >= 0 && bounds.y + bounds.height <= 300
+    }).toBe(true)
   })
 
   test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {

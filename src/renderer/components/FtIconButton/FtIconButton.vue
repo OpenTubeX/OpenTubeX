@@ -224,6 +224,7 @@ const useModal = ref(false)
 
 let blockLeftClick = false
 let longPressTimer = null
+let dropdownViewportUpdateFrame = null
 
 if (props.dropdownModalOnMobile) {
   onMounted(() => {
@@ -240,8 +241,8 @@ const dropdown = useTemplateRef('dropdown')
 
 watch(dropdownShown, (shown) => {
   if (shown && !useModal.value) {
-    window.addEventListener('resize', keepDropdownInViewport)
-    window.addEventListener('scroll', keepDropdownInViewport, { capture: true, passive: true })
+    window.addEventListener('resize', scheduleDropdownViewportUpdate)
+    window.addEventListener('scroll', scheduleDropdownViewportUpdate, { capture: true, passive: true })
   } else {
     removeDropdownViewportListeners()
   }
@@ -322,9 +323,25 @@ function keepDropdownInViewport() {
   dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
 }
 
+function scheduleDropdownViewportUpdate() {
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+  }
+
+  dropdownViewportUpdateFrame = requestAnimationFrame(() => {
+    dropdownViewportUpdateFrame = null
+    keepDropdownInViewport()
+  })
+}
+
 function removeDropdownViewportListeners() {
-  window.removeEventListener('resize', keepDropdownInViewport)
-  window.removeEventListener('scroll', keepDropdownInViewport, true)
+  window.removeEventListener('resize', scheduleDropdownViewportUpdate)
+  window.removeEventListener('scroll', scheduleDropdownViewportUpdate, true)
+
+  if (dropdownViewportUpdateFrame != null) {
+    cancelAnimationFrame(dropdownViewportUpdateFrame)
+    dropdownViewportUpdateFrame = null
+  }
 }
 
 function preventButtonClickAfterLongPress() {
