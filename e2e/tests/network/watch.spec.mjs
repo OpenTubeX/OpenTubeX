@@ -194,7 +194,12 @@ test.describe('watch page', () => {
 
       await watchView.$store.dispatch('updateHideRecommendedVideos', true)
       watchView.useTheatreMode = true
-      watchView.videoChapters = [{ title: 'Test chapter', timestamp: '0:00', startSeconds: 0 }]
+      watchView.videoChapters = Array.from({ length: 20 }, (_, index) => ({
+        title: `Test chapter ${index + 1}`,
+        timestamp: `${index}:00`,
+        startSeconds: index * 60
+      }))
+      watchView.videoCurrentChapterIndex = 19
       watchView.showSidebarChapters = true
       await watchView.$nextTick()
     })
@@ -203,6 +208,18 @@ test.describe('watch page', () => {
     const panel = page.locator('.watchVideoChaptersPanel')
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
+    await expect.poll(() => panel.evaluate((element) => {
+      const container = element.querySelector('.chaptersWrapper')
+      const currentChapter = container?.querySelector('.chapter.current')
+      const containerBounds = container?.getBoundingClientRect()
+      const chapterBounds = currentChapter?.getBoundingClientRect()
+      return Boolean(
+        containerBounds &&
+        chapterBounds &&
+        chapterBounds.top >= containerBounds.top &&
+        chapterBounds.bottom <= containerBounds.bottom
+      )
+    })).toBe(true)
 
     await panel.getByRole('button', { name: 'Close Chapters' }).click()
     await expect(panel).toHaveClass(/chapters-panel-leave-active/)

@@ -141,7 +141,7 @@ function getThumbnailStyle(thumbnail) {
 const observeVisibilityOptions = {
   callback: (isVisible, _entry) => {
     if (isVisible) {
-      chaptersWrapper.value.scrollTop = 0
+      scrollToCurrentChapter()
     }
   },
   intersection: {
