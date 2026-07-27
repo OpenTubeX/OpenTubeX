@@ -286,6 +286,9 @@ test.describe('large new feed refresh', () => {
     await refreshNewContent.click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toBeVisible()
     await expect(page.getByText(/126 subscriptions can take a long time/)).toBeVisible()
+    expect(await page.locator('.promptCard').evaluate(
+      element => element.scrollHeight <= element.clientHeight
+    )).toBe(true)
 
     await page.getByRole('button', { name: 'No', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Refresh all subscription feeds?' })).toHaveCount(0)

@@ -168,6 +168,20 @@ test.describe('search suggestion remove button layout', () => {
       const removeBox = await removeButton.boundingBox()
       return removeBox.width
     }).toBeLessThan(40)
+
+    const [entryBox, removeBox] = await Promise.all([
+      entry.boundingBox(),
+      removeButton.boundingBox()
+    ])
+    expect(entryBox.x + entryBox.width - removeBox.x - removeBox.width).toBeGreaterThanOrEqual(8)
+
+    const colors = await entry.evaluate((element) => ({
+      row: getComputedStyle(element).backgroundColor,
+      handle: getComputedStyle(
+        element.closest('.list').querySelector('.os-scrollbar-vertical .os-scrollbar-handle')
+      ).backgroundColor
+    }))
+    expect(colors.handle).toBe(colors.row)
   })
 
   test('the leading icon is vertically centered in its row', async ({ page }) => {

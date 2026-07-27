@@ -194,7 +194,12 @@ test.describe('watch page', () => {
 
       await watchView.$store.dispatch('updateHideRecommendedVideos', true)
       watchView.useTheatreMode = true
-      watchView.videoChapters = [{ title: 'Test chapter', timestamp: '0:00', startSeconds: 0 }]
+      watchView.videoChapters = Array.from({ length: 20 }, (_, index) => ({
+        title: `Test chapter ${index + 1}`,
+        timestamp: `${index}:00`,
+        startSeconds: index * 60
+      }))
+      watchView.videoCurrentChapterIndex = 19
       watchView.showSidebarChapters = true
       await watchView.$nextTick()
     })
@@ -203,6 +208,18 @@ test.describe('watch page', () => {
     const panel = page.locator('.watchVideoChaptersPanel')
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
+    await expect.poll(() => panel.evaluate((element) => {
+      const container = element.querySelector('.chaptersWrapper')
+      const currentChapter = container?.querySelector('.chapter.current')
+      const containerBounds = container?.getBoundingClientRect()
+      const chapterBounds = currentChapter?.getBoundingClientRect()
+      return Boolean(
+        containerBounds &&
+        chapterBounds &&
+        chapterBounds.top >= containerBounds.top &&
+        chapterBounds.bottom <= containerBounds.bottom
+      )
+    })).toBe(true)
 
     await panel.getByRole('button', { name: 'Close Chapters' }).click()
     await expect(panel).toHaveClass(/chapters-panel-leave-active/)
@@ -388,6 +405,7 @@ test.describe('watch page', () => {
     await page.addStyleTag({
       content: `
         .fullscreenCommentsOverlay .comment { display: none; }
+        .fullscreenCommentsOverlay.open { inset-block-start: calc(100% - 306px) !important; }
       `
     })
     await page.route(/\/youtubei\/v1\/next/, async (route) => {
@@ -402,6 +420,57 @@ test.describe('watch page', () => {
     await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
     const repeatedLoadCount = await commentCards.count()
     await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(repeatedLoadCount)
+  })
+
+  test('fullscreen metadata uses one full-dock scrollbar', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await setPlayerFullscreen(page, true)
+    await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
+
+    const metadata = page.locator('.fullscreenMetadataOverlay.open')
+    await expect(metadata).toBeVisible()
+    await expect(metadata.locator('.fullscreenMetadataTarget'))
+      .toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(metadata.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect(metadata.locator('.descriptionScroll'))
+      .not.toHaveAttribute('data-overlayscrollbars-viewport')
+  })
+
+  test('fullscreen comments scrollbar reaches the dock bottom', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const dock = page.locator('.fullscreenCommentsOverlay.open')
+    const content = dock.locator('.commentsContentWrapper')
+    await expect(content).toBeVisible()
+
+    const bottomGap = await Promise.all([dock.boundingBox(), content.boundingBox()])
+      .then(([dockBox, contentBox]) => (
+        dockBox.y + dockBox.height - contentBox.y - contentBox.height
+      ))
+    expect(bottomGap).toBeLessThanOrEqual(2)
+  })
+
+  test('fullscreen SponsorBlock uses one content scrollbar', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openVideo(page)
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenSponsorBlockToggle').click({ force: true })
+
+    const sponsorBlock = page.locator('.fullscreenSponsorBlockOverlay.open')
+    await expect(sponsorBlock).toBeVisible()
+    await expect(sponsorBlock.locator('.sponsorBlockContent'))
+      .toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(sponsorBlock.locator('.sponsorBlockSegments'))
+      .not.toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(sponsorBlock.locator('.os-scrollbar-vertical')).toHaveCount(1)
   })
 
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
@@ -442,6 +511,10 @@ test.describe('watch page', () => {
     await expect(title).toHaveAttribute('aria-expanded', 'true')
     await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
     await expect(page.locator('.fullscreenMetadataTarget .videoTitle')).toContainText(CAPTIONED_VIDEO.title)
+    await expect(page.locator('.fullscreenMetadataTarget')).toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(page.locator('.fullscreenMetadataOverlay .os-scrollbar-vertical')).toHaveCount(1)
+    await expect(page.locator('.fullscreenMetadataTarget .descriptionScroll'))
+      .not.toHaveAttribute('data-overlayscrollbars-viewport')
     await expect(page.locator('.fullscreenMetadataTarget .shareButton')).toHaveCount(0)
     await expect(page.locator('.fullscreenMetadataTarget .quickBookmarkVideoIcon')).toHaveCount(0)
     await expect(page.locator('.fullscreenMetadataTarget').getByRole('button', { name: 'Add to playlist' })).toHaveCount(0)
@@ -491,6 +564,8 @@ test.describe('watch page', () => {
     await expect(page.locator('.fullscreenMetadataHeader')).toHaveCSS('cursor', 'grab')
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptCard')).toBeVisible()
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegment').first()).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.fullscreenTranscriptTarget .transcriptSegments'))
+      .toHaveAttribute('data-overlayscrollbars-viewport')
     await expect(page.locator('.fullscreenTranscriptTarget .transcriptActions .iconButton')).toHaveCount(2)
 
     const transcriptDock = page.locator('.fullscreenTranscriptOverlay.open')

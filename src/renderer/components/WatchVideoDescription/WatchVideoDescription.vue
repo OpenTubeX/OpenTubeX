@@ -19,7 +19,8 @@
       {{ $t("Description.Expand Description") }}
     </span>
     <div
-      v-overlay-scrollbars
+      ref="descriptionScroll"
+      v-overlay-scrollbars="!alwaysExpanded"
       class="descriptionScroll"
     >
       <FtTimestampCatcher
@@ -82,6 +83,7 @@ const props = defineProps({
 const emit = defineEmits(['timestamp-event'])
 
 let shownDescription = ''
+const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
 const showControls = ref(false)
@@ -144,6 +146,7 @@ function expandDescription() {
  * Enables user to collapse contents of description
  */
 function collapseDescription() {
+  descriptionScroll.value.scrollTop = 0
   showFullDescription.value = false
 }
 
