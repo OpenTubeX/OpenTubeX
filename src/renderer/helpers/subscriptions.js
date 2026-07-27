@@ -18,6 +18,7 @@ import { mapConcurrently } from './concurrent-map'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
 export const SUBSCRIPTION_REFRESH_CHANNEL_EVENT = 'opentubex-subscription-refresh-channel'
+export const SUBSCRIPTION_REFRESH_CANCELLED_EVENT = 'opentubex-subscription-refresh-cancelled'
 export const SUBSCRIPTION_REFRESH_COMPLETED_EVENT = 'opentubex-subscription-refresh-completed'
 export const SUBSCRIPTION_REFRESH_FINISHED_EVENT = 'opentubex-subscription-refresh-finished'
 export const SUBSCRIPTION_REFRESH_LOCK_NAME = 'opentubex-subscription-refresh'
@@ -38,7 +39,6 @@ let activeRefresh = null
 // Incremented on every cancellation request, so that a cancellation is not
 // missed when it arrives between two feed refreshes.
 let cancelCount = 0
-const cancelCountsByRefresh = new Map()
 
 const IS_UPCOMING_REGEX = /"isUpcoming"\s*:\s*true/
 const SCHEDULED_START_REGEX = /"scheduledStartTime"\s*:\s*"(\d+)"/
@@ -52,11 +52,18 @@ const SUBSCRIPTION_FETCH_CONCURRENCY = 8
  */
 export function cancelSubscriptionRefresh() {
   cancelCount++
+  markActiveSubscriptionRefreshCancelled()
+}
 
-  if (activeRefresh !== null) {
+function markActiveSubscriptionRefreshCancelled() {
+  if (activeRefresh !== null && !activeRefresh.cancelled) {
     activeRefresh.cancelled = true
-    const key = `${activeRefresh.profileId}:${activeRefresh.tab}`
-    cancelCountsByRefresh.set(key, (cancelCountsByRefresh.get(key) ?? 0) + 1)
+    window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_CANCELLED_EVENT, {
+      detail: {
+        tab: activeRefresh.tab,
+        profileId: activeRefresh.profileId
+      }
+    }))
   }
 }
 
@@ -82,11 +89,7 @@ export function requestSubscriptionRefreshCancellation() {
  * Lets callers that refresh several feeds in a row notice a cancellation that
  * happened between two feeds, when no refresh was running.
  */
-export function getSubscriptionRefreshCancelCount(tab, profileId) {
-  if (tab && profileId) {
-    return cancelCountsByRefresh.get(`${profileId}:${tab}`) ?? 0
-  }
-
+export function getSubscriptionRefreshCancelCount() {
   return cancelCount
 }
 
@@ -106,11 +109,16 @@ async function withSubscriptionRefreshLock(tab, profileId, refresh) {
     return null
   }
 
+  const cancelCountAtStart = cancelCount
   const runRefresh = async () => {
+    activeRefresh = { cancelled: false, tab, profileId }
     window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REFRESH_STARTED_EVENT, {
       detail: { tab, profileId }
     }))
-    activeRefresh = { cancelled: false, tab, profileId }
+
+    if (cancelCount !== cancelCountAtStart) {
+      markActiveSubscriptionRefreshCancelled()
+    }
 
     try {
       return await refresh()
