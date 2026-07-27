@@ -93,6 +93,19 @@ test.describe('top nav beside the vertical tab bar', () => {
   })
 })
 
+test.describe('tab orientation shortcut', () => {
+  test('F1 switches between horizontal and vertical tabs', async ({ page }) => {
+    const app = page.locator('.app')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+
+    await page.keyboard.press('F1')
+    await expect(app).toHaveClass(/verticalTabs/)
+
+    await page.keyboard.press('F1')
+    await expect(app).not.toHaveClass(/verticalTabs/)
+  })
+})
+
 test.describe('narrow layout top padding', () => {
   test('page content clears the fixed top nav and tab bar', async ({ app, page }) => {
     // On mobile widths the top nav is fixed and taller when a tab bar is

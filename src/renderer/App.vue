@@ -1716,6 +1716,13 @@ function handleKeyboardShortcuts(event) {
       }
     }
 
+    // F1: Toggle between horizontal and vertical tabs
+    if (matchesKeyboardShortcut(event, shortcuts.TOGGLE_TAB_ORIENTATION)) {
+      event.preventDefault()
+      store.dispatch('updateUseVerticalTabBar', !useVerticalTabBar.value)
+      return
+    }
+
     // Ctrl+T: New tab
     if (matchesKeyboardShortcut(event, shortcuts.NEW_TAB)) {
       event.preventDefault()
