@@ -58,5 +58,7 @@
 }
 
 .license {
+  /* bdi is inline by default, block keeps the margins now that it isn't a flex item */
+  display: block;
   margin-block: 1em;
 }
