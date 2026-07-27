@@ -597,7 +597,7 @@ Settings:
     Invalid History Retention Days: Wprowadź liczbę całkowitą dni większą od zera
     Enable Watch Statistics: Włącz statystyki oglądania
     Week Starts On: Tydzień zaczyna się w
-    Watched Percentage Threshold: Próg procentowy „obejrzanych”
+    Watched Percentage Threshold: Próg oznaczenia jako „obejrzany” (%)
     Watched Percentage Threshold Tooltip: Filmy są oznaczane jako obejrzane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one oznaczane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one oznaczane po zakończeniu odtwarzania.
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
@@ -1136,9 +1136,9 @@ Video:
       CloseSegmentActions: Zamknij działania segmentu
       FullVideo: Cały film
       LockedSegment: Zablokowany segment
-      DownvoteSegment: Głos w dół dla segmentu
-      UpvoteSegment: Głos w górę dla segmentu
-      VoteFailed: Nie udało się przesłać głosu do SponsorBlock.
+      DownvoteSegment: Oceń segment negatywnie
+      UpvoteSegment: Oceń segment pozytywnie
+      VoteFailed: Nie udało się przesłać oceny segmentu do SponsorBlock.
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1211,13 +1211,13 @@ Video:
   Unmark As Watched: Oznacz jako nieobejrzany
   Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
   Queue: Kolejka
-  Play Next: Odtwórz następny
+  Play Next: Odtwórz jako następne
   Add to Queue: Dodaj do kolejki
   Added to Play Next: Wideo zostanie odtworzone jako następne
   Added to Queue: Wideo dodane do kolejki
   Clear Queue: Wyczyść kolejkę
   Remove from Queue: Usuń {title} z kolejki
-  Queue Video Count: '{count} wideo | {count}'
+  Queue Video Count: '{count} film(y/ów) | {count} film(y/ów)'
   Drag to Reorder Queue: Przeciągnij {title}, aby zmienić kolejność w kolejce
   Metadata: Informacje o wideo
   Close Metadata: Zamknij informacje o wideo
@@ -1712,7 +1712,7 @@ Downloads:
   Delete Template: Usuń szablon
   Template Saved: Zapisano szablon pobierania „{name}”
   Choose Folder: Zmień
-  Select Folder: Wybierz Folder
+  Select Folder: Wybierz folder
   Folder Required: Wybierz folder pobierania, aby umożliwić pobieranie.
   System Downloads Folder: Systemowy folder pobierania
   Processing: Przetwarzanie…
