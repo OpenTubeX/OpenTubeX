@@ -268,6 +268,7 @@ const state = {
   showDistractionFreeTitles: false,
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
+  tabCloseFocus: 'previousTab',
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
   useVerticalTabBar: false,

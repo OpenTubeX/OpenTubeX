@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../store/index'
 import {
+  getSubscriptionRefreshCancelCount,
   refreshSubscriptionLiveFromRemote,
   refreshSubscriptionPostsFromRemote,
   refreshSubscriptionShortsFromRemote,
@@ -59,8 +60,16 @@ export function useRefreshAllSubscriptionFeeds() {
     attemptedFetch.value = true
     errorChannels.value = []
 
+    const cancelCountAtStart = getSubscriptionRefreshCancelCount()
+
     try {
       for (const feed of enabledFeeds.value) {
+        // Also covers a cancellation between two feeds, when no feed refresh
+        // was running to receive it
+        if (getSubscriptionRefreshCancelCount() !== cancelCountAtStart) {
+          break
+        }
+
         await feed.refresh({ t, errorChannels: errorChannels.value })
       }
     } finally {

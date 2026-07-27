@@ -59,11 +59,12 @@
           {{ t('Feed.Next Auto Refresh', { date: nextAutoRefreshTimestamp }) }}
         </p>
       </div>
+      <!-- While a refresh runs, the same button cancels it -->
       <FtIconButton
-        :disabled="disableRefresh"
-        :icon="['fas', 'sync']"
+        :disabled="!refreshInProgress && disableRefresh"
+        :icon="refreshInProgress ? ['fas', 'xmark'] : ['fas', 'sync']"
         class="refreshButton"
-        :title="refreshFeedButtonTitle"
+        :title="refreshInProgress ? t('Feed.Cancel Refresh') : refreshFeedButtonTitle"
         :size="12"
         theme="primary"
         @click="click"
@@ -108,6 +109,10 @@ const props = defineProps({
     default: 0
   },
   embedded: {
+    type: Boolean,
+    default: false
+  },
+  refreshInProgress: {
     type: Boolean,
     default: false
   },
@@ -188,10 +193,14 @@ const refreshFeedButtonTitle = computed(() => {
   )
 })
 
-const emit = defineEmits(['click'])
+const emit = defineEmits(['cancel', 'click'])
 
 function click() {
-  emit('click')
+  if (props.refreshInProgress) {
+    emit('cancel')
+  } else {
+    emit('click')
+  }
 }
 </script>
 
