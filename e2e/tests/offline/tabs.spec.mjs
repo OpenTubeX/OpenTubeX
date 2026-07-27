@@ -327,9 +327,8 @@ test.describe('tab bar', () => {
     const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
     await expect(submenu).toBeVisible()
 
-    // The path below only clears the safe triangle by a couple of pixels, so it
-    // has to be built from where the submenu comes to rest rather than from
-    // where it is mid-animation.
+    // Build the path from the settled submenu and keep it comfortably inside
+    // the safe triangle so device-pixel rounding cannot close the submenu.
     const parentBox = await boundingBoxWhenSettled(closeTabs)
     const submenuBox = await boundingBoxWhenSettled(submenu)
 
@@ -339,7 +338,7 @@ test.describe('tab bar', () => {
     )
     await page.mouse.move(
       submenuBox.x + submenuBox.width / 2,
-      submenuBox.y + submenuBox.height * 0.8,
+      submenuBox.y + submenuBox.height * 0.65,
       { steps: 10 }
     )
 

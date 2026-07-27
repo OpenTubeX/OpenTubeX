@@ -369,7 +369,9 @@
         v-if="isLoading"
       />
       <div
+        v-if="!isLoading && !isLoadingMoreComments"
         v-observe-visibility="observeVisibilityOptions"
+        class="commentAutoLoadSentinel"
       >
       <!--
         Dummy element to be observed by Intersection Observer
@@ -640,6 +642,7 @@ const observeVisibilityOptions = computed(() => {
       }
     },
     intersection: {
+      root: props.fullscreenOverlay ? commentsContentWrapper.value : null,
       // Only when it intersects with N% above bottom
       rootMargin: '0% 0% 0% 0%',
     },
