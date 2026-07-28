@@ -9,6 +9,10 @@ import { fixtureKey } from '../../helpers/innertube.mjs'
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
 
+// Mirrors MAX_SABR_ERROR_RECOVERIES_PER_VIDEO in src/renderer/views/Watch/Watch.js,
+// which is a module-level constant in a Vue component and so cannot be imported here.
+const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
+
 test.use({
   seed: {
     history: [{
@@ -243,5 +247,29 @@ test('seeking around a stream that never plays does not refill the budget', asyn
   ])
 
   expect(result.reloads).toHaveLength(3)
+  expect(result.finalFormat).toBe('legacy')
+})
+
+test('a video that keeps breaking after settling still stops reloading eventually', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  // Every failure is followed by enough real playback to refill the per-incident
+  // budget, so without a hard per-video ceiling this reloads for ever. That is
+  // what turned an unrecoverable stream into an unwatchable reload loop rather
+  // than letting it settle on a format that plays.
+  const script = []
+  for (let i = 0; i < 12; i++) {
+    script.push({ error: true }, { playFor: 60 })
+  }
+
+  const result = await driveWatchView(page, script)
+
+  // Exactly the documented per-video ceiling: every failure up to it recovers,
+  // and the ones after it fall back instead of reloading again.
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES_PER_VIDEO)
   expect(result.finalFormat).toBe('legacy')
 })
