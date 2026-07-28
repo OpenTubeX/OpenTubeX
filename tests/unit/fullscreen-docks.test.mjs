@@ -103,14 +103,34 @@ test('expanding a dock never drives another one below its collapsed height', () 
   }
 })
 
-test('expanding does not touch a stack it is not part of', () => {
+test('a collapsed dock can still be expanded after its sibling is closed', () => {
+  const stack = createStack(['metadata', 'transcript'])
+
+  toggle(stack, 'metadata')
+
+  // The user closes the transcript panel outright, leaving the collapsed
+  // metadata dock on its own. A lone dock fills the height whatever its weight,
+  // so nothing looks wrong until a second dock opens again - at which point it
+  // must not snap back to the sliver it was collapsed to.
+  stack.openDocks = ['metadata']
+  assert.equal(toggle(stack, 'metadata'), true)
+  assert.equal(stack.collapsedState.metadata, null)
+  assert.equal(stack.weights.metadata, 1)
+})
+
+test('a lone dock cannot be collapsed, as there is nowhere to put its height', () => {
+  const stack = createStack(['metadata'])
+
+  assert.equal(toggle(stack, 'metadata'), false)
+  assert.equal(stack.collapsedState.metadata, null)
+  assert.equal(stack.weights.metadata, 1)
+})
+
+test('toggling does not touch a stack it is not part of', () => {
   const stack = createStack(['metadata', 'transcript'])
 
   assert.equal(toggleFullscreenDockCollapsed(
     stack.openDocks, 'comments', stack.weights, stack.collapsedState, CONTAINER_HEIGHT
-  ), false)
-  assert.equal(toggleFullscreenDockCollapsed(
-    ['metadata'], 'metadata', stack.weights, stack.collapsedState, CONTAINER_HEIGHT
   ), false)
   assert.deepEqual(stack.weights, { metadata: 1, transcript: 1 })
 })

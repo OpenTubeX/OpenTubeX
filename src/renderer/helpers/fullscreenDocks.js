@@ -73,6 +73,13 @@ export function takeFullscreenDockWeight(openDocks, dock, amount, weights, conta
         getFullscreenDockCollapsedWeight(openDocks, name, weights, containerHeight))
     }))
 
+  // A lone dock fills the height whatever its weight, so there is nothing to
+  // reclaim from and nothing to take into account: hand it the weight outright,
+  // ready for the next dock that opens alongside it
+  if (donors.length === 0) {
+    return amount
+  }
+
   // Let the dock it borrowed from pay it all back first, so an otherwise
   // untouched stack returns to exactly the layout it had before collapsing
   const preferred = donors.find(donor => donor.name === preferredDonor)
@@ -105,12 +112,15 @@ export function takeFullscreenDockWeight(openDocks, dock, amount, weights, conta
  * @param {number} containerHeight
  */
 export function toggleFullscreenDockCollapsed(openDocks, dock, weights, collapsedState, containerHeight) {
-  if (openDocks.length < 2 || !openDocks.includes(dock)) {
+  if (!openDocks.includes(dock)) {
     return false
   }
 
   const savedState = collapsedState[dock]
 
+  // Expanding stays available even once the dock is the only one left open: the
+  // siblings it was collapsed next to may have been closed in the meantime, and
+  // it has to be able to take its remembered height back before they reopen
   if (savedState) {
     collapsedState[dock] = null
     weights[dock] += takeFullscreenDockWeight(
@@ -123,6 +133,11 @@ export function toggleFullscreenDockCollapsed(openDocks, dock, weights, collapse
     )
 
     return true
+  }
+
+  // Collapsing needs somewhere to put the freed height, so it needs a sibling
+  if (openDocks.length < 2) {
+    return false
   }
 
   const neighbor = getFullscreenDockCollapseNeighbor(openDocks, dock, collapsedState)
