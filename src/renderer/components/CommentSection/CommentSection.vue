@@ -424,6 +424,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import store from '../../store/index'
 
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
+import { getReplyLoadState } from '../../helpers/comment-replies'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -1068,7 +1069,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     let replyThreads
     let nextContinuation
-    if ('getReplies' in continuation && !continuation.replies) {
+    if ('getReplies' in continuation && comment.replies.length === 0) {
       await continuation.getReplies()
       replyThreads = continuation.replies ?? []
       nextContinuation = continuation.has_continuation ? continuation : null
@@ -1083,15 +1084,22 @@ async function getCommentRepliesLocal(index, commentId = null) {
       .filter(Boolean)
     comment.replies = comment.replies.concat(parsedReplies)
 
-    if (nextContinuation) {
-      replyTokens.set(comment.id, nextContinuation)
+    const replyLoadState = getReplyLoadState(
+      parsedReplies.length,
+      comment.replies.length,
+      comment.numReplies,
+      nextContinuation !== null
+    )
+
+    if (replyLoadState.hasMore) {
+      replyTokens.set(comment.id, nextContinuation ?? continuation)
       comment.hasReplyToken = true
     } else {
       replyTokens.delete(comment.id)
       comment.hasReplyToken = false
     }
 
-    comment.showReplies = true
+    comment.showReplies = replyLoadState.showReplies
   } catch (err) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
@@ -1168,10 +1176,16 @@ async function getCommentRepliesInvidious(index) {
     const { commentData, continuation } = await invidiousGetCommentReplies({ id: props.id, replyToken })
 
     comment.replies = comment.replies.concat(commentData)
-    comment.showReplies = true
+    const replyLoadState = getReplyLoadState(
+      commentData.length,
+      comment.replies.length,
+      comment.numReplies,
+      continuation !== null
+    )
+    comment.showReplies = replyLoadState.showReplies
 
-    if (continuation) {
-      replyTokens.set(comment.id, continuation)
+    if (replyLoadState.hasMore) {
+      replyTokens.set(comment.id, continuation ?? replyToken)
       comment.hasReplyToken = true
     } else {
       replyTokens.delete(comment.id)
@@ -1234,10 +1248,16 @@ async function getPostCommentRepliesInvidious(index) {
       authorId: props.postAuthorId
     })
     comment.replies = comment.replies.concat(comments)
-    comment.showReplies = true
+    const replyLoadState = getReplyLoadState(
+      comments.length,
+      comment.replies.length,
+      comment.numReplies,
+      continuation !== null
+    )
+    comment.showReplies = replyLoadState.showReplies
 
-    if (continuation) {
-      replyTokens.set(comment.id, continuation)
+    if (replyLoadState.hasMore) {
+      replyTokens.set(comment.id, continuation ?? replyToken)
       comment.hasReplyToken = true
     } else {
       replyTokens.delete(comment.id)
