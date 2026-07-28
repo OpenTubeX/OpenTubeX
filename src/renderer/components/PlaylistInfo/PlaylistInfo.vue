@@ -949,7 +949,7 @@ function handleDeletePlaylistPromptAnswer(option) {
     store.dispatch('removePlaylist', props.id)
     router.push(
       {
-        path: '/userPlaylists'
+        path: '/userplaylists'
       }
     )
     showToast({
