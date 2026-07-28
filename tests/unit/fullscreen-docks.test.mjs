@@ -186,9 +186,13 @@ test('a lone dock cannot be collapsed, as there is nowhere to put its height', (
 
 test('toggling does not touch a stack it is not part of', () => {
   const stack = createStack(['metadata', 'transcript'])
+  const weightsBefore = { ...stack.weights }
+  const collapsedStateBefore = { ...stack.collapsedState }
 
   assert.equal(toggleFullscreenDockCollapsed(
     stack.openDocks, 'comments', stack.weights, stack.collapsedState, CONTAINER_HEIGHT
   ), false)
-  assert.deepEqual(stack.weights, { metadata: 1, transcript: 1 })
+  assert.deepEqual(stack.weights, weightsBefore)
+  // Including not recording a collapsed entry for a dock that is not in the stack
+  assert.deepEqual(stack.collapsedState, collapsedStateBefore)
 })
