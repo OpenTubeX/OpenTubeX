@@ -429,12 +429,36 @@ test.describe('watch page', () => {
     await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
 
     const metadata = page.locator('.fullscreenMetadataOverlay.open')
+    const target = metadata.locator('.fullscreenMetadataTarget')
     await expect(metadata).toBeVisible()
-    await expect(metadata.locator('.fullscreenMetadataTarget'))
-      .toHaveAttribute('data-overlayscrollbars-viewport')
+    await expect(target).toHaveAttribute('data-overlayscrollbars-viewport')
     await expect(metadata.locator('.os-scrollbar-vertical')).toHaveCount(1)
     await expect(metadata.locator('.descriptionScroll'))
       .not.toHaveAttribute('data-overlayscrollbars-viewport')
+
+    await metadata.locator('.description').evaluate((element) => {
+      element.textContent = Array.from(
+        { length: 100 },
+        (_, index) => `Long description line ${index + 1}`
+      ).join('\n')
+    })
+    await expect.poll(() => target.evaluate(
+      element => element.scrollHeight > element.clientHeight
+    )).toBe(true)
+
+    const scrollbar = target.locator(':scope > .os-scrollbar-vertical')
+    const scrollbarBounds = await scrollbar.boundingBox()
+    const targetBounds = await target.boundingBox()
+    expect(scrollbarBounds.y - targetBounds.y).toBeLessThanOrEqual(1)
+    expect(
+      targetBounds.y + targetBounds.height - scrollbarBounds.y - scrollbarBounds.height
+    ).toBeLessThanOrEqual(1)
+
+    await target.evaluate(element => {
+      element.scrollTop = (element.scrollHeight - element.clientHeight) / 3
+    })
+    const handle = scrollbar.locator('.os-scrollbar-handle')
+    await handle.hover()
   })
 
   test('fullscreen comments scrollbar reaches the dock bottom', async ({ page, innertube }) => {
