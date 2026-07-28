@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { getReplyLoadState } from '../../src/renderer/helpers/comment-replies.js'
+import {
+  getReplyLoadState,
+  shouldLoadInitialReplies
+} from '../../src/renderer/helpers/comment-replies.js'
 
 test('keeps an empty reply load retryable without opening the reply panel', () => {
   assert.deepEqual(getReplyLoadState(0, 0, 1, false), {
@@ -33,4 +36,12 @@ test('keeps a zero-progress continuation retryable after earlier replies loaded'
     showReplies: true,
     shouldRetry: true
   })
+})
+
+test('retries an unusable initial batch when it has no continuation', () => {
+  assert.equal(shouldLoadInitialReplies(true, false, false), true)
+})
+
+test('advances after an unusable initial batch when it has a continuation', () => {
+  assert.equal(shouldLoadInitialReplies(true, false, true), false)
 })

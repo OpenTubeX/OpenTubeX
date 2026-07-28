@@ -424,7 +424,7 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import store from '../../store/index'
 
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
-import { getReplyLoadState } from '../../helpers/comment-replies'
+import { getReplyLoadState, shouldLoadInitialReplies } from '../../helpers/comment-replies'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -1069,7 +1069,15 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     let replyThreads
     let nextContinuation
-    if ('getReplies' in continuation && comment.replies.length === 0) {
+    const hasLoadedReplyBatch = !!continuation.replies
+    const loadInitialReplies = 'getReplies' in continuation &&
+      shouldLoadInitialReplies(
+        hasLoadedReplyBatch,
+        comment.replies.length > 0,
+        hasLoadedReplyBatch && continuation.has_continuation
+      )
+
+    if (loadInitialReplies) {
       await continuation.getReplies()
       replyThreads = continuation.replies ?? []
       nextContinuation = continuation.has_continuation ? continuation : null

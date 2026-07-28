@@ -13,3 +13,12 @@ export function getReplyLoadState(parsedReplyCount, loadedReplyCount, expectedRe
     shouldRetry
   }
 }
+
+/**
+ * @param {boolean} hasLoadedBatch
+ * @param {boolean} hasUsableReplies
+ * @param {boolean} hasContinuation
+ */
+export function shouldLoadInitialReplies(hasLoadedBatch, hasUsableReplies, hasContinuation) {
+  return !hasLoadedBatch || (!hasUsableReplies && !hasContinuation)
+}
