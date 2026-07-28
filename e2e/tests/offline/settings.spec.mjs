@@ -225,6 +225,44 @@ test.describe('settings', () => {
   })
 })
 
+test.describe('sync settings', () => {
+  test.use({
+    seed: {
+      settings: {
+        syncServerAutoSync: false,
+        syncServerPrivacyMode: 'legacy',
+        syncServerToken: 'invalid-token',
+        syncServerUrl: 'https://sync.d3sox.me',
+        syncServerUsername: 'sync-user'
+      }
+    }
+  })
+
+  test('clears a sync error and enables credentials after disconnecting', async ({ page }) => {
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      if (new URL(route.request().url()).pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+      } else {
+        await route.fulfill({ status: 401, body: 'Invalid or missing authentication token' })
+      }
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(syncSection.locator('.error')).toHaveText(
+      'Invalid or missing authentication token'
+    )
+
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+    await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+    await expect(syncSection.getByLabel('Password')).toBeEnabled()
+  })
+})
+
 test.describe('invalid toast position', () => {
   test.use({ seed: { settings: { toastPosition: 'unsupported' } } })
 

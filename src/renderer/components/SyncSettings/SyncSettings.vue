@@ -436,7 +436,7 @@ const lastSyncLabel = computed(() => {
 let serverCheckTimer = null
 let serverCheckSequence = 0
 
-watch(serverUrl, value => {
+watch([serverUrl, connected], ([value]) => {
   clearTimeout(serverCheckTimer)
   const sequence = ++serverCheckSequence
   serverPrivacySupported.value = null
@@ -524,6 +524,7 @@ async function confirmDataLossSync() {
 
 async function disconnect() {
   if (busy.value) return
+  localError.value = ''
   await store.dispatch('disconnectSyncServer')
 }
 
