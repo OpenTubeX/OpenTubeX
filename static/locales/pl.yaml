@@ -429,6 +429,8 @@ Settings:
     Thumbnail Size: Rozmiar miniatury
     Show Thumbnail Size Button in Header: Pokaż przycisk rozmiaru miniatury w nagłówku
     Hide Profile Selector in Header: Ukryj selektor profilu w nagłówku
+    UI Roundness: Zaokrąglenie elementów UI
+    Always Show Scrollbars: Zawsze pokazuj paski przewijania
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -1428,6 +1430,7 @@ Tooltips:
     IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
   Theme Settings:
     Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
+    Always Show Scrollbars: Utrzymuje paski przewijania widoczne przez cały czas. Po wyłączeniu, znikają one wkrótce po zatrzymaniu ruchu myszy i pojawiają się ponownie, gdy tylko ponownie nią poruszysz.
   Download Settings:
     yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
     yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
