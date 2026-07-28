@@ -34,6 +34,8 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        # Playwright needs the base branch history to identify tests changed by a PR.
+        fetch-depth: 0
         persist-credentials: false
 
     - name: Use Node.js 24.x
@@ -89,10 +91,15 @@ jobs:
     # attempt and automatically falls back to recorded fixtures on retry.
     - name: Run E2E tests
       run: |
+        test_args=()
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          test_args+=("--only-changed=origin/${GITHUB_BASE_REF}" "--pass-with-no-tests")
+        fi
+
         if [ "${{ steps.project.outputs.project }}" = "all" ]; then
-          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e
+          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e "${test_args[@]}"
         else
-          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }}
+          xvfb-run --auto-servernum --server-args='-screen 0 1920x1080x24' pnpm run test:e2e:${{ steps.project.outputs.project }} "${test_args[@]}"
         fi
       shell: bash
 
