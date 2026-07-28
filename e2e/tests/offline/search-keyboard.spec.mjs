@@ -22,6 +22,23 @@ test('Enter searches in place', async ({ page }) => {
   await expect(page).toHaveURL(/#\/search\/enter%20search/)
 })
 
+test('back navigation restores the previous search text', async ({ page }) => {
+  const searchInput = page.locator(sel.searchInput)
+
+  await searchInput.fill('first search')
+  await searchInput.press('Enter')
+  await expect(page).toHaveURL(/#\/search\/first%20search/)
+
+  await searchInput.fill('second search')
+  await searchInput.press('Enter')
+  await expect(page).toHaveURL(/#\/search\/second%20search/)
+
+  await page.locator(sel.backButton).click()
+
+  await expect(page).toHaveURL(/#\/search\/first%20search/)
+  await expect(searchInput).toHaveValue('first search')
+})
+
 test('Shift+Enter searches in a new window', async ({ app, page }) => {
   await page.locator(sel.searchInput).fill('shift enter search')
 
