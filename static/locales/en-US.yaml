@@ -386,6 +386,14 @@ Settings:
       System: System
       Force On: Force on
       Force Off: Force off
+    Toast Position:
+      Toast Position: Toast Position
+      Bottom Left: Bottom left
+      Bottom Center: Bottom center
+      Bottom Right: Bottom right
+      Top Left: Top left
+      Top Center: Top center
+      Top Right: Top right
     System Default: System Default
     Avoid translation:
       Avoid translation: Keep original text

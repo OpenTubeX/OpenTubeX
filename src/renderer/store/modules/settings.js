@@ -351,6 +351,7 @@ const state = {
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
   showThumbnailSizeButtonInHeader: true,
+  toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,
   syncServerUrl: 'https://sync.d3sox.me',
