@@ -81,20 +81,35 @@ function optimizeBodyScrollbarDrag(instance) {
     event.stopImmediatePropagation()
 
     const pointerId = event.pointerId
-    const startClientY = event.clientY
-    const startScrollY = window.scrollY
-    const scrollRange = instance.state().overflowAmount.y
-    const trackRange = track.clientHeight - handle.clientHeight
-    let clientY = startClientY
+    const handleBounds = handle.getBoundingClientRect()
+    const grabRatio = (event.clientY - handleBounds.top) / handleBounds.height
+    let clientY = event.clientY
     let frame = null
 
-    if (trackRange <= 0 || scrollRange <= 0) {
+    if (track.clientHeight <= handle.clientHeight || instance.state().overflowAmount.y <= 0) {
       return
     }
 
     const applyDrag = () => {
       frame = null
-      window.scrollTo(window.scrollX, startScrollY + (clientY - startClientY) / trackRange * scrollRange)
+      const scrollRange = instance.state().overflowAmount.y
+      const currentHandleBounds = handle.getBoundingClientRect()
+      const trackRange = track.clientHeight - handle.clientHeight
+      const handleOffset = clientY -
+        (currentHandleBounds.top + currentHandleBounds.height * grabRatio)
+
+      if (trackRange <= 0 || scrollRange <= 0) {
+        return
+      }
+
+      window.scrollTo(
+        window.scrollX,
+        window.scrollY + handleOffset / trackRange * scrollRange
+      )
+    }
+
+    const scheduleDrag = () => {
+      frame ??= requestAnimationFrame(applyDrag)
     }
 
     const onPointerMove = (moveEvent) => {
@@ -105,7 +120,13 @@ function optimizeBodyScrollbarDrag(instance) {
       moveEvent.preventDefault()
       moveEvent.stopPropagation()
       clientY = moveEvent.clientY
-      frame ??= requestAnimationFrame(applyDrag)
+      scheduleDrag()
+    }
+
+    const onUpdated = (_, { updateHints }) => {
+      if (updateHints.overflowAmountChanged || updateHints.overflowEdgeChanged) {
+        scheduleDrag()
+      }
     }
 
     const finish = (finishEvent) => {
@@ -117,6 +138,7 @@ function optimizeBodyScrollbarDrag(instance) {
       handle.removeEventListener('pointermove', onPointerMove)
       handle.removeEventListener('pointerup', finish)
       handle.removeEventListener('pointercancel', finish)
+      instance.off('updated', onUpdated)
 
       if (frame !== null) {
         cancelAnimationFrame(frame)
@@ -127,6 +149,7 @@ function optimizeBodyScrollbarDrag(instance) {
     handle.addEventListener('pointermove', onPointerMove)
     handle.addEventListener('pointerup', finish)
     handle.addEventListener('pointercancel', finish)
+    instance.on('updated', onUpdated)
     handle.setPointerCapture(pointerId)
   }
 
