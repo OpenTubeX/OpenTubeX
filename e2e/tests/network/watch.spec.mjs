@@ -262,6 +262,17 @@ test.describe('watch page', () => {
 
     await panel.getByRole('button', { name: 'Close Chapters' }).click()
     await expect(panel).toHaveClass(/chapters-panel-leave-active/)
+    const leavingScrollbar = await panel.evaluate((element) => {
+      const viewport = element.querySelector('.chaptersWrapper')
+      return viewport && {
+        initializing: viewport.hasAttribute('data-overlayscrollbars-initialize'),
+        nativeScrollbarWidth: getComputedStyle(viewport).scrollbarWidth
+      }
+    })
+    expect(leavingScrollbar).toEqual({
+      initializing: true,
+      nativeScrollbarWidth: 'none'
+    })
 
     const leavingLayout = await page.evaluate(() => {
       const layoutElement = document.querySelector('.videoLayout')
