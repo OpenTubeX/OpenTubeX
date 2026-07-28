@@ -11,13 +11,14 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
+import { useAutoRefreshClock } from '../composables/useAutoRefreshClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import {
@@ -36,8 +37,16 @@ const attemptedFetch = ref(false)
 const lastRemoteRefreshSuccessTimestamp = ref(null)
 
 let alreadyLoadedRemotely = false
-let nextAutoRefreshTicker = null
-const now = ref(Date.now())
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hasPendingAutoRefresh = computed(() => {
+  const interval = parseInt(store.getters.getSubscriptionLiveAutoRefreshInterval, 10)
+
+  return !!store.getters.getSubscriptionLiveNextAutoRefreshTimestamp &&
+    !Number.isNaN(interval) && interval > 0
+})
+
+const now = useAutoRefreshClock(hasPendingAutoRefresh)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -174,14 +183,7 @@ if (!subscriptionCacheReady.value) {
 }
 
 onMounted(() => {
-  nextAutoRefreshTicker = setInterval(() => {
-    now.value = Date.now()
-  }, 30000)
   loadVideosFromRemoteFirstPerWindowSometimes()
-})
-
-onBeforeUnmount(() => {
-  clearInterval(nextAutoRefreshTicker)
 })
 
 function loadVideosFromRemoteFirstPerWindowSometimes() {

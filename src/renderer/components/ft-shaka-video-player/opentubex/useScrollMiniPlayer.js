@@ -95,6 +95,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   /** @type {{ type: 'drag' | 'resize' | 'volume', corner?: string, startX: number, startY: number, startRect: import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect } | null} */
   let scrollMiniPointerSession = null
   let lastKnownInlinePlayerHeight = 0
+  /** @type {number | null} */
+  let scrollMiniScrollFrame = null
 
   function updateScrollMiniVideoAspectRatio() {
     const videoElement = video.value
@@ -537,14 +539,17 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   function updateScrollMiniPlayer() {
-    rememberInlinePlayerLayoutHeight()
-
+    // Check first: everything below reads layout, which forces a synchronous
+    // reflow. Measuring before knowing whether the mini player can run at all
+    // would do that on every scroll event even with the feature turned off.
     if (!canUseScrollMiniPlayer()) {
       if (scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       }
       return
     }
+
+    rememberInlinePlayerLayoutHeight()
 
     repairScrollMiniPlaceholderHeight()
 
@@ -567,7 +572,24 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
   function handleScrollMiniWindowScroll() {
     suppressScrollMiniPlayPausePointerReveal()
-    updateScrollMiniPlayer()
+
+    // Scroll fires far more often than the screen refreshes, so coalesce the
+    // layout-reading update into the next frame instead of running it per event.
+    if (scrollMiniScrollFrame !== null) {
+      return
+    }
+
+    scrollMiniScrollFrame = requestAnimationFrame(() => {
+      scrollMiniScrollFrame = null
+      updateScrollMiniPlayer()
+    })
+  }
+
+  function cancelPendingScrollMiniScrollFrame() {
+    if (scrollMiniScrollFrame !== null) {
+      cancelAnimationFrame(scrollMiniScrollFrame)
+      scrollMiniScrollFrame = null
+    }
   }
 
   /**
@@ -799,6 +821,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     clearScrollMiniVolumeHideTimeout()
 
     cancelScrollMiniPlayerBounce()
+    cancelPendingScrollMiniScrollFrame()
 
     endScrollMiniPointerSession()
     window.removeEventListener('pointerup', handleScrollMiniVolumePointerUpWindow)

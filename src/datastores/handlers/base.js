@@ -2,6 +2,8 @@ import * as db from '../index'
 import { PlaylistVideoAddResult } from '../../constants'
 import { hasReachedWatchedThreshold, migrateLegacyHistoryRecord } from '../../history'
 
+const HISTORY_WATCHED_STATUS_MIGRATION_ID = 'historyWatchedStatusMigrated'
+
 class Settings {
   static async find() {
     const currentLocale = await db.settings.findOneAsync({ _id: 'currentLocale' })
@@ -145,6 +147,22 @@ class History {
   }
 
   static async _migrateWatchedStatus() {
+    // `isWatched` isn't indexed, so the lookup below is a full collection scan
+    // that history loading blocks on. Once every record has been migrated the
+    // answer can never change, so record that and skip the scan on later runs.
+    //
+    // Skipping it later is safe even though `updateWatchProgress` can upsert a
+    // record without the field: such a record has no `lengthSeconds`, so the
+    // migration would only ever have derived `isWatched: false` for it, and
+    // `isHistoryEntryWatched` falls back to the same threshold when the field
+    // is absent. Every path that writes a full record (`upsert`, `overwrite`,
+    // `applySyncChanges`) migrates it inline, so a legacy-shaped record can no
+    // longer appear after this point either.
+    const migrationMarker = await db.settings.findOneAsync({ _id: HISTORY_WATCHED_STATUS_MIGRATION_ID })
+    if (migrationMarker?.value === true) {
+      return
+    }
+
     const records = await db.history.findAsync({ isWatched: { $exists: false } })
     const batchSize = 250
 
@@ -173,6 +191,12 @@ class History {
     if (records.length > 0) {
       await db.history.compactDatafileAsync()
     }
+
+    await db.settings.updateAsync(
+      { _id: HISTORY_WATCHED_STATUS_MIGRATION_ID },
+      { _id: HISTORY_WATCHED_STATUS_MIGRATION_ID, value: true },
+      { upsert: true }
+    )
   }
 
   static updateWatchProgress(videoId, watchProgress) {

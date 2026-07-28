@@ -4,7 +4,7 @@
     tag="div"
     name="feed"
     :appear="appear"
-    :move-class="suppressMoveTransition ? 'feed-move-suppressed' : undefined"
+    :move-class="moveClass"
     :class="{
       autoGrid: true,
       grid: grid,
@@ -36,8 +36,18 @@ const props = defineProps({
   thumbnailSize: {
     type: Number,
     default: DEFAULT_THUMBNAIL_SIZE
+  },
+  itemCount: {
+    type: Number,
+    default: 0
   }
 })
+
+// Above this many items the move transition costs more than it conveys. Vue's
+// FLIP measures and then writes a transform per child in one loop, so every
+// item forces its own layout pass; on a feed of hundreds of cards that stalls
+// the very interaction (pagination, filtering) it is meant to smooth over.
+const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
 const gridWidth = ref(0)
@@ -50,6 +60,24 @@ const gridWidth = ref(0)
 // no transition, so the TransitionGroup skips the move handling entirely.
 const suppressMoveTransition = ref(false)
 let suppressResetTimeout = null
+
+const prefersReducedMotion = ref(false)
+/** @type {MediaQueryList | null} */
+let reducedMotionQuery = null
+
+function handleReducedMotionChange(event) {
+  prefersReducedMotion.value = event.matches
+}
+
+// 'feed-move-suppressed' has no transition, so the TransitionGroup bails out of
+// the move handling instead of measuring and translating every child.
+const moveClass = computed(() => {
+  const suppressed = suppressMoveTransition.value ||
+    prefersReducedMotion.value ||
+    props.itemCount > MOVE_TRANSITION_MAX_ITEMS
+
+  return suppressed ? 'feed-move-suppressed' : undefined
+})
 
 const gridStyle = computed(() => {
   return getThumbnailSizeStyles(props.thumbnailSize, gridWidth.value)
@@ -70,6 +98,10 @@ let observedScrollbarWidth = 0
 let observedViewportWidth = null
 
 onMounted(() => {
+  reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  prefersReducedMotion.value = reducedMotionQuery.matches
+  reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
+
   resizeObserver = new ResizeObserver(([entry]) => {
     const scrollbarCompensated = document.body.style.overflow === 'hidden' &&
       document.body.style.paddingInlineEnd !== ''
@@ -100,6 +132,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect()
+  reducedMotionQuery?.removeEventListener('change', handleReducedMotionChange)
   clearTimeout(suppressResetTimeout)
 })
 </script>

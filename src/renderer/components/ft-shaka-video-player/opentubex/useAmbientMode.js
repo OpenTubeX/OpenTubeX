@@ -22,6 +22,8 @@ export function useAmbientMode({ enabled, video }) {
 
   /** @type {number|null} */
   let frameInterval = null
+  /** @type {HTMLVideoElement | null} */
+  let playbackListenersAttached = null
   let lastVideoTime = -1
   let blendTicksRemaining = 0
   let hasAmbientFrame = false
@@ -31,11 +33,20 @@ export function useAmbientMode({ enabled, video }) {
     const canvas = ambientCanvas.value
     const videoElement = video.value
 
+    // The element only shows up once the player is ready, so keep trying until
+    // there is something to listen to.
+    attachPlaybackListeners()
+
     const videoTimeChanged = videoElement?.currentTime !== lastVideoTime
 
     if (!enabled.value || document.hidden || !canvas || !videoElement ||
       videoElement.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
       (!videoTimeChanged && blendTicksRemaining === 0)) {
+      // Nothing left to draw and no new frames coming: 'play' restarts the timer.
+      if (playbackListenersAttached && videoElement?.paused && blendTicksRemaining === 0) {
+        pauseAmbientTicking()
+      }
+
       return
     }
 
@@ -83,14 +94,49 @@ export function useAmbientMode({ enabled, video }) {
     blendTicksRemaining = 0
     hasAmbientFrame = false
     drawAmbientFrame()
-    frameInterval = window.setInterval(drawAmbientFrame, AMBIENT_FRAME_INTERVAL_MS)
+    resumeAmbientTicking()
   }
 
   function stopAmbientFrames() {
+    pauseAmbientTicking()
+    detachPlaybackListeners()
+  }
+
+  function resumeAmbientTicking() {
+    if (frameInterval !== null || !enabled.value) {
+      return
+    }
+
+    frameInterval = window.setInterval(drawAmbientFrame, AMBIENT_FRAME_INTERVAL_MS)
+    attachPlaybackListeners()
+  }
+
+  function pauseAmbientTicking() {
     if (frameInterval !== null) {
       window.clearInterval(frameInterval)
       frameInterval = null
     }
+  }
+
+  // A paused video produces no new frames, so the timer stops itself once the
+  // blend has settled (see drawAmbientFrame) and playing again restarts it.
+  function attachPlaybackListeners() {
+    const videoElement = video.value
+    if (!videoElement || playbackListenersAttached) {
+      return
+    }
+
+    videoElement.addEventListener('play', resumeAmbientTicking)
+    playbackListenersAttached = videoElement
+  }
+
+  function detachPlaybackListeners() {
+    if (!playbackListenersAttached) {
+      return
+    }
+
+    playbackListenersAttached.removeEventListener('play', resumeAmbientTicking)
+    playbackListenersAttached = null
   }
 
   watch(enabled, (isEnabled) => {

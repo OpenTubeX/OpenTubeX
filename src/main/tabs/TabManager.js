@@ -568,6 +568,8 @@ export class TabManager {
     /** @type {Promise<void>} */
     this._previewCaptureLock = Promise.resolve()
     this._previewCapturePaused = false
+    /** Tabs whose navigation history the renderer has already been sent. */
+    this._historyAnnouncedTabIds = new Set()
     this.bridge = new TabRendererBridge(browserWindow)
     this._initialPresentationResolved = false
     this._initialPresentationPromise = new Promise(resolve => {
@@ -2058,28 +2060,41 @@ export class TabManager {
   /**
    * @returns {object}
    */
-  getState() {
-    const tabs = Array.from(this.tabs.values()).map(tab => ({
-      id: tab.id,
+  /**
+   * @param {{ historyForTabIds?: Set<string> | null }} [options]
+   *   Which tabs the navigation history should be included for. Defaults to all
+   *   of them; pass a set to leave it out for the rest.
+   */
+  getState({ historyForTabIds = null } = {}) {
+    const tabs = Array.from(this.tabs.values()).map(tab => {
       // The renderer only consumes this when it first learns about a tab
-      // (e.g. session restore); afterwards it owns the live history.
-      history: tab.navigationHistory,
-      historyIndex: tab.navigationHistory != null ? tab.navigationHistoryIndex : undefined,
-      url: tab.url,
-      route: cloneRoute(tab.route),
-      title: tab.title,
-      isActive: tab.id === this.activeTabId,
-      isUnloaded: tab.loadState === 'unloaded',
-      isLoading: this._getTabLoadingState(tab),
-      isPlaying: tab.isPlaying || false,
-      isPinned: tab.isPinned || false,
-      color: TabManager.normalizeTabColor(tab.color),
-      loadState: tab.loadState,
-      preloadInBackground: tab.preloadInBackground,
-      pendingActivation: tab.pendingActivation,
-      mountRevision: tab.mountRevision,
-      refreshKey: tab.refreshKey
-    }))
+      // (e.g. session restore); afterwards it owns the live history. Sending it
+      // on every update would serialize each tab's whole history over IPC just
+      // for the renderer to discard it.
+      const includeHistory = historyForTabIds === null || historyForTabIds.has(tab.id)
+
+      return {
+        id: tab.id,
+        history: includeHistory ? tab.navigationHistory : undefined,
+        historyIndex: includeHistory && tab.navigationHistory != null
+          ? tab.navigationHistoryIndex
+          : undefined,
+        url: tab.url,
+        route: cloneRoute(tab.route),
+        title: tab.title,
+        isActive: tab.id === this.activeTabId,
+        isUnloaded: tab.loadState === 'unloaded',
+        isLoading: this._getTabLoadingState(tab),
+        isPlaying: tab.isPlaying || false,
+        isPinned: tab.isPinned || false,
+        color: TabManager.normalizeTabColor(tab.color),
+        loadState: tab.loadState,
+        preloadInBackground: tab.preloadInBackground,
+        pendingActivation: tab.pendingActivation,
+        mountRevision: tab.mountRevision,
+        refreshKey: tab.refreshKey
+      }
+    })
 
     return {
       tabs,
@@ -2098,7 +2113,32 @@ export class TabManager {
   }
 
   _broadcastStateUpdate() {
-    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState())
+    // Queued snapshots get coalesced down to the newest one, so while the
+    // renderer is still bootstrapping every snapshot has to carry the history
+    // in full — whichever one survives is the one the tabs get created from.
+    if (!this.bridge.ready) {
+      this._historyAnnouncedTabIds.clear()
+      this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState())
+      return
+    }
+
+    const historyForTabIds = new Set()
+    for (const tabId of this.tabs.keys()) {
+      if (!this._historyAnnouncedTabIds.has(tabId)) {
+        historyForTabIds.add(tabId)
+      }
+    }
+
+    this.bridge.send(IpcChannels.TABS_STATE_UPDATED, this.getState({ historyForTabIds }))
+
+    for (const tabId of historyForTabIds) {
+      this._historyAnnouncedTabIds.add(tabId)
+    }
+    for (const tabId of this._historyAnnouncedTabIds) {
+      if (!this.tabs.has(tabId)) {
+        this._historyAnnouncedTabIds.delete(tabId)
+      }
+    }
   }
 
   async _saveSession() {
