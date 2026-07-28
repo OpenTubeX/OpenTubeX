@@ -14,6 +14,10 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'raw.githubusercontent.com',
   'user-images.githubusercontent.com',
 ])
+const ALLOWED_IMAGE_DOWNLOAD_HOSTS = new Set([
+  ...ALLOWED_IMAGE_HOSTS,
+  'github-production-user-asset-6210df.s3.amazonaws.com',
+])
 
 function extractMarkedSection(body, marker) {
   const startMarker = `<!-- ${marker}:start -->`
@@ -69,7 +73,7 @@ export function parseReleaseImage(section) {
   }
 }
 
-function validateImageUrl(value) {
+function validateImageUrl(value, allowedHosts = ALLOWED_IMAGE_HOSTS) {
   let url
 
   try {
@@ -78,9 +82,13 @@ function validateImageUrl(value) {
     throw new Error('The release note image has an invalid URL.')
   }
 
-  if (url.protocol !== 'https:' || !ALLOWED_IMAGE_HOSTS.has(url.hostname)) { throw new Error('Release note images must be hosted by GitHub.') }
+  if (url.protocol !== 'https:' || !allowedHosts.has(url.hostname)) { throw new Error('Release note images must be hosted by GitHub.') }
 
   return url
+}
+
+export function validateDownloadedImageUrl(value) {
+  return validateImageUrl(value, ALLOWED_IMAGE_DOWNLOAD_HOSTS)
 }
 
 export function parseReleaseNote(body) {
@@ -217,9 +225,7 @@ async function downloadImage(url) {
 
   if (!response.ok) { throw new Error(`Could not download release note image (${response.status}).`) }
 
-  const finalUrl = validateImageUrl(response.url)
-
-  if (!ALLOWED_IMAGE_HOSTS.has(finalUrl.hostname)) { throw new Error('The release note image redirected outside GitHub.') }
+  validateDownloadedImageUrl(response.url)
 
   return Buffer.from(await response.arrayBuffer())
 }

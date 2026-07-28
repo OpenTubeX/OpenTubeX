@@ -6,6 +6,7 @@ import {
   parseReleaseNote,
   probeImageSize,
   renderReleaseNotes,
+  validateDownloadedImageUrl,
   validatePullRequestEvent,
 } from '../../_scripts/releaseNotes.mjs'
 
@@ -70,6 +71,17 @@ ${NOTE_MARKERS}
     alt: 'A & B',
     url: 'https://github.com/user-attachments/assets/example?name=a&amp;b',
   })
+})
+
+test('GitHub user attachment storage redirects are accepted narrowly', () => {
+  assert.equal(
+    validateDownloadedImageUrl('https://github-production-user-asset-6210df.s3.amazonaws.com/image.png').hostname,
+    'github-production-user-asset-6210df.s3.amazonaws.com',
+  )
+  assert.throws(
+    () => validateDownloadedImageUrl('https://untrusted-bucket.s3.amazonaws.com/image.png'),
+    /must be hosted by GitHub/,
+  )
 })
 
 test('image dimensions are read from PNG data', () => {
