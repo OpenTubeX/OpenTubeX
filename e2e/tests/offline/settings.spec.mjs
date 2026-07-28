@@ -133,7 +133,9 @@ test.describe('settings', () => {
 
     async function dragToast (toast, distance) {
       const bounds = await toast.boundingBox()
-      const x = bounds.x + bounds.width / 2
+      const x = distance < 0
+        ? bounds.x + bounds.width - 5
+        : bounds.x + 5
       const y = bounds.y + bounds.height / 2
 
       await page.mouse.move(x, y)
