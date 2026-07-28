@@ -245,3 +245,25 @@ test('seeking around a stream that never plays does not refill the budget', asyn
   expect(result.reloads).toHaveLength(3)
   expect(result.finalFormat).toBe('legacy')
 })
+
+test('a video that keeps breaking after settling still stops reloading eventually', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  // Every failure is followed by enough real playback to refill the per-incident
+  // budget, so without a hard per-video ceiling this reloads for ever. That is
+  // what turned an unrecoverable stream into an unwatchable reload loop rather
+  // than letting it settle on a format that plays.
+  const script = []
+  for (let i = 0; i < 12; i++) {
+    script.push({ error: true }, { playFor: 60 })
+  }
+
+  const result = await driveWatchView(page, script)
+
+  expect(result.reloads.length).toBeLessThan(12)
+  expect(result.finalFormat).toBe('legacy')
+})

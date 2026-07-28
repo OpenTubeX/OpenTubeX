@@ -19,6 +19,7 @@ import {
 import shaka from 'shaka-player'
 
 import { deepCopy } from '../utils'
+import { createBackoffLoopTracker } from './sabrBackoffLoop'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -56,8 +57,6 @@ const LIVE_POLICY_RETRY_DELAY_MS = 500
  * @property {SabrStreamState} sabrStreamState
  * @property {?TimeoutController} timeoutController
  * @property {?EventEmitterLike} eventEmitter
- * @property {number} cumulativeBackOffTimeMs
- * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetryDueToNextRequestPolicy
  */
 /**
@@ -71,6 +70,7 @@ const LIVE_POLICY_RETRY_DELAY_MS = 500
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
  * @property {number} lastRequestedPlayerTimeMs
+ * @property {ReturnType<typeof createBackoffLoopTracker>} backoffLoopTracker
  * @property {(reloadPlaybackContext: ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>} reload
  * @property {Uint8Array} videoPlaybackUstreamerConfig
  */
@@ -341,16 +341,13 @@ async function doRequest(
       // i.e. backoff time parts received will not reset timeout - counted as video loading issue
       currentState.timeoutController?.resetTimeoutOnce()
 
-      currentState.cumulativeBackOffTimeMs += currentState.sabrStreamState.nextRequestPolicy.backoffTimeMs
-      currentState.cumulativeBackOffRequested += 1
-      const timeoutMs = operationInputs.request.retryParameters.timeout
-      // Detect infinite backoff loop by no. of times requested and cumulative time approaching timeout
-      if (
-        (!operationInputs.isLive && currentState.cumulativeBackOffRequested >= 3) ||
-        (timeoutMs > 0 && timeoutMs <= (currentState.cumulativeBackOffTimeMs + currentBackoffTimeMs))
-      ) {
-        shouldReloadDueToBackoffLoop = true
-      }
+      // Detect an infinite backoff loop by how many were requested without a
+      // segment arriving, and by the cumulative time approaching the timeout.
+      shouldReloadDueToBackoffLoop = currentState.sabrStreamState.backoffLoopTracker.record({
+        backoffTimeMs: currentBackoffTimeMs,
+        isLive: operationInputs.isLive,
+        timeoutMs: operationInputs.request.retryParameters.timeout
+      })
     }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
       // Fire fake reload event due to detecting retry loop
@@ -587,6 +584,9 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
+    // A segment arrived, so whatever the server was backing off for has cleared.
+    currentState.sabrStreamState.backoffLoopTracker.reset()
+
     const data = /** @__NOINLINE__ */ concatenateChunks(responseDataChunks)
 
     if (operationInputs.isInit) {
@@ -745,6 +745,7 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     playerReloadRequested: false,
     requestNumber: 0,
     lastRequestedPlayerTimeMs: 0,
+    backoffLoopTracker: createBackoffLoopTracker(),
     reload: sabrData.reload,
     videoPlaybackUstreamerConfig: base64ToU8(sabrData.ustreamerConfig),
   }
@@ -950,8 +951,6 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       sabrStreamState,
       timeoutController,
       eventEmitter,
-      cumulativeBackOffTimeMs: 0,
-      cumulativeBackOffRequested: 0,
       cumulativeRetryDueToNextRequestPolicy: 0,
     }
 
