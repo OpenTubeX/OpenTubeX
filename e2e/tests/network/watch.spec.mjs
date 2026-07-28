@@ -86,7 +86,7 @@ test.describe('background watch tab', () => {
     const backgroundContent = page.locator('.tabContent[aria-hidden="true"]').nth(0)
     await expect(backgroundContent.locator('.videoTitle')).toContainText('Me at the zoo', { timeout: 30_000 })
     await expect(backgroundContent.locator('.commentsTitle')).toHaveCount(1, { timeout: 30_000 })
-    expect(await backgroundContent.locator('.comment').count()).toBeGreaterThan(0)
+    await expect(backgroundContent.locator('.comment')).not.toHaveCount(0, { timeout: 30_000 })
 
     await backgroundTab.click()
     await expect(page.locator('.commentsTitle')).toBeVisible()
