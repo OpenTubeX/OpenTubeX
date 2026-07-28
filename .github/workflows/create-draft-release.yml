@@ -34,24 +34,29 @@ jobs:
         persist-credentials: false
         ref: ${{ inputs.target }}
 
+    - name: Resolve release target
+      id: target
+      run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
     - name: Generate release notes
       env:
         GH_TOKEN: ${{ github.token }}
         PREVIOUS_TAG: ${{ inputs.previousTag }}
-        TARGET: ${{ inputs.target }}
+        TARGET_BRANCH: ${{ inputs.target }}
+        TARGET_SHA: ${{ steps.target.outputs.sha }}
       run: node _scripts/releaseNotes.mjs generate release-notes.md
 
     - name: Create draft release
       env:
         GH_TOKEN: ${{ github.token }}
         TAG: ${{ inputs.tag }}
-        TARGET: ${{ inputs.target }}
+        TARGET_SHA: ${{ steps.target.outputs.sha }}
       run: |
         set -euo pipefail
 
         release_url="$(gh release create "$TAG" \
           --draft \
-          --target "$TARGET" \
+          --target "$TARGET_SHA" \
           --title "OpenTubeX ${TAG#v}" \
           --notes-file release-notes.md)"
         release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --jq .id)"

@@ -8,6 +8,7 @@ const NOTEWORTHY_LABEL = 'noteworthy-for-release'
 const RELEASE_NOTE_MARKER = 'release-note'
 const RELEASE_IMAGE_MARKER = 'release-note-image'
 const MAX_IMAGE_HEIGHT = 300
+const IMAGE_DOWNLOAD_TIMEOUT_MS = 30_000
 const ALLOWED_IMAGE_HOSTS = new Set([
   'github.com',
   'private-user-images.githubusercontent.com',
@@ -43,7 +44,7 @@ function decodeHtml(value) {
 }
 
 function extractHtmlAttribute(tag, attribute) {
-  const match = tag.match(new RegExp(`\\b${attribute}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'))
+  const match = tag.match(new RegExp(`(?:^|\\s)${attribute}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'))
   return match?.[1] ?? match?.[2] ?? null
 }
 
@@ -221,6 +222,7 @@ async function downloadImage(url) {
       'User-Agent': 'OpenTubeX-release-notes',
     },
     redirect: 'follow',
+    signal: AbortSignal.timeout(IMAGE_DOWNLOAD_TIMEOUT_MS),
   })
 
   if (!response.ok) { throw new Error(`Could not download release note image (${response.status}).`) }
@@ -342,12 +344,15 @@ async function validateEvent(eventPath) {
 async function generate(outputPath) {
   const repository = process.env.GITHUB_REPOSITORY
   const previousTag = process.env.PREVIOUS_TAG
-  const target = process.env.TARGET
+  const targetBranch = process.env.TARGET_BRANCH
+  const targetSha = process.env.TARGET_SHA
 
-  if (!repository || !previousTag || !target) { throw new Error('GITHUB_REPOSITORY, PREVIOUS_TAG, and TARGET are required.') }
+  if (!repository || !previousTag || !targetBranch || !targetSha) {
+    throw new Error('GITHUB_REPOSITORY, PREVIOUS_TAG, TARGET_BRANCH, and TARGET_SHA are required.')
+  }
 
-  const pullRequests = listNoteworthyPullRequests(repository, target)
-  const selectedPullRequests = selectPullRequests(pullRequests, previousTag, target)
+  const pullRequests = listNoteworthyPullRequests(repository, targetBranch)
+  const selectedPullRequests = selectPullRequests(pullRequests, previousTag, targetSha)
   const releaseNotes = await renderReleaseNotes(selectedPullRequests)
 
   fs.writeFileSync(outputPath, releaseNotes)
