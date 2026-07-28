@@ -25,8 +25,15 @@ export function createBackoffLoopTracker() {
       cumulativeTimeMs += backoffTimeMs
       requested += 1
 
+      // Escalate one wait early rather than once the budget is already blown:
+      // the server has been handing out backoffs of roughly this length, so if
+      // another one would pass the request timeout there is no point serving it
+      // and then giving up. `cumulativeTimeMs` already covers the wait we just
+      // did, and this adds the one we expect to be told to do next.
+      const projectedTimeMs = cumulativeTimeMs + backoffTimeMs
+
       return (!isLive && requested >= MAX_BACKOFFS_WITHOUT_PROGRESS) ||
-        (timeoutMs > 0 && timeoutMs <= cumulativeTimeMs + backoffTimeMs)
+        (timeoutMs > 0 && timeoutMs <= projectedTimeMs)
     },
 
     /** A segment arrived, so the stream is progressing again. */

@@ -9,6 +9,10 @@ import { fixtureKey } from '../../helpers/innertube.mjs'
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
 
+// Mirrors MAX_SABR_ERROR_RECOVERIES_PER_VIDEO in src/renderer/views/Watch/Watch.js,
+// which is a module-level constant in a Vue component and so cannot be imported here.
+const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
+
 test.use({
   seed: {
     history: [{
@@ -264,6 +268,8 @@ test('a video that keeps breaking after settling still stops reloading eventuall
 
   const result = await driveWatchView(page, script)
 
-  expect(result.reloads.length).toBeLessThan(12)
+  // Exactly the documented per-video ceiling: every failure up to it recovers,
+  // and the ones after it fall back instead of reloading again.
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES_PER_VIDEO)
   expect(result.finalFormat).toBe('legacy')
 })
