@@ -85,6 +85,7 @@
       </template>
       <bdo
         v-safer-html.lenient="updateChangelog"
+        v-overlay-scrollbars
         class="changeLogText"
         dir="ltr"
         lang="en"
@@ -201,6 +202,7 @@
     >
       <div
         ref="tabSwitcherRef"
+        v-overlay-scrollbars
         class="tabSwitcher"
         :class="{ pointerActive: tabSwitcherPointerActive }"
         role="listbox"

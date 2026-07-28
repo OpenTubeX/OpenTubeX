@@ -52,6 +52,7 @@
         class="profileDropdown"
       >
         <ul
+          v-overlay-scrollbars
           class="profileList"
         >
           <li

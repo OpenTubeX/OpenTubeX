@@ -6,6 +6,9 @@ test('context-dependent shortcuts are shown as non-editable', async ({ page }) =
     store.commit('setIsKeyboardShortcutPromptShown', true)
   })
   await expect(page.getByRole('heading', { name: 'Keyboard Shortcuts' })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Keyboard Shortcuts' })).toHaveAttribute(
+    'data-overlayscrollbars-viewport'
+  )
 
   const reservedPaths = [
     'APP.GENERAL.FOCUS_SEARCH_ALT_SLASH',

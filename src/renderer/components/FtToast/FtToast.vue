@@ -17,6 +17,7 @@
         :class="toast.dismissDirection && `dismiss-${toast.dismissDirection}`"
       >
         <div
+          v-overlay-scrollbars
           class="toast"
           :class="{ hasImage: toast.image, dragging: toast.dragging }"
           :style="dragStyle(toast)"
