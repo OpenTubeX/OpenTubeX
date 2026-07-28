@@ -98,6 +98,18 @@ test.describe('watch history', () => {
     await expect(videos.nth(1)).toContainText('Second test video')
   })
 
+  test('does not offer watched actions for an active live history entry', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const activeLiveStream = page.locator('.ft-list-video').filter({ hasText: 'Active live stream' })
+    await activeLiveStream.hover()
+    await activeLiveStream.locator('.optionsButton').click()
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
+  })
+
   test('marks every history entry as watched', async ({ app, page }) => {
     await goTo(page, 'history')
 

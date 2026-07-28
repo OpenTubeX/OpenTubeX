@@ -40,4 +40,9 @@ test('active live content cannot be marked as watched', () => {
   assert.equal(isHistoryEntryWatched({ isLive: true, isWatched: true }), false)
   assert.equal(canMarkHistoryEntryAsWatched({ isLive: false }), true)
   assert.equal(isHistoryEntryWatched({ isLive: false, isWatched: true }), true)
+  assert.equal(isHistoryEntryWatched({
+    isLive: false,
+    watchProgress: 9 * 60,
+    lengthSeconds: 10 * 60,
+  }), true)
 })

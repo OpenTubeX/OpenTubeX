@@ -1299,7 +1299,7 @@ function parseVideoData() {
   }
 
   description.value = props.data.description
-  isLive.value = props.data.liveNow || props.data.lengthSeconds === undefined
+  isLive.value = props.data.isLive || props.data.liveNow || props.data.lengthSeconds === undefined
   isPremiere.value = props.data.isPremiere === true ||
     (isLive.value && props.data.premiereTimestamp > 0)
   isUpcoming.value = props.data.isUpcoming || props.data.premiere

@@ -2062,7 +2062,12 @@ export default defineComponent({
     },
 
     markAsWatchedIfFinished(currentSeconds, isFinished = false) {
-      if (!this.rememberHistory || this.isUpcoming || this.isLive || this.historyEntry?.isWatched === true) {
+      if (
+        !this.rememberHistory ||
+        this.isUpcoming ||
+        this.isLive ||
+        isHistoryEntryWatched(this.historyEntry)
+      ) {
         return
       }
 

@@ -129,6 +129,7 @@ test.describe('subscriptions feed from cache', () => {
     await runningPremiere.locator('.optionsButton').click()
 
     await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 
