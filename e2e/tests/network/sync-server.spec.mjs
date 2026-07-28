@@ -23,6 +23,7 @@ async function getSyncCapabilities() {
 }
 
 test.describe('OpenTubeX sync server', () => {
+  test.describe.configure({ mode: 'serial' })
   test.skip(!syncServerUrl, 'Set OPENTUBEX_SYNC_SERVER_URL to run the local sync-server test')
 
   test.use({
