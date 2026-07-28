@@ -1522,3 +1522,10 @@ if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumb
 </script>
 
 <style scoped src="./FtListVideo.scss" lang="scss" />
+
+<style>
+body:has(.collaboratorChannelButton:disabled),
+body:has(.collaboratorChannelButton:disabled) * {
+  cursor: wait !important;
+}
+</style>

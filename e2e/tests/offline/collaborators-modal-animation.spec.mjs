@@ -146,3 +146,57 @@ test.describe('at 150% display scale', () => {
   test.use({ launchArgs: ['--force-device-scale-factor=1.5'] })
   defineCase()
 })
+
+test.describe('while collaborators are loading', () => {
+  test.use({
+    seed: {
+      settings: {
+        fetchSubscriptionsAutomatically: false
+      },
+      profiles: [
+        {
+          _id: 'allChannels',
+          name: 'All Channels',
+          bgColor: '#000000',
+          textColor: '#FFFFFF',
+          subscriptions: [
+            { id: CHANNEL_A, name: 'Channel A', thumbnail: '' }
+          ]
+        }
+      ],
+      subscriptionCache: [
+        {
+          _id: CHANNEL_A,
+          videos: [
+            feedVideo('bbbbbbbbbb1', 'Uncached collab video', now - HOUR, {
+              author: 'Channel A and others',
+              hasCollaborators: true
+            })
+          ],
+          videosTimestamp: new Date(now - 2 * HOUR).toISOString()
+        }
+      ]
+    }
+  })
+
+  test('shows the loading cursor across the app', async ({ page }) => {
+    let releaseRequests
+    const requestsReleased = new Promise(resolve => {
+      releaseRequests = resolve
+    })
+    await page.route(/^https?:\/\//, async route => {
+      await requestsReleased
+      await route.abort()
+    })
+
+    await goTo(page, 'subscriptions')
+    await page.click('.collaboratorChannelButton')
+
+    await expect(page.locator('.collaboratorChannelButton')).toBeDisabled()
+    await page.locator('.topNav').hover()
+    await expect(page.locator('.topNav')).toHaveCSS('cursor', 'wait')
+
+    releaseRequests()
+    await expect(page.locator('.collaboratorChannelButton')).toBeEnabled()
+  })
+})
