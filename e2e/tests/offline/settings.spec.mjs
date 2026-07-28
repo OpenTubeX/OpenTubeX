@@ -127,6 +127,7 @@ test.describe('settings', () => {
       const toast = holder.locator('.toast', { hasText: message })
       await expect(toast).toBeVisible()
       await expect(toast).toHaveCSS('transform', 'none')
+      await expect(toast.locator('..')).toHaveCSS('transform', 'none')
       return toast
     }
 
