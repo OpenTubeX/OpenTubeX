@@ -1079,6 +1079,13 @@ const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 const shouldShowCollaboratorsButton = computed(() => !!props.data.hasCollaborators && channelName.value !== null)
 
 function handleWatchPageLinkClick(event) {
+  // `auxclick` also fires for the right mouse button after `contextmenu`.
+  // Treat only middle clicks as opening the video so a new-feed entry is not
+  // marked as seen (and removed) while its context menu is open.
+  if (event?.type === 'auxclick' && event.button !== 1) {
+    return
+  }
+
   markSubscriptionVideoAsSeen()
 
   if (externalPlayerIsDefaultViewingMode.value) {

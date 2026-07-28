@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { reconcileFetchedSubscriptionEntries } from '../../src/renderer/helpers/subscription-entries.js'
+import {
+  ensureSubscriptionFeedEntryState,
+  reconcileFetchedSubscriptionEntries
+} from '../../src/renderer/helpers/subscription-entries.js'
 
 const HOUR = 3_600_000
 const now = Date.now()
@@ -104,6 +107,26 @@ test('keeps entries that were already marked as new', () => {
   const reconciled = reconcileFetchedSubscriptionEntries(entries, previousEntries, 'videoId', now - HOUR)
 
   assert.equal(reconciled[0].isNewInSubscriptionFeed, true)
+})
+
+test('preserves New-feed state when a channel page updates raw cached entries', () => {
+  const previousEntries = [
+    video('new', now - HOUR, { isNewInSubscriptionFeed: true }),
+    video('seen', now - 2 * HOUR, { isNewInSubscriptionFeed: false })
+  ]
+  const channelPageEntries = [
+    video('new', now - HOUR),
+    video('seen', now - 2 * HOUR)
+  ]
+
+  const reconciled = ensureSubscriptionFeedEntryState(
+    channelPageEntries,
+    previousEntries,
+    'videoId',
+    now - 3 * HOUR
+  )
+
+  assert.deepEqual(reconciled.map(entry => entry.isNewInSubscriptionFeed), [true, false])
 })
 
 test('does not mark watched videos as new', () => {

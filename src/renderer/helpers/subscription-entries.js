@@ -92,3 +92,33 @@ export function reconcileFetchedSubscriptionEntries(
     return reconciledEntry
   })
 }
+
+/**
+ * Channel pages return raw entries without New-feed state, while subscription
+ * refreshes reconcile that state before updating the cache. Reconcile only the
+ * raw entries so opening a channel cannot clear previously-new items.
+ * @param {object[]} entries
+ * @param {object[] | null | undefined} previousEntries
+ * @param {'videoId' | 'postId'} idKey
+ * @param {Date | number | string | null | undefined} previousFetchTimestamp
+ * @param {Record<string, object>} [historyById]
+ */
+export function ensureSubscriptionFeedEntryState(
+  entries,
+  previousEntries,
+  idKey,
+  previousFetchTimestamp,
+  historyById = {}
+) {
+  if (entries.every(entry => typeof entry.isNewInSubscriptionFeed === 'boolean')) {
+    return entries
+  }
+
+  return reconcileFetchedSubscriptionEntries(
+    entries,
+    previousEntries,
+    idKey,
+    previousFetchTimestamp,
+    historyById
+  )
+}
