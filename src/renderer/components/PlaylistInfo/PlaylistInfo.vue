@@ -101,6 +101,7 @@
     />
     <p
       v-else
+      v-overlay-scrollbars
       class="playlistDescription"
       dir="auto"
     >

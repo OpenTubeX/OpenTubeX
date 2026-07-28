@@ -18,7 +18,14 @@ test.use({
           { id: 'UCaaaaaaaaaaaaaaaaaaaaaa', name: 'Alpha Channel', thumbnail: '' },
           { id: 'UCbbbbbbbbbbbbbbbbbbbbbb', name: 'Beta Channel', thumbnail: '' }
         ]
-      }
+      },
+      ...Array.from({ length: 6 }, (_, index) => ({
+        _id: `profile-${index}`,
+        name: `Profile ${index}`,
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: []
+      }))
     ]
   }
 })
@@ -34,6 +41,17 @@ test.describe('subscribed channels', () => {
     await page.getByPlaceholder('Search Channels').fill('Beta')
     await expect(page.locator('.channel', { hasText: 'Beta Channel' })).toBeVisible()
     await expect(page.locator('.channel', { hasText: 'Alpha Channel' })).toBeHidden()
+  })
+
+  test('profile dropdown uses an overlay scrollbar', async ({ page }) => {
+    await goTo(page, 'subscribedchannels')
+
+    const alpha = page.locator('.channel', { hasText: 'Alpha Channel' })
+    await alpha.locator('.profileDropdownToggle').click()
+
+    const dropdown = alpha.locator('.profileDropdown')
+    await expect(dropdown).toHaveAttribute('data-overlayscrollbars-viewport')
+    expect(await dropdown.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
   })
 
   test('unsubscribing asks for confirmation and persists', async ({ app, page }) => {

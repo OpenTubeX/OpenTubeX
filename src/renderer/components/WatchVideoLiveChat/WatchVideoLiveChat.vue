@@ -70,6 +70,7 @@
       </div>
       <div
         v-if="superChatComments.length > 0"
+        v-overlay-scrollbars
         class="superChatComments"
       >
         <div
@@ -143,6 +144,7 @@
       </div>
       <div
         ref="commentsRef"
+        v-overlay-scrollbars
         class="liveChatComments"
         :style="{ blockSize: chatHeight }"
         @mousewheel.passive="onScroll"

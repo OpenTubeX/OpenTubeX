@@ -20,6 +20,7 @@
       </button>
     </header>
     <TransitionGroup
+      v-overlay-scrollbars
       name="queueItem"
       tag="ol"
       class="queueItems"

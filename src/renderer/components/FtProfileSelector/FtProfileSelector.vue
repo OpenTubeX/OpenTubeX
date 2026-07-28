@@ -41,6 +41,7 @@
         @click="openProfileSettings"
       />
       <div
+        v-overlay-scrollbars
         class="profileWrapper"
         role="listbox"
         :aria-labelledby="id + 'title'"

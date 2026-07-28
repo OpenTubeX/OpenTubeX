@@ -91,6 +91,7 @@
       <div
         v-else
         ref="dropdown"
+        v-overlay-scrollbars
         tabindex="-1"
         class="iconDropdown"
         :class="{

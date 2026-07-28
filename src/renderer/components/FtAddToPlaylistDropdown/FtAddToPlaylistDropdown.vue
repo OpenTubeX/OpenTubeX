@@ -4,6 +4,7 @@
       {{ t('User Playlists.Save to') }}
     </p>
     <ul
+      v-overlay-scrollbars
       class="playlistList"
       role="listbox"
       :aria-label="t('User Playlists.Add to Playlist')"

@@ -48,6 +48,7 @@
     <Transition name="profile-dropdown">
       <div
         v-if="isProfileDropdownOpen"
+        v-overlay-scrollbars
         tabindex="-1"
         class="profileDropdown"
       >

@@ -11,6 +11,7 @@
     >
       <FtCard
         ref="promptCard"
+        v-overlay-scrollbars
         class="promptCard"
         :class="{ autosize, [theme]: true }"
         role="dialog"

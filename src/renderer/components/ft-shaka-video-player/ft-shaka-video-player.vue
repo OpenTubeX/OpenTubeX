@@ -89,6 +89,7 @@
       <Transition name="fade">
         <div
           v-if="autoplayCountdown"
+          v-overlay-scrollbars
           class="autoplayCountdownOverlay shaka-no-propagation"
           role="dialog"
           :aria-label="$t('Up Next')"
@@ -781,7 +782,10 @@
           >
             {{ sponsorBlockSubmissionError }}
           </p>
-          <div class="sponsorBlockSubmissionSegments">
+          <div
+            v-overlay-scrollbars
+            class="sponsorBlockSubmissionSegments"
+          >
             <div
               v-for="segment in sponsorBlockDraftSegments"
               :key="segment.id"

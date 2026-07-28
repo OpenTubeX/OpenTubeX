@@ -57,7 +57,10 @@
         @change="sortBy = $event"
       />
     </div>
-    <div class="playlists-container">
+    <div
+      v-overlay-scrollbars
+      class="playlists-container"
+    >
       <FtFlexBox>
         <div
           v-for="playlist in activePlaylists"
