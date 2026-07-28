@@ -422,6 +422,7 @@ import FtSpinner from '../FtSpinner/FtSpinner.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import store from '../../store/index'
+import { useTabContext } from '../../tabs/TabContext'
 
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
@@ -439,6 +440,7 @@ import {
 } from '../../helpers/api/invidious'
 
 const { t } = useI18n()
+const { isTabPresented } = useTabContext()
 
 const props = defineProps({
   id: {
@@ -635,6 +637,18 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 const canPerformInitialCommentLoading = computed(() => {
   return commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
+
+watch(
+  [generalAutoLoadMorePaginatedItemsEnabled, () => isTabPresented?.value],
+  ([autoLoadEnabled, presented]) => {
+    // Background tabs have no layout, so their visibility observer cannot
+    // trigger the initial load.
+    if (autoLoadEnabled && presented === false && canPerformInitialCommentLoading.value) {
+      getCommentData()
+    }
+  },
+  { immediate: true }
+)
 
 const canPerformMoreCommentLoading = computed(() => {
   return commentData.value.length > 0 && !isLoading.value && !isLoadingMoreComments.value && showComments.value && !!nextPageToken.value
