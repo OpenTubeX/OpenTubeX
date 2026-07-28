@@ -88,9 +88,8 @@ Settings:
   General Settings: {}
   Theme Settings: {}
   Player Settings: {}
-About:
+About: {}
   #On About page
-  Email: 'ই-মেইল'
 Channel:
   Videos:
     Videos: ভিডিও

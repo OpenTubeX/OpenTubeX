@@ -619,7 +619,6 @@ About:
   room rules: ルームの規則
   Chat on Matrix: Matrix でチャット
   Mastodon: マストドン
-  Email: メールアドレス
   Website: ウェブサイト
   Please check for duplicates before posting: 投稿する前に重複を確認してください
   GitHub issues: GitHub の課題
@@ -864,7 +863,6 @@ Mini Player: 'ミニプレーヤー'
 Comments:
   Comments: 'コメント'
   Click to View Comments: 'コメント表示'
-  Getting comment replies, please wait: 'コメント返信を取得中。お待ちください'
   Hide Comments: 'コメント非表示'
   # Context: View 10 Replies, View 1 Reply
   There are no comments available for this video: 'この動画にはコメントがありません'

@@ -145,9 +145,8 @@ Settings:
     Match Top Bar with Main Color: 'टॉप बार को मेन कलर से मैच करें'
   Player Settings:
     Proxy Videos Through Invidious: 'इनविडियस के माध्यम से प्रॉक्सी वीडियो'
-About:
+About: {}
   #On About page
-  Email: ईमेल करें
 Channel:
   Videos:
     Videos: वीडियो

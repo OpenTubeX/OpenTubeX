@@ -27,8 +27,7 @@ Channel:
 Video:
   External Player: {}
 Tooltips: {}
-About:
-  Email: ኢመይል
+About: {}
 KeyboardShortcutPrompt:
   Toggle Developer Tools: መሳርሒታት
   Fullscreen: ምሉእ ኤለክትሮኒካዊ መሳርሒ

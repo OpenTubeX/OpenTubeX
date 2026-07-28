@@ -425,7 +425,14 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['move-video-down', 'move-video-up', 'pause-player', 'remove-from-playlist'])
+const emit = defineEmits([
+  'move-video-down',
+  'move-video-to-the-bottom',
+  'move-video-to-the-top',
+  'move-video-up',
+  'pause-player',
+  'remove-from-playlist'
+])
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -608,6 +615,23 @@ const dropdownOptions = computed(() => {
         }]
       : [])
   ]
+  if (inUserPlaylist.value) {
+    if (props.canMoveVideoUp || props.canMoveVideoDown) {
+      options.push({ type: 'divider' })
+    }
+    if (props.canMoveVideoUp) {
+      options.push({
+        label: t('User Playlists.Move Video to the Top'),
+        value: 'moveVideoTop'
+      })
+    }
+    if (props.canMoveVideoDown) {
+      options.push({
+        label: t('User Playlists.Move Video to the Bottom'),
+        value: 'moveVideoBottom'
+      })
+    }
+  }
   if (!hideSharingActions.value) {
     options.push(
       {
@@ -754,6 +778,12 @@ function handleOptionsClick(option) {
       break
     case 'removeHistory':
       removeFromHistory()
+      break
+    case 'moveVideoTop':
+      emit('move-video-to-the-top', id.value, props.playlistItemId)
+      break
+    case 'moveVideoBottom':
+      emit('move-video-to-the-bottom', id.value, props.playlistItemId)
       break
     case 'copyYoutube': {
       let videoUrl = `https://youtu.be/${id.value}`

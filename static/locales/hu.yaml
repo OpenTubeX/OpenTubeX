@@ -639,7 +639,6 @@ About:
   room rules: szobaszabályok
   Chat on Matrix: Csevegés a Matrixon
   Mastodon: Mastodon
-  Email: E-mail
   Website: Weboldal
   Please check for duplicates before posting: Beküldés előtt ellenőrizze, nincs-e már azonos
   GitHub issues: GitHub hibajegyek
@@ -927,7 +926,6 @@ Mini Player: 'Minilejátszó'
 Comments:
   Comments: 'Hozzászólások'
   Click to View Comments: 'Hozzászólások megtekintése'
-  Getting comment replies, please wait: 'Hozzászólásra adott válaszok beolvasása, várjon'
   There are no more comments for this video: 'Ehhez a videóhoz nincsenek további hozzászólások'
   Hide Comments: 'Hozzászólások elrejtése'
   # Context: View 10 Replies, View 1 Reply

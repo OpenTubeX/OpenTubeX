@@ -34,6 +34,8 @@
         :show-grab-bar="isDraggable && layout === 'grid'"
         @move-video-up="moveVideoUp"
         @move-video-down="moveVideoDown"
+        @move-video-to-the-top="moveVideoToTheTop"
+        @move-video-to-the-bottom="moveVideoToTheBottom"
         @remove-from-playlist="removeFromPlaylist"
       />
       <FtListChannel
@@ -168,7 +170,16 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['move-dragged-video', 'move-video-down', 'move-video-up', 'remove-from-playlist', 'drag-video', 'drag-video-end'])
+const emit = defineEmits([
+  'move-dragged-video',
+  'move-video-down',
+  'move-video-up',
+  'move-video-to-the-top',
+  'move-video-to-the-bottom',
+  'remove-from-playlist',
+  'drag-video',
+  'drag-video-end'
+])
 
 const inUserPlaylist = props.playlistType === 'user'
 const isDraggable = computed(() => inUserPlaylist && props.isSortOrderCustom && (props.canMoveVideoUp || props.canMoveVideoDown))
@@ -304,6 +315,22 @@ function moveVideoUp(videoId, playlistItemId) {
  */
 function moveVideoDown(videoId, playlistItemId) {
   emit('move-video-down', videoId, playlistItemId)
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ */
+function moveVideoToTheTop(videoId, playlistItemId) {
+  emit('move-video-to-the-top', videoId, playlistItemId)
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ */
+function moveVideoToTheBottom(videoId, playlistItemId) {
+  emit('move-video-to-the-bottom', videoId, playlistItemId)
 }
 
 /**

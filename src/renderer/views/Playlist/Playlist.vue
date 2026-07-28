@@ -97,6 +97,8 @@
             @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
             @move-video-up="moveVideoUp"
             @move-video-down="moveVideoDown"
+            @move-video-to-the-top="moveVideoToTheTop"
+            @move-video-to-the-bottom="moveVideoToTheBottom"
             @remove-from-playlist="removeVideoFromPlaylist"
           />
           <TransitionGroup
@@ -130,6 +132,8 @@
               @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
               @move-video-up="moveVideoUp"
               @move-video-down="moveVideoDown"
+              @move-video-to-the-top="moveVideoToTheTop"
+              @move-video-to-the-bottom="moveVideoToTheBottom"
               @remove-from-playlist="removeVideoFromPlaylist"
             />
           </TransitionGroup>
@@ -736,6 +740,10 @@ function moveVideoUp(videoId, playlistItemId) {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
+  if (index === -1) {
+    return
+  }
+
   if (index === 0) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
@@ -777,6 +785,10 @@ function moveVideoDown(videoId, playlistItemId) {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
+  if (index === -1) {
+    return
+  }
+
   if (index + 1 >= playlistItems_.length) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
@@ -803,6 +815,88 @@ function moveVideoDown(videoId, playlistItemId) {
       message: t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'),
       icon: ['fas', 'circle-exclamation'],
     })
+    console.error(e)
+  }
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ */
+function moveVideoToTheTop(videoId, playlistItemId) {
+  const playlistItems_ = playlistItems.value.slice()
+
+  const index = playlistItems_.findIndex((video) => {
+    return video.videoId === videoId && video.playlistItemId === playlistItemId
+  })
+
+  if (index === -1) {
+    return
+  }
+
+  if (index === 0) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'))
+    return
+  }
+
+  const videoObject = playlistItems_[index]
+  playlistItems_.splice(index, 1)
+  playlistItems_.unshift(videoObject)
+
+  const playlist = {
+    playlistName: playlistTitle.value,
+    protected: selectedUserPlaylist.value.protected,
+    description: playlistDescription.value,
+    videos: deepCopy(playlistItems_),
+    _id: playlistId.value
+  }
+
+  try {
+    store.dispatch('updatePlaylist', playlist)
+    playlistItems.value = playlistItems_
+  } catch (e) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
+    console.error(e)
+  }
+}
+
+/**
+ * @param {string} videoId
+ * @param {string} playlistItemId
+ */
+function moveVideoToTheBottom(videoId, playlistItemId) {
+  const playlistItems_ = playlistItems.value.slice()
+
+  const index = playlistItems_.findIndex((video) => {
+    return video.videoId === videoId && video.playlistItemId === playlistItemId
+  })
+
+  if (index === -1) {
+    return
+  }
+
+  if (index === playlistItems_.length - 1) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'))
+    return
+  }
+
+  const videoObject = playlistItems_[index]
+  playlistItems_.splice(index, 1)
+  playlistItems_.push(videoObject)
+
+  const playlist = {
+    playlistName: playlistTitle.value,
+    protected: selectedUserPlaylist.value.protected,
+    description: playlistDescription.value,
+    videos: deepCopy(playlistItems_),
+    _id: playlistId.value
+  }
+
+  try {
+    store.dispatch('updatePlaylist', playlist)
+    playlistItems.value = playlistItems_
+  } catch (e) {
+    showToast(t('User Playlists.SinglePlaylistView.Toast["There was an issue with updating this playlist."]'))
     console.error(e)
   }
 }
