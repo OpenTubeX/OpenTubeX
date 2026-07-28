@@ -40,3 +40,37 @@ test.describe('side nav navigation', () => {
     await expect(popout).not.toHaveCSS('box-shadow', 'none')
   })
 })
+
+test.describe('navigation history titles', () => {
+  test.use({
+    seed: {
+      history: [{
+        _id: 'jNQXAC9IVRw',
+        videoId: 'jNQXAC9IVRw',
+        title: 'Me at the zoo',
+        author: 'jawed',
+        authorId: 'UC4QobU6STFB0P71PMvOGN5A',
+        published: 0,
+        lengthSeconds: 19,
+        watchProgress: 0,
+        timeWatched: Date.now(),
+        isWatched: false,
+        type: 'video'
+      }]
+    }
+  })
+
+  test('keeps a known video title when navigating away before it loads', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.locator('.ft-list-video .title').click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/history/)
+    await page.locator(sel.forwardButton).click({ button: 'right' })
+
+    const options = page.locator('.topNav .iconDropdown [role="option"]')
+    await expect(options.filter({ hasText: 'Me at the zoo' })).toHaveCount(1)
+    await expect(options.filter({ hasText: '/watch/jNQXAC9IVRw' })).toHaveCount(0)
+  })
+})

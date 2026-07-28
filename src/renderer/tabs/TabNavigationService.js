@@ -237,6 +237,9 @@ export class TabNavigationService {
     const from = this.resolve(tab.route)
     const to = this.resolve(location, from)
     const route = serializeResolvedRoute(to)
+    const initialTitle = typeof location?.state?.tabTitle === 'string'
+      ? location.state.tabTitle
+      : null
     const sameRoute = route.fullPath === tab.route.fullPath
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
     const preserveScroll = location?.state?.preserveScroll === true
@@ -292,7 +295,7 @@ export class TabNavigationService {
         history = tab.history.slice(0, tab.historyIndex + 1).map(cloneHistoryEntry)
         history.push({
           route: cloneRoute(route),
-          title: routeTitle(to),
+          title: initialTitle || routeTitle(to),
           scroll: { left: 0, top: 0 }
         })
         if (history.length > MAX_LOGICAL_HISTORY_ENTRIES) {
@@ -305,7 +308,9 @@ export class TabNavigationService {
       const applyNavigation = async () => {
         this.store.commit('setTabNavigation', { tabId, route, history, historyIndex })
         navigationCommitted = true
-        if (typeof to.name === 'string') {
+        if (initialTitle) {
+          this.setTitle(tabId, initialTitle)
+        } else if (typeof to.name === 'string') {
           this.setTitle(tabId, routeTitle(to))
         }
         this.publishRoute(tabId, route)

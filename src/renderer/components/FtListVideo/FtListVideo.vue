@@ -1048,6 +1048,7 @@ const watchVideoRouterLink = computed(() => {
     return {
       path: `/watch/${id.value}`,
       query: watchPageLinkQuery.value,
+      state: { tabTitle: title.value },
     }
   } else {
     return {}
@@ -1099,6 +1100,7 @@ function handleWatchPageLinkClick(event) {
     openInternalPath({
       path: `/watch/${id.value}`,
       query: watchPageLinkQuery.value,
+      title: title.value,
       doCreateNewWindow: event.shiftKey,
       doCreateNewTab: !event.shiftKey,
       makeActive: false
