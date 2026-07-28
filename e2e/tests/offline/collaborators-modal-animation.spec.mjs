@@ -198,5 +198,6 @@ test.describe('while collaborators are loading', () => {
 
     releaseRequests()
     await expect(page.locator('.collaboratorChannelButton')).toBeEnabled()
+    await expect(page.locator('.topNav')).not.toHaveCSS('cursor', 'wait')
   })
 })
