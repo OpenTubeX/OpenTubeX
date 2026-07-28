@@ -415,6 +415,23 @@ const searchTextByTabId = new Map()
 let currentSearchText = ''
 
 /**
+ * @param {string} path
+ * @returns {string | null}
+ */
+function getSearchTextFromPath(path) {
+  const encodedQuery = path.match(/^\/search\/(.+)$/)?.[1]
+  if (encodedQuery == null) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(encodedQuery)
+  } catch {
+    return encodedQuery
+  }
+}
+
+/**
  * @param {string} tabId
  * @returns {string}
  */
@@ -424,17 +441,31 @@ function getSearchTextForTab(tabId) {
   }
 
   const path = store.getters.getTabById(tabId)?.route.path ?? ''
-  const encodedQuery = path.match(/^\/search\/(.+)$/)?.[1]
-  if (encodedQuery == null) {
-    return ''
+  return getSearchTextFromPath(path) ?? ''
+}
+
+const presentedRoutePath = computed(() => {
+  if (!process.env.IS_ELECTRON) {
+    return route.path
   }
 
-  try {
-    return decodeURIComponent(encodedQuery)
-  } catch {
-    return encodedQuery
+  const tabId = store.getters.getPresentedTabId
+  return store.getters.getTabById(tabId)?.route.path ?? ''
+})
+
+watch([searchFilterTabId, presentedRoutePath], ([tabId, path], [previousTabId]) => {
+  // Tab switches restore that tab's cached draft in the watcher below. Route
+  // changes within one tab restore the submitted query from navigation history.
+  if (tabId !== previousTabId) {
+    return
   }
-}
+
+  const searchText = getSearchTextFromPath(path)
+  if (searchText != null) {
+    updateSearchInputText(searchText)
+    clearLastSuggestionQuery()
+  }
+})
 
 if (process.env.IS_ELECTRON) {
   const presentedTabId = computed(() => store.getters.getPresentedTabId)
