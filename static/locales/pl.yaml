@@ -199,6 +199,8 @@ User Playlists:
   The playlist has been successfully exported: Lista odtwarzania została pomyślnie wyeksportowana
   TotalTimePlaylist: 'Całkowita długość: {duration}'
   Export list of URLs: Eksportuj listę adresów URL
+  Quick Bookmark Icon: Ikona szybkiej zakładki
+  Save to: Zapisz do…
 History:
   # On History Page
   History: 'Historia'
@@ -299,6 +301,10 @@ Settings:
       Force On: wymuś włączenie
       Force Off: wymuś wyłączenie
     Show Tab Icons: Pokaż ikony kart
+    Tab Close Focus:
+      Tab Close Focus: Po zamknięciu karty
+      Previous tab: Przełącz na poprzednią kartę
+      Next tab: Przełącz na następną kartę
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -423,6 +429,8 @@ Settings:
     Thumbnail Size: Rozmiar miniatury
     Show Thumbnail Size Button in Header: Pokaż przycisk rozmiaru miniatury w nagłówku
     Hide Profile Selector in Header: Ukryj selektor profilu w nagłówku
+    UI Roundness: Zaokrąglenie elementów UI
+    Always Show Scrollbars: Zawsze pokazuj paski przewijania
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -547,6 +555,7 @@ Settings:
     Fast-Forward Through Silence: Szybkie przewijanie poprzez ciszę
     Show Fast-Forward Through Silence Toggle: Pokaż przełącznik szybkiego przewijania poprzez ciszę
     Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
+    Automatically Open Chapters: Automatycznie otwieraj rozdziały
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
@@ -595,6 +604,8 @@ Settings:
     Invalid History Retention Days: Wprowadź liczbę całkowitą dni większą od zera
     Enable Watch Statistics: Włącz statystyki oglądania
     Week Starts On: Tydzień zaczyna się w
+    Watched Percentage Threshold: Próg oznaczenia jako „obejrzany” (%)
+    Watched Percentage Threshold Tooltip: Filmy są oznaczane jako obejrzane po osiągnięciu wybranego procentu i gdy pozostały nie więcej niż 2 minuty. Przy wartości 0% są one oznaczane w momencie rozpoczęcia odtwarzania. Przy wartości 100% są one oznaczane po zakończeniu odtwarzania.
   Data Settings:
     How do I import my subscriptions?: Jak mogę zaimportować swoje subskrypcje?
     Unknown data key: Nieznany klucz danych
@@ -697,6 +708,7 @@ Settings:
     Hide Channel Courses: Schowaj kartę kanału „Kursy”
     Hide Channel Posts: Schowaj kartę kanału „Wpisy”
     Hide Subscriptions Posts: Schowaj wpisy z subskrypcji
+    Hide End-Screen Annotations: Ukryj adnotacje na ekranie końcowym
   The app needs to restart for changes to take effect. Restart and apply change?: Aplikacja musi zostać ponownie uruchomiona, aby zmiany zostały wprowadzone. Uruchomić ponownie i zastosować zmiany?
   Proxy Settings:
     Your Info: O Tobie
@@ -871,6 +883,7 @@ Settings:
     Username: Nazwa użytkownika
     Open Tabs: Otwarte karty i sesję
     Syncing open tabs: Synchronizowanie otwartych kart i sesji…
+    Privacy Policy: Polityka prywatności dla tego serwera
   Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
   Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
 About:
@@ -1130,6 +1143,9 @@ Video:
       CloseSegmentActions: Zamknij działania segmentu
       FullVideo: Cały film
       LockedSegment: Zablokowany segment
+      DownvoteSegment: Oceń segment negatywnie
+      UpvoteSegment: Oceń segment pozytywnie
+      VoteFailed: Nie udało się przesłać oceny segmentu do SponsorBlock.
     Scroll Mini Player:
       Back to Top: Powrót na górę
       Volume: Głośność
@@ -1155,6 +1171,7 @@ Video:
     Show: Pokaż
     Up next in {seconds}: Następny za {seconds}
     Play now: Odtwórz teraz
+    Resize dock: Zmień rozmiar doku
   IP block: YouTube uniemożliwił odtworzenie filmów blokując Twój adres IP. Możesz spróbować przełączyć się na inny, korzystając z VPN lub proxy.
   AgeRestricted: Filmy z ograniczeniem wiekowym nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Google z potwierdzonym wiekiem użytkownika.
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
@@ -1200,6 +1217,21 @@ Video:
   Premiere started: Premiera w toku. Rozpoczęto {timeAgo}
   Unmark As Watched: Oznacz jako nieobejrzany
   Video has been unmarked as watched: Film został oznaczony jako nieobejrzany
+  Queue: Kolejka
+  Play Next: Odtwórz jako następne
+  Add to Queue: Dodaj do kolejki
+  Added to Play Next: Wideo zostanie odtworzone jako następne
+  Added to Queue: Wideo dodane do kolejki
+  Clear Queue: Wyczyść kolejkę
+  Remove from Queue: Usuń {title} z kolejki
+  Queue Video Count: '{count} film(y/ów) | {count} film(y/ów)'
+  Drag to Reorder Queue: Przeciągnij {title}, aby zmienić kolejność w kolejce
+  Metadata: Informacje o wideo
+  Close Metadata: Zamknij informacje o wideo
+  Video has been saved to {playlistName}: Film został zapisany na liście odtwarzania {playlistName}
+  Video has been removed from {playlistName}: Film został usunięty z listy odtwarzania {playlistName}
+  There was a problem saving the video to {playlistName}: Wystąpił problem z zapisaniem filmu na liście odtwarzania {playlistName}
+  There was a problem removing the video from {playlistName}: Wystąpił problem podczas usuwania filmu z listy odtwarzania {playlistName}
 Playlist:
   #& About
   View Full Playlist: 'Zobacz całą playlistę'
@@ -1221,6 +1253,7 @@ Playlist:
     VideoDurationAscending: Czasu trwania (od najkrótszych)
     PublishedNewest: Daty publikacji (od najświeższej)
     PublishedOldest: Daty publikacji (od najdawniejszej)
+  Close Playlist: Zamknij listę odtwarzania
 Change Format:
   Change Media Formats: 'Zmień formaty wideo'
   Use Dash Formats: 'Użyj formatów DASH'
@@ -1362,6 +1395,7 @@ Tooltips:
       Opcja „Załaduj wcześniej załadowane karty” ładuje karty, które były załadowane w momencie zamknięcia OpenTubeX, i pozostawia pozostałe karty niezaładowane.
       Opcja „Załaduj aktywną kartę” ładuje tylko aktywną kartę, pozostałe ładują się dopiero po kliknięciu na nie.
       Opcja „Uruchom nową sesję” anuluje zapisane karty i otwiera nowe okno z pustą sesją.
+    Remember Tab Navigation History: Historia nawigacji wstecz i do przodu dla każdej karty jest zapisywana i przywracana po ponownym uruchomieniu OpenTubeX.
   Player Settings:
     Default Video Format: Ustaw formaty, które zostaną użyte do odtwarzania filmów. Formaty DASH obsługują wyższe rozdzielczości. Stare formaty są ograniczone do 360p, ale zużywają mniej przepustowości. Formaty audio odtwarzają tylko dźwięk.
     Proxy Videos Through Invidious: Filmy dostarczane będą poprzez Invidious, a nie przez bezpośrednie połączenie z YouTube.
@@ -1396,6 +1430,14 @@ Tooltips:
     IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
   Theme Settings:
     Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
+    Always Show Scrollbars: Utrzymuje paski przewijania widoczne przez cały czas. Po wyłączeniu, znikają one wkrótce po zatrzymaniu ruchu myszy i pojawiają się ponownie, gdy tylko ponownie nią poruszysz.
+  Download Settings:
+    yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
+    yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
+    FFmpeg Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet FFmpeg lub pobrać i zarządzać własną statyczną kompilacją FFmpeg, która jest przechowywana w katalogu danych użytkownika.
+    yt-dlp Executable Path: Domyślnie OpenTubeX zakłada, że yt-dlp można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
+    FFmpeg Executable Path: FFmpeg jest wymagany do łączenia oddzielnych strumieni wideo i audio oraz do konwersji audio. Domyślnie OpenTubeX zakłada, że FFmpeg można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
+    Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
@@ -1446,6 +1488,7 @@ Feed:
   Refresh Feed: Odśwież „{subscriptionName}”
   Feed Last Updated: 'Ostatnia aktualizacja „{feedName}”: {date}'
   Next Auto Refresh: 'Następne odświeżenie: {date}'
+  Cancel Refresh: Anuluj odświeżanie
 Moments Ago: chwilę temu
 Yes, Delete: Tak, usuń
 Search character limit: Zapytanie przekroczyło limit {searchCharacterLimit} znaków
@@ -1546,6 +1589,19 @@ KeyboardShortcutPrompt:
   Find in Page: Znajdź tekst na bieżącej stronie
   Find Next Match: Przejdź do następnego dopasowania
   Find Previous Match: Przejdź do poprzedniego dopasowania
+  Edit Hint: Wybierz skrót, a następnie naciśnij nową kombinację klawiszy. Naciśnij Backspace lub Delete, aby usunąć przypisanie.
+  Change Shortcut: Zmień skrót dla {action}
+  Press Shortcut: Naciśnij skrót klawiszowy…
+  Unassigned: Nieprzypisany
+  Reset Shortcut: Zresetuj skrót dla {action}
+  Reset to Defaults: Przywróć ustawienia domyślne
+  Shortcut Already Assigned: Skrót jest już przypisany
+  Shortcut Conflict: '{shortcut} jest już przypisany do {actions}. Czy chcesz go ponownie przypisać?'
+  Reserved Shortcut Conflict: '{shortcut} jest zarezerwowany dla {actions} i nie można go ponownie przypisać.'
+  Reassign: Przypisz ponownie
+  Undo: Cofnij
+  Toggle Fast-Forward Through Silence: Przełączanie szybkiego przewijania przez ciszę
+  Toggle Tab Orientation: Przełączanie między kartami poziomymi i pionowymi
 shortcutLabelSeparator: ｜
 Compact side navigation: Skompresuj boczną nawigację
 Expand side navigation: Rozwiń boczną nawigację
@@ -1601,3 +1657,90 @@ Stats:
 Use Vertical Tabs: Używaj pionowych kart
 Use Horizontal Tabs: Używaj poziomych kart
 Resize Tab Bar: Zmień rozmiar paska kart
+Context Menu:
+  Context Menu: Menu kontekstowe
+  Cut: Wytnij
+  Copy: Kopiuj
+  Paste: Wklej
+  Select All: Zaznacz wszystko
+  Save Image As…: Zapisz obraz jako…
+  Copy Image: Kopiuj obraz
+  Copy Image Address: Kopiuj adres do obrazu
+  Reload Videos: Załaduj ponownie filmy
+  Reload Shorts: Załaduj ponownie shorty
+  Reload Live: Załaduj ponownie transmisje na żywo
+  Reload Posts: Załaduj ponownie wpisy
+  Reload All Feeds: Załaduj ponownie wszystkie subskrypcje
+  Close Tab: Zamknij kartę
+  Close Multiple Tabs: Zamknij {count} kart(y)
+  Duplicate Tab: Duplikuj kartę
+  Duplicate Multiple Tabs: Duplikuj {count} kart(y)
+  Move Tab: Przenieś kartę
+  Move Tabs: Przenieś karty
+  To Beginning: Na początek
+  To End: Na koniec
+  Close Tabs: Zamknij karty
+  To the Top: Na górę
+  To the Left: W lewo
+  To the Bottom: Na dół
+  To the Right: W prawo
+  Other Tabs: Pozostałe karty
+  Copy YouTube Link: Kopiuj odnośnik do YouTube
+  Copy YouTube Links: Kopiuj odnośniki do YouTube
+  Pin Tab: Przypnij kartę
+  Pin Tabs: Przypnij karty
+  Unpin Tab: Odepnij kartę
+  Unpin Tabs: Odepnij karty
+  Tab Color: Kolor karty
+  Default: Domyślny
+  Red: Czerwony
+  Orange: Pomarańczowy
+  Yellow: Żółty
+  Green: Zielony
+  Blue: Niebieski
+  Purple: Fioletowy
+  New Tab: Nowa karta
+  Reopen Closed Tab: Otwórz ponownie zamkniętą kartę
+  Reload Tab: Załaduj ponownie kartę
+  Reload Tabs: Załaduj ponownie karty
+  Load Tab: Załaduj kartę
+  Load Tabs: Załaduj karty
+  Unload Tab: Uśpij kartę
+  Unload Tabs: Uśpij karty
+  Move Tab to Window: Przenieś kartę do nowego okna
+  Move Tabs to Window: Przenieś karty do nowego okna
+  Open in a New Tab: Otwórz w nowej karcie
+  Open in a New Window: Otwórz w nowym oknie
+  Copy Link: Kopiuj odnośnik
+  Copy Invidious Link: Kopiuj odnośnik do Invidious
+  Search Selection in New Tab: Wyszukaj „{selection}” w nowej karcie
+  Search Selection in New Window: Wyszukaj „{selection}” w nowym oknie
+  Selection Too Long: Zaznaczona fraza jest za długa do wyszukiwania (> {count} znaków)
+  Cancel Refresh: Anuluj odświeżanie
+Downloads:
+  Download: Pobierz
+  Download Video: Pobierz wideo
+  Download Type: Typ pobierania
+  Custom yt-dlp Arguments: Niestandardowe argumenty dla yt-dlp
+  Template Name: Nazwa szablonu
+  Save Template: Zapisz szablon
+  Delete Template: Usuń szablon
+  Template Saved: Zapisano szablon pobierania „{name}”
+  Choose Folder: Zmień
+  Select Folder: Wybierz folder
+  Folder Required: Wybierz folder pobierania, aby umożliwić pobieranie.
+  System Downloads Folder: Systemowy folder pobierania
+  Processing: Przetwarzanie…
+  Download Complete: Pobieranie zakończone
+  Download Cancelled: Pobieranie anulowane
+  Download Failed: Pobieranie nie powiodło się
+  Cancel Download: Anuluj pobieranie
+  yt-dlp Not Found: Nie znaleziono yt-dlp. Zainstaluj go lub ustaw jego ścieżkę w ustawieniach pobierania.
+  Download Complete Template: Pobieranie „{title}” zostało zakończone
+  Download Failed Template: Pobieranie „{title}” nie powiodło się
+  Templates:
+    Video Best: Wideo - najlepsza jakość
+    Video Resolution: Wideo - {resolution}
+    Audio Best: Dźwięk - najlepsza jakość
+    Audio Format: Dźwięk - {format}
+    Custom Arguments: Niestandardowe argumenty dla yt-dlp
