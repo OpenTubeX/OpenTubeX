@@ -254,6 +254,8 @@ test.describe('sync settings', () => {
       'Invalid or missing authentication token'
     )
 
+    await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
 
     await expect(syncSection.locator('.error')).toHaveCount(0)
