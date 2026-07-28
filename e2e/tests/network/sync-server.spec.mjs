@@ -22,9 +22,23 @@ async function getSyncCapabilities() {
   return health.capabilities ?? {}
 }
 
+function rateLimitClient(title) {
+  const suffix = [...title]
+    .reduce((sum, character) => sum + character.charCodeAt(0), 0) % 254 + 1
+  return `192.0.2.${suffix}`
+}
+
 test.describe('OpenTubeX sync server', () => {
-  test.describe.configure({ mode: 'serial' })
   test.skip(!syncServerUrl, 'Set OPENTUBEX_SYNC_SERVER_URL to run the local sync-server test')
+
+  test.beforeEach(async ({ page }, testInfo) => {
+    await page.route('**/account/**', route => route.continue({
+      headers: {
+        ...route.request().headers(),
+        'X-Forwarded-For': rateLimitClient(testInfo.title)
+      }
+    }))
+  })
 
   test.use({
     seed: {
@@ -296,7 +310,7 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
   })
 
-  test('migrates existing plaintext data before locking the account', async ({ app, page }) => {
+  test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {
     const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
     test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
 
@@ -304,7 +318,10 @@ test.describe('OpenTubeX sync server', () => {
     const password = 'local-test-password'
     const registerResponse = await fetch(`${syncServerUrl}/v1/account/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Forwarded-For': rateLimitClient(testInfo.title)
+      },
       body: JSON.stringify({ name: username, password })
     })
     expect(registerResponse.ok).toBe(true)
