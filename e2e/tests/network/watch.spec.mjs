@@ -449,14 +449,20 @@ test.describe('watch page', () => {
     const scrollbar = target.locator(':scope > .os-scrollbar-vertical')
     const scrollbarBounds = await scrollbar.boundingBox()
     const targetBounds = await target.boundingBox()
-    expect(scrollbarBounds.y - targetBounds.y).toBeLessThanOrEqual(1)
+    expect(Math.abs(scrollbarBounds.y - targetBounds.y)).toBeLessThanOrEqual(1)
     expect(
-      targetBounds.y + targetBounds.height - scrollbarBounds.y - scrollbarBounds.height
+      Math.abs(
+        targetBounds.y + targetBounds.height -
+        scrollbarBounds.y - scrollbarBounds.height
+      )
     ).toBeLessThanOrEqual(1)
 
     await target.evaluate(element => {
       element.scrollTop = (element.scrollHeight - element.clientHeight) / 3
     })
+    await expect.poll(() => target.evaluate(
+      element => element.scrollTop
+    )).toBeGreaterThan(0)
     const handle = scrollbar.locator('.os-scrollbar-handle')
     await handle.hover()
   })
