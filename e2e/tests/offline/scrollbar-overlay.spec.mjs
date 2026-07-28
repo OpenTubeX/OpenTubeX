@@ -82,6 +82,35 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
   })
 
+  test('keeps the page handle under the pointer when content loads during a drag', async ({ page }) => {
+    await goTo(page, 'settings')
+    await expect.poll(() => pageOverflows(page)).toBe(true)
+
+    const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
+    const initialBox = await handle.boundingBox()
+    const pointerX = initialBox.x + initialBox.width / 2
+    const pointerY = initialBox.y + initialBox.height / 2 + 150
+
+    await page.mouse.move(initialBox.x + initialBox.width / 2, initialBox.y + initialBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(pointerX, pointerY)
+
+    const heightBefore = await handle.evaluate((element) => element.clientHeight)
+    await page.evaluate(() => {
+      const addedContent = document.createElement('div')
+      addedContent.style.height = '3000px'
+      document.body.append(addedContent)
+    })
+
+    await expect.poll(() => handle.evaluate((element) => element.clientHeight)).toBeLessThan(heightBefore)
+    await expect.poll(async () => {
+      const box = await handle.boundingBox()
+      return Math.abs(box.y + box.height / 2 - pointerY)
+    }).toBeLessThan(2)
+
+    await page.mouse.up()
+  })
+
   test.describe('a nested scroll container', () => {
     const now = Date.now()
     test.use({
