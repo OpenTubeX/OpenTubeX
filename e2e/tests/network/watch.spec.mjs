@@ -28,6 +28,18 @@ async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zo
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${video.id}`))
   await expect(page.locator('.videoTitle')).toContainText(video.title, { timeout: 30_000 })
+
+  const player = page.locator('.ftVideoPlayer')
+  const errorMessage = page.locator('.errorMessage')
+  await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+
+  const errorText = await errorMessage.isVisible()
+    ? (await errorMessage.textContent())?.trim() ?? ''
+    : ''
+  test.skip(
+    /blocked your IP|Ratelimited|IP block/i.test(errorText),
+    `watch page unavailable from the live API: ${errorText}`
+  )
 }
 
 async function openCaptionedVideoOrSkip(page) {
