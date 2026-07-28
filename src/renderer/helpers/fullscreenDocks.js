@@ -49,9 +49,35 @@ export function getFullscreenDockCollapseNeighbor(openDocks, dock, collapsedStat
     .find(name => name != null && name !== dock && collapsedState[name] == null) ?? null
 }
 
+/** Weight differences below this are rounding noise rather than real height. */
+const WEIGHT_EPSILON = 1e-9
+
+/**
+ * The docks a collapsed dock's weight was handed down through, nearest first.
+ *
+ * Collapsing lends weight to a neighbour, and collapsing that neighbour lends it
+ * on again, so reclaiming has to follow the same path back. Guards against a
+ * cycle, which two docks that were collapsed onto each other can form.
+ *
+ * @param {string | undefined} preferredDonor
+ * @param {Record<string, { neighbor: string, weight: number } | null>} collapsedState
+ */
+function getFullscreenDockLoanChain(preferredDonor, collapsedState) {
+  const chain = []
+  let name = preferredDonor
+
+  while (name != null && !chain.includes(name)) {
+    chain.push(name)
+    name = collapsedState[name]?.neighbor
+  }
+
+  return chain
+}
+
 /**
  * Frees up to `amount` of weight from the other open docks and reports how much
- * it could free. Mutates `weights`.
+ * it could free. Mutates `weights`, and `collapsedState` when a loan has to be
+ * charged against a borrower that cannot pay it out of its live weight.
  *
  * The donors keep at least their collapsed size. A dock that was collapsed after
  * lending its weight out has already passed it on, so charging it again would
@@ -61,10 +87,11 @@ export function getFullscreenDockCollapseNeighbor(openDocks, dock, collapsedStat
  * @param {string} dock
  * @param {number} amount
  * @param {Record<string, number>} weights
+ * @param {Record<string, { neighbor: string, weight: number } | null>} collapsedState
  * @param {number} containerHeight
  * @param {string} [preferredDonor]
  */
-export function takeFullscreenDockWeight(openDocks, dock, amount, weights, containerHeight, preferredDonor) {
+export function takeFullscreenDockWeight(openDocks, dock, amount, weights, collapsedState, containerHeight, preferredDonor) {
   const donors = openDocks
     .filter(name => name !== dock)
     .map(name => ({
@@ -80,25 +107,54 @@ export function takeFullscreenDockWeight(openDocks, dock, amount, weights, conta
     return amount
   }
 
-  // Let the dock it borrowed from pay it all back first, so an otherwise
-  // untouched stack returns to exactly the layout it had before collapsing
-  const preferred = donors.find(donor => donor.name === preferredDonor)
-  if (preferred != null && preferred.spare >= amount) {
-    weights[preferred.name] -= amount
+  let remaining = amount
+
+  // Walk the chain of loans: the dock this one lent to pays first, then whoever
+  // that dock lent to when it was collapsed in turn, and so on. Following the
+  // chain is what keeps the weight moving back along the path it took, instead
+  // of being reclaimed from docks that never received any of it.
+  for (const name of getFullscreenDockLoanChain(preferredDonor, collapsedState)) {
+    if (remaining <= WEIGHT_EPSILON) {
+      break
+    }
+
+    const donor = donors.find(candidate => candidate.name === name)
+    if (donor == null) {
+      continue
+    }
+
+    const paid = Math.min(donor.spare, remaining)
+    weights[name] -= paid
+    donor.spare -= paid
+    remaining -= paid
+
+    // A borrower that was collapsed in the meantime has already handed the
+    // weight on and cannot pay out of its live weight. Charge what it still owes
+    // against what it remembers being owed, otherwise it would later reclaim
+    // weight that stopped being its own and squeeze another dock down to nothing
+    // that no double click can undo.
+    const borrowerState = remaining > WEIGHT_EPSILON ? collapsedState[name] : null
+    if (borrowerState != null) {
+      borrowerState.weight = Math.max(weights[name], borrowerState.weight - remaining)
+    }
+  }
+
+  if (remaining <= WEIGHT_EPSILON) {
     return amount
   }
 
-  const totalSpare = donors.reduce((total, donor) => total + donor.spare, 0)
+  const payingDonors = donors.filter(donor => donor.spare > 0)
+  const totalSpare = payingDonors.reduce((total, donor) => total + donor.spare, 0)
   if (totalSpare === 0) {
-    return 0
+    return amount - remaining
   }
 
-  const taken = Math.min(amount, totalSpare)
-  for (const donor of donors) {
+  const taken = Math.min(remaining, totalSpare)
+  for (const donor of payingDonors) {
     weights[donor.name] -= taken * donor.spare / totalSpare
   }
 
-  return taken
+  return amount - remaining + taken
 }
 
 /**
@@ -128,6 +184,7 @@ export function toggleFullscreenDockCollapsed(openDocks, dock, weights, collapse
       dock,
       savedState.weight - weights[dock],
       weights,
+      collapsedState,
       containerHeight,
       savedState.neighbor
     )

@@ -103,6 +103,64 @@ test('expanding a dock never drives another one below its collapsed height', () 
   }
 })
 
+test('expanding both collapsed docks again restores the original layout', () => {
+  const stack = createStack(['metadata', 'transcript', 'comments'])
+
+  // Collapsing the first hands its height to the second, and collapsing the
+  // second then hands both on to the third
+  toggle(stack, 'metadata')
+  toggle(stack, 'transcript')
+
+  // Expanding them back used to let the second dock reclaim the height the first
+  // one had already taken back, squeezing the third down to its collapsed size
+  // while nothing marked it collapsed - so double-clicking it collapsed it
+  // instead of expanding it, with no way back to the even split.
+  toggle(stack, 'metadata')
+  toggle(stack, 'transcript')
+
+  for (const dock of stack.openDocks) {
+    assert.ok(
+      Math.abs(stack.weights[dock] - 1) < 1e-9,
+      `${dock} ended up at ${stack.weights[dock]} instead of an even third`
+    )
+  }
+  assert.deepEqual(stack.collapsedState, { metadata: null, transcript: null, comments: null })
+})
+
+test('any collapse and expand order restores the layout it started from', () => {
+  const permutations = (items) => items.length <= 1
+    ? [items]
+    : items.flatMap((item, index) => permutations([...items.slice(0, index), ...items.slice(index + 1)])
+      .map(rest => [item, ...rest]))
+
+  const openDocks = ['metadata', 'transcript', 'comments', 'playlist']
+  // An unevenly resized stack, as the divider drags leave it
+  const start = { metadata: 1.4, transcript: 0.7, comments: 1.9, playlist: 1 }
+  const startTotal = Object.values(start).reduce((total, weight) => total + weight, 0)
+
+  for (const collapseOrder of permutations(openDocks)) {
+    for (let count = 1; count < openDocks.length; count++) {
+      const collapsed = collapseOrder.slice(0, count)
+
+      for (const expandOrder of permutations(collapsed)) {
+        const stack = { openDocks, weights: { ...start }, collapsedState: Object.fromEntries(openDocks.map(dock => [dock, null])) }
+        for (const dock of collapsed) { toggle(stack, dock) }
+        for (const dock of expandOrder) { toggle(stack, dock) }
+
+        const total = Object.values(stack.weights).reduce((sum, weight) => sum + weight, 0)
+        for (const dock of openDocks) {
+          assert.ok(
+            Math.abs(stack.weights[dock] / total - start[dock] / startTotal) < 1e-9,
+            `collapse [${collapsed}] then expand [${expandOrder}] left ${dock} at ` +
+            `${(stack.weights[dock] / total).toFixed(4)} instead of ${(start[dock] / startTotal).toFixed(4)}`
+          )
+          assert.equal(stack.collapsedState[dock], null, `${dock} kept a stale collapsed flag`)
+        }
+      }
+    }
+  }
+})
+
 test('a collapsed dock can still be expanded after its sibling is closed', () => {
   const stack = createStack(['metadata', 'transcript'])
 
