@@ -37,18 +37,28 @@ jobs:
         )"
 
         if [[ -z "$existing_tag" ]]; then
+          release_tags="$(
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name'
+          )"
           while IFS= read -r tag; do
-            release_sha="$(
-              gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq .sha
-            )"
+            [[ -z "$tag" ]] && continue
+            if release_sha="$(
+              gh api "repos/${GITHUB_REPOSITORY}/commits/$tag" --jq .sha 2>&1
+            )"; then
+              :
+            elif [[ "$release_sha" == *"(HTTP 404)"* ||
+              "$release_sha" == *"No commit found for SHA:"*"(HTTP 422)"* ]]; then
+              continue
+            else
+              echo "$release_sha" >&2
+              exit 1
+            fi
             if [[ "$release_sha" == "$development_sha" ]]; then
               existing_tag="$tag"
               break
             fi
-          done < <(
-            gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
-              --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name'
-          )
+          done <<< "$release_tags"
         fi
 
         if [[ -n "$existing_tag" ]]; then
