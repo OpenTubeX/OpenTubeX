@@ -230,6 +230,7 @@ test.describe('sync settings', () => {
     seed: {
       settings: {
         syncServerAutoSync: false,
+        syncServerPrivacyKey: 'e2e-privacy-key',
         syncServerPrivacyMode: 'legacy',
         syncServerToken: 'invalid-token',
         syncServerUrl: 'https://sync.d3sox.me',
@@ -243,16 +244,14 @@ test.describe('sync settings', () => {
       if (new URL(route.request().url()).pathname === '/health') {
         await route.fulfill({ status: 200, body: 'OK' })
       } else {
-        await route.fulfill({ status: 401, body: 'Invalid or missing authentication token' })
+        await route.fulfill({ status: 500, body: 'Sync failed' })
       }
     })
     await goTo(page, 'settings')
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    await expect(syncSection.locator('.error')).toHaveText(
-      'Invalid or missing authentication token'
-    )
+    await expect(syncSection.locator('.error')).toHaveText('Sync failed')
 
     await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
