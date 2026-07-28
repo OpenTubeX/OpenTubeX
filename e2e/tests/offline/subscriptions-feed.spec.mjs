@@ -121,6 +121,17 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
+  test('does not offer to mark a running premiere as watched', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const runningPremiere = page.locator('.ft-list-video').filter({ hasText: 'Running premiere video' })
+    await runningPremiere.hover()
+    await runningPremiere.locator('.optionsButton').click()
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
+  })
+
   test('shows when the cache was last refreshed, from the oldest channel timestamp', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Video B newest')).toBeVisible()

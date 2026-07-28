@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
-function historyEntry(videoId, title, timeWatched, isWatched = false) {
+function historyEntry(videoId, title, timeWatched, isWatched = false, isLive = false) {
   return {
     _id: videoId,
     videoId,
@@ -17,7 +17,7 @@ function historyEntry(videoId, title, timeWatched, isWatched = false) {
     watchProgress: 10,
     isWatched,
     timeWatched,
-    isLive: false,
+    isLive,
     type: 'video'
   }
 }
@@ -26,7 +26,8 @@ test.use({
   seed: {
     history: [
       historyEntry('aaaaaaaaaaa', 'First test video', Date.now() - 1000, true),
-      historyEntry('bbbbbbbbbbb', 'Second test video', Date.now() - 2000)
+      historyEntry('bbbbbbbbbbb', 'Second test video', Date.now() - 2000),
+      historyEntry('ccccccccccc', 'Active live stream', Date.now() - 3000, false, true)
     ]
   }
 })
@@ -118,7 +119,8 @@ test.describe('watch history', () => {
       const latestRecords = Object.values(Object.fromEntries(
         records.filter(record => record.videoId).map(record => [record.videoId, record])
       ))
-      return latestRecords.every(record => record.isWatched === true)
+      return latestRecords.every(record => record.isLive === true || record.isWatched === true) &&
+        latestRecords.find(record => record.videoId === 'ccccccccccc')?.isWatched === false
     }).toBe(true)
   })
 })

@@ -2032,7 +2032,7 @@ export default defineComponent({
         watchProgress: watchProgress,
         isWatched,
         timeWatched: now,
-        isLive: false,
+        isLive: this.isLive,
         type: 'video',
       }
 

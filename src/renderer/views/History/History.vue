@@ -283,7 +283,7 @@ const historyCacheSorted = computed(() => {
 })
 
 const hasUnwatchedHistory = computed(() => {
-  return historyCacheSorted.value.some(record => record.isWatched !== true)
+  return historyCacheSorted.value.some(record => record.isWatched !== true && record.isLive !== true)
 })
 
 async function markAllAsWatched() {

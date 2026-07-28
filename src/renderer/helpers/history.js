@@ -1,4 +1,5 @@
 export {
+  canMarkHistoryEntryAsWatched,
   hasReachedWatchedThreshold,
   isHistoryEntryWatched,
   migrateLegacyHistoryRecord,

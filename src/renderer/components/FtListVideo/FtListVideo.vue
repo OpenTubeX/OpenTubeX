@@ -474,6 +474,8 @@ const historyEntryExists = computed(() => historyEntry.value !== undefined)
 
 const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
+const canMarkAsWatched = computed(() => !isLive.value)
+
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
     return 0
@@ -509,6 +511,9 @@ const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailActio
 const extraThumbnailActionButton = computed(() => {
   switch (extraThumbnailAction.value) {
     case 'history':
+      if (!canMarkAsWatched.value) {
+        return null
+      }
       return {
         title: isWatched.value
           ? t('Video.Unmark As Watched')
@@ -593,13 +598,15 @@ const dropdownOptions = computed(() => {
     {
       type: 'divider'
     },
-    {
-      label: isWatched.value
-        ? t('Video.Unmark As Watched')
-        : t('Video.Mark As Watched'),
-      value: 'history',
-      icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
-    },
+    ...canMarkAsWatched.value
+      ? [{
+          label: isWatched.value
+            ? t('Video.Unmark As Watched')
+            : t('Video.Mark As Watched'),
+          value: 'history',
+          icon: isWatched.value ? ['fas', 'eye-slash'] : ['fas', 'eye']
+        }]
+      : [],
     ...historyEntryExists.value
       ? [{
           label: t('Video.Remove From History'),
@@ -1226,7 +1233,7 @@ function openInExternalPlayer() {
     window.ftElectron.openInExternalPlayer(payload)
   }
 
-  if (rememberHistory.value) {
+  if (rememberHistory.value && canMarkAsWatched.value) {
     markAsWatched()
   }
 }
@@ -1341,6 +1348,10 @@ function parseVideoData() {
 }
 
 function markAsWatched() {
+  if (!canMarkAsWatched.value) {
+    return
+  }
+
   const videoData = {
     ...historyEntry.value,
     videoId: id.value,
