@@ -20,6 +20,20 @@
 ## Screenshots <!-- If appropriate -->
 <!-- Please add before and after screenshots if there is a visible change. -->
 
+## Release note
+<!-- Required when the PR has the `noteworthy-for-release` label. -->
+<!-- Write one concise, user-facing highlight without a leading bullet. -->
+<!-- release-note:start -->
+
+<!-- release-note:end -->
+
+## Release note image
+<!-- Optional. Paste one Markdown image or HTML image tag here. -->
+<!-- The release notes will use an HTML image tag and limit images taller than 300 pixels. -->
+<!-- release-note-image:start -->
+
+<!-- release-note-image:end -->
+
 ## Testing
 <!-- How can reviewers verify that the PR produces correct results? -->
 <!-- Please provide instructions so that others can ensure that your pull request would produce correct results. For examples see, https://github.com/FreeTubeApp/FreeTube/pull/5743, https://github.com/FreeTubeApp/FreeTube/pull/7349, https://github.com/FreeTubeApp/FreeTube/pull/5125, https://github.com/FreeTubeApp/FreeTube/pull/7338 -->

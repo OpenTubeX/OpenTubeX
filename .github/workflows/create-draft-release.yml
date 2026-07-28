@@ -1,0 +1,64 @@
+name: Create Draft Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: New release tag (for example, v0.30.0-beta)
+        required: true
+        type: string
+      previousTag:
+        description: Previous release tag
+        required: true
+        type: string
+      target:
+        description: Target branch
+        required: true
+        default: development
+        type: string
+
+permissions: {}
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+        ref: ${{ inputs.target }}
+
+    - name: Generate release notes
+      env:
+        GH_TOKEN: ${{ github.token }}
+        PREVIOUS_TAG: ${{ inputs.previousTag }}
+        TARGET: ${{ inputs.target }}
+      run: node _scripts/releaseNotes.mjs generate release-notes.md
+
+    - name: Create draft release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ inputs.tag }}
+        TARGET: ${{ inputs.target }}
+      run: |
+        set -euo pipefail
+
+        release_url="$(gh release create "$TAG" \
+          --draft \
+          --target "$TARGET" \
+          --title "OpenTubeX ${TAG#v}" \
+          --notes-file release-notes.md)"
+        release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --jq .id)"
+
+        {
+          echo "## Draft release created"
+          echo
+          echo "- Release: ${release_url}"
+          echo "- Release ID for the Upload Release workflow: \`${release_id}\`"
+        } >> "$GITHUB_STEP_SUMMARY"
