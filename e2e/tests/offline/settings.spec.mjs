@@ -263,6 +263,42 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
     await expect(syncSection.getByLabel('Password')).toBeEnabled()
   })
+
+  test('disables credentials while authentication is pending', async ({ page }) => {
+    let finishAuthentication
+    const authenticationPending = new Promise((resolve) => {
+      finishAuthentication = resolve
+    })
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+      } else {
+        await authenticationPending
+        await route.fulfill({ status: 401, body: 'Invalid credentials' })
+      }
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+    await syncSection.getByLabel('Username').fill('sync-user')
+    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    await expect(syncSection.getByLabel('Server URL')).toBeDisabled()
+    await expect(syncSection.getByLabel('Username')).toBeDisabled()
+    await expect(syncSection.getByLabel('Password')).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Log in' })).toBeDisabled()
+    await expect(syncSection.getByRole('button', { name: 'Register' })).toBeDisabled()
+
+    finishAuthentication()
+    await expect(syncSection.locator('.error')).toHaveText('Invalid credentials')
+    await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+    await expect(syncSection.getByLabel('Password')).toBeEnabled()
+  })
 })
 
 test.describe('invalid toast position', () => {

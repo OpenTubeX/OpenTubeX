@@ -9,7 +9,7 @@
         :show-action-button="false"
         :data-list="syncServerInstances"
         :value="serverUrl"
-        :disabled="connected"
+        :disabled="connected || authenticating"
         show-label
         @input="serverUrl = $event"
         @blur="saveServerUrl"
@@ -366,6 +366,7 @@ const serverPrivacySupported = ref(null)
 const serverCheckStatus = ref('idle')
 const serverCheckError = ref('')
 const localError = ref('')
+const authenticating = ref(false)
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
@@ -383,7 +384,8 @@ const privacyPolicyUrl = computed(() => {
   }
 })
 const serverCredentialsDisabled = computed(() => (
-  !connected.value && serverCheckStatus.value !== 'valid'
+  authenticating.value ||
+  (!connected.value && serverCheckStatus.value !== 'valid')
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
@@ -477,6 +479,7 @@ async function saveServerUrl() {
 async function authenticate(mode) {
   if (busy.value || serverCredentialsDisabled.value) return
   localError.value = ''
+  authenticating.value = true
   try {
     await store.dispatch('authenticateSyncServer', {
       mode,
@@ -492,6 +495,8 @@ async function authenticate(mode) {
     showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
   } catch (error) {
     localError.value = error.message
+  } finally {
+    authenticating.value = false
   }
 }
 
