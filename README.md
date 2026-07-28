@@ -299,10 +299,10 @@ The first build with a green check mark is the latest build.
 > You will need to have a GitHub account to download these builds.
 > If you don't have a GitHub account, you can download the builds via [nightly.link](https://nightly.link/OpenTubeX/OpenTubeX/workflows/build/development).
 
-* Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/)
-* Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/)
-* openSUSE: [RPM nightly repository](https://rpm.opentubex.org/)
-* Flatpak: [Nightly branch](https://flatpak.opentubex.org/) (`org.opentubex.OpenTubeX//nightly`)
+* Debian / Ubuntu: [APT nightly repository](https://apt.opentubex.org/#nightly-builds)
+* Fedora / Enterprise Linux: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
+* openSUSE: [RPM nightly repository](https://rpm.opentubex.org/#nightly-builds)
+* Flatpak: [Nightly branch](https://flatpak.opentubex.org/#nightly-builds) (`org.opentubex.OpenTubeX//nightly`)
 * Arch User Repository (AUR): [Download](https://aur.archlinux.org/packages/opentubex-git/) (`opentubex-git`)
 
 ## Contributing

@@ -116,7 +116,8 @@ test.describe('seeded playlists', () => {
 
     await page.getByTitle('Delete Playlist').click()
     await page.getByRole('button', { name: 'Yes, Delete' }).click()
-    await expect(page).toHaveURL(/#\/user[Pp]laylists/)
+    await expect(page).toHaveURL(/#\/userplaylists\/?$/)
+    await expect(page.locator(sel.activeTab).locator('[data-icon="bookmark"]')).toBeVisible()
     await expect(page.getByText('Renamed seeded playlist')).toHaveCount(0)
 
     await expect.poll(async () => {

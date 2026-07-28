@@ -86,6 +86,11 @@ const SABR_ERROR_RECOVERY_SETTLE_SECONDS = 30
 // content, otherwise seeking around a broken stream would keep handing it fresh
 // recovery attempts.
 const SABR_ERROR_RECOVERY_MAX_TICK_SECONDS = 2
+// The refill above deliberately has no time limit, so a video that breaks every
+// time it has played just past the settle threshold could otherwise reload for
+// ever. This is the hard stop for a whole video: once it is spent the format
+// fallback runs and the video settles on something that plays.
+const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
 let nextSabrSchemeId = 0
 const UNAVAILABLE_VIDEO_THUMBNAILS = {
   light: 'https://www.youtube.com/img/desktop/unavailable/unavailable_video.png',
@@ -270,6 +275,7 @@ export default defineComponent({
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
+      sabrErrorRecoveriesForCurrentVideo: 0,
       /** @type {number|null} */
       sabrErrorRecoveryLastSeconds: null,
       sabrErrorRecoveryPlayedSeconds: 0,
@@ -863,6 +869,7 @@ export default defineComponent({
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
         this.sabrErrorRecoveryAttempts = 0
+        this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
         this.sabrErrorRecoveryPlayedSeconds = 0
       }
@@ -2621,12 +2628,14 @@ export default defineComponent({
       if (
         this.activeFormat === 'dash' &&
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
-        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES
+        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
+        this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
       ) {
         // A SABR playback session may no longer be reusable after a critical
         // error. Refetch it in-place before giving up HD and falling back to
         // the legacy 360p stream.
         this.sabrErrorRecoveryAttempts++
+        this.sabrErrorRecoveriesForCurrentVideo++
         // The reload resumes here, so this is the baseline the refreshed stream
         // starts accumulating played content from before the budget refills.
         this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
