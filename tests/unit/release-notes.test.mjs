@@ -58,6 +58,20 @@ ${NOTE_MARKERS}
   })
 })
 
+test('HTML entities in image attributes are decoded only once', () => {
+  const result = parseReleaseNote(`
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+<img src="https://github.com/user-attachments/assets/example?name=a&amp;amp;b" alt="A &amp; B">
+<!-- release-note-image:end -->
+`)
+
+  assert.deepEqual(result.image, {
+    alt: 'A & B',
+    url: 'https://github.com/user-attachments/assets/example?name=a&amp;b',
+  })
+})
+
 test('image dimensions are read from PNG data', () => {
   assert.deepEqual(probeImageSize(png(640, 480)), {
     height: 480,

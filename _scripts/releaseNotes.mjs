@@ -15,10 +15,6 @@ const ALLOWED_IMAGE_HOSTS = new Set([
   'user-images.githubusercontent.com',
 ])
 
-function stripComments(value) {
-  return value.replaceAll(/<!--[\s\S]*?-->/g, '').trim()
-}
-
 function extractMarkedSection(body, marker) {
   const startMarker = `<!-- ${marker}:start -->`
   const endMarker = `<!-- ${marker}:end -->`
@@ -27,16 +23,19 @@ function extractMarkedSection(body, marker) {
 
   if (start === -1 || end === -1 || end < start) { return null }
 
-  return stripComments(body.slice(start + startMarker.length, end))
+  return body.slice(start + startMarker.length, end).trim()
 }
 
 function decodeHtml(value) {
-  return value
-    .replaceAll('&amp;', '&')
-    .replaceAll('&quot;', '"')
-    .replaceAll('&#39;', '\'')
-    .replaceAll('&lt;', '<')
-    .replaceAll('&gt;', '>')
+  const entities = {
+    '#39': '\'',
+    amp: '&',
+    gt: '>',
+    lt: '<',
+    quot: '"',
+  }
+
+  return value.replaceAll(/&(#39|amp|gt|lt|quot);/g, (entity, name) => entities[name])
 }
 
 function extractHtmlAttribute(tag, attribute) {
