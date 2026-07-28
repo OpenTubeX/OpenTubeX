@@ -1,6 +1,7 @@
 import {
   SyncServerClient,
   SyncServerDataLossError,
+  isSessionExpiredError,
   normalizeSyncServerUrl,
   syncChannelPlaybackSpeeds,
   syncHistory,
@@ -336,6 +337,13 @@ async function runSync(context, { allowDataLoss = false } = {}) {
       await dispatch('setSyncServerAutoSync', false)
     }
     commit('setSyncServerProgress', null)
+    if (isSessionExpiredError(error)) {
+      // Retrying cannot help once the token is rejected, and every scheduled
+      // sync would keep failing with the same opaque message. Drop the token so
+      // automatic sync stops and the UI asks for a sign-in.
+      await dispatch('expireSyncServerSession')
+      throw error
+    }
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
     throw error
@@ -398,6 +406,21 @@ const actions = {
 
     await dispatch('startSyncServerAutoSync')
     return dispatch('syncWithSyncServer')
+  },
+
+  /**
+   * Handle the server rejecting the stored token.
+   *
+   * Only the token is cleared. The server URL, username, snapshot and privacy
+   * key are kept so that signing in again resumes where sync left off instead of
+   * re-downloading everything.
+   */
+  async expireSyncServerSession({ commit, dispatch }) {
+    await dispatch('stopSyncServerAutoSync')
+    await dispatch('updateSyncServerToken', '', { root: true })
+    commit('setSyncServerProgress', null)
+    commit('setSyncServerError', 'Sync server session expired. Sign in again to resume syncing.')
+    commit('setSyncServerStatus', 'error')
   },
 
   async disconnectSyncServer({ commit, dispatch }) {
