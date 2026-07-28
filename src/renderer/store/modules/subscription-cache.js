@@ -1,6 +1,7 @@
 import {
   DBSubscriptionCacheHandlers,
 } from '../../../datastores/handlers/index'
+import { ensureSubscriptionFeedEntryState } from '../../helpers/subscription-entries'
 
 /**
  * Electron datastore payloads are converted to plain JSON before crossing IPC,
@@ -108,7 +109,16 @@ const actions = {
     }
   },
 
-  async updateSubscriptionVideosCacheByChannel({ commit }, { channelId, videos, timestamp = new Date() }) {
+  async updateSubscriptionVideosCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
+    const previousCache = state.videoCache[channelId]
+    videos = ensureSubscriptionFeedEntryState(
+      videos,
+      previousCache?.videos,
+      'videoId',
+      previousCache?.timestamp,
+      rootGetters.getHistoryCacheById
+    )
+
     try {
       await DBSubscriptionCacheHandlers.updateVideosByChannelId(channelId, videos, timestamp)
       commit('updateVideoCacheByChannel', { channelId, entries: videos, timestamp })
@@ -135,7 +145,16 @@ const actions = {
     }
   },
 
-  async updateSubscriptionLiveCacheByChannel({ commit }, { channelId, videos, timestamp = new Date() }) {
+  async updateSubscriptionLiveCacheByChannel({ commit, state, rootGetters }, { channelId, videos, timestamp = new Date() }) {
+    const previousCache = state.liveCache[channelId]
+    videos = ensureSubscriptionFeedEntryState(
+      videos,
+      previousCache?.videos,
+      'videoId',
+      previousCache?.timestamp,
+      rootGetters.getHistoryCacheById
+    )
+
     try {
       await DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId(channelId, videos, timestamp)
       commit('updateLiveCacheByChannel', { channelId, entries: videos, timestamp })
@@ -144,7 +163,15 @@ const actions = {
     }
   },
 
-  async updateSubscriptionPostsCacheByChannel({ commit }, { channelId, posts, timestamp = new Date() }) {
+  async updateSubscriptionPostsCacheByChannel({ commit, state }, { channelId, posts, timestamp = new Date() }) {
+    const previousCache = state.postsCache[channelId]
+    posts = ensureSubscriptionFeedEntryState(
+      posts,
+      previousCache?.posts,
+      'postId',
+      previousCache?.timestamp
+    )
+
     try {
       await DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId(channelId, posts, timestamp)
       commit('updatePostsCacheByChannel', { channelId, entries: posts, timestamp })

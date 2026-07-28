@@ -120,6 +120,28 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.newContentDot')).toHaveCount(0)
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
+
+  test('keeps a new video and its menus open until the video is chosen', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'New video' })
+    await video.locator('.thumbnailLink').click({ button: 'right' })
+
+    await expect(page.getByRole('menu', { name: 'Context menu' })).toBeVisible()
+    await expect(video).toBeVisible()
+    // The broken behavior removed the card after its 200 ms leave transition.
+    await page.waitForTimeout(300)
+    await expect(page.getByRole('menu', { name: 'Context menu' })).toBeVisible()
+    await expect(video).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await video.hover()
+    await video.locator('.optionsButton').click()
+
+    await expect(video.locator('.optionsButton .iconDropdown')).toBeVisible()
+    await expect(video).toBeVisible()
+  })
 })
 
 test.describe('new feed settings and seen state', () => {
