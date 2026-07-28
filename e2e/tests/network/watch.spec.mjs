@@ -66,6 +66,33 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+test.describe('background watch tab', () => {
+  test.use({
+    seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: true
+      }
+    }
+  })
+
+  test('auto-loads comments for a video opened in the background', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await page.evaluate((route) => window.ftElectron.tabs.create({
+      route,
+      makeActive: false
+    }), '/watch/jNQXAC9IVRw')
+
+    const backgroundTab = page.locator(sel.tabs).nth(1)
+    const backgroundContent = page.locator('.tabContent[aria-hidden="true"]').nth(0)
+    await expect(backgroundContent.locator('.videoTitle')).toContainText('Me at the zoo', { timeout: 30_000 })
+    await expect(backgroundContent.locator('.commentsTitle')).toHaveCount(1, { timeout: 30_000 })
+    await expect(backgroundContent.locator('.comment')).not.toHaveCount(0, { timeout: 30_000 })
+
+    await backgroundTab.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible()
+  })
+})
+
 test.describe('watch page', () => {
   test('shows video metadata', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
