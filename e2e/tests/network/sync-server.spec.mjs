@@ -23,9 +23,12 @@ async function getSyncCapabilities() {
 }
 
 function rateLimitClient(title) {
-  const suffix = [...title]
-    .reduce((sum, character) => sum + character.charCodeAt(0), 0) % 254 + 1
-  return `192.0.2.${suffix}`
+  let hash = 2166136261
+  for (const character of title) {
+    hash ^= character.codePointAt(0)
+    hash = Math.imul(hash, 16777619)
+  }
+  return `10.${hash & 0xff}.${(hash >>> 8) & 0xff}.${(hash >>> 16) & 0xff}`
 }
 
 test.describe('OpenTubeX sync server', () => {
