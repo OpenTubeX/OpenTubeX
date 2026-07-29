@@ -631,8 +631,11 @@ function isUnresolvedWatchEntry(tab, route) {
   }
 
   const entry = tab.history[tab.historyIndex]
-  const hasPlaceholderTitle = entry?.title === route.fullPath || entry?.title === routeTitle(route)
-  return hasPlaceholderTitle && tab.contentTitle === route.fullPath
+  const placeholderTitle = routeTitle(route)
+  const hasPlaceholderTitle = entry?.title === route.fullPath || entry?.title === placeholderTitle
+  const hasPlaceholderContentTitle =
+    tab.contentTitle === route.fullPath || tab.contentTitle === placeholderTitle
+  return hasPlaceholderTitle && hasPlaceholderContentTitle
 }
 
 function getDeepestRouteComponent(route) {

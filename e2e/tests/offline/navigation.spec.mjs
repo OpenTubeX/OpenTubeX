@@ -79,7 +79,12 @@ test.describe('navigation history titles', () => {
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
-    await page.locator(sel.backButton).click()
+    await page.evaluate((backButtonSelector) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tabId = store.getters.getActiveTabId
+      store.commit('setTabContentTitle', { tabId, title: 'Watch' })
+      document.querySelector(backButtonSelector).click()
+    }, sel.backButton)
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(page.locator(sel.forwardButton)).toBeDisabled()
   })
