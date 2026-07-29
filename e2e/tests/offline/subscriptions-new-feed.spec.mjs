@@ -322,6 +322,15 @@ test.describe('new feed display filters', () => {
 })
 
 test.describe('new feed latest-per-channel limit', () => {
+  const publishedTimeShort = video('published-time-short', 'New short by published time', undefined, {
+    isNewInSubscriptionFeed: true,
+    publishedTime: now + HOUR
+  })
+  const latestLimitCache = [{
+    ...populatedCache[0],
+    shorts: [publishedTimeShort]
+  }]
+
   test.use({
     seed: {
       settings: {
@@ -330,7 +339,7 @@ test.describe('new feed latest-per-channel limit', () => {
         onlyShowLatestFromChannelNumber: 1
       },
       profiles: [profile()],
-      subscriptionCache: populatedCache
+      subscriptionCache: latestLimitCache
     }
   })
 
@@ -338,11 +347,11 @@ test.describe('new feed latest-per-channel limit', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
-    await expect(page.getByText('New live stream', { exact: true })).toBeVisible()
+    await expect(page.getByText('New short by published time', { exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
-    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
-    await expect(page.getByRole('heading', { name: 'Shorts', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Live', exact: true })).toHaveCount(0)
   })
 })
 

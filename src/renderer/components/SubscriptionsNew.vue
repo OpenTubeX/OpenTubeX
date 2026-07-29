@@ -154,7 +154,8 @@ const newMediaByCategory = computed(() => {
   }))
 
   mediaEntries.sort((a, b) => {
-    return (b.entry.published ?? 0) - (a.entry.published ?? 0)
+    return (b.entry.published ?? b.entry.publishedTime ?? 0) -
+      (a.entry.published ?? a.entry.publishedTime ?? 0)
   })
 
   if (store.getters.getOnlyShowLatestFromChannel) {
