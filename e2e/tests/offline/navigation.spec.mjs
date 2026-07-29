@@ -73,4 +73,28 @@ test.describe('navigation history titles', () => {
     await expect(options.filter({ hasText: 'Me at the zoo' })).toHaveCount(1)
     await expect(options.filter({ hasText: '/watch/jNQXAC9IVRw' })).toHaveCount(0)
   })
+
+  test('removes an untitled watch entry when navigating back before it loads', async ({ page }) => {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await expect(page.locator(sel.forwardButton)).toBeDisabled()
+  })
+
+  test('removes an untitled watch entry when navigating to another page', async ({ page }) => {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await page.getByRole('link', { name: 'Go to Subscriptions' }).click()
+    await expect(page).toHaveURL(/#\/subscriptions/)
+    await page.locator(sel.backButton).click({ button: 'right' })
+
+    const options = page.locator('.topNav .iconDropdown [role="option"]')
+    await expect(options).toHaveCount(2)
+    await expect(options.filter({ hasText: 'Watch' })).toHaveCount(0)
+  })
 })

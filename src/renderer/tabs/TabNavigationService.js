@@ -243,6 +243,7 @@ export class TabNavigationService {
     const sameRoute = route.fullPath === tab.route.fullPath
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
     const preserveScroll = location?.state?.preserveScroll === true
+    const discardCurrentEntry = !sameRoute && isUnresolvedWatchEntry(tab, from)
 
     if (mode === 'push' && sameRoute) {
       return
@@ -281,6 +282,12 @@ export class TabNavigationService {
       if (mode === 'history') {
         history = tab.history.map(cloneHistoryEntry)
         historyIndex = historyTargetIndex
+        if (discardCurrentEntry) {
+          history.splice(tab.historyIndex, 1)
+          if (historyIndex > tab.historyIndex) {
+            historyIndex--
+          }
+        }
       } else if (mode === 'replace') {
         history = tab.history.map(cloneHistoryEntry)
         historyIndex = tab.historyIndex
@@ -292,7 +299,8 @@ export class TabNavigationService {
             : { left: 0, top: 0 }
         }
       } else {
-        history = tab.history.slice(0, tab.historyIndex + 1).map(cloneHistoryEntry)
+        const historyEnd = discardCurrentEntry ? tab.historyIndex : tab.historyIndex + 1
+        history = tab.history.slice(0, historyEnd).map(cloneHistoryEntry)
         history.push({
           route: cloneRoute(route),
           title: initialTitle || routeTitle(to),
@@ -615,6 +623,16 @@ function routeTitle(route) {
   return typeof route.meta?.title === 'string'
     ? translateWindowTitle(route.meta.title) ?? route.meta.title
     : route.fullPath
+}
+
+function isUnresolvedWatchEntry(tab, route) {
+  if (!route.path.startsWith('/watch/')) {
+    return false
+  }
+
+  const entry = tab.history[tab.historyIndex]
+  const hasPlaceholderTitle = entry?.title === route.fullPath || entry?.title === routeTitle(route)
+  return hasPlaceholderTitle && tab.contentTitle === route.fullPath
 }
 
 function getDeepestRouteComponent(route) {
