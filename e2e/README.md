@@ -27,7 +27,7 @@ mobile layout and breaks selectors.
   Seed settings/datastores per file via `test.use({ seed: { ... } })`.
   The main process honours `OPENTUBEX_E2E_USER_DATA_DIR` for isolation.
 - `helpers/innertube.mjs` – record/replay for Innertube requests (see below).
-- `tests/offline/` – must pass without any external network. Runs on every PR.
+- `tests/offline/` – must pass without any external network.
 - `tests/network/` – requires YouTube. Runs nightly and via workflow dispatch.
 - `fixtures/innertube/` – gzipped recorded Innertube responses, committed to git.
 
@@ -67,10 +67,11 @@ E2E_USE_FIXTURES=1 pnpm run test:e2e:network
 
 `.github/workflows/e2e.yml`:
 
-- **Pull requests** → full offline and network suites (blocking).
+- **Pull requests** → changed test files and tests importing changed helpers.
 - **Nightly** → full offline and network suites.
 - **Manual dispatch** → all suites by default, or an individual suite.
 
+Pull requests without changed or affected E2E tests pass without running tests.
 Network tests use the fixture fallback on retry.
 
 On failure the Playwright HTML report and traces are uploaded as artifacts.

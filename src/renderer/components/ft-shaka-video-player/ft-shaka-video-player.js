@@ -49,6 +49,11 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
+import {
+  FULLSCREEN_DOCK_GAP,
+  FULLSCREEN_DOCK_OUTER_INSET,
+  toggleFullscreenDockCollapsed,
+} from '../../helpers/fullscreenDocks'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
@@ -100,9 +105,6 @@ const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
 const FULLSCREEN_DOCK_COMPACT_MIN_HEIGHT = 96
-const FULLSCREEN_DOCK_COLLAPSED_HEIGHT = 60
-const FULLSCREEN_DOCK_OUTER_INSET = 12
-const FULLSCREEN_DOCK_GAP = 12
 const FULLSCREEN_DOCK_HEADER_SELECTOR = [
   '.chapterOverlayHeader',
   '.fullscreenMetadataHeader',
@@ -630,36 +632,21 @@ export default defineComponent({
       const target = event.target instanceof Element ? event.target : null
       const header = target?.closest(FULLSCREEN_DOCK_HEADER_SELECTOR)
       const interactiveTarget = target?.closest('button, a, input, select, textarea, [role="button"]')
-      const openDocks = getFullscreenOpenDocks()
-      const index = openDocks.indexOf(dock)
-      if (!header || interactiveTarget || !event.currentTarget.contains(header) || openDocks.length < 2) {
+      if (!header || interactiveTarget || !event.currentTarget.contains(header)) {
         return
       }
 
-      const savedState = fullscreenDockCollapsedState[dock]
-      const neighbor = savedState && openDocks.includes(savedState.neighbor)
-        ? savedState.neighbor
-        : openDocks[index + 1] ?? openDocks[index - 1]
-      if (savedState) {
-        const restoredWeight = savedState.weight
-        fullscreenDockWeights[neighbor] -= restoredWeight - fullscreenDockWeights[dock]
-        fullscreenDockWeights[dock] = restoredWeight
-        fullscreenDockCollapsedState[dock] = null
-      } else {
-        const totalWeight = openDocks.reduce((total, name) => total + fullscreenDockWeights[name], 0)
-        const panelChrome = index === 0 || index === openDocks.length - 1
-          ? FULLSCREEN_DOCK_OUTER_INSET + FULLSCREEN_DOCK_GAP / 2
-          : FULLSCREEN_DOCK_GAP
-        const collapsedWeight = (FULLSCREEN_DOCK_COLLAPSED_HEIGHT + panelChrome) /
-          container.value.clientHeight * totalWeight
-        fullscreenDockCollapsedState[dock] = {
-          neighbor,
-          weight: fullscreenDockWeights[dock],
-        }
-        fullscreenDockWeights[neighbor] += fullscreenDockWeights[dock] - collapsedWeight
-        fullscreenDockWeights[dock] = collapsedWeight
+      const toggled = toggleFullscreenDockCollapsed(
+        getFullscreenOpenDocks(),
+        dock,
+        fullscreenDockWeights,
+        fullscreenDockCollapsedState,
+        container.value.clientHeight
+      )
+
+      if (toggled) {
+        event.preventDefault()
       }
-      event.preventDefault()
     }
 
     function setFullscreenDockBoundary(dock, firstWeight) {
