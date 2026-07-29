@@ -153,7 +153,12 @@ const mutations = {
     }
   },
 
-  setTabContentTitle(state, { tabId, title, skipHistoryEntry = false }) {
+  setTabContentTitle(state, {
+    tabId,
+    title,
+    skipHistoryEntry = false,
+    resolveHistoryEntry = true
+  }) {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
     if (!tab) {
       return
@@ -165,6 +170,9 @@ const mutations = {
     }
     const entry = tab.history[tab.historyIndex]
     if (entry) {
+      if (resolveHistoryEntry) {
+        entry.titlePending = false
+      }
       const resolvedTitle = title || entry.route.fullPath
       // A caller can provide a title it already knows before a dynamic page
       // finishes loading. Do not replace that useful history label with the
@@ -400,6 +408,7 @@ function normalizeHistoryEntry(entry) {
   return {
     route: cloneRoute(entry?.route),
     title: typeof entry?.title === 'string' ? entry.title : entry?.route?.fullPath || '/',
+    titlePending: entry?.titlePending === true,
     scroll: normalizeScroll(entry?.scroll)
   }
 }

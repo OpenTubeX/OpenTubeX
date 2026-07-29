@@ -47,7 +47,7 @@ test.describe('navigation history titles', () => {
       history: [{
         _id: 'jNQXAC9IVRw',
         videoId: 'jNQXAC9IVRw',
-        title: 'Me at the zoo',
+        title: 'Watch',
         author: 'jawed',
         authorId: 'UC4QobU6STFB0P71PMvOGN5A',
         published: 0,
@@ -60,7 +60,7 @@ test.describe('navigation history titles', () => {
     }
   })
 
-  test('keeps a known video title when navigating away before it loads', async ({ page }) => {
+  test('keeps a known video titled Watch when navigating away before it loads', async ({ page }) => {
     await goTo(page, 'history')
     await page.locator('.ft-list-video .title').click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -70,7 +70,7 @@ test.describe('navigation history titles', () => {
     await page.locator(sel.forwardButton).click({ button: 'right' })
 
     const options = page.locator('.topNav .iconDropdown [role="option"]')
-    await expect(options.filter({ hasText: 'Me at the zoo' })).toHaveCount(1)
+    await expect(options.filter({ hasText: 'Watch' })).toHaveCount(1)
     await expect(options.filter({ hasText: '/watch/jNQXAC9IVRw' })).toHaveCount(0)
   })
 
@@ -82,11 +82,49 @@ test.describe('navigation history titles', () => {
     await page.evaluate((backButtonSelector) => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const tabId = store.getters.getActiveTabId
-      store.commit('setTabContentTitle', { tabId, title: 'Watch' })
+      store.commit('setTabContentTitle', {
+        tabId,
+        title: 'Watch',
+        resolveHistoryEntry: false
+      })
       document.querySelector(backButtonSelector).click()
     }, sel.backButton)
     await expect(page).toHaveURL(/#\/subscriptions/)
     await expect(page.locator(sel.forwardButton)).toBeDisabled()
+  })
+
+  test('removes an untitled watch entry when navigating forward past it', async ({ page }) => {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tab = store.getters.getActiveTab
+      tab.history[tab.historyIndex].titlePending = false
+    })
+    await page.locator(sel.sideNavLink('settings')).first().evaluate(link => link.click())
+    await expect(page).toHaveURL(/#\/settings/)
+    await page.locator(sel.backButton).click()
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await page.evaluate((forwardButtonSelector) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const tab = store.getters.getActiveTab
+      tab.history[tab.historyIndex].titlePending = true
+      store.commit('setTabContentTitle', {
+        tabId: tab.id,
+        title: 'Watch',
+        resolveHistoryEntry: false
+      })
+      document.querySelector(forwardButtonSelector).click()
+    }, sel.forwardButton)
+    await expect(page).toHaveURL(/#\/settings/)
+
+    await page.locator(sel.backButton).click({ button: 'right' })
+    const options = page.locator('.topNav .iconDropdown [role="option"]')
+    await expect(options).toHaveCount(2)
+    await expect(options.filter({ hasText: 'Watch' })).toHaveCount(0)
   })
 
   test('removes an untitled watch entry when navigating to another page', async ({ page }) => {

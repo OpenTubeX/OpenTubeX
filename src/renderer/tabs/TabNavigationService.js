@@ -243,6 +243,7 @@ export class TabNavigationService {
     const sameRoute = route.fullPath === tab.route.fullPath
     const preserveContentTitle = location?.state?.skipTabRouteLoading === true
     const preserveScroll = location?.state?.preserveScroll === true
+    const titlePending = initialTitle === null && route.path.startsWith('/watch/')
     const discardCurrentEntry = !sameRoute && isUnresolvedWatchEntry(tab, from)
 
     if (mode === 'push' && sameRoute) {
@@ -294,6 +295,9 @@ export class TabNavigationService {
         history[historyIndex] = {
           route: cloneRoute(route),
           title: history[historyIndex]?.title || routeTitle(to),
+          titlePending: sameRoute
+            ? history[historyIndex]?.titlePending === true
+            : titlePending,
           scroll: sameRoute || preserveScroll
             ? { ...history[historyIndex]?.scroll }
             : { left: 0, top: 0 }
@@ -304,6 +308,7 @@ export class TabNavigationService {
         history.push({
           route: cloneRoute(route),
           title: initialTitle || routeTitle(to),
+          titlePending,
           scroll: { left: 0, top: 0 }
         })
         if (history.length > MAX_LOGICAL_HISTORY_ENTRIES) {
@@ -319,7 +324,7 @@ export class TabNavigationService {
         if (initialTitle) {
           this.setTitle(tabId, initialTitle)
         } else if (typeof to.name === 'string') {
-          this.setTitle(tabId, routeTitle(to))
+          this.setTitle(tabId, routeTitle(to), { resolveHistoryEntry: false })
         }
         this.publishRoute(tabId, route)
 
@@ -461,13 +466,25 @@ export class TabNavigationService {
     }
   }
 
-  setTitle(tabId, title, { skipHistoryEntry = false } = {}) {
+  setTitle(tabId, title, { skipHistoryEntry = false, resolveHistoryEntry = true } = {}) {
     if (typeof title !== 'string') {
       return
     }
 
-    this.store.commit('setTabContentTitle', { tabId, title, skipHistoryEntry })
+    const tab = this.store.getters.getTabById(tabId)
+    const resolvedPendingEntry = !skipHistoryEntry &&
+      resolveHistoryEntry &&
+      tab?.history[tab.historyIndex]?.titlePending === true
+    this.store.commit('setTabContentTitle', {
+      tabId,
+      title,
+      skipHistoryEntry,
+      resolveHistoryEntry
+    })
     window.ftElectron?.tabs?.updateTitle?.(formatDocumentTitle(title), tabId)
+    if (resolvedPendingEntry) {
+      this.publishHistory(tabId)
+    }
 
     if (this.store.getters.getPresentedTabId === tabId) {
       this.store.commit('setAppTitle', title)
@@ -615,6 +632,7 @@ function cloneHistoryEntry(entry) {
   return {
     route: cloneRoute(entry.route),
     title: entry.title,
+    titlePending: entry.titlePending === true,
     scroll: { ...entry.scroll }
   }
 }
@@ -626,16 +644,8 @@ function routeTitle(route) {
 }
 
 function isUnresolvedWatchEntry(tab, route) {
-  if (!route.path.startsWith('/watch/')) {
-    return false
-  }
-
-  const entry = tab.history[tab.historyIndex]
-  const placeholderTitle = routeTitle(route)
-  const hasPlaceholderTitle = entry?.title === route.fullPath || entry?.title === placeholderTitle
-  const hasPlaceholderContentTitle =
-    tab.contentTitle === route.fullPath || tab.contentTitle === placeholderTitle
-  return hasPlaceholderTitle && hasPlaceholderContentTitle
+  return route.path.startsWith('/watch/') &&
+    tab.history[tab.historyIndex]?.titlePending === true
 }
 
 function getDeepestRouteComponent(route) {

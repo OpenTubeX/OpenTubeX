@@ -168,6 +168,7 @@ export default defineComponent({
       thumbnail: '',
       videoId: '',
       videoTitle: '',
+      hasResolvedVideoTitle: false,
       videoDescription: '',
       videoDescriptionHtml: '',
       videoCategory: '',
@@ -908,6 +909,9 @@ export default defineComponent({
     resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
       const previousVideoTitle = this.videoTitle
 
+      if (!preserveTitle) {
+        this.hasResolvedVideoTitle = false
+      }
       this.playlistScrollPositions.sidebar = null
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
@@ -1094,6 +1098,7 @@ export default defineComponent({
           // extract localised title first and fall back to the not localised one
           this.videoTitle = result.primary_info?.title?.text?.trim() ?? result.basic_info.title?.trim() ?? ''
         }
+        this.hasResolvedVideoTitle = this.videoTitle.length > 0
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
 
@@ -1575,6 +1580,7 @@ export default defineComponent({
           }
 
           this.videoTitle = result.title
+          this.hasResolvedVideoTitle = this.videoTitle.length > 0
           this.videoViewCount = result.viewCount
 
           const subCount = parseLocalSubscriberCount(result.subCountText)
@@ -3001,7 +3007,10 @@ export default defineComponent({
     },
 
     updateTitle: function () {
-      this.setTabTitle(this.videoTitle || this.getRoutePlaceholderTitle())
+      this.setTabTitle(
+        this.videoTitle || this.getRoutePlaceholderTitle(),
+        { resolveHistoryEntry: this.hasResolvedVideoTitle }
+      )
     },
 
     isHiddenVideo: function (forbiddenTitles, channelsHidden, video) {
