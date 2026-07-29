@@ -126,13 +126,18 @@
               <font-awesome-icon :icon="['fas', 'thumbs-down']" />
             </button>
             <button
+              v-if="!isSponsorBlockFullVideoSegment(segment)"
               type="button"
               class="sponsorBlockVoteButton sponsorBlockSkipButton"
-              :aria-label="$t('Video.Player.SponsorBlock.SkipSegment')"
-              :title="$t('Video.Player.SponsorBlock.SkipSegment')"
+              :aria-label="segment.actionType === 'mute'
+                ? $t('Video.Player.SponsorBlock.MuteSegment')
+                : $t('Video.Player.SponsorBlock.SkipSegment')"
+              :title="segment.actionType === 'mute'
+                ? $t('Video.Player.SponsorBlock.MuteSegment')
+                : $t('Video.Player.SponsorBlock.SkipSegment')"
               @click="$emit('skip', segment.uuid)"
             >
-              <font-awesome-icon :icon="['fas', 'forward-fast']" />
+              <font-awesome-icon :icon="['fas', segment.actionType === 'mute' ? 'volume-xmark' : 'forward-fast']" />
             </button>
           </div>
         </div>
@@ -211,6 +216,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { isSponsorBlockFullVideoSegment } from '../../helpers/player/sponsorBlockFullVideo'
 
 const props = defineProps({
   autoSkipDisabled: Boolean,
@@ -241,6 +247,10 @@ function selectSegment(uuid) {
 }
 
 function isSegmentPassed(segment) {
+  if (isSponsorBlockFullVideoSegment(segment)) {
+    return false
+  }
+
   const endTime = segment.actionType === 'poi' ? segment.startTime : segment.endTime
   return Number.isFinite(endTime) && props.currentTime >= endTime
 }

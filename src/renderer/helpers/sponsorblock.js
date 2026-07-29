@@ -1,8 +1,11 @@
 import store from '../store/index'
 import packageDetails from '../../../package.json'
+import { selectSponsorBlockFullVideoLabel } from './player/sponsorBlockFullVideo'
 
 const SPONSOR_BLOCK_ID_CHARSET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 const SPONSOR_BLOCK_USER_ID_LENGTH = 30
+const SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE = 256
+const sponsorBlockVideoLabelCache = new Map()
 
 function generateSponsorBlockUserId() {
   const randomValues = new Uint32Array(SPONSOR_BLOCK_USER_ID_LENGTH)
@@ -24,7 +27,7 @@ async function getVideoHash(videoId) {
 }
 
 /**
- * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'hook' | 'music_offtopic' | 'filler' | 'poi_highlight' | 'chapter'} SponsorBlockCategory
+ * @typedef {'sponsor' | 'selfpromo' | 'interaction' | 'intro' | 'outro' | 'preview' | 'hook' | 'music_offtopic' | 'filler' | 'poi_highlight' | 'exclusive_access' | 'chapter'} SponsorBlockCategory
  */
 
 /**
@@ -76,6 +79,59 @@ export async function sponsorBlockSkipSegments(videoId, categories, actionTypes 
     console.error('failed to fetch SponsorBlock segments', requestUrl, error)
     throw error
   }
+}
+
+/**
+ * @param {string} videoId
+ * @returns {Promise<{
+ *   UUID: string,
+ *   actionType: 'full',
+ *   category: 'sponsor' | 'exclusive_access' | 'selfpromo',
+ *   locked: 1|0,
+ *   segment: [0, 0],
+ *   videoDuration: number,
+ *   votes: number
+ * } | null>}
+ */
+export async function getSponsorBlockVideoLabel(videoId) {
+  const sponsorBlockUrl = store.getters.getSponsorBlockUrl
+  const cacheKey = `${sponsorBlockUrl}:${videoId}`
+  const cachedLabel = sponsorBlockVideoLabelCache.get(cacheKey)
+
+  if (cachedLabel) {
+    return cachedLabel
+  }
+
+  const request = (async () => {
+    const videoIdHashPrefix = await getVideoHash(videoId)
+    const requestUrl = `${sponsorBlockUrl}/api/videoLabels/${videoIdHashPrefix}`
+
+    try {
+      const response = await fetch(requestUrl)
+      if (response.status === 404) {
+        return null
+      }
+
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+
+      const results = await response.json()
+      const segments = results.find(result => result.videoID === videoId)?.segments ?? []
+      return selectSponsorBlockFullVideoLabel(segments)
+    } catch (error) {
+      sponsorBlockVideoLabelCache.delete(cacheKey)
+      console.error('failed to fetch SponsorBlock video label', requestUrl, error)
+      throw error
+    }
+  })()
+
+  if (sponsorBlockVideoLabelCache.size >= SPONSOR_BLOCK_VIDEO_LABEL_CACHE_SIZE) {
+    sponsorBlockVideoLabelCache.delete(sponsorBlockVideoLabelCache.keys().next().value)
+  }
+  sponsorBlockVideoLabelCache.set(cacheKey, request)
+
+  return request
 }
 
 export async function deArrowData(videoId) {
@@ -158,7 +214,7 @@ export async function getOrCreateSponsorBlockUserId() {
  * @param {{
  *   segment: [number, number]
  *   category: SponsorBlockCategory
- *   actionType: 'skip' | 'poi'
+ *   actionType: 'skip' | 'mute' | 'full' | 'poi'
  *   description: string
  * }[]} segments
  */

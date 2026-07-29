@@ -132,6 +132,8 @@ export function translateSponsorBlockCategory(category) {
       return i18n.global.t('Video.Sponsor Block category.filler')
     case 'poi_highlight':
       return i18n.global.t('Video.Sponsor Block category.highlight')
+    case 'exclusive_access':
+      return i18n.global.t('Video.Sponsor Block category.exclusive access')
     default:
       console.error(`Unknown translation for SponsorBlock category ${category}`)
       return category
