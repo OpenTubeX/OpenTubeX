@@ -1201,12 +1201,24 @@ test.describe('custom Shorts player', () => {
     await expect(page.locator('.shortsExternalMetadata')).toBeVisible()
     await expect(page.locator('.shortsActionRail')).toBeVisible()
 
-    const commentsButton = page.getByRole('button', { name: 'Show Comments' })
+    const commentsButton = page.locator('.shortsCommentsAction').getByRole('button')
     await commentsButton.click()
     const commentsPanel = page.locator('.shortsCommentsPanel')
     await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+    const commentsScroller = commentsPanel.locator('.commentsContentWrapper')
+    await commentsScroller.evaluate(element => {
+      const overflowProbe = document.createElement('div')
+      overflowProbe.style.blockSize = '2000px'
+      element.append(overflowProbe)
+    })
+    await expect.poll(() => commentsScroller.evaluate(element => {
+      return element.scrollHeight > element.clientHeight
+    })).toBe(true)
+    const commentsScrollTop = await commentsScroller.evaluate(element => element.scrollTop)
     await commentsPanel.hover()
     await page.mouse.wheel(0, 120)
+    await expect.poll(() => commentsScroller.evaluate(element => element.scrollTop))
+      .toBeGreaterThan(commentsScrollTop)
     await expect(page).toHaveURL(
       /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
     )
@@ -1214,7 +1226,7 @@ test.describe('custom Shorts player', () => {
     await expect(page).toHaveURL(
       /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
     )
-    await page.getByRole('button', { name: 'Hide Comments' }).click()
+    await commentsPanel.getByRole('button', { name: 'Hide Comments' }).click()
 
     const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =
       await Promise.all([
@@ -1249,6 +1261,22 @@ test.describe('custom Shorts player', () => {
       /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
     )
     expect(await page.evaluate(() => window.__shortsNavigationDisappeared)).toBe(false)
+
+    await page.waitForTimeout(500)
+    await page.keyboard.press('ArrowUp')
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    await page.waitForTimeout(500)
+    // Browser middle-button autoscroll moves the window instead of emitting a
+    // wheel event, so window scrolling must navigate Shorts too.
+    await page.evaluate(() => window.scrollTo({
+      top: document.documentElement.scrollHeight
+    }))
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
 
     await page.waitForTimeout(500)
     await page.keyboard.press('ArrowUp')

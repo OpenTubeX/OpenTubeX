@@ -78,6 +78,9 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await page.evaluate(() => {
     const player = document.createElement('div')
     const control = document.createElement('button')
+    const volume = document.createElement('div')
+    const volumeButton = document.createElement('button')
+    const volumeSlider = document.createElement('input')
 
     player.className = 'ftVideoPlayer shortsPlayer'
     player.style.backgroundColor = '#fff'
@@ -87,14 +90,27 @@ test('Shorts top controls stay visible over white video content', async ({ page 
     player.style.zIndex = '10000'
     control.className = 'shortsTopControl'
     control.textContent = '⋮'
-    player.append(control)
+    volume.className = 'shortsVolumeControl'
+    volumeButton.className = 'shortsTopControl'
+    volumeButton.textContent = '🔊'
+    volumeSlider.className = 'shortsVolumeSlider'
+    volumeSlider.type = 'range'
+    volume.append(volumeButton, volumeSlider)
+    player.append(control, volume)
     document.body.append(player)
   })
 
-  const control = page.locator('.shortsTopControl')
+  const control = page.locator('.shortsTopControl').first()
   await expect(control).toHaveCSS('backdrop-filter', /blur\(8px\)/)
   await control.hover()
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.68)')
+
+  const volume = page.locator('.shortsVolumeControl')
+  const volumeButton = volume.locator('.shortsTopControl')
+  await volume.hover()
+  await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.58)')
+  await expect(volumeButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
 })
 
 test.describe('history reorder animation', () => {

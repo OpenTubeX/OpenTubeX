@@ -606,6 +606,10 @@
       transform: translateX(0);
     }
 
+    .shortsCommentsPanel :deep(.fullscreenCommentCard) {
+      block-size: 100%;
+    }
+
     .shortsAuxPanelOpen {
       display: flex;
       opacity: 1;
