@@ -4,7 +4,13 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-const NOTEWORTHY_LABEL = 'noteworthy-for-release'
+const NOT_NOTEWORTHY_CATEGORY = 'Not noteworthy'
+const RELEASE_NOTE_CATEGORIES = new Map([
+  ['Highlights', '# Highlights'],
+  ['More improvements', '## More improvements'],
+  ['Fixed bugs', '## Fixed bugs'],
+])
+const RELEASE_NOTE_CATEGORY_MARKER = 'release-note-category'
 const RELEASE_NOTE_MARKER = 'release-note'
 const RELEASE_IMAGE_MARKER = 'release-note-image'
 const MAX_IMAGE_HEIGHT = 300
@@ -105,16 +111,42 @@ export function parseReleaseNote(body) {
   return { image, note }
 }
 
+export function parseReleaseNoteCategory(body) {
+  const section = extractMarkedSection(body, RELEASE_NOTE_CATEGORY_MARKER)
+
+  if (!section) { throw new Error('Select one release note category.') }
+
+  const selected = [...section.matchAll(/^\s*-\s*\[[xX]\]\s+(.+?)\s*$/gm)]
+    .map((match) => match[1])
+
+  if (selected.length !== 1) { throw new Error('Select exactly one release note category.') }
+
+  const category = selected[0]
+
+  if (category !== NOT_NOTEWORTHY_CATEGORY && !RELEASE_NOTE_CATEGORIES.has(category)) {
+    throw new Error(`Unknown release note category: ${category}.`)
+  }
+
+  return category
+}
+
+function parsePullRequestReleaseNote(body) {
+  const category = parseReleaseNoteCategory(body)
+
+  if (category === NOT_NOTEWORTHY_CATEGORY) { return { category } }
+
+  return {
+    category,
+    ...parseReleaseNote(body),
+  }
+}
+
 export function validatePullRequestEvent(event) {
   const pullRequest = event.pull_request
 
   if (!pullRequest) { throw new Error('The event does not contain a pull request.') }
 
-  const isNoteworthy = pullRequest.labels.some(({ name }) => name === NOTEWORTHY_LABEL)
-
-  if (!isNoteworthy) { return null }
-
-  return parseReleaseNote(pullRequest.body ?? '')
+  return parsePullRequestReleaseNote(pullRequest.body ?? '')
 }
 
 function readUInt24LE(buffer, offset) {
@@ -279,7 +311,7 @@ export function selectPullRequests(pullRequests, previousTag, target) {
     .sort((left, right) => left.mergedAt.localeCompare(right.mergedAt))
 }
 
-function listNoteworthyPullRequests(repository, target) {
+function listMergedPullRequests(repository, target) {
   const output = execFileSync('gh', [
     'pr',
     'list',
@@ -289,8 +321,6 @@ function listNoteworthyPullRequests(repository, target) {
     'merged',
     '--base',
     target,
-    '--label',
-    NOTEWORTHY_LABEL,
     '--limit',
     '1000',
     '--json',
@@ -305,40 +335,48 @@ function indentContinuationLines(value) {
 }
 
 export async function renderReleaseNotes(pullRequests, loadImage = downloadImage) {
-  if (pullRequests.length === 0) { throw new Error('No noteworthy pull requests were found between the selected refs.') }
-
-  const highlights = []
+  const sections = new Map([...RELEASE_NOTE_CATEGORIES.keys()].map((category) => [category, []]))
 
   for (const pullRequest of pullRequests) {
     let parsed
 
     try {
-      parsed = parseReleaseNote(pullRequest.body ?? '')
+      parsed = parsePullRequestReleaseNote(pullRequest.body ?? '')
     } catch (error) {
       throw new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
     }
 
-    let highlight = `- ${indentContinuationLines(parsed.note)}`
+    if (parsed.category === NOT_NOTEWORTHY_CATEGORY) { continue }
+
+    let releaseNote = `- ${indentContinuationLines(parsed.note)}`
 
     if (parsed.image) {
       try {
-        highlight += `\n  ${await normalizeReleaseImage(parsed.image, pullRequest.title, loadImage)}`
+        releaseNote += `\n  ${await normalizeReleaseImage(parsed.image, pullRequest.title, loadImage)}`
       } catch (error) {
         throw new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
       }
     }
 
-    highlights.push(highlight)
+    sections.get(parsed.category).push(releaseNote)
   }
 
-  return `# Highlights\n\n${highlights.join('\n\n')}\n`
+  const renderedSections = [...RELEASE_NOTE_CATEGORIES]
+    .filter(([category]) => sections.get(category).length > 0)
+    .map(([category, heading]) => `${heading}\n\n${sections.get(category).join('\n')}`)
+
+  if (renderedSections.length === 0) {
+    throw new Error('No noteworthy pull requests were found between the selected refs.')
+  }
+
+  return `${renderedSections.join('\n\n')}\n`
 }
 
 async function validateEvent(eventPath) {
   const event = JSON.parse(fs.readFileSync(eventPath, 'utf8'))
   const releaseNote = validatePullRequestEvent(event)
 
-  if (releaseNote) { console.log('Release note is valid.') } else { console.log(`PR does not have the ${NOTEWORTHY_LABEL} label.`) }
+  console.log(`Release note category is valid: ${releaseNote.category}.`)
 }
 
 async function generate(outputPath) {
@@ -351,12 +389,12 @@ async function generate(outputPath) {
     throw new Error('GITHUB_REPOSITORY, PREVIOUS_TAG, TARGET_BRANCH, and TARGET_SHA are required.')
   }
 
-  const pullRequests = listNoteworthyPullRequests(repository, targetBranch)
+  const pullRequests = listMergedPullRequests(repository, targetBranch)
   const selectedPullRequests = selectPullRequests(pullRequests, previousTag, targetSha)
   const releaseNotes = await renderReleaseNotes(selectedPullRequests)
 
   fs.writeFileSync(outputPath, releaseNotes)
-  console.log(`Wrote ${selectedPullRequests.length} highlights to ${outputPath}.`)
+  console.log(`Processed ${selectedPullRequests.length} pull requests and wrote ${outputPath}.`)
 }
 
 async function main() {

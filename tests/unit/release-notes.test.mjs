@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   normalizeReleaseImage,
   parseReleaseNote,
+  parseReleaseNoteCategory,
   probeImageSize,
   renderReleaseNotes,
   validateDownloadedImageUrl,
@@ -14,6 +15,15 @@ const NOTE_MARKERS = `
 <!-- release-note:start -->
 Adds a compact player.
 <!-- release-note:end -->
+`
+
+const categoryMarkers = (category) => `
+<!-- release-note-category:start -->
+- [${category === 'Not noteworthy' ? 'x' : ' '}] Not noteworthy
+- [${category === 'Highlights' ? 'x' : ' '}] Highlights
+- [${category === 'More improvements' ? 'x' : ' '}] More improvements
+- [${category === 'Fixed bugs' ? 'x' : ' '}] Fixed bugs
+<!-- release-note-category:end -->
 `
 
 function png(width, height) {
@@ -60,18 +70,33 @@ function webp(type, width, height) {
   return buffer
 }
 
-test('release notes are required only for noteworthy pull requests', () => {
-  assert.equal(validatePullRequestEvent({
+test('every pull request requires exactly one release note category', () => {
+  assert.deepEqual(validatePullRequestEvent({
     pull_request: {
-      body: '',
-      labels: [],
+      body: categoryMarkers('Not noteworthy'),
     },
-  }), null)
+  }), {
+    category: 'Not noteworthy',
+  })
 
   assert.throws(() => validatePullRequestEvent({
     pull_request: {
       body: '',
-      labels: [{ name: 'noteworthy-for-release' }],
+    },
+  }), /Select one release note category/)
+
+  assert.throws(() => parseReleaseNoteCategory(`
+<!-- release-note-category:start -->
+- [x] Highlights
+- [x] Fixed bugs
+<!-- release-note-category:end -->
+`), /Select exactly one release note category/)
+})
+
+test('release notes are required for noteworthy categories', () => {
+  assert.throws(() => validatePullRequestEvent({
+    pull_request: {
+      body: categoryMarkers('Highlights'),
     },
   }), /Fill in the release note section/)
 })
@@ -197,10 +222,11 @@ test('images up to 300 pixels have no dimensions', async () => {
   )
 })
 
-test('release notes render as highlights with normalized image tags', async () => {
+test('release notes render under their selected categories', async () => {
   const result = await renderReleaseNotes([
     {
       body: `
+${categoryMarkers('Highlights')}
 ${NOTE_MARKERS}
 <!-- release-note-image:start -->
 <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="800" height="600">
@@ -211,12 +237,28 @@ ${NOTE_MARKERS}
     },
     {
       body: `
+${categoryMarkers('More improvements')}
 <!-- release-note:start -->
 Adds keyboard shortcuts.
 <!-- release-note:end -->
 `,
       number: 43,
       title: 'Keyboard shortcuts',
+    },
+    {
+      body: `
+${categoryMarkers('Fixed bugs')}
+<!-- release-note:start -->
+Fixed videos failing to load.
+<!-- release-note:end -->
+`,
+      number: 44,
+      title: 'Fix video loading',
+    },
+    {
+      body: categoryMarkers('Not noteworthy'),
+      number: 45,
+      title: 'Refactor tests',
     },
   ], async () => png(800, 600))
 
@@ -225,6 +267,41 @@ Adds keyboard shortcuts.
 - Adds a compact player.
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" height="300">
 
+## More improvements
+
 - Adds keyboard shortcuts.
+
+## Fixed bugs
+
+- Fixed videos failing to load.
 `)
+})
+
+test('empty release note categories are omitted', async () => {
+  const result = await renderReleaseNotes([
+    {
+      body: `
+${categoryMarkers('Fixed bugs')}
+${NOTE_MARKERS}
+`,
+      number: 42,
+      title: 'Compact player',
+    },
+  ])
+
+  assert.equal(result, `## Fixed bugs
+
+- Adds a compact player.
+`)
+})
+
+test('a release with only non-noteworthy pull requests is rejected', async () => {
+  await assert.rejects(
+    renderReleaseNotes([{
+      body: categoryMarkers('Not noteworthy'),
+      number: 42,
+      title: 'Refactor tests',
+    }]),
+    /No noteworthy pull requests/,
+  )
 })

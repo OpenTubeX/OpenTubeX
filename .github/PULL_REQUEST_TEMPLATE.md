@@ -20,9 +20,18 @@
 ## Screenshots <!-- If appropriate -->
 <!-- Please add before and after screenshots if there is a visible change. -->
 
+## Release note category
+<!-- Select exactly one category. Every pull request must select one. -->
+<!-- release-note-category:start -->
+- [ ] Not noteworthy
+- [ ] Highlights
+- [ ] More improvements
+- [ ] Fixed bugs
+<!-- release-note-category:end -->
+
 ## Release note
-<!-- Required when the PR has the `noteworthy-for-release` label. -->
-<!-- Write one concise, user-facing highlight without a leading bullet. -->
+<!-- Required unless "Not noteworthy" is selected. -->
+<!-- Write one concise, user-facing entry without a leading bullet. -->
 <!-- release-note:start -->
 
 <!-- release-note:end -->
