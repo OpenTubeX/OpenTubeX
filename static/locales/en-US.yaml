@@ -361,7 +361,6 @@ Settings:
     Open Deep Links In New Window: Open URLs Passed to OpenTubeX in a New Window
     Minimize to system tray: Minimize to system tray
     Remember Tab Navigation History: Remember Tab Navigation History
-    Show Tab Icons: Show Tab Icons
     Auto Load Next Page:
       Label: Auto Load Next Page
       Tooltip: Load additional pages and comments automatically.
@@ -386,14 +385,6 @@ Settings:
       System: System
       Force On: Force on
       Force Off: Force off
-    Toast Position:
-      Toast Position: Toast Position
-      Bottom Left: Bottom left
-      Bottom Center: Bottom center
-      Bottom Right: Bottom right
-      Top Left: Top left
-      Top Center: Top center
-      Top Right: Top right
     System Default: System Default
     Avoid translation:
       Avoid translation: Keep original text
@@ -457,6 +448,16 @@ Settings:
     UI Roundness: UI Roundness
     Thumbnail Size: Thumbnail Size
     Show Thumbnail Size Button in Header: Show Thumbnail Size Button in Header
+    Show Tab Icons: Show Tab Icons
+    Show Toast Timeout Indicator: Show toast timeout indicator
+    Toast Position:
+      Toast Position: Toast Position
+      Bottom Left: Bottom left
+      Bottom Center: Bottom center
+      Bottom Right: Bottom right
+      Top Left: Top left
+      Top Center: Top center
+      Top Right: Top right
     Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo

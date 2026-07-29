@@ -117,7 +117,8 @@ test.describe('settings', () => {
   test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const positionSelect = page.locator('.select')
+    const themeSection = page.locator('[data-section="theme"]')
+    const positionSelect = themeSection.locator('.select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     const holder = page.locator('.toast-holder')
@@ -131,6 +132,7 @@ test.describe('settings', () => {
       await expect(toast).toBeVisible()
       await expect(toast).toHaveCSS('transform', 'none')
       await expect(toast.locator('..')).toHaveCSS('transform', 'none')
+      await expect(toast.locator('..').locator('.timeout-indicator')).toHaveCSS('animation-duration', '10s')
       return toast
     }
 
@@ -144,6 +146,13 @@ test.describe('settings', () => {
       await page.mouse.move(x, y)
       await page.mouse.down()
       await page.mouse.move(x + distance, y, { steps: 5 })
+
+      const indicatorTrack = toast.locator('..').locator('.timeout-indicator-track')
+      const transforms = await Promise.all([
+        toast.evaluate(element => getComputedStyle(element).transform),
+        indicatorTrack.evaluate(element => getComputedStyle(element).transform)
+      ])
+      expect(transforms[1]).toBe(transforms[0])
     }
 
     function viewportSize () {
@@ -230,6 +239,91 @@ test.describe('settings', () => {
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
+  })
+
+  test('configures the toast timeout indicator and pauses toasts on hover', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const themeSection = page.locator('[data-section="theme"]')
+    const indicatorToggle = themeSection.getByRole('checkbox', { name: 'Show toast timeout indicator' })
+    await expect(indicatorToggle).toBeChecked()
+    await expect(themeSection.getByRole('checkbox', { name: 'Show Tab Icons' })).toBeVisible()
+    await expect(page.locator('[data-section="general"]').getByRole('checkbox', {
+      name: /Show (toast timeout indicator|Tab Icons)/
+    })).toHaveCount(0)
+
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Hover toast', 2000)
+    })
+
+    const toast = page.locator('.toast', { hasText: 'Hover toast' })
+    const indicator = toast.locator('..').locator('.timeout-indicator')
+    await toast.hover()
+    await expect.poll(() => indicator.evaluate((element) => {
+      const animation = element.getAnimations()[0]
+      return animation ? animation.playState : null
+    })).toBe('paused')
+    await page.waitForTimeout(2200)
+    await expect(toast).toBeVisible()
+
+    await page.mouse.move(800, 300)
+    await expect(toast).toHaveCount(0)
+
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Dragged hover toast', 2000)
+    })
+    const draggedToast = page.locator('.toast', { hasText: 'Dragged hover toast' })
+    const draggedToastBounds = await draggedToast.boundingBox()
+    await page.mouse.move(
+      draggedToastBounds.x + draggedToastBounds.width / 2,
+      draggedToastBounds.y + draggedToastBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      draggedToastBounds.x + draggedToastBounds.width / 2 + 40,
+      draggedToastBounds.y + draggedToastBounds.height / 2
+    )
+    await page.mouse.up()
+    await page.mouse.move(800, 300)
+    await expect(draggedToast).toHaveCount(0)
+
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('First alternating toast', 2000)
+      window.ftElectron.showToastOnAllTabs('Second alternating toast', 2000)
+    })
+    const firstAlternatingToast = page.locator('.toast', { hasText: 'First alternating toast' })
+    const secondAlternatingToast = page.locator('.toast', { hasText: 'Second alternating toast' })
+    await page.waitForTimeout(400)
+    await firstAlternatingToast.hover()
+    await secondAlternatingToast.hover()
+    await page.waitForTimeout(300)
+    await firstAlternatingToast.hover()
+
+    const firstIndicatorScale = await firstAlternatingToast
+      .locator('..')
+      .locator('.timeout-indicator')
+      .evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
+    expect(firstIndicatorScale).toBeLessThan(0.85)
+
+    await page.mouse.move(800, 300)
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Show toast timeout indicator' })
+      .click()
+    await expect(indicatorToggle).not.toBeChecked()
+
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('No indicator toast', 2000)
+    })
+    const toastWithoutIndicator = page.locator('.toast', { hasText: 'No indicator toast' })
+    await toastWithoutIndicator.hover()
+    await expect(toastWithoutIndicator.locator('..').locator('.timeout-indicator')).toHaveCount(0)
+    await page.waitForTimeout(2200)
+    await expect(toastWithoutIndicator).toBeVisible()
+
+    await page.mouse.move(800, 300)
+    await expect(toastWithoutIndicator).toHaveCount(0)
   })
 })
 
@@ -400,7 +494,7 @@ test.describe('invalid toast position', () => {
   test('falls back to bottom left', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const positionSelect = page.locator('.select')
+    const positionSelect = page.locator('[data-section="theme"] .select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     await expect(positionSelect).toHaveValue('bottom-left')
