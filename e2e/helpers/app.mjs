@@ -30,6 +30,13 @@ function toNedbFile(docs) {
   return docs.map((doc) => JSON.stringify(doc)).join('\n') + '\n'
 }
 
+export function latestSettings(contents) {
+  return Object.fromEntries(contents.trim().split('\n')
+    .map(line => JSON.parse(line))
+    .filter(record => record._id && !record.$$deleted)
+    .map(record => [record._id, record.value]))
+}
+
 /**
  * Creates an isolated userData directory, optionally seeded with
  * settings and datastore documents.
