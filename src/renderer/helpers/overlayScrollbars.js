@@ -204,8 +204,12 @@ function toggleOverlayScrollbars(element, enabled) {
  * @param {number} scrollTop
  */
 export function restoreOverlayScrollTop(element, scrollTop) {
-  OverlayScrollbars(element)?.update(true)
+  const instance = OverlayScrollbars(element)
+  instance?.update(true)
   element.scrollTop = scrollTop
+  // Setting an offset can change the browser's effective scroll range when a
+  // previously valid position became stale after the viewport grew.
+  instance?.update(true)
 }
 
 /**

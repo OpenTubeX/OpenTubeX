@@ -233,12 +233,12 @@ test.describe('watch page', () => {
 
       await watchView.$store.dispatch('updateHideRecommendedVideos', true)
       watchView.useTheatreMode = true
-      watchView.videoChapters = Array.from({ length: 20 }, (_, index) => ({
+      watchView.videoChapters = Array.from({ length: 6 }, (_, index) => ({
         title: `Test chapter ${index + 1}`,
         timestamp: `${index}:00`,
         startSeconds: index * 60
       }))
-      watchView.videoCurrentChapterIndex = 19
+      watchView.videoCurrentChapterIndex = 5
       watchView.showSidebarChapters = true
       await watchView.$nextTick()
     })
@@ -247,6 +247,18 @@ test.describe('watch page', () => {
     const panel = page.locator('.watchVideoChaptersPanel')
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
+    await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
+    await expect.poll(() => panel.evaluate((element) => {
+      const container = element.querySelector('.chaptersWrapper')
+      const scrollbar = container?.querySelector(':scope > .os-scrollbar-vertical')
+      return container && {
+        hasVisibleScrollbar: scrollbar?.classList.contains('os-scrollbar-visible'),
+        scrollTop: container.scrollTop,
+      }
+    })).toEqual({
+      hasVisibleScrollbar: false,
+      scrollTop: 0,
+    })
     await expect.poll(() => panel.evaluate((element) => {
       const container = element.querySelector('.chaptersWrapper')
       const currentChapter = container?.querySelector('.chapter.current')

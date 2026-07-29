@@ -54,8 +54,10 @@
 </template>
 
 <script setup>
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const props = defineProps({
   chapters: {
@@ -80,6 +82,29 @@ const emit = defineEmits(['copy-timestamp', 'timestamp-event'])
 
 const chaptersWrapper = useTemplateRef('chaptersWrapper')
 const currentIndex = ref(props.currentChapterIndex)
+let resizeFrame = null
+let resizeObserver = null
+
+onMounted(() => {
+  resizeObserver = new ResizeObserver(() => {
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame)
+    }
+
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null
+      reconcileScrollRange()
+    })
+  })
+  resizeObserver.observe(chaptersWrapper.value)
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  if (resizeFrame !== null) {
+    cancelAnimationFrame(resizeFrame)
+  }
+})
 
 watch(() => props.currentChapterIndex, (value) => {
   if (currentIndex.value !== value) {
@@ -202,6 +227,26 @@ function scrollToCurrentChapter() {
   } else if (currentItemRect.bottom > containerRect.bottom) {
     container.scrollTop += currentItemRect.bottom - containerRect.bottom
   }
+}
+
+/**
+ * Clamp offsets chosen while an opening or resizing panel was smaller than its
+ * final size, then refresh the custom scrollbar against the settled geometry.
+ */
+function reconcileScrollRange() {
+  const container = chaptersWrapper.value
+  if (!container) {
+    return
+  }
+
+  const chapterRows = container.querySelectorAll(':scope > .chapter')
+  const firstChapter = chapterRows[0]
+  const lastChapter = chapterRows[chapterRows.length - 1]
+  const contentHeight = firstChapter && lastChapter
+    ? lastChapter.offsetTop - firstChapter.offsetTop + lastChapter.offsetHeight
+    : 0
+  const maximumScrollTop = Math.max(0, contentHeight - container.clientHeight)
+  restoreOverlayScrollTop(container, Math.min(container.scrollTop, maximumScrollTop))
 }
 </script>
 
