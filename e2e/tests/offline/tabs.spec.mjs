@@ -597,6 +597,7 @@ test.describe('tab close focus set to the next tab', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
     const previousTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
+    await expect(page.locator(`.tab[data-tab-id="${previousTabId}"]`)).not.toHaveClass(/unloaded/)
     const unloadedTab = await page.evaluate(() => window.ftElectron.tabs.create({
       makeActive: false,
       lazyLoad: true
