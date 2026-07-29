@@ -75,6 +75,24 @@ async function openCaptionedVideoOrSkip(page) {
   }
 }
 
+async function openFullscreenPlaylistVideo(page, { enableQuickBookmark = false } = {}) {
+  await page.locator(sel.sideNavLink('userplaylists')).first().evaluate(element => element.click())
+  await expect(page).toHaveURL(/#\/userplaylists/)
+  await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.playlistName }).first().click()
+  await expect(page).toHaveURL(new RegExp(`#\\/playlist\\/${FULLSCREEN_PLAYLIST_ID}`))
+  if (enableQuickBookmark) {
+    const enableButton = page.getByTitle('Enable Quick Bookmark With This Playlist')
+    if (await enableButton.isVisible()) {
+      await enableButton.click()
+    }
+    await expect(page.getByTitle('Quick Bookmark Enabled')).toBeVisible()
+  }
+  await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.videos[0].title }).first().click()
+  await expect(page).toHaveURL(
+    new RegExp(`#\\/watch\\/jNQXAC9IVRw\\?.*playlistId=${FULLSCREEN_PLAYLIST_ID}`)
+  )
+}
+
 async function setWindowWidth(app, width) {
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
@@ -216,7 +234,7 @@ test.describe('watch page', () => {
     expect(scrollCall.distance).toBeLessThanOrEqual(scrollCall.clientHeight)
   })
 
-  test('closing the only sidebar chapter panel keeps it beside the description', async ({ page, innertube }) => {
+  test('sidebar chapters and SponsorBlock honor roundness while closing beside the description', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
 
@@ -248,6 +266,8 @@ test.describe('watch page', () => {
         throw new Error('Unable to access the watch view')
       }
 
+      document.body.style.setProperty('--ui-roundness', '2')
+      window.__sidebarRoundnessWatchView = watchView
       await watchView.$store.dispatch('updateHideRecommendedVideos', true)
       watchView.useTheatreMode = true
       watchView.videoChapters = Array.from({ length: 6 }, (_, index) => ({
@@ -262,8 +282,13 @@ test.describe('watch page', () => {
 
     const layout = page.locator('.videoLayout')
     const panel = page.locator('.watchVideoChaptersPanel')
+    const standardCardRadius = await page.locator('.watchVideoInfo.ft-card').evaluate(element => {
+      return getComputedStyle(element).borderRadius
+    })
     await expect(layout).toHaveClass(/useTheatreMode/)
     await expect(panel).toBeVisible()
+    expect(standardCardRadius).toBe('16px')
+    await expect(panel).toHaveCSS('border-radius', standardCardRadius)
     await expect(panel).not.toHaveClass(/chapters-panel-enter-active/)
     await expect.poll(() => panel.evaluate((element) => {
       const container = element.querySelector('.chaptersWrapper')
@@ -321,6 +346,15 @@ test.describe('watch page', () => {
 
     await expect(panel).toHaveCount(0)
     await expect(layout).toHaveClass(/noSidebar/)
+
+    await page.evaluate(async () => {
+      window.__sidebarRoundnessWatchView.showSidebarSponsorBlock = true
+      await window.__sidebarRoundnessWatchView.$nextTick()
+    })
+    await expect(page.locator('.watchVideoSponsorBlock')).toHaveCSS(
+      'border-radius',
+      standardCardRadius
+    )
   })
 
   test('comments load on request', async ({ app, page, innertube }) => {
@@ -1057,19 +1091,131 @@ test.describe('watch page', () => {
   })
 
   test.describe('fullscreen playlist dock', () => {
-    test.use({ seed: { playlists: [FULLSCREEN_PLAYLIST] } })
+    test.use({
+      seed: {
+        playlists: [FULLSCREEN_PLAYLIST],
+        history: [{
+          ...FULLSCREEN_PLAYLIST.videos[0],
+          _id: 'jNQXAC9IVRw',
+          watchProgress: 19,
+          isWatched: true,
+          timeWatched: Date.now(),
+          isLive: false,
+        }]
+      }
+    })
+
+    test('does not duplicate the remove action for the Quick Bookmark playlist', async ({ page, innertube }) => {
+      test.skip(innertube.replay, 'watch page hydration needs the real API')
+      await openVideo(page)
+      await openFullscreenPlaylistVideo(page, { enableQuickBookmark: true })
+
+      const item = page.locator('.watchVideoPlaylist .playlistItem').first()
+      await item.locator('.videoThumbnail').hover()
+      await expect(item.locator('.trashIcon')).toHaveCount(1)
+      await expect(item.locator('.quickBookmarkVideoIcon')).toHaveCount(0)
+    })
+
+    test('keeps compact watched labels and playlist menus clear of other controls', async ({ page, innertube }) => {
+      test.skip(innertube.replay, 'watch page hydration needs the real API')
+      await openVideo(page)
+      await openFullscreenPlaylistVideo(page)
+
+      const playlist = page.locator('.watchVideoPlaylist.resizablePlaylist')
+      const item = playlist.locator('.playlistItem').first()
+      const thumbnail = item.locator('.videoThumbnail')
+      const watched = thumbnail.locator('.videoWatched')
+      const actions = thumbnail.locator('.playlistIcons')
+      await expect(playlist).toBeVisible()
+      await thumbnail.hover()
+      await expect(watched).toBeVisible()
+      await expect(actions).toBeVisible()
+
+      const [watchedBox, actionsBox] = await Promise.all([
+        watched.boundingBox(),
+        actions.boundingBox(),
+      ])
+      expect(
+        watchedBox.x + watchedBox.width <= actionsBox.x ||
+        actionsBox.x + actionsBox.width <= watchedBox.x ||
+        watchedBox.y + watchedBox.height <= actionsBox.y ||
+        actionsBox.y + actionsBox.height <= watchedBox.y
+      ).toBe(true)
+
+      const sponsorBlockLabel = thumbnail.locator('.sponsorBlockVideoLabel')
+      await thumbnail.evaluate(element => {
+        const watched = element.querySelector('.videoWatched')
+        watched.style.display = 'none'
+        watched.closest('.ft-list-item').classList.remove('watched')
+
+        const label = element.querySelector('.videoDuration').cloneNode(false)
+        label.className = 'sponsorBlockVideoLabel'
+        const text = document.createElement('span')
+        text.textContent = 'Self-Promotion'
+        for (const attribute of label.getAttributeNames()) {
+          if (attribute.startsWith('data-v-')) {
+            text.setAttribute(attribute, '')
+          }
+        }
+        label.append(text)
+        element.append(label)
+      })
+      await expect(sponsorBlockLabel).toBeVisible()
+      const [sponsorBlockBox, durationBox] = await Promise.all([
+        sponsorBlockLabel.boundingBox(),
+        thumbnail.locator('.videoDuration').boundingBox(),
+      ])
+      expect(sponsorBlockBox.y).toBeGreaterThan(actionsBox.y + actionsBox.height)
+      expect(sponsorBlockBox.x + sponsorBlockBox.width).toBeLessThanOrEqual(durationBox.x)
+
+      const addToPlaylist = item.locator('.addToPlaylistIcon .iconButton')
+      await addToPlaylist.click()
+      const dropdown = page.locator('.app > .iconDropdown.portal')
+      await expect(dropdown).toBeVisible()
+      const [buttonBox, dropdownBox] = await Promise.all([
+        addToPlaylist.boundingBox(),
+        dropdown.boundingBox(),
+      ])
+      expect(dropdownBox.y + dropdownBox.height).toBeLessThanOrEqual(buttonBox.y)
+      expect(dropdownBox.x).toBeGreaterThanOrEqual(8)
+      expect(dropdownBox.x + dropdownBox.width).toBeLessThanOrEqual(
+        await page.evaluate(() => window.innerWidth - 8)
+      )
+      expect(await dropdown.evaluate(element => element.parentElement?.classList.contains('app'))).toBe(true)
+      await expect(dropdown).toHaveCSS(
+        'font-family',
+        await page.locator('.app').evaluate(element => getComputedStyle(element).fontFamily)
+      )
+      expect(await dropdown.evaluate(element => {
+        const bounds = element.getBoundingClientRect()
+        return element.contains(document.elementFromPoint(
+          bounds.left + bounds.width / 2,
+          bounds.top + bounds.height / 2
+        ))
+      })).toBe(true)
+      await page.keyboard.press('Escape')
+
+      const moreOptions = item.locator('.optionsButton .iconButton')
+      await moreOptions.click()
+      await expect(dropdown).toBeVisible()
+      const optionsDropdownBox = await dropdown.boundingBox()
+      expect(optionsDropdownBox.y).toBeGreaterThanOrEqual(8)
+      expect(optionsDropdownBox.y + optionsDropdownBox.height).toBeLessThanOrEqual(
+        await page.evaluate(() => window.innerHeight - 8)
+      )
+      expect(optionsDropdownBox.x).toBeGreaterThanOrEqual(8)
+      expect(optionsDropdownBox.x + optionsDropdownBox.width).toBeLessThanOrEqual(
+        await page.evaluate(() => window.innerWidth - 8)
+      )
+      expect(await dropdown.evaluate(element => element.parentElement?.classList.contains('app'))).toBe(true)
+      await expect(moreOptions).toBeVisible()
+    })
 
     test('shows the progress preview above the content viewport', async ({ page, innertube }) => {
       test.skip(innertube.replay, 'watch page hydration needs the real API')
       await openVideo(page)
-      await page.evaluate(async (playlistId) => {
-        const router = document.querySelector('#app').__vue_app__.config.globalProperties.$router
-        await router.push({
-          path: '/watch/jNQXAC9IVRw',
-          query: { playlistId, playlistType: 'user' }
-        })
-      }, FULLSCREEN_PLAYLIST_ID)
-      await expect(page.locator('.watchVideoPlaylist')).toBeVisible()
+      await openFullscreenPlaylistVideo(page)
+      await expect(page.locator('.watchVideoPlaylist.resizablePlaylist')).toBeVisible()
 
       await page.locator('.full-window-button').click({ force: true })
       await page.locator('.fullscreenPlaylistToggle').click({ force: true })
@@ -1168,7 +1314,9 @@ test.describe('custom Shorts player', () => {
       settings: {
         useCustomShortsPlayer: true,
         useSponsorBlock: true,
-        fetchSubscriptionsAutomatically: false
+        fetchSubscriptionsAutomatically: false,
+        playNextVideo: true,
+        defaultInterval: 0
       },
       profiles: [{
         _id: 'allChannels',
@@ -1286,8 +1434,9 @@ test.describe('custom Shorts player', () => {
     await volumeControl.hover()
     await expect(volumeControl.locator('.shortsVolumeSlider')).toBeVisible()
 
-    await player.locator('.shortsTopControl').nth(3).click()
+    const moreOptions = player.getByRole('button', { name: 'More Options' })
     const overflowMenu = player.locator('.shaka-overflow-menu')
+    await moreOptions.click()
     await expect(overflowMenu).toBeVisible()
     const [playerBox, menuBox] = await Promise.all([
       player.boundingBox(),
@@ -1303,7 +1452,7 @@ test.describe('custom Shorts player', () => {
     await fullWindowMenuButton.click()
     await expect(player).toHaveClass(/fullWindow/)
 
-    await player.locator('.shortsTopControl').nth(3).click()
+    await moreOptions.click()
     const exitFullWindowMenuButton = overflowMenu.getByRole('button', {
       name: /Exit Full Window/
     })
@@ -1311,10 +1460,10 @@ test.describe('custom Shorts player', () => {
     await exitFullWindowMenuButton.click()
     await expect(player).not.toHaveClass(/fullWindow/)
 
-    await player.locator('.shortsTopControl').nth(3).dblclick()
+    await moreOptions.dblclick()
     expect(await page.evaluate(() => document.fullscreenElement === null)).toBe(true)
 
-    await player.locator('.shortsTopControl').nth(3).click()
+    await moreOptions.click()
     const videoInfoMenuButton = overflowMenu.getByRole('button', {
       name: 'Video information'
     })
@@ -1355,6 +1504,81 @@ test.describe('custom Shorts player', () => {
 
     const bounds = await player.boundingBox()
     expect(bounds.height).toBeGreaterThan(bounds.width)
+  })
+
+  test('keeps captions fixed when hover controls appear', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'Shorts detection needs the real API')
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    await player.locator('video').evaluate(async element => {
+      if (element.paused) await element.play()
+    })
+    await expect(player).not.toHaveClass(/shortsPaused/)
+
+    const controls = player.locator('.shaka-controls-container')
+    await player.evaluate(element => {
+      if (element.querySelector('.shaka-text-container')) return
+
+      const captions = document.createElement('div')
+      captions.className = 'shaka-text-container'
+      element.querySelector('.shaka-controls-container').after(captions)
+    })
+    const captions = player.locator('.shaka-text-container')
+    await page.mouse.move(0, 0)
+    await expect(controls).not.toHaveAttribute('shown', 'true')
+    const captionsBottomWithoutHover = await captions.evaluate(element => {
+      return getComputedStyle(element).bottom
+    })
+    expect(Number.parseFloat(captionsBottomWithoutHover)).toBeGreaterThan(0)
+
+    const playerBounds = await player.boundingBox()
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height - 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(captions).toHaveCSS('bottom', captionsBottomWithoutHover)
+  })
+
+  test('only exposes applicable controls and stays in the Shorts player', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'Shorts detection needs the real API')
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    const captionTrackCount = await player.evaluate(element => {
+      return element.ui.getControls().getPlayer().getTextTracks().length
+    })
+    await expect(player.locator('.shortsCaptionsControl')).toHaveCount(captionTrackCount > 0 ? 1 : 0)
+
+    const overflowMenu = player.locator('.shaka-overflow-menu')
+    await player.getByRole('button', { name: 'More Options' }).click()
+    await expect(overflowMenu).toBeVisible()
+    await expect(overflowMenu.getByRole('button', { name: /Autoplay/ })).toHaveCount(0)
+
+    await player.locator('video').dispatchEvent('ended')
+    await page.waitForTimeout(500)
+
+    await expect(page).toHaveURL(/#\/watch\/[^?]+\?[^#]*\bshort=true\b/)
+    await expect(page.locator('.autoplayCountdownOverlay')).toHaveCount(0)
   })
 
   test('scrolls through the cached subscriptions Shorts feed', async ({ page }) => {
