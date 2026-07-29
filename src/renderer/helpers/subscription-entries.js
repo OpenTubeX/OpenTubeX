@@ -141,3 +141,65 @@ export function ensureSubscriptionFeedEntryState(
     historyById
   )
 }
+
+/**
+ * Video ids the RSS premiere lookup has already resolved as "not a premiere",
+ * recovered from the caches the subscription refresh persists.
+ *
+ * Only a `false` verdict is reusable: an upcoming premiere eventually goes
+ * live, and entries that were never premiere candidates carry no verdict.
+ *
+ * @param {Array<Record<string, { videos?: object[] }> | null | undefined>} caches
+ *  per-channel caches, keyed by channel id
+ * @returns {Set<string>}
+ */
+export function collectResolvedNonPremiereVideoIds(caches) {
+  const videoIds = new Set()
+
+  for (const cache of caches) {
+    for (const channelCache of Object.values(cache ?? {})) {
+      for (const video of channelCache?.videos ?? []) {
+        if (video.isUpcoming === false && video.videoId != null) {
+          videoIds.add(video.videoId)
+        }
+      }
+    }
+  }
+
+  return videoIds
+}
+
+/**
+ * Applies the outcome of an RSS premiere lookup to an entry.
+ *
+ * A failed lookup deliberately leaves no verdict behind. The entry is cached
+ * as-is, so `collectResolvedNonPremiereVideoIds` will not mistake the failure
+ * for a resolved "not a premiere" and the next refresh looks it up again.
+ *
+ * @param {object} video
+ * @param {{ isUpcoming: boolean, failed?: boolean, premiereDate?: Date }} upcomingInfo
+ */
+export function applyRssPremiereVerdict(video, upcomingInfo) {
+  if (upcomingInfo.failed) {
+    return video
+  }
+
+  if (!upcomingInfo.isUpcoming) {
+    return {
+      ...video,
+      isUpcoming: false
+    }
+  }
+
+  const enrichedVideo = {
+    ...video,
+    isUpcoming: true
+  }
+
+  if (upcomingInfo.premiereDate) {
+    enrichedVideo.premiereDate = upcomingInfo.premiereDate
+    enrichedVideo.published = upcomingInfo.premiereDate.getTime()
+  }
+
+  return enrichedVideo
+}

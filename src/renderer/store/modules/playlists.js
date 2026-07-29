@@ -1,5 +1,10 @@
 import { PlaylistVideoAddResult } from '../../../constants'
 import { DBPlaylistHandlers } from '../../../datastores/handlers/index'
+import {
+  decrementPlaylistVideoCounts,
+  incrementPlaylistVideoCounts,
+  resetPlaylistVideoCounts
+} from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
 import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
 import { deepCopy } from '../../helpers/utils'
@@ -109,6 +114,8 @@ const state = {
   // which depends on playlist data being ready
   playlistsReady: false,
   playlists: [],
+  /** @type {import('../../helpers/playlist-video-counts').PlaylistVideoCounts} */
+  playlistVideoCounts: new Map(),
   defaultPlaylists: [
     {
       playlistName: 'Favorites',
@@ -130,20 +137,11 @@ const state = {
 const getters = {
   getPlaylistsReady: (state) => state.playlistsReady,
   getAllPlaylists: (state) => state.playlists,
-  // Every list item reads this, and it is rebuilt on any playlist change, so
-  // fill the set directly instead of allocating an intermediate array per
-  // playlist plus one flattened array holding every video id.
-  getPlaylistVideoIds: (state) => {
-    const videoIds = new Set()
-
-    for (const playlist of state.playlists) {
-      for (const video of playlist.videos) {
-        videoIds.add(video.videoId)
-      }
-    }
-
-    return videoIds
-  },
+  // `has(videoId)` answers "is this video in any playlist". Kept incrementally
+  // by the mutations below rather than derived, because every list item reads
+  // it: deriving it made one playlist edit rescan every saved video and
+  // invalidate the answer for all of them at once.
+  getPlaylistVideoCounts: (state) => state.playlistVideoCounts,
   getPlaylist: (state) => (playlistId) => {
     return state.playlists.find(playlist => playlist._id === playlistId)
   },
@@ -519,13 +517,37 @@ const actions = {
   },
 }
 
+/**
+ * Removes the matching videos from a playlist and stops counting them, in one
+ * pass over the playlist.
+ *
+ * @param {object} state
+ * @param {{ videos: object[] }} playlist
+ * @param {(video: object) => boolean} matches
+ */
+function dropPlaylistVideos(state, playlist, matches) {
+  const removed = []
+  const kept = []
+
+  for (const video of playlist.videos) {
+    (matches(video) ? removed : kept).push(video)
+  }
+
+  decrementPlaylistVideoCounts(state.playlistVideoCounts, removed)
+  playlist.videos = kept
+}
+
 const mutations = {
   addPlaylist(state, payload) {
     state.playlists.push(payload)
+    incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
   },
 
   addPlaylists(state, payload) {
     state.playlists.push(...payload)
+    for (const playlist of payload) {
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+    }
   },
 
   upsertPlaylistToList(state, updatedPlaylist) {
@@ -535,9 +557,15 @@ const mutations = {
 
     if (i === -1) {
       state.playlists.push(updatedPlaylist)
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, updatedPlaylist.videos)
     } else {
       const foundPlaylist = state.playlists[i]
+      // The update may or may not carry videos. Dropping the old ones and
+      // counting whatever the playlist ends up with covers both cases: an
+      // update that leaves `videos` alone re-adds the very same entries.
+      decrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
       state.playlists.splice(i, 1, Object.assign(foundPlaylist, updatedPlaylist))
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, foundPlaylist.videos)
     }
   },
 
@@ -546,6 +574,7 @@ const mutations = {
     if (playlist) {
       playlist.videos.push(payload.videoData)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, [payload.videoData])
     }
   },
 
@@ -554,50 +583,61 @@ const mutations = {
     if (playlist) {
       playlist.videos = [].concat(playlist.videos, payload.videos)
       playlist.lastUpdatedAt = payload.lastUpdatedAt
+      incrementPlaylistVideoCounts(state.playlistVideoCounts, payload.videos)
     }
   },
 
   removeAllPlaylists(state) {
     state.playlists = []
+    state.playlistVideoCounts.clear()
   },
 
   removeAllVideos(state, playlistId) {
     const playlist = state.playlists.find(playlist => playlist._id === playlistId)
     if (playlist) {
+      decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
       playlist.videos = []
     }
   },
 
   removeVideo(state, { _id, lastUpdatedAt, videoId, playlistItemId }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
-    if (playlist) {
-      if (playlistItemId != null) {
-        playlist.videos = playlist.videos.filter(video => video.playlistItemId !== playlistItemId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      } else if (videoId != null) {
-        playlist.videos = playlist.videos.filter(video => video.videoId !== videoId)
-        playlist.lastUpdatedAt = lastUpdatedAt
-      }
+    if (!playlist) {
+      return
+    }
+
+    if (playlistItemId != null) {
+      dropPlaylistVideos(state, playlist, video => video.playlistItemId === playlistItemId)
+      playlist.lastUpdatedAt = lastUpdatedAt
+    } else if (videoId != null) {
+      dropPlaylistVideos(state, playlist, video => video.videoId === videoId)
+      playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removeVideos(state, { _id, lastUpdatedAt, playlistItemIds }) {
     const playlist = state.playlists.find(playlist => playlist._id === _id)
     if (playlist) {
-      playlist.videos = playlist.videos.filter(video => {
-        const playlistItemIdMatches = playlistItemIds.includes(video.playlistItemId)
-        return !playlistItemIdMatches
-      })
+      dropPlaylistVideos(state, playlist, video => playlistItemIds.includes(video.playlistItemId))
       playlist.lastUpdatedAt = lastUpdatedAt
     }
   },
 
   removePlaylist(state, playlistId) {
-    state.playlists = state.playlists.filter(playlist => playlist._id !== playlistId || playlist.protected)
+    const isKept = playlist => playlist._id !== playlistId || playlist.protected
+
+    for (const playlist of state.playlists) {
+      if (!isKept(playlist)) {
+        decrementPlaylistVideoCounts(state.playlistVideoCounts, playlist.videos)
+      }
+    }
+
+    state.playlists = state.playlists.filter(isKept)
   },
 
   setAllPlaylists(state, payload) {
     state.playlists = payload
+    resetPlaylistVideoCounts(state.playlistVideoCounts, payload)
   },
 
   setPlaylistsReady(state, payload) {

@@ -585,7 +585,7 @@ export default defineComponent({
     })
     const showFullscreenShareAction = computed(() => !store.getters.getHideSharingActions)
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
-    const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(props.videoId))
+    const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.videoId))
 
     const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters'])
     const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))

@@ -346,6 +346,7 @@ import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/a
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock.js'
 import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
+import { setCollaboratorsLoading } from './collaboratorsLoading.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -993,7 +994,7 @@ const playlistTypeFinal = computed(() => playlistIdTypePairFinal.value?.playlist
 const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistItemId)
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
-const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(id.value))
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(id.value))
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)
@@ -1263,6 +1264,7 @@ async function openCollaboratorsPrompt() {
   }
 
   isFetchingCollaborators.value = true
+  setCollaboratorsLoading(true)
 
   try {
     const videoInfo = await getLocalVideoInfo(id.value)
@@ -1276,6 +1278,7 @@ async function openCollaboratorsPrompt() {
     showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
   } finally {
     isFetchingCollaborators.value = false
+    setCollaboratorsLoading(false)
   }
 }
 
@@ -1549,8 +1552,8 @@ if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumb
 <style scoped src="./FtListVideo.scss" lang="scss" />
 
 <style>
-body:has(.collaboratorChannelButton:disabled),
-body:has(.collaboratorChannelButton:disabled) * {
+body.collaboratorsLoading,
+body.collaboratorsLoading * {
   cursor: wait !important;
 }
 </style>
