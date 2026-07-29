@@ -39,7 +39,8 @@ export function getSponsorBlockSubmissionSegmentTimes(segment) {
 export function selectSponsorBlockFullVideoLabel(segments) {
   for (const category of SPONSORBLOCK_FULL_VIDEO_CATEGORY_PRIORITY) {
     const segment = segments.find(candidate => {
-      return candidate.actionType === 'full' && candidate.category === category
+      return candidate.category === category &&
+        (candidate.actionType == null || candidate.actionType === 'full')
     })
 
     if (segment) {

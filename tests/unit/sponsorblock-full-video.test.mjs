@@ -35,5 +35,8 @@ test('full-video labels use SponsorBlock priority', () => {
     sponsor,
   ]), sponsor)
   assert.equal(selectSponsorBlockFullVideoLabel([selfPromotion, exclusiveAccess]), exclusiveAccess)
+  assert.deepEqual(selectSponsorBlockFullVideoLabel([
+    { category: 'exclusive_access' }
+  ]), { category: 'exclusive_access' })
   assert.equal(selectSponsorBlockFullVideoLabel([{ actionType: 'skip', category: 'sponsor' }]), null)
 })
