@@ -48,7 +48,21 @@ jobs:
         REVIEWER: ${{ github.event.review.user.login }}
         REVIEWER_TYPE: ${{ github.event.review.user.type }}
         AUTHOR: ${{ github.event.pull_request.user.login }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
+        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]')
+
+        is_trusted_bot() {
+          local candidate
+          for candidate in "${TRUSTED_BOTS[@]}"; do
+            if [[ "$1" == "$candidate" ]]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
         reviewer_permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
 
         if [[ "$reviewer_permission" == "admin" ]]; then
@@ -57,10 +71,26 @@ jobs:
         fi
 
         author_permission="$(gh api "repos/$REPOSITORY/collaborators/$AUTHOR/permission" --jq '.permission' 2>/dev/null || true)"
-        if [[ "$REVIEWER_TYPE" == "Bot" &&
-          ( "$REVIEWER" == "coderabbitai[bot]" || "$REVIEWER" == "greptile-apps[bot]" ) &&
-          "$author_permission" == "admin" ]]; then
-          echo "Trusted bot approval for admin author $AUTHOR authorized."
+        if [[ "$REVIEWER_TYPE" == "Bot" ]] && is_trusted_bot "$REVIEWER" && [[ "$author_permission" == "admin" ]]; then
+          reviews="$(gh api --paginate "repos/$REPOSITORY/pulls/$PR_NUMBER/reviews" | jq -cs '[.[][]]')"
+          missing_bots=()
+
+          for bot in "${TRUSTED_BOTS[@]}"; do
+            bot_review_state="$(BOT="$bot" jq -r \
+              '[.[] | select(.user.login == env.BOT and .commit_id == env.HEAD_SHA)] | sort_by(.submitted_at) | last | .state // empty' \
+              <<< "$reviews")"
+
+            if [[ "$bot_review_state" != "APPROVED" ]]; then
+              missing_bots+=("$bot")
+            fi
+          done
+
+          if [[ ${#missing_bots[@]} -gt 0 ]]; then
+            echo "Bot approvals only authorize auto-merge once every trusted bot has approved $HEAD_SHA. Still waiting for: ${missing_bots[*]}."
+            exit 0
+          fi
+
+          echo "Trusted bot approvals for admin author $AUTHOR authorized."
           exit 0
         fi
 
