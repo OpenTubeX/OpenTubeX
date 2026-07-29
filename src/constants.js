@@ -68,6 +68,7 @@ const IpcChannels = {
   TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',
   CONTEXT_MENU_OPEN: 'context-menu-open',
   CONTEXT_MENU_EXECUTE: 'context-menu-execute',
+  RESOLVE_FAVICON: 'resolve-favicon',
   CREATE_NEW_TAB: 'create-new-tab',
 
   DB_SETTINGS: 'db-settings',

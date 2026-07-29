@@ -41,9 +41,20 @@
                 class="itemIcon"
                 aria-hidden="true"
               >
-                <FontAwesomeIcon :icon="getItemIcon(item)" />
+                <img
+                  v-if="hasImageIcon(item)"
+                  class="itemImageIcon"
+                  :src="item.icon"
+                  alt=""
+                  referrerpolicy="no-referrer"
+                  @error="handleImageIconError(item.icon)"
+                >
+                <FontAwesomeIcon
+                  v-else
+                  :icon="getItemIcon(item)"
+                />
               </span>
-              <span>{{ translateLabel(item.label) }}</span>
+              <span>{{ localizedLabel(item) }}</span>
               <span
                 class="submenuArrow"
                 aria-hidden="true"
@@ -78,14 +89,25 @@
                     :class="getItemIconClass(child)"
                     aria-hidden="true"
                   >
-                    <FontAwesomeIcon :icon="getItemIcon(child, item.label)" />
+                    <img
+                      v-if="hasImageIcon(child)"
+                      class="itemImageIcon"
+                      :src="child.icon"
+                      alt=""
+                      referrerpolicy="no-referrer"
+                      @error="handleImageIconError(child.icon)"
+                    >
+                    <FontAwesomeIcon
+                      v-else
+                      :icon="getItemIcon(child, item.label)"
+                    />
                     <FontAwesomeIcon
                       v-if="child.checked"
                       class="checkedMark"
                       :icon="['fas', 'check']"
                     />
                   </span>
-                  <span>{{ translateLabel(child.label) }}</span>
+                  <span>{{ localizedLabel(child) }}</span>
                 </button>
               </template>
             </div>
@@ -106,14 +128,25 @@
               :class="getItemIconClass(item)"
               aria-hidden="true"
             >
-              <FontAwesomeIcon :icon="getItemIcon(item)" />
+              <img
+                v-if="hasImageIcon(item)"
+                class="itemImageIcon"
+                :src="item.icon"
+                alt=""
+                referrerpolicy="no-referrer"
+                @error="handleImageIconError(item.icon)"
+              >
+              <FontAwesomeIcon
+                v-else
+                :icon="getItemIcon(item)"
+              />
               <FontAwesomeIcon
                 v-if="item.checked"
                 class="checkedMark"
                 :icon="['fas', 'check']"
               />
             </span>
-            <span>{{ translateLabel(item.label) }}</span>
+            <span>{{ localizedLabel(item) }}</span>
           </button>
         </template>
       </div>
@@ -128,7 +161,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 
-const { t, te } = useI18n()
+const { t } = useI18n()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)
 const isOpen = ref(false)
@@ -137,6 +170,7 @@ const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
 const submenusOpenStart = ref(false)
 const verticalTabLayout = ref(false)
+const failedImageIcons = ref(new Set())
 let openRequest = 0
 
 const menuStyle = computed(() => ({
@@ -154,7 +188,12 @@ const displayedItems = computed(() => {
   }
 
   return items.value.map(item => item.refreshingLabel
-    ? { ...item, label: item.refreshingLabel }
+    ? {
+        ...item,
+        label: item.refreshingLabel,
+        labelKey: item.refreshingLabelKey,
+        labelParameters: item.refreshingLabelParameters
+      }
     : item)
 })
 
@@ -230,6 +269,28 @@ function getItemIconClass(item) {
     : undefined
 }
 
+function hasImageIcon(item) {
+  return typeof item.icon === 'string' &&
+    item.icon.length > 0 &&
+    !failedImageIcons.value.has(item.icon)
+}
+
+function handleImageIconError(icon) {
+  failedImageIcons.value = new Set([...failedImageIcons.value, icon])
+}
+
+function resolveItemFavicons(menuItems) {
+  for (const item of menuItems) {
+    if (typeof item.faviconSource === 'string') {
+      const source = item.faviconSource
+      window.ftElectron.resolveFavicon(source).then(icon => {
+        if (item.faviconSource === source && icon) item.icon = icon
+      }).catch(() => {})
+    }
+    if (Array.isArray(item.submenu)) resolveItemFavicons(item.submenu)
+  }
+}
+
 function getSelectionText(target) {
   if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
     const start = target.selectionStart ?? 0
@@ -276,6 +337,7 @@ async function open(event) {
   if (request !== openRequest || result.items.length === 0) return
 
   items.value = result.items
+  resolveItemFavicons(items.value)
   sessionId.value = result.sessionId
   position.value = { x: event.clientX, y: event.clientY }
   submenusOpenStart.value = event.clientX > window.innerWidth / 2
@@ -308,27 +370,11 @@ async function execute(item) {
   await window.ftElectron.contextMenu.execute(currentSessionId, item.actionId)
 }
 
-function translateLabel(label) {
-  let match = /^Close (\d+) Tabs$/.exec(label)
-  if (match) return t('Context Menu.Close Multiple Tabs', { count: Number(match[1]) })
+function localizedLabel(item) {
+  if (!item.labelKey) return item.label
 
-  match = /^Duplicate (\d+) Tabs$/.exec(label)
-  if (match) return t('Context Menu.Duplicate Multiple Tabs', { count: Number(match[1]) })
-
-  match = /^Search "(.+)" in a New (Tab|Window)$/.exec(label)
-  if (match) {
-    return match[2] === 'Tab'
-      ? t('Context Menu.Search Selection in New Tab', { selection: match[1] })
-      : t('Context Menu.Search Selection in New Window', { selection: match[1] })
-  }
-
-  match = /^".+" is too long for search \(> (\d+) chars\)$/.exec(label)
-  if (match) return t('Context Menu.Selection Too Long', { count: Number(match[1]) })
-
-  const key = `Context Menu.${label}`
-  // Labels are validated against this namespace before being translated.
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-  return te(key) ? t(key) : label
+  return t(item.labelKey, item.labelParameters ?? {})
 }
 
 function handleKeydown(event) {
