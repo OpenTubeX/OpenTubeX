@@ -121,6 +121,35 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
+  test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const header = page.locator('.subscriptionsHeader')
+    const video = page.locator('.ft-list-video').first()
+    await expect(video).toBeVisible()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await expect(video.locator('.iconDropdown')).toBeVisible()
+
+    const headerCoversVideo = await page.evaluate(() => {
+      const header = document.querySelector('.subscriptionsHeader')
+      const video = document.querySelector('.ft-list-video')
+      const initialHeaderRect = header.getBoundingClientRect()
+      const initialVideoRect = video.getBoundingClientRect()
+      window.scrollBy(0, initialVideoRect.top - initialHeaderRect.top + 20)
+
+      const headerRect = header.getBoundingClientRect()
+      const thumbnailRect = video.querySelector('.videoThumbnail').getBoundingClientRect()
+      const elementAtHeader = document.elementFromPoint(
+        thumbnailRect.left + thumbnailRect.width / 2,
+        headerRect.bottom - 5
+      )
+      return header.contains(elementAtHeader)
+    })
+
+    expect(headerCoversVideo).toBe(true)
+  })
+
   test('does not offer to mark a running premiere as watched', async ({ page }) => {
     await goTo(page, 'subscriptions')
 

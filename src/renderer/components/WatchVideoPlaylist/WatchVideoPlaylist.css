@@ -191,7 +191,10 @@
   box-sizing: border-box;
   padding-block: 8px 16px;
   padding-inline: 16px;
-  overflow-x: hidden;
+
+  /* The playlist items provide the dock's scroll viewport. Keep this wrapper
+     visible so the progress preview can extend over the dock header. */
+  overflow: visible;
 }
 
 .fullscreenPlaylist .playlistHeader {
@@ -277,6 +280,8 @@
   display: grid;
   grid-template-columns: 30px 1fr;
   align-items: center;
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 72px;
   transition: background 0.2s ease-out;
 }
 

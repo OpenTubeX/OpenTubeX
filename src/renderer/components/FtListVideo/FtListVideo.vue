@@ -874,6 +874,14 @@ const thumbnail = computed(() => {
     return deArrowCache.value.thumbnail
   }
 
+  if (
+    props.appearance === 'youtubeShort' &&
+    thumbnailPreference.value === '' &&
+    props.data.thumbnailUrl
+  ) {
+    return props.data.thumbnailUrl
+  }
+
   return getVideoThumbnailUrl(
     id.value,
     backendPreference.value,

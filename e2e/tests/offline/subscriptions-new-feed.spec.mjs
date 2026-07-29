@@ -49,7 +49,10 @@ function profile (subscriptions = [{ id: CHANNEL_ID, name: 'Channel A', thumbnai
 const newVideo = video('new-video-1', 'New video', now - HOUR, { isNewInSubscriptionFeed: true })
 const watchedVideo = video('watched-new', 'Watched new video', now - 2 * HOUR, { isNewInSubscriptionFeed: true })
 const oldVideo = video('not-new', 'Previously seen video', now - 3 * HOUR, { isNewInSubscriptionFeed: false })
-const newShort = video('new-short-1', 'New short', now - 30 * 60000, { isNewInSubscriptionFeed: true })
+const newShort = video('new-short-1', 'New short', now - 30 * 60000, {
+  isNewInSubscriptionFeed: true,
+  thumbnailUrl: 'https://i.ytimg.com/vi/new-short-1/hq720_2.jpg?sqp=selected&rs=signature'
+})
 const newLive = video('new-live-1', 'New live stream', now - 15 * 60000, {
   isNewInSubscriptionFeed: true,
   liveNow: true
@@ -129,7 +132,7 @@ test.describe('new subscriptions feed', () => {
     await expect(short).toBeVisible()
     await expect(short.locator('.videoDuration')).toHaveText('2:00')
     await expect(short.locator('.uploadedTime')).not.toBeEmpty()
-    await expect(short.locator('.thumbnailImage')).toHaveAttribute('src', /\/oardefault\.jpg$/)
+    await expect(short.locator('.thumbnailImage')).toHaveAttribute('src', newShort.thumbnailUrl)
 
     const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
       return getComputedStyle(element).aspectRatio

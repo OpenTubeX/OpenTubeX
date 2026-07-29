@@ -150,7 +150,10 @@
   position: absolute;
   text-align: center;
   user-select: none;
-  z-index: 3;
+  // Above route headers and the tab bar, while the top navigation stays above
+  // it. Raising only the dropdown avoids lifting the whole feed card over its
+  // sticky header.
+  z-index: 6;
   overflow: hidden;
 
   &.left {

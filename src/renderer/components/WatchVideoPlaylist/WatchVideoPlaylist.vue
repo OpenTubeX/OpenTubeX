@@ -29,7 +29,6 @@
         </button>
       </header>
       <div
-        v-overlay-scrollbars="fullscreenOverlay"
         :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
       >
         <div class="playlistHeader">
@@ -95,8 +94,9 @@
                 />
                 <div
                   v-if="showProgressBarPreview"
+                  ref="progressBarPreview"
                   class="progressBarPreview"
-                  :style="{ left: previewPosition + '%', transform: `translateX(${ previewTransformXPercentage }%)` }"
+                  :style="previewStyle"
                 >
                   <div class="previewTooltip">
                     <img
@@ -171,12 +171,13 @@
             </button>
           </div>
         </div>
-        <TransitionGroup
+        <component
+          :is="playlistItemsWrapperComponent"
           v-if="!isLoading"
           ref="playlistItemsWrapper"
           v-overlay-scrollbars
-          name="playlistItem"
-          tag="div"
+          :name="animatePlaylistItems ? 'playlistItem' : undefined"
+          :tag="animatePlaylistItems ? 'div' : undefined"
           class="playlistItemsWrapper"
         >
           <FtListVideoNumbered
@@ -210,7 +211,7 @@
             @remove-from-playlist="removeVideoFromPlaylist"
             @pause-player="pausePlayer"
           />
-        </TransitionGroup>
+        </component>
         <FtPrompt
           v-if="showRemoveWatchedVideosPrompt"
           :label="removeWatchedVideosPromptLabel"
@@ -226,7 +227,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -303,9 +304,8 @@ const randomizedPlaylistItems = shallowRef([])
 /** @type {import('vue').Ref<VideoData>} */
 const draggedVideo = ref({ videoId: null, playlistItemId: null })
 const showProgressBarPreview = ref(false)
-const previewPosition = ref(0)
+const previewPositionPixels = ref(0)
 const previewVideoIndex = ref(1)
-const windowWidth = ref(window.innerWidth)
 
 let prevVideoBeforeDeletion = null
 let getPlaylistInfoRun = false
@@ -425,22 +425,27 @@ const canMoveVideos = computed(() => {
   return isUserPlaylist.value && isSortOrderCustom.value && playlistItems.value.length > 1
 })
 
+const MAX_ENHANCED_PLAYLIST_ITEMS = 200
+const animatePlaylistItems = computed(() => {
+  return canMoveVideos.value && playlistItems.value.length < MAX_ENHANCED_PLAYLIST_ITEMS
+})
+
+// TransitionGroup runs FLIP layout measurements for every child whenever this
+// component updates. The fullscreen dock changes this component's layout, so a
+// large playlist would synchronously measure thousands of items just to open or
+// close. Retain move animations only where that cost stays bounded.
+const playlistItemsWrapperComponent = computed(() => animatePlaylistItems.value ? TransitionGroup : 'div')
+
 const isVideoDragging = computed(() => {
   const { videoId, playlistItemId } = draggedVideo.value
 
   return videoId != null && playlistItemId != null
 })
 
-const previewTransformXPercentage = computed(() => {
-  // Breakpoint for single-column-template
-  if (windowWidth.value > 1050) {
-    // Align left when preview is on the right half to avoid going out of right side of the window
-    return previewPosition.value <= 50 ? -50 : -100
-  }
-
-  // Align left/right to avoid going out of either side of the window
-  return previewPosition.value <= 50 ? 0 : -100
-})
+const previewStyle = computed(() => ({
+  left: `${previewPositionPixels.value}px`,
+  transform: 'none'
+}))
 
 const previewVideoTitle = computed(() => {
   const index = previewVideoIndex.value - 1
@@ -561,16 +566,12 @@ onMounted(() => {
       nexttrack: playNextVideo
     })
   }
-
-  window.addEventListener('resize', calculateWindowWidth)
 })
 
 onBeforeUnmount(() => {
   if ('mediaSession' in navigator) {
     tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {})
   }
-
-  window.removeEventListener('resize', calculateWindowWidth)
 })
 
 /**
@@ -1134,11 +1135,12 @@ function pausePlayer() {
 }
 
 const playlistProgressBar = useTemplateRef('playlistProgressBar')
+const progressBarPreview = useTemplateRef('progressBarPreview')
 
 /**
  * @param {MouseEvent} event
  */
-function updateProgressBarPreview(event) {
+async function updateProgressBarPreview(event) {
   if (!showProgressBarPreview.value) return
 
   const rect = playlistProgressBar.value.getBoundingClientRect()
@@ -1146,8 +1148,23 @@ function updateProgressBarPreview(event) {
   const progressBarWidth = rect.width
   const percentage = Math.max(0, Math.min(100, (mouseX / progressBarWidth) * 100))
 
-  previewPosition.value = percentage
   previewVideoIndex.value = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil((percentage / 100) * playlistVideoCount.value)))
+
+  await nextTick()
+  const boundary = playlistProgressBar.value.closest('.watchVideoPlaylist')
+  if (boundary && progressBarPreview.value) {
+    const boundaryRect = boundary.getBoundingClientRect()
+    const previewWidth = progressBarPreview.value.offsetWidth
+    const margin = 8
+    const minimumViewportLeft = boundaryRect.left + margin
+    const maximumViewportLeft = boundaryRect.right - margin - previewWidth
+    const centeredViewportLeft = event.clientX - (previewWidth / 2)
+    const viewportLeft = Math.max(
+      minimumViewportLeft,
+      Math.min(maximumViewportLeft, centeredViewportLeft)
+    )
+    previewPositionPixels.value = viewportLeft - rect.left
+  }
 }
 
 /**
@@ -1165,10 +1182,6 @@ function handleProgressBarClick(event) {
   if (targetArrayIndex >= 0 && targetArrayIndex < playlistItems.value.length) {
     scrollToVideo(targetArrayIndex)
   }
-}
-
-function calculateWindowWidth() {
-  windowWidth.value = window.innerWidth
 }
 
 const videoIsLastInInPlaylistItems = computed(() => {

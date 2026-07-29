@@ -9,6 +9,23 @@ const CAPTIONED_VIDEO = {
   title: 'What’s It Like to Be Killed by Nature’s Most Brutal Predator',
   url: 'https://www.youtube.com/watch?v=Xf-uUy5pdUI'
 }
+const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
+const FULLSCREEN_PLAYLIST = {
+  _id: FULLSCREEN_PLAYLIST_ID,
+  playlistName: 'Fullscreen preview',
+  protected: false,
+  description: '',
+  videos: [{
+    videoId: 'jNQXAC9IVRw',
+    title: 'Me at the zoo',
+    author: 'jawed',
+    authorId: 'UC4QobU6STFB0P71PMvOGN5A',
+    lengthSeconds: 19,
+    type: 'video'
+  }],
+  createdAt: Date.now() - 86_400_000,
+  lastUpdatedAt: Date.now() - 86_400_000
+}
 
 function longTranscript() {
   const timestamp = (seconds) => {
@@ -853,6 +870,51 @@ test.describe('watch page', () => {
     )
     await expect(actions).toHaveCSS('z-index', '0')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
+  })
+
+  test.describe('fullscreen playlist dock', () => {
+    test.use({ seed: { playlists: [FULLSCREEN_PLAYLIST] } })
+
+    test('shows the progress preview above the content viewport', async ({ page, innertube }) => {
+      test.skip(innertube.replay, 'watch page hydration needs the real API')
+      await openVideo(page)
+      await page.evaluate(async (playlistId) => {
+        const router = document.querySelector('#app').__vue_app__.config.globalProperties.$router
+        await router.push({
+          path: '/watch/jNQXAC9IVRw',
+          query: { playlistId, playlistType: 'user' }
+        })
+      }, FULLSCREEN_PLAYLIST_ID)
+      await expect(page.locator('.watchVideoPlaylist')).toBeVisible()
+
+      await page.locator('.full-window-button').click({ force: true })
+      await page.locator('.fullscreenPlaylistToggle').click({ force: true })
+
+      const dock = page.locator('.fullscreenPlaylistOverlay.open')
+      const content = dock.locator('.fullscreenPlaylistContent')
+      const progress = dock.locator('.playlistProgressBarContainer')
+      await expect(dock).toBeVisible()
+      const progressBox = await progress.boundingBox()
+      await page.mouse.move(progressBox.x + 1, progressBox.y + (progressBox.height / 2))
+
+      const preview = dock.locator('.previewTooltip')
+      await expect(preview).toBeVisible()
+      const contentBox = await content.boundingBox()
+      const previewBox = await preview.boundingBox()
+      expect(previewBox.y).toBeLessThan(contentBox.y)
+      await expect(content).toHaveCSS('overflow', 'visible')
+      await expect(content).not.toHaveAttribute('data-overlayscrollbars-viewport')
+
+      for (const position of [0.25, 0.5, 0.75]) {
+        await page.mouse.move(
+          progressBox.x + (progressBox.width * position),
+          progressBox.y + (progressBox.height / 2)
+        )
+        const box = await preview.boundingBox()
+        expect(box.x).toBeGreaterThanOrEqual(contentBox.x - 1)
+        expect(box.x + box.width).toBeLessThanOrEqual(contentBox.x + contentBox.width + 1)
+      }
+    })
   })
 
   test('full window playlist action shows its popover above the player', async ({ page, innertube }) => {
