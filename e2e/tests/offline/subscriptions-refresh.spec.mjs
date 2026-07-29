@@ -119,6 +119,48 @@ test.describe('incremental subscription feed refresh', () => {
   })
 })
 
+test.describe('subscription feed refresh controls', () => {
+  const cachedShort = {
+    videoId: 'cached-short',
+    title: 'Cached short',
+    author: 'Channel 0',
+    authorId: channelId(0),
+    published: now - HOUR,
+    viewCount: 1000,
+    lengthSeconds: 30,
+    liveNow: false,
+    isUpcoming: false,
+    type: 'video',
+    isNewInSubscriptionFeed: true
+  }
+
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        hideSubscriptionsShorts: false,
+        showNewSubscriptionFeedIndicators: true
+      },
+      profiles: [profileWith(1)],
+      subscriptionCache: [{
+        ...cachedChannel(0),
+        shorts: [cachedShort],
+        shortsTimestamp: new Date(now - 2 * HOUR).toISOString()
+      }]
+    }
+  })
+
+  test('keeps Mark all as seen enabled while another feed refreshes', async ({ page }) => {
+    await routeFeeds(page, () => 8_000)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+  })
+})
+
 test.describe('cancelling a subscription feed refresh', () => {
   // More channels than are fetched at once, so that the cancellation can skip
   // the ones that haven't started yet
