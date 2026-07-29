@@ -2778,7 +2778,13 @@ export async function setupTabsIPC(options = {}) {
 
   ipcMain.handle(IpcChannels.TABS_REQUEST_PICTURE_IN_PICTURE, async (event, tabId) => {
     const manager = getManager(event)
-    if (!manager || typeof tabId !== 'string' || !manager.tabs.has(tabId)) {
+    if (
+      !manager ||
+      typeof tabId !== 'string' ||
+      !manager.tabs.has(tabId) ||
+      manager._deferredCloseTabIds.has(tabId) ||
+      manager._deferredUnloadTabIds.has(tabId)
+    ) {
       return false
     }
 
