@@ -366,7 +366,12 @@ async function execute(item) {
 }
 
 function translateLabel(label) {
-  let match = /^Close (\d+) Tabs$/.exec(label)
+  if (label === 'Search with...') return t('Context Menu.Search With Multiple')
+
+  let match = /^Search with (.+)$/.exec(label)
+  if (match) return t('Context Menu.Search With', { engine: match[1] })
+
+  match = /^Close (\d+) Tabs$/.exec(label)
   if (match) return t('Context Menu.Close Multiple Tabs', { count: Number(match[1]) })
 
   match = /^Duplicate (\d+) Tabs$/.exec(label)

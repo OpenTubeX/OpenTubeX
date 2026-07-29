@@ -35,12 +35,14 @@
         </div>
         <template v-if="engine.id.startsWith('custom-')">
           <FtInput
+            :key="inputKey(engine.id, 'name')"
             :placeholder="t('Settings.Context Menu Search Settings.Engine Name')"
             :value="engine.name"
             :show-action-button="false"
             @blur="updateCustomEngine(engine.id, 'name', $event)"
           />
           <FtInput
+            :key="inputKey(engine.id, 'url')"
             input-type="url"
             :placeholder="t('Settings.Context Menu Search Settings.Search URL')"
             :value="engine.url"
@@ -107,6 +109,7 @@ const customName = ref('')
 const customUrl = ref('')
 const failedFavicons = ref(new Set())
 const resolvedFavicons = ref(new Map())
+const inputRevisions = ref(new Map())
 
 const configuredSearchEngines = computed(() => {
   return parseSearchEngines(store.getters.getContextMenuSearchEngines)
@@ -165,6 +168,18 @@ function showInvalidEngineToast() {
   })
 }
 
+function inputKey(id, field) {
+  return `${id}:${field}:${inputRevisions.value.get(`${id}:${field}`) ?? 0}`
+}
+
+function resetCustomEngineInput(id, field) {
+  const key = `${id}:${field}`
+  inputRevisions.value = new Map([
+    ...inputRevisions.value,
+    [key, (inputRevisions.value.get(key) ?? 0) + 1]
+  ])
+}
+
 function updateCustomEngine(id, field, value) {
   const trimmedValue = value.trim()
   if (
@@ -172,6 +187,7 @@ function updateCustomEngine(id, field, value) {
     (field === 'url' && !isValidSearchUrl(trimmedValue))
   ) {
     showInvalidEngineToast()
+    resetCustomEngineInput(id, field)
     return
   }
 

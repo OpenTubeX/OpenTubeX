@@ -835,6 +835,8 @@ function runApp() {
   let contextMenuSessionId = 0
   /** @type {Map<number, { sessionId: number, actions: Map<string, Function> }>} */
   const contextMenuSessions = new Map()
+  /** @type {Map<number, number>} */
+  const latestContextMenuRequests = new Map()
 
   function createDefaultContextMenuActions(parameters, webContents) {
     const hasSelection = parameters.selectionText.length > 0
@@ -927,6 +929,8 @@ function runApp() {
 
   ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, async (event, rawParameters = {}) => {
     const webContents = event.sender
+    const sessionId = ++contextMenuSessionId
+    latestContextMenuRequests.set(webContents.id, sessionId)
     const parameters = {
       x: Number.isFinite(rawParameters.x) ? rawParameters.x : 0,
       y: Number.isFinite(rawParameters.y) ? rawParameters.y : 0,
@@ -961,10 +965,11 @@ function runApp() {
       ...await contextMenuOptions.append(defaultActions, parameters, webContents)
     ]
     const actions = new Map()
-    const sessionId = ++contextMenuSessionId
     const serializedItems = serializeContextMenuItems(items, actions)
 
-    contextMenuSessions.set(webContents.id, { sessionId, actions })
+    if (latestContextMenuRequests.get(webContents.id) === sessionId) {
+      contextMenuSessions.set(webContents.id, { sessionId, actions })
+    }
     return { sessionId, items: serializedItems }
   })
 
@@ -3914,6 +3919,7 @@ function runApp() {
 
     webContents.once('destroyed', () => {
       contextMenuSessions.delete(webContents.id)
+      latestContextMenuRequests.delete(webContents.id)
       pendingOpenUrlsByWebContentsId.delete(webContents.id)
       openUrlReadyWebContentsIds.delete(webContents.id)
       invidiousAuthorizations.delete(webContents.id)

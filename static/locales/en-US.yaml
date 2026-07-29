@@ -1547,6 +1547,8 @@ Context Menu:
   Copy Invidious Link: Copy Invidious Link
   Search Selection in New Tab: 'Search "{selection}" in a New Tab'
   Search Selection in New Window: 'Search "{selection}" in a New Window'
+  Search With: Search with {engine}
+  Search With Multiple: Search with...
   Selection Too Long: 'Selection is too long for search (> {count} characters)'
 
 Chapters:

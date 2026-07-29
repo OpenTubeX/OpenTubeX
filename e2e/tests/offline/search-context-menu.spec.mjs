@@ -64,6 +64,23 @@ test('keeps web search enabled and below in-app search for long selections', asy
   expect(webSearchIndex).toBeGreaterThan(Math.max(...inAppSearchIndices))
 })
 
+test('keeps the newest overlapping context menu session executable', async ({ page }) => {
+  const contextMenus = await page.evaluate(() => {
+    return Promise.all(Array.from({ length: 10 }, (_, index) => {
+      return window.ftElectron.contextMenu.open({ selectionText: `overlap ${index}` })
+    }))
+  })
+  const contextMenu = contextMenus.at(-1)
+  const search = contextMenu.items.find(item => item.label === 'Search "overlap 9" in a New Tab')
+
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: search.actionId })
+
+  await expect(page.locator(sel.tabs)).toHaveCount(2)
+  await expect(page).toHaveURL(/#\/search\/overlap%209/)
+})
+
 test('adds a custom search engine from settings', async ({ page }) => {
   await goTo(page, 'settings')
   const sectionOrder = await page.locator('.settingsMenu [data-section]').evaluateAll(items => {
@@ -107,6 +124,11 @@ test('adds a custom search engine from settings', async ({ page }) => {
     })
   ]).then(([inputCenter, buttonCenter]) => Math.abs(inputCenter - buttonCenter))
   expect(centerDifference).toBeLessThan(1)
+
+  const urlInput = customRow.getByLabel('Search URL')
+  await urlInput.fill('not a search URL')
+  await urlInput.blur()
+  await expect(urlInput).toHaveValue('https://example.com/search?q=%s')
 
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'custom search'
