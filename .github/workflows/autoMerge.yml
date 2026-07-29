@@ -40,18 +40,28 @@ jobs:
       pull-requests: read
 
     steps:
-    - name: Verify reviewer is repository admin
+    - name: Verify approval can authorize auto-merge
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
         REPOSITORY: ${{ github.repository }}
         REVIEWER: ${{ github.event.review.user.login }}
+        REVIEWER_TYPE: ${{ github.event.review.user.type }}
+        AUTHOR: ${{ github.event.pull_request.user.login }}
       run: |
-        permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
+        reviewer_permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
 
-        if [[ "$permission" != "admin" ]]; then
-          echo "Reviewer $REVIEWER has '$permission' permission, not admin. Auto-merge will not be enabled."
+        if [[ "$reviewer_permission" == "admin" ]]; then
+          echo "Admin approval authorized. A trusted follow-up workflow will enable auto-merge."
           exit 0
         fi
 
-        echo "Admin approval authorized. A trusted follow-up workflow will enable auto-merge."
+        author_permission="$(gh api "repos/$REPOSITORY/collaborators/$AUTHOR/permission" --jq '.permission' 2>/dev/null || true)"
+        if [[ "$REVIEWER_TYPE" == "Bot" &&
+          ( "$REVIEWER" == "coderabbitai[bot]" || "$REVIEWER" == "greptile-apps[bot]" ) &&
+          "$author_permission" == "admin" ]]; then
+          echo "Trusted bot approval for admin author $AUTHOR authorized."
+          exit 0
+        fi
+
+        echo "Approval by $REVIEWER does not authorize auto-merge."

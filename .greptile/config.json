@@ -1,0 +1,7 @@
+{
+  "triggerOnUpdates": true,
+  "autoApprove": {
+    "enabled": true,
+    "riskCeiling": "low"
+  }
+}
