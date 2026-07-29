@@ -56,6 +56,13 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
     clientX: narrowProgressBox.x + 1,
     clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
   })
+  await expect.poll(async () => {
+    const box = await sidebarPreview.boundingBox()
+    return Math.round(box.x - narrowCardBox.x)
+  }).toBe(8)
+  const narrowLeftPreviewBox = await sidebarPreview.boundingBox()
+  expect(narrowLeftPreviewBox.width).toBeLessThanOrEqual(narrowCardBox.width - 16)
+
   await sidebarProgress.dispatchEvent('mousemove', {
     clientX: narrowProgressBox.x + narrowProgressBox.width - 1,
     clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
@@ -64,8 +71,6 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
     const box = await sidebarPreview.boundingBox()
     return Math.round(narrowCardBox.x + narrowCardBox.width - (box.x + box.width))
   }).toBe(8)
-  const narrowPreviewBox = await sidebarPreview.boundingBox()
-  expect(narrowPreviewBox.width).toBeLessThanOrEqual(narrowCardBox.width - 16)
   await sidebarCard.evaluate((element) => {
     element.style.removeProperty('inline-size')
   })

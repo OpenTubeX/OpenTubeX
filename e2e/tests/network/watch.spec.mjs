@@ -914,6 +914,15 @@ test.describe('watch page', () => {
         expect(box.x).toBeGreaterThanOrEqual(contentBox.x - 1)
         expect(box.x + box.width).toBeLessThanOrEqual(contentBox.x + contentBox.width + 1)
       }
+
+      await page.mouse.move(
+        progressBox.x + progressBox.width - 1,
+        progressBox.y + (progressBox.height / 2)
+      )
+      const rightEdgeBox = await preview.boundingBox()
+      expect(rightEdgeBox.x + rightEdgeBox.width).toBeLessThanOrEqual(
+        contentBox.x + contentBox.width + 1
+      )
     })
   })
 
