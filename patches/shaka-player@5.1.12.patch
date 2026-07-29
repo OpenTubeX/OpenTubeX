@@ -1,7 +1,20 @@
 diff --git a/dist/shaka-player.ui-es2021.js b/dist/shaka-player.ui-es2021.js
-index 15a75205adac5ae9c14227791bcd307d5687b67c..029945705b77301479e1d09e9e08748d1e298a56 100644
+index 15a75205adac5ae9c14227791bcd307d5687b67c..7020e86c562d3a918f38689919b913b4f06e7614 100644
 --- a/dist/shaka-player.ui-es2021.js
 +++ b/dist/shaka-player.ui-es2021.js
+@@ -1559,9 +1559,9 @@ function vI(a){const b=a.F.seekBarColors.chapters;var c=a.controls.H;if(c.length
+ a.A?.stop())}}else a.o.style.background="transparent",a.A?.stop()}function wI(a){a.l.style.visibility="hidden"}function xI(a){var b=a.player.sa();b=b.end-b.start;return a.player.ra()&&(b<5||!isFinite(b))?!1:a.ad==null||!a.ad.isLinear()}function yI(a){const b=()=>{tI(a);var c=a.player.sa();c=c.end-c.start;a.player.ra()&&c>5&&a.G.va(.25)};b();a.player.wd()||a.eventManager.ea(a.player,"loaded",b)}
+ function zI(a,b){const c=parseFloat(a.bar.min);var d=parseFloat(a.bar.max);d=(a.bar.getBoundingClientRect().width-12)/(d-c);AI(a,(b-c)*d+6,b)}function uI(a,b){return a.length&&b&&b!=="transparent"?a.map(({position:c,width:d})=>d.endsWith("%")?(c=parseFloat(c),d=c+parseFloat(d),`linear-gradient(to right, ${`transparent ${c}%`}, ${`${b} ${c}%`}, ${`${b} ${d}%`}, ${`transparent ${d}%`}) 0 0 / 100% 100% no-repeat`):`linear-gradient(${b}, ${b}) ${c} / ${d} 100% no-repeat`).join(","):"transparent"}
+ async function AI(a,b,c){c<0&&(c=0);var d=!1;a.m.length&&(d=a.m.some(n=>n.end?c>=n.start&&c<=n.end:!1));var e=a.player.sa(),f=Math.max(Math.ceil(e.start),Math.min(Math.floor(e.end),c));if(a.player.ra()){e=e.end-c;var g=e<1?a.localization.resolve("LIVE"):"-"+SH(e,e>=3600)}else g=SH(c,c>=3600);(e=BI(a,c))?a.L.textContent=g+" \u00b7 "+e.title:a.L.textContent=g;g=a.l.clientWidth;a.l.style.left=Math.min(a.bar.offsetWidth-g,Math.max(0,b-g/2))+"px";a.l.style.visibility="visible";b=a.player.Sd().length>0;
+-const h=e&&e.images.length>0;if(d||!b&&!h)a.i.style.display="none";else{a.i.style.display="";if(!a.i.style.height){d=16/9;const n=a.player.getVideoTracks().find(p=>p.active);n&&n.width&&n.height&&(d=n.width/n.height);a.i.style.height=Math.floor(g/d)+"px"}var k;h&&(k=CI(e));b&&(k=await a.player.vg(null,f)??k);if(k){k.width<k.height?a.i.classList.add("portrait-thumbnail"):a.i.classList.remove("portrait-thumbnail");var l=k.uris[0].split("#xywh=")[0];if(!a.C||l!==a.C.uris[0].split("#xywh=")[0]||k.startByte!=
+-a.C.startByte||k.endByte!=a.C.endByte){a.C=k;a.j&&(a.j.abort(),a.j=null);if(k.codecs=="mjpg"||l.startsWith("offline:")){a.g.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';try{var m=wm(k.uris,k.startByte,k.endByte,a.player.getConfiguration().streaming.retryParameters);a.j=a.player.fb().request(rg,m,{type:1});const n=await a.j.promise;a.j=null;l=TH(k,n)}catch(n){if(n.code==7001)return;throw n;}}try{a.i.removeChild(a.g)}catch(n){}a.g=N("img");a.g.classList.add("shaka-player-ui-thumbnail-image");
+-a.g.draggable=!1;a.g.src=l;a.g.onload=()=>{l.startsWith("blob:")&&URL.revokeObjectURL(l)};a.i.insertBefore(a.g,a.i.firstChild)}f=a.i.clientWidth;m=f/k.width;k.imageHeight?a.g.height=k.imageHeight:k.sprite||(a.g.style.height="100%",a.g.style.objectFit="contain");k.imageWidth?a.g.width=k.imageWidth:k.sprite||(a.g.style.width="100%",a.g.style.objectFit="contain");!isNaN(m)&&isFinite(m)&&(a.g.style.left="-"+m*k.positionX+"px",a.g.style.top="-"+m*k.positionY+"px",a.g.style.transform="scale("+m+")",a.g.style.transformOrigin=
++const h=e&&e.images.length>0;if(d||!b&&!h)a.i.style.display="none";else{a.i.style.display="";if(!a.i.style.height){d=16/9;const n=a.player.getVideoTracks().find(p=>p.active);n&&n.width&&n.height&&(d=n.width/n.height);a.i.style.height=Math.floor(g/d)+"px"}var k;h&&(k=CI(e));b&&(k=await a.player.vg(null,f)??k);if(k){const q=k.sprite||k.imageWidth>k.width||k.imageHeight>k.height||k.positionX!=0||k.positionY!=0;k.width<k.height?a.i.classList.add("portrait-thumbnail"):a.i.classList.remove("portrait-thumbnail");var l=k.uris[0].split("#xywh=")[0];if(!a.C||l!==a.C.uris[0].split("#xywh=")[0]||k.startByte!=
++a.C.startByte||k.endByte!=a.C.endByte){a.C=k;a.j&&(a.j.abort(),a.j=null);if(k.codecs=="mjpg"||l.startsWith("offline:")){a.g.src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>';try{var m=wm(k.uris,k.startByte,k.endByte,a.player.getConfiguration().streaming.retryParameters);a.j=a.player.fb().request(rg,m,{type:1});const n=await a.j.promise;a.j=null;l=TH(k,n)}catch(n){if(n.code==7001)return;throw n;}}try{a.i.removeChild(a.g)}catch(n){}a.g=N("img");const n=a.g;a.g.classList.add("shaka-player-ui-thumbnail-image");
++a.g.draggable=!1;a.g.src=l;a.g.onload=()=>{q&&n.naturalWidth&&n.naturalHeight&&(n.width=n.naturalWidth,n.height=n.naturalHeight);l.startsWith("blob:")&&URL.revokeObjectURL(l)};a.i.insertBefore(a.g,a.i.firstChild)}f=a.i.clientWidth;m=f/k.width;q&&a.g.naturalHeight?a.g.height=a.g.naturalHeight:k.imageHeight?a.g.height=k.imageHeight:k.sprite||(a.g.style.height="100%",a.g.style.objectFit="contain");q&&a.g.naturalWidth?a.g.width=a.g.naturalWidth:k.imageWidth?a.g.width=k.imageWidth:k.sprite||(a.g.style.width="100%",a.g.style.objectFit="contain");!isNaN(m)&&isFinite(m)&&(a.g.style.left="-"+m*k.positionX+"px",a.g.style.top="-"+m*k.positionY+"px",a.g.style.transform="scale("+m+")",a.g.style.transformOrigin=
+ "left top");k=Math.floor(f*k.height/k.width);!isNaN(k)&&isFinite(k)&&(a.i.style.height=k+"px")}}}function BI(a,b){for(const c of a.controls.H)if(c.startTime<=b&&c.endTime>=b)return c;return null}
+ function CI(a){if(!a||!a.images.length)return null;const b=a.images[0];return{segment:null,imageHeight:b.height||0,imageWidth:b.width||0,height:b.height||0,positionX:0,positionY:0,startTime:a.startTime,duration:a.endTime-a.startTime,uris:[b.url],startByte:0,endByte:null,width:b.width||0,sprite:!1,mimeType:"",codecs:""}}
+ var DI=class extends sI{constructor(a,b){super(a,b,["shaka-seek-bar-container"],["shaka-seek-bar","shaka-no-propagation","shaka-show-controls-on-mouse-over"]);this.H=N("div");this.H.classList.add("shaka-ad-markers");this.container.insertBefore(this.H,this.container.childNodes[0]);this.o=N("div");this.o.classList.add("shaka-chapter-markers");this.container.insertBefore(this.o,this.container.childNodes[0]);this.F=this.controls.g;this.K=new I(()=>{let c=this.getValue();this.player.ra()||c==this.video.duration&&
 @@ -1733,7 +1733,7 @@ break;case a.g.shortcuts.captions.toLowerCase():if(!a.ib)break;a.j.Ua().some(k=>
  (d=a.j.sa(),e=d.end-d.start,e>0&&nI(a,d.start+parseInt(b.key,10)/10*e))}}}function nI(a,b,c=!1){c&&"fastSeek"in a.A?a.A.fastSeek(b):a.A.currentTime=b;mI(a)}function UJ(a,b){if(!(a.l&&a.l.isLinear()||a.j.yc())){var c=a.j.getVideoTracks().find(d=>d.active);c&&c.frameRate&&(a.A.paused||a.A.pause(),mI(a),c=1/c.frameRate,b=a.$b()+c*b,b>=0&&b<=a.j.sa().end&&a.A.currentTime!==b&&nI(a,b))}}
  function RJ(a,b){var c=a.T.filter(e=>!e.classList.contains("shaka-hidden"));if(c.length){var d=c[0];if(d.childNodes.length){for(c=d.firstElementChild;c&&c.classList.contains("shaka-hidden");)c=c.nextElementSibling;for(d=d.lastElementChild;d&&d.classList.contains("shaka-hidden");)d=d.previousElementSibling;const e=document.activeElement;a.Ha.has("Shift")?e==c&&(b.preventDefault(),d.focus()):e==d&&(b.preventDefault(),c.focus())}}}
@@ -25,3 +38,55 @@ index b525e966d69c8e891adf54b7349b36add9b5e8b5..e85a973f83a55de978fcc1963bd42306
          return;
        }
        this.controlsContainer_.removeAttribute('shown');
+diff --git a/ui/seek_bar.js b/ui/seek_bar.js
+index a5f4162b45c06d7ae196fbe163219f07c1ee9780..7e8797e4ce7b313daba6592faac9aebbedb2c49c 100644
+--- a/ui/seek_bar.js
++++ b/ui/seek_bar.js
+@@ -741,6 +741,10 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     if (!thumbnail) {
+       return;
+     }
++    const isThumbnailSheet = thumbnail.sprite ||
++        thumbnail.imageWidth > thumbnail.width ||
++        thumbnail.imageHeight > thumbnail.height ||
++        thumbnail.positionX != 0 || thumbnail.positionY != 0;
+     if (thumbnail.width < thumbnail.height) {
+       this.thumbnailImageContainer_.classList.add('portrait-thumbnail');
+     } else {
+@@ -786,10 +790,16 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+       }
+       this.thumbnailImage_ = /** @type {!HTMLImageElement} */ (
+         shaka.util.Dom.createHTMLElement('img'));
++      const thumbnailImage = this.thumbnailImage_;
+       this.thumbnailImage_.classList.add('shaka-player-ui-thumbnail-image');
+       this.thumbnailImage_.draggable = false;
+       this.thumbnailImage_.src = uri;
+       this.thumbnailImage_.onload = () => {
++        if (isThumbnailSheet &&
++            thumbnailImage.naturalWidth && thumbnailImage.naturalHeight) {
++          thumbnailImage.width = thumbnailImage.naturalWidth;
++          thumbnailImage.height = thumbnailImage.naturalHeight;
++        }
+         if (uri.startsWith('blob:')) {
+           URL.revokeObjectURL(uri);
+         }
+@@ -799,13 +809,17 @@ shaka.ui.SeekBar = class extends shaka.ui.RangeElement {
+     }
+     const widthImageContainer = this.thumbnailImageContainer_.clientWidth;
+     const scale = widthImageContainer / thumbnail.width;
+-    if (thumbnail.imageHeight) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalHeight) {
++      this.thumbnailImage_.height = this.thumbnailImage_.naturalHeight;
++    } else if (thumbnail.imageHeight) {
+       this.thumbnailImage_.height = thumbnail.imageHeight;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.height = '100%';
+       this.thumbnailImage_.style.objectFit = 'contain';
+     }
+-    if (thumbnail.imageWidth) {
++    if (isThumbnailSheet && this.thumbnailImage_.naturalWidth) {
++      this.thumbnailImage_.width = this.thumbnailImage_.naturalWidth;
++    } else if (thumbnail.imageWidth) {
+       this.thumbnailImage_.width = thumbnail.imageWidth;
+     } else if (!thumbnail.sprite) {
+       this.thumbnailImage_.style.width = '100%';

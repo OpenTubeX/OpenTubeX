@@ -1,19 +1,12 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
 const secondChannelId = 'UC-lHJZR3Gqxm24_Vd_AJ5Yw'
 const remoteChannelId = 'UC_x5XG1OV2P6uZZ5FSM9Ttw'
-
-function latestSettings(contents) {
-  return Object.fromEntries(contents.trim().split('\n')
-    .map(line => JSON.parse(line))
-    .filter(record => record._id && !record.$$deleted)
-    .map(record => [record._id, record.value]))
-}
 
 async function getSyncCapabilities() {
   const response = await fetch(`${syncServerUrl}/health`)
@@ -38,7 +31,7 @@ test.describe('OpenTubeX sync server', () => {
     await page.route('**/account/**', route => route.continue({
       headers: {
         ...route.request().headers(),
-        'X-Forwarded-For': rateLimitClient(testInfo.title)
+        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
       }
     }))
   })
@@ -323,7 +316,7 @@ test.describe('OpenTubeX sync server', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Forwarded-For': rateLimitClient(testInfo.title)
+        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
       },
       body: JSON.stringify({ name: username, password })
     })

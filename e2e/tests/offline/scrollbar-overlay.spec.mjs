@@ -73,6 +73,7 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => pageOverflows(page)).toBe(true)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
+    await handle.hover()
     const box = await handle.boundingBox()
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
     await page.mouse.down()
@@ -87,6 +88,7 @@ test.describe('overlay scrollbars', () => {
     await expect.poll(() => pageOverflows(page)).toBe(true)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
+    await handle.hover()
     const initialBox = await handle.boundingBox()
     const pointerX = initialBox.x + initialBox.width / 2
     const pointerY = initialBox.y + initialBox.height / 2 + 150
