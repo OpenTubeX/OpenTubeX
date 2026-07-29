@@ -80,7 +80,22 @@ function extractHtmlAttribute(tag, attribute) {
 export function parseReleaseImages(section) {
   if (!section) { return [] }
 
-  const images = [...section.matchAll(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["'][^"']*["'])?\)|<img\b[^>]*>/gi)]
+  const matches = [...section.matchAll(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["'][^"']*["'])?\)|<img\b[^>]*>/gi)]
+  let end = 0
+
+  for (const match of matches) {
+    if (section.slice(end, match.index).trim()) {
+      throw new Error('Release note images must be Markdown images or <img> tags.')
+    }
+
+    end = match.index + match[0].length
+  }
+
+  if (section.slice(end).trim()) {
+    throw new Error('Release note images must be Markdown images or <img> tags.')
+  }
+
+  const images = matches
     .map((match) => {
       if (match[1] !== undefined) {
         return {

@@ -220,6 +220,18 @@ ${NOTE_MARKERS}
   )
 })
 
+test('malformed image entries are rejected after valid images', () => {
+  for (const malformedImage of ['![Broken image](', '<img src="https://github.com/user-attachments/assets/broken"']) {
+    assert.throws(() => parseReleaseNote(`
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+![Screenshot](https://github.com/user-attachments/assets/example)
+${malformedImage}
+<!-- release-note-image:end -->
+`), /must be Markdown images or <img> tags/)
+  }
+})
+
 test('GitHub user attachment storage redirects are accepted narrowly', () => {
   assert.equal(
     validateDownloadedImageUrl('https://github-production-user-asset-6210df.s3.amazonaws.com/image.png').hostname,
