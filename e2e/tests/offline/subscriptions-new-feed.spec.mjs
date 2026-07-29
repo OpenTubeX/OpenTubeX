@@ -105,11 +105,13 @@ test.describe('new subscriptions feed', () => {
     }
   })
 
-  test('combines new content without mixing posts into the media grid', async ({ page }) => {
+  test('groups new content by feed category', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
     await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Shorts', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Live', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Posts', exact: true })).toBeVisible()
     await expect(page.getByText('New video', { exact: true })).toHaveCount(1)
     await expect(page.getByText('New short', { exact: true })).toBeVisible()
@@ -119,6 +121,8 @@ test.describe('new subscriptions feed', () => {
     await expect(page.getByText('Previously seen video', { exact: true })).toHaveCount(0)
 
     await expect(page.locator('.ft-list-video').filter({ hasText: 'New video' })).toHaveClass(/grid/)
+    await expect(page.locator('.ft-list-video').filter({ hasText: 'New short' })).toHaveClass(/youtubeShort/)
+    await expect(page.locator('.ft-list-video').filter({ hasText: 'New live stream' })).not.toHaveClass(/youtubeShort/)
     await expect(page.locator('.ft-list-post').filter({ hasText: 'New community post' })).toHaveClass(/list/)
     await expect(page.locator('.newContentDot')).toHaveCount(0)
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
@@ -317,6 +321,40 @@ test.describe('new feed display filters', () => {
     await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
     await expect(page.getByRole('heading', { name: 'Posts', exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toHaveCount(0)
+  })
+})
+
+test.describe('new feed latest-per-channel limit', () => {
+  const publishedTimeShort = video('published-time-short', 'New short by published time', undefined, {
+    isNewInSubscriptionFeed: true,
+    publishedTime: now + HOUR
+  })
+  const latestLimitCache = [{
+    ...populatedCache[0],
+    shorts: [publishedTimeShort]
+  }]
+
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        onlyShowLatestFromChannel: true,
+        onlyShowLatestFromChannelNumber: 1
+      },
+      profiles: [profile()],
+      subscriptionCache: latestLimitCache
+    }
+  })
+
+  test('applies the limit across media categories', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(page.getByText('New short by published time', { exact: true })).toBeVisible()
+    await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('New live stream', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Live', exact: true })).toHaveCount(0)
   })
 })
 
