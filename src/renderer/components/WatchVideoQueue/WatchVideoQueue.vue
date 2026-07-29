@@ -44,7 +44,7 @@
           @keydown.up.prevent="move(item.queueItemId, -1)"
           @keydown.down.prevent="move(item.queueItemId, 1)"
         >
-          <FontAwesomeIcon :icon="['fas', 'fa-bars']" />
+          <FontAwesomeIcon :icon="['fas', 'bars']" />
         </span>
         <RouterLink
           class="queueVideo"

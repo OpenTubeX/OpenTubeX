@@ -29,7 +29,7 @@
           <FontAwesomeIcon
             v-if="canBecomeDraggable"
             class="grabBar"
-            :icon="['fas', 'fa-bars']"
+            :icon="['fas', 'bars']"
           />
 
           <span

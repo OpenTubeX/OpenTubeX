@@ -13,7 +13,7 @@
       class="grabBar"
     >
       <FontAwesomeIcon
-        :icon="['fas', 'fa-bars']"
+        :icon="['fas', 'bars']"
       />
     </div>
     <div
