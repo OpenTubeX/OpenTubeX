@@ -47,6 +47,10 @@
   z-index: 1002;
 }
 
+.toast-slot {
+  position: relative;
+}
+
 .toast {
   display: flex;
   align-items: center;
@@ -73,6 +77,37 @@
   /* Let the component own horizontal drag gestures instead of the browser */
   touch-action: pan-y;
   transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.timeout-indicator-track {
+  position: absolute;
+  inset-block-end: 5px;
+  inset-inline: 10px;
+  block-size: 2px;
+  pointer-events: none;
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.timeout-indicator-track.dragging {
+  transition: none;
+}
+
+.timeout-indicator {
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: var(--primary-color);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--primary-color) 70%, transparent);
+  transform-origin: left;
+  animation-name: toast-timeout;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes toast-timeout {
+  to {
+    transform: scaleX(0);
+  }
 }
 
 /* Follow the pointer instantly while dragging */

@@ -35,6 +35,13 @@
           :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
           @change="updateRememberTabNavigationHistory"
         />
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Show Toast Timeout Indicator')"
+          :default-value="showToastTimeoutIndicator"
+          setting-key="showToastTimeoutIndicator"
+          :compact="true"
+          @change="updateShowToastTimeoutIndicator"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -392,6 +399,16 @@ const showTabIcons = computed(() => store.getters.getShowTabIcons)
  */
 function updateShowTabIcons(value) {
   store.dispatch('updateShowTabIcons', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowToastTimeoutIndicator(value) {
+  store.dispatch('updateShowToastTimeoutIndicator', value)
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API

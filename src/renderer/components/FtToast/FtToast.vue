@@ -15,6 +15,8 @@
         :key="toast.id"
         class="toast-slot"
         :class="toast.dismissDirection && `dismiss-${toast.dismissDirection}`"
+        @pointerenter="pause(toast)"
+        @pointerleave="resume(toast)"
       >
         <div
           v-overlay-scrollbars
@@ -29,8 +31,8 @@
           @keydown.esc.prevent="dismiss(toast)"
           @pointerdown="onPointerDown(toast, $event)"
           @pointermove="onPointerMove(toast, $event)"
-          @pointerup="onPointerUp(toast)"
-          @pointercancel="onPointerUp(toast)"
+          @pointerup="onPointerUp(toast, $event)"
+          @pointercancel="onPointerUp(toast, $event)"
         >
           <img
             v-if="toast.image"
@@ -48,6 +50,19 @@
           <p class="message">
             {{ toast.message }}
           </p>
+        </div>
+        <div
+          v-if="showTimeoutIndicator"
+          class="timeout-indicator-track"
+          :class="{ dragging: toast.dragging }"
+          :style="dragStyle(toast)"
+          aria-hidden="true"
+        >
+          <div
+            class="timeout-indicator"
+            :style="{ animationDuration: `${toast.duration}ms` }"
+            @animationstart="onIndicatorAnimationStart(toast, $event)"
+          />
         </div>
       </div>
     </TransitionGroup>
@@ -73,7 +88,10 @@ let removeShowToastListener = null
  * @property {NodeJS.Timeout | number} timeout
  * @property {NodeJS.Timeout | number} interval
  * @property {number} id
+ * @property {number} duration lifetime of the toast in milliseconds
+ * @property {number} remainingMs lifetime remaining when the toast was paused
  * @property {number} expiresAt timestamp the toast is due to auto-dismiss at, used to reschedule after a drag
+ * @property {boolean} hovered
  * @property {boolean} dragging
  * @property {boolean} pointerMoved whether the pointer moved enough to count as a drag (suppresses the click action)
  * @property {number} dragOffset current horizontal drag offset in px
@@ -86,12 +104,16 @@ const DRAG_DISMISS_THRESHOLD = 80
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
+/** @type {Map<number, Animation>} */
+const indicatorAnimations = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => {
   return normalizeToastPosition(store.getters.getToastPosition)
 })
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
@@ -114,7 +136,10 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
     icon: icon ?? null,
     timeout: 0,
     interval: 0,
+    duration: time,
+    remainingMs: time,
     expiresAt: Date.now() + time,
+    hovered: false,
     dragging: false,
     pointerMoved: false,
     dragOffset: 0,
@@ -188,6 +213,35 @@ function onClick(toast) {
 }
 
 /**
+ * Pauses auto-dismiss while a toast is hovered.
+ * @param {Toast} toast
+ */
+function pause(toast) {
+  if (toast.hovered) { return }
+
+  toast.hovered = true
+  toast.remainingMs = Math.max(0, toast.expiresAt - Date.now())
+  clearTimeout(toast.timeout)
+  indicatorAnimations.get(toast.id)?.pause()
+}
+
+/**
+ * Resumes auto-dismiss once the toast is no longer hovered.
+ * @param {Toast} toast
+ */
+function resume(toast) {
+  if (!toast.hovered) { return }
+
+  toast.hovered = false
+  toast.expiresAt = Date.now() + toast.remainingMs
+  indicatorAnimations.get(toast.id)?.play()
+
+  if (!toast.dragging) {
+    toast.timeout = setTimeout(remove, toast.remainingMs, toast)
+  }
+}
+
+/**
  * @param {Toast} toast
  * @param {PointerEvent} event
  */
@@ -231,8 +285,9 @@ function onPointerMove(toast, event) {
 
 /**
  * @param {Toast} toast
+ * @param {PointerEvent} event
  */
-function onPointerUp(toast) {
+function onPointerUp(toast, event) {
   if (!toast.dragging) { return }
 
   toast.dragging = false
@@ -245,8 +300,23 @@ function onPointerUp(toast) {
     // for toasts whose action expires on its own schedule (e.g. the playlist
     // undo toast), which must not stay clickable after that deadline passes.
     toast.dragOffset = 0
-    toast.timeout = setTimeout(remove, Math.max(0, toast.expiresAt - Date.now()), toast)
+    if (!toast.hovered) {
+      toast.timeout = setTimeout(remove, Math.max(0, toast.expiresAt - Date.now()), toast)
+    }
   }
+
+  // Pointer capture can suppress the leave event when a drag ends outside the
+  // toast. Recheck after capture is released so hover cannot remain stuck.
+  const element = event.currentTarget
+  requestAnimationFrame(() => {
+    if (!toasts.includes(toast)) { return }
+
+    if (element.matches(':hover')) {
+      pause(toast)
+    } else {
+      resume(toast)
+    }
+  })
 }
 
 /**
@@ -281,6 +351,28 @@ function dragStyle(toast) {
 }
 
 /**
+ * Associates the browser-managed animation with its toast and seeks it to the
+ * true remaining lifetime. Seeking matters if the indicator is enabled while
+ * an existing toast is already partway through its lifetime.
+ * @param {Toast} toast
+ * @param {AnimationEvent} event
+ */
+function onIndicatorAnimationStart(toast, event) {
+  const animation = event.target.getAnimations()[0]
+  if (!animation) { return }
+
+  const remainingMs = toast.hovered
+    ? toast.remainingMs
+    : Math.max(0, toast.expiresAt - Date.now())
+
+  animation.currentTime = toast.duration - remainingMs
+  if (toast.hovered) {
+    animation.pause()
+  }
+  indicatorAnimations.set(toast.id, animation)
+}
+
+/**
  * @param {Toast} toast
  */
 function remove(toast) {
@@ -288,6 +380,7 @@ function remove(toast) {
 
   if (index !== -1) {
     toasts.splice(index, 1)
+    indicatorAnimations.delete(toast.id)
     cleanup(toast)
   }
 }

@@ -386,6 +386,7 @@ Settings:
       System: System
       Force On: Force on
       Force Off: Force off
+    Show Toast Timeout Indicator: Show toast timeout indicator
     Toast Position:
       Toast Position: Toast Position
       Bottom Left: Bottom left
