@@ -72,6 +72,27 @@
   margin-block-start: 28px;
 }
 
+.watchPlaylistItem .sponsorBlockVideoLabel {
+  box-sizing: border-box;
+  place-self: end start;
+  max-inline-size: calc(100% - 8px);
+  margin: 4px;
+}
+
+.watchPlaylistItem .sponsorBlockVideoLabel span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watchPlaylistItem.watched .sponsorBlockVideoLabel {
+  margin-block: 4px 28px;
+}
+
+.watchPlaylistItem .videoThumbnail:has(.videoDuration) .sponsorBlockVideoLabel {
+  max-inline-size: calc(100% - 46px);
+}
+
 .channelName.collaboratorChannelButton {
   background: none;
   border: 0;

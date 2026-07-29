@@ -74,6 +74,7 @@ $watched-transition-duration: 0.5s;
   }
 
   .videoThumbnail {
+    position: relative;
     display: grid;
 
     .thumbnailLink,
@@ -116,6 +117,12 @@ $watched-transition-duration: 0.5s;
       opacity: $thumbnail-overlay-opacity;
       padding: 2px;
       pointer-events: none;
+
+      @include is-watch-playlist-item {
+        place-self: flex-end start;
+        margin-block-end: 4px;
+        margin-inline-start: 4px;
+      }
     }
 
     .videoDuration {
