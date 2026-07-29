@@ -135,6 +135,7 @@
         </div>
         <div class="shortsTopControlsGroup">
           <button
+            v-if="shortsCaptionsAvailable"
             type="button"
             class="shortsTopControl shortsCaptionsControl"
             :class="{ active: shortsCaptionsEnabled }"

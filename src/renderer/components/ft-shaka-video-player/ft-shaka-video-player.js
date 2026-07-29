@@ -449,6 +449,7 @@ export default defineComponent({
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
     const shortsMuted = ref(false)
+    const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
 
     const autoplayNextVideo = computed(() => props.autoplayCountdown?.video ?? null)
@@ -2956,7 +2957,7 @@ export default defineComponent({
       if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
         uiConfig.overflowMenuButtons = [
           ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
-          'ft_autoplay_toggle',
+          ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
           'ft_skip_silence',
@@ -3694,6 +3695,7 @@ export default defineComponent({
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
         shortsPaused.value = false
+        shortsCaptionsAvailable.value = false
         shortsCaptionsEnabled.value = false
       }
       closeChaptersOverlay()
@@ -5220,8 +5222,9 @@ export default defineComponent({
     }
 
     function syncShortsCaptionsEnabled() {
-      shortsCaptionsEnabled.value = player?.getTextTracks()
-        .some(track => track.active) ?? false
+      const textTracks = player?.getTextTracks() ?? []
+      shortsCaptionsAvailable.value = textTracks.length > 0
+      shortsCaptionsEnabled.value = textTracks.some(track => track.active)
     }
 
     function toggleShortsCaptions() {
@@ -7658,6 +7661,7 @@ export default defineComponent({
         hasLoaded.value = false
         if (props.shortsPlayer) {
           shortsPaused.value = false
+          shortsCaptionsAvailable.value = false
           shortsCaptionsEnabled.value = false
         }
         chapterThumbnails.value = []
@@ -8330,6 +8334,7 @@ export default defineComponent({
       emitShortsNext,
       shortsPaused,
       shortsMuted,
+      shortsCaptionsAvailable,
       shortsCaptionsEnabled,
       toggleShortsPlayback,
       toggleShortsMuted,
