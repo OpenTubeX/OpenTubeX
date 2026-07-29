@@ -119,6 +119,19 @@ function runApp() {
   let ipBlockRecoveryScriptPromise = null
   const faviconPromises = new Map()
 
+  /**
+   * @returns {Promise<ReturnType<typeof parseSearchEngines>>}
+   */
+  async function getConfiguredSearchEngines() {
+    const setting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
+      DEFAULT_SEARCH_ENGINES_SETTING
+    return parseSearchEngines(setting)
+  }
+
+  /**
+   * @param {string} searchUrl
+   * @returns {Promise<string>}
+   */
   function resolveSearchEngineFavicon(searchUrl) {
     const fallback = getFaviconUrl(searchUrl)
     if (!fallback) return Promise.resolve('')
@@ -306,6 +319,12 @@ function runApp() {
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
+  /**
+   * @param {string} key
+   * @param {Record<string, string | number>} [parameters]
+   * @param {string} [fallback]
+   * @returns {{ key: string, parameters: Record<string, string | number>, fallback: string }}
+   */
   function contextMenuLabel(key, parameters = {}, fallback = key) {
     return {
       key: `Context Menu.${key}`,
@@ -750,9 +769,7 @@ function runApp() {
 
       const selectionText = parameters.selectionText.trim()
       const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
-      const searchEnginesSetting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
-        DEFAULT_SEARCH_ENGINES_SETTING
-      const activeSearchEngines = parseSearchEngines(searchEnginesSetting)
+      const activeSearchEngines = (await getConfiguredSearchEngines())
         .filter(engine => engine.enabled)
       const externalSearchItems = activeSearchEngines.map(engine => ({
         label: engine.name,
@@ -945,6 +962,10 @@ function runApp() {
     return cleanedItems
   }
 
+  /**
+   * @param {unknown} label
+   * @returns {{ text: string, key: string | undefined, parameters: unknown }}
+   */
   function serializeContextMenuLabel(label) {
     if (
       label != null &&
@@ -1059,9 +1080,7 @@ function runApp() {
   ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
 
-    const setting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
-      DEFAULT_SEARCH_ENGINES_SETTING
-    if (!parseSearchEngines(setting).some(engine => engine.url === url)) return ''
+    if (!(await getConfiguredSearchEngines()).some(engine => engine.url === url)) return ''
 
     return resolveSearchEngineFavicon(url)
   })

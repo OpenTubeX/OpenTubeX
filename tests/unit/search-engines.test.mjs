@@ -5,6 +5,8 @@ import {
   buildSearchUrl,
   DEFAULT_SEARCH_ENGINES,
   getFaviconUrl,
+  isValidSearchUrlTemplate,
+  MAX_CUSTOM_SEARCH_ENGINES,
   parseSearchEngines
 } from '../../src/searchEngines.js'
 
@@ -45,6 +47,27 @@ test('accepts valid custom engines and rejects unsafe templates', () => {
     enabled: true
   })
   assert.equal(engines.some(engine => engine.id === 'custom-unsafe'), false)
+})
+
+test('validates reusable HTTP search URL templates', () => {
+  assert.equal(isValidSearchUrlTemplate('https://example.com/search?q=%s'), true)
+  assert.equal(isValidSearchUrlTemplate('https://example.com/search'), false)
+  assert.equal(isValidSearchUrlTemplate('javascript:alert(%s)'), false)
+})
+
+test('caps parsed custom engines at the supported limit', () => {
+  const customEngines = Array.from({ length: MAX_CUSTOM_SEARCH_ENGINES + 1 }, (_, index) => ({
+    id: `custom-${index}`,
+    name: `Engine ${index}`,
+    url: `https://example${index}.com/search?q=%s`,
+    enabled: true
+  }))
+  const engines = parseSearchEngines(customEngines)
+
+  assert.equal(
+    engines.filter(engine => engine.id.startsWith('custom-')).length,
+    MAX_CUSTOM_SEARCH_ENGINES
+  )
 })
 
 test('resolves custom favicons directly from the engine origin', () => {

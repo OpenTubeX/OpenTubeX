@@ -102,7 +102,11 @@ import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
-import { parseSearchEngines } from '../../../searchEngines'
+import {
+  isValidSearchUrlTemplate,
+  MAX_CUSTOM_SEARCH_ENGINES,
+  parseSearchEngines
+} from '../../../searchEngines'
 
 const { t } = useI18n()
 const customName = ref('')
@@ -141,7 +145,7 @@ watch(configuredSearchEngines, (engines) => {
 
     window.ftElectron.resolveFavicon(engine.url).then(icon => {
       resolvedFavicons.value = new Map([...resolvedFavicons.value, [engine.url, icon]])
-    })
+    }).catch(() => {})
   }
 }, { immediate: true })
 
@@ -151,19 +155,18 @@ function updateEnabled(id, enabled) {
   )))
 }
 
-function isValidSearchUrl(url) {
-  if (!url.includes('%s')) return false
-
-  try {
-    return ['https:', 'http:'].includes(new URL(url.replace('%s', 'query')).protocol)
-  } catch {
-    return false
-  }
-}
-
 function showInvalidEngineToast() {
   showToast({
     message: t('Settings.Context Menu Search Settings.Invalid Engine'),
+    icon: ['fas', 'circle-exclamation']
+  })
+}
+
+function showEngineLimitToast() {
+  showToast({
+    message: t('Settings.Context Menu Search Settings.Engine Limit', {
+      count: MAX_CUSTOM_SEARCH_ENGINES
+    }),
     icon: ['fas', 'circle-exclamation']
   })
 }
@@ -184,7 +187,7 @@ function updateCustomEngine(id, field, value) {
   const trimmedValue = value.trim()
   if (
     (field === 'name' && (trimmedValue.length === 0 || trimmedValue.length > 50)) ||
-    (field === 'url' && !isValidSearchUrl(trimmedValue))
+    (field === 'url' && !isValidSearchUrlTemplate(trimmedValue))
   ) {
     showInvalidEngineToast()
     resetCustomEngineInput(id, field)
@@ -199,8 +202,15 @@ function updateCustomEngine(id, field, value) {
 function addCustomEngine() {
   const name = customName.value.trim()
   const url = customUrl.value.trim()
-  if (name.length === 0 || name.length > 50 || !isValidSearchUrl(url)) {
+  if (name.length === 0 || name.length > 50 || !isValidSearchUrlTemplate(url)) {
     showInvalidEngineToast()
+    return
+  }
+  const customEngineCount = searchEngines.value
+    .filter(engine => engine.id.startsWith('custom-'))
+    .length
+  if (customEngineCount >= MAX_CUSTOM_SEARCH_ENGINES) {
+    showEngineLimitToast()
     return
   }
 

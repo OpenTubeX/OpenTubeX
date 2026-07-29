@@ -446,6 +446,7 @@ Settings:
     Add Engine: Add engine
     Remove Engine: Remove {engine}
     Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
+    Engine Limit: You can add up to {count} custom search engines.
   Theme Settings:
     Theme Settings: Theme
     Match Top Bar with Main Color: Match Top Bar with Main Color

@@ -213,6 +213,39 @@ test.describe('with one external search engine enabled', () => {
   })
 })
 
+test.describe('with the maximum custom search engines configured', () => {
+  test.use({
+    seed: {
+      settings: {
+        contextMenuSearchEngines: JSON.stringify(Array.from({ length: 20 }, (_, index) => ({
+          id: `custom-${index}`,
+          name: `Engine ${index}`,
+          url: `https://example${index}.com/search?q=%s`,
+          enabled: true
+        })))
+      }
+    }
+  })
+
+  test('rejects another engine without clearing its inputs', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
+
+    const addRow = page.locator('.settingsSections [data-section="context-menu-search"] .addEngine')
+    const nameInput = addRow.getByLabel('Engine name')
+    const urlInput = addRow.getByLabel('Search URL')
+    await nameInput.fill('One Too Many')
+    await urlInput.fill('https://overflow.example/search?q=%s')
+    await addRow.getByRole('button', { name: 'Add engine' }).click()
+
+    await expect(nameInput).toHaveValue('One Too Many')
+    await expect(urlInput).toHaveValue('https://overflow.example/search?q=%s')
+    await expect(page.locator('.toast .message', {
+      hasText: 'You can add up to 20 custom search engines.'
+    })).toBeVisible()
+  })
+})
+
 test.describe('German locale', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 

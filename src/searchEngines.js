@@ -26,6 +26,22 @@ export const DEFAULT_SEARCH_ENGINES = Object.freeze([
 ])
 
 export const DEFAULT_SEARCH_ENGINES_SETTING = JSON.stringify(DEFAULT_SEARCH_ENGINES)
+export const MAX_CUSTOM_SEARCH_ENGINES = 20
+
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
+export function isValidSearchUrlTemplate(value) {
+  if (typeof value !== 'string' || !value.includes('%s')) return false
+
+  try {
+    const url = new URL(value.replace('%s', 'query'))
+    return url.protocol === 'https:' || url.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
 
 /**
  * @param {unknown} value
@@ -41,19 +57,12 @@ function isValidCustomEngine(value) {
     typeof engine.name !== 'string' ||
     engine.name.trim().length === 0 ||
     engine.name.length > 50 ||
-    typeof engine.url !== 'string' ||
-    !engine.url.includes('%s') ||
+    !isValidSearchUrlTemplate(engine.url) ||
     typeof engine.enabled !== 'boolean'
   ) {
     return false
   }
-
-  try {
-    const url = new URL(engine.url.replace('%s', 'query'))
-    return url.protocol === 'https:' || url.protocol === 'http:'
-  } catch {
-    return false
-  }
+  return true
 }
 
 /**
@@ -87,7 +96,7 @@ export function parseSearchEngines(setting) {
 
   const custom = entries
     .filter(isValidCustomEngine)
-    .slice(0, 20)
+    .slice(0, MAX_CUSTOM_SEARCH_ENGINES)
     .map(engine => ({
       id: engine.id,
       name: engine.name.trim(),

@@ -285,7 +285,7 @@ function resolveItemFavicons(menuItems) {
       const source = item.faviconSource
       window.ftElectron.resolveFavicon(source).then(icon => {
         if (item.faviconSource === source && icon) item.icon = icon
-      })
+      }).catch(() => {})
     }
     if (Array.isArray(item.submenu)) resolveItemFavicons(item.submenu)
   }
