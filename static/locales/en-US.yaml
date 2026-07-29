@@ -436,6 +436,16 @@ Settings:
       Open Link: Open Link
       Ask Before Opening Link: Ask Before Opening Link
       No Action: No Action
+  Context Menu Search Settings:
+    Context Menu Search Settings: Context Menu Search
+    Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
+    Engine Name: Engine name
+    Search URL: Search URL
+    URL Hint: Use %s where the URL should contain the encoded selected text.
+    Add Custom Engine: Add a custom engine
+    Add Engine: Add engine
+    Remove Engine: Remove {engine}
+    Invalid Engine: Enter a name and a valid HTTP or HTTPS search URL containing %s.
   Theme Settings:
     Theme Settings: Theme
     Match Top Bar with Main Color: Match Top Bar with Main Color

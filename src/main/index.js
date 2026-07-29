@@ -2,7 +2,7 @@ import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard,
-  Tray
+  shell, Tray
 } from 'electron'
 import './e2eUserDataOverride'
 import path from 'path'
@@ -33,6 +33,13 @@ import { isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
+import {
+  buildSearchUrl,
+  DEFAULT_SEARCH_ENGINES_SETTING,
+  getFaviconUrl,
+  parseSearchEngines
+} from '../searchEngines'
+import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -110,6 +117,23 @@ function runApp() {
   let subscriptionAutoRefreshProgress = 0
   /** @type {Promise<{ exitCode: number | null, signal: NodeJS.Signals | null, stdout: string, stderr: string }> | null} */
   let ipBlockRecoveryScriptPromise = null
+  const faviconPromises = new Map()
+
+  function resolveSearchEngineFavicon(searchUrl) {
+    const fallback = getFaviconUrl(searchUrl)
+    if (!fallback) return Promise.resolve('')
+
+    const origin = new URL(fallback).origin
+    if (!faviconPromises.has(origin)) {
+      const promise = process.env.OPENTUBEX_E2E_USER_DATA_DIR
+        ? Promise.resolve(fallback)
+        : resolveFaviconUrl(searchUrl, (url, options) => net.fetch(url, options))
+            .then(icon => fetchFaviconDataUrl(icon, (url, options) => net.fetch(url, options)))
+      faviconPromises.set(origin, promise)
+    }
+
+    return faviconPromises.get(origin)
+  }
 
   /**
    * @param {string} url
@@ -677,7 +701,7 @@ function runApp() {
     },
     // only show the copy link entry for external links and the /playlist, /channel and /watch in-app URLs
     // the /playlist, /channel and /watch in-app URLs get transformed to their equivalent YouTube or Invidious URLs
-    append: (defaultActions, parameters, webContents) => {
+    append: async (defaultActions, parameters, webContents) => {
       const pageUrl = parameters.pageURL || ''
       let visible = false
       const urlParts = parameters.linkURL.split('#')
@@ -704,6 +728,35 @@ function runApp() {
 
       const selectionText = parameters.selectionText.trim()
       const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
+      const searchEnginesSetting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
+        DEFAULT_SEARCH_ENGINES_SETTING
+      const activeSearchEngines = parseSearchEngines(searchEnginesSetting)
+        .filter(engine => engine.enabled)
+      const externalSearchItems = activeSearchEngines.map(engine => ({
+        label: engine.name,
+        icon: getFaviconUrl(engine.url),
+        faviconSource: engine.url,
+        click: async () => {
+          try {
+            await shell.openExternal(buildSearchUrl(engine.url, selectionText))
+          } catch (error) {
+            console.error(`Failed to search with ${engine.name}:`, error)
+          }
+        }
+      }))
+      const externalSearch = activeSearchEngines.length === 1
+        ? {
+            label: `Search with ${activeSearchEngines[0].name}`,
+            icon: getFaviconUrl(activeSearchEngines[0].url),
+            faviconSource: activeSearchEngines[0].url,
+            visible: selectionText.length > 0,
+            click: externalSearchItems[0].click
+          }
+        : {
+            label: 'Search with...',
+            visible: selectionText.length > 0 && activeSearchEngines.length > 1,
+            submenu: externalSearchItems
+          }
 
       return [
         {
@@ -774,6 +827,7 @@ function runApp() {
             })
           }
         },
+        externalSearch,
       ]
     },
   }
@@ -863,13 +917,15 @@ function runApp() {
         refreshingLabel: item.refreshingLabel != null ? String(item.refreshingLabel) : undefined,
         enabled: item.enabled !== false,
         checked: item.checked === true,
+        icon: typeof item.icon === 'string' ? item.icon : undefined,
+        faviconSource: typeof item.faviconSource === 'string' ? item.faviconSource : undefined,
         actionId: hasAction ? actionId : undefined,
         submenu
       }
     })
   }
 
-  ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, (event, rawParameters = {}) => {
+  ipcMain.handle(IpcChannels.CONTEXT_MENU_OPEN, async (event, rawParameters = {}) => {
     const webContents = event.sender
     const parameters = {
       x: Number.isFinite(rawParameters.x) ? rawParameters.x : 0,
@@ -902,7 +958,7 @@ function runApp() {
     const items = [
       ...contextMenuOptions.prepend(defaultActions, parameters, webContents),
       ...defaultItems,
-      ...contextMenuOptions.append(defaultActions, parameters, webContents)
+      ...await contextMenuOptions.append(defaultActions, parameters, webContents)
     ]
     const actions = new Map()
     const sessionId = ++contextMenuSessionId
@@ -918,6 +974,16 @@ function runApp() {
 
     const action = session.actions.get(payload?.actionId)
     if (action) await action()
+  })
+
+  ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
+
+    const setting = (await baseHandlers.settings._findOne('contextMenuSearchEngines'))?.value ??
+      DEFAULT_SEARCH_ENGINES_SETTING
+    if (!parseSearchEngines(setting).some(engine => engine.url === url)) return ''
+
+    return resolveSearchEngineFavicon(url)
   })
 
   if (process.platform === 'win32') {

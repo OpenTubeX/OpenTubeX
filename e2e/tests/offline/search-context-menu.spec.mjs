@@ -1,4 +1,4 @@
-import { test, expect, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 test('searching selected text in a new tab uses the default filters', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
@@ -21,4 +21,159 @@ test('searching selected text in a new tab uses the default filters', async ({ p
   await expect(page.locator('input[type="radio"][value="all"]')).toBeChecked()
   await expect(page.locator('.searchRadio', { hasText: 'Time' }).locator('input[value=""]')).toBeChecked()
   await expect(page.locator('.searchRadio', { hasText: 'Duration' }).locator('input[value=""]')).toBeChecked()
+})
+
+test('offers enabled external search engines in a submenu', async ({ page }) => {
+  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+    selectionText: 'private search'
+  }))
+  const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
+
+  expect(searchWith.submenu.map(item => item.label)).toEqual([
+    'DuckDuckGo',
+    'Startpage',
+    'Qwant',
+    'Brave Search'
+  ])
+  expect(searchWith.submenu.map(item => item.icon)).toEqual([
+    'https://duckduckgo.com/favicon.ico',
+    'https://www.startpage.com/favicon.ico',
+    'https://www.qwant.com/favicon.ico',
+    'https://search.brave.com/favicon.ico'
+  ])
+  expect(searchWith.submenu.map(item => item.faviconSource)).toEqual([
+    'https://duckduckgo.com/?q=%s',
+    'https://www.startpage.com/sp/search?query=%s',
+    'https://www.qwant.com/?q=%s',
+    'https://search.brave.com/search?q=%s'
+  ])
+})
+
+test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
+  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+    selectionText: 'x'.repeat(101)
+  }))
+  const webSearchIndex = contextMenu.items.findIndex(item => item.label === 'Search with...')
+  const inAppSearchIndices = contextMenu.items
+    .map((item, index) => typeof item.label === 'string' && item.label.includes('is too long for search')
+      ? index
+      : -1)
+    .filter(index => index !== -1)
+
+  expect(contextMenu.items[webSearchIndex].enabled).toBe(true)
+  expect(webSearchIndex).toBeGreaterThan(Math.max(...inAppSearchIndices))
+})
+
+test('adds a custom search engine from settings', async ({ page }) => {
+  await goTo(page, 'settings')
+  const sectionOrder = await page.locator('.settingsMenu [data-section]').evaluateAll(items => {
+    return items.map(item => item.dataset.section)
+  })
+  expect(sectionOrder.indexOf('context-menu-search'))
+    .toBe(sectionOrder.indexOf('return-youtube-dislike') + 1)
+
+  await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
+
+  const section = page.locator('.settingsSections [data-section="context-menu-search"]')
+  await section.getByLabel('Engine name').fill('Example Search')
+  await section.getByLabel('Search URL').fill('https://example.com/search?q=%s')
+  const addButton = section.getByRole('button', { name: 'Add engine' })
+  const addRowCenterDifference = await Promise.all([
+    section.getByLabel('Engine name').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    }),
+    addButton.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    })
+  ]).then(([inputCenter, buttonCenter]) => Math.abs(inputCenter - buttonCenter))
+  expect(addRowCenterDifference).toBeLessThan(1)
+
+  await addButton.click()
+  await expect(section.getByRole('checkbox', { name: 'Example Search' })).toBeChecked()
+
+  const customRow = section.locator('.engineRow').filter({ hasText: 'Example Search' })
+  const nameInput = customRow.getByLabel('Engine name')
+  const removeButton = customRow.getByRole('button', { name: 'Remove Example Search' })
+  const centerDifference = await Promise.all([
+    nameInput.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    }),
+    removeButton.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return bounds.top + bounds.height / 2
+    })
+  ]).then(([inputCenter, buttonCenter]) => Math.abs(inputCenter - buttonCenter))
+  expect(centerDifference).toBeLessThan(1)
+
+  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+    selectionText: 'custom search'
+  }))
+  const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
+
+  expect(searchWith.submenu.map(item => item.label)).toContain('Example Search')
+  expect(searchWith.submenu.find(item => item.label === 'Example Search').icon)
+    .toBe('https://example.com/favicon.ico')
+})
+
+test.describe('with one external search engine enabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        contextMenuSearchEngines: JSON.stringify([
+          {
+            id: 'duckduckgo',
+            name: 'DuckDuckGo',
+            url: 'https://duckduckgo.com/?q=%s',
+            enabled: true
+          },
+          {
+            id: 'startpage',
+            name: 'Startpage',
+            url: 'https://www.startpage.com/sp/search?query=%s',
+            enabled: false
+          },
+          {
+            id: 'qwant',
+            name: 'Qwant',
+            url: 'https://www.qwant.com/?q=%s',
+            enabled: false
+          },
+          {
+            id: 'brave',
+            name: 'Brave Search',
+            url: 'https://search.brave.com/search?q=%s',
+            enabled: false
+          }
+        ])
+      }
+    }
+  })
+
+  test('shows a direct action and opens the encoded URL in the default browser', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ shell }) => {
+      globalThis.openedExternalSearchUrls = []
+      shell.openExternal = async (url) => {
+        globalThis.openedExternalSearchUrls.push(url)
+      }
+    })
+
+    const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+      selectionText: 'privacy & cats'
+    }))
+    const searchWith = contextMenu.items.find(item => item.label === 'Search with DuckDuckGo')
+
+    expect(searchWith.submenu).toBeUndefined()
+    expect(searchWith.icon).toBe('https://duckduckgo.com/favicon.ico')
+    expect(searchWith.faviconSource).toBe('https://duckduckgo.com/?q=%s')
+    await page.evaluate(({ sessionId, actionId }) => {
+      return window.ftElectron.contextMenu.execute(sessionId, actionId)
+    }, { sessionId: contextMenu.sessionId, actionId: searchWith.actionId })
+
+    await expect.poll(() => app.electronApp.evaluate(() => {
+      return globalThis.openedExternalSearchUrls
+    })).toEqual(['https://duckduckgo.com/?q=privacy%20%26%20cats'])
+  })
 })

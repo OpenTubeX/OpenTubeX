@@ -338,6 +338,14 @@ export default {
   },
 
   /**
+   * @param {string} url
+   * @returns {Promise<string>}
+   */
+  resolveFavicon: (url) => {
+    return ipcRenderer.invoke(IpcChannels.RESOLVE_FAVICON, url)
+  },
+
+  /**
    * @param {number} action
    * @param {any} [data]
    */

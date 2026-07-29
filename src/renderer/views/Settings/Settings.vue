@@ -101,6 +101,7 @@ import ParentalControlSettings from '../../components/ParentalControlSettings.vu
 import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
 import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
+import ContextMenuSearchSettings from '../../components/ContextMenuSearchSettings/ContextMenuSearchSettings.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtSyncedSettingIndicator from '../../components/FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
@@ -217,6 +218,14 @@ const settingsComponentsData = computed(() => {
       icon: ['fas', 'thumbs-down'],
       component: RydSettings
     },
+    ...(process.env.IS_ELECTRON
+      ? [{
+          type: 'context-menu-search',
+          title: t('Settings.Context Menu Search Settings.Context Menu Search Settings'),
+          icon: ['fas', 'magnifying-glass'],
+          component: ContextMenuSearchSettings
+        }]
+      : []),
     {
       type: 'password',
       title: t('Settings.Password Settings.Password Settings'),

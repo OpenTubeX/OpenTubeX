@@ -41,7 +41,18 @@
                 class="itemIcon"
                 aria-hidden="true"
               >
-                <FontAwesomeIcon :icon="getItemIcon(item)" />
+                <img
+                  v-if="hasImageIcon(item)"
+                  class="itemImageIcon"
+                  :src="item.icon"
+                  alt=""
+                  referrerpolicy="no-referrer"
+                  @error="handleImageIconError(item.icon)"
+                >
+                <FontAwesomeIcon
+                  v-else
+                  :icon="getItemIcon(item)"
+                />
               </span>
               <span>{{ translateLabel(item.label) }}</span>
               <span
@@ -78,7 +89,18 @@
                     :class="getItemIconClass(child)"
                     aria-hidden="true"
                   >
-                    <FontAwesomeIcon :icon="getItemIcon(child, item.label)" />
+                    <img
+                      v-if="hasImageIcon(child)"
+                      class="itemImageIcon"
+                      :src="child.icon"
+                      alt=""
+                      referrerpolicy="no-referrer"
+                      @error="handleImageIconError(child.icon)"
+                    >
+                    <FontAwesomeIcon
+                      v-else
+                      :icon="getItemIcon(child, item.label)"
+                    />
                     <FontAwesomeIcon
                       v-if="child.checked"
                       class="checkedMark"
@@ -106,7 +128,18 @@
               :class="getItemIconClass(item)"
               aria-hidden="true"
             >
-              <FontAwesomeIcon :icon="getItemIcon(item)" />
+              <img
+                v-if="hasImageIcon(item)"
+                class="itemImageIcon"
+                :src="item.icon"
+                alt=""
+                referrerpolicy="no-referrer"
+                @error="handleImageIconError(item.icon)"
+              >
+              <FontAwesomeIcon
+                v-else
+                :icon="getItemIcon(item)"
+              />
               <FontAwesomeIcon
                 v-if="item.checked"
                 class="checkedMark"
@@ -137,6 +170,7 @@ const sessionId = ref(null)
 const position = ref({ x: 0, y: 0 })
 const submenusOpenStart = ref(false)
 const verticalTabLayout = ref(false)
+const failedImageIcons = ref(new Set())
 let openRequest = 0
 
 const menuStyle = computed(() => ({
@@ -230,6 +264,28 @@ function getItemIconClass(item) {
     : undefined
 }
 
+function hasImageIcon(item) {
+  return typeof item.icon === 'string' &&
+    item.icon.length > 0 &&
+    !failedImageIcons.value.has(item.icon)
+}
+
+function handleImageIconError(icon) {
+  failedImageIcons.value = new Set([...failedImageIcons.value, icon])
+}
+
+function resolveItemFavicons(menuItems) {
+  for (const item of menuItems) {
+    if (typeof item.faviconSource === 'string') {
+      const source = item.faviconSource
+      window.ftElectron.resolveFavicon(source).then(icon => {
+        if (item.faviconSource === source && icon) item.icon = icon
+      })
+    }
+    if (Array.isArray(item.submenu)) resolveItemFavicons(item.submenu)
+  }
+}
+
 function getSelectionText(target) {
   if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
     const start = target.selectionStart ?? 0
@@ -276,6 +332,7 @@ async function open(event) {
   if (request !== openRequest || result.items.length === 0) return
 
   items.value = result.items
+  resolveItemFavicons(items.value)
   sessionId.value = result.sessionId
   position.value = { x: event.clientX, y: event.clientY }
   submenusOpenStart.value = event.clientX > window.innerWidth / 2

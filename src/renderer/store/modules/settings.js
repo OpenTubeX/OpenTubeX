@@ -13,6 +13,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
+import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 
 /*
  * Due to the complexity of the settings module in FreeTube, a more
@@ -205,6 +206,7 @@ const state = {
   enableWatchStats: true,
   statsWeekStartsOn: '1',
   enableSearchSuggestions: true,
+  contextMenuSearchEngines: DEFAULT_SEARCH_ENGINES_SETTING,
   enableSubtitlesByDefault: false,
   enterFullscreenOnDisplayRotate: false,
   externalLinkHandling: '',

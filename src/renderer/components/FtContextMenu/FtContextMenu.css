@@ -73,6 +73,12 @@
   text-align: center;
 }
 
+.itemImageIcon {
+  inline-size: 16px;
+  block-size: 16px;
+  object-fit: contain;
+}
+
 .menuItem:hover .itemIcon:not(.colorIcon),
 .menuItem:focus-visible .itemIcon:not(.colorIcon),
 .submenuContainer:hover > .menuItem .itemIcon:not(.colorIcon) {

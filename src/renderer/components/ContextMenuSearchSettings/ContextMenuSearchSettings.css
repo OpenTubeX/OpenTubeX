@@ -1,0 +1,85 @@
+.description,
+.hint {
+  text-align: center;
+}
+
+.engineList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.engineRow {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(240px, 2fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.engineRow:has(.removeEngine) {
+  grid-template-columns: minmax(160px, 1fr) minmax(140px, 1fr) minmax(240px, 2fr) auto;
+}
+
+:deep(.engineRow .ft-input),
+:deep(.addEngine .ft-input) {
+  margin-block-end: 0;
+}
+
+.engineRow code {
+  overflow-wrap: anywhere;
+}
+
+.engineToggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.engineIcon {
+  flex: 0 0 auto;
+  inline-size: 24px;
+  block-size: 24px;
+  object-fit: contain;
+}
+
+.fallbackIcon {
+  color: var(--secondary-text-color);
+}
+
+.removeEngine {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  inline-size: 36px;
+  block-size: 36px;
+  color: var(--text-color);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+}
+
+.addEngine {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(240px, 2fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+h3 {
+  text-align: center;
+}
+
+@container settings-page (width <= 800px) {
+  .engineRow,
+  .engineRow:has(.removeEngine),
+  .addEngine {
+    grid-template-columns: 1fr;
+  }
+
+  .removeEngine {
+    justify-self: end;
+  }
+}
