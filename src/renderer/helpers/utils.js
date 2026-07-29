@@ -406,7 +406,8 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
   } else {
     router.push({
       path,
-      query
+      query,
+      state: title ? { tabTitle: title } : undefined
     })
   }
 }
