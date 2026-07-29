@@ -254,7 +254,7 @@ test.describe('settings', () => {
 
     await page.mouse.move(800, 300)
     await page.evaluate(() => {
-      window.ftElectron.showToastOnAllTabs('Hover toast', 500)
+      window.ftElectron.showToastOnAllTabs('Hover toast', 2000)
     })
 
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
@@ -264,14 +264,14 @@ test.describe('settings', () => {
       const animation = element.getAnimations()[0]
       return animation ? animation.playState : null
     })).toBe('paused')
-    await page.waitForTimeout(700)
+    await page.waitForTimeout(2200)
     await expect(toast).toBeVisible()
 
     await page.mouse.move(800, 300)
     await expect(toast).toHaveCount(0)
 
     await page.evaluate(() => {
-      window.ftElectron.showToastOnAllTabs('Dragged hover toast', 500)
+      window.ftElectron.showToastOnAllTabs('Dragged hover toast', 2000)
     })
     const draggedToast = page.locator('.toast', { hasText: 'Dragged hover toast' })
     const draggedToastBounds = await draggedToast.boundingBox()
@@ -314,12 +314,12 @@ test.describe('settings', () => {
     await expect(indicatorToggle).not.toBeChecked()
 
     await page.evaluate(() => {
-      window.ftElectron.showToastOnAllTabs('No indicator toast', 500)
+      window.ftElectron.showToastOnAllTabs('No indicator toast', 2000)
     })
     const toastWithoutIndicator = page.locator('.toast', { hasText: 'No indicator toast' })
     await toastWithoutIndicator.hover()
     await expect(toastWithoutIndicator.locator('..').locator('.timeout-indicator')).toHaveCount(0)
-    await page.waitForTimeout(700)
+    await page.waitForTimeout(2200)
     await expect(toastWithoutIndicator).toBeVisible()
 
     await page.mouse.move(800, 300)
