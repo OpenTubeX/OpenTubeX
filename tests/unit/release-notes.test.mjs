@@ -260,6 +260,11 @@ Fixed videos failing to load.
       number: 45,
       title: 'Refactor tests',
     },
+    {
+      body: 'Legacy pull request body',
+      number: 46,
+      title: 'Legacy change',
+    },
   ], async () => png(800, 600))
 
   assert.equal(result, `# Highlights

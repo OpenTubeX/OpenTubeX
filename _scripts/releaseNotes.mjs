@@ -338,10 +338,15 @@ export async function renderReleaseNotes(pullRequests, loadImage = downloadImage
   const sections = new Map([...RELEASE_NOTE_CATEGORIES.keys()].map((category) => [category, []]))
 
   for (const pullRequest of pullRequests) {
+    const body = pullRequest.body ?? ''
+
+    // Pull requests merged before categories were introduced have no marker and are not release-note candidates.
+    if (extractMarkedSection(body, RELEASE_NOTE_CATEGORY_MARKER) === null) { continue }
+
     let parsed
 
     try {
-      parsed = parsePullRequestReleaseNote(pullRequest.body ?? '')
+      parsed = parsePullRequestReleaseNote(body)
     } catch (error) {
       throw new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
     }
