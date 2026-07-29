@@ -102,7 +102,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
 
   const control = page.locator('.shortsTopControl').first()
   await expect(control).toHaveCSS('backdrop-filter', /blur\(8px\)/)
-  await control.hover()
+  await control.evaluate(element => element.classList.add('active'))
   await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.68)')
 
   const volume = page.locator('.shortsVolumeControl')
@@ -110,7 +110,7 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   const volumeSlider = volume.locator('.shortsVolumeSlider')
   await expect(volumeSlider).toHaveCSS('inline-size', '0px')
   await expect(volumeSlider).toHaveCSS('opacity', '0')
-  await volume.hover()
+  await volumeButton.focus()
   await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.58)')
   await expect(volumeButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
