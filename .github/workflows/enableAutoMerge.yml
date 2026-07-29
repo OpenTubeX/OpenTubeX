@@ -36,12 +36,6 @@ jobs:
           exit 0
         fi
 
-        permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
-        if [[ "$permission" != "admin" ]]; then
-          echo "Reviewer $REVIEWER has '$permission' permission, not admin."
-          exit 0
-        fi
-
         pr="$(gh api "repos/$REPOSITORY/pulls/$pr_number")"
         state="$(jq -r '.state' <<< "$pr")"
         pr_head_sha="$(jq -r '.head.sha' <<< "$pr")"
@@ -61,10 +55,26 @@ jobs:
           exit 0
         fi
 
-        latest_review_state="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | \
-          jq -rs '[.[][] | select(.user.login == env.REVIEWER and .commit_id == env.HEAD_SHA)] | sort_by(.submitted_at) | last | .state // empty')"
+        latest_review="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | \
+          jq -cs '[.[][] | select(.user.login == env.REVIEWER and .commit_id == env.HEAD_SHA)] | sort_by(.submitted_at) | last // {}')"
+        latest_review_state="$(jq -r '.state // empty' <<< "$latest_review")"
         if [[ "$latest_review_state" != "APPROVED" ]]; then
           echo "The latest review from $REVIEWER for $HEAD_SHA is not an approval."
+          exit 0
+        fi
+
+        reviewer_permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
+        reviewer_type="$(jq -r '.user.type // empty' <<< "$latest_review")"
+        author_permission="$(gh api "repos/$REPOSITORY/collaborators/$author/permission" --jq '.permission' 2>/dev/null || true)"
+
+        if [[ "$reviewer_permission" == "admin" ]]; then
+          echo "Admin approval by $REVIEWER authorized."
+        elif [[ "$reviewer_type" == "Bot" &&
+          ( "$REVIEWER" == "coderabbitai[bot]" || "$REVIEWER" == "greptile-apps[bot]" ) &&
+          "$author_permission" == "admin" ]]; then
+          echo "Trusted bot approval for admin author $author authorized."
+        else
+          echo "Approval by $REVIEWER does not authorize auto-merge."
           exit 0
         fi
 
