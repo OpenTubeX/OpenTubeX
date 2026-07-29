@@ -33,6 +33,8 @@ test('preserves a user mute override after the segment', () => {
   controller.handleVolumeChange()
   muted = false
   assert.equal(controller.handleVolumeChange(), false)
+  controller.setSourceSuppressed('segment', false)
+  assert.equal(muted, false)
 
   controller.setSourceActive('segment', false)
   assert.equal(muted, false)
@@ -50,7 +52,7 @@ test('can reapply mute after a user override', () => {
   muted = false
   controller.handleVolumeChange()
 
-  controller.setSourceSuppressed('segment', false)
+  controller.enforceMuted()
   assert.equal(muted, true)
   controller.handleVolumeChange()
 

@@ -2631,6 +2631,7 @@ export default defineComponent({
         sponsorBlockDoNotMuteSegments.delete(uuid)
         manuallyMutedSponsorBlockSegments.add(uuid)
         syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
+        sponsorBlockMuteController.enforceMuted()
         const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
         if (toastEntry) {
           toastEntry.unskipped = false
