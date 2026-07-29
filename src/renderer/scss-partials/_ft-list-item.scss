@@ -81,7 +81,6 @@ $watched-transition-duration: 0.5s;
     .videoDuration,
     .externalPlayerIcon,
     .playlistIcons,
-    .watchedProgressBar,
     .videoCountContainer,
     .background,
     .inner {
@@ -91,6 +90,7 @@ $watched-transition-duration: 0.5s;
     }
 
     .thumbnailLink {
+      position: relative;
       border-radius: calc(8px * var(--ui-roundness));
       display: flex;
       overflow: hidden;
@@ -169,9 +169,7 @@ $watched-transition-duration: 0.5s;
     }
 
     .watchedProgressBar {
-      place-self: flex-end stretch;
-      background-color: var(--primary-color);
-      block-size: 2px;
+      pointer-events: none;
       z-index: 2;
     }
 

@@ -34,6 +34,15 @@
           :class="{ blur: blurThumbnails }"
           alt=""
         >
+        <FtEmbeddedProgress
+          v-if="historyEntryExists"
+          class="watchedProgressBar"
+          :progress="progressPercentage"
+          :corner-radius="thumbnailProgressRadius"
+          :end-arc-fraction="0.5"
+          :line-width="3"
+          :start-arc-fraction="0.5"
+        />
       </RouterLink>
       <div
         v-if="isLive || isUpcoming || (displayDuration !== '' && displayDuration !== '0:00')"
@@ -143,11 +152,6 @@
       >
         {{ t("Video.Watched") }}
       </div>
-      <div
-        v-if="historyEntryExists"
-        class="watchedProgressBar"
-        :style="{ inlineSize: progressPercentage + '%' }"
-      />
     </div>
     <div
       class="info"
@@ -329,6 +333,7 @@ import { useRoute } from 'vue-router'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
+import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
@@ -604,6 +609,8 @@ const progressPercentage = computed(() => {
   const percentage = (Math.ceil(watchProgress.value) / lengthSeconds.value) * 100
   return Math.min(percentage, 100)
 })
+
+const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
 
 /** @type {import('vue').ComputedRef<any[]>} */
 const hiddenChannels = computed(() => store.getters.getChannelsHiddenParsed)
