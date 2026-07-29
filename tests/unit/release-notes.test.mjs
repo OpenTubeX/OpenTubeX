@@ -153,19 +153,23 @@ test('paginated pull request results are flattened', () => {
   }])
 })
 
-test('a release note and optional Markdown image are parsed', () => {
+test('a release note and optional Markdown images are parsed', () => {
   const result = parseReleaseNote(`
 ${NOTE_MARKERS}
 <!-- release-note-image:start -->
 ![Compact player](https://github.com/user-attachments/assets/example)
+![Queue and player](https://github.com/user-attachments/assets/second)
 <!-- release-note-image:end -->
 `)
 
   assert.deepEqual(result, {
-    image: {
+    images: [{
       alt: 'Compact player',
       url: 'https://github.com/user-attachments/assets/example',
-    },
+    }, {
+      alt: 'Queue and player',
+      url: 'https://github.com/user-attachments/assets/second',
+    }],
     note: 'Adds a compact player.',
   })
 })
@@ -178,10 +182,10 @@ ${NOTE_MARKERS}
 <!-- release-note-image:end -->
 `)
 
-  assert.deepEqual(result.image, {
+  assert.deepEqual(result.images, [{
     alt: 'A & B',
     url: 'https://github.com/user-attachments/assets/example?name=a&amp;b',
-  })
+  }])
 })
 
 test('HTML image parsing ignores data attributes', () => {
@@ -192,10 +196,10 @@ ${NOTE_MARKERS}
 <!-- release-note-image:end -->
 `)
 
-  assert.deepEqual(result.image, {
+  assert.deepEqual(result.images, [{
     alt: 'Right',
     url: 'https://github.com/user-attachments/assets/right',
-  })
+  }])
 })
 
 test('initial image URLs must use HTTPS and a GitHub host', () => {
@@ -214,6 +218,18 @@ ${NOTE_MARKERS}
     () => parseReleaseNote(releaseNoteWithImage('https://example.com/image.png')),
     /must be hosted by GitHub/,
   )
+})
+
+test('malformed image entries are rejected after valid images', () => {
+  for (const malformedImage of ['![Broken image](', '<img src="https://github.com/user-attachments/assets/broken"']) {
+    assert.throws(() => parseReleaseNote(`
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+![Screenshot](https://github.com/user-attachments/assets/example)
+${malformedImage}
+<!-- release-note-image:end -->
+`), /must be Markdown images or <img> tags/)
+  }
 })
 
 test('GitHub user attachment storage redirects are accepted narrowly', () => {
@@ -282,6 +298,7 @@ ${categoryMarkers('Highlights')}
 ${NOTE_MARKERS}
 <!-- release-note-image:start -->
 <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" width="800" height="600">
+![Settings](https://github.com/user-attachments/assets/second)
 <!-- release-note-image:end -->
 `,
       number: 42,
@@ -323,6 +340,7 @@ Fixed videos failing to load.
 
 - Adds a compact player.
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" height="300">
+  <img src="https://github.com/user-attachments/assets/second" alt="Settings" height="300">
 
 ## More improvements
 

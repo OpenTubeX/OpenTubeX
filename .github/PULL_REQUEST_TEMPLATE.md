@@ -35,8 +35,8 @@
 
 <!-- release-note:end -->
 
-## Release note image
-<!-- Optional. Paste one Markdown image or HTML image tag here. -->
+## Release note images
+<!-- Optional. Paste one or more Markdown images or HTML image tags here. -->
 <!-- The release notes will use an HTML image tag and limit images taller than 300 pixels. -->
 <!-- release-note-image:start -->
 
