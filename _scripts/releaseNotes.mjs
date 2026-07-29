@@ -77,30 +77,33 @@ function extractHtmlAttribute(tag, attribute) {
   return match?.[1] ?? match?.[2] ?? null
 }
 
-export function parseReleaseImage(section) {
-  if (!section) { return null }
+export function parseReleaseImages(section) {
+  if (!section) { return [] }
 
-  const markdownImage = section.match(/!\[([^\]]*)\]\((https:\/\/[^\s)]+)(?:\s+["'][^"']*["'])?\)/)
+  const images = [...section.matchAll(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+["'][^"']*["'])?\)|<img\b[^>]*>/gi)]
+    .map((match) => {
+      if (match[1] !== undefined) {
+        return {
+          alt: match[1].trim(),
+          url: match[2],
+        }
+      }
 
-  if (markdownImage) {
-    return {
-      alt: markdownImage[1].trim(),
-      url: markdownImage[2],
-    }
+      const url = extractHtmlAttribute(match[0], 'src')
+
+      if (!url) { throw new Error('A release note image is missing its src attribute.') }
+
+      return {
+        alt: decodeHtml(extractHtmlAttribute(match[0], 'alt') ?? ''),
+        url: decodeHtml(url),
+      }
+    })
+
+  if (images.length === 0) {
+    throw new Error('Release note images must be Markdown images or <img> tags.')
   }
 
-  const htmlImage = section.match(/<img\b[^>]*>/i)
-
-  if (!htmlImage) { throw new Error('The release note image must be a Markdown image or an <img> tag.') }
-
-  const url = extractHtmlAttribute(htmlImage[0], 'src')
-
-  if (!url) { throw new Error('The release note image is missing its src attribute.') }
-
-  return {
-    alt: decodeHtml(extractHtmlAttribute(htmlImage[0], 'alt') ?? ''),
-    url: decodeHtml(url),
-  }
+  return images
 }
 
 function validateImageUrl(value, allowedHosts = ALLOWED_IMAGE_HOSTS) {
@@ -127,11 +130,11 @@ export function parseReleaseNote(body) {
   if (!note) { throw new Error('Fill in the release note section before merging this noteworthy PR.') }
 
   const imageSection = extractMarkedSection(body, RELEASE_IMAGE_MARKER)
-  const image = parseReleaseImage(imageSection)
+  const images = parseReleaseImages(imageSection)
 
-  if (image) { validateImageUrl(image.url) }
+  for (const image of images) { validateImageUrl(image.url) }
 
-  return { image, note }
+  return { images, note }
 }
 
 export function parseReleaseNoteCategory(body) {
@@ -386,9 +389,9 @@ export async function renderReleaseNotes(pullRequests, loadImage = downloadImage
 
     let releaseNote = `- ${indentContinuationLines(parsed.note)}`
 
-    if (parsed.image) {
+    for (const image of parsed.images) {
       try {
-        releaseNote += `\n  ${await normalizeReleaseImage(parsed.image, pullRequest.title, loadImage)}`
+        releaseNote += `\n  ${await normalizeReleaseImage(image, pullRequest.title, loadImage)}`
       } catch (error) {
         throw new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
       }
