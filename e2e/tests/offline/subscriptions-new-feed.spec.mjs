@@ -121,6 +121,27 @@ test.describe('new subscriptions feed', () => {
     await expect(page.locator('.headerRefreshWidget .lastRefreshTimestamp')).toHaveCount(0)
   })
 
+  test('shows Shorts as portrait cards with their duration and upload time', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    const short = page.locator('.ft-list-video.youtubeShort').filter({ hasText: 'New short' })
+    await expect(short).toBeVisible()
+    await expect(short.locator('.videoDuration')).toHaveText('2:00')
+    await expect(short.locator('.uploadedTime')).not.toBeEmpty()
+    await expect(short.locator('.thumbnailImage')).toHaveAttribute('src', /\/oardefault\.jpg$/)
+
+    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+      return getComputedStyle(element).aspectRatio
+    })
+    expect(aspectRatio).toBe('2 / 3')
+
+    // This suite seeds the largest thumbnail preference. The portrait grid
+    // must honor it instead of falling back to its old fixed card width.
+    const cardWidth = await short.evaluate(element => element.getBoundingClientRect().width)
+    expect(cardWidth).toBeGreaterThanOrEqual(342)
+  })
+
   test('keeps a new video and its menus open until the video is chosen', async ({ page }) => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
@@ -194,6 +215,44 @@ test.describe('new feed settings and seen state', () => {
     await goTo(relaunched.page, 'subscriptions')
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(relaunched.page.getByText('New community post', { exact: true })).toHaveCount(0)
+  })
+})
+
+test.describe('classic Shorts watch layout', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        useCustomShortsPlayer: false
+      },
+      profiles: [profile()],
+      subscriptionCache: populatedCache
+    }
+  })
+
+  test('uses the regular player thumbnail morph when YouTube-style Shorts are disabled', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+    await expect(page.getByText('New short', { exact: true })).toBeVisible()
+
+    await page.evaluate(() => {
+      window.__watchMorphClasses = []
+      const observer = new MutationObserver(() => {
+        window.__watchMorphClasses.push(document.documentElement.className)
+      })
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class']
+      })
+    })
+
+    await page.getByText('New short', { exact: true }).click()
+    await expect(page).toHaveURL(/#\/watch\/new-short-1\?short=true&shortSource=subscriptions/)
+    await page.waitForTimeout(350)
+
+    const morphClasses = await page.evaluate(() => window.__watchMorphClasses)
+    expect(morphClasses.some(value => value.includes('viewTransitionMorphActive'))).toBe(true)
+    expect(morphClasses.some(value => value.includes('viewTransitionShortMorphActive'))).toBe(false)
   })
 })
 

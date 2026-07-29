@@ -5,6 +5,7 @@
     :video-list="videoList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
+    :youtube-style-shorts="useCustomShortsPlayer"
     refresh-tab="shorts"
     @refresh="loadVideosForSubscriptionsFromRemote"
   />
@@ -33,6 +34,7 @@ const isLoading = ref(true)
 const videoList = shallowRef([])
 const errorChannels = ref([])
 const attemptedFetch = ref(false)
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
 
@@ -228,6 +230,7 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
   })
 
   videoList.value = updateVideoListAfterProcessing(videoList_)
+    .map(video => ({ ...video, isShort: true }))
   isLoading.value = false
 }
 
@@ -256,7 +259,7 @@ async function loadVideosForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedVideos !== null) {
-      videoList.value = refreshedVideos
+      videoList.value = refreshedVideos.map(video => ({ ...video, isShort: true }))
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionShortsLastRefreshTimestamp
     }
   } finally {

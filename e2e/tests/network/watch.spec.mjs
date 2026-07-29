@@ -902,3 +902,279 @@ test.describe('watch page', () => {
     await expect(editedBadge.first()).toBeVisible()
   })
 })
+
+test.describe('custom Shorts player', () => {
+  const SHORTS_CHANNEL = 'UCshortsfeed000000000000'
+
+  test.use({
+    seed: {
+      settings: {
+        useCustomShortsPlayer: true,
+        fetchSubscriptionsAutomatically: false
+      },
+      profiles: [{
+        _id: 'allChannels',
+        name: 'All Channels',
+        bgColor: '#000000',
+        textColor: '#FFFFFF',
+        subscriptions: [{
+          id: SHORTS_CHANNEL,
+          name: 'Shorts Channel',
+          thumbnail: ''
+        }]
+      }],
+      subscriptionCache: [{
+        _id: SHORTS_CHANNEL,
+        shorts: [
+          {
+            type: 'video',
+            videoId: 'w1WKmSqwM8I',
+            title: 'First seeded Short',
+            author: 'Shorts Channel',
+            authorId: SHORTS_CHANNEL,
+            published: 2,
+            isShort: true,
+            lengthSeconds: ''
+          },
+          {
+            type: 'video',
+            videoId: 'RZ6PG5QATg4',
+            title: 'Second seeded Short',
+            author: 'Shorts Channel',
+            authorId: SHORTS_CHANNEL,
+            published: 1,
+            isShort: true,
+            lengthSeconds: ''
+          }
+        ],
+        shortsTimestamp: new Date().toISOString()
+      }]
+    }
+  })
+
+  test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'Shorts detection needs the real API')
+
+    await page.evaluate(() => {
+      window.__shortsSeekBarFlashedWhileLoading = false
+      const observer = new MutationObserver(() => {
+        if (document.querySelector('.ftVideoPlayer.shortsPlayer.shortsPaused')) {
+          window.__shortsSeekBarFlashedWhileLoading = true
+        }
+      })
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class'],
+        childList: true,
+        subtree: true
+      })
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    await expect(page.locator('.videoLayout')).toHaveClass(/shortsPlayerActive/)
+    await expect(page.locator('.shortsExternalMetadata .shortsExternalTitle')).toBeVisible()
+    await expect(page.locator('.shortsTopControls')).toBeVisible()
+    await expect(page.locator('.shortsActionRail')).toBeVisible()
+    await expect(page.locator('.shortsNavigation')).toBeVisible()
+    await expect(page.locator('.infoArea')).toBeHidden()
+    await expect(player.locator('video')).toHaveAttribute('loop', '')
+    await expect(player.locator('video')).toHaveCSS('object-fit', 'cover')
+    expect(await player.evaluate(element => {
+      return element.ui.getConfiguration().doubleClickForFullscreen
+    })).toBe(false)
+    expect(await page.evaluate(() => window.__shortsSeekBarFlashedWhileLoading)).toBe(false)
+
+    const video = player.locator('video')
+    const seekBar = player.locator('.shaka-seek-bar-container')
+    await video.evaluate(async element => {
+      if (element.paused) await element.play()
+    })
+    await expect(player).not.toHaveClass(/shortsPaused/)
+    await expect(seekBar).toHaveCSS('opacity', '0')
+
+    const playerBounds = await player.boundingBox()
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height - 2
+    )
+    await expect(seekBar).toHaveCSS('opacity', '1')
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height / 2
+    )
+    await player.locator('.shortsTopControl').first().click()
+    await expect(player).toHaveClass(/shortsPaused/)
+    await expect(seekBar).toHaveCSS('opacity', '1')
+
+    const volumeControl = player.locator('.shortsVolumeControl')
+    await volumeControl.hover()
+    await expect(volumeControl.locator('.shortsVolumeSlider')).toBeVisible()
+
+    await player.locator('.shortsTopControl').nth(3).click()
+    const overflowMenu = player.locator('.shaka-overflow-menu')
+    await expect(overflowMenu).toBeVisible()
+    const [playerBox, menuBox] = await Promise.all([
+      player.boundingBox(),
+      overflowMenu.boundingBox(),
+    ])
+    expect(menuBox.y).toBeLessThan(playerBox.y + playerBox.height / 2)
+    expect(menuBox.x).toBeGreaterThan(playerBox.x + playerBox.width / 2)
+    expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(playerBox.x + playerBox.width)
+
+    const fullWindowMenuButton = overflowMenu.getByRole('button', {
+      name: /Full Window/
+    })
+    await fullWindowMenuButton.click()
+    await expect(player).toHaveClass(/fullWindow/)
+
+    await player.locator('.shortsTopControl').nth(3).click()
+    const exitFullWindowMenuButton = overflowMenu.getByRole('button', {
+      name: /Exit Full Window/
+    })
+    await expect(exitFullWindowMenuButton).toBeVisible()
+    await exitFullWindowMenuButton.click()
+    await expect(player).not.toHaveClass(/fullWindow/)
+
+    await player.locator('.shortsTopControl').nth(3).dblclick()
+    expect(await page.evaluate(() => document.fullscreenElement === null)).toBe(true)
+
+    await player.locator('.shortsTopControl').nth(3).click()
+    const videoInfoMenuButton = overflowMenu.getByRole('button', {
+      name: 'Video information'
+    })
+    await expect(videoInfoMenuButton).toBeVisible()
+    await videoInfoMenuButton.click()
+    await expect(page.locator('.shortsAuxPanel')).toHaveClass(/shortsAuxPanelOpen/)
+    await page.getByRole('button', { name: 'Close video information' }).click()
+    await expect(page.locator('.shortsAuxPanel')).not.toHaveClass(/shortsAuxPanelOpen/)
+
+    for (const label of ['Share Video', 'Add to Playlist']) {
+      const action = page.locator('.shortsComponentAction').filter({ hasText: label })
+      const actionButton = action.getByRole('button', { name: label })
+      const idleBackground = await actionButton.evaluate(element => {
+        return getComputedStyle(element).backgroundColor
+      })
+
+      await actionButton.click()
+      await expect(actionButton).toHaveAttribute('aria-expanded', 'true')
+      await expect.poll(() => actionButton.evaluate(element => {
+        return getComputedStyle(element).backgroundColor
+      })).not.toBe(idleBackground)
+      await actionButton.click()
+    }
+
+    const commentsButton = page.getByRole('button', { name: 'Show Comments' })
+    await commentsButton.click()
+    await expect(commentsButton).toHaveAttribute('aria-pressed', 'true')
+    await expect(commentsButton).toHaveAccessibleName('Hide Comments')
+    await expect(page.locator('.shortsCommentsPanel')).toHaveClass(/shortsCommentsPanelOpen/)
+    await commentsButton.click()
+    await expect(commentsButton).toHaveAttribute('aria-pressed', 'false')
+
+    const quickBookmark = page.locator('.shortsQuickBookmark')
+    if (await quickBookmark.count()) {
+      await quickBookmark.locator('.iconButton').click()
+      await expect(quickBookmark).toHaveClass(/shortsQuickBookmarked/)
+    }
+
+    const bounds = await player.boundingBox()
+    expect(bounds.height).toBeGreaterThan(bounds.width)
+  })
+
+  test('scrolls through the cached subscriptions Shorts feed', async ({ page }) => {
+    const shortsTab = page
+      .locator('.tabContent[aria-hidden="false"]')
+      .locator('[data-subscription-feed-tab="shorts"]')
+    await shortsTab.click()
+    await page.getByText('First seeded Short', { exact: true }).click()
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    const previous = page.locator('.shortsNavigationButton').first()
+    const next = page.locator('.shortsNavigationButton').last()
+    await expect(previous).toBeDisabled()
+    await expect(next).toBeEnabled()
+    await expect(page.locator('.shortsNextPreview')).toBeVisible()
+    await expect(page.locator('.shortsNextPreview')).toHaveAttribute('style', /oardefault\.jpg/)
+    await expect(page.locator('.shortsExternalMetadata')).toBeVisible()
+    await expect(page.locator('.shortsActionRail')).toBeVisible()
+
+    const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =
+      await Promise.all([
+        player.boundingBox(),
+        page.locator('.videoArea').boundingBox(),
+        page.locator('.shortsExternalMetadata').boundingBox(),
+        page.locator('.shortsActionRail').boundingBox(),
+        page.locator('.shortsNextPreview').boundingBox(),
+        page.locator('.shortsNavigation').boundingBox(),
+      ])
+    expect(metadataBounds.x + metadataBounds.width).toBeLessThanOrEqual(playerBounds.x)
+    expect(actionBounds.x).toBeGreaterThanOrEqual(playerBounds.x + playerBounds.width)
+    expect(previewBounds.y).toBeGreaterThanOrEqual(playerBounds.y + playerBounds.height)
+    expect(previewBounds.width).toBeCloseTo(playerBounds.width, 0)
+    expect(playerBounds.x + playerBounds.width / 2)
+      .toBeCloseTo(videoAreaBounds.x + videoAreaBounds.width / 2, 0)
+    expect(navigationBounds.x).toBeGreaterThan(actionBounds.x)
+
+    await page.evaluate(() => {
+      window.__shortsNavigationDisappeared = false
+      const observer = new MutationObserver(() => {
+        if (!document.querySelector('.shortsNavigation')) {
+          window.__shortsNavigationDisappeared = true
+        }
+      })
+      observer.observe(document.body, { childList: true, subtree: true })
+    })
+
+    await next.click()
+    await expect(page.locator('.videoPlayerPlaceholder.ft-shimmer')).toHaveCount(0)
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    expect(await page.evaluate(() => window.__shortsNavigationDisappeared)).toBe(false)
+
+    await page.waitForTimeout(500)
+    await page.keyboard.press('ArrowUp')
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    await page.waitForTimeout(500)
+    const scrollbarHandle = page.locator(
+      'body > .os-scrollbar-vertical .os-scrollbar-handle'
+    )
+    const handleBounds = await scrollbarHandle.boundingBox()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2 + 50
+    )
+    await page.mouse.up()
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+  })
+})

@@ -1,7 +1,8 @@
 <template>
   <FtAutoGrid
-    :grid="displayValue !== 'list'"
+    :grid="youtubeStyleShorts || displayValue !== 'list'"
     :thumbnail-size="thumbnailSize"
+    :youtube-style-shorts="youtubeStyleShorts"
     aria-hidden="true"
     data-tab-loading-indicator
   >
@@ -9,7 +10,10 @@
       v-for="n in count"
       :key="n"
       class="skeletonCard"
-      :class="{ listCard: displayValue === 'list' }"
+      :class="{
+        listCard: displayValue === 'list' && !youtubeStyleShorts,
+        youtubeStyleShorts
+      }"
     >
       <div class="skeletonThumbnail ft-shimmer" />
       <div class="skeletonDetails">
@@ -31,6 +35,10 @@ defineProps({
   count: {
     type: Number,
     default: 12
+  },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false
   }
 })
 

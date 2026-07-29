@@ -54,8 +54,10 @@ export class FullWindowButton extends shaka.ui.Element {
 
     this.eventManager.listen(events, 'setFullWindow', (/** @type {CustomEvent} */ event) => {
       this.fullWindowEnabled_ = event.detail
+      this.isSubMenuOpened = false
 
       this.updateLocalisedStrings_()
+      this.updateVisibility_()
     })
 
     this.eventManager.listen(events, 'localeChanged', () => {

@@ -17,6 +17,10 @@
   border-radius: calc(5px * var(--ui-roundness));
 }
 
+.youtubeStyleShorts .skeletonThumbnail {
+  aspect-ratio: 2 / 3;
+}
+
 .listCard .skeletonThumbnail {
   inline-size: 262px;
   flex-shrink: 0;

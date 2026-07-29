@@ -4,6 +4,7 @@ export const MAX_THUMBNAIL_SIZE = 180
 export const THUMBNAIL_SIZE_STEP = 10
 
 const DEFAULT_GRID_ITEM_SIZE = 262
+const DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE = 190
 const GRID_GAP = 8
 
 function getDefaultGridItemSize(gridWidth) {
@@ -29,6 +30,7 @@ export function getThumbnailSizeStyles(thumbnailSize, gridWidth = 0) {
 
   return {
     '--thumbnail-grid-size': `${defaultGridItemSize * scale}px`,
+    '--shorts-thumbnail-grid-min-size': `${DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * scale}px`,
     '--thumbnail-list-size': `${336 * scale}px`,
     '--thumbnail-list-max-size': `${25 * scale}vw`,
     '--thumbnail-list-mobile-max-size': `${30 * scale}vw`

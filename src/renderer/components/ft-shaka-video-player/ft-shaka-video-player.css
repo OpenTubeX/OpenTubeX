@@ -32,6 +32,237 @@
   transition: inline-size 250ms ease;
 }
 
+.ftVideoPlayer.shortsPlayer {
+  /*
+    A focused seek input extends beyond Shaka's visual seek bar. `hidden`
+    makes this element a scroll container, so the browser scrolls it to
+    reveal the input and shifts the video upward. `clip` keeps the rounded
+    crop without allowing that internal focus scroll.
+  */
+  overflow: clip !important;
+}
+
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) {
+  inline-size: 100%;
+  block-size: 100%;
+  aspect-ratio: auto;
+  border-radius: calc(12px * var(--ui-roundness));
+}
+
+.shortsTopControls {
+  position: absolute;
+  z-index: 4;
+  inset-inline: 0;
+  inset-block-start: 0;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 16px;
+  color: #fff;
+  background: linear-gradient(rgb(0 0 0 / 54%), transparent);
+  pointer-events: none;
+}
+
+.shortsTopControlsGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortsTopControl {
+  display: grid;
+  place-items: center;
+  inline-size: 46px;
+  block-size: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: inherit;
+  background-color: rgb(0 0 0 / 42%);
+  cursor: pointer;
+  font-size: 19px;
+  pointer-events: auto;
+}
+
+.shortsTopControl:hover,
+.shortsTopControl:focus-visible,
+.shortsTopControl.active {
+  background-color: rgb(255 255 255 / 24%);
+}
+
+.shortsVolumeControl {
+  display: flex;
+  align-items: center;
+  min-inline-size: 46px;
+  border-radius: 24px;
+  background-color: rgb(0 0 0 / 42%);
+  pointer-events: auto;
+  transition: background-color 150ms ease;
+}
+
+.shortsVolumeControl .shortsTopControl {
+  flex: none;
+  background-color: transparent;
+}
+
+.shortsVolumeSlider {
+  inline-size: 0;
+  margin-inline: 0;
+  opacity: 0;
+  accent-color: #fff;
+  cursor: pointer;
+  transition: inline-size 160ms ease, margin-inline 160ms ease, opacity 120ms ease;
+}
+
+.shortsVolumeControl:is(:hover, :focus-within) {
+  background-color: rgb(0 0 0 / 58%);
+}
+
+.shortsVolumeControl:is(:hover, :focus-within) .shortsVolumeSlider {
+  inline-size: 96px;
+  margin-inline: 0 12px;
+  opacity: 1;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-controls-button-panel) {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls) {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  inline-size: 100%;
+  block-size: 0;
+  min-block-size: 0;
+  padding-block-end: 0;
+  margin: 0;
+  overflow: visible;
+  background: transparent !important;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls::before) {
+  content: '';
+  position: absolute;
+  inset: -24px 0 0;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container) {
+  position: absolute;
+  inset-block: auto 4px;
+  inset-inline: 6px;
+  inline-size: auto;
+  margin: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer.shortsPaused :deep(.shaka-seek-bar-container),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls:hover .shaka-seek-bar-container),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls:focus-within .shaka-seek-bar-container) {
+  opacity: 1;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-scrim-container) {
+  display: none;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-overflow-menu),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-settings-menu) {
+  inset: var(--shorts-menu-top, 72px) var(--shorts-menu-right, 16px) auto auto !important;
+  max-block-size: calc(100% - 88px);
+  transform: none !important;
+}
+
+.ftVideoPlayer.presentationModeChanging .shortsTopControls {
+  transition: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen .shortsTopControls,
+.ftVideoPlayer.shortsPlayer.fullWindow .shortsTopControls {
+  inset-block: 0;
+  inset-inline: calc((100% - var(--shorts-dock-width, 0px)) / 2) auto;
+  box-sizing: border-box;
+  block-size: 100%;
+  inline-size: auto;
+  max-inline-size: calc(100% - var(--shorts-dock-width, 0px));
+  aspect-ratio: var(--shorts-aspect-ratio);
+  transform: translateX(-50%);
+  align-items: flex-start;
+  background: none;
+  transition:
+    inset-inline-start 250ms ease,
+    max-inline-size 250ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
+  top: auto;
+  bottom: 70px;
+  max-inline-size: min(36vw, 560px);
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay:dir(rtl)),
+.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay:dir(rtl)) {
+  right: 5px;
+  left: auto;
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+),
+  .ftVideoPlayer.shortsPlayer.fullWindow:is(
+  .fullscreenMetadataOpen,
+  .fullscreenTranscriptOpen,
+  .fullscreenSponsorBlockOpen,
+  .fullscreenCommentsOpen,
+  .fullscreenPlaylistOpen,
+  .chaptersOverlayOpen
+) {
+  --shorts-dock-width: var(--side-panel-width);
+}
+
+.shortsNavigation {
+  position: fixed;
+  z-index: 12;
+  inset-inline-end: 24px;
+  inset-block-start: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateY(-50%);
+}
+
+.shortsNavigationButton {
+  display: grid;
+  place-items: center;
+  inline-size: 48px;
+  block-size: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-hover-color);
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.shortsNavigationButton:hover,
+.shortsNavigationButton:focus-visible {
+  background-color: var(--side-nav-active-color);
+}
+
+.shortsNavigationButton:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
 .ftVideoPlayer :deep(.videoAnnotations) {
   transition: inset-inline-end 250ms ease;
 }
@@ -1790,6 +2021,7 @@
 }
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
+.ftVideoPlayer.shortsPlayer:fullscreen .ambientFullscreenCanvas,
 .ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
   opacity: 0.42;
 }
@@ -2551,6 +2783,25 @@
   position: relative;
 }
 
+@media only screen and (width <= 760px) {
+  .shortsNavigation {
+    inset-inline-end: 12px;
+  }
+
+  .shortsNavigationButton {
+    inline-size: 42px;
+    block-size: 42px;
+    color: #fff;
+    background-color: rgb(0 0 0 / 55%);
+  }
+}
+
+@media only screen and (width <= 900px) {
+  .shortsNavigation {
+    inset-block-start: 30%;
+  }
+}
+
 .ambientCanvas {
   position: absolute;
   inset: -5% -4% -9%;
@@ -2901,6 +3152,28 @@
 ) {
   inline-size: auto;
   inset-inline-end: var(--side-panel-width);
+}
+
+.ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) > .player {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100% !important;
+  min-inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: 100% !important;
+  min-block-size: 100%;
+  max-block-size: 100%;
+  margin: 0 !important;
+  object-fit: cover !important;
+  object-position: center center;
+  transform: none !important;
+  flex: none;
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) > .player {
+  object-fit: contain;
 }
 
 /* stylelint-enable liberty/use-logical-spec */

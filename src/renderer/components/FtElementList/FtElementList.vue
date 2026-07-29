@@ -1,18 +1,19 @@
 <template>
   <FtAutoGrid
     :appear="appear"
-    :grid="displayValue !== 'list'"
+    :grid="effectiveDisplayValue !== 'list'"
     :thumbnail-size="thumbnailSize"
     :item-count="data.length"
+    :youtube-style-shorts="youtubeStyleShorts"
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
       :key="getResultKey(result, index)"
-      appearance="result"
+      :appearance="youtubeStyleShorts ? 'youtubeShort' : 'result'"
       :data="result"
       :data-type="dataType || result.type"
       :first-screen="!renderAllItemsLazily && index < 16"
-      :layout="displayValue"
+      :layout="effectiveDisplayValue"
       :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
       :show-watched-style-in-history="showWatchedStyleInHistory"
       :use-channels-hidden-preference="useChannelsHiddenPreference"
@@ -145,6 +146,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits([
@@ -166,6 +171,11 @@ const listType = computed(() => {
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const displayValue = computed(() => {
   return props.display === '' ? listType.value : props.display
+})
+
+/** @type {import('vue').ComputedRef<'grid' | 'list'>} */
+const effectiveDisplayValue = computed(() => {
+  return props.youtubeStyleShorts ? 'grid' : displayValue.value
 })
 
 /** @type {import('vue').ComputedRef<number>} */

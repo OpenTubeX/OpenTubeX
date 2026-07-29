@@ -200,9 +200,10 @@ function secondsToVttTimestamp(seconds) {
  * @param {'local' | 'invidious'} backendPreference
  * @param {string} currentInvidiousInstanceUrl
  * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {boolean} portrait
  * @returns {string | null}
  */
-export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '') {
+export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '', portrait = false) {
   if (thumbnailPreference === 'hidden') {
     return null
   }
@@ -213,13 +214,13 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
 
   switch (thumbnailPreference) {
     case 'start':
-      return `${baseUrl}/vi/${videoId}/mq1.jpg`
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar1' : 'mq1'}.jpg`
     case 'middle':
-      return `${baseUrl}/vi/${videoId}/mq2.jpg`
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar2' : 'mq2'}.jpg`
     case 'end':
-      return `${baseUrl}/vi/${videoId}/mq3.jpg`
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oar3' : 'mq3'}.jpg`
     default:
-      return `${baseUrl}/vi/${videoId}/mqdefault.jpg`
+      return `${baseUrl}/vi/${videoId}/${portrait ? 'oardefault' : 'mqdefault'}.jpg`
   }
 }
 
@@ -756,7 +757,7 @@ export function showExternalPlayerUnsupportedActionToast(externalPlayer, action)
 export function getVideoParamsFromUrl(url) {
   /** @type {URL} */
   let urlObject
-  const paramsObject = { videoId: null, timestamp: null, playlistId: null }
+  const paramsObject = { videoId: null, timestamp: null, playlistId: null, isShort: false }
   try {
     urlObject = new URL(url)
   } catch {
@@ -820,6 +821,7 @@ export function getVideoParamsFromUrl(url) {
     function () {
       if (/^\/shorts\/[\w-]+$/.test(urlObject.pathname)) {
         extractParams(urlObject.pathname.replace('/shorts/', ''))
+        paramsObject.isShort = true
         return paramsObject
       }
     },

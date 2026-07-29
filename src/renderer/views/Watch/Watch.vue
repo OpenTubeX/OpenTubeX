@@ -5,6 +5,7 @@
     :class="{
       ambientModeActive,
       isLoading,
+      shortsPlayerActive: customShortsPlayerActive,
       useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
       noSidebar: !theatrePossible && !sidebarPanelLeaving
     }"
@@ -12,10 +13,54 @@
     <div
       v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       class="videoArea"
+      :style="customShortsPlayerActive
+        ? {
+          '--shorts-aspect-ratio': videoAspectRatio,
+          '--shorts-player-width': `${shortsPlayerWidth}px`,
+          '--shorts-player-height': `${shortsPlayerHeight}px`
+        }
+        : undefined"
+      @wheel="handleShortsWheel"
+      @pointerdown.capture="handleShortsPointerDown"
+      @pointerup.capture="handleShortsPointerUp"
     >
       <div class="videoAreaMargin">
         <div
-          v-if="isLoading"
+          v-if="isLoading && customShortsPlayerActive"
+          class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
+          data-tab-loading-indicator
+        >
+          <img
+            v-if="shortsTransitionPreview"
+            :src="shortsTransitionPreview"
+            class="shortsTransitionPreview"
+            :class="{
+              shortsTransitionNext: shortsTransitionDirection > 0,
+              shortsTransitionPrevious: shortsTransitionDirection < 0
+            }"
+            alt=""
+          >
+          <div
+            v-else
+            class="shortsSkeleton"
+            aria-hidden="true"
+          >
+            <div class="shortsSkeletonControls">
+              <div class="shortsSkeletonControlGroup">
+                <span class="ft-shimmer" />
+                <span class="ft-shimmer" />
+              </div>
+              <div class="shortsSkeletonControlGroup">
+                <span class="ft-shimmer" />
+                <span class="ft-shimmer" />
+                <span class="ft-shimmer" />
+              </div>
+            </div>
+            <span class="shortsSkeletonSeek ft-shimmer" />
+          </div>
+        </div>
+        <div
+          v-else-if="isLoading"
           class="videoPlayer videoPlayerPlaceholder ft-shimmer"
           data-tab-loading-indicator
         />
@@ -75,6 +120,10 @@
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
+          :shorts-player="customShortsPlayerActive"
+          :shorts-aspect-ratio="videoAspectRatio"
+          :shorts-has-previous="hasPreviousSubscriptionShort"
+          :shorts-has-next="hasNextSubscriptionShort"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -105,6 +154,9 @@
           @chapters-overlay-change="handleChaptersOverlayChange"
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
+          @toggle-shorts-metadata="toggleShortsMetadata"
+          @shorts-previous="navigateSubscriptionShort(-1)"
+          @shorts-next="navigateSubscriptionShort(1)"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -168,6 +220,322 @@
             </div>
           </div>
         </div>
+        <div
+          v-if="customShortsPlayerActive"
+          class="shortsExternalMetadata"
+          :class="{ shortsMetadataSkeleton: isLoading }"
+        >
+          <template v-if="isLoading">
+            <div class="shortsSkeletonChannelRow">
+              <span class="shortsSkeletonAvatar ft-shimmer" />
+              <span class="shortsSkeletonChannel ft-shimmer" />
+              <span class="shortsSkeletonSubscribe ft-shimmer" />
+            </div>
+            <span class="shortsSkeletonTitle ft-shimmer" />
+          </template>
+          <div
+            v-else
+            class="shortsChannelRow"
+          >
+            <button
+              v-if="!hideUploader"
+              type="button"
+              class="shortsExternalChannel"
+              @click="openShortsChannel"
+            >
+              <img
+                v-if="channelThumbnail"
+                :src="channelThumbnail"
+                class="shortsExternalChannelThumbnail"
+                alt=""
+              >
+              <span dir="auto">{{ channelName }}</span>
+            </button>
+            <FtSubscribeButton
+              v-if="!hideUnsubscribeButton"
+              :channel-id="channelId"
+              :channel-name="channelName"
+              :channel-thumbnail="channelThumbnail"
+              :subscription-count-text="channelSubscriptionCountText"
+              :hide-profile-dropdown-toggle="true"
+            />
+          </div>
+          <h1
+            v-if="!isLoading"
+            class="shortsExternalTitle"
+            dir="auto"
+          >
+            {{ videoTitle }}
+          </h1>
+          <button
+            v-if="!isLoading && shortsLinkedVideo"
+            type="button"
+            class="shortsLinkedVideo"
+            :title="shortsLinkedVideo.title"
+            @click="openShortsLinkedVideo"
+          >
+            <font-awesome-icon :icon="['fas', 'play']" />
+            <span dir="auto">{{ shortsLinkedVideo.title }}</span>
+          </button>
+        </div>
+        <div
+          v-if="customShortsPlayerActive"
+          class="shortsActionRail"
+          :class="{ shortsActionRailSkeleton: isLoading }"
+        >
+          <template v-if="isLoading">
+            <div
+              v-for="index in shortsActionSkeletonCount"
+              :key="index"
+              class="shortsAction shortsActionSkeleton"
+            >
+              <span class="ft-shimmer" />
+              <small class="ft-shimmer" />
+            </div>
+            <span class="shortsSkeletonSound ft-shimmer" />
+          </template>
+          <div
+            v-if="!isLoading && !isLive && !hideComments"
+            class="shortsAction shortsComponentAction shortsCommentsAction"
+            :class="{ active: shortsCommentsPanelOpen }"
+          >
+            <FtIconButton
+              :title="shortsCommentsText"
+              :icon="['fas', 'comment-alt']"
+              :aria-pressed="shortsCommentsPanelOpen"
+              theme="base"
+              @click="toggleShortsComments"
+            />
+            <span>{{ shortsCommentsText }}</span>
+          </div>
+          <div
+            v-if="!isLoading && !isLive && !isUpcoming"
+            class="shortsAction shortsComponentAction"
+            :class="{ active: showTranscript }"
+          >
+            <FtIconButton
+              :title="showTranscript
+                ? $t('Video.Transcript.Hide')
+                : $t('Video.Transcript.Show')"
+              :icon="['fas', 'file-lines']"
+              :aria-pressed="showTranscript"
+              theme="base"
+              @click="toggleTranscript"
+            />
+            <span>{{ $t('Video.Transcript.Title') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && useSponsorBlock && !isUpcoming"
+            class="shortsAction shortsComponentAction"
+            :class="{ active: showSidebarSponsorBlock }"
+          >
+            <FtIconButton
+              :title="$t('Video.Player.SponsorBlock.OpenInfoPanel')"
+              :icon="['fas', 'shield-halved']"
+              :aria-pressed="showSidebarSponsorBlock"
+              theme="base"
+              @click="toggleSponsorBlockInfo"
+            />
+            <span>{{ $t('Settings.SponsorBlock Settings.SponsorBlock Settings') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && !hideSharingActions"
+            class="shortsAction shortsComponentAction"
+          >
+            <FtShareButton
+              :id="videoId"
+              :get-timestamp="getTimestamp"
+              :playlist-id="playlistId"
+              dropdown-position-y="top"
+            />
+            <span>{{ $t('Share.Share Video') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && showPlaylists && !isUpcoming"
+            class="shortsAction shortsComponentAction"
+          >
+            <FtIconButton
+              :title="$t('User Playlists.Add to Playlist')"
+              :icon="isInAnyPlaylist ? ['fac', 'playlist-check'] : ['fac', 'playlist-add']"
+              force-dropdown
+              dropdown-position-x="left"
+              dropdown-position-y="top"
+            >
+              <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
+            </FtIconButton>
+            <span>{{ $t('User Playlists.Add to Playlist') }}</span>
+          </div>
+          <div
+            v-if="!isLoading && isQuickBookmarkEnabled"
+            class="shortsAction shortsComponentAction shortsQuickBookmark"
+            :class="{ shortsQuickBookmarked: isCurrentVideoQuickBookmarked }"
+          >
+            <FtIconButton
+              :title="quickBookmarkIconText"
+              :icon="quickBookmarkIcon"
+              :theme="isCurrentVideoQuickBookmarked ? 'favorite' : 'base'"
+              @click="toggleCurrentVideoQuickBookmarked"
+            />
+            <span>{{ quickBookmarkIconText }}</span>
+          </div>
+          <button
+            v-if="!isLoading && channelThumbnail"
+            type="button"
+            class="shortsSoundThumbnail"
+            :title="channelName"
+            @click="openShortsChannel"
+          >
+            <img
+              :src="channelThumbnail"
+              alt=""
+            >
+          </button>
+        </div>
+        <button
+          v-if="customShortsPlayerActive && nextSubscriptionShortThumbnail"
+          type="button"
+          class="shortsNextPreview"
+          :style="{ '--shorts-next-thumbnail': `url(${nextSubscriptionShortThumbnail})` }"
+          :aria-label="$t('Video.Next')"
+          @click="navigateSubscriptionShort(1)"
+        />
+        <div
+          v-if="isLoading && customShortsPlayerActive &&
+            (hasPreviousSubscriptionShort || hasNextSubscriptionShort)"
+          class="shortsNavigation shortsLoadingNavigation"
+        >
+          <button
+            type="button"
+            class="shortsNavigationButton shortsLoadingNavigationButton"
+            :disabled="!hasPreviousSubscriptionShort"
+            :aria-label="$t('Video.Previous')"
+            :title="$t('Video.Previous')"
+            @click="navigateSubscriptionShort(-1)"
+          >
+            <font-awesome-icon :icon="['fas', 'arrow-up']" />
+          </button>
+          <button
+            type="button"
+            class="shortsNavigationButton shortsLoadingNavigationButton"
+            :disabled="!hasNextSubscriptionShort"
+            :aria-label="$t('Video.Next')"
+            :title="$t('Video.Next')"
+            @click="navigateSubscriptionShort(1)"
+          >
+            <font-awesome-icon :icon="['fas', 'arrow-down']" />
+          </button>
+        </div>
+      </div>
+      <div
+        v-if="customShortsPlayerActive"
+        ref="shortsCommentsTarget"
+        class="shortsCommentsPanel"
+        :class="{ shortsCommentsPanelOpen }"
+      />
+      <div
+        v-if="customShortsPlayerActive"
+        class="shortsAuxPanel"
+        :class="{ shortsAuxPanelOpen }"
+      >
+        <div
+          v-if="shortsMetadataOpen"
+          class="shortsAuxPanelHeader"
+        >
+          <h2>
+            <font-awesome-icon :icon="['fas', 'circle-info']" />
+            {{ $t('Video.Metadata') }}
+          </h2>
+          <button
+            type="button"
+            class="shortsAuxPanelClose"
+            :aria-label="$t('Video.Close Metadata')"
+            :title="$t('Video.Close Metadata')"
+            @click="toggleShortsMetadata"
+          >
+            <font-awesome-icon :icon="['fas', 'xmark']" />
+          </button>
+        </div>
+        <div
+          v-overlay-scrollbars
+          class="shortsAuxPanelTarget"
+        >
+          <watch-video-info
+            v-if="shortsMetadataOpen && !isLoading"
+            :id="videoId"
+            :title="videoTitle"
+            :channel-id="channelId"
+            :channel-name="channelName"
+            :channel-thumbnail="channelThumbnail"
+            :channel-collaborators="channelCollaborators"
+            :published="videoPublished"
+            :premiere-date="premiereDate"
+            :subscription-count-text="channelSubscriptionCountText"
+            :like-count="videoLikeCount"
+            :dislike-count="videoDislikeCount"
+            :category="videoCategory"
+            :view-count="videoViewCount"
+            :get-timestamp="getTimestamp"
+            :is-live-content="isLiveContent"
+            :is-live="isLive"
+            :is-upcoming="isUpcoming"
+            :playlist-id="playlistId"
+            :get-playlist-state="getPlaylistState"
+            :length-seconds="videoLengthSeconds"
+            :video-thumbnail="thumbnail"
+            :in-user-playlist="!!selectedUserPlaylist"
+            :is-unlisted="isUnlisted"
+            :has-ai-generated-content="hasAiGeneratedContent"
+            :can-save-watched-progress="canSaveWatchProgress"
+            :sponsor-block-panel-open="showSidebarSponsorBlock"
+            :transcript-open="showTranscript"
+            hide-share-button
+            hide-playlist-actions
+            hide-fullscreen-dock-actions
+            class="watchVideo"
+            @change-format="handleFormatChange"
+            @pause-player="pausePlayer"
+            @save-watched-progress="handleWatchProgressManualSave"
+            @save-channel-playback-speed="handleChannelPlaybackSpeedManualSave"
+            @save-channel-video-quality="handleChannelVideoQualityManualSave"
+          />
+          <watch-video-description
+            v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
+            :description="videoDescription"
+            :description-html="videoDescriptionHtml"
+            :license="license"
+            always-expanded
+            class="watchVideo"
+            @timestamp-event="changeTimestamp"
+          />
+          <watch-video-sponsor-block
+            v-if="showSidebarSponsorBlock && !isLoading"
+            class="watchVideoSideBar watchVideoSponsorBlock"
+            :loading="sponsorBlockInfoLoading"
+            :pending-uuid="sponsorBlockInfoPendingUuid"
+            :segments="sponsorBlockInfoSegments"
+            :submission-enabled="sponsorBlockInfoSubmissionEnabled"
+            :auto-skip-disabled="sponsorBlockAutoSkipTemporarilyDisabled"
+            :channel-whitelisted="isSponsorBlockChannelWhitelisted"
+            :can-whitelist-channel="Boolean(channelId)"
+            :current-time="currentTime"
+            @close="closeSidebarSponsorBlock"
+            @refresh="refreshSponsorBlockInfo"
+            @skip="skipSponsorBlockInfoSegment"
+            @auto-skip-change="handleSponsorBlockAutoSkipToggle"
+            @channel-whitelist-change="handleSponsorBlockChannelWhitelistToggle"
+            @vote="voteOnSponsorBlockInfoSegment"
+          />
+          <watch-video-transcript
+            v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+            :captions="captions"
+            :current-time="currentTime"
+            :preferred-caption-index="preferredTranscriptCaptionIndex"
+            :video-title="videoTitle"
+            class="watchVideoSideBar watchVideoTranscript"
+            @close="closeTranscript"
+            @timestamp-event="playTranscriptSegment"
+          />
+        </div>
       </div>
     </div>
     <ft-age-restricted
@@ -194,7 +562,7 @@
         :disabled="!fullscreenMetadataOpen"
       >
         <watch-video-info
-          v-if="!isLoading"
+          v-if="!isLoading && (!customShortsPlayerActive || fullscreenMetadataOpen)"
           :id="videoId"
           :title="videoTitle"
           :channel-id="channelId"
@@ -236,7 +604,7 @@
           @toggle-transcript="toggleTranscript"
         />
         <watch-video-description
-          v-if="!isLoading && !hideVideoDescription"
+          v-if="!isLoading && !hideVideoDescription && (!customShortsPlayerActive || fullscreenMetadataOpen)"
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :license="license"
@@ -344,7 +712,7 @@
           @leave-cancelled="handleSidebarPanelAfterLeave"
         >
           <watch-video-sponsor-block
-            v-if="showSidebarSponsorBlock && !isLoading"
+            v-if="showSidebarSponsorBlock && !isLoading && (!customShortsPlayerActive || fullscreenSponsorBlockOpen)"
             class="watchVideoSideBar watchVideoSponsorBlock"
             :loading="sponsorBlockInfoLoading"
             :pending-uuid="sponsorBlockInfoPendingUuid"
@@ -374,7 +742,7 @@
           @leave-cancelled="handleSidebarPanelAfterLeave"
         >
           <watch-video-transcript
-            v-if="showTranscript && !isLoading && !isLive && !isUpcoming"
+            v-if="showTranscript && !isLoading && !isLive && !isUpcoming && (!customShortsPlayerActive || fullscreenTranscriptOpen)"
             :captions="captions"
             :current-time="currentTime"
             :preferred-caption-index="preferredTranscriptCaptionIndex"
@@ -436,8 +804,8 @@
       class="commentsArea"
     >
       <Teleport
-        :to="fullscreenCommentsTarget || 'body'"
-        :disabled="!fullscreenCommentsOpen"
+        :to="fullscreenCommentsTarget || (shortsCommentsOpen ? $refs.shortsCommentsTarget : null) || 'body'"
+        :disabled="!fullscreenCommentsOpen && !shortsCommentsOpen"
       >
         <CommentSection
           v-if="!isLoading && !isLive && !hideComments"
@@ -446,7 +814,7 @@
           :class="{ theatreWatchVideo: useTheatreMode }"
           :channel-thumbnail="channelThumbnail"
           :channel-name="channelName"
-          :fullscreen-overlay="fullscreenCommentsOpen"
+          :fullscreen-overlay="fullscreenCommentsOpen || shortsCommentsOpen"
           @close-comments="closeFullscreenComments"
           @timestamp-event="changeTimestamp"
         />

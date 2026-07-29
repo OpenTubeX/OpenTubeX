@@ -3,7 +3,8 @@
     class="ftVideoPlayerHost"
     :class="{
       ambientWideLayout: theatrePossible && !useTheatreMode,
-      theatreUnavailable: !theatrePossible
+      theatreUnavailable: !theatrePossible,
+      shortsPlayer
     }"
   >
     <canvas
@@ -42,6 +43,8 @@
       class="ftVideoPlayer shaka-video-container"
       :class="{
         fullWindow: fullWindowEnabled,
+        shortsPlayer,
+        shortsPaused: shortsPaused && hasLoaded,
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
         fullscreenMetadataOpen: showFullscreenMetadata,
@@ -54,11 +57,16 @@
         fullscreenDockReordering,
         presentationModeChanging
       }"
-      :style="[captionCssVariables, scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined]"
+      :style="[
+        captionCssVariables,
+        scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
+        shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
+      ]"
       @mouseenter="handleScrollMiniPlayerEnter"
       @mouseleave="handleScrollMiniPlayerLeave"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"
+      @dblclick.capture="handlePlayerControlDoubleClick"
     >
       <!-- Ambient glow surface for fullscreen, where the host-level canvases are not rendered. -->
       <canvas
@@ -74,7 +82,8 @@
         preload="auto"
         crossorigin="anonymous"
         playsinline
-        :autoplay="autoplayVideos ? true : null"
+        :autoplay="autoplayVideos || shortsPlayer ? true : null"
+        :loop="shortsPlayer"
         :poster="thumbnail"
         @play="handlePlay"
         @pause="handlePause"
@@ -86,6 +95,73 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <div
+        v-if="shortsPlayer"
+        class="shortsTopControls shaka-no-propagation"
+        @dblclick.stop.prevent
+      >
+        <div class="shortsTopControlsGroup">
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="shortsPaused
+              ? $t('Video.Player.Scroll Mini Player.Play')
+              : $t('Video.Player.Scroll Mini Player.Pause')"
+            @click.stop="toggleShortsPlayback"
+          >
+            <font-awesome-icon :icon="['fas', shortsPaused ? 'play' : 'pause']" />
+          </button>
+          <div class="shortsVolumeControl">
+            <button
+              type="button"
+              class="shortsTopControl"
+              :aria-label="$t('KeyboardShortcutPrompt.Mute')"
+              @click.stop="toggleShortsMuted"
+            >
+              <font-awesome-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
+            </button>
+            <input
+              type="range"
+              class="shortsVolumeSlider"
+              min="0"
+              max="100"
+              step="any"
+              :value="scrollMiniVolumePercent"
+              :aria-label="$t('Video.Player.Scroll Mini Player.Volume')"
+              @input.stop="updateScrollMiniVolume"
+              @click.stop
+            >
+          </div>
+        </div>
+        <div class="shortsTopControlsGroup">
+          <button
+            type="button"
+            class="shortsTopControl shortsCaptionsControl"
+            :class="{ active: shortsCaptionsEnabled }"
+            :aria-label="$t('KeyboardShortcutPrompt.Captions')"
+            @click.stop="toggleShortsCaptions"
+          >
+            <font-awesome-icon :icon="['fas', 'closed-captioning']" />
+          </button>
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="$t('Video.More Options')"
+            @click.stop="openShortsOverflowMenu($event)"
+          >
+            <font-awesome-icon :icon="['fas', 'ellipsis-v']" />
+          </button>
+          <button
+            type="button"
+            class="shortsTopControl"
+            :aria-label="$t('KeyboardShortcutPrompt.Fullscreen')"
+            :aria-pressed="String(isFullscreen)"
+            @click.stop="toggleShortsFullscreen"
+          >
+            <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
+          </button>
+        </div>
+      </div>
       <Transition name="fade">
         <div
           v-if="autoplayCountdown"
@@ -1013,6 +1089,31 @@
           @mousedown.stop.prevent
         />
       </div>
+    </div>
+    <div
+      v-if="shortsPlayer && (shortsHasPrevious || shortsHasNext)"
+      class="shortsNavigation"
+    >
+      <button
+        type="button"
+        class="shortsNavigationButton"
+        :disabled="!shortsHasPrevious"
+        :aria-label="$t('Video.Previous')"
+        :title="$t('Video.Previous')"
+        @click="emitShortsPrevious"
+      >
+        <font-awesome-icon :icon="['fas', 'arrow-up']" />
+      </button>
+      <button
+        type="button"
+        class="shortsNavigationButton"
+        :disabled="!shortsHasNext"
+        :aria-label="$t('Video.Next')"
+        :title="$t('Video.Next')"
+        @click="emitShortsNext"
+      >
+        <font-awesome-icon :icon="['fas', 'arrow-down']" />
+      </button>
     </div>
   </div>
 </template>

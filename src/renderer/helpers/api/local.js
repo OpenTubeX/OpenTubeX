@@ -4,6 +4,7 @@ import { SEARCH_CHAR_LIMIT } from '../../../constants'
 
 import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
+import { parseLocalShortLinkedVideo } from '../player/shorts'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -614,6 +615,21 @@ export async function getLocalVideoInfo(id) {
 }
 
 /**
+ * @param {string} id
+ * @returns {Promise<{videoId: string, title: string} | null>}
+ */
+export async function getLocalShortLinkedVideo(id) {
+  const innertube = await createInnertube()
+  const response = await innertube.actions.execute('/reel/reel_item_watch', {
+    playerRequest: { videoId: id },
+    disablePlayerResponse: true,
+    parse: false,
+  })
+
+  return parseLocalShortLinkedVideo(response)
+}
+
+/**
  * @typedef {object} LocalVideoCollaborator
  * @property {string} id
  * @property {string} name
@@ -1188,6 +1204,7 @@ export function parseShort(short, channelId, channelName) {
       author: channelName,
       authorId: channelId,
       viewCount: reelItem.views.isEmpty() ? null : parseLocalSubscriberCount(reelItem.views.text),
+      isShort: true,
       lengthSeconds: ''
     }
   } else {
@@ -1201,6 +1218,7 @@ export function parseShort(short, channelId, channelName) {
       author: channelName,
       authorId: channelId,
       viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
+      isShort: true,
       lengthSeconds: ''
     }
   }
@@ -1396,6 +1414,7 @@ export function parseLocalPlaylistVideo(video) {
       videoId: short.id,
       title: short.title.text?.trim(),
       viewCount: parseLocalSubscriberCount(short.views.text),
+      isShort: true,
       lengthSeconds: ''
     }
   } else if (video.type === 'ShortsLockupView') {
@@ -1432,6 +1451,7 @@ export function parseLocalPlaylistVideo(video) {
       videoId: shortsLockupView.on_tap_endpoint.payload.videoId,
       title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
       viewCount,
+      isShort: true,
       lengthSeconds: ''
     }
   } else {

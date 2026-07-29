@@ -50,6 +50,14 @@
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Use YouTube-style Shorts')"
+          :tooltip="$t('Tooltips.Theme Settings.Use YouTube-style Shorts')"
+          compact
+          :default-value="useCustomShortsPlayer"
+          setting-key="useCustomShortsPlayer"
+          @change="updateUseCustomShortsPlayer"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Hide Side Bar Labels')"
           compact
           :default-value="hideLabelsSideBar"
@@ -369,6 +377,16 @@ const alwaysShowScrollbars = computed(() => {
  */
 function updateAlwaysShowScrollbars(value) {
   store.dispatch('updateAlwaysShowScrollbars', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseCustomShortsPlayer(value) {
+  store.dispatch('updateUseCustomShortsPlayer', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
