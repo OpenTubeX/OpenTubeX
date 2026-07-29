@@ -13,6 +13,8 @@ test('fullscreen playlist dock preserves its active state and each layout positi
 
   const sidebar = page.locator('.playlistItemsWrapper')
   await expect(sidebar).toBeVisible({ timeout: 60000 })
+  await expect(sidebar).toHaveAttribute('data-overlayscrollbars-viewport')
+  await expect(sidebar.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollHeight)).toBeGreaterThan(1000)
   await waitForPlaybackOrSkip(test, page)
 
@@ -27,6 +29,7 @@ test('fullscreen playlist dock preserves its active state and each layout positi
 
   const dock = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
   await expect(dock).toBeVisible()
+  await expect(dock).toHaveAttribute('data-overlayscrollbars-viewport')
   const currentDockItem = dock.locator('.playlistItem').filter({ has: page.locator('.videoIndexIcon') })
   await expect.poll(async () => {
     const [dockBounds, itemBounds] = await Promise.all([dock.boundingBox(), currentDockItem.boundingBox()])
@@ -59,6 +62,9 @@ test('fullscreen playlist dock preserves its active state and each layout positi
   const playlistOverlay = page.locator('.fullscreenPlaylistOverlay.open')
   const playlistDockHeader = playlistOverlay.locator('.playlistDockHeader')
   await expect(metadataOverlay).toBeVisible()
+  const dockContent = page.locator('.fullscreenPlaylistTarget .fullscreenPlaylistContent')
+  await expect(dockContent).toHaveAttribute('data-overlayscrollbars-viewport')
+  await expect(dockContent.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect(playlistDockHeader).toHaveCSS('cursor', 'grab')
   await playlistDockHeader.hover({ position: { x: 30, y: 26 } })
   const metadataBounds = await metadataOverlay.boundingBox()

@@ -144,6 +144,44 @@ test.describe('overlay scrollbars', () => {
       expect(measurements.noLayoutCost).toBe(true)
       expect(measurements.scrollTop).toBe(120)
     })
+
+    test('reconciles an end position after the viewport grows', async ({ page }) => {
+      await page.evaluate(() => {
+        const viewport = document.createElement('div')
+        viewport.dataset.resizeScrollbarTest = ''
+        Object.assign(viewport.style, {
+          height: '80px',
+          overflowY: 'auto',
+          position: 'fixed',
+          transition: 'height 250ms linear',
+          width: '200px',
+        })
+
+        const content = document.createElement('div')
+        content.style.height = '240px'
+        viewport.append(content)
+        document.body.append(viewport)
+
+        const app = document.querySelector('#app').__vue_app__
+        app._context.directives['overlay-scrollbars'].mounted(viewport, { value: true })
+        viewport.scrollTop = viewport.scrollHeight
+      })
+
+      const viewport = page.locator('[data-resize-scrollbar-test]')
+      await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(0)
+      await viewport.evaluate((element) => { element.style.height = '300px' })
+
+      await expect.poll(() => viewport.evaluate((element) => {
+        const scrollbar = element.querySelector(':scope > .os-scrollbar-vertical')
+        return {
+          hasVisibleScrollbar: scrollbar.classList.contains('os-scrollbar-visible'),
+          scrollTop: element.scrollTop,
+        }
+      })).toEqual({
+        hasVisibleScrollbar: false,
+        scrollTop: 0,
+      })
+    })
   })
 
   test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page }) => {

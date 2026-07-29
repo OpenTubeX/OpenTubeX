@@ -56,9 +56,58 @@ function create(initialization) {
 
   if (initialization === document.body) {
     optimizeBodyScrollbarDrag(instance)
+  } else if (initialization.elements?.viewport instanceof HTMLElement) {
+    reconcileScrollbarOnResize(initialization.elements.viewport, instance)
   }
 
   return instance
+}
+
+/**
+ * A viewport can be scrolled to the end while an opening transition still
+ * makes it shorter than its final size. Chromium can retain that obsolete end
+ * offset as the viewport grows, which also leaves a scrollbar for overflow
+ * that no longer exists. Remeasure growing viewports from their true origin,
+ * then restore the old position within the new range.
+ *
+ * @param {HTMLElement} element
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ */
+function reconcileScrollbarOnResize(element, instance) {
+  let previousHeight = element.clientHeight
+  let resizeFrame = null
+  const resizeObserver = new ResizeObserver(() => {
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame)
+    }
+
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null
+      const height = element.clientHeight
+      const scrollTop = element.scrollTop
+      const maximumScrollTop = Math.max(0, element.scrollHeight - height)
+      const grewAtOldEnd = height > previousHeight &&
+        scrollTop > 0 &&
+        scrollTop >= maximumScrollTop - 1
+      previousHeight = height
+
+      if (grewAtOldEnd) {
+        element.scrollTop = 0
+        instance.update(true)
+        element.scrollTop = Math.min(scrollTop, instance.state().overflowAmount.y)
+      }
+
+      instance.update(true)
+    })
+  })
+
+  resizeObserver.observe(element)
+  instance.on('destroyed', () => {
+    resizeObserver.disconnect()
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame)
+    }
+  })
 }
 
 /**
@@ -196,14 +245,29 @@ function toggleOverlayScrollbars(element, enabled) {
 }
 
 /**
+ * Forces any pending layout update before restoring a consumer-managed scroll
+ * position. This is needed when a scroll container moves between layouts,
+ * because OverlayScrollbars otherwise restores its previous offset afterwards.
+ *
+ * @param {HTMLElement} element
+ * @param {number} scrollTop
+ */
+export function restoreOverlayScrollTop(element, scrollTop) {
+  const instance = OverlayScrollbars(element)
+  instance?.update(true)
+  element.scrollTop = scrollTop
+  // Setting an offset can change the browser's effective scroll range when a
+  // previously valid position became stale after the viewport grew.
+  instance?.update(true)
+}
+
+/**
  * `v-overlay-scrollbars` - does the same for a nested scroll container.
  * Pass `false` to leave the native scrollbars alone, for containers that only
  * scroll in some layouts.
  *
- * Surviving a `<Teleport>` is fine, but note that the library restores the
- * scroll offset the container had before the move, where a native scroll
- * container would have been reset to the top. Containers that recompute their
- * own scroll position after moving (the watch page playlist) can't use this.
+ * Surviving a `<Teleport>` is fine. Use `restoreOverlayScrollTop` when the
+ * destination layout needs a different offset.
  */
 export const overlayScrollbarsDirective = {
   mounted(element, binding) {
@@ -215,6 +279,15 @@ export const overlayScrollbarsDirective = {
   },
 
   unmounted(element) {
+    const hadOverlayScrollbars = OverlayScrollbars(element) != null
     toggleOverlayScrollbars(element, false)
+    if (!hadOverlayScrollbars) {
+      return
+    }
+
+    // A parent transition can keep this element visible after Vue has already
+    // unmounted the directive. Keep native scrollbars suppressed during that
+    // leave animation; the element is about to be removed from the DOM.
+    element.setAttribute('data-overlayscrollbars-initialize', '')
   }
 }

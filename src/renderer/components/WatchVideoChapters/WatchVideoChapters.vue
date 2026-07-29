@@ -203,6 +203,7 @@ function scrollToCurrentChapter() {
     container.scrollTop += currentItemRect.bottom - containerRect.bottom
   }
 }
+
 </script>
 
 <style scoped src="./WatchVideoChapters.css" />
