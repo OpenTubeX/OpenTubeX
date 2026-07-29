@@ -27,6 +27,26 @@ jobs:
         REVIEWER: ${{ github.event.workflow_run.actor.login }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
       run: |
+        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]')
+
+        is_trusted_bot() {
+          local candidate
+          for candidate in "${TRUSTED_BOTS[@]}"; do
+            if [[ "$1" == "$candidate" ]]; then
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        # A COMMENTED review does not supersede an approval, so only APPROVED and
+        # CHANGES_REQUESTED count when deciding where a reviewer currently stands.
+        latest_decisive_review() {
+          LOGIN="$1" jq -c \
+            '[.[] | select(.user.login == env.LOGIN and .commit_id == env.HEAD_SHA and (.state == "APPROVED" or .state == "CHANGES_REQUESTED"))] | sort_by(.submitted_at) | last // {}' \
+            <<< "$reviews"
+        }
+
         job_name="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" \
           --jq '.jobs[] | select(.name | startswith("authorize-auto-merge-")) | select(.conclusion == "success") | .name')"
         pr_number="${job_name#authorize-auto-merge-}"
@@ -55,8 +75,8 @@ jobs:
           exit 0
         fi
 
-        latest_review="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | \
-          jq -cs '[.[][] | select(.user.login == env.REVIEWER and .commit_id == env.HEAD_SHA)] | sort_by(.submitted_at) | last // {}')"
+        reviews="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | jq -cs '[.[][]]')"
+        latest_review="$(latest_decisive_review "$REVIEWER")"
         latest_review_state="$(jq -r '.state // empty' <<< "$latest_review")"
         if [[ "$latest_review_state" != "APPROVED" ]]; then
           echo "The latest review from $REVIEWER for $HEAD_SHA is not an approval."
@@ -69,10 +89,23 @@ jobs:
 
         if [[ "$reviewer_permission" == "admin" ]]; then
           echo "Admin approval by $REVIEWER authorized."
-        elif [[ "$reviewer_type" == "Bot" &&
-          ( "$REVIEWER" == "coderabbitai[bot]" || "$REVIEWER" == "greptile-apps[bot]" ) &&
-          "$author_permission" == "admin" ]]; then
-          echo "Trusted bot approval for admin author $author authorized."
+        elif [[ "$reviewer_type" == "Bot" ]] && is_trusted_bot "$REVIEWER" && [[ "$author_permission" == "admin" ]]; then
+          missing_bots=()
+
+          for bot in "${TRUSTED_BOTS[@]}"; do
+            bot_review_state="$(latest_decisive_review "$bot" | jq -r '.state // empty')"
+
+            if [[ "$bot_review_state" != "APPROVED" ]]; then
+              missing_bots+=("$bot")
+            fi
+          done
+
+          if [[ ${#missing_bots[@]} -gt 0 ]]; then
+            echo "Bot approvals only authorize auto-merge once every trusted bot has approved $HEAD_SHA. Still waiting for: ${missing_bots[*]}."
+            exit 0
+          fi
+
+          echo "Trusted bot approvals for admin author $author authorized."
         else
           echo "Approval by $REVIEWER does not authorize auto-merge."
           exit 0
