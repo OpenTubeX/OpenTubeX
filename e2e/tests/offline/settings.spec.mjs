@@ -1,14 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo } from '../../helpers/app.mjs'
-
-function latestSettings(contents) {
-  return Object.fromEntries(contents.trim().split('\n')
-    .map(line => JSON.parse(line))
-    .filter(record => record._id && !record.$$deleted)
-    .map(record => [record._id, record.value]))
-}
+import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('settings page renders its sections', async ({ page }) => {
