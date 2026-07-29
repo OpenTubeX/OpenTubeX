@@ -643,6 +643,7 @@
       flex: 1 1 auto;
       min-block-size: 0;
       overflow: hidden;
+      overscroll-behavior: contain;
     }
 
     .shortsAuxPanelTarget :deep(.watchVideo) {
@@ -652,6 +653,25 @@
       margin-inline: 0;
       border-radius: 0;
       box-shadow: none;
+    }
+
+    .shortsAuxPanelTarget :deep(.watchVideoTranscript) {
+      display: flex;
+      flex-direction: column;
+      block-size: 100%;
+      max-block-size: none;
+      overflow: hidden;
+    }
+
+    .shortsAuxPanelTarget :deep(.transcriptSegments) {
+      flex: 1 1 auto;
+      min-block-size: 0;
+      max-block-size: none;
+      overscroll-behavior: contain;
+    }
+
+    .shortsAuxPanelTarget :deep(.sponsorBlockContent) {
+      overscroll-behavior: contain;
     }
 
     .shortsAuxPanelTarget :deep(.watchVideoInfo),

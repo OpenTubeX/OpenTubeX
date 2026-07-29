@@ -107,6 +107,7 @@
           :is-live="isLive"
           :is-upcoming="isUpcoming"
           :transcript-open="showTranscript"
+          :sponsor-block-info-open="showSidebarSponsorBlock"
           :video-genre-is-music="videoGenreIsMusic"
           :current-playback-rate="currentPlaybackRate"
           :current-video-quality="currentVideoQuality"

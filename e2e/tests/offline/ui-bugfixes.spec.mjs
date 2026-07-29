@@ -107,10 +107,15 @@ test('Shorts top controls stay visible over white video content', async ({ page 
 
   const volume = page.locator('.shortsVolumeControl')
   const volumeButton = volume.locator('.shortsTopControl')
+  const volumeSlider = volume.locator('.shortsVolumeSlider')
+  await expect(volumeSlider).toHaveCSS('inline-size', '0px')
+  await expect(volumeSlider).toHaveCSS('opacity', '0')
   await volume.hover()
   await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.58)')
   await expect(volumeButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
+  await expect(volumeSlider).toHaveCSS('inline-size', '96px')
+  await expect(volumeSlider).toHaveCSS('opacity', '1')
 })
 
 test.describe('history reorder animation', () => {

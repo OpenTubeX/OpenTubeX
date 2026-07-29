@@ -345,6 +345,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    sponsorBlockInfoOpen: {
+      type: Boolean,
+      default: false
+    },
     videoGenreIsMusic: {
       type: Boolean,
       default: false
@@ -1434,7 +1438,7 @@ export default defineComponent({
      */
     let sponsorBlockSegments = []
     const sponsorBlockInfoSegments = ref([])
-    const sponsorBlockInfoOpen = ref(false)
+    const sponsorBlockInfoOpen = ref(props.sponsorBlockInfoOpen)
     const sponsorBlockInfoLoading = ref(false)
     const sponsorBlockVotePending = ref(null)
     const sponsorBlockUserVotes = reactive({})
@@ -3489,7 +3493,9 @@ export default defineComponent({
         shortsCaptionsEnabled.value = false
       }
       closeChaptersOverlay()
-      closeSponsorBlockInfo()
+      if (!props.shortsPlayer) {
+        closeSponsorBlockInfo()
+      }
       resetSponsorBlockHighlightLabel()
       loadSponsorBlockDrafts()
       sponsorBlockSubmissionError.value = ''

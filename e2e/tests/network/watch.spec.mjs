@@ -983,6 +983,7 @@ test.describe('custom Shorts player', () => {
     seed: {
       settings: {
         useCustomShortsPlayer: true,
+        useSponsorBlock: true,
         fetchSubscriptionsAutomatically: false
       },
       profiles: [{
@@ -1206,11 +1207,13 @@ test.describe('custom Shorts player', () => {
     const commentsPanel = page.locator('.shortsCommentsPanel')
     await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
     const commentsScroller = commentsPanel.locator('.commentsContentWrapper')
-    await commentsScroller.evaluate(element => {
-      const overflowProbe = document.createElement('div')
-      overflowProbe.style.blockSize = '2000px'
-      element.append(overflowProbe)
-    })
+    const firstComment = commentsPanel.locator('.comment').first()
+    const loadComments = commentsPanel.locator('.getCommentsTitle')
+    await expect(firstComment.or(loadComments)).toBeVisible()
+    if (await loadComments.isVisible()) {
+      await loadComments.click()
+    }
+    await expect(firstComment).toBeVisible({ timeout: 30_000 })
     await expect.poll(() => commentsScroller.evaluate(element => {
       return element.scrollHeight > element.clientHeight
     })).toBe(true)
@@ -1242,6 +1245,83 @@ test.describe('custom Shorts player', () => {
     )
     await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
     await commentsPanel.getByRole('button', { name: 'Hide Comments' }).click()
+
+    const auxPanel = page.locator('.shortsAuxPanel')
+    const sponsorBlockButton = page.getByRole('button', { name: 'Open SponsorBlock info' })
+    await sponsorBlockButton.click()
+    await expect(sponsorBlockButton).toHaveAttribute('aria-pressed', 'true')
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+    const sponsorBlockContent = auxPanel.locator('.sponsorBlockContent')
+    await expect(sponsorBlockContent).toHaveCSS('overscroll-behavior', 'contain')
+    await sponsorBlockContent.hover()
+    await page.mouse.wheel(0, 2000)
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    await page.waitForTimeout(500)
+    await page.evaluate(() => window.scrollTo({
+      top: document.documentElement.scrollHeight
+    }))
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(sponsorBlockButton).toHaveAttribute('aria-pressed', 'true')
+
+    await page.waitForTimeout(500)
+    await previous.click()
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(sponsorBlockButton).toHaveAttribute('aria-pressed', 'true')
+    await auxPanel.locator('.sponsorBlockHeader').getByRole('button', { name: 'Close' }).click()
+
+    const transcriptButton = page.locator('.shortsComponentAction')
+      .filter({ hasText: 'Transcript' })
+      .getByRole('button')
+    await transcriptButton.click()
+    const transcriptCard = auxPanel.locator('.watchVideoTranscript')
+    const transcriptTarget = auxPanel.locator('.shortsAuxPanelTarget')
+    await expect(transcriptCard).toBeVisible()
+    await expect(transcriptTarget).toHaveCSS('overscroll-behavior', 'contain')
+    await expect.poll(async () => {
+      const [cardHeight, targetHeight] = await Promise.all([
+        transcriptCard.evaluate(element => element.offsetHeight),
+        transcriptTarget.evaluate(element => element.clientHeight),
+      ])
+      return Math.abs(cardHeight - targetHeight)
+    }).toBeLessThanOrEqual(32)
+    await transcriptTarget.hover()
+    await page.mouse.wheel(0, 2000)
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    await page.waitForTimeout(500)
+    await page.evaluate(() => window.scrollTo({
+      top: document.documentElement.scrollHeight
+    }))
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+    await expect(transcriptButton).toHaveAttribute('aria-pressed', 'true')
+    await expect.poll(async () => {
+      const [cardHeight, targetHeight] = await Promise.all([
+        transcriptCard.evaluate(element => element.offsetHeight),
+        transcriptTarget.evaluate(element => element.clientHeight),
+      ])
+      return Math.abs(cardHeight - targetHeight)
+    }).toBeLessThanOrEqual(32)
+
+    await page.waitForTimeout(500)
+    await previous.click()
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+    await auxPanel.getByRole('button', { name: 'Close transcript' }).click()
 
     const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =
       await Promise.all([
