@@ -538,6 +538,17 @@ export default defineComponent({
         this.showSidebarSponsorBlock
       )
     },
+    shortsNavigationPanelOpen: function () {
+      return this.customShortsPlayerActive && (
+        this.shortsCommentsOpen ||
+        this.shortsAuxPanelOpen ||
+        this.fullscreenMetadataOpen ||
+        this.fullscreenTranscriptOpen ||
+        this.fullscreenSponsorBlockOpen ||
+        this.fullscreenCommentsOpen ||
+        this.fullscreenPlaylistOpen
+      )
+    },
     shortsActionSkeletonCount: function () {
       return [
         !this.hideComments,
@@ -1344,6 +1355,7 @@ export default defineComponent({
       if (
         !this.subscriptionShortsFeedActive ||
         !this.isCurrentlyPresented() ||
+        this.shortsNavigationPanelOpen ||
         !this.shortsScrollbarDragging ||
         Math.abs(scrollY - this.shortsLastWindowScrollY) < 4
       ) {
@@ -1359,12 +1371,15 @@ export default defineComponent({
       // so the page scrollbar remains draggable. Reset it after interpreting
       // the drag; otherwise the next drag at the end of the range cannot emit
       // another scroll event.
-      this.shortsScrollResetPending = true
-      window.scrollTo({ top: 0 })
+      if (window.scrollY !== 0) {
+        this.shortsScrollResetPending = true
+        window.scrollTo({ top: 0 })
+      }
     },
 
     handleShortsScrollbarPointerDown: function (event) {
       this.shortsScrollbarDragging = Boolean(
+        !this.shortsNavigationPanelOpen &&
         event.target?.closest?.('.os-scrollbar-handle')
       )
       this.shortsLastWindowScrollY = window.scrollY
@@ -1375,7 +1390,11 @@ export default defineComponent({
     },
 
     handleShortsWheel: function (event) {
-      if (!this.subscriptionShortsFeedActive || Math.abs(event.deltaY) < 20) {
+      if (
+        !this.subscriptionShortsFeedActive ||
+        this.shortsNavigationPanelOpen ||
+        Math.abs(event.deltaY) < 20
+      ) {
         return
       }
 
@@ -1384,13 +1403,24 @@ export default defineComponent({
     },
 
     handleShortsPointerDown: function (event) {
-      if (this.subscriptionShortsFeedActive && event.pointerType === 'touch') {
+      if (
+        this.subscriptionShortsFeedActive &&
+        !this.shortsNavigationPanelOpen &&
+        event.pointerType === 'touch'
+      ) {
         this.shortsTouchStartY = event.clientY
+      } else {
+        this.shortsTouchStartY = null
       }
     },
 
     handleShortsPointerUp: function (event) {
-      if (this.shortsTouchStartY === null || event.pointerType !== 'touch') {
+      if (
+        this.shortsNavigationPanelOpen ||
+        this.shortsTouchStartY === null ||
+        event.pointerType !== 'touch'
+      ) {
+        this.shortsTouchStartY = null
         return
       }
 
@@ -1406,6 +1436,7 @@ export default defineComponent({
       if (
         !this.subscriptionShortsFeedActive ||
         !this.isCurrentlyPresented() ||
+        this.shortsNavigationPanelOpen ||
         event.altKey ||
         event.ctrlKey ||
         event.metaKey ||

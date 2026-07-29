@@ -1118,6 +1118,21 @@ test.describe('custom Shorts player', () => {
     await expect(page.locator('.shortsExternalMetadata')).toBeVisible()
     await expect(page.locator('.shortsActionRail')).toBeVisible()
 
+    const commentsButton = page.getByRole('button', { name: 'Show Comments' })
+    await commentsButton.click()
+    const commentsPanel = page.locator('.shortsCommentsPanel')
+    await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+    await commentsPanel.hover()
+    await page.mouse.wheel(0, 120)
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+    await page.keyboard.press('ArrowDown')
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+    await page.getByRole('button', { name: 'Hide Comments' }).click()
+
     const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =
       await Promise.all([
         player.boundingBox(),

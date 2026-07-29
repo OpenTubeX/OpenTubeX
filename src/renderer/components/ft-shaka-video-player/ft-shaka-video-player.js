@@ -3486,6 +3486,7 @@ export default defineComponent({
     watch(() => props.videoId, () => {
       if (props.shortsPlayer) {
         shortsPaused.value = false
+        shortsCaptionsEnabled.value = false
       }
       closeChaptersOverlay()
       closeSponsorBlockInfo()
@@ -4993,9 +4994,14 @@ export default defineComponent({
       video.value.muted = !video.value.muted
     }
 
+    function syncShortsCaptionsEnabled() {
+      shortsCaptionsEnabled.value = player?.getTextTracks()
+        .some(track => track.active) ?? false
+    }
+
     function toggleShortsCaptions() {
       if (toggleCaptions()) {
-        shortsCaptionsEnabled.value = player.getTextTracks().some(track => track.active)
+        syncShortsCaptionsEnabled()
       }
     }
 
@@ -5957,6 +5963,7 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_full_window', null)
       shakaOverflowMenu.registerElement('ft_full_window', null)
+      shakaOverflowMenu.registerElement('ft_shorts_video_info', null)
 
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
@@ -7306,6 +7313,7 @@ export default defineComponent({
       const controls = ui.getControls()
       player = controls.getPlayer()
       wrapTextTrackSelection()
+      player.addEventListener('textchanged', syncShortsCaptionsEnabled)
 
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
@@ -7423,6 +7431,7 @@ export default defineComponent({
         hasLoaded.value = false
         if (props.shortsPlayer) {
           shortsPaused.value = false
+          shortsCaptionsEnabled.value = false
         }
         chapterThumbnails.value = []
       })
@@ -7648,6 +7657,7 @@ export default defineComponent({
           player.selectTextTrack(textTrack)
         }
       }
+      syncShortsCaptionsEnabled()
 
       if (props.chapters.length > 0) {
         createChapterMarkers()
@@ -7860,6 +7870,7 @@ export default defineComponent({
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      player?.removeEventListener('textchanged', syncShortsCaptionsEnabled)
 
       cancelTemporaryPlaybackRateHolds()
 
