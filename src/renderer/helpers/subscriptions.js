@@ -21,6 +21,7 @@ import {
 } from './utils'
 import { getValidSubscriptionChannels } from './subscription-channels'
 import {
+  applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
   mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries
@@ -467,26 +468,7 @@ async function enrichRssVideoIfNeeded(video) {
     return video
   }
 
-  const upcomingInfo = await fetchRssVideoUpcomingInfo(video.videoId)
-
-  if (!upcomingInfo.isUpcoming) {
-    return {
-      ...video,
-      isUpcoming: false
-    }
-  }
-
-  const enrichedVideo = {
-    ...video,
-    isUpcoming: true
-  }
-
-  if (upcomingInfo.premiereDate) {
-    enrichedVideo.premiereDate = upcomingInfo.premiereDate
-    enrichedVideo.published = upcomingInfo.premiereDate.getTime()
-  }
-
-  return enrichedVideo
+  return applyRssPremiereVerdict(video, await fetchRssVideoUpcomingInfo(video.videoId))
 }
 
 /**

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
   ensureSubscriptionFeedEntryState,
   mergeSubscriptionShortThumbnails,
@@ -207,4 +208,39 @@ test('empty, missing and malformed caches are tolerated', () => {
   ])
 
   assert.equal(videoIds.size, 0)
+})
+
+test('a failed premiere lookup leaves no verdict to cache', () => {
+  const entry = { videoId: 'a', viewCount: 0 }
+
+  const result = applyRssPremiereVerdict(entry, { isUpcoming: false, failed: true })
+
+  assert.equal('isUpcoming' in result, false, 'a failure must not look like a resolved verdict')
+  // The whole point: what gets cached must not seed the non-premiere set,
+  // otherwise a premiere that failed once is never looked up again.
+  assert.equal(collectResolvedNonPremiereVideoIds([{ ch: { videos: [result] } }]).size, 0)
+})
+
+test('a settled lookup records the verdict both ways', () => {
+  const notPremiere = applyRssPremiereVerdict({ videoId: 'a' }, { isUpcoming: false })
+  assert.equal(notPremiere.isUpcoming, false)
+  assert.deepEqual([...collectResolvedNonPremiereVideoIds([{ ch: { videos: [notPremiere] } }])], ['a'])
+
+  const premiereDate = new Date('2026-01-02T03:04:05Z')
+  const premiere = applyRssPremiereVerdict({ videoId: 'b' }, { isUpcoming: true, premiereDate })
+  assert.equal(premiere.isUpcoming, true)
+  assert.equal(premiere.premiereDate, premiereDate)
+  assert.equal(premiere.published, premiereDate.getTime())
+  // An upcoming premiere goes live eventually, so it is never a durable negative.
+  assert.equal(collectResolvedNonPremiereVideoIds([{ ch: { videos: [premiere] } }]).size, 0)
+})
+
+test('an upcoming premiere without a scheduled time keeps its original date', () => {
+  const entry = { videoId: 'a', published: 1234 }
+
+  const result = applyRssPremiereVerdict(entry, { isUpcoming: true })
+
+  assert.equal(result.isUpcoming, true)
+  assert.equal(result.published, 1234)
+  assert.equal('premiereDate' in result, false)
 })
