@@ -2932,13 +2932,13 @@ export default defineComponent({
 
     handleVideoEnded: function () {
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
-      if (this.isShort) {
-        return
-      }
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
         return
       }
       if (this.playNextQueuedVideo()) {
+        return
+      }
+      if (this.isShort) {
         return
       }
       if (!this.autoplayEnabled) {

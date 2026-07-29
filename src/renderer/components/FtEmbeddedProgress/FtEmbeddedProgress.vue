@@ -49,6 +49,7 @@ const width = ref(1)
 const height = ref(1)
 const rightToLeft = ref(false)
 let resizeObserver = null
+let directionObserver = null
 
 const clampedProgress = computed(() => Math.min(100, Math.max(0, props.progress)))
 
@@ -130,16 +131,25 @@ function updateGeometry(entry) {
   const box = entry.borderBoxSize?.[0]
   width.value = Math.max(1, box ? box.inlineSize : entry.contentRect.width)
   height.value = Math.max(1, box ? box.blockSize : entry.contentRect.height)
+}
+
+function updateDirection() {
   rightToLeft.value = getComputedStyle(svg.value).direction === 'rtl'
 }
 
 onMounted(() => {
   resizeObserver = new ResizeObserver(entries => updateGeometry(entries[0]))
   resizeObserver.observe(svg.value)
+  directionObserver = new MutationObserver(updateDirection)
+  directionObserver.observe(document.body, {
+    attributeFilter: ['dir'],
+  })
+  updateDirection()
 })
 
 onBeforeUnmount(() => {
   resizeObserver?.disconnect()
+  directionObserver?.disconnect()
 })
 </script>
 

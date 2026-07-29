@@ -105,7 +105,8 @@
             center: dropdownPositionX === 'center',
             bottom: dropdownPositionY === 'bottom',
             top: dropdownPositionY === 'top',
-            portal: dropdownPortal
+            portal: dropdownPortal,
+            [dropdownClass]: dropdownClass !== ''
           }"
           @focusout="handleDropdownFocusOut"
           @keydown.esc.stop="handleDropdownEscape"
@@ -201,6 +202,10 @@ const props = defineProps({
   dropdownPortal: {
     type: Boolean,
     default: false
+  },
+  dropdownClass: {
+    type: String,
+    default: ''
   },
   dropdownPositionX: {
     type: String,

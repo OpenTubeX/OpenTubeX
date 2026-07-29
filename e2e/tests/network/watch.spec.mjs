@@ -1161,11 +1161,14 @@ test.describe('watch page', () => {
         element.append(label)
       })
       await expect(sponsorBlockLabel).toBeVisible()
-      const [sponsorBlockBox, durationBox] = await Promise.all([
+      const [sponsorBlockBox, durationBox, currentActionsBox] = await Promise.all([
         sponsorBlockLabel.boundingBox(),
         thumbnail.locator('.videoDuration').boundingBox(),
+        actions.boundingBox(),
       ])
-      expect(sponsorBlockBox.y).toBeGreaterThan(actionsBox.y + actionsBox.height)
+      expect(sponsorBlockBox.y).toBeGreaterThan(
+        currentActionsBox.y + currentActionsBox.height
+      )
       expect(sponsorBlockBox.x + sponsorBlockBox.width).toBeLessThanOrEqual(durationBox.x)
 
       const addToPlaylist = item.locator('.addToPlaylistIcon .iconButton')
@@ -1194,10 +1197,14 @@ test.describe('watch page', () => {
         ))
       })).toBe(true)
       await page.keyboard.press('Escape')
+      await expect(dropdown).toHaveCount(0)
 
       const moreOptions = item.locator('.optionsButton .iconButton')
       await moreOptions.click()
       await expect(dropdown).toBeVisible()
+      await expect(dropdown).toHaveClass(/listVideoOptionsDropdown/)
+      await expect(dropdown).toHaveCSS('font-size', '14px')
+      await expect(dropdown).toHaveCSS('overflow-y', 'auto')
       const optionsDropdownBox = await dropdown.boundingBox()
       expect(optionsDropdownBox.y).toBeGreaterThanOrEqual(8)
       expect(optionsDropdownBox.y + optionsDropdownBox.height).toBeLessThanOrEqual(

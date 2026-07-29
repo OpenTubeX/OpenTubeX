@@ -288,6 +288,7 @@
           theme="base-no-default"
           :size="16"
           :use-shadow="false"
+          dropdown-class="listVideoOptionsDropdown"
           :dropdown-portal="appearance === 'watchPlaylistItem'"
           dropdown-position-x="left"
           :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"

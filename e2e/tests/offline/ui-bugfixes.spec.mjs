@@ -137,6 +137,30 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(volumeSlider).toHaveCSS('opacity', '1')
 })
 
+test.describe('autosized prompts', () => {
+  test.use({
+    seed: {
+      history: [historyEntry('aaaaaaaaaaa', 'History entry', Date.now())]
+    }
+  })
+
+  test('centers the Delete Old History dialog in the viewport', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect.poll(() => dialog.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.abs(bounds.left + bounds.width / 2 - window.innerWidth / 2)
+    })).toBeLessThanOrEqual(1)
+    await expect.poll(() => dialog.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.abs(bounds.top + bounds.height / 2 - window.innerHeight / 2)
+    })).toBeLessThanOrEqual(1)
+  })
+})
+
 test.describe('thumbnail watched progress', () => {
   test.use({
     seed: {
@@ -181,22 +205,12 @@ test.describe('thumbnail watched progress', () => {
     expect(Math.abs(progressBounds.height - thumbnailBounds.height)).toBeLessThanOrEqual(1)
     expect(Math.abs(progressBounds.width - thumbnailBounds.width)).toBeLessThanOrEqual(1)
     expect(progressGeometry.pathLength).toBeGreaterThan(thumbnailBounds.width - 20)
-  })
 
-  test('centers the autosized Delete Old History dialog in the viewport', async ({ page }) => {
-    await goTo(page, 'history')
-    await page.getByRole('button', { name: 'Delete Old History' }).click()
-
-    const dialog = page.getByRole('dialog')
-    await expect(dialog).toBeVisible()
-    await expect.poll(() => dialog.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return Math.abs(bounds.left + bounds.width / 2 - window.innerWidth / 2)
-    })).toBeLessThanOrEqual(1)
-    await expect.poll(() => dialog.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return Math.abs(bounds.top + bounds.height / 2 - window.innerHeight / 2)
-    })).toBeLessThanOrEqual(1)
+    const leftToRightPath = progressGeometry.path
+    await page.evaluate(() => {
+      document.body.dir = 'rtl'
+    })
+    await expect.poll(() => progressPath.getAttribute('d')).not.toBe(leftToRightPath)
   })
 })
 
