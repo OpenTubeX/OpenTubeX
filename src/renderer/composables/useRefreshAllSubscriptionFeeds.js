@@ -27,16 +27,36 @@ export function useRefreshAllSubscriptionFeeds() {
     const feeds = []
 
     if (!store.getters.getHideSubscriptionsVideos) {
-      feeds.push({ cache: store.getters.getVideoCache, entriesKey: 'videos', refresh: refreshSubscriptionVideosFromRemote })
+      feeds.push({
+        category: 'videos',
+        cache: store.getters.getVideoCache,
+        entriesKey: 'videos',
+        refresh: refreshSubscriptionVideosFromRemote
+      })
     }
     if (!store.getters.getHideSubscriptionsShorts) {
-      feeds.push({ cache: store.getters.getShortsCache, entriesKey: 'videos', refresh: refreshSubscriptionShortsFromRemote })
+      feeds.push({
+        category: 'shorts',
+        cache: store.getters.getShortsCache,
+        entriesKey: 'videos',
+        refresh: refreshSubscriptionShortsFromRemote
+      })
     }
     if (!store.getters.getHideLiveStreams && !store.getters.getHideSubscriptionsLive) {
-      feeds.push({ cache: store.getters.getLiveCache, entriesKey: 'videos', refresh: refreshSubscriptionLiveFromRemote })
+      feeds.push({
+        category: 'live',
+        cache: store.getters.getLiveCache,
+        entriesKey: 'videos',
+        refresh: refreshSubscriptionLiveFromRemote
+      })
     }
     if (!store.getters.getHideSubscriptionsCommunity && !store.getters.getUseRssFeeds) {
-      feeds.push({ cache: store.getters.getPostsCache, entriesKey: 'posts', refresh: refreshSubscriptionPostsFromRemote })
+      feeds.push({
+        category: 'posts',
+        cache: store.getters.getPostsCache,
+        entriesKey: 'posts',
+        refresh: refreshSubscriptionPostsFromRemote
+      })
     }
 
     return feeds
