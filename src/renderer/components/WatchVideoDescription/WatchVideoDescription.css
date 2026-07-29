@@ -34,12 +34,21 @@
 
 .videoDescription.short .descriptionStatus {
   position: absolute;
+  z-index: 1;
   inset-block-end: calc(1lh + 12px);
   padding-block: 2px;
   inset-inline-end: 16px;
-  padding-inline-start: 40px;
-  background: linear-gradient(270deg, var(--card-bg-color) 75%, transparent 100%);
+  background-color: var(--card-bg-color);
   text-decoration: none;
+}
+
+.videoDescription.short .descriptionStatus::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 100%;
+  inline-size: 40px;
+  background: linear-gradient(90deg, transparent, var(--card-bg-color));
+  content: '';
 }
 
 .videoDescription:not(.short) .descriptionStatus {
@@ -47,8 +56,8 @@
   margin-block-start: 1em;
 }
 
-.videoDescription.short .descriptionStatus:dir(rtl) {
-  background: linear-gradient(270deg, transparent 0%, var(--card-bg-color) 25%);
+.videoDescription.short .descriptionStatus:dir(rtl)::before {
+  background: linear-gradient(270deg, transparent, var(--card-bg-color));
 }
 
 .videoDescription.short .description {

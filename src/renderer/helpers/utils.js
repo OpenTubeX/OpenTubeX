@@ -3,6 +3,7 @@ import i18n from '../i18n/index'
 import router from '../router/index'
 import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
+import { getPreferredShortThumbnailUrl } from './player/shorts'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
@@ -222,6 +223,32 @@ export function getVideoThumbnailUrl(videoId, backendPreference, currentInvidiou
     default:
       return `${baseUrl}/vi/${videoId}/${portrait ? 'oardefault' : 'mqdefault'}.jpg`
   }
+}
+
+/**
+ * Resolves a Shorts thumbnail consistently for cards, navigation previews, and
+ * the player poster. YouTube's selected portrait image wins for the default
+ * preference; explicit frame preferences still use their generated URLs.
+ * @param {{ videoId: string, thumbnailUrl?: string } | null | undefined} video
+ * @param {'local' | 'invidious'} backendPreference
+ * @param {string} currentInvidiousInstanceUrl
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @returns {string | null}
+ */
+export function getShortThumbnailUrl(video, backendPreference, currentInvidiousInstanceUrl, thumbnailPreference = '') {
+  if (!video?.videoId) {
+    return null
+  }
+
+  const fallbackUrl = getVideoThumbnailUrl(
+    video.videoId,
+    backendPreference,
+    currentInvidiousInstanceUrl,
+    thumbnailPreference,
+    true
+  )
+
+  return getPreferredShortThumbnailUrl(video, thumbnailPreference, fallbackUrl)
 }
 
 export const ToastEventBus = new EventTarget()

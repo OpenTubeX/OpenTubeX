@@ -5,6 +5,25 @@ import { isHistoryEntryWatched } from '../../history.js'
 const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
+ * Adds YouTube's selected portrait thumbnails to dated Shorts entries without
+ * replacing the exact publication and view metadata supplied by RSS.
+ * @param {object[]} entries
+ * @param {object[]} thumbnailEntries
+ */
+export function mergeSubscriptionShortThumbnails(entries, thumbnailEntries) {
+  const thumbnailsByVideoId = new Map(
+    thumbnailEntries
+      .filter(entry => entry.videoId && entry.thumbnailUrl)
+      .map(entry => [entry.videoId, entry.thumbnailUrl])
+  )
+
+  return entries.map(entry => {
+    const thumbnailUrl = thumbnailsByVideoId.get(entry.videoId)
+    return thumbnailUrl ? { ...entry, thumbnailUrl } : entry
+  })
+}
+
+/**
  * Scraped publication dates are derived from relative texts ("3 days ago") and
  * are therefore recalculated against the current time on every fetch. Entries
  * of already fetched channels would drift forwards past entries of channels

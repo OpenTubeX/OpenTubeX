@@ -3,6 +3,20 @@ const MAX_CHANNEL_SHORTS_CONTEXTS = 20
 const channelShortsNavigationContexts = new Map()
 
 /**
+ * Prefers YouTube's selected portrait thumbnail only when the user has not
+ * explicitly chosen another frame.
+ * @param {{ thumbnailUrl?: string } | null | undefined} video
+ * @param {'' | 'hidden' | 'start' | 'middle' | 'end'} thumbnailPreference
+ * @param {string | null} fallbackUrl
+ * @returns {string | null}
+ */
+export function getPreferredShortThumbnailUrl(video, thumbnailPreference, fallbackUrl) {
+  return thumbnailPreference === '' && video?.thumbnailUrl
+    ? video.thumbnailUrl
+    : fallbackUrl
+}
+
+/**
  * Keeps a channel page's visible Shorts sequence available while its Watch
  * route replaces the channel component in the same tab.
  *

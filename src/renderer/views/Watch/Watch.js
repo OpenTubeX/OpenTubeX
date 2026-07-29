@@ -31,7 +31,7 @@ import {
   formatNumber,
   getCachedOembedTitle,
   getOembedTitle,
-  getVideoThumbnailUrl,
+  getShortThumbnailUrl,
   showApiErrorToast,
   showToast,
   showToastOnAllTabs
@@ -510,17 +510,21 @@ export default defineComponent({
         ? this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + 1]
         : null
     },
+    currentSubscriptionShort: function () {
+      return this.subscriptionShortsFeedIndex >= 0
+        ? this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex]
+        : null
+    },
     nextSubscriptionShortThumbnail: function () {
       if (!this.nextSubscriptionShort) {
         return ''
       }
 
-      return getVideoThumbnailUrl(
-        this.nextSubscriptionShort.videoId,
+      return getShortThumbnailUrl(
+        this.nextSubscriptionShort,
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
-        this.thumbnailPreference,
-        true
+        this.thumbnailPreference
       ) ?? ''
     },
     shortsCommentsPanelOpen: function () {
@@ -1319,12 +1323,11 @@ export default defineComponent({
       this.shortsCommentsOpen = false
 
       this.shortsTransitionDirection = Math.sign(offset)
-      this.shortsTransitionPreview = getVideoThumbnailUrl(
-        target.videoId,
+      this.shortsTransitionPreview = getShortThumbnailUrl(
+        target,
         this.backendPreference,
         this.currentInvidiousInstanceUrl,
-        this.thumbnailPreference,
-        true
+        this.thumbnailPreference
       ) ?? ''
       this.shortsNavigationLockedUntil = Date.now() + 300
       const shortSource = this.tabRoute.query.shortSource === 'channel'
@@ -2013,12 +2016,11 @@ export default defineComponent({
           result.streaming_data?.adaptive_formats
         )
         if (this.customShortsPlayerActive) {
-          this.thumbnail = getVideoThumbnailUrl(
-            this.videoId,
+          this.thumbnail = getShortThumbnailUrl(
+            this.currentSubscriptionShort ?? { videoId: this.videoId },
             this.backendPreference,
             this.currentInvidiousInstanceUrl,
-            this.thumbnailPreference,
-            true
+            this.thumbnailPreference
           ) ?? this.thumbnail
         }
         if (this.isShort) {
@@ -2236,12 +2238,11 @@ export default defineComponent({
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
           if (this.customShortsPlayerActive) {
-            this.thumbnail = getVideoThumbnailUrl(
-              this.videoId,
+            this.thumbnail = getShortThumbnailUrl(
+              this.currentSubscriptionShort ?? { videoId: this.videoId },
               this.backendPreference,
               this.currentInvidiousInstanceUrl,
-              this.thumbnailPreference,
-              true
+              this.thumbnailPreference
             ) ?? this.thumbnail
           }
           this.updateTitle()

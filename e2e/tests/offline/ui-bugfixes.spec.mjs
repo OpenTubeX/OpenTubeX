@@ -1,4 +1,6 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import path from 'node:path'
+
+import { test, expect, goTo, repoRoot } from '../../helpers/app.mjs'
 
 function historyEntry(videoId, title, timeWatched) {
   return {
@@ -18,6 +20,82 @@ function historyEntry(videoId, title, timeWatched) {
     type: 'video'
   }
 }
+
+test('collapsed description paints the More control above its text', async ({ page }) => {
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/WatchVideoDescription/WatchVideoDescription.css'
+    )
+  })
+  await page.evaluate(() => {
+    const card = document.createElement('div')
+    const more = document.createElement('span')
+    const scroll = document.createElement('div')
+    const description = document.createElement('div')
+
+    card.className = 'videoDescription short'
+    card.style.backgroundColor = 'var(--card-bg-color)'
+    card.style.inset = '300px auto auto 300px'
+    card.style.padding = '16px'
+    card.style.position = 'fixed'
+    card.style.width = '300px'
+    card.style.zIndex = '10000'
+    more.className = 'descriptionStatus'
+    more.textContent = 'More'
+    scroll.className = 'descriptionScroll'
+    description.className = 'description'
+    description.textContent = Array.from(
+      { length: 20 },
+      (_, index) => `Long description segment ${index + 1}`
+    ).join(' ')
+
+    scroll.append(description)
+    card.append(more, scroll)
+    document.body.append(card)
+  })
+
+  const description = page.locator('.videoDescription.short').first()
+  const more = description.locator('.descriptionStatus')
+  await expect(more).toBeVisible()
+  await expect.poll(async () => more.evaluate((element) => {
+    const bounds = element.getBoundingClientRect()
+    return document.elementFromPoint(
+      bounds.left + bounds.width / 2,
+      bounds.top + bounds.height / 2
+    ) === element
+  })).toBe(true)
+})
+
+test('Shorts top controls stay visible over white video content', async ({ page }) => {
+  await goTo(page, 'history')
+  await page.addStyleTag({
+    path: path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    )
+  })
+  await page.evaluate(() => {
+    const player = document.createElement('div')
+    const control = document.createElement('button')
+
+    player.className = 'ftVideoPlayer shortsPlayer'
+    player.style.backgroundColor = '#fff'
+    player.style.inset = '300px auto auto 300px'
+    player.style.padding = '16px'
+    player.style.position = 'fixed'
+    player.style.zIndex = '10000'
+    control.className = 'shortsTopControl'
+    control.textContent = '⋮'
+    player.append(control)
+    document.body.append(player)
+  })
+
+  const control = page.locator('.shortsTopControl')
+  await expect(control).toHaveCSS('backdrop-filter', /blur\(8px\)/)
+  await control.hover()
+  await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.68)')
+})
 
 test.describe('history reorder animation', () => {
   test.use({
