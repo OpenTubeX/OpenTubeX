@@ -126,6 +126,7 @@
               <font-awesome-icon :icon="['fas', 'thumbs-down']" />
             </button>
             <button
+              v-if="segment.actionType !== 'full'"
               type="button"
               class="sponsorBlockVoteButton sponsorBlockSkipButton"
               :aria-label="$t('Video.Player.SponsorBlock.SkipSegment')"
@@ -241,6 +242,10 @@ function selectSegment(uuid) {
 }
 
 function isSegmentPassed(segment) {
+  if (segment.actionType === 'full') {
+    return false
+  }
+
   const endTime = segment.actionType === 'poi' ? segment.startTime : segment.endTime
   return Number.isFinite(endTime) && props.currentTime >= endTime
 }

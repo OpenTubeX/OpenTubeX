@@ -2,6 +2,11 @@ import { computed, reactive, ref } from 'vue'
 
 import store from '../../../store/index'
 import { submitSponsorBlockSegments } from '../../../helpers/sponsorblock'
+import {
+  getSponsorBlockSubmissionSegmentTimes,
+  isSponsorBlockFullVideoCategory,
+  resolveSponsorBlockActionType,
+} from '../../../helpers/player/sponsorBlockFullVideo'
 import { openExternalLink, showToast } from '../../../helpers/utils'
 
 const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
@@ -14,7 +19,8 @@ const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
   'hook',
   'music_offtopic',
   'filler',
-  'poi_highlight'
+  'poi_highlight',
+  'exclusive_access'
 ])
 
 const SPONSORBLOCK_PREVIEW_SECONDS = 2
@@ -122,7 +128,7 @@ export function useSponsorBlockSubmission({
   const sponsorBlockEnableSubmission = computed(() => store.getters.getSponsorBlockEnableSubmission)
   const sponsorBlockDraftSegmentsByVideoId = computed(() => store.getters.getSponsorBlockDraftSegmentsByVideoId)
 
-  /** @type {import('vue').Ref<{id: string, startTime: number, endTime: number | null, category: import('../../../helpers/sponsorblock').SponsorBlockCategory, previewed: boolean}[]>} */
+  /** @type {import('vue').Ref<{id: string, startTime: number, endTime: number | null, category: import('../../../helpers/sponsorblock').SponsorBlockCategory, actionType: 'skip' | 'full' | 'poi', previewed: boolean}[]>} */
   const sponsorBlockDraftSegments = ref([])
   const sponsorBlockDraftEditValues = reactive({})
   const sponsorBlockDraftEditingStates = reactive({})
@@ -187,7 +193,8 @@ export function useSponsorBlockSubmission({
       sponsorBlockDraftEditValues[segmentId] = {
         startTime: '',
         endTime: '',
-        category: 'sponsor'
+        category: 'sponsor',
+        actionType: 'skip'
       }
     }
 
@@ -206,7 +213,8 @@ export function useSponsorBlockSubmission({
     sponsorBlockDraftEditValues[segment.id] = {
       startTime: formatSponsorBlockDraftTimestamp(segment.startTime),
       endTime: segment.endTime == null ? '' : formatSponsorBlockDraftTimestamp(segment.endTime),
-      category: segment.category
+      category: segment.category,
+      actionType: segment.actionType
     }
   }
 
@@ -243,16 +251,22 @@ export function useSponsorBlockSubmission({
     const category = SPONSORBLOCK_SUBMISSION_CATEGORIES.includes(segment?.category)
       ? segment.category
       : 'sponsor'
+    const actionType = resolveSponsorBlockActionType(category, segment?.actionType)
 
-    const startTime = normalizeSponsorBlockDraftTime(segment?.startTime) ?? 0
-    const endTime = normalizeSponsorBlockDraftTime(segment?.endTime)
+    const startTime = actionType === 'full'
+      ? 0
+      : normalizeSponsorBlockDraftTime(segment?.startTime) ?? 0
+    const endTime = actionType === 'full'
+      ? 0
+      : normalizeSponsorBlockDraftTime(segment?.endTime)
 
     return {
       id: typeof segment?.id === 'string' && segment.id !== '' ? segment.id : createSponsorBlockDraftId(),
       startTime,
       endTime,
       category,
-      previewed: Boolean(segment?.previewed && (endTime != null || isSponsorBlockPointCategory(category)))
+      actionType,
+      previewed: actionType === 'full' || Boolean(segment?.previewed && (endTime != null || isSponsorBlockPointCategory(category)))
     }
   }
 
@@ -264,6 +278,7 @@ export function useSponsorBlockSubmission({
       startTime: normalizedSegment.startTime,
       endTime: normalizedSegment.endTime,
       category: normalizedSegment.category,
+      actionType: normalizedSegment.actionType,
       previewed: normalizedSegment.previewed
     }
   }
@@ -372,6 +387,7 @@ export function useSponsorBlockSubmission({
       startTime: Math.max(video.value?.currentTime ?? 0, 0),
       endTime: null,
       category: 'sponsor',
+      actionType: 'skip',
       previewed: false
     })
 
@@ -455,7 +471,25 @@ export function useSponsorBlockSubmission({
   }
 
   async function updateSponsorBlockDraftCategory(segmentId, value) {
-    updateSponsorBlockDraftEditField(segmentId, 'category', value)
+    const editValue = getSponsorBlockDraftEditValue(segmentId)
+    editValue.category = value
+
+    if (value === 'exclusive_access') {
+      editValue.actionType = 'full'
+    } else if (editValue.actionType === 'full' && !isSponsorBlockFullVideoCategory(value)) {
+      editValue.actionType = 'skip'
+      editValue.endTime = ''
+    }
+
+    await saveSponsorBlockDraft(segmentId)
+  }
+
+  async function updateSponsorBlockDraftActionType(segmentId, value) {
+    const editValue = getSponsorBlockDraftEditValue(segmentId)
+    editValue.actionType = value
+    if (value === 'skip') {
+      editValue.endTime = ''
+    }
     await saveSponsorBlockDraft(segmentId)
   }
 
@@ -466,10 +500,16 @@ export function useSponsorBlockSubmission({
     }
 
     const editValue = getSponsorBlockDraftEditValue(segmentId)
-    const startTime = parseSponsorBlockDraftTimestamp(editValue.startTime)
     const category = SPONSORBLOCK_SUBMISSION_CATEGORIES.includes(editValue.category) ? editValue.category : 'sponsor'
-    const isPointCategory = isSponsorBlockPointCategory(category)
-    const endTime = isPointCategory || editValue.endTime.trim() === '' ? null : parseSponsorBlockDraftTimestamp(editValue.endTime)
+    const actionType = resolveSponsorBlockActionType(category, editValue.actionType)
+    const isPointCategory = actionType === 'poi'
+    const isFullVideo = actionType === 'full'
+    const startTime = isFullVideo ? 0 : parseSponsorBlockDraftTimestamp(editValue.startTime)
+    const endTime = isFullVideo
+      ? 0
+      : isPointCategory || editValue.endTime.trim() === ''
+        ? null
+        : parseSponsorBlockDraftTimestamp(editValue.endTime)
 
     if (startTime == null) {
       const errorMessage = t('Video.Player.SponsorBlock.InvalidStartTime')
@@ -478,7 +518,7 @@ export function useSponsorBlockSubmission({
       return false
     }
 
-    if (!isPointCategory && endTime != null && endTime <= startTime) {
+    if (!isPointCategory && !isFullVideo && endTime != null && endTime <= startTime) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeAfterStart')
       sponsorBlockSubmissionError.value = errorMessage
       showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
@@ -486,7 +526,7 @@ export function useSponsorBlockSubmission({
     }
 
     const currentDuration = getSponsorBlockSubmissionVideoDuration()
-    if (currentDuration != null && (isPointCategory ? startTime : endTime) > currentDuration) {
+    if (!isFullVideo && currentDuration != null && (isPointCategory ? startTime : endTime) > currentDuration) {
       const errorMessage = t('Video.Player.SponsorBlock.EndTimeBeforeVideoEnd')
       sponsorBlockSubmissionError.value = errorMessage
       showToast({ message: errorMessage, icon: ['fas', 'circle-exclamation'] })
@@ -495,14 +535,16 @@ export function useSponsorBlockSubmission({
 
     const hasChanged = segment.startTime !== startTime ||
       segment.endTime !== endTime ||
-      segment.category !== category
+      segment.category !== category ||
+      segment.actionType !== actionType
 
     const updatedSegment = replaceSponsorBlockDraftSegment(segmentId, (draft) => ({
       ...draft,
       startTime: normalizeSponsorBlockDraftTime(startTime) ?? 0,
       endTime: normalizeSponsorBlockDraftTime(endTime),
       category,
-      previewed: hasChanged ? false : draft.previewed
+      actionType,
+      previewed: isFullVideo || (hasChanged ? false : draft.previewed)
     }))
     if (!updatedSegment) {
       return false
@@ -648,22 +690,26 @@ export function useSponsorBlockSubmission({
     return segment.actionType === 'poi' || isSponsorBlockPointCategory(segment.category)
   }
 
+  function isSponsorBlockFullVideoSegment(segment) {
+    return segment.actionType === 'full'
+  }
+
   function isSponsorBlockDraftComplete(segment) {
-    return isSponsorBlockPointSegment(segment) || typeof segment.endTime === 'number'
+    return isSponsorBlockPointSegment(segment) ||
+      isSponsorBlockFullVideoSegment(segment) ||
+      typeof segment.endTime === 'number'
   }
 
   function sponsorBlockDraftRequiresPreview(segment) {
-    return !isSponsorBlockPointSegment(segment)
-  }
-
-  function getSponsorBlockSubmissionSegmentTimes(segment) {
-    return isSponsorBlockPointSegment(segment)
-      ? [segment.startTime, segment.startTime]
-      : [segment.startTime, segment.endTime]
+    return !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)
   }
 
   function getSponsorBlockSubmissionActionType(segment) {
-    return isSponsorBlockPointSegment(segment) ? 'poi' : 'skip'
+    if (isSponsorBlockPointSegment(segment)) {
+      return 'poi'
+    }
+
+    return isSponsorBlockFullVideoSegment(segment) ? 'full' : 'skip'
   }
 
   async function submitSponsorBlockDrafts() {
@@ -711,21 +757,22 @@ export function useSponsorBlockSubmission({
 
     try {
       const videoDuration = getSponsorBlockSubmissionVideoDuration()
+      const submissionSegments = sponsorBlockDraftSegments.value.map(segment => ({
+        segment: getSponsorBlockSubmissionSegmentTimes(segment),
+        category: segment.category,
+        actionType: getSponsorBlockSubmissionActionType(segment),
+        description: ''
+      }))
       const response = await submitSponsorBlockSegments(
         props.videoId,
         videoDuration,
-        sponsorBlockDraftSegments.value.map(segment => ({
-          segment: getSponsorBlockSubmissionSegmentTimes(segment),
-          category: segment.category,
-          actionType: getSponsorBlockSubmissionActionType(segment),
-          description: ''
-        }))
+        submissionSegments
       )
 
-      onSubmittedSegments(response.map((segment) => ({
+      onSubmittedSegments(response.map((segment, index) => ({
         uuid: segment.UUID,
         category: segment.category,
-        actionType: segment.actionType,
+        actionType: segment.actionType ?? submissionSegments[index]?.actionType,
         startTime: segment.segment[0],
         endTime: segment.segment[1]
       })))
@@ -777,6 +824,7 @@ export function useSponsorBlockSubmission({
     getSponsorBlockSubmissionVideoDuration,
     handleSponsorBlockPreviewSkip,
     isSponsorBlockDraftEditing,
+    isSponsorBlockFullVideoSegment,
     isSponsorBlockPointSegment,
     loadSponsorBlockDrafts,
     openSponsorBlockGuidelines,
@@ -797,6 +845,7 @@ export function useSponsorBlockSubmission({
     submitSponsorBlockDrafts,
     toggleSponsorBlockDraftEditing,
     updateSponsorBlockDraftCategory,
+    updateSponsorBlockDraftActionType,
     updateSponsorBlockDraftEditField,
     updateSponsorBlockSubmissionState,
   }

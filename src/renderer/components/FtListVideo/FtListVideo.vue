@@ -45,6 +45,16 @@
       >
         {{ displayDurationLabel }}
       </div>
+      <div
+        v-if="sponsorBlockFullVideoCategory"
+        class="sponsorBlockVideoLabel"
+        :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
+          segmentCategory: sponsorBlockFullVideoLabel
+        })"
+      >
+        <FontAwesomeIcon :icon="sponsorBlockFullVideoIcon" />
+        <span>{{ sponsorBlockFullVideoLabel }}</span>
+      </div>
       <FtIconButton
         v-if="externalPlayer !== '' && !externalPlayerIsDefaultViewingMode"
         :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
@@ -343,7 +353,7 @@ import {
 } from '../../helpers/utils.js'
 import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
-import { deArrowData, deArrowThumbnail } from '../../helpers/sponsorblock.js'
+import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
 import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -468,6 +478,7 @@ const showDeArrowTitle = ref(false)
 const showDeArrowThumbnail = ref(false)
 const showCollaboratorsPrompt = ref(false)
 const isFetchingCollaborators = ref(false)
+const sponsorBlockFullVideoCategory = ref(null)
 
 const historyEntry = computed(() => store.getters.getHistoryCacheById[id.value])
 
@@ -506,6 +517,29 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 const currentInvidiousInstanceUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
+const useSponsorBlock = computed(() => store.getters.getUseSponsorBlock)
+
+const sponsorBlockFullVideoIcon = computed(() => {
+  switch (sponsorBlockFullVideoCategory.value) {
+    case 'exclusive_access':
+      return ['fas', 'ticket']
+    case 'selfpromo':
+      return ['fas', 'bullhorn']
+    default:
+      return ['fas', 'rectangle-ad']
+  }
+})
+
+const sponsorBlockFullVideoLabel = computed(() => {
+  switch (sponsorBlockFullVideoCategory.value) {
+    case 'exclusive_access':
+      return t('Video.Sponsor Block category.exclusive access')
+    case 'selfpromo':
+      return t('Video.Sponsor Block category.self-promotion')
+    default:
+      return t('Video.Sponsor Block category.sponsor')
+  }
+})
 
 const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
 
@@ -1360,6 +1394,15 @@ function parseVideoData() {
   }
 }
 
+async function fetchSponsorBlockVideoLabel() {
+  try {
+    const label = await getSponsorBlockVideoLabel(id.value)
+    sponsorBlockFullVideoCategory.value = label?.category ?? null
+  } catch {
+    sponsorBlockFullVideoCategory.value = null
+  }
+}
+
 function markAsWatched() {
   if (!canMarkAsWatched.value) {
     return
@@ -1542,6 +1585,10 @@ if ((showDeArrowTitle.value || showDeArrowThumbnail.value) && !deArrowCache.valu
 
 if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumbnail == null) {
   debounceGetDeArrowThumbnail()
+}
+
+if (useSponsorBlock.value && id.value) {
+  fetchSponsorBlockVideoLabel()
 }
 </script>
 

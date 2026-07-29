@@ -1298,6 +1298,7 @@ Video:
     hook: Hook/Greetings
     filler: Filler
     highlight: Highlight
+    exclusive access: Exclusive Access
   External Player:
     OpenInTemplate: Open in {externalPlayer}
     video: video
@@ -1375,6 +1376,7 @@ Video:
       ClearSegmentsPrompt: Are you sure you want to clear all drafted SponsorBlock segments for this video?
       CompleteSegmentsBeforeSubmitting: Complete every drafted segment before submitting.
       CategoryLabel: Segment category
+      ActionTypeLabel: Segment type
       DeleteSegment: Delete
       DuplicateSegments: Duplicate drafted segments are not allowed.
       EditSegment: Edit
@@ -1429,6 +1431,8 @@ Video:
       SkipSegment: Skip segment
       CloseSegmentActions: Close segment actions
       FullVideo: Full Video
+      FullVideoLabel: '{segmentCategory} · Full Video'
+      SkipActionType: Skip
       LockedSegment: Locked segment
       UpvoteSegment: Upvote segment
       DownvoteSegment: Downvote segment

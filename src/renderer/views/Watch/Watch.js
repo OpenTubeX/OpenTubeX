@@ -57,6 +57,7 @@ import {
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
 import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
+import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
@@ -319,6 +320,9 @@ export default defineComponent({
     }
   },
   computed: {
+    sponsorBlockFullVideoCategory: function () {
+      return selectSponsorBlockFullVideoLabel(this.sponsorBlockInfoSegments)?.category ?? null
+    },
     // `description` and `viewCount` are intentionally left out,
     // the store drops them from playlist entries as undesired attributes
     addToPlaylistVideoData: function () {

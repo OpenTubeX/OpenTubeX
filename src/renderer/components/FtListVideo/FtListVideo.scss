@@ -50,6 +50,28 @@
   margin-block-start: 3px;
 }
 
+.sponsorBlockVideoLabel {
+  align-items: center;
+  background-color: rgb(24 24 24 / 90%);
+  border-radius: calc(5px * var(--ui-roundness));
+  color: #fff;
+  display: flex;
+  font-size: 12px;
+  gap: 4px;
+  grid-column: 1;
+  grid-row: 1;
+  margin: 4px;
+  padding-block: 3px;
+  padding-inline: 5px;
+  place-self: start start;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.watched .sponsorBlockVideoLabel {
+  margin-block-start: 28px;
+}
+
 .channelName.collaboratorChannelButton {
   background: none;
   border: 0;

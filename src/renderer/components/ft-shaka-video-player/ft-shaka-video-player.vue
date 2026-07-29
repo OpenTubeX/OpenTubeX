@@ -874,7 +874,13 @@
                   viewing: !isSponsorBlockDraftEditing(segment.id)
                 }"
               >
-                <template v-if="isSponsorBlockDraftEditing(segment.id)">
+                <span
+                  v-if="isSponsorBlockFullVideoSegment(segment)"
+                  class="sponsorBlockDraftTimeText"
+                >
+                  {{ $t('Video.Player.SponsorBlock.FullVideo') }}
+                </span>
+                <template v-else-if="isSponsorBlockDraftEditing(segment.id)">
                   <button
                     class="sponsorBlockDraftTimeAction"
                     @click="setSponsorBlockDraftTime(segment.id, 'startTime', 0)"
@@ -901,10 +907,10 @@
                   {{ sponsorBlockDraftEditValues[segment.id]?.startTime ?? '' }}
                 </span>
                 <span
-                  v-if="!isSponsorBlockPointSegment(segment)"
+                  v-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
                   class="sponsorBlockDraftTimeDivider"
                 >{{ $t('Video.Player.SponsorBlock.TimeDivider') }}</span>
-                <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment)">
+                <template v-if="isSponsorBlockDraftEditing(segment.id) && !isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)">
                   <input
                     class="sponsorBlockDraftTimeInput"
                     :value="sponsorBlockDraftEditValues[segment.id]?.endTime ?? ''"
@@ -925,7 +931,7 @@
                   </button>
                 </template>
                 <span
-                  v-else-if="!isSponsorBlockPointSegment(segment)"
+                  v-else-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
                   class="sponsorBlockDraftTimeText"
                 >
                   {{ sponsorBlockDraftEditValues[segment.id]?.endTime ?? '' }}
@@ -945,6 +951,26 @@
                   {{ translateSponsorBlockCategory(category) }}
                 </option>
               </select>
+              <select
+                v-if="!isSponsorBlockPointSegment(segment)"
+                class="sponsorBlockDraftCategory"
+                :value="sponsorBlockDraftEditValues[segment.id]?.actionType ?? segment.actionType"
+                :aria-label="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
+                @change="updateSponsorBlockDraftActionType(segment.id, $event.target.value)"
+              >
+                <option
+                  value="skip"
+                  :disabled="(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category) === 'exclusive_access'"
+                >
+                  {{ $t('Video.Player.SponsorBlock.SkipActionType') }}
+                </option>
+                <option
+                  value="full"
+                  :disabled="!['sponsor', 'selfpromo', 'exclusive_access'].includes(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
+                >
+                  {{ $t('Video.Player.SponsorBlock.FullVideo') }}
+                </option>
+              </select>
               <div class="sponsorBlockDraftActions">
                 <button
                   class="sponsorBlockDraftActionButton"
@@ -953,6 +979,7 @@
                   {{ $t('Video.Player.SponsorBlock.DeleteSegment') }}
                 </button>
                 <button
+                  v-if="!isSponsorBlockFullVideoSegment(segment)"
                   class="sponsorBlockDraftActionButton"
                   :disabled="segment.endTime == null && !isSponsorBlockPointSegment(segment)"
                   @click="previewSponsorBlockDraft(segment.id, 'preview')"
@@ -960,13 +987,14 @@
                   {{ $t('Video.Player.SponsorBlock.PreviewSegment') }}
                 </button>
                 <button
+                  v-if="!isSponsorBlockFullVideoSegment(segment)"
                   class="sponsorBlockDraftActionButton"
                   @click="previewSponsorBlockDraft(segment.id, 'inspect')"
                 >
                   {{ $t('Video.Player.SponsorBlock.InspectSegment') }}
                 </button>
                 <button
-                  v-if="!isSponsorBlockPointSegment(segment)"
+                  v-if="!isSponsorBlockPointSegment(segment) && !isSponsorBlockFullVideoSegment(segment)"
                   class="sponsorBlockDraftActionButton"
                   :disabled="segment.endTime == null"
                   @click="previewSponsorBlockDraft(segment.id, 'end')"

@@ -8,7 +8,7 @@
         {{ title }}
       </h1>
       <div
-        v-if="isUnlisted || hasAiGeneratedContent"
+        v-if="isUnlisted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
         class="videoBadges"
       >
         <div
@@ -25,6 +25,15 @@
         >
           <FontAwesomeIcon :icon="['fas', 'info-circle']" />
           {{ t('Video.AI') }}
+        </div>
+        <div
+          v-if="sponsorBlockFullVideoCategory"
+          class="videoBadge"
+        >
+          <FontAwesomeIcon :icon="['fas', 'shield-halved']" />
+          {{ t('Video.Player.SponsorBlock.FullVideoLabel', {
+            segmentCategory: translateSponsorBlockCategory(sponsorBlockFullVideoCategory)
+          }) }}
         </div>
       </div>
     </div>
@@ -261,6 +270,7 @@ import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDown
 import store from '../../store'
 
 import { formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
+import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
@@ -363,6 +373,10 @@ const props = defineProps({
   hasAiGeneratedContent: {
     type: Boolean,
     default: false
+  },
+  sponsorBlockFullVideoCategory: {
+    type: String,
+    default: null
   },
   canSaveWatchedProgress: {
     type: Boolean,

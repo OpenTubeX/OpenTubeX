@@ -582,6 +582,69 @@ test.describe('watch page', () => {
     await expect(sponsorBlock.locator('.os-scrollbar-vertical')).toHaveCount(1)
   })
 
+  test('displays and submits full-video SponsorBlock labels', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+
+    const fullVideoSegment = {
+      UUID: 'full-video-label',
+      actionType: 'full',
+      category: 'exclusive_access',
+      description: '',
+      locked: 0,
+      segment: [0, 0],
+      videoDuration: 19,
+      votes: 1
+    }
+    let submittedBody = null
+
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [fullVideoSegment]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.route('**/api/skipSegments', async route => {
+      submittedBody = route.request().postDataJSON()
+      await route.fulfill({
+        body: JSON.stringify([{
+          UUID: 'submitted-full-video-label',
+          category: 'exclusive_access',
+          segment: [0, 0]
+        }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+
+    await openVideo(page)
+
+    await expect(page.locator('.watchVideoInfo .videoBadge'))
+      .toContainText('Exclusive Access · Full Video')
+
+    await page.locator('.sponsorblock-start-button').click({ force: true })
+    await page.locator('.sponsorblock-open-menu-button').click({ force: true })
+
+    const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+    await expect(submissionMenu).toBeVisible()
+    await submissionMenu.locator('select').first().selectOption('exclusive_access')
+    await expect(submissionMenu.locator('select').nth(1)).toHaveValue('full')
+    await expect(submissionMenu.locator('.sponsorBlockDraftTimeText')).toHaveText('Full Video')
+
+    await submissionMenu.locator('.sponsorBlockSubmissionButton').click()
+    await expect.poll(() => submittedBody).not.toBeNull()
+    expect(submittedBody.segments).toEqual([{
+      actionType: 'full',
+      category: 'exclusive_access',
+      description: '',
+      segment: [0, 0]
+    }])
+  })
+
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({

@@ -101,6 +101,7 @@ const SPONSORBLOCK_CATEGORIES = Object.freeze([
   'filler',
   'poi_highlight',
 ])
+const SPONSORBLOCK_INFO_CATEGORIES = Object.freeze([...SPONSORBLOCK_CATEGORIES, 'exclusive_access'])
 const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'poi'])
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
@@ -1427,7 +1428,7 @@ export default defineComponent({
      * @type {{
      *   uuid: string
      *   category: SponsorBlockCategory
-     *   actionType?: 'skip' | 'poi'
+     *   actionType?: 'skip' | 'full' | 'poi'
      *   startTime: number,
      *   endTime: number
      * }[]}
@@ -1467,6 +1468,7 @@ export default defineComponent({
       getSponsorBlockSubmissionVideoDuration,
       handleSponsorBlockPreviewSkip,
       isSponsorBlockDraftEditing,
+      isSponsorBlockFullVideoSegment,
       isSponsorBlockPointSegment,
       loadSponsorBlockDrafts,
       openSponsorBlockGuidelines,
@@ -1486,6 +1488,7 @@ export default defineComponent({
       startSponsorBlockDraft,
       submitSponsorBlockDrafts,
       toggleSponsorBlockDraftEditing,
+      updateSponsorBlockDraftActionType,
       updateSponsorBlockDraftCategory,
       updateSponsorBlockDraftEditField,
       updateSponsorBlockSubmissionState,
@@ -1572,7 +1575,7 @@ export default defineComponent({
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
           props.videoId,
-          SPONSORBLOCK_CATEGORIES,
+          SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
       } catch (e) {
@@ -1626,7 +1629,7 @@ export default defineComponent({
       try {
         ({ segments, averageDuration } = await getSponsorBlockSegments(
           props.videoId,
-          SPONSORBLOCK_CATEGORIES,
+          SPONSORBLOCK_INFO_CATEGORIES,
           SPONSORBLOCK_INFO_ACTION_TYPES
         ))
         refetchWhenNotFound = segments.length === 0
@@ -3315,7 +3318,9 @@ export default defineComponent({
      * @returns {string}
      */
     function getSponsorBlockSeekBarTooltipLabel(hoverTime, secondsPerPixel) {
-      const segments = sponsorBlockSegments.concat(sponsorBlockCompleteDraftSegments.value)
+      const segments = sponsorBlockSegments.concat(
+        sponsorBlockCompleteDraftSegments.value.filter(segment => !isSponsorBlockFullVideoSegment(segment))
+      )
       const pointTolerance = Math.max(secondsPerPixel, 0.5)
       const segment = segments.find((candidate) => {
         if (isSponsorBlockPointSegment(candidate)) {
@@ -7082,18 +7087,20 @@ export default defineComponent({
         )
       })
 
-      const draftMarkers = sponsorBlockCompleteDraftSegments.value.map((segment) => {
-        const isPointMarker = isSponsorBlockPointSegment(segment)
+      const draftMarkers = sponsorBlockCompleteDraftSegments.value
+        .filter(segment => !isSponsorBlockFullVideoSegment(segment))
+        .map((segment) => {
+          const isPointMarker = isSponsorBlockPointSegment(segment)
 
-        return createSponsorBlockMarker(
-          duration,
-          segment.startTime,
-          segment.endTime,
-          translateSponsorBlockCategory(segment.category),
-          `sponsorBlockMarker sponsorBlockDraftMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''}`,
-          isPointMarker
-        )
-      })
+          return createSponsorBlockMarker(
+            duration,
+            segment.startTime,
+            segment.endTime,
+            translateSponsorBlockCategory(segment.category),
+            `sponsorBlockMarker sponsorBlockDraftMarker${isPointMarker ? ' sponsorBlockPointMarker' : ''}`,
+            isPointMarker
+          )
+        })
 
       addMarkers(markers.concat(draftMarkers))
     }
@@ -8186,6 +8193,7 @@ export default defineComponent({
       sponsorBlockSubmissionMenuOpen,
       sponsorBlockSubmissionPending,
       isSponsorBlockDraftEditing,
+      isSponsorBlockFullVideoSegment,
       isSponsorBlockPointSegment,
 
       promptSponsorBlockSegments,
@@ -8204,6 +8212,7 @@ export default defineComponent({
       unskipSponsorBlockSegment,
       redoSkipSponsorBlockSegment,
       updateSponsorBlockDraftEditField,
+      updateSponsorBlockDraftActionType,
       updateSponsorBlockDraftCategory,
       setSponsorBlockDraftTime,
       saveSponsorBlockDraft,
