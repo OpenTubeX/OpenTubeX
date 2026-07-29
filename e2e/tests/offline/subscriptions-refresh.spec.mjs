@@ -155,6 +155,7 @@ test.describe('subscription feed refresh controls', () => {
     await goTo(page, 'subscriptions')
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByRole('button', { name: 'Cancel refresh' })).toBeVisible()
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
