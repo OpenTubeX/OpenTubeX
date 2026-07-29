@@ -993,7 +993,7 @@ const playlistTypeFinal = computed(() => playlistIdTypePairFinal.value?.playlist
 const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistItemId)
 
 const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
-const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(id.value))
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(id.value))
 
 const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
 const quickBookmarkIcon = computed(() => store.getters.getQuickBookmarkIcon)

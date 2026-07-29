@@ -576,7 +576,7 @@ export default defineComponent({
       return !this.$store.getters.getHidePlaylists
     },
     isInAnyPlaylist: function () {
-      return this.$store.getters.getPlaylistVideoIds.has(this.videoId)
+      return this.$store.getters.getPlaylistVideoCounts.has(this.videoId)
     },
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat

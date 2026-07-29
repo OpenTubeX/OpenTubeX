@@ -661,7 +661,7 @@ onBeforeUnmount(() => {
 })
 
 const showPlaylists = computed(() => !store.getters.getHidePlaylists)
-const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoIds.has(props.id))
+const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.id))
 
 // `description` and `viewCount` are intentionally left out,
 // the store drops them from playlist entries as undesired attributes
