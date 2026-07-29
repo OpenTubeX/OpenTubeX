@@ -13,7 +13,7 @@
       class="grabBar"
     >
       <FontAwesomeIcon
-        :icon="['fas', 'fa-bars']"
+        :icon="['fas', 'bars']"
       />
     </div>
     <div
@@ -34,6 +34,15 @@
           :class="{ blur: blurThumbnails }"
           alt=""
         >
+        <FtEmbeddedProgress
+          v-if="historyEntryExists"
+          class="watchedProgressBar"
+          :progress="progressPercentage"
+          :corner-radius="thumbnailProgressRadius"
+          :end-arc-fraction="0.5"
+          :line-width="3"
+          :start-arc-fraction="0.5"
+        />
       </RouterLink>
       <div
         v-if="isLive || isUpcoming || (displayDuration !== '' && displayDuration !== '0:00')"
@@ -92,6 +101,8 @@
           :size="playlistIconSize"
           force-dropdown
           dropdown-position-x="left"
+          :dropdown-portal="appearance === 'watchPlaylistItem'"
+          :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
         >
           <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
         </FtIconButton>
@@ -143,11 +154,6 @@
       >
         {{ t("Video.Watched") }}
       </div>
-      <div
-        v-if="historyEntryExists"
-        class="watchedProgressBar"
-        :style="{ inlineSize: progressPercentage + '%' }"
-      />
     </div>
     <div
       class="info"
@@ -282,7 +288,10 @@
           theme="base-no-default"
           :size="16"
           :use-shadow="false"
+          dropdown-class="listVideoOptionsDropdown"
+          :dropdown-portal="appearance === 'watchPlaylistItem'"
           dropdown-position-x="left"
+          :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
           :dropdown-options="dropdownOptions"
           @click="handleOptionsClick"
         />
@@ -329,6 +338,7 @@ import { useRoute } from 'vue-router'
 
 import FtAddToPlaylistDropdown from '../FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtCollaboratorsPrompt from '../FtCollaboratorsPrompt/FtCollaboratorsPrompt.vue'
+import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtNewContentDot from '../FtNewContentDot/FtNewContentDot.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
@@ -604,6 +614,8 @@ const progressPercentage = computed(() => {
   const percentage = (Math.ceil(watchProgress.value) / lengthSeconds.value) * 100
   return Math.min(percentage, 100)
 })
+
+const thumbnailProgressRadius = computed(() => 8 * store.getters.getUiRoundness / 100)
 
 /** @type {import('vue').ComputedRef<any[]>} */
 const hiddenChannels = computed(() => store.getters.getChannelsHiddenParsed)
@@ -952,6 +964,8 @@ const defaultPlayback = computed(() => store.getters.getDefaultPlayback)
 const watchedProgressSavingEnabled = computed(() => {
   return ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
 })
+
+const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberHistory = computed(() => store.getters.getRememberHistory)
@@ -1442,11 +1456,15 @@ function markAsWatched() {
   })
 }
 
-function unmarkAsWatched() {
-  store.dispatch('updateHistory', {
-    ...historyEntry.value,
-    isWatched: false,
-  })
+async function unmarkAsWatched() {
+  if (inHistory.value && watchedPercentageThreshold.value === 0) {
+    await store.dispatch('removeFromHistory', id.value)
+  } else {
+    await store.dispatch('updateHistory', {
+      ...historyEntry.value,
+      isWatched: false,
+    })
+  }
 
   showToast({
     message: t('Video.Video has been unmarked as watched'),

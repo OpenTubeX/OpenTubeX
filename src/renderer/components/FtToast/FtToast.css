@@ -81,9 +81,8 @@
 
 .timeout-indicator-track {
   position: absolute;
-  inset-block-end: 5px;
-  inset-inline: 10px;
-  block-size: 2px;
+  inset: 5px;
+  border-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
   transition: transform 300ms ease, opacity 300ms ease;
 }
@@ -93,24 +92,48 @@
 }
 
 .timeout-indicator {
-  inline-size: 100%;
-  block-size: 100%;
-  border-radius: calc(999px * var(--ui-roundness));
-  background-color: var(--primary-color);
-  box-shadow: 0 0 4px color-mix(in srgb, var(--primary-color) 70%, transparent);
-  transform-origin: left;
+  position: absolute;
+  inset: 0;
+}
+
+.timeout-indicator :deep(.embeddedProgressPath) {
+  filter: drop-shadow(0 0 2px color-mix(in srgb, var(--primary-color) 70%, transparent));
+  animation-delay: 0s;
+  animation-duration: var(--toast-duration);
   animation-name: toast-timeout;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-.timeout-indicator:dir(rtl) {
-  transform-origin: right;
+/* The line always retracts towards the screen corner the toast is anchored to,
+   so it drains away from the viewport rather than towards it. The path is drawn
+   from the inline start corner, which already follows the text direction, so
+   only positions anchored to the opposite physical edge need the other
+   keyframes. Centered toasts keep the reading direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.position-bottom-right:dir(ltr) .timeout-indicator :deep(.embeddedProgressPath),
+.position-top-right:dir(ltr) .timeout-indicator :deep(.embeddedProgressPath),
+.position-bottom-left:dir(rtl) .timeout-indicator :deep(.embeddedProgressPath),
+.position-top-left:dir(rtl) .timeout-indicator :deep(.embeddedProgressPath) {
+  animation-name: toast-timeout-away;
 }
+/* stylelint-enable liberty/use-logical-spec */
 
+/* Shortens the line from its far end, so it retracts into the corner it starts
+   from and the trailing edge finally sweeps out through that corner's arc. */
 @keyframes toast-timeout {
   to {
-    transform: scaleX(0);
+    stroke-dasharray: 0 var(--embedded-progress-gap-length);
+  }
+}
+
+/* The same retraction towards the other corner: offsetting and shortening in
+   lockstep keeps the remaining line pinned to the path's end, with a round cap
+   on both of its ends. */
+@keyframes toast-timeout-away {
+  to {
+    stroke-dasharray: 0 var(--embedded-progress-gap-length);
+    stroke-dashoffset: calc(-1 * var(--embedded-progress-path-length));
   }
 }
 

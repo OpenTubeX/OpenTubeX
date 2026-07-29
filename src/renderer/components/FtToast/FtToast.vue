@@ -58,9 +58,13 @@
           :style="dragStyle(toast)"
           aria-hidden="true"
         >
-          <div
+          <FtEmbeddedProgress
             class="timeout-indicator"
-            :style="{ animationDuration: `${toast.duration}ms` }"
+            :corner-radius="toastProgressRadius"
+            :end-arc-fraction="0.5"
+            :line-width="toastProgressLineWidth"
+            :start-arc-fraction="0.5"
+            :style="{ '--toast-duration': `${toast.duration}ms` }"
             @animationstart="onIndicatorAnimationStart(toast, $event)"
           />
         </div>
@@ -75,6 +79,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'v
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
+import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 
 let idCounter = 0
 let removeShowToastListener = null
@@ -114,6 +119,8 @@ const toastPosition = computed(() => {
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
+const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
@@ -225,7 +232,7 @@ function pause(toast, element) {
   clearTimeout(toast.timeout)
 
   const animation = indicatorAnimations.get(toast.id) ??
-    element.querySelector('.timeout-indicator')?.getAnimations()[0]
+    element.querySelector('.timeout-indicator .embeddedProgressPath')?.getAnimations()[0]
   if (animation) {
     animation.currentTime = toast.duration - toast.remainingMs
     animation.pause()

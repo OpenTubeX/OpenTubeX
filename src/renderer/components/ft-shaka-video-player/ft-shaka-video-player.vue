@@ -84,8 +84,9 @@
         playsinline
         :autoplay="autoplayVideos || shortsPlayer ? true : null"
         :loop="shortsPlayer"
-        :poster="thumbnail"
+        :poster="showPoster ? thumbnail : null"
         @play="handlePlay"
+        @playing="handlePlaying"
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="syncPlayPauseControlIcons"
@@ -135,6 +136,7 @@
         </div>
         <div class="shortsTopControlsGroup">
           <button
+            v-if="shortsCaptionsAvailable"
             type="button"
             class="shortsTopControl shortsCaptionsControl"
             :class="{ active: shortsCaptionsEnabled }"

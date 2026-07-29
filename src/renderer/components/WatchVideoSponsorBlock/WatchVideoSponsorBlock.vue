@@ -267,7 +267,7 @@ function isSegmentPassed(segment) {
   overflow: hidden;
   color: var(--primary-text-color);
   background-color: var(--card-bg-color);
-  border-radius: calc(5px * var(--ui-roundness));
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
 }
 

@@ -145,7 +145,12 @@ test.describe('settings', () => {
       await expect(toast).toBeVisible()
       await expect(toast).toHaveCSS('transform', 'none')
       await expect(toast.locator('..')).toHaveCSS('transform', 'none')
-      await expect(toast.locator('..').locator('.timeout-indicator')).toHaveCSS('animation-duration', '10s')
+      await expect(
+        toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+      ).toHaveCSS('animation-duration', '10s')
+      await expect(
+        toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+      ).toHaveCSS('animation-delay', '0s')
       return toast
     }
 
@@ -271,7 +276,7 @@ test.describe('settings', () => {
     })
 
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
-    const indicator = toast.locator('..').locator('.timeout-indicator')
+    const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
     await toast.hover()
     await expect.poll(() => indicator.evaluate((element) => {
       const animation = element.getAnimations()[0]
@@ -313,11 +318,16 @@ test.describe('settings', () => {
     await page.waitForTimeout(300)
     await firstAlternatingToast.hover()
 
-    const firstIndicatorScale = await firstAlternatingToast
+    const firstIndicatorProgress = await firstAlternatingToast
       .locator('..')
-      .locator('.timeout-indicator')
-      .evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a)
-    expect(firstIndicatorScale).toBeLessThan(0.85)
+      .locator('.timeout-indicator .embeddedProgressPath')
+      .evaluate((element) => ({
+        elapsedRatio: element.getAnimations()[0].currentTime /
+          element.getAnimations()[0].effect.getTiming().duration,
+        transform: getComputedStyle(element).transform,
+      }))
+    expect(firstIndicatorProgress.elapsedRatio).toBeGreaterThan(0.15)
+    expect(firstIndicatorProgress.transform).toBe('none')
 
     await page.mouse.move(800, 300)
 

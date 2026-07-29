@@ -89,57 +89,65 @@
           </ul>
         </slot>
       </FtPrompt>
-      <div
+      <Teleport
         v-else
-        ref="dropdown"
-        v-overlay-scrollbars
-        tabindex="-1"
-        class="iconDropdown"
-        :class="{
-          left: dropdownPositionX === 'left',
-          right: dropdownPositionX === 'right',
-          center: dropdownPositionX === 'center',
-          bottom: dropdownPositionY === 'bottom',
-          top: dropdownPositionY === 'top'
-        }"
-        @keydown.esc.stop="handleDropdownEscape"
+        to=".app"
+        :disabled="!dropdownPortal"
       >
-        <slot>
-          <ul
-            v-if="dropdownOptions.length > 0"
-            class="list"
-            role="listbox"
-          >
-            <li
-              v-for="(option, index) in dropdownOptions"
-              :id="id + index"
-              :key="index"
-              :role="option.type === 'divider' ? 'separator' : 'option'"
-              :aria-selected="option.active"
-              :tabindex="option.type === 'divider' ? '-1' : '0'"
-              :class="{
-                listItemDivider: option.type === 'divider',
-                listItem: option.type !== 'divider',
-                hasIcon: option.icon,
-                active: option.active
-              }"
-              @click="handleDropdownClick(option.value)"
-              @keydown.enter="handleDropdownClick(option.value)"
-              @keydown.space="handleDropdownClick(option.value)"
+        <div
+          ref="dropdown"
+          v-overlay-scrollbars
+          tabindex="-1"
+          class="iconDropdown"
+          :class="{
+            left: dropdownPositionX === 'left',
+            right: dropdownPositionX === 'right',
+            center: dropdownPositionX === 'center',
+            bottom: dropdownPositionY === 'bottom',
+            top: dropdownPositionY === 'top',
+            portal: dropdownPortal,
+            [dropdownClass]: dropdownClass !== ''
+          }"
+          @focusout="handleDropdownFocusOut"
+          @keydown.esc.stop="handleDropdownEscape"
+        >
+          <slot>
+            <ul
+              v-if="dropdownOptions.length > 0"
+              class="list"
+              role="listbox"
             >
-              <div
-                v-if="option.icon || option.active"
-                class="optionIconColumn"
+              <li
+                v-for="(option, index) in dropdownOptions"
+                :id="id + index"
+                :key="index"
+                :role="option.type === 'divider' ? 'separator' : 'option'"
+                :aria-selected="option.active"
+                :tabindex="option.type === 'divider' ? '-1' : '0'"
+                :class="{
+                  listItemDivider: option.type === 'divider',
+                  listItem: option.type !== 'divider',
+                  hasIcon: option.icon,
+                  active: option.active
+                }"
+                @click="handleDropdownClick(option.value)"
+                @keydown.enter="handleDropdownClick(option.value)"
+                @keydown.space="handleDropdownClick(option.value)"
               >
-                <FontAwesomeIcon
-                  :icon="option.active ? ['fas', 'check'] : option.icon"
-                />
-              </div>
-              <span v-if="option.type !== 'divider'">{{ option.label }}</span>
-            </li>
-          </ul>
-        </slot>
-      </div>
+                <div
+                  v-if="option.icon || option.active"
+                  class="optionIconColumn"
+                >
+                  <FontAwesomeIcon
+                    :icon="option.active ? ['fas', 'check'] : option.icon"
+                  />
+                </div>
+                <span v-if="option.type !== 'divider'">{{ option.label }}</span>
+              </li>
+            </ul>
+          </slot>
+        </div>
+      </Teleport>
     </template>
   </div>
 </template>
@@ -190,6 +198,14 @@ const props = defineProps({
   forceDropdown: {
     type: Boolean,
     default: false
+  },
+  dropdownPortal: {
+    type: Boolean,
+    default: false
+  },
+  dropdownClass: {
+    type: String,
+    default: ''
   },
   dropdownPositionX: {
     type: String,
@@ -322,6 +338,35 @@ function keepDropdownInViewport() {
   const viewportMargin = 8
   dropdown.value.style.removeProperty('transform')
 
+  if (props.dropdownPortal) {
+    const button = ftIconButton.value?.querySelector('.iconButton')
+    if (button == null) {
+      return
+    }
+
+    const buttonRect = button.getBoundingClientRect()
+    const dropdownRect = dropdown.value.getBoundingClientRect()
+    let left
+    if (props.dropdownPositionX === 'left') {
+      left = buttonRect.right - dropdownRect.width
+    } else if (props.dropdownPositionX === 'right') {
+      left = buttonRect.left
+    } else {
+      left = buttonRect.left + (buttonRect.width - dropdownRect.width) / 2
+    }
+
+    const top = props.dropdownPositionY === 'top'
+      ? buttonRect.top - dropdownRect.height - 4
+      : buttonRect.bottom + 4
+    const maxLeft = window.innerWidth - viewportMargin - dropdownRect.width
+    const maxTop = window.innerHeight - viewportMargin - dropdownRect.height
+
+    dropdown.value.style.inset = 'auto'
+    dropdown.value.style.left = `${Math.max(viewportMargin, Math.min(left, maxLeft))}px`
+    dropdown.value.style.top = `${Math.max(viewportMargin, Math.min(top, maxTop))}px`
+    return
+  }
+
   const rect = dropdown.value.getBoundingClientRect()
   const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
   const offsetY = Math.max(viewportMargin - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
@@ -360,8 +405,17 @@ function preventButtonClickAfterLongPress() {
 
 const ftIconButton = useTemplateRef('ftIconButton')
 
-function handleDropdownFocusOut() {
-  if (!useModal.value && dropdownShown.value && !ftIconButton.value?.matches(':focus-within')) {
+function handleDropdownFocusOut(event) {
+  const nextTarget = event.relatedTarget
+  const focusStaysInControl = (
+    nextTarget instanceof Node &&
+    (
+      ftIconButton.value?.contains(nextTarget) ||
+      dropdown.value?.contains(nextTarget)
+    )
+  )
+
+  if (!useModal.value && dropdownShown.value && !focusStaysInControl) {
     dropdownShown.value = false
   }
 }

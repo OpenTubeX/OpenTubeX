@@ -28,7 +28,7 @@
 
 .banner {
   inline-size: 85%;
-  margin-block: 40px 0;
+  margin-block: 40px;
   margin-inline: auto;
 }
 
@@ -308,7 +308,7 @@
 
   .banner {
     inline-size: 90%;
-    margin-block: 60px 0;
+    margin-block: 60px;
   }
 
   .flexBox {

@@ -64,7 +64,7 @@
         >
           <FontAwesomeIcon
             class="popoutChatIcon"
-            :icon="['fas', 'fa-arrow-up-right-from-square']"
+            :icon="['fas', 'arrow-up-right-from-square']"
           />
         </a>
       </div>

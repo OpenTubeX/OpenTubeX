@@ -198,6 +198,7 @@
             :can-move-video-up="index > 0 && canMoveVideos"
             :can-move-video-down="index < playlistItems.length - 1 && canMoveVideos"
             :can-remove-from-playlist="isUserPlaylist"
+            :quick-bookmark-button-enabled="quickBookmarkButtonEnabled"
             :dragged-video="draggedVideo"
             :is-sort-order-custom="isSortOrderCustom"
             :is-video-dragging="isVideoDragging"
@@ -347,6 +348,14 @@ const selectedUserPlaylist = computed(() => {
   if (props.playlistId == null || props.playlistId === '') { return null }
 
   return store.getters.getPlaylist(props.playlistId)
+})
+
+const quickBookmarkPlaylistId = computed(() => store.getters.getQuickBookmarkTargetPlaylistId)
+
+const quickBookmarkButtonEnabled = computed(() => {
+  if (selectedUserPlaylist.value == null) { return true }
+
+  return selectedUserPlaylist.value._id !== quickBookmarkPlaylistId.value
 })
 
 /** @type {import('vue').ComputedRef<number | undefined>} */

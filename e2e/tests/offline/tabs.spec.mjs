@@ -515,6 +515,50 @@ test.describe('tab bar', () => {
     await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
   })
 
+  // Regression: closing the presented tab activates its replacement before the
+  // old subtree is disposed. Auto-PiP must not interpret that transition as an
+  // ordinary tab switch and open PiP for the tab being closed (#364).
+  test('does not enter PiP while its source tab is closing', async ({ page }) => {
+    const sourceTab = page.locator('.tabContent[aria-hidden="false"]')
+    const sourceTabId = await sourceTab.getAttribute('data-tab-id')
+    await sourceTab.evaluate(async (root) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 320
+      canvas.height = 180
+      canvas.getContext('2d').fillRect(0, 0, canvas.width, canvas.height)
+
+      const video = document.createElement('video')
+      video.className = 'player pipTestVideo'
+      video.muted = true
+      video.srcObject = canvas.captureStream(5)
+      video.ui = {
+        getControls: () => ({
+          togglePiP: () => video.requestPictureInPicture()
+        })
+      }
+
+      root.append(canvas, video)
+      await video.play()
+    })
+
+    // Verify the synthetic player exercises the same privileged PiP request
+    // path used by automatic PiP.
+    await page.evaluate((tabId) => window.ftElectron.requestPiP(tabId), sourceTabId)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement !== null)).toBe(true)
+    await page.evaluate(() => document.exitPictureInPicture())
+
+    await page.evaluate(() => window.ftElectron.tabs.create({ makeActive: false }))
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    await page.evaluate((tabId) => {
+      window.ftElectron.tabs.close(tabId)
+      window.ftElectron.requestPiP(tabId)
+    }, sourceTabId)
+
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => document.pictureInPictureElement === null)).toBe(true)
+  })
+
   // Regression: selected tab was lost when navigating back (3f498ec59)
   test('history back keeps the current tab selected', async ({ page }) => {
     await page.locator(sel.newTabButton).click()

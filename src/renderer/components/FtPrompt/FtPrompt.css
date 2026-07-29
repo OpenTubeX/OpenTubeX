@@ -62,8 +62,11 @@
 
 .promptCard.slim {
   max-inline-size: 70%;
-  inset-inline-start: 15%;
   padding-block: 10px;
+}
+
+.promptCard:not(.autosize).slim {
+  inset-inline-start: 15%;
 }
 
 .promptCard.readable-width {
@@ -86,6 +89,9 @@
 @media only screen and (width <= 500px) {
   .promptCard.slim {
     max-inline-size: 80%;
+  }
+
+  .promptCard:not(.autosize).slim {
     inset-inline-start: 10%;
   }
 }

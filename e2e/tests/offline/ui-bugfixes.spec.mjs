@@ -21,6 +21,25 @@ function historyEntry(videoId, title, timeWatched) {
   }
 }
 
+test('update banners have equal top and bottom spacing', async ({ page }) => {
+  await page.evaluate(() => {
+    const routerView = document.querySelector('.routerView')
+    const banner = document.createElement('div')
+    banner.className = 'banner'
+    banner.textContent = 'Update available'
+    for (const attribute of routerView.attributes) {
+      if (attribute.name.startsWith('data-v-')) {
+        banner.setAttribute(attribute.name, '')
+      }
+    }
+    routerView.prepend(banner)
+  })
+
+  const banner = page.locator('.banner', { hasText: 'Update available' })
+  await expect(banner).toHaveCSS('margin-top', '40px')
+  await expect(banner).toHaveCSS('margin-bottom', '40px')
+})
+
 test('collapsed description paints the More control above its text', async ({ page }) => {
   await page.addStyleTag({
     path: path.join(
@@ -116,6 +135,142 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
   await expect(volumeSlider).toHaveCSS('inline-size', '96px')
   await expect(volumeSlider).toHaveCSS('opacity', '1')
+})
+
+test.describe('autosized prompts', () => {
+  test.use({
+    seed: {
+      history: [historyEntry('aaaaaaaaaaa', 'History entry', Date.now())]
+    }
+  })
+
+  test('centers the Delete Old History dialog in the viewport', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible()
+    await expect.poll(() => dialog.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.abs(bounds.left + bounds.width / 2 - window.innerWidth / 2)
+    })).toBeLessThanOrEqual(1)
+    await expect.poll(() => dialog.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Math.abs(bounds.top + bounds.height / 2 - window.innerHeight / 2)
+    })).toBeLessThanOrEqual(1)
+  })
+})
+
+test.describe('thumbnail watched progress', () => {
+  test.use({
+    seed: {
+      settings: { uiRoundness: 200 },
+      history: [historyEntry('aaaaaaaaaaa', 'Partially watched video', Date.now())]
+    }
+  })
+
+  test('matches the configured thumbnail corner radius', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-item').filter({ hasText: 'Partially watched video' })
+    const thumbnail = video.locator('.thumbnailLink')
+    const progress = video.locator('.watchedProgressBar')
+
+    await expect(thumbnail).toHaveCSS('border-radius', '16px')
+    await expect(progress).toBeVisible()
+    const progressPath = progress.locator('.embeddedProgressPath')
+    const progressGeometry = await progressPath.evaluate(element => {
+      const line = getComputedStyle(element)
+      return {
+        path: element.getAttribute('d'),
+        pathLength: element.getTotalLength(),
+        strokeDasharray: element.style.strokeDasharray,
+        strokeLinecap: line.strokeLinecap,
+        strokeWidth: line.strokeWidth,
+      }
+    })
+    expect(progressGeometry).toMatchObject({
+      strokeLinecap: 'round',
+      strokeWidth: '3px',
+    })
+    expect(progressGeometry.path).toContain('A 14.5 14.5')
+    const [visibleLength, gapLength] = progressGeometry.strokeDasharray
+      .split(' ')
+      .map(Number.parseFloat)
+    expect(visibleLength / (gapLength / 2)).toBeCloseTo(0.167, 2)
+
+    const thumbnailBounds = await thumbnail.boundingBox()
+    const progressBounds = await progress.boundingBox()
+    expect(Math.abs(progressBounds.y - thumbnailBounds.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(progressBounds.height - thumbnailBounds.height)).toBeLessThanOrEqual(1)
+    expect(Math.abs(progressBounds.width - thumbnailBounds.width)).toBeLessThanOrEqual(1)
+    expect(progressGeometry.pathLength).toBeGreaterThan(thumbnailBounds.width - 20)
+
+    const leftToRightPath = progressGeometry.path
+    await page.evaluate(() => {
+      document.body.dir = 'rtl'
+    })
+    await expect.poll(() => progressPath.getAttribute('d')).not.toBe(leftToRightPath)
+  })
+})
+
+test.describe('toast timeout progress', () => {
+  test.use({
+    seed: {
+      settings: {
+        uiRoundness: 200,
+        showToastTimeoutIndicator: true,
+      }
+    }
+  })
+
+  test('makes high-roundness timeout caps visible without scaling them', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Rounded timeout progress', 10000)
+    })
+
+    const toast = page.locator('.toast', { hasText: 'Rounded timeout progress' })
+    const track = toast.locator('..').locator('.timeout-indicator-track')
+    const indicator = track.locator('.timeout-indicator')
+    await expect(toast).toBeVisible()
+    await toast.hover()
+    await expect(track).toHaveCSS('border-radius', '24px')
+    await expect(indicator).toHaveCSS('transform', 'none')
+    const indicatorPath = indicator.locator('.embeddedProgressPath')
+    const initialGeometry = await indicatorPath.evaluate(element => {
+      const line = getComputedStyle(element)
+      return {
+        path: element.getAttribute('d'),
+        strokeLinecap: line.strokeLinecap,
+        strokeWidth: line.strokeWidth,
+      }
+    })
+    expect(initialGeometry).toMatchObject({
+      strokeLinecap: 'round',
+      strokeWidth: '4px',
+    })
+    const [fullLength, gapLength] = await indicatorPath.evaluate(element => {
+      return element.style.strokeDasharray.split(' ').map(Number.parseFloat)
+    })
+    expect(gapLength).toBeGreaterThan(fullLength)
+    const arcRadius = Number.parseFloat(initialGeometry.path.match(/ A ([\d.]+)/)[1])
+    expect(arcRadius).toBeGreaterThan(15)
+    await page.waitForTimeout(100)
+    expect(await indicatorPath.getAttribute('d')).toBe(initialGeometry.path)
+
+    const [toastBounds, trackBounds, indicatorBounds] = await Promise.all([
+      toast.boundingBox(),
+      track.boundingBox(),
+      indicator.boundingBox(),
+    ])
+    expect(Math.abs(trackBounds.x - toastBounds.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(trackBounds.y - toastBounds.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(trackBounds.width - toastBounds.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(trackBounds.height - toastBounds.height)).toBeLessThanOrEqual(1)
+    expect(Math.abs(indicatorBounds.y - toastBounds.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(indicatorBounds.height - toastBounds.height)).toBeLessThanOrEqual(1)
+  })
 })
 
 test.describe('history reorder animation', () => {

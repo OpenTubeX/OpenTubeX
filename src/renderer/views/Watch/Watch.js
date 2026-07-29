@@ -585,6 +585,7 @@ export default defineComponent({
       return this.$store.getters.getDefaultVideoFormat
     },
     autoplayEnabled: function () {
+      if (this.isShort) { return false }
       if (this.nextQueuedVideo) { return true }
       return this.watchingPlaylist ? this.autoplayNextPlaylistVideo : this.autoplayNextRecommendedVideo
     },
@@ -634,9 +635,11 @@ export default defineComponent({
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
     autoplayPossible: function () {
-      return !!this.nextQueuedVideo ||
-      (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
-      (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
+      return !this.isShort && (
+        !!this.nextQueuedVideo ||
+        (!this.watchingPlaylist && !this.hideRecommendedVideos && !!this.nextRecommendedVideo) ||
+        (this.watchingPlaylist && !this.$refs.watchVideoPlaylist?.shouldStopDueToPlaylistEnd)
+      )
     },
     hideChapters: function () {
       return this.$store.getters.getHideChapters
@@ -2935,6 +2938,9 @@ export default defineComponent({
       if (this.playNextQueuedVideo()) {
         return
       }
+      if (this.isShort) {
+        return
+      }
       if (!this.autoplayEnabled) {
         return
       }
@@ -3522,6 +3528,9 @@ export default defineComponent({
     },
 
     toggleAutoplay: function() {
+      if (this.isShort) {
+        return
+      }
       if (this.autoplayEnabled && this.playNextTimeout) {
         this.abortAutoplayCountdown()
       }

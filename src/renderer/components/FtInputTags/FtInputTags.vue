@@ -73,7 +73,7 @@
             @click="removeTag(tag)"
           >
             <FontAwesomeIcon
-              :icon="['fas', 'fa-times']"
+              :icon="['fas', 'times']"
             />
           </button>
         </li>

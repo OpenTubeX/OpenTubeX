@@ -2378,6 +2378,16 @@
   bottom: var(--caption-hidden-bottom-gap) !important;
 }
 
+.ftVideoPlayer.shortsPlayer :deep(.shaka-text-container),
+.ftVideoPlayer.shortsPlayer :deep(.shaka-speech-to-text-container) {
+  /*
+    Shorts only reveal the seek bar on hover and intentionally give Shaka's
+    bottom controls no height. Keep captions at their configured edge gap
+    instead of letting Shaka move them to that zero-height controls boundary.
+  */
+  bottom: var(--caption-hidden-bottom-gap) !important;
+}
+
 :deep(.shaka-text-container div),
 :deep(.shaka-text-container span) {
   background-color: transparent !important;
