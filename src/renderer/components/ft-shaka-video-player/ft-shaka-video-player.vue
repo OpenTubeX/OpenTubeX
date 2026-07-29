@@ -84,8 +84,9 @@
         playsinline
         :autoplay="autoplayVideos || shortsPlayer ? true : null"
         :loop="shortsPlayer"
-        :poster="thumbnail"
+        :poster="showPoster ? thumbnail : null"
         @play="handlePlay"
+        @playing="handlePlaying"
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="syncPlayPauseControlIcons"

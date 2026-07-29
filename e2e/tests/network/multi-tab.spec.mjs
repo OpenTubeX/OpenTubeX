@@ -24,6 +24,16 @@ async function setWindowMinimized(electronApp, minimized) {
   }, minimized)
 }
 
+async function setRendererFocused(page, focused) {
+  await page.evaluate((hasFocus) => {
+    Object.defineProperty(document, 'hasFocus', {
+      configurable: true,
+      value: () => hasFocus,
+    })
+    window.dispatchEvent(new Event(hasFocus ? 'focus' : 'blur'))
+  }, focused)
+}
+
 async function expectPictureInPicture(video, active) {
   await expect.poll(
     () => video.evaluate((element) => document.pictureInPictureElement === element)
@@ -90,6 +100,23 @@ test.describe('automatic picture-in-picture', () => {
     await expectPictureInPicture(video, true)
 
     await setWindowMinimized(app.electronApp, false)
+    await expectPictureInPicture(video, false)
+  })
+
+  // Regression: Chromium on Windows can briefly stretch the poster across the
+  // compositor surface when blur-triggered PiP detaches a playing video (#362).
+  test('removes the poster before blur-triggered PiP', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    test.slow()
+
+    const video = await openVideoInActiveTab(page, VIDEO_ONE)
+    await expect(video).not.toHaveAttribute('poster')
+
+    await setRendererFocused(page, false)
+    await expectPictureInPicture(video, true)
+    await expect(video).not.toHaveAttribute('poster')
+
+    await setRendererFocused(page, true)
     await expectPictureInPicture(video, false)
   })
 

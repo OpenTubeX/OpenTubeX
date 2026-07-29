@@ -451,6 +451,7 @@ export default defineComponent({
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
+    const showPoster = ref(true)
 
     const autoplayNextVideo = computed(() => props.autoplayCountdown?.video ?? null)
     const autoplayThumbnail = computed(() => {
@@ -3691,6 +3692,7 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      showPoster.value = true
       sponsorBlockMuteController.reset()
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
@@ -4141,6 +4143,14 @@ export default defineComponent({
       if (scrollMiniPlayerActive.value) {
         showScrollMiniPlayPause(true)
       }
+    }
+
+    function handlePlaying() {
+      // Chromium can briefly paint a video's poster across the compositor
+      // surface while detaching it into native PiP on Windows. Once a real
+      // frame is available the poster is no longer needed, so remove it before
+      // a later blur-triggered PiP transition.
+      showPoster.value = false
     }
 
     function handlePause() {
@@ -8336,9 +8346,11 @@ export default defineComponent({
       shortsMuted,
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,
+      showPoster,
       toggleShortsPlayback,
       toggleShortsMuted,
       toggleShortsCaptions,
+      handlePlaying,
       openShortsOverflowMenu,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,
