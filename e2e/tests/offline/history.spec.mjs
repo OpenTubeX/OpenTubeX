@@ -137,6 +137,34 @@ test.describe('watch history', () => {
   })
 })
 
+test.describe('watch history with an immediate watched threshold', () => {
+  test.use({
+    seed: {
+      settings: { watchedPercentageThreshold: 0 },
+      history: [
+        historyEntry('ddddddddddd', 'Immediately watched video', Date.now(), true)
+      ]
+    }
+  })
+
+  test('removes a history entry when it is marked as unwatched', async ({ app, page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').filter({ hasText: 'Immediately watched video' })
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Unmark As Watched' }).click()
+
+    await expect(video).toHaveCount(0)
+    await expect(page.getByText('Your history list is currently empty.')).toBeVisible()
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')
+      const records = contents.trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
+      return records.filter(record => record._id === 'ddddddddddd').at(-1)?.$$deleted
+    }).toBe(true)
+  })
+})
+
 test.describe('history cleanup', () => {
   test.use({
     seed: {

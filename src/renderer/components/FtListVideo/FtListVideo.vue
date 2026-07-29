@@ -953,6 +953,8 @@ const watchedProgressSavingEnabled = computed(() => {
   return ['auto', 'semi-auto'].includes(store.getters.getWatchedProgressSavingMode)
 })
 
+const watchedPercentageThreshold = computed(() => store.getters.getWatchedPercentageThreshold)
+
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberHistory = computed(() => store.getters.getRememberHistory)
 
@@ -1442,11 +1444,15 @@ function markAsWatched() {
   })
 }
 
-function unmarkAsWatched() {
-  store.dispatch('updateHistory', {
-    ...historyEntry.value,
-    isWatched: false,
-  })
+async function unmarkAsWatched() {
+  if (inHistory.value && watchedPercentageThreshold.value === 0) {
+    await store.dispatch('removeFromHistory', id.value)
+  } else {
+    await store.dispatch('updateHistory', {
+      ...historyEntry.value,
+      isWatched: false,
+    })
+  }
 
   showToast({
     message: t('Video.Video has been unmarked as watched'),
