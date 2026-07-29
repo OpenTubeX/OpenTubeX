@@ -306,6 +306,14 @@ function runApp() {
 
   // Registered per-webContents in 'web-contents-created' so the shared
   // BrowserWindow renderer can resolve native menu targets through TabManager.
+  function contextMenuLabel(key, parameters = {}, fallback = key) {
+    return {
+      key: `Context Menu.${key}`,
+      parameters,
+      fallback
+    }
+  }
+
   /** @type {Record<string, Function | boolean>} */
   const contextMenuOptions = {
     showSearchWithGoogle: false,
@@ -331,12 +339,12 @@ function runApp() {
       const subscriptionFeedTab = manager?.contextMenuSurface === 'subscriptionFeedTab'
         ? manager.contextMenuSubscriptionFeedTab
         : null
-      const subscriptionFeedLabels = {
-        videos: 'Videos',
-        shorts: 'Shorts',
-        live: 'Live',
-        posts: 'Posts',
-        all: 'All Feeds'
+      const subscriptionFeedLabelKeys = {
+        videos: 'Reload Videos',
+        shorts: 'Reload Shorts',
+        live: 'Reload Live',
+        posts: 'Reload Posts',
+        all: 'Reload All Feeds'
       }
       const contextMenuTabYouTubeUrls = contextMenuTabs.map(tab => {
         const route = getOpenTubeXRouteFromUrl(tab.url)
@@ -415,8 +423,8 @@ function runApp() {
       return [
         {
           // While a refresh runs, the same entry cancels it
-          label: `Reload ${subscriptionFeedLabels[subscriptionFeedTab] ?? 'Feed'}`,
-          refreshingLabel: 'Cancel Refresh',
+          label: contextMenuLabel(subscriptionFeedLabelKeys[subscriptionFeedTab] ?? 'Reload Videos'),
+          refreshingLabel: contextMenuLabel('Cancel Refresh'),
           visible: subscriptionFeedTab != null,
           click: () => {
             if (!manager || !subscriptionFeedTab) return
@@ -439,7 +447,13 @@ function runApp() {
           visible: subscriptionFeedTab != null
         },
         {
-          label: isBulkTabAction ? `Close ${contextMenuTabs.length} Tabs` : 'Close Tab',
+          label: isBulkTabAction
+            ? contextMenuLabel(
+                'Close Multiple Tabs',
+                { count: contextMenuTabs.length },
+                `Close ${contextMenuTabs.length} Tabs`
+              )
+            : contextMenuLabel('Close Tab'),
           visible: contextMenuTab != null,
           click: async () => {
             if (!manager || !contextMenuTab) return
@@ -448,7 +462,13 @@ function runApp() {
           }
         },
         {
-          label: isBulkTabAction ? `Duplicate ${contextMenuTabs.length} Tabs` : 'Duplicate Tab',
+          label: isBulkTabAction
+            ? contextMenuLabel(
+                'Duplicate Multiple Tabs',
+                { count: contextMenuTabs.length },
+                `Duplicate ${contextMenuTabs.length} Tabs`
+              )
+            : contextMenuLabel('Duplicate Tab'),
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
@@ -457,11 +477,11 @@ function runApp() {
           }
         },
         {
-          label: isBulkTabAction ? 'Move Tabs' : 'Move Tab',
+          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs' : 'Move Tab'),
           visible: contextMenuTab != null,
           submenu: [
             {
-              label: 'To Beginning',
+              label: contextMenuLabel('To Beginning'),
               enabled: canMoveContextMenuTabsToBeginning,
               click: () => {
                 if (!manager || !contextMenuTab) return
@@ -476,7 +496,7 @@ function runApp() {
               }
             },
             {
-              label: 'To End',
+              label: contextMenuLabel('To End'),
               enabled: canMoveContextMenuTabsToEnd,
               click: () => {
                 if (!manager || !contextMenuTab) return
@@ -497,25 +517,25 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
-          label: 'Close Tabs',
+          label: contextMenuLabel('Close Tabs'),
           visible: contextMenuTab != null,
           submenu: [
             {
-              label: manager?.contextMenuTabBarVertical ? 'To the Top' : 'To the Left',
+              label: contextMenuLabel(manager?.contextMenuTabBarVertical ? 'To the Top' : 'To the Left'),
               enabled: firstSelectedTabIndex > 0,
               click: () => {
                 closeContextMenuTabs(contextMenuTabIds.slice(0, firstSelectedTabIndex))
               }
             },
             {
-              label: manager?.contextMenuTabBarVertical ? 'To the Bottom' : 'To the Right',
+              label: contextMenuLabel(manager?.contextMenuTabBarVertical ? 'To the Bottom' : 'To the Right'),
               enabled: lastSelectedTabIndex < contextMenuTabIds.length - 1,
               click: () => {
                 closeContextMenuTabs(contextMenuTabIds.slice(lastSelectedTabIndex + 1))
               }
             },
             {
-              label: 'Other Tabs',
+              label: contextMenuLabel('Other Tabs'),
               enabled: contextMenuTabIds.length > contextMenuTabs.length,
               click: () => {
                 const selectedIds = new Set(contextMenuTabs.map(tab => tab.id))
@@ -529,7 +549,7 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
-          label: isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link',
+          label: contextMenuLabel(isBulkTabAction ? 'Copy YouTube Links' : 'Copy YouTube Link'),
           visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean),
           click: () => {
             if (!contextMenuTabYouTubeUrls.every(Boolean)) return
@@ -542,9 +562,9 @@ function runApp() {
           visible: contextMenuTabYouTubeUrls.length > 0 && contextMenuTabYouTubeUrls.every(Boolean)
         },
         {
-          label: allSelectedTabsPinned
+          label: contextMenuLabel(allSelectedTabsPinned
             ? isBulkTabAction ? 'Unpin Tabs' : 'Unpin Tab'
-            : isBulkTabAction ? 'Pin Tabs' : 'Pin Tab',
+            : isBulkTabAction ? 'Pin Tabs' : 'Pin Tab'),
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
@@ -555,18 +575,18 @@ function runApp() {
           }
         },
         {
-          label: 'Tab Color',
+          label: contextMenuLabel('Tab Color'),
           visible: contextMenuTab != null,
           submenu: [
-            { label: 'Default', color: null },
-            { label: 'Red', color: 'red' },
-            { label: 'Orange', color: 'orange' },
-            { label: 'Yellow', color: 'yellow' },
-            { label: 'Green', color: 'green' },
-            { label: 'Blue', color: 'blue' },
-            { label: 'Purple', color: 'purple' }
-          ].map(({ label, color }) => ({
-            label,
+            { key: 'Default', color: null },
+            { key: 'Red', color: 'red' },
+            { key: 'Orange', color: 'orange' },
+            { key: 'Yellow', color: 'yellow' },
+            { key: 'Green', color: 'green' },
+            { key: 'Blue', color: 'blue' },
+            { key: 'Purple', color: 'purple' }
+          ].map(({ key, color }) => ({
+            label: contextMenuLabel(key),
             type: 'radio',
             checked: selectedTabColor === color,
             click: () => {
@@ -581,7 +601,7 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
-          label: 'New Tab',
+          label: contextMenuLabel('New Tab'),
           visible: isTabBarContextMenu && contextMenuTab == null,
           click: () => {
             manager?.createTabWithPreference({ makeActive: true }).catch(error => {
@@ -590,7 +610,7 @@ function runApp() {
           }
         },
         {
-          label: 'Reopen Closed Tab',
+          label: contextMenuLabel('Reopen Closed Tab'),
           visible: isTabBarContextMenu && contextMenuTab == null,
           enabled: manager?.closedTabs.length > 0,
           click: () => {
@@ -598,7 +618,7 @@ function runApp() {
           }
         },
         {
-          label: isBulkTabAction ? 'Reload Tabs' : 'Reload Tab',
+          label: contextMenuLabel(isBulkTabAction ? 'Reload Tabs' : 'Reload Tab'),
           visible: contextMenuTab != null,
           click: () => {
             if (!manager || !contextMenuTab) return
@@ -607,7 +627,7 @@ function runApp() {
           }
         },
         {
-          label: 'Load Tabs',
+          label: contextMenuLabel('Load Tabs'),
           visible: contextMenuTab != null && isBulkTabAction,
           enabled: hasSelectedUnloadedTab,
           click: () => {
@@ -617,7 +637,9 @@ function runApp() {
           }
         },
         {
-          label: isBulkTabAction ? 'Unload Tabs' : isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab',
+          label: contextMenuLabel(
+            isBulkTabAction ? 'Unload Tabs' : isContextMenuTabUnloaded ? 'Load Tab' : 'Unload Tab'
+          ),
           visible: contextMenuTab != null,
           enabled: isBulkTabAction
             ? hasSelectedLoadedTab
@@ -646,7 +668,7 @@ function runApp() {
           visible: contextMenuTab != null && moveTargets.length > 0
         },
         {
-          label: isBulkTabAction ? 'Move Tabs to Window' : 'Move Tab to Window',
+          label: contextMenuLabel(isBulkTabAction ? 'Move Tabs to Window' : 'Move Tab to Window'),
           visible: contextMenuTab != null && moveTargets.length > 0,
           submenu: moveTargets.map(({ windowId, label }) => ({
             label,
@@ -665,7 +687,7 @@ function runApp() {
           visible: contextMenuTab != null
         },
         {
-          label: 'Open in a New Tab',
+          label: contextMenuLabel('Open in a New Tab'),
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
@@ -681,7 +703,7 @@ function runApp() {
           }
         },
         {
-          label: 'Open in a New Window',
+          label: contextMenuLabel('Open in a New Window'),
           // Only show the option for in-app URLs and not external ones
           visible: isInAppUrl,
           click: () => {
@@ -690,7 +712,7 @@ function runApp() {
         },
         // Only show select all in text fields
         {
-          label: 'Select All',
+          label: contextMenuLabel('Select All'),
           enabled: parameters.editFlags.canSelectAll,
           visible: parameters.isEditable,
           click: () => {
@@ -746,35 +768,39 @@ function runApp() {
       }))
       const externalSearch = activeSearchEngines.length === 1
         ? {
-            label: `Search with ${activeSearchEngines[0].name}`,
+            label: contextMenuLabel(
+              'Search With',
+              { engine: activeSearchEngines[0].name },
+              `Search with ${activeSearchEngines[0].name}`
+            ),
             icon: getFaviconUrl(activeSearchEngines[0].url),
             faviconSource: activeSearchEngines[0].url,
             visible: selectionText.length > 0,
             click: externalSearchItems[0].click
           }
         : {
-            label: 'Search with...',
+            label: contextMenuLabel('Search With Multiple', {}, 'Search with...'),
             visible: selectionText.length > 0 && activeSearchEngines.length > 1,
             submenu: externalSearchItems
           }
 
       return [
         {
-          label: 'Copy Link',
+          label: contextMenuLabel('Copy Link'),
           visible: visible && !isInAppUrl,
           click: () => {
             copy(parameters.linkURL)
           }
         },
         {
-          label: 'Copy YouTube Link',
+          label: contextMenuLabel('Copy YouTube Link'),
           visible: visible && isInAppUrl,
           click: () => {
             copy(transformOpenTubeXRouteUrl(urlParts[1], true))
           }
         },
         {
-          label: 'Copy Invidious Link',
+          label: contextMenuLabel('Copy Invidious Link'),
           visible: visible && isInAppUrl && (backendPreference === 'invidious' || backendFallback),
           click: () => {
             copy(transformOpenTubeXRouteUrl(urlParts[1], false))
@@ -786,7 +812,17 @@ function runApp() {
         // NOT link with no customized link text
         // NOT link for timestamp
         {
-          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Tab` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch
+            ? contextMenuLabel(
+                'Search Selection in New Tab',
+                { selection: selectionText },
+                `Search "${selectionText}" in a New Tab`
+              )
+            : contextMenuLabel(
+                'Selection Too Long',
+                { count: SEARCH_CHAR_LIMIT },
+                `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
+              ),
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
@@ -810,7 +846,17 @@ function runApp() {
           }
         },
         {
-          label: textShortEnoughForSearch ? `Search "${selectionText}" in a New Window` : `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`,
+          label: textShortEnoughForSearch
+            ? contextMenuLabel(
+                'Search Selection in New Window',
+                { selection: selectionText },
+                `Search "${selectionText}" in a New Window`
+              )
+            : contextMenuLabel(
+                'Selection Too Long',
+                { count: SEARCH_CHAR_LIMIT },
+                `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
+              ),
           enabled: textShortEnoughForSearch,
           visible: (
             !isInAppUrl &&
@@ -845,39 +891,39 @@ function runApp() {
     return {
       separator: () => ({ type: 'separator' }),
       cut: () => ({
-        label: 'Cut',
+        label: contextMenuLabel('Cut'),
         visible: parameters.isEditable,
         enabled: can('Cut') && hasSelection,
         click: () => webContents.cut()
       }),
       copy: () => ({
-        label: 'Copy',
+        label: contextMenuLabel('Copy'),
         visible: parameters.isEditable || hasSelection,
         enabled: can('Copy') && hasSelection,
         click: () => webContents.copy()
       }),
       paste: () => ({
-        label: 'Paste',
+        label: contextMenuLabel('Paste'),
         visible: parameters.isEditable,
         enabled: can('Paste'),
         click: () => webContents.paste()
       }),
       selectAll: () => ({
-        label: 'Select All',
+        label: contextMenuLabel('Select All'),
         click: () => webContents.selectAll()
       }),
       saveImageAs: () => ({
-        label: 'Save Image As…',
+        label: contextMenuLabel('Save Image As…'),
         visible: parameters.mediaType === 'image',
         click: () => webContents.downloadURL(parameters.srcURL)
       }),
       copyImage: () => ({
-        label: 'Copy Image',
+        label: contextMenuLabel('Copy Image'),
         visible: parameters.mediaType === 'image',
         click: () => webContents.copyImageAt(parameters.x, parameters.y)
       }),
       copyImageAddress: () => ({
-        label: 'Copy Image Address',
+        label: contextMenuLabel('Copy Image Address'),
         visible: parameters.mediaType === 'image',
         click: () => clipboard.writeText(parameters.srcURL)
       })
@@ -899,6 +945,27 @@ function runApp() {
     return cleanedItems
   }
 
+  function serializeContextMenuLabel(label) {
+    if (
+      label != null &&
+      typeof label === 'object' &&
+      typeof label.key === 'string' &&
+      typeof label.fallback === 'string'
+    ) {
+      return {
+        text: label.fallback,
+        key: label.key,
+        parameters: label.parameters
+      }
+    }
+
+    return {
+      text: String(label ?? ''),
+      key: undefined,
+      parameters: undefined
+    }
+  }
+
   function serializeContextMenuItems(items, actions, actionPrefix = 'item') {
     return removeUnusedContextMenuItems(items).map((item, index) => {
       if (item.type === 'separator') return { type: 'separator' }
@@ -910,13 +977,21 @@ function runApp() {
       const submenu = Array.isArray(item.submenu)
         ? serializeContextMenuItems(item.submenu, actions, actionId)
         : undefined
+      const label = serializeContextMenuLabel(item.label)
+      const refreshingLabel = item.refreshingLabel == null
+        ? null
+        : serializeContextMenuLabel(item.refreshingLabel)
 
       return {
         type: item.type ?? 'normal',
-        label: String(item.label ?? ''),
+        label: label.text,
+        labelKey: label.key,
+        labelParameters: label.parameters,
         // Shown instead of the label while a subscription refresh is running,
         // so that an open menu doesn't go stale when the refresh ends
-        refreshingLabel: item.refreshingLabel != null ? String(item.refreshingLabel) : undefined,
+        refreshingLabel: refreshingLabel?.text,
+        refreshingLabelKey: refreshingLabel?.key,
+        refreshingLabelParameters: refreshingLabel?.parameters,
         enabled: item.enabled !== false,
         checked: item.checked === true,
         icon: typeof item.icon === 'string' ? item.icon : undefined,

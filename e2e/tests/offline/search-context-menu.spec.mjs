@@ -5,6 +5,10 @@ test('searching selected text in a new tab uses the default filters', async ({ p
     selectionText: 'context search'
   }))
   const search = contextMenu.items.find(item => item.label === 'Search "context search" in a New Tab')
+  expect(search).toMatchObject({
+    labelKey: 'Context Menu.Search Selection in New Tab',
+    labelParameters: { selection: 'context search' }
+  })
 
   await page.evaluate(({ sessionId, actionId }) => {
     return window.ftElectron.contextMenu.execute(sessionId, actionId)
@@ -29,6 +33,10 @@ test('offers enabled external search engines in a submenu', async ({ page }) => 
   }))
   const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
 
+  expect(searchWith).toMatchObject({
+    labelKey: 'Context Menu.Search With Multiple',
+    labelParameters: {}
+  })
   expect(searchWith.submenu.map(item => item.label)).toEqual([
     'DuckDuckGo',
     'Startpage',
@@ -47,6 +55,7 @@ test('offers enabled external search engines in a submenu', async ({ page }) => 
     'https://www.qwant.com/?q=%s',
     'https://search.brave.com/search?q=%s'
   ])
+  expect(searchWith.submenu.every(item => item.labelKey == null)).toBe(true)
 })
 
 test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
@@ -188,6 +197,10 @@ test.describe('with one external search engine enabled', () => {
     const searchWith = contextMenu.items.find(item => item.label === 'Search with DuckDuckGo')
 
     expect(searchWith.submenu).toBeUndefined()
+    expect(searchWith).toMatchObject({
+      labelKey: 'Context Menu.Search With',
+      labelParameters: { engine: 'DuckDuckGo' }
+    })
     expect(searchWith.icon).toBe('https://duckduckgo.com/favicon.ico')
     expect(searchWith.faviconSource).toBe('https://duckduckgo.com/?q=%s')
     await page.evaluate(({ sessionId, actionId }) => {
@@ -197,5 +210,20 @@ test.describe('with one external search engine enabled', () => {
     await expect.poll(() => app.electronApp.evaluate(() => {
       return globalThis.openedExternalSearchUrls
     })).toEqual(['https://duckduckgo.com/?q=privacy%20%26%20cats'])
+  })
+})
+
+test.describe('German locale', () => {
+  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+
+  test('translates external search labels from explicit menu metadata', async ({ page }) => {
+    const searchInput = page.locator('.searchInput input')
+    await searchInput.fill('Auswahl')
+    await searchInput.selectText()
+    await searchInput.click({ button: 'right' })
+
+    const menu = page.getByRole('menu', { name: 'Kontextmenü' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Suchen mit …' })).toBeVisible()
   })
 })

@@ -54,7 +54,7 @@
                   :icon="getItemIcon(item)"
                 />
               </span>
-              <span>{{ translateLabel(item.label) }}</span>
+              <span>{{ localizedLabel(item) }}</span>
               <span
                 class="submenuArrow"
                 aria-hidden="true"
@@ -107,7 +107,7 @@
                       :icon="['fas', 'check']"
                     />
                   </span>
-                  <span>{{ translateLabel(child.label) }}</span>
+                  <span>{{ localizedLabel(child) }}</span>
                 </button>
               </template>
             </div>
@@ -146,7 +146,7 @@
                 :icon="['fas', 'check']"
               />
             </span>
-            <span>{{ translateLabel(item.label) }}</span>
+            <span>{{ localizedLabel(item) }}</span>
           </button>
         </template>
       </div>
@@ -161,7 +161,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 
-const { t, te } = useI18n()
+const { t } = useI18n()
 const menuRef = useTemplateRef('menuRef')
 const fullscreenTarget = ref(null)
 const isOpen = ref(false)
@@ -188,7 +188,12 @@ const displayedItems = computed(() => {
   }
 
   return items.value.map(item => item.refreshingLabel
-    ? { ...item, label: item.refreshingLabel }
+    ? {
+        ...item,
+        label: item.refreshingLabel,
+        labelKey: item.refreshingLabelKey,
+        labelParameters: item.refreshingLabelParameters
+      }
     : item)
 })
 
@@ -365,32 +370,11 @@ async function execute(item) {
   await window.ftElectron.contextMenu.execute(currentSessionId, item.actionId)
 }
 
-function translateLabel(label) {
-  if (label === 'Search with...') return t('Context Menu.Search With Multiple')
+function localizedLabel(item) {
+  if (!item.labelKey) return item.label
 
-  let match = /^Search with (.+)$/.exec(label)
-  if (match) return t('Context Menu.Search With', { engine: match[1] })
-
-  match = /^Close (\d+) Tabs$/.exec(label)
-  if (match) return t('Context Menu.Close Multiple Tabs', { count: Number(match[1]) })
-
-  match = /^Duplicate (\d+) Tabs$/.exec(label)
-  if (match) return t('Context Menu.Duplicate Multiple Tabs', { count: Number(match[1]) })
-
-  match = /^Search "(.+)" in a New (Tab|Window)$/.exec(label)
-  if (match) {
-    return match[2] === 'Tab'
-      ? t('Context Menu.Search Selection in New Tab', { selection: match[1] })
-      : t('Context Menu.Search Selection in New Window', { selection: match[1] })
-  }
-
-  match = /^".+" is too long for search \(> (\d+) chars\)$/.exec(label)
-  if (match) return t('Context Menu.Selection Too Long', { count: Number(match[1]) })
-
-  const key = `Context Menu.${label}`
-  // Labels are validated against this namespace before being translated.
   // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
-  return te(key) ? t(key) : label
+  return t(item.labelKey, item.labelParameters ?? {})
 }
 
 function handleKeydown(event) {

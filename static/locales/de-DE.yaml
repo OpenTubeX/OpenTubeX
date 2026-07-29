@@ -1591,6 +1591,8 @@ Context Menu:
   Copy Invidious Link: Invidious-Link kopieren
   Search Selection in New Tab: '"{selection}" in einem neuen Tab suchen'
   Search Selection in New Window: '"{selection}" in einem neuen Fenster suchen'
+  Search With: Mit {engine} suchen
+  Search With Multiple: Suchen mit …
   Selection Too Long: 'Auswahl ist zu lang für die Suche (> {count} Zeichen)'
 Stats:
   Stats: Statistik
