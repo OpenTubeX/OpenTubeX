@@ -51,7 +51,7 @@
 <!-- Please complete the following information-->
 - **OS:**
 - **OS Version:**
-- **FreeTube version:**
+- **OpenTubeX version:**
 
 ## Additional context
 <!-- Add any other context about the pull request here. -->
