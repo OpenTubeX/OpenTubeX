@@ -149,7 +149,8 @@ export const routes = [
   {
     path: '/watch/:id',
     meta: {
-      title: 'Watch'
+      title: 'Watch',
+      hasDynamicTitle: true
     },
     component: Watch
   },
