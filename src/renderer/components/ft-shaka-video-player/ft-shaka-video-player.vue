@@ -787,9 +787,7 @@
                 :style="{ color }"
               />
               <span class="skippedSegmentText">
-                {{ isHighlight
-                  ? $t('Video.Player.SponsorBlock.SkippedToHighlight')
-                  : $t('Video.Player.Skipped segment', { segmentCategory: translatedCategory }) }}
+                {{ getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) }}
               </span>
             </div>
             <div class="skippedSegmentHeaderActions">

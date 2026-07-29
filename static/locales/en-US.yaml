@@ -1417,6 +1417,8 @@ Video:
       SkippedToHighlight: Skipped to Highlight
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
+      MutedSegment: Muted {segmentCategory} segment
+      MuteToastUnmute: Unmute
       InfoPanelTitle: SponsorBlock
       InfoPanelLoading: Loading segments…
       InfoPanelHasSegments: This video has segments in the database.

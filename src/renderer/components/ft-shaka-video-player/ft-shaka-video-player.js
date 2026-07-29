@@ -1452,7 +1452,7 @@ export default defineComponent({
     /**
      * Yes a map would be much more suitable for this (unlike objects they retain the order that items were inserted),
      * but Vue 2 doesn't support reactivity on Maps, so we have to use an array instead
-     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, unskipTime: number|null}[]>}
+     * @type {import('vue').Ref<{uuid: string, translatedCategory: string, color: string, timeoutId: ReturnType<typeof setTimeout>|0, hideAt: number|null, hideRemainingMs: number, unskipped: boolean, countdownPaused: boolean, isHighlight: boolean, isMute: boolean, unskipTime: number|null}[]>}
      */
     const skippedSponsorBlockSegments = ref([])
     const promptSponsorBlockSegments = ref([])
@@ -1460,6 +1460,8 @@ export default defineComponent({
     const sponsorBlockCurrentTime = ref(0)
     let sponsorBlockToastTimeInterval = null
     const manuallyMutedSponsorBlockSegments = new Set()
+    const sponsorBlockDoNotMuteSegments = new Set()
+    const notifiedSponsorBlockMuteSegments = new Set()
     const sponsorBlockMuteController = createSponsorBlockMuteController({
       getMuted: () => video.value?.muted ?? false,
       setMuted: muted => {
@@ -1628,8 +1630,7 @@ export default defineComponent({
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
       sponsorBlockDismissedPromptSegments = new Set()
-      manuallyMutedSponsorBlockSegments.clear()
-      sponsorBlockMuteController.setSourceActive('segments', false)
+      clearSponsorBlockMuteSegments()
       sponsorBlockSegments = []
       sponsorBlockInfoSegments.value = []
       terminalSponsorBlockOutroStarted = false
@@ -1885,6 +1886,7 @@ export default defineComponent({
         existingSkip.hideRemainingMs = sponsorBlockSkippedToastDurationMs.value
         existingSkip.countdownPaused = false
         existingSkip.isHighlight = isHighlight
+        existingSkip.isMute = false
         existingSkip.unskipTime = unskipTime ?? null
         existingSkip.timeoutId = setTimeout(() => {
           removeSponsorBlockToast(uuid)
@@ -1901,10 +1903,47 @@ export default defineComponent({
         hideRemainingMs: sponsorBlockSkippedToastDurationMs.value,
         countdownPaused: false,
         isHighlight,
+        isMute: false,
         unskipTime: unskipTime ?? null,
         timeoutId: setTimeout(() => {
           removeSponsorBlockToast(uuid)
         }, sponsorBlockSkippedToastDurationMs.value)
+      })
+    }
+
+    /**
+     * @param {{ uuid: string, translatedCategory: string, color: string }} toast
+     */
+    function upsertMutedSponsorBlockToast({ uuid, translatedCategory, color }) {
+      const existingToast = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+
+      if (existingToast) {
+        clearTimeout(existingToast.timeoutId)
+        existingToast.translatedCategory = translatedCategory
+        existingToast.color = color
+        existingToast.unskipped = !(video.value?.muted ?? true)
+        existingToast.hideAt = null
+        existingToast.hideRemainingMs = 0
+        existingToast.countdownPaused = false
+        existingToast.isHighlight = false
+        existingToast.isMute = true
+        existingToast.unskipTime = null
+        existingToast.timeoutId = 0
+        return
+      }
+
+      skippedSponsorBlockSegments.value.push({
+        uuid,
+        translatedCategory,
+        color,
+        unskipped: !(video.value?.muted ?? true),
+        hideAt: null,
+        hideRemainingMs: 0,
+        countdownPaused: false,
+        isHighlight: false,
+        isMute: true,
+        unskipTime: null,
+        timeoutId: 0
       })
     }
 
@@ -1920,7 +1959,7 @@ export default defineComponent({
         return '0s'
       }
 
-      const remainingSeconds = toastEntry.unskipped
+      const remainingSeconds = toastEntry.unskipped || toastEntry.isMute
         ? Math.max(segment.endTime - sponsorBlockCurrentTime.value, 0)
         : (toastEntry.countdownPaused
             ? Math.max(toastEntry.hideRemainingMs, 0)
@@ -1939,7 +1978,7 @@ export default defineComponent({
      */
     function isSponsorBlockToastCountdownPaused(uuid) {
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      return Boolean(toastEntry?.countdownPaused && !toastEntry.unskipped)
+      return Boolean(toastEntry?.countdownPaused && !toastEntry.unskipped && !toastEntry.isMute)
     }
 
     /**
@@ -1948,9 +1987,14 @@ export default defineComponent({
      * @returns {string}
      */
     function getSponsorBlockToastActionLabel(unskipped, uuid) {
-      const actionLabel = unskipped
-        ? t('Video.Player.SponsorBlock.SkipToastReskip')
-        : t('Video.Player.SponsorBlock.SkipToastUnskip')
+      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+      const actionLabel = segment?.actionType === 'mute'
+        ? unskipped
+          ? t('Video.Player.SponsorBlock.MuteActionType')
+          : t('Video.Player.SponsorBlock.MuteToastUnmute')
+        : unskipped
+          ? t('Video.Player.SponsorBlock.SkipToastReskip')
+          : t('Video.Player.SponsorBlock.SkipToastUnskip')
 
       const activeToast = getActiveSponsorBlockToast()
       if (getActivePromptSponsorBlockToast() || activeToast?.uuid !== uuid) {
@@ -1961,6 +2005,17 @@ export default defineComponent({
         actionLabel,
         t('Keys.enter')
       )
+    }
+
+    function getSponsorBlockToastLabel(uuid, translatedCategory, isHighlight) {
+      if (isHighlight) {
+        return t('Video.Player.SponsorBlock.SkippedToHighlight')
+      }
+
+      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+      return segment?.actionType === 'mute'
+        ? t('Video.Player.SponsorBlock.MutedSegment', { segmentCategory: translatedCategory })
+        : t('Video.Player.Skipped segment', { segmentCategory: translatedCategory })
     }
 
     /**
@@ -2320,7 +2375,7 @@ export default defineComponent({
      */
     function pauseSponsorBlockToastCountdown(uuid) {
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      if (!toastEntry || toastEntry.unskipped || toastEntry.countdownPaused) {
+      if (!toastEntry || toastEntry.unskipped || toastEntry.isMute || toastEntry.countdownPaused) {
         return
       }
 
@@ -2336,7 +2391,7 @@ export default defineComponent({
      */
     function resumeSponsorBlockToastCountdown(uuid) {
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
-      if (!toastEntry || toastEntry.unskipped || !toastEntry.countdownPaused) {
+      if (!toastEntry || toastEntry.unskipped || toastEntry.isMute || !toastEntry.countdownPaused) {
         return
       }
 
@@ -2418,6 +2473,8 @@ export default defineComponent({
     }
 
     function syncSponsorBlockMuteSegments(currentTime, autoMuteEnabled = true) {
+      const activeMuteSegments = new Set()
+
       for (const uuid of manuallyMutedSponsorBlockSegments) {
         const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
         if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
@@ -2425,15 +2482,66 @@ export default defineComponent({
         }
       }
 
-      const shouldMute = sponsorBlockSegments.some(segment => {
-        return segment.actionType === 'mute' &&
+      for (const uuid of sponsorBlockDoNotMuteSegments) {
+        const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
+          sponsorBlockDoNotMuteSegments.delete(uuid)
+        }
+      }
+
+      sponsorBlockSegments.forEach(segment => {
+        const isActive = segment.actionType === 'mute' &&
           currentTime >= segment.startTime &&
           currentTime < segment.endTime &&
           (manuallyMutedSponsorBlockSegments.has(segment.uuid) ||
+            sponsorBlockDoNotMuteSegments.has(segment.uuid) ||
             (autoMuteEnabled && sponsorSkips.value.autoSkip.has(segment.category)))
+
+        if (!isActive) {
+          return
+        }
+
+        activeMuteSegments.add(segment.uuid)
+      })
+
+      for (const uuid of notifiedSponsorBlockMuteSegments) {
+        if (!activeMuteSegments.has(uuid)) {
+          notifiedSponsorBlockMuteSegments.delete(uuid)
+          removeSponsorBlockToast(uuid)
+        }
+      }
+
+      const shouldMute = sponsorBlockSegments.some(segment => {
+        return activeMuteSegments.has(segment.uuid) &&
+          !sponsorBlockDoNotMuteSegments.has(segment.uuid)
       })
 
       sponsorBlockMuteController.setSourceActive('segments', shouldMute)
+
+      sponsorBlockSegments.forEach(segment => {
+        if (!activeMuteSegments.has(segment.uuid) ||
+            !sponsorBlockShowSkippedToast.value ||
+            notifiedSponsorBlockMuteSegments.has(segment.uuid)) {
+          return
+        }
+
+        notifiedSponsorBlockMuteSegments.add(segment.uuid)
+        upsertMutedSponsorBlockToast({
+          uuid: segment.uuid,
+          translatedCategory: translateSponsorBlockCategory(segment.category),
+          color: getSponsorBlockToastColor(segment.category)
+        })
+      })
+    }
+
+    function clearSponsorBlockMuteSegments() {
+      manuallyMutedSponsorBlockSegments.clear()
+      sponsorBlockDoNotMuteSegments.clear()
+      notifiedSponsorBlockMuteSegments.clear()
+      skippedSponsorBlockSegments.value
+        .filter(segment => segment.isMute)
+        .forEach(segment => removeSponsorBlockToast(segment.uuid))
+      sponsorBlockMuteController.setSourceActive('segments', false)
     }
 
     /**
@@ -2449,6 +2557,17 @@ export default defineComponent({
       }
 
       const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+
+      if (segment.actionType === 'mute') {
+        sponsorBlockDoNotMuteSegments.add(uuid)
+        manuallyMutedSponsorBlockSegments.delete(uuid)
+        syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
+        video.value.muted = false
+        if (toastEntry) {
+          toastEntry.unskipped = true
+        }
+        return true
+      }
 
       if (isSponsorBlockPointSegment(segment)) {
         if (!toastEntry?.isHighlight || toastEntry.unskipTime === null || !canSeek()) {
@@ -2502,6 +2621,18 @@ export default defineComponent({
       const segment = sponsorBlockSegments.find(seg => seg.uuid === uuid)
       if (!segment || isSponsorBlockPointSegment(segment)) {
         return false
+      }
+
+      if (segment.actionType === 'mute') {
+        sponsorBlockDoNotMuteSegments.delete(uuid)
+        manuallyMutedSponsorBlockSegments.add(uuid)
+        syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
+        sponsorBlockMuteController.enforceMuted()
+        const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
+        if (toastEntry) {
+          toastEntry.unskipped = false
+        }
+        return true
       }
 
       sponsorBlockDoNotSkipSegments.delete(uuid)
@@ -3552,7 +3683,7 @@ export default defineComponent({
 
     watch(() => props.videoId, () => {
       sponsorBlockMuteController.reset()
-      manuallyMutedSponsorBlockSegments.clear()
+      clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
         shortsPaused.value = false
         shortsCaptionsEnabled.value = false
@@ -3569,6 +3700,7 @@ export default defineComponent({
       if (!enabled) {
         closeSponsorBlockInfo()
         sponsorBlockMuteController.reset()
+        clearSponsorBlockMuteSegments()
       }
     })
 
@@ -4094,6 +4226,11 @@ export default defineComponent({
       }
 
       const sponsorBlockVolumeChange = sponsorBlockMuteController.handleVolumeChange()
+      skippedSponsorBlockSegments.value
+        .filter(segment => segment.isMute)
+        .forEach(segment => {
+          segment.unskipped = !video_.muted
+        })
       if (!rememberVolume.value || applyingInitialVolume || sponsorBlockVolumeChange) {
         return
       }
@@ -8280,6 +8417,7 @@ export default defineComponent({
       getSponsorBlockToastTimeLabel,
       isSponsorBlockToastCountdownPaused,
       getSponsorBlockToastActionLabel,
+      getSponsorBlockToastLabel,
       pauseSponsorBlockToastCountdown,
       resumeSponsorBlockToastCountdown,
       removeSponsorBlockToast,

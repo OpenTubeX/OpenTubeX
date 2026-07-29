@@ -37,3 +37,23 @@ test('preserves a user mute override after the segment', () => {
   controller.setSourceActive('segment', false)
   assert.equal(muted, false)
 })
+
+test('can reapply mute after a user override', () => {
+  let muted = false
+  const controller = createSponsorBlockMuteController({
+    getMuted: () => muted,
+    setMuted: value => { muted = value }
+  })
+
+  controller.setSourceActive('segment', true)
+  controller.handleVolumeChange()
+  muted = false
+  controller.handleVolumeChange()
+
+  controller.enforceMuted()
+  assert.equal(muted, true)
+  controller.handleVolumeChange()
+
+  controller.setSourceActive('segment', false)
+  assert.equal(muted, false)
+})

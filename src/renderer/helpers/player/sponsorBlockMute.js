@@ -47,6 +47,15 @@ export function createSponsorBlockMuteController({ getMuted, setMuted }) {
     return false
   }
 
+  function enforceMuted() {
+    if (sources.size === 0) {
+      return
+    }
+
+    overridden = false
+    applyMuted(true)
+  }
+
   function reset() {
     const wasActive = sources.size > 0
     sources.clear()
@@ -57,6 +66,7 @@ export function createSponsorBlockMuteController({ getMuted, setMuted }) {
   }
 
   return {
+    enforceMuted,
     handleVolumeChange,
     reset,
     setSourceActive,

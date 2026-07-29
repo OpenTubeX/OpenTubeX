@@ -694,11 +694,28 @@ test.describe('watch page', () => {
     await expect(video).toHaveJSProperty('muted', true)
     await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(10)
 
+    const muteNotification = page.locator('.skippedSegment').filter({ hasText: 'Muted Sponsor segment' })
+    await expect(muteNotification).toBeVisible()
+    await expect(muteNotification.locator('.skippedSegmentTimer')).toHaveText('7s')
+    await muteNotification.getByRole('button', { name: /Unmute/ }).click()
+    await expect(video).toHaveJSProperty('muted', false)
+    await expect(muteNotification).toBeVisible()
+    await expect(muteNotification.getByRole('button', { name: /Mute/ })).toBeVisible()
+
+    await video.evaluate(element => {
+      element.currentTime = 4
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(muteNotification).toBeVisible()
+    await muteNotification.getByRole('button', { name: /Mute/ }).click()
+    await expect(video).toHaveJSProperty('muted', true)
+
     await video.evaluate(element => {
       element.currentTime = 11
       element.dispatchEvent(new Event('timeupdate'))
     })
     await expect(video).toHaveJSProperty('muted', false)
+    await expect(muteNotification).toHaveCount(0)
 
     await video.evaluate(element => {
       element.pause()
