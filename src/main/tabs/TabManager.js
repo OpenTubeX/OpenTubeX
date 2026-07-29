@@ -1079,20 +1079,33 @@ export class TabManager {
 
     const previousTabIds = orderedTabIds.slice(0, tabIndex).reverse()
     const nextTabIds = orderedTabIds.slice(tabIndex + 1)
-    // The preferred side wins, the other one is the fallback when that side has
-    // no selectable tab left.
-    const candidates = tabCloseFocus === 'nextTab'
-      ? [...nextTabIds, ...previousTabIds]
-      : [...previousTabIds, ...nextTabIds]
     // A tab already queued for deferred close/unload must never be selected as
     // the replacement, otherwise a rapid second close/unload would leave the
     // window with no selectable tab.
-    return candidates.find(candidateId =>
+    const isSelectable = candidateId =>
       this.tabs.get(candidateId)?.isTransferStaged !== true &&
       (!loadedOnly || this.tabs.get(candidateId)?.loadState === 'loaded') &&
       !this._deferredCloseTabIds.has(candidateId) &&
       !this._deferredUnloadTabIds.has(candidateId)
-    ) ?? null
+
+    const [preferredTabIds, fallbackTabIds] = tabCloseFocus === 'nextTab'
+      ? [nextTabIds, previousTabIds]
+      : [previousTabIds, nextTabIds]
+    const preferredTabId = preferredTabIds.find(isSelectable)
+    const fallbackTabId = fallbackTabIds.find(isSelectable)
+
+    // Prefer an already-loaded tab on the other side over mounting an unloaded
+    // tab on the configured side.
+    if (
+      preferredTabId != null &&
+      fallbackTabId != null &&
+      this.tabs.get(preferredTabId)?.loadState !== 'loaded' &&
+      this.tabs.get(fallbackTabId)?.loadState === 'loaded'
+    ) {
+      return fallbackTabId
+    }
+
+    return preferredTabId ?? fallbackTabId ?? null
   }
 
   _prepareNeighborActivation(tabId) {

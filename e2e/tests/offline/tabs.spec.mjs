@@ -591,6 +591,22 @@ test.describe('tab close focus set to the next tab', () => {
     await page.locator(sel.activeTab).locator('.closeButton').click()
     await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', tabIds[1])
   })
+
+  test('selects the loaded previous tab when the next tab is unloaded', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).nth(1)).toHaveClass(/active/)
+    const previousTabId = await page.locator(sel.tabs).first().getAttribute('data-tab-id')
+    const unloadedTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      makeActive: false,
+      lazyLoad: true
+    }))
+    await expect(page.locator(`.tab[data-tab-id="${unloadedTab.id}"]`)).toHaveClass(/unloaded/)
+
+    await page.locator(sel.activeTab).locator('.closeButton').click()
+    await expect(page.locator(sel.activeTab)).toHaveAttribute('data-tab-id', previousTabId)
+    await expect(page.locator(`.tab[data-tab-id="${unloadedTab.id}"]`)).toHaveClass(/unloaded/)
+  })
 })
 
 test.describe('tab icons disabled', () => {
