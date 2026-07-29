@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   ensureSubscriptionFeedEntryState,
+  mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries
 } from '../../src/renderer/helpers/subscription-entries.js'
 
@@ -12,6 +13,28 @@ const now = Date.now()
 function video(videoId, published, extra = {}) {
   return { videoId, published, type: 'video', ...extra }
 }
+
+test('adds selected Shorts thumbnails without replacing RSS metadata', () => {
+  const entries = [
+    video('matched', 10, { viewCount: 1234, isRSS: true }),
+    video('unmatched', 20, { isRSS: true })
+  ]
+  const merged = mergeSubscriptionShortThumbnails(entries, [
+    video('matched', 999, {
+      thumbnailUrl: 'https://i.ytimg.com/vi/matched/frame0.jpg',
+      viewCount: 1200
+    })
+  ])
+
+  assert.deepEqual(merged, [
+    video('matched', 10, {
+      thumbnailUrl: 'https://i.ytimg.com/vi/matched/frame0.jpg',
+      viewCount: 1234,
+      isRSS: true
+    }),
+    entries[1]
+  ])
+})
 
 test('keeps the cached publication date of entries that were already fetched', () => {
   const previousEntries = [

@@ -382,6 +382,7 @@ const mutations = {
 
           cachedVideo.title = channelVideo.title
           cachedVideo.author = channelVideo.author
+          cachedVideo.thumbnailUrl = channelVideo.thumbnailUrl ?? cachedVideo.thumbnailUrl
 
           // as the channel shorts page only has compact view counts for numbers above 1000 e.g. 12k
           // and the RSS feeds include an exact value, we only want to overwrite it when the number is larger than the cached value

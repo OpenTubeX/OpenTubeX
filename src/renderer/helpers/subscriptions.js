@@ -5,7 +5,13 @@ import {
   invidiousFetch,
   invidiousGetCommunityPosts
 } from './api/invidious'
-import { getLocalChannelCommunity, getLocalChannelLiveStreams, getLocalChannelVideos } from './api/local'
+import {
+  getLocalChannelCommunity,
+  getLocalChannelLiveStreams,
+  getLocalChannelVideos,
+  getLocalPlaylist,
+  parseLocalPlaylistVideo
+} from './api/local'
 import {
   fetchWithTimeout,
   getChannelPlaylistId,
@@ -14,7 +20,10 @@ import {
   showToastOnAllTabs,
 } from './utils'
 import { getValidSubscriptionChannels } from './subscription-channels'
-import { reconcileFetchedSubscriptionEntries } from './subscription-entries'
+import {
+  mergeSubscriptionShortThumbnails,
+  reconcileFetchedSubscriptionEntries
+} from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 
 const AUTO_REFRESH_TOAST_DURATION = 5000
@@ -1137,7 +1146,11 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
       return { videos: [] }
     }
 
-    const result = await parseYouTubeRSSFeed(await response.text(), channel.id)
+    const [result, thumbnailEntries] = await Promise.all([
+      parseYouTubeRSSFeed(await response.text(), channel.id),
+      getLocalShortThumbnailEntries(playlistId)
+    ])
+    result.videos = mergeSubscriptionShortThumbnails(result.videos, thumbnailEntries)
     result.videos.forEach(video => { video.isShort = true })
     return result
   } catch (error) {
@@ -1149,6 +1162,16 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
     }
 
     return { videos: null }
+  }
+}
+
+async function getLocalShortThumbnailEntries(playlistId) {
+  try {
+    const playlist = await getLocalPlaylist(playlistId)
+    return playlist.items.map(parseLocalPlaylistVideo)
+  } catch (error) {
+    console.warn(`Failed to load selected Shorts thumbnails for ${playlistId}`, error)
+    return []
   }
 }
 

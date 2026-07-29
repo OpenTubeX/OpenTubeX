@@ -333,6 +333,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getRelativeTimeFromDate,
+  getShortThumbnailUrl,
   getVideoThumbnailUrl,
   openExternalLink,
   openInternalPath,
@@ -874,20 +875,20 @@ const thumbnail = computed(() => {
     return deArrowCache.value.thumbnail
   }
 
-  if (
-    props.appearance === 'youtubeShort' &&
-    thumbnailPreference.value === '' &&
-    props.data.thumbnailUrl
-  ) {
-    return props.data.thumbnailUrl
+  if (props.appearance === 'youtubeShort') {
+    return getShortThumbnailUrl(
+      props.data,
+      backendPreference.value,
+      currentInvidiousInstanceUrl.value,
+      thumbnailPreference.value
+    ) ?? thumbnailPlaceholder
   }
 
   return getVideoThumbnailUrl(
     id.value,
     backendPreference.value,
     currentInvidiousInstanceUrl.value,
-    thumbnailPreference.value,
-    props.appearance === 'youtubeShort'
+    thumbnailPreference.value
   ) ?? thumbnailPlaceholder
 })
 

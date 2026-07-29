@@ -976,6 +976,8 @@ test.describe('watch page', () => {
 
 test.describe('custom Shorts player', () => {
   const SHORTS_CHANNEL = 'UCshortsfeed000000000000'
+  const FIRST_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/w1WKmSqwM8I/frame0.jpg?selected=1'
+  const SECOND_SHORT_THUMBNAIL = 'https://i.ytimg.com/vi/RZ6PG5QATg4/frame0.jpg?selected=1'
 
   test.use({
     seed: {
@@ -1005,7 +1007,8 @@ test.describe('custom Shorts player', () => {
             authorId: SHORTS_CHANNEL,
             published: 2,
             isShort: true,
-            lengthSeconds: ''
+            lengthSeconds: '',
+            thumbnailUrl: FIRST_SHORT_THUMBNAIL
           },
           {
             type: 'video',
@@ -1015,7 +1018,8 @@ test.describe('custom Shorts player', () => {
             authorId: SHORTS_CHANNEL,
             published: 1,
             isShort: true,
-            lengthSeconds: ''
+            lengthSeconds: '',
+            thumbnailUrl: SECOND_SHORT_THUMBNAIL
           }
         ],
         shortsTimestamp: new Date().toISOString()
@@ -1059,14 +1063,19 @@ test.describe('custom Shorts player', () => {
     await expect(page.locator('.shortsActionRail')).toBeVisible()
     await expect(page.locator('.shortsNavigation')).toBeVisible()
     await expect(page.locator('.infoArea')).toBeHidden()
-    await expect(player.locator('video')).toHaveAttribute('loop', '')
-    await expect(player.locator('video')).toHaveCSS('object-fit', 'cover')
+    const video = player.locator('video')
+    await expect(video).toHaveAttribute('loop', '')
+    await expect(video).toHaveAttribute('poster', FIRST_SHORT_THUMBNAIL)
+    await expect(video).toHaveCSS('object-fit', 'cover')
+    await expect(player.locator('.shortsTopControl').first()).toHaveCSS(
+      'backdrop-filter',
+      /blur\(8px\)/
+    )
     expect(await player.evaluate(element => {
       return element.ui.getConfiguration().doubleClickForFullscreen
     })).toBe(false)
     expect(await page.evaluate(() => window.__shortsSeekBarFlashedWhileLoading)).toBe(false)
 
-    const video = player.locator('video')
     const seekBar = player.locator('.shaka-seek-bar-container')
     await video.evaluate(async element => {
       if (element.paused) await element.play()
@@ -1185,7 +1194,10 @@ test.describe('custom Shorts player', () => {
     await expect(previous).toBeDisabled()
     await expect(next).toBeEnabled()
     await expect(page.locator('.shortsNextPreview')).toBeVisible()
-    await expect(page.locator('.shortsNextPreview')).toHaveAttribute('style', /oardefault\.jpg/)
+    await expect(page.locator('.shortsNextPreview')).toHaveAttribute(
+      'style',
+      /RZ6PG5QATg4\/frame0\.jpg\?selected=1/
+    )
     await expect(page.locator('.shortsExternalMetadata')).toBeVisible()
     await expect(page.locator('.shortsActionRail')).toBeVisible()
 

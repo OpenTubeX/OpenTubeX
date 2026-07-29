@@ -4,11 +4,28 @@ import test from 'node:test'
 import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
+  getPreferredShortThumbnailUrl,
   getVideoAspectRatio,
   isYouTubeShort,
   parseLocalShortLinkedVideo,
   setChannelShortsNavigationContext,
 } from '../../src/renderer/helpers/player/shorts.js'
+
+test('prefers YouTube selected Shorts thumbnails only for the default preference', () => {
+  const video = {
+    thumbnailUrl: 'https://i.ytimg.com/vi/short/frame0.jpg'
+  }
+
+  assert.equal(
+    getPreferredShortThumbnailUrl(video, '', 'https://i.ytimg.com/vi/short/oardefault.jpg'),
+    video.thumbnailUrl
+  )
+  assert.equal(
+    getPreferredShortThumbnailUrl(video, 'middle', 'https://i.ytimg.com/vi/short/oar2.jpg'),
+    'https://i.ytimg.com/vi/short/oar2.jpg'
+  )
+  assert.equal(getPreferredShortThumbnailUrl(video, 'hidden', null), null)
+})
 
 test('reads aspect ratios from local and Invidious formats', () => {
   assert.equal(getVideoAspectRatio([{ width: 1080, height: 1920 }]), 9 / 16)
