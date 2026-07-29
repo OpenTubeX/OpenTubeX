@@ -47,6 +47,29 @@ test('large fullscreen playlist dock remains responsive and preserves its state'
     sidebarCardBox.x + sidebarCardBox.width - 7
   )
 
+  await sidebarCard.evaluate((element) => {
+    element.style.inlineSize = '240px'
+  })
+  const narrowCardBox = await sidebarCard.boundingBox()
+  const narrowProgressBox = await sidebarProgress.boundingBox()
+  await sidebarProgress.dispatchEvent('mousemove', {
+    clientX: narrowProgressBox.x + 1,
+    clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
+  })
+  await sidebarProgress.dispatchEvent('mousemove', {
+    clientX: narrowProgressBox.x + narrowProgressBox.width - 1,
+    clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
+  })
+  await expect.poll(async () => {
+    const box = await sidebarPreview.boundingBox()
+    return Math.round(narrowCardBox.x + narrowCardBox.width - (box.x + box.width))
+  }).toBe(8)
+  const narrowPreviewBox = await sidebarPreview.boundingBox()
+  expect(narrowPreviewBox.width).toBeLessThanOrEqual(narrowCardBox.width - 16)
+  await sidebarCard.evaluate((element) => {
+    element.style.removeProperty('inline-size')
+  })
+
   await waitForPlaybackOrSkip(test, page)
 
   await sidebar.evaluate((element) => { element.scrollTop = 420 })

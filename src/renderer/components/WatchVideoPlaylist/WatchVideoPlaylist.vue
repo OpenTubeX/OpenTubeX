@@ -309,6 +309,8 @@ const previewVideoIndex = ref(1)
 
 let prevVideoBeforeDeletion = null
 let getPlaylistInfoRun = false
+let previewPositionUpdatePending = false
+let previewPointerClientX = 0
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -1149,16 +1151,26 @@ async function updateProgressBarPreview(event) {
   const percentage = Math.max(0, Math.min(100, (mouseX / progressBarWidth) * 100))
 
   previewVideoIndex.value = Math.max(1, Math.min(playlistVideoCount.value, Math.ceil((percentage / 100) * playlistVideoCount.value)))
+  previewPointerClientX = event.clientX
 
+  if (previewPositionUpdatePending) return
+  previewPositionUpdatePending = true
   await nextTick()
+  previewPositionUpdatePending = false
+
   const boundary = playlistProgressBar.value.closest('.watchVideoPlaylist')
   if (boundary && progressBarPreview.value) {
     const boundaryRect = boundary.getBoundingClientRect()
-    const previewWidth = progressBarPreview.value.offsetWidth
     const margin = 8
+    const availableWidth = Math.max(0, boundaryRect.width - (margin * 2))
+    progressBarPreview.value.style.setProperty(
+      '--playlist-preview-max-inline-size',
+      `${availableWidth}px`
+    )
+    const previewWidth = Math.min(progressBarPreview.value.offsetWidth, availableWidth)
     const minimumViewportLeft = boundaryRect.left + margin
     const maximumViewportLeft = boundaryRect.right - margin - previewWidth
-    const centeredViewportLeft = event.clientX - (previewWidth / 2)
+    const centeredViewportLeft = previewPointerClientX - (previewWidth / 2)
     const viewportLeft = Math.max(
       minimumViewportLeft,
       Math.min(maximumViewportLeft, centeredViewportLeft)
