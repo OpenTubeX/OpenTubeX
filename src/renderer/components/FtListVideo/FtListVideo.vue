@@ -101,6 +101,8 @@
           :size="playlistIconSize"
           force-dropdown
           dropdown-position-x="left"
+          :dropdown-portal="appearance === 'watchPlaylistItem'"
+          :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
         >
           <FtAddToPlaylistDropdown :video-data="addToPlaylistVideoData" />
         </FtIconButton>
@@ -286,7 +288,9 @@
           theme="base-no-default"
           :size="16"
           :use-shadow="false"
+          :dropdown-portal="appearance === 'watchPlaylistItem'"
           dropdown-position-x="left"
+          :dropdown-position-y="appearance === 'watchPlaylistItem' ? 'top' : 'bottom'"
           :dropdown-options="dropdownOptions"
           @click="handleOptionsClick"
         />

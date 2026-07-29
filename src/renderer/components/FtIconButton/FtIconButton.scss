@@ -173,6 +173,11 @@
     inset-block-start: 45px;
   }
 
+  &.portal {
+    position: fixed;
+    z-index: 1000;
+  }
+
   .list {
     list-style-type: none;
     margin: 0;

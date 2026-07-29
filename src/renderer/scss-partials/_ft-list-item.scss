@@ -459,7 +459,7 @@ $watched-transition-duration: 0.5s;
   }
 
   // The container opacity would make an open dropdown (e.g. add to playlist) see-through
-  :deep(.playlistIcons:has(.iconDropdown)) {
+  :deep(.playlistIcons:has(.iconDropdown, .iconButton[aria-expanded='true'])) {
     opacity: 1;
   }
 
@@ -479,7 +479,7 @@ $watched-transition-duration: 0.5s;
     &:hover .optionsButton,
     &:has(:focus-visible) .optionsButton,
     // Keep visible when the drop down is open
-    :deep(.optionsButton:has(> .iconDropdown:focus-within)) {
+    :deep(.optionsButton:has(> .iconDropdown:focus-within, .iconButton[aria-expanded='true'])) {
       opacity: 1;
     }
 
@@ -493,7 +493,7 @@ $watched-transition-duration: 0.5s;
     }
 
     // Keep visible while the dropdown is open, even if the pointer leaves the video
-    :deep(.addToPlaylistIcon:has(.iconDropdown)) {
+    :deep(.addToPlaylistIcon:has(.iconDropdown, .iconButton[aria-expanded='true'])) {
       opacity: 1;
     }
   }
