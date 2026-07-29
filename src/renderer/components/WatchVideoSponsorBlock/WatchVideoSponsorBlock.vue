@@ -129,11 +129,15 @@
               v-if="segment.actionType !== 'full'"
               type="button"
               class="sponsorBlockVoteButton sponsorBlockSkipButton"
-              :aria-label="$t('Video.Player.SponsorBlock.SkipSegment')"
-              :title="$t('Video.Player.SponsorBlock.SkipSegment')"
+              :aria-label="segment.actionType === 'mute'
+                ? $t('Video.Player.SponsorBlock.MuteSegment')
+                : $t('Video.Player.SponsorBlock.SkipSegment')"
+              :title="segment.actionType === 'mute'
+                ? $t('Video.Player.SponsorBlock.MuteSegment')
+                : $t('Video.Player.SponsorBlock.SkipSegment')"
               @click="$emit('skip', segment.uuid)"
             >
-              <font-awesome-icon :icon="['fas', 'forward-fast']" />
+              <font-awesome-icon :icon="['fas', segment.actionType === 'mute' ? 'volume-xmark' : 'forward-fast']" />
             </button>
           </div>
         </div>

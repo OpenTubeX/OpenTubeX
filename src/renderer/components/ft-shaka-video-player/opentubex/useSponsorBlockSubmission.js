@@ -107,6 +107,7 @@ function normalizeSponsorBlockDraftTime(seconds) {
  *   props: { videoId: string },
  *   showOverlayControls: () => void,
  *   sponsorBlockCurrentTime: import('vue').Ref<number>,
+ *   setSponsorBlockPreviewMuted: (muted: boolean) => void,
  *   t: (key: string) => string,
  *   useSponsorBlock: import('vue').ComputedRef<boolean>,
  *   video: import('vue').Ref<HTMLVideoElement | null>
@@ -121,6 +122,7 @@ export function useSponsorBlockSubmission({
   props,
   showOverlayControls,
   sponsorBlockCurrentTime,
+  setSponsorBlockPreviewMuted,
   t,
   useSponsorBlock,
   video,
@@ -128,7 +130,7 @@ export function useSponsorBlockSubmission({
   const sponsorBlockEnableSubmission = computed(() => store.getters.getSponsorBlockEnableSubmission)
   const sponsorBlockDraftSegmentsByVideoId = computed(() => store.getters.getSponsorBlockDraftSegmentsByVideoId)
 
-  /** @type {import('vue').Ref<{id: string, startTime: number, endTime: number | null, category: import('../../../helpers/sponsorblock').SponsorBlockCategory, actionType: 'skip' | 'full' | 'poi', previewed: boolean}[]>} */
+  /** @type {import('vue').Ref<{id: string, startTime: number, endTime: number | null, category: import('../../../helpers/sponsorblock').SponsorBlockCategory, actionType: 'skip' | 'mute' | 'full' | 'poi', previewed: boolean}[]>} */
   const sponsorBlockDraftSegments = ref([])
   const sponsorBlockDraftEditValues = reactive({})
   const sponsorBlockDraftEditingStates = reactive({})
@@ -302,6 +304,7 @@ export function useSponsorBlockSubmission({
   }
 
   function stopSponsorBlockPreviewSkip() {
+    setSponsorBlockPreviewMuted(false)
     sponsorBlockPreviewSkipSegment.value = null
 
     if (sponsorBlockPreviewSkipAnimationFrame !== null) {
@@ -486,8 +489,9 @@ export function useSponsorBlockSubmission({
 
   async function updateSponsorBlockDraftActionType(segmentId, value) {
     const editValue = getSponsorBlockDraftEditValue(segmentId)
+    const segment = sponsorBlockDraftSegments.value.find(candidate => candidate.id === segmentId)
     editValue.actionType = value
-    if (value === 'skip') {
+    if (segment?.actionType === 'full' && value !== 'full') {
       editValue.endTime = ''
     }
     await saveSponsorBlockDraft(segmentId)
@@ -634,6 +638,7 @@ export function useSponsorBlockSubmission({
     sponsorBlockCurrentTime.value = previewStartTime
     sponsorBlockPreviewSkipSegment.value = {
       id: draft.id,
+      actionType: draft.actionType,
       startTime: draft.startTime,
       endTime: draft.endTime
     }
@@ -709,7 +714,11 @@ export function useSponsorBlockSubmission({
       return 'poi'
     }
 
-    return isSponsorBlockFullVideoSegment(segment) ? 'full' : 'skip'
+    if (isSponsorBlockFullVideoSegment(segment)) {
+      return 'full'
+    }
+
+    return segment.actionType === 'mute' ? 'mute' : 'skip'
   }
 
   async function submitSponsorBlockDrafts() {
@@ -802,6 +811,11 @@ export function useSponsorBlockSubmission({
 
     if (currentTime >= previewSegment.endTime || currentTime < previewSegment.startTime - 5) {
       stopSponsorBlockPreviewSkip()
+      return
+    }
+
+    if (previewSegment.actionType === 'mute') {
+      setSponsorBlockPreviewMuted(currentTime >= previewSegment.startTime)
       return
     }
 

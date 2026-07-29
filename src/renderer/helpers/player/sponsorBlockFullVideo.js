@@ -23,6 +23,10 @@ export function resolveSponsorBlockActionType(category, actionType) {
     return 'full'
   }
 
+  if (actionType === 'mute') {
+    return 'mute'
+  }
+
   return 'skip'
 }
 

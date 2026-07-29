@@ -744,7 +744,7 @@
                 :style="{ color }"
               />
               <span class="skippedSegmentText">
-                {{ getSponsorBlockPromptLabel(translatedCategory) }}
+                {{ getSponsorBlockPromptLabel(translatedCategory, uuid) }}
               </span>
             </div>
             <div class="skippedSegmentHeaderActions">
@@ -963,6 +963,12 @@
                   :disabled="(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category) === 'exclusive_access'"
                 >
                   {{ $t('Video.Player.SponsorBlock.SkipActionType') }}
+                </option>
+                <option
+                  value="mute"
+                  :disabled="(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category) === 'exclusive_access'"
+                >
+                  {{ $t('Video.Player.SponsorBlock.MuteActionType') }}
                 </option>
                 <option
                   value="full"

@@ -1428,10 +1428,13 @@ Video:
       WhitelistChannel: Whitelist channel
       ChannelWhitelisted: Whitelisted
       RemoveChannelFromWhitelist: Remove channel from whitelist
+      MuteSegment: Mute segment
       SkipSegment: Skip segment
       CloseSegmentActions: Close segment actions
       FullVideo: Full Video
       FullVideoLabel: '{segmentCategory} · Full Video'
+      MuteActionType: Mute
+      MutePrompt: Mute {segmentCategory} segment?
       SkipActionType: Skip
       LockedSegment: Locked segment
       UpvoteSegment: Upvote segment

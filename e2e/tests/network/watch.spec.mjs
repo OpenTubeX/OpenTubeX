@@ -645,6 +645,93 @@ test.describe('watch page', () => {
     }])
   })
 
+  test('mutes SponsorBlock mute segments without skipping', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+
+    let submittedBody = null
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'mute-segment',
+          actionType: 'mute',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [2, 10],
+          videoDuration: 19,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.route('**/api/skipSegments', async route => {
+      submittedBody = route.request().postDataJSON()
+      await route.fulfill({
+        body: JSON.stringify([{
+          UUID: 'submitted-mute-segment',
+          category: 'sponsor',
+          segment: [11, 12]
+        }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.muted = false
+      element.currentTime = 3
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(video).toHaveJSProperty('muted', true)
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(10)
+
+    await video.evaluate(element => {
+      element.currentTime = 11
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(video).toHaveJSProperty('muted', false)
+
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 11
+    })
+    await page.locator('.sponsorblock-start-button').click({ force: true })
+    await video.evaluate(element => { element.currentTime = 12 })
+    await page.locator('.sponsorblock-end-button').click({ force: true })
+
+    const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+    await submissionMenu.locator('select').nth(1).selectOption('mute')
+    await submissionMenu.getByRole('button', { name: 'Preview' }).click()
+    await video.evaluate(element => {
+      element.currentTime = 11.5
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(video).toHaveJSProperty('muted', true)
+    await video.evaluate(element => {
+      element.currentTime = 12.1
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(video).toHaveJSProperty('muted', false)
+
+    await submissionMenu.locator('.sponsorBlockSubmissionButton').click()
+    await expect.poll(() => submittedBody).not.toBeNull()
+    expect(submittedBody.segments).toEqual([{
+      actionType: 'mute',
+      category: 'sponsor',
+      description: '',
+      segment: [11, 12]
+    }])
+  })
+
   test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({

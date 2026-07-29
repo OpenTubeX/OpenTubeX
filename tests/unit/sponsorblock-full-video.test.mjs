@@ -12,6 +12,7 @@ test('only supported categories can mark a full video', () => {
   assert.equal(resolveSponsorBlockActionType('selfpromo', 'full'), 'full')
   assert.equal(resolveSponsorBlockActionType('exclusive_access', 'skip'), 'full')
   assert.equal(resolveSponsorBlockActionType('interaction', 'full'), 'skip')
+  assert.equal(resolveSponsorBlockActionType('interaction', 'mute'), 'mute')
   assert.equal(resolveSponsorBlockActionType('poi_highlight', 'full'), 'poi')
 })
 
@@ -21,6 +22,11 @@ test('full-video submissions always use zero timestamps', () => {
     startTime: 42,
     endTime: 84,
   }), [0, 0])
+  assert.deepEqual(getSponsorBlockSubmissionSegmentTimes({
+    actionType: 'mute',
+    startTime: 12,
+    endTime: 24,
+  }), [12, 24])
 })
 
 test('full-video labels use SponsorBlock priority', () => {

@@ -61,6 +61,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
+import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -1428,7 +1429,7 @@ export default defineComponent({
      * @type {{
      *   uuid: string
      *   category: SponsorBlockCategory
-     *   actionType?: 'skip' | 'full' | 'poi'
+     *   actionType?: 'skip' | 'mute' | 'full' | 'poi'
      *   startTime: number,
      *   endTime: number
      * }[]}
@@ -1458,6 +1459,15 @@ export default defineComponent({
     const sponsorBlockToastNow = ref(Date.now())
     const sponsorBlockCurrentTime = ref(0)
     let sponsorBlockToastTimeInterval = null
+    const manuallyMutedSponsorBlockSegments = new Set()
+    const sponsorBlockMuteController = createSponsorBlockMuteController({
+      getMuted: () => video.value?.muted ?? false,
+      setMuted: muted => {
+        if (video.value) {
+          video.value.muted = muted
+        }
+      }
+    })
 
     const {
       cancelCurrentSponsorBlockDraft,
@@ -1508,6 +1518,7 @@ export default defineComponent({
       props,
       showOverlayControls,
       sponsorBlockCurrentTime,
+      setSponsorBlockPreviewMuted: muted => sponsorBlockMuteController.setSourceActive('preview', muted),
       t,
       useSponsorBlock,
       video,
@@ -1590,7 +1601,7 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockInfoSegments.value = segments
         sponsorBlockSegments = segments.filter(segment => {
-          return ['skip', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+          return ['skip', 'mute', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
         })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
@@ -1599,6 +1610,7 @@ export default defineComponent({
           const currentTime = video.value?.currentTime ?? 0
           syncPromptSponsorBlockSegments(currentTime)
           updateSponsorBlockHighlightState(currentTime)
+          syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
         }
       } else {
         scheduleSponsorBlockNotFoundRefetch()
@@ -1616,6 +1628,8 @@ export default defineComponent({
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
       sponsorBlockDismissedPromptSegments = new Set()
+      manuallyMutedSponsorBlockSegments.clear()
+      sponsorBlockMuteController.setSourceActive('segments', false)
       sponsorBlockSegments = []
       sponsorBlockInfoSegments.value = []
       terminalSponsorBlockOutroStarted = false
@@ -1652,7 +1666,7 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockInfoSegments.value = segments
         sponsorBlockSegments = segments.filter(segment => {
-          return ['skip', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+          return ['skip', 'mute', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
         })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
@@ -1667,6 +1681,7 @@ export default defineComponent({
         const currentTime = video.value?.currentTime ?? 0
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
+        syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
       }
     }
 
@@ -1784,6 +1799,18 @@ export default defineComponent({
     function skipSponsorBlockInfoSegment(uuid) {
       const segment = sponsorBlockInfoSegments.value.find(item => item.uuid === uuid)
       if (!segment || !canSeek()) {
+        return
+      }
+
+      if (segment.actionType === 'mute') {
+        manuallyMutedSponsorBlockSegments.add(uuid)
+        const currentTime = video.value.currentTime
+        if (currentTime < segment.startTime || currentTime >= segment.endTime) {
+          video.value.currentTime = segment.startTime
+          sponsorBlockCurrentTime.value = segment.startTime
+        }
+        syncSponsorBlockMuteSegments(video.value.currentTime)
+        showOverlayControls()
         return
       }
 
@@ -1940,7 +1967,12 @@ export default defineComponent({
      * @param {string} translatedCategory
      * @returns {string}
      */
-    function getSponsorBlockPromptLabel(translatedCategory) {
+    function getSponsorBlockPromptLabel(translatedCategory, uuid) {
+      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+      if (segment?.actionType === 'mute') {
+        return t('Video.Player.SponsorBlock.MutePrompt', { segmentCategory: translatedCategory })
+      }
+
       return t('Video.Player.SponsorBlock.SkipPrompt', { segmentCategory: translatedCategory })
     }
 
@@ -1949,12 +1981,17 @@ export default defineComponent({
      * @returns {string}
      */
     function getSponsorBlockPromptActionLabel(uuid) {
+      const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+      const actionLabel = segment?.actionType === 'mute'
+        ? t('Video.Player.SponsorBlock.MuteActionType')
+        : t('Video.Player.SponsorBlock.SkipPromptAction')
+
       if (getActivePromptSponsorBlockToast()?.uuid !== uuid) {
-        return t('Video.Player.SponsorBlock.SkipPromptAction')
+        return actionLabel
       }
 
       return addKeyboardShortcutToActionTitle(
-        t('Video.Player.SponsorBlock.SkipPromptAction'),
+        actionLabel,
         t('Keys.enter')
       )
     }
@@ -2063,6 +2100,12 @@ export default defineComponent({
 
       sponsorBlockDismissedPromptSegments.delete(uuid)
       removePromptSponsorBlockToast(uuid)
+
+      if (segment.actionType === 'mute') {
+        manuallyMutedSponsorBlockSegments.add(uuid)
+        syncSponsorBlockMuteSegments(video.value.currentTime)
+        return true
+      }
 
       const seekRange = player.seekRange()
       const targetTime = Math.min(
@@ -2330,7 +2373,7 @@ export default defineComponent({
       const skippedSegments = []
 
       sponsorBlockSegments.forEach(segment => {
-        if (isSponsorBlockPointSegment(segment) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
+        if (segment.actionType !== 'skip' || isSponsorBlockPointSegment(segment) || sponsorBlockDoNotSkipSegments.has(segment.uuid)) {
           return
         }
 
@@ -2372,6 +2415,25 @@ export default defineComponent({
           })
         })
       }
+    }
+
+    function syncSponsorBlockMuteSegments(currentTime, autoMuteEnabled = true) {
+      for (const uuid of manuallyMutedSponsorBlockSegments) {
+        const segment = sponsorBlockSegments.find(candidate => candidate.uuid === uuid)
+        if (!segment || currentTime < segment.startTime || currentTime >= segment.endTime) {
+          manuallyMutedSponsorBlockSegments.delete(uuid)
+        }
+      }
+
+      const shouldMute = sponsorBlockSegments.some(segment => {
+        return segment.actionType === 'mute' &&
+          currentTime >= segment.startTime &&
+          currentTime < segment.endTime &&
+          (manuallyMutedSponsorBlockSegments.has(segment.uuid) ||
+            (autoMuteEnabled && sponsorSkips.value.autoSkip.has(segment.category)))
+      })
+
+      sponsorBlockMuteController.setSourceActive('segments', shouldMute)
     }
 
     /**
@@ -3489,6 +3551,8 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      sponsorBlockMuteController.reset()
+      manuallyMutedSponsorBlockSegments.clear()
       if (props.shortsPlayer) {
         shortsPaused.value = false
         shortsCaptionsEnabled.value = false
@@ -3504,7 +3568,12 @@ export default defineComponent({
     watch(useSponsorBlock, enabled => {
       if (!enabled) {
         closeSponsorBlockInfo()
+        sponsorBlockMuteController.reset()
       }
+    })
+
+    watch(() => props.sponsorBlockAutoSkipDisabled, disabled => {
+      syncSponsorBlockMuteSegments(video.value?.currentTime ?? 0, !disabled)
     })
 
     watch(sponsorBlockEnableSubmission, () => emitSponsorBlockInfoState())
@@ -4024,7 +4093,8 @@ export default defineComponent({
         stats.volume = (video_.volume * 100).toFixed(1)
       }
 
-      if (!rememberVolume.value || applyingInitialVolume) {
+      const sponsorBlockVolumeChange = sponsorBlockMuteController.handleVolumeChange()
+      if (!rememberVolume.value || applyingInitialVolume || sponsorBlockVolumeChange) {
         return
       }
 
@@ -4082,10 +4152,13 @@ export default defineComponent({
         if (useSponsorBlock.value && sponsorBlockSegments.length > 0 && canSeek()) {
           syncPromptSponsorBlockSegments(currentTime)
           updateSponsorBlockHighlightState(currentTime)
+          syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
 
           if (!props.sponsorBlockAutoSkipDisabled) {
             skipSponsorBlockSegments(currentTime)
           }
+        } else {
+          sponsorBlockMuteController.setSourceActive('segments', false)
         }
 
         updateScrollMiniDragHandleContrast()
@@ -7928,6 +8001,7 @@ export default defineComponent({
       promptSponsorBlockSegments.value = []
       stopSponsorBlockToastTimer()
       clearSponsorBlockNotFoundRefetchTimeout()
+      sponsorBlockMuteController.reset()
 
       window.removeEventListener('online', onlineHandler)
       window.removeEventListener('offline', offlineHandler)

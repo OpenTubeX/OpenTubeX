@@ -214,7 +214,7 @@ export async function getOrCreateSponsorBlockUserId() {
  * @param {{
  *   segment: [number, number]
  *   category: SponsorBlockCategory
- *   actionType: 'skip' | 'full' | 'poi'
+ *   actionType: 'skip' | 'mute' | 'full' | 'poi'
  *   description: string
  * }[]} segments
  */
