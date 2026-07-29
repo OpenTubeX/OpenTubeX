@@ -15,7 +15,8 @@ async function getSyncCapabilities() {
   return health.capabilities ?? {}
 }
 
-function rateLimitClient(title) {
+function rateLimitClient(testInfo) {
+  const title = `${testInfo.file}\0${testInfo.titlePath.join('\0')}`
   let hash = 2166136261
   for (const character of title) {
     hash ^= character.codePointAt(0)
@@ -31,7 +32,7 @@ test.describe('OpenTubeX sync server', () => {
     await page.route('**/account/**', route => route.continue({
       headers: {
         ...route.request().headers(),
-        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
+        'X-Forwarded-For': rateLimitClient(testInfo)
       }
     }))
   })
@@ -316,7 +317,7 @@ test.describe('OpenTubeX sync server', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
+        'X-Forwarded-For': rateLimitClient(testInfo)
       },
       body: JSON.stringify({ name: username, password })
     })

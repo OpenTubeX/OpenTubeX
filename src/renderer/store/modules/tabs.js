@@ -165,7 +165,13 @@ const mutations = {
     }
     const entry = tab.history[tab.historyIndex]
     if (entry) {
-      entry.title = title || entry.route.fullPath
+      const resolvedTitle = title || entry.route.fullPath
+      // A caller can provide a title it already knows before a dynamic page
+      // finishes loading. Do not replace that useful history label with the
+      // route placeholder while the page is mounting.
+      if (resolvedTitle !== entry.route.fullPath || entry.title === entry.route.fullPath) {
+        entry.title = resolvedTitle
+      }
     }
   },
 
