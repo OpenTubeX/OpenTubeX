@@ -9,7 +9,7 @@
         :show-action-button="false"
         :data-list="syncServerInstances"
         :value="serverUrl"
-        :disabled="connected"
+        :disabled="connected || authenticating"
         show-label
         @input="serverUrl = $event"
         @blur="saveServerUrl"
@@ -366,6 +366,7 @@ const serverPrivacySupported = ref(null)
 const serverCheckStatus = ref('idle')
 const serverCheckError = ref('')
 const localError = ref('')
+const authenticating = ref(false)
 const showDeleteAccountPrompt = ref(false)
 const deleteAccountPassword = ref('')
 const deleteAccountError = ref('')
@@ -383,7 +384,8 @@ const privacyPolicyUrl = computed(() => {
   }
 })
 const serverCredentialsDisabled = computed(() => (
-  !connected.value && serverCheckStatus.value !== 'valid'
+  authenticating.value ||
+  (!connected.value && serverCheckStatus.value !== 'valid')
 ))
 const status = computed(() => store.getters.getSyncServerStatus)
 const busy = computed(() => status.value === 'syncing')
@@ -436,16 +438,17 @@ const lastSyncLabel = computed(() => {
 let serverCheckTimer = null
 let serverCheckSequence = 0
 
-watch(serverUrl, value => {
+watch([serverUrl, connected], ([value, isConnected], [previousValue, wasConnected] = []) => {
   clearTimeout(serverCheckTimer)
   const sequence = ++serverCheckSequence
+  const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
-  serverCheckStatus.value = 'idle'
+  serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
-  if (connected.value || !value.trim()) return
+  if (isConnected || !value.trim()) return
 
   serverCheckTimer = setTimeout(async () => {
-    serverCheckStatus.value = 'checking'
+    if (!disconnected) serverCheckStatus.value = 'checking'
     try {
       const capabilities = await new SyncServerClient(value).getCapabilities()
       if (sequence !== serverCheckSequence) return
@@ -477,6 +480,7 @@ async function saveServerUrl() {
 async function authenticate(mode) {
   if (busy.value || serverCredentialsDisabled.value) return
   localError.value = ''
+  authenticating.value = true
   try {
     await store.dispatch('authenticateSyncServer', {
       mode,
@@ -492,6 +496,8 @@ async function authenticate(mode) {
     showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
   } catch (error) {
     localError.value = error.message
+  } finally {
+    authenticating.value = false
   }
 }
 
@@ -524,6 +530,7 @@ async function confirmDataLossSync() {
 
 async function disconnect() {
   if (busy.value) return
+  localError.value = ''
   await store.dispatch('disconnectSyncServer')
 }
 
