@@ -1093,6 +1093,9 @@ test.describe('watch page', () => {
   test.describe('fullscreen playlist dock', () => {
     test.use({
       seed: {
+        settings: {
+          uiRoundness: 200,
+        },
         playlists: [FULLSCREEN_PLAYLIST],
         history: [{
           ...FULLSCREEN_PLAYLIST.videos[0],
@@ -1130,6 +1133,11 @@ test.describe('watch page', () => {
       await thumbnail.hover()
       await expect(watched).toBeVisible()
       await expect(actions).toBeVisible()
+      const duration = thumbnail.locator('.videoDuration')
+      await expect(watched).toHaveCSS('font-size', '12px')
+      await expect(watched).toHaveCSS('border-radius', '10px')
+      await expect(duration).toHaveCSS('font-size', '12px')
+      await expect(duration).toHaveCSS('border-radius', '10px')
 
       const [watchedBox, actionsBox] = await Promise.all([
         watched.boundingBox(),
@@ -1163,7 +1171,7 @@ test.describe('watch page', () => {
       await expect(sponsorBlockLabel).toBeVisible()
       const [sponsorBlockBox, durationBox, currentActionsBox] = await Promise.all([
         sponsorBlockLabel.boundingBox(),
-        thumbnail.locator('.videoDuration').boundingBox(),
+        duration.boundingBox(),
         actions.boundingBox(),
       ])
       expect(sponsorBlockBox.y).toBeGreaterThan(
