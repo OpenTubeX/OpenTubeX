@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   normalizeReleaseImage,
+  normalizePullRequestPages,
   parseReleaseNote,
   parseReleaseNoteCategory,
   probeImageSize,
@@ -99,6 +100,57 @@ test('release notes are required for noteworthy categories', () => {
       body: categoryMarkers('Highlights'),
     },
   }), /Fill in the release note section/)
+})
+
+test('paginated pull request results are flattened', () => {
+  assert.deepEqual(normalizePullRequestPages([
+    {
+      data: {
+        repository: {
+          pullRequests: {
+            nodes: [{
+              body: 'First',
+              mergeCommit: { oid: 'first' },
+              mergedAt: '2026-01-01T00:00:00Z',
+              number: 1,
+              title: 'First PR',
+              url: 'https://github.com/OpenTubeX/OpenTubeX/pull/1',
+            }],
+          },
+        },
+      },
+    },
+    {
+      data: {
+        repository: {
+          pullRequests: {
+            nodes: [{
+              body: 'Second',
+              mergeCommit: { oid: 'second' },
+              mergedAt: '2026-02-01T00:00:00Z',
+              number: 2,
+              title: 'Second PR',
+              url: 'https://github.com/OpenTubeX/OpenTubeX/pull/2',
+            }],
+          },
+        },
+      },
+    },
+  ]), [{
+    body: 'First',
+    mergeCommit: { oid: 'first' },
+    mergedAt: '2026-01-01T00:00:00Z',
+    number: 1,
+    title: 'First PR',
+    url: 'https://github.com/OpenTubeX/OpenTubeX/pull/1',
+  }, {
+    body: 'Second',
+    mergeCommit: { oid: 'second' },
+    mergedAt: '2026-02-01T00:00:00Z',
+    number: 2,
+    title: 'Second PR',
+    url: 'https://github.com/OpenTubeX/OpenTubeX/pull/2',
+  }])
 })
 
 test('a release note and optional Markdown image are parsed', () => {

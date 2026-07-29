@@ -25,6 +25,29 @@ const ALLOWED_IMAGE_DOWNLOAD_HOSTS = new Set([
   ...ALLOWED_IMAGE_HOSTS,
   'github-production-user-asset-6210df.s3.amazonaws.com',
 ])
+const MERGED_PULL_REQUESTS_QUERY = `
+query($owner: String!, $repo: String!, $base: String!, $endCursor: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequests(
+      first: 100
+      after: $endCursor
+      states: MERGED
+      baseRefName: $base
+      orderBy: { field: CREATED_AT, direction: DESC }
+    ) {
+      nodes {
+        body
+        mergeCommit { oid }
+        mergedAt
+        number
+        title
+        url
+      }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+}
+`
 
 function extractMarkedSection(body, marker) {
   const startMarker = `<!-- ${marker}:start -->`
@@ -311,23 +334,31 @@ export function selectPullRequests(pullRequests, previousTag, target) {
     .sort((left, right) => left.mergedAt.localeCompare(right.mergedAt))
 }
 
-function listMergedPullRequests(repository, target) {
+export function normalizePullRequestPages(pages) {
+  return pages.flatMap((page) => page.data.repository.pullRequests.nodes)
+}
+
+export function listMergedPullRequests(repository, target) {
+  const [owner, repo] = repository.split('/')
+
+  if (!owner || !repo) { throw new Error(`Invalid GitHub repository: ${repository}.`) }
+
   const output = execFileSync('gh', [
-    'pr',
-    'list',
-    '--repo',
-    repository,
-    '--state',
-    'merged',
-    '--base',
-    target,
-    '--limit',
-    '1000',
-    '--json',
-    'body,mergeCommit,mergedAt,number,title,url',
+    'api',
+    'graphql',
+    '--paginate',
+    '--slurp',
+    '-f',
+    `query=${MERGED_PULL_REQUESTS_QUERY}`,
+    '-F',
+    `owner=${owner}`,
+    '-F',
+    `repo=${repo}`,
+    '-F',
+    `base=${target}`,
   ], { encoding: 'utf8' })
 
-  return JSON.parse(output)
+  return normalizePullRequestPages(JSON.parse(output))
 }
 
 function indentContinuationLines(value) {
