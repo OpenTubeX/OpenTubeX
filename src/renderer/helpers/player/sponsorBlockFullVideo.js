@@ -14,6 +14,11 @@ export function isSponsorBlockFullVideoCategory(category) {
   return SPONSORBLOCK_FULL_VIDEO_CATEGORIES.includes(category)
 }
 
+export function isSponsorBlockFullVideoSegment(segment) {
+  return isSponsorBlockFullVideoCategory(segment.category) &&
+    (segment.actionType == null || segment.actionType === 'full')
+}
+
 export function resolveSponsorBlockActionType(category, actionType) {
   if (category === 'poi_highlight') {
     return 'poi'
@@ -44,7 +49,7 @@ export function selectSponsorBlockFullVideoLabel(segments) {
   for (const category of SPONSORBLOCK_FULL_VIDEO_CATEGORY_PRIORITY) {
     const segment = segments.find(candidate => {
       return candidate.category === category &&
-        (candidate.actionType == null || candidate.actionType === 'full')
+        isSponsorBlockFullVideoSegment(candidate)
     })
 
     if (segment) {

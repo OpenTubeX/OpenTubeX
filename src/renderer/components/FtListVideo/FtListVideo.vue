@@ -46,7 +46,7 @@
         {{ displayDurationLabel }}
       </div>
       <div
-        v-if="sponsorBlockFullVideoCategory"
+        v-if="useSponsorBlock && sponsorBlockFullVideoCategory"
         class="sponsorBlockVideoLabel"
         :title="t('Video.Player.SponsorBlock.FullVideoLabel', {
           segmentCategory: sponsorBlockFullVideoLabel
@@ -323,7 +323,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -1394,12 +1394,16 @@ function parseVideoData() {
   }
 }
 
-async function fetchSponsorBlockVideoLabel() {
+async function fetchSponsorBlockVideoLabel(videoId) {
   try {
-    const label = await getSponsorBlockVideoLabel(id.value)
-    sponsorBlockFullVideoCategory.value = label?.category ?? null
+    const label = await getSponsorBlockVideoLabel(videoId)
+    if (useSponsorBlock.value && id.value === videoId) {
+      sponsorBlockFullVideoCategory.value = label?.category ?? null
+    }
   } catch {
-    sponsorBlockFullVideoCategory.value = null
+    if (id.value === videoId) {
+      sponsorBlockFullVideoCategory.value = null
+    }
   }
 }
 
@@ -1587,9 +1591,12 @@ if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumb
   debounceGetDeArrowThumbnail()
 }
 
-if (useSponsorBlock.value && id.value) {
-  fetchSponsorBlockVideoLabel()
-}
+watch([useSponsorBlock, id], ([enabled, videoId]) => {
+  sponsorBlockFullVideoCategory.value = null
+  if (enabled && videoId) {
+    fetchSponsorBlockVideoLabel(videoId)
+  }
+}, { immediate: true })
 </script>
 
 <style scoped src="./FtListVideo.scss" lang="scss" />

@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   getSponsorBlockSubmissionSegmentTimes,
+  isSponsorBlockFullVideoSegment,
   resolveSponsorBlockActionType,
   selectSponsorBlockFullVideoLabel,
 } from '../../src/renderer/helpers/player/sponsorBlockFullVideo.js'
@@ -27,6 +28,19 @@ test('full-video submissions always use zero timestamps', () => {
     startTime: 12,
     endTime: 24,
   }), [12, 24])
+})
+
+test('compact full-video segments may omit their action type', () => {
+  assert.equal(isSponsorBlockFullVideoSegment({
+    category: 'exclusive_access'
+  }), true)
+  assert.equal(isSponsorBlockFullVideoSegment({
+    actionType: 'skip',
+    category: 'sponsor'
+  }), false)
+  assert.equal(isSponsorBlockFullVideoSegment({
+    category: 'interaction'
+  }), false)
 })
 
 test('full-video labels use SponsorBlock priority', () => {

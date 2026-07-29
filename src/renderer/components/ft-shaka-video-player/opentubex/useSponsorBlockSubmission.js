@@ -5,6 +5,7 @@ import { submitSponsorBlockSegments } from '../../../helpers/sponsorblock'
 import {
   getSponsorBlockSubmissionSegmentTimes,
   isSponsorBlockFullVideoCategory,
+  isSponsorBlockFullVideoSegment,
   resolveSponsorBlockActionType,
 } from '../../../helpers/player/sponsorBlockFullVideo'
 import { openExternalLink, showToast } from '../../../helpers/utils'
@@ -693,10 +694,6 @@ export function useSponsorBlockSubmission({
 
   function isSponsorBlockPointSegment(segment) {
     return segment.actionType === 'poi' || isSponsorBlockPointCategory(segment.category)
-  }
-
-  function isSponsorBlockFullVideoSegment(segment) {
-    return segment.actionType === 'full'
   }
 
   function isSponsorBlockDraftComplete(segment) {

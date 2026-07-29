@@ -688,6 +688,7 @@ test.describe('watch page', () => {
 
     const video = page.locator('.ftVideoPlayer video')
     await video.evaluate(element => {
+      element.pause()
       element.muted = false
       element.currentTime = 3
       element.dispatchEvent(new Event('timeupdate'))

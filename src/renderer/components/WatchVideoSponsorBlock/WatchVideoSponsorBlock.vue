@@ -126,7 +126,7 @@
               <font-awesome-icon :icon="['fas', 'thumbs-down']" />
             </button>
             <button
-              v-if="segment.actionType !== 'full'"
+              v-if="!isSponsorBlockFullVideoSegment(segment)"
               type="button"
               class="sponsorBlockVoteButton sponsorBlockSkipButton"
               :aria-label="segment.actionType === 'mute'
@@ -216,6 +216,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { isSponsorBlockFullVideoSegment } from '../../helpers/player/sponsorBlockFullVideo'
 
 const props = defineProps({
   autoSkipDisabled: Boolean,
@@ -246,7 +247,7 @@ function selectSegment(uuid) {
 }
 
 function isSegmentPassed(segment) {
-  if (segment.actionType === 'full') {
+  if (isSponsorBlockFullVideoSegment(segment)) {
     return false
   }
 
