@@ -2,6 +2,8 @@ import { MAIN_PROFILE_ID } from '../../constants'
 import {
   SyncServerDataLossError,
   SyncServerError,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isExpiredSessionReauthentication,
   isSessionExpiredError,
 } from './sync-server-errors'
 import { getSyncableSettingKeys } from '../store/modules/settings'
@@ -18,7 +20,13 @@ const MAX_ENCRYPTED_SYNC_TIMEOUT_MS = 5 * 60 * 1000
 const DEFAULT_CHANNEL_AVATAR = 'https://yt3.googleusercontent.com/ytc/default'
 const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\//
 
-export { SyncServerDataLossError, SyncServerError, isSessionExpiredError }
+export {
+  SyncServerDataLossError,
+  SyncServerError,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isExpiredSessionReauthentication,
+  isSessionExpiredError,
+}
 
 export function normalizeSyncServerUrl(value) {
   let url

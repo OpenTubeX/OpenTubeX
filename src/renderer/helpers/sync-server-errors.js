@@ -26,6 +26,9 @@ export class SyncServerDataLossError extends Error {
   }
 }
 
+export const SYNC_SERVER_SESSION_EXPIRED_MESSAGE =
+  'Sync server session expired. Sign in again to resume syncing.'
+
 /**
  * Whether an error means the stored token is no longer accepted.
  *
@@ -37,4 +40,25 @@ export class SyncServerDataLossError extends Error {
  */
 export function isSessionExpiredError(error) {
   return error instanceof SyncServerError && error.status === 401
+}
+
+/**
+ * Whether authentication is recovering the same expired sync session.
+ * @param {object} session
+ * @param {boolean} session.expired
+ * @param {string} session.savedServerUrl
+ * @param {string} session.savedUsername
+ * @param {string} session.serverUrl
+ * @param {string} session.username
+ */
+export function isExpiredSessionReauthentication({
+  expired,
+  savedServerUrl,
+  savedUsername,
+  serverUrl,
+  username,
+}) {
+  return expired &&
+    serverUrl === savedServerUrl &&
+    username === savedUsername
 }

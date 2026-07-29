@@ -438,16 +438,17 @@ const lastSyncLabel = computed(() => {
 let serverCheckTimer = null
 let serverCheckSequence = 0
 
-watch([serverUrl, connected], ([value]) => {
+watch([serverUrl, connected], ([value, isConnected], [previousValue, wasConnected] = []) => {
   clearTimeout(serverCheckTimer)
   const sequence = ++serverCheckSequence
+  const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
-  serverCheckStatus.value = 'idle'
+  serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
-  if (connected.value || !value.trim()) return
+  if (isConnected || !value.trim()) return
 
   serverCheckTimer = setTimeout(async () => {
-    serverCheckStatus.value = 'checking'
+    if (!disconnected) serverCheckStatus.value = 'checking'
     try {
       const capabilities = await new SyncServerClient(value).getCapabilities()
       if (sequence !== serverCheckSequence) return

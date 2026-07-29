@@ -1,6 +1,8 @@
 import {
   SyncServerClient,
   SyncServerDataLossError,
+  SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
+  isExpiredSessionReauthentication,
   isSessionExpiredError,
   normalizeSyncServerUrl,
   syncChannelPlaybackSpeeds,
@@ -49,6 +51,7 @@ const state = {
   syncServerLastResult: null,
   syncServerHistorySupported: null,
   syncServerPlaybackSpeedsSupported: null,
+  syncServerSessionExpired: false,
 }
 
 const getters = {
@@ -342,7 +345,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
       // sync would keep failing with the same opaque message. Drop the token so
       // automatic sync stops and the UI asks for a sign-in.
       await dispatch('expireSyncServerSession')
-      throw error
+      throw new Error(SYNC_SERVER_SESSION_EXPIRED_MESSAGE, { cause: error })
     }
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
@@ -352,7 +355,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
 
 const actions = {
   async authenticateSyncServer(
-    { dispatch },
+    { commit, dispatch, rootState, state },
     { mode, serverUrl, username, password, privacyPassphrase }
   ) {
     if (mode !== 'login' && mode !== 'register') {
@@ -361,6 +364,13 @@ const actions = {
 
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
     const trimmedUsername = username.trim()
+    const resumesExpiredSession = isExpiredSessionReauthentication({
+      expired: state.syncServerSessionExpired,
+      savedServerUrl: rootState.settings.syncServerUrl,
+      savedUsername: rootState.settings.syncServerUsername,
+      serverUrl: normalizedUrl,
+      username: trimmedUsername,
+    })
     if (!trimmedUsername || !password) {
       throw new Error('Username and password are required')
     }
@@ -397,12 +407,15 @@ const actions = {
     // the URL must be committed before the token enables the initial sync.
     await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })
     await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
-    await dispatch('updateSyncServerSnapshot', '{}', { root: true })
-    await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    if (!resumesExpiredSession) {
+      await dispatch('updateSyncServerSnapshot', '{}', { root: true })
+      await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
+    }
     await dispatch('updateSyncServerPrivacyMode', privacySupported ? 'enhanced' : 'legacy', { root: true })
     await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
     await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
     await dispatch('updateSyncServerToken', token, { root: true })
+    commit('setSyncServerSessionExpired', false)
 
     await dispatch('startSyncServerAutoSync')
     return dispatch('syncWithSyncServer')
@@ -419,7 +432,8 @@ const actions = {
     await dispatch('stopSyncServerAutoSync')
     await dispatch('updateSyncServerToken', '', { root: true })
     commit('setSyncServerProgress', null)
-    commit('setSyncServerError', 'Sync server session expired. Sign in again to resume syncing.')
+    commit('setSyncServerError', SYNC_SERVER_SESSION_EXPIRED_MESSAGE)
+    commit('setSyncServerSessionExpired', true)
     commit('setSyncServerStatus', 'error')
   },
 
@@ -438,6 +452,7 @@ const actions = {
     commit('setSyncServerPlaybackSpeedsSupported', null)
     commit('setSyncServerProgress', null)
     commit('setSyncServerStatus', 'idle')
+    commit('setSyncServerSessionExpired', false)
   },
 
   async deleteSyncServerAccount({ commit, dispatch, rootState }, password) {
@@ -602,6 +617,9 @@ const mutations = {
   },
   setSyncServerPlaybackSpeedsSupported(state, supported) {
     state.syncServerPlaybackSpeedsSupported = supported
+  },
+  setSyncServerSessionExpired(state, expired) {
+    state.syncServerSessionExpired = expired
   },
 }
 

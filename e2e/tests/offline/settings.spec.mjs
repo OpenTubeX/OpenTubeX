@@ -1,4 +1,14 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+
 import { test, expect, goTo } from '../../helpers/app.mjs'
+
+function latestSettings(contents) {
+  return Object.fromEntries(contents.trim().split('\n')
+    .map(line => JSON.parse(line))
+    .filter(record => record._id && !record.$$deleted)
+    .map(record => [record._id, record.value]))
+}
 
 test.describe('settings', () => {
   test('settings page renders its sections', async ({ page }) => {
@@ -232,16 +242,28 @@ test.describe('sync settings', () => {
         syncServerAutoSync: false,
         syncServerPrivacyKey: 'e2e-privacy-key',
         syncServerPrivacyMode: 'legacy',
+        syncServerSnapshot: '{"subscriptions":[]}',
         syncServerToken: 'invalid-token',
         syncServerUrl: 'https://sync.d3sox.me',
-        syncServerUsername: 'sync-user'
+        syncServerUsername: 'sync-user',
+        syncServerLastSyncAt: 1234
       }
     }
   })
 
   test('clears a sync error and enables credentials after disconnecting', async ({ page }) => {
+    let finishServerCheck
+    let serverCheckStarted
+    const serverCheckPending = new Promise((resolve) => {
+      finishServerCheck = resolve
+    })
+    const serverCheckRequested = new Promise((resolve) => {
+      serverCheckStarted = resolve
+    })
     await page.route('https://sync.d3sox.me/**', async (route) => {
       if (new URL(route.request().url()).pathname === '/health') {
+        serverCheckStarted()
+        await serverCheckPending
         await route.fulfill({ status: 200, body: 'OK' })
       } else {
         await route.fulfill({ status: 500, body: 'Sync failed' })
@@ -257,10 +279,15 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Username')).toBeDisabled()
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
 
-    await expect(syncSection.locator('.error')).toHaveCount(0)
-    await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
-    await expect(syncSection.getByLabel('Username')).toBeEnabled()
-    await expect(syncSection.getByLabel('Password')).toBeEnabled()
+    try {
+      await serverCheckRequested
+      await expect(syncSection.locator('.error')).toHaveCount(0)
+      await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
+      await expect(syncSection.getByLabel('Username')).toBeEnabled()
+      await expect(syncSection.getByLabel('Password')).toBeEnabled()
+    } finally {
+      finishServerCheck()
+    }
   })
 
   test('disables credentials while authentication is pending', async ({ page }) => {
@@ -297,6 +324,75 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
     await expect(syncSection.getByLabel('Username')).toBeEnabled()
     await expect(syncSection.getByLabel('Password')).toBeEnabled()
+  })
+
+  test('preserves the sync baseline while reauthenticating an expired session', async ({ app, page }) => {
+    let finishPostLoginSync
+    let postLoginSyncStarted
+    const postLoginSyncPending = new Promise((resolve) => {
+      finishPostLoginSync = resolve
+    })
+    const postLoginSyncRequested = new Promise((resolve) => {
+      postLoginSyncStarted = resolve
+    })
+    let authenticatedManifestRequests = 0
+
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      const request = route.request()
+      const pathname = new URL(request.url()).pathname
+      const authorization = request.headers().authorization
+
+      if (pathname === '/health') {
+        await route.fulfill({
+          status: 200,
+          json: { capabilities: { encrypted_sync: 1 } }
+        })
+      } else if (pathname === '/v1/account/login') {
+        await route.fulfill({ status: 200, json: { jwt: 'renewed-token' } })
+      } else if (authorization === 'invalid-token') {
+        await route.fulfill({
+          status: 401,
+          body: 'Invalid or missing authentication token'
+        })
+      } else if (pathname === '/v1/encrypted_sync') {
+        authenticatedManifestRequests++
+        if (authenticatedManifestRequests === 2) {
+          postLoginSyncStarted()
+          await postLoginSyncPending
+        }
+        await route.fulfill({ status: 200, json: { collections: [] } })
+      } else if (request.method() === 'PUT') {
+        await route.fulfill({ status: 200, json: {} })
+      } else {
+        await route.fulfill({ status: 200, json: { revision: 0 } })
+      }
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await expect(syncSection.locator('.error')).toHaveText(
+      'Sync server session expired. Sign in again to resume syncing.'
+    )
+    await expect(syncSection.getByLabel('Username')).toBeEnabled()
+
+    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('sync-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+
+    try {
+      await postLoginSyncRequested
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      expect(settings.syncServerSnapshot).toBe('{"subscriptions":[]}')
+      expect(settings.syncServerLastSyncAt).toBe(1234)
+    } finally {
+      finishPostLoginSync()
+    }
+
+    await expect(syncSection.getByText('Connected as sync-user')).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
   })
 })
 

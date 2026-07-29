@@ -38,7 +38,7 @@ test.describe('OpenTubeX sync server', () => {
     await page.route('**/account/**', route => route.continue({
       headers: {
         ...route.request().headers(),
-        'X-Forwarded-For': rateLimitClient(testInfo.title)
+        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
       }
     }))
   })
@@ -323,7 +323,7 @@ test.describe('OpenTubeX sync server', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Forwarded-For': rateLimitClient(testInfo.title)
+        'X-Forwarded-For': rateLimitClient(testInfo.titlePath.join('\0'))
       },
       body: JSON.stringify({ name: username, password })
     })

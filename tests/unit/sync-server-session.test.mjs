@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   SyncServerError,
+  isExpiredSessionReauthentication,
   isSessionExpiredError,
 } from '../../src/renderer/helpers/sync-server-errors.js'
 
@@ -29,4 +30,19 @@ test('ignores errors that are not sync server errors', () => {
   assert.equal(isSessionExpiredError(null), false)
   assert.equal(isSessionExpiredError(undefined), false)
   assert.equal(isSessionExpiredError({ status: 401 }), false)
+})
+
+test('preserves the baseline only when reauthenticating the same expired session', () => {
+  const session = {
+    expired: true,
+    savedServerUrl: 'https://sync.example',
+    savedUsername: 'alice',
+    serverUrl: 'https://sync.example',
+    username: 'alice',
+  }
+
+  assert.equal(isExpiredSessionReauthentication(session), true)
+  assert.equal(isExpiredSessionReauthentication({ ...session, expired: false }), false)
+  assert.equal(isExpiredSessionReauthentication({ ...session, serverUrl: 'https://other.example' }), false)
+  assert.equal(isExpiredSessionReauthentication({ ...session, username: 'bob' }), false)
 })
