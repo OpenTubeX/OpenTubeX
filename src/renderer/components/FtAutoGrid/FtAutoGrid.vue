@@ -9,7 +9,8 @@
       autoGrid: true,
       grid: grid,
       list: !grid,
-      thumbnailSizeReady: grid && gridWidth > 0
+      thumbnailSizeReady: grid && gridWidth > 0,
+      youtubeStyleShorts
     }"
     :style="gridStyle"
     @before-leave="captureLeavingItemLayout"
@@ -40,6 +41,10 @@ const props = defineProps({
   itemCount: {
     type: Number,
     default: 0
+  },
+  youtubeStyleShorts: {
+    type: Boolean,
+    default: false
   }
 })
 

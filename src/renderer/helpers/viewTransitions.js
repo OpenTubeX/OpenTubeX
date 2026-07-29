@@ -5,6 +5,7 @@ export const VIDEO_MORPH_NAME = 'video-morph'
 /** @type {HTMLElement | null} */
 let morphSourceElement = null
 let navigationRequestedAt = 0
+let shortMorphRequested = false
 
 /**
  * Request that the next router navigation runs inside a View Transition,
@@ -12,13 +13,22 @@ let navigationRequestedAt = 0
  * No-op when the browser doesn't support the View Transitions API.
  *
  * @param {EventTarget | null} linkElement the clicked watch page link
+ * @param {object} [options]
+ * @param {boolean} [options.isShort] whether the destination uses the Shorts layout
  */
-export function requestWatchPageViewTransition(linkElement) {
+export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
   if (typeof document.startViewTransition !== 'function') {
     return
   }
 
   navigationRequestedAt = Date.now()
+  const link = linkElement instanceof HTMLElement
+    ? linkElement.closest('a')
+    : null
+  const href = link?.getAttribute('href') ?? ''
+  shortMorphRequested = typeof isShort === 'boolean'
+    ? isShort
+    : href.includes('short=true') || href.includes('/shorts/')
 
   if (!(linkElement instanceof HTMLElement)) {
     return
@@ -60,12 +70,15 @@ export function installViewTransitions(router) {
     navigationRequestedAt = 0
     const source = morphSourceElement
     morphSourceElement = null
+    const shortMorph = shortMorphRequested
+    shortMorphRequested = false
 
     return new Promise((resolve) => {
       // Names the watch page's player for the duration of the transition
       // (a permanent name would force a stacking context on the player,
       // breaking its full-window mode)
       document.documentElement.classList.add('viewTransitionMorphActive')
+      document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
 
       const transition = document.startViewTransition(() => {
         return new Promise((_resolve) => {
@@ -79,7 +92,10 @@ export function installViewTransitions(router) {
       })
 
       transition.finished.finally(() => {
-        document.documentElement.classList.remove('viewTransitionMorphActive')
+        document.documentElement.classList.remove(
+          'viewTransitionMorphActive',
+          'viewTransitionShortMorphActive'
+        )
         if (source) {
           source.style.viewTransitionName = ''
         }
@@ -111,10 +127,16 @@ export async function runPendingViewTransition(update) {
   navigationRequestedAt = 0
   const source = morphSourceElement
   morphSourceElement = null
+  const shortMorph = shortMorphRequested
+  shortMorphRequested = false
   document.documentElement.classList.add('viewTransitionMorphActive')
+  document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
 
   const cleanup = () => {
-    document.documentElement.classList.remove('viewTransitionMorphActive')
+    document.documentElement.classList.remove(
+      'viewTransitionMorphActive',
+      'viewTransitionShortMorphActive'
+    )
     if (source) {
       source.style.viewTransitionName = ''
     }
@@ -131,6 +153,7 @@ export async function runPendingViewTransition(update) {
 
 function cleanupMorphSource() {
   navigationRequestedAt = 0
+  shortMorphRequested = false
   if (morphSourceElement) {
     morphSourceElement.style.viewTransitionName = ''
     morphSourceElement = null

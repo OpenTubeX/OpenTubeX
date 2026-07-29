@@ -5,6 +5,7 @@
     />
     <FtSkeletonGrid
       v-if="displayIsLoading && activeVideoList.length === 0 && !isCommunity"
+      :youtube-style-shorts="youtubeStyleShorts"
     />
     <div
       v-if="!displayIsLoading && errorChannels.length !== 0"
@@ -57,6 +58,7 @@
       :use-channels-hidden-preference="false"
       :display="isCommunity ? 'list' : ''"
       :stable-item-keys="stableItemKeys"
+      :youtube-style-shorts="youtubeStyleShorts"
     />
     <slot />
     <FtAutoLoadNextPageWrapper
@@ -139,6 +141,10 @@ const props = defineProps({
     default: false
   },
   hasAdditionalContent: {
+    type: Boolean,
+    default: false
+  },
+  youtubeStyleShorts: {
     type: Boolean,
     default: false
   }

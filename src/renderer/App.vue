@@ -2440,9 +2440,12 @@ async function handleYoutubeLink(href, {
 
   switch (result.urlType) {
     case 'video': {
-      const { videoId, timestamp, playlistId } = result
+      const { videoId, timestamp, playlistId, isShort } = result
 
       const query = {}
+      if (isShort) {
+        query.short = 'true'
+      }
       if (timestamp) {
         query.timestamp = timestamp
       }

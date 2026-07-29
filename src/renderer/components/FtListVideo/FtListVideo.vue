@@ -333,6 +333,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getRelativeTimeFromDate,
+  getVideoThumbnailUrl,
   openExternalLink,
   openInternalPath,
   showToast,
@@ -873,23 +874,13 @@ const thumbnail = computed(() => {
     return deArrowCache.value.thumbnail
   }
 
-  let baseUrl
-  if (backendPreference.value === 'invidious') {
-    baseUrl = currentInvidiousInstanceUrl.value
-  } else {
-    baseUrl = 'https://i.ytimg.com'
-  }
-
-  switch (thumbnailPreference.value) {
-    case 'start':
-      return `${baseUrl}/vi/${id.value}/mq1.jpg`
-    case 'middle':
-      return `${baseUrl}/vi/${id.value}/mq2.jpg`
-    case 'end':
-      return `${baseUrl}/vi/${id.value}/mq3.jpg`
-    default:
-      return `${baseUrl}/vi/${id.value}/mqdefault.jpg`
-  }
+  return getVideoThumbnailUrl(
+    id.value,
+    backendPreference.value,
+    currentInvidiousInstanceUrl.value,
+    thumbnailPreference.value,
+    props.appearance === 'youtubeShort'
+  ) ?? thumbnailPlaceholder
 })
 
 // The placeholder is fine in the list, but in a toast it would just be a grey
@@ -1046,6 +1037,16 @@ const watchPageLinkQuery = computed(() => {
     query.playlistItemId = playlistItemIdFinal.value
   }
 
+  if (props.data.isShort === true) {
+    query.short = 'true'
+    if (props.data.shortSource === 'channel' && props.data.shortChannelId) {
+      query.shortSource = 'channel'
+      query.shortChannelId = props.data.shortChannelId
+    } else if (inSubscriptions.value) {
+      query.shortSource = 'subscriptions'
+    }
+  }
+
   return query
 })
 
@@ -1117,7 +1118,9 @@ function handleWatchPageLinkClick(event) {
 
   // Plain left click navigates in this tab: morph the thumbnail into the player
   if (event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
-    requestWatchPageViewTransition(event.currentTarget)
+    requestWatchPageViewTransition(event.currentTarget, {
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer
+    })
   }
 }
 

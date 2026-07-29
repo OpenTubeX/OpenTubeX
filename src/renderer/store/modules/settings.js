@@ -197,6 +197,7 @@ const state = {
   defaultSkipInterval: 5,
   seekIntervalMultiplyByPlaybackRate: false,
   showPlaybackRateAdjustedTimestamp: false,
+  useCustomShortsPlayer: true,
   defaultViewingMode: 'default',
   defaultVideoFormat: 'dash',
   disableSmoothScrolling: false,

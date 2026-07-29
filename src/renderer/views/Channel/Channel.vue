@@ -139,6 +139,7 @@
           id="shortPanel"
           :data="filteredShorts"
           :use-channels-hidden-preference="false"
+          :youtube-style-shorts="useCustomShortsPlayer"
           role="tabpanel"
           aria-labelledby="shortsTab"
         />
@@ -350,6 +351,7 @@ import {
   parseChannelHomeTab
 } from '../../helpers/api/local'
 import { useTabTitle } from '../../tabs/TabContext'
+import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
   CHANNEL_SEARCH_FILTERS,
   filterChannelSearchResults,
@@ -502,6 +504,9 @@ const hideChannelHome = computed(() => store.getters.getHideChannelHome)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideChannelShorts = computed(() => store.getters.getHideChannelShorts)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideLiveStreams = computed(() => store.getters.getHideLiveStreams)
@@ -966,6 +971,27 @@ function getChannelHomeLocal() {
       homeData_ = parseChannelHomeTab(homeTab, id.value, channelName.value)
     }
 
+    const homeShorts = []
+    homeData_ = homeData_.map(shelf => ({
+      ...shelf,
+      content: shelf.content.map(item => {
+        if (!item.isShort) {
+          return item
+        }
+
+        const short = {
+          ...item,
+          shortSource: 'channel',
+          shortChannelId: id.value,
+        }
+        homeShorts.push(short)
+        return short
+      })
+    }))
+    if (homeShorts.length > 0 && latestShorts.value.length === 0) {
+      setChannelShortsNavigationContext(id.value, homeShorts)
+    }
+
     if (!hideChannelHome.value) {
       homeData.value = homeData_
     }
@@ -1113,11 +1139,18 @@ const filteredVideos = computed(() => {
 })
 
 const filteredShorts = computed(() => {
+  let shorts
   if (hideWatchedSubs.value) {
-    return filterWatchedArray(latestShorts.value)
+    shorts = filterWatchedArray(latestShorts.value)
   } else {
-    return latestShorts.value
+    shorts = latestShorts.value
   }
+
+  return shorts.map(video => ({
+    ...video,
+    shortSource: 'channel',
+    shortChannelId: id.value,
+  }))
 })
 
 const filteredLive = computed(() => {
@@ -1283,6 +1316,10 @@ const latestShorts = shallowRef([])
 const shortContinuationData = shallowRef(null)
 const showShortSortBy = ref(true)
 const shortSortBy = ref('newest')
+
+watch(filteredShorts, shorts => {
+  setChannelShortsNavigationContext(id.value, shorts)
+}, { immediate: true })
 
 watch(shortSortBy, () => {
   if (!autoRefreshOnSortByChangeEnabled) { return }

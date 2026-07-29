@@ -15,9 +15,14 @@ import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPl
 import WatchVideoQueue from '../../components/WatchVideoQueue/WatchVideoQueue.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
+import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
+import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
+import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
+import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
+import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -26,11 +31,13 @@ import {
   formatNumber,
   getCachedOembedTitle,
   getOembedTitle,
+  getVideoThumbnailUrl,
   showApiErrorToast,
   showToast,
   showToastOnAllTabs
 } from '../../helpers/utils'
 import {
+  getLocalShortLinkedVideo,
   getLocalVideoInfo,
   mapLocalLegacyFormat,
   parseLocalSubscriberCount,
@@ -50,6 +57,12 @@ import {
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
 import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
+import {
+  buildSubscriptionShortsFeed,
+  getChannelShortsNavigationContext,
+  getVideoAspectRatio,
+  isYouTubeShort
+} from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 import { useTabContext, useTabTitle } from '../../tabs/TabContext'
@@ -111,7 +124,11 @@ export default defineComponent({
     'watch-video-playlist': WatchVideoPlaylist,
     'watch-video-queue': WatchVideoQueue,
     'watch-video-recommendations': WatchVideoRecommendations,
-    'ft-age-restricted': FtAgeRestricted
+    'ft-age-restricted': FtAgeRestricted,
+    FtSubscribeButton,
+    FtShareButton,
+    FtIconButton,
+    FtAddToPlaylistDropdown,
   },
   setup: function () {
     const { t, locale } = useI18n()
@@ -160,6 +177,18 @@ export default defineComponent({
       isUpcoming: false,
       isPostLiveDvr: false,
       isUnlisted: false,
+      isShort: false,
+      videoAspectRatio: null,
+      shortsLinkedVideo: null,
+      shortsTouchStartY: null,
+      shortsNavigationLockedUntil: 0,
+      shortsLastWindowScrollY: window.scrollY,
+      shortsScrollResetPending: false,
+      shortsScrollbarDragging: false,
+      shortsTransitionPreview: '',
+      shortsTransitionDirection: 0,
+      shortsViewportHeight: window.innerHeight,
+      videoLoadGeneration: 0,
       hasAiGeneratedContent: false,
       upcomingTimestamp: null,
       upcomingTimeLeft: null,
@@ -209,6 +238,8 @@ export default defineComponent({
       sponsorBlockInfoSubmissionEnabled: false,
       videoChapterThumbnails: [],
       fullscreenMetadataOpen: false,
+      shortsMetadataOpen: false,
+      shortsCommentsOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenMetadataTarget: null,
       fullscreenTranscriptOpen: false,
@@ -398,6 +429,151 @@ export default defineComponent({
         this.activeFormat !== 'audio' &&
         this.vrProjection !== 'EQUIRECTANGULAR'
     },
+    customShortsPlayerActive: function () {
+      return this.$store.getters.getUseCustomShortsPlayer &&
+        this.isShort &&
+        this.activeFormat !== 'audio'
+    },
+    shortsPlayerWidth: function () {
+      const playerHeight = Math.max(0, this.shortsViewportHeight - 156)
+      return Math.min(600, playerHeight * (this.videoAspectRatio ?? 9 / 16))
+    },
+    shortsPlayerHeight: function () {
+      return this.shortsPlayerWidth / (this.videoAspectRatio ?? 9 / 16)
+    },
+    subscriptionShortsFeedActive: function () {
+      return this.customShortsPlayerActive
+    },
+    subscriptionShortsFeed: function () {
+      if (!this.subscriptionShortsFeedActive) {
+        return []
+      }
+
+      let feed
+      if (
+        this.tabRoute.query.shortSource === 'channel' &&
+        this.tabRoute.query.shortChannelId
+      ) {
+        feed = getChannelShortsNavigationContext(
+          this.tabRoute.query.shortChannelId
+        )
+      } else {
+        const maxPerChannel = this.$store.getters.getOnlyShowLatestFromChannel
+          ? this.$store.getters.getOnlyShowLatestFromChannelNumber
+          : null
+
+        feed = buildSubscriptionShortsFeed({
+          cache: this.$store.getters.getShortsCache,
+          subscriptions: this.$store.getters.getActiveProfile.subscriptions,
+          isHidden: video => isVideoHiddenByPreferences(video, {
+            hideLiveStreams: this.$store.getters.getHideLiveStreams,
+            hideUpcomingPremieres: this.$store.getters.getHideUpcomingPremieres,
+            forbiddenTitles: this.forbiddenTitles,
+          }),
+          isWatched: video => isHistoryEntryWatched(
+            this.$store.getters.getHistoryCacheById[video.videoId]
+          ),
+          hideWatched: this.$store.getters.getHideWatchedSubs,
+          maxPerChannel,
+          currentVideoId: this.videoId,
+        })
+      }
+
+      if (
+        this.videoId &&
+        !feed.some(video => video.videoId === this.videoId)
+      ) {
+        feed.unshift({
+          videoId: this.videoId,
+          title: this.videoTitle,
+          author: this.channelName,
+          authorId: this.channelId,
+          published: this.videoPublished,
+          isShort: true,
+        })
+      }
+
+      return feed
+    },
+    subscriptionShortsFeedIndex: function () {
+      return this.subscriptionShortsFeed.findIndex(video => video.videoId === this.videoId)
+    },
+    hasPreviousSubscriptionShort: function () {
+      return this.subscriptionShortsFeedIndex > 0
+    },
+    hasNextSubscriptionShort: function () {
+      return this.subscriptionShortsFeedIndex >= 0 &&
+        this.subscriptionShortsFeedIndex < this.subscriptionShortsFeed.length - 1
+    },
+    nextSubscriptionShort: function () {
+      return this.hasNextSubscriptionShort
+        ? this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + 1]
+        : null
+    },
+    nextSubscriptionShortThumbnail: function () {
+      if (!this.nextSubscriptionShort) {
+        return ''
+      }
+
+      return getVideoThumbnailUrl(
+        this.nextSubscriptionShort.videoId,
+        this.backendPreference,
+        this.currentInvidiousInstanceUrl,
+        this.thumbnailPreference,
+        true
+      ) ?? ''
+    },
+    shortsCommentsPanelOpen: function () {
+      return this.shortsCommentsOpen && !this.fullscreenCommentsOpen
+    },
+    shortsCommentsText: function () {
+      return this.shortsCommentsPanelOpen
+        ? this.$t('Comments.Hide Comments')
+        : this.$t('Comments.Show Comments')
+    },
+    shortsAuxPanelOpen: function () {
+      return this.customShortsPlayerActive && (
+        this.shortsMetadataOpen ||
+        this.showTranscript ||
+        this.showSidebarSponsorBlock
+      )
+    },
+    shortsNavigationPanelOpen: function () {
+      return this.customShortsPlayerActive && (
+        this.shortsCommentsOpen ||
+        this.shortsAuxPanelOpen ||
+        this.fullscreenMetadataOpen ||
+        this.fullscreenTranscriptOpen ||
+        this.fullscreenSponsorBlockOpen ||
+        this.fullscreenCommentsOpen ||
+        this.fullscreenPlaylistOpen
+      )
+    },
+    shortsActionSkeletonCount: function () {
+      return [
+        !this.hideComments,
+        true,
+        this.useSponsorBlock,
+        !this.hideSharingActions,
+        this.showPlaylists,
+        this.isQuickBookmarkEnabled,
+      ].filter(Boolean).length
+    },
+    hideUploader: function () {
+      return this.$store.getters.getHideUploader
+    },
+    hideUnsubscribeButton: function () {
+      return this.$store.getters.getHideUnsubscribeButton
+    },
+    hideSharingActions: function () {
+      return this.$store.getters.getHideSharingActions
+    },
+    showPlaylists: function () {
+      return !this.$store.getters.getHidePlaylists
+    },
+    isInAnyPlaylist: function () {
+      return this.$store.getters.getPlaylistVideoIds.has(this.videoId)
+    },
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat
     },
@@ -538,6 +714,12 @@ export default defineComponent({
     }
   },
   watch: {
+    isLoading(loading) {
+      if (!loading) {
+        this.shortsTransitionPreview = ''
+        this.shortsTransitionDirection = 0
+      }
+    },
     isTabPresented: {
       immediate: true,
       handler() {
@@ -569,6 +751,8 @@ export default defineComponent({
   created: function () {
     this.theatreModeAnimations = []
     this.videoId = this.tabRoute.params.id
+    this.isShort = this.tabRoute.query.short === 'true'
+    this.videoAspectRatio = this.isShort ? 9 / 16 : null
     this.activeFormat = this.defaultVideoFormat
     // So that the value for this session remains unchanged even if setting changed
     this.autoplayNextRecommendedVideo = this.autoplayNextRecommendedVideoByDefault
@@ -579,6 +763,12 @@ export default defineComponent({
     this.initializeVideoQuality()
   },
   mounted: function () {
+    document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    document.addEventListener('pointerdown', this.handleShortsScrollbarPointerDown, true)
+    document.addEventListener('pointerup', this.handleShortsScrollbarPointerUp, true)
+    document.addEventListener('pointercancel', this.handleShortsScrollbarPointerUp, true)
+    window.addEventListener('resize', this.updateShortsViewportHeight)
+    window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
       deactivate: this.deactivateWatchRuntime,
@@ -589,6 +779,12 @@ export default defineComponent({
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
+    document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
+    document.removeEventListener('pointerdown', this.handleShortsScrollbarPointerDown, true)
+    document.removeEventListener('pointerup', this.handleShortsScrollbarPointerUp, true)
+    document.removeEventListener('pointercancel', this.handleShortsScrollbarPointerUp, true)
+    window.removeEventListener('resize', this.updateShortsViewportHeight)
+    window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
     this.deactivateWatchRuntime()
     // When a logical-tab lifecycle is registered, its beforeDispose hook drives
@@ -603,6 +799,9 @@ export default defineComponent({
     }
   },
   methods: {
+    updateShortsViewportHeight() {
+      this.shortsViewportHeight = window.innerHeight
+    },
     handleFullscreenMetadataChange({ open, target }) {
       this.fullscreenMetadataTarget = target
       this.fullscreenMetadataOpen = open && target !== null
@@ -627,11 +826,15 @@ export default defineComponent({
       this.fullscreenSponsorBlockOpen = open && target !== null
     },
     handleFullscreenCommentsChange({ open, target }) {
-      this.fullscreenCommentsTarget = target
+      this.fullscreenCommentsTarget = open ? target : null
       this.fullscreenCommentsOpen = open && target !== null
     },
     closeFullscreenComments() {
-      this.$refs.player?.closeFullscreenComments()
+      if (this.fullscreenCommentsOpen) {
+        this.$refs.player?.closeFullscreenComments()
+        return
+      }
+      this.shortsCommentsOpen = false
     },
     handleFullscreenPlaylistChange({ open, target }) {
       const playlist = this.$refs.watchVideoPlaylist
@@ -726,9 +929,23 @@ export default defineComponent({
       this.$refs.player?.closeSponsorBlockInfo()
     },
     toggleSponsorBlockInfo() {
+      if (this.customShortsPlayerActive && !this.showSidebarSponsorBlock) {
+        this.shortsMetadataOpen = false
+        if (this.showTranscript) {
+          this.closeTranscript()
+        }
+        this.closeShortsComments()
+      }
       this.$refs.player?.toggleSponsorBlockInfo()
     },
     toggleTranscript() {
+      if (this.customShortsPlayerActive && !this.showTranscript) {
+        this.shortsMetadataOpen = false
+        if (this.showSidebarSponsorBlock) {
+          this.closeSidebarSponsorBlock()
+        }
+        this.closeShortsComments()
+      }
       if (this.showTranscript) {
         this.sidebarPanelLeaving = true
       }
@@ -745,6 +962,23 @@ export default defineComponent({
       }
       this.showTranscript = false
       this.$refs.player?.dismissFullscreenTranscript()
+    },
+    closeShortsComments() {
+      this.shortsCommentsOpen = false
+    },
+    toggleShortsMetadata() {
+      const shouldOpen = !this.shortsMetadataOpen
+      this.shortsMetadataOpen = shouldOpen
+
+      if (shouldOpen) {
+        if (this.showTranscript) {
+          this.closeTranscript()
+        }
+        if (this.showSidebarSponsorBlock) {
+          this.closeSidebarSponsorBlock()
+        }
+        this.closeShortsComments()
+      }
     },
     handleSidebarPanelBeforeLeave() {
       this.sidebarPanelLeaving = true
@@ -854,13 +1088,17 @@ export default defineComponent({
     },
 
     async reloadView({ preserveTitle = false } = {}) {
+      const loadGeneration = ++this.videoLoadGeneration
+      const requestedVideoId = this.tabRoute.params.id
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
 
       await this.handleRouteChange()
+      if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
 
       if (this.$refs.player) {
         await this.destroyPlayer()
+        if (!this.isCurrentVideoLoad(loadGeneration, requestedVideoId)) { return }
       }
 
       // react to route changes...
@@ -894,10 +1132,10 @@ export default defineComponent({
 
       switch (this.backendPreference) {
         case 'local':
-          await this.getVideoInformationLocal()
+          await this.getVideoInformationLocal(loadGeneration)
           break
         case 'invidious':
-          this.getVideoInformationInvidious()
+          this.getVideoInformationInvidious(loadGeneration)
           break
       }
     },
@@ -912,6 +1150,7 @@ export default defineComponent({
       if (!preserveTitle) {
         this.hasResolvedVideoTitle = false
       }
+      this.shortsCommentsOpen = false
       this.playlistScrollPositions.sidebar = null
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
@@ -922,6 +1161,9 @@ export default defineComponent({
       this.isUpcoming = false
       this.isPostLiveDvr = false
       this.isUnlisted = false
+      this.isShort = this.tabRoute.query.short === 'true'
+      this.videoAspectRatio = this.isShort ? 9 / 16 : null
+      this.shortsLinkedVideo = null
       this.hasAiGeneratedContent = false
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
@@ -954,6 +1196,7 @@ export default defineComponent({
       this.captions = []
       this.currentTime = 0
       this.showTranscript = false
+      this.shortsMetadataOpen = false
       this.showSidebarChapters = false
       this.videoChapterThumbnails = []
       this.vrProjection = null
@@ -985,10 +1228,11 @@ export default defineComponent({
       // this has to be below checkIfPlaylist() as theatrePossible needs to know if there is a playlist or not
       this.setViewingModeOnFirstLoad()
 
+      const loadGeneration = ++this.videoLoadGeneration
       if (!process.env.SUPPORTS_LOCAL_API || this.backendPreference === 'invidious') {
-        this.getVideoInformationInvidious()
+        this.getVideoInformationInvidious(loadGeneration)
       } else {
-        this.getVideoInformationLocal()
+        this.getVideoInformationLocal(loadGeneration)
       }
 
       window.addEventListener('beforeunload', this.handleWatchProgressAutoSave)
@@ -1035,6 +1279,214 @@ export default defineComponent({
       }
     },
 
+    updateShortsPlayerState: function (duration, formats) {
+      const explicit = this.tabRoute.query.short === 'true'
+      const sourceAspectRatio = getVideoAspectRatio(formats)
+      this.isShort = isYouTubeShort({ explicit, duration, formats })
+
+      this.videoAspectRatio = this.isShort
+        ? sourceAspectRatio !== null && sourceAspectRatio <= 1
+          ? sourceAspectRatio
+          : 9 / 16
+        : sourceAspectRatio
+    },
+
+    loadLocalShortLinkedVideo: async function (videoId) {
+      try {
+        const linkedVideo = await getLocalShortLinkedVideo(videoId)
+
+        if (this.videoId === videoId && this.isShort) {
+          this.shortsLinkedVideo = linkedVideo
+        }
+      } catch (error) {
+        console.warn('Failed to load linked Shorts video metadata', error)
+      }
+    },
+
+    navigateSubscriptionShort: function (offset) {
+      if (
+        !this.subscriptionShortsFeedActive ||
+        Date.now() < this.shortsNavigationLockedUntil
+      ) {
+        return
+      }
+
+      const target = this.subscriptionShortsFeed[this.subscriptionShortsFeedIndex + offset]
+      if (!target) {
+        return
+      }
+
+      this.shortsCommentsOpen = false
+
+      this.shortsTransitionDirection = Math.sign(offset)
+      this.shortsTransitionPreview = getVideoThumbnailUrl(
+        target.videoId,
+        this.backendPreference,
+        this.currentInvidiousInstanceUrl,
+        this.thumbnailPreference,
+        true
+      ) ?? ''
+      this.shortsNavigationLockedUntil = Date.now() + 300
+      const shortSource = this.tabRoute.query.shortSource === 'channel'
+        ? 'channel'
+        : 'subscriptions'
+      this.tabRouter.push({
+        path: `/watch/${target.videoId}`,
+        query: {
+          short: 'true',
+          shortSource,
+          ...(shortSource === 'channel'
+            ? { shortChannelId: this.tabRoute.query.shortChannelId }
+            : {}),
+          oneTimeTimestamp: '0',
+        }
+      })
+    },
+
+    handleShortsWindowScroll: function () {
+      const scrollY = window.scrollY
+
+      if (this.shortsScrollResetPending) {
+        this.shortsScrollResetPending = false
+        this.shortsLastWindowScrollY = scrollY
+        return
+      }
+
+      if (
+        !this.subscriptionShortsFeedActive ||
+        !this.isCurrentlyPresented() ||
+        this.shortsNavigationPanelOpen ||
+        !this.shortsScrollbarDragging ||
+        Math.abs(scrollY - this.shortsLastWindowScrollY) < 4
+      ) {
+        this.shortsLastWindowScrollY = scrollY
+        return
+      }
+
+      const offset = scrollY > this.shortsLastWindowScrollY ? 1 : -1
+      this.shortsLastWindowScrollY = scrollY
+      this.navigateSubscriptionShort(offset)
+
+      // The short preview deliberately gives the document a small scroll range
+      // so the page scrollbar remains draggable. Reset it after interpreting
+      // the drag; otherwise the next drag at the end of the range cannot emit
+      // another scroll event.
+      if (window.scrollY !== 0) {
+        this.shortsScrollResetPending = true
+        window.scrollTo({ top: 0 })
+      }
+    },
+
+    handleShortsScrollbarPointerDown: function (event) {
+      this.shortsScrollbarDragging = Boolean(
+        !this.shortsNavigationPanelOpen &&
+        event.target?.closest?.('.os-scrollbar-handle')
+      )
+      this.shortsLastWindowScrollY = window.scrollY
+    },
+
+    handleShortsScrollbarPointerUp: function () {
+      this.shortsScrollbarDragging = false
+    },
+
+    handleShortsWheel: function (event) {
+      if (
+        !this.subscriptionShortsFeedActive ||
+        this.shortsNavigationPanelOpen ||
+        Math.abs(event.deltaY) < 20
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      this.navigateSubscriptionShort(event.deltaY > 0 ? 1 : -1)
+    },
+
+    handleShortsPointerDown: function (event) {
+      if (
+        this.subscriptionShortsFeedActive &&
+        !this.shortsNavigationPanelOpen &&
+        event.pointerType === 'touch'
+      ) {
+        this.shortsTouchStartY = event.clientY
+      } else {
+        this.shortsTouchStartY = null
+      }
+    },
+
+    handleShortsPointerUp: function (event) {
+      if (
+        this.shortsNavigationPanelOpen ||
+        this.shortsTouchStartY === null ||
+        event.pointerType !== 'touch'
+      ) {
+        this.shortsTouchStartY = null
+        return
+      }
+
+      const distance = this.shortsTouchStartY - event.clientY
+      this.shortsTouchStartY = null
+
+      if (Math.abs(distance) >= 50) {
+        this.navigateSubscriptionShort(distance > 0 ? 1 : -1)
+      }
+    },
+
+    handleShortsNavigationKeydown: function (event) {
+      if (
+        !this.subscriptionShortsFeedActive ||
+        !this.isCurrentlyPresented() ||
+        this.shortsNavigationPanelOpen ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        ['INPUT', 'SELECT', 'TEXTAREA'].includes(event.target?.tagName) ||
+        event.target?.isContentEditable ||
+        event.target?.closest?.('[role="dialog"], [role="menu"]')
+      ) {
+        return
+      }
+
+      if (event.key === 'ArrowDown' || event.key === 'PageDown') {
+        event.preventDefault()
+        this.navigateSubscriptionShort(1)
+      } else if (event.key === 'ArrowUp' || event.key === 'PageUp') {
+        event.preventDefault()
+        this.navigateSubscriptionShort(-1)
+      }
+    },
+
+    openShortsChannel: function () {
+      if (this.channelId) {
+        this.tabRouter.push({ path: `/channel/${this.channelId}` })
+      }
+    },
+
+    openShortsLinkedVideo: function () {
+      if (this.shortsLinkedVideo?.videoId) {
+        this.tabRouter.push({ path: `/watch/${this.shortsLinkedVideo.videoId}` })
+      }
+    },
+
+    toggleShortsComments: function () {
+      if (this.shortsCommentsPanelOpen) {
+        this.shortsCommentsOpen = false
+        return
+      }
+
+      if (this.$refs.shortsCommentsTarget) {
+        this.shortsMetadataOpen = false
+        if (this.showTranscript) {
+          this.closeTranscript()
+        }
+        if (this.showSidebarSponsorBlock) {
+          this.closeSidebarSponsorBlock()
+        }
+        this.shortsCommentsOpen = true
+      }
+    },
+
     playTranscriptSegment: function (timestamp) {
       const player = this.$refs.player
 
@@ -1047,13 +1499,22 @@ export default defineComponent({
       }
     },
 
-    getVideoInformationLocal: async function () {
+    isCurrentVideoLoad: function (loadGeneration, videoId) {
+      return loadGeneration === this.videoLoadGeneration &&
+        videoId === this.tabRoute.params.id
+    },
+
+    getVideoInformationLocal: async function (loadGeneration = ++this.videoLoadGeneration) {
       if (this.firstLoad) {
         this.isLoading = true
       }
 
+      const videoId = this.tabRoute.params.id
+
       try {
-        const videoInfo = await getLocalVideoInfo(this.videoId)
+        const videoInfo = await getLocalVideoInfo(videoId)
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
         const { info: result, poToken, clientInfo, adEndTimeUnixMs, reloadSabrData } = videoInfo
 
         const playabilityStatus = result.playability_status
@@ -1241,6 +1702,7 @@ export default defineComponent({
             this.finalizeChapters(chapters, result.basic_info.duration)
           } else {
             chapters = await this.getSponsorBlockCommunityChapters(result.basic_info.duration)
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           }
         }
 
@@ -1294,6 +1756,7 @@ export default defineComponent({
             throw new Error(errorText)
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             if (didReload) {
               return
             }
@@ -1334,6 +1797,7 @@ export default defineComponent({
             ) {
               try {
                 this.manifestSrc = await this.createLocalDashManifest(result, true)
+                if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
                 this.manifestMimeType = MANIFEST_TYPE_DASH
                 useRemoteManifest = false
               } catch (error) {
@@ -1527,6 +1991,7 @@ export default defineComponent({
               result.streaming_data.adaptive_formats[0]?.cipher
             ) {
               this.manifestSrc = await this.createLocalDashManifest(result)
+              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
               // Neither a SABR streaming URL nor playable adaptive format URLs,
@@ -1543,15 +2008,33 @@ export default defineComponent({
           }
         }
 
+        this.updateShortsPlayerState(
+          result.basic_info.duration,
+          result.streaming_data?.adaptive_formats
+        )
+        if (this.customShortsPlayerActive) {
+          this.thumbnail = getVideoThumbnailUrl(
+            this.videoId,
+            this.backendPreference,
+            this.currentInvidiousInstanceUrl,
+            this.thumbnailPreference,
+            true
+          ) ?? this.thumbnail
+        }
+        if (this.isShort) {
+          this.loadLocalShortLinkedVideo(this.videoId)
+        }
         this.isLoading = false
         this.updateTitle()
       } catch (err) {
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
         console.error(err)
         if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
           const errorMessage = this.t('Local API Error (Click to copy)')
           showApiErrorToast(errorMessage, err, this.showTabToast)
           this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
-          this.getVideoInformationInvidious()
+          this.getVideoInformationInvidious(loadGeneration)
         } else {
           const didReload = await this.runIpBlockRecoveryScriptAndReload()
           if (didReload) {
@@ -1568,13 +2051,17 @@ export default defineComponent({
       }
     },
 
-    getVideoInformationInvidious: function () {
+    getVideoInformationInvidious: function (loadGeneration = ++this.videoLoadGeneration) {
       if (this.firstLoad) {
         this.isLoading = true
       }
 
-      invidiousGetVideoInformation(this.videoId)
+      const videoId = this.tabRoute.params.id
+
+      invidiousGetVideoInformation(videoId)
         .then(async result => {
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
           if (result.error) {
             throw new Error(result.error)
           }
@@ -1679,6 +2166,7 @@ export default defineComponent({
               this.finalizeChapters(chapters, result.lengthSeconds)
             } else {
               chapters = await this.getSponsorBlockCommunityChapters(result.lengthSeconds)
+              if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             }
           }
           this.videoChapters = chapters
@@ -1742,20 +2230,33 @@ export default defineComponent({
               ?.projectionType ?? null
 
             this.manifestSrc = await this.createInvidiousDashManifest(result)
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             this.manifestMimeType = MANIFEST_TYPE_DASH
           }
 
+          this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
+          if (this.customShortsPlayerActive) {
+            this.thumbnail = getVideoThumbnailUrl(
+              this.videoId,
+              this.backendPreference,
+              this.currentInvidiousInstanceUrl,
+              this.thumbnailPreference,
+              true
+            ) ?? this.thumbnail
+          }
           this.updateTitle()
 
           this.isLoading = false
         })
         .catch(async err => {
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
           console.error(err)
           if (process.env.SUPPORTS_LOCAL_API && this.backendPreference === 'invidious' && this.backendFallback) {
             const errorMessage = this.t('Invidious API Error (Click to copy)')
             showApiErrorToast(errorMessage, err, this.showTabToast)
             this.showTabToast({ message: this.t('Falling back to Local API'), icon: ['fas', 'exchange-alt'] })
-            this.getVideoInformationLocal()
+            this.getVideoInformationLocal(loadGeneration)
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
             if (didReload) {

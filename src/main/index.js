@@ -2269,7 +2269,8 @@ function runApp() {
     if (videoParams.videoId) {
       return createAppRouteUrl(`/watch/${videoParams.videoId}`, {
         timestamp: videoParams.timestamp,
-        playlistId: videoParams.playlistId
+        playlistId: videoParams.playlistId,
+        short: videoParams.isShort ? 'true' : null
       })
     }
 
@@ -2307,13 +2308,14 @@ function runApp() {
 
   /**
    * @param {URL} url
-   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null }}
+   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null, isShort: boolean }}
    */
   function getDirectVideoParams(url) {
     const params = {
       videoId: null,
       timestamp: null,
-      playlistId: null
+      playlistId: null,
+      isShort: false
     }
 
     const setVideoId = (value) => {
@@ -2331,6 +2333,7 @@ function runApp() {
       setVideoId(url.pathname.slice(1))
     } else {
       const videoPath = url.pathname.match(/^\/(?:embed|shorts|live)\/(?<videoId>[\w-]+)/)?.groups?.videoId
+      params.isShort = url.pathname.startsWith('/shorts/')
       setVideoId(videoPath)
     }
 

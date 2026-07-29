@@ -2145,7 +2145,8 @@ a:visited {
    The player is only named while a morph is running: view-transition-name
    forces a stacking context, which would otherwise trap the player's
    full-window mode below the info/sidebar areas. */
-:root.viewTransitionMorphActive .videoPlayer {
+:root.viewTransitionMorphActive:not(.viewTransitionShortMorphActive) .videoPlayer,
+:root.viewTransitionShortMorphActive .videoLayout.shortsPlayerActive .videoPlayer {
   view-transition-name: video-morph;
 }
 

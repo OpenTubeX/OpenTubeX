@@ -1137,7 +1137,9 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
       return { videos: [] }
     }
 
-    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+    const result = await parseYouTubeRSSFeed(await response.text(), channel.id)
+    result.videos.forEach(video => { video.isShort = true })
+    return result
   } catch (error) {
     showSubscriptionFetchError(channel, error, t('Local API Error (Click to copy)'))
 
@@ -1170,7 +1172,9 @@ async function getChannelShortsInvidious(channel, t, errorChannels, failedAttemp
       return { videos: [] }
     }
 
-    return await parseYouTubeRSSFeed(await response.text(), channel.id)
+    const result = await parseYouTubeRSSFeed(await response.text(), channel.id)
+    result.videos.forEach(video => { video.isShort = true })
+    return result
   } catch (error) {
     showSubscriptionFetchError(channel, error, t('Invidious API Error (Click to copy)'))
 

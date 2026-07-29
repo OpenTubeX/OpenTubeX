@@ -19,6 +19,7 @@ import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-c
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
 import { SleepTimer } from './player-components/SleepTimer'
+import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
 import { SponsorBlockClearButton } from './player-components/SponsorBlockClearButton'
 import { SponsorBlockEndButton } from './player-components/SponsorBlockEndButton'
@@ -240,6 +241,22 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    shortsPlayer: {
+      type: Boolean,
+      default: false
+    },
+    shortsAspectRatio: {
+      type: Number,
+      default: null
+    },
+    shortsHasPrevious: {
+      type: Boolean,
+      default: false
+    },
+    shortsHasNext: {
+      type: Boolean,
+      default: false
+    },
     theatrePossible: {
       type: Boolean,
       default: false
@@ -411,11 +428,21 @@ export default defineComponent({
     'chapters-overlay-change',
     'chapter-thumbnails-change',
     'sponsorblock-info-change',
+    'toggle-shorts-metadata',
+    'shorts-previous',
+    'shorts-next',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
     const { tabId, isTabPresented } = useTabContext()
     const mediaTabId = tabId ?? 'web'
+    const emitShortsPrevious = () => emit('shorts-previous')
+    const emitShortsNext = () => emit('shorts-next')
+    // Shorts request autoplay, so do not render their paused-only controls
+    // while the media element is still preparing its first `play` event.
+    const shortsPaused = ref(false)
+    const shortsMuted = ref(false)
+    const shortsCaptionsEnabled = ref(false)
 
     const autoplayNextVideo = computed(() => props.autoplayCountdown?.video ?? null)
     const autoplayThumbnail = computed(() => {
@@ -2701,6 +2728,10 @@ export default defineComponent({
         topControlPanelElements: [],
         overflowMenuButtons: [],
         contextMenuElements: contextMenuElements.value,
+        // Shorts have interactive controls over nearly the entire video
+        // surface. Do not let Shaka interpret rapid control clicks as a
+        // request to enter fullscreen.
+        doubleClickForFullscreen: !props.shortsPlayer,
 
         // only set this to label when we actually have labels, so that the warning doesn't show up
         // about it being set to labels, but that the audio tracks don't have labels
@@ -2714,8 +2745,13 @@ export default defineComponent({
       /** @type {string[]} */
       let elementList
 
-      if (onlyUseOverFlowMenu.value) {
+      // Shorts always use their custom top controls and hide Shaka's standard
+      // control panel. Keep every applicable action in the overflow menu even
+      // when full-window mode makes the player wide enough for the desktop
+      // control layout.
+      if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
         uiConfig.overflowMenuButtons = [
+          ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           'ft_autoplay_toggle',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
@@ -3017,6 +3053,23 @@ export default defineComponent({
       }
 
       fullscreenTitleClickPending = false
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+
+    /**
+     * Shaka handles fullscreen double-clicks on the controls container itself.
+     * Stop gestures that began on an actual control before that handler can
+     * observe them; bubble-phase `.stop` handlers run too late for this case.
+     * @param {MouseEvent} event
+     */
+    function handlePlayerControlDoubleClick(event) {
+      if (!(event.target instanceof Element) || !event.target.closest(
+        '.shortsTopControls, .shaka-controls-button-panel, .shaka-settings-menu, .shaka-context-menu'
+      )) {
+        return
+      }
+
       event.preventDefault()
       event.stopImmediatePropagation()
     }
@@ -3431,6 +3484,10 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      if (props.shortsPlayer) {
+        shortsPaused.value = false
+        shortsCaptionsEnabled.value = false
+      }
       closeChaptersOverlay()
       closeSponsorBlockInfo()
       resetSponsorBlockHighlightLabel()
@@ -3840,6 +3897,7 @@ export default defineComponent({
     }
 
     function handlePlay() {
+      shortsPaused.value = false
       const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
       if (process.env.IS_ELECTRON && !isActiveTab.value && !isCurrentPictureInPictureVideo) {
         video.value.pause()
@@ -3868,6 +3926,7 @@ export default defineComponent({
     }
 
     function handlePause() {
+      shortsPaused.value = true
       syncPlayPauseControlIcons()
 
       sleepTimer.pauseCountdown()
@@ -3952,6 +4011,7 @@ export default defineComponent({
     function updateVolume() {
       const video_ = video.value
       const muted = video_.muted || video_.volume === 0
+      shortsMuted.value = muted
 
       syncMuteControlIcons(muted)
 
@@ -4922,6 +4982,47 @@ export default defineComponent({
       return true
     }
 
+    function toggleShortsPlayback() {
+      if (video.value.paused) {
+        video.value.play()
+      } else {
+        video.value.pause()
+      }
+    }
+
+    function toggleShortsMuted() {
+      video.value.muted = !video.value.muted
+    }
+
+    function syncShortsCaptionsEnabled() {
+      shortsCaptionsEnabled.value = player?.getTextTracks()
+        .some(track => track.active) ?? false
+    }
+
+    function toggleShortsCaptions() {
+      if (toggleCaptions()) {
+        syncShortsCaptionsEnabled()
+      }
+    }
+
+    function openShortsOverflowMenu(event) {
+      const buttonRect = event.currentTarget.getBoundingClientRect()
+      const containerRect = container.value.getBoundingClientRect()
+      container.value.style.setProperty(
+        '--shorts-menu-top',
+        `${buttonRect.bottom - containerRect.top + 8}px`
+      )
+      container.value.style.setProperty(
+        '--shorts-menu-right',
+        `${containerRect.right - buttonRect.right}px`
+      )
+      container.value?.querySelector('.shaka-overflow-menu-button')?.click()
+    }
+
+    function toggleShortsFullscreen() {
+      container.value?.querySelector('.shaka-fullscreen-button')?.click()
+    }
+
     function registerCaptionToggleButton() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class CaptionToggleButtonFactory {
@@ -5280,6 +5381,19 @@ export default defineComponent({
 
     function registerFullWindowButton() {
       events.addEventListener('setFullWindow', async (/** @type {CustomEvent} */ event) => {
+        const controls = ui?.getControls()
+
+        // Moving the player while its overflow menu is open can leave both the
+        // menu DOM and its submenu state stuck. Reset both synchronously; the
+        // public hide method uses a timer and can otherwise lose a race with
+        // the layout transition and the next overflow-button click.
+        controls?.dispatchEvent(new shaka.util.FakeEvent('submenuclose'))
+        controls?.getControlsContainer()
+          .querySelectorAll('.shaka-overflow-menu, .shaka-settings-menu')
+          .forEach(menu => menu.classList.add('shaka-hidden'))
+        container.value?.style.removeProperty('--shorts-menu-top')
+        container.value?.style.removeProperty('--shorts-menu-right')
+
         fullWindowAnimation?.cancel()
         fullWindowAnimation = null
         suppressPanelTransitions(FULL_WINDOW_ANIMATION_DURATION_MS + 50)
@@ -5349,6 +5463,25 @@ export default defineComponent({
 
       registerOwnElement(shakaControls, 'ft_full_window', new FullWindowButtonFactory())
       registerOwnElement(shakaOverflowMenu, 'ft_full_window', new FullWindowButtonFactory())
+    }
+
+    function registerShortsVideoInfoButton() {
+      events.addEventListener('toggleShortsMetadata', () => {
+        emit('toggle-shorts-metadata')
+      })
+
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class ShortsVideoInfoButtonFactory {
+        create(rootElement, controls) {
+          return new ShortsVideoInfoButton(events, rootElement, controls)
+        }
+      }
+
+      registerOwnElement(
+        shakaOverflowMenu,
+        'ft_shorts_video_info',
+        new ShortsVideoInfoButtonFactory()
+      )
     }
 
     function registerLegacyQualitySelection() {
@@ -5830,6 +5963,7 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_full_window', null)
       shakaOverflowMenu.registerElement('ft_full_window', null)
+      shakaOverflowMenu.registerElement('ft_shorts_video_info', null)
 
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
@@ -7179,6 +7313,7 @@ export default defineComponent({
       const controls = ui.getControls()
       player = controls.getPlayer()
       wrapTextTrackSelection()
+      player.addEventListener('textchanged', syncShortsCaptionsEnabled)
 
       player.addEventListener('buffering', event => {
         isBuffering.value = event.buffering
@@ -7219,6 +7354,7 @@ export default defineComponent({
 
       registerTheatreModeButton()
       registerFullWindowButton()
+      registerShortsVideoInfoButton()
 
       if (
         props.autoOpenChapters &&
@@ -7293,6 +7429,10 @@ export default defineComponent({
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
+        if (props.shortsPlayer) {
+          shortsPaused.value = false
+          shortsCaptionsEnabled.value = false
+        }
         chapterThumbnails.value = []
       })
 
@@ -7315,14 +7455,16 @@ export default defineComponent({
             const firstVariant = player.getVariantTracks()[0]
 
             // force the player aspect ratio to 16:9 to avoid overflowing the layout
-            forceAspectRatio.value = firstVariant.width / firstVariant.height < 1.5
+            forceAspectRatio.value = !props.shortsPlayer &&
+              firstVariant.width / firstVariant.height < 1.5
           }
         })
       } else {
         // force the player aspect ratio to 16:9 to avoid overflowing the layout, when the video is too tall
 
         const firstFormat = props.legacyFormats[0]
-        forceAspectRatio.value = firstFormat.width / firstFormat.height < 1.5
+        forceAspectRatio.value = !props.shortsPlayer &&
+          firstFormat.width / firstFormat.height < 1.5
       }
 
       if (useSponsorBlock.value) {
@@ -7515,6 +7657,7 @@ export default defineComponent({
           player.selectTextTrack(textTrack)
         }
       }
+      syncShortsCaptionsEnabled()
 
       if (props.chapters.length > 0) {
         createChapterMarkers()
@@ -7727,6 +7870,7 @@ export default defineComponent({
       document.removeEventListener('click', handlePlaybackRateMenuClick, true)
       document.removeEventListener('click', handleQualityMenuClick, true)
       window.removeEventListener('blur', handleTemporaryPlaybackRateFocusLoss)
+      player?.removeEventListener('textchanged', syncShortsCaptionsEnabled)
 
       cancelTemporaryPlaybackRateHolds()
 
@@ -7954,6 +8098,17 @@ export default defineComponent({
     }
 
     return {
+      emitShortsPrevious,
+      emitShortsNext,
+      shortsPaused,
+      shortsMuted,
+      shortsCaptionsEnabled,
+      toggleShortsPlayback,
+      toggleShortsMuted,
+      toggleShortsCaptions,
+      openShortsOverflowMenu,
+      toggleShortsFullscreen,
+      handlePlayerControlDoubleClick,
       ambientCanvas,
       ambientFullscreenCanvas,
       ambientLayoutCanvas,

@@ -20,6 +20,7 @@
       }"
       :aria-disabled="disabled"
       :aria-expanded="dropdownShown"
+      :aria-pressed="ariaPressed"
       @pointerdown="handleIconPointerDown"
       @contextmenu.prevent
       @click="handleIconClick"
@@ -165,6 +166,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  ariaPressed: {
+    type: Boolean,
+    default: null
   },
   theme: {
     type: String,

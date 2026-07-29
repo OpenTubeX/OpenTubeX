@@ -31,6 +31,17 @@
   aspect-ratio: 16/9 auto;
 }
 
+.youtubeShort.grid {
+  .videoThumbnail .thumbnailImage {
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+  }
+
+  .optionsButton {
+    opacity: 1;
+  }
+}
+
 .blur {
   filter: blur(20px);
 }

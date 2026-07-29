@@ -37,6 +37,19 @@ test.describe('settings', () => {
     await expect(threshold).toHaveValue('100')
   })
 
+  test('enables YouTube-style Shorts by default in theme settings', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const toggle = page.getByRole('checkbox', { name: 'Use YouTube-style Shorts' })
+    await expect(toggle).toBeChecked()
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Use YouTube-style Shorts' })
+      .click()
+    await expect(toggle).not.toBeChecked()
+  })
+
   test('keeps the watched progress mode when history is toggled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="privacy"]').click()

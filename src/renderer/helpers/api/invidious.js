@@ -196,6 +196,7 @@ export async function getInvidiousChannelShorts(channelId, sortBy, continuation)
   // https://github.com/iv-org/invidious/issues/3801
   response.videos.forEach(video => {
     video.isUpcoming = false
+    video.isShort = true
     delete video.published
     delete video.premiereTimestamp
   })

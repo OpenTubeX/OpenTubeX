@@ -9,6 +9,18 @@
   grid-template-columns: repeat(auto-fill, min(var(--thumbnail-grid-size), 100%));
 }
 
+.grid.youtubeStyleShorts,
+.grid.youtubeStyleShorts.thumbnailSizeReady {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(
+      min(var(--shorts-thumbnail-grid-min-size), 100%),
+      1fr
+    )
+  );
+  justify-content: start;
+}
+
 .list {
   display: grid;
   gap: 4px;
