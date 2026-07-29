@@ -55,13 +55,6 @@ $watched-transition-duration: 0.5s;
 .ft-list-item {
   padding: 6px;
 
-  // Vertical tabs are painted above the route. Raise only the card whose
-  // dropdown is open so a wide thumbnail menu can cross that boundary.
-  &:has(:deep(.iconDropdown)) {
-    position: relative;
-    z-index: 6;
-  }
-
   &.watched {
     background-color: var(--bg-color);
 

@@ -22,6 +22,21 @@ const TRACKING_PARAM_NAMES = [
   'utm_content',
 ]
 
+// YouTube moved Shorts grid images from `thumbnail` to
+// `thumbnailViewModel.thumbnailViewModel.image.sources`. Preserve that exact
+// source while youtubei.js still expects the old field.
+class ShortsLockupViewWithThumbnail extends YTNodes.ShortsLockupView {
+  constructor(data) {
+    const sources = data.thumbnailViewModel?.thumbnailViewModel?.image?.sources
+    const hasThumbnail = data.thumbnail?.thumbnails?.length > 0
+    super(hasThumbnail || !sources
+      ? data
+      : { ...data, thumbnail: { thumbnails: sources } })
+  }
+}
+
+Parser.addRuntimeParser('ShortsLockupView', ShortsLockupViewWithThumbnail)
+
 if (process.env.SUPPORTS_LOCAL_API) {
   Platform.shim.eval = (data) => {
     return new Promise((resolve, reject) => {
@@ -1204,6 +1219,7 @@ export function parseShort(short, channelId, channelName) {
       author: channelName,
       authorId: channelId,
       viewCount: reelItem.views.isEmpty() ? null : parseLocalSubscriberCount(reelItem.views.text),
+      thumbnailUrl: reelItem.thumbnails.at(-1)?.url,
       isShort: true,
       lengthSeconds: ''
     }
@@ -1218,6 +1234,7 @@ export function parseShort(short, channelId, channelName) {
       author: channelName,
       authorId: channelId,
       viewCount: shortsLockupView.overlay_metadata.secondary_text ? parseLocalSubscriberCount(shortsLockupView.overlay_metadata.secondary_text.text) : null,
+      thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
       isShort: true,
       lengthSeconds: ''
     }
@@ -1414,6 +1431,7 @@ export function parseLocalPlaylistVideo(video) {
       videoId: short.id,
       title: short.title.text?.trim(),
       viewCount: parseLocalSubscriberCount(short.views.text),
+      thumbnailUrl: short.thumbnails.at(-1)?.url,
       isShort: true,
       lengthSeconds: ''
     }
@@ -1451,6 +1469,7 @@ export function parseLocalPlaylistVideo(video) {
       videoId: shortsLockupView.on_tap_endpoint.payload.videoId,
       title: shortsLockupView.overlay_metadata.primary_text.text?.trim(),
       viewCount,
+      thumbnailUrl: getShortsLockupThumbnailUrl(shortsLockupView),
       isShort: true,
       lengthSeconds: ''
     }
@@ -1507,6 +1526,14 @@ export function parseLocalPlaylistVideo(video) {
       premiereDate: video_.upcoming
     }
   }
+}
+
+/**
+ * @param {import('youtubei.js').YTNodes.ShortsLockupView} short
+ * @returns {string | undefined}
+ */
+function getShortsLockupThumbnailUrl(short) {
+  return short.thumbnail?.at(-1)?.url
 }
 
 /**

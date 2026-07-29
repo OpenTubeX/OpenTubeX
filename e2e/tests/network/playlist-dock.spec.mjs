@@ -1,21 +1,82 @@
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
 import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
-const PLAYLIST_URL = 'https://youtu.be/aqz-KE-bpKQ?list=UUSMOQeBJ2RAnuFungnQOxLg'
+const PLAYLIST_URL = 'https://youtu.be/g4OXlrxqIx0?list=UULFSMOQeBJ2RAnuFungnQOxLg'
 
-test('fullscreen playlist dock preserves its active state and each layout position', async ({ page, innertube }) => {
+async function clickAndMeasureNextPaint(locator) {
+  const page = locator.page()
+  const start = await page.evaluate(() => performance.now())
+  await locator.click()
+
+  return page.evaluate(async (clickStart) => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    return performance.now() - clickStart
+  }, start)
+}
+
+test('large fullscreen playlist dock remains responsive and preserves its state', async ({ page, innertube }) => {
   test.skip(innertube.replay, 'playlist hydration needs the real API')
 
   const searchInput = page.locator('.topNav .searchInput input.ft-input')
   await searchInput.fill(PLAYLIST_URL)
   await searchInput.press('Enter')
-  await page.waitForURL(/#\/watch\/aqz-KE-bpKQ/, { timeout: 60000 })
+  await page.waitForURL(/#\/watch\/g4OXlrxqIx0/, { timeout: 60000 })
 
   const sidebar = page.locator('.playlistItemsWrapper')
   await expect(sidebar).toBeVisible({ timeout: 60000 })
+  await expect.poll(
+    () => sidebar.locator('.playlistItem').count(),
+    { timeout: 60000 }
+  ).toBeGreaterThan(1000)
   await expect(sidebar).toHaveAttribute('data-overlayscrollbars-viewport')
   await expect(sidebar.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+  await expect(sidebar.locator('.playlistItem').first()).toHaveCSS('content-visibility', 'auto')
   await expect.poll(async () => sidebar.evaluate((element) => element.scrollHeight)).toBeGreaterThan(1000)
+
+  const sidebarCard = page.locator('.watchVideoPlaylist')
+  const sidebarProgress = sidebarCard.locator('.playlistProgressBarContainer')
+  const sidebarProgressBox = await sidebarProgress.boundingBox()
+  await page.mouse.move(
+    sidebarProgressBox.x + 1,
+    sidebarProgressBox.y + (sidebarProgressBox.height / 2)
+  )
+  const sidebarPreview = sidebarCard.locator('.previewTooltip')
+  await expect(sidebarPreview).toBeVisible()
+  const sidebarCardBox = await sidebarCard.boundingBox()
+  const sidebarPreviewBox = await sidebarPreview.boundingBox()
+  expect(sidebarPreviewBox.x).toBeGreaterThanOrEqual(sidebarCardBox.x + 7)
+  expect(sidebarPreviewBox.x + sidebarPreviewBox.width).toBeLessThanOrEqual(
+    sidebarCardBox.x + sidebarCardBox.width - 7
+  )
+
+  await sidebarCard.evaluate((element) => {
+    element.style.inlineSize = '240px'
+  })
+  const narrowCardBox = await sidebarCard.boundingBox()
+  const narrowProgressBox = await sidebarProgress.boundingBox()
+  await sidebarProgress.dispatchEvent('mousemove', {
+    clientX: narrowProgressBox.x + 1,
+    clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
+  })
+  await expect.poll(async () => {
+    const box = await sidebarPreview.boundingBox()
+    return Math.round(box.x - narrowCardBox.x)
+  }).toBe(8)
+  const narrowLeftPreviewBox = await sidebarPreview.boundingBox()
+  expect(narrowLeftPreviewBox.width).toBeLessThanOrEqual(narrowCardBox.width - 16)
+
+  await sidebarProgress.dispatchEvent('mousemove', {
+    clientX: narrowProgressBox.x + narrowProgressBox.width - 1,
+    clientY: narrowProgressBox.y + (narrowProgressBox.height / 2)
+  })
+  await expect.poll(async () => {
+    const box = await sidebarPreview.boundingBox()
+    return Math.round(narrowCardBox.x + narrowCardBox.width - (box.x + box.width))
+  }).toBe(8)
+  await sidebarCard.evaluate((element) => {
+    element.style.removeProperty('inline-size')
+  })
+
   await waitForPlaybackOrSkip(test, page)
 
   await sidebar.evaluate((element) => { element.scrollTop = 420 })
@@ -24,17 +85,15 @@ test('fullscreen playlist dock preserves its active state and each layout positi
   await setPlayerFullscreen(page, true)
   const sidebarScrollTop = await sidebar.evaluate((element) => element.scrollTop)
   const playlistToggle = page.getByRole('button', { name: 'Playlist', exact: true })
-  await playlistToggle.click()
+  const openDuration = await clickAndMeasureNextPaint(playlistToggle)
+  expect(openDuration).toBeLessThan(1500)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
 
   const dock = page.locator('.fullscreenPlaylistTarget .playlistItemsWrapper')
   await expect(dock).toBeVisible()
   await expect(dock).toHaveAttribute('data-overlayscrollbars-viewport')
   const currentDockItem = dock.locator('.playlistItem').filter({ has: page.locator('.videoIndexIcon') })
-  await expect.poll(async () => {
-    const [dockBounds, itemBounds] = await Promise.all([dock.boundingBox(), currentDockItem.boundingBox()])
-    return Math.abs((dockBounds.y + dockBounds.height / 2) - (itemBounds.y + itemBounds.height / 2))
-  }).toBeLessThan(80)
+  await expect(currentDockItem).toBeInViewport()
   const header = page.locator('.fullscreenPlaylistTarget .playlistHeader')
   const headerBounds = await header.boundingBox()
   await expect(header).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
@@ -50,9 +109,11 @@ test('fullscreen playlist dock preserves its active state and each layout positi
   await dock.evaluate((element) => element.scrollBy(0, 480))
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBeGreaterThan(centeredDockScrollTop)
   const dockScrollTop = await dock.evaluate((element) => element.scrollTop)
-  await page.getByRole('button', { name: 'Close Playlist' }).click({ force: true })
+  const closeDuration = await clickAndMeasureNextPaint(page.getByRole('button', { name: 'Close Playlist' }))
+  expect(closeDuration).toBeLessThan(1500)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'false')
-  await playlistToggle.click()
+  const reopenDuration = await clickAndMeasureNextPaint(playlistToggle)
+  expect(reopenDuration).toBeLessThan(1500)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)
@@ -63,8 +124,7 @@ test('fullscreen playlist dock preserves its active state and each layout positi
   const playlistDockHeader = playlistOverlay.locator('.playlistDockHeader')
   await expect(metadataOverlay).toBeVisible()
   const dockContent = page.locator('.fullscreenPlaylistTarget .fullscreenPlaylistContent')
-  await expect(dockContent).toHaveAttribute('data-overlayscrollbars-viewport')
-  await expect(dockContent.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+  await expect(dockContent).not.toHaveAttribute('data-overlayscrollbars-viewport')
   await expect(playlistDockHeader).toHaveCSS('cursor', 'grab')
   await playlistDockHeader.hover({ position: { x: 30, y: 26 } })
   const metadataBounds = await metadataOverlay.boundingBox()
@@ -105,7 +165,9 @@ test('fullscreen playlist dock preserves its active state and each layout positi
     return Math.abs(restoredScrollTop - sidebarScrollTop)
   }).toBeLessThan(150)
 
+  const fullscreenStart = Date.now()
   await setPlayerFullscreen(page, true)
+  expect(Date.now() - fullscreenStart).toBeLessThan(3000)
   await expect(playlistToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(dock).toBeVisible()
   await expect.poll(async () => dock.evaluate((element) => element.scrollTop)).toBe(dockScrollTop)

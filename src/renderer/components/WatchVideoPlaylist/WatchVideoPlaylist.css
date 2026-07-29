@@ -57,12 +57,16 @@
 .progressBarPreview {
   position: absolute;
   inset-block-start: -65px;
+  max-inline-size: var(--playlist-preview-max-inline-size);
   transform: translateX(-50%);
   z-index: 10;
   pointer-events: none;
 }
 
 .previewTooltip {
+  box-sizing: border-box;
+  inline-size: max-content;
+  max-inline-size: 100%;
   background-color: var(--card-bg-color);
   border: 1px solid var(--primary-border-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -76,7 +80,7 @@
   display: grid;
   grid-template:
     'thumb index title' auto /
-    max-content max-content max-content;
+    max-content max-content minmax(0, 240px);
   align-items: center;
   gap: 8px;
 }
@@ -97,7 +101,8 @@
   grid-area: title;
   font-weight: 400;
   color: var(--secondary-text-color);
-  inline-size: 240px;
+  min-inline-size: 0;
+  max-inline-size: 240px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -191,7 +196,10 @@
   box-sizing: border-box;
   padding-block: 8px 16px;
   padding-inline: 16px;
-  overflow-x: hidden;
+
+  /* The playlist items provide the dock's scroll viewport. Keep this wrapper
+     visible so the progress preview can extend over the dock header. */
+  overflow: visible;
 }
 
 .fullscreenPlaylist .playlistHeader {
@@ -277,6 +285,8 @@
   display: grid;
   grid-template-columns: 30px 1fr;
   align-items: center;
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 72px;
   transition: background 0.2s ease-out;
 }
 

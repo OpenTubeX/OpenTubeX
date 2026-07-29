@@ -112,6 +112,52 @@ test.describe('list video actions', () => {
     }).toBe(true)
   })
 
+  test('an open options dropdown crosses vertical tabs without lifting its feed card', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseVerticalTabBar', true)
+    })
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+
+    await expect(video.locator('.optionsButton .iconDropdown')).toBeVisible()
+    const stackingOrder = await video.evaluate((listVideo) => ({
+      topNav: Number(getComputedStyle(document.querySelector('.topNav')).zIndex),
+      tabBar: Number(getComputedStyle(document.querySelector('.tabBar.vertical')).zIndex),
+      dropdown: Number(getComputedStyle(listVideo.querySelector('.iconDropdown')).zIndex),
+      listVideo: getComputedStyle(listVideo).zIndex
+    }))
+    expect(stackingOrder.topNav).toBeGreaterThan(stackingOrder.dropdown)
+    expect(stackingOrder.dropdown).toBeGreaterThan(stackingOrder.tabBar)
+    expect(stackingOrder.listVideo).toBe('auto')
+
+    await video.locator('.optionsButton').click()
+    await video.locator('.addToPlaylistIcon .iconButton').click()
+    const thumbnailDropdown = video.locator('.addToPlaylistIcon .iconDropdown')
+    await expect(thumbnailDropdown).toBeVisible()
+    const dropdownCoversVerticalTabs = await thumbnailDropdown.evaluate((dropdown) => {
+      const tabBarRect = document.querySelector('.tabBar.vertical').getBoundingClientRect()
+      const initialDropdownRect = dropdown.getBoundingClientRect()
+      dropdown.style.transform = `translateX(${tabBarRect.right - initialDropdownRect.left - 40}px)`
+      const dropdownRect = dropdown.getBoundingClientRect()
+      const overlapLeft = Math.max(tabBarRect.left, dropdownRect.left)
+      const overlapRight = Math.min(tabBarRect.right, dropdownRect.right)
+      if (overlapLeft >= overlapRight) {
+        return false
+      }
+
+      const elementAtOverlap = document.elementFromPoint(
+        overlapLeft + (overlapRight - overlapLeft) / 2,
+        Math.max(tabBarRect.top, dropdownRect.top) + 10
+      )
+      return dropdown.contains(elementAtOverlap)
+    })
+    expect(dropdownCoversVerticalTabs).toBe(true)
+  })
+
   test('shows a filled playlist icon when the video is already in a playlist', async ({ page }) => {
     await goTo(page, 'history')
 
