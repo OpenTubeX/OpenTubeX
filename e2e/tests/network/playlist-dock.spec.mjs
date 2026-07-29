@@ -4,12 +4,14 @@ import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 const PLAYLIST_URL = 'https://youtu.be/g4OXlrxqIx0?list=UULFSMOQeBJ2RAnuFungnQOxLg'
 
 async function clickAndMeasureNextPaint(locator) {
-  return locator.evaluate(async (element) => {
-    const start = performance.now()
-    element.click()
+  const page = locator.page()
+  const start = await page.evaluate(() => performance.now())
+  await locator.click()
+
+  return page.evaluate(async (clickStart) => {
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-    return performance.now() - start
-  })
+    return performance.now() - clickStart
+  }, start)
 }
 
 test('large fullscreen playlist dock remains responsive and preserves its state', async ({ page, innertube }) => {
