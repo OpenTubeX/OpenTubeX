@@ -168,7 +168,7 @@
             v-if="currentTabHasNewContent"
             class="markAllSeenButton"
             type="button"
-            :disabled="markingSeenTab !== null || subscriptionFeedRefreshInProgress"
+            :disabled="markingSeenTab !== null || currentTabRefreshing"
             @click="markAllAsSeen(currentTab)"
           >
             <FontAwesomeIcon :icon="['fas', 'check']" />

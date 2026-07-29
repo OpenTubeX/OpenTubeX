@@ -185,7 +185,6 @@ export default defineComponent({
       shortsNavigationLockedUntil: 0,
       shortsLastWindowScrollY: window.scrollY,
       shortsScrollResetPending: false,
-      shortsScrollbarDragging: false,
       shortsTransitionPreview: '',
       shortsTransitionDirection: 0,
       shortsViewportHeight: window.innerHeight,
@@ -772,9 +771,6 @@ export default defineComponent({
   },
   mounted: function () {
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
-    document.addEventListener('pointerdown', this.handleShortsScrollbarPointerDown, true)
-    document.addEventListener('pointerup', this.handleShortsScrollbarPointerUp, true)
-    document.addEventListener('pointercancel', this.handleShortsScrollbarPointerUp, true)
     window.addEventListener('resize', this.updateShortsViewportHeight)
     window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
@@ -788,9 +784,6 @@ export default defineComponent({
   },
   beforeUnmount: function () {
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
-    document.removeEventListener('pointerdown', this.handleShortsScrollbarPointerDown, true)
-    document.removeEventListener('pointerup', this.handleShortsScrollbarPointerUp, true)
-    document.removeEventListener('pointercancel', this.handleShortsScrollbarPointerUp, true)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
@@ -1121,9 +1114,13 @@ export default defineComponent({
         this.sabrErrorRecoveryPlayedSeconds = 0
       }
       this.ipBlockDetectedInCurrentChain = false
+      const preserveShortsPanels = videoIdChanged &&
+        this.customShortsPlayerActive &&
+        this.tabRoute.query.short === 'true'
       this.resetVideoState({
         preserveTitle,
-        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : ''
+        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : '',
+        preserveShortsPanels,
       })
 
       this.firstLoad = true
@@ -1152,13 +1149,19 @@ export default defineComponent({
       return this.tabRoute.fullPath
     },
 
-    resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
+    resetVideoState: function ({
+      preserveTitle = false,
+      placeholderTitle = '',
+      preserveShortsPanels = false,
+    } = {}) {
       const previousVideoTitle = this.videoTitle
 
       if (!preserveTitle) {
         this.hasResolvedVideoTitle = false
       }
-      this.shortsCommentsOpen = false
+      if (!preserveShortsPanels) {
+        this.shortsCommentsOpen = false
+      }
       this.playlistScrollPositions.sidebar = null
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
@@ -1203,8 +1206,10 @@ export default defineComponent({
       this.legacyFormats = []
       this.captions = []
       this.currentTime = 0
-      this.showTranscript = false
-      this.shortsMetadataOpen = false
+      if (!preserveShortsPanels) {
+        this.showTranscript = false
+        this.shortsMetadataOpen = false
+      }
       this.showSidebarChapters = false
       this.videoChapterThumbnails = []
       this.vrProjection = null
@@ -1324,8 +1329,6 @@ export default defineComponent({
         return
       }
 
-      this.shortsCommentsOpen = false
-
       this.shortsTransitionDirection = Math.sign(offset)
       this.shortsTransitionPreview = getShortThumbnailUrl(
         target,
@@ -1362,8 +1365,6 @@ export default defineComponent({
       if (
         !this.subscriptionShortsFeedActive ||
         !this.isCurrentlyPresented() ||
-        this.shortsNavigationPanelOpen ||
-        !this.shortsScrollbarDragging ||
         Math.abs(scrollY - this.shortsLastWindowScrollY) < 4
       ) {
         this.shortsLastWindowScrollY = scrollY
@@ -1375,31 +1376,25 @@ export default defineComponent({
       this.navigateSubscriptionShort(offset)
 
       // The short preview deliberately gives the document a small scroll range
-      // so the page scrollbar remains draggable. Reset it after interpreting
-      // the drag; otherwise the next drag at the end of the range cannot emit
-      // another scroll event.
+      // so the page scrollbar and middle-button autoscroll can navigate. Reset
+      // it after interpreting the movement; otherwise the next movement at the
+      // end of the range cannot emit another scroll event.
       if (window.scrollY !== 0) {
         this.shortsScrollResetPending = true
         window.scrollTo({ top: 0 })
       }
     },
 
-    handleShortsScrollbarPointerDown: function (event) {
-      this.shortsScrollbarDragging = Boolean(
-        !this.shortsNavigationPanelOpen &&
-        event.target?.closest?.('.os-scrollbar-handle')
-      )
-      this.shortsLastWindowScrollY = window.scrollY
-    },
-
-    handleShortsScrollbarPointerUp: function () {
-      this.shortsScrollbarDragging = false
+    isShortsPanelEvent: function (event) {
+      return Boolean(event.target?.closest?.(
+        '.shortsCommentsPanel, .shortsAuxPanel, .shaka-no-propagation'
+      ))
     },
 
     handleShortsWheel: function (event) {
       if (
         !this.subscriptionShortsFeedActive ||
-        this.shortsNavigationPanelOpen ||
+        this.isShortsPanelEvent(event) ||
         Math.abs(event.deltaY) < 20
       ) {
         return
@@ -1412,7 +1407,7 @@ export default defineComponent({
     handleShortsPointerDown: function (event) {
       if (
         this.subscriptionShortsFeedActive &&
-        !this.shortsNavigationPanelOpen &&
+        !this.isShortsPanelEvent(event) &&
         event.pointerType === 'touch'
       ) {
         this.shortsTouchStartY = event.clientY
@@ -1423,8 +1418,8 @@ export default defineComponent({
 
     handleShortsPointerUp: function (event) {
       if (
-        this.shortsNavigationPanelOpen ||
         this.shortsTouchStartY === null ||
+        this.isShortsPanelEvent(event) ||
         event.pointerType !== 'touch'
       ) {
         this.shortsTouchStartY = null

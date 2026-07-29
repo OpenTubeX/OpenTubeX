@@ -106,6 +106,7 @@
 .shortsVolumeControl .shortsTopControl {
   flex: none;
   background-color: transparent;
+  backdrop-filter: none;
 }
 
 .shortsVolumeSlider {
