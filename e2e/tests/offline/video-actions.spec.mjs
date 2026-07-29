@@ -138,22 +138,34 @@ test.describe('list video actions', () => {
     await video.locator('.addToPlaylistIcon .iconButton').click()
     const thumbnailDropdown = video.locator('.addToPlaylistIcon .iconDropdown')
     await expect(thumbnailDropdown).toBeVisible()
+    // A mid-flight opacity fade on the icon would make it a stacking context and
+    // trap the dropdown below the tab bar, so let the hover transition settle first
+    await expect(video.locator('.addToPlaylistIcon')).toHaveCSS('opacity', '1')
     const dropdownCoversVerticalTabs = await thumbnailDropdown.evaluate((dropdown) => {
-      const tabBarRect = document.querySelector('.tabBar.vertical').getBoundingClientRect()
-      const initialDropdownRect = dropdown.getBoundingClientRect()
-      dropdown.style.transform = `translateX(${tabBarRect.right - initialDropdownRect.left - 40}px)`
+      // Stretch the (fixed, so reflow-free) tab bar over the dropdown instead of
+      // moving the dropdown: its inline transform belongs to FtIconButton's
+      // viewport keeping, which would overwrite ours on its next frame
+      const tabBar = document.querySelector('.tabBar.vertical')
       const dropdownRect = dropdown.getBoundingClientRect()
-      const overlapLeft = Math.max(tabBarRect.left, dropdownRect.left)
-      const overlapRight = Math.min(tabBarRect.right, dropdownRect.right)
-      if (overlapLeft >= overlapRight) {
-        return false
-      }
+      const previousInlineSize = tabBar.style.inlineSize
+      tabBar.style.inlineSize = `${dropdownRect.left + dropdownRect.width / 2}px`
 
-      const elementAtOverlap = document.elementFromPoint(
-        overlapLeft + (overlapRight - overlapLeft) / 2,
-        Math.max(tabBarRect.top, dropdownRect.top) + 10
-      )
-      return dropdown.contains(elementAtOverlap)
+      try {
+        const tabBarRect = tabBar.getBoundingClientRect()
+        const overlapLeft = Math.max(tabBarRect.left, dropdownRect.left)
+        const overlapRight = Math.min(tabBarRect.right, dropdownRect.right)
+        if (overlapLeft >= overlapRight) {
+          return false
+        }
+
+        const elementAtOverlap = document.elementFromPoint(
+          overlapLeft + (overlapRight - overlapLeft) / 2,
+          Math.max(tabBarRect.top, dropdownRect.top) + 10
+        )
+        return dropdown.contains(elementAtOverlap)
+      } finally {
+        tabBar.style.inlineSize = previousInlineSize
+      }
     })
     expect(dropdownCoversVerticalTabs).toBe(true)
   })
