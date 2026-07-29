@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  collectResolvedNonPremiereVideoIds,
   ensureSubscriptionFeedEntryState,
   mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries
@@ -170,4 +171,40 @@ test('does not mark watched videos as new', () => {
   )
 
   assert.equal(reconciled[0].isNewInSubscriptionFeed, false)
+})
+
+test('recovers resolved non-premiere verdicts from the persisted caches', () => {
+  const videoIds = collectResolvedNonPremiereVideoIds([
+    {
+      channelA: { videos: [{ videoId: 'settled', isUpcoming: false }] },
+      channelB: { videos: [{ videoId: 'premiere', isUpcoming: true }] },
+    },
+    { channelC: { videos: [{ videoId: 'shortSettled', isUpcoming: false }] } },
+    { channelD: { videos: [{ videoId: 'liveSettled', isUpcoming: false }] } },
+  ])
+
+  assert.deepEqual([...videoIds].sort(), ['liveSettled', 'settled', 'shortSettled'])
+})
+
+test('entries that were never premiere candidates carry no reusable verdict', () => {
+  // No `isUpcoming` at all: enrichment skipped them, so nothing is known.
+  const videoIds = collectResolvedNonPremiereVideoIds([
+    { channelA: { videos: [{ videoId: 'popular', viewCount: 5000 }] } },
+  ])
+
+  assert.equal(videoIds.size, 0)
+})
+
+test('empty, missing and malformed caches are tolerated', () => {
+  const videoIds = collectResolvedNonPremiereVideoIds([
+    null,
+    undefined,
+    {},
+    { channelA: null },
+    { channelB: { videos: null } },
+    { channelC: { videos: [{ isUpcoming: false }] } },
+    { channelD: { posts: [{ postId: 'p1' }] } },
+  ])
+
+  assert.equal(videoIds.size, 0)
 })

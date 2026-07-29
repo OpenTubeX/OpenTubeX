@@ -21,6 +21,7 @@ import {
 } from './utils'
 import { getValidSubscriptionChannels } from './subscription-channels'
 import {
+  collectResolvedNonPremiereVideoIds,
   mergeSubscriptionShortThumbnails,
   reconcileFetchedSubscriptionEntries
 } from './subscription-entries'
@@ -361,10 +362,41 @@ const rssNonPremiereVideoIds = new Set()
 /** @type {Map<string, Promise<{ isUpcoming: boolean, premiereDate?: Date }>>} */
 const rssUpcomingInfoRequests = new Map()
 
+let rssNonPremiereVideoIdsSeeded = false
+
+/**
+ * The set above only lives as long as the window, so every start used to
+ * re-download a watch page for each recent upload that still reads as
+ * 0 views - hundreds of them across a large subscription list. Enrichment
+ * already writes its verdict into the entries the subscription cache
+ * persists, so recover it from there instead of asking YouTube again.
+ *
+ * Runs once, on the first enrichment after the cache has loaded.
+ */
+function seedRssNonPremiereVideoIds() {
+  if (rssNonPremiereVideoIdsSeeded || !store.getters.getSubscriptionCacheReady) {
+    return
+  }
+
+  rssNonPremiereVideoIdsSeeded = true
+
+  const resolved = collectResolvedNonPremiereVideoIds([
+    store.getters.getVideoCache,
+    store.getters.getShortsCache,
+    store.getters.getLiveCache
+  ])
+
+  for (const videoId of resolved) {
+    rssNonPremiereVideoIds.add(videoId)
+  }
+}
+
 /**
  * @param {string} videoId
  */
 function fetchRssVideoUpcomingInfo(videoId) {
+  seedRssNonPremiereVideoIds()
+
   if (rssNonPremiereVideoIds.has(videoId)) {
     return Promise.resolve({ isUpcoming: false })
   }
