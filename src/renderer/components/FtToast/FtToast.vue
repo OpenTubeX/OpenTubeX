@@ -15,7 +15,7 @@
         :key="toast.id"
         class="toast-slot"
         :class="toast.dismissDirection && `dismiss-${toast.dismissDirection}`"
-        @pointerenter="pause(toast)"
+        @pointerenter="pause(toast, $event.currentTarget)"
         @pointerleave="resume(toast)"
       >
         <div
@@ -215,14 +215,22 @@ function onClick(toast) {
 /**
  * Pauses auto-dismiss while a toast is hovered.
  * @param {Toast} toast
+ * @param {HTMLElement} element
  */
-function pause(toast) {
+function pause(toast, element) {
   if (toast.hovered) { return }
 
   toast.hovered = true
   toast.remainingMs = Math.max(0, toast.expiresAt - Date.now())
   clearTimeout(toast.timeout)
-  indicatorAnimations.get(toast.id)?.pause()
+
+  const animation = indicatorAnimations.get(toast.id) ??
+    element.querySelector('.timeout-indicator')?.getAnimations()[0]
+  if (animation) {
+    animation.currentTime = toast.duration - toast.remainingMs
+    animation.pause()
+    indicatorAnimations.set(toast.id, animation)
+  }
 }
 
 /**
@@ -307,12 +315,12 @@ function onPointerUp(toast, event) {
 
   // Pointer capture can suppress the leave event when a drag ends outside the
   // toast. Recheck after capture is released so hover cannot remain stuck.
-  const element = event.currentTarget
+  const element = event.currentTarget.parentElement
   requestAnimationFrame(() => {
     if (!toasts.includes(toast)) { return }
 
     if (element.matches(':hover')) {
-      pause(toast)
+      pause(toast, element)
     } else {
       resume(toast)
     }

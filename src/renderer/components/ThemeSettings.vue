@@ -40,6 +40,13 @@
           setting-key="alwaysShowScrollbars"
           @change="updateAlwaysShowScrollbars"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Toast Timeout Indicator')"
+          compact
+          :default-value="showToastTimeoutIndicator"
+          setting-key="showToastTimeoutIndicator"
+          @change="updateShowToastTimeoutIndicator"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -70,6 +77,14 @@
           :default-value="hideProfileSelectorInHeader"
           setting-key="hideProfileSelectorInHeader"
           @change="updateHideProfileSelectorInHeader"
+        />
+        <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Show Tab Icons')"
+          compact
+          :default-value="showTabIcons"
+          setting-key="showTabIcons"
+          @change="updateShowTabIcons"
         />
       </div>
     </div>
@@ -114,6 +129,15 @@
     </FtFlexBox>
     <br>
     <FtFlexBox>
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
+        :value="toastPosition"
+        setting-key="toastPosition"
+        :select-names="toastPositionNames"
+        :select-values="TOAST_POSITION_VALUES"
+        :icon="['fas', 'message']"
+        @change="updateToastPosition"
+      />
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
         :value="baseTheme"
@@ -176,6 +200,7 @@ import {
   MIN_THUMBNAIL_SIZE,
   THUMBNAIL_SIZE_STEP
 } from '../constants/thumbnailSize'
+import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 
 const { t } = useI18n()
 
@@ -380,6 +405,45 @@ const showThumbnailSizeButtonInHeader = computed(() => {
  */
 function updateShowThumbnailSizeButtonInHeader(value) {
   store.dispatch('updateShowThumbnailSizeButtonInHeader', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowToastTimeoutIndicator(value) {
+  store.dispatch('updateShowToastTimeoutIndicator', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabIcons(value) {
+  store.dispatch('updateShowTabIcons', value)
+}
+
+const toastPositionNames = computed(() => [
+  t('Settings.Theme Settings.Toast Position.Bottom Left'),
+  t('Settings.Theme Settings.Toast Position.Bottom Center'),
+  t('Settings.Theme Settings.Toast Position.Bottom Right'),
+  t('Settings.Theme Settings.Toast Position.Top Left'),
+  t('Settings.Theme Settings.Toast Position.Top Center'),
+  t('Settings.Theme Settings.Toast Position.Top Right')
+])
+
+/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
+const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
+
+/**
+ * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
+ */
+function updateToastPosition(value) {
+  store.dispatch('updateToastPosition', value)
 }
 
 /** @type {import('vue').ComputedRef<number>} */

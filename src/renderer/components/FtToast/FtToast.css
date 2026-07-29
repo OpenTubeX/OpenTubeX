@@ -104,6 +104,10 @@
   animation-fill-mode: forwards;
 }
 
+.timeout-indicator:dir(rtl) {
+  transform-origin: right;
+}
+
 @keyframes toast-timeout {
   to {
     transform: scaleX(0);

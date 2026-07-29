@@ -35,13 +35,6 @@
           :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
           @change="updateRememberTabNavigationHistory"
         />
-        <FtToggleSwitch
-          :label="t('Settings.General Settings.Show Toast Timeout Indicator')"
-          :default-value="showToastTimeoutIndicator"
-          setting-key="showToastTimeoutIndicator"
-          :compact="true"
-          @change="updateShowToastTimeoutIndicator"
-        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -73,14 +66,6 @@
           setting-key="confirmCloseApp"
           :compact="true"
           @change="updateConfirmCloseApp"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Show Tab Icons')"
-          :default-value="showTabIcons"
-          setting-key="showTabIcons"
-          :compact="true"
-          @change="updateShowTabIcons"
         />
       </div>
     </div>
@@ -182,15 +167,6 @@
         @change="updateReducedMotion"
       />
       <FtSelect
-        :placeholder="t('Settings.General Settings.Toast Position.Toast Position')"
-        :value="toastPosition"
-        setting-key="toastPosition"
-        :select-names="toastPositionNames"
-        :select-values="TOAST_POSITION_VALUES"
-        :icon="['fas', 'message']"
-        @change="updateToastPosition"
-      />
-      <FtSelect
         v-if="SUPPORTS_LOCAL_API && (backendPreference === 'local' || backendFallback)"
         :placeholder="t('Settings.General Settings.Avoid translation.Avoid translation')"
         :value="avoidTranslation"
@@ -289,7 +265,6 @@ import FtButton from '../FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
-import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../../constants/toastPosition'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
 
@@ -389,26 +364,6 @@ const rememberTabNavigationHistory = computed(() => store.getters.getRememberTab
  */
 function updateRememberTabNavigationHistory(value) {
   store.dispatch('updateRememberTabNavigationHistory', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const showTabIcons = computed(() => store.getters.getShowTabIcons)
-
-/**
- * @param {boolean} value
- */
-function updateShowTabIcons(value) {
-  store.dispatch('updateShowTabIcons', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
-
-/**
- * @param {boolean} value
- */
-function updateShowToastTimeoutIndicator(value) {
-  store.dispatch('updateShowToastTimeoutIndicator', value)
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API
@@ -642,25 +597,6 @@ const reducedMotion = computed(() => store.getters.getReducedMotion)
  */
 function updateReducedMotion(value) {
   store.dispatch('updateReducedMotion', value)
-}
-
-const toastPositionNames = computed(() => [
-  t('Settings.General Settings.Toast Position.Bottom Left'),
-  t('Settings.General Settings.Toast Position.Bottom Center'),
-  t('Settings.General Settings.Toast Position.Bottom Right'),
-  t('Settings.General Settings.Toast Position.Top Left'),
-  t('Settings.General Settings.Toast Position.Top Center'),
-  t('Settings.General Settings.Toast Position.Top Right')
-])
-
-/** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
-const toastPosition = computed(() => normalizeToastPosition(store.getters.getToastPosition))
-
-/**
- * @param {'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'} value
- */
-function updateToastPosition(value) {
-  store.dispatch('updateToastPosition', value)
 }
 
 /** @type {import('vue').ComputedRef<'disabled' | 'watch_only' | 'entire_app'>} */

@@ -117,7 +117,8 @@ test.describe('settings', () => {
   test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const positionSelect = page.locator('.select')
+    const themeSection = page.locator('[data-section="theme"]')
+    const positionSelect = themeSection.locator('.select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     const holder = page.locator('.toast-holder')
@@ -243,8 +244,13 @@ test.describe('settings', () => {
   test('configures the toast timeout indicator and pauses toasts on hover', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const indicatorToggle = page.getByRole('checkbox', { name: 'Show toast timeout indicator' })
+    const themeSection = page.locator('[data-section="theme"]')
+    const indicatorToggle = themeSection.getByRole('checkbox', { name: 'Show toast timeout indicator' })
     await expect(indicatorToggle).toBeChecked()
+    await expect(themeSection.getByRole('checkbox', { name: 'Show Tab Icons' })).toBeVisible()
+    await expect(page.locator('[data-section="general"]').getByRole('checkbox', {
+      name: /Show (toast timeout indicator|Tab Icons)/
+    })).toHaveCount(0)
 
     await page.mouse.move(800, 300)
     await page.evaluate(() => {
@@ -488,7 +494,7 @@ test.describe('invalid toast position', () => {
   test('falls back to bottom left', async ({ page }) => {
     await goTo(page, 'settings')
 
-    const positionSelect = page.locator('.select')
+    const positionSelect = page.locator('[data-section="theme"] .select')
       .filter({ hasText: 'Toast Position' })
       .locator('select')
     await expect(positionSelect).toHaveValue('bottom-left')
