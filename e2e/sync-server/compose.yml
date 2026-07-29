@@ -5,6 +5,7 @@ services:
       DATABASE_URL: ./data/db.sqlite
       SECRET_KEY: opentubex-local-sync-server-test-secret
       ALLOW_REGISTRATION: "true"
+      TRUST_FORWARDED_FOR: "true"
       VALIDATE_SUBMITTED_METADATA: "false"
     ports:
       - "127.0.0.1:8080:8080"

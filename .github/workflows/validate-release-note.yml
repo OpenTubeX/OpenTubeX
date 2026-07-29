@@ -1,0 +1,27 @@
+name: Validate Release Note
+
+on:
+  pull_request_target:
+    types: [opened, edited, labeled, unlabeled, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-release-note:
+    name: Release Note
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Validate release note
+      run: node _scripts/releaseNotes.mjs validate-event "$GITHUB_EVENT_PATH"
