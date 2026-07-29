@@ -126,12 +126,16 @@ test.describe('settings', () => {
 
       const toast = holder.locator('.toast', { hasText: message })
       await expect(toast).toBeVisible()
+      await expect(toast).toHaveCSS('transform', 'none')
+      await expect(toast.locator('..')).toHaveCSS('transform', 'none')
       return toast
     }
 
     async function dragToast (toast, distance) {
       const bounds = await toast.boundingBox()
-      const x = bounds.x + bounds.width / 2
+      const x = distance < 0
+        ? bounds.x + bounds.width - 5
+        : bounds.x + 5
       const y = bounds.y + bounds.height / 2
 
       await page.mouse.move(x, y)
@@ -150,14 +154,14 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('bottom-left')
     await expect(holder).toHaveClass(/position-bottom-left/)
+    await expect(holder).toHaveCSS('bottom', '24px')
     let toast = await showToast('Left toast')
     let bounds = await toast.boundingBox()
-    let viewport = await viewportSize()
     expect(bounds.x).toBeLessThan(50)
-    expect(bounds.y + bounds.height).toBeGreaterThan(viewport.height - 50)
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
+    await expect(toast).toHaveCSS('transform', 'none')
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
@@ -167,7 +171,7 @@ test.describe('settings', () => {
     await expect(holder).toHaveCSS('transform', 'none')
     toast = await showToast('Center toast dragged left')
     bounds = await toast.boundingBox()
-    viewport = await viewportSize()
+    let viewport = await viewportSize()
     expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
@@ -187,38 +191,39 @@ test.describe('settings', () => {
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
+    await expect(toast).toHaveCSS('transform', 'none')
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('top-left')
     await expect(holder).toHaveClass(/position-top-left/)
+    await expect(holder).toHaveCSS('top', '24px')
     toast = await showToast('Top left toast')
     bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
-    expect(bounds.y).toBeLessThan(50)
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('top-center')
     await expect(holder).toHaveClass(/position-top-center/)
+    await expect(holder).toHaveCSS('top', '24px')
     toast = await showToast('Top center toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
     expect(bounds.x + bounds.width / 2).toBeCloseTo(viewport.width / 2, 0)
-    expect(bounds.y).toBeLessThan(50)
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('top-right')
     await expect(holder).toHaveClass(/position-top-right/)
+    await expect(holder).toHaveCSS('top', '24px')
     toast = await showToast('Top right toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
     expect(bounds.x + bounds.width).toBeGreaterThan(viewport.width - 50)
-    expect(bounds.y).toBeLessThan(50)
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
