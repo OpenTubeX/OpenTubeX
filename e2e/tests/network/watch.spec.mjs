@@ -643,6 +643,7 @@ test.describe('watch page', () => {
       description: '',
       segment: [0, 0]
     }])
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(0)
   })
 
   test('mutes SponsorBlock mute segments without skipping', async ({ page, innertube }) => {
@@ -716,6 +717,21 @@ test.describe('watch page', () => {
     })
     await expect(video).toHaveJSProperty('muted', false)
     await expect(muteNotification).toHaveCount(0)
+
+    await video.evaluate(element => {
+      element.muted = true
+      element.currentTime = 3
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(muteNotification).toBeVisible()
+    await muteNotification.getByRole('button', { name: /Unmute/ }).click()
+    await expect(video).toHaveJSProperty('muted', false)
+    await video.evaluate(element => {
+      element.currentTime = 11
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await expect(video).toHaveJSProperty('muted', true)
+    await video.evaluate(element => { element.muted = false })
 
     await video.evaluate(element => {
       element.pause()

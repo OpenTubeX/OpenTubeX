@@ -104,6 +104,7 @@ const SPONSORBLOCK_CATEGORIES = Object.freeze([
 ])
 const SPONSORBLOCK_INFO_CATEGORIES = Object.freeze([...SPONSORBLOCK_CATEGORIES, 'exclusive_access'])
 const SPONSORBLOCK_INFO_ACTION_TYPES = Object.freeze(['skip', 'mute', 'full', 'poi'])
+const SPONSORBLOCK_PLAYBACK_ACTION_TYPES = Object.freeze(['skip', 'mute', 'poi'])
 const SABR_BACKOFF_PREVIEW_REFRESH_DELAY_MS = 150
 const FULL_WINDOW_ANIMATION_DURATION_MS = 400
 const FULLSCREEN_DOCK_PREFERRED_MIN_HEIGHT = 360
@@ -1510,7 +1511,10 @@ export default defineComponent({
       getPlayer: () => player,
       isLive,
       onSubmittedSegments: (submittedSegments) => {
-        sponsorBlockSegments = sponsorBlockSegments.concat(submittedSegments).sort((a, b) => a.startTime - b.startTime)
+        const playbackSegments = submittedSegments.filter(segment => {
+          return SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType)
+        })
+        sponsorBlockSegments = sponsorBlockSegments.concat(playbackSegments).sort((a, b) => a.startTime - b.startTime)
         sponsorBlockInfoSegments.value = sponsorBlockInfoSegments.value
           .concat(submittedSegments.map(segment => ({ ...segment, locked: 0, votes: 0 })))
           .sort((a, b) => a.startTime - b.startTime)
@@ -1603,7 +1607,7 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockInfoSegments.value = segments
         sponsorBlockSegments = segments.filter(segment => {
-          return ['skip', 'mute', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+          return SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
         })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
@@ -1667,7 +1671,7 @@ export default defineComponent({
       if (segments.length > 0) {
         sponsorBlockInfoSegments.value = segments
         sponsorBlockSegments = segments.filter(segment => {
-          return ['skip', 'mute', 'poi'].includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
+          return SPONSORBLOCK_PLAYBACK_ACTION_TYPES.includes(segment.actionType) && sponsorSkips.value.seekBar.includes(segment.category)
         })
         sponsorBlockAverageVideoDuration = averageDuration
         hasSponsorBlockMusicOfftopicSegment.value = segments.some(segment => segment.category === 'music_offtopic')
@@ -2516,7 +2520,8 @@ export default defineComponent({
           !sponsorBlockDoNotMuteSegments.has(segment.uuid)
       })
 
-      sponsorBlockMuteController.setSourceActive('segments', shouldMute)
+      sponsorBlockMuteController.setSourceActive('segments', activeMuteSegments.size > 0)
+      sponsorBlockMuteController.setSourceSuppressed('segments', !shouldMute)
 
       sponsorBlockSegments.forEach(segment => {
         if (!activeMuteSegments.has(segment.uuid) ||
@@ -2562,7 +2567,6 @@ export default defineComponent({
         sponsorBlockDoNotMuteSegments.add(uuid)
         manuallyMutedSponsorBlockSegments.delete(uuid)
         syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
-        video.value.muted = false
         if (toastEntry) {
           toastEntry.unskipped = true
         }
@@ -2627,7 +2631,6 @@ export default defineComponent({
         sponsorBlockDoNotMuteSegments.delete(uuid)
         manuallyMutedSponsorBlockSegments.add(uuid)
         syncSponsorBlockMuteSegments(video.value.currentTime, !props.sponsorBlockAutoSkipDisabled)
-        sponsorBlockMuteController.enforceMuted()
         const toastEntry = skippedSponsorBlockSegments.value.find(skipped => skipped.uuid === uuid)
         if (toastEntry) {
           toastEntry.unskipped = false

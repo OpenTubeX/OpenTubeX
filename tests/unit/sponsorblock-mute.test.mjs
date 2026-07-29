@@ -50,10 +50,26 @@ test('can reapply mute after a user override', () => {
   muted = false
   controller.handleVolumeChange()
 
-  controller.enforceMuted()
+  controller.setSourceSuppressed('segment', false)
   assert.equal(muted, true)
   controller.handleVolumeChange()
 
   controller.setSourceActive('segment', false)
   assert.equal(muted, false)
+})
+
+test('restores a pre-existing mute after temporary segment unmute', () => {
+  let muted = true
+  const controller = createSponsorBlockMuteController({
+    getMuted: () => muted,
+    setMuted: value => { muted = value }
+  })
+
+  controller.setSourceActive('segment', true)
+  controller.setSourceSuppressed('segment', true)
+  assert.equal(muted, false)
+  controller.handleVolumeChange()
+
+  controller.setSourceActive('segment', false)
+  assert.equal(muted, true)
 })
