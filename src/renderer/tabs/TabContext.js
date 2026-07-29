@@ -23,13 +23,13 @@ export function useTabTitle() {
     isMounted = false
   })
 
-  return (title) => {
+  return (title, options) => {
     if (!isMounted) {
       return
     }
 
     if (process.env.IS_ELECTRON && tabId) {
-      getTabNavigationService().setTitle(tabId, title)
+      getTabNavigationService().setTitle(tabId, title, options)
     } else {
       store.commit('setAppTitle', title)
     }

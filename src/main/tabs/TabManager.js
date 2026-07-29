@@ -72,6 +72,7 @@ const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
  * @typedef {object} NavigationHistoryEntry
  * @property {ReturnType<typeof normalizeRoute>} route
  * @property {string} title
+ * @property {boolean} titlePending
  * @property {{left: number, top: number}} scroll
  */
 
@@ -222,6 +223,7 @@ export class TabManager {
         return {
           route: normalizeRoute(route),
           title: typeof entry.title === 'string' ? entry.title : route.fullPath,
+          titlePending: entry.titlePending === true,
           scroll: {
             left: Number.isFinite(entry.scroll?.left) ? entry.scroll.left : 0,
             top: Number.isFinite(entry.scroll?.top) ? entry.scroll.top : 0
