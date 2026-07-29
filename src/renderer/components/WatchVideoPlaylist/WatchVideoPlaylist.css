@@ -254,12 +254,11 @@
   overflow: hidden auto;
   overscroll-behavior: contain;
   resize: none;
+}
 
-  /* Deliberately a native scrollbar. Watch.js re-centres this list when it
-     moves between the sidebar and the dock, but OverlayScrollbars restores the
-     scroll offset it had before the move and there's no option to stop it, so
-     the list would end up thousands of pixels away from the current video. */
-  scrollbar-color: rgb(255 255 255 / 45%) transparent;
+.fullscreenPlaylist :is(.fullscreenPlaylistContent, .playlistItemsWrapper) {
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .playlistItemsWrapper::-webkit-resizer {

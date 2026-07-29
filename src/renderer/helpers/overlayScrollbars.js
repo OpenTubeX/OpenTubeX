@@ -196,14 +196,25 @@ function toggleOverlayScrollbars(element, enabled) {
 }
 
 /**
+ * Forces any pending layout update before restoring a consumer-managed scroll
+ * position. This is needed when a scroll container moves between layouts,
+ * because OverlayScrollbars otherwise restores its previous offset afterwards.
+ *
+ * @param {HTMLElement} element
+ * @param {number} scrollTop
+ */
+export function restoreOverlayScrollTop(element, scrollTop) {
+  OverlayScrollbars(element)?.update(true)
+  element.scrollTop = scrollTop
+}
+
+/**
  * `v-overlay-scrollbars` - does the same for a nested scroll container.
  * Pass `false` to leave the native scrollbars alone, for containers that only
  * scroll in some layouts.
  *
- * Surviving a `<Teleport>` is fine, but note that the library restores the
- * scroll offset the container had before the move, where a native scroll
- * container would have been reset to the top. Containers that recompute their
- * own scroll position after moving (the watch page playlist) can't use this.
+ * Surviving a `<Teleport>` is fine. Use `restoreOverlayScrollTop` when the
+ * destination layout needs a different offset.
  */
 export const overlayScrollbarsDirective = {
   mounted(element, binding) {

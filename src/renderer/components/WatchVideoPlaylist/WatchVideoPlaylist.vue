@@ -28,7 +28,10 @@
           <FontAwesomeIcon :icon="['fas', 'xmark']" />
         </button>
       </header>
-      <div :class="{ fullscreenPlaylistContent: fullscreenOverlay }">
+      <div
+        v-overlay-scrollbars="fullscreenOverlay"
+        :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
+      >
         <div class="playlistHeader">
           <div
             v-if="!fullscreenOverlay"
@@ -171,6 +174,7 @@
         <TransitionGroup
           v-if="!isLoading"
           ref="playlistItemsWrapper"
+          v-overlay-scrollbars
           name="playlistItem"
           tag="div"
           class="playlistItemsWrapper"
@@ -242,6 +246,7 @@ import {
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { isHistoryEntryWatched } from '../../helpers/history'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -1064,6 +1069,18 @@ function setScrollTop(scrollTop) {
   }
 }
 
+/** @param {number} scrollTop */
+function restoreScrollTop(scrollTop) {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
+      if (container != null) {
+        restoreOverlayScrollTop(container, scrollTop)
+      }
+    })
+  })
+}
+
 /**
  * @param {number} index
  */
@@ -1170,6 +1187,7 @@ const shouldStopDueToPlaylistEnd = computed(() => {
 defineExpose({
   centerCurrentVideo,
   getScrollTop,
+  restoreScrollTop,
   setScrollTop,
   playNextVideo,
   playPreviousVideo,

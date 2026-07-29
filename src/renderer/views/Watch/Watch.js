@@ -645,7 +645,7 @@ export default defineComponent({
         if (scrollTop == null) {
           playlist?.centerCurrentVideo()
         } else {
-          playlist?.setScrollTop(scrollTop)
+          playlist?.restoreScrollTop(scrollTop)
         }
       })
     },
