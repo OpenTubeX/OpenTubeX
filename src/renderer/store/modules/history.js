@@ -1,5 +1,8 @@
 import { DBHistoryHandlers } from '../../../datastores/handlers/index'
-import { migrateLegacyHistoryRecord } from '../../helpers/history'
+import {
+  canMarkHistoryEntryAsWatched,
+  migrateLegacyHistoryRecord,
+} from '../../helpers/history'
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 
@@ -102,7 +105,7 @@ const actions = {
   async markAllHistoryAsWatched({ dispatch, state }) {
     let markedCount = 0
     const records = state.historyCacheSorted.map(record => {
-      if (record.isWatched === true) {
+      if (record.isWatched === true || !canMarkHistoryEntryAsWatched(record)) {
         return record
       }
 

@@ -2,8 +2,10 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  canMarkHistoryEntryAsWatched,
   DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   hasReachedWatchedThreshold,
+  isHistoryEntryWatched,
 } from '../../src/history.js'
 
 test('uses the hybrid threshold by default', () => {
@@ -31,4 +33,16 @@ test('rejects invalid video progress and falls back from invalid thresholds', ()
   assert.equal(hasReachedWatchedThreshold(30, 0, 50), false)
   assert.equal(hasReachedWatchedThreshold(0, 60, -1), false)
   assert.equal(hasReachedWatchedThreshold(54 * 60, 60 * 60, 101), false)
+})
+
+test('active live content cannot be marked as watched', () => {
+  assert.equal(canMarkHistoryEntryAsWatched({ isLive: true }), false)
+  assert.equal(isHistoryEntryWatched({ isLive: true, isWatched: true }), false)
+  assert.equal(canMarkHistoryEntryAsWatched({ isLive: false }), true)
+  assert.equal(isHistoryEntryWatched({ isLive: false, isWatched: true }), true)
+  assert.equal(isHistoryEntryWatched({
+    isLive: false,
+    watchProgress: 9 * 60,
+    lengthSeconds: 10 * 60,
+  }), true)
 })
