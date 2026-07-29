@@ -226,7 +226,12 @@ export const overlayScrollbarsDirective = {
   },
 
   unmounted(element) {
+    const hadOverlayScrollbars = OverlayScrollbars(element) != null
     toggleOverlayScrollbars(element, false)
+    if (!hadOverlayScrollbars) {
+      return
+    }
+
     // A parent transition can keep this element visible after Vue has already
     // unmounted the directive. Keep native scrollbars suppressed during that
     // leave animation; the element is about to be removed from the DOM.
