@@ -1226,6 +1226,21 @@ test.describe('custom Shorts player', () => {
     await expect(page).toHaveURL(
       /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
     )
+
+    await page.evaluate(() => window.scrollTo({
+      top: document.documentElement.scrollHeight
+    }))
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
+
+    await page.waitForTimeout(500)
+    await previous.click()
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+    await expect(commentsPanel).toHaveClass(/shortsCommentsPanelOpen/)
     await commentsPanel.getByRole('button', { name: 'Hide Comments' }).click()
 
     const [playerBounds, videoAreaBounds, metadataBounds, actionBounds, previewBounds, navigationBounds] =

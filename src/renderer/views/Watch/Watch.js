@@ -1110,9 +1110,13 @@ export default defineComponent({
         this.sabrErrorRecoveryPlayedSeconds = 0
       }
       this.ipBlockDetectedInCurrentChain = false
+      const preserveShortsPanels = videoIdChanged &&
+        this.customShortsPlayerActive &&
+        this.tabRoute.query.short === 'true'
       this.resetVideoState({
         preserveTitle,
-        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : ''
+        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : '',
+        preserveShortsPanels,
       })
 
       this.firstLoad = true
@@ -1141,13 +1145,19 @@ export default defineComponent({
       return this.tabRoute.fullPath
     },
 
-    resetVideoState: function ({ preserveTitle = false, placeholderTitle = '' } = {}) {
+    resetVideoState: function ({
+      preserveTitle = false,
+      placeholderTitle = '',
+      preserveShortsPanels = false,
+    } = {}) {
       const previousVideoTitle = this.videoTitle
 
       if (!preserveTitle) {
         this.hasResolvedVideoTitle = false
       }
-      this.shortsCommentsOpen = false
+      if (!preserveShortsPanels) {
+        this.shortsCommentsOpen = false
+      }
       this.playlistScrollPositions.sidebar = null
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
@@ -1192,8 +1202,10 @@ export default defineComponent({
       this.legacyFormats = []
       this.captions = []
       this.currentTime = 0
-      this.showTranscript = false
-      this.shortsMetadataOpen = false
+      if (!preserveShortsPanels) {
+        this.showTranscript = false
+        this.shortsMetadataOpen = false
+      }
       this.showSidebarChapters = false
       this.videoChapterThumbnails = []
       this.vrProjection = null
@@ -1313,8 +1325,6 @@ export default defineComponent({
         return
       }
 
-      this.shortsCommentsOpen = false
-
       this.shortsTransitionDirection = Math.sign(offset)
       this.shortsTransitionPreview = getShortThumbnailUrl(
         target,
@@ -1351,7 +1361,6 @@ export default defineComponent({
       if (
         !this.subscriptionShortsFeedActive ||
         !this.isCurrentlyPresented() ||
-        this.shortsNavigationPanelOpen ||
         Math.abs(scrollY - this.shortsLastWindowScrollY) < 4
       ) {
         this.shortsLastWindowScrollY = scrollY
@@ -1372,10 +1381,16 @@ export default defineComponent({
       }
     },
 
+    isShortsPanelEvent: function (event) {
+      return Boolean(event.target?.closest?.(
+        '.shortsCommentsPanel, .shortsAuxPanel, .shaka-no-propagation'
+      ))
+    },
+
     handleShortsWheel: function (event) {
       if (
         !this.subscriptionShortsFeedActive ||
-        this.shortsNavigationPanelOpen ||
+        this.isShortsPanelEvent(event) ||
         Math.abs(event.deltaY) < 20
       ) {
         return
@@ -1388,7 +1403,7 @@ export default defineComponent({
     handleShortsPointerDown: function (event) {
       if (
         this.subscriptionShortsFeedActive &&
-        !this.shortsNavigationPanelOpen &&
+        !this.isShortsPanelEvent(event) &&
         event.pointerType === 'touch'
       ) {
         this.shortsTouchStartY = event.clientY
@@ -1399,8 +1414,8 @@ export default defineComponent({
 
     handleShortsPointerUp: function (event) {
       if (
-        this.shortsNavigationPanelOpen ||
         this.shortsTouchStartY === null ||
+        this.isShortsPanelEvent(event) ||
         event.pointerType !== 'touch'
       ) {
         this.shortsTouchStartY = null
