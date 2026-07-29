@@ -56,9 +56,58 @@ function create(initialization) {
 
   if (initialization === document.body) {
     optimizeBodyScrollbarDrag(instance)
+  } else if (initialization.elements?.viewport instanceof HTMLElement) {
+    reconcileScrollbarOnResize(initialization.elements.viewport, instance)
   }
 
   return instance
+}
+
+/**
+ * A viewport can be scrolled to the end while an opening transition still
+ * makes it shorter than its final size. Chromium can retain that obsolete end
+ * offset as the viewport grows, which also leaves a scrollbar for overflow
+ * that no longer exists. Remeasure growing viewports from their true origin,
+ * then restore the old position within the new range.
+ *
+ * @param {HTMLElement} element
+ * @param {import('overlayscrollbars').OverlayScrollbars} instance
+ */
+function reconcileScrollbarOnResize(element, instance) {
+  let previousHeight = element.clientHeight
+  let resizeFrame = null
+  const resizeObserver = new ResizeObserver(() => {
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame)
+    }
+
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = null
+      const height = element.clientHeight
+      const scrollTop = element.scrollTop
+      const maximumScrollTop = Math.max(0, element.scrollHeight - height)
+      const grewAtOldEnd = height > previousHeight &&
+        scrollTop > 0 &&
+        scrollTop >= maximumScrollTop - 1
+      previousHeight = height
+
+      if (grewAtOldEnd) {
+        element.scrollTop = 0
+        instance.update(true)
+        element.scrollTop = Math.min(scrollTop, instance.state().overflowAmount.y)
+      }
+
+      instance.update(true)
+    })
+  })
+
+  resizeObserver.observe(element)
+  instance.on('destroyed', () => {
+    resizeObserver.disconnect()
+    if (resizeFrame !== null) {
+      cancelAnimationFrame(resizeFrame)
+    }
+  })
 }
 
 /**
