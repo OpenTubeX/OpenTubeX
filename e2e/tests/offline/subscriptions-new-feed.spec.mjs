@@ -321,6 +321,31 @@ test.describe('new feed display filters', () => {
   })
 })
 
+test.describe('new feed latest-per-channel limit', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        onlyShowLatestFromChannel: true,
+        onlyShowLatestFromChannelNumber: 1
+      },
+      profiles: [profile()],
+      subscriptionCache: populatedCache
+    }
+  })
+
+  test('applies the limit across media categories', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    await expect(page.getByText('New live stream', { exact: true })).toBeVisible()
+    await expect(page.getByText('New video', { exact: true })).toHaveCount(0)
+    await expect(page.getByText('New short', { exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Videos', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Shorts', exact: true })).toHaveCount(0)
+  })
+})
+
 test.describe('independent new feed setting', () => {
   test.use({
     seed: {

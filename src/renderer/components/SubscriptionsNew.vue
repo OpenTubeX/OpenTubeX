@@ -142,9 +142,53 @@ const newContentByCategory = computed(() => {
 })
 
 const forbiddenTitles = computed(() => store.getters.getForbiddenTitlesParsed)
-const newVideos = computed(() => newContentByCategory.value.videos)
-const newShorts = computed(() => filterNewMedia(newContentByCategory.value.shorts))
-const newLive = computed(() => filterNewMedia(newContentByCategory.value.live))
+const newMediaByCategory = computed(() => {
+  let mediaEntries = ['videos', 'shorts', 'live'].flatMap(category => {
+    return newContentByCategory.value[category].map(entry => ({ category, entry }))
+  })
+
+  mediaEntries = mediaEntries.filter(({ entry }) => !isVideoHiddenByPreferences(entry, {
+    hideLiveStreams: store.getters.getHideLiveStreams,
+    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
+    forbiddenTitles: forbiddenTitles.value
+  }))
+
+  mediaEntries.sort((a, b) => {
+    return (b.entry.published ?? 0) - (a.entry.published ?? 0)
+  })
+
+  if (store.getters.getOnlyShowLatestFromChannel) {
+    const authorCounts = new Map()
+    const limit = store.getters.getOnlyShowLatestFromChannelNumber
+
+    mediaEntries = mediaEntries.filter(({ entry }) => {
+      if (!entry.videoId || !entry.authorId) {
+        return true
+      }
+
+      const count = authorCounts.get(entry.authorId) ?? 0
+      if (count >= limit) {
+        return false
+      }
+
+      authorCounts.set(entry.authorId, count + 1)
+      return true
+    })
+  }
+
+  return mediaEntries.reduce((entries, { category, entry }) => {
+    entries[category].push(entry)
+    return entries
+  }, {
+    videos: [],
+    shorts: [],
+    live: []
+  })
+})
+
+const newVideos = computed(() => newMediaByCategory.value.videos)
+const newShorts = computed(() => newMediaByCategory.value.shorts)
+const newLive = computed(() => newMediaByCategory.value.live)
 const newPosts = computed(() => newContentByCategory.value.posts.filter(entry => {
   const lowerCaseAuthor = entry.author?.toLowerCase()
 
@@ -156,35 +200,6 @@ const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPla
 const hasAdditionalContent = computed(() => {
   return newShorts.value.length > 0 || newLive.value.length > 0 || newPosts.value.length > 0
 })
-
-function filterNewMedia(entries) {
-  const filteredEntries = entries.filter(entry => !isVideoHiddenByPreferences(entry, {
-    hideLiveStreams: store.getters.getHideLiveStreams,
-    hideUpcomingPremieres: store.getters.getHideUpcomingPremieres,
-    forbiddenTitles: forbiddenTitles.value
-  }))
-
-  if (!store.getters.getOnlyShowLatestFromChannel) {
-    return filteredEntries
-  }
-
-  const authorCounts = new Map()
-  const limit = store.getters.getOnlyShowLatestFromChannelNumber
-
-  return filteredEntries.filter(entry => {
-    if (!entry.videoId || !entry.authorId) {
-      return true
-    }
-
-    const count = authorCounts.get(entry.authorId) ?? 0
-    if (count >= limit) {
-      return false
-    }
-
-    authorCounts.set(entry.authorId, count + 1)
-    return true
-  })
-}
 
 const isLoading = computed(() => {
   return !store.getters.getSubscriptionCacheReady || isRefreshing.value
