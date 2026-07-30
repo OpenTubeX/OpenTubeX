@@ -608,7 +608,9 @@ function handleSmoothScrolling(value) {
 <style scoped>
 .sliderGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 380px));
+  justify-content: space-evenly;
+  gap: 24px 64px;
 }
 
 .sliderGrid :deep(.pure-material-slider) {
