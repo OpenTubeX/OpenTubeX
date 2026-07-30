@@ -180,60 +180,66 @@ const actions = {
     }
   },
 
-  async markSubscriptionEntriesAsSeen({ commit, state }, { tab, channelIds }) {
-    let cache
-    let entriesKey
-    let updateEntries
-
-    switch (tab) {
-      case 'videos':
-        cache = state.videoCache
-        entriesKey = 'videos'
-        updateEntries = DBSubscriptionCacheHandlers.updateVideosByChannelId
-        break
-      case 'shorts':
-        cache = state.shortsCache
-        entriesKey = 'videos'
-        updateEntries = DBSubscriptionCacheHandlers.updateShortsByChannelId
-        break
-      case 'live':
-        cache = state.liveCache
-        entriesKey = 'videos'
-        updateEntries = DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId
-        break
-      case 'posts':
-        cache = state.postsCache
-        entriesKey = 'posts'
-        updateEntries = DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId
-        break
-      default:
-        return
+  async markSubscriptionEntriesAsSeen({ commit, state }, { tab, tabs = [tab], channelIds }) {
+    const channelIdSet = new Set(channelIds)
+    const cacheConfigs = {
+      videos: {
+        cache: state.videoCache,
+        entriesKey: 'videos',
+        updateEntries: DBSubscriptionCacheHandlers.updateVideosByChannelId
+      },
+      shorts: {
+        cache: state.shortsCache,
+        entriesKey: 'videos',
+        updateEntries: DBSubscriptionCacheHandlers.updateShortsByChannelId
+      },
+      live: {
+        cache: state.liveCache,
+        entriesKey: 'videos',
+        updateEntries: DBSubscriptionCacheHandlers.updateLiveStreamsByChannelId
+      },
+      posts: {
+        cache: state.postsCache,
+        entriesKey: 'posts',
+        updateEntries: DBSubscriptionCacheHandlers.updateCommunityPostsByChannelId
+      }
     }
 
-    const channelIdSet = new Set(channelIds)
-
-    await Promise.all(Object.entries(cache).map(async ([channelId, cacheEntry]) => {
-      if (!channelIdSet.has(channelId)) {
-        return
+    const writes = tabs.flatMap(feedTab => {
+      const config = cacheConfigs[feedTab]
+      if (config == null) {
+        return []
       }
 
-      const entries = cacheEntry?.[entriesKey]
-      if (!entries?.some(entry => entry.isNewInSubscriptionFeed === true)) {
-        return
-      }
+      return Object.entries(config.cache).map(async ([channelId, cacheEntry]) => {
+        if (!channelIdSet.has(channelId)) {
+          return null
+        }
 
-      const seenEntries = entries.map(entry => ({
-        ...entry,
-        isNewInSubscriptionFeed: false
-      }))
+        const entries = cacheEntry?.[config.entriesKey]
+        if (!entries?.some(entry => entry.isNewInSubscriptionFeed === true)) {
+          return null
+        }
 
-      try {
-        await updateEntries(channelId, seenEntries, cacheEntry.timestamp)
-        commit('markSubscriptionEntriesAsSeenByChannel', { tab, channelId })
-      } catch (errMessage) {
-        console.error(errMessage)
-      }
-    }))
+        const seenEntries = entries.map(entry => ({
+          ...entry,
+          isNewInSubscriptionFeed: false
+        }))
+
+        try {
+          await config.updateEntries(channelId, seenEntries, cacheEntry.timestamp)
+          return { tab: feedTab, channelId }
+        } catch (errMessage) {
+          console.error(errMessage)
+          return null
+        }
+      })
+    })
+
+    // Updating every successful cache entry in one mutation gives Vue one
+    // render, so all cards leave together regardless of feed size.
+    commit('markSubscriptionEntriesAsSeenInCache', (await Promise.all(writes))
+      .filter(cacheEntry => cacheEntry != null))
   },
 
   async markSubscriptionVideoAsSeen({ commit, state }, videoId) {
@@ -341,19 +347,22 @@ const mutations = {
     }
   },
 
-  markSubscriptionEntriesAsSeenByChannel(state, { tab, channelId }) {
-    const cacheEntry = tab === 'videos'
-      ? state.videoCache[channelId]
-      : tab === 'shorts'
-        ? state.shortsCache[channelId]
-        : tab === 'live'
-          ? state.liveCache[channelId]
-          : state.postsCache[channelId]
-    const entries = tab === 'posts' ? cacheEntry?.posts : cacheEntry?.videos
+  markSubscriptionEntriesAsSeenInCache(state, cacheEntries) {
+    for (const { tab, channelId } of cacheEntries) {
+      const cache = tab === 'videos'
+        ? state.videoCache
+        : tab === 'shorts'
+          ? state.shortsCache
+          : tab === 'live'
+            ? state.liveCache
+            : state.postsCache
+      const cacheEntry = cache[channelId]
+      const entries = tab === 'posts' ? cacheEntry?.posts : cacheEntry?.videos
 
-    entries?.forEach(entry => {
-      entry.isNewInSubscriptionFeed = false
-    })
+      entries?.forEach(entry => {
+        entry.isNewInSubscriptionFeed = false
+      })
+    }
   },
 
   updateVideoCacheByChannel(state, { channelId, entries, timestamp = new Date() }) {

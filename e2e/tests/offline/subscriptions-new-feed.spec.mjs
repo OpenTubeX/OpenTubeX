@@ -211,8 +211,30 @@ test.describe('new feed settings and seen state', () => {
 
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
+    await page.evaluate(() => {
+      window.__firstFeedLeaveAt = null
+
+      const observer = new MutationObserver(() => {
+        if (
+          window.__firstFeedLeaveAt === null &&
+          document.querySelector(
+            '.newFeed .feed-leave-active, .newFeed .new-feed-section-leave-active'
+          )
+        ) {
+          window.__firstFeedLeaveAt = performance.now()
+          observer.disconnect()
+        }
+      })
+      observer.observe(document.querySelector('.newFeed'), {
+        attributes: true,
+        attributeFilter: ['class'],
+        subtree: true
+      })
+    })
     await markAllAsSeen.click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
+    expect(await page.evaluate(() => performance.now() - window.__firstFeedLeaveAt))
+      .toBeLessThan(350)
     await expect(markAllAsSeen).toHaveCount(0)
 
     const relaunched = await app.relaunch()

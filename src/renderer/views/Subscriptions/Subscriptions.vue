@@ -557,15 +557,12 @@ async function markAllAsSeen(tab) {
       ? visibleTabs.value.filter(visibleTab => visibleTab !== 'new')
       : [tab]
 
-    for (const feedTab of feedTabs) {
-      await store.dispatch(
-        'markSubscriptionEntriesAsSeen',
-        {
-          tab: feedTab === 'community' ? 'posts' : feedTab,
-          channelIds: activeSubscriptionList.value.map(channel => channel.id)
-        }
-      )
-    }
+    const channelIds = activeSubscriptionList.value.map(channel => channel.id)
+
+    await store.dispatch('markSubscriptionEntriesAsSeen', {
+      tabs: feedTabs.map(feedTab => feedTab === 'community' ? 'posts' : feedTab),
+      channelIds
+    })
   } finally {
     markingSeenTab.value = null
   }
