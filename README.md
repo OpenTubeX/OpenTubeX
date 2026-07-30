@@ -2,9 +2,8 @@
  <img alt="" src="/_icons/logoColor.svg" width=500 align="center">
 </p>
 
-OpenTubeX is an open source desktop YouTube player built with privacy in mind.
-Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
-Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to Electron.
+OpenTubeX is an open-source, privacy-focused desktop YouTube player built on FreeTube, with additional playback controls and desktop workflows.
+It is available for Windows 10 and later, macOS 12 and later, and Linux.
 
 <br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
 <p align="center">
@@ -17,9 +16,19 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 </p>
 
 <hr>
-<p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
+<p align="center"><a href="#why-opentubex">Why OpenTubeX?</a> &bull; <a href="#extra-features-compared-to-freetube">Extra features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
+
+## Why OpenTubeX?
+
+OpenTubeX builds on FreeTube and is aimed at users who want:
+
+- **More playback control**, including per-channel speed and quality preferences, customizable shortcuts, a quick speed bar and fast-forwarding through silence.
+- **A browser-style desktop workflow** with tabs, configurable session restoration, multiple windows, a scroll mini-player and a watch queue.
+- **Deeper SponsorBlock integration** with a segment side panel, richer skip controls, channel whitelisting, submissions and full-video labels.
+- **More ways to manage and understand your library** through watch-time statistics, configurable history retention, enhanced subscription refreshes and advanced search history.
+- **Optional end-to-end encrypted sync** for subscriptions, playlists, history, profiles, tabs, settings and channel playback speeds.
 
 > [!NOTE] 
 > OpenTubeX is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
