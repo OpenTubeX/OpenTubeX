@@ -4369,6 +4369,7 @@ export default defineComponent({
       scrollMiniPlaceholder,
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerActive,
+      scrollMiniPlayerAnimating,
       scrollMiniPlayerStyle,
       scrollMiniPlayPauseVisible,
       scrollMiniResizeCorner,
@@ -8490,6 +8491,7 @@ export default defineComponent({
       silenceSkippingIndicatorMessage,
 
       scrollMiniPlayerActive,
+      scrollMiniPlayerAnimating,
       scrollMiniPlaceholderHeight,
       scrollMiniPlayerStyle,
       scrollMiniIsPaused,

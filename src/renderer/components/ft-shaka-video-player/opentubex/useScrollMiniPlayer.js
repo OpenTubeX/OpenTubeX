@@ -1,6 +1,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 
 import store from '../../../store/index'
+import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import {
   animateScrollMiniPlayerBounce,
   clampScrollMiniPlayerRect,
@@ -32,6 +33,7 @@ const SCROLL_MINI_VOLUME_HIDE_MS = 1000
 const SCROLL_MINI_DRAG_HANDLE_CONTRAST_MS = 400
 const SCROLL_MINI_POINTER_REVEAL_SUPPRESS_MS = 250
 const SCROLL_MINI_POINTER_REVEAL_MIN_DISTANCE = 8
+const SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS = 300
 
 /**
  * OpenTubeX's scroll mini-player integration. Keeping this composable outside the
@@ -50,6 +52,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   const scrollMiniVideoAspectRatio = ref(DEFAULT_ASPECT_RATIO)
   const scrollMiniPlayerEnabled = computed(() => store.getters.getScrollMiniPlayerEnabled)
   const scrollMiniPlayerActive = ref(false)
+  const scrollMiniPlayerAnimating = ref(false)
   const scrollMiniPlaceholderHeight = ref(0)
   /** @type {import('vue').Ref<import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect>} */
   const scrollMiniPlayerRect = ref(getDefaultScrollMiniPlayerRect())
@@ -84,6 +87,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   let scrollMiniVolumeHideTimeout = null
   /** @type {(() => void) | null} */
   let scrollMiniBounceCancel = null
+  /** @type {Animation | null} */
+  let scrollMiniLayoutAnimation = null
+  let scrollMiniLayoutAnimationSequence = 0
   let scrollMiniPlayPauseHiddenByTimer = false
   let scrollMiniDragHandleContrastLastUpdate = 0
   let scrollMiniPointerRevealSuppressedUntil = 0
@@ -383,6 +389,56 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniBounceCancel = null
   }
 
+  function cancelScrollMiniPlayerLayoutAnimation() {
+    scrollMiniLayoutAnimationSequence++
+    scrollMiniLayoutAnimation?.cancel()
+    scrollMiniLayoutAnimation = null
+    scrollMiniPlayerAnimating.value = false
+  }
+
+  /**
+   * Animate the player from its bounds before a layout switch to its new ones.
+   *
+   * @param {DOMRect} previousRect
+   * @param {boolean} expectedActive
+   * @param {number} sequence
+   */
+  async function animateScrollMiniPlayerLayout(previousRect, expectedActive, sequence) {
+    const playerContainer = container.value
+    if (!playerContainer) return
+
+    await nextTick()
+    if (
+      scrollMiniLayoutAnimationSequence !== sequence ||
+      scrollMiniPlayerActive.value !== expectedActive
+    ) return
+
+    const nextRect = playerContainer.getBoundingClientRect()
+    if (nextRect.width === 0 || nextRect.height === 0) return
+
+    const animation = playerContainer.animate([
+      {
+        transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
+        transformOrigin: 'top left'
+      },
+      {
+        transform: 'none',
+        transformOrigin: 'top left'
+      }
+    ], {
+      duration: SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS,
+      easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+    })
+
+    scrollMiniLayoutAnimation = animation
+    animation.addEventListener('finish', () => {
+      if (scrollMiniLayoutAnimation === animation) {
+        scrollMiniLayoutAnimation = null
+        scrollMiniPlayerAnimating.value = false
+      }
+    })
+  }
+
   function loadScrollMiniPlayerSavedRectFromSettings() {
     const savedRect = parseScrollMiniPlayerSavedRect(store.getters.getScrollMiniPlayerSavedRect)
     if (savedRect) {
@@ -484,6 +540,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     const playerContainer = container.value
     if (!playerContainer) return
+    const shouldAnimate = !isReducedMotionEnabled()
+    const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
     const layoutHeight = getScrollMiniPlaceholderLayoutHeight()
     if (layoutHeight < SCROLL_MINI_MIN_INLINE_LAYOUT_HEIGHT) {
@@ -501,6 +559,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     lastKnownInlinePlayerHeight = layoutHeight
     scrollMiniPlaceholderHeight.value = placeholderHeight
+
+    cancelScrollMiniPlayerLayoutAnimation()
+    const animationSequence = scrollMiniLayoutAnimationSequence
+    scrollMiniPlayerAnimating.value = previousRect !== null
 
     const savedRect = getSavedScrollMiniPlayerRect()
     scrollMiniPlayerActive.value = true
@@ -523,9 +585,22 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       updateScrollMiniVolumeBarFill()
       updateScrollMiniDragHandleContrast(true)
     })
+
+    if (previousRect) {
+      animateScrollMiniPlayerLayout(previousRect, true, animationSequence)
+    }
   }
 
-  function deactivateScrollMiniPlayer() {
+  /** @param {boolean} [animate] */
+  function deactivateScrollMiniPlayer(animate = false) {
+    const playerContainer = container.value
+    const shouldAnimate = animate && playerContainer !== null && !isReducedMotionEnabled()
+    const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
+
+    cancelScrollMiniPlayerLayoutAnimation()
+    const animationSequence = scrollMiniLayoutAnimationSequence
+    scrollMiniPlayerAnimating.value = previousRect !== null
+
     scrollMiniPlayerActive.value = false
     scrollMiniPlaceholderHeight.value = 0
     scrollMiniDragHandleOnLightBg.value = false
@@ -536,6 +611,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniVolumeExpanded.value = false
 
     cancelScrollMiniPlayerBounce()
+
+    if (previousRect) {
+      animateScrollMiniPlayerLayout(previousRect, false, animationSequence)
+    }
   }
 
   function updateScrollMiniPlayer() {
@@ -560,7 +639,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
 
     if (scrollMiniPlayerActive.value) {
       if (ratio >= EXIT_MINI_RATIO) {
-        deactivateScrollMiniPlayer()
+        deactivateScrollMiniPlayer(true)
       } else {
         syncScrollMiniPlayerState()
         updateScrollMiniDragHandleContrast()
@@ -821,6 +900,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     clearScrollMiniVolumeHideTimeout()
 
     cancelScrollMiniPlayerBounce()
+    cancelScrollMiniPlayerLayoutAnimation()
     cancelPendingScrollMiniScrollFrame()
 
     endScrollMiniPointerSession()
@@ -884,6 +964,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlaceholder,
     scrollMiniPlaceholderHeight,
     scrollMiniPlayerActive,
+    scrollMiniPlayerAnimating,
     scrollMiniPlayerStyle,
     scrollMiniPlayPauseVisible,
     scrollMiniResizeCorner,

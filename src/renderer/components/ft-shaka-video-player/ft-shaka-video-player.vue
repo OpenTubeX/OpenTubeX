@@ -47,6 +47,7 @@
         shortsPaused: shortsPaused && hasLoaded,
         sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
+        scrollMiniPlayerAnimating,
         fullscreenMetadataOpen: showFullscreenMetadata,
         fullscreenTranscriptOpen: showFullscreenTranscript,
         fullscreenSponsorBlockOpen: showFullscreenSponsorBlock,

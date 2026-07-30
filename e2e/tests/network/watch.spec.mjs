@@ -160,6 +160,57 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
+  test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.scrollMiniPlayerAnimations = []
+      const nativeAnimate = Element.prototype.animate
+
+      Element.prototype.animate = function (keyframes, options) {
+        if (this.classList.contains('ftVideoPlayer')) {
+          const style = getComputedStyle(this)
+          window.scrollMiniPlayerAnimations.push({
+            className: this.className,
+            keyframes,
+            options,
+            position: style.position,
+            zIndex: style.zIndex
+          })
+        }
+        return nativeAnimate.call(this, keyframes, options)
+      }
+    })
+
+    const player = page.locator('.ftVideoPlayer')
+    await player.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      window.scrollTo(0, window.scrollY + rect.bottom)
+    })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(1)
+
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(2)
+
+    const animations = await page.evaluate(() => window.scrollMiniPlayerAnimations)
+    for (const animation of animations) {
+      expect(animation.options.duration).toBe(300)
+      expect(animation.options.easing).toBe('cubic-bezier(0.4, 0, 0.2, 1)')
+      expect(animation.keyframes[0].transform).toContain('translate(')
+      expect(animation.keyframes[0].transform).toContain('scale(')
+      expect(animation.keyframes[1].transform).toBe('none')
+    }
+    expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
+    expect(animations[1].position).toBe('relative')
+    expect(animations[1].zIndex).toBe('150')
+  })
+
   test('keeps the context menu open when the pointer leaves a playing video', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
