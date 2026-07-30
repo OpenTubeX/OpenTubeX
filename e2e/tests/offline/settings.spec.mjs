@@ -44,6 +44,8 @@ test.describe('settings', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await page.locator(sel.tabs).first().click()
     await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect(page).toHaveURL(/#\/settings#player$/)
+    await expect(playerSectionLink).toHaveClass(/active/)
 
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollPosition)
   })
