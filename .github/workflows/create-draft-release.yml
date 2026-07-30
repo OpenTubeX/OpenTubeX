@@ -55,12 +55,19 @@ jobs:
       run: |
         set -euo pipefail
 
-        release_url="$(gh release create "$TAG" \
-          --draft \
-          --target "$TARGET_SHA" \
-          --title "OpenTubeX ${TAG#v}" \
-          --notes-file release-notes.md)"
-        release_id="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --jq .id)"
+        release_title="$TAG"
+        if [[ "$release_title" == *-beta ]]; then
+          release_title="${release_title%-beta} Beta"
+        fi
+
+        release="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
+          -f tag_name="$TAG" \
+          -f target_commitish="$TARGET_SHA" \
+          -f name="$release_title" \
+          -F draft=true \
+          -F body=@release-notes.md)"
+        release_id="$(jq --raw-output .id <<< "$release")"
+        release_url="$(jq --raw-output .html_url <<< "$release")"
 
         {
           echo "## Draft release created"
