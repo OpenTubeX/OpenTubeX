@@ -67,7 +67,11 @@ function defineCase () {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('Filler video 9')).toBeAttached()
-    await page.evaluate(() => window.scrollTo(0, 300))
+    const rootOverflowBefore = await page.evaluate(() => {
+      document.documentElement.style.overflow = 'auto'
+      window.scrollTo(0, 300)
+      return document.documentElement.style.overflow
+    })
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
 
     const topNav = page.locator('.topNav')
@@ -86,7 +90,8 @@ function defineCase () {
 
     await page.keyboard.press('Escape')
     await expect(page.locator('.prompt')).toHaveCount(0)
-    await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('')
+    await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow))
+      .toBe(rootOverflowBefore)
   })
 
   test('opening the collaborators prompt does not animate the feed behind it', async ({ page }) => {
