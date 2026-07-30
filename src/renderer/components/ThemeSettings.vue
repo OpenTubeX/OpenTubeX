@@ -121,44 +121,41 @@
           />
         </div>
       </FtFlexBox>
-      <FtFlexBox>
-        <FtSlider
-          :label="$t('Settings.Theme Settings.UI Scale')"
-          :default-value="uiScale"
-          :min-value="50"
-          :max-value="300"
-          :step="5"
-          value-extension="%"
-          @change="updateUiScale"
-        />
-      </FtFlexBox>
     </template>
-    <FtFlexBox>
-      <div class="switchColumn">
-        <FtSlider
-          :label="t('Settings.Theme Settings.Thumbnail Size')"
-          :default-value="thumbnailSize"
-          setting-key="thumbnailSize"
-          :min-value="MIN_THUMBNAIL_SIZE"
-          :max-value="MAX_THUMBNAIL_SIZE"
-          :step="THUMBNAIL_SIZE_STEP"
-          value-extension="%"
-          @input="previewThumbnailSize"
-          @change="updateThumbnailSize"
-        />
-        <FtSlider
-          :label="t('Settings.Theme Settings.UI Roundness')"
-          :default-value="uiRoundness"
-          setting-key="uiRoundness"
-          :min-value="0"
-          :max-value="200"
-          :step="5"
-          value-extension="%"
-          @input="previewUiRoundness"
-          @change="updateUiRoundness"
-        />
-      </div>
-    </FtFlexBox>
+    <div class="sliderGrid">
+      <FtSlider
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.UI Scale')"
+        :default-value="uiScale"
+        :min-value="50"
+        :max-value="300"
+        :step="5"
+        value-extension="%"
+        @change="updateUiScale"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Thumbnail Size')"
+        :default-value="thumbnailSize"
+        setting-key="thumbnailSize"
+        :min-value="MIN_THUMBNAIL_SIZE"
+        :max-value="MAX_THUMBNAIL_SIZE"
+        :step="THUMBNAIL_SIZE_STEP"
+        value-extension="%"
+        @input="previewThumbnailSize"
+        @change="updateThumbnailSize"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.UI Roundness')"
+        :default-value="uiRoundness"
+        setting-key="uiRoundness"
+        :min-value="0"
+        :max-value="200"
+        :step="5"
+        value-extension="%"
+        @input="previewUiRoundness"
+        @change="updateUiRoundness"
+      />
+    </div>
     <br>
     <FtFlexBox>
       <FtSelect
@@ -607,3 +604,15 @@ function handleSmoothScrolling(value) {
   }
 }
 </script>
+
+<style scoped>
+.sliderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+}
+
+.sliderGrid :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: calc(100% - 16px);
+}
+</style>

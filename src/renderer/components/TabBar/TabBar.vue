@@ -86,6 +86,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { getConfiguredKeyboardShortcuts } from '../../../constants'
 import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
+import { normalizeFixedTabWidth } from '../../constants/tabWidth'
 import SortableTab from './SortableTab.vue'
 import {
   buildCurrentShiftedTabIds,
@@ -116,7 +117,7 @@ const fixedTabWidthStyle = computed(() => {
     return null
   }
 
-  return { '--fixed-tab-width': `${store.getters.getFixedTabWidth}px` }
+  return { '--fixed-tab-width': `${normalizeFixedTabWidth(store.getters.getFixedTabWidth)}px` }
 })
 
 const newTabTooltip = computed(() => {

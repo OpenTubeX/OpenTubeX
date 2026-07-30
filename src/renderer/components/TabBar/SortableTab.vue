@@ -522,9 +522,9 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 }
 
 .tab.pinned {
-  inline-size: 72px;
-  min-inline-size: 72px;
-  max-inline-size: 72px;
+  inline-size: var(--fixed-tab-width, 72px);
+  min-inline-size: var(--fixed-tab-width, 72px);
+  max-inline-size: var(--fixed-tab-width, 72px);
   padding-inline: 9px 7px;
   gap: 4px;
 }
