@@ -475,6 +475,49 @@ test.describe('settings', () => {
   })
 })
 
+test.describe('SponsorBlock highlight settings', () => {
+  test.use({
+    seed: {
+      settings: {
+        highlightChangedSettings: true,
+        sponsorBlockHighlight: {
+          color: 'Blue',
+          skip: 'autoSkip'
+        },
+        useSponsorBlock: true
+      }
+    }
+  })
+
+  test('preserves the stored skip option when resetting only the color', async ({ app }) => {
+    const { page } = app
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sponsor-block"]').click()
+
+    const highlightCategory = page.locator('.sponsorBlockCategory')
+      .filter({ has: page.locator('.sponsorTitle', { hasText: /^Highlight$/ }) })
+    const color = highlightCategory.locator('select').nth(0)
+    const skipOption = highlightCategory.locator('select').nth(1)
+
+    await expect(color).toHaveValue('Blue')
+    await expect(skipOption).toHaveValue('promptToSkip')
+    await highlightCategory.getByRole('button', {
+      name: 'Reset this setting to its default'
+    }).click()
+    await expect(color).toHaveValue('Red')
+
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.sponsorBlockHighlight
+    }).toEqual({
+      color: 'Red',
+      skip: 'autoSkip'
+    })
+  })
+})
+
 test.describe('sync settings', () => {
   test.use({
     seed: {
