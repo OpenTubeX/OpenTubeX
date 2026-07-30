@@ -53,6 +53,9 @@ jobs:
 
     - run: pnpm run ci
       shell: bash
+    - name: Run unit tests
+      run: pnpm run test:unit
+      shell: bash
     - run: pnpm run lint
       shell: bash
     # let's verify that webpack is able to package the project
