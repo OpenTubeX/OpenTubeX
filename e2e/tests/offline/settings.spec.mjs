@@ -178,6 +178,72 @@ test.describe('settings', () => {
     await expect(resetButton).toHaveCount(0)
   })
 
+  test('highlights and resets caption appearance settings individually', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Highlight settings changed from defaults' })
+      .click()
+    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+
+    const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
+    await backgroundOpacity.fill('50')
+
+    const changedControl = page.locator('.pure-material-slider')
+      .filter({ has: backgroundOpacity })
+    const resetButton = changedControl.getByRole('button', {
+      name: 'Reset this setting to its default'
+    })
+
+    await expect(resetButton).toBeVisible()
+    await expect(changedControl).toHaveCSS('border-left-width', '3px')
+    await expect(page.locator('.captionControls').getByRole('button', {
+      name: 'Reset this setting to its default'
+    })).toHaveCount(1)
+
+    await resetButton.click()
+    await expect(backgroundOpacity).toHaveValue('80')
+    await expect(resetButton).toHaveCount(0)
+  })
+
+  test('highlights and resets SponsorBlock category values individually', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Highlight settings changed from defaults' })
+      .click()
+    await page.locator('.settingsMenu [data-section="sponsor-block"]').click()
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Enable SponsorBlock' })
+      .click()
+
+    const sponsorCategory = page.locator('.sponsorBlockCategory')
+      .filter({ has: page.locator('.sponsorTitle', { hasText: /^Sponsor$/ }) })
+    const color = sponsorCategory.locator('select').nth(0)
+    const skipOption = sponsorCategory.locator('select').nth(1)
+
+    await color.selectOption('Red')
+
+    const resetButton = sponsorCategory.getByRole('button', {
+      name: 'Reset this setting to its default'
+    })
+    await expect(resetButton).toHaveCount(1)
+    await expect(color).toHaveValue('Red')
+    await expect(skipOption).toHaveValue('autoSkip')
+
+    await resetButton.click()
+    await expect(color).toHaveValue('Green')
+    await expect(skipOption).toHaveValue('autoSkip')
+    await expect(resetButton).toHaveCount(0)
+
+    await skipOption.selectOption('promptToSkip')
+    await expect(resetButton).toHaveCount(1)
+    await resetButton.click()
+    await expect(color).toHaveValue('Green')
+    await expect(skipOption).toHaveValue('autoSkip')
+    await expect(resetButton).toHaveCount(0)
+  })
+
   test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
     await goTo(page, 'settings')
 

@@ -35,7 +35,11 @@
         <label class="captionControl captionColorControl">
           <span>
             {{ t('Settings.Player Settings.Caption Appearance.Text Color') }}
-            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+            <FtSyncedSettingIndicator
+              setting-key="defaultCaptionSettings"
+              :is-changed="isCaptionSettingChanged('textColor')"
+              @reset="resetCaptionSetting('textColor')"
+            />
           </span>
           <input
             type="color"
@@ -46,7 +50,11 @@
         <label class="captionControl captionColorControl">
           <span>
             {{ t('Settings.Player Settings.Caption Appearance.Background Color') }}
-            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+            <FtSyncedSettingIndicator
+              setting-key="defaultCaptionSettings"
+              :is-changed="isCaptionSettingChanged('backgroundColor')"
+              @reset="resetCaptionSetting('backgroundColor')"
+            />
           </span>
           <input
             type="color"
@@ -59,11 +67,13 @@
             :label="t('Settings.Player Settings.Caption Appearance.Background Opacity')"
             :default-value="Math.round(captionSettings.backgroundOpacity * 100)"
             setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged('backgroundOpacity')"
             :min-value="0"
             :max-value="100"
             :step="5"
             value-extension="%"
             @input="updateCaptionSetting('backgroundOpacity', $event / 100)"
+            @reset="resetCaptionSetting('backgroundOpacity')"
           />
         </div>
         <div class="captionControl">
@@ -71,11 +81,13 @@
             :label="t('Settings.Player Settings.Caption Appearance.Font Size')"
             :default-value="Math.round(captionSettings.fontScale * 100)"
             setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged('fontScale')"
             :min-value="50"
             :max-value="200"
             :step="10"
             value-extension="%"
             @input="updateCaptionSetting('fontScale', $event / 100)"
+            @reset="resetCaptionSetting('fontScale')"
           />
         </div>
         <div class="captionControl">
@@ -83,10 +95,12 @@
             :placeholder="t('Settings.Player Settings.Caption Appearance.Anchor.Anchor')"
             :value="captionSettings.anchor"
             setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged('anchor')"
             :select-names="captionAnchorNames"
             :select-values="CAPTION_ANCHORS"
             :icon="['fas', 'border-all']"
             @change="updateCaptionSetting('anchor', $event)"
+            @reset="resetCaptionSetting('anchor')"
           />
         </div>
         <div class="captionControl">
@@ -94,11 +108,13 @@
             :label="t('Settings.Player Settings.Caption Appearance.Vertical Position')"
             :default-value="Math.round(captionSettings.verticalPosition * 100)"
             setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged('verticalPosition')"
             :min-value="0"
             :max-value="50"
             :step="1"
             value-extension="%"
             @input="updateCaptionSetting('verticalPosition', $event / 100)"
+            @reset="resetCaptionSetting('verticalPosition')"
           />
         </div>
         <div class="captionControl">
@@ -106,10 +122,12 @@
             :placeholder="t('Settings.Player Settings.Caption Appearance.Edge Style.Edge Style')"
             :value="captionSettings.edgeStyle"
             setting-key="defaultCaptionSettings"
+            :is-changed="isCaptionSettingChanged('edgeStyle')"
             :select-names="captionEdgeStyleNames"
             :select-values="CAPTION_EDGE_STYLES"
             :icon="['fas', 'palette']"
             @change="updateCaptionSetting('edgeStyle', $event)"
+            @reset="resetCaptionSetting('edgeStyle')"
           />
         </div>
         <label
@@ -118,7 +136,11 @@
         >
           <span>
             {{ t('Settings.Player Settings.Caption Appearance.Edge Color') }}
-            <FtSyncedSettingIndicator setting-key="defaultCaptionSettings" />
+            <FtSyncedSettingIndicator
+              setting-key="defaultCaptionSettings"
+              :is-changed="isCaptionSettingChanged('edgeColor')"
+              @reset="resetCaptionSetting('edgeColor')"
+            />
           </span>
           <input
             type="color"
@@ -194,6 +216,21 @@ function updateCaptionSetting(setting, value) {
     ...captionSettings.value,
     [setting]: value,
   }))
+}
+
+/**
+ * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
+ * @returns {boolean}
+ */
+function isCaptionSettingChanged(setting) {
+  return !Object.is(captionSettings.value[setting], DEFAULT_CAPTION_SETTINGS[setting])
+}
+
+/**
+ * @param {'textColor' | 'backgroundColor' | 'backgroundOpacity' | 'fontScale' | 'verticalPosition' | 'anchor' | 'edgeStyle' | 'edgeColor'} setting
+ */
+function resetCaptionSetting(setting) {
+  updateCaptionSetting(setting, DEFAULT_CAPTION_SETTINGS[setting])
 }
 
 /** @param {string} value */

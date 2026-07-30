@@ -11,22 +11,26 @@
       :placeholder="$t('Settings.SponsorBlock Settings.Category Color')"
       :value="sponsorBlockValues.color"
       :setting-key="settingKey"
+      :is-changed="isValueChanged('color')"
       :select-names="colorNames"
       :select-values="COLOR_VALUES"
       :icon="['fas', 'palette']"
       :class="'sec' + sponsorBlockValues.color"
       icon-color="rgb(var(--accent-color-rgb))"
       @change="updateColor"
+      @reset="resetValue('color')"
     />
     <FtSelect
       :describe-by-id="id"
       :placeholder="$t('Settings.SponsorBlock Settings.Skip Options.Skip Option')"
       :value="sponsorBlockValues.skip"
       :setting-key="settingKey"
+      :is-changed="isValueChanged('skip')"
       :select-names="skipNames"
       :select-values="selectableSkipValues"
       :icon="['fas', 'forward']"
       @change="updateSkipOption"
+      @reset="resetValue('skip')"
     />
   </div>
 </template>
@@ -38,6 +42,7 @@ import { useI18n } from 'vue-i18n'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'
+import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 
 import { colors } from '../../helpers/colors'
 import { useColorTranslations } from '../../composables/colors'
@@ -157,6 +162,27 @@ const settingKey = computed(() => {
   }
   return `sponsorBlock${suffixes[props.categoryName]}`
 })
+
+/**
+ * @param {'color' | 'skip'} property
+ * @returns {boolean}
+ */
+function isValueChanged(property) {
+  return !Object.is(
+    sponsorBlockValues.value[property],
+    DEFAULT_SETTINGS[settingKey.value][property]
+  )
+}
+
+/**
+ * @param {'color' | 'skip'} property
+ */
+function resetValue(property) {
+  updateSponsorCategory({
+    ...sponsorBlockValues.value,
+    [property]: DEFAULT_SETTINGS[settingKey.value][property]
+  })
+}
 
 /**
  * @param {string} color

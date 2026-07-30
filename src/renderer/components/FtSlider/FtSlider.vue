@@ -23,7 +23,11 @@
       class="selectTooltip"
       :tooltip="tooltip"
     />
-    <FtSyncedSettingIndicator :setting-key="settingKey" />
+    <FtSyncedSettingIndicator
+      :setting-key="settingKey"
+      :is-changed="isChanged"
+      @reset="emit('reset')"
+    />
   </label>
 </template>
 
@@ -69,10 +73,14 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
   }
 })
 
-const emit = defineEmits(['change', 'input'])
+const emit = defineEmits(['change', 'input', 'reset'])
 
 const id = useId()
 const currentValue = ref(props.defaultValue)
