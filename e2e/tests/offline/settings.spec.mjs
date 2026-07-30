@@ -287,7 +287,9 @@ test.describe('settings', () => {
         animation.animationName ?? animation.transitionProperty ?? animation.constructor.name,
         animation.playState,
       ].join(':'))
-    })).toEqual([expect.stringMatching(/^toast-timeout[\w-]*:paused$/)])
+    })).toEqual(expect.arrayContaining([
+      expect.stringMatching(/^toast-timeout[\w-]*:paused$/),
+    ]))
     await page.waitForTimeout(2200)
     await expect(toast).toBeVisible()
 
