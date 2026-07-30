@@ -1589,6 +1589,39 @@ test.describe('custom Shorts player', () => {
     await expect(overflowMenu).toBeVisible()
     await expect(overflowMenu.getByRole('button', { name: /Autoplay/ })).toHaveCount(0)
 
+    const video = player.locator('video')
+    await expect.poll(() => video.evaluate(element => element.duration))
+      .toBeGreaterThan(0)
+    const duration = await video.evaluate(element => element.duration)
+    await video.evaluate((element, completedAt) => {
+      element.currentTime = completedAt
+      element.dispatchEvent(new Event('timeupdate'))
+      element.currentTime = 0.1
+      element.dispatchEvent(new Event('timeupdate'))
+    }, duration - 0.75)
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return {
+        watched: entry?.isWatched,
+        fullProgress: entry?.watchProgress === entry?.lengthSeconds
+      }
+    })).toEqual({ watched: true, fullProgress: true })
+
+    // Ticks from the next automatic loop must not replace completed progress
+    // with a resume point near the beginning.
+    await video.evaluate(element => {
+      element.currentTime = 0.2
+      element.dispatchEvent(new Event('timeupdate'))
+      element.dispatchEvent(new Event('pause'))
+    })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return entry.watchProgress === entry.lengthSeconds
+    })).toBe(true)
+
     await player.locator('video').dispatchEvent('ended')
     await page.waitForTimeout(500)
 

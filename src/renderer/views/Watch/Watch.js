@@ -188,6 +188,7 @@ export default defineComponent({
       shortsTransitionPreview: '',
       shortsTransitionDirection: 0,
       shortsViewportHeight: window.innerHeight,
+      shortsPlaybackCompleted: false,
       videoLoadGeneration: 0,
       hasAiGeneratedContent: false,
       upcomingTimestamp: null,
@@ -1178,6 +1179,7 @@ export default defineComponent({
       this.isShort = this.tabRoute.query.short === 'true'
       this.videoAspectRatio = this.isShort ? 9 / 16 : null
       this.shortsLinkedVideo = null
+      this.shortsPlaybackCompleted = false
       this.hasAiGeneratedContent = false
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
@@ -2526,7 +2528,34 @@ export default defineComponent({
         }
       }
 
+      // A looping media element does not fire `ended`. Persist the completed
+      // state just before a Short wraps to zero, then keep that full progress
+      // from being replaced by later ticks from the next loop.
+      const shortReachedEnd = currentSeconds >= this.videoLengthSeconds - 0.5 ||
+        (
+          currentSeconds < 0.5 &&
+          this.currentTime >= this.videoLengthSeconds - 1
+        )
+
       this.updateCurrentTime(currentSeconds)
+
+      if (
+        this.rememberHistory &&
+        this.customShortsPlayerActive &&
+        !this.shortsPlaybackCompleted &&
+        !this.isUpcoming &&
+        !this.isLive &&
+        this.videoLengthSeconds > 0 &&
+        shortReachedEnd
+      ) {
+        this.shortsPlaybackCompleted = true
+        const watchProgress = this.watchedProgressSavingEnabled
+          ? this.videoLengthSeconds
+          : (this.historyEntry?.watchProgress ?? 0)
+
+        this.addToHistory(watchProgress, true)
+      }
+
       this.updateCurrentChapter(currentSeconds)
       this.$store.commit('setCurrentWatchTimestamp', {
         tabId: this.tabId,
@@ -2711,7 +2740,9 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && !this.hasBeenPresented) { return }
       if (!this.$refs.player?.hasLoaded) { return }
 
-      const currentTime = this.getWatchedProgress()
+      const currentTime = this.shortsPlaybackCompleted && this.watchedProgressSavingEnabled
+        ? this.videoLengthSeconds
+        : this.getWatchedProgress()
       const payload = {
         videoId: this.videoId,
         watchProgress: currentTime
