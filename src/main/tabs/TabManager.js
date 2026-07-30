@@ -1152,6 +1152,7 @@ export class TabManager {
             this.activateTab(nextTabId)
           }
         }
+        this._saveSession()
         return true
       }
       return true
@@ -2162,7 +2163,12 @@ export class TabManager {
     this.sessionUpdatedAt = Date.now()
 
     const tabs = Array.from(this.tabs.values())
-      .filter(tab => tab.isTransferStaged !== true)
+      // A presented tab stays mounted until its replacement is ready, but a
+      // shutdown during that handoff must not resurrect the already-closed tab.
+      .filter(tab => (
+        tab.isTransferStaged !== true &&
+        !this._deferredCloseTabIds.has(tab.id)
+      ))
       .map(tab => {
         const tabData = {
           id: tab.id,
@@ -2170,7 +2176,7 @@ export class TabManager {
           title: tab.title,
           isPinned: tab.isPinned,
           color: TabManager.normalizeTabColor(tab.color),
-          isUnloaded: tab.loadState === 'unloaded'
+          isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id)
         }
 
         const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
@@ -2186,10 +2192,13 @@ export class TabManager {
 
         return tabData
       })
+    const activeTabId = tabs.some(tab => tab.id === this.activeTabId)
+      ? this.activeTabId
+      : tabs[0]?.id ?? null
 
     await saveTabSession(this.sessionId, {
       tabs,
-      activeTabId: this.activeTabId,
+      activeTabId,
       bounds: this._getCurrentBounds(),
       updatedAt: this.sessionUpdatedAt
     })
@@ -2201,21 +2210,28 @@ export class TabManager {
    */
   getSyncSession() {
     const state = this.getState()
-    return {
-      sessionId: this.sessionId,
-      tabs: state.tabs.map(tab => ({
+    const tabs = state.tabs
+      .filter(tab => !this._deferredCloseTabIds.has(tab.id))
+      .map(tab => ({
         id: tab.id,
         url: TabManager.stripOneTimeTimestampFromUrl(tab.url),
         title: tab.title,
         isPinned: tab.isPinned,
         color: tab.color,
-        isUnloaded: tab.isUnloaded,
+        isUnloaded: tab.isUnloaded || this._deferredUnloadTabIds.has(tab.id),
         ...(this.tabs.get(tab.id)?.persistNavigationHistory && tab.history != null && {
           history: tab.history,
           historyIndex: tab.historyIndex
         })
-      })),
-      activeTabId: state.activeTabId,
+      }))
+    const activeTabId = tabs.some(tab => tab.id === state.activeTabId)
+      ? state.activeTabId
+      : tabs[0]?.id ?? null
+
+    return {
+      sessionId: this.sessionId,
+      tabs,
+      activeTabId,
       updatedAt: this.sessionUpdatedAt
     }
   }
@@ -2300,7 +2316,6 @@ export class TabManager {
         const makeActive = tabData.id === sessionData.activeTabId
         const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
         const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
-        const previewDataUrl = await this._loadTabPreviewDataUrl(previewFileName)
         const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
         const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
           (restoreTabLoadState && tabData.isUnloaded === true) ||
@@ -2314,8 +2329,10 @@ export class TabManager {
           title: hasSavedTitle ? tabData.title : undefined,
           isPinned: tabData.isPinned === true,
           color: tabData.color,
-          previewDataUrl,
-          previewCapturedAt: previewDataUrl != null && Number.isFinite(tabData.previewCapturedAt)
+          // Preview images are only needed when the switcher asks for them.
+          // Keep the cache reference and let getTabPreview load it on demand
+          // instead of serially reading every restored tab before first paint.
+          previewCapturedAt: previewFileName != null && Number.isFinite(tabData.previewCapturedAt)
             ? tabData.previewCapturedAt
             : 0,
           previewFileName,
