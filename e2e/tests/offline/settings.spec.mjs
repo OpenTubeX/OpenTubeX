@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goTo, latestSettings, sel } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('settings page renders its sections', async ({ page }) => {
@@ -23,6 +23,29 @@ test.describe('settings', () => {
     const playerScrollPosition = await page.evaluate(() => window.scrollY)
     await page.mouse.wheel(0, 1200)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(playerScrollPosition)
+  })
+
+  test('keeps the scroll position when switching tabs', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
+    await playerSectionLink.click()
+    await expect(page).toHaveURL(/#\/settings#player$/)
+
+    // Scroll within the section, so the active section (and therefore the hash)
+    // stays the same.
+    const sectionScrollPosition = await page.evaluate(() => window.scrollY)
+    await page.mouse.wheel(0, 200)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(sectionScrollPosition)
+    const scrollPosition = await page.evaluate(() => window.scrollY)
+    await expect(playerSectionLink).toHaveClass(/active/)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollPosition)
   })
 
   test('configures the watched percentage threshold', async ({ page }) => {
