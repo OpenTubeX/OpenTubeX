@@ -2810,6 +2810,11 @@
   isolation: isolate;
 }
 
+.ftVideoPlayer.scrollMiniPlayerAnimating {
+  position: relative;
+  z-index: 150;
+}
+
 .ftVideoPlayer.scrollMiniPlayer > .player,
 .ftVideoPlayer.scrollMiniPlayer > .vrCanvas {
   border-radius: calc(10px * var(--ui-roundness));
