@@ -47,6 +47,25 @@ jobs:
             <<< "$reviews"
         }
 
+        bot_approved() {
+          local bot="$1"
+          local review_state
+          review_state="$(latest_decisive_review "$bot" | jq -r '.state // empty')"
+
+          if [[ "$review_state" == "APPROVED" ]]; then
+            return 0
+          fi
+
+          if [[ "$bot" == "greptile-apps[bot]" ]]; then
+            jq -e --arg head_sha "$HEAD_SHA" \
+              '[.[] | select(.user.login == "greptile-apps[bot]")] | sort_by(.updated_at) | last |
+              ((.body // "") | contains("<h3>Confidence Score: 5/5</h3>") and contains("/commit/" + $head_sha))' \
+              <<< "$comments" > /dev/null
+          else
+            return 1
+          fi
+        }
+
         job_name="$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/jobs" \
           --jq '.jobs[] | select(.name | startswith("authorize-auto-merge-")) | select(.conclusion == "success") | .name')"
         pr_number="${job_name#authorize-auto-merge-}"
@@ -76,6 +95,7 @@ jobs:
         fi
 
         reviews="$(gh api --paginate "repos/$REPOSITORY/pulls/$pr_number/reviews" | jq -cs '[.[][]]')"
+        comments="$(gh api --paginate "repos/$REPOSITORY/issues/$pr_number/comments" | jq -cs '[.[][]]')"
         latest_review="$(latest_decisive_review "$REVIEWER")"
         latest_review_state="$(jq -r '.state // empty' <<< "$latest_review")"
         if [[ "$latest_review_state" != "APPROVED" ]]; then
@@ -93,19 +113,17 @@ jobs:
           missing_bots=()
 
           for bot in "${TRUSTED_BOTS[@]}"; do
-            bot_review_state="$(latest_decisive_review "$bot" | jq -r '.state // empty')"
-
-            if [[ "$bot_review_state" != "APPROVED" ]]; then
+            if ! bot_approved "$bot"; then
               missing_bots+=("$bot")
             fi
           done
 
           if [[ ${#missing_bots[@]} -gt 0 ]]; then
-            echo "Bot approvals only authorize auto-merge once every trusted bot has approved $HEAD_SHA. Still waiting for: ${missing_bots[*]}."
+            echo "Trusted bot reviews do not authorize auto-merge yet for $HEAD_SHA. Still waiting for: ${missing_bots[*]}."
             exit 0
           fi
 
-          echo "Trusted bot approvals for admin author $author authorized."
+          echo "Trusted bot reviews for admin author $author authorized."
         else
           echo "Approval by $REVIEWER does not authorize auto-merge."
           exit 0
