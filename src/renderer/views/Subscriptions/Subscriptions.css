@@ -103,12 +103,24 @@
 
 .tabsIndicator {
   position: absolute;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  top: 0;
+
+  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical transform set inline */
+  left: 0;
   block-size: 3px;
+
+  /* scaled up to the tab width via the inline transform */
+  inline-size: 1px;
   background-color: var(--primary-color);
   pointer-events: none;
+  transform-origin: left top;
 
-  /* stylelint-disable-next-line liberty/use-logical-spec -- matches the physical offset measurements set inline */
-  transition: left 0.2s ease, top 0.2s ease, width 0.2s ease;
+  /* animating only the transform keeps this on the compositor, so it stays
+     smooth while the main thread renders a large feed */
+  transition: transform 0.2s ease;
+  will-change: transform;
 }
 
 .tab {
