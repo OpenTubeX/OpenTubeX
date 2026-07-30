@@ -22,7 +22,7 @@ test('stable builds only update from normal GitHub releases', () => {
   )
 })
 
-test('nightly builds only update from nightly prereleases', () => {
+test('nightly builds update to newer nightly prereleases', () => {
   const nightlyRelease = {
     name: 'OpenTubeX nightly 101',
     prerelease: true,
@@ -30,8 +30,59 @@ test('nightly builds only update from nightly prereleases', () => {
   }
 
   assert.equal(
-    findUpdateRelease([stableRelease, nightlyRelease], '0.29.0-nightly-100'),
+    findUpdateRelease([nightlyRelease], '0.29.0-nightly-100'),
     nightlyRelease
+  )
+})
+
+test('nightly builds fall back to a newer stable release', () => {
+  const newerStableRelease = {
+    name: 'OpenTubeX 0.30.1',
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+
+  assert.equal(
+    findUpdateRelease([newerStableRelease], '0.30.0-nightly-595'),
+    newerStableRelease
+  )
+})
+
+test('nightly builds prefer a newer stable version over an older-version nightly', () => {
+  const newerNightlyRelease = {
+    prerelease: true,
+    tag_name: 'v0.30.0-nightly-596'
+  }
+  const newerStableRelease = {
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+
+  assert.equal(
+    findUpdateRelease(
+      [newerNightlyRelease, newerStableRelease],
+      '0.30.0-nightly-595'
+    ),
+    newerStableRelease
+  )
+})
+
+test('nightly builds prefer a newer nightly over stable for the same version', () => {
+  const newerStableRelease = {
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+  const newerNightlyRelease = {
+    prerelease: true,
+    tag_name: 'v0.30.1-nightly-600'
+  }
+
+  assert.equal(
+    findUpdateRelease(
+      [newerStableRelease, newerNightlyRelease],
+      '0.30.0-nightly-595'
+    ),
+    newerNightlyRelease
   )
 })
 
