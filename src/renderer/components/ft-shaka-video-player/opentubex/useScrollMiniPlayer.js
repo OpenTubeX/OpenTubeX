@@ -414,7 +414,10 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     ) return
 
     const nextRect = playerContainer.getBoundingClientRect()
-    if (nextRect.width === 0 || nextRect.height === 0) return
+    if (nextRect.width === 0 || nextRect.height === 0) {
+      scrollMiniPlayerAnimating.value = false
+      return
+    }
 
     const animation = playerContainer.animate([
       {
