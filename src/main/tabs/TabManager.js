@@ -1812,6 +1812,7 @@ export class TabManager {
             this.activateTab(nextTabId)
           }
         }
+        this._saveSession()
         return true
       }
       return true
