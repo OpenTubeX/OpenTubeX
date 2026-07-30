@@ -442,10 +442,13 @@ jobs:
     permissions:
       actions: read
       contents: write
+      issues: read
+      pull-requests: read
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        fetch-depth: 0
         persist-credentials: false
 
     - name: Download build artifacts
@@ -472,6 +475,49 @@ jobs:
           cp "${files[0]}" "release-assets/$artifact_name"
         done
 
+    - name: Generate nightly release notes
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TARGET_BRANCH: development
+        TARGET_SHA: ${{ github.sha }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        releases="$(
+          gh release list --limit 100 \
+            --json isDraft,isPrerelease,tagName
+        )"
+
+        previous_tag=''
+        while IFS= read -r tag; do
+          if git merge-base --is-ancestor "$tag" "$TARGET_SHA"; then
+            previous_tag="$tag"
+            break
+          fi
+        done < <(
+          jq --raw-output '.[] | select(
+            .isDraft == false and .isPrerelease == false
+          ) | .tagName' <<< "$releases"
+        )
+
+        if [[ -z "$previous_tag" ]]; then
+          echo 'Could not find a previous release tag.' >&2
+          exit 1
+        fi
+
+        PREVIOUS_TAG="$previous_tag" \
+          node _scripts/releaseNotes.mjs generate-nightly nightly-changelog.md
+
+        {
+          printf '> [!WARNING]\n'
+          printf '> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\n'
+          printf 'Automated development build from commit %s.\n\n' "$TARGET_SHA"
+          printf '<details>\n<summary>Changelog since the latest stable release (%s)</summary>\n\n' "$previous_tag"
+          cat nightly-changelog.md
+          printf '\n</details>\n'
+        } > release-notes.md
+
     - name: Create nightly release
       id: release
       env:
@@ -482,15 +528,12 @@ jobs:
         base_version="$(jq --raw-output .version package.json)"
         version="${base_version}-nightly-${GITHUB_RUN_NUMBER}"
         tag="v${version}"
-        printf -v notes \
-          '> [!WARNING]\n> This nightly build is intended for testing only and may be unstable. Regular users should use the [latest non-prerelease](https://github.com/OpenTubeX/OpenTubeX/releases/latest).\n\nAutomated development build from commit %s.' \
-          "$GITHUB_SHA"
 
         gh release create "$tag" release-assets/* \
           --prerelease \
           --target "$GITHUB_SHA" \
           --title "v${version}" \
-          --notes "$notes"
+          --notes-file release-notes.md
 
         {
           echo "tag=$tag"
