@@ -2068,11 +2068,14 @@ function runApp() {
       // Load the shared Vue shell exactly once. Logical tab routes are projected
       // by the renderer after it reconciles the main-owned metadata.
       await newWindow.loadURL(ROOT_APP_URL)
+      // The shared shell has finished loading and can paint its themed frame.
+      // Do not keep the whole native window hidden while the initial logical
+      // route finishes mounting; that made startup feel substantially slower.
+      showWindow()
       await tabManager.waitForInitialPresentation()
       if (typeof searchQueryText === 'string' && searchQueryText.length > 0) {
         newWindow.webContents.send(IpcChannels.UPDATE_SEARCH_INPUT_TEXT, searchQueryText)
       }
-      showWindow()
     }
 
     // Kick off tab initialization (errors are logged but shouldn't crash the app)

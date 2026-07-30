@@ -574,6 +574,23 @@ test.describe('tab bar', () => {
 })
 
 test.describe('closed tabs', () => {
+  test('does not restore a tab whose deferred close is interrupted by shutdown', async ({ app }) => {
+    let page = app.page
+    const closedTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/about',
+      makeActive: false,
+      lazyLoad: true
+    }))
+
+    await page.locator(sel.activeTab).locator('.closeButton').evaluate(element => element.click())
+    ;({ page } = await app.relaunch())
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+    await expect(page.locator(sel.tabs)).not.toHaveAttribute('data-tab-id', closedTabId)
+    await expect(page).toHaveURL(/#\/about/)
+  })
+
   test('restoring a closed tab restores its navigation history', async ({ page }) => {
     await goTo(page, 'settings')
     await goTo(page, 'history')
