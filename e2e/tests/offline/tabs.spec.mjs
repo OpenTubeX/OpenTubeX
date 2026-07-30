@@ -140,8 +140,10 @@ test.describe('tab bar', () => {
       })
     }, { videoId })
 
-    await expect(page.locator(`.tab[data-tab-id="${watchTab.id}"] .loadingDot`)).toBeVisible()
-    await page.waitForTimeout(500)
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    await expect(tab.locator('.loadingDot')).toBeVisible()
+    await expect(tab.locator('.loadingDot')).toHaveCount(0)
+    await expect(tab.locator('.tabAvatar')).toBeVisible()
 
     const states = await page.evaluate(
       tabId => window.__watchTabIconStates.filter(state => state.id === tabId),

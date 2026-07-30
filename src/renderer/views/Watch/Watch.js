@@ -1154,8 +1154,12 @@ export default defineComponent({
 
     getPendingVideoTitle: function () {
       const tab = this.$store.getters.getTabById(this.tabId)
+      const entry = tab?.history[tab.historyIndex]
       const title = tab?.contentTitle
-      return typeof title === 'string' && title.length > 0 && title !== this.tabRoute.fullPath
+      return entry?.titlePending !== true &&
+        typeof title === 'string' &&
+        title.length > 0 &&
+        title !== this.tabRoute.fullPath
         ? title
         : this.tabRoute.fullPath
     },
