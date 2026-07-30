@@ -12,6 +12,14 @@
           compact
           @change="updateFetchSubscriptionsAutomatically"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show Feed Refresh Progress Notification')"
+          :default-value="showSubscriptionRefreshToast"
+          setting-key="showSubscriptionRefreshToast"
+          :tooltip="$t('Tooltips.Subscription Settings.Show Feed Refresh Progress Notification')"
+          compact
+          @change="updateShowSubscriptionRefreshToast"
+        />
         <FtSelect
           :placeholder="$t('Settings.Subscription Settings.Videos Auto Refresh Interval')"
           :value="subscriptionFeedAutoRefreshInterval"
@@ -125,6 +133,9 @@ const { t } = useI18n()
 /** @type {import('vue').ComputedRef<boolean>} */
 const fetchSubscriptionsAutomatically = computed(() => store.getters.getFetchSubscriptionsAutomatically)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const showSubscriptionRefreshToast = computed(() => store.getters.getShowSubscriptionRefreshToast)
+
 const subscriptionFeedAutoRefreshIntervalNames = computed(() => [
   t('Settings.General Settings.Avoid translation.Disabled'),
   '30 min',
@@ -150,6 +161,13 @@ const subscriptionFeedAutoRefreshIntervalValues = [
  */
 function updateFetchSubscriptionsAutomatically(value) {
   store.dispatch('updateFetchSubscriptionsAutomatically', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateShowSubscriptionRefreshToast(value) {
+  store.dispatch('updateShowSubscriptionRefreshToast', value)
 }
 
 /** @type {import('vue').ComputedRef<string>} */

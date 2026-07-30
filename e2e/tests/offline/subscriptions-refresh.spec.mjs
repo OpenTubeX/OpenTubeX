@@ -117,6 +117,23 @@ test.describe('incremental subscription feed refresh', () => {
 
     await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 30_000 })
   })
+
+  test('keeps a manual refresh in the progress toast after navigation', async ({ page }) => {
+    await routeFeeds(page, () => 8_000)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
+    await goTo(page, 'settings')
+
+    const refreshToast = page.getByTestId('subscription-refresh-toast')
+    await expect(refreshToast).toContainText('Refreshing subscription videos')
+    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+
+    await page.keyboard.press('Escape')
+    await expect(refreshToast).toBeVisible()
+    await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
+  })
 })
 
 test.describe('subscription feed refresh controls', () => {
@@ -239,11 +256,36 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     seed: {
       settings: {
         ...commonSettings,
-        subscriptionFeedAutoRefreshInterval: '5000'
+        subscriptionFeedAutoRefreshInterval: '5000',
+        showToastTimeoutIndicator: false
       },
       profiles: [profileWith(channelCount)],
       subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index))
     }
+  })
+
+  test('shows persistent progress in a toast without the global progress bar', async ({ page }) => {
+    await routeFeeds(page, (index) => index === 0 ? 0 : 8_000)
+    await goTo(page, 'settings')
+
+    const refreshToast = page.getByTestId('subscription-refresh-toast')
+    await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
+    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+
+    const indicator = refreshToast.locator('.progress-indicator')
+    await expect(indicator).toBeVisible()
+    await expect.poll(async () => Number(await indicator.getAttribute('data-progress'))).toBeGreaterThan(0)
+    expect(Number(await indicator.getAttribute('data-progress'))).toBeLessThan(100)
+
+    await page.keyboard.press('Escape')
+    await expect(refreshToast).toBeVisible()
+
+    await page.evaluate(() => document.documentElement.requestFullscreen())
+    await expect(refreshToast).toHaveCount(0)
+    await page.evaluate(() => document.exitFullscreen())
+    await expect(refreshToast).toBeVisible()
+
+    await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
   })
 
   test('resets the timer instead of immediately refreshing again', async ({ page }) => {

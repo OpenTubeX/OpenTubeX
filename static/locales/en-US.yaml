@@ -798,6 +798,7 @@ Settings:
     Shorts Auto Refresh Interval: Shorts Auto Refresh Interval
     Live Auto Refresh Interval: Live Auto Refresh Interval
     Posts Auto Refresh Interval: Posts Auto Refresh Interval
+    Show Feed Refresh Progress Notification: Show feed refresh progress notification
     'Limit the number of videos displayed for each channel': 'Limit the number of videos displayed for each channel'
     To: To
     Confirm Before Unsubscribing: Confirm Before Unsubscribing
@@ -1702,6 +1703,7 @@ Tooltips:
     Show New Content Feed: Shows a New tab containing subscription feed items that were not present during the previous fetch.
     Show New Content Indicators: Shows a small dot beside subscription feed items that were not present during the previous fetch.
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
+    Show Feed Refresh Progress Notification: Shows a persistent notification with live progress during subscription feed refreshes instead of using the global progress bar.
   Theme Settings:
     Hide Profile Selector in Header: Hides the profile selector from the top bar. The profile selector will be shown at the top of the Subscribed Channels page instead.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.

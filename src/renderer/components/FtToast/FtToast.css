@@ -157,6 +157,15 @@
   transition: none;
 }
 
+.toast.persistent {
+  cursor: progress;
+  pointer-events: none;
+}
+
+.progress-indicator :deep(.embeddedProgressPath) {
+  animation: none;
+}
+
 /* Tighten the leading padding so the thumbnail sits closer to the edge */
 .toast.hasImage {
   padding-inline-start: 10px;

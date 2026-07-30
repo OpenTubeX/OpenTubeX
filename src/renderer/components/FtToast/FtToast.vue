@@ -69,6 +69,39 @@
           />
         </div>
       </div>
+      <div
+        v-if="showSubscriptionRefreshToast"
+        key="subscription-refresh"
+        class="toast-slot"
+        data-testid="subscription-refresh-toast"
+      >
+        <div
+          class="toast persistent"
+          role="status"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'sync']"
+            class="icon"
+            fixed-width
+          />
+          <p class="message">
+            {{ subscriptionRefreshMessage }}
+          </p>
+        </div>
+        <div
+          class="timeout-indicator-track"
+          aria-hidden="true"
+        >
+          <FtEmbeddedProgress
+            class="timeout-indicator progress-indicator"
+            :corner-radius="toastProgressRadius"
+            :end-arc-fraction="0.5"
+            :line-width="toastProgressLineWidth"
+            :progress="subscriptionRefreshProgress"
+            :start-arc-fraction="0.5"
+          />
+        </div>
+      </div>
     </TransitionGroup>
   </Teleport>
 </template>
@@ -76,6 +109,7 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
@@ -83,6 +117,14 @@ import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 
 let idCounter = 0
 let removeShowToastListener = null
+const { t } = useI18n()
+
+const props = defineProps({
+  showSubscriptionRefresh: {
+    type: Boolean,
+    default: false
+  }
+})
 
 /**
  * @typedef Toast
@@ -119,6 +161,25 @@ const toastPosition = computed(() => {
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+const showSubscriptionRefreshToast = computed(() => {
+  return fullscreenTarget.value === null &&
+    props.showSubscriptionRefresh &&
+    store.getters.getShowSubscriptionRefreshToast &&
+    store.getters.getSubscriptionFeedRefreshInProgress
+})
+const subscriptionRefreshProgress = computed(() => store.getters.getSubscriptionFeedRefreshProgress)
+const subscriptionRefreshMessage = computed(() => {
+  switch (store.getters.getSubscriptionFeedRefreshTab) {
+    case 'shorts':
+      return t('Subscriptions.Refreshing Subscription Shorts')
+    case 'live':
+      return t('Subscriptions.Refreshing Subscription Live Streams')
+    case 'posts':
+      return t('Subscriptions.Refreshing Subscription Posts')
+    default:
+      return t('Subscriptions.Refreshing Subscription Videos')
+  }
+})
 const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 

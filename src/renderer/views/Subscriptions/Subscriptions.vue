@@ -336,7 +336,7 @@ const currentTabRefreshing = computed(() => {
 
 /** @type {import('vue').ComputedRef<number>} */
 const refreshProgressPercentage = computed(() => {
-  return store.getters.getProgressBarPercentage
+  return store.getters.getSubscriptionFeedRefreshProgress
 })
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
