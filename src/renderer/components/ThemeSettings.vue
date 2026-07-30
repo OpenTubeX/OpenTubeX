@@ -98,43 +98,64 @@
     </div>
     <template v-if="usingElectron">
       <FtFlexBox>
-        <FtSlider
-          :label="$t('Settings.Theme Settings.UI Scale')"
-          :default-value="uiScale"
-          :min-value="50"
-          :max-value="300"
-          :step="5"
-          value-extension="%"
-          @change="updateUiScale"
-        />
+        <div class="switchColumn">
+          <FtToggleSwitch
+            :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+            :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+            compact
+            :default-value="useFixedTabWidth"
+            setting-key="useFixedTabWidth"
+            @change="updateUseFixedTabWidth"
+          />
+          <FtSlider
+            :label="$t('Settings.Theme Settings.Tab Width')"
+            :default-value="fixedTabWidth"
+            setting-key="fixedTabWidth"
+            :min-value="MIN_FIXED_TAB_WIDTH"
+            :max-value="MAX_FIXED_TAB_WIDTH"
+            :step="FIXED_TAB_WIDTH_STEP"
+            :disabled="!useFixedTabWidth"
+            value-extension="px"
+            @input="previewFixedTabWidth"
+            @change="updateFixedTabWidth"
+          />
+        </div>
       </FtFlexBox>
     </template>
-    <FtFlexBox>
-      <div class="switchColumn">
-        <FtSlider
-          :label="t('Settings.Theme Settings.Thumbnail Size')"
-          :default-value="thumbnailSize"
-          setting-key="thumbnailSize"
-          :min-value="MIN_THUMBNAIL_SIZE"
-          :max-value="MAX_THUMBNAIL_SIZE"
-          :step="THUMBNAIL_SIZE_STEP"
-          value-extension="%"
-          @input="previewThumbnailSize"
-          @change="updateThumbnailSize"
-        />
-        <FtSlider
-          :label="t('Settings.Theme Settings.UI Roundness')"
-          :default-value="uiRoundness"
-          setting-key="uiRoundness"
-          :min-value="0"
-          :max-value="200"
-          :step="5"
-          value-extension="%"
-          @input="previewUiRoundness"
-          @change="updateUiRoundness"
-        />
-      </div>
-    </FtFlexBox>
+    <div class="sliderGrid">
+      <FtSlider
+        v-if="usingElectron"
+        :label="$t('Settings.Theme Settings.UI Scale')"
+        :default-value="uiScale"
+        :min-value="50"
+        :max-value="300"
+        :step="5"
+        value-extension="%"
+        @change="updateUiScale"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Thumbnail Size')"
+        :default-value="thumbnailSize"
+        setting-key="thumbnailSize"
+        :min-value="MIN_THUMBNAIL_SIZE"
+        :max-value="MAX_THUMBNAIL_SIZE"
+        :step="THUMBNAIL_SIZE_STEP"
+        value-extension="%"
+        @input="previewThumbnailSize"
+        @change="updateThumbnailSize"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.UI Roundness')"
+        :default-value="uiRoundness"
+        setting-key="uiRoundness"
+        :min-value="0"
+        :max-value="200"
+        :step="5"
+        value-extension="%"
+        @input="previewUiRoundness"
+        @change="updateUiRoundness"
+      />
+    </div>
     <br>
     <FtFlexBox>
       <FtSelect
@@ -208,6 +229,11 @@ import {
   MIN_THUMBNAIL_SIZE,
   THUMBNAIL_SIZE_STEP
 } from '../constants/thumbnailSize'
+import {
+  FIXED_TAB_WIDTH_STEP,
+  MAX_FIXED_TAB_WIDTH,
+  MIN_FIXED_TAB_WIDTH
+} from '../constants/tabWidth'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 
 const { t } = useI18n()
@@ -445,6 +471,33 @@ function updateShowTabIcons(value) {
   store.dispatch('updateShowTabIcons', value)
 }
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const useFixedTabWidth = computed(() => store.getters.getUseFixedTabWidth)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fixedTabWidth = computed(() => store.getters.getFixedTabWidth)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseFixedTabWidth(value) {
+  store.dispatch('updateUseFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewFixedTabWidth(value) {
+  store.commit('setFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateFixedTabWidth(value) {
+  store.dispatch('updateFixedTabWidth', value)
+}
+
 const toastPositionNames = computed(() => [
   t('Settings.Theme Settings.Toast Position.Bottom Left'),
   t('Settings.Theme Settings.Toast Position.Bottom Center'),
@@ -551,3 +604,17 @@ function handleSmoothScrolling(value) {
   }
 }
 </script>
+
+<style scoped>
+.sliderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 380px));
+  justify-content: space-evenly;
+  gap: 24px 64px;
+}
+
+.sliderGrid :deep(.pure-material-slider) {
+  box-sizing: border-box;
+  inline-size: calc(100% - 16px);
+}
+</style>

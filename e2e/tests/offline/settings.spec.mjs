@@ -75,6 +75,32 @@ test.describe('settings', () => {
     await expect(toggle).not.toBeChecked()
   })
 
+  test('the tab width slider only becomes usable with fixed tab width on', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const slider = page.getByRole('slider', { name: /Tab Width/ })
+    await expect(slider).toBeDisabled()
+
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Use Fixed Tab Width in Horizontal Mode' })
+      .click()
+    await expect(page.getByRole('checkbox', { name: 'Use Fixed Tab Width in Horizontal Mode' })).toBeChecked()
+    await expect(slider).toBeEnabled()
+
+    // Dragging resizes the tabs live.
+    await slider.evaluate((input) => {
+      input.value = '100'
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      input.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    await expect.poll(async () => {
+      return await page.locator(sel.activeTab).evaluate(
+        tab => Math.round(tab.getBoundingClientRect().width)
+      )
+    }).toBe(100)
+  })
+
   test('keeps the watched progress mode when history is toggled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="privacy"]').click()

@@ -435,8 +435,11 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
   cursor: pointer;
   block-size: 31px;
-  min-inline-size: 100px;
-  max-inline-size: 200px;
+
+  /* Without a configured fixed width, tabs size to their content within these
+     bounds. `--fixed-tab-width` (set by the tab bar) pins both ends together. */
+  min-inline-size: var(--fixed-tab-width, 100px);
+  max-inline-size: var(--fixed-tab-width, 200px);
   flex-shrink: 0;
   border: 1px solid transparent;
   border-block-end: 0;
@@ -519,9 +522,9 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 }
 
 .tab.pinned {
-  inline-size: 72px;
-  min-inline-size: 72px;
-  max-inline-size: 72px;
+  inline-size: var(--fixed-tab-width, 72px);
+  min-inline-size: var(--fixed-tab-width, 72px);
+  max-inline-size: var(--fixed-tab-width, 72px);
   padding-inline: 9px 7px;
   gap: 4px;
 }
