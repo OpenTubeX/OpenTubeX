@@ -386,7 +386,7 @@ function indentContinuationLines(value) {
   return value.split('\n').map((line, index) => index === 0 ? line : `  ${line}`).join('\n')
 }
 
-export async function renderReleaseNotes(pullRequests, loadImage = downloadImage) {
+export async function renderReleaseNotes(pullRequests, loadImage = downloadImage, emptyMessage = null) {
   const sections = new Map([...RELEASE_NOTE_CATEGORIES.keys()].map((category) => [category, []]))
 
   for (const pullRequest of pullRequests) {
@@ -427,6 +427,8 @@ export async function renderReleaseNotes(pullRequests, loadImage = downloadImage
     .map(([category, heading]) => `${heading}\n\n${sections.get(category).join('\n')}`)
 
   if (renderedSections.length === 0) {
+    if (emptyMessage !== null) { return `${emptyMessage}\n` }
+
     throw new Error('No noteworthy pull requests were found between the selected refs.')
   }
 
@@ -440,7 +442,7 @@ async function validateEvent(eventPath) {
   console.log(`Release note category is valid: ${releaseNote.category}.`)
 }
 
-async function generate(outputPath) {
+async function generate(outputPath, emptyMessage = null) {
   const repository = process.env.GITHUB_REPOSITORY
   const previousTag = process.env.PREVIOUS_TAG
   const targetBranch = process.env.TARGET_BRANCH
@@ -452,7 +454,7 @@ async function generate(outputPath) {
 
   const pullRequests = listMergedPullRequests(repository, targetBranch)
   const selectedPullRequests = selectPullRequests(pullRequests, previousTag, targetSha)
-  const releaseNotes = await renderReleaseNotes(selectedPullRequests)
+  const releaseNotes = await renderReleaseNotes(selectedPullRequests, downloadImage, emptyMessage)
 
   fs.writeFileSync(outputPath, releaseNotes)
   console.log(`Processed ${selectedPullRequests.length} pull requests and wrote ${outputPath}.`)
@@ -465,7 +467,11 @@ async function main() {
 
   if (command === 'generate' && argument) { return generate(argument) }
 
-  throw new Error('Usage: releaseNotes.mjs <validate-event EVENT_PATH | generate OUTPUT_PATH>')
+  if (command === 'generate-nightly' && argument) {
+    return generate(argument, 'No noteworthy changes since the latest stable release.')
+  }
+
+  throw new Error('Usage: releaseNotes.mjs <validate-event EVENT_PATH | generate OUTPUT_PATH | generate-nightly OUTPUT_PATH>')
 }
 
 const isMainModule = process.argv[1] &&

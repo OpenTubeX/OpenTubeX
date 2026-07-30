@@ -385,3 +385,13 @@ test('a release with only non-noteworthy pull requests is rejected', async () =>
     /No noteworthy pull requests/,
   )
 })
+
+test('nightly releases can render a fallback when there are no noteworthy changes', async () => {
+  const result = await renderReleaseNotes([{
+    body: categoryMarkers('Not noteworthy'),
+    number: 42,
+    title: 'Refactor tests',
+  }], undefined, 'No noteworthy changes since the latest stable release.')
+
+  assert.equal(result, 'No noteworthy changes since the latest stable release.\n')
+})
