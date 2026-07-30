@@ -124,7 +124,7 @@ test.describe('subscriptions feed tab indicator', () => {
     const { indicator, tab } = await page.evaluate(() => {
       const toBox = (element) => {
         const rect = element.getBoundingClientRect()
-        return { x: rect.x, width: rect.width, top: rect.top }
+        return { x: rect.x, width: rect.width, top: rect.top, bottom: rect.bottom }
       }
 
       return {
@@ -135,5 +135,35 @@ test.describe('subscriptions feed tab indicator', () => {
 
     expect(Math.abs(indicator.x - tab.x)).toBeLessThan(1)
     expect(Math.abs(indicator.width - tab.width)).toBeLessThan(1)
+    expect(Math.abs(indicator.top - tab.bottom)).toBeLessThan(1)
+  })
+
+  test('keeps the last clicked tab when switching back and forth quickly', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+
+    // Both clicks happen in the same task, so the second one lands while the
+    // first tab change is still deferred
+    await page.evaluate(() => {
+      document.querySelector('[data-subscription-feed-tab="shorts"]').click()
+      document.querySelector('[data-subscription-feed-tab="videos"]').click()
+    })
+
+    await page.waitForTimeout(400)
+
+    await expect(page.locator('.tab.selectedTab')).toHaveText(/Videos/)
+    await expect(page.getByText('video video 000')).toBeVisible()
+
+    const { indicator, tab } = await page.evaluate(() => {
+      const toX = (element) => element.getBoundingClientRect().x
+
+      return {
+        indicator: toX(document.querySelector('.tabsIndicator')),
+        tab: toX(document.querySelector('[data-subscription-feed-tab="videos"]'))
+      }
+    })
+
+    expect(Math.abs(indicator - tab)).toBeLessThan(1)
   })
 })

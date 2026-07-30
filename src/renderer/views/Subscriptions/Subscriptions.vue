@@ -499,7 +499,21 @@ if (visibleTabs.value.length === 0) {
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 function changeTab(tab) {
+  // A pending change from a previous click is always dropped, its indicator
+  // placement included, so the last clicked tab wins
+  const hadPendingChange = pendingTabChangeFrame !== null
+
+  if (hadPendingChange) {
+    window.cancelAnimationFrame(pendingTabChangeFrame)
+    pendingTabChangeFrame = null
+  }
+
   if (tab === currentTab.value) {
+    if (hadPendingChange) {
+      // Put the indicator back onto the tab that stays selected
+      updateTabsIndicator()
+    }
+
     return
   }
 
@@ -507,11 +521,6 @@ function changeTab(tab) {
   const target = visibleTabs.value.includes(tab)
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
-
-  if (pendingTabChangeFrame !== null) {
-    window.cancelAnimationFrame(pendingTabChangeFrame)
-    pendingTabChangeFrame = null
-  }
 
   // Move the indicator first and let it paint before the panel is swapped,
   // otherwise rendering a feed with a lot of videos in the same frame delays
@@ -765,6 +774,13 @@ function placeTabsIndicator(tabElement) {
 }
 
 function updateTabsIndicator() {
+  // While a tab change is pending the indicator already sits on the tab that is
+  // about to be selected, so re-measuring the still selected one (e.g. from the
+  // ResizeObserver when a refresh loader appears) would move it back
+  if (pendingTabChangeFrame !== null) {
+    return
+  }
+
   const container = tabsContainerRef.value?.$el
   const selected = container?.querySelector('.tab.selectedTab')
 
