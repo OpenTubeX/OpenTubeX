@@ -417,6 +417,13 @@ function markScrolledToSectionAsActive() {
 }
 
 function handleResize(width = settingsPageRef.value?.clientWidth ?? window.innerWidth) {
+  // A hidden tab reports a width of 0. Treating that as the mobile layout would
+  // scroll back to the active section once the tab is presented again, undoing
+  // the tab's restored scroll position.
+  if (width === 0) {
+    return
+  }
+
   const wasNotInDesktopView = !isInDesktopView.value
 
   if (!hasMeasuredSettingsWidth) {
