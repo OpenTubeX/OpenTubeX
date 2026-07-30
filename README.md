@@ -18,7 +18,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
-<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
+<p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
 > [!NOTE] 
@@ -262,8 +262,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 | ![](docs/screenshots/OpenTubeX3.png)                                                            |
 
 ## How does it work?
-OpenTubeX uses a built in extractor to grab and serve data / videos. The [Invidious API](https://github.com/iv-org/invidious) can also optionally be used. OpenTubeX does not use any official APIs to obtain data. While YouTube can still see your video requests, it can no
-longer track you using cookies or JavaScript. Your subscriptions, playlists and history are stored locally on your computer and never sent out.
+OpenTubeX uses a built-in extractor to request data and videos directly from YouTube. The [Invidious API](https://github.com/iv-org/invidious) can be used instead; depending on the video proxy setting, media requests may still go directly to YouTube. OpenTubeX does not use YouTube's official API.
+
+OpenTubeX does not load the standard YouTube website or its page JavaScript, which reduces the browser-based tracking surface. It does not hide network requests: YouTube, an Invidious operator, or an optional service may still observe request metadata, including your IP address unless a proxy is used. See [PRIVACY.md](PRIVACY.md) for the complete threat model.
+
+By default, subscriptions, playlists, settings, history, profiles and other app data remain on your device. When synchronization is enabled, copies of the selected data categories are sent to the configured sync server. Enhanced-privacy sync encrypts those copies on your device before upload; legacy sync servers may receive them in plaintext.
 
 > [!IMPORTANT]  
 > Using a VPN or Tor is highly recommended to hide your IP while using OpenTubeX.
