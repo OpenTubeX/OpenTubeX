@@ -145,12 +145,14 @@ test.describe('settings', () => {
       await expect(toast).toBeVisible()
       await expect(toast).toHaveCSS('transform', 'none')
       await expect(toast.locator('..')).toHaveCSS('transform', 'none')
+      // The drain waits out the enter transition and then uses up the rest of
+      // the toast's lifetime, so it empties just as the toast is dismissed
       await expect(
         toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
-      ).toHaveCSS('animation-duration', '10s')
+      ).toHaveCSS('animation-duration', '9.7s')
       await expect(
         toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
-      ).toHaveCSS('animation-delay', '0s')
+      ).toHaveCSS('animation-delay', '0.3s')
       return toast
     }
 

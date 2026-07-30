@@ -271,6 +271,55 @@ test.describe('toast timeout progress', () => {
     expect(Math.abs(indicatorBounds.y - toastBounds.y)).toBeLessThanOrEqual(1)
     expect(Math.abs(indicatorBounds.height - toastBounds.height)).toBeLessThanOrEqual(1)
   })
+
+  test('stays wrapped around both corners until the toast has animated in', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Held timeout progress', 6000)
+    })
+
+    const indicatorPath = page.locator('.toast-slot .embeddedProgressPath').first()
+    await indicatorPath.waitFor()
+
+    // Pausing removes the wall clock from the picture, so the sampled lengths
+    // below depend only on the delay/duration the stylesheet asks for
+    const timing = await indicatorPath.evaluate(element => {
+      const animation = element.getAnimations()[0]
+      animation.pause()
+      window.__toastTimeout = animation
+      return animation.effect.getComputedTiming()
+    })
+    // The drain has to wait out the enter transition, then use up the rest of
+    // the toast's lifetime so it empties exactly as the toast is dismissed
+    expect(timing.delay).toBe(300)
+    expect(timing.duration).toBe(5700)
+
+    /** @returns {Promise<{ full: number, visible: number, offset: number }>} */
+    const sampleAt = time => indicatorPath.evaluate(async (element, time) => {
+      window.__toastTimeout.currentTime = time
+      await window.__toastTimeout.ready
+      const style = getComputedStyle(element)
+      return {
+        full: Number.parseFloat(element.style.strokeDasharray),
+        visible: Number.parseFloat(style.strokeDasharray),
+        offset: Number.parseFloat(style.strokeDashoffset),
+      }
+    }, time)
+
+    // Both bottom corner arcs are only a few percent of the path, so any drain
+    // during the enter transition already eats the trailing one
+    for (const time of [0, 150, 299]) {
+      const held = await sampleAt(time)
+      expect(held.visible, `held at ${time}ms`).toBeCloseTo(held.full, 3)
+      expect(held.offset, `held at ${time}ms`).toBe(0)
+    }
+
+    const midway = await sampleAt(300 + 5700 / 2)
+    expect(midway.visible).toBeCloseTo(midway.full / 2, 1)
+
+    const finished = await sampleAt(6000)
+    expect(finished.visible).toBeCloseTo(0, 3)
+  })
 })
 
 test.describe('history reorder animation', () => {

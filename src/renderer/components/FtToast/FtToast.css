@@ -1,6 +1,10 @@
 .toast-holder {
   position: fixed;
 
+  /* Drives the enter/leave transitions and the matching hold before the timeout
+     indicator starts draining */
+  --toast-transition-duration: 300ms;
+
   /* Higher than any prompt */
   z-index: 300;
   display: flex;
@@ -98,8 +102,14 @@
 
 .timeout-indicator :deep(.embeddedProgressPath) {
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--primary-color) 70%, transparent));
-  animation-delay: 0s;
-  animation-duration: var(--toast-duration);
+
+  /* Hold the line at its full length until the toast has finished animating in,
+     so it always appears wrapped around both bottom corners. The corner arcs are
+     only a few percent of the path, so without this the trailing arc is already
+     gone by the time the toast has finished sliding in. Draining over the
+     remaining time keeps it empty exactly when the toast is dismissed. */
+  animation-delay: var(--toast-transition-duration);
+  animation-duration: calc(var(--toast-duration) - var(--toast-transition-duration));
   animation-name: toast-timeout;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
@@ -167,7 +177,9 @@
 }
 
 .toast-enter-active {
-  transition: opacity 300ms, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition:
+    opacity var(--toast-transition-duration),
+    transform var(--toast-transition-duration) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .toast-leave-active {
