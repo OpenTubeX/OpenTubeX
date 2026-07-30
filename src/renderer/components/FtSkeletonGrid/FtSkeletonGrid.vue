@@ -1,7 +1,6 @@
 <template>
   <FtAutoGrid
     :grid="youtubeStyleShorts || displayValue !== 'list'"
-    :thumbnail-size="thumbnailSize"
     :youtube-style-shorts="youtubeStyleShorts"
     aria-hidden="true"
     data-tab-loading-indicator
@@ -44,9 +43,6 @@ defineProps({
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const displayValue = computed(() => store.getters.getListType)
-
-/** @type {import('vue').ComputedRef<number>} */
-const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 </script>
 
 <style scoped src="./FtSkeletonGrid.css" />
