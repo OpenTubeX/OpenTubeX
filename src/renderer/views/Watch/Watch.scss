@@ -543,7 +543,7 @@
       transform: scale(1.1);
     }
 
-    .shortsLoadingNavigation {
+    .shortsNavigation {
       position: fixed;
       z-index: 12;
       inset-inline-end: 24px;
@@ -554,7 +554,7 @@
       transform: translateY(-50%);
     }
 
-    .shortsLoadingNavigationButton {
+    .shortsNavigationButton {
       display: grid;
       place-items: center;
       inline-size: 48px;
@@ -568,12 +568,12 @@
       font-size: 18px;
     }
 
-    .shortsLoadingNavigationButton:hover,
-    .shortsLoadingNavigationButton:focus-visible {
+    .shortsNavigationButton:hover,
+    .shortsNavigationButton:focus-visible {
       background-color: var(--side-nav-active-color);
     }
 
-    .shortsLoadingNavigationButton:disabled {
+    .shortsNavigationButton:disabled {
       cursor: default;
       opacity: 0.35;
     }
@@ -813,6 +813,11 @@
         min-inline-size: 0;
       }
 
+      .shortsExternalChannel {
+        color: var(--primary-text-color);
+        opacity: 1;
+      }
+
       .shortsExternalTitle {
         display: -webkit-box;
         max-block-size: 2.6em;
@@ -836,24 +841,23 @@
       .shortsNextPreview {
         grid-row: 3;
       }
+
+      // The rail overlays the player here and grows upwards from its bottom, so
+      // a viewport-anchored nav ends up on the action buttons. Let it flow as
+      // the top of the same column instead, which lines it up with them.
+      .shortsNavigation {
+        position: static;
+        gap: inherit;
+        transform: none;
+      }
     }
 
     @media only screen and (width <= 760px) {
-      .shortsLoadingNavigation {
-        inset-inline-end: 12px;
-      }
-
-      .shortsLoadingNavigationButton {
+      .shortsNavigationButton {
         inline-size: 42px;
         block-size: 42px;
         color: #fff;
         background-color: rgb(0 0 0 / 55%);
-      }
-    }
-
-    @media only screen and (width <= 900px) {
-      .shortsLoadingNavigation {
-        inset-block-start: 30%;
       }
     }
   }

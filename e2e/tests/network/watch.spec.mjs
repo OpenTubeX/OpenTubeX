@@ -1763,6 +1763,40 @@ test.describe('custom Shorts player', () => {
       .toBeCloseTo(videoAreaBounds.x + videoAreaBounds.width / 2, 0)
     expect(navigationBounds.x).toBeGreaterThan(actionBounds.x)
 
+    // Narrow layouts move the rail over the player and grow it upwards, so the
+    // navigation joins the same column above the actions instead of landing on
+    // top of them.
+    await page.setViewportSize({ width: 900, height: 700 })
+    await expect(page.locator('.shortsExternalChannel')).toHaveCSS('opacity', '1')
+    expect(await page.locator('.shortsExternalChannel').evaluate(element => {
+      return getComputedStyle(element).color === getComputedStyle(document.body).color
+    })).toBe(true)
+    await expect.poll(async () => {
+      const [rail, navigation, firstAction] = await Promise.all([
+        page.locator('.shortsActionRail').boundingBox(),
+        page.locator('.shortsNavigation').boundingBox(),
+        page.locator('.shortsAction').first().boundingBox()
+      ])
+
+      return {
+        navigationAboveActions: navigation.y + navigation.height <= firstAction.y,
+        centeredInRail: Math.abs(
+          (navigation.x + navigation.width / 2) - (rail.x + rail.width / 2)
+        ) <= 1,
+        insideRail: navigation.x >= rail.x && navigation.x + navigation.width <= rail.x + rail.width
+      }
+    }).toEqual({ navigationAboveActions: true, centeredInRail: true, insideRail: true })
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await expect.poll(async () => {
+      const [rail, navigation] = await Promise.all([
+        page.locator('.shortsActionRail').boundingBox(),
+        page.locator('.shortsNavigation').boundingBox()
+      ])
+
+      return navigation.x > rail.x + rail.width
+    }).toBe(true)
+
     await page.evaluate(() => {
       window.__shortsNavigationDisappeared = false
       const observer = new MutationObserver(() => {

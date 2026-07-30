@@ -1124,31 +1124,6 @@
         />
       </div>
     </div>
-    <div
-      v-if="shortsPlayer && (shortsHasPrevious || shortsHasNext)"
-      class="shortsNavigation"
-    >
-      <button
-        type="button"
-        class="shortsNavigationButton"
-        :disabled="!shortsHasPrevious"
-        :aria-label="$t('Video.Previous')"
-        :title="$t('Video.Previous')"
-        @click="emitShortsPrevious"
-      >
-        <font-awesome-icon :icon="['fas', 'arrow-up']" />
-      </button>
-      <button
-        type="button"
-        class="shortsNavigationButton"
-        :disabled="!shortsHasNext"
-        :aria-label="$t('Video.Next')"
-        :title="$t('Video.Next')"
-        @click="emitShortsNext"
-      >
-        <font-awesome-icon :icon="['fas', 'arrow-down']" />
-      </button>
-    </div>
   </div>
 </template>
 

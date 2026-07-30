@@ -252,14 +252,6 @@ export default defineComponent({
       type: Number,
       default: null
     },
-    shortsHasPrevious: {
-      type: Boolean,
-      default: false
-    },
-    shortsHasNext: {
-      type: Boolean,
-      default: false
-    },
     theatrePossible: {
       type: Boolean,
       default: false
@@ -436,15 +428,11 @@ export default defineComponent({
     'chapter-thumbnails-change',
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
-    'shorts-previous',
-    'shorts-next',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
     const { tabId, isTabPresented } = useTabContext()
     const mediaTabId = tabId ?? 'web'
-    const emitShortsPrevious = () => emit('shorts-previous')
-    const emitShortsNext = () => emit('shorts-next')
     // Shorts request autoplay, so do not render their paused-only controls
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
@@ -8340,8 +8328,6 @@ export default defineComponent({
     }
 
     return {
-      emitShortsPrevious,
-      emitShortsNext,
       shortsPaused,
       shortsMuted,
       shortsCaptionsAvailable,
