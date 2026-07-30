@@ -171,7 +171,7 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 - Download videos with yt-dlp
 <img width="510" height="273" alt="image" src="https://github.com/user-attachments/assets/cbc33197-d6df-4619-a040-c28fb8a3ba42" />
 
-- Full-screen docks for comments, playlists and chapters
+- Full-screen docks for video info, comments, playlists and chapters
 <img height="350" alt="image" src="https://github.com/user-attachments/assets/1cb48073-f523-455d-9926-c96a95fdc959" />
 
 - Customizable keyboard shortcuts
