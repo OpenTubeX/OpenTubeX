@@ -406,6 +406,8 @@ function nextAnimationFrame() {
 
 let isMounted = false
 let removeFeedReloadRequestListener = null
+/** @type {number | null} */
+let pendingTabChangeFrame = null
 
 onMounted(() => {
   isMounted = true
@@ -418,6 +420,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   isMounted = false
   removeFeedReloadRequestListener?.()
+
+  if (pendingTabChangeFrame !== null) {
+    window.cancelAnimationFrame(pendingTabChangeFrame)
+    pendingTabChangeFrame = null
+  }
 })
 
 watch(currentTab, async (value, previousValue) => {
@@ -492,16 +499,43 @@ if (visibleTabs.value.length === 0) {
  * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
  */
 function changeTab(tab) {
+  // A pending change from a previous click is always dropped, its indicator
+  // placement included, so the last clicked tab wins
+  const hadPendingChange = pendingTabChangeFrame !== null
+
+  if (hadPendingChange) {
+    window.cancelAnimationFrame(pendingTabChangeFrame)
+    pendingTabChangeFrame = null
+  }
+
   if (tab === currentTab.value) {
+    if (hadPendingChange) {
+      // Put the indicator back onto the tab that stays selected
+      updateTabsIndicator()
+    }
+
     return
   }
 
-  if (visibleTabs.value.includes(tab)) {
-    currentTab.value = tab
-  } else {
-    // First visible tab or no tab
-    currentTab.value = visibleTabs.value.length > 0 ? visibleTabs.value[0] : null
+  // First visible tab or no tab as fallback
+  const target = visibleTabs.value.includes(tab)
+    ? tab
+    : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
+
+  // Move the indicator first and let it paint before the panel is swapped,
+  // otherwise rendering a feed with a lot of videos in the same frame delays
+  // the start of the animation and it appears to jump
+  if (target !== null && moveTabsIndicatorTo(target)) {
+    pendingTabChangeFrame = window.requestAnimationFrame(() => {
+      pendingTabChangeFrame = window.requestAnimationFrame(() => {
+        pendingTabChangeFrame = null
+        currentTab.value = target
+      })
+    })
+    return
   }
+
+  currentTab.value = target
 }
 
 const videosTab = useTemplateRef('videosTab')
@@ -703,7 +737,50 @@ let tabsResizeObserver = null
 // otherwise it visibly flies in from the stale position.
 let tabsIndicatorWasHidden = true
 
+const tabElementRefs = {
+  videos: videosTab,
+  shorts: shortsTab,
+  live: liveTab,
+  community: communityTab,
+  new: newTab
+}
+
+/**
+ * @param {HTMLElement} tabElement
+ * @returns {boolean} whether the indicator was positioned on the tab
+ */
+function placeTabsIndicator(tabElement) {
+  if (tabElement.getClientRects().length === 0) {
+    tabsIndicatorWasHidden = true
+    return false
+  }
+
+  // Physical values to match the physical offset measurements (RTL-safe).
+  // The indicator sits just below the tab, like the old selectedTab border
+  // (which extended past the box through its -3px margin).
+  // Only the transform is animated, so the movement runs on the compositor and
+  // doesn't stutter while the main thread renders a large feed.
+  const style = {
+    transform: `translate(${tabElement.offsetLeft}px, ${tabElement.offsetTop + tabElement.offsetHeight}px) scaleX(${tabElement.offsetWidth})`
+  }
+
+  if (tabsIndicatorWasHidden) {
+    style.transition = 'none'
+    tabsIndicatorWasHidden = false
+  }
+
+  tabsIndicatorStyle.value = style
+  return true
+}
+
 function updateTabsIndicator() {
+  // While a tab change is pending the indicator already sits on the tab that is
+  // about to be selected, so re-measuring the still selected one (e.g. from the
+  // ResizeObserver when a refresh loader appears) would move it back
+  if (pendingTabChangeFrame !== null) {
+    return
+  }
+
   const container = tabsContainerRef.value?.$el
   const selected = container?.querySelector('.tab.selectedTab')
 
@@ -713,26 +790,23 @@ function updateTabsIndicator() {
     return
   }
 
-  if (selected.getClientRects().length === 0) {
-    tabsIndicatorWasHidden = true
-    return
+  placeTabsIndicator(selected)
+}
+
+/**
+ * Moves the indicator onto a tab before it becomes the selected one, so the
+ * animation can start before the new panel is rendered.
+ * @param {'videos' | 'shorts' | 'live' | 'community' | 'new'} tab
+ * @returns {boolean} whether the indicator was moved
+ */
+function moveTabsIndicatorTo(tab) {
+  if (!isMounted || tabsIndicatorStyle.value === null || tabsIndicatorWasHidden) {
+    return false
   }
 
-  // Physical values to match the physical offset measurements (RTL-safe).
-  // The indicator sits just below the tab, like the old selectedTab border
-  // (which extended past the box through its -3px margin).
-  const style = {
-    left: `${selected.offsetLeft}px`,
-    top: `${selected.offsetTop + selected.offsetHeight}px`,
-    width: `${selected.offsetWidth}px`
-  }
+  const tabElement = tabElementRefs[tab]?.value
 
-  if (tabsIndicatorWasHidden) {
-    style.transition = 'none'
-    tabsIndicatorWasHidden = false
-  }
-
-  tabsIndicatorStyle.value = style
+  return tabElement instanceof HTMLElement && placeTabsIndicator(tabElement)
 }
 
 watch([currentTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
