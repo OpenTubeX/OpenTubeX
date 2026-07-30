@@ -231,13 +231,43 @@ function pause(toast, element) {
   toast.remainingMs = Math.max(0, toast.expiresAt - Date.now())
   clearTimeout(toast.timeout)
 
-  const animation = indicatorAnimations.get(toast.id) ??
-    element.querySelector('.timeout-indicator .embeddedProgressPath')?.getAnimations()[0]
-  if (animation) {
-    animation.currentTime = toast.duration - toast.remainingMs
-    animation.pause()
-    indicatorAnimations.set(toast.id, animation)
+  // `hovered` is already set, so this is the only chance to freeze the line: a
+  // second pointerenter returns early. Retry next frame if the indicator was not
+  // resolvable yet, rather than leaving it draining for the rest of the hover.
+  if (!freezeIndicator(toast, element)) {
+    requestAnimationFrame(() => {
+      if (toast.hovered) { freezeIndicator(toast, element) }
+    })
   }
+}
+
+/**
+ * Finds the drain animation on a toast's timeout indicator. Matched by name
+ * rather than taken by index, because `getAnimations()` also reports
+ * transitions and orders them before animations.
+ * @param {HTMLElement} element the toast's slot
+ * @returns {Animation | undefined}
+ */
+function findIndicatorAnimation(element) {
+  return element.querySelector('.timeout-indicator .embeddedProgressPath')
+    ?.getAnimations()
+    .find(animation => animation.animationName?.startsWith('toast-timeout'))
+}
+
+/**
+ * Seeks a toast's indicator to its true remaining lifetime and holds it there.
+ * @param {Toast} toast
+ * @param {HTMLElement} element the toast's slot
+ * @returns {boolean} whether the animation could be resolved
+ */
+function freezeIndicator(toast, element) {
+  const animation = indicatorAnimations.get(toast.id) ?? findIndicatorAnimation(element)
+  if (!animation) { return false }
+
+  animation.currentTime = toast.duration - toast.remainingMs
+  animation.pause()
+  indicatorAnimations.set(toast.id, animation)
+  return true
 }
 
 /**
@@ -373,7 +403,8 @@ function dragStyle(toast) {
  * @param {AnimationEvent} event
  */
 function onIndicatorAnimationStart(toast, event) {
-  const animation = event.target.getAnimations()[0]
+  const animation = event.target.getAnimations()
+    .find(candidate => candidate.animationName === event.animationName)
   if (!animation) { return }
 
   const remainingMs = toast.hovered

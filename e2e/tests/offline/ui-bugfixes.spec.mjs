@@ -278,13 +278,18 @@ test.describe('toast timeout progress', () => {
       window.ftElectron.showToastOnAllTabs('Held timeout progress', 6000)
     })
 
-    const indicatorPath = page.locator('.toast-slot .embeddedProgressPath').first()
+    // Scoped to this toast's own slot: any other toast on screen would bring its
+    // own indicator, and picking the first one would sample the wrong duration
+    const indicatorPath = page.locator('.toast', { hasText: 'Held timeout progress' })
+      .locator('..')
+      .locator('.timeout-indicator .embeddedProgressPath')
     await indicatorPath.waitFor()
 
     // Pausing removes the wall clock from the picture, so the sampled lengths
     // below depend only on the delay/duration the stylesheet asks for
     const timing = await indicatorPath.evaluate(element => {
-      const animation = element.getAnimations()[0]
+      const animation = element.getAnimations()
+        .find(candidate => candidate.animationName?.startsWith('toast-timeout'))
       animation.pause()
       window.__toastTimeout = animation
       return animation.effect.getComputedTiming()
