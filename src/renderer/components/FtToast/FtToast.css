@@ -55,6 +55,10 @@
   position: relative;
 }
 
+.toast-slot.persistent-slot {
+  pointer-events: none;
+}
+
 .toast {
   display: flex;
   align-items: center;

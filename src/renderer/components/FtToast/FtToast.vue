@@ -72,7 +72,7 @@
       <div
         v-if="showSubscriptionRefreshToast"
         key="subscription-refresh"
-        class="toast-slot"
+        class="toast-slot persistent-slot"
         data-testid="subscription-refresh-toast"
       >
         <div

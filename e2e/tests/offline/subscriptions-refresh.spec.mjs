@@ -271,6 +271,11 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+    expect(await refreshToast.evaluate((toast) => {
+      const { left, top, width, height } = toast.getBoundingClientRect()
+      const hit = document.elementFromPoint(left + width / 2, top + height / 2)
+      return hit !== null && !toast.contains(hit)
+    })).toBe(true)
 
     const indicator = refreshToast.locator('.progress-indicator')
     await expect(indicator).toBeVisible()

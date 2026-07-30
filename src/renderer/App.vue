@@ -636,9 +636,6 @@ async function initializeManagedDownloadTools() {
   let toolProgressPercentage = 0
 
   function showToolProgress() {
-    if (subscriptionRefreshInProgress.value) {
-      return
-    }
     store.commit('setProgressBarPercentage', toolProgressPercentage)
     store.commit('setShowProgressBar', true)
   }
@@ -651,18 +648,6 @@ async function initializeManagedDownloadTools() {
     })
     showToolProgress()
   }
-
-  const stopWatchingSubscriptionRefresh = watch(subscriptionRefreshInProgress, inProgress => {
-    if (!downloadStarted) {
-      return
-    }
-
-    if (inProgress) {
-      store.commit('setShowProgressBar', false)
-    } else {
-      showToolProgress()
-    }
-  })
 
   const progressByBinary = {}
   const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
@@ -683,9 +668,7 @@ async function initializeManagedDownloadTools() {
     const percentages = Object.values(progressByBinary)
     const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
     toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    if (!subscriptionRefreshInProgress.value) {
-      store.commit('setProgressBarPercentage', toolProgressPercentage)
-    }
+    store.commit('setProgressBarPercentage', toolProgressPercentage)
   })
 
   try {
@@ -703,9 +686,7 @@ async function initializeManagedDownloadTools() {
 
     if (failures.length === 0 && updatedBinaries.length > 0) {
       toolProgressPercentage = 100
-      if (!subscriptionRefreshInProgress.value) {
-        store.commit('setProgressBarPercentage', toolProgressPercentage)
-      }
+      store.commit('setProgressBarPercentage', toolProgressPercentage)
       const updatedTools = updatedBinaries.join(' and ')
       showToast({
         message: missingBinaries.length > 0
@@ -723,13 +704,10 @@ async function initializeManagedDownloadTools() {
       }
     }
   } finally {
-    stopWatchingSubscriptionRefresh()
     removeProgressListener()
     if (downloadStarted) {
       store.commit('setShowProgressBar', false)
-      if (!subscriptionRefreshInProgress.value) {
-        store.commit('setProgressBarPercentage', 0)
-      }
+      store.commit('setProgressBarPercentage', 0)
     }
   }
 }
