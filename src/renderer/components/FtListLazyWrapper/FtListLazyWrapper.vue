@@ -30,7 +30,7 @@
         :can-move-video-up="canMoveVideoUp"
         :can-move-video-down="canMoveVideoDown"
         :can-remove-from-playlist="canRemoveFromPlaylist"
-        :layout="layout"
+        :force-list-type="layout"
         :show-grab-bar="isDraggable && layout === 'grid'"
         @move-video-up="moveVideoUp"
         @move-video-down="moveVideoDown"
