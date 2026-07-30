@@ -4,6 +4,7 @@ import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
+import { getFixedInternalRouteTitle } from '../../internalRoutes.js'
 import {
   clearTabSession,
   replaceAllTabSessions,
@@ -250,8 +251,8 @@ export class TabManager {
    * @returns {string}
    */
   static formatDefaultTabTitle(url) {
-    const route = TabManager.getOpenTubeXRoute(url)
-    return route || '/'
+    const route = TabManager.getRouteFromUrl(url)
+    return getFixedInternalRouteTitle(route.path) ?? route.fullPath
   }
 
   /**
@@ -777,7 +778,7 @@ export class TabManager {
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: Boolean(isPinned),
-      isLoading: shouldMount,
+      isLoading: shouldMount && getFixedInternalRouteTitle(location.route.path) === null,
       loadingSources: new Set(shouldMount ? [TAB_LOADING_SOURCE_MOUNT] : []),
       color: TabManager.normalizeTabColor(color),
       previewDataUrl: restoredPreviewDataUrl,
@@ -1312,7 +1313,11 @@ export class TabManager {
    * @returns {boolean}
    */
   _getTabLoadingState(tab) {
-    return this._getTabLoadingSources(tab).size > 0 || tab.loadState === 'mounting'
+    const loadingSources = this._getTabLoadingSources(tab)
+    if (getFixedInternalRouteTitle(tab.route.path) !== null) {
+      return loadingSources.has(TAB_LOADING_SOURCE_RENDERER)
+    }
+    return loadingSources.size > 0 || tab.loadState === 'mounting'
   }
 
   /**
@@ -1983,7 +1988,7 @@ export class TabManager {
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: snapshot.isPinned === true,
-      isLoading: true,
+      isLoading: getFixedInternalRouteTitle(snapshot.route.path) === null,
       loadingSources: new Set([TAB_LOADING_SOURCE_MOUNT]),
       color: TabManager.normalizeTabColor(snapshot.color),
       previewDataUrl: snapshot.previewDataUrl ?? null,

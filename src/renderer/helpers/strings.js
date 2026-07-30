@@ -2,7 +2,7 @@ import i18n from '../i18n/index'
 
 const WINDOW_TITLE_TRANSLATION_KEYS = {
   Subscriptions: 'Subscriptions.Subscriptions',
-  Channels: 'Channels.Title',
+  'Channel List': 'Channels.Title',
   Trending: 'Trending.Trending',
   'Most Popular': 'Most Popular',
   'Your Playlists': 'User Playlists.Your Playlists',
@@ -10,7 +10,7 @@ const WINDOW_TITLE_TRANSLATION_KEYS = {
   Stats: 'Stats.Stats',
   Settings: 'Settings.Settings',
   About: 'About.About',
-  'Profile Settings': 'Profile.Profile Settings',
+  'Profile Manager': 'Profile.Profile Manager',
   Playlist: 'Playlist.Playlist'
 }
 

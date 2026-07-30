@@ -1,5 +1,6 @@
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, h } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
 import Trending from '../views/Trending/Trending.vue'
@@ -18,7 +19,17 @@ import Post from '../views/Post.vue'
 // instead of `RouterView` resolving them during navigation, so they must be
 // wrapped in `defineAsyncComponent` rather than passing the raw import function
 // to `component`.
-const Watch = defineAsyncComponent(() => import('../views/Watch/Watch.vue'))
+const AsyncRouteLoadingIndicator = {
+  render: () => h('span', {
+    hidden: true,
+    'data-tab-loading-indicator': ''
+  })
+}
+const Watch = defineAsyncComponent({
+  loader: () => import('../views/Watch/Watch.vue'),
+  loadingComponent: AsyncRouteLoadingIndicator,
+  delay: 0
+})
 const Settings = defineAsyncComponent(() => import('../views/Settings/Settings.vue'))
 const ProfileSettings = defineAsyncComponent(() => import('../views/ProfileSettings/ProfileSettings.vue'))
 const About = defineAsyncComponent(() => import('../views/About/About.vue'))
@@ -38,7 +49,7 @@ export const routes = [
     path: '/subscriptions',
     name: 'subscriptions',
     meta: {
-      title: 'Subscriptions',
+      title: getFixedInternalRouteTitle('/subscriptions'),
       hasResizableThumbnails: true
     },
     component: Subscriptions
@@ -47,7 +58,7 @@ export const routes = [
     path: '/subscribedchannels',
     name: 'subscribedChannels',
     meta: {
-      title: 'Channels'
+      title: getFixedInternalRouteTitle('/subscribedchannels')
     },
     component: SubscribedChannels
   },
@@ -56,7 +67,7 @@ export const routes = [
         path: '/trending',
         name: 'trending',
         meta: {
-          title: 'Trending',
+          title: getFixedInternalRouteTitle('/trending'),
           hasResizableThumbnails: true
         },
         component: Trending
@@ -66,7 +77,7 @@ export const routes = [
     path: '/popular',
     name: 'popular',
     meta: {
-      title: 'Most Popular',
+      title: getFixedInternalRouteTitle('/popular'),
       hasResizableThumbnails: true
     },
     component: Popular
@@ -75,7 +86,7 @@ export const routes = [
     path: '/userplaylists',
     name: 'userPlaylists',
     meta: {
-      title: 'Your Playlists',
+      title: getFixedInternalRouteTitle('/userplaylists'),
       hasResizableThumbnails: true
     },
     component: UserPlaylists
@@ -84,7 +95,7 @@ export const routes = [
     path: '/history',
     name: 'history',
     meta: {
-      title: 'History',
+      title: getFixedInternalRouteTitle('/history'),
       hasResizableThumbnails: true
     },
     component: History
@@ -93,7 +104,7 @@ export const routes = [
     path: '/stats',
     name: 'stats',
     meta: {
-      title: 'Stats'
+      title: getFixedInternalRouteTitle('/stats')
     },
     component: Stats
   },
@@ -101,7 +112,7 @@ export const routes = [
     path: '/settings',
     name: 'settings',
     meta: {
-      title: 'Settings'
+      title: getFixedInternalRouteTitle('/settings')
     },
     component: Settings
   },
@@ -109,7 +120,7 @@ export const routes = [
     path: '/about',
     name: 'about',
     meta: {
-      title: 'About'
+      title: getFixedInternalRouteTitle('/about')
     },
     component: About
   },
@@ -117,7 +128,7 @@ export const routes = [
     path: '/settings/profile',
     name: 'profileSettings',
     meta: {
-      title: 'Profile Settings'
+      title: getFixedInternalRouteTitle('/settings/profile')
     },
     component: ProfileSettings
   },

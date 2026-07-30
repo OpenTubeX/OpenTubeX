@@ -2,6 +2,7 @@ import { computed, nextTick } from 'vue'
 import { START_LOCATION } from 'vue-router'
 
 import packageDetails from '../../../package.json'
+import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import { translateWindowTitle } from '../helpers/strings'
 import { runPendingViewTransition } from '../helpers/viewTransitions'
 import { cloneRoute, normalizeRoute } from '../store/modules/tabs'
@@ -256,11 +257,11 @@ export class TabNavigationService {
       // pages replace this route placeholder once their content has loaded.
       // historyIndex still points at the outgoing entry here, so don't let the
       // placeholder overwrite that entry's title.
-      this.setTitle(tabId, to.fullPath, { skipHistoryEntry: true })
+      this.setTitle(tabId, routePlaceholderTitle(to), { skipHistoryEntry: true })
     }
 
     this.saveScroll(tabId)
-    const loadingToken = preserveContentTitle
+    const loadingToken = preserveContentTitle || getFixedInternalRouteTitle(route.path) !== null
       ? null
       : this.startRouteLoading(tabId)
     let navigationCommitted = false
@@ -472,9 +473,23 @@ export class TabNavigationService {
     }
 
     const tab = this.store.getters.getTabById(tabId)
+    const entry = tab?.history[tab.historyIndex]
+    // Watch publishes its URL while metadata is unresolved. Keep a title that
+    // the opener already supplied (or that an earlier response resolved),
+    // especially when a background request ends in an IP-block error.
+    if (
+      tab?.route.path.startsWith('/watch/') &&
+      title === tab.route.fullPath &&
+      entry?.titlePending !== true &&
+      typeof tab.contentTitle === 'string' &&
+      tab.contentTitle.length > 0 &&
+      tab.contentTitle !== title
+    ) {
+      return
+    }
     const resolvedPendingEntry = !skipHistoryEntry &&
       resolveHistoryEntry &&
-      tab?.history[tab.historyIndex]?.titlePending === true
+      entry?.titlePending === true
     this.store.commit('setTabContentTitle', {
       tabId,
       title,
@@ -641,6 +656,13 @@ function routeTitle(route) {
   return typeof route.meta?.title === 'string'
     ? translateWindowTitle(route.meta.title) ?? route.meta.title
     : route.fullPath
+}
+
+function routePlaceholderTitle(route) {
+  const title = getFixedInternalRouteTitle(route.path)
+  return title === null
+    ? route.fullPath
+    : translateWindowTitle(title) ?? title
 }
 
 function isUnresolvedWatchEntry(tab, route) {

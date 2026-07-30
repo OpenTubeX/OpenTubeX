@@ -2061,7 +2061,7 @@ function runApp() {
         if (windowStartupUrl != null) {
           tabManager.createTab({ url: windowStartupUrl, makeActive: true })
         } else {
-          tabManager.createTab({ url: ROOT_APP_URL, makeActive: true })
+          await tabManager.createTabWithPreference({ makeActive: true })
         }
       }
 

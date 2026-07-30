@@ -178,6 +178,7 @@
         <div
           v-if="currentTabRefreshing"
           class="tabsProgressBar"
+          data-tab-loading-indicator
           :style="{ inlineSize: refreshProgressPercentage + '%' }"
         />
       </div>

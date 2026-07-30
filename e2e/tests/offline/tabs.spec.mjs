@@ -55,8 +55,40 @@ test.describe('tab bar', () => {
     await expect(page.locator(sel.tabs).nth(1).locator('[data-icon="rss"]')).toBeVisible()
   })
 
+  test('fixed internal routes use their page title before mounting', async ({ page }) => {
+    const fixedRoutes = [
+      ['/subscriptions', 'Subscriptions'],
+      ['/subscribedchannels', 'Channel List'],
+      ['/trending', 'Trending'],
+      ['/popular', 'Most Popular'],
+      ['/userplaylists', 'Your Playlists'],
+      ['/history', 'History'],
+      ['/stats', 'Stats'],
+      ['/settings', 'Settings'],
+      ['/about', 'About'],
+      ['/settings/profile', 'Profile Manager']
+    ]
+    const tabs = await page.evaluate(async (routes) => {
+      return await Promise.all(routes.map(route => (
+        window.ftElectron.tabs.create({
+          route,
+          makeActive: false,
+          lazyLoad: true
+        })
+      )))
+    }, [...fixedRoutes.map(([route]) => route), '/channel/channel-id', '/'])
+
+    expect(tabs.map(tab => tab.title)).toEqual([
+      ...fixedRoutes.map(([, title]) => title),
+      '/channel/channel-id',
+      '/'
+    ])
+  })
+
   test('uses the matching app icon when the route changes', async ({ page }) => {
     await goTo(page, 'settings')
+    await page.waitForTimeout(100)
+    expect(await page.locator(`${sel.activeTab} .loadingDot`).count()).toBe(0)
     await expect(page.locator(sel.activeTab).locator('[data-icon="sliders"]')).toBeVisible()
 
     await goTo(page, 'history')
@@ -73,6 +105,54 @@ test.describe('tab bar', () => {
 
     await expect(tab.locator('[data-icon="clapperboard"]')).toBeVisible()
     await expect(tab.locator('[data-icon="play"]')).toHaveCount(0)
+  })
+
+  test('does not show a cached watch avatar before its loading indicator settles', async ({ page }) => {
+    const videoId = 'jNQXAC9IVRw'
+    await page.evaluate(({ videoId }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setVideoAvatar', {
+        videoId,
+        avatar: 'data:image/png;base64,iVBORw0KGgo='
+      })
+
+      window.__watchTabIconStates = []
+      const recordIconStates = () => {
+        for (const tab of document.querySelectorAll('.tab')) {
+          window.__watchTabIconStates.push({
+            id: tab.dataset.tabId,
+            loading: tab.querySelector('.loadingDot') != null,
+            avatar: tab.querySelector('.tabAvatar') != null
+          })
+        }
+      }
+      new MutationObserver(recordIconStates).observe(
+        document.querySelector('.tabsContainer'),
+        { childList: true, subtree: true }
+      )
+    }, { videoId })
+
+    const watchTab = await page.evaluate(({ videoId }) => {
+      return window.ftElectron.tabs.create({
+        route: `/watch/${videoId}`,
+        title: 'Cached video',
+        makeActive: true
+      })
+    }, { videoId })
+
+    const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+    await expect(tab.locator('.loadingDot')).toBeVisible()
+    await expect(tab.locator('.loadingDot')).toHaveCount(0)
+    await expect(tab.locator('.tabAvatar')).toBeVisible()
+
+    const states = await page.evaluate(
+      tabId => window.__watchTabIconStates.filter(state => state.id === tabId),
+      watchTab.id
+    )
+    const lastLoadingIndex = states.findLastIndex(state => state.loading)
+
+    expect(lastLoadingIndex).toBeGreaterThanOrEqual(0)
+    expect(states.slice(0, lastLoadingIndex + 1).some(state => state.avatar)).toBe(false)
   })
 
   test('Ctrl+T opens and Ctrl+W closes a tab', async ({ page }) => {
@@ -713,6 +793,22 @@ test.describe('localized tab titles', () => {
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await expect(page.locator(sel.activeTab)).toContainText('Abos')
     await expect(page.locator(sel.activeTab)).not.toContainText(/\/subscriptions|Subscriptions\.Subscriptions/)
+  })
+})
+
+test.describe('custom default page', () => {
+  test.use({ seed: { settings: { landingPage: 'history' } } })
+
+  test('uses the configured route and title for a new tab', async ({ page }) => {
+    const tab = await page.evaluate(async () => {
+      return await window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      })
+    })
+
+    expect(tab.route.fullPath).toBe('/history')
+    expect(tab.title).toBe('History')
   })
 })
 
