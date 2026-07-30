@@ -128,7 +128,7 @@ onMounted(() => {
   reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
 
   resizeObserver = new ResizeObserver(([entry]) => {
-    const scrollbarCompensated = document.body.style.overflow === 'hidden' &&
+    const scrollbarCompensated = document.documentElement.style.overflow === 'hidden' &&
       document.body.style.paddingInlineEnd !== ''
     const measurement = measureStableGridWidth(
       entry.contentRect.width,

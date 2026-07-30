@@ -63,6 +63,32 @@ test.use({
 })
 
 function defineCase () {
+  test('opening the collaborators prompt keeps the sticky app header visible', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Filler video 9')).toBeAttached()
+    await page.evaluate(() => window.scrollTo(0, 300))
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+
+    const topNav = page.locator('.topNav')
+    const topBefore = await topNav.evaluate(element => element.getBoundingClientRect().top)
+    await page.locator('.collaboratorChannelButton').evaluate(element => element.click())
+    await expect(page.locator('.prompt')).toBeVisible()
+
+    await expect.poll(() => topNav.evaluate(element => element.getBoundingClientRect().top))
+      .toBeCloseTo(topBefore, 0)
+    await expect(topNav).toBeInViewport()
+
+    const scrollBefore = await page.evaluate(() => window.scrollY)
+    await page.mouse.move(10, 200)
+    await page.mouse.wheel(0, 500)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBefore)
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.prompt')).toHaveCount(0)
+    await expect.poll(() => page.evaluate(() => document.documentElement.style.overflow)).toBe('')
+  })
+
   test('opening the collaborators prompt does not animate the feed behind it', async ({ page }) => {
     await goTo(page, 'subscriptions')
 

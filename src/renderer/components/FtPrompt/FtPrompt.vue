@@ -67,7 +67,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
 let scrollLockCount = 0
-let originalBodyOverflow = ''
+let originalDocumentOverflow = ''
 let originalBodyPaddingInlineEnd = ''
 
 const props = defineProps({
@@ -149,10 +149,12 @@ function lockBodyScroll() {
   if (scrollLockCount === 0) {
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
 
-    originalBodyOverflow = document.body.style.overflow
+    originalDocumentOverflow = document.documentElement.style.overflow
     originalBodyPaddingInlineEnd = document.body.style.paddingInlineEnd
 
-    document.body.style.overflow = 'hidden'
+    // Lock the root viewport rather than turning the body into an overflow
+    // container, which would make its sticky app chrome scroll out of view.
+    document.documentElement.style.overflow = 'hidden'
 
     if (scrollbarWidth > 0) {
       document.body.style.paddingInlineEnd = `calc(${originalBodyPaddingInlineEnd || '0px'} + ${scrollbarWidth}px)`
@@ -166,7 +168,7 @@ function unlockBodyScroll() {
   scrollLockCount = Math.max(0, scrollLockCount - 1)
 
   if (scrollLockCount === 0) {
-    document.body.style.overflow = originalBodyOverflow
+    document.documentElement.style.overflow = originalDocumentOverflow
     document.body.style.paddingInlineEnd = originalBodyPaddingInlineEnd
   }
 }
