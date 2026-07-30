@@ -29,7 +29,13 @@ jobs:
     name: authorize-auto-merge-${{ github.event.pull_request.number }}
     if: |
       github.event_name == 'pull_request_review' &&
-      github.event.review.state == 'approved' &&
+      (
+        github.event.review.state == 'approved' ||
+        (
+          github.event.review.state == 'commented' &&
+          github.event.review.user.login == 'greptile-apps[bot]'
+        )
+      ) &&
       github.event.pull_request.state == 'open' &&
       !github.event.pull_request.draft &&
       (github.event.pull_request.base.ref == 'development' || startsWith(github.event.pull_request.base.ref, 'RC'))
@@ -78,6 +84,10 @@ jobs:
 
           if [[ "$review_state" == "APPROVED" ]]; then
             return 0
+          fi
+
+          if [[ "$review_state" == "CHANGES_REQUESTED" ]]; then
+            return 1
           fi
 
           if [[ "$bot" == "greptile-apps[bot]" ]]; then

@@ -56,6 +56,10 @@ jobs:
             return 0
           fi
 
+          if [[ "$review_state" == "CHANGES_REQUESTED" ]]; then
+            return 1
+          fi
+
           if [[ "$bot" == "greptile-apps[bot]" ]]; then
             jq -e --arg head_sha "$HEAD_SHA" \
               '[.[] | select(.user.login == "greptile-apps[bot]")] | sort_by(.updated_at) | last |
@@ -98,18 +102,13 @@ jobs:
         comments="$(gh api --paginate "repos/$REPOSITORY/issues/$pr_number/comments" | jq -cs '[.[][]]')"
         latest_review="$(latest_decisive_review "$REVIEWER")"
         latest_review_state="$(jq -r '.state // empty' <<< "$latest_review")"
-        if [[ "$latest_review_state" != "APPROVED" ]]; then
-          echo "The latest review from $REVIEWER for $HEAD_SHA is not an approval."
-          exit 0
-        fi
 
         reviewer_permission="$(gh api "repos/$REPOSITORY/collaborators/$REVIEWER/permission" --jq '.permission' 2>/dev/null || true)"
-        reviewer_type="$(jq -r '.user.type // empty' <<< "$latest_review")"
         author_permission="$(gh api "repos/$REPOSITORY/collaborators/$author/permission" --jq '.permission' 2>/dev/null || true)"
 
-        if [[ "$reviewer_permission" == "admin" ]]; then
+        if [[ "$reviewer_permission" == "admin" && "$latest_review_state" == "APPROVED" ]]; then
           echo "Admin approval by $REVIEWER authorized."
-        elif [[ "$reviewer_type" == "Bot" ]] && is_trusted_bot "$REVIEWER" && [[ "$author_permission" == "admin" ]]; then
+        elif is_trusted_bot "$REVIEWER" && [[ "$author_permission" == "admin" ]] && bot_approved "$REVIEWER"; then
           missing_bots=()
 
           for bot in "${TRUSTED_BOTS[@]}"; do
