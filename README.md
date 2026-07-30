@@ -200,6 +200,54 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 
 - Open a chatter's channel by clicking their handle in live chat
 
+- Support for end-to-end encrypted synchronization of subscriptions, playlists, history, channel playback speeds, profiles, tabs and settings. LibreTube Sync Servers are also supported.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/15144ab2-0111-4e38-b011-c7a57417fcd0" />
+
+- Simple watch queue. Videos can be queued from the three-dots menu and managed in a side panel on the watch page, including drag-and-drop reordering.
+<img width="295" height="98" alt="image" src="https://github.com/user-attachments/assets/186215f1-f8de-4bfa-bcd8-188172448f69" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/e4496c03-6fa7-441b-85fd-e93019d429a9" />
+
+- Add-to-playlist inline popover that lets you select which playlists a video should be added to, plus an icon picker for the quick-bookmark playlist.
+<img height="300" alt="Screencast_20260728_120456" src="https://github.com/user-attachments/assets/c3c6aead-f462-4386-8e82-399dbef2abd1" />
+<img width="382" height="129" alt="image" src="https://github.com/user-attachments/assets/bd6dcd6e-346c-4849-9806-dae1a00f6457" />
+<br />
+<img width="328" height="198" alt="image" src="https://github.com/user-attachments/assets/4ef1ba2d-ceb6-49dc-b884-6a19d1468fe9" />
+<img width="372" height="73" alt="image" src="https://github.com/user-attachments/assets/456cc066-1075-42e4-a7dc-91e95716dd33" />
+
+- Custom, translatable context menus with icons, plus a web-search option with search-engine customization when selecting text.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/862fd213-8646-4f2e-a039-a9cf14c21600" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/7569641f-a94b-46b6-9b17-4079112a943b" />
+
+- Full search history with restored filters when selecting a search suggestion, plus chips to filter channel search results.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/2932ddbf-6ac3-4cca-b381-914509fe6ef2" />
+
+- Customizable watched-percentage threshold. Set it to 0% to restore the old behavior of marking videos as watched instantly.
+<img width="405" height="82" alt="image" src="https://github.com/user-attachments/assets/91d298bd-8cda-4c7d-815d-3834cac977aa" />
+
+- Option to highlight settings that differ from their defaults, with a reset button for them.
+<img width="746" height="267" alt="image" src="https://github.com/user-attachments/assets/9ee3f994-e803-4679-80cf-454f294c9b0a" />
+
+- Toast notifications with icons, optional timeout indicators and video thumbnails. Their position is customizable and they can be dismissed by swiping them away or pressing <kbd>Escape</kbd>.
+<img width="417" height="126" alt="Screencast_20260729_091357" src="https://github.com/user-attachments/assets/c1b1e055-4f25-46f3-8a8d-eae2345c94b5" />
+<img width="324" height="237" alt="image" src="https://github.com/user-attachments/assets/88db071c-4ae7-4a12-a449-69390edba248" />
+<img width="254" height="34" alt="image" src="https://github.com/user-attachments/assets/2b762b06-f001-4541-8bba-005828176d16" />
+
+- Option to adjust how rounded UI elements should be, with consistently applied rounding and overlay scrollbars that can be disabled.
+<img width="402" height="69" alt="image" src="https://github.com/user-attachments/assets/1a5d4b45-307e-480b-8dcc-75a1502f4625" />
+<img width="281" height="39" alt="image" src="https://github.com/user-attachments/assets/2158bbc6-8893-42be-a12b-8b75034bcd56" />
+
+- YouTube-style Shorts display and player that can be disabled in the theme settings.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/22b51708-12b1-4d85-b09b-da6c7065e086" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/44333d49-4ba7-4035-86da-0a28d4b7064a" />
+
+- Display and submission support for SponsorBlock full-video labels and mute segments.
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/8a7a0a53-0b1f-478c-a615-9174c4508ddc" />
+<img width="334" height="93" alt="image" src="https://github.com/user-attachments/assets/a8232e86-8d3b-42dc-9f81-e6718cfcea3c" />
+
+- Subscription feed refreshes can be canceled and show new videos instantly while loading the rest. The New subscriptions feed separates Videos, Shorts and Live content into dedicated sections.
+<img height="300" alt="Screencast_20260728_124530" src="https://github.com/user-attachments/assets/b200bd06-0cde-49a5-8b13-2706a3c6cc8c" />
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/36e73dcf-ab41-4cef-b798-59593cfa4b30" />
+
 </details>
 
 ## Screenshots
