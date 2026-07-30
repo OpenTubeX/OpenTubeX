@@ -275,6 +275,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       with:
         tag_name: ${{ steps.release.outputs.tag }}
+        draft: true
         files: release-assets/*
         fail_on_unmatched_files: true
 
