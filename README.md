@@ -214,9 +214,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="328" height="198" alt="image" src="https://github.com/user-attachments/assets/4ef1ba2d-ceb6-49dc-b884-6a19d1468fe9" />
 <img width="372" height="73" alt="image" src="https://github.com/user-attachments/assets/456cc066-1075-42e4-a7dc-91e95716dd33" />
 
-- Custom, translatable context menus with icons, plus a web-search option with search-engine customization when selecting text.
+- Search selected text using your chosen search engine.
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/862fd213-8646-4f2e-a039-a9cf14c21600" />
-<img height="300" alt="image" src="https://github.com/user-attachments/assets/7569641f-a94b-46b6-9b17-4079112a943b" />
 
 - Full search history with restored filters when selecting a search suggestion, plus chips to filter channel search results.
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/2932ddbf-6ac3-4cca-b381-914509fe6ef2" />
@@ -232,11 +231,11 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img width="324" height="237" alt="image" src="https://github.com/user-attachments/assets/88db071c-4ae7-4a12-a449-69390edba248" />
 <img width="254" height="34" alt="image" src="https://github.com/user-attachments/assets/2b762b06-f001-4541-8bba-005828176d16" />
 
-- Option to adjust how rounded UI elements should be, with consistently applied rounding and overlay scrollbars that can be disabled.
+- Option to adjust how rounded UI elements should be, with consistently applied rounding and overlay scrollbars that can remain visible instead of automatically hiding.
 <img width="402" height="69" alt="image" src="https://github.com/user-attachments/assets/1a5d4b45-307e-480b-8dcc-75a1502f4625" />
 <img width="281" height="39" alt="image" src="https://github.com/user-attachments/assets/2158bbc6-8893-42be-a12b-8b75034bcd56" />
 
-- YouTube-style Shorts display and player that can be disabled in the theme settings.
+- Option to use a YouTube-style Shorts display and player or the regular video grid and player.
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/22b51708-12b1-4d85-b09b-da6c7065e086" />
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/44333d49-4ba7-4035-86da-0a28d4b7064a" />
 
@@ -244,9 +243,8 @@ Available for Windows (10 and later), Mac (macOS 12 and later) & Linux thanks to
 <img height="300" alt="image" src="https://github.com/user-attachments/assets/8a7a0a53-0b1f-478c-a615-9174c4508ddc" />
 <img width="334" height="93" alt="image" src="https://github.com/user-attachments/assets/a8232e86-8d3b-42dc-9f81-e6718cfcea3c" />
 
-- Subscription feed refreshes can be canceled and show new videos instantly while loading the rest. The New subscriptions feed separates Videos, Shorts and Live content into dedicated sections.
+- Subscription feed refreshes can be canceled and show new videos instantly while loading the rest.
 <img height="300" alt="Screencast_20260728_124530" src="https://github.com/user-attachments/assets/b200bd06-0cde-49a5-8b13-2706a3c6cc8c" />
-<img height="300" alt="image" src="https://github.com/user-attachments/assets/36e73dcf-ab41-4cef-b798-59593cfa4b30" />
 
 </details>
 
