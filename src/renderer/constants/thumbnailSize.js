@@ -21,16 +21,30 @@ function getDefaultGridItemSize(gridWidth) {
 }
 
 /**
+ * Grid columns depend on the measured width of the grid, so these have to be
+ * set on each grid element.
  * @param {number} thumbnailSize
  * @param {number} [gridWidth]
  */
-export function getThumbnailSizeStyles(thumbnailSize, gridWidth = 0) {
+export function getThumbnailGridStyles(thumbnailSize, gridWidth = 0) {
   const scale = thumbnailSize / DEFAULT_THUMBNAIL_SIZE
   const defaultGridItemSize = getDefaultGridItemSize(gridWidth)
 
   return {
     '--thumbnail-grid-size': `${defaultGridItemSize * scale}px`,
-    '--shorts-thumbnail-grid-min-size': `${DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * scale}px`,
+    '--shorts-thumbnail-grid-min-size': `${DEFAULT_SHORTS_GRID_ITEM_MIN_SIZE * scale}px`
+  }
+}
+
+/**
+ * List thumbnails scale off fixed values only, so these are set once on the
+ * document body instead of per list.
+ * @param {number} thumbnailSize
+ */
+export function getThumbnailListStyles(thumbnailSize) {
+  const scale = thumbnailSize / DEFAULT_THUMBNAIL_SIZE
+
+  return {
     '--thumbnail-list-size': `${336 * scale}px`,
     '--thumbnail-list-max-size': `${25 * scale}vw`,
     '--thumbnail-list-mobile-max-size': `${30 * scale}vw`

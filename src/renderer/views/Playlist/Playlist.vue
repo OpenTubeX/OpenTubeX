@@ -54,7 +54,6 @@
     <FtCard
       v-if="!isLoading"
       class="playlistItemsCard"
-      :style="thumbnailSizeStyles"
     >
       <template
         v-if="shownPlaylistItems.length > 0"
@@ -211,7 +210,6 @@ import {
 } from '../../helpers/utils'
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
-import { getThumbnailSizeStyles } from '../../constants/thumbnailSize'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
 import { useTabContext, useTabLifecycle, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
@@ -279,10 +277,6 @@ const playlistId = computed(() => route.params.id)
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => isUserPlaylistRequested.value && !forceListView.value ? store.getters.getListType : 'list')
-
-const thumbnailSizeStyles = computed(() => {
-  return getThumbnailSizeStyles(store.getters.getThumbnailSize)
-})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)

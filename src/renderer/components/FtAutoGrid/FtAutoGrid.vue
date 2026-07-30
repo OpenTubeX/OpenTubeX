@@ -9,10 +9,9 @@
       autoGrid: true,
       grid: grid,
       list: !grid,
-      thumbnailSizeReady: grid && gridWidth > 0,
+      thumbnailSizeReady: grid && thumbnailSizeReady,
       youtubeStyleShorts
     }"
-    :style="gridStyle"
     @before-leave="captureLeavingItemLayout"
   >
     <slot />
@@ -20,9 +19,11 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 
-import { DEFAULT_THUMBNAIL_SIZE, getThumbnailSizeStyles } from '../../constants/thumbnailSize'
+import store from '../../store/index'
+
+import { getThumbnailGridStyles } from '../../constants/thumbnailSize'
 import { measureStableGridWidth } from './gridWidth'
 
 const props = defineProps({
@@ -33,10 +34,6 @@ const props = defineProps({
   grid: {
     type: Boolean,
     required: true
-  },
-  thumbnailSize: {
-    type: Number,
-    default: DEFAULT_THUMBNAIL_SIZE
   },
   itemCount: {
     type: Number,
@@ -55,7 +52,18 @@ const props = defineProps({
 const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
-const gridWidth = ref(0)
+
+// The thumbnail size custom properties are written straight to the element
+// instead of through a reactive `:style` binding, and the measured width is
+// kept out of the reactive graph: TransitionGroup's render function calls
+// getBoundingClientRect() on every child, so any re-render of this component
+// costs a layout pass over the whole feed. Dragging the thumbnail size slider
+// emits an event per step, which turned that into hundreds of forced layouts.
+let gridWidth = 0
+
+// Only whether the width is known needs to reach the template, and that flips
+// just once, right after mount.
+const thumbnailSizeReady = ref(false)
 
 // While the container itself is being sized or resized (initial layout,
 // window resize, or a modal's
@@ -84,9 +92,21 @@ const moveClass = computed(() => {
   return suppressed ? 'feed-move-suppressed' : undefined
 })
 
-const gridStyle = computed(() => {
-  return getThumbnailSizeStyles(props.thumbnailSize, gridWidth.value)
-})
+function applyThumbnailSizeStyles() {
+  const element = gridElement.value?.$el
+
+  if (!element) {
+    return
+  }
+
+  const styles = getThumbnailGridStyles(store.getters.getThumbnailSize, gridWidth)
+
+  for (const [property, value] of Object.entries(styles)) {
+    element.style.setProperty(property, value)
+  }
+}
+
+watch(() => store.getters.getThumbnailSize, applyThumbnailSizeStyles)
 
 function captureLeavingItemLayout(element) {
   const itemRect = element.getBoundingClientRect()
@@ -121,15 +141,17 @@ onMounted(() => {
     observedScrollbarWidth = measurement.scrollbarWidth
     observedViewportWidth = measurement.viewportWidth
 
-    if (measurement.gridWidth !== gridWidth.value) {
+    if (measurement.gridWidth !== gridWidth) {
       suppressMoveTransition.value = true
       clearTimeout(suppressResetTimeout)
       suppressResetTimeout = setTimeout(() => {
         suppressMoveTransition.value = false
       }, 100)
-    }
 
-    gridWidth.value = measurement.gridWidth
+      gridWidth = measurement.gridWidth
+      applyThumbnailSizeStyles()
+      thumbnailSizeReady.value = gridWidth > 0
+    }
   })
 
   resizeObserver.observe(gridElement.value.$el)

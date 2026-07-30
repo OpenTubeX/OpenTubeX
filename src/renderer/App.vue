@@ -306,6 +306,7 @@ import {
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { getTabAccentColor } from './constants/tabColors'
+import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -1639,6 +1640,11 @@ const uiRoundness = computed(() => store.getters.getUiRoundness)
 
 watch(uiRoundness, updateUiRoundness)
 
+/** @type {import('vue').ComputedRef<number>} */
+const thumbnailSize = computed(() => store.getters.getThumbnailSize)
+
+watch(thumbnailSize, updateThumbnailListSize)
+
 function updateTheme() {
   document.body.className = `${baseTheme.value || 'system'} main${mainColor.value || 'Red'} sec${secColor.value || 'Blue'}`
   document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -1648,8 +1654,17 @@ function updateUiRoundness() {
   document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
 }
 
+// Setting these once on the body keeps a thumbnail size change from
+// re-rendering every list that shows thumbnails.
+function updateThumbnailListSize() {
+  for (const [property, value] of Object.entries(getThumbnailListStyles(thumbnailSize.value))) {
+    document.body.style.setProperty(property, value)
+  }
+}
+
 updateTheme()
 updateUiRoundness()
+updateThumbnailListSize()
 
 const showUpdatesBanner = ref(false)
 const latestVersionNumber = ref('')

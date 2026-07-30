@@ -2,7 +2,6 @@
   <FtAutoGrid
     :appear="appear"
     :grid="effectiveDisplayValue !== 'list'"
-    :thumbnail-size="thumbnailSize"
     :item-count="data.length"
     :youtube-style-shorts="youtubeStyleShorts"
   >
@@ -177,9 +176,6 @@ const displayValue = computed(() => {
 const effectiveDisplayValue = computed(() => {
   return props.youtubeStyleShorts ? 'grid' : displayValue.value
 })
-
-/** @type {import('vue').ComputedRef<number>} */
-const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 function getResultKey(result, index) {
   const type = props.dataType || result.type
