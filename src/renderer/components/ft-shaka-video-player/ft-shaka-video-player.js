@@ -428,6 +428,7 @@ export default defineComponent({
     'chapter-thumbnails-change',
     'sponsorblock-info-change',
     'toggle-shorts-metadata',
+    'seeking',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -4185,6 +4186,11 @@ export default defineComponent({
       }
 
       emit('ended', sleepTimerEnded)
+    }
+
+    function handleSeeking() {
+      syncPlayPauseControlIcons()
+      emit('seeking')
     }
 
     function applyPendingPresentationModes() {
@@ -8468,6 +8474,7 @@ export default defineComponent({
       syncPlayPauseControlIcons,
       handleCanPlay,
       handleEnded,
+      handleSeeking,
       updateVolume,
       handleTimeupdate,
       handleEnterPictureInPicture,

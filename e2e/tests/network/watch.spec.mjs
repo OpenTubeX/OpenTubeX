@@ -1593,12 +1593,31 @@ test.describe('custom Shorts player', () => {
     await expect.poll(() => video.evaluate(element => element.duration))
       .toBeGreaterThan(0)
     const duration = await video.evaluate(element => element.duration)
-    await video.evaluate((element, completedAt) => {
-      element.currentTime = completedAt
-      element.dispatchEvent(new Event('timeupdate'))
-      element.currentTime = 0.1
-      element.dispatchEvent(new Event('timeupdate'))
-    }, duration - 0.75)
+    await video.evaluate(async (element, scrubbedTo) => {
+      element.pause()
+      element.currentTime = scrubbedTo
+      if (element.seeking) {
+        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
+      }
+    }, duration - 0.25)
+
+    // Scrubbing to the end must not count as completing the Short.
+    await expect.poll(() => page.evaluate((expectedDuration) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return {
+        nearEnd: entry?.watchProgress >= expectedDuration - 0.5,
+        full: entry?.watchProgress === entry?.lengthSeconds
+      }
+    }, duration)).toEqual({ nearEnd: true, full: false })
+
+    await video.evaluate(async (element, playbackStart) => {
+      element.currentTime = playbackStart
+      if (element.seeking) {
+        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
+      }
+      await element.play()
+    }, duration - 2)
 
     await expect.poll(() => page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store

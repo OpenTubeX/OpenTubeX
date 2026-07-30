@@ -61,6 +61,7 @@ import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBl
 import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
+  getShortsCompletionState,
   getVideoAspectRatio,
   isYouTubeShort
 } from '../../helpers/player/shorts'
@@ -189,6 +190,8 @@ export default defineComponent({
       shortsTransitionDirection: 0,
       shortsViewportHeight: window.innerHeight,
       shortsPlaybackCompleted: false,
+      shortsCompletionBlockedBySeek: false,
+      shortsPlaybackAfterSeekSeconds: 0,
       videoLoadGeneration: 0,
       hasAiGeneratedContent: false,
       upcomingTimestamp: null,
@@ -1180,6 +1183,8 @@ export default defineComponent({
       this.videoAspectRatio = this.isShort ? 9 / 16 : null
       this.shortsLinkedVideo = null
       this.shortsPlaybackCompleted = false
+      this.shortsCompletionBlockedBySeek = false
+      this.shortsPlaybackAfterSeekSeconds = 0
       this.hasAiGeneratedContent = false
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
@@ -2528,14 +2533,21 @@ export default defineComponent({
         }
       }
 
+      const elapsedSeconds = currentSeconds - this.currentTime
+      const shortsCompletion = getShortsCompletionState({
+        blockedBySeek: this.shortsCompletionBlockedBySeek,
+        playbackAfterSeekSeconds: this.shortsPlaybackAfterSeekSeconds,
+        elapsedSeconds,
+        currentSeconds,
+        durationSeconds: this.videoLengthSeconds
+      })
+      this.shortsCompletionBlockedBySeek = shortsCompletion.blockedBySeek
+      this.shortsPlaybackAfterSeekSeconds = shortsCompletion.playbackAfterSeekSeconds
+
       // A looping media element does not fire `ended`. Persist the completed
-      // state just before a Short wraps to zero, then keep that full progress
-      // from being replaced by later ticks from the next loop.
-      const shortReachedEnd = currentSeconds >= this.videoLengthSeconds - 0.5 ||
-        (
-          currentSeconds < 0.5 &&
-          this.currentTime >= this.videoLengthSeconds - 1
-        )
+      // state just before a Short wraps to zero, but never from a seek-driven
+      // time update.
+      const shortReachedEnd = shortsCompletion.reachedEnd
 
       this.updateCurrentTime(currentSeconds)
 
@@ -2672,6 +2684,14 @@ export default defineComponent({
       this.watchTimeLastTick = null
       this.flushWatchTime()
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
+    },
+    handlePlayerSeeking() {
+      if (!this.customShortsPlayerActive) {
+        return
+      }
+
+      this.shortsCompletionBlockedBySeek = true
+      this.shortsPlaybackAfterSeekSeconds = 0
     },
     clearPendingWatchTime() {
       this.watchTimeLastTick = null

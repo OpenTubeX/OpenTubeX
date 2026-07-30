@@ -130,6 +130,7 @@
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
           @pause="handleVideoPause"
+          @seeking="handlePlayerSeeking"
           @toggle-theatre-mode="toggleTheatreMode"
           @toggle-autoplay="toggleAutoplay"
           @autoplay-cancel="abortAutoplayCountdown"
