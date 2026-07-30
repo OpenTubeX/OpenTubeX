@@ -109,7 +109,11 @@
      gone by the time the toast has finished sliding in. Draining over the
      remaining time keeps it empty exactly when the toast is dismissed. */
   animation-delay: var(--toast-transition-duration);
-  animation-duration: calc(var(--toast-duration) - var(--toast-transition-duration));
+
+  /* A toast shorter than the hold would give a negative, and therefore invalid,
+     duration. Such a toast is gone before the hold is over, so it just keeps the
+     full line for its whole lifetime. */
+  animation-duration: max(0s, var(--toast-duration) - var(--toast-transition-duration));
   animation-name: toast-timeout;
   animation-timing-function: linear;
   animation-fill-mode: forwards;

@@ -280,10 +280,16 @@ test.describe('settings', () => {
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
     const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
     await toast.hover()
+    // Reported as a list so a failure says which animations were on the element
+    // and what state they were in, instead of just "expected paused"
     await expect.poll(() => indicator.evaluate((element) => {
-      const animation = element.getAnimations()[0]
-      return animation ? animation.playState : null
-    })).toBe('paused')
+      return element.getAnimations().map(animation => [
+        animation.animationName ?? animation.transitionProperty ?? animation.constructor.name,
+        animation.playState,
+      ].join(':'))
+    })).toEqual(expect.arrayContaining([
+      expect.stringMatching(/^toast-timeout[\w-]*:paused$/),
+    ]))
     await page.waitForTimeout(2200)
     await expect(toast).toBeVisible()
 
