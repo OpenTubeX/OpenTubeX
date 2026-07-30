@@ -123,8 +123,6 @@
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
           :shorts-player="customShortsPlayerActive"
           :shorts-aspect-ratio="videoAspectRatio"
-          :shorts-has-previous="hasPreviousSubscriptionShort"
-          :shorts-has-next="hasNextSubscriptionShort"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -132,6 +130,7 @@
           @terminal-outro-started="handleTerminalOutroStarted"
           @ended="handlePlayerEnded"
           @pause="handleVideoPause"
+          @seeking="handlePlayerSeeking"
           @toggle-theatre-mode="toggleTheatreMode"
           @toggle-autoplay="toggleAutoplay"
           @autoplay-cancel="abortAutoplayCountdown"
@@ -156,8 +155,6 @@
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
           @toggle-shorts-metadata="toggleShortsMetadata"
-          @shorts-previous="navigateSubscriptionShort(-1)"
-          @shorts-next="navigateSubscriptionShort(1)"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -284,6 +281,31 @@
           class="shortsActionRail"
           :class="{ shortsActionRailSkeleton: isLoading }"
         >
+          <div
+            v-if="hasPreviousSubscriptionShort || hasNextSubscriptionShort"
+            class="shortsNavigation"
+          >
+            <button
+              type="button"
+              class="shortsNavigationButton"
+              :disabled="!hasPreviousSubscriptionShort"
+              :aria-label="$t('Video.Previous')"
+              :title="$t('Video.Previous')"
+              @click="navigateSubscriptionShort(-1)"
+            >
+              <font-awesome-icon :icon="['fas', 'arrow-up']" />
+            </button>
+            <button
+              type="button"
+              class="shortsNavigationButton"
+              :disabled="!hasNextSubscriptionShort"
+              :aria-label="$t('Video.Next')"
+              :title="$t('Video.Next')"
+              @click="navigateSubscriptionShort(1)"
+            >
+              <font-awesome-icon :icon="['fas', 'arrow-down']" />
+            </button>
+          </div>
           <template v-if="isLoading">
             <div
               v-for="index in shortsActionSkeletonCount"
@@ -400,32 +422,6 @@
           :aria-label="$t('Video.Next')"
           @click="navigateSubscriptionShort(1)"
         />
-        <div
-          v-if="isLoading && customShortsPlayerActive &&
-            (hasPreviousSubscriptionShort || hasNextSubscriptionShort)"
-          class="shortsNavigation shortsLoadingNavigation"
-        >
-          <button
-            type="button"
-            class="shortsNavigationButton shortsLoadingNavigationButton"
-            :disabled="!hasPreviousSubscriptionShort"
-            :aria-label="$t('Video.Previous')"
-            :title="$t('Video.Previous')"
-            @click="navigateSubscriptionShort(-1)"
-          >
-            <font-awesome-icon :icon="['fas', 'arrow-up']" />
-          </button>
-          <button
-            type="button"
-            class="shortsNavigationButton shortsLoadingNavigationButton"
-            :disabled="!hasNextSubscriptionShort"
-            :aria-label="$t('Video.Next')"
-            :title="$t('Video.Next')"
-            @click="navigateSubscriptionShort(1)"
-          >
-            <font-awesome-icon :icon="['fas', 'arrow-down']" />
-          </button>
-        </div>
       </div>
       <div
         v-if="customShortsPlayerActive"

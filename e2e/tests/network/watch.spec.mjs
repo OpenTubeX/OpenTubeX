@@ -1589,6 +1589,58 @@ test.describe('custom Shorts player', () => {
     await expect(overflowMenu).toBeVisible()
     await expect(overflowMenu.getByRole('button', { name: /Autoplay/ })).toHaveCount(0)
 
+    const video = player.locator('video')
+    await expect.poll(() => video.evaluate(element => element.duration))
+      .toBeGreaterThan(0)
+    const duration = await video.evaluate(element => element.duration)
+    await video.evaluate(async (element, scrubbedTo) => {
+      element.pause()
+      element.currentTime = scrubbedTo
+      if (element.seeking) {
+        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
+      }
+    }, duration - 0.25)
+
+    // Scrubbing to the end must not count as completing the Short.
+    await expect.poll(() => page.evaluate((expectedDuration) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return {
+        nearEnd: entry?.watchProgress >= expectedDuration - 0.5,
+        full: entry?.watchProgress === entry?.lengthSeconds
+      }
+    }, duration)).toEqual({ nearEnd: true, full: false })
+
+    await video.evaluate(async (element, playbackStart) => {
+      element.currentTime = playbackStart
+      if (element.seeking) {
+        await new Promise(resolve => element.addEventListener('seeked', resolve, { once: true }))
+      }
+      await element.play()
+    }, duration - 2)
+
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return {
+        watched: entry?.isWatched,
+        fullProgress: entry?.watchProgress === entry?.lengthSeconds
+      }
+    })).toEqual({ watched: true, fullProgress: true })
+
+    // Ticks from the next automatic loop must not replace completed progress
+    // with a resume point near the beginning.
+    await video.evaluate(element => {
+      element.currentTime = 0.2
+      element.dispatchEvent(new Event('timeupdate'))
+      element.dispatchEvent(new Event('pause'))
+    })
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const entry = store.getters.getHistoryCacheById.w1WKmSqwM8I
+      return entry.watchProgress === entry.lengthSeconds
+    })).toBe(true)
+
     await player.locator('video').dispatchEvent('ended')
     await page.waitForTimeout(500)
 
@@ -1762,6 +1814,40 @@ test.describe('custom Shorts player', () => {
     expect(playerBounds.x + playerBounds.width / 2)
       .toBeCloseTo(videoAreaBounds.x + videoAreaBounds.width / 2, 0)
     expect(navigationBounds.x).toBeGreaterThan(actionBounds.x)
+
+    // Narrow layouts move the rail over the player and grow it upwards, so the
+    // navigation joins the same column above the actions instead of landing on
+    // top of them.
+    await page.setViewportSize({ width: 900, height: 700 })
+    await expect(page.locator('.shortsExternalChannel')).toHaveCSS('opacity', '1')
+    expect(await page.locator('.shortsExternalChannel').evaluate(element => {
+      return getComputedStyle(element).color === getComputedStyle(document.body).color
+    })).toBe(true)
+    await expect.poll(async () => {
+      const [rail, navigation, firstAction] = await Promise.all([
+        page.locator('.shortsActionRail').boundingBox(),
+        page.locator('.shortsNavigation').boundingBox(),
+        page.locator('.shortsAction').first().boundingBox()
+      ])
+
+      return {
+        navigationAboveActions: navigation.y + navigation.height <= firstAction.y,
+        centeredInRail: Math.abs(
+          (navigation.x + navigation.width / 2) - (rail.x + rail.width / 2)
+        ) <= 1,
+        insideRail: navigation.x >= rail.x && navigation.x + navigation.width <= rail.x + rail.width
+      }
+    }).toEqual({ navigationAboveActions: true, centeredInRail: true, insideRail: true })
+
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await expect.poll(async () => {
+      const [rail, navigation] = await Promise.all([
+        page.locator('.shortsActionRail').boundingBox(),
+        page.locator('.shortsNavigation').boundingBox()
+      ])
+
+      return navigation.x > rail.x + rail.width
+    }).toBe(true)
 
     await page.evaluate(() => {
       window.__shortsNavigationDisappeared = false

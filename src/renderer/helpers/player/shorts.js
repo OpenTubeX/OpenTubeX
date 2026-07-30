@@ -1,6 +1,49 @@
 const MAX_SHORT_DURATION_SECONDS = 3 * 60
 const MAX_CHANNEL_SHORTS_CONTEXTS = 20
+const SHORTS_COMPLETION_END_MARGIN_SECONDS = 0.5
+const SHORTS_COMPLETION_MAX_PLAYBACK_TICK_SECONDS = 2
+const SHORTS_COMPLETION_MIN_PLAYBACK_AFTER_SEEK_SECONDS = 1
 const channelShortsNavigationContexts = new Map()
+
+/**
+ * Keeps seek jumps from completing a Short. After a seek, only continuous
+ * forward playback can re-enable completion detection.
+ *
+ * @param {object} options
+ * @param {boolean} options.blockedBySeek
+ * @param {number} options.playbackAfterSeekSeconds
+ * @param {number} options.elapsedSeconds
+ * @param {number} options.currentSeconds
+ * @param {number} options.durationSeconds
+ * @returns {{blockedBySeek: boolean, playbackAfterSeekSeconds: number, reachedEnd: boolean}}
+ */
+export function getShortsCompletionState({
+  blockedBySeek,
+  playbackAfterSeekSeconds,
+  elapsedSeconds,
+  currentSeconds,
+  durationSeconds,
+}) {
+  let playedSeconds = playbackAfterSeekSeconds
+  let blocked = blockedBySeek
+
+  if (
+    blocked &&
+    elapsedSeconds > 0 &&
+    elapsedSeconds <= SHORTS_COMPLETION_MAX_PLAYBACK_TICK_SECONDS
+  ) {
+    playedSeconds += elapsedSeconds
+    blocked = playedSeconds < SHORTS_COMPLETION_MIN_PLAYBACK_AFTER_SEEK_SECONDS
+  }
+
+  return {
+    blockedBySeek: blocked,
+    playbackAfterSeekSeconds: playedSeconds,
+    reachedEnd: !blocked &&
+      durationSeconds > 0 &&
+      currentSeconds >= durationSeconds - SHORTS_COMPLETION_END_MARGIN_SECONDS
+  }
+}
 
 /**
  * Prefers YouTube's selected portrait thumbnail only when the user has not

@@ -173,6 +173,18 @@ test.describe('new subscriptions feed', () => {
 })
 
 test.describe('new feed settings and seen state', () => {
+  const videoPost = {
+    ...post('new-post-2', 'New video post', now - 40 * 60000),
+    postContent: {
+      type: 'video',
+      content: video('post-video-1', 'Attached video', now - 40 * 60000)
+    }
+  }
+  const cacheWithVideoPost = [{
+    ...populatedCache[0],
+    communityPosts: [...populatedCache[0].communityPosts, videoPost]
+  }]
+
   test.use({
     seed: {
       settings: {
@@ -181,7 +193,7 @@ test.describe('new feed settings and seen state', () => {
         showNewSubscriptionFeedIndicators: false
       },
       profiles: [profile()],
-      subscriptionCache: populatedCache
+      subscriptionCache: cacheWithVideoPost
     }
   })
 
@@ -199,14 +211,104 @@ test.describe('new feed settings and seen state', () => {
 
     const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
     await expect(markAllAsSeen).toBeVisible()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      window.__markSeenMutations = []
+      window.__unsubscribeMarkSeen = store.subscribe((mutation) => {
+        if (mutation.type === 'markSubscriptionEntriesAsSeenInCache') {
+          window.__markSeenMutations.push(mutation.payload)
+        }
+      })
+    })
     await markAllAsSeen.click()
     await expect(page.getByText('There is no new content.')).toBeVisible()
+    expect(await page.evaluate(() => {
+      window.__unsubscribeMarkSeen()
+      return window.__markSeenMutations
+    })).toEqual([[
+      { tab: 'videos', channelId: CHANNEL_ID },
+      { tab: 'shorts', channelId: CHANNEL_ID },
+      { tab: 'live', channelId: CHANNEL_ID },
+      { tab: 'posts', channelId: CHANNEL_ID }
+    ]])
     await expect(markAllAsSeen).toHaveCount(0)
 
     const relaunched = await app.relaunch()
     await goTo(relaunched.page, 'subscriptions')
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(relaunched.page.getByText('There is no new content.')).toBeVisible()
+  })
+
+  test('keeps YouTube-style Shorts as portrait grid cards in list display mode', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    const short = page.locator('.ft-list-video.youtubeShort').filter({ hasText: 'New short' })
+    await expect(short).toBeVisible()
+    // The list layout squeezes the portrait card into a row and drops the
+    // portrait thumbnail rule, which the grid class must prevent.
+    await expect(short).toContainClass('grid')
+    await expect(short).not.toContainClass('list')
+
+    const aspectRatio = await short.locator('.thumbnailImage').evaluate(element => {
+      return getComputedStyle(element).aspectRatio
+    })
+    expect(aspectRatio).toBe('2 / 3')
+  })
+
+  test('stacks community post sections in list display mode', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const post = page.locator('.ft-list-post').filter({ hasText: 'New community post' })
+    await expect(post).toBeVisible()
+
+    // The video list template placed the author, the text and the bottom
+    // section into its three columns instead of stacking them.
+    const layout = await post.evaluate(element => {
+      const author = element.querySelector('.author-div').getBoundingClientRect()
+      const text = element.querySelector('.postText').getBoundingClientRect()
+
+      return {
+        postWidth: element.getBoundingClientRect().width,
+        authorBottom: author.bottom,
+        textTop: text.top,
+        textWidth: text.width
+      }
+    })
+
+    expect(layout.textTop).toBeGreaterThanOrEqual(layout.authorBottom)
+    expect(layout.textWidth).toBeGreaterThan(layout.postWidth * 0.8)
+  })
+
+  test('keeps an attached video inside a post as a full width card in list display mode', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="posts"]').click()
+
+    const attachedVideo = page.locator('.ft-list-post .ft-list-video').filter({ hasText: 'Attached video' })
+    await expect(attachedVideo).toBeVisible()
+    // The list layout put the thumbnail beside the title and left the duration
+    // badge stranded outside the shrunken thumbnail.
+    await expect(attachedVideo).toContainClass('grid')
+
+    const layout = await attachedVideo.evaluate(element => {
+      const thumbnail = element.querySelector('.videoThumbnail').getBoundingClientRect()
+      const title = element.querySelector('.title').getBoundingClientRect()
+      const duration = element.querySelector('.videoDuration').getBoundingClientRect()
+
+      return {
+        cardWidth: element.getBoundingClientRect().width,
+        thumbnailWidth: thumbnail.width,
+        thumbnailRight: thumbnail.right,
+        titleTop: title.top,
+        thumbnailBottom: thumbnail.bottom,
+        durationRight: duration.right
+      }
+    })
+
+    expect(layout.thumbnailWidth).toBeGreaterThan(layout.cardWidth * 0.8)
+    expect(layout.titleTop).toBeGreaterThanOrEqual(layout.thumbnailBottom - 12)
+    expect(layout.durationRight).toBeLessThanOrEqual(layout.thumbnailRight)
   })
 
   test('persists a post as seen when its comments are opened', async ({ app, page }) => {

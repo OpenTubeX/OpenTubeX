@@ -438,10 +438,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  layout: {
-    type: String,
-    default: 'list',
-  },
   showGrabBar: {
     type: Boolean,
     default: false,

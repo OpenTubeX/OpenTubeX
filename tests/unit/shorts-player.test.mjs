@@ -5,11 +5,54 @@ import {
   buildSubscriptionShortsFeed,
   getChannelShortsNavigationContext,
   getPreferredShortThumbnailUrl,
+  getShortsCompletionState,
   getVideoAspectRatio,
   isYouTubeShort,
   parseLocalShortLinkedVideo,
   setChannelShortsNavigationContext,
 } from '../../src/renderer/helpers/player/shorts.js'
+
+test('only completes Shorts after continuous playback following a seek', () => {
+  const seekToEnd = getShortsCompletionState({
+    blockedBySeek: true,
+    playbackAfterSeekSeconds: 0,
+    elapsedSeconds: 59.75,
+    currentSeconds: 59.75,
+    durationSeconds: 60,
+  })
+  assert.deepEqual(seekToEnd, {
+    blockedBySeek: true,
+    playbackAfterSeekSeconds: 0,
+    reachedEnd: false
+  })
+
+  const seekBackToStart = getShortsCompletionState({
+    ...seekToEnd,
+    elapsedSeconds: -59.75,
+    currentSeconds: 0,
+    durationSeconds: 60,
+  })
+  assert.equal(seekBackToStart.reachedEnd, false)
+
+  const firstPlaybackTick = getShortsCompletionState({
+    ...seekBackToStart,
+    elapsedSeconds: 0.5,
+    currentSeconds: 59,
+    durationSeconds: 60,
+  })
+  const completed = getShortsCompletionState({
+    ...firstPlaybackTick,
+    elapsedSeconds: 0.5,
+    currentSeconds: 59.5,
+    durationSeconds: 60,
+  })
+
+  assert.deepEqual(completed, {
+    blockedBySeek: false,
+    playbackAfterSeekSeconds: 1,
+    reachedEnd: true
+  })
+})
 
 test('prefers YouTube selected Shorts thumbnails only for the default preference', () => {
   const video = {

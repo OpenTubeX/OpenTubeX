@@ -152,6 +152,13 @@
   padding-block-end: 20px;
 }
 
+// The shared list layout is a 'grabBar thumbnail info' column grid meant for
+// video cards. A post has none of those areas, so its sections would get
+// auto-placed into those columns side by side instead of stacking.
+.ft-list-item.list {
+  display: block;
+}
+
 .sliderContainer {
   display: grid;
 }
