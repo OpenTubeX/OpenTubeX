@@ -4,6 +4,7 @@
     ref="tabBarRef"
     class="tabBar"
     :class="{ vertical }"
+    :style="fixedTabWidthStyle"
   >
     <div
       ref="tabsViewportRef"
@@ -107,6 +108,16 @@ const tabs = computed(() => store.getters.getTabs)
 /** @type {import('vue').ComputedRef<boolean>} */
 const vertical = computed(() => store.getters.getUseVerticalTabBar)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
+
+// Only the horizontal bar sizes tabs by their content, so the fixed width is
+// applied there; vertical tabs always fill the column.
+const fixedTabWidthStyle = computed(() => {
+  if (vertical.value || !store.getters.getUseFixedTabWidth) {
+    return null
+  }
+
+  return { '--fixed-tab-width': `${store.getters.getFixedTabWidth}px` }
+})
 
 const newTabTooltip = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(

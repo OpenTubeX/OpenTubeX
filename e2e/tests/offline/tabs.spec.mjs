@@ -679,6 +679,30 @@ test.describe('tab icons disabled', () => {
   })
 })
 
+test.describe('fixed tab width', () => {
+  test.use({ seed: { settings: { useFixedTabWidth: true, fixedTabWidth: 140 } } })
+
+  test('gives every horizontal tab the configured width', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).evaluateAll(
+        tabs => tabs.map(tab => Math.round(tab.getBoundingClientRect().width))
+      )
+    }).toEqual([140, 140])
+
+    // Vertical tabs fill the column, so the setting must not constrain them.
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).first().evaluate(
+        tab => Math.round(tab.getBoundingClientRect().width)
+      )
+    }).toBeGreaterThan(140)
+  })
+})
+
 test.describe('localized tab titles', () => {
   test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
 

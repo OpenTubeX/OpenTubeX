@@ -98,6 +98,30 @@
     </div>
     <template v-if="usingElectron">
       <FtFlexBox>
+        <div class="switchColumn">
+          <FtToggleSwitch
+            :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+            :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+            compact
+            :default-value="useFixedTabWidth"
+            setting-key="useFixedTabWidth"
+            @change="updateUseFixedTabWidth"
+          />
+          <FtSlider
+            :label="$t('Settings.Theme Settings.Tab Width')"
+            :default-value="fixedTabWidth"
+            setting-key="fixedTabWidth"
+            :min-value="MIN_FIXED_TAB_WIDTH"
+            :max-value="MAX_FIXED_TAB_WIDTH"
+            :step="FIXED_TAB_WIDTH_STEP"
+            :disabled="!useFixedTabWidth"
+            value-extension="px"
+            @input="previewFixedTabWidth"
+            @change="updateFixedTabWidth"
+          />
+        </div>
+      </FtFlexBox>
+      <FtFlexBox>
         <FtSlider
           :label="$t('Settings.Theme Settings.UI Scale')"
           :default-value="uiScale"
@@ -208,6 +232,11 @@ import {
   MIN_THUMBNAIL_SIZE,
   THUMBNAIL_SIZE_STEP
 } from '../constants/thumbnailSize'
+import {
+  FIXED_TAB_WIDTH_STEP,
+  MAX_FIXED_TAB_WIDTH,
+  MIN_FIXED_TAB_WIDTH
+} from '../constants/tabWidth'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 
 const { t } = useI18n()
@@ -443,6 +472,33 @@ const showTabIcons = computed(() => store.getters.getShowTabIcons)
  */
 function updateShowTabIcons(value) {
   store.dispatch('updateShowTabIcons', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useFixedTabWidth = computed(() => store.getters.getUseFixedTabWidth)
+
+/** @type {import('vue').ComputedRef<number>} */
+const fixedTabWidth = computed(() => store.getters.getFixedTabWidth)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseFixedTabWidth(value) {
+  store.dispatch('updateUseFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewFixedTabWidth(value) {
+  store.commit('setFixedTabWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateFixedTabWidth(value) {
+  store.dispatch('updateFixedTabWidth', value)
 }
 
 const toastPositionNames = computed(() => [
