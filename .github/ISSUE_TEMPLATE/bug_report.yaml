@@ -84,12 +84,16 @@ body:
       options:
         - .AppImage
         - .deb
+        - APT repository
         - Flatpak
         - .dmg
         - .exe
+        - WinGet
         - .pacman
         - Portable
         - .rpm
+        - COPR repository
+        - RPM repository
         - .zip / .7z
         - AUR
         - other
