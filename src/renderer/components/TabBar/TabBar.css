@@ -16,6 +16,14 @@
   overflow: hidden;
 }
 
+/* The horizontal bar shares the top edge with the sticky top navigation, so it
+   is chrome: it stays above open dropdowns (z-index 6), which would otherwise
+   paint over the tabs while a fast scroll outruns their repositioning. The
+   vertical bar is a side column that dropdowns are allowed to cross. */
+.tabBar:not(.vertical) {
+  z-index: 8;
+}
+
 .tabsViewport {
   position: relative;
   flex: 1;

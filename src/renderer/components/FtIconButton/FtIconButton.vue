@@ -330,13 +330,50 @@ function handleIconPointerDown(event) {
   }
 }
 
+/**
+ * The bottom edge of the sticky app chrome (the horizontal tab bar and the top
+ * navigation). Dropdowns must not cover it, so it is their upper boundary
+ * instead of the viewport edge. The vertical tab bar is a side column, so it
+ * never sits above the content.
+ * @returns {number}
+ */
+function getTopChromeBottom() {
+  // In fullscreen the chrome is not on screen, even though it keeps its layout.
+  if (document.fullscreenElement != null) {
+    return 0
+  }
+
+  let bottom = 0
+
+  for (const selector of ['.topNav', '.tabBar:not(.vertical)']) {
+    const element = document.querySelector(selector)
+
+    if (element != null) {
+      bottom = Math.max(bottom, element.getBoundingClientRect().bottom)
+    }
+  }
+
+  return bottom
+}
+
 function keepDropdownInViewport() {
   if (dropdown.value == null) {
     return
   }
 
   const viewportMargin = 8
+  const minTop = Math.max(viewportMargin, getTopChromeBottom() + 4)
   dropdown.value.style.removeProperty('transform')
+  dropdown.value.style.removeProperty('max-block-size')
+  dropdown.value.style.removeProperty('overflow-y')
+
+  // A menu that is too tall for the space below the chrome has to scroll,
+  // otherwise clamping it would just push it past the viewport bottom instead.
+  const availableHeight = window.innerHeight - minTop - viewportMargin
+  if (dropdown.value.getBoundingClientRect().height > availableHeight) {
+    dropdown.value.style.maxBlockSize = `${availableHeight}px`
+    dropdown.value.style.overflowY = 'auto'
+  }
 
   if (props.dropdownPortal) {
     const button = ftIconButton.value?.querySelector('.iconButton')
@@ -363,13 +400,13 @@ function keepDropdownInViewport() {
 
     dropdown.value.style.inset = 'auto'
     dropdown.value.style.left = `${Math.max(viewportMargin, Math.min(left, maxLeft))}px`
-    dropdown.value.style.top = `${Math.max(viewportMargin, Math.min(top, maxTop))}px`
+    dropdown.value.style.top = `${Math.max(minTop, Math.min(top, maxTop))}px`
     return
   }
 
   const rect = dropdown.value.getBoundingClientRect()
   const offsetX = Math.max(viewportMargin - rect.left, Math.min(0, window.innerWidth - viewportMargin - rect.right))
-  const offsetY = Math.max(viewportMargin - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
+  const offsetY = Math.max(minTop - rect.top, Math.min(0, window.innerHeight - viewportMargin - rect.bottom))
 
   dropdown.value.style.transform = `translate(${offsetX}px, ${offsetY}px)`
 }

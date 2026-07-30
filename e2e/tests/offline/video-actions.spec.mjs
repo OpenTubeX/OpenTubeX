@@ -112,6 +112,45 @@ test.describe('list video actions', () => {
     }).toBe(true)
   })
 
+  test('a tall options dropdown stays below the horizontal tab bar', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.setViewportSize({ width: 1200, height: 400 })
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+
+    const dropdown = video.locator('.optionsButton .iconDropdown')
+    await expect(dropdown).toBeVisible()
+
+    // Clamping to the viewport edge let a menu that is too tall for the space
+    // below it cover the tabs and the top navigation instead of scrolling.
+    const [dropdownBounds, chromeBottom] = await Promise.all([
+      dropdown.boundingBox(),
+      page.evaluate(() => {
+        return Math.max(
+          document.querySelector('.topNav').getBoundingClientRect().bottom,
+          document.querySelector('.tabBar:not(.vertical)').getBoundingClientRect().bottom
+        )
+      })
+    ])
+
+    expect(chromeBottom).toBeGreaterThan(0)
+    expect(dropdownBounds.y).toBeGreaterThanOrEqual(chromeBottom)
+    expect(dropdownBounds.y + dropdownBounds.height).toBeLessThanOrEqual(400)
+    expect(await dropdown.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true)
+
+    // Repositioning alone cannot keep up with a fast scroll, so the chrome also
+    // has to paint above the dropdown.
+    const stackingOrder = await dropdown.evaluate((element) => ({
+      dropdown: Number(getComputedStyle(element).zIndex),
+      tabBar: Number(getComputedStyle(document.querySelector('.tabBar:not(.vertical)')).zIndex),
+      topNav: Number(getComputedStyle(document.querySelector('.topNav')).zIndex)
+    }))
+    expect(stackingOrder.tabBar).toBeGreaterThan(stackingOrder.dropdown)
+    expect(stackingOrder.topNav).toBeGreaterThan(stackingOrder.dropdown)
+  })
+
   test('an open options dropdown crosses vertical tabs without lifting its feed card', async ({ page }) => {
     await goTo(page, 'history')
     await page.evaluate(() => {
