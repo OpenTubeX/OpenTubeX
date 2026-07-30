@@ -12,6 +12,11 @@ on:
         type: string
         required: true
         description: Release ID
+      publishRelease:
+        type: boolean
+        required: true
+        default: true
+        description: Publish release after uploading assets
 
 permissions: {}
 
@@ -272,9 +277,37 @@ jobs:
         tag_name: ${{ steps.release.outputs.tag }}
         files: release-assets/*
         fail_on_unmatched_files: true
+
+  publish-release:
+    name: Publish draft release
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Publish release if it is a draft
+      if: inputs.publishRelease
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RELEASE_ID: ${{ inputs.releaseId }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        draft="$(gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" --jq .draft)"
+        if [[ "$draft" == true ]]; then
+          gh api \
+            --method PATCH \
+            "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" \
+            -F draft=false \
+            --silent
+        fi
+
   trigger-flatpak:
     name: Trigger Flatpak build
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -309,7 +342,7 @@ jobs:
 
   trigger-aur-update:
     name: Trigger AUR repository update
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -343,7 +376,7 @@ jobs:
 
   trigger-rpm-update:
     name: Trigger RPM repository update
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -377,7 +410,7 @@ jobs:
 
   trigger-apt-update:
     name: Trigger APT repository update
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -411,7 +444,7 @@ jobs:
 
   trigger-snap-update:
     name: Trigger Snap package update
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
@@ -445,7 +478,7 @@ jobs:
 
   trigger-website-update:
     name: Trigger website update
-    needs: build
+    needs: publish-release
     runs-on: ubuntu-latest
 
     permissions:
