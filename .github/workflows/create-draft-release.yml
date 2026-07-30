@@ -51,7 +51,7 @@ jobs:
       env:
         GH_TOKEN: ${{ github.token }}
         TAG: ${{ inputs.tag }}
-        TARGET_SHA: ${{ steps.target.outputs.sha }}
+        TARGET_BRANCH: ${{ inputs.target }}
       run: |
         set -euo pipefail
 
@@ -62,7 +62,7 @@ jobs:
 
         release="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/releases" \
           -f tag_name="$TAG" \
-          -f target_commitish="$TARGET_SHA" \
+          -f target_commitish="$TARGET_BRANCH" \
           -f name="$release_title" \
           -F draft=true \
           -F body=@release-notes.md)"
