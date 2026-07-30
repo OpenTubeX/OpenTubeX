@@ -110,6 +110,7 @@ test('paginated pull request results are flattened', () => {
           pullRequests: {
             nodes: [{
               body: 'First',
+              closingIssuesReferences: { nodes: [{ number: 10 }] },
               mergeCommit: { oid: 'first' },
               mergedAt: '2026-01-01T00:00:00Z',
               number: 1,
@@ -138,6 +139,7 @@ test('paginated pull request results are flattened', () => {
     },
   ]), [{
     body: 'First',
+    closingIssuesReferences: { nodes: [{ number: 10 }] },
     mergeCommit: { oid: 'first' },
     mergedAt: '2026-01-01T00:00:00Z',
     number: 1,
@@ -301,6 +303,9 @@ ${NOTE_MARKERS}
 ![Settings](https://github.com/user-attachments/assets/second)
 <!-- release-note-image:end -->
 `,
+      closingIssuesReferences: {
+        nodes: [{ number: 40 }, { number: 41 }],
+      },
       number: 42,
       title: 'Compact player',
     },
@@ -338,17 +343,17 @@ Fixed videos failing to load.
 
   assert.equal(result, `# Highlights
 
-- Adds a compact player.
+- Adds a compact player. (#40, #41, #42)
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" height="300">
   <img src="https://github.com/user-attachments/assets/second" alt="Settings" height="300">
 
 ## More improvements
 
-- Adds keyboard shortcuts.
+- Adds keyboard shortcuts. (#43)
 
 ## Fixed bugs
 
-- Fixed videos failing to load.
+- Fixed videos failing to load. (#44)
 `)
 })
 
@@ -366,7 +371,7 @@ ${NOTE_MARKERS}
 
   assert.equal(result, `## Fixed bugs
 
-- Adds a compact player.
+- Adds a compact player. (#42)
 `)
 })
 

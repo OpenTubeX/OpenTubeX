@@ -37,6 +37,9 @@ query($owner: String!, $repo: String!, $base: String!, $endCursor: String) {
     ) {
       nodes {
         body
+        closingIssuesReferences(first: 100) {
+          nodes { number }
+        }
         mergeCommit { oid }
         mergedAt
         number
@@ -402,7 +405,11 @@ export async function renderReleaseNotes(pullRequests, loadImage = downloadImage
 
     if (parsed.category === NOT_NOTEWORTHY_CATEGORY) { continue }
 
-    let releaseNote = `- ${indentContinuationLines(parsed.note)}`
+    const references = [
+      ...(pullRequest.closingIssuesReferences?.nodes ?? []).map((issue) => issue.number),
+      pullRequest.number,
+    ].map((number) => `#${number}`).join(', ')
+    let releaseNote = `- ${indentContinuationLines(parsed.note)} (${references})`
 
     for (const image of parsed.images) {
       try {

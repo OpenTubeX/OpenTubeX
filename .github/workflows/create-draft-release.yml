@@ -25,6 +25,7 @@ jobs:
 
     permissions:
       contents: write
+      issues: read
       pull-requests: read
 
     steps:
