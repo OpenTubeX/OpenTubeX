@@ -45,8 +45,14 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
   }
 })
+
+const emit = defineEmits(['reset'])
 
 const { t } = useI18n()
 
@@ -64,8 +70,10 @@ const isSynced = computed(() => {
 const showReset = computed(() => {
   return store.state.settings.highlightChangedSettings === true &&
     props.settingKey !== 'highlightChangedSettings' &&
-    Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, props.settingKey) &&
-    !settingsValuesEqual(store.state.settings[props.settingKey], DEFAULT_SETTINGS[props.settingKey])
+    (props.isChanged ?? (
+      Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, props.settingKey) &&
+      !settingsValuesEqual(store.state.settings[props.settingKey], DEFAULT_SETTINGS[props.settingKey])
+    ))
 })
 
 const label = computed(() => isSynced.value
@@ -88,7 +96,11 @@ function settingsValuesEqual(currentValue, defaultValue) {
 }
 
 function resetToDefault() {
-  store.dispatch('resetSettingToDefault', props.settingKey)
+  if (props.isChanged !== null) {
+    emit('reset')
+  } else {
+    store.dispatch('resetSettingToDefault', props.settingKey)
+  }
 }
 
 async function toggleSync() {

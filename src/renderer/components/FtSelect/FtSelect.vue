@@ -43,6 +43,8 @@
         <FtSyncedSettingIndicator
           v-if="tooltip === ''"
           :setting-key="settingKey"
+          :is-changed="isChanged"
+          @reset="emit('reset')"
         />
       </span>
     </label>
@@ -54,7 +56,11 @@
         class="selectTooltip"
         :tooltip="tooltip"
       />
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
+      <FtSyncedSettingIndicator
+        :setting-key="settingKey"
+        :is-changed="isChanged"
+        @reset="emit('reset')"
+      />
     </span>
   </div>
 </template>
@@ -110,10 +116,14 @@ defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  isChanged: {
+    type: Boolean,
+    default: null
   }
 })
 
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'reset'])
 
 const id = useId()
 

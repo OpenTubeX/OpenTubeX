@@ -11,22 +11,26 @@
       :placeholder="$t('Settings.SponsorBlock Settings.Category Color')"
       :value="sponsorBlockValues.color"
       :setting-key="settingKey"
+      :is-changed="isValueChanged('color')"
       :select-names="colorNames"
       :select-values="COLOR_VALUES"
       :icon="['fas', 'palette']"
       :class="'sec' + sponsorBlockValues.color"
       icon-color="rgb(var(--accent-color-rgb))"
       @change="updateColor"
+      @reset="resetValue('color')"
     />
     <FtSelect
       :describe-by-id="id"
       :placeholder="$t('Settings.SponsorBlock Settings.Skip Options.Skip Option')"
       :value="sponsorBlockValues.skip"
       :setting-key="settingKey"
+      :is-changed="isValueChanged('skip')"
       :select-names="skipNames"
       :select-values="selectableSkipValues"
       :icon="['fas', 'forward']"
       @change="updateSkipOption"
+      @reset="resetValue('skip')"
     />
   </div>
 </template>
@@ -38,6 +42,7 @@ import { useI18n } from 'vue-i18n'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'
+import { DEFAULT_SETTINGS } from '../../store/modules/settings'
 
 import { colors } from '../../helpers/colors'
 import { useColorTranslations } from '../../composables/colors'
@@ -83,7 +88,7 @@ const colorNames = useColorTranslations()
 const id = useId()
 
 /** @type {import('vue').ComputedRef<{ color: string, skip: string }>} */
-const sponsorBlockValues = computed(() => {
+const storedSponsorBlockValues = computed(() => {
   switch (props.categoryName) {
     case 'sponsor':
       return store.getters.getSponsorBlockSponsor
@@ -103,17 +108,20 @@ const sponsorBlockValues = computed(() => {
       return store.getters.getSponsorBlockMusicOffTopic
     case 'filler':
       return store.getters.getSponsorBlockFiller
-    case 'highlight': {
-      const highlightValues = store.getters.getSponsorBlockHighlight
-      return {
-        ...highlightValues,
-        skip: highlightValues.skip === 'autoSkip' ? 'promptToSkip' : highlightValues.skip
-      }
-    }
+    case 'highlight':
+      return store.getters.getSponsorBlockHighlight
     default:
       return ''
   }
 })
+
+/** @type {import('vue').ComputedRef<{ color: string, skip: string }>} */
+const sponsorBlockValues = computed(() => ({
+  ...storedSponsorBlockValues.value,
+  skip: props.categoryName === 'highlight' && storedSponsorBlockValues.value.skip === 'autoSkip'
+    ? 'promptToSkip'
+    : storedSponsorBlockValues.value.skip
+}))
 
 const translatedCategoryName = computed(() => {
   switch (props.categoryName) {
@@ -159,12 +167,33 @@ const settingKey = computed(() => {
 })
 
 /**
+ * @param {'color' | 'skip'} property
+ * @returns {boolean}
+ */
+function isValueChanged(property) {
+  return !Object.is(
+    sponsorBlockValues.value[property],
+    DEFAULT_SETTINGS[settingKey.value][property]
+  )
+}
+
+/**
+ * @param {'color' | 'skip'} property
+ */
+function resetValue(property) {
+  updateSponsorCategory({
+    ...storedSponsorBlockValues.value,
+    [property]: DEFAULT_SETTINGS[settingKey.value][property]
+  })
+}
+
+/**
  * @param {string} color
  */
 function updateColor(color) {
   updateSponsorCategory({
+    ...storedSponsorBlockValues.value,
     color,
-    skip: sponsorBlockValues.value.skip
   })
 }
 
@@ -173,7 +202,7 @@ function updateColor(color) {
  */
 function updateSkipOption(skipOption) {
   updateSponsorCategory({
-    color: sponsorBlockValues.value.color,
+    ...storedSponsorBlockValues.value,
     skip: skipOption
   })
 }
@@ -182,40 +211,36 @@ function updateSkipOption(skipOption) {
  * @param {{ color: string, skip: string }} payload
  */
 function updateSponsorCategory(payload) {
-  const nextPayload = props.categoryName === 'highlight' && payload.skip === 'autoSkip'
-    ? { ...payload, skip: 'promptToSkip' }
-    : payload
-
   switch (props.categoryName) {
     case 'sponsor':
-      store.dispatch('updateSponsorBlockSponsor', nextPayload)
+      store.dispatch('updateSponsorBlockSponsor', payload)
       break
     case 'self-promotion':
-      store.dispatch('updateSponsorBlockSelfPromo', nextPayload)
+      store.dispatch('updateSponsorBlockSelfPromo', payload)
       break
     case 'interaction':
-      store.dispatch('updateSponsorBlockInteraction', nextPayload)
+      store.dispatch('updateSponsorBlockInteraction', payload)
       break
     case 'intro':
-      store.dispatch('updateSponsorBlockIntro', nextPayload)
+      store.dispatch('updateSponsorBlockIntro', payload)
       break
     case 'outro':
-      store.dispatch('updateSponsorBlockOutro', nextPayload)
+      store.dispatch('updateSponsorBlockOutro', payload)
       break
     case 'recap':
-      store.dispatch('updateSponsorBlockRecap', nextPayload)
+      store.dispatch('updateSponsorBlockRecap', payload)
       break
     case 'hook':
-      store.dispatch('updateSponsorBlockHook', nextPayload)
+      store.dispatch('updateSponsorBlockHook', payload)
       break
     case 'music offtopic':
-      store.dispatch('updateSponsorBlockMusicOffTopic', nextPayload)
+      store.dispatch('updateSponsorBlockMusicOffTopic', payload)
       break
     case 'filler':
-      store.dispatch('updateSponsorBlockFiller', nextPayload)
+      store.dispatch('updateSponsorBlockFiller', payload)
       break
     case 'highlight':
-      store.dispatch('updateSponsorBlockHighlight', nextPayload)
+      store.dispatch('updateSponsorBlockHighlight', payload)
       break
   }
 }
