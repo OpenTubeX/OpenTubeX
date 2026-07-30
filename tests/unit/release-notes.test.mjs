@@ -339,7 +339,9 @@ Fixed videos failing to load.
       number: 46,
       title: 'Legacy change',
     },
-  ], async () => png(800, 600))
+  ], {
+    loadImage: async () => png(800, 600),
+  })
 
   assert.equal(result, `# Highlights
 
@@ -391,7 +393,34 @@ test('nightly releases can render a fallback when there are no noteworthy change
     body: categoryMarkers('Not noteworthy'),
     number: 42,
     title: 'Refactor tests',
-  }], undefined, 'No noteworthy changes since the latest stable release.')
+  }], {
+    emptyMessage: 'No noteworthy changes since the latest stable release.',
+  })
 
   assert.equal(result, 'No noteworthy changes since the latest stable release.\n')
+})
+
+test('nightly releases omit images that cannot be processed', async () => {
+  const imageErrors = []
+  const result = await renderReleaseNotes([{
+    body: `
+${categoryMarkers('More improvements')}
+${NOTE_MARKERS}
+<!-- release-note-image:start -->
+![Screenshot](https://github.com/user-attachments/assets/example)
+<!-- release-note-image:end -->
+`,
+    number: 42,
+    title: 'Compact player',
+  }], {
+    loadImage: async () => { throw new Error('Image unavailable.') },
+    onImageError: (error) => imageErrors.push(error),
+  })
+
+  assert.equal(result, `## More improvements
+
+- Adds a compact player. (#42)
+`)
+  assert.equal(imageErrors.length, 1)
+  assert.match(imageErrors[0].message, /PR #42: Image unavailable/)
 })

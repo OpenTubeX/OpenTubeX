@@ -386,7 +386,11 @@ function indentContinuationLines(value) {
   return value.split('\n').map((line, index) => index === 0 ? line : `  ${line}`).join('\n')
 }
 
-export async function renderReleaseNotes(pullRequests, loadImage = downloadImage, emptyMessage = null) {
+export async function renderReleaseNotes(pullRequests, {
+  emptyMessage = null,
+  loadImage = downloadImage,
+  onImageError = null,
+} = {}) {
   const sections = new Map([...RELEASE_NOTE_CATEGORIES.keys()].map((category) => [category, []]))
 
   for (const pullRequest of pullRequests) {
@@ -415,7 +419,14 @@ export async function renderReleaseNotes(pullRequests, loadImage = downloadImage
       try {
         releaseNote += `\n  ${await normalizeReleaseImage(image, pullRequest.title, loadImage)}`
       } catch (error) {
-        throw new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
+        const imageError = new Error(`PR #${pullRequest.number}: ${error.message}`, { cause: error })
+
+        if (onImageError) {
+          onImageError(imageError)
+          continue
+        }
+
+        throw imageError
       }
     }
 
@@ -442,7 +453,7 @@ async function validateEvent(eventPath) {
   console.log(`Release note category is valid: ${releaseNote.category}.`)
 }
 
-async function generate(outputPath, emptyMessage = null) {
+async function generate(outputPath, options) {
   const repository = process.env.GITHUB_REPOSITORY
   const previousTag = process.env.PREVIOUS_TAG
   const targetBranch = process.env.TARGET_BRANCH
@@ -454,7 +465,7 @@ async function generate(outputPath, emptyMessage = null) {
 
   const pullRequests = listMergedPullRequests(repository, targetBranch)
   const selectedPullRequests = selectPullRequests(pullRequests, previousTag, targetSha)
-  const releaseNotes = await renderReleaseNotes(selectedPullRequests, downloadImage, emptyMessage)
+  const releaseNotes = await renderReleaseNotes(selectedPullRequests, options)
 
   fs.writeFileSync(outputPath, releaseNotes)
   console.log(`Processed ${selectedPullRequests.length} pull requests and wrote ${outputPath}.`)
@@ -468,7 +479,10 @@ async function main() {
   if (command === 'generate' && argument) { return generate(argument) }
 
   if (command === 'generate-nightly' && argument) {
-    return generate(argument, 'No noteworthy changes since the latest stable release.')
+    return generate(argument, {
+      emptyMessage: 'No noteworthy changes since the latest stable release.',
+      onImageError: (error) => console.warn(`${error.message} The image will be omitted from this nightly.`),
+    })
   }
 
   throw new Error('Usage: releaseNotes.mjs <validate-event EVENT_PATH | generate OUTPUT_PATH | generate-nightly OUTPUT_PATH>')
