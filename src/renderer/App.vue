@@ -124,9 +124,12 @@
       v-if="showCreatePlaylistPrompt"
     />
     <FtContextMenu v-if="isElectron" />
-    <FtToast />
+    <FtToast
+      :show-subscription-refresh="presentedRoutePath !== '/subscriptions'"
+    />
     <FtProgressBar
       v-if="showProgressBar"
+      :progress="displayedProgressBarPercentage"
     />
     <div
       v-if="findbarVisible"
@@ -467,6 +470,9 @@ const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
+const subscriptionRefreshUsesToast = computed(() => {
+  return store.getters.getShowSubscriptionRefreshToast
+})
 
 const presentedRoutePath = computed(() => {
   if (isElectron) {
@@ -478,7 +484,14 @@ const presentedRoutePath = computed(() => {
 const showProgressBar = computed(() => {
   // The Subscriptions view shows its own progress bar below the tab bar
   return localProgressBarVisible.value ||
-    (subscriptionRefreshInProgress.value && presentedRoutePath.value !== '/subscriptions')
+    (subscriptionRefreshInProgress.value &&
+      !subscriptionRefreshUsesToast.value &&
+      presentedRoutePath.value !== '/subscriptions')
+})
+const displayedProgressBarPercentage = computed(() => {
+  return localProgressBarVisible.value
+    ? store.getters.getProgressBarPercentage
+    : store.getters.getSubscriptionFeedRefreshProgress
 })
 
 const landingPage = computed(() => '/' + store.getters.getLandingPage)
@@ -623,9 +636,6 @@ async function initializeManagedDownloadTools() {
   let toolProgressPercentage = 0
 
   function showToolProgress() {
-    if (subscriptionRefreshInProgress.value) {
-      return
-    }
     store.commit('setProgressBarPercentage', toolProgressPercentage)
     store.commit('setShowProgressBar', true)
   }
@@ -638,18 +648,6 @@ async function initializeManagedDownloadTools() {
     })
     showToolProgress()
   }
-
-  const stopWatchingSubscriptionRefresh = watch(subscriptionRefreshInProgress, inProgress => {
-    if (!downloadStarted) {
-      return
-    }
-
-    if (inProgress) {
-      store.commit('setShowProgressBar', false)
-    } else {
-      showToolProgress()
-    }
-  })
 
   const progressByBinary = {}
   const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
@@ -670,9 +668,7 @@ async function initializeManagedDownloadTools() {
     const percentages = Object.values(progressByBinary)
     const combinedPercentage = percentages.reduce((sum, value) => sum + value, 0) / percentages.length
     toolProgressPercentage = Math.max(toolProgressPercentage, combinedPercentage)
-    if (!subscriptionRefreshInProgress.value) {
-      store.commit('setProgressBarPercentage', toolProgressPercentage)
-    }
+    store.commit('setProgressBarPercentage', toolProgressPercentage)
   })
 
   try {
@@ -690,9 +686,7 @@ async function initializeManagedDownloadTools() {
 
     if (failures.length === 0 && updatedBinaries.length > 0) {
       toolProgressPercentage = 100
-      if (!subscriptionRefreshInProgress.value) {
-        store.commit('setProgressBarPercentage', toolProgressPercentage)
-      }
+      store.commit('setProgressBarPercentage', toolProgressPercentage)
       const updatedTools = updatedBinaries.join(' and ')
       showToast({
         message: missingBinaries.length > 0
@@ -710,13 +704,10 @@ async function initializeManagedDownloadTools() {
       }
     }
   } finally {
-    stopWatchingSubscriptionRefresh()
     removeProgressListener()
     if (downloadStarted) {
       store.commit('setShowProgressBar', false)
-      if (!subscriptionRefreshInProgress.value) {
-        store.commit('setProgressBarPercentage', 0)
-      }
+      store.commit('setProgressBarPercentage', 0)
     }
   }
 }
@@ -1432,7 +1423,11 @@ function handleSubscriptionRefreshStarted(event) {
       // The owner still has its renderer-local progress state.
     }
   }
-  applySubscriptionAutoRefreshState({ inProgress: true, percentage: 0, tab: event.detail.tab })
+  applySubscriptionAutoRefreshState({
+    inProgress: true,
+    percentage: 0,
+    tab: event.detail.tab
+  })
 }
 
 /**
@@ -1440,7 +1435,7 @@ function handleSubscriptionRefreshStarted(event) {
  */
 function handleSubscriptionRefreshProgress(event) {
   const percentage = normalizeSubscriptionRefreshProgress(event.detail.percentage)
-  store.commit('setProgressBarPercentage', percentage)
+  store.commit('setSubscriptionFeedRefreshProgress', percentage)
 
   if (process.env.IS_ELECTRON) {
     window.ftElectron.subscriptionAutoRefresh.setProgress(
@@ -1534,12 +1529,12 @@ function applySubscriptionAutoRefreshState(state) {
   // it to every renderer. An older broadcast can therefore arrive after a newer
   // local update, so keep progress monotonic for the duration of this refresh.
   if (state.inProgress && wasInProgress && nextTab === previousTab) {
-    percentage = Math.max(store.getters.getProgressBarPercentage, percentage)
+    percentage = Math.max(store.getters.getSubscriptionFeedRefreshProgress, percentage)
   }
 
   store.commit('setSubscriptionFeedRefreshInProgress', state.inProgress)
   store.commit('setSubscriptionFeedRefreshTab', nextTab)
-  store.commit('setProgressBarPercentage', percentage)
+  store.commit('setSubscriptionFeedRefreshProgress', percentage)
 }
 
 /**

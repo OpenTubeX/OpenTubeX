@@ -55,6 +55,10 @@
   position: relative;
 }
 
+.toast-slot.persistent-slot {
+  pointer-events: none;
+}
+
 .toast {
   display: flex;
   align-items: center;
@@ -155,6 +159,15 @@
 .toast.dragging {
   cursor: grabbing;
   transition: none;
+}
+
+.toast.persistent {
+  cursor: progress;
+  pointer-events: none;
+}
+
+.progress-indicator :deep(.embeddedProgressPath) {
+  animation: none;
 }
 
 /* Tighten the leading padding so the thumbnail sits closer to the edge */

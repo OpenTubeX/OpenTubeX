@@ -569,7 +569,7 @@ async function refreshSubscriptionVideosFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast) {
+  if (showStartToast && !store.getters.getShowSubscriptionRefreshToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Videos'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -673,7 +673,7 @@ async function refreshSubscriptionShortsFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast) {
+  if (showStartToast && !store.getters.getShowSubscriptionRefreshToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Shorts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -763,7 +763,7 @@ async function refreshSubscriptionLiveFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast) {
+  if (showStartToast && !store.getters.getShowSubscriptionRefreshToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Live Streams'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 
@@ -867,7 +867,7 @@ async function refreshSubscriptionPostsFromRemoteUnlocked({
   store.commit('setSubscriptionFeedRefreshInProgress', true)
   setSubscriptionRefreshProgress(0)
 
-  if (showStartToast) {
+  if (showStartToast && !store.getters.getShowSubscriptionRefreshToast) {
     showToastOnAllTabs(t('Subscriptions.Refreshing Subscription Posts'), AUTO_REFRESH_TOAST_DURATION, ['fas', 'sync'])
   }
 

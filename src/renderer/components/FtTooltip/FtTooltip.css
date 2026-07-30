@@ -8,7 +8,7 @@
 }
 
 .text {
-  background-color: color-mix(in srgb, var(--primary-text-color) 80%, transparent);
+  background-color: color-mix(in srgb, var(--primary-text-color) 80%, var(--card-bg-color));
   border-radius: calc(20px * var(--ui-roundness));
   color: var(--card-bg-color);
   font-size: 1rem;
@@ -16,14 +16,13 @@
   margin: 0;
   max-inline-size: max-content;
   min-inline-size: 15em;
-  opacity: 0;
   padding-block: 10px;
   padding-inline: 8px;
   pointer-events: none;
   position: absolute;
   text-align: center;
   transition-duration: 275ms;
-  transition-property: opacity, transform, visibility;
+  transition-property: transform;
   visibility: hidden;
   z-index: 2;
 }
@@ -65,7 +64,6 @@
 
 .button:focus + .text,
 .button:hover + .text {
-  opacity: 1;
   visibility: visible;
 }
 
@@ -94,4 +92,9 @@
 .tooltip {
   display: inline-block;
   position: relative;
+}
+
+.tooltip:hover,
+.tooltip:focus-within {
+  z-index: 10;
 }

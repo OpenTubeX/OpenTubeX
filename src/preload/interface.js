@@ -504,7 +504,7 @@ export default {
 
     /**
      * Listen for app-wide subscription refresh ownership changes.
-     * @param {(state: {inProgress: boolean, percentage: number}) => void} handler
+     * @param {(state: {inProgress: boolean, percentage: number, tab: string | null}) => void} handler
      * @returns {() => void}
      */
     onStateChanged: (handler) => {
