@@ -187,6 +187,24 @@ test('watch page IP-block error does not break later navigation', async ({ app, 
   }
 })
 
+test('an IP-block error keeps the title passed to a background watch tab', async ({ app, page }) => {
+  await mockBlockedVideo({
+    app,
+    page,
+    omitVideoMetadata: true
+  })
+
+  await goTo(page, 'history')
+  await page.getByText('Blocked test video').click({ button: 'middle' })
+
+  const backgroundTab = page.locator(sel.tabs).nth(1)
+  const backgroundContent = page.locator('.tabContent[aria-hidden="true"]').first()
+  await expect(backgroundTab).toContainText('Blocked test video')
+  await expect(backgroundContent.locator('.errorMessage')).toContainText('blocked', { timeout: 30_000 })
+  await expect(backgroundTab).toContainText('Blocked test video')
+  await expect(backgroundTab).not.toContainText('/watch/jNQXAC9IVRw')
+})
+
 test('a late video response cannot replace the title after going back', async ({ app, page }) => {
   let releaseMetadataResponse
   let notifyMetadataRequested

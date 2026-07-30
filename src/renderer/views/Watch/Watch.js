@@ -1126,7 +1126,7 @@ export default defineComponent({
         this.tabRoute.query.short === 'true'
       this.resetVideoState({
         preserveTitle,
-        placeholderTitle: videoIdChanged ? this.getRoutePlaceholderTitle() : '',
+        placeholderTitle: videoIdChanged ? this.getPendingVideoTitle() : '',
         preserveShortsPanels,
       })
 
@@ -1152,8 +1152,12 @@ export default defineComponent({
       }
     },
 
-    getRoutePlaceholderTitle: function () {
-      return this.tabRoute.fullPath
+    getPendingVideoTitle: function () {
+      const tab = this.$store.getters.getTabById(this.tabId)
+      const title = tab?.contentTitle
+      return typeof title === 'string' && title.length > 0 && title !== this.tabRoute.fullPath
+        ? title
+        : this.tabRoute.fullPath
     },
 
     resetVideoState: function ({
@@ -3566,7 +3570,7 @@ export default defineComponent({
 
     updateTitle: function () {
       this.setTabTitle(
-        this.videoTitle || this.getRoutePlaceholderTitle(),
+        this.videoTitle || this.getPendingVideoTitle(),
         { resolveHistoryEntry: this.hasResolvedVideoTitle }
       )
     },

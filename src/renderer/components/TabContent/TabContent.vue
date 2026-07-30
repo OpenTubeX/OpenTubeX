@@ -149,6 +149,7 @@ watch(
     disposalNotified = false
     pictureInPictureExitRequested = false
     await nextTick()
+    updateLoaderState()
     if (mountRevision > acknowledgedMountRevision) {
       acknowledgedMountRevision = mountRevision
       tabRuntimeRegistry.markMounted(props.tab.id, mountRevision)
@@ -214,12 +215,16 @@ function scheduleLoaderUpdate() {
 
   loaderAnimationFrameId = window.requestAnimationFrame(() => {
     loaderAnimationFrameId = null
-    navigation.setLoadingSource(
-      props.tab.id,
-      TAB_LOADER_LOADING_SOURCE,
-      tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null
-    )
+    updateLoaderState()
   })
+}
+
+function updateLoaderState() {
+  navigation.setLoadingSource(
+    props.tab.id,
+    TAB_LOADER_LOADING_SOURCE,
+    tabContentRef.value?.querySelector(TAB_LOADER_SELECTOR) != null
+  )
 }
 </script>
 

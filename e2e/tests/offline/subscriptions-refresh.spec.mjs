@@ -107,6 +107,7 @@ test.describe('incremental subscription feed refresh', () => {
     await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.locator('.tab.active .loadingDot')).toBeVisible()
 
     // Channel 0 is done well before the pending channel 1, which keeps its
     // cached entry in the meantime
@@ -116,6 +117,7 @@ test.describe('incremental subscription feed refresh', () => {
     await expect(page.locator('.tabsProgressBar')).toBeVisible()
 
     await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 30_000 })
+    await expect(page.locator('.tab.active .loadingDot')).toHaveCount(0)
   })
 })
 
