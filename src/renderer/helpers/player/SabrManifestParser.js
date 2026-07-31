@@ -683,12 +683,8 @@ async function createMediaSegmentIndex(
     url += `&resolution=${resolution}`
   }
 
-  if (presentationTimeline.isLive()) {
-    url += '&live'
-  }
-
   const initUrl = presentationTimeline.isLive()
-    ? `${url}&init&startTimeMs=0`
+    ? `${url}&init&live&startTimeMs=0`
     : `${url}&init`
 
   /** @type {shaka.extern.Request} */
@@ -794,10 +790,7 @@ function createLiveMediaSegmentIndex(initUrl, url, response, stream, presentatio
     const reference = new shaka.media.SegmentReference(
       startTime,
       startTime + segmentDuration,
-      // SABR selects the segment ending at playerTimeMs, while Shaka asks for
-      // the reference containing the playhead. Request the reference end so
-      // the returned media timestamps cover [startTime, endTime].
-      () => [`${url}&startTimeMs=${Math.round((startTime + segmentDuration) * 1000)}`],
+      () => [`${url}&startTimeMs=${Math.round(startTime * 1000)}`],
       0,
       null,
       initSegmentReference,
@@ -814,7 +807,7 @@ function createLiveMediaSegmentIndex(initUrl, url, response, stream, presentatio
   const availabilityStart = presentationTimeline.getSegmentAvailabilityStart()
   const availabilityEnd = presentationTimeline.getSegmentAvailabilityEnd()
   const firstSegmentNumber = Math.max(0, Math.floor(availabilityStart / segmentDuration))
-  let nextSegmentNumber = Math.max(firstSegmentNumber, Math.floor(availabilityEnd / segmentDuration))
+  let nextSegmentNumber = Math.max(firstSegmentNumber, Math.ceil(availabilityEnd / segmentDuration))
   const references = []
 
   for (let segmentNumber = firstSegmentNumber; segmentNumber < nextSegmentNumber; segmentNumber++) {
@@ -825,7 +818,7 @@ function createLiveMediaSegmentIndex(initUrl, url, response, stream, presentatio
   segmentIndex.updateEvery(segmentDuration, () => {
     segmentIndex.evict(presentationTimeline.getSegmentAvailabilityStart())
 
-    const endSegmentNumber = Math.floor(presentationTimeline.getSegmentAvailabilityEnd() / segmentDuration)
+    const endSegmentNumber = Math.ceil(presentationTimeline.getSegmentAvailabilityEnd() / segmentDuration)
     const newReferences = []
     while (nextSegmentNumber < endSegmentNumber) {
       newReferences.push(createReference(nextSegmentNumber++))

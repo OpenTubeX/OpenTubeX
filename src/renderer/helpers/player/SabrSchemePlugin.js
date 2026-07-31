@@ -23,7 +23,6 @@ import { createBackoffLoopTracker } from './sabrBackoffLoop'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
-const LIVE_POLICY_RETRY_DELAY_MS = 500
 
 /**
  * @typedef OperationInputs
@@ -65,11 +64,9 @@ const LIVE_POLICY_RETRY_DELAY_MS = 500
  * @property {string} sabrUrl
  * @property {Set<number>} activeSabrContextTypes
  * @property {Map<number, SabrContextUpdate>} sabrContexts
- * @property {Map<string, MediaHeader>} lastMediaHeaders
  * @property {?NextRequestPolicy} nextRequestPolicy
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
- * @property {number} lastRequestedPlayerTimeMs
  * @property {ReturnType<typeof createBackoffLoopTracker>} backoffLoopTracker
  * @property {(reloadPlaybackContext: ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>} reload
  * @property {Uint8Array} videoPlaybackUstreamerConfig
@@ -105,9 +102,8 @@ function formatIdFromString(str) {
  * @param {import('googlevideo/protos').FormatId} formatId
  * @param {shaka.extern.BufferedRange} buffered
  * @param {shaka.media.SegmentIndex} segmentIndex
- * @param {MediaHeader | undefined} mediaHeader
  */
-function createBufferedRange(formatId, buffered, segmentIndex, mediaHeader) {
+function createBufferedRange(formatId, buffered, segmentIndex) {
   let endSegmentIndex = segmentIndex.find(buffered.end)
   if (endSegmentIndex == null) {
     // Using Last end time will get `null` in `segmentIndex.find`
@@ -118,8 +114,8 @@ function createBufferedRange(formatId, buffered, segmentIndex, mediaHeader) {
     formatId,
     startTimeMs: String(Math.round(buffered.start * 1000)),
     durationMs: String(Math.round((buffered.end - buffered.start) * 1000)),
-    startSegmentIndex: mediaHeader?.sequenceNumber ?? segmentIndex.find(buffered.start),
-    endSegmentIndex: mediaHeader?.sequenceNumber ?? endSegmentIndex,
+    startSegmentIndex: segmentIndex.find(buffered.start),
+    endSegmentIndex: endSegmentIndex,
   }
 }
 
@@ -152,9 +148,8 @@ function createFullBufferRange(formatId) {
  * @param {boolean} streamIsAudio - Fake video bufferRange can be used
  * @param {import('googlevideo/protos').BufferedRange[]} bufferedRanges
  * @param {shaka.extern.Track} activeVariant
- * @param {Map<string, MediaHeader>} lastMediaHeaders
  */
-function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant, lastMediaHeaders) {
+function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant) {
   const bufferedInfo = player.getBufferedInfo()
 
   if (bufferedInfo.audio.length > 0 || bufferedInfo.video.length > 0) {
@@ -177,12 +172,7 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
       bufferedRanges.push(createFullBufferRange(audioFormatId))
     } else {
       for (const buffered of bufferedInfo.audio) {
-        bufferedRanges.push(createBufferedRange(
-          audioFormatId,
-          buffered,
-          audioSegmentIndex,
-          lastMediaHeaders.get(activeVariant.originalAudioId)
-        ))
+        bufferedRanges.push(createBufferedRange(audioFormatId, buffered, audioSegmentIndex))
       }
     }
 
@@ -203,12 +193,7 @@ function fillBufferedRanges(player, manifest, audioFormatsActive, streamIsVideo,
           videoSegmentIndex = activeManifestVariant.video.segmentIndex
         }
 
-        bufferedRanges.push(createBufferedRange(
-          videoFormatId,
-          buffered,
-          videoSegmentIndex,
-          lastMediaHeaders.get(activeVariant.originalVideoId)
-        ))
+        bufferedRanges.push(createBufferedRange(videoFormatId, buffered, videoSegmentIndex))
       }
     }
   }
@@ -418,9 +403,6 @@ async function doRequest(
                 ) {
                   mediaHeaderId = mediaHeader.headerId
                 }
-                if (mediaHeaderId !== undefined) {
-                  currentState.sabrStreamState.lastMediaHeaders.set(operationInputs.formatIdString, mediaHeader)
-                }
               }
             }
 
@@ -551,22 +533,6 @@ async function doRequest(
     }
 
     await reloadPromise
-
-    if (
-      operationInputs.isLive &&
-      !segmentComplete &&
-      currentState.abrRequest.clientAbrState.playerTimeMs === '0' &&
-      liveMetadata
-    ) {
-      const maxSeekableTimeMs = Math.round(
-        Number(liveMetadata.maxSeekableTimeTicks) /
-        Number(liveMetadata.maxSeekableTimescale) * 1000
-      )
-      if (Number.isFinite(maxSeekableTimeMs) && maxSeekableTimeMs > 0) {
-        currentState.abrRequest.clientAbrState.playerTimeMs = String(maxSeekableTimeMs)
-        shouldRetry = true
-      }
-    }
   } catch (error) {
     if (currentState.abortStatus.cancelled) {
       throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
@@ -612,28 +578,6 @@ async function doRequest(
     if (shouldRetryDueToNextRequestPolicy) {
       // Only count on actual retry to avoid counting false positive (when segmentComplete
       currentState.cumulativeRetryDueToNextRequestPolicy += 1
-
-      // Some live servers answer an early request with a zero-backoff policy
-      // until the next segment becomes available. Retrying synchronously spins
-      // through the retry limit and causes a player reload before the segment
-      // boundary advances.
-      if (
-        operationInputs.isLive &&
-        !currentState.abortController.signal.aborted &&
-        !(currentState.sabrStreamState.nextRequestPolicy?.backoffTimeMs > 0)
-      ) {
-        await new Promise((resolve) => {
-          const onAbort = () => {
-            clearTimeout(timeoutId)
-            resolve()
-          }
-          const timeoutId = setTimeout(() => {
-            currentState.abortController.signal.removeEventListener('abort', onAbort)
-            resolve()
-          }, LIVE_POLICY_RETRY_DELAY_MS)
-          currentState.abortController.signal.addEventListener('abort', onAbort, { once: true })
-        })
-      }
     }
 
     const { sabrContexts, unsentSabrContexts } = prepareSabrContexts(currentState.sabrStreamState)
@@ -740,11 +684,9 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     sabrUrl: sabrData.url,
     activeSabrContextTypes: new Set(),
     sabrContexts: new Map(),
-    lastMediaHeaders: new Map(),
     nextRequestPolicy: undefined,
     playerReloadRequested: false,
     requestNumber: 0,
-    lastRequestedPlayerTimeMs: 0,
     backoffLoopTracker: createBackoffLoopTracker(),
     reload: sabrData.reload,
     videoPlaybackUstreamerConfig: base64ToU8(sabrData.ustreamerConfig),
@@ -810,33 +752,13 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     const bufferedRanges = []
 
     if (!isInit && activeVariant) {
-      /** @__NOINLINE__ */ fillBufferedRanges(
-        player,
-        getManifest(),
-        isAudioOnly,
-        streamIsVideo,
-        streamIsAudio,
-        bufferedRanges,
-        activeVariant,
-        sabrStreamState.lastMediaHeaders
-      )
+      /** @__NOINLINE__ */ fillBufferedRanges(player, getManifest(), isAudioOnly, streamIsVideo, streamIsAudio, bufferedRanges, activeVariant)
     }
 
     let playerTimeMs = '0'
 
     if (url.searchParams.has('startTimeMs')) {
       playerTimeMs = url.searchParams.get('startTimeMs')
-    }
-
-    const numericPlayerTimeMs = Number(playerTimeMs)
-    if (
-      Number.isFinite(numericPlayerTimeMs) &&
-      numericPlayerTimeMs < sabrStreamState.lastRequestedPlayerTimeMs - 1000
-    ) {
-      sabrStreamState.nextRequestPolicy = undefined
-    }
-    if (Number.isFinite(numericPlayerTimeMs)) {
-      sabrStreamState.lastRequestedPlayerTimeMs = numericPlayerTimeMs
     }
 
     const drcEnabled = url.searchParams.has('drc') || !!(activeVariant && activeVariant.audioRoles.includes('drc'))
