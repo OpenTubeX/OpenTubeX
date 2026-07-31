@@ -3312,7 +3312,10 @@ export default defineComponent({
           .map(format => Number(format.target_duration_dec))
           .filter(targetDuration => Number.isFinite(targetDuration) && targetDuration > 0)
         segmentDuration = targetDurations.length > 0 ? Math.max(...targetDurations) : 1
-        presentationDelay = segmentDuration * 2
+        // Keep one complete segment buffered ahead of the playhead. Some live
+        // SABR responses only contain the segment ending at maxSeekableTime;
+        // starting exactly there leaves the player stalled at the buffer edge.
+        presentationDelay = segmentDuration * 3
 
         const dvrDurations = formats
           .map(format => Number(format.max_dvr_duration_sec))
