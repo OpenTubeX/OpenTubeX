@@ -1,0 +1,52 @@
+.iconPackPreview {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  inline-size: 100%;
+  margin-block: 8px 28px;
+}
+
+.previewGrid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(auto-fill, 2rem);
+  justify-content: center;
+  inline-size: 100%;
+  max-block-size: 220px;
+  max-inline-size: calc(100% - 48px);
+  margin-inline: 24px;
+  overflow: auto;
+  padding-block: 12px;
+  padding-inline: 12px;
+  border: 1px solid var(--primary-shadow-color);
+  border-radius: var(--ui-roundness, 8px);
+  background-color: var(--bg-color);
+}
+
+.previewItem {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  block-size: 2rem;
+  inline-size: 2rem;
+  line-height: 0;
+  border-radius: calc(var(--ui-roundness, 8px) * 0.75);
+  color: var(--primary-text-color);
+}
+
+.previewItem:hover {
+  background-color: var(--side-nav-hover-color, color-mix(in srgb, var(--primary-text-color) 8%, transparent));
+}
+
+.previewIcon {
+  font-size: 1.25rem;
+  line-height: 0;
+}
+
+.previewItem :deep(.ft-icon),
+.previewItem :deep(.svg-inline--fa) {
+  display: block;
+  margin: 0;
+  vertical-align: 0;
+}

@@ -63,8 +63,12 @@
 
 .iconSelect {
   position: absolute;
-  inset-block-start: 10px;
+  inset-block-start: 50%;
   inset-inline-end: 10px;
+  transform: translateY(-50%);
+  display: block;
+  line-height: 0;
+  vertical-align: 0;
 
   /* Styling the down arrow */
   padding: 0;
@@ -73,6 +77,12 @@
   border-inline-end: 6px solid transparent;
   pointer-events: none;
   color: var(--tertiary-text-color);
+}
+
+.iconSelect.ft-icon,
+:deep(.iconSelect.ft-icon),
+:deep(.iconSelect.svg-inline--fa) {
+  vertical-align: 0;
 }
 
 .disabled,

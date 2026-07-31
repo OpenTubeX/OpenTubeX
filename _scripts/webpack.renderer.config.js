@@ -210,6 +210,10 @@ const config = {
       // Make @fortawesome/vue-fontawesome use the trimmed down API instead of the original @fortawesome/fontawesome-svg-core
       '@fortawesome/fontawesome-svg-core$': path.resolve(__dirname, '../src/renderer/fontawesome-minimal.js'),
 
+      // Temporary icon-pack preview (#388): route FA Vue components through FtIcon
+      '@fortawesome/vue-fontawesome$': path.resolve(__dirname, '../src/renderer/icons/vue-fontawesome-shim.js'),
+      '@fortawesome/vue-fontawesome-original$': require.resolve('@fortawesome/vue-fontawesome'),
+
       // Fix dompurify not being tree-shaking friendly
       dompurify$: path.resolve(__dirname, '_undefinedDefaultExport.mjs')
     },

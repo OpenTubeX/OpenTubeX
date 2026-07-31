@@ -178,7 +178,11 @@ const config = {
       'shaka-player$': 'shaka-player/dist/shaka-player.ui-es2021.js',
 
       // Make @fortawesome/vue-fontawesome use the trimmed down API instead of the original @fortawesome/fontawesome-svg-core
-      '@fortawesome/fontawesome-svg-core$': path.resolve(__dirname, '../src/renderer/fontawesome-minimal.js')
+      '@fortawesome/fontawesome-svg-core$': path.resolve(__dirname, '../src/renderer/fontawesome-minimal.js'),
+
+      // Temporary icon-pack preview (#388): route FA Vue components through FtIcon
+      '@fortawesome/vue-fontawesome$': path.resolve(__dirname, '../src/renderer/icons/vue-fontawesome-shim.js'),
+      '@fortawesome/vue-fontawesome-original$': require.resolve('@fortawesome/vue-fontawesome')
     },
     extensions: ['.js', '.vue']
   },

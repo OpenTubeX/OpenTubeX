@@ -4,3 +4,4 @@
 - When creating PRs use the PR template. Always create ready-for-review PRs unless otherwise told to do so.
 - After creating a PR wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
 - Always prefer bundling follow up changes and review resolving commits into one push.
+- For icon-pack / Font Awesome replacement work (#388): get human confirmation that remapped glyphs fit visually in every pack (Material, Tabler, Phosphor, Lucide, Remix, and Font Awesome legacy) before considering the mapping done.

@@ -128,9 +128,12 @@
 }
 
 .playlistButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   font-size: 20px;
-  line-height: 1em;
+  line-height: 0;
   padding: 10px;
   margin-block-start: -25px;
   cursor: pointer;
@@ -138,20 +141,37 @@
   border-style: none;
   color: var(--tertiary-text-color);
   transition: background 0.2s ease-out;
+}
+
+/* FA-only cutout outline — must not inherit onto Iconify stroke/fill glyphs. */
+.playlistButton :deep(.svg-inline--fa) {
+  display: block;
+  vertical-align: 0;
   stroke-width: 20;
   stroke: var(--bg-color);
+}
+
+.playlistButton :deep(.ft-icon) {
+  display: block;
+  vertical-align: 0;
 }
 
 .playlistButton:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
+  transition: background 0.2s ease-in;
+}
+
+.playlistButton:hover :deep(.svg-inline--fa) {
   stroke-width: 20;
   stroke: var(--side-nav-hover-color);
-  transition: background 0.2s ease-in;
 }
 
 .playlistButtonActive {
   color: var(--accent-color);
+}
+
+.playlistButtonActive :deep(.svg-inline--fa) {
   stroke-width: 10;
   stroke: var(--accent-color);
 }
@@ -159,13 +179,20 @@
 .playlistButtonActive:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--accent-color-hover);
-  stroke-width: 10;
-  stroke: var(--accent-color-hover);
   transition: background 0.2s ease-in;
 }
 
+.playlistButtonActive:hover :deep(.svg-inline--fa) {
+  stroke-width: 10;
+  stroke: var(--accent-color-hover);
+}
+
 .playlistIcon {
+  display: block;
   inline-size: 1em;
+  block-size: 1em;
+  line-height: 0;
+  vertical-align: 0;
 }
 
 .playlistItemsWrapper {
