@@ -93,15 +93,24 @@
 }
 
 .navButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border-style: none;
   background-color: transparent;
   color: var(--primary-text-color);
   cursor: pointer;
   font-size: 20px;
-  line-height: 1em;
+  line-height: 0;
   padding: 10px;
   transition: background 0.2s ease-out;
+}
+
+.navButton :deep(.ft-icon),
+.navButton :deep(.svg-inline--fa) {
+  display: block;
+  vertical-align: 0;
 }
 
 .navButton,

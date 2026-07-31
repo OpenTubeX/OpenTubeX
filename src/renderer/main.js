@@ -27,6 +27,7 @@ import { ObserveVisibility } from 'vue-observe-visibility'
 import {
   faAngleDown,
   faAngleLeft,
+  faAngleRight,
   faAngleUp,
   faArrowDown,
   faArrowDownShortWide,
@@ -171,6 +172,9 @@ import {
   faYoutube,
 } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
+import { registerMappedIcons } from './icons/registerMappedIcons'
+
+registerMappedIcons()
 
 // Please keep the list of constants sorted by name
 // to avoid code conflict and duplicate entries
@@ -178,6 +182,7 @@ library.add(
   // solid icons
   faAngleDown,
   faAngleLeft,
+  faAngleRight,
   faAngleUp,
   faArrowDown,
   faArrowDownShortWide,

@@ -9,12 +9,16 @@
 }
 
 .iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: transparent;
   border-radius: 50%;
   border-style: none;
   color: inherit;
   cursor: pointer;
-  line-height: 1em;
+  // Avoid text-baseline strut so FA / Iconify glyphs share the same geometric center.
+  line-height: 0;
   transition: background 0.15s ease-out;
 
   &.shadow {
@@ -122,9 +126,20 @@
 }
 
 .icon {
+  display: block;
   inline-size: 1em;
+  block-size: 1em;
+  line-height: 0;
+  overflow: visible;
+  vertical-align: 0;
 
   --fa-width: 1em;
+}
+
+.iconButton :deep(.ft-icon),
+.iconButton :deep(.svg-inline--fa) {
+  display: block;
+  vertical-align: 0;
 }
 
 /* Overlay icons read as a cut-out of the main icon by matching the button background */

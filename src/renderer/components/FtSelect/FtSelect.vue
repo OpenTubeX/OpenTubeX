@@ -24,7 +24,7 @@
       </option>
     </select>
     <FontAwesomeIcon
-      :icon="['fas', 'sort-down']"
+      :icon="['fas', 'angle-down']"
       class="iconSelect"
     />
     <span class="select-highlight" />
