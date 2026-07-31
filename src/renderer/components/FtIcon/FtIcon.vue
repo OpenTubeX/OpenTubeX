@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { computed, useAttrs } from 'vue'
+import { computed, normalizeStyle, useAttrs } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome-original'
 
@@ -102,7 +102,17 @@ const forwardedAttrs = computed(() => {
 })
 
 const baseStyle = computed(() => {
-  return { ...(typeof attrs.style === 'object' && attrs.style ? attrs.style : {}) }
+  const style = attrs.style
+  if (style == null || style === '') {
+    return {}
+  }
+  // Wrap strings so normalizeStyle parses them into an object we can merge.
+  const normalized = normalizeStyle(
+    typeof style === 'string' ? [style] : style
+  )
+  return {
+    ...(normalized && typeof normalized === 'object' ? normalized : {})
+  }
 })
 
 /** FA branch keeps keyword sizes on the component prop; only merge attrs.style. */
