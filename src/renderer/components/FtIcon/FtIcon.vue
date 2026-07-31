@@ -155,7 +155,7 @@ function cssFromFaTransform(transform) {
     const flipX = transform.flipX ? -1 : 1
     const flipY = transform.flipY ? -1 : 1
     return {
-      transform: `scale(${(size / 16) * flipX}, ${(size / 16) * flipY}) translate(${x / 16}em, ${y / 16}em) rotate(${rotate}deg)`
+      transform: `translate(${x / 16}em, ${y / 16}em) scale(${(size / 16) * flipX}, ${(size / 16) * flipY}) rotate(${rotate}deg)`
     }
   }
 
@@ -215,7 +215,7 @@ function cssFromFaTransform(transform) {
   const scaleX = (size / 16) * flipX
   const scaleY = (size / 16) * flipY
   return {
-    transform: `scale(${scaleX}, ${scaleY}) translate(${x / 16}em, ${y / 16}em) rotate(${rotate}deg)`
+    transform: `translate(${x / 16}em, ${y / 16}em) scale(${scaleX}, ${scaleY}) rotate(${rotate}deg)`
   }
 }
 
