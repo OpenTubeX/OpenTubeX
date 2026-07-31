@@ -17,6 +17,7 @@
   border-style: none;
   color: inherit;
   cursor: pointer;
+
   // Avoid text-baseline strut so FA / Iconify glyphs share the same geometric center.
   line-height: 0;
   transition: background 0.15s ease-out;

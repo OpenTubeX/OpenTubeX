@@ -1,3 +1,4 @@
+import faAliasToCanon from './faAliasToCanon.json'
 import faIconMap from './faIconMap.json'
 import { currentIconPack } from './iconPackState'
 
@@ -66,15 +67,16 @@ export function resolveIconifyId(icon, pack = currentIconPack.value) {
     return null
   }
 
-  const [prefix, name] = normalized
+  const [prefix, rawName] = normalized
+  const name = faAliasToCanon[rawName] || rawName
 
-  const mapping = faIconMap[name]
+  const mapping = faIconMap[name] ?? faIconMap[rawName]
   if (!mapping) {
     // Fall back to OpenTubeX custom glyphs when a pack has no native match.
     if (prefix === 'fac') {
-      return `otx:${name}`
+      return `otx:${rawName}`
     }
-    console.warn(`[icon-pack] no mapping for ${prefix}:${name}`)
+    console.warn(`[icon-pack] no mapping for ${prefix}:${rawName}`)
     return null
   }
 

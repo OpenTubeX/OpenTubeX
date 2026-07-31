@@ -1,22 +1,30 @@
 <template>
   <FontAwesomeIcon
-    v-if="useFontAwesome"
+    v-if="useFontAwesome || !iconifyId"
+    v-bind="forwardedAttrs"
     :icon="icon"
     :fixed-width="fixedWidth"
     :size="size"
     :transform="transform"
     :class="iconClass"
-    :style="iconStyle"
+    :style="fontAwesomeStyle"
   />
-  <Icon
-    v-else-if="iconifyId"
-    :icon="iconifyId"
-    :class="['ft-icon', { 'ft-icon--fw': fixedWidth }, iconClass]"
-    :style="iconStyle"
-    width="1em"
-    height="1em"
-    aria-hidden="true"
-  />
+  <span
+    v-else
+    v-bind="forwardedAttrs"
+    class="ft-icon"
+    :class="[{ 'ft-icon--fw': fixedWidth }, iconClass]"
+    :style="iconifyWrapperStyle"
+  >
+    <Icon
+      class="ft-icon__glyph"
+      :icon="iconifyId"
+      :style="iconifyGlyphStyle"
+      width="1em"
+      height="1em"
+      aria-hidden="true"
+    />
+  </span>
 </template>
 
 <script setup>
@@ -50,6 +58,26 @@ const props = defineProps({
   }
 })
 
+/** @type {Record<string, string>} */
+const FA_SIZE_TO_EM = {
+  '2xs': '0.625em',
+  xs: '0.75em',
+  sm: '0.875em',
+  lg: '1.25em',
+  xl: '1.5em',
+  '2xl': '2em',
+  '1x': '1em',
+  '2x': '2em',
+  '3x': '3em',
+  '4x': '4em',
+  '5x': '5em',
+  '6x': '6em',
+  '7x': '7em',
+  '8x': '8em',
+  '9x': '9em',
+  '10x': '10em'
+}
+
 const attrs = useAttrs()
 
 const useFontAwesome = computed(() => currentIconPack.value === 'fontawesome')
@@ -58,24 +86,153 @@ const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 const iconClass = computed(() => attrs.class)
 
-const iconStyle = computed(() => {
-  const style = { ...(typeof attrs.style === 'object' && attrs.style ? attrs.style : {}) }
-  if (props.size != null && props.size !== '') {
-    const value = typeof props.size === 'number' || /^\d+$/.test(String(props.size))
-      ? `${props.size}px`
-      : props.size
-    style.fontSize = value
+/**
+ * Forward non-class/style attrs (e.g. aria-hidden) onto the rendered SVG/wrapper.
+ */
+const forwardedAttrs = computed(() => {
+  /** @type {Record<string, unknown>} */
+  const rest = {}
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === 'class' || key === 'style') {
+      continue
+    }
+    rest[key] = value
+  }
+  return rest
+})
+
+const baseStyle = computed(() => {
+  return { ...(typeof attrs.style === 'object' && attrs.style ? attrs.style : {}) }
+})
+
+/** FA branch keeps keyword sizes on the component prop; only merge attrs.style. */
+const fontAwesomeStyle = computed(() => baseStyle.value)
+
+/**
+ * @param {string | number | null | undefined} size
+ * @returns {string | null}
+ */
+function cssFontSizeFromFaSize(size) {
+  if (size == null || size === '') {
+    return null
+  }
+  if (typeof size === 'number' || /^\d+(\.\d+)?$/.test(String(size))) {
+    return `${size}px`
+  }
+  const key = String(size)
+  if (FA_SIZE_TO_EM[key]) {
+    return FA_SIZE_TO_EM[key]
+  }
+  // Already a CSS length (e.g. 1.2em, 20px)
+  return key
+}
+
+const iconifyWrapperStyle = computed(() => {
+  const style = { ...baseStyle.value }
+  const fontSize = cssFontSizeFromFaSize(props.size)
+  if (fontSize != null) {
+    style.fontSize = fontSize
   }
   return style
 })
+
+/**
+ * Approximate Font Awesome power-transforms for Iconify glyphs.
+ * Uses FA's 16-unit grid: shrink-7 ≈ scale(9/16), up-1 ≈ translateY(-1/16em).
+ * @param {string | Record<string, unknown> | null | undefined} transform
+ * @returns {{ transform?: string }}
+ */
+function cssFromFaTransform(transform) {
+  if (transform == null || transform === '') {
+    return {}
+  }
+
+  if (typeof transform === 'object' && !Array.isArray(transform)) {
+    const size = typeof transform.size === 'number' ? transform.size : 16
+    const x = typeof transform.x === 'number' ? transform.x : 0
+    const y = typeof transform.y === 'number' ? transform.y : 0
+    const rotate = typeof transform.rotate === 'number' ? transform.rotate : 0
+    const flipX = transform.flipX ? -1 : 1
+    const flipY = transform.flipY ? -1 : 1
+    return {
+      transform: `scale(${(size / 16) * flipX}, ${(size / 16) * flipY}) translate(${x / 16}em, ${y / 16}em) rotate(${rotate}deg)`
+    }
+  }
+
+  const tokens = String(transform).trim().split(/\s+/).filter(Boolean)
+  let size = 16
+  let x = 0
+  let y = 0
+  let rotate = 0
+  let flipX = 1
+  let flipY = 1
+
+  for (const token of tokens) {
+    let match = /^shrink-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      size -= Number(match[1])
+      continue
+    }
+    match = /^grow-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      size += Number(match[1])
+      continue
+    }
+    match = /^up-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      y -= Number(match[1])
+      continue
+    }
+    match = /^down-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      y += Number(match[1])
+      continue
+    }
+    match = /^left-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      x -= Number(match[1])
+      continue
+    }
+    match = /^right-(\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      x += Number(match[1])
+      continue
+    }
+    match = /^rotate-(-?\d+(?:\.\d+)?)$/.exec(token)
+    if (match) {
+      rotate += Number(match[1])
+      continue
+    }
+    if (token === 'flip-h') {
+      flipX *= -1
+      continue
+    }
+    if (token === 'flip-v') {
+      flipY *= -1
+    }
+  }
+
+  const scaleX = (size / 16) * flipX
+  const scaleY = (size / 16) * flipY
+  return {
+    transform: `scale(${scaleX}, ${scaleY}) translate(${x / 16}em, ${y / 16}em) rotate(${rotate}deg)`
+  }
+}
+
+const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
 </script>
 
 <style>
 .ft-icon {
   display: inline-block;
   flex-shrink: 0;
+  line-height: 1;
   overflow: visible;
   vertical-align: -0.125em;
+}
+
+.ft-icon__glyph {
+  display: block;
 }
 
 .ft-icon--fw {
