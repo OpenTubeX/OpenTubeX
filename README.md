@@ -2,8 +2,12 @@
  <img alt="" src="/_icons/logoColor.svg" width=500 align="center">
 </p>
 
-OpenTubeX is an open-source, privacy-focused desktop YouTube player built on FreeTube, with additional playback controls and desktop workflows.
+OpenTubeX is an open-source, highly customizable, privacy-focused desktop YouTube client.
 It is available for Windows 10 and later, macOS 12 and later, and Linux.
+
+OpenTubeX originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
+and is independently developed and supported. It is not affiliated with,
+endorsed by, maintained by, or supported by the FreeTube project.
 
 <br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
 <p align="center">
@@ -16,13 +20,14 @@ It is available for Windows 10 and later, macOS 12 and later, and Linux.
 </p>
 
 <hr>
-<p align="center"><a href="#why-opentubex">Why OpenTubeX?</a> &bull; <a href="#extra-features-compared-to-freetube">Extra features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
+<p align="center"><a href="#why-opentubex">Why OpenTubeX?</a> &bull; <a href="#features-added-by-opentubex">Added features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
 ## Why OpenTubeX?
 
-OpenTubeX builds on FreeTube and is aimed at users who want:
+OpenTubeX is aimed at users who want extensive control over their viewing
+experience. Some of its major areas of focus are:
 
 - **More playback control**, including per-channel speed and quality preferences, customizable shortcuts, a quick speed bar and fast-forwarding through silence.
 - **A browser-style desktop workflow** with tabs, configurable session restoration, multiple windows, a scroll mini-player and a watch queue.
@@ -35,12 +40,12 @@ OpenTubeX builds on FreeTube and is aimed at users who want:
 >
 > If you have an idea or if you found a bug, please submit a [GitHub issue](https://github.com/OpenTubeX/OpenTubeX/issues/new/choose) so that we can track it.  Please [search the existing issues](https://github.com/OpenTubeX/OpenTubeX/issues?q=is%3Aissue+sort%3Arelevance-desc) before submitting to prevent duplicates!
 
-## Extra features compared to FreeTube
+## Features added by OpenTubeX
 
-[View the extra features on the OpenTubeX website](https://opentubex.org/extra-features/), or expand the list below.
+[View the feature overview on the OpenTubeX website](https://opentubex.org/extra-features/), or expand the list below.
 
 <details>
-<summary>Show extra features</summary>
+<summary>Show feature list</summary>
 
 - Remember playback speed on a per-channel basis. You can enable it in settings. When enabled, you can either have speeds saved automatically whenever you change them via the player options or keep automatic saving off and use a dedicated button below the player to manually save the current speed for that channel.
  <img height="150" alt="image" src="https://github.com/user-attachments/assets/e8fe58f3-80f0-4280-946e-abf997f0eac3" />
