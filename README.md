@@ -391,7 +391,7 @@ We are actively looking for translations! We use [Weblate](https://weblate.d3sox
 For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 
 ## Contact
-If you ever have any questions, feel free to ask it on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page.
+If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page or join our [Fluxer](https://fluxer.gg/PHdJoM1G) server.
 
 ## License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  
