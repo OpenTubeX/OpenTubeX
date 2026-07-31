@@ -1,16 +1,14 @@
 <template>
   <FontAwesomeLayers
     v-if="useFontAwesome"
-    :class="attrs.class"
-    :style="attrs.style"
+    v-bind="attrs"
   >
     <slot />
   </FontAwesomeLayers>
   <span
     v-else
+    v-bind="attrs"
     class="ft-icon-layers"
-    :class="attrs.class"
-    :style="attrs.style"
   >
     <slot />
   </span>
