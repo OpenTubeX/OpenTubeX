@@ -5,4 +5,4 @@
 - After creating a PR wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
 - Always prefer bundling follow up changes and review resolving commits into one push.
 - For icon-pack / Font Awesome replacement work (#388): get human confirmation that remapped glyphs fit visually in every pack (Material, Tabler, Phosphor, Lucide, Remix, and Font Awesome legacy) before considering the mapping done.
-- Never use the "FreeTube" name for promotion of the project (see issue #391 for details when in doubt).
+- Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).
