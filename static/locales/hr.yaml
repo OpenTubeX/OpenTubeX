@@ -872,7 +872,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Oglas završava za: {remindingTimeSeconds} s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': 'Preostalo vrijeme prije ponovnog pokušaja: {remindingTimeSeconds} s'
-  Private: Privatna videa se ne mogu gledati na FreeTubeu jer zahtijevaju prijavu na Google i vlasništvo nad videom.
+  Private: Privatna videa se ne mogu gledati na OpenTubeXu jer zahtijevaju prijavu na Google i vlasništvo nad videom.
 Playlist:
   #& About
   View Full Playlist: 'Pogledaj cijelu zbirku'

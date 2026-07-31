@@ -877,7 +877,7 @@ Video:
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Amser hysbysiadau cyn cyflwyniad: {remindingTimeSeconds}s'
     'Remaining SABR backoff time: {remindingTimeSeconds}s': "Amser cefnu SABR sy'n weddill: {remindingTimeSeconds}s"
-  Private: Does dim modd gwylio fideos preifat yn FreeTube gan fod angen mewngofnodiad Google arnyn nhw a pherchnogaeth o'r fideo.
+  Private: Does dim modd gwylio fideos preifat yn OpenTubeX gan fod angen mewngofnodiad Google arnyn nhw a pherchnogaeth o'r fideo.
 Playlist:
   #& About
   Playlist: 'Rhestr chwarae'
