@@ -26,9 +26,7 @@
         <FontAwesomeIcon
           class="previewIcon"
           :icon="sample"
-          fixed-width
         />
-        <span class="previewName">{{ sample[0] }} {{ sample[1] }}</span>
       </div>
     </div>
   </div>

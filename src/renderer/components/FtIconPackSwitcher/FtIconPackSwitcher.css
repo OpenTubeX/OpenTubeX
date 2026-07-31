@@ -9,8 +9,9 @@
 
 .previewGrid {
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 4px;
+  grid-template-columns: repeat(auto-fill, 2rem);
+  justify-content: center;
   inline-size: 100%;
   max-block-size: 220px;
   max-inline-size: calc(100% - 48px);
@@ -26,12 +27,10 @@
 .previewItem {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
   justify-content: center;
-  min-block-size: 56px;
-  padding-block: 6px;
-  padding-inline: 4px;
+  block-size: 2rem;
+  inline-size: 2rem;
+  line-height: 0;
   border-radius: calc(var(--ui-roundness, 8px) * 0.75);
   color: var(--primary-text-color);
 }
@@ -41,16 +40,13 @@
 }
 
 .previewIcon {
-  font-size: 20px;
+  font-size: 1.25rem;
+  line-height: 0;
 }
 
-.previewName {
-  color: var(--tertiary-text-color);
-  font-size: 11px;
-  line-height: 1.2;
-  max-inline-size: 100%;
-  overflow: hidden;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.previewItem :deep(.ft-icon),
+.previewItem :deep(.svg-inline--fa) {
+  display: block;
+  margin: 0;
+  vertical-align: 0;
 }
