@@ -17,6 +17,9 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="https://weblate.d3sox.me/engage/opentubex/">
     <img src="https://weblate.d3sox.me/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
   </a>
+  <a href="https://fluxer.gg/PHdJoM1G">
+    <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&query=%24.member_count&label=Fluxer&suffix=%20members&color=4641D9&logo=discord&logoColor=white" />
+  </a>
 </p>
 
 <hr>
