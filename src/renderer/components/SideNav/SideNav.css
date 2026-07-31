@@ -83,8 +83,9 @@
 
 .navIcon {
   block-size: 1em;
-  inline-size: 100%;
+  inline-size: 1em;
   display: block;
+  margin-inline: auto;
 }
 
 .navIcon.fa-user-check {

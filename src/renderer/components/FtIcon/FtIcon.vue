@@ -243,6 +243,8 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
 
 .ft-icon__glyph {
   display: block;
+  /* Center when callers stretch .ft-icon wider than 1em (e.g. SideNav .navIcon). */
+  margin-inline: auto;
 }
 
 .ft-icon--fw {
