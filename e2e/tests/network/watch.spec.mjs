@@ -1141,6 +1141,46 @@ test.describe('watch page', () => {
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
   })
 
+  test.describe('fullscreen captions', () => {
+    test.use({
+      seed: {
+        settings: {
+          defaultCaptionSettings: JSON.stringify({ fontScale: 1.5 })
+        }
+      }
+    })
+
+    test('keeps the configured caption size in fullscreen', async ({ page, innertube }) => {
+      test.skip(innertube.replay, 'watch page hydration needs the real API')
+      await openVideo(page)
+
+      const player = page.locator('.ftVideoPlayer')
+      await player.evaluate(element => {
+        for (const className of ['shaka-text-container', 'shaka-speech-to-text-container']) {
+          if (element.querySelector(`.${className}`)) continue
+
+          const captions = document.createElement('div')
+          captions.className = className
+          element.append(captions)
+        }
+      })
+
+      const captionContainers = player.locator(
+        '.shaka-text-container, .shaka-speech-to-text-container'
+      )
+      await expect(captionContainers).toHaveCount(2)
+      const windowedFontSizes = await captionContainers.evaluateAll(elements => {
+        return elements.map(element => getComputedStyle(element).fontSize)
+      })
+      expect(windowedFontSizes).toEqual(['30px', '30px'])
+
+      await setPlayerFullscreen(page, true)
+      await expect.poll(async () => captionContainers.evaluateAll(elements => {
+        return elements.map(element => getComputedStyle(element).fontSize)
+      })).toEqual(windowedFontSizes)
+    })
+  })
+
   test.describe('fullscreen playlist dock', () => {
     test.use({
       seed: {

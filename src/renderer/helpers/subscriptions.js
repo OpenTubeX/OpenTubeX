@@ -10,7 +10,7 @@ import {
   getLocalChannelLiveStreams,
   getLocalChannelVideos,
   getLocalPlaylist,
-  parseLocalPlaylistVideo
+  parseLocalPlaylistVideos
 } from './api/local'
 import {
   fetchWithTimeout,
@@ -1182,7 +1182,7 @@ async function getChannelShortsLocal(channel, t, errorChannels, failedAttempts =
 async function getLocalShortThumbnailEntries(playlistId) {
   try {
     const playlist = await getLocalPlaylist(playlistId)
-    return playlist.items.map(parseLocalPlaylistVideo)
+    return parseLocalPlaylistVideos(playlist.items)
   } catch (error) {
     console.warn(`Failed to load selected Shorts thumbnails for ${playlistId}`, error)
     return []

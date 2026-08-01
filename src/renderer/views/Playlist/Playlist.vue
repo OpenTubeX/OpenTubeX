@@ -197,7 +197,7 @@ import {
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
   getLocalPlaylistContinuation,
-  parseLocalPlaylistVideo,
+  parseLocalPlaylistVideos,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -483,7 +483,7 @@ async function getPlaylistLocal() {
       }
     }
 
-    const playlistItems_ = result.items.map(parseLocalPlaylistVideo)
+    const playlistItems_ = parseLocalPlaylistVideos(result.items)
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
@@ -696,7 +696,7 @@ async function getNextPageLocal() {
   let shouldGetNextPage = false
 
   if (result) {
-    const parsedVideos = result.items.map(parseLocalPlaylistVideo)
+    const parsedVideos = parseLocalPlaylistVideos(result.items)
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
     if (result.has_continuation) {
