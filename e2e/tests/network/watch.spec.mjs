@@ -101,10 +101,48 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
-test('theatre mode works until its responsive button cutoff', async ({ app, page, innertube }) => {
-  test.skip(innertube.replay, 'watch page hydration needs the real API')
+test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
   await setWindowWidth(app, 1500)
-  await openVideo(page)
+  await page.locator(sel.searchInput).fill(VIDEO_URL)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.videoLayout')).toBeVisible()
+  await page.evaluate(async () => {
+    const layout = document.querySelector('.videoLayout')
+    const app = document.querySelector('#app')?.__vue_app__
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.refs?.videoLayout === layout) {
+        return vnode.component.proxy
+      }
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) {
+          return match
+        }
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) {
+            return match
+          }
+        }
+      }
+      return null
+    }
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) {
+      throw new Error('Unable to access the watch view')
+    }
+
+    watchView.videoLoadGeneration += 1
+    watchView.errorMessage = null
+    watchView.isUpcoming = false
+    watchView.playabilityStatus = 'OK'
+    watchView.showTranscript = true
+    watchView.isLoading = false
+    await watchView.$nextTick()
+  })
 
   const layout = page.locator('.videoLayout')
   const theatreButton = page.locator('.theatre-button').first()
@@ -134,6 +172,7 @@ test('theatre mode works until its responsive button cutoff', async ({ app, page
 
   await setWindowWidth(app, 1200)
   await expect(theatreButton).toBeHidden()
+  await expect(page.locator('.ftVideoPlayerHost')).toHaveClass(/theatreUnavailable/)
 
   await page.keyboard.press('t')
   await expect(layout).not.toHaveClass(/useTheatreMode/)
