@@ -1531,7 +1531,11 @@
   display: flex;
 }
 
-/* Let Shaka's seek preview and control tooltips pass in front of the fullscreen action pill. */
+/* Let Shaka's seek preview pass in front of annotations and the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :deep(.shaka-controls-container) {
+  z-index: 3;
+}
+
 .ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
   .ftVideoPlayer:has(:deep(
     .shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)
