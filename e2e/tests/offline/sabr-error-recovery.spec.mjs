@@ -110,9 +110,10 @@ async function mockWatchPage(app, page) {
  *
  * @param {import('@playwright/test').Page} page
  * @param {Array<{ error: true } | { playFor: number } | { seekTo: number }>} script
+ * @param {{ isLoading?: boolean, legacyFormats?: Array<object> }} options
  */
-function driveWatchView(page, script) {
-  return page.evaluate(async (steps) => {
+function driveWatchView(page, script, options = {}) {
+  return page.evaluate(async ({ steps, isLoading, legacyFormats }) => {
     const app = document.querySelector('#app')?.__vue_app__
 
     const findWatchView = (vnode) => {
@@ -139,13 +140,13 @@ function driveWatchView(page, script) {
 
     // The state a video that is playing a SABR stream on the DASH format is in.
     watchView.errorMessage = ''
-    watchView.isLoading = false
+    watchView.isLoading = isLoading
     watchView.isLive = false
     watchView.isPostLiveDvr = false
     watchView.activeFormat = 'dash'
     watchView.manifestMimeType = 'application/sabr+json'
     watchView.manifestSrc = 'sabr://test'
-    watchView.legacyFormats = [{ itag: 18, qualityLabel: '360p', height: 360, width: 640, url: 'https://example.invalid/360p' }]
+    watchView.legacyFormats = legacyFormats
 
     const reloads = []
     watchView.onPlayerReloadRequested = async (_payload, toastMessage) => {
@@ -183,7 +184,11 @@ function driveWatchView(page, script) {
     }
 
     return { reloads, formats, finalFormat: watchView.activeFormat }
-  }, script)
+  }, {
+    steps: script,
+    isLoading: options.isLoading ?? false,
+    legacyFormats: options.legacyFormats ?? [{ itag: 18, qualityLabel: '360p', height: 360, width: 640, url: 'https://example.invalid/360p' }]
+  })
 }
 
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
@@ -225,6 +230,32 @@ test('SABR failures that never settle stop refetching and fall back to legacy', 
 
   expect(result.reloads).toHaveLength(3)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
+})
+
+test('a SABR failure skips to audio when no 360p fallback is available', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [{ error: true }], { legacyFormats: [] })
+
+  expect(result.reloads).toHaveLength(0)
+  expect(result.finalFormat).toBe('audio')
+})
+
+test('an error from the outgoing player is ignored while the view reloads', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [{ error: true }], { isLoading: true, legacyFormats: [] })
+
+  expect(result.reloads).toHaveLength(0)
+  expect(result.finalFormat).toBe('dash')
 })
 
 test('seeking around a stream that never plays does not refill the budget', async ({ app, page }) => {

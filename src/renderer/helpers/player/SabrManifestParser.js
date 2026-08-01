@@ -6,22 +6,17 @@ import { parseMp4SegmentIndex } from './Mp4SegmentIndexParser'
  * @typedef {{
  *   scheme: string,
  *   duration: number,
- *   isLive?: boolean,
- *   presentationStartTime?: number,
- *   presentationDelay?: number,
- *   segmentDuration?: number,
- *   segmentAvailabilityDuration?: number,
  *   formats: {
  *     itag: number,
  *     lastModified: string,
  *     mimeType: string,
  *     xtags: string | undefined,
  *     bitrate: number,
- *     initRange?: {
+ *     initRange: {
  *       start: number,
  *       end: number
  *     },
- *     indexRange?: {
+ *     indexRange: {
  *       start: number,
  *       end: number
  *     },
@@ -140,22 +135,12 @@ class SabrManifestParser {
 
     /** @type {SabrManifest} */
     const manifestData = JSON.parse(decodeURIComponent(uri.slice(uriPrefixLength)))
-    const isLive = manifestData.isLive === true
-    const presentationStartTime = isLive ? manifestData.presentationStartTime : 0
-    const presentationDelay = isLive ? manifestData.presentationDelay ?? 0 : 0
-    const presentationTimeline = new shaka.media.PresentationTimeline(
-      presentationStartTime,
-      presentationDelay,
-      true,
-      manifestData.segmentDuration ?? 1
-    )
 
-    presentationTimeline.setStatic(!isLive)
-    presentationTimeline.setSegmentAvailabilityDuration(
-      isLive ? manifestData.segmentAvailabilityDuration ?? Infinity : Infinity
-    )
+    const presentationTimeline = new shaka.media.PresentationTimeline(0, 0, true)
+    presentationTimeline.setStatic(true)
+    presentationTimeline.setSegmentAvailabilityDuration(Infinity)
     presentationTimeline.lockStartTime()
-    presentationTimeline.setDuration(isLive ? Infinity : manifestData.duration)
+    presentationTimeline.setDuration(manifestData.duration)
 
     let currentId = 0
 
@@ -309,7 +294,7 @@ class SabrManifestParser {
  * @param {SabrManifest['formats'][0]} format
  */
 function buildFormatId(format) {
-  return `${format.itag}-${format.lastModified ?? ''}-${format.xtags ?? ''}`
+  return `${format.itag}-${format.lastModified ?? '0'}-${format.xtags ?? ''}`
 }
 
 /**
@@ -683,18 +668,10 @@ async function createMediaSegmentIndex(
     url += `&resolution=${resolution}`
   }
 
-  if (presentationTimeline.isLive()) {
-    url += '&live'
-  }
-
-  const initUrl = presentationTimeline.isLive()
-    ? `${url}&init&startTimeMs=0`
-    : `${url}&init`
-
   /** @type {shaka.extern.Request} */
   const request = {
     method: 'GET',
-    uris: [initUrl],
+    uris: [`${url}&init`],
     contentType: stream.type,
     body: null,
     headers: {},
@@ -718,130 +695,19 @@ async function createMediaSegmentIndex(
     }
   ).promise
 
-  const segmentIndex = presentationTimeline.isLive()
-    ? /** @__NOINLINE__ */ createLiveMediaSegmentIndex(initUrl, url, response, stream, presentationTimeline)
-    : /** @__NOINLINE__ */ createVodMediaSegmentIndex(
-        url,
-        response,
-        format,
-        stream,
-        presentationTimeline.getDuration()
-      )
-
-  presentationTimeline.notifySegments([...segmentIndex])
-
-  return segmentIndex
+  return /** @__NOINLINE__ */ createVodMediaSegmentIndex(url, response, format, stream, presentationTimeline.getDuration())
 }
 
 /**
- * Live SABR formats have no byte index. The server selects a segment from the
- * requested playback time, so expose the moving DVR window as timed references.
- *
- * @param {string} initUrl
  * @param {string} url
  * @param {shaka.extern.Response} response
+ * @param {SabrManifest['formats'][0]} format
  * @param {shaka.extern.Stream} stream
- * @param {shaka.media.PresentationTimeline} presentationTimeline
+ * @param {number} duration
  */
-function createLiveMediaSegmentIndex(initUrl, url, response, stream, presentationTimeline) {
-  const segmentDuration = presentationTimeline.getMaxSegmentDuration()
-  const mediaQuality = /** @__NOINLINE__ */ createMediaQualityInfo(stream)
-  const liveMetadataHeader = response.headers['x-sabr-live-metadata']
-  const liveMetadata = liveMetadataHeader ? JSON.parse(liveMetadataHeader) : null
-  const headTime = Number(liveMetadata?.headTimeMs) / 1000
-  const wallTime = Number(liveMetadata?.wallTimeMs) / 1000
-  const minSeekableTime = Number(liveMetadata?.minSeekableTimeTicks) / Number(liveMetadata?.minSeekableTimescale)
-  const maxSeekableTime = Number(liveMetadata?.maxSeekableTimeTicks) / Number(liveMetadata?.maxSeekableTimescale)
-
-  if (Number.isFinite(headTime) && Number.isFinite(wallTime)) {
-    presentationTimeline.setPresentationStartTime(wallTime - headTime)
-  }
-  if (Number.isFinite(minSeekableTime) && Number.isFinite(maxSeekableTime) && maxSeekableTime > minSeekableTime) {
-    presentationTimeline.setSegmentAvailabilityDuration(maxSeekableTime - minSeekableTime)
-  }
-  const initializationMetadataHeader = response.headers['x-sabr-format-initialization']
-  const initializationMetadata = initializationMetadataHeader
-    ? JSON.parse(initializationMetadataHeader)
-    : null
-  const initRange = initializationMetadata?.initRange
-  const responseBuffer = ArrayBuffer.isView(response.data)
-    ? response.data.buffer.slice(response.data.byteOffset, response.data.byteOffset + response.data.byteLength)
-    : response.data
-  const initData = Number.isInteger(initRange?.start) && Number.isInteger(initRange?.end)
-    ? responseBuffer.slice(initRange.start, initRange.end + 1)
-    : responseBuffer
-
-  if (initData.byteLength <= 4) {
-    throw new Error('Live SABR response did not contain valid initialization data')
-  }
-
-  const initSegmentReference = new shaka.media.InitSegmentReference(
-    () => [initUrl],
-    initRange?.start ?? 0,
-    initRange?.end ?? null,
-    mediaQuality,
-    null,
-    initData,
-    null
-  )
-
-  initSegmentReference.mimeType = stream.mimeType
-  initSegmentReference.codecs = stream.codecs
-
-  /** @param {number} segmentNumber */
-  const createReference = (segmentNumber) => {
-    const startTime = segmentNumber * segmentDuration
-    const reference = new shaka.media.SegmentReference(
-      startTime,
-      startTime + segmentDuration,
-      // SABR selects the segment ending at playerTimeMs, while Shaka asks for
-      // the reference containing the playhead. Request the reference end so
-      // the returned media timestamps cover [startTime, endTime].
-      () => [`${url}&startTimeMs=${Math.round((startTime + segmentDuration) * 1000)}`],
-      0,
-      null,
-      initSegmentReference,
-      0,
-      0,
-      Infinity
-    )
-
-    reference.mimeType = stream.mimeType
-    reference.codecs = stream.codecs
-    return reference
-  }
-
-  const availabilityStart = presentationTimeline.getSegmentAvailabilityStart()
-  const availabilityEnd = presentationTimeline.getSegmentAvailabilityEnd()
-  const firstSegmentNumber = Math.max(0, Math.floor(availabilityStart / segmentDuration))
-  let nextSegmentNumber = Math.max(firstSegmentNumber, Math.floor(availabilityEnd / segmentDuration))
-  const references = []
-
-  for (let segmentNumber = firstSegmentNumber; segmentNumber < nextSegmentNumber; segmentNumber++) {
-    references.push(createReference(segmentNumber))
-  }
-
-  const segmentIndex = new shaka.media.SegmentIndex(references)
-  segmentIndex.updateEvery(segmentDuration, () => {
-    segmentIndex.evict(presentationTimeline.getSegmentAvailabilityStart())
-
-    const endSegmentNumber = Math.floor(presentationTimeline.getSegmentAvailabilityEnd() / segmentDuration)
-    const newReferences = []
-    while (nextSegmentNumber < endSegmentNumber) {
-      newReferences.push(createReference(nextSegmentNumber++))
-    }
-    return newReferences
-  })
-
-  return segmentIndex
-}
-
-/**
- * @param {shaka.extern.Stream} stream
- * @returns {shaka.extern.MediaQualityInfo}
- */
-function createMediaQualityInfo(stream) {
-  return {
+function createVodMediaSegmentIndex(url, response, format, stream, duration) {
+  /** @type {shaka.extern.MediaQualityInfo} */
+  const mediaQuality = {
     contentType: stream.type,
     bandwidth: stream.bandwidth,
     mimeType: stream.mimeType,
@@ -856,17 +722,6 @@ function createMediaQualityInfo(stream) {
     roles: stream.roles,
     pixelAspectRatio: stream.pixelAspectRatio ?? null
   }
-}
-
-/**
- * @param {string} url
- * @param {shaka.extern.Response} response
- * @param {SabrManifest['formats'][0]} format
- * @param {shaka.extern.Stream} stream
- * @param {number} duration
- */
-function createVodMediaSegmentIndex(url, response, format, stream, duration) {
-  const mediaQuality = /** @__NOINLINE__ */ createMediaQualityInfo(stream)
 
   const buffer = ArrayBuffer.isView(response.data) ? response.data.buffer : response.data
 
