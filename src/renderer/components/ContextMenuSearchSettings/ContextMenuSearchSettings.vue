@@ -5,6 +5,9 @@
     <p class="description">
       {{ t('Settings.Context Menu Search Settings.Description') }}
     </p>
+    <p class="hint">
+      {{ t('Settings.Context Menu Search Settings.Icon Hint') }}
+    </p>
 
     <div class="engineList">
       <div
@@ -141,7 +144,7 @@ function handleFaviconError(engine) {
 
 watch(configuredSearchEngines, (engines) => {
   for (const engine of engines) {
-    if (resolvedFavicons.value.has(engine.url)) continue
+    if (!engine.enabled || resolvedFavicons.value.has(engine.url)) continue
 
     window.ftElectron.resolveFavicon(engine.url).then(icon => {
       resolvedFavicons.value = new Map([...resolvedFavicons.value, [engine.url, icon]])

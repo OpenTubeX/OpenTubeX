@@ -16,6 +16,8 @@
         @change="handleRestartPrompt"
       />
     </FtFlexBox>
+    <br>
+    <FtIconPackSwitcher />
     <FtPrompt
       v-if="showRestartPrompt"
       :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
@@ -32,6 +34,7 @@ import { onMounted, ref } from 'vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtIconPackSwitcher from '../FtIconPackSwitcher/FtIconPackSwitcher.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
 const replaceHttpCacheLoading = ref(true)

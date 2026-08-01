@@ -127,6 +127,8 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByLabel('Enable Sync').click()
+
     const privacyPolicy = syncSection.getByRole('link', {
       name: 'Privacy policy for this server'
     })
@@ -138,6 +140,21 @@ test.describe('settings', () => {
 
     await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
     await expect(privacyPolicy).toHaveCount(0)
+  })
+
+  test('keeps the sync server idle until sync is enabled', async ({ page }) => {
+    const syncRequests = []
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      syncRequests.push(route.request().url())
+      await route.fulfill({ status: 200, body: 'OK' })
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.getByLabel('Server URL')).toHaveCount(0)
+    await page.waitForTimeout(500)
+    expect(syncRequests).toEqual([])
   })
 
   test('a toggled setting persists across restarts', async ({ app }) => {
@@ -522,6 +539,7 @@ test.describe('sync settings', () => {
   test.use({
     seed: {
       settings: {
+        syncServerEnabled: true,
         syncServerAutoSync: false,
         syncServerPrivacyKey: 'e2e-privacy-key',
         syncServerPrivacyMode: 'legacy',
@@ -705,6 +723,7 @@ test.describe('synced setting indicators', () => {
     seed: {
       settings: {
         reducedMotion: 'on',
+        syncServerEnabled: true,
         syncServerAutoSync: false,
         syncServerSyncSettings: true,
         syncServerToken: 'e2e-sync-token'

@@ -361,6 +361,7 @@ const state = {
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,
+  syncServerEnabled: false,
   syncServerUrl: 'https://sync.d3sox.me',
   syncServerUsername: '',
   syncServerToken: '',
@@ -591,6 +592,7 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'settingsPassword',
   'screenshotAskPath',
   'screenshotFolderPath',
+  'syncServerEnabled',
   'syncServerUrl',
   'syncServerUsername',
   'syncServerToken',
@@ -757,6 +759,14 @@ const customActions = {
 
       if (legacyAutoPipModeEntry && !hasScrollMiniSetting) {
         await dispatch('updateScrollMiniPlayerEnabled', legacyAutoPipModeEntry.value !== 'never')
+      }
+
+      // Existing logged-in sync users keep sync enabled; everyone else starts off
+      // so the default server is not contacted until the user opts in.
+      const hasSyncServerEnabledSetting = userSettings.some(entry => entry._id === 'syncServerEnabled')
+      if (!hasSyncServerEnabledSetting) {
+        const token = typeof state.syncServerToken === 'string' ? state.syncServerToken : ''
+        await dispatch('updateSyncServerEnabled', token !== '')
       }
 
       for (const _id of settingsWithSideEffects) {

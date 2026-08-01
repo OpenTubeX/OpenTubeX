@@ -41,6 +41,7 @@ test.describe('OpenTubeX sync server', () => {
     seed: {
       settings: {
         baseTheme: 'dark',
+        syncServerEnabled: true,
         channelPlaybackSpeeds: JSON.stringify({ [channelId]: 1.5 })
       },
       profiles: [{

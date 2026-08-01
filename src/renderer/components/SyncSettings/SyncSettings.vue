@@ -3,328 +3,338 @@
     <p class="description">
       {{ t('Settings.Sync Settings.Description') }}
     </p>
-    <FtFlexBox class="fields">
-      <FtInput
-        :placeholder="t('Settings.Sync Settings.Server URL')"
-        :show-action-button="false"
-        :data-list="syncServerInstances"
-        :value="serverUrl"
-        :disabled="connected || authenticating"
-        show-label
-        @input="serverUrl = $event"
-        @blur="saveServerUrl"
-      />
-      <FtInput
-        :placeholder="t('Settings.Sync Settings.Username')"
-        :show-action-button="false"
-        :value="username"
-        :disabled="connected || serverCredentialsDisabled"
-        show-label
-        @input="username = $event"
-      />
-      <FtInput
-        v-if="!connected"
-        :placeholder="t('Settings.Sync Settings.Password')"
-        :show-action-button="false"
-        :value="password"
-        :disabled="serverCredentialsDisabled"
-        input-type="password"
-        show-label
-        @input="password = $event"
-        @keydown.enter="authenticate('login')"
-      />
-      <FtInput
-        v-if="!connected && serverPrivacySupported !== false"
-        :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
-        :show-action-button="false"
-        :value="privacyPassphrase"
-        :disabled="serverCredentialsDisabled"
-        input-type="password"
-        show-label
-        @input="privacyPassphrase = $event"
-        @keydown.enter="authenticate('login')"
+    <FtFlexBox class="toggles">
+      <FtToggleSwitch
+        :label="t('Settings.Sync Settings.Enable Sync')"
+        :default-value="syncEnabled"
+        compact
+        @change="setSyncEnabled"
       />
     </FtFlexBox>
-    <p
-      v-if="privacyPolicyUrl"
-      class="privacyPolicy"
-    >
-      <a :href="privacyPolicyUrl">
-        {{ t('Settings.Sync Settings.Privacy Policy') }}
-      </a>
-    </p>
-    <p
-      v-if="!connected && serverPrivacySupported !== false"
-      class="privacyHint"
-    >
-      {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
-    </p>
-    <p
-      v-if="!connected && serverCheckStatus === 'checking'"
-      class="serverCheckStatus"
-      aria-live="polite"
-    >
-      {{ t('Settings.Sync Settings.Checking Server') }}
-    </p>
-    <p
-      v-if="!connected && serverPrivacySupported === false"
-      class="privacyWarning"
-      role="status"
-    >
-      {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
-    </p>
-
-    <div
-      v-if="busy && syncProgress"
-      class="syncProgress"
-      aria-live="polite"
-    >
-      <div class="syncProgressLabel">
-        <span>{{ syncProgressLabel }}</span>
-        <span>
-          {{ t('Settings.Sync Settings.Sync progress percentage', {
-            percentage: syncProgress.percentage,
-          }) }}
-        </span>
-      </div>
-      <div
-        class="syncProgressTrack"
-        role="progressbar"
-        :aria-label="syncProgressLabel"
-        :aria-valuenow="syncProgress.percentage"
-        aria-valuemin="0"
-        aria-valuemax="100"
-      >
-        <div
-          class="syncProgressFill"
-          :style="{ inlineSize: `${syncProgress.percentage}%` }"
+    <template v-if="syncEnabled">
+      <FtFlexBox class="fields">
+        <FtInput
+          :placeholder="t('Settings.Sync Settings.Server URL')"
+          :show-action-button="false"
+          :data-list="syncServerInstances"
+          :value="serverUrl"
+          :disabled="connected || authenticating"
+          show-label
+          @input="serverUrl = $event"
+          @blur="saveServerUrl"
         />
-      </div>
-    </div>
-    <FtLoader v-else-if="busy" />
-    <p
-      v-if="errorMessage"
-      class="error"
-      role="alert"
-    >
-      {{ errorMessage }}
-    </p>
-
-    <template v-if="connected">
-      <p class="connectionStatus">
-        {{ t('Settings.Sync Settings.Connected as', { username: savedUsername }) }}
-      </p>
+        <FtInput
+          :placeholder="t('Settings.Sync Settings.Username')"
+          :show-action-button="false"
+          :value="username"
+          :disabled="connected || serverCredentialsDisabled"
+          show-label
+          @input="username = $event"
+        />
+        <FtInput
+          v-if="!connected"
+          :placeholder="t('Settings.Sync Settings.Password')"
+          :show-action-button="false"
+          :value="password"
+          :disabled="serverCredentialsDisabled"
+          input-type="password"
+          show-label
+          @input="password = $event"
+          @keydown.enter="authenticate('login')"
+        />
+        <FtInput
+          v-if="!connected && serverPrivacySupported !== false"
+          :placeholder="t('Settings.Sync Settings.Privacy Passphrase')"
+          :show-action-button="false"
+          :value="privacyPassphrase"
+          :disabled="serverCredentialsDisabled"
+          input-type="password"
+          show-label
+          @input="privacyPassphrase = $event"
+          @keydown.enter="authenticate('login')"
+        />
+      </FtFlexBox>
       <p
-        v-if="privacyMode === 'enhanced'"
-        class="privacyStatus"
+        v-if="privacyPolicyUrl"
+        class="privacyPolicy"
       >
-        {{ t('Settings.Sync Settings.Enhanced Privacy Enabled') }}
+        <a :href="privacyPolicyUrl">
+          {{ t('Settings.Sync Settings.Privacy Policy') }}
+        </a>
       </p>
       <p
-        v-else-if="privacyMode === 'legacy'"
+        v-if="!connected && serverPrivacySupported !== false"
+        class="privacyHint"
+      >
+        {{ t('Settings.Sync Settings.Privacy Passphrase Hint') }}
+      </p>
+      <p
+        v-if="!connected && serverCheckStatus === 'checking'"
+        class="serverCheckStatus"
+        aria-live="polite"
+      >
+        {{ t('Settings.Sync Settings.Checking Server') }}
+      </p>
+      <p
+        v-if="!connected && serverPrivacySupported === false"
         class="privacyWarning"
-        role="alert"
+        role="status"
       >
         {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
       </p>
-      <FtFlexBox class="toggles">
-        <FtToggleSwitch
-          :label="t('Settings.Sync Settings.Automatic Sync')"
-          :default-value="autoSync"
-          compact
-          @change="setAutoSync"
-        />
-        <FtToggleSwitch
-          :label="t('Subscriptions.Subscriptions')"
-          :default-value="syncSubscriptionsEnabled"
-          :disabled="busy"
-          compact
-          @change="store.dispatch('updateSyncServerSyncSubscriptions', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Playlists')"
-          :default-value="syncPlaylistsEnabled"
-          :disabled="busy"
-          compact
-          @change="store.dispatch('updateSyncServerSyncPlaylists', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('History.History')"
-          :default-value="syncHistoryEnabled"
-          :disabled="busy || historySupported === false"
-          compact
-          @change="store.dispatch('updateSyncServerSyncHistory', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Sync Settings.Channel Playback Speeds')"
-          :default-value="syncPlaybackSpeedsEnabled"
-          :disabled="busy || playbackSpeedsSupported === false"
-          compact
-          @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Sync Settings.Profiles')"
-          :default-value="syncProfilesEnabled"
-          :disabled="busy"
-          compact
-          @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
-        />
-        <FtToggleSwitch
-          v-if="sessionsSupported"
-          :label="t('Settings.Sync Settings.Open Tabs')"
-          :default-value="syncSessionsEnabled"
-          :disabled="busy"
-          compact
-          @change="store.dispatch('updateSyncServerSyncSessions', $event)"
-        />
-        <FtToggleSwitch
-          :label="t('Settings.Sync Settings.Settings')"
-          :default-value="syncSettingsEnabled"
-          :disabled="busy || settingsSupported === false"
-          compact
-          @change="store.dispatch('updateSyncServerSyncSettings', $event)"
-        />
-      </FtFlexBox>
-      <p
-        v-if="lastSyncLabel"
-        class="lastSync"
+
+      <div
+        v-if="busy && syncProgress"
+        class="syncProgress"
+        aria-live="polite"
       >
-        {{ t('Settings.Sync Settings.Last synced', { date: lastSyncLabel }) }}
-      </p>
-      <p
-        v-if="historySupported === false"
-        class="compatibilityWarning"
-      >
-        {{ t('Settings.Sync Settings.History not supported') }}
-      </p>
-      <p
-        v-if="playbackSpeedsSupported === false && settingsSupported"
-        class="compatibilityWarning"
-      >
-        {{ t('Settings.Sync Settings.Playback speeds not supported') }}
-      </p>
-      <p
-        v-else-if="playbackSpeedsSupported === false"
-        class="compatibilityWarning"
-      >
-        {{ t('Settings.Sync Settings.Playback speeds and settings not supported') }}
-      </p>
-      <p
-        v-else-if="settingsSupported === false"
-        class="compatibilityWarning"
-      >
-        {{ t('Settings.Sync Settings.Settings not supported') }}
-      </p>
-      <FtFlexBox class="actions">
-        <FtButton
-          :label="t('Settings.Sync Settings.Sync Now')"
-          :icon="['fas', 'sync']"
-          :disabled="busy"
-          @click="syncNow"
-        />
-        <FtButton
-          :label="t('Settings.Sync Settings.Disconnect')"
-          :icon="['fas', 'right-from-bracket']"
-          :disabled="busy"
-          @click="disconnect"
-        />
-        <FtButton
-          :label="t('Settings.Sync Settings.Delete Account')"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
-          :icon="['fas', 'trash']"
-          :disabled="busy"
-          @click="showDeleteAccountPrompt = true"
-        />
-      </FtFlexBox>
-    </template>
-    <FtFlexBox
-      v-else-if="!busy"
-      class="actions"
-    >
-      <FtButton
-        :label="t('Settings.Sync Settings.Log In')"
-        :icon="['fas', 'right-to-bracket']"
-        :disabled="serverCredentialsDisabled"
-        @click="authenticate('login')"
-      />
-      <FtButton
-        :label="t('Settings.Sync Settings.Register')"
-        :icon="['fas', 'user-plus']"
-        :disabled="serverCredentialsDisabled"
-        @click="authenticate('register')"
-      />
-    </FtFlexBox>
-    <FtPrompt
-      v-if="dataLossWarning"
-      :label="t('Settings.Sync Settings.Data Loss Confirmation')"
-      theme="readable-width"
-      @click="dataLossWarning = null"
-    >
-      <div class="deleteAccountContent">
-        <p class="deleteAccountWarning">
-          {{ t('Settings.Sync Settings.Data Loss Warning', {
-            deleted: dataLossWarning.deleted,
-            previous: dataLossWarning.previous,
-            collection: dataLossWarning.collection,
-          }) }}
-        </p>
-        <FtFlexBox class="actions">
-          <FtButton
-            :label="t('Settings.Sync Settings.Confirm Data Loss')"
-            text-color="var(--destructive-text-color)"
-            background-color="var(--destructive-color)"
-            :icon="['fas', 'triangle-exclamation']"
-            @click="confirmDataLossSync"
+        <div class="syncProgressLabel">
+          <span>{{ syncProgressLabel }}</span>
+          <span>
+            {{ t('Settings.Sync Settings.Sync progress percentage', {
+              percentage: syncProgress.percentage,
+            }) }}
+          </span>
+        </div>
+        <div
+          class="syncProgressTrack"
+          role="progressbar"
+          :aria-label="syncProgressLabel"
+          :aria-valuenow="syncProgress.percentage"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div
+            class="syncProgressFill"
+            :style="{ inlineSize: `${syncProgress.percentage}%` }"
           />
-          <FtButton
-            :label="t('Cancel')"
-            @click="dataLossWarning = null"
-          />
-        </FtFlexBox>
+        </div>
       </div>
-    </FtPrompt>
-    <FtPrompt
-      v-if="showDeleteAccountPrompt"
-      :label="t('Settings.Sync Settings.Delete Account Confirmation')"
-      theme="readable-width"
-      @click="closeDeleteAccountPrompt"
-    >
-      <div class="deleteAccountContent">
-        <p class="deleteAccountWarning">
-          {{ t('Settings.Sync Settings.Delete Account Warning') }}
+      <FtLoader v-else-if="busy" />
+      <p
+        v-if="errorMessage"
+        class="error"
+        role="alert"
+      >
+        {{ errorMessage }}
+      </p>
+
+      <template v-if="connected">
+        <p class="connectionStatus">
+          {{ t('Settings.Sync Settings.Connected as', { username: savedUsername }) }}
         </p>
-        <FtInput
-          :placeholder="t('Settings.Sync Settings.Password')"
-          :show-action-button="false"
-          :value="deleteAccountPassword"
-          input-type="password"
-          show-label
-          @input="deleteAccountPassword = $event"
-          @keydown.enter="deleteAccount"
-        />
         <p
-          v-if="deleteAccountError"
-          class="error"
+          v-if="privacyMode === 'enhanced'"
+          class="privacyStatus"
+        >
+          {{ t('Settings.Sync Settings.Enhanced Privacy Enabled') }}
+        </p>
+        <p
+          v-else-if="privacyMode === 'legacy'"
+          class="privacyWarning"
           role="alert"
         >
-          {{ deleteAccountError }}
+          {{ t('Settings.Sync Settings.Enhanced Privacy Unsupported') }}
+        </p>
+        <FtFlexBox class="toggles">
+          <FtToggleSwitch
+            :label="t('Settings.Sync Settings.Automatic Sync')"
+            :default-value="autoSync"
+            compact
+            @change="setAutoSync"
+          />
+          <FtToggleSwitch
+            :label="t('Subscriptions.Subscriptions')"
+            :default-value="syncSubscriptionsEnabled"
+            :disabled="busy"
+            compact
+            @change="store.dispatch('updateSyncServerSyncSubscriptions', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('Playlists')"
+            :default-value="syncPlaylistsEnabled"
+            :disabled="busy"
+            compact
+            @change="store.dispatch('updateSyncServerSyncPlaylists', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('History.History')"
+            :default-value="syncHistoryEnabled"
+            :disabled="busy || historySupported === false"
+            compact
+            @change="store.dispatch('updateSyncServerSyncHistory', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('Settings.Sync Settings.Channel Playback Speeds')"
+            :default-value="syncPlaybackSpeedsEnabled"
+            :disabled="busy || playbackSpeedsSupported === false"
+            compact
+            @change="store.dispatch('updateSyncServerSyncPlaybackSpeeds', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('Settings.Sync Settings.Profiles')"
+            :default-value="syncProfilesEnabled"
+            :disabled="busy"
+            compact
+            @change="store.dispatch('updateSyncServerSyncProfiles', $event)"
+          />
+          <FtToggleSwitch
+            v-if="sessionsSupported"
+            :label="t('Settings.Sync Settings.Open Tabs')"
+            :default-value="syncSessionsEnabled"
+            :disabled="busy"
+            compact
+            @change="store.dispatch('updateSyncServerSyncSessions', $event)"
+          />
+          <FtToggleSwitch
+            :label="t('Settings.Sync Settings.Settings')"
+            :default-value="syncSettingsEnabled"
+            :disabled="busy || settingsSupported === false"
+            compact
+            @change="store.dispatch('updateSyncServerSyncSettings', $event)"
+          />
+        </FtFlexBox>
+        <p
+          v-if="lastSyncLabel"
+          class="lastSync"
+        >
+          {{ t('Settings.Sync Settings.Last synced', { date: lastSyncLabel }) }}
+        </p>
+        <p
+          v-if="historySupported === false"
+          class="compatibilityWarning"
+        >
+          {{ t('Settings.Sync Settings.History not supported') }}
+        </p>
+        <p
+          v-if="playbackSpeedsSupported === false && settingsSupported"
+          class="compatibilityWarning"
+        >
+          {{ t('Settings.Sync Settings.Playback speeds not supported') }}
+        </p>
+        <p
+          v-else-if="playbackSpeedsSupported === false"
+          class="compatibilityWarning"
+        >
+          {{ t('Settings.Sync Settings.Playback speeds and settings not supported') }}
+        </p>
+        <p
+          v-else-if="settingsSupported === false"
+          class="compatibilityWarning"
+        >
+          {{ t('Settings.Sync Settings.Settings not supported') }}
         </p>
         <FtFlexBox class="actions">
           <FtButton
-            :label="t('Settings.Sync Settings.Confirm Delete Account')"
+            :label="t('Settings.Sync Settings.Sync Now')"
+            :icon="['fas', 'sync']"
+            :disabled="busy"
+            @click="syncNow"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Disconnect')"
+            :icon="['fas', 'right-from-bracket']"
+            :disabled="busy"
+            @click="disconnect"
+          />
+          <FtButton
+            :label="t('Settings.Sync Settings.Delete Account')"
             text-color="var(--destructive-text-color)"
             background-color="var(--destructive-color)"
             :icon="['fas', 'trash']"
-            @click="deleteAccount"
-          />
-          <FtButton
-            :label="t('Cancel')"
-            @click="closeDeleteAccountPrompt"
+            :disabled="busy"
+            @click="showDeleteAccountPrompt = true"
           />
         </FtFlexBox>
-      </div>
-    </FtPrompt>
+      </template>
+      <FtFlexBox
+        v-else-if="!busy"
+        class="actions"
+      >
+        <FtButton
+          :label="t('Settings.Sync Settings.Log In')"
+          :icon="['fas', 'right-to-bracket']"
+          :disabled="serverCredentialsDisabled"
+          @click="authenticate('login')"
+        />
+        <FtButton
+          :label="t('Settings.Sync Settings.Register')"
+          :icon="['fas', 'user-plus']"
+          :disabled="serverCredentialsDisabled"
+          @click="authenticate('register')"
+        />
+      </FtFlexBox>
+      <FtPrompt
+        v-if="dataLossWarning"
+        :label="t('Settings.Sync Settings.Data Loss Confirmation')"
+        theme="readable-width"
+        @click="dataLossWarning = null"
+      >
+        <div class="deleteAccountContent">
+          <p class="deleteAccountWarning">
+            {{ t('Settings.Sync Settings.Data Loss Warning', {
+              deleted: dataLossWarning.deleted,
+              previous: dataLossWarning.previous,
+              collection: dataLossWarning.collection,
+            }) }}
+          </p>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Settings.Sync Settings.Confirm Data Loss')"
+              text-color="var(--destructive-text-color)"
+              background-color="var(--destructive-color)"
+              :icon="['fas', 'triangle-exclamation']"
+              @click="confirmDataLossSync"
+            />
+            <FtButton
+              :label="t('Cancel')"
+              @click="dataLossWarning = null"
+            />
+          </FtFlexBox>
+        </div>
+      </FtPrompt>
+      <FtPrompt
+        v-if="showDeleteAccountPrompt"
+        :label="t('Settings.Sync Settings.Delete Account Confirmation')"
+        theme="readable-width"
+        @click="closeDeleteAccountPrompt"
+      >
+        <div class="deleteAccountContent">
+          <p class="deleteAccountWarning">
+            {{ t('Settings.Sync Settings.Delete Account Warning') }}
+          </p>
+          <FtInput
+            :placeholder="t('Settings.Sync Settings.Password')"
+            :show-action-button="false"
+            :value="deleteAccountPassword"
+            input-type="password"
+            show-label
+            @input="deleteAccountPassword = $event"
+            @keydown.enter="deleteAccount"
+          />
+          <p
+            v-if="deleteAccountError"
+            class="error"
+            role="alert"
+          >
+            {{ deleteAccountError }}
+          </p>
+          <FtFlexBox class="actions">
+            <FtButton
+              :label="t('Settings.Sync Settings.Confirm Delete Account')"
+              text-color="var(--destructive-text-color)"
+              background-color="var(--destructive-color)"
+              :icon="['fas', 'trash']"
+              @click="deleteAccount"
+            />
+            <FtButton
+              :label="t('Cancel')"
+              @click="closeDeleteAccountPrompt"
+            />
+          </FtFlexBox>
+        </div>
+      </FtPrompt>
+    </template>
   </FtSettingsSection>
 </template>
 
@@ -373,6 +383,7 @@ const deleteAccountError = ref('')
 const dataLossWarning = ref(null)
 
 const savedUsername = computed(() => store.getters.getSyncServerUsername)
+const syncEnabled = computed(() => store.getters.getSyncServerEnabled)
 const connected = computed(() => store.getters.getSyncServerToken !== '')
 const privacyPolicyUrl = computed(() => {
   try {
@@ -438,14 +449,14 @@ const lastSyncLabel = computed(() => {
 let serverCheckTimer = null
 let serverCheckSequence = 0
 
-watch([serverUrl, connected], ([value, isConnected], [previousValue, wasConnected] = []) => {
+watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [previousValue, wasConnected] = []) => {
   clearTimeout(serverCheckTimer)
   const sequence = ++serverCheckSequence
   const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
   serverCheckStatus.value = disconnected ? 'valid' : 'idle'
   serverCheckError.value = ''
-  if (isConnected || !value.trim()) return
+  if (!isEnabled || isConnected || !value.trim()) return
 
   serverCheckTimer = setTimeout(async () => {
     if (!disconnected) serverCheckStatus.value = 'checking'
@@ -536,6 +547,11 @@ async function disconnect() {
 
 function setAutoSync(enabled) {
   store.dispatch('setSyncServerAutoSync', enabled)
+}
+
+function setSyncEnabled(enabled) {
+  localError.value = ''
+  store.dispatch('setSyncServerEnabled', enabled)
 }
 
 function closeDeleteAccountPrompt() {

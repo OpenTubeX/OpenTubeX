@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue'
 
 export const ICON_PACKS = /** @type {const} */ ([
-  { id: 'material', label: 'Material Symbols' },
   { id: 'fontawesome', label: 'Font Awesome (legacy)' },
+  { id: 'material', label: 'Material Symbols' },
   { id: 'tabler', label: 'Tabler' },
   { id: 'phosphor', label: 'Phosphor' },
   { id: 'lucide', label: 'Lucide' },
@@ -28,7 +28,7 @@ function readStoredPack() {
   } catch {
     // ignore (private mode / unavailable storage)
   }
-  return 'material'
+  return 'fontawesome'
 }
 
 /** @type {import('vue').Ref<IconPackId>} */

@@ -200,7 +200,6 @@
       />
     </FtFlexBox>
     <br>
-    <FtIconPackSwitcher />
     <FtPrompt
       v-if="showRestartPrompt"
       :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
@@ -220,7 +219,6 @@ import FtSelect from './FtSelect/FtSelect.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
-import FtIconPackSwitcher from './FtIconPackSwitcher/FtIconPackSwitcher.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 
 import store from '../store/index'

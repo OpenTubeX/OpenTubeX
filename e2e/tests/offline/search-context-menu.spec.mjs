@@ -1,4 +1,9 @@
 import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { DEFAULT_SEARCH_ENGINES } from '../../../src/searchEngines.js'
+
+const allExternalSearchEnginesEnabled = JSON.stringify(
+  DEFAULT_SEARCH_ENGINES.map(engine => ({ ...engine, enabled: true }))
+)
 
 test('searching selected text in a new tab uses the default filters', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
@@ -27,50 +32,68 @@ test('searching selected text in a new tab uses the default filters', async ({ p
   await expect(page.locator('.searchRadio', { hasText: 'Duration' }).locator('input[value=""]')).toBeChecked()
 })
 
-test('offers enabled external search engines in a submenu', async ({ page }) => {
+test('does not offer external search engines when they are disabled by default', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'private search'
   }))
-  const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
 
-  expect(searchWith).toMatchObject({
-    labelKey: 'Context Menu.Search With Multiple',
-    labelParameters: {}
-  })
-  expect(searchWith.submenu.map(item => item.label)).toEqual([
-    'DuckDuckGo',
-    'Startpage',
-    'Qwant',
-    'Brave Search'
-  ])
-  expect(searchWith.submenu.map(item => item.icon)).toEqual([
-    'https://duckduckgo.com/favicon.ico',
-    'https://www.startpage.com/favicon.ico',
-    'https://www.qwant.com/favicon.ico',
-    'https://search.brave.com/favicon.ico'
-  ])
-  expect(searchWith.submenu.map(item => item.faviconSource)).toEqual([
-    'https://duckduckgo.com/?q=%s',
-    'https://www.startpage.com/sp/search?query=%s',
-    'https://www.qwant.com/?q=%s',
-    'https://search.brave.com/search?q=%s'
-  ])
-  expect(searchWith.submenu.every(item => item.labelKey == null)).toBe(true)
+  expect(contextMenu.items.some(item => typeof item.label === 'string' && item.label.startsWith('Search with'))).toBe(false)
 })
 
-test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
-  const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
-    selectionText: 'x'.repeat(101)
-  }))
-  const webSearchIndex = contextMenu.items.findIndex(item => item.label === 'Search with...')
-  const inAppSearchIndices = contextMenu.items
-    .map((item, index) => typeof item.label === 'string' && item.label.includes('is too long for search')
-      ? index
-      : -1)
-    .filter(index => index !== -1)
+test.describe('with all built-in external search engines enabled', () => {
+  test.use({
+    seed: {
+      settings: {
+        contextMenuSearchEngines: allExternalSearchEnginesEnabled
+      }
+    }
+  })
 
-  expect(contextMenu.items[webSearchIndex].enabled).toBe(true)
-  expect(webSearchIndex).toBeGreaterThan(Math.max(...inAppSearchIndices))
+  test('offers enabled external search engines in a submenu', async ({ page }) => {
+    const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+      selectionText: 'private search'
+    }))
+    const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
+
+    expect(searchWith).toMatchObject({
+      labelKey: 'Context Menu.Search With Multiple',
+      labelParameters: {}
+    })
+    expect(searchWith.submenu.map(item => item.label)).toEqual([
+      'DuckDuckGo',
+      'Startpage',
+      'Qwant',
+      'Brave Search'
+    ])
+    expect(searchWith.submenu.map(item => item.icon)).toEqual([
+      'https://duckduckgo.com/favicon.ico',
+      'https://www.startpage.com/favicon.ico',
+      'https://www.qwant.com/favicon.ico',
+      'https://search.brave.com/favicon.ico'
+    ])
+    expect(searchWith.submenu.map(item => item.faviconSource)).toEqual([
+      'https://duckduckgo.com/?q=%s',
+      'https://www.startpage.com/sp/search?query=%s',
+      'https://www.qwant.com/?q=%s',
+      'https://search.brave.com/search?q=%s'
+    ])
+    expect(searchWith.submenu.every(item => item.labelKey == null)).toBe(true)
+  })
+
+  test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
+    const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
+      selectionText: 'x'.repeat(101)
+    }))
+    const webSearchIndex = contextMenu.items.findIndex(item => item.label === 'Search with...')
+    const inAppSearchIndices = contextMenu.items
+      .map((item, index) => typeof item.label === 'string' && item.label.includes('is too long for search')
+        ? index
+        : -1)
+      .filter(index => index !== -1)
+
+    expect(contextMenu.items[webSearchIndex].enabled).toBe(true)
+    expect(webSearchIndex).toBeGreaterThan(Math.max(...inAppSearchIndices))
+  })
 })
 
 test('keeps the newest overlapping context menu session executable', async ({ page }) => {
@@ -247,7 +270,14 @@ test.describe('with the maximum custom search engines configured', () => {
 })
 
 test.describe('German locale', () => {
-  test.use({ seed: { settings: { currentLocale: 'de-DE' } } })
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'de-DE',
+        contextMenuSearchEngines: allExternalSearchEnginesEnabled
+      }
+    }
+  })
 
   test('translates external search labels from explicit menu metadata', async ({ page }) => {
     const searchInput = page.locator('.searchInput input')

@@ -3,25 +3,25 @@ export const DEFAULT_SEARCH_ENGINES = Object.freeze([
     id: 'duckduckgo',
     name: 'DuckDuckGo',
     url: 'https://duckduckgo.com/?q=%s',
-    enabled: true
+    enabled: false
   },
   {
     id: 'startpage',
     name: 'Startpage',
     url: 'https://www.startpage.com/sp/search?query=%s',
-    enabled: true
+    enabled: false
   },
   {
     id: 'qwant',
     name: 'Qwant',
     url: 'https://www.qwant.com/?q=%s',
-    enabled: true
+    enabled: false
   },
   {
     id: 'brave',
     name: 'Brave Search',
     url: 'https://search.brave.com/search?q=%s',
-    enabled: true
+    enabled: false
   }
 ])
 

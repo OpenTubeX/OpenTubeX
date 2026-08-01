@@ -10,6 +10,16 @@ import {
   parseSearchEngines
 } from '../../src/searchEngines.js'
 
+test('defaults built-in engines to disabled', () => {
+  const engines = parseSearchEngines(undefined)
+
+  assert.equal(engines.every(engine => engine.enabled === false), true)
+  assert.deepEqual(
+    engines.map(({ id, enabled }) => ({ id, enabled })),
+    DEFAULT_SEARCH_ENGINES.map(({ id, enabled }) => ({ id, enabled }))
+  )
+})
+
 test('uses canonical built-ins and preserves their enabled states', () => {
   const engines = parseSearchEngines(JSON.stringify([
     { id: 'duckduckgo', name: 'Changed', url: 'https://example.com/?q=%s', enabled: false }

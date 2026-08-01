@@ -58,7 +58,8 @@ const { t } = useI18n()
 
 const canConfigureSync = computed(() => {
   const settings = store.state.settings
-  return settings.syncServerToken !== '' &&
+  return settings.syncServerEnabled &&
+    settings.syncServerToken !== '' &&
     settings.syncServerSyncSettings &&
     isSettingSyncable(props.settingKey)
 })

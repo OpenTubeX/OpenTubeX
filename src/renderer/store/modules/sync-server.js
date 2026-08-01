@@ -361,6 +361,9 @@ const actions = {
     if (mode !== 'login' && mode !== 'register') {
       throw new Error('Invalid authentication mode')
     }
+    if (!rootState.settings.syncServerEnabled) {
+      throw new Error('Enable sync first')
+    }
 
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
     const trimmedUsername = username.trim()
@@ -484,6 +487,9 @@ const actions = {
   },
 
   syncWithSyncServer(context, options = {}) {
+    if (!context.rootState.settings.syncServerEnabled) {
+      return Promise.reject(new Error('Enable sync first'))
+    }
     if (!context.rootState.settings.syncServerToken) {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
@@ -509,7 +515,7 @@ const actions = {
   },
 
   async initializeSyncServer({ commit, dispatch, rootState }) {
-    if (!rootState.settings.syncServerToken) return
+    if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
     try {
       const client = new SyncServerClient(
@@ -548,6 +554,7 @@ const actions = {
 
   startSyncServerAutoSync({ dispatch, rootState }) {
     if (autoSyncTimer ||
+        !rootState.settings.syncServerEnabled ||
         !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, 'automatic')) {
@@ -576,7 +583,8 @@ const actions = {
   },
 
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
-    if (!rootState.settings.syncServerAutoSync ||
+    if (!rootState.settings.syncServerEnabled ||
+        !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, reason) ||
         rootState.syncServer.syncServerStatus === 'syncing') {
@@ -596,6 +604,17 @@ const actions = {
   async setSyncServerAutoSync({ dispatch }, enabled) {
     await dispatch('updateSyncServerAutoSync', enabled, { root: true })
     await dispatch(enabled ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync')
+  },
+
+  async setSyncServerEnabled({ dispatch, rootState }, enabled) {
+    await dispatch('updateSyncServerEnabled', enabled, { root: true })
+    if (!enabled) {
+      await dispatch('stopSyncServerAutoSync')
+      return
+    }
+    if (rootState.settings.syncServerToken) {
+      await dispatch('initializeSyncServer')
+    }
   },
 }
 

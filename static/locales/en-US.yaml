@@ -430,6 +430,7 @@ Settings:
   Context Menu Search Settings:
     Context Menu Search Settings: Context Menu Search
     Description: Choose which search engines appear when you right-click selected text. Searches open in your default browser.
+    Icon Hint: Enabling an engine contacts its website to load the favicon.
     Engine Name: Engine name
     Search URL: Search URL
     URL Hint: Use %s where the URL should contain the encoded selected text.
@@ -917,6 +918,7 @@ Settings:
     Manage Subscriptions: Manage Subscriptions
   Sync Settings:
     Sync Settings: Sync
+    Enable Sync: Enable Sync
     Privacy Passphrase: Privacy passphrase
     Privacy Passphrase Hint: Use a separate passphrase from your account password. It never leaves this device and is required on every device; losing it makes encrypted sync data unrecoverable.
     Privacy Policy: Privacy policy for this server
