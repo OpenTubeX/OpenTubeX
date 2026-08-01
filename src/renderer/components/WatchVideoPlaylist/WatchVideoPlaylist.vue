@@ -243,7 +243,7 @@ import { deepCopy, getVideoThumbnailUrl, showApiErrorToast, showToast, throttle 
 import {
   getLocalCachedFeedContinuation,
   getLocalPlaylist,
-  parseLocalPlaylistVideo,
+  parseLocalPlaylistVideos,
   untilEndOfLocalPlayList,
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
@@ -941,10 +941,10 @@ async function loadCachedPlaylistInformation(cachedPlaylist) {
     const videos = cachedPlaylist.items
 
     const continuationData = await getLocalCachedFeedContinuation('playlist', cachedPlaylist.continuationData)
-    videos.push(...continuationData.items.map(parseLocalPlaylistVideo))
+    videos.push(...parseLocalPlaylistVideos(continuationData.items))
 
     await untilEndOfLocalPlayList(continuationData, (p) => {
-      videos.push(...p.items.map(parseLocalPlaylistVideo))
+      videos.push(...parseLocalPlaylistVideos(p.items))
     }, { runCallbackOnceFirst: false })
 
     playlistItems.value = applyReversePlaylistState(videos)
@@ -976,7 +976,7 @@ async function getPlaylistInformationLocal() {
 
     const videos = []
     await untilEndOfLocalPlayList(playlist, (p) => {
-      videos.push(...p.items.map(parseLocalPlaylistVideo))
+      videos.push(...parseLocalPlaylistVideos(p.items))
     })
 
     playlistItems.value = applyReversePlaylistState(videos)

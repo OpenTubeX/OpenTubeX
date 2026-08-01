@@ -2106,12 +2106,6 @@
   }
 }
 
-:deep(.shaka-text-container),
-:deep(.shaka-speech-to-text-container) {
-  /* Keep shaka's caption raise animation alongside the panel push. */
-  transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
-}
-
 /* Keep the floating fullscreen actions next to the video instead of under the panel. */
 .ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
 .ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
@@ -2328,7 +2322,8 @@
   color: #fff;
 }
 
-:deep(.shaka-text-container) {
+:deep(.shaka-text-container),
+:deep(.shaka-speech-to-text-container) {
   box-sizing: border-box;
   align-items: var(--caption-align-items) !important;
   justify-content: var(--caption-justify-content) !important;
@@ -2337,6 +2332,9 @@
   font-size: calc(20px * var(--caption-font-scale)) !important;
   text-align: var(--caption-text-align) !important;
   transform: translateY(var(--caption-vertical-transform));
+
+  /* Keep shaka's caption raise animation alongside the panel push. */
+  transition: inset-inline-end 250ms ease, bottom cubic-bezier(0.4, 0, 0.6, 1) 0.1s;
 }
 
 :deep(.shaka-controls-container:not([shown='true'], [casting='true']) ~ .shaka-text-container) {
@@ -2354,13 +2352,16 @@
 }
 
 :deep(.shaka-text-container div),
-:deep(.shaka-text-container span) {
+:deep(.shaka-text-container span),
+:deep(.shaka-speech-to-text-container div),
+:deep(.shaka-speech-to-text-container span) {
   background-color: transparent !important;
   font-size: inherit !important;
   text-align: var(--caption-text-align) !important;
 }
 
-:deep(.shaka-text-container [translate='no']) {
+:deep(.shaka-text-container [translate='no']),
+:deep(.shaka-speech-to-text-container [translate='no']) {
   background-color: var(--caption-background-color) !important;
   color: var(--caption-text-color) !important;
   -webkit-font-smoothing: antialiased;
@@ -2723,7 +2724,8 @@
 }
 
 @media only screen and (width <=400px) {
-  :deep(.shaka-text-container) {
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container) {
     /* make subtitles take up slightly less space when a mobile phone is in portrait orientation */
     font-size: calc(16px * var(--caption-font-scale)) !important;
   }

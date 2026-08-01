@@ -197,7 +197,7 @@ import {
   extractLocalCacheablePlaylistContinuation,
   getLocalPlaylist,
   getLocalPlaylistContinuation,
-  parseLocalPlaylistVideo,
+  parseLocalPlaylistVideos,
 } from '../../helpers/api/local'
 import {
   debounce,
@@ -483,7 +483,7 @@ async function getPlaylistLocal() {
       }
     }
 
-    const playlistItems_ = result.items.map(parseLocalPlaylistVideo)
+    const playlistItems_ = parseLocalPlaylistVideos(result.items)
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
@@ -508,7 +508,7 @@ async function getPlaylistLocal() {
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
-      shouldGetNextPage = playlistItems.value.length < 100
+      shouldGetNextPage = result.items.length < 100 && playlistItems.value.length < 100
     }
     // To workaround the effect of useless continuation data
     // auto load next page again when no. of parsed items < page size
@@ -696,7 +696,7 @@ async function getNextPageLocal() {
   let shouldGetNextPage = false
 
   if (result) {
-    const parsedVideos = result.items.map(parseLocalPlaylistVideo)
+    const parsedVideos = parseLocalPlaylistVideos(result.items)
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
     if (result.has_continuation) {
@@ -704,7 +704,7 @@ async function getNextPageLocal() {
 
       // To workaround the effect of useless continuation data
       // auto load next page again when no. of parsed items < page size
-      shouldGetNextPage = parsedVideos.length < 100
+      shouldGetNextPage = result.items.length < 100 && parsedVideos.length < 100
     } else {
       continuationData.value = null
     }
