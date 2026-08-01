@@ -2724,7 +2724,8 @@
 }
 
 @media only screen and (width <=400px) {
-  :deep(.shaka-text-container) {
+  :deep(.shaka-text-container),
+  :deep(.shaka-speech-to-text-container) {
     /* make subtitles take up slightly less space when a mobile phone is in portrait orientation */
     font-size: calc(16px * var(--caption-font-scale)) !important;
   }
