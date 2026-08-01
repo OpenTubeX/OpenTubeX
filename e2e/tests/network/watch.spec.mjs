@@ -9,11 +9,6 @@ const CAPTIONED_VIDEO = {
   title: 'What’s It Like to Be Killed by Nature’s Most Brutal Predator',
   url: 'https://www.youtube.com/watch?v=Xf-uUy5pdUI'
 }
-const WIDE_END_SCREEN_VIDEO = {
-  id: 'f6qZElzRBpg',
-  title: 'Top 15 Best Android Apps - August 2026!',
-  url: 'https://www.youtube.com/watch?v=f6qZElzRBpg'
-}
 const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
 const FULLSCREEN_PLAYLIST = {
   _id: FULLSCREEN_PLAYLIST_ID,
@@ -134,43 +129,6 @@ test.describe('background watch tab', () => {
 })
 
 test.describe('watch page', () => {
-  test('keeps wide-video end screens aligned when a fullscreen dock is open', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'watch page hydration needs the real API')
-    await openVideo(page, WIDE_END_SCREEN_VIDEO)
-    await waitForPlaybackOrSkip(test, page)
-
-    const video = page.locator('.ftVideoPlayer video.player')
-    await video.evaluate((element) => {
-      element.currentTime = Math.max(0, element.duration - 5)
-      element.dispatchEvent(new Event('timeupdate'))
-    })
-    await expect(page.locator('.annotationSurface .annotation').first()).toBeVisible({ timeout: 30_000 })
-
-    await setPlayerFullscreen(page, true)
-    await page.locator('.playerFullscreenTitleOverlay').click({ force: true })
-    await expect(page.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
-    await expect.poll(() => video.evaluate((element) => element.videoWidth / element.videoHeight)).toBeCloseTo(2)
-
-    await expect.poll(async () => page.evaluate(() => {
-      const videoElement = document.querySelector('.ftVideoPlayer video.player')
-      const surface = document.querySelector('.annotationSurface')
-      const videoBounds = videoElement.getBoundingClientRect()
-      const surfaceBounds = surface.getBoundingClientRect()
-      const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight
-      const expectedHeight = Math.min(videoBounds.height, videoBounds.width / videoAspectRatio)
-      const expectedWidth = expectedHeight * videoAspectRatio
-      const expectedLeft = videoBounds.left + (videoBounds.width - expectedWidth) / 2
-      const expectedTop = videoBounds.top + (videoBounds.height - expectedHeight) / 2
-
-      return Math.max(
-        Math.abs(surfaceBounds.left - expectedLeft),
-        Math.abs(surfaceBounds.top - expectedTop),
-        Math.abs(surfaceBounds.width - expectedWidth),
-        Math.abs(surfaceBounds.height - expectedHeight)
-      )
-    })).toBeLessThanOrEqual(1)
-  })
-
   test('shows video metadata', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)

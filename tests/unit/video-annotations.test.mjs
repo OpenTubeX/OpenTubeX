@@ -32,6 +32,15 @@ test('keeps annotations inside the letterboxes of an ultrawide video', () => {
   })
 })
 
+test('centers annotations when a fullscreen dock narrows the video viewport', () => {
+  assert.deepEqual(getVideoRect(1440, 1080, 16 / 9), {
+    left: 0,
+    top: 135,
+    width: 1440,
+    height: 810
+  })
+})
+
 test('extends the annotation surface through cropped cover content', () => {
   assert.deepEqual(getVideoRect(1600, 900, 4 / 3, 'cover'), {
     left: 0,
