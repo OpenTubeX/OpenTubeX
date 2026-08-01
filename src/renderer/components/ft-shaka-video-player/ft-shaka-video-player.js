@@ -4434,6 +4434,7 @@ export default defineComponent({
      */
     function handleEnterPictureInPicture(event) {
       pipWindow = event.pictureInPictureWindow
+      tabMediaCoordinator.setPictureInPicture(mediaTabId, true)
       handlePictureInPictureResize()
       pipWindow.addEventListener('resize', handlePictureInPictureResize)
 
@@ -4443,6 +4444,8 @@ export default defineComponent({
     }
 
     function handleLeavePictureInPicture() {
+      tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
+
       if (pipWindow) {
         pipWindow.removeEventListener('resize', handlePictureInPictureResize)
       }
@@ -8335,6 +8338,7 @@ export default defineComponent({
     }
 
     return {
+      hasLoaded,
       shortsPaused,
       shortsMuted,
       shortsCaptionsAvailable,
