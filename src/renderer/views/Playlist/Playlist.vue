@@ -508,7 +508,7 @@ async function getPlaylistLocal() {
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
-      shouldGetNextPage = playlistItems.value.length < 100
+      shouldGetNextPage = result.items.length < 100 && playlistItems.value.length < 100
     }
     // To workaround the effect of useless continuation data
     // auto load next page again when no. of parsed items < page size
@@ -704,7 +704,7 @@ async function getNextPageLocal() {
 
       // To workaround the effect of useless continuation data
       // auto load next page again when no. of parsed items < page size
-      shouldGetNextPage = parsedVideos.length < 100
+      shouldGetNextPage = result.items.length < 100 && parsedVideos.length < 100
     } else {
       continuationData.value = null
     }
