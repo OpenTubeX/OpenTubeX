@@ -89,6 +89,7 @@ import { useTabToast } from '../../composables/useTabToast'
 const MANIFEST_TYPE_DASH = 'application/dash+xml'
 const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
 const THEATRE_MODE_ANIMATION_DURATION = 400
+const RESPONSIVE_THEATRE_MODE_MAX_WIDTH = 1350
 // A SABR session can go stale more than once during a long video, so the
 // refetch budget is per incident rather than per video: it refills once the
 // refreshed stream has played this many seconds, and only bounds reload loops
@@ -171,6 +172,7 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
       isLive: false,
@@ -638,6 +640,9 @@ export default defineComponent({
         (!this.hideLiveChat && this.isLive) || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
+    theatreTogglePossible: function () {
+      return this.theatreLayoutAvailable && this.theatrePossible
+    },
     autoplayPossible: function () {
       return !this.isShort && (
         !!this.nextQueuedVideo ||
@@ -779,6 +784,7 @@ export default defineComponent({
   mounted: function () {
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.addEventListener('resize', this.updateShortsViewportHeight)
+    window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
@@ -792,6 +798,7 @@ export default defineComponent({
   beforeUnmount: function () {
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
+    window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
     this.deactivateWatchRuntime()
@@ -807,6 +814,9 @@ export default defineComponent({
     }
   },
   methods: {
+    updateTheatreLayoutAvailability() {
+      this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
+    },
     updateShortsViewportHeight() {
       this.shortsViewportHeight = window.innerHeight
     },
@@ -1276,7 +1286,7 @@ export default defineComponent({
     setViewingModeOnFirstLoad: function () {
       switch (this.defaultViewingMode) {
         case 'theatre':
-          this.useTheatreMode = this.theatrePossible
+          this.useTheatreMode = this.theatreTogglePossible
           break
         case 'fullscreen':
         case 'fullscreen_always_on':

@@ -101,6 +101,44 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+test('theatre mode works until its responsive button cutoff', async ({ app, page, innertube }) => {
+  test.skip(innertube.replay, 'watch page hydration needs the real API')
+  await setWindowWidth(app, 1500)
+  await openVideo(page)
+
+  const layout = page.locator('.videoLayout')
+  const theatreButton = page.locator('.theatre-button').first()
+  const videoArea = page.locator('.videoArea')
+  const sidebar = page.locator('.sidebarArea')
+  await expect(theatreButton).toBeVisible()
+  await expect.poll(async () => {
+    const [videoBounds, sidebarBounds] = await Promise.all([
+      videoArea.boundingBox(),
+      sidebar.boundingBox()
+    ])
+    return sidebarBounds.x >= videoBounds.x + videoBounds.width - 1
+  }).toBe(true)
+
+  await theatreButton.evaluate(button => button.click())
+  await expect(layout).toHaveClass(/useTheatreMode/)
+  await expect.poll(async () => {
+    const [videoBounds, sidebarBounds] = await Promise.all([
+      videoArea.boundingBox(),
+      sidebar.boundingBox()
+    ])
+    return sidebarBounds.y >= videoBounds.y + videoBounds.height - 1
+  }).toBe(true)
+
+  await theatreButton.evaluate(button => button.click())
+  await expect(layout).not.toHaveClass(/useTheatreMode/)
+
+  await setWindowWidth(app, 1200)
+  await expect(theatreButton).toBeHidden()
+
+  await page.keyboard.press('t')
+  await expect(layout).not.toHaveClass(/useTheatreMode/)
+})
+
 test.describe('background watch tab', () => {
   test.use({
     seed: {
