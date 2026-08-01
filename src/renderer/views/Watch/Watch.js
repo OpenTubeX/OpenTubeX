@@ -3281,6 +3281,12 @@ export default defineComponent({
       // needs its own scheme so one SABR player cannot replace or unregister
       // another player's request handler.
       const scheme = `sabr${nextSabrSchemeId++}`
+      const formatDurationsMs = videoInfo.streaming_data.adaptive_formats
+        .map(format => format.approx_duration_ms)
+        .filter(Number.isFinite)
+      const fallbackDurationSeconds = Number.isFinite(videoInfo.basic_info.duration)
+        ? videoInfo.basic_info.duration
+        : 0
 
       this.sabrData = {
         scheme,
@@ -3295,7 +3301,9 @@ export default defineComponent({
         scheme,
         // Different formats have different durations and
         // use of slightly longer duration in PresentationTimeline causes player to stuck at the end
-        duration: Math.min(...videoInfo.streaming_data.adaptive_formats.map(f => f.approx_duration_ms)) / 1000,
+        duration: formatDurationsMs.length > 0
+          ? Math.min(...formatDurationsMs) / 1000
+          : fallbackDurationSeconds,
         formats: videoInfo.streaming_data.adaptive_formats.map((format) => ({
           itag: format.itag,
           lastModified: format.last_modified_ms,

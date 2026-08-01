@@ -99,6 +99,7 @@ function formatIdFromString(str) {
  * @param {shaka.media.SegmentIndex} segmentIndex
  */
 function createBufferedRange(formatId, buffered, segmentIndex) {
+  const startSegmentIndex = segmentIndex.find(buffered.start) ?? 0
   let endSegmentIndex = segmentIndex.find(buffered.end)
   if (endSegmentIndex == null) {
     // Using Last end time will get `null` in `segmentIndex.find`
@@ -109,7 +110,7 @@ function createBufferedRange(formatId, buffered, segmentIndex) {
     formatId,
     startTimeMs: String(Math.round(buffered.start * 1000)),
     durationMs: String(Math.round((buffered.end - buffered.start) * 1000)),
-    startSegmentIndex: segmentIndex.find(buffered.start),
+    startSegmentIndex,
     endSegmentIndex: endSegmentIndex,
   }
 }
@@ -326,7 +327,7 @@ async function doRequest(
       // player reload.
       if (
         currentState.cumulativeBackOffRequested >= 3 ||
-        (timeoutMs > 0 && timeoutMs <= currentState.cumulativeBackOffTimeMs + currentBackoffTimeMs)
+        (timeoutMs > 0 && timeoutMs <= currentState.cumulativeBackOffTimeMs)
       ) {
         shouldReloadDueToBackoffLoop = true
       }

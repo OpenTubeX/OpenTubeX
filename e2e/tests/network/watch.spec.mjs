@@ -160,23 +160,6 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
-  test('pausing does not access undefined player state', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    const loadingStateWarnings = []
-    page.on('console', (message) => {
-      if (message.type() === 'warning' && message.text().includes('Property "hasLoaded"')) {
-        loadingStateWarnings.push(message.text())
-      }
-    })
-
-    await openVideo(page)
-    const video = await waitForPlaybackOrSkip(test, page)
-    await video.evaluate(element => element.pause())
-    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
-
-    expect(loadingStateWarnings).toEqual([])
-  })
-
   test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
@@ -1443,6 +1426,24 @@ test.describe('custom Shorts player', () => {
     }
   })
 
+  test('pausing exposes loaded player state to the template', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await expect(player).toHaveClass(/shortsPaused/)
+  })
+
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'Shorts detection needs the real API')
 
@@ -1510,6 +1511,8 @@ test.describe('custom Shorts player', () => {
       playerBounds.y + playerBounds.height / 2
     )
     await player.locator('.shortsTopControl').first().click()
+    // Production regression: this class depends on hasLoaded being available
+    // to the template after pausing, where Vue runtime warnings are stripped.
     await expect(player).toHaveClass(/shortsPaused/)
     await expect(seekBar).toHaveCSS('opacity', '1')
 
