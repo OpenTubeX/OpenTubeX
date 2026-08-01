@@ -160,6 +160,21 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
+  test('hides the tab play indicator while buffering', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    const activeTab = page.locator(sel.activeTab)
+    await expect(activeTab.locator('.playingIcon')).toBeVisible()
+
+    await video.dispatchEvent('waiting')
+    await expect(activeTab.locator('.playingIcon')).toHaveCount(0)
+
+    await video.dispatchEvent('playing')
+    await expect(activeTab.locator('.playingIcon')).toBeVisible()
+  })
+
   test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
