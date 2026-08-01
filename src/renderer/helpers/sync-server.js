@@ -1,6 +1,7 @@
 import { MAIN_PROFILE_ID } from '../../constants'
 import {
   SyncServerDataLossError,
+  SyncServerCancelledError,
   SyncServerError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
@@ -22,6 +23,7 @@ const YOUTUBE_VIDEO_THUMBNAIL_REGEX = /^https?:\/\/i\.ytimg\.com\/vi(?:_webp)?\/
 
 export {
   SyncServerDataLossError,
+  SyncServerCancelledError,
   SyncServerError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
@@ -57,10 +59,19 @@ export class SyncServerClient {
     this.token = token
     this.apiPrefix = null
     this.capabilitiesPromise = null
+    this.requestControllers = new Set()
+    this.cancelled = false
+  }
+
+  cancel() {
+    this.cancelled = true
+    for (const controller of this.requestControllers) controller.abort()
   }
 
   async request(path, { timeoutMs = REQUEST_TIMEOUT_MS, ...options } = {}) {
+    if (this.cancelled) throw new SyncServerCancelledError()
     const controller = new AbortController()
+    this.requestControllers.add(controller)
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
     const headers = { Accept: 'application/json', ...options.headers }
 
@@ -96,11 +107,13 @@ export class SyncServerClient {
         throw error
       }
       if (error?.name === 'AbortError') {
+        if (this.cancelled) throw new SyncServerCancelledError()
         throw new SyncServerError('Sync server request timed out')
       }
       throw new SyncServerError(error?.message || 'Unable to reach sync server')
     } finally {
       clearTimeout(timeout)
+      this.requestControllers.delete(controller)
     }
   }
 

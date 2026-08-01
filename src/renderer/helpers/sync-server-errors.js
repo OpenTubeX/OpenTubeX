@@ -14,6 +14,13 @@ export class SyncServerError extends Error {
   }
 }
 
+export class SyncServerCancelledError extends Error {
+  constructor() {
+    super('Sync cancelled')
+    this.name = 'SyncServerCancelledError'
+  }
+}
+
 export class SyncServerDataLossError extends Error {
   constructor(collection, deleted, previous) {
     super(

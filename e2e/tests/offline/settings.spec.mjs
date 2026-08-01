@@ -127,6 +127,8 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
+
     const privacyPolicy = syncSection.getByRole('link', {
       name: 'Privacy policy for this server'
     })
@@ -138,6 +140,21 @@ test.describe('settings', () => {
 
     await syncSection.getByLabel('Server URL').fill('https://sync.libretube.dev')
     await expect(privacyPolicy).toHaveCount(0)
+  })
+
+  test('keeps the sync server idle until sync is enabled', async ({ page }) => {
+    const syncRequests = []
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      syncRequests.push(route.request().url())
+      await route.fulfill({ status: 200, body: 'OK' })
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.getByLabel('Server URL')).toHaveCount(0)
+    await page.waitForTimeout(500)
+    expect(syncRequests).toEqual([])
   })
 
   test('a toggled setting persists across restarts', async ({ app }) => {
@@ -522,6 +539,7 @@ test.describe('sync settings', () => {
   test.use({
     seed: {
       settings: {
+        syncServerEnabled: true,
         syncServerAutoSync: false,
         syncServerPrivacyKey: 'e2e-privacy-key',
         syncServerPrivacyMode: 'legacy',
@@ -571,6 +589,44 @@ test.describe('sync settings', () => {
     } finally {
       finishServerCheck()
     }
+  })
+
+  test('stops an active sync when sync is disabled', async ({ page }) => {
+    let finishSyncRequest
+    let syncRequestStarted
+    const syncRequestPending = new Promise((resolve) => {
+      finishSyncRequest = resolve
+    })
+    const syncRequestRequested = new Promise((resolve) => {
+      syncRequestStarted = resolve
+    })
+    const syncRequests = []
+
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+        return
+      }
+
+      syncRequests.push(pathname)
+      syncRequestStarted()
+      await syncRequestPending
+      await route.fulfill({ status: 200, json: [] })
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await syncRequestRequested
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    finishSyncRequest()
+
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+    await page.waitForTimeout(500)
+    expect(syncRequests).toHaveLength(1)
   })
 
   test('disables credentials while authentication is pending', async ({ page }) => {
@@ -705,6 +761,7 @@ test.describe('synced setting indicators', () => {
     seed: {
       settings: {
         reducedMotion: 'on',
+        syncServerEnabled: true,
         syncServerAutoSync: false,
         syncServerSyncSettings: true,
         syncServerToken: 'e2e-sync-token'

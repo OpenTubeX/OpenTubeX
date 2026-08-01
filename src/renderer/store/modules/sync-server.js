@@ -1,5 +1,6 @@
 import {
   SyncServerClient,
+  SyncServerCancelledError,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
@@ -40,6 +41,7 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 ]
 
 let activeSyncPromise = null
+let activeSyncClient = null
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
@@ -83,6 +85,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
   const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
+  activeSyncClient = networkClient
   let client = networkClient
   let encryptedCollections = null
   const previous = parseSnapshot(settings.syncServerSnapshot)
@@ -109,12 +112,20 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   ]
   let completedStages = 0
 
+  function assertSyncStillActive() {
+    if (networkClient.cancelled || !rootState.settings.syncServerEnabled) {
+      throw new SyncServerCancelledError()
+    }
+  }
+
   async function runStage(stage, callback) {
+    assertSyncStillActive()
     commit('setSyncServerProgress', {
       stage,
       percentage: Math.round((completedStages / stages.length) * 100),
     })
     const value = await callback()
+    assertSyncStillActive()
     completedStages++
     commit('setSyncServerProgress', {
       stage,
@@ -277,6 +288,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     if (encryptedCollections) {
       await runStage('upload', async () => {
         for (const collection of encryptedCollections.upload) {
+          assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
           if (revision > 0 &&
@@ -336,6 +348,12 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     commit('setSyncServerStatus', 'success')
     return result
   } catch (error) {
+    if (error instanceof SyncServerCancelledError) {
+      commit('setSyncServerProgress', null)
+      commit('setSyncServerError', '')
+      commit('setSyncServerStatus', 'idle')
+      return null
+    }
     if (error instanceof SyncServerDataLossError) {
       await dispatch('setSyncServerAutoSync', false)
     }
@@ -350,6 +368,8 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
     throw error
+  } finally {
+    if (activeSyncClient === networkClient) activeSyncClient = null
   }
 }
 
@@ -360,6 +380,9 @@ const actions = {
   ) {
     if (mode !== 'login' && mode !== 'register') {
       throw new Error('Invalid authentication mode')
+    }
+    if (!rootState.settings.syncServerEnabled) {
+      throw new Error('Enable sync first')
     }
 
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
@@ -484,6 +507,9 @@ const actions = {
   },
 
   syncWithSyncServer(context, options = {}) {
+    if (!context.rootState.settings.syncServerEnabled) {
+      return Promise.reject(new Error('Enable sync first'))
+    }
     if (!context.rootState.settings.syncServerToken) {
       return Promise.reject(new Error('Connect to a sync server first'))
     }
@@ -492,6 +518,7 @@ const actions = {
       clearTimeout(eventSyncTimer)
       eventSyncTimer = null
       activeSyncPromise = withSyncLock(() => {
+        if (!context.rootState.settings.syncServerEnabled) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
@@ -509,7 +536,7 @@ const actions = {
   },
 
   async initializeSyncServer({ commit, dispatch, rootState }) {
-    if (!rootState.settings.syncServerToken) return
+    if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
     try {
       const client = new SyncServerClient(
@@ -548,6 +575,7 @@ const actions = {
 
   startSyncServerAutoSync({ dispatch, rootState }) {
     if (autoSyncTimer ||
+        !rootState.settings.syncServerEnabled ||
         !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, 'automatic')) {
@@ -576,7 +604,8 @@ const actions = {
   },
 
   scheduleSyncServer({ dispatch, rootState }, reason = 'data') {
-    if (!rootState.settings.syncServerAutoSync ||
+    if (!rootState.settings.syncServerEnabled ||
+        !rootState.settings.syncServerAutoSync ||
         !rootState.settings.syncServerToken ||
         !isSyncReasonEnabled(rootState.settings, reason) ||
         rootState.syncServer.syncServerStatus === 'syncing') {
@@ -596,6 +625,21 @@ const actions = {
   async setSyncServerAutoSync({ dispatch }, enabled) {
     await dispatch('updateSyncServerAutoSync', enabled, { root: true })
     await dispatch(enabled ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync')
+  },
+
+  async setSyncServerEnabled({ commit, dispatch, rootState }, enabled) {
+    if (!enabled) activeSyncClient?.cancel()
+    await dispatch('updateSyncServerEnabled', enabled, { root: true })
+    if (!enabled) {
+      await dispatch('stopSyncServerAutoSync')
+      commit('setSyncServerProgress', null)
+      commit('setSyncServerError', '')
+      commit('setSyncServerStatus', 'idle')
+      return
+    }
+    if (rootState.settings.syncServerToken) {
+      await dispatch('initializeSyncServer')
+    }
   },
 }
 

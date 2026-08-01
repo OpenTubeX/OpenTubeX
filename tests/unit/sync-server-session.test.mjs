@@ -2,10 +2,17 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  SyncServerCancelledError,
   SyncServerError,
   isExpiredSessionReauthentication,
   isSessionExpiredError,
 } from '../../src/renderer/helpers/sync-server-errors.js'
+
+test('sync cancellation has a distinct error type', () => {
+  const error = new SyncServerCancelledError()
+  assert.equal(error.name, 'SyncServerCancelledError')
+  assert.equal(error.message, 'Sync cancelled')
+})
 
 test('treats 401 as an expired session', () => {
   assert.equal(
