@@ -12,6 +12,8 @@
   <span
     v-else
     v-bind="forwardedAttrs"
+    :data-prefix="semanticIcon?.[0]"
+    :data-icon="semanticIcon?.[1]"
     class="ft-icon"
     :class="[{ 'ft-icon--fw': fixedWidth }, iconClass]"
     :style="iconifyWrapperStyle"
@@ -32,8 +34,9 @@ import { computed, normalizeStyle, useAttrs } from 'vue'
 import { Icon } from '@iconify/vue/offline'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome-original'
 
+import faAliasToCanon from '../../icons/faAliasToCanon.json'
 import { currentIconPack } from '../../icons/iconPackState'
-import { resolveIconifyId } from '../../icons/resolveIconifyId'
+import { normalizeFaIcon, resolveIconifyId } from '../../icons/resolveIconifyId'
 
 defineOptions({
   inheritAttrs: false
@@ -83,6 +86,17 @@ const attrs = useAttrs()
 const useFontAwesome = computed(() => currentIconPack.value === 'fontawesome')
 
 const iconifyId = computed(() => resolveIconifyId(props.icon))
+
+// Preserve Font Awesome's semantic metadata when a different pack renders the
+// glyph. Existing styling and consumers can then identify an icon independently
+// of the active pack's visual name.
+const semanticIcon = computed(() => {
+  const normalized = normalizeFaIcon(props.icon)
+  if (!normalized) {
+    return null
+  }
+  return [normalized[0], faAliasToCanon[normalized[1]] || normalized[1]]
+})
 
 const iconClass = computed(() => attrs.class)
 
