@@ -52,4 +52,10 @@ test('keeps media controls associated with a paused PiP video', (t) => {
   handlers.get('play')()
 
   assert.deepEqual(played, ['pip-tab', 'active-tab'])
+
+  tabMediaCoordinator.unregister('pip-tab')
+  tabMediaCoordinator.setPictureInPicture('pip-tab', true)
+  handlers.get('play')()
+
+  assert.deepEqual(played, ['pip-tab', 'active-tab', 'active-tab'])
 })

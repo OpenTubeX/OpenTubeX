@@ -121,7 +121,7 @@ export const tabMediaCoordinator = {
 
   setPictureInPicture(tabId, active) {
     if (active) {
-      if (!getEntry(tabId)) {
+      if (!mediaByTabId.has(tabId)) {
         return
       }
       pictureInPictureTabId = tabId
