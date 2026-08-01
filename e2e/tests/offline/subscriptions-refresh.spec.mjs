@@ -125,10 +125,16 @@ test.describe('incremental subscription feed refresh', () => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
 
+    const firstChannelResponse = page.waitForResponse((response) => {
+      return response.url().includes('/feeds/videos.xml') &&
+        channelIndexFromUrl(response.url()) === 0 &&
+        response.ok()
+    })
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
     await page.locator(sel.newTabButton).click()
     await goTo(page, 'history')
 
+    await firstChannelResponse
     const refreshProgress = page.getByTestId('subscription-refresh-toast')
       .locator('.progress-indicator')
     await expect.poll(async () => Number(await refreshProgress.getAttribute('data-progress')))
