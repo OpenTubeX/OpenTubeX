@@ -8279,6 +8279,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      setFullscreenMetadata,
       closeFullscreenMetadata,
       setFullscreenTranscript,
       closeFullscreenTranscript,

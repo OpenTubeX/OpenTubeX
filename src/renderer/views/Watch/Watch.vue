@@ -155,7 +155,48 @@
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
           @toggle-shorts-metadata="toggleShortsMetadata"
-        />
+        >
+          <template #shorts-fullscreen-metadata>
+            <div class="shortsFullscreenMetadataContent">
+              <div class="shortsFullscreenChannelRow">
+                <button
+                  v-if="!hideUploader"
+                  type="button"
+                  class="shortsFullscreenChannel"
+                  @click="openShortsChannel"
+                >
+                  <img
+                    v-if="channelThumbnail"
+                    :src="channelThumbnail"
+                    class="shortsFullscreenChannelThumbnail"
+                    alt=""
+                  >
+                  <span dir="auto">{{ channelName }}</span>
+                </button>
+                <FtSubscribeButton
+                  v-if="!hideUnsubscribeButton"
+                  :channel-id="channelId"
+                  :channel-name="channelName"
+                  :channel-thumbnail="channelThumbnail"
+                  :subscription-count-text="channelSubscriptionCountText"
+                  :hide-profile-dropdown-toggle="true"
+                />
+              </div>
+              <h1 class="shortsFullscreenTitle">
+                <button
+                  type="button"
+                  class="shortsFullscreenTitleButton"
+                  dir="auto"
+                  :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
+                  :aria-expanded="fullscreenMetadataOpen"
+                  @click="toggleFullscreenMetadata"
+                >
+                  {{ videoTitle }}
+                </button>
+              </h1>
+            </div>
+          </template>
+        </ft-shaka-video-player>
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
           class="videoPlayer"

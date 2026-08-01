@@ -165,6 +165,20 @@
           </button>
         </div>
       </div>
+      <div
+        v-if="shortsPlayer"
+        class="shortsFullscreenMetadata shaka-no-propagation"
+        @click.stop
+        @dblclick.stop
+      >
+        <div class="shortsFullscreenMetadataSide">
+          <slot name="shorts-fullscreen-metadata" />
+        </div>
+        <div
+          class="shortsFullscreenVideoSpace"
+          aria-hidden="true"
+        />
+      </div>
       <Transition name="fade">
         <div
           v-if="autoplayCountdown"
