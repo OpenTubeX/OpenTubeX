@@ -39,40 +39,58 @@ function compareVersionParts(left, right) {
 }
 
 /**
- * Finds the newest update available to the installed build.
+ * Finds all updates available to the installed build, newest first.
  * Stable builds stay on stable releases, while nightly builds can update to a
  * newer nightly or fall back to a newer stable version.
+ *
+ * @param {Array<{ draft?: boolean, prerelease?: boolean, tag_name?: string }>} releases
+ * @param {string} installedVersion
+ * @returns {object[]}
+ */
+export function findUpdateReleases(releases, installedVersion) {
+  const installed = parseVersion(installedVersion)
+  if (installed === null) {
+    return []
+  }
+
+  return releases
+    .map((release) => ({
+      release,
+      version: parseVersion(release.tag_name ?? '')
+    }))
+    .filter(({ release, version }) => {
+      const isNightlyRelease = release.prerelease === true
+
+      return release.draft !== true &&
+        version !== null &&
+        isNightlyRelease === (version.channel === 'nightly') &&
+        !(installed.channel === 'stable' && version.channel === 'nightly') &&
+        compareVersionParts(version.parts, installed.parts) > 0
+    })
+    .sort((left, right) => compareVersionParts(right.version.parts, left.version.parts))
+    .map(({ release }) => release)
+}
+
+/**
+ * Finds the newest update available to the installed build.
  *
  * @param {Array<{ draft?: boolean, prerelease?: boolean, tag_name?: string }>} releases
  * @param {string} installedVersion
  * @returns {object | null}
  */
 export function findUpdateRelease(releases, installedVersion) {
-  const installed = parseVersion(installedVersion)
-  if (installed === null) {
-    return null
-  }
+  return findUpdateReleases(releases, installedVersion)[0] ?? null
+}
 
-  let latestRelease = null
-  let latestVersion = installed
-
-  for (const release of releases) {
-    const releaseVersion = parseVersion(release.tag_name ?? '')
-    const isNightlyRelease = release.prerelease === true
-
-    if (
-      release.draft === true ||
-      releaseVersion === null ||
-      isNightlyRelease !== (releaseVersion.channel === 'nightly') ||
-      (installed.channel === 'stable' && releaseVersion.channel === 'nightly') ||
-      compareVersionParts(releaseVersion.parts, latestVersion.parts) <= 0
-    ) {
-      continue
-    }
-
-    latestRelease = release
-    latestVersion = releaseVersion
-  }
-
-  return latestRelease
+/**
+ * Combines release notes into a changelog with a heading for each release.
+ *
+ * @param {Array<{ body?: string | null, name?: string | null, tag_name?: string }>} releases
+ * @returns {string}
+ */
+export function formatReleaseChangelog(releases) {
+  return releases.map((release) => {
+    const title = release.name ?? release.tag_name ?? ''
+    return `## ${title}\n\n${release.body ?? ''}`
+  }).join('\n\n')
 }
