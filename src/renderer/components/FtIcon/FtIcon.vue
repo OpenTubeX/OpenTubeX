@@ -14,6 +14,7 @@
     v-bind="forwardedAttrs"
     :data-prefix="semanticIcon?.[0]"
     :data-icon="semanticIcon?.[1]"
+    :data-icon-pack="currentIconPack"
     class="ft-icon"
     :class="[{ 'ft-icon--fw': fixedWidth }, iconClass]"
     :style="iconifyWrapperStyle"
