@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('settings page renders its sections', async ({ page }) => {
@@ -155,6 +155,24 @@ test.describe('settings', () => {
     await expect(syncSection.getByLabel('Server URL')).toHaveCount(0)
     await page.waitForTimeout(500)
     expect(syncRequests).toEqual([])
+  })
+
+  test('loads each experimental icon pack when selected', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="experimental"]').click()
+
+    const preview = page.locator('.iconPackPreview')
+    const select = preview.locator('select')
+    for (const pack of ['material', 'tabler', 'phosphor', 'lucide', 'remix']) {
+      await select.selectOption(pack)
+      await expect(preview.locator('.previewIcon.ft-icon').first()).toBeVisible()
+      await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
+    }
+
+    await page.reload()
+    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await expect(preview.locator('select')).toHaveValue('remix')
+    await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
   })
 
   test('a toggled setting persists across restarts', async ({ app }) => {
@@ -625,8 +643,95 @@ test.describe('sync settings', () => {
     await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
     await expect(syncSection.locator('.syncProgress')).toBeHidden()
     await expect(syncSection.locator('.error')).toHaveCount(0)
+    await expect(page.locator('.toast', { hasText: 'Sync completed' })).toHaveCount(0)
     await page.waitForTimeout(500)
     expect(syncRequests).toHaveLength(1)
+  })
+
+  test('stops an active sync in another window when sync is disabled', async ({ app, page }) => {
+    const [otherWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      page.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(otherWindow)
+
+    let finishSyncRequest
+    let syncRequestStarted
+    const syncRequestPending = new Promise((resolve) => {
+      finishSyncRequest = resolve
+    })
+    const syncRequestRequested = new Promise((resolve) => {
+      syncRequestStarted = resolve
+    })
+    const syncRequests = []
+
+    await otherWindow.route('https://sync.d3sox.me/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+        return
+      }
+      syncRequests.push(pathname)
+      syncRequestStarted()
+      await syncRequestPending
+      await route.fulfill({ status: 200, json: [] }).catch(() => {})
+    })
+
+    await goTo(page, 'settings')
+    await goTo(otherWindow, 'settings')
+    const firstSyncSection = page.locator('[data-section="sync"]')
+    const otherSyncSection = otherWindow.locator('[data-section="sync"]')
+
+    await otherSyncSection.getByRole('button', { name: 'Sync now' }).click()
+    await syncRequestRequested
+    await firstSyncSection.getByText('Enable Sync', { exact: true }).click()
+    finishSyncRequest()
+
+    await expect(firstSyncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(otherSyncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(otherSyncSection.locator('.syncProgress')).toBeHidden()
+    await otherWindow.waitForTimeout(500)
+    expect(syncRequests).toHaveLength(1)
+  })
+
+  test('cancels authentication without storing a new token when sync is disabled', async ({ app, page }) => {
+    let finishAuthentication
+    let authenticationStarted
+    const authenticationPending = new Promise((resolve) => {
+      finishAuthentication = resolve
+    })
+    const authenticationRequested = new Promise((resolve) => {
+      authenticationStarted = resolve
+    })
+
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+        return
+      }
+      authenticationStarted()
+      await authenticationPending
+      await route.fulfill({ status: 200, json: { jwt: 'late-token' } }).catch(() => {})
+    })
+
+    await goTo(page, 'settings')
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Disconnect' }).click()
+    await syncSection.getByLabel('Username').fill('sync-user')
+    await syncSection.getByLabel('Password').fill('sync-password')
+    await syncSection.getByRole('button', { name: 'Log in' }).click()
+    await authenticationRequested
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    finishAuthentication()
+
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.syncServerToken
+    }).toBe('')
   })
 
   test('disables credentials while authentication is pending', async ({ page }) => {

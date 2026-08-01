@@ -448,9 +448,12 @@ const lastSyncLabel = computed(() => {
 
 let serverCheckTimer = null
 let serverCheckSequence = 0
+let serverCheckClient = null
 
 watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [previousValue, wasConnected] = []) => {
   clearTimeout(serverCheckTimer)
+  serverCheckClient?.cancel()
+  serverCheckClient = null
   const sequence = ++serverCheckSequence
   const disconnected = wasConnected && !isConnected && value === previousValue
   serverPrivacySupported.value = null
@@ -460,8 +463,10 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
 
   serverCheckTimer = setTimeout(async () => {
     if (!disconnected) serverCheckStatus.value = 'checking'
+    const client = new SyncServerClient(value)
+    serverCheckClient = client
     try {
-      const capabilities = await new SyncServerClient(value).getCapabilities()
+      const capabilities = await client.getCapabilities()
       if (sequence !== serverCheckSequence) return
       serverPrivacySupported.value = capabilities.encrypted_sync === 1
       serverCheckStatus.value = 'valid'
@@ -469,11 +474,16 @@ watch([serverUrl, connected, syncEnabled], ([value, isConnected, isEnabled], [pr
       if (sequence !== serverCheckSequence) return
       serverCheckStatus.value = 'error'
       serverCheckError.value = t('Settings.Sync Settings.Server Unavailable')
+    } finally {
+      if (serverCheckClient === client) serverCheckClient = null
     }
   }, 400)
 }, { immediate: true })
 
-onBeforeUnmount(() => clearTimeout(serverCheckTimer))
+onBeforeUnmount(() => {
+  clearTimeout(serverCheckTimer)
+  serverCheckClient?.cancel()
+})
 
 async function saveServerUrl() {
   if (connected.value || !serverUrl.value.trim()) return
@@ -516,8 +526,10 @@ async function syncNow() {
   if (busy.value) return
   localError.value = ''
   try {
-    await store.dispatch('syncWithSyncServer')
-    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+    const result = await store.dispatch('syncWithSyncServer')
+    if (result !== null) {
+      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+    }
   } catch (error) {
     if (error instanceof SyncServerDataLossError) {
       dataLossWarning.value = error
@@ -532,8 +544,10 @@ async function confirmDataLossSync() {
   dataLossWarning.value = null
   localError.value = ''
   try {
-    await store.dispatch('syncWithSyncServer', { allowDataLoss: true })
-    showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+    const result = await store.dispatch('syncWithSyncServer', { allowDataLoss: true })
+    if (result !== null) {
+      showToast({ message: t('Settings.Sync Settings.Sync completed'), icon: ['fas', 'sync'] })
+    }
   } catch (error) {
     localError.value = error.message
   }

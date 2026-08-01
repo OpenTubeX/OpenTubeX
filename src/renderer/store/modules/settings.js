@@ -794,6 +794,9 @@ const customActions = {
             }
 
             commit(defaultMutationId(data._id), data.value)
+            if (data._id === 'syncServerEnabled') {
+              dispatch('applySyncServerEnabled', data.value, { root: true })
+            }
             break
 
           default:

@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { registerMappedIcons } from './registerMappedIcons.js'
 
 export const ICON_PACKS = /** @type {const} */ ([
   { id: 'fontawesome', label: 'Font Awesome (legacy)' },
@@ -39,10 +40,11 @@ export const currentIconPack = computed(() => iconPack.value)
 /**
  * @param {IconPackId} pack
  */
-export function setIconPack(pack) {
+export async function setIconPack(pack) {
   if (!VALID_PACK_IDS.has(pack)) {
     return
   }
+  await registerMappedIcons(pack)
   iconPack.value = pack
   try {
     localStorage.setItem(STORAGE_KEY, pack)

@@ -4,7 +4,7 @@
  *
  * Usage: node _scripts/generateIconifyBundle.mjs
  */
-import { writeFileSync, statSync } from 'node:fs'
+import { mkdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
@@ -34,15 +34,31 @@ const DEFAULT_SIZE = {
   'simple-icons': 24
 }
 
-/** @type {Record<string, object>} */
-const out = {}
+const PACK_PREFIXES = {
+  lucide: 'lucide',
+  material: 'material-symbols',
+  phosphor: 'ph',
+  remix: 'ri',
+  tabler: 'tabler'
+}
+
+const PACK_FIELDS = {
+  lucide: 'lucide',
+  material: 'material',
+  phosphor: 'ph',
+  remix: 'ri',
+  tabler: 'tabler'
+}
+
+/** @type {Record<string, Record<string, object>>} */
+const bundles = Object.fromEntries(Object.keys(PACK_PREFIXES).map(pack => [pack, {}]))
 
 /**
  * @param {string} prefix
  * @param {string} name
  * @param {object} collection
  */
-function add(prefix, name, collection) {
+function add(out, prefix, name, collection) {
   const id = `${prefix}:${name}`
 
   if (customPackIcons[id]) {
@@ -67,29 +83,40 @@ function add(prefix, name, collection) {
   out[`${prefix}:${iconName}`] = data
 }
 
-for (const mapping of Object.values(faIconMap)) {
-  add('lucide', mapping.lucide, COLLECTIONS.lucide)
-  add('tabler', mapping.tabler, COLLECTIONS.tabler)
-  add('ph', mapping.ph, COLLECTIONS.ph)
-  add('ri', mapping.ri, COLLECTIONS.ri)
-  add('material-symbols', mapping.material, COLLECTIONS['material-symbols'])
-  if (mapping.simple) {
-    add('simple-icons', mapping.simple, COLLECTIONS['simple-icons'])
+for (const [pack, prefix] of Object.entries(PACK_PREFIXES)) {
+  const out = bundles[pack]
+  for (const mapping of Object.values(faIconMap)) {
+    const name = mapping[PACK_FIELDS[pack]]
+    add(out, prefix, name, COLLECTIONS[prefix])
+    if (mapping.simple) {
+      add(out, 'simple-icons', mapping.simple, COLLECTIONS['simple-icons'])
+    }
   }
 }
 
-add('ph', 'bookmark-simple-fill', COLLECTIONS.ph)
-add('tabler', 'bookmark-filled', COLLECTIONS.tabler)
-add('ri', 'bookmark-fill', COLLECTIONS.ri)
-add('material-symbols', 'bookmark', COLLECTIONS['material-symbols'])
-add('lucide', 'bookmark', COLLECTIONS.lucide)
+add(bundles.phosphor, 'ph', 'bookmark-simple-fill', COLLECTIONS.ph)
+add(bundles.tabler, 'tabler', 'bookmark-filled', COLLECTIONS.tabler)
+add(bundles.remix, 'ri', 'bookmark-fill', COLLECTIONS.ri)
+add(bundles.material, 'material-symbols', 'bookmark', COLLECTIONS['material-symbols'])
+add(bundles.lucide, 'lucide', 'bookmark', COLLECTIONS.lucide)
 
 // Ensure every custom pack glyph is present even if not referenced yet.
 for (const id of Object.keys(customPackIcons)) {
   const [prefix, name] = id.split(':')
-  add(prefix, name, COLLECTIONS[prefix])
+  const pack = Object.entries(PACK_PREFIXES).find(([, packPrefix]) => packPrefix === prefix)?.[0]
+  if (!pack) throw new Error(`unknown custom icon prefix: ${prefix}`)
+  add(bundles[pack], prefix, name, COLLECTIONS[prefix])
 }
 
-const outPath = join(root, 'src/renderer/icons/iconifyBundle.json')
-writeFileSync(outPath, `${JSON.stringify(out)}\n`)
-console.log(`Wrote ${Object.keys(out).length} icons (${statSync(outPath).size} bytes) → ${outPath}`)
+const outputDirectory = join(root, 'src/renderer/icons/iconifyBundles')
+mkdirSync(outputDirectory, { recursive: true })
+rmSync(join(root, 'src/renderer/icons/iconifyBundle.json'), { force: true })
+
+for (const [pack, bundle] of Object.entries(bundles)) {
+  const outPath = join(outputDirectory, `${pack}.json`)
+  writeFileSync(outPath, `${JSON.stringify(bundle)}\n`)
+  console.log(
+    `Wrote ${Object.keys(bundle).length} ${pack} icons ` +
+    `(${statSync(outPath).size} bytes) → ${outPath}`
+  )
+}
