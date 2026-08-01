@@ -11,7 +11,9 @@ export default defineConfig({
   expect: {
     timeout: 15_000
   },
-  workers: process.env.CI ? 2 : undefined,
+  // Electron windows share the CI X server, so parallel pointer input can
+  // move another test's cursor and interrupt drags or auto-hide timers.
+  workers: process.env.CI ? 1 : undefined,
   reporter: [['list'], ['html', { outputFolder: 'report', open: 'never' }]],
   use: {
     trace: 'retain-on-failure'
