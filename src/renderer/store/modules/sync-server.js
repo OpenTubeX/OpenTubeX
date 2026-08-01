@@ -43,6 +43,14 @@ let activeSyncPromise = null
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
+let syncGeneration = 0
+
+class SyncServerCancelledError extends Error {
+  constructor() {
+    super('Sync cancelled')
+    this.name = 'SyncServerCancelledError'
+  }
+}
 
 const state = {
   syncServerStatus: 'idle',
@@ -82,6 +90,7 @@ function withSyncLock(callback) {
 async function runSync(context, { allowDataLoss = false } = {}) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
+  const runId = syncGeneration
   const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
   let client = networkClient
   let encryptedCollections = null
@@ -109,12 +118,20 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   ]
   let completedStages = 0
 
+  function assertSyncStillActive() {
+    if (runId !== syncGeneration || !rootState.settings.syncServerEnabled) {
+      throw new SyncServerCancelledError()
+    }
+  }
+
   async function runStage(stage, callback) {
+    assertSyncStillActive()
     commit('setSyncServerProgress', {
       stage,
       percentage: Math.round((completedStages / stages.length) * 100),
     })
     const value = await callback()
+    assertSyncStillActive()
     completedStages++
     commit('setSyncServerProgress', {
       stage,
@@ -277,6 +294,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     if (encryptedCollections) {
       await runStage('upload', async () => {
         for (const collection of encryptedCollections.upload) {
+          assertSyncStillActive()
           let revision = encryptedCollections.remote[collection].revision
           let data = client.document[collection]
           if (revision > 0 &&
@@ -336,6 +354,12 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     commit('setSyncServerStatus', 'success')
     return result
   } catch (error) {
+    if (error instanceof SyncServerCancelledError) {
+      commit('setSyncServerProgress', null)
+      commit('setSyncServerError', '')
+      commit('setSyncServerStatus', 'idle')
+      return null
+    }
     if (error instanceof SyncServerDataLossError) {
       await dispatch('setSyncServerAutoSync', false)
     }
@@ -606,10 +630,15 @@ const actions = {
     await dispatch(enabled ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync')
   },
 
-  async setSyncServerEnabled({ dispatch, rootState }, enabled) {
+  async setSyncServerEnabled({ commit, dispatch, rootState }, enabled) {
     await dispatch('updateSyncServerEnabled', enabled, { root: true })
     if (!enabled) {
+      // Invalidate any in-flight run so later stages/uploads stop contacting the server.
+      syncGeneration++
       await dispatch('stopSyncServerAutoSync')
+      commit('setSyncServerProgress', null)
+      commit('setSyncServerError', '')
+      commit('setSyncServerStatus', 'idle')
       return
     }
     if (rootState.settings.syncServerToken) {

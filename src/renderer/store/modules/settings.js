@@ -763,10 +763,11 @@ const customActions = {
 
       // Existing logged-in sync users keep sync enabled; everyone else starts off
       // so the default server is not contacted until the user opts in.
+      // Use setSyncServerEnabled so enablement also starts the sync lifecycle.
       const hasSyncServerEnabledSetting = userSettings.some(entry => entry._id === 'syncServerEnabled')
       if (!hasSyncServerEnabledSetting) {
         const token = typeof state.syncServerToken === 'string' ? state.syncServerToken : ''
-        await dispatch('updateSyncServerEnabled', token !== '')
+        await dispatch('setSyncServerEnabled', token !== '', { root: true })
       }
 
       for (const _id of settingsWithSideEffects) {

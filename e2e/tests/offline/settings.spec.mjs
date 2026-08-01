@@ -127,7 +127,7 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     const syncSection = page.locator('[data-section="sync"]')
-    await syncSection.getByLabel('Enable Sync').click()
+    await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
 
     const privacyPolicy = syncSection.getByRole('link', {
       name: 'Privacy policy for this server'

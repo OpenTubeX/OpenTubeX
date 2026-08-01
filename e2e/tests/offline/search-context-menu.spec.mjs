@@ -165,11 +165,15 @@ test('adds a custom search engine from settings', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'custom search'
   }))
-  const searchWith = contextMenu.items.find(item => item.label === 'Search with...')
+  // Built-ins are disabled by default, so a single custom engine is a direct action.
+  const searchWith = contextMenu.items.find(item => item.label === 'Search with Example Search')
 
-  expect(searchWith.submenu.map(item => item.label)).toContain('Example Search')
-  expect(searchWith.submenu.find(item => item.label === 'Example Search').icon)
-    .toBe('https://example.com/favicon.ico')
+  expect(searchWith).toMatchObject({
+    labelKey: 'Context Menu.Search With',
+    labelParameters: { engine: 'Example Search' }
+  })
+  expect(searchWith.submenu).toBeUndefined()
+  expect(searchWith.icon).toBe('https://example.com/favicon.ico')
 })
 
 test.describe('with one external search engine enabled', () => {
