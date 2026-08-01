@@ -8,6 +8,7 @@ import { app, BrowserWindow } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
+import { getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
@@ -354,17 +355,7 @@ async function installBinary(data, destinationPath) {
 async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
-  let assetName
-  switch (process.platform) {
-    case 'win32':
-      assetName = 'yt-dlp.exe'
-      break
-    case 'darwin':
-      assetName = 'yt-dlp_macos'
-      break
-    default:
-      assetName = 'yt-dlp'
-  }
+  const assetName = getYtDlpAssetName(process.platform, process.arch)
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
