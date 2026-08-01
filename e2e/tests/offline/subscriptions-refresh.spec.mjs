@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const HOUR = 3_600_000
 const now = Date.now()
@@ -118,6 +118,28 @@ test.describe('incremental subscription feed refresh', () => {
 
     await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.tab.active .loadingDot')).toHaveCount(0)
+  })
+
+  test('defers incremental feed renders while its app tab is hidden', async ({ page }) => {
+    await routeFeeds(page, (index) => index === 1 ? 8_000 : 2_000)
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'history')
+
+    const refreshProgress = page.getByTestId('subscription-refresh-toast')
+      .locator('.progress-indicator')
+    await expect.poll(async () => Number(await refreshProgress.getAttribute('data-progress')))
+      .toBeGreaterThan(0)
+
+    const hiddenSubscriptions = page.locator('.tabContent[aria-hidden="true"]')
+    await expect(hiddenSubscriptions.getByText('Fresh video 0', { exact: true })).toHaveCount(0)
+    await expect(hiddenSubscriptions.getByText('Cached video 0', { exact: true })).toHaveCount(1)
+
+    await page.locator(sel.tabs).first().click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 3_000 })
   })
 
   test('keeps a manual refresh in the progress toast after navigation', async ({ page }) => {
