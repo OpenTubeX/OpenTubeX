@@ -1,4 +1,4 @@
-// How many backoffs a VOD may be told to wait through without a single segment
+// How many backoffs a stream may be told to wait through without a single segment
 // arriving before we treat it as a loop rather than a wait.
 export const MAX_BACKOFFS_WITHOUT_PROGRESS = 3
 
@@ -19,9 +19,9 @@ export function createBackoffLoopTracker() {
     /**
      * Records a backoff and reports whether it has become a loop that only a
      * player reload can break.
-     * @param {{ backoffTimeMs: number, isLive: boolean, timeoutMs: number }} options
+     * @param {{ backoffTimeMs: number, timeoutMs: number }} options
      */
-    record({ backoffTimeMs, isLive, timeoutMs }) {
+    record({ backoffTimeMs, timeoutMs }) {
       cumulativeTimeMs += backoffTimeMs
       requested += 1
 
@@ -32,7 +32,7 @@ export function createBackoffLoopTracker() {
       // did, and this adds the one we expect to be told to do next.
       const projectedTimeMs = cumulativeTimeMs + backoffTimeMs
 
-      return (!isLive && requested >= MAX_BACKOFFS_WITHOUT_PROGRESS) ||
+      return requested >= MAX_BACKOFFS_WITHOUT_PROGRESS ||
         (timeoutMs > 0 && timeoutMs <= projectedTimeMs)
     },
 

@@ -91,11 +91,7 @@ async function sharedInit() {
   theSession.setUserAgent(session.defaultSession.getUserAgent())
 
   theSession.webRequest.onBeforeSendHeaders({
-    urls: [
-      'https://www.google.com/js/*',
-      'https://www.youtube.com/youtubei/*',
-      'https://jnn-pa.googleapis.com/*'
-    ]
+    urls: ['https://www.google.com/js/*', 'https://www.youtube.com/youtubei/*']
   }, ({ requestHeaders, url }, callback) => {
     if (url.startsWith('https://www.youtube.com/youtubei/')) {
       // make InnerTube requests work with the fetch function
@@ -106,12 +102,6 @@ async function sharedInit() {
       requestHeaders['Sec-Fetch-Site'] = 'same-origin'
       requestHeaders['Sec-Fetch-Mode'] = 'same-origin'
       requestHeaders['X-Youtube-Bootstrap-Logged-In'] = 'false'
-    } else if (url.startsWith('https://jnn-pa.googleapis.com/')) {
-      requestHeaders.Referer = 'https://www.youtube.com/'
-      requestHeaders.Origin = 'https://www.youtube.com'
-      requestHeaders['Sec-Fetch-Site'] = 'cross-site'
-      requestHeaders['Sec-Fetch-Mode'] = 'cors'
-      requestHeaders['Sec-Fetch-Dest'] = 'empty'
     } else {
       requestHeaders['Sec-Fetch-Dest'] = 'script'
       requestHeaders['Sec-Fetch-Site'] = 'cross-site'
@@ -129,8 +119,7 @@ async function sharedInit() {
         responseHeaders: {
           ...responseHeaders,
           'Access-Control-Allow-Origin': ['*'],
-          'Access-Control-Allow-Methods': ['GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH'],
-          'Access-Control-Allow-Headers': ['content-type, x-goog-api-key, x-user-agent']
+          'Access-Control-Allow-Methods': ['GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH']
         }
       })
     }
@@ -176,7 +165,6 @@ async function internalGeneratePotoken(videoId, context, proxyUrl) {
         safeDialogs: true,
         sandbox: true,
         contextIsolation: true,
-        webSecurity: false,
         v8CacheOptions: 'none',
         session: theSession,
         offscreen: true,

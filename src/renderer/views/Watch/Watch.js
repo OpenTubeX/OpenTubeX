@@ -81,8 +81,7 @@ import { useTabToast } from '../../composables/useTabToast'
  *     clientVersion: string,
  *     osName: string,
  *     osVersion: string
- *   },
- *   reload: (reloadPlaybackContext: import('googlevideo/protos').ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>
+ *   }
  * }} SabrData
  */
 
@@ -1535,7 +1534,7 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, reloadSabrData } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs } = videoInfo
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -1797,17 +1796,7 @@ export default defineComponent({
         if ((this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
           let useRemoteManifest = true
 
-          if (
-            this.isLive &&
-            result.basic_info.is_live_dvr_enabled &&
-            result.streaming_data?.adaptive_formats.length > 0 &&
-            result.streaming_data.server_abr_streaming_url &&
-            result.player_config.media_common_config.media_ustreamer_request_config
-          ) {
-            this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, [], reloadSabrData)
-            this.manifestMimeType = MANIFEST_TYPE_SABR
-            useRemoteManifest = false
-          } else if (this.isPostLiveDvr) {
+          if (this.isPostLiveDvr) {
             // I wasn't able to get SABR working with Post-Live-DVR yet, so for the moment we'll use YouTube's provided DASH manifest instead.
             // It only contains the last 4 hours of the stream, instead of starting from the beginning but that is better than nothing.
             if (
@@ -2003,7 +1992,7 @@ export default defineComponent({
                   }]
                 : []
 
-              this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, storyboards, reloadSabrData)
+              this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, storyboards)
               this.manifestMimeType = MANIFEST_TYPE_SABR
             } else if (
               result.streaming_data.adaptive_formats[0]?.url ||
@@ -3268,9 +3257,8 @@ export default defineComponent({
      * @param {string} poToken
      * @param {SabrData['clientInfo']} clientInfo
      * @param {import('../../helpers/player/SabrManifestParser').SabrManifest['storyboards']} storyboards
-     * @param {SabrData['reload']} reload
      */
-    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards, reload) {
+    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards) {
       const url = new URL(videoInfo.streaming_data.server_abr_streaming_url)
       url.searchParams.set('alr', 'yes')
       url.searchParams.set('cpn', videoInfo.cpn)
@@ -3284,43 +3272,7 @@ export default defineComponent({
         url: url.toString(),
         poToken,
         ustreamerConfig: videoInfo.player_config.media_common_config.media_ustreamer_request_config.video_playback_ustreamer_config,
-        clientInfo,
-        reload
-      }
-
-      const formats = videoInfo.streaming_data.adaptive_formats
-      const formatDurations = formats
-        .map(format => format.approx_duration_ms / 1000)
-        .filter(duration => Number.isFinite(duration) && duration > 0)
-      const duration = formatDurations.length > 0
-        ? Math.min(...formatDurations)
-        : videoInfo.basic_info.duration
-      const isLive = !!videoInfo.basic_info.is_live
-
-      let presentationStartTime
-      let presentationDelay
-      let segmentDuration
-      let segmentAvailabilityDuration
-
-      if (isLive) {
-        const startTimestamp = videoInfo.basic_info.start_timestamp?.getTime() / 1000
-        presentationStartTime = Number.isFinite(duration) && duration > 0
-          ? Date.now() / 1000 - duration
-          : Number.isFinite(startTimestamp) ? startTimestamp : Date.now() / 1000
-
-        const targetDurations = formats
-          .map(format => Number(format.target_duration_dec))
-          .filter(targetDuration => Number.isFinite(targetDuration) && targetDuration > 0)
-        segmentDuration = targetDurations.length > 0 ? Math.max(...targetDurations) : 1
-        // Keep one complete segment buffered ahead of the playhead. Some live
-        // SABR responses only contain the segment ending at maxSeekableTime;
-        // starting exactly there leaves the player stalled at the buffer edge.
-        presentationDelay = segmentDuration * 3
-
-        const dvrDurations = formats
-          .map(format => Number(format.max_dvr_duration_sec))
-          .filter(dvrDuration => Number.isFinite(dvrDuration) && dvrDuration > 0)
-        segmentAvailabilityDuration = dvrDurations.length > 0 ? Math.min(...dvrDurations) : undefined
+        clientInfo
       }
 
       /** @type {import('../../helpers/player/SabrManifestParser').SabrManifest} */
@@ -3328,13 +3280,8 @@ export default defineComponent({
         scheme,
         // Different formats have different durations and
         // use of slightly longer duration in PresentationTimeline causes player to stuck at the end
-        duration,
-        isLive,
-        presentationStartTime,
-        presentationDelay,
-        segmentDuration,
-        segmentAvailabilityDuration,
-        formats: formats.map((format) => ({
+        duration: Math.min(...videoInfo.streaming_data.adaptive_formats.map(f => f.approx_duration_ms)) / 1000,
+        formats: videoInfo.streaming_data.adaptive_formats.map((format) => ({
           itag: format.itag,
           lastModified: format.last_modified_ms,
           mimeType: format.mime_type,
