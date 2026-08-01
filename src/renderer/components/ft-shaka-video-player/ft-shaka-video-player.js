@@ -4122,10 +4122,6 @@ export default defineComponent({
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
-      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('playing', tabId)
-      }
-
       updateAutoPip()
       updateScrollMiniPlayer()
 
@@ -4140,6 +4136,16 @@ export default defineComponent({
       // frame is available the poster is no longer needed, so remove it before
       // a later blur-triggered PiP transition.
       showPoster.value = false
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('playing', tabId)
+      }
+    }
+
+    function handleWaiting() {
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('paused', tabId)
+      }
     }
 
     function handlePause() {
@@ -8344,6 +8350,7 @@ export default defineComponent({
       toggleShortsMuted,
       toggleShortsCaptions,
       handlePlaying,
+      handleWaiting,
       openShortsOverflowMenu,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,

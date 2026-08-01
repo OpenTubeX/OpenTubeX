@@ -88,6 +88,7 @@
         :poster="showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
+        @waiting="handleWaiting"
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="handleSeeking"
