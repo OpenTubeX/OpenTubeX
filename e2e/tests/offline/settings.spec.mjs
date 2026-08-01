@@ -591,6 +591,44 @@ test.describe('sync settings', () => {
     }
   })
 
+  test('stops an active sync when sync is disabled', async ({ page }) => {
+    let finishSyncRequest
+    let syncRequestStarted
+    const syncRequestPending = new Promise((resolve) => {
+      finishSyncRequest = resolve
+    })
+    const syncRequestRequested = new Promise((resolve) => {
+      syncRequestStarted = resolve
+    })
+    const syncRequests = []
+
+    await page.route('https://sync.d3sox.me/**', async (route) => {
+      const pathname = new URL(route.request().url()).pathname
+      if (pathname === '/health') {
+        await route.fulfill({ status: 200, body: 'OK' })
+        return
+      }
+
+      syncRequests.push(pathname)
+      syncRequestStarted()
+      await syncRequestPending
+      await route.fulfill({ status: 200, json: [] })
+    })
+    await goTo(page, 'settings')
+
+    const syncSection = page.locator('[data-section="sync"]')
+    await syncSection.getByRole('button', { name: 'Sync now' }).click()
+    await syncRequestRequested
+    await syncSection.getByText('Enable Sync', { exact: true }).click()
+    finishSyncRequest()
+
+    await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
+    await expect(syncSection.locator('.syncProgress')).toBeHidden()
+    await expect(syncSection.locator('.error')).toHaveCount(0)
+    await page.waitForTimeout(500)
+    expect(syncRequests).toHaveLength(1)
+  })
+
   test('disables credentials while authentication is pending', async ({ page }) => {
     let finishAuthentication
     const authenticationPending = new Promise((resolve) => {

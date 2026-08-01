@@ -7,7 +7,6 @@
       <FtToggleSwitch
         :label="t('Settings.Sync Settings.Enable Sync')"
         :default-value="syncEnabled"
-        :disabled="busy"
         compact
         @change="setSyncEnabled"
       />

@@ -1,5 +1,6 @@
 import {
   SyncServerClient,
+  SyncServerCancelledError,
   SyncServerDataLossError,
   SYNC_SERVER_SESSION_EXPIRED_MESSAGE,
   isExpiredSessionReauthentication,
@@ -40,17 +41,10 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 ]
 
 let activeSyncPromise = null
+let activeSyncClient = null
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
-let syncGeneration = 0
-
-class SyncServerCancelledError extends Error {
-  constructor() {
-    super('Sync cancelled')
-    this.name = 'SyncServerCancelledError'
-  }
-}
 
 const state = {
   syncServerStatus: 'idle',
@@ -90,8 +84,8 @@ function withSyncLock(callback) {
 async function runSync(context, { allowDataLoss = false } = {}) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
-  const runId = syncGeneration
   const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
+  activeSyncClient = networkClient
   let client = networkClient
   let encryptedCollections = null
   const previous = parseSnapshot(settings.syncServerSnapshot)
@@ -119,7 +113,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   let completedStages = 0
 
   function assertSyncStillActive() {
-    if (runId !== syncGeneration || !rootState.settings.syncServerEnabled) {
+    if (networkClient.cancelled || !rootState.settings.syncServerEnabled) {
       throw new SyncServerCancelledError()
     }
   }
@@ -374,6 +368,8 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     commit('setSyncServerError', error.message)
     commit('setSyncServerStatus', 'error')
     throw error
+  } finally {
+    if (activeSyncClient === networkClient) activeSyncClient = null
   }
 }
 
@@ -522,6 +518,7 @@ const actions = {
       clearTimeout(eventSyncTimer)
       eventSyncTimer = null
       activeSyncPromise = withSyncLock(() => {
+        if (!context.rootState.settings.syncServerEnabled) return null
         if (options.skipIfRecent &&
             isRecentSync(context.rootState.settings.syncServerLastSyncAt)) {
           return null
@@ -631,10 +628,9 @@ const actions = {
   },
 
   async setSyncServerEnabled({ commit, dispatch, rootState }, enabled) {
+    if (!enabled) activeSyncClient?.cancel()
     await dispatch('updateSyncServerEnabled', enabled, { root: true })
     if (!enabled) {
-      // Invalidate any in-flight run so later stages/uploads stop contacting the server.
-      syncGeneration++
       await dispatch('stopSyncServerAutoSync')
       commit('setSyncServerProgress', null)
       commit('setSyncServerError', '')
