@@ -250,8 +250,10 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
 .ft-icon {
   display: inline-block;
   flex-shrink: 0;
+  inline-size: var(--fa-width, 1.25em);
   line-height: 1;
   overflow: visible;
+  text-align: center;
   vertical-align: -0.125em;
 }
 
@@ -259,10 +261,11 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
   display: block;
   /* Center when callers stretch .ft-icon wider than 1em (e.g. SideNav .navIcon). */
   margin-inline: auto;
+  /* Iconify packs leave more padding in their view boxes than Font Awesome. */
+  scale: 1.2;
 }
 
 .ft-icon--fw {
   inline-size: 1.25em;
-  text-align: center;
 }
 </style>
