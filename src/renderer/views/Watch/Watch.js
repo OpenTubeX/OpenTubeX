@@ -824,6 +824,9 @@ export default defineComponent({
         })
       }
     },
+    toggleFullscreenMetadata() {
+      this.$refs.player?.setFullscreenMetadata(!this.fullscreenMetadataOpen)
+    },
     handleFullscreenTranscriptChange({ open, target }) {
       this.fullscreenTranscriptTarget = target
       this.fullscreenTranscriptOpen = open && target !== null
