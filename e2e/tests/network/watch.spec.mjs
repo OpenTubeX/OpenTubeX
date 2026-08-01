@@ -1346,7 +1346,7 @@ test.describe('watch page', () => {
       const previewBox = await preview.boundingBox()
       expect(previewBox.y).toBeLessThan(contentBox.y)
       await expect(content).toHaveCSS('overflow', 'visible')
-      await expect(content).not.toHaveAttribute('data-overlayscrollbars-viewport')
+      await expect(content).toHaveAttribute('data-overlayscrollbars-viewport')
 
       for (const position of [0.25, 0.5, 0.75]) {
         await page.mouse.move(
