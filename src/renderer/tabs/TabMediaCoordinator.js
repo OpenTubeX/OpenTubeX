@@ -13,6 +13,7 @@ const MEDIA_SESSION_ACTIONS = [
 const mediaByTabId = new Map()
 let presentedTabId = null
 let ownerTabId = null
+let pictureInPictureTabId = null
 let playSequence = 0
 let powerSaveBlocked = false
 
@@ -35,6 +36,10 @@ function getEntry(tabId) {
 }
 
 function chooseOwner() {
+  if (pictureInPictureTabId && mediaByTabId.has(pictureInPictureTabId)) {
+    return pictureInPictureTabId
+  }
+
   const presented = mediaByTabId.get(presentedTabId)
   if (presented?.playbackState === 'playing') {
     return presentedTabId
@@ -114,6 +119,18 @@ export const tabMediaCoordinator = {
     applyOwner()
   },
 
+  setPictureInPicture(tabId, active) {
+    if (active) {
+      if (!getEntry(tabId)) {
+        return
+      }
+      pictureInPictureTabId = tabId
+    } else if (pictureInPictureTabId === tabId) {
+      pictureInPictureTabId = null
+    }
+    applyOwner()
+  },
+
   setPlaybackState(tabId, playbackState) {
     const entry = getEntry(tabId)
     if (!entry) {
@@ -166,6 +183,9 @@ export const tabMediaCoordinator = {
 
   unregister(tabId) {
     mediaByTabId.delete(tabId)
+    if (pictureInPictureTabId === tabId) {
+      pictureInPictureTabId = null
+    }
     if (ownerTabId === tabId) {
       ownerTabId = null
     }
