@@ -883,6 +883,11 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    const annotationVideoFit = computed(() => {
+      return props.shortsPlayer && !isFullscreen.value && !fullWindowEnabled.value
+        ? 'cover'
+        : 'contain'
+    })
     const fullWindowPlaceholderHeight = ref(0)
     /** @type {Animation|null} */
     let fullWindowAnimation = null
@@ -8366,6 +8371,7 @@ export default defineComponent({
       captionCssVariables,
       captionAppearanceSampleBottom,
       showCaptionAppearanceSample,
+      isActiveTab,
       container,
       video,
       vrCanvas,
@@ -8427,6 +8433,7 @@ export default defineComponent({
       playerDimensions,
       annotationCurrentTime,
       annotationVideoAspectRatio,
+      annotationVideoFit,
 
       autoplayVideos,
       sponsorBlockShowSkippedToast,

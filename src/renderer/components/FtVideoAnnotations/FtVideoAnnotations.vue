@@ -106,7 +106,7 @@ import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
-import { getContainedVideoRect } from './annotationSurface'
+import { getVideoRect } from './annotationSurface'
 
 const props = defineProps({
   annotations: {
@@ -117,9 +117,18 @@ const props = defineProps({
     type: Number,
     default: 0
   },
+  active: {
+    type: Boolean,
+    default: true
+  },
   videoAspectRatio: {
     type: Number,
     default: null
+  },
+  videoFit: {
+    type: String,
+    default: 'contain',
+    validator: (value) => ['contain', 'cover'].includes(value)
   }
 })
 
@@ -129,6 +138,16 @@ const annotationRoot = useTemplateRef('annotationRoot')
 const containerWidth = ref(0)
 const containerHeight = ref(0)
 
+function measureAnnotationRoot() {
+  if (!annotationRoot.value) {
+    return
+  }
+
+  const { width, height } = annotationRoot.value.getBoundingClientRect()
+  containerWidth.value = width
+  containerHeight.value = height
+}
+
 const resizeObserver = new ResizeObserver((entries) => {
   const { width, height } = entries[0].contentRect
   containerWidth.value = width
@@ -136,7 +155,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 })
 
 const annotationSurfaceStyle = computed(() => {
-  const rect = getContainedVideoRect(containerWidth.value, containerHeight.value, props.videoAspectRatio)
+  const rect = getVideoRect(containerWidth.value, containerHeight.value, props.videoAspectRatio, props.videoFit)
 
   if (!rect) {
     return undefined
@@ -156,6 +175,13 @@ watch(annotationRoot, (newRoot, oldRoot) => {
   }
   if (newRoot) {
     resizeObserver.observe(newRoot)
+    measureAnnotationRoot()
+  }
+}, { flush: 'post' })
+
+watch(() => props.active, (active) => {
+  if (active) {
+    measureAnnotationRoot()
   }
 }, { flush: 'post' })
 
