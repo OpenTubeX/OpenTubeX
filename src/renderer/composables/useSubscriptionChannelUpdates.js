@@ -1,6 +1,7 @@
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 import { SUBSCRIPTION_REFRESH_CHANNEL_EVENT } from '../helpers/subscriptions'
+import { useTabContext } from '../tabs/TabContext'
 
 // Rebuilding and sorting the whole feed for every channel would be wasteful
 // with hundreds of subscriptions, so updates are coalesced.
@@ -13,34 +14,70 @@ const FEED_UPDATE_INTERVAL_MS = 500
  * @param {() => void} onChannelsRefreshed
  */
 export function useSubscriptionChannelUpdates(tab, onChannelsRefreshed) {
+  const { isTabPresented } = useTabContext()
   let timeout = null
   let lastRun = 0
+  let updatePending = false
+
+  function isPresented() {
+    return isTabPresented?.value !== false
+  }
 
   function run() {
     timeout = null
+
+    if (!isPresented()) {
+      return
+    }
+
+    updatePending = false
     lastRun = Date.now()
     onChannelsRefreshed()
+  }
+
+  function schedule() {
+    if (!isPresented() || timeout !== null) {
+      return
+    }
+
+    const remaining = FEED_UPDATE_INTERVAL_MS - (Date.now() - lastRun)
+    timeout = setTimeout(run, Math.max(remaining, 0))
   }
 
   /**
    * @param {CustomEvent<{tab: string}>} event
    */
   function handleChannelRefreshed(event) {
-    if (event.detail.tab !== tab || timeout !== null) {
+    if (event.detail.tab !== tab) {
       return
     }
 
-    const remaining = FEED_UPDATE_INTERVAL_MS - (Date.now() - lastRun)
+    updatePending = true
+    schedule()
+  }
 
-    if (remaining <= 0) {
-      run()
-    } else {
-      timeout = setTimeout(run, remaining)
-    }
+  if (isTabPresented !== null) {
+    watch(isTabPresented, (presented) => {
+      if (!presented) {
+        if (timeout !== null) {
+          clearTimeout(timeout)
+          timeout = null
+        }
+        return
+      }
+
+      if (updatePending) {
+        schedule()
+      }
+    })
   }
 
   onMounted(() => {
     window.addEventListener(SUBSCRIPTION_REFRESH_CHANNEL_EVENT, handleChannelRefreshed)
+
+    if (updatePending) {
+      schedule()
+    }
   })
 
   onBeforeUnmount(() => {
