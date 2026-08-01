@@ -206,12 +206,20 @@
 
 .ftVideoPlayer.shortsPlayer:fullscreen .shortsFullscreenMetadata,
 .ftVideoPlayer.shortsPlayer.fullWindow .shortsFullscreenMetadata {
+  --shorts-metadata-min-width: min(
+    220px,
+    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
+  );
+
   position: absolute;
   z-index: 5;
   inset-block: 0;
   inset-inline-start: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns:
+    minmax(var(--shorts-metadata-min-width), 1fr)
+    auto
+    minmax(0, 1fr);
   box-sizing: border-box;
   block-size: 100%;
   inline-size: calc(100% - var(--shorts-dock-width, 0px));
@@ -231,6 +239,13 @@
 .shortsFullscreenVideoSpace {
   grid-column: 2;
   block-size: 100%;
+  inline-size: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    calc(
+      100vw - var(--shorts-dock-width, 0px) -
+      var(--shorts-metadata-min-width)
+    )
+  );
   aspect-ratio: var(--shorts-aspect-ratio);
 }
 
