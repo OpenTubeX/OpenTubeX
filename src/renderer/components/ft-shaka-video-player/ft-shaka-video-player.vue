@@ -345,6 +345,7 @@
         v-if="!hideAnnotations"
         :annotations="annotations"
         :current-time="annotationCurrentTime"
+        :video-aspect-ratio="annotationVideoAspectRatio"
       />
       <div
         v-if="showCaptionAppearanceSample"

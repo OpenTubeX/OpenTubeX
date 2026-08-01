@@ -841,6 +841,7 @@ export default defineComponent({
 
     const hasLoaded = ref(false)
     const annotationCurrentTime = ref(0)
+    const annotationVideoAspectRatio = ref(null)
 
     const hasMultipleAudioTracks = ref(false)
     const isLive = ref(props.isLive)
@@ -4226,6 +4227,7 @@ export default defineComponent({
       // Re-evaluate auto-PiP now that PiP is actually allowed (the video was possibly
       // in a hidden tab / scrolled out of view while still loading).
       updateAutoPip()
+      updateAnnotationVideoAspectRatio()
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
     }
@@ -4346,6 +4348,14 @@ export default defineComponent({
 
     const videoElementWidth = ref(0)
     const videoElementHeight = ref(0)
+
+    function updateAnnotationVideoAspectRatio() {
+      const video_ = video.value
+
+      annotationVideoAspectRatio.value = video_?.videoWidth > 0 && video_.videoHeight > 0
+        ? video_.videoWidth / video_.videoHeight
+        : null
+    }
     const {
       deactivateScrollMiniPlayer,
       handleFullscreenButtonClick,
@@ -4420,6 +4430,7 @@ export default defineComponent({
 
         videoElementWidth.value = video_.clientWidth * devicePixelRatio
         videoElementHeight.value = video_.clientHeight * devicePixelRatio
+        updateAnnotationVideoAspectRatio()
         updateScrollMiniVideoAspectRatio()
       }
     })
@@ -7664,6 +7675,7 @@ export default defineComponent({
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
+        annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
           shortsPaused.value = false
           shortsCaptionsAvailable.value = false
@@ -8414,6 +8426,7 @@ export default defineComponent({
       stats,
       playerDimensions,
       annotationCurrentTime,
+      annotationVideoAspectRatio,
 
       autoplayVideos,
       sponsorBlockShowSkippedToast,

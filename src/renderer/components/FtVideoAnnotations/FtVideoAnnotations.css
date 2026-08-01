@@ -6,6 +6,13 @@
   pointer-events: none;
 }
 
+.annotationSurface {
+  position: absolute;
+  inset: 0;
+  container-type: inline-size;
+  pointer-events: none;
+}
+
 .annotationToggle {
   position: absolute;
   inset-block-start: max(8px, 1.5%);
