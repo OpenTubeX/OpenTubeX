@@ -1797,17 +1797,7 @@ export default defineComponent({
         if ((this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
           let useRemoteManifest = true
 
-          if (
-            this.isLive &&
-            result.basic_info.is_live_dvr_enabled &&
-            result.streaming_data?.adaptive_formats.length > 0 &&
-            result.streaming_data.server_abr_streaming_url &&
-            result.player_config.media_common_config.media_ustreamer_request_config
-          ) {
-            this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, [], reloadSabrData)
-            this.manifestMimeType = MANIFEST_TYPE_SABR
-            useRemoteManifest = false
-          } else if (this.isPostLiveDvr) {
+          if (this.isPostLiveDvr) {
             // I wasn't able to get SABR working with Post-Live-DVR yet, so for the moment we'll use YouTube's provided DASH manifest instead.
             // It only contains the last 4 hours of the stream, instead of starting from the beginning but that is better than nothing.
             if (
@@ -3295,33 +3285,6 @@ export default defineComponent({
       const duration = formatDurations.length > 0
         ? Math.min(...formatDurations)
         : videoInfo.basic_info.duration
-      const isLive = !!videoInfo.basic_info.is_live
-
-      let presentationStartTime
-      let presentationDelay
-      let segmentDuration
-      let segmentAvailabilityDuration
-
-      if (isLive) {
-        const startTimestamp = videoInfo.basic_info.start_timestamp?.getTime() / 1000
-        presentationStartTime = Number.isFinite(duration) && duration > 0
-          ? Date.now() / 1000 - duration
-          : Number.isFinite(startTimestamp) ? startTimestamp : Date.now() / 1000
-
-        const targetDurations = formats
-          .map(format => Number(format.target_duration_dec))
-          .filter(targetDuration => Number.isFinite(targetDuration) && targetDuration > 0)
-        segmentDuration = targetDurations.length > 0 ? Math.max(...targetDurations) : 1
-        // Keep one complete segment buffered ahead of the playhead. Some live
-        // SABR responses only contain the segment ending at maxSeekableTime;
-        // starting exactly there leaves the player stalled at the buffer edge.
-        presentationDelay = segmentDuration * 3
-
-        const dvrDurations = formats
-          .map(format => Number(format.max_dvr_duration_sec))
-          .filter(dvrDuration => Number.isFinite(dvrDuration) && dvrDuration > 0)
-        segmentAvailabilityDuration = dvrDurations.length > 0 ? Math.min(...dvrDurations) : undefined
-      }
 
       /** @type {import('../../helpers/player/SabrManifestParser').SabrManifest} */
       const sabrManifest = {
@@ -3329,11 +3292,6 @@ export default defineComponent({
         // Different formats have different durations and
         // use of slightly longer duration in PresentationTimeline causes player to stuck at the end
         duration,
-        isLive,
-        presentationStartTime,
-        presentationDelay,
-        segmentDuration,
-        segmentAvailabilityDuration,
         formats: formats.map((format) => ({
           itag: format.itag,
           lastModified: format.last_modified_ms,
