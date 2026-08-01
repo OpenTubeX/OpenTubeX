@@ -8335,6 +8335,7 @@ export default defineComponent({
     }
 
     return {
+      hasLoaded,
       shortsPaused,
       shortsMuted,
       shortsCaptionsAvailable,

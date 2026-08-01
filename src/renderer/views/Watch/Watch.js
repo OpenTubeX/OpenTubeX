@@ -3140,6 +3140,13 @@ export default defineComponent({
     handlePlayerError: async function (error) {
       // the error is logged to the console inside the player so we don't have to do it here
 
+      // The player is only rendered while loading is false. An error received
+      // after loading starts belongs to the outgoing player during its unmount
+      // tick and must not change the new player's format or trigger a reload.
+      if (this.isLoading) {
+        return
+      }
+
       const { Code } = shaka.util.Error
 
       if (error.code === Code.HTTP_ERROR) {
@@ -3189,6 +3196,9 @@ export default defineComponent({
       if (
         this.activeFormat === 'dash' &&
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.isLive &&
+        !this.isPostLiveDvr &&
+        this.legacyFormats.length > 0 &&
         this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
         this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
       ) {
@@ -3223,8 +3233,13 @@ export default defineComponent({
 
         switch (this.activeFormat) {
           case 'dash':
-            console.error('Unable to play DASH formats. Reverting to legacy formats...')
-            this.enableLegacyFormat()
+            if (this.legacyFormats.length > 0) {
+              console.error('Unable to play DASH formats. Reverting to legacy formats...')
+              this.enableLegacyFormat()
+            } else {
+              console.error('Unable to play DASH formats. Reverting to audio formats...')
+              this.enableAudioFormat()
+            }
             break
           case 'legacy':
             console.error('Unable to play legacy formats. Reverting to audio formats...')

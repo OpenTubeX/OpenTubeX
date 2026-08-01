@@ -17,7 +17,6 @@ import {
 import shaka from 'shaka-player'
 
 import { deepCopy } from '../utils'
-import { createBackoffLoopTracker } from './sabrBackoffLoop'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -53,6 +52,8 @@ const ShakaError = shaka.util.Error
  * @property {SabrStreamState} sabrStreamState
  * @property {?TimeoutController} timeoutController
  * @property {?EventEmitterLike} eventEmitter
+ * @property {number} cumulativeBackOffTimeMs
+ * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetryDueToNextRequestPolicy
  */
 /**
@@ -64,7 +65,6 @@ const ShakaError = shaka.util.Error
  * @property {?NextRequestPolicy} nextRequestPolicy
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
- * @property {ReturnType<typeof createBackoffLoopTracker>} backoffLoopTracker
  */
 /**
  * @typedef TimeoutController
@@ -318,12 +318,18 @@ async function doRequest(
       // i.e. backoff time parts received will not reset timeout - counted as video loading issue
       currentState.timeoutController?.resetTimeoutOnce()
 
-      // Detect an infinite backoff loop by how many were requested without a
-      // segment arriving, and by the cumulative time approaching the timeout.
-      shouldReloadDueToBackoffLoop = currentState.sabrStreamState.backoffLoopTracker.record({
-        backoffTimeMs: currentBackoffTimeMs,
-        timeoutMs: operationInputs.request.retryParameters.timeout
-      })
+      currentState.cumulativeBackOffTimeMs += currentBackoffTimeMs
+      currentState.cumulativeBackOffRequested++
+      const timeoutMs = operationInputs.request.retryParameters.timeout
+      // Keep these counters request-scoped, matching FreeTube: routine short
+      // backoffs on separate segment requests must not accumulate into a full
+      // player reload.
+      if (
+        currentState.cumulativeBackOffRequested >= 3 ||
+        (timeoutMs > 0 && timeoutMs <= currentState.cumulativeBackOffTimeMs + currentBackoffTimeMs)
+      ) {
+        shouldReloadDueToBackoffLoop = true
+      }
     }
     if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
       // Fire fake reload event due to detecting retry loop
@@ -373,7 +379,7 @@ async function doRequest(
             const sabrRedirect = decodePart(part, SabrRedirect)
             if (!sabrRedirect) break
 
-            currentState.sabrUrl = sabrRedirect.url
+            currentState.sabrStreamState.sabrUrl = sabrRedirect.url
             shouldRetry = true
             break
           }
@@ -514,9 +520,6 @@ async function doRequest(
   }
 
   if (responseDataChunks.length > 0 && segmentComplete) {
-    // A segment arrived, so whatever the server was backing off for has cleared.
-    currentState.sabrStreamState.backoffLoopTracker.reset()
-
     const data = /** @__NOINLINE__ */ concatenateChunks(responseDataChunks)
 
     if (operationInputs.isInit) {
@@ -647,7 +650,6 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     nextRequestPolicy: undefined,
     playerReloadRequested: false,
     requestNumber: 0,
-    backoffLoopTracker: createBackoffLoopTracker(),
   }
 
   shaka.net.NetworkingEngine.registerScheme(sabrData.scheme, (uri, request, requestType, _progressUpdated, headersReceived, _config) => {
@@ -829,6 +831,8 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       sabrStreamState,
       timeoutController,
       eventEmitter,
+      cumulativeBackOffTimeMs: 0,
+      cumulativeBackOffRequested: 0,
       cumulativeRetryDueToNextRequestPolicy: 0,
     }
 

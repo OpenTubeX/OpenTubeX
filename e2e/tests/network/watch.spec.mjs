@@ -160,6 +160,23 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
+  test('pausing does not access undefined player state', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    const loadingStateWarnings = []
+    page.on('console', (message) => {
+      if (message.type() === 'warning' && message.text().includes('Property "hasLoaded"')) {
+        loadingStateWarnings.push(message.text())
+      }
+    })
+
+    await openVideo(page)
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+
+    expect(loadingStateWarnings).toEqual([])
+  })
+
   test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
