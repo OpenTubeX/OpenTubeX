@@ -22,3 +22,12 @@ export function getReplyLoadState(parsedReplyCount, loadedReplyCount, expectedRe
 export function shouldLoadInitialReplies(hasLoadedBatch, hasUsableReplies, hasContinuation) {
   return !hasLoadedBatch || (!hasUsableReplies && !hasContinuation)
 }
+
+/**
+ * YouTube can advertise replies that have already been removed from the reply
+ * continuation. youtubei.js reports that stale continuation with this error.
+ * @param {unknown} error
+ */
+export function isUnavailableReplyError(error) {
+  return error instanceof Error && error.message === 'Unexpected response'
+}

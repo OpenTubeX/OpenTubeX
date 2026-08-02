@@ -425,7 +425,11 @@ import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
-import { getReplyLoadState, shouldLoadInitialReplies } from '../../helpers/comment-replies'
+import {
+  getReplyLoadState,
+  isUnavailableReplyError,
+  shouldLoadInitialReplies
+} from '../../helpers/comment-replies'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -1124,6 +1128,23 @@ async function getCommentRepliesLocal(index, commentId = null) {
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
     console.error(err)
+
+    if (isUnavailableReplyError(err)) {
+      const comment = findComment(commentData.value[index], commentId)
+      if (comment) {
+        replyTokens.delete(comment.id)
+        comment.hasReplyToken = false
+        comment.numReplies = comment.replies.length
+        comment.showReplies = comment.replies.length > 0
+      }
+
+      showToast({
+        message: t('Comments.These replies are no longer available on YouTube'),
+        icon: ['fas', 'comment']
+      })
+      return
+    }
+
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendFallback.value && backendPreference.value === 'local') {
