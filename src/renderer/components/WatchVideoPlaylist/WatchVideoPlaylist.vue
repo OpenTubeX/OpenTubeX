@@ -29,6 +29,7 @@
         </button>
       </header>
       <div
+        v-overlay-scrollbars="fullscreenOverlay"
         :class="{ fullscreenPlaylistContent: fullscreenOverlay }"
       >
         <div class="playlistHeader">
