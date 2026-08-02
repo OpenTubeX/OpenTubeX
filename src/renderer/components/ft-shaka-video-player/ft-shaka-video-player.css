@@ -1434,6 +1434,7 @@
 
 :deep(.sponsorBlockMarker) {
   background-color: var(--primary-color);
+  mix-blend-mode: screen;
 }
 
 :deep(.sponsorBlockPointMarker) {
