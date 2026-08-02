@@ -3201,13 +3201,12 @@ export default defineComponent({
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
         !this.isLive &&
         !this.isPostLiveDvr &&
-        this.legacyFormats.length > 0 &&
         this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
         this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
       ) {
         // A SABR playback session may no longer be reusable after a critical
-        // error. Refetch it in-place before giving up HD and falling back to
-        // the legacy 360p stream.
+        // error. Refetch it in-place before switching formats, even when the
+        // video has no legacy fallback.
         this.sabrErrorRecoveryAttempts++
         this.sabrErrorRecoveriesForCurrentVideo++
         // The reload resumes here, so this is the baseline the refreshed stream
@@ -3221,18 +3220,36 @@ export default defineComponent({
         return
       }
 
-      if (this.isLive || this.isPostLiveDvr) {
-        // live streams don't have legacy formats, so only switch between dash and audio
+      const stopPlaybackRecovery = () => {
+        this.handleWatchProgressAutoSaveWhenProgressEnabled()
+        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
+        this.errorMessage = `[PLAYER_ERROR: ${status}] Unable to recover the video stream. Please reload this video.`
+      }
 
+      if (
+        this.activeFormat === 'dash' &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.isLive &&
+        !this.isPostLiveDvr &&
+        this.legacyFormats.length === 0
+      ) {
+        // Audio is an explicit playback mode, not a degraded video fallback.
+        // Keep the bounded refresh behavior above, then stop with the actual
+        // error instead of briefly replacing the video player with audio.
+        stopPlaybackRecovery()
+        return
+      }
+
+      if (this.isLive || this.isPostLiveDvr) {
         if (this.activeFormat === 'dash') {
-          console.error('Unable to play DASH formats. Reverting to audio formats...')
-          this.enableAudioFormat()
+          stopPlaybackRecovery()
         } else {
           console.error('Unable to play audio formats. Reverting to DASH formats...')
           this.enableDashFormat()
         }
       } else {
-        // loop through formats DASH -> legacy -> audio -> DASH
+        // Audio remains available when explicitly selected, but a broken video
+        // stream must never silently turn into audio-only playback.
 
         switch (this.activeFormat) {
           case 'dash':
@@ -3240,13 +3257,11 @@ export default defineComponent({
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
               this.enableLegacyFormat()
             } else {
-              console.error('Unable to play DASH formats. Reverting to audio formats...')
-              this.enableAudioFormat()
+              stopPlaybackRecovery()
             }
             break
           case 'legacy':
-            console.error('Unable to play legacy formats. Reverting to audio formats...')
-            this.enableAudioFormat()
+            stopPlaybackRecovery()
             break
           case 'audio':
             console.error('Unable to play audio formats. Reverting to DASH formats...')
