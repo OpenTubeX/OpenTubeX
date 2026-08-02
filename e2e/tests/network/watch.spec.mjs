@@ -1,6 +1,6 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { findWatchComponent, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -166,23 +166,8 @@ test.describe('watch page', () => {
     await waitForPlaybackOrSkip(test, page)
 
     const player = page.locator('.ftVideoPlayer')
-    await player.evaluate(element => {
-      const app = document.querySelector('#app')?.__vue_app__
-      const findWatchComponent = (vnode) => {
-        if (vnode?.component?.refs?.player) return vnode.component
-        if (vnode?.component?.subTree) {
-          const match = findWatchComponent(vnode.component.subTree)
-          if (match) return match
-        }
-        if (Array.isArray(vnode?.children)) {
-          for (const child of vnode.children) {
-            const match = findWatchComponent(child)
-            if (match) return match
-          }
-        }
-        return null
-      }
-      const watchComponent = findWatchComponent(app?._container?._vnode)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await player.evaluate((element, watchComponent) => {
       const overlay = element.ui ?? element.querySelector('video')?.ui
       const shakaPlayer = overlay?.getControls().getPlayer()
       if (!watchComponent || !shakaPlayer) {
@@ -198,7 +183,8 @@ test.describe('watch page', () => {
 
       const watchView = watchComponent.proxy
       watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
-    })
+    }, watchComponent)
+    await watchComponent.dispose()
 
     await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
   })
@@ -208,26 +194,12 @@ test.describe('watch page', () => {
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
-    await page.evaluate(() => {
-      const app = document.querySelector('#app')?.__vue_app__
-      const findWatchComponent = (vnode) => {
-        if (vnode?.component?.refs?.player) return vnode.component
-        if (vnode?.component?.subTree) {
-          const match = findWatchComponent(vnode.component.subTree)
-          if (match) return match
-        }
-        if (Array.isArray(vnode?.children)) {
-          for (const child of vnode.children) {
-            const match = findWatchComponent(child)
-            if (match) return match
-          }
-        }
-        return null
-      }
-      const watchComponent = findWatchComponent(app?._container?._vnode)
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await page.evaluate((watchComponent) => {
       if (!watchComponent) throw new Error('Unable to access the watch view')
       watchComponent.proxy.handleFormatChange('audio')
-    })
+    }, watchComponent)
+    await watchComponent.dispose()
 
     const player = page.locator('.ftVideoPlayer')
     await expect(player).toHaveClass(/sixteenByNine/)
