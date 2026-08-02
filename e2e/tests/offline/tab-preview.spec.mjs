@@ -64,15 +64,13 @@ test.describe('tab previews', () => {
     expect(width / height).toBeLessThan(expectedRatio + 0.03)
   })
 
-  test('stores more pixels than the tooltip displays', async ({ page }) => {
+  test('never stores fewer pixels than the tooltip displays', async ({ page }) => {
     const dataUrl = await hoverTabForPreview(page, 0)
 
     const displayed = await page.locator('.tabTooltip .tabTooltipPreview').boundingBox()
     const { width } = imageSize(dataUrl)
-    // Displaying a page-sized screenshot at 1:1 after a ~5x downscale is what
-    // made previews look blurry; the capture has to keep headroom so the
-    // browser does the final reduction itself.
-    expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width * 2))
+    // Anything below the displayed width would be upscaled by the browser.
+    expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width))
   })
 
   test('hides tab previews from the page while capturing', async ({ page }) => {

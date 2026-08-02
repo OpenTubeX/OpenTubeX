@@ -79,12 +79,7 @@ export function measureTabPreviewContentBounds(window, document) {
 // so these are a CSS pixel budget, not a device pixel one.
 export const TAB_PREVIEW_MAX_CSS_WIDTH = 360
 export const TAB_PREVIEW_MAX_CSS_HEIGHT = 220
-// A preview is a whole page shrunk to thumbnail size (a 5x reduction at 1080p),
-// which destroys detail no matter how good the resampler is. Storing twice the
-// displayed size lets the browser do the last step of the downscale with its
-// own filtering, which is what makes small text read as text instead of mush.
-export const TAB_PREVIEW_SUPERSAMPLE = 2
-// Bounds the stored file when supersampling stacks with HiDPI or page zoom.
+// Bounds the stored file on displays that report a very high pixel ratio.
 export const TAB_PREVIEW_MAX_PIXEL_RATIO = 3
 
 /**
@@ -92,8 +87,8 @@ export const TAB_PREVIEW_MAX_PIXEL_RATIO = 3
  *
  * `NativeImage` measures and exports in logical pixels: `getSize()` reports the
  * 1x representation and `toDataURL()` writes it out, so on a scaled display the
- * capture silently loses resolution. The stored size therefore follows both the
- * window's device pixel ratio and a supersampling factor on top of it.
+ * capture would silently lose resolution. Following the window's device pixel
+ * ratio keeps the stored image at the pixel count the preview is drawn with.
  * @param {{width: number, height: number}} imageSize logical size of the crop
  * @param {TabPreviewContentBounds | null} contentBounds
  * @returns {{width: number, height: number} | null} null when it already fits
@@ -105,7 +100,7 @@ export function getTabPreviewTargetSize({ width, height }, contentBounds) {
 
   const pixelRatio = Math.min(
     TAB_PREVIEW_MAX_PIXEL_RATIO,
-    Math.max(1, contentBounds?.devicePixelRatio || 1) * TAB_PREVIEW_SUPERSAMPLE
+    Math.max(1, contentBounds?.devicePixelRatio || 1)
   )
 
   const ratio = Math.min(

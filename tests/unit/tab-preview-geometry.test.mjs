@@ -6,8 +6,7 @@ import {
   getTabPreviewTargetSize,
   measureTabPreviewContentBounds,
   TAB_PREVIEW_MAX_CSS_WIDTH,
-  TAB_PREVIEW_MAX_PIXEL_RATIO,
-  TAB_PREVIEW_SUPERSAMPLE
+  TAB_PREVIEW_MAX_PIXEL_RATIO
 } from '../../src/main/tabs/tabPreviewGeometry.js'
 
 const VIEWPORT_WIDTH = 1200
@@ -170,9 +169,9 @@ test('keeps the device pixel ratio so HiDPI previews stay sharp', () => {
   const standard = getTabPreviewTargetSize({ width: 1200, height: 600 }, boundsForRatio(1))
   const hiDpi = getTabPreviewTargetSize({ width: 1200, height: 600 }, boundsForRatio(2))
 
-  assert.equal(standard.width, TAB_PREVIEW_MAX_CSS_WIDTH * TAB_PREVIEW_SUPERSAMPLE)
-  assert.equal(hiDpi.width, TAB_PREVIEW_MAX_CSS_WIDTH * TAB_PREVIEW_MAX_PIXEL_RATIO)
-  assert.ok(hiDpi.height > standard.height)
+  assert.equal(standard.width, TAB_PREVIEW_MAX_CSS_WIDTH)
+  assert.equal(hiDpi.width, TAB_PREVIEW_MAX_CSS_WIDTH * 2)
+  assert.equal(hiDpi.height, standard.height * 2)
 })
 
 test('caps the stored pixel ratio so previews stay small', () => {
@@ -189,13 +188,13 @@ test('leaves captures that already fit untouched', () => {
 test('falls back to a single pixel ratio when bounds are unavailable', () => {
   const target = getTabPreviewTargetSize({ width: 1200, height: 600 }, null)
 
-  assert.equal(target.width, TAB_PREVIEW_MAX_CSS_WIDTH * TAB_PREVIEW_SUPERSAMPLE)
+  assert.equal(target.width, TAB_PREVIEW_MAX_CSS_WIDTH)
 })
 
-test('stores more pixels than the preview is displayed at', () => {
-  // 1080p content cropped below the chrome, on an unscaled display.
+test('never stores fewer pixels than the preview is displayed at', () => {
+  // 1080p content cropped below the chrome, on an unscaled display. The tooltip
+  // draws it ~322px wide, so anything below that would be an upscale.
   const target = getTabPreviewTargetSize({ width: 1920, height: 950 }, boundsForRatio(1))
-  const displayedCssWidth = 322
 
-  assert.ok(target.width >= displayedCssWidth * 2)
+  assert.ok(target.width >= 322)
 })
