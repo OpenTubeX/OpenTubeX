@@ -93,6 +93,17 @@
   transform: translateX(0.2em);
 }
 
+.navIcon[data-icon='user-check']:is(
+  [data-icon-pack='lucide'],
+  [data-icon-pack='material']
+) {
+  transform: translateX(0.15em);
+}
+
+.navIcon[data-icon='user-check'][data-icon-pack='phosphor'] {
+  transform: translateX(0.1em);
+}
+
 .navLabel {
   text-align: center;
   inset-inline-start: 0;
@@ -187,7 +198,7 @@
     margin-inline-start: 10px;
   }
 
-  .expanded .navIcon.fa-user-check {
+  .expanded .navIcon[data-icon='user-check'] {
     block-size: 1em;
   }
 
