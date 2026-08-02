@@ -16,7 +16,7 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
           lenientSanitizer = new Sanitizer({
             comments: false,
             elements: [
-              'blockquote', 'br', 'code', 'del', 'details', 'em',
+              'br', 'code', 'del', 'details', 'em',
               'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'kbd',
               'p', 'pre', 's', 'strong', 'summary',
               'table', 'tbody', 'td', 'th', 'thead', 'tr',
@@ -24,6 +24,10 @@ export const vSaferHtml = (element, { value, oldValue, modifiers }) => {
               {
                 name: 'a',
                 attributes: ['href', 'title']
+              },
+              {
+                name: 'blockquote',
+                attributes: ['data-alert']
               },
               {
                 name: 'img',
