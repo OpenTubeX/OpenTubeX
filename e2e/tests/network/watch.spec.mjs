@@ -1,6 +1,6 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { findWatchComponent, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -108,38 +108,40 @@ test('theatre mode works until its responsive button cutoff', async ({ app, page
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
   await expect(page.locator('.videoLayout')).toBeVisible()
   await page.evaluate(async () => {
-    const layout = document.querySelector('.videoLayout')
     const app = document.querySelector('#app')?.__vue_app__
     const findWatchView = (vnode) => {
-      if (vnode?.component?.refs?.videoLayout === layout) {
+      if (vnode?.component?.type?.name === 'Watch') {
         return vnode.component.proxy
       }
       if (vnode?.component?.subTree) {
         const match = findWatchView(vnode.component.subTree)
-        if (match) {
-          return match
-        }
+        if (match) return match
       }
       if (Array.isArray(vnode?.children)) {
         for (const child of vnode.children) {
           const match = findWatchView(child)
-          if (match) {
-            return match
-          }
+          if (match) return match
         }
       }
       return null
     }
     const watchView = findWatchView(app?._container?._vnode)
-    if (!watchView) {
-      throw new Error('Unable to access the watch view')
-    }
+    if (!watchView) throw new Error('Unable to access the watch view')
 
     watchView.videoLoadGeneration += 1
     watchView.errorMessage = null
     watchView.isUpcoming = false
     watchView.playabilityStatus = 'OK'
     watchView.showTranscript = true
+    watchView.activeFormat = 'legacy'
+    watchView.handlePlayerError = () => {}
+    watchView.legacyFormats = [{
+      itag: 18,
+      qualityLabel: '360p',
+      height: 360,
+      width: 640,
+      url: 'data:video/mp4;base64,'
+    }]
     watchView.isLoading = false
     await watchView.$nextTick()
   })
@@ -235,6 +237,52 @@ test.describe('watch page', () => {
     await expect
       .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 30_000 })
       .toBeGreaterThan(1)
+  })
+
+  test('stops querying Shaka state before a format switch unloads it', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const player = page.locator('.ftVideoPlayer')
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await player.evaluate((element, watchComponent) => {
+      const overlay = element.ui ?? element.querySelector('video')?.ui
+      const shakaPlayer = overlay?.getControls().getPlayer()
+      if (!watchComponent || !shakaPlayer) {
+        throw new Error('Unable to access the mounted player')
+      }
+
+      window.__hasLoadedAtFormatUnload = []
+      const unload = shakaPlayer.unload.bind(shakaPlayer)
+      shakaPlayer.unload = (...args) => {
+        window.__hasLoadedAtFormatUnload.push(watchComponent.refs.player.hasLoaded)
+        return unload(...args)
+      }
+
+      const watchView = watchComponent.proxy
+      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+    }, watchComponent)
+    await watchComponent.dispose()
+
+    await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+  })
+
+  test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await page.evaluate((watchComponent) => {
+      if (!watchComponent) throw new Error('Unable to access the watch view')
+      watchComponent.proxy.handleFormatChange('audio')
+    }, watchComponent)
+    await watchComponent.dispose()
+
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/sixteenByNine/)
+    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
   })
 
   test('hides the tab play indicator while buffering', async ({ page, innertube }) => {

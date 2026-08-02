@@ -3,6 +3,30 @@ import { expect } from '@playwright/test'
 export const activeTab = '.tabContent[aria-hidden="false"]'
 
 /**
+ * Finds the mounted Watch component. Pass this function directly to
+ * `page.evaluateHandle()` so the returned Vue component remains in the page.
+ */
+export function findWatchComponent() {
+  const app = document.querySelector('#app')?.__vue_app__
+  const find = (vnode) => {
+    if (vnode?.component?.refs?.player) return vnode.component
+    if (vnode?.component?.subTree) {
+      const match = find(vnode.component.subTree)
+      if (match) return match
+    }
+    if (Array.isArray(vnode?.children)) {
+      for (const child of vnode.children) {
+        const match = find(child)
+        if (match) return match
+      }
+    }
+    return null
+  }
+
+  return find(app?._container?._vnode)
+}
+
+/**
  * Waits for playback to start in the active tab and returns the video
  * locator. If YouTube blocks media streaming from this IP (common on CI
  * runners and VPNs), the test is skipped with a clear reason instead of

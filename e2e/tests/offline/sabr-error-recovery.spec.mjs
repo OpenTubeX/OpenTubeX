@@ -109,7 +109,7 @@ async function mockWatchPage(app, page) {
  * stays offline and deterministic.
  *
  * @param {import('@playwright/test').Page} page
- * @param {Array<{ error: true } | { playFor: number } | { seekTo: number }>} script
+ * @param {Array<{ error: true } | { reloadRequest: true } | { playFor: number } | { seekTo: number }>} script
  * @param {{ isLoading?: boolean, legacyFormats?: Array<object> }} options
  */
 function driveWatchView(page, script, options = {}) {
@@ -149,7 +149,7 @@ function driveWatchView(page, script, options = {}) {
     watchView.legacyFormats = legacyFormats
 
     const reloads = []
-    watchView.onPlayerReloadRequested = async (_payload, toastMessage) => {
+    watchView.performSabrReload = async (_payload, toastMessage) => {
       reloads.push(toastMessage)
     }
 
@@ -171,6 +171,8 @@ function driveWatchView(page, script, options = {}) {
     for (const step of steps) {
       if (step.error) {
         await watchView.handlePlayerError(criticalError())
+      } else if (step.reloadRequest) {
+        await watchView.onPlayerReloadRequested({ wasPlaying: true })
       } else if (step.seekTo !== undefined) {
         position = step.seekTo
         watchView.handleTimeUpdate(position)
@@ -183,7 +185,7 @@ function driveWatchView(page, script, options = {}) {
       formats.push(watchView.activeFormat)
     }
 
-    return { reloads, formats, finalFormat: watchView.activeFormat }
+    return { reloads, formats, finalFormat: watchView.activeFormat, errorMessage: watchView.errorMessage }
   }, {
     steps: script,
     isLoading: options.isLoading ?? false,
@@ -213,7 +215,7 @@ test('a second SABR failure after successful playback refetches instead of dropp
   expect(result.finalFormat).toBe('dash')
 })
 
-test('SABR failures that never settle stop refetching and fall back to legacy', async ({ app, page }) => {
+test('SABR failures that never settle fall back to legacy but never audio', async ({ app, page }) => {
   await mockWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
@@ -225,14 +227,54 @@ test('SABR failures that never settle stop refetching and fall back to legacy', 
     { error: true },
     { error: true },
     { error: true },
+    { error: true },
     { error: true }
   ])
 
   expect(result.reloads).toHaveLength(3)
-  expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
+  expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy', 'legacy'])
+  expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
-test('a SABR failure skips to audio when no 360p fallback is available', async ({ app, page }) => {
+test('repeated SABR reload requests stop instead of reloading the tab forever', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true }
+  ])
+
+  expect(result.reloads).toHaveLength(3)
+  expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
+  expect(result.finalFormat).toBe('legacy')
+})
+
+test('repeated SABR reload requests never fall back to audio', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true },
+    { reloadRequest: true }
+  ], { legacyFormats: [] })
+
+  expect(result.reloads).toHaveLength(3)
+  expect(result.finalFormat).toBe('dash')
+  expect(result.errorMessage).toContain('Unable to recover the video stream')
+})
+
+test('a SABR failure refetches when no 360p fallback is available', async ({ app, page }) => {
   await mockWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
@@ -241,8 +283,28 @@ test('a SABR failure skips to audio when no 360p fallback is available', async (
 
   const result = await driveWatchView(page, [{ error: true }], { legacyFormats: [] })
 
-  expect(result.reloads).toHaveLength(0)
-  expect(result.finalFormat).toBe('audio')
+  expect(result.reloads).toEqual(['Refreshing SABR stream after playback error'])
+  expect(result.finalFormat).toBe('dash')
+})
+
+test('repeated SABR failures without a legacy fallback never switch to audio', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { error: true },
+    { error: true },
+    { error: true },
+    { error: true }
+  ], { legacyFormats: [] })
+
+  expect(result.reloads).toHaveLength(3)
+  expect(result.formats).toEqual(['dash', 'dash', 'dash', 'dash'])
+  expect(result.finalFormat).toBe('dash')
+  expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
 test('an error from the outgoing player is ignored while the view reloads', async ({ app, page }) => {
@@ -253,6 +315,19 @@ test('an error from the outgoing player is ignored while the view reloads', asyn
   await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
 
   const result = await driveWatchView(page, [{ error: true }], { isLoading: true, legacyFormats: [] })
+
+  expect(result.reloads).toHaveLength(0)
+  expect(result.finalFormat).toBe('dash')
+})
+
+test('a SABR reload request from the outgoing player is ignored', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [{ reloadRequest: true }], { isLoading: true, legacyFormats: [] })
 
   expect(result.reloads).toHaveLength(0)
   expect(result.finalFormat).toBe('dash')

@@ -3207,42 +3207,42 @@ export default defineComponent({
       }
 
       if (
+        await this.reloadSabrStream(
+          this.$refs.player?.getSabrReloadState(),
+          'Refreshing SABR stream after playback error'
+        )
+      ) { return }
+
+      const stopPlaybackRecovery = () => {
+        this.handleWatchProgressAutoSaveWhenProgressEnabled()
+        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
+        this.errorMessage = `[PLAYER_ERROR: ${status}] Unable to recover the video stream. Please reload this video.`
+      }
+
+      if (
         this.activeFormat === 'dash' &&
         this.manifestMimeType === MANIFEST_TYPE_SABR &&
         !this.isLive &&
         !this.isPostLiveDvr &&
-        this.legacyFormats.length > 0 &&
-        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
-        this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
+        this.legacyFormats.length === 0
       ) {
-        // A SABR playback session may no longer be reusable after a critical
-        // error. Refetch it in-place before giving up HD and falling back to
-        // the legacy 360p stream.
-        this.sabrErrorRecoveryAttempts++
-        this.sabrErrorRecoveriesForCurrentVideo++
-        // The reload resumes here, so this is the baseline the refreshed stream
-        // starts accumulating played content from before the budget refills.
-        this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
-        this.sabrErrorRecoveryPlayedSeconds = 0
-        await this.onPlayerReloadRequested(
-          this.$refs.player?.getSabrReloadState(),
-          'Refreshing SABR stream after playback error'
-        )
+        // Audio is an explicit playback mode, not a degraded video fallback.
+        // Keep the bounded refresh behavior above, then stop with the actual
+        // error instead of briefly replacing the video player with audio.
+        stopPlaybackRecovery()
         return
       }
 
       if (this.isLive || this.isPostLiveDvr) {
-        // live streams don't have legacy formats, so only switch between dash and audio
-
         if (this.activeFormat === 'dash') {
-          console.error('Unable to play DASH formats. Reverting to audio formats...')
-          this.enableAudioFormat()
+          stopPlaybackRecovery()
         } else {
           console.error('Unable to play audio formats. Reverting to DASH formats...')
           this.enableDashFormat()
         }
       } else {
-        // loop through formats DASH -> legacy -> audio -> DASH
+        // Audio remains available when explicitly selected, but a broken video
+        // stream must never silently turn into audio-only playback.
 
         switch (this.activeFormat) {
           case 'dash':
@@ -3250,13 +3250,11 @@ export default defineComponent({
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
               this.enableLegacyFormat()
             } else {
-              console.error('Unable to play DASH formats. Reverting to audio formats...')
-              this.enableAudioFormat()
+              stopPlaybackRecovery()
             }
             break
           case 'legacy':
-            console.error('Unable to play legacy formats. Reverting to audio formats...')
-            this.enableAudioFormat()
+            stopPlaybackRecovery()
             break
           case 'audio':
             console.error('Unable to play audio formats. Reverting to DASH formats...')
@@ -3766,7 +3764,52 @@ export default defineComponent({
       this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
     },
 
-    async onPlayerReloadRequested(payload, toastMessage = 'Reloading player according to SABR request') {
+    isSabrVideoStream() {
+      return this.activeFormat === 'dash' &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.isLive &&
+        !this.isPostLiveDvr
+    },
+
+    canReloadSabrStream() {
+      return this.isSabrVideoStream() &&
+        !this.isLoading &&
+        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
+        this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
+    },
+
+    async reloadSabrStream(payload, toastMessage) {
+      if (!this.canReloadSabrStream()) { return false }
+
+      // Both critical Shaka errors and SABR's own reload policy mean the
+      // current playback session is no longer reusable. Keep them on the same
+      // budget so a succession of freshly fetched sessions cannot reload the
+      // tab forever without making playback progress.
+      this.sabrErrorRecoveryAttempts++
+      this.sabrErrorRecoveriesForCurrentVideo++
+      this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
+      this.sabrErrorRecoveryPlayedSeconds = 0
+      await this.performSabrReload(payload, toastMessage)
+      return true
+    },
+
+    async onPlayerReloadRequested(payload) {
+      // A request from a player that is already being replaced must not spend
+      // the new player's budget or change a format the user selected meanwhile.
+      if (!this.isSabrVideoStream() || this.isLoading) { return }
+
+      if (await this.reloadSabrStream(payload, 'Reloading player according to SABR request')) { return }
+
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
+      if (this.legacyFormats.length > 0) {
+        console.error('Unable to recover the SABR stream. Reverting to legacy formats...')
+        this.enableLegacyFormat()
+      } else {
+        this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+      }
+    },
+
+    async performSabrReload(payload, toastMessage) {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
       this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       const playbackRate = Number(payload?.playbackRate)
