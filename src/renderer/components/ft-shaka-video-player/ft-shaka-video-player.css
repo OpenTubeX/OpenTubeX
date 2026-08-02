@@ -724,6 +724,20 @@
   display: block;
 }
 
+/* The compact button only shows the icon, so mark the open state with a highlight */
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button)::before {
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(50% * var(--ui-roundness));
+  background-color: transparent;
+  content: '';
+  pointer-events: none;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button.open)::before {
+  background-color: rgb(255 255 255 / 20%);
+}
+
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-chevron) {
   display: none;
