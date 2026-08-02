@@ -108,38 +108,40 @@ test('theatre mode works until its responsive button cutoff', async ({ app, page
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
   await expect(page.locator('.videoLayout')).toBeVisible()
   await page.evaluate(async () => {
-    const layout = document.querySelector('.videoLayout')
     const app = document.querySelector('#app')?.__vue_app__
     const findWatchView = (vnode) => {
-      if (vnode?.component?.refs?.videoLayout === layout) {
+      if (vnode?.component?.type?.name === 'Watch') {
         return vnode.component.proxy
       }
       if (vnode?.component?.subTree) {
         const match = findWatchView(vnode.component.subTree)
-        if (match) {
-          return match
-        }
+        if (match) return match
       }
       if (Array.isArray(vnode?.children)) {
         for (const child of vnode.children) {
           const match = findWatchView(child)
-          if (match) {
-            return match
-          }
+          if (match) return match
         }
       }
       return null
     }
     const watchView = findWatchView(app?._container?._vnode)
-    if (!watchView) {
-      throw new Error('Unable to access the watch view')
-    }
+    if (!watchView) throw new Error('Unable to access the watch view')
 
     watchView.videoLoadGeneration += 1
     watchView.errorMessage = null
     watchView.isUpcoming = false
     watchView.playabilityStatus = 'OK'
     watchView.showTranscript = true
+    watchView.activeFormat = 'legacy'
+    watchView.handlePlayerError = () => {}
+    watchView.legacyFormats = [{
+      itag: 18,
+      qualityLabel: '360p',
+      height: 360,
+      width: 640,
+      url: 'data:video/mp4;base64,'
+    }]
     watchView.isLoading = false
     await watchView.$nextTick()
   })
