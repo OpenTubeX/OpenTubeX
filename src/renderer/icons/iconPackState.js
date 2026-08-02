@@ -34,6 +34,7 @@ function readStoredPack() {
 
 /** @type {import('vue').Ref<IconPackId>} */
 const iconPack = ref(readStoredPack())
+let selectionSequence = 0
 
 export const currentIconPack = computed(() => iconPack.value)
 
@@ -44,7 +45,9 @@ export async function setIconPack(pack) {
   if (!VALID_PACK_IDS.has(pack)) {
     return
   }
+  const sequence = ++selectionSequence
   await registerMappedIcons(pack)
+  if (sequence !== selectionSequence) return
   iconPack.value = pack
   try {
     localStorage.setItem(STORAGE_KEY, pack)

@@ -699,8 +699,13 @@ const actions = {
   },
 
   async setSyncServerEnabled({ dispatch }, enabled) {
+    if (!enabled) {
+      await dispatch('applySyncServerEnabled', false)
+    }
     await dispatch('updateSyncServerEnabled', enabled, { root: true })
-    await dispatch('applySyncServerEnabled', enabled)
+    if (enabled) {
+      await dispatch('applySyncServerEnabled', true)
+    }
   },
 }
 
