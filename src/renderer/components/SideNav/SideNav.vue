@@ -454,7 +454,10 @@ function updateIndicatorAfterResize() {
 }
 
 watch(() => route.fullPath, () => nextTick(updateIndicator))
-watch(() => activeProfile.value._id, () => {
+watch([
+  () => activeProfile.value._id,
+  () => activeProfile.value.subscriptions.length
+], () => {
   activeSubscriptionLimit.value = activeSubscriptionsPerPage
 })
 

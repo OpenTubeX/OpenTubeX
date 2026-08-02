@@ -107,6 +107,20 @@ test.describe('large subscribed channel lists', () => {
     await expect(page.locator('.channel')).toHaveCount(50)
     await expect(page.locator('.navChannel')).toHaveCount(50)
 
+    await page.locator('.sideNav .inner').evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+    })
+    await expect(page.locator('.navChannel')).toHaveCount(100)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('removeChannelFromProfiles', {
+        channelId: 'UC0000000000000000000000',
+        profileIds: ['allChannels']
+      })
+    })
+    await expect(page.locator('.navChannel')).toHaveCount(50)
+
     await page.getByPlaceholder('Search Channels').fill('Channel 899')
     expect(await page.locator('.count').textContent()).toContain('1 channel(s) found.')
     await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
@@ -114,5 +128,17 @@ test.describe('large subscribed channel lists', () => {
     await page.getByPlaceholder('Search Channels').fill('')
     await page.getByRole('button', { name: 'Load more channels' }).click()
     await expect(page.locator('.channel')).toHaveCount(100)
+  })
+
+  test('uses the first repeated channel search query value', async ({ page }) => {
+    const channelTab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/subscribedchannels?searchQueryText=Channel%20899&searchQueryText=Channel%20898',
+      makeActive: false
+    }))
+    await page.locator(`.tab[data-tab-id="${channelTab.id}"]`).click()
+
+    await expect(page.getByPlaceholder('Search Channels')).toHaveValue('Channel 899')
+    await expect(page.locator('.count')).toContainText('1 channel(s) found.')
+    await expect(page.locator('.channel', { hasText: 'Channel 899' })).toBeVisible()
   })
 })

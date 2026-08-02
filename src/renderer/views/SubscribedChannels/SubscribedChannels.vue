@@ -314,8 +314,9 @@ watch(activeSubscriptionList, () => {
 
 getSubscription()
 
-const oldQuery = route.query.searchQueryText ?? ''
-if (oldQuery !== null && oldQuery !== '') {
+const rawQuery = route.query.searchQueryText
+const oldQuery = Array.isArray(rawQuery) ? rawQuery[0] ?? '' : rawQuery ?? ''
+if (oldQuery !== '') {
   handleQueryChange(oldQuery)
 }
 
