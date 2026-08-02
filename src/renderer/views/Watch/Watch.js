@@ -3789,7 +3789,12 @@ export default defineComponent({
       this.sabrErrorRecoveriesForCurrentVideo++
       this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
       this.sabrErrorRecoveryPlayedSeconds = 0
-      await this.performSabrReload(payload, toastMessage)
+      try {
+        await this.performSabrReload(payload, toastMessage)
+      } catch (error) {
+        console.error('SABR reload failed', error)
+        return false
+      }
       return true
     },
 

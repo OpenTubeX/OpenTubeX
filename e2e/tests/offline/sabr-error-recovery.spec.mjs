@@ -9,8 +9,8 @@ import { fixtureKey } from '../../helpers/innertube.mjs'
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
 
-// Mirrors MAX_SABR_ERROR_RECOVERIES_PER_VIDEO in src/renderer/views/Watch/Watch.js,
-// which is a module-level constant in a Vue component and so cannot be imported here.
+// Mirror the module-level Watch constants, which cannot be imported here.
+const MAX_SABR_ERROR_RECOVERIES = 3
 const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
 
 test.use({
@@ -110,10 +110,10 @@ async function mockWatchPage(app, page) {
  *
  * @param {import('@playwright/test').Page} page
  * @param {Array<{ error: true } | { reloadRequest: true } | { playFor: number } | { seekTo: number }>} script
- * @param {{ isLoading?: boolean, legacyFormats?: Array<object> }} options
+ * @param {{ isLoading?: boolean, legacyFormats?: Array<object>, rejectReload?: boolean }} options
  */
 function driveWatchView(page, script, options = {}) {
-  return page.evaluate(async ({ steps, isLoading, legacyFormats }) => {
+  return page.evaluate(async ({ steps, isLoading, legacyFormats, rejectReload }) => {
     const app = document.querySelector('#app')?.__vue_app__
 
     const findWatchView = (vnode) => {
@@ -151,6 +151,7 @@ function driveWatchView(page, script, options = {}) {
     const reloads = []
     watchView.performSabrReload = async (_payload, toastMessage) => {
       reloads.push(toastMessage)
+      if (rejectReload) throw new Error('Synthetic SABR reload rejection')
     }
 
     // A critical, non-abort shaka error: the kind that walks the format
@@ -189,7 +190,8 @@ function driveWatchView(page, script, options = {}) {
   }, {
     steps: script,
     isLoading: options.isLoading ?? false,
-    legacyFormats: options.legacyFormats ?? [{ itag: 18, qualityLabel: '360p', height: 360, width: 640, url: 'https://example.invalid/360p' }]
+    legacyFormats: options.legacyFormats ?? [{ itag: 18, qualityLabel: '360p', height: 360, width: 640, url: 'https://example.invalid/360p' }],
+    rejectReload: options.rejectReload ?? false
   })
 }
 
@@ -231,7 +233,7 @@ test('SABR failures that never settle fall back to legacy but never audio', asyn
     { error: true }
   ])
 
-  expect(result.reloads).toHaveLength(3)
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy', 'legacy'])
   expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
@@ -250,7 +252,7 @@ test('repeated SABR reload requests stop instead of reloading the tab forever', 
     { reloadRequest: true }
   ])
 
-  expect(result.reloads).toHaveLength(3)
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'legacy'])
   expect(result.finalFormat).toBe('legacy')
 })
@@ -269,7 +271,7 @@ test('repeated SABR reload requests never fall back to audio', async ({ app, pag
     { reloadRequest: true }
   ], { legacyFormats: [] })
 
-  expect(result.reloads).toHaveLength(3)
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.finalFormat).toBe('dash')
   expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
@@ -301,7 +303,7 @@ test('repeated SABR failures without a legacy fallback never switch to audio', a
     { error: true }
   ], { legacyFormats: [] })
 
-  expect(result.reloads).toHaveLength(3)
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'dash'])
   expect(result.finalFormat).toBe('dash')
   expect(result.errorMessage).toContain('Unable to recover the video stream')
@@ -318,6 +320,7 @@ test('an error from the outgoing player is ignored while the view reloads', asyn
 
   expect(result.reloads).toHaveLength(0)
   expect(result.finalFormat).toBe('dash')
+  expect(result.errorMessage).toBe('')
 })
 
 test('a SABR reload request from the outgoing player is ignored', async ({ app, page }) => {
@@ -331,6 +334,24 @@ test('a SABR reload request from the outgoing player is ignored', async ({ app, 
 
   expect(result.reloads).toHaveLength(0)
   expect(result.finalFormat).toBe('dash')
+  expect(result.errorMessage).toBe('')
+})
+
+test('a rejected SABR reload request reports terminal recovery', async ({ app, page }) => {
+  await mockWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [{ reloadRequest: true }], {
+    legacyFormats: [],
+    rejectReload: true
+  })
+
+  expect(result.reloads).toEqual(['Reloading player according to SABR request'])
+  expect(result.finalFormat).toBe('dash')
+  expect(result.errorMessage).toContain('Unable to recover the video stream')
 })
 
 test('seeking around a stream that never plays does not refill the budget', async ({ app, page }) => {
@@ -352,7 +373,7 @@ test('seeking around a stream that never plays does not refill the budget', asyn
     { error: true }
   ])
 
-  expect(result.reloads).toHaveLength(3)
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
   expect(result.finalFormat).toBe('legacy')
 })
 
