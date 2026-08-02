@@ -175,6 +175,25 @@ test.describe('settings', () => {
     await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
   })
 
+  test('renders custom icons with the default Font Awesome pack', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="experimental"]').click()
+
+    const preview = page.locator('.iconPackPreview')
+    await expect(preview.locator('select')).toHaveValue('fontawesome')
+
+    for (const icon of [
+      'vertical-tabs',
+      'horizontal-tabs',
+      'playlist-add',
+      'playlist-check'
+    ]) {
+      await expect(
+        preview.locator(`[title="fac ${icon}"] svg[data-prefix="fac"][data-icon="${icon}"]`)
+      ).toBeVisible()
+    }
+  })
+
   test('a toggled setting persists across restarts', async ({ app }) => {
     let page = app.page
     await goTo(page, 'settings')

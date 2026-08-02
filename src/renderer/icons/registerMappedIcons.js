@@ -84,6 +84,7 @@ async function loadAndRegisterPack(pack) {
  * @returns {Promise<void>}
  */
 export function registerMappedIcons(pack) {
+  registerCustomIcons()
   if (pack === 'fontawesome') return Promise.resolve()
   if (!PACK_LOADERS[pack]) return Promise.reject(new Error(`Unknown icon pack: ${pack}`))
 
