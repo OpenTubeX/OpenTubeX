@@ -3,7 +3,7 @@ import test from 'node:test'
 
 import {
   getReplyLoadState,
-  isUnavailableReplyError,
+  isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../src/renderer/helpers/comment-replies.js'
 
@@ -47,8 +47,11 @@ test('advances after an unusable initial batch when it has a continuation', () =
   assert.equal(shouldLoadInitialReplies(true, false, true), false)
 })
 
-test('recognizes a stale reply continuation response', () => {
-  assert.equal(isUnavailableReplyError(new Error('Unexpected response')), true)
-  assert.equal(isUnavailableReplyError(new Error('Network error')), false)
-  assert.equal(isUnavailableReplyError('Unexpected response'), false)
+test('recognizes a missing reply continuation response', () => {
+  const missingResponseError = Object.assign(new Error('Unexpected response'), { info: {} })
+
+  assert.equal(isMissingReplyResponseError(missingResponseError), true)
+  assert.equal(isMissingReplyResponseError(new Error('Unexpected response')), false)
+  assert.equal(isMissingReplyResponseError(Object.assign(new Error('Network error'), { info: {} })), false)
+  assert.equal(isMissingReplyResponseError('Unexpected response'), false)
 })

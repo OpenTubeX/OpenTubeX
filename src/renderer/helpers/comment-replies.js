@@ -24,10 +24,12 @@ export function shouldLoadInitialReplies(hasLoadedBatch, hasUsableReplies, hasCo
 }
 
 /**
- * YouTube can advertise replies that have already been removed from the reply
- * continuation. youtubei.js reports that stale continuation with this error.
+ * youtubei.js reports this when a reply continuation response does not contain
+ * the expected reply endpoint structure.
  * @param {unknown} error
  */
-export function isUnavailableReplyError(error) {
-  return error instanceof Error && error.message === 'Unexpected response'
+export function isMissingReplyResponseError(error) {
+  return error instanceof Error &&
+    error.message === 'Unexpected response' &&
+    'info' in error
 }

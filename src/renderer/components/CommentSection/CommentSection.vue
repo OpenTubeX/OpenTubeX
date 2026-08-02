@@ -427,7 +427,7 @@ import { useTabContext } from '../../tabs/TabContext'
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
 import {
   getReplyLoadState,
-  isUnavailableReplyError,
+  isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../helpers/comment-replies'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
@@ -1073,10 +1073,11 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
-  try {
-    const comment = findComment(commentData.value[index], commentId)
-    const continuation = comment && replyTokens.get(comment.id)
+  const rootComment = commentData.value[index]
+  const comment = rootComment ? findComment(rootComment, commentId) : null
+  const continuation = comment && replyTokens.get(comment.id)
 
+  try {
     if (!comment || continuation == null || typeof continuation === 'string') {
       if (comment) {
         replyTokens.delete(comment.id)
@@ -1129,9 +1130,14 @@ async function getCommentRepliesLocal(index, commentId = null) {
   } catch (err) {
     console.error(err)
 
-    if (isUnavailableReplyError(err)) {
-      const comment = findComment(commentData.value[index], commentId)
-      if (comment) {
+    if (isMissingReplyResponseError(err)) {
+      if (backendFallback.value && backendPreference.value === 'local') {
+        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+        getCommentDataInvidious()
+        return
+      }
+
+      if (comment && replyTokens.get(comment.id) === continuation) {
         replyTokens.delete(comment.id)
         comment.hasReplyToken = false
         comment.numReplies = comment.replies.length
@@ -1139,7 +1145,7 @@ async function getCommentRepliesLocal(index, commentId = null) {
       }
 
       showToast({
-        message: t('Comments.These replies are no longer available on YouTube'),
+        message: t('Comments.YouTube did not return these replies'),
         icon: ['fas', 'comment']
       })
       return
