@@ -85,7 +85,7 @@
           :chapters-kind="videoChaptersKind"
           :chapters-src="chaptersSrc"
           :title="videoTitle"
-          :theatre-possible="theatrePossible"
+          :theatre-possible="theatreTogglePossible"
           :use-theatre-mode="useTheatreMode"
           :autoplay-possible="autoplayPossible"
           :autoplay-enabled="autoplayEnabled"

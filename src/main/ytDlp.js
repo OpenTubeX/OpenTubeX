@@ -8,6 +8,7 @@ import { app, BrowserWindow } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
+import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
@@ -163,6 +164,7 @@ async function getFfmpegVersion(executable) {
  * @typedef BinaryDownloadValidators
  * @property {string | null} etag
  * @property {string | null} lastModified
+ * @property {string} [source]
  * @property {'stable' | 'nightly' | 'master'} [channel]
  */
 
@@ -228,24 +230,18 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
 
 /**
  * @param {string} binaryPath
+ * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
  * @returns {Promise<BinaryDownloadValidators | null>}
  */
-async function readDownloadValidators(binaryPath, channel) {
+async function readDownloadValidators(binaryPath, source, channel) {
   if (!existsSync(binaryPath)) {
     return null
   }
 
   try {
     const validators = JSON.parse(await readFile(`${binaryPath}.download.json`, 'utf8'))
-    if (channel !== undefined && (validators.channel ?? 'stable') !== channel) {
-      return null
-    }
-    return {
-      etag: typeof validators.etag === 'string' ? validators.etag : null,
-      lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null,
-      ...(channel === undefined ? {} : { channel })
-    }
+    return getMatchingDownloadValidators(validators, source, channel)
   } catch {
     return null
   }
@@ -254,11 +250,13 @@ async function readDownloadValidators(binaryPath, channel) {
 /**
  * @param {string} binaryPath
  * @param {BinaryDownloadValidators} validators
+ * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
  */
-async function writeDownloadValidators(binaryPath, validators, channel) {
+async function writeDownloadValidators(binaryPath, validators, source, channel) {
   await writeFile(`${binaryPath}.download.json`, JSON.stringify({
     ...validators,
+    source,
     ...(channel === undefined ? {} : { channel })
   }))
 }
@@ -354,27 +352,18 @@ async function installBinary(data, destinationPath) {
 async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
-  let assetName
-  switch (process.platform) {
-    case 'win32':
-      assetName = 'yt-dlp.exe'
-      break
-    case 'darwin':
-      assetName = 'yt-dlp_macos'
-      break
-    default:
-      assetName = 'yt-dlp'
-  }
+  const assetName = getYtDlpAssetName(process.platform, process.arch)
+  const source = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
 
   try {
     download = await downloadFile(
-      `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`,
+      source,
       onProgress,
       onDownloadStart,
-      await readDownloadValidators(managedPath, channel)
+      await readDownloadValidators(managedPath, source, channel)
     )
 
     if (download.data !== null) {
@@ -392,7 +381,7 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
 
   if (download.data !== null) {
     try {
-      await writeDownloadValidators(managedPath, download.validators, channel)
+      await writeDownloadValidators(managedPath, download.validators, source, channel)
     } catch (error) {
       console.warn('Could not save yt-dlp download metadata', error)
     }
@@ -430,7 +419,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   let download
 
   try {
-    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath))
+    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath, url))
 
     if (download.data !== null) {
       await installBinary(extractZipEntry(download.data, matches), managedPath)
@@ -447,7 +436,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 
   if (download.data !== null) {
     try {
-      await writeDownloadValidators(managedPath, download.validators)
+      await writeDownloadValidators(managedPath, download.validators, url)
     } catch (error) {
       console.warn('Could not save FFmpeg download metadata', error)
     }

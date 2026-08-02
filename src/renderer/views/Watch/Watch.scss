@@ -1118,7 +1118,9 @@
     }
   }
 
-  @container route (width <= 1350px) {
+  // Match the player control's viewport breakpoint so theatre mode never has
+  // a visible button while the responsive layout already forces the same grid.
+  @media (width <= 1350px) {
     @include theatre-mode-template;
   }
 
