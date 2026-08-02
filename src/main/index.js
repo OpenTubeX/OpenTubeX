@@ -1588,6 +1588,15 @@ function runApp() {
       await clearAllTabSessions()
     }
 
+    // Before any window can capture a preview, drop cache entries that no
+    // restored tab points at. Without this, previews orphaned by a crash or a
+    // forced quit stay on disk forever.
+    await TabManager.pruneTabPreviewCache(
+      savedSessions.flatMap(session => (
+        Array.isArray(session?.tabs) ? session.tabs.map(tab => tab?.previewFileName) : []
+      ))
+    )
+
     let firstWindow
 
     const directStartupUrl = getDirectOpenUrl(startupUrl)
