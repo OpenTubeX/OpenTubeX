@@ -160,6 +160,49 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
+  test('stops querying Shaka state before a format switch unloads it', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const player = page.locator('.ftVideoPlayer')
+    await player.evaluate(element => {
+      const app = document.querySelector('#app')?.__vue_app__
+      const findWatchComponent = (vnode) => {
+        if (vnode?.component?.refs?.player) return vnode.component
+        if (vnode?.component?.subTree) {
+          const match = findWatchComponent(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchComponent(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const watchComponent = findWatchComponent(app?._container?._vnode)
+      const overlay = element.ui ?? element.querySelector('video')?.ui
+      const shakaPlayer = overlay?.getControls().getPlayer()
+      if (!watchComponent || !shakaPlayer) {
+        throw new Error('Unable to access the mounted player')
+      }
+
+      window.__hasLoadedAtFormatUnload = []
+      const unload = shakaPlayer.unload.bind(shakaPlayer)
+      shakaPlayer.unload = (...args) => {
+        window.__hasLoadedAtFormatUnload.push(watchComponent.refs.player.hasLoaded)
+        return unload(...args)
+      }
+
+      const watchView = watchComponent.proxy
+      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+    })
+
+    await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+  })
+
   test('hides the tab play indicator while buffering', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)

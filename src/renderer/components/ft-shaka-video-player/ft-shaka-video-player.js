@@ -7989,6 +7989,11 @@ export default defineComponent({
           restoreCaptionIndex = null
         }
 
+        // Shaka clears its manifest before unload() finishes. A timeupdate can
+        // still arrive from the media element in that window, so stop handlers
+        // from querying player state as soon as the format switch begins.
+        hasLoaded.value = false
+
         if (newFormat === 'audio' || newFormat === 'dash') {
           let label
           let audioBandwidth
@@ -8243,6 +8248,9 @@ export default defineComponent({
      */
     async function destroyPlayer() {
       ignoreErrors = true
+      // The media element can emit one final timeupdate while Shaka is being
+      // destroyed, after its internal manifest has already been cleared.
+      hasLoaded.value = false
 
       let uiState = {
         startNextVideoInFullscreen: false,
