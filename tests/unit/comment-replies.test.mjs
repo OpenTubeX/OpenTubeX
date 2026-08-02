@@ -86,4 +86,6 @@ test('prefers a reply continuation button token', () => {
 
 test('returns null when a reply continuation is unavailable', () => {
   assert.equal(getReplyContinuationToken({ comment_replies_data: null }), null)
+  assert.equal(getReplyContinuationToken({ comment_replies_data: {} }), null)
+  assert.equal(getReplyContinuationToken({ comment_replies_data: { sub_threads: undefined } }), null)
 })
