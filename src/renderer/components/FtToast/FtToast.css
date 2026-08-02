@@ -115,6 +115,18 @@
   transform: translate(18px, -18px) scale(0.5);
 }
 
+.toast-holder.horizontal-tabs.position-top-left .persistent-slot.minimized {
+  transform: translateX(-18px) scale(0.5);
+}
+
+.toast-holder.horizontal-tabs.position-top-center .persistent-slot.minimized {
+  transform: scale(0.5);
+}
+
+.toast-holder.horizontal-tabs.position-top-right .persistent-slot.minimized {
+  transform: translateX(18px) scale(0.5);
+}
+
 .toast {
   display: flex;
   align-items: center;

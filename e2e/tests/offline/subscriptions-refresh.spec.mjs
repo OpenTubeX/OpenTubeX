@@ -296,7 +296,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
     const minimizedBounds = await refreshToast.boundingBox()
     expect(minimizedBounds.x).toBeLessThan(expandedBounds.x)
-    expect(minimizedBounds.y).toBeLessThan(expandedBounds.y)
+    expect(minimizedBounds.y).toBeCloseTo(expandedBounds.y, 0)
     expect(minimizedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
 
     const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
