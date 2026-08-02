@@ -1020,6 +1020,7 @@ Screenshot Success: Saved screenshot
 New Window: New window
 Channels:
   Empty: Your channel list is currently empty.
+  Load More Channels: Load more channels
   Unsubscribe Prompt: Are you sure you want to Unsubscribe from ‘{channelName}’?
   Title: Channel list
   Search bar placeholder: Search channels

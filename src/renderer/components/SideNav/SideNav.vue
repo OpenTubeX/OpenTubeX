@@ -213,7 +213,7 @@
         class="mobileHidden"
       >
         <router-link
-          v-for="channel in activeSubscriptions"
+          v-for="channel in displayedActiveSubscriptions"
           :key="channel.id"
           :to="`/channel/${channel.id}`"
           class="navChannel channelLink mobileHidden"
@@ -246,6 +246,15 @@
             {{ channel.name }}
           </p>
         </router-link>
+        <div
+          v-if="hasMoreActiveSubscriptions"
+          :key="activeSubscriptionLimit"
+          v-observe-visibility="{
+            callback: onActiveSubscriptionsVisibilityChanged
+          }"
+          class="subscriptionLoadSentinel"
+          aria-hidden="true"
+        />
       </div>
     </div>
   </FtFlexBox>
@@ -272,6 +281,7 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 ).APP.GENERAL)
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
+const activeSubscriptionsPerPage = 50
 
 const props = defineProps({
   forceExpanded: {
@@ -330,6 +340,22 @@ const activeSubscriptions = computed(() => {
 
   return subscriptions
 })
+
+const activeSubscriptionLimit = ref(activeSubscriptionsPerPage)
+
+const displayedActiveSubscriptions = computed(() => {
+  return activeSubscriptions.value.slice(0, activeSubscriptionLimit.value)
+})
+
+const hasMoreActiveSubscriptions = computed(() => {
+  return displayedActiveSubscriptions.value.length < activeSubscriptions.value.length
+})
+
+function onActiveSubscriptionsVisibilityChanged(isVisible) {
+  if (isVisible) {
+    activeSubscriptionLimit.value += activeSubscriptionsPerPage
+  }
+}
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hidePopularVideos = computed(() => {
@@ -428,7 +454,11 @@ function updateIndicatorAfterResize() {
 }
 
 watch(() => route.fullPath, () => nextTick(updateIndicator))
-watch([isOpen, hideText, activeSubscriptions], () => {
+watch(() => activeProfile.value._id, () => {
+  activeSubscriptionLimit.value = activeSubscriptionsPerPage
+})
+
+watch([isOpen, hideText, displayedActiveSubscriptions], () => {
   nextTick(updateIndicator)
   updateIndicatorAfterResize()
 })

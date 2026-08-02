@@ -1,4 +1,4 @@
-import { defineAsyncComponent, h } from 'vue'
+import { defineAsyncComponent, h, markRaw, shallowRef } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
@@ -30,10 +30,36 @@ const Watch = defineAsyncComponent({
   loadingComponent: AsyncRouteLoadingIndicator,
   delay: 0
 })
-const Settings = defineAsyncComponent(() => import('../views/Settings/Settings.vue'))
+
+function createPreloadedRoute(name, loader) {
+  const loadedComponent = shallowRef(defineAsyncComponent(loader))
+
+  return {
+    component: {
+      name,
+      setup: () => () => h(loadedComponent.value)
+    },
+    preload: () => loader().then(({ default: component }) => {
+      loadedComponent.value = markRaw(component)
+    }).catch((error) => {
+      console.error(`Failed to preload ${name}`, error)
+    })
+  }
+}
+
+const settingsRoute = createPreloadedRoute('SettingsRoute', () => import('../views/Settings/Settings.vue'))
+const aboutRoute = createPreloadedRoute('AboutRoute', () => import('../views/About/About.vue'))
+const Settings = settingsRoute.component
+const About = aboutRoute.component
 const ProfileSettings = defineAsyncComponent(() => import('../views/ProfileSettings/ProfileSettings.vue'))
-const About = defineAsyncComponent(() => import('../views/About/About.vue'))
 const Stats = defineAsyncComponent(() => import('../views/Stats/Stats.vue'))
+
+// Keep Settings in its own chunk so its styles retain their established load
+// order, but allow the app to evaluate it before the UI can be interacted with.
+// Otherwise the first Settings navigation has to wait for this large chunk.
+export function preloadUtilityRoutes() {
+  return Promise.all([settingsRoute.preload(), aboutRoute.preload()])
+}
 
 export const routes = [
   {
