@@ -501,19 +501,15 @@ const actions = {
   },
 
   async removeVideos({ commit }, payload) {
-    try {
-      const { _id, playlistItemIds } = payload
+    const { _id, playlistItemIds } = payload
 
-      const lastUpdatedAt = Date.now()
+    const lastUpdatedAt = Date.now()
 
-      await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
+    await DBPlaylistHandlers.deleteVideoIdsByPlaylistId(_id, lastUpdatedAt, playlistItemIds)
 
-      payload.lastUpdatedAt = lastUpdatedAt
+    payload.lastUpdatedAt = lastUpdatedAt
 
-      commit('removeVideos', payload)
-    } catch (errMessage) {
-      console.error(errMessage)
-    }
+    commit('removeVideos', payload)
   },
 }
 

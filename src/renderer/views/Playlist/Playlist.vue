@@ -726,7 +726,8 @@ const canMoveVideos = computed(() => {
 })
 
 const videoDraggingPossible = computed(() => {
-  return isUserPlaylistRequested.value && isSortOrderCustom.value && shownPlaylistItems.value.length >= 2
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
+    !pendingDeletionRemovalInProgress.value && shownPlaylistItems.value.length >= 2
 })
 
 /**
@@ -1047,12 +1048,17 @@ async function removeToBeDeletedVideosSometimes() {
         // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
         playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
       })
-
+    } catch (e) {
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      console.error(e)
+    } finally {
+      pendingDeletionRemovalInProgress.value = false
       toBeDeletedPlaylistItemIds.value = []
       undoToastAbortController?.abort()
       undoToastAbortController = null
-    } finally {
-      pendingDeletionRemovalInProgress.value = false
     }
   }
 }
