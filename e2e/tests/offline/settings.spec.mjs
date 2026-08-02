@@ -4,10 +4,68 @@ import path from 'node:path'
 import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
+  test('renders without flashing native scrollbars', async ({ page }) => {
+    const renderFrames = await page.evaluate(() => {
+      return new Promise((resolve) => {
+        const settingsLink = Array.from(document.querySelectorAll('.sideNav a[href="#/settings"]'))
+          .find(link => link instanceof HTMLElement && link.offsetParent !== null)
+        const frames = []
+
+        settingsLink.click()
+
+        const captureFrame = () => {
+          const sectionCount = document.querySelectorAll('.settingsSections > .section').length
+          const menuSectionCount = document.querySelectorAll('.settingsMenu [data-section]').length
+          frames.push({
+            menuSectionCount,
+            sectionCount,
+            settingsRendered: document.querySelector('.settingsPage') !== null,
+            nativeScrollbarsHidden: [document.documentElement, document.body]
+              .every(element => getComputedStyle(element).scrollbarWidth === 'none'),
+            pageOverlayScrollbars: Array.from(document.body.children)
+              .filter(element => element.classList.contains('os-scrollbar-vertical')).length
+          })
+
+          if (menuSectionCount > 0 && sectionCount === menuSectionCount) {
+            resolve(frames)
+          } else {
+            window.requestAnimationFrame(captureFrame)
+          }
+        }
+
+        window.requestAnimationFrame(captureFrame)
+      })
+    })
+
+    expect(renderFrames[0].settingsRendered).toBe(true)
+    expect(renderFrames.map(({ sectionCount }) => sectionCount))
+      .toEqual([1, renderFrames[0].menuSectionCount])
+    expect(renderFrames.every(({ nativeScrollbarsHidden }) => nativeScrollbarsHidden)).toBe(true)
+    expect(renderFrames.every(({ pageOverlayScrollbars }) => pageOverlayScrollbars === 1)).toBe(true)
+  })
+
   test('settings page renders its sections', async ({ page }) => {
     await goTo(page, 'settings')
     await expect(page).toHaveURL(/#\/settings/)
     await expect(page.locator('.settingsMenu, .ftSettingsMenu, [class*="settings"]').first()).toBeVisible()
+  })
+
+  test('retains the mounted page when switching to About and back', async ({ page }) => {
+    await goTo(page, 'settings')
+    const settingsPage = page.locator('.settingsPage')
+    await settingsPage.evaluate(element => {
+      element.dataset.cacheTest = 'mounted'
+    })
+
+    await goTo(page, 'about')
+    await expect(page.locator('.about-chunks')).toBeVisible()
+    await expect(settingsPage).toHaveCount(0)
+
+    await goTo(page, 'settings')
+
+    await expect(page.locator('.about-chunks')).toHaveCount(0)
+    await expect(settingsPage).toBeVisible()
+    await expect(settingsPage).toHaveAttribute('data-cache-test', 'mounted')
   })
 
   test('the current section persists in the URL', async ({ page }) => {

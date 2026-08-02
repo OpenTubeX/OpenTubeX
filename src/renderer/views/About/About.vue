@@ -13,6 +13,16 @@
         <div class="version">
           {{ versionNumber }} {{ $t("About.Beta") }}
         </div>
+        <div
+          v-if="commitId"
+          class="commit"
+        >
+          {{ commitLabel }}
+          <a
+            :href="commitUrl"
+            :title="buildCommit"
+          >{{ commitId }}</a>
+        </div>
         <dl
           v-if="runtimeVersions"
           class="runtimeVersions"
@@ -58,12 +68,17 @@ import { useI18n } from 'vue-i18n'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
+import { getNightlyCommit } from '../../helpers/versionDisplay.js'
 
 import packageDetails from '../../../../package.json'
 
 const { t } = useI18n()
 
 const versionNumber = `v${packageDetails.version}`
+const buildCommit = process.env.BUILD_COMMIT
+const commitId = getNightlyCommit(packageDetails.version, buildCommit)
+const commitLabel = `${t('About.Commit')}:`
+const commitUrl = `https://github.com/OpenTubeX/OpenTubeX/commit/${buildCommit}`
 const runtimeVersions = process.env.IS_ELECTRON
   ? [
       { name: 'Electron', version: window.ftElectron.runtimeVersions.electron },

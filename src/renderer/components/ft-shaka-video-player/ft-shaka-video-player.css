@@ -200,17 +200,58 @@
     max-inline-size 250ms ease;
 }
 
-.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
-.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
-  top: auto;
-  bottom: 70px;
-  max-inline-size: min(36vw, 560px);
+.shortsFullscreenMetadata {
+  display: none;
 }
 
-.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay:dir(rtl)),
-.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay:dir(rtl)) {
-  right: 5px;
-  left: auto;
+.ftVideoPlayer.shortsPlayer:fullscreen .shortsFullscreenMetadata,
+.ftVideoPlayer.shortsPlayer.fullWindow .shortsFullscreenMetadata {
+  --shorts-metadata-min-width: min(
+    220px,
+    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
+  );
+
+  position: absolute;
+  z-index: 5;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: grid;
+  grid-template-columns:
+    minmax(var(--shorts-metadata-min-width), 1fr)
+    auto
+    minmax(0, 1fr);
+  box-sizing: border-box;
+  block-size: 100%;
+  inline-size: calc(100% - var(--shorts-dock-width, 0px));
+  color: #fff;
+  pointer-events: none;
+  transition: inline-size 250ms ease;
+}
+
+.shortsFullscreenMetadataSide {
+  grid-column: 1;
+  align-self: end;
+  min-inline-size: 0;
+  padding-block-end: 24px;
+  padding-inline: 16px;
+}
+
+.shortsFullscreenVideoSpace {
+  grid-column: 2;
+  block-size: 100%;
+  inline-size: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    calc(
+      100vw - var(--shorts-dock-width, 0px) -
+      var(--shorts-metadata-min-width)
+    )
+  );
+  aspect-ratio: var(--shorts-aspect-ratio);
+}
+
+.ftVideoPlayer.shortsPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer.shortsPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
+  display: none;
 }
 
 .ftVideoPlayer.shortsPlayer:fullscreen:is(
@@ -681,6 +722,20 @@
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-icon) {
   display: block;
+}
+
+/* The compact button only shows the icon, so mark the open state with a highlight */
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button)::before {
+  position: absolute;
+  inset: 6px;
+  border-radius: calc(50% * var(--ui-roundness));
+  background-color: transparent;
+  content: '';
+  pointer-events: none;
+}
+
+:deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button.open)::before {
+  background-color: rgb(255 255 255 / 20%);
 }
 
 :deep(.shaka-controls-button-panel.ft-controls-compact-chapters > .ft-chapters-button .ft-chapters-current-title),
@@ -1531,7 +1586,11 @@
   display: flex;
 }
 
-/* Let Shaka's seek preview and control tooltips pass in front of the fullscreen action pill. */
+/* Let Shaka's seek preview pass in front of annotations and the fullscreen action pill. */
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :deep(.shaka-controls-container) {
+  z-index: 3;
+}
+
 .ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
   .ftVideoPlayer:has(:deep(
     .shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)

@@ -7,12 +7,17 @@
     :inert="!isPresented"
     :aria-hidden="String(!isPresented)"
   >
-    <component
-      :is="resolvedComponent"
-      v-if="initialized && resolvedComponent"
-      :key="tab.refreshKey || 0"
-      class="routerView"
-    />
+    <KeepAlive
+      include="SettingsRoute,AboutRoute"
+      :max="2"
+    >
+      <component
+        :is="resolvedComponent"
+        v-if="initialized && resolvedComponent"
+        :key="resolvedComponentKey"
+        class="routerView"
+      />
+    </KeepAlive>
   </div>
 </template>
 
@@ -40,6 +45,7 @@ import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContex
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
+const CACHED_ROUTE_NAMES = new Set(['about', 'settings'])
 
 const props = defineProps({
   tab: {
@@ -60,6 +66,12 @@ const routerFacade = navigation.createRouterFacade(props.tab.id)
 // every deep route watcher in the mounted page.
 const routeFullPath = computed(() => props.tab.route?.fullPath || '/')
 const resolvedRoute = computed(() => navigation.resolve(routeFullPath.value))
+const resolvedComponentKey = computed(() => {
+  const refreshKey = props.tab.refreshKey || 0
+  return CACHED_ROUTE_NAMES.has(resolvedRoute.value.name)
+    ? `${resolvedRoute.value.name}:${refreshKey}`
+    : refreshKey
+})
 const injectedRoute = reactive({})
 const resolvedComponent = computed(() => resolveRouteComponent(resolvedRoute.value))
 

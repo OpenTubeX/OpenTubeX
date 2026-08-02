@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, repoRoot } from '../../helpers/app.mjs'
@@ -135,6 +136,46 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
   await expect(volumeSlider).toHaveCSS('inline-size', '96px')
   await expect(volumeSlider).toHaveCSS('opacity', '1')
+})
+
+test('compact chapters button marks its open state', async ({ page }) => {
+  await goTo(page, 'history')
+  const playerStyles = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    ),
+    'utf8'
+  )
+  // The component scopes these rules with :deep(), which the browser cannot parse on its own
+  await page.addStyleTag({
+    content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+  await page.evaluate(() => {
+    const panel = document.createElement('div')
+    const button = document.createElement('button')
+    const icon = document.createElement('span')
+
+    panel.className = 'shaka-controls-button-panel ft-controls-compact-chapters'
+    panel.style.inset = '300px auto auto 300px'
+    panel.style.position = 'fixed'
+    panel.style.zIndex = '10000'
+    button.className = 'ft-chapters-button'
+    icon.className = 'ft-chapters-icon'
+    button.append(icon)
+    panel.append(button)
+    document.body.append(panel)
+  })
+
+  const button = page.locator('.ft-controls-compact-chapters > .ft-chapters-button')
+  const highlightColor = () => button.evaluate((element) => {
+    return getComputedStyle(element, '::before').backgroundColor
+  })
+
+  await expect(button).toBeVisible()
+  await expect.poll(highlightColor).toBe('rgba(0, 0, 0, 0)')
+  await button.evaluate(element => element.classList.add('open'))
+  await expect.poll(highlightColor).toBe('rgba(255, 255, 255, 0.2)')
 })
 
 test.describe('autosized prompts', () => {

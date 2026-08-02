@@ -405,8 +405,7 @@ export async function getLocalSearchContinuation(continuationData) {
  *     osName: string,
  *     osVersion: string
  *   },
- *   adEndTimeUnixMs: number,
- *   reloadSabrData: (reloadPlaybackContext: import('googlevideo/protos').ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>
+ *   adEndTimeUnixMs: number
  * }>}
  */
 export async function getLocalVideoInfo(id) {
@@ -592,40 +591,11 @@ export async function getLocalVideoInfo(id) {
     }
   }
 
-  const reloadSabrData = async (reloadPlaybackContext) => {
-    const playerResponse = await webInnertube.actions.execute('/player', {
-      videoId: id,
-      contentCheckOk: true,
-      racyCheckOk: true,
-      playbackContext: {
-        contentPlaybackContext: {
-          signatureTimestamp: webInnertube.session.player.signature_timestamp
-        },
-        reloadPlaybackContext
-      },
-      serviceIntegrityDimensions: contentPoToken ? { poToken: contentPoToken } : undefined
-    })
-    const reloadedInfo = new YT.VideoInfo([playerResponse], webInnertube.actions, info.cpn)
-    const serverAbrStreamingUrl = reloadedInfo.streaming_data?.server_abr_streaming_url
-    const ustreamerConfig = reloadedInfo.player_config?.media_common_config
-      ?.media_ustreamer_request_config?.video_playback_ustreamer_config
-
-    if (!serverAbrStreamingUrl || !ustreamerConfig) {
-      throw new Error('Reloaded player response did not contain SABR data')
-    }
-
-    return {
-      url: await webInnertube.session.player.decipher(serverAbrStreamingUrl),
-      ustreamerConfig
-    }
-  }
-
   return {
     info,
     poToken: contentPoToken,
     clientInfo,
     adEndTimeUnixMs,
-    reloadSabrData,
   }
 }
 

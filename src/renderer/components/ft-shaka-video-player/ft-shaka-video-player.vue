@@ -45,7 +45,7 @@
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
-        sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
+        sixteenByNine: (format === 'audio' || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
         scrollMiniPlayerAnimating,
         fullscreenMetadataOpen: showFullscreenMetadata,
@@ -85,9 +85,10 @@
         playsinline
         :autoplay="autoplayVideos || shortsPlayer ? true : null"
         :loop="shortsPlayer"
-        :poster="showPoster ? thumbnail : null"
+        :poster="format === 'audio' || showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
+        @waiting="handleWaiting"
         @pause="handlePause"
         @ended="handleEnded"
         @seeking="handleSeeking"
@@ -164,6 +165,20 @@
             <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
           </button>
         </div>
+      </div>
+      <div
+        v-if="shortsPlayer"
+        class="shortsFullscreenMetadata shaka-no-propagation"
+        @click.stop
+        @dblclick.stop
+      >
+        <div class="shortsFullscreenMetadataSide">
+          <slot name="shorts-fullscreen-metadata" />
+        </div>
+        <div
+          class="shortsFullscreenVideoSpace"
+          aria-hidden="true"
+        />
       </div>
       <Transition name="fade">
         <div
@@ -343,8 +358,11 @@
       />
       <FtVideoAnnotations
         v-if="!hideAnnotations"
+        :active="isActiveTab"
         :annotations="annotations"
         :current-time="annotationCurrentTime"
+        :video-aspect-ratio="annotationVideoAspectRatio"
+        :video-fit="annotationVideoFit"
       />
       <div
         v-if="showCaptionAppearanceSample"

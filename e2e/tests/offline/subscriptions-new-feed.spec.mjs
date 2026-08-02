@@ -153,7 +153,9 @@ test.describe('new subscriptions feed', () => {
     await goTo(page, 'subscriptions')
     await page.locator('[data-subscription-feed-tab="all"]').click()
 
-    const video = page.locator('.ft-list-video').filter({ hasText: 'New video' })
+    const video = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
     await video.locator('.thumbnailLink').click({ button: 'right' })
 
     await expect(page.getByRole('menu', { name: 'Context menu' })).toBeVisible()
