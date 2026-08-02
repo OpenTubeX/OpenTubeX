@@ -674,7 +674,7 @@ function handleActivate(event, tabId) {
       nextSelection.add(tabId)
     }
     setTabSelection([...nextSelection])
-    selectionAnchorId = tabId
+    selectionAnchorId = nextSelection.size === 1 ? [...nextSelection][0] : tabId
     return
   }
 
