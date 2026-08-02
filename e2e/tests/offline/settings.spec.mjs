@@ -540,7 +540,7 @@ test.describe('settings', () => {
     const toastSlot = toast.locator('..')
     const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
     await expect(toastSlot).toHaveCSS('transform', 'none')
-    await toast.hover()
+    await toastSlot.dispatchEvent('pointerenter')
     // Reported as a list so a failure says which animations were on the element
     // and what state they were in, instead of just "expected paused"
     await expect.poll(() => indicator.evaluate((element) => {
@@ -554,7 +554,7 @@ test.describe('settings', () => {
     await page.waitForTimeout(2200)
     await expect(toast).toBeVisible()
 
-    await page.mouse.move(800, 300)
+    await toastSlot.dispatchEvent('pointerleave')
     await expect(toast).toHaveCount(0)
 
     await page.evaluate(() => {
@@ -609,13 +609,14 @@ test.describe('settings', () => {
       window.ftElectron.showToastOnAllTabs('No indicator toast', 2000)
     })
     const toastWithoutIndicator = page.locator('.toast', { hasText: 'No indicator toast' })
-    await expect(toastWithoutIndicator.locator('..')).toHaveCSS('transform', 'none')
-    await toastWithoutIndicator.hover()
-    await expect(toastWithoutIndicator.locator('..').locator('.timeout-indicator')).toHaveCount(0)
+    const toastWithoutIndicatorSlot = toastWithoutIndicator.locator('..')
+    await expect(toastWithoutIndicatorSlot).toHaveCSS('transform', 'none')
+    await toastWithoutIndicatorSlot.dispatchEvent('pointerenter')
+    await expect(toastWithoutIndicatorSlot.locator('.timeout-indicator')).toHaveCount(0)
     await page.waitForTimeout(2200)
     await expect(toastWithoutIndicator).toBeVisible()
 
-    await page.mouse.move(800, 300)
+    await toastWithoutIndicatorSlot.dispatchEvent('pointerleave')
     await expect(toastWithoutIndicator).toHaveCount(0)
   })
 })
