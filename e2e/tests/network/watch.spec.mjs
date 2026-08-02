@@ -1124,6 +1124,7 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     const actions = page.locator('.fullscreenActions')
     const seekBar = page.locator('.shaka-seek-bar-container')
+    const controls = page.locator('.shaka-controls-container')
     const fullscreenButton = page.locator('.shaka-fullscreen-button')
     await actions.evaluate((element) => {
       const sponsorBlockNotice = element.cloneNode(false)
@@ -1152,6 +1153,9 @@ test.describe('watch page', () => {
       seekBarBounds.x + (seekBarBounds.width / 2),
       seekBarBounds.y + (seekBarBounds.height / 2)
     )
+    // End-screen annotations use z-index 2, so the controls stacking context
+    // must rise above them for its seek preview to be visible.
+    await expect(controls).toHaveCSS('z-index', '3')
     await expect(actions).toHaveCSS('z-index', '0')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
   })
