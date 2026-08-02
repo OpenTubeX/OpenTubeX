@@ -233,6 +233,36 @@ test.describe('settings', () => {
     await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
   })
 
+  test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="experimental"]').click()
+
+    const errors = []
+    page.on('pageerror', error => errors.push(error.message))
+    await page.evaluate(() => {
+      const appendChild = document.head.appendChild.bind(document.head)
+      document.head.appendChild = element => {
+        if (element instanceof HTMLScriptElement) {
+          queueMicrotask(() => element.dispatchEvent(new Event('error')))
+          return element
+        }
+        return appendChild(element)
+      }
+    })
+
+    const select = page.locator('.iconPackPreview select')
+    const loadFailure = page.waitForEvent('console', message => (
+      message.type() === 'error' && message.text().includes('[icon-pack] failed to load material')
+    ))
+    await select.selectOption('material')
+    await loadFailure
+    expect(errors).toEqual([])
+
+    await page.reload()
+    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await expect(select).toHaveValue('fontawesome')
+  })
+
   test('renders custom icons with the default Font Awesome pack', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="experimental"]').click()
