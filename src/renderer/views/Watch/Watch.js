@@ -37,6 +37,7 @@ import {
   showToastOnAllTabs
 } from '../../helpers/utils'
 import {
+  generateAudioTrackField,
   getLocalShortLinkedVideo,
   getLocalVideoInfo,
   mapLocalLegacyFormat,
@@ -56,7 +57,14 @@ import {
 } from '../../helpers/api/invidious'
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
-import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
+import {
+  findCaptionByLocale,
+  getPreferredCaption,
+  sortCaptions,
+  MANIFEST_TYPE_DASH,
+  MANIFEST_TYPE_HLS
+} from '../../helpers/player/utils'
+import { getYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -85,8 +93,6 @@ import { useTabToast } from '../../composables/useTabToast'
  * }} SabrData
  */
 
-const MANIFEST_TYPE_DASH = 'application/dash+xml'
-const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
 const THEATRE_MODE_ANIMATION_DURATION = 400
 const RESPONSIVE_THEATRE_MODE_MAX_WIDTH = 1350
 // A SABR session can go stale more than once during a long video, so the
@@ -230,6 +236,13 @@ export default defineComponent({
       manifestMimeType: MANIFEST_TYPE_DASH,
       /** @type {SabrData | null} */
       sabrData: null,
+      /**
+       * Which engine provided the streams that are currently loaded.
+       * @type {'built-in' | 'yt-dlp'}
+       */
+      activePlaybackEngine: 'built-in',
+      /** @type {string | null} the yt-dlp version that extracted the current streams */
+      activePlaybackEngineVersion: null,
       legacyFormats: [],
       captions: [],
       currentTime: 0,
@@ -588,6 +601,41 @@ export default defineComponent({
     },
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat
+    },
+    videoPlaybackEngine: function () {
+      return process.env.IS_ELECTRON ? this.$store.getters.getVideoPlaybackEngine : 'built-in'
+    },
+    /** @returns {'sabr' | 'dash' | 'hls' | 'none'} */
+    playbackStreamType: function () {
+      if (this.manifestSrc === null || this.activeFormat === 'legacy') {
+        return 'none'
+      }
+
+      switch (this.manifestMimeType) {
+        case MANIFEST_TYPE_SABR:
+          return 'sabr'
+        case MANIFEST_TYPE_HLS:
+          return 'hls'
+        default:
+          return 'dash'
+      }
+    },
+    dashFormatAvailable: function () {
+      return this.manifestSrc !== null
+    },
+    legacyFormatAvailable: function () {
+      return !this.isLive && !this.isPostLiveDvr && this.legacyFormats.length > 0
+    },
+    audioFormatAvailable: function () {
+      if (this.manifestSrc === null) {
+        return false
+      }
+
+      // The WEB HLS manifests only contain combined audio and video files, so we can't do audio only.
+      // The IOS HLS manifests have audio-only streams
+      return !((this.isLive || this.isPostLiveDvr) &&
+        this.manifestMimeType === MANIFEST_TYPE_HLS &&
+        !this.manifestSrc.includes('/demuxed/1'))
     },
     autoplayEnabled: function () {
       if (this.isShort) { return false }
@@ -1233,6 +1281,8 @@ export default defineComponent({
       this.manifestSrc = null
       this.manifestMimeType = MANIFEST_TYPE_DASH
       this.sabrData = null
+      this.activePlaybackEngine = 'built-in'
+      this.activePlaybackEngineVersion = null
       this.legacyFormats = []
       this.captions = []
       this.currentTime = 0
@@ -2030,6 +2080,11 @@ export default defineComponent({
           }
         }
 
+        if (!this.isUpcoming) {
+          await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        }
+
         this.updateShortsPlayerState(
           result.basic_info.duration,
           result.streaming_data?.adaptive_formats
@@ -2253,6 +2308,11 @@ export default defineComponent({
             this.manifestSrc = await this.createInvidiousDashManifest(result)
             if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             this.manifestMimeType = MANIFEST_TYPE_DASH
+          }
+
+          if (!this.isUpcoming) {
+            await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           }
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
@@ -2929,7 +2989,7 @@ export default defineComponent({
         return
       }
 
-      if (this.manifestSrc === null) {
+      if (!this.dashFormatAvailable) {
         showToast({
           message: this.t('Change Format.Dash formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -2945,7 +3005,7 @@ export default defineComponent({
         return
       }
 
-      if (this.isLive || this.isPostLiveDvr || this.legacyFormats.length === 0) {
+      if (!this.legacyFormatAvailable) {
         showToast({
           message: this.t('Change Format.Legacy formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -2961,11 +3021,7 @@ export default defineComponent({
         return
       }
 
-      if (this.manifestSrc === null ||
-        ((this.isLive || this.isPostLiveDvr) &&
-        // The WEB HLS manifests only contain combined audio and video files, so we can't do audio only
-        // The IOS HLS manifests have audio-only streams
-          this.manifestMimeType === MANIFEST_TYPE_HLS && !this.manifestSrc.includes('/demuxed/1'))) {
+      if (!this.audioFormatAvailable) {
         showToast({
           message: this.t('Change Format.Audio formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -3265,6 +3321,65 @@ export default defineComponent({
     },
 
     /**
+     * Replaces the streams that the backend provided with the ones yt-dlp extracts.
+     * The metadata (captions, chapters, storyboards, ...) keeps coming from the backend,
+     * only the playback source is swapped out, so that SABR can be avoided entirely.
+     * @param {number} loadGeneration
+     * @param {string} videoId
+     */
+    applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
+      if (!process.env.IS_ELECTRON || this.videoPlaybackEngine !== 'yt-dlp') {
+        return
+      }
+
+      // Post-Live-DVR videos are served as segmented OTF streams, which yt-dlp doesn't
+      // expose the segment durations for. They don't use SABR anyway, so the built-in
+      // engine already handles them without the errors we want to avoid here.
+      if (this.isPostLiveDvr) {
+        return
+      }
+
+      let source
+      try {
+        source = await getYtDlpPlaybackSource(videoId)
+      } catch (error) {
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
+        console.error(`yt-dlp could not provide streams for ${videoId}, falling back to the built-in engine...`, error)
+        this.showTabToast({
+          message: this.t('Change Format.yt-dlp Fallback Template', { error: error.message }),
+          time: 7000,
+          icon: ['fas', 'circle-exclamation'],
+        })
+        return
+      }
+
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
+      this.manifestSrc = source.manifestSrc
+      this.manifestMimeType = source.manifestMimeType
+      this.legacyFormats = source.legacyFormats
+      // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
+      // Keeping the backend's date stops playback errors from being blamed on an
+      // expired session, which is what a missing date would compare as.
+      if (source.expiryDate !== null) {
+        this.streamingDataExpiryDate = source.expiryDate
+      }
+      // SABR specific state, which no longer applies now that the streams come from yt-dlp
+      this.sabrData = null
+      this.activePlaybackEngine = 'yt-dlp'
+      this.activePlaybackEngineVersion = source.version
+
+      if (this.activeFormat === 'legacy' && source.legacyFormats.length === 0) {
+        this.activeFormat = 'dash'
+      }
+
+      if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
+        this.activeFormat = 'dash'
+      }
+    },
+
+    /**
      * @param {import('youtubei.js').YT.VideoInfo} videoInfo
      * @param {boolean} includeThumbnails
      */
@@ -3385,7 +3500,7 @@ export default defineComponent({
           // match YouTube's local API response with English
           const languageNames = new Intl.DisplayNames('en-US', { type: 'language', languageDisplay: 'standard' })
           for (const format of audioFormats) {
-            this.generateAudioTrackFieldInvidious(format, languageNames)
+            generateAudioTrackField(format, languageNames)
           }
         }
 
@@ -3397,45 +3512,6 @@ export default defineComponent({
       }
 
       return url
-    },
-
-    /**
-     * @param {import('youtubei.js').Misc.Format} format
-     * @param {Intl.DisplayNames} languageNames
-     */
-    generateAudioTrackFieldInvidious: function (format, languageNames) {
-      let type
-
-      // use the same id numbers as YouTube (except -1, when we aren't sure what it is)
-      let idNumber
-
-      if (format.is_descriptive) {
-        type = ' descriptive'
-        idNumber = 2
-      } else if (format.is_dubbed) {
-        type = ''
-        idNumber = 3
-      } else if (format.is_original) {
-        type = ' original'
-        idNumber = 4
-      } else if (format.is_secondary) {
-        type = ' secondary'
-        idNumber = 6
-      } else if (format.is_auto_dubbed) {
-        type = ''
-        idNumber = 10
-      } else {
-        type = ' alternative'
-        idNumber = -1
-      }
-
-      const languageName = languageNames.of(format.language)
-
-      format.audio_track = {
-        audio_is_default: !!format.is_original,
-        id: `${format.language}.${idNumber}`,
-        display_name: `${languageName}${type}`
-      }
     },
 
     getAdaptiveFormatsInvidious: async function (existingInfoResult = null) {

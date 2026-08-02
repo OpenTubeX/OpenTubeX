@@ -716,6 +716,17 @@ Settings:
         Name: None
   Download Settings:
     Download Settings: Downloads
+    Managed Tools Download Started Template: 'Tools required to download videos were not found: {tools}. Downloading managed copies…'
+    Managed Tools Download Finished Template: 'Finished downloading {tools}'
+    Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'
+    Managed Tools Update Finished Template: 'Finished updating {tools}'
+    Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
+    Download Folder: Download Folder
+    Choose Download Folder: Choose Download Folder
+    Templates Hint: Custom download templates can be created and managed in the download prompt, which is located beneath the video player.
+    External Software Hint: yt-dlp and FFmpeg are configured in the External Software settings.
+  External Software Settings:
+    External Software Settings: External Software
     yt-dlp Source: yt-dlp Source
     yt-dlp Channel: yt-dlp Channel
     Sources:
@@ -740,17 +751,9 @@ Settings:
     Downloading FFmpeg: Downloading FFmpeg…
     FFmpeg Downloaded Template: FFmpeg {version} has been downloaded
     FFmpeg Download Error Template: 'Downloading FFmpeg failed: {error}'
-    Managed Tools Download Started Template: 'Tools required to download videos were not found: {tools}. Downloading managed copies…'
-    Managed Tools Download Finished Template: 'Finished downloading {tools}'
-    Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'
-    Managed Tools Update Finished Template: 'Finished updating {tools}'
     Managed Tool Already Current Template: '{tool} {version} is already up to date'
-    Managed Tools Download Error Template: 'Could not download the managed tools: {errors}'
     yt-dlp Executable Path: yt-dlp Executable Path
     FFmpeg Executable Path: FFmpeg Executable Path
-    Download Folder: Download Folder
-    Choose Download Folder: Choose Download Folder
-    Templates Hint: Custom download templates can be created and managed in the download prompt, which is located beneath the video player.
   Privacy Settings:
     Privacy Settings: Privacy
     Remember History: Remember Watch History
@@ -1030,6 +1033,10 @@ Settings:
   Experimental Settings:
     Experimental Settings: Experimental
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
+    Playback Engine:
+      Playback Engine: Playback Engine
+      yt-dlp: yt-dlp
+      Built-in: Built-in
     Replace HTTP Cache: Replace HTTP Cache
   Password Dialog:
     Password: Password
@@ -1485,6 +1492,20 @@ Change Format:
     for this video
   Legacy formats are not available for this video: Legacy formats are not available
     for this video
+  Stream Source: Stream source
+  Playback Engine: Playback engine
+  Streaming Protocol: Streaming protocol
+  Not Available For This Video: Not available for this video
+  Engines:
+    Built-in: Built-in
+  Protocols:
+    Progressive: Progressive
+  Descriptions:
+    Dash: Adaptive quality, multiple audio tracks and the highest resolutions
+    Legacy: A single file with video and audio combined, limited to lower resolutions
+    Audio: Audio only, useful for saving bandwidth or listening in the background
+  yt-dlp Fallback Template: 'yt-dlp could not provide the streams, using the built-in
+    engine instead: {error}'
 Share:
   Share Video: Share Video
   Share Post: Share Post
@@ -1680,6 +1701,8 @@ Tooltips:
     Custom External Player Arguments: Any custom command line arguments you want to be passed on to the external player.
     DefaultCustomArgumentsTemplate: "(Default: '{defaultCustomArguments}')"
   Download Settings:
+    Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
+  External Software Settings:
     yt-dlp Source: OpenTubeX can either use the yt-dlp installed on your system or download
       and manage its own copy of yt-dlp, which is stored in the user data directory.
     yt-dlp Channel: Select which yt-dlp release channel OpenTubeX downloads and manages.
@@ -1691,7 +1714,6 @@ Tooltips:
     FFmpeg Executable Path: FFmpeg is required for merging separate video and audio streams
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.
-    Download Folder: Videos are saved to this folder. Leave blank to use your system's Downloads folder.
   Distraction Free Settings:
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
@@ -1714,6 +1736,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
   Experimental Settings:
+    Playback Engine: Which tool the video streams are obtained with. yt-dlp needs to be available to be used.
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
   SponsorBlock Settings:
     UseDeArrowTitles: Replace video titles with user-submitted titles from DeArrow.

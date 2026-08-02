@@ -233,8 +233,7 @@
             :title="t('Change Format.Change Media Formats')"
             theme="secondary"
             :icon="['fas', 'file-video']"
-            :dropdown-options="formatTypeOptions"
-            @click="changeFormat"
+            @click="showFormatPrompt = true"
           />
           <FtShareButton
             v-if="!hideSharingActions && !hideShareButton"
@@ -245,6 +244,18 @@
         </span>
       </div>
     </div>
+    <WatchVideoFormatPrompt
+      v-if="showFormatPrompt"
+      :active-format="activeFormat"
+      :playback-engine="playbackEngine"
+      :playback-engine-version="playbackEngineVersion"
+      :stream-type="streamType"
+      :dash-available="dashAvailable"
+      :legacy-available="legacyAvailable"
+      :audio-available="audioAvailable"
+      @change-format="changeFormat"
+      @close="showFormatPrompt = false"
+    />
     <WatchVideoDownloadPrompt
       v-if="showDownloadPrompt"
       :video-id="id"
@@ -266,6 +277,7 @@ import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
+import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPrompt.vue'
 
 import store from '../../store'
 
@@ -378,6 +390,37 @@ const props = defineProps({
     type: String,
     default: null
   },
+  /** @type {import('vue').PropType<'dash' | 'legacy' | 'audio'>} */
+  activeFormat: {
+    type: String,
+    default: 'dash'
+  },
+  /** @type {import('vue').PropType<'built-in' | 'yt-dlp'>} */
+  playbackEngine: {
+    type: String,
+    default: 'built-in'
+  },
+  playbackEngineVersion: {
+    type: String,
+    default: null
+  },
+  /** @type {import('vue').PropType<'sabr' | 'dash' | 'hls' | 'none'>} */
+  streamType: {
+    type: String,
+    default: 'none'
+  },
+  dashAvailable: {
+    type: Boolean,
+    default: false
+  },
+  legacyAvailable: {
+    type: Boolean,
+    default: false
+  },
+  audioAvailable: {
+    type: Boolean,
+    default: false
+  },
   canSaveWatchedProgress: {
     type: Boolean,
     required: true
@@ -420,6 +463,7 @@ const { locale, t } = useI18n()
 
 const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
+const showFormatPrompt = ref(false)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)
@@ -544,21 +588,6 @@ const publishedDateText = computed(() => {
 
   return `${publishedString.value} ${dateString.value}`
 })
-
-const formatTypeOptions = computed(() => [
-  {
-    label: t('Change Format.Use Dash Formats'),
-    value: 'dash'
-  },
-  {
-    label: t('Change Format.Use Legacy Formats'),
-    value: 'legacy'
-  },
-  {
-    label: t('Change Format.Use Audio Formats'),
-    value: 'audio'
-  }
-])
 
 /**
  * @param {'dash' | 'legacy' | 'audio'} value

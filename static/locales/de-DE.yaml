@@ -761,6 +761,17 @@ Settings:
     Ignore Default Arguments: Standardargumente ignorieren
   Download Settings:
     Download Settings: Downloads
+    Managed Tools Download Started Template: 'Für das Herunterladen von Videos erforderliche Tools wurden nicht gefunden: {tools}. Verwaltete Kopien werden heruntergeladen…'
+    Managed Tools Download Finished Template: 'Herunterladen von {tools} abgeschlossen'
+    Managed Tools Update Started Template: 'Für {tools} wurde ein Update gefunden. Es wird heruntergeladen…'
+    Managed Tools Update Finished Template: 'Aktualisierung von {tools} abgeschlossen'
+    Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
+    Download Folder: Download-Ordner
+    Choose Download Folder: Download-Ordner auswählen
+    Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
+    External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
+  External Software Settings:
+    External Software Settings: Externe Software
     yt-dlp Source: yt-dlp-Quelle
     yt-dlp Channel: yt-dlp-Kanal
     Sources:
@@ -785,17 +796,9 @@ Settings:
     Downloading FFmpeg: FFmpeg wird heruntergeladen…
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
-    Managed Tools Download Started Template: 'Für das Herunterladen von Videos erforderliche Tools wurden nicht gefunden: {tools}. Verwaltete Kopien werden heruntergeladen…'
-    Managed Tools Download Finished Template: 'Herunterladen von {tools} abgeschlossen'
-    Managed Tools Update Started Template: 'Für {tools} wurde ein Update gefunden. Es wird heruntergeladen…'
-    Managed Tools Update Finished Template: 'Aktualisierung von {tools} abgeschlossen'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
-    Managed Tools Download Error Template: 'Die verwalteten Tools konnten nicht heruntergeladen werden: {errors}'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
-    Download Folder: Download-Ordner
-    Choose Download Folder: Download-Ordner auswählen
-    Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
   Parental Control Settings:
     Parental Control Settings: Kindersicherung
     Hide Unsubscribe Button: Schaltfläche „Deabonnieren“ ausblenden
@@ -806,6 +809,10 @@ Settings:
   Experimental Settings:
     Experimental Settings: Experimentell
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
+    Playback Engine:
+      Playback Engine: Wiedergabe-Engine
+      yt-dlp: yt-dlp
+      Built-in: Integriert
     Replace HTTP Cache: HTTP-Cache ersetzen
   Password Dialog:
     Password: Passwort
@@ -1182,6 +1189,19 @@ Change Format:
   Audio formats are not available for this video: Audioformate sind für dieses Video nicht verfügbar
   Dash formats are not available for this video: DASH-Formate sind für dieses Video nicht verfügbar
   Legacy formats are not available for this video: Veraltete Formate sind für dieses Video nicht verfügbar
+  Stream Source: Streamquelle
+  Playback Engine: Wiedergabe-Engine
+  Streaming Protocol: Streamingprotokoll
+  Not Available For This Video: Für dieses Video nicht verfügbar
+  Engines:
+    Built-in: Integriert
+  Protocols:
+    Progressive: Progressiv
+  Descriptions:
+    Dash: Adaptive Qualität, mehrere Tonspuren und die höchsten Auflösungen
+    Legacy: Eine einzelne Datei mit Bild und Ton, auf niedrigere Auflösungen begrenzt
+    Audio: Nur Ton, praktisch zum Sparen von Datenvolumen oder Hören im Hintergrund
+  yt-dlp Fallback Template: 'yt-dlp konnte die Streams nicht bereitstellen, stattdessen wird die integrierte Engine verwendet: {error}'
 Share:
   Share Video: Video teilen
   Share Playlist: Playlist teilen
@@ -1340,13 +1360,15 @@ Tooltips:
     DefaultCustomArgumentsTemplate: '(Standardwert: „{defaultCustomArguments}“)'
     Ignore Default Arguments: Schicke keine Standardargumente an den externen Video-Player außer der Video-URL (z.B. Abspiel-Geschwindigkeit, Playlist-URL etc.). Besondere Argumente werden weiterhin weitergeleitet.
   Download Settings:
+    Download Folder: Videos werden in diesem Ordner gespeichert. Leer lassen, um den Downloads-Ordner deines Systems zu verwenden.
+  External Software Settings:
     yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Channel: Wähle aus, welchen yt-dlp-Veröffentlichungskanal OpenTubeX herunterlädt und verwaltet. Für die meisten Benutzer wird „Stable“ empfohlen.
     FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
-    Download Folder: Videos werden in diesem Ordner gespeichert. Leer lassen, um den Downloads-Ordner deines Systems zu verwenden.
   Experimental Settings:
+    Playback Engine: Womit die Videostreams ermittelt werden. Für yt-dlp muss dieses verfügbar sein.
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
   Distraction Free Settings:
     Hide Channels: Gib eine Kanal-ID ein, um zu verhindern, dass alle Videos, Playlists und der Kanal selbst in der Suche, den Trends, den beliebtesten und den empfohlenen Videos angezeigt werden. Die eingegebene Kanal-ID muss vollständig übereinstimmen, und es wird zwischen Groß- und Kleinschreibung unterschieden.

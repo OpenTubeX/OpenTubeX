@@ -3,3 +3,13 @@
   font-weight: bold;
   padding-inline: 4%;
 }
+
+.playbackEngineSelect {
+  inline-size: 250px;
+}
+
+@media only screen and (width <= 800px) {
+  .playbackEngineSelect {
+    inline-size: calc(100% - 28px);
+  }
+}

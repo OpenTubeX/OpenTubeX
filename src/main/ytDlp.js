@@ -565,6 +565,167 @@ export async function handleYtDlpDownloadBinary(event, binary) {
 }
 
 /**
+ * @typedef YtDlpPlaybackFormat
+ * @property {string} formatId
+ * @property {string | null} url
+ * @property {string | null} manifestUrl
+ * @property {string} protocol
+ * @property {string} ext
+ * @property {string | null} container
+ * @property {string | null} vcodec
+ * @property {string | null} acodec
+ * @property {number | null} width
+ * @property {number | null} height
+ * @property {number | null} fps
+ * @property {number | null} bitrate bits per second
+ * @property {number | null} audioSampleRate
+ * @property {number | null} audioChannels
+ * @property {string | null} language
+ * @property {string | null} formatNote
+ * @property {string | null} dynamicRange
+ */
+
+/**
+ * @typedef YtDlpPlaybackInfo
+ * @property {string | null} version the version of yt-dlp that extracted this
+ * @property {boolean} isLive
+ * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
+ * @property {number | null} duration
+ * @property {string | null} hlsManifestUrl
+ * @property {YtDlpPlaybackFormat[]} formats
+ */
+
+// yt-dlp's JSON dump for a single video is a few hundred kilobytes at most,
+// but videos with lots of formats and long descriptions can exceed the default 1 MB
+const PLAYBACK_INFO_MAX_BUFFER = 32 * 1024 * 1024
+const PLAYBACK_INFO_TIMEOUT = 60_000
+
+/**
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+function toFiniteNumber(value) {
+  const number = typeof value === 'string' ? parseFloat(value) : value
+  return typeof number === 'number' && Number.isFinite(number) ? number : null
+}
+
+/**
+ * @param {unknown} value
+ * @returns {string | null}
+ */
+function toNonEmptyString(value) {
+  return typeof value === 'string' && value.length > 0 ? value : null
+}
+
+/**
+ * @param {any} format
+ * @returns {YtDlpPlaybackFormat}
+ */
+function mapPlaybackFormat(format) {
+  const bitrate = toFiniteNumber(format.tbr)
+
+  return {
+    formatId: String(format.format_id),
+    url: toNonEmptyString(format.url),
+    manifestUrl: toNonEmptyString(format.manifest_url),
+    protocol: typeof format.protocol === 'string' ? format.protocol : '',
+    ext: typeof format.ext === 'string' ? format.ext : '',
+    container: toNonEmptyString(format.container),
+    vcodec: toNonEmptyString(format.vcodec),
+    acodec: toNonEmptyString(format.acodec),
+    width: toFiniteNumber(format.width),
+    height: toFiniteNumber(format.height),
+    fps: toFiniteNumber(format.fps),
+    // yt-dlp reports bitrates in kbit/s
+    bitrate: bitrate === null ? null : Math.round(bitrate * 1000),
+    audioSampleRate: toFiniteNumber(format.asr),
+    audioChannels: toFiniteNumber(format.audio_channels),
+    language: toNonEmptyString(format.language),
+    formatNote: toNonEmptyString(format.format_note),
+    dynamicRange: toNonEmptyString(format.dynamic_range)
+  }
+}
+
+/**
+ * Extracts the stream URLs for a video with yt-dlp, so that they can be played back
+ * without relying on the SABR streaming protocol.
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {string} videoId
+ * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
+ */
+export async function handleYtDlpGetPlaybackInfo(event, videoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    return null
+  }
+
+  if (typeof videoId !== 'string' || !ID_REGEX.test(videoId)) {
+    return null
+  }
+
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+
+    if ('error' in result) {
+      return { error: result.error }
+    }
+  }
+
+  const args = ['--dump-single-json', '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15']
+
+  if ((await settings._findOne('useProxy'))?.value) {
+    const protocol = (await settings._findOne('proxyProtocol'))?.value
+    const hostname = (await settings._findOne('proxyHostname'))?.value
+    const port = (await settings._findOne('proxyPort'))?.value
+
+    if (protocol && hostname && port) {
+      args.push('--proxy', `${protocol}://${hostname}:${port}`)
+    }
+  }
+
+  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+
+  let stdout
+  try {
+    ({ stdout } = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
+    }))
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return { error: 'ENOENT' }
+    }
+
+    // yt-dlp writes the reason for a failed extraction to stderr
+    const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : ''
+    return { error: stderr.split('\n').at(-1) || error.message }
+  }
+
+  let info
+  try {
+    info = JSON.parse(stdout)
+  } catch {
+    return { error: 'yt-dlp returned invalid JSON' }
+  }
+
+  const formats = Array.isArray(info.formats) ? info.formats : []
+
+  return {
+    version: toNonEmptyString(info._version?.version),
+    isLive: !!info.is_live,
+    liveStatus: toNonEmptyString(info.live_status),
+    duration: toFiniteNumber(info.duration),
+    hlsManifestUrl: toNonEmptyString(info.manifest_url) ??
+      formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ??
+      null,
+    // storyboards are provided by the regular API, so drop them here
+    formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
+  }
+}
+
+/**
  * Splits a command line argument string into an array of arguments,
  * treating single and double quoted sections as a single argument
  * @param {string} argsString
