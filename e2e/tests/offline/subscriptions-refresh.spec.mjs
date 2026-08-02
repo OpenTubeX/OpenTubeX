@@ -287,7 +287,8 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
       settings: {
         ...commonSettings,
         subscriptionFeedAutoRefreshInterval: '5000',
-        showToastTimeoutIndicator: false
+        showToastTimeoutIndicator: false,
+        toastPosition: 'top-left'
       },
       profiles: [profileWith(channelCount)],
       subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index))
@@ -300,6 +301,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
+    await expect(refreshToast.locator('.icon')).toHaveAttribute('data-icon', 'video')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
     expect(await refreshToast.evaluate((toast) => {
       const { left, top, width, height } = toast.getBoundingClientRect()
@@ -311,6 +313,24 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     await expect(indicator).toBeVisible()
     await expect.poll(async () => Number(await indicator.getAttribute('data-progress'))).toBeGreaterThan(0)
     expect(Number(await indicator.getAttribute('data-progress'))).toBeLessThan(100)
+
+    const expandedBounds = await refreshToast.boundingBox()
+    const tabBarBounds = await page.locator('.tabBar:not(.vertical)').boundingBox()
+    expect(expandedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
+
+    await page.mouse.move(expandedBounds.x + expandedBounds.width / 2, expandedBounds.y + expandedBounds.height / 2)
+    await expect(refreshToast).toHaveClass(/minimized/)
+    await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeLessThan(expandedBounds.width * 0.6)
+
+    const minimizedBounds = await refreshToast.boundingBox()
+    expect(minimizedBounds.x).toBeLessThan(expandedBounds.x)
+    expect(minimizedBounds.y).toBeCloseTo(expandedBounds.y, 0)
+    expect(minimizedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
+
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await page.mouse.move(viewport.width / 2, viewport.height / 2)
+    await expect(refreshToast).not.toHaveClass(/minimized/)
+    await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeGreaterThan(expandedBounds.width * 0.9)
 
     await page.keyboard.press('Escape')
     await expect(refreshToast).toBeVisible()

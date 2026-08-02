@@ -7,7 +7,7 @@
       tag="div"
       name="toast"
       class="toast-holder"
-      :class="`position-${toastPosition}`"
+      :class="[`position-${toastPosition}`, { 'horizontal-tabs': hasHorizontalTabBar }]"
       @before-leave="onBeforeLeave"
     >
       <div
@@ -71,8 +71,10 @@
       </div>
       <div
         v-if="showSubscriptionRefreshToast"
+        ref="subscriptionRefreshToast"
         key="subscription-refresh"
         class="toast-slot persistent-slot"
+        :class="{ minimized: subscriptionRefreshMinimized }"
         data-testid="subscription-refresh-toast"
       >
         <div
@@ -80,7 +82,7 @@
           role="status"
         >
           <FontAwesomeIcon
-            :icon="['fas', 'sync']"
+            :icon="subscriptionRefreshIcon"
             class="icon"
             fixed-width
           />
@@ -108,7 +110,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
@@ -148,6 +150,10 @@ const props = defineProps({
 
 /** Distance in px a toast must be dragged before it slides away instead of snapping back */
 const DRAG_DISMISS_THRESHOLD = 80
+/** Distance in px at which the persistent refresh toast gets out of the pointer's way */
+const REFRESH_TOAST_PROXIMITY = 32
+/** Extra distance required before restoring the toast, to avoid flicker around the boundary */
+const REFRESH_TOAST_PROXIMITY_HYSTERESIS = 20
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
@@ -155,9 +161,23 @@ const toasts = reactive([])
 const indicatorAnimations = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
+/** @type {import('vue').Ref<HTMLElement|null>} */
+const subscriptionRefreshToast = useTemplateRef('subscriptionRefreshToast')
+const subscriptionRefreshMinimized = ref(false)
+/** @type {DOMRect|null} */
+let subscriptionRefreshBounds = null
+/** @type {HTMLElement|null} */
+let measuredSubscriptionRefreshToast = null
+/** @type {number|null} */
+let subscriptionRefreshPointerFrame = null
+let subscriptionRefreshPointerX = 0
+let subscriptionRefreshPointerY = 0
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => {
   return normalizeToastPosition(store.getters.getToastPosition)
+})
+const hasHorizontalTabBar = computed(() => {
+  return process.env.IS_ELECTRON && !store.getters.getUseVerticalTabBar
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
@@ -168,6 +188,18 @@ const showSubscriptionRefreshToast = computed(() => {
     store.getters.getSubscriptionFeedRefreshInProgress
 })
 const subscriptionRefreshProgress = computed(() => store.getters.getSubscriptionFeedRefreshProgress)
+const subscriptionRefreshIcon = computed(() => {
+  switch (store.getters.getSubscriptionFeedRefreshTab) {
+    case 'shorts':
+      return ['fa', 'clapperboard']
+    case 'live':
+      return ['fa', 'tower-broadcast']
+    case 'posts':
+      return ['fa', 'message']
+    default:
+      return ['fa', 'video']
+  }
+})
 const subscriptionRefreshMessage = computed(() => {
   switch (store.getters.getSubscriptionFeedRefreshTab) {
     case 'shorts':
@@ -185,6 +217,56 @@ const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.
 
 function updateFullscreenTarget() {
   fullscreenTarget.value = document.fullscreenElement
+}
+
+/**
+ * Keeps the non-interactive refresh toast readable until the mouse approaches,
+ * then tucks it into its configured edge of the screen. The expanded bounds
+ * remain the hit area while minimized so scaling cannot make the state flicker.
+ * @param {MouseEvent} event
+ */
+function onSubscriptionRefreshPointerMove(event) {
+  subscriptionRefreshPointerX = event.clientX
+  subscriptionRefreshPointerY = event.clientY
+  if (subscriptionRefreshPointerFrame !== null) { return }
+
+  subscriptionRefreshPointerFrame = requestAnimationFrame(updateSubscriptionRefreshProximity)
+}
+
+function updateSubscriptionRefreshProximity() {
+  subscriptionRefreshPointerFrame = null
+  const element = subscriptionRefreshToast.value
+
+  if (!element) {
+    measuredSubscriptionRefreshToast = null
+    subscriptionRefreshBounds = null
+    subscriptionRefreshMinimized.value = false
+    return
+  }
+
+  if (element !== measuredSubscriptionRefreshToast) {
+    measuredSubscriptionRefreshToast = element
+    subscriptionRefreshBounds = null
+    subscriptionRefreshMinimized.value = false
+  }
+
+  if (!subscriptionRefreshMinimized.value || subscriptionRefreshBounds === null) {
+    subscriptionRefreshBounds = element.getBoundingClientRect()
+  }
+
+  const bounds = subscriptionRefreshBounds
+  const horizontalDistance = Math.max(bounds.left - subscriptionRefreshPointerX, 0, subscriptionRefreshPointerX - bounds.right)
+  const verticalDistance = Math.max(bounds.top - subscriptionRefreshPointerY, 0, subscriptionRefreshPointerY - bounds.bottom)
+  const distance = Math.hypot(horizontalDistance, verticalDistance)
+  const threshold = REFRESH_TOAST_PROXIMITY +
+    (subscriptionRefreshMinimized.value ? REFRESH_TOAST_PROXIMITY_HYSTERESIS : 0)
+
+  subscriptionRefreshMinimized.value = distance <= threshold
+}
+
+function resetSubscriptionRefreshProximity() {
+  subscriptionRefreshBounds = null
+  subscriptionRefreshMinimized.value = false
 }
 
 /**
@@ -504,6 +586,8 @@ function cleanup(toast) {
 onMounted(() => {
   ToastEventBus.addEventListener('toast-open', open)
   document.addEventListener('fullscreenchange', updateFullscreenTarget)
+  window.addEventListener('mousemove', onSubscriptionRefreshPointerMove)
+  window.addEventListener('resize', resetSubscriptionRefreshProximity)
   updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
@@ -516,6 +600,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
   document.removeEventListener('fullscreenchange', updateFullscreenTarget)
+  window.removeEventListener('mousemove', onSubscriptionRefreshPointerMove)
+  window.removeEventListener('resize', resetSubscriptionRefreshProximity)
+  if (subscriptionRefreshPointerFrame !== null) {
+    cancelAnimationFrame(subscriptionRefreshPointerFrame)
+  }
   removeShowToastListener?.()
   toasts.forEach(cleanup)
 })
