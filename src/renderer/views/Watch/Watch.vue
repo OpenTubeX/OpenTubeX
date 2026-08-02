@@ -69,6 +69,7 @@
           ref="player"
           :manifest-src="manifestSrc"
           :manifest-mime-type="manifestMimeType"
+          :playback-engine="activePlaybackEngine"
           :sabr-data="sabrData"
           :legacy-formats="legacyFormats"
           :start-time="startTimeSeconds"

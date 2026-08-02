@@ -184,6 +184,15 @@ export default defineComponent({
       type: String,
       required: true
     },
+    /**
+     * Which engine provided the streams, as yt-dlp's manifests need a few
+     * accommodations that must not change the behaviour for the built-in one.
+     * @type {import('vue').PropType<'built-in' | 'yt-dlp'>}
+     */
+    playbackEngine: {
+      type: String,
+      default: 'built-in'
+    },
     sabrData: {
       type: Object,
       default: null
@@ -2682,7 +2691,7 @@ export default defineComponent({
 
       // yt-dlp's manifest URLs don't state the seekable duration, but they do state
       // whether the stream has a DVR window, which is what makes it rewindable
-      return props.manifestSrc.includes('/playlist_type/DVR/')
+      return props.playbackEngine === 'yt-dlp' && props.manifestSrc.includes('/playlist_type/DVR/')
     })
 
     /**
@@ -3094,8 +3103,9 @@ export default defineComponent({
           },
           showAudioCodec: false,
           // YouTube offers the same resolutions in several codecs, which shaka-player lists
-          // separately, so the codec is what tells those entries apart
-          showVideoCodec: true,
+          // separately, so the codec is what tells those entries apart. The built-in engine
+          // keeps distinguishing them by their bitrate, the way it did before.
+          showVideoCodec: props.playbackEngine === 'yt-dlp',
           volumeBarColors: {
             level: 'var(--primary-color)'
           },
