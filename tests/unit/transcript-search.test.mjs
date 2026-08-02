@@ -17,9 +17,14 @@ test('returns every segment containing part of a cross-segment match', () => {
 })
 
 test('normalizes whitespace and case across segment boundaries', () => {
+  const irregularSegments = [
+    { ...segments[0], text: 'Hello this  is\njust a' },
+    ...segments.slice(1)
+  ]
+
   assert.deepEqual(
-    filterTranscriptSegments(segments, 'IS  JUST A\nTEST TO'),
-    segments.slice(0, 2)
+    filterTranscriptSegments(irregularSegments, 'IS  JUST A\nTEST TO'),
+    irregularSegments.slice(0, 2)
   )
 })
 
