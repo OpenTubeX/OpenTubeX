@@ -1080,7 +1080,9 @@ function runApp() {
   ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
 
-    if (!(await getConfiguredSearchEngines()).some(engine => engine.url === url)) return ''
+    if (!(await getConfiguredSearchEngines()).some(engine => engine.enabled && engine.url === url)) {
+      return ''
+    }
 
     return resolveSearchEngineFavicon(url)
   })

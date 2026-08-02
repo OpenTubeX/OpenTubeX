@@ -173,8 +173,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
 import { registerMappedIcons } from './icons/registerMappedIcons'
-
-registerMappedIcons()
+import { currentIconPack, setIconPack } from './icons/iconPackState'
 
 // Please keep the list of constants sorted by name
 // to avoid code conflict and duplicate entries
@@ -353,7 +352,13 @@ installViewTransitions(router)
 
 const tabNavigation = initializeTabNavigationService(router, store)
 
-router.isReady().then(() => {
+router.isReady().then(async () => {
+  try {
+    await registerMappedIcons(currentIconPack.value)
+  } catch (error) {
+    console.error(`[icon-pack] failed to load ${currentIconPack.value}; falling back to Font Awesome`, error)
+    await setIconPack('fontawesome')
+  }
   app.mount('#app')
   initializeAppScrollbars()
 })

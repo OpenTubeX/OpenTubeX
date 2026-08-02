@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { registerMappedIcons } from './registerMappedIcons.js'
 
 export const ICON_PACKS = /** @type {const} */ ([
   { id: 'fontawesome', label: 'Font Awesome (legacy)' },
@@ -33,20 +34,33 @@ function readStoredPack() {
 
 /** @type {import('vue').Ref<IconPackId>} */
 const iconPack = ref(readStoredPack())
+let selectionSequence = 0
 
 export const currentIconPack = computed(() => iconPack.value)
 
 /**
  * @param {IconPackId} pack
+ * @returns {Promise<boolean>} whether the pack became the active selection
  */
-export function setIconPack(pack) {
+export async function setIconPack(pack) {
   if (!VALID_PACK_IDS.has(pack)) {
-    return
+    return false
   }
+  const sequence = ++selectionSequence
+  try {
+    await registerMappedIcons(pack)
+  } catch (error) {
+    if (sequence === selectionSequence) {
+      console.error(`[icon-pack] failed to load ${pack}; keeping ${iconPack.value}`, error)
+    }
+    return false
+  }
+  if (sequence !== selectionSequence) return false
   iconPack.value = pack
   try {
     localStorage.setItem(STORAGE_KEY, pack)
   } catch {
     // ignore
   }
+  return true
 }
