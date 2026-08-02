@@ -459,7 +459,7 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('top-left')
     await expect(holder).toHaveClass(/position-top-left/)
-    await expect(holder).toHaveCSS('top', '24px')
+    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top left toast')
     bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
@@ -469,7 +469,7 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('top-center')
     await expect(holder).toHaveClass(/position-top-center/)
-    await expect(holder).toHaveCSS('top', '24px')
+    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top center toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
@@ -480,7 +480,7 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('top-right')
     await expect(holder).toHaveClass(/position-top-right/)
-    await expect(holder).toHaveCSS('top', '24px')
+    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top right toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
@@ -507,7 +507,9 @@ test.describe('settings', () => {
     })
 
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
+    const toastSlot = toast.locator('..')
     const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    await expect(toastSlot).toHaveCSS('transform', 'none')
     await toast.hover()
     // Reported as a list so a failure says which animations were on the element
     // and what state they were in, instead of just "expected paused"
@@ -577,6 +579,7 @@ test.describe('settings', () => {
       window.ftElectron.showToastOnAllTabs('No indicator toast', 2000)
     })
     const toastWithoutIndicator = page.locator('.toast', { hasText: 'No indicator toast' })
+    await expect(toastWithoutIndicator.locator('..')).toHaveCSS('transform', 'none')
     await toastWithoutIndicator.hover()
     await expect(toastWithoutIndicator.locator('..').locator('.timeout-indicator')).toHaveCount(0)
     await page.waitForTimeout(2200)
