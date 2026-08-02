@@ -45,7 +45,7 @@
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
-        sixteenByNine: forceAspectRatio && !fullWindowEnabled && !scrollMiniPlayerActive,
+        sixteenByNine: (format === 'audio' || forceAspectRatio) && !fullWindowEnabled && !scrollMiniPlayerActive,
         scrollMiniPlayer: scrollMiniPlayerActive,
         scrollMiniPlayerAnimating,
         fullscreenMetadataOpen: showFullscreenMetadata,
@@ -85,7 +85,7 @@
         playsinline
         :autoplay="autoplayVideos || shortsPlayer ? true : null"
         :loop="shortsPlayer"
-        :poster="showPoster ? thumbnail : null"
+        :poster="format === 'audio' || showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"
         @waiting="handleWaiting"

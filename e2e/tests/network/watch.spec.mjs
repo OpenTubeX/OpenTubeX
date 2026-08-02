@@ -203,6 +203,37 @@ test.describe('watch page', () => {
     await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
   })
 
+  test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    await page.evaluate(() => {
+      const app = document.querySelector('#app')?.__vue_app__
+      const findWatchComponent = (vnode) => {
+        if (vnode?.component?.refs?.player) return vnode.component
+        if (vnode?.component?.subTree) {
+          const match = findWatchComponent(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchComponent(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const watchComponent = findWatchComponent(app?._container?._vnode)
+      if (!watchComponent) throw new Error('Unable to access the watch view')
+      watchComponent.proxy.handleFormatChange('audio')
+    })
+
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/sixteenByNine/)
+    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+  })
+
   test('hides the tab play indicator while buffering', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
