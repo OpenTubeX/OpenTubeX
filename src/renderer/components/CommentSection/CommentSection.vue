@@ -1162,7 +1162,8 @@ async function getCommentRepliesLocal(index, commentId = null) {
       }
 
       showToast({
-        message: t('Comments.YouTube did not return these replies'),
+        message: t('Comments.YouTube did not provide advertised replies'),
+        time: 10000,
         icon: ['fas', 'comment']
       })
       return
