@@ -313,6 +313,7 @@ import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
+import { preloadUtilityRoutes } from './router/index'
 
 const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
 const LOCAL_REPOSITORY = 'opentubex/opentubex'
@@ -713,6 +714,8 @@ async function initializeManagedDownloadTools() {
 }
 
 onMounted(async () => {
+  preloadUtilityRoutes()
+
   if (isElectron) {
     removeTabsStateListener = await store.dispatch('initializeTabs')
     window.ftElectron.tabs.rendererReady()

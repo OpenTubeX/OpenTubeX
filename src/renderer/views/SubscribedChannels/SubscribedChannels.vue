@@ -38,7 +38,7 @@
         </ft-flex-box>
         <ft-flex-box class="channels">
           <div
-            v-for="channel in channelList"
+            v-for="channel in displayedChannels"
             :key="channel.id"
             class="channel"
           >
@@ -81,6 +81,20 @@
             </div>
           </div>
         </ft-flex-box>
+        <FtAutoLoadNextPageWrapper
+          v-if="hasMoreChannels"
+          :key="channelLimit"
+          @load-next-page="loadMoreChannels"
+        >
+          <ft-flex-box>
+            <FtButton
+              :label="$t('Channels.Load More Channels')"
+              background-color="var(--primary-color)"
+              text-color="var(--text-with-main-color)"
+              @click="loadMoreChannels"
+            />
+          </ft-flex-box>
+        </FtAutoLoadNextPageWrapper>
       </template>
     </ft-card>
   </div>
@@ -90,6 +104,8 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onMounted, onBeforeUnmount, ref, watch, useTemplateRef } from 'vue'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
+import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
@@ -97,7 +113,7 @@ import FtProfileSelector from '../../components/FtProfileSelector/FtProfileSelec
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
-import { ctrlFHandler, debounce } from '../../helpers/utils'
+import { ctrlFHandler } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 
@@ -111,9 +127,11 @@ const re = {
 }
 const ytBaseURL = 'https://yt3.ggpht.com'
 const thumbnailSize = 176
+const channelsPerPage = 50
 let errorCount = 0
 
 const query = ref('')
+const channelLimit = ref(channelsPerPage)
 const subscribedChannels = ref([])
 const filteredChannels = ref([])
 
@@ -141,6 +159,14 @@ const channelList = computed(() => {
   } else {
     return subscribedChannels.value
   }
+})
+
+const displayedChannels = computed(() => {
+  return channelList.value.slice(0, channelLimit.value)
+})
+
+const hasMoreChannels = computed(() => {
+  return displayedChannels.value.length < channelList.value.length
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -181,8 +207,6 @@ function filterChannels() {
     return re.test(channel.name)
   })
 }
-
-const filterChannelsDebounce = debounce(filterChannels, 500)
 
 function thumbnailURL(originalURL) {
   if (originalURL == null) { return null }
@@ -235,16 +259,20 @@ function updateThumbnail(channel) {
   }
 }
 
-function handleQueryChange(val, filterNow = false) {
+function handleQueryChange(val) {
   query.value = val
+  channelLimit.value = channelsPerPage
+  filterChannels()
 
   saveStateInRouter(val)
+}
 
-  filterNow ? filterChannels() : filterChannelsDebounce()
+function loadMoreChannels() {
+  channelLimit.value += channelsPerPage
 }
 
 async function saveStateInRouter(query) {
-  if (query.value === '') {
+  if (query === '') {
     await router.replace({ name: 'subscribedChannels' }).catch(failure => {
       if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
         return
@@ -273,6 +301,7 @@ function keyboardShortcutHandler(event) {
 
 watch(activeProfileId, () => {
   query.value = ''
+  channelLimit.value = channelsPerPage
   getSubscription()
 })
 
@@ -285,10 +314,10 @@ watch(activeSubscriptionList, () => {
 
 getSubscription()
 
-const oldQuery = route.query.searchQueryText ?? ''
-if (oldQuery !== null && oldQuery !== '') {
-  // `handleQueryChange` must be called after `filterHistoryDebounce` assigned
-  handleQueryChange(oldQuery, true)
+const rawQuery = route.query.searchQueryText
+const oldQuery = Array.isArray(rawQuery) ? rawQuery[0] ?? '' : rawQuery ?? ''
+if (oldQuery !== '') {
+  handleQueryChange(oldQuery)
 }
 
 // endregion created
