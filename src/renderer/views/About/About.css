@@ -18,6 +18,10 @@
   font-size: 2em;
 }
 
+.commit {
+  margin-block-start: 4px;
+}
+
 .runtimeVersions {
   display: flex;
   flex-wrap: wrap;
