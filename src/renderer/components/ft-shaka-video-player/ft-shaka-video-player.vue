@@ -358,8 +358,11 @@
       />
       <FtVideoAnnotations
         v-if="!hideAnnotations"
+        :active="isActiveTab"
         :annotations="annotations"
         :current-time="annotationCurrentTime"
+        :video-aspect-ratio="annotationVideoAspectRatio"
+        :video-fit="annotationVideoFit"
       />
       <div
         v-if="showCaptionAppearanceSample"
