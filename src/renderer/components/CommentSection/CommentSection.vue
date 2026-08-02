@@ -425,7 +425,12 @@ import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
 import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
-import { getReplyLoadState, shouldLoadInitialReplies } from '../../helpers/comment-replies'
+import {
+  getReplyContinuationToken,
+  getReplyLoadState,
+  isMissingReplyResponseError,
+  shouldLoadInitialReplies
+} from '../../helpers/comment-replies'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -916,9 +921,15 @@ async function getCommentReplies(index, commentId = null) {
   loadingReplyIds.value = new Set(loadingReplyIds.value).add(replyId)
 
   try {
-    if (!process.env.SUPPORTS_LOCAL_API || commentData.value[index].dataType === 'invidious') {
+    const comment = findComment(commentData.value[index], commentId)
+    const replyToken = comment && replyTokens.get(comment.id)
+    const useInvidious = !process.env.SUPPORTS_LOCAL_API ||
+      commentData.value[index].dataType === 'invidious' ||
+      typeof replyToken === 'string'
+
+    if (useInvidious) {
       if (!props.isPostComments) {
-        await getCommentRepliesInvidious(index)
+        await getCommentRepliesInvidious(index, commentId)
       } else {
         await getPostCommentRepliesInvidious(index)
       }
@@ -1069,10 +1080,14 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
-  try {
-    const comment = findComment(commentData.value[index], commentId)
-    const continuation = comment && replyTokens.get(comment.id)
+  const rootComment = commentData.value[index]
+  const comment = rootComment ? findComment(rootComment, commentId) : null
+  const continuation = comment && replyTokens.get(comment.id)
+  const invidiousReplyToken = continuation && typeof continuation !== 'string'
+    ? getReplyContinuationToken(continuation)
+    : null
 
+  try {
     if (!comment || continuation == null || typeof continuation === 'string') {
       if (comment) {
         replyTokens.delete(comment.id)
@@ -1124,6 +1139,36 @@ async function getCommentRepliesLocal(index, commentId = null) {
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
     console.error(err)
+
+    if (isMissingReplyResponseError(err)) {
+      if (
+        !props.isPostComments &&
+        backendFallback.value &&
+        backendPreference.value === 'local' &&
+        invidiousReplyToken &&
+        comment &&
+        replyTokens.get(comment.id) === continuation
+      ) {
+        showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
+        await getCommentRepliesInvidious(index, commentId, invidiousReplyToken, comment, continuation)
+        return
+      }
+
+      if (comment && replyTokens.get(comment.id) === continuation) {
+        replyTokens.delete(comment.id)
+        comment.hasReplyToken = false
+        comment.numReplies = comment.replies.length
+        comment.showReplies = comment.replies.length > 0
+      }
+
+      showToast({
+        message: t('Comments.YouTube did not provide advertised replies'),
+        time: 10000,
+        icon: ['fas', 'comment']
+      })
+      return
+    }
+
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
     if (backendFallback.value && backendPreference.value === 'local') {
@@ -1189,13 +1234,32 @@ async function getCommentDataInvidious() {
 
 /**
  * @param {number} index
+ * @param {string | null} commentId
+ * @param {string | null} replyTokenOverride
+ * @param {Comment | null} commentOverride
+ * @param {import('youtubei.js').YTNodes.CommentThread | null} expectedReplyToken
  */
-async function getCommentRepliesInvidious(index) {
-  const comment = commentData.value[index]
-  const replyToken = replyTokens.get(comment.id)
+async function getCommentRepliesInvidious(
+  index,
+  commentId = null,
+  replyTokenOverride = null,
+  commentOverride = null,
+  expectedReplyToken = null
+) {
+  const rootComment = commentData.value[index]
+  const comment = commentOverride ?? (rootComment ? findComment(rootComment, commentId) : null)
+  if (!comment) {
+    return
+  }
+
+  const replyToken = replyTokenOverride ?? replyTokens.get(comment.id)
 
   try {
     const { commentData, continuation } = await invidiousGetCommentReplies({ id: props.id, replyToken })
+
+    if (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken) {
+      return
+    }
 
     comment.replies = comment.replies.concat(commentData)
     const replyLoadState = getReplyLoadState(
