@@ -698,8 +698,9 @@ const actions = {
     }
   },
 
-  async setSyncServerEnabled({ dispatch }, enabled) {
+  async setSyncServerEnabled({ commit, dispatch }, enabled) {
     if (!enabled) {
+      commit('setSyncServerEnabled', false, { root: true })
       await dispatch('applySyncServerEnabled', false)
     }
     await dispatch('updateSyncServerEnabled', enabled, { root: true })
