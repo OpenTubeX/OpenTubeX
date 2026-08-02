@@ -7,6 +7,10 @@ export const TAB_PREVIEW_FILE_EXTENSION = '.jpg'
 // `.png` is still accepted so caches written by older versions keep working.
 const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png)$/i
 const TAB_PREVIEW_DATA_URL_PATTERN = /^data:image\/(?:jpeg|png);base64,([A-Za-z0-9+/=]+)$/
+// Previews are written to a temporary name and renamed into place, so a failed
+// write cannot truncate the entry that is already there.
+const TAB_PREVIEW_TEMP_SUFFIX = '.tmp'
+const TAB_PREVIEW_TEMP_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png)\.tmp$/i
 const PNG_MAGIC = 0x89504e47
 
 /**
@@ -24,6 +28,22 @@ export function normalizeTabPreviewFileName(value) {
  */
 export function createTabPreviewFileName() {
   return randomUUID() + TAB_PREVIEW_FILE_EXTENSION
+}
+
+/**
+ * A scratch name to write to before renaming over the real entry.
+ * @returns {string}
+ */
+export function createTabPreviewTempFileName() {
+  return createTabPreviewFileName() + TAB_PREVIEW_TEMP_SUFFIX
+}
+
+/**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+export function isTabPreviewTempFileName(value) {
+  return typeof value === 'string' && TAB_PREVIEW_TEMP_PATTERN.test(value)
 }
 
 /**
@@ -73,8 +93,11 @@ export function tabPreviewBufferToDataUrl(buffer) {
  * own preview when they close, so these are the ones left behind by a crash or
  * a forced quit, with nothing left to point at them.
  *
- * Anything that is not a preview file name is left alone rather than deleted,
- * so an unrelated file that ends up in the directory survives.
+ * Scratch files are always stale here: this runs before any window exists, so
+ * one can only be left over from a write that never finished.
+ *
+ * Anything else that is not a preview file name is left alone rather than
+ * deleted, so an unrelated file that ends up in the directory survives.
  * @param {Iterable<string>} fileNames directory listing
  * @param {Iterable<unknown>} referencedFileNames names still in use
  * @returns {string[]}
@@ -89,6 +112,7 @@ export function selectOrphanedTabPreviews(fileNames, referencedFileNames) {
   }
 
   return Array.from(fileNames).filter(fileName => (
-    normalizeTabPreviewFileName(fileName) != null && !referenced.has(fileName.toLowerCase())
+    isTabPreviewTempFileName(fileName) ||
+    (normalizeTabPreviewFileName(fileName) != null && !referenced.has(fileName.toLowerCase()))
   ))
 }

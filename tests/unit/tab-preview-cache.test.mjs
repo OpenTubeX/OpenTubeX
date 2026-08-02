@@ -3,8 +3,10 @@ import test from 'node:test'
 
 import {
   createTabPreviewFileName,
+  createTabPreviewTempFileName,
   isReusableTabPreviewFileName,
   isTabPreviewDataUrl,
+  isTabPreviewTempFileName,
   normalizeTabPreviewFileName,
   selectOrphanedTabPreviews,
   TAB_PREVIEW_FILE_EXTENSION,
@@ -79,4 +81,23 @@ test('treats everything as orphaned when no session was restored', () => {
   const files = ['1c2f1f8e-4c9c-4f0e-8f1a-2b3c4d5e6f70.jpg', '2c2f1f8e-4c9c-4f0e-8f1a-2b3c4d5e6f71.png']
 
   assert.deepEqual(selectOrphanedTabPreviews(files, []), files)
+})
+
+test('scratch names are not mistaken for finished previews', () => {
+  const temp = createTabPreviewTempFileName()
+
+  assert.ok(isTabPreviewTempFileName(temp))
+  assert.equal(normalizeTabPreviewFileName(temp), null)
+  assert.equal(isReusableTabPreviewFileName(temp), false)
+  assert.equal(isTabPreviewTempFileName('1c2f1f8e-4c9c-4f0e-8f1a-2b3c4d5e6f70.jpg'), false)
+  assert.equal(isTabPreviewTempFileName('notes.tmp'), false)
+})
+
+test('sweeps up scratch files left by an interrupted write', () => {
+  const kept = '1c2f1f8e-4c9c-4f0e-8f1a-2b3c4d5e6f70.jpg'
+  const temp = createTabPreviewTempFileName()
+
+  // Pruning runs before any window exists, so a scratch file can only be
+  // left over from a write that never finished - even for a referenced tab.
+  assert.deepEqual(selectOrphanedTabPreviews([kept, temp], [kept]), [temp])
 })

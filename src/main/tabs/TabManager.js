@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, shell } from 'electron'
 import { randomUUID } from 'crypto'
-import { mkdir, readdir, readFile, unlink, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
@@ -14,6 +14,7 @@ import { TabRendererBridge } from './TabRendererBridge.js'
 import { buildReorderedTabMap } from './tabOrder.js'
 import {
   createTabPreviewFileName,
+  createTabPreviewTempFileName,
   isReusableTabPreviewFileName,
   isTabPreviewDataUrl,
   normalizeTabPreviewFileName,
@@ -1432,7 +1433,17 @@ export class TabManager {
     const fileName = reusableFileName ?? createTabPreviewFileName()
     const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
     await mkdir(cacheDirectory, { recursive: true })
-    await writeFile(join(cacheDirectory, fileName), buffer)
+    // Writing straight to the target would truncate it first, so a failed write
+    // (a full disk, a kill) would destroy a preview that was perfectly good.
+    // A rename within the directory swaps it in atomically instead.
+    const tempPath = join(cacheDirectory, createTabPreviewTempFileName())
+    try {
+      await writeFile(tempPath, buffer)
+      await rename(tempPath, join(cacheDirectory, fileName))
+    } catch (error) {
+      await unlink(tempPath).catch(() => {})
+      throw error
+    }
     tab.previewFileName = fileName
 
     if (reusableFileName == null && existingFileName != null) {
