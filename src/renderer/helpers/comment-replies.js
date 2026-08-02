@@ -33,3 +33,15 @@ export function isMissingReplyResponseError(error) {
     error.message === 'Unexpected response' &&
     'info' in error
 }
+
+/**
+ * @param {import('youtubei.js').YTNodes.CommentThread} commentThread
+ */
+export function getReplyContinuationToken(commentThread) {
+  const continuation = commentThread.comment_replies_data?.sub_threads
+    .find(item => item.type === 'ContinuationItem')
+
+  return continuation?.button?.endpoint?.payload?.token ??
+    continuation?.endpoint?.payload?.token ??
+    null
+}

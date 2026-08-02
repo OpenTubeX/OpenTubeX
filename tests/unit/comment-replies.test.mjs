@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  getReplyContinuationToken,
   getReplyLoadState,
   isMissingReplyResponseError,
   shouldLoadInitialReplies
@@ -54,4 +55,35 @@ test('recognizes a missing reply continuation response', () => {
   assert.equal(isMissingReplyResponseError(new Error('Unexpected response')), false)
   assert.equal(isMissingReplyResponseError(Object.assign(new Error('Network error'), { info: {} })), false)
   assert.equal(isMissingReplyResponseError('Unexpected response'), false)
+})
+
+test('gets a reply continuation token from its endpoint', () => {
+  const commentThread = {
+    comment_replies_data: {
+      sub_threads: [
+        { type: 'CommentThread' },
+        { type: 'ContinuationItem', endpoint: { payload: { token: 'reply-token' } } }
+      ]
+    }
+  }
+
+  assert.equal(getReplyContinuationToken(commentThread), 'reply-token')
+})
+
+test('prefers a reply continuation button token', () => {
+  const commentThread = {
+    comment_replies_data: {
+      sub_threads: [{
+        type: 'ContinuationItem',
+        button: { endpoint: { payload: { token: 'button-token' } } },
+        endpoint: { payload: { token: 'endpoint-token' } }
+      }]
+    }
+  }
+
+  assert.equal(getReplyContinuationToken(commentThread), 'button-token')
+})
+
+test('returns null when a reply continuation is unavailable', () => {
+  assert.equal(getReplyContinuationToken({ comment_replies_data: null }), null)
 })
