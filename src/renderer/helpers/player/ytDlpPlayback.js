@@ -76,7 +76,19 @@ function buildColorInfo(format) {
         transferCharacteristics: 'COLOR_TRANSFER_CHARACTERISTICS_ARIB_STD_B67',
         matrixCoefficients: 'COLOR_MATRIX_COEFFICIENTS_BT2020_NCL'
       }
+    case 'SDR':
+    case null:
+      // Players compare the colour information to tell otherwise identical resolutions
+      // apart, so it has to be stated for SDR streams too rather than left out,
+      // which is also what YouTube's own API reports for them
+      return {
+        primaries: 'COLOR_PRIMARIES_BT709',
+        transferCharacteristics: 'COLOR_TRANSFER_CHARACTERISTICS_BT709',
+        matrixCoefficients: 'COLOR_MATRIX_COEFFICIENTS_BT709'
+      }
     default:
+      // Claiming the wrong colour space is worse than not stating one at all,
+      // so anything we don't recognise (e.g. Dolby Vision) is left to the player
       return undefined
   }
 }
@@ -115,7 +127,7 @@ function convertYtDlpToLocalFormat(format, byteRanges, fallbackDuration) {
       ? {
           fps: format.fps ?? undefined,
           qualityLabel: buildQualityLabel(format),
-          ...(buildColorInfo(format) ? { colorInfo: buildColorInfo(format) } : {})
+          colorInfo: buildColorInfo(format)
         }
       : {
           audioQuality: 'AUDIO_QUALITY_MEDIUM',

@@ -3093,7 +3093,9 @@ export default defineComponent({
             played: 'var(--primary-color)'
           },
           showAudioCodec: false,
-          showVideoCodec: false,
+          // YouTube offers the same resolutions in several codecs, which shaka-player lists
+          // separately, so the codec is what tells those entries apart
+          showVideoCodec: true,
           volumeBarColors: {
             level: 'var(--primary-color)'
           },
