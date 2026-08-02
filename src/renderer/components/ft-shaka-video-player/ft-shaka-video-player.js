@@ -2675,8 +2675,14 @@ export default defineComponent({
 
       const match = props.manifestSrc.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
 
-      // Check how many seconds we are allowed to seek, 30 is too short, 3600 is an hour which is great
-      return match != null && parseInt(match[1] || '0') > 30
+      if (match != null) {
+        // Check how many seconds we are allowed to seek, 30 is too short, 3600 is an hour which is great
+        return parseInt(match[1] || '0') > 30
+      }
+
+      // yt-dlp's manifest URLs don't state the seekable duration, but they do state
+      // whether the stream has a DVR window, which is what makes it rewindable
+      return props.manifestSrc.includes('/playlist_type/DVR/')
     })
 
     /**

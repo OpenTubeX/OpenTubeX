@@ -2216,6 +2216,47 @@ export function parseLocalTextRuns(runs, emojiSize = 16, options = { looseChanne
 }
 
 /**
+ * Recreates the audio track information that YouTube's local API returns for videos
+ * with multiple audio tracks, for backends that don't provide it themselves.
+ * @param {import('youtubei.js').Misc.Format} format
+ * @param {Intl.DisplayNames} languageNames
+ */
+export function generateAudioTrackField(format, languageNames) {
+  let type
+
+  // use the same id numbers as YouTube (except -1, when we aren't sure what it is)
+  let idNumber
+
+  if (format.is_descriptive) {
+    type = ' descriptive'
+    idNumber = 2
+  } else if (format.is_dubbed) {
+    type = ''
+    idNumber = 3
+  } else if (format.is_original) {
+    type = ' original'
+    idNumber = 4
+  } else if (format.is_secondary) {
+    type = ' secondary'
+    idNumber = 6
+  } else if (format.is_auto_dubbed) {
+    type = ''
+    idNumber = 10
+  } else {
+    type = ' alternative'
+    idNumber = -1
+  }
+
+  const languageName = languageNames.of(format.language)
+
+  format.audio_track = {
+    audio_is_default: !!format.is_original,
+    id: `${format.language}.${idNumber}`,
+    display_name: `${languageName}${type}`
+  }
+}
+
+/**
  * @param {LocalFormat} format
  */
 export function mapLocalLegacyFormat(format) {

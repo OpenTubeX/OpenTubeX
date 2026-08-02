@@ -98,6 +98,7 @@ import PlayerSettings from '../../components/PlayerSettings/PlayerSettings.vue'
 import CaptionSettings from '../../components/CaptionSettings/CaptionSettings.vue'
 import ExternalPlayerSettings from '../../components/ExternalPlayerSettings.vue'
 import DownloadSettings from '../../components/DownloadSettings.vue'
+import ExternalSoftwareSettings from '../../components/ExternalSoftwareSettings.vue'
 import SubscriptionSettings from '../../components/SubscriptionSettings/SubscriptionSettings.vue'
 import PrivacySettings from '../../components/PrivacySettings.vue'
 import DataSettings from '../../components/DataSettings/DataSettings.vue'
@@ -166,6 +167,12 @@ const settingsComponentsData = computed(() => {
           title: t('Settings.Download Settings.Download Settings'),
           icon: ['fas', 'download'],
           component: DownloadSettings
+        },
+        {
+          type: 'external-software',
+          title: t('Settings.External Software Settings.External Software Settings'),
+          icon: ['fas', 'film'],
+          component: ExternalSoftwareSettings
         }]
       : []),
     {
