@@ -11,6 +11,9 @@
     <div
       v-if="showGrabBar"
       class="grabBar"
+      :class="{
+        grabBarDisabled: !grabBarEnabled,
+      }"
     >
       <FontAwesomeIcon
         :icon="['fas', 'bars']"
@@ -439,6 +442,10 @@ const props = defineProps({
     default: false,
   },
   showGrabBar: {
+    type: Boolean,
+    default: false,
+  },
+  grabBarEnabled: {
     type: Boolean,
     default: false,
   },
