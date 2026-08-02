@@ -1043,6 +1043,7 @@ About:
   #On About page
   About: About
   Beta: Beta
+  Commit: Commit
   Source code: Source code
   Licensed under the {licenseLink}: Licensed under the {licenseLink}
   AGPLv3: AGPLv3
