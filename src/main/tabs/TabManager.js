@@ -12,6 +12,11 @@ import {
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
 import { buildReorderedTabMap } from './tabOrder.js'
+import {
+  cropTabPreviewToContent,
+  getTabPreviewTargetSize,
+  measureTabPreviewContentBounds
+} from './tabPreviewGeometry.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
@@ -25,8 +30,6 @@ const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
 // cached here instead of being read from the settings store on every close.
 let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
-const TAB_PREVIEW_MAX_WIDTH = 360
-const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
 const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
@@ -1604,20 +1607,15 @@ export class TabManager {
         }
 
         const contentBounds = await this._getTabPreviewContentBounds()
-        const contentImage = contentBounds == null ? image : this._cropTabPreviewToContent(image, contentBounds)
+        const contentImage = contentBounds == null ? image : cropTabPreviewToContent(image, contentBounds)
         if (contentImage == null || contentImage.isEmpty()) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
 
-        const { width, height } = contentImage.getSize()
-        const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
-        const preview = ratio < 1
-          ? contentImage.resize({
-              width: Math.max(1, Math.round(width * ratio)),
-              height: Math.max(1, Math.round(height * ratio)),
-              quality: 'good'
-            })
-          : contentImage
+        const targetSize = getTabPreviewTargetSize(contentImage.getSize(), contentBounds)
+        const preview = targetSize == null
+          ? contentImage
+          : contentImage.resize({ ...targetSize, quality: 'best' })
         const dataUrl = preview.toDataURL()
         tab.previewDataUrl = dataUrl
         tab.previewCapturedAt = Date.now()
@@ -1636,76 +1634,17 @@ export class TabManager {
   }
 
   /**
-   * @returns {Promise<{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number} | null>}
+   * @returns {Promise<import('./tabPreviewGeometry.js').TabPreviewContentBounds | null>}
    */
   async _getTabPreviewContentBounds() {
     try {
-      return await this.browserWindow.webContents.executeJavaScript(`
-        (() => {
-          const viewportWidth = Math.max(
-            window.visualViewport?.width || 0,
-            window.innerWidth || 0,
-            document.documentElement?.clientWidth || 0
-          )
-          const viewportHeight = Math.max(
-            window.visualViewport?.height || 0,
-            window.innerHeight || 0,
-            document.documentElement?.clientHeight || 0
-          )
-          const tabBar = document.querySelector('.tabBar')
-          let contentTop = 0
-          let contentLeft = 0
-          let contentRight = viewportWidth
-          if (tabBar instanceof HTMLElement) {
-            const rect = tabBar.getBoundingClientRect()
-            if (tabBar.classList.contains('vertical')) {
-              // Full-height side column: crop it off horizontally. It sits at
-              // whichever inline edge matches the text direction.
-              if (rect.left <= viewportWidth - rect.right) {
-                contentLeft = Math.min(viewportWidth, Math.max(0, rect.right))
-              } else {
-                contentRight = Math.min(viewportWidth, Math.max(0, rect.left))
-              }
-            } else {
-              contentTop = Math.min(viewportHeight, Math.max(0, rect.bottom))
-            }
-          }
-          return { contentTop, contentLeft, contentRight, viewportWidth, viewportHeight }
-        })()
-      `, true)
+      return await this.browserWindow.webContents.executeJavaScript(
+        `(${measureTabPreviewContentBounds.toString()})(window, document)`,
+        true
+      )
     } catch {
       return null
     }
-  }
-
-  /**
-   * @param {import('electron').NativeImage} image
-   * @param {{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number}} contentBounds
-   * @returns {import('electron').NativeImage | null}
-   */
-  _cropTabPreviewToContent(image, contentBounds) {
-    const { contentTop = 0, contentLeft = 0, viewportWidth, viewportHeight } = contentBounds
-    const contentRight = contentBounds.contentRight ?? viewportWidth
-
-    if (contentTop <= 0 && contentLeft <= 0 && contentRight >= viewportWidth) {
-      return image
-    }
-
-    const { width, height } = image.getSize()
-    if (width <= 0 || height <= 0 || viewportWidth <= 0 || viewportHeight <= 0) {
-      return null
-    }
-
-    const scaleX = width / viewportWidth
-    const scaleY = height / viewportHeight
-    const cropX = Math.min(width, Math.max(0, Math.ceil(contentLeft * scaleX)))
-    const cropRight = Math.min(width, Math.max(0, Math.floor(contentRight * scaleX)))
-    const cropY = Math.min(height, Math.max(0, Math.ceil(contentTop * scaleY)))
-    const cropWidth = cropRight - cropX
-    const cropHeight = height - cropY
-    return cropWidth <= 0 || cropHeight <= 0
-      ? null
-      : image.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight })
   }
 
   /**
@@ -1723,11 +1662,16 @@ export class TabManager {
           if (!style) {
             style = document.createElement('style')
             style.id = ${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)}
-            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} .tabTooltip, html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
+            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
             document.head.appendChild(style)
           }
           document.documentElement.classList.add(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})
-          return new Promise(resolve => requestAnimationFrame(() => resolve(true)))
+          // Two frames: the first callback runs before the frame that applies
+          // the class is painted, so resolving there can still capture a
+          // visible overlay and put one tab's preview inside another's.
+          return new Promise(resolve => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)))
+          })
         })()
       `
       : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`

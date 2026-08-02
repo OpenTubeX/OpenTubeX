@@ -72,6 +72,7 @@
         v-if="isTooltipVisible"
         :id="tooltipId"
         class="tabTooltip"
+        data-tab-preview-overlay
         :style="tooltipStyle"
         role="tooltip"
       >
