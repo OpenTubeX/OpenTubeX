@@ -3359,13 +3359,22 @@ export default defineComponent({
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
       this.legacyFormats = source.legacyFormats
-      this.streamingDataExpiryDate = source.expiryDate
+      // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
+      // Keeping the backend's date stops playback errors from being blamed on an
+      // expired session, which is what a missing date would compare as.
+      if (source.expiryDate !== null) {
+        this.streamingDataExpiryDate = source.expiryDate
+      }
       // SABR specific state, which no longer applies now that the streams come from yt-dlp
       this.sabrData = null
       this.activePlaybackEngine = 'yt-dlp'
       this.activePlaybackEngineVersion = source.version
 
       if (this.activeFormat === 'legacy' && source.legacyFormats.length === 0) {
+        this.activeFormat = 'dash'
+      }
+
+      if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
         this.activeFormat = 'dash'
       }
     },

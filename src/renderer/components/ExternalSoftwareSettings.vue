@@ -236,12 +236,30 @@ let systemInfoRequestId = 0
 let managedInfoRequestId = 0
 let refreshTimeout = null
 
+/**
+ * A failed check has to be reported as "not available" rather than left pending,
+ * otherwise the status stays at "Checking…" and the download buttons stay disabled.
+ * @param {Parameters<typeof window.ftElectron.ytDlpGetInfo>[0]} options
+ */
+async function getBinariesInfo(options) {
+  try {
+    return await window.ftElectron.ytDlpGetInfo(options)
+  } catch (error) {
+    console.error('Checking the yt-dlp and FFmpeg binaries failed', error)
+
+    /** @type {import('../../main/ytDlp').YtDlpBinaryInfo} */
+    const unavailable = { source: options.ytDlpSource, available: false, version: null }
+
+    return { ytDlp: unavailable, ffmpeg: { ...unavailable, source: options.ffmpegSource } }
+  }
+}
+
 async function refreshSystemBinariesInfo() {
   const requestId = ++systemInfoRequestId
   const ytDlpSystemPath = ytDlpPath.value
   const ffmpegSystemPath = ytDlpFfmpegPath.value
 
-  const info = await window.ftElectron.ytDlpGetInfo({
+  const info = await getBinariesInfo({
     ytDlpSource: 'system',
     ytDlpPath: ytDlpSystemPath,
     ffmpegSource: 'system',
@@ -256,7 +274,7 @@ async function refreshSystemBinariesInfo() {
 
 async function refreshManagedBinariesInfo() {
   const requestId = ++managedInfoRequestId
-  const info = await window.ftElectron.ytDlpGetInfo({
+  const info = await getBinariesInfo({
     ytDlpSource: 'managed',
     ytDlpPath: '',
     ffmpegSource: 'managed',
@@ -278,15 +296,25 @@ async function refreshBinariesInfo() {
  * @param {{ binary: 'yt-dlp' | 'ffmpeg', percent: number | null, inProgress: boolean }} progress
  */
 function updateBinaryDownloadProgress(progress) {
-  const previousBinaryPercentage = binaryDownloadPercentages.get(progress.binary) ?? 0
   if (progress.percent !== null) {
+    const previousBinaryPercentage = binaryDownloadPercentages.get(progress.binary) ?? 0
     binaryDownloadPercentages.set(progress.binary, Math.max(previousBinaryPercentage, progress.percent))
   } else if (!binaryDownloadPercentages.has(progress.binary)) {
-    binaryDownloadPercentages.set(progress.binary, 0)
+    // the download reported no percentage, because its total size is unknown
+    binaryDownloadPercentages.set(progress.binary, null)
   }
 
   const percentages = [...binaryDownloadPercentages.values()]
-  const combinedPercentage = percentages.reduce((sum, percent) => sum + percent, 0) / percentages.length
+  const knownPercentages = percentages.filter(percent => percent !== null)
+
+  // Without a single known percentage there is nothing to fill the bar with,
+  // so it falls back to showing that something is happening at all
+  if (knownPercentages.length === 0) {
+    binaryDownloadProgress.value = { ...progress, percent: null }
+    return
+  }
+
+  const combinedPercentage = knownPercentages.reduce((sum, percent) => sum + percent, 0) / percentages.length
   const displayedPercentage = binaryDownloadProgress.value?.percent ?? 0
   binaryDownloadProgress.value = {
     ...progress,
@@ -374,6 +402,19 @@ function updateYtDlpFfmpegPath(value) {
 
 /**
  * @param {'yt-dlp' | 'ffmpeg'} binary
+ * @param {string} error
+ */
+function showDownloadErrorToast(binary, error) {
+  showToast({
+    message: binary === 'yt-dlp'
+      ? t('Settings.External Software Settings.yt-dlp Download Error Template', { error })
+      : t('Settings.External Software Settings.FFmpeg Download Error Template', { error }),
+    icon: ['fas', 'circle-exclamation'],
+  })
+}
+
+/**
+ * @param {'yt-dlp' | 'ffmpeg'} binary
  */
 async function downloadBinary(binary) {
   const inProgress = binary === 'yt-dlp' ? ytDlpBinaryDownloadInProgress : ffmpegBinaryDownloadInProgress
@@ -401,14 +442,12 @@ async function downloadBinary(binary) {
         })
       }
     } else {
-      const error = result?.error ?? ''
-      showToast({
-        message: binary === 'yt-dlp'
-          ? t('Settings.External Software Settings.yt-dlp Download Error Template', { error })
-          : t('Settings.External Software Settings.FFmpeg Download Error Template', { error }),
-        icon: ['fas', 'circle-exclamation'],
-      })
+      showDownloadErrorToast(binary, result?.error ?? '')
     }
+  } catch (error) {
+    // without this the button would just go back to its previous label,
+    // leaving the failure unexplained
+    showDownloadErrorToast(binary, error.message)
   } finally {
     if (activeBinaryDownloads.size === 0) {
       binaryDownloadProgress.value = null

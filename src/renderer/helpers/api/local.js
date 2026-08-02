@@ -2222,6 +2222,13 @@ export function parseLocalTextRuns(runs, emojiSize = 16, options = { looseChanne
  * @param {Intl.DisplayNames} languageNames
  */
 export function generateAudioTrackField(format, languageNames) {
+  // `Intl.DisplayNames` throws for anything that isn't a valid language tag.
+  // YouTube leaves the track information off the audio streams it can't label
+  // either, which players treat as the track to ignore.
+  if (!format.language) {
+    return
+  }
+
   let type
 
   // use the same id numbers as YouTube (except -1, when we aren't sure what it is)

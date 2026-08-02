@@ -21,6 +21,7 @@ const CLUSTER_ID = 0x1f43b675
 const INITIAL_PROBE_BYTES = 16 * 1024
 const MAX_PROBE_BYTES = 1024 * 1024
 const MAX_PROBE_ATTEMPTS = 3
+const PROBE_TIMEOUT = 10_000
 
 /**
  * @param {DataView} view
@@ -208,8 +209,12 @@ export async function probeStreamByteRanges(url, isWebm) {
 
   for (let attempt = 0; attempt < MAX_PROBE_ATTEMPTS; attempt++) {
     // YouTube's own range parameter is used instead of a Range header,
-    // the same way the player's request filter does it
-    const response = await fetch(`${url}&range=0-${requestedBytes - 1}`)
+    // the same way the player's request filter does it.
+    // Every format is probed at once, so a request that never completes would
+    // stall the whole extraction rather than just dropping this one format.
+    const response = await fetch(`${url}&range=0-${requestedBytes - 1}`, {
+      signal: AbortSignal.timeout(PROBE_TIMEOUT)
+    })
 
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`)
