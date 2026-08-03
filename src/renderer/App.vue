@@ -650,7 +650,9 @@ async function initializeManagedDownloadTools() {
     showToolProgress(message)
   }
 
-  const progressByBinary = {}
+  const progressByBinary = Object.fromEntries(
+    binariesToUpdate.map(binary => [binary, 0])
+  )
   const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
     if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
       return
