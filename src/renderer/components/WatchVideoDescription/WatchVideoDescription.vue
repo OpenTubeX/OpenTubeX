@@ -126,7 +126,9 @@ const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
 const showControls = ref(false)
-const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
+// a video can have games but no description, and there is nothing to expand or collapse then,
+// so treat it as expanded. `measureDescription` can't do it, it bails out on a zero height element.
+const isExpanded = computed(() => props.alwaysExpanded || shownDescription === '' || showFullDescription.value)
 
 if (props.descriptionHtml !== '') {
   const parsed = parseDescriptionHtml(props.descriptionHtml)

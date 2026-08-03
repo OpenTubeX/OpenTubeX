@@ -85,8 +85,8 @@
 
 .game {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 16px;
   padding-block: 6px;
   color: inherit;
   text-decoration: none;
@@ -97,9 +97,11 @@
   text-decoration: underline;
 }
 
+/* YouTube renders the box art at 164x230, the source image is 160x224 */
 .gameBoxArt {
-  inline-size: 40px;
-  block-size: 56px;
+  inline-size: 160px;
+  block-size: 224px;
+  max-inline-size: 40%;
   object-fit: cover;
   border-radius: calc(5px * var(--ui-roundness));
 }
