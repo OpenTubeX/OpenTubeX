@@ -78,6 +78,7 @@ import {
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useTabToast } from '../../composables/useTabToast'
 
 /**
@@ -701,11 +702,13 @@ export default defineComponent({
       return this.theatreLayoutAvailable && this.theatrePossible
     },
     canSkipToNextPlaylistVideo: function () {
+      if (!this.watchingPlaylist) { return false }
+
       // The watch queue takes precedence over the playlist, see `handleSkipToNext`
       return !!this.nextQueuedVideo || this.playlistSkipAvailability.canPlayNext
     },
     canSkipToPreviousPlaylistVideo: function () {
-      return this.playlistSkipAvailability.canPlayPrevious
+      return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
     },
     autoplayPossible: function () {
       return !this.isShort && (
@@ -830,6 +833,12 @@ export default defineComponent({
     watchStatsResetVersion() {
       this.clearPendingWatchTime()
     },
+    canSkipToNextPlaylistVideo() {
+      this.syncMediaSessionSkipHandlers()
+    },
+    canSkipToPreviousPlaylistVideo() {
+      this.syncMediaSessionSkipHandlers()
+    },
   },
   created: function () {
     this.theatreModeAnimations = []
@@ -857,6 +866,7 @@ export default defineComponent({
       beforeReload: this.cleanupWatchRuntime,
       beforeDispose: this.cleanupWatchRuntime
     })
+    this.syncMediaSessionSkipHandlers()
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
@@ -865,6 +875,9 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
+    if ('mediaSession' in navigator) {
+      tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {})
+    }
     this.deactivateWatchRuntime()
     // When a logical-tab lifecycle is registered, its beforeDispose hook drives
     // cleanupWatchRuntime before this component unmounts. Without one (e.g. the
@@ -3211,6 +3224,17 @@ export default defineComponent({
      */
     handlePlaylistSkipAvailabilityChange: function (availability) {
       this.playlistSkipAvailability = availability
+    },
+
+    // Keeps the operating system's media controls in sync with the player's skip
+    // buttons, so that both offer the same skips and take the same route to them
+    syncMediaSessionSkipHandlers: function () {
+      if (!('mediaSession' in navigator)) { return }
+
+      tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {
+        previoustrack: this.canSkipToPreviousPlaylistVideo ? this.handleSkipToPrev : null,
+        nexttrack: this.canSkipToNextPlaylistVideo ? this.handleSkipToNext : null
+      })
     },
 
     // Skip to the previous video in a playlist

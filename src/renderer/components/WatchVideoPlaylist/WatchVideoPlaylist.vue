@@ -229,7 +229,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -252,7 +252,6 @@ import { isHistoryEntryWatched } from '../../helpers/history'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getPlaylistSkipAvailability, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
-import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
 const props = defineProps({
   playlistId: {
@@ -570,14 +569,6 @@ onMounted(() => {
     loadCachedPlaylistInformation(cachedPlaylist)
   } else {
     getPlaylistInfoWithDelay()
-  }
-
-  syncMediaSessionSkipHandlers()
-})
-
-onBeforeUnmount(() => {
-  if ('mediaSession' in navigator) {
-    tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {})
   }
 })
 
@@ -1239,20 +1230,9 @@ const canPlayNextVideo = computed(() => skipAvailability.value.canPlayNext)
 
 const canPlayPreviousVideo = computed(() => skipAvailability.value.canPlayPrevious)
 
-// Also keep the operating system's media controls in sync, so they don't offer
-// skipping either when there is nothing to skip to
-function syncMediaSessionSkipHandlers() {
-  if (!('mediaSession' in navigator)) { return }
-
-  tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {
-    previoustrack: canPlayPreviousVideo.value ? playPreviousVideo : null,
-    nexttrack: canPlayNextVideo.value ? playNextVideo : null
-  })
-}
-
+// The watch view owns the skip actions, as it also knows about the watch queue
 watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious]) => {
   emit('skip-availability-change', { canPlayNext, canPlayPrevious })
-  syncMediaSessionSkipHandlers()
 }, { immediate: true })
 
 defineExpose({
