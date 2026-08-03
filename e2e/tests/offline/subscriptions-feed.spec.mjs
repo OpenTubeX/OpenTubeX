@@ -54,9 +54,9 @@ test.use({
             liveNow: true
           }),
           feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
-          feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 24 * HOUR, {
+          feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
             isUpcoming: true,
-            premiereDate: new Date(now + 24 * HOUR).toISOString()
+            premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
           })
         ],
         videosTimestamp: new Date(now - 2 * HOUR).toISOString()
@@ -130,7 +130,8 @@ test.describe('subscriptions feed from cache', () => {
 
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
 
-    await page.clock.fastForward(24 * HOUR + 1000)
+    await page.clock.fastForward(24 * 24 * HOUR)
+    await page.clock.fastForward(6 * 24 * HOUR + 1000)
 
     const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(premiere).toBeVisible()

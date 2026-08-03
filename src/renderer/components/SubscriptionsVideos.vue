@@ -112,6 +112,7 @@ function scheduleNextPremiereUpdate(timestamp) {
     premiereUpdateTimer = null
     premiereUpdateNow.value = Date.now()
     loadVideosFromCacheForAllActiveProfileChannels()
+    scheduleNextPremiereUpdate(nextUpcomingPremiereTimestamp.value)
   }, Math.min(Math.max(timestamp - Date.now(), 0), MAX_TIMEOUT_MS))
 }
 
