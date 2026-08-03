@@ -864,12 +864,13 @@ export default {
 
     /**
      * Persist the resolved profile picture for a logical tab.
-     * @param {string | null} avatarUrl
+     * @param {ArrayBuffer} avatarBytes
      * @param {string} tabId
+     * @param {string} routePath
      * @returns {Promise<boolean>}
      */
-    updateAvatar: (avatarUrl, tabId) => {
-      return ipcRenderer.invoke(IpcChannels.TABS_UPDATE_AVATAR, avatarUrl, tabId)
+    updateAvatar: (avatarBytes, tabId, routePath) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_UPDATE_AVATAR, avatarBytes, tabId, routePath)
     },
 
     /**

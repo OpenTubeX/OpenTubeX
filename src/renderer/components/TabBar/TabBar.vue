@@ -89,6 +89,7 @@ import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils
 import { normalizeFixedTabWidth } from '../../constants/tabWidth'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
+import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
 import SortableTab from './SortableTab.vue'
 import {
   buildCurrentShiftedTabIds,
@@ -124,17 +125,25 @@ watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
     if (!avatarUrl?.startsWith('http') || migratingAvatarTabIds.has(tab.id)) continue
 
     migratingAvatarTabIds.add(tab.id)
-    window.ftElectron.tabs.updateAvatar(avatarUrl, tab.id).then(migrated => {
-      if (migrated) {
-        removeLegacyTabAvatar(tab.route)
-      }
-    }).catch(error => {
-      console.error('Failed to migrate tab avatar:', error)
-    }).finally(() => {
-      migratingAvatarTabIds.delete(tab.id)
-    })
+    migrateTabAvatar(tab, avatarUrl)
   }
 }, { immediate: true })
+
+async function migrateTabAvatar(tab, avatarUrl) {
+  try {
+    const avatarBytes = await fetchTabAvatarBytes(avatarUrl)
+    if (avatarBytes == null) return
+
+    const migrated = await window.ftElectron.tabs.updateAvatar(avatarBytes, tab.id, tab.route.path)
+    if (migrated) {
+      removeLegacyTabAvatar(tab.route)
+    }
+  } catch (error) {
+    console.error('Failed to migrate tab avatar:', error)
+  } finally {
+    migratingAvatarTabIds.delete(tab.id)
+  }
+}
 
 // Only the horizontal bar sizes tabs by their content, so the fixed width is
 // applied there; vertical tabs always fill the column.

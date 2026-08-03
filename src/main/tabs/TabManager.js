@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, app, nativeImage, net, shell } from 'electron'
+import { BrowserWindow, ipcMain, app, nativeImage, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -64,7 +64,6 @@ const TAB_AVATAR_SIZE = 64
  * @property {string} title
  * @property {string | null} avatarDataUrl
  * @property {string | null} avatarFileName
- * @property {string | null} avatarRequestUrl
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
  * @property {boolean} isPinned
@@ -698,45 +697,23 @@ export class TabManager {
   }
 
   /**
-   * Keep tab-session avatars small, portable, and safe to render as images.
-   * @param {unknown} value
-   * @returns {string | null}
-   */
-  static normalizeTabAvatarUrl(value) {
-    if (typeof value !== 'string' || value.length > 4096) return null
-
-    try {
-      const url = new URL(value)
-      return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : null
-    } catch {
-      return null
-    }
-  }
-
-  /**
    * @param {TabInfo} tab
-   * @param {string | null} avatarUrl
+   * @param {unknown} avatarBytes
+   * @param {string} routePath
    * @returns {Promise<boolean>}
    */
-  async applyTabAvatar(tab, avatarUrl) {
-    const nextAvatarUrl = TabManager.normalizeTabAvatarUrl(avatarUrl)
-    if (!this._avatarsEnabled || nextAvatarUrl == null || nextAvatarUrl === tab.avatarRequestUrl) {
+  async applyTabAvatar(tab, avatarBytes, routePath) {
+    if (!this._avatarsEnabled || tab.route.path !== routePath) {
       return false
     }
 
-    tab.avatarRequestUrl = nextAvatarUrl
     try {
-      const response = await net.fetch(nextAvatarUrl)
-      const contentLength = Number(response.headers.get('content-length'))
-      if (
-        !response.ok ||
-        !response.headers.get('content-type')?.startsWith('image/') ||
-        (Number.isFinite(contentLength) && contentLength > MAX_TAB_AVATAR_DOWNLOAD_BYTES)
-      ) {
-        return false
-      }
-
-      const sourceBuffer = Buffer.from(await response.arrayBuffer())
+      const sourceBuffer = avatarBytes instanceof ArrayBuffer
+        ? Buffer.from(avatarBytes)
+        : ArrayBuffer.isView(avatarBytes)
+          ? Buffer.from(avatarBytes.buffer, avatarBytes.byteOffset, avatarBytes.byteLength)
+          : null
+      if (sourceBuffer == null) return false
       if (sourceBuffer.length === 0 || sourceBuffer.length > MAX_TAB_AVATAR_DOWNLOAD_BYTES) {
         return false
       }
@@ -758,14 +735,14 @@ export class TabManager {
       if (
         !this._avatarsEnabled ||
         !this.tabs.has(tab.id) ||
-        tab.avatarRequestUrl !== nextAvatarUrl ||
+        tab.route.path !== routePath ||
         buffer.length === 0
       ) {
         return false
       }
 
       await this._persistTabAvatar(tab, buffer)
-      if (!this._avatarsEnabled || tab.avatarRequestUrl !== nextAvatarUrl) {
+      if (!this._avatarsEnabled || tab.route.path !== routePath) {
         const fileName = tab.avatarFileName
         tab.avatarFileName = null
         await this._deleteTabPreviewFile(fileName)
@@ -778,10 +755,6 @@ export class TabManager {
     } catch (error) {
       console.error('Failed to cache tab avatar:', error)
       return false
-    } finally {
-      if (tab.avatarRequestUrl === nextAvatarUrl) {
-        tab.avatarRequestUrl = null
-      }
     }
   }
 
@@ -796,7 +769,6 @@ export class TabManager {
     if (enabled) return
 
     await Promise.all(Array.from(this.tabs.values(), async tab => {
-      tab.avatarRequestUrl = null
       tab.avatarDataUrl = null
       const fileName = tab.avatarFileName
       tab.avatarFileName = null
@@ -916,7 +888,6 @@ export class TabManager {
       title: title || TabManager.formatDefaultTabTitle(location.url),
       avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
       avatarFileName: restoredAvatarFileName,
-      avatarRequestUrl: null,
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: Boolean(isPinned),
@@ -2124,7 +2095,6 @@ export class TabManager {
       title: snapshot.title,
       avatarDataUrl: isTabPreviewDataUrl(snapshot.avatarDataUrl) ? snapshot.avatarDataUrl : null,
       avatarFileName: normalizeTabPreviewFileName(snapshot.avatarFileName),
-      avatarRequestUrl: null,
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: snapshot.isPinned === true,
@@ -2185,7 +2155,6 @@ export class TabManager {
       const avatarFileName = tab.avatarFileName
       tab.avatarDataUrl = null
       tab.avatarFileName = null
-      tab.avatarRequestUrl = null
       this._deleteTabPreviewFile(avatarFileName).catch(error => {
         console.error('Failed to delete stale tab avatar:', error)
       })
@@ -2865,11 +2834,11 @@ export async function setupTabsIPC(options = {}) {
     }
   })
 
-  ipcMain.handle(IpcChannels.TABS_UPDATE_AVATAR, async (event, avatarUrl, tabId) => {
+  ipcMain.handle(IpcChannels.TABS_UPDATE_AVATAR, async (event, avatarBytes, tabId, routePath) => {
     const manager = getManager(event)
     const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
-    if (manager && tab && (typeof avatarUrl === 'string' || avatarUrl === null)) {
-      return await manager.applyTabAvatar(tab, avatarUrl)
+    if (manager && tab && typeof routePath === 'string') {
+      return await manager.applyTabAvatar(tab, avatarBytes, routePath)
     }
     return false
   })
