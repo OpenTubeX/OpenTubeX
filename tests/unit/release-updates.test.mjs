@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  fetchReleasePages,
   findUpdateRelease,
   findUpdateReleases,
   formatReleaseChangelog
@@ -131,6 +132,47 @@ test('all skipped stable releases are returned newest first', () => {
 
   assert.deepEqual(
     findUpdateReleases([stableRelease, patchRelease], '0.29.0'),
+    [patchRelease, stableRelease]
+  )
+})
+
+test('updates from later release pages are included', async () => {
+  const firstPageUrl = 'https://api.github.com/releases?per_page=100'
+  const secondPageUrl = 'https://api.github.com/releases?per_page=100&page=2'
+  const patchRelease = {
+    name: 'OpenTubeX 0.30.1',
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+  const pages = new Map([
+    [firstPageUrl, {
+      link: `<${secondPageUrl}>; rel="next", <${secondPageUrl}>; rel="last"`,
+      releases: [patchRelease]
+    }],
+    [secondPageUrl, {
+      link: null,
+      releases: [stableRelease]
+    }]
+  ])
+  const requestedUrls = []
+
+  const releases = await fetchReleasePages(firstPageUrl, async (url) => {
+    requestedUrls.push(url)
+    const page = pages.get(url)
+
+    return {
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => page.link
+      },
+      json: async () => page.releases
+    }
+  })
+
+  assert.deepEqual(requestedUrls, [firstPageUrl, secondPageUrl])
+  assert.deepEqual(
+    findUpdateReleases(releases, '0.29.0'),
     [patchRelease, stableRelease]
   )
 })

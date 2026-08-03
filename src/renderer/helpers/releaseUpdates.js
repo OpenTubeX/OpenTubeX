@@ -1,6 +1,34 @@
 const VERSION_PATTERN = /^v?(\d+)\.(\d+)\.(\d+)(?:-beta|-nightly-(\d+))?$/
 
 /**
+ * Fetches every page of releases by following GitHub's next-page links.
+ *
+ * @param {string} initialUrl
+ * @param {typeof fetch} fetchPage
+ * @returns {Promise<object[]>}
+ */
+export async function fetchReleasePages(initialUrl, fetchPage) {
+  const releases = []
+  let pageUrl = initialUrl
+
+  while (pageUrl !== null) {
+    const response = await fetchPage(pageUrl)
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status}`)
+    }
+
+    releases.push(...await response.json())
+    const nextLink = response.headers.get('link')
+      ?.split(',')
+      .find((link) => /\brel="next"/.test(link))
+
+    pageUrl = nextLink?.match(/<([^>]+)>/)?.[1] ?? null
+  }
+
+  return releases
+}
+
+/**
  * @param {string} version
  * @returns {{ channel: 'stable' | 'nightly', parts: number[] } | null}
  */

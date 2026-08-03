@@ -290,7 +290,7 @@ import store from './store/index'
 import packageDetails from '../../package.json'
 import { KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
-import { findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
@@ -1685,12 +1685,8 @@ async function checkForNewUpdates() {
   const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=100'
 
   try {
-    const response = await fetch(releasesUrl)
-    if (!response.ok) {
-      throw new Error(`GitHub returned ${response.status}`)
-    }
-
-    const releases = findUpdateReleases(await response.json(), packageDetails.version)
+    const availableReleases = await fetchReleasePages(releasesUrl, fetch)
+    const releases = findUpdateReleases(availableReleases, packageDetails.version)
     if (releases.length === 0) {
       return
     }
