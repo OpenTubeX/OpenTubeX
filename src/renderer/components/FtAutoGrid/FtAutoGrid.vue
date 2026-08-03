@@ -5,6 +5,7 @@
     name="feed"
     :appear="appear"
     :move-class="moveClass"
+    :style="{ '--feed-transition-duration': feedTransitionDuration }"
     :class="{
       autoGrid: true,
       grid: grid,
@@ -52,6 +53,14 @@ const props = defineProps({
 const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
+const feedTransitionDuration = computed(() => {
+  const animationSpeed = store.getters.getAnimationSpeed
+  const speedMultiplier = Number.isFinite(animationSpeed) && animationSpeed > 0
+    ? animationSpeed / 100
+    : 1
+
+  return `${300 / speedMultiplier}ms`
+})
 
 // The thumbnail size custom properties are written straight to the element
 // instead of through a reactive `:style` binding, and the measured width is

@@ -51,6 +51,7 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import {
   FULLSCREEN_DOCK_GAP,
   FULLSCREEN_DOCK_OUTER_INSET,
@@ -5735,7 +5736,7 @@ export default defineComponent({
 
         await nextTick()
         const nextRect = playerContainer.getBoundingClientRect()
-        const animation = playerContainer.animate([
+        const animation = applyAnimationSpeed(playerContainer.animate([
           {
             transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
             transformOrigin: 'top left'
@@ -5747,7 +5748,7 @@ export default defineComponent({
         ], {
           duration: FULL_WINDOW_ANIMATION_DURATION_MS,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        })
+        }))
 
         fullWindowAnimation = animation
         animation.addEventListener('finish', () => {

@@ -215,6 +215,33 @@ test.describe('settings', () => {
     }).toBe(100)
   })
 
+  test('configures animation speed and disables it with reduced motion', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const slider = page.getByRole('slider', { name: /Animation Speed/ })
+    await expect(slider).toHaveValue('100')
+    await expect(slider).toBeEnabled()
+
+    await slider.fill('200')
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getAnimationSpeed
+    })).toBe(200)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateReducedMotion', 'on')
+    })
+    await expect(slider).toBeDisabled()
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateReducedMotion', 'off')
+    })
+    await expect(slider).toBeEnabled()
+  })
+
   test('keeps the watched progress mode when history is toggled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="privacy"]').click()

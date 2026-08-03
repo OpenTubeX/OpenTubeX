@@ -32,7 +32,8 @@
               <div
                 v-if="tabsIndicatorStyle"
                 class="tabsIndicator"
-                :style="tabsIndicatorStyle"
+                data-animation-speed-managed
+                :style="[tabsIndicatorStyle, { transitionDuration: tabsIndicatorTransitionDuration }]"
                 aria-hidden="true"
               />
               <!-- eslint-disable-next-line vuejs-accessibility/interactive-supports-focus -->
@@ -45,7 +46,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="videos"
                 :tabindex="currentTab === 'videos' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'videos' }"
+                :class="{ selectedTab: selectedTab === 'videos' }"
                 @click="changeTab('videos')"
                 @keydown.space.enter.prevent="changeTab('videos')"
                 @keydown.left.right="focusTab($event, 'videos')"
@@ -70,7 +71,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="shorts"
                 :tabindex="currentTab === 'shorts' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'shorts' }"
+                :class="{ selectedTab: selectedTab === 'shorts' }"
                 @click="changeTab('shorts')"
                 @keydown.space.enter.prevent="changeTab('shorts')"
                 @keydown.left.right="focusTab($event, 'shorts')"
@@ -95,7 +96,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="live"
                 :tabindex="currentTab === 'live' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'live' }"
+                :class="{ selectedTab: selectedTab === 'live' }"
                 @click="changeTab('live')"
                 @keydown.space.enter.prevent="changeTab('live')"
                 @keydown.left.right="focusTab($event, 'live')"
@@ -120,7 +121,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="posts"
                 :tabindex="currentTab === 'community' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'community' }"
+                :class="{ selectedTab: selectedTab === 'community' }"
                 @click="changeTab('community')"
                 @keydown.space.enter.prevent="changeTab('community')"
                 @keydown.left.right="focusTab($event, 'community')"
@@ -145,7 +146,7 @@
                 aria-controls="subscriptionsPanel"
                 data-subscription-feed-tab="all"
                 :tabindex="currentTab === 'new' ? 0 : -1"
-                :class="{ selectedTab: currentTab === 'new' }"
+                :class="{ selectedTab: selectedTab === 'new' }"
                 @click="changeTab('new')"
                 @keydown.space.enter.prevent="changeTab('new')"
                 @keydown.left.right="focusTab($event, 'new')"
@@ -261,6 +262,7 @@ import SubscriptionsLive from '../../components/SubscriptionsLive.vue'
 import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionsPosts.vue'
 
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
@@ -351,6 +353,7 @@ const refreshProgressPercentage = computed(() => {
 
 /** @type {import('vue').Ref<'videos' | 'shorts' | 'live' | 'community' | 'new' | null>} */
 const currentTab = ref('videos')
+const selectedTab = ref('videos')
 
 const tabScrollPositions = {
   videos: 0,
@@ -418,6 +421,7 @@ let isMounted = false
 let removeFeedReloadRequestListener = null
 /** @type {number | null} */
 let pendingTabChangeFrame = null
+let tabChangeSequence = 0
 
 onMounted(() => {
   isMounted = true
@@ -429,6 +433,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   isMounted = false
+  tabChangeSequence++
   removeFeedReloadRequestListener?.()
 
   if (pendingTabChangeFrame !== null) {
@@ -487,13 +492,15 @@ const visibleTabs = computed(() => {
 
 watch(visibleTabs, (value) => {
   if (value.length === 0) {
+    selectedTab.value = null
     currentTab.value = null
-  } else if (!value.includes(currentTab.value)) {
-    currentTab.value = value[0]
+  } else if (!value.includes(selectedTab.value)) {
+    changeTab(value[0])
   }
 })
 
 if (visibleTabs.value.length === 0) {
+  selectedTab.value = null
   currentTab.value = null
 } else {
   // Restore currentTab
@@ -501,6 +508,7 @@ if (visibleTabs.value.length === 0) {
   if (lastCurrentTabId !== null) {
     changeTab(lastCurrentTabId)
   } else if (!visibleTabs.value.includes(currentTab.value)) {
+    selectedTab.value = visibleTabs.value[0]
     currentTab.value = visibleTabs.value[0]
   }
 }
@@ -518,9 +526,11 @@ function changeTab(tab) {
     pendingTabChangeFrame = null
   }
 
-  if (tab === currentTab.value) {
+  if (tab === selectedTab.value) {
     if (hadPendingChange) {
-      // Put the indicator back onto the tab that stays selected
+      // Complete the cancelled panel swap so the highlighted tab and its
+      // content cannot get separated by a repeated activation.
+      currentTab.value = tab
       updateTabsIndicator()
     }
 
@@ -532,20 +542,30 @@ function changeTab(tab) {
     ? tab
     : (visibleTabs.value.length > 0 ? visibleTabs.value[0] : null)
 
-  // Move the indicator first and let it paint before the panel is swapped,
-  // otherwise rendering a feed with a lot of videos in the same frame delays
-  // the start of the animation and it appears to jump
-  if (target !== null && moveTabsIndicatorTo(target)) {
+  selectedTab.value = target
+  const sequence = ++tabChangeSequence
+
+  if (!isMounted || target === null) {
+    currentTab.value = target
+    return
+  }
+
+  // Let the selected label reach its final bold width before measuring the
+  // indicator. The content is swapped two frames later, after the compositor
+  // has started moving the indicator toward that stable target.
+  nextTick(() => {
+    if (sequence !== tabChangeSequence) { return }
+
+    moveTabsIndicatorTo(target)
     pendingTabChangeFrame = window.requestAnimationFrame(() => {
       pendingTabChangeFrame = window.requestAnimationFrame(() => {
+        if (sequence !== tabChangeSequence) { return }
+
         pendingTabChangeFrame = null
         currentTab.value = target
       })
     })
-    return
-  }
-
-  currentTab.value = target
+  })
 }
 
 const videosTab = useTemplateRef('videosTab')
@@ -818,6 +838,9 @@ watch([currentTabPanel, currentTabHasNewContent], () => nextTick(() => {
 const tabsContainerRef = useTemplateRef('tabsContainerRef')
 /** @type {import('vue').Ref<Record<string, string> | null>} */
 const tabsIndicatorStyle = ref(null)
+const tabsIndicatorTransitionDuration = computed(() => {
+  return `${200 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
+})
 let tabsResizeObserver = null
 // Place the indicator without animating when it was last measured while
 // hidden (e.g. in a background browser tab, where all offsets read 0),
@@ -896,7 +919,7 @@ function moveTabsIndicatorTo(tab) {
   return tabElement instanceof HTMLElement && placeTabsIndicator(tabElement)
 }
 
-watch([currentTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
+watch([selectedTab, visibleTabs, refreshingFeedTab], () => nextTick(updateTabsIndicator))
 
 onMounted(() => {
   if (typeof ResizeObserver === 'function') {
