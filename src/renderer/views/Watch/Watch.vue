@@ -550,6 +550,7 @@
             :description="videoDescription"
             :description-html="videoDescriptionHtml"
             :license="license"
+            :games="videoGames"
             always-expanded
             class="watchVideo"
             @timestamp-event="changeTimestamp"
@@ -663,6 +664,7 @@
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
           :license="license"
+          :games="videoGames"
           :always-expanded="fullscreenMetadataOpen"
           class="watchVideo"
           :class="{ theatreWatchVideo: useTheatreMode }"
