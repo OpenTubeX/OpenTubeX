@@ -92,6 +92,13 @@
   text-decoration: none;
 }
 
+.liveChatTimestamp {
+  color: var(--tertiary-text-color);
+  font-weight: normal;
+  margin-inline-end: 5px;
+  white-space: nowrap;
+}
+
 .superChat .channelThumbnail {
   margin-block-start: 3px;
   margin-inline-start: 3px;
@@ -158,12 +165,22 @@
   margin-block-start: 5px;
 }
 
-.upperSuperChatMessage .channelName {
-  color: var(--text-with-main-color);
-  opacity: 0.7;
+.upperSuperChatMessage .superChatAuthor {
+  display: flex;
+  align-items: center;
   position: absolute;
   inset-block-start: -20px;
   margin-inline-start: 65px;
+}
+
+.upperSuperChatMessage .channelName {
+  color: var(--text-with-main-color);
+  opacity: 0.7;
+}
+
+.upperSuperChatMessage .liveChatTimestamp {
+  color: var(--text-with-main-color);
+  opacity: 0.7;
 }
 
 .upperSuperChatMessage .donationAmount {
@@ -239,11 +256,14 @@
 }
 
 .title,
-.popoutChatButton {
+.liveChatActionButton {
   padding: 10px;
 }
 
-.popoutChatButton {
+.liveChatActionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   border-style: none;
   background-color: transparent;
@@ -254,21 +274,45 @@
   transition: background 0.2s ease-out;
 }
 
-.popoutChatButton:hover {
+.liveChatActionButton:hover,
+.liveChatActionButton:focus-visible,
+.liveChatActionButton.active {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
   transition: background 0.2s ease-in;
 }
 
-.popoutChatButton:active {
+.liveChatActionButton:active {
   background-color: var(--tertiary-text-color);
   color: var(--side-nav-active-text-color);
   transition: background 0.2s ease-in;
 }
 
-.popoutChatIcon {
+.liveChatActionButton svg {
   inline-size: 1em;
   pointer-events: none;
+}
+
+.liveChatActions {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.liveChatSettingsMenu {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  inline-size: max-content;
+  max-inline-size: calc(100vw - 48px);
+  padding-block: 10px;
+  padding-inline: 12px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-color);
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
 }
 
 .titleContainer {

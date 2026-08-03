@@ -275,6 +275,7 @@ const state = {
   hideLabelsSideBar: false,
   hideChapters: false,
   showDistractionFreeTitles: false,
+  showLiveChatTimestamps: false,
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
   tabCloseFocus: 'previousTab',
