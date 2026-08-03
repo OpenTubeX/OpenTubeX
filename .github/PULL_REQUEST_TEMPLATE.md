@@ -16,9 +16,6 @@
 ## Description
 <!-- Please write a clear and concise description of what the pull request does. -->
 
-## Screenshots <!-- If appropriate -->
-<!-- Please add before and after screenshots if there is a visible change. -->
-
 ## Release note category
 <!-- Select exactly one category. Every pull request must select one. -->
 <!-- release-note-category:start -->
@@ -36,6 +33,7 @@
 <!-- release-note:end -->
 
 ## Release note images
+<!-- Human-only: Agents must leave this section empty. -->
 <!-- Optional. Paste one or more Markdown images or HTML image tags here. -->
 <!-- The release notes will use an HTML image tag and limit images taller than 300 pixels. -->
 <!-- release-note-image:start -->
@@ -45,12 +43,7 @@
 ## Testing
 <!-- How can reviewers verify that the PR produces correct results? -->
 <!-- Please provide instructions so that others can ensure that your pull request would produce correct results. For examples see, https://github.com/FreeTubeApp/FreeTube/pull/5743, https://github.com/FreeTubeApp/FreeTube/pull/7349, https://github.com/FreeTubeApp/FreeTube/pull/5125, https://github.com/FreeTubeApp/FreeTube/pull/7338 -->
-
-## Desktop
-<!-- Please complete the following information-->
-- **OS:**
-- **OS Version:**
-- **OpenTubeX version:**
+<!-- Agent instructions: Always write human-facing steps that explain how to verify the change while running this branch in dev mode. Include expected results and, when applicable, helpful console snippets. -->
 
 ## Additional context
 <!-- Add any other context about the pull request here. -->
