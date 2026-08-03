@@ -418,7 +418,7 @@ const state = {
   subscriptionShortsAutoRefreshInterval: '0',
   subscriptionLiveAutoRefreshInterval: '0',
   subscriptionPostsAutoRefreshInterval: '0',
-  showSubscriptionRefreshToast: true,
+  showProgressBarToast: true,
   settingsPassword: '',
   useDeArrowTitles: false,
   useDeArrowThumbnails: false,
@@ -743,6 +743,12 @@ const customActions = {
       const legacyAutoPipTabEntry = userSettings.find(entry => entry._id === 'autoPictureInPictureOnTabChange')
       const hasPipTriggersSetting = userSettings.some(entry => entry._id === 'autoPictureInPictureTriggers')
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
+      const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
+      const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
+
+      if (legacyProgressToastEntry && !hasProgressToastSetting) {
+        await dispatch('updateShowProgressBarToast', legacyProgressToastEntry.value === true)
+      }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.
       // The old behavior fired on both in-app tab changes and window minimize, so preserve both.

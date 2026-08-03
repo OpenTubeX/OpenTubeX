@@ -47,6 +47,14 @@
           setting-key="showToastTimeoutIndicator"
           @change="updateShowToastTimeoutIndicator"
         />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Progress as Notification')"
+          :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
+          compact
+          :default-value="showProgressBarToast"
+          setting-key="showProgressBarToast"
+          @change="updateShowProgressBarToast"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -460,6 +468,16 @@ const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeo
  */
 function updateShowToastTimeoutIndicator(value) {
   store.dispatch('updateShowToastTimeoutIndicator', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showProgressBarToast = computed(() => store.getters.getShowProgressBarToast)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowProgressBarToast(value) {
+  store.dispatch('updateShowProgressBarToast', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

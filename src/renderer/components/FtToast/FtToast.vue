@@ -70,24 +70,24 @@
         </div>
       </div>
       <div
-        v-if="showSubscriptionRefreshToast"
-        ref="subscriptionRefreshToast"
-        key="subscription-refresh"
+        v-if="showProgressToast"
+        ref="progressToast"
+        key="progress"
         class="toast-slot persistent-slot"
-        :class="{ minimized: subscriptionRefreshMinimized }"
-        data-testid="subscription-refresh-toast"
+        :class="{ minimized: progressToastMinimized }"
+        :data-testid="store.getters.getShowProgressBar ? 'progress-toast' : 'subscription-refresh-toast'"
       >
         <div
           class="toast persistent"
           role="status"
         >
           <FontAwesomeIcon
-            :icon="subscriptionRefreshIcon"
+            :icon="progressToastIcon"
             class="icon"
             fixed-width
           />
           <p class="message">
-            {{ subscriptionRefreshMessage }}
+            {{ progressToastMessage }}
           </p>
         </div>
         <div
@@ -99,7 +99,7 @@
             :corner-radius="toastProgressRadius"
             :end-arc-fraction="0.5"
             :line-width="toastProgressLineWidth"
-            :progress="subscriptionRefreshProgress"
+            :progress="progressToastPercentage"
             :start-arc-fraction="0.5"
           />
         </div>
@@ -151,9 +151,9 @@ const props = defineProps({
 /** Distance in px a toast must be dragged before it slides away instead of snapping back */
 const DRAG_DISMISS_THRESHOLD = 80
 /** Distance in px at which the persistent refresh toast gets out of the pointer's way */
-const REFRESH_TOAST_PROXIMITY = 32
+const PROGRESS_TOAST_PROXIMITY = 32
 /** Extra distance required before restoring the toast, to avoid flicker around the boundary */
-const REFRESH_TOAST_PROXIMITY_HYSTERESIS = 20
+const PROGRESS_TOAST_PROXIMITY_HYSTERESIS = 20
 
 /** @type {import('vue').Reactive<Toast[]>} */
 const toasts = reactive([])
@@ -162,16 +162,16 @@ const indicatorAnimations = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
 /** @type {import('vue').Ref<HTMLElement|null>} */
-const subscriptionRefreshToast = useTemplateRef('subscriptionRefreshToast')
-const subscriptionRefreshMinimized = ref(false)
+const progressToast = useTemplateRef('progressToast')
+const progressToastMinimized = ref(false)
 /** @type {DOMRect|null} */
-let subscriptionRefreshBounds = null
+let progressToastBounds = null
 /** @type {HTMLElement|null} */
-let measuredSubscriptionRefreshToast = null
+let measuredProgressToast = null
 /** @type {number|null} */
-let subscriptionRefreshPointerFrame = null
-let subscriptionRefreshPointerX = 0
-let subscriptionRefreshPointerY = 0
+let progressToastPointerFrame = null
+let progressToastPointerX = 0
+let progressToastPointerY = 0
 /** @type {import('vue').ComputedRef<'bottom-left' | 'bottom-center' | 'bottom-right' | 'top-left' | 'top-center' | 'top-right'>} */
 const toastPosition = computed(() => {
   return normalizeToastPosition(store.getters.getToastPosition)
@@ -181,13 +181,17 @@ const hasHorizontalTabBar = computed(() => {
 })
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
-const showSubscriptionRefreshToast = computed(() => {
+const showProgressToast = computed(() => {
   return fullscreenTarget.value === null &&
-    props.showSubscriptionRefresh &&
-    store.getters.getShowSubscriptionRefreshToast &&
-    store.getters.getSubscriptionFeedRefreshInProgress
+    store.getters.getShowProgressBarToast &&
+    (store.getters.getShowProgressBar ||
+      (props.showSubscriptionRefresh && store.getters.getSubscriptionFeedRefreshInProgress))
 })
-const subscriptionRefreshProgress = computed(() => store.getters.getSubscriptionFeedRefreshProgress)
+const progressToastPercentage = computed(() => {
+  return store.getters.getShowProgressBar
+    ? store.getters.getProgressBarPercentage
+    : store.getters.getSubscriptionFeedRefreshProgress
+})
 const subscriptionRefreshIcon = computed(() => {
   switch (store.getters.getSubscriptionFeedRefreshTab) {
     case 'shorts':
@@ -212,6 +216,18 @@ const subscriptionRefreshMessage = computed(() => {
       return t('Subscriptions.Refreshing Subscription Videos')
   }
 })
+const progressToastIcon = computed(() => {
+  return store.getters.getShowProgressBar
+    ? store.getters.getProgressBarIcon
+    : subscriptionRefreshIcon.value
+})
+const progressToastMessage = computed(() => {
+  if (!store.getters.getShowProgressBar) {
+    return subscriptionRefreshMessage.value
+  }
+
+  return store.getters.getProgressBarMessage || t('Settings.Theme Settings.Operation in Progress')
+})
 const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
 const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.getters.getUiRoundness / 100)))
 
@@ -225,48 +241,48 @@ function updateFullscreenTarget() {
  * remain the hit area while minimized so scaling cannot make the state flicker.
  * @param {MouseEvent} event
  */
-function onSubscriptionRefreshPointerMove(event) {
-  subscriptionRefreshPointerX = event.clientX
-  subscriptionRefreshPointerY = event.clientY
-  if (subscriptionRefreshPointerFrame !== null) { return }
+function onProgressToastPointerMove(event) {
+  progressToastPointerX = event.clientX
+  progressToastPointerY = event.clientY
+  if (progressToastPointerFrame !== null) { return }
 
-  subscriptionRefreshPointerFrame = requestAnimationFrame(updateSubscriptionRefreshProximity)
+  progressToastPointerFrame = requestAnimationFrame(updateProgressToastProximity)
 }
 
-function updateSubscriptionRefreshProximity() {
-  subscriptionRefreshPointerFrame = null
-  const element = subscriptionRefreshToast.value
+function updateProgressToastProximity() {
+  progressToastPointerFrame = null
+  const element = progressToast.value
 
   if (!element) {
-    measuredSubscriptionRefreshToast = null
-    subscriptionRefreshBounds = null
-    subscriptionRefreshMinimized.value = false
+    measuredProgressToast = null
+    progressToastBounds = null
+    progressToastMinimized.value = false
     return
   }
 
-  if (element !== measuredSubscriptionRefreshToast) {
-    measuredSubscriptionRefreshToast = element
-    subscriptionRefreshBounds = null
-    subscriptionRefreshMinimized.value = false
+  if (element !== measuredProgressToast) {
+    measuredProgressToast = element
+    progressToastBounds = null
+    progressToastMinimized.value = false
   }
 
-  if (!subscriptionRefreshMinimized.value || subscriptionRefreshBounds === null) {
-    subscriptionRefreshBounds = element.getBoundingClientRect()
+  if (!progressToastMinimized.value || progressToastBounds === null) {
+    progressToastBounds = element.getBoundingClientRect()
   }
 
-  const bounds = subscriptionRefreshBounds
-  const horizontalDistance = Math.max(bounds.left - subscriptionRefreshPointerX, 0, subscriptionRefreshPointerX - bounds.right)
-  const verticalDistance = Math.max(bounds.top - subscriptionRefreshPointerY, 0, subscriptionRefreshPointerY - bounds.bottom)
+  const bounds = progressToastBounds
+  const horizontalDistance = Math.max(bounds.left - progressToastPointerX, 0, progressToastPointerX - bounds.right)
+  const verticalDistance = Math.max(bounds.top - progressToastPointerY, 0, progressToastPointerY - bounds.bottom)
   const distance = Math.hypot(horizontalDistance, verticalDistance)
-  const threshold = REFRESH_TOAST_PROXIMITY +
-    (subscriptionRefreshMinimized.value ? REFRESH_TOAST_PROXIMITY_HYSTERESIS : 0)
+  const threshold = PROGRESS_TOAST_PROXIMITY +
+    (progressToastMinimized.value ? PROGRESS_TOAST_PROXIMITY_HYSTERESIS : 0)
 
-  subscriptionRefreshMinimized.value = distance <= threshold
+  progressToastMinimized.value = distance <= threshold
 }
 
-function resetSubscriptionRefreshProximity() {
-  subscriptionRefreshBounds = null
-  subscriptionRefreshMinimized.value = false
+function resetProgressToastProximity() {
+  progressToastBounds = null
+  progressToastMinimized.value = false
 }
 
 /**
@@ -586,8 +602,8 @@ function cleanup(toast) {
 onMounted(() => {
   ToastEventBus.addEventListener('toast-open', open)
   document.addEventListener('fullscreenchange', updateFullscreenTarget)
-  window.addEventListener('mousemove', onSubscriptionRefreshPointerMove)
-  window.addEventListener('resize', resetSubscriptionRefreshProximity)
+  window.addEventListener('mousemove', onProgressToastPointerMove)
+  window.addEventListener('resize', resetProgressToastProximity)
   updateFullscreenTarget()
 
   if (process.env.IS_ELECTRON) {
@@ -600,10 +616,10 @@ onMounted(() => {
 onBeforeUnmount(() => {
   ToastEventBus.removeEventListener('toast-open', open)
   document.removeEventListener('fullscreenchange', updateFullscreenTarget)
-  window.removeEventListener('mousemove', onSubscriptionRefreshPointerMove)
-  window.removeEventListener('resize', resetSubscriptionRefreshProximity)
-  if (subscriptionRefreshPointerFrame !== null) {
-    cancelAnimationFrame(subscriptionRefreshPointerFrame)
+  window.removeEventListener('mousemove', onProgressToastPointerMove)
+  window.removeEventListener('resize', resetProgressToastProximity)
+  if (progressToastPointerFrame !== null) {
+    cancelAnimationFrame(progressToastPointerFrame)
   }
   removeShowToastListener?.()
   toasts.forEach(cleanup)
