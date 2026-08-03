@@ -28,7 +28,7 @@
         <div
           v-if="isLoading && customShortsPlayerActive"
           class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
-          data-tab-loading-indicator
+          :data-tab-loading-indicator="isTabPresented ? '' : null"
         >
           <img
             v-if="shortsTransitionPreview"

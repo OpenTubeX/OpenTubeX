@@ -187,7 +187,12 @@ onMounted(() => {
 
   if (typeof MutationObserver === 'function' && tabContentRef.value) {
     loaderObserver = new MutationObserver(scheduleLoaderUpdate)
-    loaderObserver.observe(tabContentRef.value, { childList: true, subtree: true })
+    loaderObserver.observe(tabContentRef.value, {
+      attributes: true,
+      attributeFilter: ['data-tab-loading-indicator'],
+      childList: true,
+      subtree: true
+    })
   }
   scheduleLoaderUpdate()
 })

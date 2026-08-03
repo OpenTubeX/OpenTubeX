@@ -1,4 +1,5 @@
 import packageDetails from '../../../../package.json'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
@@ -225,8 +226,23 @@ const actions = {
     return await window.ftElectron.tabs.create(tabOptions)
   },
 
-  activateTab(_context, tabId) {
+  activateTab({ rootGetters }, tabId) {
     if (!process.env.IS_ELECTRON) return
+
+    const activeTabId = rootGetters.getActiveTabId
+    const activeTab = rootGetters.getTabById(activeTabId)
+    const navigation = getTabNavigationService()
+    navigation.setLoadingSuppressed(tabId, false)
+    if (
+      activeTabId !== tabId &&
+      activeTab?.route?.query?.short === 'true'
+    ) {
+      // Send this before activation so the main process cannot publish the
+      // outgoing Shorts tab as both inactive and transiently loading. The
+      // hidden Watch view stops contributing its loader during deactivation.
+      navigation.setLoadingSuppressed(activeTabId, true)
+    }
+
     window.ftElectron.tabs.activate(tabId)
   },
 

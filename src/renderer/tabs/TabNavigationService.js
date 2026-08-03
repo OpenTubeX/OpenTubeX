@@ -36,6 +36,7 @@ export class TabNavigationService {
     this.transitionQueue = Promise.resolve()
     this.staleTransitionResolvers = new Map()
     this.loadingSourcesByTabId = new Map()
+    this.loadingSuppressedTabIds = new Set()
     this.navigationQueuesByTabId = new Map()
     this.routeLoadingStateByTabId = new Map()
     this.beforeEachHooksByTabId = new Map()
@@ -565,6 +566,10 @@ export class TabNavigationService {
   }
 
   setLoadingSource(tabId, source, isLoading) {
+    if (this.loadingSuppressedTabIds.has(tabId)) {
+      return
+    }
+
     let sources = this.loadingSourcesByTabId.get(tabId)
     if (!sources) {
       sources = new Set()
@@ -581,6 +586,21 @@ export class TabNavigationService {
       this.loadingSourcesByTabId.delete(tabId)
     }
     window.ftElectron?.tabs?.setLoading?.(sources.size > 0, tabId)
+  }
+
+  setLoadingSuppressed(tabId, suppressed) {
+    if (suppressed) {
+      this.loadingSuppressedTabIds.add(tabId)
+      this.loadingSourcesByTabId.delete(tabId)
+      const routeLoadingState = this.routeLoadingStateByTabId.get(tabId)
+      if (routeLoadingState?.timeoutId != null) {
+        window.clearTimeout(routeLoadingState.timeoutId)
+      }
+      this.routeLoadingStateByTabId.delete(tabId)
+      window.ftElectron?.tabs?.setLoading?.(false, tabId)
+    } else {
+      this.loadingSuppressedTabIds.delete(tabId)
+    }
   }
 
   startRouteLoading(tabId) {
@@ -617,6 +637,7 @@ export class TabNavigationService {
 
   disposeTab(tabId) {
     this.loadingSourcesByTabId.delete(tabId)
+    this.loadingSuppressedTabIds.delete(tabId)
     this.navigationQueuesByTabId.delete(tabId)
     const routeLoadingState = this.routeLoadingStateByTabId.get(tabId)
     if (routeLoadingState?.timeoutId != null) {

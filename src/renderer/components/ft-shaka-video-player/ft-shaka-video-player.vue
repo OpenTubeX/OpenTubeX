@@ -64,9 +64,10 @@
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"
       @mouseenter="handleScrollMiniPlayerEnter"
-      @mouseleave="handleScrollMiniPlayerLeave"
+      @mouseleave="handlePlayerMouseLeave"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"
+      @contextmenu="positionShortsContextMenu"
       @dblclick.capture="handlePlayerControlDoubleClick"
     >
       <!-- Ambient glow surface for fullscreen, where the host-level canvases are not rendered. -->
@@ -112,7 +113,18 @@
               : $t('Video.Player.Scroll Mini Player.Pause')"
             @click.stop="toggleShortsPlayback"
           >
-            <font-awesome-icon :icon="['fas', shortsPaused ? 'play' : 'pause']" />
+            <svg
+              v-if="shortsEnded"
+              class="shortsReplayIcon"
+              viewBox="0 -960 960 960"
+              aria-hidden="true"
+            >
+              <path :d="replayIcon" />
+            </svg>
+            <font-awesome-icon
+              v-else
+              :icon="['fas', shortsPaused ? 'play' : 'pause']"
+            />
           </button>
           <div class="shortsVolumeControl">
             <button
@@ -143,9 +155,20 @@
             class="shortsTopControl shortsCaptionsControl"
             :class="{ active: shortsCaptionsEnabled }"
             :aria-label="$t('KeyboardShortcutPrompt.Captions')"
+            :aria-pressed="String(shortsCaptionsEnabled)"
             @click.stop="toggleShortsCaptions"
           >
-            <font-awesome-icon :icon="['fas', 'closed-captioning']" />
+            <svg
+              class="shortsCaptionsControlIcon"
+              viewBox="0 -960 960 960"
+              aria-hidden="true"
+            >
+              <path :d="shortsCaptionsEnabled ? closedCaptionsFilledIcon : closedCaptionsOutlinedIcon" />
+            </svg>
+            <span
+              class="shortsCaptionsControlSlash"
+              aria-hidden="true"
+            />
           </button>
           <button
             type="button"
