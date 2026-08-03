@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, app, shell } from 'electron'
+import { BrowserWindow, ipcMain, app, nativeImage, shell } from 'electron'
 import { randomUUID } from 'crypto'
 import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -49,6 +49,8 @@ const transferringTabIds = new Set()
 const TAB_LOADING_SOURCE_MOUNT = 'mount'
 const TAB_LOADING_SOURCE_RENDERER = 'renderer'
 const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
+const MAX_TAB_AVATAR_DOWNLOAD_BYTES = 2 * 1024 * 1024
+const TAB_AVATAR_SIZE = 64
 
 /**
  * @typedef {'unloaded' | 'mounting' | 'loaded' | 'unloading'} TabLoadState
@@ -60,6 +62,8 @@ const MAX_PERSISTED_NAV_HISTORY_ENTRIES = 25
  * @property {string} url
  * @property {{name?: string | null, path: string, params: Record<string, string>, query: Record<string, string>, hash: string, fullPath: string}} route
  * @property {string} title
+ * @property {string | null} avatarDataUrl
+ * @property {string | null} avatarFileName
  * @property {number} lastActiveAt
  * @property {boolean} isPlaying
  * @property {boolean} isPinned
@@ -144,9 +148,9 @@ export class TabManager {
   }
 
   /**
-   * Deletes cached previews that no restored session refers to. Tabs delete
-   * their own preview when they close, but a crash or a forced quit leaves the
-   * file behind with nothing left to point at it.
+   * Deletes cached previews and avatars that no restored session refers to.
+   * Tabs delete their own files when they close, but a crash or a forced quit
+   * can leave a file behind with nothing left to point at it.
    *
    * Must run before any window exists: a capture racing this would write a file
    * that is not in `referencedFileNames` yet and would be deleted right away.
@@ -529,6 +533,8 @@ export class TabManager {
       // source state before activating. (url/route stay as mounted; isPinned is
       // fixed by insertion order and must not change here.)
       stagedTab.title = detached.title
+      stagedTab.avatarDataUrl = detached.avatarDataUrl
+      stagedTab.avatarFileName = detached.avatarFileName
       stagedTab.color = detached.color
       stagedTab.previewDataUrl = detached.previewDataUrl
       stagedTab.previewCapturedAt = detached.previewCapturedAt
@@ -590,6 +596,7 @@ export class TabManager {
     /** @type {Promise<void>} */
     this._previewCaptureLock = Promise.resolve()
     this._previewCapturePaused = false
+    this._avatarsEnabled = true
     /** Tabs whose navigation history the renderer has already been sent. */
     this._historyAnnouncedTabIds = new Set()
     this.bridge = new TabRendererBridge(browserWindow)
@@ -690,6 +697,95 @@ export class TabManager {
   }
 
   /**
+   * @param {TabInfo} tab
+   * @param {unknown} avatarBytes
+   * @param {string} routePath
+   * @returns {Promise<boolean>}
+   */
+  async applyTabAvatar(tab, avatarBytes, routePath) {
+    if (!this._avatarsEnabled || tab.route.path !== routePath) {
+      return false
+    }
+
+    try {
+      const sourceBuffer = avatarBytes instanceof ArrayBuffer
+        ? Buffer.from(avatarBytes)
+        : ArrayBuffer.isView(avatarBytes)
+          ? Buffer.from(avatarBytes.buffer, avatarBytes.byteOffset, avatarBytes.byteLength)
+          : null
+      if (sourceBuffer == null) return false
+      if (sourceBuffer.length === 0 || sourceBuffer.length > MAX_TAB_AVATAR_DOWNLOAD_BYTES) {
+        return false
+      }
+
+      let image = nativeImage.createFromBuffer(sourceBuffer)
+      if (image.isEmpty()) {
+        console.warn('Failed to decode tab avatar image data')
+        return false
+      }
+
+      const size = image.getSize()
+      if (size.width > TAB_AVATAR_SIZE || size.height > TAB_AVATAR_SIZE) {
+        const scale = TAB_AVATAR_SIZE / Math.max(size.width, size.height)
+        image = image.resize({
+          width: Math.max(1, Math.round(size.width * scale)),
+          height: Math.max(1, Math.round(size.height * scale)),
+          quality: 'best'
+        })
+      }
+
+      const buffer = image.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
+      if (
+        !this._avatarsEnabled ||
+        !this.tabs.has(tab.id) ||
+        tab.route.path !== routePath ||
+        buffer.length === 0
+      ) {
+        return false
+      }
+
+      await this._persistTabAvatar(tab, buffer)
+      if (
+        !this._avatarsEnabled ||
+        !this.tabs.has(tab.id) ||
+        tab.route.path !== routePath
+      ) {
+        const fileName = tab.avatarFileName
+        tab.avatarFileName = null
+        await this._deleteTabPreviewFile(fileName)
+        return false
+      }
+      tab.avatarDataUrl = tabPreviewBufferToDataUrl(buffer)
+      this._broadcastStateUpdate()
+      await this._saveSession()
+      return true
+    } catch (error) {
+      console.error('Failed to cache tab avatar:', error)
+      return false
+    }
+  }
+
+  /**
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  async setTabAvatarsEnabled(enabled) {
+    if (this._avatarsEnabled === enabled) return
+
+    this._avatarsEnabled = enabled
+    if (enabled) return
+
+    await Promise.all(Array.from(this.tabs.values(), async tab => {
+      tab.avatarDataUrl = null
+      const fileName = tab.avatarFileName
+      tab.avatarFileName = null
+      await this._deleteTabPreviewFile(fileName)
+    }))
+    this._broadcastStateUpdate()
+    await this._saveSession()
+  }
+
+  /**
    * @param {string | undefined} url
    * @param {string | undefined} route
    * @param {object | undefined} query
@@ -753,6 +849,8 @@ export class TabManager {
       route,
       query,
       title,
+      avatarDataUrl = null,
+      avatarFileName = null,
       isPinned = false,
       color = null,
       previewDataUrl = null,
@@ -783,6 +881,7 @@ export class TabManager {
       ? previewDataUrl
       : null
     const restoredPreviewFileName = normalizeTabPreviewFileName(previewFileName)
+    const restoredAvatarFileName = normalizeTabPreviewFileName(avatarFileName)
     const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
       ? previewCapturedAt
       : 0
@@ -794,6 +893,8 @@ export class TabManager {
       url: location.url,
       route: location.route,
       title: title || TabManager.formatDefaultTabTitle(location.url),
+      avatarDataUrl: isTabPreviewDataUrl(avatarDataUrl) ? avatarDataUrl : null,
+      avatarFileName: restoredAvatarFileName,
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: Boolean(isPinned),
@@ -1217,6 +1318,9 @@ export class TabManager {
     this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
       console.error('Failed to delete closed tab preview:', error)
     })
+    this._deleteTabPreviewFile(tab.avatarFileName).catch(error => {
+      console.error('Failed to delete closed tab avatar:', error)
+    })
 
     if (nextTabId) {
       this.activeTabId = null
@@ -1247,6 +1351,7 @@ export class TabManager {
     return this.createTab({
       url: tab.url,
       title: tab.title,
+      avatarDataUrl: tab.avatarDataUrl,
       isPinned: tab.isPinned,
       color: tab.color,
       makeActive: true
@@ -1445,6 +1550,32 @@ export class TabManager {
       throw error
     }
     tab.previewFileName = fileName
+
+    if (reusableFileName == null && existingFileName != null) {
+      await this._deleteTabPreviewFile(existingFileName)
+    }
+  }
+
+  /**
+   * @param {TabInfo} tab
+   * @param {Buffer} buffer
+   * @returns {Promise<void>}
+   */
+  async _persistTabAvatar(tab, buffer) {
+    const existingFileName = normalizeTabPreviewFileName(tab.avatarFileName)
+    const reusableFileName = isReusableTabPreviewFileName(existingFileName) ? existingFileName : null
+    const fileName = reusableFileName ?? createTabPreviewFileName()
+    const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
+    await mkdir(cacheDirectory, { recursive: true })
+    const tempPath = join(cacheDirectory, createTabPreviewTempFileName())
+    try {
+      await writeFile(tempPath, buffer)
+      await rename(tempPath, join(cacheDirectory, fileName))
+    } catch (error) {
+      await unlink(tempPath).catch(() => {})
+      throw error
+    }
+    tab.avatarFileName = fileName
 
     if (reusableFileName == null && existingFileName != null) {
       await this._deleteTabPreviewFile(existingFileName)
@@ -1900,6 +2031,8 @@ export class TabManager {
       url: tab.url,
       route: cloneRoute(tab.route),
       title: tab.title,
+      avatarDataUrl: tab.avatarDataUrl,
+      avatarFileName: tab.avatarFileName,
       isPinned: tab.isPinned,
       color: tab.color,
       previewDataUrl: tab.previewDataUrl,
@@ -1967,6 +2100,8 @@ export class TabManager {
       url: snapshot.url,
       route: cloneRoute(snapshot.route),
       title: snapshot.title,
+      avatarDataUrl: isTabPreviewDataUrl(snapshot.avatarDataUrl) ? snapshot.avatarDataUrl : null,
+      avatarFileName: normalizeTabPreviewFileName(snapshot.avatarFileName),
       lastActiveAt: Date.now(),
       isPlaying: false,
       isPinned: snapshot.isPinned === true,
@@ -2022,7 +2157,16 @@ export class TabManager {
     const tab = this.tabs.get(tabId)
     if (!tab) return
 
-    tab.route = normalizeRoute(route)
+    const nextRoute = normalizeRoute(route)
+    if (nextRoute.path !== tab.route.path) {
+      const avatarFileName = tab.avatarFileName
+      tab.avatarDataUrl = null
+      tab.avatarFileName = null
+      this._deleteTabPreviewFile(avatarFileName).catch(error => {
+        console.error('Failed to delete stale tab avatar:', error)
+      })
+    }
+    tab.route = nextRoute
     tab.url = url || this._urlFromRoute(tab.route)
     this._scheduleTabPreviewRefresh(tab)
     this._saveSession()
@@ -2086,6 +2230,7 @@ export class TabManager {
         url: tab.url,
         route: cloneRoute(tab.route),
         title: tab.title,
+        avatarUrl: tab.avatarDataUrl,
         isActive: tab.id === this.activeTabId,
         isUnloaded: tab.loadState === 'unloaded',
         isLoading: this._getTabLoadingState(tab),
@@ -2171,6 +2316,11 @@ export class TabManager {
         if (previewFileName != null && tab.previewCapturedAt > 0) {
           tabData.previewFileName = previewFileName
           tabData.previewCapturedAt = tab.previewCapturedAt
+        }
+
+        const avatarFileName = normalizeTabPreviewFileName(tab.avatarFileName)
+        if (avatarFileName != null) {
+          tabData.avatarFileName = avatarFileName
         }
 
         if (tab.persistNavigationHistory && tab.navigationHistory != null) {
@@ -2274,13 +2424,14 @@ export class TabManager {
     await Promise.all(
       Array.from(this.tabs.values())
         .filter(tab => tab.isTransferStaged !== true)
-        .map(tab => this._deleteTabPreviewFile(tab.previewFileName))
+        .flatMap(tab => [tab.previewFileName, tab.avatarFileName])
+        .map(fileName => this._deleteTabPreviewFile(fileName))
     )
     await clearTabSession(this.sessionId)
   }
 
   /**
-   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
+   * @param {{ tabs?: Array<{id?: string, url: string, title?: string, avatarFileName?: string | null, isPinned?: boolean, color?: string | null, isUnloaded?: boolean, previewFileName?: string | null, previewCapturedAt?: number, history?: object[], historyIndex?: number}>, activeTabId?: string }} sessionData
    * @param {{ loadInactiveTabs?: boolean, restoreTabLoadState?: boolean }} [options]
    * @returns {Promise<boolean>}
    */
@@ -2304,6 +2455,8 @@ export class TabManager {
         const makeActive = tabData.id === sessionData.activeTabId
         const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
         const previewFileName = normalizeTabPreviewFileName(tabData.previewFileName)
+        const avatarFileName = normalizeTabPreviewFileName(tabData.avatarFileName)
+        const avatarDataUrl = await this._loadTabPreviewDataUrl(avatarFileName)
         const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
         const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
           (restoreTabLoadState && tabData.isUnloaded === true) ||
@@ -2315,6 +2468,8 @@ export class TabManager {
           // Strip here as well to heal sessions persisted before the strip on save existed
           url: TabManager.stripOneTimeTimestampFromUrl(tabData.url),
           title: hasSavedTitle ? tabData.title : undefined,
+          avatarDataUrl,
+          avatarFileName: avatarDataUrl == null ? null : avatarFileName,
           isPinned: tabData.isPinned === true,
           color: tabData.color,
           // Preview images are only needed when the switcher asks for them.
@@ -2684,6 +2839,22 @@ export async function setupTabsIPC(options = {}) {
     if (manager && tab && typeof title === 'string') {
       manager.applyTabTitle(tab, title)
     }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_UPDATE_AVATAR, async (event, avatarBytes, tabId, routePath) => {
+    const manager = getManager(event)
+    const tab = typeof tabId === 'string' ? manager?.tabs.get(tabId) : null
+    if (manager && tab && typeof routePath === 'string') {
+      return await manager.applyTabAvatar(tab, avatarBytes, routePath)
+    }
+    return false
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_AVATARS_ENABLED, (event, enabled) => {
+    const manager = getManager(event)
+    manager?.setTabAvatarsEnabled(enabled === true).catch(error => {
+      console.error('Failed to update tab avatar caching:', error)
+    })
   })
 
   ipcMain.on(IpcChannels.TABS_UPDATE_ROUTE, (event, payload) => {

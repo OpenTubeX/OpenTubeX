@@ -1,50 +1,43 @@
 const CHANNEL_THUMBNAIL_CACHE_KEY = 'channelThumbnailCache'
 const VIDEO_AVATAR_CACHE_KEY = 'videoAvatarCache'
 
-// Cap the persisted cache so it can't grow without bound across sessions. The
-// cache is only a best-effort tab preview fallback, so an approximate FIFO
-// eviction of the oldest entries is good enough.
-export const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
-export const VIDEO_AVATAR_CACHE_LIMIT = 200
-
-function loadThumbnailCache(key) {
+function loadLegacyThumbnailCache(key) {
   try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return {}
-
-    const parsed = JSON.parse(raw)
+    const parsed = JSON.parse(localStorage.getItem(key) ?? '{}')
     return parsed !== null && typeof parsed === 'object' ? parsed : {}
   } catch {
     return {}
   }
 }
 
-/**
- * @returns {Record<string, string>}
- */
-export function loadChannelThumbnailCache() {
-  return loadThumbnailCache(CHANNEL_THUMBNAIL_CACHE_KEY)
+export function loadLegacyChannelThumbnailCache() {
+  return loadLegacyThumbnailCache(CHANNEL_THUMBNAIL_CACHE_KEY)
 }
 
-export function loadVideoAvatarCache() {
-  return loadThumbnailCache(VIDEO_AVATAR_CACHE_KEY)
+export function loadLegacyVideoAvatarCache() {
+  return loadLegacyThumbnailCache(VIDEO_AVATAR_CACHE_KEY)
 }
 
-/**
- * @param {Record<string, string>} cache
- */
-export function persistChannelThumbnailCache(cache) {
-  persistThumbnailCache(CHANNEL_THUMBNAIL_CACHE_KEY, cache)
+export function removeLegacyTabAvatar(route) {
+  const path = route?.path ?? ''
+  const channelId = path.match(/^\/channel\/([^/]+)/)?.[1]
+  const videoId = path.match(/^\/watch\/([^/]+)/)?.[1]
+  if (channelId) removeLegacyThumbnail(CHANNEL_THUMBNAIL_CACHE_KEY, channelId)
+  if (videoId) removeLegacyThumbnail(VIDEO_AVATAR_CACHE_KEY, videoId)
 }
 
-export function persistVideoAvatarCache(cache) {
-  persistThumbnailCache(VIDEO_AVATAR_CACHE_KEY, cache)
-}
-
-function persistThumbnailCache(key, cache) {
+function removeLegacyThumbnail(key, id) {
   try {
-    localStorage.setItem(key, JSON.stringify(cache))
+    const cache = loadLegacyThumbnailCache(key)
+    if (!(id in cache)) return
+
+    delete cache[id]
+    if (Object.keys(cache).length === 0) {
+      localStorage.removeItem(key)
+    } else {
+      localStorage.setItem(key, JSON.stringify(cache))
+    }
   } catch {
-    // Ignore quota/serialization errors — the cache is a best-effort fallback.
+    // Migration is best-effort; a later page load can populate the file cache.
   }
 }
