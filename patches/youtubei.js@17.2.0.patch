@@ -1,3 +1,35 @@
+diff --git a/dist/src/parser/classes/VideoAttributeView.d.ts b/dist/src/parser/classes/VideoAttributeView.d.ts
+index fe90c6fe53ec4428d9a55c60902da64771541c60..f02b34a6727688b0dc21c800d96277b8151e9272 100644
+--- a/dist/src/parser/classes/VideoAttributeView.d.ts
++++ b/dist/src/parser/classes/VideoAttributeView.d.ts
+@@ -14,6 +14,7 @@ export default class VideoAttributeView extends YTNode {
+     };
+     orientation: string;
+     sizing_rule: string;
++    on_tap: NavigationEndpoint;
+     overflow_menu_on_tap: NavigationEndpoint;
+     overflow_menu_a11y_label: string;
+     constructor(data: RawNode);
+diff --git a/dist/src/parser/classes/VideoAttributeView.js b/dist/src/parser/classes/VideoAttributeView.js
+index f310e850d6f41c9e85457d6bfad62c4dc80af605..f1c1acb6b21af0d33cd153b058b3ec0957cc3c1a 100644
+--- a/dist/src/parser/classes/VideoAttributeView.js
++++ b/dist/src/parser/classes/VideoAttributeView.js
+@@ -12,6 +12,7 @@ export default class VideoAttributeView extends YTNode {
+     secondary_subtitle;
+     orientation;
+     sizing_rule;
++    on_tap;
+     overflow_menu_on_tap;
+     overflow_menu_a11y_label;
+     constructor(data) {
+@@ -32,6 +33,7 @@ export default class VideoAttributeView extends YTNode {
+         }
+         this.orientation = data.orientation;
+         this.sizing_rule = data.sizingRule;
++        this.on_tap = new NavigationEndpoint(data.onTap?.innertubeCommand);
+         this.overflow_menu_on_tap = new NavigationEndpoint(data.overflowMenuOnTap);
+         this.overflow_menu_a11y_label = data.overflowMenuA11yLabel;
+     }
 diff --git a/dist/src/parser/classes/comments/CommentReplies.d.ts b/dist/src/parser/classes/comments/CommentReplies.d.ts
 index 3a48b70d187b2f854452d56ce292d2548b660f27..4b5ea214f8ae2a208b0d00191473012e4d4aaa75 100644
 --- a/dist/src/parser/classes/comments/CommentReplies.d.ts

@@ -23,6 +23,7 @@ import { calculateColorLuminance } from '../../helpers/colors'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { parseLocalVideoGames } from '../../helpers/video-games'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -212,6 +213,8 @@ export default defineComponent({
       videoDescription: '',
       videoDescriptionHtml: '',
       videoCategory: '',
+      /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
+      videoGames: [],
       license: '',
       videoViewCount: 0,
       videoLikeCount: 0,
@@ -1261,6 +1264,7 @@ export default defineComponent({
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.videoCategory = ''
+      this.videoGames = []
       this.license = ''
       this.videoViewCount = 0
       this.videoLikeCount = 0
@@ -1644,6 +1648,7 @@ export default defineComponent({
         this.hasResolvedVideoTitle = this.videoTitle.length > 0
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
+        this.videoGames = parseLocalVideoGames(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)
         const primaryCollaborator = this.channelCollaborators[0]

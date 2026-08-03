@@ -70,3 +70,50 @@
   display: block;
   margin-block: 1em;
 }
+
+.gamesHeading {
+  margin-block: 1em 0.5em;
+  font-size: 17px;
+  color: var(--primary-text-color);
+}
+
+.gameList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.game {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gameLink:hover,
+.gameLink:focus {
+  text-decoration: underline;
+}
+
+.gameBoxArt {
+  inline-size: 40px;
+  block-size: 56px;
+  object-fit: cover;
+  border-radius: calc(5px * var(--ui-roundness));
+}
+
+.gameText {
+  display: flex;
+  flex-direction: column;
+}
+
+.gameTitle {
+  color: var(--primary-text-color);
+}
+
+.gameSubtitle {
+  font-size: 14px;
+  color: var(--secondary-text-color);
+}
