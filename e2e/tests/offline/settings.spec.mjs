@@ -737,6 +737,30 @@ test.describe('playback engine migration', () => {
   })
 })
 
+test.describe('playback engine proxy migration', () => {
+  test.use({
+    seed: {
+      settings: {
+        proxyVideos: true,
+        useProxy: false,
+        videoPlaybackEngine: 'built-in'
+      }
+    }
+  })
+
+  test('preserves Invidious media proxying for existing users', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        engine: settings.videoPlaybackEngine,
+        migrated: settings.ytDlpPlaybackEngineDefaultMigration
+      }
+    }).toEqual({ engine: 'built-in', migrated: true })
+  })
+})
+
 test.describe('SponsorBlock highlight settings', () => {
   test.use({
     seed: {

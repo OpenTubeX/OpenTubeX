@@ -754,8 +754,20 @@ const customActions = {
         entry => entry._id === YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING
       )
       if (!hasMigratedPlaybackEngine) {
-        await dispatch('updateVideoPlaybackEngine', 'yt-dlp')
-        await DBSettingHandlers.upsert(YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING, true)
+        try {
+          // Invidious media proxying cannot be passed to yt-dlp. Keep the built-in
+          // engine when it is the user's only protection against direct requests.
+          if (!state.proxyVideos || state.useProxy) {
+            await DBSettingHandlers.upsert('videoPlaybackEngine', 'yt-dlp')
+            commit('setVideoPlaybackEngine', 'yt-dlp')
+          }
+
+          // Persist this only after the engine update above succeeds, so a failed
+          // write is retried on the next launch.
+          await DBSettingHandlers.upsert(YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate the playback engine to yt-dlp', error)
+        }
       }
 
       if (legacyProgressToastEntry && !hasProgressToastSetting) {
