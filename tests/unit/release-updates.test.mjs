@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { findUpdateRelease } from '../../src/renderer/helpers/releaseUpdates.js'
+import {
+  fetchReleasePages,
+  findUpdateRelease,
+  findUpdateReleases,
+  formatReleaseChangelog
+} from '../../src/renderer/helpers/releaseUpdates.js'
 
 const stableRelease = {
   name: 'OpenTubeX 0.30.0',
@@ -115,5 +120,95 @@ test('the newest semantic version is selected regardless of API order', () => {
   assert.equal(
     findUpdateRelease([newerStableRelease, stableRelease], '0.29.0'),
     newerStableRelease
+  )
+})
+
+test('all skipped stable releases are returned newest first', () => {
+  const patchRelease = {
+    name: 'OpenTubeX 0.30.1',
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+
+  assert.deepEqual(
+    findUpdateReleases([stableRelease, patchRelease], '0.29.0'),
+    [patchRelease, stableRelease]
+  )
+})
+
+test('updates from later release pages are included', async () => {
+  const firstPageUrl = 'https://api.github.com/releases?per_page=100'
+  const secondPageUrl = 'https://api.github.com/releases?per_page=100&page=2'
+  const patchRelease = {
+    name: 'OpenTubeX 0.30.1',
+    prerelease: false,
+    tag_name: 'v0.30.1-beta'
+  }
+  const pages = new Map([
+    [firstPageUrl, {
+      link: `<${secondPageUrl}>; rel="next", <${secondPageUrl}>; rel="last"`,
+      releases: [patchRelease]
+    }],
+    [secondPageUrl, {
+      link: null,
+      releases: [stableRelease]
+    }]
+  ])
+  const requestedUrls = []
+
+  const releases = await fetchReleasePages(firstPageUrl, async (url) => {
+    requestedUrls.push(url)
+    const page = pages.get(url)
+
+    return {
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => page.link
+      },
+      json: async () => page.releases
+    }
+  })
+
+  assert.deepEqual(requestedUrls, [firstPageUrl, secondPageUrl])
+  assert.deepEqual(
+    findUpdateReleases(releases, '0.29.0'),
+    [patchRelease, stableRelease]
+  )
+})
+
+test('installed and older releases are excluded from skipped releases', () => {
+  const installedRelease = {
+    prerelease: false,
+    tag_name: 'v0.29.0-beta'
+  }
+  const olderRelease = {
+    prerelease: false,
+    tag_name: 'v0.28.0-beta'
+  }
+
+  assert.deepEqual(
+    findUpdateReleases([stableRelease, installedRelease, olderRelease], '0.29.0'),
+    [stableRelease]
+  )
+})
+
+test('release changelogs contain the notes for every update', () => {
+  const releases = [
+    {
+      name: 'OpenTubeX 0.30.1',
+      tag_name: 'v0.30.1-beta',
+      body: 'Patch release notes'
+    },
+    {
+      name: 'OpenTubeX 0.30.0',
+      tag_name: 'v0.30.0-beta',
+      body: 'Minor release notes'
+    }
+  ]
+
+  assert.equal(
+    formatReleaseChangelog(releases),
+    '## OpenTubeX 0.30.1\n\nPatch release notes\n\n## OpenTubeX 0.30.0\n\nMinor release notes'
   )
 })

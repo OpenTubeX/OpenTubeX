@@ -290,7 +290,7 @@ import store from './store/index'
 import packageDetails from '../../package.json'
 import { KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
-import { findUpdateRelease } from './helpers/releaseUpdates'
+import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
@@ -1685,27 +1685,21 @@ async function checkForNewUpdates() {
   const releasesUrl = 'https://api.github.com/repos/OpenTubeX/OpenTubeX/releases?per_page=100'
 
   try {
-    const response = await fetch(releasesUrl)
-    if (!response.ok) {
-      throw new Error(`GitHub returned ${response.status}`)
-    }
-
-    const release = findUpdateRelease(await response.json(), packageDetails.version)
-    if (release === null) {
+    const availableReleases = await fetchReleasePages(releasesUrl, fetch)
+    const releases = findUpdateReleases(availableReleases, packageDetails.version)
+    if (releases.length === 0) {
       return
     }
 
+    const release = releases[0]
     const tagName = release.tag_name
     const versionNumber = tagName.replace('v', '').replace('-beta', '')
 
-    let changelog = release.body
+    const changelog = formatReleaseChangelog(releases)
       // Link usernames to their GitHub profiles
       .replaceAll(/@(\S+)\b/g, '[@$1](https://github.com/$1)')
       // Shorten pull request links to #1234
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
-
-    // Add the title
-    changelog = `${changelog}`
 
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
     changeLogTitle.value = release.name
