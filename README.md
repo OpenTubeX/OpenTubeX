@@ -185,7 +185,7 @@ experience. Some of its major areas of focus are:
 - Caption appearance controls and a preferred caption language setting
 <img height="250" alt="image" src="https://github.com/user-attachments/assets/0098caa1-ccd6-40d5-bcb8-5daed8e0e15a" />
 
-- Download videos with yt-dlp
+- Reliable video playback and downloads with yt-dlp
 <img width="510" height="273" alt="image" src="https://github.com/user-attachments/assets/cbc33197-d6df-4619-a040-c28fb8a3ba42" />
 
 - Full-screen docks for video info, comments, playlists and chapters

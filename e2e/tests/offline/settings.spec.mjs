@@ -697,6 +697,46 @@ test.describe('settings', () => {
   })
 })
 
+test.describe('playback engine migration', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in' } } })
+
+  test('switches existing users to yt-dlp only once', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        engine: settings.videoPlaybackEngine,
+        migrated: settings.ytDlpPlaybackEngineDefaultMigration
+      }
+    }).toEqual({ engine: 'yt-dlp', migrated: true })
+
+    await goTo(app.page, 'settings')
+    const generalSection = app.page.locator('[data-section="general"]')
+    const playbackEngine = generalSection.locator('.select').filter({ hasText: 'Playback Engine' })
+    await expect(playbackEngine.locator('select')).toHaveValue('yt-dlp')
+    await expect(
+      app.page.locator('[data-section="experimental"] .select').filter({ hasText: 'Playback Engine' })
+    ).toHaveCount(0)
+
+    await playbackEngine.locator('select').selectOption('built-in')
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.videoPlaybackEngine
+    }).toBe('built-in')
+
+    const { page } = await app.relaunch()
+    await goTo(page, 'settings')
+    await expect(
+      page.locator('[data-section="general"] .select')
+        .filter({ hasText: 'Playback Engine' })
+        .locator('select')
+    ).toHaveValue('built-in')
+  })
+})
+
 test.describe('SponsorBlock highlight settings', () => {
   test.use({
     seed: {

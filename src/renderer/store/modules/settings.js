@@ -16,6 +16,8 @@ import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 
+const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
+
 /*
  * Due to the complexity of the settings module in FreeTube, a more
  * in-depth explanation for adding new settings is required.
@@ -218,7 +220,7 @@ const state = {
   externalPlayerIgnoreDefaultArgs: false,
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
-  videoPlaybackEngine: 'built-in',
+  videoPlaybackEngine: 'yt-dlp',
   ytDlpSource: 'system',
   ytDlpChannel: 'stable',
   ytDlpPath: '',
@@ -745,6 +747,16 @@ const customActions = {
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
       const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
+
+      // Switch every existing installation to the new default once, while allowing
+      // users to select the built-in engine again afterwards.
+      const hasMigratedPlaybackEngine = userSettings.some(
+        entry => entry._id === YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING
+      )
+      if (!hasMigratedPlaybackEngine) {
+        await dispatch('updateVideoPlaybackEngine', 'yt-dlp')
+        await DBSettingHandlers.upsert(YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING, true)
+      }
 
       if (legacyProgressToastEntry && !hasProgressToastSetting) {
         await dispatch('updateShowProgressBarToast', legacyProgressToastEntry.value === true)
