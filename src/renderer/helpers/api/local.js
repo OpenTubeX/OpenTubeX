@@ -25,17 +25,19 @@ const TRACKING_PARAM_NAMES = [
 // YouTube moved Shorts grid images from `thumbnail` to
 // `thumbnailViewModel.thumbnailViewModel.image.sources`. Preserve that exact
 // source while youtubei.js still expects the old field.
-class ShortsLockupViewWithThumbnail extends YTNodes.ShortsLockupView {
-  constructor(data) {
-    const sources = data.thumbnailViewModel?.thumbnailViewModel?.image?.sources
-    const hasThumbnail = data.thumbnail?.thumbnails?.length > 0
-    super(hasThumbnail || !sources
-      ? data
-      : { ...data, thumbnail: { thumbnails: sources } })
+if (process.env.SUPPORTS_LOCAL_API) {
+  class ShortsLockupViewWithThumbnail extends YTNodes.ShortsLockupView {
+    constructor(data) {
+      const sources = data.thumbnailViewModel?.thumbnailViewModel?.image?.sources
+      const hasThumbnail = data.thumbnail?.thumbnails?.length > 0
+      super(hasThumbnail || !sources
+        ? data
+        : { ...data, thumbnail: { thumbnails: sources } })
+    }
   }
-}
 
-Parser.addRuntimeParser('ShortsLockupView', ShortsLockupViewWithThumbnail)
+  Parser.addRuntimeParser('ShortsLockupView', ShortsLockupViewWithThumbnail)
+}
 
 if (process.env.SUPPORTS_LOCAL_API) {
   Platform.shim.eval = (data) => {
