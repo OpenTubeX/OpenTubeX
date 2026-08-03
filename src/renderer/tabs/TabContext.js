@@ -2,6 +2,7 @@ import { inject, onBeforeUnmount } from 'vue'
 
 import store from '../store/index'
 import { getTabNavigationService } from './TabNavigationService'
+import { removeLegacyTabAvatar } from '../helpers/channelThumbnailStorage'
 
 export const tabIdKey = Symbol('logical-tab-id')
 export const tabPresentedKey = Symbol('logical-tab-presented')
@@ -32,6 +33,27 @@ export function useTabTitle() {
       getTabNavigationService().setTitle(tabId, title, options)
     } else {
       store.commit('setAppTitle', title)
+    }
+  }
+}
+
+export function useTabAvatar() {
+  const { tabId } = useTabContext()
+  let isMounted = true
+
+  onBeforeUnmount(() => {
+    isMounted = false
+  })
+
+  return (avatarUrl) => {
+    if (isMounted && process.env.IS_ELECTRON && tabId && store.getters.getShowTabIcons) {
+      window.ftElectron.tabs.updateAvatar(avatarUrl, tabId).then(cached => {
+        if (cached) {
+          removeLegacyTabAvatar(store.getters.getTabById(tabId)?.route)
+        }
+      }).catch(error => {
+        console.error('Failed to cache tab avatar:', error)
+      })
     }
   }
 }

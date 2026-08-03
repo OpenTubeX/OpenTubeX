@@ -863,6 +863,24 @@ export default {
     },
 
     /**
+     * Persist the resolved profile picture for a logical tab.
+     * @param {string | null} avatarUrl
+     * @param {string} tabId
+     * @returns {Promise<boolean>}
+     */
+    updateAvatar: (avatarUrl, tabId) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_UPDATE_AVATAR, avatarUrl, tabId)
+    },
+
+    /**
+     * Enable or disable avatar caching for this window's tabs.
+     * @param {boolean} enabled
+     */
+    setAvatarsEnabled: (enabled) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_AVATARS_ENABLED, enabled === true)
+    },
+
+    /**
      * Set loading state for a logical tab.
      * @param {boolean} isLoading
      * @param {string} tabId
