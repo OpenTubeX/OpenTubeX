@@ -5,8 +5,10 @@ import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
   ensureSubscriptionFeedEntryState,
+  getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
-  reconcileFetchedSubscriptionEntries
+  reconcileFetchedSubscriptionEntries,
+  updateUpcomingPremiereState
 } from '../../src/renderer/helpers/subscription-entries.js'
 
 const HOUR = 3_600_000
@@ -15,6 +17,31 @@ const now = Date.now()
 function video(videoId, published, extra = {}) {
   return { videoId, published, type: 'video', ...extra }
 }
+
+test('reads premiere times from Local API dates and Invidious timestamps', () => {
+  assert.equal(
+    getUpcomingPremiereTimestamp({ premiereDate: '2026-08-03T12:00:00.000Z' }),
+    Date.parse('2026-08-03T12:00:00.000Z')
+  )
+  assert.equal(getUpcomingPremiereTimestamp({ premiereTimestamp: 1_785_758_400 }), 1_785_758_400_000)
+  assert.equal(getUpcomingPremiereTimestamp({ premiereDate: 'invalid' }), null)
+})
+
+test('clears upcoming premiere state when its scheduled time arrives', () => {
+  const scheduledTime = now + HOUR
+  const upcoming = video('premiere', scheduledTime, {
+    isUpcoming: true,
+    premiere: true,
+    premiereDate: new Date(scheduledTime)
+  })
+
+  assert.equal(updateUpcomingPremiereState(upcoming, scheduledTime - 1), upcoming)
+  assert.deepEqual(updateUpcomingPremiereState(upcoming, scheduledTime), {
+    ...upcoming,
+    isUpcoming: false,
+    premiere: false
+  })
+})
 
 test('adds selected Shorts thumbnails without replacing RSS metadata', () => {
   const entries = [

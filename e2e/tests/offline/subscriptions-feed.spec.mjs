@@ -121,6 +121,22 @@ test.describe('subscriptions feed from cache', () => {
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
   })
 
+  test('shows a hidden upcoming premiere when its scheduled time arrives', async ({ page }) => {
+    // The app opens on Subscriptions, so leave it before installing the clock;
+    // timers created before installation cannot be advanced by Playwright.
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+
+    await page.clock.fastForward(24 * HOUR + 1000)
+
+    const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(premiere).toBeVisible()
+    await expect(premiere.locator('.videoDuration')).not.toHaveText('Upcoming')
+  })
+
   test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
