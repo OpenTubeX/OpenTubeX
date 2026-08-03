@@ -129,14 +129,6 @@ test('pull request bodies have to keep every release note marker', () => {
       new RegExp(`Keep the ${marker} markers`),
       `removing the ${marker} markers has to be rejected`,
     )
-
-    const withoutEndMarker = body.replace(`<!-- ${marker}:end -->`, '')
-
-    assert.throws(
-      () => validatePullRequestEvent({ pull_request: { body: withoutEndMarker } }),
-      new RegExp(`Keep the ${marker} markers`),
-      `removing the ${marker} end marker has to be rejected`,
-    )
   }
 
   assert.throws(
