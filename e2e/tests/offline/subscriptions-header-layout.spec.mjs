@@ -45,12 +45,24 @@ test.use({
   }
 })
 
-async function setWindowWidth (app, width) {
+// The bounds are set in the main process, while the header layout follows a
+// ResizeObserver in the renderer, so the renderer has to catch up before the
+// layout may be read back
+async function setWindowWidth (app, page, width) {
+  const previousWidth = await page.evaluate(() => window.innerWidth)
+
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
     const bounds = browserWindow.getBounds()
     browserWindow.setBounds({ ...bounds, width: targetWidth })
   }, width)
+
+  await page.waitForFunction(previous => window.innerWidth !== previous, previousWidth)
+
+  // One frame for the ResizeObserver, one for the class it ends up setting
+  await page.evaluate(() => new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve))
+  }))
 }
 
 function headerBoxes (page) {
@@ -88,7 +100,7 @@ test.describe('subscriptions header layout', () => {
     await goTo(page, 'subscriptions')
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
 
-    await setWindowWidth(app, 800)
+    await setWindowWidth(app, page, 800)
 
     await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
 
@@ -104,10 +116,10 @@ test.describe('subscriptions header layout', () => {
   test('merges the rows again when the window grows back', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
 
-    await setWindowWidth(app, 800)
+    await setWindowWidth(app, page, 800)
     await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
 
-    await setWindowWidth(app, 1600)
+    await setWindowWidth(app, page, 1600)
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
 
     // The layout has to settle instead of flipping between the two
@@ -135,7 +147,7 @@ test.describe('subscriptions header layout', () => {
     let width = 1920
     while (width > 900) {
       width -= 20
-      await setWindowWidth(app, width)
+      await setWindowWidth(app, page, width)
 
       if (!await header.evaluate(element => element.classList.contains('singleRow'))) {
         break
@@ -153,6 +165,30 @@ test.describe('subscriptions header layout', () => {
     await expect(header).toHaveClass(/singleRow/)
   })
 
+  test('stays split while the tabs themselves have to wrap', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+
+    // Narrow enough that the tabs no longer fit on one line inside their own
+    // row, so their rendered width is the shrunken one rather than the width
+    // they would need. That must not be mistaken for fitting next to the title.
+    await setWindowWidth(app, page, 700)
+
+    const wrapped = await page.evaluate(() => {
+      const tabs = [...document.querySelectorAll('.tab')]
+      return new Set(tabs.map(tab => tab.getBoundingClientRect().top)).size > 1
+    })
+    expect(wrapped, 'the tabs are expected to wrap at this width').toBe(true)
+
+    await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+
+    // A wrong measurement here would merge the rows, which widens the tabs and
+    // makes the next measurement split them again
+    for (let index = 0; index < 3; index++) {
+      await page.waitForTimeout(150)
+      await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+    }
+  })
+
   test('saves vertical space compared to the two line layout', async ({ app, page }) => {
     await goTo(page, 'subscriptions')
 
@@ -162,7 +198,7 @@ test.describe('subscriptions header layout', () => {
 
     const merged = await headerHeight()
 
-    await setWindowWidth(app, 800)
+    await setWindowWidth(app, page, 800)
     await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
 
     expect(merged).toBeLessThan(await headerHeight())
