@@ -719,7 +719,10 @@ export class TabManager {
       }
 
       let image = nativeImage.createFromBuffer(sourceBuffer)
-      if (image.isEmpty()) return false
+      if (image.isEmpty()) {
+        console.warn('Failed to decode tab avatar image data')
+        return false
+      }
 
       const size = image.getSize()
       if (size.width > TAB_AVATAR_SIZE || size.height > TAB_AVATAR_SIZE) {
@@ -742,7 +745,11 @@ export class TabManager {
       }
 
       await this._persistTabAvatar(tab, buffer)
-      if (!this._avatarsEnabled || tab.route.path !== routePath) {
+      if (
+        !this._avatarsEnabled ||
+        !this.tabs.has(tab.id) ||
+        tab.route.path !== routePath
+      ) {
         const fileName = tab.avatarFileName
         tab.avatarFileName = null
         await this._deleteTabPreviewFile(fileName)
