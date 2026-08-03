@@ -62,6 +62,25 @@ test.describe('settings', () => {
     await expect(dropdown.locator('.os-scrollbar-vertical')).toHaveCount(1)
     await expect(dropdown).toHaveCSS('scrollbar-width', 'none')
 
+    const appearance = await dropdown.evaluate((menu) => {
+      const menuStyle = getComputedStyle(menu)
+      const chromeBottom = Math.max(
+        ...Array.from(document.querySelectorAll('.topNav, .tabBar:not(.vertical)'))
+          .map(element => element.getBoundingClientRect().bottom)
+      )
+
+      return {
+        chromeBottom,
+        cursor: getComputedStyle(menu.querySelector('.selectOption')).cursor,
+        fontFamily: menuStyle.fontFamily,
+        menuTop: menu.getBoundingClientRect().top
+      }
+    })
+
+    expect(appearance.fontFamily).toContain('Roboto')
+    expect(appearance.cursor).not.toBe('pointer')
+    expect(appearance.menuTop).toBeGreaterThanOrEqual(appearance.chromeBottom)
+
     await combobox.press('ArrowDown')
     await combobox.press('Enter')
     await expect(combobox).toContainText('English (US) (100%)')

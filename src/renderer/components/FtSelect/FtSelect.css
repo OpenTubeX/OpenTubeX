@@ -42,7 +42,6 @@
   font-size: 16px;
   border-radius: calc(5px * var(--ui-roundness));
   border: 0;
-  cursor: pointer;
   text-align: start;
 }
 
@@ -76,13 +75,15 @@
 
 .selectDropdown {
   position: fixed;
-  z-index: 10000;
+  z-index: 1000;
   box-sizing: border-box;
   overflow-y: auto;
   padding-block: 4px;
   padding-inline: 0;
   margin: 0;
   list-style: none;
+  font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-size: 16px;
   color: var(--secondary-text-color);
   background-color: var(--card-bg-color);
   border: 1px solid var(--tertiary-text-color);
@@ -95,7 +96,6 @@
   min-block-size: 34px;
   padding-block: 7px;
   padding-inline: 16px;
-  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

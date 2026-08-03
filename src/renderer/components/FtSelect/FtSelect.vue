@@ -245,27 +245,54 @@ function closeDropdown() {
 
 function updateDropdownPosition() {
   const button = selectButton.value
-  if (button === null) {
+  const menu = dropdown.value
+  if (button === null || menu === null) {
     return
   }
 
   const viewportMargin = 8
   const menuGap = 4
   const maximumHeight = 400
+  const minimumTop = Math.max(viewportMargin, getTopChromeBottom() + menuGap)
+  const maximumBottom = window.innerHeight - viewportMargin
   const buttonRect = button.getBoundingClientRect()
-  const spaceBelow = window.innerHeight - buttonRect.bottom - menuGap - viewportMargin
-  const spaceAbove = buttonRect.top - menuGap - viewportMargin
-  const openAbove = spaceBelow < 200 && spaceAbove > spaceBelow
+  const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
+  const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
+  const desiredHeight = Math.min(maximumHeight, menu.scrollHeight)
+  const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
+  const menuHeight = Math.min(desiredHeight, availableHeight)
+  const menuWidth = Math.min(buttonRect.width, window.innerWidth - viewportMargin * 2)
+  const left = Math.max(
+    viewportMargin,
+    Math.min(buttonRect.left, window.innerWidth - viewportMargin - menuWidth)
+  )
+  const top = openAbove
+    ? Math.max(minimumTop, buttonRect.top - menuGap - menuHeight)
+    : Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
 
   dropdownStyle.value = {
-    inlineSize: `${buttonRect.width}px`,
-    left: `${Math.max(viewportMargin, Math.min(buttonRect.left, window.innerWidth - viewportMargin - buttonRect.width))}px`,
-    maxBlockSize: `${Math.min(maximumHeight, availableHeight)}px`,
-    ...(openAbove
-      ? { bottom: `${window.innerHeight - buttonRect.top + menuGap}px` }
-      : { top: `${buttonRect.bottom + menuGap}px` })
+    inlineSize: `${menuWidth}px`,
+    left: `${left}px`,
+    top: `${top}px`,
+    maxBlockSize: `${menuHeight}px`
   }
+}
+
+function getTopChromeBottom() {
+  if (document.fullscreenElement !== null) {
+    return 0
+  }
+
+  let bottom = 0
+  for (const selector of ['.topNav', '.tabBar:not(.vertical)']) {
+    const element = document.querySelector(selector)
+    if (element !== null) {
+      bottom = Math.max(bottom, element.getBoundingClientRect().bottom)
+    }
+  }
+
+  return bottom
 }
 
 function moveActiveIndex(offset) {
