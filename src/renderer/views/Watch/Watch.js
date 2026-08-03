@@ -81,6 +81,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
+import { areCommentsAvailable } from './watchComments'
 
 /**
  * @typedef {{
@@ -189,6 +190,7 @@ export default defineComponent({
       isFamilyFriendly: false,
       commentsDisabled: false,
       isLive: false,
+      isPremiere: false,
       liveChat: null,
       isLiveContent: false,
       isUpcoming: false,
@@ -682,6 +684,9 @@ export default defineComponent({
     },
     hideComments: function () {
       return this.$store.getters.getHideComments
+    },
+    commentsAvailable: function () {
+      return areCommentsAvailable(this)
     },
     hideVideoDescription: function () {
       return this.$store.getters.getHideVideoDescription
@@ -1257,6 +1262,7 @@ export default defineComponent({
       this.isFamilyFriendly = false
       this.commentsDisabled = false
       this.isLive = false
+      this.isPremiere = false
       this.liveChat = null
       this.isLiveContent = false
       this.isUpcoming = false
@@ -1746,6 +1752,7 @@ export default defineComponent({
         this.isLive = !!result.basic_info.is_live
         this.isUpcoming = !!result.basic_info.is_upcoming
         this.isLiveContent = !!result.basic_info.is_live_content
+        this.isPremiere = this.isLive && !this.isLiveContent
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
         this.isUnlisted = !!result.basic_info.is_unlisted
         this.hasAiGeneratedContent = result.primary_info?.badges.some(badge => badge.label === 'AI') ?? false
@@ -2227,6 +2234,7 @@ export default defineComponent({
           this.recommendedVideos = recommendedVideos.sort(this.sortWatchedVideosLast)
 
           this.isLive = result.liveNow
+          this.isPremiere = this.isLive && result.premiereTimestamp > 0
           this.isFamilyFriendly = result.isFamilyFriendly
           this.isPostLiveDvr = !!result.isPostLiveDvr
           this.isUnlisted = !result.isListed

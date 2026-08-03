@@ -114,7 +114,7 @@
           :current-video-quality="currentVideoQuality"
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
-          :comments-available="!isLive && !hideComments"
+          :comments-available="commentsAvailable"
           :quick-bookmark-enabled="isQuickBookmarkEnabled"
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
@@ -372,7 +372,7 @@
             <span class="shortsSkeletonSound ft-shimmer" />
           </template>
           <div
-            v-if="!isLoading && !isLive && !hideComments"
+            v-if="!isLoading && commentsAvailable"
             class="shortsAction shortsComponentAction shortsCommentsAction"
             :class="{ active: shortsCommentsPanelOpen }"
           >
@@ -877,7 +877,7 @@
         :disabled="!fullscreenCommentsOpen && !shortsCommentsOpen"
       >
         <CommentSection
-          v-if="!isLoading && !isLive && !hideComments"
+          v-if="!isLoading && commentsAvailable"
           :id="videoId"
           class="watchVideo"
           :class="{ theatreWatchVideo: useTheatreMode }"

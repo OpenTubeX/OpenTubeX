@@ -147,8 +147,10 @@
         v-overlay-scrollbars
         class="liveChatComments"
         :style="{ blockSize: chatHeight }"
-        @mousewheel.passive="onScroll"
-        @scrollend="e => onScroll(e, true)"
+        @pointerdown="stopScrollingToBottom"
+        @scroll.passive="onScroll"
+        @scrollend="onScrollEnd"
+        @wheel.passive="stopScrollingToBottom"
       >
         <div
           v-for="comment in comments"
@@ -236,8 +238,8 @@
         :aria-label="t('Video.Scroll to Bottom')"
         role="button"
         tabindex="0"
-        @click="scrollToBottom"
-        @keydown.enter.space.prevent="scrollToBottom"
+        @click="scrollToBottom()"
+        @keydown.enter.space.prevent="scrollToBottom()"
       >
         <FontAwesomeIcon
           class="icon"
@@ -286,7 +288,8 @@ const { t } = useI18n()
 /** @type {import('youtubei.js').YT.LiveChat|null} */
 let liveChatInstance = null
 let hasEnded = false
-let stayAtBottom = false
+let stayAtBottom = true
+let isScrollingToBottom = false
 
 const isLoading = ref(true)
 const hasError = ref(false)
@@ -417,10 +420,7 @@ function handleStart(initialData) {
   isLoading.value = false
 
   nextTick(() => {
-    commentsRef.value?.scrollTo({
-      top: commentsRef.value.scrollHeight,
-      behavior: 'instant'
-    })
+    scrollToBottom('instant')
   })
 }
 
@@ -537,10 +537,7 @@ function pushComment(comment) {
 
   if (!isLoading.value && stayAtBottom) {
     nextTick(() => {
-      commentsRef.value?.scrollTo({
-        top: commentsRef.value.scrollHeight,
-        behavior: scrollingBehaviour.value
-      })
+      scrollToBottom()
     })
   }
 
@@ -570,35 +567,50 @@ function showSuperChatComment(comment) {
   }
 }
 
-/**
- * @param {any} event
- * @param {boolean} [isScrollEnd]
- */
-function onScroll(event, isScrollEnd = false) {
+function onScroll() {
   const liveChatComments = commentsRef.value
-  if (event.wheelDelta >= 0 && stayAtBottom) {
-    stayAtBottom = false
+  const isAtBottom = liveChatComments.scrollHeight - liveChatComments.scrollTop - liveChatComments.clientHeight <= 1
 
-    if (liveChatComments.scrollHeight > liveChatComments.clientHeight) {
-      showScrollToBottom.value = true
-    }
-  } else if ((isScrollEnd || event.wheelDelta < 0) && !stayAtBottom && (liveChatComments.scrollHeight - liveChatComments.scrollTop) === liveChatComments.clientHeight) {
-    scrollToBottom()
+  if (isAtBottom) {
+    stayAtBottom = true
+    isScrollingToBottom = false
+    showScrollToBottom.value = false
+  } else if (!isScrollingToBottom) {
+    stayAtBottom = false
+    showScrollToBottom.value = liveChatComments.scrollHeight > liveChatComments.clientHeight
   }
+}
+
+function onScrollEnd() {
+  isScrollingToBottom = false
+  onScroll()
+}
+
+function stopScrollingToBottom() {
+  isScrollingToBottom = false
 }
 
 function hideSuperChat() {
   showSuperChat.value = false
 }
 
-function scrollToBottom() {
-  commentsRef.value.scrollTo({
-    top: commentsRef.value.scrollHeight,
-    behavior: scrollingBehaviour.value
-  })
+/**
+ * @param {ScrollBehavior | 'instant'} [behavior]
+ */
+function scrollToBottom(behavior = scrollingBehaviour.value) {
+  const liveChatComments = commentsRef.value
+  if (!liveChatComments) {
+    return
+  }
 
   stayAtBottom = true
+  isScrollingToBottom = true
   showScrollToBottom.value = false
+
+  liveChatComments.scrollTo({
+    top: liveChatComments.scrollHeight,
+    behavior
+  })
 }
 
 </script>
