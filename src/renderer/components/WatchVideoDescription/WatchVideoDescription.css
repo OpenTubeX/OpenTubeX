@@ -85,6 +85,9 @@
 
 .game {
   display: flex;
+
+  /* shrink wrap, so that the empty space next to the game isn't clickable too */
+  inline-size: fit-content;
   align-items: flex-start;
   gap: 16px;
   padding-block: 6px;
@@ -96,7 +99,6 @@
 .gameBoxArt {
   inline-size: 160px;
   block-size: 224px;
-  max-inline-size: 40%;
   object-fit: cover;
   border-radius: calc(5px * var(--ui-roundness));
 }
