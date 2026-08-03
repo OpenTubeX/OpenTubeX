@@ -1153,6 +1153,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
       comment.hasReplyToken = false
     }
 
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
+    }
+
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
     console.error(err)
@@ -1295,6 +1299,10 @@ async function getCommentRepliesInvidious(
       comment.hasReplyToken = false
     }
 
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
+    }
+
     isLoading.value = false
   } catch (error) {
     console.error(error)
@@ -1365,6 +1373,10 @@ async function getPostCommentRepliesInvidious(index) {
     } else {
       replyTokens.delete(comment.id)
       comment.hasReplyToken = false
+    }
+
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
     }
 
     isLoading.value = false

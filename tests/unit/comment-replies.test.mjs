@@ -8,35 +8,35 @@ import {
   shouldLoadInitialReplies
 } from '../../src/renderer/helpers/comment-replies.js'
 
-test('keeps an empty reply load retryable without opening the reply panel', () => {
+test('exhausts a stale advertised reply without opening the reply panel', () => {
   assert.deepEqual(getReplyLoadState(0, 0, 1, false), {
-    hasMore: true,
-    showReplies: false,
-    shouldRetry: true
+    hasMore: false,
+    hasMissingReplies: true,
+    showReplies: false
   })
 })
 
 test('marks a completed reply load as exhausted', () => {
   assert.deepEqual(getReplyLoadState(1, 1, 1, false), {
     hasMore: false,
-    showReplies: true,
-    shouldRetry: false
+    hasMissingReplies: false,
+    showReplies: true
   })
 })
 
 test('keeps a loaded reply panel open while its continuation is available', () => {
   assert.deepEqual(getReplyLoadState(1, 3, 4, true), {
     hasMore: true,
-    showReplies: true,
-    shouldRetry: false
+    hasMissingReplies: false,
+    showReplies: true
   })
 })
 
-test('keeps a zero-progress continuation retryable after earlier replies loaded', () => {
+test('exhausts a zero-progress continuation after earlier replies loaded', () => {
   assert.deepEqual(getReplyLoadState(0, 3, 4, false), {
-    hasMore: true,
-    showReplies: true,
-    shouldRetry: true
+    hasMore: false,
+    hasMissingReplies: true,
+    showReplies: true
   })
 })
 

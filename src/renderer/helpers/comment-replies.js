@@ -5,12 +5,14 @@
  * @param {boolean} hasNextContinuation
  */
 export function getReplyLoadState(parsedReplyCount, loadedReplyCount, expectedReplyCount, hasNextContinuation) {
-  const shouldRetry = parsedReplyCount === 0 && loadedReplyCount < expectedReplyCount
+  const hasMissingReplies = parsedReplyCount === 0 &&
+    loadedReplyCount < expectedReplyCount &&
+    !hasNextContinuation
 
   return {
-    hasMore: hasNextContinuation || shouldRetry,
+    hasMore: hasNextContinuation,
+    hasMissingReplies,
     showReplies: loadedReplyCount > 0,
-    shouldRetry
   }
 }
 
