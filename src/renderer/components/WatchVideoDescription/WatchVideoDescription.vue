@@ -50,7 +50,6 @@
               :to="`/channel/${game.channelId}`"
               :tabindex="game.channelId ? linkTabIndex : null"
               class="game"
-              :class="{ gameLink: !!game.channelId }"
             >
               <img
                 v-if="game.thumbnail"

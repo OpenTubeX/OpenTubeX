@@ -92,11 +92,6 @@
   text-decoration: none;
 }
 
-.gameLink:hover,
-.gameLink:focus {
-  text-decoration: underline;
-}
-
 /* YouTube renders the box art at 164x230, the source image is 160x224 */
 .gameBoxArt {
   inline-size: 160px;
