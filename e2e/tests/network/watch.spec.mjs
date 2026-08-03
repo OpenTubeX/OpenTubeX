@@ -689,6 +689,41 @@ test.describe('watch page', () => {
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
   })
 
+  test('reloading fullscreen comments scrolls back to the first comment', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollHeight)).toBeGreaterThan(500)
+
+    // The end of the loaded comments: the offset the reloaded, shorter list has
+    // no room for, so it used to leave the dock parked past its own content.
+    await comments.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBeGreaterThan(300)
+
+    const [reloadResponse] = await Promise.all([
+      page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 }),
+      page.locator('.fullscreenCommentHeader').getByRole('button', { name: 'Reload Comments' }).click()
+    ])
+    expect(reloadResponse.ok()).toBe(true)
+    await expect(page.locator('.fullscreenCommentsOverlay .comment').first()).toBeVisible({ timeout: 30_000 })
+
+    // OverlayScrollbars reapplies its remembered offset once the new list has
+    // rendered, so the position has to still be at the top a moment later.
+    await page.waitForTimeout(1000)
+    expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
+  })
+
   test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
