@@ -182,8 +182,7 @@ const hasHorizontalTabBar = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
 const showProgressToast = computed(() => {
-  return fullscreenTarget.value === null &&
-    store.getters.getShowProgressBarToast &&
+  return store.getters.getShowProgressBarToast &&
     (store.getters.getShowProgressBar ||
       (props.showSubscriptionRefresh && store.getters.getSubscriptionFeedRefreshInProgress))
 })

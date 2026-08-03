@@ -79,7 +79,18 @@ test.describe('global progress presentation', () => {
     })
 
     await expect(progressToast).toHaveCount(0)
-    await expect(page.locator('.app > .progressBar')).toBeVisible()
+    await expect(page.locator('.app > .progressBar')).toHaveCount(1)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowProgressBarToast', true)
+    })
+    await expect(progressToast).toBeVisible()
+
+    await page.evaluate(() => document.querySelector('.app').requestFullscreen())
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+    await expect(progressToast).toBeVisible()
+    await page.evaluate(() => document.exitFullscreen())
   })
 })
 
