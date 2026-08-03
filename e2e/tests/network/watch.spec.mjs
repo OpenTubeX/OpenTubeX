@@ -2287,7 +2287,7 @@ test.describe('custom Shorts player', () => {
     )
   })
 
-  test('does not show a stale loading indicator after leaving a loaded Shorts tab', async ({ page }) => {
+  test('does not show a stale loading indicator after leaving a loaded Shorts tab', async ({ app, page }) => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     const shortTab = page.locator(sel.tabs).first()
@@ -2383,7 +2383,22 @@ test.describe('custom Shorts player', () => {
       }, 250)
     }, shortTabId)
 
-    await otherTab.click()
+    await app.evaluate(({ BrowserWindow, Menu }) => {
+      const findMenuItem = (items, label) => {
+        for (const item of items) {
+          if (item.label === label) return item
+          const match = findMenuItem(item.submenu?.items ?? [], label)
+          if (match) return match
+        }
+        return null
+      }
+      const menuItem = findMenuItem(Menu.getApplicationMenu()?.items ?? [], 'Next Tab')
+      const browserWindow = BrowserWindow.getFocusedWindow()
+      if (!menuItem || !browserWindow) {
+        throw new Error('Next Tab application-menu item was not found')
+      }
+      menuItem.click(undefined, browserWindow, undefined)
+    })
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await page.waitForTimeout(5000)
     const loadingResult = await page.evaluate(() => ({
