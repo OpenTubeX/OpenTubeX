@@ -291,6 +291,7 @@ export default defineComponent({
       autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
       watchingPlaylist: false,
+      playlistSkipAvailability: { canPlayNext: true, canPlayPrevious: true },
       playlistId: '',
       playlistType: '',
       playlistItemId: null,
@@ -698,6 +699,13 @@ export default defineComponent({
     },
     theatreTogglePossible: function () {
       return this.theatreLayoutAvailable && this.theatrePossible
+    },
+    canSkipToNextPlaylistVideo: function () {
+      // The watch queue takes precedence over the playlist, see `handleSkipToNext`
+      return !!this.nextQueuedVideo || this.playlistSkipAvailability.canPlayNext
+    },
+    canSkipToPreviousPlaylistVideo: function () {
+      return this.playlistSkipAvailability.canPlayPrevious
     },
     autoplayPossible: function () {
       return !this.isShort && (
@@ -3196,6 +3204,13 @@ export default defineComponent({
       this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
+    },
+
+    /**
+     * @param {{ canPlayNext: boolean, canPlayPrevious: boolean }} availability
+     */
+    handlePlaylistSkipAvailabilityChange: function (availability) {
+      this.playlistSkipAvailability = availability
     },
 
     // Skip to the previous video in a playlist
