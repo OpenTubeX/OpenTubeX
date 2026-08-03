@@ -263,6 +263,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
 import store from '../../store/index'
+import { localeTranslationPercentages } from '../../i18n/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
@@ -568,7 +569,7 @@ const LOCALE_VALUES = ['system', ...allLocales]
 
 const localeNames = computed(() => [
   t('Settings.General Settings.System Default'),
-  ...process.env.LOCALE_NAMES
+  ...process.env.LOCALE_NAMES.map((name, index) => `${name} (${localeTranslationPercentages.value[index]}%)`)
 ])
 
 /** @type {import('vue').ComputedRef<string>} */

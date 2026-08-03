@@ -1,7 +1,10 @@
 import { createI18n } from 'vue-i18n'
+import { ref } from 'vue'
 import { createWebURL } from '../helpers/utils'
 // List of locales approved for use
 import activeLocales from '../../../static/locales/activeLocales.json'
+
+export const localeTranslationPercentages = ref(process.env.LOCALE_TRANSLATION_PERCENTAGES)
 
 const i18n = createI18n({
   locale: 'en-US',
@@ -57,7 +60,9 @@ if (process.env.HOT_RELOAD_LOCALES) {
     const message = JSON.parse(event.data)
 
     if (message.type === 'freetube-locale-update') {
-      for (const [locale, data] of message.data) {
+      localeTranslationPercentages.value = message.data.translationPercentages
+
+      for (const [locale, data] of message.data.locales) {
         // Only update locale data if it was already loaded
         if (i18n.global.availableLocales.includes(locale) &&
           Object.keys(i18n.global.messages.value[locale]).length > 0) {
