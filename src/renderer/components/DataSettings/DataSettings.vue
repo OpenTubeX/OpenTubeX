@@ -132,6 +132,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
 import store from '../../store/index'
 import { defaultUpdaterId, NON_TRANSFERABLE_SETTINGS } from '../../store/modules/settings'
+import { migrateLegacySettings } from '../../helpers/settings-migrations'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
@@ -1710,6 +1711,8 @@ async function importSettings() {
       }).filter((entry) => entry.length > 0)
     )
   }
+
+  importedSettings = migrateLegacySettings(importedSettings)
 
   const currentTransferableSettings = transferableSettings.value
   const currentSettings = store.state.settings

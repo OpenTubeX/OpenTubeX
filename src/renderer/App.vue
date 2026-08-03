@@ -469,8 +469,8 @@ const localProgressBarVisible = computed(() => store.getters.getShowProgressBar)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionRefreshInProgress = computed(() => store.getters.getSubscriptionFeedRefreshInProgress)
-const subscriptionRefreshUsesToast = computed(() => {
-  return store.getters.getShowSubscriptionRefreshToast
+const progressUsesToast = computed(() => {
+  return store.getters.getShowProgressBarToast
 })
 
 const presentedRoutePath = computed(() => {
@@ -482,9 +482,9 @@ const presentedRoutePath = computed(() => {
 
 const showProgressBar = computed(() => {
   // The Subscriptions view shows its own progress bar below the tab bar
-  return localProgressBarVisible.value ||
+  return (localProgressBarVisible.value && !progressUsesToast.value) ||
     (subscriptionRefreshInProgress.value &&
-      !subscriptionRefreshUsesToast.value &&
+      !progressUsesToast.value &&
       presentedRoutePath.value !== '/subscriptions')
 })
 const displayedProgressBarPercentage = computed(() => {
@@ -634,21 +634,25 @@ async function initializeManagedDownloadTools() {
   let downloadStarted = missingBinaries.length > 0
   let toolProgressPercentage = 0
 
-  function showToolProgress() {
+  function showToolProgress(message) {
+    store.commit('setProgressBarMessage', message)
+    store.commit('setProgressBarIcon', ['fas', 'download'])
     store.commit('setProgressBarPercentage', toolProgressPercentage)
     store.commit('setShowProgressBar', true)
   }
 
   if (downloadStarted) {
-    const missingTools = missingBinaries.join(' and ')
-    showToast({
-      message: t('Settings.Download Settings.Managed Tools Download Started Template', { tools: missingTools }),
-      icon: ['fas', 'download'],
-    })
-    showToolProgress()
+    const tools = binariesToUpdate.join(' and ')
+    const message = t('Settings.Download Settings.Managed Tools Download Started Template', { tools })
+    if (!progressUsesToast.value) {
+      showToast({ message, icon: ['fas', 'download'] })
+    }
+    showToolProgress(message)
   }
 
-  const progressByBinary = {}
+  const progressByBinary = Object.fromEntries(
+    binariesToUpdate.map(binary => [binary, 0])
+  )
   const removeProgressListener = window.ftElectron.addYtDlpBinaryDownloadProgressListener(({ binary, percent, inProgress }) => {
     if (!binariesToUpdate.includes(binary) || !inProgress || percent === null) {
       return
@@ -656,11 +660,12 @@ async function initializeManagedDownloadTools() {
 
     if (!downloadStarted) {
       downloadStarted = true
-      showToast({
-        message: t('Settings.Download Settings.Managed Tools Update Started Template', { tools: binary }),
-        icon: ['fas', 'download'],
-      })
-      showToolProgress()
+      const tools = binariesToUpdate.join(' and ')
+      const message = t('Settings.Download Settings.Managed Tools Update Started Template', { tools })
+      if (!progressUsesToast.value) {
+        showToast({ message, icon: ['fas', 'download'] })
+      }
+      showToolProgress(message)
     }
 
     progressByBinary[binary] = Math.max(progressByBinary[binary] ?? 0, percent)
@@ -707,6 +712,8 @@ async function initializeManagedDownloadTools() {
     if (downloadStarted) {
       store.commit('setShowProgressBar', false)
       store.commit('setProgressBarPercentage', 0)
+      store.commit('setProgressBarMessage', '')
+      store.commit('setProgressBarIcon', ['fas', 'sync'])
     }
   }
 }

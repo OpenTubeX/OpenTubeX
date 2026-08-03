@@ -43,6 +43,8 @@ const state = {
   channelThumbnailCache: loadChannelThumbnailCache(),
   videoAvatarCache: loadVideoAvatarCache(),
   showProgressBar: false,
+  progressBarMessage: '',
+  progressBarIcon: ['fas', 'sync'],
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
@@ -159,6 +161,14 @@ const getters = {
 
   getProgressBarPercentage(state) {
     return state.progressBarPercentage
+  },
+
+  getProgressBarMessage(state) {
+    return state.progressBarMessage
+  },
+
+  getProgressBarIcon(state) {
+    return state.progressBarIcon
   },
 
   getRegionNames(state) {
@@ -662,6 +672,14 @@ const mutations = {
 
   setProgressBarPercentage (state, value) {
     state.progressBarPercentage = value
+  },
+
+  setProgressBarMessage (state, value) {
+    state.progressBarMessage = value
+  },
+
+  setProgressBarIcon (state, value) {
+    state.progressBarIcon = value
   },
 
   setSessionSearchHistory (state, history) {

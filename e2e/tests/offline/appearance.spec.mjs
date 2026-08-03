@@ -57,6 +57,43 @@ test.describe('default appearance', () => {
   })
 })
 
+test.describe('global progress presentation', () => {
+  test('uses a persistent notification or the global bar based on the theme setting', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setProgressBarMessage', 'Downloading yt-dlp and ffmpeg')
+      store.commit('setProgressBarIcon', ['fas', 'download'])
+      store.commit('setProgressBarPercentage', 42)
+      store.commit('setShowProgressBar', true)
+    })
+
+    const progressToast = page.getByTestId('progress-toast')
+    await expect(progressToast).toContainText('Downloading yt-dlp and ffmpeg')
+    await expect(progressToast.locator('.icon')).toHaveAttribute('data-icon', 'download')
+    await expect(progressToast.locator('.progress-indicator')).toHaveAttribute('data-progress', '42')
+    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowProgressBarToast', false)
+    })
+
+    await expect(progressToast).toHaveCount(0)
+    await expect(page.locator('.app > .progressBar')).toHaveCount(1)
+
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setShowProgressBarToast', true)
+    })
+    await expect(progressToast).toBeVisible()
+
+    await page.evaluate(() => document.querySelector('.app').requestFullscreen())
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
+    await expect(progressToast).toBeVisible()
+    await page.evaluate(() => document.exitFullscreen())
+  })
+})
+
 test.describe('UI roundness', () => {
   test.use({ seed: { settings: { uiRoundness: 0 } } })
 

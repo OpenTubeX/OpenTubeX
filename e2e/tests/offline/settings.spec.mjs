@@ -520,6 +520,26 @@ test.describe('settings', () => {
     await expect(toast).toHaveCount(0)
   })
 
+  test('does not dismiss non-actionable toasts when clicked', async ({ page }) => {
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Swipe-only dismissal', 10000)
+    })
+
+    const toast = page.locator('.toast', { hasText: 'Swipe-only dismissal' })
+    await expect(toast).toBeVisible()
+    await expect(toast).not.toHaveAttribute('tabindex')
+
+    await toast.click()
+    await expect(toast).toBeVisible()
+
+    const bounds = await toast.boundingBox()
+    await page.mouse.move(bounds.x + bounds.width - 5, bounds.y + bounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(bounds.x - 120, bounds.y + bounds.height / 2, { steps: 5 })
+    await page.mouse.up()
+    await expect(toast).toHaveCount(0)
+  })
+
   test('configures the toast timeout indicator and pauses toasts on hover', async ({ page }) => {
     await goTo(page, 'settings')
 
