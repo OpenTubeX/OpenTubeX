@@ -1139,7 +1139,6 @@ async function getCommentRepliesLocal(index, commentId = null) {
     comment.replies = comment.replies.concat(parsedReplies)
 
     const replyLoadState = getReplyLoadState(
-      parsedReplies.length,
       comment.replies.length,
       comment.numReplies,
       nextContinuation !== null
@@ -1284,7 +1283,6 @@ async function getCommentRepliesInvidious(
 
     comment.replies = comment.replies.concat(commentData)
     const replyLoadState = getReplyLoadState(
-      commentData.length,
       comment.replies.length,
       comment.numReplies,
       continuation !== null
@@ -1360,7 +1358,6 @@ async function getPostCommentRepliesInvidious(index) {
     })
     comment.replies = comment.replies.concat(comments)
     const replyLoadState = getReplyLoadState(
-      comments.length,
       comment.replies.length,
       comment.numReplies,
       continuation !== null

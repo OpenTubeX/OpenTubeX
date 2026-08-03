@@ -9,7 +9,7 @@ import {
 } from '../../src/renderer/helpers/comment-replies.js'
 
 test('exhausts a stale advertised reply without opening the reply panel', () => {
-  assert.deepEqual(getReplyLoadState(0, 0, 1, false), {
+  assert.deepEqual(getReplyLoadState(0, 1, false), {
     hasMore: false,
     hasMissingReplies: true,
     showReplies: false
@@ -17,7 +17,7 @@ test('exhausts a stale advertised reply without opening the reply panel', () => 
 })
 
 test('marks a completed reply load as exhausted', () => {
-  assert.deepEqual(getReplyLoadState(1, 1, 1, false), {
+  assert.deepEqual(getReplyLoadState(1, 1, false), {
     hasMore: false,
     hasMissingReplies: false,
     showReplies: true
@@ -25,7 +25,7 @@ test('marks a completed reply load as exhausted', () => {
 })
 
 test('keeps a loaded reply panel open while its continuation is available', () => {
-  assert.deepEqual(getReplyLoadState(1, 3, 4, true), {
+  assert.deepEqual(getReplyLoadState(3, 4, true), {
     hasMore: true,
     hasMissingReplies: false,
     showReplies: true
@@ -33,7 +33,15 @@ test('keeps a loaded reply panel open while its continuation is available', () =
 })
 
 test('exhausts a zero-progress continuation after earlier replies loaded', () => {
-  assert.deepEqual(getReplyLoadState(0, 3, 4, false), {
+  assert.deepEqual(getReplyLoadState(3, 4, false), {
+    hasMore: false,
+    hasMissingReplies: true,
+    showReplies: true
+  })
+})
+
+test('reconciles an underfilled final reply page', () => {
+  assert.deepEqual(getReplyLoadState(2, 3, false), {
     hasMore: false,
     hasMissingReplies: true,
     showReplies: true
