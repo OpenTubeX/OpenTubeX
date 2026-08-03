@@ -119,6 +119,8 @@
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
           :quick-bookmark-icon="quickBookmarkIcon"
+          :paid-promotion="hasPaidPromotion"
+          :paid-promotion-duration-ms="paidPromotionDurationMs"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
@@ -159,6 +161,10 @@
         >
           <template #shorts-fullscreen-metadata>
             <div class="shortsFullscreenMetadataContent">
+              <FtPaidPromotionBadge
+                v-if="hasPaidPromotion"
+                class="shortsPaidPromotion"
+              />
               <div class="shortsFullscreenChannelRow">
                 <button
                   v-if="!hideUploader"
@@ -274,33 +280,38 @@
             </div>
             <span class="shortsSkeletonTitle ft-shimmer" />
           </template>
-          <div
-            v-else
-            class="shortsChannelRow"
-          >
-            <button
-              v-if="!hideUploader"
-              type="button"
-              class="shortsExternalChannel"
-              @click="openShortsChannel"
-            >
-              <img
-                v-if="channelThumbnail"
-                :src="channelThumbnail"
-                class="shortsExternalChannelThumbnail"
-                alt=""
-              >
-              <span dir="auto">{{ channelName }}</span>
-            </button>
-            <FtSubscribeButton
-              v-if="!hideUnsubscribeButton"
-              :channel-id="channelId"
-              :channel-name="channelName"
-              :channel-thumbnail="channelThumbnail"
-              :subscription-count-text="channelSubscriptionCountText"
-              :hide-profile-dropdown-toggle="true"
+          <template v-else>
+            <FtPaidPromotionBadge
+              v-if="hasPaidPromotion"
+              class="shortsPaidPromotion"
             />
-          </div>
+            <div
+              class="shortsChannelRow"
+            >
+              <button
+                v-if="!hideUploader"
+                type="button"
+                class="shortsExternalChannel"
+                @click="openShortsChannel"
+              >
+                <img
+                  v-if="channelThumbnail"
+                  :src="channelThumbnail"
+                  class="shortsExternalChannelThumbnail"
+                  alt=""
+                >
+                <span dir="auto">{{ channelName }}</span>
+              </button>
+              <FtSubscribeButton
+                v-if="!hideUnsubscribeButton"
+                :channel-id="channelId"
+                :channel-name="channelName"
+                :channel-thumbnail="channelThumbnail"
+                :subscription-count-text="channelSubscriptionCountText"
+                :hide-profile-dropdown-toggle="true"
+              />
+            </div>
+          </template>
           <h1
             v-if="!isLoading"
             class="shortsExternalTitle"

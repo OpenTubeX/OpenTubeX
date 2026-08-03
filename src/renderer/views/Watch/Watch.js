@@ -19,6 +19,7 @@ import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeBut
 import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
+import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
@@ -138,6 +139,7 @@ export default defineComponent({
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
+    FtPaidPromotionBadge,
   },
   setup: function () {
     const { t, locale } = useI18n()
@@ -204,6 +206,8 @@ export default defineComponent({
       shortsPlaybackAfterSeekSeconds: 0,
       videoLoadGeneration: 0,
       hasAiGeneratedContent: false,
+      hasPaidPromotion: false,
+      paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
       upcomingTimeLeft: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
@@ -1259,6 +1263,8 @@ export default defineComponent({
       this.shortsCompletionBlockedBySeek = false
       this.shortsPlaybackAfterSeekSeconds = 0
       this.hasAiGeneratedContent = false
+      this.hasPaidPromotion = false
+      this.paidPromotionDurationMs = 10000
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
       this.thumbnail = ''
@@ -1603,7 +1609,7 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs } = videoInfo
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -1619,6 +1625,8 @@ export default defineComponent({
         }
 
         this.adEndTimeUnixMs = adEndTimeUnixMs
+        this.hasPaidPromotion = paidPromotionDurationMs !== null
+        this.paidPromotionDurationMs = paidPromotionDurationMs ?? 10000
 
         this.isFamilyFriendly = result.basic_info.is_family_safe
 
