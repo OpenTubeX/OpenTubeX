@@ -29,6 +29,7 @@ class ProcessLocalesPlugin {
     /** @type {Map<string, any>} */
     this.locales = new Map()
     this.localeNames = []
+    this.localeTranslationPercentages = []
 
     /** @type {Map<string, any>} */
     this.cache = new Map()
@@ -154,6 +155,39 @@ class ProcessLocalesPlugin {
 
       this.localeNames.push(data['Locale Name'] ?? locale)
     }
+
+    const sourceLocale = this.locales.get('en-US')
+    const sourceTranslationCount = this.countTranslations(sourceLocale)
+
+    for (const locale of activeLocales) {
+      const translationCount = this.countTranslations(this.locales.get(locale), sourceLocale)
+      this.localeTranslationPercentages.push(Math.floor(translationCount / sourceTranslationCount * 100))
+    }
+  }
+
+  /**
+   * Count non-empty translation values. When a reference locale is provided, only values
+   * which correspond to a source translation are counted.
+   * @param {object|string} data
+   * @param {object|string|null} reference
+   * @returns {number}
+   */
+  countTranslations(data, reference = null) {
+    if (typeof data !== 'object' || data === null) {
+      return data ? 1 : 0
+    }
+
+    const keys = reference && typeof reference === 'object'
+      ? Object.keys(reference)
+      : Object.keys(data)
+
+    return keys.reduce((count, key) => {
+      if (key === 'Locale Name') {
+        return count
+      }
+
+      return count + this.countTranslations(data[key], reference?.[key] ?? null)
+    }, 0)
   }
 
   async compressLocale(data) {

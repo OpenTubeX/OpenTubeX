@@ -568,7 +568,7 @@ const LOCALE_VALUES = ['system', ...allLocales]
 
 const localeNames = computed(() => [
   t('Settings.General Settings.System Default'),
-  ...process.env.LOCALE_NAMES
+  ...process.env.LOCALE_NAMES.map((name, index) => `${name} (${process.env.LOCALE_TRANSLATION_PERCENTAGES[index]}%)`)
 ])
 
 /** @type {import('vue').ComputedRef<string>} */
