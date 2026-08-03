@@ -21,9 +21,9 @@
         <div
           v-overlay-scrollbars
           class="toast"
-          :class="{ hasImage: toast.image, dragging: toast.dragging }"
+          :class="{ hasImage: toast.image, actionable: toast.action, dragging: toast.dragging }"
           :style="dragStyle(toast)"
-          tabindex="0"
+          :tabindex="toast.action ? 0 : null"
           role="status"
           @click="onClick(toast)"
           @keydown.enter.prevent="performAction(toast)"
@@ -348,7 +348,11 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
  * @param {Toast} toast
  */
 function performAction(toast) {
-  toast.action?.()
+  if (!toast.action) {
+    return
+  }
+
+  toast.action()
   remove(toast)
 }
 
@@ -366,8 +370,8 @@ function dismiss(toast, direction = toastPosition.value.endsWith('right') ? 'rig
 }
 
 /**
- * Runs the toast action on click, unless the pointer was dragged (in which case
- * the click is the tail end of a drag gesture and should be ignored).
+ * Runs an available toast action on click, unless the pointer was dragged (in
+ * which case the click is the tail end of a drag gesture and should be ignored).
  * @param {Toast} toast
  */
 function onClick(toast) {

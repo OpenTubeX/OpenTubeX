@@ -144,15 +144,16 @@
   color: #fff;
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
-
-  /* Many toasts are clickable, so keep the click affordance until a drag starts */
-  cursor: pointer;
   pointer-events: auto;
   user-select: none;
 
   /* Let the component own horizontal drag gestures instead of the browser */
   touch-action: pan-y;
   transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.toast.actionable {
+  cursor: pointer;
 }
 
 .timeout-indicator-track {
