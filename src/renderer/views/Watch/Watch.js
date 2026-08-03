@@ -2161,6 +2161,7 @@ export default defineComponent({
           this.videoTitle = result.title
           this.hasResolvedVideoTitle = this.videoTitle.length > 0
           this.videoViewCount = result.viewCount
+          this.hasPaidPromotion = result.paid
 
           const subCount = parseLocalSubscriberCount(result.subCountText)
           if (!isNaN(subCount)) {
