@@ -69,6 +69,7 @@
           ref="player"
           :manifest-src="manifestSrc"
           :manifest-mime-type="manifestMimeType"
+          :playback-engine="activePlaybackEngine"
           :sabr-data="sabrData"
           :legacy-formats="legacyFormats"
           :start-time="startTimeSeconds"
@@ -85,7 +86,7 @@
           :chapters-kind="videoChaptersKind"
           :chapters-src="chaptersSrc"
           :title="videoTitle"
-          :theatre-possible="theatrePossible"
+          :theatre-possible="theatreTogglePossible"
           :use-theatre-mode="useTheatreMode"
           :autoplay-possible="autoplayPossible"
           :autoplay-enabled="autoplayEnabled"
@@ -155,7 +156,48 @@
           @chapter-thumbnails-change="handleChapterThumbnailsChange"
           @sponsorblock-info-change="handleSponsorBlockInfoChange"
           @toggle-shorts-metadata="toggleShortsMetadata"
-        />
+        >
+          <template #shorts-fullscreen-metadata>
+            <div class="shortsFullscreenMetadataContent">
+              <div class="shortsFullscreenChannelRow">
+                <button
+                  v-if="!hideUploader"
+                  type="button"
+                  class="shortsFullscreenChannel"
+                  @click="openShortsChannel"
+                >
+                  <img
+                    v-if="channelThumbnail"
+                    :src="channelThumbnail"
+                    class="shortsFullscreenChannelThumbnail"
+                    alt=""
+                  >
+                  <span dir="auto">{{ channelName }}</span>
+                </button>
+                <FtSubscribeButton
+                  v-if="!hideUnsubscribeButton"
+                  :channel-id="channelId"
+                  :channel-name="channelName"
+                  :channel-thumbnail="channelThumbnail"
+                  :subscription-count-text="channelSubscriptionCountText"
+                  :hide-profile-dropdown-toggle="true"
+                />
+              </div>
+              <h1 class="shortsFullscreenTitle">
+                <button
+                  type="button"
+                  class="shortsFullscreenTitleButton"
+                  dir="auto"
+                  :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
+                  :aria-expanded="fullscreenMetadataOpen"
+                  @click="toggleFullscreenMetadata"
+                >
+                  {{ videoTitle }}
+                </button>
+              </h1>
+            </div>
+          </template>
+        </ft-shaka-video-player>
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
           class="videoPlayer"
@@ -483,6 +525,13 @@
             :is-unlisted="isUnlisted"
             :has-ai-generated-content="hasAiGeneratedContent"
             :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
+            :active-format="activeFormat"
+            :playback-engine="activePlaybackEngine"
+            :playback-engine-version="activePlaybackEngineVersion"
+            :stream-type="playbackStreamType"
+            :dash-available="dashFormatAvailable"
+            :legacy-available="legacyFormatAvailable"
+            :audio-available="audioFormatAvailable"
             :can-save-watched-progress="canSaveWatchProgress"
             :sponsor-block-panel-open="showSidebarSponsorBlock"
             :transcript-open="showTranscript"
@@ -586,6 +635,13 @@
           :is-unlisted="isUnlisted"
           :has-ai-generated-content="hasAiGeneratedContent"
           :sponsor-block-full-video-category="sponsorBlockFullVideoCategory"
+          :active-format="activeFormat"
+          :playback-engine="activePlaybackEngine"
+          :playback-engine-version="activePlaybackEngineVersion"
+          :stream-type="playbackStreamType"
+          :dash-available="dashFormatAvailable"
+          :legacy-available="legacyFormatAvailable"
+          :audio-available="audioFormatAvailable"
           :can-save-watched-progress="canSaveWatchProgress"
           :sponsor-block-panel-open="showSidebarSponsorBlock"
           :transcript-open="showTranscript"

@@ -168,6 +168,7 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
+import { filterTranscriptSegments } from './transcriptSearch.js'
 
 import {
   copyToClipboard,
@@ -217,11 +218,7 @@ let hasAlignedActiveSegment = false
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase())
 const filteredSegments = computed(() => {
-  if (normalizedSearchQuery.value === '') {
-    return segments.value
-  }
-
-  return segments.value.filter(segment => segment.text.toLocaleLowerCase().includes(normalizedSearchQuery.value))
+  return filterTranscriptSegments(segments.value, normalizedSearchQuery.value)
 })
 const activeSegmentIndex = computed(() => {
   return segments.value.findLastIndex(segment => (

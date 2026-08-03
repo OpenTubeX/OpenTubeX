@@ -343,7 +343,7 @@ Fixed videos failing to load.
     loadImage: async () => png(800, 600),
   })
 
-  assert.equal(result, `# Highlights
+  assert.equal(result, `## Highlights
 
 - Adds a compact player. (#40, #41, #42)
   <img src="https://github.com/user-attachments/assets/example" alt="Screenshot" height="300">

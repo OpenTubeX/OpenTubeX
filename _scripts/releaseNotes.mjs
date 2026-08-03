@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const NOT_NOTEWORTHY_CATEGORY = 'Not noteworthy'
 const RELEASE_NOTE_CATEGORIES = new Map([
-  ['Highlights', '# Highlights'],
+  ['Highlights', '## Highlights'],
   ['More improvements', '## More improvements'],
   ['Fixed bugs', '## Fixed bugs'],
 ])

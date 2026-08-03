@@ -405,8 +405,7 @@ export async function getLocalSearchContinuation(continuationData) {
  *     osName: string,
  *     osVersion: string
  *   },
- *   adEndTimeUnixMs: number,
- *   reloadSabrData: (reloadPlaybackContext: import('googlevideo/protos').ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>
+ *   adEndTimeUnixMs: number
  * }>}
  */
 export async function getLocalVideoInfo(id) {
@@ -592,40 +591,11 @@ export async function getLocalVideoInfo(id) {
     }
   }
 
-  const reloadSabrData = async (reloadPlaybackContext) => {
-    const playerResponse = await webInnertube.actions.execute('/player', {
-      videoId: id,
-      contentCheckOk: true,
-      racyCheckOk: true,
-      playbackContext: {
-        contentPlaybackContext: {
-          signatureTimestamp: webInnertube.session.player.signature_timestamp
-        },
-        reloadPlaybackContext
-      },
-      serviceIntegrityDimensions: contentPoToken ? { poToken: contentPoToken } : undefined
-    })
-    const reloadedInfo = new YT.VideoInfo([playerResponse], webInnertube.actions, info.cpn)
-    const serverAbrStreamingUrl = reloadedInfo.streaming_data?.server_abr_streaming_url
-    const ustreamerConfig = reloadedInfo.player_config?.media_common_config
-      ?.media_ustreamer_request_config?.video_playback_ustreamer_config
-
-    if (!serverAbrStreamingUrl || !ustreamerConfig) {
-      throw new Error('Reloaded player response did not contain SABR data')
-    }
-
-    return {
-      url: await webInnertube.session.player.decipher(serverAbrStreamingUrl),
-      ustreamerConfig
-    }
-  }
-
   return {
     info,
     poToken: contentPoToken,
     clientInfo,
     adEndTimeUnixMs,
-    reloadSabrData,
   }
 }
 
@@ -2246,6 +2216,54 @@ export function parseLocalTextRuns(runs, emojiSize = 16, options = { looseChanne
 }
 
 /**
+ * Recreates the audio track information that YouTube's local API returns for videos
+ * with multiple audio tracks, for backends that don't provide it themselves.
+ * @param {import('youtubei.js').Misc.Format} format
+ * @param {Intl.DisplayNames} languageNames
+ */
+export function generateAudioTrackField(format, languageNames) {
+  // `Intl.DisplayNames` throws for anything that isn't a valid language tag.
+  // YouTube leaves the track information off the audio streams it can't label
+  // either, which players treat as the track to ignore.
+  if (!format.language) {
+    return
+  }
+
+  let type
+
+  // use the same id numbers as YouTube (except -1, when we aren't sure what it is)
+  let idNumber
+
+  if (format.is_descriptive) {
+    type = ' descriptive'
+    idNumber = 2
+  } else if (format.is_dubbed) {
+    type = ''
+    idNumber = 3
+  } else if (format.is_original) {
+    type = ' original'
+    idNumber = 4
+  } else if (format.is_secondary) {
+    type = ' secondary'
+    idNumber = 6
+  } else if (format.is_auto_dubbed) {
+    type = ''
+    idNumber = 10
+  } else {
+    type = ' alternative'
+    idNumber = -1
+  }
+
+  const languageName = languageNames.of(format.language)
+
+  format.audio_track = {
+    audio_is_default: !!format.is_original,
+    id: `${format.language}.${idNumber}`,
+    display_name: `${languageName}${type}`
+  }
+}
+
+/**
  * @param {LocalFormat} format
  */
 export function mapLocalLegacyFormat(format) {
@@ -2380,7 +2398,11 @@ export function parseLocalCommunityPosts(posts) {
   // we don't currently support SharedPost's so that is also filtered out
   for (const post of posts) {
     if (post.type === 'SharedPost') {
-      foundIds.push(post.original_post.id, post.id)
+      // `original_post` can be null if it was deleted
+      if (post.original_post) {
+        foundIds.push(post.original_post.id)
+      }
+      foundIds.push(post.id)
     }
   }
 

@@ -37,6 +37,7 @@ import {
   showToastOnAllTabs
 } from '../../helpers/utils'
 import {
+  generateAudioTrackField,
   getLocalShortLinkedVideo,
   getLocalVideoInfo,
   mapLocalLegacyFormat,
@@ -56,7 +57,14 @@ import {
 } from '../../helpers/api/invidious'
 import { sponsorBlockSkipSegments } from '../../helpers/sponsorblock'
 import { getVideoDislikes } from '../../helpers/returnyoutubedislike'
-import { findCaptionByLocale, getPreferredCaption, sortCaptions } from '../../helpers/player/utils'
+import {
+  findCaptionByLocale,
+  getPreferredCaption,
+  sortCaptions,
+  MANIFEST_TYPE_DASH,
+  MANIFEST_TYPE_HLS
+} from '../../helpers/player/utils'
+import { getYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -81,14 +89,12 @@ import { useTabToast } from '../../composables/useTabToast'
  *     clientVersion: string,
  *     osName: string,
  *     osVersion: string
- *   },
- *   reload: (reloadPlaybackContext: import('googlevideo/protos').ReloadPlaybackContext) => Promise<{url: string, ustreamerConfig: string}>
+ *   }
  * }} SabrData
  */
 
-const MANIFEST_TYPE_DASH = 'application/dash+xml'
-const MANIFEST_TYPE_HLS = 'application/x-mpegurl'
 const THEATRE_MODE_ANIMATION_DURATION = 400
+const RESPONSIVE_THEATRE_MODE_MAX_WIDTH = 1350
 // A SABR session can go stale more than once during a long video, so the
 // refetch budget is per incident rather than per video: it refills once the
 // refreshed stream has played this many seconds, and only bounds reload loops
@@ -171,6 +177,7 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
       isLive: false,
@@ -229,6 +236,13 @@ export default defineComponent({
       manifestMimeType: MANIFEST_TYPE_DASH,
       /** @type {SabrData | null} */
       sabrData: null,
+      /**
+       * Which engine provided the streams that are currently loaded.
+       * @type {'built-in' | 'yt-dlp'}
+       */
+      activePlaybackEngine: 'built-in',
+      /** @type {string | null} the yt-dlp version that extracted the current streams */
+      activePlaybackEngineVersion: null,
       legacyFormats: [],
       captions: [],
       currentTime: 0,
@@ -588,6 +602,41 @@ export default defineComponent({
     defaultVideoFormat: function () {
       return this.$store.getters.getDefaultVideoFormat
     },
+    videoPlaybackEngine: function () {
+      return process.env.IS_ELECTRON ? this.$store.getters.getVideoPlaybackEngine : 'built-in'
+    },
+    /** @returns {'sabr' | 'dash' | 'hls' | 'none'} */
+    playbackStreamType: function () {
+      if (this.manifestSrc === null || this.activeFormat === 'legacy') {
+        return 'none'
+      }
+
+      switch (this.manifestMimeType) {
+        case MANIFEST_TYPE_SABR:
+          return 'sabr'
+        case MANIFEST_TYPE_HLS:
+          return 'hls'
+        default:
+          return 'dash'
+      }
+    },
+    dashFormatAvailable: function () {
+      return this.manifestSrc !== null
+    },
+    legacyFormatAvailable: function () {
+      return !this.isLive && !this.isPostLiveDvr && this.legacyFormats.length > 0
+    },
+    audioFormatAvailable: function () {
+      if (this.manifestSrc === null) {
+        return false
+      }
+
+      // The WEB HLS manifests only contain combined audio and video files, so we can't do audio only.
+      // The IOS HLS manifests have audio-only streams
+      return !((this.isLive || this.isPostLiveDvr) &&
+        this.manifestMimeType === MANIFEST_TYPE_HLS &&
+        !this.manifestSrc.includes('/demuxed/1'))
+    },
     autoplayEnabled: function () {
       if (this.isShort) { return false }
       if (this.nextQueuedVideo) { return true }
@@ -637,6 +686,9 @@ export default defineComponent({
       return this.showTranscript || !this.hideRecommendedVideos ||
         (!this.hideLiveChat && this.isLive) || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
+    },
+    theatreTogglePossible: function () {
+      return this.theatreLayoutAvailable && this.theatrePossible
     },
     autoplayPossible: function () {
       return !this.isShort && (
@@ -779,6 +831,7 @@ export default defineComponent({
   mounted: function () {
     document.addEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.addEventListener('resize', this.updateShortsViewportHeight)
+    window.addEventListener('resize', this.updateTheatreLayoutAvailability)
     window.addEventListener('scroll', this.handleShortsWindowScroll, { passive: true })
     this.removeTabLifecycle = this.tabLifecycle?.register(this.tabId, {
       activate: this.activateWatchRuntime,
@@ -792,6 +845,7 @@ export default defineComponent({
   beforeUnmount: function () {
     document.removeEventListener('keydown', this.handleShortsNavigationKeydown, true)
     window.removeEventListener('resize', this.updateShortsViewportHeight)
+    window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
     this.deactivateWatchRuntime()
@@ -807,6 +861,9 @@ export default defineComponent({
     }
   },
   methods: {
+    updateTheatreLayoutAvailability() {
+      this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
+    },
     updateShortsViewportHeight() {
       this.shortsViewportHeight = window.innerHeight
     },
@@ -824,6 +881,9 @@ export default defineComponent({
           }
         })
       }
+    },
+    toggleFullscreenMetadata() {
+      this.$refs.player?.setFullscreenMetadata(!this.fullscreenMetadataOpen)
     },
     handleFullscreenTranscriptChange({ open, target }) {
       this.fullscreenTranscriptTarget = target
@@ -1221,6 +1281,8 @@ export default defineComponent({
       this.manifestSrc = null
       this.manifestMimeType = MANIFEST_TYPE_DASH
       this.sabrData = null
+      this.activePlaybackEngine = 'built-in'
+      this.activePlaybackEngineVersion = null
       this.legacyFormats = []
       this.captions = []
       this.currentTime = 0
@@ -1276,7 +1338,7 @@ export default defineComponent({
     setViewingModeOnFirstLoad: function () {
       switch (this.defaultViewingMode) {
         case 'theatre':
-          this.useTheatreMode = this.theatrePossible
+          this.useTheatreMode = this.theatreTogglePossible
           break
         case 'fullscreen':
         case 'fullscreen_always_on':
@@ -1535,7 +1597,7 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, reloadSabrData } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs } = videoInfo
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -1797,17 +1859,7 @@ export default defineComponent({
         if ((this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
           let useRemoteManifest = true
 
-          if (
-            this.isLive &&
-            result.basic_info.is_live_dvr_enabled &&
-            result.streaming_data?.adaptive_formats.length > 0 &&
-            result.streaming_data.server_abr_streaming_url &&
-            result.player_config.media_common_config.media_ustreamer_request_config
-          ) {
-            this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, [], reloadSabrData)
-            this.manifestMimeType = MANIFEST_TYPE_SABR
-            useRemoteManifest = false
-          } else if (this.isPostLiveDvr) {
+          if (this.isPostLiveDvr) {
             // I wasn't able to get SABR working with Post-Live-DVR yet, so for the moment we'll use YouTube's provided DASH manifest instead.
             // It only contains the last 4 hours of the stream, instead of starting from the beginning but that is better than nothing.
             if (
@@ -2003,7 +2055,7 @@ export default defineComponent({
                   }]
                 : []
 
-              this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, storyboards, reloadSabrData)
+              this.manifestSrc = this.createLocalSabrManifest(result, poToken, clientInfo, storyboards)
               this.manifestMimeType = MANIFEST_TYPE_SABR
             } else if (
               result.streaming_data.adaptive_formats[0]?.url ||
@@ -2026,6 +2078,11 @@ export default defineComponent({
             this.manifestSrc = null
             this.enableLegacyFormat()
           }
+        }
+
+        if (!this.isUpcoming) {
+          await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
         }
 
         this.updateShortsPlayerState(
@@ -2251,6 +2308,11 @@ export default defineComponent({
             this.manifestSrc = await this.createInvidiousDashManifest(result)
             if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
             this.manifestMimeType = MANIFEST_TYPE_DASH
+          }
+
+          if (!this.isUpcoming) {
+            await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
+            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
           }
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
@@ -2927,7 +2989,7 @@ export default defineComponent({
         return
       }
 
-      if (this.manifestSrc === null) {
+      if (!this.dashFormatAvailable) {
         showToast({
           message: this.t('Change Format.Dash formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -2943,7 +3005,7 @@ export default defineComponent({
         return
       }
 
-      if (this.isLive || this.isPostLiveDvr || this.legacyFormats.length === 0) {
+      if (!this.legacyFormatAvailable) {
         showToast({
           message: this.t('Change Format.Legacy formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -2959,11 +3021,7 @@ export default defineComponent({
         return
       }
 
-      if (this.manifestSrc === null ||
-        ((this.isLive || this.isPostLiveDvr) &&
-        // The WEB HLS manifests only contain combined audio and video files, so we can't do audio only
-        // The IOS HLS manifests have audio-only streams
-          this.manifestMimeType === MANIFEST_TYPE_HLS && !this.manifestSrc.includes('/demuxed/1'))) {
+      if (!this.audioFormatAvailable) {
         showToast({
           message: this.t('Change Format.Audio formats are not available for this video'),
           icon: ['fas', 'circle-exclamation'],
@@ -3151,6 +3209,13 @@ export default defineComponent({
     handlePlayerError: async function (error) {
       // the error is logged to the console inside the player so we don't have to do it here
 
+      // The player is only rendered while loading is false. An error received
+      // after loading starts belongs to the outgoing player during its unmount
+      // tick and must not change the new player's format or trigger a reload.
+      if (this.isLoading) {
+        return
+      }
+
       const { Code } = shaka.util.Error
 
       if (error.code === Code.HTTP_ERROR) {
@@ -3198,54 +3263,119 @@ export default defineComponent({
       }
 
       if (
-        this.activeFormat === 'dash' &&
-        this.manifestMimeType === MANIFEST_TYPE_SABR &&
-        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
-        this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
-      ) {
-        // A SABR playback session may no longer be reusable after a critical
-        // error. Refetch it in-place before giving up HD and falling back to
-        // the legacy 360p stream.
-        this.sabrErrorRecoveryAttempts++
-        this.sabrErrorRecoveriesForCurrentVideo++
-        // The reload resumes here, so this is the baseline the refreshed stream
-        // starts accumulating played content from before the budget refills.
-        this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
-        this.sabrErrorRecoveryPlayedSeconds = 0
-        await this.onPlayerReloadRequested(
+        await this.reloadSabrStream(
           this.$refs.player?.getSabrReloadState(),
           'Refreshing SABR stream after playback error'
         )
+      ) { return }
+
+      const stopPlaybackRecovery = () => {
+        this.handleWatchProgressAutoSaveWhenProgressEnabled()
+        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
+        this.errorMessage = `[PLAYER_ERROR: ${status}] Unable to recover the video stream. Please reload this video.`
+      }
+
+      if (
+        this.activeFormat === 'dash' &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.isLive &&
+        !this.isPostLiveDvr &&
+        this.legacyFormats.length === 0
+      ) {
+        // Audio is an explicit playback mode, not a degraded video fallback.
+        // Keep the bounded refresh behavior above, then stop with the actual
+        // error instead of briefly replacing the video player with audio.
+        stopPlaybackRecovery()
         return
       }
 
       if (this.isLive || this.isPostLiveDvr) {
-        // live streams don't have legacy formats, so only switch between dash and audio
-
         if (this.activeFormat === 'dash') {
-          console.error('Unable to play DASH formats. Reverting to audio formats...')
-          this.enableAudioFormat()
+          stopPlaybackRecovery()
         } else {
           console.error('Unable to play audio formats. Reverting to DASH formats...')
           this.enableDashFormat()
         }
       } else {
-        // loop through formats DASH -> legacy -> audio -> DASH
+        // Audio remains available when explicitly selected, but a broken video
+        // stream must never silently turn into audio-only playback.
 
         switch (this.activeFormat) {
           case 'dash':
-            console.error('Unable to play DASH formats. Reverting to legacy formats...')
-            this.enableLegacyFormat()
+            if (this.legacyFormats.length > 0) {
+              console.error('Unable to play DASH formats. Reverting to legacy formats...')
+              this.enableLegacyFormat()
+            } else {
+              stopPlaybackRecovery()
+            }
             break
           case 'legacy':
-            console.error('Unable to play legacy formats. Reverting to audio formats...')
-            this.enableAudioFormat()
+            stopPlaybackRecovery()
             break
           case 'audio':
             console.error('Unable to play audio formats. Reverting to DASH formats...')
             this.enableDashFormat()
             break
         }
+      }
+    },
+
+    /**
+     * Replaces the streams that the backend provided with the ones yt-dlp extracts.
+     * The metadata (captions, chapters, storyboards, ...) keeps coming from the backend,
+     * only the playback source is swapped out, so that SABR can be avoided entirely.
+     * @param {number} loadGeneration
+     * @param {string} videoId
+     */
+    applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
+      if (!process.env.IS_ELECTRON || this.videoPlaybackEngine !== 'yt-dlp') {
+        return
+      }
+
+      // Post-Live-DVR videos are served as segmented OTF streams, which yt-dlp doesn't
+      // expose the segment durations for. They don't use SABR anyway, so the built-in
+      // engine already handles them without the errors we want to avoid here.
+      if (this.isPostLiveDvr) {
+        return
+      }
+
+      let source
+      try {
+        source = await getYtDlpPlaybackSource(videoId)
+      } catch (error) {
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
+        console.error(`yt-dlp could not provide streams for ${videoId}, falling back to the built-in engine...`, error)
+        this.showTabToast({
+          message: this.t('Change Format.yt-dlp Fallback Template', { error: error.message }),
+          time: 7000,
+          icon: ['fas', 'circle-exclamation'],
+        })
+        return
+      }
+
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+
+      this.manifestSrc = source.manifestSrc
+      this.manifestMimeType = source.manifestMimeType
+      this.legacyFormats = source.legacyFormats
+      // HLS manifests refresh themselves, so they don't expire the way the stream URLs do.
+      // Keeping the backend's date stops playback errors from being blamed on an
+      // expired session, which is what a missing date would compare as.
+      if (source.expiryDate !== null) {
+        this.streamingDataExpiryDate = source.expiryDate
+      }
+      // SABR specific state, which no longer applies now that the streams come from yt-dlp
+      this.sabrData = null
+      this.activePlaybackEngine = 'yt-dlp'
+      this.activePlaybackEngineVersion = source.version
+
+      if (this.activeFormat === 'legacy' && source.legacyFormats.length === 0) {
+        this.activeFormat = 'dash'
+      }
+
+      if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
+        this.activeFormat = 'dash'
       }
     },
 
@@ -3268,9 +3398,8 @@ export default defineComponent({
      * @param {string} poToken
      * @param {SabrData['clientInfo']} clientInfo
      * @param {import('../../helpers/player/SabrManifestParser').SabrManifest['storyboards']} storyboards
-     * @param {SabrData['reload']} reload
      */
-    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards, reload) {
+    createLocalSabrManifest: function (videoInfo, poToken, clientInfo, storyboards) {
       const url = new URL(videoInfo.streaming_data.server_abr_streaming_url)
       url.searchParams.set('alr', 'yes')
       url.searchParams.set('cpn', videoInfo.cpn)
@@ -3278,49 +3407,19 @@ export default defineComponent({
       // needs its own scheme so one SABR player cannot replace or unregister
       // another player's request handler.
       const scheme = `sabr${nextSabrSchemeId++}`
+      const formatDurationsMs = videoInfo.streaming_data.adaptive_formats
+        .map(format => format.approx_duration_ms)
+        .filter(Number.isFinite)
+      const fallbackDurationSeconds = Number.isFinite(videoInfo.basic_info.duration)
+        ? videoInfo.basic_info.duration
+        : 0
 
       this.sabrData = {
         scheme,
         url: url.toString(),
         poToken,
         ustreamerConfig: videoInfo.player_config.media_common_config.media_ustreamer_request_config.video_playback_ustreamer_config,
-        clientInfo,
-        reload
-      }
-
-      const formats = videoInfo.streaming_data.adaptive_formats
-      const formatDurations = formats
-        .map(format => format.approx_duration_ms / 1000)
-        .filter(duration => Number.isFinite(duration) && duration > 0)
-      const duration = formatDurations.length > 0
-        ? Math.min(...formatDurations)
-        : videoInfo.basic_info.duration
-      const isLive = !!videoInfo.basic_info.is_live
-
-      let presentationStartTime
-      let presentationDelay
-      let segmentDuration
-      let segmentAvailabilityDuration
-
-      if (isLive) {
-        const startTimestamp = videoInfo.basic_info.start_timestamp?.getTime() / 1000
-        presentationStartTime = Number.isFinite(duration) && duration > 0
-          ? Date.now() / 1000 - duration
-          : Number.isFinite(startTimestamp) ? startTimestamp : Date.now() / 1000
-
-        const targetDurations = formats
-          .map(format => Number(format.target_duration_dec))
-          .filter(targetDuration => Number.isFinite(targetDuration) && targetDuration > 0)
-        segmentDuration = targetDurations.length > 0 ? Math.max(...targetDurations) : 1
-        // Keep one complete segment buffered ahead of the playhead. Some live
-        // SABR responses only contain the segment ending at maxSeekableTime;
-        // starting exactly there leaves the player stalled at the buffer edge.
-        presentationDelay = segmentDuration * 3
-
-        const dvrDurations = formats
-          .map(format => Number(format.max_dvr_duration_sec))
-          .filter(dvrDuration => Number.isFinite(dvrDuration) && dvrDuration > 0)
-        segmentAvailabilityDuration = dvrDurations.length > 0 ? Math.min(...dvrDurations) : undefined
+        clientInfo
       }
 
       /** @type {import('../../helpers/player/SabrManifestParser').SabrManifest} */
@@ -3328,13 +3427,10 @@ export default defineComponent({
         scheme,
         // Different formats have different durations and
         // use of slightly longer duration in PresentationTimeline causes player to stuck at the end
-        duration,
-        isLive,
-        presentationStartTime,
-        presentationDelay,
-        segmentDuration,
-        segmentAvailabilityDuration,
-        formats: formats.map((format) => ({
+        duration: formatDurationsMs.length > 0
+          ? Math.min(...formatDurationsMs) / 1000
+          : fallbackDurationSeconds,
+        formats: videoInfo.streaming_data.adaptive_formats.map((format) => ({
           itag: format.itag,
           lastModified: format.last_modified_ms,
           mimeType: format.mime_type,
@@ -3404,7 +3500,7 @@ export default defineComponent({
           // match YouTube's local API response with English
           const languageNames = new Intl.DisplayNames('en-US', { type: 'language', languageDisplay: 'standard' })
           for (const format of audioFormats) {
-            this.generateAudioTrackFieldInvidious(format, languageNames)
+            generateAudioTrackField(format, languageNames)
           }
         }
 
@@ -3416,45 +3512,6 @@ export default defineComponent({
       }
 
       return url
-    },
-
-    /**
-     * @param {import('youtubei.js').Misc.Format} format
-     * @param {Intl.DisplayNames} languageNames
-     */
-    generateAudioTrackFieldInvidious: function (format, languageNames) {
-      let type
-
-      // use the same id numbers as YouTube (except -1, when we aren't sure what it is)
-      let idNumber
-
-      if (format.is_descriptive) {
-        type = ' descriptive'
-        idNumber = 2
-      } else if (format.is_dubbed) {
-        type = ''
-        idNumber = 3
-      } else if (format.is_original) {
-        type = ' original'
-        idNumber = 4
-      } else if (format.is_secondary) {
-        type = ' secondary'
-        idNumber = 6
-      } else if (format.is_auto_dubbed) {
-        type = ''
-        idNumber = 10
-      } else {
-        type = ' alternative'
-        idNumber = -1
-      }
-
-      const languageName = languageNames.of(format.language)
-
-      format.audio_track = {
-        audio_is_default: !!format.is_original,
-        id: `${format.language}.${idNumber}`,
-        display_name: `${languageName}${type}`
-      }
     },
 
     getAdaptiveFormatsInvidious: async function (existingInfoResult = null) {
@@ -3783,7 +3840,57 @@ export default defineComponent({
       this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
     },
 
-    async onPlayerReloadRequested(payload, toastMessage = 'Reloading player according to SABR request') {
+    isSabrVideoStream() {
+      return this.activeFormat === 'dash' &&
+        this.manifestMimeType === MANIFEST_TYPE_SABR &&
+        !this.isLive &&
+        !this.isPostLiveDvr
+    },
+
+    canReloadSabrStream() {
+      return this.isSabrVideoStream() &&
+        !this.isLoading &&
+        this.sabrErrorRecoveryAttempts < MAX_SABR_ERROR_RECOVERIES &&
+        this.sabrErrorRecoveriesForCurrentVideo < MAX_SABR_ERROR_RECOVERIES_PER_VIDEO
+    },
+
+    async reloadSabrStream(payload, toastMessage) {
+      if (!this.canReloadSabrStream()) { return false }
+
+      // Both critical Shaka errors and SABR's own reload policy mean the
+      // current playback session is no longer reusable. Keep them on the same
+      // budget so a succession of freshly fetched sessions cannot reload the
+      // tab forever without making playback progress.
+      this.sabrErrorRecoveryAttempts++
+      this.sabrErrorRecoveriesForCurrentVideo++
+      this.sabrErrorRecoveryLastSeconds = this.getTimestamp()
+      this.sabrErrorRecoveryPlayedSeconds = 0
+      try {
+        await this.performSabrReload(payload, toastMessage)
+      } catch (error) {
+        console.error('SABR reload failed', error)
+        return false
+      }
+      return true
+    },
+
+    async onPlayerReloadRequested(payload) {
+      // A request from a player that is already being replaced must not spend
+      // the new player's budget or change a format the user selected meanwhile.
+      if (!this.isSabrVideoStream() || this.isLoading) { return }
+
+      if (await this.reloadSabrStream(payload, 'Reloading player according to SABR request')) { return }
+
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
+      if (this.legacyFormats.length > 0) {
+        console.error('Unable to recover the SABR stream. Reverting to legacy formats...')
+        this.enableLegacyFormat()
+      } else {
+        this.errorMessage = '[PLAYER_ERROR: SABR_RELOAD] Unable to recover the video stream. Please reload this video.'
+      }
+    },
+
+    async performSabrReload(payload, toastMessage) {
       this.resumePlaybackAfterSabrReload = payload?.wasPlaying === true
       this.sabrReloadCaptionIndex = Number.isInteger(payload?.captionIndex) ? payload.captionIndex : null
       const playbackRate = Number(payload?.playbackRate)

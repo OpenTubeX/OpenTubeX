@@ -89,8 +89,8 @@
             :playlist-items-length="shownPlaylistItems.length"
             :can-remove-from-playlist="true"
             :dragged-video="draggedVideo"
-            :is-sort-order-custom="isSortOrderCustom"
             :is-video-dragging="isVideoDragging"
+            :video-dragging-possible="videoDraggingPossible"
             @drag-video="setDraggedVideo"
             @drag-video-end="onDragVideoEnd"
             @move-dragged-video="moveDraggedVideoTemporarilyThrottled"
@@ -254,8 +254,10 @@ const videoSearchQuery = ref('')
 const promptOpen = ref(false)
 /** @type {import('vue').Ref<string[]>} */
 const toBeDeletedPlaylistItemIds = ref([])
+const pendingDeletionRemovalInProgress = ref(false)
 /** @type {AbortController | null} */
 let undoToastAbortController = null
+let removePendingVideosAfterDrag = false
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => store.getters.getBackendPreference)
@@ -720,7 +722,12 @@ async function getNextPageLocal() {
 }
 
 const canMoveVideos = computed(() => {
-  return !playlistInVideoSearchMode.value && isSortOrderCustom.value && noPlaylistItemsPendingDeletion.value
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value && !pendingDeletionRemovalInProgress.value
+})
+
+const videoDraggingPossible = computed(() => {
+  return isUserPlaylistRequested.value && !playlistInVideoSearchMode.value && isSortOrderCustom.value &&
+    !pendingDeletionRemovalInProgress.value && shownPlaylistItems.value.length >= 2
 })
 
 /**
@@ -729,16 +736,15 @@ const canMoveVideos = computed(() => {
  */
 function moveVideoUp(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
+  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
-  if (index === -1) {
+  if (shownIndex === -1) {
     return
   }
 
-  if (index === 0) {
+  if (shownIndex === 0) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved up."]'),
       icon: ['fas', 'circle-exclamation'],
@@ -746,7 +752,13 @@ function moveVideoUp(videoId, playlistItemId) {
     return
   }
 
-  [playlistItems_[index], playlistItems_[index - 1]] = [playlistItems_[index - 1], playlistItems_[index]]
+  const previousPlaylistItemId = shownPlaylistItems.value[shownIndex - 1].playlistItemId
+  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
+  const previousIndex = playlistItems_.findIndex(video => video.playlistItemId === previousPlaylistItemId)
+  const video = playlistItems_[index]
+
+  playlistItems_[index] = playlistItems_[previousIndex]
+  playlistItems_[previousIndex] = video
 
   const playlist = {
     playlistName: playlistTitle.value,
@@ -774,16 +786,15 @@ function moveVideoUp(videoId, playlistItemId) {
  */
 function moveVideoDown(videoId, playlistItemId) {
   const playlistItems_ = playlistItems.value.slice()
-
-  const index = playlistItems_.findIndex((video) => {
+  const shownIndex = shownPlaylistItems.value.findIndex((video) => {
     return video.videoId === videoId && video.playlistItemId === playlistItemId
   })
 
-  if (index === -1) {
+  if (shownIndex === -1) {
     return
   }
 
-  if (index + 1 >= playlistItems_.length) {
+  if (shownIndex + 1 >= shownPlaylistItems.value.length) {
     showToast({
       message: t('User Playlists.SinglePlaylistView.Toast["This video cannot be moved down."]'),
       icon: ['fas', 'circle-exclamation'],
@@ -791,7 +802,13 @@ function moveVideoDown(videoId, playlistItemId) {
     return
   }
 
-  [playlistItems_[index], playlistItems_[index + 1]] = [playlistItems_[index + 1], playlistItems_[index]]
+  const nextPlaylistItemId = shownPlaylistItems.value[shownIndex + 1].playlistItemId
+  const index = playlistItems_.findIndex(video => video.playlistItemId === playlistItemId)
+  const nextIndex = playlistItems_.findIndex(video => video.playlistItemId === nextPlaylistItemId)
+  const video = playlistItems_[index]
+
+  playlistItems_[index] = playlistItems_[nextIndex]
+  playlistItems_[nextIndex] = video
 
   const playlist = {
     playlistName: playlistTitle.value,
@@ -902,7 +919,7 @@ function setDraggedVideo(video) {
   draggedVideo.value = video
 }
 
-function onDragVideoEnd() {
+async function onDragVideoEnd() {
   if (tempShownPlaylistItems.value != null) {
     // Save on drag end ONLY
     const playlist = {
@@ -915,7 +932,7 @@ function onDragVideoEnd() {
     }
 
     try {
-      store.dispatch('updatePlaylist', playlist)
+      await store.dispatch('updatePlaylist', playlist)
       playlistItems.value = tempShownPlaylistItems.value
     } catch (e) {
       showToast({
@@ -934,6 +951,11 @@ function onDragVideoEnd() {
     videoId: null,
     playlistItemId: null,
   })
+
+  if (removePendingVideosAfterDrag) {
+    removePendingVideosAfterDrag = false
+    await removeToBeDeletedVideosSometimes()
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -1012,17 +1034,32 @@ function removeVideoFromPlaylist(videoId, playlistItemId) {
 
 async function removeToBeDeletedVideosSometimes() {
   if (isLoading.value) { return }
+  if (isVideoDragging.value) {
+    removePendingVideosAfterDrag = true
+    return
+  }
 
   if (toBeDeletedPlaylistItemIds.value.length > 0) {
-    await store.dispatch('removeVideos', {
-      _id: playlistId.value,
-      // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
-      playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
-    })
+    pendingDeletionRemovalInProgress.value = true
 
-    toBeDeletedPlaylistItemIds.value = []
-    undoToastAbortController?.abort()
-    undoToastAbortController = null
+    try {
+      await store.dispatch('removeVideos', {
+        _id: playlistId.value,
+        // Create a new non-reactive array to avoid Electron erroring about Proxy objects not being clonable
+        playlistItemIds: [...toBeDeletedPlaylistItemIds.value],
+      })
+    } catch (e) {
+      showToast({
+        message: t('User Playlists.SinglePlaylistView.Toast.There was a problem with removing this video'),
+        icon: ['fas', 'circle-exclamation'],
+      })
+      console.error(e)
+    } finally {
+      pendingDeletionRemovalInProgress.value = false
+      toBeDeletedPlaylistItemIds.value = []
+      undoToastAbortController?.abort()
+      undoToastAbortController = null
+    }
   }
 }
 

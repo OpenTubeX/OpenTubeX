@@ -41,10 +41,29 @@ const LEGACY_ENCRYPTED_COLLECTIONS = [
 ]
 
 let activeSyncPromise = null
-let activeSyncClient = null
+const activeSyncClients = new Set()
 let autoSyncTimer = null
 let eventSyncTimer = null
 let lifecycleSyncStarted = false
+
+function trackSyncClient(client) {
+  activeSyncClients.add(client)
+  return client
+}
+
+function releaseSyncClient(client) {
+  activeSyncClients.delete(client)
+}
+
+function cancelActiveSyncClients() {
+  for (const client of activeSyncClients) client.cancel()
+}
+
+function assertSyncEnabled(rootState, client) {
+  if (!rootState.settings.syncServerEnabled || client.cancelled) {
+    throw new SyncServerCancelledError()
+  }
+}
 
 const state = {
   syncServerStatus: 'idle',
@@ -84,8 +103,9 @@ function withSyncLock(callback) {
 async function runSync(context, { allowDataLoss = false } = {}) {
   const { commit, dispatch, rootState } = context
   const settings = rootState.settings
-  const networkClient = new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
-  activeSyncClient = networkClient
+  const networkClient = trackSyncClient(
+    new SyncServerClient(settings.syncServerUrl, settings.syncServerToken)
+  )
   let client = networkClient
   let encryptedCollections = null
   const previous = parseSnapshot(settings.syncServerSnapshot)
@@ -113,9 +133,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
   let completedStages = 0
 
   function assertSyncStillActive() {
-    if (networkClient.cancelled || !rootState.settings.syncServerEnabled) {
-      throw new SyncServerCancelledError()
-    }
+    assertSyncEnabled(rootState, networkClient)
   }
 
   async function runStage(stage, callback) {
@@ -369,7 +387,7 @@ async function runSync(context, { allowDataLoss = false } = {}) {
     commit('setSyncServerStatus', 'error')
     throw error
   } finally {
-    if (activeSyncClient === networkClient) activeSyncClient = null
+    releaseSyncClient(networkClient)
   }
 }
 
@@ -387,6 +405,7 @@ const actions = {
 
     const normalizedUrl = normalizeSyncServerUrl(serverUrl)
     const trimmedUsername = username.trim()
+    const previousToken = rootState.settings.syncServerToken
     const resumesExpiredSession = isExpiredSessionReauthentication({
       expired: state.syncServerSessionExpired,
       savedServerUrl: rootState.settings.syncServerUrl,
@@ -398,50 +417,71 @@ const actions = {
       throw new Error('Username and password are required')
     }
 
-    const client = new SyncServerClient(normalizedUrl)
-    const privacySupported = await client.supportsEncryptedSync()
-    if (privacySupported && !privacyPassphrase) {
-      throw new Error('A privacy passphrase is required by this server')
-    }
-    if (privacySupported && privacyPassphrase.length < 12) {
-      throw new Error('The privacy passphrase must be at least 12 characters')
-    }
-    if (privacySupported && privacyPassphrase === password) {
-      throw new Error('The privacy passphrase must be different from the account password')
-    }
-    const token = await client.authenticate(mode, trimmedUsername, password)
-    let privacyKey = ''
-    let privacySalt = ''
+    const client = trackSyncClient(new SyncServerClient(normalizedUrl))
+    try {
+      const updateWhileEnabled = async (action, value) => {
+        assertSyncEnabled(rootState, client)
+        await dispatch(action, value, { root: true })
+        assertSyncEnabled(rootState, client)
+      }
 
-    if (privacySupported) {
-      const manifest = await client.getEncryptedSyncManifest()
-      const firstCollection = manifest.collections[0]?.collection
-      const remote = firstCollection
-        ? await client.getEncryptedSyncCollection(firstCollection)
-        : manifest.legacy_encrypted_data
-          ? await client.getLegacyEncryptedSync()
-          : null
-      const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
-      privacyKey = privacy.key
-      privacySalt = privacy.salt
-    }
+      const privacySupported = await client.supportsEncryptedSync()
+      if (privacySupported && !privacyPassphrase) {
+        throw new Error('A privacy passphrase is required by this server')
+      }
+      if (privacySupported && privacyPassphrase.length < 12) {
+        throw new Error('The privacy passphrase must be at least 12 characters')
+      }
+      if (privacySupported && privacyPassphrase === password) {
+        throw new Error('The privacy passphrase must be different from the account password')
+      }
+      const token = await client.authenticate(mode, trimmedUsername, password)
+      let privacyKey = ''
+      let privacySalt = ''
 
-    // Keep writes to the shared settings datastore ordered. In particular,
-    // the URL must be committed before the token enables the initial sync.
-    await dispatch('updateSyncServerUrl', normalizedUrl, { root: true })
-    await dispatch('updateSyncServerUsername', trimmedUsername, { root: true })
-    if (!resumesExpiredSession) {
-      await dispatch('updateSyncServerSnapshot', '{}', { root: true })
-      await dispatch('updateSyncServerLastSyncAt', 0, { root: true })
-    }
-    await dispatch('updateSyncServerPrivacyMode', privacySupported ? 'enhanced' : 'legacy', { root: true })
-    await dispatch('updateSyncServerPrivacyKey', privacyKey, { root: true })
-    await dispatch('updateSyncServerPrivacySalt', privacySalt, { root: true })
-    await dispatch('updateSyncServerToken', token, { root: true })
-    commit('setSyncServerSessionExpired', false)
+      if (privacySupported) {
+        const manifest = await client.getEncryptedSyncManifest()
+        const firstCollection = manifest.collections[0]?.collection
+        const remote = firstCollection
+          ? await client.getEncryptedSyncCollection(firstCollection)
+          : manifest.legacy_encrypted_data
+            ? await client.getLegacyEncryptedSync()
+            : null
+        const privacy = await preparePrivacyKey(remote?.payload, privacyPassphrase)
+        privacyKey = privacy.key
+        privacySalt = privacy.salt
+      }
 
-    await dispatch('startSyncServerAutoSync')
-    return dispatch('syncWithSyncServer')
+      assertSyncEnabled(rootState, client)
+
+      // Keep writes to the shared settings datastore ordered. In particular,
+      // the URL must be committed before the token enables the initial sync.
+      await updateWhileEnabled('updateSyncServerUrl', normalizedUrl)
+      await updateWhileEnabled('updateSyncServerUsername', trimmedUsername)
+      if (!resumesExpiredSession) {
+        await updateWhileEnabled('updateSyncServerSnapshot', '{}')
+        await updateWhileEnabled('updateSyncServerLastSyncAt', 0)
+      }
+      await updateWhileEnabled(
+        'updateSyncServerPrivacyMode',
+        privacySupported ? 'enhanced' : 'legacy'
+      )
+      await updateWhileEnabled('updateSyncServerPrivacyKey', privacyKey)
+      await updateWhileEnabled('updateSyncServerPrivacySalt', privacySalt)
+      await updateWhileEnabled('updateSyncServerToken', token)
+      commit('setSyncServerSessionExpired', false)
+
+      await dispatch('startSyncServerAutoSync')
+      return dispatch('syncWithSyncServer')
+    } catch (error) {
+      if (error instanceof SyncServerCancelledError &&
+          rootState.settings.syncServerToken !== previousToken) {
+        await dispatch('updateSyncServerToken', previousToken, { root: true })
+      }
+      throw error
+    } finally {
+      releaseSyncClient(client)
+    }
   },
 
   /**
@@ -492,13 +532,23 @@ const actions = {
     await dispatch('stopSyncServerAutoSync')
 
     try {
-      const client = new SyncServerClient(
+      const client = trackSyncClient(new SyncServerClient(
         rootState.settings.syncServerUrl,
         rootState.settings.syncServerToken
-      )
-      await client.deleteAccount(password)
-      await dispatch('disconnectSyncServer')
+      ))
+      try {
+        await client.deleteAccount(password)
+        assertSyncEnabled(rootState, client)
+        await dispatch('disconnectSyncServer')
+      } finally {
+        releaseSyncClient(client)
+      }
     } catch (error) {
+      if (error instanceof SyncServerCancelledError) {
+        commit('setSyncServerError', '')
+        commit('setSyncServerStatus', 'idle')
+        return null
+      }
       commit('setSyncServerError', error.message)
       commit('setSyncServerStatus', 'error')
       await dispatch('startSyncServerAutoSync')
@@ -539,11 +589,17 @@ const actions = {
     if (!rootState.settings.syncServerEnabled || !rootState.settings.syncServerToken) return
 
     try {
-      const client = new SyncServerClient(
+      const client = trackSyncClient(new SyncServerClient(
         rootState.settings.syncServerUrl,
         rootState.settings.syncServerToken
-      )
-      const privacySupported = await client.supportsEncryptedSync()
+      ))
+      let privacySupported
+      try {
+        privacySupported = await client.supportsEncryptedSync()
+        assertSyncEnabled(rootState, client)
+      } finally {
+        releaseSyncClient(client)
+      }
       const privacyMode = privacySupported ? 'enhanced' : 'legacy'
       await dispatch('updateSyncServerPrivacyMode', privacyMode, { root: true })
       if (privacySupported && !rootState.settings.syncServerPrivacyKey) {
@@ -554,6 +610,7 @@ const actions = {
         return
       }
     } catch (error) {
+      if (error instanceof SyncServerCancelledError) return
       commit('setSyncServerError', error.message)
       return
     }
@@ -627,10 +684,9 @@ const actions = {
     await dispatch(enabled ? 'startSyncServerAutoSync' : 'stopSyncServerAutoSync')
   },
 
-  async setSyncServerEnabled({ commit, dispatch, rootState }, enabled) {
-    if (!enabled) activeSyncClient?.cancel()
-    await dispatch('updateSyncServerEnabled', enabled, { root: true })
+  async applySyncServerEnabled({ commit, dispatch, rootState }, enabled) {
     if (!enabled) {
+      cancelActiveSyncClients()
       await dispatch('stopSyncServerAutoSync')
       commit('setSyncServerProgress', null)
       commit('setSyncServerError', '')
@@ -639,6 +695,17 @@ const actions = {
     }
     if (rootState.settings.syncServerToken) {
       await dispatch('initializeSyncServer')
+    }
+  },
+
+  async setSyncServerEnabled({ commit, dispatch }, enabled) {
+    if (!enabled) {
+      commit('setSyncServerEnabled', false, { root: true })
+      await dispatch('applySyncServerEnabled', false)
+    }
+    await dispatch('updateSyncServerEnabled', enabled, { root: true })
+    if (enabled) {
+      await dispatch('applySyncServerEnabled', true)
     }
   },
 }

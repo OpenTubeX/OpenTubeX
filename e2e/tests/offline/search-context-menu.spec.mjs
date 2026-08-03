@@ -38,6 +38,11 @@ test('does not offer external search engines when they are disabled by default',
   }))
 
   expect(contextMenu.items.some(item => typeof item.label === 'string' && item.label.startsWith('Search with'))).toBe(false)
+
+  const favicon = await page.evaluate(() => {
+    return window.ftElectron.resolveFavicon('https://duckduckgo.com/?q=%s')
+  })
+  expect(favicon).toBe('')
 })
 
 test.describe('with all built-in external search engines enabled', () => {

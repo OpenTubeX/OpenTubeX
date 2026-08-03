@@ -204,6 +204,23 @@ test.describe('tab bar', () => {
     await expect(tabs.nth(1)).toHaveClass(/active/)
   })
 
+  test('uses the only selected tab as the shift-selection anchor', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+
+    const tabs = page.locator(sel.tabs)
+    await tabs.first().click()
+    await tabs.nth(2).click({ modifiers: ['Control'] })
+    await tabs.first().click({ modifiers: ['Control'] })
+    await tabs.nth(3).click({ modifiers: ['Shift'] })
+
+    await expect(tabs.first()).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(1)).toHaveAttribute('aria-pressed', 'false')
+    await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true')
+    await expect(tabs.nth(3)).toHaveAttribute('aria-pressed', 'true')
+  })
+
   test('clears multi-selection when a shortcut activates another tab', async ({ page }) => {
     const tabIds = await openThreeTabsAndActivate(page, 0)
     const tabs = page.locator(sel.tabs)

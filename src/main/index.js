@@ -27,7 +27,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { handleYtDlpCancelDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo } from './ytDlp'
+import { handleYtDlpCancelDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo } from './ytDlp'
 import { generatePoToken } from './poTokenGenerator'
 import { isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
@@ -1080,7 +1080,9 @@ function runApp() {
   ipcMain.handle(IpcChannels.RESOLVE_FAVICON, async (event, url) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof url !== 'string') return ''
 
-    if (!(await getConfiguredSearchEngines()).some(engine => engine.url === url)) return ''
+    if (!(await getConfiguredSearchEngines()).some(engine => engine.enabled && engine.url === url)) {
+      return ''
+    }
 
     return resolveSearchEngineFavicon(url)
   })
@@ -1587,6 +1589,15 @@ function runApp() {
     if (!shouldRestoreSession) {
       await clearAllTabSessions()
     }
+
+    // Before any window can capture a preview, drop cache entries that no
+    // restored tab points at. Without this, previews orphaned by a crash or a
+    // forced quit stay on disk forever.
+    await TabManager.pruneTabPreviewCache(
+      savedSessions.flatMap(session => (
+        Array.isArray(session?.tabs) ? session.tabs.map(tab => tab?.previewFileName) : []
+      ))
+    )
 
     let firstWindow
 
@@ -3125,6 +3136,8 @@ function runApp() {
   ipcMain.on(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, handleYtDlpCancelDownload)
 
   ipcMain.handle(IpcChannels.YT_DLP_GET_INFO, handleYtDlpGetInfo)
+
+  ipcMain.handle(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, handleYtDlpGetPlaybackInfo)
 
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD_BINARY, handleYtDlpDownloadBinary)
 

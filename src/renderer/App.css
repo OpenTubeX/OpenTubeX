@@ -113,6 +113,57 @@
   block-size: auto;
 }
 
+.changeLogText :deep(details) {
+  margin-block: 1em;
+  padding-block: 0.75em;
+  padding-inline: 1em;
+  background-color: color-mix(in srgb, var(--card-bg-color) 88%, var(--primary-text-color));
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: calc(6px * var(--ui-roundness));
+}
+
+.changeLogText :deep(summary) {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.changeLogText :deep(blockquote[data-alert]) {
+  --change-log-alert-color: #0969da;
+
+  margin-inline: 0;
+  padding-block: 0.75em;
+  padding-inline: 1em;
+  background-color: color-mix(in srgb, var(--change-log-alert-color) 12%, var(--card-bg-color));
+  border-inline-start: 4px solid var(--change-log-alert-color);
+  border-radius: 0 calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0;
+}
+
+.changeLogText :deep(blockquote[data-alert]::before) {
+  display: block;
+  margin-block-end: 0.5em;
+  color: var(--change-log-alert-color);
+  content: attr(data-alert);
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.changeLogText :deep(blockquote[data-alert='tip']) {
+  --change-log-alert-color: #1a7f37;
+}
+
+.changeLogText :deep(blockquote[data-alert='important']) {
+  --change-log-alert-color: #8250df;
+}
+
+.changeLogText :deep(blockquote[data-alert='warning']) {
+  --change-log-alert-color: #9a6700;
+}
+
+.changeLogText :deep(blockquote[data-alert='caution']) {
+  --change-log-alert-color: #cf222e;
+}
+
 .findbar {
   position: fixed;
   inset-block-start: 102px;

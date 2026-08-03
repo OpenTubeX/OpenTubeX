@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const HOUR = 3_600_000
 const now = Date.now()
@@ -118,6 +118,34 @@ test.describe('incremental subscription feed refresh', () => {
 
     await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 30_000 })
     await expect(page.locator('.tab.active .loadingDot')).toHaveCount(0)
+  })
+
+  test('defers incremental feed renders while its app tab is hidden', async ({ page }) => {
+    await routeFeeds(page, (index) => index === 1 ? 8_000 : 2_000)
+    await goTo(page, 'subscriptions')
+    await expect(page.getByText('Cached video 0', { exact: true })).toBeVisible()
+
+    const firstChannelResponse = page.waitForResponse((response) => {
+      return response.url().includes('/feeds/videos.xml') &&
+        channelIndexFromUrl(response.url()) === 0 &&
+        response.ok()
+    })
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'history')
+
+    await firstChannelResponse
+    const refreshProgress = page.getByTestId('subscription-refresh-toast')
+      .locator('.progress-indicator')
+    await expect.poll(async () => Number(await refreshProgress.getAttribute('data-progress')))
+      .toBeGreaterThan(0)
+
+    const hiddenSubscriptions = page.locator('.tabContent[aria-hidden="true"]')
+    await expect(hiddenSubscriptions.getByText('Fresh video 0', { exact: true })).toHaveCount(0)
+    await expect(hiddenSubscriptions.getByText('Cached video 0', { exact: true })).toHaveCount(1)
+
+    await page.locator(sel.tabs).first().click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible({ timeout: 3_000 })
   })
 
   test('keeps a manual refresh in the progress toast after navigation', async ({ page }) => {
@@ -259,7 +287,8 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
       settings: {
         ...commonSettings,
         subscriptionFeedAutoRefreshInterval: '5000',
-        showToastTimeoutIndicator: false
+        showToastTimeoutIndicator: false,
+        toastPosition: 'top-left'
       },
       profiles: [profileWith(channelCount)],
       subscriptionCache: Array.from({ length: channelCount }, (_, index) => cachedChannel(index))
@@ -272,6 +301,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
+    await expect(refreshToast.locator('.icon')).toHaveAttribute('data-icon', 'video')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
     expect(await refreshToast.evaluate((toast) => {
       const { left, top, width, height } = toast.getBoundingClientRect()
@@ -283,6 +313,24 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     await expect(indicator).toBeVisible()
     await expect.poll(async () => Number(await indicator.getAttribute('data-progress'))).toBeGreaterThan(0)
     expect(Number(await indicator.getAttribute('data-progress'))).toBeLessThan(100)
+
+    const expandedBounds = await refreshToast.boundingBox()
+    const tabBarBounds = await page.locator('.tabBar:not(.vertical)').boundingBox()
+    expect(expandedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
+
+    await page.mouse.move(expandedBounds.x + expandedBounds.width / 2, expandedBounds.y + expandedBounds.height / 2)
+    await expect(refreshToast).toHaveClass(/minimized/)
+    await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeLessThan(expandedBounds.width * 0.6)
+
+    const minimizedBounds = await refreshToast.boundingBox()
+    expect(minimizedBounds.x).toBeLessThan(expandedBounds.x)
+    expect(minimizedBounds.y).toBeCloseTo(expandedBounds.y, 0)
+    expect(minimizedBounds.y).toBeGreaterThanOrEqual(tabBarBounds.y + tabBarBounds.height)
+
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await page.mouse.move(viewport.width / 2, viewport.height / 2)
+    await expect(refreshToast).not.toHaveClass(/minimized/)
+    await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeGreaterThan(expandedBounds.width * 0.9)
 
     await page.keyboard.press('Escape')
     await expect(refreshToast).toBeVisible()

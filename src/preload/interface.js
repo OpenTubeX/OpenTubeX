@@ -288,6 +288,14 @@ export default {
   },
 
   /**
+   * @param {string} videoId
+   * @returns {Promise<import('../main/ytDlp').YtDlpPlaybackInfo | { error: string } | null>}
+   */
+  ytDlpGetPlaybackInfo: (videoId) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId)
+  },
+
+  /**
    * @param {'yt-dlp' | 'ffmpeg'} binary
    * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
    */

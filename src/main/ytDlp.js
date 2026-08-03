@@ -8,6 +8,7 @@ import { app, BrowserWindow } from 'electron'
 import { settings } from '../datastores/handlers/base'
 import { isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
+import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
@@ -163,6 +164,7 @@ async function getFfmpegVersion(executable) {
  * @typedef BinaryDownloadValidators
  * @property {string | null} etag
  * @property {string | null} lastModified
+ * @property {string} [source]
  * @property {'stable' | 'nightly' | 'master'} [channel]
  */
 
@@ -228,24 +230,18 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
 
 /**
  * @param {string} binaryPath
+ * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
  * @returns {Promise<BinaryDownloadValidators | null>}
  */
-async function readDownloadValidators(binaryPath, channel) {
+async function readDownloadValidators(binaryPath, source, channel) {
   if (!existsSync(binaryPath)) {
     return null
   }
 
   try {
     const validators = JSON.parse(await readFile(`${binaryPath}.download.json`, 'utf8'))
-    if (channel !== undefined && (validators.channel ?? 'stable') !== channel) {
-      return null
-    }
-    return {
-      etag: typeof validators.etag === 'string' ? validators.etag : null,
-      lastModified: typeof validators.lastModified === 'string' ? validators.lastModified : null,
-      ...(channel === undefined ? {} : { channel })
-    }
+    return getMatchingDownloadValidators(validators, source, channel)
   } catch {
     return null
   }
@@ -254,11 +250,13 @@ async function readDownloadValidators(binaryPath, channel) {
 /**
  * @param {string} binaryPath
  * @param {BinaryDownloadValidators} validators
+ * @param {string} source
  * @param {'stable' | 'nightly' | 'master'} [channel]
  */
-async function writeDownloadValidators(binaryPath, validators, channel) {
+async function writeDownloadValidators(binaryPath, validators, source, channel) {
   await writeFile(`${binaryPath}.download.json`, JSON.stringify({
     ...validators,
+    source,
     ...(channel === undefined ? {} : { channel })
   }))
 }
@@ -354,27 +352,18 @@ async function installBinary(data, destinationPath) {
 async function downloadManagedYtDlp(onProgress, onDownloadStart) {
   const configuredChannel = (await settings._findOne('ytDlpChannel'))?.value
   const channel = Object.hasOwn(YT_DLP_RELEASE_REPOSITORIES, configuredChannel) ? configuredChannel : 'stable'
-  let assetName
-  switch (process.platform) {
-    case 'win32':
-      assetName = 'yt-dlp.exe'
-      break
-    case 'darwin':
-      assetName = 'yt-dlp_macos'
-      break
-    default:
-      assetName = 'yt-dlp'
-  }
+  const assetName = getYtDlpAssetName(process.platform, process.arch)
+  const source = `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`
 
   const managedPath = getManagedBinaryPath('yt-dlp')
   let download
 
   try {
     download = await downloadFile(
-      `https://github.com/${YT_DLP_RELEASE_REPOSITORIES[channel]}/releases/latest/download/${assetName}`,
+      source,
       onProgress,
       onDownloadStart,
-      await readDownloadValidators(managedPath, channel)
+      await readDownloadValidators(managedPath, source, channel)
     )
 
     if (download.data !== null) {
@@ -392,7 +381,7 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
 
   if (download.data !== null) {
     try {
-      await writeDownloadValidators(managedPath, download.validators, channel)
+      await writeDownloadValidators(managedPath, download.validators, source, channel)
     } catch (error) {
       console.warn('Could not save yt-dlp download metadata', error)
     }
@@ -430,7 +419,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   let download
 
   try {
-    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath))
+    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath, url))
 
     if (download.data !== null) {
       await installBinary(extractZipEntry(download.data, matches), managedPath)
@@ -447,7 +436,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
 
   if (download.data !== null) {
     try {
-      await writeDownloadValidators(managedPath, download.validators)
+      await writeDownloadValidators(managedPath, download.validators, url)
     } catch (error) {
       console.warn('Could not save FFmpeg download metadata', error)
     }
@@ -572,6 +561,167 @@ export async function handleYtDlpDownloadBinary(event, binary) {
     return result
   } finally {
     sendProgress(result != null && 'version' in result && result.updated ? 100 : null, false)
+  }
+}
+
+/**
+ * @typedef YtDlpPlaybackFormat
+ * @property {string} formatId
+ * @property {string | null} url
+ * @property {string | null} manifestUrl
+ * @property {string} protocol
+ * @property {string} ext
+ * @property {string | null} container
+ * @property {string | null} vcodec
+ * @property {string | null} acodec
+ * @property {number | null} width
+ * @property {number | null} height
+ * @property {number | null} fps
+ * @property {number | null} bitrate bits per second
+ * @property {number | null} audioSampleRate
+ * @property {number | null} audioChannels
+ * @property {string | null} language
+ * @property {string | null} formatNote
+ * @property {string | null} dynamicRange
+ */
+
+/**
+ * @typedef YtDlpPlaybackInfo
+ * @property {string | null} version the version of yt-dlp that extracted this
+ * @property {boolean} isLive
+ * @property {'is_live' | 'post_live' | 'was_live' | 'not_live' | 'is_upcoming' | null} liveStatus
+ * @property {number | null} duration
+ * @property {string | null} hlsManifestUrl
+ * @property {YtDlpPlaybackFormat[]} formats
+ */
+
+// yt-dlp's JSON dump for a single video is a few hundred kilobytes at most,
+// but videos with lots of formats and long descriptions can exceed the default 1 MB
+const PLAYBACK_INFO_MAX_BUFFER = 32 * 1024 * 1024
+const PLAYBACK_INFO_TIMEOUT = 60_000
+
+/**
+ * @param {unknown} value
+ * @returns {number | null}
+ */
+function toFiniteNumber(value) {
+  const number = typeof value === 'string' ? parseFloat(value) : value
+  return typeof number === 'number' && Number.isFinite(number) ? number : null
+}
+
+/**
+ * @param {unknown} value
+ * @returns {string | null}
+ */
+function toNonEmptyString(value) {
+  return typeof value === 'string' && value.length > 0 ? value : null
+}
+
+/**
+ * @param {any} format
+ * @returns {YtDlpPlaybackFormat}
+ */
+function mapPlaybackFormat(format) {
+  const bitrate = toFiniteNumber(format.tbr)
+
+  return {
+    formatId: String(format.format_id),
+    url: toNonEmptyString(format.url),
+    manifestUrl: toNonEmptyString(format.manifest_url),
+    protocol: typeof format.protocol === 'string' ? format.protocol : '',
+    ext: typeof format.ext === 'string' ? format.ext : '',
+    container: toNonEmptyString(format.container),
+    vcodec: toNonEmptyString(format.vcodec),
+    acodec: toNonEmptyString(format.acodec),
+    width: toFiniteNumber(format.width),
+    height: toFiniteNumber(format.height),
+    fps: toFiniteNumber(format.fps),
+    // yt-dlp reports bitrates in kbit/s
+    bitrate: bitrate === null ? null : Math.round(bitrate * 1000),
+    audioSampleRate: toFiniteNumber(format.asr),
+    audioChannels: toFiniteNumber(format.audio_channels),
+    language: toNonEmptyString(format.language),
+    formatNote: toNonEmptyString(format.format_note),
+    dynamicRange: toNonEmptyString(format.dynamic_range)
+  }
+}
+
+/**
+ * Extracts the stream URLs for a video with yt-dlp, so that they can be played back
+ * without relying on the SABR streaming protocol.
+ * @param {import('electron').IpcMainInvokeEvent} event
+ * @param {string} videoId
+ * @returns {Promise<YtDlpPlaybackInfo | { error: string } | null>}
+ */
+export async function handleYtDlpGetPlaybackInfo(event, videoId) {
+  if (!isOpenTubeXUrl(event.senderFrame.url)) {
+    return null
+  }
+
+  if (typeof videoId !== 'string' || !ID_REGEX.test(videoId)) {
+    return null
+  }
+
+  const { source, executable } = await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp')
+
+  if (source === 'managed' && !existsSync(executable)) {
+    const result = await downloadManagedYtDlp()
+
+    if ('error' in result) {
+      return { error: result.error }
+    }
+  }
+
+  const args = ['--dump-single-json', '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15']
+
+  if ((await settings._findOne('useProxy'))?.value) {
+    const protocol = (await settings._findOne('proxyProtocol'))?.value
+    const hostname = (await settings._findOne('proxyHostname'))?.value
+    const port = (await settings._findOne('proxyPort'))?.value
+
+    if (protocol && hostname && port) {
+      args.push('--proxy', `${protocol}://${hostname}:${port}`)
+    }
+  }
+
+  args.push(`https://www.youtube.com/watch?v=${videoId}`)
+
+  let stdout
+  try {
+    ({ stdout } = await execFileAsync(executable, args, {
+      timeout: PLAYBACK_INFO_TIMEOUT,
+      maxBuffer: PLAYBACK_INFO_MAX_BUFFER,
+      windowsHide: true
+    }))
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return { error: 'ENOENT' }
+    }
+
+    // yt-dlp writes the reason for a failed extraction to stderr
+    const stderr = typeof error.stderr === 'string' ? error.stderr.trim() : ''
+    return { error: stderr.split('\n').at(-1) || error.message }
+  }
+
+  let info
+  try {
+    info = JSON.parse(stdout)
+  } catch {
+    return { error: 'yt-dlp returned invalid JSON' }
+  }
+
+  const formats = Array.isArray(info.formats) ? info.formats : []
+
+  return {
+    version: toNonEmptyString(info._version?.version),
+    isLive: !!info.is_live,
+    liveStatus: toNonEmptyString(info.live_status),
+    duration: toFiniteNumber(info.duration),
+    hlsManifestUrl: toNonEmptyString(info.manifest_url) ??
+      formats.find(format => format.protocol === 'm3u8_native' && format.manifest_url)?.manifest_url ??
+      null,
+    // storyboards are provided by the regular API, so drop them here
+    formats: formats.filter(format => format.protocol !== 'mhtml').map(mapPlaybackFormat)
   }
 }
 

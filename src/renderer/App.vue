@@ -83,7 +83,7 @@
           {{ changeLogTitle }}
         </h1>
       </template>
-      <bdo
+      <div
         v-safer-html.lenient="updateChangelog"
         v-overlay-scrollbars
         class="changeLogText"
@@ -264,7 +264,6 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { Marked } from 'marked'
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
@@ -292,6 +291,7 @@ import packageDetails from '../../package.json'
 import { KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
+import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import {
   cancelSubscriptionRefresh,
@@ -313,12 +313,13 @@ import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
+import { preloadUtilityRoutes } from './router/index'
 
 const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
 const LOCAL_REPOSITORY = 'opentubex/opentubex'
 const UPSTREAM_REPOSITORY = 'freetubeapp/freetube'
 
-const releaseNotesMarkdown = new Marked({
+const releaseNotesMarkdown = createReleaseNotesMarkdown({
   extensions: [{
     name: 'issueReference',
     level: 'inline',
@@ -339,26 +340,24 @@ const releaseNotesMarkdown = new Marked({
       return `<a href="https://github.com/OpenTubeX/OpenTubeX/issues/${issueNumber}">#${issueNumber}</a>`
     }
   }],
-  renderer: {
-    link(token) {
-      const match = GITHUB_ISSUE_URL_PATTERN.exec(token.href)
+  renderLink(token) {
+    const match = GITHUB_ISSUE_URL_PATTERN.exec(token.href)
 
-      if (!match) {
-        return false
-      }
-
-      const [, owner, repository, issueNumber] = match
-      const repositoryName = `${owner}/${repository}`
-      let label = `${repositoryName}#${issueNumber}`
-
-      if (repositoryName.toLowerCase() === LOCAL_REPOSITORY) {
-        label = `#${issueNumber}`
-      } else if (repositoryName.toLowerCase() === UPSTREAM_REPOSITORY) {
-        label = `${owner}#${issueNumber}`
-      }
-
-      return `<a href="${token.href}">${label}</a>`
+    if (!match) {
+      return false
     }
+
+    const [, owner, repository, issueNumber] = match
+    const repositoryName = `${owner}/${repository}`
+    let label = `${repositoryName}#${issueNumber}`
+
+    if (repositoryName.toLowerCase() === LOCAL_REPOSITORY) {
+      label = `#${issueNumber}`
+    } else if (repositoryName.toLowerCase() === UPSTREAM_REPOSITORY) {
+      label = `${owner}#${issueNumber}`
+    }
+
+    return `<a href="${token.href}">${label}</a>`
   }
 })
 
@@ -713,6 +712,8 @@ async function initializeManagedDownloadTools() {
 }
 
 onMounted(async () => {
+  preloadUtilityRoutes()
+
   if (isElectron) {
     removeTabsStateListener = await store.dispatch('initializeTabs')
     window.ftElectron.tabs.rendererReady()

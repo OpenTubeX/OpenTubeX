@@ -60,7 +60,7 @@
         <div class="settingsSections">
           <component
             :is="section.component"
-            v-for="section in settingsSectionComponents"
+            v-for="section in renderedSettingsSectionComponents"
             :key="section.type"
             ref="sectionRefs"
             class="section"
@@ -79,7 +79,16 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import {
+  computed,
+  nextTick,
+  onActivated,
+  onBeforeUnmount,
+  onDeactivated,
+  onMounted,
+  ref,
+  useTemplateRef
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -89,6 +98,7 @@ import PlayerSettings from '../../components/PlayerSettings/PlayerSettings.vue'
 import CaptionSettings from '../../components/CaptionSettings/CaptionSettings.vue'
 import ExternalPlayerSettings from '../../components/ExternalPlayerSettings.vue'
 import DownloadSettings from '../../components/DownloadSettings.vue'
+import ExternalSoftwareSettings from '../../components/ExternalSoftwareSettings.vue'
 import SubscriptionSettings from '../../components/SubscriptionSettings/SubscriptionSettings.vue'
 import PrivacySettings from '../../components/PrivacySettings.vue'
 import DataSettings from '../../components/DataSettings/DataSettings.vue'
@@ -157,6 +167,12 @@ const settingsComponentsData = computed(() => {
           title: t('Settings.Download Settings.Download Settings'),
           icon: ['fas', 'download'],
           component: DownloadSettings
+        },
+        {
+          type: 'external-software',
+          title: t('Settings.External Software Settings.External Software Settings'),
+          icon: ['fas', 'film'],
+          component: ExternalSoftwareSettings
         }]
       : []),
     {
@@ -269,6 +285,11 @@ const settingsSectionComponents = computed(() => {
   return [generalSettingsEntry, ...settingsSections]
 })
 
+const renderedSectionCount = ref(1)
+const renderedSettingsSectionComponents = computed(() => {
+  return settingsSectionComponents.value.slice(0, renderedSectionCount.value)
+})
+
 const unlocked = ref(store.getters.getSettingsPassword === '')
 
 if (unlocked.value) {
@@ -283,10 +304,21 @@ function handleUnlock() {
   })
 }
 
-onBeforeUnmount(() => {
+function stopObservingSettingsPage() {
   document.removeEventListener('scroll', markScrolledToSectionAsActive)
   settingsResizeObserver?.disconnect()
+  settingsResizeObserver = null
+  window.cancelAnimationFrame(renderSectionsAnimationFrameId)
+}
+
+onActivated(() => {
+  if (unlocked.value && settingsResizeObserver == null) {
+    observeSettingsPage()
+    scheduleRemainingSettingsSections()
+  }
 })
+onDeactivated(stopObservingSettingsPage)
+onBeforeUnmount(stopObservingSettingsPage)
 
 function showKeyboardShortcutPrompt() {
   store.dispatch('showKeyboardShortcutPrompt')
@@ -307,12 +339,9 @@ function updateHighlightChangedSettings(value) {
 }
 
 function handleMounted() {
-  handleResize()
-  settingsResizeObserver = new ResizeObserver(([entry]) => {
-    handleResize(entry.contentRect.width)
-  })
-  settingsResizeObserver.observe(settingsPageRef.value)
-  document.addEventListener('scroll', markScrolledToSectionAsActive)
+  if (settingsResizeObserver == null) {
+    observeSettingsPage()
+  }
 
   const sectionFromHash = route.hash.slice(1)
   const initialSection = settingsSectionComponents.value.some(({ type }) => type === sectionFromHash)
@@ -326,18 +355,48 @@ function handleMounted() {
   } else if (isInDesktopView.value) {
     updateSectionHash(initialSection)
   }
+
+  scheduleRemainingSettingsSections()
+}
+
+function observeSettingsPage() {
+  handleResize()
+  settingsResizeObserver = new ResizeObserver(([entry]) => {
+    handleResize(entry.contentRect.width)
+  })
+  settingsResizeObserver.observe(settingsPageRef.value)
+  document.addEventListener('scroll', markScrolledToSectionAsActive)
 }
 
 const sectionRefs = useTemplateRef('sectionRefs')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 let settingsResizeObserver = null
 let hasMeasuredSettingsWidth = false
+let renderSectionsAnimationFrameId = 0
+
+function scheduleRemainingSettingsSections() {
+  if (renderedSectionCount.value >= settingsSectionComponents.value.length) {
+    return
+  }
+
+  renderSectionsAnimationFrameId = window.requestAnimationFrame(() => {
+    // Mount below-the-fold sections together after the Settings shell paints.
+    // Growing the document over several frames makes the page scrollbar update
+    // repeatedly and exposes scrollbar flicker while opening Settings.
+    renderedSectionCount.value = settingsSectionComponents.value.length
+  })
+}
 
 /**
  * @param {string} sectionType
  * @param {boolean} updateHash
  */
 function navigateToSection(sectionType, updateHash = true) {
+  const sectionIndex = settingsSectionComponents.value.findIndex(({ type }) => type === sectionType)
+  if (sectionIndex >= renderedSectionCount.value) {
+    renderedSectionCount.value = sectionIndex + 1
+  }
+
   if (updateHash) {
     updateSectionHash(sectionType)
   }
@@ -347,6 +406,9 @@ function navigateToSection(sectionType, updateHash = true) {
       const sectionElement = sectionRefs.value.find(sectionRef => {
         return sectionRef.$el.dataset.section === sectionType
       })?.$el
+      if (!sectionElement) {
+        return
+      }
       sectionElement.scrollIntoView()
 
       const sectionHeading = sectionElement.firstChild.firstChild

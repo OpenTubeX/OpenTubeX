@@ -1,6 +1,6 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { findWatchComponent, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -101,6 +101,85 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
+  await setWindowWidth(app, 1500)
+  await page.locator(sel.searchInput).fill(VIDEO_URL)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.videoLayout')).toBeVisible()
+  await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') {
+        return vnode.component.proxy
+      }
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) throw new Error('Unable to access the watch view')
+
+    watchView.videoLoadGeneration += 1
+    watchView.errorMessage = null
+    watchView.isUpcoming = false
+    watchView.playabilityStatus = 'OK'
+    watchView.showTranscript = true
+    watchView.activeFormat = 'legacy'
+    watchView.handlePlayerError = () => {}
+    watchView.legacyFormats = [{
+      itag: 18,
+      qualityLabel: '360p',
+      height: 360,
+      width: 640,
+      url: 'data:video/mp4;base64,'
+    }]
+    watchView.isLoading = false
+    await watchView.$nextTick()
+  })
+
+  const layout = page.locator('.videoLayout')
+  const theatreButton = page.locator('.theatre-button').first()
+  const videoArea = page.locator('.videoArea')
+  const sidebar = page.locator('.sidebarArea')
+  await expect(theatreButton).toBeVisible()
+  await expect.poll(async () => {
+    const [videoBounds, sidebarBounds] = await Promise.all([
+      videoArea.boundingBox(),
+      sidebar.boundingBox()
+    ])
+    return sidebarBounds.x >= videoBounds.x + videoBounds.width - 1
+  }).toBe(true)
+
+  await theatreButton.evaluate(button => button.click())
+  await expect(layout).toHaveClass(/useTheatreMode/)
+  await expect.poll(async () => {
+    const [videoBounds, sidebarBounds] = await Promise.all([
+      videoArea.boundingBox(),
+      sidebar.boundingBox()
+    ])
+    return sidebarBounds.y >= videoBounds.y + videoBounds.height - 1
+  }).toBe(true)
+
+  await theatreButton.evaluate(button => button.click())
+  await expect(layout).not.toHaveClass(/useTheatreMode/)
+
+  await setWindowWidth(app, 1200)
+  await expect(theatreButton).toBeHidden()
+  await expect(page.locator('.ftVideoPlayerHost')).toHaveClass(/theatreUnavailable/)
+
+  await page.keyboard.press('t')
+  await expect(layout).not.toHaveClass(/useTheatreMode/)
+})
+
 test.describe('background watch tab', () => {
   test.use({
     seed: {
@@ -158,6 +237,67 @@ test.describe('watch page', () => {
     await expect
       .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 30_000 })
       .toBeGreaterThan(1)
+  })
+
+  test('stops querying Shaka state before a format switch unloads it', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const player = page.locator('.ftVideoPlayer')
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await player.evaluate((element, watchComponent) => {
+      const overlay = element.ui ?? element.querySelector('video')?.ui
+      const shakaPlayer = overlay?.getControls().getPlayer()
+      if (!watchComponent || !shakaPlayer) {
+        throw new Error('Unable to access the mounted player')
+      }
+
+      window.__hasLoadedAtFormatUnload = []
+      const unload = shakaPlayer.unload.bind(shakaPlayer)
+      shakaPlayer.unload = (...args) => {
+        window.__hasLoadedAtFormatUnload.push(watchComponent.refs.player.hasLoaded)
+        return unload(...args)
+      }
+
+      const watchView = watchComponent.proxy
+      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+    }, watchComponent)
+    await watchComponent.dispose()
+
+    await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+  })
+
+  test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await page.evaluate((watchComponent) => {
+      if (!watchComponent) throw new Error('Unable to access the watch view')
+      watchComponent.proxy.handleFormatChange('audio')
+    }, watchComponent)
+    await watchComponent.dispose()
+
+    const player = page.locator('.ftVideoPlayer')
+    await expect(player).toHaveClass(/sixteenByNine/)
+    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+  })
+
+  test('hides the tab play indicator while buffering', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    const activeTab = page.locator(sel.activeTab)
+    await expect(activeTab.locator('.playingIcon')).toBeVisible()
+
+    await video.dispatchEvent('waiting')
+    await expect(activeTab.locator('.playingIcon')).toHaveCount(0)
+
+    await video.dispatchEvent('playing')
+    await expect(activeTab.locator('.playingIcon')).toBeVisible()
   })
 
   test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
@@ -1109,6 +1249,7 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     const actions = page.locator('.fullscreenActions')
     const seekBar = page.locator('.shaka-seek-bar-container')
+    const controls = page.locator('.shaka-controls-container')
     const fullscreenButton = page.locator('.shaka-fullscreen-button')
     await actions.evaluate((element) => {
       const sponsorBlockNotice = element.cloneNode(false)
@@ -1137,6 +1278,9 @@ test.describe('watch page', () => {
       seekBarBounds.x + (seekBarBounds.width / 2),
       seekBarBounds.y + (seekBarBounds.height / 2)
     )
+    // End-screen annotations use z-index 2, so the controls stacking context
+    // must rise above them for its seek preview to be visible.
+    await expect(controls).toHaveCSS('z-index', '3')
     await expect(actions).toHaveCSS('z-index', '0')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '0')
   })
@@ -1346,7 +1490,7 @@ test.describe('watch page', () => {
       const previewBox = await preview.boundingBox()
       expect(previewBox.y).toBeLessThan(contentBox.y)
       await expect(content).toHaveCSS('overflow', 'visible')
-      await expect(content).not.toHaveAttribute('data-overlayscrollbars-viewport')
+      await expect(content).toHaveAttribute('data-overlayscrollbars-viewport')
 
       for (const position of [0.25, 0.5, 0.75]) {
         await page.mouse.move(
@@ -1473,6 +1617,24 @@ test.describe('custom Shorts player', () => {
     }
   })
 
+  test('pausing exposes loaded player state to the template', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await expect(player).toHaveClass(/shortsPaused/)
+  })
+
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'Shorts detection needs the real API')
 
@@ -1540,6 +1702,8 @@ test.describe('custom Shorts player', () => {
       playerBounds.y + playerBounds.height / 2
     )
     await player.locator('.shortsTopControl').first().click()
+    // Production regression: this class depends on hasLoaded being available
+    // to the template after pausing, where Vue runtime warnings are stripped.
     await expect(player).toHaveClass(/shortsPaused/)
     await expect(seekBar).toHaveCSS('opacity', '1')
 

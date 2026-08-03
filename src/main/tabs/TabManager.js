@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain, app, shell } from 'electron'
 import { randomUUID } from 'crypto'
-import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
+import { mkdir, readdir, readFile, rename, unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { IpcChannels } from '../../constants.js'
 import * as baseHandlers from '../../datastores/handlers/base.js'
@@ -12,6 +12,21 @@ import {
 } from './TabSessionStore.js'
 import { TabRendererBridge } from './TabRendererBridge.js'
 import { buildReorderedTabMap } from './tabOrder.js'
+import {
+  createTabPreviewFileName,
+  createTabPreviewTempFileName,
+  isReusableTabPreviewFileName,
+  isTabPreviewDataUrl,
+  normalizeTabPreviewFileName,
+  selectOrphanedTabPreviews,
+  TAB_PREVIEW_JPEG_QUALITY,
+  tabPreviewBufferToDataUrl
+} from './tabPreviewCache.js'
+import {
+  cropTabPreviewToContent,
+  getTabPreviewTargetSize,
+  measureTabPreviewContentBounds
+} from './tabPreviewGeometry.js'
 import { isOpenTubeXUrl } from '../utils.js'
 
 /** @type {Map<number, TabManager>} windowId -> TabManager */
@@ -25,13 +40,10 @@ const VALID_TAB_CLOSE_FOCUS = new Set(['previousTab', 'nextTab'])
 // cached here instead of being read from the settings store on every close.
 let tabCloseFocus = DEFAULT_TAB_CLOSE_FOCUS
 const VALID_TAB_COLORS = new Set(['red', 'orange', 'yellow', 'green', 'blue', 'purple'])
-const TAB_PREVIEW_MAX_WIDTH = 360
-const TAB_PREVIEW_MAX_HEIGHT = 220
 const TAB_PREVIEW_REFRESH_DELAY_MS = 700
 const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
 const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
-const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.png$/i
 const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
 const transferringTabIds = new Set()
 const TAB_LOADING_SOURCE_MOUNT = 'mount'
@@ -125,16 +137,6 @@ export class TabManager {
   }
 
   /**
-   * @param {unknown} value
-   * @returns {string | null}
-   */
-  static normalizePreviewFileName(value) {
-    return typeof value === 'string' && TAB_PREVIEW_FILE_PATTERN.test(value)
-      ? value
-      : null
-  }
-
-  /**
    * @returns {string}
    */
   static getTabPreviewCacheDirectory() {
@@ -142,24 +144,41 @@ export class TabManager {
   }
 
   /**
-   * @param {string} dataUrl
-   * @returns {Buffer | null}
+   * Deletes cached previews that no restored session refers to. Tabs delete
+   * their own preview when they close, but a crash or a forced quit leaves the
+   * file behind with nothing left to point at it.
+   *
+   * Must run before any window exists: a capture racing this would write a file
+   * that is not in `referencedFileNames` yet and would be deleted right away.
+   * @param {Iterable<string | null | undefined>} referencedFileNames
+   * @returns {Promise<number>} how many files were deleted
    */
-  static tabPreviewDataUrlToBuffer(dataUrl) {
-    if (typeof dataUrl !== 'string') {
-      return null
+  static async pruneTabPreviewCache(referencedFileNames) {
+    const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
+    /** @type {string[]} */
+    let fileNames
+    try {
+      fileNames = await readdir(cacheDirectory)
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        console.error('Failed to read the tab preview cache:', error)
+      }
+      return 0
     }
 
-    const match = dataUrl.match(/^data:image\/png;base64,([A-Za-z0-9+/=]+)$/)
-    return match ? Buffer.from(match[1], 'base64') : null
-  }
-
-  /**
-   * @param {Buffer} buffer
-   * @returns {string}
-   */
-  static tabPreviewBufferToDataUrl(buffer) {
-    return 'data:image/png;base64,' + buffer.toString('base64')
+    const orphans = selectOrphanedTabPreviews(fileNames, referencedFileNames)
+    const results = await Promise.all(orphans.map(async fileName => {
+      try {
+        await unlink(join(cacheDirectory, fileName))
+        return true
+      } catch (error) {
+        if (error?.code !== 'ENOENT') {
+          console.error('Failed to delete an orphaned tab preview:', error)
+        }
+        return false
+      }
+    }))
+    return results.filter(Boolean).length
   }
 
   /**
@@ -760,10 +779,10 @@ export class TabManager {
     const location = this._resolveTabLocation(url, route, query)
     const startsUnloaded = (Boolean(lazyLoad) || Boolean(isUnloaded)) && !makeActive && !preloadInBackground
     const shouldMount = !startsUnloaded
-    const restoredPreviewDataUrl = typeof previewDataUrl === 'string' && previewDataUrl.startsWith('data:image/png;base64,')
+    const restoredPreviewDataUrl = isTabPreviewDataUrl(previewDataUrl)
       ? previewDataUrl
       : null
-    const restoredPreviewFileName = TabManager.normalizePreviewFileName(previewFileName)
+    const restoredPreviewFileName = normalizeTabPreviewFileName(previewFileName)
     const restoredPreviewCapturedAt = (restoredPreviewDataUrl != null || restoredPreviewFileName != null) && Number.isFinite(previewCapturedAt)
       ? previewCapturedAt
       : 0
@@ -1391,7 +1410,7 @@ export class TabManager {
    * @returns {string | null}
    */
   _getTabPreviewFilePath(fileName) {
-    const normalizedFileName = TabManager.normalizePreviewFileName(fileName)
+    const normalizedFileName = normalizeTabPreviewFileName(fileName)
     return normalizedFileName == null
       ? null
       : join(TabManager.getTabPreviewCacheDirectory(), normalizedFileName)
@@ -1399,20 +1418,37 @@ export class TabManager {
 
   /**
    * @param {TabInfo} tab
-   * @param {string} dataUrl
+   * @param {Buffer} buffer
    * @returns {Promise<void>}
    */
-  async _persistTabPreview(tab, dataUrl) {
-    const buffer = TabManager.tabPreviewDataUrlToBuffer(dataUrl)
+  async _persistTabPreview(tab, buffer) {
     if (buffer == null || buffer.length === 0) {
       return
     }
 
-    const fileName = TabManager.normalizePreviewFileName(tab.previewFileName) ?? randomUUID() + '.png'
+    const existingFileName = normalizeTabPreviewFileName(tab.previewFileName)
+    // A cache entry left by an older version is a PNG; writing JPEG bytes into
+    // it would leave the extension lying about the contents, so start a new file.
+    const reusableFileName = isReusableTabPreviewFileName(existingFileName) ? existingFileName : null
+    const fileName = reusableFileName ?? createTabPreviewFileName()
     const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
     await mkdir(cacheDirectory, { recursive: true })
-    await writeFile(join(cacheDirectory, fileName), buffer)
+    // Writing straight to the target would truncate it first, so a failed write
+    // (a full disk, a kill) would destroy a preview that was perfectly good.
+    // A rename within the directory swaps it in atomically instead.
+    const tempPath = join(cacheDirectory, createTabPreviewTempFileName())
+    try {
+      await writeFile(tempPath, buffer)
+      await rename(tempPath, join(cacheDirectory, fileName))
+    } catch (error) {
+      await unlink(tempPath).catch(() => {})
+      throw error
+    }
     tab.previewFileName = fileName
+
+    if (reusableFileName == null && existingFileName != null) {
+      await this._deleteTabPreviewFile(existingFileName)
+    }
   }
 
   /**
@@ -1427,7 +1463,7 @@ export class TabManager {
 
     try {
       const buffer = await readFile(filePath)
-      return buffer.length > 0 ? TabManager.tabPreviewBufferToDataUrl(buffer) : null
+      return buffer.length > 0 ? tabPreviewBufferToDataUrl(buffer) : null
     } catch (error) {
       if (error?.code !== 'ENOENT') {
         console.error('Failed to load tab preview:', error)
@@ -1604,24 +1640,24 @@ export class TabManager {
         }
 
         const contentBounds = await this._getTabPreviewContentBounds()
-        const contentImage = contentBounds == null ? image : this._cropTabPreviewToContent(image, contentBounds)
+        const contentImage = contentBounds == null ? image : cropTabPreviewToContent(image, contentBounds)
         if (contentImage == null || contentImage.isEmpty()) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
 
-        const { width, height } = contentImage.getSize()
-        const ratio = Math.min(TAB_PREVIEW_MAX_WIDTH / width, TAB_PREVIEW_MAX_HEIGHT / height, 1)
-        const preview = ratio < 1
-          ? contentImage.resize({
-              width: Math.max(1, Math.round(width * ratio)),
-              height: Math.max(1, Math.round(height * ratio)),
-              quality: 'good'
-            })
-          : contentImage
-        const dataUrl = preview.toDataURL()
+        const targetSize = getTabPreviewTargetSize(contentImage.getSize(), contentBounds)
+        const preview = targetSize == null
+          ? contentImage
+          : contentImage.resize({ ...targetSize, quality: 'best' })
+        const previewBuffer = preview.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
+        if (previewBuffer.length === 0) {
+          return await this._getCachedTabPreviewDataUrl(tab)
+        }
+
+        const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
         tab.previewDataUrl = dataUrl
         tab.previewCapturedAt = Date.now()
-        await this._persistTabPreview(tab, dataUrl)
+        await this._persistTabPreview(tab, previewBuffer)
         await this._saveSession()
         return dataUrl
       } catch (error) {
@@ -1636,76 +1672,17 @@ export class TabManager {
   }
 
   /**
-   * @returns {Promise<{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number} | null>}
+   * @returns {Promise<import('./tabPreviewGeometry.js').TabPreviewContentBounds | null>}
    */
   async _getTabPreviewContentBounds() {
     try {
-      return await this.browserWindow.webContents.executeJavaScript(`
-        (() => {
-          const viewportWidth = Math.max(
-            window.visualViewport?.width || 0,
-            window.innerWidth || 0,
-            document.documentElement?.clientWidth || 0
-          )
-          const viewportHeight = Math.max(
-            window.visualViewport?.height || 0,
-            window.innerHeight || 0,
-            document.documentElement?.clientHeight || 0
-          )
-          const tabBar = document.querySelector('.tabBar')
-          let contentTop = 0
-          let contentLeft = 0
-          let contentRight = viewportWidth
-          if (tabBar instanceof HTMLElement) {
-            const rect = tabBar.getBoundingClientRect()
-            if (tabBar.classList.contains('vertical')) {
-              // Full-height side column: crop it off horizontally. It sits at
-              // whichever inline edge matches the text direction.
-              if (rect.left <= viewportWidth - rect.right) {
-                contentLeft = Math.min(viewportWidth, Math.max(0, rect.right))
-              } else {
-                contentRight = Math.min(viewportWidth, Math.max(0, rect.left))
-              }
-            } else {
-              contentTop = Math.min(viewportHeight, Math.max(0, rect.bottom))
-            }
-          }
-          return { contentTop, contentLeft, contentRight, viewportWidth, viewportHeight }
-        })()
-      `, true)
+      return await this.browserWindow.webContents.executeJavaScript(
+        `(${measureTabPreviewContentBounds.toString()})(window, document)`,
+        true
+      )
     } catch {
       return null
     }
-  }
-
-  /**
-   * @param {import('electron').NativeImage} image
-   * @param {{contentTop: number, contentLeft: number, contentRight: number, viewportWidth: number, viewportHeight: number}} contentBounds
-   * @returns {import('electron').NativeImage | null}
-   */
-  _cropTabPreviewToContent(image, contentBounds) {
-    const { contentTop = 0, contentLeft = 0, viewportWidth, viewportHeight } = contentBounds
-    const contentRight = contentBounds.contentRight ?? viewportWidth
-
-    if (contentTop <= 0 && contentLeft <= 0 && contentRight >= viewportWidth) {
-      return image
-    }
-
-    const { width, height } = image.getSize()
-    if (width <= 0 || height <= 0 || viewportWidth <= 0 || viewportHeight <= 0) {
-      return null
-    }
-
-    const scaleX = width / viewportWidth
-    const scaleY = height / viewportHeight
-    const cropX = Math.min(width, Math.max(0, Math.ceil(contentLeft * scaleX)))
-    const cropRight = Math.min(width, Math.max(0, Math.floor(contentRight * scaleX)))
-    const cropY = Math.min(height, Math.max(0, Math.ceil(contentTop * scaleY)))
-    const cropWidth = cropRight - cropX
-    const cropHeight = height - cropY
-    return cropWidth <= 0 || cropHeight <= 0
-      ? null
-      : image.crop({ x: cropX, y: cropY, width: cropWidth, height: cropHeight })
   }
 
   /**
@@ -1723,11 +1700,16 @@ export class TabManager {
           if (!style) {
             style = document.createElement('style')
             style.id = ${JSON.stringify(TAB_PREVIEW_CAPTURE_STYLE_ID)}
-            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} .tabTooltip, html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
+            style.textContent = 'html.${TAB_PREVIEW_CAPTURE_CLASS} [data-tab-preview-overlay] { visibility: hidden !important; }'
             document.head.appendChild(style)
           }
           document.documentElement.classList.add(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})
-          return new Promise(resolve => requestAnimationFrame(() => resolve(true)))
+          // Two frames: the first callback runs before the frame that applies
+          // the class is painted, so resolving there can still capture a
+          // visible overlay and put one tab's preview inside another's.
+          return new Promise(resolve => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)))
+          })
         })()
       `
       : `document.documentElement.classList.remove(${JSON.stringify(TAB_PREVIEW_CAPTURE_CLASS)})`
@@ -1993,7 +1975,7 @@ export class TabManager {
       color: TabManager.normalizeTabColor(snapshot.color),
       previewDataUrl: snapshot.previewDataUrl ?? null,
       previewCapturedAt: snapshot.previewCapturedAt ?? 0,
-      previewFileName: TabManager.normalizePreviewFileName(snapshot.previewFileName),
+      previewFileName: normalizeTabPreviewFileName(snapshot.previewFileName),
       previewCaptureTimeoutId: null,
       previewCapturePromise: null,
       loadState: 'mounting',
@@ -2185,7 +2167,7 @@ export class TabManager {
           isUnloaded: tab.loadState === 'unloaded' || this._deferredUnloadTabIds.has(tab.id)
         }
 
-        const previewFileName = TabManager.normalizePreviewFileName(tab.previewFileName)
+        const previewFileName = normalizeTabPreviewFileName(tab.previewFileName)
         if (previewFileName != null && tab.previewCapturedAt > 0) {
           tabData.previewFileName = previewFileName
           tabData.previewCapturedAt = tab.previewCapturedAt
@@ -2321,7 +2303,7 @@ export class TabManager {
       for (const tabData of sessionData.tabs) {
         const makeActive = tabData.id === sessionData.activeTabId
         const hasSavedTitle = typeof tabData.title === 'string' && tabData.title.trim().length > 0
-        const previewFileName = TabManager.normalizePreviewFileName(tabData.previewFileName)
+        const previewFileName = normalizeTabPreviewFileName(tabData.previewFileName)
         const loadInBackground = loadInactiveTabs || (restoreTabLoadState && tabData.isUnloaded === false)
         const restoreAsUnloaded = !loadInactiveTabs && !makeActive && (
           (restoreTabLoadState && tabData.isUnloaded === true) ||

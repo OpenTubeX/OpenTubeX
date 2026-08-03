@@ -184,6 +184,15 @@ export default defineComponent({
       type: String,
       required: true
     },
+    /**
+     * Which engine provided the streams, as yt-dlp's manifests need a few
+     * accommodations that must not change the behaviour for the built-in one.
+     * @type {import('vue').PropType<'built-in' | 'yt-dlp'>}
+     */
+    playbackEngine: {
+      type: String,
+      default: 'built-in'
+    },
     sabrData: {
       type: Object,
       default: null
@@ -841,6 +850,7 @@ export default defineComponent({
 
     const hasLoaded = ref(false)
     const annotationCurrentTime = ref(0)
+    const annotationVideoAspectRatio = ref(null)
 
     const hasMultipleAudioTracks = ref(false)
     const isLive = ref(props.isLive)
@@ -882,6 +892,11 @@ export default defineComponent({
     const activeLegacyFormat = shallowRef(null)
 
     const fullWindowEnabled = ref(false)
+    const annotationVideoFit = computed(() => {
+      return props.shortsPlayer && !isFullscreen.value && !fullWindowEnabled.value
+        ? 'cover'
+        : 'contain'
+    })
     const fullWindowPlaceholderHeight = ref(0)
     /** @type {Animation|null} */
     let fullWindowAnimation = null
@@ -2669,8 +2684,14 @@ export default defineComponent({
 
       const match = props.manifestSrc.match(/\/(?:manifest|playlist)_duration\/(\d+)\//)
 
-      // Check how many seconds we are allowed to seek, 30 is too short, 3600 is an hour which is great
-      return match != null && parseInt(match[1] || '0') > 30
+      if (match != null) {
+        // Check how many seconds we are allowed to seek, 30 is too short, 3600 is an hour which is great
+        return parseInt(match[1] || '0') > 30
+      }
+
+      // yt-dlp's manifest URLs don't state the seekable duration, but they do state
+      // whether the stream has a DVR window, which is what makes it rewindable
+      return props.playbackEngine === 'yt-dlp' && props.manifestSrc.includes('/playlist_type/DVR/')
     })
 
     /**
@@ -3081,7 +3102,10 @@ export default defineComponent({
             played: 'var(--primary-color)'
           },
           showAudioCodec: false,
-          showVideoCodec: false,
+          // YouTube offers the same resolutions in several codecs, which shaka-player lists
+          // separately, so the codec is what tells those entries apart. The built-in engine
+          // keeps distinguishing them by their bitrate, the way it did before.
+          showVideoCodec: props.playbackEngine === 'yt-dlp',
           volumeBarColors: {
             level: 'var(--primary-color)'
           },
@@ -4122,10 +4146,6 @@ export default defineComponent({
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
-      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
-        window.ftElectron.tabs.setPlaybackState('playing', tabId)
-      }
-
       updateAutoPip()
       updateScrollMiniPlayer()
 
@@ -4140,6 +4160,16 @@ export default defineComponent({
       // frame is available the poster is no longer needed, so remove it before
       // a later blur-triggered PiP transition.
       showPoster.value = false
+
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('playing', tabId)
+      }
+    }
+
+    function handleWaiting() {
+      if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
+        window.ftElectron.tabs.setPlaybackState('paused', tabId)
+      }
     }
 
     function handlePause() {
@@ -4226,6 +4256,7 @@ export default defineComponent({
       // Re-evaluate auto-PiP now that PiP is actually allowed (the video was possibly
       // in a hidden tab / scrolled out of view while still loading).
       updateAutoPip()
+      updateAnnotationVideoAspectRatio()
       updateScrollMiniVideoAspectRatio()
       updateScrollMiniPlayer()
     }
@@ -4346,6 +4377,14 @@ export default defineComponent({
 
     const videoElementWidth = ref(0)
     const videoElementHeight = ref(0)
+
+    function updateAnnotationVideoAspectRatio() {
+      const video_ = video.value
+
+      annotationVideoAspectRatio.value = video_?.videoWidth > 0 && video_.videoHeight > 0
+        ? video_.videoWidth / video_.videoHeight
+        : null
+    }
     const {
       deactivateScrollMiniPlayer,
       handleFullscreenButtonClick,
@@ -4420,6 +4459,7 @@ export default defineComponent({
 
         videoElementWidth.value = video_.clientWidth * devicePixelRatio
         videoElementHeight.value = video_.clientHeight * devicePixelRatio
+        updateAnnotationVideoAspectRatio()
         updateScrollMiniVideoAspectRatio()
       }
     })
@@ -4434,6 +4474,7 @@ export default defineComponent({
      */
     function handleEnterPictureInPicture(event) {
       pipWindow = event.pictureInPictureWindow
+      tabMediaCoordinator.setPictureInPicture(mediaTabId, true)
       handlePictureInPictureResize()
       pipWindow.addEventListener('resize', handlePictureInPictureResize)
 
@@ -4443,6 +4484,8 @@ export default defineComponent({
     }
 
     function handleLeavePictureInPicture() {
+      tabMediaCoordinator.setPictureInPicture(mediaTabId, false)
+
       if (pipWindow) {
         pipWindow.removeEventListener('resize', handlePictureInPictureResize)
       }
@@ -7664,6 +7707,7 @@ export default defineComponent({
 
       player.addEventListener('loading', () => {
         hasLoaded.value = false
+        annotationVideoAspectRatio.value = null
         if (props.shortsPlayer) {
           shortsPaused.value = false
           shortsCaptionsAvailable.value = false
@@ -7963,6 +8007,11 @@ export default defineComponent({
           restoreCaptionIndex = null
         }
 
+        // Shaka clears its manifest before unload() finishes. A timeupdate can
+        // still arrive from the media element in that window, so stop handlers
+        // from querying player state as soon as the format switch begins.
+        hasLoaded.value = false
+
         if (newFormat === 'audio' || newFormat === 'dash') {
           let label
           let audioBandwidth
@@ -8217,6 +8266,9 @@ export default defineComponent({
      */
     async function destroyPlayer() {
       ignoreErrors = true
+      // The media element can emit one final timeupdate while Shaka is being
+      // destroyed, after its internal manifest has already been cleared.
+      hasLoaded.value = false
 
       let uiState = {
         startNextVideoInFullscreen: false,
@@ -8279,6 +8331,7 @@ export default defineComponent({
       getCurrentTime,
       setCurrentTime,
       getSabrReloadState,
+      setFullscreenMetadata,
       closeFullscreenMetadata,
       setFullscreenTranscript,
       closeFullscreenTranscript,
@@ -8335,6 +8388,7 @@ export default defineComponent({
     }
 
     return {
+      hasLoaded,
       shortsPaused,
       shortsMuted,
       shortsCaptionsAvailable,
@@ -8344,6 +8398,7 @@ export default defineComponent({
       toggleShortsMuted,
       toggleShortsCaptions,
       handlePlaying,
+      handleWaiting,
       openShortsOverflowMenu,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,
@@ -8354,6 +8409,7 @@ export default defineComponent({
       captionCssVariables,
       captionAppearanceSampleBottom,
       showCaptionAppearanceSample,
+      isActiveTab,
       container,
       video,
       vrCanvas,
@@ -8414,6 +8470,8 @@ export default defineComponent({
       stats,
       playerDimensions,
       annotationCurrentTime,
+      annotationVideoAspectRatio,
+      annotationVideoFit,
 
       autoplayVideos,
       sponsorBlockShowSkippedToast,

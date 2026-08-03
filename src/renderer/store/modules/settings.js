@@ -218,6 +218,7 @@ const state = {
   externalPlayerIgnoreDefaultArgs: false,
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
+  videoPlaybackEngine: 'built-in',
   ytDlpSource: 'system',
   ytDlpChannel: 'stable',
   ytDlpPath: '',
@@ -579,12 +580,14 @@ export const NON_TRANSFERABLE_SETTINGS = new Set([
   'externalPlayerIgnoreDefaultArgs',
   'externalPlayerCustomArgs',
   'showAddedExternalPlayerCustomArgs',
-  // DownloadSettings
+  // ExternalSoftwareSettings
+  'videoPlaybackEngine',
   'ytDlpSource',
   'ytDlpChannel',
   'ytDlpPath',
   'ytDlpFfmpegSource',
   'ytDlpFfmpegPath',
+  // DownloadSettings
   'ytDlpDownloadFolderPath',
   // Others
   'disableSmoothScrolling',
@@ -794,6 +797,9 @@ const customActions = {
             }
 
             commit(defaultMutationId(data._id), data.value)
+            if (data._id === 'syncServerEnabled') {
+              dispatch('applySyncServerEnabled', data.value, { root: true })
+            }
             break
 
           default:

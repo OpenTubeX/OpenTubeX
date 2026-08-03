@@ -47,10 +47,20 @@ jobs:
             <<< "$reviews"
         }
 
+        coderabbit_has_findings() {
+          jq -e --arg head_sha "$HEAD_SHA" \
+            'any(.[]; .user.login == "coderabbitai[bot]" and .commit_id == $head_sha and .state == "COMMENTED")' \
+            <<< "$reviews" > /dev/null
+        }
+
         bot_approved() {
           local bot="$1"
           local review_state
           review_state="$(latest_decisive_review "$bot" | jq -r '.state // empty')"
+
+          if [[ "$bot" == "coderabbitai[bot]" ]] && coderabbit_has_findings; then
+            return 1
+          fi
 
           if [[ "$review_state" == "APPROVED" ]]; then
             return 0

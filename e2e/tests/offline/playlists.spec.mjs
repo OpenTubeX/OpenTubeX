@@ -144,3 +144,55 @@ test.describe('seeded playlists', () => {
     await expect(page.getByTitle('Quick Bookmark Enabled').locator('[data-icon="clock"]')).toBeVisible()
   })
 })
+
+test.describe('custom playlist order', () => {
+  test.use({
+    seed: {
+      settings: {
+        listType: 'grid',
+        userPlaylistSortOrder: 'custom'
+      },
+      playlists: [
+        {
+          _id: 'large-custom-playlist',
+          playlistName: 'Large custom playlist',
+          protected: false,
+          description: '',
+          videos: Array.from({ length: 101 }, (_, index) => ({
+            videoId: String(index).padStart(11, '0'),
+            title: `Custom playlist video ${index + 1}`,
+            author: 'Test Channel',
+            authorId: 'UC-test-channel-id',
+            lengthSeconds: 120,
+            published: Date.now() - 86_400_000,
+            timeAdded: Date.now() - index,
+            playlistItemId: `custom-playlist-item-${index}`,
+            type: 'video'
+          })),
+          createdAt: Date.now() - 86_400_000,
+          lastUpdatedAt: Date.now()
+        }
+      ]
+    }
+  })
+
+  test('keeps the grid grab bars in place during the removal undo period', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const secondVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 2', { exact: true })
+    })
+    await expect(secondVideo.locator('.grabBar')).toBeVisible()
+    await secondVideo.getByTitle('Remove from Playlist').click()
+
+    await expect(secondVideo).toHaveCount(0)
+    await expect(page.locator('.playlistItemsCard .grid.draggable .grabBar').first()).toBeVisible()
+
+    const thirdVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 3', { exact: true })
+    })
+    await thirdVideo.getByTitle('Move Video Up').click()
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+  })
+})

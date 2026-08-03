@@ -74,6 +74,17 @@
     transform: translateX(0.2em);
   }
 
+  .navIcon[data-icon='user-check']:is(
+    [data-icon-pack='lucide'],
+    [data-icon-pack='material']
+  ) {
+    transform: translateX(0.15em);
+  }
+
+  .navIcon[data-icon='user-check'][data-icon-pack='phosphor'] {
+    transform: translateX(0.1em);
+  }
+
   .moreOption {
     display: block;
   }

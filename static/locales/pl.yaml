@@ -798,6 +798,15 @@ Settings:
     Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
   Download Settings:
     Download Settings: Pobieranie
+    Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
+    Managed Tools Download Finished Template: Zakończono pobieranie {tools}
+    Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
+    Managed Tools Update Finished Template: Zakończono aktualizację {tools}
+    Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
+    Download Folder: 'Pobierane pliki zapisuj do:'
+    Choose Download Folder: Wybierz folder pobierania
+    Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
+  External Software Settings:
     yt-dlp Source: Źródło yt-dlp
     yt-dlp Channel: Kanał wersji yt-dlp
     Sources:
@@ -822,17 +831,9 @@ Settings:
     Downloading FFmpeg: Pobieranie FFmpeg…
     FFmpeg Downloaded Template: Pobrano FFmpeg w wersji {version}
     FFmpeg Download Error Template: 'Pobieranie FFmpeg nie powiodło się: {error}'
-    Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
-    Managed Tools Download Finished Template: Zakończono pobieranie {tools}
-    Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
-    Managed Tools Update Finished Template: Zakończono aktualizację {tools}
     Managed Tool Already Current Template: '{tool} {version} jest już aktualny'
-    Managed Tools Download Error Template: 'Nie można pobrać zarządzanych narzędzi: {errors}'
     yt-dlp Executable Path: Ścieżka do pliku wykonywalnego yt-dlp
     FFmpeg Executable Path: Ścieżka do pliku wykonywalnego FFmpeg
-    Download Folder: 'Pobierane pliki zapisuj do:'
-    Choose Download Folder: Wybierz folder pobierania
-    Templates Hint: Niestandardowe szablony pobierania można tworzyć i zarządzać nimi w oknie pobierania, które znajduje się pod odtwarzaczem wideo.
   Sync Settings:
     Sync Settings: Synchronizacja
     Privacy Passphrase Hint: Użyj osobnego hasła, które nie jest tym samym co hasło do Twojego konta. Nigdy nie opuszcza tego urządzenia i jest wymagane na każdym urządzeniu; jeśli je utracisz, nie będzie można odzyskać zaszyfrowanych danych synchronizacji.
@@ -1432,12 +1433,13 @@ Tooltips:
     Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
     Always Show Scrollbars: Utrzymuje paski przewijania widoczne przez cały czas. Po wyłączeniu, znikają one wkrótce po zatrzymaniu ruchu myszy i pojawiają się ponownie, gdy tylko ponownie nią poruszysz.
   Download Settings:
+    Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.
+  External Software Settings:
     yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
     yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
     FFmpeg Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet FFmpeg lub pobrać i zarządzać własną statyczną kompilacją FFmpeg, która jest przechowywana w katalogu danych użytkownika.
     yt-dlp Executable Path: Domyślnie OpenTubeX zakłada, że yt-dlp można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
     FFmpeg Executable Path: FFmpeg jest wymagany do łączenia oddzielnych strumieni wideo i audio oraz do konwersji audio. Domyślnie OpenTubeX zakłada, że FFmpeg można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
-    Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
 More: Więcej
 Unknown YouTube url type, cannot be opened in app: Nieznany typ adresu URL YouTube. Nie można go otworzyć w aplikacji
