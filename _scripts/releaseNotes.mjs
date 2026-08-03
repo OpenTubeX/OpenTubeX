@@ -147,12 +147,19 @@ export function parseReleaseNote(body) {
 
   if (!note) { throw new Error('Fill in the release note section before merging this noteworthy PR.') }
 
-  const imageSection = extractMarkedSection(body, RELEASE_IMAGE_MARKER)
-  const images = parseReleaseImages(imageSection)
+  const images = parseReleaseNoteImages(body)
 
   for (const image of images) { validateImageUrl(image.url) }
 
   return { images, note }
+}
+
+function parseReleaseNoteImages(body) {
+  const section = extractMarkedSection(body, RELEASE_IMAGE_MARKER)
+
+  if (section === null) { throw new Error('Keep the release note images section in the pull request body.') }
+
+  return parseReleaseImages(section)
 }
 
 export function parseReleaseNoteCategory(body) {
@@ -175,7 +182,15 @@ export function parseReleaseNoteCategory(body) {
 }
 
 function parsePullRequestReleaseNote(body) {
+  for (const marker of [RELEASE_NOTE_CATEGORY_MARKER, RELEASE_NOTE_MARKER, RELEASE_IMAGE_MARKER]) {
+    if (extractMarkedSection(body, marker) === null) {
+      throw new Error(`Keep the ${marker} markers in the pull request body.`)
+    }
+  }
+
   const category = parseReleaseNoteCategory(body)
+
+  parseReleaseNoteImages(body)
 
   if (category === NOT_NOTEWORTHY_CATEGORY) { return { category } }
 
