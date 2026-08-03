@@ -50,6 +50,24 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsMenu, .ftSettingsMenu, [class*="settings"]').first()).toBeVisible()
   })
 
+  test('select dropdowns use overlay scrollbars', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const combobox = page.getByRole('combobox', { name: /Language preference|Locale Preference/ })
+    await combobox.click()
+
+    const dropdown = page.locator('.selectDropdown')
+    await expect(dropdown).toBeVisible()
+    await expect(dropdown).toContainText('English (US) (100%)')
+    await expect(dropdown.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect(dropdown).toHaveCSS('scrollbar-width', 'none')
+
+    await combobox.press('ArrowDown')
+    await combobox.press('Enter')
+    await expect(combobox).toContainText('English (US) (100%)')
+    await expect(dropdown).toHaveCount(0)
+  })
+
   test('retains the mounted page when switching to About and back', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsPage = page.locator('.settingsPage')

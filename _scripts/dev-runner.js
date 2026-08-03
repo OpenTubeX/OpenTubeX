@@ -127,8 +127,8 @@ function scheduleElectronRestart() {
  * @param {WebpackDevServer} devServer
  */
 function setupNotifyLocaleUpdate(compiler, devServer) {
-  const notifyLocaleChange = (updatedLocales) => {
-    devServer.sendMessage(devServer.webSocketServer.clients, 'freetube-locale-update', updatedLocales)
+  const notifyLocaleChange = (update) => {
+    devServer.sendMessage(devServer.webSocketServer.clients, 'freetube-locale-update', update)
   }
 
   compiler.options.plugins
