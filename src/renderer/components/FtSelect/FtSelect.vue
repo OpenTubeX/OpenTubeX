@@ -97,6 +97,7 @@
         role="listbox"
         :aria-labelledby="`${id}-label`"
         :style="dropdownStyle"
+        @pointerdown="handleDropdownPointerDown"
       >
         <li
           v-for="(name, index) in selectNames"
@@ -193,6 +194,7 @@ const activeIndex = ref(0)
 const dropdownStyle = ref({})
 let typeahead = ''
 let typeaheadTimer = null
+let pointerDownInDropdown = false
 
 const selectedIndex = computed(() => props.selectValues.indexOf(props.value))
 const selectedName = computed(() => props.selectNames[selectedIndex.value] ?? '')
@@ -258,7 +260,8 @@ function updateDropdownPosition() {
   const buttonRect = button.getBoundingClientRect()
   const spaceBelow = Math.max(0, maximumBottom - buttonRect.bottom - menuGap)
   const spaceAbove = Math.max(0, buttonRect.top - menuGap - minimumTop)
-  const desiredHeight = Math.min(maximumHeight, menu.scrollHeight)
+  const naturalHeight = menu.scrollHeight + menu.offsetHeight - menu.clientHeight
+  const desiredHeight = Math.min(maximumHeight, naturalHeight)
   const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
   const menuHeight = Math.min(desiredHeight, availableHeight)
@@ -269,13 +272,16 @@ function updateDropdownPosition() {
   )
   const top = openAbove
     ? Math.max(minimumTop, buttonRect.top - menuGap - menuHeight)
-    : Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
+    : Math.max(
+        minimumTop,
+        Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
+      )
 
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
     left: `${left}px`,
     top: `${top}px`,
-    maxBlockSize: `${menuHeight}px`
+    maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null
   }
 }
 
@@ -406,9 +412,25 @@ function handleOutsidePointerDown(event) {
 }
 
 function handleFocusOut(event) {
-  if (!(event.relatedTarget instanceof Node) || !selectRoot.value?.contains(event.relatedTarget)) {
+  if (pointerDownInDropdown) {
+    return
+  }
+
+  const nextTarget = event.relatedTarget
+  const focusStaysInControl = nextTarget instanceof Node && (
+    selectRoot.value?.contains(nextTarget) || dropdown.value?.contains(nextTarget)
+  )
+
+  if (!focusStaysInControl) {
     closeDropdown()
   }
+}
+
+function handleDropdownPointerDown() {
+  pointerDownInDropdown = true
+  setTimeout(() => {
+    pointerDownInDropdown = false
+  }, 0)
 }
 
 function removeDropdownListeners() {

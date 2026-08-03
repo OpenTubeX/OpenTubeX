@@ -75,7 +75,7 @@
 
 .selectDropdown {
   position: fixed;
-  z-index: 1000;
+  z-index: 6;
   box-sizing: border-box;
   overflow-y: auto;
   padding-block: 4px;
@@ -96,8 +96,10 @@
   min-block-size: 34px;
   padding-block: 7px;
   padding-inline: 16px;
+  cursor: default;
   overflow: hidden;
   text-overflow: ellipsis;
+  user-select: none;
   white-space: nowrap;
 }
 

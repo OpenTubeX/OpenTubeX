@@ -78,13 +78,32 @@ test.describe('settings', () => {
     })
 
     expect(appearance.fontFamily).toContain('Roboto')
-    expect(appearance.cursor).not.toBe('pointer')
+    expect(appearance.cursor).toBe('default')
     expect(appearance.menuTop).toBeGreaterThanOrEqual(appearance.chromeBottom)
 
+    const scrollbarHandle = dropdown.locator('.os-scrollbar-vertical .os-scrollbar-handle')
+    const handleBounds = await scrollbarHandle.boundingBox()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2 + 30
+    )
+    await expect(dropdown).toBeVisible()
+    await page.mouse.up()
+
+    await combobox.press('Home')
     await combobox.press('ArrowDown')
     await combobox.press('Enter')
     await expect(combobox).toContainText('English (US) (100%)')
     await expect(dropdown).toHaveCount(0)
+
+    await page.getByRole('combobox', { name: 'Preferred API backend' }).click()
+    await expect(dropdown).toBeVisible()
+    expect(await dropdown.evaluate(menu => menu.scrollHeight <= menu.clientHeight)).toBe(true)
   })
 
   test('retains the mounted page when switching to About and back', async ({ page }) => {
