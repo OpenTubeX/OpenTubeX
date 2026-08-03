@@ -99,6 +99,14 @@ test('every pull request requires exactly one release note category', () => {
     },
   }), /Select exactly one release note category/)
 
+  const unknownCategoryBody = pullRequestBody('Not noteworthy')
+    .replace('- [x] Not noteworthy', '- [x] None of them')
+  assert.throws(() => validatePullRequestEvent({
+    pull_request: {
+      body: unknownCategoryBody,
+    },
+  }), /Unknown release note category: None of them/)
+
   assert.throws(() => parseReleaseNoteCategory(''), /Select one release note category/)
 
   assert.throws(() => parseReleaseNoteCategory(`
