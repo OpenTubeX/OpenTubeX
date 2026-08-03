@@ -230,6 +230,15 @@ test.describe('settings', () => {
     })).toBe(200)
 
     await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Wall-clock animation', 2000)
+    })
+    const timeoutIndicator = page.locator('.toast', { hasText: 'Wall-clock animation' })
+      .locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    await expect.poll(() => timeoutIndicator.evaluate((element) => {
+      return element.getAnimations()[0]?.playbackRate
+    })).toBe(1)
+
+    await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.dispatch('updateReducedMotion', 'on')
     })

@@ -166,4 +166,20 @@ test.describe('subscriptions feed tab indicator', () => {
 
     expect(Math.abs(indicator - tab)).toBeLessThan(1)
   })
+
+  test('completes a pending switch when the selected tab is clicked again', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    // Let the deferred swap reach its first animation frame, then activate the
+    // visually selected tab again before the second frame replaces the panel.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
+    await expect(page.getByText('short video 000')).toBeVisible()
+    await expect(page.getByText('video video 000')).toHaveCount(0)
+  })
 })

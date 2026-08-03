@@ -7,16 +7,30 @@ let animationPlaybackRate = 1
  * attached to the document.
  */
 function updateActiveAnimations() {
-  document.getAnimations({ subtree: true }).forEach(animation => {
-    applyAnimationSpeed(animation)
-  })
+  document.getAnimations({ subtree: true })
+    .filter(animation => !isWallClockAnimation(animation))
+    .forEach(animation => {
+      applyAnimationSpeed(animation)
+    })
+}
+
+/**
+ * Some animations visualize a separate wall-clock timer and must stay in sync
+ * with that timer rather than the UI animation preference.
+ *
+ * @param {Animation} animation
+ * @returns {boolean}
+ */
+function isWallClockAnimation(animation) {
+  const target = animation.effect?.target
+  return target instanceof Element && target.closest('.timeout-indicator') !== null
 }
 
 function updateTargetAnimations(event) {
   queueMicrotask(() => {
     if (!(event.target instanceof Element)) { return }
     if (event.target.matches('.feed-enter-active, .feed-move') ||
-      event.target.closest('[data-animation-speed-managed]')) { return }
+      event.target.closest('[data-animation-speed-managed], .timeout-indicator')) { return }
 
     event.target.getAnimations({ subtree: false }).forEach(animation => {
       applyAnimationSpeed(animation)
