@@ -123,6 +123,26 @@ export function getScrollMiniVerticalAnchor(rect, insets = getViewportInsets()) 
 }
 
 /**
+ * Anchor for rects saved before the anchor was recorded. Their coordinates were
+ * measured against a viewport we no longer know, so they are only worth reading
+ * while they still put the player at an edge: after a big enough resize the
+ * stale position can be nearest the opposite edge, which would keep the player
+ * stranded in the middle. Falling back to the bottom matches a fresh player, and
+ * only ever happens once, since activation persists a real anchor.
+ *
+ * @param {ScrollMiniPlayerRect} rect
+ * @param {{ top: number, bottom: number }} insets
+ * @returns {{ verticalDock: 'top' | 'bottom', verticalOffset: number }}
+ */
+function getLegacyVerticalAnchor(rect, insets) {
+  const anchor = getScrollMiniVerticalAnchor(rect, insets)
+
+  return anchor.verticalOffset <= EDGE_SNAP
+    ? anchor
+    : { verticalDock: 'bottom', verticalOffset: 0 }
+}
+
+/**
  * Re-place a rect against the current viewport, keeping it the same distance
  * from the edges it was docked to. Without this a window that grew while the
  * player was docked (or closed) strands it mid-screen, because its remembered
@@ -137,7 +157,7 @@ export function reanchorScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_
   const sized = clampScrollMiniPlayerRect(rect, aspectRatio)
   const anchor = hasVerticalAnchor(rect)
     ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
-    : getScrollMiniVerticalAnchor(sized, insets)
+    : getLegacyVerticalAnchor(sized, insets)
 
   const top = anchor.verticalDock === 'top'
     ? insets.top + anchor.verticalOffset

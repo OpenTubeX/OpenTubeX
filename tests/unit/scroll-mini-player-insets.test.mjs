@@ -172,6 +172,35 @@ test('a window that grew while the player was away still docks it to the edge', 
   assert.equal(activated.top + activated.height, 1041 - MARGIN)
 })
 
+test('a legacy rect without an anchor is docked to the bottom once it is adrift', () => {
+  // Saved before the anchor existed: bottom-right in an 894-tall window.
+  const legacy = JSON.stringify(
+    { left: 660, top: 590, width: 512, height: 288, dock: 'right' }
+  )
+
+  // Its stale top is now nearer the top edge than the bottom one, so reading the
+  // position at face value would leave the player floating mid-screen.
+  stubViewport({ clientWidth: 1744, clientHeight: 2000 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(legacy))
+
+  assert.equal(activated.verticalDock, 'bottom')
+  assert.equal(activated.top + activated.height, 2000 - MARGIN)
+})
+
+test('a legacy rect still parked at an edge keeps its offset', () => {
+  // Within EDGE_SNAP of the top inset, so it still reads as parked up there.
+  const legacy = JSON.stringify(
+    { left: 16, top: 60, width: 512, height: 288, dock: 'left' }
+  )
+
+  stubViewport({ clientWidth: 1744, clientHeight: 900 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(legacy))
+
+  assert.equal(activated.verticalDock, 'top')
+  assert.equal(activated.top, 60)
+  assert.equal(activated.left, MARGIN)
+})
+
 test('a restored rect that no longer fits is pulled back into view on activation', () => {
   const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
 
