@@ -5,6 +5,47 @@ import { isHistoryEntryWatched } from '../../history.js'
 const NEW_CONTENT_PUBLICATION_TOLERANCE_MS = 60 * 60 * 1000
 
 /**
+ * @param {object} video
+ * @returns {number | null}
+ */
+export function getUpcomingPremiereTimestamp(video) {
+  if (video.premiereDate != null) {
+    const timestamp = new Date(video.premiereDate).getTime()
+    return Number.isNaN(timestamp) ? null : timestamp
+  }
+
+  if (video.premiereTimestamp != null) {
+    const timestamp = Number(video.premiereTimestamp) * 1000
+    return Number.isFinite(timestamp) ? timestamp : null
+  }
+
+  return null
+}
+
+/**
+ * Clears stale upcoming flags once a premiere's scheduled time has arrived.
+ * @param {object} video
+ * @param {number} now
+ */
+export function updateUpcomingPremiereState(video, now) {
+  const premiereTimestamp = getUpcomingPremiereTimestamp(video)
+
+  if (
+    premiereTimestamp != null &&
+    premiereTimestamp <= now &&
+    (video.isUpcoming || video.premiere)
+  ) {
+    return {
+      ...video,
+      isUpcoming: false,
+      premiere: false
+    }
+  }
+
+  return video
+}
+
+/**
  * Adds YouTube's selected portrait thumbnails to dated Shorts entries without
  * replacing the exact publication and view metadata supplied by RSS.
  * @param {object[]} entries
