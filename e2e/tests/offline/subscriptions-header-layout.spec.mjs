@@ -13,7 +13,9 @@ const videos = Array.from({ length: 5 }, (_, index) => ({
   lengthSeconds: 120,
   liveNow: false,
   isUpcoming: false,
-  type: 'video'
+  type: 'video',
+  // So that the header also carries the Mark all as seen button
+  isNewInSubscriptionFeed: true
 }))
 
 test.use({
@@ -21,7 +23,8 @@ test.use({
     settings: {
       fetchSubscriptionsAutomatically: false,
       hideSubscriptionsVideos: false,
-      hideSubscriptionsShorts: false
+      hideSubscriptionsShorts: false,
+      showNewSubscriptionFeedIndicators: true
     },
     profiles: [
       {
@@ -118,6 +121,36 @@ test.describe('subscriptions header layout', () => {
 
     expect(new Set(heights).size).toBe(1)
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
+  })
+
+  test('merges the rows when the Mark all as seen button is what did not fit', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+
+    const header = page.locator('.subscriptionsHeader')
+    const markAllSeen = page.locator('.markAllSeenButton')
+    await expect(markAllSeen).toBeVisible()
+
+    // Narrow the window step by step until the button is what pushes the tabs
+    // onto their own line
+    let width = 1920
+    while (width > 900) {
+      width -= 20
+      await setWindowWidth(app, width)
+
+      if (!await header.evaluate(element => element.classList.contains('singleRow'))) {
+        break
+      }
+    }
+
+    await expect(header).not.toHaveClass(/singleRow/)
+
+    // Removing the button frees far more space than the last step took away, so
+    // the tabs fit next to the title again. The button leaves without resizing
+    // the tabs row, which keeps its full width while it has its own line.
+    await markAllSeen.click()
+    await expect(markAllSeen).toBeHidden()
+
+    await expect(header).toHaveClass(/singleRow/)
   })
 
   test('saves vertical space compared to the two line layout', async ({ app, page }) => {

@@ -791,18 +791,28 @@ function observeHeaderRow() {
     return
   }
 
-  // The children are observed as well, because text inside them (the refresh
-  // timestamps above all) changes their widths without resizing the row
+  // Everything the measurement reads is observed, not just the row: text inside
+  // the children (the refresh timestamps above all) changes their widths without
+  // resizing the row, and the tabs row keeps its full width while it has a line
+  // of its own, so its children have to be watched instead of it
   headerResizeObserver.disconnect()
   headerResizeObserver.observe(row)
 
   for (const child of row.children) {
     headerResizeObserver.observe(child)
   }
+
+  for (const child of tabsRowRef.value?.children ?? []) {
+    headerResizeObserver.observe(child)
+  }
 }
 
-// The refresh widget is only rendered once the current panel is mounted
-watch(currentTabPanel, () => nextTick(observeHeaderRow))
+// Which elements exist changes with the panel (the refresh widget is only
+// rendered once it is mounted) and with the Mark all as seen button
+watch([currentTabPanel, currentTabHasNewContent], () => nextTick(() => {
+  observeHeaderRow()
+  updateHeaderFitsOneRow()
+}))
 
 // ===== Sliding feed tab indicator =====
 const tabsContainerRef = useTemplateRef('tabsContainerRef')
