@@ -129,7 +129,7 @@ async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sou
 
 /**
  * Builds the proxy URL for yt-dlp's `--proxy` argument from the app's proxy settings.
- * @returns {Promise<string | null>} null when no proxy is configured
+ * @returns {Promise<string | null>} null when the proxy is disabled
  */
 async function getProxyUrl() {
   if (!(await settings._findOne('useProxy'))?.value) {
