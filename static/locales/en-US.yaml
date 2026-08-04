@@ -353,6 +353,10 @@ Settings:
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
     General Settings: General
+    Playback Engine:
+      Playback Engine: Playback Engine
+      yt-dlp: yt-dlp
+      Built-in: Built-in
     Check for Updates: Check for Updates
     Confirm Before Closing App: Confirm before closing OpenTubeX
     Fallback to Non-Preferred Backend on Failure: Fallback to Non-Preferred Backend
@@ -718,7 +722,7 @@ Settings:
         Name: None
   Download Settings:
     Download Settings: Downloads
-    Managed Tools Download Started Template: 'Tools required to download videos were not found: {tools}. Downloading managed copies…'
+    Managed Tools Download Started Template: 'Required external software was not found: {tools}. Downloading managed copies…'
     Managed Tools Download Finished Template: 'Finished downloading {tools}'
     Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'
     Managed Tools Update Finished Template: 'Finished updating {tools}'
@@ -1034,10 +1038,6 @@ Settings:
   Experimental Settings:
     Experimental Settings: Experimental
     Warning: These settings are experimental, they may cause crashes while enabled. Making backups is highly recommended. Use at your own risk!
-    Playback Engine:
-      Playback Engine: Playback Engine
-      yt-dlp: yt-dlp
-      Built-in: Built-in
     Replace HTTP Cache: Replace HTTP Cache
   Password Dialog:
     Password: Password
@@ -1638,6 +1638,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Playback Engine: Which engine obtains the video streams. yt-dlp must be available when selected.
     Avoid translation: |
       Disable YouTube's autotranslation of title, description and chapters of a video.
       Too many requests, such as fetching video titles across lists, may temporarily
@@ -1738,7 +1739,6 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
   Experimental Settings:
-    Playback Engine: Which tool the video streams are obtained with. yt-dlp needs to be available to be used.
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
   SponsorBlock Settings:
     UseDeArrowTitles: Replace video titles with user-submitted titles from DeArrow.

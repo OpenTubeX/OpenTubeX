@@ -587,10 +587,10 @@ const tabSwitcherSelectedTabId = computed(() => {
 })
 
 /**
- * Falls back to OpenTubeX-managed download tools when the configured system
+ * Falls back to OpenTubeX-managed external software when the configured system
  * executables are unavailable and updates every selected managed executable.
  */
-async function initializeManagedDownloadTools() {
+async function initializeManagedExternalSoftware() {
   if (!isElectron) {
     return
   }
@@ -766,7 +766,7 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
-    initializeManagedDownloadTools().catch(error => console.error('Failed to initialize managed download tools', error))
+    initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {
       checkForNewUpdates()
