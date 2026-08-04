@@ -34,4 +34,4 @@ HTTPS encrypts request paths and payloads in transit, but DNS providers and netw
 - To keep app data local, leave synchronization disabled.
 - To prevent a sync operator from reading synced data, use a server that supports enhanced-privacy sync and use a separate, strong privacy passphrase.
 - To avoid sending requests to optional services, leave SponsorBlock, DeArrow, Return YouTube Dislike, and synchronization disabled.
-- To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration. This includes `yt-dlp` when it is used for playback or downloads, unless custom `yt-dlp` arguments override the proxy.
+- To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration.
