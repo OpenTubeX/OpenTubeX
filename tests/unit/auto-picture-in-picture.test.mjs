@@ -157,6 +157,21 @@ test('PiP closed by the user is not reopened by an active trigger', () => {
   player.closedByUser()
   assert.equal(player.inPip, false)
   assert.deepEqual(player.toggles, ['enter'])
+
+  // A later re-evaluation (the player refreshes on `canplay`, focus changes and
+  // tab switches) must not reopen what the user just closed.
+  player.update()
+  assert.equal(player.inPip, false)
+  assert.deepEqual(player.toggles, ['enter'])
+
+  // Restoring ends the trigger, so the next one may open PiP again.
+  applyMinimizedState(state, false)
+  player.update()
+  applyMinimizedState(state, true)
+  player.update()
+  player.settle()
+  assert.equal(player.inPip, true)
+  assert.deepEqual(player.toggles, ['enter', 'enter'])
 })
 
 test('PiP opened by the user is not closed on restore', () => {

@@ -35,7 +35,10 @@ export function createAutoPictureInPictureState({ minimized = false, focused = t
     pendingPipTarget: null,
     // A blur only counts as a trigger once the document has been focused since
     // the last restore, see `applyMinimizedState`.
-    blurTriggerArmed: true
+    blurTriggerArmed: true,
+    // Whether the user closed an automatically opened PiP window while its
+    // trigger still applies, see `applyPictureInPictureState`.
+    pictureInPictureDismissed: false
   }
 }
 
@@ -84,8 +87,13 @@ export function resolveAutoPictureInPictureAction(state, { wantPip, inPip }) {
     state.pendingPipTarget = null
   }
 
+  // Once the trigger stops applying, a dismissal from that trigger is spent.
+  if (!wantPip) {
+    state.pictureInPictureDismissed = false
+  }
+
   if (wantPip && !inPip) {
-    return 'enter'
+    return state.pictureInPictureDismissed ? 'none' : 'enter'
   }
 
   if (!wantPip && inPip && state.autoPipActive) {
@@ -153,9 +161,14 @@ export function applyPictureInPictureState(state, inPip) {
   if (!inPip) {
     state.autoPipActive = false
     // A PiP window closed by the user must not be reopened by a trigger that is
-    // still active, so only a close that was requested here settles the state.
+    // still active, so remember the dismissal until that trigger stops applying
+    // and let only a requested close settle the state right away.
+    state.pictureInPictureDismissed = !wasRequested
+
     return wasRequested
   }
+
+  state.pictureInPictureDismissed = false
 
   return true
 }

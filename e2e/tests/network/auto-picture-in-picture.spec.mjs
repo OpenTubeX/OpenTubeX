@@ -143,6 +143,21 @@ test.describe('automatic Picture-in-Picture', () => {
     await expect.poll(() => pictureInPictureActive(page)).toBe(false)
   })
 
+  test('does not reopen a PiP window that the user closed', async ({ app, page }) => {
+    await setMinimized(app, true)
+    await expect.poll(() => pictureInPictureActive(page)).toBe(true)
+
+    await page.evaluate(() => document.exitPictureInPicture())
+    await expect.poll(() => pictureInPictureActive(page)).toBe(false)
+
+    // Re-evaluating the triggers while the window is still minimized must not
+    // undo the manual dismissal.
+    await setFocused(page, false)
+    await setFocused(page, true)
+    await page.waitForTimeout(2000)
+    expect(await pictureInPictureActive(page)).toBe(false)
+  })
+
   test('does not close a PiP window that the user opened', async ({ app, page }) => {
     await page.locator(`${activeTab} video`).evaluate(element => element.requestPictureInPicture())
     await expect.poll(() => pictureInPictureActive(page)).toBe(true)
