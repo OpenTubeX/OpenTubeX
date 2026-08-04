@@ -116,7 +116,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
 
     if (scrollMiniPlayerActive.value) {
-      applyScrollMiniPlayerRect(scrollMiniPlayerRect.value)
+      // Resizing to the video's aspect ratio is not the user moving the player,
+      // so it must not turn a temporarily clamped position into its anchor.
+      applyScrollMiniPlayerRect(scrollMiniPlayerRect.value, false, true)
     }
   }
 
