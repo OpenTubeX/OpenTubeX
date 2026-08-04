@@ -201,6 +201,7 @@
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
           class="videoPlayer"
+          :class="{ videoPlayerError: errorMessage }"
         >
           <img
             v-if="!isUpcoming || playabilityStatus !== 'OK'"
