@@ -32,10 +32,24 @@ test('subscription refresh uses YouTube selected Shorts thumbnails', async ({ pa
 
   await goTo(page, 'subscriptions')
   await page.locator('[data-subscription-feed-tab="shorts"]').click()
-  await page.getByRole('button', { name: /Refresh Shorts/ }).click()
 
   const short = page.locator('.ft-list-video.youtubeShort').first()
-  await expect(short).toBeVisible({ timeout: 60_000 })
+
+  // YouTube sometimes answers with an empty Shorts tab for a channel that does
+  // have Shorts, so the finished refresh leaves the feed empty. Asking again
+  // returns the real one, the refresh button only comes back once the previous
+  // refresh is done.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.getByRole('button', { name: /Refresh Shorts/ }).click()
+    try {
+      await short.waitFor({ state: 'visible', timeout: 25_000 })
+      break
+    } catch {
+      // an empty feed is retried, the assertion below reports a lasting one
+    }
+  }
+
+  await expect(short).toBeVisible()
   const thumbnailUrl = await short.locator('.thumbnailImage').getAttribute('src')
 
   expect(thumbnailUrl).toMatch(/^https:\/\/i\.ytimg\.com\/vi\//)
