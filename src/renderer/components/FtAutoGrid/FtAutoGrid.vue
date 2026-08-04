@@ -25,6 +25,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import store from '../../store/index'
 
 import { getThumbnailGridStyles } from '../../constants/thumbnailSize'
+import { getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import { measureStableGridWidth } from './gridWidth'
 
 const props = defineProps({
@@ -54,12 +55,7 @@ const MOVE_TRANSITION_MAX_ITEMS = 50
 
 const gridElement = useTemplateRef('gridElement')
 const feedTransitionDuration = computed(() => {
-  const animationSpeed = store.getters.getAnimationSpeed
-  const speedMultiplier = Number.isFinite(animationSpeed) && animationSpeed > 0
-    ? animationSpeed / 100
-    : 1
-
-  return `${300 / speedMultiplier}ms`
+  return `${300 / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)}ms`
 })
 
 // The thumbnail size custom properties are written straight to the element

@@ -1,4 +1,6 @@
 const DEFAULT_ANIMATION_SPEED = 100
+const MIN_ANIMATION_SPEED = 25
+const MAX_ANIMATION_SPEED = 200
 
 let animationPlaybackRate = 1
 
@@ -8,29 +10,31 @@ let animationPlaybackRate = 1
  */
 function updateActiveAnimations() {
   document.getAnimations({ subtree: true })
-    .filter(animation => !isWallClockAnimation(animation))
+    .filter(animation => !isAnimationSpeedManaged(animation.effect?.target))
     .forEach(animation => {
       applyAnimationSpeed(animation)
     })
 }
 
 /**
- * Some animations visualize a separate wall-clock timer and must stay in sync
- * with that timer rather than the UI animation preference.
+ * Some animations already incorporate the configured speed in their duration
+ * or visualize a separate wall-clock timer, so their playback rate must stay
+ * unchanged.
  *
- * @param {Animation} animation
+ * @param {EventTarget | null | undefined} target
  * @returns {boolean}
  */
-function isWallClockAnimation(animation) {
-  const target = animation.effect?.target
-  return target instanceof Element && target.closest('.timeout-indicator') !== null
+function isAnimationSpeedManaged(target) {
+  return target instanceof Element && (
+    target.matches('.feed-enter-active, .feed-move') ||
+    target.closest('[data-animation-speed-managed], .timeout-indicator') !== null
+  )
 }
 
 function updateTargetAnimations(event) {
   queueMicrotask(() => {
+    if (isAnimationSpeedManaged(event.target)) { return }
     if (!(event.target instanceof Element)) { return }
-    if (event.target.matches('.feed-enter-active, .feed-move') ||
-      event.target.closest('[data-animation-speed-managed], .timeout-indicator')) { return }
 
     event.target.getAnimations({ subtree: false }).forEach(animation => {
       applyAnimationSpeed(animation)
@@ -45,12 +49,20 @@ document.addEventListener('transitionrun', updateTargetAnimations, true)
  * @param {number} value percentage of the default animation speed
  */
 export function setAnimationSpeed(value) {
+  animationPlaybackRate = getAnimationSpeedMultiplier(value)
+  updateActiveAnimations()
+}
+
+/**
+ * @param {number} value percentage of the default animation speed
+ * @returns {number}
+ */
+export function getAnimationSpeedMultiplier(value) {
   const speed = Number.isFinite(value) && value > 0
-    ? value
+    ? Math.min(Math.max(value, MIN_ANIMATION_SPEED), MAX_ANIMATION_SPEED)
     : DEFAULT_ANIMATION_SPEED
 
-  animationPlaybackRate = speed / DEFAULT_ANIMATION_SPEED
-  updateActiveAnimations()
+  return speed / DEFAULT_ANIMATION_SPEED
 }
 
 /**
