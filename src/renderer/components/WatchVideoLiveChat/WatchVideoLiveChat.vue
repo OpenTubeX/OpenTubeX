@@ -74,7 +74,8 @@
             <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
           </button>
           <a
-            :href="popoutUrl"
+            v-if="!isReplay"
+            :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
             :aria-label="t('Video.Popout Live Chat')"
             :title="t('Video.Popout Live Chat')"
             target="_blank"
@@ -399,12 +400,6 @@ const backendPreference = computed(() => store.getters.getBackendPreference)
 const backendFallback = computed(() => store.getters.getBackendFallback)
 
 const chatHeight = computed(() => superChatComments.length > 0 ? '390px' : '445px')
-
-const popoutUrl = computed(() => {
-  const path = isReplay.value ? 'live_chat_replay' : 'live_chat'
-
-  return `https://www.youtube.com/${path}?is_popout=1&v=${props.videoId}`
-})
 
 const scrollingBehaviour = computed(() => {
   return store.getters.getDisableSmoothScrolling ? 'auto' : 'smooth'
