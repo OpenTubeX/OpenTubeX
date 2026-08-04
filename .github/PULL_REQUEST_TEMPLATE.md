@@ -1,5 +1,6 @@
 <!-- Thanks for sending a pull request! Make sure to follow the contributing guidelines. -->
 <!-- Important note, we may remove your pull request if you do not use this provided PR template correctly. -->
+<!-- Agent instructions: Preserve every heading, comment, and marker in this template. Never remove or rewrite the release-note-category:start/end, release-note:start/end, or release-note-image:start/end marker pairs. Never remove or rewrite the Release note images section; leave its contents for a human. -->
 
 ## Pull Request Type
 <!-- Please select what type of pull request this is: [x] -->
@@ -33,7 +34,7 @@
 <!-- release-note:end -->
 
 ## Release note images
-<!-- Human-only: Agents must leave this section empty. -->
+<!-- Human-only: Agents must preserve this entire section and leave it empty. -->
 <!-- Optional. Paste one or more Markdown images or HTML image tags here. -->
 <!-- The release notes will use an HTML image tag and limit images taller than 300 pixels. -->
 <!-- release-note-image:start -->

@@ -29,6 +29,9 @@ class ProcessLocalesPlugin {
     /** @type {Map<string, any>} */
     this.locales = new Map()
     this.localeNames = []
+    this.localeTranslationPercentages = []
+    this.localeTranslationKeys = new Map()
+    this.activeLocales = []
 
     /** @type {Map<string, any>} */
     this.cache = new Map()
@@ -37,7 +40,7 @@ class ProcessLocalesPlugin {
     this.previousTimestamps = new Map()
     this.startTime = Date.now()
 
-    /** @type {(updatedLocales: [string, string][]) => void|null} */
+    /** @type {(update: { locales: [string, string][], translationPercentages: number[] }) => void|null} */
     this.notifyLocaleChange = null
 
     this.loadLocales()
@@ -74,7 +77,11 @@ class ProcessLocalesPlugin {
         await Promise.all(promises)
 
         if (this.hotReload && this.notifyLocaleChange && updatedLocales.length > 0) {
-          this.notifyLocaleChange(updatedLocales)
+          this.updateTranslationPercentages()
+          this.notifyLocaleChange({
+            locales: updatedLocales,
+            translationPercentages: this.localeTranslationPercentages
+          })
         }
       })
     })
@@ -113,6 +120,7 @@ class ProcessLocalesPlugin {
     }
 
     this.removeEmptyValues(data)
+    this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
 
     let filename = `${this.outputDir}/${locale}.json`
     let output = JSON.stringify(data)
@@ -141,9 +149,9 @@ class ProcessLocalesPlugin {
   }
 
   loadLocales() {
-    const activeLocales = JSON.parse(readFileSync(`${this.inputDir}/activeLocales.json`))
+    this.activeLocales = JSON.parse(readFileSync(`${this.inputDir}/activeLocales.json`))
 
-    for (const locale of activeLocales) {
+    for (const locale of this.activeLocales) {
       const filePath = join(this.inputDir, `${locale}.yaml`)
 
       this.filePaths.push(filePath)
@@ -151,9 +159,54 @@ class ProcessLocalesPlugin {
       const contents = readFileSync(filePath, 'utf-8')
       const data = loadYaml(contents)
       this.locales.set(locale, data)
+      this.localeTranslationKeys.set(locale, this.getTranslationKeys(data))
 
       this.localeNames.push(data['Locale Name'] ?? locale)
     }
+
+    this.updateTranslationPercentages()
+  }
+
+  /**
+   * @param {object|string} data
+   * @param {string[]} path
+   * @param {Set<string>} keys
+   * @returns {Set<string>}
+   */
+  getTranslationKeys(data, path = [], keys = new Set()) {
+    if (typeof data !== 'object' || data === null) {
+      if (data) {
+        keys.add(path.join('\0'))
+      }
+      return keys
+    }
+
+    for (const key of Object.keys(data)) {
+      if (path.length === 0 && key === 'Locale Name') {
+        continue
+      }
+
+      this.getTranslationKeys(data[key], [...path, key], keys)
+    }
+
+    return keys
+  }
+
+  updateTranslationPercentages() {
+    const sourceKeys = this.localeTranslationKeys.get('en-US')
+
+    this.localeTranslationPercentages = this.activeLocales.map((locale) => {
+      const translatedKeys = this.localeTranslationKeys.get(locale)
+      let translationCount = 0
+
+      for (const key of sourceKeys) {
+        if (translatedKeys.has(key)) {
+          translationCount += 1
+        }
+      }
+
+      return Math.floor(translationCount / sourceKeys.size * 100)
+    })
   }
 
   async compressLocale(data) {

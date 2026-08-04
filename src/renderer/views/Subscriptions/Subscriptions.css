@@ -27,7 +27,7 @@
   box-shadow: 0 1px 0 var(--primary-shadow-color);
 }
 
-.titleRow {
+.headerRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -69,7 +69,7 @@
 }
 
 .headerRefreshWidget {
-  /* Size to its content so the title row positions the whole widget: tucked to
+  /* Size to its content so the header row positions the whole widget: tucked to
      the inline-end while it fits beside the title, and flush to the inline-start
      once it wraps onto its own line. */
   max-inline-size: 100%;
@@ -94,6 +94,36 @@
   margin-block: 0;
   position: relative;
   color: var(--tertiary-text-color);
+}
+
+/* Two line layout: the tabs are moved past the refresh widget, so that they end
+   up on the line below the one with the title */
+.subscriptionsHeader:not(.singleRow) .tabsRow {
+  order: 1;
+  flex-basis: 100%;
+}
+
+.subscriptionsHeader.singleRow .headerRow {
+  justify-content: flex-start;
+}
+
+/* Deciding whether everything fits onto one line relies on the natural widths,
+   so nothing may shrink or wrap while it does */
+.subscriptionsHeader.singleRow .headerRow > * {
+  flex-shrink: 0;
+}
+
+.subscriptionsHeader.singleRow .tabsRow,
+.subscriptionsHeader.singleRow .tabs {
+  flex-wrap: nowrap;
+}
+
+.subscriptionsHeader.singleRow .tabsRow {
+  margin-block-start: 0;
+}
+
+.subscriptionsHeader.singleRow .headerRefreshWidget {
+  margin-inline-start: auto;
 }
 
 .selectedTab {
@@ -173,7 +203,7 @@
     padding-block-end: 10px;
   }
 
-  .titleRow {
+  .headerRow {
     align-items: flex-start;
   }
 

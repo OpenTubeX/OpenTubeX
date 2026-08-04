@@ -9,13 +9,12 @@ import {
   searchFiltersMatch,
 } from '../../helpers/utils'
 import {
-  CHANNEL_THUMBNAIL_CACHE_LIMIT,
-  VIDEO_AVATAR_CACHE_LIMIT,
-  loadChannelThumbnailCache,
-  loadVideoAvatarCache,
-  persistChannelThumbnailCache,
-  persistVideoAvatarCache,
+  loadLegacyChannelThumbnailCache,
+  loadLegacyVideoAvatarCache,
 } from '../../helpers/channelThumbnailStorage'
+
+const CHANNEL_THUMBNAIL_CACHE_LIMIT = 200
+const VIDEO_AVATAR_CACHE_LIMIT = 200
 
 function getOrCreateSearchSettings(state, tabId) {
   state.searchSettingsByTabId[tabId] ??= {
@@ -40,8 +39,10 @@ const state = {
   },
   cachedPlaylists: {},
   deArrowCache: {},
-  channelThumbnailCache: loadChannelThumbnailCache(),
-  videoAvatarCache: loadVideoAvatarCache(),
+  // Seed the in-memory fallback once so upgraded sessions can migrate unloaded
+  // tabs to image files without opening every tab first.
+  channelThumbnailCache: loadLegacyChannelThumbnailCache(),
+  videoAvatarCache: loadLegacyVideoAvatarCache(),
   showProgressBar: false,
   progressBarMessage: '',
   progressBarIcon: ['fas', 'sync'],
@@ -718,7 +719,6 @@ const mutations = {
     }
 
     cache[channelId] = thumbnail
-    persistChannelThumbnailCache(cache)
   },
 
   setVideoAvatar (state, { videoId, avatar }) {
@@ -733,7 +733,6 @@ const mutations = {
     }
 
     cache[videoId] = avatar
-    persistVideoAvatarCache(cache)
   },
 
   removeFromSessionSearchHistory (state, query) {

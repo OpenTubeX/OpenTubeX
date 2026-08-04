@@ -14,6 +14,8 @@ export function getTabPreviewFallbackUrl(tab) {
 }
 
 export function getTabAvatarUrl(tab) {
+  if (tab?.avatarUrl) return tab.avatarUrl
+
   const path = tab?.route?.path ?? ''
   const channelId = path.match(/^\/channel\/([^/]+)/)?.[1]
   if (channelId) return store.getters.getChannelThumbnail(channelId)

@@ -798,7 +798,7 @@ Settings:
     Return YouTube Dislike Url: 'Adres URL do API wyświetlania łapek w dół z YouTube (Domyślnie: https://ryd-proxy.kavin.rocks)'
   Download Settings:
     Download Settings: Pobieranie
-    Managed Tools Download Started Template: 'Nie znaleziono narzędzi potrzebnych do pobierania filmów: {tools}. Pobieranie zarządzanych kopii…'
+    Managed Tools Download Started Template: 'Nie znaleziono wymaganego oprogramowania zewnętrznego: {tools}. Pobieranie zarządzanych kopii…'
     Managed Tools Download Finished Template: Zakończono pobieranie {tools}
     Managed Tools Update Started Template: Znaleziono aktualizację dla {tools}. Pobieranie…
     Managed Tools Update Finished Template: Zakończono aktualizację {tools}
