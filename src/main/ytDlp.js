@@ -4,9 +4,9 @@ import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, net } from 'electron'
 import { settings } from '../datastores/handlers/base'
-import { isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
@@ -128,6 +128,35 @@ async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sou
 }
 
 /**
+ * Builds the proxy URL for yt-dlp's `--proxy` argument from the app's proxy settings.
+ * @returns {Promise<string | null>} null when no proxy is configured
+ */
+async function getProxyUrl() {
+  if (!(await settings._findOne('useProxy'))?.value) {
+    return null
+  }
+
+  return buildProxyUrl({
+    protocol: (await settings._findOne('proxyProtocol'))?.value,
+    hostname: (await settings._findOne('proxyHostname'))?.value,
+    port: (await settings._findOne('proxyPort'))?.value,
+    username: (await settings._findOne('proxyUsername'))?.value,
+    password: (await settings._findOne('proxyPassword'))?.value
+  })
+}
+
+/**
+ * @param {string[]} args
+ */
+async function pushProxyArgument(args) {
+  const proxyUrl = await getProxyUrl()
+
+  if (proxyUrl !== null) {
+    args.push('--proxy', proxyUrl)
+  }
+}
+
+/**
  * @param {string} executable
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
@@ -184,7 +213,9 @@ async function downloadFile(url, onProgress, onDownloadStart, validators) {
     headers['If-Modified-Since'] = validators.lastModified
   }
 
-  const response = await fetch(url, { headers })
+  // use Electron's net module instead of fetch, so that the download
+  // goes through the configured proxy (including its authentication)
+  const response = await net.fetch(url, { headers })
 
   if (response.status === 304) {
     return { data: null, validators }
@@ -681,15 +712,7 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId) {
 
   const args = ['--dump-single-json', '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15']
 
-  if ((await settings._findOne('useProxy'))?.value) {
-    const protocol = (await settings._findOne('proxyProtocol'))?.value
-    const hostname = (await settings._findOne('proxyHostname'))?.value
-    const port = (await settings._findOne('proxyPort'))?.value
-
-    if (protocol && hostname && port) {
-      args.push('--proxy', `${protocol}://${hostname}:${port}`)
-    }
-  }
+  await pushProxyArgument(args)
 
   args.push(`https://www.youtube.com/watch?v=${videoId}`)
 
@@ -766,6 +789,8 @@ export async function handleYtDlpDownload(event, payload) {
   }
 
   const args = ['--newline', '--no-playlist']
+
+  await pushProxyArgument(args)
 
   const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
 
