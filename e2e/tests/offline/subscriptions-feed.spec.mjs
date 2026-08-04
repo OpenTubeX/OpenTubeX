@@ -16,7 +16,6 @@ function feedVideo(videoId, title, authorId, published, extra = {}) {
     viewCount: 1000,
     lengthSeconds: 120,
     liveNow: false,
-    isUpcoming: false,
     type: 'video',
     ...extra
   }
@@ -54,9 +53,8 @@ test.use({
             liveNow: true
           }),
           feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
-          feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 24 * HOUR, {
-            isUpcoming: true,
-            premiereDate: new Date(now + 24 * HOUR).toISOString()
+          feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
+            premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
           })
         ],
         videosTimestamp: new Date(now - 2 * HOUR).toISOString()
@@ -119,6 +117,23 @@ test.describe('subscriptions feed from cache', () => {
 
     // The subscription feed honours the hide-upcoming-premieres setting.
     await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+  })
+
+  test('shows a hidden upcoming premiere when its scheduled time arrives', async ({ page }) => {
+    // The app opens on Subscriptions, so leave it before installing the clock;
+    // timers created before installation cannot be advanced by Playwright.
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Upcoming premiere video')).toHaveCount(0)
+
+    await page.clock.fastForward(24 * 24 * HOUR)
+    await page.clock.fastForward(6 * 24 * HOUR + 1000)
+
+    const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(premiere).toBeVisible()
+    await expect(premiere.locator('.videoDuration')).not.toHaveText('Upcoming')
   })
 
   test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {

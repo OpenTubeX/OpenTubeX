@@ -55,18 +55,45 @@
             {{ t('Global.Counts.Watching Count', { count: formattedWatchingCount }, watchingCount) }}
           </span>
         </h4>
-        <a
-          :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
-          :aria-label="t('Video.Popout Live Chat')"
-          :title="t('Video.Popout Live Chat')"
-          target="_blank"
-          class="popoutChatButton"
+        <div
+          ref="liveChatActionsRef"
+          class="liveChatActions"
+          @keydown.esc.stop.prevent="settingsMenuOpen = false"
         >
-          <FontAwesomeIcon
-            class="popoutChatIcon"
-            :icon="['fas', 'arrow-up-right-from-square']"
-          />
-        </a>
+          <button
+            type="button"
+            class="liveChatActionButton"
+            :class="{ active: settingsMenuOpen }"
+            :aria-label="t('Video.Live Chat Settings')"
+            :title="t('Video.Live Chat Settings')"
+            :aria-expanded="String(settingsMenuOpen)"
+            @click="settingsMenuOpen = !settingsMenuOpen"
+          >
+            <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+          </button>
+          <a
+            :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
+            :aria-label="t('Video.Popout Live Chat')"
+            :title="t('Video.Popout Live Chat')"
+            target="_blank"
+            class="liveChatActionButton"
+          >
+            <FontAwesomeIcon
+              :icon="['fas', 'arrow-up-right-from-square']"
+            />
+          </a>
+          <div
+            v-if="settingsMenuOpen"
+            class="liveChatSettingsMenu"
+          >
+            <FtToggleSwitch
+              :label="t('Video.Show Live Chat Timestamps')"
+              :default-value="showLiveChatTimestamps"
+              :compact="true"
+              @change="updateShowLiveChatTimestamps"
+            />
+          </div>
+        </div>
       </div>
       <div
         v-if="superChatComments.length > 0"
@@ -121,13 +148,21 @@
               class="channelThumbnail"
               alt=""
             >
-            <RouterLink
-              class="channelName"
-              dir="auto"
-              :to="`/channel/${superChat.author.id}`"
-            >
-              {{ superChat.author.name }}
-            </RouterLink>
+            <div class="superChatAuthor">
+              <span
+                v-if="showLiveChatTimestamps"
+                class="liveChatTimestamp"
+              >
+                {{ superChat.timestampText }}
+              </span>
+              <RouterLink
+                class="channelName"
+                dir="auto"
+                :to="`/channel/${superChat.author.id}`"
+              >
+                {{ superChat.author.name }}
+              </RouterLink>
+            </div>
             <p
               class="donationAmount"
               dir="auto"
@@ -147,8 +182,10 @@
         v-overlay-scrollbars
         class="liveChatComments"
         :style="{ blockSize: chatHeight }"
-        @mousewheel.passive="onScroll"
-        @scrollend="e => onScroll(e, true)"
+        @pointerdown="stopScrollingToBottom"
+        @scroll.passive="onScroll"
+        @scrollend="onScrollEnd"
+        @wheel.passive="stopScrollingToBottom"
       >
         <div
           v-for="comment in comments"
@@ -167,13 +204,21 @@
                 class="channelThumbnail"
                 alt=""
               >
-              <RouterLink
-                class="channelName"
-                dir="auto"
-                :to="`/channel/${comment.author.id}`"
-              >
-                {{ comment.author.name }}
-              </RouterLink>
+              <div class="superChatAuthor">
+                <span
+                  v-if="showLiveChatTimestamps"
+                  class="liveChatTimestamp"
+                >
+                  {{ comment.timestampText }}
+                </span>
+                <RouterLink
+                  class="channelName"
+                  dir="auto"
+                  :to="`/channel/${comment.author.id}`"
+                >
+                  {{ comment.author.name }}
+                </RouterLink>
+              </div>
               <p
                 class="donationAmount"
                 dir="auto"
@@ -199,6 +244,12 @@
             <p
               class="chatContent"
             >
+              <span
+                v-if="showLiveChatTimestamps"
+                class="liveChatTimestamp"
+              >
+                {{ comment.timestampText }}
+              </span>
               <RouterLink
                 class="channelName"
                 :class="{
@@ -236,8 +287,8 @@
         :aria-label="t('Video.Scroll to Bottom')"
         role="button"
         tabindex="0"
-        @click="scrollToBottom"
-        @keydown.enter.space.prevent="scrollToBottom"
+        @click="scrollToBottom()"
+        @keydown.enter.space.prevent="scrollToBottom()"
       >
         <FontAwesomeIcon
           class="icon"
@@ -251,13 +302,14 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import autolinker from 'autolinker'
-import { computed, nextTick, onBeforeUnmount, ref, shallowReactive, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { YTNodes } from 'youtubei.js'
 
 import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -281,12 +333,13 @@ const props = defineProps({
   }
 })
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 
 /** @type {import('youtubei.js').YT.LiveChat|null} */
 let liveChatInstance = null
 let hasEnded = false
-let stayAtBottom = false
+let stayAtBottom = true
+let isScrollingToBottom = false
 
 const isLoading = ref(true)
 const hasError = ref(false)
@@ -294,6 +347,8 @@ const showEnableChat = ref(false)
 const errorMessage = ref('')
 const showSuperChat = ref(false)
 const showScrollToBottom = ref(false)
+const settingsMenuOpen = ref(false)
+const liveChatActionsRef = useTemplateRef('liveChatActionsRef')
 const comments = shallowReactive([])
 const superChatComments = shallowReactive([])
 const superChat = ref({
@@ -323,6 +378,7 @@ const scrollingBehaviour = computed(() => {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
+const showLiveChatTimestamps = computed(() => store.getters.getShowLiveChatTimestamps)
 
 /** @type {import('vue').Ref<number | null>} */
 const watchingCount = ref(null)
@@ -332,7 +388,12 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', handleChatSettingsClickOutside)
   handleEnd()
+})
+
+onMounted(() => {
+  document.addEventListener('pointerdown', handleChatSettingsClickOutside)
 })
 
 if (!process.env.SUPPORTS_LOCAL_API) {
@@ -417,10 +478,7 @@ function handleStart(initialData) {
   isLoading.value = false
 
   nextTick(() => {
-    commentsRef.value?.scrollTo({
-      top: commentsRef.value.scrollHeight,
-      behavior: 'instant'
-    })
+    scrollToBottom('instant')
   })
 }
 
@@ -481,6 +539,7 @@ function parseLiveChatComment(comment) {
 
   const parsedComment = {
     id: comment.id,
+    timestampText: formatLiveChatTimestamp(comment),
     message: autolinker.link(parseLocalTextRuns(comment.message.runs, 20)),
     author: {
       id: comment.author.id,
@@ -508,6 +567,7 @@ function parseLiveChatComment(comment) {
 function parseLiveChatSuperChat(superChat) {
   const parsedComment = {
     id: superChat.id,
+    timestampText: formatLiveChatTimestamp(superChat),
     message: autolinker.link(parseLocalTextRuns(superChat.message.runs, 20)),
     author: {
       id: superChat.author.id,
@@ -537,10 +597,7 @@ function pushComment(comment) {
 
   if (!isLoading.value && stayAtBottom) {
     nextTick(() => {
-      commentsRef.value?.scrollTo({
-        top: commentsRef.value.scrollHeight,
-        behavior: scrollingBehaviour.value
-      })
+      scrollToBottom()
     })
   }
 
@@ -570,35 +627,72 @@ function showSuperChatComment(comment) {
   }
 }
 
-/**
- * @param {any} event
- * @param {boolean} [isScrollEnd]
- */
-function onScroll(event, isScrollEnd = false) {
-  const liveChatComments = commentsRef.value
-  if (event.wheelDelta >= 0 && stayAtBottom) {
-    stayAtBottom = false
-
-    if (liveChatComments.scrollHeight > liveChatComments.clientHeight) {
-      showScrollToBottom.value = true
-    }
-  } else if ((isScrollEnd || event.wheelDelta < 0) && !stayAtBottom && (liveChatComments.scrollHeight - liveChatComments.scrollTop) === liveChatComments.clientHeight) {
-    scrollToBottom()
+function formatLiveChatTimestamp(comment) {
+  if (comment.timestamp_text) {
+    return comment.timestamp_text
   }
+
+  if (Number.isFinite(comment.timestamp)) {
+    return new Intl.DateTimeFormat([locale.value, 'en'], { timeStyle: 'short' }).format(comment.timestamp)
+  }
+
+  return ''
+}
+
+function handleChatSettingsClickOutside(event) {
+  if (settingsMenuOpen.value && !liveChatActionsRef.value?.contains(event.target)) {
+    settingsMenuOpen.value = false
+  }
+}
+
+function updateShowLiveChatTimestamps(value) {
+  store.dispatch('updateShowLiveChatTimestamps', value)
+}
+
+function onScroll() {
+  const liveChatComments = commentsRef.value
+  const isAtBottom = liveChatComments.scrollHeight - liveChatComments.scrollTop - liveChatComments.clientHeight <= 1
+
+  if (isAtBottom) {
+    stayAtBottom = true
+    isScrollingToBottom = false
+    showScrollToBottom.value = false
+  } else if (!isScrollingToBottom) {
+    stayAtBottom = false
+    showScrollToBottom.value = liveChatComments.scrollHeight > liveChatComments.clientHeight
+  }
+}
+
+function onScrollEnd() {
+  isScrollingToBottom = false
+  onScroll()
+}
+
+function stopScrollingToBottom() {
+  isScrollingToBottom = false
 }
 
 function hideSuperChat() {
   showSuperChat.value = false
 }
 
-function scrollToBottom() {
-  commentsRef.value.scrollTo({
-    top: commentsRef.value.scrollHeight,
-    behavior: scrollingBehaviour.value
-  })
+/**
+ * @param {ScrollBehavior | 'instant'} [behavior]
+ */
+function scrollToBottom(behavior = scrollingBehaviour.value) {
+  const liveChatComments = commentsRef.value
+  if (!liveChatComments) {
+    return
+  }
 
   stayAtBottom = true
+  isScrollingToBottom = true
   showScrollToBottom.value = false
+
+  liveChatComments.scrollTo({
+    top: liveChatComments.scrollHeight,
+    behavior
+  })
 }
 
 </script>

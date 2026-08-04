@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
@@ -20,6 +20,7 @@ import store from '../store/index'
 
 import { useAutoRefreshClock } from '../composables/useAutoRefreshClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
+import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import {
   refreshSubscriptionVideosFromRemote,
@@ -44,6 +45,10 @@ const hasPendingAutoRefresh = computed(() => {
 })
 
 const now = useAutoRefreshClock(hasPendingAutoRefresh)
+const premiereUpdateNow = ref(Date.now())
+const MAX_TIMEOUT_MS = 2 ** 31 - 1
+/** @type {ReturnType<typeof setTimeout> | null} */
+let premiereUpdateTimer = null
 
 let alreadyLoadedRemotely = false
 
@@ -68,6 +73,52 @@ const cacheEntriesForAllActiveProfileChannels = computed(() => {
   })
 
   return entries
+})
+
+const nextUpcomingPremiereTimestamp = computed(() => {
+  let nextTimestamp = null
+
+  for (const cacheEntry of cacheEntriesForAllActiveProfileChannels.value) {
+    for (const video of cacheEntry.videos ?? []) {
+      const timestamp = getUpcomingPremiereTimestamp(video)
+
+      if (
+        timestamp != null &&
+        timestamp > premiereUpdateNow.value &&
+        (nextTimestamp == null || timestamp < nextTimestamp)
+      ) {
+        nextTimestamp = timestamp
+      }
+    }
+  }
+
+  return nextTimestamp
+})
+
+watch(nextUpcomingPremiereTimestamp, scheduleNextPremiereUpdate, { immediate: true })
+
+function scheduleNextPremiereUpdate(timestamp) {
+  if (premiereUpdateTimer !== null) {
+    clearTimeout(premiereUpdateTimer)
+    premiereUpdateTimer = null
+  }
+
+  if (timestamp == null) {
+    return
+  }
+
+  premiereUpdateTimer = setTimeout(() => {
+    premiereUpdateTimer = null
+    premiereUpdateNow.value = Date.now()
+    loadVideosFromCacheForAllActiveProfileChannels()
+    scheduleNextPremiereUpdate(nextUpcomingPremiereTimestamp.value)
+  }, Math.min(Math.max(timestamp - Date.now(), 0), MAX_TIMEOUT_MS))
+}
+
+onBeforeUnmount(() => {
+  if (premiereUpdateTimer !== null) {
+    clearTimeout(premiereUpdateTimer)
+  }
 })
 
 const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
@@ -226,7 +277,7 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
     return cacheEntry.videos ?? []
   })
 
-  videoList.value = updateVideoListAfterProcessing(videoList_)
+  videoList.value = updateVideoListAfterProcessing(videoList_, premiereUpdateNow.value)
   isLoading.value = false
 }
 

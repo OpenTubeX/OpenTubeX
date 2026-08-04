@@ -23,8 +23,10 @@ import { getValidSubscriptionChannels } from './subscription-channels'
 import {
   applyRssPremiereVerdict,
   collectResolvedNonPremiereVideoIds,
+  getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
-  reconcileFetchedSubscriptionEntries
+  reconcileFetchedSubscriptionEntries,
+  updateUpcomingPremiereState
 } from './subscription-entries'
 import { mapConcurrently } from './concurrent-map'
 
@@ -311,6 +313,20 @@ export function isRssUpcomingPremiere(video) {
 
 /**
  * @param {object} video
+ * @param {number} [now]
+ */
+export function isUpcomingPremiere(video, now = Date.now()) {
+  const premiereTimestamp = getUpcomingPremiereTimestamp(video)
+
+  if (premiereTimestamp != null) {
+    return premiereTimestamp > now
+  }
+
+  return isRssUpcomingPremiere(video)
+}
+
+/**
+ * @param {object} video
  * @param {{
  *  hideLiveStreams?: boolean,
  *  hideUpcomingPremieres?: boolean,
@@ -330,11 +346,7 @@ export function isVideoHiddenByPreferences(video, {
 
   if (
     hideUpcomingPremieres &&
-    (
-      video.premiereDate != null ||
-      video.premiereTimestamp != null ||
-      isRssUpcomingPremiere(video)
-    )
+    isUpcomingPremiere(video)
   ) {
     return true
   }
@@ -475,8 +487,8 @@ async function enrichRssVideoIfNeeded(video) {
  * Filtering and sort based on user preferences
  * @param {any[]} videos
  */
-export function updateVideoListAfterProcessing(videos) {
-  let videoList = videos
+export function updateVideoListAfterProcessing(videos, now = Date.now()) {
+  let videoList = videos.map(video => updateUpcomingPremiereState(video, now))
 
   if (store.getters.getHideLiveStreams) {
     videoList = videoList.filter(item => {
@@ -485,19 +497,7 @@ export function updateVideoListAfterProcessing(videos) {
   }
 
   if (store.getters.getHideUpcomingPremieres) {
-    videoList = videoList.filter(item => {
-      if (isRssUpcomingPremiere(item)) {
-        return false
-      }
-
-      // Observed for premieres in Local API Subscriptions.
-      return (item.premiereDate == null ||
-        // Invidious API
-        // `premiereTimestamp` only available on premiered videos
-        // https://docs.invidious.io/api/common_types/#videoobject
-        item.premiereTimestamp == null
-      )
-    })
+    videoList = videoList.filter(item => !isUpcomingPremiere(item, now))
   }
 
   videoList.sort((a, b) => {
