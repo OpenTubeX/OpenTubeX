@@ -14,6 +14,7 @@ import {
   getScrollMiniInlineLayoutHeight,
   getScrollMiniVerticalAnchor,
   parseScrollMiniPlayerSavedRect,
+  pickScrollMiniVerticalAnchor,
   reanchorScrollMiniPlayerRect,
   resizeScrollMiniPlayerFromCorner,
   resolveScrollMiniDragHandleOnLightBg,
@@ -371,13 +372,18 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   /**
    * @param {import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect} rect
    * @param {boolean} [persist]
+   * @param {boolean} [keepAnchor] trust the rect's own anchor over its geometry
    */
-  function applyScrollMiniPlayerRect(rect, persist = false) {
+  function applyScrollMiniPlayerRect(rect, persist = false, keepAnchor = false) {
     const insets = getViewportInsets()
     const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value)
     // Remember the edge the player is parked at, so a later resize can put it
     // back against that edge instead of leaving it where the old viewport was.
-    Object.assign(clamped, getScrollMiniVerticalAnchor(clamped, insets))
+    // Dragging makes the geometry authoritative, but a re-anchored rect brings
+    // the distance it is meant to keep: a viewport too short to honour it clamps
+    // the rect, and re-deriving from that would forget the distance for good.
+    Object.assign(clamped, (keepAnchor && pickScrollMiniVerticalAnchor(rect)) ||
+      getScrollMiniVerticalAnchor(clamped, insets))
     scrollMiniPlayerRect.value = clamped
     scrollMiniResizeCorner.value = getResizeHandleCorner(clamped, insets)
 
@@ -581,7 +587,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
         // The window may have changed size since the rect was saved, so replay
         // it against the edges it was docked to rather than its old coordinates.
         ? reanchorScrollMiniPlayerRect(savedRect, scrollMiniVideoAspectRatio.value)
-        : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value)
+        : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
+      false,
+      true
     )
     syncScrollMiniPlayerState()
 
@@ -695,6 +703,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     cancelScrollMiniPlayerBounce()
     applyScrollMiniPlayerRect(
       reanchorScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value),
+      true,
       true
     )
   }

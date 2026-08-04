@@ -9,6 +9,7 @@ import {
   parseScrollMiniPlayerSavedRect,
   serializeScrollMiniPlayerSavedRect,
   getScrollMiniVerticalAnchor,
+  pickScrollMiniVerticalAnchor,
   reanchorScrollMiniPlayerRect,
   MARGIN
 } from '../../src/renderer/helpers/scrollMiniPlayer.js'
@@ -170,6 +171,28 @@ test('a window that grew while the player was away still docks it to the edge', 
 
   assert.equal(activated.left + activated.width, 1744 - MARGIN)
   assert.equal(activated.top + activated.height, 1041 - MARGIN)
+})
+
+test('a viewport too short for the saved distance does not forget it', () => {
+  const parked = { ...SAVED_RECT, verticalDock: 'bottom', verticalOffset: 600 }
+
+  // 600px above the bottom does not fit in an 800px-tall viewport, so the rect
+  // has to be clamped...
+  stubViewport({ clientWidth: 1585, clientHeight: 800 })
+  const squeezed = reanchorScrollMiniPlayerRect(parked)
+
+  assert.equal(squeezed.top, MARGIN, 'clamped against the top inset')
+  assert.deepEqual(
+    pickScrollMiniVerticalAnchor(squeezed),
+    { verticalDock: 'bottom', verticalOffset: 600 },
+    'but the distance it should keep survives the clamp'
+  )
+
+  // ...and is restored once there is room for it again.
+  stubViewport({ clientWidth: 1585, clientHeight: 1200 })
+  const restored = reanchorScrollMiniPlayerRect(squeezed)
+
+  assert.equal(1200 - (restored.top + restored.height), MARGIN + 600)
 })
 
 test('a legacy rect without an anchor is docked to the bottom once it is adrift', () => {

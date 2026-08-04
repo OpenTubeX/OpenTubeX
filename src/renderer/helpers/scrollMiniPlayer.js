@@ -86,9 +86,7 @@ export function parseScrollMiniPlayerSavedRect(value) {
       width: parsed.width,
       height: parsed.height,
       dock: parsed.dock === 'left' ? 'left' : 'right',
-      ...(hasVerticalAnchor(parsed)
-        ? { verticalDock: parsed.verticalDock, verticalOffset: parsed.verticalOffset }
-        : {}),
+      ...pickScrollMiniVerticalAnchor(parsed),
     }
   } catch {
     return null
@@ -96,12 +94,20 @@ export function parseScrollMiniPlayerSavedRect(value) {
 }
 
 /**
+ * The anchor a rect already carries, if any. Reading it back beats re-deriving
+ * one from the geometry: a viewport too short to honour the remembered distance
+ * has to clamp the rect, and inferring from that would forget the distance for
+ * good, instead of restoring it once the window grows again.
+ *
  * @param {Partial<ScrollMiniPlayerRect> | null | undefined} rect
- * @returns {boolean}
+ * @returns {{ verticalDock: 'top' | 'bottom', verticalOffset: number } | null}
  */
-function hasVerticalAnchor(rect) {
-  return (rect?.verticalDock === 'top' || rect?.verticalDock === 'bottom') &&
-    Number.isFinite(rect.verticalOffset)
+export function pickScrollMiniVerticalAnchor(rect) {
+  const parked = rect?.verticalDock === 'top' || rect?.verticalDock === 'bottom'
+
+  return parked && Number.isFinite(rect.verticalOffset)
+    ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
+    : null
 }
 
 /**
@@ -155,9 +161,7 @@ function getLegacyVerticalAnchor(rect, insets) {
 export function reanchorScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO) {
   const insets = getViewportInsets()
   const sized = clampScrollMiniPlayerRect(rect, aspectRatio)
-  const anchor = hasVerticalAnchor(rect)
-    ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
-    : getLegacyVerticalAnchor(sized, insets)
+  const anchor = pickScrollMiniVerticalAnchor(rect) ?? getLegacyVerticalAnchor(sized, insets)
 
   const top = anchor.verticalDock === 'top'
     ? insets.top + anchor.verticalOffset
@@ -174,9 +178,7 @@ export function reanchorScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_
  * @returns {string}
  */
 export function serializeScrollMiniPlayerSavedRect(rect) {
-  const anchor = hasVerticalAnchor(rect)
-    ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
-    : getScrollMiniVerticalAnchor(rect)
+  const anchor = pickScrollMiniVerticalAnchor(rect) ?? getScrollMiniVerticalAnchor(rect)
 
   return JSON.stringify({
     left: rect.left,
