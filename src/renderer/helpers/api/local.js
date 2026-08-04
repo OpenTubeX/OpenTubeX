@@ -669,6 +669,27 @@ export async function getLocalComments(id) {
   return innertube.getComments(id)
 }
 
+/**
+ * When the uploader turns comments off, YouTube replaces the comment section's
+ * continuation with a message ("Comments are turned off."), so requesting the
+ * comments would only ever return an empty page.
+ *
+ * @param {import('youtubei.js').YT.VideoInfo} videoInfo
+ */
+export function areLocalCommentsDisabled(videoInfo) {
+  const itemSections = videoInfo.page[1]?.contents_memo?.get('ItemSection') ?? []
+
+  const commentSection = itemSections.find(itemSection => {
+    return itemSection.target_id === 'comments-section' || itemSection.target_id === 'comment-item-section'
+  })
+
+  if (!commentSection) {
+    return false
+  }
+
+  return !commentSection.contents.some(node => node.type === 'ContinuationItem')
+}
+
 // I know `type & type` is typescript syntax and not valid jsdoc but I couldn't get @extends or @augments to work
 
 /**

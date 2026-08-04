@@ -38,6 +38,7 @@ import {
   showToastOnAllTabs
 } from '../../helpers/utils'
 import {
+  areLocalCommentsDisabled,
   generateAudioTrackField,
   getLocalShortLinkedVideo,
   getLocalVideoInfo,
@@ -183,6 +184,7 @@ export default defineComponent({
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
+      commentsDisabled: false,
       isLive: false,
       liveChat: null,
       isLiveContent: false,
@@ -1246,6 +1248,7 @@ export default defineComponent({
       this.playlistScrollPositions.fullscreen = null
       this.isLoading = true
       this.isFamilyFriendly = false
+      this.commentsDisabled = false
       this.isLive = false
       this.liveChat = null
       this.isLiveContent = false
@@ -1621,6 +1624,7 @@ export default defineComponent({
         this.adEndTimeUnixMs = adEndTimeUnixMs
 
         this.isFamilyFriendly = result.basic_info.is_family_safe
+        this.commentsDisabled = areLocalCommentsDisabled(result)
 
         this.recommendedVideos = result.watch_next_feed
           ?.filter((item) => {
