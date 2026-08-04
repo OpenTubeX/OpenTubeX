@@ -239,14 +239,15 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
-  test('stops querying Shaka state before a format switch unloads it', async ({ page, innertube }) => {
+  test('keeps the thumbnail visible while switching formats', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
+    const initialUrl = page.url()
     const player = page.locator('.ftVideoPlayer')
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await player.evaluate((element, watchComponent) => {
+    const formats = await player.evaluate((element, watchComponent) => {
       const overlay = element.ui ?? element.querySelector('video')?.ui
       const shakaPlayer = overlay?.getControls().getPlayer()
       if (!watchComponent || !shakaPlayer) {
@@ -254,18 +255,47 @@ test.describe('watch page', () => {
       }
 
       window.__hasLoadedAtFormatUnload = []
+      window.__blockNextFormatUnload = false
+      window.__formatUnloadBlocked = false
       const unload = shakaPlayer.unload.bind(shakaPlayer)
-      shakaPlayer.unload = (...args) => {
+      shakaPlayer.unload = async (...args) => {
         window.__hasLoadedAtFormatUnload.push(watchComponent.refs.player.hasLoaded)
-        return unload(...args)
+        await unload(...args)
+
+        if (window.__blockNextFormatUnload) {
+          await new Promise(resolve => {
+            window.__finishFormatUnload = resolve
+            window.__formatUnloadBlocked = true
+          })
+        }
       }
 
       const watchView = watchComponent.proxy
-      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+      const oldFormat = watchView.activeFormat
+      const newFormat = oldFormat === 'audio' ? 'dash' : 'audio'
+      watchView.handleFormatChange(newFormat)
+      return { oldFormat, newFormat }
     }, watchComponent)
-    await watchComponent.dispose()
 
     await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.newFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await page.evaluate(() => { window.__blockNextFormatUnload = true })
+    await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
+    await expect.poll(() => page.evaluate(() => window.__formatUnloadBlocked)).toBe(true)
+    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+    await page.evaluate(() => window.__finishFormatUnload())
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.oldFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await watchComponent.dispose()
   })
 
   test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
