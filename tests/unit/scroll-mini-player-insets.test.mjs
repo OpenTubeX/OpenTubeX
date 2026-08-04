@@ -252,3 +252,21 @@ test('a malformed saved rect is rejected', () => {
     null
   )
 })
+
+test('a corrupt anchor is dropped instead of replayed', () => {
+  stubViewport({ clientWidth: 1585 })
+
+  // An offset is a distance from an inset, so these cannot describe a position.
+  for (const verticalOffset of [-100, NaN, 'nope']) {
+    const saved = JSON.stringify({ ...SAVED_RECT, verticalDock: 'top', verticalOffset })
+
+    assert.equal(pickScrollMiniVerticalAnchor(parseScrollMiniPlayerSavedRect(saved)), null)
+  }
+
+  // The rect itself still survives, with an anchor inferred from its geometry.
+  const saved = JSON.stringify({ ...SAVED_RECT, verticalDock: 'bottom', verticalOffset: -100 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(saved))
+
+  assert.equal(activated.top + activated.height, 800 - MARGIN)
+  assert.equal(activated.verticalOffset, 0)
+})

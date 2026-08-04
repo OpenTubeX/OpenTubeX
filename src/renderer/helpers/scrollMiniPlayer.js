@@ -105,7 +105,9 @@ export function parseScrollMiniPlayerSavedRect(value) {
 export function pickScrollMiniVerticalAnchor(rect) {
   const parked = rect?.verticalDock === 'top' || rect?.verticalDock === 'bottom'
 
-  return parked && Number.isFinite(rect.verticalOffset)
+  // The offset is a distance from an inset, so anything negative is corrupt
+  // rather than a position, and inferring one from the geometry beats replaying it.
+  return parked && Number.isFinite(rect.verticalOffset) && rect.verticalOffset >= 0
     ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
     : null
 }
