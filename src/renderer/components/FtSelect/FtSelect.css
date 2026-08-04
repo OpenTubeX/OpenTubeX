@@ -63,7 +63,9 @@
 .select .select-text {
   appearance: none;
   text-overflow: ellipsis;
-  padding-inline-end: 1.5rem;
+
+  /* leave room for .iconSelect so the arrow never overlaps the selected value */
+  padding-inline-end: 2.5rem;
 }
 
 .selectedValue {
@@ -143,12 +145,7 @@
   display: block;
   line-height: 0;
   vertical-align: 0;
-
-  /* Styling the down arrow */
   padding: 0;
-  content: '';
-  border-inline-start: 6px solid transparent;
-  border-inline-end: 6px solid transparent;
   pointer-events: none;
   color: var(--tertiary-text-color);
   transition: transform 120ms ease;

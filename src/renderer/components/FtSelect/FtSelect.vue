@@ -321,32 +321,48 @@ function scrollActiveOptionIntoView() {
  * @param {KeyboardEvent} event
  */
 function handleButtonKeydown(event) {
+  // Alt+Arrow is the platform shortcut for opening/closing a select
+  if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && event.altKey) {
+    event.preventDefault()
+    if (dropdownShown.value) {
+      closeDropdown()
+    } else {
+      openDropdown()
+    }
+    return
+  }
+
   if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
     event.preventDefault()
-    if (!dropdownShown.value) {
-      openDropdown()
+    const offset = event.key === 'ArrowDown' ? 1 : -1
+    if (dropdownShown.value) {
+      moveActiveIndex(offset)
     } else {
-      moveActiveIndex(event.key === 'ArrowDown' ? 1 : -1)
+      // Native selects change the value straight away while closed
+      selectOffset(offset)
     }
     return
   }
 
   if (event.key === 'Home' || event.key === 'End') {
     event.preventDefault()
-    if (!dropdownShown.value) {
-      openDropdown()
+    const index = event.key === 'Home' ? 0 : props.selectValues.length - 1
+    if (dropdownShown.value) {
+      activeIndex.value = index
+      scrollActiveOptionIntoView()
+    } else {
+      selectOption(index)
     }
-    activeIndex.value = event.key === 'Home' ? 0 : props.selectValues.length - 1
-    scrollActiveOptionIntoView()
     return
   }
 
   if (event.key === 'PageDown' || event.key === 'PageUp') {
     event.preventDefault()
-    if (!dropdownShown.value) {
-      openDropdown()
+    const offset = event.key === 'PageDown' ? 10 : -10
+    if (dropdownShown.value) {
+      moveActiveIndex(offset)
     } else {
-      moveActiveIndex(event.key === 'PageDown' ? 10 : -10)
+      selectOffset(offset)
     }
     return
   }
@@ -398,6 +414,15 @@ function handleTypeahead(character) {
   } else {
     selectOption(match)
   }
+}
+
+/**
+ * Moves the selection relative to the currently selected option, like a closed native select does.
+ * @param {number} offset
+ */
+function selectOffset(offset) {
+  const index = Math.max(0, Math.min(props.selectValues.length - 1, Math.max(0, selectedIndex.value) + offset))
+  selectOption(index)
 }
 
 function selectOption(index) {
