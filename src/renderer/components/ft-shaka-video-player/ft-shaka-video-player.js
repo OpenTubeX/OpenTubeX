@@ -7933,6 +7933,17 @@ export default defineComponent({
       }
     }
 
+    async function unloadForFormatSwitch() {
+      // The previous frame disappears when Shaka unloads. Keep the normal
+      // player dimensions filled with the thumbnail until the new format has
+      // produced a frame of its own.
+      showPoster.value = true
+
+      try {
+        await player.unload()
+      } catch { }
+    }
+
     watch(
       () => props.format,
       /**
@@ -7952,9 +7963,7 @@ export default defineComponent({
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value) {
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
 
@@ -8021,9 +8030,7 @@ export default defineComponent({
             dimension = preferredVideoQuality.value
           }
 
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
           queuePlaybackRateRestore(playbackRate)
@@ -8087,9 +8094,7 @@ export default defineComponent({
             previousQuality = previousTrack.height > previousTrack.width ? previousTrack.width : previousTrack.height
           }
 
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
 
