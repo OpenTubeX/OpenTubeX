@@ -1,0 +1,96 @@
+name: Mirror to GitLab
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '**'
+  delete:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitlab-repository-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    if: github.repository == 'OpenTubeX/OpenTubeX'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      SOURCE_URL: https://github.com/OpenTubeX/OpenTubeX.git
+      TARGET_URL: https://gitlab.com/opentubex/OpenTubeX.git
+
+    steps:
+      - name: Validate mirror credentials
+        env:
+          GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${GITLAB_MIRROR_TOKEN}" ]]; then
+            echo "::error::The GITLAB_MIRROR_TOKEN repository secret is missing."
+            exit 1
+          fi
+
+      - name: Mirror and verify branches and tags
+        env:
+          GITLAB_MIRROR_TOKEN: ${{ secrets.GITLAB_MIRROR_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          echo "::add-mask::${GITLAB_MIRROR_TOKEN}"
+
+          mirror_dir="$(mktemp -d "${RUNNER_TEMP}/gitlab-mirror.XXXXXX")"
+          netrc_file="${HOME}/.netrc"
+
+          cleanup() {
+            rm -f "${netrc_file}"
+            rm -rf "${mirror_dir}"
+          }
+          trap cleanup EXIT
+
+          cat > "${netrc_file}" <<EOF
+          machine gitlab.com
+            login oauth2
+            password ${GITLAB_MIRROR_TOKEN}
+          EOF
+          chmod 600 "${netrc_file}"
+
+          git init --bare "${mirror_dir}/repository.git"
+
+          git -C "${mirror_dir}/repository.git" fetch \
+            --prune \
+            --force \
+            "${SOURCE_URL}" \
+            '+refs/heads/*:refs/heads/*' \
+            '+refs/tags/*:refs/tags/*'
+
+          git -C "${mirror_dir}/repository.git" push \
+            --prune \
+            --force \
+            "${TARGET_URL}" \
+            'refs/heads/*:refs/heads/*' \
+            'refs/tags/*:refs/tags/*'
+
+          git ls-remote --heads --tags "${SOURCE_URL}" \
+            | LC_ALL=C sort > "${mirror_dir}/source-refs.txt"
+
+          git ls-remote --heads --tags "${TARGET_URL}" \
+            | LC_ALL=C sort > "${mirror_dir}/target-refs.txt"
+
+          if ! diff --unified \
+            "${mirror_dir}/source-refs.txt" \
+            "${mirror_dir}/target-refs.txt"; then
+            echo "::error::GitLab branch or tag refs do not match GitHub."
+            exit 1
+          fi
+
+          echo "GitLab mirror matches GitHub."
