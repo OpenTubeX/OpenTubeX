@@ -1599,6 +1599,11 @@
   z-index: 0;
 }
 
+.ftVideoPlayer .fullscreenActions:has(:deep(.fullscreenShareAction .iconDropdown)),
+.ftVideoPlayer .fullscreenActions:has(:deep(.fullscreenPlaylistAction .iconDropdown)) {
+  z-index: 5;
+}
+
 .ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
 .ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions {
   opacity: 1;
