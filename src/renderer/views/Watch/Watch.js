@@ -76,7 +76,7 @@ import {
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
-import { useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
 
 /**
@@ -145,6 +145,7 @@ export default defineComponent({
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
     const setTabTitle = useTabTitle()
+    const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
 
     return {
@@ -156,6 +157,7 @@ export default defineComponent({
       tabRoute,
       tabRouter,
       setTabTitle,
+      setTabAvatar,
       showTabToast
     }
   },
@@ -1660,6 +1662,7 @@ export default defineComponent({
           videoId: this.videoId,
           avatar: this.channelThumbnail
         })
+        this.setTabAvatar(this.channelThumbnail)
 
         this.videoCategory = result.basic_info.category ?? ''
         this.videoGenreIsMusic = this.videoCategory === 'Music'
@@ -2182,6 +2185,7 @@ export default defineComponent({
             videoId: this.videoId,
             avatar: this.channelThumbnail
           })
+          this.setTabAvatar(this.channelThumbnail)
           this.updateSubscriptionDetails({
             channelThumbnailUrl: channelThumb?.url,
             channelName: result.author,

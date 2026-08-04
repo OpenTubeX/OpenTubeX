@@ -60,6 +60,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
@@ -4901,32 +4902,13 @@ export default defineComponent({
         previousQuality = preferredVideoQuality.value
       }
 
-      /** @type {object[]} */
-      const legacyFormats = props.legacyFormats
-
-      const isPortrait = legacyFormats[0].height > legacyFormats[0].width
-
-      let matches = legacyFormats.filter(variant => {
-        return previousQuality === isPortrait ? variant.width : variant.height
-      })
-
-      if (matches.length === 0) {
-        matches = legacyFormats.filter(variant => {
-          return previousQuality > isPortrait ? variant.width : variant.height
-        })
-
-        if (matches.length > 0) {
-          matches.sort((a, b) => b.bitrate - a.bitrate)
-        } else {
-          matches = legacyFormats.sort((a, b) => a.bitrate - b.bitrate)
-        }
-      }
+      const format = findLegacyFormatForQuality(props.legacyFormats, previousQuality)
 
       hasMultipleAudioTracks.value = false
 
       events.dispatchEvent(new CustomEvent('setLegacyFormat', {
         detail: {
-          format: matches[0],
+          format,
           playbackPosition,
           playbackRate
         }
@@ -5779,11 +5761,11 @@ export default defineComponent({
         activeLegacyFormat.value = event.detail.format
         const quality = getQualityFromDimensions(format.width, format.height)
 
-        if (quality !== null) {
-          emit('video-quality-updated', quality)
-        }
-
+        // Only remember the quality when the user picked it themselves. The legacy formats top out
+        // at 360p, so remembering an automatically chosen one would downgrade the preferred quality
+        // when switching back to the DASH formats.
         if (userSelected && quality !== null) {
+          emit('video-quality-updated', quality)
           emit('video-quality-user-set', quality)
         }
 
@@ -8018,10 +8000,10 @@ export default defineComponent({
           let dimension
 
           if (oldFormat === 'legacy' && newFormat === 'dash') {
-            const legacyFormat = activeLegacyFormat.value
-
             if (!useAutoQuality) {
-              dimension = legacyFormat.height > legacyFormat.width ? legacyFormat.width : legacyFormat.height
+              // Use the preferred quality instead of the active legacy format's dimensions, as the
+              // legacy formats top out at 360p and the user may never have chosen that themselves
+              dimension = preferredVideoQuality.value
             }
           } else if (oldFormat !== 'legacy') {
             const track = player.getVariantTracks().find(track => track.active)

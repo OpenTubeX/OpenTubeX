@@ -1595,7 +1595,9 @@ function runApp() {
     // forced quit stay on disk forever.
     await TabManager.pruneTabPreviewCache(
       savedSessions.flatMap(session => (
-        Array.isArray(session?.tabs) ? session.tabs.map(tab => tab?.previewFileName) : []
+        Array.isArray(session?.tabs)
+          ? session.tabs.flatMap(tab => [tab?.previewFileName, tab?.avatarFileName])
+          : []
       ))
     )
 
