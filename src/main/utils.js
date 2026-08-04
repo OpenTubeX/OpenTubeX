@@ -1,6 +1,15 @@
+export const DEFAULT_PROXY_SETTINGS = {
+  protocol: 'socks5',
+  hostname: '127.0.0.1',
+  port: '9050'
+}
+
 /**
  * Builds a proxy URL from the app's proxy settings,
  * for tools that take the proxy as a single URL (e.g. yt-dlp's `--proxy`).
+ *
+ * Settings are only written to the database once they get changed,
+ * so missing values mean that the default is still in use.
  * @param {{
  *   protocol?: string,
  *   hostname?: string,
@@ -8,12 +17,12 @@
  *   username?: string,
  *   password?: string
  * }} proxySettings
- * @returns {string | null} null when the settings are incomplete
+ * @returns {string}
  */
 export function buildProxyUrl({ protocol, hostname, port, username, password }) {
-  if (!protocol || !hostname || !port) {
-    return null
-  }
+  protocol ||= DEFAULT_PROXY_SETTINGS.protocol
+  hostname ||= DEFAULT_PROXY_SETTINGS.hostname
+  port ||= DEFAULT_PROXY_SETTINGS.port
 
   const credentials = username
     ? `${encodeURIComponent(username)}:${encodeURIComponent(password ?? '')}@`

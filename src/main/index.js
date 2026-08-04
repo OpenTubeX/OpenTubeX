@@ -29,7 +29,7 @@ import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
 import { handleYtDlpCancelDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo } from './ytDlp'
 import { generatePoToken } from './poTokenGenerator'
-import { isOpenTubeXUrl } from './utils'
+import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
 import { clearAllTabSessions, loadAllTabSessions } from './tabs/TabSessionStore'
 import { isShareableOpenTubeXRoute, transformOpenTubeXRouteUrl } from '../renderer/helpers/share'
@@ -1326,9 +1326,9 @@ function runApp() {
 
     let disableSmoothScrolling = false
     let useProxy = false
-    let proxyProtocol = 'socks5'
-    let proxyHostname = '127.0.0.1'
-    let proxyPort = '9050'
+    let proxyProtocol = DEFAULT_PROXY_SETTINGS.protocol
+    let proxyHostname = DEFAULT_PROXY_SETTINGS.hostname
+    let proxyPort = DEFAULT_PROXY_SETTINGS.port
 
     if (docArray?.length > 0) {
       docArray.forEach((doc) => {
@@ -1370,7 +1370,7 @@ function runApp() {
     }
 
     if (useProxy) {
-      proxyUrl = `${proxyProtocol}://${proxyHostname}:${proxyPort}`
+      proxyUrl = buildProxyUrl({ protocol: proxyProtocol, hostname: proxyHostname, port: proxyPort })
 
       session.defaultSession.setProxy({
         proxyRules: proxyUrl

@@ -65,10 +65,12 @@ test('includes escaped proxy credentials', () => {
   }), 'socks5://127.0.0.1:9050')
 })
 
-test('returns null for incomplete proxy settings', () => {
-  assert.equal(buildProxyUrl({ hostname: '127.0.0.1', port: '9050' }), null)
-  assert.equal(buildProxyUrl({ protocol: 'socks5', port: '9050' }), null)
-  assert.equal(buildProxyUrl({ protocol: 'socks5', hostname: '127.0.0.1' }), null)
-  assert.equal(buildProxyUrl({ protocol: 'socks5', hostname: '', port: '9050' }), null)
-  assert.equal(buildProxyUrl({}), null)
+// settings are only written to the database once they get changed,
+// so unchanged proxy settings are missing entirely
+test('falls back to the default proxy settings', () => {
+  assert.equal(buildProxyUrl({}), 'socks5://127.0.0.1:9050')
+  assert.equal(buildProxyUrl({ hostname: 'proxy.example.com' }), 'socks5://proxy.example.com:9050')
+  assert.equal(buildProxyUrl({ protocol: 'http', port: '8080' }), 'http://127.0.0.1:8080')
+  assert.equal(buildProxyUrl({ protocol: '', hostname: '', port: '' }), 'socks5://127.0.0.1:9050')
+  assert.equal(buildProxyUrl({ username: 'user', password: 'pass' }), 'socks5://user:pass@127.0.0.1:9050')
 })
