@@ -276,6 +276,7 @@ const state = {
   hideChapters: false,
   showDistractionFreeTitles: false,
   showLiveChatTimestamps: false,
+  liveChatFilter: 'TOP_CHAT',
   landingPage: 'subscriptions',
   newTabPosition: 'afterCurrent',
   tabCloseFocus: 'previousTab',

@@ -24,6 +24,22 @@ function fakeContinuation({ actions = [], continuation = 'NEXT', header = null }
   })
 }
 
+/**
+ * The two views a chat offers, in the order YouTube returns them. `selected` is
+ * deliberately left pointing at the default view even after a switch, which is how
+ * the real thing behaves for as long as the initial info isn't refreshed.
+ */
+function fakeViewSelector() {
+  return {
+    view_selector: {
+      sub_menu_items: [
+        { title: 'Top chat', selected: true, continuation: 'TOP_CHAT_CONTINUATION' },
+        { title: 'Live chat', selected: false, continuation: 'LIVE_CHAT_CONTINUATION' },
+      ],
+    },
+  }
+}
+
 function fakeReplayAction(videoOffsetTimeMsec) {
   return { video_offset_time_msec: videoOffsetTimeMsec }
 }
@@ -31,12 +47,12 @@ function fakeReplayAction(videoOffsetTimeMsec) {
 /**
  * @param {((args: any, callIndex: number) => any)} respond
  */
-function createReplay(respond) {
+function createReplay(respond, { isReplay = true } = {}) {
   const requests = []
 
   const videoInfo = {
     basic_info: { id: 'dQw4w9WgXcQ', channel_id: 'UC38IQsAvIsxxjztdMZQtwHA' },
-    livechat: { continuation: INITIAL_CONTINUATION, is_replay: true },
+    livechat: { continuation: INITIAL_CONTINUATION, is_replay: isReplay },
     actions: {
       execute(endpoint, args) {
         requests.push({ endpoint, args })
@@ -239,4 +255,140 @@ test('concurrent polls are collapsed into one request', async () => {
   await flush()
 
   assert.equal(requests.length, 2)
+})
+
+test('switching views moves the chat onto the other continuation', async () => {
+  const { liveChat, requests } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? fakeViewSelector() : null,
+    }),
+  }))
+
+  liveChat.start()
+  await flush()
+  assert.equal(liveChat.filter, 'TOP_CHAT')
+
+  liveChat.setFilter('LIVE_CHAT')
+  assert.equal(liveChat.filter, 'LIVE_CHAT')
+
+  await liveChat.pollNext()
+  await flush()
+  assert.equal(requests[1].args.continuation, 'LIVE_CHAT_CONTINUATION')
+})
+
+test('switching back to the default view works', async () => {
+  const { liveChat, requests } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      // Only the very first response refreshes the initial info, so the selection
+      // flags on it still say the default view is the selected one.
+      header: callIndex === 0 ? fakeViewSelector() : null,
+    }),
+  }))
+
+  liveChat.start()
+  await flush()
+
+  liveChat.setFilter('LIVE_CHAT')
+  await liveChat.pollNext()
+  await flush()
+
+  liveChat.setFilter('TOP_CHAT')
+  await liveChat.pollNext()
+  await flush()
+
+  // applyFilter() would have bailed out here, because it reads the stale selection
+  // flags rather than tracking the view it last switched to.
+  assert.equal(liveChat.filter, 'TOP_CHAT')
+  assert.equal(requests[2].args.continuation, 'TOP_CHAT_CONTINUATION')
+})
+
+test('seeking a replay stays on the selected view', async () => {
+  const { liveChat, requests } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? fakeViewSelector() : null,
+    }),
+  }))
+
+  liveChat.start()
+  await flush()
+
+  liveChat.setFilter('LIVE_CHAT')
+  liveChat.seekTo(600_000)
+  await liveChat.pollNext()
+  await flush()
+
+  // Seeking must not drop back to the view the chat happened to start on.
+  assert.equal(requests[1].args.continuation, 'LIVE_CHAT_CONTINUATION')
+  assert.deepEqual(requests[1].args.currentPlayerState, { playerOffsetMs: '600000' })
+})
+
+test('switching views discards the messages already on their way', async () => {
+  const pendingResponses = []
+
+  const { liveChat, updates } = createReplay((args, callIndex) => {
+    if (callIndex === 1) {
+      return new Promise((resolve) => pendingResponses.push(resolve))
+    }
+
+    return {
+      continuation_contents: fakeContinuation({
+        continuation: `AFTER_${callIndex}`,
+        header: callIndex === 0 ? fakeViewSelector() : null,
+      }),
+    }
+  })
+
+  liveChat.start()
+  await flush()
+
+  liveChat.pollNext()
+  await flush()
+  liveChat.setFilter('LIVE_CHAT')
+
+  pendingResponses[0]({
+    continuation_contents: fakeContinuation({
+      continuation: 'STALE',
+      actions: [fakeReplayAction('120000')],
+    }),
+  })
+  await flush()
+
+  // Those messages belong to the view that was switched away from.
+  assert.deepEqual(updates, [])
+})
+
+test('a live chat keeps polling after its view is switched', async (t) => {
+  const { liveChat, requests } = createReplay((args, callIndex) => ({
+    continuation_contents: fakeContinuation({
+      continuation: `AFTER_${callIndex}`,
+      header: callIndex === 0 ? fakeViewSelector() : null,
+    }),
+  }), { isReplay: false })
+
+  // A live chat polls itself, so it has to be stopped even if an assertion below
+  // fails, otherwise it keeps the process alive and the run hangs instead of failing.
+  t.after(() => liveChat.stop())
+
+  liveChat.start()
+  await flush()
+
+  const before = requests.length
+  liveChat.setFilter('LIVE_CHAT')
+  await flush()
+
+  // Discarding the in-flight response breaks the self-sustaining poll chain that a
+  // live chat runs on, so switching has to restart it.
+  assert.ok(requests.length > before, `expected a new request, got ${requests.length} vs ${before}`)
+  assert.equal(requests[before].args.continuation, 'LIVE_CHAT_CONTINUATION')
+})
+
+test('the view cannot be switched before the chat has started', () => {
+  const { liveChat } = createReplay(() => ({
+    continuation_contents: fakeContinuation({ header: fakeViewSelector() }),
+  }))
+
+  assert.throws(() => liveChat.setFilter('LIVE_CHAT'), /before initial info is retrieved/)
 })

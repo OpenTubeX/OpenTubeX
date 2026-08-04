@@ -374,10 +374,10 @@ index 8b6d412c79178ed9786c6ab143a6f0822c3b13c3..101063c7c348d941814b4122b36f6eb4
          }));
          this.#continuation = body_node?.contents?.firstOfType(ContinuationItem);
 diff --git a/dist/src/parser/youtube/LiveChat.d.ts b/dist/src/parser/youtube/LiveChat.d.ts
-index 371f753a780be9c927a767ad844c3b071e9707c8..a3bb55c260682cfd12013e84f43d42d2bdf75c44 100644
+index 371f753a780be9c927a767ad844c3b071e9707c8..f9b97e606e787462c85e50510e01d0e991d9ebc3 100644
 --- a/dist/src/parser/youtube/LiveChat.d.ts
 +++ b/dist/src/parser/youtube/LiveChat.d.ts
-@@ -57,6 +57,19 @@ export default class LiveChat extends EventEmitter {
+@@ -57,6 +57,30 @@ export default class LiveChat extends EventEmitter {
      once(type: 'end', listener: () => void): void;
      start(): void;
      stop(): void;
@@ -389,6 +389,17 @@ index 371f753a780be9c927a767ad844c3b071e9707c8..a3bb55c260682cfd12013e84f43d42d2
 +     */
 +    seekTo(offset_ms: number): void;
 +    /**
++     * The view the chat is currently on.
++     */
++    get filter(): 'TOP_CHAT' | 'LIVE_CHAT';
++    /**
++     * Switches between the chat's "Top chat" and "Live chat" views. Unlike
++     * {@link applyFilter} this tracks the selected view itself, rather than reading it
++     * back off the initial info, whose selection flags go stale as soon as it is used.
++     * @param filter - The view to switch to.
++     */
++    setFilter(filter: 'TOP_CHAT' | 'LIVE_CHAT'): void;
++    /**
 +     * Requests the next batch of replay actions. Replays don't poll on their own,
 +     * as only the consumer knows how far ahead of the player it wants to buffer.
 +     * Resolves once the actions of that batch have been emitted.
@@ -398,10 +409,10 @@ index 371f753a780be9c927a767ad844c3b071e9707c8..a3bb55c260682cfd12013e84f43d42d2
       * Sends a message.
       * @param text - Text to send.
 diff --git a/dist/src/parser/youtube/LiveChat.js b/dist/src/parser/youtube/LiveChat.js
-index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f90410c422 100644
+index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42076cac11 100644
 --- a/dist/src/parser/youtube/LiveChat.js
 +++ b/dist/src/parser/youtube/LiveChat.js
-@@ -18,8 +18,12 @@ export default class LiveChat extends EventEmitter {
+@@ -18,8 +18,13 @@ export default class LiveChat extends EventEmitter {
      #video_id;
      #channel_id;
      #continuation;
@@ -411,10 +422,11 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f9
 +    #player_offset_ms = null;
 +    #seek_generation = 0;
 +    #polling = false;
++    #filter = 'TOP_CHAT';
      smoothed_queue;
      initial_info;
      metadata;
-@@ -31,6 +35,7 @@ export default class LiveChat extends EventEmitter {
+@@ -31,6 +36,7 @@ export default class LiveChat extends EventEmitter {
          this.#channel_id = video_info.basic_info.channel_id;
          this.#actions = video_info.actions;
          this.#continuation = video_info.livechat?.continuation;
@@ -422,7 +434,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f9
          this.is_replay = video_info.livechat?.is_replay || false;
          this.smoothed_queue = new SmoothedQueue();
          this.smoothed_queue.callback = async (actions) => {
-@@ -42,14 +47,6 @@ export default class LiveChat extends EventEmitter {
+@@ -42,14 +48,6 @@ export default class LiveChat extends EventEmitter {
                  // If there are less than 10 actions, wait until all of them are emitted.
                  await this.#emitSmoothedActions(actions);
              }
@@ -437,7 +449,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f9
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -69,17 +66,60 @@ export default class LiveChat extends EventEmitter {
+@@ -69,17 +67,96 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -471,6 +483,42 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f9
 +        this.#player_offset_ms = Math.max(0, Math.round(offset_ms));
 +    }
 +    /**
++     * The view the chat is currently on.
++     * @returns {'TOP_CHAT' | 'LIVE_CHAT'}
++     */
++    get filter() {
++        return this.#filter;
++    }
++    /**
++     * Switches between the chat's "Top chat" and "Live chat" views. Unlike
++     * {@link applyFilter} this tracks the selected view itself, rather than reading it
++     * back off the initial info, whose selection flags go stale as soon as it is used.
++     * @param filter - The view to switch to.
++     */
++    setFilter(filter) {
++        if (filter === this.#filter)
++            return;
++        const menu_items = this.initial_info?.header?.view_selector?.sub_menu_items;
++        if (!menu_items)
++            throw new InnertubeError('Cannot change the filter before initial info is retrieved.');
++        const continuation = menu_items.at(filter === 'TOP_CHAT' ? 0 : 1)?.continuation;
++        if (!continuation)
++            throw new InnertubeError(`This live chat has no '${filter}' view.`);
++        this.#filter = filter;
++        // Invalidates the responses of any requests that are still in flight, as they
++        // hold the messages of the view being switched away from.
++        this.#seek_generation++;
++        this.#polling = false;
++        this.smoothed_queue.clear();
++        this.#continuation = continuation;
++        // Seeking a replay has to stay on the view that is selected now.
++        this.#initial_continuation = continuation;
++        // Live chats poll on their own, but discarding the in-flight response above broke
++        // that chain, so it needs restarting. Replays are polled by the consumer instead.
++        if (this.running && !this.is_replay)
++            this.#pollLivechat();
++    }
++    /**
 +     * Requests the next batch of replay actions. Replays don't poll on their own,
 +     * as only the consumer knows how far ahead of the player it wants to buffer.
 +     * Resolves once the actions of that batch have been emitted.
@@ -501,7 +549,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..943e1eb8540774700f7d635eb1af45f9
                  const contents = response.continuation_contents;
                  if (!contents) {
                      this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
-@@ -91,24 +131,39 @@ export default class LiveChat extends EventEmitter {
+@@ -91,24 +168,39 @@ export default class LiveChat extends EventEmitter {
                      this.emit('end');
                      return;
                  }

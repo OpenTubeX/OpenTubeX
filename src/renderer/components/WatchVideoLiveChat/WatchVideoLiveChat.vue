@@ -95,6 +95,15 @@
               :compact="true"
               @change="updateShowLiveChatTimestamps"
             />
+            <FtRadioButton
+              v-if="canFilter"
+              class="liveChatFilter"
+              :title="t('Video.Chat Filter')"
+              :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+              :values="['TOP_CHAT', 'LIVE_CHAT']"
+              :model-value="liveChatFilter"
+              @update:model-value="updateLiveChatFilter"
+            />
           </div>
         </div>
       </div>
@@ -313,6 +322,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -371,6 +381,7 @@ let replayPollInFlight = false
 
 const isLoading = ref(true)
 const isReplay = ref(false)
+const canFilter = ref(false)
 const hasError = ref(false)
 const showEnableChat = ref(false)
 const errorMessage = ref('')
@@ -408,6 +419,9 @@ const scrollingBehaviour = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 const showLiveChatTimestamps = computed(() => store.getters.getShowLiveChatTimestamps)
+
+/** @type {import('vue').ComputedRef<'TOP_CHAT' | 'LIVE_CHAT'>} */
+const liveChatFilter = computed(() => store.getters.getLiveChatFilter)
 
 /** @type {import('vue').Ref<number | null>} */
 const watchingCount = ref(null)
@@ -502,6 +516,15 @@ const commentsRef = useTemplateRef('commentsRef')
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
+  canFilter.value = (initialData.header?.view_selector?.sub_menu_items?.length ?? 0) > 1
+
+  // A chat always starts on YouTube's default view, so switch away from it before
+  // showing anything if the other one is the view that is wanted.
+  if (canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
+    applyChatFilter()
+    return
+  }
+
   for (const action of initialData.actions) {
     handleChatAction(action)
   }
@@ -568,6 +591,38 @@ function handleChatAction(action, offsetMs) {
 }
 
 /**
+ * Drops everything on screen, which is what switching to a different part of the
+ * video or to a different view of the chat leaves behind.
+ */
+function clearChat() {
+  comments.splice(0, comments.length)
+  superChatComments.splice(0, superChatComments.length)
+  showSuperChat.value = false
+  pendingReplayComments = []
+  replayFetchedUntilMs = 0
+}
+
+/**
+ * Moves the chat onto the currently selected view, keeping a replay at the
+ * position the player is at.
+ */
+function applyChatFilter() {
+  if (liveChatInstance === null || !canFilter.value || liveChatInstance.filter === liveChatFilter.value) {
+    return
+  }
+
+  clearChat()
+  liveChatInstance.setFilter(liveChatFilter.value)
+
+  if (isReplay.value) {
+    liveChatInstance.seekTo(props.currentTime * 1000)
+    requestMoreReplayComments()
+  }
+}
+
+watch(liveChatFilter, applyChatFilter)
+
+/**
  * Shows every buffered replay message that the player has reached by now.
  */
 function releaseReplayComments() {
@@ -607,12 +662,7 @@ watch(() => props.currentTime, (currentTime) => {
 
   if (seeked) {
     // Everything on screen and in the buffer belongs to the position we just left.
-    comments.splice(0, comments.length)
-    superChatComments.splice(0, superChatComments.length)
-    showSuperChat.value = false
-    pendingReplayComments = []
-    replayFetchedUntilMs = 0
-
+    clearChat()
     liveChatInstance.seekTo(currentTime * 1000)
   } else {
     releaseReplayComments()
@@ -787,6 +837,10 @@ function handleChatSettingsClickOutside(event) {
 
 function updateShowLiveChatTimestamps(value) {
   store.dispatch('updateShowLiveChatTimestamps', value)
+}
+
+function updateLiveChatFilter(value) {
+  store.dispatch('updateLiveChatFilter', value)
 }
 
 function onScroll() {

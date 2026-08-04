@@ -315,6 +315,12 @@
   box-shadow: 0 6px 20px rgb(0 0 0 / 35%);
 }
 
+.liveChatFilter {
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--side-nav-hover-color);
+}
+
 .titleContainer {
   display: flex;
   justify-content: space-between;
