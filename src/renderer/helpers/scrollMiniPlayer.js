@@ -35,7 +35,7 @@ export function getScrollMiniInlineLayoutHeight(container, lastKnownHeight = 0) 
   return Math.max(measuredHeight, expectedHeight, lastKnownHeight)
 }
 
-/** @typedef {{ left: number, top: number, width: number, height: number, dock: 'left' | 'right' }} ScrollMiniPlayerRect */
+/** @typedef {{ left: number, top: number, width: number, height: number, dock: 'left' | 'right', verticalDock?: 'top' | 'bottom', verticalOffset?: number }} ScrollMiniPlayerRect */
 
 /** @type {ScrollMiniPlayerRect | null} */
 let savedScrollMiniPlayerRect = null
@@ -86,9 +86,92 @@ export function parseScrollMiniPlayerSavedRect(value) {
       width: parsed.width,
       height: parsed.height,
       dock: parsed.dock === 'left' ? 'left' : 'right',
+      ...pickScrollMiniVerticalAnchor(parsed),
     }
   } catch {
     return null
+  }
+}
+
+/**
+ * The anchor a rect already carries, if any. Reading it back beats re-deriving
+ * one from the geometry: a viewport too short to honour the remembered distance
+ * has to clamp the rect, and inferring from that would forget the distance for
+ * good, instead of restoring it once the window grows again.
+ *
+ * @param {Partial<ScrollMiniPlayerRect> | null | undefined} rect
+ * @returns {{ verticalDock: 'top' | 'bottom', verticalOffset: number } | null}
+ */
+export function pickScrollMiniVerticalAnchor(rect) {
+  const parked = rect?.verticalDock === 'top' || rect?.verticalDock === 'bottom'
+
+  // The offset is a distance from an inset, so anything negative is corrupt
+  // rather than a position, and inferring one from the geometry beats replaying it.
+  return parked && Number.isFinite(rect.verticalOffset) && rect.verticalOffset >= 0
+    ? { verticalDock: rect.verticalDock, verticalOffset: rect.verticalOffset }
+    : null
+}
+
+/**
+ * Which vertical edge the rect is parked at, and how far from it. Absolute
+ * coordinates go stale the moment the window is resized, so the anchor is what
+ * gets remembered and replayed against the new viewport.
+ *
+ * @param {ScrollMiniPlayerRect} rect
+ * @param {{ top: number, bottom: number }} [insets]
+ * @returns {{ verticalDock: 'top' | 'bottom', verticalOffset: number }}
+ */
+export function getScrollMiniVerticalAnchor(rect, insets = getViewportInsets()) {
+  const topOffset = rect.top - insets.top
+  const bottomOffset = window.innerHeight - insets.bottom - (rect.top + rect.height)
+
+  return bottomOffset <= topOffset
+    ? { verticalDock: 'bottom', verticalOffset: Math.max(0, bottomOffset) }
+    : { verticalDock: 'top', verticalOffset: Math.max(0, topOffset) }
+}
+
+/**
+ * Anchor for rects saved before the anchor was recorded. Their coordinates were
+ * measured against a viewport we no longer know, so they are only worth reading
+ * while they still put the player at an edge: after a big enough resize the
+ * stale position can be nearest the opposite edge, which would keep the player
+ * stranded in the middle. Falling back to the bottom matches a fresh player, and
+ * only ever happens once, since activation persists a real anchor.
+ *
+ * @param {ScrollMiniPlayerRect} rect
+ * @param {{ top: number, bottom: number }} insets
+ * @returns {{ verticalDock: 'top' | 'bottom', verticalOffset: number }}
+ */
+function getLegacyVerticalAnchor(rect, insets) {
+  const anchor = getScrollMiniVerticalAnchor(rect, insets)
+
+  return anchor.verticalOffset <= EDGE_SNAP
+    ? anchor
+    : { verticalDock: 'bottom', verticalOffset: 0 }
+}
+
+/**
+ * Re-place a rect against the current viewport, keeping it the same distance
+ * from the edges it was docked to. Without this a window that grew while the
+ * player was docked (or closed) strands it mid-screen, because its remembered
+ * left/top were only edge-aligned for the old viewport.
+ *
+ * @param {ScrollMiniPlayerRect} rect
+ * @param {number} [aspectRatio]
+ * @returns {ScrollMiniPlayerRect}
+ */
+export function reanchorScrollMiniPlayerRect(rect, aspectRatio = DEFAULT_ASPECT_RATIO) {
+  const insets = getViewportInsets()
+  const sized = clampScrollMiniPlayerRect(rect, aspectRatio)
+  const anchor = pickScrollMiniVerticalAnchor(rect) ?? getLegacyVerticalAnchor(sized, insets)
+
+  const top = anchor.verticalDock === 'top'
+    ? insets.top + anchor.verticalOffset
+    : window.innerHeight - insets.bottom - sized.height - anchor.verticalOffset
+
+  return {
+    ...clampScrollMiniPlayerRect(snapScrollMiniPlayerToEdge({ ...sized, top }, insets), aspectRatio),
+    ...anchor,
   }
 }
 
@@ -97,12 +180,15 @@ export function parseScrollMiniPlayerSavedRect(value) {
  * @returns {string}
  */
 export function serializeScrollMiniPlayerSavedRect(rect) {
+  const anchor = pickScrollMiniVerticalAnchor(rect) ?? getScrollMiniVerticalAnchor(rect)
+
   return JSON.stringify({
     left: rect.left,
     top: rect.top,
     width: rect.width,
     height: rect.height,
     dock: rect.dock,
+    ...anchor,
   })
 }
 

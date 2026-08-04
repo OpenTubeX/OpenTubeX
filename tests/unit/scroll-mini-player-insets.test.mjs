@@ -8,6 +8,9 @@ import {
   clampScrollMiniPlayerRect,
   parseScrollMiniPlayerSavedRect,
   serializeScrollMiniPlayerSavedRect,
+  getScrollMiniVerticalAnchor,
+  pickScrollMiniVerticalAnchor,
+  reanchorScrollMiniPlayerRect,
   MARGIN
 } from '../../src/renderer/helpers/scrollMiniPlayer.js'
 
@@ -16,9 +19,10 @@ import {
  * @param {{ left: number, right: number } | null} [options.verticalTabBarRect]
  * @param {number} options.clientWidth usable width (excludes the scrollbar)
  * @param {number} [options.scrollbarWidth]
+ * @param {number} [options.clientHeight]
  */
-function stubViewport ({ verticalTabBarRect = null, clientWidth, scrollbarWidth = 0 }) {
-  global.window = { innerWidth: clientWidth + scrollbarWidth, innerHeight: 800 }
+function stubViewport ({ verticalTabBarRect = null, clientWidth, scrollbarWidth = 0, clientHeight = 800 }) {
+  global.window = { innerWidth: clientWidth + scrollbarWidth, innerHeight: clientHeight }
   global.document = {
     querySelector (selector) {
       if (selector === '.tabBar.vertical' && verticalTabBarRect) {
@@ -96,8 +100,17 @@ test('the left dock edge follows the tab rail width', () => {
 })
 
 // Exactly 16:9 and fits the 800px-tall stub viewport, so activation must
-// preserve it verbatim (including the height, which is derived from the width).
-const SAVED_RECT = { left: 1000, top: 400, width: 512, height: 288, dock: 'right' }
+// preserve its size (the height is derived from the width) and its distance
+// from the edges it is docked to.
+const SAVED_RECT = {
+  left: 1000,
+  top: 400,
+  width: 512,
+  height: 288,
+  dock: 'right',
+  verticalDock: 'bottom',
+  verticalOffset: 96
+}
 
 test('parsing a saved rect round-trips it without consulting the viewport', () => {
   const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
@@ -112,22 +125,103 @@ test('parsing a saved rect round-trips it without consulting the viewport', () =
   assert.deepEqual(parseScrollMiniPlayerSavedRect(saved), SAVED_RECT)
 })
 
-test('restoring while unsized then activating keeps the saved position and size', () => {
+test('the vertical anchor is measured from the nearer edge', () => {
+  stubViewport({ clientWidth: 1585 })
+
+  assert.deepEqual(
+    getScrollMiniVerticalAnchor({ left: 0, top: 400, width: 512, height: 288, dock: 'right' }),
+    { verticalDock: 'bottom', verticalOffset: 96 }
+  )
+  assert.deepEqual(
+    getScrollMiniVerticalAnchor({ left: 0, top: 40, width: 512, height: 288, dock: 'right' }),
+    { verticalDock: 'top', verticalOffset: 24 }
+  )
+})
+
+test('restoring while unsized then activating keeps the saved size and edges', () => {
   const saved = serializeScrollMiniPlayerSavedRect(SAVED_RECT)
 
   // The restore/activation sequence: parse while the tab is still loading...
   stubViewport({ clientWidth: 0 })
   const restored = parseScrollMiniPlayerSavedRect(saved)
 
-  // ...then activation clamps it, once layout has settled.
+  // ...then activation re-anchors it, once layout has settled.
   stubViewport({ clientWidth: 1585, scrollbarWidth: 15 })
-  const activated = clampScrollMiniPlayerRect(restored)
+  const activated = reanchorScrollMiniPlayerRect(restored)
 
   assert.equal(activated.width, SAVED_RECT.width)
   assert.equal(activated.height, SAVED_RECT.height)
-  assert.equal(activated.left, SAVED_RECT.left)
-  assert.equal(activated.top, SAVED_RECT.top)
+  assert.equal(activated.left + activated.width, 1585 - MARGIN)
+  assert.equal(800 - (activated.top + activated.height), MARGIN + SAVED_RECT.verticalOffset)
   assert.equal(activated.dock, 'right')
+})
+
+test('a window that grew while the player was away still docks it to the edge', () => {
+  // Saved against a small window...
+  stubViewport({ clientWidth: 1188, clientHeight: 894 })
+  const saved = serializeScrollMiniPlayerSavedRect(
+    // Parked in the bottom-right corner.
+    { left: 1188 - 16 - 512, top: 894 - 16 - 288, width: 512, height: 288, dock: 'right' }
+  )
+
+  // ...then reopened after the window was maximised. Regression: the stale
+  // absolute left/top left the player floating in the middle of the screen.
+  stubViewport({ clientWidth: 1744, clientHeight: 1041 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(saved))
+
+  assert.equal(activated.left + activated.width, 1744 - MARGIN)
+  assert.equal(activated.top + activated.height, 1041 - MARGIN)
+})
+
+test('a viewport too short for the saved distance does not forget it', () => {
+  const parked = { ...SAVED_RECT, verticalDock: 'bottom', verticalOffset: 600 }
+
+  // 600px above the bottom does not fit in an 800px-tall viewport, so the rect
+  // has to be clamped...
+  stubViewport({ clientWidth: 1585, clientHeight: 800 })
+  const squeezed = reanchorScrollMiniPlayerRect(parked)
+
+  assert.equal(squeezed.top, MARGIN, 'clamped against the top inset')
+  assert.deepEqual(
+    pickScrollMiniVerticalAnchor(squeezed),
+    { verticalDock: 'bottom', verticalOffset: 600 },
+    'but the distance it should keep survives the clamp'
+  )
+
+  // ...and is restored once there is room for it again.
+  stubViewport({ clientWidth: 1585, clientHeight: 1200 })
+  const restored = reanchorScrollMiniPlayerRect(squeezed)
+
+  assert.equal(1200 - (restored.top + restored.height), MARGIN + 600)
+})
+
+test('a legacy rect without an anchor is docked to the bottom once it is adrift', () => {
+  // Saved before the anchor existed: bottom-right in an 894-tall window.
+  const legacy = JSON.stringify(
+    { left: 660, top: 590, width: 512, height: 288, dock: 'right' }
+  )
+
+  // Its stale top is now nearer the top edge than the bottom one, so reading the
+  // position at face value would leave the player floating mid-screen.
+  stubViewport({ clientWidth: 1744, clientHeight: 2000 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(legacy))
+
+  assert.equal(activated.verticalDock, 'bottom')
+  assert.equal(activated.top + activated.height, 2000 - MARGIN)
+})
+
+test('a legacy rect still parked at an edge keeps its offset', () => {
+  // Within EDGE_SNAP of the top inset, so it still reads as parked up there.
+  const legacy = JSON.stringify(
+    { left: 16, top: 60, width: 512, height: 288, dock: 'left' }
+  )
+
+  stubViewport({ clientWidth: 1744, clientHeight: 900 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(legacy))
+
+  assert.equal(activated.verticalDock, 'top')
+  assert.equal(activated.top, 60)
+  assert.equal(activated.left, MARGIN)
 })
 
 test('a restored rect that no longer fits is pulled back into view on activation', () => {
@@ -157,4 +251,22 @@ test('a malformed saved rect is rejected', () => {
     parseScrollMiniPlayerSavedRect(JSON.stringify({ left: NaN, top: 0, width: 1, height: 1 })),
     null
   )
+})
+
+test('a corrupt anchor is dropped instead of replayed', () => {
+  stubViewport({ clientWidth: 1585 })
+
+  // An offset is a distance from an inset, so these cannot describe a position.
+  for (const verticalOffset of [-100, NaN, 'nope']) {
+    const saved = JSON.stringify({ ...SAVED_RECT, verticalDock: 'top', verticalOffset })
+
+    assert.equal(pickScrollMiniVerticalAnchor(parseScrollMiniPlayerSavedRect(saved)), null)
+  }
+
+  // The rect itself still survives, with an anchor inferred from its geometry.
+  const saved = JSON.stringify({ ...SAVED_RECT, verticalDock: 'bottom', verticalOffset: -100 })
+  const activated = reanchorScrollMiniPlayerRect(parseScrollMiniPlayerSavedRect(saved))
+
+  assert.equal(activated.top + activated.height, 800 - MARGIN)
+  assert.equal(activated.verticalOffset, 0)
 })

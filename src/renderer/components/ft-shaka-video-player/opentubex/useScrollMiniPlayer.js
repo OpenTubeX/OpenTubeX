@@ -13,7 +13,10 @@ import {
   getSavedScrollMiniPlayerRect,
   getViewportInsets,
   getScrollMiniInlineLayoutHeight,
+  getScrollMiniVerticalAnchor,
   parseScrollMiniPlayerSavedRect,
+  pickScrollMiniVerticalAnchor,
+  reanchorScrollMiniPlayerRect,
   resizeScrollMiniPlayerFromCorner,
   resolveScrollMiniDragHandleOnLightBg,
   sampleScrollMiniDragHandleLuminance,
@@ -114,7 +117,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniVideoAspectRatio.value = videoElement.videoWidth / videoElement.videoHeight
 
     if (scrollMiniPlayerActive.value) {
-      applyScrollMiniPlayerRect(scrollMiniPlayerRect.value)
+      // Resizing to the video's aspect ratio is not the user moving the player,
+      // so it must not turn a temporarily clamped position into its anchor.
+      applyScrollMiniPlayerRect(scrollMiniPlayerRect.value, false, true)
     }
   }
 
@@ -370,11 +375,20 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   /**
    * @param {import('../../../helpers/scrollMiniPlayer').ScrollMiniPlayerRect} rect
    * @param {boolean} [persist]
+   * @param {boolean} [keepAnchor] trust the rect's own anchor over its geometry
    */
-  function applyScrollMiniPlayerRect(rect, persist = false) {
+  function applyScrollMiniPlayerRect(rect, persist = false, keepAnchor = false) {
+    const insets = getViewportInsets()
     const clamped = clampScrollMiniPlayerRect(rect, scrollMiniVideoAspectRatio.value)
+    // Remember the edge the player is parked at, so a later resize can put it
+    // back against that edge instead of leaving it where the old viewport was.
+    // Dragging makes the geometry authoritative, but a re-anchored rect brings
+    // the distance it is meant to keep: a viewport too short to honour it clamps
+    // the rect, and re-deriving from that would forget the distance for good.
+    Object.assign(clamped, (keepAnchor && pickScrollMiniVerticalAnchor(rect)) ||
+      getScrollMiniVerticalAnchor(clamped, insets))
     scrollMiniPlayerRect.value = clamped
-    scrollMiniResizeCorner.value = getResizeHandleCorner(clamped, getViewportInsets())
+    scrollMiniResizeCorner.value = getResizeHandleCorner(clamped, insets)
 
     if (persist) {
       // Drag and bounce frames can be interrupted, so only remember settled positions.
@@ -572,10 +586,13 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniPlayerActive.value = true
     updateScrollMiniVideoAspectRatio()
     applyScrollMiniPlayerRect(
-      clampScrollMiniPlayerRect(
-        savedRect ?? getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
-        scrollMiniVideoAspectRatio.value
-      )
+      savedRect
+        // The window may have changed size since the rect was saved, so replay
+        // it against the edges it was docked to rather than its old coordinates.
+        ? reanchorScrollMiniPlayerRect(savedRect, scrollMiniVideoAspectRatio.value)
+        : getDefaultScrollMiniPlayerRect(scrollMiniVideoAspectRatio.value),
+      false,
+      true
     )
     syncScrollMiniPlayerState()
 
@@ -676,9 +693,9 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
   }
 
   /**
-   * Re-dock to the current insets. Needed whenever the usable area changes
-   * (window resize, or the vertical tab bar being toggled/resized), otherwise
-   * the player is stranded mid-screen at its old edge.
+   * Re-dock to the current insets, horizontally and vertically. Needed whenever
+   * the usable area changes (window resize, or the vertical tab bar being
+   * toggled/resized), otherwise the player is stranded mid-screen at its old edge.
    */
   function resnapScrollMiniPlayerToEdge() {
     if (!scrollMiniPlayerActive.value) return
@@ -687,8 +704,11 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     if (scrollMiniPointerSession?.type === 'drag' || scrollMiniPointerSession?.type === 'resize') return
 
     cancelScrollMiniPlayerBounce()
-    const clamped = clampScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value)
-    applyScrollMiniPlayerRect(snapScrollMiniPlayerToEdge(clamped, getViewportInsets()), true)
+    applyScrollMiniPlayerRect(
+      reanchorScrollMiniPlayerRect(scrollMiniPlayerRect.value, scrollMiniVideoAspectRatio.value),
+      true,
+      true
+    )
   }
 
   function handleScrollMiniWindowResize() {

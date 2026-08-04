@@ -112,6 +112,45 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+/** Resize the window and wait for the renderer to have laid out at the new size. */
+async function setWindowSize(app, page, { width, height }) {
+  const before = await getViewport(page)
+
+  await app.electronApp.evaluate(({ BrowserWindow }, size) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const bounds = browserWindow.getBounds()
+    browserWindow.setBounds({ ...bounds, ...size })
+  }, { width, height })
+
+  await expect.poll(async () => {
+    const viewport = await getViewport(page)
+    return viewport.width !== before.width && viewport.height !== before.height
+  }).toBe(true)
+
+  return await getViewport(page)
+}
+
+function getViewport(page) {
+  return page.evaluate(() => ({
+    width: document.documentElement.clientWidth,
+    height: window.innerHeight
+  }))
+}
+
+/** @param {{ width: number, height: number }} viewport */
+async function expectDockedToBottomRight(player, viewport, margin = 16) {
+  // Polled because the layout animation skews the box for its first 300ms.
+  await expect.poll(async () => {
+    const box = await player.boundingBox()
+    if (!box) return null
+
+    return {
+      right: Math.round(viewport.width - (box.x + box.width)),
+      bottom: Math.round(viewport.height - (box.y + box.height))
+    }
+  }).toEqual({ right: margin, bottom: margin })
+}
+
 test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
   await setWindowWidth(app, 1500)
   await page.locator(sel.searchInput).fill(VIDEO_URL)
@@ -390,6 +429,39 @@ test.describe('watch page', () => {
     expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
     expect(animations[1].position).toBe('relative')
     expect(animations[1].zIndex).toBe('150')
+  })
+
+  test('keeps the scroll mini player docked across window resizes', async ({ app, page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await setWindowSize(app, page, { width: 1200, height: 850 })
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+
+    const player = page.locator('.ftVideoPlayer')
+    const scrollBelowPlayer = () => player.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      window.scrollTo(0, window.scrollY + rect.bottom)
+    })
+
+    // Docked bottom-right in the small window.
+    await scrollBelowPlayer()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+    // Growing the window used to leave the player where the old bottom edge
+    // was, i.e. floating in the middle of the screen.
+    const grown = await setWindowSize(app, page, { width: 1600, height: 1050 })
+    await expectDockedToBottomRight(player, grown)
+
+    // ...and the stale position outlived a trip back to the inline player.
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+
+    const shrunk = await setWindowSize(app, page, { width: 1300, height: 900 })
+    await scrollBelowPlayer()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expectDockedToBottomRight(player, shrunk)
   })
 
   test('keeps the context menu open when the pointer leaves a playing video', async ({ page, innertube }) => {
