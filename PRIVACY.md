@@ -25,7 +25,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Return YouTube Dislike | Configured Return YouTube Dislike operator | IP address, video identifiers, and timing |
 | Enhanced-privacy sync | Configured sync operator | IP address, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, and timing; not the decrypted selected data |
 | Legacy sync | Configured sync operator | IP address, account identifier, authentication data, selected synced data, and timing |
-| `yt-dlp` playback and downloads | YouTube and any proxy configured for `yt-dlp` | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's own proxy setting is not automatically passed to `yt-dlp` |
+| `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`, and is also used for downloading the managed `yt-dlp` and FFmpeg binaries |
 
 HTTPS encrypts request paths and payloads in transit, but DNS providers and network operators may still learn destination hostnames and traffic patterns. A VPN or Tor changes which parties see your direct IP address; it does not prevent the destination service from seeing the request itself.
 
@@ -34,4 +34,4 @@ HTTPS encrypts request paths and payloads in transit, but DNS providers and netw
 - To keep app data local, leave synchronization disabled.
 - To prevent a sync operator from reading synced data, use a server that supports enhanced-privacy sync and use a separate, strong privacy passphrase.
 - To avoid sending requests to optional services, leave SponsorBlock, DeArrow, Return YouTube Dislike, and synchronization disabled.
-- To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration. Configure `yt-dlp` separately when using it for playback or downloads.
+- To hide your direct IP address from YouTube or optional services, route the relevant requests through a trusted VPN or Tor and verify the proxy configuration. This includes `yt-dlp` when it is used for playback or downloads, unless custom `yt-dlp` arguments override the proxy.
