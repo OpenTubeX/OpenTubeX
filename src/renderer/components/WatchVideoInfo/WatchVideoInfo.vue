@@ -1,12 +1,12 @@
 <template>
   <FtCard class="watchVideoInfo">
     <div>
+      <!-- rendered as HTML so that the hashtags and handles in the title are clickable -->
       <h1
+        v-safer-html="titleHtml"
         class="videoTitle"
         dir="auto"
-      >
-        {{ title }}
-      </h1>
+      />
       <div
         v-if="isUnlisted || hasAiGeneratedContent || sponsorBlockFullVideoCategory"
         class="videoBadges"
@@ -281,7 +281,10 @@ import WatchVideoFormatPrompt from '../WatchVideoFormatPrompt/WatchVideoFormatPr
 
 import store from '../../store'
 
-import { formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
+import { vSaferHtml } from '../../directives/vSaferHtml'
+
+import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
+import { escapeHTML, formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -464,6 +467,10 @@ const { locale, t } = useI18n()
 const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
+
+// the title is plain text, so it has to be escaped before the hashtags and handles are linked
+/** @type {import('vue').ComputedRef<string>} */
+const titleHtml = computed(() => linkifyHashtagsAndHandles(escapeHTML(props.title)))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSharingActions = computed(() => store.getters.getHideSharingActions)

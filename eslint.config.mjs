@@ -284,6 +284,11 @@ export default defineConfig([
       'object-shorthand': 'off',
       'vue/multi-word-component-names': 'off',
 
+      // `v-safer-html` fills the element with sanitized HTML, just like `v-html` does
+      'vuejs-accessibility/heading-has-content': ['error', {
+        accessibleDirectives: ['safer-html'],
+      }],
+
       'vuejs-accessibility/label-has-for': ['error', {
         required: {
           some: ['nesting', 'id'],

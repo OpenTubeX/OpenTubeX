@@ -432,6 +432,19 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       })
     }
   } else {
+    // The web build has no tabs or windows of its own, so a Ctrl/middle/Shift+click
+    // is handed to the browser, pointed at this app's route for the destination
+    // instead of the external URL the click started from.
+    if (doCreateNewTab || doCreateNewWindow) {
+      const { href } = router.resolve({ path, query })
+
+      // `window.open` returns null when a popup blocker steps in,
+      // navigating in place is better than doing nothing at all
+      if (window.open(href, '_blank', doCreateNewWindow ? 'popup' : undefined) != null) {
+        return
+      }
+    }
+
     router.push({
       path,
       query,

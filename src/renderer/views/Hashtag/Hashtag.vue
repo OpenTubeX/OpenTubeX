@@ -116,7 +116,9 @@ function resetData() {
 }
 
 async function getHashtag() {
-  hashtag.value = decodeURIComponent(route.params.hashtag)
+  // Hashtag pages only exist in lowercase, querying them with the casing used in
+  // a video description (e.g. `#ShiorinSketch`) returns no videos at all
+  hashtag.value = decodeURIComponent(route.params.hashtag).toLowerCase()
   if (process.env.SUPPORTS_LOCAL_API && backendPreference.value === 'local') {
     await getLocalHashtag()
   } else {

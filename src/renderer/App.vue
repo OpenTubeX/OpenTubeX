@@ -749,10 +749,14 @@ onMounted(async () => {
     store.dispatch('grabAllSubscriptions')
     store.dispatch('grabSearchHistoryEntries')
 
+    // YouTube links have to be caught in both builds, otherwise the browser
+    // navigates away from the app instead of opening the linked video,
+    // channel, playlist or hashtag in it
+    document.addEventListener('click', handleClick)
+    document.addEventListener('auxclick', handleAuxClick)
+
     if (process.env.IS_ELECTRON) {
       store.dispatch('setupListenersToSyncWindows')
-      document.addEventListener('click', handleClick)
-      document.addEventListener('auxclick', handleAuxClick)
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
@@ -2383,7 +2387,9 @@ function handleAuxClick(event) {
   // navigate anything. Route buttons 3 (back) and 4 (forward) through the tab
   // navigation service instead. auxclick fires once per click, avoiding the
   // double dispatch seen with mousedown/mouseup for these buttons.
-  if (event.button === 3 || event.button === 4) {
+  // The web build has no logical tabs and the browser's own history still
+  // works there, so those buttons are left alone.
+  if (process.env.IS_ELECTRON && (event.button === 3 || event.button === 4)) {
     event.preventDefault()
 
     const tabId = activeTabId.value
@@ -2404,9 +2410,12 @@ function handleLinkClick(event) {
   const youtubeUrlPattern = /^https?:\/\/((www\.)?youtube\.com(\/embed)?|youtu\.be)\/(?!.*live_chat).*$/
   const isYoutubeLink = youtubeUrlPattern.test(href)
 
-  // Determine if we should open in new tab or new window
-  const ctrlOrCmdPressed = (process.platform !== 'darwin' && event.ctrlKey) ||
-    (process.platform === 'darwin' && event.metaKey)
+  // Determine if we should open in new tab or new window.
+  // `process.platform` is `undefined` in the web build, where the app can be
+  // opened from any OS, so both modifiers count there.
+  const ctrlOrCmdPressed = process.env.IS_ELECTRON
+    ? ((process.platform !== 'darwin' && event.ctrlKey) || (process.platform === 'darwin' && event.metaKey))
+    : (event.ctrlKey || event.metaKey)
   const isMiddleClick = event.type === 'auxclick' && event.button === 1
   const doCreateNewTab = ctrlOrCmdPressed || isMiddleClick
   const doCreateNewWindow = event.shiftKey

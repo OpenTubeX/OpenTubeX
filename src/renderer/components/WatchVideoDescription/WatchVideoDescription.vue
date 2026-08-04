@@ -84,12 +84,11 @@
 </template>
 
 <script setup>
-import autolinker from 'autolinker'
-
 import { onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
+import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { useTabContext } from '../../tabs/TabContext'
 
 import store from '../../store/index'
@@ -140,11 +139,11 @@ if (props.descriptionHtml !== '') {
   testDiv.innerHTML = parsed
 
   if (!/^\s*$/.test(testDiv.innerText)) {
-    shownDescription = parsed
+    shownDescription = linkifyHashtagsAndHandles(parsed)
   }
 } else {
   if (!/^\s*$/.test(props.description)) {
-    shownDescription = autolinker.link(props.description)
+    shownDescription = linkifyDescription(props.description)
   }
 }
 
