@@ -14,6 +14,7 @@ import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
+import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
@@ -359,6 +360,7 @@ const state = {
   thumbnailPreference: '',
   thumbnailSize: DEFAULT_THUMBNAIL_SIZE,
   uiRoundness: 100,
+  animationSpeed: 100,
   showThumbnailSizeButtonInHeader: true,
   showToastTimeoutIndicator: true,
   toastPosition: 'bottom-left',
@@ -452,6 +454,10 @@ const sideEffectHandlers = {
 
   reducedMotion: (store, value) => {
     setReducedMotionPreference(value)
+  },
+
+  animationSpeed: (_store, value) => {
+    setAnimationSpeed(value)
   },
 
   currentLocale: async ({ dispatch }, value) => {

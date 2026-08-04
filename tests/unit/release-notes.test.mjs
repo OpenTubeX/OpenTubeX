@@ -122,21 +122,15 @@ test('pull request bodies have to keep every release note marker', () => {
   const markers = ['release-note-category', 'release-note', 'release-note-image']
 
   for (const marker of markers) {
-    const withoutMarker = body.replace(`<!-- ${marker}:start -->`, '')
+    for (const side of ['start', 'end']) {
+      const withoutMarker = body.replace(`<!-- ${marker}:${side} -->`, '')
 
-    assert.throws(
-      () => validatePullRequestEvent({ pull_request: { body: withoutMarker } }),
-      new RegExp(`Keep the ${marker} markers`),
-      `removing the ${marker} markers has to be rejected`,
-    )
-
-    const withoutEndMarker = body.replace(`<!-- ${marker}:end -->`, '')
-
-    assert.throws(
-      () => validatePullRequestEvent({ pull_request: { body: withoutEndMarker } }),
-      new RegExp(`Keep the ${marker} markers`),
-      `removing the ${marker} end marker has to be rejected`,
-    )
+      assert.throws(
+        () => validatePullRequestEvent({ pull_request: { body: withoutMarker } }),
+        new RegExp(`Keep the ${marker} markers`),
+        `removing the ${marker}:${side} marker has to be rejected`,
+      )
+    }
   }
 
   assert.throws(

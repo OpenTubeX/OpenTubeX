@@ -5,11 +5,13 @@
 /* applied by the TransitionGroup in FtAutoGrid: existing items glide to
    their new position while newly inserted items fade in */
 .feed-move {
-  transition: transform 300ms ease;
+  transition: transform var(--feed-transition-duration, 300ms) ease;
 }
 
 .feed-enter-active {
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition:
+    opacity var(--feed-transition-duration, 300ms) ease,
+    transform var(--feed-transition-duration, 300ms) ease;
 }
 
 .feed-enter-from {

@@ -21,6 +21,7 @@ import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
+import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
@@ -1113,7 +1114,7 @@ export default defineComponent({
         const isVideoPlayer = element.classList.contains('videoPlayer')
         const scaleX = isVideoPlayer ? previousRect.width / nextRect.width : 1
         const scaleY = isVideoPlayer ? previousRect.height / nextRect.height : 1
-        const animation = element.animate([
+        const animation = applyAnimationSpeed(element.animate([
           {
             transform: `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`,
             transformOrigin: 'top left'
@@ -1125,7 +1126,7 @@ export default defineComponent({
         ], {
           duration: THEATRE_MODE_ANIMATION_DURATION,
           easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-        })
+        }))
 
         animation.addEventListener('finish', () => {
           this.theatreModeAnimations = this.theatreModeAnimations.filter(item => item !== animation)

@@ -166,4 +166,45 @@ test.describe('subscriptions feed tab indicator', () => {
 
     expect(Math.abs(indicator - tab)).toBeLessThan(1)
   })
+
+  test('completes a pending switch when the selected tab is clicked again', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    // Let the deferred swap reach its first animation frame, then activate the
+    // visually selected tab again before the second frame replaces the panel.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)))
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    await expect(page.locator('.tab.selectedTab')).toHaveText(/Shorts/)
+    await expect(page.getByText('short video 000')).toBeVisible()
+    await expect(page.getByText('video video 000')).toHaveCount(0)
+  })
+
+  test('does not restore a pending feed after every tab is hidden', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('video video 000')).toBeVisible()
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+
+      document.querySelector('[data-subscription-feed-tab="shorts"]').click()
+      await Promise.all([
+        store.dispatch('updateHideSubscriptionsVideos', true),
+        store.dispatch('updateHideSubscriptionsShorts', true),
+        store.dispatch('updateHideSubscriptionsLive', true),
+        store.dispatch('updateHideSubscriptionsCommunity', true)
+      ])
+    })
+
+    // Wait long enough that the stale second animation frame would have put
+    // the shorts panel back after the all-tabs-hidden state was selected.
+    await page.waitForTimeout(100)
+
+    await expect(page.locator('.tabs [role="tab"]')).toHaveCount(0)
+    await expect(page.locator('#subscriptionsPanel')).toHaveCount(0)
+    await expect(page.getByText('All subscription tabs are hidden', { exact: false })).toBeVisible()
+  })
 })

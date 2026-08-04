@@ -163,6 +163,18 @@
         @input="previewUiRoundness"
         @change="updateUiRoundness"
       />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Animation Speed')"
+        :default-value="animationSpeed"
+        setting-key="animationSpeed"
+        :min-value="25"
+        :max-value="200"
+        :step="5"
+        :disabled="reducedMotionEnabled"
+        value-extension="%"
+        @input="previewAnimationSpeed"
+        @change="updateAnimationSpeed"
+      />
     </div>
     <br>
     <FtFlexBox>
@@ -219,7 +231,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
@@ -244,6 +256,7 @@ import {
   MIN_FIXED_TAB_WIDTH
 } from '../constants/tabWidth'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
+import { setAnimationSpeed } from '../helpers/animationSpeed'
 
 const { t } = useI18n()
 
@@ -549,6 +562,20 @@ function updateUiScale(value) {
 /** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 const uiRoundness = computed(() => store.getters.getUiRoundness)
+const animationSpeed = computed(() => store.getters.getAnimationSpeed)
+
+const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+const systemReducedMotionEnabled = ref(systemReducedMotion.matches)
+const reducedMotion = computed(() => store.getters.getReducedMotion)
+const reducedMotionEnabled = computed(() => reducedMotion.value === 'on' ||
+  (reducedMotion.value === 'system' && systemReducedMotionEnabled.value))
+
+function updateSystemReducedMotion(event) {
+  systemReducedMotionEnabled.value = event.matches
+}
+
+onMounted(() => systemReducedMotion.addEventListener('change', updateSystemReducedMotion))
+onUnmounted(() => systemReducedMotion.removeEventListener('change', updateSystemReducedMotion))
 
 /**
  * @param {number} value
@@ -576,6 +603,20 @@ function previewUiRoundness(value) {
  */
 function updateUiRoundness(value) {
   store.dispatch('updateUiRoundness', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewAnimationSpeed(value) {
+  setAnimationSpeed(value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateAnimationSpeed(value) {
+  store.dispatch('updateAnimationSpeed', value)
 }
 
 /** @type {boolean} */
@@ -626,14 +667,16 @@ function handleSmoothScrolling(value) {
 
 <style scoped>
 .sliderGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 380px));
-  justify-content: space-evenly;
-  gap: 24px 64px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
 }
 
 .sliderGrid :deep(.pure-material-slider) {
   box-sizing: border-box;
-  inline-size: calc(100% - 16px);
+  flex: 1 1 180px;
+  max-inline-size: 380px;
+  inline-size: auto;
 }
 </style>
