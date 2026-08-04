@@ -7933,6 +7933,18 @@ export default defineComponent({
       }
     }
 
+    async function unloadForFormatSwitch() {
+      try {
+        await player.unload()
+      } catch { }
+
+      // A manual format change starts a new playback session. Reusing the
+      // previous SABR contexts can make YouTube request an immediate player
+      // reload for the newly selected format.
+      clearSabrBackoffTimer()
+      sabrStream?.reset()
+    }
+
     watch(
       () => props.format,
       /**
@@ -7952,9 +7964,7 @@ export default defineComponent({
         // format switch happened before the player loaded, probably because of an error
         // as there are no previous player settings to restore, we should treat it like this was the original format
         if (!hasLoaded.value) {
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
 
@@ -8021,9 +8031,7 @@ export default defineComponent({
             dimension = preferredVideoQuality.value
           }
 
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
           queuePlaybackRateRestore(playbackRate)
@@ -8087,9 +8095,7 @@ export default defineComponent({
             previousQuality = previousTrack.height > previousTrack.width ? previousTrack.width : previousTrack.height
           }
 
-          try {
-            await player.unload()
-          } catch { }
+          await unloadForFormatSwitch()
 
           ignoreErrors = false
 

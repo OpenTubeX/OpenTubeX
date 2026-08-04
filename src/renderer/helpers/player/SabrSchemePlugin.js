@@ -17,6 +17,7 @@ import {
 import shaka from 'shaka-player'
 
 import { deepCopy } from '../utils'
+import { resetSabrSessionState } from './sabrSession'
 
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
@@ -77,6 +78,7 @@ const ShakaError = shaka.util.Error
  * @type {object}
  * @property {(cb: ({backoffMs: number}) => void) => void} onBackoffRequested
  * @property {(cb: () => void) => void} onReloadOnce
+ * @property {() => void} reset
  * @property {() => void | undefined} cleanup
  */
 
@@ -869,6 +871,9 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     },
     onReloadOnce(callback) {
       eventEmitter.once('reload', callback)
+    },
+    reset() {
+      resetSabrSessionState(sabrStreamState)
     },
     cleanup,
   }

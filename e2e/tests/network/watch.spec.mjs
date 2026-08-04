@@ -244,9 +244,10 @@ test.describe('watch page', () => {
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
+    const initialUrl = page.url()
     const player = page.locator('.ftVideoPlayer')
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await player.evaluate((element, watchComponent) => {
+    const formats = await player.evaluate((element, watchComponent) => {
       const overlay = element.ui ?? element.querySelector('video')?.ui
       const shakaPlayer = overlay?.getControls().getPlayer()
       if (!watchComponent || !shakaPlayer) {
@@ -261,11 +262,27 @@ test.describe('watch page', () => {
       }
 
       const watchView = watchComponent.proxy
-      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+      const oldFormat = watchView.activeFormat
+      const newFormat = oldFormat === 'audio' ? 'dash' : 'audio'
+      watchView.handleFormatChange(newFormat)
+      return { oldFormat, newFormat }
     }, watchComponent)
-    await watchComponent.dispose()
 
     await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.newFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.oldFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await watchComponent.dispose()
   })
 
   test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
