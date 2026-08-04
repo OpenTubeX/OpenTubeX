@@ -21,20 +21,35 @@ async function replayStreamForbiddenErrors(page, errorCount) {
   const watchView = await watchViewHandle(page)
 
   return await watchView.evaluate(async (view, count) => {
-    view.errorMessage = ''
-    view.isLoading = false
-    view.isLive = false
-    view.isPostLiveDvr = false
-    view.activeFormat = 'dash'
-    view.manifestMimeType = 'application/dash+xml'
-    // Not expired, so the 403 isn't attributed to a stale watch session.
-    view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+    // The state a video that is playing a DASH stream is in.
+    const enterPlayingState = () => {
+      view.errorMessage = ''
+      view.isLoading = false
+      view.isLive = false
+      view.isPostLiveDvr = false
+      view.activeFormat = 'dash'
+      view.manifestMimeType = 'application/dash+xml'
+      // Not expired, so the 403 isn't attributed to a stale watch session.
+      view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+    }
+
+    enterPlayingState()
 
     const reloads = []
     const recoveries = []
-    view.reloadView = async () => { reloads.push(view.videoId) }
+    // The real reload runs, so that a reset of the one-shot reload state during
+    // a same-video reload would show up here as an extra reload.
+    const reloadView = view.reloadView.bind(view)
+    view.reloadView = async (options) => {
+      reloads.push(view.videoId)
+      await reloadView(options)
+      enterPlayingState()
+    }
+    // Same no-op guard as the real method, so the loads that happen during a
+    // reload don't count as recovery runs.
     view.runIpBlockRecoveryScriptAndReload = async () => {
-      recoveries.push(view.ipBlockDetectedInCurrentChain)
+      if (!view.ipBlockDetectedInCurrentChain) { return false }
+      recoveries.push(view.videoId)
       return true
     }
 
@@ -83,7 +98,7 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
     { reloads: 1, recoveries: 0 },
     { reloads: 1, recoveries: 1 }
   ])
-  expect(result.recoveries).toEqual([true])
+  expect(result.recoveries).toEqual(['jNQXAC9IVRw'])
 })
 
 test('subscription refresh waits for an active IP block recovery', async ({ app, page }) => {
