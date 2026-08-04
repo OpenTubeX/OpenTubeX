@@ -959,7 +959,7 @@ export default defineComponent({
     const {
       initializeActiveTab,
       isActiveTab,
-      resetAutoPictureInPictureOwnership,
+      notifyPictureInPictureState,
       setupAutoPictureInPicture,
       teardownAutoPictureInPicture,
       updateAutoPip,
@@ -4482,6 +4482,8 @@ export default defineComponent({
       if (scrollMiniPlayerActive.value) {
         deactivateScrollMiniPlayer()
       }
+
+      notifyPictureInPictureState(true)
     }
 
     function handleLeavePictureInPicture() {
@@ -4495,7 +4497,7 @@ export default defineComponent({
       pipWindowWidth.value = null
       pipWindowHeight.value = null
 
-      resetAutoPictureInPictureOwnership()
+      notifyPictureInPictureState(false)
 
       updateScrollMiniPlayer()
     }
