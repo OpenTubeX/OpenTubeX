@@ -182,7 +182,11 @@ const hasHorizontalTabBar = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
 const showProgressToast = computed(() => {
-  return store.getters.getShowProgressBarToast &&
+  // The toast holder is teleported into the fullscreen element, so a progress
+  // toast would sit on top of the fullscreen player. Hide it until fullscreen
+  // is left, as progress updates aren't urgent enough to interrupt playback.
+  return fullscreenTarget.value === null &&
+    store.getters.getShowProgressBarToast &&
     (store.getters.getShowProgressBar ||
       (props.showSubscriptionRefresh && store.getters.getSubscriptionFeedRefreshInProgress))
 })

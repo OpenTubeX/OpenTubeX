@@ -87,10 +87,14 @@ test.describe('global progress presentation', () => {
     })
     await expect(progressToast).toBeVisible()
 
+    // Fullscreen is for watching, so the progress notification steps aside
     await page.evaluate(() => document.querySelector('.app').requestFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
-    await expect(progressToast).toBeVisible()
+    await expect(progressToast).toHaveCount(0)
+    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+
     await page.evaluate(() => document.exitFullscreen())
+    await expect(progressToast).toBeVisible()
   })
 })
 
