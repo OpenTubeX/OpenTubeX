@@ -23,6 +23,7 @@ import { calculateColorLuminance } from '../../helpers/colors'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
+import { parseLocalVideoGames } from '../../helpers/video-games'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -75,7 +76,7 @@ import {
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
-import { useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { useTabToast } from '../../composables/useTabToast'
 
 /**
@@ -144,6 +145,7 @@ export default defineComponent({
     const tabRouter = useRouter()
     const { tabId, isTabPresented, lifecycle: tabLifecycle } = useTabContext()
     const setTabTitle = useTabTitle()
+    const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
 
     return {
@@ -155,6 +157,7 @@ export default defineComponent({
       tabRoute,
       tabRouter,
       setTabTitle,
+      setTabAvatar,
       showTabToast
     }
   },
@@ -212,6 +215,8 @@ export default defineComponent({
       videoDescription: '',
       videoDescriptionHtml: '',
       videoCategory: '',
+      /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
+      videoGames: [],
       license: '',
       videoViewCount: 0,
       videoLikeCount: 0,
@@ -1261,6 +1266,7 @@ export default defineComponent({
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.videoCategory = ''
+      this.videoGames = []
       this.license = ''
       this.videoViewCount = 0
       this.videoLikeCount = 0
@@ -1644,6 +1650,7 @@ export default defineComponent({
         this.hasResolvedVideoTitle = this.videoTitle.length > 0
         this.videoViewCount = result.basic_info.view_count ?? (result.primary_info.view_count ? extractNumberFromString(result.primary_info.view_count.text) : null)
         this.license = result.secondary_info.metadata.rows.find(element => element.title?.text === 'License')?.contents[0]?.text
+        this.videoGames = parseLocalVideoGames(result)
 
         this.channelCollaborators = parseLocalVideoCollaborators(result)
         const primaryCollaborator = this.channelCollaborators[0]
@@ -1655,6 +1662,7 @@ export default defineComponent({
           videoId: this.videoId,
           avatar: this.channelThumbnail
         })
+        this.setTabAvatar(this.channelThumbnail)
 
         this.videoCategory = result.basic_info.category ?? ''
         this.videoGenreIsMusic = this.videoCategory === 'Music'
@@ -2177,6 +2185,7 @@ export default defineComponent({
             videoId: this.videoId,
             avatar: this.channelThumbnail
           })
+          this.setTabAvatar(this.channelThumbnail)
           this.updateSubscriptionDetails({
             channelThumbnailUrl: channelThumb?.url,
             channelName: result.author,

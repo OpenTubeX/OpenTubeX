@@ -350,7 +350,7 @@ import {
   parseLocalPlaylistVideos,
   parseChannelHomeTab
 } from '../../helpers/api/local'
-import { useTabTitle } from '../../tabs/TabContext'
+import { useTabAvatar, useTabTitle } from '../../tabs/TabContext'
 import { setChannelShortsNavigationContext } from '../../helpers/player/shorts'
 import {
   CHANNEL_SEARCH_FILTERS,
@@ -363,6 +363,7 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const setTabTitle = useTabTitle()
+const setTabAvatar = useTabAvatar()
 
 let skipRouteChangeWatcherOnce = false
 let autoRefreshOnSortByChangeEnabled = false
@@ -411,6 +412,7 @@ watch([channelName, isLoading], ([name, loading]) => {
 watch(thumbnailUrl, (thumbnail) => {
   if (id.value && thumbnail) {
     store.commit('setChannelThumbnail', { channelId: id.value, thumbnail })
+    setTabAvatar(thumbnail)
   }
 })
 

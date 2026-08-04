@@ -16,6 +16,8 @@ import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 
+const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
+
 /*
  * Due to the complexity of the settings module in FreeTube, a more
  * in-depth explanation for adding new settings is required.
@@ -218,7 +220,7 @@ const state = {
   externalPlayerIgnoreDefaultArgs: false,
   externalPlayerCustomArgs: '[]',
   showAddedExternalPlayerCustomArgs: true,
-  videoPlaybackEngine: 'built-in',
+  videoPlaybackEngine: 'yt-dlp',
   ytDlpSource: 'system',
   ytDlpChannel: 'stable',
   ytDlpPath: '',
@@ -745,6 +747,28 @@ const customActions = {
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
       const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
+
+      // Switch every existing installation to the new default once, while allowing
+      // users to select the built-in engine again afterwards.
+      const hasMigratedPlaybackEngine = userSettings.some(
+        entry => entry._id === YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING
+      )
+      if (!hasMigratedPlaybackEngine) {
+        try {
+          // Invidious media proxying cannot be passed to yt-dlp. Keep the built-in
+          // engine when it is the user's only protection against direct requests.
+          if (!state.proxyVideos || state.useProxy) {
+            await DBSettingHandlers.upsert('videoPlaybackEngine', 'yt-dlp')
+            commit('setVideoPlaybackEngine', 'yt-dlp')
+          }
+
+          // Persist this only after the engine update above succeeds, so a failed
+          // write is retried on the next launch.
+          await DBSettingHandlers.upsert(YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING, true)
+        } catch (error) {
+          console.error('Failed to migrate the playback engine to yt-dlp', error)
+        }
+      }
 
       if (legacyProgressToastEntry && !hasProgressToastSetting) {
         await dispatch('updateShowProgressBarToast', legacyProgressToastEntry.value === true)

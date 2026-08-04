@@ -234,6 +234,10 @@ Settings:
   Settings: Einstellungen
   General Settings:
     General Settings: Allgemein
+    Playback Engine:
+      Playback Engine: Wiedergabe-Engine
+      yt-dlp: yt-dlp
+      Built-in: Integriert
     Fallback to Non-Preferred Backend on Failure: Bei Ausfall auf nicht bevorzugtes Backend zurückgreifen
     Enable Search Suggestions: Suchvorschläge aktivieren
     Default Landing Page: Standard-Startseite
@@ -761,7 +765,7 @@ Settings:
     Ignore Default Arguments: Standardargumente ignorieren
   Download Settings:
     Download Settings: Downloads
-    Managed Tools Download Started Template: 'Für das Herunterladen von Videos erforderliche Tools wurden nicht gefunden: {tools}. Verwaltete Kopien werden heruntergeladen…'
+    Managed Tools Download Started Template: 'Erforderliche externe Software wurde nicht gefunden: {tools}. Verwaltete Kopien werden heruntergeladen…'
     Managed Tools Download Finished Template: 'Herunterladen von {tools} abgeschlossen'
     Managed Tools Update Started Template: 'Für {tools} wurde ein Update gefunden. Es wird heruntergeladen…'
     Managed Tools Update Finished Template: 'Aktualisierung von {tools} abgeschlossen'
@@ -809,10 +813,6 @@ Settings:
   Experimental Settings:
     Experimental Settings: Experimentell
     Warning: Diese Einstellungen sind experimentell und können zu Abstürzen führen, wenn sie aktiviert sind. Es wird dringend empfohlen, Backups zu erstellen. Verwendung auf eigene Gefahr!
-    Playback Engine:
-      Playback Engine: Wiedergabe-Engine
-      yt-dlp: yt-dlp
-      Built-in: Integriert
     Replace HTTP Cache: HTTP-Cache ersetzen
   Password Dialog:
     Password: Passwort
@@ -1312,6 +1312,7 @@ Download From Site: Von der Website herunterladen
 Version {versionNumber} is now available!  Click for more details: Version {versionNumber} ist jetzt verfügbar!  Für mehr Details klicken
 Tooltips:
   General Settings:
+    Playback Engine: Legt fest, welche Engine die Videostreams ermittelt. yt-dlp muss verfügbar sein, wenn es ausgewählt ist.
     Thumbnail Preference: Alle Vorschaubilder in OpenTubeX werden verpixelt, versteckt oder durch ein Einzelbild aus dem Video ersetzt, anstatt das Standard-Vorschaubild anzuzeigen.
     Invidious Instance: Die Invidious-Instanz, mit der sich OpenTubeX für API-Aufrufe verbinden wird.
     Fallback to Non-Preferred Backend on Failure: Wenn deine bevorzugte API ein Problem hat, wird OpenTubeX automatisch versuchen, deine nicht-bevorzugte API als Ausweichmethode zu verwenden, wenn sie aktiviert ist.
@@ -1368,7 +1369,6 @@ Tooltips:
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
   Experimental Settings:
-    Playback Engine: Womit die Videostreams ermittelt werden. Für yt-dlp muss dieses verfügbar sein.
     Replace HTTP Cache: Deaktiviert den festplattenbasierten HTTP-Cache von Electron und aktiviert einen benutzerdefinierten In-Memory-Image-Cache. Dies führt zu einer erhöhten RAM-Auslastung.
   Distraction Free Settings:
     Hide Channels: Gib eine Kanal-ID ein, um zu verhindern, dass alle Videos, Playlists und der Kanal selbst in der Suche, den Trends, den beliebtesten und den empfohlenen Videos angezeigt werden. Die eingegebene Kanal-ID muss vollständig übereinstimmen, und es wird zwischen Groß- und Kleinschreibung unterschieden.

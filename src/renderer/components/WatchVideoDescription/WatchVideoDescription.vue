@@ -1,6 +1,6 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0"
+    v-if="shownDescription.length > 0 || games.length > 0"
     :class="{
       videoDescription: true,
       short: !isExpanded,
@@ -36,6 +36,39 @@
       >
         {{ license }}
       </bdi>
+      <template v-if="games.length > 0 && isExpanded">
+        <h3 class="gamesHeading">
+          {{ $t("Description.Games") }}
+        </h3>
+        <ul class="gameList">
+          <li
+            v-for="(game, index) in shownGames"
+            :key="game.channelId ?? index"
+          >
+            <component
+              :is="game.channelId ? 'RouterLink' : 'div'"
+              :to="`/channel/${game.channelId}`"
+              :tabindex="game.channelId ? linkTabIndex : null"
+              class="game"
+            >
+              <img
+                v-if="game.thumbnail"
+                :src="game.thumbnail"
+                class="gameBoxArt"
+                alt=""
+                loading="lazy"
+              >
+              <span class="gameText">
+                <bdi class="gameTitle">{{ game.title }}</bdi>
+                <bdi
+                  v-if="game.subtitle"
+                  class="gameSubtitle"
+                >{{ game.subtitle }}</bdi>
+              </span>
+            </component>
+          </li>
+        </ul>
+      </template>
     </div>
     <span
       v-if="showControls && isExpanded && !alwaysExpanded"
@@ -59,6 +92,8 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import { useTabContext } from '../../tabs/TabContext'
 
+import store from '../../store/index'
+
 const props = defineProps({
   description: {
     type: String,
@@ -71,6 +106,11 @@ const props = defineProps({
   license: {
     type: String,
     default: null,
+  },
+  /** @type {import('vue').PropType<import('../../helpers/video-games').LocalVideoGame[]>} */
+  games: {
+    type: Array,
+    default: () => [],
   },
   alwaysExpanded: {
     type: Boolean,
@@ -85,7 +125,9 @@ const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
 const showControls = ref(false)
-const isExpanded = computed(() => props.alwaysExpanded || showFullDescription.value)
+// a video can have games but no description, and there is nothing to expand or collapse then,
+// so treat it as expanded. `measureDescription` can't do it, it bails out on a zero height element.
+const isExpanded = computed(() => props.alwaysExpanded || shownDescription === '' || showFullDescription.value)
 
 if (props.descriptionHtml !== '') {
   const parsed = parseDescriptionHtml(props.descriptionHtml)
@@ -114,6 +156,15 @@ const processedShownDescription = computed(() => {
 
 const linkTabIndex = computed(() => {
   return isExpanded.value ? '0' : '-1'
+})
+
+// drop the channel ids when channel links are disabled, so that the games render as plain text
+const shownGames = computed(() => {
+  if (!store.getters.getDisableChannelLinks) {
+    return props.games
+  }
+
+  return props.games.map(game => ({ ...game, channelId: undefined }))
 })
 
 /**

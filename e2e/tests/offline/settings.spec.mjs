@@ -50,6 +50,62 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsMenu, .ftSettingsMenu, [class*="settings"]').first()).toBeVisible()
   })
 
+  test('select dropdowns use overlay scrollbars', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const combobox = page.getByRole('combobox', { name: /Language preference|Locale Preference/ })
+    await combobox.click()
+
+    const dropdown = page.locator('.selectDropdown')
+    await expect(dropdown).toBeVisible()
+    await expect(dropdown).toContainText('English (US) (100%)')
+    await expect(dropdown.locator('.os-scrollbar-vertical')).toHaveCount(1)
+    await expect(dropdown).toHaveCSS('scrollbar-width', 'none')
+
+    const appearance = await dropdown.evaluate((menu) => {
+      const menuStyle = getComputedStyle(menu)
+      const chromeBottom = Math.max(
+        ...Array.from(document.querySelectorAll('.topNav, .tabBar:not(.vertical)'))
+          .map(element => element.getBoundingClientRect().bottom)
+      )
+
+      return {
+        chromeBottom,
+        cursor: getComputedStyle(menu.querySelector('.selectOption')).cursor,
+        fontFamily: menuStyle.fontFamily,
+        menuTop: menu.getBoundingClientRect().top
+      }
+    })
+
+    expect(appearance.fontFamily).toContain('Roboto')
+    expect(appearance.cursor).toBe('default')
+    expect(appearance.menuTop).toBeGreaterThanOrEqual(appearance.chromeBottom)
+
+    const scrollbarHandle = dropdown.locator('.os-scrollbar-vertical .os-scrollbar-handle')
+    const handleBounds = await scrollbarHandle.boundingBox()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      handleBounds.x + handleBounds.width / 2,
+      handleBounds.y + handleBounds.height / 2 + 30
+    )
+    await expect(dropdown).toBeVisible()
+    await page.mouse.up()
+
+    await combobox.press('Home')
+    await combobox.press('ArrowDown')
+    await combobox.press('Enter')
+    await expect(combobox).toContainText('English (US) (100%)')
+    await expect(dropdown).toHaveCount(0)
+
+    await page.getByRole('combobox', { name: 'Preferred API backend' }).click()
+    await expect(dropdown).toBeVisible()
+    expect(await dropdown.evaluate(menu => menu.scrollHeight <= menu.clientHeight)).toBe(true)
+  })
+
   test('retains the mounted page when switching to About and back', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsPage = page.locator('.settingsPage')
@@ -638,6 +694,70 @@ test.describe('settings', () => {
 
     await toastWithoutIndicatorSlot.dispatchEvent('pointerleave')
     await expect(toastWithoutIndicator).toHaveCount(0)
+  })
+})
+
+test.describe('playback engine migration', () => {
+  test.use({ seed: { settings: { videoPlaybackEngine: 'built-in' } } })
+
+  test('switches existing users to yt-dlp only once', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        engine: settings.videoPlaybackEngine,
+        migrated: settings.ytDlpPlaybackEngineDefaultMigration
+      }
+    }).toEqual({ engine: 'yt-dlp', migrated: true })
+
+    await goTo(app.page, 'settings')
+    const generalSection = app.page.locator('[data-section="general"]')
+    const playbackEngine = generalSection.locator('.select').filter({ hasText: 'Playback Engine' })
+    await expect(playbackEngine.locator('select')).toHaveValue('yt-dlp')
+    await expect(
+      app.page.locator('[data-section="experimental"] .select').filter({ hasText: 'Playback Engine' })
+    ).toHaveCount(0)
+
+    await playbackEngine.locator('select').selectOption('built-in')
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.videoPlaybackEngine
+    }).toBe('built-in')
+
+    const { page } = await app.relaunch()
+    await goTo(page, 'settings')
+    await expect(
+      page.locator('[data-section="general"] .select')
+        .filter({ hasText: 'Playback Engine' })
+        .locator('select')
+    ).toHaveValue('built-in')
+  })
+})
+
+test.describe('playback engine proxy migration', () => {
+  test.use({
+    seed: {
+      settings: {
+        proxyVideos: true,
+        useProxy: false,
+        videoPlaybackEngine: 'built-in'
+      }
+    }
+  })
+
+  test('preserves Invidious media proxying for existing users', async ({ app }) => {
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return {
+        engine: settings.videoPlaybackEngine,
+        migrated: settings.ytDlpPlaybackEngineDefaultMigration
+      }
+    }).toEqual({ engine: 'built-in', migrated: true })
   })
 })
 

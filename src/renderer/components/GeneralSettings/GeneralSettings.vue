@@ -71,6 +71,17 @@
     </div>
     <div class="switchGrid">
       <FtSelect
+        v-if="USING_ELECTRON"
+        :placeholder="t('Settings.General Settings.Playback Engine.Playback Engine')"
+        :value="videoPlaybackEngine"
+        setting-key="videoPlaybackEngine"
+        :select-names="playbackEngineNames"
+        :select-values="PLAYBACK_ENGINE_VALUES"
+        :tooltip="t('Tooltips.General Settings.Playback Engine')"
+        :icon="['fas', 'circle-play']"
+        @change="updateVideoPlaybackEngine"
+      />
+      <FtSelect
         :placeholder="t('Settings.General Settings.Preferred API Backend.Preferred API Backend')"
         :value="backendPreference"
         :select-names="backendNames"
@@ -263,6 +274,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
 import store from '../../store/index'
+import { localeTranslationPercentages } from '../../i18n/index'
 
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
@@ -271,9 +283,25 @@ import { translateWindowTitle } from '../../helpers/strings'
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
 const IS_MAC = process.platform === 'darwin'
+const PLAYBACK_ENGINE_VALUES = ['yt-dlp', 'built-in']
 
 const { t } = useI18n()
 const router = useRouter()
+
+const playbackEngineNames = computed(() => [
+  t('Settings.General Settings.Playback Engine.yt-dlp'),
+  t('Settings.General Settings.Playback Engine.Built-in')
+])
+
+/** @type {import('vue').ComputedRef<'yt-dlp' | 'built-in'>} */
+const videoPlaybackEngine = computed(() => store.getters.getVideoPlaybackEngine)
+
+/**
+ * @param {'yt-dlp' | 'built-in'} value
+ */
+function updateVideoPlaybackEngine(value) {
+  store.dispatch('updateVideoPlaybackEngine', value)
+}
 
 // The 'minimize' event doesn't fire on wayland
 // https://github.com/electron/electron/issues/51766
@@ -568,7 +596,7 @@ const LOCALE_VALUES = ['system', ...allLocales]
 
 const localeNames = computed(() => [
   t('Settings.General Settings.System Default'),
-  ...process.env.LOCALE_NAMES
+  ...process.env.LOCALE_NAMES.map((name, index) => `${name} (${localeTranslationPercentages.value[index]}%)`)
 ])
 
 /** @type {import('vue').ComputedRef<string>} */
