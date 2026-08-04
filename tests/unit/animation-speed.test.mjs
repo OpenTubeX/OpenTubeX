@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 class FakeElement {
-  constructor ({ feed = false, managed = false, timeout = false } = {}) {
+  constructor ({ animations = [], feed = false, managed = false, timeout = false } = {}) {
+    this.animations = animations
     this.feed = feed
     this.managed = managed
     this.timeout = timeout
@@ -15,13 +16,20 @@ class FakeElement {
   closest () {
     return this.managed || this.timeout ? this : null
   }
+
+  getAnimations () {
+    return this.animations
+  }
 }
 
 globalThis.Element = FakeElement
 
 const activeAnimations = []
+const listeners = new Map()
 globalThis.document = {
-  addEventListener () {},
+  addEventListener (type, listener) {
+    listeners.set(type, listener)
+  },
   getAnimations () {
     return activeAnimations
   }
@@ -61,4 +69,25 @@ test('does not rescale animations with speed-managed timing', () => {
   setAnimationSpeed(300)
 
   assert.deepEqual(playbackRates, [2])
+  activeAnimations.length = 0
+})
+
+test('applies speed to newly started unmanaged animations', async () => {
+  const playbackRates = []
+  const animation = {
+    updatePlaybackRate (rate) {
+      playbackRates.push(rate)
+    }
+  }
+  const unmanagedTarget = new FakeElement({ animations: [animation] })
+  const managedTarget = new FakeElement({ animations: [animation], managed: true })
+
+  setAnimationSpeed(200)
+  listeners.get('animationstart')({ target: unmanagedTarget })
+  listeners.get('animationstart')({ target: managedTarget })
+  listeners.get('transitionrun')({ target: unmanagedTarget })
+  listeners.get('transitionrun')({ target: managedTarget })
+  await Promise.resolve()
+
+  assert.deepEqual(playbackRates, [2, 2])
 })
