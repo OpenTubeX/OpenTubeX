@@ -307,6 +307,17 @@ test('repeated SABR failures without a legacy fallback never switch to audio', a
   expect(result.formats).toEqual(['dash', 'dash', 'dash', 'dash'])
   expect(result.finalFormat).toBe('dash')
   expect(result.errorMessage).toContain('Unable to recover the video stream')
+
+  const errorPlayer = page.locator('.videoPlayerError')
+  await expect(errorPlayer).toBeVisible()
+  await expect(errorPlayer.locator('.videoThumbnail')).toHaveAttribute('src', /\S+/)
+
+  const [playerBounds, infoBounds] = await Promise.all([
+    errorPlayer.boundingBox(),
+    page.locator('.infoArea').boundingBox()
+  ])
+  expect(playerBounds.width / playerBounds.height).toBeCloseTo(16 / 9, 1)
+  expect(infoBounds.y).toBeGreaterThanOrEqual(playerBounds.y + playerBounds.height)
 })
 
 test('an error from the outgoing player is ignored while the view reloads', async ({ app, page }) => {

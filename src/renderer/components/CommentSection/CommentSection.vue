@@ -431,6 +431,7 @@ import {
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../helpers/comment-replies'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getYoutubeCommunityPostCommentUrl, getYoutubeVideoCommentUrl } from '../../helpers/share'
 import {
   getLocalCommunityPostComments,
@@ -509,6 +510,20 @@ watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) =
     })
   }
 })
+
+/**
+ * Sends the fullscreen dock back to the first comment, for the reloads and sort
+ * changes that replace the whole list. The old offset points at comments that
+ * are gone, and OverlayScrollbars restores it over the shorter list once that
+ * has rendered, leaving the dock parked past its end until it is scrolled up.
+ */
+function resetCommentsScroll() {
+  fullscreenScrollTop = 0
+
+  if (commentsContentWrapper.value != null) {
+    restoreOverlayScrollTop(commentsContentWrapper.value, 0)
+  }
+}
 
 const replyTrees = computed(() => commentData.value.map(buildReplyTree))
 
@@ -723,6 +738,7 @@ function handleSortChange(value) {
   sortNewest.value = newest
   commentData.value = []
   nextPageToken.value = null
+  resetCommentsScroll()
   getCommentData()
 }
 
@@ -731,6 +747,7 @@ function reloadCommentData() {
   nextPageToken.value = null
   localCommentsInstance = undefined
   replyTokens.clear()
+  resetCommentsScroll()
   getCommentData({ preserveSort: true })
 }
 

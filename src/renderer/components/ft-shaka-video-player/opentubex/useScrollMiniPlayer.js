@@ -1,6 +1,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 
 import store from '../../../store/index'
+import { applyAnimationSpeed } from '../../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../../helpers/reducedMotion'
 import {
   animateScrollMiniPlayerBounce,
@@ -419,7 +420,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
       return
     }
 
-    const animation = playerContainer.animate([
+    const animation = applyAnimationSpeed(playerContainer.animate([
       {
         transform: `translate(${previousRect.left - nextRect.left}px, ${previousRect.top - nextRect.top}px) scale(${previousRect.width / nextRect.width}, ${previousRect.height / nextRect.height})`,
         transformOrigin: 'top left'
@@ -431,7 +432,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     ], {
       duration: SCROLL_MINI_LAYOUT_ANIMATION_DURATION_MS,
       easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
-    })
+    }))
 
     scrollMiniLayoutAnimation = animation
     animation.addEventListener('finish', () => {

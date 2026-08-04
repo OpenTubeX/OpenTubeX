@@ -32,6 +32,20 @@
   transition: inline-size 250ms ease;
 }
 
+.paidPromotionOverlay {
+  position: absolute;
+  z-index: 4;
+  inset-block-start: 12px;
+  inset-inline-start: 8px;
+  opacity: 0.82;
+  transition: opacity 150ms ease;
+}
+
+.paidPromotionOverlay:hover,
+.paidPromotionOverlay:focus-visible {
+  opacity: 1;
+}
+
 .ftVideoPlayer.shortsPlayer {
   /*
     Keep the container from becoming a focus-scroll area and let the seek

@@ -9,6 +9,7 @@
   margin: 4px;
   padding-block: 3px 5px;
   padding-inline: 16px;
+  border-radius: calc(8px * var(--ui-roundness));
   box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
   position: relative;
   cursor: pointer;

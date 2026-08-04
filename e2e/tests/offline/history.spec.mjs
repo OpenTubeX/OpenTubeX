@@ -193,6 +193,23 @@ test.describe('history cleanup', () => {
       return records.filter((record) => record._id === 'ooooooooooo').at(-1)?.$$deleted
     }).toBe(true)
   })
+
+  test('selects a history cutoff from the modal dropdown', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.getByRole('button', { name: 'Delete Old History' }).click()
+
+    const dialog = page.getByRole('dialog')
+    const combobox = dialog.getByRole('combobox', { name: /Delete entries older than/i })
+    await combobox.click()
+
+    const dropdown = page.getByRole('listbox', { name: /Delete entries older than/i })
+    await expect(dropdown).toBeVisible()
+    await expect(dropdown.locator('xpath=..')).toHaveClass(/prompt/)
+    await dropdown.getByRole('option', { name: '1 month' }).click()
+
+    await expect(combobox).toContainText('1 month')
+    await expect(dialog).toBeVisible()
+  })
 })
 
 test.describe('legacy watch history', () => {

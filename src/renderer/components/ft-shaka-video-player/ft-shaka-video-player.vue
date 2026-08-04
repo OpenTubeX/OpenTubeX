@@ -100,6 +100,10 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <FtPaidPromotionBadge
+        v-if="showPaidPromotion"
+        class="paidPromotionOverlay shaka-no-propagation"
+      />
       <div
         v-if="shortsPlayer"
         class="shortsTopControls shaka-no-propagation"

@@ -5,6 +5,7 @@ import { SEARCH_CHAR_LIMIT } from '../../../constants'
 import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
+import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -405,12 +406,14 @@ export async function getLocalSearchContinuation(continuationData) {
  *     osName: string,
  *     osVersion: string
  *   },
- *   adEndTimeUnixMs: number
+ *   adEndTimeUnixMs: number,
+ *   paidPromotionDurationMs: number | null
  * }>}
  */
 export async function getLocalVideoInfo(id) {
   let responseTime = Date.now()
   let totalAdTimeMilliseconds = 0
+  let paidPromotionDurationMs = null
 
   const webInnertube = await createInnertube({
     withPlayer: true,
@@ -427,6 +430,8 @@ export async function getLocalVideoInfo(id) {
       responseTime = Date.now()
 
       const json = JSON.parse(responseText)
+
+      paidPromotionDurationMs ??= getPaidPromotionDurationMs(json)
 
       if (Array.isArray(json.adSlots)) {
         for (const adSlot of json.adSlots) {
@@ -475,7 +480,19 @@ export async function getLocalVideoInfo(id) {
     }
   }
 
-  const info = await webInnertube.getInfo(id, { po_token: contentPoToken })
+  // The current WEB player response does not include the paid-promotion
+  // disclosure. ANDROID exposes it as a lightweight player overlay, so fetch
+  // that metadata in parallel; a failure must not fail the video load.
+  const paidPromotionRequest = webInnertube.actions.execute('/player', {
+    videoId: id,
+    client: 'ANDROID',
+    parse: false,
+  }).catch(() => null)
+
+  const [info] = await Promise.all([
+    webInnertube.getInfo(id, { po_token: contentPoToken }),
+    paidPromotionRequest,
+  ])
 
   // Some time would be used for parsing and maybe additional requests so end time should be calculated sooner to reduce actual waiting time
   // Legacy format requires this
@@ -529,7 +546,7 @@ export async function getLocalVideoInfo(id) {
 
   if ((info.playability_status.status === 'UNPLAYABLE' && (!hasTrailer || trailerIsAgeRestricted)) ||
     info.playability_status.status === 'LOGIN_REQUIRED') {
-    return { info, poToken: undefined, clientInfo }
+    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs }
   }
 
   if (hasTrailer && info.playability_status.status !== 'OK') {
@@ -596,6 +613,7 @@ export async function getLocalVideoInfo(id) {
     poToken: contentPoToken,
     clientInfo,
     adEndTimeUnixMs,
+    paidPromotionDurationMs,
   }
 }
 

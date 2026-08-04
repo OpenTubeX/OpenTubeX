@@ -87,10 +87,19 @@ test.describe('global progress presentation', () => {
     })
     await expect(progressToast).toBeVisible()
 
+    // Fullscreen is for watching, so the progress notification steps aside
     await page.evaluate(() => document.querySelector('.app').requestFullscreen())
     await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true)
-    await expect(progressToast).toBeVisible()
+    await expect(progressToast).toHaveCount(0)
+    await expect(page.locator('.app > .progressBar')).toHaveCount(0)
+
+    // Only the progress notification is suppressed: a regular toast still has
+    // something to say that the fullscreen player can't tell the user itself
+    await page.evaluate(() => window.ftElectron.showToastOnAllTabs('Copied to clipboard', 10000))
+    await expect(page.locator('.toast', { hasText: 'Copied to clipboard' })).toBeVisible()
+
     await page.evaluate(() => document.exitFullscreen())
+    await expect(progressToast).toBeVisible()
   })
 })
 

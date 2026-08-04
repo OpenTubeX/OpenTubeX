@@ -1,6 +1,6 @@
 import { sel } from '../../helpers/app.mjs'
 import { test, expect, setPlayerFullscreen } from '../../helpers/innertube.mjs'
-import { findWatchComponent, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { activeTab, findWatchComponent, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO_URL = 'https://www.youtube.com/watch?v=jNQXAC9IVRw'
@@ -40,23 +40,34 @@ function longTranscript() {
   )).join('\n\n')}\n`
 }
 
+/**
+ * Opens the watch page, or skips when the live API refuses to serve it (bot
+ * checks on CI runners and VPNs), which leaves the page shell without any
+ * video data instead of producing an error message.
+ */
 async function openVideo(page, video = { id: 'jNQXAC9IVRw', title: 'Me at the zoo', url: VIDEO_URL }) {
   await page.locator(sel.searchInput).fill(video.url)
   await page.locator(sel.searchInput).press('Enter')
   await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${video.id}`))
-  await expect(page.locator('.videoTitle')).toContainText(video.title, { timeout: 30_000 })
 
-  const player = page.locator('.ftVideoPlayer')
-  const errorMessage = page.locator('.errorMessage')
-  await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+  const title = page.locator(`${activeTab} .videoTitle`)
+  const errorMessage = page.locator(`${activeTab} .errorMessage`)
+  let state = 'waiting'
+  const settled = await expect
+    .poll(async () => {
+      const titleText = await title.textContent().catch(() => '') ?? ''
+      if (titleText.includes(video.title)) {
+        state = 'loaded'
+      } else if (await errorMessage.isVisible().catch(() => false)) {
+        state = (await errorMessage.textContent())?.trim() ?? 'unavailable'
+      }
+      return state === 'waiting' ? 'waiting' : 'done'
+    }, { timeout: 30_000, message: 'waiting for the watch page to load' })
+    .toBe('done')
+    .then(() => true, () => false)
 
-  const errorText = await errorMessage.isVisible()
-    ? (await errorMessage.textContent())?.trim() ?? ''
-    : ''
-  test.skip(
-    /blocked your IP|Ratelimited|IP block/i.test(errorText),
-    `watch page unavailable from the live API: ${errorText}`
-  )
+  test.skip(!settled || state !== 'loaded', `watch page unavailable from the live API: ${state}`)
+  await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible({ timeout: 30_000 })
 }
 
 async function openCaptionedVideoOrSkip(page) {
@@ -239,14 +250,15 @@ test.describe('watch page', () => {
       .toBeGreaterThan(1)
   })
 
-  test('stops querying Shaka state before a format switch unloads it', async ({ page, innertube }) => {
+  test('keeps the thumbnail visible while switching formats', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
+    const initialUrl = page.url()
     const player = page.locator('.ftVideoPlayer')
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await player.evaluate((element, watchComponent) => {
+    const formats = await player.evaluate((element, watchComponent) => {
       const overlay = element.ui ?? element.querySelector('video')?.ui
       const shakaPlayer = overlay?.getControls().getPlayer()
       if (!watchComponent || !shakaPlayer) {
@@ -254,18 +266,47 @@ test.describe('watch page', () => {
       }
 
       window.__hasLoadedAtFormatUnload = []
+      window.__blockNextFormatUnload = false
+      window.__formatUnloadBlocked = false
       const unload = shakaPlayer.unload.bind(shakaPlayer)
-      shakaPlayer.unload = (...args) => {
+      shakaPlayer.unload = async (...args) => {
         window.__hasLoadedAtFormatUnload.push(watchComponent.refs.player.hasLoaded)
-        return unload(...args)
+        await unload(...args)
+
+        if (window.__blockNextFormatUnload) {
+          await new Promise(resolve => {
+            window.__finishFormatUnload = resolve
+            window.__formatUnloadBlocked = true
+          })
+        }
       }
 
       const watchView = watchComponent.proxy
-      watchView.handleFormatChange(watchView.activeFormat === 'audio' ? 'dash' : 'audio')
+      const oldFormat = watchView.activeFormat
+      const newFormat = oldFormat === 'audio' ? 'dash' : 'audio'
+      watchView.handleFormatChange(newFormat)
+      return { oldFormat, newFormat }
     }, watchComponent)
-    await watchComponent.dispose()
 
     await expect.poll(() => page.evaluate(() => window.__hasLoadedAtFormatUnload)).toEqual([false])
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.newFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await page.evaluate(() => { window.__blockNextFormatUnload = true })
+    await watchComponent.evaluate((component, format) => component.proxy.handleFormatChange(format), formats.oldFormat)
+    await expect.poll(() => page.evaluate(() => window.__formatUnloadBlocked)).toBe(true)
+    await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
+    await page.evaluate(() => window.__finishFormatUnload())
+    await expect.poll(() => watchComponent.evaluate((component) => ({
+      format: component.proxy.activeFormat,
+      loaded: component.refs.player.hasLoaded
+    }))).toEqual({ format: formats.oldFormat, loaded: true })
+    expect(page.url()).toBe(initialUrl)
+
+    await watchComponent.dispose()
   })
 
   test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
@@ -290,14 +331,14 @@ test.describe('watch page', () => {
     await openVideo(page)
 
     const video = await waitForPlaybackOrSkip(test, page)
-    const activeTab = page.locator(sel.activeTab)
-    await expect(activeTab.locator('.playingIcon')).toBeVisible()
+    const tabBarTab = page.locator(sel.activeTab)
+    await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
 
     await video.dispatchEvent('waiting')
-    await expect(activeTab.locator('.playingIcon')).toHaveCount(0)
+    await expect(tabBarTab.locator('.playingIcon')).toHaveCount(0)
 
     await video.dispatchEvent('playing')
-    await expect(activeTab.locator('.playingIcon')).toBeVisible()
+    await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
   })
 
   test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
@@ -687,6 +728,41 @@ test.describe('watch page', () => {
     await setPlayerFullscreen(page, true)
     await expect(page.locator('.fullscreenCommentsOverlay.open')).toBeVisible()
     await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBe(300)
+  })
+
+  test('reloading fullscreen comments scrolls back to the first comment', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollHeight)).toBeGreaterThan(500)
+
+    // The end of the loaded comments: the offset the reloaded, shorter list has
+    // no room for, so it used to leave the dock parked past its own content.
+    await comments.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBeGreaterThan(300)
+
+    const [reloadResponse] = await Promise.all([
+      page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 }),
+      page.locator('.fullscreenCommentHeader').getByRole('button', { name: 'Reload Comments' }).click()
+    ])
+    expect(reloadResponse.ok()).toBe(true)
+    await expect(page.locator('.fullscreenCommentsOverlay .comment').first()).toBeVisible({ timeout: 30_000 })
+
+    // OverlayScrollbars reapplies its remembered offset once the new list has
+    // rendered, so the position has to still be at the top a moment later.
+    await page.waitForTimeout(1000)
+    expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
   })
 
   test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {

@@ -88,6 +88,19 @@
         inline-size: 100%;
       }
 
+      &.videoPlayerError {
+        aspect-ratio: 16 / 9;
+        inline-size: 100%;
+        overflow: hidden;
+        background-color: #000;
+
+        .videoThumbnail {
+          block-size: 100%;
+          object-fit: cover;
+          filter: brightness(0.55);
+        }
+      }
+
       .errorContainer {
         position: absolute;
         inset: 30px;
@@ -305,6 +318,10 @@
       flex-wrap: wrap;
       align-items: center;
       gap: 10px;
+    }
+
+    .shortsPaidPromotion {
+      margin-block-end: 8px;
     }
 
     .shortsChannelRow :deep(.ftSubscribeButton) {

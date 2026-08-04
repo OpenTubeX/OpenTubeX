@@ -1,6 +1,17 @@
 import { computed, watch } from 'vue'
 
 import store from '../../../store/index'
+import {
+  applyFocusState,
+  applyMinimizedState,
+  applyPictureInPictureState,
+  BLUR_TRIGGER_RECHECK_DELAY_MS,
+  createAutoPictureInPictureState,
+  markPictureInPictureRequested,
+  markPictureInPictureRequestFailed,
+  resolveAutoPictureInPictureAction,
+  shouldAutoPictureInPicture
+} from './autoPictureInPictureState'
 
 /**
  * OpenTubeX tab-awareness and automatic Picture-in-Picture behavior.
@@ -24,29 +35,32 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   const triggerOnBlur = computed(() => autoPictureInPictureTriggers.value.includes('blur'))
   const autoPipEnabled = computed(() => autoPictureInPictureTriggers.value.length > 0)
 
-  let autoPipActive = false
   // In Electron the minimized state is driven by native window events (see setup below),
   // because `document.hidden` doesn't fire on minimize on Wayland. On the web we fall back
   // to `document.hidden`, which also covers browser-tab switches.
-  let windowMinimized = process.env.IS_ELECTRON ? false : document.hidden
-  let windowFocused = document.hasFocus()
+  const state = createAutoPictureInPictureState({
+    minimized: process.env.IS_ELECTRON ? false : document.hidden,
+    focused: document.hasFocus()
+  })
   let stopActiveTabWatch = null
   let removeMinimizedListener = null
+  let blurTriggerRecheckTimeout = null
 
-  function shouldAutoPipNow() {
+  function canAutoPipNow() {
     if (!autoPipEnabled.value || props.format === 'audio') return false
 
     const videoElement = video.value
-    if (!videoElement || videoElement.ended || (videoElement.paused && !autoPipActive)) return false
+    return !!videoElement && !videoElement.ended && (!videoElement.paused || state.autoPipActive)
+  }
 
-    // An in-app tab change is handled by the 'tab' trigger. Window minimize / blur only
-    // apply while this is the presented tab, so background tabs don't spuriously enter PiP.
-    const active = isActiveTab.value
-    const tabHidden = triggerOnTabChange.value && !active
-    const minimized = active && triggerOnMinimize.value && windowMinimized
-    const blurred = active && triggerOnBlur.value && !windowFocused
-
-    return tabHidden || minimized || blurred
+  function shouldAutoPipNow() {
+    return shouldAutoPictureInPicture(state, {
+      canAutoPip: canAutoPipNow(),
+      isActiveTab: isActiveTab.value,
+      triggerOnTabChange: triggerOnTabChange.value,
+      triggerOnMinimize: triggerOnMinimize.value,
+      triggerOnBlur: triggerOnBlur.value
+    })
   }
 
   function triggerPipToggle() {
@@ -74,48 +88,62 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     const controls = ui.getControls?.()
     if (!controls) return
 
-    const wantPip = shouldAutoPipNow()
-    const inPip = controls.isPiPEnabled()
+    const action = resolveAutoPictureInPictureAction(state, {
+      wantPip: shouldAutoPipNow(),
+      inPip: controls.isPiPEnabled()
+    })
 
-    if (wantPip && !inPip) {
+    if (action === 'enter') {
       if (!controls.isPiPAllowed()) return
 
-      autoPipActive = true
+      markPictureInPictureRequested(state, true)
       if (!triggerPipToggle()) {
-        autoPipActive = false
+        markPictureInPictureRequestFailed(state)
       }
-    } else if (!wantPip && inPip && autoPipActive) {
-      triggerPipToggle()
-      autoPipActive = false
+    } else if (action === 'exit') {
+      markPictureInPictureRequested(state, false)
+      if (!triggerPipToggle()) {
+        markPictureInPictureRequestFailed(state)
+      }
     }
   }
 
   function refreshFocusState() {
-    windowFocused = document.hasFocus()
+    applyFocusState(state, document.hasFocus())
     updateAutoPip()
   }
 
   function refreshVisibilityState() {
-    windowMinimized = document.hidden
-    windowFocused = document.hasFocus()
+    state.windowMinimized = document.hidden
+    applyFocusState(state, document.hasFocus())
     updateAutoPip()
   }
 
   function handleMinimizedState(minimized) {
-    windowMinimized = minimized
-    // Restoring/showing the app makes its document the active application surface.
-    // Keep the stale blur emitted while minimizing (or while PiP had focus) from
-    // holding an automatically opened PiP window open forever.
+    applyMinimizedState(state, minimized)
     if (!minimized) {
-      windowFocused = true
+      // The blur trigger stays disarmed until the document is focused again. Re-check
+      // shortly after in case the restore doesn't emit a focus event at all.
+      clearBlurTriggerRecheck()
+      blurTriggerRecheckTimeout = setTimeout(() => {
+        blurTriggerRecheckTimeout = null
+        refreshFocusState()
+      }, BLUR_TRIGGER_RECHECK_DELAY_MS)
     }
     updateAutoPip()
   }
 
+  function clearBlurTriggerRecheck() {
+    if (blurTriggerRecheckTimeout != null) {
+      clearTimeout(blurTriggerRecheckTimeout)
+      blurTriggerRecheckTimeout = null
+    }
+  }
+
   function initializeActiveTab() {
-    windowFocused = document.hasFocus()
+    applyFocusState(state, document.hasFocus())
     if (!process.env.IS_ELECTRON) {
-      windowMinimized = document.hidden
+      state.windowMinimized = document.hidden
     }
     updateAutoPip()
   }
@@ -131,8 +159,15 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     stopActiveTabWatch = watch(isActiveTab, updateAutoPip)
   }
 
-  function resetAutoPictureInPictureOwnership() {
-    autoPipActive = false
+  /**
+   * Reports an observed Picture-in-Picture transition of this player.
+   *
+   * @param {boolean} inPip
+   */
+  function notifyPictureInPictureState(inPip) {
+    if (applyPictureInPictureState(state, inPip)) {
+      updateAutoPip()
+    }
   }
 
   function teardownAutoPictureInPicture() {
@@ -144,6 +179,7 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
     }
     window.removeEventListener('focus', refreshFocusState)
     window.removeEventListener('blur', refreshFocusState)
+    clearBlurTriggerRecheck()
     stopActiveTabWatch?.()
     stopActiveTabWatch = null
   }
@@ -153,7 +189,7 @@ export function useAutoPictureInPicture({ getUi, props, video, tabId = null, isT
   return {
     initializeActiveTab,
     isActiveTab,
-    resetAutoPictureInPictureOwnership,
+    notifyPictureInPictureState,
     setupAutoPictureInPicture,
     teardownAutoPictureInPicture,
     updateAutoPip,

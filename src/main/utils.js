@@ -1,4 +1,33 @@
 /**
+ * Builds a proxy URL from the app's proxy settings,
+ * for tools that take the proxy as a single URL (e.g. yt-dlp's `--proxy`).
+ * @param {{
+ *   protocol?: string,
+ *   hostname?: string,
+ *   port?: string | number,
+ *   username?: string,
+ *   password?: string
+ * }} proxySettings
+ * @returns {string | null} null when the settings are incomplete
+ */
+export function buildProxyUrl({ protocol, hostname, port, username, password }) {
+  if (!protocol || !hostname || !port) {
+    return null
+  }
+
+  const credentials = username
+    ? `${encodeURIComponent(username)}:${encodeURIComponent(password ?? '')}@`
+    : ''
+
+  // IPv6 addresses have to be wrapped in brackets to separate them from the port
+  const host = hostname.includes(':') && !hostname.startsWith('[')
+    ? `[${hostname}]`
+    : hostname
+
+  return `${protocol}://${credentials}${host}:${port}`
+}
+
+/**
  * @param {string | URL} url
  */
 export function isOpenTubeXUrl(url) {
