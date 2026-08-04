@@ -56,6 +56,8 @@ const IpcChannels = {
   TABS_UPDATE_ROUTE: 'tabs-update-route',
   TABS_UPDATE_NAV_HISTORY: 'tabs-update-nav-history',
   TABS_UPDATE_TITLE: 'tabs-update-title',
+  TABS_UPDATE_AVATAR: 'tabs-update-avatar',
+  TABS_SET_AVATARS_ENABLED: 'tabs-set-avatars-enabled',
   TABS_EXIT_FULLSCREEN: 'tabs-exit-fullscreen',
   TABS_ACTIVE_CHANGED: 'tabs-active-changed',
   TABS_IS_ACTIVE: 'tabs-is-active',
