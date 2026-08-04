@@ -51,7 +51,7 @@ import {
   copyToClipboard,
 } from '../../helpers/utils'
 import { colors } from '../../helpers/colors'
-import { applyAnimationSpeed } from '../../helpers/animationSpeed'
+import { applyAnimationSpeed, getAnimationSpeedMultiplier } from '../../helpers/animationSpeed'
 import {
   FULLSCREEN_DOCK_GAP,
   FULLSCREEN_DOCK_OUTER_INSET,
@@ -5705,10 +5705,13 @@ export default defineComponent({
 
         fullWindowAnimation?.cancel()
         fullWindowAnimation = null
-        suppressPanelTransitions(FULL_WINDOW_ANIMATION_DURATION_MS + 50)
 
         const playerContainer = container.value
         const shouldAnimate = playerContainer !== null && !isReducedMotionEnabled()
+        const animationDuration = shouldAnimate
+          ? FULL_WINDOW_ANIMATION_DURATION_MS / getAnimationSpeedMultiplier(store.getters.getAnimationSpeed)
+          : FULL_WINDOW_ANIMATION_DURATION_MS
+        suppressPanelTransitions(animationDuration + 50)
         const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
         if (event.detail) {
