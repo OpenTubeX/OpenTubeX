@@ -16,7 +16,8 @@ export const BLUR_TRIGGER_RECHECK_DELAY_MS = 750
  *   windowFocused: boolean,
  *   autoPipActive: boolean,
  *   pendingPipTarget: boolean | null,
- *   blurTriggerArmed: boolean
+ *   blurTriggerArmed: boolean,
+ *   pictureInPictureDismissed: boolean
  * }} AutoPictureInPictureState
  */
 
