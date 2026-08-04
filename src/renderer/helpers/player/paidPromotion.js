@@ -23,3 +23,13 @@ export function getPaidPromotionDurationMs(playerResponse) {
     ? durationMs
     : DEFAULT_PAID_PROMOTION_DURATION_MS
 }
+
+export function shouldStartPaidPromotionTimer({
+  videoId,
+  previousVideoId,
+  paidPromotion,
+  shortsPlayer,
+  paused,
+}) {
+  return previousVideoId === videoId && paidPromotion && !shortsPlayer && paused === false
+}

@@ -62,6 +62,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
+import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
@@ -3755,7 +3756,18 @@ export default defineComponent({
 
     watch(
       [() => props.videoId, () => props.paidPromotion, () => props.shortsPlayer],
-      resetPaidPromotion,
+      ([videoId, paidPromotion, shortsPlayer], previous = []) => {
+        resetPaidPromotion()
+        if (shouldStartPaidPromotionTimer({
+          videoId,
+          previousVideoId: previous[0],
+          paidPromotion,
+          shortsPlayer,
+          paused: video.value?.paused,
+        })) {
+          startPaidPromotionTimer()
+        }
+      },
       { immediate: true }
     )
 
