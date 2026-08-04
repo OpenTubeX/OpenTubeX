@@ -824,10 +824,11 @@
         </transition>
       </Teleport>
       <watch-video-live-chat
-        v-if="!isLoading && !hideLiveChat && (isLive || isUpcoming)"
+        v-if="!isLoading && showLiveChat"
         :live-chat="liveChat"
         :video-id="videoId"
         :channel-id="channelId"
+        :current-time="currentTime"
         class="watchVideoSideBar watchVideoPlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
       />

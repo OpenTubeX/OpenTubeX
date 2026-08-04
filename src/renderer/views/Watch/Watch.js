@@ -192,6 +192,7 @@ export default defineComponent({
       isLive: false,
       isPremiere: false,
       liveChat: null,
+      liveChatIsReplay: false,
       isLiveContent: false,
       isUpcoming: false,
       isPostLiveDvr: false,
@@ -682,6 +683,9 @@ export default defineComponent({
     hideLiveChat: function () {
       return this.$store.getters.getHideLiveChat
     },
+    showLiveChat: function () {
+      return !this.hideLiveChat && (this.isLive || this.isUpcoming || this.liveChatIsReplay)
+    },
     hideComments: function () {
       return this.$store.getters.getHideComments
     },
@@ -702,7 +706,7 @@ export default defineComponent({
     },
     theatrePossible: function () {
       return this.showTranscript || !this.hideRecommendedVideos ||
-        (!this.hideLiveChat && this.isLive) || this.watchingPlaylist || !!this.nextQueuedVideo ||
+        this.showLiveChat || this.watchingPlaylist || !!this.nextQueuedVideo ||
         this.showSidebarChapters || this.showSidebarSponsorBlock
     },
     theatreTogglePossible: function () {
@@ -1264,6 +1268,7 @@ export default defineComponent({
       this.isLive = false
       this.isPremiere = false
       this.liveChat = null
+      this.liveChatIsReplay = false
       this.isLiveContent = false
       this.isUpcoming = false
       this.isPostLiveDvr = false
@@ -1880,10 +1885,14 @@ export default defineComponent({
           }
         }
 
-        if (!this.hideLiveChat && (this.isLive || this.isUpcoming) && result.livechat) {
+        // Streams that have ended keep their chat around as a replay, which is played back
+        // in sync with the video instead of in real time.
+        if (!this.hideLiveChat && result.livechat && (this.isLive || this.isUpcoming || result.livechat.is_replay)) {
           this.liveChat = result.getLiveChat()
+          this.liveChatIsReplay = this.liveChat.is_replay
         } else {
           this.liveChat = null
+          this.liveChatIsReplay = false
         }
 
         if ((this.isLive || this.isPostLiveDvr) && !this.isUpcoming) {
