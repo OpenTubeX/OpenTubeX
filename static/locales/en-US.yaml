@@ -353,8 +353,8 @@ Settings:
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
     General Settings: General
-    Playback Engine:
-      Playback Engine: Playback Engine
+    Stream Extraction Method:
+      Stream Extraction Method: Stream extraction method
       yt-dlp: yt-dlp
       Built-in: Built-in
     Check for Updates: Check for Updates
@@ -1644,7 +1644,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
-    Playback Engine: Which engine obtains the video streams. yt-dlp must be available when selected.
+    Stream Extraction Method: Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
     Avoid translation: |
       Disable YouTube's autotranslation of title, description and chapters of a video.
       Too many requests, such as fetching video titles across lists, may temporarily

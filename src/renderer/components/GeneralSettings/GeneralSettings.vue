@@ -72,12 +72,12 @@
     <div class="switchGrid">
       <FtSelect
         v-if="USING_ELECTRON"
-        :placeholder="t('Settings.General Settings.Playback Engine.Playback Engine')"
+        :placeholder="t('Settings.General Settings.Stream Extraction Method.Stream Extraction Method')"
         :value="videoPlaybackEngine"
         setting-key="videoPlaybackEngine"
         :select-names="playbackEngineNames"
         :select-values="PLAYBACK_ENGINE_VALUES"
-        :tooltip="t('Tooltips.General Settings.Playback Engine')"
+        :tooltip="t('Tooltips.General Settings.Stream Extraction Method')"
         :icon="['fas', 'circle-play']"
         @change="updateVideoPlaybackEngine"
       />
@@ -289,8 +289,8 @@ const { t } = useI18n()
 const router = useRouter()
 
 const playbackEngineNames = computed(() => [
-  t('Settings.General Settings.Playback Engine.yt-dlp'),
-  t('Settings.General Settings.Playback Engine.Built-in')
+  t('Settings.General Settings.Stream Extraction Method.yt-dlp'),
+  t('Settings.General Settings.Stream Extraction Method.Built-in')
 ])
 
 /** @type {import('vue').ComputedRef<'yt-dlp' | 'built-in'>} */
