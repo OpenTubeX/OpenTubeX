@@ -87,7 +87,7 @@
         @reset="emit('reset')"
       />
     </span>
-    <Teleport to="body">
+    <Teleport :to="dropdownTarget">
       <ul
         v-if="dropdownShown"
         :id="`${id}-listbox`"
@@ -125,7 +125,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
@@ -192,6 +192,7 @@ const options = useTemplateRef('options')
 const dropdownShown = ref(false)
 const activeIndex = ref(0)
 const dropdownStyle = ref({})
+const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
 let typeahead = ''
 let typeaheadTimer = null
 let pointerDownInDropdown = false
@@ -233,6 +234,7 @@ function toggleDropdown() {
 
 function openDropdown() {
   activeIndex.value = Math.max(0, selectedIndex.value)
+  dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
   nextTick(() => {
