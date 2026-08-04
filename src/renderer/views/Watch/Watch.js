@@ -334,6 +334,7 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
+      stream403ReloadAttemptedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
       sabrErrorRecoveriesForCurrentVideo: 0,
       /** @type {number|null} */
@@ -1185,6 +1186,7 @@ export default defineComponent({
       const videoIdChanged = this.videoId !== previousVideoId
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
+        this.stream403ReloadAttemptedForCurrentVideo = false
         this.sabrErrorRecoveryAttempts = 0
         this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
@@ -3263,6 +3265,20 @@ export default defineComponent({
               this.errorMessage = '[BAD_HTTP_STATUS: 403] Potential causes: IP block, streaming URL deciphering failed or music video geo-block'
             } else {
               this.errorMessage = '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+            }
+
+            // Streaming URLs are bound to the IP they were issued to, so they also
+            // start returning 403 when our own IP changes (reconnect, prefix rotation,
+            // VPN switch). That looks exactly like an IP block, but fresh URLs fix it,
+            // so reload once before assuming the IP is blocked and running the script.
+            if (!this.stream403ReloadAttemptedForCurrentVideo) {
+              this.stream403ReloadAttemptedForCurrentVideo = true
+              this.showTabToast({
+                message: this.t('Video.Reloading video after streaming URL error'),
+                icon: ['fas', 'sync'],
+              })
+              await this.reloadView()
+              return
             }
 
             this.ipBlockDetectedInCurrentChain = true

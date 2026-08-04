@@ -1,7 +1,90 @@
 import { chmod, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { goTo, test, expect } from '../../helpers/app.mjs'
+import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../../helpers/watch.mjs'
+
+test.use({
+  seed: {
+    history: [{ ...watchHistoryEntry, title: 'IP block test video' }]
+  }
+})
+
+/**
+ * Replays streaming URL 403s against the mounted Watch view, recording whether
+ * each one reloaded the video or escalated to the IP block recovery script.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {number} errorCount
+ */
+async function replayStreamForbiddenErrors(page, errorCount) {
+  const watchView = await watchViewHandle(page)
+
+  return await watchView.evaluate(async (view, count) => {
+    view.errorMessage = ''
+    view.isLoading = false
+    view.isLive = false
+    view.isPostLiveDvr = false
+    view.activeFormat = 'dash'
+    view.manifestMimeType = 'application/dash+xml'
+    // Not expired, so the 403 isn't attributed to a stale watch session.
+    view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+
+    const reloads = []
+    const recoveries = []
+    view.reloadView = async () => { reloads.push(view.videoId) }
+    view.runIpBlockRecoveryScriptAndReload = async () => {
+      recoveries.push(view.ipBlockDetectedInCurrentChain)
+      return true
+    }
+
+    // 1001 = BAD_HTTP_STATUS, category 1 = NETWORK.
+    const forbiddenError = () => ({
+      severity: 2,
+      category: 1,
+      code: 1001,
+      data: ['https://example.invalid/videoplayback', 403]
+    })
+
+    const steps = []
+    for (let index = 0; index < count; index++) {
+      await view.handlePlayerError(forbiddenError())
+      steps.push({ reloads: reloads.length, recoveries: recoveries.length })
+    }
+
+    return { steps, reloads, recoveries }
+  }, errorCount)
+}
+
+async function openWatchPage(app, page) {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('IP block test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+}
+
+test('a streaming URL 403 reloads the video before blaming the IP', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 1)
+
+  // Our own IP changing invalidates the issued streaming URLs the same way an
+  // IP block does, so the first 403 must only fetch fresh URLs.
+  expect(result.steps).toEqual([{ reloads: 1, recoveries: 0 }])
+})
+
+test('a streaming URL 403 that survives the reload runs the recovery script', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 2)
+
+  expect(result.steps).toEqual([
+    { reloads: 1, recoveries: 0 },
+    { reloads: 1, recoveries: 1 }
+  ])
+  expect(result.recoveries).toEqual([true])
+})
 
 test('subscription refresh waits for an active IP block recovery', async ({ app, page }) => {
   const isWindows = process.platform === 'win32'

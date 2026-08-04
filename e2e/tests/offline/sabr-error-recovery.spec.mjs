@@ -1,13 +1,5 @@
-import crypto from 'node:crypto'
-import { readFile, readdir } from 'node:fs/promises'
-import path from 'node:path'
-import { gunzipSync } from 'node:zlib'
-
-import { goTo, repoRoot, test, expect } from '../../helpers/app.mjs'
-import { fixtureKey } from '../../helpers/innertube.mjs'
-
-const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
-const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
+import { goTo, test, expect } from '../../helpers/app.mjs'
+import { mockUnplayableWatchPage, watchHistoryEntry } from '../../helpers/watch.mjs'
 
 // Mirror the module-level Watch constants, which cannot be imported here.
 const MAX_SABR_ERROR_RECOVERIES = 3
@@ -15,92 +7,9 @@ const MAX_SABR_ERROR_RECOVERIES_PER_VIDEO = 8
 
 test.use({
   seed: {
-    history: [{
-      _id: 'jNQXAC9IVRw',
-      videoId: 'jNQXAC9IVRw',
-      title: 'SABR test video',
-      author: 'Test Channel',
-      authorId: 'UC-test-channel-id',
-      published: Date.now() - 86_400_000,
-      description: '',
-      viewCount: 1234,
-      lengthSeconds: 600,
-      watchProgress: 10,
-      isWatched: false,
-      timeWatched: Date.now(),
-      isLive: false,
-      type: 'video'
-    }]
+    history: [{ ...watchHistoryEntry, title: 'SABR test video' }]
   }
 })
-
-async function fixture(dir, name) {
-  try {
-    return gunzipSync(await readFile(path.join(dir, name)))
-  } catch {
-    return null
-  }
-}
-
-/**
- * Serves the watch page from fixtures with an unplayable video, so the Watch
- * view mounts without a real player emitting errors of its own.
- */
-async function mockWatchPage(app, page) {
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    ipcMain.removeHandler('generate-po-token')
-    ipcMain.handle('generate-po-token', () => 'test-po-token')
-  })
-
-  await page.route(/^https?:\/\//, (route) => route.abort())
-  await page.route(/^https?:\/\//, async (route, request) => {
-    const url = request.url()
-
-    if (url.includes('/img/desktop/unavailable/')) {
-      return route.fulfill({ status: 200, contentType: 'image/png', body: '' })
-    }
-
-    if (/\/s\/player\//.test(url) || /\/sw\.js_data/.test(url)) {
-      const { pathname } = new URL(url)
-      const name = `shared-${crypto.createHash('sha1').update(pathname).digest('hex').slice(0, 12)}.gz`
-      const body = await fixture(sharedDir, name) ??
-        (url.includes('/s/player/') ? await fixture(sharedDir, 'shared-99c4a5c04897.gz') : null)
-      if (body) {
-        return route.fulfill({
-          status: 200,
-          contentType: url.includes('/s/player/') ? 'text/javascript' : 'application/json',
-          body
-        })
-      }
-      return route.abort()
-    }
-
-    if (url.includes('/youtubei/v1/player')) {
-      const files = await readdir(fixtureDir)
-      const body = await fixture(fixtureDir, files.find((file) => file.startsWith('player-')))
-      const json = JSON.parse(body.toString())
-      json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
-      delete json.streamingData
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(json) })
-    }
-
-    if (url.includes('/youtubei/v1/')) {
-      const key = fixtureKey(url, request.postData())
-      let body = await fixture(fixtureDir, `${key}.0.json.gz`)
-      if (!body) {
-        const endpoint = key.replace(/-[0-9a-f]{12}$/, '')
-        const files = (await readdir(fixtureDir)).filter((file) => file.startsWith(`${endpoint}-`))
-        if (files.length > 0) body = await fixture(fixtureDir, files[0])
-      }
-      if (body) {
-        return route.fulfill({ status: 200, contentType: 'application/json', body })
-      }
-      return route.abort()
-    }
-
-    return route.fallback()
-  })
-}
 
 /**
  * Puts the mounted Watch view into "playing a SABR stream on DASH" state, then
@@ -196,7 +105,7 @@ function driveWatchView(page, script, options = {}) {
 }
 
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -218,7 +127,7 @@ test('a second SABR failure after successful playback refetches instead of dropp
 })
 
 test('SABR failures that never settle fall back to legacy but never audio', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -239,7 +148,7 @@ test('SABR failures that never settle fall back to legacy but never audio', asyn
 })
 
 test('repeated SABR reload requests stop instead of reloading the tab forever', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -258,7 +167,7 @@ test('repeated SABR reload requests stop instead of reloading the tab forever', 
 })
 
 test('repeated SABR reload requests never fall back to audio', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -277,7 +186,7 @@ test('repeated SABR reload requests never fall back to audio', async ({ app, pag
 })
 
 test('a SABR failure refetches when no 360p fallback is available', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -290,7 +199,7 @@ test('a SABR failure refetches when no 360p fallback is available', async ({ app
 })
 
 test('repeated SABR failures without a legacy fallback never switch to audio', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -321,7 +230,7 @@ test('repeated SABR failures without a legacy fallback never switch to audio', a
 })
 
 test('an error from the outgoing player is ignored while the view reloads', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -335,7 +244,7 @@ test('an error from the outgoing player is ignored while the view reloads', asyn
 })
 
 test('a SABR reload request from the outgoing player is ignored', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -349,7 +258,7 @@ test('a SABR reload request from the outgoing player is ignored', async ({ app, 
 })
 
 test('a rejected SABR reload request reports terminal recovery', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -366,7 +275,7 @@ test('a rejected SABR reload request reports terminal recovery', async ({ app, p
 })
 
 test('seeking around a stream that never plays does not refill the budget', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -389,7 +298,7 @@ test('seeking around a stream that never plays does not refill the budget', asyn
 })
 
 test('a video that keeps breaking after settling still stops reloading eventually', async ({ app, page }) => {
-  await mockWatchPage(app, page)
+  await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
   await page.getByText('SABR test video').click()
   await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
