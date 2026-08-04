@@ -88,37 +88,40 @@
       />
     </span>
     <Teleport to="body">
-      <ul
-        v-if="dropdownShown"
-        :id="`${id}-listbox`"
-        ref="dropdown"
-        v-overlay-scrollbars
-        class="selectDropdown"
-        role="listbox"
-        :aria-labelledby="`${id}-label`"
-        :style="dropdownStyle"
-        @pointerdown="handleDropdownPointerDown"
-      >
-        <li
-          v-for="(name, index) in selectNames"
-          :id="`${id}-option-${index}`"
-          :key="selectValues[index]"
-          ref="options"
-          class="selectOption"
-          :class="{ active: index === activeIndex, selected: selectValues[index] === value }"
-          role="option"
-          tabindex="-1"
-          :aria-selected="selectValues[index] === value"
-          :dir="isLocaleSelector ? 'auto' : null"
-          :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
-          @mousedown.prevent
-          @pointermove="activeIndex = index"
-          @click="selectOption(index)"
-          @keydown.enter.space.prevent="selectOption(index)"
+      <Transition name="select-dropdown">
+        <ul
+          v-if="dropdownShown"
+          :id="`${id}-listbox`"
+          ref="dropdown"
+          v-overlay-scrollbars
+          class="selectDropdown"
+          :class="dropdownPlacement"
+          role="listbox"
+          :aria-labelledby="`${id}-label`"
+          :style="dropdownStyle"
+          @pointerdown="handleDropdownPointerDown"
         >
-          {{ name }}
-        </li>
-      </ul>
+          <li
+            v-for="(name, index) in selectNames"
+            :id="`${id}-option-${index}`"
+            :key="selectValues[index]"
+            ref="options"
+            class="selectOption"
+            :class="{ active: index === activeIndex, selected: selectValues[index] === value }"
+            role="option"
+            tabindex="-1"
+            :aria-selected="selectValues[index] === value"
+            :dir="isLocaleSelector ? 'auto' : null"
+            :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
+            @mousedown.prevent
+            @pointermove="activeIndex = index"
+            @click="selectOption(index)"
+            @keydown.enter.space.prevent="selectOption(index)"
+          >
+            {{ name }}
+          </li>
+        </ul>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -192,6 +195,7 @@ const options = useTemplateRef('options')
 const dropdownShown = ref(false)
 const activeIndex = ref(0)
 const dropdownStyle = ref({})
+const dropdownPlacement = ref('below')
 let typeahead = ''
 let typeaheadTimer = null
 let pointerDownInDropdown = false
@@ -277,6 +281,7 @@ function updateDropdownPosition() {
         Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
       )
 
+  dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
     left: `${left}px`,
