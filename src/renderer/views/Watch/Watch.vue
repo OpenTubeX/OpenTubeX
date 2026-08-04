@@ -872,6 +872,7 @@
           :class="{ theatreWatchVideo: useTheatreMode }"
           :channel-thumbnail="channelThumbnail"
           :channel-name="channelName"
+          :comments-disabled="commentsDisabled"
           :fullscreen-overlay="fullscreenCommentsOpen || shortsCommentsOpen"
           @close-comments="closeFullscreenComments"
           @timestamp-event="changeTimestamp"

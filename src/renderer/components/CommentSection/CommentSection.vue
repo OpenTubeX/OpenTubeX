@@ -17,7 +17,7 @@
         @keydown.esc.stop.prevent="sortMenuOpen = false"
       >
         <button
-          v-if="showSortBy"
+          v-if="showSortBy && !commentsDisabled"
           type="button"
           class="fullscreenCommentAction"
           :class="{ active: sortMenuOpen }"
@@ -29,6 +29,7 @@
           <FontAwesomeIcon :icon="['fas', 'arrow-down-short-wide']" />
         </button>
         <button
+          v-if="!commentsDisabled"
           type="button"
           class="fullscreenCommentAction"
           :aria-label="$t('Comments.Reload Comments')"
@@ -336,11 +337,18 @@
         </div>
       </div>
       <div
-        v-else-if="showComments && !isLoading"
+        v-else-if="commentsDisabled || (showComments && !isLoading)"
         class="noComments"
+        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
       >
         <h3
-          v-if="isPostComments"
+          v-if="commentsDisabled"
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.Comments are turned off") }}
+        </h3>
+        <h3
+          v-else-if="isPostComments"
           class="noCommentMsg"
         >
           {{ $t("Comments.There are no comments available for this post") }}
@@ -352,7 +360,7 @@
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
         <div
-          v-if="!fullscreenOverlay"
+          v-if="!fullscreenOverlay && !commentsDisabled"
           class="noCommentActions"
         >
           <FtSelect
@@ -463,6 +471,10 @@ const props = defineProps({
     required: true
   },
   isPostComments: {
+    type: Boolean,
+    default: false,
+  },
+  commentsDisabled: {
     type: Boolean,
     default: false,
   },
@@ -656,7 +668,7 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 })
 
 const canPerformInitialCommentLoading = computed(() => {
-  return commentData.value.length === 0 && !isLoading.value && !showComments.value
+  return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
 
 watch(
