@@ -9,6 +9,11 @@ const CAPTIONED_VIDEO = {
   title: 'What’s It Like to Be Killed by Nature’s Most Brutal Predator',
   url: 'https://www.youtube.com/watch?v=Xf-uUy5pdUI'
 }
+const COMMENTS_DISABLED_VIDEO = {
+  id: 'Mapn4dhcFlc',
+  title: 'Public Works - How to turn your water on and off',
+  url: 'https://www.youtube.com/watch?v=Mapn4dhcFlc'
+}
 const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
 const FULLSCREEN_PLAYLIST = {
   _id: FULLSCREEN_PLAYLIST_ID,
@@ -769,6 +774,65 @@ test.describe('watch page', () => {
     ])
     expect(continuationResponse.ok()).toBe(true)
     await expect(replies.first()).toBeVisible()
+  })
+
+  test('stale reply controls disappear after an empty final reply page', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const comments = page.locator('.comment')
+    const commentIndex = await comments.evaluateAll(elements => (
+      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
+    ))
+    expect(commentIndex).toBeGreaterThanOrEqual(0)
+    const comment = comments.nth(commentIndex)
+    const replyToggle = comment.locator('.commentMoreReplies')
+    await expect(replyToggle).toBeVisible()
+
+    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        onResponseReceivedEndpoints: [{
+          appendContinuationItemsAction: {
+            targetId: 'comment-replies-item-stale'
+          }
+        }]
+      })
+    }), { times: 1 })
+
+    await replyToggle.click()
+
+    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
+    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
+    await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
+  })
+
+  test('reports comments as turned off instead of empty', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page, COMMENTS_DISABLED_VIDEO)
+
+    const commentSection = page.locator('.commentsArea')
+    await expect(commentSection.locator('.noCommentMsg')).toHaveText(
+      'Comments are turned off',
+      { timeout: 30_000 }
+    )
+    // Nothing to load, sort or reload, so those affordances stay hidden.
+    await expect(commentSection.locator('.getCommentsTitle')).toHaveCount(0)
+    await expect(commentSection.locator('.noCommentActions')).toHaveCount(0)
+    await expect(commentSection.locator('.comment')).toHaveCount(0)
+
+    // Losing the actions must not collapse the card into a cramped strip.
+    const [messageBox, cardBox] = await Promise.all([
+      commentSection.locator('.noCommentMsg').boundingBox(),
+      commentSection.locator('.card').boundingBox()
+    ])
+    expect(cardBox.height).toBeGreaterThanOrEqual(messageBox.height + 40)
   })
 
   test('fullscreen comments dock preserves its active state and scroll position', async ({ page, innertube }) => {

@@ -17,7 +17,7 @@
         @keydown.esc.stop.prevent="sortMenuOpen = false"
       >
         <button
-          v-if="showSortBy"
+          v-if="showSortBy && !commentsDisabled"
           type="button"
           class="fullscreenCommentAction"
           :class="{ active: sortMenuOpen }"
@@ -29,6 +29,7 @@
           <FontAwesomeIcon :icon="['fas', 'arrow-down-short-wide']" />
         </button>
         <button
+          v-if="!commentsDisabled"
           type="button"
           class="fullscreenCommentAction"
           :aria-label="$t('Comments.Reload Comments')"
@@ -336,11 +337,18 @@
         </div>
       </div>
       <div
-        v-else-if="showComments && !isLoading"
+        v-else-if="commentsDisabled || (showComments && !isLoading)"
         class="noComments"
+        :class="{ noCommentsMessageOnly: commentsDisabled || fullscreenOverlay }"
       >
         <h3
-          v-if="isPostComments"
+          v-if="commentsDisabled"
+          class="noCommentMsg"
+        >
+          {{ $t("Comments.Comments are turned off") }}
+        </h3>
+        <h3
+          v-else-if="isPostComments"
           class="noCommentMsg"
         >
           {{ $t("Comments.There are no comments available for this post") }}
@@ -352,7 +360,7 @@
           {{ $t("Comments.There are no comments available for this video") }}
         </h3>
         <div
-          v-if="!fullscreenOverlay"
+          v-if="!fullscreenOverlay && !commentsDisabled"
           class="noCommentActions"
         >
           <FtSelect
@@ -463,6 +471,10 @@ const props = defineProps({
     required: true
   },
   isPostComments: {
+    type: Boolean,
+    default: false,
+  },
+  commentsDisabled: {
     type: Boolean,
     default: false,
   },
@@ -656,7 +668,7 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 })
 
 const canPerformInitialCommentLoading = computed(() => {
-  return commentData.value.length === 0 && !isLoading.value && !showComments.value
+  return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
 
 watch(
@@ -1139,7 +1151,6 @@ async function getCommentRepliesLocal(index, commentId = null) {
     comment.replies = comment.replies.concat(parsedReplies)
 
     const replyLoadState = getReplyLoadState(
-      parsedReplies.length,
       comment.replies.length,
       comment.numReplies,
       nextContinuation !== null
@@ -1151,6 +1162,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
     } else {
       replyTokens.delete(comment.id)
       comment.hasReplyToken = false
+    }
+
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
     }
 
     comment.showReplies = replyLoadState.showReplies
@@ -1280,7 +1295,6 @@ async function getCommentRepliesInvidious(
 
     comment.replies = comment.replies.concat(commentData)
     const replyLoadState = getReplyLoadState(
-      commentData.length,
       comment.replies.length,
       comment.numReplies,
       continuation !== null
@@ -1293,6 +1307,10 @@ async function getCommentRepliesInvidious(
     } else {
       replyTokens.delete(comment.id)
       comment.hasReplyToken = false
+    }
+
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
     }
 
     isLoading.value = false
@@ -1352,7 +1370,6 @@ async function getPostCommentRepliesInvidious(index) {
     })
     comment.replies = comment.replies.concat(comments)
     const replyLoadState = getReplyLoadState(
-      comments.length,
       comment.replies.length,
       comment.numReplies,
       continuation !== null
@@ -1365,6 +1382,10 @@ async function getPostCommentRepliesInvidious(index) {
     } else {
       replyTokens.delete(comment.id)
       comment.hasReplyToken = false
+    }
+
+    if (replyLoadState.hasMissingReplies) {
+      comment.numReplies = comment.replies.length
     }
 
     isLoading.value = false

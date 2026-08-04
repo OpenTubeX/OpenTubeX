@@ -159,6 +159,12 @@
   padding-block: 8px;
 }
 
+/* The sort/reload actions normally give the card its height. Without them the
+   lone message would sit in a cramped strip, so pad it out instead. */
+.noCommentsMessageOnly {
+  padding-block: 24px;
+}
+
 .noCommentActions {
   display: flex;
   flex: 0 0 auto;

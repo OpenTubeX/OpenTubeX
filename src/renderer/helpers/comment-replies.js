@@ -1,16 +1,16 @@
 /**
- * @param {number} parsedReplyCount
  * @param {number} loadedReplyCount
  * @param {number} expectedReplyCount
  * @param {boolean} hasNextContinuation
  */
-export function getReplyLoadState(parsedReplyCount, loadedReplyCount, expectedReplyCount, hasNextContinuation) {
-  const shouldRetry = parsedReplyCount === 0 && loadedReplyCount < expectedReplyCount
+export function getReplyLoadState(loadedReplyCount, expectedReplyCount, hasNextContinuation) {
+  const hasMissingReplies = loadedReplyCount < expectedReplyCount &&
+    !hasNextContinuation
 
   return {
-    hasMore: hasNextContinuation || shouldRetry,
+    hasMore: hasNextContinuation,
+    hasMissingReplies,
     showReplies: loadedReplyCount > 0,
-    shouldRetry
   }
 }
 
