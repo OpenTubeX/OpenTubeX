@@ -236,6 +236,17 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await player.evaluate(element => element.classList.remove('shortsPaused'))
   await expect(topControls).toHaveCSS('opacity', '0')
   await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
+
+  await player.evaluate(element => {
+    const actionDock = document.createElement('div')
+    actionDock.className = 'fullscreenActions'
+    element.classList.add('fullWindow')
+    element.append(actionDock)
+  })
+  const actionDock = player.locator('.fullscreenActions')
+  await expect(actionDock).toHaveCSS('display', 'flex')
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(actionDock).toHaveCSS('pointer-events', 'auto')
 })
 
 test('compact chapters button marks its open state', async ({ page }) => {

@@ -64,6 +64,7 @@
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"
       @mouseenter="handleScrollMiniPlayerEnter"
+      @mousemove.capture="handlePlayerMouseMove"
       @mouseleave="handlePlayerMouseLeave"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"

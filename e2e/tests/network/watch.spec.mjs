@@ -1701,6 +1701,60 @@ test.describe('custom Shorts player', () => {
     expect((await replayIcon.locator('path').getAttribute('d')).length).toBeGreaterThan(20)
   })
 
+  test('fullscreen Shorts controls follow the video hover area', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    let playerLoaded = false
+    const settled = await expect.poll(async () => {
+      playerLoaded = await player.isVisible().catch(() => false)
+      return playerLoaded || await errorMessage.isVisible().catch(() => false) ? 'done' : 'waiting'
+    }, { timeout: 30_000 }).toBe('done').then(() => true, () => false)
+    test.skip(
+      !settled || !playerLoaded,
+      `Shorts watch page unavailable from the live API: ${(await errorMessage.textContent().catch(() => ''))?.trim() || 'unhydrated'}`
+    )
+
+    await waitForPlaybackOrSkip(test, page)
+    await setPlayerFullscreen(page, true)
+
+    const controls = player.locator('.shaka-controls-container')
+    const topControls = player.locator('.shortsTopControls')
+    const actionDock = player.locator('.fullscreenActions')
+    const videoSpace = player.locator('.shortsFullscreenVideoSpace')
+    const [playerBounds, videoBounds] = await Promise.all([
+      player.boundingBox(),
+      videoSpace.boundingBox(),
+    ])
+    expect(videoBounds.width).toBeGreaterThan(0)
+    expect(videoBounds.x).toBeGreaterThan(playerBounds.x)
+
+    await page.mouse.move(
+      videoBounds.x + videoBounds.width / 2,
+      videoBounds.y + videoBounds.height / 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+
+    await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
+    await expect(controls).not.toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
+    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(actionDock).toHaveCSS('opacity', '1')
+    await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+
+    await page.mouse.move(
+      videoBounds.x + videoBounds.width / 2,
+      videoBounds.y + videoBounds.height / 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+  })
+
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'Shorts detection needs the real API')
 

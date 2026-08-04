@@ -5320,7 +5320,33 @@ export default defineComponent({
       handleScrollMiniPlayerLeave(event)
 
       if (props.shortsPlayer && !video.value.paused) {
-        ui?.getControls().getControlsContainer().setAttribute('shown', 'false')
+        ui?.getControls().getControlsContainer().removeAttribute('shown')
+      }
+    }
+
+    /**
+     * In fullscreen Shaka's controls surface fills the viewport, so mouse
+     * movement over the empty space would keep the controls visible. Prevent
+     * those events from reaching Shaka and treat the explicit video-space
+     * column like the inline player's hover area.
+     * @param {MouseEvent} event
+     */
+    function handlePlayerMouseMove(event) {
+      const videoElement = video.value
+      if (!props.shortsPlayer || !isFullscreen.value || videoElement.paused) {
+        return
+      }
+
+      const videoSpace = container.value?.querySelector('.shortsFullscreenVideoSpace')
+      if (!videoSpace) {
+        return
+      }
+
+      const bounds = videoSpace.getBoundingClientRect()
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+          event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        event.stopPropagation()
+        ui?.getControls().getControlsContainer().removeAttribute('shown')
       }
     }
 
@@ -8434,6 +8460,7 @@ export default defineComponent({
       handleWaiting,
       openShortsOverflowMenu,
       positionShortsContextMenu,
+      handlePlayerMouseMove,
       handlePlayerMouseLeave,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,

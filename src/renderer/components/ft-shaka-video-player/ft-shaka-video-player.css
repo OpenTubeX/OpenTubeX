@@ -272,6 +272,8 @@
   align-items: flex-start;
   background: none;
   transition:
+    opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 600ms,
     inset-inline-start 250ms ease,
     max-inline-size 250ms ease;
 }
@@ -1676,7 +1678,9 @@
 }
 
 .ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
-.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions {
+.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer.shortsPlayer:fullscreen .fullscreenActions,
+.ftVideoPlayer.shortsPlayer.fullWindow .fullscreenActions {
   opacity: 1;
   pointer-events: auto;
 }
