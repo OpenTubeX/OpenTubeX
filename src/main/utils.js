@@ -19,7 +19,12 @@ export function buildProxyUrl({ protocol, hostname, port, username, password }) 
     ? `${encodeURIComponent(username)}:${encodeURIComponent(password ?? '')}@`
     : ''
 
-  return `${protocol}://${credentials}${hostname}:${port}`
+  // IPv6 addresses have to be wrapped in brackets to separate them from the port
+  const host = hostname.includes(':') && !hostname.startsWith('[')
+    ? `[${hostname}]`
+    : hostname
+
+  return `${protocol}://${credentials}${host}:${port}`
 }
 
 /**
