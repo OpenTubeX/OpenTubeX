@@ -699,6 +699,43 @@ test.describe('watch page', () => {
     await expect(replies.first()).toBeVisible()
   })
 
+  test('stale reply controls disappear after an empty final reply page', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const comments = page.locator('.comment')
+    const commentIndex = await comments.evaluateAll(elements => (
+      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
+    ))
+    expect(commentIndex).toBeGreaterThanOrEqual(0)
+    const comment = comments.nth(commentIndex)
+    const replyToggle = comment.locator('.commentMoreReplies')
+    await expect(replyToggle).toBeVisible()
+
+    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        onResponseReceivedEndpoints: [{
+          appendContinuationItemsAction: {
+            targetId: 'comment-replies-item-stale'
+          }
+        }]
+      })
+    }), { times: 1 })
+
+    await replyToggle.click()
+
+    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
+    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
+    await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
+  })
+
   test('fullscreen comments dock preserves its active state and scroll position', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
