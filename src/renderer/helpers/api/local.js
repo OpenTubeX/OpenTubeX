@@ -6,6 +6,7 @@ import { PlayerCache } from './PlayerCache'
 import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
+import { getLocalPremiereState } from '../premiere'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -409,13 +410,15 @@ export async function getLocalSearchContinuation(continuationData) {
  *     osVersion: string
  *   },
  *   adEndTimeUnixMs: number,
- *   paidPromotionDurationMs: number | null
+ *   paidPromotionDurationMs: number | null,
+ *   isPremiere: boolean | undefined
  * }>}
  */
 export async function getLocalVideoInfo(id) {
   let responseTime = Date.now()
   let totalAdTimeMilliseconds = 0
   let paidPromotionDurationMs = null
+  let isPremiere
 
   const webInnertube = await createInnertube({
     withPlayer: true,
@@ -434,6 +437,7 @@ export async function getLocalVideoInfo(id) {
       const json = JSON.parse(responseText)
 
       paidPromotionDurationMs ??= getPaidPromotionDurationMs(json)
+      isPremiere ??= getLocalPremiereState(json.videoDetails)
 
       if (Array.isArray(json.adSlots)) {
         for (const adSlot of json.adSlots) {
@@ -548,7 +552,7 @@ export async function getLocalVideoInfo(id) {
 
   if ((info.playability_status.status === 'UNPLAYABLE' && (!hasTrailer || trailerIsAgeRestricted)) ||
     info.playability_status.status === 'LOGIN_REQUIRED') {
-    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs }
+    return { info, poToken: undefined, clientInfo, paidPromotionDurationMs, isPremiere }
   }
 
   if (hasTrailer && info.playability_status.status !== 'OK') {
@@ -616,6 +620,7 @@ export async function getLocalVideoInfo(id) {
     clientInfo,
     adEndTimeUnixMs,
     paidPromotionDurationMs,
+    isPremiere,
   }
 }
 

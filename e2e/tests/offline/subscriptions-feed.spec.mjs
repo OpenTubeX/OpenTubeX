@@ -16,7 +16,6 @@ function feedVideo(videoId, title, authorId, published, extra = {}) {
     viewCount: 1000,
     lengthSeconds: 120,
     liveNow: false,
-    isUpcoming: false,
     type: 'video',
     ...extra
   }
@@ -55,7 +54,6 @@ test.use({
           }),
           feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
           feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
-            isUpcoming: true,
             premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
           })
         ],

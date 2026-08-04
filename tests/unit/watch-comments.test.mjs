@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { getLocalPremiereState } from '../../src/renderer/helpers/premiere.js'
 import { areCommentsAvailable } from '../../src/renderer/views/Watch/watchComments.js'
+
+test('only identifies a Local API livestream as a premiere from an explicit marker', () => {
+  assert.equal(getLocalPremiereState({ isLive: true, isLiveContent: false }), true)
+  assert.equal(getLocalPremiereState({ isLive: true, isLiveContent: true }), false)
+  assert.equal(getLocalPremiereState({ isLive: true }), undefined)
+  assert.equal(getLocalPremiereState({ isLive: false }), false)
+})
 
 test('shows comments for videos and active premieres but not live streams', () => {
   assert.equal(areCommentsAvailable({ isLive: false, isPremiere: false, hideComments: false }), true)

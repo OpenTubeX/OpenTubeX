@@ -85,7 +85,6 @@ const nextUpcomingPremiereTimestamp = computed(() => {
       if (
         timestamp != null &&
         timestamp > premiereUpdateNow.value &&
-        (video.isUpcoming || video.premiere) &&
         (nextTimestamp == null || timestamp < nextTimestamp)
       ) {
         nextTimestamp = timestamp

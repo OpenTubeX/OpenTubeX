@@ -1621,7 +1621,7 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere } = videoInfo
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -1752,7 +1752,7 @@ export default defineComponent({
         this.isLive = !!result.basic_info.is_live
         this.isUpcoming = !!result.basic_info.is_upcoming
         this.isLiveContent = !!result.basic_info.is_live_content
-        this.isPremiere = this.isLive && !this.isLiveContent
+        this.isPremiere = isPremiere === true
         this.isPostLiveDvr = !!result.basic_info.is_post_live_dvr
         this.isUnlisted = !!result.basic_info.is_unlisted
         this.hasAiGeneratedContent = result.primary_info?.badges.some(badge => badge.label === 'AI') ?? false
