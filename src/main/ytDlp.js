@@ -482,6 +482,13 @@ export async function handleYtDlpGetInfo(event, options) {
     return null
   }
 
+  // The startup check (called without options) downloads the managed binaries
+  // when they are missing, which would hit the network and show the download
+  // progress bar during E2E runs.
+  if (options === undefined && process.env.OPENTUBEX_E2E_USER_DATA_DIR) {
+    return null
+  }
+
   if (options !== undefined && (
     options === null ||
     typeof options !== 'object' ||
