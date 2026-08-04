@@ -87,45 +87,48 @@
         @reset="emit('reset')"
       />
     </span>
-    <Teleport to="body">
-      <ul
-        v-if="dropdownShown"
-        :id="`${id}-listbox`"
-        ref="dropdown"
-        v-overlay-scrollbars
-        class="selectDropdown"
-        role="listbox"
-        :aria-labelledby="`${id}-label`"
-        :style="dropdownStyle"
-        @pointerdown="handleDropdownPointerDown"
-      >
-        <li
-          v-for="(name, index) in selectNames"
-          :id="`${id}-option-${index}`"
-          :key="selectValues[index]"
-          ref="options"
-          class="selectOption"
-          :class="{ active: index === activeIndex, selected: selectValues[index] === value }"
-          role="option"
-          tabindex="-1"
-          :aria-selected="selectValues[index] === value"
-          :dir="isLocaleSelector ? 'auto' : null"
-          :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
-          @mousedown.prevent
-          @pointermove="activeIndex = index"
-          @click="selectOption(index)"
-          @keydown.enter.space.prevent="selectOption(index)"
+    <Teleport :to="dropdownTarget">
+      <Transition name="select-dropdown">
+        <ul
+          v-if="dropdownShown"
+          :id="`${id}-listbox`"
+          ref="dropdown"
+          v-overlay-scrollbars
+          class="selectDropdown"
+          :class="dropdownPlacement"
+          role="listbox"
+          :aria-labelledby="`${id}-label`"
+          :style="dropdownStyle"
+          @pointerdown="handleDropdownPointerDown"
         >
-          {{ name }}
-        </li>
-      </ul>
+          <li
+            v-for="(name, index) in selectNames"
+            :id="`${id}-option-${index}`"
+            :key="selectValues[index]"
+            ref="options"
+            class="selectOption"
+            :class="{ active: index === activeIndex, selected: selectValues[index] === value }"
+            role="option"
+            tabindex="-1"
+            :aria-selected="selectValues[index] === value"
+            :dir="isLocaleSelector ? 'auto' : null"
+            :lang="isLocaleSelector && selectValues[index] !== 'system' && selectValues[index] !== '' ? selectValues[index] : null"
+            @mousedown.prevent
+            @pointermove="activeIndex = index"
+            @click="selectOption(index)"
+            @keydown.enter.space.prevent="selectOption(index)"
+          >
+            {{ name }}
+          </li>
+        </ul>
+      </Transition>
     </Teleport>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
@@ -192,6 +195,8 @@ const options = useTemplateRef('options')
 const dropdownShown = ref(false)
 const activeIndex = ref(0)
 const dropdownStyle = ref({})
+const dropdownTarget = shallowRef(document.fullscreenElement ?? document.body)
+const dropdownPlacement = ref('below')
 let typeahead = ''
 let typeaheadTimer = null
 let pointerDownInDropdown = false
@@ -233,6 +238,7 @@ function toggleDropdown() {
 
 function openDropdown() {
   activeIndex.value = Math.max(0, selectedIndex.value)
+  dropdownTarget.value = selectRoot.value?.closest('.prompt') ?? document.fullscreenElement ?? document.body
   dropdownShown.value = true
 
   nextTick(() => {
@@ -277,6 +283,7 @@ function updateDropdownPosition() {
         Math.min(buttonRect.bottom + menuGap, maximumBottom - menuHeight)
       )
 
+  dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
     left: `${left}px`,
