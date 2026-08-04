@@ -492,6 +492,14 @@ const visibleTabs = computed(() => {
 
 watch(visibleTabs, (value) => {
   if (value.length === 0) {
+    // Invalidate both scheduled nextTick work and an already queued frame so a
+    // deferred switch cannot restore a feed after its final tab is hidden.
+    tabChangeSequence++
+    if (pendingTabChangeFrame !== null) {
+      window.cancelAnimationFrame(pendingTabChangeFrame)
+      pendingTabChangeFrame = null
+    }
+
     selectedTab.value = null
     currentTab.value = null
   } else if (!value.includes(selectedTab.value)) {
