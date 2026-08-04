@@ -18,18 +18,6 @@ Adds a compact player.
 <!-- release-note:end -->
 `
 
-const EMPTY_NOTE_MARKERS = `
-<!-- release-note:start -->
-
-<!-- release-note:end -->
-`
-
-const IMAGE_MARKERS = `
-<!-- release-note-image:start -->
-
-<!-- release-note-image:end -->
-`
-
 const categoryMarkers = (category) => `
 <!-- release-note-category:start -->
 - [${category === 'Not noteworthy' ? 'x' : ' '}] Not noteworthy
@@ -38,6 +26,19 @@ const categoryMarkers = (category) => `
 - [${category === 'Fixed bugs' ? 'x' : ' '}] Fixed bugs
 <!-- release-note-category:end -->
 `
+
+// Pull request bodies have to keep every marker pair of the template, so the
+// fixtures compose them the same way the template does.
+function pullRequestBody(category, { note = '', images = '' } = {}) {
+  return `${categoryMarkers(category)}
+<!-- release-note:start -->
+${note}
+<!-- release-note:end -->
+<!-- release-note-image:start -->
+${images}
+<!-- release-note-image:end -->
+`
+}
 
 function png(width, height) {
   const buffer = Buffer.alloc(24)
@@ -86,7 +87,7 @@ function webp(type, width, height) {
 test('every pull request requires exactly one release note category', () => {
   assert.deepEqual(validatePullRequestEvent({
     pull_request: {
-      body: `${categoryMarkers('Not noteworthy')}${EMPTY_NOTE_MARKERS}${IMAGE_MARKERS}`,
+      body: pullRequestBody('Not noteworthy'),
     },
   }), {
     category: 'Not noteworthy',
@@ -94,9 +95,11 @@ test('every pull request requires exactly one release note category', () => {
 
   assert.throws(() => validatePullRequestEvent({
     pull_request: {
-      body: `${categoryMarkers(null)}${NOTE_MARKERS}${IMAGE_MARKERS}`,
+      body: pullRequestBody('None of them'),
     },
   }), /Select exactly one release note category/)
+
+  assert.throws(() => parseReleaseNoteCategory(''), /Select one release note category/)
 
   assert.throws(() => parseReleaseNoteCategory(`
 <!-- release-note-category:start -->
@@ -109,9 +112,37 @@ test('every pull request requires exactly one release note category', () => {
 test('release notes are required for noteworthy categories', () => {
   assert.throws(() => validatePullRequestEvent({
     pull_request: {
-      body: `${categoryMarkers('Highlights')}${EMPTY_NOTE_MARKERS}${IMAGE_MARKERS}`,
+      body: pullRequestBody('Highlights'),
     },
   }), /Fill in the release note section/)
+})
+
+test('pull request bodies have to keep every release note marker', () => {
+  const body = pullRequestBody('Not noteworthy')
+  const markers = ['release-note-category', 'release-note', 'release-note-image']
+
+  for (const marker of markers) {
+    const withoutMarker = body.replace(`<!-- ${marker}:start -->`, '')
+
+    assert.throws(
+      () => validatePullRequestEvent({ pull_request: { body: withoutMarker } }),
+      new RegExp(`Keep the ${marker} markers`),
+      `removing the ${marker} markers has to be rejected`,
+    )
+
+    const withoutEndMarker = body.replace(`<!-- ${marker}:end -->`, '')
+
+    assert.throws(
+      () => validatePullRequestEvent({ pull_request: { body: withoutEndMarker } }),
+      new RegExp(`Keep the ${marker} markers`),
+      `removing the ${marker} end marker has to be rejected`,
+    )
+  }
+
+  assert.throws(
+    () => validatePullRequestEvent({ pull_request: { body: '' } }),
+    /Keep the release-note-category markers/,
+  )
 })
 
 test('paginated pull request results are flattened', () => {
@@ -322,31 +353,24 @@ ${NOTE_MARKERS}
       title: 'Compact player',
     },
     {
-      body: `
-${categoryMarkers('More improvements')}
-<!-- release-note:start -->
-Adds keyboard shortcuts.
-<!-- release-note:end -->
-${IMAGE_MARKERS}
-`,
+      body: pullRequestBody('More improvements', { note: 'Adds keyboard shortcuts.' }),
       number: 43,
       title: 'Keyboard shortcuts',
     },
     {
-      body: `
-${categoryMarkers('Fixed bugs')}
-<!-- release-note:start -->
-Fixed videos failing to load.
-<!-- release-note:end -->
-${IMAGE_MARKERS}
-`,
+      body: pullRequestBody('Fixed bugs', { note: 'Fixed videos failing to load.' }),
       number: 44,
       title: 'Fix video loading',
     },
     {
-      body: `${categoryMarkers('Not noteworthy')}${EMPTY_NOTE_MARKERS}${IMAGE_MARKERS}`,
+      body: pullRequestBody('Not noteworthy'),
       number: 45,
       title: 'Refactor tests',
+    },
+    {
+      body: 'Legacy pull request body',
+      number: 46,
+      title: 'Legacy change',
     },
   ], {
     loadImage: async () => png(800, 600),
@@ -371,11 +395,7 @@ ${IMAGE_MARKERS}
 test('empty release note categories are omitted', async () => {
   const result = await renderReleaseNotes([
     {
-      body: `
-${categoryMarkers('Fixed bugs')}
-${NOTE_MARKERS}
-${IMAGE_MARKERS}
-`,
+      body: pullRequestBody('Fixed bugs', { note: 'Adds a compact player.' }),
       number: 42,
       title: 'Compact player',
     },
@@ -390,7 +410,7 @@ ${IMAGE_MARKERS}
 test('a release with only non-noteworthy pull requests is rejected', async () => {
   await assert.rejects(
     renderReleaseNotes([{
-      body: `${categoryMarkers('Not noteworthy')}${EMPTY_NOTE_MARKERS}${IMAGE_MARKERS}`,
+      body: pullRequestBody('Not noteworthy'),
       number: 42,
       title: 'Refactor tests',
     }]),
@@ -400,7 +420,7 @@ test('a release with only non-noteworthy pull requests is rejected', async () =>
 
 test('nightly releases can render a fallback when there are no noteworthy changes', async () => {
   const result = await renderReleaseNotes([{
-    body: `${categoryMarkers('Not noteworthy')}${EMPTY_NOTE_MARKERS}${IMAGE_MARKERS}`,
+    body: pullRequestBody('Not noteworthy'),
     number: 42,
     title: 'Refactor tests',
   }], {

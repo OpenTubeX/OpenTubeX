@@ -1,4 +1,5 @@
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
+import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
 import shaka from 'shaka-player'
 import { useI18n } from 'vue-i18n'
 
@@ -61,6 +62,7 @@ import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
+import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
@@ -166,6 +168,7 @@ const LOCALE_MAPPINGS = new Map(process.env.SHAKA_LOCALE_MAPPINGS)
 export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
+    FtPaidPromotionBadge,
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
@@ -394,6 +397,14 @@ export default defineComponent({
       type: Array,
       default: () => ['fas', 'bookmark']
     },
+    paidPromotion: {
+      type: Boolean,
+      default: false
+    },
+    paidPromotionDurationMs: {
+      type: Number,
+      default: 10000
+    },
     resumePlaybackAfterSabrReload: {
       type: Boolean,
       default: false
@@ -451,6 +462,25 @@ export default defineComponent({
     const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
     const showPoster = ref(true)
+    const showPaidPromotion = ref(false)
+    let paidPromotionTimer = null
+
+    function resetPaidPromotion() {
+      clearTimeout(paidPromotionTimer)
+      paidPromotionTimer = null
+      showPaidPromotion.value = props.paidPromotion && !props.shortsPlayer
+    }
+
+    function startPaidPromotionTimer() {
+      if (!showPaidPromotion.value || paidPromotionTimer !== null) {
+        return
+      }
+
+      paidPromotionTimer = setTimeout(() => {
+        showPaidPromotion.value = false
+        paidPromotionTimer = null
+      }, props.paidPromotionDurationMs)
+    }
 
     const autoplayNextVideo = computed(() => props.autoplayCountdown?.video ?? null)
     const autoplayThumbnail = computed(() => {
@@ -3724,6 +3754,23 @@ export default defineComponent({
       updateSponsorBlockSubmissionState()
     }, { immediate: true })
 
+    watch(
+      [() => props.videoId, () => props.paidPromotion, () => props.shortsPlayer],
+      ([videoId, paidPromotion, shortsPlayer], previous = []) => {
+        resetPaidPromotion()
+        if (shouldStartPaidPromotionTimer({
+          videoId,
+          previousVideoId: previous[0],
+          paidPromotion,
+          shortsPlayer,
+          paused: video.value?.paused,
+        })) {
+          startPaidPromotionTimer()
+        }
+      },
+      { immediate: true }
+    )
+
     watch(useSponsorBlock, enabled => {
       if (!enabled) {
         closeSponsorBlockInfo()
@@ -4161,6 +4208,7 @@ export default defineComponent({
       // frame is available the poster is no longer needed, so remove it before
       // a later blur-triggered PiP transition.
       showPoster.value = false
+      startPaidPromotionTimer()
 
       if (process.env.IS_ELECTRON && window.ftElectron?.tabs?.setPlaybackState) {
         window.ftElectron.tabs.setPlaybackState('playing', tabId)
@@ -8123,6 +8171,7 @@ export default defineComponent({
     // #region tear down
 
     onBeforeUnmount(() => {
+      clearTimeout(paidPromotionTimer)
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       closeFullscreenMetadata()
@@ -8383,6 +8432,7 @@ export default defineComponent({
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,
       showPoster,
+      showPaidPromotion,
       toggleShortsPlayback,
       toggleShortsMuted,
       toggleShortsCaptions,
