@@ -55,6 +55,47 @@ test('truncates long selections so the rest of the label is never cut off', asyn
   await expect.poll(() => page.url()).toContain(`#/search/${encodeURIComponent(selectionText)}`)
 })
 
+test('truncates long selections without splitting emoji', async ({ page }) => {
+  // The 30th UTF-16 code unit lands inside the family emoji's ZWJ sequence
+  const selectionText = 'Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and more text'
+  const label = await page.evaluate((selection) => window.ftElectron.contextMenu.open({
+    selectionText: selection
+  }).then(menu => menu.items
+    .find(item => item.labelKey === 'Context Menu.Search Selection in New Tab')
+    .labelParameters.selection), selectionText)
+
+  expect(label.endsWith('…')).toBe(true)
+  // A cut inside the sequence would leave an unpaired surrogate behind
+  expect(label).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/)
+  expect(label).toBe('Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and…')
+})
+
+test('keeps a tall context menu inside the window', async ({ page }) => {
+  await page.evaluate(() => {
+    const paragraph = document.createElement('p')
+    paragraph.textContent = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
+    paragraph.style.cssText = 'position:fixed;top:8px;left:40px;width:300px;z-index:19000;background:#000'
+    document.body.append(paragraph)
+
+    const range = document.createRange()
+    range.selectNodeContents(paragraph)
+    const selection = window.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+  })
+  await page.mouse.click(60, 20, { button: 'right' })
+
+  const menu = page.getByRole('menu', { name: 'Context Menu' })
+  await expect(menu).toBeVisible()
+
+  const bounds = await menu.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    return { top: rect.top, bottom: rect.bottom, viewport: window.innerHeight }
+  })
+  expect(bounds.top).toBeGreaterThanOrEqual(0)
+  expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewport)
+})
+
 test('renders long selection labels without clipping them', async ({ page }) => {
   const point = await page.evaluate(() => {
     const paragraph = document.createElement('p')

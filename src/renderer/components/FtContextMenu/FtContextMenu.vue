@@ -7,6 +7,7 @@
       <div
         v-if="isOpen"
         ref="menuRef"
+        v-overlay-scrollbars
         class="contextMenu"
         :class="{ submenusOpenStart }"
         :style="menuStyle"

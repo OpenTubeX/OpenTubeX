@@ -14,6 +14,11 @@
   position: fixed;
   z-index: 20000;
   transform-origin: top left;
+
+  /* Wrapping labels makes tall menus more likely, so keep the bottom entries
+     reachable instead of letting them run past the edge of the window */
+  max-block-size: calc(100vh - 16px);
+  overflow-y: auto;
 }
 
 .contextMenu.submenusOpenStart {

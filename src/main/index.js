@@ -337,13 +337,23 @@ function runApp() {
   // (e.g. the trailing "in a New Tab") stays readable instead of being cut off
   const SELECTION_LABEL_MAX_LENGTH = 30
 
+  // Counting grapheme clusters rather than UTF-16 code units, so that the cut
+  // never lands inside an emoji or a combining character sequence
+  const selectionLabelSegmenter = new Intl.Segmenter()
+
   /**
    * @param {string} text
    */
   function truncateSelectionForLabel(text) {
-    return text.length > SELECTION_LABEL_MAX_LENGTH
-      ? `${text.slice(0, SELECTION_LABEL_MAX_LENGTH).trimEnd()}…`
-      : text
+    const graphemes = []
+    for (const { segment } of selectionLabelSegmenter.segment(text)) {
+      if (graphemes.length === SELECTION_LABEL_MAX_LENGTH) {
+        return `${graphemes.join('').trimEnd()}…`
+      }
+      graphemes.push(segment)
+    }
+
+    return text
   }
 
   /** @type {Record<string, Function | boolean>} */
