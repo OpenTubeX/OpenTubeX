@@ -1,9 +1,12 @@
 name: Mirror to GitLab
 
+# Every run mirrors all refs, so there is nothing to gain from starting one per
+# pushed branch. Listening on '**' only made the mirror a check on every pull
+# request, because GitHub reports push runs against the head commit.
 on:
   push:
     branches:
-      - '**'
+      - development
     tags:
       - '**'
   delete:
@@ -80,16 +83,26 @@ jobs:
             'refs/heads/*:refs/heads/*' \
             'refs/tags/*:refs/tags/*'
 
-          git ls-remote --heads --tags "${SOURCE_URL}" \
-            | LC_ALL=C sort > "${mirror_dir}/source-refs.txt"
+          # Verify against the snapshot that was just pushed, not against a
+          # fresh look at GitHub: branches are deleted there while the mirror
+          # runs (auto-delete on merge), and re-reading the source made those
+          # deletions look like refs the mirror had failed to prune. The next
+          # run reconciles whatever moved in the meantime.
+          git -C "${mirror_dir}/repository.git" for-each-ref \
+            --format='%(objectname) %(refname)' refs/heads refs/tags \
+            | LC_ALL=C sort > "${mirror_dir}/expected-refs.txt"
 
+          # ls-remote reports an extra '^{}' line per annotated tag, which
+          # for-each-ref does not, so drop the peeled entries on both sides.
           git ls-remote --heads --tags "${TARGET_URL}" \
+            | sed '/\^{}$/d' \
+            | awk '{ print $1, $2 }' \
             | LC_ALL=C sort > "${mirror_dir}/target-refs.txt"
 
           if ! diff --unified \
-            "${mirror_dir}/source-refs.txt" \
+            "${mirror_dir}/expected-refs.txt" \
             "${mirror_dir}/target-refs.txt"; then
-            echo "::error::GitLab branch or tag refs do not match GitHub."
+            echo "::error::GitLab branch or tag refs do not match the mirrored GitHub snapshot."
             exit 1
           fi
 
