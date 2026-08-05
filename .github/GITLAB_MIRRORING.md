@@ -5,10 +5,17 @@ GitHub (`OpenTubeX/OpenTubeX`) is the authoritative repository. GitLab
 upstream source. Direct commits, branches, or tags created on GitLab may be
 overwritten or deleted by the next synchronization.
 
-The `Mirror to GitLab` workflow synchronizes every GitHub branch and tag after
-pushes and deletions. It also runs nightly to reconcile failed attempts. Force
-updates preserve exact synchronization after rewritten GitHub history, and
-branch or tag deletions on GitHub are propagated to GitLab.
+The `Mirror to GitLab` workflow synchronizes every GitHub branch and tag in a
+single run. It starts after pushes to `development`, after tag pushes, after
+branch or tag deletions, and nightly to reconcile failed attempts. Pushes to
+other branches do not start a run of their own, so a new feature branch reaches
+GitLab with the next run rather than immediately. Force updates preserve exact
+synchronization after rewritten GitHub history, and branch or tag deletions on
+GitHub are propagated to GitLab.
+
+Verification compares GitLab against the snapshot the run itself fetched and
+pushed. Refs that appear or disappear on GitHub while a run is in flight are
+therefore not reported as mirroring failures; the next run picks them up.
 
 Only Git refs are mirrored. Issues, merge requests, pull requests, releases,
 CI variables, project settings, packages, and other platform-specific metadata
