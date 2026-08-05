@@ -186,6 +186,7 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
       isFamilyFriendly: false,
@@ -285,6 +286,9 @@ export default defineComponent({
       fullscreenCommentsOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenCommentsTarget: null,
+      fullscreenLiveChatOpen: false,
+      /** @type {HTMLElement|null} */
+      fullscreenLiveChatTarget: null,
       fullscreenPlaylistOpen: false,
       /** @type {HTMLElement|null} */
       fullscreenPlaylistTarget: null,
@@ -589,6 +593,7 @@ export default defineComponent({
         this.fullscreenTranscriptOpen ||
         this.fullscreenSponsorBlockOpen ||
         this.fullscreenCommentsOpen ||
+        this.fullscreenLiveChatOpen ||
         this.fullscreenPlaylistOpen
       )
     },
@@ -823,6 +828,11 @@ export default defineComponent({
       if (!loading) {
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
+
+        if (this.applyDefaultTheatreModeAfterLoad) {
+          this.applyDefaultTheatreModeAfterLoad = false
+          this.useTheatreMode = this.theatreTogglePossible
+        }
       }
     },
     isTabPresented: {
@@ -945,6 +955,13 @@ export default defineComponent({
     handleFullscreenCommentsChange({ open, target }) {
       this.fullscreenCommentsTarget = open ? target : null
       this.fullscreenCommentsOpen = open && target !== null
+    },
+    handleFullscreenLiveChatChange({ open, target }) {
+      this.fullscreenLiveChatTarget = open ? target : null
+      this.fullscreenLiveChatOpen = open && target !== null
+    },
+    closeFullscreenLiveChat() {
+      this.$refs.player?.closeFullscreenLiveChat()
     },
     closeFullscreenComments() {
       if (this.fullscreenCommentsOpen) {
@@ -1404,7 +1421,14 @@ export default defineComponent({
     setViewingModeOnFirstLoad: function () {
       switch (this.defaultViewingMode) {
         case 'theatre':
-          this.useTheatreMode = this.theatreTogglePossible
+          if (this.theatreTogglePossible) {
+            this.useTheatreMode = true
+          } else {
+            // Live chat and other sidebar panels are only known after video
+            // metadata loads. Re-evaluate once instead of permanently rejecting
+            // the configured default based on the empty loading state.
+            this.applyDefaultTheatreModeAfterLoad = true
+          }
           break
         case 'fullscreen':
         case 'fullscreen_always_on':

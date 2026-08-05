@@ -52,6 +52,7 @@
         fullscreenTranscriptOpen: showFullscreenTranscript,
         fullscreenSponsorBlockOpen: showFullscreenSponsorBlock,
         fullscreenCommentsOpen: showFullscreenComments,
+        fullscreenLiveChatOpen: showFullscreenLiveChat,
         fullscreenPlaylistOpen: showFullscreenPlaylist,
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
         fullscreenDockResizing,
@@ -279,7 +280,7 @@
         </div>
       </Transition>
       <div
-        v-if="watchingPlaylist || commentsAvailable || useSponsorBlock || !isLive || showFullscreenShareAction || showFullscreenPlaylistAction || quickBookmarkEnabled"
+        v-if="watchingPlaylist || commentsAvailable || liveChatAvailable || useSponsorBlock || !isLive || showFullscreenShareAction || showFullscreenPlaylistAction || quickBookmarkEnabled"
         class="fullscreenActions shaka-no-propagation"
         @click.stop
         @dblclick.stop
@@ -295,6 +296,18 @@
           @click="setFullscreenPlaylist(!showFullscreenPlaylist)"
         >
           <FontAwesomeIcon :icon="['fas', 'list']" />
+        </button>
+        <button
+          v-if="liveChatAvailable"
+          type="button"
+          class="fullscreenAction fullscreenLiveChatToggle"
+          :class="{ open: showFullscreenLiveChat }"
+          :aria-label="$t('Video.Live Chat')"
+          :title="$t('Video.Live Chat')"
+          :aria-expanded="String(showFullscreenLiveChat)"
+          @click="setFullscreenLiveChat(!showFullscreenLiveChat)"
+        >
+          <FontAwesomeIcon :icon="['fas', 'message']" />
         </button>
         <button
           v-if="commentsAvailable"
@@ -582,6 +595,41 @@
         <div
           ref="fullscreenSponsorBlockTarget"
           class="fullscreenSponsorBlockTarget"
+        />
+      </aside>
+      <aside
+        ref="fullscreenLiveChatOverlay"
+        class="fullscreenLiveChatOverlay shaka-no-propagation"
+        :class="{
+          open: showFullscreenLiveChat,
+          fullscreenDockReorderable: fullscreenDockCanReorder('liveChat')
+        }"
+        :style="fullscreenDockStyle('liveChat')"
+        role="dialog"
+        :aria-label="$t('Video.Live Chat')"
+        :aria-hidden="String(!showFullscreenLiveChat)"
+        :inert="!showFullscreenLiveChat"
+        @click.stop
+        @dblclick.capture="handleFullscreenDockHeaderDoubleClick($event, 'liveChat')"
+        @dblclick.stop
+        @pointerdown.capture="handleFullscreenDockReorderPointerDown($event, 'liveChat')"
+        @pointerdown.stop
+        @wheel.stop
+        @keydown.esc.stop.prevent="closeFullscreenLiveChat"
+      >
+        <button
+          v-if="fullscreenDockCanResize('liveChat')"
+          type="button"
+          class="fullscreenDockResizeHandle"
+          :aria-label="$t('Video.Player.Resize dock', 'Resize dock')"
+          :title="$t('Video.Player.Resize dock', 'Resize dock')"
+          @pointerdown="handleFullscreenDockResizePointerDown($event, 'liveChat')"
+          @keydown="handleFullscreenDockResizeKeydown($event, 'liveChat')"
+          @dblclick.stop.prevent="resetFullscreenDockHeights"
+        />
+        <div
+          ref="fullscreenLiveChatTarget"
+          class="fullscreenLiveChatTarget"
         />
       </aside>
       <aside

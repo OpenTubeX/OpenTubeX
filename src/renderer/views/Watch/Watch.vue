@@ -117,6 +117,7 @@
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
           :comments-available="commentsAvailable"
+          :live-chat-available="showLiveChat"
           :quick-bookmark-enabled="isQuickBookmarkEnabled"
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
@@ -154,6 +155,7 @@
           @fullscreen-sponsorblock-change="handleFullscreenSponsorBlockChange"
           @toggle-transcript="toggleTranscript"
           @fullscreen-comments-change="handleFullscreenCommentsChange"
+          @fullscreen-live-chat-change="handleFullscreenLiveChatChange"
           @fullscreen-playlist-change="handleFullscreenPlaylistChange"
           @toggle-quick-bookmark="toggleCurrentVideoQuickBookmarked"
           @chapters-overlay-change="handleChaptersOverlayChange"
@@ -825,15 +827,37 @@
           />
         </transition>
       </Teleport>
-      <watch-video-live-chat
-        v-if="!isLoading && showLiveChat"
-        :live-chat="liveChat"
-        :video-id="videoId"
-        :channel-id="channelId"
-        :current-time="liveChatCurrentTime"
-        class="watchVideoSideBar watchVideoPlaylist"
-        :class="{ theatrePlaylist: useTheatreMode }"
-      />
+      <div
+        v-if="isLoading"
+        class="liveChatSkeleton watchVideoSideBar watchVideoPlaylist"
+        aria-hidden="true"
+      >
+        <div class="skeletonLine skeletonLiveChatTitle ft-shimmer" />
+        <div
+          v-for="index in 8"
+          :key="index"
+          class="skeletonLiveChatMessage"
+        >
+          <div class="skeletonLiveChatAvatar ft-shimmer" />
+          <div class="skeletonLine skeletonLiveChatLine ft-shimmer" />
+        </div>
+      </div>
+      <Teleport
+        :to="fullscreenLiveChatTarget || 'body'"
+        :disabled="!fullscreenLiveChatOpen"
+      >
+        <watch-video-live-chat
+          v-if="!isLoading && showLiveChat"
+          :live-chat="liveChat"
+          :video-id="videoId"
+          :channel-id="channelId"
+          :current-time="liveChatCurrentTime"
+          :fullscreen-overlay="fullscreenLiveChatOpen"
+          class="watchVideoSideBar watchVideoPlaylist"
+          :class="{ theatrePlaylist: useTheatreMode }"
+          @close="closeFullscreenLiveChat"
+        />
+      </Teleport>
       <watch-video-queue
         v-if="$store.getters.getWatchQueueLength > 0"
         class="watchVideoSideBar watchVideoQueue"

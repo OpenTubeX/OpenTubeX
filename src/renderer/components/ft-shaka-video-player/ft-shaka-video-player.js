@@ -119,6 +119,7 @@ const FULLSCREEN_DOCK_HEADER_SELECTOR = [
   '.fullscreenMetadataHeader',
   '.transcriptHeader',
   '.sponsorBlockHeader',
+  '.liveChatDockHeader',
   '.fullscreenCommentHeader',
   '.playlistDockHeader',
 ].join(', ')
@@ -391,6 +392,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    liveChatAvailable: {
+      type: Boolean,
+      default: false
+    },
     quickBookmarkEnabled: {
       type: Boolean,
       default: false
@@ -452,6 +457,7 @@ export default defineComponent({
     'fullscreen-transcript-change',
     'fullscreen-sponsorblock-change',
     'fullscreen-comments-change',
+    'fullscreen-live-chat-change',
     'fullscreen-playlist-change',
     'toggle-transcript',
     'toggle-quick-bookmark',
@@ -619,6 +625,11 @@ export default defineComponent({
     const fullscreenCommentsOverlay = ref(null)
     const showFullscreenComments = ref(false)
     /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenLiveChatOverlay = ref(null)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
+    const fullscreenLiveChatTarget = ref(null)
+    const showFullscreenLiveChat = ref(false)
+    /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenPlaylistOverlay = ref(null)
     /** @type {import('vue').Ref<HTMLElement | null>} */
     const fullscreenPlaylistTarget = ref(null)
@@ -636,7 +647,7 @@ export default defineComponent({
     const showFullscreenPlaylistAction = computed(() => !store.getters.getHidePlaylists)
     const isInAnyPlaylist = computed(() => store.getters.getPlaylistVideoCounts.has(props.videoId))
 
-    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'comments', 'playlist', 'chapters'])
+    const fullscreenDockOrder = reactive(['metadata', 'transcript', 'sponsorBlock', 'liveChat', 'comments', 'playlist', 'chapters'])
     const fullscreenDockWeights = reactive(Object.fromEntries(fullscreenDockOrder.map(dock => [dock, 1])))
     const fullscreenDockCollapsedState = Object.fromEntries(fullscreenDockOrder.map(dock => [dock, null]))
     const fullscreenDockResizing = ref(false)
@@ -652,6 +663,7 @@ export default defineComponent({
         case 'transcript': return showFullscreenTranscript.value
         case 'sponsorBlock': return showFullscreenSponsorBlock.value
         case 'comments': return showFullscreenComments.value
+        case 'liveChat': return showFullscreenLiveChat.value
         case 'playlist': return showFullscreenPlaylist.value
         case 'chapters': return showChaptersOverlay.value && props.chapters.length > 0
         default: return false
@@ -955,6 +967,7 @@ export default defineComponent({
     let restoreFullscreenTranscript = false
     let restoreFullscreenSponsorBlock = false
     let restoreFullscreenComments = props.startWithFullscreenComments
+    let restoreFullscreenLiveChat = false
     let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
@@ -5491,6 +5504,22 @@ export default defineComponent({
       })
     }
 
+    function setFullscreenLiveChat(shouldOpen) {
+      const open = Boolean(
+        shouldOpen && props.liveChatAvailable &&
+        (isNativeFullscreenActive() || fullWindowEnabled.value)
+      )
+      showFullscreenLiveChat.value = open
+      emit('fullscreen-live-chat-change', {
+        open,
+        target: fullscreenLiveChatTarget.value
+      })
+    }
+
+    function closeFullscreenLiveChat() {
+      setFullscreenLiveChat(false)
+    }
+
     function closeFullscreenComments() {
       setFullscreenComments(false)
     }
@@ -5587,6 +5616,7 @@ export default defineComponent({
       restoreFullscreenTranscript = showFullscreenTranscript.value
       restoreFullscreenSponsorBlock = showFullscreenSponsorBlock.value
       restoreFullscreenComments = showFullscreenComments.value
+      restoreFullscreenLiveChat = showFullscreenLiveChat.value
       restoreFullscreenPlaylist = showFullscreenPlaylist.value
     }
 
@@ -5605,6 +5635,11 @@ export default defineComponent({
       if (restoreFullscreenComments) {
         restoreFullscreenComments = false
         setFullscreenComments(true)
+      }
+
+      if (restoreFullscreenLiveChat) {
+        restoreFullscreenLiveChat = false
+        setFullscreenLiveChat(true)
       }
 
       if (restoreFullscreenMetadata) {
@@ -5634,6 +5669,10 @@ export default defineComponent({
       }
     })
 
+    watch(() => props.liveChatAvailable, available => {
+      if (!available && showFullscreenLiveChat.value) closeFullscreenLiveChat()
+    })
+
     watch(() => props.watchingPlaylist, watching => {
       if (!watching && showFullscreenPlaylist.value) {
         closeFullscreenPlaylist()
@@ -5659,6 +5698,7 @@ export default defineComponent({
         closeFullscreenMetadata()
         closeFullscreenTranscript()
         closeFullscreenSponsorBlock()
+        closeFullscreenLiveChat()
         closeFullscreenComments()
         closeFullscreenPlaylist()
       }
@@ -7591,6 +7631,7 @@ export default defineComponent({
           closeFullscreenMetadata()
           closeFullscreenTranscript()
           closeFullscreenSponsorBlock()
+          closeFullscreenLiveChat()
           closeFullscreenComments()
           closeFullscreenPlaylist()
         }
@@ -8276,6 +8317,7 @@ export default defineComponent({
       closeFullscreenMetadata()
       closeFullscreenTranscript()
       closeFullscreenSponsorBlock()
+      closeFullscreenLiveChat()
       closeFullscreenComments()
       closeFullscreenPlaylist()
       if (document.body.dataset.playerFullWindowOwner === mediaTabId) {
@@ -8476,6 +8518,7 @@ export default defineComponent({
       setFullscreenSponsorBlock,
       closeFullscreenSponsorBlock,
       closeFullscreenComments,
+      closeFullscreenLiveChat,
       closeFullscreenPlaylist,
       closeChaptersOverlay,
       toggleSponsorBlockInfo,
@@ -8596,6 +8639,11 @@ export default defineComponent({
       showFullscreenComments,
       closeFullscreenComments,
       setFullscreenComments,
+      fullscreenLiveChatOverlay,
+      fullscreenLiveChatTarget,
+      showFullscreenLiveChat,
+      closeFullscreenLiveChat,
+      setFullscreenLiveChat,
       fullscreenPlaylistOverlay,
       fullscreenPlaylistTarget,
       showFullscreenPlaylist,

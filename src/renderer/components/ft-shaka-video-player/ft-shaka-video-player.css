@@ -350,6 +350,7 @@
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
   .fullscreenCommentsOpen,
   .fullscreenPlaylistOpen,
   .chaptersOverlayOpen
@@ -358,6 +359,7 @@
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
   .fullscreenCommentsOpen,
   .fullscreenPlaylistOpen,
   .chaptersOverlayOpen
@@ -578,7 +580,7 @@
   page sidebar instead. When the comments panel is open too, chapters takes
   the available height is shared with the other open docks.
 */
-:is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay) {
+:is(.chapterOverlay, .fullscreenMetadataOverlay, .fullscreenTranscriptOverlay, .fullscreenSponsorBlockOverlay, .fullscreenLiveChatOverlay, .fullscreenCommentsOverlay, .fullscreenPlaylistOverlay) {
   /* Fullscreen docks use the contrast-safe Catppuccin Mocha glass palette in
      every app theme because their background is the video, not the app page. */
   --primary-text-color: #cdd6f4;
@@ -631,6 +633,7 @@
 .fullscreenDockReorderable :is(.chapterOverlayHeader, .fullscreenMetadataHeader),
 .fullscreenDockReorderable :deep(.transcriptHeader),
 .fullscreenDockReorderable :deep(.sponsorBlockHeader),
+.fullscreenDockReorderable :deep(.liveChatDockHeader),
 .fullscreenDockReorderable :deep(.fullscreenCommentHeader),
 .fullscreenDockReorderable :deep(.playlistDockHeader) {
   cursor: grab !important;
@@ -642,6 +645,7 @@
   .fullscreenMetadataOverlay,
   .fullscreenTranscriptOverlay,
   .fullscreenSponsorBlockOverlay,
+  .fullscreenLiveChatOverlay,
   .fullscreenCommentsOverlay,
   .fullscreenPlaylistOverlay
 ) {
@@ -1707,6 +1711,7 @@
 .fullscreenMetadataOverlay,
 .fullscreenTranscriptOverlay,
 .fullscreenSponsorBlockOverlay,
+.fullscreenLiveChatOverlay,
 .fullscreenCommentsOverlay,
 .fullscreenPlaylistOverlay {
   position: absolute;
@@ -1744,6 +1749,7 @@
 .fullscreenMetadataOverlay::before,
 .fullscreenTranscriptOverlay::before,
 .fullscreenSponsorBlockOverlay::before,
+.fullscreenLiveChatOverlay::before,
 .fullscreenCommentsOverlay::before,
 .fullscreenPlaylistOverlay::before {
   content: '';
@@ -1758,6 +1764,7 @@
 .ftVideoPlayer.presentationModeChanging .fullscreenMetadataOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenTranscriptOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenSponsorBlockOverlay,
+.ftVideoPlayer.presentationModeChanging .fullscreenLiveChatOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenCommentsOverlay,
 .ftVideoPlayer.presentationModeChanging .fullscreenPlaylistOverlay {
   transition: none !important;
@@ -1770,6 +1777,7 @@
 .fullscreenMetadataOverlay.open,
 .fullscreenTranscriptOverlay.open,
 .fullscreenSponsorBlockOverlay.open,
+.fullscreenLiveChatOverlay.open,
 .fullscreenCommentsOverlay.open,
 .fullscreenPlaylistOverlay.open {
   opacity: 1;
@@ -1784,6 +1792,22 @@
   block-size: 100%;
   min-block-size: 0;
   margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget,
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget :deep(.watchVideoSideBar) {
+  display: flex;
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.ftVideoPlayer.fullscreenLiveChatOpen .fullscreenLiveChatTarget :deep(.ft-card) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
   border-radius: 0;
   box-shadow: none;
 }
@@ -2063,6 +2087,7 @@
   .fullscreenMetadataTarget,
   .fullscreenTranscriptTarget,
   .fullscreenSponsorBlockTarget,
+  .fullscreenLiveChatTarget,
   .fullscreenCommentsOverlay
 ) :deep(.os-scrollbar-vertical) {
   --os-padding-axis: 0;
@@ -2104,6 +2129,7 @@
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
   .fullscreenCommentsOpen,
   .chaptersOverlayOpen
 ) .fullscreenPlaylistTarget :deep(.fullscreenPlaylistContent) {
@@ -2116,6 +2142,7 @@
   .fullscreenMetadataOpen,
   .fullscreenTranscriptOpen,
   .fullscreenSponsorBlockOpen,
+  .fullscreenLiveChatOpen,
   .fullscreenCommentsOpen,
   .chaptersOverlayOpen
 ) .fullscreenPlaylistTarget :deep(.playlistItemsWrapper) {
@@ -2150,7 +2177,7 @@
 
 .ftVideoPlayer.fullWindow .ambientFullscreenCanvas,
 .ftVideoPlayer.shortsPlayer:fullscreen .ambientFullscreenCanvas,
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .ambientFullscreenCanvas {
   opacity: 0.42;
 }
 
@@ -2266,14 +2293,14 @@
 }
 
 /* Keep the floating fullscreen actions next to the video instead of under the panel. */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .fullscreenActions {
   inset-inline-end: calc(var(--side-panel-width) + 24px);
 }
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 
@@ -3268,12 +3295,12 @@
   aside instead of covering it. Kept at the end of the file so the
   higher-specificity .player rules follow the scroll mini player ones.
 */
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .player {
   inline-size: calc(100% - var(--side-panel-width));
 }
 
-.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
@@ -3281,7 +3308,7 @@
   :deep(.shaka-text-container),
   :deep(.shaka-speech-to-text-container)
 ),
-  .ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
+  .ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) :is(
   :deep(.shaka-controls-container),
   :deep(.shaka-spinner-container),
   .countdownOverlay,
