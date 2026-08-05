@@ -39,14 +39,20 @@ test('subscription refresh uses YouTube selected Shorts thumbnails', async ({ pa
   // have Shorts, so the finished refresh leaves the feed empty. Asking again
   // returns the real one, the refresh button only comes back once the previous
   // refresh is done.
-  for (let attempt = 0; attempt < 3; attempt++) {
+  let served = false
+  for (let attempt = 0; attempt < 3 && !served; attempt++) {
     await page.getByRole('button', { name: /Refresh Shorts/ }).click()
-    try {
-      await short.waitFor({ state: 'visible', timeout: 25_000 })
-      break
-    } catch {
-      // an empty feed is retried, the assertion below reports a lasting one
-    }
+    served = await short.waitFor({ state: 'visible', timeout: 25_000 }).then(() => true, () => false)
+  }
+
+  if (!served) {
+    // Only a refresh that finished and reported an empty feed is the API
+    // withholding the Shorts. Shorts that never render without that message
+    // are a real failure, so they fall through to the assertion below.
+    const emptyFeed = page.locator('.message', { hasText: 'does not have any videos' })
+    const confirmedEmpty = await emptyFeed.waitFor({ state: 'visible', timeout: 15_000 })
+      .then(() => true, () => false)
+    test.skip(confirmedEmpty, 'the live API kept answering with an empty Shorts tab')
   }
 
   await expect(short).toBeVisible()

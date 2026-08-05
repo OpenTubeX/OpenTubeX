@@ -1,6 +1,5 @@
-import { sel } from '../../helpers/app.mjs'
 import { test, expect } from '../../helpers/innertube.mjs'
-import { activeTab, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
+import { activeTab, openVideoOrSkip, waitForPlaybackOrSkip } from '../../helpers/player.mjs'
 
 // "Me at the zoo" - the oldest video on YouTube, short and stable.
 const VIDEO = { id: 'jNQXAC9IVRw', title: 'Me at the zoo', url: 'https://www.youtube.com/watch?v=jNQXAC9IVRw' }
@@ -41,34 +40,8 @@ function pictureInPictureActive(page) {
   return page.evaluate(() => document.pictureInPictureElement !== null)
 }
 
-/**
- * Opens the watch page, or skips when the live API refuses to serve it (bot
- * checks on CI runners and VPNs), which leaves the page shell without any
- * video data instead of producing an error message.
- */
-async function openVideo(page) {
-  await page.locator(sel.searchInput).fill(VIDEO.url)
-  await page.locator(sel.searchInput).press('Enter')
-  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${VIDEO.id}`))
-
-  const title = page.locator(`${activeTab} .videoTitle`)
-  const errorMessage = page.locator(`${activeTab} .errorMessage`)
-  let state = 'waiting'
-  const settled = await expect
-    .poll(async () => {
-      const titleText = await title.textContent().catch(() => '') ?? ''
-      if (titleText.includes(VIDEO.title)) {
-        state = 'loaded'
-      } else if (await errorMessage.isVisible().catch(() => false)) {
-        state = (await errorMessage.textContent())?.trim() ?? 'unavailable'
-      }
-      return state === 'waiting' ? 'waiting' : 'done'
-    }, { timeout: 30_000, message: 'waiting for the watch page to load' })
-    .toBe('done')
-    .then(() => true, () => false)
-
-  test.skip(!settled || state !== 'loaded', `watch page unavailable from the live API: ${state}`)
-  await expect(page.locator(`${activeTab} .ftVideoPlayer`)).toBeVisible({ timeout: 30_000 })
+function openVideo(page) {
+  return openVideoOrSkip(test, page, VIDEO)
 }
 
 test.describe('automatic Picture-in-Picture', () => {

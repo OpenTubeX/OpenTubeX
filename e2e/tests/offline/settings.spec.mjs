@@ -749,10 +749,10 @@ test.describe('playback engine migration', () => {
 
     await goTo(app.page, 'settings')
     const generalSection = app.page.locator('[data-section="general"]')
-    const playbackEngine = generalSection.locator('.select').filter({ hasText: 'Playback Engine' })
+    const playbackEngine = generalSection.locator('.select').filter({ hasText: 'Stream extraction method' })
     await expect(playbackEngine.locator('select')).toHaveValue('yt-dlp')
     await expect(
-      app.page.locator('[data-section="experimental"] .select').filter({ hasText: 'Playback Engine' })
+      app.page.locator('[data-section="experimental"] .select').filter({ hasText: 'Stream extraction method' })
     ).toHaveCount(0)
 
     await playbackEngine.locator('select').selectOption('built-in')
@@ -767,7 +767,7 @@ test.describe('playback engine migration', () => {
     await goTo(page, 'settings')
     await expect(
       page.locator('[data-section="general"] .select')
-        .filter({ hasText: 'Playback Engine' })
+        .filter({ hasText: 'Stream extraction method' })
         .locator('select')
     ).toHaveValue('built-in')
   })
