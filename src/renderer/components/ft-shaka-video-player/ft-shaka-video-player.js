@@ -71,6 +71,7 @@ import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
+  getCaptionPlayerVariables,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
 import { useAmbientMode } from './opentubex/useAmbientMode'
@@ -4427,6 +4428,12 @@ export default defineComponent({
 
     const videoElementWidth = ref(0)
     const videoElementHeight = ref(0)
+    /** Height of the video element in CSS pixels, used to scale the captions with the player. */
+    const videoElementLayoutHeight = ref(0)
+
+    const captionPlayerVariables = computed(() => {
+      return getCaptionPlayerVariables(videoElementLayoutHeight.value)
+    })
 
     function updateAnnotationVideoAspectRatio() {
       const video_ = video.value
@@ -4509,6 +4516,7 @@ export default defineComponent({
 
         videoElementWidth.value = video_.clientWidth * devicePixelRatio
         videoElementHeight.value = video_.clientHeight * devicePixelRatio
+        videoElementLayoutHeight.value = video_.clientHeight
         updateAnnotationVideoAspectRatio()
         updateScrollMiniVideoAspectRatio()
       }
@@ -8450,6 +8458,7 @@ export default defineComponent({
       ambientLayoutCanvas,
       ambientModeVisible,
       captionCssVariables,
+      captionPlayerVariables,
       captionAppearanceSampleBottom,
       showCaptionAppearanceSample,
       isActiveTab,

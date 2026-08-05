@@ -13,6 +13,22 @@ export const CAPTION_ANCHORS = Object.freeze([
   'bottom-right',
 ])
 
+export const MIN_CAPTION_FONT_SCALE = 0.5
+export const MAX_CAPTION_FONT_SCALE = 4
+
+/**
+ * Player height from which on captions get their full configured size (a 16:9 player at 711px wide).
+ * Deliberately smaller than a regular watch page player, so only players that are actually small
+ * scale their captions down.
+ */
+const REFERENCE_PLAYER_HEIGHT = 400
+
+/** Keeps captions legible in tiny players, where a purely proportional size would be unreadable. */
+const MIN_CAPTION_PLAYER_SCALE = 0.45
+
+/** Share of the player height a single line of captions may take up at most. */
+const MAX_CAPTION_FONT_SIZE_RATIO = 0.1
+
 export const DEFAULT_CAPTION_SETTINGS = Object.freeze({
   textColor: '#ffffff',
   backgroundColor: '#000000',
@@ -122,8 +138,8 @@ export function parseCaptionSettings(value) {
     fontScale: normalizeNumber(
       settings.fontScale ?? settings.fontPercent,
       DEFAULT_CAPTION_SETTINGS.fontScale,
-      0.5,
-      2
+      MIN_CAPTION_FONT_SCALE,
+      MAX_CAPTION_FONT_SCALE
     ),
     verticalPosition: normalizeNumber(
       settings.verticalPosition,
@@ -159,6 +175,39 @@ function getContrastingEdgeColor(color) {
   const blue = Number.parseInt(color.slice(5, 7), 16)
   const luminance = red * 0.299 + green * 0.587 + blue * 0.114
   return luminance > 150 ? '#000000' : '#ffffff'
+}
+
+/**
+ * Captions are sized in pixels, so without this they stay just as big when the player shrinks
+ * (e.g. the scroll mini player), where they would cover the entire video.
+ * Only ever scales down, so that regular and fullscreen players keep their configured size.
+ * @param {number} playerHeight height of the player in CSS pixels
+ * @returns {number}
+ */
+export function getCaptionPlayerScale(playerHeight) {
+  if (!Number.isFinite(playerHeight) || playerHeight <= 0) {
+    return 1
+  }
+
+  return Math.min(1, Math.max(MIN_CAPTION_PLAYER_SCALE, playerHeight / REFERENCE_PLAYER_HEIGHT))
+}
+
+/**
+ * A large font size can outgrow a small player even after it was scaled down, so cap it at a
+ * share of the player height that always leaves room for a couple of lines of captions.
+ * @param {number} playerHeight height of the player in CSS pixels
+ * @returns {Record<string, string>}
+ */
+export function getCaptionPlayerVariables(playerHeight) {
+  const variables = {
+    '--caption-player-scale': getCaptionPlayerScale(playerHeight).toString(),
+  }
+
+  if (Number.isFinite(playerHeight) && playerHeight > 0) {
+    variables['--caption-max-font-size'] = `${Math.round(playerHeight * MAX_CAPTION_FONT_SIZE_RATIO)}px`
+  }
+
+  return variables
 }
 
 /**

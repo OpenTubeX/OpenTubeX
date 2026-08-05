@@ -436,6 +436,96 @@ test.describe('watch page', () => {
     expect(animations[1].zIndex).toBe('150')
   })
 
+  test('scales the captions down with the scroll mini player', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+
+    const player = page.locator('.ftVideoPlayer')
+    await player.evaluate(element => {
+      if (element.querySelector('.shaka-text-container')) return
+
+      const captions = document.createElement('div')
+      captions.className = 'shaka-text-container'
+      element.append(captions)
+    })
+
+    const captions = player.locator('.shaka-text-container')
+    const getFontSize = () => captions.evaluate(element => {
+      return Number.parseFloat(getComputedStyle(element).fontSize)
+    })
+    const inlineFontSize = await getFontSize()
+    expect(inlineFontSize).toBe(20)
+
+    await player.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      window.scrollTo(0, window.scrollY + rect.bottom)
+    })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+    // The mini player is only a couple of hundred pixels tall, so inline sized captions covered all of it.
+    await expect.poll(getFontSize).toBeLessThan(inlineFontSize * 0.8)
+
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(getFontSize).toBe(inlineFontSize)
+  })
+
+  test.describe('large captions in the scroll mini player', () => {
+    test.use({
+      seed: {
+        settings: {
+          defaultCaptionSettings: JSON.stringify({ fontScale: 4 })
+        }
+      }
+    })
+
+    test('keeps the captions inside the scroll mini player', async ({ page, innertube }) => {
+      test.skip(!innertube.playback, 'needs real media streams')
+      await openVideo(page)
+
+      const video = await waitForPlaybackOrSkip(test, page)
+      await video.evaluate(element => element.pause())
+
+      const player = page.locator('.ftVideoPlayer')
+      await player.evaluate(element => {
+        if (element.querySelector('.shaka-text-container')) return
+
+        const captions = document.createElement('div')
+        captions.className = 'shaka-text-container'
+        const cue = document.createElement('div')
+        const text = document.createElement('span')
+        text.setAttribute('translate', 'no')
+        text.textContent = 'a caption long enough to wrap over several lines in a small player, '
+          .repeat(3)
+        cue.append(text)
+        captions.append(cue)
+        element.append(captions)
+      })
+
+      await player.evaluate(element => {
+        const rect = element.getBoundingClientRect()
+        window.scrollTo(0, window.scrollY + rect.bottom)
+      })
+      await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+      // The maximum font size used to overflow the mini player in every direction.
+      await expect.poll(() => player.evaluate(element => {
+        const playerRect = element.getBoundingClientRect()
+        const captionRect = element.querySelector('.shaka-text-container').getBoundingClientRect()
+
+        return {
+          top: captionRect.top >= playerRect.top,
+          bottom: captionRect.bottom <= playerRect.bottom,
+          left: captionRect.left >= playerRect.left,
+          right: captionRect.right <= playerRect.right
+        }
+      })).toEqual({ top: true, bottom: true, left: true, right: true })
+    })
+  })
+
   test('keeps the scroll mini player docked across window resizes', async ({ app, page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await setWindowSize(app, page, { width: 1200, height: 850 })
@@ -1531,16 +1621,25 @@ test.describe('watch page', () => {
       })
       expect(windowedFontSizes).toEqual(['30px', '30px'])
 
+      // The player is only a few hundred pixels tall here, so the captions scale down with it.
       await setWindowWidth(app, 400)
-      const narrowFontSizes = ['24px', '24px']
       await expect.poll(async () => captionContainers.evaluateAll(elements => {
         return elements.map(element => getComputedStyle(element).fontSize)
-      })).toEqual(narrowFontSizes)
+      })).not.toEqual(windowedFontSizes)
 
+      const narrowFontSizes = await captionContainers.evaluateAll(elements => {
+        return elements.map(element => Number.parseFloat(getComputedStyle(element).fontSize))
+      })
+      for (const fontSize of narrowFontSizes) {
+        expect(fontSize).toBeGreaterThan(30 * 0.45)
+        expect(fontSize).toBeLessThan(30 * 0.75)
+      }
+
+      // Fullscreen makes the player tall again, so the configured size comes back.
       await setPlayerFullscreen(page, true)
       await expect.poll(async () => captionContainers.evaluateAll(elements => {
         return elements.map(element => getComputedStyle(element).fontSize)
-      })).toEqual(narrowFontSizes)
+      })).toEqual(windowedFontSizes)
     })
   })
 

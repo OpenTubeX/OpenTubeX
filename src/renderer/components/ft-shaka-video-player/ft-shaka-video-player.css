@@ -2403,7 +2403,17 @@
   justify-content: var(--caption-justify-content) !important;
   padding-top: var(--caption-top-padding);
   padding-inline: var(--caption-edge-gap);
-  font-size: calc(20px * var(--caption-font-scale)) !important;
+
+  /*
+    The player is the only space the captions get. Subtracting the gap accounts for the offset
+    they are anchored at, so that they can't grow out of the top of the player either.
+  */
+  max-block-size: calc(100% - var(--caption-edge-gap));
+  overflow: hidden;
+  font-size: min(
+    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
+    var(--caption-max-font-size, 100vb)
+  ) !important;
   text-align: var(--caption-text-align) !important;
   transform: translateY(var(--caption-vertical-transform));
 
@@ -2482,7 +2492,10 @@
   padding-top: var(--caption-top-padding);
   padding-inline: var(--caption-edge-gap);
   color: var(--caption-text-color);
-  font-size: calc(20px * var(--caption-font-scale));
+  font-size: min(
+    calc(20px * var(--caption-font-scale) * var(--caption-player-scale, 1)),
+    var(--caption-max-font-size, 100vb)
+  );
   line-height: 1.4;
   text-align: var(--caption-text-align);
   text-shadow: var(--caption-text-shadow);
@@ -2798,12 +2811,10 @@
 }
 
 @media only screen and (width <=400px) {
-  :deep(.shaka-text-container),
-  :deep(.shaka-speech-to-text-container) {
-    /* make subtitles take up slightly less space when a mobile phone is in portrait orientation */
-    font-size: calc(16px * var(--caption-font-scale)) !important;
-  }
-
+  /*
+    Captions don't need a rule here: --caption-player-scale already shrinks them
+    for the small player that a narrow window results in.
+  */
   .sponsorBlockSubmissionWrapper {
     right: 8px;
     left: 8px;
@@ -2881,7 +2892,9 @@
 .ftVideoPlayer.scrollMiniPlayer {
   box-shadow: 0 8px 28px rgb(0 0 0 / 45%);
   border-radius: calc(10px * var(--ui-roundness));
-  overflow: visible;
+
+  /* The mini player floats over the page, so nothing of it may be painted outside its frame. */
+  overflow: clip;
   touch-action: none;
   isolation: isolate;
 }
