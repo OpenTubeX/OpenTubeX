@@ -333,6 +333,19 @@ function runApp() {
     }
   }
 
+  // Keep the interpolated selection short, so that the surrounding translated text
+  // (e.g. the trailing "in a New Tab") stays readable instead of being cut off
+  const SELECTION_LABEL_MAX_LENGTH = 30
+
+  /**
+   * @param {string} text
+   */
+  function truncateSelectionForLabel(text) {
+    return text.length > SELECTION_LABEL_MAX_LENGTH
+      ? `${text.slice(0, SELECTION_LABEL_MAX_LENGTH).trimEnd()}…`
+      : text
+  }
+
   /** @type {Record<string, Function | boolean>} */
   const contextMenuOptions = {
     showSearchWithGoogle: false,
@@ -768,6 +781,7 @@ function runApp() {
       }
 
       const selectionText = parameters.selectionText.trim()
+      const selectionLabelText = truncateSelectionForLabel(selectionText)
       const textShortEnoughForSearch = selectionText.length <= SEARCH_CHAR_LIMIT
       const activeSearchEngines = (await getConfiguredSearchEngines())
         .filter(engine => engine.enabled)
@@ -832,13 +846,13 @@ function runApp() {
           label: textShortEnoughForSearch
             ? contextMenuLabel(
                 'Search Selection in New Tab',
-                { selection: selectionText },
-                `Search "${selectionText}" in a New Tab`
+                { selection: selectionLabelText },
+                `Search "${selectionLabelText}" in a New Tab`
               )
             : contextMenuLabel(
                 'Selection Too Long',
                 { count: SEARCH_CHAR_LIMIT },
-                `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
+                `"${selectionLabelText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
               ),
           enabled: textShortEnoughForSearch,
           visible: (
@@ -866,13 +880,13 @@ function runApp() {
           label: textShortEnoughForSearch
             ? contextMenuLabel(
                 'Search Selection in New Window',
-                { selection: selectionText },
-                `Search "${selectionText}" in a New Window`
+                { selection: selectionLabelText },
+                `Search "${selectionLabelText}" in a New Window`
               )
             : contextMenuLabel(
                 'Selection Too Long',
                 { count: SEARCH_CHAR_LIMIT },
-                `"${selectionText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
+                `"${selectionLabelText}" is too long for search (> ${SEARCH_CHAR_LIMIT} chars)`
               ),
           enabled: textShortEnoughForSearch,
           visible: (

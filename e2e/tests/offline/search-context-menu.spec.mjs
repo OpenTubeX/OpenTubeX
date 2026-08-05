@@ -32,6 +32,59 @@ test('searching selected text in a new tab uses the default filters', async ({ p
   await expect(page.locator('.searchRadio', { hasText: 'Duration' }).locator('input[value=""]')).toBeChecked()
 })
 
+test('truncates long selections so the rest of the label is never cut off', async ({ page }) => {
+  const selectionText = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
+  const contextMenu = await page.evaluate((selection) => window.ftElectron.contextMenu.open({
+    selectionText: selection
+  }), selectionText)
+
+  const newTab = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search Selection in New Tab')
+  const newWindow = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search Selection in New Window')
+
+  for (const item of [newTab, newWindow]) {
+    expect(item.labelParameters.selection).toBe('OpenTubeX is a privacy respect…')
+  }
+  expect(newTab.label).toBe('Search "OpenTubeX is a privacy respect…" in a New Tab')
+  expect(newWindow.label).toBe('Search "OpenTubeX is a privacy respect…" in a New Window')
+
+  // Searching still uses the full selection, only the label is shortened
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: newTab.actionId })
+
+  await expect.poll(() => page.url()).toContain(`#/search/${encodeURIComponent(selectionText)}`)
+})
+
+test('renders long selection labels without clipping them', async ({ page }) => {
+  const point = await page.evaluate(() => {
+    const paragraph = document.createElement('p')
+    paragraph.textContent = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
+    paragraph.style.cssText = 'position:fixed;top:120px;left:40px;width:300px;z-index:19000;background:#000'
+    document.body.append(paragraph)
+
+    const range = document.createRange()
+    range.selectNodeContents(paragraph)
+    const selection = window.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+
+    const bounds = paragraph.getBoundingClientRect()
+    return { x: bounds.left + 10, y: bounds.top + 5 }
+  })
+  await page.mouse.click(point.x, point.y, { button: 'right' })
+
+  const menu = page.getByRole('menu', { name: 'Context Menu' })
+  await expect(menu).toBeVisible()
+
+  const label = menu.getByRole('menuitem', { name: /^Search ".*" in a New Tab$/ }).locator('span:not([aria-hidden])')
+  await expect(label).toHaveText('Search "OpenTubeX is a privacy respect…" in a New Tab')
+
+  const isClipped = await label.evaluate(element => {
+    return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1
+  })
+  expect(isClipped).toBe(false)
+})
+
 test('does not offer external search engines when they are disabled by default', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'private search'

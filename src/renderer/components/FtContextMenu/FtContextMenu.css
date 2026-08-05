@@ -49,11 +49,10 @@
   cursor: default;
 }
 
+/* Labels wrap instead of being clipped, so translations are never cut off */
 .menuItem > span:nth-child(2):last-child {
   grid-column: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .menuItem.disabled {
@@ -137,9 +136,7 @@
 
 .submenuContainer > .menuItem > span:nth-child(2) {
   grid-column: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .submenuArrow {
