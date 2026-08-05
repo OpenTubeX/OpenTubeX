@@ -1606,10 +1606,15 @@
   z-index: 3;
 }
 
-.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(.fullscreenActions, .skippedSegmentsWrapper),
-  .ftVideoPlayer:has(:deep(
-    .shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active)
-  )) .fullscreenActions {
+.ftVideoPlayer .fullscreenActions:has(:deep(.iconDropdown)) {
+  z-index: 5;
+}
+
+.ftVideoPlayer:has(:deep(.shaka-seek-bar-container:hover)) :is(
+  .fullscreenActions:not(:has(:deep(.iconDropdown))),
+  .skippedSegmentsWrapper
+),
+  .ftVideoPlayer:has(:deep(.shaka-controls-button-panel > :is(.shaka-tooltip, .shaka-tooltip-status):is(:hover, :focus-visible, :active))) .fullscreenActions:not(:has(:deep(.iconDropdown))) {
   z-index: 0;
 }
 
