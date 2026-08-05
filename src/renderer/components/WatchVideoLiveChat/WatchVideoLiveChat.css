@@ -7,6 +7,93 @@
   position: relative;
 }
 
+.card.fullscreenChat,
+.fullscreenChat > .relative {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.card.fullscreenChat {
+  block-size: 100% !important;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--primary-text-color);
+  background: transparent;
+}
+
+.fullscreenChat > .relative {
+  box-sizing: border-box;
+  padding-block: 0 16px;
+  padding-inline: 16px;
+}
+
+.liveChatDockHeader {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding-inline: 16px 8px;
+  border-block-end: 1px solid rgb(255 255 255 / 10%);
+  background-color: rgb(20 20 20 / 52%);
+}
+
+.liveChatDockHeader h3 {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  margin: 0;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.liveChatDockTitleIcon {
+  display: block;
+  flex: 0 0 18px;
+  inline-size: 18px;
+  block-size: 18px;
+  color: #fff;
+}
+
+.liveChatDockActions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.liveChatDockAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.liveChatDockAction:is(:hover, :focus-visible) {
+  background-color: rgb(255 255 255 / 20%);
+}
+
+.liveChatDockAction.active {
+  background-color: rgb(255 255 255 / 20%);
+}
+
 .messageContainer {
   inline-size: 100%;
   block-size: 100%;
@@ -199,6 +286,15 @@
 .liveChatComments {
   inline-size: 100%;
   overflow-y: auto;
+}
+
+.fullscreenChat .liveChatComments {
+  flex: 1 1 auto;
+  block-size: auto !important;
+  min-block-size: 0;
+
+  --scrollbar-color: rgb(255 255 255 / 45%);
+  --scrollbar-color-hover: rgb(255 255 255 / 65%);
 }
 
 .chatContent {

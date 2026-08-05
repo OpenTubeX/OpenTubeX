@@ -1,8 +1,76 @@
 <template>
   <FtCard
     class="card relative"
-    :class="{ hasError }"
+    :class="{ hasError, fullscreenChat: fullscreenOverlay }"
   >
+    <header
+      v-if="fullscreenOverlay"
+      class="liveChatDockHeader"
+    >
+      <h3>
+        <FontAwesomeIcon
+          class="liveChatDockTitleIcon"
+          :icon="['fas', 'message']"
+        />
+        {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
+      </h3>
+      <div
+        ref="liveChatActionsRef"
+        class="liveChatDockActions"
+        @keydown.esc.stop.prevent="settingsMenuOpen = false"
+      >
+        <button
+          type="button"
+          class="liveChatDockAction"
+          :class="{ active: settingsMenuOpen }"
+          :aria-label="t('Video.Live Chat Settings')"
+          :title="t('Video.Live Chat Settings')"
+          :aria-expanded="String(settingsMenuOpen)"
+          @click="settingsMenuOpen = !settingsMenuOpen"
+        >
+          <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+        </button>
+        <a
+          v-if="!isReplay"
+          :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
+          :aria-label="t('Video.Popout Live Chat')"
+          :title="t('Video.Popout Live Chat')"
+          target="_blank"
+          class="liveChatDockAction"
+        >
+          <FontAwesomeIcon :icon="['fas', 'arrow-up-right-from-square']" />
+        </a>
+        <button
+          type="button"
+          class="liveChatDockAction"
+          :aria-label="t('Settings.Distraction Free Settings.Hide Live Chat')"
+          :title="t('Settings.Distraction Free Settings.Hide Live Chat')"
+          @click="emit('close')"
+        >
+          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+        </button>
+        <div
+          v-if="settingsMenuOpen"
+          class="liveChatSettingsMenu"
+        >
+          <FtToggleSwitch
+            :label="t('Video.Show Live Chat Timestamps')"
+            :default-value="showLiveChatTimestamps"
+            :compact="true"
+            @change="updateShowLiveChatTimestamps"
+          />
+          <FtRadioButton
+            v-if="canFilter"
+            class="liveChatFilter"
+            :title="t('Video.Chat Filter')"
+            :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+            :values="['TOP_CHAT', 'LIVE_CHAT']"
+            :model-value="liveChatFilter"
+            @update:model-value="updateLiveChatFilter"
+          />
+        </div>
+      </div>
+    </header>
     <FtLoader
       v-if="isLoading"
     />
@@ -44,6 +112,7 @@
       class="relative"
     >
       <div
+        v-if="!fullscreenOverlay"
         class="titleContainer"
       >
         <h4
@@ -339,6 +408,10 @@ import {
 } from './liveChatReplay.js'
 
 const props = defineProps({
+  fullscreenOverlay: {
+    type: Boolean,
+    default: false
+  },
   liveChat: {
     type: EventTarget,
     default: null
@@ -356,6 +429,8 @@ const props = defineProps({
     default: 0
   }
 })
+
+const emit = defineEmits(['close'])
 
 const { locale, t } = useI18n()
 
@@ -442,12 +517,14 @@ const formattedWatchingCount = computed(() => {
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('pointerdown', handleChatSettingsClickOutside)
+  document.removeEventListener('pointerdown', handleChatSettingsClickOutside, true)
   handleEnd()
 })
 
 onMounted(() => {
-  document.addEventListener('pointerdown', handleChatSettingsClickOutside)
+  // Fullscreen docks stop pointer events from bubbling into the player. Capture
+  // the event first so clicking another dock can still dismiss this menu.
+  document.addEventListener('pointerdown', handleChatSettingsClickOutside, true)
 })
 
 if (!process.env.SUPPORTS_LOCAL_API) {
@@ -518,16 +595,47 @@ function startLiveChatLocal() {
     liveChatInstance.seekTo(props.currentTime * 1000)
   }
 
+  // A component remount (notably Vue HMR in development) can receive the same
+  // chat instance after it has already advanced beyond its initial continuation.
+  // Restarting that instance resumes polling, but it cannot emit `start` again
+  // until a replay seek. Rehydrate from youtubei.js' cached initial payload so
+  // loading and the chat filter UI do not wait forever.
+  if (liveChatInstance.initial_info) {
+    handleStart(liveChatInstance.initial_info)
+  }
+
   liveChatInstance.start()
 }
 
 const commentsRef = useTemplateRef('commentsRef')
 
+watch(() => props.fullscreenOverlay, fullscreenOverlay => {
+  if (!fullscreenOverlay) {
+    return
+  }
+
+  scrollToLiveAfterLayout()
+})
+
+/**
+ * OverlayScrollbars measures its viewport after Vue renders. Waiting through
+ * the following frame ensures both sidebar creation and dock teleporting have
+ * their final height before the chat is anchored to the live edge.
+ */
+function scrollToLiveAfterLayout() {
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => scrollToBottom('instant'))
+    })
+  })
+}
+
 /**
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
-  canFilter.value = (initialData.header?.view_selector?.sub_menu_items?.length ?? 0) > 1
+  const viewSelector = initialData.header?.view_selector ?? liveChatInstance?.initial_info?.header?.view_selector
+  canFilter.value = (viewSelector?.sub_menu_items?.length ?? 0) > 1
 
   // A chat always starts on YouTube's default view, so switch away from it before
   // showing anything if the other one is the view that is wanted.
@@ -547,9 +655,7 @@ function handleStart(initialData) {
     requestMoreReplayComments()
   }
 
-  nextTick(() => {
-    scrollToBottom('instant')
-  })
+  scrollToLiveAfterLayout()
 }
 
 /**
@@ -770,11 +876,14 @@ function deliverComment(comment) {
  * @param {any} comment
  */
 function pushComment(comment) {
+  const shouldStayAtBottom = stayAtBottom
   comments.push(comment)
 
-  if (!isLoading.value && stayAtBottom) {
+  if (!isLoading.value && shouldStayAtBottom) {
     nextTick(() => {
-      scrollToBottom()
+      // Smooth scrolling can be interrupted when another message arrives or the
+      // tab is backgrounded. An instant follow-up keeps the bottom anchored.
+      scrollToBottom('instant')
     })
   }
 
@@ -854,6 +963,7 @@ function onScrollEnd() {
 
 function stopScrollingToBottom() {
   isScrollingToBottom = false
+  stayAtBottom = false
 }
 
 function hideSuperChat() {
