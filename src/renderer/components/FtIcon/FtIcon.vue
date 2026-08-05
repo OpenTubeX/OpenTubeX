@@ -5,6 +5,8 @@
     :icon="icon"
     :fixed-width="fixedWidth"
     :size="size"
+    :color="color"
+    :spin="spin"
     :transform="transform"
     :class="iconClass"
     :style="fontAwesomeStyle"
@@ -16,7 +18,7 @@
     :data-icon="semanticIcon?.[1]"
     :data-icon-pack="currentIconPack"
     class="ft-icon"
-    :class="[{ 'ft-icon--fw': fixedWidth }, iconClass]"
+    :class="[{ 'ft-icon--fw': fixedWidth, 'ft-icon--spin': spin }, iconClass]"
     :style="iconifyWrapperStyle"
   >
     <Icon
@@ -59,6 +61,14 @@ const props = defineProps({
   transform: {
     type: [String, Object],
     default: null
+  },
+  color: {
+    type: String,
+    default: null
+  },
+  spin: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -157,6 +167,10 @@ const iconifyWrapperStyle = computed(() => {
   const fontSize = cssFontSizeFromFaSize(props.size)
   if (fontSize != null) {
     style.fontSize = fontSize
+  }
+  // Iconify glyphs paint with currentColor, so Font Awesome's `color` prop has to become CSS
+  if (props.color != null && props.color !== '') {
+    style.color = props.color
   }
   return style
 })
@@ -268,5 +282,26 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
 
 .ft-icon--fw {
   inline-size: 1.25em;
+}
+
+/* Mirrors Font Awesome's `spin` prop, which only applies to its own SVGs. */
+.ft-icon--spin .ft-icon__glyph {
+  animation: ft-icon-spin 2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-icon--spin .ft-icon__glyph {
+    animation-duration: 10s;
+  }
+}
+
+@keyframes ft-icon-spin {
+  from {
+    rotate: 0deg;
+  }
+
+  to {
+    rotate: 360deg;
+  }
 }
 </style>
