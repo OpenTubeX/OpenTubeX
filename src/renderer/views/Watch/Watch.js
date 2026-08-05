@@ -3197,6 +3197,12 @@ export default defineComponent({
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
         return
       }
+      // YouTube-style Shorts stop for the replay control instead of advancing.
+      // With looping disabled they emit `ended`, so this must run before queue
+      // autoplay.
+      if (this.customShortsPlayerActive) {
+        return
+      }
       if (this.playNextQueuedVideo()) {
         return
       }
