@@ -1,5 +1,6 @@
 .contextMenu,
 .submenu {
+  box-sizing: border-box;
   inline-size: max-content;
   max-inline-size: min(360px, calc(100vw - 16px));
   padding: 5px;
@@ -10,27 +11,22 @@
   box-shadow: 0 12px 32px rgb(0 0 0 / 34%);
 }
 
-/* Deliberately not a scroll container: submenus are absolutely positioned
-   inside it, so any overflow value other than visible clips them away. */
 .contextMenu {
   position: fixed;
   z-index: 20000;
-  transform-origin: top left;
-}
-
-.contextMenu.submenusOpenStart {
-  transform-origin: top right;
+  max-block-size: calc(100vh - 16px);
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .context-menu-enter-active,
 .context-menu-leave-active {
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition: opacity 120ms ease;
 }
 
 .context-menu-enter-from,
 .context-menu-leave-to {
   opacity: 0;
-  transform: scale(0.96);
 }
 
 .menuItem {
@@ -154,12 +150,14 @@
 /* Submenu placement follows physical pointer coordinates in both text directions. */
 /* stylelint-disable liberty/use-logical-spec */
 .submenu {
-  position: absolute;
-  inset-block-start: var(--submenu-top, -5px);
+  /* Fixed positioning lets fly-outs escape the top-level menu's scrollport. */
+  position: fixed;
+  inset-block-start: var(--submenu-top, 8px);
   max-block-size: calc(100vh - 16px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   right: auto;
-  left: var(--submenu-left, calc(100% - 2px));
+  left: var(--submenu-left, 8px);
   visibility: hidden;
   opacity: 0;
   pointer-events: none;

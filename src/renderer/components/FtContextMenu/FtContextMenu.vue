@@ -14,6 +14,7 @@
         :aria-label="t('Context Menu.Context Menu')"
         @contextmenu.prevent
         @pointerdown.stop
+        @scroll="positionOpenSubmenu"
       >
         <template
           v-for="(item, index) in displayedItems"
@@ -364,8 +365,10 @@ function close(event) {
   isOpen.value = false
 }
 
-function positionSubmenu(event) {
-  const container = event.currentTarget
+function positionSubmenu(eventOrContainer) {
+  const container = eventOrContainer instanceof HTMLElement
+    ? eventOrContainer
+    : eventOrContainer.currentTarget
   if (!(container instanceof HTMLElement)) return
 
   const submenu = container.querySelector(':scope > .submenu')
@@ -399,8 +402,15 @@ function positionSubmenu(event) {
   const opensToStart = left === alternateLeft ? !opensAtStart : opensAtStart
   container.classList.toggle('submenuOpenStart', opensToStart)
   container.classList.toggle('submenuOpenEnd', !opensToStart)
-  container.style.setProperty('--submenu-left', `${clampedLeft - containerRect.left}px`)
-  container.style.setProperty('--submenu-top', `${top - containerRect.top}px`)
+  container.style.setProperty('--submenu-left', `${clampedLeft}px`)
+  container.style.setProperty('--submenu-top', `${top}px`)
+}
+
+function positionOpenSubmenu() {
+  const container = menuRef.value?.querySelector(
+    '.submenuContainer:hover, .submenuContainer:focus-within'
+  )
+  if (container instanceof HTMLElement) positionSubmenu(container)
 }
 
 async function execute(item) {

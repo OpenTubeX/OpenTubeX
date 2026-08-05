@@ -70,6 +70,37 @@ test('truncates long selections without splitting emoji', async ({ page }) => {
   expect(label).toBe('Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and…')
 })
 
+test('keeps tall top-level menus inside the viewport and scrollable', async ({ page }) => {
+  await page.setViewportSize({ width: 420, height: 180 })
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.tabs).first().click({ button: 'right' })
+
+  const menu = page.getByRole('menu', { name: 'Context Menu' })
+  await expect(menu).toBeVisible()
+
+  const geometry = await menu.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      top: bounds.top,
+      bottom: bounds.bottom,
+      viewportBottom: innerHeight - 8,
+      overflowY: getComputedStyle(element).overflowY,
+      scrollable: element.scrollHeight > element.clientHeight
+    }
+  })
+
+  expect(geometry.top).toBeGreaterThanOrEqual(8)
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportBottom + 1)
+  expect(geometry.overflowY).toBe('auto')
+  expect(geometry.scrollable).toBe(true)
+
+  const lastTopLevelItem = menu
+    .locator(':scope > .menuItem, :scope > .submenuContainer > .menuItem')
+    .last()
+  await lastTopLevelItem.scrollIntoViewIfNeeded()
+  await expect(lastTopLevelItem).toBeInViewport()
+})
+
 test('does not clip fly-out submenus', async ({ page }) => {
   await page.locator(sel.newTabButton).click()
   await page.locator(sel.tabs).first().click({ button: 'right' })
@@ -79,8 +110,7 @@ test('does not clip fly-out submenus', async ({ page }) => {
   const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
   await expect(submenu).toBeVisible()
 
-  // Submenus are absolutely positioned inside the menu, so giving the menu a
-  // max height with overflow scrolling would clip them out of reach.
+  // Fixed-position fly-outs escape the top-level menu's scrollport.
   await expect.poll(() => submenu.evaluate((element) => {
     const menu = element.closest('.contextMenu')
     const style = getComputedStyle(menu)
@@ -88,12 +118,18 @@ test('does not clip fly-out submenus', async ({ page }) => {
     return {
       overflowX: style.overflowX,
       overflowY: style.overflowY,
+      position: getComputedStyle(element).position,
       reachable: document.elementFromPoint(
         (bounds.left + bounds.right) / 2,
         (bounds.top + bounds.bottom) / 2
       )?.closest('[role="menu"]') === element
     }
-  })).toEqual({ overflowX: 'visible', overflowY: 'visible', reachable: true })
+  })).toEqual({
+    overflowX: 'auto',
+    overflowY: 'auto',
+    position: 'fixed',
+    reachable: true
+  })
 })
 
 test('renders long selection labels without clipping them', async ({ page }) => {
