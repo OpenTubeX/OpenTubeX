@@ -10,7 +10,20 @@ export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
  * @returns {boolean}
  */
 export function canMarkHistoryEntryAsWatched(historyEntry) {
-  return historyEntry?.isLive !== true && historyEntry?.isUpcoming !== true
+  if (historyEntry?.isLive === true) {
+    return false
+  }
+
+  if (historyEntry?.isUpcoming !== true) {
+    return true
+  }
+
+  if (historyEntry.premiereTimestamp == null) {
+    return false
+  }
+
+  const premiereTimestamp = Number(historyEntry.premiereTimestamp) * 1000
+  return Number.isFinite(premiereTimestamp) && premiereTimestamp <= Date.now()
 }
 
 /**

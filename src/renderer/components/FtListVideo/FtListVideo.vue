@@ -335,7 +335,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -502,6 +502,11 @@ const historyEntryExists = computed(() => historyEntry.value !== undefined)
 
 const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
+const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
+const premiereNow = ref(Date.now())
+const MAX_TIMEOUT_DELAY = 2_147_483_647
+let premiereStartTimer = null
+
 const canMarkAsWatched = computed(() => {
   if (isLive.value) {
     return false
@@ -509,13 +514,35 @@ const canMarkAsWatched = computed(() => {
 
   // A scheduled premiere can only be watched once its start time has passed,
   // even if a cached entry still carries a stale upcoming flag.
-  const premiereTimestamp = getUpcomingPremiereTimestamp(props.data)
-  if (premiereTimestamp != null) {
-    return premiereTimestamp <= Date.now()
+  if (premiereTimestamp.value != null) {
+    return premiereTimestamp.value <= premiereNow.value
   }
 
   return !isUpcoming.value
 })
+
+function clearPremiereStartTimer() {
+  if (premiereStartTimer != null) {
+    clearTimeout(premiereStartTimer)
+    premiereStartTimer = null
+  }
+}
+
+function schedulePremiereStartInvalidation() {
+  clearPremiereStartTimer()
+
+  const timestamp = premiereTimestamp.value
+  const now = Date.now()
+  premiereNow.value = now
+  if (timestamp == null || timestamp <= now) {
+    return
+  }
+
+  premiereStartTimer = setTimeout(() => {
+    premiereStartTimer = null
+    schedulePremiereStartInvalidation()
+  }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
+}
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
@@ -1630,6 +1657,9 @@ if ((showDeArrowTitle.value || showDeArrowThumbnail.value) && !deArrowCache.valu
 if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumbnail == null) {
   debounceGetDeArrowThumbnail()
 }
+
+watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
+onBeforeUnmount(clearPremiereStartTimer)
 
 watch([useSponsorBlock, id], ([enabled, videoId]) => {
   sponsorBlockFullVideoCategory.value = null
