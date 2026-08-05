@@ -3929,6 +3929,13 @@ export default defineComponent({
     },
 
     /**
+     * @param {number} volume
+     */
+    updateVolume(volume) {
+      this.currentVolume = volume
+    },
+
+    /**
      * @param {boolean} enabled
      */
     saveChannelSubtitlesState(enabled) {

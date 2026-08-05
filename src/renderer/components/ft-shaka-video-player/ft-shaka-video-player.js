@@ -47,7 +47,6 @@ import {
   showToast,
   writeFileWithPicker,
   throttle,
-  debounce,
   removeFromArrayIfExists,
   copyToClipboard,
 } from '../../helpers/utils'
@@ -448,6 +447,7 @@ export default defineComponent({
     'video-quality-user-set',
     'subtitles-state-updated',
     'subtitles-state-user-set',
+    'volume-updated',
     'volume-user-set',
     'skip-to-next',
     'skip-to-prev',
@@ -4375,9 +4375,22 @@ export default defineComponent({
       updateScrollMiniPlayer()
     }
 
+    let volumeUserSetTimer = null
+
     // Dragging the volume slider fires a continuous stream of events,
     // so wait for the user to settle on a volume before persisting it
-    const emitVolumeUserSet = debounce((volume) => emit('volume-user-set', volume), 500)
+    function emitVolumeUserSet(volume) {
+      clearTimeout(volumeUserSetTimer)
+      volumeUserSetTimer = setTimeout(() => {
+        volumeUserSetTimer = null
+        emit('volume-user-set', volume)
+      }, 500)
+    }
+
+    function cancelPendingVolumeUserSet() {
+      clearTimeout(volumeUserSetTimer)
+      volumeUserSetTimer = null
+    }
 
     function updateVolume() {
       const video_ = video.value
@@ -4400,7 +4413,9 @@ export default defineComponent({
         return
       }
 
-      emitVolumeUserSet(video_.muted ? 0 : video_.volume)
+      const volume = video_.muted ? 0 : video_.volume
+      emit('volume-updated', volume)
+      emitVolumeUserSet(volume)
 
       if (!rememberVolume.value) {
         return
@@ -4444,6 +4459,7 @@ export default defineComponent({
       }
 
       applyingInitialVolume = false
+      emit('volume-updated', videoElement.muted ? 0 : videoElement.volume)
     }
 
     function handleTimeupdate() {
@@ -8337,6 +8353,7 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       clearTimeout(paidPromotionTimer)
+      cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       closeFullscreenMetadata()
@@ -8469,6 +8486,7 @@ export default defineComponent({
      */
     async function destroyPlayer() {
       ignoreErrors = true
+      cancelPendingVolumeUserSet()
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false

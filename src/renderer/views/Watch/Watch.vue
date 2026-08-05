@@ -147,6 +147,7 @@
           @video-quality-user-set="handleVideoQualityUserSet"
           @subtitles-state-updated="updateSubtitlesState"
           @subtitles-state-user-set="handleSubtitlesStateUserSet"
+          @volume-updated="updateVolume"
           @volume-user-set="handleVolumeUserSet"
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
