@@ -36,6 +36,14 @@ const getters = {
 
     return mainProfile.subscriptions.reduce((set, channel) => set.add(channel.id), new Set())
   },
+
+  /** Cached subscription details, so channel ids can be resolved to names without a network request */
+  getSubscribedChannelsById: (state) => {
+    // The all channels profile is always the first profile in the array
+    const mainProfile = state.profileList[0]
+
+    return new Map(mainProfile.subscriptions.map((channel) => [channel.id, channel]))
+  },
 }
 
 const collator = new Intl.Collator(undefined, {

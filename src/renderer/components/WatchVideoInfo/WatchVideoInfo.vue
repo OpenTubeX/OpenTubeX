@@ -187,16 +187,21 @@
             @click="saveWatchedProgressManually"
           />
           <FtIconButton
-            v-if="showSaveChannelPlaybackSpeedButton"
-            :title="t('Video.Save Channel Playback Speed')"
-            :icon="['fas', 'gauge']"
-            @click="saveChannelPlaybackSpeedManually"
+            v-if="channelSettingSaveActions.length === 1"
+            :title="channelSettingSaveActions[0].label"
+            :icon="channelSettingSaveActions[0].icon"
+            :overlay-icon="channelSettingSaveActions[0].saved ? ['fas', 'check'] : null"
+            :disabled="channelSettingSaveActions[0].disabled"
+            @click="saveChannelSetting(channelSettingSaveActions[0].value)"
           />
           <FtIconButton
-            v-if="showSaveChannelVideoQualityButton"
-            :title="t('Video.Save Channel Video Quality')"
-            :icon="['fas', 'photo-film']"
-            @click="saveChannelVideoQualityManually"
+            v-else-if="channelSettingSaveActions.length > 1"
+            :title="t('Video.Save Channel Setting')"
+            :icon="['fas', 'floppy-disk']"
+            :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
+            :dropdown-options="channelSettingSaveActions"
+            dropdown-position-x="left"
+            @click="saveChannelSetting"
           />
           <FtIconButton
             v-if="useSponsorBlock && !isUpcoming && !hideFullscreenDockActions"
@@ -286,6 +291,7 @@ import { vSaferHtml } from '../../directives/vSaferHtml'
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
 import { escapeHTML, formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
+import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
@@ -303,6 +309,22 @@ const props = defineProps({
   channelId: {
     type: String,
     required: true
+  },
+  currentPlaybackRate: {
+    type: Number,
+    default: null
+  },
+  currentVideoQuality: {
+    type: String,
+    default: null
+  },
+  currentSubtitlesState: {
+    type: Boolean,
+    default: null
+  },
+  currentVolume: {
+    type: Number,
+    default: null
   },
   channelName: {
     type: String,
@@ -456,6 +478,8 @@ const emit = defineEmits([
   'save-watched-progress',
   'save-channel-playback-speed',
   'save-channel-video-quality',
+  'save-channel-subtitles-state',
+  'save-channel-volume',
   'toggle-sponsorblock-info',
   'toggle-transcript',
 ])
@@ -627,10 +651,6 @@ const showSaveChannelPlaybackSpeedButton = computed(() => {
     !useQuickPlaybackSpeedBar.value
 })
 
-function saveChannelPlaybackSpeedManually() {
-  emit('save-channel-playback-speed')
-}
-
 /** @type {import('vue').ComputedRef<boolean>} */
 const rememberVideoQualityPerChannel = computed(() => store.getters.getRememberVideoQualityPerChannel)
 
@@ -641,8 +661,111 @@ const showSaveChannelVideoQualityButton = computed(() => {
   return !props.isUpcoming && rememberVideoQualityPerChannel.value && !autoUpdateChannelVideoQualities.value
 })
 
-function saveChannelVideoQualityManually() {
-  emit('save-channel-video-quality')
+const showSaveChannelSubtitlesStateButton = computed(() => {
+  return !props.isUpcoming &&
+    store.getters.getRememberSubtitlesStatePerChannel &&
+    !store.getters.getAutoUpdateChannelSubtitlesStates
+})
+
+const showSaveChannelVolumeButton = computed(() => {
+  return !props.isUpcoming &&
+    store.getters.getRememberVolumePerChannel &&
+    !store.getters.getAutoUpdateChannelVolumes
+})
+
+const savedChannelSettings = computed(() => ({
+  playbackSpeed: parseChannelPreferences(
+    store.getters.getChannelPlaybackSpeeds,
+    'channelPlaybackSpeeds'
+  )[props.channelId],
+  videoQuality: parseChannelPreferences(
+    store.getters.getChannelVideoQualities,
+    'channelVideoQualities'
+  )[props.channelId],
+  subtitlesState: parseChannelPreferences(
+    store.getters.getChannelSubtitlesStates,
+    'channelSubtitlesStates'
+  )[props.channelId],
+  volume: parseChannelPreferences(
+    store.getters.getChannelVolumes,
+    'channelVolumes'
+  )[props.channelId]
+}))
+
+const currentChannelSettings = computed(() => ({
+  playbackSpeed: props.currentPlaybackRate,
+  videoQuality: props.currentVideoQuality,
+  subtitlesState: props.currentSubtitlesState,
+  volume: props.currentVolume
+}))
+
+function formatChannelSettingValue(type, value) {
+  if (type === 'playbackSpeed') {
+    return `${value}×`
+  }
+  if (type === 'videoQuality') {
+    return `${value}p`
+  }
+  if (type === 'subtitlesState') {
+    return value ? '✓' : '✕'
+  }
+  return `${Math.round(value * 100)}%`
+}
+
+function createChannelSettingSaveAction(type, visible, label, settingLabel, icon) {
+  const savedValue = savedChannelSettings.value[type]
+  const currentValue = currentChannelSettings.value[type]
+  const hasSavedValue = savedValue !== undefined
+  const disabled = hasSavedValue && currentValue !== null && String(savedValue) === String(currentValue)
+  const formattedValue = hasSavedValue ? formatChannelSettingValue(type, savedValue) : ''
+  let actionLabel = label
+
+  if (disabled) {
+    actionLabel = t('Video.Channel Setting Already Set', { setting: settingLabel, value: formattedValue })
+  } else if (hasSavedValue) {
+    actionLabel = `${label}: ${formattedValue}`
+  }
+
+  return {
+    visible,
+    label: actionLabel,
+    icon,
+    value: type,
+    saved: hasSavedValue,
+    disabled
+  }
+}
+
+const channelSettingSaveActions = computed(() => [
+  createChannelSettingSaveAction('playbackSpeed', showSaveChannelPlaybackSpeedButton.value,
+    t('Video.Save Channel Playback Speed'), t('Settings.Channel Settings.Playback Speed'), ['fas', 'gauge']),
+  createChannelSettingSaveAction('videoQuality', showSaveChannelVideoQualityButton.value,
+    t('Video.Save Channel Video Quality'), t('Settings.Channel Settings.Video Quality'), ['fas', 'photo-film']),
+  createChannelSettingSaveAction('subtitlesState', showSaveChannelSubtitlesStateButton.value,
+    t('Video.Save Channel Subtitles State'), t('Settings.Channel Settings.Subtitles State'),
+    ['fas', 'closed-captioning']),
+  createChannelSettingSaveAction('volume', showSaveChannelVolumeButton.value,
+    t('Video.Save Channel Volume'), t('Settings.Channel Settings.Volume'), ['fas', 'volume-high'])
+].filter(action => action.visible))
+
+/**
+ * @param {'playbackSpeed'|'videoQuality'|'subtitlesState'|'volume'} setting
+ */
+function saveChannelSetting(setting) {
+  switch (setting) {
+    case 'playbackSpeed':
+      emit('save-channel-playback-speed')
+      break
+    case 'videoQuality':
+      emit('save-channel-video-quality')
+      break
+    case 'subtitlesState':
+      emit('save-channel-subtitles-state')
+      break
+    case 'volume':
+      emit('save-channel-volume')
+      break
+  }
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

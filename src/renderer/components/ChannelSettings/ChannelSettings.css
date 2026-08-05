@@ -1,0 +1,142 @@
+.sectionDescription {
+  margin-block: 0 1em;
+  padding-inline: 20px;
+  color: var(--secondary-text-color);
+}
+
+.preferenceToggles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1em 2em;
+  margin-block-end: 1em;
+}
+
+.autoUpdateToggle {
+  margin-block-start: 0.5em;
+  margin-inline-start: 1em;
+}
+
+.channelSearch {
+  margin-block-end: 1em;
+}
+
+.channelListContainer {
+  /* Use the height the search field and the close button leave over */
+  flex-grow: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+
+  /* Keep the cards' focus outlines clear of the scroll container's edges */
+  padding: 2px;
+}
+
+.emptyState {
+  padding: 2rem;
+  text-align: center;
+}
+
+.channelList {
+  display: flex;
+  flex-wrap: wrap;
+
+  /* Centres a lone card instead of stretching it across the whole prompt */
+  justify-content: center;
+  gap: 1em;
+  margin-block: 0 1em;
+  padding: 0;
+  list-style: none;
+}
+
+.channelEntry {
+  display: flex;
+
+  /* Basis wide enough to fit two preference columns, so cards stay wide instead
+     of the prompt packing in as many narrow ones as it can */
+  flex: 1 1 520px;
+  flex-direction: column;
+  max-inline-size: 760px;
+  padding: 1em;
+  border: 1px solid var(--border-color);
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
+.channelHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+}
+
+.channelThumbnail {
+  inline-size: 40px;
+  block-size: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.channelThumbnailPlaceholder {
+  display: grid;
+
+  /* Icons default to a 1.25em wide box, which would sit off-centre in the circle */
+  --fa-width: 1em;
+
+  place-items: center;
+  background-color: var(--side-nav-hover-color);
+  color: var(--secondary-text-color);
+  font-size: 20px;
+}
+
+.channelName {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.channelPreferences {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.5em 1em;
+  margin-block-start: 0.75em;
+}
+
+.channelPreference {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+
+  /* Keeps the rows level even though the controls have different natural heights */
+  min-block-size: 56px;
+}
+
+/* Each control ships its own spacing for use in a settings page, which would
+   leave the rows here indented by different amounts. */
+.channelPreference :deep(.pure-material-slider) {
+  inline-size: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.channelPreference :deep(.select) {
+  inline-size: auto;
+}
+
+.preferenceIcon {
+  inline-size: 20px;
+  flex-shrink: 0;
+  color: var(--secondary-text-color);
+}
+
+.channelPreference > :nth-child(2) {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* FtSelect reserves space above itself for its floating label, which pushes the
+   select box below the row's centre. Reserve the same space for the row's other
+   items, so they line up with the box instead of the label. */
+.channelPreference:has(.select) > .preferenceIcon,
+.channelPreference:has(.select) > :last-child {
+  margin-block-start: 30px;
+}

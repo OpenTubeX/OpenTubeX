@@ -96,6 +96,7 @@ import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vu
 import ThemeSettings from '../../components/ThemeSettings.vue'
 import PlayerSettings from '../../components/PlayerSettings/PlayerSettings.vue'
 import CaptionSettings from '../../components/CaptionSettings/CaptionSettings.vue'
+import ChannelSettings from '../../components/ChannelSettings/ChannelSettings.vue'
 import ExternalPlayerSettings from '../../components/ExternalPlayerSettings.vue'
 import DownloadSettings from '../../components/DownloadSettings.vue'
 import ExternalSoftwareSettings from '../../components/ExternalSoftwareSettings.vue'
@@ -148,6 +149,12 @@ const settingsComponentsData = computed(() => {
       title: t('Settings.Player Settings.Player Settings'),
       icon: ['fas', 'circle-play'],
       component: PlayerSettings
+    },
+    {
+      type: 'channel',
+      title: t('Settings.Channel Settings.Channel Settings'),
+      icon: ['fas', 'users'],
+      component: ChannelSettings
     },
     {
       type: 'caption-appearance',

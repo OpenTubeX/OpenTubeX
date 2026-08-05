@@ -62,6 +62,7 @@ import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
+import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
@@ -444,6 +445,10 @@ export default defineComponent({
     'save-channel-playback-speed',
     'video-quality-updated',
     'video-quality-user-set',
+    'subtitles-state-updated',
+    'subtitles-state-user-set',
+    'volume-updated',
+    'volume-user-set',
     'skip-to-next',
     'skip-to-prev',
     'player-reload-requested',
@@ -959,10 +964,30 @@ export default defineComponent({
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
 
+    /**
+     * The subtitles state that was saved for this video's channel, if there is one.
+     * @returns {boolean | null}
+     */
+    function getSavedChannelSubtitlesState() {
+      if (!store.getters.getRememberSubtitlesStatePerChannel || props.channelId === '') {
+        return null
+      }
+
+      const value = parseChannelPreferences(
+        store.getters.getChannelSubtitlesStates,
+        'channelSubtitlesStates'
+      )[props.channelId]
+
+      return typeof value === 'boolean' ? value : null
+    }
+
     /** @type {number|null} */
     let restoreCaptionIndex = props.sabrReloadCaptionIndex
 
-    if (restoreCaptionIndex === null && store.getters.getEnableSubtitlesByDefault && props.captions.length > 0) {
+    // The channel's subtitles state is more specific than the global default, so it wins
+    const enableSubtitlesInitially = getSavedChannelSubtitlesState() ?? store.getters.getEnableSubtitlesByDefault
+
+    if (restoreCaptionIndex === null && enableSubtitlesInitially && props.captions.length > 0) {
       const caption = getCaptionToEnable()
       restoreCaptionIndex = caption ? props.captions.indexOf(caption) : 0
     }
@@ -1204,6 +1229,25 @@ export default defineComponent({
     /** @type {import('vue').ComputedRef<boolean>} */
     const rememberVolume = computed(() => {
       return store.getters.getRememberVolume
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const rememberVolumePerChannel = computed(() => {
+      return store.getters.getRememberVolumePerChannel
+    })
+
+    /**
+     * The volume that was saved for this video's channel, if there is one.
+     * @type {import('vue').ComputedRef<number | null>}
+     */
+    const savedChannelVolume = computed(() => {
+      if (!rememberVolumePerChannel.value || props.channelId === '') {
+        return null
+      }
+
+      const value = parseChannelPreferences(store.getters.getChannelVolumes, 'channelVolumes')[props.channelId]
+
+      return typeof value === 'number' && Number.isFinite(value) ? Math.min(Math.max(value, 0), 1) : null
     })
 
     let applyingInitialVolume = false
@@ -4331,6 +4375,23 @@ export default defineComponent({
       updateScrollMiniPlayer()
     }
 
+    let volumeUserSetTimer = null
+
+    // Dragging the volume slider fires a continuous stream of events,
+    // so wait for the user to settle on a volume before persisting it
+    function emitVolumeUserSet(volume) {
+      clearTimeout(volumeUserSetTimer)
+      volumeUserSetTimer = setTimeout(() => {
+        volumeUserSetTimer = null
+        emit('volume-user-set', volume)
+      }, 500)
+    }
+
+    function cancelPendingVolumeUserSet() {
+      clearTimeout(volumeUserSetTimer)
+      volumeUserSetTimer = null
+    }
+
     function updateVolume() {
       const video_ = video.value
       const muted = video_.muted || video_.volume === 0
@@ -4348,7 +4409,15 @@ export default defineComponent({
         .forEach(segment => {
           segment.unskipped = !video_.muted
         })
-      if (!rememberVolume.value || applyingInitialVolume || sponsorBlockVolumeChange) {
+      if (applyingInitialVolume || sponsorBlockVolumeChange) {
+        return
+      }
+
+      const volume = video_.muted ? 0 : video_.volume
+      emit('volume-updated', volume)
+      emitVolumeUserSet(volume)
+
+      if (!rememberVolume.value) {
         return
       }
 
@@ -4370,7 +4439,11 @@ export default defineComponent({
     function applyInitialVolume(videoElement) {
       applyingInitialVolume = true
 
-      if (rememberVolume.value) {
+      // The channel's volume is more specific than the globally remembered one, so it wins
+      if (savedChannelVolume.value !== null) {
+        videoElement.volume = savedChannelVolume.value
+        videoElement.muted = savedChannelVolume.value === 0
+      } else if (rememberVolume.value) {
         const remembered = getRememberedPlayerVolume()
 
         if (remembered !== null) {
@@ -4386,6 +4459,7 @@ export default defineComponent({
       }
 
       applyingInitialVolume = false
+      emit('volume-updated', videoElement.muted ? 0 : videoElement.volume)
     }
 
     function handleTimeupdate() {
@@ -4596,8 +4670,14 @@ export default defineComponent({
     function wrapTextTrackSelection() {
       const selectTextTrack = player.selectTextTrack.bind(player)
 
-      player.selectTextTrack = (track = null) => {
+      // Shaka's own UI only passes the track, so anything without `isUserAction`
+      // is a selection the user made themselves
+      player.selectTextTrack = (track = null, isUserAction = true) => {
         const activeTextTrack = player.getTextTracks().find(textTrack => textTrack.active)
+
+        if (isUserAction) {
+          emit('subtitles-state-user-set', track !== null)
+        }
 
         if (track === null) {
           clearDisplayedCaptions()
@@ -4611,6 +4691,7 @@ export default defineComponent({
         }
 
         selectTextTrack(track)
+        emit('subtitles-state-updated', track !== null)
       }
     }
 
@@ -8065,10 +8146,11 @@ export default defineComponent({
         const textTrack = player.getTextTracks()[index]
 
         if (textTrack) {
-          player.selectTextTrack(textTrack)
+          player.selectTextTrack(textTrack, false)
         }
       }
       syncShortsCaptionsEnabled()
+      emit('subtitles-state-updated', player.getTextTracks().some(track => track.active))
 
       if (props.chapters.length > 0) {
         createChapterMarkers()
@@ -8142,7 +8224,7 @@ export default defineComponent({
 
           // hide captions before switching as shaka/the browser doesn't clean up the displayed captions
           // when switching away from the legacy formats
-          player.selectTextTrack(null)
+          player.selectTextTrack(null, false)
         } else {
           restoreCaptionIndex = null
         }
@@ -8271,6 +8353,7 @@ export default defineComponent({
 
     onBeforeUnmount(() => {
       clearTimeout(paidPromotionTimer)
+      cancelPendingVolumeUserSet()
       fullWindowAnimation?.cancel()
       hasLoaded.value = false
       closeFullscreenMetadata()
@@ -8403,6 +8486,7 @@ export default defineComponent({
      */
     async function destroyPlayer() {
       ignoreErrors = true
+      cancelPendingVolumeUserSet()
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false

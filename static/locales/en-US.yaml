@@ -655,8 +655,6 @@ Settings:
     Show Fast-Forward Through Silence Toggle: Show Fast-Forward Through Silence Toggle
     Hold to Double Playback Speed: Hold to Double Playback Speed
     Default Playback Rate: Default Playback Rate
-    Remember Playback Speed Per Channel: Remember Playback Speed Per Channel
-    Auto Update Channel Playback Speed: Automatically update when changing via player options
     Use Quick Playback Speed Bar: Use Quick Playback Speed Bar
     Customize Quick Playback Speed Bar: Customize Quick Playback Speed Bar
     Quick Playback Speed Bar Manager: Quick Playback Speed Bar
@@ -666,14 +664,6 @@ Settings:
     Edit Playback Speed Name: Edit playback speed name
     Use Automatic Playback Speed Name: Use automatic playback speed name
     Reorder Playback Speed: Drag to reorder playback speed
-    Manage Channel Playback Speeds: Manage Channel Playback Speeds
-    Channel Playback Speed Manager: Channel Playback Speed Manager
-    No Saved Playback Speeds: No saved playback speeds
-    Remember Video Quality Per Channel: Remember Video Quality Per Channel
-    Auto Update Channel Video Quality: Automatically update when changing via player options
-    Manage Channel Video Qualities: Manage Channel Video Qualities
-    Channel Video Quality Manager: Channel Video Quality Manager
-    No Saved Video Qualities: No saved video qualities
     Playback Speed: Playback Speed
     Max Video Playback Rate: Max Video Playback Rate
     Video Playback Rate Interval: Video Playback Rate Interval
@@ -712,6 +702,29 @@ Settings:
       Error:
         Forbidden Characters: Forbidden Characters
         Empty File Name: Empty File Name
+  Channel Settings:
+    Channel Settings: Channel Settings
+    Channel Settings Description: Remember the settings you pick while watching for each channel individually, so they are applied again the next time you watch one of its videos.
+    Enable Playback Speed: Enable Playback Speed
+    Enable Video Quality: Enable Video Quality
+    Enable Subtitles State: Enable Subtitles State
+    Enable Volume: Enable Volume
+    Auto Update: Automatically update when changing via player options
+    Auto Update Subtitles: Automatically update when toggled
+    Auto Update Volume: Automatically update whenever you change the volume
+    Manage Saved Channels: 'Manage Saved Channels ({channelCount})'
+    Saved Channels: Saved Channel Settings
+    Search Channels: Search channels
+    No Saved Channels: No channel specific settings have been saved yet
+    No Matching Channels: No channels match your search
+    Forget Channel: Forget all settings for this channel
+    Forget Value: Forget this setting
+    Add Setting: Remember another setting for this channel
+    Playback Speed: Playback Speed
+    Video Quality: Video Quality
+    Subtitles State: Subtitles
+    Subtitles Enabled: Subtitles Enabled
+    Volume: Volume
   External Player Settings:
     External Player Settings: External Player
     External Player: External Player
@@ -1245,6 +1258,12 @@ Video:
   Channel Playback Speed Saved: Channel Playback Speed Saved
   Save Channel Video Quality: Save Channel Video Quality
   Channel Video Quality Saved: Channel Video Quality Saved
+  Save Channel Subtitles State: Save Channel Subtitles State
+  Channel Subtitles State Saved: Channel Subtitles State Saved
+  Save Channel Volume: Save Channel Volume
+  Channel Volume Saved: Channel Volume Saved
+  Save Channel Setting: Save channel setting…
+  Channel Setting Already Set: '{setting} already set to {value}'
   Save Video: Save Video
   Video has been saved: Video has been saved
   Video has been saved to {playlistName}: Video has been saved to {playlistName}

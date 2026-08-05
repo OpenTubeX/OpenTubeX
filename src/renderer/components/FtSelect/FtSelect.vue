@@ -59,6 +59,7 @@
       :for="id"
     >
       <FontAwesomeIcon
+        v-if="showIcon"
         :icon="icon"
         class="select-icon"
         :color="iconColor"
@@ -165,6 +166,10 @@ const props = defineProps({
   icon: {
     type: Array,
     required: true
+  },
+  showIcon: {
+    type: Boolean,
+    default: true
   },
   iconColor: {
     type: String,
