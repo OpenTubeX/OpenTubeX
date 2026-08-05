@@ -8,7 +8,9 @@ import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/u
 import { installViewTransitions } from './helpers/viewTransitions'
 import { library } from './fontawesome-minimal'
 import {
+  facFluxer,
   facHorizontalTabs,
+  facMatrix,
   facPlaylistAdd,
   facPlaylistCheck,
   facVerticalTabs
@@ -326,7 +328,9 @@ library.add(
   faYoutube,
 
   // custom icons
+  facFluxer,
   facHorizontalTabs,
+  facMatrix,
   facPlaylistAdd,
   facPlaylistCheck,
   facVerticalTabs,

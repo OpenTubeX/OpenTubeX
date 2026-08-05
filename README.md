@@ -17,10 +17,10 @@ endorsed by, maintained by, or supported by the FreeTube project.
   <a href="https://weblate.d3sox.me/engage/opentubex/">
     <img src="https://weblate.d3sox.me/widgets/opentubex/-/svg-badge.svg" alt="Translation status" />
   </a>
-  <a href="https://fluxer.gg/PHdJoM1G">
+  <a href="https://opentubex.org/fluxer">
     <img alt="Fluxer members" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fluxer.app%2Finvites%2FPHdJoM1G&query=%24.member_count&label=Fluxer&suffix=%20members&color=4641D9&logo=fluxer&logoColor=white" />
   </a>
-  <a href="https://matrix.to/#/#opentubex:matrix.org">
+  <a href="https://opentubex.org/matrix">
     <img alt="Matrix" src="https://img.shields.io/badge/Matrix-%23opentubex-black?logo=matrix&logoColor=white" />
   </a>
 </p>
@@ -394,7 +394,7 @@ We are actively looking for translations! We use [Weblate](https://weblate.d3sox
 For the Linux Flatpak, the desktop entry comment string can be translated at our [Flatpak repository](https://github.com/OpenTubeX/flatpak/blob/main/org.opentubex.OpenTubeX.desktop).
 
 ## Contact
-If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page, join our [Fluxer](https://fluxer.gg/PHdJoM1G) server, or our [Matrix](https://matrix.to/#/#opentubex:matrix.org) space (`#opentubex:matrix.org`).
+If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page, join our [Fluxer](https://opentubex.org/fluxer) server, or our [Matrix](https://opentubex.org/matrix) space (`#opentubex:matrix.org`).
 
 ## License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  

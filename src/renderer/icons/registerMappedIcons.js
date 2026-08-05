@@ -2,7 +2,9 @@ import { addIcon } from '@iconify/vue/offline'
 
 import lucideFilledBases from './lucideFilledBases.json'
 import {
+  facFluxer,
   facHorizontalTabs,
+  facMatrix,
   facPlaylistAdd,
   facPlaylistCheck,
   facVerticalTabs
@@ -46,13 +48,15 @@ function registerCustomIcons() {
     facVerticalTabs,
     facHorizontalTabs,
     facPlaylistAdd,
-    facPlaylistCheck
+    facPlaylistCheck,
+    facFluxer,
+    facMatrix
   ]) {
-    const [, , , , path] = custom.icon
+    const [width, height, , , path] = custom.icon
     addIcon(`otx:${custom.iconName}`, {
       body: `<path fill="currentColor" d="${path}" />`,
-      width: 512,
-      height: 512
+      width,
+      height
     })
   }
 }
