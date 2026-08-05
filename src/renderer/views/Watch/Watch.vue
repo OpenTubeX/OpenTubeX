@@ -103,6 +103,7 @@
           :start-with-chapters="startNextVideoWithChapters"
           :start-with-fullscreen-metadata="startNextVideoWithFullscreenMetadata"
           :start-with-fullscreen-comments="startNextVideoWithFullscreenComments"
+          :start-with-fullscreen-live-chat="startNextVideoWithFullscreenLiveChat"
           :start-with-fullscreen-playlist="startNextVideoWithFullscreenPlaylist"
           :channel-id="channelId"
           :playlist-video-data="addToPlaylistVideoData"

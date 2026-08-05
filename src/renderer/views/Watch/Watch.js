@@ -175,6 +175,7 @@ export default defineComponent({
       startNextVideoWithChapters: false,
       startNextVideoWithFullscreenMetadata: false,
       startNextVideoWithFullscreenComments: false,
+      startNextVideoWithFullscreenLiveChat: false,
       startNextVideoWithFullscreenPlaylist: false,
       isLoading: true,
       firstLoad: true,
@@ -3990,6 +3991,7 @@ export default defineComponent({
       this.startNextVideoWithChapters = uiState.startNextVideoWithChapters
       this.startNextVideoWithFullscreenMetadata = uiState.startNextVideoWithFullscreenMetadata
       this.startNextVideoWithFullscreenComments = uiState.startNextVideoWithFullscreenComments
+      this.startNextVideoWithFullscreenLiveChat = uiState.startNextVideoWithFullscreenLiveChat
       this.startNextVideoWithFullscreenPlaylist = uiState.startNextVideoWithFullscreenPlaylist
     },
 

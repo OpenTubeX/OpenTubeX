@@ -336,6 +336,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    startWithFullscreenLiveChat: {
+      type: Boolean,
+      default: false
+    },
     startWithFullscreenPlaylist: {
       type: Boolean,
       default: false
@@ -967,7 +971,7 @@ export default defineComponent({
     let restoreFullscreenTranscript = false
     let restoreFullscreenSponsorBlock = false
     let restoreFullscreenComments = props.startWithFullscreenComments
-    let restoreFullscreenLiveChat = false
+    let restoreFullscreenLiveChat = props.startWithFullscreenLiveChat
     let restoreFullscreenPlaylist = props.startWithFullscreenPlaylist
     let exitFullscreenCleanup = null
     let syncingChapterOverlayButton = false
@@ -8440,6 +8444,7 @@ export default defineComponent({
      *   startNextVideoWithChapters: boolean,
      *   startNextVideoWithFullscreenMetadata: boolean,
      *   startNextVideoWithFullscreenComments: boolean,
+     *   startNextVideoWithFullscreenLiveChat: boolean,
      *   startNextVideoWithFullscreenPlaylist: boolean
      * }>}
      */
@@ -8456,6 +8461,7 @@ export default defineComponent({
         startNextVideoWithChapters: false,
         startNextVideoWithFullscreenMetadata: false,
         startNextVideoWithFullscreenComments: false,
+        startNextVideoWithFullscreenLiveChat: false,
         startNextVideoWithFullscreenPlaylist: false
       }
 
@@ -8470,6 +8476,7 @@ export default defineComponent({
             startNextVideoWithChapters: showChaptersOverlay.value,
             startNextVideoWithFullscreenMetadata: showFullscreenMetadata.value,
             startNextVideoWithFullscreenComments: showFullscreenComments.value,
+            startNextVideoWithFullscreenLiveChat: showFullscreenLiveChat.value,
             startNextVideoWithFullscreenPlaylist: showFullscreenPlaylist.value
           }
         }
