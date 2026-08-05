@@ -367,6 +367,7 @@ import {
 } from '../../helpers/utils.js'
 import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
+import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
 import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
@@ -501,7 +502,20 @@ const historyEntryExists = computed(() => historyEntry.value !== undefined)
 
 const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
-const canMarkAsWatched = computed(() => !isLive.value)
+const canMarkAsWatched = computed(() => {
+  if (isLive.value) {
+    return false
+  }
+
+  // A scheduled premiere can only be watched once its start time has passed,
+  // even if a cached entry still carries a stale upcoming flag.
+  const premiereTimestamp = getUpcomingPremiereTimestamp(props.data)
+  if (premiereTimestamp != null) {
+    return premiereTimestamp <= Date.now()
+  }
+
+  return !isUpcoming.value
+})
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
@@ -1447,6 +1461,7 @@ function markAsWatched() {
     isWatched: true,
     timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,
+    isUpcoming: false,
     type: 'video'
   }
 

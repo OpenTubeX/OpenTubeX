@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
-function historyEntry(videoId, title, timeWatched, isWatched = false, isLive = false) {
+function historyEntry(videoId, title, timeWatched, isWatched = false, extra = {}) {
   return {
     _id: videoId,
     videoId,
@@ -17,8 +17,9 @@ function historyEntry(videoId, title, timeWatched, isWatched = false, isLive = f
     watchProgress: 10,
     isWatched,
     timeWatched,
-    isLive,
-    type: 'video'
+    isLive: false,
+    type: 'video',
+    ...extra
   }
 }
 
@@ -27,7 +28,8 @@ test.use({
     history: [
       historyEntry('aaaaaaaaaaa', 'First test video', Date.now() - 1000, true),
       historyEntry('bbbbbbbbbbb', 'Second test video', Date.now() - 2000),
-      historyEntry('ccccccccccc', 'Active live stream', Date.now() - 3000, false, true)
+      historyEntry('ccccccccccc', 'Active live stream', Date.now() - 3000, false, { isLive: true }),
+      historyEntry('eeeeeeeeeee', 'Upcoming premiere', Date.now() - 4000, false, { isUpcoming: true })
     ]
   }
 })
@@ -110,6 +112,18 @@ test.describe('watch history', () => {
     await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
   })
 
+  test('does not offer watched actions for an upcoming premiere history entry', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
+    await upcomingPremiere.hover()
+    await upcomingPremiere.locator('.optionsButton').click()
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
+  })
+
   test('marks every history entry as watched', async ({ app, page }) => {
     await goTo(page, 'history')
 
@@ -131,8 +145,11 @@ test.describe('watch history', () => {
       const latestRecords = Object.values(Object.fromEntries(
         records.filter(record => record.videoId).map(record => [record.videoId, record])
       ))
-      return latestRecords.every(record => record.isLive === true || record.isWatched === true) &&
-        latestRecords.find(record => record.videoId === 'ccccccccccc')?.isWatched === false
+      return latestRecords.every(record => {
+        return record.isLive === true || record.isUpcoming === true || record.isWatched === true
+      }) &&
+        latestRecords.find(record => record.videoId === 'ccccccccccc')?.isWatched === false &&
+        latestRecords.find(record => record.videoId === 'eeeeeeeeeee')?.isWatched === false
     }).toBe(true)
   })
 })

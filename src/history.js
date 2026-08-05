@@ -10,7 +10,7 @@ export { DEFAULT_WATCHED_PERCENTAGE_THRESHOLD, WATCHED_MAX_REMAINING_SECONDS }
  * @returns {boolean}
  */
 export function canMarkHistoryEntryAsWatched(historyEntry) {
-  return historyEntry?.isLive !== true
+  return historyEntry?.isLive !== true && historyEntry?.isUpcoming !== true
 }
 
 /**

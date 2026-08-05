@@ -46,3 +46,10 @@ test('active live content cannot be marked as watched', () => {
     lengthSeconds: 10 * 60,
   }), true)
 })
+
+test('upcoming premieres cannot be marked as watched', () => {
+  assert.equal(canMarkHistoryEntryAsWatched({ isUpcoming: true }), false)
+  assert.equal(isHistoryEntryWatched({ isUpcoming: true, isWatched: true }), false)
+  assert.equal(canMarkHistoryEntryAsWatched({ isUpcoming: false }), true)
+  assert.equal(isHistoryEntryWatched({ isUpcoming: false, isWatched: true }), true)
+})
