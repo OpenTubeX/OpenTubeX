@@ -828,7 +828,7 @@
         </transition>
       </Teleport>
       <div
-        v-if="isLoading"
+        v-if="isLoading && showLiveChat"
         class="liveChatSkeleton watchVideoSideBar watchVideoPlaylist"
         aria-hidden="true"
       >
