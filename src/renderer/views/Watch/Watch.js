@@ -1179,6 +1179,16 @@ export default defineComponent({
         return
       }
 
+      if (this.subscriptionShortsFeedActive) {
+        this.shortsScrollResetPending = false
+        this.shortsLastWindowScrollY = window.scrollY
+        requestAnimationFrame(() => {
+          if (this.isCurrentlyPresented()) {
+            this.shortsLastWindowScrollY = window.scrollY
+          }
+        })
+      }
+
       document.removeEventListener('keydown', this.resetAutoplayInterruptionTimeout)
       document.removeEventListener('click', this.resetAutoplayInterruptionTimeout)
       document.addEventListener('keydown', this.resetAutoplayInterruptionTimeout)
@@ -1492,24 +1502,42 @@ export default defineComponent({
     handleShortsWindowScroll: function () {
       const scrollY = window.scrollY
 
+      const logicalTabSelected = !process.env.IS_ELECTRON ||
+        this.tabId == null ||
+        this.$store.getters.getActiveTabId === this.tabId
+
+      if (
+        !this.subscriptionShortsFeedActive ||
+        !this.isCurrentlyPresented() ||
+        !logicalTabSelected
+      ) {
+        this.shortsLastWindowScrollY = scrollY
+        return
+      }
+
       if (this.shortsScrollResetPending) {
         this.shortsScrollResetPending = false
         this.shortsLastWindowScrollY = scrollY
         return
       }
 
-      if (
-        !this.subscriptionShortsFeedActive ||
-        !this.isCurrentlyPresented() ||
-        Math.abs(scrollY - this.shortsLastWindowScrollY) < 4
-      ) {
+      if (Math.abs(scrollY - this.shortsLastWindowScrollY) < 4) {
         this.shortsLastWindowScrollY = scrollY
         return
       }
 
-      const offset = scrollY > this.shortsLastWindowScrollY ? 1 : -1
+      const movedDown = scrollY > this.shortsLastWindowScrollY
       this.shortsLastWindowScrollY = scrollY
-      this.navigateSubscriptionShort(offset)
+
+      // The document starts at its upper boundary, so native document
+      // scrolling can only intentionally advance the feed. A decrease is our
+      // own reset or tab scroll restoration; wheel, touch, and keyboard input
+      // handle navigation to the previous Short directly.
+      if (!movedDown) {
+        return
+      }
+
+      this.navigateSubscriptionShort(1)
 
       // The short preview deliberately gives the document a small scroll range
       // so the page scrollbar and middle-button autoscroll can navigate. Reset

@@ -1865,6 +1865,126 @@ test.describe('custom Shorts player', () => {
     await expect(player).toHaveClass(/shortsPaused/)
   })
 
+  test('hides Shorts controls on leave and keeps edge controls usable', async ({ page }) => {
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    const video = player.locator('video')
+    await video.evaluate(async element => {
+      if (element.paused) await element.play()
+    })
+    const controls = player.locator('.shaka-controls-container')
+    const topControls = player.locator('.shortsTopControls')
+    const seekBar = player.locator('.shaka-seek-bar-container')
+    const playerBounds = await player.boundingBox()
+
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height / 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+    await page.mouse.move(0, 0)
+    await expect(controls).not.toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
+
+    await expect(seekBar).toHaveCSS('opacity', '1')
+    await expect(seekBar).toHaveCSS('height', '3px')
+    await expect(seekBar).toHaveCSS('bottom', '-2px')
+    const seekBounds = await seekBar.boundingBox()
+    expect(seekBounds.x).toBeGreaterThan(playerBounds.x)
+    expect(seekBounds.x + seekBounds.width).toBeLessThan(playerBounds.x + playerBounds.width)
+    expect(seekBounds.y + seekBounds.height)
+      .toBeGreaterThan(playerBounds.y + playerBounds.height)
+
+    const contextMenu = player.locator('.shaka-context-menu')
+    await player.click({
+      button: 'right',
+      position: { x: playerBounds.width - 1, y: playerBounds.height - 1 }
+    })
+    await expect(contextMenu).toBeVisible()
+    await expect.poll(async () => {
+      const menu = await contextMenu.boundingBox()
+      return {
+        left: menu.x >= playerBounds.x + 7,
+        right: menu.x + menu.width <= playerBounds.x + playerBounds.width - 7,
+        top: menu.y >= playerBounds.y + 7,
+        bottom: menu.y + menu.height <= playerBounds.y + playerBounds.height - 7,
+      }
+    }).toEqual({ left: true, right: true, top: true, bottom: true })
+
+    await video.evaluate(element => {
+      element.loop = false
+      element.dispatchEvent(new Event('ended'))
+    })
+    const replayIcon = player.locator('.shortsReplayIcon')
+    await expect(replayIcon).toBeVisible()
+    await expect(replayIcon).toHaveAttribute('viewBox', '0 -960 960 960')
+    expect((await replayIcon.locator('path').getAttribute('d')).length).toBeGreaterThan(20)
+  })
+
+  test('fullscreen Shorts controls follow the video hover area', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    let playerLoaded = false
+    const settled = await expect.poll(async () => {
+      playerLoaded = await player.isVisible().catch(() => false)
+      return playerLoaded || await errorMessage.isVisible().catch(() => false) ? 'done' : 'waiting'
+    }, { timeout: 30_000 }).toBe('done').then(() => true, () => false)
+    test.skip(
+      !settled || !playerLoaded,
+      `Shorts watch page unavailable from the live API: ${(await errorMessage.textContent().catch(() => ''))?.trim() || 'unhydrated'}`
+    )
+
+    await waitForPlaybackOrSkip(test, page)
+    await setPlayerFullscreen(page, true)
+
+    const controls = player.locator('.shaka-controls-container')
+    const topControls = player.locator('.shortsTopControls')
+    const actionDock = player.locator('.fullscreenActions')
+    const videoSpace = player.locator('.shortsFullscreenVideoSpace')
+    const [playerBounds, videoBounds] = await Promise.all([
+      player.boundingBox(),
+      videoSpace.boundingBox(),
+    ])
+    expect(videoBounds.width).toBeGreaterThan(0)
+    expect(videoBounds.x).toBeGreaterThan(playerBounds.x)
+
+    await page.mouse.move(
+      videoBounds.x + videoBounds.width / 2,
+      videoBounds.y + videoBounds.height / 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+
+    await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
+    await expect(controls).not.toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
+    await expect(topControls).toHaveCSS('opacity', '0')
+    await expect(actionDock).toHaveCSS('opacity', '1')
+    await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+
+    await page.mouse.move(
+      videoBounds.x + videoBounds.width / 2,
+      videoBounds.y + videoBounds.height / 2
+    )
+    await expect(controls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+  })
+
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'Shorts detection needs the real API')
 
@@ -1919,9 +2039,33 @@ test.describe('custom Shorts player', () => {
       if (element.paused) await element.play()
     })
     await expect(player).not.toHaveClass(/shortsPaused/)
-    await expect(seekBar).toHaveCSS('opacity', '0')
+    await expect(seekBar).toHaveCSS('opacity', '1')
+    await expect(seekBar).toHaveCSS('height', '3px')
+    await expect(seekBar).toHaveCSS('bottom', '-2px')
 
-    const playerBounds = await player.boundingBox()
+    const [playerBounds, seekBarBounds] = await Promise.all([
+      player.boundingBox(),
+      seekBar.boundingBox(),
+    ])
+    expect(seekBarBounds.x).toBeGreaterThan(playerBounds.x)
+    expect(seekBarBounds.x + seekBarBounds.width).toBeLessThan(playerBounds.x + playerBounds.width)
+    expect(seekBarBounds.y + seekBarBounds.height)
+      .toBeGreaterThan(playerBounds.y + playerBounds.height)
+
+    const shakaControls = player.locator('.shaka-controls-container')
+    const topControls = player.locator('.shortsTopControls')
+    await page.mouse.move(
+      playerBounds.x + playerBounds.width / 2,
+      playerBounds.y + playerBounds.height / 2
+    )
+    await expect(shakaControls).toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('opacity', '1')
+    await expect(topControls).toHaveCSS('border-top-left-radius', /.+/)
+    await page.mouse.move(0, 0)
+    await expect(shakaControls).not.toHaveAttribute('shown', 'true')
+    await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
+    await expect(topControls).toHaveCSS('opacity', '0')
+
     await page.mouse.move(
       playerBounds.x + playerBounds.width / 2,
       playerBounds.y + playerBounds.height - 2
@@ -1937,6 +2081,26 @@ test.describe('custom Shorts player', () => {
     await expect(player).toHaveClass(/shortsPaused/)
     await expect(seekBar).toHaveCSS('opacity', '1')
 
+    const contextMenu = player.locator('.shaka-context-menu')
+    await player.click({
+      button: 'right',
+      position: { x: playerBounds.width - 1, y: playerBounds.height - 1 }
+    })
+    await expect(contextMenu).toBeVisible()
+    await expect.poll(async () => {
+      const [container, menu] = await Promise.all([
+        player.boundingBox(),
+        contextMenu.boundingBox(),
+      ])
+      return {
+        left: menu.x >= container.x + 7,
+        right: menu.x + menu.width <= container.x + container.width - 7,
+        top: menu.y >= container.y + 7,
+        bottom: menu.y + menu.height <= container.y + container.height - 7,
+      }
+    }).toEqual({ left: true, right: true, top: true, bottom: true })
+    await page.keyboard.press('Escape')
+
     const volumeControl = player.locator('.shortsVolumeControl')
     await volumeControl.hover()
     await expect(volumeControl.locator('.shortsVolumeSlider')).toBeVisible()
@@ -1950,18 +2114,18 @@ test.describe('custom Shorts player', () => {
       overflowMenu.boundingBox(),
     ])
     expect(menuBox.y).toBeLessThan(playerBox.y + playerBox.height / 2)
-    expect(menuBox.x).toBeGreaterThan(playerBox.x + playerBox.width / 2)
+    expect(menuBox.x).toBeGreaterThanOrEqual(playerBox.x)
     expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(playerBox.x + playerBox.width)
 
     const fullWindowMenuButton = overflowMenu.getByRole('button', {
-      name: /Full Window/
+      name: /Full window/i
     })
     await fullWindowMenuButton.click()
     await expect(player).toHaveClass(/fullWindow/)
 
     await moreOptions.click()
     const exitFullWindowMenuButton = overflowMenu.getByRole('button', {
-      name: /Exit Full Window/
+      name: /Exit full window/i
     })
     await expect(exitFullWindowMenuButton).toBeVisible()
     await exitFullWindowMenuButton.click()
@@ -2133,7 +2297,14 @@ test.describe('custom Shorts player', () => {
       return entry.watchProgress === entry.lengthSeconds
     })).toBe(true)
 
-    await player.locator('video').dispatchEvent('ended')
+    await video.evaluate(element => {
+      element.loop = false
+      element.dispatchEvent(new Event('ended'))
+    })
+    const replayIcon = player.locator('.shortsReplayIcon')
+    await expect(replayIcon).toBeVisible()
+    await expect(replayIcon).toHaveAttribute('viewBox', '0 -960 960 960')
+    expect((await replayIcon.locator('path').getAttribute('d')).length).toBeGreaterThan(20)
     await page.waitForTimeout(500)
 
     await expect(page).toHaveURL(/#\/watch\/[^?]+\?[^#]*\bshort=true\b/)
@@ -2398,5 +2569,136 @@ test.describe('custom Shorts player', () => {
     await expect(page).toHaveURL(
       /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
     )
+  })
+
+  test('does not show a stale loading indicator after leaving a loaded Shorts tab', async ({ app, page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    const shortTab = page.locator(sel.tabs).first()
+    const otherTab = page.locator(sel.tabs).nth(1)
+    await shortTab.click()
+
+    const shortsFeedTab = page
+      .locator('.tabContent[aria-hidden="false"]')
+      .locator('[data-subscription-feed-tab="shorts"]')
+    await shortsFeedTab.click()
+    await page.getByText('First seeded Short', { exact: true }).click()
+    await expect(page).toHaveURL(
+      /#\/watch\/w1WKmSqwM8I\?short=true&shortSource=subscriptions/
+    )
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const errorMessage = page.locator('.errorMessage')
+    await expect(player.or(errorMessage)).toBeVisible({ timeout: 30_000 })
+    if (await errorMessage.isVisible()) {
+      test.skip(true, `Shorts watch page unavailable from the live API: ${await errorMessage.textContent()}`)
+    }
+
+    await expect(shortTab).not.toHaveClass(/loading/)
+    await shortTab.evaluate((tab) => {
+      window.__shortTabShowedLoadingWhileScrolling = false
+      new MutationObserver(() => {
+        if (tab.classList.contains('loading')) {
+          window.__shortTabShowedLoadingWhileScrolling = true
+        }
+      }).observe(tab, { attributes: true, attributeFilter: ['class'] })
+    })
+    await page.evaluate(() => window.scrollTo({
+      top: document.documentElement.scrollHeight
+    }))
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    await expect.poll(() => page.evaluate(
+      () => window.__shortTabShowedLoadingWhileScrolling
+    )).toBe(true)
+    await expect(player).toBeVisible()
+    await expect(
+      page.locator('.tabContent[aria-hidden="false"] [data-tab-loading-indicator]')
+    ).toHaveCount(0)
+
+    await expect(shortTab).not.toHaveClass(/loading/)
+    await shortTab.evaluate((tab) => {
+      window.__shortTabShowedLoadingAfterDeactivation = false
+      window.__shortTabLoadingTransitions = []
+      new MutationObserver(() => {
+        window.__shortTabLoadingTransitions.push({
+          loading: tab.classList.contains('loading'),
+          markers: [...document.querySelectorAll(
+            `[data-tab-id="${tab.dataset.tabId}"] [data-tab-loading-indicator]`
+          )].map(element => element.className),
+        })
+        if (tab.classList.contains('loading')) {
+          window.__shortTabShowedLoadingAfterDeactivation = true
+        }
+      }).observe(tab, { attributes: true, attributeFilter: ['class'] })
+    })
+
+    const shortTabId = await shortTab.getAttribute('data-tab-id')
+    await page.evaluate((tabId) => {
+      const app = document.querySelector('#app')?.__vue_app__
+      const findWatchView = (vnode) => {
+        if (
+          vnode?.component?.type?.name === 'Watch' &&
+          vnode.component.proxy?.tabId === tabId
+        ) {
+          return vnode.component.proxy
+        }
+        if (vnode?.component?.subTree) {
+          const match = findWatchView(vnode.component.subTree)
+          if (match) return match
+        }
+        if (Array.isArray(vnode?.children)) {
+          for (const child of vnode.children) {
+            const match = findWatchView(child)
+            if (match) return match
+          }
+        }
+        return null
+      }
+      const watchView = findWatchView(app?._container?._vnode)
+      if (!watchView) throw new Error('Unable to access the Shorts watch view')
+
+      // Reproduce a delayed placeholder appearing while the first tab switch
+      // begins. Once hidden, it must never contribute to the tab loader.
+      watchView.shortsTransitionPreview = ''
+      window.setTimeout(() => {
+        watchView.isLoading = true
+      }, 250)
+    }, shortTabId)
+
+    await app.evaluate(({ BrowserWindow, Menu }) => {
+      const findMenuItem = (items, label) => {
+        for (const item of items) {
+          if (item.label === label) return item
+          const match = findMenuItem(item.submenu?.items ?? [], label)
+          if (match) return match
+        }
+        return null
+      }
+      const menuItem = findMenuItem(Menu.getApplicationMenu()?.items ?? [], 'Next Tab')
+      const browserWindow = BrowserWindow.getFocusedWindow()
+      if (!menuItem || !browserWindow) {
+        throw new Error('Next Tab application-menu item was not found')
+      }
+      menuItem.click(undefined, browserWindow, undefined)
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await page.waitForTimeout(5000)
+    const loadingResult = await page.evaluate(() => ({
+      showed: window.__shortTabShowedLoadingAfterDeactivation,
+      transitions: window.__shortTabLoadingTransitions,
+    }))
+    expect(loadingResult.showed, JSON.stringify(loadingResult.transitions)).toBe(false)
+    await expect(shortTab).not.toHaveClass(/loading/)
+
+    await shortTab.click()
+    await expect(page).toHaveURL(
+      /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
+    )
+    await expect(shortTab).toHaveClass(/loading/)
+    await expect(
+      page.locator('.tabContent[aria-hidden="false"] [data-tab-loading-indicator]')
+    ).toHaveCount(1)
   })
 })

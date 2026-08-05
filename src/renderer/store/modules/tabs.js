@@ -1,4 +1,5 @@
 import packageDetails from '../../../../package.json'
+import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
@@ -198,16 +199,39 @@ const mutations = {
   }
 }
 
+function prepareTabActivationLoading(state, payload) {
+  const outgoingTabId = state.activeTabId
+  const incomingTabId = payload.activeTabId ?? null
+  if (!outgoingTabId || !incomingTabId || outgoingTabId === incomingTabId) {
+    return payload
+  }
+
+  const navigation = getTabNavigationService()
+  navigation.setLoadingSuppressed(incomingTabId, false)
+  const outgoingTab = state.tabs.find(tab => tab.id === outgoingTabId)
+  if (outgoingTab?.route?.query?.short !== 'true') {
+    return payload
+  }
+
+  navigation.setLoadingSuppressed(outgoingTabId, true)
+  return {
+    ...payload,
+    tabs: payload.tabs?.map(tab => tab.id === outgoingTabId
+      ? { ...tab, isLoading: false }
+      : tab)
+  }
+}
+
 const actions = {
-  async initializeTabs({ commit }) {
+  async initializeTabs({ commit, state }) {
     if (!process.env.IS_ELECTRON) return () => {}
 
     const removeStateListener = window.ftElectron.tabs.onStateUpdated((newState) => {
-      commit('setTabsState', newState)
+      commit('setTabsState', prepareTabActivationLoading(state, newState))
     })
     const tabState = await window.ftElectron.tabs.getState()
     if (tabState) {
-      commit('setTabsState', tabState)
+      commit('setTabsState', prepareTabActivationLoading(state, tabState))
     }
 
     return () => {
@@ -225,8 +249,23 @@ const actions = {
     return await window.ftElectron.tabs.create(tabOptions)
   },
 
-  activateTab(_context, tabId) {
+  activateTab({ rootGetters }, tabId) {
     if (!process.env.IS_ELECTRON) return
+
+    const activeTabId = rootGetters.getActiveTabId
+    const activeTab = rootGetters.getTabById(activeTabId)
+    const navigation = getTabNavigationService()
+    navigation.setLoadingSuppressed(tabId, false)
+    if (
+      activeTabId !== tabId &&
+      activeTab?.route?.query?.short === 'true'
+    ) {
+      // Send this before activation so the main process cannot publish the
+      // outgoing Shorts tab as both inactive and transiently loading. The
+      // hidden Watch view stops contributing its loader during deactivation.
+      navigation.setLoadingSuppressed(activeTabId, true)
+    }
+
     window.ftElectron.tabs.activate(tabId)
   },
 

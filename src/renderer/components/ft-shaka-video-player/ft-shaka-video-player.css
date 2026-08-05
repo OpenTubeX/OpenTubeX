@@ -48,12 +48,10 @@
 
 .ftVideoPlayer.shortsPlayer {
   /*
-    A focused seek input extends beyond Shaka's visual seek bar. `hidden`
-    makes this element a scroll container, so the browser scrolls it to
-    reveal the input and shifts the video upward. `clip` keeps the rounded
-    crop without allowing that internal focus scroll.
+    Keep the container from becoming a focus-scroll area and let the seek
+    thumb extend below the video. The video itself owns the rounded crop.
   */
-  overflow: clip !important;
+  overflow: visible !important;
 }
 
 .ftVideoPlayer.shortsPlayer:not(:fullscreen, .fullWindow) {
@@ -72,9 +70,29 @@
   justify-content: space-between;
   box-sizing: border-box;
   padding: 16px;
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
   color: #fff;
-  background: linear-gradient(rgb(0 0 0 / 54%), transparent);
+  visibility: hidden;
+  opacity: 0;
+  background: linear-gradient(rgb(0 0 0 / 38%), transparent);
   pointer-events: none;
+  transform: translateZ(0);
+  transition:
+    opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 600ms;
+  will-change: opacity;
+}
+
+.ftVideoPlayer.presentationModeChanging .shortsTopControls {
+  transition: none !important;
+}
+
+.ftVideoPlayer.shortsPlayer.shortsPaused > .shortsTopControls,
+.ftVideoPlayer.shortsPlayer:has(:deep(.shaka-controls-container[shown='true'])) > .shortsTopControls {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 150ms ease;
 }
 
 .shortsTopControlsGroup {
@@ -92,7 +110,7 @@
   border: 0;
   border-radius: 50%;
   color: inherit;
-  background-color: rgb(0 0 0 / 48%);
+  background-color: rgb(0 0 0 / 32%);
   backdrop-filter: blur(8px) saturate(120%);
   cursor: pointer;
   font-size: 19px;
@@ -103,7 +121,7 @@
 .shortsTopControl:hover,
 .shortsTopControl:focus-visible,
 .shortsTopControl.active {
-  background-color: rgb(0 0 0 / 68%);
+  background-color: rgb(0 0 0 / 52%);
 }
 
 .shortsVolumeControl {
@@ -111,7 +129,7 @@
   align-items: center;
   min-inline-size: 46px;
   border-radius: 24px;
-  background-color: rgb(0 0 0 / 48%);
+  background-color: rgb(0 0 0 / 32%);
   backdrop-filter: blur(8px) saturate(120%);
   pointer-events: auto;
   transition: background-color 150ms ease;
@@ -133,7 +151,34 @@
 }
 
 .shortsVolumeControl:is(:hover, :focus-within) {
-  background-color: rgb(0 0 0 / 58%);
+  background-color: rgb(0 0 0 / 44%);
+}
+
+.shortsCaptionsControl {
+  position: relative;
+}
+
+.shortsCaptionsControlIcon {
+  inline-size: 28px;
+  block-size: 28px;
+  fill: currentcolor;
+}
+
+.shortsCaptionsControlSlash {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 25px;
+  block-size: 2.5px;
+  border-radius: calc(999px * var(--ui-roundness));
+  background-color: currentcolor;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(1);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shortsCaptionsControl.active > .shortsCaptionsControlSlash {
+  transform: translate(-50%, -50%) rotate(45deg) scaleX(0);
 }
 
 .shortsVolumeControl:is(:hover, :focus-within) .shortsVolumeSlider {
@@ -167,19 +212,46 @@
 
 .ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container) {
   position: absolute;
-  inset-block: auto 4px;
-  inset-inline: 6px;
+  inset-block: auto -2px;
+  inset-inline: calc(12px * var(--ui-roundness));
   inline-size: auto;
+  block-size: 3px;
   margin: 0;
   z-index: 1;
-  opacity: 0;
-  transition: opacity 120ms ease;
+  opacity: 1;
+  transition: none;
 }
 
-.ftVideoPlayer.shortsPlayer.shortsPaused :deep(.shaka-seek-bar-container),
-.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls:hover .shaka-seek-bar-container),
-.ftVideoPlayer.shortsPlayer :deep(.shaka-bottom-controls:focus-within .shaka-seek-bar-container) {
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-seek-bar-container:is(:hover, :focus-within) .shaka-range-element::-webkit-slider-thumb
+) {
   opacity: 1;
+  transform: scale(1);
+}
+
+.ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-moz-range-thumb) {
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.ftVideoPlayer.shortsPlayer :deep(
+  .shaka-seek-bar-container:is(:hover, :focus-within) .shaka-range-element::-moz-range-thumb
+) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.shortsReplayIcon {
+  inline-size: 24px;
+  block-size: 24px;
+  fill: currentcolor;
 }
 
 .ftVideoPlayer.shortsPlayer :deep(.shaka-scrim-container) {
@@ -189,12 +261,16 @@
 .ftVideoPlayer.shortsPlayer :deep(.shaka-overflow-menu),
 .ftVideoPlayer.shortsPlayer :deep(.shaka-settings-menu) {
   inset: var(--shorts-menu-top, 72px) var(--shorts-menu-right, 16px) auto auto !important;
+  max-inline-size: calc(100% - 16px);
   max-block-size: calc(100% - 88px);
   transform: none !important;
 }
 
-.ftVideoPlayer.presentationModeChanging .shortsTopControls {
-  transition: none !important;
+.ftVideoPlayer.shortsPlayer :deep(.shaka-context-menu) {
+  max-inline-size: calc(100% - 16px);
+  max-block-size: calc(100% - 16px);
+  overflow-y: auto;
+  translate: var(--shorts-context-menu-x, 0) var(--shorts-context-menu-y, 0);
 }
 
 .ftVideoPlayer.shortsPlayer:fullscreen .shortsTopControls,
@@ -210,6 +286,8 @@
   align-items: flex-start;
   background: none;
   transition:
+    opacity 600ms cubic-bezier(0.4, 0, 0.6, 1),
+    visibility 0s linear 600ms,
     inset-inline-start 250ms ease,
     max-inline-size 250ms ease;
 }
@@ -1619,7 +1697,9 @@
 }
 
 .ftVideoPlayer:fullscreen:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
-.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions {
+.ftVideoPlayer.fullWindow:has(:deep(.shaka-controls-container[shown='true'])) .fullscreenActions,
+.ftVideoPlayer.shortsPlayer:fullscreen .fullscreenActions,
+.ftVideoPlayer.shortsPlayer.fullWindow .fullscreenActions {
   opacity: 1;
   pointer-events: auto;
 }
@@ -3212,6 +3292,7 @@
   min-block-size: 100%;
   max-block-size: 100%;
   margin: 0 !important;
+  border-radius: inherit;
   object-fit: cover !important;
   object-position: center center;
   transform: none !important;

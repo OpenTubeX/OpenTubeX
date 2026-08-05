@@ -89,25 +89,54 @@ test('collapsed description paints the More control above its text', async ({ pa
 
 test('Shorts top controls stay visible over white video content', async ({ page }) => {
   await goTo(page, 'history')
-  await page.addStyleTag({
-    path: path.join(
+  const playerStyles = await readFile(
+    path.join(
       repoRoot,
       'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
-    )
+    ),
+    'utf8'
+  )
+  const captionsButtonSource = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/player-components/CaptionToggleButton.js'
+    ),
+    'utf8'
+  )
+  const outlinedCaptionsIcon = captionsButtonSource.match(
+    /export const CLOSED_CAPTIONS_OUTLINED = '([^']+)'/
+  )?.[1]
+  expect(outlinedCaptionsIcon?.length).toBeGreaterThan(100)
+  await page.addStyleTag({
+    content: playerStyles.replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
   })
-  await page.evaluate(() => {
+  await page.evaluate((captionsIconPath) => {
     const player = document.createElement('div')
+    const topControls = document.createElement('div')
+    const group = document.createElement('div')
     const control = document.createElement('button')
     const volume = document.createElement('div')
     const volumeButton = document.createElement('button')
     const volumeSlider = document.createElement('input')
+    const captions = document.createElement('button')
+    const captionsIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    const captionsPath = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    const captionsSlash = document.createElement('span')
+    const shakaControls = document.createElement('div')
+    const seekBar = document.createElement('div')
+    const seekInput = document.createElement('input')
 
-    player.className = 'ftVideoPlayer shortsPlayer'
+    player.className = 'ftVideoPlayer shortsPlayer shortsPaused'
     player.style.backgroundColor = '#fff'
+    player.style.borderRadius = '16px'
     player.style.inset = '300px auto auto 300px'
-    player.style.padding = '16px'
     player.style.position = 'fixed'
+    player.style.width = '360px'
+    player.style.height = '640px'
     player.style.zIndex = '10000'
+    player.style.setProperty('--ui-roundness', '1')
+    topControls.className = 'shortsTopControls'
+    group.className = 'shortsTopControlsGroup'
     control.className = 'shortsTopControl'
     control.textContent = '⋮'
     volume.className = 'shortsVolumeControl'
@@ -115,15 +144,35 @@ test('Shorts top controls stay visible over white video content', async ({ page 
     volumeButton.textContent = '🔊'
     volumeSlider.className = 'shortsVolumeSlider'
     volumeSlider.type = 'range'
+    captions.className = 'shortsTopControl shortsCaptionsControl'
+    captionsIcon.classList.add('shortsCaptionsControlIcon')
+    captionsPath.setAttribute('d', captionsIconPath)
+    captionsSlash.className = 'shortsCaptionsControlSlash'
+    captionsIcon.append(captionsPath)
+    captions.append(captionsIcon, captionsSlash)
     volume.append(volumeButton, volumeSlider)
-    player.append(control, volume)
+    group.append(control, volume, captions)
+    topControls.append(group)
+    shakaControls.className = 'shaka-controls-container'
+    seekBar.className = 'shaka-seek-bar-container'
+    seekInput.className = 'shaka-range-element'
+    seekInput.type = 'range'
+    seekBar.append(seekInput)
+    shakaControls.append(seekBar)
+    player.append(topControls, shakaControls)
     document.body.append(player)
-  })
+  }, outlinedCaptionsIcon)
 
+  const player = page.locator('.ftVideoPlayer.shortsPlayer')
+  const topControls = player.locator('.shortsTopControls')
   const control = page.locator('.shortsTopControl').first()
+  await expect(topControls).toHaveCSS('opacity', '1')
+  await expect(topControls).toHaveCSS('border-top-left-radius', '16px')
+  await expect(topControls).toHaveCSS('border-top-right-radius', '16px')
+  await expect(topControls).toHaveCSS('transition-duration', '0.15s')
   await expect(control).toHaveCSS('backdrop-filter', /blur\(8px\)/)
   await control.evaluate(element => element.classList.add('active'))
-  await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.68)')
+  await expect(control).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.52)')
 
   const volume = page.locator('.shortsVolumeControl')
   const volumeButton = volume.locator('.shortsTopControl')
@@ -131,11 +180,73 @@ test('Shorts top controls stay visible over white video content', async ({ page 
   await expect(volumeSlider).toHaveCSS('inline-size', '0px')
   await expect(volumeSlider).toHaveCSS('opacity', '0')
   await volumeButton.focus()
-  await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.58)')
+  await expect(volume).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.44)')
   await expect(volumeButton).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   await expect(volumeButton).toHaveCSS('backdrop-filter', 'none')
   await expect(volumeSlider).toHaveCSS('inline-size', '96px')
   await expect(volumeSlider).toHaveCSS('opacity', '1')
+
+  const captions = player.locator('.shortsCaptionsControl')
+  expect((await captions.locator('path').getAttribute('d')).length).toBeGreaterThan(100)
+  await expect(captions.locator('.shortsCaptionsControlIcon')).toHaveCSS('width', '28px')
+  await expect(captions.locator('.shortsCaptionsControlIcon')).toHaveCSS('height', '28px')
+  await expect(captions.locator('.shortsCaptionsControlSlash')).toHaveCSS(
+    'transform',
+    /matrix\([^)]*0\.707107/
+  )
+  await captions.evaluate(element => element.classList.add('active'))
+  await expect(captions.locator('.shortsCaptionsControlSlash')).toHaveCSS(
+    'transform',
+    /matrix\(0, 0, -0\.707107, 0\.707107/
+  )
+
+  const seekBar = player.locator('.shaka-seek-bar-container')
+  await expect(seekBar).toHaveCSS('height', '3px')
+  await expect(seekBar).toHaveCSS('bottom', '-2px')
+  await expect(seekBar).toHaveCSS('left', '12px')
+  await expect(seekBar).toHaveCSS('right', '12px')
+  await expect(seekBar).toHaveCSS('opacity', '1')
+  const seekThumbRules = await page.evaluate(() => {
+    return [...document.styleSheets]
+      .flatMap(styleSheet => [...styleSheet.cssRules])
+      .filter(rule => rule.selectorText?.includes(
+        '.shaka-range-element::-webkit-slider-thumb'
+      ))
+      .map(rule => ({
+        selector: rule.selectorText,
+        opacity: rule.style.opacity,
+        transform: rule.style.transform,
+        transition: rule.style.transition,
+      }))
+  })
+  expect(seekThumbRules).toEqual(expect.arrayContaining([
+    expect.objectContaining({
+      opacity: '0',
+      transform: 'scale(0)',
+      transition: expect.stringContaining('120ms'),
+    }),
+    expect.objectContaining({ opacity: '1', transform: 'scale(1)' }),
+  ]))
+  const [playerBounds, seekBounds] = await Promise.all([
+    player.boundingBox(),
+    seekBar.boundingBox(),
+  ])
+  expect(seekBounds.y + seekBounds.height).toBeGreaterThan(playerBounds.y + playerBounds.height)
+
+  await player.evaluate(element => element.classList.remove('shortsPaused'))
+  await expect(topControls).toHaveCSS('opacity', '0')
+  await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
+
+  await player.evaluate(element => {
+    const actionDock = document.createElement('div')
+    actionDock.className = 'fullscreenActions'
+    element.classList.add('fullWindow')
+    element.append(actionDock)
+  })
+  const actionDock = player.locator('.fullscreenActions')
+  await expect(actionDock).toHaveCSS('display', 'flex')
+  await expect(actionDock).toHaveCSS('opacity', '1')
+  await expect(actionDock).toHaveCSS('pointer-events', 'auto')
 })
 
 test('compact chapters button marks its open state', async ({ page }) => {

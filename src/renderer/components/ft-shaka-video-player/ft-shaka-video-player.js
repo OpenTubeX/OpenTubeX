@@ -10,7 +10,7 @@ import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { CaptionSelection } from './player-components/CaptionSelection'
-import { CaptionToggleButton } from './player-components/CaptionToggleButton'
+import { CaptionToggleButton, CLOSED_CAPTIONS_OUTLINED } from './player-components/CaptionToggleButton'
 import { ChapterOverlayButton } from './player-components/ChapterOverlayButton'
 import { CopyVideoUrlButton, setCopyVideoUrlContext } from './player-components/CopyVideoUrlButton'
 import { FullWindowButton } from './player-components/FullWindowButton'
@@ -467,6 +467,7 @@ export default defineComponent({
     // Shorts request autoplay, so do not render their paused-only controls
     // while the media element is still preparing its first `play` event.
     const shortsPaused = ref(false)
+    const shortsEnded = ref(false)
     const shortsMuted = ref(false)
     const shortsCaptionsAvailable = ref(false)
     const shortsCaptionsEnabled = ref(false)
@@ -3755,6 +3756,7 @@ export default defineComponent({
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
         shortsPaused.value = false
+        shortsEnded.value = false
         shortsCaptionsAvailable.value = false
         shortsCaptionsEnabled.value = false
       }
@@ -4193,6 +4195,7 @@ export default defineComponent({
 
     function handlePlay() {
       shortsPaused.value = false
+      shortsEnded.value = false
       const isCurrentPictureInPictureVideo = document.pictureInPictureElement === video.value
       if (process.env.IS_ELECTRON && !isActiveTab.value && !isCurrentPictureInPictureVideo) {
         video.value.pause()
@@ -4259,6 +4262,8 @@ export default defineComponent({
     }
 
     function handleEnded() {
+      shortsPaused.value = true
+      shortsEnded.value = true
       syncPlayPauseControlIcons()
 
       sleepTimer.pauseCountdown()
@@ -4282,6 +4287,7 @@ export default defineComponent({
     }
 
     function handleSeeking() {
+      shortsEnded.value = false
       syncPlayPauseControlIcons()
       emit('seeking')
     }
@@ -5339,6 +5345,74 @@ export default defineComponent({
         `${containerRect.right - buttonRect.right}px`
       )
       container.value?.querySelector('.shaka-overflow-menu-button')?.click()
+    }
+
+    function positionShortsContextMenu() {
+      if (!props.shortsPlayer || !container.value) {
+        return
+      }
+
+      const playerContainer = container.value
+      const contextMenu = playerContainer.querySelector('.shaka-context-menu')
+      contextMenu?.style.removeProperty('--shorts-context-menu-x')
+      contextMenu?.style.removeProperty('--shorts-context-menu-y')
+
+      requestAnimationFrame(() => {
+        if (!contextMenu || contextMenu.classList.contains('shaka-hidden')) {
+          return
+        }
+
+        const gap = 8
+        const containerRect = playerContainer.getBoundingClientRect()
+        const menuRect = contextMenu.getBoundingClientRect()
+        const minLeft = containerRect.left + gap
+        const maxRight = containerRect.right - gap
+        const minTop = containerRect.top + gap
+        const maxBottom = containerRect.bottom - gap
+        const translateX = menuRect.left < minLeft
+          ? minLeft - menuRect.left
+          : Math.min(0, maxRight - menuRect.right)
+        const translateY = menuRect.top < minTop
+          ? minTop - menuRect.top
+          : Math.min(0, maxBottom - menuRect.bottom)
+
+        contextMenu.style.setProperty('--shorts-context-menu-x', `${translateX}px`)
+        contextMenu.style.setProperty('--shorts-context-menu-y', `${translateY}px`)
+      })
+    }
+
+    function handlePlayerMouseLeave(event) {
+      handleScrollMiniPlayerLeave(event)
+
+      if (props.shortsPlayer && !video.value.paused) {
+        ui?.getControls().getControlsContainer().removeAttribute('shown')
+      }
+    }
+
+    /**
+     * In fullscreen Shaka's controls surface fills the viewport, so mouse
+     * movement over the empty space would keep the controls visible. Prevent
+     * those events from reaching Shaka and treat the explicit video-space
+     * column like the inline player's hover area.
+     * @param {MouseEvent} event
+     */
+    function handlePlayerMouseMove(event) {
+      const videoElement = video.value
+      if (!props.shortsPlayer || !isFullscreen.value || videoElement.paused) {
+        return
+      }
+
+      const videoSpace = container.value?.querySelector('.shortsFullscreenVideoSpace')
+      if (!videoSpace) {
+        return
+      }
+
+      const bounds = videoSpace.getBoundingClientRect()
+      if (event.clientX < bounds.left || event.clientX > bounds.right ||
+          event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        event.stopPropagation()
+        ui?.getControls().getControlsContainer().removeAttribute('shown')
+      }
     }
 
     function toggleShortsFullscreen() {
@@ -8445,9 +8519,13 @@ export default defineComponent({
     return {
       hasLoaded,
       shortsPaused,
+      shortsEnded,
+      replayIcon: shaka.ui.Enums.MaterialDesignSVGIcons.REPLAY,
       shortsMuted,
       shortsCaptionsAvailable,
       shortsCaptionsEnabled,
+      closedCaptionsOutlinedIcon: CLOSED_CAPTIONS_OUTLINED,
+      closedCaptionsFilledIcon: shaka.ui.Enums.MaterialDesignSVGIcons.CLOSED_CAPTIONS,
       showPoster,
       showPaidPromotion,
       toggleShortsPlayback,
@@ -8456,6 +8534,9 @@ export default defineComponent({
       handlePlaying,
       handleWaiting,
       openShortsOverflowMenu,
+      positionShortsContextMenu,
+      handlePlayerMouseMove,
+      handlePlayerMouseLeave,
       toggleShortsFullscreen,
       handlePlayerControlDoubleClick,
       ambientCanvas,
