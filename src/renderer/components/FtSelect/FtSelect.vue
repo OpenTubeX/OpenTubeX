@@ -286,10 +286,24 @@ function updateDropdownPosition() {
   dropdownPlacement.value = openAbove ? 'above' : 'below'
   dropdownStyle.value = {
     inlineSize: `${menuWidth}px`,
-    left: `${left}px`,
-    top: `${top}px`,
+    left: `${snapToDevicePixels(left)}px`,
+    top: `${snapToDevicePixels(top)}px`,
     maxBlockSize: naturalHeight > menuHeight ? `${menuHeight}px` : null
   }
+}
+
+/**
+ * The button's bounding box rarely lands on a whole pixel, and Chromium only
+ * snaps an option's text to the pixel grid once it has a background to paint,
+ * so hovering an option at a fractional offset visibly nudges its label. Place
+ * the menu on the device pixel grid instead, which keeps every option's text
+ * where it already was.
+ *
+ * @param {number} value
+ */
+function snapToDevicePixels(value) {
+  const ratio = window.devicePixelRatio || 1
+  return Math.round(value * ratio) / ratio
 }
 
 function getTopChromeBottom() {
