@@ -308,6 +308,7 @@ Settings:
     Stream Extraction Method:
       Stream Extraction Method: Metoda ekstrakcji strumienia
       yt-dlp: yt-dlp
+      Built-in: Wbudowany
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -890,6 +891,10 @@ Settings:
     Privacy Policy: Polityka prywatności dla tego serwera
   Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
   Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
+  Context Menu Search Settings:
+    Context Menu Search Settings: Wyszukiwanie z menu kontekstowego
+    Description: Wybierz, które wyszukiwarki będą wyświetlane po kliknięciu zaznaczonego tekstu prawym przyciskiem myszy. Wyszukiwania otwierają się w domyślnej przeglądarce.
+    Icon Hint: Włączenie wyszukiwarki powoduje nawiązanie połączenia z jej stroną internetową w celu załadowania ikony favicon.
 About:
   #On About page
   About: 'O projekcie'
