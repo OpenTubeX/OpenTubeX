@@ -305,6 +305,9 @@ Settings:
       Tab Close Focus: Po zamknięciu karty
       Previous tab: Przełącz na poprzednią kartę
       Next tab: Przełącz na następną kartę
+    Stream Extraction Method:
+      Stream Extraction Method: Metoda ekstrakcji strumienia
+      yt-dlp: yt-dlp
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
