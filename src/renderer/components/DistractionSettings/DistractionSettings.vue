@@ -319,6 +319,13 @@
           setting-key="hideCommentPhotos"
           @change="updateHideCommentPhotos"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Paid Promotion Badge')"
+          :compact="true"
+          :default-value="hidePaidPromotion"
+          setting-key="hidePaidPromotion"
+          @change="updateHidePaidPromotion"
+        />
       </div>
     </div>
   </FtSettingsSection>
@@ -540,6 +547,16 @@ const hideEndScreenAnnotations = computed(() => store.getters.getHideEndScreenAn
  */
 function updateHideEndScreenAnnotations(value) {
   store.dispatch('updateHideEndScreenAnnotations', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hidePaidPromotion = computed(() => store.getters.getHidePaidPromotion)
+
+/**
+ * @param {boolean} value
+ */
+function updateHidePaidPromotion(value) {
+  store.dispatch('updateHidePaidPromotion', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

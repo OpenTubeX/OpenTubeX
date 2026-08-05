@@ -687,6 +687,12 @@ export default defineComponent({
     hideEndScreenAnnotations: function () {
       return this.$store.getters.getHideEndScreenAnnotations
     },
+    hidePaidPromotion: function () {
+      return this.$store.getters.getHidePaidPromotion
+    },
+    showPaidPromotion: function () {
+      return this.hasPaidPromotion && !this.hidePaidPromotion
+    },
     hideLiveChat: function () {
       return this.$store.getters.getHideLiveChat
     },

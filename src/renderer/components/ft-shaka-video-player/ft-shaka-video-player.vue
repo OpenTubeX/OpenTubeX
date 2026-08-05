@@ -87,7 +87,7 @@
         crossorigin="anonymous"
         playsinline
         :autoplay="autoplayVideos || shortsPlayer ? true : null"
-        :loop="shortsPlayer"
+        :loop="shortsPlayer && loopShorts"
         :poster="format === 'audio' || showPoster ? thumbnail : null"
         @play="handlePlay"
         @playing="handlePlaying"

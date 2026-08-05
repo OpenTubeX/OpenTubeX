@@ -75,6 +75,14 @@
           :tooltip="t('Tooltips.Player Settings.Multiply Seek Interval by Playback Rate')"
           @change="updateSeekIntervalMultiplyByPlaybackRate"
         />
+        <FtToggleSwitch
+          :label="t('Global.Ambient Mode')"
+          :compact="true"
+          :default-value="ambientMode"
+          setting-key="ambientMode"
+          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
+          @change="updateAmbientMode"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -98,6 +106,23 @@
           :default-value="autoplayVideos"
           setting-key="autoplayVideos"
           @change="updateAutoplayVideos"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Use YouTube-style Shorts')"
+          :compact="true"
+          :default-value="useCustomShortsPlayer"
+          setting-key="useCustomShortsPlayer"
+          :tooltip="t('Tooltips.Player Settings.Use YouTube-style Shorts')"
+          @change="updateUseCustomShortsPlayer"
+        />
+        <FtToggleSwitch
+          :label="t('Settings.Player Settings.Loop Shorts')"
+          :compact="true"
+          :disabled="!useCustomShortsPlayer"
+          :default-value="loopShorts"
+          setting-key="loopShorts"
+          :tooltip="t('Tooltips.Player Settings.Loop Shorts')"
+          @change="updateLoopShorts"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Automatically Open Chapters')"
@@ -134,14 +159,6 @@
           :default-value="scrollMiniPlayerEnabled"
           setting-key="scrollMiniPlayerEnabled"
           @change="updateScrollMiniPlayerEnabled"
-        />
-        <FtToggleSwitch
-          :label="t('Global.Ambient Mode')"
-          :compact="true"
-          :default-value="ambientMode"
-          setting-key="ambientMode"
-          :tooltip="t('Tooltips.Player Settings.Ambient Mode')"
-          @change="updateAmbientMode"
         />
       </div>
     </div>
@@ -653,6 +670,26 @@ const autoplayVideos = computed(() => store.getters.getAutoplayVideos)
  */
 function updateAutoplayVideos(value) {
   store.dispatch('updateAutoplayVideos', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
+
+/**
+ * @param {boolean} value
+ */
+function updateUseCustomShortsPlayer(value) {
+  store.dispatch('updateUseCustomShortsPlayer', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const loopShorts = computed(() => store.getters.getLoopShorts)
+
+/**
+ * @param {boolean} value
+ */
+function updateLoopShorts(value) {
+  store.dispatch('updateLoopShorts', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
