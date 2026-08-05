@@ -392,3 +392,47 @@ test('the view cannot be switched before the chat has started', () => {
 
   assert.throws(() => liveChat.setFilter('LIVE_CHAT'), /before initial info is retrieved/)
 })
+
+test('a collapsed poll resolves only once the batch it joined has emitted', async () => {
+  const pendingResponses = []
+
+  const { liveChat, updates } = createReplay((args, callIndex) => {
+    if (callIndex === 1) {
+      return new Promise((resolve) => pendingResponses.push(resolve))
+    }
+
+    return {
+      continuation_contents: fakeContinuation({
+        continuation: `AFTER_${callIndex}`,
+        header: callIndex === 0 ? {} : null,
+      }),
+    }
+  })
+
+  liveChat.start()
+  await flush()
+
+  const first = liveChat.pollNext()
+  await flush()
+  // Collapsed into the request that is already on its way.
+  const second = liveChat.pollNext()
+
+  let secondResolved = false
+  second.then(() => { secondResolved = true })
+  await flush()
+
+  // pollNext() promises that the batch's actions have been emitted once it resolves,
+  // so the collapsed caller must not resolve ahead of the batch it joined.
+  assert.equal(secondResolved, false)
+
+  pendingResponses[0]({
+    continuation_contents: fakeContinuation({
+      continuation: 'AFTER_1',
+      actions: [fakeReplayAction('5000')],
+    }),
+  })
+  await Promise.all([first, second])
+
+  assert.equal(secondResolved, true)
+  assert.deepEqual(updates, [fakeReplayAction('5000')])
+})

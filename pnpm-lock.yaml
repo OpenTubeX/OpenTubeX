@@ -10,7 +10,7 @@ overrides:
 
 patchedDependencies:
   shaka-player@5.1.12: 17d85e267c8958999207ce9d6c29a2ddf18734d0499fb30870ac8a55d90303fa
-  youtubei.js@17.2.0: a2906d1a8ffdd86682ec16cce4e436640add7ad09b203b3d4b7cf39e836c3118
+  youtubei.js@17.2.0: 82a17ea1894879fa26c1d70226541120697508f90730bda238d7cbe2c20c3ee0
 
 importers:
 
@@ -81,7 +81,7 @@ importers:
         version: 4.1.0(vue@3.5.40)
       youtubei.js:
         specifier: ^17.2.0
-        version: 17.2.0(patch_hash=a2906d1a8ffdd86682ec16cce4e436640add7ad09b203b3d4b7cf39e836c3118)
+        version: 17.2.0(patch_hash=82a17ea1894879fa26c1d70226541120697508f90730bda238d7cbe2c20c3ee0)
     devDependencies:
       '@babel/core':
         specifier: ^8.0.1
@@ -10609,7 +10609,7 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  youtubei.js@17.2.0(patch_hash=a2906d1a8ffdd86682ec16cce4e436640add7ad09b203b3d4b7cf39e836c3118):
+  youtubei.js@17.2.0(patch_hash=82a17ea1894879fa26c1d70226541120697508f90730bda238d7cbe2c20c3ee0):
     dependencies:
       '@bufbuild/protobuf': 2.1.0
       fflate: 0.8.3

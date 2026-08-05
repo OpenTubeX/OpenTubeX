@@ -61,3 +61,39 @@ export function takeDueReplayComments(pending, currentSeconds) {
 export function shouldPrefetchReplay(fetchedUntilMs, currentSeconds) {
   return fetchedUntilMs < currentSeconds * 1000 + REPLAY_PREFETCH_MS
 }
+
+/**
+ * Wraps a poll so that only one runs at a time, and a request made while one is
+ * already running re-runs it afterwards instead of being dropped.
+ *
+ * Dropping it is not safe: a seek discards the response of the poll that is in
+ * flight, so the request that follows the seek is the only thing that would fetch
+ * the new position. Losing it leaves the chat empty until something else happens
+ * to trigger a poll, which never comes while the video is paused.
+ * @param {() => Promise<void>} poll
+ * @returns {() => Promise<void>}
+ */
+export function createCoalescingPoller(poll) {
+  let inFlight = false
+  let pending = false
+
+  return async function request() {
+    if (inFlight) {
+      pending = true
+      return
+    }
+
+    inFlight = true
+
+    try {
+      await poll()
+    } finally {
+      inFlight = false
+    }
+
+    if (pending) {
+      pending = false
+      await request()
+    }
+  }
+}

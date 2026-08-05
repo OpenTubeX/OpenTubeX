@@ -686,6 +686,12 @@ export default defineComponent({
     showLiveChat: function () {
       return !this.hideLiveChat && (this.isLive || this.isUpcoming || this.liveChatIsReplay)
     },
+    // The player reports its position about four times a second, but a chat replay
+    // buffers 20 seconds ahead and only cares about jumps of more than a few seconds.
+    // Rounding keeps the chat from re-rendering its message list on every tick.
+    liveChatCurrentTime: function () {
+      return Math.floor(this.currentTime)
+    },
     hideComments: function () {
       return this.$store.getters.getHideComments
     },

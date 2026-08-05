@@ -828,7 +828,7 @@
         :live-chat="liveChat"
         :video-id="videoId"
         :channel-id="channelId"
-        :current-time="currentTime"
+        :current-time="liveChatCurrentTime"
         class="watchVideoSideBar watchVideoPlaylist"
         :class="{ theatrePlaylist: useTheatreMode }"
       />

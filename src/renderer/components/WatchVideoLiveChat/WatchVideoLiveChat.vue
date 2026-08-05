@@ -331,6 +331,7 @@ import { formatNumber } from '../../helpers/utils'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
 import {
+  createCoalescingPoller,
   isReplaySeek,
   parseReplayOffsetMs,
   shouldPrefetchReplay,
@@ -377,7 +378,17 @@ let lastCurrentTime = props.currentTime
  * without any chat activity don't look like an empty buffer.
  */
 let replayFetchedUntilMs = 0
-let replayPollInFlight = false
+
+/**
+ * Tops the replay buffer back up once it no longer reaches far enough ahead of the player.
+ */
+const requestMoreReplayComments = createCoalescingPoller(async () => {
+  if (liveChatInstance === null || !shouldPrefetchReplay(replayFetchedUntilMs, props.currentTime)) {
+    return
+  }
+
+  await liveChatInstance.pollNext()
+})
 
 const isLoading = ref(true)
 const isReplay = ref(false)
@@ -628,27 +639,6 @@ watch(liveChatFilter, applyChatFilter)
 function releaseReplayComments() {
   for (const { comment } of takeDueReplayComments(pendingReplayComments, props.currentTime)) {
     deliverComment(comment)
-  }
-}
-
-/**
- * Tops the replay buffer back up once it no longer reaches far enough ahead of the player.
- */
-async function requestMoreReplayComments() {
-  if (replayPollInFlight || liveChatInstance === null) {
-    return
-  }
-
-  if (!shouldPrefetchReplay(replayFetchedUntilMs, props.currentTime)) {
-    return
-  }
-
-  replayPollInFlight = true
-
-  try {
-    await liveChatInstance.pollNext()
-  } finally {
-    replayPollInFlight = false
   }
 }
 

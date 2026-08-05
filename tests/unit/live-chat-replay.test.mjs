@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  createCoalescingPoller,
   isReplaySeek,
   parseReplayOffsetMs,
   shouldPrefetchReplay,
@@ -66,4 +67,78 @@ test('keeps fetching while the replay does not reach far enough ahead of the pla
 
   // Seeking ahead of everything fetched so far has to refill the buffer.
   assert.equal(shouldPrefetchReplay(60_000, 3000), true)
+})
+
+test('runs one poll at a time', async () => {
+  let running = 0
+  let overlapped = false
+  let calls = 0
+
+  const poll = createCoalescingPoller(async () => {
+    calls++
+    running++
+    overlapped ||= running > 1
+    await new Promise((resolve) => setTimeout(resolve, 5))
+    running--
+  })
+
+  await Promise.all([poll(), poll(), poll()])
+
+  assert.equal(overlapped, false)
+  // The two requests made while the first was running collapse into one re-run.
+  assert.equal(calls, 2)
+})
+
+test('re-runs a poll that was requested while one was already in flight', async () => {
+  // The scenario this exists for: a poll is in flight, the player seeks, the seek
+  // discards that poll's response, and the request that follows it is the only thing
+  // left that would fetch the new position.
+  const positions = []
+  let currentPosition = 0
+  let releaseFirst
+
+  const poll = createCoalescingPoller(async () => {
+    const position = currentPosition
+    if (position === 0) {
+      await new Promise((resolve) => { releaseFirst = resolve })
+    }
+    positions.push(position)
+  })
+
+  poll()
+  await Promise.resolve()
+
+  // Seek while that first poll is still in flight.
+  currentPosition = 3600
+  poll()
+
+  releaseFirst()
+  await new Promise((resolve) => setTimeout(resolve, 0))
+
+  // Without the re-run the chat would sit empty at 3600 until playback resumed.
+  assert.deepEqual(positions, [0, 3600])
+})
+
+test('stops re-running once nothing further was requested', async () => {
+  let calls = 0
+  const poll = createCoalescingPoller(async () => { calls++ })
+
+  await poll()
+  assert.equal(calls, 1)
+
+  await poll()
+  assert.equal(calls, 2)
+})
+
+test('a failing poll does not wedge the poller', async () => {
+  let calls = 0
+  const poll = createCoalescingPoller(async () => {
+    calls++
+    throw new Error('network down')
+  })
+
+  await assert.rejects(poll(), /network down/)
+  // The in-flight flag has to be released, or nothing would ever poll again.
+  await assert.rejects(poll(), /network down/)
+  assert.equal(calls, 2)
 })

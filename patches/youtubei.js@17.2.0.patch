@@ -409,10 +409,10 @@ index 371f753a780be9c927a767ad844c3b071e9707c8..f9b97e606e787462c85e50510e01d0e9
       * Sends a message.
       * @param text - Text to send.
 diff --git a/dist/src/parser/youtube/LiveChat.js b/dist/src/parser/youtube/LiveChat.js
-index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42076cac11 100644
+index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..80b0f3996e424c794f4eb08d768715dc7603ef43 100644
 --- a/dist/src/parser/youtube/LiveChat.js
 +++ b/dist/src/parser/youtube/LiveChat.js
-@@ -18,8 +18,13 @@ export default class LiveChat extends EventEmitter {
+@@ -18,8 +18,14 @@ export default class LiveChat extends EventEmitter {
      #video_id;
      #channel_id;
      #continuation;
@@ -422,11 +422,12 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +    #player_offset_ms = null;
 +    #seek_generation = 0;
 +    #polling = false;
++    #poll_promise = null;
 +    #filter = 'TOP_CHAT';
      smoothed_queue;
      initial_info;
      metadata;
-@@ -31,6 +36,7 @@ export default class LiveChat extends EventEmitter {
+@@ -31,6 +37,7 @@ export default class LiveChat extends EventEmitter {
          this.#channel_id = video_info.basic_info.channel_id;
          this.#actions = video_info.actions;
          this.#continuation = video_info.livechat?.continuation;
@@ -434,7 +435,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
          this.is_replay = video_info.livechat?.is_replay || false;
          this.smoothed_queue = new SmoothedQueue();
          this.smoothed_queue.callback = async (actions) => {
-@@ -42,14 +48,6 @@ export default class LiveChat extends EventEmitter {
+@@ -42,14 +49,6 @@ export default class LiveChat extends EventEmitter {
                  // If there are less than 10 actions, wait until all of them are emitted.
                  await this.#emitSmoothedActions(actions);
              }
@@ -449,7 +450,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
              else {
                  // There are more than 10 actions, emit them asynchronously so we can request the next incremental continuation.
                  this.#emitSmoothedActions(actions);
-@@ -69,17 +67,96 @@ export default class LiveChat extends EventEmitter {
+@@ -69,17 +68,102 @@ export default class LiveChat extends EventEmitter {
          if (!this.running) {
              this.running = true;
              this.#pollLivechat();
@@ -466,6 +467,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +        // later start() isn't blocked by a poll that nobody is listening for anymore.
 +        this.#seek_generation++;
 +        this.#polling = false;
++        this.#poll_promise = null;
 +    }
 +    /**
 +     * Jumps the replay to the given player position, so that the next
@@ -479,6 +481,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +        // Invalidates the responses of any requests that are still in flight.
 +        this.#seek_generation++;
 +        this.#polling = false;
++        this.#poll_promise = null;
 +        this.#continuation = this.#initial_continuation;
 +        this.#player_offset_ms = Math.max(0, Math.round(offset_ms));
 +    }
@@ -509,6 +512,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +        // hold the messages of the view being switched away from.
 +        this.#seek_generation++;
 +        this.#polling = false;
++        this.#poll_promise = null;
 +        this.smoothed_queue.clear();
 +        this.#continuation = continuation;
 +        // Seeking a replay has to stay on the view that is selected now.
@@ -529,11 +533,13 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
      }
      #pollLivechat() {
 -        (async () => {
++        // Concurrent callers await the batch that is already on its way, rather than
++        // a resolved promise that would claim its actions have been emitted.
 +        if (this.#polling)
-+            return Promise.resolve();
++            return this.#poll_promise ?? Promise.resolve();
 +        this.#polling = true;
 +        const seek_generation = this.#seek_generation;
-+        return (async () => {
++        this.#poll_promise = (async () => {
              try {
 -                const response = await this.#actions.execute(this.is_replay ? 'live_chat/get_live_chat_replay' : 'live_chat/get_live_chat', { continuation: this.#continuation, parse: true });
 +                const args = { continuation: this.#continuation, parse: true };
@@ -546,10 +552,11 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +                if (seek_generation !== this.#seek_generation)
 +                    return;
 +                this.#polling = false;
++                this.#poll_promise = null;
                  const contents = response.continuation_contents;
                  if (!contents) {
                      this.emit('error', new InnertubeError('Unexpected live chat incremental continuation response', response));
-@@ -91,24 +168,39 @@ export default class LiveChat extends EventEmitter {
+@@ -91,24 +175,40 @@ export default class LiveChat extends EventEmitter {
                      this.emit('end');
                      return;
                  }
@@ -584,6 +591,7 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
 +                if (seek_generation !== this.#seek_generation)
 +                    return;
 +                this.#polling = false;
++                this.#poll_promise = null;
                  this.emit('error', err);
                  if (this.#retry_count++ < 10) {
                      await this.#wait(2000);
@@ -593,3 +601,11 @@ index 90faaabfaf9e2f80d08d410bb272f708ceea94b7..b69419313f75371956073e485d2aac42
                  }
                  else {
                      this.emit('error', new InnertubeError('Reached retry limit for incremental continuation requests', err));
+@@ -117,6 +217,7 @@ export default class LiveChat extends EventEmitter {
+                 }
+             }
+         })();
++        return this.#poll_promise;
+     }
+     /**
+      * Ensures actions are emitted at the right speed.
