@@ -1284,14 +1284,20 @@ Video:
   Live: Live
   Live Now: Live Now
   Live Chat: Live Chat
+  Live Chat Replay: Live Chat Replay
   Live Chat Settings: Live chat settings
   Show Live Chat Timestamps: Show timestamps
+  Chat Filter: Chat filter
+  Top Chat: Top chat
+  All Messages: All messages
   Enable Live Chat: Enable Live Chat
   Popout Live Chat: Popout Chat
   Live Chat is currently not supported in this build.: Live Chat is currently not
     supported in this build.
   Live chat is enabled. Chat messages will appear here once sent.: Live chat is enabled.  Chat
     messages will appear here once sent.
+  'Live chat replay is enabled. Chat messages will appear here as the video plays.': Live
+    chat replay is enabled.  Chat messages will appear here as the video plays.
   'Live Chat is currently not supported with the Invidious API. A direct connection to YouTube is required.': Live
     Chat is currently not supported with the Invidious API.  A direct connection to
     YouTube is required.

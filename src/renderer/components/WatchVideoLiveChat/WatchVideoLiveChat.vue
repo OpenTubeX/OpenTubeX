@@ -34,7 +34,9 @@
       <p
         class="message"
       >
-        {{ t("Video['Live chat is enabled. Chat messages will appear here once sent.']") }}
+        {{ isReplay
+          ? t("Video['Live chat replay is enabled. Chat messages will appear here as the video plays.']")
+          : t("Video['Live chat is enabled. Chat messages will appear here once sent.']") }}
       </p>
     </div>
     <div
@@ -47,7 +49,7 @@
         <h4
           class="title"
         >
-          {{ t("Video.Live Chat") }}
+          {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
           <span
             v-if="!hideVideoViews && watchingCount !== null"
             class="watchingCount"
@@ -72,6 +74,7 @@
             <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
           </button>
           <a
+            v-if="!isReplay"
             :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
             :aria-label="t('Video.Popout Live Chat')"
             :title="t('Video.Popout Live Chat')"
@@ -91,6 +94,15 @@
               :default-value="showLiveChatTimestamps"
               :compact="true"
               @change="updateShowLiveChatTimestamps"
+            />
+            <FtRadioButton
+              v-if="canFilter"
+              class="liveChatFilter"
+              :title="t('Video.Chat Filter')"
+              :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+              :values="['TOP_CHAT', 'LIVE_CHAT']"
+              :model-value="liveChatFilter"
+              @update:model-value="updateLiveChatFilter"
             />
           </div>
         </div>
@@ -302,7 +314,7 @@
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import autolinker from 'autolinker'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { YTNodes } from 'youtubei.js'
 
@@ -310,6 +322,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtRadioButton from '../FtRadioButton/FtRadioButton.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import store from '../../store/index'
@@ -317,6 +330,13 @@ import store from '../../store/index'
 import { formatNumber } from '../../helpers/utils'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
+import {
+  createCoalescingPoller,
+  isReplaySeek,
+  parseReplayOffsetMs,
+  shouldPrefetchReplay,
+  takeDueReplayComments
+} from './liveChatReplay.js'
 
 const props = defineProps({
   liveChat: {
@@ -330,6 +350,10 @@ const props = defineProps({
   channelId: {
     type: String,
     required: true
+  },
+  currentTime: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -341,7 +365,34 @@ let hasEnded = false
 let stayAtBottom = true
 let isScrollingToBottom = false
 
+/**
+ * Replay messages that were fetched but that the player hasn't reached yet.
+ * @type {{ offsetMs: number, comment: any }[]}
+ */
+let pendingReplayComments = []
+let lastCurrentTime = props.currentTime
+
+/**
+ * The player position the replay has been fetched up to. Unlike the pending
+ * messages this doesn't shrink as messages are shown, so stretches of the stream
+ * without any chat activity don't look like an empty buffer.
+ */
+let replayFetchedUntilMs = 0
+
+/**
+ * Tops the replay buffer back up once it no longer reaches far enough ahead of the player.
+ */
+const requestMoreReplayComments = createCoalescingPoller(async () => {
+  if (liveChatInstance === null || !shouldPrefetchReplay(replayFetchedUntilMs, props.currentTime)) {
+    return
+  }
+
+  await liveChatInstance.pollNext()
+})
+
 const isLoading = ref(true)
+const isReplay = ref(false)
+const canFilter = ref(false)
 const hasError = ref(false)
 const showEnableChat = ref(false)
 const errorMessage = ref('')
@@ -379,6 +430,9 @@ const scrollingBehaviour = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 const showLiveChatTimestamps = computed(() => store.getters.getShowLiveChatTimestamps)
+
+/** @type {import('vue').ComputedRef<'TOP_CHAT' | 'LIVE_CHAT'>} */
+const liveChatFilter = computed(() => store.getters.getLiveChatFilter)
 
 /** @type {import('vue').Ref<number | null>} */
 const watchingCount = ref(null)
@@ -450,11 +504,19 @@ function showLiveChatUnavailable() {
 }
 
 function startLiveChatLocal() {
-  liveChatInstance.once('start', handleStart)
+  isReplay.value = liveChatInstance.is_replay
+
+  // Replays emit `start` again after every seek, so this can't be a `once` listener.
+  liveChatInstance.on('start', handleStart)
   liveChatInstance.on('chat-update', handleChatUpdate)
   liveChatInstance.on('metadata-update', handleMetadataUpdate)
   liveChatInstance.once('error', handleError)
   liveChatInstance.once('end', handleEnd)
+
+  // Videos opened at a saved watch progress start midway through the replay.
+  if (isReplay.value && props.currentTime > 0) {
+    liveChatInstance.seekTo(props.currentTime * 1000)
+  }
 
   liveChatInstance.start()
 }
@@ -465,17 +527,25 @@ const commentsRef = useTemplateRef('commentsRef')
  * @param {import ('youtubei.js/dist/src/parser/continuations').LiveChatContinuation} initialData
  */
 function handleStart(initialData) {
-  const actions = initialData.actions.filterType(YTNodes.AddChatItemAction)
+  canFilter.value = (initialData.header?.view_selector?.sub_menu_items?.length ?? 0) > 1
 
-  for (const { item } of actions) {
-    if (item.is(YTNodes.LiveChatTextMessage)) {
-      parseLiveChatComment(item)
-    } else if (item.is(YTNodes.LiveChatPaidMessage)) {
-      parseLiveChatSuperChat(item)
-    }
+  // A chat always starts on YouTube's default view, so switch away from it before
+  // showing anything if the other one is the view that is wanted.
+  if (canFilter.value && liveChatInstance.filter !== liveChatFilter.value) {
+    applyChatFilter()
+    return
+  }
+
+  for (const action of initialData.actions) {
+    handleChatAction(action)
   }
 
   isLoading.value = false
+
+  if (isReplay.value) {
+    releaseReplayComments()
+    requestMoreReplayComments()
+  }
 
   nextTick(() => {
     scrollToBottom('instant')
@@ -486,14 +556,110 @@ function handleStart(initialData) {
  * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').ChatAction} action
  */
 function handleChatUpdate(action) {
-  if (!hasEnded && action.is(YTNodes.AddChatItemAction)) {
-    if (action.item.is(YTNodes.LiveChatTextMessage)) {
-      parseLiveChatComment(action.item)
-    } else if (action.item.is(YTNodes.LiveChatPaidMessage)) {
-      parseLiveChatSuperChat(action.item)
-    }
+  if (!hasEnded) {
+    handleChatAction(action)
   }
 }
+
+/**
+ * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').ChatAction} action
+ * @param {number} [offsetMs] the player position this action belongs to, for replays
+ */
+function handleChatAction(action, offsetMs) {
+  if (action.is(YTNodes.ReplayChatItemAction)) {
+    const actionOffsetMs = parseReplayOffsetMs(action.video_offset_time_msec)
+
+    replayFetchedUntilMs = Math.max(replayFetchedUntilMs, actionOffsetMs)
+
+    for (const replayedAction of action.actions) {
+      handleChatAction(replayedAction, actionOffsetMs)
+    }
+
+    return
+  }
+
+  if (!action.is(YTNodes.AddChatItemAction)) {
+    return
+  }
+
+  let comment = null
+
+  if (action.item.is(YTNodes.LiveChatTextMessage)) {
+    comment = parseLiveChatComment(action.item)
+  } else if (action.item.is(YTNodes.LiveChatPaidMessage)) {
+    comment = parseLiveChatSuperChat(action.item)
+  }
+
+  if (comment === null) {
+    return
+  }
+
+  if (offsetMs === undefined) {
+    deliverComment(comment)
+  } else {
+    pendingReplayComments.push({ offsetMs, comment })
+  }
+}
+
+/**
+ * Drops everything on screen, which is what switching to a different part of the
+ * video or to a different view of the chat leaves behind.
+ */
+function clearChat() {
+  comments.splice(0, comments.length)
+  superChatComments.splice(0, superChatComments.length)
+  showSuperChat.value = false
+  pendingReplayComments = []
+  replayFetchedUntilMs = 0
+}
+
+/**
+ * Moves the chat onto the currently selected view, keeping a replay at the
+ * position the player is at.
+ */
+function applyChatFilter() {
+  if (liveChatInstance === null || !canFilter.value || liveChatInstance.filter === liveChatFilter.value) {
+    return
+  }
+
+  clearChat()
+  liveChatInstance.setFilter(liveChatFilter.value)
+
+  if (isReplay.value) {
+    liveChatInstance.seekTo(props.currentTime * 1000)
+    requestMoreReplayComments()
+  }
+}
+
+watch(liveChatFilter, applyChatFilter)
+
+/**
+ * Shows every buffered replay message that the player has reached by now.
+ */
+function releaseReplayComments() {
+  for (const { comment } of takeDueReplayComments(pendingReplayComments, props.currentTime)) {
+    deliverComment(comment)
+  }
+}
+
+watch(() => props.currentTime, (currentTime) => {
+  if (!isReplay.value || liveChatInstance === null) {
+    return
+  }
+
+  const seeked = isReplaySeek(lastCurrentTime, currentTime)
+  lastCurrentTime = currentTime
+
+  if (seeked) {
+    // Everything on screen and in the buffer belongs to the position we just left.
+    clearChat()
+    liveChatInstance.seekTo(currentTime * 1000)
+  } else {
+    releaseReplayComments()
+  }
+
+  requestMoreReplayComments()
+})
 
 /**
  * @param {import('youtubei.js/dist/src/parser/youtube/LiveChat').LiveMetadata} metadata
@@ -558,7 +724,7 @@ function parseLiveChatComment(comment) {
     }
   }
 
-  pushComment(parsedComment)
+  return parsedComment
 }
 
 /**
@@ -580,13 +746,24 @@ function parseLiveChatSuperChat(superChat) {
     }
   }
 
-  superChatComments.unshift(parsedComment)
+  return parsedComment
+}
 
-  setTimeout(() => {
-    removeFromSuperChat(parsedComment)
-  }, 120000)
+/**
+ * Adds a parsed message to the chat. For replays this happens once the player
+ * reaches the position the message was sent at, rather than as soon as it is fetched.
+ * @param {any} comment
+ */
+function deliverComment(comment) {
+  if (comment.superChat) {
+    superChatComments.unshift(comment)
 
-  pushComment(parsedComment)
+    setTimeout(() => {
+      removeFromSuperChat(comment)
+    }, 120000)
+  }
+
+  pushComment(comment)
 }
 
 /**
@@ -612,7 +789,10 @@ function pushComment(comment) {
 function removeFromSuperChat(comment) {
   const index = superChatComments.indexOf(comment)
 
-  superChatComments.splice(index, 1)
+  // Seeking a replay clears the ticker while the removal timeouts are still pending.
+  if (index !== -1) {
+    superChatComments.splice(index, 1)
+  }
 }
 
 /**
@@ -647,6 +827,10 @@ function handleChatSettingsClickOutside(event) {
 
 function updateShowLiveChatTimestamps(value) {
   store.dispatch('updateShowLiveChatTimestamps', value)
+}
+
+function updateLiveChatFilter(value) {
+  store.dispatch('updateLiveChatFilter', value)
 }
 
 function onScroll() {
