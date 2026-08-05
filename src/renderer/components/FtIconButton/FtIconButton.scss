@@ -221,6 +221,18 @@
       font-weight: 600;
     }
 
+    &.disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    &.disabled:hover,
+    &.disabled:focus-visible,
+    &.disabled:active {
+      background-color: transparent;
+      color: inherit;
+    }
+
     &:active {
       background-color: var(--side-nav-active-color);
       color: var(--side-nav-active-text-color);

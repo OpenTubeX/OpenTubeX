@@ -63,16 +63,18 @@
               :key="index"
               role="option"
               :aria-selected="option.active"
+              :aria-disabled="option.disabled"
               tabindex="-1"
               :class="{
                 listItemDivider: option.type === 'divider',
                 listItem: option.type !== 'divider',
                 hasIcon: option.icon,
-                active: option.active
+                active: option.active,
+                disabled: option.disabled
               }"
-              @click="handleDropdownClick(option.value)"
-              @keydown.enter="handleDropdownClick(option.value)"
-              @keydown.space="handleDropdownClick(option.value)"
+              @click="handleDropdownClick(option)"
+              @keydown.enter="handleDropdownClick(option)"
+              @keydown.space="handleDropdownClick(option)"
             >
               <template v-if="option.type !== 'divider'">
                 <div
@@ -123,16 +125,18 @@
                 :key="index"
                 :role="option.type === 'divider' ? 'separator' : 'option'"
                 :aria-selected="option.active"
-                :tabindex="option.type === 'divider' ? '-1' : '0'"
+                :aria-disabled="option.disabled"
+                :tabindex="option.type === 'divider' || option.disabled ? '-1' : '0'"
                 :class="{
                   listItemDivider: option.type === 'divider',
                   listItem: option.type !== 'divider',
                   hasIcon: option.icon,
-                  active: option.active
+                  active: option.active,
+                  disabled: option.disabled
                 }"
-                @click="handleDropdownClick(option.value)"
-                @keydown.enter="handleDropdownClick(option.value)"
-                @keydown.space="handleDropdownClick(option.value)"
+                @click="handleDropdownClick(option)"
+                @keydown.enter="handleDropdownClick(option)"
+                @keydown.space="handleDropdownClick(option)"
               >
                 <div
                   v-if="option.icon || option.active"
@@ -222,6 +226,7 @@ const props = defineProps({
     // - value: String (if type === 'labelValue')
     // - (OPTIONAL) icon: FontAwesome IconDefinition tuple (if type === 'labelValue')
     // - (OPTIONAL) active: Number (if type === 'labelValue')
+    // - (OPTIONAL) disabled: Boolean (if type === 'labelValue')
     type: Array,
     default: () => []
   },
@@ -462,8 +467,12 @@ function handleDropdownEscape() {
   ftIconButton.value?.firstElementChild?.focus()
 }
 
-function handleDropdownClick(value) {
-  emit('click', value)
+function handleDropdownClick(option) {
+  if (option.disabled) {
+    return
+  }
+
+  emit('click', option.value)
 
   dropdownShown.value = false
 }

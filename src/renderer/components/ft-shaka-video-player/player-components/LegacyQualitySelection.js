@@ -150,7 +150,7 @@ export class LegacyQualitySelection extends shaka.ui.SettingsMenu {
 
       // hide captions before switching as shaka/the browser doesn't clean up the displayed captions
       // when switching away from the legacy formats
-      this.player.selectTextTrack(null)
+      this.player.selectTextTrack(null, false)
     }
 
     this.events_.dispatchEvent(new CustomEvent('setLegacyFormat', {

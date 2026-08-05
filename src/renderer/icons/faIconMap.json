@@ -692,7 +692,7 @@
     "ri": "broadcast-line",
     "material": "satellite-alt-outline"
   },
-  "save": {
+  "floppy-disk": {
     "lucide": "save",
     "tabler": "device-floppy",
     "ph": "floppy-disk",

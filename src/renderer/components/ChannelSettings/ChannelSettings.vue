@@ -1,0 +1,481 @@
+<template>
+  <FtSettingsSection
+    :title="t('Settings.Channel Settings.Channel Settings')"
+  >
+    <p class="sectionDescription">
+      {{ t('Settings.Channel Settings.Channel Settings Description') }}
+    </p>
+    <div class="preferenceToggles">
+      <div
+        v-for="preference in preferences"
+        :key="preference.type"
+        class="preferenceToggle"
+      >
+        <FtToggleSwitch
+          :label="preference.rememberLabel"
+          :compact="true"
+          :default-value="settings[preference.rememberKey]"
+          :setting-key="preference.rememberKey"
+          @change="value => updateSetting(preference.rememberKey, value)"
+        />
+        <FtToggleSwitch
+          v-if="settings[preference.rememberKey]"
+          class="autoUpdateToggle"
+          :label="preference.autoUpdateLabel"
+          :compact="true"
+          :default-value="settings[preference.autoUpdateKey]"
+          :setting-key="preference.autoUpdateKey"
+          @change="value => updateSetting(preference.autoUpdateKey, value)"
+        />
+      </div>
+    </div>
+    <FtFlexBox>
+      <FtButton
+        :label="manageButtonLabel"
+        :icon="['fas', 'sliders-h']"
+        @click="showManager = true"
+      />
+    </FtFlexBox>
+    <FtPrompt
+      v-if="showManager"
+      :label="t('Settings.Channel Settings.Saved Channels')"
+      theme="flex-column"
+      @click="handleManagerClick"
+    >
+      <FtInput
+        v-if="channelEntries.length > SEARCH_THRESHOLD"
+        class="channelSearch"
+        :placeholder="t('Settings.Channel Settings.Search Channels')"
+        :show-action-button="false"
+        :show-clear-text-button="true"
+        :value="searchQuery"
+        @input="value => searchQuery = value"
+        @clear="searchQuery = ''"
+      />
+      <div
+        v-overlay-scrollbars
+        class="channelListContainer"
+      >
+        <p
+          v-if="visibleChannelEntries.length === 0"
+          class="emptyState"
+        >
+          {{ channelEntries.length === 0
+            ? t('Settings.Channel Settings.No Saved Channels')
+            : t('Settings.Channel Settings.No Matching Channels') }}
+        </p>
+        <ul
+          v-else
+          class="channelList"
+        >
+          <li
+            v-for="channel in visibleChannelEntries"
+            :key="channel.id"
+            class="channelEntry"
+          >
+            <div class="channelHeader">
+              <img
+                v-if="channel.thumbnail"
+                class="channelThumbnail"
+                :src="channel.thumbnail"
+                alt=""
+              >
+              <span
+                v-else
+                class="channelThumbnail channelThumbnailPlaceholder"
+              >
+                <FontAwesomeIcon :icon="['fas', 'circle-user']" />
+              </span>
+              <p class="channelName">
+                {{ channel.name }}
+              </p>
+              <FtIconButton
+                v-if="channel.addableOptions.length > 0"
+                :title="t('Settings.Channel Settings.Add Setting')"
+                :icon="['fas', 'plus']"
+                :dropdown-options="channel.addableOptions"
+                dropdown-position-x="left"
+                :dropdown-portal="true"
+                @click="type => addPreference(channel.id, type)"
+              />
+              <FtIconButton
+                :title="t('Settings.Channel Settings.Forget Channel')"
+                :icon="['fas', 'trash']"
+                theme="destructive"
+                @click="forgetChannel(channel.id)"
+              />
+            </div>
+            <div class="channelPreferences">
+              <div
+                v-for="preference in channel.preferences"
+                :key="preference.type"
+                class="channelPreference"
+              >
+                <FontAwesomeIcon
+                  class="preferenceIcon"
+                  :icon="preference.icon"
+                  :title="preference.label"
+                />
+                <FtSlider
+                  v-if="preference.type === 'playbackSpeed'"
+                  :label="t('Settings.Channel Settings.Playback Speed')"
+                  :default-value="preference.value"
+                  :min-value="videoPlaybackRateInterval"
+                  :max-value="maxVideoPlaybackRate"
+                  :step="videoPlaybackRateInterval"
+                  value-extension="x"
+                  @change="value => setPreference(channel.id, preference.type, value)"
+                />
+                <FtSelect
+                  v-else-if="preference.type === 'videoQuality'"
+                  :placeholder="t('Settings.Channel Settings.Video Quality')"
+                  :value="preference.value"
+                  :select-names="qualityNames"
+                  :select-values="QUALITY_VALUES"
+                  :icon="preference.icon"
+                  :show-icon="false"
+                  @change="value => setPreference(channel.id, preference.type, value)"
+                />
+                <FtToggleSwitch
+                  v-else-if="preference.type === 'subtitlesState'"
+                  :label="t('Settings.Channel Settings.Subtitles Enabled')"
+                  :compact="true"
+                  :default-value="preference.value"
+                  @change="value => setPreference(channel.id, preference.type, value)"
+                />
+                <FtSlider
+                  v-else
+                  :label="t('Settings.Channel Settings.Volume')"
+                  :default-value="Math.round(preference.value * 100)"
+                  :min-value="0"
+                  :max-value="100"
+                  :step="1"
+                  value-extension="%"
+                  @change="value => setPreference(channel.id, preference.type, value / 100)"
+                />
+                <FtIconButton
+                  :title="t('Settings.Channel Settings.Forget Value')"
+                  :icon="['fas', 'xmark']"
+                  @click="deletePreference(channel.id, preference.type)"
+                />
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <FtFlexBox>
+        <FtButton
+          :label="t('Close')"
+          @click="showManager = false"
+        />
+      </FtFlexBox>
+    </FtPrompt>
+  </FtSettingsSection>
+</template>
+
+<script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import FtButton from '../FtButton/FtButton.vue'
+import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import FtInput from '../FtInput/FtInput.vue'
+import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
+import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
+import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+
+import store from '../../store/index'
+import {
+  CHANNEL_PREFERENCE_TYPES,
+  fetchChannelInfo,
+  getCachedChannelInfo,
+  parseChannelPreferences
+} from '../../helpers/channel-preferences'
+
+const { locale, t } = useI18n()
+
+const PREFERENCES = CHANNEL_PREFERENCE_TYPES
+
+/** Only offer the search field once scanning the list by eye gets tedious */
+const SEARCH_THRESHOLD = 5
+
+// TODO: Revert when auto is fixed
+const QUALITY_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+
+const qualityNames = computed(() => [
+  t('Settings.Player Settings.Default Quality.4k'),
+  t('Settings.Player Settings.Default Quality.1440p'),
+  t('Settings.Player Settings.Default Quality.1080p'),
+  t('Settings.Player Settings.Default Quality.720p'),
+  t('Settings.Player Settings.Default Quality.480p'),
+  t('Settings.Player Settings.Default Quality.360p'),
+  t('Settings.Player Settings.Default Quality.240p'),
+  t('Settings.Player Settings.Default Quality.144p'),
+])
+
+const rememberLabels = computed(() => ({
+  playbackSpeed: t('Settings.Channel Settings.Enable Playback Speed'),
+  videoQuality: t('Settings.Channel Settings.Enable Video Quality'),
+  subtitlesState: t('Settings.Channel Settings.Enable Subtitles State'),
+  volume: t('Settings.Channel Settings.Enable Volume')
+}))
+
+const autoUpdateLabels = computed(() => ({
+  playbackSpeed: t('Settings.Channel Settings.Auto Update'),
+  videoQuality: t('Settings.Channel Settings.Auto Update'),
+  subtitlesState: t('Settings.Channel Settings.Auto Update Subtitles'),
+  volume: t('Settings.Channel Settings.Auto Update Volume')
+}))
+
+/** Shared between the rows in a channel's card and the menu for adding one */
+const PREFERENCE_ICONS = Object.freeze({
+  playbackSpeed: ['fas', 'gauge'],
+  videoQuality: ['fas', 'photo-film'],
+  subtitlesState: ['fas', 'closed-captioning'],
+  volume: ['fas', 'volume-high']
+})
+
+const preferenceLabels = computed(() => ({
+  playbackSpeed: t('Settings.Channel Settings.Playback Speed'),
+  videoQuality: t('Settings.Channel Settings.Video Quality'),
+  subtitlesState: t('Settings.Channel Settings.Subtitles Enabled'),
+  volume: t('Settings.Channel Settings.Volume')
+}))
+
+const preferences = computed(() => PREFERENCES.map(preference => ({
+  ...preference,
+  rememberLabel: rememberLabels.value[preference.type],
+  autoUpdateLabel: autoUpdateLabels.value[preference.type]
+})))
+
+const settings = computed(() => store.state.settings)
+
+/** @type {import('vue').ComputedRef<string>} */
+const defaultQuality = computed(() => {
+  const value = store.getters.getDefaultQuality
+
+  // TODO: Revert when auto is fixed (720 is the default settings value)
+  return value === 'auto' ? '720' : value
+})
+
+/** @type {import('vue').ComputedRef<number>} */
+const videoPlaybackRateInterval = computed(() => store.getters.getVideoPlaybackRateInterval)
+
+/** @type {import('vue').ComputedRef<number>} */
+const maxVideoPlaybackRate = computed(() => parseInt(store.getters.getMaxVideoPlaybackRate))
+
+/** @type {import('vue').ComputedRef<Map<string, { name: string, thumbnail: string }>>} */
+const subscriptionsById = computed(() => store.getters.getSubscribedChannelsById)
+
+const backendOptions = computed(() => ({
+  preference: store.getters.getBackendPreference,
+  fallback: store.getters.getBackendFallback,
+}))
+
+const showManager = ref(false)
+const searchQuery = ref('')
+
+/**
+ * Channels that had to be fetched, so that they can be displayed once they arrive.
+ * @type {import('vue').Ref<Map<string, { name: string, thumbnail: string }>>}
+ */
+const fetchedChannels = ref(new Map())
+
+/**
+ * @param {string} settingKey
+ * @param {boolean} value
+ */
+function updateSetting(settingKey, value) {
+  store.dispatch(`update${settingKey[0].toUpperCase()}${settingKey.slice(1)}`, value)
+}
+
+/**
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ */
+function preferenceValuesFor(type) {
+  const { valuesKey } = PREFERENCES.find(preference => preference.type === type)
+  return { valuesKey, values: parseChannelPreferences(settings.value[valuesKey], valuesKey) }
+}
+
+const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
+
+/**
+ * Every channel that has at least one remembered value, along with the types
+ * that are enabled globally but not remembered for it yet.
+ * @type {import('vue').ComputedRef<{
+ *   id: string,
+ *   name: string,
+ *   thumbnail: string,
+ *   preferences: {
+ *     type: string,
+ *     value: number | string | boolean,
+ *     icon: string[],
+ *     label: string
+ *   }[],
+ *   addableOptions: { label: string, value: string, icon: string[] }[]
+ * }[]>}
+ */
+const channelEntries = computed(() => {
+  /** @type {Map<string, Map<string, number | string | boolean>>} */
+  const valuesByChannel = new Map()
+
+  for (const { type, valuesKey } of PREFERENCES) {
+    for (const [channelId, value] of Object.entries(parseChannelPreferences(settings.value[valuesKey], valuesKey))) {
+      if (!valuesByChannel.has(channelId)) {
+        valuesByChannel.set(channelId, new Map())
+      }
+
+      valuesByChannel.get(channelId).set(
+        type,
+        // TODO: Revert when auto is fixed, existing entries can still hold it
+        type === 'videoQuality' && String(value) === 'auto' ? defaultQuality.value : value
+      )
+    }
+  }
+
+  const entries = Array.from(valuesByChannel, ([channelId, values]) => {
+    // Read unconditionally, so this recomputes once a fetch fills the channel in
+    const fetched = fetchedChannels.value.get(channelId)
+    const channel = getCachedChannelInfo(channelId, subscriptionsById.value) ?? fetched
+
+    const preferences = PREFERENCES
+      .filter(({ type }) => values.has(type))
+      .map(({ type }) => ({
+        type,
+        value: values.get(type),
+        icon: PREFERENCE_ICONS[type],
+        label: preferenceLabels.value[type]
+      }))
+
+    // Types that are enabled globally but not remembered for this channel yet
+    const addableOptions = PREFERENCES
+      .filter(({ type, rememberKey }) => !values.has(type) && settings.value[rememberKey])
+      .map(({ type }) => ({
+        label: preferenceLabels.value[type],
+        value: type,
+        icon: PREFERENCE_ICONS[type]
+      }))
+
+    return {
+      id: channelId,
+      name: channel?.name || channelId,
+      thumbnail: channel?.thumbnail ?? '',
+      preferences,
+      addableOptions
+    }
+  })
+
+  return entries.sort((a, b) => collator.value.compare(a.name, b.name))
+})
+
+const visibleChannelEntries = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase()
+
+  if (query === '') {
+    return channelEntries.value
+  }
+
+  return channelEntries.value.filter(({ id, name }) => {
+    return name.toLowerCase().includes(query) || id.toLowerCase().includes(query)
+  })
+})
+
+const manageButtonLabel = computed(() => {
+  return t('Settings.Channel Settings.Manage Saved Channels', { channelCount: channelEntries.value.length })
+})
+
+/** Resolves the channels that aren't subscribed to, the rest is already known locally */
+async function fetchMissingChannels() {
+  const missingIds = channelEntries.value
+    .map(({ id }) => id)
+    .filter(id => getCachedChannelInfo(id, subscriptionsById.value) === null)
+
+  for (const channelId of missingIds) {
+    const channel = await fetchChannelInfo(channelId, backendOptions.value)
+
+    if (channel !== null) {
+      // replace the map so that the computed entries pick the channel up
+      fetchedChannels.value = new Map(fetchedChannels.value).set(channelId, channel)
+    }
+  }
+}
+
+watch([showManager, channelEntries], ([isManagerOpen]) => {
+  if (isManagerOpen) {
+    fetchMissingChannels()
+  }
+})
+
+/**
+ * @param {string | null} value
+ */
+function handleManagerClick(value) {
+  if (value === null) {
+    showManager.value = false
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ * @param {number | string | boolean} value
+ */
+function setPreference(channelId, type, value) {
+  const { valuesKey, values } = preferenceValuesFor(type)
+  values[channelId] = value
+  updateSetting(valuesKey, JSON.stringify(values))
+}
+
+/**
+ * Starts remembering a setting for a channel that doesn't have one yet,
+ * beginning at whatever the global default is.
+ * @param {string} channelId
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ */
+function addPreference(channelId, type) {
+  switch (type) {
+    case 'playbackSpeed':
+      setPreference(channelId, type, store.getters.getDefaultPlayback)
+      break
+    case 'videoQuality':
+      setPreference(channelId, type, defaultQuality.value)
+      break
+    case 'subtitlesState':
+      setPreference(channelId, type, store.getters.getEnableSubtitlesByDefault)
+      break
+    case 'volume':
+      setPreference(channelId, type, store.getters.getDefaultVolume)
+      break
+  }
+}
+
+/**
+ * @param {string} channelId
+ * @param {'playbackSpeed' | 'videoQuality' | 'subtitlesState' | 'volume'} type
+ */
+function deletePreference(channelId, type) {
+  const { valuesKey, values } = preferenceValuesFor(type)
+  delete values[channelId]
+  updateSetting(valuesKey, JSON.stringify(values))
+}
+
+/**
+ * @param {string} channelId
+ */
+function forgetChannel(channelId) {
+  for (const { valuesKey } of PREFERENCES) {
+    const values = parseChannelPreferences(settings.value[valuesKey], valuesKey)
+
+    if (Object.hasOwn(values, channelId)) {
+      delete values[channelId]
+      updateSetting(valuesKey, JSON.stringify(values))
+    }
+  }
+}
+</script>
+
+<style scoped src="./ChannelSettings.css" />

@@ -26,6 +26,7 @@ import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { parseLocalVideoGames } from '../../helpers/video-games'
+import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import {
   buildChaptersVttFile,
   buildVTTFileLocally,
@@ -328,6 +329,10 @@ export default defineComponent({
       streamingDataExpiryDate: null,
       currentPlaybackRate: null,
       currentVideoQuality: null,
+      /** @type {boolean|null} */
+      currentSubtitlesState: null,
+      /** @type {number|null} */
+      currentVolume: null,
 
       // Local, non-persistent toggle for temporarily disabling SponsorBlock auto-skipping
       sponsorBlockAutoSkipTemporarilyDisabled: false,
@@ -2826,7 +2831,10 @@ export default defineComponent({
       }
 
       this.saveChannelPlaybackSpeed(this.currentPlaybackRate)
-      showToast({ message: this.t('Video.Channel Playback Speed Saved'), icon: ['fas', 'gauge'] })
+      showToast({
+        message: `${this.t('Video.Channel Playback Speed Saved')}: ${this.currentPlaybackRate}×`,
+        icon: ['fas', 'gauge']
+      })
     },
     handleChannelVideoQualityManualSave() {
       // Should be called by manual action, settings should be checked in UI
@@ -2836,8 +2844,38 @@ export default defineComponent({
       }
 
       if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
-        showToast({ message: this.t('Video.Channel Video Quality Saved'), icon: ['fas', 'film'] })
+        const savedQuality = this.normalizeVideoQuality(this.currentVideoQuality)
+        showToast({
+          message: `${this.t('Video.Channel Video Quality Saved')}: ${savedQuality}p`,
+          icon: ['fas', 'film']
+        })
       }
+    },
+    handleChannelSubtitlesStateManualSave() {
+      // Should be called by manual action, settings should be checked in UI
+      const rememberPerChannel = this.$store.getters.getRememberSubtitlesStatePerChannel
+      if (!rememberPerChannel || !this.channelId || this.currentSubtitlesState === null) {
+        return
+      }
+
+      this.saveChannelSubtitlesState(this.currentSubtitlesState)
+      showToast({
+        message: `${this.t('Video.Channel Subtitles State Saved')}: ${this.currentSubtitlesState ? '✓' : '✕'}`,
+        icon: ['fas', 'closed-captioning']
+      })
+    },
+    handleChannelVolumeManualSave() {
+      // Should be called by manual action, settings should be checked in UI
+      const rememberPerChannel = this.$store.getters.getRememberVolumePerChannel
+      if (!rememberPerChannel || !this.channelId || this.currentVolume === null) {
+        return
+      }
+
+      this.saveChannelVolume(this.currentVolume)
+      showToast({
+        message: `${this.t('Video.Channel Volume Saved')}: ${Math.round(this.currentVolume * 100)}%`,
+        icon: ['fas', 'volume-high']
+      })
     },
     handleWatchProgressAutoSave() {
       if (!this.rememberHistory || !this.autosaveWatchedProgress) { return }
@@ -3854,6 +3892,61 @@ export default defineComponent({
     },
 
     /**
+     * @param {boolean} enabled
+     */
+    handleSubtitlesStateUserSet(enabled) {
+      this.currentSubtitlesState = enabled
+
+      if (!this.$store.getters.getRememberSubtitlesStatePerChannel ||
+        !this.$store.getters.getAutoUpdateChannelSubtitlesStates ||
+        !this.channelId) {
+        return
+      }
+
+      this.saveChannelSubtitlesState(enabled)
+    },
+
+    /**
+     * @param {boolean} enabled
+     */
+    updateSubtitlesState(enabled) {
+      this.currentSubtitlesState = enabled
+    },
+
+    /**
+     * @param {number} volume
+     */
+    handleVolumeUserSet(volume) {
+      this.currentVolume = volume
+
+      if (!this.$store.getters.getRememberVolumePerChannel ||
+        !this.$store.getters.getAutoUpdateChannelVolumes ||
+        !this.channelId) {
+        return
+      }
+
+      this.saveChannelVolume(volume)
+    },
+
+    /**
+     * @param {boolean} enabled
+     */
+    saveChannelSubtitlesState(enabled) {
+      const states = parseChannelPreferences(this.$store.getters.getChannelSubtitlesStates, 'channelSubtitlesStates')
+      states[this.channelId] = enabled
+      this.$store.dispatch('updateChannelSubtitlesStates', JSON.stringify(states))
+    },
+
+    /**
+     * @param {number} volume
+     */
+    saveChannelVolume(volume) {
+      const volumes = parseChannelPreferences(this.$store.getters.getChannelVolumes, 'channelVolumes')
+      volumes[this.channelId] = volume
+      this.$store.dispatch('updateChannelVolumes', JSON.stringify(volumes))
+    },
+
+    /**
      * @param {string | number | null | undefined} quality
      * @returns {string}
      */
@@ -3898,11 +3991,7 @@ export default defineComponent({
       try {
         const channelQualities = JSON.parse(this.$store.getters.getChannelVideoQualities || '{}')
         const normalizedQuality = this.normalizeVideoQuality(quality)
-        const defaultQuality = this.getDefaultVideoQuality()
-
-        if (normalizedQuality.length === 0 || normalizedQuality === defaultQuality) {
-          delete channelQualities[this.channelId]
-          this.$store.dispatch('updateChannelVideoQualities', JSON.stringify(channelQualities))
+        if (normalizedQuality.length === 0) {
           return false
         }
 
