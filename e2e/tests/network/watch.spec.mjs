@@ -2542,5 +2542,9 @@ test.describe('custom Shorts player', () => {
     await expect(page).toHaveURL(
       /#\/watch\/RZ6PG5QATg4\?short=true&shortSource=subscriptions/
     )
+    await expect(shortTab).toHaveClass(/loading/)
+    await expect(
+      page.locator('.tabContent[aria-hidden="false"] [data-tab-loading-indicator]')
+    ).toHaveCount(1)
   })
 })

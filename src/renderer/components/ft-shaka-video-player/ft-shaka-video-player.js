@@ -3743,6 +3743,7 @@ export default defineComponent({
       clearSponsorBlockMuteSegments()
       if (props.shortsPlayer) {
         shortsPaused.value = false
+        shortsEnded.value = false
         shortsCaptionsAvailable.value = false
         shortsCaptionsEnabled.value = false
       }
