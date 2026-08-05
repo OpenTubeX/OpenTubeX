@@ -701,13 +701,13 @@ export default defineComponent({
     theatreTogglePossible: function () {
       return this.theatreLayoutAvailable && this.theatrePossible
     },
-    canSkipToNextPlaylistVideo: function () {
-      if (!this.watchingPlaylist) { return false }
-
-      // The watch queue takes precedence over the playlist, see `handleSkipToNext`
-      return !!this.nextQueuedVideo || this.playlistSkipAvailability.canPlayNext
+    canSkipToNextVideo: function () {
+      // The watch queue takes precedence over the playlist and works without one,
+      // see `handleSkipToNext`
+      return !!this.nextQueuedVideo || (this.watchingPlaylist && this.playlistSkipAvailability.canPlayNext)
     },
-    canSkipToPreviousPlaylistVideo: function () {
+    canSkipToPreviousVideo: function () {
+      // Only a playlist has a previous video, see `handleSkipToPrev`
       return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
     },
     autoplayPossible: function () {
@@ -833,10 +833,10 @@ export default defineComponent({
     watchStatsResetVersion() {
       this.clearPendingWatchTime()
     },
-    canSkipToNextPlaylistVideo() {
+    canSkipToNextVideo() {
       this.syncMediaSessionSkipHandlers()
     },
-    canSkipToPreviousPlaylistVideo() {
+    canSkipToPreviousVideo() {
       this.syncMediaSessionSkipHandlers()
     },
   },
@@ -3232,8 +3232,8 @@ export default defineComponent({
       if (!('mediaSession' in navigator)) { return }
 
       tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {
-        previoustrack: this.canSkipToPreviousPlaylistVideo ? this.handleSkipToPrev : null,
-        nexttrack: this.canSkipToNextPlaylistVideo ? this.handleSkipToNext : null
+        previoustrack: this.canSkipToPreviousVideo ? this.handleSkipToPrev : null,
+        nexttrack: this.canSkipToNextVideo ? this.handleSkipToNext : null
       })
     },
 

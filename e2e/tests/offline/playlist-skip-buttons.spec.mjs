@@ -28,7 +28,23 @@ test.use({
         createdAt: Date.now() - 86_400_000,
         lastUpdatedAt: Date.now()
       }
-    ]
+    ],
+    history: ['Queued video', 'Standalone video'].map((title, index) => ({
+      _id: `queuevideo${index}`,
+      videoId: `queuevideo${index}`,
+      title,
+      author: 'Test Channel',
+      authorId: 'UC-test-channel-id',
+      published: Date.now() - 86_400_000,
+      description: '',
+      viewCount: 100,
+      lengthSeconds: 60,
+      watchProgress: 0,
+      isWatched: false,
+      timeWatched: Date.now() - index,
+      isLive: false,
+      type: 'video'
+    }))
   }
 })
 
@@ -63,8 +79,8 @@ function readSkipAvailability(page) {
     }
 
     return {
-      canPlayNext: watchView.canSkipToNextPlaylistVideo,
-      canPlayPrevious: watchView.canSkipToPreviousPlaylistVideo
+      canPlayNext: watchView.canSkipToNextVideo,
+      canPlayPrevious: watchView.canSkipToPreviousVideo
     }
   })
 }
@@ -111,5 +127,26 @@ test('only offers skipping to playlist videos that exist', async ({ page }) => {
   await expect.poll(() => readSkipAvailability(page)).toEqual({
     canPlayNext: true,
     canPlayPrevious: true
+  })
+})
+
+test('offers skipping to a queued video without a playlist', async ({ page }) => {
+  await page.route(/^https?:\/\//, (route) => route.abort())
+
+  await goTo(page, 'history')
+
+  const queuedVideo = page.locator('.ft-list-video').filter({ hasText: 'Queued video' })
+  await queuedVideo.hover()
+  await queuedVideo.locator('.optionsButton').click()
+  await page.getByRole('option', { name: 'Add to Queue' }).click()
+
+  await page.getByRole('link', { name: /Standalone video/ }).click()
+  await expect(page).toHaveURL(/#\/watch\/queuevideo1/)
+  await expect(page.locator('.watchQueue')).toBeVisible()
+
+  // The queue supplies a next video, nothing supplies a previous one
+  await expect.poll(() => readSkipAvailability(page)).toEqual({
+    canPlayNext: true,
+    canPlayPrevious: false
   })
 })
