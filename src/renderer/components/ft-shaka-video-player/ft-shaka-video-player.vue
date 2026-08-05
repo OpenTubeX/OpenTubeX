@@ -60,6 +60,7 @@
       }"
       :style="[
         captionCssVariables,
+        captionPlayerVariables,
         scrollMiniPlayerActive ? scrollMiniPlayerStyle : undefined,
         shortsPlayer ? { '--shorts-aspect-ratio': shortsAspectRatio } : undefined
       ]"

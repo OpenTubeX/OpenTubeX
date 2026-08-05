@@ -82,8 +82,8 @@
             :default-value="Math.round(captionSettings.fontScale * 100)"
             setting-key="defaultCaptionSettings"
             :is-changed="isCaptionSettingChanged('fontScale')"
-            :min-value="50"
-            :max-value="200"
+            :min-value="MIN_CAPTION_FONT_SCALE * 100"
+            :max-value="MAX_CAPTION_FONT_SCALE * 100"
             :step="10"
             value-extension="%"
             @input="updateCaptionSetting('fontScale', $event / 100)"
@@ -176,6 +176,8 @@ import {
   CAPTION_EDGE_STYLES,
   DEFAULT_CAPTION_SETTINGS,
   getCaptionCssVariables,
+  MAX_CAPTION_FONT_SCALE,
+  MIN_CAPTION_FONT_SCALE,
   parseCaptionSettings,
 } from '../../helpers/player/caption-settings'
 import store from '../../store/index'

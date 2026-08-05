@@ -5,6 +5,8 @@ import {
   CAPTION_ANCHORS,
   CAPTION_EDGE_STYLES,
   DEFAULT_CAPTION_SETTINGS,
+  MAX_CAPTION_FONT_SCALE,
+  MIN_CAPTION_FONT_SCALE,
 } from '../../../helpers/player/caption-settings'
 
 const CAPTION_COLOR_PALETTE = Object.freeze([
@@ -64,7 +66,7 @@ export class CaptionSelection extends shaka.ui.TextSelection {
     this.textColor_ = this.createColorControl_('textColor')
     this.backgroundColor_ = this.createColorControl_('backgroundColor')
     this.backgroundOpacity_ = this.createRangeControl_('backgroundOpacity', 0, 1, 0.05)
-    this.fontScale_ = this.createRangeControl_('fontScale', 0.5, 2, 0.1)
+    this.fontScale_ = this.createRangeControl_('fontScale', MIN_CAPTION_FONT_SCALE, MAX_CAPTION_FONT_SCALE, 0.1)
     this.anchor_ = this.createAnchorControl_()
     this.verticalPosition_ = this.createRangeControl_('verticalPosition', 0, 0.5, 0.01)
     this.edgeStyle_ = this.createEdgeStyleControl_()

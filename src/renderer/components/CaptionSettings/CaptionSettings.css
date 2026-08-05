@@ -1,7 +1,9 @@
 .captionPreview {
   position: relative;
   box-sizing: border-box;
-  min-block-size: 120px;
+
+  /* grows with the font size, so large captions still have room in the preview */
+  min-block-size: max(120px, 3em);
   margin-block-end: 1rem;
   border-radius: calc(5px * var(--ui-roundness));
   background: linear-gradient(135deg, #576574, #222f3e);
