@@ -112,11 +112,16 @@ export function findUpdateRelease(releases, installedVersion) {
 
 /**
  * Combines release notes into a changelog with a heading for each release.
+ * A single release gets no heading, as the prompt title already names it.
  *
  * @param {Array<{ body?: string | null, name?: string | null, tag_name?: string }>} releases
  * @returns {string}
  */
 export function formatReleaseChangelog(releases) {
+  if (releases.length === 1) {
+    return releases[0].body ?? ''
+  }
+
   return releases.map((release) => {
     const title = release.name ?? release.tag_name ?? ''
     return `## ${title}\n\n${release.body ?? ''}`

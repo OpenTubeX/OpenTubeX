@@ -78,7 +78,6 @@
         <h1
           :id="labelId"
           class="changeLogTitle"
-          dir="ltr"
         >
           {{ changeLogTitle }}
         </h1>
@@ -315,51 +314,7 @@ import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadUtilityRoutes } from './router/index'
 
-const GITHUB_ISSUE_URL_PATTERN = /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)\/?$/i
-const LOCAL_REPOSITORY = 'opentubex/opentubex'
-const UPSTREAM_REPOSITORY = 'freetubeapp/freetube'
-
-const releaseNotesMarkdown = createReleaseNotesMarkdown({
-  extensions: [{
-    name: 'issueReference',
-    level: 'inline',
-    start: (source) => source.search(/#\d+\b/),
-    tokenizer(source, tokens) {
-      const match = /^#(\d+)\b/.exec(source)
-      const previousToken = tokens.at(-1)
-
-      if (match && !this.lexer.state.inLink && !/[\w/]$/.test(previousToken?.raw ?? '')) {
-        return {
-          type: 'issueReference',
-          raw: match[0],
-          issueNumber: match[1]
-        }
-      }
-    },
-    renderer({ issueNumber }) {
-      return `<a href="https://github.com/OpenTubeX/OpenTubeX/issues/${issueNumber}">#${issueNumber}</a>`
-    }
-  }],
-  renderLink(token) {
-    const match = GITHUB_ISSUE_URL_PATTERN.exec(token.href)
-
-    if (!match) {
-      return false
-    }
-
-    const [, owner, repository, issueNumber] = match
-    const repositoryName = `${owner}/${repository}`
-    let label = `${repositoryName}#${issueNumber}`
-
-    if (repositoryName.toLowerCase() === LOCAL_REPOSITORY) {
-      label = `#${issueNumber}`
-    } else if (repositoryName.toLowerCase() === UPSTREAM_REPOSITORY) {
-      label = `${owner}#${issueNumber}`
-    }
-
-    return `<a href="${token.href}">${label}</a>`
-  }
-})
+const releaseNotesMarkdown = createReleaseNotesMarkdown()
 
 const route = useRoute()
 const router = useRouter()
@@ -1713,7 +1668,7 @@ async function checkForNewUpdates() {
       .replaceAll(/https:\/\/github\.com\/OpenTubeX\/OpenTubeX\/pull\/(\d+)/g, '[#$1]($&)')
 
     updateChangelog.value = releaseNotesMarkdown.parse(changelog)
-    changeLogTitle.value = release.name
+    changeLogTitle.value = t('Update to {version}', { version: release.name ?? tagName })
     latestVersionNumber.value = versionNumber
     showUpdatesBanner.value = true
   } catch (error) {

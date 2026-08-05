@@ -212,3 +212,15 @@ test('release changelogs contain the notes for every update', () => {
     '## OpenTubeX 0.30.1\n\nPatch release notes\n\n## OpenTubeX 0.30.0\n\nMinor release notes'
   )
 })
+
+test('a single release changelog has no heading', () => {
+  const releases = [
+    {
+      name: 'OpenTubeX 0.30.1',
+      tag_name: 'v0.30.1-beta',
+      body: 'Patch release notes'
+    }
+  ]
+
+  assert.equal(formatReleaseChangelog(releases), 'Patch release notes')
+})
