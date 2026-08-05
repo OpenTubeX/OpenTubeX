@@ -25,7 +25,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Return YouTube Dislike | Configured Return YouTube Dislike operator | IP address, video identifiers, and timing |
 | Enhanced-privacy sync | Configured sync operator | IP address, account identifier, authentication data, encrypted payloads, collection names, payload sizes, revisions, and timing; not the decrypted selected data |
 | Legacy sync | Configured sync operator | IP address, account identifier, authentication data, selected synced data, and timing |
-| `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`, and is also used for downloading the managed `yt-dlp` and FFmpeg binaries |
+| `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
 
 HTTPS encrypts request paths and payloads in transit, but DNS providers and network operators may still learn destination hostnames and traffic patterns. A VPN or Tor changes which parties see your direct IP address; it does not prevent the destination service from seeing the request itself.
 
