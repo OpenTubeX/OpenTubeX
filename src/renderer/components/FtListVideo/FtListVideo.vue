@@ -335,7 +335,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -367,6 +367,7 @@ import {
 } from '../../helpers/utils.js'
 import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
+import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
 import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
@@ -501,7 +502,47 @@ const historyEntryExists = computed(() => historyEntry.value !== undefined)
 
 const isWatched = computed(() => isHistoryEntryWatched(historyEntry.value))
 
-const canMarkAsWatched = computed(() => !isLive.value)
+const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data))
+const premiereNow = ref(Date.now())
+const MAX_TIMEOUT_DELAY = 2_147_483_647
+let premiereStartTimer = null
+
+const canMarkAsWatched = computed(() => {
+  if (isLive.value) {
+    return false
+  }
+
+  // A scheduled premiere can only be watched once its start time has passed,
+  // even if a cached entry still carries a stale upcoming flag.
+  if (premiereTimestamp.value != null) {
+    return premiereTimestamp.value <= premiereNow.value
+  }
+
+  return !isUpcoming.value
+})
+
+function clearPremiereStartTimer() {
+  if (premiereStartTimer != null) {
+    clearTimeout(premiereStartTimer)
+    premiereStartTimer = null
+  }
+}
+
+function schedulePremiereStartInvalidation() {
+  clearPremiereStartTimer()
+
+  const timestamp = premiereTimestamp.value
+  const now = Date.now()
+  premiereNow.value = now
+  if (timestamp == null || timestamp <= now) {
+    return
+  }
+
+  premiereStartTimer = setTimeout(() => {
+    premiereStartTimer = null
+    schedulePremiereStartInvalidation()
+  }, Math.min(timestamp - now + 1, MAX_TIMEOUT_DELAY))
+}
 
 const watchProgress = computed(() => {
   if (!historyEntryExists.value || !watchedProgressSavingEnabled.value) {
@@ -1447,6 +1488,7 @@ function markAsWatched() {
     isWatched: true,
     timeWatched: historyEntry.value?.timeWatched ?? Date.now(),
     isLive: false,
+    isUpcoming: false,
     type: 'video'
   }
 
@@ -1615,6 +1657,9 @@ if ((showDeArrowTitle.value || showDeArrowThumbnail.value) && !deArrowCache.valu
 if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumbnail == null) {
   debounceGetDeArrowThumbnail()
 }
+
+watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
+onBeforeUnmount(clearPremiereStartTimer)
 
 watch([useSponsorBlock, id], ([enabled, videoId]) => {
   sponsorBlockFullVideoCategory.value = null

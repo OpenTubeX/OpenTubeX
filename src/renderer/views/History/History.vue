@@ -189,6 +189,7 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store'
 
+import { canMarkHistoryEntryAsWatched } from '../../helpers/history'
 import { ctrlFHandler, debounce, getIconForSortPreference, showToast } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -284,7 +285,7 @@ const historyCacheSorted = computed(() => {
 })
 
 const hasUnwatchedHistory = computed(() => {
-  return historyCacheSorted.value.some(record => record.isWatched !== true && record.isLive !== true)
+  return historyCacheSorted.value.some(record => record.isWatched !== true && canMarkHistoryEntryAsWatched(record))
 })
 
 async function markAllAsWatched() {

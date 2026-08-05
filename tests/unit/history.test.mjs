@@ -46,3 +46,34 @@ test('active live content cannot be marked as watched', () => {
     lengthSeconds: 10 * 60,
   }), true)
 })
+
+test('upcoming premieres become markable after their scheduled time', () => {
+  const now = Math.floor(Date.now() / 1000)
+
+  assert.equal(canMarkHistoryEntryAsWatched({ isUpcoming: true }), false)
+  assert.equal(canMarkHistoryEntryAsWatched({
+    isUpcoming: true,
+    premiereTimestamp: now + 60,
+  }), false)
+  assert.equal(isHistoryEntryWatched({
+    isUpcoming: true,
+    premiereTimestamp: now + 60,
+    isWatched: true,
+  }), false)
+  assert.equal(canMarkHistoryEntryAsWatched({
+    isUpcoming: true,
+    premiereTimestamp: now - 60,
+  }), true)
+  assert.equal(isHistoryEntryWatched({
+    isUpcoming: true,
+    premiereTimestamp: now - 60,
+    isWatched: true,
+  }), true)
+  assert.equal(canMarkHistoryEntryAsWatched({
+    isLive: true,
+    isUpcoming: true,
+    premiereTimestamp: now - 60,
+  }), false)
+  assert.equal(canMarkHistoryEntryAsWatched({ isUpcoming: false }), true)
+  assert.equal(isHistoryEntryWatched({ isUpcoming: false, isWatched: true }), true)
+})

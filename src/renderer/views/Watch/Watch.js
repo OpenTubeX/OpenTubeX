@@ -2792,6 +2792,7 @@ export default defineComponent({
         isWatched,
         timeWatched: now,
         isLive: this.isLive,
+        isUpcoming: this.isUpcoming,
         type: 'video',
       }
 

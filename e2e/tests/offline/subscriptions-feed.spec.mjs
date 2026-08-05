@@ -24,51 +24,51 @@ function feedVideo(videoId, title, authorId, published, extra = {}) {
 // Auto-fetch is disabled so the feed must come entirely from the seeded
 // cache — this is exactly the offline startup path the app uses before
 // any refresh (53caa4084, 7ad96d185).
-test.use({
-  seed: {
-    settings: {
-      fetchSubscriptionsAutomatically: false,
-      hideUpcomingPremieres: true,
-      thumbnailSize: 180
+const seed = {
+  settings: {
+    fetchSubscriptionsAutomatically: false,
+    hideUpcomingPremieres: true,
+    thumbnailSize: 180
+  },
+  profiles: [
+    {
+      _id: 'allChannels',
+      name: 'All Channels',
+      bgColor: '#000000',
+      textColor: '#FFFFFF',
+      subscriptions: [
+        { id: CHANNEL_A, name: 'Channel A', thumbnail: '' },
+        { id: CHANNEL_B, name: 'Channel B', thumbnail: '' }
+      ]
+    }
+  ],
+  subscriptionCache: [
+    {
+      _id: CHANNEL_A,
+      videos: [
+        feedVideo('aaaaaaaaaa1', 'Video A newer', CHANNEL_A, now - 1 * HOUR),
+        feedVideo('aaaaaaaaaa4', 'Running premiere video', CHANNEL_A, now - 2 * HOUR, {
+          isPremiere: true,
+          liveNow: true
+        }),
+        feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
+        feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
+          premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
+        })
+      ],
+      videosTimestamp: new Date(now - 2 * HOUR).toISOString()
     },
-    profiles: [
-      {
-        _id: 'allChannels',
-        name: 'All Channels',
-        bgColor: '#000000',
-        textColor: '#FFFFFF',
-        subscriptions: [
-          { id: CHANNEL_A, name: 'Channel A', thumbnail: '' },
-          { id: CHANNEL_B, name: 'Channel B', thumbnail: '' }
-        ]
-      }
-    ],
-    subscriptionCache: [
-      {
-        _id: CHANNEL_A,
-        videos: [
-          feedVideo('aaaaaaaaaa1', 'Video A newer', CHANNEL_A, now - 1 * HOUR),
-          feedVideo('aaaaaaaaaa4', 'Running premiere video', CHANNEL_A, now - 2 * HOUR, {
-            isPremiere: true,
-            liveNow: true
-          }),
-          feedVideo('aaaaaaaaaa2', 'Video A older', CHANNEL_A, now - 3 * HOUR),
-          feedVideo('aaaaaaaaaa3', 'Upcoming premiere video', CHANNEL_A, now + 30 * 24 * HOUR, {
-            premiereDate: new Date(now + 30 * 24 * HOUR).toISOString()
-          })
-        ],
-        videosTimestamp: new Date(now - 2 * HOUR).toISOString()
-      },
-      {
-        _id: CHANNEL_B,
-        videos: [
-          feedVideo('bbbbbbbbbb1', 'Video B newest', CHANNEL_B, now - 0.5 * HOUR)
-        ],
-        videosTimestamp: new Date(now - 1 * HOUR).toISOString()
-      }
-    ]
-  }
-})
+    {
+      _id: CHANNEL_B,
+      videos: [
+        feedVideo('bbbbbbbbbb1', 'Video B newest', CHANNEL_B, now - 0.5 * HOUR)
+      ],
+      videosTimestamp: new Date(now - 1 * HOUR).toISOString()
+    }
+  ]
+}
+
+test.use({ seed })
 
 test.describe('subscriptions feed from cache', () => {
   test('does not animate cards while calculating the initial grid size', async ({ page }) => {
@@ -186,5 +186,27 @@ test.describe('subscriptions feed from cache', () => {
     const lastRefresh = page.locator('.lastRefreshTimestamp').first()
     await expect(lastRefresh).toBeVisible()
     await expect(lastRefresh).toContainText('2 hours ago')
+  })
+})
+
+test.describe('subscriptions feed with upcoming premieres shown', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: { ...seed.settings, hideUpcomingPremieres: false }
+    }
+  })
+
+  test('does not offer to mark an upcoming premiere as watched', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(upcomingPremiere).toBeVisible()
+    await upcomingPremiere.hover()
+    await upcomingPremiere.locator('.optionsButton').click()
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 })

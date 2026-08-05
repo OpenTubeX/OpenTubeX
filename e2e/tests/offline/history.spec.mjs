@@ -3,7 +3,10 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
-function historyEntry(videoId, title, timeWatched, isWatched = false, isLive = false) {
+const now = Date.now()
+const DAY = 86_400_000
+
+function historyEntry(videoId, title, timeWatched, isWatched = false, extra = {}) {
   return {
     _id: videoId,
     videoId,
@@ -17,17 +20,26 @@ function historyEntry(videoId, title, timeWatched, isWatched = false, isLive = f
     watchProgress: 10,
     isWatched,
     timeWatched,
-    isLive,
-    type: 'video'
+    isLive: false,
+    type: 'video',
+    ...extra
   }
 }
 
 test.use({
   seed: {
     history: [
-      historyEntry('aaaaaaaaaaa', 'First test video', Date.now() - 1000, true),
-      historyEntry('bbbbbbbbbbb', 'Second test video', Date.now() - 2000),
-      historyEntry('ccccccccccc', 'Active live stream', Date.now() - 3000, false, true)
+      historyEntry('aaaaaaaaaaa', 'First test video', now - 1000, true),
+      historyEntry('bbbbbbbbbbb', 'Second test video', now - 2000),
+      historyEntry('ccccccccccc', 'Active live stream', now - 3000, false, { isLive: true }),
+      historyEntry('eeeeeeeeeee', 'Upcoming premiere', now - 4000, false, {
+        isUpcoming: true,
+        premiereTimestamp: Math.floor((now + 30 * DAY) / 1000)
+      }),
+      historyEntry('fffffffffff', 'Started premiere with stale flag', now - 5000, false, {
+        isUpcoming: true,
+        premiereTimestamp: Math.floor((now - DAY) / 1000)
+      })
     ]
   }
 })
@@ -110,6 +122,35 @@ test.describe('watch history', () => {
     await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
   })
 
+  test('does not offer watched actions for an upcoming premiere history entry', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
+    await upcomingPremiere.hover()
+    await upcomingPremiere.locator('.optionsButton').click()
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
+    await expect(page.getByRole('option', { name: 'Remove From History' })).toBeVisible()
+  })
+
+  test('enables watched actions when a mounted premiere reaches its scheduled time', async ({ page }) => {
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'history')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere' })
+    await upcomingPremiere.hover()
+    await upcomingPremiere.locator('.optionsButton').click()
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toHaveCount(0)
+
+    // Split the jump so timers beyond Chromium's maximum timeout are rescheduled.
+    await page.clock.fastForward(24 * DAY)
+    await page.clock.fastForward(6 * DAY + 1000)
+
+    await expect(page.getByRole('option', { name: 'Mark As Watched' })).toBeVisible()
+  })
+
   test('marks every history entry as watched', async ({ app, page }) => {
     await goTo(page, 'history')
 
@@ -131,8 +172,12 @@ test.describe('watch history', () => {
       const latestRecords = Object.values(Object.fromEntries(
         records.filter(record => record.videoId).map(record => [record.videoId, record])
       ))
-      return latestRecords.every(record => record.isLive === true || record.isWatched === true) &&
-        latestRecords.find(record => record.videoId === 'ccccccccccc')?.isWatched === false
+      return latestRecords.every(record => {
+        return record.isLive === true || record.isUpcoming === true || record.isWatched === true
+      }) &&
+        latestRecords.find(record => record.videoId === 'ccccccccccc')?.isWatched === false &&
+        latestRecords.find(record => record.videoId === 'eeeeeeeeeee')?.isWatched === false &&
+        latestRecords.find(record => record.videoId === 'fffffffffff')?.isWatched === true
     }).toBe(true)
   })
 })
