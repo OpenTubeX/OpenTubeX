@@ -1,6 +1,45 @@
 import { expect } from '@playwright/test'
 
+import { sel } from './app.mjs'
+
 export const activeTab = '.tabContent[aria-hidden="false"]'
+
+/**
+ * Opens a watch page and waits for its player, or skips when the live API
+ * refuses to serve it (bot checks and IP blocks on CI runners and VPNs),
+ * which leaves the page shell without any video data or replaces the player
+ * with an error message.
+ *
+ * The metadata hydrates before the streams do, so the error has to win over a
+ * loaded title: an IP block still renders the title, description and
+ * recommendations, only the player is missing.
+ */
+export async function openVideoOrSkip(test, page, video) {
+  await page.locator(sel.searchInput).fill(video.url)
+  await page.locator(sel.searchInput).press('Enter')
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/${video.id}`))
+
+  const title = page.locator(`${activeTab} .videoTitle`)
+  const errorMessage = page.locator(`${activeTab} .errorMessage`)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  let state = 'waiting'
+  const settled = await expect
+    .poll(async () => {
+      if (await errorMessage.isVisible().catch(() => false)) {
+        state = (await errorMessage.textContent())?.trim() ?? 'unavailable'
+      } else if (await player.isVisible().catch(() => false)) {
+        const titleText = await title.textContent().catch(() => '') ?? ''
+        if (titleText.includes(video.title)) {
+          state = 'loaded'
+        }
+      }
+      return state === 'waiting' ? 'waiting' : 'done'
+    }, { timeout: 60_000, message: 'waiting for the watch page to load' })
+    .toBe('done')
+    .then(() => true, () => false)
+
+  test.skip(!settled || state !== 'loaded', `watch page unavailable from the live API: ${state}`)
+}
 
 /**
  * Finds the mounted Watch component. Pass this function directly to
