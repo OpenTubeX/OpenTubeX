@@ -470,7 +470,6 @@ Settings:
       Top Center: Top center
       Top Right: Top right
     Always Show Scrollbars: Always Show Scrollbars
-    Use YouTube-style Shorts: Use YouTube-style Shorts
     Hide Side Bar Labels: Hide Side Bar Labels
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
     Hide Profile Selector in Header: Hide Profile Selector in Header
@@ -645,7 +644,8 @@ Settings:
     Display Play Button In Video Player: Display Play Button In Video Player
     Enter Fullscreen on Display Rotate: Enter Fullscreen on Display Rotate
     Show Playback Rate Adjusted Timestamp: Show Playback Rate Adjusted Timestamp
-    Use YouTube-style Shorts Player: Use YouTube-style Shorts Player
+    Use YouTube-style Shorts: Use YouTube-style Shorts
+    Loop Shorts: Loop Shorts
     Next Video Interval: Autoplay Countdown Timer
     Autoplay Interruption Timer: Autoplay Interruption Timer
     Fast-Forward / Rewind Interval: Fast-Forward / Rewind Interval
@@ -854,6 +854,7 @@ Settings:
     Hide Videos on Watch: Hide Videos on Watch
     Hide Chapters: Hide Chapters
     Hide End-Screen Annotations: Hide End-Screen Annotations
+    Hide Paid Promotion Badge: Hide Paid Promotion Badge
     Hide Channels: Hide Videos From Channels
     Hide Channels Disabled Message: Some channels were blocked using ID and weren't processed. Feature is blocked while those IDs are updating
     Hide Channels Placeholder: Channel ID
@@ -1719,7 +1720,8 @@ Tooltips:
     Skip by Scrolling Over Video Player: Use the scroll wheel to skip through the video, MPV style.
     Multiply Seek Interval by Playback Rate: When enabled, seek intervals (arrow keys and J/L) are multiplied by the current playback rate. When disabled, seek intervals remain constant regardless of playback rate.
     Show Playback Rate Adjusted Timestamp: When enabled and playback speed differs from 1x, the player shows playback-rate-adjusted timestamps in parentheses after the normal timestamp display.
-    Use YouTube-style Shorts Player: Displays Shorts in a tall, rounded player that preserves their portrait or square aspect ratio, similar to YouTube.
+    Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
+    Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Fast-Forward Through Silence Toggle: Shows an on/off toggle for fast-forwarding through silence in the player's settings menu.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
@@ -1770,7 +1772,6 @@ Tooltips:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Hide Profile Selector in Header: Hides the profile selector from the top bar. The profile selector will be shown at the top of the Subscribed Channels page instead.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
-    Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.

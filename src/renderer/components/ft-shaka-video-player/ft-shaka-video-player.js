@@ -1059,6 +1059,11 @@ export default defineComponent({
       return store.getters.getAutoplayVideos && isActiveTab.value
     })
 
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const loopShorts = computed(() => {
+      return store.getters.getLoopShorts
+    })
+
     watch(isActiveTab, (active) => {
       if (active) {
         nextTick(() => {
@@ -8759,6 +8764,7 @@ export default defineComponent({
       annotationVideoFit,
 
       autoplayVideos,
+      loopShorts,
       sponsorBlockShowSkippedToast,
       sponsorBlockDraftEditValues,
       sponsorBlockDraftSegments,

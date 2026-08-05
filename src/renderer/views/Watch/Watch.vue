@@ -123,7 +123,7 @@
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
           :quick-bookmark-icon="quickBookmarkIcon"
-          :paid-promotion="hasPaidPromotion"
+          :paid-promotion="showPaidPromotion"
           :paid-promotion-duration-ms="paidPromotionDurationMs"
           :resume-playback-after-sabr-reload="resumePlaybackAfterSabrReload"
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
@@ -171,7 +171,7 @@
           <template #shorts-fullscreen-metadata>
             <div class="shortsFullscreenMetadataContent">
               <FtPaidPromotionBadge
-                v-if="hasPaidPromotion"
+                v-if="showPaidPromotion"
                 class="shortsPaidPromotion"
               />
               <div class="shortsFullscreenChannelRow">
@@ -291,7 +291,7 @@
           </template>
           <template v-else>
             <FtPaidPromotionBadge
-              v-if="hasPaidPromotion"
+              v-if="showPaidPromotion"
               class="shortsPaidPromotion"
             />
             <div

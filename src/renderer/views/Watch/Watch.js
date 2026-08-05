@@ -693,6 +693,12 @@ export default defineComponent({
     hideEndScreenAnnotations: function () {
       return this.$store.getters.getHideEndScreenAnnotations
     },
+    hidePaidPromotion: function () {
+      return this.$store.getters.getHidePaidPromotion
+    },
+    showPaidPromotion: function () {
+      return this.hasPaidPromotion && !this.hidePaidPromotion
+    },
     hideLiveChat: function () {
       return this.$store.getters.getHideLiveChat
     },
@@ -3215,6 +3221,12 @@ export default defineComponent({
     handleVideoEnded: function () {
       this.handleWatchProgressAutoSaveWhenProgressEnabled()
       if (process.env.IS_ELECTRON && !this.isTabPresented) {
+        return
+      }
+      // YouTube-style Shorts stop for the replay control instead of advancing.
+      // With looping disabled they emit `ended`, so this must run before queue
+      // autoplay.
+      if (this.customShortsPlayerActive) {
         return
       }
       if (this.playNextQueuedVideo()) {
