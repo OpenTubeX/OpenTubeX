@@ -1,10 +1,10 @@
 blank_issues_enabled: true
 contact_links:
   - name: Fluxer Community
-    url: https://opentubex.org/fluxer
+    url: https://fluxer.opentubex.org
     about: Not sure if this belongs here? Ask on our Fluxer server first
   - name: Matrix Space
-    url: https://opentubex.org/matrix
+    url: https://matrix.opentubex.org
     about: Chat with the community on Matrix (#opentubex:matrix.org)
   - name: Discussions
     url: https://github.com/OpenTubeX/OpenTubeX/discussions/categories/general

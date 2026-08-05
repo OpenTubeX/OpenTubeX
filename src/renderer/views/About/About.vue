@@ -114,12 +114,12 @@ const chunks = computed(() => [
   {
     icon: ['fac', 'fluxer'],
     title: t('About.Fluxer'),
-    content: '<a href="https://opentubex.org/fluxer">https://opentubex.org/fluxer</a>',
+    content: '<a href="https://fluxer.opentubex.org">https://fluxer.opentubex.org</a>',
   },
   {
     icon: ['fac', 'matrix'],
     title: t('About.Chat on Matrix'),
-    content: '<a href="https://opentubex.org/matrix">#opentubex:matrix.org</a>',
+    content: '<a href="https://matrix.opentubex.org">#opentubex:matrix.org</a>',
   },
   {
     icon: ['fas', 'exclamation-circle'],
