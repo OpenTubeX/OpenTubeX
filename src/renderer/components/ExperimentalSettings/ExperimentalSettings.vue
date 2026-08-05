@@ -20,6 +20,7 @@
     <FtIconPackSwitcher />
     <FtPrompt
       v-if="showRestartPrompt"
+      autosize
       :label="$t('Settings[\'The app needs to restart for changes to take effect. Restart and apply change?\']')"
       :option-names="[$t('Yes, Restart'), $t('Cancel')]"
       :option-values="['restart', 'cancel']"

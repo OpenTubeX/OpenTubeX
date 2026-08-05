@@ -212,6 +212,7 @@
       </footer>
       <FtPrompt
         v-if="showResetPrompt"
+        autosize
         :label="t('Stats.Reset confirmation')"
         :option-names="resetPromptNames"
         :option-values="RESET_PROMPT_VALUES"

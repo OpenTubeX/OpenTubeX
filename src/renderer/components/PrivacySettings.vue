@@ -131,6 +131,7 @@
     </FtFlexBox>
     <FtPrompt
       v-if="showSearchCachePrompt"
+      autosize
       :label="$t('Settings.Privacy Settings.Are you sure you want to clear out your search history and cache?')"
       :option-names="promptNames"
       :option-values="PROMPT_VALUES"
@@ -139,6 +140,7 @@
     />
     <FtPrompt
       v-if="showRemoveHistoryPrompt"
+      autosize
       :label="$t('Settings.Privacy Settings.Are you sure you want to remove your entire watch history?')"
       :option-names="promptNames"
       :option-values="PROMPT_VALUES"
@@ -147,6 +149,7 @@
     />
     <FtPrompt
       v-if="showRemoveSubscriptionsPrompt"
+      autosize
       :label="removeSubscriptionsPromptMessage"
       :option-names="promptNames"
       :option-values="PROMPT_VALUES"
@@ -155,6 +158,7 @@
     />
     <FtPrompt
       v-if="showRemovePlaylistsPrompt"
+      autosize
       :label="$t('Settings.Privacy Settings.Are you sure you want to remove all your playlists?')"
       :option-names="promptNames"
       :option-values="PROMPT_VALUES"

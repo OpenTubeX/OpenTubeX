@@ -104,6 +104,7 @@
     </FtPrompt>
     <FtPrompt
       v-if="showExternalLinkOpeningPrompt"
+      autosize
       :label="t('Are you sure you want to open this link?')"
       :extra-labels="[lastExternalLinkToBeOpened]"
       :option-names="externalLinkOpeningPromptNames"

@@ -106,6 +106,7 @@
       </FtAutoLoadNextPageWrapper>
       <FtPrompt
         v-if="showMarkAllPrompt"
+        autosize
         :label="t('History.Mark All As Watched Confirmation')"
         :option-names="markAllPromptNames"
         :option-values="MARK_ALL_PROMPT_VALUES"

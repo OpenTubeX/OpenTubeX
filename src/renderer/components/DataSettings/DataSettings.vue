@@ -97,6 +97,7 @@
     </FtFlexBox>
     <FtPrompt
       v-if="showExportSubscriptionsPrompt"
+      autosize
       :label="$t('Settings.Data Settings.Select Export Type')"
       :option-names="exportSubscriptionsPromptNames"
       :option-values="SUBSCRIPTIONS_PROMPT_VALUES"
@@ -104,6 +105,7 @@
     />
     <FtPrompt
       v-if="showExportWatchHistoryPrompt"
+      autosize
       :label="t('Settings.Data Settings.Select Export Type')"
       :option-names="exportWatchSearchHistoryPromptNames"
       :option-values="WATCH_SEARCH_HISTORY_PROMPT_VALUES"
@@ -111,6 +113,7 @@
     />
     <FtPrompt
       v-if="showExportSearchHistoryPrompt"
+      autosize
       :label="t('Settings.Data Settings.Select Export Type')"
       :option-names="exportWatchSearchHistoryPromptNames"
       :option-values="WATCH_SEARCH_HISTORY_PROMPT_VALUES"

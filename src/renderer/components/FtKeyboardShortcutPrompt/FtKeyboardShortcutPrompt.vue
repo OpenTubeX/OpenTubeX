@@ -108,6 +108,7 @@
 
   <FtPrompt
     v-if="pendingShortcutConflict"
+    autosize
     :label="$t('KeyboardShortcutPrompt.Shortcut Already Assigned')"
     :extra-labels="[shortcutConflictMessage]"
     :option-names="shortcutConflictOptionNames"

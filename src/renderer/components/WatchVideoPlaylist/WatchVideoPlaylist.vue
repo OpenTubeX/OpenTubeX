@@ -216,6 +216,7 @@
         </component>
         <FtPrompt
           v-if="showRemoveWatchedVideosPrompt"
+          autosize
           :label="removeWatchedVideosPromptLabel"
           :option-names="removeWatchedVideosPromptOptionNames"
           :option-values="REMOVE_WATCHED_VIDEOS_PROMPT_VALUES"

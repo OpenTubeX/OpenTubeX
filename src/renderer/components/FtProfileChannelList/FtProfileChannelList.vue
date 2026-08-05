@@ -43,6 +43,7 @@
     </FtCard>
     <FtPrompt
       v-if="showDeletePrompt"
+      autosize
       :label="deletePromptMessage"
       :option-names="deletePromptNames"
       :option-values="DELTE_PROMPT_VALUES"

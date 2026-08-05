@@ -230,6 +230,7 @@
       </div>
       <FtPrompt
         v-if="showDeletePlaylistPrompt"
+        autosize
         :label="$t('User Playlists.Are you sure you want to delete this playlist? This cannot be undone')"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -238,6 +239,7 @@
       />
       <FtPrompt
         v-if="showRemoveVideosOnWatchPrompt"
+        autosize
         :label="removeVideosOnWatchPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -246,6 +248,7 @@
       />
       <FtPrompt
         v-if="showRemoveDuplicateVideosPrompt"
+        autosize
         :label="removeDuplicateVideosPromptLabelText"
         :option-names="deletePlaylistPromptNames"
         :option-values="DELETE_PLAYLIST_PROMPT_VALUES"
@@ -254,6 +257,7 @@
       />
       <FtPrompt
         v-if="showExportPrompt"
+        autosize
         :label="t('Settings.Data Settings.Select Export Type')"
         :option-names="exportNames"
         :option-values="EXPORT_VALUES"
