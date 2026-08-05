@@ -896,6 +896,7 @@ Settings:
     Description: Wybierz, które wyszukiwarki będą wyświetlane po kliknięciu zaznaczonego tekstu prawym przyciskiem myszy. Wyszukiwania otwierają się w domyślnej przeglądarce.
     Icon Hint: Włączenie wyszukiwarki powoduje nawiązanie połączenia z jej stroną internetową w celu załadowania ikony favicon.
     Engine Name: Nazwa wyszukiwarki
+    Search URL: Adres URL wyszukiwarki
 About:
   #On About page
   About: 'O projekcie'
