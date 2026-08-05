@@ -14,6 +14,7 @@
         :aria-label="t('Context Menu.Context Menu')"
         @contextmenu.prevent
         @pointerdown.stop
+        @scroll="positionOpenSubmenu"
       >
         <template
           v-for="(item, index) in displayedItems"
@@ -27,6 +28,8 @@
           <div
             v-else-if="item.submenu"
             class="submenuContainer"
+            @pointerenter="positionSubmenu"
+            @focusin="positionSubmenu"
           >
             <button
               class="menuItem"
@@ -360,6 +363,54 @@ function close(event) {
   if (event?.target instanceof Element && event.target.closest('.contextMenu')) return
   openRequest++
   isOpen.value = false
+}
+
+function positionSubmenu(eventOrContainer) {
+  const container = eventOrContainer instanceof HTMLElement
+    ? eventOrContainer
+    : eventOrContainer.currentTarget
+  if (!(container instanceof HTMLElement)) return
+
+  const submenu = container.querySelector(':scope > .submenu')
+  if (!(submenu instanceof HTMLElement)) return
+
+  const containerRect = container.getBoundingClientRect()
+  const submenuWidth = submenu.offsetWidth
+  const submenuHeight = submenu.offsetHeight
+  const viewportMargin = 8
+  const opensAtStart = submenusOpenStart.value
+  const preferredLeft = opensAtStart
+    ? containerRect.left - submenuWidth + 2
+    : containerRect.right - 2
+  const alternateLeft = opensAtStart
+    ? containerRect.right - 2
+    : containerRect.left - submenuWidth + 2
+  const fitsHorizontally = left => left >= viewportMargin &&
+    left + submenuWidth <= window.innerWidth - viewportMargin
+  const left = fitsHorizontally(preferredLeft) || !fitsHorizontally(alternateLeft)
+    ? preferredLeft
+    : alternateLeft
+  const clampedLeft = Math.max(
+    viewportMargin,
+    Math.min(left, window.innerWidth - submenuWidth - viewportMargin)
+  )
+  const top = Math.max(
+    viewportMargin,
+    Math.min(containerRect.top - 5, window.innerHeight - submenuHeight - viewportMargin)
+  )
+
+  const opensToStart = left === alternateLeft ? !opensAtStart : opensAtStart
+  container.classList.toggle('submenuOpenStart', opensToStart)
+  container.classList.toggle('submenuOpenEnd', !opensToStart)
+  container.style.setProperty('--submenu-left', `${clampedLeft}px`)
+  container.style.setProperty('--submenu-top', `${top}px`)
+}
+
+function positionOpenSubmenu() {
+  const container = menuRef.value?.querySelector(
+    '.submenuContainer:hover, .submenuContainer:focus-within'
+  )
+  if (container instanceof HTMLElement) positionSubmenu(container)
 }
 
 async function execute(item) {

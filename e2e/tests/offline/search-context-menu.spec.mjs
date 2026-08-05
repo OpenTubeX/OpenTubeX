@@ -32,6 +32,136 @@ test('searching selected text in a new tab uses the default filters', async ({ p
   await expect(page.locator('.searchRadio', { hasText: 'Duration' }).locator('input[value=""]')).toBeChecked()
 })
 
+test('truncates long selections so the rest of the label is never cut off', async ({ page }) => {
+  const selectionText = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
+  const contextMenu = await page.evaluate((selection) => window.ftElectron.contextMenu.open({
+    selectionText: selection
+  }), selectionText)
+
+  const newTab = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search Selection in New Tab')
+  const newWindow = contextMenu.items.find(item => item.labelKey === 'Context Menu.Search Selection in New Window')
+
+  for (const item of [newTab, newWindow]) {
+    expect(item.labelParameters.selection).toBe('OpenTubeX is a privacy respect…')
+  }
+  expect(newTab.label).toBe('Search "OpenTubeX is a privacy respect…" in a New Tab')
+  expect(newWindow.label).toBe('Search "OpenTubeX is a privacy respect…" in a New Window')
+
+  // Searching still uses the full selection, only the label is shortened
+  await page.evaluate(({ sessionId, actionId }) => {
+    return window.ftElectron.contextMenu.execute(sessionId, actionId)
+  }, { sessionId: contextMenu.sessionId, actionId: newTab.actionId })
+
+  await expect.poll(() => page.url()).toContain(`#/search/${encodeURIComponent(selectionText)}`)
+})
+
+test('truncates long selections without splitting emoji', async ({ page }) => {
+  // The 30th UTF-16 code unit lands inside the family emoji's ZWJ sequence
+  const selectionText = 'Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and more text'
+  const label = await page.evaluate((selection) => window.ftElectron.contextMenu.open({
+    selectionText: selection
+  }).then(menu => menu.items
+    .find(item => item.labelKey === 'Context Menu.Search Selection in New Tab')
+    .labelParameters.selection), selectionText)
+
+  expect(label.endsWith('…')).toBe(true)
+  // A cut inside the sequence would leave an unpaired surrogate behind
+  expect(label).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/)
+  expect(label).toBe('Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and…')
+})
+
+test('keeps tall top-level menus inside the viewport and scrollable', async ({ page }) => {
+  await page.setViewportSize({ width: 420, height: 180 })
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.tabs).first().click({ button: 'right' })
+
+  const menu = page.getByRole('menu', { name: 'Context Menu' })
+  await expect(menu).toBeVisible()
+
+  const geometry = await menu.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return {
+      top: bounds.top,
+      bottom: bounds.bottom,
+      viewportBottom: innerHeight - 8,
+      overflowY: getComputedStyle(element).overflowY,
+      scrollable: element.scrollHeight > element.clientHeight
+    }
+  })
+
+  expect(geometry.top).toBeGreaterThanOrEqual(8)
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportBottom + 1)
+  expect(geometry.overflowY).toBe('auto')
+  expect(geometry.scrollable).toBe(true)
+
+  const lastTopLevelItem = menu
+    .locator(':scope > .menuItem, :scope > .submenuContainer > .menuItem')
+    .last()
+  await lastTopLevelItem.scrollIntoViewIfNeeded()
+  await expect(lastTopLevelItem).toBeInViewport()
+})
+
+test('does not clip fly-out submenus', async ({ page }) => {
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.tabs).first().click({ button: 'right' })
+
+  const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+  await closeTabs.hover()
+  const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+  await expect(submenu).toBeVisible()
+
+  // Fixed-position fly-outs escape the top-level menu's scrollport.
+  await expect.poll(() => submenu.evaluate((element) => {
+    const menu = element.closest('.contextMenu')
+    const style = getComputedStyle(menu)
+    const bounds = element.getBoundingClientRect()
+    return {
+      overflowX: style.overflowX,
+      overflowY: style.overflowY,
+      position: getComputedStyle(element).position,
+      reachable: document.elementFromPoint(
+        (bounds.left + bounds.right) / 2,
+        (bounds.top + bounds.bottom) / 2
+      )?.closest('[role="menu"]') === element
+    }
+  })).toEqual({
+    overflowX: 'auto',
+    overflowY: 'auto',
+    position: 'fixed',
+    reachable: true
+  })
+})
+
+test('renders long selection labels without clipping them', async ({ page }) => {
+  const point = await page.evaluate(() => {
+    const paragraph = document.createElement('p')
+    paragraph.textContent = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
+    paragraph.style.cssText = 'position:fixed;top:120px;left:40px;width:300px;z-index:19000;background:#000'
+    document.body.append(paragraph)
+
+    const range = document.createRange()
+    range.selectNodeContents(paragraph)
+    const selection = window.getSelection()
+    selection.removeAllRanges()
+    selection.addRange(range)
+
+    const bounds = paragraph.getBoundingClientRect()
+    return { x: bounds.left + 10, y: bounds.top + 5 }
+  })
+  await page.mouse.click(point.x, point.y, { button: 'right' })
+
+  const menu = page.getByRole('menu', { name: 'Context Menu' })
+  await expect(menu).toBeVisible()
+
+  const label = menu.getByRole('menuitem', { name: /^Search ".*" in a New Tab$/ }).locator('span:not([aria-hidden])')
+  await expect(label).toHaveText('Search "OpenTubeX is a privacy respect…" in a New Tab')
+
+  const isClipped = await label.evaluate(element => {
+    return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1
+  })
+  expect(isClipped).toBe(false)
+})
+
 test('does not offer external search engines when they are disabled by default', async ({ page }) => {
   const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
     selectionText: 'private search'

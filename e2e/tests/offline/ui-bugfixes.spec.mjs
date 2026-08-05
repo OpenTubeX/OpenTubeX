@@ -522,3 +522,61 @@ test.describe('history reorder animation', () => {
     expect(probes).not.toContain(null)
   })
 })
+
+test.describe('select dropdown pixel grid', () => {
+  // A fractional device pixel ratio is what makes the misalignment visible.
+  test.use({ launchArgs: ['--force-device-scale-factor=1.5'] })
+
+  test('keeps option text in place when it gains a hover background', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await page.getByRole('combobox', { name: 'Default Landing Page' }).first().click()
+    const dropdown = page.locator('.selectDropdown')
+    await expect(dropdown).toBeVisible()
+    // The opening animation scales the menu, so wait for its final resting place.
+    await expect
+      .poll(() => dropdown.evaluate(menu => getComputedStyle(menu).transform))
+      .toBe('none')
+
+    const dpr = await page.evaluate(() => window.devicePixelRatio)
+    expect(Math.abs(dpr - 1.5)).toBeLessThan(0.001)
+
+    const options = dropdown.locator('.selectOption')
+    const inactiveOptionIndex = await options.evaluateAll(optionElements =>
+      optionElements.findIndex(option => !option.classList.contains('active'))
+    )
+    expect(inactiveOptionIndex).toBeGreaterThanOrEqual(0)
+    const option = options.nth(inactiveOptionIndex)
+    // The option label is a direct text node, so measure its rendered range.
+    const textPosition = () => option.evaluate(element => {
+      const range = document.createRange()
+      range.selectNodeContents(element)
+      const bounds = range.getBoundingClientRect()
+      return { x: bounds.x, y: bounds.y }
+    })
+    const beforeHover = await textPosition()
+
+    await option.hover()
+    await expect(option).toHaveClass(/active/)
+    expect(await textPosition()).toEqual(beforeHover)
+
+    // Chromium only snaps an option's text to the pixel grid once the option
+    // has a background to paint, so an option sitting at a fractional offset
+    // nudges its label the first time it is hovered.
+    const offGrid = await dropdown.evaluate((menu) => {
+      const onGrid = (value) => Math.abs(value * devicePixelRatio - Math.round(value * devicePixelRatio)) < 0.001
+      const bounds = menu.getBoundingClientRect()
+
+      return [
+        ...(onGrid(bounds.left) ? [] : [`menu left ${bounds.left}`]),
+        ...(onGrid(bounds.top) ? [] : [`menu top ${bounds.top}`]),
+        ...[...menu.querySelectorAll('.selectOption')]
+          .map(option => option.getBoundingClientRect().top)
+          .filter(top => !onGrid(top))
+          .map(top => `option top ${top}`)
+      ]
+    })
+
+    expect(offGrid).toEqual([])
+  })
+})
