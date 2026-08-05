@@ -94,6 +94,8 @@
           :auto-open-chapters="autoOpenChapters"
           :sidebar-chapters-open="showSidebarChapters"
           :watching-playlist="watchingPlaylist"
+          :can-skip-next="canSkipToNextVideo"
+          :can-skip-previous="canSkipToPreviousVideo"
           :vr-projection="vrProjection"
           :start-in-fullscreen="startNextVideoInFullscreen"
           :start-in-fullwindow="startNextVideoInFullwindow"
@@ -855,6 +857,7 @@
           :class="{ theatrePlaylist: useTheatreMode }"
           @close="closeFullscreenPlaylist"
           @pause-player="pausePlayer"
+          @skip-availability-change="handlePlaylistSkipAvailabilityChange"
         />
       </Teleport>
       <watch-video-recommendations

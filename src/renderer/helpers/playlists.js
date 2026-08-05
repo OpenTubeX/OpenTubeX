@@ -37,6 +37,33 @@ export function getSortedPlaylistItems(playlistItems, sortOrder, locale, reverse
   })
 }
 
+/**
+ * Whether the playlist has a video to skip to from the current position,
+ * so that the player only offers the skip buttons that actually do something.
+ * @param {object} options
+ * @param {number} options.itemCount amount of videos in the order the playlist is played back in
+ * @param {number} options.currentIndex index of the current video, -1 when it isn't part of the playlist
+ * @param {boolean} options.loopEnabled loop makes both directions wrap around
+ * @param {number} [options.previousVideoSourceIndex] index the previous video is looked up from,
+ * which differs from the current index when the current video was deleted from the playlist
+ * @returns {{ canPlayNext: boolean, canPlayPrevious: boolean }}
+ */
+export function getPlaylistSkipAvailability({ itemCount, currentIndex, loopEnabled, previousVideoSourceIndex = currentIndex }) {
+  if (itemCount === 0) {
+    return { canPlayNext: false, canPlayPrevious: false }
+  }
+
+  // A video that isn't part of the playlist plays the first video next and the last one previously
+  if (loopEnabled || currentIndex === -1) {
+    return { canPlayNext: true, canPlayPrevious: true }
+  }
+
+  return {
+    canPlayNext: currentIndex < itemCount - 1,
+    canPlayPrevious: previousVideoSourceIndex > 0
+  }
+}
+
 export function videoDurationPresent(video) {
   if (typeof video.lengthSeconds !== 'number') { return false }
 

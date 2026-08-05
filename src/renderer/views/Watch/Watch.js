@@ -80,6 +80,7 @@ import {
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
+import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useTabToast } from '../../composables/useTabToast'
 import { areCommentsAvailable } from './watchComments'
 
@@ -297,6 +298,7 @@ export default defineComponent({
       autoplayNextPlaylistVideo: false,
       recommendedVideos: [],
       watchingPlaylist: false,
+      playlistSkipAvailability: { canPlayNext: true, canPlayPrevious: true },
       playlistId: '',
       playlistType: '',
       playlistItemId: null,
@@ -718,6 +720,15 @@ export default defineComponent({
     theatreTogglePossible: function () {
       return this.theatreLayoutAvailable && this.theatrePossible
     },
+    canSkipToNextVideo: function () {
+      // The watch queue takes precedence over the playlist and works without one,
+      // see `handleSkipToNext`
+      return !!this.nextQueuedVideo || (this.watchingPlaylist && this.playlistSkipAvailability.canPlayNext)
+    },
+    canSkipToPreviousVideo: function () {
+      // Only a playlist has a previous video, see `handleSkipToPrev`
+      return this.watchingPlaylist && this.playlistSkipAvailability.canPlayPrevious
+    },
     autoplayPossible: function () {
       return !this.isShort && (
         !!this.nextQueuedVideo ||
@@ -841,6 +852,12 @@ export default defineComponent({
     watchStatsResetVersion() {
       this.clearPendingWatchTime()
     },
+    canSkipToNextVideo() {
+      this.syncMediaSessionSkipHandlers()
+    },
+    canSkipToPreviousVideo() {
+      this.syncMediaSessionSkipHandlers()
+    },
   },
   created: function () {
     this.theatreModeAnimations = []
@@ -868,6 +885,7 @@ export default defineComponent({
       beforeReload: this.cleanupWatchRuntime,
       beforeDispose: this.cleanupWatchRuntime
     })
+    this.syncMediaSessionSkipHandlers()
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
@@ -876,6 +894,9 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
+    if ('mediaSession' in navigator) {
+      tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {})
+    }
     this.deactivateWatchRuntime()
     // When a logical-tab lifecycle is registered, its beforeDispose hook drives
     // cleanupWatchRuntime before this component unmounts. Without one (e.g. the
@@ -3226,6 +3247,24 @@ export default defineComponent({
       this.tabRouter.push({ path: `/watch/${nextVideo.videoId}` })
       showToast({ message: this.t('Playing Next Video'), icon: ['fas', 'step-forward'] })
       return true
+    },
+
+    /**
+     * @param {{ canPlayNext: boolean, canPlayPrevious: boolean }} availability
+     */
+    handlePlaylistSkipAvailabilityChange: function (availability) {
+      this.playlistSkipAvailability = availability
+    },
+
+    // Keeps the operating system's media controls in sync with the player's skip
+    // buttons, so that both offer the same skips and take the same route to them
+    syncMediaSessionSkipHandlers: function () {
+      if (!('mediaSession' in navigator)) { return }
+
+      tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {
+        previoustrack: this.canSkipToPreviousVideo ? this.handleSkipToPrev : null,
+        nexttrack: this.canSkipToNextVideo ? this.handleSkipToNext : null
+      })
     },
 
     // Skip to the previous video in a playlist

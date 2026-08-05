@@ -298,6 +298,14 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    canSkipNext: {
+      type: Boolean,
+      default: false
+    },
+    canSkipPrevious: {
+      type: Boolean,
+      default: false
+    },
     vrProjection: {
       type: String,
       default: null
@@ -3089,8 +3097,13 @@ export default defineComponent({
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'toggle_stereoscopic')
       }
 
-      if (!props.watchingPlaylist) {
+      // Only offer skipping where there actually is a video to skip to. The watch
+      // view knows where those come from, a playlist or the watch queue.
+      if (!props.canSkipPrevious) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_previous')
+      }
+
+      if (!props.canSkipNext) {
         removeFromArrayIfExists(uiConfig.controlPanelElements, 'ft_skip_next')
       }
 

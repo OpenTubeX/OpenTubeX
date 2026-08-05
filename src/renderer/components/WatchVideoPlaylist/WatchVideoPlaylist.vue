@@ -229,7 +229,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -250,9 +250,8 @@ import {
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { isHistoryEntryWatched } from '../../helpers/history'
 import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
-import { getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
+import { getPlaylistSkipAvailability, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
-import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 
 const props = defineProps({
   playlistId: {
@@ -281,7 +280,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'pause-player'])
+const emit = defineEmits(['close', 'pause-player', 'skip-availability-change'])
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -309,7 +308,7 @@ const showProgressBarPreview = ref(false)
 const previewPositionPixels = ref(0)
 const previewVideoIndex = ref(1)
 
-let prevVideoBeforeDeletion = null
+const prevVideoBeforeDeletion = ref(null)
 let getPlaylistInfoRun = false
 let previewPositionUpdatePending = false
 let previewPointerClientX = 0
@@ -519,7 +518,7 @@ watch(() => props.videoId, (newId, oldId) => {
 })
 
 watch(() => props.playlistItemId, () => {
-  prevVideoBeforeDeletion = null
+  prevVideoBeforeDeletion.value = null
 })
 
 watch(
@@ -571,19 +570,6 @@ onMounted(() => {
   } else {
     getPlaylistInfoWithDelay()
   }
-
-  if ('mediaSession' in navigator) {
-    tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {
-      previoustrack: playPreviousVideo,
-      nexttrack: playNextVideo
-    })
-  }
-})
-
-onBeforeUnmount(() => {
-  if ('mediaSession' in navigator) {
-    tabMediaCoordinator.setActionHandlers(playlistCacheTabId, 'playlist', {})
-  }
 })
 
 /**
@@ -592,8 +578,8 @@ onBeforeUnmount(() => {
 function findIndexOfCurrentVideoInPlaylist(videoList) {
   const playlistItemId = props.playlistItemId
   const videoId = props.videoId
-  const prevVideoBeforeDeletionPlaylistItemId = prevVideoBeforeDeletion?.playlistItemId
-  const prevVideoBeforeDeletionPlaylistVideoId = prevVideoBeforeDeletion?.videoId
+  const prevVideoBeforeDeletionPlaylistItemId = prevVideoBeforeDeletion.value?.playlistItemId
+  const prevVideoBeforeDeletionPlaylistVideoId = prevVideoBeforeDeletion.value?.videoId
 
   return videoList.findIndex((item) => {
     if (item.playlistItemId && (playlistItemId || prevVideoBeforeDeletionPlaylistItemId)) {
@@ -885,19 +871,13 @@ function playNextVideo() {
 }
 
 function playPreviousVideo() {
-  let videoIndex = videoIndexInPlaylistItems.value
-
-  /*
-  * When the current video being watched in the playlist is deleted,
-  * the previous video is shown as the "current" one.
-  * So if we want to play the previous video, in this case,
-  * we actually want to actually play the "current" video.
-  * The only exception is when shuffle is enabled, as we don't actually
-  * want to play the last sequential video with shuffle.
-  */
-  if (prevVideoBeforeDeletion && !shuffleEnabled.value) {
-    videoIndex++
+  // At the start of the playlist there is nothing to go back to, unless loop wraps us around
+  if (!canPlayPreviousVideo.value) {
+    showToast({ message: t('The playlist is at the beginning. Enable loop to continue playing'), icon: ['fas', 'retweet'] })
+    return
   }
+
+  const videoIndex = previousVideoSourceIndex.value
 
   // Wrap around to the end of the playlist only if there are no remaining earlier videos
   const targetVideoIndex = (videoIndex === 0 || videoIsNotPlaylistItem.value) ? playlistItems.value.length - 1 : videoIndex - 1
@@ -1032,7 +1012,7 @@ function parseUserPlaylist(playlist) {
     // grab 2nd video if the 1st one is current & deleted
     // or the prior video in the list before the current video's deletion
     const targetVideoIndex = currentVideoIndexZeroBased.value - 1
-    prevVideoBeforeDeletion = targetVideoIndex >= 0 ? playlistItems.value[targetVideoIndex] : null
+    prevVideoBeforeDeletion.value = targetVideoIndex >= 0 ? playlistItems.value[targetVideoIndex] : null
   }
 
   playlistItems.value = getSortedPlaylistItems(playlist.videos, sortOrder.value, locale.value, reversePlaylist.value)
@@ -1218,6 +1198,42 @@ const shouldStopDueToPlaylistEnd = computed(() => {
   // Loop enabled = should not stop
   return videoIsLastInInPlaylistItems.value && !loopEnabled.value
 })
+
+/**
+ * Index that `playPreviousVideo` steps back from.
+ *
+ * When the current video being watched in the playlist is deleted,
+ * the previous video is shown as the "current" one.
+ * So if we want to play the previous video, in this case,
+ * we actually want to actually play the "current" video.
+ * The only exception is when shuffle is enabled, as we don't actually
+ * want to play the last sequential video with shuffle.
+ */
+const previousVideoSourceIndex = computed(() => {
+  const videoIndex = videoIndexInPlaylistItems.value
+
+  return prevVideoBeforeDeletion.value && !shuffleEnabled.value ? videoIndex + 1 : videoIndex
+})
+
+const skipAvailability = computed(() => {
+  const items = shuffleEnabled.value ? randomizedPlaylistItems.value : playlistItems.value
+
+  return getPlaylistSkipAvailability({
+    itemCount: items.length,
+    currentIndex: videoIndexInPlaylistItems.value,
+    loopEnabled: loopEnabled.value,
+    previousVideoSourceIndex: previousVideoSourceIndex.value
+  })
+})
+
+const canPlayNextVideo = computed(() => skipAvailability.value.canPlayNext)
+
+const canPlayPreviousVideo = computed(() => skipAvailability.value.canPlayPrevious)
+
+// The watch view owns the skip actions, as it also knows about the watch queue
+watch([canPlayNextVideo, canPlayPreviousVideo], ([canPlayNext, canPlayPrevious]) => {
+  emit('skip-availability-change', { canPlayNext, canPlayPrevious })
+}, { immediate: true })
 
 defineExpose({
   centerCurrentVideo,

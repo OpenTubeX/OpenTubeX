@@ -1781,6 +1781,7 @@ Default Invidious instance has been set to {instance}: Default Invidious instanc
 Default Invidious instance has been cleared: Default Invidious instance has been cleared
 'The playlist has ended. Enable loop to continue playing': 'The playlist has ended.  Enable
   loop to continue playing'
+'The playlist is at the beginning. Enable loop to continue playing': 'The playlist is at the beginning. Enable loop to continue playing'
 Age Restricted:
   This channel is age restricted: This channel is age restricted
   This video is age restricted: This video is age restricted
