@@ -155,13 +155,15 @@
 /* stylelint-disable liberty/use-logical-spec */
 .submenu {
   position: absolute;
-  inset-block-start: -5px;
+  inset-block-start: var(--submenu-top, -5px);
+  max-block-size: calc(100vh - 16px);
+  overflow-y: auto;
   right: auto;
-  left: calc(100% - 2px);
+  left: var(--submenu-left, calc(100% - 2px));
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  transform: translateX(-4px) scale(0.98);
+  transform: translateX(var(--submenu-translate, -4px)) scale(0.98);
   transform-origin: top left;
   transition: opacity 100ms ease, transform 100ms ease, visibility 0s linear 100ms;
 }
@@ -176,17 +178,30 @@
   content: '';
 }
 
-.submenusOpenStart .submenu {
-  right: calc(100% - 2px);
-  left: auto;
-  transform: translateX(4px) scale(0.98);
+.submenusOpenStart .submenu,
+.submenuOpenStart .submenu {
+  --submenu-translate: 4px;
+
   transform-origin: top right;
 }
 
-.submenusOpenStart .submenu::before {
+.submenusOpenStart .submenu::before,
+.submenuOpenStart .submenu::before {
   right: auto;
   left: 100%;
   clip-path: polygon(0 0, 0 100%, 100% 16px);
+}
+
+.submenuOpenEnd .submenu {
+  --submenu-translate: -4px;
+
+  transform-origin: top left;
+}
+
+.submenuOpenEnd .submenu::before {
+  right: 100%;
+  left: auto;
+  clip-path: polygon(0 16px, 100% 0, 100% 100%);
 }
 /* stylelint-enable liberty/use-logical-spec */
 

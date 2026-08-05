@@ -489,6 +489,30 @@ test.describe('tab bar', () => {
     await expect(submenu).toBeVisible()
   })
 
+  test('keeps a submenu inside the viewport for a bottom vertical tab', async ({ page }) => {
+    await page.setViewportSize({ width: 800, height: 450 })
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    for (let index = 0; index < 7; index++) {
+      await page.keyboard.press('Control+t')
+    }
+
+    await page.locator(sel.activeTab).click({ button: 'right' })
+    const tabColor = page.getByRole('menuitem', { name: 'Tab Color', exact: true })
+    await tabColor.hover()
+
+    const submenu = tabColor.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+    const submenuBox = await boundingBoxWhenSettled(submenu)
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+
+    expect(submenuBox.x).toBeGreaterThanOrEqual(8)
+    expect(submenuBox.y).toBeGreaterThanOrEqual(8)
+    expect(submenuBox.x + submenuBox.width).toBeLessThanOrEqual(viewport.width - 8)
+    expect(submenuBox.y + submenuBox.height).toBeLessThanOrEqual(viewport.height - 8)
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)
