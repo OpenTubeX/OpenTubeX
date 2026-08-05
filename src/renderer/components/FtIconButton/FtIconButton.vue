@@ -72,7 +72,7 @@
                 active: option.active,
                 disabled: option.disabled
               }"
-              @click="handleDropdownClick(option)"
+              @click="handleDropdownClick(option, $event)"
               @keydown.enter="handleDropdownClick(option)"
               @keydown.space="handleDropdownClick(option)"
             >
@@ -467,8 +467,12 @@ function handleDropdownEscape() {
   ftIconButton.value?.firstElementChild?.focus()
 }
 
-function handleDropdownClick(option) {
+function handleDropdownClick(option, event) {
   if (option.disabled) {
+    if (useModal.value) {
+      event?.stopPropagation()
+    }
+
     return
   }
 
