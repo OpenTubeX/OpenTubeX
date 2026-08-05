@@ -566,10 +566,6 @@ export class TabNavigationService {
   }
 
   setLoadingSource(tabId, source, isLoading) {
-    if (this.loadingSuppressedTabIds.has(tabId)) {
-      return
-    }
-
     let sources = this.loadingSourcesByTabId.get(tabId)
     if (!sources) {
       sources = new Set()
@@ -585,21 +581,19 @@ export class TabNavigationService {
     if (sources.size === 0) {
       this.loadingSourcesByTabId.delete(tabId)
     }
-    window.ftElectron?.tabs?.setLoading?.(sources.size > 0, tabId)
+    if (!this.loadingSuppressedTabIds.has(tabId)) {
+      window.ftElectron?.tabs?.setLoading?.(sources.size > 0, tabId)
+    }
   }
 
   setLoadingSuppressed(tabId, suppressed) {
     if (suppressed) {
       this.loadingSuppressedTabIds.add(tabId)
-      this.loadingSourcesByTabId.delete(tabId)
-      const routeLoadingState = this.routeLoadingStateByTabId.get(tabId)
-      if (routeLoadingState?.timeoutId != null) {
-        window.clearTimeout(routeLoadingState.timeoutId)
-      }
-      this.routeLoadingStateByTabId.delete(tabId)
       window.ftElectron?.tabs?.setLoading?.(false, tabId)
     } else {
       this.loadingSuppressedTabIds.delete(tabId)
+      const sources = this.loadingSourcesByTabId.get(tabId)
+      window.ftElectron?.tabs?.setLoading?.((sources?.size ?? 0) > 0, tabId)
     }
   }
 
