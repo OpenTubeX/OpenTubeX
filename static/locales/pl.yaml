@@ -897,6 +897,10 @@ Settings:
     Icon Hint: Włączenie wyszukiwarki powoduje nawiązanie połączenia z jej stroną internetową w celu załadowania ikony favicon.
     Engine Name: Nazwa wyszukiwarki
     Search URL: Adres URL wyszukiwarki
+    URL Hint: Użyj %s, gdzie adres URL powinien zawierać zakodowany zaznaczony tekst.
+    Add Custom Engine: Dodaj niestandardową wyszukiwarkę
+    Add Engine: Dodaj wyszukiwarkę
+    Remove Engine: Usuń {engine}
 About:
   #On About page
   About: 'O projekcie'
