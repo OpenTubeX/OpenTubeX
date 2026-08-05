@@ -1372,6 +1372,10 @@ export default defineComponent({
       this.videoGenreIsMusic = false
       this.streamingDataExpiryDate = null
       this.ipBlockDetectedInCurrentChain = false
+      // Cleared until the new player reports its ready state; otherwise the
+      // manual save actions could persist the previous video's values.
+      this.currentSubtitlesState = null
+      this.currentVolume = null
       if (!preserveTitle) {
         this.sabrReloadCaptionIndex = null
         this.sabrReloadPlaybackRate = null

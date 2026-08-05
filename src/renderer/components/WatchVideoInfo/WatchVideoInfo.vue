@@ -716,11 +716,15 @@ function createChannelSettingSaveAction(type, visible, label, settingLabel, icon
   const savedValue = savedChannelSettings.value[type]
   const currentValue = currentChannelSettings.value[type]
   const hasSavedValue = savedValue !== undefined
-  const disabled = hasSavedValue && currentValue !== null && String(savedValue) === String(currentValue)
+  // Player-driven values (especially volume) stay null until initialization finishes;
+  // keep the action disabled so the parent handler cannot silently no-op.
+  const isUninitialized = currentValue === null
+  const isAlreadyCurrent = !isUninitialized && hasSavedValue && String(savedValue) === String(currentValue)
+  const disabled = isUninitialized || isAlreadyCurrent
   const formattedValue = hasSavedValue ? formatChannelSettingValue(type, savedValue) : ''
   let actionLabel = label
 
-  if (disabled) {
+  if (isAlreadyCurrent) {
     actionLabel = t('Video.Channel Setting Already Set', { setting: settingLabel, value: formattedValue })
   } else if (hasSavedValue) {
     actionLabel = `${label}: ${formattedValue}`
