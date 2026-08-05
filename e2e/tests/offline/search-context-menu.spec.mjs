@@ -70,30 +70,30 @@ test('truncates long selections without splitting emoji', async ({ page }) => {
   expect(label).toBe('Cafe rules ok yes indeed 👨‍👩‍👧‍👦 and…')
 })
 
-test('keeps a tall context menu inside the window', async ({ page }) => {
-  await page.evaluate(() => {
-    const paragraph = document.createElement('p')
-    paragraph.textContent = 'OpenTubeX is a privacy respecting YouTube client for the desktop'
-    paragraph.style.cssText = 'position:fixed;top:8px;left:40px;width:300px;z-index:19000;background:#000'
-    document.body.append(paragraph)
+test('does not clip fly-out submenus', async ({ page }) => {
+  await page.locator(sel.newTabButton).click()
+  await page.locator(sel.tabs).first().click({ button: 'right' })
 
-    const range = document.createRange()
-    range.selectNodeContents(paragraph)
-    const selection = window.getSelection()
-    selection.removeAllRanges()
-    selection.addRange(range)
-  })
-  await page.mouse.click(60, 20, { button: 'right' })
+  const closeTabs = page.getByRole('menuitem', { name: 'Close Tabs', exact: true })
+  await closeTabs.hover()
+  const submenu = closeTabs.locator('xpath=following-sibling::*[@role="menu"]')
+  await expect(submenu).toBeVisible()
 
-  const menu = page.getByRole('menu', { name: 'Context Menu' })
-  await expect(menu).toBeVisible()
-
-  const bounds = await menu.evaluate((element) => {
-    const rect = element.getBoundingClientRect()
-    return { top: rect.top, bottom: rect.bottom, viewport: window.innerHeight }
-  })
-  expect(bounds.top).toBeGreaterThanOrEqual(0)
-  expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewport)
+  // Submenus are absolutely positioned inside the menu, so giving the menu a
+  // max height with overflow scrolling would clip them out of reach.
+  await expect.poll(() => submenu.evaluate((element) => {
+    const menu = element.closest('.contextMenu')
+    const style = getComputedStyle(menu)
+    const bounds = element.getBoundingClientRect()
+    return {
+      overflowX: style.overflowX,
+      overflowY: style.overflowY,
+      reachable: document.elementFromPoint(
+        (bounds.left + bounds.right) / 2,
+        (bounds.top + bounds.bottom) / 2
+      )?.closest('[role="menu"]') === element
+    }
+  })).toEqual({ overflowX: 'visible', overflowY: 'visible', reachable: true })
 })
 
 test('renders long selection labels without clipping them', async ({ page }) => {
