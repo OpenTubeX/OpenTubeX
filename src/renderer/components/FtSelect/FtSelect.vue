@@ -418,10 +418,12 @@ function handleTypeahead(character) {
 
 /**
  * Moves the selection relative to the currently selected option, like a closed native select does.
+ * Clamping happens after the offset is applied, so that moving down from a value that isn't in
+ * the list (`selectedIndex` is -1) lands on the first option instead of skipping it.
  * @param {number} offset
  */
 function selectOffset(offset) {
-  const index = Math.max(0, Math.min(props.selectValues.length - 1, Math.max(0, selectedIndex.value) + offset))
+  const index = Math.max(0, Math.min(props.selectValues.length - 1, selectedIndex.value + offset))
   selectOption(index)
 }
 
