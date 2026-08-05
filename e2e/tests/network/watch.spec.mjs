@@ -1327,6 +1327,7 @@ test.describe('watch page', () => {
     const seekBar = page.locator('.shaka-seek-bar-container')
     const controls = page.locator('.shaka-controls-container')
     const fullscreenButton = page.locator('.shaka-fullscreen-button')
+    const shareButton = actions.getByRole('button', { name: 'Share Video' })
     await actions.evaluate((element) => {
       const sponsorBlockNotice = element.cloneNode(false)
       sponsorBlockNotice.className = 'skippedSegmentsWrapper'
@@ -1337,12 +1338,19 @@ test.describe('watch page', () => {
     await expect(actions).toBeVisible()
     await expect(actions).toHaveCSS('z-index', '2')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
-    await actions.getByRole('button', { name: 'Share Video' }).click()
+    await shareButton.click()
     await expect(actions.locator('.fullscreenShareAction .iconDropdown')).toBeVisible()
     await expect(actions).toHaveCSS('z-index', '5')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
+    await fullscreenButton.hover()
+    await expect.poll(() => fullscreenButton.evaluate((element) => {
+      const { content } = getComputedStyle(element, '::after')
+      return content !== 'none' && content !== 'normal' && content !== ''
+    })).toBe(true)
+    await expect(actions).toHaveCSS('z-index', '5')
     await page.keyboard.press('Escape')
     await expect(actions.locator('.fullscreenShareAction .iconDropdown')).toHaveCount(0)
+    await shareButton.hover()
     await expect(actions).toHaveCSS('z-index', '2')
     await actions.getByRole('button', { name: 'Add to playlist' }).click()
     await expect(actions.locator('.fullscreenPlaylistAction .iconDropdown')).toBeVisible()
@@ -1357,10 +1365,6 @@ test.describe('watch page', () => {
     // than only checking the static capability class) so a tooltip
     // rendering/config regression fails the test; the z-index checks below then
     // confirm it sits above the action dock.
-    await expect.poll(() => fullscreenButton.evaluate((element) => {
-      const { content } = getComputedStyle(element, '::after')
-      return content !== 'none' && content !== 'normal' && content !== ''
-    })).toBe(true)
     await expect(actions).toHaveCSS('z-index', '0')
     await expect(sponsorBlockNotice).toHaveCSS('z-index', '3')
     const seekBarBounds = await seekBar.boundingBox()
