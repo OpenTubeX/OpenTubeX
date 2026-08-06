@@ -566,7 +566,7 @@ Settings:
     Proxy Username: اسم مستخدم الوكيل
     Proxy Password: كلمة مرور الوكيل
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: تنبيه عندما يتم تخطي شريحة الراعي
+    Notify when sponsor segment is skipped: إظهار إشعار بعد تخطي فقرة ما
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API عنوان (الافتراضي هو https://sponsor.ajay.app)
     Enable SponsorBlock: تفعيل حجب الرعاة
     SponsorBlock Settings: حظر الرعاة
@@ -782,14 +782,22 @@ Video:
   Save Video: احفظ الفيديو
   Video has been removed from your saved list: تمت إزالة الفيديو من قائمتك المحفوظة
   Sponsor Block category:
-    music offtopic: موسيقى خارجة عن المألوف
-    interaction: تفاعل
-    self-promotion: الترويج الذاتي
-    outro: الخاتمة
-    intro: المقدمة
-    sponsor: الرعاة
-    filler: حشو
-    recap: الخلاصة
+    music offtopic: 'الموسيقى: مقطع لا موسيقي'
+    interaction: التذكير بالتفاعل (الاشتراك)
+    self-promotion: دعاية غير مدفوعة/ذاتية
+    outro: شاشات نهاية/الشكر و التقدير
+    intro: المقدمة/فاصل
+    sponsor: رعاية
+    filler: المتهمين/النكات
+    recap: معاينة/خلاصة
+    hook: الجذب/التحيات
+    highlight: ابراز
+    exclusive access: وصول حصري
+  Sponsor Block category short:
+    intro: انترو
+    interaction: تذكير بالتفاعل
+    music offtopic: غير موسيقي
+    filler: المتهمين
   External Player:
     Unsupported Actions:
       looping playlists: تكرار قوائم التشغيل
@@ -828,7 +836,7 @@ Video:
       Video ID: 'معرف الفيديو: {videoId}'
       Resolution: 'الدقة: {width}x{height}{''@''}{frameRate}'
       Bandwidth: 'عرض النطاق الترددي: {bandwidth} كيلوبت في الثانية'
-    Skipped segment: تم تخطي شريحة {segmentCategory}
+    Skipped segment: 'تم تخطي {segmentCategory}'
     Theatre Mode: وضع المسرح
     Exit Theatre Mode: الخروج من وضع المسرح
     Show Stats: عرض الاحصائيات

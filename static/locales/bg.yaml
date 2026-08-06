@@ -583,7 +583,7 @@ Settings:
     Proxy Username: Потребителско име
     Proxy Password: Парола
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Известие при пропускане на спонсориран сегмент
+    Notify when sponsor segment is skipped: Показване на известие след пропускане на сегмент
     Enable SponsorBlock: Активиране на SponsorBlock
     SponsorBlock Settings: SponsorBlock
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API адрес (по подразбиране е https://sponsor.ajay.app)
@@ -801,14 +801,22 @@ Video:
   Video has been saved: Видеото е запазено
   Save Video: Запазване на видео
   Sponsor Block category:
-    interaction: Взаимодействие
-    self-promotion: Самореклама
-    outro: Епилог
-    intro: Въведение
-    sponsor: Спонсор
-    music offtopic: Музика извън темата
-    recap: Резюме
-    filler: Запълване
+    interaction: Напомняне за действие (абониране)
+    self-promotion: Неплатена/Самореклама
+    outro: Крайни картички/Заслуги
+    intro: Антракт/Начална анимация
+    sponsor: Спонсорство
+    music offtopic: 'Музика: Част без музика'
+    recap: Кратко резюме/Обобщение
+    filler: Несвързани теми/Шеги
+    hook: Кукичка/Поздрави
+    highlight: Акцент
+    exclusive access: Ексклузивен достъп
+  Sponsor Block category short:
+    intro: Антракт
+    interaction: Напомняне за взаимодействие
+    music offtopic: Без музика
+    filler: Несвързани теми
   External Player:
     Unsupported Actions:
       looping playlists: повтаряне на плейлисти
@@ -853,7 +861,7 @@ Video:
       Dropped Frames / Total Frames: 'Изпуснати кадри: {droppedFrames} / Общо кадри: {totalFrames}'
     You appear to be offline: Изглежда, че сте офлайн.
     Playback will resume automatically when your connection comes back: Възпроизвеждането ще се възобнови автоматично, когато връзката ви се възстанови.
-    Skipped segment: Пропуснат сегмент {segmentCategory}
+    Skipped segment: '{segmentCategory} пропуснат'
     TranslatedCaptionTemplate: '{language} (преведено от "{originalLanguage}")'
     Theatre Mode: Широкоекранен режим
     Full Window: Цял прозорец
@@ -865,8 +873,8 @@ Video:
   Unlisted: Непосочен в списъка
   MembersOnly: Видеата, предназначени само за членове, не могат да се гледат с OpenTubeX, тъй като изискват вход в Google и платено членство в канала на качващия.
   DeArrow:
-    Show Original Details: Показване на оригинални данни
-    Show Modified Details: Показване на променени данни
+    Show Original Details: Показване на оригиналните детайли
+    Show Modified Details: Показване на изменените подробности
   DRMProtected: Видеата, защитени с DRM не могат да се възпроизвеждат във OpenTubeX, тъй като изискват собствени компоненти със затворен код. Ако искате да гледате това видео, моля, използвайте официалния уебсайт на YouTube в уеб браузър поддържащ DRM.
 #& Playlists
   Watched Progress Saved: Напредъка на гледането е запазен

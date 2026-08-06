@@ -577,7 +577,7 @@ Settings:
     Proxy Username: 代理用户名
     Proxy Password: 代理密码
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: 当赞助商时间被跳过时通知
+    Notify when sponsor segment is skipped: 在跳过片段后显示通知
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': 赞助商区域调用的API地址（默认是 https://sponsor.ajay.app）
     Enable SponsorBlock: 开启赞助商区域
     SponsorBlock Settings: SponsorBlock
@@ -771,14 +771,22 @@ Video:
       starting video at offset: 在偏移处开始视频
       opening playlists: 打开播放列表
   Sponsor Block category:
-    outro: 结尾部分
-    self-promotion: 自我推销
-    interaction: 互动
-    music offtopic: 无关音乐
-    intro: 介绍
-    sponsor: 赞助者
-    recap: 回顾
-    filler: 过滤器
+    outro: 结束画面/结尾职员表
+    self-promotion: 无偿的/自我推广
+    interaction: 互动提醒（订阅）
+    music offtopic: 音乐：非音乐部分
+    intro: 过场/开场动画
+    sponsor: 赞助商广告
+    recap: 预览/概要
+    filler: 偏题/笑话
+    hook: 引子/问候
+    highlight: 精彩时刻
+    exclusive access: 独家限定
+  Sponsor Block category short:
+    intro: 过场
+    interaction: 互动提醒
+    music offtopic: 非音乐
+    filler: 偏题
   Premieres: 首映
   Scroll to Bottom: 滚动到底部
   Show Super Chat Comment: 显示超级聊天评论
@@ -813,7 +821,7 @@ Video:
     Playback will resume automatically when your connection comes back: 网络连接恢复时，将自动继续播放。
     TranslatedCaptionTemplate: '{language} (翻译自 "{originalLanguage}")'
     Exit Theatre Mode: 推出影院模式
-    Skipped segment: 跳过了 {segmentCategory} 部分
+    Skipped segment: '已跳过{segmentCategory}个片段'
     Autoplay is off: 自动播放关闭
     Autoplay is on: 自动播放开启
   IP block: 你的 IP 地址被 Youtube 禁止观看视频。请试着切换到不同的 VPN 或代理。
@@ -821,8 +829,8 @@ Video:
   AgeRestricted: 无法用 OpenTubeX 观看受限年龄的视频，因这些视频需要 Google 登录并使用验证过年龄的 YouTube 账户。
   Unlisted: 不公开列出的视频
   DeArrow:
-    Show Modified Details: 显示修改过的详情
-    Show Original Details: 显示原始详情
+    Show Modified Details: 显示修改后的详细信息
+    Show Original Details: 显示原始详细信息
   DRMProtected: OpenTubeX 无法播放受 DRM 保护的视频，因它们需要专有的、闭源的部件。如果要观看此视频，，请在启用了 DRM 的网页浏览器中在官方 YouTube 网站上观看。
 #& Playlists
   Watched Progress Saved: 保存了已观看进度

@@ -583,7 +583,7 @@ Settings:
     Proxy Username: Uživatelské jméno proxy
     Proxy Password: Heslo proxy
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Upozornit při přeskočení segmentu
+    Notify when sponsor segment is skipped: Zobrazit upozornění po přeskočení segmentu
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API SponsorBlock (výchozí je https://sponsor.ajay.app)
     Enable SponsorBlock: Zapnout SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -804,14 +804,22 @@ Video:
   Save Video: Uložit video
   Video has been removed from your saved list: Video bylo odstraněno z vašeho uloženého seznamu
   Sponsor Block category:
-    music offtopic: Není hudba
-    interaction: Interakce
-    self-promotion: Sebepropagace
-    outro: Závěr
-    intro: Úvod
+    music offtopic: 'Hudba: nehudební sekce'
+    interaction: Připomenutí interakce (odběr)
+    self-promotion: Neplacená / vlastní propagace
+    outro: Koncové karty / titulky
+    intro: Přestávka / úvodní animace
     sponsor: Sponzor
-    recap: Shrnutí
-    filler: Výplň
+    recap: Náhled / shrnutí
+    filler: Mimo téma / vtipy
+    hook: Zaujetí / pozdrav
+    highlight: Zvýraznění
+    exclusive access: Exkluzivní přístup
+  Sponsor Block category short:
+    intro: Přestávka
+    interaction: Připomenutí interakce
+    music offtopic: Jiné než hudba
+    filler: Mimo téma
   External Player:
     Unsupported Actions:
       opening specific video in a playlist (falling back to opening the video): Otevření specifického videa v seznamu skladeb
@@ -849,7 +857,7 @@ Video:
       Dropped Frames / Total Frames: 'Vypuštěno snímků: {droppedFrames} / Celkem snímků: {totalFrames}'
       CodecAudio: 'Kodek: {audioCodec} ({audioItag})'
       CodecsVideoAudio: 'Kodeky: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
-    Skipped segment: Přeskočen segment {segmentCategory}
+    Skipped segment: 'Segment {segmentCategory} přeskočen'
     TranslatedCaptionTemplate: '{language} (přeloženo z jazyka {originalLanguage})'
     Audio Tracks: Zvukové stopy
     Theatre Mode: Režim kina

@@ -576,7 +576,7 @@ Settings:
         Name: ללא
     Ignore Default Arguments: התעלם מפרמטרים ברירת מחדל
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: להודיע לגבי דילוג על קטע החסוּת
+    Notify when sponsor segment is skipped: הצג הודעה לאחר דילוג על מקטע
     SponsorBlock Settings: חוסם מממנים
     Enable SponsorBlock: הפעלת חוסם מממנים
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': כתובת ה־API של חוסם המממנים (ברירת המחדל היא https://sponsor.ajay.app)
@@ -783,14 +783,21 @@ Video:
   Video has been saved: סרטון נשמר
   Save Video: שמירת סרטון
   Sponsor Block category:
-    outro: סיום
-    self-promotion: קידום עצמי
-    interaction: אינטראקציה
+    outro: כרטיסי סיום/קרדיטים
+    self-promotion: קידום עצמי / לא ממומן
+    interaction: תזכורת למעקב (הירשם כמנוי)
     sponsor: נותן חסות
-    intro: פתיח
-    music offtopic: מוזיקה - לא בהקשר
-    filler: ממלא מקום
-    recap: סיכום
+    intro: אנימציית הפסקה/הקדמה
+    music offtopic: 'מוזיקה: קטעים ללא מוזיקה'
+    filler: 'טנג''נטים/בדיחות'
+    recap: תצוגה מקדימה/סיכום
+    highlight: קטע חשוב
+    exclusive access: גישה אקסקלוסיבית
+  Sponsor Block category short:
+    intro: הפסקה
+    interaction: תזכורת לפעולה
+    music offtopic: ללא מוזיקה
+    filler: טנגנטים
   External Player:
     video: סרטון
     playlist: רשימת נגינה
@@ -836,7 +843,7 @@ Video:
     Hide Stats: הסתר נתונים
     You appear to be offline: נראה שהחיבור שלך נקטע.
     Playback will resume automatically when your connection comes back: הפלייבק יחודש אוטומטית כאשר החיבור שלך יחזור.
-    Skipped segment: דילגתי על {segmentCategory}
+    Skipped segment: '{segmentCategory} דולג'
     Autoplay is off: הפעלה אוטומטית כבויה
     Autoplay is on: הניגון האוטומטי פעיל
   Hide Channel: הסתר ערוץ
@@ -847,8 +854,8 @@ Video:
   AgeRestricted: אי אפשר לצפות בסרטונים שמוגבלים בגיל עם OpenTubeX כיוון שהם דורשים כניסה עם Google ושימוש בחשבון YouTube עם גיל מאומת.
   Unlisted: לא מופיע
   DeArrow:
-    Show Modified Details: הצגת פרטים לאחר שינוי
-    Show Original Details: הצגת פרטים מקוריים
+    Show Modified Details: הצג פרטים ערוכים
+    Show Original Details: הצג פרטים מקוריים
 #& Playlists
   Save Watched Progress: שמור התקדמות נצפית
   DRMProtected: סרטונים המוגנים ב-DRM אינם יכולים להתנגן ב-OpenTubeX, מכיוון שהם דורשים רכיבים סגורים ובעלים. אם אתה רוצה לצפות בסרטון הזה, אנא צפה בו באתר הרשמי של YouTube בדפדפן אינטרנט עם תמיכה ב-DRM.

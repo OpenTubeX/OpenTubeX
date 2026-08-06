@@ -1,5 +1,6 @@
 import { computed, defineComponent, nextTick, onBeforeUnmount, onMounted, onUnmounted, reactive, ref, shallowRef, watch } from 'vue'
 import FtPaidPromotionBadge from '../FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
+import FtSelect from '../FtSelect/FtSelect.vue'
 import shaka from 'shaka-player'
 import { useI18n } from 'vue-i18n'
 
@@ -173,6 +174,7 @@ export default defineComponent({
   name: 'FtShakaVideoPlayer',
   components: {
     FtPaidPromotionBadge,
+    FtSelect,
     FtShareButton,
     FtIconButton,
     FtAddToPlaylistDropdown,
@@ -1612,6 +1614,9 @@ export default defineComponent({
       sponsorBlockDraftSegments,
       sponsorBlockDraftSegmentsByVideoId,
       sponsorBlockSubmissionCategories,
+      sponsorBlockSubmissionCategoryNames,
+      getSponsorBlockActionTypeSelectNames,
+      getSponsorBlockActionTypeSelectValues,
       sponsorBlockSubmissionError,
       sponsorBlockSubmissionMenuOpen,
       sponsorBlockSubmissionPending,
@@ -8769,6 +8774,9 @@ export default defineComponent({
       sponsorBlockDraftEditValues,
       sponsorBlockDraftSegments,
       sponsorBlockSubmissionCategories,
+      sponsorBlockSubmissionCategoryNames,
+      getSponsorBlockActionTypeSelectNames,
+      getSponsorBlockActionTypeSelectValues,
       sponsorBlockSubmissionError,
       sponsorBlockSubmissionMenuOpen,
       sponsorBlockSubmissionPending,

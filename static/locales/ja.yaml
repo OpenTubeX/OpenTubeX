@@ -576,7 +576,7 @@ Settings:
     Proxy Username: プロキシのユーザー名
     Proxy Password: プロキシのパスワード
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: スポンサーセグメントがスキップされたときに通知する
+    Notify when sponsor segment is skipped: セグメントがスキップされた後に通知を表示する
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': スポンサーブロック APIのURL（デフォルト https://sponsor.ajay.app）
     Enable SponsorBlock: スポンサーブロックの有効化
     SponsorBlock Settings: スポンサーブロック
@@ -753,14 +753,22 @@ Video:
   Video has been saved: 動画を保存しました
   Save Video: 動画の保存
   Sponsor Block category:
-    sponsor: スポンサー
-    music offtopic: 音楽以外
-    interaction: インタラクション
-    self-promotion: 自己紹介
-    outro: アウトロ（末尾）
-    intro: イントロ（冒頭）
-    recap: 要約
-    filler: フィラー（穴埋め）
+    sponsor: 広告
+    music offtopic: '音楽: 音楽ではない区間'
+    interaction: 行動のお願い (登録/寄付など)
+    self-promotion: 無報酬 / 自己の宣伝
+    outro: 終了画面 / クレジット
+    intro: 合間 / 導入アニメ
+    recap: 予告/あらすじ
+    filler: 脱線/冗談
+    hook: 掴み/挨拶
+    highlight: ハイライト
+    exclusive access: 独占的な広告
+  Sponsor Block category short:
+    intro: 合間
+    interaction: 行動のお願い
+    music offtopic: 音楽以外の部分
+    filler: 脱線
   External Player:
     OpeningTemplate: '{externalPlayer} で {videoOrPlaylist} を開く...'
     Unsupported Actions:
@@ -800,7 +808,7 @@ Video:
       Stats: 統計
     You appear to be offline: オフラインのようです。
     Playback will resume automatically when your connection comes back: ネットワーク接続が回復すると再生が自動的に再開されます。
-    Skipped segment: '{segmentCategory} 区分をスキップしました'
+    Skipped segment: '{segmentCategory}を飛ばしました'
     TranslatedCaptionTemplate: '{language}（「{originalLanguage}」から翻訳）'
     Audio Tracks: オーディオ トラック
     Theatre Mode: シアターモード
@@ -817,8 +825,8 @@ Video:
   MembersOnly: メンバー限定動画は Google にログインし、投稿チャンネルに課金する必要があるので OpenTubeX から直接見ることはできません。
   AgeRestricted: 年齢制限がかかっている 動画 は Google にログインしておりかつ年齢確認を済ましている YouTube アカウントが必要なため、OpenTubeX から直接見ることはできません。
   DeArrow:
-    Show Original Details: 元の情報を表示
-    Show Modified Details: 変更された詳細を表示
+    Show Original Details: 元の詳細を表示
+    Show Modified Details: 改善の詳細を表示
   DRMProtected: DRM保護された動画はOpenTubeXでは再生できません。これらの動画には、独自の非オープンソースのコンポーネントが必要です。この動画を視聴したい場合は、DRM対応のウェブブラウザで公式のYouTubeウェブサイトでご覧ください。
 #& Playlists
   Save Watched Progress: 視聴進捗を保存

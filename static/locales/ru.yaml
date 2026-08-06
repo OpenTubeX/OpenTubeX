@@ -564,7 +564,7 @@ Settings:
     Proxy Username: Имя пользователя прокси
     Proxy Password: Пароль прокси
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Уведомлять о пропущенном сегменте
+    Notify when sponsor segment is skipped: Показывать уведомление после пропуска сегмента
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Адрес SponsorBlock API (По умолчанию https://sponsor.ajay.app)
     Enable SponsorBlock: Включить SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -742,14 +742,22 @@ Video:
   Video has been saved: Видео было добавлено в сохранённые
   Save Video: Добавить видео в сохранённые
   Sponsor Block category:
-    music offtopic: Сегмент без музыки
-    interaction: Напоминание
-    self-promotion: Самореклама
-    outro: Концовка
-    intro: Вступление
+    music offtopic: 'Музыка: Сегмент без музыки'
+    interaction: Напоминание о взаимодействии (подписка)
+    self-promotion: Безвозмездная или самореклама
+    outro: Конечная заставка/титры
+    intro: Пауза/интро
     sponsor: Спонсор
-    recap: Краткое содержание
-    filler: Отвлечение
+    recap: Предпросмотр/краткое содержание
+    filler: Отвлечённые темы/шутки
+    hook: Завязка/приветствие
+    highlight: Важное
+    exclusive access: Эксклюзивный доступ
+  Sponsor Block category short:
+    intro: Заставка
+    interaction: Напоминание о взаимодействии
+    music offtopic: Без музыки
+    filler: Отвлечённые темы
   External Player:
     Unsupported Actions:
       looping playlists: повторение плейлистов
@@ -789,7 +797,7 @@ Video:
       Volume: 'Громкость: {volumePercentage}%'
       Bandwidth: 'Пропускная способность: {bandwidth} кбит/с'
     You appear to be offline: Похоже, вы Оффлайн.
-    Skipped segment: Пропущен {segmentCategory} сегмент
+    Skipped segment: 'Пропущено: {segmentCategory}'
     Playback will resume automatically when your connection comes back: Воспроизведение будет возобновлено автоматически, когда соединение будет восстановлено.
     Audio Tracks: Аудиодорожки
     Theatre Mode: Широкий экран
@@ -806,8 +814,8 @@ Video:
   Unlisted: Отсутствует в списках
   AgeRestricted: Видео с возрастными ограничениями нельзя смотреть через OpenTubeX, так как для этого требуется вход в Google и использование подтвержденной учетной записи YouTube.
   DeArrow:
-    Show Original Details: Показать стандартные свойства
-    Show Modified Details: Показать модифицированные свойства
+    Show Original Details: Показать изначальные сведения
+    Show Modified Details: Показать изменённые сведения
 #& Playlists
   DRMProtected: Видео, защищенное DRM, не может быть воспроизведено в OpenTubeX, так как оно требует использования проприетарных компонентов с закрытым исходным кодом. Если вы хотите посмотреть это видео, пожалуйста, смотрите его на официальном сайте YouTube в веб-браузере с поддержкой DRM.
   Save Watched Progress: Сохранение прогресса просмотренного видео

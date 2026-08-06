@@ -1028,7 +1028,7 @@ Settings:
     Export Generated User ID: Export Generated User ID
     Generated SponsorBlock User ID Copy Button: Copy generated SponsorBlock user ID
     Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
-    Notify when sponsor segment is skipped: Notify when sponsor segment is skipped
+    Notify when sponsor segment is skipped: Show notice after a segment is skipped
     Skip notification timeout: Skip notification timeout
     UseDeArrowTitles: Use DeArrow Video Titles
     UseDeArrowThumbnails: Use DeArrow for thumbnails
@@ -1337,16 +1337,22 @@ Video:
     Show Modified Details: Show Modified Details
   Sponsor Block category:
     sponsor: Sponsor
-    intro: Intro
-    outro: Outro
-    self-promotion: Self-Promotion
-    interaction: Interaction
-    music offtopic: Music Offtopic
-    recap: Recap
+    intro: Intermission/Intro Animation
+    outro: Endcards/Credits
+    self-promotion: Unpaid/Self Promotion
+    interaction: Interaction Reminder (Subscribe)
+    music offtopic: 'Music: Non-Music Section'
+    recap: Preview/Recap
     hook: Hook/Greetings
-    filler: Filler
+    filler: Tangents/Jokes
     highlight: Highlight
     exclusive access: Exclusive Access
+  # Short labels used on the seekbar / skip notices (matches SponsorBlock extension)
+  Sponsor Block category short:
+    intro: Intermission
+    interaction: Interaction Reminder
+    music offtopic: Non-Music
+    filler: Tangents
   External Player:
     OpenInTemplate: Open in {externalPlayer}
     video: video
@@ -1417,13 +1423,13 @@ Video:
       Play: Play
       Pause: Pause
       Drag Handle: Move mini player
-    Skipped segment: 'Skipped {segmentCategory} segment'
+    Skipped segment: '{segmentCategory} Skipped'
     SponsorBlock:
       CancelCurrentSegment: Cancel Creating Segment
       ClearSegments: Clear Segments
       ClearSegmentsPrompt: Are you sure you want to clear all drafted SponsorBlock segments for this video?
       CompleteSegmentsBeforeSubmitting: Complete every drafted segment before submitting.
-      CategoryLabel: Segment category
+      CategoryLabel: Category
       ActionTypeLabel: Segment type
       DeleteSegment: Delete
       DuplicateSegments: Duplicate drafted segments are not allowed.
@@ -1450,7 +1456,7 @@ Video:
       StartAction: (Start)
       StartSegmentNow: Start Segment Now
       SubmissionBadRequest: SponsorBlock rejected the submission request.
-      SubmissionDuplicate: SponsorBlock says these segments were already submitted.
+      SubmissionDuplicate: This has already been submitted before.
       SubmissionFailed: Failed to submit SponsorBlock segments.
       SubmissionForbidden: SponsorBlock rejected the submission.
       SubmissionRateLimited: SponsorBlock rate limited this submission.
@@ -1459,18 +1465,18 @@ Video:
       SubmitSegments: Submit
       StartTimeLabel: Segment start time
       TimeDivider: to
-      SkipPrompt: Skip {segmentCategory} segment?
+      SkipPrompt: 'Skip {segmentCategory}?'
       SkipPromptAction: Skip
       SkipToHighlight: Skip to Highlight?
       SkippedToHighlight: Skipped to Highlight
       SkipToastUnskip: Unskip
       SkipToastReskip: Reskip
-      MutedSegment: Muted {segmentCategory} segment
+      MutedSegment: '{segmentCategory} Muted'
       MuteToastUnmute: Unmute
       InfoPanelTitle: SponsorBlock
-      InfoPanelLoading: Loading segments…
-      InfoPanelHasSegments: This video has segments in the database.
-      InfoPanelNoSegments: No segments were found for this video.
+      InfoPanelLoading: Segments still loading...
+      InfoPanelHasSegments: 'This video has segments in the database!'
+      InfoPanelNoSegments: No segments found
       RefreshSegments: Refresh segments
       AutoSkipEnabled: Automatically skip segments
       AutoSkipOn: 'On'
@@ -1484,11 +1490,11 @@ Video:
       FullVideo: Full Video
       FullVideoLabel: '{segmentCategory} · Full Video'
       MuteActionType: Mute
-      MutePrompt: Mute {segmentCategory} segment?
+      MutePrompt: 'Mute {segmentCategory}?'
       SkipActionType: Skip
       LockedSegment: Locked segment
-      UpvoteSegment: Upvote segment
-      DownvoteSegment: Downvote segment
+      UpvoteSegment: Upvote
+      DownvoteSegment: Downvote
       VoteFailed: Failed to submit SponsorBlock vote.
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Remaining preroll-ad time: {remindingTimeSeconds}s'

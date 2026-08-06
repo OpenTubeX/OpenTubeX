@@ -558,7 +558,7 @@ Settings:
     Experimental Settings: Експериментално
     Warning: Ова подешавања су експериментална, могу да доведу до отказивања док су омогућена. Прављење резервних копија је веома препоручљиво. Користите на властиту одговорност!
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Обавештење када се спонзор сегмент прескочи
+    Notify when sponsor segment is skipped: Прикажи обавештење након што је сегмент прескочен
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API-ја SponsorBlock-а (Подразумевано је https://sponsor.ajay.app)
     Skip Options:
       Skip Option: Опција прескакања
@@ -762,14 +762,22 @@ Video:
     In less than a minute: За мање од једног минута
   Upcoming: Предстојеће
   Sponsor Block category:
-    interaction: Интеракција
-    filler: Попуњавање
-    music offtopic: Сегмент без музике
-    outro: Завршна анимација
-    self-promotion: Самопромоција
+    interaction: Подсетник о интеракцији (праћење)
+    filler: Дигресије/Шале
+    music offtopic: 'Музика: Сегмент без музике'
+    outro: Завршне картице/Заслуге
+    self-promotion: Неплаћена промоција/Самопромоција
     sponsor: Спонзор
-    recap: Рекапитулација
-    intro: Уводна анимација
+    recap: Преглед/Рекапитулација
+    intro: Пауза/Уводна анимација
+    hook: Мамац/Поздрави
+    highlight: Истакнуто
+    exclusive access: Ексклузивни приступ
+  Sponsor Block category short:
+    intro: Пауза
+    interaction: Подсетник за интеракцију
+    music offtopic: Без музике
+    filler: Дигресије
   External Player:
     Unsupported Actions:
       opening playlists: отварање плејлиста
@@ -822,7 +830,7 @@ Video:
     Full Window: Цео прозор
     You appear to be offline: Изгледа да сте офлајн.
     Playback will resume automatically when your connection comes back: Репродукција ће се аутоматски наставити када се ваша интернет веза врати.
-    Skipped segment: Прескочен сегмент „{segmentCategory}“
+    Skipped segment: 'Прескочен сегмент: {segmentCategory}'
     Autoplay is off: Аутоматско пуштање је искључено
     Autoplay is on: Аутоматско пуштање је укључено
   IP block: YouTube је блокирао вашу IP адресу за гледање видео снимака. Покушајте прећи на други VPN или прокси.

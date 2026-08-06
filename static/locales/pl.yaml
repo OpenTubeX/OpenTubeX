@@ -740,7 +740,7 @@ Settings:
     Reloading video after IP block recovery: Przeładuj wideo po ominięciu blokady IP
     Failed to select IP block recovery script: Nie udało się wybrać skryptu omijania blokady IP
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Powiadamiaj, kiedy segment sponsorowany zostanie pominięty
+    Notify when sponsor segment is skipped: Pokaż informację po pominięciu segmentu
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Adres URL interfejsu API SponsorBlock (Domyślnie jest https://sponsor.ajay.app)
     Enable SponsorBlock: Włącz SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -1038,15 +1038,21 @@ Video:
   Save Video: Zapisz film
   Sponsor Block category:
     music offtopic: 'Muzyka: Sekcja niemuzyczna'
-    interaction: Interakcja (subskrybuj)
-    self-promotion: Nieodpłatna/Autopromocja
-    outro: Napisy końcowe (Outro)
-    intro: Przerwa/Intro
-    sponsor: Sponsorowany
+    interaction: Przypomnienie o interakcji (Subskrybuj)
+    self-promotion: Nieopłacona/Własna promocja
+    outro: Ekran końcowy/Napisy
+    intro: Przerwa/Animowane intro
+    sponsor: Sponsor
     filler: Wypełniacze/Żarty
     recap: Zapowiedź/Podsumowanie
-    hook: Zachęty/Pozdrowienia
-    highlight: Ważny moment
+    hook: Zaczepka/Powitanie
+    highlight: Wyróżnione
+    exclusive access: Dostęp na wyłączność
+  Sponsor Block category short:
+    intro: Przerwa
+    interaction: Przypomnienie o interakcji
+    music offtopic: Bez muzyki
+    filler: Wypełniacze
   External Player:
     Unsupported Actions:
       reversing playlists: odwracania playlist
@@ -1094,7 +1100,7 @@ Video:
       Resolution: 'Rozdzielczość: {width}x{height}{''@''}{frameRate}'
     You appear to be offline: Zdaje się, że jesteś rozłączony.
     Playback will resume automatically when your connection comes back: Odtwarzanie zostanie wznowione, jak tylko połączenie zostanie odzyskane.
-    Skipped segment: Pominięto segment „{segmentCategory}”
+    Skipped segment: '{segmentCategory} — pominięto'
     Full Window: Pełne okno
     Autoplay is off: Autoodtwarzanie jest wyłączone
     Autoplay is on: Autoodtwarzanie jest włączone
@@ -1105,10 +1111,10 @@ Video:
       ClearSegments: Wyczyść segmenty
       ClearSegmentsPrompt: Czy na pewno chcesz wyczyścić wszystkie utworzone segmenty SponsorBlock dla tego filmu?
       CompleteSegmentsBeforeSubmitting: Przed wysłaniem należy dokończyć tworzenie każdego segmentu.
-      CategoryLabel: Kategoria segmentu
+      CategoryLabel: Kategoria
       DeleteSegment: Usuń
       DuplicateSegments: Duplikowanie segmentów roboczych jest niedozwolone.
-      EditSegment: Edycja
+      EditSegment: Edytuj
       EndAction: (Koniec)
       EndActionLabel: Koniec
       EndTimeAfterStart: Czas zakończenia segmentu musi przypadać po czasie rozpoczęcia.
@@ -1117,39 +1123,39 @@ Video:
       DisableAutoSkipTemporarily: Tymczasowo wyłącz automatyczne pomijanie SponsorBlock
       EnableAutoSkipTemporarily: Włącz ponownie automatyczne pomijanie SponsorBlock
       Guidelines: Wytyczne
-      InspectSegment: Zweryfikuj
+      InspectSegment: Sprawdź
       InvalidStartTime: Wprowadź prawidłowy czas rozpoczęcia segmentu.
       NoSegmentsToSubmit: Przed wysłaniem utwórz co najmniej jeden kompletny segment.
       NowAction: (Teraz)
       OpenSubmissionMenu: Otwórz menu zgłoszenia
       PreviewRequired: Przed wysłaniem należy przejrzeć każdy segment.
-      PreviewSegment: Przejrzyj
+      PreviewSegment: Podgląd
       SaveSegment: Zapisz
-      SetSegmentEndNow: Zakończ segment tutaj
+      SetSegmentEndNow: Koniec segmentu
       StartAction: (Początek)
-      StartSegmentNow: Rozpocznij segment tutaj
+      StartSegmentNow: Początek segmentu
       SubmissionBadRequest: SponsorBlock odrzucił prośbę o przesłanie zgłoszenia.
-      SubmissionDuplicate: SponsorBlock twierdzi, że te segmenty zostały już przesłane.
+      SubmissionDuplicate: To już zostało przesłane wcześniej.
       SubmissionFailed: Nie udało się przesłać segmentów SponsorBlock.
       SubmissionForbidden: SponsorBlock odrzucił zgłoszenie.
       SubmissionRateLimited: SponsorBlock ograniczył liczbę zgłoszeń.
       SubmissionSuccess: Segmenty SponsorBlock zostały zgłoszone.
       SubmitSegment: Zgłoś segment
-      SubmitSegments: Zgłoś
+      SubmitSegments: Wyślij
       StartTimeLabel: Czas rozpoczęcia segmentu
       TimeDivider: do
-      SkipPrompt: Pominąć segment „{segmentCategory}”?
+      SkipPrompt: '{segmentCategory} — pominąć?'
       SkipPromptAction: Pomiń
-      SkipToastUnskip: Anuluj pominięcie
-      SkipToastReskip: Wznów pominięcie
-      SkipToHighlight: Przeskocz do „Ważny moment”
-      SkippedToHighlight: Przeskoczono do „Ważny moment”
+      SkipToastUnskip: Cofnij
+      SkipToastReskip: Pomiń
+      SkipToHighlight: 'Przejść do Wyróżnione?'
+      SkippedToHighlight: Przewinięto do Wyróżnione
       CloseInfoPanel: Zamknij panel SponsorBlock
       OpenInfoPanel: Otwórz panel SponsorBlock
       InfoPanelTitle: SponsorBlock
-      InfoPanelLoading: Ładowanie segmentów…
-      InfoPanelHasSegments: Ten film ma segmenty w bazie danych.
-      InfoPanelNoSegments: Nie znaleziono żadnych segmentów dla tego filmu.
+      InfoPanelLoading: Segmenty nadal się ładują...
+      InfoPanelHasSegments: 'Ten film ma segmenty w bazie danych!'
+      InfoPanelNoSegments: Nie znaleziono segmentów
       RefreshSegments: Odśwież segmenty
       AutoSkipEnabled: Automatyczne pomijanie segmentów
       AutoSkipOn: włączone
@@ -1161,8 +1167,8 @@ Video:
       CloseSegmentActions: Zamknij działania segmentu
       FullVideo: Cały film
       LockedSegment: Zablokowany segment
-      DownvoteSegment: Oceń segment negatywnie
-      UpvoteSegment: Oceń segment pozytywnie
+      DownvoteSegment: Głos przeciw
+      UpvoteSegment: Głos za
       VoteFailed: Nie udało się przesłać oceny segmentu do SponsorBlock.
     Scroll Mini Player:
       Back to Top: Powrót na górę
@@ -1195,8 +1201,8 @@ Video:
   MembersOnly: Filmy tylko dla wspierających nie mogą być odtwarzane przez OpenTubeX, ponieważ wymagają danych logowania do konta Googla oraz płatną subskrypcje kanału.
   Unlisted: Niepubliczny
   DeArrow:
-    Show Original Details: Pokaż szczegóły oryginału
-    Show Modified Details: Pokaż zmodyfikowane szczegóły
+    Show Original Details: Pokaż oryginał
+    Show Modified Details: Pokaż zmienione szczegóły
   DRMProtected: OpenTubeX nie może odtwarzać filmów chronionych przez DRM, ponieważ wymagają one obsługi zastrzeżonych prawnie komponentów o zamkniętym kodzie. By obejrzeć ten film, możesz odwiedzić oficjalną stronę YouTube, korzystając z przeglądarki z włączoną obsługą DRM.
 #& Playlists
   Watched Progress Saved: Postęp odtwarzania zapisany

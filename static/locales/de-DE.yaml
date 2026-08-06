@@ -730,7 +730,7 @@ Settings:
     Reloading video after IP block recovery: Video wird nach IP-Block-Wiederherstellung neu geladen
     Failed to select IP block recovery script: Auswahl der IP-Block-Wiederherstellungsskriptdatei fehlgeschlagen
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Benachrichtigen, wenn ein Abschnitt übersprungen wird
+    Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
     Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
     Enable SponsorBlock: SponsorBlock aktivieren
@@ -982,16 +982,22 @@ Video:
   Video has been saved: Video wurde gespeichert
   Save Video: Video speichern
   Sponsor Block category:
-    music offtopic: Musik Offtopic
-    interaction: Interaktion
-    self-promotion: Eigenwerbung
-    outro: Abspann
-    intro: Intro
-    sponsor: Sponsor
+    music offtopic: 'Musik: Nicht-Musik-Abschnitt'
+    interaction: Interaktions-Erinnerung (Abonnieren usw.)
+    self-promotion: Unbezahlt/​Eigenwerbung
+    outro: Endkarten/Quellen/Anerkennungen
+    intro: Unterbrechung/Intro-Animation
+    sponsor: Gesponserte Videosegmente
     recap: Vorschau/Rückblick
-    filler: Füller
-    hook: Aufhänger/Begrüßung
+    filler: Nebensachen/Witze
+    hook: Hook/Begrüßungen
     highlight: Highlight
+    exclusive access: Exklusiver Zugriff
+  Sponsor Block category short:
+    intro: Unterbrechung
+    interaction: Interaktions-Erinnerung
+    music offtopic: Nicht-Musik
+    filler: Nebensachen
   External Player:
     OpenInTemplate: In {externalPlayer} öffnen
     Unsupported Actions:
@@ -1058,13 +1064,13 @@ Video:
       CodecsVideoAudioNoItags: 'Codecs: {videoCodec} / {audioCodec}'
     You appear to be offline: Du scheinst offline zu sein.
     Playback will resume automatically when your connection comes back: Die Wiedergabe wird automatisch fortgesetzt, wenn deine Verbindung wiederhergestellt ist.
-    Skipped segment: 'Segment {segmentCategory} übersprungen'
+    Skipped segment: '{segmentCategory} übersprungen'
     SponsorBlock:
       CancelCurrentSegment: Segmenterstellung abbrechen
-      ClearSegments: Segmente löschen
+      ClearSegments: Alle Segmente löschen
       ClearSegmentsPrompt: Bist du sicher, dass du alle entworfenen SponsorBlock-Segmente für dieses Video löschen möchtest?
       CompleteSegmentsBeforeSubmitting: Vervollständige jedes entworfene Segment, bevor du es absendest.
-      CategoryLabel: Segmentkategorie
+      CategoryLabel: Kategorie
       DeleteSegment: Löschen
       DuplicateSegments: Doppelte entworfene Segmente sind nicht erlaubt.
       EditSegment: Bearbeiten
@@ -1076,21 +1082,21 @@ Video:
       DisableAutoSkipTemporarily: SponsorBlock Überspringen vorübergehend deaktivieren
       EnableAutoSkipTemporarily: SponsorBlock Überspringen wieder aktivieren
       Guidelines: Richtlinien
-      InspectSegment: Prüfen
+      InspectSegment: Überprüfen
       InvalidStartTime: Gib eine gültige Segmentstartzeit ein.
       NoSegmentsToSubmit: Erstelle mindestens ein vollständiges Segment, bevor du es absendest.
-      NowAction: (Jetzt)
+      NowAction: (jetzt)
       CloseInfoPanel: SponsorBlock-Informationen schließen
       OpenInfoPanel: SponsorBlock-Informationen öffnen
       OpenSubmissionMenu: Einreichungsmenü öffnen
       PreviewRequired: Bitte sieh dir jedes Segment vor dem Absenden an.
       PreviewSegment: Vorschau
       SaveSegment: Speichern
-      SetSegmentEndNow: Segment jetzt beenden
+      SetSegmentEndNow: Segment endet jetzt
       StartAction: (Start)
-      StartSegmentNow: Segment jetzt starten
+      StartSegmentNow: Segment startet jetzt
       SubmissionBadRequest: SponsorBlock hat die Einreichungsanfrage abgelehnt.
-      SubmissionDuplicate: SponsorBlock sagt, dass diese Segmente bereits eingereicht wurden.
+      SubmissionDuplicate: Das wurde bereits eingereicht.
       SubmissionFailed: SponsorBlock-Segmente konnten nicht eingereicht werden.
       SubmissionForbidden: SponsorBlock hat die Einreichung abgelehnt.
       SubmissionRateLimited: SponsorBlock hat diese Einreichung rate-limitiert.
@@ -1099,16 +1105,16 @@ Video:
       SubmitSegments: Einreichen
       StartTimeLabel: Segmentstartzeit
       TimeDivider: bis
-      SkipToHighlight: Zum Highlight springen?
-      SkippedToHighlight: Zum Highlight gesprungen
+      SkipToHighlight: 'Zu Highlight springen?'
+      SkippedToHighlight: Zu Highlight gesprungen
       SkipToastUnskip: Nicht überspringen
       SkipToastReskip: Nochmal überspringen
-      SkipPrompt: '{segmentCategory} Segment überspringen?'
+      SkipPrompt: '{segmentCategory} überspringen?'
       SkipPromptAction: Überspringen
       InfoPanelTitle: SponsorBlock
-      InfoPanelLoading: Segmente werden geladen…
-      InfoPanelHasSegments: Dieses Video enthält Segmente in der Datenbank.
-      InfoPanelNoSegments: Für dieses Video wurden keine Segmente gefunden.
+      InfoPanelLoading: Segmente werden noch geladen...
+      InfoPanelHasSegments: 'Dieses Video hat Segmente in der Datenbank!'
+      InfoPanelNoSegments: Keine Segmente gefunden
       RefreshSegments: Segmente aktualisieren
       AutoSkipEnabled: Segmente automatisch überspringen
       AutoSkipOn: An
@@ -1118,10 +1124,10 @@ Video:
       RemoveChannelFromWhitelist: Kanal von der Ausnahmeliste entfernen
       SkipSegment: Segment überspringen
       CloseSegmentActions: Segmentaktionen schließen
-      FullVideo: Ganzes Video
+      FullVideo: Vollständiges Video
       LockedSegment: Gesperrtes Segment
-      UpvoteSegment: Segment positiv bewerten
-      DownvoteSegment: Segment negativ bewerten
+      UpvoteSegment: Positiv bewerten
+      DownvoteSegment: Negativ bewerten
       VoteFailed: SponsorBlock-Bewertung konnte nicht übermittelt werden.
     TranslatedCaptionTemplate: '{language} (übersetzt von {originalLanguage})'
     Exit Full Window: Vollständiges Fenster beenden
@@ -1143,7 +1149,7 @@ Video:
   AgeRestricted: Videos mit Altersbeschränkung können mit OpenTubeX nicht angesehen werden, da sie eine Google-Anmeldung und die Verwendung eines altersgeprüften YouTube-Kontos erfordern.
   DeArrow:
     Show Modified Details: Geänderte Details anzeigen
-    Show Original Details: Originaldetails anzeigen
+    Show Original Details: Originale Details anzeigen
   DRMProtected: DRM-geschützte Videos können in OpenTubeX nicht abgespielt werden, da sie proprietäre Closed-Source-Komponenten benötigen. Wenn du dieses Video ansehen möchtest, sieh es dir bitte auf der offiziellen YouTube-Website in einem DRM-fähigen Webbrowser an.
   Save Channel Playback Speed: Kanal-Wiedergabegeschwindigkeit speichern
   Channel Playback Speed Saved: Kanal-Wiedergabegeschwindigkeit gespeichert

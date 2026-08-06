@@ -624,7 +624,7 @@ Settings:
     SponsorBlock Settings: ''
     Enable SponsorBlock: ''
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': ''
-    Notify when sponsor segment is skipped: ''
+    Notify when sponsor segment is skipped: Tunjukkan Makluman Setelah Segmen Dilangkau
     UseDeArrowTitles: ''
     UseDeArrowThumbnails: ''
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': ''
@@ -838,14 +838,20 @@ Video:
     Show Original Details: ''
     Show Modified Details: ''
   Sponsor Block category:
-    sponsor: ''
-    intro: ''
-    outro: ''
-    self-promotion: ''
-    interaction: ''
-    music offtopic: ''
+    sponsor: Penaja
+    intro: Intermission / Pengenalan Animasi
+    outro: Kad Akhir / Kredit
+    self-promotion: Promosi Tanpa Bayaran / Diri
+    interaction: Peringatan Interaksi (Langgan)
+    music offtopic: 'Muzik: Bahagian Bukan Muzik'
     recap: ''
     filler: ''
+    highlight: Sorotan
+    exclusive access: Akses Eksklusif
+  Sponsor Block category short:
+    intro: Selang
+    interaction: Peringatan Interaksi
+    music offtopic: Bukan Muzik
   External Player:
     OpenInTemplate: ''
     video: ''
@@ -888,7 +894,7 @@ Video:
       CodecsVideoAudioNoItags: ''
     You appear to be offline: ''
     Playback will resume automatically when your connection comes back: ''
-    Skipped segment: ''
+    Skipped segment: '{segmentCategory} Melangkau'
 #& Playlists
 Playlist:
   #& About

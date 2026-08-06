@@ -424,7 +424,7 @@ Settings:
     SponsorBlock Settings: Configuración de SponsorBlock
     Enable SponsorBlock: Habilitar SponsorBlock
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL de la API de SponsorBlock (https://sponsor.ajay.app por defecto)
-    Notify when sponsor segment is skipped: Notificar cuando el tramo publicitario es omitido
+    Notify when sponsor segment is skipped: Mostrar aviso después de que se omita un segmento
   Sort Settings Sections (A-Z): Ordenar secciones de configuración (A-Z)
   Return to Settings Menu: Volver al menú de configuración
 About:
@@ -526,12 +526,22 @@ Video:
     video: video
     playlist: lista de reproducción
   Sponsor Block category:
-    interaction: interacción
-    sponsor: publicitante
-    intro: introducción
-    outro: final
-    self-promotion: auto-promoción
-    music offtopic: música irrelevante
+    interaction: Recordatorio de Interacción (Suscribir)
+    sponsor: Sponsor
+    intro: Intermisión/Animación de Introducción
+    outro: Tarjetas/Créditos
+    self-promotion: Promoción Propia/No Remunerada
+    music offtopic: 'Música: Sección sin musica'
+    recap: Vista previa/Recapitulación
+    hook: Gancho/Saludos
+    filler: Desvíos/Bromas
+    highlight: Destacado
+    exclusive access: Acceso Exclusivo
+  Sponsor Block category short:
+    intro: Intermisión
+    interaction: Recordatorio de Interacción
+    music offtopic: Sin Música
+    filler: Tangentes
   Save Video: Guardar video
   Streamed on: Transmitido en
   Open Channel in YouTube: Abrir canal en YouTube

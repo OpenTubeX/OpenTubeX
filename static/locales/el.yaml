@@ -574,7 +574,7 @@ Settings:
     Ignore Default Arguments: Αγνοήστε τα προεπιλεγμένα επιχειρήματα
   SponsorBlock Settings:
     Enable SponsorBlock: Ενεργοποίηση του SponsorBlock
-    Notify when sponsor segment is skipped: Ειδοποίηση όταν παραλείπεται το τμήμα χορηγού
+    Notify when sponsor segment is skipped: Εμφάνιση ειδοποιήσεων μετά την παράλειψη κάθε τμήματος
     SponsorBlock Settings: 'SponsorBlock'
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Διεύθυνση URL του API του SponsorBlock (Η προεπιλογή είναι https://sponsor.ajay.app)
     Skip Options:
@@ -779,14 +779,22 @@ Video:
   Video has been saved: Το βίντεο έχει αποθηκευτεί
   Save Video: Αποθήκευση βίντεο
   Sponsor Block category:
-    intro: Εισαγωγή
-    interaction: Αλληλεπίδραση
-    sponsor: Χορηγός
-    outro: Επίλογος
-    self-promotion: Αυτοπροβολή
-    music offtopic: Μουσική Εκτός θέματος
-    recap: Ανακεφαλαίωση
-    filler: Γεμιστικό
+    intro: Παύση/Εισαγωγή με Animation
+    interaction: Υπενθύμιση Αλληλεπίδρασης (Εγγραφή)
+    sponsor: Χορηγία
+    outro: Προτεινόμενα βίντεο καναλιών/Εύσημα
+    self-promotion: Αφιλοκέρδεια/Προσωπική Προώθηση
+    music offtopic: 'Μουσική: Τμήμα χωρίς μουσική'
+    recap: Προεπισκόπηση/Περίληψη
+    filler: Εφαπτόμενα/Αστεία
+    hook: Δέλεαρ/Χαιρετισμοί
+    highlight: Καλύτερη στιγμή
+    exclusive access: Αποκλειστική Πρόσβαση
+  Sponsor Block category short:
+    intro: Διάλειμμα
+    interaction: Υπενθύμιση Αλληλεπίδρασης
+    music offtopic: Χωρίς Μουσική
+    filler: Εφαπτόμενα
   External Player:
     video: βίντεο
     OpenInTemplate: Άνοιγμα σε {externalPlayer}
@@ -836,7 +844,7 @@ Video:
     Show Stats: Εμφάνιση στατιστικών στοιχείων
     Hide Stats: Απόκρυψη στατιστικών
     Audio Tracks: Κομμάτια ήχου
-    Skipped segment: Παραλείφθηκε το τμήμα {segmentCategory}
+    Skipped segment: 'Παραλείφθηκε «{segmentCategory}»'
     Playback will resume automatically when your connection comes back: Η αναπαραγωγή θα συνεχιστεί αυτόματα όταν επανέλθει η σύνδεσή σας.
     You appear to be offline: Φαίνεται ότι είστε εκτός σύνδεσης.
   MembersOnly: Τα βίντεο μόνο για μέλη δεν μπορούν να παρακολουθηθούν με το OpenTubeX, καθώς απαιτούν σύνδεση στο Google και συνδρομή επί πληρωμή στο κανάλι του μεταφορτωτή.
@@ -845,8 +853,8 @@ Video:
   IP block: Το YouTube έχει αποκλείσει τη διεύθυνση IP σας από την παρακολούθηση βίντεο. Προσπαθήστε να αλλάξετε VPN ή proxy.
   AgeRestricted: Τα βίντεο με περιορισμούς ηλικίας δεν μπορούν να παρακολουθηθούν με το OpenTubeX, καθώς απαιτούν σύνδεση στο Google και χρήση ενός λογαριασμού YouTube που έχει επαληθευτεί ως προς την ηλικία.
   DeArrow:
-    Show Original Details: Εμφάνιση αρχικών λεπτομερειών
-    Show Modified Details: Εμφάνιση τροποποιημένων λεπτομερειών
+    Show Original Details: Εμφάνιση Αρχικών Λεπτομερειών
+    Show Modified Details: Εμφάνιση Τροποποιημένων Λεπτομερειών
   More Options: Περισσότερες Επιλογές
   DRMProtected: Τα βίντεο που προστατεύονται με DRM δεν μπορούν να αναπαραχθούν στο OpenTubeX, καθώς απαιτούν ιδιόκτητα εξαρτήματα κλειστού κώδικα. Αν θέλετε να παρακολουθήσετε αυτό το βίντεο, παρακαλούμε να το παρακολουθήσετε στον επίσημο ιστότοπο του YouTube σε ένα πρόγραμμα περιήγησης ιστού με δυνατότητα DRM.
   Popout Live Chat: Αναδυόμενο παράθυρο συνομιλίας

@@ -327,35 +327,35 @@ const state = {
   },
   sponsorBlockSelfPromo: {
     color: 'Yellow',
-    skip: 'showInSeekBar'
+    skip: 'promptToSkip'
   },
   sponsorBlockInteraction: {
     color: 'Pink',
-    skip: 'showInSeekBar'
+    skip: 'promptToSkip'
   },
   sponsorBlockIntro: {
     color: 'Cyan',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockOutro: {
     color: 'Blue',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockRecap: {
     color: 'Indigo',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockHook: {
     color: 'Blue',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockMusicOffTopic: {
     color: 'Orange',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockFiller: {
     color: 'Purple',
-    skip: 'doNothing'
+    skip: 'promptToSkip'
   },
   sponsorBlockHighlight: {
     color: 'Red',

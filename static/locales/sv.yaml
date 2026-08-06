@@ -584,7 +584,7 @@ Settings:
     Proxy Username: Proxyanvändarnamn
     Proxy Password: Proxylösenord
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Avisera när ett sponsorsegment hoppas över
+    Notify when sponsor segment is skipped: Visa ett meddelande efter att ett segment har hoppats över
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': 'URL till SponsorBlock-API:t (förvald: https://sponsor.ajay.app)'
     Enable SponsorBlock: Använd sponsorblockering (SponsorBlock)
     SponsorBlock Settings: SponsorBlock
@@ -802,14 +802,22 @@ Video:
   Video has been saved: Videon har sparats
   Save Video: Spara videon
   Sponsor Block category:
-    music offtopic: Musik utanför ämnet
-    interaction: Interaktion
-    self-promotion: Självmarknadsföring
-    outro: Avslut
-    intro: Intro
-    sponsor: Sponsring
-    recap: Sammanfattning
-    filler: Utfyllnad
+    music offtopic: 'Musik: Icke-musikavsnitt'
+    interaction: Interaktionspåminnelse (prenumerera)
+    self-promotion: Obetald reklam​/egenreklam
+    outro: Slutkort/eftertexter
+    intro: Uppehåll/introduktion
+    sponsor: Sponsor
+    recap: Förhandstitt/Sammanfattning
+    filler: Ämnesavvikelse/skämt
+    hook: Hook/Hälsningar
+    highlight: Höjdpunkt
+    exclusive access: Exklusiv tillgång
+  Sponsor Block category short:
+    intro: Uppehåll
+    interaction: Interaktions­påminnelse
+    music offtopic: Icke-musik
+    filler: Ämnesavvikelse
   External Player:
     Unsupported Actions:
       shuffling playlists: blanda spellistor
@@ -852,7 +860,7 @@ Video:
     Hide Stats: Dölj statistik
     You appear to be offline: Du verkar vara offline.
     Playback will resume automatically when your connection comes back: Uppspelningen återupptas automatiskt när anslutningen återkommer.
-    Skipped segment: Hoppade över {segmentCategory}-segmentet
+    Skipped segment: '{segmentCategory} hoppades över'
     Audio Tracks: Ljudspår
     Autoplay is off: Automatisk uppspelning är inaktiverad
     Autoplay is on: Automatisk uppspelning är aktiverad
@@ -867,7 +875,7 @@ Video:
   DRMProtected: DRM-skyddade videor kan inte spelas upp i OpenTubeX eftersom de kräver proprietära komponenter med sluten källkod. Öppna videon på YouTubes officiella webbplats i en DRM-kompatibel webbläsare.
   DeArrow:
     Show Original Details: Visa originaldetaljer
-    Show Modified Details: Visa ändrade detaljer
+    Show Modified Details: Visa ändrade uppgifter
   Unlisted: Olistad
   MembersOnly: Videor endast för medlemmar kan inte ses med OpenTubeX eftersom de kräver Google-inloggning och betalt medlemskap på uppladdarens kanal.
   Watched Progress Saved: Visningspositionen har sparats

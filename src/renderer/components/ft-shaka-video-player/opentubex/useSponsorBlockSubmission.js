@@ -8,6 +8,7 @@ import {
   isSponsorBlockFullVideoSegment,
   resolveSponsorBlockActionType,
 } from '../../../helpers/player/sponsorBlockFullVideo'
+import { translateSponsorBlockCategory } from '../../../helpers/player/utils'
 import { openExternalLink, showToast } from '../../../helpers/utils'
 
 const SPONSORBLOCK_SUBMISSION_CATEGORIES = Object.freeze([
@@ -696,6 +697,44 @@ export function useSponsorBlockSubmission({
     return segment.actionType === 'poi' || isSponsorBlockPointCategory(segment.category)
   }
 
+  const sponsorBlockSubmissionCategoryNames = computed(() => {
+    // Depend on i18n so labels refresh when the locale changes.
+    t('Video.Sponsor Block category.sponsor')
+    return SPONSORBLOCK_SUBMISSION_CATEGORIES.map(category => {
+      return translateSponsorBlockCategory(category, { short: false })
+    })
+  })
+
+  /**
+   * @param {string} category
+   * @returns {Array<'skip' | 'mute' | 'full'>}
+   */
+  function getSponsorBlockActionTypeSelectValues(category) {
+    if (category === 'exclusive_access') {
+      return ['full']
+    }
+
+    if (isSponsorBlockFullVideoCategory(category)) {
+      return ['skip', 'mute', 'full']
+    }
+
+    return ['skip', 'mute']
+  }
+
+  /**
+   * @param {string} category
+   * @returns {string[]}
+   */
+  function getSponsorBlockActionTypeSelectNames(category) {
+    const labels = {
+      skip: t('Video.Player.SponsorBlock.SkipActionType'),
+      mute: t('Video.Player.SponsorBlock.MuteActionType'),
+      full: t('Video.Player.SponsorBlock.FullVideo'),
+    }
+
+    return getSponsorBlockActionTypeSelectValues(category).map(value => labels[value])
+  }
+
   function isSponsorBlockDraftComplete(segment) {
     return isSponsorBlockPointSegment(segment) ||
       isSponsorBlockFullVideoSegment(segment) ||
@@ -848,6 +887,9 @@ export function useSponsorBlockSubmission({
     sponsorBlockDraftSegments,
     sponsorBlockDraftSegmentsByVideoId,
     sponsorBlockSubmissionCategories: SPONSORBLOCK_SUBMISSION_CATEGORIES,
+    sponsorBlockSubmissionCategoryNames,
+    getSponsorBlockActionTypeSelectNames,
+    getSponsorBlockActionTypeSelectValues,
     sponsorBlockSubmissionError,
     sponsorBlockSubmissionMenuOpen,
     sponsorBlockSubmissionPending,

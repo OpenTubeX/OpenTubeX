@@ -1253,13 +1253,14 @@
 
 .sponsorBlockSubmissionWrapper {
   position: absolute;
-  right: 2%;
+  inset-inline-end: 2%;
   bottom: max(16%, calc(50px + 2.5% + 3%));
   z-index: 4;
   width: max-content;
   min-width: min(420px, calc(100% - 16px));
   max-width: calc(100% - 16px);
   pointer-events: auto;
+  transition: inset-inline-end 250ms ease;
 }
 
 .sponsorBlockSubmissionMenu {
@@ -1361,20 +1362,16 @@
   cursor: pointer;
 }
 
-.sponsorBlockDraftTimeInput,
-.sponsorBlockDraftCategory {
+.sponsorBlockDraftTimeInput {
+  width: 78px;
+  min-width: 78px;
   min-height: 30px;
+  box-sizing: border-box;
   padding: 4px 8px;
   border: 1px solid rgb(255 255 255 / 18%);
   border-radius: calc(4px * var(--ui-roundness));
   background-color: rgb(0 0 0 / 35%);
   color: inherit;
-}
-
-.sponsorBlockDraftTimeInput {
-  width: 78px;
-  min-width: 78px;
-  box-sizing: border-box;
 }
 
 .sponsorBlockDraftTimeText {
@@ -1393,8 +1390,36 @@
   text-align: center;
 }
 
-.sponsorBlockDraftCategory {
-  width: 100%;
+:deep(.sponsorBlockDraftCategory) {
+  inline-size: 100%;
+  margin-block-start: 16px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-text),
+:deep(.sponsorBlockDraftCategory .nativeSelect) {
+  block-size: 34px;
+  padding-inline-start: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: calc(4px * var(--ui-roundness));
+  background-color: rgb(0 0 0 / 35%);
+  color: #fff;
+  font-size: 13px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-label),
+:deep(.sponsorBlockDraftCategory .select-text ~ .select-label),
+:deep(.sponsorBlockDraftCategory .iconSelect) {
+  color: rgb(255 255 255 / 70%);
+  font-size: 12px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-text ~ .select-label) {
+  inset-block-start: -16px;
+}
+
+:deep(.sponsorBlockDraftCategory .select-bar::before),
+:deep(.sponsorBlockDraftCategory .select-bar::after) {
+  background: rgb(255 255 255 / 55%);
 }
 
 .sponsorBlockDraftActions {
@@ -1526,11 +1551,16 @@
   padding: 0;
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 
 :deep(.sponsorBlockMarker) {
+  position: absolute;
+  height: 100%;
   background-color: var(--primary-color);
-  mix-blend-mode: screen;
+
+  /* Keep category hue/saturation; use seekbar luminosity so played/buffer stay visible. */
+  mix-blend-mode: color;
 }
 
 :deep(.sponsorBlockPointMarker) {
@@ -1542,15 +1572,11 @@
 }
 
 :deep(.chapterMarker) {
-  width: 2px;
-  background-color: #000;
-}
-
-:deep(.sponsorBlockMarker),
-:deep(.chapterMarker) {
   position: absolute;
-  opacity: 0.6;
+  width: 2px;
   height: 100%;
+  background-color: #000;
+  opacity: 0.6;
 }
 
 :deep(.playerFullscreenTitleOverlay) {
@@ -2300,7 +2326,9 @@
 
 /* Keep SponsorBlock notices inside the video area when a dock is open. */
 .ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
-.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper {
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .skippedSegmentsWrapper,
+.ftVideoPlayer:fullscreen:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper,
+.ftVideoPlayer.fullWindow:is(.fullscreenMetadataOpen, .fullscreenTranscriptOpen, .fullscreenSponsorBlockOpen, .fullscreenLiveChatOpen, .fullscreenCommentsOpen, .fullscreenPlaylistOpen, .chaptersOverlayOpen) .sponsorBlockSubmissionWrapper {
   inset-inline-end: calc(var(--side-panel-width) + 2%);
 }
 
@@ -2928,8 +2956,7 @@
     for the small player that a narrow window results in.
   */
   .sponsorBlockSubmissionWrapper {
-    right: 8px;
-    left: 8px;
+    inset-inline: 8px;
     width: auto;
   }
 }

@@ -110,14 +110,23 @@ export async function getSponsorBlockSegments(videoId, categories, actionTypes) 
 }
 
 /**
+ * Map SponsorBlock API categories to locale keys under Video.Sponsor Block category.
+ * Prefer the short label (extension seekbar/skip-notice wording) when available,
+ * unless `short: false` is passed (e.g. submission / settings UI).
+ * Falls back to the full label when the active locale has not translated the short key yet.
  * @param {SponsorBlockCategory} category
+ * @param {{ short?: boolean }} [options]
  */
-export function translateSponsorBlockCategory(category) {
+export function translateSponsorBlockCategory(category, { short = true } = {}) {
+  const locale = i18n.global.locale.value
+
   switch (category) {
     case 'sponsor':
       return i18n.global.t('Video.Sponsor Block category.sponsor')
     case 'intro':
-      return i18n.global.t('Video.Sponsor Block category.intro')
+      return short && i18n.global.te('Video.Sponsor Block category short.intro', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.intro')
+        : i18n.global.t('Video.Sponsor Block category.intro')
     case 'outro':
       return i18n.global.t('Video.Sponsor Block category.outro')
     case 'recap':
@@ -128,11 +137,17 @@ export function translateSponsorBlockCategory(category) {
     case 'selfpromo':
       return i18n.global.t('Video.Sponsor Block category.self-promotion')
     case 'interaction':
-      return i18n.global.t('Video.Sponsor Block category.interaction')
+      return short && i18n.global.te('Video.Sponsor Block category short.interaction', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.interaction')
+        : i18n.global.t('Video.Sponsor Block category.interaction')
     case 'music_offtopic':
-      return i18n.global.t('Video.Sponsor Block category.music offtopic')
+      return short && i18n.global.te('Video.Sponsor Block category short.music offtopic', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.music offtopic')
+        : i18n.global.t('Video.Sponsor Block category.music offtopic')
     case 'filler':
-      return i18n.global.t('Video.Sponsor Block category.filler')
+      return short && i18n.global.te('Video.Sponsor Block category short.filler', locale)
+        ? i18n.global.t('Video.Sponsor Block category short.filler')
+        : i18n.global.t('Video.Sponsor Block category.filler')
     case 'poi_highlight':
       return i18n.global.t('Video.Sponsor Block category.highlight')
     case 'exclusive_access':

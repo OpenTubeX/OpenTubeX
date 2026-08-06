@@ -572,7 +572,7 @@ Settings:
       Auto Skip: Tự động bỏ qua
       Prompt To Skip: Nhắc nhở bỏ qua
       Do Nothing: Không làm gì
-    Notify when sponsor segment is skipped: Thông báo khi đoạn quảng cáo bị bỏ qua
+    Notify when sponsor segment is skipped: Hiển thị thông báo sau khi bỏ qua phân đoạn
     Category Color: Bản màu
     SponsorBlock Settings: SponsorBlock
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': URL API ảnh xem trước DeArrow (Mặc định là https://dearrow-thumb.ajay.app)
@@ -735,13 +735,21 @@ Video:
   Copy YouTube Channel Link: Sao chép liên kết của kênh
   Sponsor Block category:
     sponsor: Nhà tài trợ
-    intro: Giới thiệu
-    self-promotion: Tự thúc đẩy
-    interaction: Tương tác
-    music offtopic: Nhạc ngoại tuyến
-    outro: Kết thúc
-    recap: Tóm tắt
-    filler: Bộ lọc
+    intro: Tạm dừng/Giới thiệu
+    self-promotion: Quảng cáo không trả công/Tự quảng cáo
+    interaction: Nhắc tương tác (Đăng ký)
+    music offtopic: 'Nhạc: Phần không nhạc'
+    outro: Màn hình kết thúc/Danh đề
+    recap: Xem trước/Tóm tắt
+    filler: 'Lạc đề, nhảm nhí/Câu đùa'
+    hook: Gây chú ý/Lời chào
+    highlight: Điểm/Khoảnh khắc quan trọng
+    exclusive access: Truy cập riêng
+  Sponsor Block category short:
+    intro: Tạm ngừng
+    interaction: Nhắc nhở tương tác
+    music offtopic: Không có nhạc
+    filler: 'Các đoạn lạc đề, nhảm nhí'
   Streamed on: Phát trực tiếp vào lúc
   Started streaming on: Bắt đầu phát trực tiếp vào lúc
   External Player:
@@ -788,7 +796,7 @@ Video:
       Stats: Thông tin nâng cao
       Media Formats: 'Định dạng: {formats}'
       Dropped Frames / Total Frames: 'Khung bị bỏ: {droppedFrames} / tổng số khung: {totalFrames}'
-    Skipped segment: Đã bỏ qua phân đoạn {segmentCategory}
+    Skipped segment: '{segmentCategory} đã bỏ qua'
     You appear to be offline: Bạn có vẻ đang offline.
     Playback will resume automatically when your connection comes back: Trình phát sẽ tự động tiếp tục khi bạn kết nối trở lại.
     TranslatedCaptionTemplate: '{language} (được dịch từ "{originalLanguage}")'
@@ -804,8 +812,8 @@ Video:
   AgeRestricted: Các video giới hạn độ tuổi không thể được xem qua OpenTubeX vì chúng yêu cầu đăng nhập qua Google và sử dụng một tài khoản YouTube đã được xác minh độ tuổi.
   IP block: YouTube đang chặn địa chị IP của bạn khỏi việc xem video. Hãy thử sử dụng một VPN hoặc proxy khác.
   DeArrow:
-    Show Modified Details: Hiện thông tin đã sửa đổi
-    Show Original Details: Hiện thông tin gốc
+    Show Modified Details: Hiện chi tiết đã sửa đổi
+    Show Original Details: Hiện chi tiết gốc
 #& Playlists
   Unlisted: Không liệt kê
   DRMProtected: Không thể phát video được bảo vệ DRM trong OpenTubeX vì chúng yêu cầu các thành phần nguồn đóng độc quyền. Nếu bạn muốn xem video này, vui lòng xem trên trang web chính thức của YouTube trong trình duyệt web hỗ trợ DRM.
