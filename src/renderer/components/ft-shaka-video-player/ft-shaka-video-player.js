@@ -7314,7 +7314,12 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
           event.preventDefault()
           const enabled = !skipSilence.value
-          await updateSkipSilence(enabled)
+          try {
+            await updateSkipSilence(enabled)
+          } catch (error) {
+            console.error('Failed to update skip-silence setting:', error)
+            break
+          }
 
           // Only confirm the state that was actually persisted.
           if (skipSilence.value !== enabled) {
