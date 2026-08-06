@@ -42,6 +42,7 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
 
     const reloads = []
     const recoveries = []
+    const toasts = []
     // The real reload runs, so that a reset of the one-shot reload state during
     // a same-video reload would show up here as an extra reload.
     const reloadView = view.reloadView.bind(view)
@@ -56,6 +57,9 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
       if (!view.ipBlockDetectedInCurrentChain) { return false }
       recoveries.push(view.videoId)
       return true
+    }
+    view.showTabToast = (options) => {
+      toasts.push(typeof options === 'string' ? options : options.message)
     }
 
     // 1001 = BAD_HTTP_STATUS, category 1 = NETWORK.
@@ -72,11 +76,12 @@ async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
       steps.push({
         reloads: reloads.length,
         recoveries: recoveries.length,
-        errorMessage: view.errorMessage || ''
+        errorMessage: view.errorMessage || '',
+        toasts: [...toasts]
       })
     }
 
-    return { steps, reloads, recoveries }
+    return { steps, reloads, recoveries, toasts }
   }, { count: errorCount, sessionExpired: !!options.sessionExpired })
 }
 
@@ -95,7 +100,14 @@ test('a streaming URL 403 reloads the video before blaming the IP', async ({ app
 
   // Our own IP changing invalidates the issued streaming URLs the same way an
   // IP block does, so the first 403 must only fetch fresh URLs.
-  expect(result.steps).toEqual([{ reloads: 1, recoveries: 0, errorMessage: '' }])
+  expect(result.steps).toEqual([{
+    reloads: 1,
+    recoveries: 0,
+    errorMessage: '',
+    toasts: [
+      'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+    ]
+  }])
 })
 
 test('a streaming URL 403 that survives the reload runs the recovery script', async ({ app, page }) => {
@@ -104,11 +116,21 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
   const result = await replayStreamForbiddenErrors(page, 2)
 
   expect(result.steps).toEqual([
-    { reloads: 1, recoveries: 0, errorMessage: '' },
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+      ]
+    },
     {
       reloads: 1,
       recoveries: 1,
-      errorMessage: '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+      errorMessage: '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+      ]
     }
   ])
   expect(result.recoveries).toEqual(['jNQXAC9IVRw'])
@@ -119,7 +141,14 @@ test('an expired watch session 403 reloads the video before showing the error', 
 
   const result = await replayStreamForbiddenErrors(page, 1, { sessionExpired: true })
 
-  expect(result.steps).toEqual([{ reloads: 1, recoveries: 0, errorMessage: '' }])
+  expect(result.steps).toEqual([{
+    reloads: 1,
+    recoveries: 0,
+    errorMessage: '',
+    toasts: [
+      'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+    ]
+  }])
 })
 
 test('an expired watch session 403 that survives the reload shows the error', async ({ app, page }) => {
@@ -128,11 +157,21 @@ test('an expired watch session 403 that survives the reload shows the error', as
   const result = await replayStreamForbiddenErrors(page, 2, { sessionExpired: true })
 
   expect(result.steps).toEqual([
-    { reloads: 1, recoveries: 0, errorMessage: '' },
     {
       reloads: 1,
       recoveries: 0,
-      errorMessage: '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+      errorMessage: '',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+      ]
+    },
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+      ]
     }
   ])
   expect(result.recoveries).toEqual([])
