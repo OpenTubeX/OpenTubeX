@@ -57,6 +57,8 @@
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
+import { getCenteredChapterScrollTop } from './chapterScroll'
+
 const props = defineProps({
   chapters: {
     type: Array,
@@ -141,7 +143,9 @@ function getThumbnailStyle(thumbnail) {
 const observeVisibilityOptions = {
   callback: (isVisible, _entry) => {
     if (isVisible) {
-      scrollToCurrentChapter()
+      // Wait for the panel/dock layout to settle; centering with a zero-height
+      // container would scroll by half a row and clip the first chapter.
+      requestAnimationFrame(() => scrollToCurrentChapter())
     }
   },
   intersection: {
@@ -185,10 +189,11 @@ function navigateChapters(direction) {
 }
 
 /**
+ * @param {number} [remainingAttempts]
  */
-function scrollToCurrentChapter() {
+function scrollToCurrentChapter(remainingAttempts = 5) {
   const container = chaptersWrapper.value
-  const currentItem = container?.children[currentIndex.value]
+  const currentItem = container?.querySelectorAll(':scope > .chapter')[currentIndex.value]
 
   if (!container || !currentItem) {
     return
@@ -197,11 +202,26 @@ function scrollToCurrentChapter() {
   const containerRect = container.getBoundingClientRect()
   const currentItemRect = currentItem.getBoundingClientRect()
 
-  if (currentItemRect.top < containerRect.top) {
-    container.scrollTop += currentItemRect.top - containerRect.top
-  } else if (currentItemRect.bottom > containerRect.bottom) {
-    container.scrollTop += currentItemRect.bottom - containerRect.bottom
+  if (containerRect.height < currentItemRect.height && remainingAttempts > 0) {
+    requestAnimationFrame(() => scrollToCurrentChapter(remainingAttempts - 1))
+    return
   }
+
+  const top = getCenteredChapterScrollTop(
+    container.scrollTop + (currentItemRect.top - containerRect.top),
+    currentItemRect.height,
+    containerRect.height,
+    container.scrollHeight - container.clientHeight
+  )
+
+  if (top == null) {
+    if (remainingAttempts > 0) {
+      requestAnimationFrame(() => scrollToCurrentChapter(remainingAttempts - 1))
+    }
+    return
+  }
+
+  container.scrollTo({ top, behavior: 'smooth' })
 }
 
 </script>
