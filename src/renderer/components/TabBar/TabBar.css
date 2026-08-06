@@ -8,12 +8,14 @@
   min-block-size: 32px;
   padding-inline: 4px;
   gap: 2px;
-  -webkit-app-region: drag;
   position: sticky;
   inset-block-start: 0;
   z-index: 5;
   inline-size: 100%;
-  overflow: hidden;
+
+  /* Horizontal scrolling is handled by .tabsContainer. A non-visible overflow-x
+     value would force overflow-y to clip too, which flattens the tab top radii. */
+  overflow: visible;
 }
 
 /* The horizontal bar shares the top edge with the sticky top navigation, so it

@@ -435,7 +435,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   background-color: var(--tab-surface-color, var(--bg-color));
   border-radius: calc(6px * var(--ui-roundness)) calc(6px * var(--ui-roundness)) 0 0;
   cursor: pointer;
-  block-size: 31px;
+  block-size: 30px;
 
   /* Without a configured fixed width, tabs size to their content within these
      bounds. `--fixed-tab-width` (set by the tab bar) pins both ends together. */

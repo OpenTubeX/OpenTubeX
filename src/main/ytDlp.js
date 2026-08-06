@@ -12,6 +12,22 @@ import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
+/** @type {Map<string, AbortController>} */
+const getInfoAbortControllers = new Map()
+
+/**
+ * Supersede an earlier ytDlpGetInfo for the same probe key. System and managed
+ * refreshes use different keys so they can run in parallel on mount.
+ * @param {string} key
+ * @returns {AbortSignal}
+ */
+function takeGetInfoAbortSignal(key) {
+  getInfoAbortControllers.get(key)?.abort()
+  const controller = new AbortController()
+  getInfoAbortControllers.set(key, controller)
+  return controller.signal
+}
+
 /**
  * @typedef YtDlpDownloadPayload
  * @property {string} videoId
@@ -158,11 +174,17 @@ async function pushProxyArgument(args) {
 
 /**
  * @param {string} executable
+ * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
-async function getYtDlpVersion(executable) {
+async function getYtDlpVersion(executable, signal) {
   try {
-    const { stdout } = await execFileAsync(executable, ['--version'], { timeout: 10_000, windowsHide: true })
+    // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
+    const { stdout } = await execFileAsync(executable, ['--version'], {
+      timeout: 60_000,
+      windowsHide: true,
+      signal
+    })
     return stdout.trim()
   } catch {
     return null
@@ -171,11 +193,16 @@ async function getYtDlpVersion(executable) {
 
 /**
  * @param {string} executable
+ * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
-async function getFfmpegVersion(executable) {
+async function getFfmpegVersion(executable, signal) {
   try {
-    const { stdout } = await execFileAsync(executable, ['-version'], { timeout: 10_000, windowsHide: true })
+    const { stdout } = await execFileAsync(executable, ['-version'], {
+      timeout: 60_000,
+      windowsHide: true,
+      signal
+    })
     const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
     // the martin-riedl.de builds embed their website URL in the version string
     return version?.replace(/-https?:.*$/, '') ?? null
@@ -499,6 +526,23 @@ async function getBinaryInfo(resolved, getVersion) {
 }
 
 /**
+ * @param {{
+ *   ytDlpSource: 'system' | 'managed',
+ *   ytDlpPath: string,
+ *   ffmpegSource: 'system' | 'managed',
+ *   ffmpegPath: string
+ * } | undefined} options
+ * @returns {string}
+ */
+function getInfoProbeKey(options) {
+  if (options === undefined) {
+    return 'startup'
+  }
+
+  return `${options.ytDlpSource}:${options.ffmpegSource}`
+}
+
+/**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {{
  *   ytDlpSource: 'system' | 'managed',
@@ -535,20 +579,36 @@ export async function handleYtDlpGetInfo(event, options) {
     return null
   }
 
-  const [ytDlp, ffmpeg] = await Promise.all([
-    getBinaryInfo(
-      await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
-      getYtDlpVersion
-    ),
-    getBinaryInfo(
-      await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
-      getFfmpegVersion
-    )
-  ])
+  // Abort superseded probes for this key (e.g. rapid path edits) so the longer
+  // PyInstaller cold-start timeout cannot accumulate children. System vs managed
+  // use different keys and stay concurrent.
+  const probeKey = getInfoProbeKey(options)
+  const signal = takeGetInfoAbortSignal(probeKey)
 
-  return {
-    ytDlp,
-    ffmpeg
+  try {
+    const [ytDlp, ffmpeg] = await Promise.all([
+      getBinaryInfo(
+        await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
+        (executable) => getYtDlpVersion(executable, signal)
+      ),
+      getBinaryInfo(
+        await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
+        (executable) => getFfmpegVersion(executable, signal)
+      )
+    ])
+
+    if (signal.aborted) {
+      return null
+    }
+
+    return {
+      ytDlp,
+      ffmpeg
+    }
+  } finally {
+    if (getInfoAbortControllers.get(probeKey)?.signal === signal) {
+      getInfoAbortControllers.delete(probeKey)
+    }
   }
 }
 

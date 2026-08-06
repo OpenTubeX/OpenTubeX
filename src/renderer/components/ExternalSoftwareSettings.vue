@@ -274,6 +274,16 @@ async function refreshSystemBinariesInfo() {
 
 async function refreshManagedBinariesInfo() {
   const requestId = ++managedInfoRequestId
+
+  // Stale "not downloaded" must not stick around while we re-probe after a
+  // download — null means the UI shows "Checking…".
+  if (binariesInfoCache.value.ytDlp.managed?.available === false) {
+    binariesInfoCache.value.ytDlp.managed = null
+  }
+  if (binariesInfoCache.value.ffmpeg.managed?.available === false) {
+    binariesInfoCache.value.ffmpeg.managed = null
+  }
+
   const info = await getBinariesInfo({
     ytDlpSource: 'managed',
     ytDlpPath: '',
@@ -424,6 +434,9 @@ async function downloadBinary(binary) {
     const result = await window.ftElectron.ytDlpDownloadBinary(binary)
 
     if (result != null && 'version' in result) {
+      const key = binary === 'yt-dlp' ? 'ytDlp' : 'ffmpeg'
+      binariesInfoCache.value[key].managed = { source: 'managed', available: true, version: result.version }
+
       if (result.updated) {
         showToast({
           message: binary === 'yt-dlp'

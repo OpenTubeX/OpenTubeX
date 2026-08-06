@@ -142,7 +142,9 @@ const config = {
   plugins: [
     processLocalesPlugin,
     new webpack.DefinePlugin({
-      'process.platform': `'${process.platform}'`,
+      // OTX_PLATFORM overrides the build host when cross-packing (e.g.
+      // OTX_PLATFORM=darwin while building a macOS zip on Linux).
+      'process.platform': JSON.stringify(process.env.OTX_PLATFORM || process.platform),
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.SUPPORTS_LOCAL_API': true,
