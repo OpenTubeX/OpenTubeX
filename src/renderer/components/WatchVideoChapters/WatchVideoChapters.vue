@@ -215,6 +215,9 @@ function scrollToCurrentChapter(remainingAttempts = 5) {
   )
 
   if (top == null) {
+    if (remainingAttempts > 0) {
+      requestAnimationFrame(() => scrollToCurrentChapter(remainingAttempts - 1))
+    }
     return
   }
 
