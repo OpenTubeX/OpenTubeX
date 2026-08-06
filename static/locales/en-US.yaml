@@ -1679,7 +1679,9 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
-    Stream Extraction Method: Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
+    Stream Extraction Method: |
+      Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
+      Built-in does not support seeking for livestreams and premieres.
     Avoid translation: |
       Disable YouTube's autotranslation of title, description and chapters of a video.
       Too many requests, such as fetching video titles across lists, may temporarily
