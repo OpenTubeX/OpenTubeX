@@ -3429,42 +3429,60 @@ export default defineComponent({
           case 403:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
 
-            if (new Date() > this.streamingDataExpiryDate) {
-              this.errorMessage = '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
-              this.customErrorIcon = ['fas', 'clock']
-              return
-            }
-
-            if (this.videoGenreIsMusic) {
-              this.errorMessage = '[BAD_HTTP_STATUS: 403] Potential causes: IP block, streaming URL deciphering failed or music video geo-block'
-            } else {
-              this.errorMessage = '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
-            }
-
             // Streaming URLs are bound to the IP they were issued to, so they also
             // start returning 403 when our own IP changes (reconnect, prefix rotation,
-            // VPN switch). That looks exactly like an IP block, but fresh URLs fix it,
-            // so reload once before assuming the IP is blocked and running the script.
-            if (!this.stream403ReloadAttemptedForCurrentVideo) {
-              this.stream403ReloadAttemptedForCurrentVideo = true
-              this.showTabToast({
-                message: this.t('Video.Reloading video after streaming URL error'),
-                icon: ['fas', 'sync'],
-              })
-              await this.reloadView()
+            // VPN switch). An expired watch session likewise needs a fresh fetch.
+            // Reload once before escalating — to the IP block recovery script, or to
+            // the session-expired error — so the genuine failure paths are unchanged
+            // apart from the extra reload before them.
+            {
+              const sessionExpired = new Date() > this.streamingDataExpiryDate
+              const specificError = sessionExpired
+                ? '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+                : this.videoGenreIsMusic
+                  ? '[BAD_HTTP_STATUS: 403] Potential causes: IP block, streaming URL deciphering failed or music video geo-block'
+                  : '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+
+              if (!this.stream403ReloadAttemptedForCurrentVideo) {
+                this.stream403ReloadAttemptedForCurrentVideo = true
+                this.showTabToast({
+                  message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
+                  icon: ['fas', 'sync'],
+                })
+                await this.reloadView()
+                return
+              }
+
+              if (sessionExpired) {
+                this.errorMessage = specificError
+                this.customErrorIcon = ['fas', 'clock']
+                return
+              }
+
+              this.errorMessage = specificError
+              this.ipBlockDetectedInCurrentChain = true
+              await this.runIpBlockRecoveryScriptAndReload()
               return
             }
-
-            this.ipBlockDetectedInCurrentChain = true
-            await this.runIpBlockRecoveryScriptAndReload()
-            return
         }
       } else if (error.code === Code.VIDEO_ERROR) {
         if (this.activeFormat === 'legacy') {
           if (new Date() > this.streamingDataExpiryDate) {
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
 
-            this.errorMessage = '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+            const specificError = '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+
+            if (!this.stream403ReloadAttemptedForCurrentVideo) {
+              this.stream403ReloadAttemptedForCurrentVideo = true
+              this.showTabToast({
+                message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
+                icon: ['fas', 'sync'],
+              })
+              await this.reloadView()
+              return
+            }
+
+            this.errorMessage = specificError
             this.customErrorIcon = ['fas', 'clock']
             return
           }

@@ -11,38 +11,44 @@ test.use({
 })
 
 /**
- * Replays streaming URL 403s against the mounted Watch view, recording whether
- * each one reloaded the video or escalated to the IP block recovery script.
+ * Replays streaming URL failures against the mounted Watch view, recording
+ * whether each one reloaded the video, escalated to the IP block recovery
+ * script, or showed the session-expired error.
  *
  * @param {import('@playwright/test').Page} page
  * @param {number} errorCount
+ * @param {{ sessionExpired?: boolean, legacyVideoError?: boolean }} [options]
  */
-async function replayStreamForbiddenErrors(page, errorCount) {
+async function replayStreamForbiddenErrors(page, errorCount, options = {}) {
   const watchView = await watchViewHandle(page)
 
-  return await watchView.evaluate(async (view, count) => {
-    // The state a video that is playing a DASH stream is in.
+  return await watchView.evaluate(async (view, { count, sessionExpired, legacyVideoError }) => {
+    // The state a video that is playing is in for the chosen format.
     const enterPlayingState = () => {
       view.errorMessage = ''
+      view.customErrorIcon = null
       view.isLoading = false
       view.isLive = false
       view.isPostLiveDvr = false
-      view.activeFormat = 'dash'
+      view.activeFormat = legacyVideoError ? 'legacy' : 'dash'
       view.manifestMimeType = 'application/dash+xml'
-      // Not expired, so the 403 isn't attributed to a stale watch session.
-      view.streamingDataExpiryDate = new Date(Date.now() + 3_600_000)
+      // Fresh URLs for the IP-change path; past expiry for the session path.
+      view.streamingDataExpiryDate = sessionExpired
+        ? new Date(Date.now() - 60_000)
+        : new Date(Date.now() + 3_600_000)
     }
 
     enterPlayingState()
 
     const reloads = []
     const recoveries = []
+    const toasts = []
     // The real reload runs, so that a reset of the one-shot reload state during
     // a same-video reload would show up here as an extra reload.
     const reloadView = view.reloadView.bind(view)
-    view.reloadView = async (options) => {
+    view.reloadView = async (reloadOptions) => {
       reloads.push(view.videoId)
-      await reloadView(options)
+      await reloadView(reloadOptions)
       enterPlayingState()
     }
     // Same no-op guard as the real method, so the loads that happen during a
@@ -52,23 +58,37 @@ async function replayStreamForbiddenErrors(page, errorCount) {
       recoveries.push(view.videoId)
       return true
     }
+    view.showTabToast = (toastOptions) => {
+      toasts.push(typeof toastOptions === 'string' ? toastOptions : toastOptions.message)
+    }
 
-    // 1001 = BAD_HTTP_STATUS, category 1 = NETWORK.
-    const forbiddenError = () => ({
-      severity: 2,
-      category: 1,
-      code: 1001,
-      data: ['https://example.invalid/videoplayback', 403]
-    })
+    // 1001 = BAD_HTTP_STATUS (NETWORK); 3016 = VIDEO_ERROR (MEDIA).
+    const playerError = () => legacyVideoError
+      ? { severity: 2, category: 3, code: 3016, data: [] }
+      : {
+          severity: 2,
+          category: 1,
+          code: 1001,
+          data: ['https://example.invalid/videoplayback', 403]
+        }
 
     const steps = []
     for (let index = 0; index < count; index++) {
-      await view.handlePlayerError(forbiddenError())
-      steps.push({ reloads: reloads.length, recoveries: recoveries.length })
+      await view.handlePlayerError(playerError())
+      steps.push({
+        reloads: reloads.length,
+        recoveries: recoveries.length,
+        errorMessage: view.errorMessage || '',
+        toasts: [...toasts]
+      })
     }
 
-    return { steps, reloads, recoveries }
-  }, errorCount)
+    return { steps, reloads, recoveries, toasts }
+  }, {
+    count: errorCount,
+    sessionExpired: !!options.sessionExpired,
+    legacyVideoError: !!options.legacyVideoError
+  })
 }
 
 async function openWatchPage(app, page) {
@@ -86,7 +106,14 @@ test('a streaming URL 403 reloads the video before blaming the IP', async ({ app
 
   // Our own IP changing invalidates the issued streaming URLs the same way an
   // IP block does, so the first 403 must only fetch fresh URLs.
-  expect(result.steps).toEqual([{ reloads: 1, recoveries: 0 }])
+  expect(result.steps).toEqual([{
+    reloads: 1,
+    recoveries: 0,
+    errorMessage: '',
+    toasts: [
+      'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+    ]
+  }])
 })
 
 test('a streaming URL 403 that survives the reload runs the recovery script', async ({ app, page }) => {
@@ -95,10 +122,112 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
   const result = await replayStreamForbiddenErrors(page, 2)
 
   expect(result.steps).toEqual([
-    { reloads: 1, recoveries: 0 },
-    { reloads: 1, recoveries: 1 }
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+      ]
+    },
+    {
+      reloads: 1,
+      recoveries: 1,
+      errorMessage: '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+      ]
+    }
   ])
   expect(result.recoveries).toEqual(['jNQXAC9IVRw'])
+})
+
+test('an expired watch session 403 reloads the video before showing the error', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 1, { sessionExpired: true })
+
+  expect(result.steps).toEqual([{
+    reloads: 1,
+    recoveries: 0,
+    errorMessage: '',
+    toasts: [
+      'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+    ]
+  }])
+})
+
+test('an expired watch session 403 that survives the reload shows the error', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 2, { sessionExpired: true })
+
+  expect(result.steps).toEqual([
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+      ]
+    },
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
+      toasts: [
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+      ]
+    }
+  ])
+  expect(result.recoveries).toEqual([])
+})
+
+test('an expired legacy VIDEO_ERROR reloads the video before showing the error', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 1, {
+    sessionExpired: true,
+    legacyVideoError: true
+  })
+
+  expect(result.steps).toEqual([{
+    reloads: 1,
+    recoveries: 0,
+    errorMessage: '',
+    toasts: [
+      'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+    ]
+  }])
+})
+
+test('an expired legacy VIDEO_ERROR that survives the reload shows the error', async ({ app, page }) => {
+  await openWatchPage(app, page)
+
+  const result = await replayStreamForbiddenErrors(page, 2, {
+    sessionExpired: true,
+    legacyVideoError: true
+  })
+
+  expect(result.steps).toEqual([
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '',
+      toasts: [
+        'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+      ]
+    },
+    {
+      reloads: 1,
+      recoveries: 0,
+      errorMessage: '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.',
+      toasts: [
+        'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+      ]
+    }
+  ])
+  expect(result.recoveries).toEqual([])
 })
 
 test('subscription refresh waits for an active IP block recovery', async ({ app, page }) => {
