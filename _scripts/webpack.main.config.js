@@ -53,7 +53,9 @@ const config = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.platform': `'${process.platform}'`,
+      // Do not bake process.platform here. Cross-compiling (e.g. macOS
+      // builds on Linux) would otherwise hardcode the build host OS and
+      // download the wrong managed yt-dlp/ffmpeg binaries at runtime.
       'process.env.IS_ELECTRON_MAIN': true
     })
   ],

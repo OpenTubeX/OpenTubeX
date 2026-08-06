@@ -162,7 +162,8 @@ async function pushProxyArgument(args) {
  */
 async function getYtDlpVersion(executable) {
   try {
-    const { stdout } = await execFileAsync(executable, ['--version'], { timeout: 10_000, windowsHide: true })
+    // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
+    const { stdout } = await execFileAsync(executable, ['--version'], { timeout: 60_000, windowsHide: true })
     return stdout.trim()
   } catch {
     return null
@@ -175,7 +176,7 @@ async function getYtDlpVersion(executable) {
  */
 async function getFfmpegVersion(executable) {
   try {
-    const { stdout } = await execFileAsync(executable, ['-version'], { timeout: 10_000, windowsHide: true })
+    const { stdout } = await execFileAsync(executable, ['-version'], { timeout: 60_000, windowsHide: true })
     const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
     // the martin-riedl.de builds embed their website URL in the version string
     return version?.replace(/-https?:.*$/, '') ?? null

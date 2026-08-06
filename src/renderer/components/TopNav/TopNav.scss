@@ -71,8 +71,9 @@
   }
 }
 
-.menuButton {
-  @media only screen and (width <= 680px) {
+@media only screen and (width <= 680px) {
+  /* Beat .navButton { display: inline-flex } from the icon-pack styles. */
+  .menuButton.navButton {
     display: none;
   }
 }
