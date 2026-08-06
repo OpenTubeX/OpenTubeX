@@ -13,6 +13,7 @@ concurrency:
 jobs:
   validate-release-note:
     name: Release Note
+    if: ${{ github.head_ref != 'weblate-translations' }}
     runs-on: ubuntu-latest
 
     permissions:

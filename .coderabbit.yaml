@@ -3,3 +3,6 @@
 reviews:
   high_level_summary: false
   request_changes_workflow: true
+  auto_review:
+    ignore_title_keywords:
+      - "Translations update from Weblate"

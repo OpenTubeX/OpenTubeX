@@ -3,5 +3,6 @@
   "autoApprove": {
     "enabled": true,
     "riskCeiling": "low"
-  }
+  },
+  "excludeBranches": ["weblate-translations"]
 }
