@@ -9,6 +9,10 @@
   border-block-end: 1px solid var(--tertiary-text-color);
   block-size: 32px;
   min-block-size: 32px;
+
+  /* Keep top radii off the title-bar edge without growing .tabsContainer, so the
+     active tab's ::after connector can still cover the 1px bottom separator. */
+  padding-block-start: 1px;
   padding-inline: 4px;
   gap: 2px;
   position: sticky;
@@ -40,10 +44,6 @@
 .tabsContainer {
   display: flex;
   min-inline-size: 0;
-
-  /* 1px keeps top radii/borders off the overflow-y clip edge (CSS cannot do
-     overflow-x: auto with overflow-y: visible). */
-  padding-block-start: 1px;
   overflow: auto hidden;
 
   /* The horizontal layout draws its own scrollbar below (.tabsScrollbar). The
