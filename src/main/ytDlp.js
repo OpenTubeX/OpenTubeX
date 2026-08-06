@@ -12,6 +12,34 @@ import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
+/** @type {Set<import('node:child_process').ChildProcess>} */
+const activeVersionProbes = new Set()
+
+function cancelActiveVersionProbes() {
+  for (const child of activeVersionProbes) {
+    child.kill()
+  }
+}
+
+/**
+ * @param {string} executable
+ * @param {string[]} args
+ * @returns {Promise<string | null>}
+ */
+function runVersionProbe(executable, args) {
+  return new Promise((resolve) => {
+    const child = execFile(executable, args, { timeout: 60_000, windowsHide: true }, (error, stdout) => {
+      activeVersionProbes.delete(child)
+      if (error) {
+        resolve(null)
+        return
+      }
+      resolve(typeof stdout === 'string' ? stdout : stdout.toString())
+    })
+    activeVersionProbes.add(child)
+  })
+}
+
 /**
  * @typedef YtDlpDownloadPayload
  * @property {string} videoId
@@ -161,13 +189,9 @@ async function pushProxyArgument(args) {
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
 async function getYtDlpVersion(executable) {
-  try {
-    // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
-    const { stdout } = await execFileAsync(executable, ['--version'], { timeout: 60_000, windowsHide: true })
-    return stdout.trim()
-  } catch {
-    return null
-  }
+  // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
+  const stdout = await runVersionProbe(executable, ['--version'])
+  return stdout?.trim() ?? null
 }
 
 /**
@@ -175,14 +199,13 @@ async function getYtDlpVersion(executable) {
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
 async function getFfmpegVersion(executable) {
-  try {
-    const { stdout } = await execFileAsync(executable, ['-version'], { timeout: 60_000, windowsHide: true })
-    const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
-    // the martin-riedl.de builds embed their website URL in the version string
-    return version?.replace(/-https?:.*$/, '') ?? null
-  } catch {
+  const stdout = await runVersionProbe(executable, ['-version'])
+  if (stdout == null) {
     return null
   }
+  const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
+  // the martin-riedl.de builds embed their website URL in the version string
+  return version?.replace(/-https?:.*$/, '') ?? null
 }
 
 /**
@@ -535,6 +558,10 @@ export async function handleYtDlpGetInfo(event, options) {
   if (!await waitForFirstWindowShow(event.sender)) {
     return null
   }
+
+  // Drop in-flight probes from a superseded ytDlpGetInfo (e.g. rapid path edits)
+  // so the longer PyInstaller cold-start timeout cannot accumulate children.
+  cancelActiveVersionProbes()
 
   const [ytDlp, ffmpeg] = await Promise.all([
     getBinaryInfo(
