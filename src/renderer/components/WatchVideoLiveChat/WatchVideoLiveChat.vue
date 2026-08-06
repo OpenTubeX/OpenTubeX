@@ -2,6 +2,7 @@
   <FtCard
     class="card relative"
     :class="{ hasError, fullscreenChat: fullscreenOverlay }"
+    @wheel.stop
   >
     <header
       v-if="fullscreenOverlay"
@@ -208,80 +209,25 @@
           </p>
         </div>
       </div>
-      <div
-        v-if="showSuperChat"
-        class="openedSuperChat"
-        :class="superChat.superChat.colorClass"
-        role="button"
-        tabindex="0"
-        @click="hideSuperChat"
-        @keydown.enter.space.prevent="hideSuperChat"
-      >
+      <div class="liveChatBody">
         <div
-          class="superChatMessage"
-          @click.stop.prevent
+          v-if="showSuperChat"
+          class="openedSuperChat"
+          :class="superChat.superChat.colorClass"
+          role="button"
+          tabindex="0"
+          @click="hideSuperChat"
+          @keydown.enter.space.prevent="hideSuperChat"
         >
           <div
-            class="upperSuperChatMessage"
-          >
-            <img
-              :src="superChat.author.thumbnailUrl"
-              class="channelThumbnail"
-              alt=""
-            >
-            <div class="superChatAuthor">
-              <span
-                v-if="showLiveChatTimestamps"
-                class="liveChatTimestamp"
-              >
-                {{ superChat.timestampText }}
-              </span>
-              <RouterLink
-                class="channelName"
-                dir="auto"
-                :to="`/channel/${superChat.author.id}`"
-              >
-                {{ superChat.author.name }}
-              </RouterLink>
-            </div>
-            <p
-              class="donationAmount"
-              dir="auto"
-            >
-              {{ superChat.superChat.amount }}
-            </p>
-          </div>
-          <p
-            v-safer-html="superChat.message"
-            class="chatMessage"
-            dir="auto"
-          />
-        </div>
-      </div>
-      <div
-        ref="commentsRef"
-        v-overlay-scrollbars
-        class="liveChatComments"
-        :style="{ blockSize: chatHeight }"
-        @pointerdown="stopScrollingToBottom"
-        @scroll.passive="onScroll"
-        @scrollend="onScrollEnd"
-        @wheel.passive="stopScrollingToBottom"
-      >
-        <div
-          v-for="comment in comments"
-          :key="comment.id"
-          class="comment"
-          :class="comment.superChat ? `superChatMessage ${comment.superChat.colorClass}` : ''"
-        >
-          <template
-            v-if="comment.superChat"
+            class="superChatMessage"
+            @click.stop.prevent
           >
             <div
               class="upperSuperChatMessage"
             >
               <img
-                :src="comment.author.thumbnailUrl"
+                :src="superChat.author.thumbnailUrl"
                 class="channelThumbnail"
                 alt=""
               >
@@ -290,76 +236,140 @@
                   v-if="showLiveChatTimestamps"
                   class="liveChatTimestamp"
                 >
-                  {{ comment.timestampText }}
+                  {{ superChat.timestampText }}
                 </span>
                 <RouterLink
                   class="channelName"
                   dir="auto"
-                  :to="`/channel/${comment.author.id}`"
+                  :to="`/channel/${superChat.author.id}`"
                 >
-                  {{ comment.author.name }}
+                  {{ superChat.author.name }}
                 </RouterLink>
               </div>
               <p
                 class="donationAmount"
                 dir="auto"
               >
-                {{ comment.superChat.amount }}
+                {{ superChat.superChat.amount }}
               </p>
             </div>
             <p
-              v-if="comment.message"
-              v-safer-html="comment.message"
+              v-safer-html="superChat.message"
               class="chatMessage"
               dir="auto"
             />
-          </template>
-          <template
-            v-else
+          </div>
+        </div>
+        <div
+          ref="commentsRef"
+          v-overlay-scrollbars
+          class="liveChatComments"
+          :style="{ blockSize: chatHeight }"
+          @pointerdown="stopScrollingToBottom"
+          @scroll.passive="onScroll"
+          @scrollend="onScrollEnd"
+          @wheel.passive="stopScrollingToBottom"
+        >
+          <TransitionGroup
+            name="live-chat-message"
+            tag="div"
+            class="liveChatCommentList"
+            @after-enter="onLiveChatMessageEntered"
           >
-            <img
-              :src="comment.author.thumbnailUrl"
-              class="channelThumbnail"
-              alt=""
+            <div
+              v-for="comment in comments"
+              :key="comment.id"
+              class="comment"
+              :class="comment.superChat ? `superChatMessage ${comment.superChat.colorClass}` : ''"
             >
-            <p
-              class="chatContent"
-            >
-              <span
-                v-if="showLiveChatTimestamps"
-                class="liveChatTimestamp"
+              <template
+                v-if="comment.superChat"
               >
-                {{ comment.timestampText }}
-              </span>
-              <RouterLink
-                class="channelName"
-                :class="{
-                  member: comment.author.isMember,
-                  moderator: comment.author.isModerator,
-                  owner: comment.author.isOwner
-                }"
-                dir="auto"
-                :to="`/channel/${comment.author.id}`"
-              >
-                {{ comment.author.name }}
-              </RouterLink>
-              <span
-                v-if="comment.author.badge"
-                class="badge"
+                <div
+                  class="upperSuperChatMessage"
+                >
+                  <img
+                    :src="comment.author.thumbnailUrl"
+                    class="channelThumbnail"
+                    alt=""
+                  >
+                  <div class="superChatAuthor">
+                    <span
+                      v-if="showLiveChatTimestamps"
+                      class="liveChatTimestamp"
+                    >
+                      {{ comment.timestampText }}
+                    </span>
+                    <RouterLink
+                      class="channelName"
+                      dir="auto"
+                      :to="`/channel/${comment.author.id}`"
+                    >
+                      {{ comment.author.name }}
+                    </RouterLink>
+                  </div>
+                  <p
+                    class="donationAmount"
+                    dir="auto"
+                  >
+                    {{ comment.superChat.amount }}
+                  </p>
+                </div>
+                <p
+                  v-if="comment.message"
+                  v-safer-html="comment.message"
+                  class="chatMessage"
+                  dir="auto"
+                />
+              </template>
+              <template
+                v-else
               >
                 <img
-                  :src="comment.author.badge.url"
+                  :src="comment.author.thumbnailUrl"
+                  class="channelThumbnail"
                   alt=""
-                  :title="comment.author.badge.tooltip"
-                  class="badgeImage"
                 >
-              </span>
-              <bdi
-                v-safer-html="comment.message"
-                class="chatMessage"
-              />
-            </p>
-          </template>
+                <p
+                  class="chatContent"
+                >
+                  <span
+                    v-if="showLiveChatTimestamps"
+                    class="liveChatTimestamp"
+                  >
+                    {{ comment.timestampText }}
+                  </span>
+                  <RouterLink
+                    class="channelName"
+                    :class="{
+                      member: comment.author.isMember,
+                      moderator: comment.author.isModerator,
+                      owner: comment.author.isOwner
+                    }"
+                    dir="auto"
+                    :to="`/channel/${comment.author.id}`"
+                  >
+                    {{ comment.author.name }}
+                  </RouterLink>
+                  <span
+                    v-if="comment.author.badge"
+                    class="badge"
+                  >
+                    <img
+                      :src="comment.author.badge.url"
+                      alt=""
+                      :title="comment.author.badge.tooltip"
+                      class="badgeImage"
+                    >
+                  </span>
+                  <bdi
+                    v-safer-html="comment.message"
+                    class="chatMessage"
+                  />
+                </p>
+              </template>
+            </div>
+          </TransitionGroup>
         </div>
       </div>
       <div
@@ -399,6 +409,7 @@ import store from '../../store/index'
 import { formatNumber } from '../../helpers/utils'
 import { getRandomColorClass } from '../../helpers/colors'
 import { getLocalVideoInfo, parseLocalTextRuns } from '../../helpers/api/local'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   createCoalescingPoller,
   isReplaySeek,
@@ -439,6 +450,11 @@ let liveChatInstance = null
 let hasEnded = false
 let stayAtBottom = true
 let isScrollingToBottom = false
+/** @type {ReturnType<typeof setTimeout> | null} */
+let scrollToLiveHoldTimer = null
+
+/** Hold auto-follow through the message enter animation (~180ms). */
+const SCROLL_TO_LIVE_HOLD_MS = 220
 
 /**
  * Replay messages that were fetched but that the player hasn't reached yet.
@@ -518,6 +534,10 @@ const formattedWatchingCount = computed(() => {
 
 onBeforeUnmount(() => {
   document.removeEventListener('pointerdown', handleChatSettingsClickOutside, true)
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
   handleEnd()
 })
 
@@ -609,13 +629,37 @@ function startLiveChatLocal() {
 
 const commentsRef = useTemplateRef('commentsRef')
 
-watch(() => props.fullscreenOverlay, fullscreenOverlay => {
-  if (!fullscreenOverlay) {
+watch(() => props.fullscreenOverlay, () => {
+  // Entering and leaving the dock both change the viewport height; OverlayScrollbars
+  // can keep an obsolete end offset and leave the list parked on empty space.
+  if (stayAtBottom) {
+    scrollToLiveAfterLayout()
+  }
+})
+
+/**
+ * Keep the live edge glued across dock open/close animations and height shares.
+ * OverlayScrollbars otherwise restores a stale scrollTop past the content end —
+ * empty view until the user scrolls up (same failure mode as the comments dock).
+ */
+watch(commentsRef, (element, _previous, onCleanup) => {
+  if (element == null) {
     return
   }
 
-  scrollToLiveAfterLayout()
-})
+  const resizeObserver = new ResizeObserver(() => {
+    if (!stayAtBottom) {
+      return
+    }
+
+    scrollToBottom('instant')
+  })
+
+  resizeObserver.observe(element)
+  onCleanup(() => {
+    resizeObserver.disconnect()
+  })
+}, { flush: 'post' })
 
 /**
  * OverlayScrollbars measures its viewport after Vue renders. Waiting through
@@ -879,16 +923,18 @@ function pushComment(comment) {
   const shouldStayAtBottom = stayAtBottom
   comments.push(comment)
 
+  // Trim before re-anchoring so OverlayScrollbars does not restore a scrollTop
+  // that pointed past messages that were just removed from the top.
+  if (comments.length > 150 && shouldStayAtBottom) {
+    comments.splice(0, comments.length - 150)
+  }
+
   if (!isLoading.value && shouldStayAtBottom) {
     nextTick(() => {
       // Smooth scrolling can be interrupted when another message arrives or the
       // tab is backgrounded. An instant follow-up keeps the bottom anchored.
       scrollToBottom('instant')
     })
-  }
-
-  if (comments.length > 150 && stayAtBottom) {
-    comments.splice(0, comments.length - 150)
   }
 }
 
@@ -901,6 +947,11 @@ function removeFromSuperChat(comment) {
   // Seeking a replay clears the ticker while the removal timeouts are still pending.
   if (index !== -1) {
     superChatComments.splice(index, 1)
+  }
+
+  // The ticker chip is gone; don't leave its expanded card floating over chat.
+  if (showSuperChat.value && superChat.value.id === comment.id) {
+    showSuperChat.value = false
   }
 }
 
@@ -948,7 +999,10 @@ function onScroll() {
 
   if (isAtBottom) {
     stayAtBottom = true
-    isScrollingToBottom = false
+    // Keep the programmatic follow flag for the enter-animation hold window.
+    if (scrollToLiveHoldTimer === null) {
+      isScrollingToBottom = false
+    }
     showScrollToBottom.value = false
   } else if (!isScrollingToBottom) {
     stayAtBottom = false
@@ -957,17 +1011,38 @@ function onScroll() {
 }
 
 function onScrollEnd() {
+  // Programmatic follow uses a hold timer through the enter animation; don't let
+  // an intermediate scrollend drop stayAtBottom early.
+  if (scrollToLiveHoldTimer !== null) {
+    return
+  }
+
   isScrollingToBottom = false
   onScroll()
 }
 
 function stopScrollingToBottom() {
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
+
   isScrollingToBottom = false
   stayAtBottom = false
 }
 
 function hideSuperChat() {
   showSuperChat.value = false
+}
+
+/**
+ * Enter animation can leave the viewport short of the live edge for a frame;
+ * re-pin once the new message has finished sliding in.
+ */
+function onLiveChatMessageEntered() {
+  if (stayAtBottom) {
+    scrollToBottom('instant')
+  }
 }
 
 /**
@@ -983,8 +1058,35 @@ function scrollToBottom(behavior = scrollingBehaviour.value) {
   isScrollingToBottom = true
   showScrollToBottom.value = false
 
+  if (scrollToLiveHoldTimer !== null) {
+    clearTimeout(scrollToLiveHoldTimer)
+    scrollToLiveHoldTimer = null
+  }
+
+  const top = liveChatComments.scrollHeight
+
+  if (behavior === 'instant' || behavior === 'auto') {
+    // Force OverlayScrollbars to accept the new end offset; a plain scrollTo can
+    // lose to its restored pre-teleport / pre-trim position.
+    restoreOverlayScrollTop(liveChatComments, top)
+    scrollToLiveHoldTimer = setTimeout(() => {
+      scrollToLiveHoldTimer = null
+      if (commentsRef.value !== liveChatComments) {
+        return
+      }
+
+      if (stayAtBottom) {
+        restoreOverlayScrollTop(liveChatComments, liveChatComments.scrollHeight)
+      }
+
+      isScrollingToBottom = false
+      onScroll()
+    }, SCROLL_TO_LIVE_HOLD_MS)
+    return
+  }
+
   liveChatComments.scrollTo({
-    top: liveChatComments.scrollHeight,
+    top,
     behavior
   })
 }
