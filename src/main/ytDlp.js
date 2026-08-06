@@ -12,32 +12,20 @@ import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
 
 const execFileAsync = promisify(execFile)
 
-/** @type {Set<import('node:child_process').ChildProcess>} */
-const activeVersionProbes = new Set()
-
-function cancelActiveVersionProbes() {
-  for (const child of activeVersionProbes) {
-    child.kill()
-  }
-}
+/** @type {Map<string, AbortController>} */
+const getInfoAbortControllers = new Map()
 
 /**
- * @param {string} executable
- * @param {string[]} args
- * @returns {Promise<string | null>}
+ * Supersede an earlier ytDlpGetInfo for the same probe key. System and managed
+ * refreshes use different keys so they can run in parallel on mount.
+ * @param {string} key
+ * @returns {AbortSignal}
  */
-function runVersionProbe(executable, args) {
-  return new Promise((resolve) => {
-    const child = execFile(executable, args, { timeout: 60_000, windowsHide: true }, (error, stdout) => {
-      activeVersionProbes.delete(child)
-      if (error) {
-        resolve(null)
-        return
-      }
-      resolve(typeof stdout === 'string' ? stdout : stdout.toString())
-    })
-    activeVersionProbes.add(child)
-  })
+function takeGetInfoAbortSignal(key) {
+  getInfoAbortControllers.get(key)?.abort()
+  const controller = new AbortController()
+  getInfoAbortControllers.set(key, controller)
+  return controller.signal
 }
 
 /**
@@ -186,26 +174,41 @@ async function pushProxyArgument(args) {
 
 /**
  * @param {string} executable
+ * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
-async function getYtDlpVersion(executable) {
-  // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
-  const stdout = await runVersionProbe(executable, ['--version'])
-  return stdout?.trim() ?? null
+async function getYtDlpVersion(executable, signal) {
+  try {
+    // PyInstaller onefile builds extract on first launch; allow time for that on slow disks/VMs
+    const { stdout } = await execFileAsync(executable, ['--version'], {
+      timeout: 60_000,
+      windowsHide: true,
+      signal
+    })
+    return stdout.trim()
+  } catch {
+    return null
+  }
 }
 
 /**
  * @param {string} executable
+ * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
  * @returns {Promise<string | null>} the version, or null if the executable doesn't work
  */
-async function getFfmpegVersion(executable) {
-  const stdout = await runVersionProbe(executable, ['-version'])
-  if (stdout == null) {
+async function getFfmpegVersion(executable, signal) {
+  try {
+    const { stdout } = await execFileAsync(executable, ['-version'], {
+      timeout: 60_000,
+      windowsHide: true,
+      signal
+    })
+    const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
+    // the martin-riedl.de builds embed their website URL in the version string
+    return version?.replace(/-https?:.*$/, '') ?? null
+  } catch {
     return null
   }
-  const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
-  // the martin-riedl.de builds embed their website URL in the version string
-  return version?.replace(/-https?:.*$/, '') ?? null
 }
 
 /**
@@ -523,6 +526,23 @@ async function getBinaryInfo(resolved, getVersion) {
 }
 
 /**
+ * @param {{
+ *   ytDlpSource: 'system' | 'managed',
+ *   ytDlpPath: string,
+ *   ffmpegSource: 'system' | 'managed',
+ *   ffmpegPath: string
+ * } | undefined} options
+ * @returns {string}
+ */
+function getInfoProbeKey(options) {
+  if (options === undefined) {
+    return 'startup'
+  }
+
+  return `${options.ytDlpSource}:${options.ffmpegSource}`
+}
+
+/**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {{
  *   ytDlpSource: 'system' | 'managed',
@@ -559,24 +579,36 @@ export async function handleYtDlpGetInfo(event, options) {
     return null
   }
 
-  // Drop in-flight probes from a superseded ytDlpGetInfo (e.g. rapid path edits)
-  // so the longer PyInstaller cold-start timeout cannot accumulate children.
-  cancelActiveVersionProbes()
+  // Abort superseded probes for this key (e.g. rapid path edits) so the longer
+  // PyInstaller cold-start timeout cannot accumulate children. System vs managed
+  // use different keys and stay concurrent.
+  const probeKey = getInfoProbeKey(options)
+  const signal = takeGetInfoAbortSignal(probeKey)
 
-  const [ytDlp, ffmpeg] = await Promise.all([
-    getBinaryInfo(
-      await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
-      getYtDlpVersion
-    ),
-    getBinaryInfo(
-      await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
-      getFfmpegVersion
-    )
-  ])
+  try {
+    const [ytDlp, ffmpeg] = await Promise.all([
+      getBinaryInfo(
+        await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
+        (executable) => getYtDlpVersion(executable, signal)
+      ),
+      getBinaryInfo(
+        await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
+        (executable) => getFfmpegVersion(executable, signal)
+      )
+    ])
 
-  return {
-    ytDlp,
-    ffmpeg
+    if (signal.aborted) {
+      return null
+    }
+
+    return {
+      ytDlp,
+      ffmpeg
+    }
+  } finally {
+    if (getInfoAbortControllers.get(probeKey)?.signal === signal) {
+      getInfoAbortControllers.delete(probeKey)
+    }
   }
 }
 
