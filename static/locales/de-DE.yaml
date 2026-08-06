@@ -731,7 +731,7 @@ Settings:
     Failed to select IP block recovery script: Auswahl der IP-Block-Wiederherstellungsskriptdatei fehlgeschlagen
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Hinweis nach dem Überspringen eines Segments anzeigen
-    Skip notification timeout: 'Dauer der Überspringen-Meldung (Sekunden):'
+    Skip notification timeout: Timeout für Benachrichtigung bei Überspringen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-URL (Standard ist https://sponsor.ajay.app)
     Enable SponsorBlock: SponsorBlock aktivieren
     Enable SponsorBlock Submission: SponsorBlock-Einreichung aktivieren

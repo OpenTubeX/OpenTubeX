@@ -757,7 +757,7 @@ Settings:
     Export Generated User ID: Wyeksportuj wygenerowany ID
     Generated SponsorBlock User ID Copy Button: Skopiuj wygenerowany ID użytkownika SponsorBlock
     Generated SponsorBlock User ID Copied: Wygenerowany ID użytkownika SponsorBlock został skopiowany do schowka
-    Skip notification timeout: 'Czas trwania powiadomienia pominięcia (sekundy):'
+    Skip notification timeout: Czas trwania powiadomienia o cofnięciu pominięcia
   External Player Settings:
     Custom External Player Arguments: Niestandardowe argumenty zewnętrznego odtwarzacza
     Custom External Player Executable: Niestandardowy plik wykonywalny zewnętrznego odtwarzacza

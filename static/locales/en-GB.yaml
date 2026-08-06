@@ -594,7 +594,7 @@ Settings:
     Proxy Password: Proxy Password
   SponsorBlock Settings:
     Notify when sponsor segment is skipped: Show notice after a segment is skipped
-    Skip notification timeout: 'Skip notice duration (seconds):'
+    Skip notification timeout: Skip notification timeout
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API Url (Default is https://sponsor.ajay.app)
     Enable SponsorBlock: Enable SponsorBlock
     SponsorBlock Settings: SponsorBlock

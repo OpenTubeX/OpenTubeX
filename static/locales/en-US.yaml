@@ -1029,7 +1029,7 @@ Settings:
     Generated SponsorBlock User ID Copy Button: Copy generated SponsorBlock user ID
     Generated SponsorBlock User ID Copied: Generated SponsorBlock user ID copied to clipboard
     Notify when sponsor segment is skipped: Show notice after a segment is skipped
-    Skip notification timeout: 'Skip notice duration (seconds):'
+    Skip notification timeout: Skip notification timeout
     UseDeArrowTitles: Use DeArrow Video Titles
     UseDeArrowThumbnails: Use DeArrow for thumbnails
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': 'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)'
