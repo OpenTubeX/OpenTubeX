@@ -4,6 +4,7 @@ import router from '../router/index'
 import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
 import { getPreferredShortThumbnailUrl } from './player/shorts'
+import { captureTabMorphSnapshot, morphThumbnailIntoTab } from './tabMorph'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
@@ -402,8 +403,19 @@ export async function openExternalLink(url) {
  * @param {string} [params.title] initial title for the destination
  * @param {object} [params.query] the query params to use (optional)
  * @param {string} [params.searchQueryText] the text to show in the search bar in the new window (optional)
+ * @param {EventTarget | null} [params.morphSource] thumbnail/link to morph into the new tab (watch tabs only)
+ * @returns {Promise<{ id: string } | null | undefined>}
  */
-export function openInternalPath({ path, query = undefined, doCreateNewWindow = false, doCreateNewTab = false, makeActive = true, title = undefined, searchQueryText = null }) {
+export async function openInternalPath({
+  path,
+  query = undefined,
+  doCreateNewWindow = false,
+  doCreateNewTab = false,
+  makeActive = true,
+  title = undefined,
+  searchQueryText = null,
+  morphSource = null
+}) {
   if (process.env.IS_ELECTRON) {
     if (doCreateNewTab) {
       // Open in new tab
@@ -411,7 +423,12 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
-      window.ftElectron.tabs.create({
+      // Capture before create: activating the tab hides this view via v-show
+      const morphSnapshot = morphSource != null && path.startsWith('/watch/')
+        ? captureTabMorphSnapshot(morphSource)
+        : null
+
+      const created = await window.ftElectron.tabs.create({
         route,
         query,
         title,
@@ -420,6 +437,13 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         openerTabId: getTabNavigationService().getPresentedTabId(),
         preloadInBackground: !makeActive && path.startsWith('/watch/')
       })
+
+      if (morphSnapshot && created?.id) {
+        // Fire-and-forget so tab creation isn't blocked on the animation
+        morphThumbnailIntoTab(morphSnapshot, created.id)
+      }
+
+      return created
     } else if (doCreateNewWindow) {
       // Open in new window
       window.ftElectron.openInNewWindow(path, query, searchQueryText)
@@ -431,6 +455,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
         state: title ? { tabTitle: title } : undefined
       })
     }
+    return null
   } else {
     // The web build has no tabs or windows of its own, so a Ctrl/middle/Shift+click
     // is handed to the browser, pointed at this app's route for the destination
@@ -441,7 +466,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       // `window.open` returns null when a popup blocker steps in,
       // navigating in place is better than doing nothing at all
       if (window.open(href, '_blank', doCreateNewWindow ? 'popup' : undefined) != null) {
-        return
+        return null
       }
     }
 
@@ -450,6 +475,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       query,
       state: title ? { tabTitle: title } : undefined
     })
+    return null
   }
 }
 

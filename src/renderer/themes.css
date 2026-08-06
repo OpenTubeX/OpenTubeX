@@ -2155,6 +2155,18 @@ a:visited {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Flying thumbnail clone used when opening a watch page in a new tab
+   (see helpers/tabMorph.js). Kept out of layout and above the tab bar. */
+.tabThumbnailMorph {
+  position: fixed;
+  z-index: 10000;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+  object-fit: cover;
+  box-sizing: border-box;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 200ms;

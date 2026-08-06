@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo, sel } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const HOUR = 3600000
@@ -364,6 +364,56 @@ test.describe('classic Shorts watch layout', () => {
     const morphClasses = await page.evaluate(() => window.__watchMorphClasses)
     expect(morphClasses.some(value => value.includes('viewTransitionMorphActive'))).toBe(true)
     expect(morphClasses.some(value => value.includes('viewTransitionShortMorphActive'))).toBe(false)
+  })
+})
+
+test.describe('new tab thumbnail morph', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        listType: 'grid',
+        reducedMotion: 'off',
+        thumbnailSize: 180
+      },
+      profiles: [profile()],
+      history: watchedHistory,
+      subscriptionCache: populatedCache
+    }
+  })
+
+  test('middle-click flies the thumbnail into the new background tab', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const video = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await expect(video).toBeVisible()
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+
+    await page.evaluate(() => {
+      window.__sawTabThumbnailMorph = false
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node instanceof HTMLElement && node.classList.contains('tabThumbnailMorph')) {
+              window.__sawTabThumbnailMorph = true
+            }
+          }
+        }
+      })
+      observer.observe(document.body, { childList: true })
+    })
+
+    const currentUrl = page.url()
+    await video.locator('.thumbnailLink').click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    // Background open keeps the current tab on subscriptions
+    await expect(page).toHaveURL(currentUrl)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect.poll(() => page.evaluate(() => window.__sawTabThumbnailMorph)).toBe(true)
   })
 })
 

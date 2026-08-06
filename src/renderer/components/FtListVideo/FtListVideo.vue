@@ -1204,7 +1204,15 @@ function handleWatchPageLinkClick(event) {
     return
   }
 
-  if (process.env.IS_ELECTRON && event?.button === 1) {
+  const isMiddleClick = process.env.IS_ELECTRON && event?.button === 1
+  const isModifierNewTabClick = process.env.IS_ELECTRON &&
+    event?.button === 0 &&
+    (event.ctrlKey || event.metaKey) &&
+    !event.altKey
+
+  // Middle-click and Ctrl/Cmd(+Shift)+click open a new tab/window so we can
+  // morph the thumbnail into the new tab (native window.open cannot).
+  if (isMiddleClick || isModifierNewTabClick) {
     event.preventDefault()
 
     openInternalPath({
@@ -1213,7 +1221,9 @@ function handleWatchPageLinkClick(event) {
       title: title.value,
       doCreateNewWindow: event.shiftKey,
       doCreateNewTab: !event.shiftKey,
-      makeActive: false
+      // Middle-click opens in the background; Ctrl/Cmd+click activates the tab
+      makeActive: !isMiddleClick,
+      morphSource: event.currentTarget
     })
     return
   }

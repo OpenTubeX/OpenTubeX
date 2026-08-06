@@ -88,6 +88,10 @@ export async function launchApp(userDataDir, extraArgs = []) {
     ELECTRON_OZONE_PLATFORM_HINT: 'x11'
   }
   delete env.WAYLAND_DISPLAY
+  // Cursor / some agent shells set this, which turns Electron into plain Node
+  // and breaks require('electron') / Playwright's Electron launcher.
+  delete env.ELECTRON_RUN_AS_NODE
+  delete env.ELECTRON_NO_ATTACH_CONSOLE
 
   // The E2E build lives in its own directory so a running `pnpm dev`
   // (which rebuilds dist/ in development mode) can't clobber it.
