@@ -265,11 +265,12 @@
 
 .tabSwitcher {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(160px, 220px);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
+  justify-content: center;
   gap: 10px;
+  inline-size: fit-content;
   max-inline-size: min(88vw, 980px);
-  max-block-size: min(48vh, 300px);
+  max-block-size: min(80vh, 720px);
   overflow: auto;
   padding: 12px;
   background-color: color-mix(in srgb, var(--bg-color) 92%, #000);
@@ -341,10 +342,35 @@
 }
 
 .tabSwitcherTitle {
-  overflow: hidden;
+  display: flex;
+  align-items: start;
+  gap: 6px;
   min-inline-size: 0;
+  overflow: hidden;
   font-size: 13px;
   line-height: 1.3;
+}
+
+.tabSwitcherTitleAvatar {
+  inline-size: 16px;
+  block-size: 16px;
+  margin-block-start: 1px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.tabSwitcherTitleIcon {
+  inline-size: 14px;
+  margin-block-start: 2px;
+  font-size: 13px;
+  color: var(--secondary-text-color);
+  flex-shrink: 0;
+}
+
+.tabSwitcherTitleText {
+  min-inline-size: 0;
+  overflow: hidden;
   overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -381,7 +407,7 @@
   }
 
   .tabSwitcher {
-    grid-auto-columns: minmax(138px, 176px);
+    grid-template-columns: repeat(auto-fit, minmax(138px, 176px));
     gap: 8px;
     max-inline-size: 94vw;
     padding: 10px;
