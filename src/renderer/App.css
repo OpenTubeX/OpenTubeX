@@ -316,7 +316,7 @@
 .tabSwitcherPreview img {
   inline-size: 100%;
   block-size: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .tabSwitcherPreview .tabSwitcherPreviewAvatar {

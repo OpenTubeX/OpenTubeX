@@ -739,7 +739,7 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .tabTooltipPreview .tabTooltipPreviewAvatar {
