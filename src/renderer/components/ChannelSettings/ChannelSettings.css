@@ -98,7 +98,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.5em 1em;
-  margin-block-start: 0.75em;
+
+  /* Room for FtSelect's absolutely positioned floating label above the control */
+  margin-block-start: 1.5em;
 }
 
 .channelPreference {
@@ -111,7 +113,8 @@
 }
 
 /* Each control ships its own spacing for use in a settings page, which would
-   leave the rows here indented by different amounts. */
+   leave the rows here indented by different amounts. Drop FtSelect's top margin
+   too so the select box centres with the slider instead of sitting below it. */
 .channelPreference :deep(.pure-material-slider) {
   inline-size: auto;
   margin: 0;
@@ -120,6 +123,7 @@
 
 .channelPreference :deep(.select) {
   inline-size: auto;
+  margin-block-start: 0;
 }
 
 .preferenceIcon {
@@ -131,12 +135,4 @@
 .channelPreference > :nth-child(2) {
   flex: 1;
   min-inline-size: 0;
-}
-
-/* FtSelect reserves space above itself for its floating label, which pushes the
-   select box below the row's centre. Reserve the same space for the row's other
-   items, so they line up with the box instead of the label. */
-.channelPreference:has(.select) > .preferenceIcon,
-.channelPreference:has(.select) > :last-child {
-  margin-block-start: 30px;
 }
