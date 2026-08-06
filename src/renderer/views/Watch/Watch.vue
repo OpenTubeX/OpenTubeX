@@ -176,7 +176,7 @@
               />
               <div class="shortsFullscreenChannelRow">
                 <RouterLink
-                  v-if="!hideUploader"
+                  v-if="!hideUploader && channelId"
                   class="shortsFullscreenChannel"
                   :to="`/channel/${channelId}`"
                   @click="openShortsChannel"
@@ -299,7 +299,7 @@
               class="shortsChannelRow"
             >
               <RouterLink
-                v-if="!hideUploader"
+                v-if="!hideUploader && channelId"
                 class="shortsExternalChannel"
                 :to="`/channel/${channelId}`"
                 @click="openShortsChannel"
@@ -331,7 +331,7 @@
             {{ videoTitle }}
           </h1>
           <RouterLink
-            v-if="!isLoading && shortsLinkedVideo"
+            v-if="!isLoading && shortsLinkedVideo?.videoId"
             class="shortsLinkedVideo"
             :to="`/watch/${shortsLinkedVideo.videoId}`"
             :title="shortsLinkedVideo.title"
@@ -468,7 +468,7 @@
             <span>{{ quickBookmarkIconText }}</span>
           </div>
           <RouterLink
-            v-if="!isLoading && channelThumbnail"
+            v-if="!isLoading && channelId && channelThumbnail"
             class="shortsSoundThumbnail"
             :to="`/channel/${channelId}`"
             :title="channelName"
