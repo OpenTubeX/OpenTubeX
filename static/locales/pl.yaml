@@ -305,6 +305,10 @@ Settings:
       Tab Close Focus: Po zamknięciu karty
       Previous tab: Przełącz na poprzednią kartę
       Next tab: Przełącz na następną kartę
+    Stream Extraction Method:
+      Stream Extraction Method: Metoda ekstrakcji strumienia
+      yt-dlp: yt-dlp
+      Built-in: Wbudowany
   Theme Settings:
     Theme Settings: 'Wygląd'
     Match Top Bar with Main Color: 'Dopasuj górną belkę do głównego koloru'
@@ -431,6 +435,7 @@ Settings:
     Hide Profile Selector in Header: Ukryj selektor profilu w nagłówku
     UI Roundness: Zaokrąglenie elementów UI
     Always Show Scrollbars: Zawsze pokazuj paski przewijania
+    Animation Speed: Szybkość animacji
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -887,6 +892,18 @@ Settings:
     Privacy Policy: Polityka prywatności dla tego serwera
   Highlight Changed Settings: Podświetl ustawienia zmienione z domyślnych
   Reset Setting to Default: Zresetuj to ustawienie do wartości domyślnej
+  Context Menu Search Settings:
+    Context Menu Search Settings: Wyszukiwanie z menu kontekstowego
+    Description: Wybierz, które wyszukiwarki będą wyświetlane po kliknięciu zaznaczonego tekstu prawym przyciskiem myszy. Wyszukiwania otwierają się w domyślnej przeglądarce.
+    Icon Hint: Włączenie wyszukiwarki powoduje nawiązanie połączenia z jej stroną internetową w celu załadowania ikony favicon.
+    Engine Name: Nazwa wyszukiwarki
+    Search URL: Adres URL wyszukiwarki
+    URL Hint: Użyj %s, gdzie adres URL powinien zawierać zakodowany zaznaczony tekst.
+    Add Custom Engine: Dodaj niestandardową wyszukiwarkę
+    Add Engine: Dodaj wyszukiwarkę
+    Remove Engine: Usuń {engine}
+    Invalid Engine: Wprowadź nazwę i prawidłowy adres URL wyszukiwania HTTP lub HTTPS zawierający %s.
+    Engine Limit: Możesz dodać maksymalnie {count} niestandardowych wyszukiwarek.
 About:
   #On About page
   About: 'O projekcie'
@@ -1746,3 +1763,4 @@ Downloads:
     Audio Best: Dźwięk - najlepsza jakość
     Audio Format: Dźwięk - {format}
     Custom Arguments: Niestandardowe argumenty dla yt-dlp
+Update to {version}: Zaktualizuj do wersji {version}
