@@ -568,7 +568,7 @@ Settings:
     Proxy Username: Ім'я користувача проксі-сервера
     Proxy Password: Пароль проксі-сервера
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Сповіщати про пропуск спонсорованого відтинка
+    Notify when sponsor segment is skipped: Показувати сповіщення після пропуску сегмента
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL-адреса API SponsorBlock (типово https://sponsor.ajay.app)
     Enable SponsorBlock: Увімкнути SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -784,14 +784,22 @@ Video:
   Video has been saved: Відео збережено
   Save Video: Зберегти відео
   Sponsor Block category:
-    music offtopic: Музика поза темою
-    interaction: Взаємодія
-    self-promotion: Самореклама
-    outro: Кінцівка
-    intro: Вступ
+    music offtopic: 'Музика: Немузичний фрагмент'
+    interaction: Нагадування про взаємодію (підписка)
+    self-promotion: Неоплачена / самореклама
+    outro: Кінцеві заставки / Титри
+    intro: Перебивка / Заставка
     sponsor: Спонсор
-    recap: Підсумок
-    filler: Заповнювач
+    recap: Анонс / Повтор
+    filler: Відступи / Жарти
+    hook: Зачіпка / Привітання
+    highlight: Найцікавіший момент
+    exclusive access: Ексклюзивний доступ
+  Sponsor Block category short:
+    intro: Заставка
+    interaction: Нагадування про взаємодію
+    music offtopic: Без музики
+    filler: Відступи
   External Player:
     Unsupported Actions:
       looping playlists: зациклювання добірок
@@ -839,7 +847,7 @@ Video:
     Audio Tracks: Аудіотреки
     Theatre Mode: Режим кінотеатру
     Hide Stats: Приховати статистику
-    Skipped segment: Пропущено сегмент {segmentCategory}
+    Skipped segment: 'Пропущено: {segmentCategory}'
     Autoplay is off: Автовідтворення вимкнено
     Autoplay is on: Автовідтворення увімкнено
   IP block: YouTube заблокував вашу IP-адресу для перегляду відео. Будь ласка, спробуйте змінити VPN або проксі.
@@ -847,8 +855,8 @@ Video:
   AgeRestricted: Відео з віковими обмеженнями не можна переглядати за допомогою OpenTubeX, оскільки вони вимагають входу через Google та використання відео-аккаунту YouTube з підтвердженням віку.
   More Options: Більше опцій
   DeArrow:
-    Show Original Details: Показати оригінальні деталі
-    Show Modified Details: Показати змінені деталі
+    Show Original Details: Показати оригінальну інформацію
+    Show Modified Details: Показати змінену інформацію
   MembersOnly: Відео, доступні лише для учасників, не можна переглядати за допомогою OpenTubeX, оскільки вони вимагають входу через Google та платної підписки на канал завантажувача.
   DRMProtected: Відео, захищені DRM, неможливо відтворити у OpenTubeX, оскільки для цього потрібні пропрієтарні компоненти з закритим вихідним кодом. Щоб переглянути це відео, скористайтеся офіційним сайтом YouTube у веб-браузері з підтримкою DRM.
 #& Playlists

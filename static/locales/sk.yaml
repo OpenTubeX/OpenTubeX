@@ -574,7 +574,7 @@ Settings:
     Proxy Username: Používateľský názov proxy
     Proxy Warning: OpenTubeX nemá vstavaný proxy server, ale môže sa pripojiť k externému proxy serveru, napríklad k serveru bežiacemu na vašom počítači, ako je Tor, alebo k externému proxy serveru, ako je SOCKS5 proxy server poskytovaný niektorými VPN. Ak je táto funkcia povolená, uistite sa, že je váš proxy server/Tor správne nakonfigurovaný, inak OpenTubeX nebude môcť načítať žiadne údaje.
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Upozorniť, keď bude segment sponzora preskočený
+    Notify when sponsor segment is skipped: Zobraziť upozornenie pri preskočení segmentu
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API SponsorBlock (predvolená adresa je https://sponsor.ajay.app)
     Enable SponsorBlock: Zapnúť SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -749,14 +749,22 @@ Video:
   Video has been saved: Video bolo uložené
   Save Video: Uložiť video
   Sponsor Block category:
-    music offtopic: Hudba offtopic
-    interaction: Interakcia
-    self-promotion: Sebapropagácia
-    outro: Záver
-    intro: Úvod
+    music offtopic: 'Hudba: časť bez hudby'
+    interaction: Pripomienka interakcie (Prihlásiť sa na odber)
+    self-promotion: Neplatená/Vlastná propagácia
+    outro: Koncové karty / titulky
+    intro: Prerušenie/Úvodná animácia
     sponsor: Sponzor
-    filler: Výplň
-    recap: Zhrnutie
+    filler: Mimo tému/vtipy
+    recap: Náhľad / zhrnutie
+    hook: Zaujatie / Pozdravy
+    highlight: Hlavný obsah videa
+    exclusive access: Exkluzívny Prístup
+  Sponsor Block category short:
+    intro: Prerušenie
+    interaction: Pripomienka interakcie
+    music offtopic: Bez hudby
+    filler: Mimo tému
   External Player:
     OpenInTemplate: Otvoriť v {externalPlayer}
     Unsupported Actions:
@@ -773,7 +781,7 @@ Video:
     OpeningTemplate: Otvára sa {videoOrPlaylist} v {externalPlayer}...
 #& Playlists
   Player:
-    Skipped segment: Preskočený segment {segmentCategory}
+    Skipped segment: '{segmentCategory} preskočené'
     Playback will resume automatically when your connection comes back: Prehrávanie bude automaticky pokračovať, keď sa obnoví pripojenie.
     You appear to be offline: Zdá sa, že ste offline.
     Stats:
@@ -802,7 +810,7 @@ Video:
     Audio Tracks: Zvukové stopy
     TranslatedCaptionTemplate: '{language} (preložené z "{originalLanguage}")'
   DeArrow:
-    Show Modified Details: Zobraziť upravené detaily
+    Show Modified Details: Zobraziť upravené podrobnosti
     Show Original Details: Zobraziť pôvodné detaily
   Published:
     In less than a minute: Za menej ako minútu

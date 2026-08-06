@@ -572,7 +572,7 @@ Settings:
     Proxy Password: Mot de passe du proxy
     Proxy Username: Nom d'utilisateur du proxy
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Notification lorsqu’un segment sponsorisé est ignoré
+    Notify when sponsor segment is skipped: 'Notifier après qu''un segment a été sauté'
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': 'URL de l’API SponsorBlock (par défaut : https://sponsor.ajay.app)'
     Enable SponsorBlock: Activer SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -753,14 +753,22 @@ Video:
   Video has been saved: La vidéo a été enregistrée
   Save Video: Enregistrer la vidéo
   Sponsor Block category:
-    music offtopic: Musique hors sujet
-    interaction: Interaction
-    sponsor: Sponsor
-    self-promotion: Autopromotion
-    outro: Conclusion
-    intro: Intro
-    filler: Bouche-trou
-    recap: Récap
+    music offtopic: 'Musique : Segment non musical'
+    interaction: 'Rappel d''interaction (abonnement)'
+    sponsor: Message sponsorisé
+    self-promotion: Non rémunéré/autopromotion
+    outro: Écrans de fin/Crédits
+    intro: 'Entracte/Animation d''introduction'
+    filler: Digressions/Blagues
+    recap: Aperçu/Résumé
+    hook: Accroche/Salutations
+    highlight: Temps fort
+    exclusive access: Accès exclusif
+  Sponsor Block category short:
+    intro: Entracte
+    interaction: 'Rappel d''interaction'
+    music offtopic: Section non musicale
+    filler: Digressions
   External Player:
     playlist: playlist
     video: vidéo
@@ -804,7 +812,7 @@ Video:
       CodecsVideoAudioNoItags: 'Codecs : {videoCodec} / {audioCodec}'
       CodecsVideoAudio: 'Codecs : {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
       Dropped Frames / Total Frames: 'Images perdues : {droppedFrames} / Images totales : {totalFrames}'
-    Skipped segment: Segment {segmentCategory} ignoré
+    Skipped segment: '{segmentCategory} ignoré'
     TranslatedCaptionTemplate: '{language} (traduit depuis : {originalLanguage})'
     Exit Full Window: Quitter le plein écran
     Take Screenshot: Prendre une capture d'écran
@@ -817,8 +825,8 @@ Video:
   AgeRestricted: Les vidéos soumises à des restrictions d'âge ne peuvent pas être regardées avec OpenTubeX car elles nécessitent une connexion Google et l'utilisation d'un compte YouTube dont l'âge a été vérifié.
   MembersOnly: Les vidéos réservées aux membres ne peuvent pas être visionnées avec OpenTubeX, car elles nécessitent une connexion Google et une adhésion payante à la chaîne du vidéaste.
   DeArrow:
-    Show Original Details: Afficher les détails originaux
-    Show Modified Details: Afficher les détails modifiés
+    Show Original Details: 'Montrer les détails d''origine'
+    Show Modified Details: Montrer les détails modifiés
   DRMProtected: Les vidéos protégées par DRM ne peuvent pas être lues dans OpenTubeX, car elles nécessitent des composants propriétaires et à source fermée. Si vous souhaitez regarder cette vidéo, veuillez la visionner sur le site officiel de YouTube dans un navigateur Web prenant en charge le DRM.
 #& Playlists
   Save Watched Progress: Enregistrer l'état de visionnage

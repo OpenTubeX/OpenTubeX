@@ -582,7 +582,7 @@ Settings:
     Proxy Password: Puhverserveri salasõna
   The app needs to restart for changes to take effect. Restart and apply change?: See rakendus vajab muudatuste jõustamiseks uuesti käivitamist. Kas teeme seda nüüd?
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Anna teada, kui toetajate vaade jääb vahele
+    Notify when sponsor segment is skipped: Kuva segmendi vahelejätmisel teatis
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Sponsorite blokeerija API URL (vaikimisi https://sponsor.ajay.app)
     Enable SponsorBlock: Kasuta sponsorite blokeerijat
     SponsorBlock Settings: Sponsorite blokeerija
@@ -800,14 +800,21 @@ Video:
   Started streaming on: Voogedastus algas
   Streamed on: Voogedastatud
   Sponsor Block category:
-    music offtopic: Esitatava muusika teemaväline teave
-    self-promotion: Enesereklaam
-    interaction: Suhtlus
-    intro: Sissejuhatus
-    outro: Lõputiitrid
+    music offtopic: 'Muusika: mitte-muusika jaotis'
+    self-promotion: Tasumata/enesepromo
+    interaction: Tegutsemise meeldetuletus (kanali tellimine)
+    intro: Vaheaeg/sissejuhatav animatsioon
+    outro: Lõpukaardid/-tiitrid
     sponsor: Sponsor
-    filler: Täitevideo
+    filler: Teemavahetus/Naljad
     recap: Kokkuvõte
+    highlight: Esiletõst
+    exclusive access: Eksklusiivne ligipääs
+  Sponsor Block category short:
+    intro: Vaheaeg
+    interaction: Tegutsemise meeldetuletus
+    music offtopic: Mitte-muusika
+    filler: Teemavahetused
   External Player:
     UnsupportedActionTemplate: 'Rakenduses {externalPlayer} puudub tugi: {action}'
     OpeningTemplate: Avan {videoOrPlaylist} {externalPlayer} rakendusega...
@@ -851,7 +858,7 @@ Video:
       Resolution: 'Mõõdud ja kaadrisagedus: {width}x{height}{''@''}{frameRate}'
       Player Dimensions: 'Meediamängija mõõdud: {width}x{height}'
       Dropped Frames / Total Frames: 'Vahelejäetud kaadreid: {droppedFrames} / Kaadreid kokku: {totalFrames}'
-    Skipped segment: Vahelejäetud {segmentCategory} segment
+    Skipped segment: '{segmentCategory} vahelejäetud'
     TranslatedCaptionTemplate: '{language} (algne keel „{originalLanguage}“)'
     Exit Full Window: Välju täisekraanivaatest
     Hide Stats: Peida statistika

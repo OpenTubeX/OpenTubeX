@@ -577,7 +577,7 @@ Settings:
     Proxy Username: Nome de usuário do Proxy
     Proxy Password: Senha do Proxy
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Notificar quando vídeos publicitários for ignorado
+    Notify when sponsor segment is skipped: Mostrar aviso após um segmento ser ignorado
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL da API SponsorBlock (o padrão é https://sponsor.ajay.app)
     Enable SponsorBlock: Habilitar SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -754,14 +754,22 @@ Video:
   Video has been saved: O vídeo foi salvo
   Save Video: Salvar vídeo
   Sponsor Block category:
-    music offtopic: Música fora do contexto
-    interaction: Interação
-    self-promotion: Auto-promoção
-    outro: Cartões finais e créditos
-    intro: Introdução
+    music offtopic: 'Música: trecho sem música'
+    interaction: Lembrete de interação (inscrever-se)
+    self-promotion: Não-pago/Autopromoção
+    outro: Finalização/Créditos
+    intro: Intervalo/Vinheta de abertura
     sponsor: Patrocinador
-    filler: Preenchimento
-    recap: Recapitulação
+    filler: Enrolação/Piadas
+    recap: Prévia/Recapitulação
+    hook: Gancho/Saudações
+    highlight: Destaques
+    exclusive access: Acesso exclusivo
+  Sponsor Block category short:
+    intro: Intervalo
+    interaction: Lembrete de interação
+    music offtopic: Sem música
+    filler: Tangentes
   External Player:
     Unsupported Actions:
       shuffling playlists: Playlists aleatórias
@@ -806,7 +814,7 @@ Video:
       CodecsVideoAudio: 'Codecs: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
     You appear to be offline: Parece que você está offline.
     Playback will resume automatically when your connection comes back: A reprodução será retomada automaticamente quando a conexão for restabelecida.
-    Skipped segment: Segmento {segmentCategory} ignorado
+    Skipped segment: '{segmentCategory} pulado'
     Full Window: Preencher janela
     TranslatedCaptionTemplate: '{language} (traduzido do "{originalLanguage}")'
     Show Stats: Mostrar estatísticas
@@ -819,7 +827,7 @@ Video:
   AgeRestricted: Vídeos com restrição de idade não podem ser assistidos com o OpenTubeX, pois exigem login do Google e uso de uma conta do YouTube com verificação de idade.
   DeArrow:
     Show Original Details: Mostrar detalhes originais
-    Show Modified Details: Mostrar detalhes modificados
+    Show Modified Details: Mostrar Detalhes Modificados
   DRMProtected: Os vídeos protegidos por DRM não podem ser reproduzidos no OpenTubeX, pois exigem componentes proprietários e de código fechado. Se quiser assistir a esse vídeo, acesse o site oficial do YouTube em um navegador da Web habilitado para DRM.
 #& Playlists
   Watched Progress Saved: Progresso de reprodução salvo

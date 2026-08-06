@@ -1033,46 +1033,27 @@
                   {{ sponsorBlockDraftEditValues[segment.id]?.endTime ?? '' }}
                 </span>
               </div>
-              <select
+              <FtSelect
                 class="sponsorBlockDraftCategory"
+                :placeholder="$t('Video.Player.SponsorBlock.CategoryLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category"
-                :aria-label="$t('Video.Player.SponsorBlock.CategoryLabel')"
-                @change="updateSponsorBlockDraftCategory(segment.id, $event.target.value)"
-              >
-                <option
-                  v-for="category in sponsorBlockSubmissionCategories"
-                  :key="category"
-                  :value="category"
-                >
-                  {{ translateSponsorBlockCategory(category) }}
-                </option>
-              </select>
-              <select
+                :select-names="sponsorBlockSubmissionCategoryNames"
+                :select-values="sponsorBlockSubmissionCategories"
+                :icon="['fas', 'list']"
+                :show-icon="false"
+                @change="updateSponsorBlockDraftCategory(segment.id, $event)"
+              />
+              <FtSelect
                 v-if="!isSponsorBlockPointSegment(segment)"
                 class="sponsorBlockDraftCategory"
+                :placeholder="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
                 :value="sponsorBlockDraftEditValues[segment.id]?.actionType ?? segment.actionType"
-                :aria-label="$t('Video.Player.SponsorBlock.ActionTypeLabel')"
-                @change="updateSponsorBlockDraftActionType(segment.id, $event.target.value)"
-              >
-                <option
-                  value="skip"
-                  :disabled="(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category) === 'exclusive_access'"
-                >
-                  {{ $t('Video.Player.SponsorBlock.SkipActionType') }}
-                </option>
-                <option
-                  value="mute"
-                  :disabled="(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category) === 'exclusive_access'"
-                >
-                  {{ $t('Video.Player.SponsorBlock.MuteActionType') }}
-                </option>
-                <option
-                  value="full"
-                  :disabled="!['sponsor', 'selfpromo', 'exclusive_access'].includes(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
-                >
-                  {{ $t('Video.Player.SponsorBlock.FullVideo') }}
-                </option>
-              </select>
+                :select-names="getSponsorBlockActionTypeSelectNames(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
+                :select-values="getSponsorBlockActionTypeSelectValues(sponsorBlockDraftEditValues[segment.id]?.category ?? segment.category)"
+                :icon="['fas', 'forward']"
+                :show-icon="false"
+                @change="updateSponsorBlockDraftActionType(segment.id, $event)"
+              />
               <div class="sponsorBlockDraftActions">
                 <button
                   class="sponsorBlockDraftActionButton"

@@ -557,7 +557,7 @@ Settings:
     Proxy Username: Välityspalvelimen käyttäjänimi
     Proxy Password: Välityspalvelimen salasana
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Ilmoita sponsoriosuuden yli hypättäessä
+    Notify when sponsor segment is skipped: Näytä ilmoitus ohitetun osion jälkeen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-sponsorieston API-ohjelmointirajapinnan Url-osoite (vakio-osoite on https://sponsor.ajay.app)
     Enable SponsorBlock: Kytke SponsorBlock-sponsoriesto päälle
     SponsorBlock Settings: SponsorBlock
@@ -742,14 +742,22 @@ Video:
     video: video
     OpenInTemplate: Avaa käyttäen {externalPlayer}
   Sponsor Block category:
-    music offtopic: Musiikki aihepiirin ulkopuolelta
-    interaction: Kanssakäyminen
-    self-promotion: Itsepromootio
-    outro: Loppu
-    intro: Alku
+    music offtopic: 'Musiikki: Musiikiton osa'
+    interaction: Vuorovaikutusmuistutus (tilaaminen)
+    self-promotion: Maksamaton/Itsensä mainostus
+    outro: Loppukortit/-tekstit
+    intro: Tauko/Introanimaatio
     sponsor: Sponsori
-    recap: Kertaus
-    filler: Täyte
+    recap: Esikatselu/Kertaus
+    filler: Toissijaiset kohtaukset/Vitsit
+    hook: Koukku/Tervehdykset
+    highlight: Kohokohta
+    exclusive access: Yksinoikeudellinen ensikatsaus
+  Sponsor Block category short:
+    intro: Tauko
+    interaction: Vuorovaikutusmuistutus
+    music offtopic: Musiikiton
+    filler: Toissijaiset kohtaukset
   Video has been removed from your saved list: Video poistettiin tallennettujen videoiden luettelostasi
   Video has been saved: Video on tallennettu
   Save Video: Tallenna video
@@ -771,7 +779,7 @@ Video:
   Unlisted: Listaamaton
   DeArrow:
     Show Original Details: Näytä alkuperäiset tiedot
-    Show Modified Details: Näytä muokatut yksityiskohdat
+    Show Modified Details: Näytä muokatut tiedot
   Player:
     TranslatedCaptionTemplate: '{language} (käännetty kielestä "{originalLanguage}")'
     Autoplay is off: Automaattinen toisto on pois päältä
@@ -799,7 +807,7 @@ Video:
       Dropped Frames / Total Frames: 'Pudotetut kehykset: {droppedFrames} / Kehyksiä yhteensä: {totalFrames}'
     You appear to be offline: Näytät olevan offline-tilassa.
     Playback will resume automatically when your connection comes back: Toisto jatkuu automaattisesti, kun verkkoyhteytesi palautuu.
-    Skipped segment: Ohitettu {segmentCategory} osio
+    Skipped segment: '{segmentCategory} ohitettu'
     Audio Tracks: Ääniraitoja
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Mainosta jäljellä: {remindingTimeSeconds} s'

@@ -355,7 +355,7 @@ Settings:
   SponsorBlock Settings:
     SponsorBlock Settings: SponsorBlock 설정
     Enable SponsorBlock: SponsorBlock 사용
-    Notify when sponsor segment is skipped: 스폰서 구간을 건너뛸 경우 알림
+    Notify when sponsor segment is skipped: 구간을 건너뛴 후 알림 표시
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock API 주소 (기본 주소는 https://sponsor.ajay.app 입니다)
     Skip Options:
       Auto Skip: 자동 건너뛰기
@@ -532,14 +532,22 @@ Video:
     video: 비디오
     playlist: 재생목록
   Sponsor Block category:
-    music offtopic: 음악 주제에서 벗어나기
-    recap: 씌우기
-    filler: 필터
-    sponsor: 스폰서
-    intro: 도입부
-    outro: 결말부
-    self-promotion: 자기 홍보
-    interaction: 상호 작용
+    music offtopic: 음악이 아닌 구간
+    recap: 미리보기/요약 구간
+    filler: 잡담/농담
+    sponsor: 후원이나 협찬 구간
+    intro: 인트로/무음 구간
+    outro: 최종 화면 구간
+    self-promotion: 무대가 홍보 구간
+    interaction: 상호작용 알림 구간
+    hook: 후킹/인사말
+    highlight: 하이라이트
+    exclusive access: 홍보 동영상
+  Sponsor Block category short:
+    intro: 인트로/무음 구간
+    interaction: 상호작용 알림 구간
+    music offtopic: 음악이 아닌 구간
+    filler: 잡담
   Premieres: 프리미어
   Upcoming: 공개 예정
   Show Super Chat Comment: 슈퍼채팅 댓글 보이기

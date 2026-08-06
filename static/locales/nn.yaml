@@ -332,7 +332,7 @@ Settings:
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-nettadresse (standard er https://sponsor.ajay.app)
     Enable SponsorBlock: Skru på SponsorBlock
     SponsorBlock Settings: SponsorBlock-innstillingar
-    Notify when sponsor segment is skipped: Gi beskjed når sponsordelen blir hoppa over
+    Notify when sponsor segment is skipped: Vis varsel etter at et segment har blitt hoppet over
     Skip Options:
       Skip Option: Alternativ for å hoppe over
       Auto Skip: Hopp over automatisk
@@ -492,14 +492,20 @@ Video:
   Started streaming on: 'Begynte å straume på'
 #& Videos
   Sponsor Block category:
-    outro: Avslutting
-    interaction: Samhandling
-    intro: Introduksjon
+    outro: Rulletekster
+    interaction: Samhandlingspåminnelse (Abonner)
+    intro: Midtpause-/Introanimasjon
     sponsor: Sponsor
-    music offtopic: Musikk utanfor tema
-    self-promotion: Eigenpromotering
+    music offtopic: 'Musikk: Seksjon uten musikk'
+    self-promotion: Ubetalt/Selvpromotering
     recap: Oppsummering
     filler: Fyllstoff
+    highlight: Høydepunkt
+    exclusive access: Ekslusiv tilgang
+  Sponsor Block category short:
+    intro: Midtpause
+    interaction: Samhandlingspåminnelse
+    music offtopic: Ikke-musikk
   External Player:
     video: video
     playlist: speleliste

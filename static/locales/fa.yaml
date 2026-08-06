@@ -664,7 +664,7 @@ Video:
   Views: دیده شده ها
   Live Chat is currently not supported in this build.: گفتگوی زنده در حال حاضر در این ساخت پشتیبانی نمی شود.
   Sponsor Block category:
-    sponsor: حامی
+    sponsor: اسپانسر
     intro: معرفی
     self-promotion: خود تبلیغی
     filler: پرکننده
@@ -672,6 +672,10 @@ Video:
     music offtopic: موسیقی آف تاپیک
     interaction: تعامل
     outro: دیگر
+    highlight: برجسته
+    exclusive access: دسترسی اختصاصی
+  Sponsor Block category short:
+    music offtopic: غیر موسیقی
   Loop Playlist: حلقه پخش لیست
   Live Now: زنده هم اکنون
   Save Video: ذخیره ویدیو
@@ -725,7 +729,7 @@ Video:
       CodecsVideoAudioNoItags: 'کدک‌ها: {videoCodec} / {audioCodec}'
     Take Screenshot: گرفتن عکس صفحه
     Show Stats: نمایش اطلاعات
-    Skipped segment: بخش {segmentCategory} رد شد
+    Skipped segment: '{segmentCategory} رد شد'
     TranslatedCaptionTemplate: '{language} (ترجمه شده از "{originalLanguage}")'
     Hide Stats: مخفی کردن اطلاعات
     Full Window: تمام‌صفحه

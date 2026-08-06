@@ -569,7 +569,7 @@ Settings:
     Proxy Username: Nama pengguna proksi
     Proxy Password: Kata sandi proksi
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Beri tahu saat segmen sponsor dilewati
+    Notify when sponsor segment is skipped: Tampilkan pemberitahuan setelah melewati segmen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': Url SponsorBlock API (Default is https://sponsor.ajay.app)
     Enable SponsorBlock: Aktifkan SponsorBlock
     SponsorBlock Settings: SponsorBlok
@@ -784,14 +784,21 @@ Video:
   Video has been saved: Video telah disimpan
   Save Video: Simpan Video
   Sponsor Block category:
-    interaction: Interaksi
-    music offtopic: Musik Non-Topik
-    self-promotion: Promosi Diri Sendiri
-    outro: outro
-    intro: Intro
+    interaction: Pengingat Interaksi (Berlangganan)
+    music offtopic: 'Musik: Bagian Non-Musik'
+    self-promotion: Promosi Diri Sendiri/Tidak Dibayar
+    outro: Kartu Akhir/Kredit
+    intro: Jeda/Animasi Intro
     sponsor: Sponsor
     recap: Rekap
-    filler: Pengisi
+    filler: Candaan atau bagian yang menyimpang dari isi cerita
+    highlight: Sorotan
+    exclusive access: Akses Eksklusif
+  Sponsor Block category short:
+    intro: Jeda
+    interaction: Pengingat Interaksi
+    music offtopic: Non-Musik
+    filler: Penyimpangan cerita
   External Player:
     Unsupported Actions:
       starting video at offset: memulai video pada offset
@@ -814,8 +821,8 @@ Video:
   Published:
     In less than a minute: Dalam waktu kurang dari satu menit
   DeArrow:
-    Show Original Details: Tampilkan Detail Asli
-    Show Modified Details: Tampilkan Detail yang Dimodifikasi
+    Show Original Details: Lihat Detail Original
+    Show Modified Details: Perlihatkan detail yang dimodifikasi
   Player:
     TranslatedCaptionTemplate: '{language} (diterjemahkan dari "{originalLanguage}")'
     Audio Tracks: Trek Audio
@@ -844,7 +851,7 @@ Video:
     Take Screenshot: Ambil Tangkapan Layar
     You appear to be offline: Anda tampaknya sedang offline.
     Playback will resume automatically when your connection comes back: Pemutaran ulang akan dilanjutkan secara otomatis ketika koneksi Anda kembali.
-    Skipped segment: Melewati segmen {segmentCategory}
+    Skipped segment: '{segmentCategory} dilewati'
   More Options: Lebih Banyak Pilihan
   'Live Chat is unavailable for this stream. It may have been disabled by the uploader.': Obrolan Langsung tidak tersedia untuk streaming ini. Mungkin telah dinonaktifkan oleh pengunggah.
   Show Super Chat Comment: Tampilkan Komentar Super Chat

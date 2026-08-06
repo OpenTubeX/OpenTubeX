@@ -474,7 +474,7 @@ Settings:
     Proxy Host: Host del Proxy
     Proxy Warning: OpenTubeX no tiene un proxy integrado, pero puede conectarse a un proxy externo, como uno que se esté ejecutando en tu máquina (como Tor) o un proxy externo, como un proxy SOCKS5 provisto por algunas VPNs. Si activás esta opción, asegurate de que tu proxy o Tor esté configurado correctamente, de lo contrario OpenTubeX no podrá obtener datos.
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Notificar cuando el tramo publicitario es omitido
+    Notify when sponsor segment is skipped: Mostrar aviso después de que se omita un segmento
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL de la API de SponsorBlock (https://sponsor.ajay.app por defecto)
     Skip Options:
       Skip Option: Omitir opción

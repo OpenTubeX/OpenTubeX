@@ -563,7 +563,7 @@ Settings:
     Proxy Username: Proxy-gebruikers­naam
     Proxy Password: Proxy-wacht­woord
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Mij informeren wanneer een gesponsord segment wordt overgeslagen
+    Notify when sponsor segment is skipped: Melding weergeven nadat een segment is overgeslagen
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL naar API van SponsorBlock (Standaard is https://sponsor.ajay.app)
     Enable SponsorBlock: SponsorBlock inschakelen
     SponsorBlock Settings: SponsorBlock
@@ -736,14 +736,20 @@ Video:
   Video has been saved: Video is opgeslagen
   Save Video: Video opslaan
   Sponsor Block category:
-    music offtopic: Niet-muziek
-    interaction: Interactie
-    self-promotion: Zelfpromotie
-    outro: Outro
-    intro: Intro
+    music offtopic: 'Muziek: sectie niet-muziek'
+    interaction: Interactieherinnering (abonneren)
+    self-promotion: Onbetaalde promotie of zelfpromotie
+    outro: Eindkaarten/aftiteling
+    intro: Onderbreking/intro-animatie
     sponsor: Sponsor
-    recap: Samenvatting
+    recap: Voorbeeld/samenvatting
     filler: Opvulling
+    highlight: Hoogtepunt
+    exclusive access: Exclusieve toegang
+  Sponsor Block category short:
+    intro: Onderbreking
+    interaction: Interactieherinnering
+    music offtopic: Niet-muziek
   External Player:
     Unsupported Actions:
       shuffling playlists: afspeellijsten shufflen
@@ -787,7 +793,7 @@ Video:
     Audio Tracks: Audiosporen
     TranslatedCaptionTemplate: '{language} (vertaald vanuit "{originalLanguage}")'
     Playback will resume automatically when your connection comes back: Het afspelen hervat automatisch wanneer u weer verbonden bent.
-    Skipped segment: '{segmentCategory} segment overgeslagen'
+    Skipped segment: '{segmentCategory} overgeslagen'
     Full Window: Volledig Venster
     Exit Full Window: Volledig Venster Sluiten
     You appear to be offline: Het lijkt erop dat u offline bent.
@@ -800,8 +806,8 @@ Video:
   DRMProtected: Videos die beschermd worden door DRM (Digital Rights Management) kunnen niet worden afgespeeld in OpenTubeX omdat ze beschermde closed source onderdelen vereisen. Als u deze video wilt bekijken, probeer het dan via de officiële YouTube website met een web browser die DRM ondersteund.
   Unlisted: Verborgen
   DeArrow:
-    Show Original Details: Oorspronkelijke Details Weergeven
-    Show Modified Details: Aangepaste Details Weergeven
+    Show Original Details: Originele details weergeven
+    Show Modified Details: Gewijzigde details weergeven
   MembersOnly: Members-only videos kunnen niet bekeken worden via OpenTubeX omdat ze een Google login en betaald abonnement op het kanaal van de uploader vereisen.
   AgeRestricted: Videos met een leeftijdsbeperking kunnen niet via OpenTubeX bekeken worden omdat ze een Google login en een YouTube account met bevestigde leeftijd vereisen.
   Save Watched Progress: Kĳk­voortgang opslaan

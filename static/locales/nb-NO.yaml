@@ -563,7 +563,7 @@ Settings:
     Hide Channel Posts: Skjul «Innlegg»-fanen i kanaler
   The app needs to restart for changes to take effect. Restart and apply change?: Start programmet på nytt for å ta i bruk endringene?
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Gi beskjed når sponsordelen blir hoppet over
+    Notify when sponsor segment is skipped: Vis varsel etter at et segment har blitt hoppet over
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': SponsorBlock-API-nettadresse (standard er https://sponsor.ajay.app)
     Enable SponsorBlock: Skru på SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -738,14 +738,20 @@ Video:
   Previous: 'Forrige'
   Next: 'Neste'
   Sponsor Block category:
-    interaction: Samhandling
-    outro: Outro
-    intro: Intro
+    interaction: Samhandlingspåminnelse (Abonner)
+    outro: Rulletekster
+    intro: Midtpause-/Introanimasjon
     sponsor: Sponsor
-    music offtopic: Musikkfritt segment
-    self-promotion: Egenpromotering
+    music offtopic: 'Musikk: Seksjon uten musikk'
+    self-promotion: Ubetalt/Selvpromotering
     recap: Oppsummering
     filler: Fyllstoff
+    highlight: Høydepunkt
+    exclusive access: Ekslusiv tilgang
+  Sponsor Block category short:
+    intro: Midtpause
+    interaction: Samhandlingspåminnelse
+    music offtopic: Ikke-musikk
   External Player:
     Unsupported Actions:
       shuffling playlists: spiller av spillelister i tilfeldig rekkefølge
@@ -788,7 +794,7 @@ Video:
     Hide Stats: Skjul statistikk
     Full Window: Fullt vindu
     TranslatedCaptionTemplate: '{language} (Oversatt fra "{originalLanguage}")'
-    Skipped segment: Hoppet over {segmentCategory}-segment
+    Skipped segment: '{segmentCategory} hoppet over'
     Autoplay is on: Automatisk avspilling er slått på
     Exit Full Window: Avslutt fullskjerm
     Autoplay is off: Automatisk avspilling er slått av
@@ -807,7 +813,7 @@ Video:
   Watched Progress Saved: Sted i videoen lagret
   DeArrow:
     Show Modified Details: Vis endrede detaljer
-    Show Original Details: Vis originaldetaljer
+    Show Original Details: Vis opprinnelige detaljer
   Popout Live Chat: Chat i eget vindu
   Watch:
     'Remaining preroll-ad time: {remindingTimeSeconds}s': 'Tid før reklamen før videoen kan hoppes over: {remindingTimeSeconds}s'

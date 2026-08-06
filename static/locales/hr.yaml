@@ -580,7 +580,7 @@ Settings:
     Proxy Username: Proxy korisničko ime
     Proxy Password: Proxy lozinka
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Obavijesti kad se preskoči segment sponzora
+    Notify when sponsor segment is skipped: Pokaži obavijest nakon preskakanja isječka
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL API-a za blokiranja sponzora (standardno je https://sponsor.ajay.app)
     Enable SponsorBlock: Aktiviraj blokiranja sponzora
     SponsorBlock Settings: Blokiranja sponzora
@@ -798,14 +798,20 @@ Video:
   Video has been saved: Video je spremljen
   Save Video: Spremi video
   Sponsor Block category:
-    music offtopic: Druga vrsta glazbe
-    interaction: Interakcija
-    self-promotion: Samopromocija
-    outro: Kraj
-    intro: Uvod
+    music offtopic: 'Glazba: Ne-glazbeni dio'
+    interaction: Podsjetnik interakcije (Pretplati se)
+    self-promotion: Neplaćena promocija ili samopromocija
+    outro: Završni kadrovi/Zasluge
+    intro: Stanka/Uvodna animacija
     sponsor: Sponzor
     recap: Rekapitulacija
     filler: Dodatni materijal
+    highlight: Istaknuto
+    exclusive access: Eksluzivni pristup
+  Sponsor Block category short:
+    intro: Stanka
+    interaction: Podsjetnik interakcije
+    music offtopic: Ne-glazbeni
   External Player:
     Unsupported Actions:
       starting video at offset: pokretanje videa pri odmaku
@@ -844,7 +850,7 @@ Video:
       Player Dimensions: 'Veličina playera: {width}x{height}'
       Buffered: 'Učitano: {bufferedPercentage}%'
     You appear to be offline: Čini se da ne postoji veza s internetom.
-    Skipped segment: Preskočen segment „{segmentCategory}”
+    Skipped segment: 'Preskočeno: {segmentCategory}'
     Take Screenshot: Snimi snimku ekrana
     Show Stats: Prikaži statistiku
     Hide Stats: Sakrij statistiku
@@ -862,7 +868,7 @@ Video:
   IP block: YouTube je blokirao tvoju IP adresu za gledanje videa. Pokušaj se prebaciti na jedan drugi VPN ili proxy.
   AgeRestricted: Videa s dobnim ograničenjem se ne mogu gledati s OpenTubeXom jer zahtijevaju prijavu na Google i korištenje YouTube računa s dobnom provjerom.
   DeArrow:
-    Show Original Details: Prikaži detalje originala
+    Show Original Details: Prikaži izvorne detalje
     Show Modified Details: Prikaži detalje promjena
   DRMProtected: DRM-om zaštićena videa ne mogu se reproducirati u OpenTubeXu jer zahtijevaju vlasničke komponente zatvorenog koda. Ako želiš gledati ovaj video, gledaj ga na službenoj YouTube web stranici u web pregledniku s aktiviranim DRM-om.
 #& Playlists

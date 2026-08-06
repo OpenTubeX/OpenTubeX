@@ -568,7 +568,7 @@ Settings:
     Proxy Password: Contraseña del proxy
     Proxy Username: Nombre de Usuario del proxy
   SponsorBlock Settings:
-    Notify when sponsor segment is skipped: Notificar cuando se salta un segmento de patrocinio
+    Notify when sponsor segment is skipped: Mostrar aviso después de que se omita un segmento
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': URL de la API de SponsorBlock (por defecto es https://sponsor.ajay.app)
     Enable SponsorBlock: Activar SponsorBlock
     SponsorBlock Settings: SponsorBlock
@@ -785,14 +785,22 @@ Video:
   Video has been saved: El vídeo ha sido guardado
   Save Video: Guardar el vídeo
   Sponsor Block category:
-    music offtopic: No relacionado con la música
-    interaction: Interacción
-    self-promotion: Auto promoción
-    outro: Epílogo
-    intro: Introducción
-    sponsor: Patrocinador
-    recap: Recapitulación
-    filler: Relleno
+    music offtopic: 'Música: Sección sin musica'
+    interaction: Recordatorio de Interacción (Suscribir)
+    self-promotion: Promoción Propia/No Remunerada
+    outro: Tarjetas/Créditos
+    intro: Intermisión/Animación de Introducción
+    sponsor: Sponsor
+    recap: Vista previa/Recapitulación
+    filler: Desvíos/Bromas
+    hook: Gancho/Saludos
+    highlight: Destacado
+    exclusive access: Acceso Exclusivo
+  Sponsor Block category short:
+    intro: Intermisión
+    interaction: Recordatorio de Interacción
+    music offtopic: Sin Música
+    filler: Tangentes
   External Player:
     playlist: lista de reproducción
     video: vídeo
@@ -837,7 +845,7 @@ Video:
       CodecsVideoAudioNoItags: 'Códecs: {videoCodec} / {audioCodec}'
     You appear to be offline: Parece que no tienes conexión.
     Playback will resume automatically when your connection comes back: La reproducción se reanudará automáticamente cuando se restablezca la conexión.
-    Skipped segment: Segmento {segmentCategory} omitido
+    Skipped segment: '{segmentCategory} Omitido/as'
     Audio Tracks: Pistas de audio
     Theatre Mode: Modo cine
     Exit Theatre Mode: Salir del modo cine
@@ -849,8 +857,8 @@ Video:
   Unlisted: No listado
   AgeRestricted: Los vídeos con restricciones de edad no se pueden ver con OpenTubeX ya que requieren iniciar sesión en Google y usar una cuenta de YouTube verificada por edad.
   DeArrow:
-    Show Original Details: Mostrar detalles originales
-    Show Modified Details: Mostrar detalles modificados
+    Show Original Details: Mostrar Detalles Originales
+    Show Modified Details: Mostrar Detalles Modificados
 #& Playlists
   DRMProtected: Los videos restringidos con DRM no pueden reproducirse en OpenTubeX, dado que requieren componentes propietarias de fuente cerrada. Si desea ver este video, por favor véalo en la página oficial de YouTube con un buscador que tenga DRM habilitado.
   Watched Progress Saved: Progreso de visualización guardado

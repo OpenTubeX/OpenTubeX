@@ -637,7 +637,7 @@ Settings:
     SponsorBlock Settings: 'ஒப்புரவாளர் தொகுதி'
     Enable SponsorBlock: 'ஒப்புரவாளர் பிளாக் இயக்கவும்'
     'SponsorBlock API Url (Default is https://sponsor.ajay.app)': 'ஒப்புரவாளர் பிளாக் பநிஇ முகவரி (இயல்புநிலை https://sponsor.ajay.app)'
-    Notify when sponsor segment is skipped: 'ஒப்புரவாளர் பிரிவு தவிர்க்கப்படும்போது அறிவிக்கவும்'
+    Notify when sponsor segment is skipped: ஒரு பிரிவு தவிர்க்கப்பட்ட பிறகு அறிவிப்பைக் காட்டு
     UseDeArrowTitles: 'அன்புள்ள வீடியோ தலைப்புகளைப் பயன்படுத்தவும்'
     UseDeArrowThumbnails: 'சிறுபடங்களுக்கு டியர்ரோவைப் பயன்படுத்தவும்'
     'DeArrow Thumbnail Generator API Url (Default is https://dearrow-thumb.ajay.app)': 'அன்புள்ள சிறு செனரேட்டர் பநிஇ முகவரி (இயல்புநிலை https://dearrow-thumb.ajay.app)'
@@ -878,14 +878,20 @@ Video:
   Started streaming on: 'ச்ட்ரீமிங் செய்யத் தொடங்கியது'
   Publicationtemplate: ''
   Sponsor Block category:
-    sponsor: 'ஒப்புரவாளர்'
-    intro: 'அறிமுகம்'
-    outro: 'மற்றொன்று'
-    self-promotion: 'தன்வய ஊக்குவிப்பு'
-    interaction: 'உள்வினை'
-    music offtopic: 'மியூசிக் ஆஃப் டோபிக்'
+    sponsor: ஸ்பான்சர்
+    intro: இடைமறிப்பு / அறிமுக அனிமேஷன்
+    outro: எண்ட்கார்டுகள் / வரவு
+    self-promotion: செலுத்தப்படாத / சுய ஊக்குவிப்பு
+    interaction: தொடர்பு நினைவூட்டல் (குழுசேர்)
+    music offtopic: 'இசை: இசை அல்லாத பிரிவு'
     recap: 'மறுபரிசீலனை செய்யுங்கள்'
     filler: 'தடி'
+    highlight: முன்னிலைப்படுத்த
+    exclusive access: பிரத்யேக அணுகல்
+  Sponsor Block category short:
+    intro: இடைமறிப்பு
+    interaction: தொடர்பு நினைவூட்டல்
+    music offtopic: இசை அல்லாதது
   External Player:
     OpenInTemplate: '{externalPlayer} இல் திறக்கவும்'
     video: 'ஒளிதோற்றம்'
@@ -926,7 +932,7 @@ Video:
       CodecsVideoAudioNoItags: 'கோடெக்குகள்: {videoCodec} / {audioCodec}'
     You appear to be offline: 'நீங்கள் ஆஃப்லைனில் இருப்பதாகத் தெரிகிறது.'
     Playback will resume automatically when your connection comes back: 'உங்கள் இணைப்பு மீண்டும் வரும்போது பிளேபேக் தானாகவே மீண்டும் தொடங்கும்.'
-    Skipped segment: '{segmentCategory} பிரிவு தவிர்க்கப்பட்டது'
+    Skipped segment: '{segmentCategory} தவிர்க்கப்பட்டது'
 #& Videos
     Autoplay is off: ஆட்டோபிளே முடக்கப்பட்டுள்ளது
     Autoplay is on: ஆட்டோபிளே இயக்கத்தில் உள்ளது

@@ -559,7 +559,7 @@ Settings:
       Show In Seek Bar: Vis i statuslinje
       Do Nothing: Gør intet
     Category Color: Kategorifarve
-    Notify when sponsor segment is skipped: Underret, når et sponsorsegment springes over
+    Notify when sponsor segment is skipped: 'Vis meddelelse, når et segment er sprunget over'
     SponsorBlock Settings: SponsorBlock
     Enable SponsorBlock: Aktivér SponsorBlock
     UseDeArrowTitles: Brug DeArrow-videotitler
@@ -761,14 +761,21 @@ Video:
   Started streaming on: Begyndte at sende
   Streamed on: Sendt
   Sponsor Block category:
-    intro: Intro
+    intro: Pause-/intro-animation
     sponsor: Sponsor
     recap: Opsummering
-    music offtopic: Musik Off-topic
-    outro: Outro
-    self-promotion: Selvpromovering
-    interaction: Interaktion
-    filler: Fyldstof
+    music offtopic: 'Musik: Ikke-Musikalsk Sektion'
+    outro: Slutkort/anerkendelser
+    self-promotion: Ubetalt/selvmarkedsføring
+    interaction: Påmindelse om interaktion (abonnere)
+    filler: Sidespor/vittigheder
+    highlight: Fremhæv
+    exclusive access: Eksklusiv adgang
+  Sponsor Block category short:
+    intro: Pause
+    interaction: Påmindelse om interaktion
+    music offtopic: Ikke-Musikalsk
+    filler: Sidespor
   External Player:
     Unsupported Actions:
       opening playlists: åbner playlister
@@ -804,7 +811,7 @@ Video:
       CodecsVideoAudio: 'Codecs: {videoCodec} ({videoItag}) / {audioCodec} ({audioItag})'
       Player Dimensions: 'Afspillerens dimensioner: {width}x{height}'
       Buffered: 'Bufret: {bufferedPercentage}%'
-    Skipped segment: Sprang {segmentCategory} segment over
+    Skipped segment: '{segmentCategory} sprunget over'
     Playback will resume automatically when your connection comes back: Afspilning genoptager automatisk, når din forbindelse vender tilbage.
 #& Playlists
     Exit Full Window: Afslut fuldt vindue
@@ -828,7 +835,7 @@ Video:
   Show Super Chat Comment: Vis Super Chat-kommentar
   DeArrow:
     Show Modified Details: Vis ændrede detaljer
-    Show Original Details: Vis originale detaljer
+    Show Original Details: Vis oprindelige detaljer
   Published:
     In less than a minute: Mindre end et minut siden
   Save Watched Progress: Gem set fremskridt
