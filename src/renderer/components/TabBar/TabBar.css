@@ -1,7 +1,10 @@
 .tabBar {
   box-sizing: border-box;
   display: flex;
-  align-items: center;
+
+  /* Sit tabs on the bottom edge so the top radii clear the window chrome and
+     the scrollport clip (overflow-y cannot stay visible while overflow-x scrolls). */
+  align-items: flex-end;
   background-color: var(--side-nav-color);
   border-block-end: 1px solid var(--tertiary-text-color);
   block-size: 32px;
@@ -12,10 +15,7 @@
   inset-block-start: 0;
   z-index: 5;
   inline-size: 100%;
-
-  /* Horizontal scrolling is handled by .tabsContainer. A non-visible overflow-x
-     value would force overflow-y to clip too, which flattens the tab top radii. */
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* The horizontal bar shares the top edge with the sticky top navigation, so it
@@ -40,6 +40,10 @@
 .tabsContainer {
   display: flex;
   min-inline-size: 0;
+
+  /* 1px keeps top radii/borders off the overflow-y clip edge (CSS cannot do
+     overflow-x: auto with overflow-y: visible). */
+  padding-block-start: 1px;
   overflow: auto hidden;
 
   /* The horizontal layout draws its own scrollbar below (.tabsScrollbar). The
@@ -90,6 +94,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: center;
   background: none;
   border: 0;
   cursor: pointer;
@@ -132,6 +137,7 @@
 }
 
 .tabBar.vertical .newTabButton {
+  align-self: stretch;
   padding-block-end: 10px;
 }
 
