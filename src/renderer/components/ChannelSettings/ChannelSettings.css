@@ -98,9 +98,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.5em 1em;
-
-  /* Room for FtSelect's absolutely positioned floating label above the control */
-  margin-block-start: 1.5em;
+  margin-block-start: 0.75em;
 }
 
 .channelPreference {
@@ -110,6 +108,10 @@
 
   /* Keeps the rows level even though the controls have different natural heights */
   min-block-size: 56px;
+
+  /* Per-row room for FtSelect's floating label so wrapped auto-fit rows stay clear.
+     Applied to every preference so side-by-side controls keep a shared centre line. */
+  padding-block-start: 30px;
 }
 
 /* Each control ships its own spacing for use in a settings page, which would
