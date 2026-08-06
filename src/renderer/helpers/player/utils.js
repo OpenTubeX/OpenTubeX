@@ -113,15 +113,18 @@ export async function getSponsorBlockSegments(videoId, categories, actionTypes) 
  * Map SponsorBlock API categories to locale keys under Video.Sponsor Block category.
  * Prefer the short label (extension seekbar/skip-notice wording) when available,
  * unless `short: false` is passed (e.g. submission / settings UI).
+ * Falls back to the full label when the active locale has not translated the short key yet.
  * @param {SponsorBlockCategory} category
  * @param {{ short?: boolean }} [options]
  */
 export function translateSponsorBlockCategory(category, { short = true } = {}) {
+  const locale = i18n.global.locale.value
+
   switch (category) {
     case 'sponsor':
       return i18n.global.t('Video.Sponsor Block category.sponsor')
     case 'intro':
-      return short
+      return short && i18n.global.te('Video.Sponsor Block category short.intro', locale)
         ? i18n.global.t('Video.Sponsor Block category short.intro')
         : i18n.global.t('Video.Sponsor Block category.intro')
     case 'outro':
@@ -134,15 +137,15 @@ export function translateSponsorBlockCategory(category, { short = true } = {}) {
     case 'selfpromo':
       return i18n.global.t('Video.Sponsor Block category.self-promotion')
     case 'interaction':
-      return short
+      return short && i18n.global.te('Video.Sponsor Block category short.interaction', locale)
         ? i18n.global.t('Video.Sponsor Block category short.interaction')
         : i18n.global.t('Video.Sponsor Block category.interaction')
     case 'music_offtopic':
-      return short
+      return short && i18n.global.te('Video.Sponsor Block category short.music offtopic', locale)
         ? i18n.global.t('Video.Sponsor Block category short.music offtopic')
         : i18n.global.t('Video.Sponsor Block category.music offtopic')
     case 'filler':
-      return short
+      return short && i18n.global.te('Video.Sponsor Block category short.filler', locale)
         ? i18n.global.t('Video.Sponsor Block category short.filler')
         : i18n.global.t('Video.Sponsor Block category.filler')
     case 'poi_highlight':
