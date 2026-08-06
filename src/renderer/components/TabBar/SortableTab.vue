@@ -739,7 +739,10 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   display: block;
   inline-size: 100%;
   block-size: 100%;
-  object-fit: cover;
+
+  /* Captures are the page content region (often wider than 16:9 after the
+     chrome is cropped). Cover would clip the sides; contain shows the full page. */
+  object-fit: contain;
 }
 
 .tabTooltipPreview .tabTooltipPreviewAvatar {
