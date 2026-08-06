@@ -1182,7 +1182,7 @@ export default defineComponent({
 
     /** @param {boolean} value */
     function updateSkipSilence(value) {
-      store.dispatch('updateSkipSilence', value)
+      return store.dispatch('updateSkipSilence', value)
     }
 
     watch(displayVideoPlayButton, (newValue) => {
@@ -7204,7 +7204,7 @@ export default defineComponent({
     /**
      * @param {KeyboardEvent} event
      */
-    function keyboardShortcutHandler(event) {
+    async function keyboardShortcutHandler(event) {
       if (!player || !isActiveTab.value) {
         return
       }
@@ -7314,7 +7314,12 @@ export default defineComponent({
         case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
           event.preventDefault()
           const enabled = !skipSilence.value
-          updateSkipSilence(enabled)
+          await updateSkipSilence(enabled)
+
+          // Only confirm the state that was actually persisted.
+          if (skipSilence.value !== enabled) {
+            break
+          }
 
           const localization = ui.getControls().getLocalization()
           const message = localization.resolve(enabled ? 'ON' : 'OFF')
