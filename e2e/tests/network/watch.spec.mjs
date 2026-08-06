@@ -730,6 +730,71 @@ test.describe('watch page', () => {
     )
   })
 
+  test('keeps the current chapter centered in the sidebar and fullscreen dock', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const currentChapterIndex = 20
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await page.evaluate(async ({ component, chapterIndex }) => {
+      const watchView = component.proxy
+      if (!watchView) {
+        throw new Error('Unable to access the watch view')
+      }
+
+      watchView.videoChapters = Array.from({ length: 40 }, (_, index) => ({
+        title: `Test chapter ${index + 1}`,
+        timestamp: `${index}:00`,
+        startSeconds: index * 60,
+        endSeconds: (index + 1) * 60
+      }))
+      watchView.videoCurrentChapterIndex = chapterIndex
+      watchView.showSidebarChapters = true
+      await watchView.$nextTick()
+    }, { component: watchComponent, chapterIndex: currentChapterIndex })
+
+    const panel = page.locator('.watchVideoChaptersPanel')
+    await expect(panel).toBeVisible()
+    await expect.poll(() => panel.evaluate((element) => {
+      const container = element.querySelector('.chaptersWrapper')
+      const currentChapter = container?.querySelector('.chapter.current')
+      if (!container || !currentChapter) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      const containerBounds = container.getBoundingClientRect()
+      const chapterBounds = currentChapter.getBoundingClientRect()
+      const containerMid = containerBounds.top + containerBounds.height / 2
+      const chapterMid = chapterBounds.top + chapterBounds.height / 2
+      return Math.abs(containerMid - chapterMid)
+    })).toBeLessThan(40)
+
+    await panel.getByRole('button', { name: 'Close Chapters' }).click()
+    await expect(panel).toHaveCount(0)
+
+    await setPlayerFullscreen(page, true)
+    await page.evaluate(async (component) => {
+      component.refs.player.showChaptersOverlay = true
+      await component.proxy.$nextTick()
+    }, watchComponent)
+
+    const overlay = page.locator('.chapterOverlay')
+    await expect(overlay).toBeVisible()
+    await expect.poll(() => overlay.evaluate((element) => {
+      const container = element.querySelector('.chaptersWrapper')
+      const currentChapter = container?.querySelector('.chapter.current')
+      if (!container || !currentChapter) {
+        return Number.POSITIVE_INFINITY
+      }
+
+      const containerBounds = container.getBoundingClientRect()
+      const chapterBounds = currentChapter.getBoundingClientRect()
+      const containerMid = containerBounds.top + containerBounds.height / 2
+      const chapterMid = chapterBounds.top + chapterBounds.height / 2
+      return Math.abs(containerMid - chapterMid)
+    })).toBeLessThan(40)
+  })
+
   test('comments load on request', async ({ app, page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
