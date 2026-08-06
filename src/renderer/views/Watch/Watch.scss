@@ -358,6 +358,7 @@
       background: transparent;
       cursor: pointer;
       font: inherit;
+      text-decoration: none;
       text-shadow: 0 1px 2px #000, 0 2px 8px rgb(0 0 0 / 85%);
     }
 
@@ -422,6 +423,7 @@
       font: inherit;
       flex: 0 0 auto;
       max-inline-size: 100%;
+      text-decoration: none;
     }
 
     .shortsExternalChannel span {
@@ -484,7 +486,7 @@
     }
 
     .shortsLinkedVideo {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 7px;
       max-inline-size: 100%;
@@ -498,6 +500,7 @@
       cursor: pointer;
       font: inherit;
       font-size: 12px;
+      text-decoration: none;
     }
 
     .shortsLinkedVideo span {
@@ -542,6 +545,7 @@
       margin-block-start: 2px;
       overflow: hidden;
       border-radius: calc(8px * var(--ui-roundness));
+      text-decoration: none;
     }
 
     .shortsComponentAction :deep(.iconButton) {

@@ -36,6 +36,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  openInternalPath,
   showApiErrorToast,
   showToast,
   showToastOnAllTabs
@@ -1663,16 +1664,58 @@ export default defineComponent({
       }
     },
 
-    openShortsChannel: function () {
-      if (this.channelId) {
-        this.tabRouter.push({ path: `/channel/${this.channelId}` })
+    openShortsChannel: function (event) {
+      if (!this.channelId) {
+        return
       }
+
+      // Plain left clicks are handled by the router-link. Electron needs help
+      // for middle-click / modifier-click so those open a tab or window.
+      if (!process.env.IS_ELECTRON) {
+        return
+      }
+
+      const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+      const isModifiedClick = event?.type === 'click' && (event.ctrlKey || event.metaKey)
+      if (!isMiddleClick && !isModifiedClick) {
+        return
+      }
+
+      event.preventDefault()
+      openInternalPath({
+        path: `/channel/${this.channelId}`,
+        title: this.channelName,
+        doCreateNewWindow: event.shiftKey,
+        doCreateNewTab: !event.shiftKey,
+        makeActive: !isMiddleClick
+      })
     },
 
-    openShortsLinkedVideo: function () {
-      if (this.shortsLinkedVideo?.videoId) {
-        this.tabRouter.push({ path: `/watch/${this.shortsLinkedVideo.videoId}` })
+    openShortsLinkedVideo: function (event) {
+      if (!this.shortsLinkedVideo?.videoId) {
+        return
       }
+
+      // Plain left clicks are handled by the router-link. Electron needs help
+      // for middle-click / modifier-click so those open a tab or window.
+      if (!process.env.IS_ELECTRON) {
+        return
+      }
+
+      const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+      const isModifiedClick = event?.type === 'click' && (event.ctrlKey || event.metaKey)
+      if (!isMiddleClick && !isModifiedClick) {
+        return
+      }
+
+      event.preventDefault()
+      openInternalPath({
+        path: `/watch/${this.shortsLinkedVideo.videoId}`,
+        title: this.shortsLinkedVideo.title,
+        doCreateNewWindow: event.shiftKey,
+        doCreateNewTab: !event.shiftKey,
+        makeActive: !isMiddleClick
+      })
     },
 
     toggleShortsComments: function () {
