@@ -563,6 +563,44 @@ test.describe('watch page', () => {
     await expect.poll(async () => await video.evaluate((el) => el.playbackRate)).toBeLessThan(raisedRate)
   })
 
+  test.describe('fast-forward through silence shortcut', () => {
+    test.use({
+      seed: {
+        settings: {
+          keyboardShortcuts: JSON.stringify({
+            VIDEO_PLAYER: {
+              PLAYBACK: {
+                TOGGLE_SKIP_SILENCE: 'h'
+              }
+            }
+          })
+        }
+      }
+    })
+
+    test('shows an on-screen indicator when toggled', async ({ page, innertube }) => {
+      test.skip(!innertube.playback, 'needs real media streams')
+      await openVideo(page)
+      await waitForPlaybackOrSkip(test, page)
+
+      const popup = page.locator(`${activeTab} .valueChangePopup`)
+      const skipSilence = () => page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.getters.getSkipSilence
+      })
+
+      await page.locator('body').press('h')
+      await expect(popup).toBeVisible()
+      await expect(popup).toHaveText(/On/)
+      await expect.poll(skipSilence).toBe(true)
+
+      await page.locator('body').press('h')
+      await expect(popup).toBeVisible()
+      await expect(popup).toHaveText(/Off/)
+      await expect.poll(skipSilence).toBe(false)
+    })
+  })
+
   test('long transcripts quickly align with the current cue', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({

@@ -7311,10 +7311,17 @@ export default defineComponent({
           blurTooltipButtons()
           break
         }
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
           event.preventDefault()
-          updateSkipSilence(!skipSilence.value)
+          const enabled = !skipSilence.value
+          updateSkipSilence(enabled)
+
+          const localization = ui.getControls().getLocalization()
+          const message = localization.resolve(enabled ? 'ON' : 'OFF')
+          showValueChange(message, 'forward-fast', true)
+          blurTooltipButtons()
           break
+        }
       }
 
       if (event.defaultPrevented) {
