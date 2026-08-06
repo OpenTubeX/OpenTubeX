@@ -316,9 +316,6 @@
 .tabSwitcherPreview img {
   inline-size: 100%;
   block-size: 100%;
-
-  /* Same as the tab tooltip: page captures are often wider than this box after
-     the chrome is cropped, so cover would clip the sides. */
   object-fit: contain;
 }
 
