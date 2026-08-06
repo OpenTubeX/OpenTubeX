@@ -1669,25 +1669,9 @@ export default defineComponent({
         return
       }
 
-      // Plain left clicks are handled by the router-link. Electron needs help
-      // for middle-click / modifier-click so those open a tab or window.
-      if (!process.env.IS_ELECTRON) {
-        return
-      }
-
-      const isMiddleClick = event?.type === 'auxclick' && event.button === 1
-      const isModifiedClick = event?.type === 'click' && (event.ctrlKey || event.metaKey)
-      if (!isMiddleClick && !isModifiedClick) {
-        return
-      }
-
-      event.preventDefault()
-      openInternalPath({
+      this.openShortsInternalPath(event, {
         path: `/channel/${this.channelId}`,
-        title: this.channelName,
-        doCreateNewWindow: event.shiftKey,
-        doCreateNewTab: !event.shiftKey,
-        makeActive: !isMiddleClick
+        title: this.channelName
       })
     },
 
@@ -1696,22 +1680,34 @@ export default defineComponent({
         return
       }
 
-      // Plain left clicks are handled by the router-link. Electron needs help
-      // for middle-click / modifier-click so those open a tab or window.
+      this.openShortsInternalPath(event, {
+        path: `/watch/${this.shortsLinkedVideo.videoId}`,
+        title: this.shortsLinkedVideo.title
+      })
+    },
+
+    /**
+     * Plain left clicks stay on the router-link. Electron needs this for
+     * middle-click / Ctrl–Cmd / Shift so those open a tab or window.
+     * @param {MouseEvent} event
+     * @param {{ path: string, title: string }} destination
+     */
+    openShortsInternalPath: function (event, { path, title }) {
       if (!process.env.IS_ELECTRON) {
         return
       }
 
       const isMiddleClick = event?.type === 'auxclick' && event.button === 1
-      const isModifiedClick = event?.type === 'click' && (event.ctrlKey || event.metaKey)
+      const isModifiedClick = event?.type === 'click' &&
+        (event.ctrlKey || event.metaKey || event.shiftKey)
       if (!isMiddleClick && !isModifiedClick) {
         return
       }
 
       event.preventDefault()
       openInternalPath({
-        path: `/watch/${this.shortsLinkedVideo.videoId}`,
-        title: this.shortsLinkedVideo.title,
+        path,
+        title,
         doCreateNewWindow: event.shiftKey,
         doCreateNewTab: !event.shiftKey,
         makeActive: !isMiddleClick
