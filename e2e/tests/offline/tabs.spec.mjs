@@ -1023,10 +1023,14 @@ test.describe('tab switcher', () => {
     try {
       await openTabSwitcher(page)
 
-      const rowTops = await page.locator('.tabSwitcherItem').evaluateAll((items) => {
-        return [...new Set(items.map((item) => Math.round(item.getBoundingClientRect().top)))]
+      const gridPositions = await page.locator('.tabSwitcherItem').evaluateAll((items) => {
+        return {
+          rows: new Set(items.map((item) => Math.round(item.getBoundingClientRect().top))).size,
+          columns: new Set(items.map((item) => Math.round(item.getBoundingClientRect().left))).size
+        }
       })
-      expect(rowTops.length).toBeGreaterThan(1)
+      expect(gridPositions.rows).toBeGreaterThan(1)
+      expect(gridPositions.columns).toBeGreaterThan(1)
     } finally {
       await page.keyboard.up('Control')
     }
