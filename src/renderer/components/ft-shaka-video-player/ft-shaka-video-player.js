@@ -1182,7 +1182,7 @@ export default defineComponent({
 
     /** @param {boolean} value */
     function updateSkipSilence(value) {
-      store.dispatch('updateSkipSilence', value)
+      return store.dispatch('updateSkipSilence', value)
     }
 
     watch(displayVideoPlayButton, (newValue) => {
@@ -7204,7 +7204,7 @@ export default defineComponent({
     /**
      * @param {KeyboardEvent} event
      */
-    function keyboardShortcutHandler(event) {
+    async function keyboardShortcutHandler(event) {
       if (!player || !isActiveTab.value) {
         return
       }
@@ -7311,10 +7311,27 @@ export default defineComponent({
           blurTooltipButtons()
           break
         }
-        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.PLAYBACK.TOGGLE_SKIP_SILENCE): {
           event.preventDefault()
-          updateSkipSilence(!skipSilence.value)
+          const enabled = !skipSilence.value
+          try {
+            await updateSkipSilence(enabled)
+          } catch (error) {
+            console.error('Failed to update skip-silence setting:', error)
+            break
+          }
+
+          // Only confirm the state that was actually persisted.
+          if (skipSilence.value !== enabled) {
+            break
+          }
+
+          const localization = ui.getControls().getLocalization()
+          const message = localization.resolve(enabled ? 'ON' : 'OFF')
+          showValueChange(message, 'forward-fast', true)
+          blurTooltipButtons()
           break
+        }
       }
 
       if (event.defaultPrevented) {
