@@ -175,11 +175,12 @@
                 class="shortsPaidPromotion"
               />
               <div class="shortsFullscreenChannelRow">
-                <button
-                  v-if="!hideUploader"
-                  type="button"
+                <RouterLink
+                  v-if="!hideUploader && channelId"
                   class="shortsFullscreenChannel"
+                  :to="`/channel/${channelId}`"
                   @click="openShortsChannel"
+                  @auxclick="openShortsChannel"
                 >
                   <img
                     v-if="channelThumbnail"
@@ -188,7 +189,7 @@
                     alt=""
                   >
                   <span dir="auto">{{ channelName }}</span>
-                </button>
+                </RouterLink>
                 <FtSubscribeButton
                   v-if="!hideUnsubscribeButton"
                   :channel-id="channelId"
@@ -297,11 +298,12 @@
             <div
               class="shortsChannelRow"
             >
-              <button
-                v-if="!hideUploader"
-                type="button"
+              <RouterLink
+                v-if="!hideUploader && channelId"
                 class="shortsExternalChannel"
+                :to="`/channel/${channelId}`"
                 @click="openShortsChannel"
+                @auxclick="openShortsChannel"
               >
                 <img
                   v-if="channelThumbnail"
@@ -310,7 +312,7 @@
                   alt=""
                 >
                 <span dir="auto">{{ channelName }}</span>
-              </button>
+              </RouterLink>
               <FtSubscribeButton
                 v-if="!hideUnsubscribeButton"
                 :channel-id="channelId"
@@ -328,16 +330,17 @@
           >
             {{ videoTitle }}
           </h1>
-          <button
-            v-if="!isLoading && shortsLinkedVideo"
-            type="button"
+          <RouterLink
+            v-if="!isLoading && shortsLinkedVideo?.videoId"
             class="shortsLinkedVideo"
+            :to="`/watch/${shortsLinkedVideo.videoId}`"
             :title="shortsLinkedVideo.title"
             @click="openShortsLinkedVideo"
+            @auxclick="openShortsLinkedVideo"
           >
             <font-awesome-icon :icon="['fas', 'play']" />
             <span dir="auto">{{ shortsLinkedVideo.title }}</span>
-          </button>
+          </RouterLink>
         </div>
         <div
           v-if="customShortsPlayerActive"
@@ -464,18 +467,19 @@
             />
             <span>{{ quickBookmarkIconText }}</span>
           </div>
-          <button
-            v-if="!isLoading && channelThumbnail"
-            type="button"
+          <RouterLink
+            v-if="!isLoading && channelId && channelThumbnail"
             class="shortsSoundThumbnail"
+            :to="`/channel/${channelId}`"
             :title="channelName"
             @click="openShortsChannel"
+            @auxclick="openShortsChannel"
           >
             <img
               :src="channelThumbnail"
               alt=""
             >
-          </button>
+          </RouterLink>
         </div>
         <button
           v-if="customShortsPlayerActive && nextSubscriptionShortThumbnail"

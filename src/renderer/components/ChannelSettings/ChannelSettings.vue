@@ -74,21 +74,30 @@
             class="channelEntry"
           >
             <div class="channelHeader">
-              <img
-                v-if="channel.thumbnail"
-                class="channelThumbnail"
-                :src="channel.thumbnail"
-                alt=""
+              <router-link
+                class="channelLink"
+                :to="`/channel/${channel.id}`"
+                @click="showManager = false"
               >
-              <span
-                v-else
-                class="channelThumbnail channelThumbnailPlaceholder"
-              >
-                <FontAwesomeIcon :icon="['fas', 'circle-user']" />
-              </span>
-              <p class="channelName">
-                {{ channel.name }}
-              </p>
+                <img
+                  v-if="channel.thumbnail"
+                  class="channelThumbnail"
+                  :src="channel.thumbnail"
+                  alt=""
+                >
+                <span
+                  v-else
+                  class="channelThumbnail channelThumbnailPlaceholder"
+                >
+                  <FontAwesomeIcon :icon="['fas', 'circle-user']" />
+                </span>
+                <p
+                  class="channelName"
+                  dir="auto"
+                >
+                  {{ channel.name }}
+                </p>
+              </router-link>
               <FtIconButton
                 v-if="channel.addableOptions.length > 0"
                 :title="t('Settings.Channel Settings.Add Setting')"

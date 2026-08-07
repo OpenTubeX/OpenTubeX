@@ -36,6 +36,7 @@ import {
   getCachedOembedTitle,
   getOembedTitle,
   getShortThumbnailUrl,
+  openInternalPath,
   showApiErrorToast,
   showToast,
   showToastOnAllTabs
@@ -1663,16 +1664,54 @@ export default defineComponent({
       }
     },
 
-    openShortsChannel: function () {
-      if (this.channelId) {
-        this.tabRouter.push({ path: `/channel/${this.channelId}` })
+    openShortsChannel: function (event) {
+      if (!this.channelId) {
+        return
       }
+
+      this.openShortsInternalPath(event, {
+        path: `/channel/${this.channelId}`,
+        title: this.channelName
+      })
     },
 
-    openShortsLinkedVideo: function () {
-      if (this.shortsLinkedVideo?.videoId) {
-        this.tabRouter.push({ path: `/watch/${this.shortsLinkedVideo.videoId}` })
+    openShortsLinkedVideo: function (event) {
+      if (!this.shortsLinkedVideo?.videoId) {
+        return
       }
+
+      this.openShortsInternalPath(event, {
+        path: `/watch/${this.shortsLinkedVideo.videoId}`,
+        title: this.shortsLinkedVideo.title
+      })
+    },
+
+    /**
+     * Plain left clicks stay on the router-link. Electron needs this for
+     * middle-click / Ctrl–Cmd / Shift so those open a tab or window.
+     * @param {MouseEvent} event
+     * @param {{ path: string, title: string }} destination
+     */
+    openShortsInternalPath: function (event, { path, title }) {
+      if (!process.env.IS_ELECTRON) {
+        return
+      }
+
+      const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+      const isModifiedClick = event?.type === 'click' &&
+        (event.ctrlKey || event.metaKey || event.shiftKey)
+      if (!isMiddleClick && !isModifiedClick) {
+        return
+      }
+
+      event.preventDefault()
+      openInternalPath({
+        path,
+        title,
+        doCreateNewWindow: event.shiftKey,
+        doCreateNewTab: !event.shiftKey,
+        makeActive: !isMiddleClick
+      })
     },
 
     toggleShortsComments: function () {
