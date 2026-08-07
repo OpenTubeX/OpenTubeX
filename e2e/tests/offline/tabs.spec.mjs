@@ -996,3 +996,77 @@ test.describe('background tab shortcuts', () => {
     expect(externalRequests).toEqual([])
   })
 })
+
+/**
+ * Opens the Ctrl+Tab switcher and keeps Control held so the overlay stays up.
+ * Callers must release Control (or Escape) when finished.
+ * @param {import('@playwright/test').Page} page
+ */
+async function openTabSwitcher(page) {
+  await page.keyboard.down('Control')
+  await page.keyboard.press('Tab')
+  await expect(page.locator('.tabSwitcher')).toBeVisible()
+}
+
+test.describe('tab switcher', () => {
+  test('wraps into multiple rows when there are many tabs', async ({ page }) => {
+    await page.evaluate(async () => {
+      for (let i = 0; i < 9; i++) {
+        await window.ftElectron.tabs.create({
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(10)
+
+    try {
+      await openTabSwitcher(page)
+
+      const gridPositions = await page.locator('.tabSwitcherItem').evaluateAll((items) => {
+        return {
+          rows: new Set(items.map((item) => Math.round(item.getBoundingClientRect().top))).size,
+          columns: new Set(items.map((item) => Math.round(item.getBoundingClientRect().left))).size
+        }
+      })
+      expect(gridPositions.rows).toBeGreaterThan(1)
+      expect(gridPositions.columns).toBeGreaterThan(1)
+    } finally {
+      await page.keyboard.up('Control')
+    }
+
+    await expect(page.locator('.tabSwitcher')).toHaveCount(0)
+  })
+
+  test('shows page icons when tab icons are enabled', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    try {
+      await openTabSwitcher(page)
+      await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon')).toHaveCount(2)
+      await expect(page.locator('.tabSwitcherItem .tabSwitcherTitleIcon').first())
+        .toHaveAttribute('data-icon', 'rss')
+    } finally {
+      await page.keyboard.up('Control')
+    }
+  })
+})
+
+test.describe('tab switcher without icons', () => {
+  test.use({ seed: { settings: { showTabIcons: false } } })
+
+  test('hides title icons when tab icons are disabled', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+
+    try {
+      await openTabSwitcher(page)
+      await expect(
+        page.locator('.tabSwitcherItem .tabSwitcherTitleIcon, .tabSwitcherItem .tabSwitcherTitleAvatar')
+      ).toHaveCount(0)
+    } finally {
+      await page.keyboard.up('Control')
+    }
+  })
+})

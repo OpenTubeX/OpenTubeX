@@ -254,7 +254,22 @@
             </span>
           </span>
           <span class="tabSwitcherTitle">
-            {{ formatTabSwitcherTitle(tab.title) }}
+            <img
+              v-if="showTabIcons && getTabAvatarUrl(tab)"
+              :src="getTabAvatarUrl(tab)"
+              class="tabSwitcherTitleAvatar"
+              alt=""
+              draggable="false"
+            >
+            <FontAwesomeIcon
+              v-else-if="showTabIcons && getTabPageIcon(tab)"
+              :icon="getTabPageIcon(tab)"
+              class="tabSwitcherTitleIcon"
+              aria-hidden="true"
+            />
+            <span class="tabSwitcherTitleText">
+              {{ formatTabSwitcherTitle(tab.title) }}
+            </span>
           </span>
         </button>
       </div>
@@ -312,7 +327,7 @@ import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
-import { getTabPreviewFallbackUrl } from './tabs/tabPreview'
+import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadUtilityRoutes } from './router/index'
 
 const releaseNotesMarkdown = createReleaseNotesMarkdown()
@@ -526,6 +541,7 @@ let findbarMatches = []
 const findbarStateByTabId = new Map()
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
+const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const findbarStatus = computed(() => {
   if (findbarQuery.value.trim().length === 0) {
     return ''
@@ -2171,7 +2187,13 @@ function handleTabSwitcherWheel(event) {
     return
   }
 
-  switcher.scrollLeft += delta
+  // Prefer vertical scrolling when the switcher wraps into multiple rows;
+  // fall back to horizontal when that is the only overflow axis.
+  if (switcher.scrollHeight > switcher.clientHeight) {
+    switcher.scrollTop += delta
+  } else {
+    switcher.scrollLeft += delta
+  }
 }
 
 function scrollTabSwitcherSelectionIntoView() {
