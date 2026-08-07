@@ -21,8 +21,10 @@
 }
 
 .communityImage {
-  block-size: 100%;
+  display: block;
   inline-size: 100%;
+  block-size: auto;
+  border-radius: calc(8px * var(--ui-roundness));
 }
 
 .communityThumbnail {
