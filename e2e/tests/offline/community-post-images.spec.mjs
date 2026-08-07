@@ -142,7 +142,7 @@ test.describe('community post images', () => {
     }
   })
 
-  test('keeps YouTube crops, aspect ratio, and UI roundness', async ({ page }) => {
+  test('keeps carousel crops, shows full single images, and applies UI roundness', async ({ page }) => {
     await stubPostImages(page)
 
     await goTo(page, 'subscriptions')
@@ -158,8 +158,9 @@ test.describe('community post images', () => {
     await expect(multiImage).toBeVisible()
     await expect(singleImage).toBeVisible()
 
+    // Carousels keep YouTube's square CDN crop; single images drop it.
     await expect(multiImage).toHaveAttribute('src', new RegExp(FCROP))
-    await expect(singleImage).toHaveAttribute('src', new RegExp(FCROP))
+    await expect(singleImage).not.toHaveAttribute('src', new RegExp(FCROP))
 
     await expect.poll(async () => multiImage.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0)
     await expect.poll(async () => singleImage.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0)
@@ -182,7 +183,9 @@ test.describe('community post images', () => {
     // uiRoundness 200 → --ui-roundness: 2 → 8px * 2 = 16px
     expect(multiMetrics.borderRadius).toBe('16px')
     expect(multiMetrics.displayRatio).toBeCloseTo(multiMetrics.naturalRatio, 2)
+    expect(multiMetrics.naturalRatio).toBeCloseTo(1, 2)
     expect(singleMetrics.displayRatio).toBeCloseTo(singleMetrics.naturalRatio, 2)
+    expect(singleMetrics.naturalRatio).toBeCloseTo(800 / 450, 2)
 
     // Carousel chrome should sit on the image, not in a tall empty gap below it.
     const carouselLayout = await multiPost.locator('swiper-container.sliderContainer').evaluate((container) => {
