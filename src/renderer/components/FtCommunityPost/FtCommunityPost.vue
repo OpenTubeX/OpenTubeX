@@ -305,8 +305,9 @@ function getBestQualityImage(imageArray) {
     return Number.parseInt(b.width) - Number.parseInt(a.width)
   })
 
-  // Remove cropping directives when applicable
-  return imageArrayCopy[0]?.url?.replace(/-c-fcrop64=[^-]+/i, '') ?? ''
+  // Keep YouTube's fcrop64 directive so the CDN returns the same
+  // pre-cropped image YouTube shows (stripping it softens/mismatches).
+  return imageArrayCopy[0]?.url ?? ''
 }
 
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
