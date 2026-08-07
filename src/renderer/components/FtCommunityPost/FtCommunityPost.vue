@@ -71,7 +71,7 @@
         lazy="true"
       >
         <img
-          :src="getBestQualityImage(img)"
+          :src="getBestQualityImage(img, { preserveYouTubeCrop: true })"
           class="communityImage"
           alt=""
           loading="lazy"
@@ -298,16 +298,23 @@ function parseCommunityData() {
 
 /**
  * @param {{ width: number, height: number, url: string }[]} imageArray
+ * @param {{ preserveYouTubeCrop?: boolean }} [options]
  */
-function getBestQualityImage(imageArray) {
+function getBestQualityImage(imageArray, options = {}) {
   const imageArrayCopy = Array.from(imageArray)
   imageArrayCopy.sort((a, b) => {
     return Number.parseInt(b.width) - Number.parseInt(a.width)
   })
 
-  // Keep YouTube's fcrop64 directive so the CDN returns the same
-  // pre-cropped image YouTube shows (stripping it softens/mismatches).
-  return imageArrayCopy[0]?.url ?? ''
+  const url = imageArrayCopy[0]?.url ?? ''
+
+  // Multi-image carousels match YouTube's square CDN crops. Single-image
+  // posts show the full frame (YouTube omits fcrop64 for those).
+  if (options.preserveYouTubeCrop) {
+    return url
+  }
+
+  return url.replace(/-c-fcrop64=[^-]+/i, '')
 }
 
 const swiperContainerRef = useTemplateRef('swiperContainerRef')
