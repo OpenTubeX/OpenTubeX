@@ -86,6 +86,16 @@ function reconcileScrollbarOnResize(element, instance) {
       const height = element.clientHeight
       const scrollTop = element.scrollTop
       const maximumScrollTop = Math.max(0, element.scrollHeight - height)
+      // Content can shrink (trimmed live chat) or the viewport can grow after a
+      // dock transition while an obsolete end offset is still applied — that
+      // parks the view on empty space until the user scrolls up.
+      if (scrollTop > maximumScrollTop + 1) {
+        element.scrollTop = maximumScrollTop
+        instance.update(true)
+        previousHeight = height
+        return
+      }
+
       const grewAtOldEnd = height > previousHeight &&
         scrollTop > 0 &&
         scrollTop >= maximumScrollTop - 1
