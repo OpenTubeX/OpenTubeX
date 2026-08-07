@@ -486,6 +486,9 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 .tab::after {
   content: '';
   position: absolute;
+
+  /* Sits in .tabsContainer's padding-block-end, covering the tab bar's inset
+     separator under the active tab without leaving the overflow clip. */
   inset-block-end: -1px;
   inset-inline: 0;
   block-size: 1px;
