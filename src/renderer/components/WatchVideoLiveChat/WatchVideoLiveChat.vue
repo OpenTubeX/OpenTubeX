@@ -217,7 +217,7 @@
           role="button"
           tabindex="0"
           @click="hideSuperChat"
-          @keydown.enter.space.prevent="hideSuperChat"
+          @keydown.enter.space.self.prevent="hideSuperChat"
         >
           <div
             class="superChatMessage"
@@ -352,13 +352,13 @@
                     {{ comment.author.name }}
                   </RouterLink>
                   <span
-                    v-if="comment.author.badge"
+                    v-if="comment.badge"
                     class="badge"
                   >
                     <img
-                      :src="comment.author.badge.url"
+                      :src="comment.badge.url"
                       alt=""
-                      :title="comment.author.badge.tooltip"
+                      :title="comment.badge.tooltip"
                       class="badgeImage"
                     >
                   </span>
