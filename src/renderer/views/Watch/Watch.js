@@ -352,7 +352,7 @@ export default defineComponent({
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
-      stream403ReloadAttemptedForCurrentVideo: false,
+      streamErrorReloadAttemptedForCurrentVideo: false,
       sabrErrorRecoveryAttempts: 0,
       sabrErrorRecoveriesForCurrentVideo: 0,
       /** @type {number|null} */
@@ -616,6 +616,9 @@ export default defineComponent({
     },
     hideUploader: function () {
       return this.$store.getters.getHideUploader
+    },
+    disableChannelLinks: function () {
+      return this.$store.getters.getDisableChannelLinks
     },
     hideUnsubscribeButton: function () {
       return this.$store.getters.getHideUnsubscribeButton
@@ -1264,7 +1267,7 @@ export default defineComponent({
       const videoIdChanged = this.videoId !== previousVideoId
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
-        this.stream403ReloadAttemptedForCurrentVideo = false
+        this.streamErrorReloadAttemptedForCurrentVideo = false
         this.sabrErrorRecoveryAttempts = 0
         this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
@@ -1665,7 +1668,8 @@ export default defineComponent({
     },
 
     openShortsChannel: function (event) {
-      if (!this.channelId) {
+      if (!this.channelId || this.disableChannelLinks) {
+        event?.preventDefault()
         return
       }
 
@@ -3438,6 +3442,26 @@ export default defineComponent({
     },
 
     /**
+     * Reload once for a playback error that may be fixed by fetching fresh
+     * streaming data.
+     * @param {string} specificError
+     * @returns {Promise<boolean>} whether a reload was started
+     */
+    reloadAfterStreamErrorOnce: async function (specificError) {
+      if (this.streamErrorReloadAttemptedForCurrentVideo) {
+        return false
+      }
+
+      this.streamErrorReloadAttemptedForCurrentVideo = true
+      this.showTabToast({
+        message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
+        icon: ['fas', 'sync'],
+      })
+      await this.reloadView()
+      return true
+    },
+
+    /**
      * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
      */
     handlePlayerError: async function (error) {
@@ -3482,13 +3506,7 @@ export default defineComponent({
                   ? '[BAD_HTTP_STATUS: 403] Potential causes: IP block, streaming URL deciphering failed or music video geo-block'
                   : '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
 
-              if (!this.stream403ReloadAttemptedForCurrentVideo) {
-                this.stream403ReloadAttemptedForCurrentVideo = true
-                this.showTabToast({
-                  message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
-                  icon: ['fas', 'sync'],
-                })
-                await this.reloadView()
+              if (await this.reloadAfterStreamErrorOnce(specificError)) {
                 return
               }
 
@@ -3511,13 +3529,7 @@ export default defineComponent({
 
             const specificError = '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
 
-            if (!this.stream403ReloadAttemptedForCurrentVideo) {
-              this.stream403ReloadAttemptedForCurrentVideo = true
-              this.showTabToast({
-                message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
-                icon: ['fas', 'sync'],
-              })
-              await this.reloadView()
+            if (await this.reloadAfterStreamErrorOnce(specificError)) {
               return
             }
 

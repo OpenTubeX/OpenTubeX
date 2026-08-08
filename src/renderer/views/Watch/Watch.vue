@@ -175,10 +175,11 @@
                 class="shortsPaidPromotion"
               />
               <div class="shortsFullscreenChannelRow">
-                <RouterLink
+                <component
+                  :is="disableChannelLinks ? 'span' : 'router-link'"
                   v-if="!hideUploader && channelId"
                   class="shortsFullscreenChannel"
-                  :to="`/channel/${channelId}`"
+                  :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
                   @click="openShortsChannel"
                   @auxclick="openShortsChannel"
                 >
@@ -189,7 +190,7 @@
                     alt=""
                   >
                   <span dir="auto">{{ channelName }}</span>
-                </RouterLink>
+                </component>
                 <FtSubscribeButton
                   v-if="!hideUnsubscribeButton"
                   :channel-id="channelId"
@@ -298,10 +299,11 @@
             <div
               class="shortsChannelRow"
             >
-              <RouterLink
+              <component
+                :is="disableChannelLinks ? 'span' : 'router-link'"
                 v-if="!hideUploader && channelId"
                 class="shortsExternalChannel"
-                :to="`/channel/${channelId}`"
+                :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
                 @click="openShortsChannel"
                 @auxclick="openShortsChannel"
               >
@@ -312,7 +314,7 @@
                   alt=""
                 >
                 <span dir="auto">{{ channelName }}</span>
-              </RouterLink>
+              </component>
               <FtSubscribeButton
                 v-if="!hideUnsubscribeButton"
                 :channel-id="channelId"
@@ -467,10 +469,11 @@
             />
             <span>{{ quickBookmarkIconText }}</span>
           </div>
-          <RouterLink
+          <component
+            :is="disableChannelLinks ? 'span' : 'router-link'"
             v-if="!isLoading && channelId && channelThumbnail"
             class="shortsSoundThumbnail"
-            :to="`/channel/${channelId}`"
+            :to="disableChannelLinks ? undefined : `/channel/${channelId}`"
             :title="channelName"
             @click="openShortsChannel"
             @auxclick="openShortsChannel"
@@ -479,7 +482,7 @@
               :src="channelThumbnail"
               alt=""
             >
-          </RouterLink>
+          </component>
         </div>
         <button
           v-if="customShortsPlayerActive && nextSubscriptionShortThumbnail"
