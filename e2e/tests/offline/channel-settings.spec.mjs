@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 const CHANNEL_ID = 'UCaaaaaaaaaaaaaaaaaaaaaa'
 const CHANNEL_NAME = 'Alpha Channel'
@@ -26,21 +26,21 @@ test.use({
 
 test.describe('channel settings', () => {
   test('saved channels in the manager open their channel page', async ({ page }) => {
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await goToSettingsSection(page, 'channel')
 
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
 
-    const dialog = page.getByRole('dialog', { name: 'Saved Channel Settings' })
-    await expect(dialog).toBeVisible()
+    const settingsWindow = page.locator('.settingsWindow')
+    await expect(settingsWindow.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
 
-    const channelLink = dialog.getByRole('link', { name: CHANNEL_NAME })
+    const channelLink = settingsWindow.getByRole('link', { name: CHANNEL_NAME })
     await expect(channelLink).toHaveAttribute('href', `#/channel/${CHANNEL_ID}`)
 
     await channelLink.click()
 
-    await expect(dialog).toHaveCount(0)
     await expect(page).toHaveURL(new RegExp(`#/channel/${CHANNEL_ID}`))
+    await expect(settingsWindow).toBeVisible()
+    await expect(settingsWindow.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
   })
 
   test('saved channels are not links when channel links are disabled', async ({ page }) => {
@@ -49,12 +49,10 @@ test.describe('channel settings', () => {
       await store.dispatch('updateDisableChannelLinks', true)
     })
 
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await goToSettingsSection(page, 'channel')
     await page.getByRole('button', { name: 'Manage Saved Channels (1)' }).click()
 
-    const dialog = page.getByRole('dialog', { name: 'Saved Channel Settings' })
-    const channel = dialog.locator('.channelLink', { hasText: CHANNEL_NAME })
+    const channel = page.locator('.settingsWindow .channelLink', { hasText: CHANNEL_NAME })
     await expect(channel).toBeVisible()
     await expect(channel).not.toHaveAttribute('href')
     await expect(channel).toHaveJSProperty('tagName', 'SPAN')

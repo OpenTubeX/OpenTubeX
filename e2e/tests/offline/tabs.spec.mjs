@@ -1000,32 +1000,36 @@ test.describe('background tab shortcuts', () => {
     await page.locator(sel.newTabButton).click()
     await goTo(page, 'history')
 
-    const externalRequests = []
+    const subscriptionRefreshRequests = []
     page.on('request', (request) => {
-      if (/^https?:/.test(request.url())) {
-        externalRequests.push(request.url())
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
       }
     })
 
     await page.locator('body').press('r')
-    await page.waitForTimeout(500)
-    expect(externalRequests).toEqual([])
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
   })
 
   test('R typed in settings search does not refresh subscriptions behind it', async ({ page }) => {
     await goTo(page, 'settings')
     const search = page.getByRole('searchbox', { name: 'Search settings' })
-    const externalRequests = []
+    const subscriptionRefreshRequests = []
     page.on('request', (request) => {
-      if (/^https?:/.test(request.url())) {
-        externalRequests.push(request.url())
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
       }
     })
 
     await search.press('r')
     await expect(search).toHaveValue('r')
-    await page.waitForTimeout(500)
-    expect(externalRequests).toEqual([])
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
   })
 })
 

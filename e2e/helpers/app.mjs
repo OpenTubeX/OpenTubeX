@@ -266,6 +266,17 @@ export async function goTo(page, route) {
   await expect(page).toHaveURL(new RegExp(`#/${route}`))
 }
 
+/** Opens Settings and selects one category in the two-column modal layout. */
+export async function goToSettingsSection(page, section) {
+  if (!await page.locator('.settingsWindow').isVisible()) {
+    await goTo(page, 'settings')
+  }
+  await page.locator(`.settingsMenu [data-section="${section}"]`).click()
+  const content = page.locator(`.settingsContent > [data-section="${section}"]`)
+  await expect(content).toBeVisible()
+  return content
+}
+
 /** Common locators, kept in one place so selector changes only hit here. */
 export const sel = {
   searchInput: '.topNav .searchInput input.ft-input',

@@ -116,7 +116,6 @@
           <FontAwesomeIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
-          ref="settingsCloseButtonRef"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: settingsSectionSortEnabled }"
@@ -139,6 +138,7 @@
           <FontAwesomeIcon :icon="['fas', 'pen']" />
         </button>
         <button
+          ref="settingsCloseButtonRef"
           type="button"
           class="settingsHeaderButton settingsCloseButton"
           :aria-label="t('Close')"
@@ -306,6 +306,11 @@ import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
 import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getProxyTestUrl } from '../../helpers/proxy-test'
+import {
+  SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS,
+  SETTINGS_SEARCH_KEYS,
+  SETTINGS_SEARCH_SELECT_GROUP_LABELS,
+} from '../../helpers/settings-search-config'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SETTINGS_DESKTOP_WIDTH_THRESHOLD = 760
@@ -315,69 +320,6 @@ const MINIMUM_WIDTH = 360
 const MINIMUM_HEIGHT = 360
 const RESIZE_DIRECTIONS = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
 
-const SETTINGS_SEARCH_KEYS = {
-  general: 'Settings.General Settings',
-  theme: 'Settings.Theme Settings',
-  player: 'Settings.Player Settings',
-  channel: 'Settings.Channel Settings',
-  'caption-appearance': 'Settings.Player Settings.Caption Appearance',
-  'external-player': 'Settings.External Player Settings',
-  download: 'Settings.Download Settings',
-  'external-software': 'Settings.External Software Settings',
-  subscription: 'Settings.Subscription Settings',
-  distraction: 'Settings.Distraction Free Settings',
-  'parental-control': 'Settings.Parental Control Settings',
-  privacy: 'Settings.Privacy Settings',
-  data: 'Settings.Data Settings',
-  sync: 'Settings.Sync Settings',
-  proxy: 'Settings.Proxy Settings',
-  'sponsor-block': 'Settings.SponsorBlock Settings',
-  'return-youtube-dislike': 'Settings.Return YouTube Dislike Settings',
-  'context-menu-search': 'Settings.Context Menu Search Settings',
-  password: 'Settings.Password Settings',
-  experimental: 'Settings.Experimental Settings'
-}
-
-const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
-  general: {
-    'Stream Extraction Method': ['Stream Extraction Method'],
-    'New Tab Position': ['New Tab Position'],
-    'Tab Close Focus': ['Tab Close Focus'],
-    'Startup Behavior': ['Startup Behavior'],
-    'Reduced Motion': ['Reduced Motion'],
-    'Avoid translation': ['Avoid translation'],
-    'Preferred API Backend': ['Preferred API Backend'],
-    'Video View Type': ['Video View Type'],
-    'Thumbnail Preference': ['Thumbnail Preference'],
-    'Extra Thumbnail Action Button': ['Extra Thumbnail Action Button'],
-    'External Link Handling': ['External Link Handling']
-  },
-  theme: {
-    'Toast Position': ['Toast Position'],
-    'Base Theme': ['Base Theme'],
-    'Main Color Theme': ['Main Color Theme']
-  },
-  player: {
-    'Caption Appearance': [],
-    'Default Viewing Mode': ['Default Viewing Mode', 'Tooltip'],
-    'Auto Picture in Picture': ['Auto Picture in Picture', 'Wayland Minimize Unsupported'],
-    'Default Video Format': ['Default Video Format'],
-    'Default Quality': ['Default Quality'],
-    'Screenshot.Modes': []
-  },
-  'caption-appearance': {
-    Anchor: ['Anchor'],
-    'Edge Style': ['Edge Style']
-  },
-  'external-player': { Players: [] },
-  'external-software': { Sources: [] },
-  privacy: { 'Watched Progress Saving Mode.Modes': [] },
-  'sponsor-block': { 'Skip Options': ['Skip Option'] }
-}
-const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
-  general: new Set(['System Default']),
-  'caption-appearance': new Set(['Application Language'])
-}
 const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^No\b|^How\b|^Checking\b|^Current .+\b(?:has|is|will)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure)$)/i
 
 const { locale, t, tm } = useI18n()
@@ -395,6 +337,7 @@ const subpageTitle = ref('')
 let closeSubpage = null
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
+let settingsContentPaddingBottom = 0
 let observationScheduled = false
 let boundsSaveTimer = null
 let searchHighlightTimer = null
@@ -565,13 +508,17 @@ const isSearchableSettingsMessage = (sectionType, path, value) => {
   return !SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS[sectionType]?.has(messagePath) &&
     !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey)
 }
-const removeRedundantSearchMatches = (values) => values
-  .toSorted((a, b) => a.length - b.length)
-  .filter((value, index, sortedValues) => {
+const removeRedundantSearchMatches = (values) => {
+  const keptMatches = []
+  const normalizedMatches = []
+  for (const value of values.toSorted((a, b) => a.length - b.length)) {
     const normalizedValue = normalizeSearchText(value)
-    return !sortedValues.slice(0, index).some(shorterValue =>
-      normalizedValue.includes(normalizeSearchText(shorterValue)))
-  })
+    if (normalizedMatches.some(shorterValue => normalizedValue.includes(shorterValue))) continue
+    keptMatches.push(value)
+    normalizedMatches.push(normalizedValue)
+  }
+  return keptMatches
+}
 const settingsSearchableValues = computed(() => new Map(
   settingsSectionComponents.value.map((section) => {
     const messages = tm(SETTINGS_SEARCH_KEYS[section.type])
@@ -648,7 +595,11 @@ provide(settingsSubpageKey, {
 
 onMounted(handleMounted)
 onActivated(handleMounted)
-onDeactivated(stopObserving)
+onDeactivated(() => {
+  stopObserving()
+  stopDragging()
+  stopResizing()
+})
 onBeforeUnmount(() => {
   stopObserving()
   stopDragging()
@@ -669,6 +620,7 @@ watch(isProfileManagerOpen, (open) => {
 watch(activeSection, () => nextTick(observeActiveSettingsSection))
 
 function handleMounted() {
+  unlocked.value = store.getters.getSettingsPassword === ''
   handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
   setInitialSection()
   nextTick(() => (settingsSearchInputRef.value ?? settingsCloseButtonRef.value)?.focus())
@@ -711,6 +663,7 @@ function stopObserving() {
   settingsResizeObserver = null
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
+  settingsContentPaddingBottom = 0
   window.removeEventListener('resize', clampWindowToViewport)
 }
 
@@ -720,6 +673,7 @@ function observeActiveSettingsSection() {
   const content = settingsContentRef.value
   const section = content?.querySelector('.section')
   if (!content || !section) return
+  settingsContentPaddingBottom = Number.parseFloat(getComputedStyle(content).paddingBottom)
 
   settingsSectionResizeObserver = new ResizeObserver(() => {
     clampOverlayScrollTop(content, section)
@@ -732,8 +686,7 @@ function clampSettingsContentScroll(event) {
   const content = event.currentTarget
   const section = content.querySelector('.section')
   if (!section) return
-  const contentEnd = section.offsetTop + section.offsetHeight +
-    Number.parseFloat(getComputedStyle(content).paddingBottom)
+  const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
   if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
     clampOverlayScrollTop(content, section)
   }
@@ -832,8 +785,7 @@ function goBack() {
   if (isKeyboardShortcutPromptOpen.value) {
     store.dispatch('hideKeyboardShortcutPrompt')
   } else if (isProfileManagerOpen.value) {
-    store.dispatch('showSettingsWindowRoot')
-    activeSection.value = 'data'
+    returnToSettingsMenu()
   } else if (subpageTitle.value) {
     closeSubpage?.()
   } else {
@@ -1044,8 +996,13 @@ function getInitialBounds() {
 function scheduleBoundsSave() {
   if (boundsSaveTimer !== null) clearTimeout(boundsSaveTimer)
   boundsSaveTimer = setTimeout(() => {
-    localStorage.setItem(SETTINGS_BOUNDS_STORAGE_KEY, JSON.stringify(windowBounds.value))
-    boundsSaveTimer = null
+    try {
+      localStorage.setItem(SETTINGS_BOUNDS_STORAGE_KEY, JSON.stringify(windowBounds.value))
+    } catch {
+      // Bounds are convenience state; storage can be unavailable or full.
+    } finally {
+      boundsSaveTimer = null
+    }
   }, 150)
 }
 </script>

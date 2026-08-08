@@ -18,18 +18,18 @@ test.describe('side nav navigation', () => {
 
   test('navigation history back and forward work', async ({ page }) => {
     await goTo(page, 'history')
-    await goTo(page, 'settings')
+    await goTo(page, 'userplaylists')
 
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.forwardButton).click()
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/userplaylists/)
   })
 
   test('navigation history popout shows page icons and a drop shadow', async ({ page }) => {
     await goTo(page, 'history')
-    await goTo(page, 'settings')
+    await goTo(page, 'userplaylists')
 
     await page.locator(sel.backButton).click({ button: 'right' })
 
@@ -103,8 +103,8 @@ test.describe('navigation history titles', () => {
       const tab = store.getters.getActiveTab
       tab.history[tab.historyIndex].titlePending = false
     })
-    await page.locator(sel.sideNavLink('settings')).first().evaluate(link => link.click())
-    await expect(page).toHaveURL(/#\/settings/)
+    await page.locator(sel.sideNavLink('history')).first().evaluate(link => link.click())
+    await expect(page).toHaveURL(/#\/history/)
     await page.locator(sel.backButton).click()
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
 
@@ -119,7 +119,7 @@ test.describe('navigation history titles', () => {
       })
       document.querySelector(forwardButtonSelector).click()
     }, sel.forwardButton)
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.backButton).click({ button: 'right' })
     const options = page.locator('.topNav .iconDropdown [role="option"]')
