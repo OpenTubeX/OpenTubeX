@@ -326,6 +326,7 @@ const props = defineProps({
   videoId: { type: String, default: '' },
   videoIds: { type: Array, default: () => [] },
   playlistId: { type: String, default: '' },
+  playlistKey: { type: String, default: '' },
   isPlaylist: { type: Boolean, default: false },
   title: { type: String, required: true },
   thumbnail: { type: String, default: '' }
@@ -526,9 +527,7 @@ function deleteTemplate() {
 
 function matchesDownload(download) {
   if (!props.isPlaylist) return download.videoId === props.videoId
-  if (props.playlistId !== '') return download.playlistId === props.playlistId
-  return Array.isArray(download.videoIds) && download.videoIds.length === props.videoIds.length &&
-    download.videoIds.every((videoId, index) => videoId === props.videoIds[index])
+  return props.playlistKey !== '' && download.playlistKey === props.playlistKey
 }
 
 const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
@@ -552,6 +551,7 @@ async function startDownload() {
     videoId: props.videoId,
     videoIds: [...props.videoIds],
     playlistId: props.playlistId,
+    playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,
     title: props.title,
     thumbnail: props.thumbnail

@@ -141,6 +141,31 @@ test.describe('video downloads', () => {
 
     await hydratedDownload.getByTitle('Cancel Download').click()
     await expect(otherDownload).toContainText('Download cancelled')
+
+    await hydratedDownload.getByTitle('Clear From List').click()
+    await expect(otherDownload).toHaveCount(0)
+  })
+
+  test('flushes completed download history before quitting', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect(page.getByText('Download complete', { exact: true })).toBeVisible()
+
+    const { page: relaunchedPage } = await app.relaunch()
+    await goTo(relaunchedPage, 'downloads')
+    await expect(relaunchedPage.getByText('Bookmarkable video', { exact: true })).toBeVisible()
   })
 })
 
@@ -206,8 +231,7 @@ test.describe('list video actions', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       store.commit('upsertYtDlpDownload', {
         id: 43,
-        playlistId: '',
-        videoIds: ['differentId'],
+        playlistKey: 'different-playlist',
         title: 'Saved videos',
         status: 'downloading',
         percent: 50
@@ -218,6 +242,26 @@ test.describe('list video actions', () => {
 
     await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
     await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
+  })
+
+  test('reattaches to a changed local playlist by its stable id', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Saved videos', { exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 44,
+        playlistKey: 'saved-videos',
+        title: 'Old playlist title',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    await page.getByTitle('Download Playlist').click()
+
+    await expect(page.getByText('50.0%', { exact: true })).toBeVisible()
+    await expect(page.getByText('Media Type', { exact: true })).toHaveCount(0)
   })
 
   test('does not overflow horizontally in a narrow download modal', async ({ page }) => {

@@ -415,6 +415,10 @@ if (process.env.IS_ELECTRON) {
     }
   })
 
+  window.ftElectron.handleYtDlpDownloadsRemoved((ids) => {
+    for (const id of ids) store.commit('removeYtDlpDownload', id)
+  })
+
   window.ftElectron.ytDlpListDownloads().then(downloads => {
     for (const download of downloads) {
       store.commit('upsertYtDlpDownload', download)

@@ -112,6 +112,7 @@ const IpcChannels = {
   YT_DLP_DOWNLOAD: 'yt-dlp-download',
   YT_DLP_CANCEL_DOWNLOAD: 'yt-dlp-cancel-download',
   YT_DLP_DOWNLOAD_STATUS: 'yt-dlp-download-status',
+  YT_DLP_DOWNLOADS_REMOVED: 'yt-dlp-downloads-removed',
   YT_DLP_LIST_DOWNLOADS: 'yt-dlp-list-downloads',
   YT_DLP_CLEAR_DOWNLOADS: 'yt-dlp-clear-downloads',
   YT_DLP_OPEN_DOWNLOAD: 'yt-dlp-open-download',

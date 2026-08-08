@@ -273,6 +273,7 @@
       <WatchVideoDownloadPrompt
         v-if="showDownloadPrompt"
         :playlist-id="isUserPlaylist ? '' : id"
+        :playlist-key="id"
         :video-ids="isUserPlaylist ? sortedVideos.map(video => video.videoId) : []"
         :is-playlist="true"
         :title="title"

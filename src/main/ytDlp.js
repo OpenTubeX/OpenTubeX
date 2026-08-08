@@ -33,6 +33,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} videoId
  * @property {string[]} [videoIds]
  * @property {string} [playlistId]
+ * @property {string} [playlistKey] stable playlist identity used only by the renderer
  * @property {boolean} [isPlaylist]
  * @property {string} [title] only used for display purposes in the renderer
  * @property {string} [thumbnail] only used for display purposes in the renderer
@@ -60,7 +61,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {number} id
  * @property {string} videoId
  * @property {string} playlistId
- * @property {string[]} videoIds
+ * @property {string} playlistKey
  * @property {string} title
  * @property {string} thumbnail
  * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
@@ -99,6 +100,14 @@ const activeDownloads = new Map()
 const downloadRecords = new Map()
 let downloadRecordsLoaded = false
 
+function broadcastToRenderers(channel, payload) {
+  for (const browserWindow of BrowserWindow.getAllWindows()) {
+    if (!browserWindow.webContents.isDestroyed()) {
+      browserWindow.webContents.send(channel, payload)
+    }
+  }
+}
+
 function getDownloadRecordsPath() {
   return join(app.getPath('userData'), 'downloads.json')
 }
@@ -131,6 +140,10 @@ function saveDownloadRecords() {
         .slice(-200)
       return writeFile(getDownloadRecordsPath(), JSON.stringify(records), 'utf8')
     })
+  return downloadRecordsSaveQueue
+}
+
+export function flushYtDlpDownloadRecords() {
   return downloadRecordsSaveQueue
 }
 const windowsShownOnce = new WeakSet()
@@ -1073,7 +1086,7 @@ export async function handleYtDlpDownload(event, payload) {
     id,
     videoId: isSingleVideo ? payload.videoId : '',
     playlistId: typeof payload.playlistId === 'string' ? payload.playlistId.slice(0, 128) : '',
-    videoIds,
+    playlistKey: typeof payload.playlistKey === 'string' ? payload.playlistKey.slice(0, 255) : '',
     title: typeof payload.title === 'string' ? payload.title.slice(0, 255) : payload.videoId ?? payload.playlistId,
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     status: 'downloading',
@@ -1099,11 +1112,7 @@ export async function handleYtDlpDownload(event, payload) {
     }
     lastSent = now
 
-    for (const browserWindow of BrowserWindow.getAllWindows()) {
-      if (!browserWindow.webContents.isDestroyed()) {
-        browserWindow.webContents.send(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...status })
-      }
-    }
+    broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...status })
   }
 
   sendStatus(true)
@@ -1267,6 +1276,7 @@ export async function handleYtDlpRemoveDownload(event, id) {
   }
   downloadRecords.delete(id)
   await saveDownloadRecords()
+  broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [id])
   return true
 }
 
@@ -1290,9 +1300,11 @@ export async function handleYtDlpClearDownloads(event, ids) {
     return false
   }
   await loadDownloadRecords()
+  const removedIds = []
   for (const id of ids) {
-    if (!activeDownloads.has(id)) downloadRecords.delete(id)
+    if (!activeDownloads.has(id) && downloadRecords.delete(id)) removedIds.push(id)
   }
   await saveDownloadRecords()
+  if (removedIds.length > 0) broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, removedIds)
   return true
 }

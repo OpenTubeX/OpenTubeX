@@ -281,6 +281,15 @@ export default {
   },
 
   /**
+   * @param {(ids: number[]) => void} handler
+   */
+  handleYtDlpDownloadsRemoved: (handler) => {
+    ipcRenderer.on(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, (event, ids) => {
+      handler(ids)
+    })
+  },
+
+  /**
    * @param {string | undefined} currentPath
    * @returns {Promise<string | undefined>}
    */

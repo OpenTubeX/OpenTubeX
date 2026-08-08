@@ -95,6 +95,7 @@
     <WatchVideoDownloadPrompt
       v-if="showDownloadPrompt"
       :playlist-id="isUserPlaylist ? '' : playlistId"
+      :playlist-key="playlistId"
       :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
       :is-playlist="true"
       :title="title"
