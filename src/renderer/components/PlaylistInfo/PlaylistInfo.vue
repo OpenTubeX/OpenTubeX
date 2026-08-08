@@ -181,6 +181,13 @@
             @click="showExportPrompt = true"
           />
           <FtIconButton
+            v-if="IS_ELECTRON && !editMode && videoCount > 0"
+            :title="t('Downloads.Download Playlist')"
+            :icon="['fas', 'download']"
+            theme="secondary"
+            @click="showDownloadPrompt = true"
+          />
+          <FtIconButton
             v-if="!editMode && userPlaylistDuplicateItemCount > 0"
             :title="$t('User Playlists.Remove Duplicate Videos')"
             :icon="['fas', 'users-slash']"
@@ -263,6 +270,15 @@
         :option-values="EXPORT_VALUES"
         @click="handleExport"
       />
+      <WatchVideoDownloadPrompt
+        v-if="showDownloadPrompt"
+        :playlist-id="isUserPlaylist ? '' : id"
+        :video-ids="isUserPlaylist ? sortedVideos.map(video => video.videoId) : []"
+        :is-playlist="true"
+        :title="title"
+        :thumbnail="thumbnail"
+        @close="showDownloadPrompt = false"
+      />
     </div>
   </div>
 </template>
@@ -278,6 +294,7 @@ import FtInput from '../FtInput/FtInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtQuickBookmarkIconPicker from '../FtQuickBookmarkIconPicker/FtQuickBookmarkIconPicker.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
 
@@ -384,6 +401,7 @@ const props = defineProps({
 const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-query-change', 'prompt-open', 'prompt-close'])
 
 const { locale, t } = useI18n()
+const IS_ELECTRON = process.env.IS_ELECTRON
 
 const query = ref('')
 const editMode = ref(false)
@@ -391,6 +409,7 @@ const showDeletePlaylistPrompt = ref(false)
 const showRemoveVideosOnWatchPrompt = ref(false)
 const showRemoveDuplicateVideosPrompt = ref(false)
 const showExportPrompt = ref(false)
+const showDownloadPrompt = ref(false)
 const newTitle = ref(props.title)
 const newDescription = ref(props.description)
 const newQuickBookmarkIcon = ref('bookmark')
@@ -556,6 +575,7 @@ const playlistPersistenceDisabled = computed(() => {
 watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
+watch(showDownloadPrompt, handlePromptToggle)
 
 /**
  * @param {boolean} shown

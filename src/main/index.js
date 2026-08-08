@@ -27,7 +27,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { handleYtDlpCancelDownload, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo } from './ytDlp'
+import { handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload } from './ytDlp'
 import { generatePoToken } from './poTokenGenerator'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
@@ -3160,6 +3160,10 @@ function runApp() {
   ipcMain.handle(IpcChannels.YT_DLP_DOWNLOAD, handleYtDlpDownload)
 
   ipcMain.on(IpcChannels.YT_DLP_CANCEL_DOWNLOAD, handleYtDlpCancelDownload)
+  ipcMain.handle(IpcChannels.YT_DLP_LIST_DOWNLOADS, handleYtDlpListDownloads)
+  ipcMain.handle(IpcChannels.YT_DLP_CLEAR_DOWNLOADS, handleYtDlpClearDownloads)
+  ipcMain.handle(IpcChannels.YT_DLP_OPEN_DOWNLOAD, handleYtDlpOpenDownload)
+  ipcMain.handle(IpcChannels.YT_DLP_REMOVE_DOWNLOAD, handleYtDlpRemoveDownload)
 
   ipcMain.handle(IpcChannels.YT_DLP_GET_INFO, handleYtDlpGetInfo)
 

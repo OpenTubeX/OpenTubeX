@@ -5,6 +5,7 @@ const PAGE_ICONS = [
   [/^\/popular(?:\/|$)/, ['fas', 'users']],
   [/^\/(?:userplaylists|playlist)(?:\/|$)/, ['fas', 'bookmark']],
   [/^\/history(?:\/|$)/, ['fas', 'history']],
+  [/^\/downloads(?:\/|$)/, ['fas', 'download']],
   [/^\/stats(?:\/|$)/, ['fas', 'chart-line']],
   [/^\/settings(?:\/|$)/, ['fas', 'sliders-h']],
   [/^\/about(?:\/|$)/, ['fas', 'info-circle']],

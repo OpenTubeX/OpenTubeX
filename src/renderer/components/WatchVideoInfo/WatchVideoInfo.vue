@@ -265,6 +265,7 @@
       v-if="showDownloadPrompt"
       :video-id="id"
       :title="title"
+      :thumbnail="videoThumbnail"
       @close="showDownloadPrompt = false"
     />
   </FtCard>

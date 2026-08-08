@@ -414,4 +414,10 @@ if (process.env.IS_ELECTRON) {
       })
     }
   })
+
+  window.ftElectron.ytDlpListDownloads().then(downloads => {
+    for (const download of downloads) {
+      store.commit('upsertYtDlpDownload', download)
+    }
+  }).catch(error => console.warn('Could not load download history', error))
 }

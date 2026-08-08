@@ -5,6 +5,7 @@ const FIXED_INTERNAL_ROUTE_TITLES = Object.freeze({
   '/popular': 'Most Popular',
   '/userplaylists': 'Your Playlists',
   '/history': 'History',
+  '/downloads': 'Downloads',
   '/stats': 'Stats',
   '/settings': 'Settings',
   '/about': 'About',

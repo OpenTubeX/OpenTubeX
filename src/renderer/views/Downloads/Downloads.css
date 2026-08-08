@@ -1,0 +1,134 @@
+.downloadsPage {
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin-block: 0 60px;
+  margin-inline: auto;
+  max-inline-size: 92vw;
+}
+
+.downloadsHeader,
+.downloadRow,
+.downloadMain,
+.downloadActions {
+  align-items: center;
+  display: flex;
+}
+
+.downloadsHeader {
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.downloadRow h3,
+.downloadRow p {
+  margin-block: 4px;
+}
+
+.headingIcon {
+  color: var(--primary-color);
+}
+
+.downloadSection {
+  margin-block-start: 28px;
+}
+
+.downloadRow {
+  background: var(--side-nav-color);
+  border-radius: calc(8px * var(--ui-roundness));
+  gap: 20px;
+  justify-content: space-between;
+  margin-block: 10px;
+  padding: 16px;
+}
+
+.downloadMain {
+  flex: 1 1 auto;
+  gap: 16px;
+  min-inline-size: 0;
+}
+
+.downloadThumbnail {
+  aspect-ratio: 16 / 9;
+  border-radius: calc(6px * var(--ui-roundness));
+  flex: none;
+  inline-size: 144px;
+  object-fit: cover;
+}
+
+.downloadDetails {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.downloadDetails h3,
+.destination {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.downloadStatus,
+.destination {
+  color: var(--secondary-text-color);
+  font-size: 0.9rem;
+}
+
+.downloadActions {
+  flex: none;
+  gap: 6px;
+}
+
+.progressTrack {
+  background: #9e9e9e;
+  block-size: 7px;
+  border-radius: 4px;
+  margin-block: 10px;
+  overflow: hidden;
+}
+
+.progressFill {
+  background: var(--accent-color);
+  block-size: 100%;
+  transition: inline-size 0.3s ease;
+}
+
+.progressFill.indeterminate {
+  animation: download-pulse 1.5s ease-in-out infinite;
+  inline-size: 100% !important;
+}
+
+.emptyDownloads {
+  color: var(--secondary-text-color);
+  padding-block: 90px;
+  text-align: center;
+}
+
+.emptyDownloads > svg {
+  font-size: 3rem;
+}
+
+@keyframes download-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media only screen and (width <= 680px) {
+  .downloadsPage {
+    inline-size: 100%;
+  }
+
+  .downloadsHeader,
+  .downloadRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .downloadActions {
+    justify-content: flex-end;
+  }
+
+  .downloadThumbnail {
+    inline-size: 112px;
+  }
+}

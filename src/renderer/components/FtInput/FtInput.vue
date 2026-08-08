@@ -18,7 +18,7 @@
       class="selectLabel"
       :class="{ disabled }"
     >
-      {{ label || placeholder }}
+      <span class="selectLabelText">{{ label || placeholder }}</span>
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"

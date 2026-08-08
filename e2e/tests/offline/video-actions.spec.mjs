@@ -76,7 +76,120 @@ test.describe('rounded action popovers', () => {
   })
 })
 
+test.describe('video downloads', () => {
+  test.use({
+    seed: {
+      ...SEED,
+      settings: {
+        ...SEED.settings,
+        ytDlpSource: 'system',
+        ytDlpPath: '/bin/false',
+        ytDlpFfmpegSource: 'system',
+        ytDlpFfmpegPath: '/bin/false'
+      }
+    }
+  })
+
+  test('sends plain download options over IPC', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+    await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
+  })
+})
+
+test('asks for confirmation before removing a downloaded file', async ({ page }) => {
+  await goTo(page, 'downloads')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('upsertYtDlpDownload', {
+      id: 42,
+      title: 'Finished download',
+      status: 'completed',
+      percent: 100,
+      thumbnail: 'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg',
+      destination: '/tmp/finished-download.mp4'
+    })
+  })
+
+  const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Finished download' })
+  await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute(
+    'src',
+    'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg'
+  )
+  const rowLayout = await downloadRow.evaluate((row) => ({
+    thumbnailRight: row.querySelector('.downloadThumbnail').getBoundingClientRect().right,
+    detailsLeft: row.querySelector('.downloadDetails').getBoundingClientRect().left
+  }))
+  expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
+
+  await page.getByTitle('Remove File').click()
+  await expect(page.getByRole('dialog')).toContainText('Remove downloaded file?')
+  await expect(page.getByRole('dialog')).toContainText('Finished download')
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByText('Finished download')).toBeVisible()
+})
+
 test.describe('list video actions', () => {
+  test('does not overflow horizontally in a narrow download modal', async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 940 })
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    for (const locator of [page.locator('.downloadPromptCard'), page.locator('.downloadOptions')]) {
+      await expect.poll(() => locator.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)
+    }
+
+    const templateSection = page.locator('.fixedTemplateSection')
+    await page.waitForTimeout(200)
+    const templateTop = await templateSection.evaluate(element => element.getBoundingClientRect().top)
+    await page.locator('.downloadOptions').evaluate(element => element.scrollTop = element.scrollHeight)
+    await expect.poll(() => page.locator('.downloadOptions').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
+  })
+
+  test('disabled download inputs do not fade their tooltips', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    const metadataSection = page.locator('.optionSection').filter({
+      has: page.getByRole('heading', { name: 'Subtitles and Metadata' })
+    })
+    await expect(metadataSection.locator('.switch-label-text')).toHaveText([
+      'Embed thumbnail as cover art',
+      'Embed title, author, description, and chapters',
+      'Include subtitles',
+      'Embed subtitles in the media file'
+    ])
+
+    const subtitleLanguages = page.locator('.subtitleLanguages')
+    const tooltip = subtitleLanguages.locator('[role="tooltip"]')
+    await expect(subtitleLanguages.locator('input')).toBeDisabled()
+    await subtitleLanguages.locator('.selectTooltip button').hover()
+    await expect(tooltip).toBeVisible()
+
+    const opacity = await subtitleLanguages.evaluate((field) => ({
+      label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
+      labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity,
+      tooltip: getComputedStyle(field.querySelector('[role="tooltip"]')).opacity
+    }))
+    expect(opacity).toEqual({ label: '1', labelText: '0.4', tooltip: '1' })
+  })
+
   test('the options dropdown shows readable single-column actions with icons', async ({ page }) => {
     await goTo(page, 'history')
     await page.setViewportSize({ width: 1200, height: 360 })

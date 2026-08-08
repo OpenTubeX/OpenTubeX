@@ -63,6 +63,7 @@ test.describe('tab bar', () => {
       ['/popular', 'Most Popular'],
       ['/userplaylists', 'Your Playlists'],
       ['/history', 'History'],
+      ['/downloads', 'Downloads'],
       ['/stats', 'Stats'],
       ['/settings', 'Settings'],
       ['/about', 'About'],
@@ -93,6 +94,22 @@ test.describe('tab bar', () => {
 
     await goTo(page, 'history')
     await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
+
+    await goTo(page, 'downloads')
+    await expect(page.locator(sel.activeTab).locator('[data-icon="download"]')).toBeVisible()
+  })
+
+  test('uses the full page card layout for downloads', async ({ page }) => {
+    await goTo(page, 'history')
+    const historyWidth = await page.locator('.card').first().evaluate(element => element.getBoundingClientRect().width)
+    const historyHeadingTop = await page.locator('.headingRow h2').evaluate(element => element.getBoundingClientRect().top)
+
+    await goTo(page, 'downloads')
+    const downloadsPage = page.locator('.downloadsPage')
+    await expect(downloadsPage.locator('.downloadsHeader [data-icon="download"]')).toBeVisible()
+    await expect(downloadsPage).not.toContainText('Manage active and completed downloads.')
+    await expect.poll(() => downloadsPage.evaluate(element => element.getBoundingClientRect().width)).toBeCloseTo(historyWidth, 0)
+    await expect.poll(() => downloadsPage.locator('.downloadsHeader h2').evaluate(element => element.getBoundingClientRect().top)).toBeCloseTo(historyHeadingTop, 0)
   })
 
   test('uses a distinct page icon for watch tabs', async ({ page }) => {
