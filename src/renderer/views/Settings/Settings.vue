@@ -5,6 +5,8 @@
     :style="windowStyle"
     role="dialog"
     :aria-label="t('Settings.Settings')"
+    tabindex="-1"
+    @keydown.esc.capture="handleSettingsEscape"
   >
     <header
       class="settingsWindowHeader"
@@ -94,6 +96,7 @@
       >
         <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
         <input
+          ref="settingsSearchInputRef"
           v-model="settingsSearchQuery"
           type="search"
           :placeholder="t('Settings.Search Settings')"
@@ -113,6 +116,7 @@
           <FontAwesomeIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
+          ref="settingsCloseButtonRef"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: settingsSectionSortEnabled }"
@@ -370,6 +374,11 @@ const SETTINGS_SEARCH_SELECT_GROUP_LABELS = {
   privacy: { 'Watched Progress Saving Mode.Modes': [] },
   'sponsor-block': { 'Skip Options': ['Skip Option'] }
 }
+const SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS = {
+  general: new Set(['System Default']),
+  'caption-appearance': new Set(['Application Language'])
+}
+const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^No\b|^How\b|^Checking\b|^Current .+\b(?:has|is|will)\b|^Operation in Progress$|(?:Description|Hint|Tooltip|Template|Warning|Error|Status|Message|Not Downloaded|Unavailable|Connected|Connecting|Success|Failed|Failure)$)/i
 
 const { locale, t, tm } = useI18n()
 const isInDesktopView = ref(true)
@@ -378,6 +387,8 @@ const settingsSearchQuery = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
+const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
+const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
@@ -547,24 +558,12 @@ const settingsSearchExtraValues = computed(() => ({
     getProxyTestUrl(locale.value)
   ]
 }))
-const settingsSearchExcludedValues = computed(() => ({
-  general: [t('Settings.General Settings.System Default')],
-  'caption-appearance': [
-    t('Settings.Player Settings.Caption Appearance.Application Language')
-  ],
-  data: [t('Settings.Data Settings.How do I import my subscriptions?')],
-  'external-software': [
-    t('Settings.External Software Settings.Checking yt-dlp'),
-    t('Settings.External Software Settings.Checking FFmpeg')
-  ],
-  sync: [t('Settings.Sync Settings.Checking Server')]
-}))
-const isSearchableSettingsValue = (sectionType, value) => {
+const isSearchableSettingsMessage = (sectionType, path, value) => {
   if (/\{[^{}]+\}/.test(value)) return false
-
-  const normalizedValue = normalizeSearchText(value)
-  return !(settingsSearchExcludedValues.value[sectionType] ?? [])
-    .some(excludedValue => normalizeSearchText(excludedValue) === normalizedValue)
+  const messagePath = path.join('.')
+  const messageKey = path.at(-1) ?? ''
+  return !SETTINGS_SEARCH_EXCLUDED_MESSAGE_PATHS[sectionType]?.has(messagePath) &&
+    !NON_SETTING_MESSAGE_KEY_PATTERN.test(messageKey)
 }
 const removeRedundantSearchMatches = (values) => values
   .toSorted((a, b) => a.length - b.length)
@@ -573,20 +572,28 @@ const removeRedundantSearchMatches = (values) => values
     return !sortedValues.slice(0, index).some(shorterValue =>
       normalizedValue.includes(normalizeSearchText(shorterValue)))
   })
-const settingsSearchResults = computed(() => {
-  const query = normalizeSearchText(settingsSearchQuery.value)
-  if (query === '') return []
-
-  return settingsSectionComponents.value.flatMap((section) => {
+const settingsSearchableValues = computed(() => new Map(
+  settingsSectionComponents.value.map((section) => {
     const messages = tm(SETTINGS_SEARCH_KEYS[section.type])
     const values = [...new Set([
       section.title,
       ...flattenMessageValues(
         messages,
-        SETTINGS_SEARCH_SELECT_GROUP_LABELS[section.type]
+        SETTINGS_SEARCH_SELECT_GROUP_LABELS[section.type],
+        [],
+        (path, value) => isSearchableSettingsMessage(section.type, path, value)
       ),
       ...(settingsSearchExtraValues.value[section.type] ?? [])
-    ])].filter(value => isSearchableSettingsValue(section.type, value))
+    ])]
+    return [section.type, values]
+  })
+))
+const settingsSearchResults = computed(() => {
+  const query = normalizeSearchText(settingsSearchQuery.value)
+  if (query === '') return []
+
+  return settingsSectionComponents.value.flatMap((section) => {
+    const values = settingsSearchableValues.value.get(section.type) ?? []
     const matches = removeRedundantSearchMatches(
       values.filter(value => normalizeSearchText(value).includes(query))
     )
@@ -664,6 +671,7 @@ watch(activeSection, () => nextTick(observeActiveSettingsSection))
 function handleMounted() {
   handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
   setInitialSection()
+  nextTick(() => (settingsSearchInputRef.value ?? settingsCloseButtonRef.value)?.focus())
   if (settingsResizeObserver !== null || observationScheduled) {
     return
   }
@@ -800,18 +808,18 @@ function handleSettingsSearch() {
   })
 }
 
-function flattenMessageValues(value, selectGroups = {}, path = []) {
-  if (typeof value === 'string') return [value]
+function flattenMessageValues(value, selectGroups = {}, path = [], include = () => true) {
+  if (typeof value === 'string') return include(path, value) ? [value] : []
   if (Array.isArray(value)) {
     return value.flatMap((item, index) =>
-      flattenMessageValues(item, selectGroups, [...path, index.toString()]))
+      flattenMessageValues(item, selectGroups, [...path, index.toString()], include))
   }
   if (value !== null && typeof value === 'object') {
     const retainedKeys = selectGroups[path.join('.')]
     return Object.entries(value)
       .filter(([key]) => retainedKeys === undefined || retainedKeys.includes(key))
       .flatMap(([key, childValue]) =>
-        flattenMessageValues(childValue, selectGroups, [...path, key]))
+        flattenMessageValues(childValue, selectGroups, [...path, key], include))
   }
   return []
 }
@@ -887,8 +895,14 @@ function closeSettings() {
   store.dispatch('hideSettingsWindow')
 }
 
+function handleSettingsEscape(event) {
+  if (event.target.closest('[aria-expanded="true"]')) return
+  event.stopPropagation()
+  closeSettings()
+}
+
 function startDragging(event) {
-  if (event.button !== 0 || event.target.closest('button, input')) return
+  if (event.button !== 0 || event.target.closest('button, input, .settingsSearch')) return
   const bounds = settingsWindowRef.value.getBoundingClientRect()
   draggingPointerId = event.pointerId
   dragOffsetX = event.clientX - bounds.left
@@ -953,19 +967,23 @@ function resizeWindow(event) {
   if (direction.includes('s')) bottom += deltaY
   if (direction.includes('n')) top += deltaY
 
-  if (right - left < MINIMUM_WIDTH) {
-    if (direction.includes('w')) left = right - MINIMUM_WIDTH
-    else right = left + MINIMUM_WIDTH
-  }
-  if (bottom - top < MINIMUM_HEIGHT) {
-    if (direction.includes('n')) top = bottom - MINIMUM_HEIGHT
-    else bottom = top + MINIMUM_HEIGHT
-  }
-
+  const maximumRight = window.innerWidth - WINDOW_MARGIN
+  const maximumBottom = window.innerHeight - WINDOW_MARGIN
+  const minimumWidth = Math.min(MINIMUM_WIDTH, maximumRight - WINDOW_MARGIN)
+  const minimumHeight = Math.min(MINIMUM_HEIGHT, maximumBottom - WINDOW_MARGIN)
   left = Math.max(WINDOW_MARGIN, left)
   top = Math.max(WINDOW_MARGIN, top)
-  right = Math.min(window.innerWidth - WINDOW_MARGIN, right)
-  bottom = Math.min(window.innerHeight - WINDOW_MARGIN, bottom)
+  right = Math.min(maximumRight, right)
+  bottom = Math.min(maximumBottom, bottom)
+
+  if (right - left < minimumWidth) {
+    if (direction.includes('w')) left = Math.max(WINDOW_MARGIN, right - minimumWidth)
+    else right = Math.min(maximumRight, left + minimumWidth)
+  }
+  if (bottom - top < minimumHeight) {
+    if (direction.includes('n')) top = Math.max(WINDOW_MARGIN, bottom - minimumHeight)
+    else bottom = Math.min(maximumBottom, top + minimumHeight)
+  }
 
   windowBounds.value = {
     x: left,

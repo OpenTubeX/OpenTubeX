@@ -14,12 +14,17 @@ const router = useRouter()
 onMounted(async () => {
   const view = route.path.startsWith('/settings/profile') ? 'profile' : null
   await store.dispatch('showSettingsWindow', view)
-  await router.back()
+  const tabId = store.getters.getPresentedTabId ?? store.getters.getActiveTabId
+  const tab = store.getters.getTabById(tabId)
+  const previousRoute = tab?.history[tab.historyIndex - 1]?.route
+  const previousPath = typeof previousRoute === 'string' ? previousRoute : previousRoute?.path
+  const browserBackPath = window.history.state?.back
+  const safePreviousPath = process.env.IS_ELECTRON ? previousPath : browserBackPath
 
-  setTimeout(() => {
-    if (route.path.startsWith('/settings')) {
-      router.replace('/')
-    }
-  }, 100)
+  if (typeof safePreviousPath === 'string' && !safePreviousPath.startsWith('/settings')) {
+    await router.back()
+  } else {
+    await router.replace('/')
+  }
 })
 </script>

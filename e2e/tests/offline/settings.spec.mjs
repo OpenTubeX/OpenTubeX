@@ -50,6 +50,19 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent > [data-section="general"]')).toBeVisible()
   })
 
+  test('keeps a direct legacy settings route inside the app', async ({ page }) => {
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/settings',
+      makeActive: true
+    }))
+
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(candidate => candidate.id === tab.id)?.route.fullPath
+    }).toBe('/')
+  })
+
   test('toggles from the app settings button', async ({ page }) => {
     const settingsButton = page.locator('.navSettingsButton')
     await settingsButton.click()
@@ -57,6 +70,18 @@ test.describe('settings', () => {
 
     await settingsButton.click()
     await expect(page.locator('.settingsWindow')).toHaveClass(/settings-window-leave-active/)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+  })
+
+  test('focuses its search and closes with Escape', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await expect(search).toBeFocused()
+    await search.evaluate(element => element.blur())
+    await page.locator('.settingsSearch svg').click()
+    await expect(search).toBeFocused()
+
+    await page.keyboard.press('Escape')
     await expect(page.locator('.settingsWindow')).toBeHidden()
   })
 
@@ -130,6 +155,12 @@ test.describe('settings', () => {
     await search.fill('checking')
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
+    await search.fill('No default instance has been set')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('Current instance will be randomized on startup')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
     await search.fill('Catppuccin Latte')
     await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
 
@@ -199,6 +230,21 @@ test.describe('settings', () => {
     const bounds = await page.locator('.settingsWindow').boundingBox()
     expect(bounds.x).toBeGreaterThanOrEqual(0)
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(340)
+  })
+
+  test('keeps its minimum size when a resize pointer crosses the window', async ({ page }) => {
+    await goTo(page, 'settings')
+    const resizeHandle = page.locator('.resize-se')
+    const handleBounds = await resizeHandle.boundingBox()
+
+    await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(0, 0)
+    await page.mouse.up()
+
+    const bounds = await page.locator('.settingsWindow').boundingBox()
+    expect(bounds.width).toBeGreaterThanOrEqual(359.9)
+    expect(bounds.height).toBeGreaterThanOrEqual(359.9)
   })
 
   test('wraps controls before the two-column detail pane clips them', async ({ page }) => {

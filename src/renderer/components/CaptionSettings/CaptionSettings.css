@@ -86,7 +86,7 @@
   align-items: stretch;
   justify-content: center;
   gap: 0;
-  color: rgb(var(--primary-text-color) 0.87);
+  color: color-mix(in srgb, var(--primary-text-color) 87%, transparent);
   cursor: pointer;
 }
 

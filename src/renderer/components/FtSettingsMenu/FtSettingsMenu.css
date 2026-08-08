@@ -6,12 +6,17 @@
   box-sizing: border-box;
   padding: 10px;
   margin: 0;
+  list-style: none;
   background: var(--side-nav-color);
 }
 
-.title {
+.titleItem {
   flex: 1 0 42px;
   min-block-size: 42px;
+  display: flex;
+}
+
+.title {
   inline-size: 100%;
   box-sizing: border-box;
   display: flex;
@@ -38,7 +43,7 @@
   font-weight: 600;
 }
 
-.settingsMenu.filtered .title {
+.settingsMenu.filtered .titleItem {
   flex-grow: 0;
 }
 
@@ -76,6 +81,6 @@
   padding: 12px;
 }
 
-.settingsMenu.mobileSettingsMenu .title {
+.settingsMenu.mobileSettingsMenu .titleItem {
   flex-basis: 48px;
 }

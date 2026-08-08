@@ -3,33 +3,38 @@
     class="settingsMenu"
     :class="{ filtered }"
   >
-    <button
+    <li
       v-for="settingsSection in settingsSections"
-      ref="linkRefs"
       :key="settingsSection.type"
-      class="title"
-      :class="{ active: activeSection === settingsSection.type }"
-      type="button"
-      :data-section="settingsSection.type"
-      @click.stop="goToSettingsSection"
+      class="titleItem"
     >
-      <div class="titleContent">
-        <div class="iconAndTitleText">
-          <FontAwesomeIcon
-            :icon="settingsSection.icon"
-            class="titleIcon"
-          />
-          {{ settingsSection.title }}
+      <button
+        ref="linkRefs"
+        class="title"
+        :class="{ active: activeSection === settingsSection.type }"
+        type="button"
+        :data-section="settingsSection.type"
+        @click.stop="goToSettingsSection"
+      >
+        <div class="titleContent">
+          <div class="iconAndTitleText">
+            <FontAwesomeIcon
+              :icon="settingsSection.icon"
+              class="titleIcon"
+            />
+            {{ settingsSection.title }}
+          </div>
+          <div class="titleUnderline" />
         </div>
-        <div class="titleUnderline" />
-      </div>
-    </button>
-    <p
+      </button>
+    </li>
+    <li
       v-if="settingsSections.length === 0 && emptyMessage"
-      class="emptyMessage"
     >
-      {{ emptyMessage }}
-    </p>
+      <p class="emptyMessage">
+        {{ emptyMessage }}
+      </p>
+    </li>
   </menu>
 </template>
 
@@ -72,7 +77,7 @@ defineExpose({
    * @param {string} name
    */
   focusLink: (name) => {
-    linkRefs.value.find((link) => link.dataset.section === name)?.focus()
+    linkRefs.value?.find((link) => link.dataset.section === name)?.focus()
   }
 })
 </script>

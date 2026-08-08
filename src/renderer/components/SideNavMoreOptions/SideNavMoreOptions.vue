@@ -176,7 +176,7 @@
     <hr>
     <button
       type="button"
-      class="navOption mobileShow"
+      class="navOption navOptionButton mobileShow"
       :title="$t('Settings.Settings')"
       :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
       @click="openSettings"

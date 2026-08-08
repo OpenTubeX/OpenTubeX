@@ -853,6 +853,22 @@ test.describe('custom default page', () => {
   })
 })
 
+test.describe('removed settings landing page', () => {
+  test.use({ seed: { settings: { landingPage: 'settings' } } })
+
+  test('migrates to subscriptions before creating tabs', async ({ page }) => {
+    const tab = await page.evaluate(async () => {
+      return await window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      })
+    })
+
+    expect(tab.route.fullPath).toBe('/subscriptions')
+    expect(tab.title).toBe('Subscriptions')
+  })
+})
+
 test.describe('RTL context menus', () => {
   test.use({ seed: { settings: { currentLocale: 'ar' } } })
 

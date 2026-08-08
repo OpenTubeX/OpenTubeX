@@ -283,7 +283,7 @@ function keyboardShortcutHandler(event) {
   }
   const target = event.target
   if (target instanceof HTMLElement && (
-    target.matches('input, textarea') || target.isContentEditable
+    target.matches('input, textarea, select') || target.isContentEditable
   )) {
     return
   }
