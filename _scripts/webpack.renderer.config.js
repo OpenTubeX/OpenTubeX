@@ -15,16 +15,15 @@ const {
 const { sigFrameTemplateParameters } = require('./sigFrameConfig')
 
 const isDevMode = process.env.NODE_ENV === 'development'
-const requestedPlatform = process.env.npm_config_platform
+const rendererPlatform = process.platform
 
-if (!process.env.OTX_PLATFORM && requestedPlatform && requestedPlatform !== process.platform) {
-  throw new Error(`Cross-packing for ${requestedPlatform} requires OTX_PLATFORM=${requestedPlatform}`)
-}
-
-const rendererPlatform = process.env.OTX_PLATFORM || process.platform
-
-if (!['darwin', 'linux', 'win32'].includes(rendererPlatform)) {
-  throw new Error(`Unsupported OTX_PLATFORM: ${rendererPlatform}`)
+for (const [name, requestedPlatform] of [
+  ['OTX_PLATFORM', process.env.OTX_PLATFORM],
+  ['npm_config_platform', process.env.npm_config_platform]
+]) {
+  if (requestedPlatform && requestedPlatform !== rendererPlatform) {
+    throw new Error(`${name}=${requestedPlatform} does not match the packager platform ${rendererPlatform}`)
+  }
 }
 
 const { version: swiperVersion } = JSON.parse(readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
@@ -153,8 +152,8 @@ const config = {
   plugins: [
     processLocalesPlugin,
     new webpack.DefinePlugin({
-      // Cross-pack callers must declare the target through OTX_PLATFORM because
-      // renderer platform checks are compiled into the bundle.
+      // build.mjs packages for the host OS, so reject mismatched target hints
+      // above instead of compiling renderer behavior for a different platform.
       'process.platform': JSON.stringify(rendererPlatform),
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
