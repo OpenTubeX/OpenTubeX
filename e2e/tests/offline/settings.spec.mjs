@@ -428,6 +428,31 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent [role="tooltip"]:visible')).toHaveCount(0)
   })
 
+  test('keeps help tooltips inside the settings scroller', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 900,
+        height: 360
+      }))
+    })
+    await goTo(page, 'settings')
+
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const tooltipButton = content.locator('.selectTooltip .button').last()
+    await tooltipButton.hover()
+    const tooltip = tooltipButton.locator('..').getByRole('tooltip')
+    await expect(tooltip).toBeVisible()
+
+    const contentBounds = await content.boundingBox()
+    await expect.poll(async () => {
+      const tooltipBounds = await tooltip.boundingBox()
+      return tooltipBounds.y + tooltipBounds.height
+    }).toBeLessThanOrEqual(contentBounds.y + contentBounds.height - 7)
+  })
+
   test('select dropdowns use overlay scrollbars', async ({ page }) => {
     await goTo(page, 'settings')
 
