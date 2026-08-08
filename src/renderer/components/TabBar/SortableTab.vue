@@ -672,6 +672,10 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   background-color: var(--tab-active-color, var(--card-bg-color));
 }
 
+.tab.vertical.pinned .closeButton {
+  inset-inline-end: 10px;
+}
+
 .tab.pinned:hover .tabTitle {
   padding-inline-end: 12px;
 }
