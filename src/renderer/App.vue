@@ -69,6 +69,9 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
+    <Transition name="settings-window">
+      <SettingsWindow v-if="settingsWindowOpen" />
+    </Transition>
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
@@ -113,9 +116,6 @@
     />
     <FtSearchFilters
       v-if="showSearchFilters"
-    />
-    <FtKeyboardShortcutPrompt
-      v-if="isKeyboardShortcutPromptShown"
     />
     <FtPlaylistAddVideoPrompt
       v-if="showAddToPlaylistPrompt"
@@ -279,7 +279,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
 
@@ -295,7 +295,6 @@ import FtToast from './components/FtToast/FtToast.vue'
 import FtProgressBar from './components/FtProgressBar/FtProgressBar.vue'
 import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPlaylistAddVideoPrompt.vue'
 import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
-import FtKeyboardShortcutPrompt from './components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
 import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
 import { vSaferHtml } from './directives/vSaferHtml.js'
@@ -323,6 +322,7 @@ import {
   SUBSCRIPTION_REFRESH_STARTED_EVENT
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
+import { initializePlatformInfo } from './helpers/platform'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
@@ -330,12 +330,15 @@ import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
 import { preloadUtilityRoutes } from './router/index'
 
+const SettingsWindow = defineAsyncComponent(() => import('./views/Settings/Settings.vue'))
+
 const releaseNotesMarkdown = createReleaseNotesMarkdown()
 
 const route = useRoute()
 const router = useRouter()
 const navigation = process.env.IS_ELECTRON ? getTabNavigationService() : null
 const isElectron = process.env.IS_ELECTRON
+const platformInfoReady = initializePlatformInfo()
 if (isElectron) {
   provide(routerKey, navigation.createPresentedRouterFacade())
 }
@@ -428,6 +431,7 @@ const showSearchFilters = computed(() => store.getters.getShowSearchFilters)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
+const settingsWindowOpen = computed(() => store.getters.getSettingsWindowOpen)
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showAddToPlaylistPrompt = computed(() => store.getters.getShowAddToPlaylistPrompt)
@@ -734,7 +738,7 @@ onMounted(async () => {
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
     }
 
-    await syncDataReady
+    await Promise.all([syncDataReady, platformInfoReady])
     store.dispatch('initializeSyncServer').catch(error => {
       console.error('Initial sync server sync failed', error)
     })
@@ -1753,7 +1757,9 @@ function handleKeyboardShortcuts(event) {
 
   if (matchesKeyboardShortcut(event, shortcuts.SHOW_SHORTCUTS) && !isTypingTarget(event.target)) {
     event.preventDefault()
-    store.commit('setIsKeyboardShortcutPromptShown', !isKeyboardShortcutPromptShown.value)
+    store.dispatch(isKeyboardShortcutPromptShown.value
+      ? 'hideKeyboardShortcutPrompt'
+      : 'showKeyboardShortcutPrompt')
   }
 
   if (event.key === 'Tab' && !event.ctrlKey) {

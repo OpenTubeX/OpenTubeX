@@ -1,145 +1,81 @@
 .settingsMenu {
-  /* top nav + margin */
-  inset-block-start: 96px;
-  position: sticky;
   display: flex;
   flex-direction: column;
-  padding-inline-start: 0;
-  block-size: calc(85vh - 96px);
-  max-block-size: 600px;
-}
-
-.header {
-  inline-size: fit-content;
-  margin-block: 0 10px;
-}
-
-.headingIcon {
-  color: var(--primary-color);
+  min-inline-size: 0;
+  block-size: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  margin: 0;
+  background: var(--side-nav-color);
 }
 
 .title {
-  text-decoration: none;
-  color: var(--tertiary-text-color);
-  inline-size: 220px;
-  flex: 1 1 auto;
+  flex: 1 0 42px;
+  min-block-size: 42px;
+  inline-size: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: calc(6px * var(--ui-roundness));
+  color: var(--tertiary-text-color);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
-/* prevent hover styling from showing on title click for mobile */
-@media (hover: hover) {
-  .title:hover {
-    color: var(--primary-text-color);
-  }
+.title:hover,
+.title:focus-visible {
+  color: var(--primary-text-color);
+  background: var(--side-nav-hover-color);
 }
 
-.titleContent {
-  inline-size: fit-content;
-  max-inline-size: 100%;
+.title.active {
+  color: var(--side-nav-hover-text-color);
+  background: var(--side-nav-hover-color);
+  font-weight: 600;
 }
 
+.settingsMenu.filtered .title {
+  flex-grow: 0;
+}
+
+.titleContent,
+.iconAndTitleText {
+  min-inline-size: 0;
+  inline-size: 100%;
+}
 
 .iconAndTitleText {
-  overflow-x: hidden;
+  overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
 
-  /* needed to have underline poke out */
-  margin-inline-start: 3px;
+.titleIcon {
+  inline-size: 18px;
+  block-size: 18px;
+  margin-inline-end: 10px;
 }
 
 .titleUnderline {
-  /* have underline poke out */
-  inline-size: calc(100% + 6px);
-
-  /* prevent "active" border from visibly pushing the content up */
-  border-block-end: 4px solid transparent;
+  display: none;
 }
 
-.settingsMenu:not(.mobileSettingsMenu) {
-  margin-block: 0;
-  font-size: 16px;
-
-  .header {
-    margin-block-start: 10px;
-    font-size: 26px;
-  }
-
-  .titleIcon {
-    inline-size: 16px;
-    block-size: 16px;
-  }
-
-  .title.active {
-    color: var(--primary-text-color);
-    font-weight: 600;
-  }
-
-  .title.active .titleUnderline {
-    border-block-end: 4px solid var(--primary-color);
-  }
+.emptyMessage {
+  margin: auto;
+  color: var(--tertiary-text-color);
+  text-align: center;
 }
 
-/* overall mobile breakpoint; large text */
 .settingsMenu.mobileSettingsMenu {
-  inline-size: fit-content;
-  margin-inline: auto;
-  position: relative;
-  inset-block-start: 0;
-  font-size: 30px;
-  max-block-size: 1100px;
-
-  .titleIcon {
-    inline-size: 30px;
-    block-size: 30px;
-    margin-inline-end: 10px;
-  }
-
-  .title {
-    inline-size: fit-content;
-    max-inline-size: 90vw;
-  }
-
-  .header {
-    font-size: 32px;
-  }
-
-  /* hide the settings icon on mobile to avoid confusion */
-  .headingIcon {
-    display: none;
-  }
+  inline-size: 100%;
+  font-size: 18px;
+  padding: 12px;
 }
 
-/* small height or width mobile breakpoint; intermediary text */
-@media only screen and (height <= 830px) {
-  .settingsMenu.mobileSettingsMenu {
-    font-size: 25px;
-
-    .titleIcon {
-      inline-size: 25px;
-      block-size: 25px;
-      margin-inline-end: 5px;
-    }
-
-    .header {
-      font-size: 25px;
-    }
-  }
-}
-
-@container settings-page (width <= 500px) {
-  .settingsMenu.mobileSettingsMenu {
-    font-size: 25px;
-
-    .titleIcon {
-      inline-size: 25px;
-      block-size: 25px;
-      margin-inline-end: 5px;
-    }
-
-    .header {
-      font-size: 25px;
-    }
-  }
+.settingsMenu.mobileSettingsMenu .title {
+  flex-basis: 48px;
 }

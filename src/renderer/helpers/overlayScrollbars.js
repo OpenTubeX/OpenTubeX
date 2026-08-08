@@ -272,6 +272,27 @@ export function restoreOverlayScrollTop(element, scrollTop) {
 }
 
 /**
+ * Recalculates a nested scroll container's range and clamps an offset that was
+ * valid before dynamically rendered content became shorter.
+ *
+ * @param {HTMLElement} element
+ * @param {HTMLElement | null} contentElement the element whose rendered end defines the real scroll range
+ */
+export function clampOverlayScrollTop(element, contentElement = null) {
+  const instance = OverlayScrollbars(element)
+  instance?.update(true)
+  const contentEnd = contentElement === null
+    ? element.scrollHeight
+    : contentElement.offsetTop + contentElement.offsetHeight +
+      Number.parseFloat(getComputedStyle(element).paddingBottom)
+  const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+  if (element.scrollTop > maximumScrollTop) {
+    element.scrollTop = maximumScrollTop
+    instance?.update(true)
+  }
+}
+
+/**
  * `v-overlay-scrollbars` - does the same for a nested scroll container.
  * Pass `false` to leave the native scrollbars alone, for containers that only
  * scroll in some layouts.

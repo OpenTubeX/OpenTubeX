@@ -262,7 +262,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -279,6 +279,7 @@ import { localeTranslationPercentages } from '../../i18n/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
 import { debounce, randomArrayItem, showToast } from '../../helpers/utils'
 import { translateWindowTitle } from '../../helpers/strings'
+import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SUPPORTS_LOCAL_API = !!process.env.SUPPORTS_LOCAL_API
@@ -303,14 +304,9 @@ function updateVideoPlaybackEngine(value) {
   store.dispatch('updateVideoPlaybackEngine', value)
 }
 
-// The 'minimize' event doesn't fire on wayland
-// https://github.com/electron/electron/issues/51766
-const isLinuxWayland = ref(false)
-if (process.env.IS_ELECTRON && process.platform === 'linux') {
-  onMounted(async () => {
-    isLinuxWayland.value = await window.ftElectron.isWaylandPlatform()
-  })
-}
+// The 'minimize' event doesn't fire on Wayland. This shared check starts during
+// app initialization, before settings can mount, and is cached for every view.
+initializePlatformInfo()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
@@ -436,7 +432,6 @@ const INCLUDED_DEFAULT_PAGE_NAMES = [
   'popular',
   'userPlaylists',
   'history',
-  'settings',
   ...(process.env.SUPPORTS_LOCAL_API ? ['trending'] : [])
 ]
 
@@ -465,11 +460,11 @@ const defaultPageValues = computed(() => {
   return defaultPages.value.map((route) => route.path.slice(1))
 })
 
-/** @type {import('vue').ComputedRef<'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'settings' | 'trending'>} */
+/** @type {import('vue').ComputedRef<'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'>} */
 const landingPage = computed(() => store.getters.getLandingPage)
 
 /**
- * @param {'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'settings' | 'trending'} value
+ * @param {'subscriptions' | 'subscribedChannels' | 'popular' | 'userPlaylists' | 'history' | 'trending'} value
  */
 function updateLandingPage(value) {
   store.dispatch('updateLandingPage', value)

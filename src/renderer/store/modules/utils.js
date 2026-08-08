@@ -49,6 +49,8 @@ const state = {
   showAddToPlaylistPrompt: false,
   showCreatePlaylistPrompt: false,
   isKeyboardShortcutPromptShown: false,
+  settingsWindowOpen: false,
+  settingsWindowView: null,
   showSearchFilters: false,
   searchFilterValueChangedByTabId: {},
   progressBarPercentage: 0,
@@ -130,6 +132,14 @@ const getters = {
 
   getIsKeyboardShortcutPromptShown(state) {
     return state.isKeyboardShortcutPromptShown
+  },
+
+  getSettingsWindowOpen(state) {
+    return state.settingsWindowOpen
+  },
+
+  getSettingsWindowView(state) {
+    return state.settingsWindowView
   },
 
   getShowAddToPlaylistPrompt(state) {
@@ -332,10 +342,35 @@ const actions = {
 
   showKeyboardShortcutPrompt ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', true)
+    commit('setSettingsWindowOpen', true)
   },
 
   hideKeyboardShortcutPrompt ({ commit }) {
     commit('setIsKeyboardShortcutPromptShown', false)
+  },
+
+  showSettingsWindow ({ commit }, view = null) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowView', view)
+    commit('setSettingsWindowOpen', true)
+  },
+
+  toggleSettingsWindow ({ state, commit }) {
+    const open = !state.settingsWindowOpen
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowView', null)
+    commit('setSettingsWindowOpen', open)
+  },
+
+  hideSettingsWindow ({ commit }) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowOpen', false)
+    commit('setSettingsWindowView', null)
+  },
+
+  showSettingsWindowRoot ({ commit }) {
+    commit('setIsKeyboardShortcutPromptShown', false)
+    commit('setSettingsWindowView', null)
   },
 
   showSearchFilters ({ commit }) {
@@ -770,6 +805,14 @@ const mutations = {
 
   setIsKeyboardShortcutPromptShown (state, payload) {
     state.isKeyboardShortcutPromptShown = payload
+  },
+
+  setSettingsWindowOpen (state, payload) {
+    state.settingsWindowOpen = payload
+  },
+
+  setSettingsWindowView (state, payload) {
+    state.settingsWindowView = payload
   },
 
   setShowSearchFilters (state, payload) {

@@ -1,24 +1,17 @@
 <template>
   <menu
     class="settingsMenu"
+    :class="{ filtered }"
   >
-    <h2 class="header">
-      <FontAwesomeIcon
-        :icon="['fas', 'sliders-h']"
-        class="headingIcon"
-      />
-      {{ $t('Settings.Settings') }}
-    </h2>
-    <a
+    <button
       v-for="settingsSection in settingsSections"
       ref="linkRefs"
       :key="settingsSection.type"
       class="title"
       :class="{ active: activeSection === settingsSection.type }"
-      href="javascript:;"
+      type="button"
       :data-section="settingsSection.type"
       @click.stop="goToSettingsSection"
-      @keydown.enter.stop="goToSettingsSection"
     >
       <div class="titleContent">
         <div class="iconAndTitleText">
@@ -30,7 +23,13 @@
         </div>
         <div class="titleUnderline" />
       </div>
-    </a>
+    </button>
+    <p
+      v-if="settingsSections.length === 0 && emptyMessage"
+      class="emptyMessage"
+    >
+      {{ emptyMessage }}
+    </p>
   </menu>
 </template>
 
@@ -46,6 +45,14 @@ defineProps({
   activeSection: {
     type: String,
     default: null
+  },
+  emptyMessage: {
+    type: String,
+    default: ''
+  },
+  filtered: {
+    type: Boolean,
+    default: false
   }
 })
 

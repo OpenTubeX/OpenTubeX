@@ -251,6 +251,12 @@ export { expect }
  * (regular entry + "more options" flyout), so this clicks the first one.
  */
 export async function goTo(page, route) {
+  if (route === 'settings') {
+    await page.locator('.navSettingsButton').click()
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    return
+  }
+
   const visibleLink = () => page.locator(`${sel.sideNavLink(route)}:visible`).first()
   if (await visibleLink().count() === 0) {
     // Entry lives in the "More" flyout in the collapsed side nav.

@@ -4,6 +4,17 @@
   max-inline-size: 80%;
 }
 
+.keyboardShortcutPromptEmbedded {
+  display: flex;
+  flex-direction: column;
+  max-inline-size: none;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
 .titleAndCloseButton {
   display: flex;
   justify-content: space-between;
@@ -30,9 +41,20 @@ h3 {
   text-align: center;
 }
 
+.shortcutToolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  margin-block-end: 0.5em;
+  padding-block: 0.5em 1em;
+  background: var(--base-color);
+}
+
 .editHint {
-  margin-block: 0 1.5em;
-  text-align: center;
+  flex: 1;
+  margin: 0;
 }
 
 .shortcutColumns,
@@ -45,6 +67,14 @@ h3 {
   align-items: flex-start;
   flex-flow: row wrap;
   justify-content: space-evenly;
+}
+
+.keyboardShortcutPromptEmbedded .shortcutColumns {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-block-end: 1em;
 }
 
 .shortcutColumn {
@@ -138,17 +168,27 @@ h3 {
   color: var(--accent-color);
 }
 
-.shortcutActions {
-  display: flex;
-  justify-content: center;
-  margin-block-start: 2em;
-}
-
 :deep(.promptCard) {
   overflow-x: hidden;
 }
 
 @media only screen and (width <= 600px) {
+  .label {
+    min-inline-size: 200px;
+    inline-size: 200px;
+  }
+
+  .shortcutColumn {
+    display: contents;
+  }
+}
+
+@container (width <= 600px) {
+  .shortcutToolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .label {
     min-inline-size: 200px;
     inline-size: 200px;

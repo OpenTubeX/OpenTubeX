@@ -50,9 +50,9 @@
 .channelEntry {
   display: flex;
 
-  /* Basis wide enough to fit two preference columns, so cards stay wide instead
-     of the prompt packing in as many narrow ones as it can */
-  flex: 1 1 520px;
+  /* A card only needs room for one preference column. This lets medium-sized
+     settings windows place two channels side by side. */
+  flex: 1 1 360px;
   flex-direction: column;
   max-inline-size: 760px;
   padding: 1em;

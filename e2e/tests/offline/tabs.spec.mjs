@@ -85,11 +85,10 @@ test.describe('tab bar', () => {
     ])
   })
 
-  test('uses the matching app icon when the route changes', async ({ page }) => {
+  test('keeps the current app icon when Settings opens over the route', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.waitForTimeout(100)
     expect(await page.locator(`${sel.activeTab} .loadingDot`).count()).toBe(0)
-    await expect(page.locator(sel.activeTab).locator('[data-icon="sliders"]')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
 
     await goTo(page, 'history')
     await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
@@ -166,19 +165,19 @@ test.describe('tab bar', () => {
   })
 
   test('each tab keeps its own route', async ({ page }) => {
-    await goTo(page, 'settings')
-    await expect(page).toHaveURL(/#\/settings/)
-
-    await page.locator(sel.newTabButton).click()
     await goTo(page, 'history')
     await expect(page).toHaveURL(/#\/history/)
 
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'about')
+    await expect(page).toHaveURL(/#\/about/)
+
     // Switch back to the first tab: its route must be restored.
     await page.locator(sel.tabs).first().click()
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.tabs).nth(1).click()
-    await expect(page).toHaveURL(/#\/history/)
+    await expect(page).toHaveURL(/#\/about/)
   })
 
   test('selects multiple tabs with modifier clicks', async ({ page }) => {
@@ -713,7 +712,7 @@ test.describe('closed tabs', () => {
   })
 
   test('restoring a closed tab restores its navigation history', async ({ page }) => {
-    await goTo(page, 'settings')
+    await goTo(page, 'about')
     await goTo(page, 'history')
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click()
@@ -725,7 +724,7 @@ test.describe('closed tabs', () => {
 
     await expect(page).toHaveURL(/#\/history/)
     await page.locator(sel.backButton).click()
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/about/)
     await page.locator(sel.forwardButton).click()
     await expect(page).toHaveURL(/#\/history/)
   })
@@ -735,13 +734,14 @@ test.describe('closed tabs', () => {
 
     test('does not persist restored history across a relaunch', async ({ app }) => {
       let page = app.page
-      await goTo(page, 'settings')
+      await goTo(page, 'about')
       await goTo(page, 'history')
       await page.locator(sel.newTabButton).click()
       await page.locator(sel.tabs).first().click()
       await page.keyboard.press('Control+w')
 
       await goTo(page, 'settings')
+      await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
       const rememberHistory = page.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
       await expect(rememberHistory).toBeChecked()
       await page.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
@@ -933,7 +933,7 @@ test.describe('subscription feed tabs', () => {
     await page.locator(sel.tabs).first().click()
     await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
 
-    await goTo(page, 'settings')
+    await goTo(page, 'history')
     await goTo(page, 'subscriptions')
     await expect(feedTab('live')).toHaveAttribute('aria-selected', 'true')
   })
@@ -992,6 +992,22 @@ test.describe('background tab shortcuts', () => {
     })
 
     await page.locator('body').press('r')
+    await page.waitForTimeout(500)
+    expect(externalRequests).toEqual([])
+  })
+
+  test('R typed in settings search does not refresh subscriptions behind it', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    const externalRequests = []
+    page.on('request', (request) => {
+      if (/^https?:/.test(request.url())) {
+        externalRequests.push(request.url())
+      }
+    })
+
+    await search.press('r')
+    await expect(search).toHaveValue('r')
     await page.waitForTimeout(500)
     expect(externalRequests).toEqual([])
   })

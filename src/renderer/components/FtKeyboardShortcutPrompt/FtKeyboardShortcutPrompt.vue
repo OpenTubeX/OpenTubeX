@@ -1,10 +1,16 @@
 <template>
-  <FtPrompt
-    :label="$t('KeyboardShortcutPrompt.Keyboard Shortcuts')"
-    :inert="pendingShortcutConflict !== null"
-    @click="hideKeyboardShortcutPrompt"
+  <component
+    :is="embedded ? 'div' : FtPrompt"
+    class="keyboardShortcutPrompt"
+    :class="{ keyboardShortcutPromptEmbedded: embedded }"
+    :label="embedded ? undefined : $t('KeyboardShortcutPrompt.Keyboard Shortcuts')"
+    :inert="embedded && pendingShortcutConflict === null ? undefined : pendingShortcutConflict !== null"
+    @click="handleContainerClick"
   >
-    <template #label="{ labelId }">
+    <template
+      v-if="!embedded"
+      #label="{ labelId }"
+    >
       <div class="titleAndCloseButton">
         <h2 :id="labelId">
           {{ $t('KeyboardShortcutPrompt.Keyboard Shortcuts') }}
@@ -18,11 +24,23 @@
       </div>
     </template>
 
-    <p class="editHint">
-      {{ $t('KeyboardShortcutPrompt.Edit Hint') }}
-    </p>
+    <div class="shortcutToolbar">
+      <p class="editHint">
+        {{ $t('KeyboardShortcutPrompt.Edit Hint') }}
+      </p>
+      <FtButton
+        :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
+        :text-color="null"
+        :background-color="null"
+        :disabled="!hasModifiedKeyboardShortcuts"
+        @click="resetKeyboardShortcuts"
+      />
+    </div>
 
-    <div class="shortcutColumns">
+    <div
+      v-overlay-scrollbars="embedded"
+      class="shortcutColumns"
+    >
       <div
         v-for="(shortcutColumn, index) of shortcutColumns"
         :key="index"
@@ -95,16 +113,7 @@
         </div>
       </div>
     </div>
-
-    <div class="shortcutActions">
-      <FtButton
-        :label="$t('KeyboardShortcutPrompt.Reset to Defaults')"
-        :text-color="null"
-        :background-color="null"
-        @click="resetKeyboardShortcuts"
-      />
-    </div>
-  </FtPrompt>
+  </component>
 
   <FtPrompt
     v-if="pendingShortcutConflict"
@@ -138,6 +147,12 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 const { t } = useI18n()
+const { embedded } = defineProps({
+  embedded: {
+    type: Boolean,
+    default: false
+  }
+})
 const isMac = process.platform === 'darwin'
 const recordingShortcutPath = ref('')
 const pendingShortcutConflict = ref(null)
@@ -296,6 +311,11 @@ const shortcutColumns = computed(() => [
     }
   ]
 ])
+const hasModifiedKeyboardShortcuts = computed(() => shortcutColumns.value.some(column =>
+  column.some(section => section.shortcutDictionary.some(shortcut =>
+    shortcut.bindings.some(binding => binding.modified)
+  ))
+))
 
 const localizedShortcutNameToShortcutsMappings = computed(() => {
   return [
@@ -372,6 +392,12 @@ const localizedShortcutNameToShortcutsMappings = computed(() => {
 
 function hideKeyboardShortcutPrompt() {
   store.dispatch('hideKeyboardShortcutPrompt')
+}
+
+function handleContainerClick() {
+  if (!embedded) {
+    hideKeyboardShortcutPrompt()
+  }
 }
 
 function getLocalizedShortcutNamesAndValues(dictionary, dictionaryPath, includedShortcutCodes = Object.keys(dictionary)) {

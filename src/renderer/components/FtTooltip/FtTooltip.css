@@ -23,7 +23,7 @@
   text-align: center;
   transition-duration: 275ms;
   transition-property: transform;
-  visibility: hidden;
+  display: none;
   z-index: 2;
 }
 
@@ -64,7 +64,7 @@
 
 .button:focus + .text,
 .button:hover + .text {
-  visibility: visible;
+  display: block;
 }
 
 .button:focus + .text.bottom,

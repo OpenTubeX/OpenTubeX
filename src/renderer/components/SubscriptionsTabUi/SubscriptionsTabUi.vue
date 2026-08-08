@@ -281,7 +281,10 @@ function keyboardShortcutHandler(event) {
   if (isTabPresented && !isTabPresented.value) {
     return
   }
-  if (document.activeElement.classList.contains('ft-input')) {
+  const target = event.target
+  if (target instanceof HTMLElement && (
+    target.matches('input, textarea') || target.isContentEditable
+  )) {
     return
   }
   // Avoid handling events due to user holding a key (not released)

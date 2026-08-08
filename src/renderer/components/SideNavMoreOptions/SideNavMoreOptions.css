@@ -11,6 +11,14 @@
   display: block;
 }
 
+.navOptionButton {
+  inline-size: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: inherit;
+}
+
 .navOption:hover {
   background-color: var(--side-nav-hover-color);
   color: var(--side-nav-hover-text-color);
