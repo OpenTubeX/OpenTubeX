@@ -27,7 +27,7 @@ import { brotliDecompress } from 'zlib'
 
 import packageDetails from '../../package.json'
 import { handleOpenInExternalPlayer } from './externalPlayer'
-import { flushYtDlpDownloadRecords, handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload } from './ytDlp'
+import { handleYtDlpCancelDownload, handleYtDlpClearDownloads, handleYtDlpDownload, handleYtDlpDownloadBinary, handleYtDlpGetInfo, handleYtDlpGetPlaybackInfo, handleYtDlpListDownloads, handleYtDlpOpenDownload, handleYtDlpRemoveDownload, shutdownYtDlpDownloads } from './ytDlp'
 import { generatePoToken } from './poTokenGenerator'
 import { buildProxyUrl, DEFAULT_PROXY_SETTINGS, isOpenTubeXUrl } from './utils'
 import { TabManager, setupTabsIPC } from './tabs/TabManager'
@@ -3990,7 +3990,7 @@ function runApp() {
 
     await Promise.allSettled([
       baseHandlers.compactAllDatastores(),
-      flushYtDlpDownloadRecords(),
+      shutdownYtDlpDownloads(),
       session.defaultSession.clearCache(),
       session.defaultSession.clearStorageData({
         storages: [

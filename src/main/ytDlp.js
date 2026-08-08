@@ -146,6 +146,22 @@ function saveDownloadRecords() {
 export function flushYtDlpDownloadRecords() {
   return downloadRecordsSaveQueue
 }
+
+export async function shutdownYtDlpDownloads() {
+  const downloads = [...activeDownloads.values()]
+  const settled = downloads.map(({ child }) => new Promise((resolve) => {
+    child.once('close', resolve)
+    child.once('error', resolve)
+  }))
+
+  for (const entry of downloads) {
+    entry.cancelled = true
+    entry.child.kill()
+  }
+
+  await Promise.allSettled(settled)
+  await flushYtDlpDownloadRecords()
+}
 const windowsShownOnce = new WeakSet()
 
 /**
