@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, waitForAppReady } from '../../helpers/app.mjs'
@@ -102,6 +102,46 @@ test.describe('video downloads', () => {
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
   })
+
+  test('broadcasts active downloads to other windows', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const [otherWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      page.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(otherWindow)
+    await otherWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+
+    await page.bringToFront()
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+
+    const otherDownload = otherWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(otherDownload).toContainText('0.0%')
+
+    const [lateWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      otherWindow.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(lateWindow)
+    await lateWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+    const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(hydratedDownload).toContainText('0.0%')
+
+    await hydratedDownload.getByTitle('Cancel Download').click()
+    await expect(otherDownload).toContainText('Download cancelled')
+  })
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {
@@ -137,6 +177,28 @@ test('asks for confirmation before removing a downloaded file', async ({ page })
 })
 
 test.describe('list video actions', () => {
+  test('does not attach to an unrelated active download with the same title', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 41,
+        videoId: 'differentId',
+        title: 'Bookmarkable video',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
+    await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
+  })
+
   test('does not overflow horizontally in a narrow download modal', async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 940 })
     await goTo(page, 'history')

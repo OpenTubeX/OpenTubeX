@@ -525,7 +525,8 @@ function deleteTemplate() {
 }
 
 const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
-  download.title === props.title && (download.status === 'downloading' || download.status === 'processing')
+  (props.isPlaylist ? download.title === props.title : download.videoId === props.videoId) &&
+  (download.status === 'downloading' || download.status === 'processing')
 ).at(-1)
 const downloadId = ref(runningDownload?.id ?? null)
 const downloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)

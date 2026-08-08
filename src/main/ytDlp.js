@@ -89,6 +89,7 @@ const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 
 let downloadCounter = 0
+let downloadRecordsSaveQueue = Promise.resolve()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -119,11 +120,16 @@ async function loadDownloadRecords() {
   }
 }
 
-async function saveDownloadRecords() {
-  const records = [...downloadRecords.values()]
-    .filter(record => !['downloading', 'processing'].includes(record.status))
-    .slice(-200)
-  await writeFile(getDownloadRecordsPath(), JSON.stringify(records), 'utf8')
+function saveDownloadRecords() {
+  downloadRecordsSaveQueue = downloadRecordsSaveQueue
+    .catch(() => {})
+    .then(() => {
+      const records = [...downloadRecords.values()]
+        .filter(record => !['downloading', 'processing'].includes(record.status))
+        .slice(-200)
+      return writeFile(getDownloadRecordsPath(), JSON.stringify(records), 'utf8')
+    })
+  return downloadRecordsSaveQueue
 }
 const windowsShownOnce = new WeakSet()
 
@@ -1060,8 +1066,6 @@ export async function handleYtDlpDownload(event, payload) {
   const entry = { child, cancelled: false }
   activeDownloads.set(id, entry)
 
-  const webContents = event.sender
-
   /** @type {YtDlpDownloadStatus} */
   const status = {
     id,
@@ -1091,10 +1095,14 @@ export async function handleYtDlpDownload(event, payload) {
     }
     lastSent = now
 
-    if (!webContents.isDestroyed()) {
-      webContents.send(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...status })
+    for (const browserWindow of BrowserWindow.getAllWindows()) {
+      if (!browserWindow.webContents.isDestroyed()) {
+        browserWindow.webContents.send(IpcChannels.YT_DLP_DOWNLOAD_STATUS, { ...status })
+      }
     }
   }
+
+  sendStatus(true)
 
   /** @type {string[]} */
   const stderrLines = []
@@ -1264,7 +1272,7 @@ export async function handleYtDlpRemoveDownload(event, id) {
 export async function handleYtDlpListDownloads(event) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) return []
   await loadDownloadRecords()
-  return [...downloadRecords.values()].filter(record => !activeDownloads.has(record.id))
+  return [...downloadRecords.values()]
 }
 
 /**
