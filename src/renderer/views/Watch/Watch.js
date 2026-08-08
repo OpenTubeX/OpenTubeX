@@ -230,6 +230,7 @@ export default defineComponent({
       videoDescription: '',
       videoDescriptionHtml: '',
       videoCategory: '',
+      videoTags: [],
       /** @type {import('../../helpers/video-games').LocalVideoGame[]} */
       videoGames: [],
       license: '',
@@ -1359,6 +1360,7 @@ export default defineComponent({
       this.videoDescription = ''
       this.videoDescriptionHtml = ''
       this.videoCategory = ''
+      this.videoTags = []
       this.videoGames = []
       this.license = ''
       this.videoViewCount = 0
@@ -1829,6 +1831,7 @@ export default defineComponent({
         this.setTabAvatar(this.channelThumbnail)
 
         this.videoCategory = result.basic_info.category ?? ''
+        this.videoTags = result.basic_info.keywords ?? []
         this.videoGenreIsMusic = this.videoCategory === 'Music'
 
         this.updateSubscriptionDetails({
@@ -2344,6 +2347,7 @@ export default defineComponent({
           }
 
           this.videoCategory = result.genre ?? ''
+          this.videoTags = result.keywords ?? []
           this.videoGenreIsMusic = this.videoCategory === 'Music'
 
           this.channelId = result.authorId
@@ -2366,6 +2370,7 @@ export default defineComponent({
           this.initializeVideoQuality()
 
           this.videoPublished = result.published * 1000
+          this.videoDescription = result.description ?? ''
           this.videoDescriptionHtml = result.descriptionHtml
           const recommendedVideos = result.recommendedVideos
 

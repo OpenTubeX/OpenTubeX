@@ -6,6 +6,7 @@
 
 .descriptionScroll {
   overflow-y: auto;
+  overflow-anchor: none;
   max-block-size: 20lh;
 
   /* stretch into the card's inline padding so the scrollbar stays anchored to the card edge */
@@ -19,6 +20,14 @@
   line-height: 1.4;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  padding-inline-end: 40px;
+}
+
+.descriptionCopyButton {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
 }
 
 .descriptionStatus {
@@ -52,6 +61,7 @@
 }
 
 .videoDescription:not(.short) .descriptionStatus {
+  display: block;
   position: relative;
   margin-block-start: 1em;
 }
@@ -69,6 +79,12 @@
   /* bdi is inline by default, block keeps the margins now that it isn't a flex item */
   display: block;
   margin-block: 1em;
+}
+
+.videoTags {
+  display: block;
+  margin-block-start: 1em;
+  overflow-wrap: anywhere;
 }
 
 .gamesHeading {
