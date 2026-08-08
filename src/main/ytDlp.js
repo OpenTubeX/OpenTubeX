@@ -59,6 +59,8 @@ function takeGetInfoAbortSignal(key) {
  * @typedef YtDlpDownloadStatus
  * @property {number} id
  * @property {string} videoId
+ * @property {string} playlistId
+ * @property {string[]} videoIds
  * @property {string} title
  * @property {string} thumbnail
  * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
@@ -1070,6 +1072,8 @@ export async function handleYtDlpDownload(event, payload) {
   const status = {
     id,
     videoId: isSingleVideo ? payload.videoId : '',
+    playlistId: typeof payload.playlistId === 'string' ? payload.playlistId.slice(0, 128) : '',
+    videoIds,
     title: typeof payload.title === 'string' ? payload.title.slice(0, 255) : payload.videoId ?? payload.playlistId,
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     status: 'downloading',

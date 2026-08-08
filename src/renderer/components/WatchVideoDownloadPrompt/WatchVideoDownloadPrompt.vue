@@ -524,8 +524,15 @@ function deleteTemplate() {
   loadTemplate('video:best')
 }
 
+function matchesDownload(download) {
+  if (!props.isPlaylist) return download.videoId === props.videoId
+  if (props.playlistId !== '') return download.playlistId === props.playlistId
+  return Array.isArray(download.videoIds) && download.videoIds.length === props.videoIds.length &&
+    download.videoIds.every((videoId, index) => videoId === props.videoIds[index])
+}
+
 const runningDownload = Object.values(store.getters.getYtDlpDownloads).filter(download =>
-  (props.isPlaylist ? download.title === props.title : download.videoId === props.videoId) &&
+  matchesDownload(download) &&
   (download.status === 'downloading' || download.status === 'processing')
 ).at(-1)
 const downloadId = ref(runningDownload?.id ?? null)

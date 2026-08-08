@@ -199,6 +199,27 @@ test.describe('list video actions', () => {
     await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
   })
 
+  test('does not attach to an unrelated active playlist with the same title', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Saved videos', { exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 43,
+        playlistId: '',
+        videoIds: ['differentId'],
+        title: 'Saved videos',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    await page.getByTitle('Download Playlist').click()
+
+    await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
+    await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
+  })
+
   test('does not overflow horizontally in a narrow download modal', async ({ page }) => {
     await page.setViewportSize({ width: 480, height: 940 })
     await goTo(page, 'history')
