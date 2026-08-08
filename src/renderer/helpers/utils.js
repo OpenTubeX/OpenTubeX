@@ -411,7 +411,7 @@ export function openInternalPath({ path, query = undefined, doCreateNewWindow = 
       if (route.startsWith('/')) {
         route = route.substring(1)
       }
-      window.ftElectron.tabs.create({
+      return window.ftElectron.tabs.create({
         route,
         query,
         title,

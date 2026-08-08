@@ -1,6 +1,9 @@
 import { nextTick } from 'vue'
 
+import { isReducedMotionEnabled } from './reducedMotion'
+
 export const VIDEO_MORPH_NAME = 'video-morph'
+export const NEW_TAB_THUMBNAIL_MORPH_NAME = 'new-tab-thumbnail-morph'
 
 /** @type {HTMLElement | null} */
 let morphSourceElement = null
@@ -17,7 +20,7 @@ let shortMorphRequested = false
  * @param {boolean} [options.isShort] whether the destination uses the Shorts layout
  */
 export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
-  if (typeof document.startViewTransition !== 'function') {
+  if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
     return
   }
 
@@ -34,7 +37,7 @@ export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
     return
   }
 
-  const thumbnail = linkElement.querySelector('.thumbnailImage')
+  const thumbnail = findThumbnail(linkElement)
 
   // Only name the thumbnail when nothing else on the page carries the name
   // (e.g. the current watch page's player), as duplicate view-transition-names
@@ -46,6 +49,60 @@ export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
   if (thumbnail instanceof HTMLElement && !hasVisiblePlayer) {
     morphSourceElement = thumbnail
     thumbnail.style.viewTransitionName = VIDEO_MORPH_NAME
+  }
+}
+
+/**
+ * Morph a clicked video thumbnail into a newly created background tab.
+ *
+ * @param {EventTarget | null} linkElement the clicked watch page link
+ * @param {() => Promise<{ id?: string } | null>} createTab creates the background tab
+ */
+export async function morphThumbnailIntoNewTab(linkElement, createTab) {
+  if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
+    await createTab()
+    return
+  }
+
+  const thumbnail = linkElement instanceof HTMLElement
+    ? findThumbnail(linkElement)
+    : null
+  if (!(thumbnail instanceof HTMLElement)) {
+    await createTab()
+    return
+  }
+
+  let target = null
+  thumbnail.style.viewTransitionName = NEW_TAB_THUMBNAIL_MORPH_NAME
+
+  const cleanup = () => {
+    thumbnail.style.viewTransitionName = ''
+    if (target) {
+      target.style.viewTransitionName = ''
+    }
+  }
+
+  try {
+    const transition = document.startViewTransition(async () => {
+      const tab = await createTab()
+      await nextTick()
+      // The source remains visible because this is a background-tab creation.
+      // Remove its name after the old snapshot so only the new tab owns the
+      // name when Chromium captures the new state.
+      thumbnail.style.viewTransitionName = ''
+      target = tab?.id
+        ? document.querySelector(`.tab[data-tab-id="${CSS.escape(tab.id)}"]`)
+        : null
+      if (target instanceof HTMLElement) {
+        target.style.viewTransitionName = NEW_TAB_THUMBNAIL_MORPH_NAME
+      }
+    })
+
+    transition.finished.then(cleanup, cleanup)
+    await transition.updateCallbackDone
+  } catch (error) {
+    cleanup()
+    throw error
   }
 }
 
@@ -113,15 +170,31 @@ export function installViewTransitions(router) {
  * @returns {Promise<void>}
  */
 export async function runPendingViewTransition(update) {
-  if (
-    typeof document === 'undefined' ||
-    typeof document.startViewTransition !== 'function' ||
-    navigationRequestedAt === 0 ||
-    Date.now() - navigationRequestedAt > 1000
-  ) {
+  const runTransition = takePendingViewTransition()
+  await runTransition(update)
+}
+
+export function hasPendingViewTransition(maxAge = 1000) {
+  return typeof document !== 'undefined' &&
+    typeof document.startViewTransition === 'function' &&
+    !isReducedMotionEnabled() &&
+    navigationRequestedAt !== 0 &&
+    Date.now() - navigationRequestedAt <= maxAge
+}
+
+/**
+ * Consume a pending thumbnail morph immediately and return a function that can
+ * start it after slower navigation preparation has completed.
+ *
+ * @param {number} [maxAge=1000] maximum age of the pending request in milliseconds
+ * @returns {((update: () => Promise<void> | void) => Promise<void>) & { cancel: () => void }}
+ */
+export function takePendingViewTransition(maxAge = 1000) {
+  if (!hasPendingViewTransition(maxAge)) {
     cleanupMorphSource()
-    await update()
-    return
+    const runWithoutTransition = async (update) => await update()
+    runWithoutTransition.cancel = () => {}
+    return runWithoutTransition
   }
 
   navigationRequestedAt = 0
@@ -129,26 +202,36 @@ export async function runPendingViewTransition(update) {
   morphSourceElement = null
   const shortMorph = shortMorphRequested
   shortMorphRequested = false
-  document.documentElement.classList.add('viewTransitionMorphActive')
-  document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
+  let started = false
+  const runTransition = async (update) => {
+    started = true
+    document.documentElement.classList.add('viewTransitionMorphActive')
+    document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
 
-  const cleanup = () => {
-    document.documentElement.classList.remove(
-      'viewTransitionMorphActive',
-      'viewTransitionShortMorphActive'
-    )
-    if (source) {
+    const cleanup = () => {
+      document.documentElement.classList.remove(
+        'viewTransitionMorphActive',
+        'viewTransitionShortMorphActive'
+      )
+      if (source) {
+        source.style.viewTransitionName = ''
+      }
+    }
+
+    const transition = document.startViewTransition(async () => {
+      await update()
+      await nextTick()
+    })
+
+    transition.finished.then(cleanup, cleanup)
+    await transition.updateCallbackDone
+  }
+  runTransition.cancel = () => {
+    if (!started && source) {
       source.style.viewTransitionName = ''
     }
   }
-
-  const transition = document.startViewTransition(async () => {
-    await update()
-    await nextTick()
-  })
-
-  transition.finished.then(cleanup, cleanup)
-  await transition.updateCallbackDone
+  return runTransition
 }
 
 function cleanupMorphSource() {
@@ -158,4 +241,9 @@ function cleanupMorphSource() {
     morphSourceElement.style.viewTransitionName = ''
     morphSourceElement = null
   }
+}
+
+function findThumbnail(linkElement) {
+  return linkElement.querySelector('.thumbnailImage') ??
+    linkElement.closest('.ft-list-video')?.querySelector('.thumbnailImage')
 }
