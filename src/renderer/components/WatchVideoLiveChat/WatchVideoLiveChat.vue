@@ -2,7 +2,6 @@
   <FtCard
     class="card relative"
     :class="{ hasError, fullscreenChat: fullscreenOverlay }"
-    @wheel.stop
   >
     <header
       v-if="fullscreenOverlay"
@@ -265,9 +264,11 @@
           v-overlay-scrollbars
           class="liveChatComments"
           :style="{ blockSize: chatHeight }"
+          tabindex="0"
           @pointerdown="stopScrollingToBottom"
           @scroll.passive="onScroll"
           @scrollend="onScrollEnd"
+          @keydown="handleLiveChatScrollKeydown"
           @wheel.passive="stopScrollingToBottom"
         >
           <TransitionGroup
@@ -1029,6 +1030,18 @@ function stopScrollingToBottom() {
 
   isScrollingToBottom = false
   stayAtBottom = false
+}
+
+/**
+ * Keyboard scrolling does not emit pointer or wheel events. Cancel the
+ * auto-follow hold before the browser moves the viewport so it is not snapped
+ * back to the live edge on a busy chat.
+ * @param {KeyboardEvent} event
+ */
+function handleLiveChatScrollKeydown(event) {
+  if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+    stopScrollingToBottom()
+  }
 }
 
 function hideSuperChat() {

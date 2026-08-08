@@ -15,6 +15,17 @@ const {
 const { sigFrameTemplateParameters } = require('./sigFrameConfig')
 
 const isDevMode = process.env.NODE_ENV === 'development'
+const requestedPlatform = process.env.npm_config_platform
+
+if (!process.env.OTX_PLATFORM && requestedPlatform && requestedPlatform !== process.platform) {
+  throw new Error(`Cross-packing for ${requestedPlatform} requires OTX_PLATFORM=${requestedPlatform}`)
+}
+
+const rendererPlatform = process.env.OTX_PLATFORM || process.platform
+
+if (!['darwin', 'linux', 'win32'].includes(rendererPlatform)) {
+  throw new Error(`Unsupported OTX_PLATFORM: ${rendererPlatform}`)
+}
 
 const { version: swiperVersion } = JSON.parse(readFileSync(path.join(__dirname, '../node_modules/swiper/package.json')))
 
@@ -142,9 +153,9 @@ const config = {
   plugins: [
     processLocalesPlugin,
     new webpack.DefinePlugin({
-      // OTX_PLATFORM overrides the build host when cross-packing (e.g.
-      // OTX_PLATFORM=darwin while building a macOS zip on Linux).
-      'process.platform': JSON.stringify(process.env.OTX_PLATFORM || process.platform),
+      // Cross-pack callers must declare the target through OTX_PLATFORM because
+      // renderer platform checks are compiled into the bundle.
+      'process.platform': JSON.stringify(rendererPlatform),
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.SUPPORTS_LOCAL_API': true,

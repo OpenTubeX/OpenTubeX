@@ -698,8 +698,6 @@ export function useSponsorBlockSubmission({
   }
 
   const sponsorBlockSubmissionCategoryNames = computed(() => {
-    // Depend on i18n so labels refresh when the locale changes.
-    t('Video.Sponsor Block category.sponsor')
     return SPONSORBLOCK_SUBMISSION_CATEGORIES.map(category => {
       return translateSponsorBlockCategory(category, { short: false })
     })

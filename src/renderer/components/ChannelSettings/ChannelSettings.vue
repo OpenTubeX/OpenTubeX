@@ -74,10 +74,11 @@
             class="channelEntry"
           >
             <div class="channelHeader">
-              <router-link
+              <component
+                :is="disableChannelLinks ? 'span' : 'router-link'"
                 class="channelLink"
-                :to="`/channel/${channel.id}`"
-                @click="showManager = false"
+                :to="disableChannelLinks ? undefined : `/channel/${channel.id}`"
+                @click="handleChannelLinkClick"
               >
                 <img
                   v-if="channel.thumbnail"
@@ -97,7 +98,7 @@
                 >
                   {{ channel.name }}
                 </p>
-              </router-link>
+              </component>
               <FtIconButton
                 v-if="channel.addableOptions.length > 0"
                 :title="t('Settings.Channel Settings.Add Setting')"
@@ -208,6 +209,7 @@ import {
 const { locale, t } = useI18n()
 
 const PREFERENCES = CHANNEL_PREFERENCE_TYPES
+const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
 /** Only offer the search field once scanning the list by eye gets tedious */
 const SEARCH_THRESHOLD = 5
@@ -286,6 +288,28 @@ const backendOptions = computed(() => ({
 }))
 
 const showManager = ref(false)
+
+/**
+ * Close the manager only when the current tab is navigating. Modified clicks
+ * may open another tab or window and should leave this dialog untouched.
+ * @param {MouseEvent} event
+ */
+function handleChannelLinkClick(event) {
+  if (disableChannelLinks.value) {
+    event.preventDefault()
+    return
+  }
+
+  if (
+    event.button === 0 &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.shiftKey &&
+    !event.altKey
+  ) {
+    showManager.value = false
+  }
+}
 const searchQuery = ref('')
 
 /**
