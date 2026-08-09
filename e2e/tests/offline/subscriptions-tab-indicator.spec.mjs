@@ -112,7 +112,7 @@ test.describe('subscriptions feed tab indicator', () => {
     ).toBeLessThan(mutations.indexOf('panel'))
   })
 
-  test('ends up aligned with the selected tab', async ({ page }) => {
+  test('ends up aligned with the selected tab', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
@@ -136,6 +136,7 @@ test.describe('subscriptions feed tab indicator', () => {
     expect(Math.abs(indicator.x - tab.x)).toBeLessThan(1)
     expect(Math.abs(indicator.width - tab.width)).toBeLessThan(1)
     expect(Math.abs(indicator.top - tab.bottom)).toBeLessThan(1)
+    await attachScreenshot('indicator under the Shorts tab')
   })
 
   test('keeps the last clicked tab when switching back and forth quickly', async ({ page }) => {

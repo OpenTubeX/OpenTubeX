@@ -63,7 +63,7 @@ test.use({
 })
 
 function defineCase () {
-  test('opening the collaborators prompt keeps the sticky app header visible', async ({ page }) => {
+  test('opening the collaborators prompt keeps the sticky app header visible', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.getByText('Filler video 9')).toBeAttached()
@@ -82,6 +82,7 @@ function defineCase () {
     await expect.poll(() => topNav.evaluate(element => element.getBoundingClientRect().top))
       .toBeCloseTo(topBefore, 0)
     await expect(topNav).toBeInViewport()
+    await attachScreenshot('collaborators prompt over the scrolled feed')
 
     const scrollBefore = await page.evaluate(() => window.scrollY)
     await page.mouse.move(10, 200)
@@ -210,7 +211,7 @@ test.describe('while collaborators are loading', () => {
     }
   })
 
-  test('shows the loading cursor across the app', async ({ page }) => {
+  test('shows the loading cursor across the app', async ({ page, attachScreenshot }) => {
     let releaseRequests
     const requestsReleased = new Promise(resolve => {
       releaseRequests = resolve
@@ -226,6 +227,7 @@ test.describe('while collaborators are loading', () => {
     await expect(page.locator('.collaboratorChannelButton')).toBeDisabled()
     await page.locator('.topNav').hover()
     await expect(page.locator('.topNav')).toHaveCSS('cursor', 'wait')
+    await attachScreenshot('loading collaborators')
 
     releaseRequests()
     await expect(page.locator('.collaboratorChannelButton')).toBeEnabled()

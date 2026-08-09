@@ -32,7 +32,7 @@ test.describe('distraction and appearance settings', () => {
     }
   })
 
-  test('hidden UI elements stay hidden and the theme applies', async ({ page }) => {
+  test('hidden UI elements stay hidden and the theme applies', async ({ page, attachScreenshot }) => {
     // Trending is removed from the side nav entirely.
     await expect(page.locator(sel.sideNavLink('trending'))).toHaveCount(0)
 
@@ -42,18 +42,22 @@ test.describe('distraction and appearance settings', () => {
     // The base theme is applied as a class on <body>.
     await expect(page.locator('body')).toHaveClass(/dark/)
 
+    await attachScreenshot('dark theme with the hidden elements')
+
     await goToSettingsSection(page, 'distraction')
     await expect(page.getByRole('checkbox', { name: 'Hide End-Screen Annotations' })).toBeChecked()
+    await attachScreenshot('distraction settings')
   })
 })
 
 test.describe('default appearance', () => {
-  test('trending link and profile selector are visible by default', async ({ page }) => {
+  test('trending link and profile selector are visible by default', async ({ page, attachScreenshot }) => {
     // The link may live in the side nav itself or its "More" flyout,
     // depending on the collapsed state — either way it must exist.
     await expect(page.locator(sel.sideNavLink('trending'))).not.toHaveCount(0)
     await expect(page.locator('.topNav .profiles .colorOption').first()).toBeVisible()
     await expect(page.locator('body')).toHaveClass(/system/)
+    await attachScreenshot('default appearance')
   })
 })
 
@@ -106,7 +110,7 @@ test.describe('global progress presentation', () => {
 test.describe('UI roundness', () => {
   test.use({ seed: { settings: { uiRoundness: 0 } } })
 
-  test('applies to controls, cards, popovers, and modals', async ({ app, page }) => {
+  test('applies to controls, cards, popovers, and modals', async ({ app, page, attachScreenshot }) => {
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '0')
 
     await goToSettingsSection(page, 'theme')
@@ -122,10 +126,12 @@ test.describe('UI roundness', () => {
     await page.locator('.settingsMenu [data-section="data"]').click()
     await page.getByRole('button', { name: 'Export Subscriptions' }).click()
     await expect(page.getByRole('dialog')).toHaveCSS('border-radius', '0px')
+    await attachScreenshot('square modal at 0% roundness')
 
     await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
     await page.locator(sel.tabs).first().click({ button: 'right' })
     await expect(page.getByRole('menu', { name: 'Context menu' })).toHaveCSS('border-radius', '0px')
+    await attachScreenshot('square context menu at 0% roundness')
 
     await page.keyboard.press('Escape')
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -134,6 +140,7 @@ test.describe('UI roundness', () => {
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
     expect(await toggleTrackRadius()).toBe('8px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
+    await attachScreenshot('settings at 150% roundness')
 
     ;({ page } = await app.relaunch())
     await goToSettingsSection(page, 'theme')
@@ -153,7 +160,7 @@ test.describe('rounded feed page headers', () => {
     }
   })
 
-  test('preserves scaled card corners on feed pages', async ({ page }) => {
+  test('preserves scaled card corners on feed pages', async ({ page, attachScreenshot }) => {
     const pages = [
       { route: 'subscriptions', header: '.subscriptionsHeader' },
       { route: 'trending', header: '.pageHeader' },
@@ -164,12 +171,13 @@ test.describe('rounded feed page headers', () => {
       await goTo(page, route)
       await expect(page.locator(header)).toHaveCSS('border-top-left-radius', '16px')
       await expect(page.locator(header)).toHaveCSS('border-top-right-radius', '16px')
+      await attachScreenshot(`${route} header`)
     }
   })
 })
 
 test.describe('top nav beside the vertical tab bar', () => {
-  test('search bar and profile selector stay clear of the tab column', async ({ app, page }) => {
+  test('search bar and profile selector stay clear of the tab column', async ({ app, page, attachScreenshot }) => {
     await enableVerticalTabBar(page, 220)
 
     // Wide enough viewport for the 3-column grid, but the top nav itself (beside
@@ -188,6 +196,7 @@ test.describe('top nav beside the vertical tab bar', () => {
         profilesBox.x + profilesBox.width <= viewportWidth + 1
       )
     }).toBe(true)
+    await attachScreenshot('top nav beside the vertical tab bar')
 
     // Mobile layout: the fixed search bar opens beside the tab column, not behind it.
     await setWindowWidth(app, 660)
@@ -204,11 +213,12 @@ test.describe('top nav beside the vertical tab bar', () => {
         searchBox.x + searchBox.width <= viewportWidth + 1
       )
     }).toBe(true)
+    await attachScreenshot('mobile search bar beside the vertical tab bar')
   })
 })
 
 test.describe('tab orientation shortcut', () => {
-  test('F1 switches between horizontal and vertical tabs', async ({ page }) => {
+  test('F1 switches between horizontal and vertical tabs', async ({ page, attachScreenshot }) => {
     const app = page.locator('.app')
     await expect(app).not.toHaveClass(/verticalTabs/)
 
@@ -221,9 +231,11 @@ test.describe('tab orientation shortcut', () => {
         return viewportEnd - tabEnd
       })
     }).toBeGreaterThanOrEqual(1)
+    await attachScreenshot('vertical tabs')
 
     await page.keyboard.press('F1')
     await expect(app).not.toHaveClass(/verticalTabs/)
+    await attachScreenshot('horizontal tabs')
   })
 
   test('presses in quick succession are not swallowed by the pending write', async ({ app: appHandle, page }) => {
@@ -276,7 +288,7 @@ test.describe('tab orientation shortcut rebound to a printable key', () => {
 })
 
 test.describe('narrow layout top padding', () => {
-  test('page content clears the fixed top nav and tab bar', async ({ app, page }) => {
+  test('page content clears the fixed top nav and tab bar', async ({ app, page, attachScreenshot }) => {
     // On mobile widths the top nav is fixed and taller when a tab bar is
     // present; the page content must keep a gap below it instead of tucking
     // underneath (previously the content sat flush against the nav).
@@ -290,5 +302,6 @@ test.describe('narrow layout top padding', () => {
       const gap = routerBox.y - (topNavBox.y + topNavBox.height)
       return gap >= 4 && gap <= 40
     }).toBe(true)
+    await attachScreenshot('narrow layout')
   })
 })

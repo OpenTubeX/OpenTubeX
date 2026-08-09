@@ -142,7 +142,7 @@ test.describe('community post images', () => {
     }
   })
 
-  test('keeps carousel crops, shows full single images, and applies UI roundness', async ({ page }) => {
+  test('keeps carousel crops, shows full single images, and applies UI roundness', async ({ page, attachScreenshot }) => {
     await stubPostImages(page)
 
     await goTo(page, 'subscriptions')
@@ -164,6 +164,7 @@ test.describe('community post images', () => {
 
     await expect.poll(async () => multiImage.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0)
     await expect.poll(async () => singleImage.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0)
+    await attachScreenshot('community posts feed')
 
     const multiMetrics = await multiImage.evaluate((img) => {
       const style = getComputedStyle(img)
