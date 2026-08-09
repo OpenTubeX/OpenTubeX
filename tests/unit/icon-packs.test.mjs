@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
@@ -10,7 +10,8 @@ import {
 } from '../../src/renderer/icons/iconMappingResolver.js'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
-const iconRoot = path.join(repoRoot, 'src/renderer/icons')
+const rendererRoot = path.join(repoRoot, 'src/renderer')
+const iconRoot = path.join(rendererRoot, 'icons')
 const packs = ['lucide', 'material', 'phosphor', 'remix', 'tabler']
 const aliases = await readJson('faAliasToCanon.json')
 const mapping = await readJson('faIconMap.json')
@@ -67,3 +68,42 @@ test('every mapped glyph is present in its generated pack bundle', async () => {
     }
   }
 })
+
+test('every Font Awesome icon the renderer asks for has a mapping', async () => {
+  // `fac` icons are the project's own glyphs and resolve to the otx: collection
+  // without a mapping entry, so they are not part of this.
+  const iconPattern = /\[\s*['"](fas|far|fab)['"]\s*,\s*['"]([a-z0-9-]+)['"]\s*\]/g
+  const unmapped = new Map()
+
+  for (const file of await readRendererSources()) {
+    const source = await readFile(file, 'utf8')
+    for (const [, prefix, name] of source.matchAll(iconPattern)) {
+      if (resolveIconifyId([prefix, name], 'lucide') == null) {
+        unmapped.set(`${prefix}:${name}`, path.relative(repoRoot, file))
+      }
+    }
+  }
+
+  assert.deepEqual(
+    Object.fromEntries(unmapped),
+    {},
+    'these icons fall back to a missing glyph in every non-Font Awesome pack'
+  )
+})
+
+async function readRendererSources() {
+  const files = []
+  const walk = async (directory) => {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name)
+      // The icon data itself lists names that are not icon usages
+      if (entry.isDirectory() && entryPath !== iconRoot) {
+        await walk(entryPath)
+      } else if (entry.isFile() && /\.(?:vue|js)$/.test(entry.name)) {
+        files.push(entryPath)
+      }
+    }
+  }
+  await walk(rendererRoot)
+  return files
+}
