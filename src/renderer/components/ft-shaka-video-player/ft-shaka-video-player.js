@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
@@ -1074,7 +1074,7 @@ export default defineComponent({
         })
         // An already-scrolled tab that was inactive never got to reevaluate its
         // scroll position, so restore the mini-player state now that it is active.
-        updateScrollMiniPlayer()
+        updateScrollMiniPlayer({ animateActivation: false })
       } else {
         if (controlPanelLayoutFrame !== null) {
           cancelAnimationFrame(controlPanelLayoutFrame)
@@ -4613,6 +4613,13 @@ export default defineComponent({
       isActiveTab,
       props,
       video,
+    })
+
+    // Logical tabs restore their saved scroll position after becoming active.
+    // Refresh once that restoration is complete so an already-active mini player
+    // is placed directly at its saved bounds instead of replaying its entrance.
+    useTabLifecycle({
+      activate: () => updateScrollMiniPlayer({ animateActivation: false })
     })
 
     const ambientModeVisible = computed(() => {

@@ -442,6 +442,48 @@ test.describe('watch page', () => {
     expect(animations[1].zIndex).toBe('150')
   })
 
+  test('does not replay the scroll mini player animation after switching tabs', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.scrollMiniPlayerAnimationCount = 0
+      const nativeAnimate = Element.prototype.animate
+
+      Element.prototype.animate = function (keyframes, options) {
+        if (this.classList.contains('ftVideoPlayer')) {
+          window.scrollMiniPlayerAnimationCount++
+        }
+        return nativeAnimate.call(this, keyframes, options)
+      }
+    })
+
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      window.scrollTo(0, window.scrollY + rect.bottom)
+    })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    const animationCountBeforeReturn = await page.evaluate(
+      () => window.scrollMiniPlayerAnimationCount
+    )
+    await page.locator(sel.tabs).first().click()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+    // The old behavior scheduled the restored entrance animation on the next
+    // Vue tick, so wait past its duration before checking that none was added.
+    await page.waitForTimeout(350)
+    expect(await page.evaluate(() => window.scrollMiniPlayerAnimationCount))
+      .toBe(animationCountBeforeReturn)
+  })
+
   test('scales the captions down with the scroll mini player', async ({ page, innertube }) => {
     test.skip(!innertube.playback, 'needs real media streams')
     await openVideo(page)
