@@ -583,6 +583,7 @@
             v-if="shortsMetadataOpen && !isLoading && !hideVideoDescription"
             :description="videoDescription"
             :description-html="videoDescriptionHtml"
+            :tags="videoTags"
             :license="license"
             :games="videoGames"
             always-expanded
@@ -703,6 +704,7 @@
           v-if="!isLoading && !hideVideoDescription && (!customShortsPlayerActive || fullscreenMetadataOpen)"
           :description="videoDescription"
           :description-html="videoDescriptionHtml"
+          :tags="videoTags"
           :license="license"
           :games="videoGames"
           :always-expanded="fullscreenMetadataOpen"

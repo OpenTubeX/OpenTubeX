@@ -244,6 +244,38 @@ test.describe('watch page', () => {
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
 
+  test('shows tags below the description and copies the description', async ({ app, page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      const watchView = component.proxy
+      watchView.isLoading = true
+      await watchView.$nextTick()
+      watchView.videoDescription = 'Description to copy'
+      watchView.videoDescriptionHtml = ''
+      watchView.videoTags = ['first tag', 'second tag']
+      watchView.isLoading = false
+      await watchView.$nextTick()
+    })
+
+    const description = page.locator(`${activeTab} .videoDescription`)
+    const descriptionText = description.locator('.description')
+    const tags = description.locator('.videoTags')
+    await expect(tags).toHaveText('Video Tags: first tag, second tag')
+    await expect(description.locator('.descriptionScroll')).toHaveCSS('overflow-anchor', 'none')
+    expect(await descriptionText.evaluate((element, tagsElement) => (
+      Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)
+    ), await tags.elementHandle())).toBe(true)
+    expect(await tags.evaluate(element => element.closest('.descriptionScroll'))).not.toBeNull()
+
+    await description.locator('.descriptionCopyButton button').click()
+    await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe('Description to copy')
+    await watchComponent.dispose()
+  })
+
   test('the sidebar panels use overlay scrollbars', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
