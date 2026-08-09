@@ -1242,7 +1242,11 @@ async function handleWatchPageLinkClick(event) {
     if (event.shiftKey) {
       openVideo()
     } else {
-      await morphThumbnailIntoNewTab(event.currentTarget, openVideo)
+      try {
+        await morphThumbnailIntoNewTab(event.currentTarget, openVideo)
+      } catch (error) {
+        console.error('Failed to open the video in a new tab:', error)
+      }
     }
     return
   }

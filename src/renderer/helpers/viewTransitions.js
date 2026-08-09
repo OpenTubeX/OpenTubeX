@@ -218,10 +218,16 @@ export function takePendingViewTransition(maxAge = 1000) {
       }
     }
 
-    const transition = document.startViewTransition(async () => {
-      await update()
-      await nextTick()
-    })
+    let transition
+    try {
+      transition = document.startViewTransition(async () => {
+        await update()
+        await nextTick()
+      })
+    } catch (error) {
+      cleanup()
+      throw error
+    }
 
     transition.finished.then(cleanup, cleanup)
     await transition.updateCallbackDone

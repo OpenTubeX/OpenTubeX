@@ -137,6 +137,7 @@ export class TabNavigationService {
     ) {
       await waitForTabElement(tabId, '.videoPlayer')
       if (this.isTransitionStale(tabId, revision, requestId)) {
+        takePendingViewTransition(TAB_VIEW_TRANSITION_MAX_AGE_MS).cancel()
         return false
       }
     }
