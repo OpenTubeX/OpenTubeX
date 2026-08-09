@@ -1228,6 +1228,7 @@ Video:
   Drag to Reorder Queue: 'Drag {title} to reorder queue'
   Metadata: Video information
   Close Metadata: Close video information
+  Fetching Streams: Fetching streams with yt-dlp…
   Transcript:
     Title: Transcript
     Search: Search transcript

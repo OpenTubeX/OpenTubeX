@@ -20,6 +20,7 @@ import FtShareButton from '../../components/FtShareButton/FtShareButton.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtAddToPlaylistDropdown from '../../components/FtAddToPlaylistDropdown/FtAddToPlaylistDropdown.vue'
 import FtPaidPromotionBadge from '../../components/FtPaidPromotionBadge/FtPaidPromotionBadge.vue'
+import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
@@ -146,6 +147,7 @@ export default defineComponent({
     FtIconButton,
     FtAddToPlaylistDropdown,
     FtPaidPromotionBadge,
+    'ft-loader': FtLoader,
   },
   setup: function () {
     const { t, locale } = useI18n()
@@ -264,6 +266,10 @@ export default defineComponent({
       activePlaybackEngine: 'built-in',
       /** @type {string | null} the yt-dlp version that extracted the current streams */
       activePlaybackEngineVersion: null,
+      // yt-dlp is a separate process that takes a while to extract the streams. The
+      // metadata is already there at that point, so the rest of the page is shown
+      // immediately and only the player waits behind a thumbnail placeholder.
+      ytDlpStreamsPending: false,
       legacyFormats: [],
       captions: [],
       currentTime: 0,
@@ -817,11 +823,21 @@ export default defineComponent({
       return null
     },
 
+    /**
+     * The metadata is rendered as soon as the backend responds, but the player can
+     * only be created once the streams it is supposed to play are known.
+     */
+    playerReady() {
+      return !this.isLoading && !this.ytDlpStreamsPending
+    },
+
     canSaveWatchProgress() {
       if (this.isUpcoming || this.isLive) { return false }
 
-      // `this.$refs.player?.hasLoaded` cannot be used in computed property
-      return !this.isLoading
+      // `this.$refs.player?.hasLoaded` cannot be used in computed property.
+      // While the streams are still being extracted there is no player to read a
+      // position from, so the manual save action must not be offered yet either.
+      return this.playerReady
     },
     useSponsorBlock: function () {
       return this.$store.getters.getUseSponsorBlock
@@ -1384,6 +1400,7 @@ export default defineComponent({
       this.sabrData = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
+      this.ytDlpStreamsPending = false
       this.legacyFormats = []
       this.captions = []
       this.currentTime = 0
@@ -2261,8 +2278,9 @@ export default defineComponent({
         }
 
         if (!this.isUpcoming) {
-          await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
-          if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+          // Deliberately not awaited, so that the metadata (title, description,
+          // comments, recommendations, ...) is shown while yt-dlp is still extracting.
+          this.applyYtDlpPlaybackSource(loadGeneration, videoId)
         }
 
         this.updateShortsPlayerState(
@@ -2496,8 +2514,9 @@ export default defineComponent({
           }
 
           if (!this.isUpcoming) {
-            await this.applyYtDlpPlaybackSource(loadGeneration, videoId)
-            if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+            // Deliberately not awaited, so that the metadata (title, description,
+            // comments, recommendations, ...) is shown while yt-dlp is still extracting.
+            this.applyYtDlpPlaybackSource(loadGeneration, videoId)
           }
 
           this.updateShortsPlayerState(result.lengthSeconds, result.adaptiveFormats)
@@ -3607,6 +3626,10 @@ export default defineComponent({
      * Replaces the streams that the backend provided with the ones yt-dlp extracts.
      * The metadata (captions, chapters, storyboards, ...) keeps coming from the backend,
      * only the playback source is swapped out, so that SABR can be avoided entirely.
+     *
+     * The callers don't await this, they only wait for the metadata. `ytDlpStreamsPending`
+     * is set synchronously here, so the player is held back (behind a thumbnail
+     * placeholder) until the streams it should play are known.
      * @param {number} loadGeneration
      * @param {string} videoId
      */
@@ -3622,6 +3645,27 @@ export default defineComponent({
         return
       }
 
+      this.ytDlpStreamsPending = true
+
+      try {
+        await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+      } catch (error) {
+        // The callers don't await this, so nothing else can handle it.
+        console.error('Applying the yt-dlp playback source failed', error)
+      } finally {
+        // A stale load has already had its state reset (and may have started its own
+        // extraction), so it must not clear the flag of the load that replaced it.
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          this.ytDlpStreamsPending = false
+        }
+      }
+    },
+
+    /**
+     * @param {number} loadGeneration
+     * @param {string} videoId
+     */
+    extractYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       let source
       try {
         source = await getYtDlpPlaybackSource(videoId)
