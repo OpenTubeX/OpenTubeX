@@ -158,7 +158,6 @@ export async function setupInnertube(page, testInfo) {
             return route.fulfill({ status: 200, contentType: 'application/json', body })
           }
         }
-        // eslint-disable-next-line no-console
         console.warn(`[e2e] Missing Innertube fixture: ${key} (${fixtureDir})`)
         return route.abort()
       }

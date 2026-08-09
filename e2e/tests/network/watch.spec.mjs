@@ -248,31 +248,53 @@ test.describe('watch page', () => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
 
+    const videoDescription = Array(30).fill('Description to copy').join('\n')
     const watchComponent = await page.evaluateHandle(findWatchComponent)
-    await watchComponent.evaluate(async (component) => {
+    await watchComponent.evaluate(async (component, description) => {
       const watchView = component.proxy
       watchView.isLoading = true
       await watchView.$nextTick()
-      watchView.videoDescription = 'Description to copy'
+      watchView.videoDescription = description
       watchView.videoDescriptionHtml = ''
       watchView.videoTags = ['first tag', 'second tag']
       watchView.isLoading = false
       await watchView.$nextTick()
-    })
+    }, videoDescription)
 
     const description = page.locator(`${activeTab} .videoDescription`)
     const descriptionText = description.locator('.description')
     const tags = description.locator('.videoTags')
+    await description.locator(':scope > .descriptionStatus').click()
     await expect(tags).toHaveText('Video Tags: first tag, second tag')
     await expect(description.locator('.descriptionScroll')).toHaveCSS('overflow-anchor', 'none')
     expect(await descriptionText.evaluate((element, tagsElement) => (
       Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)
     ), await tags.elementHandle())).toBe(true)
     expect(await tags.evaluate(element => element.closest('.descriptionScroll'))).not.toBeNull()
+    const descriptionScroll = description.locator('.descriptionScroll')
+    const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
+    await expect(collapseControl).toBeVisible()
+    await expect(collapseControl).toHaveCSS('position', 'sticky')
+    const maxScrollTop = await descriptionScroll.evaluate(element =>
+      element.scrollHeight - element.clientHeight
+    )
+    expect(maxScrollTop).toBeGreaterThan(0)
+    await descriptionScroll.evaluate((element, maxScrollTop) => {
+      element.scrollTop = maxScrollTop / 2
+    }, maxScrollTop)
+    await expect.poll(() => descriptionScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => descriptionScroll.evaluate(element =>
+      element.scrollTop < element.scrollHeight - element.clientHeight
+    )).toBe(true)
+    await expect.poll(() => collapseControl.evaluate(element => {
+      const controlBottom = element.getBoundingClientRect().bottom
+      const scrollBottom = element.parentElement.getBoundingClientRect().bottom
+      return Math.abs(controlBottom - scrollBottom) <= 1
+    })).toBe(true)
 
     await description.locator('.descriptionCopyButton button').click()
     await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
-    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe('Description to copy')
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(videoDescription)
     await watchComponent.dispose()
   })
 
@@ -2825,7 +2847,6 @@ test.describe('custom Shorts player', () => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     const shortTab = page.locator(sel.tabs).first()
-    const otherTab = page.locator(sel.tabs).nth(1)
     await shortTab.click()
 
     const shortsFeedTab = page

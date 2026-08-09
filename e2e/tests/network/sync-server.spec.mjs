@@ -262,25 +262,27 @@ test.describe('OpenTubeX sync server', () => {
     }
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    if (!enhancedPrivacy) await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
-      return records
-        .filter(record => record._id === 'allChannels' && !record.$$deleted)
-        .at(-1)
-        ?.subscriptions
-        .find(channel => channel.id === remoteChannelId)
-    }).toEqual(expect.objectContaining({
-      id: remoteChannelId,
-      thumbnail: null
-    }))
-    if (!enhancedPrivacy) await expect.poll(async () => {
-      const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
-      return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
-    }).toEqual({
-      [channelId]: 1.5,
-      [remoteChannelId]: 2
-    })
+    if (!enhancedPrivacy) {
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        return records
+          .filter(record => record._id === 'allChannels' && !record.$$deleted)
+          .at(-1)
+          ?.subscriptions
+          .find(channel => channel.id === remoteChannelId)
+      }).toEqual(expect.objectContaining({
+        id: remoteChannelId,
+        thumbnail: null
+      }))
+      await expect.poll(async () => {
+        const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
+        return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
+      }).toEqual({
+        [channelId]: 1.5,
+        [remoteChannelId]: 2
+      })
+    }
 
     await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
     const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })

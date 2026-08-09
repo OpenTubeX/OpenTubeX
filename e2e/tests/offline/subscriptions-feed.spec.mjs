@@ -139,7 +139,6 @@ test.describe('subscriptions feed from cache', () => {
   test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {
     await goTo(page, 'subscriptions')
 
-    const header = page.locator('.subscriptionsHeader')
     const video = page.locator('.ft-list-video').first()
     await expect(video).toBeVisible()
     await video.hover()
