@@ -50,9 +50,9 @@
 .channelEntry {
   display: flex;
 
-  /* A card only needs room for one preference column. This lets medium-sized
-     settings windows place two channels side by side. */
-  flex: 1 1 360px;
+  /* Keep cards wide enough for two preference columns instead of packing the
+     prompt with narrow cards whose controls have to stack or wrap. */
+  flex: 1 1 520px;
   flex-direction: column;
   max-inline-size: 760px;
   padding: 1em;
@@ -106,7 +106,7 @@
 
 .channelPreferences {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 0.5em 1em;
   margin-block-start: 0.75em;
 }

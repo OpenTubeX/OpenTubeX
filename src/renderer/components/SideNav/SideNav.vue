@@ -165,27 +165,6 @@
         </p>
       </router-link>
       <hr>
-      <button
-        type="button"
-        class="navOption navOptionButton mobileShow smallMobileOnlyHidden"
-        :title="settingsTitle"
-        @click="openSettings"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'sliders-h']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t('Settings.Settings') }}
-        </p>
-      </button>
       <router-link
         class="navOption mobileHidden"
         role="button"
@@ -282,10 +261,6 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 const activeSubscriptionsPerPage = 50
-
-function openSettings() {
-  store.dispatch('toggleSettingsWindow')
-}
 
 const props = defineProps({
   forceExpanded: {
@@ -411,13 +386,6 @@ const historyTitle = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('History.History'),
     shortcut
-  )
-})
-
-const settingsTitle = computed(() => {
-  return localizeAndAddKeyboardShortcutToActionTitle(
-    t('Settings.Settings'),
-    appKeyboardShortcuts.value.NAVIGATE_TO_SETTINGS
   )
 })
 

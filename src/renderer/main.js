@@ -87,6 +87,7 @@ import {
   faGamepad,
   faGauge,
   faGaugeHigh,
+  faGear,
   faGlobe,
   faGrip,
   faHashtag,
@@ -241,6 +242,7 @@ library.add(
   faGamepad,
   faGauge,
   faGaugeHigh,
+  faGear,
   faGlobe,
   faGrip,
   faHashtag,
@@ -370,6 +372,10 @@ router.isReady().then(async () => {
 // to avoid accessing electron api from web app build
 if (process.env.IS_ELECTRON) {
   window.ftElectron.handleChangeView((route, tabId) => {
+    if (typeof route === 'string' && (route === '/settings' || route.startsWith('/settings/profile'))) {
+      store.dispatch('showSettingsWindow', route.startsWith('/settings/profile') ? 'profile' : null)
+      return
+    }
     const targetTabId = tabId ?? store.getters.getActiveTabId
     if (route && targetTabId) {
       tabNavigation.push(targetTabId, route)

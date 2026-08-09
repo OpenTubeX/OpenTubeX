@@ -135,25 +135,6 @@
           {{ $t('Stats.Stats') }}
         </p>
       </router-link>
-      <button
-        type="button"
-        class="navOption navOptionButton smallMobileOnlyShow"
-        :title="$t('Settings.Settings')"
-        :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
-        @click="openSettings"
-      >
-        <FontAwesomeIcon
-          :icon="['fas', 'sliders-h']"
-          class="navIcon"
-          :class="applyNavIconExpand"
-        />
-        <p
-          id="settingsNavLabel"
-          class="navLabel"
-        >
-          {{ $t("Settings.Settings") }}
-        </p>
-      </button>
     </div>
     <router-link
       class="navOption navOptionButton mobileShow"
@@ -174,25 +155,6 @@
       </p>
     </router-link>
     <hr>
-    <button
-      type="button"
-      class="navOption navOptionButton mobileShow"
-      :title="$t('Settings.Settings')"
-      :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
-      @click="openSettings"
-    >
-      <FontAwesomeIcon
-        :icon="['fas', 'sliders-h']"
-        class="navIcon"
-        :class="applyNavIconExpand"
-      />
-      <p
-        id="settingsNavLabel"
-        class="navLabel"
-      >
-        {{ $t("Settings.Settings") }}
-      </p>
-    </button>
     <router-link
       class="navOption mobileHidden"
       :title="$t('About.About')"
@@ -257,11 +219,6 @@ const applyNavIconExpand = computed(() => {
 
 function closeMenu() {
   openMoreOptions.value = false
-}
-
-function openSettings() {
-  store.dispatch('toggleSettingsWindow')
-  closeMenu()
 }
 
 function handleClickOutside(event) {

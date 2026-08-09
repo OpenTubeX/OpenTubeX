@@ -36,6 +36,7 @@ test.describe('settings', () => {
     const windowIcon = page.locator('.settingsWindowIcon')
     const breadcrumbLabel = page.locator('.settingsBreadcrumbLabel').first()
     await expect(windowIcon).toBeVisible()
+    await expect(windowIcon).toHaveAttribute('data-icon', 'gear')
     await expect(page.locator('.settingsBreadcrumbCategoryIcon')).toBeVisible()
     const [iconBounds, labelBounds] = await Promise.all([
       windowIcon.boundingBox(),
@@ -48,6 +49,26 @@ test.describe('settings', () => {
     }).locator('[data-icon="pen"]')).toBeVisible()
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await expect(page.locator('.settingsContent > [data-section="general"]')).toBeVisible()
+  })
+
+  test('opens from Preferences without remounting the current feed', async ({ app, page }) => {
+    await goTo(page, 'subscriptions')
+    const subscriptionsPage = page.locator('.subscriptionsPage')
+    await subscriptionsPage.evaluate(element => {
+      element.dataset.settingsShortcutMarker = 'preserved'
+    })
+
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      const browserWindow = BrowserWindow.getAllWindows()[0]
+      if (!browserWindow) throw new Error('Browser window was not found')
+      browserWindow.webContents.send('change-view', {
+        route: '/settings',
+        tabId: 'preferences-test'
+      })
+    })
+
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect(subscriptionsPage).toHaveAttribute('data-settings-shortcut-marker', 'preserved')
   })
 
   test('keeps a direct legacy settings route inside the app', async ({ page }) => {
@@ -65,12 +86,26 @@ test.describe('settings', () => {
 
   test('toggles from the app settings button', async ({ page }) => {
     const settingsButton = page.locator('.navSettingsButton')
+    await expect(settingsButton.locator('[data-icon="gear"]')).toBeVisible()
+    await expect(page.locator('.sideNav').getByText('Settings', { exact: true })).toHaveCount(0)
     await settingsButton.click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
 
     await settingsButton.click()
     await expect(page.locator('.settingsWindow')).toHaveClass(/settings-window-leave-active/)
     await expect(page.locator('.settingsWindow')).toBeHidden()
+  })
+
+  test('restores the last selected category when reopened', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="privacy"]').click()
+    await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
+
+    await page.locator('.settingsCloseButton').click()
+    await page.locator('.navSettingsButton').click()
+
+    await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
+    await expect(page.locator('.settingsMenu [data-section="privacy"]')).toHaveClass(/active/)
   })
 
   test('focuses its search and closes with Escape', async ({ page }) => {
@@ -135,6 +170,17 @@ test.describe('settings', () => {
       .click()
     await expect(page.locator('.settingsSearchTarget.select')).toBeVisible()
 
+    await page.getByRole('combobox', { name: 'External Player', exact: true }).click()
+    await page.getByRole('option', { name: 'mpv', exact: true }).click()
+    await search.fill('Custom External Player Executable')
+    await page.getByRole('button', { name: 'Custom External Player Executable', exact: true }).click()
+    const executableHighlight = page.locator('input.settingsSearchTarget')
+    await expect(executableHighlight).toHaveAttribute('placeholder', 'Custom External Player Executable')
+    expect(await executableHighlight.evaluate(element => getComputedStyle(element).animationName))
+      .toContain('settings-search-highlight')
+    expect((await executableHighlight.boundingBox()).height).toBeLessThanOrEqual(45)
+    await expect(page.locator('.ft-input-component.settingsSearchTarget')).toHaveCount(0)
+
     await search.fill('test')
     await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toBeVisible()
     await expect(page.locator('.settingsSearchResultMatch')).not.toContainText('Clicking on Test Proxy')
@@ -185,6 +231,7 @@ test.describe('settings', () => {
   test('resizes without creating horizontal settings overflow', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')
+    await expect(settingsWindow).not.toHaveClass(/settings-window-enter-active/)
     const originalBounds = await settingsWindow.boundingBox()
     const resizeHandle = page.locator('.resize-se')
     const handleBounds = await resizeHandle.boundingBox()
@@ -197,6 +244,8 @@ test.describe('settings', () => {
     const resizedBounds = await settingsWindow.boundingBox()
     expect(resizedBounds.width).toBeLessThan(originalBounds.width)
     expect(resizedBounds.height).toBeLessThan(originalBounds.height)
+    expect(resizedBounds.x).toBeCloseTo(originalBounds.x, 0)
+    expect(resizedBounds.y).toBeCloseTo(originalBounds.y, 0)
     await expect(settingsWindow.locator('.settingsPage')).toHaveClass(/compactSettings/)
     expect(await page.locator('.settingsContent').evaluate(element => {
       const bounds = element.getBoundingClientRect()
@@ -219,6 +268,65 @@ test.describe('settings', () => {
     const restoredBounds = await settingsWindow.boundingBox()
     expect(restoredBounds.width).toBeCloseTo(resizedBounds.width, 0)
     expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
+  })
+
+  test('animates maximize and restore while preserving its floating bounds', async ({ page }) => {
+    await goTo(page, 'settings')
+    const settingsWindow = page.locator('.settingsWindow')
+    await expect(settingsWindow).not.toHaveClass(/settings-window-enter-active/)
+    const originalBounds = await settingsWindow.boundingBox()
+    await settingsWindow.evaluate(element => {
+      const animate = element.animate.bind(element)
+      element.animate = (...args) => {
+        element.dataset.boundsAnimationStarted = 'true'
+        return animate(...args)
+      }
+    })
+
+    await page.getByRole('button', { name: 'Maximize' }).click()
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    await expect(settingsWindow).toHaveAttribute('data-bounds-animation-started', 'true')
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }))
+    await expect.poll(async () => (await settingsWindow.boundingBox()).width).toBe(viewport.width)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).height).toBe(viewport.height)
+    await expect(page.locator('.settingsResizeHandle:visible')).toHaveCount(0)
+
+    await settingsWindow.getByRole('button', { name: 'Restore', exact: true }).click()
+    await expect(settingsWindow).not.toHaveClass(/maximized/)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).width)
+      .toBeCloseTo(originalBounds.width, 0)
+    await expect.poll(async () => (await settingsWindow.boundingBox()).height)
+      .toBeCloseTo(originalBounds.height, 0)
+
+    const breadcrumb = page.locator('.settingsBreadcrumb')
+    const breadcrumbBounds = await breadcrumb.boundingBox()
+    await breadcrumb.dblclick({
+      position: { x: breadcrumbBounds.width - 4, y: breadcrumbBounds.height / 2 }
+    })
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    await breadcrumb.dblclick({
+      position: { x: breadcrumbBounds.width - 4, y: breadcrumbBounds.height / 2 }
+    })
+    await expect(settingsWindow).not.toHaveClass(/maximized/)
+
+    await page.getByRole('button', { name: 'Maximize' }).click()
+    await expect(settingsWindow).toHaveClass(/maximized/)
+    await expect(page.locator('body > .os-scrollbar-vertical')).toHaveCSS('visibility', 'hidden')
+    await expect.poll(() => settingsWindow.evaluate(element => element.getAnimations().length)).toBe(0)
+    const dragTargetBounds = await page.locator('.settingsBreadcrumbLabel').first().boundingBox()
+    await page.mouse.move(
+      dragTargetBounds.x + dragTargetBounds.width / 2,
+      dragTargetBounds.y + dragTargetBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(
+      dragTargetBounds.x + dragTargetBounds.width / 2 + 30,
+      dragTargetBounds.y + dragTargetBounds.height / 2 + 20
+    )
+    await expect(settingsWindow).not.toHaveClass(/maximized/)
+    await page.mouse.up()
+    await expect.poll(async () => (await settingsWindow.boundingBox()).width)
+      .toBeCloseTo(originalBounds.width, 0)
   })
 
   test('keeps the settings window inside the narrowest supported viewport', async ({ page }) => {
@@ -293,14 +401,19 @@ test.describe('settings', () => {
     await expect(breadcrumb).not.toContainText('Saved Channel Settings')
   })
 
-  test('uses multiple saved-channel columns in a medium-width window', async ({ page }) => {
+  test('keeps saved-channel controls in two columns without narrow wrapping', async ({ page }) => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({
-        channel1: 1,
-        channel2: 1.25,
-        channel3: 1.5
-      }))
+      return Promise.all([
+        store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({
+          channel1: 1,
+          channel2: 1.25,
+          channel3: 1.5
+        })),
+        store.dispatch('updateChannelVideoQualities', JSON.stringify({ channel1: '1080' })),
+        store.dispatch('updateChannelSubtitlesStates', JSON.stringify({ channel1: true })),
+        store.dispatch('updateChannelVolumes', JSON.stringify({ channel1: 0.5 }))
+      ])
     })
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="channel"]').click()
@@ -308,10 +421,11 @@ test.describe('settings', () => {
 
     const entries = page.locator('.channelEntry')
     await expect(entries).toHaveCount(3)
-    const firstRowTops = await entries.evaluateAll(elements => {
+    const firstEntryPreferences = entries.first().locator('.channelPreference')
+    const preferenceTops = await firstEntryPreferences.evaluateAll(elements => {
       return elements.slice(0, 2).map(element => Math.round(element.getBoundingClientRect().top))
     })
-    expect(new Set(firstRowTops).size).toBe(1)
+    expect(new Set(preferenceTops).size).toBe(1)
 
     await entries.first().locator('.channelLink').click()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
@@ -327,9 +441,14 @@ test.describe('settings', () => {
         height: 450
       }))
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      return store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(Object.fromEntries(
-        Array.from({ length: 8 }, (_, index) => [`channel${index}`, 1 + index / 10])
-      )))
+      return Promise.all([
+        store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(Object.fromEntries(
+          Array.from({ length: 8 }, (_, index) => [`channel${index}`, 1 + index / 10])
+        ))),
+        store.dispatch('updateChannelVideoQualities', JSON.stringify({ channel0: '1080' })),
+        store.dispatch('updateChannelSubtitlesStates', JSON.stringify({ channel0: true })),
+        store.dispatch('updateChannelVolumes', JSON.stringify({ channel0: 0.5 }))
+      ])
     })
     await goTo(page, 'settings')
     await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
@@ -349,6 +468,9 @@ test.describe('settings', () => {
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
     const channelList = page.locator('.channelListContainer')
+    expect(await page.locator('.channelPreferences').first().evaluate(element => {
+      return getComputedStyle(element).gridTemplateColumns.split(' ').length
+    })).toBe(1)
     expect(await channelList.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
     await channelList.evaluate(element => {
       element.scrollTop = element.scrollHeight

@@ -86,7 +86,7 @@
         >
           <FontAwesomeIcon
             class="navIcon"
-            :icon="['fas', 'sliders-h']"
+            :icon="['fas', 'cog']"
           />
         </button>
         <RouterLink

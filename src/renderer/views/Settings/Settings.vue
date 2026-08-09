@@ -2,6 +2,7 @@
   <section
     ref="settingsWindowRef"
     class="settingsWindow"
+    :class="{ maximized: isMaximized }"
     :style="windowStyle"
     role="dialog"
     :aria-label="t('Settings.Settings')"
@@ -11,6 +12,7 @@
     <header
       class="settingsWindowHeader"
       @pointerdown="startDragging"
+      @dblclick="handleHeaderDoubleClick"
     >
       <button
         v-if="showBackButton"
@@ -34,7 +36,7 @@
         >
           <FontAwesomeIcon
             class="settingsWindowIcon"
-            :icon="['fas', 'sliders-h']"
+            :icon="['fas', 'cog']"
             aria-hidden="true"
           />
           <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
@@ -45,7 +47,7 @@
         >
           <FontAwesomeIcon
             class="settingsWindowIcon"
-            :icon="['fas', 'sliders-h']"
+            :icon="['fas', 'cog']"
             aria-hidden="true"
           />
           <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
@@ -136,6 +138,15 @@
           @click="updateHighlightChangedSettings(!highlightChangedSettings)"
         >
           <FontAwesomeIcon :icon="['fas', 'pen']" />
+        </button>
+        <button
+          type="button"
+          class="settingsHeaderButton"
+          :aria-label="maximizeButtonLabel"
+          :title="maximizeButtonLabel"
+          @click="toggleMaximized"
+        >
+          <FontAwesomeIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
         </button>
         <button
           ref="settingsCloseButtonRef"
@@ -251,6 +262,7 @@
     </div>
     <div
       v-for="direction in RESIZE_DIRECTIONS"
+      v-show="!isMaximized"
       :key="direction"
       class="settingsResizeHandle"
       :class="`resize-${direction}`"
@@ -295,7 +307,6 @@ import SponsorBlockSettings from '../../components/SponsorBlockSettings.vue'
 import RydSettings from '../../components/RydSettings.vue'
 import ParentalControlSettings from '../../components/ParentalControlSettings.vue'
 import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
-import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import ContextMenuSearchSettings from '../../components/ContextMenuSearchSettings/ContextMenuSearchSettings.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
@@ -324,7 +335,8 @@ const NON_SETTING_MESSAGE_KEY_PATTERN = /(?:^No\b|^How\b|^Checking\b|^Current .+
 
 const { locale, t, tm } = useI18n()
 const isInDesktopView = ref(true)
-const activeSection = ref(null)
+const isMaximized = ref(false)
+const activeSection = ref(store.getters.getSettingsWindowSection)
 const settingsSearchQuery = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
@@ -340,19 +352,30 @@ let settingsSectionResizeObserver = null
 let settingsContentPaddingBottom = 0
 let observationScheduled = false
 let boundsSaveTimer = null
+let boundsAnimation = null
 let searchHighlightTimer = null
 let draggingPointerId = null
 let resizeSession = null
 let dragOffsetX = 0
 let dragOffsetY = 0
+let maximizedDragSession = null
+let restoreBounds = null
 
 const windowBounds = ref(getInitialBounds())
-const windowStyle = computed(() => ({
-  left: `${windowBounds.value.x}px`,
-  top: `${windowBounds.value.y}px`,
-  inlineSize: `${windowBounds.value.width}px`,
-  blockSize: `${windowBounds.value.height}px`
-}))
+const windowStyle = computed(() => isMaximized.value
+  ? {
+      left: '0',
+      top: '0',
+      inlineSize: '100vw',
+      blockSize: '100vh'
+    }
+  : {
+      left: `${windowBounds.value.x}px`,
+      top: `${windowBounds.value.y}px`,
+      inlineSize: `${windowBounds.value.width}px`,
+      blockSize: `${windowBounds.value.height}px`
+    })
+const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t('Maximize'))
 
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
 const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
@@ -466,12 +489,6 @@ const settingsComponentsData = computed(() => [
         component: ContextMenuSearchSettings
       }]
     : []),
-  {
-    type: 'password',
-    title: t('Settings.Password Settings.Password Settings'),
-    icon: ['fas', 'key'],
-    component: PasswordSettings
-  },
   ...(process.env.IS_ELECTRON
     ? [{
         type: 'experimental',
@@ -496,6 +513,7 @@ const settingsSectionComponents = computed(() => {
   }, ...sections]
 })
 const settingsSearchExtraValues = computed(() => ({
+  privacy: flattenMessageValues(tm('Settings.Password Settings')),
   proxy: [
     `${t('Settings.Proxy Settings.Clicking on Test Proxy will send a request to')} ` +
     getProxyTestUrl(locale.value)
@@ -607,6 +625,7 @@ onBeforeUnmount(() => {
   if (boundsSaveTimer !== null) {
     clearTimeout(boundsSaveTimer)
   }
+  boundsAnimation?.cancel()
   if (searchHighlightTimer !== null) {
     clearTimeout(searchHighlightTimer)
   }
@@ -617,7 +636,12 @@ watch(isProfileManagerOpen, (open) => {
     setInitialSection()
   }
 })
-watch(activeSection, () => nextTick(observeActiveSettingsSection))
+watch(activeSection, (section) => {
+  if (section !== null) {
+    store.commit('setSettingsWindowSection', section)
+  }
+  nextTick(observeActiveSettingsSection)
+})
 
 function handleMounted() {
   unlocked.value = store.getters.getSettingsPassword === ''
@@ -637,12 +661,19 @@ function handleMounted() {
       const { width, height } = entry.contentRect
       handleResize(width)
       if (width > 0 && height > 0) {
-        windowBounds.value = clampBounds({
-          ...windowBounds.value,
-          width: element.offsetWidth,
-          height: element.offsetHeight
-        })
-        scheduleBoundsSave()
+        if (
+          !isMaximized.value &&
+          boundsAnimation === null &&
+          draggingPointerId === null &&
+          resizeSession === null
+        ) {
+          windowBounds.value = clampBounds({
+            ...windowBounds.value,
+            width: element.offsetWidth,
+            height: element.offsetHeight
+          })
+          scheduleBoundsSave()
+        }
         if (settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
@@ -700,8 +731,15 @@ function handleUnlock() {
 function setInitialSection() {
   if (isProfileManagerOpen.value || !unlocked.value || settingsSearchQuery.value !== '') return
   if (isInDesktopView.value && activeSection.value === null) {
-    activeSection.value = settingsSectionComponents.value[0].type
+    activeSection.value = getRememberedSection()
   }
+}
+
+function getRememberedSection() {
+  const rememberedSection = store.getters.getSettingsWindowSection
+  return settingsSectionComponents.value.some(({ type }) => type === rememberedSection)
+    ? rememberedSection
+    : settingsSectionComponents.value[0].type
 }
 
 function navigateToSection(sectionType) {
@@ -727,14 +765,17 @@ async function openSearchResult(sectionType, label) {
   )]
     .filter(element => element.getClientRects().length > 0)
   const labelElement = visibleTextElements
-    .filter(element => normalizeSearchText(element.textContent.trim()) === normalizedLabel)
+    .filter(element => getSearchTargetText(element) === normalizedLabel)
     .at(-1) ?? visibleTextElements
-    .filter(element => normalizeSearchText(element.textContent.trim()).startsWith(`${normalizedLabel}:`))
+    .filter(element => getSearchTargetText(element).startsWith(`${normalizedLabel}:`))
     .at(-1)
-  const target = labelElement?.closest(
+  const control = labelElement?.closest(
     '.switch-ctn, .select, .ft-input-component, .pure-material-slider, ' +
     '.pure-checkbox, .captionControl, .preferenceToggle'
   ) ?? labelElement
+  const target = control?.classList.contains('ft-input-component')
+    ? control.querySelector('.ft-input')
+    : control
   if (!target) return
 
   target.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -749,12 +790,18 @@ async function openSearchResult(sectionType, label) {
   }, 2200)
 }
 
+function getSearchTargetText(element) {
+  const clone = element.cloneNode(true)
+  clone.querySelectorAll('.tooltip, .changedSettingIndicator').forEach(child => child.remove())
+  return normalizeSearchText(clone.textContent.trim())
+}
+
 function handleSettingsSearch() {
   closeSubpage?.()
   subpageTitle.value = ''
   closeSubpage = null
   activeSection.value = settingsSearchQuery.value === '' && isInDesktopView.value
-    ? settingsSectionComponents.value[0].type
+    ? getRememberedSection()
     : null
   nextTick(() => {
     if (settingsContentRef.value) settingsContentRef.value.scrollTop = 0
@@ -838,7 +885,7 @@ function handleResize(width) {
   if (desktop === isInDesktopView.value) return
   isInDesktopView.value = desktop
   if (desktop && activeSection.value === null && settingsSearchQuery.value === '') {
-    activeSection.value = settingsSectionComponents.value[0].type
+    activeSection.value = getRememberedSection()
   }
 }
 
@@ -847,18 +894,90 @@ function closeSettings() {
   store.dispatch('hideSettingsWindow')
 }
 
+async function toggleMaximized() {
+  cancelBoundsAnimation()
+  const element = settingsWindowRef.value
+  const from = getWindowAnimationState(element)
+  if (isMaximized.value) {
+    restoreSettingsWindow()
+  } else {
+    restoreBounds = { ...windowBounds.value }
+    isMaximized.value = true
+  }
+  await nextTick()
+  animateWindowBounds(element, from)
+}
+
+function getWindowAnimationState(element) {
+  if (!element) return null
+  const bounds = element.getBoundingClientRect()
+  const style = getComputedStyle(element)
+  return {
+    left: `${bounds.left}px`,
+    top: `${bounds.top}px`,
+    width: `${bounds.width}px`,
+    height: `${bounds.height}px`,
+    borderRadius: style.borderRadius,
+    borderWidth: style.borderWidth
+  }
+}
+
+function animateWindowBounds(element, from) {
+  if (!element || !from || document.documentElement.dataset.reducedMotion === 'reduce') return
+  const to = getWindowAnimationState(element)
+  const animation = element.animate([from, to], {
+    duration: 240,
+    easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
+  })
+  boundsAnimation = animation
+  animation.finished.catch(() => {}).finally(() => {
+    if (boundsAnimation === animation) boundsAnimation = null
+  })
+}
+
+function cancelBoundsAnimation() {
+  boundsAnimation?.cancel()
+  boundsAnimation = null
+}
+
+function restoreSettingsWindow() {
+  if (!isMaximized.value) return
+  windowBounds.value = clampBounds(restoreBounds ?? windowBounds.value)
+  restoreBounds = null
+  isMaximized.value = false
+  scheduleBoundsSave()
+}
+
 function handleSettingsEscape(event) {
   if (event.target.closest('[aria-expanded="true"]')) return
   event.stopPropagation()
   closeSettings()
 }
 
+function handleHeaderDoubleClick(event) {
+  if (event.button !== 0 || event.target.closest('button, input, .settingsSearch')) return
+  toggleMaximized()
+}
+
 function startDragging(event) {
   if (event.button !== 0 || event.target.closest('button, input, .settingsSearch')) return
-  const bounds = settingsWindowRef.value.getBoundingClientRect()
+  cancelBoundsAnimation()
+  const renderedBounds = settingsWindowRef.value.getBoundingClientRect()
+  if (isMaximized.value) {
+    const floatingBounds = clampBounds(restoreBounds ?? windowBounds.value)
+    maximizedDragSession = {
+      floatingBounds,
+      horizontalPosition: renderedBounds.width > 0
+        ? (event.clientX - renderedBounds.left) / renderedBounds.width
+        : 0.5,
+      pointerOffsetY: event.clientY - renderedBounds.top
+    }
+  } else {
+    const bounds = windowBounds.value
+    dragOffsetX = event.clientX - bounds.x
+    dragOffsetY = event.clientY - bounds.y
+  }
   draggingPointerId = event.pointerId
-  dragOffsetX = event.clientX - bounds.left
-  dragOffsetY = event.clientY - bounds.top
   document.documentElement.classList.add('draggingSettingsWindow')
   window.addEventListener('pointermove', dragWindow)
   window.addEventListener('pointerup', stopDragging)
@@ -868,6 +987,20 @@ function startDragging(event) {
 
 function dragWindow(event) {
   if (event.pointerId !== draggingPointerId) return
+  if (maximizedDragSession !== null) {
+    const { floatingBounds, horizontalPosition, pointerOffsetY } = maximizedDragSession
+    windowBounds.value = clampBounds({
+      ...floatingBounds,
+      x: event.clientX - floatingBounds.width * horizontalPosition,
+      y: event.clientY - pointerOffsetY
+    })
+    dragOffsetX = event.clientX - windowBounds.value.x
+    dragOffsetY = event.clientY - windowBounds.value.y
+    maximizedDragSession = null
+    restoreBounds = null
+    isMaximized.value = false
+    return
+  }
   windowBounds.value = clampBounds({
     ...windowBounds.value,
     x: event.clientX - dragOffsetX,
@@ -879,6 +1012,7 @@ function stopDragging(event) {
   if (event && event.pointerId !== draggingPointerId) return
   if (draggingPointerId === null) return
   draggingPointerId = null
+  maximizedDragSession = null
   document.documentElement.classList.remove('draggingSettingsWindow')
   window.removeEventListener('pointermove', dragWindow)
   window.removeEventListener('pointerup', stopDragging)
@@ -887,7 +1021,8 @@ function stopDragging(event) {
 }
 
 function startResizing(event, direction) {
-  if (event.button !== 0) return
+  if (event.button !== 0 || isMaximized.value) return
+  cancelBoundsAnimation()
   resizeSession = {
     direction,
     pointerId: event.pointerId,
@@ -957,6 +1092,7 @@ function stopResizing(event) {
 }
 
 function clampWindowToViewport() {
+  if (isMaximized.value) return
   windowBounds.value = clampBounds(windowBounds.value)
 }
 
