@@ -147,6 +147,24 @@
         </p>
       </router-link>
       <router-link
+        v-if="IS_ELECTRON"
+        class="navOption mobileShow"
+        role="button"
+        to="/downloads"
+        :title="$t('Downloads.Downloads')"
+      >
+        <div class="thumbnailContainer">
+          <FontAwesomeIcon
+            :icon="['fas', 'download']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p class="navLabel">
+          {{ $t('Downloads.Downloads') }}
+        </p>
+      </router-link>
+      <router-link
         v-if="showWatchStats"
         class="navOption mobileHidden"
         role="button"
@@ -260,6 +278,7 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 ).APP.GENERAL)
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
+const IS_ELECTRON = process.env.IS_ELECTRON
 const activeSubscriptionsPerPage = 50
 
 const props = defineProps({

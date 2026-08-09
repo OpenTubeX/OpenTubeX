@@ -71,11 +71,17 @@
         :use-shadow="false"
         @click="handleExternalPlayer"
       />
-      <span
-        v-if="isUserPlaylist"
-        class="playlistIcons"
-      >
+      <span class="playlistIcons">
         <FtIconButton
+          v-if="IS_ELECTRON && videoCount > 0"
+          :title="t('Downloads.Download Playlist')"
+          :icon="['fas', 'download']"
+          theme="base-no-default"
+          :size="16"
+          @click="showDownloadPrompt = true"
+        />
+        <FtIconButton
+          v-if="isUserPlaylist"
           :title="markedAsQuickBookmarkTarget ? t('User Playlists.Quick Bookmark Enabled') : t('User Playlists.Enable Quick Bookmark With This Playlist')"
           :icon="markedAsQuickBookmarkTarget ? quickBookmarkIcon : ['far', 'bookmark']"
           :disabled="markedAsQuickBookmarkTarget"
@@ -86,15 +92,26 @@
         />
       </span>
     </div>
+    <WatchVideoDownloadPrompt
+      v-if="showDownloadPrompt"
+      :playlist-id="isUserPlaylist ? '' : playlistId"
+      :playlist-key="playlistId"
+      :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
+      :is-playlist="true"
+      :title="title"
+      :thumbnail="thumbnailForDisplay"
+      @close="showDownloadPrompt = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
+import WatchVideoDownloadPrompt from '../WatchVideoDownloadPrompt/WatchVideoDownloadPrompt.vue'
 
 import store from '../../store/index'
 
@@ -117,6 +134,8 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const IS_ELECTRON = process.env.IS_ELECTRON
+const showDownloadPrompt = ref(false)
 
 let playlistId = ''
 let title = ''

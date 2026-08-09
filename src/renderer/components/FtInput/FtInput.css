@@ -49,8 +49,13 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   opacity: 1;
 }
 
-.disabled {
+.ft-input.disabled,
+.selectLabel.disabled .selectLabelText {
   opacity: 0.4;
+}
+
+.ft-input.disabled,
+.selectLabel.disabled {
   cursor: not-allowed;
 }
 

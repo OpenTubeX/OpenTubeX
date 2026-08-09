@@ -1943,9 +1943,49 @@ KeyboardShortcutPrompt:
   Skip to Next Video: Skip to the next video in a playlist or next recommended video
   Skip to Previous Video: Skip to the previous video in a playlist
 Downloads:
+  Downloads: Downloads
   Download: Download
   Download Video: Download Video
+  Download Playlist: Download Playlist
+  Downloading: Downloading
+  Downloaded: Downloaded
+  No Downloads: No downloads yet
+  No Downloads Description: Downloads you start will appear here.
+  Clear Finished: Clear Finished
+  Clear From List: Clear From List
+  Show in Folder: Show in Folder
+  Remove File: Remove File
+  Remove File Confirmation: Remove downloaded file?
+  Remove File Warning: 'This will move "{title}" to your device trash.'
+  File Not Found: The downloaded file could not be found.
   Download Type: Download Type
+  Template: Template
+  Unsaved: Unsaved
+  Media Type: Media Type
+  Video: Video
+  Audio: Audio
+  Maximum Resolution: Maximum Resolution
+  Best Available: Best Available
+  Automatic: Automatic
+  Container: Container
+  Video Codec: Video Codec
+  Audio Codec: Audio Codec
+  File Name Template: File Name Template
+  File Name Template Help: 'Available fields: {title}, {author}, {upload_date}, {id}, {playlist}, {playlist_index}, {ext}'
+  Time Range and Chapters: Time Range and Chapters
+  Start Time: Start Time (HH:MM:SS)
+  End Time: End Time (HH:MM:SS)
+  Split by Chapters: Split into separate files by chapter
+  Remove Segments: Remove segments
+  SponsorBlock: SponsorBlock
+  Subtitles and Metadata: Subtitles and Metadata
+  Include Subtitles: Include subtitles
+  Embed Subtitles: Embed subtitles in the media file
+  Subtitle Languages: Subtitle Languages
+  Subtitle Languages Help: 'Comma-separated yt-dlp language selectors, for example: en.*,de.*'
+  Embed Cover Art: Embed thumbnail as cover art
+  Embed Metadata: Embed title, author, description, and chapters
+  Additional yt-dlp Arguments: Additional yt-dlp Arguments
   Custom yt-dlp Arguments: Custom yt-dlp Arguments
   Template Name: Template Name
   Save Template: Save Template

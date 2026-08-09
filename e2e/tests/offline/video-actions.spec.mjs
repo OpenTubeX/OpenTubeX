@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { test, expect, goTo, waitForAppReady } from '../../helpers/app.mjs'
@@ -76,7 +76,351 @@ test.describe('rounded action popovers', () => {
   })
 })
 
+test.describe('video downloads', () => {
+  test.use({
+    seed: {
+      ...SEED,
+      settings: {
+        ...SEED.settings,
+        ytDlpSource: 'system',
+        ytDlpPath: '/bin/false',
+        ytDlpFfmpegSource: 'system',
+        ytDlpFfmpegPath: '/bin/false'
+      }
+    }
+  })
+
+  test('sends plain download options over IPC', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+
+    await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+    await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
+  })
+
+  test('rejects custom arguments that can execute external code', async ({ page }) => {
+    const customArguments = [
+      '--exec "echo unsafe"',
+      '--config-location=/tmp/yt-dlp.conf',
+      '--external-downloader custom-binary',
+      '--plugin-dirs /tmp/plugins',
+      '--remote-components ejs:github'
+    ]
+    await page.bringToFront()
+    const results = await page.evaluate((args) => Promise.all(args.map(customArgs => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      mode: 'video',
+      customArgs
+    }))), customArguments)
+    expect(results).toEqual(customArguments.map(() => ({ error: 'unsupported-custom-argument' })))
+  })
+
+  test('escapes percent signs in local playlist folder names', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'Top 100%(title)s',
+      mode: 'video'
+    }))
+
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('Top 100%%(title)s')
+  })
+
+  test('prefixes Windows reserved local playlist folder names', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'CON.txt',
+      mode: 'video'
+    }))
+
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('_CON.txt/%(autonumber)03d')
+  })
+
+  test('rejects invalid and oversized local playlist video lists', async ({ page }) => {
+    await page.bringToFront()
+    const results = await page.evaluate(() => Promise.all([
+      window.ftElectron.ytDlpDownload({
+        videoIds: ['eeeeeeeeeee', 'invalid', 'fffffffffff'],
+        isPlaylist: true,
+        mode: 'video'
+      }),
+      window.ftElectron.ytDlpDownload({
+        videoIds: Array.from({ length: 501 }, () => 'eeeeeeeeeee'),
+        isPlaylist: true,
+        mode: 'video'
+      })
+    ]))
+
+    expect(results).toEqual([
+      { error: 'invalid-video-ids' },
+      { error: 'too-many-videos' }
+    ])
+  })
+
+  test('keeps untitled multi-video downloads in history', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nsleep 0.2\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 42,
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, result.id)).toMatchObject({ title: '', status: 'completed' })
+  })
+
+  test('broadcasts active downloads to other windows', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    const [otherWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      page.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(otherWindow)
+    await otherWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+
+    await page.bringToFront()
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+
+    const otherDownload = otherWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(otherDownload).toContainText('0.0%')
+
+    const [lateWindow] = await Promise.all([
+      app.electronApp.waitForEvent('window'),
+      otherWindow.locator('.topNav .navNewWindowButton').click()
+    ])
+    await waitForAppReady(lateWindow)
+    await lateWindow.locator('.sideNav a[href="#/downloads"]:visible').first().click()
+    const hydratedDownload = lateWindow.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(hydratedDownload).toContainText('0.0%')
+
+    await hydratedDownload.getByTitle('Cancel Download').click()
+    await expect(otherDownload).toContainText('Download cancelled')
+
+    await hydratedDownload.getByTitle('Clear From List').click()
+    await expect(otherDownload).toHaveCount(0)
+  })
+
+  test('flushes completed download history before quitting', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nprintf "[download] 100.0%% at 1MiB/s ETA 00:00\\n"\nsleep 0.2\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect(page.getByText('Download complete', { exact: true })).toBeVisible()
+
+    const { page: relaunchedPage } = await app.relaunch()
+    await goTo(relaunchedPage, 'downloads')
+    await expect(relaunchedPage.getByText('Bookmarkable video', { exact: true })).toBeVisible()
+  })
+})
+
+test('asks for confirmation before removing a downloaded file', async ({ page }) => {
+  await goTo(page, 'downloads')
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('upsertYtDlpDownload', {
+      id: 42,
+      title: 'Finished download',
+      status: 'completed',
+      percent: 100,
+      thumbnail: 'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg',
+      destination: '/tmp/finished-download.mp4'
+    })
+  })
+
+  const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Finished download' })
+  await expect(downloadRow.locator('.downloadThumbnail')).toHaveAttribute(
+    'src',
+    'https://i.ytimg.com/vi/eeeeeeeeeee/mqdefault.jpg'
+  )
+  const rowLayout = await downloadRow.evaluate((row) => ({
+    thumbnailRight: row.querySelector('.downloadThumbnail').getBoundingClientRect().right,
+    detailsLeft: row.querySelector('.downloadDetails').getBoundingClientRect().left
+  }))
+  expect(rowLayout.thumbnailRight).toBeLessThanOrEqual(rowLayout.detailsLeft)
+
+  await page.getByTitle('Remove File').click()
+  await expect(page.getByRole('dialog')).toContainText('Remove downloaded file?')
+  await expect(page.getByRole('dialog')).toContainText('Finished download')
+  await page.getByRole('button', { name: 'Cancel' }).click()
+  await expect(page.getByText('Finished download')).toBeVisible()
+})
+
 test.describe('list video actions', () => {
+  test('does not attach to an unrelated active download with the same title', async ({ page }) => {
+    await goTo(page, 'history')
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 41,
+        videoId: 'differentId',
+        title: 'Bookmarkable video',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
+    await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
+  })
+
+  test('does not attach to an unrelated active playlist with the same title', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Saved videos', { exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 43,
+        playlistKey: 'different-playlist',
+        title: 'Saved videos',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    await page.getByTitle('Download Playlist').click()
+
+    await expect(page.getByText('Media Type', { exact: true })).toBeVisible()
+    await expect(page.getByText('50.0%', { exact: true })).toHaveCount(0)
+  })
+
+  test('reattaches to a changed local playlist by its stable id', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Saved videos', { exact: true }).click()
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('upsertYtDlpDownload', {
+        id: 44,
+        playlistKey: 'saved-videos',
+        title: 'Old playlist title',
+        status: 'downloading',
+        percent: 50
+      })
+    })
+
+    await page.getByTitle('Download Playlist').click()
+
+    await expect(page.getByText('50.0%', { exact: true })).toBeVisible()
+    await expect(page.getByText('Media Type', { exact: true })).toHaveCount(0)
+  })
+
+  test('does not overflow horizontally in a narrow download modal', async ({ page }) => {
+    await page.setViewportSize({ width: 480, height: 940 })
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    for (const locator of [page.locator('.downloadPromptCard'), page.locator('.downloadOptions')]) {
+      await expect.poll(() => locator.evaluate(element => element.scrollWidth - element.clientWidth)).toBe(0)
+    }
+
+    const templateSection = page.locator('.fixedTemplateSection')
+    await page.waitForTimeout(200)
+    const templateTop = await templateSection.evaluate(element => element.getBoundingClientRect().top)
+    await page.locator('.downloadOptions').evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+    })
+    await expect.poll(() => page.locator('.downloadOptions').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
+  })
+
+  test('disabled download inputs do not fade their tooltips', async ({ page }) => {
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    const metadataSection = page.locator('.optionSection').filter({
+      has: page.getByRole('heading', { name: 'Subtitles and Metadata' })
+    })
+    await expect(metadataSection.locator('.switch-label-text')).toHaveText([
+      'Embed thumbnail as cover art',
+      'Embed title, author, description, and chapters',
+      'Include subtitles',
+      'Embed subtitles in the media file'
+    ])
+
+    const subtitleLanguages = page.locator('.subtitleLanguages')
+    const tooltip = subtitleLanguages.locator('[role="tooltip"]')
+    await expect(subtitleLanguages.locator('input')).toBeDisabled()
+    await subtitleLanguages.locator('.selectTooltip button').hover()
+    await expect(tooltip).toBeVisible()
+
+    const opacity = await subtitleLanguages.evaluate((field) => ({
+      label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
+      labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity,
+      tooltip: getComputedStyle(field.querySelector('[role="tooltip"]')).opacity
+    }))
+    expect(opacity).toEqual({ label: '1', labelText: '0.4', tooltip: '1' })
+  })
+
   test('the options dropdown shows readable single-column actions with icons', async ({ page }) => {
     await goTo(page, 'history')
     await page.setViewportSize({ width: 1200, height: 360 })

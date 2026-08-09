@@ -7,6 +7,7 @@ import Trending from '../views/Trending/Trending.vue'
 import Popular from '../views/Popular/Popular.vue'
 import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
 import History from '../views/History/History.vue'
+import Downloads from '../views/Downloads/Downloads.vue'
 import SearchPage from '../views/SearchPage/SearchPage.vue'
 import Playlist from '../views/Playlist/Playlist.vue'
 import Channel from '../views/Channel/Channel.vue'
@@ -125,6 +126,16 @@ export const routes = [
     },
     component: History
   },
+  ...(process.env.IS_ELECTRON
+    ? [{
+        path: '/downloads',
+        name: 'downloads',
+        meta: {
+          title: getFixedInternalRouteTitle('/downloads')
+        },
+        component: Downloads
+      }]
+    : []),
   {
     path: '/stats',
     name: 'stats',

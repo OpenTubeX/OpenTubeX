@@ -328,6 +328,7 @@
       v-if="showDownloadPrompt"
       :video-id="id"
       :title="title"
+      :thumbnail="thumbnail"
       @close="showDownloadPrompt = false"
     />
   </div>

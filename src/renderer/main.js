@@ -403,6 +403,8 @@ if (process.env.IS_ELECTRON) {
     }
   )
 
+  const removedDownloadIds = new Set()
+
   window.ftElectron.handleYtDlpDownloadStatus((download) => {
     store.commit('upsertYtDlpDownload', download)
 
@@ -420,4 +422,17 @@ if (process.env.IS_ELECTRON) {
       })
     }
   })
+
+  window.ftElectron.handleYtDlpDownloadsRemoved((ids) => {
+    for (const id of ids) {
+      removedDownloadIds.add(id)
+      store.commit('removeYtDlpDownload', id)
+    }
+  })
+
+  window.ftElectron.ytDlpListDownloads().then(downloads => {
+    for (const download of downloads) {
+      if (!removedDownloadIds.has(download.id)) store.commit('upsertYtDlpDownload', download)
+    }
+  }).catch(error => console.warn('Could not load download history', error))
 }

@@ -247,11 +247,45 @@ export default {
   },
 
   /**
+   * @param {number} id
+   */
+  ytDlpOpenDownload: (id) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_OPEN_DOWNLOAD, id)
+  },
+
+  /**
+   * @param {number} id
+   */
+  ytDlpRemoveDownload: (id) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_REMOVE_DOWNLOAD, id)
+  },
+
+  ytDlpListDownloads: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_LIST_DOWNLOADS)
+  },
+
+  /**
+   * @param {number[]} ids
+   */
+  ytDlpClearDownloads: (ids) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_CLEAR_DOWNLOADS, ids)
+  },
+
+  /**
    * @param {(status: import('../main/ytDlp').YtDlpDownloadStatus) => void} handler
    */
   handleYtDlpDownloadStatus: (handler) => {
     ipcRenderer.on(IpcChannels.YT_DLP_DOWNLOAD_STATUS, (event, status) => {
       handler(status)
+    })
+  },
+
+  /**
+   * @param {(ids: number[]) => void} handler
+   */
+  handleYtDlpDownloadsRemoved: (handler) => {
+    ipcRenderer.on(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, (event, ids) => {
+      handler(ids)
     })
   },
 

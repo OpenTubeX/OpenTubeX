@@ -1,6 +1,9 @@
 <template>
   <div class="pure-checkbox filter">
-    <h3 class="checkboxTitle">
+    <h3
+      v-if="title !== ''"
+      class="checkboxTitle"
+    >
       {{ title }}
       <FtSyncedSettingIndicator :setting-key="settingKey" />
     </h3>
@@ -43,7 +46,7 @@ const id = useId()
 const props = defineProps({
   title: {
     type: String,
-    required: true
+    default: ''
   },
   labels: {
     type: Array,

@@ -13,7 +13,7 @@
         ref="promptCard"
         v-overlay-scrollbars
         class="promptCard"
-        :class="{ autosize, [theme]: true }"
+        :class="{ autosize, [theme]: true, [cardClass]: cardClass !== '' }"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="id"
@@ -95,6 +95,10 @@ const props = defineProps({
   theme: {
     type: String,
     default: 'base'
+  },
+  cardClass: {
+    type: String,
+    default: ''
   },
   inert: {
     type: Boolean,
