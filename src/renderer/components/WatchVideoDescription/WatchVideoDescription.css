@@ -62,8 +62,10 @@
 
 .videoDescription:not(.short) .descriptionStatus {
   display: block;
-  position: relative;
+  position: sticky;
+  inset-block-end: 0;
   margin-block-start: 1em;
+  background-color: var(--card-bg-color);
 }
 
 .videoDescription.short .descriptionStatus:dir(rtl)::before {

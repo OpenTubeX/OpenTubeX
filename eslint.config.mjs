@@ -448,5 +448,20 @@ export default defineConfig([
       'unicorn/prefer-date-now': 'error',
       'unicorn/prefer-array-index-of': 'error',
     }
+  },
+  {
+    files: ['e2e/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    },
+    rules: {
+      '@stylistic/space-before-function-paren': 'off',
+      '@stylistic/comma-dangle': ['error', 'only-multiline'],
+    },
   }
 ])
