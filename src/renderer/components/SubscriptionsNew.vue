@@ -127,7 +127,11 @@ const newContentByCategory = computed(() => {
         }
 
         seenIds.add(id)
-        entries[category].push({ ...entry, hideNewSubscriptionFeedIndicator: true })
+        entries[category].push({
+          ...entry,
+          hideNewSubscriptionFeedIndicator: true,
+          isInNewSubscriptionFeed: true
+        })
       })
     })
   })
