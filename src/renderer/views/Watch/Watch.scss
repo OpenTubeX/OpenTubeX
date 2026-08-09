@@ -876,7 +876,12 @@
     .shortsAuxPanelTarget :deep(.videoViews::before),
     .shortsAuxPanelTarget :deep(.videoCategory::before) {
       margin-inline-end: 5px;
-      content: '•';
+      // Emitted as a CSS escape instead of a literal bullet, because any
+      // non-ASCII character makes Sass prefix this stylesheet with `@charset`.
+      // Minification turns that into a BOM, which then sits in the middle of the
+      // bundled CSS and invalidates whichever rule of ours comes first.
+      // Interpolation is required, a Sass escape would be decoded back again.
+      content: #{'"\\2022"'};
     }
 
     .shortsAuxPanelTarget :deep(.profileRow) {

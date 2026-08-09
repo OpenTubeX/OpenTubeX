@@ -124,6 +124,12 @@
   background-color: color-mix(in srgb, var(--tertiary-text-color) 45%, transparent);
 }
 
+.submenuScroll {
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .submenuContainer {
   position: relative;
 }
@@ -154,8 +160,13 @@
   position: fixed;
   inset-block-start: var(--submenu-top, 8px);
   max-block-size: calc(100vh - 16px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
+
+  /* The items scroll in .submenuScroll instead of here, so that the hover bridge
+     below never counts as scrollable overflow of the fly-out itself. It used to
+     add a stray horizontal scrollbar whenever the fly-out opened towards the
+     start, which is the side the bridge sits on. */
+  display: flex;
+  flex-direction: column;
   right: auto;
   left: var(--submenu-left, 8px);
   visibility: hidden;

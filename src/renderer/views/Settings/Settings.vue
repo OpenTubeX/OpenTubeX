@@ -911,21 +911,34 @@ async function toggleMaximized() {
 function getWindowAnimationState(element) {
   if (!element) return null
   const bounds = element.getBoundingClientRect()
-  const style = getComputedStyle(element)
   return {
-    left: `${bounds.left}px`,
-    top: `${bounds.top}px`,
-    width: `${bounds.width}px`,
-    height: `${bounds.height}px`,
-    borderRadius: style.borderRadius,
-    borderWidth: style.borderWidth
+    left: bounds.left,
+    top: bounds.top,
+    width: bounds.width,
+    height: bounds.height,
+    borderRadius: getComputedStyle(element).borderRadius
   }
 }
 
+// The window is already at its target bounds here, so the difference is played back
+// with transforms only. Animating left/top/width/height instead would relayout the
+// whole settings page and re-evaluate its container queries on every single frame.
 function animateWindowBounds(element, from) {
   if (!element || !from || document.documentElement.dataset.reducedMotion === 'reduce') return
   const to = getWindowAnimationState(element)
-  const animation = element.animate([from, to], {
+  if (to.width === 0 || to.height === 0) return
+  const animation = element.animate([
+    {
+      transformOrigin: '0 0',
+      transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width}, ${from.height / to.height})`,
+      borderRadius: from.borderRadius
+    },
+    {
+      transformOrigin: '0 0',
+      transform: 'none',
+      borderRadius: to.borderRadius
+    }
+  ], {
     duration: 240,
     easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)'
   })

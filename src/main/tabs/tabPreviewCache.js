@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { createHash, randomUUID } from 'crypto'
 
 // Previews are lossy tolerant screenshots, and JPEG stores them at roughly a
 // third of the PNG size, which pays for capturing them at a sharp resolution.
@@ -6,6 +6,11 @@ export const TAB_PREVIEW_JPEG_QUALITY = 82
 export const TAB_PREVIEW_FILE_EXTENSION = '.jpg'
 // `.png` is still accepted so caches written by older versions keep working.
 const TAB_PREVIEW_FILE_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png)$/i
+// Avatars are named after their contents so that every tab of the same channel
+// points at one file instead of storing a byte identical copy each. Older caches
+// still hold per tab avatars under the random name above, which stay valid.
+const TAB_AVATAR_FILE_PATTERN = /^avatar-[0-9a-f]{32}\.jpg$/i
+const TAB_AVATAR_HASH_LENGTH = 32
 const TAB_PREVIEW_DATA_URL_PATTERN = /^data:image\/(?:jpeg|png);base64,([A-Za-z0-9+/=]+)$/
 // Previews are written to a temporary name and renamed into place, so a failed
 // write cannot truncate the entry that is already there.
@@ -18,7 +23,8 @@ const PNG_MAGIC = 0x89504e47
  * @returns {string | null} the file name, or null when it is not one of ours
  */
 export function normalizeTabPreviewFileName(value) {
-  return typeof value === 'string' && TAB_PREVIEW_FILE_PATTERN.test(value)
+  return typeof value === 'string' &&
+    (TAB_PREVIEW_FILE_PATTERN.test(value) || TAB_AVATAR_FILE_PATTERN.test(value))
     ? value
     : null
 }
@@ -28,6 +34,17 @@ export function normalizeTabPreviewFileName(value) {
  */
 export function createTabPreviewFileName() {
   return randomUUID() + TAB_PREVIEW_FILE_EXTENSION
+}
+
+/**
+ * The name of the cache entry that holds these exact avatar bytes. Tabs of the
+ * same channel resolve to the same name and therefore share a single file.
+ * @param {Buffer} buffer
+ * @returns {string}
+ */
+export function createTabAvatarFileName(buffer) {
+  const hash = createHash('sha256').update(buffer).digest('hex').slice(0, TAB_AVATAR_HASH_LENGTH)
+  return `avatar-${hash}${TAB_PREVIEW_FILE_EXTENSION}`
 }
 
 /**

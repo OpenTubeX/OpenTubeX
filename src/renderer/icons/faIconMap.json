@@ -433,6 +433,13 @@
     "ri": "speed-up-line",
     "material": "speed"
   },
+  "gear": {
+    "lucide": "settings",
+    "tabler": "settings",
+    "ph": "gear",
+    "ri": "settings-3-line",
+    "material": "settings-rounded"
+  },
   "globe": {
     "lucide": "globe",
     "tabler": "world",
