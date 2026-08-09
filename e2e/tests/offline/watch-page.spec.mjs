@@ -69,7 +69,7 @@ test.describe('watch page', () => {
     expect(await descriptionText.evaluate((element, tagsElement) => (
       Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)
     ), await tags.elementHandle())).toBe(true)
-    expect(await tags.evaluate(element => element.closest('.descriptionScroll'))).not.toBeNull()
+    expect(await tags.evaluate(element => element.closest('.descriptionScroll') !== null)).toBe(true)
     const descriptionScroll = description.locator('.descriptionScroll')
     const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
     await expect(collapseControl).toBeVisible()
@@ -319,43 +319,6 @@ test.describe('watch page', () => {
     expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
   })
 
-  test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await waitForPlayback(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    await setPlayerFullscreen(page, true)
-    await page.locator('.fullscreenCommentsToggle').click({ force: true })
-
-    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
-    const commentCards = page.locator('.fullscreenCommentsOverlay .comment')
-    await expect(comments).toBeVisible()
-
-    await page.addStyleTag({
-      content: `
-        .fullscreenCommentsOverlay .comment { display: none; }
-        .fullscreenCommentsOverlay.open { inset-block-start: calc(100% - 306px) !important; }
-      `
-    })
-    await page.route(/\/youtubei\/v1\/next/, async (route) => {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      await route.continue()
-    })
-    await page.evaluate(() => {
-      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
-    })
-    const initialCommentCount = await commentCards.count()
-    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
-    const repeatedLoadCount = await commentCards.count()
-    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(repeatedLoadCount)
-  })
-
   test('fullscreen metadata uses one full-dock scrollbar', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -584,10 +547,13 @@ test.describe('fullscreen playlist dock', () => {
     await expect(page).toHaveURL(new RegExp(`#\\/playlist\\/${FULLSCREEN_PLAYLIST_ID}`))
     if (enableQuickBookmark) {
       const enableButton = page.getByTitle('Enable Quick Bookmark With This Playlist')
+      const enabledIndicator = page.getByTitle('Quick Bookmark Enabled')
+      // Wait for either state before branching, isVisible() does not retry.
+      await expect(enableButton.or(enabledIndicator).first()).toBeVisible()
       if (await enableButton.isVisible()) {
         await enableButton.click()
       }
-      await expect(page.getByTitle('Quick Bookmark Enabled')).toBeVisible()
+      await expect(enabledIndicator).toBeVisible()
     }
     await page.getByRole('link', { name: FULLSCREEN_PLAYLIST.videos[0].title }).first().click()
     await expect(page).toHaveURL(

@@ -209,7 +209,8 @@ function filterChannels() {
 }
 
 function thumbnailURL(originalURL) {
-  if (!originalURL) { return null }
+  // Imported subscriptions can carry anything here, including non-strings.
+  if (typeof originalURL !== 'string' || originalURL === '') { return null }
   let newURL = originalURL
   // Sometimes relative protocol URLs are passed in
   if (originalURL.startsWith('//')) {

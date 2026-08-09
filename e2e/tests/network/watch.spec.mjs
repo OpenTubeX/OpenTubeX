@@ -210,6 +210,43 @@ test.describe('watch page metadata', () => {
 })
 
 test.describe('watch page', () => {
+  test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {
+    test.skip(innertube.replay, 'needs more comment pages than are recorded')
+    await openVideo(page)
+    await waitForPlaybackOrSkip(test, page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    const commentCards = page.locator('.fullscreenCommentsOverlay .comment')
+    await expect(comments).toBeVisible()
+
+    await page.addStyleTag({
+      content: `
+        .fullscreenCommentsOverlay .comment { display: none; }
+        .fullscreenCommentsOverlay.open { inset-block-start: calc(100% - 306px) !important; }
+      `
+    })
+    await page.route(/\/youtubei\/v1\/next/, async (route) => {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      await route.continue()
+    })
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setGeneralAutoLoadMorePaginatedItemsEnabled', true)
+    })
+    const initialCommentCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(initialCommentCount)
+    const repeatedLoadCount = await commentCards.count()
+    await expect.poll(() => commentCards.count(), { timeout: 30_000 }).toBeGreaterThan(repeatedLoadCount)
+  })
+
   test('keeps the thumbnail visible while switching formats', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'needs the adaptive formats of the real API')
     await openVideo(page)

@@ -42,8 +42,11 @@ test.describe('settings', () => {
       windowIcon.boundingBox(),
       breadcrumbLabel.boundingBox()
     ])
-    expect(iconBounds.y + iconBounds.height / 2)
-      .toBeCloseTo(labelBounds.y + labelBounds.height / 2, 0)
+    // Within a pixel rather than toBeCloseTo's half: both boxes land on
+    // fractional pixels on scaled displays, which is not a misalignment.
+    const iconCenter = iconBounds.y + iconBounds.height / 2
+    const labelCenter = labelBounds.y + labelBounds.height / 2
+    expect(Math.abs(iconCenter - labelCenter)).toBeLessThanOrEqual(1)
     await expect(page.getByRole('button', {
       name: 'Highlight settings changed from defaults'
     }).locator('[data-icon="pen"]')).toBeVisible()

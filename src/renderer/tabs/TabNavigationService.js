@@ -69,6 +69,11 @@ export class TabNavigationService {
         if (presented || this.store.getters.getPresentedTabId === tabId) {
           return presented
         }
+        // Another tab may have been selected while we waited. Retrying then
+        // would present the old one and make the newer request stale.
+        if (this.isTransitionStale(tabId, revision, this.latestTransitionRequestId)) {
+          return false
+        }
         return this.requestPresentation(tabId, revision)
       })
     }
