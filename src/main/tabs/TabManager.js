@@ -13,6 +13,7 @@ import {
 import { TabRendererBridge } from './TabRendererBridge.js'
 import { buildReorderedTabMap } from './tabOrder.js'
 import {
+  createTabAvatarFileName,
   createTabPreviewFileName,
   createTabPreviewTempFileName,
   isReusableTabPreviewFileName,
@@ -752,7 +753,7 @@ export class TabManager {
       ) {
         const fileName = tab.avatarFileName
         tab.avatarFileName = null
-        await this._deleteTabPreviewFile(fileName)
+        await this._releaseTabAvatarFile(fileName)
         return false
       }
       tab.avatarDataUrl = tabPreviewBufferToDataUrl(buffer)
@@ -775,12 +776,15 @@ export class TabManager {
     this._avatarsEnabled = enabled
     if (enabled) return
 
-    await Promise.all(Array.from(this.tabs.values(), async tab => {
+    // Every tab has to let go of its avatar before the first file is released,
+    // or a name shared by two tabs would still look referenced and survive.
+    const fileNames = Array.from(this.tabs.values(), tab => {
       tab.avatarDataUrl = null
       const fileName = tab.avatarFileName
       tab.avatarFileName = null
-      await this._deleteTabPreviewFile(fileName)
-    }))
+      return fileName
+    })
+    await Promise.all(fileNames.map(fileName => this._releaseTabAvatarFile(fileName)))
     this._broadcastStateUpdate()
     await this._saveSession()
   }
@@ -1318,7 +1322,7 @@ export class TabManager {
     this._deleteTabPreviewFile(tab.previewFileName).catch(error => {
       console.error('Failed to delete closed tab preview:', error)
     })
-    this._deleteTabPreviewFile(tab.avatarFileName).catch(error => {
+    this._releaseTabAvatarFile(tab.avatarFileName).catch(error => {
       console.error('Failed to delete closed tab avatar:', error)
     })
 
@@ -1563,8 +1567,10 @@ export class TabManager {
    */
   async _persistTabAvatar(tab, buffer) {
     const existingFileName = normalizeTabPreviewFileName(tab.avatarFileName)
-    const reusableFileName = isReusableTabPreviewFileName(existingFileName) ? existingFileName : null
-    const fileName = reusableFileName ?? createTabPreviewFileName()
+    // Named after the bytes, so every tab of the same channel ends up on one
+    // file. Rewriting it costs a couple of kilobytes and keeps the write atomic
+    // even when a previous one was interrupted halfway.
+    const fileName = createTabAvatarFileName(buffer)
     const cacheDirectory = TabManager.getTabPreviewCacheDirectory()
     await mkdir(cacheDirectory, { recursive: true })
     const tempPath = join(cacheDirectory, createTabPreviewTempFileName())
@@ -1577,9 +1583,46 @@ export class TabManager {
     }
     tab.avatarFileName = fileName
 
-    if (reusableFileName == null && existingFileName != null) {
-      await this._deleteTabPreviewFile(existingFileName)
+    if (existingFileName != null && existingFileName !== fileName) {
+      await this._releaseTabAvatarFile(existingFileName)
     }
+  }
+
+  /**
+   * Whether any tab, in this window or another one, still shows this avatar.
+   * @param {string} fileName
+   * @param {Set<TabInfo>} [ignoredTabs] tabs that are dropping it right now
+   * @returns {boolean}
+   */
+  _isTabAvatarFileReferenced(fileName, ignoredTabs) {
+    for (const manager of tabManagers.values()) {
+      for (const tab of manager.tabs.values()) {
+        if (ignoredTabs?.has(tab)) continue
+        if (normalizeTabPreviewFileName(tab.avatarFileName) === fileName) {
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  /**
+   * Deletes a cached avatar once the last tab using it lets go. Avatars are
+   * shared between tabs of the same channel, so unlinking on the first close
+   * would take the file out from under the tabs that are still open.
+   * @param {string | null | undefined} fileName
+   * @param {Set<TabInfo>} [ignoredTabs]
+   * @returns {Promise<void>}
+   */
+  async _releaseTabAvatarFile(fileName, ignoredTabs) {
+    const normalizedFileName = normalizeTabPreviewFileName(fileName)
+    if (
+      normalizedFileName == null ||
+      this._isTabAvatarFileReferenced(normalizedFileName, ignoredTabs)
+    ) {
+      return
+    }
+    await this._deleteTabPreviewFile(normalizedFileName)
   }
 
   /**
@@ -2162,7 +2205,7 @@ export class TabManager {
       const avatarFileName = tab.avatarFileName
       tab.avatarDataUrl = null
       tab.avatarFileName = null
-      this._deleteTabPreviewFile(avatarFileName).catch(error => {
+      this._releaseTabAvatarFile(avatarFileName).catch(error => {
         console.error('Failed to delete stale tab avatar:', error)
       })
     }
@@ -2421,12 +2464,16 @@ export class TabManager {
 
   async clearSession() {
     this._sessionPersistenceDisabled = true
-    await Promise.all(
-      Array.from(this.tabs.values())
-        .filter(tab => tab.isTransferStaged !== true)
-        .flatMap(tab => [tab.previewFileName, tab.avatarFileName])
-        .map(fileName => this._deleteTabPreviewFile(fileName))
-    )
+    const clearedTabs = Array.from(this.tabs.values())
+      .filter(tab => tab.isTransferStaged !== true)
+    await Promise.all([
+      ...clearedTabs.map(tab => this._deleteTabPreviewFile(tab.previewFileName)),
+      // These tabs are all going away, so none of them counts as a reference
+      ...clearedTabs.map(tab => this._releaseTabAvatarFile(
+        tab.avatarFileName,
+        new Set(clearedTabs)
+      ))
+    ])
     await clearTabSession(this.sessionId)
   }
 

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  createTabAvatarFileName,
   createTabPreviewFileName,
   createTabPreviewTempFileName,
   isReusableTabPreviewFileName,
@@ -100,4 +101,30 @@ test('sweeps up scratch files left by an interrupted write', () => {
   // Pruning runs before any window exists, so a scratch file can only be
   // left over from a write that never finished - even for a referenced tab.
   assert.deepEqual(selectOrphanedTabPreviews([kept, temp], [kept]), [temp])
+})
+
+test('names an avatar after its contents so identical ones share a file', () => {
+  const avatar = Buffer.from('channel avatar bytes')
+
+  assert.equal(createTabAvatarFileName(avatar), createTabAvatarFileName(Buffer.from(avatar)))
+  assert.notEqual(createTabAvatarFileName(avatar), createTabAvatarFileName(Buffer.from('other')))
+  assert.ok(createTabAvatarFileName(avatar).endsWith(TAB_PREVIEW_FILE_EXTENSION))
+})
+
+test('accepts content addressed avatars alongside the random names', () => {
+  const avatarFileName = createTabAvatarFileName(Buffer.from('channel avatar bytes'))
+
+  assert.equal(normalizeTabPreviewFileName(avatarFileName), avatarFileName)
+  assert.ok(isReusableTabPreviewFileName(avatarFileName))
+  assert.equal(isTabPreviewTempFileName(avatarFileName), false)
+  // Path traversal stays rejected
+  assert.equal(normalizeTabPreviewFileName('avatar-../../etc/passwd.jpg'), null)
+  assert.equal(normalizeTabPreviewFileName('avatar-zz.jpg'), null)
+})
+
+test('keeps an avatar that a tab still refers to and prunes the rest', () => {
+  const shared = createTabAvatarFileName(Buffer.from('channel avatar bytes'))
+  const stale = createTabAvatarFileName(Buffer.from('an avatar nothing points at'))
+
+  assert.deepEqual(selectOrphanedTabPreviews([shared, stale], [shared]), [stale])
 })
