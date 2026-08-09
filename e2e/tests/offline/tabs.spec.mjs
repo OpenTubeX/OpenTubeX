@@ -512,6 +512,28 @@ test.describe('tab bar', () => {
     expect(submenuBox.y + submenuBox.height).toBeLessThanOrEqual(viewport.height - 8)
   })
 
+  test('aligns close buttons for pinned and unpinned vertical tabs', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    const tabs = page.locator(sel.tabs)
+    const pinnedTab = tabs.first()
+    const unpinnedTab = tabs.nth(1)
+    const pinnedTabId = await pinnedTab.getAttribute('data-tab-id')
+
+    await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
+    await expect(pinnedTab).toHaveClass(/pinned/)
+    await pinnedTab.hover()
+
+    const pinnedCloseBox = await pinnedTab.locator('.closeButton').boundingBox()
+    const unpinnedCloseBox = await unpinnedTab.locator('.closeButton').boundingBox()
+
+    expect(pinnedCloseBox).not.toBeNull()
+    expect(unpinnedCloseBox).not.toBeNull()
+    expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)
