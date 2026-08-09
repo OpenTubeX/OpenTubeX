@@ -553,12 +553,13 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     scrollMiniIntersectionObserver.observe(anchor)
   }
 
-  function activateScrollMiniPlayer() {
+  /** @param {boolean} [animate] */
+  function activateScrollMiniPlayer(animate = true) {
     if (scrollMiniPlayerActive.value) return
 
     const playerContainer = container.value
     if (!playerContainer) return
-    const shouldAnimate = !isReducedMotionEnabled()
+    const shouldAnimate = animate && !isReducedMotionEnabled()
     const previousRect = shouldAnimate ? playerContainer.getBoundingClientRect() : null
 
     const layoutHeight = getScrollMiniPlaceholderLayoutHeight()
@@ -638,7 +639,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     }
   }
 
-  function updateScrollMiniPlayer() {
+  /** @param {{ animateActivation?: boolean }} [options] */
+  function updateScrollMiniPlayer({ animateActivation = true } = {}) {
     // Check first: everything below reads layout, which forces a synchronous
     // reflow. Measuring before knowing whether the mini player can run at all
     // would do that on every scroll event even with the feature turned off.
@@ -666,7 +668,7 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
         updateScrollMiniDragHandleContrast()
       }
     } else if (ratio < ENTER_MINI_RATIO && canActivateScrollMiniPlayer()) {
-      activateScrollMiniPlayer()
+      activateScrollMiniPlayer(animateActivation)
     }
   }
 
@@ -954,8 +956,8 @@ export function useScrollMiniPlayer({ container, fullWindowEnabled, getUi, isAct
     { immediate: true }
   )
 
-  watch(scrollMiniPlayerEnabled, updateScrollMiniPlayer)
-  watch(fullWindowEnabled, updateScrollMiniPlayer)
+  watch(scrollMiniPlayerEnabled, () => updateScrollMiniPlayer())
+  watch(fullWindowEnabled, () => updateScrollMiniPlayer())
 
   // Toggling or resizing the vertical tab bar changes the usable area without
   // firing a window resize, so re-dock explicitly (after the DOM updates, so the

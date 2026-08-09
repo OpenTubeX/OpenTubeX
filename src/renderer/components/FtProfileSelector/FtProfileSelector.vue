@@ -85,7 +85,6 @@
 <script setup>
 import { computed, nextTick, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -160,10 +159,8 @@ function toggleProfileList() {
   }
 }
 
-const router = useRouter()
-
 function openProfileSettings() {
-  router.push({ path: '/settings/profile' })
+  store.dispatch('showSettingsWindow', 'profile')
   profileListShown.value = false
 }
 

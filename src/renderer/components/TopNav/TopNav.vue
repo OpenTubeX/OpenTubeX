@@ -77,6 +77,18 @@
             :icon="tabLayoutIcon"
           />
         </button>
+        <button
+          type="button"
+          class="navSettingsButton navButton"
+          :aria-label="t('Settings.Settings')"
+          :title="t('Settings.Settings')"
+          @click="openSettings"
+        >
+          <FontAwesomeIcon
+            class="navIcon"
+            :icon="['fas', 'cog']"
+          />
+        </button>
         <RouterLink
           v-if="!hideHeaderLogo"
           class="logo"
@@ -196,6 +208,10 @@ const barColor = computed(() => store.getters.getBarColor)
 const showThumbnailSizeControl = computed(() => {
   return route.meta.hasResizableThumbnails === true && store.getters.getShowThumbnailSizeButtonInHeader
 })
+
+function openSettings() {
+  store.dispatch('toggleSettingsWindow')
+}
 
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')

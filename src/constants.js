@@ -572,6 +572,32 @@ const PlaylistVideoAddResult = {
 const DEFAULT_WATCHED_PERCENTAGE_THRESHOLD = 90
 const WATCHED_MAX_REMAINING_SECONDS = 120
 
+const LIGHT_BASE_THEMES = [
+  'light',
+  'pastelPink',
+  'catppuccinLatte',
+  'everforestLightHard',
+  'everforestLightMedium',
+  'everforestLightLow',
+  'gruvboxLight',
+  'solarizedLight',
+]
+
+const DARK_BASE_THEMES = [
+  'dark',
+  'black',
+  'nordic',
+  'hotPink',
+  'catppuccinFrappe',
+  'catppuccinMocha',
+  'dracula',
+  'everforestDarkHard',
+  'everforestDarkMedium',
+  'everforestDarkLow',
+  'gruvboxDark',
+  'solarizedDark',
+]
+
 export {
   IpcChannels,
   DBActions,
@@ -596,4 +622,6 @@ export {
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,
   DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   WATCHED_MAX_REMAINING_SECONDS,
+  LIGHT_BASE_THEMES,
+  DARK_BASE_THEMES,
 }

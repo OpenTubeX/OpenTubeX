@@ -154,13 +154,12 @@ test.describe('incremental subscription feed refresh', () => {
 
     await page.getByRole('button', { name: /Refresh Videos/ }).click()
     await expect(page.getByTestId('subscription-refresh-toast')).toHaveCount(0)
-    await goTo(page, 'settings')
+    await goTo(page, 'history')
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos')
     await expect(page.locator('.app > .progressBar')).toHaveCount(0)
 
-    await page.keyboard.press('Escape')
     await expect(refreshToast).toBeVisible()
     await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
   })
@@ -297,7 +296,7 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
 
   test('shows persistent progress in a toast without the global progress bar', async ({ page }) => {
     await routeFeeds(page, (index) => index === 0 ? 0 : 8_000)
-    await goTo(page, 'settings')
+    await goTo(page, 'history')
 
     const refreshToast = page.getByTestId('subscription-refresh-toast')
     await expect(refreshToast).toContainText('Refreshing subscription videos', { timeout: 10_000 })
@@ -331,9 +330,6 @@ test.describe('cancelling an automatic subscription feed refresh', () => {
     await page.mouse.move(viewport.width / 2, viewport.height / 2)
     await expect(refreshToast).not.toHaveClass(/minimized/)
     await expect.poll(async () => (await refreshToast.boundingBox()).width).toBeGreaterThan(expandedBounds.width * 0.9)
-
-    await page.keyboard.press('Escape')
-    await expect(refreshToast).toBeVisible()
 
     await page.evaluate(() => document.documentElement.requestFullscreen())
     await expect(refreshToast).toHaveCount(0)

@@ -6,15 +6,10 @@
      the scrollport clip (overflow-y cannot stay visible while overflow-x scrolls). */
   align-items: flex-end;
   background-color: var(--side-nav-color);
-
-  /* Draw the separator inside the padding box. A border-block-end sits in the
-     border region, and overflow:hidden clips ::after before it can cover it. */
-  box-shadow: inset 0 -1px 0 var(--tertiary-text-color);
   block-size: 32px;
   min-block-size: 32px;
 
-  /* Keep top radii off the title-bar edge. Content is then 31px: 30px tab +
-     1px tabsContainer padding-block-end for the active connector. */
+  /* Keep top radii off the title-bar edge. */
   padding-block-start: 1px;
   padding-inline: 4px;
   gap: 2px;
@@ -47,9 +42,6 @@
 .tabsContainer {
   display: flex;
   min-inline-size: 0;
-
-  /* Room for .tab::after (inset-block-end: -1px) inside this scrollport's clip. */
-  padding-block-end: 1px;
   overflow: auto hidden;
 
   /* The horizontal layout draws its own scrollbar below (.tabsScrollbar). The
@@ -135,7 +127,6 @@
   inline-size: var(--vertical-tab-bar-width, 220px);
   block-size: auto;
   min-block-size: 0;
-  box-shadow: none;
 
   /* No bottom padding: the new-tab button reaches the screen edge, so clicks
      at the very bottom still land on it */
@@ -156,7 +147,6 @@
 .tabBar.vertical .tabsContainer {
   flex-direction: column;
   block-size: 100%;
-  padding-block-end: 0;
   overflow: hidden auto;
   overscroll-behavior: contain;
 }

@@ -184,27 +184,6 @@
       </router-link>
       <hr>
       <router-link
-        class="navOption mobileShow smallMobileOnlyHidden"
-        role="button"
-        to="/settings"
-        :title="settingsTitle"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'sliders-h']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t('Settings.Settings') }}
-        </p>
-      </router-link>
-      <router-link
         class="navOption mobileHidden"
         role="button"
         to="/about"
@@ -426,13 +405,6 @@ const historyTitle = computed(() => {
   return localizeAndAddKeyboardShortcutToActionTitle(
     t('History.History'),
     shortcut
-  )
-})
-
-const settingsTitle = computed(() => {
-  return localizeAndAddKeyboardShortcutToActionTitle(
-    t('Settings.Settings'),
-    appKeyboardShortcuts.value.NAVIGATE_TO_SETTINGS
   )
 })
 

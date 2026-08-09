@@ -469,10 +469,6 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   border-color: var(--tab-border-color, var(--tertiary-text-color));
 }
 
-.tab.vertical::after {
-  display: none;
-}
-
 .tab.vertical.colored {
   box-shadow: inset 2px 0 0 var(--tab-accent-color);
 }
@@ -481,20 +477,6 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   inline-size: calc(100% - 1px);
   min-inline-size: 0;
   max-inline-size: none;
-}
-
-.tab::after {
-  content: '';
-  position: absolute;
-
-  /* Sits in .tabsContainer's padding-block-end, covering the tab bar's inset
-     separator under the active tab without leaving the overflow clip. */
-  inset-block-end: -1px;
-  inset-inline: 0;
-  block-size: 1px;
-  background-color: var(--tab-surface-color, var(--bg-color));
-  opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
 .tab:hover {
@@ -545,10 +527,6 @@ watch(() => props.disableTooltips, (disableTooltips) => {
 .tab.unloaded:hover .tabTitle,
 .tab.unloaded.active .tabTitle,
 .tab.unloaded.loading .tabTitle {
-  opacity: 1;
-}
-
-.tab.active::after {
   opacity: 1;
 }
 
@@ -670,6 +648,10 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   inset-block-start: 50%;
   transform: translateY(-50%);
   background-color: var(--tab-active-color, var(--card-bg-color));
+}
+
+.tab.vertical.pinned .closeButton {
+  inset-inline-end: 10px;
 }
 
 .tab.pinned:hover .tabTitle {

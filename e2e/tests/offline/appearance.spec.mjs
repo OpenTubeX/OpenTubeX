@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, sel } from '../../helpers/app.mjs'
 
 async function setWindowWidth (app, width) {
   await app.electronApp.evaluate(({ BrowserWindow }, targetWidth) => {
@@ -42,7 +42,7 @@ test.describe('distraction and appearance settings', () => {
     // The base theme is applied as a class on <body>.
     await expect(page.locator('body')).toHaveClass(/dark/)
 
-    await goTo(page, 'settings')
+    await goToSettingsSection(page, 'distraction')
     await expect(page.getByRole('checkbox', { name: 'Hide End-Screen Annotations' })).toBeChecked()
   })
 })
@@ -109,7 +109,7 @@ test.describe('UI roundness', () => {
   test('applies to controls, cards, popovers, and modals', async ({ app, page }) => {
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '0')
 
-    await goTo(page, 'settings')
+    await goToSettingsSection(page, 'theme')
     const roundnessSlider = page.getByRole('slider', { name: /UI Roundness/ })
     const toggleSwitch = page.locator('label.switch-label').first()
     const toggleTrackRadius = () => toggleSwitch.evaluate((element) =>
@@ -128,13 +128,15 @@ test.describe('UI roundness', () => {
     await expect(page.getByRole('menu', { name: 'Context menu' })).toHaveCSS('border-radius', '0px')
 
     await page.keyboard.press('Escape')
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+    await goToSettingsSection(page, 'theme')
     await roundnessSlider.fill('150')
     await expect(page.locator('body')).toHaveCSS('--ui-roundness', '1.5')
     expect(await toggleTrackRadius()).toBe('8px')
     await expect(page.locator('.sectionBody').first()).toHaveCSS('border-radius', '12px')
 
     ;({ page } = await app.relaunch())
-    await goTo(page, 'settings')
+    await goToSettingsSection(page, 'theme')
     await expect(page.getByRole('slider', { name: /UI Roundness/ })).toHaveValue('150')
   })
 })

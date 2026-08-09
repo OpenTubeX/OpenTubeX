@@ -276,10 +276,16 @@ function updateDropdownPosition() {
   const openAbove = desiredHeight > spaceBelow && spaceAbove > spaceBelow
   const availableHeight = Math.max(0, openAbove ? spaceAbove : spaceBelow)
   const menuHeight = Math.min(desiredHeight, availableHeight)
-  const menuWidth = Math.min(buttonRect.width, window.innerWidth - viewportMargin * 2)
+  const menuChromeWidth = menu.offsetWidth - menu.clientWidth
+  const widestOption = Math.max(
+    buttonRect.width,
+    ...(options.value ?? []).map(option => option.scrollWidth + menuChromeWidth)
+  )
+  const menuWidth = Math.min(widestOption, window.innerWidth - viewportMargin * 2)
+  const centeredLeft = buttonRect.left + (buttonRect.width - menuWidth) / 2
   const left = Math.max(
     viewportMargin,
-    Math.min(buttonRect.left, window.innerWidth - viewportMargin - menuWidth)
+    Math.min(centeredLeft, window.innerWidth - viewportMargin - menuWidth)
   )
   const top = openAbove
     ? Math.max(minimumTop, buttonRect.top - menuGap - menuHeight)

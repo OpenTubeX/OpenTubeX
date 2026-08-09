@@ -1,23 +1,361 @@
-.settingsPage {
-  container-name: settings-page;
+.settingsWindow {
+  position: fixed;
+  z-index: 9;
+  min-inline-size: min(360px, calc(100vw - 24px));
+  min-block-size: min(360px, calc(100vh - 24px));
+  max-inline-size: calc(100vw - 24px);
+  max-block-size: calc(100vh - 24px);
+  resize: none;
+  overflow: hidden;
+  flex: none;
+  margin: 0 !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  color: var(--primary-text-color);
+  background: var(--card-bg-color);
+  border: 1px solid var(--tertiary-text-color);
+  border-radius: calc(10px * var(--ui-roundness));
+  box-shadow: 0 12px 40px rgb(0 0 0 / 38%);
+  container-name: settings-window;
   container-type: inline-size;
-  display: flex;
-  gap: 20px;
 }
 
-.settingsSections,
-.switchRow {
-  overflow-x: hidden;
-  max-inline-size: 90%;
+.settingsWindow.maximized {
+  max-inline-size: 100vw;
+  max-block-size: 100vh;
+  border-width: 0;
+  border-radius: 0;
 }
 
-.switchRow {
+/* The app page keeps its own scrollbar behind the modal. Do not let it show
+   through beside the settings content while the modal covers the viewport. */
+:global(body:has(.settingsWindow.maximized) > .os-scrollbar) {
+  visibility: hidden;
+}
+
+.settingsWindow.settings-window-enter-active,
+.settingsWindow.settings-window-leave-active {
+  transform-origin: center;
+  transition:
+    opacity 160ms ease,
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.settingsWindow.settings-window-enter-from,
+.settingsWindow.settings-window-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+:global(:root[data-reduced-motion='reduce']) .settingsWindow.settings-window-enter-active,
+:global(:root[data-reduced-motion='reduce']) .settingsWindow.settings-window-leave-active {
+  transition: none;
+}
+
+.settingsWindowHeader {
+  flex: 0 0 auto;
+  min-block-size: 52px;
+  box-sizing: border-box;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-inline-end: auto;
   align-items: center;
-  margin-block-end: 5px;
+  gap: 8px;
+  padding-inline: 10px;
+  color: var(--primary-text-color);
+  background: var(--side-nav-color);
+  border-block-end: 1px solid var(--scrollbar-color);
+  cursor: move;
+  user-select: none;
+}
+
+.settingsWindowIcon {
+  display: block;
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--tertiary-text-color);
+  vertical-align: 0;
+}
+
+.settingsBreadcrumb {
+  min-inline-size: 0;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.settingsBreadcrumbLabel {
+  min-inline-size: 0;
+}
+
+.settingsBreadcrumbSeparator {
+  flex: 0 0 auto;
+  color: var(--tertiary-text-color);
+  font-size: 13px;
+}
+
+.settingsBreadcrumbCategoryIcon {
+  display: block;
+  flex: 0 0 auto;
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--tertiary-text-color);
+  vertical-align: 0;
+}
+
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent,
+.settingsHeaderButton {
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent,
+.settingsBreadcrumbLabel {
+  min-block-size: 24px;
+  min-inline-size: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.2;
+}
+
+.settingsBreadcrumbText {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settingsBreadcrumbRoot,
+.settingsBreadcrumbParent {
+  appearance: none;
+  padding: 0;
+  color: var(--tertiary-text-color);
+}
+
+.settingsBreadcrumbRoot:hover,
+.settingsBreadcrumbParent:hover {
+  color: var(--primary-text-color);
+}
+
+.settingsSearch {
+  flex: 0 1 300px;
+  min-inline-size: 150px;
+  block-size: 36px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-inline: 12px;
+  border-radius: calc(6px * var(--ui-roundness));
+  color: var(--tertiary-text-color);
+  background: var(--search-bar-color);
+  cursor: text;
+}
+
+.settingsSearch input {
+  min-inline-size: 0;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--primary-text-color);
+  background: transparent;
+  font: inherit;
+}
+
+.settingsSearch input::placeholder {
+  color: var(--tertiary-text-color);
+}
+
+.settingsHeaderActions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.settingsHeaderButton {
+  inline-size: 38px;
+  block-size: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: calc(6px * var(--ui-roundness));
+  color: var(--tertiary-text-color);
+}
+
+.settingsHeaderButton > svg {
+  display: block;
+}
+
+.settingsHeaderButton:hover,
+.settingsHeaderButton:focus-visible,
+.settingsHeaderButton.active {
+  color: var(--primary-text-color);
+  background: var(--side-nav-hover-color);
+}
+
+.settingsHeaderButton.active {
+  color: var(--primary-color);
+}
+
+.settingsPage {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  min-inline-size: 0;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--base-color);
+}
+
+.settingsMenu,
+.settingsContent,
+.settingsSubpageScroll,
+.settingsPassword {
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.settingsContent {
+  container-name: settings-content;
+  container-type: inline-size;
+  overflow-x: hidden !important;
+  max-inline-size: 100%;
+}
+
+.settingsContent .section,
+.settingsContent :deep(.settingsSection),
+.settingsContent :deep(.sectionBody) {
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  inline-size: 100%;
+}
+
+.settingsContent :deep(.sectionBody) {
+  box-sizing: border-box;
+  padding-block-start: 5px;
+}
+
+.settingsMenu {
+  border-inline-end: 1px solid var(--scrollbar-color);
+}
+
+.settingsContent,
+.settingsSubpageScroll,
+.settingsPassword {
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.settingsPassword {
+  grid-column: 1 / -1;
+  display: grid;
+  place-items: center;
+}
+
+.settingsNoResults {
+  margin: auto;
+  color: var(--tertiary-text-color);
+  text-align: center;
+}
+
+.settingsSearchResults {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  align-content: start;
+  gap: 12px;
+}
+
+.settingsSearchResult {
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: calc(6px * var(--ui-roundness));
+  background: var(--card-bg-color);
+}
+
+.settingsSearchResultHeading {
+  padding: 4px;
+  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--primary-text-color);
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.settingsSearchResultHeading > svg {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.settingsSearchResultMatch {
+  padding-block: 6px;
+  padding-inline: 8px;
+  border: 0;
+  border-radius: calc(4px * var(--ui-roundness));
+  overflow: hidden;
+  color: var(--tertiary-text-color);
+  background: transparent;
+  font: inherit;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.settingsSearchResultHeading:hover,
+.settingsSearchResultHeading:focus-visible,
+.settingsSearchResultMatch:hover,
+.settingsSearchResultMatch:focus-visible {
+  color: var(--primary-text-color);
+  background: var(--side-nav-hover-color);
+}
+
+.settingsContent :deep(.settingsSearchTarget) {
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  animation: settings-search-highlight 2.2s ease-in-out;
+}
+
+@keyframes settings-search-highlight {
+  0%,
+  40%,
+  80%,
+  100% {
+    outline-color: transparent;
+  }
+
+  10%,
+  30%,
+  50%,
+  70% {
+    outline-color: var(--primary-color);
+  }
+}
+
+.settingsContent :deep(.sectionTitle) {
+  display: none;
 }
 
 :deep(.switch-ctn:has(.changedSettingIndicator)),
@@ -31,74 +369,138 @@
   padding-inline-start: 9px;
 }
 
-.settingsToggle {
-  padding-block: 0;
-  margin-block: 0;
+.settingsSubpageScroll {
+  grid-column: 1 / -1;
 }
 
-.settingButtonWithSync {
-  display: inline-flex;
-  align-items: center;
+.settingsKeyboardShortcutPage {
+  overflow: hidden;
 }
 
-.section {
-  /* enables anchor link clicks to land with the section title in the top quarter of the page */
-  scroll-margin-top: 24vh;
+.settingsSubpageScroll :deep(.card > h2:first-child) {
+  display: none;
 }
 
-@container settings-page (width > 1015px) {
-  .section + .section {
-    padding-block-start: 20px;
-  }
-
-  .settingsSections:last-child {
-    /* Add enough blank space to have the last setting section be active on the FtSettingsMenu when scrolled to */
-    margin-block-end: calc(76vh - 150px);
-  }
+.compactSettings {
+  display: block;
 }
 
-@container settings-page (width <= 1200px) {
-  .settingsSections,
-  .switchRow {
-    max-inline-size: 100%;
-  }
+.compactSettings .settingsMenu,
+.compactSettings .settingsContent,
+.compactSettings .settingsSubpageScroll,
+.compactSettings .settingsPassword {
+  block-size: 100%;
 }
 
-.settingsPage.mobileSettings {
-  /* Needed to overcome routerView styling for margin-block */
-  margin-block: 0;
-  flex-direction: column;
-  gap: 10px;
+.compactSettings .settingsMenu,
+.compactSettings .settingsContent {
+  border-inline-end: 0;
+}
 
-  .switchRow,
-  .settingsSections {
-    margin-inline: auto;
+.compactSettings .settingsContent {
+  padding: 14px;
+}
+
+:global(html.draggingSettingsWindow),
+:global(html.draggingSettingsWindow *) {
+  cursor: move !important;
+  user-select: none !important;
+}
+
+.settingsResizeHandle {
+  position: absolute;
+  z-index: 2;
+}
+
+.resize-n,
+.resize-s {
+  inset-inline: 12px;
+  block-size: 8px;
+}
+
+.resize-e,
+.resize-w {
+  inset-block: 12px;
+  inline-size: 8px;
+}
+
+.resize-n {
+  inset-block-start: -2px;
+  cursor: ns-resize;
+}
+
+.resize-s {
+  inset-block-end: -2px;
+  cursor: ns-resize;
+}
+
+.resize-e {
+  inset-inline-end: -2px;
+  cursor: ew-resize;
+}
+
+.resize-w {
+  inset-inline-start: -2px;
+  cursor: ew-resize;
+}
+
+.resize-ne,
+.resize-se,
+.resize-sw,
+.resize-nw {
+  inline-size: 16px;
+  block-size: 16px;
+}
+
+.resize-ne {
+  inset-block-start: -2px;
+  inset-inline-end: -2px;
+  cursor: nesw-resize;
+}
+
+.resize-se {
+  inset-block-end: -2px;
+  inset-inline-end: -2px;
+  cursor: nwse-resize;
+}
+
+.resize-sw {
+  inset-block-end: -2px;
+  inset-inline-start: -2px;
+  cursor: nesw-resize;
+}
+
+.resize-nw {
+  inset-block-start: -2px;
+  inset-inline-start: -2px;
+  cursor: nwse-resize;
+}
+
+:global(html.resizingSettingsWindow),
+:global(html.resizingSettingsWindow *) {
+  user-select: none !important;
+}
+
+@container settings-window (width <= 560px) {
+  .settingsWindowHeader {
+    flex-wrap: wrap;
+    padding-block: 5px;
+    padding-inline: 10px;
+    gap: 3px;
   }
 
-  .switchRow {
-    display: none;
+  .settingsSearch {
+    order: 3;
+    flex-basis: 100%;
+    min-inline-size: 100%;
   }
 
-  .settingsSections {
-    overflow-y: hidden;
-    margin-block-end: 80px;
+  .settingsHeaderButton {
+    inline-size: 34px;
+    block-size: 34px;
   }
 
-  .hideOnMobile {
-    display: none;
-  }
-
-  .returnToMenuMobileButton {
-    margin-block-start: 20px;
-    background-color: transparent;
-    color: inherit;
-    cursor: pointer;
-    border-style: none;
-    font-size: 30px;
-    line-height: 1em;
-  }
-
-  .returnToMenuMobileIcon {
-    inline-size: 1em;
+  .settingsBreadcrumb {
+    font-size: 16px;
   }
 }

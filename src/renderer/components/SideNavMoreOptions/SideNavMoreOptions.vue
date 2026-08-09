@@ -135,28 +135,9 @@
           {{ $t('Stats.Stats') }}
         </p>
       </router-link>
-      <router-link
-        class="navOption smallMobileOnlyShow"
-        :title="$t('Settings.Settings')"
-        :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
-        to="/settings"
-        @click="closeMenu"
-      >
-        <FontAwesomeIcon
-          :icon="['fas', 'sliders-h']"
-          class="navIcon"
-          :class="applyNavIconExpand"
-        />
-        <p
-          id="settingsNavLabel"
-          class="navLabel"
-        >
-          {{ $t("Settings.Settings") }}
-        </p>
-      </router-link>
     </div>
     <router-link
-      class="navOption mobileShow"
+      class="navOption navOptionButton mobileShow"
       :title="$t('History.History')"
       :aria-label="hideLabelsSideBar ? $t('History.History'): null"
       to="/history"
@@ -174,24 +155,6 @@
       </p>
     </router-link>
     <hr>
-    <router-link
-      class="navOption mobileShow"
-      :title="$t('Settings.Settings')"
-      :aria-label="hideLabelsSideBar ? $t('Settings.Settings') : null"
-      to="/settings"
-    >
-      <FontAwesomeIcon
-        :icon="['fas', 'sliders-h']"
-        class="navIcon"
-        :class="applyNavIconExpand"
-      />
-      <p
-        id="settingsNavLabel"
-        class="navLabel"
-      >
-        {{ $t("Settings.Settings") }}
-      </p>
-    </router-link>
     <router-link
       class="navOption mobileHidden"
       :title="$t('About.About')"

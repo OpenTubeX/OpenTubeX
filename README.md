@@ -9,6 +9,17 @@ It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
 endorsed by, maintained by, or supported by the FreeTube project.
 
+## AI-assisted development
+
+OpenTubeX is developed extensively with AI-assisted tools. This allows our small
+maintainer team to develop features, fix bugs, and iterate much more rapidly.
+The source code remains open for anyone to inspect, review, modify, or fork.
+
+This disclosure refers to how OpenTubeX is developed. It does not mean the app
+sends your viewing data to an AI service. If AI-assisted development does not
+align with your preferences, OpenTubeX may simply not be the right project for
+you.
+
 <br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">

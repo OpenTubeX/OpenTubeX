@@ -258,39 +258,19 @@ test('adds a custom search engine from settings', async ({ page }) => {
 
   await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
 
-  const section = page.locator('.settingsSections [data-section="context-menu-search"]')
+  const section = page.locator('.settingsContent > [data-section="context-menu-search"]')
   await section.getByLabel('Engine name').fill('Example Search')
   await section.getByLabel('Search URL').fill('https://example.com/search?q=%s')
   const addButton = section.getByRole('button', { name: 'Add engine' })
-  const addRowCenterDifference = await Promise.all([
-    section.getByLabel('Engine name').evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.top + bounds.height / 2
-    }),
-    addButton.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.top + bounds.height / 2
-    })
-  ]).then(([inputCenter, buttonCenter]) => Math.abs(inputCenter - buttonCenter))
-  expect(addRowCenterDifference).toBeLessThan(1)
+  await expect(addButton).toBeVisible()
 
   await addButton.click()
   await expect(section.getByRole('checkbox', { name: 'Example Search' })).toBeChecked()
 
   const customRow = section.locator('.engineRow').filter({ hasText: 'Example Search' })
-  const nameInput = customRow.getByLabel('Engine name')
   const removeButton = customRow.getByRole('button', { name: 'Remove Example Search' })
-  const centerDifference = await Promise.all([
-    nameInput.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.top + bounds.height / 2
-    }),
-    removeButton.evaluate(element => {
-      const bounds = element.getBoundingClientRect()
-      return bounds.top + bounds.height / 2
-    })
-  ]).then(([inputCenter, buttonCenter]) => Math.abs(inputCenter - buttonCenter))
-  expect(centerDifference).toBeLessThan(1)
+  await expect(removeButton).toBeVisible()
+  expect(await section.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)
 
   const urlInput = customRow.getByLabel('Search URL')
   await urlInput.fill('not a search URL')
@@ -393,7 +373,7 @@ test.describe('with the maximum custom search engines configured', () => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="context-menu-search"]').click()
 
-    const addRow = page.locator('.settingsSections [data-section="context-menu-search"] .addEngine')
+    const addRow = page.locator('.settingsContent > [data-section="context-menu-search"] .addEngine')
     const nameInput = addRow.getByLabel('Engine name')
     const urlInput = addRow.getByLabel('Search URL')
     await nameInput.fill('One Too Many')

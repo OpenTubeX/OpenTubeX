@@ -244,6 +244,73 @@ test.describe('watch page', () => {
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
 
+  test('shows tags below the description and copies the description', async ({ app, page, innertube }) => {
+    test.skip(innertube.replay, 'watch page hydration needs the real API')
+    await openVideo(page)
+
+    const videoDescription = Array(30).fill('Description to copy').join('\n')
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component, description) => {
+      const watchView = component.proxy
+      watchView.isLoading = true
+      await watchView.$nextTick()
+      watchView.videoDescription = description
+      watchView.videoDescriptionHtml = ''
+      watchView.videoTags = ['first tag', 'second tag']
+      watchView.isLoading = false
+      await watchView.$nextTick()
+    }, videoDescription)
+
+    const description = page.locator(`${activeTab} .videoDescription`)
+    const descriptionText = description.locator('.description')
+    const tags = description.locator('.videoTags')
+    await description.locator(':scope > .descriptionStatus').click()
+    await expect(tags).toHaveText('Video Tags: first tag, second tag')
+    await expect(description.locator('.descriptionScroll')).toHaveCSS('overflow-anchor', 'none')
+    expect(await descriptionText.evaluate((element, tagsElement) => (
+      Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)
+    ), await tags.elementHandle())).toBe(true)
+    expect(await tags.evaluate(element => element.closest('.descriptionScroll'))).not.toBeNull()
+    const descriptionScroll = description.locator('.descriptionScroll')
+    const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
+    await expect(collapseControl).toBeVisible()
+    await expect(collapseControl).toHaveCSS('position', 'sticky')
+    const collapseControlStyles = await collapseControl.evaluate(element => {
+      const style = getComputedStyle(element)
+      const fadeStyle = getComputedStyle(element, '::before')
+      return {
+        fadeBackground: fadeStyle.backgroundImage,
+        fadeHeight: Number.parseFloat(fadeStyle.height),
+        fontSize: Number.parseFloat(style.fontSize),
+        marginBlockStart: Number.parseFloat(style.marginBlockStart)
+      }
+    })
+    expect(collapseControlStyles.fadeBackground).toContain('linear-gradient')
+    expect(collapseControlStyles.fadeHeight).toBeGreaterThan(0)
+    expect(collapseControlStyles.marginBlockStart).toBeGreaterThan(collapseControlStyles.fontSize)
+    const maxScrollTop = await descriptionScroll.evaluate(element =>
+      element.scrollHeight - element.clientHeight
+    )
+    expect(maxScrollTop).toBeGreaterThan(0)
+    await descriptionScroll.evaluate((element, maxScrollTop) => {
+      element.scrollTop = maxScrollTop / 2
+    }, maxScrollTop)
+    await expect.poll(() => descriptionScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => descriptionScroll.evaluate(element =>
+      element.scrollTop < element.scrollHeight - element.clientHeight
+    )).toBe(true)
+    await expect.poll(() => collapseControl.evaluate(element => {
+      const controlBottom = element.getBoundingClientRect().bottom
+      const scrollBottom = element.parentElement.getBoundingClientRect().bottom
+      return Math.abs(controlBottom - scrollBottom) <= 1
+    })).toBe(true)
+
+    await description.locator('.descriptionCopyButton button').click()
+    await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
+    await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(videoDescription)
+    await watchComponent.dispose()
+  })
+
   test('the sidebar panels use overlay scrollbars', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
@@ -408,6 +475,48 @@ test.describe('watch page', () => {
     expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
     expect(animations[1].position).toBe('relative')
     expect(animations[1].zIndex).toBe('150')
+  })
+
+  test('does not replay the scroll mini player animation after switching tabs', async ({ page, innertube }) => {
+    test.skip(!innertube.playback, 'needs real media streams')
+    await openVideo(page)
+
+    const video = await waitForPlaybackOrSkip(test, page)
+    await video.evaluate(element => element.pause())
+    await page.evaluate(() => {
+      document.documentElement.dataset.reducedMotion = 'no-preference'
+      window.scrollMiniPlayerAnimationCount = 0
+      const nativeAnimate = Element.prototype.animate
+
+      Element.prototype.animate = function (keyframes, options) {
+        if (this.classList.contains('ftVideoPlayer')) {
+          window.scrollMiniPlayerAnimationCount++
+        }
+        return nativeAnimate.call(this, keyframes, options)
+      }
+    })
+
+    const player = page.locator(`${activeTab} .ftVideoPlayer`)
+    await player.evaluate(element => {
+      const rect = element.getBoundingClientRect()
+      window.scrollTo(0, window.scrollY + rect.bottom)
+    })
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    const animationCountBeforeReturn = await page.evaluate(
+      () => window.scrollMiniPlayerAnimationCount
+    )
+    await page.locator(sel.tabs).first().click()
+    await expect(player).toHaveClass(/scrollMiniPlayer/)
+
+    // The old behavior scheduled the restored entrance animation on the next
+    // Vue tick, so wait past its duration before checking that none was added.
+    await page.waitForTimeout(350)
+    expect(await page.evaluate(() => window.scrollMiniPlayerAnimationCount))
+      .toBe(animationCountBeforeReturn)
   })
 
   test('scales the captions down with the scroll mini player', async ({ page, innertube }) => {
@@ -2751,7 +2860,6 @@ test.describe('custom Shorts player', () => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     const shortTab = page.locator(sel.tabs).first()
-    const otherTab = page.locator(sel.tabs).nth(1)
     await shortTab.click()
 
     const shortsFeedTab = page

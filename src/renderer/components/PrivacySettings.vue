@@ -129,6 +129,7 @@
         @click="showRemovePlaylistsPrompt = true"
       />
     </FtFlexBox>
+    <PasswordSettings />
     <FtPrompt
       v-if="showSearchCachePrompt"
       autosize
@@ -180,6 +181,7 @@ import FtSelect from './FtSelect/FtSelect.vue'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
+import PasswordSettings from './PasswordSettings/PasswordSettings.vue'
 
 import store from '../store/index'
 

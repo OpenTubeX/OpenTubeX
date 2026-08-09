@@ -86,11 +86,10 @@ test.describe('tab bar', () => {
     ])
   })
 
-  test('uses the matching app icon when the route changes', async ({ page }) => {
+  test('keeps the current app icon when Settings opens over the route', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.waitForTimeout(100)
     expect(await page.locator(`${sel.activeTab} .loadingDot`).count()).toBe(0)
-    await expect(page.locator(sel.activeTab).locator('[data-icon="sliders"]')).toBeVisible()
+    await expect(page.locator(sel.activeTab).locator('[data-icon="rss"]')).toBeVisible()
 
     await goTo(page, 'history')
     await expect(page.locator(sel.activeTab).locator('[data-icon="clock-rotate-left"]')).toBeVisible()
@@ -183,19 +182,19 @@ test.describe('tab bar', () => {
   })
 
   test('each tab keeps its own route', async ({ page }) => {
-    await goTo(page, 'settings')
-    await expect(page).toHaveURL(/#\/settings/)
-
-    await page.locator(sel.newTabButton).click()
     await goTo(page, 'history')
     await expect(page).toHaveURL(/#\/history/)
 
+    await page.locator(sel.newTabButton).click()
+    await goTo(page, 'about')
+    await expect(page).toHaveURL(/#\/about/)
+
     // Switch back to the first tab: its route must be restored.
     await page.locator(sel.tabs).first().click()
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.tabs).nth(1).click()
-    await expect(page).toHaveURL(/#\/history/)
+    await expect(page).toHaveURL(/#\/about/)
   })
 
   test('selects multiple tabs with modifier clicks', async ({ page }) => {
@@ -530,6 +529,28 @@ test.describe('tab bar', () => {
     expect(submenuBox.y + submenuBox.height).toBeLessThanOrEqual(viewport.height - 8)
   })
 
+  test('aligns close buttons for pinned and unpinned vertical tabs', async ({ page }) => {
+    await page.keyboard.press('Control+t')
+    await page.keyboard.press('F1')
+    await expect(page.locator('.app')).toHaveClass(/verticalTabs/)
+
+    const tabs = page.locator(sel.tabs)
+    const pinnedTab = tabs.first()
+    const unpinnedTab = tabs.nth(1)
+    const pinnedTabId = await pinnedTab.getAttribute('data-tab-id')
+
+    await page.evaluate(tabId => window.ftElectron.tabs.setPinned(tabId, true), pinnedTabId)
+    await expect(pinnedTab).toHaveClass(/pinned/)
+    await pinnedTab.hover()
+
+    const pinnedCloseBox = await pinnedTab.locator('.closeButton').boundingBox()
+    const unpinnedCloseBox = await unpinnedTab.locator('.closeButton').boundingBox()
+
+    expect(pinnedCloseBox).not.toBeNull()
+    expect(unpinnedCloseBox).not.toBeNull()
+    expect(pinnedCloseBox.x).toBe(unpinnedCloseBox.x)
+  })
+
   // Regression: search bar text used to leak between tabs (65f4e2e13)
   test('search bar text is independent per tab', async ({ page }) => {
     const searchInput = page.locator(sel.searchInput)
@@ -730,7 +751,7 @@ test.describe('closed tabs', () => {
   })
 
   test('restoring a closed tab restores its navigation history', async ({ page }) => {
-    await goTo(page, 'settings')
+    await goTo(page, 'about')
     await goTo(page, 'history')
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click()
@@ -742,7 +763,7 @@ test.describe('closed tabs', () => {
 
     await expect(page).toHaveURL(/#\/history/)
     await page.locator(sel.backButton).click()
-    await expect(page).toHaveURL(/#\/settings/)
+    await expect(page).toHaveURL(/#\/about/)
     await page.locator(sel.forwardButton).click()
     await expect(page).toHaveURL(/#\/history/)
   })
@@ -752,13 +773,14 @@ test.describe('closed tabs', () => {
 
     test('does not persist restored history across a relaunch', async ({ app }) => {
       let page = app.page
-      await goTo(page, 'settings')
+      await goTo(page, 'about')
       await goTo(page, 'history')
       await page.locator(sel.newTabButton).click()
       await page.locator(sel.tabs).first().click()
       await page.keyboard.press('Control+w')
 
       await goTo(page, 'settings')
+      await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
       const rememberHistory = page.getByRole('checkbox', { name: 'Remember Tab Navigation History' })
       await expect(rememberHistory).toBeChecked()
       await page.locator('label.switch-label').filter({ hasText: 'Remember Tab Navigation History' }).click()
@@ -870,6 +892,22 @@ test.describe('custom default page', () => {
   })
 })
 
+test.describe('removed settings landing page', () => {
+  test.use({ seed: { settings: { landingPage: 'settings' } } })
+
+  test('migrates to subscriptions before creating tabs', async ({ page }) => {
+    const tab = await page.evaluate(async () => {
+      return await window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      })
+    })
+
+    expect(tab.route.fullPath).toBe('/subscriptions')
+    expect(tab.title).toBe('Subscriptions')
+  })
+})
+
 test.describe('RTL context menus', () => {
   test.use({ seed: { settings: { currentLocale: 'ar' } } })
 
@@ -950,7 +988,7 @@ test.describe('subscription feed tabs', () => {
     await page.locator(sel.tabs).first().click()
     await expect(feedTab('shorts')).toHaveAttribute('aria-selected', 'true')
 
-    await goTo(page, 'settings')
+    await goTo(page, 'history')
     await goTo(page, 'subscriptions')
     await expect(feedTab('live')).toHaveAttribute('aria-selected', 'true')
   })
@@ -1001,16 +1039,36 @@ test.describe('background tab shortcuts', () => {
     await page.locator(sel.newTabButton).click()
     await goTo(page, 'history')
 
-    const externalRequests = []
+    const subscriptionRefreshRequests = []
     page.on('request', (request) => {
-      if (/^https?:/.test(request.url())) {
-        externalRequests.push(request.url())
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
       }
     })
 
     await page.locator('body').press('r')
-    await page.waitForTimeout(500)
-    expect(externalRequests).toEqual([])
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
+  })
+
+  test('R typed in settings search does not refresh subscriptions behind it', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    const subscriptionRefreshRequests = []
+    page.on('request', (request) => {
+      if (request.url().includes('UC-test-subscription')) {
+        subscriptionRefreshRequests.push(request.url())
+      }
+    })
+
+    await search.press('r')
+    await expect(search).toHaveValue('r')
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => {
+      requestAnimationFrame(resolve)
+    })))
+    expect(subscriptionRefreshRequests).toEqual([])
   })
 })
 

@@ -1,12 +1,20 @@
 <template>
   <FtCard
-    v-if="shownDescription.length > 0 || games.length > 0"
+    v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0"
     :class="{
       videoDescription: true,
       short: !isExpanded,
       alwaysExpanded
     }"
   >
+    <FtIconButton
+      v-if="shownDescription.length > 0"
+      class="descriptionCopyButton"
+      :title="t('Description.Copy Description')"
+      :icon="['fas', 'copy']"
+      theme="base"
+      @click="copyDescription"
+    />
     <span
       v-if="showControls && !isExpanded && !alwaysExpanded"
       class="descriptionStatus"
@@ -69,26 +77,35 @@
           </li>
         </ul>
       </template>
+      <bdi
+        v-if="tags.length > 0 && isExpanded"
+        class="videoTags"
+      >
+        <strong>{{ t('Description.Video Tags') }}</strong> {{ tags.join(', ') }}
+      </bdi>
+      <span
+        v-if="showControls && isExpanded && !alwaysExpanded"
+        class="descriptionStatus"
+        role="button"
+        tabindex="0"
+        @click="collapseDescription"
+        @keydown.enter.space.prevent="collapseDescription"
+      >
+        {{ $t("Description.Collapse Description") }}
+      </span>
     </div>
-    <span
-      v-if="showControls && isExpanded && !alwaysExpanded"
-      class="descriptionStatus"
-      role="button"
-      tabindex="0"
-      @click="collapseDescription"
-      @keydown.enter.space.prevent="collapseDescription"
-    >
-      {{ $t("Description.Collapse Description") }}
-    </span>
   </FtCard>
 </template>
 
 <script setup>
 import { onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import FtCard from '../ft-card/ft-card.vue'
+import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 
 import { linkifyDescription, linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
+import { copyToClipboard } from '../../helpers/utils'
 import { useTabContext } from '../../tabs/TabContext'
 
 import store from '../../store/index'
@@ -101,6 +118,10 @@ const props = defineProps({
   descriptionHtml: {
     type: String,
     default: ''
+  },
+  tags: {
+    type: Array,
+    default: () => [],
   },
   license: {
     type: String,
@@ -118,8 +139,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['timestamp-event'])
+const { t } = useI18n()
 
 let shownDescription = ''
+let descriptionText = props.description
 const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
@@ -139,6 +162,7 @@ if (props.descriptionHtml !== '') {
   testDiv.innerHTML = parsed
 
   if (!/^\s*$/.test(testDiv.innerText)) {
+    descriptionText ||= testDiv.innerText
     shownDescription = linkifyHashtagsAndHandles(parsed)
   }
 } else {
@@ -171,6 +195,12 @@ const shownGames = computed(() => {
  */
 function onTimestamp(timestamp) {
   emit('timestamp-event', timestamp)
+}
+
+async function copyDescription() {
+  await copyToClipboard(descriptionText, {
+    messageOnSuccess: t('Description.Description Copied')
+  })
 }
 
 /**

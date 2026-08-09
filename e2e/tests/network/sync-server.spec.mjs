@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
@@ -115,8 +115,7 @@ test.describe('OpenTubeX sync server', () => {
       if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     const serverUrlInput = syncSection.getByLabel('Server URL')
     await serverUrlInput.fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
@@ -263,25 +262,27 @@ test.describe('OpenTubeX sync server', () => {
     }
 
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
-    if (!enhancedPrivacy) await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
-      const records = contents.trim().split('\n').map(line => JSON.parse(line))
-      return records
-        .filter(record => record._id === 'allChannels' && !record.$$deleted)
-        .at(-1)
-        ?.subscriptions
-        .find(channel => channel.id === remoteChannelId)
-    }).toEqual(expect.objectContaining({
-      id: remoteChannelId,
-      thumbnail: null
-    }))
-    if (!enhancedPrivacy) await expect.poll(async () => {
-      const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
-      return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
-    }).toEqual({
-      [channelId]: 1.5,
-      [remoteChannelId]: 2
-    })
+    if (!enhancedPrivacy) {
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        return records
+          .filter(record => record._id === 'allChannels' && !record.$$deleted)
+          .at(-1)
+          ?.subscriptions
+          .find(channel => channel.id === remoteChannelId)
+      }).toEqual(expect.objectContaining({
+        id: remoteChannelId,
+        thumbnail: null
+      }))
+      await expect.poll(async () => {
+        const syncedSettings = latestSettings(await readFile(settingsPath, 'utf8'))
+        return JSON.parse(syncedSettings.channelPlaybackSpeeds || '{}')
+      }).toEqual({
+        [channelId]: 1.5,
+        [remoteChannelId]: 2
+      })
+    }
 
     await syncSection.getByRole('button', { name: 'Delete sync account' }).click()
     const deleteAccountPrompt = page.getByRole('dialog', { name: 'Delete sync account?' })
@@ -356,8 +357,7 @@ test.describe('OpenTubeX sync server', () => {
       }
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill(password)
@@ -433,8 +433,7 @@ test.describe('OpenTubeX sync server', () => {
       }
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
@@ -494,8 +493,7 @@ test.describe('OpenTubeX sync server', () => {
       return route.continue()
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
@@ -576,8 +574,7 @@ test.describe('OpenTubeX sync server', () => {
       await route.continue()
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     const serverUrlInput = syncSection.getByLabel('Server URL')
     await page.route('https://not-a-sync-server.invalid/**', route => route.abort())
     await serverUrlInput.fill('https://not-a-sync-server.invalid')

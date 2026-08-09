@@ -370,7 +370,10 @@ import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/a
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
-import { requestWatchPageViewTransition } from '../../helpers/viewTransitions.js'
+import {
+  morphThumbnailIntoNewTab,
+  requestWatchPageViewTransition
+} from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
@@ -1190,7 +1193,7 @@ const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 
 const shouldShowCollaboratorsButton = computed(() => !!props.data.hasCollaborators && channelName.value !== null)
 
-function handleWatchPageLinkClick(event) {
+async function handleWatchPageLinkClick(event) {
   // `auxclick` also fires for the right mouse button after `contextmenu`.
   // Treat only middle clicks as opening the video so a new-feed entry is not
   // marked as seen (and removed) while its context menu is open.
@@ -1205,10 +1208,30 @@ function handleWatchPageLinkClick(event) {
     return
   }
 
+  const opensActiveTab = process.env.IS_ELECTRON &&
+    event?.button === 0 &&
+    (event.ctrlKey || event.metaKey) &&
+    !event.shiftKey &&
+    !event.altKey
+
+  if (opensActiveTab) {
+    event.preventDefault()
+    requestWatchPageViewTransition(event.currentTarget, {
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer
+    })
+    openInternalPath({
+      path: `/watch/${id.value}`,
+      query: watchPageLinkQuery.value,
+      title: title.value,
+      doCreateNewTab: true
+    })
+    return
+  }
+
   if (process.env.IS_ELECTRON && event?.button === 1) {
     event.preventDefault()
 
-    openInternalPath({
+    const openVideo = () => openInternalPath({
       path: `/watch/${id.value}`,
       query: watchPageLinkQuery.value,
       title: title.value,
@@ -1216,6 +1239,16 @@ function handleWatchPageLinkClick(event) {
       doCreateNewTab: !event.shiftKey,
       makeActive: false
     })
+
+    if (event.shiftKey) {
+      openVideo()
+    } else {
+      try {
+        await morphThumbnailIntoNewTab(event.currentTarget, openVideo)
+      } catch (error) {
+        console.error('Failed to open the video in a new tab:', error)
+      }
+    }
     return
   }
 

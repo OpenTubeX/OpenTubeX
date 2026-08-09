@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 
 import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
-import { useTabContext } from '../../tabs/TabContext'
+import { useTabContext, useTabLifecycle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { AmbientModeButton } from './player-components/AmbientModeButton'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
@@ -68,6 +68,7 @@ import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
+import { findSponsorBlockSeekBarSegment } from '../../helpers/player/sponsorBlockSeekBar'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -1074,7 +1075,7 @@ export default defineComponent({
         })
         // An already-scrolled tab that was inactive never got to reevaluate its
         // scroll position, so restore the mini-player state now that it is active.
-        updateScrollMiniPlayer()
+        updateScrollMiniPlayer({ animateActivation: false })
       } else {
         if (controlPanelLayoutFrame !== null) {
           cancelAnimationFrame(controlPanelLayoutFrame)
@@ -3655,14 +3656,7 @@ export default defineComponent({
       const segments = sponsorBlockSegments.concat(
         sponsorBlockCompleteDraftSegments.value.filter(segment => !isSponsorBlockFullVideoSegment(segment))
       )
-      const pointTolerance = Math.max(secondsPerPixel, 0.5)
-      const segment = segments.find((candidate) => {
-        if (isSponsorBlockPointSegment(candidate)) {
-          return Math.abs(hoverTime - candidate.startTime) <= pointTolerance
-        }
-
-        return hoverTime >= candidate.startTime && hoverTime <= candidate.endTime
-      })
+      const segment = findSponsorBlockSeekBarSegment(segments, hoverTime, secondsPerPixel)
 
       return segment ? translateSponsorBlockCategory(segment.category) : ''
     }
@@ -4613,6 +4607,13 @@ export default defineComponent({
       isActiveTab,
       props,
       video,
+    })
+
+    // Logical tabs restore their saved scroll position after becoming active.
+    // Refresh once that restoration is complete so an already-active mini player
+    // is placed directly at its saved bounds instead of replaying its entrance.
+    useTabLifecycle({
+      activate: () => updateScrollMiniPlayer({ animateActivation: false })
     })
 
     const ambientModeVisible = computed(() => {
