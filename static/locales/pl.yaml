@@ -436,6 +436,14 @@ Settings:
     UI Roundness: Zaokrąglenie elementów UI
     Always Show Scrollbars: Zawsze pokazuj paski przewijania
     Animation Speed: Szybkość animacji
+    Show Tab Icons: Pokaż ikony kart
+    Use Fixed Tab Width: Użyj stałej szerokości kart w trybie poziomym
+    Tab Width: Szerokość karty
+    Show Toast Timeout Indicator: Pokaż wskaźnik czasu powiadomień
+    Show Progress as Notification: Pokaż postęp jako powiadomienie
+    Operation in Progress: Operacja w toku
+    Toast Position:
+      Toast Position: Pozycja powiadomienia
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -1770,3 +1778,5 @@ Downloads:
     Audio Format: Dźwięk - {format}
     Custom Arguments: Niestandardowe argumenty dla yt-dlp
 Update to {version}: Zaktualizuj do wersji {version}
+Maximize: Maksymalizuj
+Restore: Przywróć
