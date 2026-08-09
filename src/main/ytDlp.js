@@ -91,7 +91,8 @@ const DENIED_CUSTOM_ARGS = [
   '--external-downloader',
   '--external-downloader-args',
   '--ffmpeg-location',
-  '--plugin-dirs'
+  '--plugin-dirs',
+  '--remote-components'
 ]
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 const YT_DLP_RELEASE_REPOSITORIES = {
@@ -1121,7 +1122,9 @@ export async function handleYtDlpDownload(event, payload) {
     videoId: isSingleVideo ? payload.videoId : '',
     playlistId: typeof payload.playlistId === 'string' ? payload.playlistId.slice(0, 128) : '',
     playlistKey: typeof payload.playlistKey === 'string' ? payload.playlistKey.slice(0, 255) : '',
-    title: typeof payload.title === 'string' ? payload.title.slice(0, 255) : payload.videoId ?? payload.playlistId ?? '',
+    title: typeof payload.title === 'string'
+      ? payload.title.slice(0, 255)
+      : (isSingleVideo ? payload.videoId : isRemotePlaylist ? payload.playlistId : ''),
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     status: 'downloading',
     percent: 0,

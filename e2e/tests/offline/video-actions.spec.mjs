@@ -108,7 +108,8 @@ test.describe('video downloads', () => {
       '--exec "echo unsafe"',
       '--config-location=/tmp/yt-dlp.conf',
       '--external-downloader custom-binary',
-      '--plugin-dirs /tmp/plugins'
+      '--plugin-dirs /tmp/plugins',
+      '--remote-components ejs:github'
     ]
     await page.bringToFront()
     const results = await page.evaluate((args) => Promise.all(args.map(customArgs => window.ftElectron.ytDlpDownload({
@@ -151,6 +152,7 @@ test.describe('video downloads', () => {
 
     await page.bringToFront()
     const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 42,
       videoIds: ['eeeeeeeeeee'],
       isPlaylist: true,
       mode: 'video'
