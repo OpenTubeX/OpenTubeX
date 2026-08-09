@@ -72,7 +72,7 @@ h3 {
   text-align: center;
 }
 
-@container settings-page (width <= 800px) {
+@container settings-content (width <= 800px) {
   .engineRow,
   .engineRow:has(.removeEngine),
   .addEngine {

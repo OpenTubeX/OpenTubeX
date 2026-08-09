@@ -23,7 +23,7 @@
   text-align: center;
   transition-duration: 275ms;
   transition-property: transform;
-  visibility: hidden;
+  display: none;
   z-index: 2;
 }
 
@@ -64,7 +64,7 @@
 
 .button:focus + .text,
 .button:hover + .text {
-  visibility: visible;
+  display: block;
 }
 
 .button:focus + .text.bottom,
@@ -73,14 +73,14 @@
 .button:hover + .text.bottom-left,
 .button:focus + .text.top,
 .button:hover + .text.top {
-  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient) + var(--ft-tooltip-shift-x, 0px)), 0);
+  transform: translate(calc(-50% * var(--horizontal-directionality-coefficient) + var(--ft-tooltip-shift-x, 0px)), var(--ft-tooltip-shift-y, 0));
 }
 
 .button:focus + .text.left,
 .button:hover + .text.left,
 .button:focus + .text.right,
 .button:hover + .text.right {
-  transform: translate(var(--ft-tooltip-shift-x, 0), -50%);
+  transform: translate(var(--ft-tooltip-shift-x, 0), calc(-50% + var(--ft-tooltip-shift-y, 0)));
 }
 
 .text.allowNewlines {

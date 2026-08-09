@@ -389,11 +389,10 @@
       </FtFlexBox>
       <br>
     </div>
-    <FtPrompt
-      v-if="showQuickPlaybackSpeedBarManager"
-      :label="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
-      theme="readable-width"
-      @click="handleQuickPlaybackSpeedBarManagerClick"
+    <FtSettingsSubpage
+      :open="showQuickPlaybackSpeedBarManager"
+      :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
+      @close="showQuickPlaybackSpeedBarManager = false"
     >
       <div class="quickPlaybackSpeedList">
         <div
@@ -492,12 +491,8 @@
           :icon="['fas', 'undo']"
           @click="resetQuickPlaybackSpeedBarOptions"
         />
-        <FtButton
-          :label="t('Close')"
-          @click="showQuickPlaybackSpeedBarManager = false"
-        />
       </FtFlexBox>
-    </FtPrompt>
+    </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
 
@@ -516,9 +511,10 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
-import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
+import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 
 const { t } = useI18n()
 
@@ -816,12 +812,7 @@ const AUTO_PIP_TRIGGER_VALUES = ['tab', 'minimize', 'blur']
 
 // The 'minimize' window event doesn't fire on Wayland, so the minimize trigger can't work there.
 // https://github.com/electron/electron/issues/51766
-const isLinuxWayland = ref(false)
-if (process.env.IS_ELECTRON && process.platform === 'linux') {
-  onMounted(async () => {
-    isLinuxWayland.value = await window.ftElectron.isWaylandPlatform()
-  })
-}
+initializePlatformInfo()
 
 const autoPictureInPictureTriggerLabels = computed(() => [
   t('Settings.Player Settings.Auto Picture in Picture.On Tab Change'),
@@ -1016,15 +1007,6 @@ const quickPlaybackSpeedBarOptions = computed(() => store.getters.getQuickPlayba
 const quickPlaybackSpeedBarEntries = computed(() => {
   return parseQuickPlaybackSpeedBarOptions(quickPlaybackSpeedBarOptions.value)
 })
-
-/**
- * @param {string | null} value
- */
-function handleQuickPlaybackSpeedBarManagerClick(value) {
-  if (value === null) {
-    showQuickPlaybackSpeedBarManager.value = false
-  }
-}
 
 /**
  * @param {string} value

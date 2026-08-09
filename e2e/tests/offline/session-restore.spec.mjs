@@ -3,7 +3,7 @@ import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
 
-const SETTINGS_TAB_ID = 'e2e-settings-tab'
+const SUBSCRIPTIONS_TAB_ID = 'e2e-subscriptions-tab'
 const HISTORY_TAB_ID = 'e2e-history-tab'
 const WATCH_TAB_ID = 'e2e-watch-tab'
 const STALE_WATCH_URL = 'app://bundle/index.html#/watch/jNQXAC9IVRw?oneTimeTimestamp=12&timestamp=34'
@@ -17,9 +17,9 @@ test.use({
         value: {
           tabs: [
             {
-              id: SETTINGS_TAB_ID,
-              url: 'app://bundle/index.html#/settings',
-              title: 'Einstellungen',
+              id: SUBSCRIPTIONS_TAB_ID,
+              url: 'app://bundle/index.html#/subscriptions',
+              title: 'Abos',
               isUnloaded: false
             },
             {
@@ -57,7 +57,7 @@ async function readSavedSession(userDataDir) {
 test('restores tab order, titles, active route, and saved load state across restarts', async ({ app, page }) => {
   const tabs = page.locator(sel.tabs)
   await expect(tabs).toHaveCount(3)
-  await expect(tabs.nth(0)).toContainText('Einstellungen')
+  await expect(tabs.nth(0)).toContainText('Abos')
   await expect(tabs.nth(1)).toContainText('Verlauf')
   await expect(tabs.nth(2)).toContainText('Saved video')
   await expect(tabs.nth(1)).toHaveClass(/active/)
@@ -73,18 +73,18 @@ test('restores tab order, titles, active route, and saved load state across rest
   }).toBe('app://bundle/index.html#/watch/jNQXAC9IVRw?timestamp=34')
 
   await tabs.nth(0).click()
-  await expect(page).toHaveURL(/#\/settings/)
+  await expect(page).toHaveURL(/#\/subscriptions/)
   await expect(tabs.nth(0)).toHaveClass(/active/)
-  await expect(tabs.nth(0)).toContainText('Einstellungen')
+  await expect(tabs.nth(0)).toContainText('Abos')
 
   ;({ page } = await app.relaunch())
   const restoredTabs = page.locator(sel.tabs)
   await expect(restoredTabs).toHaveCount(3)
   await expect(restoredTabs.nth(0)).toHaveClass(/active/)
-  await expect(restoredTabs.nth(0)).toContainText('Einstellungen')
+  await expect(restoredTabs.nth(0)).toContainText('Abos')
   await expect(restoredTabs.nth(1)).toContainText('Verlauf')
   await expect(restoredTabs.filter({ hasText: /Settings\.Settings|History\.History/ })).toHaveCount(0)
-  await expect(page).toHaveURL(/#\/settings/)
+  await expect(page).toHaveURL(/#\/subscriptions/)
   await expect(restoredTabs.nth(1)).not.toHaveClass(/unloaded/)
   await expect(restoredTabs.nth(2)).toHaveClass(/unloaded/)
 

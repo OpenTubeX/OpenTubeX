@@ -138,6 +138,7 @@ import FtLoader from '../FtLoader/FtLoader.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 
 import store from '../../store/index'
+import { getProxyTestUrl } from '../../helpers/proxy-test'
 
 import { debounce, showToast } from '../../helpers/utils'
 
@@ -203,24 +204,7 @@ const proxyUrl = computed(() => {
   return `${proxyProtocol.value}://${proxyHostname.value}:${proxyPort.value}`
 })
 
-// locales found here: https://ipwhois.io/documentation
-const SUPPORTED_LANGS = ['en', 'ru', 'de', 'es', 'pt-BR', 'fr', 'zh-CN', 'ja']
-
-const localeToUse = computed(() => {
-  const freeTubeLang = locale.value
-
-  return SUPPORTED_LANGS.find(lang => freeTubeLang === lang) ?? SUPPORTED_LANGS.find(lang => freeTubeLang.slice(0, 2) === lang.slice(0, 2))
-})
-
-const proxyTestUrl = computed(() => {
-  let proxyTestUrl = 'https://ipwho.is/?output=json&fields=ip,country,city,region'
-
-  if (localeToUse.value) {
-    proxyTestUrl += `&lang=${localeToUse.value}`
-  }
-
-  return proxyTestUrl
-})
+const proxyTestUrl = computed(() => getProxyTestUrl(locale.value))
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const areCredentialsSupported = computed(() => {

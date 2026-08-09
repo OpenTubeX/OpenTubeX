@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
@@ -115,8 +115,7 @@ test.describe('OpenTubeX sync server', () => {
       if (pathname.endsWith('/bulk')) bulkRequests.push(pathname)
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     const serverUrlInput = syncSection.getByLabel('Server URL')
     await serverUrlInput.fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
@@ -356,8 +355,7 @@ test.describe('OpenTubeX sync server', () => {
       }
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill(password)
@@ -433,8 +431,7 @@ test.describe('OpenTubeX sync server', () => {
       }
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
@@ -494,8 +491,7 @@ test.describe('OpenTubeX sync server', () => {
       return route.continue()
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     await syncSection.getByLabel('Server URL').fill(syncServerUrl)
     await syncSection.getByLabel('Username').fill(username)
     await syncSection.getByLabel('Password').fill('local-test-password')
@@ -576,8 +572,7 @@ test.describe('OpenTubeX sync server', () => {
       await route.continue()
     })
 
-    await goTo(page, 'settings')
-    const syncSection = page.locator('[data-section="sync"]')
+    const syncSection = await goToSettingsSection(page, 'sync')
     const serverUrlInput = syncSection.getByLabel('Server URL')
     await page.route('https://not-a-sync-server.invalid/**', route => route.abort())
     await serverUrlInput.fill('https://not-a-sync-server.invalid')

@@ -36,11 +36,10 @@
         @click="showManager = true"
       />
     </FtFlexBox>
-    <FtPrompt
-      v-if="showManager"
-      :label="t('Settings.Channel Settings.Saved Channels')"
-      theme="flex-column"
-      @click="handleManagerClick"
+    <FtSettingsSubpage
+      :open="showManager"
+      :title="t('Settings.Channel Settings.Saved Channels')"
+      @close="showManager = false"
     >
       <FtInput
         v-if="channelEntries.length > SEARCH_THRESHOLD"
@@ -173,13 +172,7 @@
           </li>
         </ul>
       </div>
-      <FtFlexBox>
-        <FtButton
-          :label="t('Close')"
-          @click="showManager = false"
-        />
-      </FtFlexBox>
-    </FtPrompt>
+    </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
 
@@ -192,7 +185,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
-import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
@@ -289,25 +282,10 @@ const backendOptions = computed(() => ({
 
 const showManager = ref(false)
 
-/**
- * Close the manager only when the current tab is navigating. Modified clicks
- * may open another tab or window and should leave this dialog untouched.
- * @param {MouseEvent} event
- */
+/** @param {MouseEvent} event */
 function handleChannelLinkClick(event) {
   if (disableChannelLinks.value) {
     event.preventDefault()
-    return
-  }
-
-  if (
-    event.button === 0 &&
-    !event.ctrlKey &&
-    !event.metaKey &&
-    !event.shiftKey &&
-    !event.altKey
-  ) {
-    showManager.value = false
   }
 }
 const searchQuery = ref('')
@@ -442,15 +420,6 @@ watch([showManager, channelEntries], ([isManagerOpen]) => {
     fetchMissingChannels()
   }
 })
-
-/**
- * @param {string | null} value
- */
-function handleManagerClick(value) {
-  if (value === null) {
-    showManager.value = false
-  }
-}
 
 /**
  * @param {string} channelId

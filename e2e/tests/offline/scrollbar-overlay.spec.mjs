@@ -1,4 +1,4 @@
-import { test, expect, goTo, sel } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection, sel } from '../../helpers/app.mjs'
 
 // The page's own scrollbars are the ones appended to the body.
 const PAGE_SCROLLBAR = 'body > .os-scrollbar-vertical'
@@ -8,10 +8,19 @@ const pageOverflows = (page) => page.evaluate(
   () => document.documentElement.scrollHeight > window.innerHeight
 )
 
+async function addPageOverflow(page) {
+  await page.evaluate(() => {
+    const content = document.createElement('div')
+    content.dataset.scrollbarTestContent = ''
+    content.style.height = '3000px'
+    document.body.append(content)
+  })
+  await expect.poll(() => pageOverflows(page)).toBe(true)
+}
+
 test.describe('overlay scrollbars', () => {
   test('the main scroll container reserves no layout space for its scrollbar', async ({ page }) => {
-    await goTo(page, 'settings')
-    await expect.poll(() => pageOverflows(page)).toBe(true)
+    await addPageOverflow(page)
 
     // A classic scrollbar shrinks clientWidth below the viewport width, an
     // overlay one floats above the content and leaves the layout untouched.
@@ -24,7 +33,7 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('the scrollbar hides once the pointer rests and follows it back', async ({ page }) => {
-    await goTo(page, 'settings')
+    await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)
 
     await page.mouse.move(800, 400)
@@ -39,7 +48,7 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('the scrollbar handle picks up the theme', async ({ page }) => {
-    await goTo(page, 'settings')
+    await addPageOverflow(page)
     await page.mouse.wheel(0, 300)
 
     await expect(page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)).toHaveCSS(
@@ -50,10 +59,9 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('clicking the track jumps to that position', async ({ page }) => {
-    await goTo(page, 'settings')
+    await addPageOverflow(page)
     // Otherwise there is nothing to scroll and the assertion below would fail
     // whether or not click scrolling works.
-    await expect.poll(() => pageOverflows(page)).toBe(true)
     expect(await page.evaluate(() => window.scrollY)).toBe(0)
 
     // Needs the ClickScrollPlugin to be registered; without it the library
@@ -69,8 +77,7 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('dragging the page handle scrolls the document', async ({ page }) => {
-    await goTo(page, 'settings')
-    await expect.poll(() => pageOverflows(page)).toBe(true)
+    await addPageOverflow(page)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
     await handle.hover()
@@ -84,8 +91,7 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('keeps the page handle under the pointer when content loads during a drag', async ({ page }) => {
-    await goTo(page, 'settings')
-    await expect.poll(() => pageOverflows(page)).toBe(true)
+    await addPageOverflow(page)
 
     const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
     await handle.hover()
@@ -185,18 +191,21 @@ test.describe('overlay scrollbars', () => {
   })
 
   test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page }) => {
-    await goTo(page, 'settings')
+    await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)
 
     await page.mouse.move(800, 400)
     await page.mouse.wheel(0, 300)
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(300)
 
-    const toggle = page.getByRole('checkbox', { name: 'Always Show Scrollbars' })
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const toggle = themeSection.getByRole('checkbox', { name: 'Always Show Scrollbars' })
     await expect(toggle).not.toBeChecked()
     // The styled label covers the checkbox input, so click that instead.
-    await page.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' }).click()
+    await themeSection.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' }).click()
     await expect(toggle).toBeChecked()
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await expect(page.locator('.settingsWindow')).toBeHidden()
 
     // The switch takes effect on the scrollbars that already exist, and
     // rebuilding them mustn't lose where the page was scrolled to.

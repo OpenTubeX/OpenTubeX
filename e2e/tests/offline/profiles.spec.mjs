@@ -57,7 +57,8 @@ test.describe('profile manager', () => {
   test('a profile can be created through the UI and persists', async ({ app, page }) => {
     await profileIcon(page).click()
     await page.locator('.profileList .profileSettings').click()
-    await expect(page).toHaveURL(/#\/settings\/profile/)
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
 
     await page.getByRole('button', { name: 'Create New Profile' }).click()
     await page.locator('.profileName input').fill('Created via UI')

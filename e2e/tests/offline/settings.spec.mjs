@@ -4,50 +4,453 @@ import path from 'node:path'
 import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
-  test('renders without flashing native scrollbars', async ({ page }) => {
-    const renderFrames = await page.evaluate(() => {
-      return new Promise((resolve) => {
-        const settingsLink = Array.from(document.querySelectorAll('.sideNav a[href="#/settings"]'))
-          .find(link => link instanceof HTMLElement && link.offsetParent !== null)
-        const frames = []
+  test('keeps General settings aligned to the bottom of its scroll range', async ({ page }) => {
+    await page.locator('.navSettingsButton').click()
+    const content = page.locator('.settingsContent')
+    await expect(content).toBeVisible()
+    await content.hover()
+    await page.mouse.wheel(0, 2000)
 
-        settingsLink.click()
-
-        const captureFrame = () => {
-          const sectionCount = document.querySelectorAll('.settingsSections > .section').length
-          const menuSectionCount = document.querySelectorAll('.settingsMenu [data-section]').length
-          frames.push({
-            menuSectionCount,
-            sectionCount,
-            settingsRendered: document.querySelector('.settingsPage') !== null,
-            nativeScrollbarsHidden: [document.documentElement, document.body]
-              .every(element => getComputedStyle(element).scrollbarWidth === 'none'),
-            pageOverlayScrollbars: Array.from(document.body.children)
-              .filter(element => element.classList.contains('os-scrollbar-vertical')).length
-          })
-
-          if (menuSectionCount > 0 && sectionCount === menuSectionCount) {
-            resolve(frames)
-          } else {
-            window.requestAnimationFrame(captureFrame)
-          }
-        }
-
-        window.requestAnimationFrame(captureFrame)
-      })
-    })
-
-    expect(renderFrames[0].settingsRendered).toBe(true)
-    expect(renderFrames.map(({ sectionCount }) => sectionCount))
-      .toEqual([1, renderFrames[0].menuSectionCount])
-    expect(renderFrames.every(({ nativeScrollbarsHidden }) => nativeScrollbarsHidden)).toBe(true)
-    expect(renderFrames.every(({ pageOverlayScrollbars }) => pageOverlayScrollbars === 1)).toBe(true)
+    await expect.poll(() => content.evaluate((element) => {
+      const lastControl = element.querySelector('.switchGrid > :last-child')
+      return element.getBoundingClientRect().bottom - lastControl.getBoundingClientRect().bottom
+    })).toBeLessThanOrEqual(45)
   })
 
-  test('settings page renders its sections', async ({ page }) => {
+  test('renders without flashing native scrollbars', async ({ page }) => {
     await goTo(page, 'settings')
-    await expect(page).toHaveURL(/#\/settings/)
-    await expect(page.locator('.settingsMenu, .ftSettingsMenu, [class*="settings"]').first()).toBeVisible()
+
+    await expect(page.locator('.settingsContent > .section')).toHaveCount(1)
+    await expect(page.locator('.settingsContent .os-scrollbar-vertical')).toHaveCount(1)
+    await expect(page.locator('.settingsContent')).toHaveCSS('scrollbar-width', 'none')
+  })
+
+  test('opens over the current page and renders the selected section', async ({ page }) => {
+    const url = page.url()
+    const activeTab = await page.locator(sel.activeTab).textContent()
+
+    await goTo(page, 'settings')
+
+    await expect(page).toHaveURL(url)
+    await expect(page.locator(sel.activeTab)).toContainText(activeTab)
+    const windowIcon = page.locator('.settingsWindowIcon')
+    const breadcrumbLabel = page.locator('.settingsBreadcrumbLabel').first()
+    await expect(windowIcon).toBeVisible()
+    await expect(page.locator('.settingsBreadcrumbCategoryIcon')).toBeVisible()
+    const [iconBounds, labelBounds] = await Promise.all([
+      windowIcon.boundingBox(),
+      breadcrumbLabel.boundingBox()
+    ])
+    expect(iconBounds.y + iconBounds.height / 2)
+      .toBeCloseTo(labelBounds.y + labelBounds.height / 2, 0)
+    await expect(page.getByRole('button', {
+      name: 'Highlight settings changed from defaults'
+    }).locator('[data-icon="pen"]')).toBeVisible()
+    await expect(page.locator('.settingsMenu')).toBeVisible()
+    await expect(page.locator('.settingsContent > [data-section="general"]')).toBeVisible()
+  })
+
+  test('keeps a direct legacy settings route inside the app', async ({ page }) => {
+    const tab = await page.evaluate(() => window.ftElectron.tabs.create({
+      route: '/settings',
+      makeActive: true
+    }))
+
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.tabs.find(candidate => candidate.id === tab.id)?.route.fullPath
+    }).toBe('/')
+  })
+
+  test('toggles from the app settings button', async ({ page }) => {
+    const settingsButton = page.locator('.navSettingsButton')
+    await settingsButton.click()
+    await expect(page.locator('.settingsWindow')).toBeVisible()
+
+    await settingsButton.click()
+    await expect(page.locator('.settingsWindow')).toHaveClass(/settings-window-leave-active/)
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+  })
+
+  test('focuses its search and closes with Escape', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await expect(search).toBeFocused()
+    await search.evaluate(element => element.blur())
+    await page.locator('.settingsSearch svg').click()
+    await expect(search).toBeFocused()
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.settingsWindow')).toBeHidden()
+  })
+
+  test('searches setting labels and opens their category', async ({ page }) => {
+    await goTo(page, 'settings')
+    const search = page.getByRole('searchbox', { name: 'Search settings' })
+    await expect(search).toBeVisible()
+
+    await search.fill('update')
+    await expect(page.locator('.settingsMenu .title.active')).toHaveCount(0)
+    await expect(page.locator('.settingsContent > .section')).toHaveCount(0)
+    await expect(page.locator('.settingsSearchResult')).toHaveCount(3)
+    expect((await page.locator('.settingsMenu .title').first().boundingBox()).height)
+      .toBeLessThanOrEqual(50)
+
+    await search.fill('a')
+    const searchContent = page.locator('.settingsContent')
+    await searchContent.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await search.fill('FFmpeg Source')
+    await expect.poll(() => searchContent.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(page.locator('.settingsMenu .title')).toHaveCount(1)
+    await expect(page.locator('.settingsMenu [data-section="external-software"]')).toBeVisible()
+    await expect(page.locator('.settingsSearchResult')).toContainText('FFmpeg Source')
+    await page.getByRole('button', { name: 'FFmpeg Source', exact: true }).click()
+    await expect(page.locator('.settingsContent > [data-section="external-software"]')).toBeVisible()
+    await expect(page.locator('.settingsBreadcrumbCategoryIcon[data-icon="server"]')).toBeVisible()
+    await expect(page.locator('.select.settingsSearchTarget')).toContainText('FFmpeg Source')
+    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+
+    await search.fill('Check for Updates')
+    await page.getByRole('button', { name: /Check for updates/i, exact: true }).click()
+    await expect(page.locator('.switch-ctn.settingsSearchTarget')).toContainText(/Check for updates/i)
+    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+
+    await search.fill('UI Scale')
+    await page.getByRole('button', { name: 'UI Scale', exact: true }).click()
+    await expect(page.locator('.pure-material-slider.settingsSearchTarget')).toContainText('UI Scale')
+    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+
+    await search.fill('Region for Trending')
+    await page.getByRole('button', { name: /Region for trending/i }).click()
+    await expect(page.locator('.settingsSearchTarget')).toContainText(/Region for trending/i)
+    await expect.poll(() => page.locator('.settingsContent').evaluate(element => element.scrollTop))
+      .toBeGreaterThan(0)
+
+    await search.fill('External Player')
+    await page.locator('.settingsSearchResultMatch')
+      .filter({ hasText: /^External Player$/ })
+      .click()
+    await expect(page.locator('.settingsSearchTarget.select')).toBeVisible()
+
+    await search.fill('test')
+    await expect(page.getByRole('button', { name: 'Test Proxy', exact: true })).toBeVisible()
+    await expect(page.locator('.settingsSearchResultMatch')).not.toContainText('Clicking on Test Proxy')
+
+    const proxyInfo = 'Clicking on Test Proxy will send a request to ' +
+      'https://ipwho.is/?output=json&fields=ip,country,city,region&lang=en'
+    await search.fill(proxyInfo)
+    await expect(page.locator('.settingsMenu [data-section="proxy"]')).toBeVisible()
+    await page.getByRole('button', { name: proxyInfo, exact: true }).click()
+    await expect(page.locator('.section.settingsSearchTarget')).toHaveCount(0)
+
+    await search.fill('Manage Saved Channels')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('How do I import my subscriptions?')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('checking')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('No default instance has been set')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('Current instance will be randomized on startup')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('Catppuccin Latte')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('Application Language')
+    await expect(page.locator('.settingsSearchResultMatch')).toHaveCount(0)
+
+    await search.fill('Base Theme')
+    await expect(page.getByRole('button', { name: /^Base theme$/i })).toBeVisible()
+
+    await search.fill('Default Landing Page')
+    await page.getByRole('button', { name: /^Default landing page$/i }).click()
+    const landingPageSelect = page.getByRole('combobox', { name: /Default landing page/i })
+    await landingPageSelect.click()
+    await expect(page.getByRole('option', { name: 'Settings', exact: true })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+
+    await search.fill('no setting has this name')
+    await expect(page.locator('.settingsMenu')).toContainText('No settings found')
+    await expect(page.locator('.settingsContent')).toContainText('No settings found')
+  })
+
+  test('resizes without creating horizontal settings overflow', async ({ page }) => {
+    await goTo(page, 'settings')
+    const settingsWindow = page.locator('.settingsWindow')
+    const originalBounds = await settingsWindow.boundingBox()
+    const resizeHandle = page.locator('.resize-se')
+    const handleBounds = await resizeHandle.boundingBox()
+
+    await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(handleBounds.x - 360, handleBounds.y - 180)
+    await page.mouse.up()
+
+    const resizedBounds = await settingsWindow.boundingBox()
+    expect(resizedBounds.width).toBeLessThan(originalBounds.width)
+    expect(resizedBounds.height).toBeLessThan(originalBounds.height)
+    await expect(settingsWindow.locator('.settingsPage')).toHaveClass(/compactSettings/)
+    expect(await page.locator('.settingsContent').evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      return Array.from(element.querySelectorAll('*'))
+        .filter(child => child.getBoundingClientRect().right > bounds.right + 1)
+        .map(child => ({
+          className: child.className?.toString(),
+          right: child.getBoundingClientRect().right,
+          tagName: child.tagName
+        }))
+    })).toEqual([])
+
+    await expect.poll(() => page.evaluate(() => {
+      return JSON.parse(localStorage.getItem('opentubex-settings-window-bounds'))?.width
+    })).toBeCloseTo(resizedBounds.width, 0)
+    await page.locator('.settingsCloseButton').click()
+    await goTo(page, 'settings')
+    await expect(settingsWindow).not.toHaveClass(/settings-window-enter-active/)
+
+    const restoredBounds = await settingsWindow.boundingBox()
+    expect(restoredBounds.width).toBeCloseTo(resizedBounds.width, 0)
+    expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
+  })
+
+  test('keeps the settings window inside the narrowest supported viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 })
+    await goTo(page, 'settings')
+    await page.setViewportSize({ width: 340, height: 600 })
+    await expect(page.locator('.settingsWindow')).not.toHaveClass(/settings-window-enter-active/)
+
+    const bounds = await page.locator('.settingsWindow').boundingBox()
+    expect(bounds.x).toBeGreaterThanOrEqual(0)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(340)
+  })
+
+  test('keeps its minimum size when a resize pointer crosses the window', async ({ page }) => {
+    await goTo(page, 'settings')
+    const resizeHandle = page.locator('.resize-se')
+    const handleBounds = await resizeHandle.boundingBox()
+
+    await page.mouse.move(handleBounds.x + handleBounds.width / 2, handleBounds.y + handleBounds.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(0, 0)
+    await page.mouse.up()
+
+    const bounds = await page.locator('.settingsWindow').boundingBox()
+    expect(bounds.width).toBeGreaterThanOrEqual(359.9)
+    expect(bounds.height).toBeGreaterThanOrEqual(359.9)
+  })
+
+  test('wraps controls before the two-column detail pane clips them', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 820,
+        height: 700
+      }))
+    })
+    await goTo(page, 'settings')
+    await expect(page.locator('.settingsPage')).not.toHaveClass(/compactSettings/)
+
+    for (const grid of ['.switchColumnGrid', '.switchGrid']) {
+      expect(await page.locator(grid).first().evaluate(element => {
+        return getComputedStyle(element).gridTemplateColumns.split(' ').length
+      })).toBe(1)
+    }
+
+    const content = page.locator('.settingsContent')
+    expect(await content.evaluate(element => {
+      const rightEdge = element.getBoundingClientRect().right
+      return Array.from(element.querySelectorAll('.section *')).every(child => {
+        const bounds = child.getBoundingClientRect()
+        return bounds.width === 0 || bounds.right <= rightEdge + 1
+      })
+    })).toBe(true)
+  })
+
+  test('returns from saved channel settings through its clickable breadcrumb', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+
+    const breadcrumb = page.locator('.settingsBreadcrumb')
+    await expect(breadcrumb).toContainText('Settings')
+    await expect(breadcrumb).toContainText('Channel Settings')
+    await expect(breadcrumb).toContainText('Saved Channel Settings')
+    await breadcrumb
+      .getByRole('button', { name: 'Channel Settings' })
+      .locator('.settingsBreadcrumbCategoryIcon')
+      .click()
+
+    await expect(page.locator('.settingsContent > [data-section="channel"]')).toBeVisible()
+    await expect(breadcrumb).not.toContainText('Saved Channel Settings')
+  })
+
+  test('uses multiple saved-channel columns in a medium-width window', async ({ page }) => {
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify({
+        channel1: 1,
+        channel2: 1.25,
+        channel3: 1.5
+      }))
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+
+    const entries = page.locator('.channelEntry')
+    await expect(entries).toHaveCount(3)
+    const firstRowTops = await entries.evaluateAll(elements => {
+      return elements.slice(0, 2).map(element => Math.round(element.getBoundingClientRect().top))
+    })
+    expect(new Set(firstRowTops).size).toBe(1)
+
+    await entries.first().locator('.channelLink').click()
+    await expect(page.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
+    await expect(page.locator('.channelListContainer')).toBeVisible()
+  })
+
+  test('keeps shortcut and saved-channel subpages scrollable in compact layout', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 500,
+        height: 450
+      }))
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.dispatch('updateChannelPlaybackSpeeds', JSON.stringify(Object.fromEntries(
+        Array.from({ length: 8 }, (_, index) => [`channel${index}`, 1 + index / 10])
+      )))
+    })
+    await goTo(page, 'settings')
+    await expect(page.locator('.settingsPage')).toHaveClass(/compactSettings/)
+    const [headerBounds, searchBounds] = await Promise.all([
+      page.locator('.settingsWindowHeader').boundingBox(),
+      page.locator('.settingsSearch').boundingBox()
+    ])
+    expect(searchBounds.x - headerBounds.x).toBeCloseTo(10, 0)
+    expect(headerBounds.x + headerBounds.width - searchBounds.x - searchBounds.width)
+      .toBeCloseTo(10, 0)
+    await page.getByRole('searchbox', { name: 'Search settings' }).fill('FFmpeg Source')
+    await expect(page.locator('.settingsMenu')).toBeHidden()
+    await expect(page.getByRole('button', { name: 'FFmpeg Source', exact: true })).toBeVisible()
+    await page.getByRole('searchbox', { name: 'Search settings' }).fill('')
+    await expect(page.locator('.settingsMenu')).toBeVisible()
+    await page.locator('.settingsMenu [data-section="channel"]').click()
+    await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
+
+    const channelList = page.locator('.channelListContainer')
+    expect(await channelList.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await channelList.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+    })
+    await expect.poll(() => channelList.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
+    const shortcuts = page.locator('.shortcutColumns')
+    expect(await shortcuts.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await shortcuts.evaluate(element => {
+      element.scrollTop = element.scrollHeight
+    })
+    await expect.poll(() => shortcuts.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
+    await expect(page.locator('.settingsMenu')).toBeVisible()
+    await expect(page.locator('.settingsContent')).toBeHidden()
+  })
+
+  test('aligns caption color controls with neighboring selects', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+
+    const edgeStyle = page.getByRole('combobox', { name: 'Edge Style' })
+    await edgeStyle.click()
+    await page.getByRole('option', { name: 'Drop Shadow' }).click()
+
+    const edgeStyleLabel = edgeStyle.locator('..').locator('.select-label')
+    const edgeColorControl = page.locator('.captionColorControl').filter({ hasText: 'Edge Color' })
+    const edgeColorLabel = edgeColorControl.locator(':scope > span')
+    const edgeColorInput = edgeColorControl.locator('input[type="color"]')
+    const [styleLabelBounds, colorLabelBounds, styleInputBounds, colorInputBounds] = await Promise.all([
+      edgeStyleLabel.boundingBox(),
+      edgeColorLabel.boundingBox(),
+      edgeStyle.boundingBox(),
+      edgeColorInput.boundingBox()
+    ])
+
+    expect(colorLabelBounds.y).toBeCloseTo(styleLabelBounds.y, 0)
+    expect(colorInputBounds.y).toBeCloseTo(styleInputBounds.y, 0)
+    expect(colorInputBounds.height).toBeCloseTo(styleInputBounds.height, 0)
+  })
+
+  test('stacks caption controls at narrow settings widths', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 420,
+        height: 700
+      }))
+    })
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
+
+    const preview = page.locator('.captionPreview')
+    const initialPreviewBounds = await preview.boundingBox()
+    await page.getByRole('slider', { name: /Font Size/ }).fill('400')
+    const enlargedPreviewBounds = await preview.boundingBox()
+    expect(initialPreviewBounds.height).toBe(240)
+    expect(enlargedPreviewBounds.height).toBe(initialPreviewBounds.height)
+
+    const controls = page.locator('.captionControls')
+    expect(await controls.evaluate(element => {
+      return getComputedStyle(element).gridTemplateColumns.split(' ').length
+    })).toBe(1)
+    const contentBounds = await page.locator('.settingsContent').boundingBox()
+    expect(await page.locator('.captionControl').evaluateAll((elements, rightEdge) => {
+      return elements.every(element => element.getBoundingClientRect().right <= rightEdge + 1)
+    }, contentBounds.x + contentBounds.width)).toBe(true)
+  })
+
+  test('does not focus a help tooltip when opening Downloads', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="download"]').click()
+
+    await expect(page.locator('.settingsContent [role="tooltip"]:visible')).toHaveCount(0)
+  })
+
+  test('keeps help tooltips inside the settings scroller', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
+        x: 40,
+        y: 40,
+        width: 900,
+        height: 360
+      }))
+    })
+    await goTo(page, 'settings')
+
+    const content = page.locator('.settingsContent')
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    const tooltipButton = content.locator('.selectTooltip .button').last()
+    await tooltipButton.hover()
+    const tooltip = tooltipButton.locator('..').getByRole('tooltip')
+    await expect(tooltip).toBeVisible()
+
+    const contentBounds = await content.boundingBox()
+    await expect.poll(async () => {
+      const tooltipBounds = await tooltip.boundingBox()
+      return tooltipBounds.y + tooltipBounds.height
+    }).toBeLessThanOrEqual(contentBounds.y + contentBounds.height - 7)
   })
 
   test('select dropdowns use overlay scrollbars', async ({ page }) => {
@@ -106,62 +509,49 @@ test.describe('settings', () => {
     expect(await dropdown.evaluate(menu => menu.scrollHeight <= menu.clientHeight)).toBe(true)
   })
 
-  test('retains the mounted page when switching to About and back', async ({ page }) => {
+  test('closes without replacing the underlying page', async ({ page }) => {
+    const url = page.url()
     await goTo(page, 'settings')
-    const settingsPage = page.locator('.settingsPage')
-    await settingsPage.evaluate(element => {
-      element.dataset.cacheTest = 'mounted'
-    })
+    await page.locator('.settingsCloseButton').click()
 
-    await goTo(page, 'about')
-    await expect(page.locator('.about-chunks')).toBeVisible()
-    await expect(settingsPage).toHaveCount(0)
-
-    await goTo(page, 'settings')
-
-    await expect(page.locator('.about-chunks')).toHaveCount(0)
-    await expect(settingsPage).toBeVisible()
-    await expect(settingsPage).toHaveAttribute('data-cache-test', 'mounted')
+    await expect(page.locator('.settingsWindow')).toHaveCount(0)
+    await expect(page).toHaveURL(url)
   })
 
-  test('the current section persists in the URL', async ({ page }) => {
+  test('switches sections without changing the current URL', async ({ page }) => {
+    const url = page.url()
     await goTo(page, 'settings')
 
     const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
     await playerSectionLink.click()
-    await expect(page).toHaveURL(/#\/settings#player$/)
-
-    await page.reload()
     await expect(playerSectionLink).toHaveClass(/active/)
-
-    const playerScrollPosition = await page.evaluate(() => window.scrollY)
-    await page.mouse.wheel(0, 1200)
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(playerScrollPosition)
+    await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+    await expect(page).toHaveURL(url)
   })
 
-  test('keeps the scroll position when switching tabs', async ({ page }) => {
+  test('keeps the window and its scroll position when switching tabs', async ({ page }) => {
     await goTo(page, 'settings')
 
     const playerSectionLink = page.locator('.settingsMenu [data-section="player"]')
     await playerSectionLink.click()
-    await expect(page).toHaveURL(/#\/settings#player$/)
 
-    // Scroll within the section, so the active section (and therefore the hash)
-    // stays the same.
-    const sectionScrollPosition = await page.evaluate(() => window.scrollY)
+    const settingsContent = page.locator('.settingsContent')
+    const sectionScrollPosition = await settingsContent.evaluate(element => element.scrollTop)
+    await settingsContent.hover()
     await page.mouse.wheel(0, 200)
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(sectionScrollPosition)
-    const scrollPosition = await page.evaluate(() => window.scrollY)
+    await expect.poll(() => settingsContent.evaluate(element => element.scrollTop))
+      .toBeGreaterThan(sectionScrollPosition)
+    const scrollPosition = await settingsContent.evaluate(element => element.scrollTop)
     await expect(playerSectionLink).toHaveClass(/active/)
 
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
     await page.locator(sel.tabs).first().click()
     await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
-    await expect(page).toHaveURL(/#\/settings#player$/)
+    await expect(page.locator('.settingsWindow')).toBeVisible()
     await expect(playerSectionLink).toHaveClass(/active/)
 
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollPosition)
+    await expect.poll(() => settingsContent.evaluate(element => element.scrollTop)).toBe(scrollPosition)
   })
 
   test('configures the watched percentage threshold', async ({ page }) => {
@@ -176,9 +566,9 @@ test.describe('settings', () => {
     await expect(threshold).toHaveValue('100')
   })
 
-  test('enables YouTube-style Shorts by default in theme settings', async ({ page }) => {
+  test('enables YouTube-style Shorts by default in player settings', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await page.locator('.settingsMenu [data-section="player"]').click()
 
     const toggle = page.getByRole('checkbox', { name: 'Use YouTube-style Shorts' })
     await expect(toggle).toBeChecked()
@@ -275,6 +665,7 @@ test.describe('settings', () => {
 
   test('links the public sync server privacy policy', async ({ page }) => {
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.locator('label.switch-label').filter({ hasText: 'Enable Sync' }).click()
@@ -299,6 +690,7 @@ test.describe('settings', () => {
       await route.fulfill({ status: 200, body: 'OK' })
     })
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await expect(syncSection.getByLabel('Enable Sync')).not.toBeChecked()
@@ -320,6 +712,7 @@ test.describe('settings', () => {
     }
 
     await page.reload()
+    await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="experimental"]').click()
     await expect(preview.locator('select')).toHaveValue('remix')
     await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
@@ -351,6 +744,7 @@ test.describe('settings', () => {
     expect(errors).toEqual([])
 
     await page.reload()
+    await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="experimental"]').click()
     await expect(select).toHaveValue('fontawesome')
   })
@@ -398,9 +792,7 @@ test.describe('settings', () => {
     await page.locator('label.switch-label').filter({ hasText: 'Auto Load Next Page' }).click()
     await expect(autoLoadToggle).toBeChecked()
 
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Highlight settings changed from defaults' })
-      .click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
     const autoLoadSetting = page.locator('.switch-ctn').filter({ has: autoLoadToggle })
     const resetButton = autoLoadSetting.getByRole('button', { name: 'Reset this setting to its default' })
@@ -415,9 +807,7 @@ test.describe('settings', () => {
   test('highlights and resets caption appearance settings individually', async ({ page }) => {
     await goTo(page, 'settings')
 
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Highlight settings changed from defaults' })
-      .click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.locator('.settingsMenu [data-section="caption-appearance"]').click()
 
     const backgroundOpacity = page.getByRole('slider', { name: /Background Opacity/ })
@@ -443,9 +833,7 @@ test.describe('settings', () => {
   test('highlights and resets SponsorBlock category values individually', async ({ page }) => {
     await goTo(page, 'settings')
 
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Highlight settings changed from defaults' })
-      .click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.locator('.settingsMenu [data-section="sponsor-block"]').click()
     await page.locator('label.switch-label')
       .filter({ hasText: 'Enable SponsorBlock' })
@@ -480,6 +868,7 @@ test.describe('settings', () => {
 
   test('positions toasts and dismisses them towards the configured edge', async ({ page }) => {
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const themeSection = page.locator('[data-section="theme"]')
     const positionSelect = themeSection.locator('.select')
@@ -634,6 +1023,7 @@ test.describe('settings', () => {
 
   test('configures the toast timeout indicator and pauses toasts on hover', async ({ page }) => {
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const themeSection = page.locator('[data-section="theme"]')
     const indicatorToggle = themeSection.getByRole('checkbox', { name: 'Show toast timeout indicator' })
@@ -876,6 +1266,7 @@ test.describe('sync settings', () => {
       }
     })
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
@@ -920,6 +1311,7 @@ test.describe('sync settings', () => {
       await route.fulfill({ status: 200, json: [] })
     })
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
@@ -966,6 +1358,8 @@ test.describe('sync settings', () => {
 
     await goTo(page, 'settings')
     await goTo(otherWindow, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
+    await otherWindow.locator('.settingsMenu [data-section="sync"]').click()
     const firstSyncSection = page.locator('[data-section="sync"]')
     const otherSyncSection = otherWindow.locator('[data-section="sync"]')
 
@@ -1003,6 +1397,7 @@ test.describe('sync settings', () => {
     })
 
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
     await syncSection.getByLabel('Username').fill('sync-user')
@@ -1036,6 +1431,7 @@ test.describe('sync settings', () => {
       }
     })
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Disconnect' }).click()
@@ -1099,6 +1495,7 @@ test.describe('sync settings', () => {
       }
     })
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="sync"]').click()
 
     const syncSection = page.locator('[data-section="sync"]')
     await syncSection.getByRole('button', { name: 'Sync now' }).click()
@@ -1132,6 +1529,7 @@ test.describe('invalid toast position', () => {
 
   test('falls back to bottom left', async ({ page }) => {
     await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const positionSelect = page.locator('[data-section="theme"] .select')
       .filter({ hasText: 'Toast Position' })
@@ -1171,6 +1569,7 @@ test.describe('synced setting indicators', () => {
     await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
 
     await page.reload()
+    await goTo(page, 'settings')
     await expect(syncedLabel.getByRole('button', { name: 'Sync this setting' })).toBeVisible()
 
     const toggle = page.getByRole('checkbox', { name: /Auto load next page/i })
@@ -1185,9 +1584,7 @@ test.describe('synced setting indicators', () => {
 
   test('spaces setting sync and help icons', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Highlight settings changed from defaults' })
-      .click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
     await page.locator('.settingsMenu [data-section="privacy"]').click()
 
     const slider = page.locator('label.pure-material-slider')
@@ -1265,9 +1662,7 @@ test.describe('synced setting indicators', () => {
 
   test('renders select tooltips above neighboring setting indicators', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Highlight settings changed from defaults' })
-      .click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
     const startupSelect = page.locator('.select').filter({ hasText: 'On Startup' })
     await startupSelect.locator('select').selectOption('restoreTabLoadState')

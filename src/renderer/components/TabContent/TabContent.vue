@@ -8,8 +8,8 @@
     :aria-hidden="String(!isPresented)"
   >
     <KeepAlive
-      include="SettingsRoute,AboutRoute"
-      :max="2"
+      include="AboutRoute"
+      :max="1"
     >
       <component
         :is="resolvedComponent"
@@ -45,7 +45,7 @@ import { tabIdKey, tabLifecycleKey, tabPresentedKey } from '../../tabs/TabContex
 
 const TAB_LOADER_SELECTOR = '[data-tab-loading-indicator]'
 const TAB_LOADER_LOADING_SOURCE = 'loader'
-const CACHED_ROUTE_NAMES = new Set(['about', 'settings'])
+const CACHED_ROUTE_NAMES = new Set(['about'])
 
 const props = defineProps({
   tab: {

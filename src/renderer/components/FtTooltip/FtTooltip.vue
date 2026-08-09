@@ -32,36 +32,45 @@ import { useId, useTemplateRef } from 'vue'
 
 const textRef = useTemplateRef('textRef')
 
-// Keep the tooltip inside whatever would otherwise cut it off horizontally. It
+// Keep the tooltip inside whatever would otherwise cut it off. It
 // is positioned purely with CSS relative to its icon, so an icon near the start
 // of a clipping container (the settings page clips with `overflow-x: hidden`)
-// left part of the tooltip unreachable. We compute its shown horizontal extent
-// and offset it back into view via a CSS variable.
-// `offsetLeft`/`offsetWidth` are used because, unlike `getBoundingClientRect()`,
+// can leave part of the tooltip unreachable. We compute its shown extent and
+// offset it back into view via CSS variables.
+// Offset geometry is used because, unlike `getBoundingClientRect()`,
 // they are unaffected by the CSS transform (and its transition), so the shown
 // fade/slide animation is preserved.
 const EDGE_MARGIN = 8
 
 /**
- * The horizontal bounds the tooltip has to stay within: the nearest ancestor
- * that clips horizontally, falling back to the viewport.
+ * The bounds the tooltip has to stay within, intersecting the viewport with
+ * every ancestor that clips either axis.
  *
  * @param {HTMLElement} el
- * @returns {{ min: number, max: number }}
+ * @returns {{ left: number, right: number, top: number, bottom: number }}
  */
-function getHorizontalBounds(el) {
+function getClippingBounds(el) {
+  const bounds = {
+    left: 0,
+    right: window.innerWidth,
+    top: 0,
+    bottom: window.innerHeight
+  }
   for (let node = el.parentElement; node != null; node = node.parentElement) {
-    const overflowX = getComputedStyle(node).overflowX
-    if (overflowX !== 'visible') {
+    const style = getComputedStyle(node)
+    if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
       const rect = node.getBoundingClientRect()
-      return {
-        min: Math.max(0, rect.left),
-        max: Math.min(window.innerWidth, rect.right)
+      if (style.overflowX !== 'visible') {
+        bounds.left = Math.max(bounds.left, rect.left)
+        bounds.right = Math.min(bounds.right, rect.right)
+      }
+      if (style.overflowY !== 'visible') {
+        bounds.top = Math.max(bounds.top, rect.top)
+        bounds.bottom = Math.min(bounds.bottom, rect.bottom)
       }
     }
   }
-
-  return { min: 0, max: window.innerWidth }
+  return bounds
 }
 
 function clampToViewport() {
@@ -73,9 +82,11 @@ function clampToViewport() {
 
   // Measure the unshifted position, so repeated hovers don't compound the shift.
   el.style.setProperty('--ft-tooltip-shift-x', '0px')
+  el.style.setProperty('--ft-tooltip-shift-y', '0px')
 
   const width = el.offsetWidth
-  const parentLeft = offsetParent.getBoundingClientRect().left
+  const height = el.offsetHeight
+  const parentRect = offsetParent.getBoundingClientRect()
   const dir = getComputedStyle(el).direction === 'rtl' ? -1 : 1
 
   // The visible transform's static horizontal translate: centered variants shift
@@ -84,19 +95,29 @@ function clampToViewport() {
     el.classList.contains('bottom-left') ||
     el.classList.contains('top')
   const staticTranslateX = centered ? -0.5 * width * dir : 0
+  const staticTranslateY = centered ? 0 : -0.5 * height
 
-  const left = parentLeft + el.offsetLeft + staticTranslateX
+  const left = parentRect.left + el.offsetLeft + staticTranslateX
   const right = left + width
-  const { min, max } = getHorizontalBounds(el)
+  const top = parentRect.top + el.offsetTop + staticTranslateY
+  const bottom = top + height
+  const bounds = getClippingBounds(el)
 
-  let shift = 0
-  if (left < min + EDGE_MARGIN) {
-    shift = Math.ceil(min + EDGE_MARGIN - left)
-  } else if (right > max - EDGE_MARGIN) {
-    shift = Math.floor(max - EDGE_MARGIN - right)
+  let shiftX = 0
+  let shiftY = 0
+  if (left < bounds.left + EDGE_MARGIN) {
+    shiftX = Math.ceil(bounds.left + EDGE_MARGIN - left)
+  } else if (right > bounds.right - EDGE_MARGIN) {
+    shiftX = Math.floor(bounds.right - EDGE_MARGIN - right)
+  }
+  if (top < bounds.top + EDGE_MARGIN) {
+    shiftY = Math.ceil(bounds.top + EDGE_MARGIN - top)
+  } else if (bottom > bounds.bottom - EDGE_MARGIN) {
+    shiftY = Math.floor(bounds.bottom - EDGE_MARGIN - bottom)
   }
 
-  el.style.setProperty('--ft-tooltip-shift-x', `${shift}px`)
+  el.style.setProperty('--ft-tooltip-shift-x', `${shiftX}px`)
+  el.style.setProperty('--ft-tooltip-shift-y', `${shiftY}px`)
 }
 
 defineProps({

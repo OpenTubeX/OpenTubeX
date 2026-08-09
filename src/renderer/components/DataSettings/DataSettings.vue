@@ -95,41 +95,58 @@
         @click="exportSettings"
       />
     </FtFlexBox>
-    <FtPrompt
-      v-if="showExportSubscriptionsPrompt"
-      autosize
-      :label="$t('Settings.Data Settings.Select Export Type')"
-      :option-names="exportSubscriptionsPromptNames"
-      :option-values="SUBSCRIPTIONS_PROMPT_VALUES"
-      @click="exportSubscriptions"
-    />
-    <FtPrompt
-      v-if="showExportWatchHistoryPrompt"
-      autosize
-      :label="t('Settings.Data Settings.Select Export Type')"
-      :option-names="exportWatchSearchHistoryPromptNames"
-      :option-values="WATCH_SEARCH_HISTORY_PROMPT_VALUES"
-      @click="exportWatchHistory"
-    />
-    <FtPrompt
-      v-if="showExportSearchHistoryPrompt"
-      autosize
-      :label="t('Settings.Data Settings.Select Export Type')"
-      :option-names="exportWatchSearchHistoryPromptNames"
-      :option-values="WATCH_SEARCH_HISTORY_PROMPT_VALUES"
-      @click="exportSearchHistory"
-    />
+    <FtSettingsSubpage
+      :open="showExportSubscriptionsPrompt"
+      :title="t('Settings.Data Settings.Select Export Type')"
+      @close="showExportSubscriptionsPrompt = false"
+    >
+      <FtFlexBox>
+        <FtButton
+          v-for="(name, index) in exportSubscriptionsPromptNames.slice(0, SUBSCRIPTIONS_PROMPT_VALUES.length - 1)"
+          :key="SUBSCRIPTIONS_PROMPT_VALUES[index]"
+          :label="name"
+          @click="exportSubscriptions(SUBSCRIPTIONS_PROMPT_VALUES[index])"
+        />
+      </FtFlexBox>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
+      :open="showExportWatchHistoryPrompt"
+      :title="t('Settings.Data Settings.Select Export Type')"
+      @close="showExportWatchHistoryPrompt = false"
+    >
+      <FtFlexBox>
+        <FtButton
+          v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
+          :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
+          :label="name"
+          @click="exportWatchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
+        />
+      </FtFlexBox>
+    </FtSettingsSubpage>
+    <FtSettingsSubpage
+      :open="showExportSearchHistoryPrompt"
+      :title="t('Settings.Data Settings.Select Export Type')"
+      @close="showExportSearchHistoryPrompt = false"
+    >
+      <FtFlexBox>
+        <FtButton
+          v-for="(name, index) in exportWatchSearchHistoryPromptNames.slice(0, WATCH_SEARCH_HISTORY_PROMPT_VALUES.length)"
+          :key="WATCH_SEARCH_HISTORY_PROMPT_VALUES[index]"
+          :label="name"
+          @click="exportSearchHistory(WATCH_SEARCH_HISTORY_PROMPT_VALUES[index])"
+        />
+      </FtFlexBox>
+    </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
 
@@ -161,10 +178,8 @@ const IMPORT_DIRECTORY_ID = 'data-settings-import'
 const START_IN_DIRECTORY = 'downloads'
 
 const { t } = useI18n()
-const router = useRouter()
-
 function openProfileSettings() {
-  router.push('/settings/profile')
+  store.dispatch('showSettingsWindow', 'profile')
 }
 
 /**

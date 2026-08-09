@@ -47,18 +47,17 @@ function createPreloadedRoute(name, loader) {
   }
 }
 
-const settingsRoute = createPreloadedRoute('SettingsRoute', () => import('../views/Settings/Settings.vue'))
+const settingsWindowRoute = createPreloadedRoute('SettingsWindowRoute', () => import('../views/Settings/Settings.vue'))
 const aboutRoute = createPreloadedRoute('AboutRoute', () => import('../views/About/About.vue'))
-const Settings = settingsRoute.component
+const SettingsRoute = defineAsyncComponent(() => import('../views/Settings/SettingsRoute.vue'))
 const About = aboutRoute.component
-const ProfileSettings = defineAsyncComponent(() => import('../views/ProfileSettings/ProfileSettings.vue'))
 const Stats = defineAsyncComponent(() => import('../views/Stats/Stats.vue'))
 
 // Keep Settings in its own chunk so its styles retain their established load
 // order, but allow the app to evaluate it before the UI can be interacted with.
 // Otherwise the first Settings navigation has to wait for this large chunk.
 export function preloadUtilityRoutes() {
-  return Promise.all([settingsRoute.preload(), aboutRoute.preload()])
+  return Promise.all([settingsWindowRoute.preload(), aboutRoute.preload()])
 }
 
 export const routes = [
@@ -140,7 +139,7 @@ export const routes = [
     meta: {
       title: getFixedInternalRouteTitle('/settings')
     },
-    component: Settings
+    component: SettingsRoute
   },
   {
     path: '/about',
@@ -156,7 +155,7 @@ export const routes = [
     meta: {
       title: getFixedInternalRouteTitle('/settings/profile')
     },
-    component: ProfileSettings
+    component: SettingsRoute
   },
   {
     path: '/search/:query',

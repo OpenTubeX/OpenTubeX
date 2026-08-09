@@ -165,11 +165,11 @@
         </p>
       </router-link>
       <hr>
-      <router-link
-        class="navOption mobileShow smallMobileOnlyHidden"
-        role="button"
-        to="/settings"
+      <button
+        type="button"
+        class="navOption navOptionButton mobileShow smallMobileOnlyHidden"
         :title="settingsTitle"
+        @click="openSettings"
       >
         <div
           class="thumbnailContainer"
@@ -185,7 +185,7 @@
         >
           {{ $t('Settings.Settings') }}
         </p>
-      </router-link>
+      </button>
       <router-link
         class="navOption mobileHidden"
         role="button"
@@ -282,6 +282,10 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 const activeSubscriptionsPerPage = 50
+
+function openSettings() {
+  store.dispatch('toggleSettingsWindow')
+}
 
 const props = defineProps({
   forceExpanded: {

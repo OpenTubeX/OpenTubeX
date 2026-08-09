@@ -61,6 +61,15 @@
   -webkit-user-drag: none;
 }
 
+.navOptionButton {
+  inline-size: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
 .channelLink {
   display: block;
   color: inherit;

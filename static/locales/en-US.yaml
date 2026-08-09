@@ -1058,6 +1058,11 @@ Settings:
   Password Dialog:
     Password: Password
     Enter Password To Unlock: Enter password to unlock settings
+    Incorrect Password: Incorrect password
+    Unlock: Unlock
+    Unlocking: Unlocking…
+  Search Settings: Search settings
+  No Settings Found: No settings found
   Password Settings:
     Password Settings: Password
     Set Password To Prevent Access: Set a password to prevent access to settings

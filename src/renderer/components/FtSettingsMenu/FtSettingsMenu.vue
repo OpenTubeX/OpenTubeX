@@ -1,36 +1,40 @@
 <template>
   <menu
     class="settingsMenu"
+    :class="{ filtered }"
   >
-    <h2 class="header">
-      <FontAwesomeIcon
-        :icon="['fas', 'sliders-h']"
-        class="headingIcon"
-      />
-      {{ $t('Settings.Settings') }}
-    </h2>
-    <a
+    <li
       v-for="settingsSection in settingsSections"
-      ref="linkRefs"
       :key="settingsSection.type"
-      class="title"
-      :class="{ active: activeSection === settingsSection.type }"
-      href="javascript:;"
-      :data-section="settingsSection.type"
-      @click.stop="goToSettingsSection"
-      @keydown.enter.stop="goToSettingsSection"
+      class="titleItem"
     >
-      <div class="titleContent">
-        <div class="iconAndTitleText">
-          <FontAwesomeIcon
-            :icon="settingsSection.icon"
-            class="titleIcon"
-          />
-          {{ settingsSection.title }}
+      <button
+        ref="linkRefs"
+        class="title"
+        :class="{ active: activeSection === settingsSection.type }"
+        type="button"
+        :data-section="settingsSection.type"
+        @click.stop="goToSettingsSection"
+      >
+        <div class="titleContent">
+          <div class="iconAndTitleText">
+            <FontAwesomeIcon
+              :icon="settingsSection.icon"
+              class="titleIcon"
+            />
+            {{ settingsSection.title }}
+          </div>
+          <div class="titleUnderline" />
         </div>
-        <div class="titleUnderline" />
-      </div>
-    </a>
+      </button>
+    </li>
+    <li
+      v-if="settingsSections.length === 0 && emptyMessage"
+    >
+      <p class="emptyMessage">
+        {{ emptyMessage }}
+      </p>
+    </li>
   </menu>
 </template>
 
@@ -46,6 +50,14 @@ defineProps({
   activeSection: {
     type: String,
     default: null
+  },
+  emptyMessage: {
+    type: String,
+    default: ''
+  },
+  filtered: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -65,7 +77,7 @@ defineExpose({
    * @param {string} name
    */
   focusLink: (name) => {
-    linkRefs.value.find((link) => link.dataset.section === name)?.focus()
+    linkRefs.value?.find((link) => link.dataset.section === name)?.focus()
   }
 })
 </script>

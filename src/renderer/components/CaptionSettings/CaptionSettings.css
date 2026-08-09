@@ -1,9 +1,7 @@
 .captionPreview {
   position: relative;
   box-sizing: border-box;
-
-  /* grows with the font size, so large captions still have room in the preview */
-  min-block-size: max(120px, 3em);
+  block-size: 240px;
   margin-block-end: 1rem;
   border-radius: calc(5px * var(--ui-roundness));
   background: linear-gradient(135deg, #576574, #222f3e);
@@ -84,15 +82,25 @@
 }
 
 .captionColorControl {
-  justify-content: space-between;
-  gap: 1rem;
-  color: rgb(var(--primary-text-color) 0.87);
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  color: color-mix(in srgb, var(--primary-text-color) 87%, transparent);
   cursor: pointer;
 }
 
+.captionColorControl > span {
+  min-block-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .captionColorControl input {
-  inline-size: 48px;
-  block-size: 36px;
+  inline-size: 100%;
+  block-size: 45px;
+  box-sizing: border-box;
   padding: 2px;
   border: 1px solid var(--border-color);
   border-radius: calc(4px * var(--ui-roundness));
@@ -107,13 +115,13 @@
   border-block-start: 1px solid var(--border-color);
 }
 
-@media only screen and (width <= 1100px) {
+@container settings-content (width <= 1100px) {
   .captionControls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media only screen and (width <= 680px) {
+@container settings-content (width <= 680px) {
   .captionControls {
     grid-template-columns: minmax(0, 1fr);
   }

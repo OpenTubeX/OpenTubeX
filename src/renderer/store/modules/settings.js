@@ -749,6 +749,10 @@ const customActions = {
         }
       }
 
+      if (state.landingPage === 'settings') {
+        await dispatch('updateLandingPage', 'subscriptions')
+      }
+
       const keyboardShortcutsEntry = userSettings.find(entry => entry._id === 'keyboardShortcuts')
       if (keyboardShortcutsEntry) {
         const sanitizedShortcuts = sanitizeKeyboardShortcutOverrides(keyboardShortcutsEntry.value)
