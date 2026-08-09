@@ -7,8 +7,18 @@ import { repoRoot } from './app.mjs'
 import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
 import { demoPlayerResponse, routeDemoMedia, routeIframeApi, stubPoToken } from './media.mjs'
 
-const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
+const watchFixtures = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
+
+// Recordings are keyed per test title, so the responses one mocked watch page
+// needs are spread over several directories: the page itself in one, the
+// comment pages in the others. The keys are content hashes, so pooling them is
+// safe - a key only ever matches the request it was recorded for.
+const fixtureDirs = [
+  path.join(watchFixtures, 'shows-video-metadata'),
+  path.join(watchFixtures, 'comments-load-on-request'),
+  path.join(watchFixtures, 'edited-comments-carry-the-edited-badge')
+]
 
 /** The history entry the fixtures below belong to. */
 export const watchHistoryEntry = {
@@ -52,6 +62,8 @@ async function fixture(dir, name) {
  * @param {boolean} [options.playable] serve the demo video instead of an error
  */
 export async function mockWatchPage(app, page, { playable = false } = {}) {
+  const counters = new Map()
+
   await stubPoToken(app.electronApp)
 
   await page.route(/^https?:\/\//, (route) => route.abort())
@@ -97,15 +109,33 @@ export async function mockWatchPage(app, page, { playable = false } = {}) {
 
     if (url.includes('/youtubei/v1/')) {
       const key = fixtureKey(url, request.postData())
-      let body = await fixture(fixtureDir, `${key}.0.json.gz`)
+      // Repeated identical requests (comment continuations) are served in the
+      // order they were recorded.
+      const index = counters.get(key) ?? 0
+      counters.set(key, index + 1)
+
+      let body = null
+      for (const dir of fixtureDirs) {
+        body = await fixture(dir, `${key}.${index}.json.gz`) ?? await fixture(dir, `${key}.0.json.gz`)
+        if (body) break
+      }
+
       if (!body) {
         const endpoint = key.replace(/-[0-9a-f]{12}$/, '')
-        const files = (await readdir(fixtureDir)).filter((file) => file.startsWith(`${endpoint}-`))
-        if (files.length > 0) body = await fixture(fixtureDir, files[0])
+        for (const dir of fixtureDirs) {
+          const files = (await readdir(dir).catch(() => []))
+            .filter((file) => file.startsWith(`${endpoint}-`))
+          if (files.length > 0) {
+            body = await fixture(dir, files[0])
+            if (body) break
+          }
+        }
       }
+
       if (body) {
         return route.fulfill({ status: 200, contentType: 'application/json', body })
       }
+      console.warn(`[e2e] Missing watch page fixture: ${key}`)
       return route.abort()
     }
 
