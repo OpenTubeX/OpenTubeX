@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import { createServer } from 'node:http'
 import path from 'node:path'
 
 import { test, expect, sel, goTo } from '../../helpers/app.mjs'
@@ -90,4 +91,54 @@ test('restores tab order, titles, active route, and saved load state across rest
 
   await goTo(page, 'history')
   await expect(restoredTabs.nth(0)).toHaveClass(/active/)
+})
+
+test.describe('active watch tab restore', () => {
+  const watchRestoreSeed = {
+    settings: {
+      backendPreference: 'invidious',
+      defaultInvidiousInstance: '',
+      startupBehavior: 'loadLastActiveTab'
+    },
+    tabSessions: [
+      {
+        _id: 'e2e-window-session',
+        value: {
+          tabs: [
+            {
+              id: WATCH_TAB_ID,
+              url: 'app://bundle/index.html#/watch/jNQXAC9IVRw',
+              title: 'Saved video',
+              isUnloaded: false
+            }
+          ],
+          activeTabId: WATCH_TAB_ID,
+          bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+        }
+      }
+    ]
+  }
+  const invidiousServer = createServer()
+
+  test.use({
+    seed: watchRestoreSeed
+  })
+
+  test.beforeAll(async () => {
+    await new Promise(resolve => invidiousServer.listen(0, '127.0.0.1', resolve))
+    const address = invidiousServer.address()
+    watchRestoreSeed.settings.defaultInvidiousInstance = `http://127.0.0.1:${address.port}`
+  })
+
+  test.afterAll(async () => {
+    invidiousServer.closeAllConnections()
+    await new Promise(resolve => invidiousServer.close(resolve))
+  })
+
+  test('presents the video player skeleton during startup', async ({ page }) => {
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator(
+      '.tabContent[aria-hidden="false"] .videoPlayerPlaceholder.ft-shimmer'
+    )).toBeVisible()
+  })
 })

@@ -63,9 +63,20 @@
 .videoDescription:not(.short) .descriptionStatus {
   display: block;
   position: sticky;
+  z-index: 1;
   inset-block-end: 0;
-  margin-block-start: 1em;
+  margin-block-start: 1.5em;
   background-color: var(--card-bg-color);
+}
+
+.videoDescription:not(.short) .descriptionStatus::before {
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline: 0;
+  block-size: 1.5em;
+  background: linear-gradient(transparent, var(--card-bg-color));
+  pointer-events: none;
+  content: '';
 }
 
 .videoDescription.short .descriptionStatus:dir(rtl)::before {
