@@ -4,7 +4,11 @@ import { START_LOCATION } from 'vue-router'
 import packageDetails from '../../../package.json'
 import { getFixedInternalRouteTitle } from '../../internalRoutes'
 import { translateWindowTitle } from '../helpers/strings'
-import { runPendingViewTransition } from '../helpers/viewTransitions'
+import {
+  hasPendingViewTransition,
+  runPendingViewTransition,
+  takePendingViewTransition
+} from '../helpers/viewTransitions'
 import { cloneRoute, normalizeRoute } from '../store/modules/tabs'
 import { tabLifecycleService } from './TabLifecycleService'
 import { tabMediaCoordinator } from './TabMediaCoordinator'
@@ -12,6 +16,7 @@ import { tabRuntimeRegistry } from './TabRuntimeRegistry'
 
 const TAB_ROUTE_LOADING_MIN_MS = 450
 const TAB_ROUTE_LOADING_SOURCE = 'route'
+const TAB_VIEW_TRANSITION_MAX_AGE_MS = 10_000
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
 
 let service = null
@@ -34,6 +39,7 @@ export class TabNavigationService {
     this.store = store
     this.latestTransitionRequestId = 0
     this.transitionQueue = Promise.resolve()
+    this.pendingPresentation = null
     this.staleTransitionResolvers = new Map()
     this.loadingSourcesByTabId = new Map()
     this.loadingSuppressedTabIds = new Set()
@@ -48,6 +54,13 @@ export class TabNavigationService {
       return Promise.resolve(false)
     }
 
+    if (
+      this.pendingPresentation?.tabId === tabId &&
+      this.pendingPresentation.revision === revision
+    ) {
+      return this.pendingPresentation.promise
+    }
+
     const requestId = ++this.latestTransitionRequestId
     for (const [olderRequestId, resolve] of this.staleTransitionResolvers) {
       if (olderRequestId < requestId) {
@@ -60,7 +73,16 @@ export class TabNavigationService {
       .catch(error => console.error('Logical tab transition failed:', error))
       .then(() => this.presentTab(tabId, revision, requestId))
 
-    return this.transitionQueue
+    const promise = this.transitionQueue
+    this.pendingPresentation = { tabId, revision, promise }
+    const clearPendingPresentation = () => {
+      if (this.pendingPresentation?.promise === promise) {
+        this.pendingPresentation = null
+      }
+    }
+    promise.then(clearPendingPresentation, clearPendingPresentation)
+
+    return promise
   }
 
   async presentTab(tabId, revision, requestId) {
@@ -109,30 +131,54 @@ export class TabNavigationService {
     }
     targetTab = refreshedTargetTab
 
-    await this.projectRoute(targetTab.route)
-    if (this.isTransitionStale(tabId, revision, requestId)) {
-      return false
+    if (
+      targetTab.route.path.startsWith('/watch/') &&
+      hasPendingViewTransition(TAB_VIEW_TRANSITION_MAX_AGE_MS)
+    ) {
+      await waitForTabElement(tabId, '.videoPlayer')
+      if (this.isTransitionStale(tabId, revision, requestId)) {
+        takePendingViewTransition(TAB_VIEW_TRANSITION_MAX_AGE_MS).cancel()
+        return false
+      }
     }
 
-    if (outgoingTabId && outgoingTabId !== tabId) {
-      await tabLifecycleService.run(outgoingTabId, 'deactivate', { toTabId: tabId })
+    // Mount readiness can enqueue a duplicate presentation request. Consume
+    // the morph only after that race has settled so the latest request can use
+    // it instead of the stale one cancelling it.
+    const runTransition = takePendingViewTransition(TAB_VIEW_TRANSITION_MAX_AGE_MS)
+    try {
+      await this.projectRoute(targetTab.route)
+      if (this.isTransitionStale(tabId, revision, requestId)) {
+        return false
+      }
+
+      if (outgoingTabId && outgoingTabId !== tabId) {
+        await tabLifecycleService.run(outgoingTabId, 'deactivate', { toTabId: tabId })
+      }
+
+      if (this.isTransitionStale(tabId, revision, requestId)) {
+        return false
+      }
+
+      await runTransition(async () => {
+        this.store.commit('setPresentedTab', tabId)
+        tabMediaCoordinator.setPresented(tabId)
+        this.projectTitle(tabId)
+        await nextTick()
+      })
+      await nextAnimationFrame()
+      this.restoreScroll(tabId)
+
+      await tabLifecycleService.run(tabId, 'activate', { fromTabId: outgoingTabId })
+      if (this.isTransitionStale(tabId, revision, requestId)) {
+        return false
+      }
+
+      window.ftElectron?.tabs?.presented?.(tabId, revision)
+      return true
+    } finally {
+      runTransition.cancel()
     }
-
-    this.store.commit('setPresentedTab', tabId)
-    tabMediaCoordinator.setPresented(tabId)
-    this.projectTitle(tabId)
-
-    await nextTick()
-    await nextAnimationFrame()
-    this.restoreScroll(tabId)
-
-    await tabLifecycleService.run(tabId, 'activate', { fromTabId: outgoingTabId })
-    if (this.isTransitionStale(tabId, revision, requestId)) {
-      return false
-    }
-
-    window.ftElectron?.tabs?.presented?.(tabId, revision)
-    return true
   }
 
   isTransitionStale(tabId, revision, requestId) {
@@ -695,6 +741,31 @@ function urlFromRoute(route) {
 
 function nextAnimationFrame() {
   return new Promise(resolve => window.requestAnimationFrame(() => resolve()))
+}
+
+function waitForTabElement(tabId, selector, timeout = 3000) {
+  const root = tabRuntimeRegistry.getRoot(tabId)
+  if (!root || root.querySelector(selector)) {
+    return Promise.resolve()
+  }
+
+  return new Promise(resolve => {
+    const finish = () => {
+      window.clearTimeout(timeoutId)
+      observer.disconnect()
+      resolve()
+    }
+    const observer = new MutationObserver(() => {
+      if (root.querySelector(selector)) {
+        finish()
+      }
+    })
+    const timeoutId = window.setTimeout(finish, timeout)
+    observer.observe(root, { childList: true, subtree: true })
+    if (root.querySelector(selector)) {
+      finish()
+    }
+  })
 }
 
 function formatDocumentTitle(title) {

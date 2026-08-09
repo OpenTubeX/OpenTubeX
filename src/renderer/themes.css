@@ -2155,6 +2155,11 @@ a:visited {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+::view-transition-group(new-tab-thumbnail-morph) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: 200ms;
