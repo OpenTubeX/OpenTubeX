@@ -444,6 +444,12 @@ Settings:
     Operation in Progress: Operacja w toku
     Toast Position:
       Toast Position: Pozycja powiadomienia
+      Bottom Left: Dolny lewy
+      Bottom Center: Dolny środek
+      Bottom Right: Dolny prawy
+      Top Left: Górny lewy
+      Top Center: Górny środek
+      Top Right: Górny prawy
   Player Settings:
     Player Settings: 'Odtwarzacz'
     Play Next Video: 'Automatycznie otwórz polecane wideo'
@@ -569,6 +575,8 @@ Settings:
     Show Fast-Forward Through Silence Toggle: Pokaż przełącznik szybkiego przewijania poprzez ciszę
     Hold to Double Playback Speed: Przytrzymaj, aby podwoić prędkość odtwarzania
     Automatically Open Chapters: Automatycznie otwieraj rozdziały
+    Use YouTube-style Shorts: Użyj stylu Filmów Short z YouTube
+    Loop Shorts: Zapętlaj filmy short
   Subscription Settings:
     Subscription Settings: 'Subskrypcje'
     Fetch Feeds from RSS: Pobierz subskrypcje z RSS
