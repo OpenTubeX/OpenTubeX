@@ -48,7 +48,7 @@ test.describe('automatic Picture-in-Picture', () => {
   test.beforeEach(async ({ page, innertube }) => {
     // Auto PiP only applies to a playing video, and recorded fixtures cannot
     // hydrate a watch page or serve media streams.
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for this video')
 
     await stubFocus(page)
     await openVideo(page)

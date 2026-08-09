@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync, gunzipSync } from 'node:zlib'
 
 import { test as baseAppTest, expect, setPlayerFullscreen } from './app.mjs'
+import { demoPlayerResponse, routeDemoMedia, routeIframeApi, stubPoToken } from './media.mjs'
 
 const fixturesRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'innertube')
 
@@ -17,6 +18,9 @@ const VOLATILE_BODY_KEYS = new Set([
   'attestationRequest',
   'botguardResponse'
 ])
+
+/** The recorded player script, used whenever its id doesn't match. */
+export const SHARED_PLAYER_SCRIPT = 'shared-99c4a5c04897'
 
 // Non-Innertube resources youtubei.js needs to bootstrap a session and
 // decipher stream URLs. Shared between tests, keyed by URL path.
@@ -118,11 +122,12 @@ async function writeFixture(dir, name, body) {
  * - record (E2E_RECORD=1): real network, responses are saved as fixtures.
  * - replay (E2E_USE_FIXTURES=1, or automatically on Playwright retry):
  *   Innertube requests are answered from fixtures and all other external
- *   network is blocked, so the run is deterministic. Media streams
- *   (googlevideo.com) are not recorded — playback assertions must be
- *   skipped in replay mode.
+ *   network is blocked, so the run is deterministic. Media streams are not
+ *   recorded; instead the player response is replaced with one that points
+ *   at the local demo video, so playback still works (see media.mjs).
  */
-export async function setupInnertube(page, testInfo) {
+export async function setupInnertube(app, testInfo) {
+  const page = app.page
   const record = !!process.env.E2E_RECORD
   const replay = !record && (!!process.env.E2E_USE_FIXTURES || testInfo.retry > 0)
   const fixtureDir = fixtureDirFor(testInfo)
@@ -135,11 +140,33 @@ export async function setupInnertube(page, testInfo) {
     // that the more specific routes below don't handle.
     await page.route(/^https?:\/\//, (route) => route.abort())
 
+    // BotGuard can't run without YouTube's attestation servers, and the video
+    // load aborts when the poToken is missing.
+    await stubPoToken(app.electronApp)
+    await routeIframeApi(page)
+    await routeDemoMedia(page)
+
     await page.route(/^https?:\/\//, async (route, request) => {
       const url = request.url()
 
+      // The recorded player responses are useless on replay: their stream
+      // URLs expire, and CI recordings are often bot checks to begin with.
+      // The demo video keeps the watch page playable instead.
+      if (url.includes('/youtubei/v1/player')) {
+        const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'e2e-demo'
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(demoPlayerResponse(videoId))
+        })
+      }
+
       if (isSharedResource(url)) {
-        const body = await readFixture(sharedDir, sharedResourceKey(url))
+        // The player script was recorded under the real player id, but
+        // routeIframeApi pins it to a fixed one - fall back to the recorded
+        // script, there is only ever one per recording.
+        const body = await readFixture(sharedDir, sharedResourceKey(url)) ??
+          (url.includes('/s/player/') ? await readFixture(sharedDir, SHARED_PLAYER_SCRIPT) : null)
         if (body) {
           const contentType = url.includes('/s/player/') ? 'text/javascript' : 'application/json'
           return route.fulfill({ status: 200, contentType, body })
@@ -167,7 +194,11 @@ export async function setupInnertube(page, testInfo) {
   } else if (record) {
     await page.route(/^https?:\/\//, async (route, request) => {
       const url = request.url()
-      const recordable = isSharedResource(url) || url.includes('/youtubei/v1/')
+      // Player responses are never replayed (replay serves the demo video
+      // instead), so there is no point in recording their expiring stream
+      // URLs - or the bot checks CI runners usually get back.
+      const recordable = (isSharedResource(url) || url.includes('/youtubei/v1/')) &&
+        !url.includes('/youtubei/v1/player')
       if (!recordable) {
         return route.fallback()
       }
@@ -199,24 +230,19 @@ export async function setupInnertube(page, testInfo) {
     })
   }
 
-  return {
-    record,
-    replay,
-    // Media playback needs real googlevideo.com streams and is impossible
-    // in replay mode. Live tests detect the app's explicit IP-block error
-    // and skip only the affected playback assertion.
-    playback: !replay
-  }
+  // Playback works in every mode: live tests stream from YouTube, replay
+  // plays the local demo video.
+  return { record, replay }
 }
 
 /**
  * App test extended with an `innertube` fixture. Reference it in network
- * tests to get record/replay behaviour; gate playback assertions on
- * `innertube.playback` and data-hydration assertions on `innertube.replay`.
+ * tests to get record/replay behaviour, and gate assertions that need data
+ * only the live API has (or that has no fixtures) on `innertube.replay`.
  */
 export const test = baseAppTest.extend({
   innertube: [async ({ app }, use, testInfo) => {
-    const mode = await setupInnertube(app.page, testInfo)
+    const mode = await setupInnertube(app, testInfo)
     await use(mode)
   }, { auto: true }]
 })

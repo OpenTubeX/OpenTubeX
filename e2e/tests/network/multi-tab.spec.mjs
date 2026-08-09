@@ -41,8 +41,7 @@ async function expectPictureInPicture(video, active) {
 }
 
 // Regression: quick playback speed state leaked between tabs (021b06197)
-test('playback speed is isolated per tab', async ({ page, innertube }) => {
-  test.skip(!innertube.playback, 'needs real media streams')
+test('playback speed is isolated per tab', async ({ page }) => {
   test.slow()
 
   await openVideoInActiveTab(page, VIDEO_ONE)
@@ -64,8 +63,7 @@ test('playback speed is isolated per tab', async ({ page, innertube }) => {
 
 // Regression: measuring the hidden player's control bar could enter a
 // resize/mutation loop and make the renderer stop processing all input.
-test('switching away from a playing video keeps the renderer responsive', async ({ page, innertube }) => {
-  test.skip(!innertube.playback, 'needs real media streams')
+test('switching away from a playing video keeps the renderer responsive', async ({ page }) => {
   test.slow()
 
   await openVideoInActiveTab(page, VIDEO_ONE)
@@ -91,7 +89,7 @@ test.describe('automatic picture-in-picture', () => {
   // Regression: the blur emitted while minimizing kept the blur trigger active
   // after restore, so the automatically opened PiP window never closed (#265).
   test('exits PiP after restoring a minimized window', async ({ app, page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for these videos')
     test.slow()
 
     const video = await openVideoInActiveTab(page, VIDEO_ONE)
@@ -106,7 +104,7 @@ test.describe('automatic picture-in-picture', () => {
   // Regression: Chromium on Windows can briefly stretch the poster across the
   // compositor surface when blur-triggered PiP detaches a playing video (#362).
   test('removes the poster before blur-triggered PiP', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for these videos')
     test.slow()
 
     const video = await openVideoInActiveTab(page, VIDEO_ONE)
@@ -123,7 +121,7 @@ test.describe('automatic picture-in-picture', () => {
   // Regression: play events from an inactive logical tab were rejected even
   // when that tab's video was still presented in the native PiP window (#266).
   test('resumes PiP playback from an inactive tab while minimized', async ({ app, page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for these videos')
     test.slow()
 
     const video = await openVideoInActiveTab(page, VIDEO_ONE)

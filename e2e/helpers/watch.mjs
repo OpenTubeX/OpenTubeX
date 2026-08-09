@@ -4,7 +4,8 @@ import path from 'node:path'
 import { gunzipSync } from 'node:zlib'
 
 import { repoRoot } from './app.mjs'
-import { fixtureKey } from './innertube.mjs'
+import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
+import { demoPlayerResponse, routeDemoMedia, routeIframeApi, stubPoToken } from './media.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -36,19 +37,30 @@ async function fixture(dir, name) {
 }
 
 /**
- * Serves the watch page from fixtures with an unplayable video, so the Watch
- * view mounts without a real player emitting errors of its own.
+ * Serves the watch page for `jNQXAC9IVRw` from the committed Innertube
+ * fixtures, without any network access.
+ *
+ * The recorded player responses are unusable (expired stream URLs, and CI
+ * recordings are usually bot checks), so the player response is synthesized:
+ * either playable — backed by the local demo video, see media.mjs — or
+ * explicitly unplayable, which mounts the Watch view without a real player
+ * emitting errors of its own.
  *
  * @param {import('./app.mjs').ElectronAppFixture} app
  * @param {import('@playwright/test').Page} page
+ * @param {object} [options]
+ * @param {boolean} [options.playable] serve the demo video instead of an error
  */
-export async function mockUnplayableWatchPage(app, page) {
-  await app.electronApp.evaluate(({ ipcMain }) => {
-    ipcMain.removeHandler('generate-po-token')
-    ipcMain.handle('generate-po-token', () => 'test-po-token')
-  })
+export async function mockWatchPage(app, page, { playable = false } = {}) {
+  await stubPoToken(app.electronApp)
 
   await page.route(/^https?:\/\//, (route) => route.abort())
+  await routeIframeApi(page)
+
+  if (playable) {
+    await routeDemoMedia(page)
+  }
+
   await page.route(/^https?:\/\//, async (route, request) => {
     const url = request.url()
 
@@ -60,7 +72,7 @@ export async function mockUnplayableWatchPage(app, page) {
       const { pathname } = new URL(url)
       const name = `shared-${crypto.createHash('sha1').update(pathname).digest('hex').slice(0, 12)}.gz`
       const body = await fixture(sharedDir, name) ??
-        (url.includes('/s/player/') ? await fixture(sharedDir, 'shared-99c4a5c04897.gz') : null)
+        (url.includes('/s/player/') ? await fixture(sharedDir, `${SHARED_PLAYER_SCRIPT}.gz`) : null)
       if (body) {
         return route.fulfill({
           status: 200,
@@ -72,11 +84,14 @@ export async function mockUnplayableWatchPage(app, page) {
     }
 
     if (url.includes('/youtubei/v1/player')) {
-      const files = await readdir(fixtureDir)
-      const body = await fixture(fixtureDir, files.find((file) => file.startsWith('player-')))
-      const json = JSON.parse(body.toString())
-      json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
-      delete json.streamingData
+      const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
+      const json = demoPlayerResponse(videoId)
+
+      if (!playable) {
+        json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
+        delete json.streamingData
+      }
+
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(json) })
     }
 
@@ -96,6 +111,16 @@ export async function mockUnplayableWatchPage(app, page) {
 
     return route.fallback()
   })
+}
+
+/** @see mockWatchPage */
+export function mockUnplayableWatchPage(app, page) {
+  return mockWatchPage(app, page, { playable: false })
+}
+
+/** @see mockWatchPage */
+export function mockPlayableWatchPage(app, page) {
+  return mockWatchPage(app, page, { playable: true })
 }
 
 /**

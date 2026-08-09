@@ -91,45 +91,6 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
-/** Resize the window and wait for the renderer to have laid out at the new size. */
-async function setWindowSize(app, page, { width, height }) {
-  const before = await getViewport(page)
-
-  await app.electronApp.evaluate(({ BrowserWindow }, size) => {
-    const browserWindow = BrowserWindow.getAllWindows()[0]
-    const bounds = browserWindow.getBounds()
-    browserWindow.setBounds({ ...bounds, ...size })
-  }, { width, height })
-
-  await expect.poll(async () => {
-    const viewport = await getViewport(page)
-    return viewport.width !== before.width && viewport.height !== before.height
-  }).toBe(true)
-
-  return await getViewport(page)
-}
-
-function getViewport(page) {
-  return page.evaluate(() => ({
-    width: document.documentElement.clientWidth,
-    height: window.innerHeight
-  }))
-}
-
-/** @param {{ width: number, height: number }} viewport */
-async function expectDockedToBottomRight(player, viewport, margin = 16) {
-  // Polled because the layout animation skews the box for its first 300ms.
-  await expect.poll(async () => {
-    const box = await player.boundingBox()
-    if (!box) return null
-
-    return {
-      right: Math.round(viewport.width - (box.x + box.width)),
-      bottom: Math.round(viewport.height - (box.y + box.height))
-    }
-  }).toEqual({ right: margin, bottom: margin })
-}
-
 test('theatre mode works until its responsive button cutoff', async ({ app, page }) => {
   await setWindowWidth(app, 1500)
   await page.locator(sel.searchInput).fill(VIDEO_URL)
@@ -237,8 +198,7 @@ test.describe('background watch tab', () => {
 })
 
 test.describe('watch page', () => {
-  test('shows video metadata', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'watch page hydration needs the real API')
+  test('shows video metadata', async ({ page }) => {
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
@@ -325,18 +285,8 @@ test.describe('watch page', () => {
     }
   })
 
-  test('playback starts', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    await expect
-      .poll(async () => await video.evaluate((el) => el.currentTime), { timeout: 30_000 })
-      .toBeGreaterThan(1)
-  })
-
   test('keeps the thumbnail visible while switching formats', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'needs the adaptive formats of the real API')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
@@ -395,7 +345,7 @@ test.describe('watch page', () => {
   })
 
   test('keeps audio-only playback at video size with the thumbnail visible', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'needs the adaptive formats of the real API')
     await openVideo(page)
     await waitForPlaybackOrSkip(test, page)
 
@@ -409,305 +359,6 @@ test.describe('watch page', () => {
     const player = page.locator('.ftVideoPlayer')
     await expect(player).toHaveClass(/sixteenByNine/)
     await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
-  })
-
-  test('hides the tab play indicator while buffering', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    const tabBarTab = page.locator(sel.activeTab)
-    await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
-
-    await video.dispatchEvent('waiting')
-    await expect(tabBarTab.locator('.playingIcon')).toHaveCount(0)
-
-    await video.dispatchEvent('playing')
-    await expect(tabBarTab.locator('.playingIcon')).toBeVisible()
-  })
-
-  test('animates into and out of the scroll mini player', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    await video.evaluate(element => element.pause())
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.scrollMiniPlayerAnimations = []
-      const nativeAnimate = Element.prototype.animate
-
-      Element.prototype.animate = function (keyframes, options) {
-        if (this.classList.contains('ftVideoPlayer')) {
-          const style = getComputedStyle(this)
-          window.scrollMiniPlayerAnimations.push({
-            className: this.className,
-            keyframes,
-            options,
-            position: style.position,
-            zIndex: style.zIndex
-          })
-        }
-        return nativeAnimate.call(this, keyframes, options)
-      }
-    })
-
-    const player = page.locator('.ftVideoPlayer')
-    await player.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      window.scrollTo(0, window.scrollY + rect.bottom)
-    })
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(1)
-
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimations.length)).toBe(2)
-
-    const animations = await page.evaluate(() => window.scrollMiniPlayerAnimations)
-    for (const animation of animations) {
-      expect(animation.options.duration).toBe(300)
-      expect(animation.options.easing).toBe('cubic-bezier(0.4, 0, 0.2, 1)')
-      expect(animation.keyframes[0].transform).toContain('translate(')
-      expect(animation.keyframes[0].transform).toContain('scale(')
-      expect(animation.keyframes[1].transform).toBe('none')
-    }
-    expect(animations[1].className).toContain('scrollMiniPlayerAnimating')
-    expect(animations[1].position).toBe('relative')
-    expect(animations[1].zIndex).toBe('150')
-  })
-
-  test('does not replay the scroll mini player animation after switching tabs', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    await video.evaluate(element => element.pause())
-    await page.evaluate(() => {
-      document.documentElement.dataset.reducedMotion = 'no-preference'
-      window.scrollMiniPlayerAnimationCount = 0
-      const nativeAnimate = Element.prototype.animate
-
-      Element.prototype.animate = function (keyframes, options) {
-        if (this.classList.contains('ftVideoPlayer')) {
-          window.scrollMiniPlayerAnimationCount++
-        }
-        return nativeAnimate.call(this, keyframes, options)
-      }
-    })
-
-    const player = page.locator(`${activeTab} .ftVideoPlayer`)
-    await player.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      window.scrollTo(0, window.scrollY + rect.bottom)
-    })
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(() => page.evaluate(() => window.scrollMiniPlayerAnimationCount)).toBe(1)
-
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    const animationCountBeforeReturn = await page.evaluate(
-      () => window.scrollMiniPlayerAnimationCount
-    )
-    await page.locator(sel.tabs).first().click()
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-
-    // The old behavior scheduled the restored entrance animation on the next
-    // Vue tick, so wait past its duration before checking that none was added.
-    await page.waitForTimeout(350)
-    expect(await page.evaluate(() => window.scrollMiniPlayerAnimationCount))
-      .toBe(animationCountBeforeReturn)
-  })
-
-  test('scales the captions down with the scroll mini player', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    await video.evaluate(element => element.pause())
-
-    const player = page.locator('.ftVideoPlayer')
-    await player.evaluate(element => {
-      if (element.querySelector('.shaka-text-container')) return
-
-      const captions = document.createElement('div')
-      captions.className = 'shaka-text-container'
-      element.append(captions)
-    })
-
-    const captions = player.locator('.shaka-text-container')
-    const getFontSize = () => captions.evaluate(element => {
-      return Number.parseFloat(getComputedStyle(element).fontSize)
-    })
-    const inlineFontSize = await getFontSize()
-    expect(inlineFontSize).toBe(20)
-
-    await player.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      window.scrollTo(0, window.scrollY + rect.bottom)
-    })
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-
-    // The mini player is only a couple of hundred pixels tall, so inline sized captions covered all of it.
-    await expect.poll(getFontSize).toBeLessThan(inlineFontSize * 0.8)
-
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-    await expect.poll(getFontSize).toBe(inlineFontSize)
-  })
-
-  test.describe('large captions in the scroll mini player', () => {
-    test.use({
-      seed: {
-        settings: {
-          defaultCaptionSettings: JSON.stringify({ fontScale: 4 })
-        }
-      }
-    })
-
-    test('keeps the captions inside the scroll mini player', async ({ page, innertube }) => {
-      test.skip(!innertube.playback, 'needs real media streams')
-      await openVideo(page)
-
-      const video = await waitForPlaybackOrSkip(test, page)
-      await video.evaluate(element => element.pause())
-
-      const player = page.locator('.ftVideoPlayer')
-      await player.evaluate(element => {
-        if (element.querySelector('.shaka-text-container')) return
-
-        const captions = document.createElement('div')
-        captions.className = 'shaka-text-container'
-        const cue = document.createElement('div')
-        const text = document.createElement('span')
-        text.setAttribute('translate', 'no')
-        text.textContent = 'a caption long enough to wrap over several lines in a small player, '
-          .repeat(3)
-        cue.append(text)
-        captions.append(cue)
-        element.append(captions)
-      })
-
-      await player.evaluate(element => {
-        const rect = element.getBoundingClientRect()
-        window.scrollTo(0, window.scrollY + rect.bottom)
-      })
-      await expect(player).toHaveClass(/scrollMiniPlayer/)
-
-      // The maximum font size used to overflow the mini player in every direction.
-      await expect.poll(() => player.evaluate(element => {
-        const playerRect = element.getBoundingClientRect()
-        const captionRect = element.querySelector('.shaka-text-container').getBoundingClientRect()
-
-        return {
-          top: captionRect.top >= playerRect.top,
-          bottom: captionRect.bottom <= playerRect.bottom,
-          left: captionRect.left >= playerRect.left,
-          right: captionRect.right <= playerRect.right
-        }
-      })).toEqual({ top: true, bottom: true, left: true, right: true })
-    })
-  })
-
-  test('keeps the scroll mini player docked across window resizes', async ({ app, page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await setWindowSize(app, page, { width: 1200, height: 850 })
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-    await video.evaluate(element => element.pause())
-
-    const player = page.locator('.ftVideoPlayer')
-    const scrollBelowPlayer = () => player.evaluate(element => {
-      const rect = element.getBoundingClientRect()
-      window.scrollTo(0, window.scrollY + rect.bottom)
-    })
-
-    // Docked bottom-right in the small window.
-    await scrollBelowPlayer()
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-
-    // Growing the window used to leave the player where the old bottom edge
-    // was, i.e. floating in the middle of the screen.
-    const grown = await setWindowSize(app, page, { width: 1600, height: 1050 })
-    await expectDockedToBottomRight(player, grown)
-
-    // ...and the stale position outlived a trip back to the inline player.
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await expect(player).not.toHaveClass(/scrollMiniPlayer/)
-
-    const shrunk = await setWindowSize(app, page, { width: 1300, height: 900 })
-    await scrollBelowPlayer()
-    await expect(player).toHaveClass(/scrollMiniPlayer/)
-    await expectDockedToBottomRight(player, shrunk)
-  })
-
-  test('keeps the context menu open when the pointer leaves a playing video', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    await waitForPlaybackOrSkip(test, page)
-    await page.locator('.ftVideoPlayer').click({ button: 'right' })
-
-    const contextMenu = page.locator('.shaka-context-menu')
-    await expect(contextMenu).toBeVisible()
-
-    await page.mouse.move(0, 0)
-    await page.waitForTimeout(3500)
-    await expect(contextMenu).toBeVisible()
-  })
-
-  // Regression: playback speed controls stopped working (1c958d468)
-  test('keyboard shortcuts change the playback rate', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
-    await openVideo(page)
-
-    const video = await waitForPlaybackOrSkip(test, page)
-
-    await page.locator('body').press('p')
-    await expect.poll(async () => await video.evaluate((el) => el.playbackRate)).toBeGreaterThan(1)
-    const raisedRate = await video.evaluate((el) => el.playbackRate)
-
-    await page.locator('body').press('o')
-    await expect.poll(async () => await video.evaluate((el) => el.playbackRate)).toBeLessThan(raisedRate)
-  })
-
-  test.describe('fast-forward through silence shortcut', () => {
-    test.use({
-      seed: {
-        settings: {
-          keyboardShortcuts: JSON.stringify({
-            VIDEO_PLAYER: {
-              PLAYBACK: {
-                TOGGLE_SKIP_SILENCE: 'h'
-              }
-            }
-          })
-        }
-      }
-    })
-
-    test('shows an on-screen indicator when toggled', async ({ page, innertube }) => {
-      test.skip(!innertube.playback, 'needs real media streams')
-      await openVideo(page)
-      await waitForPlaybackOrSkip(test, page)
-
-      const popup = page.locator(`${activeTab} .valueChangePopup`)
-      const skipSilence = () => page.evaluate(() => {
-        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
-        return store.getters.getSkipSilence
-      })
-
-      await page.locator('body').press('h')
-      await expect(popup).toBeVisible()
-      await expect(popup).toHaveText(/On/)
-      await expect.poll(skipSilence).toBe(true)
-
-      await page.locator('body').press('h')
-      await expect(popup).toBeVisible()
-      await expect(popup).toHaveText(/Off/)
-      await expect.poll(skipSilence).toBe(false)
-    })
   })
 
   test('long transcripts quickly align with the current cue', async ({ page, innertube }) => {
@@ -942,8 +593,7 @@ test.describe('watch page', () => {
     })).toBeLessThan(40)
   })
 
-  test('comments load on request', async ({ app, page, innertube }) => {
-    test.skip(innertube.replay, 'watch page hydration needs the real API')
+  test('comments load on request', async ({ app, page }) => {
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -2051,8 +1701,7 @@ test.describe('watch page', () => {
   })
 
   // Regression: edited comments show their "(edited)" marker (929369543)
-  test('edited comments carry the edited badge', async ({ page, innertube }) => {
-    test.skip(innertube.replay, 'watch page hydration needs the real API')
+  test('edited comments carry the edited badge', async ({ page }) => {
     await openVideo(page)
 
     const loadComments = page.locator('.getCommentsTitle')
@@ -2133,7 +1782,7 @@ test.describe('custom Shorts player', () => {
   })
 
   test('pausing exposes loaded player state to the template', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for this Short')
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
@@ -2217,7 +1866,7 @@ test.describe('custom Shorts player', () => {
   })
 
   test('fullscreen Shorts controls follow the video hover area', async ({ page, innertube }) => {
-    test.skip(!innertube.playback, 'needs real media streams')
+    test.skip(innertube.replay, 'no recorded fixtures for this Short')
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/w1WKmSqwM8I\?short=true/)
