@@ -187,6 +187,7 @@ test.describe('new subscriptions feed', () => {
 
     await expect(video).toBeVisible()
     await expect(video.locator('.newContentDot')).toHaveCount(0)
+    await expect(video).not.toHaveClass(/watched/)
 
     await video.hover()
     await video.locator('.optionsButton').click()
