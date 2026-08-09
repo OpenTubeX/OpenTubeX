@@ -274,7 +274,7 @@
         v-if="showDownloadPrompt"
         :playlist-id="isUserPlaylist ? '' : id"
         :playlist-key="id"
-        :video-ids="isUserPlaylist ? sortedVideos.map(video => video.videoId) : []"
+        :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
         :is-playlist="true"
         :title="title"
         :thumbnail="thumbnail"

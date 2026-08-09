@@ -103,6 +103,64 @@ test.describe('video downloads', () => {
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
   })
 
+  test('rejects custom arguments that can execute external code', async ({ page }) => {
+    const customArguments = [
+      '--exec "echo unsafe"',
+      '--config-location=/tmp/yt-dlp.conf',
+      '--external-downloader custom-binary',
+      '--plugin-dirs /tmp/plugins'
+    ]
+    await page.bringToFront()
+    const results = await page.evaluate((args) => Promise.all(args.map(customArgs => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      mode: 'video',
+      customArgs
+    }))), customArguments)
+    expect(results).toEqual(customArguments.map(() => ({ error: 'unsupported-custom-argument' })))
+  })
+
+  test('escapes percent signs in local playlist folder names', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'Top 100%(title)s',
+      mode: 'video'
+    }))
+
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('Top 100%%(title)s')
+  })
+
+  test('keeps untitled multi-video downloads in history', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, '#!/bin/sh\nsleep 0.2\n')
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      mode: 'video'
+    }))
+    await expect.poll(() => page.evaluate(async (id) => {
+      const downloads = await window.ftElectron.ytDlpListDownloads()
+      return downloads.find(download => download.id === id)
+    }, result.id)).toMatchObject({ title: '', status: 'completed' })
+  })
+
   test('broadcasts active downloads to other windows', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     await writeFile(executable, '#!/bin/sh\nprintf "[download] 10.0%% at 1MiB/s ETA 00:10\\n"\nexec sleep 30\n')

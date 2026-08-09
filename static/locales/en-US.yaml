@@ -1945,7 +1945,7 @@ Downloads:
   Show in Folder: Show in Folder
   Remove File: Remove File
   Remove File Confirmation: Remove downloaded file?
-  Remove File Warning: 'This will permanently delete "{title}" from your device.'
+  Remove File Warning: 'This will move "{title}" to your device trash.'
   File Not Found: The downloaded file could not be found.
   Download Type: Download Type
   Template: Template

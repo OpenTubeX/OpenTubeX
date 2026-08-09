@@ -80,6 +80,19 @@ const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
+const DENIED_CUSTOM_ARGS = [
+  '--alias',
+  '--config-location',
+  '--config-locations',
+  '--downloader',
+  '--downloader-args',
+  '--exec',
+  '--exec-before-download',
+  '--external-downloader',
+  '--external-downloader-args',
+  '--ffmpeg-location',
+  '--plugin-dirs'
+]
 const TIME_REGEX = /^(?:\d+:)?[0-5]?\d:[0-5]\d(?:\.\d+)?$/
 const YT_DLP_RELEASE_REPOSITORIES = {
   stable: 'yt-dlp/yt-dlp',
@@ -98,11 +111,12 @@ let downloadRecordsSaveQueue = Promise.resolve()
 const activeDownloads = new Map()
 /** @type {Map<number, YtDlpDownloadStatus>} */
 const downloadRecords = new Map()
-let downloadRecordsLoaded = false
+/** @type {Promise<void> | null} */
+let downloadRecordsLoadPromise = null
 
 function broadcastToRenderers(channel, payload) {
   for (const browserWindow of BrowserWindow.getAllWindows()) {
-    if (!browserWindow.webContents.isDestroyed()) {
+    if (!browserWindow.webContents.isDestroyed() && isOpenTubeXUrl(browserWindow.webContents.getURL())) {
       browserWindow.webContents.send(channel, payload)
     }
   }
@@ -112,23 +126,23 @@ function getDownloadRecordsPath() {
   return join(app.getPath('userData'), 'downloads.json')
 }
 
-async function loadDownloadRecords() {
-  if (downloadRecordsLoaded) return
-  downloadRecordsLoaded = true
-
-  try {
-    const records = JSON.parse(await readFile(getDownloadRecordsPath(), 'utf8'))
-    if (!Array.isArray(records)) return
-    for (const record of records) {
-      if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
-        ['completed', 'failed', 'cancelled'].includes(record.status)) {
-        downloadRecords.set(record.id, record)
-        downloadCounter = Math.max(downloadCounter, record.id)
+function loadDownloadRecords() {
+  downloadRecordsLoadPromise ??= (async () => {
+    try {
+      const records = JSON.parse(await readFile(getDownloadRecordsPath(), 'utf8'))
+      if (!Array.isArray(records)) return
+      for (const record of records) {
+        if (Number.isInteger(record?.id) && typeof record.title === 'string' &&
+          ['completed', 'failed', 'cancelled'].includes(record.status)) {
+          if (!downloadRecords.has(record.id)) downloadRecords.set(record.id, record)
+          downloadCounter = Math.max(downloadCounter, record.id)
+        }
       }
+    } catch (error) {
+      if (error.code !== 'ENOENT') console.warn('Could not load download history', error)
     }
-  } catch (error) {
-    if (error.code !== 'ENOENT') console.warn('Could not load download history', error)
-  }
+  })()
+  return downloadRecordsLoadPromise
 }
 
 function saveDownloadRecords() {
@@ -988,7 +1002,7 @@ export async function handleYtDlpDownload(event, payload) {
         if (character.charCodeAt(0) < 32) return '_'
         return character
       }).join('')
-      .replace(/[. ]+$/, '').slice(0, 120) || 'Playlist'
+      .replace(/[. ]+$/, '').slice(0, 120).replaceAll('%', '%%') || 'Playlist'
     : 'Playlist'
   const templateFields = {
     title: '%(title)s',
@@ -1071,7 +1085,11 @@ export async function handleYtDlpDownload(event, payload) {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
   if (typeof payload.customArgs === 'string' && payload.customArgs.trim() !== '') {
-    args.push(...splitArguments(payload.customArgs))
+    const customArgs = splitArguments(payload.customArgs)
+    if (customArgs.some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
+      return { error: 'unsupported-custom-argument' }
+    }
+    args.push(...customArgs)
   }
 
   if (isRemotePlaylist) {
@@ -1103,7 +1121,7 @@ export async function handleYtDlpDownload(event, payload) {
     videoId: isSingleVideo ? payload.videoId : '',
     playlistId: typeof payload.playlistId === 'string' ? payload.playlistId.slice(0, 128) : '',
     playlistKey: typeof payload.playlistKey === 'string' ? payload.playlistKey.slice(0, 255) : '',
-    title: typeof payload.title === 'string' ? payload.title.slice(0, 255) : payload.videoId ?? payload.playlistId,
+    title: typeof payload.title === 'string' ? payload.title.slice(0, 255) : payload.videoId ?? payload.playlistId ?? '',
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
     status: 'downloading',
     percent: 0,
@@ -1287,9 +1305,18 @@ export async function handleYtDlpRemoveDownload(event, id) {
     return false
   }
 
+  let trashed = false
   for (const destination of destinations) {
-    if (existsSync(destination)) await shell.trashItem(destination)
+    if (!existsSync(destination)) continue
+    try {
+      await shell.trashItem(destination)
+      trashed = true
+    } catch (error) {
+      console.warn('Could not move download to trash', destination, error)
+    }
   }
+  if (!trashed) return false
+
   downloadRecords.delete(id)
   await saveDownloadRecords()
   broadcastToRenderers(IpcChannels.YT_DLP_DOWNLOADS_REMOVED, [id])
