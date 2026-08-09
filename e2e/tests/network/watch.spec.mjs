@@ -275,6 +275,19 @@ test.describe('watch page', () => {
     const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
     await expect(collapseControl).toBeVisible()
     await expect(collapseControl).toHaveCSS('position', 'sticky')
+    const collapseControlStyles = await collapseControl.evaluate(element => {
+      const style = getComputedStyle(element)
+      const fadeStyle = getComputedStyle(element, '::before')
+      return {
+        fadeBackground: fadeStyle.backgroundImage,
+        fadeHeight: Number.parseFloat(fadeStyle.height),
+        fontSize: Number.parseFloat(style.fontSize),
+        marginBlockStart: Number.parseFloat(style.marginBlockStart)
+      }
+    })
+    expect(collapseControlStyles.fadeBackground).toContain('linear-gradient')
+    expect(collapseControlStyles.fadeHeight).toBeGreaterThan(0)
+    expect(collapseControlStyles.marginBlockStart).toBeGreaterThan(collapseControlStyles.fontSize)
     const maxScrollTop = await descriptionScroll.evaluate(element =>
       element.scrollHeight - element.clientHeight
     )

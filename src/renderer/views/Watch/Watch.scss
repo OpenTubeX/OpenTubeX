@@ -10,11 +10,6 @@
   grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / minmax(0, 1fr);
 }
 
-.videoPlayerPlaceholder {
-  aspect-ratio: 16 / 9;
-  inline-size: 100%;
-}
-
 .streamPlaceholder {
   background-color: #000;
   display: grid;
@@ -120,6 +115,11 @@
 
   align-items: start;
   display: grid;
+
+  .videoPlayerPlaceholder {
+    aspect-ratio: 16 / 9;
+    inline-size: 100%;
+  }
 
   .videoArea {
     grid-area: video;
