@@ -67,52 +67,59 @@
               class="submenu"
               role="menu"
             >
-              <template
-                v-for="(child, childIndex) in item.submenu"
-                :key="child.actionId ?? `separator-${childIndex}`"
+              <!-- Presentational scrollport: keeps the hover bridge on .submenu
+                   from becoming scrollable overflow -->
+              <div
+                class="submenuScroll"
+                role="none"
               >
-                <div
-                  v-if="child.type === 'separator'"
-                  class="separator"
-                  role="separator"
-                />
-                <button
-                  v-else
-                  class="menuItem"
-                  :class="{ disabled: !child.enabled }"
-                  type="button"
-                  :role="child.type === 'radio' ? 'menuitemradio' : 'menuitem'"
-                  :aria-checked="child.type === 'radio' ? child.checked : undefined"
-                  :disabled="!child.enabled"
-                  @pointerdown.prevent
-                  @click="execute(child)"
+                <template
+                  v-for="(child, childIndex) in item.submenu"
+                  :key="child.actionId ?? `separator-${childIndex}`"
                 >
-                  <span
-                    class="itemIcon"
-                    :class="getItemIconClass(child)"
-                    aria-hidden="true"
+                  <div
+                    v-if="child.type === 'separator'"
+                    class="separator"
+                    role="separator"
+                  />
+                  <button
+                    v-else
+                    class="menuItem"
+                    :class="{ disabled: !child.enabled }"
+                    type="button"
+                    :role="child.type === 'radio' ? 'menuitemradio' : 'menuitem'"
+                    :aria-checked="child.type === 'radio' ? child.checked : undefined"
+                    :disabled="!child.enabled"
+                    @pointerdown.prevent
+                    @click="execute(child)"
                   >
-                    <img
-                      v-if="hasImageIcon(child)"
-                      class="itemImageIcon"
-                      :src="child.icon"
-                      alt=""
-                      referrerpolicy="no-referrer"
-                      @error="handleImageIconError(child.icon)"
+                    <span
+                      class="itemIcon"
+                      :class="getItemIconClass(child)"
+                      aria-hidden="true"
                     >
-                    <FontAwesomeIcon
-                      v-else
-                      :icon="getItemIcon(child, item.label)"
-                    />
-                    <FontAwesomeIcon
-                      v-if="child.checked"
-                      class="checkedMark"
-                      :icon="['fas', 'check']"
-                    />
-                  </span>
-                  <span>{{ localizedLabel(child) }}</span>
-                </button>
-              </template>
+                      <img
+                        v-if="hasImageIcon(child)"
+                        class="itemImageIcon"
+                        :src="child.icon"
+                        alt=""
+                        referrerpolicy="no-referrer"
+                        @error="handleImageIconError(child.icon)"
+                      >
+                      <FontAwesomeIcon
+                        v-else
+                        :icon="getItemIcon(child, item.label)"
+                      />
+                      <FontAwesomeIcon
+                        v-if="child.checked"
+                        class="checkedMark"
+                        :icon="['fas', 'check']"
+                      />
+                    </span>
+                    <span>{{ localizedLabel(child) }}</span>
+                  </button>
+                </template>
+              </div>
             </div>
           </div>
           <button

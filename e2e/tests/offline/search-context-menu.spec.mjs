@@ -215,6 +215,43 @@ test.describe('with all built-in external search engines enabled', () => {
     expect(searchWith.submenu.every(item => item.labelKey == null)).toBe(true)
   })
 
+  test('opens the fly-out towards the start without a horizontal scrollbar', async ({ page }) => {
+    await goTo(page, 'settings')
+    const input = page.locator('.settingsSearch input')
+    await input.fill('private search')
+    await input.selectText()
+
+    // Right-clicking past the middle of the viewport makes the fly-out open
+    // towards the start, which is the side its hover bridge sits on.
+    const box = await input.boundingBox()
+    await page.mouse.click(box.x + box.width - 4, box.y + box.height / 2, { button: 'right' })
+
+    const searchWith = page.getByRole('menuitem', { name: 'Search with...', exact: true })
+    await searchWith.hover()
+    const submenu = searchWith.locator('xpath=following-sibling::*[@role="menu"]')
+    await expect(submenu).toBeVisible()
+    await expect(submenu.locator('xpath=..')).toHaveClass(/submenuOpenStart/)
+
+    // Re-hover on every attempt, the fly-out closes if the pointer state is lost
+    await expect.poll(async () => {
+      await searchWith.hover()
+      return submenu.evaluate((element) => {
+        const scrollsHorizontally = (node) => {
+          const overflowX = getComputedStyle(node).overflowX
+          return (overflowX === 'auto' || overflowX === 'scroll') &&
+            node.scrollWidth > node.clientWidth
+        }
+        const bounds = element.getBoundingClientRect()
+        return {
+          submenu: scrollsHorizontally(element),
+          insideSubmenu: [...element.querySelectorAll('*')].some(scrollsHorizontally),
+          // The hover bridge still has to be hit-testable outside the fly-out
+          bridgeReachable: document.elementFromPoint(bounds.right + 12, bounds.top + 30) === element
+        }
+      })
+    }).toEqual({ submenu: false, insideSubmenu: false, bridgeReachable: true })
+  })
+
   test('keeps web search enabled and below in-app search for long selections', async ({ page }) => {
     const contextMenu = await page.evaluate(() => window.ftElectron.contextMenu.open({
       selectionText: 'x'.repeat(101)
