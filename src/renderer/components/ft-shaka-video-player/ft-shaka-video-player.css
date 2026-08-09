@@ -46,6 +46,11 @@
   opacity: 1;
 }
 
+.ftVideoPlayer:fullscreen > .paidPromotionOverlay {
+  /* Keep the badge clear of the single-line fullscreen title overlay. */
+  inset-block-start: 65px;
+}
+
 .ftVideoPlayer.shortsPlayer {
   /*
     Keep the container from becoming a focus-scroll area and let the seek
