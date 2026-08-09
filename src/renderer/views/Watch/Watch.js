@@ -834,8 +834,10 @@ export default defineComponent({
     canSaveWatchProgress() {
       if (this.isUpcoming || this.isLive) { return false }
 
-      // `this.$refs.player?.hasLoaded` cannot be used in computed property
-      return !this.isLoading
+      // `this.$refs.player?.hasLoaded` cannot be used in computed property.
+      // While the streams are still being extracted there is no player to read a
+      // position from, so the manual save action must not be offered yet either.
+      return this.playerReady
     },
     useSponsorBlock: function () {
       return this.$store.getters.getUseSponsorBlock
