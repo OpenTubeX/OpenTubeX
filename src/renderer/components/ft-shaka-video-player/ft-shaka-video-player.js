@@ -68,6 +68,7 @@ import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
+import { findSponsorBlockSeekBarSegment } from '../../helpers/player/sponsorBlockSeekBar'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
 import { voteOnSponsorBlockSegment } from '../../helpers/sponsorblock'
 import {
@@ -3655,14 +3656,7 @@ export default defineComponent({
       const segments = sponsorBlockSegments.concat(
         sponsorBlockCompleteDraftSegments.value.filter(segment => !isSponsorBlockFullVideoSegment(segment))
       )
-      const pointTolerance = Math.max(secondsPerPixel, 0.5)
-      const segment = segments.find((candidate) => {
-        if (isSponsorBlockPointSegment(candidate)) {
-          return Math.abs(hoverTime - candidate.startTime) <= pointTolerance
-        }
-
-        return hoverTime >= candidate.startTime && hoverTime <= candidate.endTime
-      })
+      const segment = findSponsorBlockSeekBarSegment(segments, hoverTime, secondsPerPixel)
 
       return segment ? translateSponsorBlockCategory(segment.category) : ''
     }
