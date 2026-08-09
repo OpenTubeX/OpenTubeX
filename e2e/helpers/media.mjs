@@ -1,3 +1,4 @@
+import { statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -11,6 +12,8 @@ import { repoRoot } from './app.mjs'
 export const DEMO_MEDIA_PATH = path.join(repoRoot, 'e2e', 'fixtures', 'media', 'demo.webm')
 export const DEMO_MEDIA_MIME_TYPE = 'video/webm; codecs="vp9, opus"'
 export const DEMO_MEDIA_DURATION_SECONDS = 30
+/** Real streams always declare their size, and players rely on it. */
+export const DEMO_MEDIA_LENGTH = statSync(DEMO_MEDIA_PATH).size
 
 /**
  * Looks like a real progressive stream URL, so the app treats it the same way
@@ -59,6 +62,7 @@ export function demoPlayerResponse(videoId, overrides = {}) {
         width: 640,
         height: 360,
         lastModified: '1700000000000000',
+        contentLength: String(DEMO_MEDIA_LENGTH),
         quality: 'medium',
         fps: 15,
         qualityLabel: '360p',
@@ -120,8 +124,23 @@ export async function routeDemoMedia(page) {
       })
     }
 
-    const start = range[1] ? Number(range[1]) : 0
-    const end = range[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1
+    // An empty first value makes it a suffix range ("the last N bytes"),
+    // which players use to read the trailing metadata of a file. A suffix
+    // longer than the file means all of it.
+    const [, rawStart, rawEnd] = range
+    const suffix = rawStart === ''
+    const start = suffix ? Math.max(0, body.length - Number(rawEnd || 0)) : Number(rawStart)
+    const end = suffix || rawEnd === ''
+      ? body.length - 1
+      : Math.min(Number(rawEnd), body.length - 1)
+
+    // Past the end of the file, or a zero-length suffix.
+    if (start > end) {
+      return route.fulfill({
+        status: 416,
+        headers: { 'accept-ranges': 'bytes', 'content-range': `bytes */${body.length}` }
+      })
+    }
 
     return route.fulfill({
       status: 206,
