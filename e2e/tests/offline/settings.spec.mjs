@@ -351,9 +351,12 @@ test.describe('settings', () => {
     await page.mouse.move(0, 0)
     await page.mouse.up()
 
+    // Rounded because the window lands on a fractional CSS pixel on scaled
+    // displays: the point is that it stopped at its 360px minimum instead of
+    // collapsing, not that it hit it to the pixel.
     const bounds = await page.locator('.settingsWindow').boundingBox()
-    expect(bounds.width).toBeGreaterThanOrEqual(359.9)
-    expect(bounds.height).toBeGreaterThanOrEqual(359.9)
+    expect(Math.round(bounds.width)).toBeGreaterThanOrEqual(360)
+    expect(Math.round(bounds.height)).toBeGreaterThanOrEqual(360)
   })
 
   test('wraps controls before the two-column detail pane clips them', async ({ page, attachScreenshot }) => {
@@ -1407,7 +1410,9 @@ test.describe('sync settings', () => {
 
     try {
       await serverCheckRequested
-      await expect(syncSection.locator('.error')).toHaveCount(0)
+      // Scoped to the sync failure: the same element also carries unrelated
+      // notices (e.g. the enhanced-privacy hint) once the server check lands.
+      await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
       await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
       await expect(syncSection.getByLabel('Username')).toBeEnabled()
       await expect(syncSection.getByLabel('Password')).toBeEnabled()
