@@ -1,7 +1,8 @@
 <template>
-  <FtSettingsSection
-    :title="$t('Settings.Password Settings.Password Settings')"
-  >
+  <div class="passwordSettings">
+    <h4 class="groupTitle">
+      {{ $t('Settings.Password Settings.Password Settings') }}
+    </h4>
     <FtFlexBox
       v-if="hasStoredPassword"
       class="settingsFlexStart460px"
@@ -30,13 +31,12 @@
         @click="handleSetPassword"
       />
     </FtFlexBox>
-  </FtSettingsSection>
+  </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 
-import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'

@@ -51,6 +51,7 @@ const state = {
   isKeyboardShortcutPromptShown: false,
   settingsWindowOpen: false,
   settingsWindowView: null,
+  settingsWindowSection: null,
   showSearchFilters: false,
   searchFilterValueChangedByTabId: {},
   progressBarPercentage: 0,
@@ -140,6 +141,10 @@ const getters = {
 
   getSettingsWindowView(state) {
     return state.settingsWindowView
+  },
+
+  getSettingsWindowSection(state) {
+    return state.settingsWindowSection
   },
 
   getShowAddToPlaylistPrompt(state) {
@@ -813,6 +818,10 @@ const mutations = {
 
   setSettingsWindowView (state, payload) {
     state.settingsWindowView = payload
+  },
+
+  setSettingsWindowSection (state, payload) {
+    state.settingsWindowSection = payload
   },
 
   setShowSearchFilters (state, payload) {

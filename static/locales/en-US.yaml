@@ -23,6 +23,8 @@ Toggle fullscreen: Toggle fullscreen
 Window: Window
 Minimize: Minimize
 Close: Close
+Maximize: Maximize
+Restore: Restore
 Close Tab: Close Tab
 Close Confirmation:
   Title: Quit OpenTubeX?

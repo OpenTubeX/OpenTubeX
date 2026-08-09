@@ -21,6 +21,19 @@
   container-type: inline-size;
 }
 
+.settingsWindow.maximized {
+  max-inline-size: 100vw;
+  max-block-size: 100vh;
+  border-width: 0;
+  border-radius: 0;
+}
+
+/* The app page keeps its own scrollbar behind the modal. Do not let it show
+   through beside the settings content while the modal covers the viewport. */
+:global(body:has(.settingsWindow.maximized) > .os-scrollbar) {
+  visibility: hidden;
+}
+
 .settingsWindow.settings-window-enter-active,
 .settingsWindow.settings-window-leave-active {
   transform-origin: center;
@@ -320,21 +333,24 @@
 }
 
 .settingsContent :deep(.settingsSearchTarget) {
-  animation: settings-search-highlight 2.2s ease-out;
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  animation: settings-search-highlight 2.2s ease-in-out;
 }
 
 @keyframes settings-search-highlight {
   0%,
-  35% {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 4px;
-    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  40%,
+  80%,
+  100% {
+    outline-color: transparent;
   }
 
-  100% {
-    outline: 2px solid transparent;
-    outline-offset: 4px;
-    background-color: transparent;
+  10%,
+  30%,
+  50%,
+  70% {
+    outline-color: var(--primary-color);
   }
 }
 

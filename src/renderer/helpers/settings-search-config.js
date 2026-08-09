@@ -17,7 +17,6 @@ export const SETTINGS_SEARCH_KEYS = {
   'sponsor-block': 'Settings.SponsorBlock Settings',
   'return-youtube-dislike': 'Settings.Return YouTube Dislike Settings',
   'context-menu-search': 'Settings.Context Menu Search Settings',
-  password: 'Settings.Password Settings',
   experimental: 'Settings.Experimental Settings'
 }
 
