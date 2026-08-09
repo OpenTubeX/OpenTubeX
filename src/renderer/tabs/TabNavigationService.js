@@ -58,7 +58,24 @@ export class TabNavigationService {
       this.pendingPresentation?.tabId === tabId &&
       this.pendingPresentation.revision === revision
     ) {
-      return this.pendingPresentation.promise
+      // Reusing the in-flight presentation keeps a duplicate request from
+      // cancelling its morph, but it must not swallow the request either: the
+      // one in flight can still give up (it starts before the tab has mounted,
+      // so a mount failure resolves it as unmounted), and the duplicate is
+      // usually the mount-ready retry that has to finish the job. Only then
+      // does a fresh request go out, otherwise the tab stays hidden and its
+      // route is never projected.
+      return this.pendingPresentation.promise.then(presented => {
+        if (presented || this.store.getters.getPresentedTabId === tabId) {
+          return presented
+        }
+        // Another tab may have been selected while we waited. Retrying then
+        // would present the old one and make the newer request stale.
+        if (this.isTransitionStale(tabId, revision, this.latestTransitionRequestId)) {
+          return false
+        }
+        return this.requestPresentation(tabId, revision)
+      })
     }
 
     const requestId = ++this.latestTransitionRequestId

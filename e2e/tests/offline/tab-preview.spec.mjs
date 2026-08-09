@@ -47,8 +47,9 @@ async function hoverTabForPreview(page, index) {
 }
 
 test.describe('tab previews', () => {
-  test('captures the page content without the tab bar and header', async ({ page }) => {
+  test('captures the page content without the tab bar and header', async ({ page, attachScreenshot }) => {
     const dataUrl = await hoverTabForPreview(page, 0)
+    await attachScreenshot('tab preview tooltip')
 
     const expectedRatio = await page.evaluate(() => {
       const bottomOf = (selector) => document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0

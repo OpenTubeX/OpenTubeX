@@ -27,28 +27,61 @@ mobile layout and breaks selectors.
   Seed settings/datastores per file via `test.use({ seed: { ... } })`.
   The main process honours `OPENTUBEX_E2E_USER_DATA_DIR` for isolation.
 - `helpers/innertube.mjs` – record/replay for Innertube requests (see below).
+- `helpers/media.mjs` – the offline demo video and the fake player response
+  that serves it (see below).
+- `helpers/watch.mjs` – a fully mocked watch page, playable or unplayable.
 - `tests/offline/` – must pass without any external network.
 - `tests/network/` – requires YouTube. Runs nightly and via workflow dispatch.
 - `fixtures/innertube/` – gzipped recorded Innertube responses, committed to git.
+- `fixtures/media/demo.webm` – 30s VP9/Opus clip with a burnt-in timecode.
+
+## Playing a video without YouTube
+
+Media streams can't be recorded, and recorded player responses are useless
+(their stream URLs expire, and CI recordings are usually bot checks). So
+whenever the player has to run without the live API, the `/youtubei/v1/player`
+response is synthesized instead: `demoPlayerResponse()` reports a playable
+video with a single progressive format pointing at `fixtures/media/demo.webm`,
+which is served locally by `routeDemoMedia()`. Without adaptive formats the
+app takes its legacy (progressive) player path, so neither a DASH manifest
+nor SABR is involved.
+
+Everything else (title, channel, description, comments, recommendations)
+still comes from the recorded `/next` response, so tests that only need
+*some* video playing belong in `tests/offline/` — see
+`tests/offline/player.spec.mjs` and `mockPlayableWatchPage()`.
 
 ## Network fallback
 
 Network tests hit the real YouTube servers on the first attempt. If a test
 fails (e.g. bot checks on CI runner IPs), Playwright retries it and the retry
 replays recorded fixtures instead: Innertube requests are answered from
-`fixtures/innertube/`, all other external network is blocked.
+`fixtures/innertube/`, all other external network is blocked, and the player
+plays the demo video.
 
-Media streams (googlevideo.com) are not recorded, and full watch-page
-hydration needs the real API, so those assertions are guarded with
-`test.skip(...)` on `innertube.playback` / `innertube.replay`. Replay mode
-is a smoke layer: it still verifies search results, the channel page, and
-navigation against recorded Innertube data.
+Tests whose videos have no recorded fixtures, or that need data the demo
+player response doesn't have (adaptive formats), are guarded with
+`test.skip(innertube.replay, ...)`. Replay mode is a smoke layer: it verifies
+search results, the channel page, playback and navigation against recorded
+Innertube data.
 
-Playback tests wait for either media playback or the app's explicit IP-block
-error. GitHub-hosted runners are commonly blocked from streaming media; in
-that case only the playback-dependent test is skipped with a clear reason.
-Other watch-page assertions continue against the live API, while unexpected
-player failures still fail normally.
+Live playback tests wait for either media playback or the app's explicit
+IP-block error. GitHub-hosted runners are commonly blocked from streaming
+media; in that case only the playback-dependent test is skipped with a clear
+reason. Other watch-page assertions continue against the live API, while
+unexpected player failures still fail normally.
+
+## Screenshots
+
+Failures always attach a screenshot. Tests that assert something visual
+should also attach screenshots of the states they check, so the HTML report
+can be reviewed by eye:
+
+```js
+test('...', async ({ page, attachScreenshot }) => {
+  await attachScreenshot('subscriptions feed')
+})
+```
 
 To (re-)record fixtures after YouTube-facing changes or for new tests:
 
@@ -56,7 +89,8 @@ To (re-)record fixtures after YouTube-facing changes or for new tests:
 E2E_RECORD=1 pnpm run test:e2e:network
 ```
 
-Commit the updated files under `fixtures/innertube/`. To force replay mode
+Commit the updated files under `fixtures/innertube/`. Player responses are
+deliberately not recorded. To force replay mode
 locally (validate fixtures without touching the network):
 
 ```bash

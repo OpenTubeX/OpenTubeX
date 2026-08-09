@@ -5,6 +5,7 @@ import { gunzipSync } from 'node:zlib'
 
 import { goTo, repoRoot, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -60,9 +61,7 @@ async function mockWatchPage(app, page) {
     }
 
     if (url.includes('/youtubei/v1/player')) {
-      const files = await readdir(fixtureDir)
-      const body = await fixture(fixtureDir, files.find((file) => file.startsWith('player-')))
-      const json = JSON.parse(body.toString())
+      const json = demoPlayerResponse(JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw')
       json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
       delete json.streamingData
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(json) })

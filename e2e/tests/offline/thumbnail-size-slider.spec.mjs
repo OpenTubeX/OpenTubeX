@@ -63,7 +63,7 @@ async function dragSlider(page, values) {
 }
 
 test.describe('thumbnail size slider', () => {
-  test('resizes the feed without re-measuring every card', async ({ page }) => {
+  test('resizes the feed without re-measuring every card', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await expect(page.getByText('Feed video 00')).toBeVisible()
 
@@ -75,6 +75,7 @@ test.describe('thumbnail size slider', () => {
 
     await page.locator('.thumbnailSizeButton').click()
     await expect(page.locator('.thumbnailSizeSlider')).toBeVisible()
+    await attachScreenshot('feed at the default thumbnail size')
 
     // TransitionGroup measures every child whenever it re-renders, so a
     // reactive thumbnail size would cost one getBoundingClientRect per card per
@@ -101,6 +102,8 @@ test.describe('thumbnail size slider', () => {
     await expect
       .poll(() => grid.evaluate((element) => element.style.getPropertyValue('--thumbnail-grid-size')))
       .not.toBe(initialSize)
+    await attachScreenshot('feed at the largest thumbnail size')
+
     const listSize = await page.evaluate(() => {
       return document.body.style.getPropertyValue('--thumbnail-list-size')
     })

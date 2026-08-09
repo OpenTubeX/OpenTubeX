@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -174,6 +174,58 @@ export async function waitForAppReady(page) {
 }
 
 /**
+ * Attaches a screenshot to the HTML report, so visual behaviour can be
+ * reviewed there instead of only on failure. Never fails the test: a
+ * screenshot that can't be taken (e.g. the window is already closing) is
+ * not worth losing the result over.
+ *
+ * Prefer the `attachScreenshot` fixture below, which binds page and testInfo.
+ *
+ * @param {import('@playwright/test').TestInfo} testInfo
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name shown as the attachment's title in the report
+ */
+export async function attachScreenshot(testInfo, page, name) {
+  try {
+    await testInfo.attach(name, { body: await page.screenshot(), contentType: 'image/png' })
+  } catch {
+    // ignored on purpose, see above
+  }
+}
+
+/** The renderer's current viewport size. */
+export function getViewport(page) {
+  return page.evaluate(() => ({
+    width: document.documentElement.clientWidth,
+    height: window.innerHeight
+  }))
+}
+
+/**
+ * Resizes the window and waits until the renderer has laid out at the new
+ * size, then returns the resulting viewport.
+ *
+ * @param {import('@playwright/test').ElectronApplication} electronApp
+ * @param {import('@playwright/test').Page} page
+ * @param {{ width: number, height: number }} size
+ */
+export async function setWindowSize({ electronApp }, page, size) {
+  const before = await getViewport(page)
+
+  await electronApp.evaluate(({ BrowserWindow }, bounds) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    browserWindow.setBounds({ ...browserWindow.getBounds(), ...bounds })
+  }, size)
+
+  await expect.poll(async () => {
+    const viewport = await getViewport(page)
+    return viewport.width !== before.width && viewport.height !== before.height
+  }).toBe(true)
+
+  return await getViewport(page)
+}
+
+/**
  * Toggles player fullscreen and waits for the Fullscreen API state.
  *
  * @param {import('@playwright/test').Page} page
@@ -228,14 +280,19 @@ export const test = base.extend({
       await use(appHandle)
     } finally {
       if (testInfo.status !== testInfo.expectedStatus) {
-        const screenshotPath = testInfo.outputPath('failure.png')
-        await mkdir(path.dirname(screenshotPath), { recursive: true })
-        await appHandle.page.screenshot({ path: screenshotPath }).catch(() => {})
-        testInfo.attachments.push({ name: 'failure', path: screenshotPath, contentType: 'image/png' })
+        await attachScreenshot(testInfo, appHandle.page, 'failure')
       }
       await appHandle.electronApp.close().catch(() => {})
       await rm(userDataDir, { recursive: true, force: true })
     }
+  },
+
+  /**
+   * Attaches a named screenshot of the app window to the report:
+   *   await attachScreenshot('subscriptions feed')
+   */
+  attachScreenshot: async ({ app }, use, testInfo) => {
+    await use((name) => attachScreenshot(testInfo, app.page, name))
   },
 
   // Convenience: `page` resolves to the app's window.

@@ -5,6 +5,7 @@ import { gunzipSync } from 'node:zlib'
 
 import { goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -78,9 +79,12 @@ async function mockBlockedVideo({
 
     if (url.includes('/youtubei/v1/player')) {
       await beforePlayerResponse?.()
-      const files = await readdir(fixtureDir)
-      const body = await fixture(fixtureDir, files.find((file) => file.startsWith('player-')))
-      const json = JSON.parse(body.toString())
+      const json = demoPlayerResponse(JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw')
+      if (omitVideoMetadata) {
+        // No title anywhere, so the watch page has to fall back to the route.
+        delete json.videoDetails
+        delete json.microformat
+      }
       json.playabilityStatus = {
         status: 'LOGIN_REQUIRED',
         reason: 'Sign in to confirm you’re not a bot'

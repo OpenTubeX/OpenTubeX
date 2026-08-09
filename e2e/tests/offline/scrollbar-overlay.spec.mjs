@@ -47,7 +47,7 @@ test.describe('overlay scrollbars', () => {
     await expect(scrollbar).toHaveCSS('opacity', '1')
   })
 
-  test('the scrollbar handle picks up the theme', async ({ page }) => {
+  test('the scrollbar handle picks up the theme', async ({ page, attachScreenshot }) => {
     await addPageOverflow(page)
     await page.mouse.wheel(0, 300)
 
@@ -56,6 +56,7 @@ test.describe('overlay scrollbars', () => {
       // --scrollbar-color of the light theme
       'rgb(204, 204, 204)'
     )
+    await attachScreenshot('themed scrollbar handle')
   })
 
   test('clicking the track jumps to that position', async ({ page }) => {
@@ -190,7 +191,7 @@ test.describe('overlay scrollbars', () => {
     })
   })
 
-  test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page }) => {
+  test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page, attachScreenshot }) => {
     await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)
 
@@ -213,6 +214,7 @@ test.describe('overlay scrollbars', () => {
     await page.waitForTimeout(2500)
 
     await expect(scrollbar).toBeVisible()
+    await attachScreenshot('scrollbar still visible while idle')
     await expect(scrollbar).toHaveCSS('opacity', '1')
     // Roughly, not exactly: flipping the switch also reflows the settings page
     // a little by revealing the "changed setting" indicator.

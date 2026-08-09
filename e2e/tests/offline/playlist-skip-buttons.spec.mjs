@@ -85,7 +85,7 @@ function readSkipAvailability(page) {
   })
 }
 
-test('only offers skipping to playlist videos that exist', async ({ page }) => {
+test('only offers skipping to playlist videos that exist', async ({ page, attachScreenshot }) => {
   await page.route(/^https?:\/\//, (route) => route.abort())
 
   await goTo(page, 'userplaylists')
@@ -103,6 +103,7 @@ test('only offers skipping to playlist videos that exist', async ({ page }) => {
     canPlayNext: true,
     canPlayPrevious: false
   })
+  await attachScreenshot('first playlist video')
 
   // Loop wraps the playlist around in both directions
   const loopButton = page.locator('.watchVideoPlaylist .playlistButton').first()

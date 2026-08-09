@@ -25,7 +25,7 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent')).toHaveCSS('scrollbar-width', 'none')
   })
 
-  test('opens over the current page and renders the selected section', async ({ page }) => {
+  test('opens over the current page and renders the selected section', async ({ page, attachScreenshot }) => {
     const url = page.url()
     const activeTab = await page.locator(sel.activeTab).textContent()
 
@@ -42,13 +42,17 @@ test.describe('settings', () => {
       windowIcon.boundingBox(),
       breadcrumbLabel.boundingBox()
     ])
-    expect(iconBounds.y + iconBounds.height / 2)
-      .toBeCloseTo(labelBounds.y + labelBounds.height / 2, 0)
+    // Within a pixel rather than toBeCloseTo's half: both boxes land on
+    // fractional pixels on scaled displays, which is not a misalignment.
+    const iconCenter = iconBounds.y + iconBounds.height / 2
+    const labelCenter = labelBounds.y + labelBounds.height / 2
+    expect(Math.abs(iconCenter - labelCenter)).toBeLessThanOrEqual(1)
     await expect(page.getByRole('button', {
       name: 'Highlight settings changed from defaults'
     }).locator('[data-icon="pen"]')).toBeVisible()
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await expect(page.locator('.settingsContent > [data-section="general"]')).toBeVisible()
+    await attachScreenshot('settings window over the page')
   })
 
   test('opens from Preferences without remounting the current feed', async ({ app, page }) => {
@@ -350,12 +354,15 @@ test.describe('settings', () => {
     await page.mouse.move(0, 0)
     await page.mouse.up()
 
+    // Rounded because the window lands on a fractional CSS pixel on scaled
+    // displays: the point is that it stopped at its 360px minimum instead of
+    // collapsing, not that it hit it to the pixel.
     const bounds = await page.locator('.settingsWindow').boundingBox()
-    expect(bounds.width).toBeGreaterThanOrEqual(359.9)
-    expect(bounds.height).toBeGreaterThanOrEqual(359.9)
+    expect(Math.round(bounds.width)).toBeGreaterThanOrEqual(360)
+    expect(Math.round(bounds.height)).toBeGreaterThanOrEqual(360)
   })
 
-  test('wraps controls before the two-column detail pane clips them', async ({ page }) => {
+  test('wraps controls before the two-column detail pane clips them', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
         x: 40,
@@ -381,6 +388,7 @@ test.describe('settings', () => {
         return bounds.width === 0 || bounds.right <= rightEdge + 1
       })
     })).toBe(true)
+    await attachScreenshot('820px wide settings window')
   })
 
   test('returns from saved channel settings through its clickable breadcrumb', async ({ page }) => {
@@ -401,7 +409,7 @@ test.describe('settings', () => {
     await expect(breadcrumb).not.toContainText('Saved Channel Settings')
   })
 
-  test('keeps saved-channel controls in two columns without narrow wrapping', async ({ page }) => {
+  test('keeps saved-channel controls in two columns without narrow wrapping', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return Promise.all([
@@ -426,6 +434,7 @@ test.describe('settings', () => {
       return elements.slice(0, 2).map(element => Math.round(element.getBoundingClientRect().top))
     })
     expect(new Set(preferenceTops).size).toBe(1)
+    await attachScreenshot('saved channel controls in two columns')
 
     await entries.first().locator('.channelLink').click()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Saved Channel Settings')
@@ -514,7 +523,7 @@ test.describe('settings', () => {
     expect(colorInputBounds.height).toBeCloseTo(styleInputBounds.height, 0)
   })
 
-  test('stacks caption controls at narrow settings widths', async ({ page }) => {
+  test('stacks caption controls at narrow settings widths', async ({ page, attachScreenshot }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
         x: 40,
@@ -537,6 +546,8 @@ test.describe('settings', () => {
     expect(await controls.evaluate(element => {
       return getComputedStyle(element).gridTemplateColumns.split(' ').length
     })).toBe(1)
+    await attachScreenshot('caption settings at 420px')
+
     const contentBounds = await page.locator('.settingsContent').boundingBox()
     expect(await page.locator('.captionControl').evaluateAll((elements, rightEdge) => {
       return elements.every(element => element.getBoundingClientRect().right <= rightEdge + 1)
@@ -821,7 +832,7 @@ test.describe('settings', () => {
     expect(syncRequests).toEqual([])
   })
 
-  test('loads each experimental icon pack when selected', async ({ page }) => {
+  test('loads each experimental icon pack when selected', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="experimental"]').click()
 
@@ -831,6 +842,7 @@ test.describe('settings', () => {
       await select.selectOption(pack)
       await expect(preview.locator('.previewIcon.ft-icon').first()).toBeVisible()
       await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
+      await attachScreenshot(`${pack} icon pack`)
     }
 
     await page.reload()
@@ -907,7 +919,7 @@ test.describe('settings', () => {
     await expect(page.getByRole('checkbox', { name: 'Check for Updates' })).toBeChecked()
   })
 
-  test('highlights changed settings and resets them to defaults', async ({ page }) => {
+  test('highlights changed settings and resets them to defaults', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
 
     const autoLoadToggle = page.getByRole('checkbox', { name: /Auto Load Next Page/i })
@@ -920,6 +932,7 @@ test.describe('settings', () => {
     const resetButton = autoLoadSetting.getByRole('button', { name: 'Reset this setting to its default' })
     await expect(resetButton).toBeVisible()
     await expect(autoLoadSetting).toHaveCSS('border-left-width', '3px')
+    await attachScreenshot('highlighted changed setting')
 
     await resetButton.click()
     await expect(autoLoadToggle).not.toBeChecked()
@@ -1400,7 +1413,9 @@ test.describe('sync settings', () => {
 
     try {
       await serverCheckRequested
-      await expect(syncSection.locator('.error')).toHaveCount(0)
+      // Scoped to the sync failure: the same element also carries unrelated
+      // notices (e.g. the enhanced-privacy hint) once the server check lands.
+      await expect(syncSection.locator('.error', { hasText: 'Sync failed' })).toHaveCount(0)
       await expect(syncSection.getByLabel('Server URL')).toBeEnabled()
       await expect(syncSection.getByLabel('Username')).toBeEnabled()
       await expect(syncSection.getByLabel('Password')).toBeEnabled()

@@ -82,10 +82,11 @@ function headerBoxes (page) {
 }
 
 test.describe('subscriptions header layout', () => {
-  test('puts the tabs beside the title when they fit', async ({ page }) => {
+  test('puts the tabs beside the title when they fit', async ({ page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
+    await attachScreenshot('single row header')
 
     const { title, tabs, refreshWidget } = await headerBoxes(page)
 
@@ -96,13 +97,14 @@ test.describe('subscriptions header layout', () => {
     expect(refreshWidget.top).toBeLessThan(tabs.bottom)
   })
 
-  test('drops the tabs onto their own line when the window is too narrow', async ({ app, page }) => {
+  test('drops the tabs onto their own line when the window is too narrow', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
 
     await setWindowWidth(app, page, 800)
 
     await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+    await attachScreenshot('two row header')
 
     const { title, tabs, refreshWidget } = await headerBoxes(page)
 
@@ -113,7 +115,7 @@ test.describe('subscriptions header layout', () => {
     expect(tabs.top).toBeGreaterThanOrEqual(refreshWidget.bottom)
   })
 
-  test('merges the rows again when the window grows back', async ({ app, page }) => {
+  test('merges the rows again when the window grows back', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
     await setWindowWidth(app, page, 800)
@@ -133,6 +135,7 @@ test.describe('subscriptions header layout', () => {
 
     expect(new Set(heights).size).toBe(1)
     await expect(page.locator('.subscriptionsHeader')).toHaveClass(/singleRow/)
+    await attachScreenshot('merged header after growing the window')
   })
 
   test('merges the rows when the Mark all as seen button is what did not fit', async ({ app, page }) => {
@@ -165,7 +168,7 @@ test.describe('subscriptions header layout', () => {
     await expect(header).toHaveClass(/singleRow/)
   })
 
-  test('stays split while the tabs themselves have to wrap', async ({ app, page }) => {
+  test('stays split while the tabs themselves have to wrap', async ({ app, page, attachScreenshot }) => {
     await goTo(page, 'subscriptions')
 
     // Narrow enough that the tabs no longer fit on one line inside their own
@@ -180,6 +183,7 @@ test.describe('subscriptions header layout', () => {
     expect(wrapped, 'the tabs are expected to wrap at this width').toBe(true)
 
     await expect(page.locator('.subscriptionsHeader')).not.toHaveClass(/singleRow/)
+    await attachScreenshot('header with wrapped tabs')
 
     // A wrong measurement here would merge the rows, which widens the tabs and
     // makes the next measurement split them again

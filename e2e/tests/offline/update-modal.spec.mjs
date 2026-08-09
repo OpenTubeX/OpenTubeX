@@ -44,7 +44,7 @@ async function showUpdatePrompt(page, releases) {
   await expect(page.locator('.changeLogTitle')).toBeVisible()
 }
 
-test('a single update shows its version once and renders the release notes', async ({ page }) => {
+test('a single update shows its version once and renders the release notes', async ({ page, attachScreenshot }) => {
   await showUpdatePrompt(page, [
     release('OpenTubeX 0.31.0', 'v0.31.0-beta', NEWEST_NOTES)
   ])
@@ -52,6 +52,8 @@ test('a single update shows its version once and renders the release notes', asy
   await expect(page.locator('.changeLogTitle')).toHaveText('Update to OpenTubeX 0.31.0')
   // The title already names the release, so the notes must not repeat it.
   await expect(page.locator('.changeLogText h2')).toHaveCount(0)
+
+  await attachScreenshot('update prompt')
 
   const summary = page.locator('.changeLogText summary')
   const details = page.locator('.changeLogText details')
@@ -70,7 +72,7 @@ test('a single update shows its version once and renders the release notes', asy
   )
 })
 
-test('skipped updates keep a heading per release', async ({ page }) => {
+test('skipped updates keep a heading per release', async ({ page, attachScreenshot }) => {
   await showUpdatePrompt(page, [
     release('OpenTubeX 0.31.0', 'v0.31.0-beta', 'Newest notes'),
     release('OpenTubeX 0.30.3', 'v0.30.3-beta', 'Older notes')
@@ -81,4 +83,5 @@ test('skipped updates keep a heading per release', async ({ page }) => {
     'OpenTubeX 0.31.0',
     'OpenTubeX 0.30.3'
   ])
+  await attachScreenshot('update prompt with skipped releases')
 })
