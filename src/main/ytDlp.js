@@ -80,6 +80,8 @@ const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
+// Keeps local-playlist URLs comfortably below Windows' process command-line limit.
+const MAX_LOCAL_PLAYLIST_VIDEOS = 500
 const DENIED_CUSTOM_ARGS = [
   '--alias',
   '--config-location',
@@ -955,11 +957,28 @@ export async function handleYtDlpDownload(event, payload) {
     return null
   }
 
-  await loadDownloadRecords()
+  if (!['video', 'audio', 'custom'].includes(payload.mode)) {
+    return null
+  }
+
+  const customArgs = typeof payload.customArgs === 'string' && payload.customArgs.trim() !== ''
+    ? splitArguments(payload.customArgs)
+    : []
+  if (customArgs.some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
+    return { error: 'unsupported-custom-argument' }
+  }
+
+  if (payload.videoIds !== undefined && (!Array.isArray(payload.videoIds) ||
+    payload.videoIds.some(videoId => typeof videoId !== 'string' || !ID_REGEX.test(videoId)))) {
+    return { error: 'invalid-video-ids' }
+  }
 
   const videoIds = Array.isArray(payload.videoIds)
-    ? payload.videoIds.filter(videoId => typeof videoId === 'string' && ID_REGEX.test(videoId))
+    ? payload.videoIds
     : []
+  if (videoIds.length > MAX_LOCAL_PLAYLIST_VIDEOS) {
+    return { error: 'too-many-videos' }
+  }
   const isRemotePlaylist = payload.isPlaylist === true && typeof payload.playlistId === 'string' &&
     PLAYLIST_ID_REGEX.test(payload.playlistId)
   const isSingleVideo = typeof payload.videoId === 'string' && ID_REGEX.test(payload.videoId)
@@ -967,6 +986,8 @@ export async function handleYtDlpDownload(event, payload) {
   if (!isRemotePlaylist && !isSingleVideo && videoIds.length === 0) {
     return null
   }
+
+  await loadDownloadRecords()
 
   const args = ['--newline', '--progress', '--print', `after_move:${FINAL_PATH_PREFIX}%(filepath)s`]
 
@@ -997,14 +1018,18 @@ export async function handleYtDlpDownload(event, payload) {
   let outputTemplate = typeof payload.filenameTemplate === 'string' && payload.filenameTemplate.trim() !== ''
     ? payload.filenameTemplate.trim()
     : '{title} [{id}].{ext}'
-  const localPlaylistTitle = typeof payload.title === 'string'
+  let localPlaylistTitle = typeof payload.title === 'string'
     ? payload.title.replaceAll(/[<>:"/\\|?*]/g, '_')
       .split('').map(character => {
         if (character.charCodeAt(0) < 32) return '_'
         return character
       }).join('')
-      .replace(/[. ]+$/, '').slice(0, 120).replaceAll('%', '%%') || 'Playlist'
+      .replace(/[. ]+$/, '').slice(0, 120) || 'Playlist'
     : 'Playlist'
+  if (/^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(localPlaylistTitle)) {
+    localPlaylistTitle = `_${localPlaylistTitle}`
+  }
+  localPlaylistTitle = localPlaylistTitle.replaceAll('%', '%%')
   const templateFields = {
     title: '%(title)s',
     author: '%(uploader)s',
@@ -1052,8 +1077,6 @@ export async function handleYtDlpDownload(event, payload) {
       break
     case 'custom':
       break
-    default:
-      return null
   }
 
   if (payload.splitChapters === true) {
@@ -1085,11 +1108,7 @@ export async function handleYtDlpDownload(event, payload) {
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
-  if (typeof payload.customArgs === 'string' && payload.customArgs.trim() !== '') {
-    const customArgs = splitArguments(payload.customArgs)
-    if (customArgs.some(argument => DENIED_CUSTOM_ARGS.includes(argument.split('=')[0]))) {
-      return { error: 'unsupported-custom-argument' }
-    }
+  if (customArgs.length > 0) {
     args.push(...customArgs)
   }
 

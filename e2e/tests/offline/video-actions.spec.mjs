@@ -141,6 +141,48 @@ test.describe('video downloads', () => {
     await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('Top 100%%(title)s')
   })
 
+  test('prefixes Windows reserved local playlist folder names', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'capture-yt-dlp-args.sh')
+    const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-args.txt')
+    await writeFile(executable, `#!/bin/sh\nprintf '%s\\n' "$@" > "${capturedArgs}"\n`)
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await page.bringToFront()
+    await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoIds: ['eeeeeeeeeee'],
+      isPlaylist: true,
+      title: 'CON.txt',
+      mode: 'video'
+    }))
+
+    await expect.poll(async () => readFile(capturedArgs, 'utf8').catch(() => '')).toContain('_CON.txt/%(autonumber)03d')
+  })
+
+  test('rejects invalid and oversized local playlist video lists', async ({ page }) => {
+    await page.bringToFront()
+    const results = await page.evaluate(() => Promise.all([
+      window.ftElectron.ytDlpDownload({
+        videoIds: ['eeeeeeeeeee', 'invalid', 'fffffffffff'],
+        isPlaylist: true,
+        mode: 'video'
+      }),
+      window.ftElectron.ytDlpDownload({
+        videoIds: Array.from({ length: 501 }, () => 'eeeeeeeeeee'),
+        isPlaylist: true,
+        mode: 'video'
+      })
+    ]))
+
+    expect(results).toEqual([
+      { error: 'invalid-video-ids' },
+      { error: 'too-many-videos' }
+    ])
+  })
+
   test('keeps untitled multi-video downloads in history', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
     await writeFile(executable, '#!/bin/sh\nsleep 0.2\n')
