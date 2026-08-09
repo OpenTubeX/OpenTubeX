@@ -9,17 +9,6 @@ It originated as a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube)
 and is independently developed and supported. It is not affiliated with,
 endorsed by, maintained by, or supported by the FreeTube project.
 
-## AI-assisted development
-
-OpenTubeX is developed extensively with AI-assisted tools. This allows our small
-maintainer team to develop features, fix bugs, and iterate much more rapidly.
-The source code remains open for anyone to inspect, review, modify, or fork.
-
-This disclosure refers to how OpenTubeX is developed. It does not mean the app
-sends your viewing data to an AI service. If AI-assisted development does not
-align with your preferences, OpenTubeX may simply not be the right project for
-you.
-
 <br><p align="center"><a href="https://opentubex.org/downloads/">Download OpenTubeX</a></p>
 <p align="center">
   <a href="https://github.com/OpenTubeX/OpenTubeX/actions/workflows/build.yml">
@@ -37,7 +26,7 @@ you.
 </p>
 
 <hr>
-<p align="center"><a href="#why-opentubex">Why OpenTubeX?</a> &bull; <a href="#features-added-by-opentubex">Added features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
+<p align="center"><a href="#features-added-by-opentubex">Added features</a> &bull; <a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#download-links">Download Links</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://opentubex.org/">Website</a> &bull; <a href="PRIVACY.md">Privacy</a> &bull; <a href="https://github.com/OpenTubeX/OpenTubeX/discussions">Discussions</a></p>
 <hr>
 
@@ -406,6 +395,17 @@ For the Linux Flatpak, the desktop entry comment string can be translated at our
 
 ## Contact
 If you ever have any questions, feel free to ask on our [Discussions](https://github.com/OpenTubeX/OpenTubeX/discussions) page, join our [Fluxer](https://fluxer.opentubex.org) server, or our [Matrix](https://matrix.opentubex.org) space (`#opentubex:matrix.org`).
+
+## AI-assisted development
+
+OpenTubeX is developed extensively with AI-assisted tools. This allows our small
+maintainer team to develop features, fix bugs, and iterate much more rapidly.
+The source code remains open for anyone to inspect, review, modify, or fork.
+
+This disclosure refers to how OpenTubeX is developed. It does not mean the app
+sends your viewing data to an AI service. If AI-assisted development does not
+align with your preferences, OpenTubeX may simply not be the right project for
+you.
 
 ## License
 [![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  
