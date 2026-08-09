@@ -580,3 +580,79 @@ test.describe('select dropdown pixel grid', () => {
     expect(offGrid).toEqual([])
   })
 })
+
+test('a save channel setting dropdown clears the fullscreen dock content', async ({ page }) => {
+  await goTo(page, 'history')
+  const playerStyles = await readFile(
+    path.join(
+      repoRoot,
+      'src/renderer/components/ft-shaka-video-player/ft-shaka-video-player.css'
+    ),
+    'utf8'
+  )
+  // The dropdown's own placement lives in FtIconButton's stylesheet, and it is
+  // what puts the fly-out over the dock edge in the first place.
+  const { compile } = await import('sass')
+  const buttonStyles = compile(
+    path.join(repoRoot, 'src/renderer/components/FtIconButton/FtIconButton.scss')
+  ).css
+  await page.addStyleTag({
+    content: [playerStyles, buttonStyles]
+      .join('\n')
+      .replaceAll(/:deep\(((?:[^()]|\([^()]*\))*)\)/g, '$1')
+  })
+
+  // The dock stacks the video info card and the description as siblings and
+  // clips whatever leaves its box. The button the dropdown hangs off sits at
+  // the dock's start edge, and the dropdown drops over the description below.
+  await page.evaluate(() => {
+    const dock = document.createElement('div')
+    const info = document.createElement('div')
+    const buttons = document.createElement('div')
+    const options = document.createElement('div')
+    const iconButton = document.createElement('div')
+    const dropdown = document.createElement('div')
+    const description = document.createElement('div')
+
+    dock.className = 'fullscreenMetadataTarget'
+    dock.style.cssText = 'position:fixed;inset:100px auto auto 400px;width:420px;height:420px;z-index:10000;background:#222'
+    info.className = 'watchVideo watchVideoInfo'
+    buttons.className = 'videoButtons'
+    options.className = 'videoOptions'
+    iconButton.className = 'iconButton'
+    iconButton.style.cssText = 'position:relative;inline-size:30px;block-size:30px'
+    dropdown.className = 'iconDropdown left bottom'
+    dropdown.textContent = 'Save video quality'
+    dropdown.style.inlineSize = '220px'
+    dropdown.style.blockSize = '120px'
+    description.className = 'watchVideo videoDescription'
+    description.textContent = 'Description text that follows the info card'
+    description.style.cssText = 'block-size:200px;background:#111'
+
+    iconButton.append(dropdown)
+    options.append(iconButton)
+    buttons.append(options)
+    info.append(buttons)
+    dock.append(info, description)
+    document.body.append(dock)
+  })
+
+  const dropdown = page.locator('.fullscreenMetadataTarget .iconDropdown')
+  await expect(dropdown).toBeVisible()
+
+  await expect.poll(() => dropdown.evaluate((element) => {
+    const dock = element.closest('.fullscreenMetadataTarget')
+    const bounds = element.getBoundingClientRect()
+    const dockBounds = dock.getBoundingClientRect()
+    const hit = document.elementFromPoint(
+      bounds.left + bounds.width / 2,
+      bounds.bottom - 8
+    )
+    return {
+      // Not cut off by the dock, which clips its inline axis
+      insideDock: bounds.left >= dockBounds.left && bounds.right <= dockBounds.right,
+      // Not painted over by the description card that follows
+      onTop: hit === element || element.contains(hit)
+    }
+  })).toEqual({ insideDock: true, onTop: true })
+})

@@ -1919,6 +1919,22 @@
   box-shadow: none;
 }
 
+/* The rule above makes each card its own stacking context, so an icon button
+   dropdown cannot escape its card no matter how high it reaches and the card
+   after it paints over the dropdown. Lift the card while one is open, the same
+   way the normal layout raises .infoArea. */
+.fullscreenMetadataTarget :deep(.watchVideo:has(.iconDropdown)) {
+  z-index: 1;
+}
+
+/* The dock scrolls vertically, which means it also clips the inline axis, and
+   its buttons sit against the start edge. A dropdown opening towards the start
+   would be cut off by the panel edge (and the video shows through where it is
+   missing), so open them towards the end where the panel has room. */
+.fullscreenMetadataTarget :deep(.iconDropdown.left) {
+  inset-inline: calc(50% - 10px) auto;
+}
+
 .fullscreenMetadataTarget :deep(.watchVideoInfo),
 .fullscreenMetadataTarget :deep(.videoDescription) {
   flex: 0 0 auto;
