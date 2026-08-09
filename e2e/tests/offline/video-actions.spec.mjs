@@ -382,7 +382,9 @@ test.describe('list video actions', () => {
     const templateSection = page.locator('.fixedTemplateSection')
     await page.waitForTimeout(200)
     const templateTop = await templateSection.evaluate(element => element.getBoundingClientRect().top)
-    await page.locator('.downloadOptions').evaluate(element => element.scrollTop = element.scrollHeight)
+    await page.locator('.downloadOptions').evaluate((element) => {
+      element.scrollTop = element.scrollHeight
+    })
     await expect.poll(() => page.locator('.downloadOptions').evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await expect.poll(() => templateSection.evaluate(element => element.getBoundingClientRect().top)).toBe(templateTop)
   })
