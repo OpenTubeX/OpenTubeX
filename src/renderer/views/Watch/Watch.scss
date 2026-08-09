@@ -10,6 +10,58 @@
   grid-template: 'video' auto 'info' auto 'sidebar' auto 'comments' auto / minmax(0, 1fr);
 }
 
+.streamPlaceholder {
+  background-color: #000;
+  display: grid;
+  overflow: hidden;
+  place-items: center;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+
+  .videoThumbnail {
+    block-size: 100%;
+    object-fit: cover;
+    filter: brightness(0.55);
+  }
+}
+
+.streamPlaceholderOverlay {
+  align-items: center;
+  background-color: rgb(0 0 0 / 90%);
+  border-radius: calc(20px * var(--ui-roundness));
+  color: #fff;
+  display: flex;
+  gap: 10px;
+  max-inline-size: calc(100% - 40px);
+  padding-block: 10px;
+  padding-inline: 20px;
+  // Both are static grid items in the same cell, where the poster (a replaced
+  // element) would otherwise paint over this. A z-index establishes a stacking
+  // context for a grid item even without positioning it.
+  z-index: 1;
+}
+
+.streamPlaceholderSpinner {
+  // `inline-size`/`block-size` don't apply to inline boxes, which would leave
+  // FtLoader's `100%` container resolving against the whole pill
+  display: flex;
+  block-size: 24px;
+  flex: 0 0 auto;
+  inline-size: 24px;
+
+  :deep(.spinner) {
+    block-size: 100%;
+    inline-size: 100%;
+    margin-block: 0;
+  }
+}
+
+.streamPlaceholderText {
+  min-inline-size: 0;
+}
+
 .ageRestricted {
   @include single-column-template;
 

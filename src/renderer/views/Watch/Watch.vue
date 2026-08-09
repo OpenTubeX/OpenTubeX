@@ -64,8 +64,27 @@
           class="videoPlayer videoPlayerPlaceholder ft-shimmer"
           data-tab-loading-indicator
         />
+        <div
+          v-else-if="ytDlpStreamsPending && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
+          class="videoPlayer videoPlayerPlaceholder streamPlaceholder"
+          :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
+          data-tab-loading-indicator
+        >
+          <img
+            v-if="thumbnail"
+            :src="thumbnail"
+            class="videoThumbnail"
+            alt=""
+          >
+          <div class="streamPlaceholderOverlay">
+            <span class="streamPlaceholderSpinner">
+              <ft-loader />
+            </span>
+            <span class="streamPlaceholderText">{{ $t("Video.Fetching Streams") }}</span>
+          </div>
+        </div>
         <ft-shaka-video-player
-          v-if="!isLoading && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
+          v-if="playerReady && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
           ref="player"
           :manifest-src="manifestSrc"
           :manifest-mime-type="manifestMimeType"
