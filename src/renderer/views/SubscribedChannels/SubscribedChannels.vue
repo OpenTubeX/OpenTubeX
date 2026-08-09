@@ -209,13 +209,20 @@ function filterChannels() {
 }
 
 function thumbnailURL(originalURL) {
-  if (originalURL == null) { return null }
+  if (!originalURL) { return null }
   let newURL = originalURL
   // Sometimes relative protocol URLs are passed in
   if (originalURL.startsWith('//')) {
     newURL = `https:${originalURL}`
   }
-  const hostname = new URL(newURL).hostname
+  // Subscriptions imported from other apps can carry an unusable thumbnail,
+  // which used to throw here and take the whole page render down with it.
+  let hostname
+  try {
+    hostname = new URL(newURL).hostname
+  } catch {
+    return null
+  }
   if (hostname === 'yt3.ggpht.com' || hostname === 'yt3.googleusercontent.com') {
     if (backendPreference.value === 'invidious') { // YT to IV
       newURL = youtubeImageUrlToInvidious(newURL, currentInvidiousInstanceUrl.value)
