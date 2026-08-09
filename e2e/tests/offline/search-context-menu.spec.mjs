@@ -268,7 +268,6 @@ test('adds a custom search engine from settings', async ({ page }) => {
   await expect(section.getByRole('checkbox', { name: 'Example Search' })).toBeChecked()
 
   const customRow = section.locator('.engineRow').filter({ hasText: 'Example Search' })
-  const nameInput = customRow.getByLabel('Engine name')
   const removeButton = customRow.getByRole('button', { name: 'Remove Example Search' })
   await expect(removeButton).toBeVisible()
   expect(await section.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true)

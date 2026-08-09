@@ -271,9 +271,19 @@ test.describe('watch page', () => {
       Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)
     ), await tags.elementHandle())).toBe(true)
     expect(await tags.evaluate(element => element.closest('.descriptionScroll'))).not.toBeNull()
+    const descriptionScroll = description.locator('.descriptionScroll')
     const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
     await expect(collapseControl).toBeVisible()
     await expect(collapseControl).toHaveCSS('position', 'sticky')
+    await descriptionScroll.evaluate(element => {
+      element.scrollTop = element.scrollHeight / 2
+    })
+    await expect.poll(() => descriptionScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => collapseControl.evaluate(element => {
+      const controlBottom = element.getBoundingClientRect().bottom
+      const scrollBottom = element.parentElement.getBoundingClientRect().bottom
+      return Math.abs(controlBottom - scrollBottom) <= 1
+    })).toBe(true)
 
     await description.locator('.descriptionCopyButton button').click()
     await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()

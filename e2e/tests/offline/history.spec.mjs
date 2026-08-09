@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, sel, goTo } from '../../helpers/app.mjs'
+import { test, expect, goTo } from '../../helpers/app.mjs'
 
 const now = Date.now()
 const DAY = 86_400_000
