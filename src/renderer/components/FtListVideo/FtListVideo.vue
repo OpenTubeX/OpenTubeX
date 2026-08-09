@@ -695,6 +695,13 @@ const dropdownOptions = computed(() => {
     {
       type: 'divider'
     },
+    ...showMarkAsSeen.value
+      ? [{
+          label: t('Subscriptions.Mark as Seen'),
+          value: 'markAsSeen',
+          icon: ['fas', 'check']
+        }]
+      : [],
     ...canMarkAsWatched.value
       ? [{
           label: isWatched.value
@@ -873,6 +880,9 @@ function handleOptionsClick(option) {
     case 'addToQueue':
       addToWatchQueue(false)
       break
+    case 'markAsSeen':
+      markSubscriptionVideoAsSeen()
+      break
     case 'history':
       if (isWatched.value) {
         unmarkAsWatched()
@@ -1029,6 +1039,11 @@ const showNewSubscriptionFeedIndicator = computed(() => {
     props.data.isNewInSubscriptionFeed === true &&
     props.data.hideNewSubscriptionFeedIndicator !== true &&
     !isHistoryEntryWatched(historyEntry.value)
+})
+
+const showMarkAsSeen = computed(() => {
+  return props.data.isNewInSubscriptionFeed === true &&
+    (props.data.isInNewSubscriptionFeed === true || showNewSubscriptionFeedIndicator.value)
 })
 
 /** @type {import('vue').ComputedRef<string>} */

@@ -172,6 +172,27 @@ test.describe('new subscriptions feed', () => {
     await expect(video.locator('.optionsButton .iconDropdown')).toBeVisible()
     await expect(video).toBeVisible()
   })
+
+  test('marks a dotted video as seen from its options menu', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const video = page.locator('.ft-list-video').filter({
+      has: page.getByText('New video', { exact: true })
+    })
+    await expect(video.locator('.newContentDot')).toBeVisible()
+
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Mark as seen' }).click()
+
+    await expect(video).toBeVisible()
+    await expect(video.locator('.newContentDot')).toHaveCount(0)
+    await expect(video).not.toHaveClass(/watched/)
+
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await expect(page.getByRole('option', { name: 'Mark as seen' })).toHaveCount(0)
+  })
 })
 
 test.describe('new feed settings and seen state', () => {
@@ -239,6 +260,29 @@ test.describe('new feed settings and seen state', () => {
     await goTo(relaunched.page, 'subscriptions')
     await relaunched.page.locator('[data-subscription-feed-tab="all"]').click()
     await expect(relaunched.page.getByText('There is no new content.')).toBeVisible()
+  })
+
+  test('marks a video as seen from the New feed even when dots are disabled', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const regularFeedVideo = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await regularFeedVideo.hover()
+    await regularFeedVideo.locator('.optionsButton').click()
+    await expect(page.getByRole('option', { name: 'Mark as seen' })).toHaveCount(0)
+
+    await page.keyboard.press('Escape')
+    await page.locator('[data-subscription-feed-tab="all"]').click()
+
+    const newFeedVideo = page.locator('.ft-list-video').filter({
+      has: page.getByRole('heading', { name: 'New video', exact: true })
+    })
+    await newFeedVideo.hover()
+    await newFeedVideo.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Mark as seen' }).click()
+
+    await expect(newFeedVideo).toHaveCount(0)
   })
 
   test('keeps YouTube-style Shorts as portrait grid cards in list display mode', async ({ page }) => {
