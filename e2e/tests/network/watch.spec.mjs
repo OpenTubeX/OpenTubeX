@@ -197,13 +197,19 @@ test.describe('background watch tab', () => {
   })
 })
 
-test.describe('watch page', () => {
+test.describe('watch page metadata', () => {
+  // The tab shows a play icon instead of the channel avatar while the video
+  // plays, so keep this tab out of the playing state entirely.
+  test.use({ seed: { settings: { autoplayVideos: false } } })
+
   test('shows video metadata', async ({ page }) => {
     await openVideo(page)
     await expect(page.getByText('jawed').first()).toBeVisible()
     await expect(page.locator(sel.activeTab).locator('.tabAvatar')).toBeVisible()
   })
+})
 
+test.describe('watch page', () => {
   test('shows tags below the description and copies the description', async ({ app, page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await openVideo(page)
