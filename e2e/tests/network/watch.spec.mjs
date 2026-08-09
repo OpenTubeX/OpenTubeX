@@ -275,10 +275,17 @@ test.describe('watch page', () => {
     const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
     await expect(collapseControl).toBeVisible()
     await expect(collapseControl).toHaveCSS('position', 'sticky')
-    await descriptionScroll.evaluate(element => {
-      element.scrollTop = element.scrollHeight / 2
-    })
+    const maxScrollTop = await descriptionScroll.evaluate(element =>
+      element.scrollHeight - element.clientHeight
+    )
+    expect(maxScrollTop).toBeGreaterThan(0)
+    await descriptionScroll.evaluate((element, maxScrollTop) => {
+      element.scrollTop = maxScrollTop / 2
+    }, maxScrollTop)
     await expect.poll(() => descriptionScroll.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await expect.poll(() => descriptionScroll.evaluate(element =>
+      element.scrollTop < element.scrollHeight - element.clientHeight
+    )).toBe(true)
     await expect.poll(() => collapseControl.evaluate(element => {
       const controlBottom = element.getBoundingClientRect().bottom
       const scrollBottom = element.parentElement.getBoundingClientRect().bottom
