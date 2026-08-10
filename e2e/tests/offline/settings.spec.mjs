@@ -647,7 +647,12 @@ test.describe('settings', () => {
 
     const content = page.locator('.settingsContent')
     const tooltipButton = content.locator('.selectTooltip .button').last()
-    await tooltipButton.evaluate(element => element.scrollIntoView({ block: 'end' }))
+    await tooltipButton.evaluate(element => {
+      const scrollContainer = element.closest('.settingsContent')
+      const buttonBounds = element.getBoundingClientRect()
+      const contentBounds = scrollContainer.getBoundingClientRect()
+      scrollContainer.scrollTop += buttonBounds.bottom - contentBounds.bottom + 8
+    })
     await tooltipButton.hover()
     const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
