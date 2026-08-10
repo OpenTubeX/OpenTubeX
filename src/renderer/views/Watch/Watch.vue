@@ -542,6 +542,7 @@
           </button>
         </div>
         <div
+          ref="shortsAuxPanelTarget"
           v-overlay-scrollbars
           class="shortsAuxPanelTarget"
         >

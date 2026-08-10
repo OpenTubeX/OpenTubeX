@@ -20,6 +20,7 @@
       </button>
     </header>
     <TransitionGroup
+      ref="queueItems"
       v-overlay-scrollbars
       name="queueItem"
       tag="ol"
@@ -84,11 +85,12 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import store from '../../store/index'
+import { clampOverlayScrollTop } from '../../helpers/overlayScrollbars'
 
 const emit = defineEmits(['pause-player'])
 const { t } = useI18n()
@@ -97,6 +99,23 @@ const items = computed(() => store.getters.getWatchQueue)
 const backendPreference = computed(() => store.getters.getBackendPreference)
 const invidiousUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl)
 const draggedQueueItemId = ref(null)
+const queueItems = useTemplateRef('queueItems')
+let queueObserver = null
+
+onMounted(() => {
+  const container = queueItems.value?.$el ?? queueItems.value
+  queueObserver = new MutationObserver(() => {
+    requestAnimationFrame(() => {
+      clampOverlayScrollTop(
+        container,
+        container.querySelector(':scope > .queueItem:last-of-type')
+      )
+    })
+  })
+  queueObserver.observe(container, { childList: true })
+})
+
+onBeforeUnmount(() => queueObserver?.disconnect())
 
 function thumbnailUrl(videoId) {
   const baseUrl = backendPreference.value === 'invidious' ? invidiousUrl.value : 'https://i.ytimg.com'

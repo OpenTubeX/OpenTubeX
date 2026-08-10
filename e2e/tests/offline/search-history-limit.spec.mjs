@@ -29,4 +29,10 @@ test('shows every saved search in a scrollable list', async ({ page }) => {
   await expect.poll(() => list.evaluate(element => {
     return element.clientWidth === element.offsetWidth
   })).toBe(true)
+
+  await list.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => list.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.locator(sel.searchInput).fill(entries.at(-1)._id)
+  await expect(suggestions).toHaveCount(1)
+  await expect.poll(() => list.evaluate(element => element.scrollTop)).toBe(0)
 })

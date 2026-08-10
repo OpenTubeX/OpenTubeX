@@ -24,6 +24,7 @@ import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import { calculateColorLuminance } from '../../helpers/colors'
 import { applyAnimationSpeed } from '../../helpers/animationSpeed'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { hasReachedWatchedThreshold, isHistoryEntryWatched } from '../../helpers/history'
 import { isVideoHiddenByPreferences } from '../../helpers/subscriptions'
 import { parseLocalVideoGames } from '../../helpers/video-games'
@@ -1097,6 +1098,7 @@ export default defineComponent({
     },
     toggleSponsorBlockInfo() {
       if (this.customShortsPlayerActive && !this.showSidebarSponsorBlock) {
+        this.resetShortsAuxPanelScroll()
         this.shortsMetadataOpen = false
         if (this.showTranscript) {
           this.closeTranscript()
@@ -1107,6 +1109,7 @@ export default defineComponent({
     },
     toggleTranscript() {
       if (this.customShortsPlayerActive && !this.showTranscript) {
+        this.resetShortsAuxPanelScroll()
         this.shortsMetadataOpen = false
         if (this.showSidebarSponsorBlock) {
           this.closeSidebarSponsorBlock()
@@ -1135,6 +1138,9 @@ export default defineComponent({
     },
     toggleShortsMetadata() {
       const shouldOpen = !this.shortsMetadataOpen
+      if (shouldOpen) {
+        this.resetShortsAuxPanelScroll()
+      }
       this.shortsMetadataOpen = shouldOpen
 
       if (shouldOpen) {
@@ -1145,6 +1151,15 @@ export default defineComponent({
           this.closeSidebarSponsorBlock()
         }
         this.closeShortsComments()
+      }
+    },
+    resetShortsAuxPanelScroll() {
+      const target = this.$refs.shortsAuxPanelTarget
+      if (target != null) {
+        restoreOverlayScrollTop(target, 0)
+        this.$nextTick(() => {
+          requestAnimationFrame(() => restoreOverlayScrollTop(target, 0))
+        })
       }
     },
     handleSidebarPanelBeforeLeave() {

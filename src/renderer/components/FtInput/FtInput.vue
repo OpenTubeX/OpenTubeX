@@ -80,6 +80,7 @@
     <div class="options">
       <ul
         v-if="showOptions"
+        ref="optionsList"
         v-overlay-scrollbars
         class="list"
         @mouseenter="searchState.isPointerInList = true"
@@ -131,6 +132,7 @@ import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettin
 
 import store from '../../store/index'
 
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { isKeyboardEventKeyPrintableChar, isNullOrEmpty } from '../../helpers/strings'
 import { getInputTextAscentOffset } from './inputTextMetrics'
 
@@ -216,6 +218,7 @@ const emit = defineEmits(['blur', 'clear', 'click', 'input', 'keydown', 'remove'
 const id = useId()
 
 const inputRef = useTemplateRef('inputRef')
+const optionsList = useTemplateRef('optionsList')
 
 const inputData = ref(props.value)
 const searchState = reactive({
@@ -505,6 +508,10 @@ function handleFocus() {
 }
 
 function updateVisibleDataList() {
+  if (optionsList.value != null) {
+    restoreOverlayScrollTop(optionsList.value, 0)
+  }
+
   // Reset selected option before it's updated
   // Block resetting if it was just the "Remove" button that was pressed
   if (!removalMade.value || searchState.selectedOption >= props.dataList.length) {

@@ -90,6 +90,32 @@ test('manages a temporary queue from video menus and the watch sidebar', async (
     'Queue video two'
   ])
 
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    for (let index = 0; index < 20; index++) {
+      store.commit('addVideoToWatchQueue', {
+        video: {
+          videoId: `overflow${index}`,
+          title: `Overflow video ${index}`,
+          author: 'Queue Test Channel'
+        }
+      })
+    }
+  })
+  await expect(queueItems).toHaveCount(22)
+  const queueScroller = queue.locator('.queueItems')
+  await queueScroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => queueScroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    const queueItemIds = store.getters.getWatchQueue.slice(4).map(item => item.queueItemId)
+    for (const queueItemId of queueItemIds) {
+      store.commit('removeVideoFromWatchQueue', queueItemId)
+    }
+  })
+  await expect(queueItems).toHaveCount(4)
+  await expect.poll(() => queueScroller.evaluate(element => element.scrollTop)).toBe(0)
+
   await queue.getByRole('button', { name: 'Clear Queue' }).click()
   await expect(queue).toBeHidden()
 })
