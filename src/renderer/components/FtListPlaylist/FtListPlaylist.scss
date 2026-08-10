@@ -3,3 +3,8 @@
 .blur {
   filter: blur(20px);
 }
+
+.playlistButtonStack {
+  align-items: flex-start;
+  display: flex;
+}

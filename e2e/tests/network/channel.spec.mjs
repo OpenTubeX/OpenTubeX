@@ -9,7 +9,7 @@ const CHANNEL_URL = 'https://www.youtube.com/channel/UCSMOQeBJ2RAnuFungnQOxLg'
 const CHANNEL_ID = 'UCSMOQeBJ2RAnuFungnQOxLg'
 
 test.describe('channel page', () => {
-  test.use({ seed: { settings: { uiRoundness: 200 } } })
+  test.use({ seed: { settings: { uiRoundness: 200, externalPlayer: 'mpv' } } })
 
   test('shows channel info and videos', async ({ page }) => {
     await page.locator(sel.searchInput).fill(CHANNEL_URL)
@@ -55,6 +55,13 @@ test.describe('channel page', () => {
     await expect(playlistResultsFilter).toHaveAttribute('aria-pressed', 'true')
     await expect(videoResults).toHaveCount(0)
     await expect(playlistResults.first()).toBeVisible()
+
+    const externalPlayerButton = playlistResults.first().locator('.externalPlayerButton .iconButton')
+    const downloadButton = playlistResults.first().getByTitle('Download Playlist')
+    const externalPlayerBounds = await externalPlayerButton.boundingBox()
+    const downloadBounds = await downloadButton.boundingBox()
+    expect(Math.abs(externalPlayerBounds.y - downloadBounds.y)).toBeLessThanOrEqual(2)
+    expect(externalPlayerBounds.x + externalPlayerBounds.width).toBeLessThanOrEqual(downloadBounds.x)
 
     await page.locator('.channelSearch .clearInputTextButton').click()
     await expect(page).not.toHaveURL(/searchQueryText=/)
