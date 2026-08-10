@@ -23,6 +23,8 @@ function readAbrState(page) {
 
     return {
       abrEnabled: player.getConfiguration().abr.enabled,
+      clearBufferSwitch: player.getConfiguration().abr.clearBufferSwitch,
+      safeMarginSwitch: player.getConfiguration().abr.safeMarginSwitch,
       autoButtonVisible: autoButton != null && getComputedStyle(autoButton).display !== 'none'
     }
   })
@@ -44,8 +46,10 @@ test.describe('auto quality', () => {
       await openVideoOrSkip(test, page, VIDEO)
       await waitForPlaybackOrSkip(test, page)
 
-      const { abrEnabled, autoButtonVisible } = await readAbrState(page)
+      const { abrEnabled, clearBufferSwitch, safeMarginSwitch, autoButtonVisible } = await readAbrState(page)
       expect(abrEnabled).toBe(true)
+      expect(clearBufferSwitch).toBe(true)
+      expect(safeMarginSwitch).toBe(10)
       expect(autoButtonVisible).toBe(true)
     })
   })
@@ -67,8 +71,9 @@ test.describe('auto quality', () => {
       await openVideoOrSkip(test, page, VIDEO)
       await waitForPlaybackOrSkip(test, page)
 
-      const { abrEnabled, autoButtonVisible } = await readAbrState(page)
+      const { abrEnabled, clearBufferSwitch, autoButtonVisible } = await readAbrState(page)
       expect(abrEnabled).toBe(false)
+      expect(clearBufferSwitch).toBe(false)
       expect(autoButtonVisible).toBe(false)
     })
   })

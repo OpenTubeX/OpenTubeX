@@ -2879,7 +2879,14 @@ export default defineComponent({
           enabled: useAutoQuality,
 
           // This only affects the "auto" quality, users can still manually select whatever quality they want.
-          restrictToElementSize: true
+          restrictToElementSize: true,
+
+          // The regular buffer can contain up to three minutes of video. Without clearing it on an
+          // automatic switch, playback can therefore stay at the initial low quality long after the
+          // quality menu and stats report the newly selected variant. Keep two typical DASH segments
+          // for a seamless switch, but replace the rest with segments from the new variant.
+          clearBufferSwitch: streamsSupportAutoQuality(format, isSabrPlayback.value),
+          safeMarginSwitch: 10
         },
 
         // Prioritise variants that are predicted to play:
