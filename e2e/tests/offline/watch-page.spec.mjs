@@ -72,7 +72,26 @@ test.describe('watch page', () => {
     const description = page.locator(`${activeTab} .videoDescription`)
     const descriptionText = description.locator('.description')
     const tags = description.locator('.videoTags')
-    await description.locator(':scope > .descriptionStatus').click()
+    const expandControl = description.locator(':scope > .descriptionStatus')
+    await description.evaluate(element => { element.style.height = '70px' })
+    await expect(expandControl).toHaveClass(/avoidCopyButton/)
+    expect(await expandControl.evaluate((element, copyButton) => {
+      const expandRect = element.getBoundingClientRect()
+      const copyRect = copyButton.getBoundingClientRect()
+      return (
+        expandRect.top < copyRect.bottom &&
+        expandRect.bottom > copyRect.top &&
+        expandRect.left < copyRect.right &&
+        expandRect.right > copyRect.left
+      )
+    }, await description.locator('.descriptionCopyButton').elementHandle())).toBe(false)
+
+    await description.evaluate(element => { element.style.height = '160px' })
+    await expect(expandControl).not.toHaveClass(/avoidCopyButton/)
+    await expect(expandControl).toHaveCSS('inset-inline-end', '16px')
+    await description.evaluate(element => { element.style.height = '' })
+
+    await expandControl.click()
     await expect(tags.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
     await expect(tags.locator('.videoTagLink').first()).toHaveAttribute('href', /\/search\/first%20tag/)
     await expect(description.locator('.descriptionScroll')).toHaveCSS('overflow-anchor', 'none')
@@ -121,6 +140,30 @@ test.describe('watch page', () => {
     await description.locator('.descriptionCopyButton button').click()
     await expect(page.locator('.toast', { hasText: 'Description copied to clipboard' })).toBeVisible()
     await expect.poll(() => app.electronApp.evaluate(({ clipboard }) => clipboard.readText())).toBe(videoDescription)
+    await watchComponent.dispose()
+  })
+
+  test('handles videos without a description', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const pageErrors = []
+    page.on('pageerror', error => pageErrors.push(error.message))
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async component => {
+      const watchView = component.proxy
+      watchView.isLoading = true
+      await watchView.$nextTick()
+      watchView.videoDescription = ''
+      watchView.videoDescriptionHtml = ''
+      watchView.videoTags = []
+      watchView.videoGames = []
+      watchView.isLoading = false
+      await watchView.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .videoDescription`)).toHaveCount(0)
+    expect(pageErrors).toEqual([])
     await watchComponent.dispose()
   })
 
