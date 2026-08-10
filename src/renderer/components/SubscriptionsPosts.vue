@@ -223,9 +223,10 @@ function loadPostsFromCacheSometimes() {
 }
 
 function loadPostsFromCacheForAllActiveProfileChannels() {
-  const postList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    return cacheEntry.posts ?? []
-  })
+  const forbiddenTitles = store.getters.getForbiddenTitlesParsed
+  const postList_ = cacheEntriesForAllActiveProfileChannels.value
+    .flatMap(cacheEntry => cacheEntry.posts ?? [])
+    .filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
 
   postList_.sort((a, b) => {
     return b.publishedTime - a.publishedTime
@@ -260,7 +261,7 @@ async function loadPostsForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedPosts !== null) {
-      postList.value = refreshedPosts
+      loadPostsFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
     }
   } finally {

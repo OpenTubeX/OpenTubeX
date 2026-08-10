@@ -36,6 +36,19 @@ function rssFeed(index) {
 </feed>`
 }
 
+function rssFeedWithPreviousEntry(index) {
+  return rssFeed(index).replace('</feed>', `
+  <entry>
+    <yt:videoId>cached${index}</yt:videoId>
+    <title>Cached video ${index}</title>
+    <published>${new Date(now - 2 * HOUR).toISOString()}</published>
+    <media:group>
+      <media:statistics views="1000"/>
+    </media:group>
+  </entry>
+</feed>`)
+}
+
 function cachedChannel(index) {
   return {
     _id: channelId(index),
@@ -72,7 +85,7 @@ function profileWith(channelCount) {
 /**
  * @param {(index: number) => number} delayFor per channel response delay
  */
-async function routeFeeds(page, delayFor) {
+async function routeFeeds(page, delayFor, feedFor = rssFeed) {
   await page.route(/^https?:\/\//, (route) => route.abort())
 
   await page.route('**/feeds/videos.xml**', async (route, request) => {
@@ -87,7 +100,7 @@ async function routeFeeds(page, delayFor) {
     await route.fulfill({
       status: 200,
       contentType: 'application/xml',
-      body: rssFeed(index)
+      body: feedFor(index)
     }).catch(() => {})
   })
 }
@@ -205,6 +218,46 @@ test.describe('subscription feed refresh controls', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+  })
+
+  test('updates the Shorts feed immediately when all entries are marked as seen', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(markAllAsSeen).toBeVisible()
+    await markAllAsSeen.click()
+
+    await expect(page.locator('.newContentDot')).toHaveCount(0)
+    await expect(markAllAsSeen).toHaveCount(0)
+  })
+})
+
+test.describe('seen state after a subscription feed refresh', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        showNewSubscriptionFeedIndicators: true
+      },
+      profiles: [profileWith(1)],
+      subscriptionCache: [cachedChannel(0)]
+    }
+  })
+
+  test('updates the refreshed feed immediately when all entries are marked as seen', async ({ page }) => {
+    await routeFeeds(page, () => 0, rssFeedWithPreviousEntry)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(markAllAsSeen).toBeVisible()
+    await markAllAsSeen.click()
+
+    await expect(page.locator('.newContentDot')).toHaveCount(0)
+    await expect(markAllAsSeen).toHaveCount(0)
   })
 })
 

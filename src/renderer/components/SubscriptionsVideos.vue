@@ -306,7 +306,7 @@ async function loadVideosForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedVideos !== null) {
-      videoList.value = refreshedVideos
+      loadVideosFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionFeedLastRefreshTimestamp
     }
   } finally {
