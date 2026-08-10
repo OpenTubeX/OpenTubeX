@@ -528,6 +528,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
+import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../constants'
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
@@ -535,18 +536,6 @@ import {
 } from '../../helpers/player/segmentPrefetch'
 
 const { t } = useI18n()
-
-const DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS = Object.freeze([
-  { speed: 0.5, name: '' },
-  { speed: 1, name: '' },
-  { speed: 1.25, name: '' },
-  { speed: 1.5, name: '' },
-  { speed: 1.75, name: '' },
-  { speed: 2, name: '' },
-  { speed: 2.25, name: '' },
-  { speed: 2.5, name: '' },
-  { speed: 3, name: '' },
-])
 
 const QUICK_PLAYBACK_SPEED_DRAG_THRESHOLD_PX = 5
 const QUICK_PLAYBACK_SPEED_SETTLE_DURATION_MS = 180

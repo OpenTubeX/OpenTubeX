@@ -571,6 +571,17 @@ const PlaylistVideoAddResult = {
 // Percentage of a video's duration that must be played before it is considered watched
 const DEFAULT_WATCHED_PERCENTAGE_THRESHOLD = 90
 const WATCHED_MAX_REMAINING_SECONDS = 120
+const DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS = Object.freeze([
+  { speed: 0.5, name: '' },
+  { speed: 1, name: '' },
+  { speed: 1.25, name: '' },
+  { speed: 1.5, name: '' },
+  { speed: 1.75, name: '' },
+  { speed: 2, name: '' },
+  { speed: 2.25, name: '' },
+  { speed: 2.5, name: '' },
+  { speed: 3, name: '' },
+])
 
 const LIGHT_BASE_THEMES = [
   'light',
@@ -620,6 +631,7 @@ export {
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,
+  DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS,
   DEFAULT_WATCHED_PERCENTAGE_THRESHOLD,
   WATCHED_MAX_REMAINING_SECONDS,
   LIGHT_BASE_THEMES,

@@ -643,6 +643,40 @@ test.describe('settings', () => {
     expect(fontFamily).toContain('Roboto')
   })
 
+  test('keeps an open help tooltip aligned and visible in fullscreen', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const settingsWindow = page.locator('.settingsWindow')
+    const tooltipButton = page.locator('.settingsContent .selectTooltip .button').first()
+    await tooltipButton.focus()
+
+    const bodyTooltip = page.locator('body > [role="tooltip"]:visible')
+    await expect(bodyTooltip).toBeVisible()
+    const initialButtonBounds = await tooltipButton.boundingBox()
+    const initialTooltipBounds = await bodyTooltip.boundingBox()
+
+    await settingsWindow.evaluate(element => {
+      element.style.left = `${element.getBoundingClientRect().left + 40}px`
+    })
+    await expect.poll(async () => {
+      const [buttonBounds, tooltipBounds] = await Promise.all([
+        tooltipButton.boundingBox(),
+        bodyTooltip.boundingBox()
+      ])
+      const buttonMovement = buttonBounds.x - initialButtonBounds.x
+      const tooltipMovement = tooltipBounds.x - initialTooltipBounds.x
+      return buttonMovement > 30 && Math.abs(tooltipMovement - buttonMovement) <= 1
+    }).toBe(true)
+
+    await settingsWindow.evaluate(element => element.requestFullscreen())
+    await expect.poll(() => settingsWindow.evaluate(element => document.fullscreenElement === element)).toBe(true)
+    await expect(settingsWindow.locator(':scope > [role="tooltip"]:visible')).toBeVisible()
+
+    await page.evaluate(() => document.exitFullscreen())
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement)).toBeNull()
+    await expect(bodyTooltip).toBeVisible()
+  })
+
   test('select dropdowns use overlay scrollbars', async ({ page }) => {
     await goTo(page, 'settings')
 

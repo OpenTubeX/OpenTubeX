@@ -44,6 +44,7 @@ const EDGE_MARGIN = 8
 const TOOLTIP_GAP = 16
 let hovered = false
 let focused = false
+let positionAnimationFrame = null
 
 /**
  * @param {boolean} value
@@ -64,7 +65,29 @@ function setFocused(value) {
 function updateVisibility() {
   visible.value = hovered || focused
   if (visible.value) {
-    nextTick(positionTooltip)
+    nextTick(() => {
+      if (!visible.value) return
+      positionTooltip()
+      startTrackingPosition()
+    })
+  } else {
+    stopTrackingPosition()
+  }
+}
+
+function startTrackingPosition() {
+  if (!visible.value || positionAnimationFrame !== null) return
+  const trackPosition = () => {
+    positionTooltip()
+    positionAnimationFrame = requestAnimationFrame(trackPosition)
+  }
+  positionAnimationFrame = requestAnimationFrame(trackPosition)
+}
+
+function stopTrackingPosition() {
+  if (positionAnimationFrame !== null) {
+    cancelAnimationFrame(positionAnimationFrame)
+    positionAnimationFrame = null
   }
 }
 
@@ -114,14 +137,25 @@ function handleViewportChange() {
   if (visible.value) positionTooltip()
 }
 
+async function handleFullscreenChange() {
+  tooltipTarget.value = document.fullscreenElement ?? document.body
+  if (visible.value) {
+    await nextTick()
+    positionTooltip()
+  }
+}
+
 onMounted(() => {
   window.addEventListener('resize', handleViewportChange)
   window.addEventListener('scroll', handleViewportChange, true)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
 })
 
 onBeforeUnmount(() => {
+  stopTrackingPosition()
   window.removeEventListener('resize', handleViewportChange)
   window.removeEventListener('scroll', handleViewportChange, true)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
 })
 
 const props = defineProps({
