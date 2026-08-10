@@ -1028,7 +1028,21 @@ test.describe('settings', () => {
       await expect(
         toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
       ).toHaveCSS('animation-delay', '0.3s')
+      // The row a toast sits in slides it into place, so let that settle before
+      // anything measures where the toast ended up
+      await page.waitForTimeout(400)
       return toast
+    }
+
+    async function expectToastInset (toast, edge, inset) {
+      const bounds = await toast.boundingBox()
+      const viewport = await viewportSize()
+
+      if (edge === 'top') {
+        expect(bounds.y).toBeCloseTo(inset, 0)
+      } else {
+        expect(viewport.height - (bounds.y + bounds.height)).toBeCloseTo(inset, 0)
+      }
     }
 
     async function dragToast (toast, distance) {
@@ -1042,12 +1056,18 @@ test.describe('settings', () => {
       await page.mouse.down()
       await page.mouse.move(x + distance, y, { steps: 5 })
 
+      // The timeout indicator has to follow the toast as it is dragged
       const indicatorTrack = toast.locator('..').locator('.timeout-indicator-track')
-      const transforms = await Promise.all([
-        toast.evaluate(element => getComputedStyle(element).transform),
-        indicatorTrack.evaluate(element => getComputedStyle(element).transform)
+      const [draggedBounds, indicatorBounds] = await Promise.all([
+        toast.boundingBox(),
+        indicatorTrack.boundingBox()
       ])
-      expect(transforms[1]).toBe(transforms[0])
+      expect(indicatorBounds.x).toBeCloseTo(draggedBounds.x, 0)
+      expect(indicatorBounds.y).toBeCloseTo(draggedBounds.y, 0)
+
+      // A drag is dismissed on distance or on speed, so hold still for a moment
+      // to keep these deliberate drags out of the flick-to-dismiss range
+      await page.waitForTimeout(300)
     }
 
     function viewportSize () {
@@ -1061,21 +1081,20 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('bottom-left')
     await expect(holder).toHaveClass(/position-bottom-left/)
-    await expect(holder).toHaveCSS('bottom', '24px')
     let toast = await showToast('Left toast')
     let bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
+    await expectToastInset(toast, 'bottom', 29)
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
-    await expect(toast).toHaveCSS('transform', 'none')
+    await expect.poll(async () => (await toast.boundingBox()).x).toBeCloseTo(bounds.x, 0)
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('bottom-center')
     await expect(holder).toHaveClass(/position-bottom-center/)
-    await expect(holder).toHaveCSS('transform', 'none')
     toast = await showToast('Center toast dragged left')
     bounds = await toast.boundingBox()
     let viewport = await viewportSize()
@@ -1098,24 +1117,24 @@ test.describe('settings', () => {
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toBeVisible()
-    await expect(toast).toHaveCSS('transform', 'none')
+    await expect.poll(async () => (await toast.boundingBox()).x).toBeCloseTo(bounds.x, 0)
     await dragToast(toast, dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('top-left')
     await expect(holder).toHaveClass(/position-top-left/)
-    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top left toast')
     bounds = await toast.boundingBox()
     expect(bounds.x).toBeLessThan(50)
+    // Below the horizontal tab bar
+    await expectToastInset(toast, 'top', 61)
     await dragToast(toast, -dismissDragDistance)
     await page.mouse.up()
     await expect(toast).toHaveCount(0)
 
     await positionSelect.selectOption('top-center')
     await expect(holder).toHaveClass(/position-top-center/)
-    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top center toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
@@ -1126,7 +1145,6 @@ test.describe('settings', () => {
 
     await positionSelect.selectOption('top-right')
     await expect(holder).toHaveClass(/position-top-right/)
-    await expect(holder).toHaveCSS('top', '56px')
     toast = await showToast('Top right toast')
     bounds = await toast.boundingBox()
     viewport = await viewportSize()
@@ -1174,24 +1192,29 @@ test.describe('settings', () => {
     })
 
     const toast = page.locator('.toast', { hasText: 'Hover toast' })
-    const toastSlot = toast.locator('..')
     const indicator = toast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
-    await expect(toastSlot).toHaveCSS('transform', 'none')
-    await toastSlot.dispatchEvent('pointerenter')
-    // Reported as a list so a failure says which animations were on the element
-    // and what state they were in, instead of just "expected paused"
-    await expect.poll(() => indicator.evaluate((element) => {
-      return element.getAnimations().map(animation => [
-        animation.animationName ?? animation.transitionProperty ?? animation.constructor.name,
-        animation.playState,
-      ].join(':'))
-    })).toEqual(expect.arrayContaining([
+
+    /**
+     * Reported as a list so a failure says which animations were on the element
+     * and what state they were in, instead of just "expected paused".
+     */
+    function indicatorStates (locator) {
+      return locator.evaluate((element) => {
+        return element.getAnimations().map(animation => [
+          animation.animationName ?? animation.transitionProperty ?? animation.constructor.name,
+          animation.playState,
+        ].join(':'))
+      })
+    }
+
+    await toast.hover()
+    await expect.poll(() => indicatorStates(indicator)).toEqual(expect.arrayContaining([
       expect.stringMatching(/^toast-timeout[\w-]*:paused$/),
     ]))
     await page.waitForTimeout(2200)
     await expect(toast).toBeVisible()
 
-    await toastSlot.dispatchEvent('pointerleave')
+    await page.mouse.move(800, 300)
     await expect(toast).toHaveCount(0)
 
     await page.evaluate(() => {
@@ -1218,24 +1241,34 @@ test.describe('settings', () => {
     })
     const firstAlternatingToast = page.locator('.toast', { hasText: 'First alternating toast' })
     const secondAlternatingToast = page.locator('.toast', { hasText: 'Second alternating toast' })
+    const firstIndicator = firstAlternatingToast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
+    const secondIndicator = secondAlternatingToast.locator('..').locator('.timeout-indicator .embeddedProgressPath')
     await page.waitForTimeout(400)
-    await firstAlternatingToast.hover()
-    await secondAlternatingToast.hover()
-    await page.waitForTimeout(300)
-    await firstAlternatingToast.hover()
 
-    const firstIndicatorProgress = await firstAlternatingToast
-      .locator('..')
-      .locator('.timeout-indicator .embeddedProgressPath')
-      .evaluate((element) => ({
-        elapsedRatio: element.getAnimations()[0].currentTime /
-          element.getAnimations()[0].effect.getTiming().duration,
-        transform: getComputedStyle(element).transform,
-      }))
-    expect(firstIndicatorProgress.elapsedRatio).toBeGreaterThan(0.15)
-    expect(firstIndicatorProgress.transform).toBe('none')
+    // The stack is collapsed until it is hovered, so the toasts behind the front
+    // one are only reachable once hovering the front one has fanned it out
+    await secondAlternatingToast.hover()
+
+    // Hovering anywhere in the stack holds every toast in it, so moving between
+    // two toasts must not let either of them resume in between
+    await expect.poll(() => indicatorStates(firstIndicator)).toEqual(expect.arrayContaining([
+      expect.stringMatching(/^toast-timeout[\w-]*:paused$/),
+    ]))
+    await firstAlternatingToast.hover()
+    await page.waitForTimeout(300)
+    await secondAlternatingToast.hover()
+    await expect(indicatorStates(secondIndicator)).resolves.toEqual(expect.arrayContaining([
+      expect.stringMatching(/^toast-timeout[\w-]*:paused$/),
+    ]))
+
+    // Both toasts outlive their two second lifetime while the stack is held
+    await page.waitForTimeout(2200)
+    await expect(firstAlternatingToast).toBeVisible()
+    await expect(secondAlternatingToast).toBeVisible()
 
     await page.mouse.move(800, 300)
+    await expect(firstAlternatingToast).toHaveCount(0)
+    await expect(secondAlternatingToast).toHaveCount(0)
 
     await page.locator('label.switch-label')
       .filter({ hasText: 'Show toast timeout indicator' })
@@ -1247,14 +1280,197 @@ test.describe('settings', () => {
     })
     const toastWithoutIndicator = page.locator('.toast', { hasText: 'No indicator toast' })
     const toastWithoutIndicatorSlot = toastWithoutIndicator.locator('..')
-    await expect(toastWithoutIndicatorSlot).toHaveCSS('transform', 'none')
-    await toastWithoutIndicatorSlot.dispatchEvent('pointerenter')
+    await toastWithoutIndicator.hover()
     await expect(toastWithoutIndicatorSlot.locator('.timeout-indicator')).toHaveCount(0)
     await page.waitForTimeout(2200)
     await expect(toastWithoutIndicator).toBeVisible()
 
-    await toastWithoutIndicatorSlot.dispatchEvent('pointerleave')
+    await page.mouse.move(800, 300)
     await expect(toastWithoutIndicator).toHaveCount(0)
+  })
+
+  test('keeps the stack fanned out while the pointer moves between toasts', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      // Deliberately mismatched widths: the toasts are only as wide as their
+      // message, so consecutive ones do not line up
+      window.ftElectron.showToastOnAllTabs('Alpha toast that is a great deal wider than the others around it', 30000)
+      window.ftElectron.showToastOnAllTabs('Beta', 30000, ['fas', 'eye'])
+      window.ftElectron.showToastOnAllTabs('Gamma toast of a middling sort of width', 30000)
+    })
+    await expect(page.locator('.toast', { hasText: 'Gamma toast' })).toBeVisible()
+    await page.waitForTimeout(700)
+
+    const rows = page.locator('[data-sonner-toast]')
+    await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
+
+    await page.locator('.toast', { hasText: 'Gamma toast' }).hover()
+    await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
+
+    const centres = await page.locator('.toast').evaluateAll((elements) => {
+      return elements
+        .map((element) => {
+          const { x, y, width, height } = element.getBoundingClientRect()
+          return { x: x + width / 2, y: y + height / 2 }
+        })
+        .sort((a, b) => b.y - a.y)
+    })
+
+    // Walking from one toast to the next must never drop out of the stack, or
+    // it collapses under the pointer and immediately reopens
+    for (let index = 1; index < centres.length; index++) {
+      const from = centres[index - 1]
+      const to = centres[index]
+
+      for (let step = 1; step <= 12; step++) {
+        await page.mouse.move(
+          from.x + (to.x - from.x) * step / 12,
+          from.y + (to.y - from.y) * step / 12
+        )
+        await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
+      }
+    }
+
+    // and it lets go once the pointer is clear of the toasts, rather than
+    // holding on across the width of the window
+    const widest = Math.max(...(await page.locator('.toast').evaluateAll((elements) => {
+      return elements.map(element => element.getBoundingClientRect().right)
+    })))
+    await page.mouse.move(widest + 120, centres[0].y)
+    await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
+
+    await page.mouse.move(800, 300)
+    await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
+  })
+
+  test('reflows smoothly when a toast in the middle of the stack is dismissed', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Alpha toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Beta toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Gamma toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Delta toast', 30000)
+    })
+    await expect(page.locator('.toast', { hasText: 'Delta toast' })).toBeVisible()
+    await page.waitForTimeout(700)
+
+    await page.locator('.toast', { hasText: 'Delta toast' }).hover()
+    await expect(page.locator('[data-sonner-toast]').first()).toHaveAttribute('data-expanded', 'true')
+    await page.waitForTimeout(400)
+
+    // Resting on the toast that is about to go: once it stops taking input the
+    // pointer is left over nothing, which is what collapses the stack
+    await page.locator('.toast', { hasText: 'Beta toast' }).hover()
+    await page.waitForTimeout(200)
+
+    const alphaStart = (await page.locator('.toast', { hasText: 'Alpha toast' }).boundingBox()).y
+
+    // Dismiss a toast from the middle of the stack where it stands, the way one
+    // that has simply run out of time goes, and follow the stack closing the gap
+    const { samples, unreachable, collapsed } = await page.evaluate(() => {
+      const start = performance.now()
+      const samples = []
+      const unreachable = new Set()
+      const collapsed = []
+
+      const beta = [...document.querySelectorAll('.toast')].find(e => e.textContent.includes('Beta'))
+      beta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+
+      return new Promise((resolve) => {
+        function sample () {
+          const toasts = [...document.querySelectorAll('.toast')]
+          const alpha = toasts.find(e => e.textContent.includes('Alpha'))
+          if (alpha) { samples.push([performance.now() - start, alpha.getBoundingClientRect().y]) }
+
+          // The toast on its way out must not cover the ones staying behind: at
+          // every frame each of those has to answer for its own middle
+          for (const toast of toasts) {
+            if (toast.closest('[data-removed="true"]')) { continue }
+
+            const { x, y, width, height } = toast.getBoundingClientRect()
+            if (!toast.contains(document.elementFromPoint(x + width / 2, y + height / 2))) {
+              unreachable.add(toast.textContent.trim().split(' ')[0])
+            }
+          }
+
+          // The pointer is still on the stack throughout, so it must stay
+          // fanned out: collapsing and reopening around the dismissal throws
+          // every remaining toast across the screen and back
+          const row = document.querySelector('[data-sonner-toast]')
+          if (row && row.dataset.expanded !== 'true') {
+            collapsed.push(Math.round(performance.now() - start))
+          }
+
+          if (performance.now() - start < 1000) {
+            requestAnimationFrame(sample)
+          } else {
+            resolve({ samples, unreachable: [...unreachable], collapsed })
+          }
+        }
+        requestAnimationFrame(sample)
+      })
+    })
+
+    expect(unreachable).toEqual([])
+    expect(collapsed).toEqual([])
+    await expect(page.locator('.toast', { hasText: 'Beta toast' })).toHaveCount(0)
+
+    const positions = samples.map(([, y]) => y)
+    const settled = positions.at(-1)
+    expect(settled).toBeGreaterThan(alphaStart)
+
+    // The stack slides into place without springing past it and back
+    expect(Math.max(...positions)).toBeCloseTo(settled, 0)
+
+    // and it closes the gap while the dismissed toast is still animating out,
+    // rather than sitting still and then shifting once it has gone
+    const [startedAt] = samples.find(([, y]) => y > positions[0] + 1)
+    expect(startedAt).toBeLessThan(200)
+  })
+
+  test('keeps the stack open when a toast is swiped out of the middle of it', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Alpha toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Beta toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Gamma toast', 30000)
+      window.ftElectron.showToastOnAllTabs('Delta toast', 30000)
+    })
+    await expect(page.locator('.toast', { hasText: 'Delta toast' })).toBeVisible()
+    await page.waitForTimeout(700)
+
+    const rows = page.locator('[data-sonner-toast]')
+    await page.locator('.toast', { hasText: 'Delta toast' }).hover()
+    await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
+    await page.waitForTimeout(400)
+
+    const beta = await page.locator('.toast', { hasText: 'Beta toast' }).boundingBox()
+    const delta = await page.locator('.toast', { hasText: 'Delta toast' }).boundingBox()
+
+    // Swipe the middle toast out towards the edge the stack is anchored to
+    const swipeFrom = beta.x + beta.width - 10
+    await page.mouse.move(swipeFrom, beta.y + beta.height / 2)
+    await page.mouse.down()
+    for (let step = 1; step <= 6; step++) {
+      await page.mouse.move(swipeFrom - 90 * step / 6, beta.y + beta.height / 2)
+    }
+    await page.mouse.up()
+    await expect(page.locator('.toast', { hasText: 'Beta toast' })).toHaveCount(0)
+
+    // Only the toast that was actually swiped: a toast must never be able to
+    // take a drag aimed at one of its neighbours
+    await expect(page.locator('.toast', { hasText: 'Alpha toast' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'Gamma toast' })).toBeVisible()
+    await expect(page.locator('.toast', { hasText: 'Delta toast' })).toBeVisible()
+
+    // Letting go leaves the pointer beside the stack rather than on a toast, so
+    // the stack has to hold itself open until the pointer is back on one
+    const from = { x: swipeFrom - 90, y: beta.y + beta.height / 2 }
+    const to = { x: delta.x + delta.width / 2, y: delta.y + delta.height / 2 }
+    for (let step = 1; step <= 16; step++) {
+      await page.mouse.move(from.x + (to.x - from.x) * step / 16, from.y + (to.y - from.y) * step / 16)
+      await expect(rows.first()).toHaveAttribute('data-expanded', 'true')
+    }
   })
 })
 

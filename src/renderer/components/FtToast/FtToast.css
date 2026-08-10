@@ -1,69 +1,271 @@
-.toast-holder {
-  position: fixed;
+/* The toast stack is vue-sonner's `<Toaster>`: an `ol.toast-holder` of
+   absolutely positioned `li[data-sonner-toast]` elements, each wrapping one
+   `FtToastItem`. Sonner's own stylesheet only handles positioning and stacking
+   here — `data-styled` is false for component toasts, so none of its visual
+   styling applies and the design below is ours. The overrides deliberately
+   qualify with `[data-sonner-toaster]` / `[data-sonner-toast]` so they beat
+   sonner's rules on specificity rather than on import order. */
 
+.toast-holder[data-sonner-toaster] {
   /* Drives the enter/leave transitions and the matching hold before the timeout
      indicator starts draining */
   --toast-transition-duration: 300ms;
 
   /* Higher than any prompt */
   z-index: 300;
-  display: flex;
-  flex-direction: column;
+  inline-size: var(--width);
+  font-family: inherit;
   pointer-events: none;
+
+  /* The offsets shift when the persistent progress toast appears or goes away,
+     so the stack slides across instead of jumping */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  transition: transform 400ms ease, top 300ms ease, bottom 300ms ease;
 }
 
-.toast-holder.position-bottom-left,
-.toast-holder.position-bottom-center,
-.toast-holder.position-bottom-right {
-  inset-block-end: 24px;
+/* Each toast is a full-width row, so the toast inside it can be aligned to the
+   configured edge without the row itself catching pointer events. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast] {
+  display: flex;
+  inline-size: 100%;
+  pointer-events: none;
+  transition: transform var(--toast-transition-duration) ease, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
 }
 
-.toast-holder.position-top-left,
-.toast-holder.position-top-center,
-.toast-holder.position-top-right {
-  inset-block-start: 24px;
-  flex-direction: column-reverse;
+/* Sonner drives the enter, the leave and the reflow from the row's transform, so
+   each state carries its own curve. The reflow has to stay on a plain curve: an
+   overshoot here reads as the whole stack bouncing every time a toast in the
+   middle of it is dismissed. The overshoot that makes a toast look dropped onto
+   the stack lives on the scale instead, further down, which only the enter and
+   the leave touch. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-mounted='true'] {
+  transition: transform var(--toast-transition-duration) ease, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
+}
+
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true'] {
+  transition: transform var(--toast-transition-duration) ease-in, opacity var(--toast-transition-duration), block-size var(--toast-transition-duration);
+}
+
+/* Follow the pointer instantly while swiping */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-swiping='true'],
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-swiping='true'] > * {
+  transition: none;
+}
+
+.toast-holder.position-bottom-center [data-sonner-toast],
+.toast-holder.position-top-center [data-sonner-toast] {
+  justify-content: center;
+}
+
+/* stylelint-disable-next-line liberty/use-logical-spec -- names a physical edge */
+.toast-holder.position-bottom-right [data-sonner-toast],
+.toast-holder.position-top-right [data-sonner-toast] {
+  justify-content: flex-end;
+}
+
+/* Sonner's `position` prop is pinned (see `SONNER_POSITION`), so the configured
+   position is anchored here instead. Every rule outweighs sonner's own, both the
+   default ones and the narrow-window ones it applies below 600px, which would
+   otherwise stretch the stack across the window. */
+.toast-holder.position-top-left[data-sonner-toaster],
+.toast-holder.position-top-center[data-sonner-toaster],
+.toast-holder.position-top-right[data-sonner-toaster] {
+  inset-block: var(--offset-top) auto;
+}
+
+.toast-holder.position-bottom-left[data-sonner-toaster],
+.toast-holder.position-bottom-center[data-sonner-toaster],
+.toast-holder.position-bottom-right[data-sonner-toaster] {
+  inset-block: auto var(--offset-bottom);
+}
+
+/* Toasts stack away from the edge they are anchored to, which for the top
+   positions is the opposite of the direction sonner assumes. */
+.toast-holder.position-top-left[data-sonner-toaster] [data-sonner-toast],
+.toast-holder.position-top-center[data-sonner-toaster] [data-sonner-toast],
+.toast-holder.position-top-right[data-sonner-toaster] [data-sonner-toast] {
+  --lift: 1;
+  --lift-amount: calc(1 * var(--gap));
+
+  inset-block: 0 auto;
 }
 
 /* These settings name physical screen edges, independent of text direction. */
 /* stylelint-disable liberty/use-logical-spec */
-.toast-holder.position-bottom-left,
-.toast-holder.position-top-left {
-  left: 24px;
-  align-items: flex-start;
+.toast-holder.position-bottom-left[data-sonner-toaster],
+.toast-holder.position-top-left[data-sonner-toaster] {
+  right: auto;
+  left: var(--offset-left);
+  transform: none;
 }
 
-.toast-holder.position-bottom-center,
-.toast-holder.position-top-center {
+.toast-holder.position-bottom-right[data-sonner-toaster],
+.toast-holder.position-top-right[data-sonner-toaster] {
+  right: var(--offset-right);
+  left: auto;
+  transform: none;
+}
+
+.toast-holder.position-bottom-center[data-sonner-toaster],
+.toast-holder.position-top-center[data-sonner-toaster] {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+.playerFullWindow .toast-holder[data-sonner-toaster] {
+  z-index: 1002;
+}
+
+/* The timeout indicator always retracts towards the screen corner the toast is
+   anchored to, so it drains away from the viewport rather than towards it. The
+   path is drawn from the inline start corner, which already follows the text
+   direction, so only positions anchored to the opposite physical edge need the
+   other keyframes. Centered toasts keep the reading direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.toast-holder.position-bottom-right:dir(ltr),
+.toast-holder.position-top-right:dir(ltr),
+.toast-holder.position-bottom-left:dir(rtl),
+.toast-holder.position-top-left:dir(rtl) {
+  --toast-drain: toast-timeout-away;
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+/* The enter and leave states keep our short slide, in place of sonner's
+   full-height one. `--y` is the only thing sonner puts in the row's
+   `transform`, so overriding it is enough. Mounted rows keep sonner's own
+   `--y`, which carries the stacking offset. The matching scale lives on the
+   toast inside the row: sonner measures the row's box to lay the stack out, and
+   it does so while the enter transition is still running, so a scale on the row
+   itself would have it record a height that is too small. */
+.toast-holder.position-bottom-left [data-sonner-toast]:not([data-mounted='true']),
+.toast-holder.position-top-left [data-sonner-toast]:not([data-mounted='true']) {
+  --y: translateX(-15px);
+}
+
+.toast-holder.position-bottom-right [data-sonner-toast]:not([data-mounted='true']),
+.toast-holder.position-top-right [data-sonner-toast]:not([data-mounted='true']) {
+  --y: translateX(15px);
+}
+
+.toast-holder.position-bottom-center [data-sonner-toast]:not([data-mounted='true']) {
+  --y: translateY(15px);
+}
+
+.toast-holder.position-top-center [data-sonner-toast]:not([data-mounted='true']) {
+  --y: translateY(-15px);
+}
+
+/* Leaving toasts drift back out the way they came in, but keep the stacking
+   offset they were removed at, so the ones above can animate into the gap.
+   Toasts swiped away are left to sonner's swipe-out animation. */
+.toast-holder.position-bottom-left [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']),
+.toast-holder.position-top-left [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']) {
+  --y: translateY(calc(var(--lift) * var(--offset))) translateX(-15px);
+
+  opacity: 0;
+}
+
+.toast-holder.position-bottom-right [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']),
+.toast-holder.position-top-right [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']) {
+  --y: translateY(calc(var(--lift) * var(--offset))) translateX(15px);
+
+  opacity: 0;
+}
+
+.toast-holder.position-bottom-center [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']) {
+  --y: translateY(calc(var(--lift) * var(--offset) + 15px));
+
+  opacity: 0;
+}
+
+.toast-holder.position-top-center [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']) {
+  --y: translateY(calc(var(--lift) * var(--offset) - 15px));
+
+  opacity: 0;
+}
+
+/* The persistent progress toast is not part of the toast queue: it is a status
+   readout with its own lifetime, so it is anchored to the same edge on its own
+   and the toaster is offset past it. */
+.progress-toast-holder {
+  position: fixed;
+  z-index: 300;
+  display: flex;
+
+  /* Matches the inset the toasts get from the toaster's own offset, so the
+     progress toast lines up with the stack above it */
+  padding: 5px;
+  pointer-events: none;
+}
+
+.playerFullWindow .progress-toast-holder {
+  z-index: 1002;
+}
+
+.progress-toast-holder.position-bottom-left,
+.progress-toast-holder.position-bottom-center,
+.progress-toast-holder.position-bottom-right {
+  inset-block-end: 24px;
+}
+
+.progress-toast-holder.position-top-left,
+.progress-toast-holder.position-top-center,
+.progress-toast-holder.position-top-right {
+  inset-block-start: 24px;
+}
+
+/* These settings name physical screen edges, independent of text direction. */
+/* stylelint-disable liberty/use-logical-spec */
+.progress-toast-holder.position-bottom-left,
+.progress-toast-holder.position-top-left {
+  left: 24px;
+  justify-content: flex-start;
+}
+
+.progress-toast-holder.position-bottom-center,
+.progress-toast-holder.position-top-center {
   right: 0;
   left: 0;
-  align-items: center;
+  justify-content: center;
 }
 
-.toast-holder.position-bottom-right,
-.toast-holder.position-top-right {
+.progress-toast-holder.position-bottom-right,
+.progress-toast-holder.position-top-right {
   right: 24px;
-  align-items: flex-end;
+  justify-content: flex-end;
 }
 /* stylelint-enable liberty/use-logical-spec */
 
 /* Keep top-positioned toasts below the horizontal tab bar. */
-.toast-holder.horizontal-tabs.position-top-left,
-.toast-holder.horizontal-tabs.position-top-center,
-.toast-holder.horizontal-tabs.position-top-right {
+.progress-toast-holder.horizontal-tabs.position-top-left,
+.progress-toast-holder.horizontal-tabs.position-top-center,
+.progress-toast-holder.horizontal-tabs.position-top-right {
   inset-block-start: 56px;
-}
-
-:global(body.playerFullWindow .toast-holder) {
-  z-index: 1002;
 }
 
 .toast-slot {
   position: relative;
+  pointer-events: none;
+}
+
+/* The scale half of the enter and leave animations, kept off the row itself so
+   sonner's height measurements stay accurate */
+.toast-holder[data-sonner-toaster] .toast-slot {
+  transition: transform var(--toast-transition-duration) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true'] .toast-slot {
+  transition: transform var(--toast-transition-duration) ease-in;
+}
+
+.toast-holder[data-sonner-toaster] [data-sonner-toast]:not([data-mounted='true']) .toast-slot,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true']:not([data-swipe-out='true']) .toast-slot {
+  transform: scale(0.95);
 }
 
 .toast-slot.persistent-slot {
-  pointer-events: none;
   transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -115,19 +317,22 @@
   transform: translate(18px, -18px) scale(0.5);
 }
 
-.toast-holder.horizontal-tabs.position-top-left .persistent-slot.minimized {
+.progress-toast-holder.horizontal-tabs.position-top-left .persistent-slot.minimized {
   transform: translateX(-18px) scale(0.5);
 }
 
-.toast-holder.horizontal-tabs.position-top-center .persistent-slot.minimized {
+.progress-toast-holder.horizontal-tabs.position-top-center .persistent-slot.minimized {
   transform: scale(0.5);
 }
 
-.toast-holder.horizontal-tabs.position-top-right .persistent-slot.minimized {
+.progress-toast-holder.horizontal-tabs.position-top-right .persistent-slot.minimized {
   transform: translateX(18px) scale(0.5);
 }
 
 .toast {
+  /* Positioned so it stays above the margin of hover behind it, which would
+     otherwise take the clicks and drags meant for the toast */
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -137,7 +342,6 @@
   max-inline-size: min(400px, calc(100vw - 60px));
   padding-block: 12px;
   padding-inline: 18px;
-  margin: 5px;
   text-align: start;
   overflow-y: auto;
   background-color: rgb(28 28 28 / 92%);
@@ -147,9 +351,8 @@
   pointer-events: auto;
   user-select: none;
 
-  /* Let the component own horizontal drag gestures instead of the browser */
+  /* Let sonner own horizontal drag gestures instead of the browser */
   touch-action: pan-y;
-  transition: transform 300ms ease, opacity 300ms ease;
 }
 
 .toast.actionable {
@@ -158,14 +361,9 @@
 
 .timeout-indicator-track {
   position: absolute;
-  inset: 5px;
+  inset: 0;
   border-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
-  transition: transform 300ms ease, opacity 300ms ease;
-}
-
-.timeout-indicator-track.dragging {
-  transition: none;
 }
 
 .timeout-indicator {
@@ -173,7 +371,7 @@
   inset: 0;
 }
 
-.timeout-indicator :deep(.embeddedProgressPath) {
+.timeout-indicator .embeddedProgressPath {
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--primary-color) 70%, transparent));
 
   /* Hold the line at its full length until the toast has finished animating in,
@@ -187,24 +385,16 @@
      duration. Such a toast is gone before the hold is over, so it just keeps the
      full line for its whole lifetime. */
   animation-duration: max(0s, var(--toast-duration) - var(--toast-transition-duration));
-  animation-name: toast-timeout;
+  animation-name: var(--toast-drain, toast-timeout);
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-/* The line always retracts towards the screen corner the toast is anchored to,
-   so it drains away from the viewport rather than towards it. The path is drawn
-   from the inline start corner, which already follows the text direction, so
-   only positions anchored to the opposite physical edge need the other
-   keyframes. Centered toasts keep the reading direction. */
-/* stylelint-disable liberty/use-logical-spec */
-.position-bottom-right:dir(ltr) .timeout-indicator :deep(.embeddedProgressPath),
-.position-top-right:dir(ltr) .timeout-indicator :deep(.embeddedProgressPath),
-.position-bottom-left:dir(rtl) .timeout-indicator :deep(.embeddedProgressPath),
-.position-top-left:dir(rtl) .timeout-indicator :deep(.embeddedProgressPath) {
-  animation-name: toast-timeout-away;
+/* The persistent toast reports real progress, so its line is driven by the
+   `progress` prop rather than by the timeout drain. */
+.timeout-indicator.progress-indicator .embeddedProgressPath {
+  animation: none;
 }
-/* stylelint-enable liberty/use-logical-spec */
 
 /* Shortens the line from its far end, so it retracts into the corner it starts
    from and the trailing edge finally sweeps out through that corner's arc. */
@@ -224,19 +414,9 @@
   }
 }
 
-/* Follow the pointer instantly while dragging */
-.toast.dragging {
-  cursor: grabbing;
-  transition: none;
-}
-
 .toast.persistent {
   cursor: progress;
   pointer-events: none;
-}
-
-.progress-indicator :deep(.embeddedProgressPath) {
-  animation: none;
 }
 
 /* Tighten the leading padding so the thumbnail sits closer to the edge */
@@ -262,60 +442,132 @@
   margin: 0;
 }
 
-.toast-enter-active {
-  transition:
-    opacity var(--toast-transition-duration),
-    transform var(--toast-transition-duration) cubic-bezier(0.34, 1.56, 0.64, 1);
+/* Sonner holds a toast's timer while the pointer is over the stack, the stack
+   has focus, or the window is in the background. The indicator tracks the same
+   clock, so it stops with it. */
+.timeout-indicator-track.paused .timeout-indicator .embeddedProgressPath {
+  animation-play-state: paused;
 }
 
-.toast-leave-active {
-  /* Taken out of flow (pinned via position: fixed in the before-leave hook) so
-     the ones above animate up to fill the gap (via .toast-move) instead of
-     jumping once it is finally removed */
-  transition: opacity 300ms, transform 300ms ease-in;
+/* Fade a toast out as it is pushed towards the edge it is anchored to */
+[data-sonner-toast][data-swiping='true'] .toast,
+[data-sonner-toast][data-swiping='true'] .timeout-indicator-track {
+  /* stylelint-disable-next-line scss/no-global-function-names -- CSS abs(), not the Sass one */
+  opacity: max(0, calc(1 - abs(var(--swipe-amount-x, 0px)) / 200px));
+}
+
+[data-sonner-toast][data-swiping='true'] .toast {
+  cursor: grabbing;
+}
+
+/* Collapsed stack: the toasts behind the front one are layered underneath it,
+   each peeking out by one gap and drawn slightly smaller, and fan out while the
+   pointer is over the stack. Sonner puts both the offset and the shrink in the
+   row's `--y`, but our row spans the full width of the column while the toast
+   sits at one edge of it, so scaling the row would drag the toast towards the
+   middle of the screen. The row keeps the offset and the toast itself takes the
+   shrink, which also leaves the row's measured height alone. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] {
+  --y: translateY(calc(var(--lift-amount) * var(--toasts-before)));
+}
+
+/* While the stack is fanned out it is backed by a region that holds the hover. Without one the stack collapses the moment the pointer is
+   between two toasts, or over one that has just been dismissed, and then reopens
+   as the next toast slides under the pointer.
+
+   It has to be a single region behind the whole stack rather than something each
+   toast carries: the rows are stacked in front of one another, so anything a
+   toast held on to would reach over its neighbours and take the clicks and drags
+   meant for them. This sits behind every row instead, so it can only ever be hit
+   where no toast is. Sonner's own equivalents, which do ride along with their
+   toast, are left inert for the same reason.
+
+   It is tied to the stack being fanned out and nothing else. A toast on its way
+   out needs no backdrop of its own: the stack is open for as long as the pointer
+   is on this one, and keeping it alive past that only catches the pointer again
+   once the stack has closed, and opens it right back up. */
+.toast-holder[data-sonner-toaster]:has([data-sonner-toast][data-expanded='true'])::before {
+  position: absolute;
+  z-index: 0;
+  content: '';
+
+  /* Sized from the toasts rather than from the rows they sit in, which span the
+     whole column: a backdrop that wide would hold the stack open, and swallow
+     clicks, most of the way across the window */
+  inline-size: calc(var(--stack-width, 0px) + 80px);
+  block-size: var(--stack-height, 0);
+  pointer-events: auto;
+}
+
+.toast-holder.position-bottom-left[data-sonner-toaster]::before,
+.toast-holder.position-bottom-center[data-sonner-toaster]::before,
+.toast-holder.position-bottom-right[data-sonner-toaster]::before {
+  inset-block-end: 0;
+}
+
+.toast-holder.position-top-left[data-sonner-toaster]::before,
+.toast-holder.position-top-center[data-sonner-toaster]::before,
+.toast-holder.position-top-right[data-sonner-toaster]::before {
+  inset-block-start: 0;
+}
+
+/* Anchored to the same edge as the toasts it backs. */
+/* stylelint-disable liberty/use-logical-spec */
+.toast-holder.position-bottom-left[data-sonner-toaster]::before,
+.toast-holder.position-top-left[data-sonner-toaster]::before {
+  left: -40px;
+}
+
+.toast-holder.position-bottom-right[data-sonner-toaster]::before,
+.toast-holder.position-top-right[data-sonner-toaster]::before {
+  right: -40px;
+}
+
+.toast-holder.position-bottom-center[data-sonner-toaster]::before,
+.toast-holder.position-top-center[data-sonner-toaster]::before {
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* stylelint-enable liberty/use-logical-spec */
+
+/* A drag can carry the pointer well past the backdrop, so the toast being
+   dragged keeps the widened hit area sonner gives it for exactly that. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-swiping='true']::before {
+  pointer-events: auto;
+}
+
+/* A toast on its way out is not worth aiming at, and it covers the one that is
+   about to take its place, so it stops taking input as soon as it is dismissed */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-removed='true'] .toast {
   pointer-events: none;
 }
 
-.position-bottom-center .toast-enter-from,
-.position-bottom-center .toast-leave-to {
+/* Only the front toast is readable while the stack is collapsed. The ones
+   behind it are trimmed to its height so the stack reads as one pile of equally
+   sized cards rather than a ragged edge. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .toast-slot,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .toast {
+  box-sizing: border-box;
+  inline-size: var(--front-toast-width);
+  block-size: 100%;
+}
+
+.toast-holder[data-sonner-toaster] .image,
+.toast-holder[data-sonner-toaster] .icon,
+.toast-holder[data-sonner-toaster] .message,
+.toast-holder[data-sonner-toaster] .timeout-indicator-track {
+  transition: opacity var(--toast-transition-duration);
+}
+
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .image,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .icon,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .message,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .timeout-indicator-track {
   opacity: 0;
-  transform: translateY(15px) scale(0.95);
 }
 
-.position-top-center .toast-enter-from,
-.position-top-center .toast-leave-to {
-  opacity: 0;
-  transform: translateY(-15px) scale(0.95);
-}
-
-.position-bottom-left .toast-enter-from,
-.position-bottom-left .toast-leave-to,
-.position-top-left .toast-enter-from,
-.position-top-left .toast-leave-to {
-  opacity: 0;
-  transform: translateX(-15px) scale(0.95);
-}
-
-.position-bottom-right .toast-enter-from,
-.position-bottom-right .toast-leave-to,
-.position-top-right .toast-enter-from,
-.position-top-right .toast-leave-to {
-  opacity: 0;
-  transform: translateX(15px) scale(0.95);
-}
-
-/* When dismissed by a swipe, continue sliding off through that side */
-.toast-slot.dismiss-left.toast-leave-to {
-  transform: translateX(-110%);
-}
-
-.toast-slot.dismiss-right.toast-leave-to {
-  transform: translateX(110%);
-}
-
-/* stack reflow when a toast is removed */
-.toast-move {
-  transition: transform 300ms ease;
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'][data-mounted='true']:not([data-removed='true']) .toast-slot {
+  transform: scale(calc(-1 * var(--toasts-before) * 0.05 + 1));
 }
 
 @media (prefers-reduced-motion: reduce) {

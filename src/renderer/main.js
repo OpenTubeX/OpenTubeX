@@ -19,6 +19,8 @@ import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/o
 // import the styles
 import '@fortawesome/fontawesome-svg-core/styles.css'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
+// Only the positioning and stacking rules are used, FtToast supplies the design
+import 'vue-sonner/style.css'
 
 import { register as registerSwiper } from 'swiper/element'
 

@@ -10,6 +10,7 @@ overrides:
 
 patchedDependencies:
   shaka-player@5.1.12: 17d85e267c8958999207ce9d6c29a2ddf18734d0499fb30870ac8a55d90303fa
+  vue-sonner@2.0.9: ae94d00b3ff46bede626a25ac5a36a6cd35987f33d73c14ffc73afbd5767f95c
   youtubei.js@17.2.0: 82a17ea1894879fa26c1d70226541120697508f90730bda238d7cbe2c20c3ee0
 
 importers:
@@ -76,6 +77,9 @@ importers:
       vue-router:
         specifier: ^5.2.0
         version: 5.2.0(@vue/compiler-sfc@3.5.40)(vue@3.5.40)(webpack@5.109.2)
+      vue-sonner:
+        specifier: ^2.0.9
+        version: 2.0.9(patch_hash=ae94d00b3ff46bede626a25ac5a36a6cd35987f33d73c14ffc73afbd5767f95c)
       vuex:
         specifier: ^4.1.0
         version: 4.1.0(vue@3.5.40)
@@ -5053,6 +5057,20 @@ packages:
       pinia:
         optional: true
       vite:
+        optional: true
+
+  vue-sonner@2.0.9:
+    resolution: {integrity: sha512-i6BokNlNDL93fpzNxN/LZSn6D6MzlO+i3qXt6iVZne3x1k7R46d5HlFB4P8tYydhgqOrRbIZEsnRd3kG7qGXyw==}
+    peerDependencies:
+      '@nuxt/kit': ^4.0.3
+      '@nuxt/schema': ^4.0.3
+      nuxt: ^4.0.3
+    peerDependenciesMeta:
+      '@nuxt/kit':
+        optional: true
+      '@nuxt/schema':
+        optional: true
+      nuxt:
         optional: true
 
   vue@3.5.40:
@@ -10354,6 +10372,8 @@ snapshots:
       - rollup
       - unloader
       - webpack
+
+  vue-sonner@2.0.9(patch_hash=ae94d00b3ff46bede626a25ac5a36a6cd35987f33d73c14ffc73afbd5767f95c): {}
 
   vue@3.5.40:
     dependencies:
