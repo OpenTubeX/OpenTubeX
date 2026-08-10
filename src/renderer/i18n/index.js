@@ -1,6 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import { createWebURL } from '../helpers/utils'
+import { createPluralRules } from './plurals'
 // List of locales approved for use
 import activeLocales from '../../../static/locales/activeLocales.json'
 
@@ -22,7 +23,8 @@ const i18n = createI18n({
     'pt-PT': ['pt'],
     // any -> en-US
     default: ['en-US'],
-  }
+  },
+  pluralRules: createPluralRules(activeLocales)
 })
 
 export async function loadLocale(locale) {
