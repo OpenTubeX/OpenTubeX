@@ -158,7 +158,7 @@
   padding-inline: 12px;
   border-radius: calc(6px * var(--ui-roundness));
   color: var(--tertiary-text-color);
-  background: var(--search-bar-color);
+  background: var(--settings-search-bar-color);
   cursor: text;
 }
 
@@ -399,6 +399,57 @@
 
 .compactSettings .settingsContent {
   padding: 14px;
+}
+
+.settingsSectionSlideForward {
+  animation: settings-section-slide-forward 180ms ease-out;
+}
+
+.settingsSectionSlideBackward {
+  animation: settings-section-slide-backward 180ms ease-out;
+}
+
+.settingsCompactSlideForward {
+  animation: settings-compact-slide-forward 200ms ease-out;
+}
+
+.settingsCompactSlideBackward {
+  animation: settings-compact-slide-backward 200ms ease-out;
+}
+
+@keyframes settings-section-slide-forward {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes settings-section-slide-backward {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+@keyframes settings-compact-slide-forward {
+  from {
+    opacity: 0;
+    transform: translateX(calc(28px * var(--horizontal-directionality-coefficient)));
+  }
+}
+
+@keyframes settings-compact-slide-backward {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-28px * var(--horizontal-directionality-coefficient)));
+  }
+}
+
+:global(:root[data-reduced-motion='reduce']) .settingsSectionSlideForward,
+:global(:root[data-reduced-motion='reduce']) .settingsSectionSlideBackward,
+:global(:root[data-reduced-motion='reduce']) .settingsCompactSlideForward,
+:global(:root[data-reduced-motion='reduce']) .settingsCompactSlideBackward {
+  animation: none;
 }
 
 :global(html.draggingSettingsWindow),

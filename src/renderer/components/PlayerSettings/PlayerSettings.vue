@@ -402,8 +402,25 @@
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
+      grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >
+      <div class="quickPlaybackSpeedToolbar">
+        <FtFlexBox class="quickPlaybackSpeedToolbarActions">
+          <FtButton
+            :label="t('Settings.Player Settings.Add Playback Speed')"
+            :icon="['fas', 'plus']"
+            :disabled="quickPlaybackSpeedBarEntries.length >= QUICK_PLAYBACK_SPEED_LIMIT"
+            @click="addQuickPlaybackSpeed"
+          />
+          <FtButton
+            :label="t('Settings.Player Settings.Reset Quick Playback Speed Bar')"
+            :icon="['fas', 'undo']"
+            :disabled="!hasModifiedQuickPlaybackSpeedBarOptions"
+            @click="resetQuickPlaybackSpeedBarOptions"
+          />
+        </FtFlexBox>
+      </div>
       <div class="quickPlaybackSpeedList">
         <div
           v-for="(option, index) in quickPlaybackSpeedBarEntries"
@@ -442,7 +459,7 @@
                 :aria-label="t('Settings.Player Settings.Edit Playback Speed Name')"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
               >
-                <FontAwesomeIcon :icon="['fas', 'pen']" />
+                <FontAwesomeIcon :icon="['fas', 'edit']" />
               </button>
             </div>
             <div
@@ -489,19 +506,6 @@
           </button>
         </div>
       </div>
-      <FtFlexBox>
-        <FtButton
-          :label="t('Settings.Player Settings.Add Playback Speed')"
-          :icon="['fas', 'plus']"
-          :disabled="quickPlaybackSpeedBarEntries.length >= QUICK_PLAYBACK_SPEED_LIMIT"
-          @click="addQuickPlaybackSpeed"
-        />
-        <FtButton
-          :label="t('Settings.Player Settings.Reset Quick Playback Speed Bar')"
-          :icon="['fas', 'undo']"
-          @click="resetQuickPlaybackSpeedBarOptions"
-        />
-      </FtFlexBox>
     </FtSettingsSubpage>
   </FtSettingsSection>
 </template>
@@ -524,6 +528,7 @@ import FtTooltip from '../FtTooltip/FtTooltip.vue'
 import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
+import { DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS } from '../../../constants'
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
 import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
@@ -532,18 +537,6 @@ import {
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { t } = useI18n()
-
-const DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS = Object.freeze([
-  { speed: 0.5, name: '' },
-  { speed: 1, name: '' },
-  { speed: 1.25, name: '' },
-  { speed: 1.5, name: '' },
-  { speed: 1.75, name: '' },
-  { speed: 2, name: '' },
-  { speed: 2.25, name: '' },
-  { speed: 2.5, name: '' },
-  { speed: 3, name: '' },
-])
 
 const QUICK_PLAYBACK_SPEED_DRAG_THRESHOLD_PX = 5
 const QUICK_PLAYBACK_SPEED_SETTLE_DURATION_MS = 180
@@ -1040,6 +1033,15 @@ const quickPlaybackSpeedBarOptions = computed(() => store.getters.getQuickPlayba
 /** @type {import('vue').ComputedRef<Array<{id: string, speed: number, name: string}>>} */
 const quickPlaybackSpeedBarEntries = computed(() => {
   return parseQuickPlaybackSpeedBarOptions(quickPlaybackSpeedBarOptions.value)
+})
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hasModifiedQuickPlaybackSpeedBarOptions = computed(() => {
+  return quickPlaybackSpeedBarEntries.value.length !== DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS.length ||
+    quickPlaybackSpeedBarEntries.value.some((option, index) => {
+      const defaultOption = DEFAULT_QUICK_PLAYBACK_SPEED_BAR_OPTIONS[index]
+      return option.speed !== defaultOption.speed || option.name.trim() !== defaultOption.name
+    })
 })
 
 /**

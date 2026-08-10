@@ -58,11 +58,30 @@
   align-items: center;
 }
 
+.quickPlaybackSpeedToolbarActions,
+.quickPlaybackSpeedList {
+  inline-size: min(800px, 100%);
+  box-sizing: border-box;
+  margin-inline: auto;
+}
+
+.quickPlaybackSpeedToolbar {
+  position: sticky;
+  z-index: 2;
+  inset-block-start: -20px;
+  flex: 0 0 auto;
+  margin-block-start: -20px;
+  margin-inline: -20px;
+  padding-block: calc(20px + 0.5rem) 0.5rem;
+  padding-inline: 20px;
+  background-color: var(--card-bg-color);
+}
+
 .quickPlaybackSpeedList {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-block: 1rem;
+  margin-block: 0.5rem 1rem;
 }
 
 .quickPlaybackSpeedEntry {

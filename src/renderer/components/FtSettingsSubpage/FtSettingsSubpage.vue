@@ -3,7 +3,10 @@
     v-if="open"
     :to="`#${settingsWindow.targetId}`"
   >
-    <div class="settingsSubpageContent">
+    <div
+      class="settingsSubpageContent"
+      :class="{ growWithContent }"
+    >
       <slot />
     </div>
   </Teleport>
@@ -22,6 +25,10 @@ const props = defineProps({
   title: {
     type: String,
     required: true
+  },
+  growWithContent: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -50,5 +57,9 @@ onBeforeUnmount(() => settingsWindow.close(close))
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+}
+
+.settingsSubpageContent.growWithContent {
+  block-size: auto;
 }
 </style>

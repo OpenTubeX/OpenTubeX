@@ -1,126 +1,164 @@
 <template>
-  <div
-    class="tooltip"
-    @mouseenter="clampToViewport"
-    @focusin="clampToViewport"
-  >
+  <div class="tooltip">
     <button
+      ref="buttonRef"
       :aria-labelledby="id"
       class="button"
       type="button"
+      @mouseenter="setHovered(true)"
+      @mouseleave="setHovered(false)"
+      @focus="setFocused(true)"
+      @blur="setFocused(false)"
     >
       <FontAwesomeIcon :icon="['fas', 'question-circle']" />
     </button>
-    <p
-      :id="id"
-      ref="textRef"
-      class="text"
-      :class="{
-        [position]: true,
-        allowNewlines,
-      }"
-      role="tooltip"
-    >
-      {{ tooltip }}
-    </p>
+    <Teleport :to="tooltipTarget">
+      <p
+        v-show="visible"
+        :id="id"
+        ref="textRef"
+        class="text"
+        :class="{
+          [position]: true,
+          allowNewlines,
+        }"
+        role="tooltip"
+        :style="tooltipStyle"
+      >
+        {{ tooltip }}
+      </p>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useId, useTemplateRef } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId, useTemplateRef } from 'vue'
 
+const buttonRef = useTemplateRef('buttonRef')
 const textRef = useTemplateRef('textRef')
-
-// Keep the tooltip inside whatever would otherwise cut it off. It
-// is positioned purely with CSS relative to its icon, so an icon near the start
-// of a clipping container (the settings page clips with `overflow-x: hidden`)
-// can leave part of the tooltip unreachable. We compute its shown extent and
-// offset it back into view via CSS variables.
-// Offset geometry is used because, unlike `getBoundingClientRect()`,
-// they are unaffected by the CSS transform (and its transition), so the shown
-// fade/slide animation is preserved.
+const tooltipTarget = shallowRef(document.fullscreenElement ?? document.body)
+const tooltipStyle = ref({})
+const visible = ref(false)
 const EDGE_MARGIN = 8
+const TOOLTIP_GAP = 16
+let hovered = false
+let focused = false
+let positionAnimationFrame = null
 
 /**
- * The bounds the tooltip has to stay within, intersecting the viewport with
- * every ancestor that clips either axis.
- *
- * @param {HTMLElement} el
- * @returns {{ left: number, right: number, top: number, bottom: number }}
+ * @param {boolean} value
  */
-function getClippingBounds(el) {
-  const bounds = {
-    left: 0,
-    right: window.innerWidth,
-    top: 0,
-    bottom: window.innerHeight
-  }
-  for (let node = el.parentElement; node != null; node = node.parentElement) {
-    const style = getComputedStyle(node)
-    if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
-      const rect = node.getBoundingClientRect()
-      if (style.overflowX !== 'visible') {
-        bounds.left = Math.max(bounds.left, rect.left)
-        bounds.right = Math.min(bounds.right, rect.right)
-      }
-      if (style.overflowY !== 'visible') {
-        bounds.top = Math.max(bounds.top, rect.top)
-        bounds.bottom = Math.min(bounds.bottom, rect.bottom)
-      }
-    }
-  }
-  return bounds
+function setHovered(value) {
+  hovered = value
+  updateVisibility()
 }
 
-function clampToViewport() {
-  const el = textRef.value
-  const offsetParent = el?.offsetParent
-  if (!el || !offsetParent) {
-    return
-  }
-
-  // Measure the unshifted position, so repeated hovers don't compound the shift.
-  el.style.setProperty('--ft-tooltip-shift-x', '0px')
-  el.style.setProperty('--ft-tooltip-shift-y', '0px')
-
-  const width = el.offsetWidth
-  const height = el.offsetHeight
-  const parentRect = offsetParent.getBoundingClientRect()
-  const dir = getComputedStyle(el).direction === 'rtl' ? -1 : 1
-
-  // The visible transform's static horizontal translate: centered variants shift
-  // by -50% (times the writing-direction coefficient), edge variants by 0.
-  const centered = el.classList.contains('bottom') ||
-    el.classList.contains('bottom-left') ||
-    el.classList.contains('top')
-  const staticTranslateX = centered ? -0.5 * width * dir : 0
-  const staticTranslateY = centered ? 0 : -0.5 * height
-
-  const left = parentRect.left + el.offsetLeft + staticTranslateX
-  const right = left + width
-  const top = parentRect.top + el.offsetTop + staticTranslateY
-  const bottom = top + height
-  const bounds = getClippingBounds(el)
-
-  let shiftX = 0
-  let shiftY = 0
-  if (left < bounds.left + EDGE_MARGIN) {
-    shiftX = Math.ceil(bounds.left + EDGE_MARGIN - left)
-  } else if (right > bounds.right - EDGE_MARGIN) {
-    shiftX = Math.floor(bounds.right - EDGE_MARGIN - right)
-  }
-  if (top < bounds.top + EDGE_MARGIN) {
-    shiftY = Math.ceil(bounds.top + EDGE_MARGIN - top)
-  } else if (bottom > bounds.bottom - EDGE_MARGIN) {
-    shiftY = Math.floor(bounds.bottom - EDGE_MARGIN - bottom)
-  }
-
-  el.style.setProperty('--ft-tooltip-shift-x', `${shiftX}px`)
-  el.style.setProperty('--ft-tooltip-shift-y', `${shiftY}px`)
+/**
+ * @param {boolean} value
+ */
+function setFocused(value) {
+  focused = value
+  updateVisibility()
 }
 
-defineProps({
+function updateVisibility() {
+  visible.value = hovered || focused
+  if (visible.value) {
+    nextTick(() => {
+      if (!visible.value) return
+      positionTooltip()
+      startTrackingPosition()
+    })
+  } else {
+    stopTrackingPosition()
+  }
+}
+
+function startTrackingPosition() {
+  if (!visible.value || positionAnimationFrame !== null) return
+  const trackPosition = () => {
+    positionTooltip()
+    positionAnimationFrame = requestAnimationFrame(trackPosition)
+  }
+  positionAnimationFrame = requestAnimationFrame(trackPosition)
+}
+
+function stopTrackingPosition() {
+  if (positionAnimationFrame !== null) {
+    cancelAnimationFrame(positionAnimationFrame)
+    positionAnimationFrame = null
+  }
+}
+
+function positionTooltip() {
+  const button = buttonRef.value
+  const text = textRef.value
+  if (!visible.value || !button || !text) return
+
+  const buttonRect = button.getBoundingClientRect()
+  const width = text.offsetWidth
+  const height = text.offsetHeight
+  const isRtl = getComputedStyle(button).direction === 'rtl'
+  let left
+  let top
+
+  switch (props.position) {
+    case 'left':
+      left = isRtl ? buttonRect.right + TOOLTIP_GAP : buttonRect.left - width - TOOLTIP_GAP
+      top = buttonRect.top + (buttonRect.height - height) / 2
+      break
+    case 'right':
+      left = isRtl ? buttonRect.left - width - TOOLTIP_GAP : buttonRect.right + TOOLTIP_GAP
+      top = buttonRect.top + (buttonRect.height - height) / 2
+      break
+    case 'top':
+      left = buttonRect.left + (buttonRect.width - width) / 2
+      top = buttonRect.top - height - TOOLTIP_GAP
+      break
+    case 'bottom-left':
+      left = isRtl ? buttonRect.left : buttonRect.right - width
+      top = buttonRect.bottom + TOOLTIP_GAP
+      break
+    default:
+      left = buttonRect.left + (buttonRect.width - width) / 2
+      top = buttonRect.bottom + TOOLTIP_GAP
+  }
+
+  left = Math.max(EDGE_MARGIN, Math.min(left, window.innerWidth - width - EDGE_MARGIN))
+  top = Math.max(EDGE_MARGIN, Math.min(top, window.innerHeight - height - EDGE_MARGIN))
+  tooltipStyle.value = {
+    left: `${Math.round(left)}px`,
+    top: `${Math.round(top)}px`,
+  }
+}
+
+function handleViewportChange() {
+  if (visible.value) positionTooltip()
+}
+
+async function handleFullscreenChange() {
+  tooltipTarget.value = document.fullscreenElement ?? document.body
+  if (visible.value) {
+    await nextTick()
+    positionTooltip()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', handleViewportChange)
+  window.addEventListener('scroll', handleViewportChange, true)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+})
+
+onBeforeUnmount(() => {
+  stopTrackingPosition()
+  window.removeEventListener('resize', handleViewportChange)
+  window.removeEventListener('scroll', handleViewportChange, true)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+})
+
+const props = defineProps({
   position: {
     type: String,
     default: 'bottom',

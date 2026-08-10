@@ -22,6 +22,7 @@ body {
   --link-color: var(--accent-color);
   --link-visited-color: var(--accent-color-visited);
   --instance-menu-color: var(--search-bar-color);
+  --settings-search-bar-color: var(--search-bar-color);
   --red-500: #f44336;
   --top-bar-push-down-adjustment-default: -35px;
 
@@ -192,6 +193,7 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --side-nav-hover-color: #212121;
   --side-nav-active-color: #303030;
   --search-bar-color: #262626;
+  --settings-search-bar-color: var(--card-bg-color);
   --logo-icon: url('../../_icons/iconWhiteSmall.svg');
   --logo-text: url('../../_icons/textWhiteSmall.svg');
 }

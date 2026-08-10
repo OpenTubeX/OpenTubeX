@@ -187,7 +187,10 @@
             v-show="!subpageTitle && (isInDesktopView || (!activeSection && settingsSearchQuery === ''))"
             ref="menuRef"
             v-overlay-scrollbars
-            :class="{ mobileSettingsMenu: !isInDesktopView }"
+            :class="[
+              { mobileSettingsMenu: !isInDesktopView },
+              settingsMenuTransitionClass
+            ]"
             :settings-sections="filteredSettingsSectionComponents"
             :active-section="activeSection"
             :empty-message="t('Settings.No Settings Found')"
@@ -199,6 +202,7 @@
             ref="settingsContentRef"
             v-overlay-scrollbars
             class="settingsContent"
+            :class="settingsContentTransitionClass"
             tabindex="-1"
             @scroll.passive="clampSettingsContentScroll"
           >
@@ -338,6 +342,8 @@ const isInDesktopView = ref(true)
 const isMaximized = ref(false)
 const activeSection = ref(store.getters.getSettingsWindowSection)
 const settingsSearchQuery = ref('')
+const settingsContentTransitionClass = ref('')
+const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
@@ -743,13 +749,40 @@ function getRememberedSection() {
 }
 
 function navigateToSection(sectionType) {
+  const previousSection = activeSection.value
   closeSubpage?.()
   subpageTitle.value = ''
   closeSubpage = null
   activeSection.value = sectionType
-  if (!isInDesktopView.value) {
+  if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
+    const previousIndex = settingsSectionComponents.value.findIndex(({ type }) => type === previousSection)
+    const nextIndex = settingsSectionComponents.value.findIndex(({ type }) => type === sectionType)
+    animateSettingsElement(
+      settingsContentRef,
+      settingsContentTransitionClass,
+      nextIndex >= previousIndex ? 'settingsSectionSlideForward' : 'settingsSectionSlideBackward'
+    )
+  } else if (!isInDesktopView.value) {
+    animateSettingsElement(
+      settingsContentRef,
+      settingsContentTransitionClass,
+      'settingsCompactSlideForward'
+    )
     nextTick(() => settingsContentRef.value?.focus({ preventScroll: true }))
   }
+}
+
+/**
+ * @param {Readonly<import('vue').ShallowRef<HTMLElement | {$el?: HTMLElement} | null>>} elementRef
+ * @param {import('vue').Ref<string>} classRef
+ * @param {string} className
+ */
+async function animateSettingsElement(elementRef, classRef, className) {
+  classRef.value = ''
+  await nextTick()
+  const element = elementRef.value?.$el ?? elementRef.value
+  element?.getBoundingClientRect()
+  classRef.value = className
 }
 
 async function openSearchResult(sectionType, label) {
@@ -859,6 +892,7 @@ function returnToSettingsMenu() {
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value
     activeSection.value = null
+    animateSettingsElement(menuRef, settingsMenuTransitionClass, 'settingsCompactSlideBackward')
     nextTick(() => menuRef.value?.focusLink(previousSection))
   }
 }
