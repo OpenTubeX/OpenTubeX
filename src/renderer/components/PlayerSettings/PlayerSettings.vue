@@ -267,13 +267,13 @@
         @change="updateDefaultPlayback"
       />
       <FtSlider
-        :label="t('Settings.Player Settings.Concurrent Segment Downloads')"
+        :label="t('Settings.Player Settings.Parallel Segment Loading')"
         :default-value="segmentPrefetchLimit"
         setting-key="segmentPrefetchLimit"
         :min-value="DEFAULT_SEGMENT_PREFETCH_LIMIT"
         :max-value="MAX_SEGMENT_PREFETCH_LIMIT"
         :step="1"
-        :tooltip="t('Tooltips.Player Settings.Concurrent Segment Downloads')"
+        :tooltip="t('Tooltips.Player Settings.Parallel Segment Loading')"
         @change="updateSegmentPrefetchLimit"
       />
       <FtSlider
