@@ -206,6 +206,7 @@ function loadPostsFromCacheSometimes() {
 
   // This method is called on view visible
   if (postCacheForAllActiveProfileChannelsPresent.value) {
+    attemptedFetch.value = true
     loadPostsFromCacheForAllActiveProfileChannels()
     return
   }
@@ -216,16 +217,16 @@ function loadPostsFromCacheSometimes() {
     return
   }
 
-  // Auto fetch disabled, not enough cache for profile = show nothing
-  postList.value = []
+  // Auto fetch disabled, show the cache that is available for the profile
   attemptedFetch.value = false
-  isLoading.value = false
+  loadPostsFromCacheForAllActiveProfileChannels()
 }
 
 function loadPostsFromCacheForAllActiveProfileChannels() {
-  const postList_ = cacheEntriesForAllActiveProfileChannels.value.flatMap((cacheEntry) => {
-    return cacheEntry.posts ?? []
-  })
+  const forbiddenTitles = store.getters.getForbiddenTitlesParsed
+  const postList_ = cacheEntriesForAllActiveProfileChannels.value
+    .flatMap(cacheEntry => cacheEntry.posts ?? [])
+    .filter(post => !forbiddenTitles.some(text => post.author.toLowerCase().includes(text)))
 
   postList_.sort((a, b) => {
     return b.publishedTime - a.publishedTime
@@ -260,7 +261,7 @@ async function loadPostsForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedPosts !== null) {
-      postList.value = refreshedPosts
+      loadPostsFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionPostsLastRefreshTimestamp
     }
   } finally {

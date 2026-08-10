@@ -36,6 +36,19 @@ function rssFeed(index) {
 </feed>`
 }
 
+function rssFeedWithPreviousEntry(index) {
+  return rssFeed(index).replace('</feed>', `
+  <entry>
+    <yt:videoId>cached${index}</yt:videoId>
+    <title>Cached video ${index}</title>
+    <published>${new Date(now - 2 * HOUR).toISOString()}</published>
+    <media:group>
+      <media:statistics views="1000"/>
+    </media:group>
+  </entry>
+</feed>`)
+}
+
 function cachedChannel(index) {
   return {
     _id: channelId(index),
@@ -55,6 +68,19 @@ function cachedChannel(index) {
   }
 }
 
+function cachedCollaboratorChannel(index) {
+  const channel = cachedChannel(index)
+  channel.videos[0] = {
+    ...channel.videos[0],
+    hasCollaborators: true,
+    collaborators: [
+      { id: channelId(index), name: `Channel ${index}`, thumbnail: '', subtitle: '' },
+      { id: 'UCcollaborator00000000000', name: 'Collaborator', thumbnail: '', subtitle: '' }
+    ]
+  }
+  return channel
+}
+
 function profileWith(channelCount) {
   return {
     _id: 'allChannels',
@@ -72,7 +98,7 @@ function profileWith(channelCount) {
 /**
  * @param {(index: number) => number} delayFor per channel response delay
  */
-async function routeFeeds(page, delayFor) {
+async function routeFeeds(page, delayFor, feedFor = rssFeed) {
   await page.route(/^https?:\/\//, (route) => route.abort())
 
   await page.route('**/feeds/videos.xml**', async (route, request) => {
@@ -87,7 +113,7 @@ async function routeFeeds(page, delayFor) {
     await route.fulfill({
       status: 200,
       contentType: 'application/xml',
-      body: rssFeed(index)
+      body: feedFor(index)
     }).catch(() => {})
   })
 }
@@ -165,6 +191,29 @@ test.describe('incremental subscription feed refresh', () => {
   })
 })
 
+test.describe('subscription feed state during refresh', () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profileWith(2)],
+      subscriptionCache: [cachedCollaboratorChannel(0), cachedChannel(1)]
+    }
+  })
+
+  test('keeps an open collaborators modal when refreshed videos reorder the feed', async ({ page }) => {
+    await routeFeeds(page, (index) => index === 0 ? 8_000 : 0)
+    await goTo(page, 'subscriptions')
+
+    const collaboratorVideo = page.locator('.ft-list-video').filter({ hasText: 'Cached video 0' })
+    await collaboratorVideo.getByRole('button', { name: 'Channel 0' }).click()
+    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => button.click())
+    await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 3_000 })
+    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
+  })
+})
+
 test.describe('subscription feed refresh controls', () => {
   const cachedShort = {
     videoId: 'cached-short',
@@ -205,6 +254,46 @@ test.describe('subscription feed refresh controls', () => {
     await page.locator('[data-subscription-feed-tab="shorts"]').click()
 
     await expect(page.getByRole('button', { name: 'Mark all as seen' })).toBeEnabled()
+  })
+
+  test('updates the Shorts feed immediately when all entries are marked as seen', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+    await page.locator('[data-subscription-feed-tab="shorts"]').click()
+
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(markAllAsSeen).toBeVisible()
+    await markAllAsSeen.click()
+
+    await expect(page.locator('.newContentDot')).toHaveCount(0)
+    await expect(markAllAsSeen).toHaveCount(0)
+  })
+})
+
+test.describe('seen state after a subscription feed refresh', () => {
+  test.use({
+    seed: {
+      settings: {
+        ...commonSettings,
+        showNewSubscriptionFeedIndicators: true
+      },
+      profiles: [profileWith(1)],
+      subscriptionCache: [cachedChannel(0)]
+    }
+  })
+
+  test('updates the refreshed feed immediately when all entries are marked as seen', async ({ page }) => {
+    await routeFeeds(page, () => 0, rssFeedWithPreviousEntry)
+    await goTo(page, 'subscriptions')
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).click()
+    await expect(page.getByText('Fresh video 0', { exact: true })).toBeVisible()
+
+    const markAllAsSeen = page.getByRole('button', { name: 'Mark all as seen' })
+    await expect(markAllAsSeen).toBeVisible()
+    await markAllAsSeen.click()
+
+    await expect(page.locator('.newContentDot')).toHaveCount(0)
+    await expect(markAllAsSeen).toHaveCount(0)
   })
 })
 

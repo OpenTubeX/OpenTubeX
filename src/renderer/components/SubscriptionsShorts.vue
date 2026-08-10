@@ -2,7 +2,7 @@
   <SubscriptionsTabUi
     ref="tabUi"
     :is-loading="isLoading"
-    :video-list="videoList"
+    :video-list="shortsList"
     :error-channels="errorChannels"
     :attempted-fetch="attemptedFetch"
     :youtube-style-shorts="useCustomShortsPlayer"
@@ -32,6 +32,7 @@ const tabUi = useTemplateRef('tabUi')
 
 const isLoading = ref(true)
 const videoList = shallowRef([])
+const shortsList = computed(() => videoList.value.map(video => ({ ...video, isShort: true })))
 const errorChannels = ref([])
 const attemptedFetch = ref(false)
 const useCustomShortsPlayer = computed(() => store.getters.getUseCustomShortsPlayer)
@@ -208,6 +209,7 @@ function loadVideosFromCacheSometimes() {
 
   // This method is called on view visible
   if (videoCacheForAllActiveProfileChannelsPresent.value) {
+    attemptedFetch.value = true
     loadVideosFromCacheForAllActiveProfileChannels()
     return
   }
@@ -218,10 +220,9 @@ function loadVideosFromCacheSometimes() {
     return
   }
 
-  // Auto fetch disabled, not enough cache for profile = show nothing
-  videoList.value = []
+  // Auto fetch disabled, show the cache that is available for the profile
   attemptedFetch.value = false
-  isLoading.value = false
+  loadVideosFromCacheForAllActiveProfileChannels()
 }
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
@@ -230,7 +231,6 @@ function loadVideosFromCacheForAllActiveProfileChannels() {
   })
 
   videoList.value = updateVideoListAfterProcessing(videoList_)
-    .map(video => ({ ...video, isShort: true }))
   isLoading.value = false
 }
 
@@ -259,7 +259,7 @@ async function loadVideosForSubscriptionsFromRemote() {
       errorChannels: errorChannels.value
     })
     if (refreshedVideos !== null) {
-      videoList.value = refreshedVideos.map(video => ({ ...video, isShort: true }))
+      loadVideosFromCacheForAllActiveProfileChannels()
       lastRemoteRefreshSuccessTimestamp.value = store.getters.getSubscriptionShortsLastRefreshTimestamp
     }
   } finally {
