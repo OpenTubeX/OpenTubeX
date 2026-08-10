@@ -13,7 +13,16 @@ concurrency:
 jobs:
   validate-release-note:
     name: Release Note
-    if: ${{ github.head_ref != 'weblate-translations' }}
+    if: >-
+      ${{
+        github.head_ref != 'weblate-translations' &&
+        !(
+          github.event.pull_request.user.login == 'pull[bot]' &&
+          github.event.pull_request.head.repo.full_name == 'FreeTubeApp/FreeTube' &&
+          github.event.pull_request.head.ref == 'development' &&
+          github.event.pull_request.base.ref == 'development'
+        )
+      }}
     runs-on: ubuntu-latest
 
     permissions:

@@ -8,10 +8,10 @@ async function openPlayerSettings(page) {
   await page.locator('.settingsMenu [data-section="player"]').click()
   await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
 
-  return page.getByRole('slider', { name: /Concurrent Segment Downloads/ })
+  return page.getByRole('slider', { name: /Parallel Segment Loading/ })
 }
 
-test.describe('concurrent segment downloads slider', () => {
+test.describe('parallel segment loading slider', () => {
   test('persists the configured limit', async ({ app }) => {
     const slider = await openPlayerSettings(app.page)
 
