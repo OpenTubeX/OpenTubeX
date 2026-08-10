@@ -34,7 +34,7 @@
       </ft-flex-box>
       <template v-else>
         <ft-flex-box class="count">
-          {{ $t('Channels.Count', { number: channelList.length }) }}
+          {{ $t('Channels.Count', { number: channelList.length }, channelList.length) }}
         </ft-flex-box>
         <ft-flex-box class="channels">
           <div

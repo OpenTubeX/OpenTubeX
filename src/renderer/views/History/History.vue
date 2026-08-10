@@ -247,7 +247,7 @@ async function deleteOldHistory() {
 
   await store.dispatch('removeHistoryOlderThan', days)
   closeHistoryCleanupPrompt()
-  showToast({ message: t('History.History Older Than Days Removed', { days }), icon: ['fas', 'trash'] })
+  showToast({ message: t('History.History Older Than Days Removed', { days }, days), icon: ['fas', 'trash'] })
 }
 
 const HISTORY_SORT_BY_VALUES = {

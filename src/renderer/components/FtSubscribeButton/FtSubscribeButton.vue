@@ -317,7 +317,7 @@ function handleUnsubscription(profile) {
 
   if (profile._id === MAIN_PROFILE_ID && profileIds.length > 1) {
     showToast({
-      message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }),
+      message: t('Channel.Removed subscription from {count} other channel(s)', { count: profileIds.length - 1 }, profileIds.length - 1),
       icon: ['fas', 'trash'],
     })
   }

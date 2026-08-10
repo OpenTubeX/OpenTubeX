@@ -823,7 +823,7 @@ const commentsTitle = computed(() => {
     return t('Comments.Comments')
   }
 
-  return `${formattedCommentCount.value} ${t('Comments.Comments')}`
+  return t('Comments.Comment Count', { count: formattedCommentCount.value }, commentCount.value)
 })
 
 watch(() => props.initialCommentCount, (value) => {

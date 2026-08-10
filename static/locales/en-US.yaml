@@ -192,7 +192,7 @@ Subscriptions:
   Refreshing Subscription Posts: Refreshing subscription posts
   New Content: New content
   New Feed Refresh Warning Title: Refresh all subscription feeds?
-  New Feed Refresh Warning: Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
+  New Feed Refresh Warning: Refreshing all content types without RSS for 1 subscription can take a long time. Do you want to continue? | Refreshing all content types without RSS for {count} subscriptions can take a long time. Do you want to continue?
   New Since Last Refresh: New since last refresh
   Mark as Seen: Mark as seen
   Mark All as Seen: Mark all as seen
@@ -202,7 +202,7 @@ Channels:
   Channels: Channels
   Title: Channel List
   Search bar placeholder: Search Channels
-  Count: '{number} channel(s) found.'
+  Count: '1 channel found. | {number} channels found.'
   Empty: Your channel list is currently empty.
   Unsubscribe Prompt: Are you sure you want to unsubscribe from "{channelName}"?
 Trending:
@@ -345,7 +345,7 @@ History:
   3 Months: 3 months
   1 Year: 1 year
   Custom: Custom
-  History Older Than Days Removed: Watch history older than {days} days has been removed
+  History Older Than Days Removed: Watch history older than 1 day has been removed | Watch history older than {days} days has been removed
 Settings:
   # On Settings Page
   Settings: Settings
@@ -1139,7 +1139,7 @@ Profile:
   Select None: Select None
   Delete Selected: Delete Selected
   Add Selected To Profile: Add Selected To Profile
-  No channel(s) have been selected: No channel(s) have been selected
+  No channel(s) have been selected: No channels have been selected
   ? This is your primary profile.  Are you sure you want to delete the selected channels?  The
     same channels will be deleted in any profile they are found in.
   : This is your primary profile.  Are you sure you want to delete the selected channels?  The
@@ -1155,7 +1155,7 @@ Channel:
   Unsubscribe: Unsubscribe
   Channel has been removed from your subscriptions: Channel has been removed from
     your subscriptions
-  Removed subscription from {count} other channel(s): Removed subscription from {count} other channel(s)
+  Removed subscription from {count} other channel(s): Removed subscription from 1 other channel | Removed subscription from {count} other channels
   Added channel to your subscriptions: Added channel to your subscriptions
   Search Channel: Search Channel
   Search Result Types: Search result types
@@ -1213,7 +1213,7 @@ Channel:
     Featured Channels: Featured Channels
   Posts:
     This channel currently does not have any posts: This channel currently does not have any posts
-    votes: '{votes} votes'
+    votes: '1 vote | {votes} votes'
     View Full Post: View Full Post
     Reveal Answers: Reveal Answers
     Hide Answers: Hide Answers
@@ -1651,6 +1651,7 @@ Chapters:
 Mini Player: Mini Player
 Comments:
   Comments: Comments
+  Comment Count: 1 Comment | {count} Comments
   Show Comments: Show Comments
   Click to View Comments: Click to View Comments
   Copy YouTube Link: Copy YouTube Link
