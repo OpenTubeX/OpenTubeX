@@ -4,6 +4,8 @@ import test from 'node:test'
 
 import { load as loadYaml } from 'js-yaml'
 
+import { createPluralRules } from '../../src/renderer/i18n/plurals.js'
+
 const localeUrl = new URL('../../static/locales/en-US.yaml', import.meta.url)
 const sourceDirUrl = new URL('../../src/', import.meta.url)
 
@@ -103,7 +105,10 @@ test('plural messages declare a singular and a plural form', () => {
   for (const path of pluralPaths) {
     const forms = path.split('.').reduce((messages, key) => messages[key], locale).split(' | ')
 
-    assert.ok(forms.length >= 2, `${path} must declare at least two plural forms`)
+    // English groups numbers as "one" and "other", so a third form would only
+    // ever be reachable through vue-i18n's built-in "zero | singular | plural"
+    // rule, which the translated locales can't express.
+    assert.equal(forms.length, 2, `${path} must declare exactly two plural forms`)
 
     for (const form of forms) {
       assert.notEqual(form.trim(), '', `${path} must not declare an empty plural form`)
@@ -130,5 +135,87 @@ test('plural messages are translated with a plural choice', async () => {
         `${file.pathname}: "${path}" has plural forms, so it needs a count as the third argument of t()`
       )
     }
+  }
+})
+
+/** vue-i18n's built-in rule, which our rules fall back to. */
+const builtInRule = (choice, choicesLength) => {
+  choice = Math.abs(choice)
+
+  return choicesLength === 2 ? (choice === 1 ? 0 : 1) : Math.min(choice, 2)
+}
+
+/**
+ * @param {string} locale
+ * @param {number} choicesLength
+ * @param {number[]} counts
+ * @returns {number[]}
+ */
+function selectForms(locale, choicesLength, counts) {
+  const rule = createPluralRules([locale])[locale]
+
+  return counts.map(count => rule(count, choicesLength, builtInRule))
+}
+
+test('plural rules pick the form each language groups the count under', () => {
+  const counts = [1, 2, 3, 4, 5, 11, 12, 21, 22, 25, 112]
+
+  // 1 komentarz | 2 komentarze | 5 komentarzy, where "few" also covers 22 but not 12
+  assert.deepEqual(
+    selectForms('pl', 3, counts),
+    [0, 1, 1, 1, 2, 2, 2, 2, 1, 2, 2]
+  )
+
+  // Russian additionally groups 21 and 101 with 1
+  assert.deepEqual(
+    selectForms('ru', 3, counts),
+    [0, 1, 1, 1, 2, 2, 2, 0, 1, 2, 2]
+  )
+
+  // Slovenian has a dedicated form for 2
+  assert.deepEqual(
+    selectForms('sl', 4, counts),
+    [0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3]
+  )
+
+  // Japanese doesn't inflect for number at all
+  assert.deepEqual(
+    selectForms('ja', 1, counts),
+    counts.map(() => 0)
+  )
+
+  // English is unchanged: singular for 1, plural for everything else
+  assert.deepEqual(
+    selectForms('en-US', 2, [0, ...counts]),
+    [1, 0, ...counts.slice(1).map(() => 1)]
+  )
+})
+
+test('plural rules fall back when a translation does not cover every form', () => {
+  const counts = [0, 1, 2, 5, 22]
+  const fallback = counts.map(count => builtInRule(count, 2))
+
+  // Polish and Arabic translations that only provide a singular and a plural
+  // keep behaving the way they did before the rules were introduced.
+  assert.deepEqual(selectForms('pl', 2, counts), fallback)
+  assert.deepEqual(selectForms('ar', 2, counts), fallback)
+
+  // As do messages that still use vue-i18n's "zero | singular | plural" rule.
+  assert.deepEqual(
+    selectForms('en-US', 3, [0, 1, 2, 5]),
+    [0, 1, 2, 2]
+  )
+})
+
+test('every active locale gets a plural rule', async () => {
+  const activeLocales = JSON.parse(await readFile(
+    new URL('../../static/locales/activeLocales.json', import.meta.url),
+    'utf8'
+  ))
+
+  const rules = createPluralRules(activeLocales)
+
+  for (const activeLocale of activeLocales) {
+    assert.equal(typeof rules[activeLocale], 'function', `${activeLocale} must have a plural rule`)
   }
 })
