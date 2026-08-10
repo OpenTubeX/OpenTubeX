@@ -1,5 +1,8 @@
-/* TODO: Revert when auto is fixed */
-:deep(.shaka-enable-abr-button) {
+/*
+  Auto quality's runtime switches are broken with SABR (FreeTube#8906),
+  so it is only offered for stream sources that don't use it.
+*/
+.ftVideoPlayer.autoQualityUnavailable :deep(.shaka-enable-abr-button) {
   display: none !important;
 }
 

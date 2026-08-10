@@ -81,6 +81,7 @@ import {
   isYouTubeShort
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
+import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -2948,8 +2949,11 @@ export default defineComponent({
 
       if (this.saveChannelVideoQuality(this.currentVideoQuality)) {
         const savedQuality = this.normalizeVideoQuality(this.currentVideoQuality)
+        const savedQualityLabel = savedQuality === 'auto'
+          ? this.t('Settings.Player Settings.Default Quality.Auto')
+          : `${savedQuality}p`
         showToast({
-          message: `${this.t('Video.Channel Video Quality Saved')}: ${savedQuality}p`,
+          message: `${this.t('Video.Channel Video Quality Saved')}: ${savedQualityLabel}`,
           icon: ['fas', 'film']
         })
       }
@@ -4120,8 +4124,10 @@ export default defineComponent({
     normalizeVideoQuality(quality) {
       const normalizedQuality = quality == null ? '' : String(quality)
 
-      // TODO: Revert when auto is fixed
-      if (normalizedQuality === 'auto') {
+      // Auto is broken with SABR, so fall back to the default quality there.
+      // The player checks the streams it actually received as well, as yt-dlp
+      // can fall back to the built-in extraction method.
+      if (normalizedQuality === 'auto' && !playbackEngineSupportsAutoQuality(this.videoPlaybackEngine)) {
         return '720'
       }
 

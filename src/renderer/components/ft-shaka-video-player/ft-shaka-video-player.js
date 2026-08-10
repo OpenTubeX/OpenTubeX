@@ -62,6 +62,7 @@ import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
+import { streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
@@ -1214,13 +1215,17 @@ export default defineComponent({
       events.dispatchEvent(new CustomEvent('timeDisplaySettingsChanged'))
     })
 
-    /** @type {import('vue').ComputedRef<number | 'auto'>} */
+    /**
+     * The numeric quality to start with. Auto is handled separately by
+     * `preferAutoQuality`, so that the quality selection code paths, which all
+     * work with resolutions, keep a usable value to fall back to.
+     * @type {import('vue').ComputedRef<number>}
+     */
     const defaultQuality = computed(() => {
       const value = store.getters.getDefaultQuality
 
-      // TODO: Revert when auto is fixed (720 is the default setttings value)
+      // 720 is the default settings value
       if (value === 'auto') { return 720 }
-      // if (value === 'auto') { return value }
 
       return parseInt(value)
     })
@@ -1229,6 +1234,22 @@ export default defineComponent({
     const preferredVideoQuality = computed(() => {
       const value = Number.parseInt(props.currentVideoQuality)
       return Number.isNaN(value) ? defaultQuality.value : value
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const preferAutoQuality = computed(() => {
+      if (!autoQualitySupported.value) {
+        return false
+      }
+
+      if (props.currentVideoQuality === 'auto') {
+        return true
+      }
+
+      // Only fall back to the setting when no quality was passed in,
+      // e.g. before the watch page has resolved a channel specific one
+      return Number.isNaN(Number.parseInt(props.currentVideoQuality)) &&
+        store.getters.getDefaultQuality === 'auto'
     })
 
     /** @type {import('vue').ComputedRef<boolean>} */
@@ -2809,16 +2830,24 @@ export default defineComponent({
       return props.playbackEngine === 'yt-dlp' && props.manifestSrc.includes('/playlist_type/DVR/')
     })
 
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const isSabrPlayback = computed(() => {
+      return !!process.env.SUPPORTS_LOCAL_API &&
+        props.format !== 'legacy' &&
+        props.manifestMimeType === MANIFEST_TYPE_SABR
+    })
+
+    /** @type {import('vue').ComputedRef<boolean>} */
+    const autoQualitySupported = computed(() => {
+      return streamsSupportAutoQuality(props.format, isSabrPlayback.value)
+    })
+
     /**
      * How many segments per stream shaka-player downloads in parallel ahead of the playhead.
      * @type {import('vue').ComputedRef<number>}
      */
     const segmentPrefetchLimit = computed(() => {
-      const isSabr = !!process.env.SUPPORTS_LOCAL_API &&
-        props.format !== 'legacy' &&
-        props.manifestMimeType === MANIFEST_TYPE_SABR
-
-      return resolveSegmentPrefetchLimit(store.getters.getSegmentPrefetchLimit, isSabr)
+      return resolveSegmentPrefetchLimit(store.getters.getSegmentPrefetchLimit, isSabrPlayback.value)
     })
 
     watch(segmentPrefetchLimit, (newValue) => {
@@ -7902,7 +7931,7 @@ export default defineComponent({
 
       player.addEventListener('error', event => handleError(event.detail, 'shaka error handler'))
 
-      player.configure(getPlayerConfig(props.format, false))
+      player.configure(getPlayerConfig(props.format, preferAutoQuality.value))
 
       if (process.env.SUPPORTS_LOCAL_API) {
         player.getNetworkingEngine().registerRequestFilter(requestFilter)
@@ -8107,7 +8136,10 @@ export default defineComponent({
           await player.load(props.manifestSrc, props.startTime, props.manifestMimeType)
 
           if (props.format === 'dash') {
-            setDashQuality(preferredVideoQuality.value)
+            // Let shaka-player's ABR pick the variant when auto quality is preferred
+            if (!preferAutoQuality.value) {
+              setDashQuality(preferredVideoQuality.value)
+            }
           } else {
             let variants = player.getVariantTracks()
 
@@ -8289,7 +8321,7 @@ export default defineComponent({
 
           ignoreErrors = false
 
-          player.configure(getPlayerConfig(newFormat, false))
+          player.configure(getPlayerConfig(newFormat, preferAutoQuality.value))
 
           await performFirstLoad()
           return
@@ -8300,7 +8332,11 @@ export default defineComponent({
         const wasPaused = video_.paused
         const playbackRate = getCurrentPlaybackRate()
 
-        const useAutoQuality = oldFormat === 'legacy' ? false : player.getConfiguration().abr.enabled
+        // The legacy formats don't have an ABR configuration to carry over,
+        // so fall back to the user's preference when switching away from them
+        const useAutoQuality = oldFormat === 'legacy'
+          ? preferAutoQuality.value
+          : player.getConfiguration().abr.enabled
 
         if (!wasPaused) {
           video_.pause()
@@ -8792,6 +8828,8 @@ export default defineComponent({
       useSponsorBlock,
       getShareTimestamp,
       toggleQuickBookmark,
+
+      autoQualitySupported,
 
       fullWindowEnabled,
       fullWindowPlaceholderHeight,

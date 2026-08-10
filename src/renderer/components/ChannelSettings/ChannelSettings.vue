@@ -140,7 +140,7 @@
                   :placeholder="t('Settings.Channel Settings.Video Quality')"
                   :value="preference.value"
                   :select-names="qualityNames"
-                  :select-values="QUALITY_VALUES"
+                  :select-values="qualityValues"
                   :icon="preference.icon"
                   :show-icon="false"
                   @change="value => setPreference(channel.id, preference.type, value)"
@@ -198,6 +198,7 @@ import {
   getCachedChannelInfo,
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
+import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
 
@@ -207,8 +208,20 @@ const disableChannelLinks = computed(() => store.getters.getDisableChannelLinks)
 /** Only offer the search field once scanning the list by eye gets tedious */
 const SEARCH_THRESHOLD = 5
 
-// TODO: Revert when auto is fixed
-const QUALITY_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+
+/**
+ * Auto quality is broken with SABR, so it is only offered for the
+ * stream extraction methods that don't use it.
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const autoQualityAvailable = computed(() => {
+  return playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine)
+})
+
+const qualityValues = computed(() => {
+  return autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES
+})
 
 const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.4k'),
@@ -219,6 +232,8 @@ const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.360p'),
   t('Settings.Player Settings.Default Quality.240p'),
   t('Settings.Player Settings.Default Quality.144p'),
+
+  ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
 ])
 
 const rememberLabels = computed(() => ({
@@ -262,8 +277,8 @@ const settings = computed(() => store.state.settings)
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
 
-  // TODO: Revert when auto is fixed (720 is the default settings value)
-  return value === 'auto' ? '720' : value
+  // 720 is the default settings value
+  return value === 'auto' && !autoQualityAvailable.value ? '720' : value
 })
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -342,8 +357,10 @@ const channelEntries = computed(() => {
 
       valuesByChannel.get(channelId).set(
         type,
-        // TODO: Revert when auto is fixed, existing entries can still hold it
-        type === 'videoQuality' && String(value) === 'auto' ? defaultQuality.value : value
+        // Fall back for entries that still hold auto while it is unavailable
+        type === 'videoQuality' && String(value) === 'auto' && !autoQualityAvailable.value
+          ? defaultQuality.value
+          : value
       )
     }
   }

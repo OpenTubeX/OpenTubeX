@@ -199,7 +199,7 @@
         :value="defaultQuality"
         setting-key="defaultQuality"
         :select-names="qualityNames"
-        :select-values="QUALITY_VALUES"
+        :select-values="qualityValues"
         :icon="['fas', 'photo-film']"
         @change="updateDefaultQuality"
       />
@@ -529,6 +529,7 @@ import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
   MAX_SEGMENT_PREFETCH_LIMIT
 } from '../../helpers/player/segmentPrefetch'
+import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { t } = useI18n()
 
@@ -868,9 +869,20 @@ function updateDefaultVideoFormat(value) {
   store.dispatch('updateDefaultVideoFormat', value)
 }
 
-// TODO: Revert when auto is fixed
-// const QUALITY_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144', 'auto']
-const QUALITY_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+const RESOLUTION_VALUES = ['2160', '1440', '1080', '720', '480', '360', '240', '144']
+
+/**
+ * Auto quality is broken with SABR, so it is only offered for the
+ * stream extraction methods that don't use it.
+ * @type {import('vue').ComputedRef<boolean>}
+ */
+const autoQualityAvailable = computed(() => {
+  return playbackEngineSupportsAutoQuality(store.getters.getVideoPlaybackEngine)
+})
+
+const qualityValues = computed(() => {
+  return autoQualityAvailable.value ? [...RESOLUTION_VALUES, 'auto'] : RESOLUTION_VALUES
+})
 
 const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.4k'),
@@ -882,16 +894,15 @@ const qualityNames = computed(() => [
   t('Settings.Player Settings.Default Quality.240p'),
   t('Settings.Player Settings.Default Quality.144p'),
 
-  // TODO: Revert when auto is fixed
-  // t('Settings.Player Settings.Default Quality.Auto')
+  ...(autoQualityAvailable.value ? [t('Settings.Player Settings.Default Quality.Auto')] : [])
 ])
 
 /** @type {import('vue').ComputedRef<'2160' | '1440' | '1080' | '720' | '480' | '360' | '240' | '144' | 'auto'>} */
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
 
-  // TODO: Revert when auto is fixed (720 is the default setttings value)
-  if (value === 'auto') { return '720' }
+  // 720 is the default settings value
+  if (value === 'auto' && !autoQualityAvailable.value) { return '720' }
 
   return value
 })
