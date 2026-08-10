@@ -522,6 +522,7 @@ const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 let fullscreenScrollTop = 0
+const MAX_HIGHLIGHTED_REPLY_PAGES = 20
 
 watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
   if (wasFullscreenOverlay) {
@@ -686,18 +687,16 @@ const canPerformInitialCommentLoading = computed(() => {
 })
 
 watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
-  if (!commentId) {
-    return
-  }
-
-  if (previousCommentId !== undefined && previousCommentId !== commentId) {
+  const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
+  if (targetChanged) {
+    isLoading.value = false
     commentData.value = []
     nextPageToken.value = null
     localCommentsInstance = undefined
     replyTokens.clear()
   }
 
-  if (canPerformInitialCommentLoading.value) {
+  if ((commentId || targetChanged) && canPerformInitialCommentLoading.value) {
     getCommentData()
   }
 }, { immediate: true })
@@ -903,8 +902,7 @@ function copyCommentYoutubeLink(commentId) {
 function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
 
-  const useInvidious = !process.env.SUPPORTS_LOCAL_API ||
-    (backendPreference.value === 'invidious' && !props.highlightedCommentId)
+  const useInvidious = !process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious'
 
   if (useInvidious) {
     if (!props.isPostComments) {
@@ -1109,10 +1107,21 @@ async function loadHighlightedReply() {
     return
   }
 
-  while (!findComment(thread, highlightedCommentId) && thread.hasReplyToken) {
+  let loadedPageCount = 0
+  while (
+    !findComment(thread, highlightedCommentId) &&
+    thread.hasReplyToken &&
+    loadedPageCount < MAX_HIGHLIGHTED_REPLY_PAGES
+  ) {
     const previousReplyCount = thread.replies.length
     const previousReplyToken = replyTokens.get(thread.id)
+
+    if (highlightedCommentId !== props.highlightedCommentId || commentData.value[threadIndex] !== thread) {
+      return
+    }
+
     await getCommentReplies(threadIndex)
+    loadedPageCount++
 
     if (thread.replies.length === previousReplyCount && replyTokens.get(thread.id) === previousReplyToken) {
       break
@@ -1125,6 +1134,8 @@ async function loadHighlightedReply() {
  * @param {boolean} preserveSort
  */
 async function getCommentDataLocal(more = false, preserveSort = false) {
+  const requestedHighlightedCommentId = props.highlightedCommentId
+
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
@@ -1132,7 +1143,6 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       comments = await nextPageToken.value.getContinuation()
     } else if (localCommentsInstance && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
-      localCommentsInstance = comments
     } else {
       if (props.isPostComments) {
         comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
@@ -1146,7 +1156,13 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       } else {
         sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
       }
+    }
 
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
+    if (!more) {
       localCommentsInstance = comments
     }
 
@@ -1172,6 +1188,10 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
       await loadHighlightedReply()
     }
   } catch (err) {
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
     if (err.message.includes('Comments page did not have any content')) {
@@ -1190,7 +1210,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-    if (backendFallback.value && (backendPreference.value === 'local' || props.highlightedCommentId)) {
+    if (backendFallback.value && backendPreference.value === 'local') {
       localCommentsInstance = undefined
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       if (props.isPostComments) {
@@ -1313,12 +1333,18 @@ async function getCommentRepliesLocal(index, commentId = null) {
 }
 
 async function getCommentDataInvidious() {
+  const requestedHighlightedCommentId = props.highlightedCommentId
+
   try {
     let { response, commentData: comments } = await invidiousGetComments({
       id: props.id,
       nextPageToken: nextPageToken.value,
       sortNewest: sortNewest.value
     })
+
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
 
     setCommentCount(response.commentCount)
 
@@ -1338,6 +1364,10 @@ async function getCommentDataInvidious() {
     isLoading.value = false
     showComments.value = true
   } catch (err) {
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
     if (err.message.includes('Comments not found')) {
