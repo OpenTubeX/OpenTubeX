@@ -1258,6 +1258,19 @@ test.describe('settings', () => {
   })
 })
 
+test.describe('dark theme settings', () => {
+  test.use({ seed: { settings: { baseTheme: 'dark' } } })
+
+  test('shows the search field against the settings header', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await expect(page.locator('.settingsWindowHeader'))
+      .toHaveCSS('background-color', 'rgb(38, 38, 38)')
+    await expect(page.locator('.settingsSearch'))
+      .toHaveCSS('background-color', 'rgb(48, 48, 48)')
+  })
+})
+
 test.describe('playback engine migration', () => {
   test.use({ seed: { settings: { videoPlaybackEngine: 'built-in' } } })
 
