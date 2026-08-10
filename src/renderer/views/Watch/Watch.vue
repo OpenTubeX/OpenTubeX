@@ -277,7 +277,7 @@
               {{ $t("Video.Starting soon, please refresh the page to check again") }}
             </p>
             <button
-              v-if="supportsLiveReminders && premiereDate"
+              v-if="canToggleLiveReminder"
               type="button"
               class="liveReminderButton"
               :class="{ active: liveReminderActive }"

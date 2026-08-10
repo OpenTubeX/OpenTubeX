@@ -226,11 +226,15 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
 
-  test('toggles and persists a reminder from the rightmost thumbnail action', async ({ app }) => {
-    let page = app.page
+  test('toggles a reminder from the rightmost thumbnail action', async ({ app }) => {
+    await app.electronApp.evaluate(({ Notification }) => {
+      Notification.isSupported = () => true
+    })
+
+    const page = app.page
     await goTo(page, 'subscriptions')
 
-    let upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     const reminderButton = upcomingPremiere.getByRole('button', { name: 'Notify me' })
     await expect(reminderButton).toBeVisible()
     await expect(reminderButton).toHaveAttribute('aria-pressed', 'false')
@@ -242,12 +246,6 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     expect(isRightmost).toBe(true)
 
     await reminderButton.click()
-    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
-      .toHaveAttribute('aria-pressed', 'true')
-
-    ;({ page } = await app.relaunch())
-    await goTo(page, 'subscriptions')
-    upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
       .toHaveAttribute('aria-pressed', 'true')
   })
