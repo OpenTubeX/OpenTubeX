@@ -211,13 +211,13 @@ test.describe('watch page metadata', () => {
 
 test.describe('watch page', () => {
   test('shows a pasted comment link as the first unpinned highlighted comment', async ({ page }) => {
-    const commentId = 'Ugwh6iFZf1tOPih3Z3J4AaABAg'
+    const commentId = 'UgxZaBRFEKqDUoZULy94AaABAg'
     await page.locator(sel.searchInput).fill(
-      `https://www.youtube.com/watch?v=QMfwMNd1mR4&lc=${commentId}&pp=0gcJCSIANpG00pGi`
+      `${VIDEO_URL}&lc=${commentId}&pp=0gcJCSIANpG00pGi`
     )
     await page.locator(sel.searchInput).press('Enter')
 
-    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/QMfwMNd1mR4\\?.*commentId=${commentId}`))
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/jNQXAC9IVRw\\?.*commentId=${commentId}`))
     const badge = page.getByText('Highlighted comment', { exact: true })
     await expect(badge).toBeVisible({ timeout: 60_000 })
 
@@ -231,9 +231,9 @@ test.describe('watch page', () => {
       })
     }).toBe(true)
 
-    const replyId = `${commentId}.A_IKgLISR5LA_IQAHGoLUG`
+    const replyId = 'UgzuC3zzpRZkjc5Qzsd4AaABAg.958xaQsh63D95AEkVnh_di'
     await page.locator(sel.searchInput).fill(
-      `https://www.youtube.com/watch?v=QMfwMNd1mR4&lc=${replyId}`
+      `${VIDEO_URL}&lc=${replyId}`
     )
     await page.locator(sel.searchInput).press('Enter')
 

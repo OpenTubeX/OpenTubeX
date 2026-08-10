@@ -143,11 +143,11 @@ test.describe('navigation history titles', () => {
 })
 
 test('preserves a pasted YouTube comment link target', async ({ page }) => {
-  const commentId = 'Ugwh6iFZf1tOPih3Z3J4AaABAg'
+  const commentId = 'UgxZaBRFEKqDUoZULy94AaABAg'
   await page.locator(sel.searchInput).fill(
-    `https://www.youtube.com/watch?v=QMfwMNd1mR4&lc=${commentId}&pp=0gcJCSIANpG00pGi`
+    `https://www.youtube.com/watch?v=jNQXAC9IVRw&lc=${commentId}&pp=0gcJCSIANpG00pGi`
   )
   await page.locator(sel.searchInput).press('Enter')
 
-  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/QMfwMNd1mR4\\?.*commentId=${commentId}`))
+  await expect(page).toHaveURL(new RegExp(`#\\/watch\\/jNQXAC9IVRw\\?.*commentId=${commentId}`))
 })
