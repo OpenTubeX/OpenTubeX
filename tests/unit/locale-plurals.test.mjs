@@ -191,6 +191,21 @@ test('plural rules pick the form each language groups the count under', () => {
   )
 })
 
+test('plural rules cover categories that only apply to large round numbers', () => {
+  // French, and likewise Spanish, Italian, Portuguese and Breton, has a form
+  // for whole millions on top of its singular and plural.
+  assert.deepEqual(
+    selectForms('fr', 3, [0, 1, 2, 1000, 999999, 1000000, 2000000]),
+    [0, 0, 2, 2, 2, 1, 1]
+  )
+
+  // Languages whose forms all apply to small numbers are unaffected.
+  assert.deepEqual(
+    selectForms('pl', 3, [1, 2, 5, 1000000]),
+    [0, 1, 2, 2]
+  )
+})
+
 test('plural rules fall back when a translation does not cover every form', () => {
   const counts = [0, 1, 2, 5, 22]
   const fallback = counts.map(count => builtInRule(count, 2))

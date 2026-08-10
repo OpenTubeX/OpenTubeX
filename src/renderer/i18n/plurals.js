@@ -13,10 +13,26 @@ const PLURAL_CATEGORY_ORDER = ['zero', 'one', 'two', 'few', 'many', 'other']
 
 // Categories are collected by sampling instead of using
 // `resolvedOptions().pluralCategories`, because that also reports categories
-// that only apply to fractions, which never occur in our counts. Numbers above
-// this range can still resolve to a category that isn't in the sample (French
-// uses "many" for whole millions), which falls back to the built-in rule.
-const PLURAL_CATEGORY_SAMPLE_SIZE = 200
+// that only apply to fractions, which never occur in our counts.
+const PLURAL_CATEGORY_SAMPLES = (() => {
+  const samples = []
+
+  // Every rule that groups small numbers is covered well before 200, e.g. Welsh
+  // has a category that only applies to 6.
+  for (let count = 0; count <= 200; count++) {
+    samples.push(count)
+  }
+
+  // Some languages also have a category for large round numbers, e.g. French,
+  // Spanish, Italian, Portuguese and Breton use "many" for whole millions.
+  for (let exponent = 3; exponent <= 9; exponent++) {
+    const power = 10 ** exponent
+
+    samples.push(power, power * 2, power * 3)
+  }
+
+  return samples
+})()
 
 /**
  * The plural categories a locale uses for the counts we display, in the order translations write them.
@@ -25,11 +41,7 @@ const PLURAL_CATEGORY_SAMPLE_SIZE = 200
  */
 function getPluralCategories(locale) {
   const pluralRules = new Intl.PluralRules(locale)
-  const categories = new Set()
-
-  for (let count = 0; count <= PLURAL_CATEGORY_SAMPLE_SIZE; count++) {
-    categories.add(pluralRules.select(count))
-  }
+  const categories = new Set(PLURAL_CATEGORY_SAMPLES.map(count => pluralRules.select(count)))
 
   return PLURAL_CATEGORY_ORDER.filter(category => categories.has(category))
 }
