@@ -42,6 +42,7 @@
       ref="container"
       class="ftVideoPlayer shaka-video-container"
       :class="{
+        autoQualityUnavailable: !autoQualitySupported,
         fullWindow: fullWindowEnabled,
         shortsPlayer,
         shortsPaused: shortsPaused && hasLoaded,
