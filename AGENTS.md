@@ -1,4 +1,6 @@
-- Always start by implementing something first without running tests. Only after I give you the go that it's fine from my side continue with them. Exception: When it's actually beneficial for the implementation to reproduce something first it is always allowed and encouraged.
+- Always start by implementing something first without running tests. Only after I give you the go that it's fine from my side continue with them.
+  - Exception: When it's actually beneficial for the implementation to reproduce something first it is always allowed and encouraged.
+  - Exception: If you have already been granted permission to run them, you may and should use it for the current thread.
 - Always run Electron/Playwright E2E tests under a private X server using `xvfb-run -a -s "-screen 0 1920x1080x24"`.
 - Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
