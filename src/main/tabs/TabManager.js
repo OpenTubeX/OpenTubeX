@@ -591,6 +591,11 @@ export class TabManager {
     this._pendingTabMountWaiters = new Map()
     this._deferredCloseTabIds = new Set()
     this._deferredUnloadTabIds = new Set()
+    // While a batch runs, state broadcasts and session writes are collapsed into
+    // a single one that is emitted once the batch finishes (see runBatched).
+    this._batchDepth = 0
+    this._batchedBroadcastPending = false
+    this._batchedSessionSavePending = false
     // Serializes preview captures across every tab in this window. Captures share
     // the window's single renderer, so running two at once would screenshot each
     // other's content and toggle capture mode out from under one another.
@@ -1197,7 +1202,14 @@ export class TabManager {
     }
   }
 
-  _getNeighborTabId(tabId, loadedOnly = false) {
+  /**
+   * @param {string} tabId
+   * @param {boolean} [loadedOnly]
+   * @param {Set<string> | null} [excludedTabIds] tabs that are about to be closed
+   * or unloaded as part of the same bulk operation
+   * @returns {string | null}
+   */
+  _getNeighborTabId(tabId, loadedOnly = false, excludedTabIds = null) {
     const orderedTabIds = Array.from(this.tabs.keys())
     const tabIndex = orderedTabIds.indexOf(tabId)
     if (tabIndex === -1) {
@@ -1210,6 +1222,7 @@ export class TabManager {
     // the replacement, otherwise a rapid second close/unload would leave the
     // window with no selectable tab.
     const isSelectable = candidateId =>
+      excludedTabIds?.has(candidateId) !== true &&
       this.tabs.get(candidateId)?.isTransferStaged !== true &&
       (!loadedOnly || this.tabs.get(candidateId)?.loadState === 'loaded') &&
       !this._deferredCloseTabIds.has(candidateId) &&
@@ -1342,6 +1355,83 @@ export class TabManager {
     }
 
     return this.tabs.size > 0
+  }
+
+  /**
+   * Close several tabs at once. Activating the surviving replacement up front
+   * keeps the tabs that are on their way out from being mounted just to be torn
+   * down again, and the batching collapses the per-tab renderer updates and
+   * session writes into one.
+   * @param {string[]} tabIds
+   * @returns {Promise<boolean>} whether the window still has tabs
+   */
+  async closeTabs(tabIds) {
+    const closingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
+    if (closingTabIds.length === 0) {
+      return this.tabs.size > 0
+    }
+    if (closingTabIds.length === 1) {
+      return this.closeTab(closingTabIds[0])
+    }
+
+    return await this.runBatched(() => {
+      const closingTabIdSet = new Set(closingTabIds)
+      if (this.activeTabId != null && closingTabIdSet.has(this.activeTabId)) {
+        const nextTabId = this._getNeighborTabId(this.activeTabId, false, closingTabIdSet)
+        if (nextTabId != null && this._prepareNeighborActivation(nextTabId)) {
+          this.activateTab(nextTabId)
+        }
+      }
+
+      // Close the presented tab last so its replacement can be shown before the
+      // composited subtree is removed.
+      closingTabIds.sort((a, b) => Number(a === this.presentedTabId) - Number(b === this.presentedTabId))
+      let hasRemainingTabs = this.tabs.size > 0
+      for (const tabId of closingTabIds) {
+        hasRemainingTabs = this.closeTab(tabId)
+      }
+      return hasRemainingTabs
+    })
+  }
+
+  /**
+   * Unload several tabs at once, see {@link closeTabs}.
+   * @param {string[]} tabIds
+   * @returns {Promise<void>}
+   */
+  async unloadTabs(tabIds) {
+    const unloadingTabIds = tabIds.filter(tabId => this.tabs.has(tabId))
+    if (unloadingTabIds.length === 0) {
+      return
+    }
+
+    const presentedTabId = this.presentedTabId
+    const batchedTabIds = unloadingTabIds.filter(tabId => tabId !== presentedTabId)
+
+    await this.runBatched(async () => {
+      const unloadingTabIdSet = new Set(unloadingTabIds)
+      if (this.activeTabId != null && unloadingTabIdSet.has(this.activeTabId)) {
+        const nextTabId = this._getNeighborTabId(this.activeTabId, true, unloadingTabIdSet) ??
+          this._getNeighborTabId(this.activeTabId, false, unloadingTabIdSet)
+        if (nextTabId != null && this._prepareNeighborActivation(nextTabId)) {
+          this.activateTab(nextTabId)
+        }
+      }
+
+      for (const tabId of batchedTabIds) {
+        await this.unloadTab(tabId).catch(error => {
+          console.error('Failed to unload tab:', error)
+        })
+      }
+    })
+
+    // The presented tab captures a fresh preview before it goes. Run it outside
+    // the manager-wide batch so the capture cannot hold back unrelated updates.
+    if (presentedTabId != null && unloadingTabIds.includes(presentedTabId)) {
+      await this.unloadTab(presentedTabId).catch(error => {
+        console.error('Failed to unload tab:', error)
+      })
+    }
   }
 
   /**
@@ -2304,7 +2394,43 @@ export class TabManager {
     return this.browserWindow.webContents.isDestroyed() ? null : this.browserWindow.webContents
   }
 
+  /**
+   * Run a bulk operation with its state broadcasts and session writes collapsed
+   * into a single one, so the renderer re-renders the tab bar and the session
+   * file is written once instead of once per tab. Batching is manager-wide, so
+   * asynchronous callbacks must stay short to avoid suppressing unrelated state
+   * updates until the callback settles.
+   * @template T
+   * @param {() => T | Promise<T>} run
+   * @returns {Promise<T>}
+   */
+  async runBatched(run) {
+    this._batchDepth += 1
+    try {
+      return await run()
+    } finally {
+      this._batchDepth -= 1
+      if (this._batchDepth === 0) {
+        const broadcastPending = this._batchedBroadcastPending
+        const sessionSavePending = this._batchedSessionSavePending
+        this._batchedBroadcastPending = false
+        this._batchedSessionSavePending = false
+        if (broadcastPending) {
+          this._broadcastStateUpdate()
+        }
+        if (sessionSavePending) {
+          await this._saveSession()
+        }
+      }
+    }
+  }
+
   _broadcastStateUpdate() {
+    if (this._batchDepth > 0) {
+      this._batchedBroadcastPending = true
+      return
+    }
+
     // Queued snapshots get coalesced down to the newest one, so while the
     // renderer is still bootstrapping every snapshot has to carry the history
     // in full — whichever one survives is the one the tabs get created from.
@@ -2335,6 +2461,11 @@ export class TabManager {
 
   async _saveSession() {
     if (this._sessionPersistenceDisabled) return
+
+    if (this._batchDepth > 0) {
+      this._batchedSessionSavePending = true
+      return
+    }
 
     this.sessionUpdatedAt = Date.now()
 
@@ -2790,6 +2921,38 @@ export async function setupTabsIPC(options = {}) {
       return { hasRemainingTabs }
     }
     return { hasRemainingTabs: false }
+  })
+
+  ipcMain.handle(IpcChannels.TABS_CLOSE_MULTIPLE, async (event, tabIds) => {
+    const manager = getManager(event)
+    if (!manager || !Array.isArray(tabIds)) {
+      return { hasRemainingTabs: false }
+    }
+
+    const closingTabIds = tabIds.filter(tabId => typeof tabId === 'string' && manager.tabs.has(tabId))
+    if (closingTabIds.length === 0) {
+      return { hasRemainingTabs: manager.tabs.size > 0 }
+    }
+
+    if (
+      closingTabIds.length === manager.tabs.size &&
+      !await confirmCloseWindow(manager.browserWindow)
+    ) {
+      return { hasRemainingTabs: true }
+    }
+
+    let hasRemainingTabs
+    try {
+      hasRemainingTabs = await manager.closeTabs(closingTabIds)
+    } catch (error) {
+      console.error('Failed to close tabs:', error)
+      hasRemainingTabs = manager.tabs.size > 0
+    }
+    if (!hasRemainingTabs) {
+      markWindowCloseConfirmed(manager.browserWindow)
+      manager.browserWindow.close()
+    }
+    return { hasRemainingTabs }
   })
 
   ipcMain.handle(IpcChannels.TABS_DUPLICATE, (event, tabId) => {

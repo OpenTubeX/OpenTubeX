@@ -17,6 +17,7 @@ import {
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
+  CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
 } from '../constants'
@@ -312,6 +313,55 @@ function runApp() {
     return quitPromptInProgress
   }
 
+  let closeMultipleTabsRequestCount = 0
+
+  /**
+   * Ask the renderer to confirm a bulk tab close.
+   * @param {TabManager | null | undefined} manager
+   * @param {number} count the number of tabs that would be closed
+   * @returns {Promise<boolean>}
+   */
+  function confirmCloseMultipleTabs(manager, count) {
+    if (count < CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD) {
+      return Promise.resolve(true)
+    }
+
+    const browserWindow = manager?.browserWindow
+    if (!browserWindow || browserWindow.isDestroyed()) {
+      return Promise.resolve(true)
+    }
+
+    const requestId = `close-multiple-tabs-${++closeMultipleTabsRequestCount}`
+    return new Promise(resolve => {
+      /**
+       * @param {import('electron').IpcMainEvent} _event
+       * @param {{ requestId?: string, confirmed?: boolean }} response
+       */
+      const listener = (_event, response) => {
+        if (response?.requestId !== requestId) return
+
+        finish(response.confirmed === true)
+      }
+
+      const handleWindowClosed = () => finish(false)
+
+      /**
+       * @param {boolean} confirmed
+       */
+      function finish(confirmed) {
+        clearTimeout(timeoutId)
+        ipcMain.removeListener(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
+        browserWindow.removeListener('closed', handleWindowClosed)
+        resolve(confirmed)
+      }
+
+      const timeoutId = setTimeout(() => finish(false), 30_000)
+      ipcMain.on(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
+      browserWindow.once('closed', handleWindowClosed)
+      manager.bridge.send(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, { requestId, count })
+    })
+  }
+
   // Becomes true once the user asks the app to quit (e.g. Ctrl+Q / "Quit" menu
   // item / last-window-closed on non-darwin). Window close handlers use this to
   // decide whether their persisted tab session record should be kept (so the
@@ -438,26 +488,31 @@ function runApp() {
         : undefined
       const hasSelectedUnloadedTab = contextMenuTabs.some(tab => tab.loadState === 'unloaded')
       const hasSelectedLoadedTab = contextMenuTabs.some(tab => !['unloaded', 'unloading'].includes(tab.loadState))
+      /**
+       * Apply a bulk tab action as one renderer update instead of one per tab.
+       * @param {() => void} run
+       */
+      const runBatchedTabAction = (run) => {
+        manager?.runBatched(run).catch(error => {
+          console.error('Failed to apply a bulk tab action:', error)
+        })
+      }
       const closeContextMenuTabs = async (tabIds) => {
         if (!manager) return
 
         const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
+        if (existingTabIds.length === 0) return
+
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
-        if (
-          existingTabIds.length === manager.tabs.size &&
-          isLastWindow &&
-          !await confirmCloseApp(manager.browserWindow)
-        ) {
+        const closesWindow = existingTabIds.length === manager.tabs.size
+        if (closesWindow && isLastWindow) {
+          // The quit confirmation already covers this case
+          if (!await confirmCloseApp(manager.browserWindow)) return
+        } else if (!await confirmCloseMultipleTabs(manager, existingTabIds.length)) {
           return
         }
 
-        // Close the presented tab last so its replacement can be shown before
-        // the composited subtree is removed.
-        existingTabIds.sort((a, b) => Number(a === manager.presentedTabId) - Number(b === manager.presentedTabId))
-        let hasRemainingTabs = true
-        for (const tabId of existingTabIds) {
-          hasRemainingTabs = manager.closeTab(tabId)
-        }
+        const hasRemainingTabs = await manager.closeTabs(existingTabIds)
         if (!hasRemainingTabs) {
           if (isLastWindow) closeConfirmedWindowIds.add(manager.browserWindow.id)
           manager.browserWindow.close()
@@ -517,7 +572,9 @@ function runApp() {
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            for (const tab of contextMenuTabs) manager.duplicateTab(tab.id)
+            runBatchedTabAction(() => {
+              for (const tab of contextMenuTabs) manager.duplicateTab(tab.id)
+            })
           }
         },
         {
@@ -531,9 +588,11 @@ function runApp() {
                 if (!manager || !contextMenuTab) return
 
                 if (isBulkTabAction) {
-                  for (const tab of [...contextMenuTabs].reverse()) {
-                    manager.moveTab(tab.id, 0)
-                  }
+                  runBatchedTabAction(() => {
+                    for (const tab of [...contextMenuTabs].reverse()) {
+                      manager.moveTab(tab.id, 0)
+                    }
+                  })
                 } else {
                   manager.moveTab(contextMenuTab.id, 0)
                 }
@@ -546,9 +605,11 @@ function runApp() {
                 if (!manager || !contextMenuTab) return
 
                 if (isBulkTabAction) {
-                  for (const tab of contextMenuTabs) {
-                    manager.moveTab(tab.id, manager.tabs.size)
-                  }
+                  runBatchedTabAction(() => {
+                    for (const tab of contextMenuTabs) {
+                      manager.moveTab(tab.id, manager.tabs.size)
+                    }
+                  })
                 } else {
                   manager.moveTab(contextMenuTab.id, manager.tabs.size)
                 }
@@ -613,9 +674,11 @@ function runApp() {
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            for (const tab of contextMenuTabs) {
-              manager.setTabPinned(tab.id, !allSelectedTabsPinned)
-            }
+            runBatchedTabAction(() => {
+              for (const tab of contextMenuTabs) {
+                manager.setTabPinned(tab.id, !allSelectedTabsPinned)
+              }
+            })
           }
         },
         {
@@ -636,7 +699,9 @@ function runApp() {
             click: () => {
               if (!manager || !contextMenuTab) return
 
-              for (const tab of contextMenuTabs) manager.setTabColor(tab.id, color)
+              runBatchedTabAction(() => {
+                for (const tab of contextMenuTabs) manager.setTabColor(tab.id, color)
+              })
             }
           }))
         },
@@ -677,7 +742,9 @@ function runApp() {
           click: () => {
             if (!manager || !contextMenuTab) return
 
-            for (const tab of contextMenuTabs) manager.loadTab(tab.id)
+            runBatchedTabAction(() => {
+              for (const tab of contextMenuTabs) manager.loadTab(tab.id)
+            })
           }
         },
         {
@@ -700,11 +767,7 @@ function runApp() {
               return
             }
 
-            for (const tab of contextMenuTabs) {
-              await manager.unloadTab(tab.id).catch(error => {
-                console.error('Failed to unload tab:', error)
-              })
-            }
+            await manager.unloadTabs(contextMenuTabs.map(tab => tab.id))
           }
         },
         {
@@ -4447,19 +4510,19 @@ function runApp() {
           {
             label: 'Close Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_TAB),
-            click: (_menuItem, browserWindow) => {
+            click: async (_menuItem, browserWindow) => {
               if (browserWindow) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.activeTabId) {
                   const tabIds = tabManager.selectedTabIds.length > 1
                     ? [...tabManager.selectedTabIds]
                     : [tabManager.activeTabId]
-                  tabIds.sort((a, b) => Number(a === tabManager.activeTabId) - Number(b === tabManager.activeTabId))
-                  let hasRemainingTabs = true
-                  for (const tabId of tabIds) {
-                    hasRemainingTabs = tabManager.closeTab(tabId)
-                    if (!hasRemainingTabs) break
+                  const closesLastWindow = tabIds.length === tabManager.tabs.size &&
+                    BrowserWindow.getAllWindows().length === 1
+                  if (!closesLastWindow && !await confirmCloseMultipleTabs(tabManager, tabIds.length)) {
+                    return
                   }
+                  const hasRemainingTabs = await tabManager.closeTabs(tabIds)
                   if (!hasRemainingTabs) {
                     browserWindow.close()
                   }

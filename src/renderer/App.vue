@@ -114,6 +114,15 @@
       :option-values="EXTERNAL_LINK_OPENING_PROMPT_VALUES"
       @click="handleExternalLinkOpeningPromptAnswer"
     />
+    <FtPrompt
+      v-if="closeMultipleTabsPromptCount > 0"
+      autosize
+      :label="t('Close Multiple Tabs Confirmation.Title')"
+      :extra-labels="[t('Close Multiple Tabs Confirmation.Message', { count: closeMultipleTabsPromptCount })]"
+      :option-names="closeMultipleTabsPromptNames"
+      :option-values="CLOSE_MULTIPLE_TABS_PROMPT_VALUES"
+      @click="handleCloseMultipleTabsPromptAnswer"
+    />
     <FtSearchFilters
       v-if="showSearchFilters"
     />
@@ -302,7 +311,7 @@ import { vSaferHtml } from './directives/vSaferHtml.js'
 import store from './store/index'
 
 import packageDetails from '../../package.json'
-import { KeyboardShortcuts } from '../constants'
+import { CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
@@ -535,6 +544,7 @@ let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
+let removeConfirmCloseMultipleTabsListener = null
 let removeOpenUrlListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
@@ -736,6 +746,8 @@ onMounted(async () => {
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
+      removeConfirmCloseMultipleTabsListener = window.ftElectron.tabs
+        .onConfirmCloseMultiple(handleConfirmCloseMultipleTabsRequest)
     }
 
     await Promise.all([syncDataReady, platformInfoReady])
@@ -826,6 +838,7 @@ onBeforeUnmount(() => {
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
+  removeConfirmCloseMultipleTabsListener?.()
   removeOpenUrlListener?.()
 })
 
@@ -2294,17 +2307,71 @@ function getShortcutTabIds() {
     : activeTabId.value ? [activeTabId.value] : []
 }
 
+const closeMultipleTabsPromptCount = ref(0)
+const CLOSE_MULTIPLE_TABS_PROMPT_VALUES = ['close', 'cancel']
+
+/** @type {((confirmed: boolean) => void) | null} */
+let closeMultipleTabsPromptResolve = null
+/** @type {Promise<boolean> | null} */
+let closeMultipleTabsPromptPromise = null
+
+const closeMultipleTabsPromptNames = computed(() => [
+  t('Close Multiple Tabs Confirmation.Close Tabs', { count: closeMultipleTabsPromptCount.value }),
+  t('Cancel')
+])
+
+/**
+ * Ask the user to confirm closing several tabs at once. Concurrent requests
+ * (e.g. the menu accelerator and the in-page shortcut) share one prompt.
+ * @param {number} count
+ * @returns {Promise<boolean>}
+ */
+function confirmCloseMultipleTabs(count) {
+  if (closeMultipleTabsPromptPromise) {
+    closeMultipleTabsPromptCount.value = Math.max(closeMultipleTabsPromptCount.value, count)
+    return closeMultipleTabsPromptPromise
+  }
+
+  closeMultipleTabsPromptCount.value = count
+  closeMultipleTabsPromptPromise = new Promise(resolve => {
+    closeMultipleTabsPromptResolve = resolve
+  })
+  return closeMultipleTabsPromptPromise
+}
+
+/**
+ * @param {'close' | 'cancel' | null} option
+ */
+function handleCloseMultipleTabsPromptAnswer(option) {
+  closeMultipleTabsPromptCount.value = 0
+  const resolve = closeMultipleTabsPromptResolve
+  closeMultipleTabsPromptResolve = null
+  closeMultipleTabsPromptPromise = null
+  resolve?.(option === 'close')
+}
+
+/**
+ * @param {{ requestId: string, count: number }} request
+ */
+async function handleConfirmCloseMultipleTabsRequest({ requestId, count }) {
+  const confirmed = await confirmCloseMultipleTabs(count)
+  window.ftElectron.tabs.respondConfirmCloseMultiple(requestId, confirmed)
+}
+
 async function closeShortcutTabs() {
   const tabIds = getShortcutTabIds()
-  const activeId = activeTabId.value
-  tabIds.sort((a, b) => Number(a === activeId) - Number(b === activeId))
-
-  let hasRemainingTabs = true
-  for (const tabId of tabIds) {
-    hasRemainingTabs = await store.dispatch('closeTab', tabId)
-    if (!hasRemainingTabs) break
+  if (tabIds.length >= CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD && !await confirmCloseMultipleTabs(tabIds.length)) {
+    return true
   }
-  return hasRemainingTabs
+
+  if (tabIds.length === 0) {
+    return true
+  }
+  if (tabIds.length === 1) {
+    return await store.dispatch('closeTab', tabIds[0])
+  }
+
+  return await store.dispatch('closeTabs', tabIds)
 }
 
 function handleMouseDown() {
