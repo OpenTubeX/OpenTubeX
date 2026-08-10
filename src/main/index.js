@@ -119,6 +119,7 @@ function runApp() {
     'emptySession'
   ])
   const closeConfirmedWindowIds = new Set()
+  const closingWindowIds = new Set()
   let quitPromptInProgress = null
   const windowClosePromptsInProgress = new Map()
   let isQuitConfirmed = false
@@ -2333,7 +2334,9 @@ function runApp() {
         let confirmed = wasLastWindow
           ? await confirmCloseApp(newWindow)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
-        if (confirmed && !wasLastWindow && BrowserWindow.getAllWindows().length === 1) {
+        const openWindowCount = BrowserWindow.getAllWindows()
+          .filter(window => !closingWindowIds.has(window.id)).length
+        if (confirmed && !wasLastWindow && openWindowCount === 1) {
           confirmed = await confirmCloseApp(newWindow)
         }
         if (confirmed) {
@@ -2344,9 +2347,13 @@ function runApp() {
         return
       }
 
+      closingWindowIds.add(newWindow.id)
+
       // A confirmation can remain open while another window closes. Recompute
       // this after the async prompt so the session decision uses current state.
-      const isLastWindow = BrowserWindow.getAllWindows().length === 1
+      const isLastWindow = BrowserWindow.getAllWindows()
+        .filter(window => window.id === newWindow.id || !closingWindowIds.has(window.id))
+        .length === 1
 
       // returns true if the element existed in the set
       const htmlFullscreen = htmlFullscreenWindowIds.delete(newWindow.id)
@@ -2390,6 +2397,7 @@ function runApp() {
     })
 
     newWindow.once('closed', () => {
+      closingWindowIds.delete(newWindow.id)
       const allWindows = BrowserWindow.getAllWindows()
       if (allWindows.length !== 0 && newWindow === mainWindow) {
         // Replace mainWindow to avoid accessing `mainWindow.webContents`

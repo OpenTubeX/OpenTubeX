@@ -104,13 +104,13 @@ test.describe('multi-tab window close confirmation', () => {
 
       const primaryClosed = page.waitForEvent('close')
       await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), primaryWindowId)
-      await primaryClosed
 
       await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[0](0))
       await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
         'This window contains 2 tabs. Are you sure you want to close it?',
         'Are you sure you want to quit OpenTubeX?'
       ])
+      await primaryClosed
 
       const secondaryClosed = newWindow.waitForEvent('close')
       await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[1](0))
