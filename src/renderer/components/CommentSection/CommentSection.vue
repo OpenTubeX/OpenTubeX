@@ -522,6 +522,7 @@ const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 let fullscreenScrollTop = 0
+let highlightedTargetGeneration = 0
 const MAX_HIGHLIGHTED_REPLY_PAGES = 20
 
 watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
@@ -689,11 +690,16 @@ const canPerformInitialCommentLoading = computed(() => {
 watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
   const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
   if (targetChanged) {
+    highlightedTargetGeneration++
     isLoading.value = false
+    isLoadingMoreComments.value = false
+    loadingReplyIds.value = new Set()
+    showComments.value = false
     commentData.value = []
     nextPageToken.value = null
     localCommentsInstance = undefined
     replyTokens.clear()
+    resetCommentsScroll()
   }
 
   if ((commentId || targetChanged) && canPerformInitialCommentLoading.value) {
@@ -975,6 +981,7 @@ function toggleCommentReplies(index) {
  */
 async function getCommentReplies(index, commentId = null) {
   const replyId = commentId ?? commentData.value[index].id
+  const targetGeneration = highlightedTargetGeneration
   if (loadingReplyIds.value.has(replyId)) {
     return
   }
@@ -998,9 +1005,11 @@ async function getCommentReplies(index, commentId = null) {
       await getCommentRepliesLocal(index, commentId)
     }
   } finally {
-    const nextLoadingReplyIds = new Set(loadingReplyIds.value)
-    nextLoadingReplyIds.delete(replyId)
-    loadingReplyIds.value = nextLoadingReplyIds
+    if (targetGeneration === highlightedTargetGeneration) {
+      const nextLoadingReplyIds = new Set(loadingReplyIds.value)
+      nextLoadingReplyIds.delete(replyId)
+      loadingReplyIds.value = nextLoadingReplyIds
+    }
   }
 }
 
@@ -1229,6 +1238,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
+  const targetGeneration = highlightedTargetGeneration
   const rootComment = commentData.value[index]
   const comment = rootComment ? findComment(rootComment, commentId) : null
   const continuation = comment && replyTokens.get(comment.id)
@@ -1265,6 +1275,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
       nextContinuation = response.has_continuation ? response : null
     }
 
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     const parsedReplies = replyThreads
       .map(reply => parseLocalCommentThread(reply))
       .filter(Boolean)
@@ -1290,6 +1304,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(err)
 
     if (isMissingReplyResponseError(err)) {
@@ -1409,6 +1427,7 @@ async function getCommentRepliesInvidious(
   commentOverride = null,
   expectedReplyToken = null
 ) {
+  const targetGeneration = highlightedTargetGeneration
   const rootComment = commentData.value[index]
   const comment = commentOverride ?? (rootComment ? findComment(rootComment, commentId) : null)
   if (!comment) {
@@ -1420,7 +1439,10 @@ async function getCommentRepliesInvidious(
   try {
     const { commentData, continuation } = await invidiousGetCommentReplies({ id: props.id, replyToken })
 
-    if (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken) {
+    if (
+      targetGeneration !== highlightedTargetGeneration ||
+      (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken)
+    ) {
       return
     }
 
@@ -1446,6 +1468,10 @@ async function getCommentRepliesInvidious(
 
     isLoading.value = false
   } catch (error) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
@@ -1490,6 +1516,7 @@ function getPostCommentsInvidious() {
 }
 
 async function getPostCommentRepliesInvidious(index) {
+  const targetGeneration = highlightedTargetGeneration
   const comment = commentData.value[index]
   const replyToken = replyTokens.get(comment.id)
 
@@ -1499,6 +1526,11 @@ async function getPostCommentRepliesInvidious(index) {
       replyToken: replyToken,
       authorId: props.postAuthorId
     })
+
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     comment.replies = comment.replies.concat(comments)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
@@ -1521,6 +1553,10 @@ async function getPostCommentRepliesInvidious(index) {
 
     isLoading.value = false
   } catch (error) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)

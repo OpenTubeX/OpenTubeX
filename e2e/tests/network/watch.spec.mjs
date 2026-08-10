@@ -227,7 +227,12 @@ test.describe('watch page', () => {
         const threads = [...thread.parentElement.children]
         const highlightedIndex = threads.indexOf(thread)
         const lastPinnedIndex = threads.findLastIndex(candidate => candidate.querySelector('.commentPinned'))
-        return highlightedIndex === lastPinnedIndex + 1
+        const allPreviousThreadsArePinned = threads
+          .slice(0, highlightedIndex)
+          .every(candidate => candidate.querySelector('.commentPinned') !== null)
+        return highlightedIndex >= 0 &&
+          allPreviousThreadsArePinned &&
+          highlightedIndex === lastPinnedIndex + 1
       })
     }).toBe(true)
 
