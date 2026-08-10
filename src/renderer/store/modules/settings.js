@@ -16,6 +16,7 @@ import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
+import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 
@@ -200,6 +201,8 @@ const state = {
   defaultQuality: '720',
   defaultSkipInterval: 5,
   seekIntervalMultiplyByPlaybackRate: false,
+  // How many segments per stream shaka-player downloads in parallel ahead of the playhead
+  segmentPrefetchLimit: DEFAULT_SEGMENT_PREFETCH_LIMIT,
   showPlaybackRateAdjustedTimestamp: false,
   useCustomShortsPlayer: true,
   loopShorts: true,
