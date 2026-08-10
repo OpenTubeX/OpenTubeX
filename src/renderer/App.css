@@ -294,6 +294,14 @@
   transition: border-color 0.12s ease, background-color 0.12s ease, transform 0.12s ease;
 }
 
+.tabSwitcher.noPreviews {
+  grid-template-columns: minmax(240px, 420px);
+}
+
+.tabSwitcher.noPreviews .tabSwitcherItem {
+  grid-template-rows: minmax(34px, auto);
+}
+
 .tabSwitcher.pointerActive .tabSwitcherItem:hover,
 .tabSwitcherItem.selected {
   border-color: var(--tab-switcher-accent-color, var(--primary-text-color));

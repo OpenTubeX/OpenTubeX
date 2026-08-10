@@ -216,7 +216,10 @@
         ref="tabSwitcherRef"
         v-overlay-scrollbars
         class="tabSwitcher"
-        :class="{ pointerActive: tabSwitcherPointerActive }"
+        :class="{
+          pointerActive: tabSwitcherPointerActive,
+          noPreviews: !showTabPreviews
+        }"
         role="listbox"
         :aria-label="t('KeyboardShortcutPrompt.Tab Switcher')"
         :aria-activedescendant="tabSwitcherSelectedTabId"
@@ -237,7 +240,10 @@
           @focus="setTabSwitcherSelectedIndex(index)"
           @click="commitTabSwitcherSelection(index)"
         >
-          <span class="tabSwitcherPreview">
+          <span
+            v-if="showTabPreviews"
+            class="tabSwitcherPreview"
+          >
             <img
               v-if="tabSwitcherPreviewUrls[tab.id]"
               :src="tabSwitcherPreviewUrls[tab.id]"
@@ -556,6 +562,7 @@ const findbarStateByTabId = new Map()
 
 const tabSwitcherTabs = computed(() => store.getters.getTabs)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
 const findbarStatus = computed(() => {
   if (findbarQuery.value.trim().length === 0) {
     return ''
@@ -2123,7 +2130,9 @@ function cycleTabSwitcher(direction) {
     tabSwitcherSelectedIndex.value = wrapTabSwitcherIndex(activeIndex + direction, tabs.length)
     tabSwitcherPreviewUrls.value = {}
     tabSwitcherPointerActive.value = false
-    window.ftElectron.tabs.setPreviewCapturePaused(true)
+    if (showTabPreviews.value) {
+      window.ftElectron.tabs.setPreviewCapturePaused(true)
+    }
     tabSwitcherVisible.value = true
     scrollTabSwitcherSelectionIntoView()
     loadTabSwitcherPreviews()
@@ -2148,6 +2157,7 @@ function wrapTabSwitcherIndex(index, length) {
 
 function loadTabSwitcherPreviews() {
   if (
+    !showTabPreviews.value ||
     !process.env.IS_ELECTRON ||
     typeof window.ftElectron?.tabs?.getCachedPreviews !== 'function'
   ) {

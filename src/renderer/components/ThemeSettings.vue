@@ -94,6 +94,14 @@
           setting-key="showTabIcons"
           @change="updateShowTabIcons"
         />
+        <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Show Tab Previews')"
+          compact
+          :default-value="showTabPreviews"
+          setting-key="showTabPreviews"
+          @change="updateShowTabPreviews"
+        />
       </div>
     </div>
     <template v-if="usingElectron">
@@ -484,6 +492,16 @@ const showTabIcons = computed(() => store.getters.getShowTabIcons)
  */
 function updateShowTabIcons(value) {
   store.dispatch('updateShowTabIcons', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabPreviews(value) {
+  store.dispatch('updateShowTabPreviews', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

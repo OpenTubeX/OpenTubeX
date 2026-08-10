@@ -836,6 +836,14 @@ export default {
     },
 
     /**
+     * Enable or disable thumbnail previews for this window's tabs.
+     * @param {boolean} enabled
+     */
+    setPreviewsEnabled: (enabled) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_PREVIEWS_ENABLED, enabled === true)
+    },
+
+    /**
      * Pause background page captures while preview UI is visible.
      * @param {boolean} paused
      */

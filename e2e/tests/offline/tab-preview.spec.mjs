@@ -96,3 +96,40 @@ test.describe('tab previews', () => {
     expect(hiddenWhileCapturing.every((visibility) => visibility === 'hidden')).toBe(true)
   })
 })
+
+test.describe('tab previews disabled', () => {
+  test.use({ seed: { settings: { showTabPreviews: false } } })
+
+  test('keeps a compact title tooltip and removes preview images', async ({ page }) => {
+    await page.locator(sel.tabs).first().hover()
+
+    const tooltip = page.locator('.tabTooltip')
+    const title = tooltip.locator('.tabTooltipTitle')
+    await expect(tooltip).toBeVisible()
+    await expect(title).not.toBeEmpty()
+    await expect(tooltip.locator('.tabTooltipPreview')).toHaveCount(0)
+
+    const [tooltipBox, titleBox] = await Promise.all([
+      tooltip.boundingBox(),
+      title.boundingBox()
+    ])
+    expect(tooltipBox.width).toBeLessThanOrEqual(titleBox.width + 20)
+
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    await expect.poll(() => page.evaluate(
+      tabId => window.ftElectron.tabs.capturePreview(tabId),
+      activeTabId
+    )).toBe(null)
+
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await page.keyboard.down('Control')
+    try {
+      await page.keyboard.press('Tab')
+      await expect(page.locator('.tabSwitcher.noPreviews')).toBeVisible()
+      await expect(page.locator('.tabSwitcherPreview')).toHaveCount(0)
+    } finally {
+      await page.keyboard.up('Control')
+    }
+  })
+})

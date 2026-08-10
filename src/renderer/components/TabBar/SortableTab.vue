@@ -71,6 +71,7 @@
       <div
         v-if="isTooltipVisible"
         :id="tooltipId"
+        ref="tooltipRef"
         class="tabTooltip"
         data-tab-preview-overlay
         :style="tooltipStyle"
@@ -79,7 +80,10 @@
         <div class="tabTooltipTitle">
           {{ displayTitle }}
         </div>
-        <div class="tabTooltipPreview">
+        <div
+          v-if="showPreview"
+          class="tabTooltipPreview"
+        >
           <img
             v-if="tooltipPreviewUrl"
             :src="tooltipPreviewUrl"
@@ -111,7 +115,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import packageDetails from '@root/package.json'
 import { getTabAccentColor } from '../../constants/tabColors'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from '../../tabs/tabPreview'
@@ -161,6 +165,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  showPreview: {
+    type: Boolean,
+    default: true
+  },
   isSelected: {
     type: Boolean,
     default: false
@@ -171,11 +179,13 @@ const emit = defineEmits(['activate', 'close', 'middleClick'])
 
 const TOOLTIP_MAX_WIDTH_PX = 340
 const TOOLTIP_ESTIMATED_HEIGHT_PX = 240
+const TOOLTIP_TITLE_ONLY_ESTIMATED_HEIGHT_PX = 35
 const TOOLTIP_MARGIN_PX = 8
 const TOOLTIP_OFFSET_PX = 6
 const TOOLTIP_SHOW_DELAY_MS = 80
 
 const tabRef = useTemplateRef('tabRef')
+const tooltipRef = useTemplateRef('tooltipRef')
 const isTooltipVisible = ref(false)
 const tooltipPreviewUrl = ref(null)
 const tooltipStyle = ref({})
@@ -223,6 +233,9 @@ const displayTitle = computed(() => {
 
 const tooltipId = computed(() => `tab-tooltip-${props.tab.id}`)
 const tooltipPreviewAlt = computed(() => `${displayTitle.value} preview`)
+const tooltipEstimatedHeight = computed(() => props.showPreview
+  ? TOOLTIP_ESTIMATED_HEIGHT_PX
+  : TOOLTIP_TITLE_ONLY_ESTIMATED_HEIGHT_PX)
 
 // When a tab points at a channel page and no screenshot has been captured yet,
 // fall back to the channel's profile picture (cached by the Channel view).
@@ -257,6 +270,7 @@ function showTooltip() {
 
     updateTooltipPosition()
     isTooltipVisible.value = true
+    nextTick(updateTooltipPosition)
     addTooltipDismissListeners()
     window.addEventListener('resize', updateTooltipPosition)
     loadTooltipPreview()
@@ -331,20 +345,27 @@ function updateTooltipPosition() {
   }
 
   const rect = element.getBoundingClientRect()
-  const tooltipWidth = Math.min(
+  const maxTooltipWidth = Math.min(
     TOOLTIP_MAX_WIDTH_PX,
     Math.max(120, window.innerWidth - TOOLTIP_MARGIN_PX * 2)
   )
+  const renderedTooltipWidth = tooltipRef.value?.getBoundingClientRect().width
+  const tooltipWidth = !props.showPreview && renderedTooltipWidth > 0
+    ? Math.min(renderedTooltipWidth, maxTooltipWidth)
+    : maxTooltipWidth
+  const widthStyle = props.showPreview
+    ? { inlineSize: `${Math.round(maxTooltipWidth)}px` }
+    : { inlineSize: 'max-content', maxInlineSize: `${Math.round(maxTooltipWidth)}px` }
 
   if (props.vertical) {
     // Place the tooltip beside the tab, keeping it inside the viewport.
     const top = Math.max(
       TOOLTIP_MARGIN_PX,
-      Math.min(window.innerHeight - TOOLTIP_ESTIMATED_HEIGHT_PX, rect.top)
+      Math.min(window.innerHeight - tooltipEstimatedHeight.value, rect.top)
     )
 
     tooltipStyle.value = {
-      inlineSize: `${Math.round(tooltipWidth)}px`,
+      ...widthStyle,
       insetInlineStart: `${Math.round(rect.right + TOOLTIP_OFFSET_PX)}px`,
       insetBlockStart: `${Math.round(top)}px`
     }
@@ -360,7 +381,7 @@ function updateTooltipPosition() {
   )
 
   tooltipStyle.value = {
-    inlineSize: `${Math.round(tooltipWidth)}px`,
+    ...widthStyle,
     insetInlineStart: `${Math.round(left)}px`,
     insetBlockStart: `${Math.round(rect.bottom + TOOLTIP_OFFSET_PX)}px`
   }
@@ -371,6 +392,7 @@ async function loadTooltipPreview() {
   tooltipPreviewUrl.value = null
 
   if (
+    !props.showPreview ||
     !process.env.IS_ELECTRON ||
     typeof window.ftElectron?.tabs?.capturePreview !== 'function'
   ) {
@@ -420,6 +442,17 @@ watch(() => props.isDragging, (isDragging) => {
 watch(() => props.disableTooltips, (disableTooltips) => {
   if (disableTooltips) {
     hideTooltip()
+  }
+})
+
+watch(() => props.showPreview, (showPreview) => {
+  tooltipPreviewUrl.value = null
+  tooltipRequestId.value++
+  if (isTooltipVisible.value) {
+    updateTooltipPosition()
+    if (showPreview) {
+      loadTooltipPreview()
+    }
   }
 })
 </script>
@@ -756,5 +789,9 @@ watch(() => props.disableTooltips, (disableTooltips) => {
   white-space: nowrap;
   font-size: 12px;
   line-height: 1.35;
+}
+
+.tabTooltipTitle:only-child {
+  margin-block-end: 0;
 }
 </style>

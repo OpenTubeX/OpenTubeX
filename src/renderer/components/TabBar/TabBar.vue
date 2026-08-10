@@ -34,6 +34,7 @@
           :disable-tooltips="draggingTabIds.size > 0"
           :close-tooltips-signal="closeTooltipsSignal"
           :show-icon="showTabIcons"
+          :show-preview="showTabPreviews"
           :is-selected="selectedTabIds.has(tab.id)"
           :close-label="t('Close Tab')"
           @activate="handleActivate"
@@ -112,7 +113,14 @@ const tabs = computed(() => store.getters.getTabs)
 /** @type {import('vue').ComputedRef<boolean>} */
 const vertical = computed(() => store.getters.getUseVerticalTabBar)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
 const migratingAvatarTabIds = new Set()
+
+watch(showTabPreviews, enabled => {
+  if (isElectron) {
+    window.ftElectron.tabs.setPreviewsEnabled(enabled)
+  }
+}, { immediate: true })
 
 watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
   if (!isElectron) return
