@@ -279,6 +279,7 @@ const state = {
   hideUpcomingPremieres: false,
   hideVideoLikesAndDislikes: false,
   hideVideoViews: false,
+  shortenViewCounts: true,
   hideWatchedSubs: false,
   hideUploader: false,
   unsubscriptionPopupStatus: false,

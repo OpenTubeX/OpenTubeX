@@ -864,6 +864,7 @@ Settings:
       Watch Page: Watch Page
       General: General
     Hide Video Views: Hide Video Views
+    Shorten View Counts: Shorten View Counts
     Hide Video Likes And Dislikes: Hide Video Likes And Dislikes
     Hide Channel Subscribers: Hide Channel Subscribers
     Hide Comment Likes: Hide Comment Likes
@@ -1808,6 +1809,7 @@ Tooltips:
       and for audio conversion. By default, OpenTubeX will assume that FFmpeg can be found
       via the PATH environment variable. If needed, a custom path can be set here.
   Distraction Free Settings:
+    Shorten View Counts: Shows view counts that YouTube has already rounded in a shortened form, e.g. 14K instead of 14,000. Exact view counts are always shown in full.
     Hide Channels: Enter a channel ID to hide all videos, playlists and the channel itself from appearing in search, trending, most popular and recommended.
        The channel ID entered must be a complete match and is case sensitive.
     Hide Subscriptions Live: 'This setting is overridden by the app-wide "{appWideSetting}" setting, in the "{subsection}" section of the "{settingsSection}"'

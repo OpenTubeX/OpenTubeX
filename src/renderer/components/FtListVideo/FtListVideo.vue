@@ -353,7 +353,7 @@ import store from '../../store/index'
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
-  formatNumber,
+  formatViewCount,
   getCachedOembedTitle,
   getOembedTitle,
   getRelativeTimeFromDate,
@@ -1004,6 +1004,9 @@ const toastThumbnail = computed(() => thumbnailPreference.value === 'hidden' ? n
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
 const addWatchedStyle = computed(() => {
   return isWatched.value && (!inHistory.value || props.showWatchedStyleInHistory)
 })
@@ -1497,7 +1500,7 @@ function parseVideoData() {
   if (hideVideoViews.value) {
     hideViews.value = true
   } else if (props.data.viewCount !== undefined && props.data.viewCount !== null) {
-    parsedViewCount.value = formatNumber(props.data.viewCount)
+    parsedViewCount.value = formatViewCount(props.data.viewCount, shortenViewCounts.value)
   } else if (props.data.viewCountText !== undefined) {
     parsedViewCount.value = props.data.viewCountText.replace(' views', '')
   } else {
