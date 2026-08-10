@@ -765,6 +765,15 @@ export default {
     },
 
     /**
+     * Close several tabs at once
+     * @param {string[]} tabIds
+     * @returns {Promise<{hasRemainingTabs: boolean}>}
+     */
+    closeMultiple: (tabIds) => {
+      return ipcRenderer.invoke(IpcChannels.TABS_CLOSE_MULTIPLE, tabIds)
+    },
+
+    /**
      * Duplicate a tab
      * @param {string} tabId
      * @returns {Promise<{id: string, url: string, title: string}|null>}
@@ -865,6 +874,27 @@ export default {
      */
     setSelected: (tabIds) => {
       ipcRenderer.send(IpcChannels.TABS_SET_SELECTED, tabIds)
+    },
+
+    /**
+     * Listen for bulk close confirmation requests from main (e.g. the tab
+     * context menu's "Close Tabs" entries).
+     * @param {(request: { requestId: string, count: number }) => void} handler
+     * @returns {() => void}
+     */
+    onConfirmCloseMultiple: (handler) => {
+      const listener = (_event, request) => handler(request)
+      ipcRenderer.on(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, listener)
+    },
+
+    /**
+     * Answer a bulk close confirmation request from main.
+     * @param {string} requestId
+     * @param {boolean} confirmed
+     */
+    respondConfirmCloseMultiple: (requestId, confirmed) => {
+      ipcRenderer.send(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, { requestId, confirmed })
     },
 
     /**

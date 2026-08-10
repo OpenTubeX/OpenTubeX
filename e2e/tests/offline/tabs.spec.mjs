@@ -284,6 +284,93 @@ test.describe('tab bar', () => {
     await expect(tabs).toHaveAttribute('data-tab-id', unselectedId)
   })
 
+  test('confirms before closing several selected tabs at once', async ({ page }) => {
+    for (let index = 0; index < 5; index++) {
+      await page.locator(sel.newTabButton).click()
+    }
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(6)
+
+    await tabs.first().click()
+    for (let index = 1; index < 5; index++) {
+      await tabs.nth(index).click({ modifiers: ['Control'] })
+    }
+
+    await page.keyboard.press('Control+w')
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toBeVisible()
+    await expect(prompt).toContainText('5')
+
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
+    await expect(prompt).toHaveCount(0)
+    await expect(tabs).toHaveCount(6)
+
+    await page.keyboard.press('Control+w')
+    await expect(prompt).toBeVisible()
+    await prompt.getByRole('button', { name: /Close/ }).click()
+    await expect(tabs).toHaveCount(1)
+  })
+
+  test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(3)
+
+    await tabs.first().click()
+    await tabs.nth(1).click({ modifiers: ['Control'] })
+
+    await page.keyboard.press('Control+w')
+    await expect(tabs).toHaveCount(1)
+    await expect(page.locator('.prompt')).toHaveCount(0)
+  })
+
+  test('closes several tabs in one state update', async ({ page }) => {
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(4)
+
+    // The first tab stays active, so no tab that is about to be closed has to
+    // be presented (and mounted) on the way out. A tab that is still presented
+    // while it closes is kept alive until its replacement paints, which is a
+    // second state update by design.
+    await page.locator(sel.tabs).first().click()
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect.poll(async () => {
+      const state = await page.evaluate(() => window.ftElectron.tabs.getState())
+      return state.presentedTabId === state.tabs[0].id
+    }).toBe(true)
+
+    const tabCounts = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const closingIds = initialState.tabs.slice(1).map(tab => tab.id)
+
+      return await new Promise((resolve, reject) => {
+        const counts = []
+        const timeoutId = window.setTimeout(() => {
+          removeListener()
+          reject(new Error('Timed out waiting for the tabs to close'))
+        }, 5000)
+        const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+          if (state.tabs.length === initialState.tabs.length) return
+
+          counts.push(state.tabs.length)
+          if (state.tabs.length === 1) {
+            window.clearTimeout(timeoutId)
+            removeListener()
+            resolve(counts)
+          }
+        })
+
+        window.ftElectron.tabs.closeMultiple(closingIds)
+      })
+    })
+
+    expect(tabCounts).toEqual([1])
+    await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+
   test('applies a complete tab reorder in one state update', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.newTabButton).click()

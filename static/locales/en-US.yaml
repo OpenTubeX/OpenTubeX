@@ -31,6 +31,10 @@ Close Confirmation:
   Message: Are you sure you want to quit OpenTubeX?
   Quit: Quit
   Never Ask Again: Never ask again
+Close Multiple Tabs Confirmation:
+  Title: Close multiple tabs?
+  Message: This will close {count} tabs.
+  Close Tabs: Close {count} Tabs
 Compact side navigation: Compact side navigation
 Expand side navigation: Expand side navigation
 Back: Back
