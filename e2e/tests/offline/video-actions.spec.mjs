@@ -408,17 +408,17 @@ test.describe('list video actions', () => {
     ])
 
     const subtitleLanguages = page.locator('.subtitleLanguages')
-    const tooltip = subtitleLanguages.locator('[role="tooltip"]')
     await expect(subtitleLanguages.locator('input')).toBeDisabled()
     await subtitleLanguages.locator('.selectTooltip button').hover()
+    const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
 
     const opacity = await subtitleLanguages.evaluate((field) => ({
       label: getComputedStyle(field.querySelector('.selectLabel')).opacity,
-      labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity,
-      tooltip: getComputedStyle(field.querySelector('[role="tooltip"]')).opacity
+      labelText: getComputedStyle(field.querySelector('.selectLabelText')).opacity
     }))
-    expect(opacity).toEqual({ label: '1', labelText: '0.4', tooltip: '1' })
+    expect(opacity).toEqual({ label: '1', labelText: '0.4' })
+    await expect(tooltip).toHaveCSS('opacity', '1')
   })
 
   test('the options dropdown shows readable single-column actions with icons', async ({ page }) => {

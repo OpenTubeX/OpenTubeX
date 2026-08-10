@@ -474,6 +474,7 @@ test.describe('settings', () => {
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('')
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await page.locator('.settingsMenu [data-section="channel"]').click()
+    await expect(page.locator('.settingsContent')).toHaveClass(/settingsCompactSlideForward/)
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
     const channelList = page.locator('.channelListContainer')
@@ -486,6 +487,10 @@ test.describe('settings', () => {
     })
     await expect.poll(() => channelList.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
+    await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
+    await expect(page.locator('.settingsMenu')).toBeVisible()
+    await expect(page.locator('.settingsMenu')).toHaveClass(/settingsCompactSlideBackward/)
+
     await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
     const shortcuts = page.locator('.shortcutColumns')
     expect(await shortcuts.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
@@ -497,6 +502,51 @@ test.describe('settings', () => {
     await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
     await expect(page.locator('.settingsMenu')).toBeVisible()
     await expect(page.locator('.settingsContent')).toBeHidden()
+  })
+
+  test('animates category changes vertically in two-column layout', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    await page.locator('.settingsMenu [data-section="player"]').click()
+    await expect(page.locator('.settingsContent')).toHaveClass(/settingsSectionSlideForward/)
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await expect(page.locator('.settingsContent')).toHaveClass(/settingsSectionSlideBackward/)
+  })
+
+  test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.locator('.settingsMenu [data-section="player"]').click()
+    await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+
+    const scroller = page.locator('.settingsSubpageScroll')
+    const toolbar = page.locator('.quickPlaybackSpeedToolbar')
+    const list = page.locator('.quickPlaybackSpeedList')
+    const reset = page.getByRole('button', { name: 'Reset to Defaults' })
+    await expect(reset).toBeDisabled()
+
+    const [scrollerBounds, listBounds] = await Promise.all([
+      scroller.boundingBox(),
+      list.boundingBox()
+    ])
+    expect(listBounds.width).toBeLessThanOrEqual(800)
+    expect(Math.abs(
+      listBounds.x + listBounds.width / 2 - scrollerBounds.x - scrollerBounds.width / 2
+    )).toBeLessThanOrEqual(1)
+
+    await page.getByRole('button', { name: 'Add Playback Speed' }).click()
+    await expect(reset).toBeEnabled()
+    await reset.click()
+    await expect(reset).toBeDisabled()
+
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(async () => {
+      const [currentScrollerBounds, toolbarBounds] = await Promise.all([
+        scroller.boundingBox(),
+        toolbar.boundingBox()
+      ])
+      return Math.abs(toolbarBounds.y - currentScrollerBounds.y)
+    }).toBeLessThanOrEqual(1)
+    await expect(toolbar).toBeVisible()
   })
 
   test('aligns caption color controls with neighboring selects', async ({ page }) => {
@@ -558,10 +608,10 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="download"]').click()
 
-    await expect(page.locator('.settingsContent [role="tooltip"]:visible')).toHaveCount(0)
+    await expect(page.locator('[role="tooltip"]:visible')).toHaveCount(0)
   })
 
-  test('keeps help tooltips inside the settings scroller', async ({ page }) => {
+  test('allows help tooltips outside the settings window', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem('opentubex-settings-window-bounds', JSON.stringify({
         x: 40,
@@ -576,14 +626,21 @@ test.describe('settings', () => {
     await content.evaluate(element => { element.scrollTop = element.scrollHeight })
     const tooltipButton = content.locator('.selectTooltip .button').last()
     await tooltipButton.hover()
-    const tooltip = tooltipButton.locator('..').getByRole('tooltip')
+    const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
 
-    const contentBounds = await content.boundingBox()
-    await expect.poll(async () => {
-      const tooltipBounds = await tooltip.boundingBox()
-      return tooltipBounds.y + tooltipBounds.height
-    }).toBeLessThanOrEqual(contentBounds.y + contentBounds.height - 7)
+    const [contentBounds, tooltipBounds, viewport, fontFamily] = await Promise.all([
+      content.boundingBox(),
+      tooltip.boundingBox(),
+      page.evaluate(() => ({ width: innerWidth, height: innerHeight })),
+      tooltip.evaluate(element => getComputedStyle(element).fontFamily)
+    ])
+    expect(tooltipBounds.y + tooltipBounds.height).toBeGreaterThan(contentBounds.y + contentBounds.height)
+    expect(tooltipBounds.x).toBeGreaterThanOrEqual(7)
+    expect(tooltipBounds.y).toBeGreaterThanOrEqual(7)
+    expect(tooltipBounds.x + tooltipBounds.width).toBeLessThanOrEqual(viewport.width - 7)
+    expect(tooltipBounds.y + tooltipBounds.height).toBeLessThanOrEqual(viewport.height - 7)
+    expect(fontFamily).toContain('Roboto')
   })
 
   test('select dropdowns use overlay scrollbars', async ({ page }) => {
@@ -1768,8 +1825,8 @@ test.describe('synced setting indicators', () => {
     expect(Math.abs(syncBox.y - resetBox.y)).toBeLessThanOrEqual(1)
     expect(resetBox.x - syncBox.x - syncBox.width).toBeGreaterThanOrEqual(6)
 
-    const tooltipText = select.locator('.selectTooltip .text')
     await select.locator('.selectTooltip button').focus()
+    const tooltipText = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltipText).toBeVisible()
 
     const [tooltipTextBox, sectionBox] = await Promise.all([
@@ -1817,8 +1874,8 @@ test.describe('synced setting indicators', () => {
     const startupSelect = page.locator('.select').filter({ hasText: 'On Startup' })
     await startupSelect.locator('select').selectOption('restoreTabLoadState')
 
-    const tooltipText = startupSelect.locator('.selectTooltip .text')
     await startupSelect.locator('.selectTooltip button').focus()
+    const tooltipText = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltipText).toBeVisible()
 
     const thumbnailIndicators = page.locator('.select')
