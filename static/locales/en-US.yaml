@@ -1751,7 +1751,7 @@ Tooltips:
     Concurrent Segment Downloads: |
       How many video and audio segments are downloaded in parallel ahead of the current playback position.
       Higher values can improve the download speed on slow or unstable connections, but use more bandwidth and memory.
-      This has no effect when the built-in stream extraction method is used, as it only supports one request at a time.
+      Streams that only allow one request at a time, which most of those from the built-in stream extraction method are, are unaffected.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.
