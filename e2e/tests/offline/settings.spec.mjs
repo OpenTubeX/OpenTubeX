@@ -35,7 +35,7 @@ test.describe('settings', () => {
     await page.mouse.wheel(0, 2000)
 
     await expect.poll(() => content.evaluate((element) => {
-      const lastControl = element.querySelector('.switchGrid > :last-child')
+      const lastControl = element.querySelector('.confirmations')
       return element.getBoundingClientRect().bottom - lastControl.getBoundingClientRect().bottom
     })).toBeLessThanOrEqual(45)
   })
@@ -646,8 +646,8 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     const content = page.locator('.settingsContent')
-    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
     const tooltipButton = content.locator('.selectTooltip .button').last()
+    await tooltipButton.evaluate(element => element.scrollIntoView({ block: 'end' }))
     await tooltipButton.hover()
     const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
