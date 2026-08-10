@@ -323,6 +323,45 @@ test.describe('watch page', () => {
     await expect(player.locator('video')).toHaveAttribute('poster', /\S+/)
   })
 
+  test('resets the transcript scroll position when searching', async ({ page }) => {
+    await page.route('https://example.test/transcript.vtt', route => route.fulfill({
+      body: longTranscript(),
+      contentType: 'text/vtt'
+    }))
+    await page.locator(sel.searchInput).fill(VIDEO_URL)
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator('.videoLayout')).toBeVisible()
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      const watchView = component.proxy
+      watchView.videoLoadGeneration += 1
+      watchView.errorMessage = null
+      watchView.isLive = false
+      watchView.isUpcoming = false
+      watchView.playabilityStatus = 'OK'
+      watchView.captions = [{
+        url: 'https://example.test/transcript.vtt',
+        label: 'English',
+        language: 'en'
+      }]
+      watchView.showTranscript = true
+      watchView.isLoading = false
+      await watchView.$nextTick()
+    })
+
+    const transcriptSegments = page.locator('.transcriptSegments')
+    await expect(page.locator('.transcriptSegment').first()).toBeVisible()
+    await transcriptSegments.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    await page.getByPlaceholder('Search transcript').fill('Transcript line 2500.')
+    await expect(page.locator('.transcriptSegment')).toHaveCount(1)
+    await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBe(0)
+
+    await watchComponent.dispose()
+  })
+
   test('long transcripts quickly align with the current cue', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({
