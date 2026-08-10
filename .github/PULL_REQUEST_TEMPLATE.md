@@ -19,6 +19,7 @@
 
 ## Release note category
 <!-- Select exactly one category. Every pull request must select one. -->
+<!-- Select "Not noteworthy" when the pull request fixes a bug in or improves functionality that has not yet appeared in a stable release. -->
 <!-- release-note-category:start -->
 - [ ] Not noteworthy
 - [ ] Highlights
