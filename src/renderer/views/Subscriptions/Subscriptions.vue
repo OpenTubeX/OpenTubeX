@@ -236,7 +236,7 @@
       <FtPrompt
         v-if="showAllFeedsRefreshWarning"
         :label="$t('Subscriptions.New Feed Refresh Warning Title')"
-        :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size })]"
+        :extra-labels="[$t('Subscriptions.New Feed Refresh Warning', { count: allFeedsActiveSubscriptionIds.size }, allFeedsActiveSubscriptionIds.size)]"
         :option-names="[$t('Yes'), $t('No')]"
         :option-values="['refresh', 'cancel']"
         autosize
