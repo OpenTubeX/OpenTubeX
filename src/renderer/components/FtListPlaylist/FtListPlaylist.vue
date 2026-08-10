@@ -61,17 +61,17 @@
           {{ channelName }}
         </bdi>
       </div>
-      <FtIconButton
-        v-if="externalPlayer !== '' && !isUserPlaylist"
-        :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
-        :icon="['fas', 'external-link-alt']"
-        class="externalPlayerButton"
-        theme="base-no-default"
-        :size="16"
-        :use-shadow="false"
-        @click="handleExternalPlayer"
-      />
-      <span class="playlistIcons">
+      <div class="buttonStack playlistButtonStack">
+        <FtIconButton
+          v-if="externalPlayer !== '' && !isUserPlaylist"
+          :title="t('Video.External Player.OpenInTemplate', { externalPlayer })"
+          :icon="['fas', 'external-link-alt']"
+          class="externalPlayerButton"
+          theme="base-no-default"
+          :size="16"
+          :use-shadow="false"
+          @click="handleExternalPlayer"
+        />
         <FtIconButton
           v-if="IS_ELECTRON && videoCount > 0"
           :title="t('Downloads.Download Playlist')"
@@ -90,7 +90,7 @@
           @disabled-click="handleQuickBookmarkEnabledDisabledClick"
           @click="enableQuickBookmarkForThisPlaylist"
         />
-      </span>
+      </div>
     </div>
     <WatchVideoDownloadPrompt
       v-if="showDownloadPrompt"
