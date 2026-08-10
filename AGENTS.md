@@ -1,5 +1,6 @@
 - Always start by implementing something first without running tests. Only after I give you the go that it's fine from my side continue with them. Exception: When it's actually beneficial for the implementation to reproduce something first it is always allowed and encouraged.
 - Always run Electron/Playwright E2E tests under a private X server using `xvfb-run -a -s "-screen 0 1920x1080x24"`.
+- Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
 - When creating PRs use the PR template. Always create ready-for-review PRs unless otherwise told to do so.
