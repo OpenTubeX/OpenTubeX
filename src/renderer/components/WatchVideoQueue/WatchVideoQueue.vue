@@ -101,11 +101,13 @@ const invidiousUrl = computed(() => store.getters.getCurrentInvidiousInstanceUrl
 const draggedQueueItemId = ref(null)
 const queueItems = useTemplateRef('queueItems')
 let queueObserver = null
+let queueClampFrame = null
 
 onMounted(() => {
   const container = queueItems.value?.$el ?? queueItems.value
   queueObserver = new MutationObserver(() => {
-    requestAnimationFrame(() => {
+    queueClampFrame ??= requestAnimationFrame(() => {
+      queueClampFrame = null
       clampOverlayScrollTop(
         container,
         container.querySelector(':scope > .queueItem:last-of-type')
@@ -115,7 +117,13 @@ onMounted(() => {
   queueObserver.observe(container, { childList: true })
 })
 
-onBeforeUnmount(() => queueObserver?.disconnect())
+onBeforeUnmount(() => {
+  queueObserver?.disconnect()
+  if (queueClampFrame !== null) {
+    cancelAnimationFrame(queueClampFrame)
+    queueClampFrame = null
+  }
+})
 
 function thumbnailUrl(videoId) {
   const baseUrl = backendPreference.value === 'invidious' ? invidiousUrl.value : 'https://i.ytimg.com'

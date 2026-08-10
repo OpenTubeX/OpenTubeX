@@ -1050,16 +1050,27 @@ function shufflePlaylistItems() {
 
 const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
 let playlistItemsObserver = null
+let playlistItemsClampFrame = null
+
+function stopObservingPlaylistItems() {
+  playlistItemsObserver?.disconnect()
+  playlistItemsObserver = null
+  if (playlistItemsClampFrame !== null) {
+    cancelAnimationFrame(playlistItemsClampFrame)
+    playlistItemsClampFrame = null
+  }
+}
 
 watch(playlistItemsWrapper, (wrapper) => {
-  playlistItemsObserver?.disconnect()
+  stopObservingPlaylistItems()
   const container = wrapper?.$el ?? wrapper
   if (container == null) {
     return
   }
 
   playlistItemsObserver = new MutationObserver(() => {
-    requestAnimationFrame(() => {
+    playlistItemsClampFrame ??= requestAnimationFrame(() => {
+      playlistItemsClampFrame = null
       const items = container.querySelectorAll(':scope > .playlistItem')
       clampOverlayScrollTop(
         container,
@@ -1070,7 +1081,7 @@ watch(playlistItemsWrapper, (wrapper) => {
   playlistItemsObserver.observe(container, { childList: true })
 }, { flush: 'post' })
 
-onBeforeUnmount(() => playlistItemsObserver?.disconnect())
+onBeforeUnmount(stopObservingPlaylistItems)
 
 function getScrollTop() {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
