@@ -433,13 +433,14 @@ const actions = {
       urlStr = `https://www.youtube.com/${urlStr}`
     }
 
-    const { videoId, timestamp, playlistId, isShort } = getVideoParamsFromUrl(urlStr)
+    const { videoId, timestamp, playlistId, commentId, isShort } = getVideoParamsFromUrl(urlStr)
     if (videoId) {
       return {
         urlType: 'video',
         videoId,
         playlistId,
         timestamp,
+        commentId,
         isShort
       }
     }

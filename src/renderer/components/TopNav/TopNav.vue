@@ -556,7 +556,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
   store.dispatch('getYoutubeUrlInfo', queryText).then((result) => {
     switch (result.urlType) {
       case 'video': {
-        const { videoId, timestamp, playlistId, isShort } = result
+        const { videoId, timestamp, playlistId, commentId, isShort } = result
 
         const query = {}
         if (isShort) {
@@ -567,6 +567,9 @@ function goToSearch(queryText, { event, dataListIndex }) {
         }
         if (playlistId && playlistId.length > 0) {
           query.playlistId = playlistId
+        }
+        if (commentId) {
+          query.commentId = commentId
         }
 
         openInternalPath({

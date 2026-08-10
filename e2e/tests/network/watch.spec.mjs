@@ -210,6 +210,38 @@ test.describe('watch page metadata', () => {
 })
 
 test.describe('watch page', () => {
+  test('shows a pasted comment link as the first unpinned highlighted comment', async ({ page }) => {
+    const commentId = 'Ugwh6iFZf1tOPih3Z3J4AaABAg'
+    await page.locator(sel.searchInput).fill(
+      `https://www.youtube.com/watch?v=QMfwMNd1mR4&lc=${commentId}&pp=0gcJCSIANpG00pGi`
+    )
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page).toHaveURL(new RegExp(`#\\/watch\\/QMfwMNd1mR4\\?.*commentId=${commentId}`))
+    const badge = page.getByText('Highlighted comment', { exact: true })
+    await expect(badge).toBeVisible({ timeout: 60_000 })
+
+    const highlightedThread = badge.locator('..')
+    await expect.poll(async () => {
+      return highlightedThread.evaluate((thread) => {
+        const threads = [...thread.parentElement.children]
+        const highlightedIndex = threads.indexOf(thread)
+        const lastPinnedIndex = threads.findLastIndex(candidate => candidate.querySelector('.commentPinned'))
+        return highlightedIndex === lastPinnedIndex + 1
+      })
+    }).toBe(true)
+
+    const replyId = `${commentId}.A_IKgLISR5LA_IQAHGoLUG`
+    await page.locator(sel.searchInput).fill(
+      `https://www.youtube.com/watch?v=QMfwMNd1mR4&lc=${replyId}`
+    )
+    await page.locator(sel.searchInput).press('Enter')
+
+    await expect(page).toHaveURL(new RegExp(`commentId=${replyId.replace('.', '\\.')}`))
+    const replyBadge = page.getByText('Highlighted reply', { exact: true })
+    await expect(replyBadge).toBeVisible({ timeout: 60_000 })
+  })
+
   test('fullscreen comments keep auto-loading while the sentinel stays visible', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'needs more comment pages than are recorded')
     await openVideo(page)

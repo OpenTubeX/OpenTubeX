@@ -797,7 +797,7 @@ export function showExternalPlayerUnsupportedActionToast(externalPlayer, action)
 export function getVideoParamsFromUrl(url) {
   /** @type {URL} */
   let urlObject
-  const paramsObject = { videoId: null, timestamp: null, playlistId: null, isShort: false }
+  const paramsObject = { videoId: null, timestamp: null, playlistId: null, commentId: null, isShort: false }
   try {
     urlObject = new URL(url)
   } catch {
@@ -806,6 +806,7 @@ export function getVideoParamsFromUrl(url) {
 
   function extractParams(videoId) {
     paramsObject.videoId = videoId
+    paramsObject.commentId = urlObject.searchParams.get('lc')
     let timestamp = urlObject.searchParams.get('t')
     if (timestamp && (timestamp.includes('h') || timestamp.includes('m') || timestamp.includes('s'))) {
       const { seconds, minutes, hours } = timestamp.match(/(?:(?<hours>(\d+))h)?(?:(?<minutes>(\d+))m)?(?:(?<seconds>(\d+))s)?/).groups

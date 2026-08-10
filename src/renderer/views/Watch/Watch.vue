@@ -958,6 +958,7 @@
           :channel-name="channelName"
           :comments-disabled="commentsDisabled"
           :fullscreen-overlay="fullscreenCommentsOpen || shortsCommentsOpen"
+          :highlighted-comment-id="tabRoute.query.commentId"
           @close-comments="closeFullscreenComments"
           @timestamp-event="changeTimestamp"
         />

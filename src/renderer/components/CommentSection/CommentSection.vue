@@ -147,8 +147,17 @@
           :id="'comment' + index"
           :key="comment.id"
           class="comment commentThread"
-          :class="{ commentThreadExpanded: comment.showReplies }"
+          :class="{
+            commentThreadExpanded: comment.showReplies,
+            highlightedComment: comment.id === highlightedCommentId
+          }"
         >
+          <p
+            v-if="comment.id === highlightedCommentId"
+            class="highlightedCommentBadge"
+          >
+            {{ $t('Comments.Highlighted comment') }}
+          </p>
           <component
             :is="enableChannelLinks ? 'router-link' : 'div'"
             :to="`/channel/${comment.authorLink}`"
@@ -296,6 +305,7 @@
               :subscribed-channel-ids="subscribedChannelIds"
               :channel-thumbnail="channelThumbnail"
               :loading-reply-ids="loadingReplyIds"
+              :highlighted-comment-id="highlightedCommentId"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
               @timestamp-event="onTimestamp"
@@ -493,6 +503,10 @@ const props = defineProps({
   fullscreenOverlay: {
     type: Boolean,
     default: false,
+  },
+  highlightedCommentId: {
+    type: String,
+    default: null,
   }
 })
 
@@ -670,6 +684,23 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 const canPerformInitialCommentLoading = computed(() => {
   return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
+
+watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
+  if (!commentId) {
+    return
+  }
+
+  if (previousCommentId !== undefined && previousCommentId !== commentId) {
+    commentData.value = []
+    nextPageToken.value = null
+    localCommentsInstance = undefined
+    replyTokens.clear()
+  }
+
+  if (canPerformInitialCommentLoading.value) {
+    getCommentData()
+  }
+}, { immediate: true })
 
 watch(
   [generalAutoLoadMorePaginatedItemsEnabled, () => isTabPresented?.value],
@@ -872,7 +903,10 @@ function copyCommentYoutubeLink(commentId) {
 function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  const useInvidious = !process.env.SUPPORTS_LOCAL_API ||
+    (backendPreference.value === 'invidious' && !props.highlightedCommentId)
+
+  if (useInvidious) {
     if (!props.isPostComments) {
       getCommentDataInvidious()
     } else {
@@ -890,7 +924,7 @@ function getMoreComments() {
     isLoadingMoreComments.value = true
     let commentLoadPromise
 
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    if (typeof nextPageToken.value === 'string') {
       if (!props.isPostComments) {
         commentLoadPromise = getCommentDataInvidious()
       } else {
@@ -993,7 +1027,11 @@ function parseLocalCommentThread(commentThread, showReplies = true) {
   comment.replies = (commentThread.replies ?? [])
     .map(reply => parseLocalCommentThread(reply))
     .filter(Boolean)
-  comment.showReplies = showReplies && comment.replies.length > 0
+  const containsHighlightedComment = props.highlightedCommentId && (
+    findComment(comment, props.highlightedCommentId) !== null ||
+    comment.id === getHighlightedRootCommentId()
+  )
+  comment.showReplies = (showReplies || containsHighlightedComment) && comment.replies.length > 0
 
   const hasReplyToken = commentThread.has_replies &&
     (!commentThread.replies || commentThread.has_continuation)
@@ -1027,6 +1065,61 @@ function findComment(comment, commentId) {
   return null
 }
 
+function getHighlightedRootCommentId() {
+  return props.highlightedCommentId?.split('.')[0] ?? null
+}
+
+/**
+ * Keep pinned comments at the top, followed by the thread containing the
+ * highlighted comment or reply.
+ *
+ * @param {Comment[]} comments
+ * @returns {Comment[]}
+ */
+function prioritizeHighlightedComment(comments) {
+  if (!props.highlightedCommentId) {
+    return comments
+  }
+
+  const pinnedComments = comments.filter(comment => comment.isPinned)
+  const unpinnedComments = comments.filter(comment => !comment.isPinned)
+  const highlightedIndex = unpinnedComments.findIndex(comment => {
+    return findComment(comment, props.highlightedCommentId) !== null ||
+      comment.id === getHighlightedRootCommentId()
+  })
+
+  if (highlightedIndex > 0) {
+    const [highlightedComment] = unpinnedComments.splice(highlightedIndex, 1)
+    unpinnedComments.unshift(highlightedComment)
+  }
+
+  return pinnedComments.concat(unpinnedComments)
+}
+
+async function loadHighlightedReply() {
+  const highlightedCommentId = props.highlightedCommentId
+  const rootCommentId = getHighlightedRootCommentId()
+  if (!highlightedCommentId?.includes('.') || !rootCommentId) {
+    return
+  }
+
+  const threadIndex = commentData.value.findIndex(comment => comment.id === rootCommentId)
+  const thread = commentData.value[threadIndex]
+  if (!thread) {
+    return
+  }
+
+  while (!findComment(thread, highlightedCommentId) && thread.hasReplyToken) {
+    const previousReplyCount = thread.replies.length
+    const previousReplyToken = replyTokens.get(thread.id)
+    await getCommentReplies(threadIndex)
+
+    if (thread.replies.length === previousReplyCount && replyTokens.get(thread.id) === previousReplyToken) {
+      break
+    }
+  }
+}
+
 /**
  * @param {boolean | undefined} more
  * @param {boolean} preserveSort
@@ -1037,17 +1130,18 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     let comments
     if (more) {
       comments = await nextPageToken.value.getContinuation()
-    } else if (localCommentsInstance) {
+    } else if (localCommentsInstance && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       localCommentsInstance = comments
     } else {
       if (props.isPostComments) {
         comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
       } else {
-        comments = await getLocalComments(props.id)
+        const sortBy = preserveSort ? (sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS') : undefined
+        comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
-      if (preserveSort) {
+      if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
         comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       } else {
         sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
@@ -1058,9 +1152,11 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
 
     setLocalCommentCount(comments)
 
-    const parsedComments = comments.contents
-      .map(commentThread => parseLocalCommentThread(commentThread, false))
-      .filter(Boolean)
+    const parsedComments = prioritizeHighlightedComment(
+      comments.contents
+        .map(commentThread => parseLocalCommentThread(commentThread, false))
+        .filter(Boolean)
+    )
 
     if (more) {
       commentData.value = commentData.value.concat(parsedComments)
@@ -1071,6 +1167,10 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     nextPageToken.value = comments.has_continuation ? comments : null
     isLoading.value = false
     showComments.value = true
+
+    if (!more) {
+      await loadHighlightedReply()
+    }
   } catch (err) {
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
@@ -1090,7 +1190,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     console.error(err)
     const errorMessage = t('Local API Error (Click to copy)')
     showApiErrorToast(errorMessage, err)
-    if (backendFallback.value && backendPreference.value === 'local') {
+    if (backendFallback.value && (backendPreference.value === 'local' || props.highlightedCommentId)) {
       localCommentsInstance = undefined
       showToast({ message: t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
       if (props.isPostComments) {
@@ -1231,6 +1331,7 @@ async function getCommentDataInvidious() {
 
       return comment
     })
+    comments = prioritizeHighlightedComment(comments)
 
     commentData.value = commentData.value.concat(comments)
     nextPageToken.value = response.continuation

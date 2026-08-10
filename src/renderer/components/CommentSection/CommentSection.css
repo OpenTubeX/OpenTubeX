@@ -234,10 +234,28 @@
   padding: 15px;
 }
 
+.comment.highlightedComment {
+  padding-block-start: 0;
+}
+
+.highlightedCommentBadge {
+  display: table;
+  margin-block: 0 8px;
+  padding-block: 2px;
+  padding-inline: 5px;
+  color: var(--primary-text-color);
+  background-color: var(--side-nav-hover-color);
+  border-radius: calc(2px * var(--ui-roundness));
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 16px;
+}
+
 .commentThread {
   position: relative;
 
   --comment-thread-line-color: color-mix(in srgb, var(--tertiary-text-color) 55%, var(--card-bg-color));
+  --highlighted-comment-offset: 13px;
 }
 
 .commentThreadExpanded::before {
@@ -248,6 +266,10 @@
   inset-inline-start: 45px;
   border-inline-start: 1px solid var(--comment-thread-line-color);
   pointer-events: none;
+}
+
+.commentThreadExpanded.highlightedComment::before {
+  inset-block-start: calc(75px + var(--highlighted-comment-offset));
 }
 
 .commentTitleAction {
