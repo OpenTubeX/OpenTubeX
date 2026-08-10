@@ -80,6 +80,22 @@ test.describe('seeded playlists', () => {
     await expect(page.getByText('Upcoming seeded premiere')).toBeVisible()
   })
 
+  test('playlist artwork keeps its native aspect ratio', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('My seeded playlist').click()
+
+    const thumbnail = page.locator('.playlistThumbnail img')
+    await page.addStyleTag({ content: '.playlistThumbnail { display: block !important; }' })
+    await thumbnail.evaluate((image) => {
+      image.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"/>'
+    })
+    await expect(thumbnail).toBeVisible()
+    await expect(thumbnail).toHaveJSProperty('complete', true)
+
+    const bounds = await thumbnail.boundingBox()
+    expect(bounds.width).toBe(bounds.height)
+  })
+
   test('keeps the playlist title when switching tabs', async ({ page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('My seeded playlist').click()
