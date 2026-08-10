@@ -64,7 +64,8 @@ test.describe('watch page', () => {
     const descriptionText = description.locator('.description')
     const tags = description.locator('.videoTags')
     await description.locator(':scope > .descriptionStatus').click()
-    await expect(tags).toHaveText('Video Tags: first tag, second tag')
+    await expect(tags.locator('.videoTagLink')).toHaveText(['first tag', 'second tag'])
+    await expect(tags.locator('.videoTagLink').first()).toHaveAttribute('href', /\/search\/first%20tag/)
     await expect(description.locator('.descriptionScroll')).toHaveCSS('overflow-anchor', 'none')
     expect(await descriptionText.evaluate((element, tagsElement) => (
       Boolean(element.compareDocumentPosition(tagsElement) & Node.DOCUMENT_POSITION_FOLLOWING)

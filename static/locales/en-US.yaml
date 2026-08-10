@@ -1210,7 +1210,7 @@ Channel:
     About: About
     Channel Description: Channel Description
     Tags:
-      Tags: Tags
+      Tags: Channel Tags
       Search for: Search for "{tag}"
     Details: Details
     Joined: Joined
@@ -1693,7 +1693,7 @@ Description:
   Copy Description: Copy Description
   Description Copied: Description copied to clipboard
   Video Category: 'Video Category:'
-  Video Tags: 'Video Tags:'
+  Video Tags: 'Video Tags'
   Games: Games
 
 #Tooltips

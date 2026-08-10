@@ -95,9 +95,31 @@
 }
 
 .videoTags {
-  display: block;
   margin-block-start: 1em;
   overflow-wrap: anywhere;
+}
+
+.videoTagList {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 5px 15px;
+  justify-content: center;
+  margin-block: 0.75em 0;
+  margin-inline: 0;
+  padding: 0;
+}
+
+.videoTag {
+  display: flex;
+  list-style: none;
+}
+
+.videoTagLink {
+  background-color: var(--secondary-card-bg-color);
+  color: var(--primary-text-color);
+  border-radius: calc(7px * var(--ui-roundness));
+  padding: 7px;
+  text-decoration: none;
 }
 
 .gamesHeading {
