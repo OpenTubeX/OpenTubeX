@@ -2330,9 +2330,12 @@ function runApp() {
           (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        const confirmed = wasLastWindow
+        let confirmed = wasLastWindow
           ? await confirmCloseApp(newWindow)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
+        if (confirmed && !wasLastWindow && BrowserWindow.getAllWindows().length === 1) {
+          confirmed = await confirmCloseApp(newWindow)
+        }
         if (confirmed) {
           closeConfirmedWindowIds.add(newWindow.id)
           newWindow.close()

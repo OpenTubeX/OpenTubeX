@@ -75,37 +75,57 @@ test.describe('multi-tab window close confirmation', () => {
     })).toBe(false)
   })
 
-  test('preserves the session if the window becomes last while confirming', async ({ app, page }) => {
-    const { newWindow, windowId, primaryWindowId } = await openSecondWindowWithTwoTabs(app, page)
-
-    await app.electronApp.evaluate(({ dialog }) => {
-      globalThis.windowCloseDialogOpen = false
-      dialog.showMessageBox = async () => new Promise(resolve => {
-        globalThis.windowCloseDialogOpen = true
-        globalThis.resolveWindowCloseDialog = () => resolve({ response: 0 })
-      })
+  test.describe('with app close confirmation enabled', () => {
+    test.use({
+      seed: {
+        settings: {
+          confirmCloseApp: true,
+          confirmCloseWindowWithMultipleTabs: true
+        }
+      }
     })
 
-    await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
-    await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogOpen)).toBe(true)
+    test('preserves the session if the window becomes last while confirming', async ({ app, page }) => {
+      const { newWindow, windowId, primaryWindowId } = await openSecondWindowWithTwoTabs(app, page)
 
-    const primaryClosed = page.waitForEvent('close')
-    await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), primaryWindowId)
-    await primaryClosed
+      await app.electronApp.evaluate(({ dialog }) => {
+        globalThis.windowCloseDialogMessages = []
+        globalThis.windowCloseDialogResolvers = []
+        dialog.showMessageBox = async (_window, options) => new Promise(resolve => {
+          globalThis.windowCloseDialogMessages.push(options.message)
+          globalThis.windowCloseDialogResolvers.push(response => resolve({ response }))
+        })
+      })
 
-    const secondaryClosed = newWindow.waitForEvent('close')
-    await app.electronApp.evaluate(() => globalThis.resolveWindowCloseDialog())
-    await secondaryClosed
+      await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
+        'This window contains 2 tabs. Are you sure you want to close it?'
+      ])
 
-    await expect.poll(async () => {
-      const contents = await readFile(path.join(app.userDataDir, 'tab-session.db'), 'utf8')
-      const sessions = new Map()
-      for (const record of contents.trim().split('\n').map(line => JSON.parse(line))) {
-        if (record.$$deleted) sessions.delete(record._id)
-        else if (record.value) sessions.set(record._id, record.value)
-      }
-      return [...sessions.values()].some(session => session.tabs.length === 2)
-    }).toBe(true)
+      const primaryClosed = page.waitForEvent('close')
+      await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), primaryWindowId)
+      await primaryClosed
+
+      await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[0](0))
+      await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogMessages)).toEqual([
+        'This window contains 2 tabs. Are you sure you want to close it?',
+        'Are you sure you want to quit OpenTubeX?'
+      ])
+
+      const secondaryClosed = newWindow.waitForEvent('close')
+      await app.electronApp.evaluate(() => globalThis.windowCloseDialogResolvers[1](0))
+      await secondaryClosed
+
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'tab-session.db'), 'utf8')
+        const sessions = new Map()
+        for (const record of contents.trim().split('\n').map(line => JSON.parse(line))) {
+          if (record.$$deleted) sessions.delete(record._id)
+          else if (record.value) sessions.set(record._id, record.value)
+        }
+        return [...sessions.values()].some(session => session.tabs.length === 2)
+      }).toBe(true)
+    })
   })
 
   test('confirms when the renderer closes every tab in a multi-tab window', async ({ app, page }) => {
