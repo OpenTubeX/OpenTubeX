@@ -1405,6 +1405,9 @@ export class TabManager {
       return
     }
 
+    const presentedTabId = this.presentedTabId
+    const batchedTabIds = unloadingTabIds.filter(tabId => tabId !== presentedTabId)
+
     await this.runBatched(async () => {
       const unloadingTabIdSet = new Set(unloadingTabIds)
       if (this.activeTabId != null && unloadingTabIdSet.has(this.activeTabId)) {
@@ -1415,15 +1418,20 @@ export class TabManager {
         }
       }
 
-      // The presented tab captures a fresh preview before it goes, so unload it
-      // last instead of holding up the cheap unloads behind that round-trip.
-      unloadingTabIds.sort((a, b) => Number(a === this.presentedTabId) - Number(b === this.presentedTabId))
-      for (const tabId of unloadingTabIds) {
+      for (const tabId of batchedTabIds) {
         await this.unloadTab(tabId).catch(error => {
           console.error('Failed to unload tab:', error)
         })
       }
     })
+
+    // The presented tab captures a fresh preview before it goes. Run it outside
+    // the manager-wide batch so the capture cannot hold back unrelated updates.
+    if (presentedTabId != null && unloadingTabIds.includes(presentedTabId)) {
+      await this.unloadTab(presentedTabId).catch(error => {
+        console.error('Failed to unload tab:', error)
+      })
+    }
   }
 
   /**
@@ -2389,7 +2397,9 @@ export class TabManager {
   /**
    * Run a bulk operation with its state broadcasts and session writes collapsed
    * into a single one, so the renderer re-renders the tab bar and the session
-   * file is written once instead of once per tab.
+   * file is written once instead of once per tab. Batching is manager-wide, so
+   * asynchronous callbacks must stay short to avoid suppressing unrelated state
+   * updates until the callback settles.
    * @template T
    * @param {() => T | Promise<T>} run
    * @returns {Promise<T>}
@@ -2931,7 +2941,13 @@ export async function setupTabsIPC(options = {}) {
       return { hasRemainingTabs: true }
     }
 
-    const hasRemainingTabs = await manager.closeTabs(closingTabIds)
+    let hasRemainingTabs
+    try {
+      hasRemainingTabs = await manager.closeTabs(closingTabIds)
+    } catch (error) {
+      console.error('Failed to close tabs:', error)
+      hasRemainingTabs = manager.tabs.size > 0
+    }
     if (!hasRemainingTabs) {
       markWindowCloseConfirmed(manager.browserWindow)
       manager.browserWindow.close()

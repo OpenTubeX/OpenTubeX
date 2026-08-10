@@ -283,8 +283,13 @@ const actions = {
 
   async closeTabs(_context, tabIds) {
     if (!process.env.IS_ELECTRON) return false
-    const result = await window.ftElectron.tabs.closeMultiple(tabIds)
-    return result?.hasRemainingTabs ?? false
+    try {
+      const result = await window.ftElectron.tabs.closeMultiple(tabIds)
+      return result?.hasRemainingTabs ?? false
+    } catch (error) {
+      console.error('Failed to close tabs:', error)
+      return true
+    }
   },
 
   async closeActiveTab({ state, dispatch }) {

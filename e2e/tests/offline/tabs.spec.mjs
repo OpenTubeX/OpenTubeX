@@ -307,7 +307,7 @@ test.describe('tab bar', () => {
 
     await page.keyboard.press('Control+w')
     await expect(prompt).toBeVisible()
-    await prompt.getByRole('button', { name: /Close/ }).click()
+    await prompt.getByRole('button', { name: 'Close 5 Tabs', exact: true }).click()
     await expect(tabs).toHaveCount(1)
   })
 

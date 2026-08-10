@@ -2328,6 +2328,7 @@ const closeMultipleTabsPromptNames = computed(() => [
  */
 function confirmCloseMultipleTabs(count) {
   if (closeMultipleTabsPromptPromise) {
+    closeMultipleTabsPromptCount.value = Math.max(closeMultipleTabsPromptCount.value, count)
     return closeMultipleTabsPromptPromise
   }
 

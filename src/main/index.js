@@ -349,11 +349,13 @@ function runApp() {
        * @param {boolean} confirmed
        */
       function finish(confirmed) {
+        clearTimeout(timeoutId)
         ipcMain.removeListener(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
         browserWindow.removeListener('closed', handleWindowClosed)
         resolve(confirmed)
       }
 
+      const timeoutId = setTimeout(() => finish(false), 30_000)
       ipcMain.on(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
       browserWindow.once('closed', handleWindowClosed)
       manager.bridge.send(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, { requestId, count })
@@ -499,6 +501,8 @@ function runApp() {
         if (!manager) return
 
         const existingTabIds = tabIds.filter(tabId => manager.tabs.has(tabId))
+        if (existingTabIds.length === 0) return
+
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
         const closesWindow = existingTabIds.length === manager.tabs.size
         if (closesWindow && isLastWindow) {
@@ -4510,7 +4514,9 @@ function runApp() {
                   const tabIds = tabManager.selectedTabIds.length > 1
                     ? [...tabManager.selectedTabIds]
                     : [tabManager.activeTabId]
-                  if (!await confirmCloseMultipleTabs(tabManager, tabIds.length)) {
+                  const closesLastWindow = tabIds.length === tabManager.tabs.size &&
+                    BrowserWindow.getAllWindows().length === 1
+                  if (!closesLastWindow && !await confirmCloseMultipleTabs(tabManager, tabIds.length)) {
                     return
                   }
                   const hasRemainingTabs = await tabManager.closeTabs(tabIds)
