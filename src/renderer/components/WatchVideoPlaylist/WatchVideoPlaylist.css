@@ -197,6 +197,7 @@
 
 .playlistItemsWrapper {
   overflow-y: auto;
+  overflow-anchor: none;
   block-size: 360px;
   min-block-size: 180px;
   resize: vertical;

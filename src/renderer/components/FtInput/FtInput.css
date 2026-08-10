@@ -230,6 +230,7 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
 
 .list {
   position: absolute;
+  overflow-anchor: none;
   inline-size: 100%;
   list-style: none;
   margin: 0;

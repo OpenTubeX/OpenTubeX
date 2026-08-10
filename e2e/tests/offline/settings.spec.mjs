@@ -297,6 +297,70 @@ test.describe('settings', () => {
     expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
   })
 
+  test('clamps the settings scroll position after repeated resizing', async ({ page }) => {
+    await goTo(page, 'settings')
+    const settingsWindow = page.locator('.settingsWindow')
+    const content = page.locator('.settingsContent')
+    const resizeHandle = page.locator('.resize-se')
+    await expect(settingsWindow).not.toHaveClass(/settings-window-enter-active/)
+
+    const originalHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      originalHandleBounds.x + originalHandleBounds.width / 2,
+      originalHandleBounds.y + originalHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(originalHandleBounds.x - 180, originalHandleBounds.y - 180)
+    await page.mouse.up()
+
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    const smallerHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      smallerHandleBounds.x + smallerHandleBounds.width / 2,
+      smallerHandleBounds.y + smallerHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(smallerHandleBounds.x + 180, smallerHandleBounds.y + 180)
+    await page.mouse.up()
+
+    await page.waitForTimeout(250)
+    expect(await content.evaluate(element => {
+      const section = element.querySelector('.section')
+      const contentEnd = section.offsetTop + section.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
+    })).toBeLessThanOrEqual(1)
+
+    const restoredHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      restoredHandleBounds.x + restoredHandleBounds.width / 2,
+      restoredHandleBounds.y + restoredHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(restoredHandleBounds.x - 180, restoredHandleBounds.y - 180)
+    await page.mouse.up()
+
+    const menu = page.locator('.settingsMenu')
+    await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    const compactHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      compactHandleBounds.x + compactHandleBounds.width / 2,
+      compactHandleBounds.y + compactHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(compactHandleBounds.x + 180, compactHandleBounds.y + 180)
+    await page.mouse.up()
+
+    await page.waitForTimeout(250)
+    expect(await menu.evaluate(element => (
+      element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)
+    ))).toBeLessThanOrEqual(1)
+  })
+
   test('animates maximize and restore while preserving its floating bounds', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')
