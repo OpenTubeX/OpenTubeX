@@ -2311,13 +2311,13 @@ function runApp() {
     })
 
     newWindow.on('close', async (event) => {
-      const isLastWindow = BrowserWindow.getAllWindows().length === 1
+      const wasLastWindow = BrowserWindow.getAllWindows().length === 1
 
       if (!isQuitting && !closeConfirmedWindowIds.delete(newWindow.id) &&
-          (isLastWindow || tabManager.tabs.size > 1)) {
+          (wasLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        const confirmed = isLastWindow
+        const confirmed = wasLastWindow
           ? await confirmCloseApp(newWindow)
           : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
         if (confirmed) {
@@ -2327,6 +2327,10 @@ function runApp() {
 
         return
       }
+
+      // A confirmation can remain open while another window closes. Recompute
+      // this after the async prompt so the session decision uses current state.
+      const isLastWindow = BrowserWindow.getAllWindows().length === 1
 
       // returns true if the element existed in the set
       const htmlFullscreen = htmlFullscreenWindowIds.delete(newWindow.id)
