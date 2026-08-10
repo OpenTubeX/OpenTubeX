@@ -485,6 +485,33 @@ export default {
     ipcRenderer.send(IpcChannels.SHOW_TOAST, message, time, icon)
   },
 
+  liveReminder: {
+    /**
+     * @param {string} videoId
+     */
+    get: (videoId) => ipcRenderer.invoke(IpcChannels.LIVE_REMINDER_GET, videoId),
+
+    /**
+     * @param {{ videoId: string, startTimestamp: number, notificationTitle: string, notificationBody: string }} reminder
+     */
+    schedule: (reminder) => ipcRenderer.invoke(IpcChannels.LIVE_REMINDER_SCHEDULE, reminder),
+
+    /**
+     * @param {string} videoId
+     */
+    cancel: (videoId) => ipcRenderer.invoke(IpcChannels.LIVE_REMINDER_CANCEL, videoId),
+
+    /**
+     * @param {(videoId: string, scheduled: boolean) => void} handler
+     * @returns {() => void}
+     */
+    onUpdated: (handler) => {
+      const listener = (_event, videoId, scheduled) => handler(videoId, scheduled)
+      ipcRenderer.on(IpcChannels.LIVE_REMINDER_UPDATED, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.LIVE_REMINDER_UPDATED, listener)
+    }
+  },
+
   subscriptionAutoRefresh: {
     /**
      * Atomically claim ownership of the subscription auto refresh.

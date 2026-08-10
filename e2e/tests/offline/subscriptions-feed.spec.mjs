@@ -225,4 +225,40 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await expect(page.getByRole('option', { name: 'Unmark As Watched' })).toHaveCount(0)
     await expect(page.getByRole('option', { name: 'Add to Queue' })).toBeVisible()
   })
+
+  test('toggles and persists a reminder from the rightmost thumbnail action', async ({ app }) => {
+    let page = app.page
+    await goTo(page, 'subscriptions')
+
+    let upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    const reminderButton = upcomingPremiere.getByRole('button', { name: 'Notify me' })
+    await expect(reminderButton).toBeVisible()
+    await expect(reminderButton).toHaveAttribute('aria-pressed', 'false')
+
+    const isRightmost = await reminderButton.evaluate(button => {
+      const actions = button.closest('.playlistIcons')
+      return Math.abs(button.getBoundingClientRect().right - actions.getBoundingClientRect().right) < 1
+    })
+    expect(isRightmost).toBe(true)
+
+    await reminderButton.click()
+    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
+      .toHaveAttribute('aria-pressed', 'true')
+
+    ;({ page } = await app.relaunch())
+    await goTo(page, 'subscriptions')
+    upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
+      .toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('does not render adjacent separators in the upcoming-video menu', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    const upcomingPremiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
+    await upcomingPremiere.locator('.optionsButton').click()
+    const menu = upcomingPremiere.locator('.iconDropdown')
+    await expect(menu).toBeVisible()
+    await expect(menu.locator('.listItemDivider + .listItemDivider')).toHaveCount(0)
+  })
 })

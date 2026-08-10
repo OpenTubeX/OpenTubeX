@@ -224,6 +224,10 @@ export default defineComponent({
       paidPromotionDurationMs: 10000,
       upcomingTimestamp: null,
       upcomingTimeLeft: null,
+      supportsLiveReminders: process.env.IS_ELECTRON,
+      liveReminderActive: false,
+      liveReminderLoading: false,
+      removeLiveReminderUpdatedListener: null,
       /** @type {'dash' | 'audio' | 'legacy'} */
       activeFormat: 'legacy',
       thumbnail: '',
@@ -930,6 +934,11 @@ export default defineComponent({
       beforeDispose: this.cleanupWatchRuntime
     })
     this.syncMediaSessionSkipHandlers()
+    this.removeLiveReminderUpdatedListener = window.ftElectron?.liveReminder?.onUpdated?.((videoId, scheduled) => {
+      if (videoId === this.videoId) {
+        this.liveReminderActive = scheduled
+      }
+    }) ?? null
     this.onMountedDependOnLocalStateLoading()
   },
   beforeUnmount: function () {
@@ -938,6 +947,8 @@ export default defineComponent({
     window.removeEventListener('resize', this.updateTheatreLayoutAvailability)
     window.removeEventListener('scroll', this.handleShortsWindowScroll)
     this.theatreModeAnimations.forEach(animation => animation.cancel())
+    this.removeLiveReminderUpdatedListener?.()
+    this.removeLiveReminderUpdatedListener = null
     if ('mediaSession' in navigator) {
       tabMediaCoordinator.setActionHandlers(this.tabId ?? 'web', 'playlist', {})
     }
@@ -954,6 +965,72 @@ export default defineComponent({
     }
   },
   methods: {
+    getLiveReminderPayload() {
+      return {
+        videoId: this.videoId,
+        startTimestamp: this.premiereDate.getTime(),
+        notificationTitle: this.t('Video.Scheduled video starting'),
+        notificationBody: this.t('Video.Live notification body', { videoTitle: this.videoTitle })
+      }
+    },
+    async syncLiveReminder(loadGeneration, videoId) {
+      if (!this.supportsLiveReminders || !(this.premiereDate instanceof Date)) return
+
+      const startTimestamp = this.premiereDate.getTime()
+      const reminder = await window.ftElectron.liveReminder.get(videoId)
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        !(this.premiereDate instanceof Date) ||
+        this.premiereDate.getTime() !== startTimestamp
+      ) {
+        return
+      }
+
+      if (reminder && reminder.startTimestamp !== startTimestamp) {
+        this.liveReminderActive = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+      } else {
+        this.liveReminderActive = reminder !== null
+      }
+    },
+    async toggleLiveReminder() {
+      if (this.liveReminderLoading || !(this.premiereDate instanceof Date)) return
+
+      const videoId = this.videoId
+      this.liveReminderLoading = true
+      try {
+        if (this.liveReminderActive) {
+          await window.ftElectron.liveReminder.cancel(videoId)
+          if (videoId !== this.videoId) return
+          this.liveReminderActive = false
+          this.showTabToast({
+            message: this.t('Video.Notification cancelled'),
+            icon: ['fas', 'calendar-days']
+          })
+        } else {
+          const scheduled = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+          if (videoId !== this.videoId) return
+          this.liveReminderActive = scheduled
+          this.showTabToast({
+            message: scheduled
+              ? this.t('Video.Notification enabled')
+              : this.t('Video.Notification unavailable'),
+            icon: ['fas', 'calendar-days']
+          })
+        }
+      } catch (error) {
+        console.error('Failed to update live stream reminder', error)
+        if (videoId === this.videoId) {
+          this.showTabToast({
+            message: this.t('Video.Notification unavailable'),
+            icon: ['fas', 'calendar-days']
+          })
+        }
+      } finally {
+        if (videoId === this.videoId) {
+          this.liveReminderLoading = false
+        }
+      }
+    },
     updateTheatreLayoutAvailability() {
       this.theatreLayoutAvailable = window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH
     },
@@ -1372,6 +1449,8 @@ export default defineComponent({
       this.paidPromotionDurationMs = 10000
       this.upcomingTimestamp = null
       this.upcomingTimeLeft = null
+      this.liveReminderActive = false
+      this.liveReminderLoading = false
       this.thumbnail = ''
       this.videoTitle = preserveTitle ? previousVideoTitle : placeholderTitle
       this.videoDescription = ''
@@ -2140,6 +2219,9 @@ export default defineComponent({
             }
 
             this.premiereDate = upcomingTimestamp
+            this.syncLiveReminder(loadGeneration, videoId).catch(error => {
+              console.error('Failed to load live stream reminder', error)
+            })
           } else {
             this.upcomingTimestamp = null
             this.upcomingTimeLeft = null
