@@ -688,10 +688,12 @@ export function parseLocalVideoCollaborators(videoInfo) {
 
 /**
  * @param {string} id
+ * @param {'TOP_COMMENTS' | 'NEWEST_FIRST' | undefined} sortBy
+ * @param {string | undefined} commentId
  */
-export async function getLocalComments(id) {
+export async function getLocalComments(id, sortBy = undefined, commentId = undefined) {
   const innertube = await createInnertube({ generateSessionLocally: false })
-  return innertube.getComments(id)
+  return innertube.getComments(id, sortBy, commentId)
 }
 
 /**

@@ -147,8 +147,17 @@
           :id="'comment' + index"
           :key="comment.id"
           class="comment commentThread"
-          :class="{ commentThreadExpanded: comment.showReplies }"
+          :class="{
+            commentThreadExpanded: comment.showReplies,
+            highlightedComment: comment.id === highlightedCommentId
+          }"
         >
+          <p
+            v-if="comment.id === highlightedCommentId"
+            class="highlightedCommentBadge"
+          >
+            {{ $t('Comments.Highlighted comment') }}
+          </p>
           <component
             :is="enableChannelLinks ? 'router-link' : 'div'"
             :to="`/channel/${comment.authorLink}`"
@@ -296,6 +305,7 @@
               :subscribed-channel-ids="subscribedChannelIds"
               :channel-thumbnail="channelThumbnail"
               :loading-reply-ids="loadingReplyIds"
+              :highlighted-comment-id="highlightedCommentId"
               @copy-youtube-link="copyCommentYoutubeLink"
               @get-more-replies="getCommentReplies(index, $event)"
               @timestamp-event="onTimestamp"
@@ -493,6 +503,10 @@ const props = defineProps({
   fullscreenOverlay: {
     type: Boolean,
     default: false,
+  },
+  highlightedCommentId: {
+    type: String,
+    default: null,
   }
 })
 
@@ -508,6 +522,8 @@ const commentData = ref([])
 const commentCount = ref(props.initialCommentCount)
 const commentsContentWrapper = useTemplateRef('commentsContentWrapper')
 let fullscreenScrollTop = 0
+let highlightedTargetGeneration = 0
+const MAX_HIGHLIGHTED_REPLY_PAGES = 20
 
 watch(() => props.fullscreenOverlay, (fullscreenOverlay, wasFullscreenOverlay) => {
   if (wasFullscreenOverlay) {
@@ -670,6 +686,26 @@ const generalAutoLoadMorePaginatedItemsEnabled = computed(() => {
 const canPerformInitialCommentLoading = computed(() => {
   return !props.commentsDisabled && commentData.value.length === 0 && !isLoading.value && !showComments.value
 })
+
+watch(() => props.highlightedCommentId, (commentId, previousCommentId) => {
+  const targetChanged = previousCommentId !== undefined && previousCommentId !== commentId
+  if (targetChanged) {
+    highlightedTargetGeneration++
+    isLoading.value = false
+    isLoadingMoreComments.value = false
+    loadingReplyIds.value = new Set()
+    showComments.value = false
+    commentData.value = []
+    nextPageToken.value = null
+    localCommentsInstance = undefined
+    replyTokens.clear()
+    resetCommentsScroll()
+  }
+
+  if ((commentId || targetChanged) && canPerformInitialCommentLoading.value) {
+    getCommentData()
+  }
+}, { immediate: true })
 
 watch(
   [generalAutoLoadMorePaginatedItemsEnabled, () => isTabPresented?.value],
@@ -872,7 +908,9 @@ function copyCommentYoutubeLink(commentId) {
 function getCommentData({ preserveSort = false } = {}) {
   isLoading.value = true
 
-  if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+  const useInvidious = !process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious'
+
+  if (useInvidious) {
     if (!props.isPostComments) {
       getCommentDataInvidious()
     } else {
@@ -890,7 +928,7 @@ function getMoreComments() {
     isLoadingMoreComments.value = true
     let commentLoadPromise
 
-    if (!process.env.SUPPORTS_LOCAL_API || backendPreference.value === 'invidious') {
+    if (typeof nextPageToken.value === 'string') {
       if (!props.isPostComments) {
         commentLoadPromise = getCommentDataInvidious()
       } else {
@@ -943,6 +981,7 @@ function toggleCommentReplies(index) {
  */
 async function getCommentReplies(index, commentId = null) {
   const replyId = commentId ?? commentData.value[index].id
+  const targetGeneration = highlightedTargetGeneration
   if (loadingReplyIds.value.has(replyId)) {
     return
   }
@@ -966,9 +1005,11 @@ async function getCommentReplies(index, commentId = null) {
       await getCommentRepliesLocal(index, commentId)
     }
   } finally {
-    const nextLoadingReplyIds = new Set(loadingReplyIds.value)
-    nextLoadingReplyIds.delete(replyId)
-    loadingReplyIds.value = nextLoadingReplyIds
+    if (targetGeneration === highlightedTargetGeneration) {
+      const nextLoadingReplyIds = new Set(loadingReplyIds.value)
+      nextLoadingReplyIds.delete(replyId)
+      loadingReplyIds.value = nextLoadingReplyIds
+    }
   }
 }
 
@@ -993,7 +1034,11 @@ function parseLocalCommentThread(commentThread, showReplies = true) {
   comment.replies = (commentThread.replies ?? [])
     .map(reply => parseLocalCommentThread(reply))
     .filter(Boolean)
-  comment.showReplies = showReplies && comment.replies.length > 0
+  const containsHighlightedComment = props.highlightedCommentId && (
+    findComment(comment, props.highlightedCommentId) !== null ||
+    comment.id === getHighlightedRootCommentId()
+  )
+  comment.showReplies = (showReplies || containsHighlightedComment) && comment.replies.length > 0
 
   const hasReplyToken = commentThread.has_replies &&
     (!commentThread.replies || commentThread.has_continuation)
@@ -1027,40 +1072,116 @@ function findComment(comment, commentId) {
   return null
 }
 
+function getHighlightedRootCommentId() {
+  return props.highlightedCommentId?.split('.')[0] ?? null
+}
+
+/**
+ * Keep pinned comments at the top, followed by the thread containing the
+ * highlighted comment or reply.
+ *
+ * @param {Comment[]} comments
+ * @returns {Comment[]}
+ */
+function prioritizeHighlightedComment(comments) {
+  if (!props.highlightedCommentId) {
+    return comments
+  }
+
+  const pinnedComments = comments.filter(comment => comment.isPinned)
+  const unpinnedComments = comments.filter(comment => !comment.isPinned)
+  const highlightedIndex = unpinnedComments.findIndex(comment => {
+    return findComment(comment, props.highlightedCommentId) !== null ||
+      comment.id === getHighlightedRootCommentId()
+  })
+
+  if (highlightedIndex > 0) {
+    const [highlightedComment] = unpinnedComments.splice(highlightedIndex, 1)
+    unpinnedComments.unshift(highlightedComment)
+  }
+
+  return pinnedComments.concat(unpinnedComments)
+}
+
+async function loadHighlightedReply() {
+  const highlightedCommentId = props.highlightedCommentId
+  const rootCommentId = getHighlightedRootCommentId()
+  if (!highlightedCommentId?.includes('.') || !rootCommentId) {
+    return
+  }
+
+  const threadIndex = commentData.value.findIndex(comment => comment.id === rootCommentId)
+  const thread = commentData.value[threadIndex]
+  if (!thread) {
+    return
+  }
+
+  let loadedPageCount = 0
+  while (
+    !findComment(thread, highlightedCommentId) &&
+    thread.hasReplyToken &&
+    loadedPageCount < MAX_HIGHLIGHTED_REPLY_PAGES
+  ) {
+    const previousReplyCount = thread.replies.length
+    const previousReplyToken = replyTokens.get(thread.id)
+
+    if (highlightedCommentId !== props.highlightedCommentId || commentData.value[threadIndex] !== thread) {
+      return
+    }
+
+    await getCommentReplies(threadIndex)
+    loadedPageCount++
+
+    if (thread.replies.length === previousReplyCount && replyTokens.get(thread.id) === previousReplyToken) {
+      break
+    }
+  }
+}
+
 /**
  * @param {boolean | undefined} more
  * @param {boolean} preserveSort
  */
 async function getCommentDataLocal(more = false, preserveSort = false) {
+  const requestedHighlightedCommentId = props.highlightedCommentId
+
   try {
     /** @type {import('youtubei.js').YT.Comments} */
     let comments
     if (more) {
       comments = await nextPageToken.value.getContinuation()
-    } else if (localCommentsInstance) {
+    } else if (localCommentsInstance && !props.highlightedCommentId) {
       comments = await localCommentsInstance.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
-      localCommentsInstance = comments
     } else {
       if (props.isPostComments) {
         comments = await getLocalCommunityPostComments(props.id, props.postAuthorId)
       } else {
-        comments = await getLocalComments(props.id)
+        const sortBy = preserveSort ? (sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS') : undefined
+        comments = await getLocalComments(props.id, sortBy, getHighlightedRootCommentId() ?? undefined)
       }
 
-      if (preserveSort) {
+      if (preserveSort && (props.isPostComments || !props.highlightedCommentId)) {
         comments = await comments.applySort(sortNewest.value ? 'NEWEST_FIRST' : 'TOP_COMMENTS')
       } else {
         sortNewest.value = comments.header?.sort_menu?.sub_menu_items?.[1].selected ?? false
       }
+    }
 
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
+    if (!more) {
       localCommentsInstance = comments
     }
 
     setLocalCommentCount(comments)
 
-    const parsedComments = comments.contents
-      .map(commentThread => parseLocalCommentThread(commentThread, false))
-      .filter(Boolean)
+    const parsedComments = prioritizeHighlightedComment(
+      comments.contents
+        .map(commentThread => parseLocalCommentThread(commentThread, false))
+        .filter(Boolean)
+    )
 
     if (more) {
       commentData.value = commentData.value.concat(parsedComments)
@@ -1071,7 +1192,15 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
     nextPageToken.value = comments.has_continuation ? comments : null
     isLoading.value = false
     showComments.value = true
+
+    if (!more) {
+      await loadHighlightedReply()
+    }
   } catch (err) {
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
     if (err.message.includes('Comments page did not have any content')) {
@@ -1109,6 +1238,7 @@ async function getCommentDataLocal(more = false, preserveSort = false) {
  * @param {string | null} commentId
  */
 async function getCommentRepliesLocal(index, commentId = null) {
+  const targetGeneration = highlightedTargetGeneration
   const rootComment = commentData.value[index]
   const comment = rootComment ? findComment(rootComment, commentId) : null
   const continuation = comment && replyTokens.get(comment.id)
@@ -1145,6 +1275,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
       nextContinuation = response.has_continuation ? response : null
     }
 
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     const parsedReplies = replyThreads
       .map(reply => parseLocalCommentThread(reply))
       .filter(Boolean)
@@ -1170,6 +1304,10 @@ async function getCommentRepliesLocal(index, commentId = null) {
 
     comment.showReplies = replyLoadState.showReplies
   } catch (err) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(err)
 
     if (isMissingReplyResponseError(err)) {
@@ -1213,12 +1351,18 @@ async function getCommentRepliesLocal(index, commentId = null) {
 }
 
 async function getCommentDataInvidious() {
+  const requestedHighlightedCommentId = props.highlightedCommentId
+
   try {
     let { response, commentData: comments } = await invidiousGetComments({
       id: props.id,
       nextPageToken: nextPageToken.value,
       sortNewest: sortNewest.value
     })
+
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
 
     setCommentCount(response.commentCount)
 
@@ -1231,12 +1375,17 @@ async function getCommentDataInvidious() {
 
       return comment
     })
+    comments = prioritizeHighlightedComment(comments)
 
     commentData.value = commentData.value.concat(comments)
     nextPageToken.value = response.continuation
     isLoading.value = false
     showComments.value = true
   } catch (err) {
+    if (requestedHighlightedCommentId !== props.highlightedCommentId) {
+      return
+    }
+
     // region No comment detection
     // No comment related info when video info requested earlier in parent component
     if (err.message.includes('Comments not found')) {
@@ -1278,6 +1427,7 @@ async function getCommentRepliesInvidious(
   commentOverride = null,
   expectedReplyToken = null
 ) {
+  const targetGeneration = highlightedTargetGeneration
   const rootComment = commentData.value[index]
   const comment = commentOverride ?? (rootComment ? findComment(rootComment, commentId) : null)
   if (!comment) {
@@ -1289,7 +1439,10 @@ async function getCommentRepliesInvidious(
   try {
     const { commentData, continuation } = await invidiousGetCommentReplies({ id: props.id, replyToken })
 
-    if (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken) {
+    if (
+      targetGeneration !== highlightedTargetGeneration ||
+      (expectedReplyToken && replyTokens.get(comment.id) !== expectedReplyToken)
+    ) {
       return
     }
 
@@ -1315,6 +1468,10 @@ async function getCommentRepliesInvidious(
 
     isLoading.value = false
   } catch (error) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)
@@ -1359,6 +1516,7 @@ function getPostCommentsInvidious() {
 }
 
 async function getPostCommentRepliesInvidious(index) {
+  const targetGeneration = highlightedTargetGeneration
   const comment = commentData.value[index]
   const replyToken = replyTokens.get(comment.id)
 
@@ -1368,6 +1526,11 @@ async function getPostCommentRepliesInvidious(index) {
       replyToken: replyToken,
       authorId: props.postAuthorId
     })
+
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     comment.replies = comment.replies.concat(comments)
     const replyLoadState = getReplyLoadState(
       comment.replies.length,
@@ -1390,6 +1553,10 @@ async function getPostCommentRepliesInvidious(index) {
 
     isLoading.value = false
   } catch (error) {
+    if (targetGeneration !== highlightedTargetGeneration) {
+      return
+    }
+
     console.error(error)
     const errorMessage = t('Invidious API Error (Click to copy)')
     showApiErrorToast(errorMessage, error)

@@ -2,13 +2,25 @@
   <div
     :id="`comment${threadIndex}-${node.index}`"
     class="commentReplyBranch"
-    :class="{ commentReplyBranchRoot: rootLevel }"
+    :class="{
+      commentReplyBranchRoot: rootLevel,
+      highlightedCommentBranch: reply.id === highlightedCommentId
+    }"
   >
     <span
       class="commentReplyConnector"
       aria-hidden="true"
     />
-    <div class="comment commentReplyContent">
+    <div
+      class="comment commentReplyContent"
+      :class="{ highlightedComment: reply.id === highlightedCommentId }"
+    >
+      <p
+        v-if="reply.id === highlightedCommentId"
+        class="highlightedCommentBadge"
+      >
+        {{ $t('Comments.Highlighted reply') }}
+      </p>
       <span
         v-if="node.children.length > 0"
         class="commentReplyChildStem"
@@ -140,6 +152,7 @@
         :subscribed-channel-ids="subscribedChannelIds"
         :channel-thumbnail="channelThumbnail"
         :loading-reply-ids="loadingReplyIds"
+        :highlighted-comment-id="highlightedCommentId"
         @copy-youtube-link="emit('copy-youtube-link', $event)"
         @get-more-replies="emit('get-more-replies', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
@@ -191,6 +204,10 @@ const props = defineProps({
   loadingReplyIds: {
     type: Set,
     required: true
+  },
+  highlightedCommentId: {
+    type: String,
+    default: null
   }
 })
 

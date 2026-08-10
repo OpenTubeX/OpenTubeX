@@ -2318,6 +2318,7 @@ function runApp() {
       return createAppRouteUrl(`/watch/${videoParams.videoId}`, {
         timestamp: videoParams.timestamp,
         playlistId: videoParams.playlistId,
+        commentId: videoParams.commentId,
         short: videoParams.isShort ? 'true' : null
       })
     }
@@ -2356,13 +2357,14 @@ function runApp() {
 
   /**
    * @param {URL} url
-   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null, isShort: boolean }}
+   * @returns {{ videoId: string | null, timestamp: string | null, playlistId: string | null, commentId: string | null, isShort: boolean }}
    */
   function getDirectVideoParams(url) {
     const params = {
       videoId: null,
       timestamp: null,
       playlistId: null,
+      commentId: null,
       isShort: false
     }
 
@@ -2372,6 +2374,7 @@ function runApp() {
         params.videoId = videoId
         params.timestamp = getDirectTimestamp(url)
         params.playlistId = url.searchParams.get('list')
+        params.commentId = url.searchParams.get('lc')
       }
     }
 

@@ -2445,7 +2445,7 @@ async function handleYoutubeLink(href, {
 
   switch (result.urlType) {
     case 'video': {
-      const { videoId, timestamp, playlistId, isShort } = result
+      const { videoId, timestamp, playlistId, commentId, isShort } = result
 
       const query = {}
       if (isShort) {
@@ -2456,6 +2456,9 @@ async function handleYoutubeLink(href, {
       }
       if (playlistId && playlistId.length > 0) {
         query.playlistId = playlistId
+      }
+      if (commentId) {
+        query.commentId = commentId
       }
 
       openPath({
