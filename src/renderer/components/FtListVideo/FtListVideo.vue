@@ -474,7 +474,6 @@ const channelName = ref(null)
 const channelId = ref(null)
 const channelCollaborators = ref([])
 const viewCount = ref(0)
-const parsedViewCount = ref('')
 const uploadedTime = ref('')
 const lengthSeconds = ref(0)
 const duration = ref('')
@@ -1007,6 +1006,14 @@ const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 /** @type {import('vue').ComputedRef<boolean>} */
 const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
 
+const parsedViewCount = computed(() => {
+  if (props.data.viewCount != null) {
+    return formatViewCount(props.data.viewCount, shortenViewCounts.value)
+  }
+
+  return props.data.viewCountText?.replace(' views', '') ?? ''
+})
+
 const addWatchedStyle = computed(() => {
   return isWatched.value && (!inHistory.value || props.showWatchedStyleInHistory)
 })
@@ -1497,13 +1504,7 @@ function parseVideoData() {
     }
   }
 
-  if (hideVideoViews.value) {
-    hideViews.value = true
-  } else if (props.data.viewCount !== undefined && props.data.viewCount !== null) {
-    parsedViewCount.value = formatViewCount(props.data.viewCount, shortenViewCounts.value)
-  } else if (props.data.viewCountText !== undefined) {
-    parsedViewCount.value = props.data.viewCountText.replace(' views', '')
-  } else {
+  if (hideVideoViews.value || (props.data.viewCount == null && props.data.viewCountText === undefined)) {
     hideViews.value = true
   }
 }
