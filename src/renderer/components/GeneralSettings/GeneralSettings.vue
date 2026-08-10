@@ -322,35 +322,48 @@ function updateCheckForUpdates(value) {
   store.dispatch('updateCheckForUpdates', value)
 }
 
-const CONFIRMATION_VALUES = ['closeApp', 'closeWindow', 'closeTabs', 'loadTabs', 'unloadTabs']
-const confirmationLabels = computed(() => [
-  t('Settings.General Settings.Confirmation Options.Closing App'),
-  t('Settings.General Settings.Confirmation Options.Closing Window'),
-  t('Settings.General Settings.Confirmation Options.Closing Tabs'),
-  t('Settings.General Settings.Confirmation Options.Loading Tabs'),
-  t('Settings.General Settings.Confirmation Options.Unloading Tabs')
-])
+const CONFIRMATION_OPTIONS = [
+  {
+    value: 'closeApp',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing App'),
+    enabled: () => store.getters.getConfirmCloseApp,
+    action: 'updateConfirmCloseApp'
+  },
+  {
+    value: 'closeWindow',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing Window'),
+    enabled: () => store.getters.getConfirmCloseWindowWithMultipleTabs,
+    action: 'updateConfirmCloseWindowWithMultipleTabs'
+  },
+  {
+    value: 'closeTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing Tabs'),
+    enabled: () => store.getters.getConfirmCloseMultipleTabs,
+    action: 'updateConfirmCloseMultipleTabs'
+  },
+  {
+    value: 'loadTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Loading Tabs'),
+    enabled: () => store.getters.getConfirmLoadMultipleTabs,
+    action: 'updateConfirmLoadMultipleTabs'
+  },
+  {
+    value: 'unloadTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Unloading Tabs'),
+    enabled: () => store.getters.getConfirmUnloadMultipleTabs,
+    action: 'updateConfirmUnloadMultipleTabs'
+  }
+]
+const CONFIRMATION_VALUES = CONFIRMATION_OPTIONS.map(option => option.value)
+const confirmationLabels = computed(() => CONFIRMATION_OPTIONS.map(option => option.label()))
 const enabledConfirmations = computed({
-  get: () => [
-    ...(store.getters.getConfirmCloseApp ? ['closeApp'] : []),
-    ...(store.getters.getConfirmCloseWindowWithMultipleTabs ? ['closeWindow'] : []),
-    ...(store.getters.getConfirmCloseMultipleTabs ? ['closeTabs'] : []),
-    ...(store.getters.getConfirmLoadMultipleTabs ? ['loadTabs'] : []),
-    ...(store.getters.getConfirmUnloadMultipleTabs ? ['unloadTabs'] : [])
-  ],
+  get: () => CONFIRMATION_OPTIONS.filter(option => option.enabled()).map(option => option.value),
   set: values => {
     const enabled = new Set(values)
-    const updates = [
-      ['closeApp', 'updateConfirmCloseApp', store.getters.getConfirmCloseApp],
-      ['closeWindow', 'updateConfirmCloseWindowWithMultipleTabs', store.getters.getConfirmCloseWindowWithMultipleTabs],
-      ['closeTabs', 'updateConfirmCloseMultipleTabs', store.getters.getConfirmCloseMultipleTabs],
-      ['loadTabs', 'updateConfirmLoadMultipleTabs', store.getters.getConfirmLoadMultipleTabs],
-      ['unloadTabs', 'updateConfirmUnloadMultipleTabs', store.getters.getConfirmUnloadMultipleTabs]
-    ]
-    for (const [value, action, current] of updates) {
-      const next = enabled.has(value)
-      if (current !== next) {
-        store.dispatch(action, next)
+    for (const option of CONFIRMATION_OPTIONS) {
+      const next = enabled.has(option.value)
+      if (option.enabled() !== next) {
+        store.dispatch(option.action, next)
       }
     }
   }

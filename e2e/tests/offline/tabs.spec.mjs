@@ -315,14 +315,22 @@ test.describe('tab bar', () => {
     })).toBe(false)
   })
 
-  test('shows a confirmation for loading several tabs', async ({ app, page }) => {
-    await app.electronApp.evaluate(({ BrowserWindow }) => {
-      BrowserWindow.getAllWindows()[0].webContents.send('tabs-confirm-multiple-action', {
-        requestId: 'load-tabs-confirmation-test',
-        count: 5,
-        action: 'load'
-      })
-    })
+  test('shows a confirmation for loading several unloaded tabs', async ({ page }) => {
+    for (let index = 0; index < 5; index++) {
+      await page.evaluate(() => window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      }))
+    }
+
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(6)
+    await tabs.first().click()
+    for (let index = 1; index < 6; index++) {
+      await tabs.nth(index).click({ modifiers: ['Control'] })
+    }
+    await tabs.last().click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Load Tabs', exact: true }).click()
 
     const prompt = page.locator('.prompt')
     await expect(prompt).toContainText('Load multiple tabs?')
@@ -330,6 +338,7 @@ test.describe('tab bar', () => {
     await expect(prompt).toContainText('Settings → General → Confirm before…')
     await expect(prompt.getByRole('button', { name: 'Load 5 Tabs', exact: true })).toBeVisible()
     await prompt.getByRole('button', { name: 'Cancel' }).click()
+    await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(5)
   })
 
   test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {

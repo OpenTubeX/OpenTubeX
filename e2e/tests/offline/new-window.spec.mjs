@@ -107,17 +107,44 @@ test.describe('multi-tab window close confirmation', () => {
       return [...sessions.values()].some(session => session.tabs.length === 2)
     }).toBe(true)
   })
+
+  test('confirms when the renderer closes every tab in a multi-tab window', async ({ app, page }) => {
+    const { newWindow } = await openSecondWindowWithTwoTabs(app, page)
+
+    await app.electronApp.evaluate(({ dialog }) => {
+      globalThis.windowCloseDialogs = []
+      dialog.showMessageBox = async (_window, options) => {
+        globalThis.windowCloseDialogs.push(options.message)
+        return { response: 1 }
+      }
+    })
+
+    const result = await newWindow.evaluate(async () => {
+      const state = await window.ftElectron.tabs.getState()
+      return await window.ftElectron.tabs.closeMultiple(state.tabs.map(tab => tab.id))
+    })
+
+    expect(result).toEqual({ hasRemainingTabs: true })
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.windowCloseDialogs)).toEqual([
+      'This window contains 2 tabs. Are you sure you want to close it?'
+    ])
+    expect(newWindow.isClosed()).toBe(false)
+  })
 })
 
-test('can disable the multi-tab window close confirmation', async ({ app, page }) => {
-  const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
+test.describe('disabled multi-tab window close confirmation', () => {
+  test.use({ seed: { settings: { confirmCloseWindowWithMultipleTabs: false } } })
 
-  await app.electronApp.evaluate(({ dialog }) => {
-    dialog.showMessageBox = async () => {
-      throw new Error('Window close confirmation should be disabled')
-    }
+  test('can disable the multi-tab window close confirmation', async ({ app, page }) => {
+    const { newWindow, windowId } = await openSecondWindowWithTwoTabs(app, page)
+
+    await app.electronApp.evaluate(({ dialog }) => {
+      dialog.showMessageBox = async () => {
+        throw new Error('Window close confirmation should be disabled')
+      }
+    })
+    const closed = newWindow.waitForEvent('close')
+    await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
+    await closed
   })
-  const closed = newWindow.waitForEvent('close')
-  await app.electronApp.evaluate(({ BrowserWindow }, id) => BrowserWindow.fromId(id)?.close(), windowId)
-  await closed
 })

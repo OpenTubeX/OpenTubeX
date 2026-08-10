@@ -2391,7 +2391,11 @@ async function handleMultipleTabsActionPromptAnswer(option) {
   multipleTabsActionPromptResolve = null
   multipleTabsActionPromptPromise = null
   if (option === 'neverAskAgain' && action != null) {
-    await disableMultipleTabsActionConfirmation(action)
+    try {
+      await disableMultipleTabsActionConfirmation(action)
+    } catch (error) {
+      console.error('Failed to disable the bulk tab action confirmation', error)
+    }
   }
   resolve?.(option === 'confirm' || option === 'neverAskAgain')
 }

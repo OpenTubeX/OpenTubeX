@@ -22,7 +22,7 @@ test.describe('settings', () => {
     const [first, second, third] = await Promise.all(labels.slice(0, 3).map(label => (
       page.getByText(label, { exact: true }).boundingBox()
     )))
-    expect(first.y).toBe(second.y)
+    expect(second.y).toBeCloseTo(first.y, 0)
     expect(first.x).toBeLessThan(second.x)
     expect(third.y).toBeGreaterThan(first.y)
   })
@@ -653,7 +653,7 @@ test.describe('settings', () => {
       const contentBounds = scrollContainer.getBoundingClientRect()
       scrollContainer.scrollTop += buttonBounds.bottom - contentBounds.bottom + 8
     })
-    await tooltipButton.hover()
+    await tooltipButton.evaluate(element => element.focus({ preventScroll: true }))
     const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
 

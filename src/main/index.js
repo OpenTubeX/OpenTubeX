@@ -347,7 +347,11 @@ function runApp() {
       })
 
       if (response === 2) {
-        await updateSettingFromMain('confirmCloseApp', false)
+        try {
+          await updateSettingFromMain('confirmCloseApp', false)
+        } catch (error) {
+          console.error('Failed to disable the app close confirmation:', error)
+        }
         isQuitConfirmed = true
         return true
       }
@@ -383,7 +387,7 @@ function runApp() {
       const { response } = await dialog.showMessageBox(browserWindow, {
         type: 'question',
         title: t('Close Window Confirmation.Title'),
-        message: t('Close Window Confirmation.Message').replace('{count}', String(count)),
+        message: t('Close Window Confirmation.Message').replaceAll('{count}', String(count)),
         detail: t('Confirmations.Settings Hint'),
         buttons: [
           t('Close Window Confirmation.Close Window'),
@@ -396,7 +400,11 @@ function runApp() {
       })
 
       if (response === 2) {
-        await updateSettingFromMain('confirmCloseWindowWithMultipleTabs', false)
+        try {
+          await updateSettingFromMain('confirmCloseWindowWithMultipleTabs', false)
+        } catch (error) {
+          console.error('Failed to disable the multi-tab window close confirmation:', error)
+        }
         return true
       }
 
@@ -870,7 +878,7 @@ function runApp() {
             }
 
             const tabIds = contextMenuTabs
-              .filter(tab => tab.loadState !== 'unloaded')
+              .filter(tab => !['unloaded', 'unloading'].includes(tab.loadState))
               .map(tab => tab.id)
             if (!await confirmMultipleTabsAction(manager, tabIds.length, 'unload')) return
 
@@ -1773,7 +1781,12 @@ function runApp() {
     await setupTabsIPC({
       confirmCloseWindow: (browserWindow) => {
         const isLastWindow = BrowserWindow.getAllWindows().length === 1
-        return isLastWindow ? confirmCloseApp(browserWindow) : true
+        if (isLastWindow) return confirmCloseApp(browserWindow)
+
+        const manager = TabManager.getForWindow(browserWindow.id)
+        return manager && manager.tabs.size > 1
+          ? confirmCloseWindowWithMultipleTabs(browserWindow, manager.tabs.size)
+          : true
       },
       markWindowCloseConfirmed: (browserWindow) => {
         if (BrowserWindow.getAllWindows().length === 1) {
