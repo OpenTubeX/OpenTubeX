@@ -877,24 +877,23 @@ export default {
     },
 
     /**
-     * Listen for bulk close confirmation requests from main (e.g. the tab
-     * context menu's "Close Tabs" entries).
-     * @param {(request: { requestId: string, count: number }) => void} handler
+     * Listen for bulk tab action confirmation requests from main.
+     * @param {(request: { requestId: string, count: number, action: 'close' | 'load' | 'unload' }) => void} handler
      * @returns {() => void}
      */
-    onConfirmCloseMultiple: (handler) => {
+    onConfirmMultipleAction: (handler) => {
       const listener = (_event, request) => handler(request)
-      ipcRenderer.on(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, listener)
-      return () => ipcRenderer.removeListener(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, listener)
+      ipcRenderer.on(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, listener)
+      return () => ipcRenderer.removeListener(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, listener)
     },
 
     /**
-     * Answer a bulk close confirmation request from main.
+     * Answer a bulk tab action confirmation request from main.
      * @param {string} requestId
      * @param {boolean} confirmed
      */
-    respondConfirmCloseMultiple: (requestId, confirmed) => {
-      ipcRenderer.send(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, { requestId, confirmed })
+    respondConfirmMultipleAction: (requestId, confirmed) => {
+      ipcRenderer.send(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, { requestId, confirmed })
     },
 
     /**

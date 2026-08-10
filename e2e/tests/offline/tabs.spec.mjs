@@ -306,9 +306,30 @@ test.describe('tab bar', () => {
     await expect(tabs).toHaveCount(6)
 
     await page.keyboard.press('Control+w')
-    await expect(prompt).toBeVisible()
-    await prompt.getByRole('button', { name: 'Close 5 Tabs', exact: true }).click()
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await prompt.getByRole('button', { name: 'Never ask again', exact: true }).click()
     await expect(tabs).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getConfirmCloseMultipleTabs
+    })).toBe(false)
+  })
+
+  test('shows a confirmation for loading several tabs', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0].webContents.send('tabs-confirm-multiple-action', {
+        requestId: 'load-tabs-confirmation-test',
+        count: 5,
+        action: 'load'
+      })
+    })
+
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toContainText('Load multiple tabs?')
+    await expect(prompt).toContainText('This will load 5 tabs.')
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await expect(prompt.getByRole('button', { name: 'Load 5 Tabs', exact: true })).toBeVisible()
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
   })
 
   test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {
@@ -369,6 +390,27 @@ test.describe('tab bar', () => {
 
     expect(tabCounts).toEqual([1])
     await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+
+  test('coalesces rapid tab creation state updates', async ({ page }) => {
+    const tabCounts = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const counts = []
+      const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+        if (state.tabs.length === initialState.tabs.length || state.tabs.length === counts.at(-1)) return
+        counts.push(state.tabs.length)
+      })
+
+      await Promise.all(Array.from({ length: 4 }, () => (
+        window.ftElectron.tabs.create({ route: '/history', makeActive: false })
+      )))
+      removeListener()
+      return counts
+    })
+
+    // The first tab appears immediately; the rest of the burst arrives together.
+    expect(tabCounts).toEqual([2, 5])
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
   })
 
   test('applies a complete tab reorder in one state update', async ({ page }) => {

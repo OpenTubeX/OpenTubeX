@@ -115,13 +115,13 @@
       @click="handleExternalLinkOpeningPromptAnswer"
     />
     <FtPrompt
-      v-if="closeMultipleTabsPromptCount > 0"
+      v-if="multipleTabsActionPrompt != null"
       autosize
-      :label="t('Close Multiple Tabs Confirmation.Title')"
-      :extra-labels="[t('Close Multiple Tabs Confirmation.Message', { count: closeMultipleTabsPromptCount })]"
-      :option-names="closeMultipleTabsPromptNames"
-      :option-values="CLOSE_MULTIPLE_TABS_PROMPT_VALUES"
-      @click="handleCloseMultipleTabsPromptAnswer"
+      :label="multipleTabsActionPromptTitle"
+      :extra-labels="[multipleTabsActionPromptMessage, t('Confirmations.Settings Hint')]"
+      :option-names="multipleTabsActionPromptNames"
+      :option-values="MULTIPLE_TABS_ACTION_PROMPT_VALUES"
+      @click="handleMultipleTabsActionPromptAnswer"
     />
     <FtSearchFilters
       v-if="showSearchFilters"
@@ -311,7 +311,7 @@ import { vSaferHtml } from './directives/vSaferHtml.js'
 import store from './store/index'
 
 import packageDetails from '../../package.json'
-import { CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
@@ -544,7 +544,7 @@ let removeSubscriptionAutoRefreshCancelListener = null
 let removeSubscriptionAutoRefreshStateChangedListener = null
 let removeTabsStateListener = null
 let removeReloadRequestListener = null
-let removeConfirmCloseMultipleTabsListener = null
+let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
@@ -746,8 +746,8 @@ onMounted(async () => {
       removeOpenUrlListener = enableOpenUrl()
       store.dispatch('getExternalPlayerCmdArgumentsData')
       removeReloadRequestListener = window.ftElectron.tabs.onRequestReload(prepareAndReloadTab)
-      removeConfirmCloseMultipleTabsListener = window.ftElectron.tabs
-        .onConfirmCloseMultiple(handleConfirmCloseMultipleTabsRequest)
+      removeConfirmMultipleTabsActionListener = window.ftElectron.tabs
+        .onConfirmMultipleAction(handleConfirmMultipleTabsActionRequest)
     }
 
     await Promise.all([syncDataReady, platformInfoReady])
@@ -838,7 +838,7 @@ onBeforeUnmount(() => {
   removeSubscriptionAutoRefreshStateChangedListener?.()
   removeTabsStateListener?.()
   removeReloadRequestListener?.()
-  removeConfirmCloseMultipleTabsListener?.()
+  removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
 })
 
@@ -2307,60 +2307,106 @@ function getShortcutTabIds() {
     : activeTabId.value ? [activeTabId.value] : []
 }
 
-const closeMultipleTabsPromptCount = ref(0)
-const CLOSE_MULTIPLE_TABS_PROMPT_VALUES = ['close', 'cancel']
+const multipleTabsActionPrompt = ref(null)
+const multipleTabsActionPromptCount = ref(0)
+const MULTIPLE_TABS_ACTION_PROMPT_VALUES = ['confirm', 'cancel', 'neverAskAgain']
 
 /** @type {((confirmed: boolean) => void) | null} */
-let closeMultipleTabsPromptResolve = null
+let multipleTabsActionPromptResolve = null
 /** @type {Promise<boolean> | null} */
-let closeMultipleTabsPromptPromise = null
+let multipleTabsActionPromptPromise = null
 
-const closeMultipleTabsPromptNames = computed(() => [
-  t('Close Multiple Tabs Confirmation.Close Tabs', { count: closeMultipleTabsPromptCount.value }),
-  t('Cancel')
+const multipleTabsActionPromptTitle = computed(() => {
+  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Title')
+  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Title')
+  return t('Close Multiple Tabs Confirmation.Title')
+})
+const multipleTabsActionPromptMessage = computed(() => {
+  const parameters = { count: multipleTabsActionPromptCount.value }
+  if (multipleTabsActionPrompt.value === 'load') return t('Load Multiple Tabs Confirmation.Message', parameters)
+  if (multipleTabsActionPrompt.value === 'unload') return t('Unload Multiple Tabs Confirmation.Message', parameters)
+  return t('Close Multiple Tabs Confirmation.Message', parameters)
+})
+const multipleTabsActionPromptNames = computed(() => [
+  multipleTabsActionPrompt.value === 'load'
+    ? t('Load Multiple Tabs Confirmation.Load Tabs', { count: multipleTabsActionPromptCount.value })
+    : multipleTabsActionPrompt.value === 'unload'
+      ? t('Unload Multiple Tabs Confirmation.Unload Tabs', { count: multipleTabsActionPromptCount.value })
+      : t('Close Multiple Tabs Confirmation.Close Tabs', { count: multipleTabsActionPromptCount.value }),
+  t('Cancel'),
+  t('Confirmations.Never Ask Again')
 ])
 
 /**
- * Ask the user to confirm closing several tabs at once. Concurrent requests
- * (e.g. the menu accelerator and the in-page shortcut) share one prompt.
+ * @param {'close' | 'load' | 'unload'} action
+ */
+function isMultipleTabsActionConfirmationEnabled(action) {
+  if (action === 'load') return store.getters.getConfirmLoadMultipleTabs
+  if (action === 'unload') return store.getters.getConfirmUnloadMultipleTabs
+  return store.getters.getConfirmCloseMultipleTabs
+}
+
+/**
+ * @param {'close' | 'load' | 'unload'} action
+ */
+function disableMultipleTabsActionConfirmation(action) {
+  if (action === 'load') return store.dispatch('updateConfirmLoadMultipleTabs', false)
+  if (action === 'unload') return store.dispatch('updateConfirmUnloadMultipleTabs', false)
+  return store.dispatch('updateConfirmCloseMultipleTabs', false)
+}
+
+/**
+ * Ask the user to confirm an action affecting several tabs at once. Concurrent
+ * requests for the same action share one prompt; a different action is rejected.
  * @param {number} count
+ * @param {'close' | 'load' | 'unload'} action
  * @returns {Promise<boolean>}
  */
-function confirmCloseMultipleTabs(count) {
-  if (closeMultipleTabsPromptPromise) {
-    closeMultipleTabsPromptCount.value = Math.max(closeMultipleTabsPromptCount.value, count)
-    return closeMultipleTabsPromptPromise
+function confirmMultipleTabsAction(count, action) {
+  if (!isMultipleTabsActionConfirmationEnabled(action)) return Promise.resolve(true)
+
+  if (multipleTabsActionPromptPromise) {
+    if (multipleTabsActionPrompt.value !== action) return Promise.resolve(false)
+
+    multipleTabsActionPromptCount.value = Math.max(multipleTabsActionPromptCount.value, count)
+    return multipleTabsActionPromptPromise
   }
 
-  closeMultipleTabsPromptCount.value = count
-  closeMultipleTabsPromptPromise = new Promise(resolve => {
-    closeMultipleTabsPromptResolve = resolve
+  multipleTabsActionPrompt.value = action
+  multipleTabsActionPromptCount.value = count
+  multipleTabsActionPromptPromise = new Promise(resolve => {
+    multipleTabsActionPromptResolve = resolve
   })
-  return closeMultipleTabsPromptPromise
+  return multipleTabsActionPromptPromise
 }
 
 /**
- * @param {'close' | 'cancel' | null} option
+ * @param {'confirm' | 'cancel' | 'neverAskAgain' | null} option
  */
-function handleCloseMultipleTabsPromptAnswer(option) {
-  closeMultipleTabsPromptCount.value = 0
-  const resolve = closeMultipleTabsPromptResolve
-  closeMultipleTabsPromptResolve = null
-  closeMultipleTabsPromptPromise = null
-  resolve?.(option === 'close')
+async function handleMultipleTabsActionPromptAnswer(option) {
+  const action = multipleTabsActionPrompt.value
+  multipleTabsActionPrompt.value = null
+  multipleTabsActionPromptCount.value = 0
+  const resolve = multipleTabsActionPromptResolve
+  multipleTabsActionPromptResolve = null
+  multipleTabsActionPromptPromise = null
+  if (option === 'neverAskAgain' && action != null) {
+    await disableMultipleTabsActionConfirmation(action)
+  }
+  resolve?.(option === 'confirm' || option === 'neverAskAgain')
 }
 
 /**
- * @param {{ requestId: string, count: number }} request
+ * @param {{ requestId: string, count: number, action: 'close' | 'load' | 'unload' }} request
  */
-async function handleConfirmCloseMultipleTabsRequest({ requestId, count }) {
-  const confirmed = await confirmCloseMultipleTabs(count)
-  window.ftElectron.tabs.respondConfirmCloseMultiple(requestId, confirmed)
+async function handleConfirmMultipleTabsActionRequest({ requestId, count, action }) {
+  const confirmed = await confirmMultipleTabsAction(count, action)
+  window.ftElectron.tabs.respondConfirmMultipleAction(requestId, confirmed)
 }
 
 async function closeShortcutTabs() {
   const tabIds = getShortcutTabIds()
-  if (tabIds.length >= CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD && !await confirmCloseMultipleTabs(tabIds.length)) {
+  if (tabIds.length >= MULTIPLE_TABS_CONFIRM_THRESHOLD && !await confirmMultipleTabsAction(tabIds.length, 'close')) {
     return true
   }
 

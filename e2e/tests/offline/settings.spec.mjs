@@ -4,6 +4,29 @@ import path from 'node:path'
 import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
+  test('groups confirmation preferences together', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const labels = [
+      'Closing OpenTubeX',
+      'Closing a window with multiple tabs',
+      'Closing multiple tabs',
+      'Loading multiple tabs',
+      'Unloading multiple tabs'
+    ]
+    await expect(page.getByRole('heading', { name: 'Confirm before…', exact: true })).toBeVisible()
+    for (const label of labels) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible()
+    }
+
+    const [first, second, third] = await Promise.all(labels.slice(0, 3).map(label => (
+      page.getByText(label, { exact: true }).boundingBox()
+    )))
+    expect(first.y).toBe(second.y)
+    expect(first.x).toBeLessThan(second.x)
+    expect(third.y).toBeGreaterThan(first.y)
+  })
+
   test('keeps General settings aligned to the bottom of its scroll range', async ({ page }) => {
     await page.locator('.navSettingsButton').click()
     const content = page.locator('.settingsContent')

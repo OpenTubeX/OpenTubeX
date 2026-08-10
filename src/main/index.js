@@ -17,7 +17,7 @@ import {
   getConfiguredKeyboardShortcuts,
   getElectronAccelerator,
   SEARCH_CHAR_LIMIT,
-  CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD,
+  MULTIPLE_TABS_CONFIRM_THRESHOLD,
   LIGHT_BASE_THEMES,
   DARK_BASE_THEMES,
 } from '../constants'
@@ -105,6 +105,12 @@ function runApp() {
   let backendPreference = 'local'
   let backendFallback = true
   const DEFAULT_CONFIRM_CLOSE_APP = true
+  const DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS = true
+  const MULTIPLE_TABS_CONFIRMATION_SETTING_KEYS = {
+    close: 'confirmCloseMultipleTabs',
+    load: 'confirmLoadMultipleTabs',
+    unload: 'confirmUnloadMultipleTabs'
+  }
   const DEFAULT_STARTUP_BEHAVIOR = 'loadLastActiveTab'
   const VALID_STARTUP_BEHAVIORS = new Set([
     'loadAllTabs',
@@ -114,6 +120,7 @@ function runApp() {
   ])
   const closeConfirmedWindowIds = new Set()
   let quitPromptInProgress = null
+  const windowClosePromptsInProgress = new Map()
   let isQuitConfirmed = false
   /** @type {{ webContents: import('electron').WebContents, tabId: string } | null} */
   let subscriptionAutoRefreshOwner = null
@@ -190,6 +197,50 @@ function runApp() {
     } catch (error) {
       console.error('Failed to load close confirmation preference:', error)
       return DEFAULT_CONFIRM_CLOSE_APP
+    }
+  }
+
+  async function getConfirmCloseWindowWithMultipleTabs() {
+    try {
+      const value = (await baseHandlers.settings._findOne('confirmCloseWindowWithMultipleTabs'))?.value
+      return typeof value === 'boolean' ? value : DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS
+    } catch (error) {
+      console.error('Failed to load window close confirmation preference:', error)
+      return DEFAULT_CONFIRM_CLOSE_WINDOW_WITH_MULTIPLE_TABS
+    }
+  }
+
+  /**
+   * @param {'close' | 'load' | 'unload'} action
+   * @returns {Promise<boolean>}
+   */
+  async function getConfirmMultipleTabsAction(action) {
+    const settingKey = MULTIPLE_TABS_CONFIRMATION_SETTING_KEYS[action]
+    try {
+      const value = (await baseHandlers.settings._findOne(settingKey))?.value
+      return typeof value === 'boolean' ? value : true
+    } catch (error) {
+      console.error(`Failed to load ${action} tabs confirmation preference:`, error)
+      return true
+    }
+  }
+
+  /**
+   * Persist a setting changed by a native main-process prompt and update every
+   * open renderer so its Settings UI remains accurate.
+   * @param {string} settingKey
+   * @param {boolean} value
+   */
+  async function updateSettingFromMain(settingKey, value) {
+    await baseHandlers.settings.upsert(settingKey, value)
+    const syncPayload = {
+      event: SyncEvents.GENERAL.UPSERT,
+      data: { _id: settingKey, value }
+    }
+    for (const window of BrowserWindow.getAllWindows()) {
+      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.SYNC_SETTINGS, syncPayload)
+      }
     }
   }
 
@@ -284,6 +335,7 @@ function runApp() {
         type: 'question',
         title: t('Close Confirmation.Title'),
         message: t('Close Confirmation.Message'),
+        detail: t('Confirmations.Settings Hint'),
         buttons: [
           t('Close Confirmation.Quit'),
           t('Cancel'),
@@ -295,7 +347,7 @@ function runApp() {
       })
 
       if (response === 2) {
-        await baseHandlers.settings.upsert('confirmCloseApp', false)
+        await updateSettingFromMain('confirmCloseApp', false)
         isQuitConfirmed = true
         return true
       }
@@ -313,25 +365,70 @@ function runApp() {
     return quitPromptInProgress
   }
 
-  let closeMultipleTabsRequestCount = 0
-
   /**
-   * Ask the renderer to confirm a bulk tab close.
-   * @param {TabManager | null | undefined} manager
-   * @param {number} count the number of tabs that would be closed
+   * @param {import('electron').BrowserWindow} browserWindow
+   * @param {number} count
    * @returns {Promise<boolean>}
    */
-  function confirmCloseMultipleTabs(manager, count) {
-    if (count < CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD) {
-      return Promise.resolve(true)
+  async function confirmCloseWindowWithMultipleTabs(browserWindow, count) {
+    if (isQuitting || !await getConfirmCloseWindowWithMultipleTabs()) {
+      return true
+    }
+
+    const existingPrompt = windowClosePromptsInProgress.get(browserWindow.id)
+    if (existingPrompt) return existingPrompt
+
+    const prompt = (async () => {
+      const t = await createMainTranslator()
+      const { response } = await dialog.showMessageBox(browserWindow, {
+        type: 'question',
+        title: t('Close Window Confirmation.Title'),
+        message: t('Close Window Confirmation.Message').replace('{count}', String(count)),
+        detail: t('Confirmations.Settings Hint'),
+        buttons: [
+          t('Close Window Confirmation.Close Window'),
+          t('Cancel'),
+          t('Confirmations.Never Ask Again')
+        ],
+        defaultId: 1,
+        cancelId: 1,
+        noLink: true
+      })
+
+      if (response === 2) {
+        await updateSettingFromMain('confirmCloseWindowWithMultipleTabs', false)
+        return true
+      }
+
+      return response === 0
+    })().finally(() => {
+      windowClosePromptsInProgress.delete(browserWindow.id)
+    })
+
+    windowClosePromptsInProgress.set(browserWindow.id, prompt)
+    return prompt
+  }
+
+  let multipleTabsActionRequestCount = 0
+
+  /**
+   * Ask the renderer to confirm a bulk tab action.
+   * @param {TabManager | null | undefined} manager
+   * @param {number} count the number of tabs affected
+   * @param {'close' | 'load' | 'unload'} action
+   * @returns {Promise<boolean>}
+   */
+  async function confirmMultipleTabsAction(manager, count, action) {
+    if (count < MULTIPLE_TABS_CONFIRM_THRESHOLD || !await getConfirmMultipleTabsAction(action)) {
+      return true
     }
 
     const browserWindow = manager?.browserWindow
     if (!browserWindow || browserWindow.isDestroyed()) {
-      return Promise.resolve(true)
+      return true
     }
 
-    const requestId = `close-multiple-tabs-${++closeMultipleTabsRequestCount}`
+    const requestId = `${action}-multiple-tabs-${++multipleTabsActionRequestCount}`
     return new Promise(resolve => {
       /**
        * @param {import('electron').IpcMainEvent} _event
@@ -350,15 +447,15 @@ function runApp() {
        */
       function finish(confirmed) {
         clearTimeout(timeoutId)
-        ipcMain.removeListener(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
+        ipcMain.removeListener(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
         browserWindow.removeListener('closed', handleWindowClosed)
         resolve(confirmed)
       }
 
       const timeoutId = setTimeout(() => finish(false), 30_000)
-      ipcMain.on(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE, listener)
+      ipcMain.on(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE, listener)
       browserWindow.once('closed', handleWindowClosed)
-      manager.bridge.send(IpcChannels.TABS_CONFIRM_CLOSE_MULTIPLE, { requestId, count })
+      manager.bridge.send(IpcChannels.TABS_CONFIRM_MULTIPLE_ACTION, { requestId, count, action })
     })
   }
 
@@ -508,7 +605,7 @@ function runApp() {
         if (closesWindow && isLastWindow) {
           // The quit confirmation already covers this case
           if (!await confirmCloseApp(manager.browserWindow)) return
-        } else if (!await confirmCloseMultipleTabs(manager, existingTabIds.length)) {
+        } else if (!await confirmMultipleTabsAction(manager, existingTabIds.length, 'close')) {
           return
         }
 
@@ -739,11 +836,16 @@ function runApp() {
           label: contextMenuLabel('Load Tabs'),
           visible: contextMenuTab != null && isBulkTabAction,
           enabled: hasSelectedUnloadedTab,
-          click: () => {
+          click: async () => {
             if (!manager || !contextMenuTab) return
 
-            runBatchedTabAction(() => {
-              for (const tab of contextMenuTabs) manager.loadTab(tab.id)
+            const tabIds = contextMenuTabs
+              .filter(tab => tab.loadState === 'unloaded')
+              .map(tab => tab.id)
+            if (!await confirmMultipleTabsAction(manager, tabIds.length, 'load')) return
+
+            await manager.runBatched(() => {
+              for (const tabId of tabIds) manager.loadTab(tabId)
             })
           }
         },
@@ -767,7 +869,12 @@ function runApp() {
               return
             }
 
-            await manager.unloadTabs(contextMenuTabs.map(tab => tab.id))
+            const tabIds = contextMenuTabs
+              .filter(tab => tab.loadState !== 'unloaded')
+              .map(tab => tab.id)
+            if (!await confirmMultipleTabsAction(manager, tabIds.length, 'unload')) return
+
+            await manager.unloadTabs(tabIds)
           }
         },
         {
@@ -2206,10 +2313,14 @@ function runApp() {
     newWindow.on('close', async (event) => {
       const isLastWindow = BrowserWindow.getAllWindows().length === 1
 
-      if (!isQuitting && isLastWindow && !closeConfirmedWindowIds.delete(newWindow.id)) {
+      if (!isQuitting && !closeConfirmedWindowIds.delete(newWindow.id) &&
+          (isLastWindow || tabManager.tabs.size > 1)) {
         event.preventDefault()
 
-        if (await confirmCloseApp(newWindow)) {
+        const confirmed = isLastWindow
+          ? await confirmCloseApp(newWindow)
+          : await confirmCloseWindowWithMultipleTabs(newWindow, tabManager.tabs.size)
+        if (confirmed) {
           closeConfirmedWindowIds.add(newWindow.id)
           newWindow.close()
         }
@@ -4519,7 +4630,7 @@ function runApp() {
                     : [tabManager.activeTabId]
                   const closesLastWindow = tabIds.length === tabManager.tabs.size &&
                     BrowserWindow.getAllWindows().length === 1
-                  if (!closesLastWindow && !await confirmCloseMultipleTabs(tabManager, tabIds.length)) {
+                  if (!closesLastWindow && !await confirmMultipleTabsAction(tabManager, tabIds.length, 'close')) {
                     return
                   }
                   const hasRemainingTabs = await tabManager.closeTabs(tabIds)
