@@ -138,7 +138,7 @@ const props = defineProps({
   },
   stableItemKeys: {
     type: Boolean,
-    default: false
+    default: true
   },
   hasAdditionalContent: {
     type: Boolean,

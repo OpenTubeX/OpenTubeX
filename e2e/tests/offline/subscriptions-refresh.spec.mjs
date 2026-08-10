@@ -68,6 +68,19 @@ function cachedChannel(index) {
   }
 }
 
+function cachedCollaboratorChannel(index) {
+  const channel = cachedChannel(index)
+  channel.videos[0] = {
+    ...channel.videos[0],
+    hasCollaborators: true,
+    collaborators: [
+      { id: channelId(index), name: `Channel ${index}`, thumbnail: '', subtitle: '' },
+      { id: 'UCcollaborator00000000000', name: 'Collaborator', thumbnail: '', subtitle: '' }
+    ]
+  }
+  return channel
+}
+
 function profileWith(channelCount) {
   return {
     _id: 'allChannels',
@@ -175,6 +188,29 @@ test.describe('incremental subscription feed refresh', () => {
 
     await expect(refreshToast).toBeVisible()
     await expect(refreshToast).toHaveCount(0, { timeout: 30_000 })
+  })
+})
+
+test.describe('subscription feed state during refresh', () => {
+  test.use({
+    seed: {
+      settings: commonSettings,
+      profiles: [profileWith(2)],
+      subscriptionCache: [cachedCollaboratorChannel(0), cachedChannel(1)]
+    }
+  })
+
+  test('keeps an open collaborators modal when refreshed videos reorder the feed', async ({ page }) => {
+    await routeFeeds(page, (index) => index === 0 ? 8_000 : 0)
+    await goTo(page, 'subscriptions')
+
+    const collaboratorVideo = page.locator('.ft-list-video').filter({ hasText: 'Cached video 0' })
+    await collaboratorVideo.getByRole('button', { name: 'Channel 0' }).click()
+    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
+
+    await page.getByRole('button', { name: /Refresh Videos/ }).evaluate(button => button.click())
+    await expect(page.getByText('Fresh video 1', { exact: true })).toBeVisible({ timeout: 3_000 })
+    await expect(page.getByRole('heading', { name: 'Collaborators' })).toBeVisible()
   })
 })
 

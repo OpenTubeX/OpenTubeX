@@ -188,6 +188,23 @@ test.describe('subscriptions feed from cache', () => {
   })
 })
 
+test.describe('subscriptions feed with a partially cached profile', () => {
+  test.use({
+    seed: {
+      ...seed,
+      subscriptionCache: [seed.subscriptionCache[0]]
+    }
+  })
+
+  test('keeps cached videos visible when automatic fetching is disabled', async ({ page }) => {
+    await goTo(page, 'subscriptions')
+
+    await expect(page.getByText('Video A newer')).toBeVisible()
+    await expect(page.getByText('Video A older')).toBeVisible()
+    await expect(page.getByText('Video B newest')).toHaveCount(0)
+  })
+})
+
 test.describe('subscriptions feed with upcoming premieres shown', () => {
   test.use({
     seed: {

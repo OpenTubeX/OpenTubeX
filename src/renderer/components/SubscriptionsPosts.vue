@@ -206,6 +206,7 @@ function loadPostsFromCacheSometimes() {
 
   // This method is called on view visible
   if (postCacheForAllActiveProfileChannelsPresent.value) {
+    attemptedFetch.value = true
     loadPostsFromCacheForAllActiveProfileChannels()
     return
   }
@@ -216,10 +217,9 @@ function loadPostsFromCacheSometimes() {
     return
   }
 
-  // Auto fetch disabled, not enough cache for profile = show nothing
-  postList.value = []
+  // Auto fetch disabled, show the cache that is available for the profile
   attemptedFetch.value = false
-  isLoading.value = false
+  loadPostsFromCacheForAllActiveProfileChannels()
 }
 
 function loadPostsFromCacheForAllActiveProfileChannels() {

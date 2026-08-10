@@ -256,6 +256,7 @@ function loadVideosFromCacheSometimes() {
 
   // This method is called on view visible
   if (videoCacheForAllActiveProfileChannelsPresent.value) {
+    attemptedFetch.value = true
     loadVideosFromCacheForAllActiveProfileChannels()
     return
   }
@@ -266,10 +267,9 @@ function loadVideosFromCacheSometimes() {
     return
   }
 
-  // Auto fetch disabled, not enough cache for profile = show nothing
-  videoList.value = []
+  // Auto fetch disabled, show the cache that is available for the profile
   attemptedFetch.value = false
-  isLoading.value = false
+  loadVideosFromCacheForAllActiveProfileChannels()
 }
 
 function loadVideosFromCacheForAllActiveProfileChannels() {
