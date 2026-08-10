@@ -69,8 +69,8 @@ const IpcChannels = {
   TABS_REQUEST_FULLSCREEN: 'tabs-request-fullscreen',
   TABS_SET_TAB_BAR_SCROLL: 'tabs-set-tab-bar-scroll',
   TABS_SET_CONTEXT_MENU_TAB: 'tabs-set-context-menu-tab',
-  TABS_CONFIRM_CLOSE_MULTIPLE: 'tabs-confirm-close-multiple',
-  TABS_CONFIRM_CLOSE_MULTIPLE_RESPONSE: 'tabs-confirm-close-multiple-response',
+  TABS_CONFIRM_MULTIPLE_ACTION: 'tabs-confirm-multiple-action',
+  TABS_CONFIRM_MULTIPLE_ACTION_RESPONSE: 'tabs-confirm-multiple-action-response',
   CONTEXT_MENU_OPEN: 'context-menu-open',
   CONTEXT_MENU_EXECUTE: 'context-menu-execute',
   RESOLVE_FAVICON: 'resolve-favicon',
@@ -550,8 +550,8 @@ const MOBILE_WIDTH_THRESHOLD = 680
 // Height threshold in px at which we switch to using a more heavily altered playlist view for mobile users
 const PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD = 500
 
-// Closing this many tabs at once (or more) asks for a confirmation first
-const CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD = 5
+// Acting on this many tabs at once (or more) asks for a confirmation first
+const MULTIPLE_TABS_CONFIRM_THRESHOLD = 5
 
 // YouTube search character limit is 100 characters
 const SEARCH_CHAR_LIMIT = 100
@@ -634,7 +634,7 @@ export {
   MAIN_PROFILE_ID,
   MOBILE_WIDTH_THRESHOLD,
   PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD,
-  CLOSE_MULTIPLE_TABS_CONFIRM_THRESHOLD,
+  MULTIPLE_TABS_CONFIRM_THRESHOLD,
   SEARCH_CHAR_LIMIT,
   SEARCH_RESULTS_DISPLAY_LIMIT,
   MIXED_SEARCH_HISTORY_ENTRIES_DISPLAY_LIMIT,

@@ -31,10 +31,25 @@ Close Confirmation:
   Message: Are you sure you want to quit OpenTubeX?
   Quit: Quit
   Never Ask Again: Never ask again
+Close Window Confirmation:
+  Title: Close window?
+  Message: This window contains {count} tabs. Are you sure you want to close it?
+  Close Window: Close Window
+Confirmations:
+  Never Ask Again: Never ask again
+  Settings Hint: You can re-enable this confirmation in Settings → General → Confirm before…
 Close Multiple Tabs Confirmation:
   Title: Close multiple tabs?
   Message: This will close {count} tabs.
   Close Tabs: Close {count} Tabs
+Load Multiple Tabs Confirmation:
+  Title: Load multiple tabs?
+  Message: This will load {count} tabs.
+  Load Tabs: Load {count} Tabs
+Unload Multiple Tabs Confirmation:
+  Title: Unload multiple tabs?
+  Message: This will unload {count} tabs.
+  Unload Tabs: Unload {count} Tabs
 Compact side navigation: Compact side navigation
 Expand side navigation: Expand side navigation
 Back: Back
@@ -366,7 +381,13 @@ Settings:
       yt-dlp: yt-dlp
       Built-in: Built-in
     Check for Updates: Check for Updates
-    Confirm Before Closing App: Confirm before closing OpenTubeX
+    Confirm Before: Confirm before…
+    Confirmation Options:
+      Closing App: Closing OpenTubeX
+      Closing Window: Closing a window with multiple tabs
+      Closing Tabs: Closing multiple tabs
+      Loading Tabs: Loading multiple tabs
+      Unloading Tabs: Unloading multiple tabs
     Fallback to Non-Preferred Backend on Failure: Fallback to Non-Preferred Backend
       on Failure
     Enable Search Suggestions: Enable Search Suggestions

@@ -46,6 +46,8 @@ const TAB_PREVIEW_CAPTURE_STYLE_ID = 'opentubex-tab-preview-capture-style'
 const TAB_PREVIEW_CAPTURE_CLASS = 'opentubex-tab-preview-capturing'
 const TAB_PREVIEW_CACHE_DIR_NAME = 'tab-previews'
 const TAB_TRANSFER_MOUNT_TIMEOUT_MS = 8000
+const RAPID_TAB_CREATION_BATCH_DELAY_MS = 40
+const RAPID_TAB_CREATION_BATCH_MAX_DELAY_MS = 100
 const transferringTabIds = new Set()
 const TAB_LOADING_SOURCE_MOUNT = 'mount'
 const TAB_LOADING_SOURCE_RENDERER = 'renderer'
@@ -596,6 +598,7 @@ export class TabManager {
     this._batchDepth = 0
     this._batchedBroadcastPending = false
     this._batchedSessionSavePending = false
+    this._rapidTabCreationBatch = null
     // Serializes preview captures across every tab in this window. Captures share
     // the window's single renderer, so running two at once would screenshot each
     // other's content and toggle capture mode out from under one another.
@@ -615,6 +618,11 @@ export class TabManager {
     this._installWindowOpenHandler()
 
     browserWindow.on('closed', () => {
+      if (this._rapidTabCreationBatch) {
+        clearTimeout(this._rapidTabCreationBatch.timeoutId)
+        this._rapidTabCreationBatch.resolve()
+        this._rapidTabCreationBatch = null
+      }
       tabManagers.delete(browserWindow.id)
       // Preview refreshes can self-reschedule (see _scheduleTabPreviewRefresh), so
       // any still-pending capture timer would keep firing and pin this manager
@@ -872,7 +880,8 @@ export class TabManager {
       preloadInBackground = false,
       history = null,
       historyIndex = null,
-      persistHistory = history != null
+      persistHistory = history != null,
+      _deferUpdates = false
     } = options
 
     // Only trusted callers (session restore, transfers) supply an id; renderer
@@ -944,12 +953,16 @@ export class TabManager {
         // reports ready.
         tabInfo.pendingActivation = true
         tabInfo.preloadInBackground = true
+        if (!_deferUpdates) {
+          this._broadcastStateUpdate()
+          this._saveSession()
+        }
+      }
+    } else {
+      if (!_deferUpdates) {
         this._broadcastStateUpdate()
         this._saveSession()
       }
-    } else {
-      this._broadcastStateUpdate()
-      this._saveSession()
     }
 
     return tabInfo
@@ -967,7 +980,59 @@ export class TabManager {
       ? options
       : { ...options, route: await TabManager.getStoredLandingRoute() }
 
-    return this.createTab({ ...tabOptions, openPosition })
+    const canBatchRapidCreation = this.activeTabId != null
+    const deferUpdates = canBatchRapidCreation && this._rapidTabCreationBatch != null
+    const tab = this.createTab({ ...tabOptions, openPosition, _deferUpdates: deferUpdates })
+    if (canBatchRapidCreation) {
+      const flush = this._scheduleRapidTabCreationFlush(deferUpdates)
+      if (deferUpdates) await flush
+    }
+    return tab
+  }
+
+  /**
+   * Publish the first tab in a burst immediately, then coalesce additional tab
+   * creations into one renderer snapshot and session write. The maximum delay
+   * keeps a held shortcut from postponing updates indefinitely.
+   * @param {boolean} updatesDeferred
+   * @returns {Promise<void>}
+   */
+  _scheduleRapidTabCreationFlush(updatesDeferred) {
+    if (!this._rapidTabCreationBatch) {
+      /** @type {(value?: void | PromiseLike<void>) => void} */
+      let resolveBatch
+      const promise = new Promise(resolve => {
+        resolveBatch = resolve
+      })
+      this._rapidTabCreationBatch = {
+        startedAt: Date.now(),
+        hasDeferredUpdates: false,
+        timeoutId: null,
+        promise,
+        resolve: resolveBatch
+      }
+    }
+
+    const batch = this._rapidTabCreationBatch
+    batch.hasDeferredUpdates ||= updatesDeferred
+    clearTimeout(batch.timeoutId)
+    const elapsed = Date.now() - batch.startedAt
+    const delay = Math.max(0, Math.min(
+      RAPID_TAB_CREATION_BATCH_DELAY_MS,
+      RAPID_TAB_CREATION_BATCH_MAX_DELAY_MS - elapsed
+    ))
+    batch.timeoutId = setTimeout(() => {
+      if (this._rapidTabCreationBatch !== batch) return
+
+      this._rapidTabCreationBatch = null
+      if (batch.hasDeferredUpdates) {
+        this._broadcastStateUpdate()
+        this._saveSession()
+      }
+      batch.resolve()
+    }, delay)
+
+    return batch.promise
   }
 
   /**

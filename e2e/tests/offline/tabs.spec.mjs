@@ -306,9 +306,39 @@ test.describe('tab bar', () => {
     await expect(tabs).toHaveCount(6)
 
     await page.keyboard.press('Control+w')
-    await expect(prompt).toBeVisible()
-    await prompt.getByRole('button', { name: 'Close 5 Tabs', exact: true }).click()
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await prompt.getByRole('button', { name: 'Never ask again', exact: true }).click()
     await expect(tabs).toHaveCount(1)
+    await expect.poll(() => page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      return store.getters.getConfirmCloseMultipleTabs
+    })).toBe(false)
+  })
+
+  test('shows a confirmation for loading several unloaded tabs', async ({ page }) => {
+    for (let index = 0; index < 5; index++) {
+      await page.evaluate(() => window.ftElectron.tabs.create({
+        makeActive: false,
+        lazyLoad: true
+      }))
+    }
+
+    const tabs = page.locator(sel.tabs)
+    await expect(tabs).toHaveCount(6)
+    await tabs.first().click()
+    for (let index = 1; index < 6; index++) {
+      await tabs.nth(index).click({ modifiers: ['Control'] })
+    }
+    await tabs.last().click({ button: 'right' })
+    await page.getByRole('menuitem', { name: 'Load Tabs', exact: true }).click()
+
+    const prompt = page.locator('.prompt')
+    await expect(prompt).toContainText('Load multiple tabs?')
+    await expect(prompt).toContainText('This will load 5 tabs.')
+    await expect(prompt).toContainText('Settings → General → Confirm before…')
+    await expect(prompt.getByRole('button', { name: 'Load 5 Tabs', exact: true })).toBeVisible()
+    await prompt.getByRole('button', { name: 'Cancel' }).click()
+    await expect(page.locator(`${sel.tabs}.unloaded`)).toHaveCount(5)
   })
 
   test('does not confirm when closing fewer tabs than the threshold', async ({ page }) => {
@@ -369,6 +399,27 @@ test.describe('tab bar', () => {
 
     expect(tabCounts).toEqual([1])
     await expect(page.locator(sel.tabs)).toHaveCount(1)
+  })
+
+  test('coalesces rapid tab creation state updates', async ({ page }) => {
+    const tabCounts = await page.evaluate(async () => {
+      const initialState = await window.ftElectron.tabs.getState()
+      const counts = []
+      const removeListener = window.ftElectron.tabs.onStateUpdated((state) => {
+        if (state.tabs.length === initialState.tabs.length || state.tabs.length === counts.at(-1)) return
+        counts.push(state.tabs.length)
+      })
+
+      await Promise.all(Array.from({ length: 4 }, () => (
+        window.ftElectron.tabs.create({ route: '/history', makeActive: false })
+      )))
+      removeListener()
+      return counts
+    })
+
+    // The first tab appears immediately; the rest of the burst arrives together.
+    expect(tabCounts).toEqual([2, 5])
+    await expect(page.locator(sel.tabs)).toHaveCount(5)
   })
 
   test('applies a complete tab reorder in one state update', async ({ page }) => {

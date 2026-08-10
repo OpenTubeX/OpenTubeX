@@ -59,14 +59,6 @@
           :compact="true"
           @change="updateHideToTrayOnMinimize"
         />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Confirm Before Closing App')"
-          :default-value="confirmCloseApp"
-          setting-key="confirmCloseApp"
-          :compact="true"
-          @change="updateConfirmCloseApp"
-        />
       </div>
     </div>
     <div class="switchGrid">
@@ -258,6 +250,17 @@
         />
       </FtFlexBox>
     </div>
+    <FtFlexBox
+      v-if="USING_ELECTRON"
+      class="confirmations"
+    >
+      <FtCheckboxList
+        v-model="enabledConfirmations"
+        :title="t('Settings.General Settings.Confirm Before')"
+        :labels="confirmationLabels"
+        :values="CONFIRMATION_VALUES"
+      />
+    </FtFlexBox>
   </FtSettingsSection>
 </template>
 
@@ -270,6 +273,7 @@ import FtSettingsSection from '../FtSettingsSection/FtSettingsSection.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtCheckboxList from '../FtCheckboxList/FtCheckboxList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
@@ -318,15 +322,52 @@ function updateCheckForUpdates(value) {
   store.dispatch('updateCheckForUpdates', value)
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const confirmCloseApp = computed(() => store.getters.getConfirmCloseApp)
-
-/**
- * @param {boolean} value
- */
-function updateConfirmCloseApp(value) {
-  store.dispatch('updateConfirmCloseApp', value)
-}
+const CONFIRMATION_OPTIONS = [
+  {
+    value: 'closeApp',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing App'),
+    enabled: () => store.getters.getConfirmCloseApp,
+    action: 'updateConfirmCloseApp'
+  },
+  {
+    value: 'closeWindow',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing Window'),
+    enabled: () => store.getters.getConfirmCloseWindowWithMultipleTabs,
+    action: 'updateConfirmCloseWindowWithMultipleTabs'
+  },
+  {
+    value: 'closeTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Closing Tabs'),
+    enabled: () => store.getters.getConfirmCloseMultipleTabs,
+    action: 'updateConfirmCloseMultipleTabs'
+  },
+  {
+    value: 'loadTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Loading Tabs'),
+    enabled: () => store.getters.getConfirmLoadMultipleTabs,
+    action: 'updateConfirmLoadMultipleTabs'
+  },
+  {
+    value: 'unloadTabs',
+    label: () => t('Settings.General Settings.Confirmation Options.Unloading Tabs'),
+    enabled: () => store.getters.getConfirmUnloadMultipleTabs,
+    action: 'updateConfirmUnloadMultipleTabs'
+  }
+]
+const CONFIRMATION_VALUES = CONFIRMATION_OPTIONS.map(option => option.value)
+const confirmationLabels = computed(() => CONFIRMATION_OPTIONS.map(option => option.label()))
+const enabledConfirmations = computed({
+  get: () => CONFIRMATION_OPTIONS.filter(option => option.enabled()).map(option => option.value),
+  set: values => {
+    const enabled = new Set(values)
+    for (const option of CONFIRMATION_OPTIONS) {
+      const next = enabled.has(option.value)
+      if (option.enabled() !== next) {
+        store.dispatch(option.action, next)
+      }
+    }
+  }
+})
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const backendFallback = computed(() => store.getters.getBackendFallback)

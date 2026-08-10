@@ -4,6 +4,29 @@ import path from 'node:path'
 import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
+  test('groups confirmation preferences together', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const labels = [
+      'Closing OpenTubeX',
+      'Closing a window with multiple tabs',
+      'Closing multiple tabs',
+      'Loading multiple tabs',
+      'Unloading multiple tabs'
+    ]
+    await expect(page.getByRole('heading', { name: 'Confirm before…', exact: true })).toBeVisible()
+    for (const label of labels) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible()
+    }
+
+    const [first, second, third] = await Promise.all(labels.slice(0, 3).map(label => (
+      page.getByText(label, { exact: true }).boundingBox()
+    )))
+    expect(second.y).toBeCloseTo(first.y, 0)
+    expect(first.x).toBeLessThan(second.x)
+    expect(third.y).toBeGreaterThan(first.y)
+  })
+
   test('keeps General settings aligned to the bottom of its scroll range', async ({ page }) => {
     await page.locator('.navSettingsButton').click()
     const content = page.locator('.settingsContent')
@@ -12,7 +35,7 @@ test.describe('settings', () => {
     await page.mouse.wheel(0, 2000)
 
     await expect.poll(() => content.evaluate((element) => {
-      const lastControl = element.querySelector('.switchGrid > :last-child')
+      const lastControl = element.querySelector('.confirmations')
       return element.getBoundingClientRect().bottom - lastControl.getBoundingClientRect().bottom
     })).toBeLessThanOrEqual(45)
   })
@@ -623,9 +646,14 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
 
     const content = page.locator('.settingsContent')
-    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
     const tooltipButton = content.locator('.selectTooltip .button').last()
-    await tooltipButton.hover()
+    await tooltipButton.evaluate(element => {
+      const scrollContainer = element.closest('.settingsContent')
+      const buttonBounds = element.getBoundingClientRect()
+      const contentBounds = scrollContainer.getBoundingClientRect()
+      scrollContainer.scrollTop += buttonBounds.bottom - contentBounds.bottom + 8
+    })
+    await tooltipButton.evaluate(element => element.focus({ preventScroll: true }))
     const tooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(tooltip).toBeVisible()
 

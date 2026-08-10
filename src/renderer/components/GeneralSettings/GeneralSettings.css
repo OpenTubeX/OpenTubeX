@@ -7,3 +7,18 @@
   gap: 10px;
   margin-block-end: 12px;
 }
+
+.confirmations {
+  margin-block-start: 30px;
+}
+
+.confirmations :deep(.pure-checkbox) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  column-gap: 40px;
+  inline-size: min(100%, 700px);
+}
+
+.confirmations :deep(.checkboxTitle) {
+  grid-column: 1 / -1;
+}
