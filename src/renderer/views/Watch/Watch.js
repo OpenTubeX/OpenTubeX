@@ -81,7 +81,7 @@ import {
   isYouTubeShort
 } from '../../helpers/player/shorts'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
-import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
@@ -4128,7 +4128,7 @@ export default defineComponent({
       // The player checks the streams it actually received as well, as yt-dlp
       // can fall back to the built-in extraction method.
       if (normalizedQuality === 'auto' && !playbackEngineSupportsAutoQuality(this.videoPlaybackEngine)) {
-        return '720'
+        return AUTO_QUALITY_FALLBACK
       }
 
       return normalizedQuality

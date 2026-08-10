@@ -62,7 +62,7 @@ import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
 import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
-import { streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
+import { AUTO_QUALITY_FALLBACK, streamsSupportAutoQuality } from '../../helpers/player/autoQuality'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
@@ -1224,10 +1224,7 @@ export default defineComponent({
     const defaultQuality = computed(() => {
       const value = store.getters.getDefaultQuality
 
-      // 720 is the default settings value
-      if (value === 'auto') { return 720 }
-
-      return parseInt(value)
+      return parseInt(value === 'auto' ? AUTO_QUALITY_FALLBACK : value)
     })
 
     /** @type {import('vue').ComputedRef<number>} */

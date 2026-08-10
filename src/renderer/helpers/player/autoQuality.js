@@ -9,6 +9,14 @@
  */
 
 /**
+ * The quality that a stored `auto` falls back to while auto quality is
+ * unavailable. It is the default value of the `defaultQuality` setting, but
+ * intentionally not that setting's current value: playback uses this fallback,
+ * so anything that displays the fallback has to use it as well to agree.
+ */
+export const AUTO_QUALITY_FALLBACK = '720'
+
+/**
  * Whether the currently playing streams support the automatic quality selection.
  * @param {'dash'|'audio'|'legacy'} format the legacy formats have their own quality selection
  * @param {boolean} isSabr whether the streams are served over SABR

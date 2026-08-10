@@ -529,7 +529,7 @@ import {
   DEFAULT_SEGMENT_PREFETCH_LIMIT,
   MAX_SEGMENT_PREFETCH_LIMIT
 } from '../../helpers/player/segmentPrefetch'
-import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { t } = useI18n()
 
@@ -901,8 +901,7 @@ const qualityNames = computed(() => [
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
 
-  // 720 is the default settings value
-  if (value === 'auto' && !autoQualityAvailable.value) { return '720' }
+  if (value === 'auto' && !autoQualityAvailable.value) { return AUTO_QUALITY_FALLBACK }
 
   return value
 })

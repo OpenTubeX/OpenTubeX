@@ -198,7 +198,7 @@ import {
   getCachedChannelInfo,
   parseChannelPreferences
 } from '../../helpers/channel-preferences'
-import { playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
 
 const { locale, t } = useI18n()
 
@@ -277,8 +277,7 @@ const settings = computed(() => store.state.settings)
 const defaultQuality = computed(() => {
   const value = store.getters.getDefaultQuality
 
-  // 720 is the default settings value
-  return value === 'auto' && !autoQualityAvailable.value ? '720' : value
+  return value === 'auto' && !autoQualityAvailable.value ? AUTO_QUALITY_FALLBACK : value
 })
 
 /** @type {import('vue').ComputedRef<number>} */
@@ -357,9 +356,10 @@ const channelEntries = computed(() => {
 
       valuesByChannel.get(channelId).set(
         type,
-        // Fall back for entries that still hold auto while it is unavailable
+        // Fall back for entries that still hold auto while it is unavailable,
+        // to the same quality that playback uses for them
         type === 'videoQuality' && String(value) === 'auto' && !autoQualityAvailable.value
-          ? defaultQuality.value
+          ? AUTO_QUALITY_FALLBACK
           : value
       )
     }
