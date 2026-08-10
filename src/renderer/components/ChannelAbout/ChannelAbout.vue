@@ -66,6 +66,20 @@
       </table>
     </template>
     <template
+      v-if="!hideFeaturedChannels && relatedChannels.length > 0"
+    >
+      <h2>{{ $t("Channel.About.Featured Channels") }}</h2>
+      <FtFlexBox>
+        <FtChannelBubble
+          v-for="channel in relatedChannels"
+          :key="channel.id"
+          :channel-id="channel.id"
+          :channel-name="channel.name"
+          :channel-thumbnail="channel.thumbnailUrl"
+        />
+      </FtFlexBox>
+    </template>
+    <template
       v-if="tags.length > 0"
     >
       <h2>{{ $t('Channel.About.Tags.Tags') }}</h2>
@@ -97,20 +111,6 @@
           </span>
         </li>
       </ul>
-    </template>
-    <template
-      v-if="!hideFeaturedChannels && relatedChannels.length > 0"
-    >
-      <h2>{{ $t("Channel.About.Featured Channels") }}</h2>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in relatedChannels"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnailUrl"
-        />
-      </FtFlexBox>
     </template>
   </div>
 </template>

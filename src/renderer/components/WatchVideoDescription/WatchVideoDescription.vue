@@ -77,12 +77,39 @@
           </li>
         </ul>
       </template>
-      <bdi
+      <div
         v-if="tags.length > 0 && isExpanded"
         class="videoTags"
       >
-        <strong>{{ t('Description.Video Tags') }}</strong> {{ tags.join(', ') }}
-      </bdi>
+        <strong>{{ t('Description.Video Tags') }}</strong>
+        <ul class="videoTagList">
+          <li
+            v-for="tag in tags"
+            :key="tag"
+            class="videoTag"
+            dir="auto"
+          >
+            <router-link
+              v-if="!hideSearchBar"
+              class="videoTagLink"
+              :title="$t('Channel.About.Tags.Search for', { tag })"
+              :to="{
+                path: `/search/${encodeURIComponent(tag)}`,
+                query: searchSettings
+              }"
+              :tabindex="linkTabIndex"
+            >
+              {{ tag }}
+            </router-link>
+            <span
+              v-else
+              class="videoTagLink"
+            >
+              {{ tag }}
+            </span>
+          </li>
+        </ul>
+      </div>
       <span
         v-if="showControls && isExpanded && !alwaysExpanded"
         class="descriptionStatus"
@@ -228,7 +255,12 @@ function collapseDescription() {
   showFullDescription.value = false
 }
 
-const { isTabPresented } = useTabContext()
+const { tabId: injectedTabId, isTabPresented } = useTabContext()
+const tabId = injectedTabId ?? 'web'
+
+const hideSearchBar = computed(() => store.getters.getHideSearchBar)
+const searchSettings = computed(() => store.getters.getSearchSettings(tabId))
+
 let hasMeasured = false
 
 /**
