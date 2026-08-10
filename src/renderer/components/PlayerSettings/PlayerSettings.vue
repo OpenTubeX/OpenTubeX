@@ -267,6 +267,16 @@
         @change="updateDefaultPlayback"
       />
       <FtSlider
+        :label="t('Settings.Player Settings.Concurrent Segment Downloads')"
+        :default-value="segmentPrefetchLimit"
+        setting-key="segmentPrefetchLimit"
+        :min-value="DEFAULT_SEGMENT_PREFETCH_LIMIT"
+        :max-value="MAX_SEGMENT_PREFETCH_LIMIT"
+        :step="1"
+        :tooltip="t('Tooltips.Player Settings.Concurrent Segment Downloads')"
+        @change="updateSegmentPrefetchLimit"
+      />
+      <FtSlider
         :label="t('Settings.Player Settings.Max Video Playback Rate')"
         :default-value="maxVideoPlaybackRate"
         setting-key="maxVideoPlaybackRate"
@@ -515,6 +525,10 @@ import FtSettingsSubpage from '../FtSettingsSubpage/FtSettingsSubpage.vue'
 
 import store from '../../store/index'
 import { initializePlatformInfo, isLinuxWayland } from '../../helpers/platform'
+import {
+  DEFAULT_SEGMENT_PREFETCH_LIMIT,
+  MAX_SEGMENT_PREFETCH_LIMIT
+} from '../../helpers/player/segmentPrefetch'
 
 const { t } = useI18n()
 
@@ -954,6 +968,16 @@ const defaultPlayback = computed(() => store.getters.getDefaultPlayback)
  */
 function updateDefaultPlayback(value) {
   store.dispatch('updateDefaultPlayback', value)
+}
+
+/** @type {import('vue').ComputedRef<number>} */
+const segmentPrefetchLimit = computed(() => store.getters.getSegmentPrefetchLimit)
+
+/**
+ * @param {number} value
+ */
+function updateSegmentPrefetchLimit(value) {
+  store.dispatch('updateSegmentPrefetchLimit', value)
 }
 
 /** @type {import('vue').ComputedRef<number>} */

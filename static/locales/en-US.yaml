@@ -669,6 +669,7 @@ Settings:
     Reorder Playback Speed: Drag to reorder playback speed
     Playback Speed: Playback Speed
     Max Video Playback Rate: Max Video Playback Rate
+    Concurrent Segment Downloads: Concurrent Segment Downloads
     Video Playback Rate Interval: Video Playback Rate Interval
     Default Video Format:
       Default Video Format: Default Video Format
@@ -1747,6 +1748,10 @@ Tooltips:
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.
+    Concurrent Segment Downloads: |
+      How many video and audio segments are downloaded in parallel ahead of the current playback position.
+      Higher values can improve the download speed on slow or unstable connections, but use more bandwidth and memory.
+      This has no effect when the built-in stream extraction method is used, as it only supports one request at a time.
   External Player Settings:
     External Player: Choosing an external player will display an icon, for opening the
       video (playlist if supported) in the external player, on the thumbnail. Warning, Invidious settings do not affect external players.

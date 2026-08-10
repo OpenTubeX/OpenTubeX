@@ -61,6 +61,7 @@ import {
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
+import { resolveSegmentPrefetchLimit } from '../../helpers/player/segmentPrefetch'
 import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
@@ -2809,6 +2810,22 @@ export default defineComponent({
     })
 
     /**
+     * How many segments per stream shaka-player downloads in parallel ahead of the playhead.
+     * @type {import('vue').ComputedRef<number>}
+     */
+    const segmentPrefetchLimit = computed(() => {
+      const isSabr = !!process.env.SUPPORTS_LOCAL_API &&
+        props.format !== 'legacy' &&
+        props.manifestMimeType === MANIFEST_TYPE_SABR
+
+      return resolveSegmentPrefetchLimit(store.getters.getSegmentPrefetchLimit, isSabr)
+    })
+
+    watch(segmentPrefetchLimit, (newValue) => {
+      player?.configure('streaming.segmentPrefetchLimit', newValue)
+    })
+
+    /**
      * @param {'dash'|'audio'|'legacy'} format
      * @param {boolean} useAutoQuality
      * @returns {shaka.extern.PlayerConfiguration}
@@ -2820,7 +2837,8 @@ export default defineComponent({
         streaming: {
           bufferingGoal: 180,
           rebufferingGoal: 0.02,
-          bufferBehind: 300
+          bufferBehind: 300,
+          segmentPrefetchLimit: segmentPrefetchLimit.value
         },
         manifest: {
           disableVideo: format === 'audio',
