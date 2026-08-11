@@ -1,5 +1,8 @@
 <template>
-  <FtCard class="transcriptCard">
+  <FtCard
+    class="transcriptCard"
+    :class="{ transcriptCardFullscreen: fullscreenOverlay }"
+  >
     <div class="transcriptHeader">
       <h3 class="transcriptTitle">
         <FontAwesomeIcon
@@ -14,7 +17,6 @@
         @keydown.esc.stop.prevent="languageMenuOpen = false"
       >
         <button
-          v-if="fullscreenOverlay"
           type="button"
           class="transcriptHeaderAction"
           :class="{ active: searchOpen }"
@@ -26,7 +28,7 @@
           <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
         </button>
         <button
-          v-if="fullscreenOverlay && captions.length > 1"
+          v-if="captions.length > 1"
           type="button"
           class="transcriptHeaderAction"
           :class="{ active: languageMenuOpen }"
@@ -38,37 +40,25 @@
           <FontAwesomeIcon :icon="['fas', 'language']" />
         </button>
         <div
-          v-if="segments.length > 0"
+          v-if="captions.length > 0"
           class="transcriptActions"
         >
-          <template v-if="fullscreenOverlay">
-            <FtIconButton
-              :title="t('Video.Transcript.Copy')"
-              :icon="['fas', 'copy']"
-              theme="base-no-default"
-              :use-shadow="false"
-              @click="copyTranscript"
-            />
-            <FtIconButton
-              :title="t('Video.Transcript.Save')"
-              :icon="['fas', 'download']"
-              theme="base-no-default"
-              :use-shadow="false"
-              @click="saveTranscript"
-            />
-          </template>
-          <template v-else>
-            <FtButton
-              :label="t('Video.Transcript.Copy')"
-              :icon="['fas', 'copy']"
-              @click="copyTranscript"
-            />
-            <FtButton
-              :label="t('Video.Transcript.Save')"
-              :icon="['fas', 'download']"
-              @click="saveTranscript"
-            />
-          </template>
+          <FtIconButton
+            :title="t('Video.Transcript.Copy')"
+            :icon="['fas', 'copy']"
+            :disabled="isLoading || segments.length === 0"
+            theme="base-no-default"
+            :use-shadow="false"
+            @click="copyTranscript"
+          />
+          <FtIconButton
+            :title="t('Video.Transcript.Save')"
+            :icon="['fas', 'download']"
+            :disabled="isLoading || segments.length === 0"
+            theme="base-no-default"
+            :use-shadow="false"
+            @click="saveTranscript"
+          />
         </div>
         <FtIconButton
           :title="t('Video.Transcript.Close')"
@@ -99,7 +89,7 @@
     </div>
 
     <div
-      v-if="captions.length > 0 && (!fullscreenOverlay || searchOpen)"
+      v-if="captions.length > 0 && searchOpen"
       class="transcriptControls"
     >
       <FtInput
@@ -109,15 +99,6 @@
         :show-clear-text-button="true"
         @input="searchQuery = $event"
         @clear="searchQuery = ''"
-      />
-      <FtSelect
-        v-if="!fullscreenOverlay && captions.length > 1"
-        :value="selectedCaptionIndex"
-        :select-names="captions.map(caption => caption.label)"
-        :select-values="captions.map((caption, index) => String(index))"
-        :placeholder="t('Video.Transcript.Language')"
-        :icon="['fas', 'language']"
-        @change="selectedCaptionIndex = $event"
       />
     </div>
 
@@ -133,8 +114,10 @@
       ref="segmentList"
       v-overlay-scrollbars
       class="transcriptSegments"
+      :class="{ transcriptFadeTop, transcriptFadeBottom }"
       role="list"
       :aria-label="t('Video.Transcript.Title')"
+      @scroll="updateTranscriptFadeState"
     >
       <div
         v-for="segment in filteredSegments"
@@ -161,12 +144,10 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import FtSelect from '../FtSelect/FtSelect.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 
@@ -212,10 +193,13 @@ const segments = ref([])
 const isLoading = ref(false)
 const loadFailed = ref(false)
 const segmentList = useTemplateRef('segmentList')
+const transcriptFadeTop = ref(false)
+const transcriptFadeBottom = ref(false)
 
 /** @type {AbortController|null} */
 let loadController = null
 let hasAlignedActiveSegment = false
+let segmentResizeObserver = null
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase())
 const filteredSegments = computed(() => {
@@ -306,6 +290,19 @@ watch(normalizedSearchQuery, () => {
   }
 })
 
+watch(segmentList, (list) => {
+  segmentResizeObserver?.disconnect()
+  segmentResizeObserver = null
+
+  if (list) {
+    segmentResizeObserver = new ResizeObserver(updateTranscriptFadeState)
+    segmentResizeObserver.observe(list)
+    nextTick(updateTranscriptFadeState)
+  }
+}, { flush: 'post' })
+
+watch(filteredSegments, () => nextTick(updateTranscriptFadeState))
+
 watch(activeSegmentIndex, async (index) => {
   if (index < 0 || normalizedSearchQuery.value !== '') {
     return
@@ -327,7 +324,10 @@ watch(activeSegmentIndex, async (index) => {
   hasAlignedActiveSegment = true
 })
 
-onBeforeUnmount(() => loadController?.abort())
+onBeforeUnmount(() => {
+  loadController?.abort()
+  segmentResizeObserver?.disconnect()
+})
 
 function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
@@ -338,6 +338,18 @@ function toggleTranscriptSearch() {
   if (!searchOpen.value) {
     searchQuery.value = ''
   }
+}
+
+function updateTranscriptFadeState() {
+  const list = segmentList.value
+  if (!list) {
+    transcriptFadeTop.value = false
+    transcriptFadeBottom.value = false
+    return
+  }
+
+  transcriptFadeTop.value = list.scrollTop > 1
+  transcriptFadeBottom.value = list.scrollTop + list.clientHeight < list.scrollHeight - 1
 }
 
 function selectCaptionLanguage(index) {

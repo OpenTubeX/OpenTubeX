@@ -29,6 +29,8 @@
       ref="descriptionScroll"
       v-overlay-scrollbars="!alwaysExpanded"
       class="descriptionScroll"
+      :class="{ descriptionFadeTop }"
+      @scroll="updateDescriptionFadeState"
     >
       <FtTimestampCatcher
         ref="descriptionContainer"
@@ -125,7 +127,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -174,6 +176,7 @@ const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
 const showFullDescription = ref(false)
 const showControls = ref(false)
+const descriptionFadeTop = ref(false)
 // a video can have games but no description, and there is nothing to expand or collapse then,
 // so treat it as expanded. `measureDescription` can't do it, it bails out on a zero height element.
 const isExpanded = computed(() => props.alwaysExpanded || shownDescription === '' || showFullDescription.value)
@@ -294,7 +297,20 @@ function measureDescription() {
   hasMeasured = true
 }
 
-onMounted(measureDescription)
+let descriptionResizeObserver = null
+
+onMounted(() => {
+  measureDescription()
+  descriptionResizeObserver = new ResizeObserver(updateDescriptionFadeState)
+  if (descriptionScroll.value) {
+    descriptionResizeObserver.observe(descriptionScroll.value)
+  }
+  nextTick(updateDescriptionFadeState)
+})
+
+onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
+
+watch(isExpanded, () => nextTick(updateDescriptionFadeState))
 
 watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
   if (!alwaysExpanded && wasAlwaysExpanded) {
@@ -308,6 +324,10 @@ if (isTabPresented) {
       nextTick(measureDescription)
     }
   })
+}
+
+function updateDescriptionFadeState() {
+  descriptionFadeTop.value = (descriptionScroll.value?.scrollTop ?? 0) > 1
 }
 
 /**

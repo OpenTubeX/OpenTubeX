@@ -361,10 +361,19 @@ test.describe('watch page', () => {
   })
 
   test('resets the transcript scroll position when searching', async ({ page }) => {
+    let releaseGermanTranscript
+    const germanTranscriptReady = new Promise(resolve => { releaseGermanTranscript = resolve })
     await page.route('https://example.test/transcript.vtt', route => route.fulfill({
       body: longTranscript(),
       contentType: 'text/vtt'
     }))
+    await page.route('https://example.test/transcript-de.vtt', async (route) => {
+      await germanTranscriptReady
+      await route.fulfill({
+        body: longTranscript(),
+        contentType: 'text/vtt'
+      })
+    })
     await page.locator(sel.searchInput).fill(VIDEO_URL)
     await page.locator(sel.searchInput).press('Enter')
     await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
@@ -382,6 +391,10 @@ test.describe('watch page', () => {
         url: 'https://example.test/transcript.vtt',
         label: 'English',
         language: 'en'
+      }, {
+        url: 'https://example.test/transcript-de.vtt',
+        label: 'German',
+        language: 'de'
       }]
       watchView.showTranscript = true
       watchView.isLoading = false
@@ -390,11 +403,39 @@ test.describe('watch page', () => {
 
     const transcriptSegments = page.locator('.transcriptSegments')
     await expect(page.locator('.transcriptSegment').first()).toBeVisible()
+    expect(await transcriptSegments.evaluate(element => getComputedStyle(element).maskImage))
+      .toContain('linear-gradient')
+    await expect(transcriptSegments).not.toHaveClass(/transcriptFadeTop/)
+    await expect(transcriptSegments).toHaveClass(/transcriptFadeBottom/)
+    const transcriptActions = page.locator('.sidebarArea .transcriptActions')
+    await expect(transcriptActions.locator('.iconButton')).toHaveCount(2)
+    await expect(transcriptActions.locator('.btn')).toHaveCount(0)
+    const copyButton = transcriptActions.getByRole('button', { name: 'Copy' })
+    const saveButton = transcriptActions.getByRole('button', { name: 'Save' })
+    const transcriptCard = page.locator('.sidebarArea .transcriptCard')
+    await expect(transcriptCard.locator('.transcriptHeader')).toHaveCSS('margin-block-end', '16px')
+    const searchButton = transcriptCard.getByRole('button', { name: 'Search transcript' })
+    await expect(searchButton).toBeVisible()
+    const languageButton = transcriptCard.getByRole('button', { name: 'Transcript language' })
+    await expect(languageButton).toBeVisible()
+    await expect(transcriptCard.getByPlaceholder('Search transcript')).toHaveCount(0)
+    await languageButton.click()
+    await transcriptCard.getByRole('button', { name: 'German' }).click()
+    await expect(copyButton).toHaveAttribute('aria-disabled', 'true')
+    await expect(saveButton).toHaveAttribute('aria-disabled', 'true')
+    releaseGermanTranscript()
+    await expect(page.locator('.transcriptSegment').first()).toBeVisible()
+    await expect(copyButton).toHaveAttribute('aria-disabled', 'false')
+    await expect(saveButton).toHaveAttribute('aria-disabled', 'false')
     await transcriptSegments.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
-    await page.getByPlaceholder('Search transcript').fill('Transcript line 2500.')
+    await expect(transcriptSegments).toHaveClass(/transcriptFadeTop/)
+    await expect(transcriptSegments).not.toHaveClass(/transcriptFadeBottom/)
+    await searchButton.click()
+    await transcriptCard.getByPlaceholder('Search transcript').fill('Transcript line 2500.')
     await expect(page.locator('.transcriptSegment')).toHaveCount(1)
     await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBe(0)
+    await expect(transcriptSegments).not.toHaveClass(/transcriptFadeTop|transcriptFadeBottom/)
 
     await watchComponent.dispose()
   })
