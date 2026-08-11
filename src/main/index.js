@@ -4539,6 +4539,7 @@ function runApp() {
             label: 'Preferences',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               navigateTo('/settings', browserWindow)
             },
             type: 'normal'
@@ -4728,6 +4729,7 @@ function runApp() {
               ? keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY_MAC
               : keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY),
             click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               navigateTo('/history', browserWindow)
             },
             type: 'normal'

@@ -16,12 +16,12 @@ async function expectHighlightCenteredOn(page, targetSelector) {
   }).toEqual({ x: 0, y: 0 })
 }
 
-async function clickNewTabMenu(app) {
-  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+async function clickAppMenuItem(app, menuLabel, itemLabel) {
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }, { menuLabel, itemLabel }) => {
     const browserWindow = BrowserWindow.getAllWindows()[0]
-    const tabsMenu = Menu.getApplicationMenu().items.find(item => item.label === 'Tabs')
-    tabsMenu.submenu.items.find(item => item.label === 'New Tab').click(undefined, browserWindow)
-  })
+    const menu = Menu.getApplicationMenu().items.find(item => item.label === menuLabel)
+    menu.submenu.items.find(item => item.label === itemLabel).click(undefined, browserWindow)
+  }, { menuLabel, itemLabel })
 }
 
 test('shows returning users only where settings moved', async ({ app, page }) => {
@@ -37,8 +37,13 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   await page.keyboard.press('Control+t')
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
 
-  await clickNewTabMenu(app)
+  await clickAppMenuItem(app, 'Tabs', 'New Tab')
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
+
+  const currentUrl = page.url()
+  await clickAppMenuItem(app, 'File', 'Preferences')
+  await clickAppMenuItem(app, 'Navigate', 'History')
+  expect(page.url()).toBe(currentUrl)
 
   const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
   await expect(primaryAction).toBeFocused()
@@ -48,7 +53,7 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   await primaryAction.click()
   await expect(tutorial).toBeHidden()
 
-  await clickNewTabMenu(app)
+  await clickAppMenuItem(app, 'Tabs', 'New Tab')
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount + 1)
 
   await page.reload()
