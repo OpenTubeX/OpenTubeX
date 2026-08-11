@@ -50,6 +50,7 @@ const IpcChannels = {
   TABS_GET_CACHED_PREVIEWS: 'tabs-get-cached-previews',
   TABS_SET_PREVIEWS_ENABLED: 'tabs-set-previews-enabled',
   TABS_SET_PREVIEW_CAPTURE_PAUSED: 'tabs-set-preview-capture-paused',
+  TABS_SET_SHORTCUTS_BLOCKED: 'tabs-set-shortcuts-blocked',
   TABS_REQUEST_PREVIEW_REFRESH: 'tabs-request-preview-refresh',
   TABS_RESTORE_CLOSED: 'tabs-restore-closed',
   TABS_RELOAD: 'tabs-reload',

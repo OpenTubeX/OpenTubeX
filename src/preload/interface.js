@@ -726,6 +726,14 @@ export default {
     },
 
     /**
+     * Block native tab menu accelerators while a modal owns keyboard input.
+     * @param {boolean} blocked
+     */
+    setShortcutsBlocked: (blocked) => {
+      ipcRenderer.send(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, blocked === true)
+    },
+
+    /**
      * Get the current tab state
      * @returns {Promise<{tabs: Array<{id: string, url: string, title: string, isActive: boolean}>, activeTabId: string|null}>}
      */

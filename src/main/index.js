@@ -122,6 +122,7 @@ function runApp() {
   ])
   const closeConfirmedWindowIds = new Set()
   const closingWindowIds = new Set()
+  const appShortcutBlockedWindows = new WeakSet()
   let quitPromptInProgress = null
   const windowClosePromptsInProgress = new Map()
   let isQuitConfirmed = false
@@ -3367,6 +3368,21 @@ function runApp() {
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
 
+  ipcMain.on(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof blocked !== 'boolean') {
+      return
+    }
+
+    const browserWindow = BrowserWindow.fromWebContents(event.sender)
+    if (!browserWindow) return
+
+    if (blocked) {
+      appShortcutBlockedWindows.add(browserWindow)
+    } else {
+      appShortcutBlockedWindows.delete(browserWindow)
+    }
+  })
+
   /**
    * @param {BrowserWindow} window
    */
@@ -4728,7 +4744,7 @@ function runApp() {
             label: 'New Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   tabManager.createTabWithPreference({ makeActive: true }).catch(error => {
@@ -4742,7 +4758,7 @@ function runApp() {
             label: 'Close Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_TAB),
             click: async (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.activeTabId) {
                   const tabIds = tabManager.selectedTabIds.length > 1
@@ -4767,7 +4783,7 @@ function runApp() {
             label: 'Reload Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RELOAD_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   const tabIds = tabManager.selectedTabIds.length > 1
@@ -4784,7 +4800,7 @@ function runApp() {
             label: 'Reopen Closed Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   tabManager.restoreClosedTab()
@@ -4797,7 +4813,7 @@ function runApp() {
             label: 'Next Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEXT_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.tabs.size > 1) {
                   const tabIds = Array.from(tabManager.tabs.keys())
@@ -4812,7 +4828,7 @@ function runApp() {
             label: 'Previous Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.PREV_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.tabs.size > 1) {
                   const tabIds = Array.from(tabManager.tabs.keys())

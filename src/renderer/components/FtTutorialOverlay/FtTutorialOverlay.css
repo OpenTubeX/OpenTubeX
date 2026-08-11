@@ -28,6 +28,8 @@
   position: fixed;
   box-sizing: border-box;
   inline-size: min(380px, calc(100vw - 24px));
+  max-block-size: calc(100dvh - 24px);
+  overflow: auto;
   margin: 0;
   padding: 24px;
   color: var(--primary-text-color);

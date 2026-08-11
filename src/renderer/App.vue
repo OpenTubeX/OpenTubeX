@@ -723,14 +723,14 @@ async function initializeManagedExternalSoftware() {
 
 const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
 
-function initializeTutorial(hasExistingSettings, lastUsedVersion) {
+function initializeTutorial(hasExistingInstallation, lastUsedVersion) {
   try {
     let audience = localStorage.getItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
     if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
-    if (hasExistingSettings === null) return false
+    if (hasExistingInstallation === null) return false
 
     if (audience !== 'new' && audience !== 'existing') {
-      audience = hasExistingSettings ? 'existing' : 'new'
+      audience = hasExistingInstallation ? 'existing' : 'new'
       localStorage.setItem(TUTORIAL_AUDIENCE_STORAGE_KEY, audience)
     }
 
@@ -762,8 +762,6 @@ onMounted(async () => {
   }
 
   const hasExistingSettings = await store.dispatch('grabUserSettings')
-  const tutorialPending = initializeTutorial(hasExistingSettings, lastUsedVersion)
-  setLastUsedVersion(packageDetails.version)
 
   updateTheme()
 
@@ -778,7 +776,17 @@ onMounted(async () => {
     }
   })
 
-  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async () => {
+  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async (hasExistingProfiles) => {
+    const hasExistingInstallation = hasExistingSettings === true || hasExistingProfiles === true
+      ? true
+      : hasExistingSettings === null || hasExistingProfiles === null
+        ? null
+        : false
+    const tutorialPending = initializeTutorial(hasExistingInstallation, lastUsedVersion)
+    if (hasExistingInstallation !== null || lastUsedVersion !== null) {
+      setLastUsedVersion(packageDetails.version)
+    }
+
     const syncDataReady = Promise.all([
       store.dispatch('grabHistory'),
       store.dispatch('grabAllPlaylists'),
@@ -865,6 +873,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
+    window.ftElectron.tabs.setShortcutsBlocked(false)
   }
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
@@ -892,6 +901,12 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
+})
+
+watch(showTutorial, (visible) => {
+  if (isElectron) {
+    window.ftElectron.tabs.setShortcutsBlocked(visible)
+  }
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {

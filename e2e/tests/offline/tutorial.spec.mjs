@@ -16,7 +16,7 @@ async function expectHighlightCenteredOn(page, targetSelector) {
   }).toEqual({ x: 0, y: 0 })
 }
 
-test('shows returning users only where settings moved', async ({ page }) => {
+test('shows returning users only where settings moved', async ({ app, page }) => {
   const tutorial = page.getByRole('dialog', { name: 'Settings have moved' })
   await expect(tutorial).toBeVisible()
   const lastUsedVersion = await page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion'))
@@ -29,6 +29,13 @@ test('shows returning users only where settings moved', async ({ page }) => {
   await page.keyboard.press('Control+t')
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
 
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const tabsMenu = Menu.getApplicationMenu().items.find(item => item.label === 'Tabs')
+    tabsMenu.submenu.items.find(item => item.label === 'New Tab').click(undefined, browserWindow)
+  })
+  await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
+
   const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
   await expect(primaryAction).toBeFocused()
   await page.keyboard.press('Tab')
@@ -39,6 +46,19 @@ test('shows returning users only where settings moved', async ({ page }) => {
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test('keeps the tutorial actions reachable in a short window', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(800, 320)
+  })
+
+  const tutorial = page.getByRole('dialog', { name: 'Settings have moved' })
+  await expect(tutorial.getByRole('button', { name: 'Got it' })).toBeVisible()
+  await expect.poll(() => tutorial.evaluate(element => {
+    const bounds = element.getBoundingClientRect()
+    return bounds.top >= 0 && bounds.bottom <= window.innerHeight
+  })).toBe(true)
 })
 
 test.describe('right-to-left layout', () => {
