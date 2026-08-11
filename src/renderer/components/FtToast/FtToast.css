@@ -552,12 +552,13 @@
 }
 
 /* The two newest toasts are readable while the stack is collapsed. The ones
-   behind them are trimmed to the front toast's size so the pile reads as one
-   run of equally sized cards rather than a ragged edge. */
+   behind them are trimmed to the size of the second, which is what they are
+   stacked behind, so the pile tucks under it as one run of equally sized cards
+   rather than a ragged edge. */
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast-slot,
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
   box-sizing: border-box;
-  inline-size: var(--front-toast-width);
+  inline-size: var(--stacked-toast-width, var(--front-toast-width));
   block-size: 100%;
 }
 
@@ -579,18 +580,14 @@
   transform: scale(calc(-1 * (var(--toasts-before) - 1) * 0.05 + 1));
 }
 
-/* A collapsed stack shows the toast at the front of it and one card peeking out
-   from behind, however many are waiting: past that the pile is all sliver and no
-   toast. The rest are still there and fan out with it on hover, so this is not
-   sonner's `visibleToasts`, which would hide them whether the stack is open or
-   not. They stop taking pointer input while they are invisible, or the sliver
-   each one would have occupied still takes the click. */
+/* Everything from the third toast back piles up behind the second rather than
+   behind the front one, so the two readable toasts sit clear of it and each
+   sliver still shows there is more waiting. Measured from the front toast's slot
+   plus a gap per toast behind it, which assumes the second is about as tall as
+   the front: a taller one covers part of the pile, which costs nothing beyond a
+   shorter peek. */
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) {
-  opacity: 0;
-}
-
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
-  pointer-events: none;
+  --y: translateY(calc(var(--lift) * (var(--front-toast-height) + var(--gap) * var(--toasts-before))));
 }
 
 @media (prefers-reduced-motion: reduce) {

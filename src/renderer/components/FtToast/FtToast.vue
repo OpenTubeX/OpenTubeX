@@ -12,7 +12,7 @@
       :swipe-directions="swipeDirections"
       :offset="toasterOffset"
       :mobile-offset="toasterOffset"
-      :style="{ '--width': TOAST_WIDTH, '--front-toast-width': frontToastWidth, '--stack-height': stackHeight, '--stack-width': stackWidth }"
+      :style="{ '--width': TOAST_WIDTH, '--front-toast-width': frontToastWidth, '--stacked-toast-width': stackedToastWidth, '--stack-height': stackHeight, '--stack-width': stackWidth }"
     />
     <div
       v-if="showProgressToast"
@@ -150,6 +150,13 @@ const progressToastHeight = ref(0)
  * @type {import('vue').Ref<string|null>}
  */
 const frontToastWidth = ref(null)
+/**
+ * Width of the second toast, as a CSS length. The pile of older toasts sits
+ * behind that one rather than behind the front one, so it is the width they have
+ * to tuck under.
+ * @type {import('vue').Ref<string|null>}
+ */
+const stackedToastWidth = ref(null)
 /**
  * Height of the whole fanned out stack, as a CSS length, used to back it with a
  * region that holds the hover. Without one the stack collapses the moment the
@@ -318,9 +325,11 @@ function measureStack(holder) {
   const width = rows.reduce((widest, row) => {
     return Math.max(widest, row.querySelector('.toast')?.offsetWidth ?? 0)
   }, 0)
+  const stacked = rows[1]?.querySelector('.toast')?.offsetWidth
 
   stackHeight.value = `${height}px`
   stackWidth.value = `${width}px`
+  stackedToastWidth.value = stacked ? `${stacked}px` : null
 }
 
 /**

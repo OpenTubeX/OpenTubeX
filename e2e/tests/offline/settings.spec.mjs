@@ -1289,7 +1289,7 @@ test.describe('settings', () => {
     await expect(toastWithoutIndicator).toHaveCount(0)
   })
 
-  test('shows two toasts at a glance and the rest on hover', async ({ page }) => {
+  test('shows two toasts at a glance with the rest piled behind', async ({ page }) => {
     await page.mouse.move(800, 300)
     await page.evaluate(() => {
       for (const name of ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']) {
@@ -1305,16 +1305,33 @@ test.describe('settings', () => {
       })
     }
 
-    // Collapsed the pile is the newest toast and one card peeking out behind it,
-    // however many are waiting: past that it is all sliver and no toast
-    await expect.poll(drawn).toBe(2)
+    function readable () {
+      return page.locator('.toast').evaluateAll((toasts) => {
+        return toasts.filter((toast) => {
+          return getComputedStyle(toast.querySelector('.message')).opacity !== '0'
+        }).length
+      })
+    }
 
-    // They are all still there though, and fan out with the rest on hover
-    await page.locator('.toast', { hasText: 'Epsilon toast' }).hover()
+    // Collapsed, the two newest toasts can be read and the rest are drawn behind
+    // them as cards with nothing on them, so a full stack still looks like more
+    // than a couple of toasts do
+    await expect.poll(readable).toBe(2)
     await expect.poll(drawn).toBe(5)
 
+    // Each of those peeks out past the one in front of it, or the pile would be
+    // hidden behind the toasts and there would be no sign of it
+    const tops = await page.locator('.toast').evaluateAll((toasts) => {
+      return toasts.map(toast => Math.round(toast.getBoundingClientRect().top))
+    })
+    expect(new Set(tops).size).toBe(tops.length)
+
+    // They all become readable on hover
+    await page.locator('.toast', { hasText: 'Epsilon toast' }).hover()
+    await expect.poll(readable).toBe(5)
+
     await page.mouse.move(800, 300)
-    await expect.poll(drawn).toBe(2)
+    await expect.poll(readable).toBe(2)
   })
 
   test('keeps the stack fanned out while the pointer moves between toasts', async ({ page }) => {
