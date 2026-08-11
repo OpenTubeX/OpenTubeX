@@ -1289,6 +1289,34 @@ test.describe('settings', () => {
     await expect(toastWithoutIndicator).toHaveCount(0)
   })
 
+  test('shows two toasts at a glance and the rest on hover', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      for (const name of ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon']) {
+        window.ftElectron.showToastOnAllTabs(`${name} toast`, 30000)
+      }
+    })
+    await expect(page.locator('.toast', { hasText: 'Epsilon toast' })).toBeVisible()
+    await page.waitForTimeout(700)
+
+    function drawn () {
+      return page.locator('[data-sonner-toast]').evaluateAll((rows) => {
+        return rows.filter(row => getComputedStyle(row).opacity !== '0').length
+      })
+    }
+
+    // Collapsed the pile is the newest toast and one card peeking out behind it,
+    // however many are waiting: past that it is all sliver and no toast
+    await expect.poll(drawn).toBe(2)
+
+    // They are all still there though, and fan out with the rest on hover
+    await page.locator('.toast', { hasText: 'Epsilon toast' }).hover()
+    await expect.poll(drawn).toBe(5)
+
+    await page.mouse.move(800, 300)
+    await expect.poll(drawn).toBe(2)
+  })
+
   test('keeps the stack fanned out while the pointer moves between toasts', async ({ page }) => {
     await page.mouse.move(800, 300)
     await page.evaluate(() => {

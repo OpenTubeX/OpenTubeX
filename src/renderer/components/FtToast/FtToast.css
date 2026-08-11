@@ -572,6 +572,20 @@
   transform: scale(calc(-1 * var(--toasts-before) * 0.05 + 1));
 }
 
+/* A collapsed stack shows the toast at the front of it and one card peeking out
+   from behind, however many are waiting: past that the pile is all sliver and no
+   toast. The rest are still there and fan out with it on hover, so this is not
+   sonner's `visibleToasts`, which would hide them whether the stack is open or
+   not. They stop taking pointer input while they are invisible, or the sliver
+   each one would have occupied still takes the click. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) {
+  opacity: 0;
+}
+
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .toast-slot.persistent-slot {
     transition-duration: 1ms;
