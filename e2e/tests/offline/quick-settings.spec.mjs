@@ -25,6 +25,22 @@ test.describe('quick settings menu', () => {
     expect(Math.abs(gaps[0] - gaps[1])).toBeLessThanOrEqual(1)
   })
 
+  test('stays inside a short viewport below horizontal tabs', async ({ app, page }) => {
+    await app.electronApp.evaluate(({ BrowserWindow }) => {
+      BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1280, height: 720 })
+    })
+
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    await expect(menu).toBeVisible()
+
+    const { bottom, viewportHeight } = await menu.evaluate(element => ({
+      bottom: element.getBoundingClientRect().bottom,
+      viewportHeight: window.innerHeight
+    }))
+    expect(bottom).toBeLessThanOrEqual(viewportHeight)
+  })
+
   test('keeps paired selects aligned and shows locale completeness', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')
