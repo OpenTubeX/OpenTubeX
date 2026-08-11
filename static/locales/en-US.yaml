@@ -383,6 +383,7 @@ Settings:
     app needs to restart for changes to take effect. Restart and apply change?
   General Settings:
     General Settings: General
+    Update Relative Timestamps: Keep relative timestamps updated
     Stream Extraction Method:
       Stream Extraction Method: Stream extraction method
       yt-dlp: yt-dlp
@@ -1770,6 +1771,7 @@ Description:
 #Tooltips
 Tooltips:
   General Settings:
+    Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
     Stream Extraction Method: |
       Choose how OpenTubeX obtains video streams. yt-dlp must be available when selected.
       Built-in does not support seeking for livestreams and premieres.

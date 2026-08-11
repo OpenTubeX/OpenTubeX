@@ -51,6 +51,7 @@ import { getRelativeTimeFromDate, showApiErrorToast } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const { t } = useI18n()
 
@@ -60,9 +61,10 @@ const isElectron = process.env.IS_ELECTRON
 const hasHorizontalTabBar = computed(() => isElectron && !store.getters.getUseVerticalTabBar)
 
 const isLoading = ref(false)
+const relativeTimeNow = useRelativeTimeClock()
 
 const lastPopularRefreshTimestamp = computed(() => {
-  return getRelativeTimeFromDate(store.getters.getLastPopularRefreshTimestamp, true)
+  return getRelativeTimeFromDate(store.getters.getLastPopularRefreshTimestamp, true, true, relativeTimeNow.value)
 })
 
 /** @type {import('vue').ComputedRef<Array | null>} */

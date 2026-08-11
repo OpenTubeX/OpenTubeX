@@ -26,6 +26,14 @@
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
         />
+        <FtToggleSwitch
+          :label="t('Settings.General Settings.Update Relative Timestamps')"
+          :tooltip="t('Tooltips.General Settings.Update Relative Timestamps')"
+          :default-value="updateRelativeTimestamps"
+          setting-key="updateRelativeTimestamps"
+          :compact="true"
+          @change="updateRelativeTimestampsSetting"
+        />
         <!-- Last in this column on purpose: it is the only one of these that
              some platforms hide, so the columns stay even where it is missing
              and this one stays the longer of the two where it is not. -->
@@ -432,6 +440,15 @@ const rememberTabNavigationHistory = computed(() => store.getters.getRememberTab
  */
 function updateRememberTabNavigationHistory(value) {
   store.dispatch('updateRememberTabNavigationHistory', value)
+}
+
+const updateRelativeTimestamps = computed(() => store.getters.getUpdateRelativeTimestamps)
+
+/**
+ * @param {boolean} value
+ */
+function updateRelativeTimestampsSetting(value) {
+  store.dispatch('updateUpdateRelativeTimestamps', value)
 }
 
 const BACKEND_VALUES = process.env.SUPPORTS_LOCAL_API

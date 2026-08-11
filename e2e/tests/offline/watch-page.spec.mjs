@@ -52,6 +52,36 @@ async function setWindowWidth(app, width) {
 }
 
 test.describe('watch page', () => {
+  test('transitions a premiere when relative timestamp updates are disabled', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await page.clock.install({ time: Date.now() })
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      const watchView = component.proxy
+      watchView.$store.commit('setUpdateRelativeTimestamps', false)
+      watchView.isLoading = false
+      watchView.errorMessage = ''
+      watchView.isUpcoming = true
+      watchView.playabilityStatus = 'UNPLAYABLE'
+      watchView.upcomingTimestamp = 'August 11 at 5:00 PM'
+      watchView.upcomingTimeLeft = 'in less than a minute'
+      watchView.premiereDate = new Date(Date.now() + 60_000)
+      watchView.scheduleLiveReminderStartInvalidation()
+      await watchView.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveCount(1)
+
+    await page.clock.fastForward(60_001)
+
+    await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveCount(0)
+    await expect(page.locator(`${activeTab} .premiereText`)).toHaveText(
+      'Starting soon, please refresh the page to check again'
+    )
+  })
+
   test('shows tags below the description and copies the description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

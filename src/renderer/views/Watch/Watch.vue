@@ -255,13 +255,13 @@
               class="premiereIcon"
             />
             <p
-              v-if="upcomingTimestamp !== null"
+              v-if="upcomingTimestamp !== null && !hasScheduledPremiereStarted"
               class="premiereText"
             >
               <span
                 class="premiereTextTimeLeft"
               >
-                {{ $t("Video.Premieres") }} {{ upcomingTimeLeft }}
+                {{ $t("Video.Premieres") }} {{ displayedUpcomingTimeLeft }}
               </span>
               <br>
               <span

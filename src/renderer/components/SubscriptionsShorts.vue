@@ -19,7 +19,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { useAutoRefreshClock } from '../composables/useAutoRefreshClock'
+import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import {
   refreshSubscriptionShortsFromRemote,
@@ -41,15 +41,7 @@ const lastRemoteRefreshSuccessTimestamp = ref(null)
 
 let alreadyLoadedRemotely = false
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasPendingAutoRefresh = computed(() => {
-  const interval = parseInt(store.getters.getSubscriptionShortsAutoRefreshInterval, 10)
-
-  return !!store.getters.getSubscriptionShortsNextAutoRefreshTimestamp &&
-    !Number.isNaN(interval) && interval > 0
-})
-
-const now = useAutoRefreshClock(hasPendingAutoRefresh)
+const now = useRelativeTimeClock()
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const subscriptionCacheReady = computed(() => store.getters.getSubscriptionCacheReady)
@@ -90,7 +82,7 @@ const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
 const lastShortRefreshTimestamp = computed(() => {
   // Cache is not ready when data is just loaded from remote
   if (lastRemoteRefreshSuccessTimestamp.value) {
-    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true)
+    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true, true, now.value)
   }
 
   if (
@@ -106,7 +98,7 @@ const lastShortRefreshTimestamp = computed(() => {
       minTimestamp = cacheEntry.timestamp
     }
   })
-  return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+  return getRelativeTimeFromDate(minTimestamp.getTime(), true, true, now.value)
 })
 
 const refreshTitle = computed(() => {

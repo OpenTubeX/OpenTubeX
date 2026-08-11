@@ -182,6 +182,7 @@ import {
   getRelativeTimeFromDate,
 } from '../../helpers/utils'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const props = defineProps({
   data: {
@@ -201,6 +202,8 @@ const props = defineProps({
     default: false
   },
 })
+
+const relativeTimeNow = useRelativeTimeClock()
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => {
@@ -258,7 +261,7 @@ const formattedVoteCount = computed(() => {
 
 const publishedText = computed(() => {
   if (props.data.publishedTime) {
-    return getRelativeTimeFromDate(props.data.publishedTime)
+    return getRelativeTimeFromDate(props.data.publishedTime, false, true, relativeTimeNow.value)
   }
 
   return ''

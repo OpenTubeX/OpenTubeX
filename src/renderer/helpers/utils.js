@@ -990,14 +990,14 @@ export function getCachedShortDateTimeFormat(locale) {
  * @param {number} date
  * @param {boolean} hideSeconds
  * @param {boolean} useThirtyDayMonths
+ * @param {number} now
  * @returns {string}
  */
-export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayMonths = true) {
+export function getRelativeTimeFromDate(date, hideSeconds = false, useThirtyDayMonths = true, now = Date.now()) {
   if (!date) {
     return ''
   }
 
-  const now = Date.now()
   // Convert from ms to second
   // For easier code interpretation the value is made to be positive
   let timeDiffFromNow = ((now - date) / 1000)

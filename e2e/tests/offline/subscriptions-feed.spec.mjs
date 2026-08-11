@@ -186,6 +186,20 @@ test.describe('subscriptions feed from cache', () => {
     await expect(lastRefresh).toBeVisible()
     await expect(lastRefresh).toContainText('2 hours ago')
   })
+
+  test('updates relative timestamps without reloading the page', async ({ page }) => {
+    // Install the clock before mounting the feed so its shared interval is controlled.
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+
+    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+
+    await page.clock.fastForward(31 * 60_000)
+
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
+  })
 })
 
 test.describe('subscriptions feed with a partially cached profile', () => {
@@ -202,6 +216,34 @@ test.describe('subscriptions feed with a partially cached profile', () => {
     await expect(page.getByText('Video A newer')).toBeVisible()
     await expect(page.getByText('Video A older')).toBeVisible()
     await expect(page.getByText('Video B newest')).toHaveCount(0)
+  })
+})
+
+test.describe('relative timestamp updates disabled', () => {
+  test.use({
+    seed: {
+      ...seed,
+      settings: {
+        ...seed.settings,
+        updateRelativeTimestamps: false
+      }
+    }
+  })
+
+  test('keeps relative timestamps fixed until the page is revisited', async ({ page }) => {
+    await goTo(page, 'trending')
+    await page.clock.install({ time: now })
+    await goTo(page, 'subscriptions')
+
+    const newestVideo = page.locator('.ft-list-video').filter({ hasText: 'Video B newest' })
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+
+    await page.clock.fastForward(31 * 60_000)
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 30 minutes ago')
+
+    await goTo(page, 'trending')
+    await goTo(page, 'subscriptions')
+    await expect(newestVideo.locator('.uploadedTime')).toHaveText('• 1 hour ago')
   })
 })
 
