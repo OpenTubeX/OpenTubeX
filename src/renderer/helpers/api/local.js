@@ -2092,6 +2092,7 @@ export function parseLocalEndscreen(endscreen) {
       id: element.id,
       type: element.style,
       title: element.title.text,
+      videoId: element.style === 'VIDEO' ? payload.videoId : undefined,
       thumbnail,
       channelId: element.style === 'CHANNEL' ? payload.browseId : undefined,
       description: element.style === 'CHANNEL' ? element.metadata?.text ?? '' : '',

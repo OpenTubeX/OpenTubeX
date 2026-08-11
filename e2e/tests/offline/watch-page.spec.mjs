@@ -1,6 +1,7 @@
 import { sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 // These used to live in the network suite, gated on the live API. They all use
 // "Me at the zoo", whose page and comment pages are recorded, so they run
@@ -51,6 +52,53 @@ async function setWindowWidth(app, width) {
   }, width)
 }
 
+async function mockTranslatedEndscreen(app, page) {
+  await mockPlayableWatchPage(app, page)
+
+  await page.route(/\/youtubei\/v1\/player/, (route, request) => {
+    const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
+    const response = demoPlayerResponse(videoId, {
+      endscreen: {
+        endscreenRenderer: {
+          elements: [{
+            endscreenElementRenderer: {
+              style: 'VIDEO',
+              title: { simpleText: 'Translated end-screen title' },
+              endpoint: { watchEndpoint: { videoId: 'end-screen-video' } },
+              image: {
+                thumbnails: [{
+                  url: 'https://i.ytimg.com/vi/end-screen-video/hqdefault.jpg',
+                  width: 480,
+                  height: 270
+                }]
+              },
+              left: '0.1',
+              top: '0.1',
+              width: '0.3',
+              aspectRatio: '1.777',
+              startMs: '0',
+              endMs: '30000',
+              id: 'original-title-annotation'
+            }
+          }],
+          startMs: '0'
+        }
+      }
+    })
+
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(response)
+    })
+  })
+
+  await page.evaluate(async () => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    await store.dispatch('updateAvoidTranslation', 'watch_only')
+  })
+}
+
 test.describe('watch page', () => {
   test('transitions a premiere when relative timestamp updates are disabled', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
@@ -80,6 +128,54 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .premiereText`)).toHaveText(
       'Starting soon, please refresh the page to check again'
     )
+  })
+
+  test('keeps original video titles in end-screen annotations', async ({ app, page }) => {
+    await mockTranslatedEndscreen(app, page)
+    await page.route(/\/oembed\?/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ title: 'Original end-screen title' })
+    }))
+
+    await openMockedVideo(page)
+    await waitForPlayback(page)
+
+    await expect(page.locator(`${activeTab} .annotationTitleText`))
+      .toHaveText('Original end-screen title')
+  })
+
+  test('does not replace an end-screen title after original text is disabled', async ({ app, page }) => {
+    await mockTranslatedEndscreen(app, page)
+
+    let releaseOembed
+    let markOembedRequested
+    const oembedRequested = new Promise((resolve) => { markOembedRequested = resolve })
+    await page.route(/\/oembed\?/, async (route) => {
+      markOembedRequested()
+      await new Promise((resolve) => { releaseOembed = resolve })
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ title: 'Original end-screen title' })
+      })
+    })
+
+    await openMockedVideo(page)
+    await waitForPlayback(page)
+    await oembedRequested
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateAvoidTranslation', 'disabled')
+    })
+    const oembedResponse = page.waitForResponse(/\/oembed\?/)
+    releaseOembed()
+    await oembedResponse
+    await page.waitForTimeout(100)
+
+    await expect(page.locator(`${activeTab} .annotationTitleText`))
+      .toHaveText('Translated end-screen title')
   })
 
   test('shows tags below the description and copies the description', async ({ app, page }) => {
