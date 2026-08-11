@@ -222,7 +222,7 @@ History:
   3 Months: 3 miesiące
   1 Year: 1 rok
   Custom: Własny okres
-  History Older Than Days Removed: Historia oglądania starsza niż {days} dni została usunięta
+  History Older Than Days Removed: Historia oglądania starsza niż 1 dzień została usunięta | Historia oglądania starsza niż {days} dni została usunięta
   Mark All As Watched: Oznacz wszystkie jako obejrzane
   Mark All As Watched Confirmation: Czy na pewno chcesz oznaczyć wszystkie filmy w historii jako obejrzane?
   All History Marked as Watched: Wszystkie filmy w Twojej historii zostały oznaczone jako obejrzane
@@ -974,10 +974,10 @@ Channel:
     Joined: Data dołączenia
     Location: Lokalizacja
     Tags:
-      Tags: Tagi
+      Tags: Tagi kanału
       Search for: Szukaj „{tag}”
   Added channel to your subscriptions: Dodano kanał do twoich subskrypcji
-  Removed subscription from {count} other channel(s): Usunięto subskrypcje z {count} pozostałych kanałów
+  Removed subscription from {count} other channel(s): Usunięto subskrypcję z 1 innego kanału | Usunięto subskrypcję z {count} innych kanałów
   Channel has been removed from your subscriptions: Kanał został usunięty z twoich subskrypcji
   This channel is age-restricted and currently cannot be viewed in OpenTubeX.: Kanał ten ma ograniczenie wiekowe, dlatego nie zostanie wyświetlony we OpenTubeX.
   Channel Tabs: Karty kanału
@@ -985,7 +985,7 @@ Channel:
   This channel does not allow searching: Ten kanał nie zezwala na przeszukiwanie
   Posts:
     This channel currently does not have any posts: Ten kanał nie ma obecnie żadnych wpisów
-    votes: '{votes} głosów'
+    votes: '{votes} głos | {votes} głosy | {votes} głosów'
     Reveal Answers: Pokaż odpowiedzi
     Hide Answers: Schowaj odpowiedzi
     Video hidden by OpenTubeX: Film schowany przez OpenTubeX
