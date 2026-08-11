@@ -4526,7 +4526,8 @@ function runApp() {
           {
             label: 'New Window',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
-            click: (_menuItem, _browserWindow, _event) => {
+            click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               createWindow({
                 replaceMainWindow: false,
                 showWindowNow: true
@@ -4573,12 +4574,16 @@ function runApp() {
           {
             label: 'Toggle Developer Tools',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.TOGGLE_DEVTOOLS),
-            click: (_menuItem, browserWindow) => browserWindow?.webContents.toggleDevTools()
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.webContents.toggleDevTools()
+            }
           },
           {
             label: 'Enter Inspect Element Mode',
             accelerator: 'CmdOrCtrl+Shift+C',
             click: (_, window) => {
+              if (appShortcutBlockedWindows.has(window)) { return }
               if (window.webContents.isDevToolsOpened()) {
                 window.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
               } else {
@@ -4606,13 +4611,16 @@ function runApp() {
           {
             label: 'Actual Size',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESET_ZOOM),
-            click: (_menuItem, browserWindow) => browserWindow?.webContents.setZoomLevel(0)
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.webContents.setZoomLevel(0)
+            }
           },
           {
             label: 'Zoom In',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_IN),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() + 0.5)
               }
             }
@@ -4621,7 +4629,7 @@ function runApp() {
             label: 'Zoom Out',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_OUT),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() - 0.5)
               }
             }
@@ -4631,6 +4639,7 @@ function runApp() {
             label: 'Toggle Full Screen',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.FULLSCREEN),
             click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               browserWindow?.setFullScreen(!browserWindow.isFullScreen())
             }
           },
@@ -4853,7 +4862,10 @@ function runApp() {
           {
             label: 'Minimize',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.MINIMIZE_WINDOW),
-            click: (_menuItem, browserWindow) => browserWindow?.minimize()
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.minimize()
+            }
           },
           {
             label: 'Close Window',

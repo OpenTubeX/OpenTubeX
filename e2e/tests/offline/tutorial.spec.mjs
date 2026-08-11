@@ -45,6 +45,34 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   await clickAppMenuItem(app, 'Navigate', 'History')
   expect(page.url()).toBe(currentUrl)
 
+  const initialWindowState = await app.electronApp.evaluate(({ BrowserWindow }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    return {
+      count: BrowserWindow.getAllWindows().length,
+      zoom: browserWindow.webContents.getZoomLevel()
+    }
+  })
+  await clickAppMenuItem(app, 'File', 'New Window')
+  await clickAppMenuItem(app, 'View', 'Toggle Developer Tools')
+  await clickAppMenuItem(app, 'View', 'Zoom In')
+  await clickAppMenuItem(app, 'View', 'Toggle Full Screen')
+  await clickAppMenuItem(app, 'Window', 'Minimize')
+  await expect.poll(() => app.electronApp.evaluate(({ BrowserWindow }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    return {
+      count: BrowserWindow.getAllWindows().length,
+      devToolsOpen: browserWindow.webContents.isDevToolsOpened(),
+      fullscreen: browserWindow.isFullScreen(),
+      minimized: browserWindow.isMinimized(),
+      zoom: browserWindow.webContents.getZoomLevel()
+    }
+  })).toEqual({
+    ...initialWindowState,
+    devToolsOpen: false,
+    fullscreen: false,
+    minimized: false
+  })
+
   const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
   await expect(primaryAction).toBeFocused()
   await page.keyboard.press('Tab')
