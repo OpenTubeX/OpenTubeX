@@ -92,6 +92,7 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Your library is always nearby')
+  await expect(tutorial.getByRole('heading', { name: 'Your library is always nearby' })).toBeFocused()
   await expectHighlightCenteredOn(page, '[data-tutorial="navigation"]')
 
   await tutorial.getByRole('button', { name: 'Next' }).click()

@@ -39,7 +39,11 @@
         >
           <FontAwesomeIcon :icon="step.icon" />
         </div>
-        <h2 :id="titleId">
+        <h2
+          :id="titleId"
+          ref="titleRef"
+          tabindex="-1"
+        >
           {{ step.title }}
         </h2>
         <p :id="descriptionId">
@@ -91,6 +95,7 @@ const descriptionId = useId()
 const promptId = useId()
 const cardRef = useTemplateRef('cardRef')
 const primaryButtonRef = useTemplateRef('primaryButtonRef')
+const titleRef = useTemplateRef('titleRef')
 const stepIndex = ref(0)
 const targetRect = ref(null)
 const cardStyle = ref({})
@@ -264,7 +269,7 @@ function advanceTutorial() {
 
   stepIndex.value++
   updatePosition()
-  nextTick(() => primaryButtonRef.value?.$el.focus())
+  nextTick(() => titleRef.value?.focus())
 }
 
 function finishTutorial() {
