@@ -26,8 +26,7 @@ test.describe('distraction and appearance settings', () => {
       settings: {
         baseTheme: 'dark',
         hideEndScreenAnnotations: true,
-        hideTrendingVideos: true,
-        hideProfileSelectorInHeader: true
+        hideTrendingVideos: true
       }
     }
   })
@@ -36,8 +35,8 @@ test.describe('distraction and appearance settings', () => {
     // Trending is removed from the side nav entirely.
     await expect(page.locator(sel.sideNavLink('trending'))).toHaveCount(0)
 
-    // Fork feature: the profile selector can be hidden from the header (7e8223dba).
-    await expect(page.locator('.topNav .profiles .colorOption')).toHaveCount(0)
+    // Profile switching and quick settings always remain available in the header.
+    await expect(page.locator('.topNav .profileTrigger')).toBeVisible()
 
     // The base theme is applied as a class on <body>.
     await expect(page.locator('body')).toHaveClass(/dark/)
@@ -55,7 +54,7 @@ test.describe('default appearance', () => {
     // The link may live in the side nav itself or its "More" flyout,
     // depending on the collapsed state — either way it must exist.
     await expect(page.locator(sel.sideNavLink('trending'))).not.toHaveCount(0)
-    await expect(page.locator('.topNav .profiles .colorOption').first()).toBeVisible()
+    await expect(page.locator('.topNav .profileTrigger')).toBeVisible()
     await expect(page.locator('body')).toHaveClass(/system/)
     await attachScreenshot('default appearance')
   })

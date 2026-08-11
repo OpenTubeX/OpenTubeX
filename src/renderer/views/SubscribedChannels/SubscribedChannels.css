@@ -12,16 +12,6 @@
   justify-content: space-between;
 }
 
-.profileSelector {
-  position: relative;
-  z-index: 11;
-}
-
-.profileSelector :deep(.profileList) {
-  inset-block-start: calc(100% + 5px);
-  inset-inline-end: 0;
-}
-
 .message {
   color: var(--tertiary-text-color);
 }

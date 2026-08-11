@@ -20,7 +20,6 @@ test.use({
   seed: {
     settings: {
       fetchSubscriptionsAutomatically: false,
-      showThumbnailSizeButtonInHeader: true,
       thumbnailSize: 100
     },
     profiles: [
@@ -73,7 +72,7 @@ test.describe('thumbnail size slider', () => {
     })
     expect(initialSize).not.toBe('')
 
-    await page.locator('.thumbnailSizeButton').click()
+    await page.locator('.profileTrigger').click()
     await expect(page.locator('.thumbnailSizeSlider')).toBeVisible()
     await attachScreenshot('feed at the default thumbnail size')
 

@@ -431,8 +431,6 @@ Settings:
     Hide OpenTubeX Header Logo: Schowaj logo OpenTubeX z paska górnego
     Hide Side Bar on Watch Pages: Ukryj pasek boczny na stronie odtwarzacza
     Thumbnail Size: Rozmiar miniatury
-    Show Thumbnail Size Button in Header: Pokaż przycisk rozmiaru miniatury w nagłówku
-    Hide Profile Selector in Header: Ukryj selektor profilu w nagłówku
     UI Roundness: Zaokrąglenie elementów UI
     Always Show Scrollbars: Zawsze pokazuj paski przewijania
     Animation Speed: Szybkość animacji
@@ -1469,7 +1467,6 @@ Tooltips:
   Proxy Settings:
     IP Block Recovery Script Path: Ścieżka do pliku skryptu uruchamianego po wykryciu blokady IP. OpenTubeX czeka na zakończenie skryptu, a następnie przeładowuje wideo. Jeśli włączony jest tryb awaryjny, skrypt uruchamia się tylko wtedy, gdy tryb awaryjny również zawiedzie.
   Theme Settings:
-    Hide Profile Selector in Header: Ukrywa selektor profilu na górnym pasku. Selektor profilu będzie wyświetlany u góry strony „Kanały”.
     Always Show Scrollbars: Utrzymuje paski przewijania widoczne przez cały czas. Po wyłączeniu, znikają one wkrótce po zatrzymaniu ruchu myszy i pojawiają się ponownie, gdy tylko ponownie nią poruszysz.
   Download Settings:
     Download Folder: Filmy będą zapisywane w tym folderze. Pozostaw puste, aby użyć systemowego folderu Pobrane.

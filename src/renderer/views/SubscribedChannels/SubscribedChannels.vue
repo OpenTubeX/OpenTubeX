@@ -9,10 +9,6 @@
           />
           {{ $t('Channels.Title') }}
         </h2>
-        <FtProfileSelector
-          v-if="hideProfileSelectorInHeader"
-          class="profileSelector"
-        />
       </div>
       <ft-input
         v-show="subscribedChannels.length > 1"
@@ -109,7 +105,6 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
-import FtProfileSelector from '../../components/FtProfileSelector/FtProfileSelector.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'
@@ -172,11 +167,6 @@ const hasMoreChannels = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideUnsubscribeButton = computed(() => {
   return store.getters.getHideUnsubscribeButton
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideProfileSelectorInHeader = computed(() => {
-  return store.getters.getHideProfileSelectorInHeader
 })
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */

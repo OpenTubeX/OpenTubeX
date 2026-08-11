@@ -186,15 +186,15 @@ test.describe('tab bar', () => {
     await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.newTabButton).click()
-    await goTo(page, 'about')
-    await expect(page).toHaveURL(/#\/about/)
+    await goTo(page, 'userplaylists')
+    await expect(page).toHaveURL(/#\/userplaylists/)
 
     // Switch back to the first tab: its route must be restored.
     await page.locator(sel.tabs).first().click()
     await expect(page).toHaveURL(/#\/history/)
 
     await page.locator(sel.tabs).nth(1).click()
-    await expect(page).toHaveURL(/#\/about/)
+    await expect(page).toHaveURL(/#\/userplaylists/)
   })
 
   test('selects multiple tabs with modifier clicks', async ({ page }) => {
@@ -889,7 +889,7 @@ test.describe('closed tabs', () => {
   })
 
   test('restoring a closed tab restores its navigation history', async ({ page }) => {
-    await goTo(page, 'about')
+    await goTo(page, 'userplaylists')
     await goTo(page, 'history')
     await page.locator(sel.newTabButton).click()
     await page.locator(sel.tabs).first().click()
@@ -901,7 +901,7 @@ test.describe('closed tabs', () => {
 
     await expect(page).toHaveURL(/#\/history/)
     await page.locator(sel.backButton).click()
-    await expect(page).toHaveURL(/#\/about/)
+    await expect(page).toHaveURL(/#\/userplaylists/)
     await page.locator(sel.forwardButton).click()
     await expect(page).toHaveURL(/#\/history/)
   })
@@ -911,7 +911,7 @@ test.describe('closed tabs', () => {
 
     test('does not persist restored history across a relaunch', async ({ app }) => {
       let page = app.page
-      await goTo(page, 'about')
+      await goTo(page, 'userplaylists')
       await goTo(page, 'history')
       await page.locator(sel.newTabButton).click()
       await page.locator(sel.tabs).first().click()

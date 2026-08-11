@@ -77,18 +77,6 @@
             :icon="tabLayoutIcon"
           />
         </button>
-        <button
-          type="button"
-          class="navSettingsButton navButton"
-          :aria-label="t('Settings.Settings')"
-          :title="t('Settings.Settings')"
-          @click="openSettings"
-        >
-          <FontAwesomeIcon
-            class="navIcon"
-            :icon="['fas', 'cog']"
-          />
-        </button>
         <RouterLink
           v-if="!hideHeaderLogo"
           class="logo"
@@ -144,8 +132,7 @@
         </div>
       </div>
       <div class="side profiles">
-        <FtThumbnailSizeControl v-if="showThumbnailSizeControl" />
-        <FtProfileSelector v-if="!hideProfileSelectorInHeader" />
+        <FtQuickSettingsMenu />
       </div>
     </div>
   </nav>
@@ -158,9 +145,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtInput from '../FtInput/FtInput.vue'
-import FtProfileSelector from '../FtProfileSelector/FtProfileSelector.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
-import FtThumbnailSizeControl from '../FtThumbnailSizeControl/FtThumbnailSizeControl.vue'
+import FtQuickSettingsMenu from '../FtQuickSettingsMenu/FtQuickSettingsMenu.vue'
 
 import store from '../../store/index'
 
@@ -196,8 +182,6 @@ const lastSuggestionQuery = ref('')
 const hideSearchBar = computed(() => store.getters.getHideSearchBar)
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideHeaderLogo = computed(() => store.getters.getHideHeaderLogo)
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideProfileSelectorInHeader = computed(() => store.getters.getHideProfileSelectorInHeader)
 const useWatchSideNavOverlay = computed(() => {
   return store.getters.getHideSideBarOnWatchPages && route.path.startsWith('/watch/')
 })
@@ -205,14 +189,6 @@ const useWatchSideNavOverlay = computed(() => {
 const enableSearchSuggestions = computed(() => store.getters.getEnableSearchSuggestions)
 /** @type {import('vue').ComputedRef<string>} */
 const barColor = computed(() => store.getters.getBarColor)
-const showThumbnailSizeControl = computed(() => {
-  return route.meta.hasResizableThumbnails === true && store.getters.getShowThumbnailSizeButtonInHeader
-})
-
-function openSettings() {
-  store.dispatch('toggleSettingsWindow')
-}
-
 const expandCollapseSideBarLabel = computed(() => {
   return store.getters.getIsSideNavOpen ? t('Compact side navigation') : t('Expand side navigation')
 })

@@ -5,7 +5,7 @@
     :class="{ maximized: isMaximized }"
     :style="windowStyle"
     role="dialog"
-    :aria-label="t('Settings.Settings')"
+    :aria-label="windowTitle"
     tabindex="-1"
     @keydown.esc.capture="handleSettingsEscape"
   >
@@ -28,8 +28,19 @@
         class="settingsBreadcrumb"
         aria-live="polite"
       >
+        <span
+          v-if="isAboutOpen"
+          class="settingsBreadcrumbLabel"
+        >
+          <FontAwesomeIcon
+            class="settingsWindowIcon"
+            :icon="['fas', 'info-circle']"
+            aria-hidden="true"
+          />
+          <span class="settingsBreadcrumbText">{{ t('About.About') }}</span>
+        </span>
         <button
-          v-if="showBackButton"
+          v-else-if="showBackButton"
           type="button"
           class="settingsBreadcrumbRoot"
           @click="returnToSettingsMenu"
@@ -52,7 +63,7 @@
           />
           <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
         </span>
-        <template v-if="currentSectionTitle">
+        <template v-if="!isAboutOpen && currentSectionTitle">
           <FontAwesomeIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
@@ -84,7 +95,7 @@
             <span class="settingsBreadcrumbText">{{ currentSectionTitle }}</span>
           </span>
         </template>
-        <template v-if="subpageTitle">
+        <template v-if="!isAboutOpen && subpageTitle">
           <FontAwesomeIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
@@ -93,7 +104,7 @@
         </template>
       </div>
       <label
-        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen"
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen"
         class="settingsSearch"
       >
         <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
@@ -108,7 +119,7 @@
       </label>
       <div class="settingsHeaderActions">
         <button
-          v-if="USING_ELECTRON"
+          v-if="USING_ELECTRON && !isAboutOpen"
           type="button"
           class="settingsHeaderButton"
           :aria-label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -118,6 +129,7 @@
           <FontAwesomeIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
+          v-if="!isAboutOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: settingsSectionSortEnabled }"
@@ -129,6 +141,7 @@
           <FontAwesomeIcon :icon="['fas', 'sort-alpha-down']" />
         </button>
         <button
+          v-if="!isAboutOpen"
           type="button"
           class="settingsHeaderButton"
           :class="{ active: highlightChangedSettings }"
@@ -166,7 +179,15 @@
       class="settingsPage"
       :class="{ compactSettings: !isInDesktopView }"
     >
-      <template v-if="unlocked">
+      <template v-if="isAboutOpen">
+        <div
+          v-overlay-scrollbars
+          class="settingsSubpageScroll settingsAboutPage"
+        >
+          <About />
+        </div>
+      </template>
+      <template v-else-if="unlocked">
         <template v-if="isProfileManagerOpen">
           <div
             v-overlay-scrollbars
@@ -316,6 +337,7 @@ import ContextMenuSearchSettings from '../../components/ContextMenuSearchSetting
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 import FtKeyboardShortcutPrompt from '../../components/FtKeyboardShortcutPrompt/FtKeyboardShortcutPrompt.vue'
 import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
+import About from '../About/About.vue'
 
 import store from '../../store/index'
 import { settingsSubpageKey } from '../../components/FtSettingsSubpage/settingsSubpage'
@@ -386,7 +408,9 @@ const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t(
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
 const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
 const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView === 'profile')
+const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
 const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
+const windowTitle = computed(() => isAboutOpen.value ? t('About.About') : t('Settings.Settings'))
 
 const settingsComponentsData = computed(() => [
   {

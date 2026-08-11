@@ -183,28 +183,6 @@
         </p>
       </router-link>
       <hr>
-      <router-link
-        class="navOption mobileHidden"
-        role="button"
-        to="/about"
-        :title="$t('About.About')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'info-circle']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("About.About") }}
-        </p>
-      </router-link>
-      <hr>
       <div
         v-if="!hideActiveSubscriptions"
         class="mobileHidden"

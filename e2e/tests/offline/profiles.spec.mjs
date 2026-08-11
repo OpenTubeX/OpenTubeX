@@ -21,8 +21,14 @@ const secondProfile = {
   subscriptions: []
 }
 
-const profileIcon = (page) => page.locator('.topNav .profiles .colorOption').first()
-const profileIconInitial = (page) => profileIcon(page).locator('.initial')
+const profileIcon = (page) => page.locator('.topNav .profileTrigger')
+const profileIconInitial = (page) => profileIcon(page).locator('.profileInitial')
+
+async function openProfileList(page) {
+  await profileIcon(page).click()
+  await page.locator('.profileSummary').click()
+  await expect(page.locator('.profileList')).toBeVisible()
+}
 
 test.describe('profile selector', () => {
   test.use({ seed: { profiles: [mainProfile, secondProfile] } })
@@ -30,12 +36,15 @@ test.describe('profile selector', () => {
   test('lists seeded profiles and switches the active profile', async ({ page }) => {
     await expect(profileIconInitial(page)).toHaveText('A')
 
-    await profileIcon(page).click()
-    const entries = page.locator('.profileList .profile')
+    await openProfileList(page)
+    const entries = page.locator('.profileList .profileOption')
     await expect(entries).toHaveCount(2)
     await expect(entries.filter({ hasText: 'Second profile' })).toBeVisible()
 
-    await page.locator('.profileList .profile[data-profile-id="e2eprofile"]').click()
+    await entries.filter({ hasText: 'Second profile' }).click()
+    await expect(page.locator('.quickSettingsMenu')).toHaveClass(/quick-settings-menu-leave-active/)
+    await expect(page.locator('.menuSection')).toHaveCount(0)
+    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     await expect(profileIconInitial(page)).toHaveText('S')
   })
 })
@@ -55,8 +64,8 @@ test.describe('default profile setting', () => {
 
 test.describe('profile manager', () => {
   test('a profile can be created through the UI and persists', async ({ app, page }) => {
-    await profileIcon(page).click()
-    await page.locator('.profileList .profileSettings').click()
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader button').last().click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
     await expect(page.locator('.settingsBreadcrumb')).toContainText('Profile Manager')
 
@@ -75,7 +84,7 @@ test.describe('profile manager', () => {
     }).toBe(true)
 
     ;({ page } = await app.relaunch())
-    await profileIcon(page).click()
-    await expect(page.locator('.profileList .profile').filter({ hasText: 'Created via UI' })).toBeVisible()
+    await openProfileList(page)
+    await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Created via UI' })).toBeVisible()
   })
 })

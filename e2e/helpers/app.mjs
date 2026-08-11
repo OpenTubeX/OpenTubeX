@@ -310,8 +310,11 @@ export { expect }
  */
 export async function goTo(page, route) {
   if (route === 'settings') {
-    await page.locator('.navSettingsButton').click()
+    await page.locator('.profileTrigger').click()
+    await expect(page.locator('.quickSettingsMenu')).toBeVisible()
+    await page.locator('.allSettingsShortcut').click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
+    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
     return
   }
 

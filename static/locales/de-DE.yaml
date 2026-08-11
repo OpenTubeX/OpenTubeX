@@ -424,12 +424,10 @@ Settings:
         #* Main Color Theme
     UI Scale: Skalierung der Benutzeroberfläche
     Thumbnail Size: Vorschaubildgröße
-    Show Thumbnail Size Button in Header: Schaltfläche für die Vorschaubildgröße in der Kopfzeile anzeigen
     Disable Smooth Scrolling: Gleichmäßiges Scrollen deaktivieren
     Expand Side Bar by Default: Seitenleiste standardmäßig erweitern
     Hide Side Bar Labels: Seitenleisten-Beschriftungen ausblenden
     Hide OpenTubeX Header Logo: OpenTubeX-Titellogo ausblenden
-    Hide Profile Selector in Header: Profilauswahl in der Kopfzeile ausblenden
     Hide Side Bar on Watch Pages: Seitenleiste auf den Wiedergabeseiten ausblenden
   Player Settings:
     Player Settings: Video-Player
@@ -1357,8 +1355,6 @@ Tooltips:
     Hold to Double Playback Speed: Halte die Leertaste oder die linke Maustaste über dem Player gedrückt, um die aktuelle Wiedergabegeschwindigkeit vorübergehend zu verdoppeln.
     Ambient Mode: Lässt die Farben des Videos in den Bereich um den Player ausstrahlen.
     Default Volume: Deaktiviert, wenn Lautstärke beibehalten aktiviert ist. Schalte Lautstärke beibehalten aus, um eine feste Lautstärke beim Start jedes Videos zu setzen.
-  Theme Settings:
-    Hide Profile Selector in Header: Blendet die Profilauswahl in der oberen Leiste aus. Die Profilauswahl wird stattdessen oben auf der Seite „Abonnierte Kanäle“ angezeigt.
   External Player Settings:
     Custom External Player Arguments: Alle benutzerdefinierten Befehlszeilenargumente, die an den externen Video-Player übergeben werden sollen.
     Ignore Warnings: Warnungen unterdrücken, wenn der aktuelle externe Video-Player die aktuelle Aktion nicht unterstützt (z. B. das Umkehren von Playlists usw.).
