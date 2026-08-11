@@ -15,6 +15,10 @@
   gap: 16px;
 }
 
+.transcriptCard:not(.transcriptCardFullscreen) .transcriptHeader {
+  margin-block-end: 16px;
+}
+
 .transcriptTitle {
   display: flex;
   align-items: center;
@@ -98,12 +102,12 @@
   margin-block: 16px;
 }
 
-.transcriptControls > :first-child {
-  flex: 1;
+.transcriptCard:not(.transcriptCardFullscreen) .transcriptControls {
+  margin-block-start: 0;
 }
 
-.transcriptControls :deep(.select) {
-  margin-block: 20px 10px;
+.transcriptControls > :first-child {
+  flex: 1;
 }
 
 .transcriptMessage {
@@ -113,9 +117,33 @@
 }
 
 .transcriptSegments {
+  --transcript-fade-size: 16px;
+  --transcript-scrollbar-reserve: 14px;
+
   position: relative;
   max-block-size: 420px;
   overflow-y: auto;
+
+  /* Fade clipped transcript text while keeping the overlay scrollbar sharp. */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--transcript-fade-size),
+      #000 calc(100% - var(--transcript-fade-size)),
+      transparent
+    ),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(100% - var(--transcript-scrollbar-reserve)) 100%,
+    var(--transcript-scrollbar-reserve) 100%;
+  mask-position: 0 0, 100% 0;
+  mask-repeat: no-repeat;
+  mask-composite: add;
+}
+
+.transcriptSegments:dir(rtl) {
+  mask-position: 100% 0, 0 0;
 }
 
 .transcriptSegment {
@@ -164,10 +192,6 @@
 
   .transcriptActions {
     justify-content: flex-start;
-  }
-
-  .transcriptControls :deep(.select) {
-    margin-block-start: 20px;
   }
 
   .transcriptSegment {

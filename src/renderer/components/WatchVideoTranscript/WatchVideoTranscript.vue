@@ -1,5 +1,8 @@
 <template>
-  <FtCard class="transcriptCard">
+  <FtCard
+    class="transcriptCard"
+    :class="{ transcriptCardFullscreen: fullscreenOverlay }"
+  >
     <div class="transcriptHeader">
       <h3 class="transcriptTitle">
         <FontAwesomeIcon
@@ -14,7 +17,6 @@
         @keydown.esc.stop.prevent="languageMenuOpen = false"
       >
         <button
-          v-if="fullscreenOverlay"
           type="button"
           class="transcriptHeaderAction"
           :class="{ active: searchOpen }"
@@ -26,7 +28,7 @@
           <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
         </button>
         <button
-          v-if="fullscreenOverlay && captions.length > 1"
+          v-if="captions.length > 1"
           type="button"
           class="transcriptHeaderAction"
           :class="{ active: languageMenuOpen }"
@@ -38,12 +40,13 @@
           <FontAwesomeIcon :icon="['fas', 'language']" />
         </button>
         <div
-          v-if="segments.length > 0"
+          v-if="captions.length > 0"
           class="transcriptActions"
         >
           <FtIconButton
             :title="t('Video.Transcript.Copy')"
             :icon="['fas', 'copy']"
+            :disabled="isLoading || segments.length === 0"
             theme="base-no-default"
             :use-shadow="false"
             @click="copyTranscript"
@@ -51,6 +54,7 @@
           <FtIconButton
             :title="t('Video.Transcript.Save')"
             :icon="['fas', 'download']"
+            :disabled="isLoading || segments.length === 0"
             theme="base-no-default"
             :use-shadow="false"
             @click="saveTranscript"
@@ -85,7 +89,7 @@
     </div>
 
     <div
-      v-if="captions.length > 0 && (!fullscreenOverlay || searchOpen)"
+      v-if="captions.length > 0 && searchOpen"
       class="transcriptControls"
     >
       <FtInput
@@ -95,15 +99,6 @@
         :show-clear-text-button="true"
         @input="searchQuery = $event"
         @clear="searchQuery = ''"
-      />
-      <FtSelect
-        v-if="!fullscreenOverlay && captions.length > 1"
-        :value="selectedCaptionIndex"
-        :select-names="captions.map(caption => caption.label)"
-        :select-values="captions.map((caption, index) => String(index))"
-        :placeholder="t('Video.Transcript.Language')"
-        :icon="['fas', 'language']"
-        @change="selectedCaptionIndex = $event"
       />
     </div>
 
@@ -151,7 +146,6 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtLoader from '../FtLoader/FtLoader.vue'
-import FtSelect from '../FtSelect/FtSelect.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 
