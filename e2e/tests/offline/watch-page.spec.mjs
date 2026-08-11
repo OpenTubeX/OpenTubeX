@@ -428,6 +428,62 @@ test.describe('watch page', () => {
     await watchComponent.dispose()
   })
 
+  test('shares the Shorts information dock with fullscreen and keeps its settings menu visible', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw\?short=true/)
+    await waitForPlayback(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      await Promise.all([
+        component.proxy.$store.dispatch('updateRememberPlaybackSpeedPerChannel', true),
+        component.proxy.$store.dispatch('updateRememberVideoQualityPerChannel', true),
+      ])
+      await component.proxy.$nextTick()
+    })
+
+    const player = page.locator('.ftVideoPlayer.shortsPlayer')
+    const moreOptions = player.getByRole('button', { name: 'More Options' })
+    const overflowMenu = player.locator('.shaka-overflow-menu')
+    const auxPanel = page.locator('.shortsAuxPanel')
+
+    await moreOptions.click()
+    await overflowMenu.getByRole('button', { name: 'Video information' }).click()
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+
+    await auxPanel.getByRole('button', { name: /Save channel setting/i }).click()
+    const settingsMenu = page.locator('.app > .iconDropdown.portal')
+    await expect(settingsMenu).toBeVisible()
+    expect(await settingsMenu.evaluate(element => {
+      const bounds = element.getBoundingClientRect()
+      const hit = document.elementFromPoint(
+        bounds.left + bounds.width / 2,
+        bounds.top + bounds.height / 2
+      )
+      return element.contains(hit)
+    })).toBe(true)
+    await page.keyboard.press('Escape')
+
+    await setPlayerFullscreen(page, true)
+    await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    await setPlayerFullscreen(page, false)
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+
+    await auxPanel.getByRole('button', { name: 'Close video information' }).click()
+    await expect(auxPanel).not.toHaveClass(/shortsAuxPanelOpen/)
+
+    await setPlayerFullscreen(page, true)
+    await moreOptions.click({ force: true })
+    await overflowMenu.getByRole('button', { name: 'Video information' }).click()
+    await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    await setPlayerFullscreen(page, false)
+    await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
+
+    await watchComponent.dispose()
+  })
+
   test('sidebar chapters and SponsorBlock honor roundness while closing beside the description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

@@ -270,6 +270,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    shortsMetadataOpen: {
+      type: Boolean,
+      default: false
+    },
     shortsAspectRatio: {
       type: Number,
       default: null
@@ -5665,8 +5669,9 @@ export default defineComponent({
     }
 
     function setFullscreenMetadata(shouldOpen) {
+      const presentationActive = isNativeFullscreenActive() || fullWindowEnabled.value
       const open = Boolean(
-        shouldOpen && (isNativeFullscreenActive() || fullWindowEnabled.value)
+        shouldOpen && presentationActive
       )
       showFullscreenMetadata.value = open
       if (fullscreenTitleOverlay) {
@@ -5674,7 +5679,8 @@ export default defineComponent({
       }
       emit('fullscreen-metadata-change', {
         open,
-        target: fullscreenMetadataTarget.value
+        target: fullscreenMetadataTarget.value,
+        presentationActive
       })
     }
 
@@ -5818,6 +5824,18 @@ export default defineComponent({
         closeFullscreenPlaylist()
       }
     })
+
+    watch(() => props.shortsMetadataOpen, open => {
+      if (!props.shortsPlayer) {
+        return
+      }
+
+      if (isNativeFullscreenActive() || fullWindowEnabled.value) {
+        setFullscreenMetadata(open)
+      } else {
+        restoreFullscreenMetadata = open
+      }
+    }, { immediate: true })
 
     watch(() => props.sidebarChaptersOpen, () => {
       if (!isNativeFullscreenActive() && !fullWindowEnabled.value) {

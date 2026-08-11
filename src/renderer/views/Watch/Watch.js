@@ -1114,9 +1114,13 @@ export default defineComponent({
     updateShortsViewportHeight() {
       this.shortsViewportHeight = window.innerHeight
     },
-    handleFullscreenMetadataChange({ open, target }) {
+    handleFullscreenMetadataChange({ open, target, presentationActive = false }) {
       this.fullscreenMetadataTarget = target
       this.fullscreenMetadataOpen = open && target !== null
+
+      if (this.customShortsPlayerActive && presentationActive) {
+        this.shortsMetadataOpen = this.fullscreenMetadataOpen
+      }
 
       if (this.fullscreenMetadataOpen) {
         this.$nextTick(() => {
