@@ -25,6 +25,8 @@
 }
 
 .profileInitial {
+  block-size: 100%;
+  inline-size: 100%;
   line-height: 1;
   user-select: none;
 }

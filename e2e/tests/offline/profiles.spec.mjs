@@ -8,7 +8,7 @@ import { test, expect } from '../../helpers/app.mjs'
 const mainProfile = {
   _id: 'allChannels',
   name: 'All Channels',
-  bgColor: '#000000',
+  bgColor: '#d50000',
   textColor: '#FFFFFF',
   subscriptions: []
 }
@@ -86,5 +86,57 @@ test.describe('profile manager', () => {
     ;({ page } = await app.relaunch())
     await openProfileList(page)
     await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Created via UI' })).toBeVisible()
+  })
+
+  test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
+    await openProfileList(page)
+    await page.locator('.profilePanelHeader button').last().click()
+    await page.locator('.card .profileList').getByText('All Channels').click()
+
+    const makeDefaultButton = page.getByRole('button', { name: 'Make Default Profile' })
+    await expect(makeDefaultButton).toBeDisabled()
+    await expect(page.locator('.colorOption.selected')).toHaveCount(1)
+
+    await page.locator('.imageInput').setInputFiles({
+      name: 'globe.svg',
+      mimeType: 'image/svg+xml',
+      buffer: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>')
+    })
+    await expect(page.getByRole('heading', { name: 'Crop Image' })).toBeVisible()
+    await page.getByRole('button', { name: 'Apply Crop' }).click()
+
+    const preview = page.locator('.profilePreviewIcon')
+    await expect(preview.locator('img')).toBeVisible()
+    await expect(preview).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+      return profile?.icon?.type === 'image' && profile.bgColor === 'transparent'
+    }).toBe(true)
+
+    const customEmoji = page.locator('#profileEmoji')
+    await customEmoji.fill('A')
+    await expect(customEmoji).toHaveValue('')
+    await expect(preview.locator('img')).toBeVisible()
+
+    await customEmoji.fill('❤')
+    await expect(customEmoji).toHaveValue('❤')
+    await expect(preview).toContainText('❤')
+
+    await customEmoji.fill('🌍')
+    await expect(preview.locator('img')).toHaveCount(0)
+    await expect(preview).toContainText('🌍')
+    await expect(preview).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await page.getByRole('button', { name: 'Update Profile' }).click()
+
+    await expect.poll(async () => {
+      const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+      const records = contents.trim().split('\n').map(line => JSON.parse(line))
+      const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+      return profile?.icon?.value === '🌍' && profile.bgColor !== 'transparent'
+    }).toBe(true)
   })
 })

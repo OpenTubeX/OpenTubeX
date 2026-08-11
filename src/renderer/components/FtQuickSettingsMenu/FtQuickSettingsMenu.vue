@@ -14,12 +14,11 @@
       @mousedown="handleTriggerMouseDown"
       @keydown.esc.stop="closeMenu"
     >
-      <span
+      <FtProfileIcon
         class="profileInitial"
-        dir="auto"
-      >
-        {{ activeProfileInitial }}
-      </span>
+        :profile="activeProfile"
+        :fallback="activeProfileInitial"
+      />
     </button>
 
     <Transition
@@ -72,12 +71,11 @@
               :aria-selected="profile._id === activeProfile._id"
               @click="setActiveProfile(profile)"
             >
-              <span
+              <FtProfileIcon
                 class="profileAvatar"
-                :style="{ background: profile.bgColor, color: profile.textColor }"
-              >
-                {{ profileInitials[profile._id] }}
-              </span>
+                :profile="profile"
+                :fallback="profileInitials[profile._id]"
+              />
               <span dir="auto">{{ translateProfileName(profile) }}</span>
               <FontAwesomeIcon
                 v-if="profile._id === activeProfile._id"
@@ -95,12 +93,11 @@
               class="profileSummary"
               @click="openProfilePanel"
             >
-              <span
+              <FtProfileIcon
                 class="profileAvatar"
-                :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
-              >
-                {{ activeProfileInitial }}
-              </span>
+                :profile="activeProfile"
+                :fallback="activeProfileInitial"
+              />
               <span class="profileSummaryText">
                 <strong dir="auto">{{ translateProfileName(activeProfile) }}</strong>
               </span>
@@ -294,6 +291,7 @@ import FtCard from '../ft-card/ft-card.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtSlider from '../FtSlider/FtSlider.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
+import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 import store from '../../store/index'
 import allLocales from '../../../../static/locales/activeLocales.json'
