@@ -9,6 +9,7 @@ import {
 test('syncs an opaque fallback for transparent profile backgrounds', () => {
   assert.equal(getSyncProfileBackground('transparent'), '#000000')
   assert.equal(getSyncProfileBackground('transparent', 'transparent'), '#000000')
+  assert.equal(getSyncProfileBackground('transparent', '#123456'), '#123456')
   assert.equal(getSyncProfileBackground(null, null), '#000000')
   assert.equal(getSyncProfileBackground('#123456'), '#123456')
 })

@@ -848,10 +848,10 @@ export async function syncHistory(client, store, previousIds = [], options = {})
   return Array.from(mergedIds)
 }
 
-function profileMetadata(profile) {
+function profileMetadata(profile, fallback = {}) {
   return {
     title: profile.name,
-    bgColor: getSyncProfileBackground(profile.bgColor),
+    bgColor: getSyncProfileBackground(profile.bgColor, fallback.bgColor),
     textColor: profile.textColor,
   }
 }
@@ -896,8 +896,8 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
   for (const id of mergedIds) {
     const local = localById.get(id)
     let remote = remoteById.get(id)
-    const localMetadata = local ? profileMetadata(local) : null
     const oldMetadata = previous[id]?.metadata
+    const localMetadata = local ? profileMetadata(local, oldMetadata) : null
     const remoteMetadata = remote
       ? remoteProfileMetadata(remote.group, oldMetadata ?? localMetadata)
       : null
