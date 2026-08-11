@@ -161,7 +161,13 @@ test.describe('watch page', () => {
     })
     const activeChat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat' })
     await expect(activeChat).toBeVisible()
-    await expect(activeChat.getByRole('button', { name: 'Close Live Chat' })).toBeVisible()
+    await activeChat.getByRole('button', { name: 'Close Live Chat' }).click()
+    await expect(activeChat).toHaveCount(0)
+
+    const activeChatToggle = page.getByTitle('Show Live Chat')
+    await expect(activeChatToggle).toBeVisible()
+    await activeChatToggle.click()
+    await expect(activeChat).toBeVisible()
 
     await watchView.evaluate(async (view) => {
       view.$store.commit('setHideLiveChat', true)
