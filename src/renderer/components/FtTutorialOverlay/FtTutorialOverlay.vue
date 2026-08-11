@@ -186,7 +186,12 @@ function schedulePositionUpdate() {
 }
 
 async function updatePosition() {
-  const target = step.value.target === null ? null : document.querySelector(step.value.target)
+  const target = step.value.target === null
+    ? null
+    : Array.from(document.querySelectorAll(step.value.target)).find(element => {
+        const rect = element.getBoundingClientRect()
+        return rect.width > 0 && rect.height > 0
+      })
   const rect = target?.getBoundingClientRect()
   targetRect.value = rect && rect.width > 0 && rect.height > 0
     ? {

@@ -730,7 +730,7 @@ export default {
      * @param {boolean} blocked
      */
     setShortcutsBlocked: (blocked) => {
-      ipcRenderer.send(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, blocked === true)
+      return ipcRenderer.invoke(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, blocked === true)
     },
 
     /**

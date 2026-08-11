@@ -3368,7 +3368,7 @@ function runApp() {
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
 
-  ipcMain.on(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
+  ipcMain.handle(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
     if (!isOpenTubeXUrl(event.senderFrame.url) || typeof blocked !== 'boolean') {
       return
     }
@@ -4390,6 +4390,10 @@ function runApp() {
     webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
       if (isMainFrame && !isInPlace) {
         openUrlReadyWebContentsIds.delete(webContents.id)
+        const browserWindow = BrowserWindow.fromWebContents(webContents)
+        if (browserWindow) {
+          appShortcutBlockedWindows.delete(browserWindow)
+        }
       }
     })
 

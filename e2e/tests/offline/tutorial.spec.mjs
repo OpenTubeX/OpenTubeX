@@ -6,7 +6,7 @@ async function expectHighlightCenteredOn(page, targetSelector) {
   await expect.poll(async () => {
     const [highlight, target] = await Promise.all([
       page.locator('.tutorialHighlight').evaluate(element => element.getBoundingClientRect().toJSON()),
-      page.locator(targetSelector).evaluate(element => element.getBoundingClientRect().toJSON())
+      page.locator(`${targetSelector}:visible`).evaluate(element => element.getBoundingClientRect().toJSON())
     ])
 
     return {
@@ -99,4 +99,18 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test('highlights the mobile search button', async ({ app, page }) => {
+  await app.electronApp.evaluate(({ BrowserWindow }) => {
+    BrowserWindow.getAllWindows()[0].setSize(600, 700)
+  })
+  await page.evaluate(() => localStorage.setItem('opentubex.tutorial.audience', 'new'))
+  await page.reload()
+
+  const tutorial = page.locator('.tutorialCard')
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await tutorial.getByRole('button', { name: 'Next' }).click()
+  await expect(tutorial).toHaveAccessibleName('Search or paste a link')
+  await expectHighlightCenteredOn(page, '.navSearchButton[data-tutorial="search"]')
 })

@@ -742,7 +742,14 @@ function initializeTutorial(hasExistingInstallation, lastUsedVersion) {
   }
 }
 
-function completeTutorial() {
+async function completeTutorial() {
+  if (isElectron) {
+    try {
+      await window.ftElectron.tabs.setShortcutsBlocked(false)
+    } catch (error) {
+      console.error('Failed to restore tab shortcuts', error)
+    }
+  }
   showTutorial.value = false
 
   try {
@@ -817,6 +824,13 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
+    if (isElectron && tutorialPending) {
+      try {
+        await window.ftElectron.tabs.setShortcutsBlocked(true)
+      } catch (error) {
+        console.error('Failed to block tab shortcuts for tutorial', error)
+      }
+    }
     showTutorial.value = tutorialPending
     initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
@@ -873,7 +887,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
-    window.ftElectron.tabs.setShortcutsBlocked(false)
+    window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
   }
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
@@ -901,12 +915,6 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
-})
-
-watch(showTutorial, (visible) => {
-  if (isElectron) {
-    window.ftElectron.tabs.setShortcutsBlocked(visible)
-  }
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
