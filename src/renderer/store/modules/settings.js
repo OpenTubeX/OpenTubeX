@@ -295,6 +295,7 @@ const state = {
   tabCloseFocus: 'previousTab',
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
+  showTabPreviews: true,
   useVerticalTabBar: false,
   verticalTabBarWidth: 220,
   useFixedTabWidth: false,

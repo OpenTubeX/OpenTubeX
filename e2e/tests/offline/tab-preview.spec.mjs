@@ -74,6 +74,33 @@ test.describe('tab previews', () => {
     expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width))
   })
 
+  test('repositions an open tooltip after previews are disabled', async ({ page }) => {
+    await hoverTabForPreview(page, 0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowTabPreviews', false)
+    })
+
+    const tooltip = page.locator('.tabTooltip')
+    await expect(tooltip.locator('.tabTooltipPreview')).toHaveCount(0)
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).first().evaluate((tab) => {
+        const tooltip = document.querySelector('.tabTooltip')
+        const tabBounds = tab.getBoundingClientRect()
+        const tooltipBounds = tooltip.getBoundingClientRect()
+        const expectedLeft = Math.max(
+          8,
+          Math.min(
+            window.innerWidth - tooltipBounds.width - 8,
+            tabBounds.left + tabBounds.width / 2 - tooltipBounds.width / 2
+          )
+        )
+        return Math.abs(tooltipBounds.left - Math.round(expectedLeft))
+      })
+    }).toBeLessThanOrEqual(1)
+  })
+
   test('hides tab previews from the page while capturing', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)
@@ -94,5 +121,105 @@ test.describe('tab previews', () => {
 
     expect(hiddenWhileCapturing.length).toBeGreaterThan(0)
     expect(hiddenWhileCapturing.every((visibility) => visibility === 'hidden')).toBe(true)
+  })
+
+  test('keeps previews when re-enabled during an active transition', async ({ page }) => {
+    await hoverTabForPreview(page, 0)
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    await page.evaluate(async (tabId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const capturePromise = window.ftElectron.tabs.capturePreview(tabId)
+      window.ftElectron.tabs.setPreviewCapturePaused(true)
+      await store.dispatch('updateShowTabPreviews', false)
+      await capturePromise
+    }, activeTabId)
+
+    await expect.poll(async () => {
+      const previews = await page.evaluate(
+        tabId => window.ftElectron.tabs.getCachedPreviews([tabId]),
+        activeTabId
+      )
+      return previews[activeTabId] ?? null
+    }).toBe(null)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowTabPreviews', true)
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      window.ftElectron.tabs.setPreviewCapturePaused(false)
+    })
+    await expect.poll(async () => {
+      const previews = await page.evaluate(
+        tabId => window.ftElectron.tabs.getCachedPreviews([tabId]),
+        activeTabId
+      )
+      return previews[activeTabId] ?? null
+    }).toMatch(/^data:image\/jpeg;base64,/)
+  })
+})
+
+test.describe('tab previews disabled', () => {
+  test.use({ seed: { settings: { showTabPreviews: false } } })
+
+  test('keeps a compact title tooltip and removes preview images', async ({ page }) => {
+    await page.locator(sel.tabs).first().hover()
+
+    const tooltip = page.locator('.tabTooltip')
+    const title = tooltip.locator('.tabTooltipTitle')
+    await expect(tooltip).toBeVisible()
+    await expect(title).not.toBeEmpty()
+    await expect(tooltip.locator('.tabTooltipPreview')).toHaveCount(0)
+
+    const [tooltipBox, titleBox] = await Promise.all([
+      tooltip.boundingBox(),
+      title.boundingBox()
+    ])
+    expect(tooltipBox.width).toBeLessThanOrEqual(titleBox.width + 20)
+
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+    await expect.poll(() => page.evaluate(
+      tabId => window.ftElectron.tabs.capturePreview(tabId),
+      activeTabId
+    )).toBe(null)
+
+    await page.evaluate(async () => {
+      for (let i = 0; i < 9; i++) {
+        await window.ftElectron.tabs.create({
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(10)
+    await page.keyboard.down('Control')
+    try {
+      await page.keyboard.press('Tab')
+      await expect(page.locator('.tabSwitcher.noPreviews')).toBeVisible()
+      await expect(page.locator('.tabSwitcherPreview')).toHaveCount(0)
+
+      const gridPositions = await page.locator('.tabSwitcherItem').evaluateAll((items) => ({
+        rows: new Set(items.map(item => Math.round(item.getBoundingClientRect().top))).size,
+        columns: new Set(items.map(item => Math.round(item.getBoundingClientRect().left))).size
+      }))
+      expect(gridPositions.rows).toBeGreaterThan(1)
+      expect(gridPositions.columns).toBeGreaterThan(1)
+
+      const verticalCenters = await page.locator('.tabSwitcherItem').first().evaluate((item) => {
+        const center = element => {
+          const bounds = element.getBoundingClientRect()
+          return bounds.top + bounds.height / 2
+        }
+        return {
+          item: center(item),
+          icon: center(item.querySelector('.tabSwitcherTitleIcon, .tabSwitcherTitleAvatar')),
+          text: center(item.querySelector('.tabSwitcherTitleText'))
+        }
+      })
+      expect(Math.abs(verticalCenters.icon - verticalCenters.item)).toBeLessThanOrEqual(1)
+      expect(Math.abs(verticalCenters.text - verticalCenters.item)).toBeLessThanOrEqual(1)
+    } finally {
+      await page.keyboard.up('Control')
+    }
   })
 })

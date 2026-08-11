@@ -47,6 +47,15 @@
           setting-key="showToastTimeoutIndicator"
           @change="updateShowToastTimeoutIndicator"
         />
+        <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+          compact
+          :default-value="useFixedTabWidth"
+          setting-key="useFixedTabWidth"
+          @change="updateUseFixedTabWidth"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -87,6 +96,14 @@
           @change="updateShowTabIcons"
         />
         <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Show Tab Previews')"
+          compact
+          :default-value="showTabPreviews"
+          setting-key="showTabPreviews"
+          @change="updateShowTabPreviews"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Show Progress as Notification')"
           :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
           compact
@@ -99,14 +116,6 @@
     <template v-if="usingElectron">
       <FtFlexBox>
         <div class="switchColumn">
-          <FtToggleSwitch
-            :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
-            :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
-            compact
-            :default-value="useFixedTabWidth"
-            setting-key="useFixedTabWidth"
-            @change="updateUseFixedTabWidth"
-          />
           <FtSlider
             :label="$t('Settings.Theme Settings.Tab Width')"
             :default-value="fixedTabWidth"
@@ -501,6 +510,16 @@ const showTabIcons = computed(() => store.getters.getShowTabIcons)
  */
 function updateShowTabIcons(value) {
   store.dispatch('updateShowTabIcons', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
+
+/**
+ * @param {boolean} value
+ */
+function updateShowTabPreviews(value) {
+  store.dispatch('updateShowTabPreviews', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

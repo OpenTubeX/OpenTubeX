@@ -605,6 +605,8 @@ export class TabManager {
     /** @type {Promise<void>} */
     this._previewCaptureLock = Promise.resolve()
     this._previewCapturePaused = false
+    this._tabPreviewsEnabled = true
+    this._tabPreviewTransitionId = 0
     this._avatarsEnabled = true
     /** Tabs whose navigation history the renderer has already been sent. */
     this._historyAnnouncedTabIds = new Set()
@@ -1640,7 +1642,7 @@ export class TabManager {
    */
   _scheduleTabPreviewRefresh(tab, delay = TAB_PREVIEW_REFRESH_DELAY_MS) {
     this._clearTabPreviewRefresh(tab)
-    if (this._previewCapturePaused || this.presentedTabId !== tab.id) {
+    if (!this._tabPreviewsEnabled || this._previewCapturePaused || this.presentedTabId !== tab.id) {
       return
     }
 
@@ -1841,6 +1843,10 @@ export class TabManager {
    * @returns {Promise<string | null>}
    */
   async captureTabPreview(tabId) {
+    if (!this._tabPreviewsEnabled) {
+      return null
+    }
+
     const tab = this.tabs.get(tabId)
     if (!tab) {
       return null
@@ -1863,6 +1869,10 @@ export class TabManager {
    * @returns {Promise<Record<string, string | null>>}
    */
   async getCachedTabPreviews(tabIds) {
+    if (!this._tabPreviewsEnabled) {
+      return Object.fromEntries(tabIds.map(tabId => [tabId, null]))
+    }
+
     const previews = await Promise.all(tabIds.map(async tabId => {
       const tab = this.tabs.get(tabId)
       const preview = tab == null
@@ -1896,10 +1906,54 @@ export class TabManager {
   }
 
   /**
+   * @param {boolean} enabled
+   * @returns {Promise<void>}
+   */
+  async setTabPreviewsEnabled(enabled) {
+    if (this._tabPreviewsEnabled === enabled) return
+
+    const transitionId = ++this._tabPreviewTransitionId
+    this._tabPreviewsEnabled = enabled
+    if (enabled) {
+      const presentedTab = this.presentedTabId == null ? null : this.tabs.get(this.presentedTabId)
+      if (presentedTab != null && !this._getTabLoadingState(presentedTab)) {
+        this._scheduleTabPreviewRefresh(presentedTab)
+      }
+      return
+    }
+
+    for (const tab of this.tabs.values()) {
+      this._clearTabPreviewRefresh(tab)
+    }
+    await Promise.allSettled(Array.from(this.tabs.values(), tab => tab.previewCapturePromise).filter(Boolean))
+    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
+      return
+    }
+
+    const fileNames = Array.from(this.tabs.values(), tab => {
+      tab.previewDataUrl = null
+      tab.previewCapturedAt = 0
+      const fileName = tab.previewFileName
+      tab.previewFileName = null
+      return fileName
+    })
+    await Promise.all(fileNames.map(fileName => this._deleteTabPreviewFile(fileName)))
+    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
+      return
+    }
+    this._broadcastStateUpdate()
+    await this._saveSession()
+  }
+
+  /**
    * @param {TabInfo} tab
    * @returns {Promise<string | null>}
    */
   async _refreshTabPreview(tab) {
+    if (!this._tabPreviewsEnabled) {
+      return null
+    }
+
     if (
       tab.id !== this.presentedTabId ||
       this.browserWindow.webContents.isDestroyed() ||
@@ -1941,6 +1995,7 @@ export class TabManager {
     try {
       // Presentation and window state may have changed while waiting for the lock.
       if (
+        !this._tabPreviewsEnabled ||
         this._previewCapturePaused ||
         tab.id !== this.presentedTabId ||
         this.browserWindow.webContents.isDestroyed() ||
@@ -1955,13 +2010,13 @@ export class TabManager {
         // process stays unblocked and another tab may have been activated. If so,
         // the renderer is now painting a different tab, so capturing here would
         // save the wrong content as this tab's preview. Bail out with the cache.
-        if (tab.id !== this.presentedTabId) {
+        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         const image = await this.browserWindow.webContents.capturePage()
         // capturePage awaits another round-trip; the presented tab may have
         // changed again. Never persist a screenshot captured for a stale tab.
-        if (tab.id !== this.presentedTabId) {
+        if (!this._tabPreviewsEnabled || tab.id !== this.presentedTabId) {
           return await this._getCachedTabPreviewDataUrl(tab)
         }
         if (image.isEmpty()) {
@@ -1981,6 +2036,10 @@ export class TabManager {
         const previewBuffer = preview.toJPEG(TAB_PREVIEW_JPEG_QUALITY)
         if (previewBuffer.length === 0) {
           return await this._getCachedTabPreviewDataUrl(tab)
+        }
+
+        if (!this._tabPreviewsEnabled) {
+          return null
         }
 
         const dataUrl = tabPreviewBufferToDataUrl(previewBuffer)
@@ -3072,6 +3131,13 @@ export async function setupTabsIPC(options = {}) {
       ? tabIds.filter(tabId => typeof tabId === 'string' && manager.tabs.has(tabId))
       : []
     return manager.getCachedTabPreviews(validTabIds)
+  })
+
+  ipcMain.on(IpcChannels.TABS_SET_PREVIEWS_ENABLED, (event, enabled) => {
+    const manager = getManager(event)
+    manager?.setTabPreviewsEnabled(enabled === true).catch(error => {
+      console.error('Failed to update tab previews:', error)
+    })
   })
 
   ipcMain.on(IpcChannels.TABS_SET_PREVIEW_CAPTURE_PAUSED, (event, paused) => {

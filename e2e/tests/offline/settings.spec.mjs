@@ -942,11 +942,13 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const slider = page.getByRole('slider', { name: /Tab Width/ })
+    const fixedWidthToggle = page.locator('.switchColumnGrid > .switchColumn').first()
+      .locator('label.switch-label')
+      .filter({ hasText: 'Use Fixed Tab Width in Horizontal Mode' })
+    await expect(fixedWidthToggle).toHaveCount(1)
     await expect(slider).toBeDisabled()
 
-    await page.locator('label.switch-label')
-      .filter({ hasText: 'Use Fixed Tab Width in Horizontal Mode' })
-      .click()
+    await fixedWidthToggle.click()
     await expect(page.getByRole('checkbox', { name: 'Use Fixed Tab Width in Horizontal Mode' })).toBeChecked()
     await expect(slider).toBeEnabled()
 
