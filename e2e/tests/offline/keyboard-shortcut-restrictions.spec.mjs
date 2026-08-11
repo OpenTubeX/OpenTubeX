@@ -1,7 +1,7 @@
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goTo } from '../../helpers/app.mjs'
 
 test('context-dependent shortcuts are shown as non-editable', async ({ page }) => {
-  await page.locator('.navSettingsButton').click()
+  await goTo(page, 'settings')
   await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
 
   await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible()

@@ -26,13 +26,6 @@
           @change="handleRestartPrompt"
         />
         <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Show Thumbnail Size Button in Header')"
-          compact
-          :default-value="showThumbnailSizeButtonInHeader"
-          setting-key="showThumbnailSizeButtonInHeader"
-          @change="updateShowThumbnailSizeButtonInHeader"
-        />
-        <FtToggleSwitch
           :label="$t('Settings.Theme Settings.Always Show Scrollbars')"
           :tooltip="$t('Tooltips.Theme Settings.Always Show Scrollbars')"
           compact
@@ -78,14 +71,6 @@
           :default-value="hideHeaderLogo"
           setting-key="hideHeaderLogo"
           @change="updateHideHeaderLogo"
-        />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Hide Profile Selector in Header')"
-          :tooltip="$t('Tooltips.Theme Settings.Hide Profile Selector in Header')"
-          compact
-          :default-value="hideProfileSelectorInHeader"
-          setting-key="hideProfileSelectorInHeader"
-          @change="updateHideProfileSelectorInHeader"
         />
         <FtToggleSwitch
           v-if="usingElectron"
@@ -456,30 +441,6 @@ const hideHeaderLogo = computed(() => {
  */
 function updateHideHeaderLogo(value) {
   store.dispatch('updateHideHeaderLogo', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideProfileSelectorInHeader = computed(() => {
-  return store.getters.getHideProfileSelectorInHeader
-})
-
-/**
- * @param {boolean} value
- */
-function updateHideProfileSelectorInHeader(value) {
-  store.dispatch('updateHideProfileSelectorInHeader', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const showThumbnailSizeButtonInHeader = computed(() => {
-  return store.getters.getShowThumbnailSizeButtonInHeader
-})
-
-/**
- * @param {boolean} value
- */
-function updateShowThumbnailSizeButtonInHeader(value) {
-  store.dispatch('updateShowThumbnailSizeButtonInHeader', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

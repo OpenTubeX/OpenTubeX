@@ -38,7 +38,7 @@ test.describe('settings', () => {
   })
 
   test('keeps General settings aligned to the bottom of its scroll range', async ({ page }) => {
-    await page.locator('.navSettingsButton').click()
+    await goTo(page, 'settings')
     const content = page.locator('.settingsContent')
     await expect(content).toBeVisible()
     await content.hover()
@@ -122,12 +122,16 @@ test.describe('settings', () => {
   })
 
   test('toggles from the app settings button', async ({ page }) => {
-    const settingsButton = page.locator('.navSettingsButton')
+    const profileButton = page.locator('.profileTrigger')
+    await profileButton.click()
+    const settingsButton = page.locator('.allSettingsShortcut')
     await expect(settingsButton.locator('[data-icon="gear"]')).toBeVisible()
     await expect(page.locator('.sideNav').getByText('Settings', { exact: true })).toHaveCount(0)
     await settingsButton.click()
     await expect(page.locator('.settingsWindow')).toBeVisible()
 
+    await profileButton.click()
+    await expect(settingsButton).toBeVisible()
     await settingsButton.click()
     await expect(page.locator('.settingsWindow')).toHaveClass(/settings-window-leave-active/)
     await expect(page.locator('.settingsWindow')).toBeHidden()
@@ -139,7 +143,7 @@ test.describe('settings', () => {
     await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
 
     await page.locator('.settingsCloseButton').click()
-    await page.locator('.navSettingsButton').click()
+    await goTo(page, 'settings')
 
     await expect(page.locator('.settingsContent > [data-section="privacy"]')).toBeVisible()
     await expect(page.locator('.settingsMenu [data-section="privacy"]')).toHaveClass(/active/)

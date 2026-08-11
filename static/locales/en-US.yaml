@@ -368,6 +368,13 @@ History:
 Settings:
   # On Settings Page
   Settings: Settings
+  Quick Settings:
+    Quick Settings: Quick settings
+    Appearance: Appearance
+    Playback: Playback
+    Content: Content
+    Language and Region: Language and region
+    All Settings: All settings
   Sort Settings Sections (A-Z): Sort Settings Sections (A-Z)
   Highlight Changed Settings: Highlight settings changed from defaults
   Reset Setting to Default: Reset this setting to its default
@@ -483,7 +490,6 @@ Settings:
     Scrollbar Width: Scrollbar Width
     Animation Speed: Animation Speed
     Thumbnail Size: Thumbnail Size
-    Show Thumbnail Size Button in Header: Show Thumbnail Size Button in Header
     Show Tab Icons: Show Tab Icons
     Show Tab Previews: Show Tab Previews
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
@@ -502,7 +508,6 @@ Settings:
     Always Show Scrollbars: Always Show Scrollbars
     Hide Side Bar Labels: Hide Side Bar Labels
     Hide OpenTubeX Header Logo: Hide OpenTubeX Header Logo
-    Hide Profile Selector in Header: Hide Profile Selector in Header
     Base Theme:
       Base Theme: Base Theme
       Black: Black
@@ -1836,7 +1841,6 @@ Tooltips:
     Auto Refresh Interval: How often OpenTubeX automatically refreshes your subscription feed while the app is open.
   Theme Settings:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
-    Hide Profile Selector in Header: Hides the profile selector from the top bar. The profile selector will be shown at the top of the Subscribed Channels page instead.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
   Experimental Settings:

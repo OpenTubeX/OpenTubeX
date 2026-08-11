@@ -1,0 +1,310 @@
+.quickSettings {
+  position: relative;
+}
+
+.profileTrigger {
+  align-items: center;
+  border: 0;
+  border-radius: 50%;
+  block-size: 40px;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 20px;
+  inline-size: 40px;
+  justify-content: center;
+  padding: 0;
+}
+
+.profileTrigger:hover,
+.profileTrigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--side-nav-hover-color);
+}
+
+.profileInitial {
+  line-height: 1;
+  user-select: none;
+}
+
+.profileHeaderRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  padding-inline-end: 8px;
+}
+
+.profileSummary {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 40px 1fr 12px;
+  inline-size: 100%;
+  padding-block: 10px;
+  padding-inline: 20px 12px;
+  text-align: start;
+}
+
+.allSettingsShortcut {
+  align-items: center;
+  align-self: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  block-size: 36px;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: inline-flex;
+  inline-size: 36px;
+  justify-content: center;
+}
+
+.profileAvatar {
+  align-items: center;
+  block-size: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  flex: 0 0 auto;
+  inline-size: 40px;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+
+.profileSummaryText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.profileSummaryText strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profilePanelHeader {
+  align-items: center;
+  border-block-end: 1px solid var(--scrollbar-color);
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  padding-block: 6px;
+  padding-inline: 8px;
+}
+
+.profilePanelHeader h2 {
+  font-size: 18px;
+  margin: 0;
+  text-align: center;
+}
+
+.profilePanelHeader button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: inline-flex;
+  block-size: 36px;
+  inline-size: 36px;
+  justify-content: center;
+}
+
+.profileList {
+  padding-block: 4px;
+}
+
+.profileOption {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 12px;
+  grid-template-columns: 40px 1fr 20px;
+  inline-size: 100%;
+  min-block-size: 54px;
+  padding-block: 7px;
+  padding-inline: 20px;
+  text-align: start;
+}
+
+.activeProfileIcon {
+  color: var(--accent-color);
+}
+
+.quickSettingsMenu {
+  background-color: var(--card-bg-color);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 55%), 0 3px 10px rgb(0 0 0 / 45%);
+  inset-block-start: 48px;
+  inset-inline-end: 0;
+  margin: 0;
+  max-block-size: calc(100vh - 76px);
+  inline-size: min(440px, calc(100vw - 20px));
+  line-height: normal;
+  overflow-y: auto;
+  padding: 0;
+  position: absolute;
+  text-align: start;
+  transform-origin: top right;
+}
+
+.quick-settings-menu-enter-active,
+.quick-settings-menu-leave-active {
+  transition:
+    opacity 140ms ease,
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.quick-settings-menu-enter-from,
+.quick-settings-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-5px) scale(0.98);
+}
+
+:global(:root[data-reduced-motion='reduce']) .quick-settings-menu-enter-active,
+:global(:root[data-reduced-motion='reduce']) .quick-settings-menu-leave-active {
+  transition: none;
+}
+
+.menuSection {
+  border-block-start: 1px solid var(--scrollbar-color);
+  padding-block: 10px 12px;
+  padding-inline: 18px;
+}
+
+.menuSection h3 {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-block: 0 10px;
+  margin-inline: 0;
+  text-transform: uppercase;
+}
+
+.menuSection :deep(.pure-material-slider),
+.menuSection :deep(.switch-ctn) {
+  margin-block: 4px;
+  inline-size: 100%;
+}
+
+.menuSection :deep(.quickSelect) {
+  inline-size: 100%;
+  margin-block: 26px 6px;
+}
+
+.menuSection :deep(.quickSelect + .quickSelect) {
+  margin-block-start: 28px;
+}
+
+.selectPair {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.selectPair :deep(.quickSelect + .quickSelect) {
+  margin-block-start: 26px;
+}
+
+.menuSection :deep(.quickSelect .select-text),
+.menuSection :deep(.quickSelect .nativeSelect) {
+  block-size: 38px;
+}
+
+.menuSection :deep(.pure-material-slider) {
+  padding-block: 2px;
+}
+
+.sliderGroup {
+  display: grid;
+  gap: 8px;
+  margin-block-start: 6px;
+}
+
+.sliderGroup :deep(.pure-material-slider) {
+  display: grid;
+  grid-template-rows: auto 24px;
+  margin: 0;
+  padding-block: 0;
+}
+
+.sliderGroup :deep(.pure-material-slider .input) {
+  block-size: 24px;
+}
+
+.sliderGroup :deep(.pure-material-slider .input::-webkit-slider-runnable-track) {
+  margin-block: 11px;
+}
+
+.sliderGroup :deep(.pure-material-slider .input::-moz-range-track) {
+  margin-block: 11px;
+  margin-inline: 0;
+}
+
+.menuSection :deep(.switch-label) {
+  padding-block: 6px;
+}
+
+.menuLinks {
+  border-block-start: 1px solid var(--scrollbar-color);
+  padding-block: 4px;
+}
+
+.menuLinks button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--primary-text-color);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 14px;
+  grid-template-columns: 20px 1fr 12px;
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding-block: 6px;
+  padding-inline: 20px;
+  text-align: start;
+}
+
+.profileSummary:hover,
+.profileSummary:focus-visible,
+.allSettingsShortcut:hover,
+.allSettingsShortcut:focus-visible,
+.profileOption:hover,
+.profileOption:focus-visible,
+.profilePanelHeader button:hover,
+.profilePanelHeader button:focus-visible,
+.menuLinks button:hover,
+.menuLinks button:focus-visible {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+}
+
+.linkArrow {
+  color: var(--secondary-text-color);
+}
+
+@media only screen and (width <= 680px) {
+  .quickSettingsMenu {
+    inset-inline-end: -3px;
+    max-block-size: calc(100vh - 72px);
+  }
+}
+
+@media only screen and (width <= 400px) {
+  .selectPair {
+    grid-template-columns: 1fr;
+  }
+
+  .selectPair :deep(.quickSelect + .quickSelect) {
+    margin-block-start: 28px;
+  }
+}
