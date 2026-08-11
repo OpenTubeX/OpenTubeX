@@ -655,6 +655,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       { name: 'ffmpeg', path: ffmpegPath },
       { name: 'ffprobe', path: ffprobePath }
     ]
+    const pendingInstalls = []
 
     try {
       for (const [index, binary] of binaries.entries()) {
@@ -667,11 +668,18 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
         )
 
         if (download.data !== null) {
-          await installBinary(extractZipEntry(download.data, name => name === binary.name), binary.path)
-          updated = true
+          pendingInstalls.push({
+            data: extractZipEntry(download.data, name => name === binary.name),
+            path: binary.path
+          })
           pendingValidatorWrites.push({ path: binary.path, validators: download.validators, url })
         }
       }
+
+      for (const pendingInstall of pendingInstalls) {
+        await installBinary(pendingInstall.data, pendingInstall.path)
+      }
+      updated = pendingInstalls.length > 0
     } catch (error) {
       return { error: error.message }
     }
