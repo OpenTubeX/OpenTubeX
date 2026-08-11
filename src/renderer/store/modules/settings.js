@@ -842,8 +842,10 @@ const customActions = {
       }
 
       await Promise.allSettled(sideEffectPromises)
+      return userSettings.length > 0
     } catch (errMessage) {
       console.error(errMessage)
+      return null
     }
   },
 

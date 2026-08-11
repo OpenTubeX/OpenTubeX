@@ -98,6 +98,7 @@
           v-show="showSearchContainer"
           ref="searchContainer"
           class="searchContainer"
+          data-tutorial="search"
         >
           <FtInput
             ref="searchInput"

@@ -72,6 +72,11 @@
     <Transition name="settings-window">
       <SettingsWindow v-if="settingsWindowOpen" />
     </Transition>
+    <FtTutorialOverlay
+      v-if="showTutorial"
+      :new-installation="tutorialIsNewInstallation"
+      @close="completeTutorial"
+    />
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
@@ -312,6 +317,7 @@ import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPl
 import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
 import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
+import FtTutorialOverlay from './components/FtTutorialOverlay/FtTutorialOverlay.vue'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
@@ -341,6 +347,7 @@ import { initializePlatformInfo } from './helpers/platform'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
+import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -520,6 +527,8 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
 const dataReady = ref(false)
+const showTutorial = ref(false)
+const tutorialIsNewInstallation = ref(false)
 const findbarVisible = ref(false)
 const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
@@ -712,7 +721,39 @@ async function initializeManagedExternalSoftware() {
   }
 }
 
+const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
+
+function initializeTutorial(hasExistingSettings, lastUsedVersion) {
+  try {
+    let audience = localStorage.getItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+    if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return
+    if (hasExistingSettings === null) return
+
+    if (audience !== 'new' && audience !== 'existing') {
+      audience = hasExistingSettings ? 'existing' : 'new'
+      localStorage.setItem(TUTORIAL_AUDIENCE_STORAGE_KEY, audience)
+    }
+
+    tutorialIsNewInstallation.value = audience === 'new'
+    showTutorial.value = true
+  } catch (error) {
+    console.error('Failed to initialize tutorial', error)
+  }
+}
+
+function completeTutorial() {
+  showTutorial.value = false
+
+  try {
+    localStorage.removeItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+  } catch (error) {
+    console.error('Failed to save tutorial completion', error)
+  }
+}
+
 onMounted(async () => {
+  const lastUsedVersion = getLastUsedVersion()
+  setLastUsedVersion(packageDetails.version)
   preloadUtilityRoutes()
 
   if (isElectron) {
@@ -720,7 +761,7 @@ onMounted(async () => {
     window.ftElectron.tabs.rendererReady()
   }
 
-  await store.dispatch('grabUserSettings')
+  const hasExistingSettings = await store.dispatch('grabUserSettings')
 
   updateTheme()
 
@@ -766,6 +807,7 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
+    initializeTutorial(hasExistingSettings, lastUsedVersion)
     initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {

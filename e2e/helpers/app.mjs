@@ -256,10 +256,18 @@ export async function setPlayerFullscreen(page, fullscreen) {
 export const test = base.extend({
   seed: [{}, { option: true }],
   launchArgs: [[], { option: true }],
+  showTutorial: [false, { option: true }],
 
-  app: async ({ seed, launchArgs }, use, testInfo) => {
+  app: async ({ seed, launchArgs, showTutorial }, use, testInfo) => {
     const userDataDir = await createUserDataDir(seed)
     const { electronApp, page } = await launchApp(userDataDir, launchArgs)
+
+    if (!showTutorial) {
+      const tutorial = page.locator('.tutorialOverlay')
+      await expect(tutorial).toBeVisible()
+      await tutorial.getByRole('button', { name: 'Got it' }).click()
+      await expect(tutorial).toBeHidden()
+    }
 
     const relaunch = async () => {
       // Wait until the old process has fully exited, otherwise it still owns
