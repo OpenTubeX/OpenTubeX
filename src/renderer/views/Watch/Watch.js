@@ -1968,6 +1968,7 @@ export default defineComponent({
 
         this.isFamilyFriendly = result.basic_info.is_family_safe
         this.commentsDisabled = areLocalCommentsDisabled(result)
+        const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
 
         this.recommendedVideos = result.watch_next_feed
           ?.filter((item) => {
@@ -1979,14 +1980,38 @@ export default defineComponent({
           .sort(this.sortWatchedVideosLast) ?? []
 
         this.videoAnnotations = parseLocalEndscreen(result.endscreen)
+        if (avoidTranslation) {
+          this.videoAnnotations = this.videoAnnotations.map((annotation) => {
+            if (!annotation.videoId) {
+              return annotation
+            }
+
+            const cachedTitle = getCachedOembedTitle(annotation.videoId)
+            if (cachedTitle !== null) {
+              return { ...annotation, title: cachedTitle }
+            }
+
+            getOembedTitle(annotation.videoId).then((title) => {
+              if (!title || !this.isCurrentVideoLoad(loadGeneration, videoId)) {
+                return
+              }
+
+              this.videoAnnotations = this.videoAnnotations.map((currentAnnotation) =>
+                currentAnnotation.id === annotation.id
+                  ? { ...currentAnnotation, title }
+                  : currentAnnotation
+              )
+            })
+
+            return annotation
+          })
+        }
 
         if (this.showFamilyFriendlyOnly && !this.isFamilyFriendly) {
           this.isLoading = false
           this.handleVideoEnded()
           return
         }
-
-        const avoidTranslation = this.$store.getters.getAvoidTranslation !== 'disabled'
 
         if (avoidTranslation) {
           this.videoTitle = result.basic_info.title?.trim() ?? ''
