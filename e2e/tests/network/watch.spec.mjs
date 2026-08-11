@@ -390,6 +390,9 @@ test.describe('watch page', () => {
 
     const transcriptSegments = page.locator('.transcriptSegments')
     await expect(page.locator('.transcriptSegment').first()).toBeVisible()
+    const transcriptActions = page.locator('.sidebarArea .transcriptActions')
+    await expect(transcriptActions.locator('.iconButton')).toHaveCount(2)
+    await expect(transcriptActions.locator('.btn')).toHaveCount(0)
     await transcriptSegments.evaluate(element => { element.scrollTop = element.scrollHeight })
     await expect.poll(() => transcriptSegments.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
     await page.getByPlaceholder('Search transcript').fill('Transcript line 2500.')

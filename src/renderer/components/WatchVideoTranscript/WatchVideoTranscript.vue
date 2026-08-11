@@ -41,34 +41,20 @@
           v-if="segments.length > 0"
           class="transcriptActions"
         >
-          <template v-if="fullscreenOverlay">
-            <FtIconButton
-              :title="t('Video.Transcript.Copy')"
-              :icon="['fas', 'copy']"
-              theme="base-no-default"
-              :use-shadow="false"
-              @click="copyTranscript"
-            />
-            <FtIconButton
-              :title="t('Video.Transcript.Save')"
-              :icon="['fas', 'download']"
-              theme="base-no-default"
-              :use-shadow="false"
-              @click="saveTranscript"
-            />
-          </template>
-          <template v-else>
-            <FtButton
-              :label="t('Video.Transcript.Copy')"
-              :icon="['fas', 'copy']"
-              @click="copyTranscript"
-            />
-            <FtButton
-              :label="t('Video.Transcript.Save')"
-              :icon="['fas', 'download']"
-              @click="saveTranscript"
-            />
-          </template>
+          <FtIconButton
+            :title="t('Video.Transcript.Copy')"
+            :icon="['fas', 'copy']"
+            theme="base-no-default"
+            :use-shadow="false"
+            @click="copyTranscript"
+          />
+          <FtIconButton
+            :title="t('Video.Transcript.Save')"
+            :icon="['fas', 'download']"
+            theme="base-no-default"
+            :use-shadow="false"
+            @click="saveTranscript"
+          />
         </div>
         <FtIconButton
           :title="t('Video.Transcript.Close')"
@@ -161,7 +147,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtButton from '../FtButton/FtButton.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
