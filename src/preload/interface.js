@@ -314,7 +314,8 @@ export default {
    * } | undefined} [options]
    * @returns {Promise<{
    *   ytDlp: import('../main/ytDlp').YtDlpBinaryInfo,
-   *   ffmpeg: import('../main/ytDlp').YtDlpBinaryInfo
+   *   ffmpeg: import('../main/ytDlp').YtDlpBinaryInfo,
+   *   ffprobe: import('../main/ytDlp').YtDlpBinaryInfo
    * } | null>}
    */
   ytDlpGetInfo: (options) => {

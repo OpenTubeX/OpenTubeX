@@ -81,6 +81,29 @@
         {{ t('Settings.External Software Settings.Detected FFmpeg Version Template', { version: ffmpegInfo.version }) }}
       </p>
     </FtFlexBox>
+    <FtFlexBox class="binaryStatusEnd">
+      <p
+        v-if="ffprobeInfo === null"
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.External Software Settings.Checking FFprobe') }}
+      </p>
+      <p
+        v-else-if="!ffprobeInfo.available"
+        class="ytDlpStatus ytDlpWarning"
+      >
+        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        {{ ytDlpFfmpegSource === 'managed'
+          ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
+          : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
+      </p>
+      <p
+        v-else
+        class="ytDlpStatus"
+      >
+        {{ t('Settings.External Software Settings.Detected FFprobe Version Template', { version: ffprobeInfo.version }) }}
+      </p>
+    </FtFlexBox>
     <FtFlexBox v-if="ytDlpSource === 'managed' || ytDlpFfmpegSource === 'managed'">
       <FtButton
         v-if="ytDlpSource === 'managed'"
@@ -100,12 +123,12 @@
       <FtButton
         v-if="ytDlpFfmpegSource === 'managed'"
         :label="ffmpegBinaryDownloadInProgress
-          ? t('Settings.External Software Settings.Downloading FFmpeg')
+          ? t('Settings.External Software Settings.Downloading FFmpeg and FFprobe')
           : (ffmpegInfo === null
             ? t('Settings.External Software Settings.Checking FFmpeg')
-            : ffmpegInfo.available
-              ? t('Settings.External Software Settings.Update FFmpeg')
-              : t('Settings.External Software Settings.Download FFmpeg'))"
+            : ffmpegToolsAvailable
+              ? t('Settings.External Software Settings.Update FFmpeg and FFprobe')
+              : t('Settings.External Software Settings.Download FFmpeg and FFprobe'))"
         :icon="['fas', 'download']"
         :disabled="ffmpegBinaryDownloadInProgress || ffmpegInfo === null"
         :text-color="null"
@@ -200,14 +223,15 @@ const ytDlpFfmpegPath = computed(() => store.getters.getYtDlpFfmpegPath)
 /** @typedef {import('../../main/ytDlp').YtDlpBinaryInfo} BinaryInfo */
 
 /**
- * @type {import('vue').Ref<Record<'ytDlp' | 'ffmpeg', {
+ * @type {import('vue').Ref<Record<'ytDlp' | 'ffmpeg' | 'ffprobe', {
  *   managed: BinaryInfo | null,
  *   system: { path: string, info: BinaryInfo } | null
  * }>>}
  */
 const binariesInfoCache = ref({
   ytDlp: { managed: null, system: null },
-  ffmpeg: { managed: null, system: null }
+  ffmpeg: { managed: null, system: null },
+  ffprobe: { managed: null, system: null }
 })
 
 /** @type {import('vue').ComputedRef<BinaryInfo | null>} */
@@ -223,6 +247,15 @@ const ffmpegInfo = computed(() => ytDlpFfmpegSource.value === 'managed'
   : binariesInfoCache.value.ffmpeg.system?.path === ytDlpFfmpegPath.value
     ? binariesInfoCache.value.ffmpeg.system.info
     : null)
+
+/** @type {import('vue').ComputedRef<BinaryInfo | null>} */
+const ffprobeInfo = computed(() => ytDlpFfmpegSource.value === 'managed'
+  ? binariesInfoCache.value.ffprobe.managed
+  : binariesInfoCache.value.ffprobe.system?.path === ytDlpFfmpegPath.value
+    ? binariesInfoCache.value.ffprobe.system.info
+    : null)
+
+const ffmpegToolsAvailable = computed(() => ffmpegInfo.value?.available === true && ffprobeInfo.value?.available === true)
 
 const ytDlpBinaryDownloadInProgress = ref(false)
 const ffmpegBinaryDownloadInProgress = ref(false)
@@ -245,12 +278,13 @@ async function getBinariesInfo(options) {
   try {
     return await window.ftElectron.ytDlpGetInfo(options)
   } catch (error) {
-    console.error('Checking the yt-dlp and FFmpeg binaries failed', error)
+    console.error('Checking the yt-dlp, FFmpeg, and FFprobe binaries failed', error)
 
     /** @type {import('../../main/ytDlp').YtDlpBinaryInfo} */
     const unavailable = { source: options.ytDlpSource, available: false, version: null }
 
-    return { ytDlp: unavailable, ffmpeg: { ...unavailable, source: options.ffmpegSource } }
+    const unavailableFfmpegTool = { ...unavailable, source: options.ffmpegSource }
+    return { ytDlp: unavailable, ffmpeg: unavailableFfmpegTool, ffprobe: unavailableFfmpegTool }
   }
 }
 
@@ -269,6 +303,7 @@ async function refreshSystemBinariesInfo() {
   if (requestId === systemInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.system = { path: ytDlpSystemPath, info: info.ytDlp }
     binariesInfoCache.value.ffmpeg.system = { path: ffmpegSystemPath, info: info.ffmpeg }
+    binariesInfoCache.value.ffprobe.system = { path: ffmpegSystemPath, info: info.ffprobe }
   }
 }
 
@@ -283,6 +318,9 @@ async function refreshManagedBinariesInfo() {
   if (binariesInfoCache.value.ffmpeg.managed?.available === false) {
     binariesInfoCache.value.ffmpeg.managed = null
   }
+  if (binariesInfoCache.value.ffprobe.managed?.available === false) {
+    binariesInfoCache.value.ffprobe.managed = null
+  }
 
   const info = await getBinariesInfo({
     ytDlpSource: 'managed',
@@ -294,6 +332,7 @@ async function refreshManagedBinariesInfo() {
   if (requestId === managedInfoRequestId && info !== null) {
     binariesInfoCache.value.ytDlp.managed = info.ytDlp
     binariesInfoCache.value.ffmpeg.managed = info.ffmpeg
+    binariesInfoCache.value.ffprobe.managed = info.ffprobe
   }
 }
 
@@ -418,7 +457,7 @@ function showDownloadErrorToast(binary, error) {
   showToast({
     message: binary === 'yt-dlp'
       ? t('Settings.External Software Settings.yt-dlp Download Error Template', { error })
-      : t('Settings.External Software Settings.FFmpeg Download Error Template', { error }),
+      : t('Settings.External Software Settings.FFmpeg and FFprobe Download Error Template', { error }),
     icon: ['fas', 'circle-exclamation'],
   })
 }
@@ -441,11 +480,11 @@ async function downloadBinary(binary) {
         showToast({
           message: binary === 'yt-dlp'
             ? t('Settings.External Software Settings.yt-dlp Downloaded Template', { version: result.version })
-            : t('Settings.External Software Settings.FFmpeg Downloaded Template', { version: result.version }),
+            : t('Settings.External Software Settings.FFmpeg and FFprobe Downloaded Template', { version: result.version }),
           icon: ['fas', 'download'],
         })
       } else {
-        const tool = binary === 'yt-dlp' ? 'yt-dlp' : 'FFmpeg'
+        const tool = binary === 'yt-dlp' ? 'yt-dlp' : 'FFmpeg and FFprobe'
         showToast({
           message: t('Settings.External Software Settings.Managed Tool Already Current Template', {
             tool,
