@@ -74,6 +74,33 @@ test.describe('tab previews', () => {
     expect(width).toBeGreaterThanOrEqual(Math.round(displayed.width))
   })
 
+  test('repositions an open tooltip after previews are disabled', async ({ page }) => {
+    await hoverTabForPreview(page, 0)
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowTabPreviews', false)
+    })
+
+    const tooltip = page.locator('.tabTooltip')
+    await expect(tooltip.locator('.tabTooltipPreview')).toHaveCount(0)
+    await expect.poll(async () => {
+      return await page.locator(sel.tabs).first().evaluate((tab) => {
+        const tooltip = document.querySelector('.tabTooltip')
+        const tabBounds = tab.getBoundingClientRect()
+        const tooltipBounds = tooltip.getBoundingClientRect()
+        const expectedLeft = Math.max(
+          8,
+          Math.min(
+            window.innerWidth - tooltipBounds.width - 8,
+            tabBounds.left + tabBounds.width / 2 - tooltipBounds.width / 2
+          )
+        )
+        return Math.abs(tooltipBounds.left - Math.round(expectedLeft))
+      })
+    }).toBeLessThanOrEqual(1)
+  })
+
   test('hides tab previews from the page while capturing', async ({ page }) => {
     await page.locator(sel.newTabButton).click()
     await expect(page.locator(sel.tabs)).toHaveCount(2)

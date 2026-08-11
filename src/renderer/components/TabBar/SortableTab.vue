@@ -73,6 +73,7 @@
         :id="tooltipId"
         ref="tooltipRef"
         class="tabTooltip"
+        :class="{ withPreview: showPreview }"
         data-tab-preview-overlay
         :style="tooltipStyle"
         role="tooltip"
@@ -353,10 +354,6 @@ function updateTooltipPosition() {
   const tooltipWidth = !props.showPreview && renderedTooltipWidth > 0
     ? Math.min(renderedTooltipWidth, maxTooltipWidth)
     : maxTooltipWidth
-  const widthStyle = props.showPreview
-    ? { inlineSize: `${Math.round(maxTooltipWidth)}px` }
-    : { inlineSize: 'max-content', maxInlineSize: `${Math.round(maxTooltipWidth)}px` }
-
   if (props.vertical) {
     // Place the tooltip beside the tab, keeping it inside the viewport.
     const top = Math.max(
@@ -365,7 +362,6 @@ function updateTooltipPosition() {
     )
 
     tooltipStyle.value = {
-      ...widthStyle,
       insetInlineStart: `${Math.round(rect.right + TOOLTIP_OFFSET_PX)}px`,
       insetBlockStart: `${Math.round(top)}px`
     }
@@ -381,7 +377,6 @@ function updateTooltipPosition() {
   )
 
   tooltipStyle.value = {
-    ...widthStyle,
     insetInlineStart: `${Math.round(left)}px`,
     insetBlockStart: `${Math.round(rect.bottom + TOOLTIP_OFFSET_PX)}px`
   }
@@ -449,7 +444,7 @@ watch(() => props.showPreview, (showPreview) => {
   tooltipPreviewUrl.value = null
   tooltipRequestId.value++
   if (isTooltipVisible.value) {
-    updateTooltipPosition()
+    nextTick(updateTooltipPosition)
     if (showPreview) {
       loadTooltipPreview()
     }
@@ -718,6 +713,8 @@ watch(() => props.showPreview, (showPreview) => {
 .tabTooltip {
   position: fixed;
   z-index: 10000;
+  inline-size: max-content;
+  max-inline-size: min(340px, calc(100vw - 16px));
   padding: 8px;
   border: 1px solid var(--tertiary-text-color);
   border-radius: calc(8px * var(--ui-roundness));
@@ -729,6 +726,10 @@ watch(() => props.showPreview, (showPreview) => {
   letter-spacing: 0;
   pointer-events: none;
   -webkit-app-region: no-drag;
+}
+
+.tabTooltip.withPreview {
+  inline-size: min(340px, calc(100vw - 16px));
 }
 
 .tab-tooltip-enter-active,
