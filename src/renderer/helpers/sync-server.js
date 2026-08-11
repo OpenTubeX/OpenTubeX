@@ -946,7 +946,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const mergedProfile = {
       _id: id,
       name: metadata.title,
-      bgColor: getMergedProfileBackground(local, metadata === localMetadata, metadata.bgColor),
+      bgColor: getMergedProfileBackground(local, metadata.bgColor),
       textColor: metadata.textColor,
       ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
       subscriptions: mergedSubscriptions,

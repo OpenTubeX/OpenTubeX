@@ -7,9 +7,9 @@ export function getSyncProfileBackground(color, fallback = DEFAULT_PROFILE_BACKG
   return color == null || color === 'transparent' ? opaqueFallback : color
 }
 
-export function getMergedProfileBackground(local, usesLocalMetadata, syncedBackground) {
-  const preserveLocalTransparency = usesLocalMetadata &&
-    local?.icon?.type === 'image' && local.bgColor === 'transparent'
+export function getMergedProfileBackground(local, syncedBackground) {
+  const preserveLocalTransparency = local?.icon?.type === 'image' &&
+    local.bgColor === 'transparent'
 
   return preserveLocalTransparency ? 'transparent' : syncedBackground
 }

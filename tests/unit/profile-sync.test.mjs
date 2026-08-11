@@ -13,13 +13,13 @@ test('syncs an opaque fallback for transparent profile backgrounds', () => {
   assert.equal(getSyncProfileBackground('#123456'), '#123456')
 })
 
-test('keeps transparency only with an authoritative local image', () => {
+test('keeps transparency whenever the local image is retained', () => {
   const imageProfile = {
     bgColor: 'transparent',
     icon: { type: 'image', value: 'data:image/webp;base64,AA==' }
   }
 
-  assert.equal(getMergedProfileBackground(imageProfile, true, '#000000'), 'transparent')
-  assert.equal(getMergedProfileBackground(imageProfile, false, '#123456'), '#123456')
-  assert.equal(getMergedProfileBackground({ bgColor: 'transparent' }, true, '#000000'), '#000000')
+  assert.equal(getMergedProfileBackground(imageProfile, '#000000'), 'transparent')
+  assert.equal(getMergedProfileBackground(imageProfile, '#123456'), 'transparent')
+  assert.equal(getMergedProfileBackground({ bgColor: 'transparent' }, '#000000'), '#000000')
 })
