@@ -46,6 +46,19 @@ test.describe('quick settings menu', () => {
     await expect(page.locator('.selectDropdown')).toContainText('English (US) (100%)')
   })
 
+  test('keeps the menu open when Escape closes a select', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const themeSelect = menu.getByRole('combobox', { name: 'Base Theme' })
+
+    await themeSelect.click()
+    await expect(page.locator('.selectDropdown')).toBeVisible()
+    await themeSelect.press('Escape')
+
+    await expect(page.locator('.selectDropdown')).toBeHidden()
+    await expect(menu).toBeVisible()
+  })
+
   test('stays open when the application window loses focus', async ({ app, page }) => {
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')

@@ -404,6 +404,7 @@ function handleButtonKeydown(event) {
 
   if (event.key === 'Escape' && dropdownShown.value) {
     event.preventDefault()
+    event.stopPropagation()
     closeDropdown()
     return
   }
