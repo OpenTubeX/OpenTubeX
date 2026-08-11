@@ -57,7 +57,7 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       run: |
-        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]')
+        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]' 'macroscopeapp[bot]')
 
         is_trusted_bot() {
           local candidate

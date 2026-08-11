@@ -27,7 +27,7 @@ jobs:
         REVIEWER: ${{ github.event.workflow_run.actor.login }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
       run: |
-        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]')
+        TRUSTED_BOTS=('coderabbitai[bot]' 'greptile-apps[bot]' 'macroscopeapp[bot]')
 
         is_trusted_bot() {
           local candidate
