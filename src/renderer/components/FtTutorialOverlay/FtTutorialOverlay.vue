@@ -100,6 +100,7 @@ const stepIndex = ref(0)
 const targetRect = ref(null)
 const cardStyle = ref({})
 let updateFrame = null
+let lastActiveElement = null
 
 const newUserSteps = computed(() => [
   {
@@ -164,6 +165,7 @@ const highlightStyle = computed(() => {
 })
 
 onMounted(() => {
+  lastActiveElement = document.activeElement
   lockBodyScroll()
   store.commit('addOpenPrompt', promptId)
   window.addEventListener('resize', schedulePositionUpdate)
@@ -180,6 +182,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleDocumentKeydown, true)
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
+  nextTick(() => lastActiveElement?.focus())
 })
 
 function schedulePositionUpdate() {
