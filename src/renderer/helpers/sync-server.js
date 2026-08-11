@@ -10,6 +10,7 @@ import {
 import { getSyncableSettingKeys } from '../store/modules/settings'
 import { deepCopy } from './utils'
 import { generateRandomUniqueId } from './playlists'
+import { getMergedProfileBackground, getSyncProfileBackground } from './profile-sync.js'
 
 const LEGACY_HISTORY_PAGE_SIZE = 50
 const BULK_SYNC_CHUNK_SIZE = 100
@@ -850,7 +851,7 @@ export async function syncHistory(client, store, previousIds = [], options = {})
 function profileMetadata(profile) {
   return {
     title: profile.name,
-    bgColor: profile.bgColor,
+    bgColor: getSyncProfileBackground(profile.bgColor),
     textColor: profile.textColor,
   }
 }
@@ -858,7 +859,7 @@ function profileMetadata(profile) {
 function remoteProfileMetadata(group, fallback = {}) {
   return {
     title: group.title,
-    bgColor: group.bg_color ?? fallback.bgColor ?? '#000000',
+    bgColor: getSyncProfileBackground(group.bg_color, fallback.bgColor),
     textColor: group.text_color ?? fallback.textColor ?? '#FFFFFF',
   }
 }
@@ -945,7 +946,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
     const mergedProfile = {
       _id: id,
       name: metadata.title,
-      bgColor: metadata.bgColor,
+      bgColor: getMergedProfileBackground(local, metadata === localMetadata, metadata.bgColor),
       textColor: metadata.textColor,
       ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
       subscriptions: mergedSubscriptions,
