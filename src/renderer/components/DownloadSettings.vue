@@ -2,7 +2,19 @@
   <FtSettingsSection
     :title="t('Settings.Download Settings.Download Settings')"
   >
-    <FtFlexBox class="downloadPathInputs settingsFlexStart460px">
+    <FtFlexBox>
+      <FtToggleSwitch
+        :label="t('Settings.Download Settings.Enable Downloads')"
+        :default-value="enableDownloads"
+        setting-key="enableDownloads"
+        :compact="true"
+        @change="updateEnableDownloads"
+      />
+    </FtFlexBox>
+    <FtFlexBox
+      v-if="enableDownloads"
+      class="downloadPathInputs settingsFlexStart460px"
+    >
       <FtInput
         :placeholder="t('Settings.Download Settings.Download Folder')"
         :show-action-button="true"
@@ -15,12 +27,12 @@
         @click="chooseDownloadFolder"
       />
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox v-if="enableDownloads">
       <p class="templatesHint">
         {{ t('Settings.Download Settings.Templates Hint') }}
       </p>
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox v-if="enableDownloads">
       <p class="templatesHint">
         {{ t('Settings.Download Settings.External Software Hint') }}
       </p>
@@ -35,13 +47,24 @@ import { useI18n } from 'vue-i18n'
 import FtSettingsSection from './FtSettingsSection/FtSettingsSection.vue'
 import FtInput from './FtInput/FtInput.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../store/index'
 
 const { t } = useI18n()
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
 /** @type {import('vue').ComputedRef<string>} */
 const ytDlpDownloadFolderPath = computed(() => store.getters.getYtDlpDownloadFolderPath)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableDownloads(value) {
+  store.dispatch('updateEnableDownloads', value)
+}
 
 /**
  * @param {string} value

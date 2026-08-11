@@ -1,7 +1,7 @@
 import { chmod, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, waitForAppReady } from '../../helpers/app.mjs'
+import { test, expect, goTo, goToSettingsSection, waitForAppReady } from '../../helpers/app.mjs'
 import { DBActions, PlaylistVideoAddResult } from '../../../src/constants.js'
 
 function historyEntry(videoId, title) {
@@ -101,6 +101,37 @@ test.describe('video downloads', () => {
 
     await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
+  })
+
+  test('disables media download actions and rejects direct requests', async ({ page }) => {
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateExtraThumbnailAction', 'download')
+    })
+
+    const downloadSection = await goToSettingsSection(page, 'download')
+    const toggle = downloadSection.getByRole('checkbox', { name: 'Enable Downloads' })
+    await expect(toggle).toBeChecked()
+    await downloadSection.locator('label.switch-label').filter({ hasText: 'Enable Downloads' }).click()
+    await expect(toggle).not.toBeChecked()
+    await expect(downloadSection.getByLabel('Download Folder')).toHaveCount(0)
+    await page.locator('.settingsCloseButton').click()
+
+    await expect(page.locator('.sideNav a[href="#/downloads"]')).toHaveCount(0)
+    await goTo(page, 'history')
+
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await expect(video.locator('.extraThumbnailActionIcon')).toHaveCount(0)
+    await video.locator('.optionsButton').click()
+    await expect(page.getByRole('option', { name: 'Download Video' })).toHaveCount(0)
+
+    await page.bringToFront()
+    const result = await page.evaluate(() => window.ftElectron.ytDlpDownload({
+      videoId: 'eeeeeeeeeee',
+      mode: 'video'
+    }))
+    expect(result).toEqual({ error: 'downloads-disabled' })
   })
 
   test('rejects custom arguments that can execute external code', async ({ page }) => {

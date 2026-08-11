@@ -149,7 +149,7 @@
         :value="extraThumbnailAction"
         setting-key="extraThumbnailAction"
         :select-names="extraThumbnailActionNames"
-        :select-values="EXTRA_THUMBNAIL_ACTION_VALUES"
+        :select-values="extraThumbnailActionValues"
         :icon="['fas', 'ellipsis-v']"
         @change="updateExtraThumbnailAction"
       />
@@ -611,14 +611,22 @@ function handleThumbnailPreferenceChange(value) {
   store.dispatch('updateThumbnailPreference', value)
 }
 
-const EXTRA_THUMBNAIL_ACTION_VALUES = ['', 'history', 'copyYoutube', 'openYoutube', ...(process.env.IS_ELECTRON ? ['download'] : [])]
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const extraThumbnailActionValues = computed(() => [
+  '',
+  'history',
+  'copyYoutube',
+  'openYoutube',
+  ...(process.env.IS_ELECTRON && enableDownloads.value ? ['download'] : [])
+])
 
 const extraThumbnailActionNames = computed(() => [
   t('Settings.General Settings.Extra Thumbnail Action Button.None'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Mark as Watched'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Copy YouTube Link'),
   t('Settings.General Settings.Extra Thumbnail Action Button.Open in YouTube'),
-  ...(process.env.IS_ELECTRON ? [t('Downloads.Download Video')] : [])
+  ...(process.env.IS_ELECTRON && enableDownloads.value ? [t('Downloads.Download Video')] : [])
 ])
 
 /** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube'>} */

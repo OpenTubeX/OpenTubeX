@@ -220,7 +220,7 @@
         </span>
         <span class="videoOptionsMobileRow">
           <FtIconButton
-            v-if="USING_ELECTRON && !isUpcoming"
+            v-if="USING_ELECTRON && enableDownloads && !isUpcoming"
             :title="t('Downloads.Download Video')"
             :icon="['fas', 'download']"
             theme="secondary"
@@ -262,7 +262,7 @@
       @close="showFormatPrompt = false"
     />
     <WatchVideoDownloadPrompt
-      v-if="showDownloadPrompt"
+      v-if="enableDownloads && showDownloadPrompt"
       :video-id="id"
       :title="title"
       :thumbnail="videoThumbnail"
@@ -492,6 +492,7 @@ const { locale, t } = useI18n()
 const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 // the title is plain text, so it has to be escaped before the hashtags and handles are linked
 /** @type {import('vue').ComputedRef<string>} */

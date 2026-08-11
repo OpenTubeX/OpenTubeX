@@ -953,6 +953,10 @@ export async function handleYtDlpDownload(event, payload) {
     return null
   }
 
+  if ((await settings._findOne('enableDownloads'))?.value === false) {
+    return { error: 'downloads-disabled' }
+  }
+
   if (typeof payload !== 'object' || payload === null) {
     return null
   }
