@@ -460,20 +460,27 @@
   cursor: grabbing;
 }
 
-/* Collapsed stack: the toasts behind the front one are layered underneath it,
-   each peeking out by one gap and drawn slightly smaller, and fan out while the
-   pointer is over the stack. Sonner puts both the offset and the shrink in the
-   row's `--y`, but our row spans the full width of the column while the toast
-   sits at one edge of it, so scaling the row would drag the toast towards the
-   middle of the screen. The row keeps the offset and the toast itself takes the
-   shrink, which also leaves the row's measured height alone. */
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] {
-  --y: translateY(calc(var(--lift-amount) * var(--toasts-before)));
+/* Collapsed stack: the two newest toasts keep the places they would have when
+   the stack is fanned out, so both can be read at a glance, and everything older
+   is layered underneath them. The whole stack fans out while the pointer is over
+   it.
+
+   Sonner would put the second toast behind the first and leave only one
+   readable, so its place is restored here. It also puts the shrink for the ones
+   underneath in the row's `--y`, but our row spans the full width of the column
+   while the toast sits at one edge of it, so scaling the row would drag the
+   toast towards the middle of the screen. The row keeps the offset and the toast
+   itself takes the shrink, which also leaves the row's measured height alone. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-index='1'] {
+  --y: translateY(calc(var(--lift) * var(--offset)));
+
+  block-size: var(--initial-height);
 }
 
-/* While the stack is fanned out it is backed by a region that holds the hover. Without one the stack collapses the moment the pointer is
-   between two toasts, or over one that has just been dismissed, and then reopens
-   as the next toast slides under the pointer.
+/* While the stack is fanned out it is backed by a region that holds the hover.
+   Without one the stack collapses the moment the pointer is between two toasts,
+   or over one that has just been dismissed, and then reopens as the next toast
+   slides under the pointer.
 
    It has to be a single region behind the whole stack rather than something each
    toast carries: the rows are stacked in front of one another, so anything a
@@ -544,11 +551,11 @@
   pointer-events: none;
 }
 
-/* Only the front toast is readable while the stack is collapsed. The ones
-   behind it are trimmed to its height so the stack reads as one pile of equally
-   sized cards rather than a ragged edge. */
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .toast-slot,
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .toast {
+/* The two newest toasts are readable while the stack is collapsed. The ones
+   behind them are trimmed to the front toast's size so the pile reads as one
+   run of equally sized cards rather than a ragged edge. */
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast-slot,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .toast {
   box-sizing: border-box;
   inline-size: var(--front-toast-width);
   block-size: 100%;
@@ -561,15 +568,15 @@
   transition: opacity var(--toast-transition-duration);
 }
 
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .image,
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .icon,
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .message,
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'] .timeout-indicator-track {
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .image,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .icon,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .message,
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) .timeout-indicator-track {
   opacity: 0;
 }
 
-.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false'][data-front='false'][data-mounted='true']:not([data-removed='true']) .toast-slot {
-  transform: scale(calc(-1 * var(--toasts-before) * 0.05 + 1));
+.toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1'])[data-mounted='true']:not([data-removed='true']) .toast-slot {
+  transform: scale(calc(-1 * (var(--toasts-before) - 1) * 0.05 + 1));
 }
 
 /* A collapsed stack shows the toast at the front of it and one card peeking out
