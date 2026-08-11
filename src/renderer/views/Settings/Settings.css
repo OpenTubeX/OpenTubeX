@@ -358,6 +358,22 @@
   display: none;
 }
 
+/* A setting still at its default reserves the marker's space (the placeholder
+   is only rendered while highlighting is on), so changing it colors the border
+   in rather than shifting the control sideways — which can otherwise re-wrap
+   its label mid-drag. Kept as specific as the rule below, which follows it and
+   therefore wins once the setting really has changed. */
+:deep(.switch-ctn:has(.changedSettingIndicatorPlaceholder)),
+:deep(.select:has(.changedSettingIndicatorPlaceholder)),
+:deep(.ft-input-component:has(.changedSettingIndicatorPlaceholder)),
+:deep(.pure-material-slider:has(.changedSettingIndicatorPlaceholder)),
+:deep(.pure-checkbox:has(.changedSettingIndicatorPlaceholder)),
+:deep(.inputTags:has(.changedSettingIndicatorPlaceholder)),
+:deep(.sponsorBlockCategory:has(.changedSettingIndicatorPlaceholder)) {
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 9px;
+}
+
 :deep(.switch-ctn:has(.changedSettingIndicator)),
 :deep(.select:has(.changedSettingIndicator)),
 :deep(.ft-input-component:has(.changedSettingIndicator)),

@@ -332,6 +332,7 @@ import {
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { initializePlatformInfo } from './helpers/platform'
+import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
@@ -1637,6 +1638,11 @@ const uiRoundness = computed(() => store.getters.getUiRoundness)
 watch(uiRoundness, updateUiRoundness)
 
 /** @type {import('vue').ComputedRef<number>} */
+const scrollbarThumbWidth = computed(() => store.getters.getScrollbarThumbWidth)
+
+watch(scrollbarThumbWidth, updateScrollbarThumbWidth)
+
+/** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 
 watch(thumbnailSize, updateThumbnailListSize)
@@ -1650,6 +1656,13 @@ function updateUiRoundness() {
   document.body.style.setProperty('--ui-roundness', String(uiRoundness.value / 100))
 }
 
+function updateScrollbarThumbWidth() {
+  document.body.style.setProperty(
+    '--scrollbar-thumb-width',
+    `${normalizeScrollbarThumbWidth(scrollbarThumbWidth.value)}px`
+  )
+}
+
 // Setting these once on the body keeps a thumbnail size change from
 // re-rendering every list that shows thumbnails.
 function updateThumbnailListSize() {
@@ -1660,6 +1673,7 @@ function updateThumbnailListSize() {
 
 updateTheme()
 updateUiRoundness()
+updateScrollbarThumbWidth()
 updateThumbnailListSize()
 
 const showUpdatesBanner = ref(false)

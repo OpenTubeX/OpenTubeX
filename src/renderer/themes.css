@@ -5,6 +5,7 @@ body {
   background-color: var(--bg-color);
 
   --ui-roundness: 1;
+  --scrollbar-thumb-width: 6px;
 
   /*
     This works because CSS variables are just a find and replace and
@@ -2174,11 +2175,13 @@ a:visited {
 body .os-scrollbar {
   box-sizing: border-box;
 
-  --os-size: 10px;
+  /* The padding is subtracted from the track, so the handle ends up exactly as
+     wide as the configured thumb width. */
+  --os-size: calc(var(--scrollbar-thumb-width) + 4px);
   --os-padding-perpendicular: 2px;
   --os-padding-axis: 2px;
   --os-handle-interactive-area-offset: 4px;
-  --os-handle-border-radius: calc(6px * var(--ui-roundness));
+  --os-handle-border-radius: calc(var(--scrollbar-thumb-width) * var(--ui-roundness));
   --os-handle-bg: var(--scrollbar-color);
   --os-handle-bg-hover: color-mix(in srgb, var(--scrollbar-color) 90%, #fff);
   --os-handle-bg-active: color-mix(in srgb, var(--scrollbar-color) 80%, #fff);

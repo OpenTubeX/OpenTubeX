@@ -3,6 +3,21 @@
     class="pure-material-slider"
     :for="id"
   >
+    <span class="labelRow">
+      <span class="label">
+        {{ $t('Display Label', {label: label, value: displayLabel}) }}
+      </span>
+      <FtTooltip
+        v-if="tooltip !== ''"
+        class="selectTooltip"
+        :tooltip="tooltip"
+      />
+      <FtSyncedSettingIndicator
+        :setting-key="settingKey"
+        :is-changed="isChanged"
+        @reset="emit('reset')"
+      />
+    </span>
     <input
       :id="id"
       v-model.number="currentValue"
@@ -15,19 +30,6 @@
       @input="input"
       @change="change"
     >
-    <span class="label">
-      {{ $t('Display Label', {label: label, value: displayLabel}) }}
-    </span>
-    <FtTooltip
-      v-if="tooltip !== ''"
-      class="selectTooltip"
-      :tooltip="tooltip"
-    />
-    <FtSyncedSettingIndicator
-      :setting-key="settingKey"
-      :is-changed="isChanged"
-      @reset="emit('reset')"
-    />
   </label>
 </template>
 
@@ -82,6 +84,9 @@ const props = defineProps({
 
 const emit = defineEmits(['change', 'input', 'reset'])
 
+// U+2007, as wide as a digit
+const FIGURE_SPACE = '\u2007'
+
 const id = useId()
 const currentValue = ref(props.defaultValue)
 
@@ -91,13 +96,28 @@ watch(() => props.defaultValue, (value) => {
   }
 })
 
-const displayLabel = computed(() => {
-  if (props.valueExtension === null) {
-    return currentValue.value
-  } else {
-    return `${currentValue.value}${props.valueExtension}`
-  }
-})
+/**
+ * @param {number} value
+ */
+function formatValue(value) {
+  return props.valueExtension === null
+    ? `${value}`
+    : `${value}${props.valueExtension}`
+}
+
+/** The widest value the slider can show, in characters. */
+const valueWidth = computed(() => Math.max(
+  formatValue(props.minValue).length,
+  formatValue(props.maxValue).length
+))
+
+/*
+ * Padding shorter values out to that width keeps the label the same size all
+ * the way along the slider, so dragging it can't make the label wrap and
+ * unwrap. Figure spaces are as wide as a digit and, unlike ordinary spaces,
+ * are neither collapsed nor a place to break the line.
+ */
+const displayLabel = computed(() => formatValue(currentValue.value).padEnd(valueWidth.value, FIGURE_SPACE))
 
 function change() {
   emit('change', currentValue.value)

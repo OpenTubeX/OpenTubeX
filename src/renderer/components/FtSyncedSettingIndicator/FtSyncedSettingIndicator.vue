@@ -27,6 +27,16 @@
   >
     <FontAwesomeIcon :icon="['fas', 'undo']" />
   </span>
+  <!-- Kept as reserved space rather than left out: a control that grows by an
+       icon the moment its value leaves the default reflows, which can re-wrap
+       a slider's label while it is still being dragged. -->
+  <span
+    v-else-if="canShowReset"
+    class="changedSettingIndicatorPlaceholder"
+    aria-hidden="true"
+  >
+    <FontAwesomeIcon :icon="['fas', 'undo']" />
+  </span>
 </template>
 
 <script setup>
@@ -68,9 +78,13 @@ const isSynced = computed(() => {
   return isSettingSyncEnabled(store.state.settings, props.settingKey)
 })
 
-const showReset = computed(() => {
+const canShowReset = computed(() => {
   return store.state.settings.highlightChangedSettings === true &&
-    props.settingKey !== 'highlightChangedSettings' &&
+    props.settingKey !== 'highlightChangedSettings'
+})
+
+const showReset = computed(() => {
+  return canShowReset.value &&
     (props.isChanged ?? (
       Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, props.settingKey) &&
       !settingsValuesEqual(store.state.settings[props.settingKey], DEFAULT_SETTINGS[props.settingKey])
@@ -120,7 +134,8 @@ async function toggleSync() {
 
 <style scoped>
 .syncedSettingIndicator,
-.changedSettingIndicator {
+.changedSettingIndicator,
+.changedSettingIndicatorPlaceholder {
   padding: 0;
   border: 0;
   color: inherit;
@@ -143,6 +158,11 @@ async function toggleSync() {
 
 .changedSettingIndicator {
   color: var(--primary-color);
+}
+
+.changedSettingIndicatorPlaceholder {
+  visibility: hidden;
+  cursor: default;
 }
 
 .syncDisabled {

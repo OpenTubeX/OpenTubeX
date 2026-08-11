@@ -335,6 +335,36 @@ export async function goToSettingsSection(page, section) {
   return content
 }
 
+/**
+ * Starts collecting the CSS animations that play from here on. The classes that
+ * trigger them are cleared once they have run, so waiting on the class instead
+ * would be a race.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export function recordAnimations(page) {
+  return page.evaluate(() => {
+    window.__playedAnimations = []
+    document.addEventListener('animationstart', (event) => {
+      window.__playedAnimations.push(event.animationName)
+    }, true)
+  })
+}
+
+/**
+ * Waits for an animation recorded by `recordAnimations` to have played. Scoped
+ * styles suffix the keyframes name with a hash, hence the prefix match.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name
+ */
+export function expectAnimation(page, name) {
+  return expect.poll(() => page.evaluate(
+    (animationName) => (window.__playedAnimations ?? []).some(played => played.startsWith(animationName)),
+    name
+  )).toBe(true)
+}
+
 /** Common locators, kept in one place so selector changes only hit here. */
 export const sel = {
   searchInput: '.topNav .searchInput input.ft-input',
