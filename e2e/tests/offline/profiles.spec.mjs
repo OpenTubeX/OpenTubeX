@@ -8,7 +8,7 @@ import { test, expect } from '../../helpers/app.mjs'
 const mainProfile = {
   _id: 'allChannels',
   name: 'All Channels',
-  bgColor: '#000000',
+  bgColor: '#d50000',
   textColor: '#FFFFFF',
   subscriptions: []
 }
@@ -121,6 +121,10 @@ test.describe('profile manager', () => {
     await customEmoji.fill('A')
     await expect(customEmoji).toHaveValue('')
     await expect(preview.locator('img')).toBeVisible()
+
+    await customEmoji.fill('❤')
+    await expect(customEmoji).toHaveValue('❤')
+    await expect(preview).toContainText('❤')
 
     await customEmoji.fill('🌍')
     await expect(preview.locator('img')).toHaveCount(0)

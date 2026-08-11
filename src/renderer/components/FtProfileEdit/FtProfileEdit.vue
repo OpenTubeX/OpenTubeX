@@ -404,7 +404,7 @@ function selectCustomEmoji(event) {
 }
 
 function isEmoji(value) {
-  return /(?:\p{Emoji_Presentation}|\p{Regional_Indicator}|\uFE0F|\u20E3)/u.test(value)
+  return /(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\uFE0F|\u20E3)/u.test(value)
 }
 
 function openImagePicker() {
