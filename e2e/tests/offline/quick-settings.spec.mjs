@@ -29,16 +29,20 @@ test.describe('quick settings menu', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => {
       BrowserWindow.getAllWindows()[0]?.setBounds({ x: 0, y: 0, width: 1280, height: 720 })
     })
+    await expect.poll(() => page.evaluate(() => window.innerHeight)).toBe(720)
 
     await page.locator('.profileTrigger').click()
     const menu = page.locator('.quickSettingsMenu')
+    const tabBar = page.locator('.tabBar:not(.vertical)')
     await expect(menu).toBeVisible()
+    await expect(tabBar).toBeVisible()
 
-    const { bottom, viewportHeight } = await menu.evaluate(element => ({
-      bottom: element.getBoundingClientRect().bottom,
-      viewportHeight: window.innerHeight
-    }))
-    expect(bottom).toBeLessThanOrEqual(viewportHeight)
+    const [menuBounds, tabBarBounds] = await Promise.all([
+      menu.evaluate(element => element.getBoundingClientRect().toJSON()),
+      tabBar.evaluate(element => element.getBoundingClientRect().toJSON())
+    ])
+    expect(menuBounds.top).toBeGreaterThanOrEqual(tabBarBounds.bottom)
+    expect(menuBounds.bottom).toBeLessThanOrEqual(720)
   })
 
   test('keeps paired selects aligned and shows locale completeness', async ({ page }) => {
