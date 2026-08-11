@@ -17,6 +17,15 @@
           @change="updateHideVideoViews"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Shorten View Counts')"
+          :compact="true"
+          :disabled="hideVideoViews"
+          :default-value="shortenViewCounts"
+          setting-key="shortenViewCounts"
+          :tooltip="t('Tooltips.Distraction Free Settings.Shorten View Counts')"
+          @change="updateShortenViewCounts"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Channel Subscribers')"
           :compact="true"
           :default-value="hideChannelSubscriptions"
@@ -370,6 +379,16 @@ const hideVideoViews = computed(() => store.getters.getHideVideoViews)
  */
 function updateHideVideoViews(value) {
   store.dispatch('updateHideVideoViews', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+/**
+ * @param {boolean} value
+ */
+function updateShortenViewCounts(value) {
+  store.dispatch('updateShortenViewCounts', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

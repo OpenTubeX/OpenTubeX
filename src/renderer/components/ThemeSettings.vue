@@ -47,14 +47,6 @@
           setting-key="showToastTimeoutIndicator"
           @change="updateShowToastTimeoutIndicator"
         />
-        <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Show Progress as Notification')"
-          :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
-          compact
-          :default-value="showProgressBarToast"
-          setting-key="showProgressBarToast"
-          @change="updateShowProgressBarToast"
-        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -101,6 +93,14 @@
           :default-value="showTabPreviews"
           setting-key="showTabPreviews"
           @change="updateShowTabPreviews"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Show Progress as Notification')"
+          :tooltip="$t('Tooltips.Theme Settings.Show Progress as Notification')"
+          compact
+          :default-value="showProgressBarToast"
+          setting-key="showProgressBarToast"
+          @change="updateShowProgressBarToast"
         />
       </div>
     </div>
@@ -162,6 +162,17 @@
         value-extension="%"
         @input="previewUiRoundness"
         @change="updateUiRoundness"
+      />
+      <FtSlider
+        :label="t('Settings.Theme Settings.Scrollbar Width')"
+        :default-value="scrollbarThumbWidth"
+        setting-key="scrollbarThumbWidth"
+        :min-value="MIN_SCROLLBAR_THUMB_WIDTH"
+        :max-value="MAX_SCROLLBAR_THUMB_WIDTH"
+        :step="SCROLLBAR_THUMB_WIDTH_STEP"
+        value-extension="px"
+        @input="previewScrollbarThumbWidth"
+        @change="updateScrollbarThumbWidth"
       />
       <FtSlider
         :label="t('Settings.Theme Settings.Animation Speed')"
@@ -256,6 +267,12 @@ import {
   MAX_FIXED_TAB_WIDTH,
   MIN_FIXED_TAB_WIDTH
 } from '../constants/tabWidth'
+import {
+  MAX_SCROLLBAR_THUMB_WIDTH,
+  MIN_SCROLLBAR_THUMB_WIDTH,
+  normalizeScrollbarThumbWidth,
+  SCROLLBAR_THUMB_WIDTH_STEP
+} from '../constants/scrollbar'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 import { setAnimationSpeed } from '../helpers/animationSpeed'
 
@@ -563,6 +580,9 @@ function updateUiScale(value) {
 /** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 const uiRoundness = computed(() => store.getters.getUiRoundness)
+const scrollbarThumbWidth = computed(
+  () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
+)
 const animationSpeed = computed(() => store.getters.getAnimationSpeed)
 
 const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -604,6 +624,20 @@ function previewUiRoundness(value) {
  */
 function updateUiRoundness(value) {
   store.dispatch('updateUiRoundness', value)
+}
+
+/**
+ * @param {number} value
+ */
+function previewScrollbarThumbWidth(value) {
+  store.commit('setScrollbarThumbWidth', value)
+}
+
+/**
+ * @param {number} value
+ */
+function updateScrollbarThumbWidth(value) {
+  store.dispatch('updateScrollbarThumbWidth', value)
 }
 
 /**
@@ -668,10 +702,12 @@ function handleSmoothScrolling(value) {
 
 <style scoped>
 .sliderGrid {
+  --slider-gap: 24px;
+
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 24px;
+  gap: var(--slider-gap);
 }
 
 .sliderGrid :deep(.pure-material-slider) {
@@ -679,5 +715,23 @@ function handleSmoothScrolling(value) {
   flex: 1 1 180px;
   max-inline-size: 380px;
   inline-size: auto;
+
+  /* The gap already spaces them out, and their own margin would count towards
+     how many fit in a row. */
+  margin-inline: 0;
+}
+
+/* Up to four sliders fill a row evenly, but a fifth would sit alone on the next
+   one while the others are squeezed together. Sizing them as thirds of the row
+   splits them 3 + 2, all the same width, with more room each. */
+.sliderGrid:has(:nth-child(5)) :deep(.pure-material-slider) {
+  --slider-size: clamp(
+    180px,
+    calc((100% - 2 * var(--slider-gap)) / 3),
+    380px
+  );
+
+  flex-basis: var(--slider-size);
+  max-inline-size: var(--slider-size);
 }
 </style>

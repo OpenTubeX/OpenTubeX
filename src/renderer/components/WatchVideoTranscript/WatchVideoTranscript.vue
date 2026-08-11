@@ -170,6 +170,7 @@ import FtSelect from '../FtSelect/FtSelect.vue'
 import { getTranscriptPreScrollTop } from './transcriptScroll.js'
 import { filterTranscriptSegments } from './transcriptSearch.js'
 
+import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
@@ -297,6 +298,12 @@ watch(() => props.fullscreenOverlay, () => {
   searchOpen.value = false
   searchQuery.value = ''
   languageMenuOpen.value = false
+})
+
+watch(normalizedSearchQuery, () => {
+  if (segmentList.value != null) {
+    restoreOverlayScrollTop(segmentList.value, 0)
+  }
 })
 
 watch(activeSegmentIndex, async (index) => {

@@ -67,7 +67,7 @@ export async function expectDockedToBottomRight(player, viewport, margin = 16) {
 export function findWatchComponent() {
   const app = document.querySelector('#app')?.__vue_app__
   const find = (vnode) => {
-    if (vnode?.component?.refs?.player) return vnode.component
+    if (vnode?.component?.type?.name === 'Watch' || vnode?.component?.refs?.player) return vnode.component
     if (vnode?.component?.subTree) {
       const match = find(vnode.component.subTree)
       if (match) return match

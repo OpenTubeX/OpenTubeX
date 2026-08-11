@@ -1,7 +1,17 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect, goTo, latestSettings, sel, waitForAppReady } from '../../helpers/app.mjs'
+import {
+  test,
+  expect,
+  expectAnimation,
+  goTo,
+  goToSettingsSection,
+  latestSettings,
+  recordAnimations,
+  sel,
+  waitForAppReady
+} from '../../helpers/app.mjs'
 
 test.describe('settings', () => {
   test('groups confirmation preferences together', async ({ page }) => {
@@ -297,6 +307,70 @@ test.describe('settings', () => {
     expect(restoredBounds.height).toBeCloseTo(resizedBounds.height, 0)
   })
 
+  test('clamps the settings scroll position after repeated resizing', async ({ page }) => {
+    await goTo(page, 'settings')
+    const settingsWindow = page.locator('.settingsWindow')
+    const content = page.locator('.settingsContent')
+    const resizeHandle = page.locator('.resize-se')
+    await expect(settingsWindow).not.toHaveClass(/settings-window-enter-active/)
+
+    const originalHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      originalHandleBounds.x + originalHandleBounds.width / 2,
+      originalHandleBounds.y + originalHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(originalHandleBounds.x - 180, originalHandleBounds.y - 180)
+    await page.mouse.up()
+
+    await content.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => content.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    const smallerHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      smallerHandleBounds.x + smallerHandleBounds.width / 2,
+      smallerHandleBounds.y + smallerHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(smallerHandleBounds.x + 180, smallerHandleBounds.y + 180)
+    await page.mouse.up()
+
+    await page.waitForTimeout(250)
+    expect(await content.evaluate(element => {
+      const section = element.querySelector('.section')
+      const contentEnd = section.offsetTop + section.offsetHeight +
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      return element.scrollTop - Math.max(0, contentEnd - element.clientHeight)
+    })).toBeLessThanOrEqual(1)
+
+    const restoredHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      restoredHandleBounds.x + restoredHandleBounds.width / 2,
+      restoredHandleBounds.y + restoredHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(restoredHandleBounds.x - 180, restoredHandleBounds.y - 180)
+    await page.mouse.up()
+
+    const menu = page.locator('.settingsMenu')
+    await menu.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => menu.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    const compactHandleBounds = await resizeHandle.boundingBox()
+    await page.mouse.move(
+      compactHandleBounds.x + compactHandleBounds.width / 2,
+      compactHandleBounds.y + compactHandleBounds.height / 2
+    )
+    await page.mouse.down()
+    await page.mouse.move(compactHandleBounds.x + 180, compactHandleBounds.y + 180)
+    await page.mouse.up()
+
+    await page.waitForTimeout(250)
+    expect(await menu.evaluate(element => (
+      element.scrollTop - Math.max(0, element.scrollHeight - element.clientHeight)
+    ))).toBeLessThanOrEqual(1)
+  })
+
   test('animates maximize and restore while preserving its floating bounds', async ({ page }) => {
     await goTo(page, 'settings')
     const settingsWindow = page.locator('.settingsWindow')
@@ -496,8 +570,9 @@ test.describe('settings', () => {
     await expect(page.getByRole('button', { name: 'FFmpeg Source', exact: true })).toBeVisible()
     await page.getByRole('searchbox', { name: 'Search settings' }).fill('')
     await expect(page.locator('.settingsMenu')).toBeVisible()
+    await recordAnimations(page)
     await page.locator('.settingsMenu [data-section="channel"]').click()
-    await expect(page.locator('.settingsContent')).toHaveClass(/settingsCompactSlideForward/)
+    await expectAnimation(page, 'settings-compact-slide-forward')
     await page.getByRole('button', { name: /Manage Saved Channels/ }).click()
 
     const channelList = page.locator('.channelListContainer')
@@ -510,9 +585,10 @@ test.describe('settings', () => {
     })
     await expect.poll(() => channelList.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
 
+    await recordAnimations(page)
     await page.locator('.settingsBreadcrumbRoot .settingsWindowIcon').click()
     await expect(page.locator('.settingsMenu')).toBeVisible()
-    await expect(page.locator('.settingsMenu')).toHaveClass(/settingsCompactSlideBackward/)
+    await expectAnimation(page, 'settings-compact-slide-backward')
 
     await page.getByRole('button', { name: 'Show Keyboard Shortcuts' }).click()
     const shortcuts = page.locator('.shortcutColumns')
@@ -530,10 +606,40 @@ test.describe('settings', () => {
   test('animates category changes vertically in two-column layout', async ({ page }) => {
     await goTo(page, 'settings')
 
+    await recordAnimations(page)
     await page.locator('.settingsMenu [data-section="player"]').click()
-    await expect(page.locator('.settingsContent')).toHaveClass(/settingsSectionSlideForward/)
+    await expectAnimation(page, 'settings-section-slide-forward')
     await page.locator('.settingsMenu [data-section="theme"]').click()
-    await expect(page.locator('.settingsContent')).toHaveClass(/settingsSectionSlideBackward/)
+    await expectAnimation(page, 'settings-section-slide-backward')
+
+    // The class is cleared once it has played, so nothing replays the slide
+    // later on — rebuilding the overlay scrollbars used to.
+    await expect(page.locator('.settingsContent')).not.toHaveClass(/settingsSectionSlide/)
+    await recordAnimations(page)
+    await page.locator('label.switch-label').filter({ hasText: 'Always Show Scrollbars' }).click()
+    await page.waitForTimeout(500)
+    expect(await page.evaluate(() => window.__playedAnimations)).toEqual([])
+  })
+
+  test.describe('with reduced motion', () => {
+    test.use({ seed: { settings: { reducedMotion: 'on' } } })
+
+    test('leaves no slide class behind for a suppressed animation', async ({ page }) => {
+      await goTo(page, 'settings')
+      await recordAnimations(page)
+      await page.locator('.settingsMenu [data-section="player"]').click()
+      await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+
+      // Nothing plays, and nothing is left that could play later: turning
+      // reduced motion back off would otherwise slide the settings unprompted.
+      await expect(page.locator('.settingsContent')).not.toHaveClass(/settingsSectionSlide/)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateReducedMotion', 'off')
+      })
+      await page.waitForTimeout(500)
+      expect(await page.evaluate(() => window.__playedAnimations)).toEqual([])
+    })
   })
 
   test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
@@ -1927,6 +2033,119 @@ test.describe('synced setting indicators', () => {
       const element = document.elementFromPoint(x, y)
       return element !== null && element.closest('[role="tooltip"]') !== null
     }, overlapPoint)).toBe(true)
+  })
+
+  test('spreads the theme sliders evenly over their rows', async ({ page }) => {
+    await goTo(page, 'settings')
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const sliders = themeSection.locator('.sliderGrid > *')
+    await expect(sliders).toHaveCount(5)
+
+    const boxes = await sliders.evaluateAll((elements) => elements.map((element) => {
+      const { y, width } = element.getBoundingClientRect()
+      return { y: Math.round(y), width: Math.round(width) }
+    }))
+
+    // Three and two, rather than four squeezed together and a lone fifth.
+    const rowSizes = new Map()
+    for (const { y } of boxes) {
+      rowSizes.set(y, (rowSizes.get(y) ?? 0) + 1)
+    }
+    expect([...rowSizes.values()]).toEqual([3, 2])
+    // The row they landed on doesn't change how much room they get.
+    expect(new Set(boxes.map(({ width }) => width)).size).toBe(1)
+  })
+
+  test('does not move a setting when its changed highlight appears', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const slider = themeSection.locator('label.pure-material-slider')
+      .filter({ hasText: 'Scrollbar Width' })
+    const label = slider.locator('.label')
+    const neighbour = themeSection.locator('label.pure-material-slider')
+      .filter({ hasText: 'Animation Speed' })
+
+    // At its default the setting reserves the marker's space without showing it.
+    await expect(slider).toHaveCSS('border-left-width', '3px')
+    await expect(slider).toHaveCSS('border-left-color', 'rgba(0, 0, 0, 0)')
+
+    const [labelBefore, neighbourBefore] = await Promise.all([
+      label.boundingBox(),
+      neighbour.boundingBox()
+    ])
+
+    await slider.getByRole('slider').fill('20')
+    await expect(slider.getByRole('button', { name: 'Reset this setting to its default' }))
+      .toBeVisible()
+
+    // Reserving that space must not stop the marker from showing up.
+    await expect(slider).not.toHaveCSS('border-left-color', 'rgba(0, 0, 0, 0)')
+
+    // Gaining the marker and the reset icon must not resize or shift anything,
+    // otherwise the row shifts under the pointer mid-drag.
+    const [labelAfter, neighbourAfter] = await Promise.all([
+      label.boundingBox(),
+      neighbour.boundingBox()
+    ])
+    expect(labelAfter.x).toBeCloseTo(labelBefore.x, 0)
+    expect(labelAfter.width).toBeCloseTo(labelBefore.width, 0)
+    expect(labelAfter.height).toBe(labelBefore.height)
+    expect(neighbourAfter.x).toBeCloseTo(neighbourBefore.x, 0)
+  })
+
+  test('keeps a wrapped slider label beside its icons and above its track', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const slider = themeSection.locator('label.pure-material-slider')
+      .filter({ hasText: 'Scrollbar Width' })
+    const range = slider.getByRole('slider')
+    const label = slider.locator('.label')
+
+    // A shorter value must not make the label any narrower, otherwise dragging
+    // the slider wraps and unwraps it, and the whole row jumps around.
+    await range.fill('20')
+    const wideValueBox = await label.boundingBox()
+    await range.fill('4')
+    const shortValueBox = await label.boundingBox()
+    expect(wideValueBox).not.toBeNull()
+    expect(shortValueBox).not.toBeNull()
+    expect(shortValueBox.width).toBeCloseTo(wideValueBox.width, 0)
+
+    await range.fill('20')
+    // Narrow windows and longer translations make the label wrap on their own;
+    // this is just a reliable way to reach the same width.
+    await slider.evaluate((element) => { element.style.maxInlineSize = '150px' })
+
+    const reset = slider.getByRole('button', { name: 'Reset this setting to its default' })
+    await expect(reset).toBeVisible()
+
+    const [labelBox, resetBox, rangeBox] = await Promise.all([
+      label.boundingBox(),
+      reset.boundingBox(),
+      range.boundingBox()
+    ])
+    expect(labelBox).not.toBeNull()
+    expect(resetBox).not.toBeNull()
+    expect(rangeBox).not.toBeNull()
+
+    // The label has to be the thing that wraps for the rest to mean anything.
+    expect(labelBox.height).toBeGreaterThan(30)
+    // Wrapped, it still keeps its size across the range.
+    await range.fill('4')
+    const wrappedShortValueBox = await label.boundingBox()
+    expect(wrappedShortValueBox.height).toBe(labelBox.height)
+    await range.fill('20')
+    // The icon stays beside the label instead of dropping onto its own line.
+    expect(resetBox.y).toBeGreaterThanOrEqual(labelBox.y)
+    expect(resetBox.y + resetBox.height).toBeLessThanOrEqual(labelBox.y + labelBox.height + 1)
+    expect(resetBox.x).toBeGreaterThanOrEqual(labelBox.x + labelBox.width)
+    // A label that needs a second line pushes the track down instead of
+    // running through it.
+    expect(rangeBox.y).toBeGreaterThanOrEqual(labelBox.y + labelBox.height - 1)
   })
 
   test('renders select tooltips above neighboring setting indicators', async ({ page }) => {

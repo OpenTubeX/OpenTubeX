@@ -184,7 +184,8 @@
 }
 
 .selectIndicators :deep(.syncedSettingIndicator),
-.selectIndicators :deep(.changedSettingIndicator) {
+.selectIndicators :deep(.changedSettingIndicator),
+.selectIndicators :deep(.changedSettingIndicatorPlaceholder) {
   margin-inline-start: 0;
 }
 

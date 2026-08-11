@@ -26,14 +26,15 @@
           :tooltip="t('Settings.General Settings.Auto Load Next Page.Tooltip')"
           @change="updateGeneralAutoLoadMorePaginatedItemsEnabled"
         />
+        <!-- Last in this column on purpose: it is the only one of these that
+             some platforms hide, so the columns stay even where it is missing
+             and this one stays the longer of the two where it is not. -->
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.General Settings.Remember Tab Navigation History')"
-          :default-value="rememberTabNavigationHistory"
-          setting-key="rememberTabNavigationHistory"
+          v-if="!IS_MAC && !isLinuxWayland && USING_ELECTRON"
+          :label="t('Settings.General Settings.Minimize to system tray')"
+          :default-value="hideToTrayOnMinimize"
           :compact="true"
-          :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
-          @change="updateRememberTabNavigationHistory"
+          @change="updateHideToTrayOnMinimize"
         />
       </div>
       <div class="switchColumn">
@@ -53,11 +54,13 @@
           @change="updateOpenDeepLinksInNewWindow"
         />
         <FtToggleSwitch
-          v-if="!IS_MAC && !isLinuxWayland && USING_ELECTRON"
-          :label="t('Settings.General Settings.Minimize to system tray')"
-          :default-value="hideToTrayOnMinimize"
+          v-if="USING_ELECTRON"
+          :label="t('Settings.General Settings.Remember Tab Navigation History')"
+          :default-value="rememberTabNavigationHistory"
+          setting-key="rememberTabNavigationHistory"
           :compact="true"
-          @change="updateHideToTrayOnMinimize"
+          :tooltip="t('Tooltips.General Settings.Remember Tab Navigation History')"
+          @change="updateRememberTabNavigationHistory"
         />
       </div>
     </div>

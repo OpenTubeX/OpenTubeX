@@ -303,6 +303,7 @@ import {
   ctrlFHandler,
   debounce,
   formatNumber,
+  formatViewCount,
   showToast,
   getTodayDateStrLocalTimezone,
   writeFileWithPicker,
@@ -473,7 +474,10 @@ const allPlaylists = computed(() => store.getters.getAllPlaylists)
 
 const firstVideoIdExists = computed(() => props.firstVideoId !== '')
 
-const parsedViewCount = computed(() => formatNumber(props.viewCount))
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+const parsedViewCount = computed(() => formatViewCount(props.viewCount, shortenViewCounts.value))
 const parsedVideoCount = computed(() => formatNumber(props.videoCount))
 
 /** @type {import('vue').ComputedRef<string>} */

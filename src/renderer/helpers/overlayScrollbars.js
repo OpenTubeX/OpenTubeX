@@ -283,13 +283,25 @@ export function clampOverlayScrollTop(element, contentElement = null) {
   instance?.update(true)
   const contentEnd = contentElement === null
     ? element.scrollHeight
-    : contentElement.offsetTop + contentElement.offsetHeight +
+    : offsetTopFromDocument(contentElement) - offsetTopFromDocument(element) +
+      contentElement.offsetHeight +
       Number.parseFloat(getComputedStyle(element).paddingBottom)
   const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
   if (element.scrollTop > maximumScrollTop) {
     element.scrollTop = maximumScrollTop
     instance?.update(true)
   }
+}
+
+/** @param {HTMLElement} element */
+function offsetTopFromDocument(element) {
+  let offsetTop = 0
+  let currentElement = element
+  while (currentElement != null) {
+    offsetTop += currentElement.offsetTop
+    currentElement = currentElement.offsetParent
+  }
+  return offsetTop
 }
 
 /**

@@ -276,6 +276,18 @@
             >
               {{ $t("Video.Starting soon, please refresh the page to check again") }}
             </p>
+            <button
+              v-if="canToggleLiveReminder"
+              type="button"
+              class="liveReminderButton"
+              :class="{ active: liveReminderActive }"
+              :disabled="liveReminderLoading"
+              :aria-pressed="liveReminderActive"
+              @click="toggleLiveReminder"
+            >
+              <font-awesome-icon :icon="['fas', 'calendar-days']" />
+              {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
+            </button>
           </div>
           <div
             v-else-if="errorMessage"
@@ -542,6 +554,7 @@
           </button>
         </div>
         <div
+          ref="shortsAuxPanelTarget"
           v-overlay-scrollbars
           class="shortsAuxPanelTarget"
         >

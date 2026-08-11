@@ -290,7 +290,7 @@ import store from '../../store'
 import { vSaferHtml } from '../../directives/vSaferHtml'
 
 import { linkifyHashtagsAndHandles } from '../../helpers/descriptionLinks'
-import { escapeHTML, formatNumber, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
+import { escapeHTML, formatNumber, formatViewCount, getRelativeTimeFromDate, getVideoThumbnailUrl, openInternalPath, showToast } from '../../helpers/utils'
 import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
@@ -563,12 +563,15 @@ const likePercentageRatio = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
 const parsedViewCount = computed(() => {
   if (hideVideoViews.value || props.viewCount == null) {
     return null
   }
 
-  return t('Global.Counts.View Count', { count: formatNumber(props.viewCount) }, props.viewCount)
+  return t('Global.Counts.View Count', { count: formatViewCount(props.viewCount, shortenViewCounts.value) }, props.viewCount)
 })
 
 const validPublishedDate = computed(() => {

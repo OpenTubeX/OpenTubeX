@@ -150,6 +150,18 @@
           :size="playlistIconSize"
           @click="removeFromPlaylist"
         />
+        <FtIconButton
+          v-if="canToggleLiveReminder"
+          :title="liveReminderActive ? t('Video.Notification on') : t('Video.Notify me')"
+          :icon="['fas', 'calendar-days']"
+          :aria-pressed="liveReminderActive"
+          :disabled="liveReminderLoading"
+          class="liveReminderIcon"
+          :theme="liveReminderActive ? 'secondary' : 'base'"
+          :padding="playlistIconPadding"
+          :size="playlistIconSize"
+          @click="toggleLiveReminder"
+        />
       </span>
       <div
         v-if="addWatchedStyle"
@@ -336,7 +348,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -353,7 +365,7 @@ import store from '../../store/index'
 import {
   copyToClipboard,
   formatDurationAsTimestamp,
-  formatNumber,
+  formatViewCount,
   getCachedOembedTitle,
   getOembedTitle,
   getRelativeTimeFromDate,
@@ -474,7 +486,6 @@ const channelName = ref(null)
 const channelId = ref(null)
 const channelCollaborators = ref([])
 const viewCount = ref(0)
-const parsedViewCount = ref('')
 const uploadedTime = ref('')
 const lengthSeconds = ref(0)
 const duration = ref('')
@@ -499,6 +510,10 @@ const showDeArrowThumbnail = ref(false)
 const showCollaboratorsPrompt = ref(false)
 const isFetchingCollaborators = ref(false)
 const sponsorBlockFullVideoCategory = ref(null)
+const liveReminderActive = ref(false)
+const liveReminderLoading = ref(false)
+let liveReminderLoadGeneration = 0
+let removeLiveReminderUpdatedListener = null
 
 const historyEntry = computed(() => store.getters.getHistoryCacheById[id.value])
 
@@ -510,6 +525,12 @@ const premiereTimestamp = computed(() => getUpcomingPremiereTimestamp(props.data
 const premiereNow = ref(Date.now())
 const MAX_TIMEOUT_DELAY = 2_147_483_647
 let premiereStartTimer = null
+
+const canToggleLiveReminder = computed(() => (
+  process.env.IS_ELECTRON &&
+  premiereTimestamp.value != null &&
+  premiereTimestamp.value > premiereNow.value
+))
 
 const canMarkAsWatched = computed(() => {
   if (isLive.value) {
@@ -844,8 +865,103 @@ const dropdownOptions = computed(() => {
     )
   }
 
-  return options
+  const normalizedOptions = []
+  for (const option of options) {
+    if (
+      option.type === 'divider' &&
+      (normalizedOptions.length === 0 || normalizedOptions.at(-1).type === 'divider')
+    ) {
+      continue
+    }
+    normalizedOptions.push(option)
+  }
+  if (normalizedOptions.at(-1)?.type === 'divider') {
+    normalizedOptions.pop()
+  }
+  return normalizedOptions
 })
+
+function getLiveReminderPayload() {
+  return {
+    videoId: id.value,
+    startTimestamp: premiereTimestamp.value,
+    notificationTitle: t('Video.Scheduled video starting'),
+    notificationBody: t('Video.Live notification body', { videoTitle: title.value })
+  }
+}
+
+async function syncLiveReminder() {
+  const generation = ++liveReminderLoadGeneration
+  const videoId = id.value
+  const startTimestamp = premiereTimestamp.value
+
+  if (!canToggleLiveReminder.value) {
+    liveReminderActive.value = false
+    return
+  }
+
+  try {
+    const reminder = await window.ftElectron.liveReminder.get(videoId)
+    if (
+      generation !== liveReminderLoadGeneration ||
+      videoId !== id.value ||
+      startTimestamp !== premiereTimestamp.value
+    ) {
+      return
+    }
+
+    if (reminder && reminder.startTimestamp !== startTimestamp) {
+      liveReminderActive.value = await window.ftElectron.liveReminder.schedule(getLiveReminderPayload())
+    } else {
+      liveReminderActive.value = reminder !== null
+    }
+  } catch (error) {
+    console.error('Failed to load live stream reminder', error)
+  }
+}
+
+async function toggleLiveReminder() {
+  if (liveReminderLoading.value || !canToggleLiveReminder.value) return
+
+  const videoId = id.value
+  liveReminderLoading.value = true
+  try {
+    if (liveReminderActive.value) {
+      await window.ftElectron.liveReminder.cancel(videoId)
+      if (videoId !== id.value) return
+      liveReminderActive.value = false
+      showToast({
+        message: t('Video.Notification cancelled'),
+        image: toastThumbnail.value,
+        icon: ['fas', 'calendar-days']
+      })
+    } else {
+      const scheduled = await window.ftElectron.liveReminder.schedule(getLiveReminderPayload())
+      if (videoId !== id.value) return
+      liveReminderActive.value = scheduled
+      showToast({
+        message: scheduled
+          ? t('Video.Notification enabled')
+          : t('Video.Notification unavailable'),
+        image: toastThumbnail.value,
+        icon: ['fas', 'calendar-days']
+      })
+    }
+  } catch (error) {
+    console.error('Failed to update live stream reminder', error)
+    if (videoId === id.value) {
+      showToast({
+        message: t('Video.Notification unavailable'),
+        image: toastThumbnail.value,
+        icon: ['fas', 'calendar-days']
+      })
+    }
+  } finally {
+    if (videoId === id.value) {
+      liveReminderLoading.value = false
+    }
+  }
+}
 
 function getYoutubeEmbedUrl() {
   return `https://www.youtube-nocookie.com/embed/${id.value}`
@@ -1003,6 +1119,17 @@ const toastThumbnail = computed(() => thumbnailPreference.value === 'hidden' ? n
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideVideoViews = computed(() => store.getters.getHideVideoViews)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const shortenViewCounts = computed(() => store.getters.getShortenViewCounts)
+
+const parsedViewCount = computed(() => {
+  if (props.data.viewCount != null) {
+    return formatViewCount(props.data.viewCount, shortenViewCounts.value)
+  }
+
+  return props.data.viewCountText?.replace(' views', '') ?? ''
+})
 
 const addWatchedStyle = computed(() => {
   return isWatched.value && (!inHistory.value || props.showWatchedStyleInHistory)
@@ -1494,13 +1621,7 @@ function parseVideoData() {
     }
   }
 
-  if (hideVideoViews.value) {
-    hideViews.value = true
-  } else if (props.data.viewCount !== undefined && props.data.viewCount !== null) {
-    parsedViewCount.value = formatNumber(props.data.viewCount)
-  } else if (props.data.viewCountText !== undefined) {
-    parsedViewCount.value = props.data.viewCountText.replace(' views', '')
-  } else {
+  if (hideVideoViews.value || (props.data.viewCount == null && props.data.viewCountText === undefined)) {
     hideViews.value = true
   }
 }
@@ -1708,7 +1829,20 @@ if (showDeArrowThumbnail.value && deArrowCache.value && deArrowCache.value.thumb
 }
 
 watch(premiereTimestamp, schedulePremiereStartInvalidation, { immediate: true })
-onBeforeUnmount(clearPremiereStartTimer)
+watch([id, premiereTimestamp], syncLiveReminder, { immediate: true })
+
+onMounted(() => {
+  removeLiveReminderUpdatedListener = window.ftElectron?.liveReminder?.onUpdated?.((videoId, scheduled) => {
+    if (videoId === id.value) {
+      liveReminderActive.value = scheduled
+    }
+  }) ?? null
+})
+
+onBeforeUnmount(() => {
+  clearPremiereStartTimer()
+  removeLiveReminderUpdatedListener?.()
+})
 
 watch([useSponsorBlock, id], ([enabled, videoId]) => {
   sponsorBlockFullVideoCategory.value = null

@@ -4,6 +4,7 @@ import router from '../router/index'
 import { getTabNavigationService } from '../tabs/TabNavigationService'
 import { UnsupportedPlayerActions } from '../../constants'
 import { getPreferredShortThumbnailUrl } from './player/shorts'
+import { isRoundedNumber } from './viewCounts'
 
 // allowed characters in channel handle: A-Z, a-z, 0-9, -, _, .
 // https://support.google.com/youtube/answer/11585688#change_handle
@@ -919,6 +920,17 @@ export function toDistractionFreeTitle(title, minUpperCase = 3) {
  */
 export function formatNumber(number, options = undefined) {
   return Intl.NumberFormat([i18n.global.locale.value, 'en'], options).format(number)
+}
+
+/**
+ * Formats a view count, using compact notation (e.g. 14K, 3.5M) when YouTube gave us
+ * an already rounded number, as the trailing zeros just waste space in that case.
+ * @param {number} viewCount
+ * @param {boolean} shorten the user's "Shorten View Counts" setting
+ * @returns {string}
+ */
+export function formatViewCount(viewCount, shorten) {
+  return formatNumber(viewCount, shorten && isRoundedNumber(viewCount) ? { notation: 'compact' } : undefined)
 }
 
 export function getTodayDateStrLocalTimezone() {

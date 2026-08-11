@@ -29,8 +29,17 @@ const FULLSCREEN_PLAYLIST = {
     author: 'jawed',
     authorId: 'UC4QobU6STFB0P71PMvOGN5A',
     lengthSeconds: 19,
+    playlistItemId: 'playlist-item-0',
     type: 'video'
-  }],
+  }, ...Array.from({ length: 29 }, (_, index) => ({
+    videoId: `playlist${String(index + 1).padStart(3, '0')}`,
+    title: `Playlist video ${index + 1}`,
+    author: 'Playlist channel',
+    authorId: 'UC-playlist-channel',
+    lengthSeconds: 60,
+    playlistItemId: `playlist-item-${index + 1}`,
+    type: 'video'
+  }))],
   createdAt: Date.now() - 86_400_000,
   lastUpdatedAt: Date.now() - 86_400_000
 }
@@ -123,6 +132,40 @@ test.describe('watch page', () => {
       await expect(page.locator(`${selector}[data-overlayscrollbars-viewport]`)).toHaveCount(1)
       await expect(page.locator(`${selector} > .os-scrollbar-vertical`)).toHaveCount(1)
     }
+  })
+
+  test('resets the Shorts auxiliary viewport when switching panels', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      const watchView = component.proxy
+      watchView.isLoading = true
+      await watchView.$nextTick()
+      watchView.isShort = true
+      watchView.videoDescription = Array(200).fill('Long Shorts metadata').join('\n')
+      watchView.videoDescriptionHtml = ''
+      watchView.shortsMetadataOpen = true
+      watchView.isLoading = false
+      await watchView.$nextTick()
+    })
+
+    const target = page.locator('.shortsAuxPanelTarget')
+    await expect(page.locator('.shortsAuxPanel')).toHaveClass(/shortsAuxPanelOpen/)
+    await expect.poll(() => target.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+    await target.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => target.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.toggleTranscript()
+      await component.proxy.$nextTick()
+    })
+    await expect(page.locator('.shortsAuxPanelTarget .watchVideoTranscript')).toBeVisible()
+    await page.waitForTimeout(250)
+    expect(await target.evaluate(element => element.scrollTop)).toBe(0)
+
+    await watchComponent.dispose()
   })
 
   test('sidebar chapters and SponsorBlock honor roundness while closing beside the description', async ({ app, page }) => {
@@ -571,6 +614,34 @@ test.describe('fullscreen playlist dock', () => {
     await item.locator('.videoThumbnail').hover()
     await expect(item.locator('.trashIcon')).toHaveCount(1)
     await expect(item.locator('.quickBookmarkVideoIcon')).toHaveCount(0)
+  })
+
+  test('clamps the watch playlist after removing most entries', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await openFullscreenPlaylistVideo(page)
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenPlaylistToggle').click()
+    await expect(page.locator('.fullscreenPlaylistTarget .watchVideoPlaylist')).toBeVisible()
+
+    const playlist = page.locator('.fullscreenPlaylistTarget .watchVideoPlaylist')
+    const scroller = playlist.locator('.playlistItemsWrapper')
+    const items = scroller.locator('.playlistItem')
+    await expect(items).toHaveCount(FULLSCREEN_PLAYLIST.videos.length)
+    await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.evaluate(async ({ playlistId, playlistItemIds }) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('removeVideos', { _id: playlistId, playlistItemIds })
+    }, {
+      playlistId: FULLSCREEN_PLAYLIST_ID,
+      playlistItemIds: FULLSCREEN_PLAYLIST.videos.slice(4).map(video => video.playlistItemId)
+    })
+    await expect(items).toHaveCount(4)
+    await page.waitForTimeout(250)
+    expect(await scroller.evaluate(element => element.scrollTop)).toBe(0)
   })
 
   test('keeps compact watched labels and playlist menus clear of other controls', async ({ app, page }) => {

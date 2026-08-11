@@ -230,7 +230,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -250,7 +250,7 @@ import {
 } from '../../helpers/api/local'
 import { invidiousGetPlaylistInfo } from '../../helpers/api/invidious'
 import { isHistoryEntryWatched } from '../../helpers/history'
-import { restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
+import { clampOverlayScrollTop, restoreOverlayScrollTop } from '../../helpers/overlayScrollbars'
 import { getPlaylistSkipAvailability, getSortedPlaylistItems, SORT_BY_VALUES } from '../../helpers/playlists'
 import { useTabContext } from '../../tabs/TabContext'
 
@@ -1049,6 +1049,39 @@ function shufflePlaylistItems() {
 }
 
 const playlistItemsWrapper = useTemplateRef('playlistItemsWrapper')
+let playlistItemsObserver = null
+let playlistItemsClampFrame = null
+
+function stopObservingPlaylistItems() {
+  playlistItemsObserver?.disconnect()
+  playlistItemsObserver = null
+  if (playlistItemsClampFrame !== null) {
+    cancelAnimationFrame(playlistItemsClampFrame)
+    playlistItemsClampFrame = null
+  }
+}
+
+watch(playlistItemsWrapper, (wrapper) => {
+  stopObservingPlaylistItems()
+  const container = wrapper?.$el ?? wrapper
+  if (container == null) {
+    return
+  }
+
+  playlistItemsObserver = new MutationObserver(() => {
+    playlistItemsClampFrame ??= requestAnimationFrame(() => {
+      playlistItemsClampFrame = null
+      const items = container.querySelectorAll(':scope > .playlistItem')
+      clampOverlayScrollTop(
+        container,
+        items[items.length - 1] ?? null
+      )
+    })
+  })
+  playlistItemsObserver.observe(container, { childList: true })
+}, { flush: 'post' })
+
+onBeforeUnmount(stopObservingPlaylistItems)
 
 function getScrollTop() {
   const container = playlistItemsWrapper.value?.$el ?? playlistItemsWrapper.value
