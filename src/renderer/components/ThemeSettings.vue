@@ -262,6 +262,7 @@ import {
 import {
   MAX_SCROLLBAR_THUMB_WIDTH,
   MIN_SCROLLBAR_THUMB_WIDTH,
+  normalizeScrollbarThumbWidth,
   SCROLLBAR_THUMB_WIDTH_STEP
 } from '../constants/scrollbar'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
@@ -561,7 +562,9 @@ function updateUiScale(value) {
 /** @type {import('vue').ComputedRef<number>} */
 const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 const uiRoundness = computed(() => store.getters.getUiRoundness)
-const scrollbarThumbWidth = computed(() => store.getters.getScrollbarThumbWidth)
+const scrollbarThumbWidth = computed(
+  () => normalizeScrollbarThumbWidth(store.getters.getScrollbarThumbWidth)
+)
 const animationSpeed = computed(() => store.getters.getAnimationSpeed)
 
 const systemReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')

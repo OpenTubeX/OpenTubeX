@@ -557,6 +557,27 @@ test.describe('settings', () => {
     expect(await page.evaluate(() => window.__playedAnimations)).toEqual([])
   })
 
+  test.describe('with reduced motion', () => {
+    test.use({ seed: { settings: { reducedMotion: 'on' } } })
+
+    test('leaves no slide class behind for a suppressed animation', async ({ page }) => {
+      await goTo(page, 'settings')
+      await recordAnimations(page)
+      await page.locator('.settingsMenu [data-section="player"]').click()
+      await expect(page.locator('.settingsContent > [data-section="player"]')).toBeVisible()
+
+      // Nothing plays, and nothing is left that could play later: turning
+      // reduced motion back off would otherwise slide the settings unprompted.
+      await expect(page.locator('.settingsContent')).not.toHaveClass(/settingsSectionSlide/)
+      await page.evaluate(() => {
+        const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+        return store.dispatch('updateReducedMotion', 'off')
+      })
+      await page.waitForTimeout(500)
+      expect(await page.evaluate(() => window.__playedAnimations)).toEqual([])
+    })
+  })
+
   test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()

@@ -332,6 +332,7 @@ import {
 } from './helpers/subscriptions'
 import { translateWindowTitle } from './helpers/strings'
 import { initializePlatformInfo } from './helpers/platform'
+import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getTabNavigationService } from './tabs/TabNavigationService'
@@ -1656,7 +1657,10 @@ function updateUiRoundness() {
 }
 
 function updateScrollbarThumbWidth() {
-  document.body.style.setProperty('--scrollbar-thumb-width', `${scrollbarThumbWidth.value}px`)
+  document.body.style.setProperty(
+    '--scrollbar-thumb-width',
+    `${normalizeScrollbarThumbWidth(scrollbarThumbWidth.value)}px`
+  )
 }
 
 // Setting these once on the body keeps a thumbnail size change from

@@ -789,8 +789,15 @@ async function animateSettingsElement(elementRef, classRef, className) {
   // anything that later has the browser start it over — rebuilding the overlay
   // scrollbars, for instance — replays the slide long after the navigation it
   // belonged to. Drop it once it has played.
+  // Nothing to play, because reduced motion suppressed it. Leaving the class
+  // behind would let it slide as soon as reduced motion is turned back off.
   const animations = element?.getAnimations() ?? []
-  if (animations.length === 0) return
+  if (animations.length === 0) {
+    if (classRef.value === className) {
+      classRef.value = ''
+    }
+    return
+  }
 
   const results = await Promise.allSettled(animations.map(animation => animation.finished))
   // Rejected means a newer navigation cancelled this one, and owns the class now.
