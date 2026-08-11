@@ -1495,7 +1495,7 @@ Screenshot Success: Zapisano zrzut ekranu jako „{filePath}”
 New Window: Nowe okno
 Channels:
   Title: Lista kanałów
-  Count: Znaleziono {number} kanał(y/ów).
+  Count: Znaleziono {number} kanał. | Znaleziono {number} kanały. | Znaleziono {number} kanałów.
   Empty: Twoja lista kanałów jest na razie pusta.
   Unsubscribe Prompt: Czy na pewno chcesz zrezygnować z subskrypcji „{channelName}”?
   Channels: Kanały
