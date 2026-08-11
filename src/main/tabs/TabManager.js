@@ -606,6 +606,7 @@ export class TabManager {
     this._previewCaptureLock = Promise.resolve()
     this._previewCapturePaused = false
     this._tabPreviewsEnabled = true
+    this._tabPreviewTransitionId = 0
     this._avatarsEnabled = true
     /** Tabs whose navigation history the renderer has already been sent. */
     this._historyAnnouncedTabIds = new Set()
@@ -1911,6 +1912,7 @@ export class TabManager {
   async setTabPreviewsEnabled(enabled) {
     if (this._tabPreviewsEnabled === enabled) return
 
+    const transitionId = ++this._tabPreviewTransitionId
     this._tabPreviewsEnabled = enabled
     if (enabled) {
       const presentedTab = this.presentedTabId == null ? null : this.tabs.get(this.presentedTabId)
@@ -1924,6 +1926,9 @@ export class TabManager {
       this._clearTabPreviewRefresh(tab)
     }
     await Promise.allSettled(Array.from(this.tabs.values(), tab => tab.previewCapturePromise).filter(Boolean))
+    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
+      return
+    }
 
     const fileNames = Array.from(this.tabs.values(), tab => {
       tab.previewDataUrl = null
@@ -1933,6 +1938,9 @@ export class TabManager {
       return fileName
     })
     await Promise.all(fileNames.map(fileName => this._deleteTabPreviewFile(fileName)))
+    if (transitionId !== this._tabPreviewTransitionId || this._tabPreviewsEnabled) {
+      return
+    }
     this._broadcastStateUpdate()
     await this._saveSession()
   }

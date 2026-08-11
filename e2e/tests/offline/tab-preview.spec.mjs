@@ -95,6 +95,29 @@ test.describe('tab previews', () => {
     expect(hiddenWhileCapturing.length).toBeGreaterThan(0)
     expect(hiddenWhileCapturing.every((visibility) => visibility === 'hidden')).toBe(true)
   })
+
+  test('keeps previews when re-enabled during an active transition', async ({ page }) => {
+    await hoverTabForPreview(page, 0)
+    const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
+
+    const cachedPreview = await page.evaluate(async (tabId) => {
+      const capturePromise = window.ftElectron.tabs.capturePreview(tabId)
+      window.ftElectron.tabs.setPreviewCapturePaused(true)
+      window.ftElectron.tabs.setPreviewsEnabled(false)
+      window.ftElectron.tabs.setPreviewsEnabled(true)
+
+      try {
+        await capturePromise
+        await new Promise(resolve => setTimeout(resolve, 50))
+        const previews = await window.ftElectron.tabs.getCachedPreviews([tabId])
+        return previews[tabId]
+      } finally {
+        window.ftElectron.tabs.setPreviewCapturePaused(false)
+      }
+    }, activeTabId)
+
+    expect(cachedPreview).toMatch(/^data:image\/jpeg;base64,/)
+  })
 })
 
 test.describe('tab previews disabled', () => {
