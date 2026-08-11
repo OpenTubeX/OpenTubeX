@@ -9,6 +9,7 @@ import { settings } from '../datastores/handlers/base'
 import { buildProxyUrl, isOpenTubeXUrl } from './utils'
 import { IpcChannels } from '../constants'
 import { getMatchingDownloadValidators, getYtDlpAssetName } from './ytDlpAsset'
+import { shouldUseGioTrash } from './trashPlatform'
 
 const execFileAsync = promisify(execFile)
 
@@ -1294,6 +1295,20 @@ export function handleYtDlpCancelDownload(event, id) {
 }
 
 /**
+ * Moves a file to the operating system trash.
+ * Electron does not use the Trash portal for document portal paths, so let
+ * GIO handle the operation when running inside Flatpak.
+ * @param {string} destination
+ */
+async function moveToTrash(destination) {
+  if (shouldUseGioTrash()) {
+    await execFileAsync('gio', ['trash', destination])
+  } else {
+    await shell.trashItem(destination)
+  }
+}
+
+/**
  * @param {import('electron').IpcMainInvokeEvent} event
  * @param {number} id
  */
@@ -1335,7 +1350,7 @@ export async function handleYtDlpRemoveDownload(event, id) {
   for (const destination of destinations) {
     if (!existsSync(destination)) continue
     try {
-      await shell.trashItem(destination)
+      await moveToTrash(destination)
       trashed = true
     } catch (error) {
       console.warn('Could not move download to trash', destination, error)
