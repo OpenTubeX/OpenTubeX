@@ -147,7 +147,7 @@
         </p>
       </router-link>
       <router-link
-        v-if="IS_ELECTRON"
+        v-if="IS_ELECTRON && enableDownloads"
         class="navOption mobileShow"
         role="button"
         to="/downloads"
@@ -280,6 +280,7 @@ const appKeyboardShortcuts = computed(() => getConfiguredKeyboardShortcuts(
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
 const IS_ELECTRON = process.env.IS_ELECTRON
 const activeSubscriptionsPerPage = 50
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const props = defineProps({
   forceExpanded: {

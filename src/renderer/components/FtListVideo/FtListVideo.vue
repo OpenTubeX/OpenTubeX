@@ -337,7 +337,7 @@
       </div>
     </div>
     <WatchVideoDownloadPrompt
-      v-if="showDownloadPrompt"
+      v-if="enableDownloads && showDownloadPrompt"
       :video-id="id"
       :title="title"
       :thumbnail="thumbnail"
@@ -502,6 +502,11 @@ const is3D = ref(false)
 const hasCaptions = ref(false)
 const isUpcoming = ref(false)
 const showDownloadPrompt = ref(false)
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 const isPremium = ref(false)
 const hideViews = ref(false)
 const deArrowTogglePinned = ref(false)
@@ -647,7 +652,7 @@ const extraThumbnailActionButton = computed(() => {
         icon: ['fab', 'youtube']
       }
     case 'download':
-      return process.env.IS_ELECTRON
+      return process.env.IS_ELECTRON && enableDownloads.value
         ? {
             title: t('Downloads.Download Video'),
             icon: ['fas', 'download']
@@ -739,7 +744,7 @@ const dropdownOptions = computed(() => {
           icon: ['fas', 'trash']
         }]
       : [],
-    ...(process.env.IS_ELECTRON && !isUpcoming.value
+    ...(process.env.IS_ELECTRON && enableDownloads.value && !isUpcoming.value
       ? [{
           label: t('Downloads.Download Video'),
           value: 'download',

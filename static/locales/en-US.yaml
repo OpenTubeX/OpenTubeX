@@ -768,6 +768,7 @@ Settings:
         Name: None
   Download Settings:
     Download Settings: Downloads
+    Enable Downloads: Enable Downloads
     Managed Tools Download Started Template: 'Required external software was not found: {tools}. Downloading managed copies…'
     Managed Tools Download Finished Template: 'Finished downloading {tools}'
     Managed Tools Update Started Template: 'An update was found for {tools}. Downloading…'

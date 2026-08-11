@@ -181,7 +181,7 @@
             @click="showExportPrompt = true"
           />
           <FtIconButton
-            v-if="IS_ELECTRON && !editMode && videoCount > 0"
+            v-if="IS_ELECTRON && enableDownloads && !editMode && videoCount > 0"
             :title="t('Downloads.Download Playlist')"
             :icon="['fas', 'download']"
             theme="secondary"
@@ -271,7 +271,7 @@
         @click="handleExport"
       />
       <WatchVideoDownloadPrompt
-        v-if="showDownloadPrompt"
+        v-if="enableDownloads && showDownloadPrompt"
         :playlist-id="isUserPlaylist ? '' : id"
         :playlist-key="id"
         :video-ids="isUserPlaylist ? videos.map(video => video.videoId) : []"
@@ -404,6 +404,7 @@ const emit = defineEmits(['enter-edit-mode', 'exit-edit-mode', 'search-video-que
 
 const { locale, t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
 const query = ref('')
 const editMode = ref(false)
@@ -581,6 +582,9 @@ watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
 watch(showDownloadPrompt, handlePromptToggle)
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 
 /**
  * @param {boolean} shown

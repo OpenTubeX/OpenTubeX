@@ -73,7 +73,7 @@
           @click="handleExternalPlayer"
         />
         <FtIconButton
-          v-if="IS_ELECTRON && videoCount > 0"
+          v-if="IS_ELECTRON && enableDownloads && videoCount > 0"
           :title="t('Downloads.Download Playlist')"
           :icon="['fas', 'download']"
           theme="base-no-default"
@@ -93,7 +93,7 @@
       </div>
     </div>
     <WatchVideoDownloadPrompt
-      v-if="showDownloadPrompt"
+      v-if="enableDownloads && showDownloadPrompt"
       :playlist-id="isUserPlaylist ? '' : playlistId"
       :playlist-key="playlistId"
       :video-ids="isUserPlaylist ? data.videos.map(video => video.videoId) : []"
@@ -107,7 +107,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -136,6 +136,11 @@ const props = defineProps({
 const { t } = useI18n()
 const IS_ELECTRON = process.env.IS_ELECTRON
 const showDownloadPrompt = ref(false)
+const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 
 let playlistId = ''
 let title = ''
