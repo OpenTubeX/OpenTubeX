@@ -129,6 +129,12 @@ const messageIntervals = new Map()
  * @type {(number | string)[]}
  */
 const liveToasts = []
+/**
+ * Removes the abort listener of each toast raised with an abort signal, by toast
+ * id.
+ * @type {Map<number | string, () => void>}
+ */
+const abortListeners = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
 /** @type {import('vue').Ref<HTMLElement|null>} */
@@ -410,9 +416,13 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
     }, updateDelay))
   }
 
-  abortSignal?.addEventListener('abort', () => {
-    sonner.dismiss(id)
-  })
+  if (abortSignal != null) {
+    const abort = () => sonner.dismiss(id)
+    abortSignal.addEventListener('abort', abort)
+    // The signal can outlive the toast, so the listener has to come off when the
+    // toast goes rather than only when the signal fires
+    abortListeners.set(id, () => abortSignal.removeEventListener('abort', abort))
+  }
 
   liveToasts.push(id)
   while (liveToasts.length > MAX_VISIBLE_TOASTS) {
@@ -425,6 +435,8 @@ function open({ detail: { message, time, action, abortSignal, image, icon } }) {
  */
 function forgetToast(toast) {
   clearMessageInterval(toast.id)
+  abortListeners.get(toast.id)?.()
+  abortListeners.delete(toast.id)
 
   const index = liveToasts.indexOf(toast.id)
   if (index !== -1) {
@@ -498,6 +510,8 @@ onBeforeUnmount(() => {
   removeShowToastListener?.()
   messageIntervals.forEach(clearInterval)
   messageIntervals.clear()
+  abortListeners.forEach(remove => remove())
+  abortListeners.clear()
 })
 </script>
 

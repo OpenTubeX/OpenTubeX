@@ -1343,6 +1343,25 @@ test.describe('settings', () => {
     await expect(rows.first()).toHaveAttribute('data-expanded', 'false')
   })
 
+  test('dismisses a toast with the keyboard', async ({ page }) => {
+    await page.mouse.move(800, 300)
+    await page.evaluate(() => {
+      window.ftElectron.showToastOnAllTabs('Keyboard toast', 30000)
+    })
+
+    const toast = page.locator('.toast', { hasText: 'Keyboard toast' })
+    await expect(toast).toBeVisible()
+    await page.waitForTimeout(500)
+
+    // A toast without an action is not focusable itself, so the row it sits in
+    // is what a user reaches, both through the toaster's hotkey and by tabbing
+    await expect(toast).not.toHaveAttribute('tabindex')
+    await page.locator('[data-sonner-toast]').filter({ hasText: 'Keyboard toast' }).focus()
+    await page.keyboard.press('Escape')
+
+    await expect(toast).toHaveCount(0)
+  })
+
   test('reflows smoothly when a toast in the middle of the stack is dismissed', async ({ page }) => {
     await page.mouse.move(800, 300)
     await page.evaluate(() => {
@@ -1366,8 +1385,12 @@ test.describe('settings', () => {
     const alphaStart = (await page.locator('.toast', { hasText: 'Alpha toast' }).boundingBox()).y
 
     // Dismiss a toast from the middle of the stack where it stands, the way one
-    // that has simply run out of time goes, and follow the stack closing the gap
-    const { samples, unreachable, collapsed } = await page.evaluate(() => {
+    // that has simply run out of time goes, and follow the stack closing the gap.
+    // Raised on the toast rather than driven through the keyboard, because
+    // moving focus there takes the hover with it and closes the stack before the
+    // dismissal lands; that a toast can be reached at all is covered on its own
+    // by 'dismisses a toast with the keyboard'.
+    const settling = page.evaluate(() => {
       const start = performance.now()
       const samples = []
       const unreachable = new Set()
@@ -1411,6 +1434,8 @@ test.describe('settings', () => {
       })
     })
 
+    const { samples, unreachable, collapsed } = await settling
+
     expect(unreachable).toEqual([])
     expect(collapsed).toEqual([])
     await expect(page.locator('.toast', { hasText: 'Beta toast' })).toHaveCount(0)
@@ -1424,8 +1449,9 @@ test.describe('settings', () => {
 
     // and it closes the gap while the dismissed toast is still animating out,
     // rather than sitting still and then shifting once it has gone
-    const [startedAt] = samples.find(([, y]) => y > positions[0] + 1)
-    expect(startedAt).toBeLessThan(200)
+    const firstMove = samples.find(([, y]) => y > positions[0] + 1)
+    expect(firstMove, 'the stack never closed the gap').toBeDefined()
+    expect(firstMove[0]).toBeLessThan(200)
   })
 
   test('keeps the stack open when a toast is swiped out of the middle of it', async ({ page }) => {

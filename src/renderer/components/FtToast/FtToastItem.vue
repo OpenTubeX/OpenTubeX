@@ -1,5 +1,8 @@
 <template>
-  <div class="toast-slot">
+  <div
+    ref="slot"
+    class="toast-slot"
+  >
     <div
       v-overlay-scrollbars
       class="toast"
@@ -9,7 +12,6 @@
       @click="onClick"
       @keydown.enter.prevent="performAction"
       @keydown.space.prevent="performAction"
-      @keydown.esc.prevent="close"
       @pointerdown="onPointerDown"
       @pointerup="onPointerUp"
     >
@@ -50,7 +52,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
 
@@ -83,6 +85,10 @@ const emit = defineEmits(['closeToast'])
 /** @type {number | null} */
 let pointerDownX = null
 let pointerMoved = false
+/** @type {HTMLElement | null} */
+let row = null
+
+const slot = useTemplateRef('slot')
 
 const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
 const toastProgressRadius = computed(() => 12 * store.getters.getUiRoundness / 100)
@@ -91,6 +97,30 @@ const toastProgressLineWidth = computed(() => Math.min(4, Math.max(2, 2 * store.
 function close() {
   emit('closeToast')
 }
+
+/**
+ * Dismisses a toast the user has reached with the keyboard. The handler belongs
+ * on the row rather than on the toast: the row is what sonner makes focusable,
+ * both for its own hotkey and for tabbing, while the toast itself only takes
+ * focus when it has an action to run. Bound on the row a key press reaches every
+ * toast, and one that ran an action still bubbles up to here.
+ * @param {KeyboardEvent} event
+ */
+function onRowKeydown(event) {
+  if (event.key !== 'Escape') { return }
+
+  event.preventDefault()
+  close()
+}
+
+onMounted(() => {
+  row = slot.value?.parentElement ?? null
+  row?.addEventListener('keydown', onRowKeydown)
+})
+
+onBeforeUnmount(() => {
+  row?.removeEventListener('keydown', onRowKeydown)
+})
 
 function performAction() {
   if (!props.toast.action) { return }

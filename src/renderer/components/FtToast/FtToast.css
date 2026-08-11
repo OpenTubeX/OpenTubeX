@@ -491,10 +491,12 @@
   z-index: 0;
   content: '';
 
-  /* Sized from the toasts rather than from the rows they sit in, which span the
-     whole column: a backdrop that wide would hold the stack open, and swallow
-     clicks, most of the way across the window */
-  inline-size: calc(var(--stack-width, 0px) + 80px);
+  /* Sized to the toasts, and no wider. The rows they sit in span the whole
+     column, and anything that reaches past a toast's own edge both holds the
+     stack open and takes the clicks there: the pointer resting in the margin
+     keeps the stack expanded, which keeps the margin present, so a click beside
+     a toast reaches neither the toast nor the page behind it. */
+  inline-size: var(--stack-width, 0);
   block-size: var(--stack-height, 0);
   pointer-events: auto;
 }
@@ -515,12 +517,12 @@
 /* stylelint-disable liberty/use-logical-spec */
 .toast-holder.position-bottom-left[data-sonner-toaster]::before,
 .toast-holder.position-top-left[data-sonner-toaster]::before {
-  left: -40px;
+  left: 0;
 }
 
 .toast-holder.position-bottom-right[data-sonner-toaster]::before,
 .toast-holder.position-top-right[data-sonner-toaster]::before {
-  right: -40px;
+  right: 0;
 }
 
 .toast-holder.position-bottom-center[data-sonner-toaster]::before,
