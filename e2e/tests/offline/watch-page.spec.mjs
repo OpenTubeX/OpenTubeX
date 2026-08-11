@@ -1,6 +1,6 @@
 import { sel, setPlayerFullscreen, test, expect } from '../../helpers/app.mjs'
 import { activeTab, findWatchComponent, openMockedVideo, waitForPlayback } from '../../helpers/player.mjs'
-import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
+import { mockPlayableWatchPage, watchViewHandle } from '../../helpers/watch.mjs'
 import { demoPlayerResponse } from '../../helpers/media.mjs'
 
 // These used to live in the network suite, gated on the live API. They all use
@@ -100,6 +100,82 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      const listeners = new Map()
+      const liveChat = new EventTarget()
+      liveChat.is_replay = true
+      liveChat.on = (event, listener) => {
+        listeners.set(listener, event)
+        liveChat.addEventListener(event, listener)
+      }
+      liveChat.once = (event, listener) => {
+        listeners.set(listener, event)
+        liveChat.addEventListener(event, listener, { once: true })
+      }
+      liveChat.off = (_event, listener) => {
+        liveChat.removeEventListener(listeners.get(listener), listener)
+        listeners.delete(listener)
+      }
+      liveChat.start = () => {}
+      liveChat.stop = () => {}
+
+      view.$store.commit('setHideLiveChat', true)
+      view.$store.commit('setHideLiveChatReplay', false)
+      view.liveChat = liveChat
+      view.liveChatIsReplay = true
+      view.liveChatOpen = true
+      view.isLive = false
+      view.isUpcoming = false
+      await view.$nextTick()
+    })
+
+    const replay = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat Replay' })
+    await expect(replay).toBeVisible()
+    await replay.getByRole('button', { name: 'Close Live Chat Replay' }).click()
+    await expect(replay).toHaveCount(0)
+
+    const replayToggle = page.getByTitle('Show Live Chat Replay')
+    await expect(replayToggle).toBeVisible()
+    await replayToggle.click()
+    await expect(replay).toBeVisible()
+    await expect(replay.getByRole('button', { name: 'Close Live Chat Replay' })).toBeVisible()
+
+    await watchView.evaluate(async (view) => {
+      view.$store.commit('setHideLiveChat', false)
+      view.$store.commit('setHideLiveChatReplay', true)
+      await view.$nextTick()
+    })
+    await expect(replay).toHaveCount(0)
+    await expect(page.getByTitle('Show Live Chat Replay')).toHaveCount(0)
+
+    await watchView.evaluate(async (view) => {
+      view.liveChat.is_replay = false
+      view.liveChatIsReplay = false
+      view.isLive = true
+      await view.$nextTick()
+    })
+    const activeChat = page.locator(`${activeTab} .watchVideoPlaylist`).filter({ hasText: 'Live Chat' })
+    await expect(activeChat).toBeVisible()
+    await activeChat.getByRole('button', { name: 'Close Live Chat' }).click()
+    await expect(activeChat).toHaveCount(0)
+
+    const activeChatToggle = page.getByTitle('Show Live Chat')
+    await expect(activeChatToggle).toBeVisible()
+    await activeChatToggle.click()
+    await expect(activeChat).toBeVisible()
+
+    await watchView.evaluate(async (view) => {
+      view.$store.commit('setHideLiveChat', true)
+      await view.$nextTick()
+    })
+    await expect(activeChat).toHaveCount(0)
+  })
+
   test('transitions a premiere when relative timestamp updates are disabled', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

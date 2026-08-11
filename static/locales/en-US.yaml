@@ -891,6 +891,7 @@ Settings:
     Hide Popular Videos: Hide Popular Videos
     Hide Playlists: Hide Playlists
     Hide Live Chat: Hide Live Chat
+    Hide Live Chat Replay: Hide Live Chat Replay
     Hide Active Subscriptions: Hide Active Subscriptions
     Hide Video Description: Hide Video Description
     Hide Comments: Hide Comments
@@ -1402,6 +1403,10 @@ Video:
   Live Now: Live Now
   Live Chat: Live Chat
   Live Chat Replay: Live Chat Replay
+  Show Live Chat: Show Live Chat
+  Show Live Chat Replay: Show Live Chat Replay
+  Close Live Chat: Close Live Chat
+  Close Live Chat Replay: Close Live Chat Replay
   Live Chat Settings: Live chat settings
   Show Live Chat Timestamps: Show timestamps
   Chat Filter: Chat filter

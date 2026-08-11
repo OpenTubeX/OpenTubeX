@@ -264,6 +264,7 @@ const state = {
   showAddedForbiddenTitles: true,
   hideVideoDescription: false,
   hideLiveChat: false,
+  hideLiveChatReplay: false,
   hideLiveStreams: false,
   hideHeaderLogo: false,
   hidePlaylists: false,
@@ -779,6 +780,8 @@ const customActions = {
       const hasScrollMiniSetting = userSettings.some(entry => entry._id === 'scrollMiniPlayerEnabled')
       const legacyProgressToastEntry = userSettings.find(entry => entry._id === 'showSubscriptionRefreshToast')
       const hasProgressToastSetting = userSettings.some(entry => entry._id === 'showProgressBarToast')
+      const legacyHideLiveChatEntry = userSettings.find(entry => entry._id === 'hideLiveChat')
+      const hasHideLiveChatReplaySetting = userSettings.some(entry => entry._id === 'hideLiveChatReplay')
 
       // Switch every existing installation to the new default once, while allowing
       // users to select the built-in engine again afterwards.
@@ -804,6 +807,12 @@ const customActions = {
 
       if (legacyProgressToastEntry && !hasProgressToastSetting) {
         await dispatch('updateShowProgressBarToast', legacyProgressToastEntry.value === true)
+      }
+
+      // Hide Live Chat covered both active chats and replays before the replay
+      // preference was split out. Preserve that choice for existing profiles.
+      if (legacyHideLiveChatEntry && !hasHideLiveChatReplaySetting) {
+        await dispatch('updateHideLiveChatReplay', legacyHideLiveChatEntry.value === true)
       }
 
       // Migrate the legacy auto Picture-in-Picture setting to the combinable triggers array.

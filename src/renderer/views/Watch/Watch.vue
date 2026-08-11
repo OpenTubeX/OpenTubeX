@@ -137,7 +137,7 @@
           :delay-load-until-unix="adEndTimeUnixMs"
           :sponsor-block-auto-skip-disabled="sponsorBlockAutoSkipDisabled"
           :comments-available="commentsAvailable"
-          :live-chat-available="showLiveChat"
+          :live-chat-available="liveChatAvailable"
           :quick-bookmark-enabled="isQuickBookmarkEnabled"
           :quick-bookmarked="isCurrentVideoQuickBookmarked"
           :quick-bookmark-title="quickBookmarkIconText"
@@ -717,6 +717,9 @@
           :current-volume="currentVolume"
           :sponsor-block-panel-open="showSidebarSponsorBlock"
           :transcript-open="showTranscript"
+          :live-chat-available="liveChatAvailable"
+          :live-chat-open="showLiveChat"
+          :live-chat-replay="liveChatIsReplay"
           :hide-share-button="fullscreenMetadataOpen"
           :hide-playlist-actions="fullscreenMetadataOpen"
           :hide-fullscreen-dock-actions="fullscreenMetadataOpen"
@@ -731,6 +734,7 @@
           @save-channel-volume="handleChannelVolumeManualSave"
           @toggle-sponsorblock-info="toggleSponsorBlockInfo"
           @toggle-transcript="toggleTranscript"
+          @toggle-live-chat="toggleLiveChat"
         />
         <watch-video-description
           v-if="!isLoading && !hideVideoDescription && (!customShortsPlayerActive || fullscreenMetadataOpen)"
@@ -904,17 +908,24 @@
         :to="fullscreenLiveChatTarget || 'body'"
         :disabled="!fullscreenLiveChatOpen"
       >
-        <watch-video-live-chat
-          v-if="!isLoading && showLiveChat"
-          :live-chat="liveChat"
-          :video-id="videoId"
-          :channel-id="channelId"
-          :current-time="liveChatCurrentTime"
-          :fullscreen-overlay="fullscreenLiveChatOpen"
-          class="watchVideoSideBar watchVideoPlaylist"
-          :class="{ theatrePlaylist: useTheatreMode }"
-          @close="closeFullscreenLiveChat"
-        />
+        <transition
+          name="sidebar-panel"
+          @before-leave="handleSidebarPanelBeforeLeave"
+          @after-leave="handleSidebarPanelAfterLeave"
+          @leave-cancelled="handleSidebarPanelAfterLeave"
+        >
+          <watch-video-live-chat
+            v-if="!isLoading && showLiveChat"
+            :live-chat="liveChat"
+            :video-id="videoId"
+            :channel-id="channelId"
+            :current-time="liveChatCurrentTime"
+            :fullscreen-overlay="fullscreenLiveChatOpen"
+            class="watchVideoSideBar watchVideoPlaylist"
+            :class="{ theatrePlaylist: useTheatreMode }"
+            @close="closeLiveChat"
+          />
+        </transition>
       </Teleport>
       <watch-video-queue
         v-if="$store.getters.getWatchQueueLength > 0"

@@ -211,6 +211,14 @@
             @click="emit('toggle-sponsorblock-info')"
           />
           <FtIconButton
+            v-if="liveChatAvailable && !hideFullscreenDockActions"
+            :title="liveChatToggleTitle"
+            :icon="['fas', 'message']"
+            :theme="liveChatOpen ? 'secondary' : 'base'"
+            :aria-pressed="liveChatOpen"
+            @click="emit('toggle-live-chat')"
+          />
+          <FtIconButton
             v-if="!isLive && !isUpcoming && !hideFullscreenDockActions"
             :title="transcriptOpen ? t('Video.Transcript.Hide') : t('Video.Transcript.Show')"
             :icon="['fas', 'file-lines']"
@@ -460,6 +468,18 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  liveChatAvailable: {
+    type: Boolean,
+    default: false
+  },
+  liveChatOpen: {
+    type: Boolean,
+    default: false
+  },
+  liveChatReplay: {
+    type: Boolean,
+    default: false
+  },
   hideShareButton: {
     type: Boolean,
     default: false
@@ -484,6 +504,7 @@ const emit = defineEmits([
   'save-channel-volume',
   'toggle-sponsorblock-info',
   'toggle-transcript',
+  'toggle-live-chat',
 ])
 
 const USING_ELECTRON = process.env.IS_ELECTRON
@@ -495,6 +516,14 @@ const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
+
+const liveChatToggleTitle = computed(() => {
+  if (props.liveChatReplay) {
+    return props.liveChatOpen ? t('Video.Close Live Chat Replay') : t('Video.Show Live Chat Replay')
+  }
+
+  return props.liveChatOpen ? t('Video.Close Live Chat') : t('Video.Show Live Chat')
+})
 
 watch(enableDownloads, (enabled) => {
   if (!enabled) showDownloadPrompt.value = false

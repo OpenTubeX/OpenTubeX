@@ -308,6 +308,13 @@
           @change="updateHideLiveChat"
         />
         <FtToggleSwitch
+          :label="t('Settings.Distraction Free Settings.Hide Live Chat Replay')"
+          :compact="true"
+          :default-value="hideLiveChatReplay"
+          setting-key="hideLiveChatReplay"
+          @change="updateHideLiveChatReplay"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Distraction Free Settings.Hide Recommended Videos')"
           :compact="true"
           :default-value="hideRecommendedVideos"
@@ -476,6 +483,16 @@ const hideLiveChat = computed(() => store.getters.getHideLiveChat)
  */
 function updateHideLiveChat(value) {
   store.dispatch('updateHideLiveChat', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const hideLiveChatReplay = computed(() => store.getters.getHideLiveChatReplay)
+
+/**
+ * @param {boolean} value
+ */
+function updateHideLiveChatReplay(value) {
+  store.dispatch('updateHideLiveChatReplay', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
