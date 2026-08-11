@@ -71,6 +71,7 @@
             @keydown.space.stop.prevent="handleSubscription(profile)"
           >
             <div
+              v-if="isProfileSubscribed(profile)"
               class="colorOption"
               :style="{ background: profile.bgColor, color: profile.textColor }"
             >
@@ -78,9 +79,15 @@
                 class="initial"
                 dir="auto"
               >
-                {{ isProfileSubscribed(profile) ? $t('checkmark') : profileInitials[profile._id] }}
+                {{ $t('checkmark') }}
               </div>
             </div>
+            <FtProfileIcon
+              v-else
+              class="colorOption"
+              :profile="profile"
+              :fallback="profileInitials[profile._id]"
+            />
             <p
               :id="id + '-' + index"
               class="profileName"
@@ -102,6 +109,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
+import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 import store from '../../store/index'
 

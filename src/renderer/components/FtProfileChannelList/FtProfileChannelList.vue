@@ -27,14 +27,17 @@
       >
         <FtButton
           :label="$t('Profile.Select All')"
+          :icon="['fas', 'check']"
           @click="selectAll"
         />
         <FtButton
           :label="$t('Profile.Select None')"
+          :icon="['fas', 'xmark']"
           @click="selectNone"
         />
         <FtButton
           :label="$t('Profile.Delete Selected')"
+          :icon="['fas', 'trash']"
           text-color="var(--destructive-text-color)"
           background-color="var(--destructive-color)"
           @click="displayDeletePrompt"

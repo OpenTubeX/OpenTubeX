@@ -4,6 +4,7 @@
   padding-block: 10px 30px;
   padding-inline: 10px;
   cursor: pointer;
+  border-radius: calc(8px * var(--ui-roundness));
   transition: background 0.2s ease-out;
 }
 
@@ -19,15 +20,7 @@
   margin-block: 20px 5px;
   margin-inline: auto;
   border-radius: 50%;
-}
-
-.initial {
   font-size: 35px;
-  line-height: 1em;
-  text-align: center;
-  padding-block: 17.5px;
-  padding-inline: 0;
-  user-select: none;
 }
 
 .profileName {

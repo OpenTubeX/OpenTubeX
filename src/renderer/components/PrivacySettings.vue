@@ -373,10 +373,7 @@ function handleRemoveSubscriptions(option) {
   profileList.value.forEach((profile) => {
     if (profile._id === MAIN_PROFILE_ID) {
       const newProfile = {
-        _id: MAIN_PROFILE_ID,
-        name: profile.name,
-        bgColor: profile.bgColor,
-        textColor: profile.textColor,
+        ...profile,
         subscriptions: []
       }
       store.dispatch('updateProfile', newProfile)

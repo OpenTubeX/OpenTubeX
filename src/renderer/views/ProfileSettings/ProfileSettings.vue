@@ -12,6 +12,7 @@
           :profile-name="profile.name"
           :background-color="profile.bgColor"
           :text-color="profile.textColor"
+          :icon="profile.icon"
           :class="{ openedProfile: openSettingsProfile?._id === profile._id }"
           @click="openSettingsForProfileWithId(profile._id)"
         />
@@ -21,6 +22,7 @@
       >
         <FtButton
           :label="$t('Profile.Create New Profile')"
+          :icon="['fas', 'user-plus']"
           @click="openSettingsForNewProfile"
         />
       </FtFlexBox>
@@ -71,6 +73,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
+ * @property {{type: 'emoji'|'image', value: string}|null|undefined} icon
  * @property {object[]} subscriptions
  * @property {string} subscriptions[].id
  * @property {string|undefined} subscriptions[].name
