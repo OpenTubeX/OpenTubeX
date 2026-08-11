@@ -23,7 +23,7 @@ export function getUpcomingPremiereTimestamp(video) {
 }
 
 /**
- * Clears stale upcoming flags once a premiere's scheduled time has arrived.
+ * Marks a premiere as live once its scheduled time has arrived.
  * @param {object} video
  * @param {number} now
  */
@@ -33,12 +33,14 @@ export function updateUpcomingPremiereState(video, now) {
   if (
     premiereTimestamp != null &&
     premiereTimestamp <= now &&
-    (video.isUpcoming || video.premiere)
+    // Local API entries can carry only the scheduled date in older caches.
+    (video.isUpcoming || video.premiere || video.premiereDate != null)
   ) {
     return {
       ...video,
       isUpcoming: false,
-      premiere: false
+      premiere: false,
+      liveNow: true
     }
   }
 

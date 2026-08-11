@@ -133,7 +133,7 @@ test.describe('subscriptions feed from cache', () => {
 
     const premiere = page.locator('.ft-list-video').filter({ hasText: 'Upcoming premiere video' })
     await expect(premiere).toBeVisible()
-    await expect(premiere.locator('.videoDuration')).not.toHaveText('Upcoming')
+    await expect(premiere.locator('.videoDuration')).toHaveText('Live')
   })
 
   test('an open video menu does not lift feed content over the sticky header', async ({ page }) => {
