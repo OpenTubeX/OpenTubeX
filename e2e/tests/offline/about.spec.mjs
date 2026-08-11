@@ -1,4 +1,4 @@
-import { test, expect, goTo } from '../../helpers/app.mjs'
+import { test, expect } from '../../helpers/app.mjs'
 
 test('about page shows the bundled runtime versions', async ({ app, page }) => {
   const expectedVersions = await app.electronApp.evaluate(() => ({
@@ -8,9 +8,12 @@ test('about page shows the bundled runtime versions', async ({ app, page }) => {
     V8: process.versions.v8
   }))
 
-  await goTo(page, 'about')
+  await page.locator('.profileTrigger').click()
+  await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
 
-  const versionRows = page.locator('.runtimeVersion')
+  const aboutWindow = page.getByRole('dialog', { name: 'About' })
+  await expect(aboutWindow).toBeVisible()
+  const versionRows = aboutWindow.locator('.runtimeVersion')
   const expectedEntries = Object.entries(expectedVersions)
   await expect(versionRows).toHaveCount(expectedEntries.length)
 
