@@ -128,9 +128,10 @@ test.describe('tab previews', () => {
     const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
 
     await page.evaluate(async (tabId) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       const capturePromise = window.ftElectron.tabs.capturePreview(tabId)
       window.ftElectron.tabs.setPreviewCapturePaused(true)
-      window.ftElectron.tabs.setPreviewsEnabled(false)
+      await store.dispatch('updateShowTabPreviews', false)
       await capturePromise
     }, activeTabId)
 
@@ -142,8 +143,10 @@ test.describe('tab previews', () => {
       return previews[activeTabId] ?? null
     }).toBe(null)
 
-    await page.evaluate(() => {
-      window.ftElectron.tabs.setPreviewsEnabled(true)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateShowTabPreviews', true)
+      await new Promise(resolve => requestAnimationFrame(resolve))
       window.ftElectron.tabs.setPreviewCapturePaused(false)
     })
     await expect.poll(async () => {
