@@ -726,8 +726,8 @@ const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
 function initializeTutorial(hasExistingSettings, lastUsedVersion) {
   try {
     let audience = localStorage.getItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
-    if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return
-    if (hasExistingSettings === null) return
+    if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
+    if (hasExistingSettings === null) return false
 
     if (audience !== 'new' && audience !== 'existing') {
       audience = hasExistingSettings ? 'existing' : 'new'
@@ -735,9 +735,10 @@ function initializeTutorial(hasExistingSettings, lastUsedVersion) {
     }
 
     tutorialIsNewInstallation.value = audience === 'new'
-    showTutorial.value = true
+    return true
   } catch (error) {
     console.error('Failed to initialize tutorial', error)
+    return false
   }
 }
 
@@ -753,7 +754,6 @@ function completeTutorial() {
 
 onMounted(async () => {
   const lastUsedVersion = getLastUsedVersion()
-  setLastUsedVersion(packageDetails.version)
   preloadUtilityRoutes()
 
   if (isElectron) {
@@ -762,6 +762,8 @@ onMounted(async () => {
   }
 
   const hasExistingSettings = await store.dispatch('grabUserSettings')
+  const tutorialPending = initializeTutorial(hasExistingSettings, lastUsedVersion)
+  setLastUsedVersion(packageDetails.version)
 
   updateTheme()
 
@@ -807,7 +809,7 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
-    initializeTutorial(hasExistingSettings, lastUsedVersion)
+    showTutorial.value = tutorialPending
     initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {
@@ -1801,6 +1803,8 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
+  if (showTutorial.value) return
+
   const shortcuts = KeyboardShortcuts.APP.GENERAL
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {

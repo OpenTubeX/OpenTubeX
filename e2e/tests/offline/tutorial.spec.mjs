@@ -25,11 +25,29 @@ test('shows returning users only where settings moved', async ({ page }) => {
   await expect(tutorial.locator('.tutorialProgress')).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
 
-  await tutorial.getByRole('button', { name: 'Got it' }).click()
+  const tabCount = await page.locator('.tabBar .tab').count()
+  await page.keyboard.press('Control+t')
+  await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
+
+  const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
+  await expect(primaryAction).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(primaryAction).toBeFocused()
+
+  await primaryAction.click()
   await expect(tutorial).toBeHidden()
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)
+})
+
+test.describe('right-to-left layout', () => {
+  test.use({ seed: { settings: { currentLocale: 'ar' } } })
+
+  test('keeps the spotlight centered on physical target coordinates', async ({ page }) => {
+    await expect(page.locator('.app')).toHaveClass(/isLocaleRightToLeft/)
+    await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
+  })
 })
 
 test('walks new users through the essential controls', async ({ page }) => {

@@ -1,7 +1,7 @@
 .tutorialOverlay {
   position: fixed;
   inset: 0;
-  z-index: 250;
+  z-index: 1001;
 }
 
 .tutorialOverlay.centered {
@@ -18,7 +18,10 @@
     0 0 0 9999px rgb(0 0 0 / 72%);
   box-sizing: border-box;
   pointer-events: none;
-  transition: inset 180ms ease-out, inline-size 180ms ease-out, block-size 180ms ease-out;
+
+  /* Physical target coordinates must not mirror in RTL layouts. */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  transition: inset-block-start 180ms ease-out, left 180ms ease-out, inline-size 180ms ease-out, block-size 180ms ease-out;
 }
 
 .tutorialCard {

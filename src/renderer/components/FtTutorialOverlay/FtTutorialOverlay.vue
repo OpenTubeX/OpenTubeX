@@ -5,6 +5,7 @@
       :class="{ centered: targetRect === null }"
       role="presentation"
       @pointerdown.self="finishTutorial"
+      @keydown.capture="handleKeydown"
     >
       <div
         v-if="targetRect"
@@ -20,7 +21,6 @@
         aria-modal="true"
         :aria-labelledby="titleId"
         :aria-describedby="descriptionId"
-        @keydown.esc.stop="finishTutorial"
       >
         <div
           v-if="steps.length > 1"
@@ -151,7 +151,7 @@ const highlightStyle = computed(() => {
 
   return {
     insetBlockStart: `${targetRect.value.top}px`,
-    insetInlineStart: `${targetRect.value.left}px`,
+    left: `${targetRect.value.left}px`,
     inlineSize: `${targetRect.value.width}px`,
     blockSize: `${targetRect.value.height}px`,
     borderRadius: targetRect.value.borderRadius
@@ -163,6 +163,7 @@ onMounted(() => {
   store.commit('addOpenPrompt', promptId)
   window.addEventListener('resize', schedulePositionUpdate)
   window.addEventListener('scroll', schedulePositionUpdate, true)
+  document.addEventListener('keydown', handleDocumentKeydown, true)
   updatePosition()
   nextTick(() => primaryButtonRef.value?.$el.focus())
 })
@@ -171,6 +172,7 @@ onBeforeUnmount(() => {
   if (updateFrame !== null) cancelAnimationFrame(updateFrame)
   window.removeEventListener('resize', schedulePositionUpdate)
   window.removeEventListener('scroll', schedulePositionUpdate, true)
+  document.removeEventListener('keydown', handleDocumentKeydown, true)
   store.commit('removeOpenPrompt', promptId)
   unlockBodyScroll()
 })
@@ -219,8 +221,34 @@ async function updatePosition() {
 
   cardStyle.value = {
     insetBlockStart: `${top}px`,
-    insetInlineStart: `${left}px`
+    left: `${left}px`
   }
+}
+
+function handleDocumentKeydown(event) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    event.stopPropagation()
+    finishTutorial()
+  }
+}
+
+function handleKeydown(event) {
+  event.stopPropagation()
+
+  if (event.key !== 'Tab') return
+
+  const buttons = Array.from(cardRef.value?.$el.querySelectorAll('.btn') ?? [])
+  if (buttons.length === 0) return
+
+  const currentIndex = buttons.indexOf(document.activeElement)
+  const nextIndex = event.shiftKey
+    ? (currentIndex <= 0 ? buttons.length - 1 : currentIndex - 1)
+    : (currentIndex === -1 || currentIndex === buttons.length - 1 ? 0 : currentIndex + 1)
+
+  event.preventDefault()
+  buttons[nextIndex].focus()
+  store.dispatch('showOutlines')
 }
 
 function advanceTutorial() {
