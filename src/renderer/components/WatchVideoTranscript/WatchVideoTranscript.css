@@ -119,6 +119,8 @@
 .transcriptSegments {
   --transcript-fade-size: 16px;
   --transcript-scrollbar-reserve: 14px;
+  --transcript-fade-top: #000;
+  --transcript-fade-bottom: #000;
 
   position: relative;
   max-block-size: 420px;
@@ -128,10 +130,10 @@
   mask-image:
     linear-gradient(
       to bottom,
-      transparent,
+      var(--transcript-fade-top),
       #000 var(--transcript-fade-size),
       #000 calc(100% - var(--transcript-fade-size)),
-      transparent
+      var(--transcript-fade-bottom)
     ),
     linear-gradient(#000 0 0);
   mask-size:
@@ -140,6 +142,14 @@
   mask-position: 0 0, 100% 0;
   mask-repeat: no-repeat;
   mask-composite: add;
+}
+
+.transcriptSegments.transcriptFadeTop {
+  --transcript-fade-top: transparent;
+}
+
+.transcriptSegments.transcriptFadeBottom {
+  --transcript-fade-bottom: transparent;
 }
 
 .transcriptSegments:dir(rtl) {

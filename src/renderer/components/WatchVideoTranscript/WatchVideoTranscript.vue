@@ -114,8 +114,10 @@
       ref="segmentList"
       v-overlay-scrollbars
       class="transcriptSegments"
+      :class="{ transcriptFadeTop, transcriptFadeBottom }"
       role="list"
       :aria-label="t('Video.Transcript.Title')"
+      @scroll="updateTranscriptFadeState"
     >
       <div
         v-for="segment in filteredSegments"
@@ -191,10 +193,13 @@ const segments = ref([])
 const isLoading = ref(false)
 const loadFailed = ref(false)
 const segmentList = useTemplateRef('segmentList')
+const transcriptFadeTop = ref(false)
+const transcriptFadeBottom = ref(false)
 
 /** @type {AbortController|null} */
 let loadController = null
 let hasAlignedActiveSegment = false
+let segmentResizeObserver = null
 
 const normalizedSearchQuery = computed(() => searchQuery.value.trim().toLocaleLowerCase())
 const filteredSegments = computed(() => {
@@ -285,6 +290,19 @@ watch(normalizedSearchQuery, () => {
   }
 })
 
+watch(segmentList, (list) => {
+  segmentResizeObserver?.disconnect()
+  segmentResizeObserver = null
+
+  if (list) {
+    segmentResizeObserver = new ResizeObserver(updateTranscriptFadeState)
+    segmentResizeObserver.observe(list)
+    nextTick(updateTranscriptFadeState)
+  }
+}, { flush: 'post' })
+
+watch(filteredSegments, () => nextTick(updateTranscriptFadeState))
+
 watch(activeSegmentIndex, async (index) => {
   if (index < 0 || normalizedSearchQuery.value !== '') {
     return
@@ -306,7 +324,10 @@ watch(activeSegmentIndex, async (index) => {
   hasAlignedActiveSegment = true
 })
 
-onBeforeUnmount(() => loadController?.abort())
+onBeforeUnmount(() => {
+  loadController?.abort()
+  segmentResizeObserver?.disconnect()
+})
 
 function formatTimestamp(seconds) {
   return formatDurationAsTimestamp(Math.floor(seconds))
@@ -317,6 +338,18 @@ function toggleTranscriptSearch() {
   if (!searchOpen.value) {
     searchQuery.value = ''
   }
+}
+
+function updateTranscriptFadeState() {
+  const list = segmentList.value
+  if (!list) {
+    transcriptFadeTop.value = false
+    transcriptFadeBottom.value = false
+    return
+  }
+
+  transcriptFadeTop.value = list.scrollTop > 1
+  transcriptFadeBottom.value = list.scrollTop + list.clientHeight < list.scrollHeight - 1
 }
 
 function selectCaptionLanguage(index) {
