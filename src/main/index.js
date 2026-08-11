@@ -4638,7 +4638,7 @@ function runApp() {
             label: 'Back',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD),
             click: (_menuItem, browserWindow, _event) => {
-              if (browserWindow == null) { return }
+              if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
               TabManager.getForWindow(browserWindow.id)?.navigateHistory(-1)
             },
@@ -4650,7 +4650,7 @@ function runApp() {
                   label: 'Back',
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
-                    if (browserWindow == null) { return }
+                    if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
                     TabManager.getForWindow(browserWindow.id)?.navigateHistory(-1)
                   },
@@ -4662,7 +4662,7 @@ function runApp() {
             label: 'Forward',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD),
             click: (_menuItem, browserWindow, _event) => {
-              if (browserWindow == null) { return }
+              if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
               TabManager.getForWindow(browserWindow.id)?.navigateHistory(1)
             },
@@ -4674,7 +4674,7 @@ function runApp() {
                   label: 'Forward',
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
-                    if (browserWindow == null) { return }
+                    if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
                     TabManager.getForWindow(browserWindow.id)?.navigateHistory(1)
                   },
