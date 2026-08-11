@@ -73,22 +73,33 @@ test.describe('watch page', () => {
     const descriptionText = description.locator('.description')
     const tags = description.locator('.videoTags')
     const expandControl = description.locator(':scope > .descriptionStatus')
-    await description.evaluate(element => { element.style.height = '70px' })
-    await expect(expandControl).toHaveClass(/avoidCopyButton/)
-    expect(await expandControl.evaluate((element, copyButton) => {
+    const copyButton = description.locator('.descriptionCopyButton')
+    const controlsOverlap = async () => expandControl.evaluate((element, copyButtonElement) => {
       const expandRect = element.getBoundingClientRect()
-      const copyRect = copyButton.getBoundingClientRect()
+      const copyRect = copyButtonElement.getBoundingClientRect()
       return (
         expandRect.top < copyRect.bottom &&
         expandRect.bottom > copyRect.top &&
         expandRect.left < copyRect.right &&
         expandRect.right > copyRect.left
       )
-    }, await description.locator('.descriptionCopyButton').elementHandle())).toBe(false)
+    }, await copyButton.elementHandle())
+
+    await description.evaluate(element => { element.style.height = '70px' })
+    await expect(expandControl).toHaveClass(/avoidCopyButton/)
+    expect(await controlsOverlap()).toBe(false)
 
     await description.evaluate(element => { element.style.height = '160px' })
     await expect(expandControl).not.toHaveClass(/avoidCopyButton/)
     await expect(expandControl).toHaveCSS('inset-inline-end', '16px')
+
+    await description.evaluate(element => {
+      element.dir = 'rtl'
+      element.style.height = '70px'
+    })
+    await expect(expandControl).toHaveClass(/avoidCopyButton/)
+    expect(await controlsOverlap()).toBe(false)
+
     await description.evaluate(element => { element.style.height = '' })
 
     await expandControl.click()
