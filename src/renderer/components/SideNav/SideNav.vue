@@ -18,6 +18,7 @@
       />
       <router-link
         class="navOption topNavOption mobileShow "
+        data-tutorial="navigation"
         role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"

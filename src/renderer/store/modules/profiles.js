@@ -70,10 +70,10 @@ const actions = {
       profiles = await DBProfileHandlers.find()
     } catch (errMessage) {
       console.error(errMessage)
-      return
+      return null
     }
 
-    if (!Array.isArray(profiles)) return
+    if (!Array.isArray(profiles)) return null
 
     if (profiles.length === 0) {
       // Create a default profile and persist it
@@ -92,9 +92,10 @@ const actions = {
         commit('setProfileList', [defaultProfile])
       } catch (errMessage) {
         console.error(errMessage)
+        return null
       }
 
-      return
+      return false
     }
 
     // We want the primary profile to always be first
@@ -112,6 +113,7 @@ const actions = {
     }
 
     commit('setProfileList', profiles)
+    return true
   },
 
   async batchUpdateSubscriptionDetails({ dispatch, state }, channels) {

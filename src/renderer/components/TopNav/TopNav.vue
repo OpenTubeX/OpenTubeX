@@ -47,6 +47,7 @@
         <button
           v-if="!hideSearchBar"
           class="navSearchButton navButton"
+          data-tutorial="search"
           @click="toggleSearchContainer"
         >
           <FontAwesomeIcon
@@ -98,6 +99,7 @@
           v-show="showSearchContainer"
           ref="searchContainer"
           class="searchContainer"
+          data-tutorial="search"
         >
           <FtInput
             ref="searchInput"

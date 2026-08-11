@@ -72,6 +72,11 @@
     <Transition name="settings-window">
       <SettingsWindow v-if="settingsWindowOpen" />
     </Transition>
+    <FtTutorialOverlay
+      v-if="showTutorial"
+      :new-installation="tutorialIsNewInstallation"
+      @close="completeTutorial"
+    />
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
@@ -312,6 +317,7 @@ import FtPlaylistAddVideoPrompt from './components/FtPlaylistAddVideoPrompt/FtPl
 import FtCreatePlaylistPrompt from './components/FtCreatePlaylistPrompt/FtCreatePlaylistPrompt.vue'
 import FtSearchFilters from './components/FtSearchFilters/FtSearchFilters.vue'
 import FtContextMenu from './components/FtContextMenu/FtContextMenu.vue'
+import FtTutorialOverlay from './components/FtTutorialOverlay/FtTutorialOverlay.vue'
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
@@ -341,6 +347,7 @@ import { initializePlatformInfo } from './helpers/platform'
 import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
+import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -520,6 +527,8 @@ const hideSubscriptionsLive = computed(() => store.getters.getHideLiveStreams ||
 const hideSubscriptionsPosts = computed(() => store.getters.getHideSubscriptionsCommunity || store.getters.getUseRssFeeds)
 
 const dataReady = ref(false)
+const showTutorial = ref(false)
+const tutorialIsNewInstallation = ref(false)
 const findbarVisible = ref(false)
 const findbarQuery = ref('')
 const findbarMatchIndex = ref(0)
@@ -712,7 +721,48 @@ async function initializeManagedExternalSoftware() {
   }
 }
 
+const TUTORIAL_AUDIENCE_STORAGE_KEY = 'opentubex.tutorial.audience'
+
+function initializeTutorial(hasExistingInstallation, lastUsedVersion) {
+  try {
+    let audience = localStorage.getItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+    if (audience !== 'new' && audience !== 'existing' && lastUsedVersion !== null) return false
+    if (hasExistingInstallation === null) return false
+
+    if (audience !== 'new' && audience !== 'existing') {
+      audience = hasExistingInstallation ? 'existing' : 'new'
+      localStorage.setItem(TUTORIAL_AUDIENCE_STORAGE_KEY, audience)
+    }
+
+    tutorialIsNewInstallation.value = audience === 'new'
+    return true
+  } catch (error) {
+    console.error('Failed to initialize tutorial', error)
+    return false
+  }
+}
+
+async function completeTutorial() {
+  showTutorial.value = false
+  await nextTick()
+
+  if (isElectron) {
+    try {
+      await window.ftElectron.tabs.setShortcutsBlocked(false)
+    } catch (error) {
+      console.error('Failed to restore tab shortcuts', error)
+    }
+  }
+
+  try {
+    localStorage.removeItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
+  } catch (error) {
+    console.error('Failed to save tutorial completion', error)
+  }
+}
+
 onMounted(async () => {
+  const lastUsedVersion = getLastUsedVersion()
   preloadUtilityRoutes()
 
   if (isElectron) {
@@ -720,7 +770,7 @@ onMounted(async () => {
     window.ftElectron.tabs.rendererReady()
   }
 
-  await store.dispatch('grabUserSettings')
+  const hasExistingSettings = await store.dispatch('grabUserSettings')
 
   updateTheme()
 
@@ -735,7 +785,17 @@ onMounted(async () => {
     }
   })
 
-  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async () => {
+  store.dispatch('grabAllProfiles', t('Profile.All Channels')).then(async (hasExistingProfiles) => {
+    const hasExistingInstallation = hasExistingSettings === true || hasExistingProfiles === true
+      ? true
+      : hasExistingSettings === null || hasExistingProfiles === null
+        ? null
+        : false
+    const tutorialPending = initializeTutorial(hasExistingInstallation, lastUsedVersion)
+    if (hasExistingInstallation !== null || lastUsedVersion !== null) {
+      setLastUsedVersion(packageDetails.version)
+    }
+
     const syncDataReady = Promise.all([
       store.dispatch('grabHistory'),
       store.dispatch('grabAllPlaylists'),
@@ -766,6 +826,14 @@ onMounted(async () => {
     dataReady.value = true
 
     await nextTick()
+    if (isElectron && tutorialPending) {
+      try {
+        await window.ftElectron.tabs.setShortcutsBlocked(true)
+      } catch (error) {
+        console.error('Failed to block tab shortcuts for tutorial', error)
+      }
+    }
+    showTutorial.value = tutorialPending
     initializeManagedExternalSoftware().catch(error => console.error('Failed to initialize managed external software', error))
 
     setTimeout(() => {
@@ -821,6 +889,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
+    window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
   }
   cancelWatchSideNavTransitionReset()
   clearSubscriptionFeedAutoRefreshTimer()
@@ -1759,6 +1828,8 @@ const outlinesHidden = computed(() => store.getters.getOutlinesHidden)
  * @param {KeyboardEvent} event
  */
 function handleKeyboardShortcuts(event) {
+  if (showTutorial.value) return
+
   const shortcuts = KeyboardShortcuts.APP.GENERAL
 
   if (matchesKeyboardShortcut(event, shortcuts.FIND_IN_PAGE)) {

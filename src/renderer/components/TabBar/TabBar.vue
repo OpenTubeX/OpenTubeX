@@ -3,6 +3,7 @@
     v-if="isElectron"
     ref="tabBarRef"
     class="tabBar"
+    data-tutorial="tabs"
     :class="{ vertical }"
     :style="fixedTabWidthStyle"
   >

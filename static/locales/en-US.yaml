@@ -1106,6 +1106,29 @@ Settings:
     Set Password To Prevent Access: Set a password to prevent access to settings
     Set Password: Set Password
     Remove Password: Remove Password
+Tutorial:
+  Skip: Skip
+  Next: Next
+  Finish: Finish
+  Got It: Got it
+  Welcome:
+    Title: Welcome to OpenTubeX
+    Description: Here are the few controls that will help you feel at home.
+  Navigation:
+    Title: Your library is always nearby
+    Description: Use the navigation to reach subscriptions, playlists, history, downloads, and more.
+  Search:
+    Title: Search or paste a link
+    Description: Find videos and channels, or paste a supported video URL directly into the search field.
+  Tabs:
+    Title: Keep pages open in tabs
+    Description: Open several pages at once and switch between them without losing your place.
+  Quick Settings:
+    Title: Make it yours
+    Description: Select your profile in the top-right to switch profiles, change common preferences, or open all settings.
+  Settings Moved:
+    Title: Settings have moved
+    Description: Select your profile in the top-right for quick controls. The cog in that menu opens all settings.
 About:
   #On About page
   About: About

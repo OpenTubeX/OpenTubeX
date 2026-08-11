@@ -122,6 +122,7 @@ function runApp() {
   ])
   const closeConfirmedWindowIds = new Set()
   const closingWindowIds = new Set()
+  const appShortcutBlockedWindows = new WeakSet()
   let quitPromptInProgress = null
   const windowClosePromptsInProgress = new Map()
   let isQuitConfirmed = false
@@ -3367,6 +3368,21 @@ function runApp() {
   /** @type {Map<number, number>} */
   const activePowerSaveBlockers = new Map()
 
+  ipcMain.handle(IpcChannels.TABS_SET_SHORTCUTS_BLOCKED, (event, blocked) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url) || typeof blocked !== 'boolean') {
+      return
+    }
+
+    const browserWindow = BrowserWindow.fromWebContents(event.sender)
+    if (!browserWindow) return
+
+    if (blocked) {
+      appShortcutBlockedWindows.add(browserWindow)
+    } else {
+      appShortcutBlockedWindows.delete(browserWindow)
+    }
+  })
+
   /**
    * @param {BrowserWindow} window
    */
@@ -4374,6 +4390,10 @@ function runApp() {
     webContents.on('did-start-navigation', (_event, _url, isInPlace, isMainFrame) => {
       if (isMainFrame && !isInPlace) {
         openUrlReadyWebContentsIds.delete(webContents.id)
+        const browserWindow = BrowserWindow.fromWebContents(webContents)
+        if (browserWindow) {
+          appShortcutBlockedWindows.delete(browserWindow)
+        }
       }
     })
 
@@ -4506,7 +4526,8 @@ function runApp() {
           {
             label: 'New Window',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_WINDOW),
-            click: (_menuItem, _browserWindow, _event) => {
+            click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               createWindow({
                 replaceMainWindow: false,
                 showWindowNow: true
@@ -4519,6 +4540,7 @@ function runApp() {
             label: 'Preferences',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_SETTINGS),
             click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               navigateTo('/settings', browserWindow)
             },
             type: 'normal'
@@ -4552,12 +4574,16 @@ function runApp() {
           {
             label: 'Toggle Developer Tools',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.TOGGLE_DEVTOOLS),
-            click: (_menuItem, browserWindow) => browserWindow?.webContents.toggleDevTools()
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.webContents.toggleDevTools()
+            }
           },
           {
             label: 'Enter Inspect Element Mode',
             accelerator: 'CmdOrCtrl+Shift+C',
             click: (_, window) => {
+              if (appShortcutBlockedWindows.has(window)) { return }
               if (window.webContents.isDevToolsOpened()) {
                 window.devToolsWebContents.executeJavaScript('DevToolsAPI.enterInspectElementMode()')
               } else {
@@ -4585,13 +4611,16 @@ function runApp() {
           {
             label: 'Actual Size',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESET_ZOOM),
-            click: (_menuItem, browserWindow) => browserWindow?.webContents.setZoomLevel(0)
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.webContents.setZoomLevel(0)
+            }
           },
           {
             label: 'Zoom In',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_IN),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() + 0.5)
               }
             }
@@ -4600,7 +4629,7 @@ function runApp() {
             label: 'Zoom Out',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.ZOOM_OUT),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 browserWindow.webContents.setZoomLevel(browserWindow.webContents.getZoomLevel() - 0.5)
               }
             }
@@ -4610,6 +4639,7 @@ function runApp() {
             label: 'Toggle Full Screen',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.FULLSCREEN),
             click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               browserWindow?.setFullScreen(!browserWindow.isFullScreen())
             }
           },
@@ -4618,7 +4648,7 @@ function runApp() {
             label: 'Back',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD),
             click: (_menuItem, browserWindow, _event) => {
-              if (browserWindow == null) { return }
+              if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
               TabManager.getForWindow(browserWindow.id)?.navigateHistory(-1)
             },
@@ -4630,7 +4660,7 @@ function runApp() {
                   label: 'Back',
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_BACKWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
-                    if (browserWindow == null) { return }
+                    if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
                     TabManager.getForWindow(browserWindow.id)?.navigateHistory(-1)
                   },
@@ -4642,7 +4672,7 @@ function runApp() {
             label: 'Forward',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD),
             click: (_menuItem, browserWindow, _event) => {
-              if (browserWindow == null) { return }
+              if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
               TabManager.getForWindow(browserWindow.id)?.navigateHistory(1)
             },
@@ -4654,7 +4684,7 @@ function runApp() {
                   label: 'Forward',
                   accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.HISTORY_FORWARD_ALT_MAC),
                   click: (_menuItem, browserWindow, _event) => {
-                    if (browserWindow == null) { return }
+                    if (browserWindow == null || appShortcutBlockedWindows.has(browserWindow)) { return }
 
                     TabManager.getForWindow(browserWindow.id)?.navigateHistory(1)
                   },
@@ -4708,6 +4738,7 @@ function runApp() {
               ? keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY_MAC
               : keyboardShortcuts.APP.GENERAL.NAVIGATE_TO_HISTORY),
             click: (_menuItem, browserWindow, _event) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
               navigateTo('/history', browserWindow)
             },
             type: 'normal'
@@ -4728,7 +4759,7 @@ function runApp() {
             label: 'New Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEW_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   tabManager.createTabWithPreference({ makeActive: true }).catch(error => {
@@ -4742,7 +4773,7 @@ function runApp() {
             label: 'Close Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.CLOSE_TAB),
             click: async (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.activeTabId) {
                   const tabIds = tabManager.selectedTabIds.length > 1
@@ -4767,7 +4798,7 @@ function runApp() {
             label: 'Reload Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RELOAD_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   const tabIds = tabManager.selectedTabIds.length > 1
@@ -4784,7 +4815,7 @@ function runApp() {
             label: 'Reopen Closed Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.RESTORE_CLOSED_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager) {
                   tabManager.restoreClosedTab()
@@ -4797,7 +4828,7 @@ function runApp() {
             label: 'Next Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.NEXT_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.tabs.size > 1) {
                   const tabIds = Array.from(tabManager.tabs.keys())
@@ -4812,7 +4843,7 @@ function runApp() {
             label: 'Previous Tab',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.PREV_TAB),
             click: (_menuItem, browserWindow) => {
-              if (browserWindow) {
+              if (browserWindow && !appShortcutBlockedWindows.has(browserWindow)) {
                 const tabManager = TabManager.getForWindow(browserWindow.id)
                 if (tabManager && tabManager.tabs.size > 1) {
                   const tabIds = Array.from(tabManager.tabs.keys())
@@ -4831,7 +4862,10 @@ function runApp() {
           {
             label: 'Minimize',
             accelerator: getElectronAccelerator(keyboardShortcuts.APP.GENERAL.MINIMIZE_WINDOW),
-            click: (_menuItem, browserWindow) => browserWindow?.minimize()
+            click: (_menuItem, browserWindow) => {
+              if (browserWindow && appShortcutBlockedWindows.has(browserWindow)) { return }
+              browserWindow?.minimize()
+            }
           },
           {
             label: 'Close Window',

@@ -4,6 +4,7 @@
       ref="triggerRef"
       type="button"
       class="profileTrigger"
+      data-tutorial="quick-settings"
       :aria-label="t('Settings.Quick Settings.Quick Settings')"
       :title="t('Settings.Quick Settings.Quick Settings')"
       :aria-expanded="menuOpen"
