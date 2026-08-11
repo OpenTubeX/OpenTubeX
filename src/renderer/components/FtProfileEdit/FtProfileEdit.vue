@@ -304,6 +304,7 @@ const cropZoom = ref(1)
 const cropOffset = { x: 0, y: 0 }
 let cropBitmap = null
 let cropPointer = null
+let imageSelectionRequest = 0
 
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
 
@@ -321,7 +322,10 @@ watch(cropZoom, () => {
   drawCropPreview()
 })
 
-onBeforeUnmount(() => cropBitmap?.close?.())
+onBeforeUnmount(() => {
+  imageSelectionRequest++
+  cropBitmap?.close?.()
+})
 
 const customColorPickerValue = computed(() => {
   return profileBgColor.value === 'transparent' ? '#000000' : profileBgColor.value
@@ -408,13 +412,20 @@ function openImagePicker() {
 }
 
 async function selectImage(event) {
+  const request = ++imageSelectionRequest
   const file = event.target.files?.[0]
   event.target.value = ''
   if (!file) return
 
   try {
+    const bitmap = await loadCropBitmap(file)
+    if (request !== imageSelectionRequest) {
+      bitmap.close?.()
+      return
+    }
+
     cropBitmap?.close?.()
-    cropBitmap = await loadCropBitmap(file)
+    cropBitmap = bitmap
     cropZoom.value = 1
     cropOffset.x = 0
     cropOffset.y = 0
@@ -422,6 +433,8 @@ async function selectImage(event) {
     await nextTick()
     drawCropPreview()
   } catch (error) {
+    if (request !== imageSelectionRequest) return
+
     console.error('Failed to load profile icon image:', error)
     showToast({
       message: t('Profile.The selected image could not be loaded'),

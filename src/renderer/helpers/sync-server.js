@@ -947,7 +947,7 @@ export async function syncProfiles(client, store, previous = {}, options = {}) {
       name: metadata.title,
       bgColor: metadata.bgColor,
       textColor: metadata.textColor,
-      ...(local?.icon ? { icon: local.icon } : {}),
+      ...(local && Object.hasOwn(local, 'icon') ? { icon: local.icon } : {}),
       subscriptions: mergedSubscriptions,
     }
     if (!local || !metadataEquals(local, mergedProfile)) {
