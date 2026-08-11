@@ -114,3 +114,37 @@ test.describe('quick distraction settings', () => {
     await expect(autoplay).toBeDisabled()
   })
 })
+
+test.describe('quick settings focus after control updates', () => {
+  test.use({
+    seed: {
+      settings: {
+        baseTheme: 'dark',
+        highlightChangedSettings: true
+      }
+    }
+  })
+
+  test('stays open when a reset control removes itself', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const reset = menu.getByRole('button', { name: 'Reset this setting to its default' }).first()
+    await expect(reset).toBeVisible()
+
+    await reset.click()
+
+    await expect(reset).toHaveCount(0)
+    await expect(menu).toBeVisible()
+  })
+
+  test('stays open when a switch adds its reset control', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+    const menu = page.locator('.quickSettingsMenu')
+    const hideComments = page.getByRole('checkbox', { name: 'Hide Comments' })
+
+    await menu.locator('label.switch-label').filter({ hasText: 'Hide Comments' }).click()
+
+    await expect(hideComments).toBeChecked()
+    await expect(menu).toBeVisible()
+  })
+})

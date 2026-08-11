@@ -316,6 +316,7 @@ const USING_ELECTRON = process.env.IS_ELECTRON
 const menuOpen = ref(false)
 const profilePanelOpen = ref(false)
 let mouseDownOnTrigger = false
+let pointerDownInsideMenu = false
 const triggerRef = useTemplateRef('triggerRef')
 const menuRef = useTemplateRef('menuRef')
 
@@ -436,8 +437,34 @@ function handleWindowFocus() {
   }
 }
 
-onMounted(() => window.addEventListener('focus', handleWindowFocus))
-onBeforeUnmount(() => window.removeEventListener('focus', handleWindowFocus))
+function handleWindowBlur() {
+  pointerDownInsideMenu = false
+}
+
+function handleDocumentPointerDown(event) {
+  pointerDownInsideMenu = event.target instanceof Node && menuRef.value?.$el?.contains(event.target)
+}
+
+function handleDocumentPointerUp() {
+  setTimeout(() => {
+    pointerDownInsideMenu = false
+  })
+}
+
+onMounted(() => {
+  window.addEventListener('focus', handleWindowFocus)
+  window.addEventListener('blur', handleWindowBlur)
+  document.addEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.addEventListener('pointerup', handleDocumentPointerUp, true)
+  document.addEventListener('pointercancel', handleDocumentPointerUp, true)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', handleWindowFocus)
+  window.removeEventListener('blur', handleWindowBlur)
+  document.removeEventListener('pointerdown', handleDocumentPointerDown, true)
+  document.removeEventListener('pointerup', handleDocumentPointerUp, true)
+  document.removeEventListener('pointercancel', handleDocumentPointerUp, true)
+})
 
 function openProfilePanel() {
   profilePanelOpen.value = true
@@ -451,7 +478,12 @@ function closeProfilePanel() {
 
 function handleMenuFocusOut(event) {
   if (event.relatedTarget === null) {
+    const controlChangedDuringClick = pointerDownInsideMenu
     setTimeout(() => {
+      if (controlChangedDuringClick) {
+        focusMenu()
+        return
+      }
       if (document.hasFocus() && !menuRef.value?.$el.matches(':focus-within')) {
         menuOpen.value = false
       }
