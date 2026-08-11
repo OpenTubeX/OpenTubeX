@@ -744,21 +744,58 @@ test.describe('settings', () => {
 
     const bodyTooltip = page.locator('body > [role="tooltip"]:visible')
     await expect(bodyTooltip).toBeVisible()
-    const initialButtonBounds = await tooltipButton.boundingBox()
-    const initialTooltipBounds = await bodyTooltip.boundingBox()
 
-    await settingsWindow.evaluate(element => {
-      element.style.left = `${element.getBoundingClientRect().left + 40}px`
+    // Read the button and the tooltip in one frame. Sampling them in separate
+    // round-trips lets a late layout change (the open transition, a font swap
+    // resizing the tooltip) land between the two reads, which offsets the
+    // baselines against each other and makes the comparison below unsatisfiable.
+    const measure = () => page.evaluate(() => {
+      const button = document.querySelector('.settingsContent .selectTooltip .button')
+      const tooltip = Array.from(document.querySelectorAll('body > [role="tooltip"]'))
+        .find(element => element.checkVisibility())
+      const buttonBounds = button.getBoundingClientRect()
+      const tooltipBounds = tooltip.getBoundingClientRect()
+      return {
+        buttonLeft: buttonBounds.left,
+        anchorOffset: tooltipBounds.left - buttonBounds.left,
+        tooltipLeft: tooltipBounds.left,
+        tooltipRight: tooltipBounds.right,
+        viewportWidth: innerWidth
+      }
     })
+
+    const EDGE_MARGIN = 8
+    // The window animates open, so wait for the button to hold still before
+    // taking the baseline.
+    let previous = null
     await expect.poll(async () => {
-      const [buttonBounds, tooltipBounds] = await Promise.all([
-        tooltipButton.boundingBox(),
-        bodyTooltip.boundingBox()
-      ])
-      const buttonMovement = buttonBounds.x - initialButtonBounds.x
-      const tooltipMovement = tooltipBounds.x - initialTooltipBounds.x
-      return buttonMovement > 30 && Math.abs(tooltipMovement - buttonMovement) <= 1
+      const current = await measure()
+      const settled = previous !== null && current.buttonLeft === previous.buttonLeft
+      previous = current
+      return settled
     }).toBe(true)
+    const initial = previous
+    // The tooltip is clamped to the viewport, so it only tracks its button
+    // while it has room. Move the window towards the side that still fits.
+    const shift = initial.tooltipRight + 40 <= initial.viewportWidth - EDGE_MARGIN
+      ? 40
+      : -40
+    expect(shift === 40 || initial.tooltipLeft - 40 >= EDGE_MARGIN).toBe(true)
+    await settingsWindow.evaluate((element, offset) => {
+      element.style.left = `${element.getBoundingClientRect().left + offset}px`
+    }, shift)
+
+    // The tooltip stays anchored to its button: it keeps the same offset from
+    // the button instead of merely moving by a similar amount.
+    await expect.poll(async () => {
+      const moved = await measure()
+      return {
+        buttonMoved: Math.abs(moved.buttonLeft - initial.buttonLeft - shift) <= 1,
+        anchored: Math.abs(moved.anchorOffset - initial.anchorOffset) <= 1,
+        withinViewport: moved.tooltipLeft >= EDGE_MARGIN &&
+          moved.tooltipRight <= moved.viewportWidth - EDGE_MARGIN
+      }
+    }).toEqual({ buttonMoved: true, anchored: true, withinViewport: true })
 
     await settingsWindow.evaluate(element => element.requestFullscreen())
     await expect.poll(() => settingsWindow.evaluate(element => document.fullscreenElement === element)).toBe(true)
