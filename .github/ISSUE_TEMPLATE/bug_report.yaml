@@ -109,6 +109,16 @@ body:
         - Invidious API
     validations:
       required: true
+  - type: dropdown
+    attributes:
+      label: Stream Extraction Method
+      description: Which stream extraction method is selected in General Settings?
+      multiple: false
+      options:
+        - yt-dlp
+        - Built-in
+    validations:
+      required: true
   - type: input
     attributes:
       label: 'Last Known Working OpenTubeX Version (If Any)'
