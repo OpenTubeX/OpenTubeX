@@ -53,6 +53,14 @@ test('marks an upcoming premiere as live when its scheduled time arrives', () =>
     premiere: false,
     liveNow: true
   })
+
+  const completed = {
+    ...upcoming,
+    isUpcoming: false,
+    premiere: false,
+    liveNow: false
+  }
+  assert.equal(updateUpcomingPremiereState(completed, scheduledTime), completed)
 })
 
 test('adds selected Shorts thumbnails without replacing RSS metadata', () => {

@@ -33,8 +33,12 @@ export function updateUpcomingPremiereState(video, now) {
   if (
     premiereTimestamp != null &&
     premiereTimestamp <= now &&
-    // Local API entries can carry only the scheduled date in older caches.
-    (video.isUpcoming || video.premiere || video.premiereDate != null)
+    (video.isUpcoming || video.premiere || (
+      // Local API entries can carry only the scheduled date in older caches.
+      video.premiereDate != null &&
+      video.isUpcoming == null &&
+      video.premiere == null
+    ))
   ) {
     return {
       ...video,
