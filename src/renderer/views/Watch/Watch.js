@@ -385,6 +385,10 @@ export default defineComponent({
     }
   },
   computed: {
+    hasScheduledPremiereStarted: function () {
+      return this.premiereDate instanceof Date &&
+        this.premiereDate.getTime() <= this.relativeTimeNow
+    },
     displayedUpcomingTimeLeft: function () {
       if (!(this.premiereDate instanceof Date)) return this.upcomingTimeLeft
 

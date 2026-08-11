@@ -255,7 +255,7 @@
               class="premiereIcon"
             />
             <p
-              v-if="upcomingTimestamp !== null"
+              v-if="upcomingTimestamp !== null && !hasScheduledPremiereStarted"
               class="premiereText"
             >
               <span

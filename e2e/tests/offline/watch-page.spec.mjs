@@ -52,6 +52,29 @@ async function setWindowWidth(app, width) {
 }
 
 test.describe('watch page', () => {
+  test('stops showing the countdown after a scheduled premiere starts', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate(async (component) => {
+      const watchView = component.proxy
+      watchView.isLoading = false
+      watchView.errorMessage = ''
+      watchView.isUpcoming = true
+      watchView.playabilityStatus = 'UNPLAYABLE'
+      watchView.upcomingTimestamp = 'August 11 at 5:00 PM'
+      watchView.upcomingTimeLeft = 'in less than a minute'
+      watchView.premiereDate = new Date(Date.now() - 60_000)
+      await watchView.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveCount(0)
+    await expect(page.locator(`${activeTab} .premiereText`)).toHaveText(
+      'Starting soon, please refresh the page to check again'
+    )
+  })
+
   test('shows tags below the description and copies the description', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

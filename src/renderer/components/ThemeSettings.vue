@@ -41,14 +41,6 @@
           @change="updateShowToastTimeoutIndicator"
         />
         <FtToggleSwitch
-          :label="$t('Settings.Theme Settings.Update Relative Timestamps')"
-          :tooltip="$t('Tooltips.Theme Settings.Update Relative Timestamps')"
-          compact
-          :default-value="updateRelativeTimestamps"
-          setting-key="updateRelativeTimestamps"
-          @change="updateRelativeTimestampsSetting"
-        />
-        <FtToggleSwitch
           v-if="usingElectron"
           :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
           :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
@@ -459,15 +451,6 @@ const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeo
  */
 function updateShowToastTimeoutIndicator(value) {
   store.dispatch('updateShowToastTimeoutIndicator', value)
-}
-
-const updateRelativeTimestamps = computed(() => store.getters.getUpdateRelativeTimestamps)
-
-/**
- * @param {boolean} value
- */
-function updateRelativeTimestampsSetting(value) {
-  store.dispatch('updateUpdateRelativeTimestamps', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */
