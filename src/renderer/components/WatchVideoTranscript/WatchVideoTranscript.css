@@ -27,10 +27,6 @@
   justify-content: flex-end;
 }
 
-.transcriptActions :deep(.btn) {
-  min-inline-size: auto;
-}
-
 .transcriptHeaderActions {
   position: relative;
   gap: 8px;
