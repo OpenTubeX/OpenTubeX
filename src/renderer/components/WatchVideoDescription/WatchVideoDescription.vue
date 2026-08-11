@@ -302,7 +302,9 @@ let descriptionResizeObserver = null
 onMounted(() => {
   measureDescription()
   descriptionResizeObserver = new ResizeObserver(updateDescriptionFadeState)
-  descriptionResizeObserver.observe(descriptionScroll.value)
+  if (descriptionScroll.value) {
+    descriptionResizeObserver.observe(descriptionScroll.value)
+  }
   nextTick(updateDescriptionFadeState)
 })
 
