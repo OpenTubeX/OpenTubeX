@@ -286,7 +286,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, ref, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
@@ -429,6 +429,15 @@ function handleTriggerMouseDown() {
 function focusMenu() {
   nextTick(() => menuRef.value?.$el?.focus())
 }
+
+function handleWindowFocus() {
+  if (menuOpen.value && !menuRef.value?.$el?.matches(':focus-within')) {
+    menuRef.value?.$el?.focus()
+  }
+}
+
+onMounted(() => window.addEventListener('focus', handleWindowFocus))
+onBeforeUnmount(() => window.removeEventListener('focus', handleWindowFocus))
 
 function openProfilePanel() {
   profilePanelOpen.value = true

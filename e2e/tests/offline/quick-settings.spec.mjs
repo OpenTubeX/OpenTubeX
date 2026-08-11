@@ -54,6 +54,10 @@ test.describe('quick settings menu', () => {
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.blur())
     await expect(menu).toBeVisible()
     await app.electronApp.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.focus())
+    await expect(menu).toBeFocused()
+
+    await page.locator('.topNav .logo').click()
+    await expect(menu).toBeHidden()
   })
 
   test('opens About in the settings-style window', async ({ page }) => {
