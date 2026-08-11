@@ -614,11 +614,15 @@ async function initializeManagedExternalSoftware() {
   if (!info.ffmpeg.available) {
     missingBinaries.push('ffmpeg')
   }
+  if (!info.ffprobe.available) {
+    missingBinaries.push('ffprobe')
+  }
 
   if (store.getters.getYtDlpSource === 'managed' || missingBinaries.includes('yt-dlp')) {
     binariesToUpdate.push('yt-dlp')
   }
-  if (store.getters.getYtDlpFfmpegSource === 'managed' || missingBinaries.includes('ffmpeg')) {
+  if (store.getters.getYtDlpFfmpegSource === 'managed' ||
+    missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) {
     binariesToUpdate.push('ffmpeg')
   }
   if (binariesToUpdate.length === 0) {
@@ -629,7 +633,8 @@ async function initializeManagedExternalSoftware() {
   if (missingBinaries.includes('yt-dlp') && store.getters.getYtDlpSource !== 'managed') {
     settingUpdates.push(store.dispatch('updateYtDlpSource', 'managed'))
   }
-  if (missingBinaries.includes('ffmpeg') && store.getters.getYtDlpFfmpegSource !== 'managed') {
+  if ((missingBinaries.includes('ffmpeg') || missingBinaries.includes('ffprobe')) &&
+    store.getters.getYtDlpFfmpegSource !== 'managed') {
     settingUpdates.push(store.dispatch('updateYtDlpFfmpegSource', 'managed'))
   }
   await Promise.all(settingUpdates)

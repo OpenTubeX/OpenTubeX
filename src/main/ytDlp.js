@@ -1,7 +1,7 @@
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
 import { app, BrowserWindow, net, shell } from 'electron'
@@ -226,7 +226,7 @@ function getManagedBinariesDirectory() {
 }
 
 /**
- * @param {'yt-dlp' | 'ffmpeg'} binaryName
+ * @param {'yt-dlp' | 'ffmpeg' | 'ffprobe'} binaryName
  */
 function getManagedBinaryPath(binaryName) {
   return join(getManagedBinariesDirectory(), process.platform === 'win32' ? `${binaryName}.exe` : binaryName)
@@ -252,6 +252,35 @@ async function resolveExecutable(sourceSettingId, pathSettingId, binaryName, sou
   const customPath = pathOverride ?? ((await settings._findOne(pathSettingId))?.value || '')
 
   return { source, executable: customPath === '' ? binaryName : customPath }
+}
+
+/**
+ * FFmpeg and FFprobe share one source setting because yt-dlp accepts a single
+ * `--ffmpeg-location`. A custom FFmpeg path therefore also locates FFprobe in
+ * the same directory.
+ * @param {'system' | 'managed'} [sourceOverride]
+ * @param {string} [ffmpegPathOverride]
+ * @returns {Promise<{ source: 'system' | 'managed', executable: string }>}
+ */
+async function resolveFfprobeExecutable(sourceOverride, ffmpegPathOverride) {
+  const ffmpeg = await resolveExecutable(
+    'ytDlpFfmpegSource',
+    'ytDlpFfmpegPath',
+    'ffmpeg',
+    sourceOverride,
+    ffmpegPathOverride
+  )
+
+  if (ffmpeg.source === 'managed') {
+    return { source: ffmpeg.source, executable: getManagedBinaryPath('ffprobe') }
+  }
+
+  const ffprobeName = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+  const ffmpegDirectory = dirname(ffmpeg.executable)
+  return {
+    source: ffmpeg.source,
+    executable: ffmpegDirectory === '.' ? 'ffprobe' : join(ffmpegDirectory, ffprobeName)
+  }
 }
 
 /**
@@ -316,6 +345,25 @@ async function getFfmpegVersion(executable, signal) {
     })
     const version = /^ffmpeg version (\S+)/.exec(stdout)?.[1] ?? null
     // the martin-riedl.de builds embed their website URL in the version string
+    return version?.replace(/-https?:.*$/, '') ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * @param {string} executable
+ * @param {AbortSignal} [signal] aborts a superseded ytDlpGetInfo probe
+ * @returns {Promise<string | null>} the version, or null if the executable doesn't work
+ */
+async function getFfprobeVersion(executable, signal) {
+  try {
+    const { stdout } = await execFileAsync(executable, ['-version'], {
+      timeout: 60_000,
+      windowsHide: true,
+      signal
+    })
+    const version = /^ffprobe version (\S+)/.exec(stdout)?.[1] ?? null
     return version?.replace(/-https?:.*$/, '') ?? null
   } catch {
     return null
@@ -560,58 +608,95 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
 }
 
 /**
- * Downloads an up-to-date FFmpeg build into the user data directory
+ * Downloads up-to-date FFmpeg and FFprobe builds into the user data directory.
+ * They are kept together because yt-dlp locates both through one
+ * `--ffmpeg-location` argument.
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
  * @returns {Promise<{ version: string, updated: boolean } | { error: string }>}
  */
 async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
-  let url
-  /** @type {(name: string) => boolean} */
-  let matches
+  const ffmpegPath = getManagedBinaryPath('ffmpeg')
+  const ffprobePath = getManagedBinaryPath('ffprobe')
+  const pendingValidatorWrites = []
+  let updated = false
 
   if (process.platform === 'win32') {
     // yt-dlp's own FFmpeg builds, patched for use with yt-dlp,
     // unfortunately they are only extractable without extra dependencies for Windows (zip)
-    url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
-    matches = (name) => name.endsWith('/bin/ffmpeg.exe')
+    const url = 'https://github.com/yt-dlp/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
+
+    try {
+      // Existing FFmpeg-only installations must fetch the archive again so
+      // FFprobe can be added even when its validators would return 304.
+      const validators = existsSync(ffprobePath)
+        ? await readDownloadValidators(ffmpegPath, url)
+        : null
+      const download = await downloadFile(url, onProgress, onDownloadStart, validators)
+
+      if (download.data !== null) {
+        await installBinary(extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), ffmpegPath)
+        await installBinary(extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), ffprobePath)
+        updated = true
+        pendingValidatorWrites.push(
+          { path: ffmpegPath, validators: download.validators, url },
+          { path: ffprobePath, validators: download.validators, url }
+        )
+      }
+    } catch (error) {
+      return { error: error.message }
+    }
   } else {
     // daily builds of the latest FFmpeg release for Linux and macOS
     // https://ffmpeg.martin-riedl.de
     const platform = process.platform === 'darwin' ? 'macos' : 'linux'
     const arch = process.arch === 'arm64' ? 'arm64' : 'amd64'
-    url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/ffmpeg.zip`
-    matches = (name) => name === 'ffmpeg'
-  }
+    const binaries = [
+      { name: 'ffmpeg', path: ffmpegPath },
+      { name: 'ffprobe', path: ffprobePath }
+    ]
 
-  const managedPath = getManagedBinaryPath('ffmpeg')
-  let download
+    try {
+      for (const [index, binary] of binaries.entries()) {
+        const url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binary.name}.zip`
+        const download = await downloadFile(
+          url,
+          percent => onProgress?.(percent === null ? null : Math.round((index * 100 + percent) / binaries.length)),
+          onDownloadStart,
+          await readDownloadValidators(binary.path, url)
+        )
 
-  try {
-    download = await downloadFile(url, onProgress, onDownloadStart, await readDownloadValidators(managedPath, url))
-
-    if (download.data !== null) {
-      await installBinary(extractZipEntry(download.data, matches), managedPath)
+        if (download.data !== null) {
+          await installBinary(extractZipEntry(download.data, name => name === binary.name), binary.path)
+          updated = true
+          pendingValidatorWrites.push({ path: binary.path, validators: download.validators, url })
+        }
+      }
+    } catch (error) {
+      return { error: error.message }
     }
-  } catch (error) {
-    return { error: error.message }
   }
 
-  const version = await getFfmpegVersion(managedPath)
+  const [version, ffprobeVersion] = await Promise.all([
+    getFfmpegVersion(ffmpegPath),
+    getFfprobeVersion(ffprobePath)
+  ])
 
   if (version === null) {
     return { error: 'The downloaded FFmpeg binary does not work on this system' }
   }
-
-  if (download.data !== null) {
-    try {
-      await writeDownloadValidators(managedPath, download.validators, url)
-    } catch (error) {
-      console.warn('Could not save FFmpeg download metadata', error)
-    }
+  if (ffprobeVersion === null) {
+    return { error: 'The downloaded FFprobe binary does not work on this system' }
   }
 
-  return { version, updated: download.data !== null }
+  try {
+    await Promise.all(pendingValidatorWrites.map(({ path, validators, url }) =>
+      writeDownloadValidators(path, validators, url)))
+  } catch (error) {
+    console.warn('Could not save FFmpeg and FFprobe download metadata', error)
+  }
+
+  return { version, updated }
 }
 
 /**
@@ -661,7 +746,7 @@ function getInfoProbeKey(options) {
  *   ffmpegSource: 'system' | 'managed',
  *   ffmpegPath: string
  * } | undefined} [options]
- * @returns {Promise<{ ytDlp: YtDlpBinaryInfo, ffmpeg: YtDlpBinaryInfo } | null>}
+ * @returns {Promise<{ ytDlp: YtDlpBinaryInfo, ffmpeg: YtDlpBinaryInfo, ffprobe: YtDlpBinaryInfo } | null>}
  */
 export async function handleYtDlpGetInfo(event, options) {
   if (!isOpenTubeXUrl(event.senderFrame.url)) {
@@ -697,7 +782,7 @@ export async function handleYtDlpGetInfo(event, options) {
   const signal = takeGetInfoAbortSignal(probeKey)
 
   try {
-    const [ytDlp, ffmpeg] = await Promise.all([
+    const [ytDlp, ffmpeg, ffprobe] = await Promise.all([
       getBinaryInfo(
         await resolveExecutable('ytDlpSource', 'ytDlpPath', 'yt-dlp', options?.ytDlpSource, options?.ytDlpPath),
         (executable) => getYtDlpVersion(executable, signal)
@@ -705,6 +790,10 @@ export async function handleYtDlpGetInfo(event, options) {
       getBinaryInfo(
         await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg', options?.ffmpegSource, options?.ffmpegPath),
         (executable) => getFfmpegVersion(executable, signal)
+      ),
+      getBinaryInfo(
+        await resolveFfprobeExecutable(options?.ffmpegSource, options?.ffmpegPath),
+        (executable) => getFfprobeVersion(executable, signal)
       )
     ])
 
@@ -714,7 +803,8 @@ export async function handleYtDlpGetInfo(event, options) {
 
     return {
       ytDlp,
-      ffmpeg
+      ffmpeg,
+      ffprobe
     }
   } finally {
     if (getInfoAbortControllers.get(probeKey)?.signal === signal) {
@@ -1005,7 +1095,8 @@ export async function handleYtDlpDownload(event, payload) {
   const ffmpeg = await resolveExecutable('ytDlpFfmpegSource', 'ytDlpFfmpegPath', 'ffmpeg')
 
   if (ffmpeg.source === 'managed') {
-    if (!existsSync(ffmpeg.executable)) {
+    const ffprobe = await resolveFfprobeExecutable()
+    if (!existsSync(ffmpeg.executable) || !existsSync(ffprobe.executable)) {
       const result = await downloadManagedFfmpeg()
 
       if ('error' in result) {

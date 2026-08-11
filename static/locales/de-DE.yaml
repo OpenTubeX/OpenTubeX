@@ -771,7 +771,7 @@ Settings:
     Download Folder: Download-Ordner
     Choose Download Folder: Download-Ordner auswählen
     Templates Hint: Benutzerdefinierte Download-Vorlagen können im Download-Dialog erstellt und verwaltet werden, der sich unterhalb des Video-Players befindet.
-    External Software Hint: yt-dlp und FFmpeg werden in den Einstellungen für externe Software konfiguriert.
+    External Software Hint: yt-dlp, FFmpeg und FFprobe werden in den Einstellungen für externe Software konfiguriert.
   External Software Settings:
     External Software Settings: Externe Software
     yt-dlp Source: yt-dlp-Quelle
@@ -798,6 +798,15 @@ Settings:
     Downloading FFmpeg: FFmpeg wird heruntergeladen…
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
+    Detected FFprobe Version Template: 'Erkannte FFprobe-Version: {version}'
+    FFprobe Managed Not Downloaded: FFprobe wurde noch nicht heruntergeladen. Klicke auf die Schaltfläche unten, um es zusammen mit FFmpeg herunterzuladen.
+    System FFprobe Missing Warning: FFprobe wurde auf deinem System nicht gefunden. Es wird zum Untersuchen von Medien während der Nachbearbeitung benötigt. Installiere es neben FFmpeg oder wechsle die Quelle auf „Von OpenTubeX verwaltet“.
+    Checking FFprobe: FFprobe wird überprüft…
+    Download FFmpeg and FFprobe: FFmpeg und FFprobe herunterladen
+    Update FFmpeg and FFprobe: FFmpeg und FFprobe aktualisieren
+    Downloading FFmpeg and FFprobe: FFmpeg und FFprobe werden heruntergeladen…
+    FFmpeg and FFprobe Downloaded Template: FFmpeg und FFprobe {version} wurden heruntergeladen
+    FFmpeg and FFprobe Download Error Template: 'Herunterladen von FFmpeg und FFprobe fehlgeschlagen: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei
@@ -1367,7 +1376,7 @@ Tooltips:
   External Software Settings:
     yt-dlp Source: OpenTubeX kann entweder das auf deinem System installierte yt-dlp verwenden oder eine eigene Kopie von yt-dlp herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert wird.
     yt-dlp Channel: Wähle aus, welchen yt-dlp-Veröffentlichungskanal OpenTubeX herunterlädt und verwaltet. Für die meisten Benutzer wird „Stable“ empfohlen.
-    FFmpeg Source: OpenTubeX kann entweder das auf deinem System installierte FFmpeg verwenden oder einen eigenen statischen FFmpeg-Build herunterladen und verwalten, der im Benutzerdatenverzeichnis gespeichert wird.
+    FFmpeg Source: OpenTubeX kann entweder die auf deinem System installierten FFmpeg und FFprobe verwenden oder eigene statische Builds herunterladen und verwalten, die im Benutzerdatenverzeichnis gespeichert werden.
     yt-dlp Executable Path: Standardmäßig nimmt OpenTubeX an, dass yt-dlp über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
     FFmpeg Executable Path: FFmpeg wird zum Zusammenführen von getrennten Video- und Audiospuren sowie zur Audiokonvertierung benötigt. Standardmäßig nimmt OpenTubeX an, dass FFmpeg über die PATH-Umgebungsvariable gefunden werden kann. Falls nötig, kann hier ein benutzerdefinierter Pfad festgelegt werden.
   Experimental Settings:
