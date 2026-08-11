@@ -27,7 +27,7 @@ test('reads premiere times from Local API dates and Invidious timestamps', () =>
   assert.equal(getUpcomingPremiereTimestamp({ premiereDate: 'invalid' }), null)
 })
 
-test('clears upcoming premiere state when its scheduled time arrives', () => {
+test('marks an upcoming premiere as live when its scheduled time arrives', () => {
   const scheduledTime = now + HOUR
   const upcoming = video('premiere', scheduledTime, {
     isUpcoming: true,
@@ -39,8 +39,28 @@ test('clears upcoming premiere state when its scheduled time arrives', () => {
   assert.deepEqual(updateUpcomingPremiereState(upcoming, scheduledTime), {
     ...upcoming,
     isUpcoming: false,
-    premiere: false
+    premiere: false,
+    liveNow: true
   })
+
+  assert.deepEqual(updateUpcomingPremiereState({
+    ...upcoming,
+    isUpcoming: undefined,
+    premiere: undefined
+  }, scheduledTime), {
+    ...upcoming,
+    isUpcoming: false,
+    premiere: false,
+    liveNow: true
+  })
+
+  const completed = {
+    ...upcoming,
+    isUpcoming: false,
+    premiere: false,
+    liveNow: false
+  }
+  assert.equal(updateUpcomingPremiereState(completed, scheduledTime), completed)
 })
 
 test('adds selected Shorts thumbnails without replacing RSS metadata', () => {
