@@ -144,13 +144,27 @@ test.describe('tab previews disabled', () => {
       activeTabId
     )).toBe(null)
 
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await page.evaluate(async () => {
+      for (let i = 0; i < 9; i++) {
+        await window.ftElectron.tabs.create({
+          makeActive: false,
+          lazyLoad: true
+        })
+      }
+    })
+    await expect(page.locator(sel.tabs)).toHaveCount(10)
     await page.keyboard.down('Control')
     try {
       await page.keyboard.press('Tab')
       await expect(page.locator('.tabSwitcher.noPreviews')).toBeVisible()
       await expect(page.locator('.tabSwitcherPreview')).toHaveCount(0)
+
+      const gridPositions = await page.locator('.tabSwitcherItem').evaluateAll((items) => ({
+        rows: new Set(items.map(item => Math.round(item.getBoundingClientRect().top))).size,
+        columns: new Set(items.map(item => Math.round(item.getBoundingClientRect().left))).size
+      }))
+      expect(gridPositions.rows).toBeGreaterThan(1)
+      expect(gridPositions.columns).toBeGreaterThan(1)
     } finally {
       await page.keyboard.up('Control')
     }

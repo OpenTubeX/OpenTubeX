@@ -295,7 +295,7 @@
 }
 
 .tabSwitcher.noPreviews {
-  grid-template-columns: minmax(240px, 420px);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 420px));
 }
 
 .tabSwitcher.noPreviews .tabSwitcherItem {
