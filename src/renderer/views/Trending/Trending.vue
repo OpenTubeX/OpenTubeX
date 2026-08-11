@@ -128,6 +128,7 @@ import { useTabToast } from '../../composables/useTabToast'
 import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
 import { matchesKeyboardShortcut } from '../../helpers/keyboardShortcuts'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const { t } = useI18n()
 const showTabToast = useTabToast()
@@ -147,8 +148,10 @@ const backendFallback = computed(() => {
   return store.getters.getBackendFallback
 })
 
+const relativeTimeNow = useRelativeTimeClock()
+
 const lastTrendingRefreshTimestamp = computed(() => {
-  return getRelativeTimeFromDate(store.getters.getLastTrendingRefreshTimestamp[currentTab.value], true)
+  return getRelativeTimeFromDate(store.getters.getLastTrendingRefreshTimestamp[currentTab.value], true, true, relativeTimeNow.value)
 })
 
 /** @type {import('vue').ComputedRef<string>} */

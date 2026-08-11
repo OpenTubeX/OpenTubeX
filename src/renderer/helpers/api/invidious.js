@@ -634,6 +634,7 @@ function parseInvidiousCommentData(response) {
       isMember: comment.isSponsor,
       memberIconUrl: youtubeImageUrlToInvidious(comment.sponsorIconUrl),
       time: getRelativeTimeFromDate(comment.published * 1000, false),
+      published: comment.published * 1000,
       isEdited: comment.isEdited
     }
   })

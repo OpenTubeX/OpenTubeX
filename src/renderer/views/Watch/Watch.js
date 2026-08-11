@@ -87,6 +87,7 @@ import { useI18n } from 'vue-i18n'
 import { useTabAvatar, useTabContext, useTabTitle } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
 import { useTabToast } from '../../composables/useTabToast'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import { areCommentsAvailable } from './watchComments'
 
 /**
@@ -160,6 +161,7 @@ export default defineComponent({
     const setTabTitle = useTabTitle()
     const setTabAvatar = useTabAvatar()
     const showTabToast = useTabToast()
+    const relativeTimeNow = useRelativeTimeClock()
 
     return {
       t,
@@ -171,7 +173,8 @@ export default defineComponent({
       tabRouter,
       setTabTitle,
       setTabAvatar,
-      showTabToast
+      showTabToast,
+      relativeTimeNow
     }
   },
   data: function () {
@@ -382,6 +385,29 @@ export default defineComponent({
     }
   },
   computed: {
+    displayedUpcomingTimeLeft: function () {
+      if (!(this.premiereDate instanceof Date)) return this.upcomingTimeLeft
+
+      let timeLeft = (this.premiereDate.getTime() - this.relativeTimeNow) / 60000
+      let timeUnit = 'minute'
+
+      if (timeLeft > 120) {
+        timeLeft /= 60
+        timeUnit = 'hour'
+      }
+
+      if (timeUnit === 'hour' && timeLeft > 24) {
+        timeLeft /= 24
+        timeUnit = 'day'
+      }
+
+      timeLeft = Math.floor(timeLeft)
+      if (timeLeft < 1) {
+        return this.t('Video.Published.In less than a minute').toLowerCase()
+      }
+
+      return new Intl.RelativeTimeFormat(this.currentLocale).format(timeLeft, timeUnit)
+    },
     canToggleLiveReminder: function () {
       return this.supportsLiveReminders &&
         this.premiereDate instanceof Date &&

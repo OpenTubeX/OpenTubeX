@@ -221,9 +221,9 @@
           {{ t('Global.Counts.View Count', { count: parsedViewCount }, viewCount) }}
         </span>
         <span
-          v-if="uploadedTime !== '' && !isLive"
+          v-if="displayedUploadedTime !== '' && !isLive"
           class="uploadedTime"
-        > • {{ uploadedTime }}</span>
+        > • {{ displayedUploadedTime }}</span>
         <span
           v-if="isLive && !hideViews"
           class="viewCount"
@@ -387,6 +387,7 @@ import {
   requestWatchPageViewTransition
 } from '../../helpers/viewTransitions.js'
 import { setCollaboratorsLoading } from './collaboratorsLoading.js'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock.js'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -487,10 +488,19 @@ const channelId = ref(null)
 const channelCollaborators = ref([])
 const viewCount = ref(0)
 const uploadedTime = ref('')
+const uploadedTimeIsRelative = ref(false)
+const relativeTimeNow = useRelativeTimeClock()
 const lengthSeconds = ref(0)
 const duration = ref('')
 const description = ref('')
 const published = ref(undefined)
+const displayedUploadedTime = computed(() => {
+  if (uploadedTimeIsRelative.value && published.value) {
+    return getRelativeTimeFromDate(published.value, false, true, relativeTimeNow.value)
+  }
+
+  return uploadedTime.value
+})
 const isLive = ref(false)
 const isPremiere = ref(false)
 const is4k = ref(false)
@@ -1560,6 +1570,7 @@ function handleExtraThumbnailAction() {
 }
 
 function parseVideoData() {
+  uploadedTimeIsRelative.value = false
   id.value = props.data.videoId
   title.value = props.data.title
 
@@ -1623,6 +1634,7 @@ function parseVideoData() {
     } else {
       // Use 30 days per month, just like calculatePublishedDate
       uploadedTime.value = getRelativeTimeFromDate(props.data.published, false)
+      uploadedTimeIsRelative.value = true
     }
   }
 

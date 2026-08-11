@@ -18,7 +18,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { useAutoRefreshClock } from '../composables/useAutoRefreshClock'
+import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { getUpcomingPremiereTimestamp } from '../helpers/subscription-entries'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
@@ -36,15 +36,7 @@ const errorChannels = ref([])
 const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasPendingAutoRefresh = computed(() => {
-  const interval = parseInt(store.getters.getSubscriptionFeedAutoRefreshInterval, 10)
-
-  return !!store.getters.getSubscriptionFeedNextAutoRefreshTimestamp &&
-    !Number.isNaN(interval) && interval > 0
-})
-
-const now = useAutoRefreshClock(hasPendingAutoRefresh)
+const now = useRelativeTimeClock()
 const premiereUpdateNow = ref(Date.now())
 const MAX_TIMEOUT_MS = 2 ** 31 - 1
 /** @type {ReturnType<typeof setTimeout> | null} */
@@ -137,7 +129,7 @@ const videoCacheForAllActiveProfileChannelsPresent = computed(() => {
 const lastVideoRefreshTimestamp = computed(() => {
   // Cache is not ready when data is just loaded from remote
   if (lastRemoteRefreshSuccessTimestamp.value) {
-    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true)
+    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true, true, now.value)
   }
 
   if (
@@ -153,7 +145,7 @@ const lastVideoRefreshTimestamp = computed(() => {
       minTimestamp = cacheEntry.timestamp
     }
   })
-  return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+  return getRelativeTimeFromDate(minTimestamp.getTime(), true, true, now.value)
 })
 
 const nextVideoAutoRefreshTimestamp = computed(() => {

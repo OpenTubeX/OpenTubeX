@@ -216,7 +216,7 @@
               alt=""
             >
             <span class="commentDate">
-              {{ comment.time }}
+              {{ formatCommentTime(comment) }}
               <template v-if="comment.isEdited">
                 {{ $t("Comments.Edited") }}
               </template>
@@ -442,7 +442,8 @@ import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import store from '../../store/index'
 import { useTabContext } from '../../tabs/TabContext'
 
-import { copyToClipboard, formatNumber, showApiErrorToast, showToast } from '../../helpers/utils'
+import { copyToClipboard, formatNumber, getRelativeTimeFromDate, showApiErrorToast, showToast } from '../../helpers/utils'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getReplyContinuationToken,
   getReplyLoadState,
@@ -466,6 +467,13 @@ import {
 
 const { t } = useI18n()
 const { isTabPresented } = useTabContext()
+const relativeTimeNow = useRelativeTimeClock()
+
+function formatCommentTime(comment) {
+  return comment.published
+    ? getRelativeTimeFromDate(comment.published, false, true, relativeTimeNow.value)
+    : comment.time
+}
 
 const props = defineProps({
   id: {

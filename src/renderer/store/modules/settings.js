@@ -296,6 +296,7 @@ const state = {
   startupBehavior: 'loadLastActiveTab',
   showTabIcons: true,
   showTabPreviews: true,
+  updateRelativeTimestamps: true,
   useVerticalTabBar: false,
   verticalTabBarWidth: 220,
   useFixedTabWidth: false,

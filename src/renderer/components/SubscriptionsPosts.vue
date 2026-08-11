@@ -20,7 +20,7 @@ import SubscriptionsTabUi from './SubscriptionsTabUi/SubscriptionsTabUi.vue'
 
 import store from '../store/index'
 
-import { useAutoRefreshClock } from '../composables/useAutoRefreshClock'
+import { useRelativeTimeClock } from '../composables/useRelativeTimeClock'
 import { useSubscriptionChannelUpdates } from '../composables/useSubscriptionChannelUpdates'
 import { getCachedRelativeTimeFormat, getCachedShortDateTimeFormat, getRelativeTimeFromDate } from '../helpers/utils'
 import { refreshSubscriptionPostsFromRemote } from '../helpers/subscriptions'
@@ -35,15 +35,7 @@ const attemptedFetch = ref(false)
 /** @type {import('vue').Ref<number | null>} */
 const lastRemoteRefreshSuccessTimestamp = ref(null)
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const hasPendingAutoRefresh = computed(() => {
-  const interval = parseInt(store.getters.getSubscriptionPostsAutoRefreshInterval, 10)
-
-  return !!store.getters.getSubscriptionPostsNextAutoRefreshTimestamp &&
-    !Number.isNaN(interval) && interval > 0
-})
-
-const now = useAutoRefreshClock(hasPendingAutoRefresh)
+const now = useRelativeTimeClock()
 
 let alreadyLoadedRemotely = false
 
@@ -86,7 +78,7 @@ const postCacheForAllActiveProfileChannelsPresent = computed(() => {
 const lastPostsRefreshTimestamp = computed(() => {
   // Cache is not ready when data is just loaded from remote
   if (lastRemoteRefreshSuccessTimestamp.value) {
-    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true)
+    return getRelativeTimeFromDate(lastRemoteRefreshSuccessTimestamp.value, true, true, now.value)
   }
 
   if (
@@ -103,7 +95,7 @@ const lastPostsRefreshTimestamp = computed(() => {
     }
   })
 
-  return getRelativeTimeFromDate(minTimestamp.getTime(), true)
+  return getRelativeTimeFromDate(minTimestamp.getTime(), true, true, now.value)
 })
 
 const refreshTitle = computed(() => {

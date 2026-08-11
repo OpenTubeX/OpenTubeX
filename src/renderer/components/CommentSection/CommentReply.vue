@@ -68,7 +68,7 @@
           alt=""
         >
         <span class="commentDate">
-          {{ reply.time }}
+          {{ formatCommentTime(reply) }}
           <template v-if="reply.isEdited">
             {{ $t("Comments.Edited") }}
           </template>
@@ -167,6 +167,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import FtRetryImage from '../FtRetryImage.vue'
 import FtSpinner from '../FtSpinner/FtSpinner.vue'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
+import { getRelativeTimeFromDate } from '../../helpers/utils'
 
 const props = defineProps({
   node: {
@@ -210,6 +212,14 @@ const props = defineProps({
     default: null
   }
 })
+
+const relativeTimeNow = useRelativeTimeClock()
+
+function formatCommentTime(comment) {
+  return comment.published
+    ? getRelativeTimeFromDate(comment.published, false, true, relativeTimeNow.value)
+    : comment.time
+}
 
 const reply = props.node.reply
 

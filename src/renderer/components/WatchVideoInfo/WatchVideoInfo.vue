@@ -295,6 +295,7 @@ import { translateSponsorBlockCategory } from '../../helpers/player/utils'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { useTabContext } from '../../tabs/TabContext'
 import { tabMediaCoordinator } from '../../tabs/TabMediaCoordinator'
+import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 
 const { tabId } = useTabContext()
 
@@ -488,6 +489,7 @@ const emit = defineEmits([
 const USING_ELECTRON = process.env.IS_ELECTRON
 
 const { locale, t } = useI18n()
+const relativeTimeNow = useRelativeTimeClock()
 
 const showCollaboratorsPrompt = ref(false)
 const showDownloadPrompt = ref(false)
@@ -596,11 +598,11 @@ const dateString = computed(() => {
 })
 
 const publishedTimeAgo = computed(() => {
-  if (!locale.value || !validPublishedDate.value || props.published > Date.now()) {
+  if (!locale.value || !validPublishedDate.value || props.published > relativeTimeNow.value) {
     return ''
   }
 
-  return getRelativeTimeFromDate(props.published)
+  return getRelativeTimeFromDate(props.published, false, true, relativeTimeNow.value)
 })
 
 const isPremiereInProgress = computed(() => {

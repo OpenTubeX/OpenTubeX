@@ -495,6 +495,7 @@ Settings:
     Use Fixed Tab Width: Use Fixed Tab Width in Horizontal Mode
     Tab Width: Tab Width
     Show Toast Timeout Indicator: Show toast timeout indicator
+    Update Relative Timestamps: Keep relative timestamps updated
     Show Progress as Notification: Show progress as notification
     Operation in Progress: Operation in progress
     Toast Position:
@@ -1843,6 +1844,7 @@ Tooltips:
     Show Progress as Notification: Shows a persistent notification with live progress for background operations, such as subscription refreshes and managed tool downloads, instead of using the global progress bar.
     Always Show Scrollbars: Keeps the scrollbars visible at all times. When disabled, they fade out shortly after you stop moving the mouse and reappear as soon as you move it again.
     Use Fixed Tab Width: Gives every tab in the horizontal tab bar the same width instead of sizing them to their title.
+    Update Relative Timestamps: Updates relative timestamps throughout the app while a page remains open. When disabled, they update only after reloading or revisiting the page.
   Experimental Settings:
     Replace HTTP Cache: Disables Electron's disk based HTTP cache and enables a custom in-memory image cache. Will lead to increased RAM usage.
   SponsorBlock Settings:
