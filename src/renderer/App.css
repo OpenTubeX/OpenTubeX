@@ -376,6 +376,15 @@
   flex-shrink: 0;
 }
 
+.tabSwitcher.noPreviews .tabSwitcherTitle {
+  align-items: center;
+}
+
+.tabSwitcher.noPreviews .tabSwitcherTitleAvatar,
+.tabSwitcher.noPreviews .tabSwitcherTitleIcon {
+  margin-block-start: 0;
+}
+
 .tabSwitcherTitleText {
   min-inline-size: 0;
   overflow: hidden;

@@ -47,6 +47,15 @@
           setting-key="showToastTimeoutIndicator"
           @change="updateShowToastTimeoutIndicator"
         />
+        <FtToggleSwitch
+          v-if="usingElectron"
+          :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
+          :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
+          compact
+          :default-value="useFixedTabWidth"
+          setting-key="useFixedTabWidth"
+          @change="updateUseFixedTabWidth"
+        />
       </div>
       <div class="switchColumn">
         <FtToggleSwitch
@@ -107,14 +116,6 @@
     <template v-if="usingElectron">
       <FtFlexBox>
         <div class="switchColumn">
-          <FtToggleSwitch
-            :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
-            :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
-            compact
-            :default-value="useFixedTabWidth"
-            setting-key="useFixedTabWidth"
-            @change="updateUseFixedTabWidth"
-          />
           <FtSlider
             :label="$t('Settings.Theme Settings.Tab Width')"
             :default-value="fixedTabWidth"

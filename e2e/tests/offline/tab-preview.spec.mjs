@@ -165,6 +165,20 @@ test.describe('tab previews disabled', () => {
       }))
       expect(gridPositions.rows).toBeGreaterThan(1)
       expect(gridPositions.columns).toBeGreaterThan(1)
+
+      const verticalCenters = await page.locator('.tabSwitcherItem').first().evaluate((item) => {
+        const center = element => {
+          const bounds = element.getBoundingClientRect()
+          return bounds.top + bounds.height / 2
+        }
+        return {
+          item: center(item),
+          icon: center(item.querySelector('.tabSwitcherTitleIcon, .tabSwitcherTitleAvatar')),
+          text: center(item.querySelector('.tabSwitcherTitleText'))
+        }
+      })
+      expect(Math.abs(verticalCenters.icon - verticalCenters.item)).toBeLessThanOrEqual(1)
+      expect(Math.abs(verticalCenters.text - verticalCenters.item)).toBeLessThanOrEqual(1)
     } finally {
       await page.keyboard.up('Control')
     }
