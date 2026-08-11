@@ -798,15 +798,6 @@ Settings:
     Downloading FFmpeg: FFmpeg wird heruntergeladen…
     FFmpeg Downloaded Template: FFmpeg {version} wurde heruntergeladen
     FFmpeg Download Error Template: 'Herunterladen von FFmpeg fehlgeschlagen: {error}'
-    Detected FFprobe Version Template: 'Detected FFprobe version: {version}'
-    FFprobe Managed Not Downloaded: FFprobe has not been downloaded yet. Click the button below to download it with FFmpeg.
-    System FFprobe Missing Warning: FFprobe was not found on your system. It is required for inspecting media during post-processing. Install it next to FFmpeg, or switch the source to "Managed by OpenTubeX".
-    Checking FFprobe: Checking FFprobe…
-    Download FFmpeg and FFprobe: Download FFmpeg and FFprobe
-    Update FFmpeg and FFprobe: Update FFmpeg and FFprobe
-    Downloading FFmpeg and FFprobe: Downloading FFmpeg and FFprobe…
-    FFmpeg and FFprobe Downloaded Template: FFmpeg and FFprobe {version} have been downloaded
-    FFmpeg and FFprobe Download Error Template: 'Downloading FFmpeg and FFprobe failed: {error}'
     Managed Tool Already Current Template: '{tool} {version} ist bereits auf dem neuesten Stand'
     yt-dlp Executable Path: Pfad zur ausführbaren yt-dlp-Datei
     FFmpeg Executable Path: Pfad zur ausführbaren FFmpeg-Datei

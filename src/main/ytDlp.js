@@ -111,6 +111,7 @@ const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 let downloadCounter = 0
 let downloadRecordsSaveQueue = Promise.resolve()
 let binaryInstallCounter = 0
+let managedBinaryInstallQueue = Promise.resolve()
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -566,7 +567,7 @@ async function installBinary(data, destinationPath) {
  * replacement fails, every executable that was already replaced is restored.
  * @param {{ data: Buffer, path: string }[]} binaries
  */
-async function installBinariesAtomically(binaries) {
+async function performAtomicBinaryInstall(binaries) {
   if (binaries.length === 0) {
     return
   }
@@ -638,6 +639,19 @@ async function installBinariesAtomically(binaries) {
   if (cleanupErrors.length > 0) {
     console.warn('Could not remove managed binary backups', cleanupErrors)
   }
+}
+
+/**
+ * Prevents concurrent managed downloads from interleaving transactions that
+ * replace the same FFmpeg and FFprobe destinations.
+ * @param {{ data: Buffer, path: string }[]} binaries
+ */
+async function installBinariesAtomically(binaries) {
+  const installation = managedBinaryInstallQueue
+    .catch(() => {})
+    .then(() => performAtomicBinaryInstall(binaries))
+  managedBinaryInstallQueue = installation
+  return installation
 }
 
 /**
