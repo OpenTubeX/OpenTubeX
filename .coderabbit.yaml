@@ -6,3 +6,5 @@ reviews:
   auto_review:
     ignore_title_keywords:
       - "Translations update from Weblate"
+    labels:
+      - "!translations"

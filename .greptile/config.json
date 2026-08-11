@@ -4,5 +4,6 @@
     "enabled": true,
     "riskCeiling": "low"
   },
-  "excludeBranches": ["weblate-translations"]
+  "ignoreKeywords": "Translations update from Weblate",
+  "disabledLabels": ["translations"]
 }
