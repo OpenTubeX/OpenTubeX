@@ -1,6 +1,7 @@
 <template>
   <FtCard
     v-if="shownDescription.length > 0 || tags.length > 0 || games.length > 0"
+    ref="descriptionCard"
     :class="{
       videoDescription: true,
       short: !isExpanded,
@@ -9,6 +10,7 @@
   >
     <FtIconButton
       v-if="shownDescription.length > 0"
+      ref="descriptionCopyButton"
       class="descriptionCopyButton"
       :title="t('Description.Copy Description')"
       :icon="['fas', 'copy']"
@@ -17,7 +19,11 @@
     />
     <span
       v-if="showControls && !isExpanded && !alwaysExpanded"
-      class="descriptionStatus"
+      ref="expandDescriptionControl"
+      :class="{
+        descriptionStatus: true,
+        avoidCopyButton: copyButtonOverlapsExpandControl
+      }"
       role="button"
       tabindex="0"
       @click="expandDescription"
@@ -174,9 +180,13 @@ let shownDescription = ''
 let descriptionText = props.description
 const descriptionScroll = useTemplateRef('descriptionScroll')
 const descriptionContainer = useTemplateRef('descriptionContainer')
+const descriptionCard = useTemplateRef('descriptionCard')
+const descriptionCopyButton = useTemplateRef('descriptionCopyButton')
+const expandDescriptionControl = useTemplateRef('expandDescriptionControl')
 const showFullDescription = ref(false)
 const showControls = ref(false)
 const descriptionFadeTop = ref(false)
+const copyButtonOverlapsExpandControl = ref(false)
 // a video can have games but no description, and there is nothing to expand or collapse then,
 // so treat it as expanded. `measureDescription` can't do it, it bails out on a zero height element.
 const isExpanded = computed(() => props.alwaysExpanded || shownDescription === '' || showFullDescription.value)
@@ -295,22 +305,58 @@ function measureDescription() {
   showFullDescription.value = isShortDescription()
   showControls.value = !showFullDescription.value
   hasMeasured = true
+
+  nextTick(updateDescriptionLayout)
+}
+
+function updateExpandControlPosition() {
+  const copyButtonElement = descriptionCopyButton.value?.$el
+  const expandControlElement = expandDescriptionControl.value
+
+  if (!copyButtonElement || !expandControlElement) {
+    copyButtonOverlapsExpandControl.value = false
+    return
+  }
+
+  const copyButtonRect = copyButtonElement.getBoundingClientRect()
+  const expandControlRect = expandControlElement.getBoundingClientRect()
+  const collisionOffset = copyButtonOverlapsExpandControl.value
+    ? (getComputedStyle(expandControlElement).direction === 'rtl' ? -40 : 40)
+    : 0
+  copyButtonOverlapsExpandControl.value = (
+    expandControlRect.top < copyButtonRect.bottom &&
+    expandControlRect.bottom > copyButtonRect.top &&
+    expandControlRect.left + collisionOffset < copyButtonRect.right &&
+    expandControlRect.right + collisionOffset > copyButtonRect.left
+  )
+}
+
+function updateDescriptionLayout() {
+  updateDescriptionFadeState()
+  updateExpandControlPosition()
 }
 
 let descriptionResizeObserver = null
 
 onMounted(() => {
   measureDescription()
-  descriptionResizeObserver = new ResizeObserver(updateDescriptionFadeState)
+
+  descriptionResizeObserver = new ResizeObserver(updateDescriptionLayout)
   if (descriptionScroll.value) {
     descriptionResizeObserver.observe(descriptionScroll.value)
   }
-  nextTick(updateDescriptionFadeState)
+
+  const descriptionCardElement = descriptionCard.value?.$el
+  if (descriptionCardElement) {
+    descriptionResizeObserver.observe(descriptionCardElement)
+  }
+
+  nextTick(updateDescriptionLayout)
 })
 
 onBeforeUnmount(() => descriptionResizeObserver?.disconnect())
 
-watch(isExpanded, () => nextTick(updateDescriptionFadeState))
+watch(isExpanded, () => nextTick(updateDescriptionLayout))
 
 watch(() => props.alwaysExpanded, (alwaysExpanded, wasAlwaysExpanded) => {
   if (!alwaysExpanded && wasAlwaysExpanded) {

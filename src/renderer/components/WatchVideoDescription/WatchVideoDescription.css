@@ -81,6 +81,10 @@
   text-decoration: none;
 }
 
+.videoDescription.short .descriptionStatus.avoidCopyButton {
+  inset-inline-end: 56px;
+}
+
 .videoDescription.short .descriptionStatus::before {
   position: absolute;
   inset-block: 0;
