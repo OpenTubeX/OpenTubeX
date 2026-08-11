@@ -245,7 +245,7 @@
   inset-block-start: 56px;
 }
 
-.toast-slot {
+:is(.toast-holder, .progress-toast-holder) .toast-slot {
   position: relative;
   pointer-events: none;
 }
@@ -265,55 +265,55 @@
   transform: scale(0.95);
 }
 
-.toast-slot.persistent-slot {
+.progress-toast-holder .toast-slot.persistent-slot {
   transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.position-bottom-left .persistent-slot {
+.progress-toast-holder.position-bottom-left .persistent-slot {
   transform-origin: bottom left;
 }
 
-.position-bottom-center .persistent-slot {
+.progress-toast-holder.position-bottom-center .persistent-slot {
   transform-origin: bottom center;
 }
 
-.position-bottom-right .persistent-slot {
+.progress-toast-holder.position-bottom-right .persistent-slot {
   transform-origin: bottom right;
 }
 
-.position-top-left .persistent-slot {
+.progress-toast-holder.position-top-left .persistent-slot {
   transform-origin: top left;
 }
 
-.position-top-center .persistent-slot {
+.progress-toast-holder.position-top-center .persistent-slot {
   transform-origin: top center;
 }
 
-.position-top-right .persistent-slot {
+.progress-toast-holder.position-top-right .persistent-slot {
   transform-origin: top right;
 }
 
-.position-bottom-left .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-left .persistent-slot.minimized {
   transform: translate(-18px, 18px) scale(0.5);
 }
 
-.position-bottom-center .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-center .persistent-slot.minimized {
   transform: translateY(18px) scale(0.5);
 }
 
-.position-bottom-right .persistent-slot.minimized {
+.progress-toast-holder.position-bottom-right .persistent-slot.minimized {
   transform: translate(18px, 18px) scale(0.5);
 }
 
-.position-top-left .persistent-slot.minimized {
+.progress-toast-holder.position-top-left .persistent-slot.minimized {
   transform: translate(-18px, -18px) scale(0.5);
 }
 
-.position-top-center .persistent-slot.minimized {
+.progress-toast-holder.position-top-center .persistent-slot.minimized {
   transform: translateY(-18px) scale(0.5);
 }
 
-.position-top-right .persistent-slot.minimized {
+.progress-toast-holder.position-top-right .persistent-slot.minimized {
   transform: translate(18px, -18px) scale(0.5);
 }
 
@@ -329,7 +329,7 @@
   transform: translateX(18px) scale(0.5);
 }
 
-.toast {
+:is(.toast-holder, .progress-toast-holder) .toast {
   /* Positioned so it stays above the margin of hover behind it, which would
      otherwise take the clicks and drags meant for the toast */
   position: relative;
@@ -355,23 +355,23 @@
   touch-action: pan-y;
 }
 
-.toast.actionable {
+:is(.toast-holder, .progress-toast-holder) .toast.actionable {
   cursor: pointer;
 }
 
-.timeout-indicator-track {
+:is(.toast-holder, .progress-toast-holder) .timeout-indicator-track {
   position: absolute;
   inset: 0;
   border-radius: calc(12px * var(--ui-roundness));
   pointer-events: none;
 }
 
-.timeout-indicator {
+:is(.toast-holder, .progress-toast-holder) .timeout-indicator {
   position: absolute;
   inset: 0;
 }
 
-.timeout-indicator .embeddedProgressPath {
+:is(.toast-holder, .progress-toast-holder) .timeout-indicator .embeddedProgressPath {
   filter: drop-shadow(0 0 2px color-mix(in srgb, var(--primary-color) 70%, transparent));
 
   /* Hold the line at its full length until the toast has finished animating in,
@@ -392,7 +392,7 @@
 
 /* The persistent toast reports real progress, so its line is driven by the
    `progress` prop rather than by the timeout drain. */
-.timeout-indicator.progress-indicator .embeddedProgressPath {
+:is(.toast-holder, .progress-toast-holder) .timeout-indicator.progress-indicator .embeddedProgressPath {
   animation: none;
 }
 
@@ -414,17 +414,17 @@
   }
 }
 
-.toast.persistent {
+:is(.toast-holder, .progress-toast-holder) .toast.persistent {
   cursor: progress;
   pointer-events: none;
 }
 
 /* Tighten the leading padding so the thumbnail sits closer to the edge */
-.toast.hasImage {
+:is(.toast-holder, .progress-toast-holder) .toast.hasImage {
   padding-inline-start: 10px;
 }
 
-.image {
+:is(.toast-holder, .progress-toast-holder) .image {
   flex-shrink: 0;
   inline-size: 64px;
   block-size: 36px;
@@ -432,20 +432,20 @@
   border-radius: calc(6px * var(--ui-roundness));
 }
 
-.icon {
+:is(.toast-holder, .progress-toast-holder) .icon {
   flex-shrink: 0;
   font-size: 18px;
   opacity: 0.85;
 }
 
-.message {
+:is(.toast-holder, .progress-toast-holder) .message {
   margin: 0;
 }
 
 /* Sonner holds a toast's timer while the pointer is over the stack, the stack
    has focus, or the window is in the background. The indicator tracks the same
    clock, so it stops with it. */
-.timeout-indicator-track.paused .timeout-indicator .embeddedProgressPath {
+.toast-holder .timeout-indicator-track.paused .embeddedProgressPath {
   animation-play-state: paused;
 }
 
@@ -591,7 +591,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .toast-slot.persistent-slot {
+  .progress-toast-holder .toast-slot.persistent-slot {
     transition-duration: 1ms;
   }
 }
