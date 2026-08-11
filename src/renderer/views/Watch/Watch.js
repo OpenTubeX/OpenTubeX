@@ -206,6 +206,7 @@ export default defineComponent({
       isPremiere: false,
       liveChat: null,
       liveChatIsReplay: false,
+      liveChatOpen: true,
       isLiveContent: false,
       isUpcoming: false,
       isPostLiveDvr: false,
@@ -757,8 +758,16 @@ export default defineComponent({
     hideLiveChat: function () {
       return this.$store.getters.getHideLiveChat
     },
+    hideLiveChatReplay: function () {
+      return this.$store.getters.getHideLiveChatReplay
+    },
+    liveChatAvailable: function () {
+      return this.liveChatIsReplay
+        ? !this.hideLiveChatReplay
+        : !this.hideLiveChat && (this.isLive || this.isUpcoming)
+    },
     showLiveChat: function () {
-      return !this.hideLiveChat && (this.isLive || this.isUpcoming || this.liveChatIsReplay)
+      return this.liveChatAvailable && this.liveChatOpen
     },
     // The player reports its position about four times a second, but a chat replay
     // buffers 20 seconds ahead and only cares about jumps of more than a few seconds.
@@ -1138,9 +1147,23 @@ export default defineComponent({
     handleFullscreenLiveChatChange({ open, target }) {
       this.fullscreenLiveChatTarget = open ? target : null
       this.fullscreenLiveChatOpen = open && target !== null
+      if (this.fullscreenLiveChatOpen) {
+        this.liveChatOpen = true
+      }
     },
     closeFullscreenLiveChat() {
       this.$refs.player?.closeFullscreenLiveChat()
+    },
+    closeLiveChat() {
+      this.liveChatOpen = false
+      this.closeFullscreenLiveChat()
+    },
+    toggleLiveChat() {
+      if (this.liveChatOpen) {
+        this.closeLiveChat()
+      } else {
+        this.liveChatOpen = true
+      }
     },
     closeFullscreenComments() {
       if (this.fullscreenCommentsOpen) {
@@ -1516,6 +1539,7 @@ export default defineComponent({
       this.isPremiere = false
       this.liveChat = null
       this.liveChatIsReplay = false
+      this.liveChatOpen = true
       this.isLiveContent = false
       this.isUpcoming = false
       this.isPostLiveDvr = false
@@ -2235,7 +2259,7 @@ export default defineComponent({
 
         // Streams that have ended keep their chat around as a replay, which is played back
         // in sync with the video instead of in real time.
-        if (!this.hideLiveChat && result.livechat && (this.isLive || this.isUpcoming || result.livechat.is_replay)) {
+        if (result.livechat && (this.isLive || this.isUpcoming || result.livechat.is_replay)) {
           this.liveChat = result.getLiveChat()
           this.liveChatIsReplay = this.liveChat.is_replay
         } else {

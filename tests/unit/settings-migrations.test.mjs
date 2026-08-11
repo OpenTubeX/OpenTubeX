@@ -23,3 +23,20 @@ test('prefers the current progress notification preference', () => {
     showProgressBarToast: true,
   })
 })
+
+test('preserves the old live chat visibility choice for replays', () => {
+  assert.deepEqual(migrateLegacySettings({ hideLiveChat: true }), {
+    hideLiveChat: true,
+    hideLiveChatReplay: true,
+  })
+})
+
+test('prefers an explicit live chat replay visibility choice', () => {
+  assert.deepEqual(migrateLegacySettings({
+    hideLiveChat: true,
+    hideLiveChatReplay: false,
+  }), {
+    hideLiveChat: true,
+    hideLiveChatReplay: false,
+  })
+})

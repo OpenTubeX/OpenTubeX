@@ -14,5 +14,12 @@ export function migrateLegacySettings(settings) {
     delete migratedSettings.showSubscriptionRefreshToast
   }
 
+  if (
+    Object.hasOwn(migratedSettings, 'hideLiveChat') &&
+    !Object.hasOwn(migratedSettings, 'hideLiveChatReplay')
+  ) {
+    migratedSettings.hideLiveChatReplay = migratedSettings.hideLiveChat === true
+  }
+
   return migratedSettings
 }

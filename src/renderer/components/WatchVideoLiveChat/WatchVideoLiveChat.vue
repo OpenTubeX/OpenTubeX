@@ -43,8 +43,8 @@
         <button
           type="button"
           class="liveChatDockAction"
-          :aria-label="t('Settings.Distraction Free Settings.Hide Live Chat')"
-          :title="t('Settings.Distraction Free Settings.Hide Live Chat')"
+          :aria-label="closeButtonTitle"
+          :title="closeButtonTitle"
           @click="emit('close')"
         >
           <FontAwesomeIcon :icon="['fas', 'xmark']" />
@@ -71,6 +71,76 @@
         </div>
       </div>
     </header>
+    <div
+      v-else
+      class="titleContainer"
+    >
+      <h4 class="title">
+        {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
+        <span
+          v-if="!hideVideoViews && watchingCount !== null"
+          class="watchingCount"
+        >
+          {{ t('Global.Counts.Watching Count', { count: formattedWatchingCount }, watchingCount) }}
+        </span>
+      </h4>
+      <div
+        ref="liveChatActionsRef"
+        class="liveChatActions"
+        @keydown.esc.stop.prevent="settingsMenuOpen = false"
+      >
+        <button
+          type="button"
+          class="liveChatActionButton"
+          :class="{ active: settingsMenuOpen }"
+          :aria-label="t('Video.Live Chat Settings')"
+          :title="t('Video.Live Chat Settings')"
+          :aria-expanded="String(settingsMenuOpen)"
+          @click="settingsMenuOpen = !settingsMenuOpen"
+        >
+          <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+        </button>
+        <a
+          v-if="!isReplay"
+          :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
+          :aria-label="t('Video.Popout Live Chat')"
+          :title="t('Video.Popout Live Chat')"
+          target="_blank"
+          class="liveChatActionButton"
+        >
+          <FontAwesomeIcon :icon="['fas', 'arrow-up-right-from-square']" />
+        </a>
+        <button
+          type="button"
+          class="liveChatActionButton"
+          :aria-label="closeButtonTitle"
+          :title="closeButtonTitle"
+          @click="emit('close')"
+        >
+          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+        </button>
+        <div
+          v-if="settingsMenuOpen"
+          class="liveChatSettingsMenu"
+        >
+          <FtToggleSwitch
+            :label="t('Video.Show Live Chat Timestamps')"
+            :default-value="showLiveChatTimestamps"
+            :compact="true"
+            @change="updateShowLiveChatTimestamps"
+          />
+          <FtRadioButton
+            v-if="canFilter"
+            class="liveChatFilter"
+            :title="t('Video.Chat Filter')"
+            :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
+            :values="['TOP_CHAT', 'LIVE_CHAT']"
+            :model-value="liveChatFilter"
+            @update:model-value="updateLiveChatFilter"
+          />
+        </div>
+      </div>
+    </div>
     <FtLoader
       v-if="isLoading"
     />
@@ -111,71 +181,6 @@
       v-else
       class="relative"
     >
-      <div
-        v-if="!fullscreenOverlay"
-        class="titleContainer"
-      >
-        <h4
-          class="title"
-        >
-          {{ isReplay ? t('Video.Live Chat Replay') : t('Video.Live Chat') }}
-          <span
-            v-if="!hideVideoViews && watchingCount !== null"
-            class="watchingCount"
-          >
-            {{ t('Global.Counts.Watching Count', { count: formattedWatchingCount }, watchingCount) }}
-          </span>
-        </h4>
-        <div
-          ref="liveChatActionsRef"
-          class="liveChatActions"
-          @keydown.esc.stop.prevent="settingsMenuOpen = false"
-        >
-          <button
-            type="button"
-            class="liveChatActionButton"
-            :class="{ active: settingsMenuOpen }"
-            :aria-label="t('Video.Live Chat Settings')"
-            :title="t('Video.Live Chat Settings')"
-            :aria-expanded="String(settingsMenuOpen)"
-            @click="settingsMenuOpen = !settingsMenuOpen"
-          >
-            <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
-          </button>
-          <a
-            v-if="!isReplay"
-            :href="`https://www.youtube.com/live_chat?is_popout=1&v=${props.videoId}`"
-            :aria-label="t('Video.Popout Live Chat')"
-            :title="t('Video.Popout Live Chat')"
-            target="_blank"
-            class="liveChatActionButton"
-          >
-            <FontAwesomeIcon
-              :icon="['fas', 'arrow-up-right-from-square']"
-            />
-          </a>
-          <div
-            v-if="settingsMenuOpen"
-            class="liveChatSettingsMenu"
-          >
-            <FtToggleSwitch
-              :label="t('Video.Show Live Chat Timestamps')"
-              :default-value="showLiveChatTimestamps"
-              :compact="true"
-              @change="updateShowLiveChatTimestamps"
-            />
-            <FtRadioButton
-              v-if="canFilter"
-              class="liveChatFilter"
-              :title="t('Video.Chat Filter')"
-              :labels="[t('Video.Top Chat'), t('Video.All Messages')]"
-              :values="['TOP_CHAT', 'LIVE_CHAT']"
-              :model-value="liveChatFilter"
-              @update:model-value="updateLiveChatFilter"
-            />
-          </div>
-        </div>
-      </div>
       <div
         v-if="superChatComments.length > 0"
         v-overlay-scrollbars
@@ -483,7 +488,10 @@ const requestMoreReplayComments = createCoalescingPoller(async () => {
 })
 
 const isLoading = ref(true)
-const isReplay = ref(false)
+const isReplay = ref(Boolean(props.liveChat?.is_replay))
+const closeButtonTitle = computed(() => isReplay.value
+  ? t('Video.Close Live Chat Replay')
+  : t('Video.Close Live Chat'))
 const canFilter = ref(false)
 const hasError = ref(false)
 const showEnableChat = ref(false)
