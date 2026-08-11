@@ -5,8 +5,6 @@
 - Before running modified Electron/Playwright E2E tests, run `pnpm run test:e2e:pack` so `dist-e2e` includes the current CSS and rendering or measurement tests do not run against an unstyled app.
 - If the request somehow involves other repos (e.g. Website, APT, RPM, Flatpak, AUR, ...) you can find them in the parent folder.
 - Before considering work done here, you need to reproduce it with the test suite (for bugfixes), and verify that your fix/feature works (unless otherwise told to do so or when it makes no sense to do a test for the change).
-- When creating PRs use the PR template. Always create ready-for-review PRs unless otherwise told to do so.
-- After creating a PR wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
-- Always prefer bundling follow up changes and review resolving commits into one push.
+- After creating a PR babysit it. Wait for reviews of CodeRabbit/Greptile. When they come in resolve the reviews.
 - For icon-pack / Font Awesome replacement work (#388): get human confirmation that remapped glyphs fit visually in every pack (Material, Tabler, Phosphor, Lucide, Remix, and Font Awesome legacy) before considering the mapping done.
 - Never use the "FreeTube" name for promotion of the project (see discussion #391 for details when in doubt).
