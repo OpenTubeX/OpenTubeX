@@ -1016,7 +1016,15 @@ export default defineComponent({
       }
 
       if (reminder && reminder.startTimestamp !== startTimestamp) {
-        this.liveReminderActive = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+        const scheduled = await window.ftElectron.liveReminder.schedule(this.getLiveReminderPayload())
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          !(this.premiereDate instanceof Date) ||
+          this.premiereDate.getTime() !== startTimestamp
+        ) {
+          return
+        }
+        this.liveReminderActive = scheduled
       } else {
         this.liveReminderActive = reminder !== null
       }
