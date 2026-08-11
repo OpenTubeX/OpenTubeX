@@ -565,11 +565,14 @@ async function installBinary(data, destinationPath) {
 /**
  * Replaces a related set of managed binaries as one transaction. If any
  * replacement fails, every executable that was already replaced is restored.
+ * @template T
  * @param {{ data: Buffer, path: string }[]} binaries
+ * @param {() => Promise<T>} validate
+ * @returns {Promise<T>}
  */
-async function performAtomicBinaryInstall(binaries) {
+async function performAtomicBinaryInstall(binaries, validate) {
   if (binaries.length === 0) {
-    return
+    return validate()
   }
 
   await mkdir(getManagedBinariesDirectory(), { recursive: true })
@@ -583,6 +586,7 @@ async function performAtomicBinaryInstall(binaries) {
     installed: false
   }))
 
+  let result
   try {
     for (const entry of entries) {
       await writeFile(entry.temporaryPath, entry.data)
@@ -602,6 +606,8 @@ async function performAtomicBinaryInstall(binaries) {
       await rename(entry.temporaryPath, entry.path)
       entry.installed = true
     }
+
+    result = await validate()
   } catch (error) {
     const rollbackErrors = []
     async function attemptRollback(operation) {
@@ -639,17 +645,22 @@ async function performAtomicBinaryInstall(binaries) {
   if (cleanupErrors.length > 0) {
     console.warn('Could not remove managed binary backups', cleanupErrors)
   }
+
+  return result
 }
 
 /**
  * Prevents concurrent managed downloads from interleaving transactions that
  * replace the same FFmpeg and FFprobe destinations.
+ * @template T
  * @param {{ data: Buffer, path: string }[]} binaries
+ * @param {() => Promise<T>} validate
+ * @returns {Promise<T>}
  */
-async function installBinariesAtomically(binaries) {
+async function installBinariesAtomically(binaries, validate) {
   const installation = managedBinaryInstallQueue
     .catch(() => {})
-    .then(() => performAtomicBinaryInstall(binaries))
+    .then(() => performAtomicBinaryInstall(binaries, validate))
   managedBinaryInstallQueue = installation
   return installation
 }
@@ -713,7 +724,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
   const ffmpegPath = getManagedBinaryPath('ffmpeg')
   const ffprobePath = getManagedBinaryPath('ffprobe')
   const pendingValidatorWrites = []
-  let updated = false
+  const pendingInstalls = []
 
   if (process.platform === 'win32') {
     // yt-dlp's own FFmpeg builds, patched for use with yt-dlp,
@@ -729,11 +740,10 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       const download = await downloadFile(url, onProgress, onDownloadStart, validators)
 
       if (download.data !== null) {
-        await installBinariesAtomically([
+        pendingInstalls.push(
           { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
           { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
-        ])
-        updated = true
+        )
         pendingValidatorWrites.push(
           { path: ffmpegPath, validators: download.validators, url },
           { path: ffprobePath, validators: download.validators, url }
@@ -751,8 +761,6 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       { name: 'ffmpeg', path: ffmpegPath },
       { name: 'ffprobe', path: ffprobePath }
     ]
-    const pendingInstalls = []
-
     try {
       for (const [index, binary] of binaries.entries()) {
         const url = `https://ffmpeg.martin-riedl.de/redirect/latest/${platform}/${arch}/release/${binary.name}.zip`
@@ -771,24 +779,30 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
           pendingValidatorWrites.push({ path: binary.path, validators: download.validators, url })
         }
       }
-
-      await installBinariesAtomically(pendingInstalls)
-      updated = pendingInstalls.length > 0
     } catch (error) {
       return { error: error.message }
     }
   }
 
-  const [version, ffprobeVersion] = await Promise.all([
-    getFfmpegVersion(ffmpegPath),
-    getFfprobeVersion(ffprobePath)
-  ])
+  let version
+  try {
+    version = await installBinariesAtomically(pendingInstalls, async () => {
+      const [ffmpegVersion, ffprobeVersion] = await Promise.all([
+        getFfmpegVersion(ffmpegPath),
+        getFfprobeVersion(ffprobePath)
+      ])
 
-  if (version === null) {
-    return { error: 'The downloaded FFmpeg binary does not work on this system' }
-  }
-  if (ffprobeVersion === null) {
-    return { error: 'The downloaded FFprobe binary does not work on this system' }
+      if (ffmpegVersion === null) {
+        throw new Error('The downloaded FFmpeg binary does not work on this system')
+      }
+      if (ffprobeVersion === null) {
+        throw new Error('The downloaded FFprobe binary does not work on this system')
+      }
+
+      return ffmpegVersion
+    })
+  } catch (error) {
+    return { error: error.message }
   }
 
   try {
@@ -798,7 +812,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
     console.warn('Could not save FFmpeg and FFprobe download metadata', error)
   }
 
-  return { version, updated }
+  return { version, updated: pendingInstalls.length > 0 }
 }
 
 /**
