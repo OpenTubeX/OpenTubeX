@@ -1,6 +1,6 @@
 import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { promisify } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
@@ -110,6 +110,7 @@ const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 
 let downloadCounter = 0
 let downloadRecordsSaveQueue = Promise.resolve()
+let binaryInstallCounter = 0
 
 /** @type {Map<number, { child: import('node:child_process').ChildProcess, cancelled: boolean }>} */
 const activeDownloads = new Map()
@@ -561,6 +562,85 @@ async function installBinary(data, destinationPath) {
 }
 
 /**
+ * Replaces a related set of managed binaries as one transaction. If any
+ * replacement fails, every executable that was already replaced is restored.
+ * @param {{ data: Buffer, path: string }[]} binaries
+ */
+async function installBinariesAtomically(binaries) {
+  if (binaries.length === 0) {
+    return
+  }
+
+  await mkdir(getManagedBinariesDirectory(), { recursive: true })
+
+  const transactionId = `${process.pid}-${++binaryInstallCounter}`
+  const entries = binaries.map(binary => ({
+    ...binary,
+    temporaryPath: `${binary.path}.part-${transactionId}`,
+    backupPath: `${binary.path}.backup-${transactionId}`,
+    backedUp: false,
+    installed: false
+  }))
+
+  try {
+    for (const entry of entries) {
+      await writeFile(entry.temporaryPath, entry.data)
+      if (process.platform !== 'win32') {
+        await chmod(entry.temporaryPath, 0o755)
+      }
+    }
+
+    for (const entry of entries) {
+      if (existsSync(entry.path)) {
+        await rename(entry.path, entry.backupPath)
+        entry.backedUp = true
+      }
+    }
+
+    for (const entry of entries) {
+      await rename(entry.temporaryPath, entry.path)
+      entry.installed = true
+    }
+  } catch (error) {
+    const rollbackErrors = []
+    async function attemptRollback(operation) {
+      try {
+        await operation()
+      } catch (rollbackError) {
+        rollbackErrors.push(rollbackError)
+      }
+    }
+
+    for (const entry of entries.toReversed()) {
+      if (entry.installed) {
+        await attemptRollback(() => rm(entry.path, { force: true }))
+      }
+      if (entry.backedUp) {
+        await attemptRollback(() => rename(entry.backupPath, entry.path))
+      }
+      await attemptRollback(() => rm(entry.temporaryPath, { force: true }))
+    }
+
+    if (rollbackErrors.length > 0) {
+      throw new AggregateError(
+        rollbackErrors,
+        'Installing the managed binaries failed and could not be fully rolled back',
+        { cause: error }
+      )
+    }
+    throw error
+  }
+
+  const cleanupResults = await Promise.allSettled(entries
+    .filter(entry => entry.backedUp)
+    .map(entry => rm(entry.backupPath, { force: true })))
+  const cleanupErrors = cleanupResults.filter(result => result.status === 'rejected')
+  if (cleanupErrors.length > 0) {
+    console.warn('Could not remove managed binary backups', cleanupErrors)
+  }
+}
+
+/**
  * Downloads the latest yt-dlp release into the user data directory
  * @param {BinaryDownloadProgressCallback} [onProgress]
  * @param {() => void} [onDownloadStart]
@@ -635,8 +715,10 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
       const download = await downloadFile(url, onProgress, onDownloadStart, validators)
 
       if (download.data !== null) {
-        await installBinary(extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), ffmpegPath)
-        await installBinary(extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), ffprobePath)
+        await installBinariesAtomically([
+          { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffmpeg.exe')), path: ffmpegPath },
+          { data: extractZipEntry(download.data, name => name.endsWith('/bin/ffprobe.exe')), path: ffprobePath }
+        ])
         updated = true
         pendingValidatorWrites.push(
           { path: ffmpegPath, validators: download.validators, url },
@@ -676,9 +758,7 @@ async function downloadManagedFfmpeg(onProgress, onDownloadStart) {
         }
       }
 
-      for (const pendingInstall of pendingInstalls) {
-        await installBinary(pendingInstall.data, pendingInstall.path)
-      }
+      await installBinariesAtomically(pendingInstalls)
       updated = pendingInstalls.length > 0
     } catch (error) {
       return { error: error.message }

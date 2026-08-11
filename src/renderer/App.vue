@@ -603,7 +603,7 @@ async function initializeManagedExternalSoftware() {
     return
   }
 
-  /** @type {('yt-dlp' | 'ffmpeg')[]} */
+  /** @type {('yt-dlp' | 'ffmpeg' | 'ffprobe')[]} */
   const missingBinaries = []
   /** @type {('yt-dlp' | 'ffmpeg')[]} */
   const binariesToUpdate = []
