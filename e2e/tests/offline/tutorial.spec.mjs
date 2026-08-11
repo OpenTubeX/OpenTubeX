@@ -16,6 +16,14 @@ async function expectHighlightCenteredOn(page, targetSelector) {
   }).toEqual({ x: 0, y: 0 })
 }
 
+async function clickNewTabMenu(app) {
+  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
+    const browserWindow = BrowserWindow.getAllWindows()[0]
+    const tabsMenu = Menu.getApplicationMenu().items.find(item => item.label === 'Tabs')
+    tabsMenu.submenu.items.find(item => item.label === 'New Tab').click(undefined, browserWindow)
+  })
+}
+
 test('shows returning users only where settings moved', async ({ app, page }) => {
   const tutorial = page.getByRole('dialog', { name: 'Settings have moved' })
   await expect(tutorial).toBeVisible()
@@ -29,11 +37,7 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   await page.keyboard.press('Control+t')
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
 
-  await app.electronApp.evaluate(({ BrowserWindow, Menu }) => {
-    const browserWindow = BrowserWindow.getAllWindows()[0]
-    const tabsMenu = Menu.getApplicationMenu().items.find(item => item.label === 'Tabs')
-    tabsMenu.submenu.items.find(item => item.label === 'New Tab').click(undefined, browserWindow)
-  })
+  await clickNewTabMenu(app)
   await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount)
 
   const primaryAction = tutorial.getByRole('button', { name: 'Got it' })
@@ -43,6 +47,9 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
 
   await primaryAction.click()
   await expect(tutorial).toBeHidden()
+
+  await clickNewTabMenu(app)
+  await expect(page.locator('.tabBar .tab')).toHaveCount(tabCount + 1)
 
   await page.reload()
   await expect(page.locator('.tutorialOverlay')).toHaveCount(0)

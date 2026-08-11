@@ -743,6 +743,9 @@ function initializeTutorial(hasExistingInstallation, lastUsedVersion) {
 }
 
 async function completeTutorial() {
+  showTutorial.value = false
+  await nextTick()
+
   if (isElectron) {
     try {
       await window.ftElectron.tabs.setShortcutsBlocked(false)
@@ -750,7 +753,6 @@ async function completeTutorial() {
       console.error('Failed to restore tab shortcuts', error)
     }
   }
-  showTutorial.value = false
 
   try {
     localStorage.removeItem(TUTORIAL_AUDIENCE_STORAGE_KEY)
