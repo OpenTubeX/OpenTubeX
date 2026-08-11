@@ -1,5 +1,6 @@
 .pure-material-slider {
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   inline-size: 380px;
   color: rgb(var(--primary-text-color) 0.87);
   font-size: 16px;
@@ -9,28 +10,30 @@
   margin-inline: 8px;
 }
 
+/* The current value is part of the label, so the text width changes while the
+   slider moves. Giving the label and its icons their own row keeps the icons
+   beside the text — the label wraps within the row rather than pushing them
+   onto a line of their own — and lets a wrapped label move the track down
+   instead of running through it. */
+.labelRow {
+  display: flex;
+  align-items: center;
+}
+
+/* Same reason as the padding in the component: equal-width digits keep the
+   label from changing size as the value does. */
+.label {
+  font-variant-numeric: tabular-nums;
+}
+
 .input {
   appearance: none;
-  position: relative;
-  inset-block-start: 24px;
   display: block;
-  margin-block: 0 -36px;
-  margin-inline: 0;
+  margin: 0;
   inline-size: 100%;
   block-size: 36px;
   background-color: transparent;
   cursor: pointer;
-}
-
-/* Without Span */
-.input:last-child {
-  position: static;
-  margin: 0;
-}
-
-.label {
-  display: inline-block;
-  margin-block-end: 36px;
 }
 
 .selectTooltip {
@@ -48,7 +51,7 @@
   opacity: 0.38;
 }
 
-.input:disabled + .label {
+.pure-material-slider:has(.input:disabled) .label {
   opacity: 0.38;
 }
 

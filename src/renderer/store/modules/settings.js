@@ -14,6 +14,7 @@ import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getSystemLocale, showToast } from '../../helpers/utils'
 import { DEFAULT_THUMBNAIL_SIZE } from '../../constants/thumbnailSize'
 import { DEFAULT_FIXED_TAB_WIDTH } from '../../constants/tabWidth'
+import { DEFAULT_SCROLLBAR_THUMB_WIDTH } from '../../constants/scrollbar'
 import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
@@ -183,6 +184,7 @@ const state = {
   autoPictureInPictureTriggers: [],
   scrollMiniPlayerEnabled: true,
   scrollMiniPlayerSavedRect: '',
+  scrollbarThumbWidth: DEFAULT_SCROLLBAR_THUMB_WIDTH,
   avoidTranslation: 'disabled',
   backendFallback: false,
   backendPreference: !process.env.SUPPORTS_LOCAL_API ? 'invidious' : 'local',

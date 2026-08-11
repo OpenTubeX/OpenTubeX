@@ -783,6 +783,22 @@ async function animateSettingsElement(elementRef, classRef, className) {
   const element = elementRef.value?.$el ?? elementRef.value
   element?.getBoundingClientRect()
   classRef.value = className
+  await nextTick()
+
+  // A class left in place keeps its animation attached to the element, so
+  // anything that later has the browser start it over — rebuilding the overlay
+  // scrollbars, for instance — replays the slide long after the navigation it
+  // belonged to. Drop it once it has played.
+  const animations = element?.getAnimations() ?? []
+  if (animations.length === 0) return
+
+  const results = await Promise.allSettled(animations.map(animation => animation.finished))
+  // Rejected means a newer navigation cancelled this one, and owns the class now.
+  if (results.some(({ status }) => status === 'rejected')) return
+
+  if (classRef.value === className) {
+    classRef.value = ''
+  }
 }
 
 async function openSearchResult(sectionType, label) {
@@ -825,7 +841,8 @@ async function openSearchResult(sectionType, label) {
 
 function getSearchTargetText(element) {
   const clone = element.cloneNode(true)
-  clone.querySelectorAll('.tooltip, .changedSettingIndicator').forEach(child => child.remove())
+  clone.querySelectorAll('.tooltip, .changedSettingIndicator, .changedSettingIndicatorPlaceholder')
+    .forEach(child => child.remove())
   return normalizeSearchText(clone.textContent.trim())
 }
 

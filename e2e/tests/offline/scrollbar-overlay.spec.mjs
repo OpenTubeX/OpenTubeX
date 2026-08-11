@@ -191,6 +191,25 @@ test.describe('overlay scrollbars', () => {
     })
   })
 
+  test('the handle is as wide as the configured thumb width', async ({ page }) => {
+    await addPageOverflow(page)
+    const handle = page.locator(`${PAGE_SCROLLBAR} .os-scrollbar-handle`)
+    await page.mouse.wheel(0, 300)
+
+    expect(await handle.evaluate((element) => element.clientWidth)).toBe(6)
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const slider = themeSection.getByRole('slider', { name: /Scrollbar Width/ })
+    await slider.focus()
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('ArrowRight')
+    }
+
+    const width = Number(await slider.inputValue())
+    expect(width).toBeGreaterThan(6)
+    await expect.poll(() => handle.evaluate((element) => element.clientWidth)).toBe(width)
+  })
+
   test('turning "Always Show Scrollbars" on keeps them visible while idle', async ({ page, attachScreenshot }) => {
     await addPageOverflow(page)
     const scrollbar = page.locator(PAGE_SCROLLBAR)
