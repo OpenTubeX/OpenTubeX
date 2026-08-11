@@ -214,7 +214,7 @@
               :default-value="hideRecommendedVideos"
               setting-key="hideRecommendedVideos"
               compact
-              @change="updateSetting('HideRecommendedVideos', $event)"
+              @change="handleHideRecommendedVideos"
             />
             <FtToggleSwitch
               :label="t('Settings.Distraction Free Settings.Hide Comments')"
@@ -500,6 +500,14 @@ function previewThumbnailSize(value) {
 
 function updateThumbnailSize(value) {
   store.dispatch('updateThumbnailSize', value)
+}
+
+function handleHideRecommendedVideos(value) {
+  if (value) {
+    store.dispatch('updatePlayNextVideo', false)
+  }
+
+  store.dispatch('updateHideRecommendedVideos', value)
 }
 
 function openSettings() {

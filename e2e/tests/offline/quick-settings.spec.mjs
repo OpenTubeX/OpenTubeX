@@ -66,3 +66,18 @@ test.describe('quick settings menu', () => {
     await expect(aboutWindow.locator('.settingsMenu')).toHaveCount(0)
   })
 })
+
+test.describe('quick distraction settings', () => {
+  test.use({ seed: { settings: { playNextVideo: true } } })
+
+  test('turns off autoplay when recommended videos are hidden', async ({ page }) => {
+    await page.locator('.profileTrigger').click()
+
+    const autoplay = page.getByRole('checkbox', { name: 'Autoplay Recommended Videos' })
+    await expect(autoplay).toBeChecked()
+    await page.locator('label.switch-label').filter({ hasText: 'Hide Recommended Videos' }).click()
+
+    await expect(autoplay).not.toBeChecked()
+    await expect(autoplay).toBeDisabled()
+  })
+})
