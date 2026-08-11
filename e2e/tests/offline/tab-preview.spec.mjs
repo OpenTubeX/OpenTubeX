@@ -100,23 +100,32 @@ test.describe('tab previews', () => {
     await hoverTabForPreview(page, 0)
     const activeTabId = await page.locator(sel.activeTab).getAttribute('data-tab-id')
 
-    const cachedPreview = await page.evaluate(async (tabId) => {
+    await page.evaluate(async (tabId) => {
       const capturePromise = window.ftElectron.tabs.capturePreview(tabId)
       window.ftElectron.tabs.setPreviewCapturePaused(true)
       window.ftElectron.tabs.setPreviewsEnabled(false)
-      window.ftElectron.tabs.setPreviewsEnabled(true)
-
-      try {
-        await capturePromise
-        await new Promise(resolve => setTimeout(resolve, 50))
-        const previews = await window.ftElectron.tabs.getCachedPreviews([tabId])
-        return previews[tabId]
-      } finally {
-        window.ftElectron.tabs.setPreviewCapturePaused(false)
-      }
+      await capturePromise
     }, activeTabId)
 
-    expect(cachedPreview).toMatch(/^data:image\/jpeg;base64,/)
+    await expect.poll(async () => {
+      const previews = await page.evaluate(
+        tabId => window.ftElectron.tabs.getCachedPreviews([tabId]),
+        activeTabId
+      )
+      return previews[activeTabId] ?? null
+    }).toBe(null)
+
+    await page.evaluate(() => {
+      window.ftElectron.tabs.setPreviewsEnabled(true)
+      window.ftElectron.tabs.setPreviewCapturePaused(false)
+    })
+    await expect.poll(async () => {
+      const previews = await page.evaluate(
+        tabId => window.ftElectron.tabs.getCachedPreviews([tabId]),
+        activeTabId
+      )
+      return previews[activeTabId] ?? null
+    }).toMatch(/^data:image\/jpeg;base64,/)
   })
 })
 
