@@ -1331,6 +1331,13 @@ Video:
   Autoplay: Autoplay
   Starting soon, please refresh the page to check again: Starting soon, please refresh
     the page to check again
+  Notify me: Notify me
+  Notification on: Notification on
+  Notification enabled: You will be notified when this video starts
+  Notification cancelled: Start notification cancelled
+  Notification unavailable: System notifications are unavailable
+  Scheduled video starting: Scheduled video starting
+  Live notification body: "{videoTitle} is starting now"
   # As in a Live Video
   Premiere: Premiere
   Premieres: Premieres

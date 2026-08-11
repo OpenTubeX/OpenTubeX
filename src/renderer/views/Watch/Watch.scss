@@ -80,7 +80,8 @@
   inset-block-end: 12px;
   color: #fff;
   display: flex;
-  block-size: 60px;
+  gap: 12px;
+  min-block-size: 60px;
   inset-inline-start: 12px;
   padding-block: 0;
   padding-inline: 12px;
@@ -94,8 +95,7 @@
   }
 
   .premiereText {
-    margin-block: 0;
-    margin-inline: 12px;
+    margin: 0;
     min-inline-size: 200px;
 
     .premiereTextTimestamp {
@@ -103,11 +103,53 @@
       font-weight: bold;
     }
   }
+
+  .liveReminderButton {
+    align-items: center;
+    background: #fff;
+    border: 2px solid #fff;
+    border-radius: calc(4px * var(--ui-roundness));
+    color: #111;
+    cursor: pointer;
+    display: flex;
+    font-weight: 500;
+    gap: 8px;
+    padding-block: 8px;
+    padding-inline: 12px;
+    white-space: nowrap;
+
+    &.active {
+      background: transparent;
+      color: #fff;
+    }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+  }
 }
 
 .premiereDate.trailer {
   margin-block-start: 8px;
   position: static;
+}
+
+@media (width <= 600px) {
+  .premiereDate {
+    align-items: flex-start;
+    flex-direction: column;
+    inset-inline: 8px;
+    padding-block: 12px;
+
+    .premiereIcon {
+      display: none;
+    }
+
+    .premiereText {
+      min-inline-size: 0;
+    }
+  }
 }
 
 .videoLayout {

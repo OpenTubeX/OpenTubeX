@@ -2,7 +2,7 @@ import {
   app, BrowserWindow, dialog, Menu, ipcMain,
   powerSaveBlocker, screen, session,
   nativeTheme, net, protocol, clipboard,
-  shell, Tray
+  shell, Tray, Notification
 } from 'electron'
 import './e2eUserDataOverride'
 import path from 'path'
@@ -22,6 +22,7 @@ import {
   DARK_BASE_THEMES,
 } from '../constants'
 import * as baseHandlers from '../datastores/handlers/base'
+import { liveReminders } from '../datastores'
 import { extractExpiryTimestamp, ImageCache } from './ImageCache'
 import { constants as fsConstants, existsSync } from 'fs'
 import asyncFs from 'fs/promises'
@@ -43,6 +44,7 @@ import {
   parseSearchEngines
 } from '../searchEngines'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
+import { LiveReminderManager } from './LiveReminderManager'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -1318,9 +1320,61 @@ function runApp() {
   /** @type {Map<number, Array<{url: string, tabId: string | null}>>} */
   const pendingOpenUrlsByWebContentsId = new Map()
   const openUrlReadyWebContentsIds = new Set()
+  const activeLiveNotifications = new Set()
   const isTrayOnMinimizeSupported = process.platform !== 'darwin' && (process.platform !== 'linux' || app.commandLine.getSwitchValue('ozone-platform') !== 'wayland')
 
   const userDataPath = app.getPath('userData')
+
+  function broadcastLiveReminderUpdate(videoId, scheduled) {
+    for (const window of BrowserWindow.getAllWindows()) {
+      if (!window.webContents.isDestroyed() && isOpenTubeXUrl(window.webContents.getURL())) {
+        window.webContents.send(IpcChannels.LIVE_REMINDER_UPDATED, videoId, scheduled)
+      }
+    }
+  }
+
+  function showLiveReminderNotification(reminder) {
+    if (!Notification.isSupported()) return
+
+    const notification = new Notification({
+      title: reminder.notificationTitle,
+      body: reminder.notificationBody
+    })
+    activeLiveNotifications.add(notification)
+    notification.once('close', () => activeLiveNotifications.delete(notification))
+    notification.once('click', () => {
+      activeLiveNotifications.delete(notification)
+      const videoUrl = `https://www.youtube.com/watch?v=${reminder.videoId}`
+
+      if (!mainWindow || mainWindow.isDestroyed()) {
+        createWindowForOpenUrl(videoUrl, {
+          showWindowNow: true,
+          reuseEmptyRootTab: true
+        }).catch(error => {
+          console.error('Failed to open live stream reminder', error)
+        })
+        return
+      }
+
+      const isHiddenInTray = trayWindows.some(window => window.id === mainWindow.id)
+      if (isHiddenInTray) {
+        trayClick(mainWindow)
+      } else if (mainWindow.isMinimized()) {
+        mainWindow.restore()
+      } else if (!mainWindow.isVisible()) {
+        mainWindow.show()
+      }
+      mainWindow.focus()
+      openUrlInWindow(mainWindow, videoUrl)
+    })
+    notification.show()
+  }
+
+  const liveReminderManager = new LiveReminderManager({
+    notify: showLiveReminderNotification,
+    onChange: broadcastLiveReminderUpdate,
+    datastore: liveReminders
+  })
 
   // command line switches need to be added before the app ready event first
   // that means we can't use the normal settings system as that is asynchronous,
@@ -1800,6 +1854,8 @@ function runApp() {
     // has its own persisted session record, so a multi-window Ctrl+Q session
     // is fully rebuilt here (one window per saved session). If there are no
     // saved sessions yet, fall back to creating a single empty window.
+    await liveReminderManager.initialize()
+
     const startupBehavior = await getStartupBehavior()
     const shouldRestoreSession = startupBehavior !== 'emptySession'
     const savedSessions = shouldRestoreSession ? await loadAllTabSessions() : []
@@ -2753,6 +2809,42 @@ function runApp() {
         window.webContents.send(IpcChannels.SHOW_TOAST, message, time, icon ?? null)
       }
     }
+  })
+
+  const isValidLiveReminderSender = event => isOpenTubeXUrl(event.senderFrame.url)
+  const isValidVideoId = videoId => typeof videoId === 'string' && /^[\w-]{11}$/.test(videoId)
+
+  ipcMain.handle(IpcChannels.LIVE_REMINDER_GET, (event, videoId) => {
+    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId) || !Notification.isSupported()) {
+      return null
+    }
+    return liveReminderManager.get(videoId)
+  })
+
+  ipcMain.handle(IpcChannels.LIVE_REMINDER_SCHEDULE, (event, reminder) => {
+    if (
+      !isValidLiveReminderSender(event) ||
+      !Notification.isSupported() ||
+      !isValidVideoId(reminder?.videoId) ||
+      !Number.isFinite(reminder?.startTimestamp) ||
+      reminder.startTimestamp <= Date.now() ||
+      typeof reminder.notificationTitle !== 'string' ||
+      reminder.notificationTitle.length === 0 ||
+      reminder.notificationTitle.length > 200 ||
+      typeof reminder.notificationBody !== 'string' ||
+      reminder.notificationBody.length === 0 ||
+      reminder.notificationBody.length > 500
+    ) {
+      return false
+    }
+    return liveReminderManager.schedule(reminder)
+  })
+
+  ipcMain.handle(IpcChannels.LIVE_REMINDER_CANCEL, (event, videoId) => {
+    if (!isValidLiveReminderSender(event) || !isValidVideoId(videoId)) {
+      return false
+    }
+    return liveReminderManager.cancel(videoId)
   })
 
   ipcMain.handle(IpcChannels.SUBSCRIPTION_AUTO_REFRESH_ACQUIRE, async (event, tabId, feedTab) => {
