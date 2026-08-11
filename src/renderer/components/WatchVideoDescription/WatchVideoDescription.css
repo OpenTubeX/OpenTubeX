@@ -14,6 +14,31 @@
   padding-inline: 16px;
 }
 
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll {
+  --description-fade-size: 16px;
+  --description-scrollbar-reserve: 14px;
+
+  /* Fade clipped text at the top while keeping the overlay scrollbar sharp. */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 var(--description-fade-size),
+      #000 100%
+    ),
+    linear-gradient(#000 0 0);
+  mask-size:
+    calc(100% - var(--description-scrollbar-reserve)) 100%,
+    var(--description-scrollbar-reserve) 100%;
+  mask-position: 0 0, 100% 0;
+  mask-repeat: no-repeat;
+  mask-composite: add;
+}
+
+.videoDescription:not(.short, .alwaysExpanded) .descriptionScroll:dir(rtl) {
+  mask-position: 100% 0, 0 0;
+}
+
 .description {
   font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   font-size: 17px;

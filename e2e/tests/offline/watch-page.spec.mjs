@@ -81,6 +81,8 @@ test.describe('watch page', () => {
     ), await tags.elementHandle())).toBe(true)
     expect(await tags.evaluate(element => element.closest('.descriptionScroll') !== null)).toBe(true)
     const descriptionScroll = description.locator('.descriptionScroll')
+    expect(await descriptionScroll.evaluate(element => getComputedStyle(element).maskImage))
+      .toContain('linear-gradient')
     const collapseControl = description.locator('.descriptionScroll > .descriptionStatus')
     await expect(collapseControl).toBeVisible()
     await expect(collapseControl).toHaveCSS('position', 'sticky')
