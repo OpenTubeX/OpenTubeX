@@ -65,8 +65,15 @@ test.describe('watch page', () => {
       watchView.playabilityStatus = 'UNPLAYABLE'
       watchView.upcomingTimestamp = 'August 11 at 5:00 PM'
       watchView.upcomingTimeLeft = 'in less than a minute'
-      watchView.premiereDate = new Date(Date.now() - 60_000)
+      watchView.premiereDate = new Date(Date.now() + 60_000)
       await watchView.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveCount(1)
+
+    await watchComponent.evaluate(async (component) => {
+      component.proxy.premiereDate = new Date(0)
+      await component.proxy.$nextTick()
     })
 
     await expect(page.locator(`${activeTab} .premiereTextTimeLeft`)).toHaveCount(0)
