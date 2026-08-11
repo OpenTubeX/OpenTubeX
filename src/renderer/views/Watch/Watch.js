@@ -387,7 +387,7 @@ export default defineComponent({
   computed: {
     hasScheduledPremiereStarted: function () {
       return this.premiereDate instanceof Date &&
-        this.premiereDate.getTime() <= this.relativeTimeNow
+        this.premiereDate.getTime() <= this.liveReminderNow
     },
     displayedUpcomingTimeLeft: function () {
       if (!(this.premiereDate instanceof Date)) return this.upcomingTimeLeft
