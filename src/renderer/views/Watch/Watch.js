@@ -1992,7 +1992,8 @@ export default defineComponent({
             }
 
             getOembedTitle(annotation.videoId).then((title) => {
-              if (!title || !this.isCurrentVideoLoad(loadGeneration, videoId)) {
+              if (!title || this.$store.getters.getAvoidTranslation === 'disabled' ||
+                  !this.isCurrentVideoLoad(loadGeneration, videoId)) {
                 return
               }
 
