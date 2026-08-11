@@ -494,6 +494,10 @@ const showDownloadPrompt = ref(false)
 const showFormatPrompt = ref(false)
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
+
 // the title is plain text, so it has to be escaped before the hashtags and handles are linked
 /** @type {import('vue').ComputedRef<string>} */
 const titleHtml = computed(() => linkifyHashtagsAndHandles(escapeHTML(props.title)))

@@ -146,7 +146,7 @@
       />
       <FtSelect
         :placeholder="t('Settings.General Settings.Extra Thumbnail Action Button.Extra Thumbnail Action Button')"
-        :value="extraThumbnailAction"
+        :value="effectiveExtraThumbnailAction"
         setting-key="extraThumbnailAction"
         :select-names="extraThumbnailActionNames"
         :select-values="extraThumbnailActionValues"
@@ -613,6 +613,15 @@ function handleThumbnailPreferenceChange(value) {
 
 const enableDownloads = computed(() => store.getters.getEnableDownloads)
 
+/** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube' | 'download'>} */
+const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
+
+const effectiveExtraThumbnailAction = computed(() => (
+  !enableDownloads.value && extraThumbnailAction.value === 'download'
+    ? ''
+    : extraThumbnailAction.value
+))
+
 const extraThumbnailActionValues = computed(() => [
   '',
   'history',
@@ -629,11 +638,8 @@ const extraThumbnailActionNames = computed(() => [
   ...(process.env.IS_ELECTRON && enableDownloads.value ? [t('Downloads.Download Video')] : [])
 ])
 
-/** @type {import('vue').ComputedRef<'' | 'history' | 'copyYoutube' | 'openYoutube'>} */
-const extraThumbnailAction = computed(() => store.getters.getExtraThumbnailAction)
-
 /**
- * @param {'' | 'history' | 'copyYoutube' | 'openYoutube'} value
+ * @param {'' | 'history' | 'copyYoutube' | 'openYoutube' | 'download'} value
  */
 function updateExtraThumbnailAction(value) {
   store.dispatch('updateExtraThumbnailAction', value)

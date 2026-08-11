@@ -582,6 +582,9 @@ watch(showDeletePlaylistPrompt, handlePromptToggle)
 watch(showRemoveVideosOnWatchPrompt, handlePromptToggle)
 watch(showExportPrompt, handlePromptToggle)
 watch(showDownloadPrompt, handlePromptToggle)
+watch(enableDownloads, (enabled) => {
+  if (!enabled) showDownloadPrompt.value = false
+})
 
 /**
  * @param {boolean} shown
