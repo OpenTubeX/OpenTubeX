@@ -774,8 +774,8 @@ test.describe('watch page', () => {
           category: 'outro',
           description: '',
           locked: 0,
-          segment: [15, 30],
-          videoDuration: 30,
+          segment: [15, 40],
+          videoDuration: 40,
           votes: 1
         }]
       }]),
@@ -797,6 +797,7 @@ test.describe('watch page', () => {
     const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
     await expect(prompt).toBeVisible()
     await prompt.getByRole('button', { name: /Skip/ }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeLessThan(40)
     await page.evaluate(() => new Promise(resolve => {
       requestAnimationFrame(() => requestAnimationFrame(resolve))
     }))
