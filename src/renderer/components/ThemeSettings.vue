@@ -114,6 +114,15 @@
             @change="updateFixedTabWidth"
           />
         </div>
+        <FtButton
+          v-if="showTabIcons"
+          :label="loadingTabIcons
+            ? $t('Settings.Theme Settings.Loading Missing Tab Icons')
+            : $t('Settings.Theme Settings.Load Missing Tab Icons')"
+          :icon="['fas', 'download']"
+          :disabled="loadingTabIcons"
+          @click="loadTabIcons"
+        />
       </FtFlexBox>
     </template>
     <div class="sliderGrid">
@@ -237,6 +246,7 @@ import FtSelect from './FtSelect/FtSelect.vue'
 import FtToggleSwitch from './FtToggleSwitch/FtToggleSwitch.vue'
 import FtSlider from './FtSlider/FtSlider.vue'
 import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
+import FtButton from './FtButton/FtButton.vue'
 import FtPrompt from './FtPrompt/FtPrompt.vue'
 
 import store from '../store/index'
@@ -261,6 +271,8 @@ import {
 } from '../constants/scrollbar'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 import { setAnimationSpeed } from '../helpers/animationSpeed'
+import { loadMissingTabAvatars } from '../helpers/loadTabAvatars'
+import { showToast } from '../helpers/utils'
 
 const { t } = useI18n()
 
@@ -465,6 +477,24 @@ function updateShowProgressBarToast(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const loadingTabIcons = ref(false)
+
+async function loadTabIcons() {
+  if (loadingTabIcons.value) return
+  loadingTabIcons.value = true
+  try {
+    const { loaded, failed } = await loadMissingTabAvatars(store.getters.getTabs)
+    if (loaded === 0 && failed === 0) {
+      showToast(t('Settings.Theme Settings.No Missing Tab Icons'))
+    } else if (failed > 0) {
+      showToast(t('Settings.Theme Settings.Loaded Tab Icons With Failures', { loaded, failed }))
+    } else {
+      showToast(t('Settings.Theme Settings.Loaded Tab Icons', { count: loaded }))
+    }
+  } finally {
+    loadingTabIcons.value = false
+  }
+}
 
 /**
  * @param {boolean} value

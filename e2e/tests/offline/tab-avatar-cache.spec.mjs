@@ -2,7 +2,7 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 // A 1x1 PNG, small enough to stay well inside the avatar download limit
 const AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
@@ -78,4 +78,58 @@ test('tabs of the same channel share one cached avatar file', async ({ app, page
     const files = await listCachedFiles(app.userDataDir, baseline)
     return files.some(file => file.name === sharedAvatar.name)
   }).toBe(false)
+})
+
+test.describe('loading missing tab icons', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
+
+  test('caches an unloaded tab icon without activating the tab', async ({ page }) => {
+    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        authorThumbnails: [{ url: 'https://images.test/avatar.png' }],
+        tabs: []
+      })
+    }))
+    await page.route('https://images.test/avatar.png', route => route.fulfill({
+      contentType: 'image/png',
+      body: Buffer.from(AVATAR_PNG, 'base64')
+    }))
+
+    const { tabId, activeTabId } = await page.evaluate(async () => {
+      const activeTabId = (await window.ftElectron.tabs.getState()).activeTabId
+      const tab = await window.ftElectron.tabs.create({
+        route: '/channel/UCmissing',
+        makeActive: false,
+        lazyLoad: true
+      })
+      return { tabId: tab.id, activeTabId }
+    })
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    await themeSection.getByRole('button', { name: 'Load Missing Tab Icons' }).click()
+    await expect(page.locator('.toast')).toContainText('Missing tab icons loaded: 1')
+
+    await expect.poll(() => page.evaluate(tabId => {
+      return window.ftElectron.tabs.getState().then(state => {
+        const tab = state.tabs.find(candidate => candidate.id === tabId)
+        return {
+          activeTabId: state.activeTabId,
+          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
+          isUnloaded: tab?.isUnloaded
+        }
+      })
+    }, tabId)).toEqual({
+      activeTabId,
+      avatarLoaded: true,
+      isUnloaded: true
+    })
+  })
 })
