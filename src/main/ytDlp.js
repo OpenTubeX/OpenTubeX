@@ -1094,7 +1094,19 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId) {
     }
   }
 
-  const args = ['--dump-single-json', '--no-playlist', '--no-warnings', '--no-progress', '--socket-timeout', '15']
+  const args = [
+    '--dump-single-json',
+    '--no-playlist',
+    '--no-warnings',
+    '--no-progress',
+    '--socket-timeout',
+    '15',
+    // Some yt-dlp versions otherwise select an iOS live HLS manifest, whose
+    // segments can stop working when YouTube enforces a PO token. Android VR
+    // live HLS does not require that token; retain the defaults as fallbacks.
+    '--extractor-args',
+    'youtube:player_client=android_vr,default'
+  ]
 
   await pushProxyArgument(args)
 
