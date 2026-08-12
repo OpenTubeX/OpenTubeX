@@ -1,10 +1,13 @@
 <template>
+  <!-- The role is what makes the label reach assistive technology: on a plain
+       span it would be dropped, leaving the compact badge with no text at all -->
   <span
     v-if="impact"
     class="performanceImpact"
     :class="[impact.level, { compact }]"
+    role="img"
     :title="title"
-    :aria-label="compact ? title : null"
+    :aria-label="fullText"
   >
     <FontAwesomeIcon :icon="['fas', impact.level === 'high' ? 'gauge-high' : 'gauge']" />
     <span
@@ -76,10 +79,10 @@ const description = computed(() => {
   return t('Settings.Performance Impact.Description', { resources })
 })
 
-// The level is only spelled out in the hover text when the badge doesn't show it
-const title = computed(() => props.compact
-  ? `${label.value}: ${description.value}`
-  : description.value)
+const fullText = computed(() => `${label.value}: ${description.value}`)
+
+// The level is only repeated in the hover text when the badge doesn't show it
+const title = computed(() => props.compact ? fullText.value : description.value)
 </script>
 
 <style scoped>

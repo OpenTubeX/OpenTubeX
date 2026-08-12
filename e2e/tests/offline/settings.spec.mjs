@@ -2542,6 +2542,10 @@ test.describe('synced setting indicators', () => {
 })
 
 test.describe('performance impact indicators', () => {
+  // Pinned because the labels matched below are worded differently in the other
+  // English locales, which is what the runner's system locale can resolve to
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
   test('only shows the badges once they are switched on', async ({ app }) => {
     const { page } = app
     const section = await goToSettingsSection(page, 'sponsor-block')
@@ -2574,6 +2578,7 @@ test.describe('performance impact indicators on selects', () => {
   test.use({
     seed: {
       settings: {
+        currentLocale: 'en-US',
         showPerformanceImpactIndicators: true
       }
     }
