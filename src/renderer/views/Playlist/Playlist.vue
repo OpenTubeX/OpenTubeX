@@ -75,6 +75,7 @@
           <FtElementList
             v-if="listType === 'grid'"
             :data="visiblePlaylistItems"
+            data-type="video"
             display="grid"
             :playlist-id="playlistId"
             :playlist-type="infoSource"
