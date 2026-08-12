@@ -454,7 +454,7 @@ const state = {
   // This makes the `favorites` playlist uses as quick bookmark target
   // If the playlist is removed quick bookmark is disabled
   quickBookmarkTargetPlaylistId: 'favorites',
-  generalAutoLoadMorePaginatedItemsEnabled: false,
+  generalAutoLoadMorePaginatedItemsEnabled: true,
   hideToTrayOnMinimize: false,
 
   // The settings below have side effects

@@ -1192,7 +1192,7 @@ test.describe('settings', () => {
 
     const autoLoadToggle = page.getByRole('checkbox', { name: /Auto Load Next Page/i })
     await page.locator('label.switch-label').filter({ hasText: 'Auto Load Next Page' }).click()
-    await expect(autoLoadToggle).toBeChecked()
+    await expect(autoLoadToggle).not.toBeChecked()
 
     await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
 
@@ -1203,7 +1203,7 @@ test.describe('settings', () => {
     await attachScreenshot('highlighted changed setting')
 
     await resetButton.click()
-    await expect(autoLoadToggle).not.toBeChecked()
+    await expect(autoLoadToggle).toBeChecked()
     await expect(resetButton).toHaveCount(0)
   })
 
@@ -2297,7 +2297,7 @@ test.describe('synced setting indicators', () => {
     await page.locator('label').filter({ hasText: 'Auto load next page' })
       .getByRole('button', { name: 'Stop syncing this setting' })
       .click()
-    await expect(toggle).not.toBeChecked()
+    await expect(toggle).toBeChecked()
 
     const localOnlyLabel = page.locator('label').filter({ hasText: 'Check for Updates' })
     await expect(localOnlyLabel.getByRole('button', { name: /syncing this setting/i })).toHaveCount(0)
