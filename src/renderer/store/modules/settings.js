@@ -19,7 +19,6 @@ import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
-import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 
@@ -415,8 +414,6 @@ const state = {
   videoPlaybackRateInterval: 0.25,
   rememberVolume: true,
   enableVideoZoom: true,
-  // Last zoom level picked in the player, reused for subsequent videos
-  videoZoom: DEFAULT_VIDEO_ZOOM,
   skipSilence: false,
   showSkipSilenceButton: false,
   useVoiceOverTranslation: false,
