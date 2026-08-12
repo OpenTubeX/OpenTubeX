@@ -4,7 +4,6 @@
       class="tutorialOverlay"
       :class="{ centered: targetRect === null }"
       role="presentation"
-      @pointerdown.self="finishTutorial"
       @keydown.capture="handleKeydown"
     >
       <div
@@ -242,7 +241,6 @@ function handleDocumentKeydown(event) {
   if (event.key === 'Escape') {
     event.preventDefault()
     event.stopPropagation()
-    finishTutorial()
   }
 }
 
