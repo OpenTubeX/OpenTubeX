@@ -26,7 +26,7 @@ async function resolveLocalAvatarUrl(path) {
   const videoId = path.match(/^\/watch\/([^/]+)/)?.[1]
   if (videoId) {
     const video = await getLocalVideoInfo(videoId)
-    return normalizeAvatarUrl(video.secondary_info?.owner?.author?.best_thumbnail?.url)
+    return normalizeAvatarUrl(video.info?.secondary_info?.owner?.author?.best_thumbnail?.url)
   }
 
   return null
@@ -51,29 +51,31 @@ async function resolveInvidiousAvatarUrl(path) {
   return null
 }
 
-async function resolveAvatarUrl(path) {
-  const useLocalApi = store.getters.getBackendPreference === 'local'
-  try {
-    return useLocalApi
-      ? await resolveLocalAvatarUrl(path)
-      : await resolveInvidiousAvatarUrl(path)
-  } catch (error) {
-    if (!store.getters.getBackendFallback) throw error
-    return useLocalApi
-      ? await resolveInvidiousAvatarUrl(path)
-      : await resolveLocalAvatarUrl(path)
-  }
+async function fetchAvatarBytes(path, useLocalApi) {
+  const avatarUrl = useLocalApi
+    ? await resolveLocalAvatarUrl(path)
+    : await resolveInvidiousAvatarUrl(path)
+  return avatarUrl ? await fetchTabAvatarBytes(avatarUrl) : null
 }
 
 async function loadTabAvatar(tab) {
   const routePath = tab.route?.path
   if (typeof routePath !== 'string') return false
 
-  const avatarUrl = await resolveAvatarUrl(routePath)
-  if (!avatarUrl) return false
+  const useLocalApi = store.getters.getBackendPreference === 'local'
+  let avatarBytes
+  try {
+    avatarBytes = await fetchAvatarBytes(routePath, useLocalApi)
+  } catch (error) {
+    if (!store.getters.getBackendFallback) throw error
+  }
 
-  const avatarBytes = await fetchTabAvatarBytes(avatarUrl)
-  return avatarBytes != null && await window.ftElectron.tabs.updateAvatar(
+  if (avatarBytes == null && store.getters.getBackendFallback) {
+    avatarBytes = await fetchAvatarBytes(routePath, !useLocalApi)
+  }
+  if (avatarBytes == null) return false
+
+  return await window.ftElectron.tabs.updateAvatar(
     avatarBytes,
     tab.id,
     routePath
@@ -86,9 +88,7 @@ async function loadTabAvatar(tab) {
  * @returns {Promise<{loaded: number, failed: number}>}
  */
 export async function loadMissingTabAvatars(tabs) {
-  const missingTabs = tabs.filter(tab => {
-    return getTabAvatarUrl(tab) == null && /^\/(?:channel|watch)\//.test(tab.route?.path ?? '')
-  })
+  const missingTabs = getMissingTabAvatarTabs(tabs)
   const results = await Promise.allSettled(missingTabs.map(loadTabAvatar))
 
   return results.reduce((counts, result) => {
@@ -102,4 +102,10 @@ export async function loadMissingTabAvatars(tabs) {
     }
     return counts
   }, { loaded: 0, failed: 0 })
+}
+
+export function getMissingTabAvatarTabs(tabs) {
+  return tabs.filter(tab => {
+    return getTabAvatarUrl(tab) == null && /^\/(?:channel|watch)\//.test(tab.route?.path ?? '')
+  })
 }

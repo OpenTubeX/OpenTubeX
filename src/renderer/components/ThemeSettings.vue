@@ -120,7 +120,7 @@
             ? $t('Settings.Theme Settings.Loading Missing Tab Icons')
             : $t('Settings.Theme Settings.Load Missing Tab Icons')"
           :icon="['fas', 'download']"
-          :disabled="loadingTabIcons"
+          :disabled="loadingTabIcons || !hasMissingTabIcons"
           @click="loadTabIcons"
         />
       </FtFlexBox>
@@ -271,7 +271,7 @@ import {
 } from '../constants/scrollbar'
 import { normalizeToastPosition, TOAST_POSITION_VALUES } from '../constants/toastPosition'
 import { setAnimationSpeed } from '../helpers/animationSpeed'
-import { loadMissingTabAvatars } from '../helpers/loadTabAvatars'
+import { getMissingTabAvatarTabs, loadMissingTabAvatars } from '../helpers/loadTabAvatars'
 import { showToast } from '../helpers/utils'
 
 const { t } = useI18n()
@@ -477,6 +477,7 @@ function updateShowProgressBarToast(value) {
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
+const hasMissingTabIcons = computed(() => getMissingTabAvatarTabs(store.getters.getTabs).length > 0)
 const loadingTabIcons = ref(false)
 
 async function loadTabIcons() {
