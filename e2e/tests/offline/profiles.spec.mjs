@@ -33,6 +33,20 @@ async function openProfileList(page) {
 test.describe('profile selector', () => {
   test.use({ seed: { profiles: [mainProfile, secondProfile] } })
 
+  test('opens directly from the profile button context menu', async ({ page }) => {
+    await profileIcon(page).click()
+    await expect(page.locator('.profileSummaryText')).toContainText('You can also right-click the profile icon to switch profiles')
+    await profileIcon(page).click()
+
+    await profileIcon(page).click({ button: 'right' })
+
+    await expect(page.locator('.profileList')).toBeVisible()
+
+    await profileIcon(page).click({ button: 'right' })
+    await page.locator('.topNav .logo').click()
+    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
+  })
+
   test('lists seeded profiles and switches the active profile', async ({ page }) => {
     await expect(profileIconInitial(page)).toHaveText('A')
 

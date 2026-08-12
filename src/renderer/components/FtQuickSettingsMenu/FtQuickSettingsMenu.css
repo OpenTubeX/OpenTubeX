@@ -91,6 +91,11 @@
   white-space: nowrap;
 }
 
+.profileSummaryText small {
+  color: var(--secondary-text-color);
+  font-size: 12px;
+}
+
 .profilePanelHeader {
   align-items: center;
   border-block-end: 1px solid var(--scrollbar-color);

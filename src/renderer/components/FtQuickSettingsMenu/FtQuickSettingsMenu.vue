@@ -11,6 +11,7 @@
       :aria-controls="id"
       :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
       @click="toggleMenu"
+      @contextmenu.stop.prevent="openProfilePanelFromContextMenu"
       @mousedown="handleTriggerMouseDown"
       @keydown.esc.stop="closeMenu"
     >
@@ -100,6 +101,7 @@
               />
               <span class="profileSummaryText">
                 <strong dir="auto">{{ translateProfileName(activeProfile) }}</strong>
+                <small>{{ t('Settings.Quick Settings.Profile Selector Hint') }}</small>
               </span>
               <FontAwesomeIcon :icon="['fas', 'angle-right']" />
             </button>
@@ -412,16 +414,17 @@ const defaultQuality = computed(() => {
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
   if (menuOpen.value) {
+    profilePanelOpen.value = false
     nextTick(() => menuRef.value?.$el?.focus())
   }
 }
 
 function handleMenuAfterLeave() {
-  profilePanelOpen.value = false
+  if (!menuOpen.value) profilePanelOpen.value = false
 }
 
-function handleTriggerMouseDown() {
-  if (menuOpen.value) {
+function handleTriggerMouseDown(event) {
+  if (event.button === 0 && menuOpen.value) {
     mouseDownOnTrigger = true
   }
 }
@@ -468,6 +471,11 @@ onBeforeUnmount(() => {
 function openProfilePanel() {
   profilePanelOpen.value = true
   focusMenu()
+}
+
+function openProfilePanelFromContextMenu() {
+  menuOpen.value = true
+  openProfilePanel()
 }
 
 function closeProfilePanel() {
