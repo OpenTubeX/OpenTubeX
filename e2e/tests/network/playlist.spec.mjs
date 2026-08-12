@@ -17,8 +17,10 @@ test('loads playlists containing members-only videos', async ({ page, innertube 
   await expect(page.locator('.playlistTitle')).toContainText(MEMBERS_ONLY_PLAYLIST.title, {
     timeout: 30_000
   })
+  await expect(page.locator('.playlistPage')).toHaveClass(/grid/)
+  await expect(page.locator('.playlistItemsCard .autoGrid')).toHaveClass(/grid/)
   await expect.poll(
-    () => page.locator('.playlistItems .playlistItem').count(),
+    () => page.locator('.playlistItemsCard .autoGrid > .grid').count(),
     { timeout: 30_000 }
   ).toBeGreaterThan(20)
 })
