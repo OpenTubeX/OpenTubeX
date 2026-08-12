@@ -1,5 +1,6 @@
 import asyncFs from 'fs/promises'
 import path from 'path'
+import { randomUUID } from 'crypto'
 
 export const VOICE_OVER_TRANSLATION_CACHE_DURATION_MS = 24 * 60 * 60 * 1000
 
@@ -8,13 +9,24 @@ export class VoiceOverTranslationCache {
     this.directory = directory
     this.validateUrl = validateUrl
     this.now = now
+    this.pendingOperation = Promise.resolve()
   }
 
   pathFor(videoId, responseLanguage) {
     return path.join(this.directory, `${videoId}_${responseLanguage}.json`)
   }
 
-  async get(videoId, responseLanguage) {
+  runExclusive(operation) {
+    const result = this.pendingOperation.then(operation, operation)
+    this.pendingOperation = result.catch(() => {})
+    return result
+  }
+
+  get(videoId, responseLanguage) {
+    return this.runExclusive(() => this.getEntry(videoId, responseLanguage))
+  }
+
+  async getEntry(videoId, responseLanguage) {
     const filePath = this.pathFor(videoId, responseLanguage)
 
     try {
@@ -35,15 +47,29 @@ export class VoiceOverTranslationCache {
     }
   }
 
-  async set(videoId, responseLanguage, result) {
-    await asyncFs.mkdir(this.directory, { recursive: true })
-    await asyncFs.writeFile(this.pathFor(videoId, responseLanguage), JSON.stringify({
-      expiresAt: this.now() + VOICE_OVER_TRANSLATION_CACHE_DURATION_MS,
-      result
-    }))
+  set(videoId, responseLanguage, result) {
+    return this.runExclusive(async () => {
+      await asyncFs.mkdir(this.directory, { recursive: true })
+
+      const filePath = this.pathFor(videoId, responseLanguage)
+      const temporaryPath = `${filePath}.${randomUUID()}.tmp`
+      try {
+        await asyncFs.writeFile(temporaryPath, JSON.stringify({
+          expiresAt: this.now() + VOICE_OVER_TRANSLATION_CACHE_DURATION_MS,
+          result
+        }))
+        await asyncFs.rename(temporaryPath, filePath)
+      } finally {
+        await asyncFs.rm(temporaryPath, { force: true })
+      }
+    })
   }
 
-  async pruneExpired() {
+  pruneExpired() {
+    return this.runExclusive(() => this.pruneExpiredEntries())
+  }
+
+  async pruneExpiredEntries() {
     let entries
 
     try {
@@ -56,9 +82,15 @@ export class VoiceOverTranslationCache {
     }
 
     await Promise.all(entries
-      .filter(entry => entry.isFile() && entry.name.endsWith('.json'))
+      .filter(entry => entry.isFile() &&
+        (entry.name.endsWith('.json') || entry.name.endsWith('.tmp')))
       .map(async entry => {
         const filePath = path.join(this.directory, entry.name)
+        if (entry.name.endsWith('.tmp')) {
+          await asyncFs.rm(filePath, { force: true })
+          return
+        }
+
         try {
           const cached = JSON.parse(await asyncFs.readFile(filePath, 'utf8'))
           if (!Number.isFinite(cached.expiresAt) || cached.expiresAt <= this.now()) {

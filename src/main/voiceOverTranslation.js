@@ -1,17 +1,12 @@
 import { net } from 'electron'
 import { VoiceOverTranslationCache } from './VoiceOverTranslationCache'
+import { isAllowedTranslationAudioUrl } from './voiceOverTranslationUrls'
 
 const MAX_VIDEO_DURATION_SECONDS = 4 * 60 * 60
 const MAX_AUDIO_REDIRECTS = 5
 const PARTIAL_CONTENT_STATUS = 5
 const RESPONSE_LANGUAGES = new Set(['ru', 'en', 'kk'])
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/
-const TRANSLATION_AUDIO_HOST_PATTERNS = [
-  /(^|\.)strm\.yandex\.net$/,
-  /^strm\.yandex\.ru$/,
-  /^storage\.yandexcloud\.net$/,
-]
-
 let clientPromise
 let translationCache
 
@@ -34,17 +29,12 @@ function getClient() {
   return clientPromise
 }
 
-function isAllowedTranslationAudioUrl(url) {
-  return url.protocol === 'https:' &&
-    TRANSLATION_AUDIO_HOST_PATTERNS.some(pattern => pattern.test(url.hostname))
-}
-
 async function validateTranslationAudioUrl(rawUrl) {
   let audioUrl = new URL(rawUrl)
 
   for (let redirectCount = 0; redirectCount <= MAX_AUDIO_REDIRECTS; redirectCount++) {
     if (!isAllowedTranslationAudioUrl(audioUrl)) {
-      throw new Error('Voice-over service returned an untrusted audio URL')
+      throw new Error(`Voice-over service returned an untrusted audio URL: ${audioUrl.hostname}`)
     }
 
     const response = await net.fetch(audioUrl.href, {

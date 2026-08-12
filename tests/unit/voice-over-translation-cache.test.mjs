@@ -60,3 +60,23 @@ test('removes translations after one day', async () => {
     assert.equal(await cache.get(VIDEO_ID, 'en'), undefined)
   })
 })
+
+test('does not prune a replacement written concurrently', async () => {
+  await withCacheDirectory(async directory => {
+    let now = 1000
+    const cache = new VoiceOverTranslationCache(
+      directory,
+      async url => new URL(url),
+      () => now
+    )
+    await cache.set(VIDEO_ID, 'en', RESULT)
+
+    now += VOICE_OVER_TRANSLATION_CACHE_DURATION_MS
+    await Promise.all([
+      cache.pruneExpired(),
+      cache.set(VIDEO_ID, 'en', { ...RESULT, status: 2 })
+    ])
+
+    assert.equal((await cache.get(VIDEO_ID, 'en')).status, 2)
+  })
+})
