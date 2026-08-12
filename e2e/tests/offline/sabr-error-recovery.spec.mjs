@@ -181,15 +181,16 @@ test('terminal yt-dlp playback failure restores the built-in source once', async
     watchView.activeFormat = 'dash'
     watchView.activePlaybackEngine = 'yt-dlp'
     watchView.activePlaybackEngineVersion = 'test'
+    watchView.playbackEngineFallbackTarget = null
     watchView.manifestSrc = 'data:application/dash+xml,yt-dlp'
     watchView.manifestMimeType = 'application/dash+xml'
     watchView.legacyFormats = []
     watchView.builtInPlaybackSource = {
-      manifestSrc: 'data:application/dash+xml,built-in',
+      manifestSrc: null,
       manifestMimeType: 'application/dash+xml',
       sabrData: null,
       legacyFormats: [{ itag: 18 }],
-      streamingDataExpiryDate: null
+      streamingDataExpiryDate: Date.now() + 60_000
     }
 
     const error = { code: 1002, data: ['https://example.invalid/video', 500] }
@@ -201,6 +202,8 @@ test('terminal yt-dlp playback failure restores the built-in source once', async
       secondFallback,
       activePlaybackEngine: watchView.activePlaybackEngine,
       activePlaybackEngineVersion: watchView.activePlaybackEngineVersion,
+      activeFormat: watchView.activeFormat,
+      fallbackTarget: watchView.playbackEngineFallbackTarget,
       manifestSrc: watchView.manifestSrc,
       legacyFormatCount: watchView.legacyFormats.length
     }
@@ -211,8 +214,80 @@ test('terminal yt-dlp playback failure restores the built-in source once', async
     secondFallback: false,
     activePlaybackEngine: 'built-in',
     activePlaybackEngineVersion: null,
-    manifestSrc: 'data:application/dash+xml,built-in',
+    activeFormat: 'legacy',
+    fallbackTarget: 'built-in',
+    manifestSrc: null,
     legacyFormatCount: 1
+  })
+})
+
+test('expired built-in playback source is refreshed before yt-dlp falls back', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) throw new Error('Unable to access the watch view')
+
+    watchView.errorMessage = ''
+    watchView.isPostLiveDvr = false
+    watchView.activePlaybackEngine = 'yt-dlp'
+    watchView.playbackEngineFallbackTarget = null
+    watchView.builtInPlaybackSource = {
+      manifestSrc: 'https://example.invalid/expired.mpd',
+      manifestMimeType: 'application/dash+xml',
+      sabrData: null,
+      legacyFormats: [],
+      streamingDataExpiryDate: Date.now() - 1
+    }
+
+    let reloadOptions = null
+    watchView.reloadView = async (options) => {
+      reloadOptions = options
+      watchView.activePlaybackEngine = 'built-in'
+      watchView.manifestSrc = 'https://example.invalid/refreshed.mpd'
+    }
+
+    const fallbackApplied = await watchView.tryPlaybackEngineFallback({
+      code: 1002,
+      data: ['https://example.invalid/video', 500]
+    })
+
+    return {
+      fallbackApplied,
+      reloadOptions,
+      fallbackTarget: watchView.playbackEngineFallbackTarget,
+      activePlaybackEngine: watchView.activePlaybackEngine,
+      manifestSrc: watchView.manifestSrc
+    }
+  })
+
+  expect(result).toEqual({
+    fallbackApplied: true,
+    reloadOptions: { preserveTitle: true },
+    fallbackTarget: 'built-in',
+    activePlaybackEngine: 'built-in',
+    manifestSrc: 'https://example.invalid/refreshed.mpd'
   })
 })
 

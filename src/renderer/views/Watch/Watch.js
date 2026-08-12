@@ -289,6 +289,8 @@ export default defineComponent({
        */
       builtInPlaybackSource: null,
       playbackEngineFallbackAttemptedForCurrentVideo: false,
+      /** @type {'built-in' | 'yt-dlp' | null} */
+      playbackEngineFallbackTarget: null,
       // yt-dlp is a separate process that takes a while to extract the streams. The
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
@@ -1485,6 +1487,7 @@ export default defineComponent({
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
         this.streamErrorReloadAttemptedForCurrentVideo = false
         this.playbackEngineFallbackAttemptedForCurrentVideo = false
+        this.playbackEngineFallbackTarget = null
         this.sabrErrorRecoveryAttempts = 0
         this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
@@ -3908,6 +3911,7 @@ export default defineComponent({
         }
 
         this.playbackEngineFallbackAttemptedForCurrentVideo = true
+        this.playbackEngineFallbackTarget = 'built-in'
         this.ytDlpStreamsPending = true
         await this.$nextTick()
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
@@ -3915,6 +3919,14 @@ export default defineComponent({
         }
 
         const source = this.builtInPlaybackSource
+        if (
+          source.streamingDataExpiryDate !== null &&
+          new Date() > source.streamingDataExpiryDate
+        ) {
+          await this.reloadView({ preserveTitle: true })
+          return true
+        }
+
         this.manifestSrc = source.manifestSrc
         this.manifestMimeType = source.manifestMimeType
         this.sabrData = source.sabrData
@@ -3923,9 +3935,15 @@ export default defineComponent({
         this.activePlaybackEngine = 'built-in'
         this.activePlaybackEngineVersion = null
 
-        if (this.activeFormat === 'dash' && this.manifestSrc === null && this.legacyFormats.length > 0) {
+        if (
+          (this.activeFormat === 'dash' || this.activeFormat === 'audio') &&
+          this.manifestSrc === null &&
+          this.legacyFormats.length > 0
+        ) {
           this.activeFormat = 'legacy'
         } else if (this.activeFormat === 'legacy' && this.legacyFormats.length === 0 && this.manifestSrc !== null) {
+          this.activeFormat = 'dash'
+        } else if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
           this.activeFormat = 'dash'
         }
 
@@ -3938,6 +3956,7 @@ export default defineComponent({
       }
 
       this.playbackEngineFallbackAttemptedForCurrentVideo = true
+      this.playbackEngineFallbackTarget = 'yt-dlp'
       this.ytDlpStreamsPending = true
       this.showTabToast({
         message: this.t('Change Format.Built-in Fallback Template', { error: reason }),
@@ -3946,11 +3965,18 @@ export default defineComponent({
 
       try {
         const fallbackApplied = await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
-        return this.isCurrentVideoLoad(loadGeneration, videoId) ? fallbackApplied : true
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          return true
+        }
+        if (!fallbackApplied) {
+          this.playbackEngineFallbackTarget = null
+        }
+        return fallbackApplied
       } catch (fallbackError) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
           return true
         }
+        this.playbackEngineFallbackTarget = null
         console.error('Falling back to yt-dlp playback failed', fallbackError)
         return false
       } finally {
@@ -3972,7 +3998,11 @@ export default defineComponent({
      * @param {string} videoId
      */
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
-      if (!process.env.IS_ELECTRON || this.videoPlaybackEngine !== 'yt-dlp') {
+      if (
+        !process.env.IS_ELECTRON ||
+        this.playbackEngineFallbackTarget === 'built-in' ||
+        (this.videoPlaybackEngine !== 'yt-dlp' && this.playbackEngineFallbackTarget !== 'yt-dlp')
+      ) {
         return
       }
 
