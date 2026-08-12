@@ -336,8 +336,17 @@ onBeforeUnmount(() => {
   cropBitmap?.close?.()
 })
 
+// the color input can't handle a CSS variable, so it needs the resolved value,
+// which has to be refreshed whenever the theme changes the variable underneath it
+const themeColor = ref(resolveThemeColor())
+
+watch([() => store.getters.getMainColor, () => store.getters.getBaseTheme], async () => {
+  await nextTick()
+  themeColor.value = resolveThemeColor()
+})
+
 const customColorPickerValue = computed(() => {
-  if (profileBgColor.value === THEME_BG_COLOR) return resolveThemeColor()
+  if (profileBgColor.value === THEME_BG_COLOR) return themeColor.value
 
   return profileBgColor.value === 'transparent' ? '#000000' : profileBgColor.value
 })

@@ -112,7 +112,8 @@ test.describe('profile manager', () => {
 
       // switching the theme color has to repaint the profile, without touching the profile itself
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
-      await profileIcon(page).click()
+      await page.locator('.settingsBreadcrumb').getByRole('button', { name: 'Settings' }).click()
+      await page.locator('.settingsMenu [data-section="theme"]').click()
       await page.getByRole('combobox', { name: 'Main Color Theme' }).click()
       await page.locator('.selectDropdown').getByRole('option', { name: 'Blue', exact: true }).click()
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(33, 150, 243)')
