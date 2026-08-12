@@ -70,6 +70,7 @@ import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
+import { waitForYtDlpFormatAvailability } from '../../helpers/player/ytDlpFormatAvailability'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import {
   DEFAULT_VIDEO_ZOOM,
@@ -6552,6 +6553,10 @@ export default defineComponent({
         }
 
         try {
+          if (!await waitForYtDlpFormatAvailability(format)) {
+            throw new Error('yt-dlp format availability delay is too long')
+          }
+
           await player.load(format.url, playbackPosition, format.mimeType)
         } catch (error) {
           handleError(error, 'setLegacyFormat', event.detail)
