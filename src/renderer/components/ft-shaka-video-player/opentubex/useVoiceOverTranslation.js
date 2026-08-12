@@ -300,7 +300,9 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
 
   function attach(videoElement) {
     videoElement.addEventListener('play', handlePlay)
+    videoElement.addEventListener('playing', handlePlay)
     videoElement.addEventListener('pause', handlePause)
+    videoElement.addEventListener('waiting', handlePause)
     videoElement.addEventListener('seeking', handleSeeking)
     videoElement.addEventListener('timeupdate', handleTimeUpdate)
     videoElement.addEventListener('ratechange', handleRateChange)
@@ -310,7 +312,9 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
 
   function detach(videoElement) {
     videoElement.removeEventListener('play', handlePlay)
+    videoElement.removeEventListener('playing', handlePlay)
     videoElement.removeEventListener('pause', handlePause)
+    videoElement.removeEventListener('waiting', handlePause)
     videoElement.removeEventListener('seeking', handleSeeking)
     videoElement.removeEventListener('timeupdate', handleTimeUpdate)
     videoElement.removeEventListener('ratechange', handleRateChange)
