@@ -700,6 +700,17 @@ Settings:
     Remember Volume: Remember Volume
     Fast-Forward Through Silence: Fast-Forward Through Silence
     Show Fast-Forward Through Silence Toggle: Show Fast-Forward Through Silence Toggle
+    Voice-over Translation:
+      Enable: Enable voice-over translation
+      Prepare in Background: Start preparing voice-over translations in the background
+      Background Preparation Tooltip: Sends the current video's ID, duration, and selected language to the translation service as soon as a supported video loads.
+      Language: Voice-over translation language
+      Supported Source Languages: "Supported source languages: Russian, English, Chinese, Korean, Lithuanian, Latvian, Arabic, French, Italian, Spanish, German, and Japanese."
+      Voice Volume: Translated voice volume
+      Original Volume: Original audio volume
+      Russian: Russian
+      English: English
+      Kazakh: Kazakh
     Hold to Double Playback Speed: Hold to Double Playback Speed
     Default Playback Rate: Default Playback Rate
     Use Quick Playback Speed Bar: Use Quick Playback Speed Bar
@@ -1480,6 +1491,14 @@ Video:
       shuffling playlists: shuffling playlists
       looping playlists: looping playlists
   Player:
+    Voice-over Translation:
+      Voice-over Translation: Voice-over translation
+      Start: Translate
+      Cancel: Cancel
+      Progress: Preparing voice-over translation…
+      Retry: Retry
+      Error: Voice-over translation failed. Please try again later.
+      Duration Error: Voice-over translation is only available for videos up to four hours long.
     Caption Appearance:
       Options: Options
       Title: Caption Appearance
@@ -1850,6 +1869,7 @@ Tooltips:
     Use YouTube-style Shorts: Displays Shorts in a portrait grid on subscription and channel pages and uses the YouTube-style Shorts player.
     Loop Shorts: When enabled, Shorts restart automatically. When disabled, Shorts stop at the end and show a replay button.
     Show Fast-Forward Through Silence Toggle: Shows an on/off toggle for fast-forwarding through silence in the player's settings menu.
+    Voice-over Translation: Sends the video ID, duration, and selected language to the unofficial Yandex voice-over translation service when you request a translation. Disabled by default.
     Hold to Double Playback Speed: Hold the Spacebar or left mouse button over the player to temporarily double the current playback speed.
     Ambient Mode: Blends the video's colors into the area around the player.
     Default Volume: Disabled while Remember Volume is enabled. Turn off Remember Volume to set a fixed startup volume for each video.

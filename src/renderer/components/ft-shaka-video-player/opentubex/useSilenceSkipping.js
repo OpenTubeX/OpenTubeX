@@ -19,8 +19,9 @@ const SPEED_RAMP_MS = 200
  * @param {import('vue').ComputedRef<boolean>} options.enabled
  * @param {import('vue').Ref<boolean>} options.isLive
  * @param {import('vue').Ref<HTMLVideoElement | null>} options.video
+ * @param {import('vue').ComputedRef<number>} options.outputGain
  */
-export function useSilenceSkipping({ enabled, isLive, video }) {
+export function useSilenceSkipping({ enabled, isLive, video, outputGain }) {
   /** @type {AudioContext | null} */
   let audioContext = null
   /** @type {AnalyserNode[]} */
@@ -84,7 +85,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     const now = gain.context.currentTime
     gain.gain.cancelScheduledValues(now)
     gain.gain.setValueAtTime(gain.gain.value, now)
-    gain.gain.linearRampToValueAtTime(1, now + 0.04)
+    gain.gain.linearRampToValueAtTime(outputGain.value, now + 0.04)
   }
 
   function resetDetection() {
@@ -376,6 +377,22 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
     }
   }
 
+  async function updateOutputGain() {
+    if (!gain && outputGain.value !== 1) {
+      try {
+        graphSetupPromise ??= setupGraph()
+        await graphSetupPromise
+      } catch (error) {
+        console.warn('Unable to adjust original audio volume', error)
+        return
+      }
+    }
+
+    if (!isAccelerating.value) {
+      restoreGain()
+    }
+  }
+
   function suspend() {
     suspended = true
     stop()
@@ -387,6 +404,7 @@ export function useSilenceSkipping({ enabled, isLive, video }) {
   }
 
   watch([enabled, isLive], updateEnabledState)
+  watch(outputGain, updateOutputGain)
 
   onMounted(() => {
     video.value?.addEventListener('play', handlePlay)

@@ -103,6 +103,7 @@ const IpcChannels = {
 
   PLAYER_CACHE_GET: 'player-cache-get',
   PLAYER_CACHE_SET: 'player-cache-set',
+  VOICE_OVER_TRANSLATION_REQUEST: 'voice-over-translation-request',
 
   SET_INVIDIOUS_AUTHORIZATION: 'set-invidious-authorization',
 

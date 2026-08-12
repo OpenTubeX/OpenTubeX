@@ -103,6 +103,18 @@
         @enterpictureinpicture="handleEnterPictureInPicture"
         @leavepictureinpicture="handleLeavePictureInPicture"
       />
+      <div
+        v-if="voiceOverTranslationState === 'loading'"
+        class="voiceOverTranslationProgress shaka-no-propagation"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          class="voiceOverTranslationProgressSpinner"
+          aria-hidden="true"
+        />
+        {{ $t('Video.Player.Voice-over Translation.Progress') }}
+      </div>
       <FtPaidPromotionBadge
         v-if="showPaidPromotion"
         class="paidPromotionOverlay shaka-no-propagation"

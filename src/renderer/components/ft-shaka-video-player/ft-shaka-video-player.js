@@ -20,6 +20,7 @@ import { LoopButton } from './player-components/LoopButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
+import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
 import { SleepTimer } from './player-components/SleepTimer'
 import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
 import { SponsorBlockCancelButton } from './player-components/SponsorBlockCancelButton'
@@ -86,6 +87,7 @@ import { useScrollMiniPlayer } from './opentubex/useScrollMiniPlayer'
 import { useSilenceSkipping } from './opentubex/useSilenceSkipping'
 import { useSleepTimer } from './opentubex/useSleepTimer'
 import { useSponsorBlockSubmission } from './opentubex/useSponsorBlockSubmission'
+import { useVoiceOverTranslation } from './opentubex/useVoiceOverTranslation'
 import FtVideoAnnotations from '../FtVideoAnnotations/FtVideoAnnotations.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
@@ -928,6 +930,41 @@ export default defineComponent({
     const hasMultipleAudioTracks = ref(false)
     const isLive = ref(props.isLive)
 
+    const useVoiceOverTranslationSetting = computed(() => {
+      return store.getters.getUseVoiceOverTranslation
+    })
+    const voiceOverTranslationLanguage = computed(() => {
+      const language = store.getters.getVoiceOverTranslationLanguage
+      return ['ru', 'en', 'kk'].includes(language) ? language : 'en'
+    })
+    const voiceOverTranslationVolume = computed(() => {
+      return Math.min(1, Math.max(0, Number(store.getters.getVoiceOverTranslationVolume) / 100))
+    })
+    const voiceOverTranslationAvailable = computed(() => {
+      return process.env.IS_ELECTRON &&
+        useVoiceOverTranslationSetting.value &&
+        props.videoId !== '' &&
+        !isLive.value
+    })
+    const voiceOverTranslationAutoPrepare = computed(() => {
+      return voiceOverTranslationAvailable.value &&
+        store.getters.getVoiceOverTranslationPrepareInBackground
+    })
+    const voiceOverTranslation = useVoiceOverTranslation({
+      video,
+      videoId: computed(() => props.videoId),
+      responseLanguage: voiceOverTranslationLanguage,
+      autoPrepare: voiceOverTranslationAutoPrepare,
+      voiceVolume: voiceOverTranslationVolume,
+      onError: error => {
+        const message = error instanceof RangeError
+          ? t('Video.Player.Voice-over Translation.Duration Error')
+          : t('Video.Player.Voice-over Translation.Error')
+        console.error('Voice-over translation failed', error)
+        showToast({ message, icon: ['fas', 'circle-exclamation'] })
+      }
+    })
+
     const preferredCaptionLocale = computed(() => {
       return store.getters.getPreferredCaptionLocale || locale.value
     })
@@ -1123,10 +1160,22 @@ export default defineComponent({
       return skipSilence.value
     })
 
+    const originalAudioGain = computed(() => {
+      if (!voiceOverTranslation.enabled.value) {
+        return 1
+      }
+
+      return Math.min(
+        1,
+        Math.max(0, Number(store.getters.getVoiceOverTranslationOriginalVolume) / 100)
+      )
+    })
+
     const silenceSkipping = useSilenceSkipping({
       enabled: silenceSkippingEnabled,
       isLive,
       video,
+      outputGain: originalAudioGain,
     })
 
     const silenceSkippingIndicatorMessage = computed(() => {
@@ -3136,6 +3185,7 @@ export default defineComponent({
           'playback_rate',
           'ft_skip_silence',
           'ft_sleep_timer',
+          'ft_voice_over_translation',
           'captions',
           'ft_audio_tracks',
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
@@ -3175,6 +3225,7 @@ export default defineComponent({
           'playback_rate',
           'ft_skip_silence',
           'ft_sleep_timer',
+          'ft_voice_over_translation',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_ambient_mode',
           'ft_loop',
@@ -3208,6 +3259,10 @@ export default defineComponent({
 
       if (!showSkipSilenceButton.value || isLive.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_skip_silence')
+      }
+
+      if (!voiceOverTranslationAvailable.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_voice_over_translation')
       }
 
       if (isLive.value) {
@@ -3866,6 +3921,7 @@ export default defineComponent({
     }, { immediate: true })
 
     watch(() => props.videoId, () => {
+      voiceOverTranslation.reset()
       showPoster.value = true
       sponsorBlockMuteController.reset()
       clearSponsorBlockMuteSegments()
@@ -3954,6 +4010,15 @@ export default defineComponent({
 
     watch(() => props.isLive, (newValue) => {
       isLive.value = newValue
+    })
+
+    watch(voiceOverTranslationLanguage, () => voiceOverTranslation.reset())
+    watch([voiceOverTranslationAvailable, voiceOverTranslationAutoPrepare], ([available, autoPrepare]) => {
+      if (!available) {
+        voiceOverTranslation.reset()
+      } else if (autoPrepare && video.value?.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        voiceOverTranslation.prepare()
+      }
     })
 
     watch(
@@ -6207,6 +6272,28 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_skip_silence', new SkipSilenceButtonFactory())
     }
 
+    function registerVoiceOverTranslationButton() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class VoiceOverTranslationButtonFactory {
+        create(rootElement, controls) {
+          return new VoiceOverTranslationButton(
+            voiceOverTranslation.state,
+            voiceOverTranslation.enabled,
+            voiceOverTranslation.toggle,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      registerOwnElement(
+        shakaOverflowMenu,
+        'ft_voice_over_translation',
+        new VoiceOverTranslationButtonFactory()
+      )
+    }
+
     function registerSleepTimer() {
       events.addEventListener('setSleepTimerDuration', (/** @type {CustomEvent} */ event) => {
         sleepTimer.startDuration(event.detail)
@@ -6589,6 +6676,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
       shakaOverflowMenu.registerElement('ft_skip_silence', null)
+      shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
       shakaOverflowMenu.registerElement('ft_sleep_timer', null)
       shakaOverflowMenu.registerElement('ft_loop', null)
 
@@ -7917,6 +8005,8 @@ export default defineComponent({
     onMounted(async () => {
       const videoElement = video.value
 
+      voiceOverTranslation.attach(videoElement)
+
       await initializeActiveTab()
 
       const localPlayer = new shaka.Player()
@@ -7983,6 +8073,7 @@ export default defineComponent({
       registerAutoplayToggle()
       registerAmbientModeButton()
       registerSkipSilenceButton()
+      registerVoiceOverTranslationButton()
       registerSleepTimer()
 
       registerTheatreModeButton()
@@ -8798,6 +8889,7 @@ export default defineComponent({
       isActiveTab,
       container,
       video,
+      voiceOverTranslationState: voiceOverTranslation.state,
       vrCanvas,
       chapterOverlay,
       showChaptersOverlay,

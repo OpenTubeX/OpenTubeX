@@ -68,6 +68,7 @@
     "@fortawesome/vue-fontawesome": "^3.3.3",
     "@iconify/vue": "^5.0.1",
     "@seald-io/nedb": "^4.1.2",
+    "@vot.js/core": "^3.0.2",
     "autolinker": "^4.1.5",
     "bgutils-js": "^4.0.3",
     "dompurify": "^3.4.13",

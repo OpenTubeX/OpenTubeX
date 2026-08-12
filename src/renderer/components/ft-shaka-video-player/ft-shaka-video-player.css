@@ -892,6 +892,50 @@
   transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.voiceOverTranslationProgress {
+  position: absolute;
+  z-index: 3;
+  inset-block-start: 16px;
+  inset-inline-start: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-inline-size: calc(100% - 32px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #fff;
+  background: rgb(0 0 0 / 75%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.voiceOverTranslationProgressSpinner {
+  flex: 0 0 auto;
+  inline-size: 16px;
+  block-size: 16px;
+  border: 2px solid rgb(255 255 255 / 35%);
+  border-block-start-color: #fff;
+  border-radius: 50%;
+  animation: ft-voice-over-translation-spin 700ms linear infinite;
+}
+
+:deep(.voice-over-translation-loading > .shaka-ui-icon) {
+  animation: ft-voice-over-translation-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ft-voice-over-translation-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ft-voice-over-translation-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 :deep(.shaka-controls-container:has(
   .shaka-overflow-menu:not(.shaka-hidden),
   .shaka-settings-menu:not(.shaka-hidden),
