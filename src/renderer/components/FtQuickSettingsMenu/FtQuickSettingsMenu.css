@@ -32,9 +32,13 @@
 }
 
 .profileHeaderRow {
+  background-color: var(--card-bg-color);
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
+  inset-block-start: 0;
   padding-inline-end: 8px;
+  position: sticky;
+  z-index: 1;
 }
 
 .profileSummary {
