@@ -2540,3 +2540,64 @@ test.describe('synced setting indicators', () => {
     })).toBe(true)
   })
 })
+
+test.describe('performance impact indicators', () => {
+  // Pinned because the labels matched below are worded differently in the other
+  // English locales, which is what the runner's system locale can resolve to
+  test.use({ seed: { settings: { currentLocale: 'en-US' } } })
+
+  test('only shows the badges once they are switched on', async ({ app }) => {
+    const { page } = app
+    const section = await goToSettingsSection(page, 'sponsor-block')
+
+    await expect(section.locator('.performanceImpact')).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Show performance impact indicators' }).click()
+
+    const sponsorBlock = section.locator('.switch-ctn')
+      .filter({ hasText: 'Enable SponsorBlock' })
+    const deArrowThumbnails = section.locator('.switch-ctn')
+      .filter({ hasText: 'Use DeArrow for thumbnails' })
+    await expect(sponsorBlock.locator('.performanceImpact')).toHaveText('Moderate impact')
+    await expect(deArrowThumbnails.locator('.performanceImpact')).toHaveText('High impact')
+    // Settings without a notable cost stay unlabelled, so that the badges keep meaning something
+    await expect(section.locator('.switch-ctn')
+      .filter({ hasText: 'Enable SponsorBlock Submission' })
+      .locator('.performanceImpact')).toHaveCount(0)
+
+    await expect.poll(async () => {
+      const settings = latestSettings(
+        await readFile(path.join(app.userDataDir, 'settings.db'), 'utf8')
+      )
+      return settings.showPerformanceImpactIndicators
+    }).toBe(true)
+  })
+})
+
+test.describe('performance impact indicators on selects', () => {
+  test.use({
+    seed: {
+      settings: {
+        currentLocale: 'en-US',
+        showPerformanceImpactIndicators: true
+      }
+    }
+  })
+
+  test('keeps the badge inside the select it belongs to', async ({ page }) => {
+    const section = await goToSettingsSection(page, 'player')
+
+    const defaultQuality = section.locator('.select')
+      .filter({ has: page.getByText('Default Quality', { exact: true }) })
+    const badge = defaultQuality.locator('.performanceImpact')
+    await expect(badge).toBeVisible()
+
+    // The label floats above the select and never wraps, so a badge that is too
+    // wide reaches into whichever setting sits in the next column
+    const [selectBox, badgeBox] = await Promise.all([
+      defaultQuality.boundingBox(),
+      badge.boundingBox()
+    ])
+    expect(badgeBox.x + badgeBox.width).toBeLessThanOrEqual(selectBox.x + selectBox.width)
+  })
+})

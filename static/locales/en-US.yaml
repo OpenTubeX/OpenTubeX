@@ -378,6 +378,17 @@ Settings:
   Sort Settings Sections (A-Z): Sort Settings Sections (A-Z)
   Highlight Changed Settings: Highlight settings changed from defaults
   Reset Setting to Default: Reset this setting to its default
+  Performance Impact:
+    Show Performance Impact: Show performance impact indicators
+    Moderate: Moderate impact
+    High: High impact
+    Description: This setting can increase {resources} usage
+    Resources:
+      CPU: CPU
+      GPU: GPU
+      Memory: memory
+      Network: network
+      Disk: disk
   Return to Settings Menu: Return to Settings Menu
   The app needs to restart for changes to take effect. Restart and apply change?: The
     app needs to restart for changes to take effect. Restart and apply change?

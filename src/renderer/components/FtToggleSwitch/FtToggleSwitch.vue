@@ -24,6 +24,7 @@
       <span class="switch-label-text">
         {{ label }}
       </span>
+      <FtPerformanceImpact :setting-key="settingKey" />
       <FtTooltip
         v-if="tooltip !== ''"
         class="selectTooltip"
@@ -40,6 +41,7 @@
 import { ref, useId, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({

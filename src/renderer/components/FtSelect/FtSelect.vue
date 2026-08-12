@@ -66,6 +66,10 @@
       />
       <span class="select-label-text">
         {{ placeholder }}
+        <FtPerformanceImpact
+          compact
+          :setting-key="settingKey"
+        />
         <FtSyncedSettingIndicator
           v-if="tooltip === ''"
           :setting-key="settingKey"
@@ -132,6 +136,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
+import FtPerformanceImpact from '../FtPerformanceImpact/FtPerformanceImpact.vue'
 import FtSyncedSettingIndicator from '../FtSyncedSettingIndicator/FtSyncedSettingIndicator.vue'
 
 const props = defineProps({
