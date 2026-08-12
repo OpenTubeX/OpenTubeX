@@ -373,6 +373,38 @@ test.describe('video downloads', () => {
       '/tmp/subtitles.de.srt'
     ])
   })
+
+  test('keeps the source subtitle destination when conversion fails', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    await writeFile(executable, [
+      '#!/bin/sh',
+      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.vtt\\n"',
+      'printf "Subtitle conversion failed\\n" >&2',
+      'sleep 0.2',
+      'exit 1'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+    await page.getByRole('combobox', { name: 'Template' }).click()
+    await page.getByRole('listbox', { name: 'Template' })
+      .getByRole('option', { name: 'Subtitles - SRT', exact: true }).click()
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect(page.getByText('Download failed', { exact: true })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(downloadRow.locator('.destination')).toHaveText('/tmp/subtitles.en.vtt')
+  })
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {

@@ -1416,6 +1416,8 @@ export async function handleYtDlpDownload(event, payload) {
 
   /** @type {string[]} */
   const stderrLines = []
+  /** @type {Set<string>} */
+  const subtitleDestinations = new Set()
 
   /**
    * @param {string} line
@@ -1430,10 +1432,8 @@ export async function handleYtDlpDownload(event, payload) {
 
     const subtitleMatch = SUBTITLE_DESTINATION_REGEX.exec(line)
     if (subtitleMatch) {
-      // `--convert-subs` replaces the written file with one that only differs in its extension
-      const subtitlePath = subtitleFormat === ''
-        ? subtitleMatch[1]
-        : subtitleMatch[1].replace(/\.[^.]+$/, `.${subtitleFormat}`)
+      const subtitlePath = subtitleMatch[1]
+      subtitleDestinations.add(subtitlePath)
       status.destination = subtitlePath
       if (!status.destinations.includes(subtitlePath)) status.destinations.push(subtitlePath)
       sendStatus(true)
@@ -1514,6 +1514,16 @@ export async function handleYtDlpDownload(event, payload) {
     if (entry.cancelled) {
       status.status = 'cancelled'
     } else if (code === 0) {
+      if (subtitleFormat !== '') {
+        const convertedSubtitleDestinations = new Map([...subtitleDestinations].map((subtitlePath) => [
+          subtitlePath,
+          subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)
+        ]))
+        status.destinations = status.destinations.map((destination) => (
+          convertedSubtitleDestinations.get(destination) ?? destination
+        ))
+        status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
+      }
       status.status = 'completed'
       status.percent = 100
     } else {
