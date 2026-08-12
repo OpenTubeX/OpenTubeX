@@ -501,6 +501,8 @@ test.describe('watch page', () => {
     const auxPanel = page.locator('.shortsAuxPanel')
 
     await moreOptions.click()
+    await expect(overflowMenu.locator(':scope > button').first())
+      .toHaveAccessibleName('Video information')
     await overflowMenu.getByRole('button', { name: 'Video information' }).click()
     await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
 

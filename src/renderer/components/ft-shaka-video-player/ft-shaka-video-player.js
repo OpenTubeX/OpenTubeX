@@ -3435,12 +3435,12 @@ export default defineComponent({
         // Keep related settings together before the one-click actions so the
         // grid's reading and tab order remain predictable.
         uiConfig.overflowMenuButtons = [
+          ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
           'captions',
           'ft_audio_tracks',
           'ft_sleep_timer',
-          ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
           ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
           'ft_skip_silence',
@@ -4191,12 +4191,12 @@ export default defineComponent({
         submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
       }
 
+      addOverlayScrollbars(menu)
+
       if (!usePlayerMenuGrid.value) {
         menu.style.minBlockSize = ''
         return
       }
-
-      addOverlayScrollbars(menu)
 
       // Opening a submenu replaces the tiles, which would otherwise resize the
       // popup around them. Remember how tall the menu is while its own tiles are
