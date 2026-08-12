@@ -190,7 +190,7 @@ test('terminal yt-dlp playback failure restores the built-in source once', async
       manifestMimeType: 'application/dash+xml',
       sabrData: null,
       legacyFormats: [{ itag: 18 }],
-      streamingDataExpiryDate: Date.now() + 60_000
+      streamingDataExpiryDate: new Date(Date.now() + 60_000)
     }
 
     const error = { code: 1002, data: ['https://example.invalid/video', 500] }
@@ -258,7 +258,7 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
       manifestMimeType: 'application/dash+xml',
       sabrData: null,
       legacyFormats: [],
-      streamingDataExpiryDate: Date.now() - 1
+      streamingDataExpiryDate: new Date(Date.now() - 1)
     }
 
     let reloadOptions = null
@@ -273,8 +273,21 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
       data: ['https://example.invalid/video', 500]
     })
 
+    watchView.activePlaybackEngine = 'yt-dlp'
+    watchView.playbackEngineFallbackAttemptedForCurrentVideo = false
+    watchView.playbackEngineFallbackTarget = null
+    watchView.reloadView = async () => {
+      throw new Error('Synthetic built-in source refresh rejection')
+    }
+    const rejectedFallbackApplied = await watchView.tryPlaybackEngineFallback({
+      code: 1002,
+      data: ['https://example.invalid/video', 500]
+    })
+
     return {
       fallbackApplied,
+      rejectedFallbackApplied,
+      pendingAfterRejectedRefresh: watchView.ytDlpStreamsPending,
       reloadOptions,
       fallbackTarget: watchView.playbackEngineFallbackTarget,
       activePlaybackEngine: watchView.activePlaybackEngine,
@@ -284,9 +297,11 @@ test('expired built-in playback source is refreshed before yt-dlp falls back', a
 
   expect(result).toEqual({
     fallbackApplied: true,
+    rejectedFallbackApplied: false,
+    pendingAfterRejectedRefresh: false,
     reloadOptions: { preserveTitle: true },
     fallbackTarget: 'built-in',
-    activePlaybackEngine: 'built-in',
+    activePlaybackEngine: 'yt-dlp',
     manifestSrc: 'https://example.invalid/refreshed.mpd'
   })
 })

@@ -3923,8 +3923,16 @@ export default defineComponent({
           source.streamingDataExpiryDate !== null &&
           new Date() > source.streamingDataExpiryDate
         ) {
-          await this.reloadView({ preserveTitle: true })
-          return true
+          try {
+            await this.reloadView({ preserveTitle: true })
+            return true
+          } catch (reloadError) {
+            console.error('Refreshing the built-in playback source failed', reloadError)
+            if (this.tabRoute.params.id === videoId) {
+              this.ytDlpStreamsPending = false
+            }
+            return false
+          }
         }
 
         this.manifestSrc = source.manifestSrc
@@ -3935,17 +3943,7 @@ export default defineComponent({
         this.activePlaybackEngine = 'built-in'
         this.activePlaybackEngineVersion = null
 
-        if (
-          (this.activeFormat === 'dash' || this.activeFormat === 'audio') &&
-          this.manifestSrc === null &&
-          this.legacyFormats.length > 0
-        ) {
-          this.activeFormat = 'legacy'
-        } else if (this.activeFormat === 'legacy' && this.legacyFormats.length === 0 && this.manifestSrc !== null) {
-          this.activeFormat = 'dash'
-        } else if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
-          this.activeFormat = 'dash'
-        }
+        this.alignActiveFormatWithAvailableSources()
 
         this.showTabToast({
           message: this.t('Change Format.yt-dlp Fallback Template', { error: reason }),
@@ -3983,6 +3981,20 @@ export default defineComponent({
         if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
           this.ytDlpStreamsPending = false
         }
+      }
+    },
+
+    alignActiveFormatWithAvailableSources: function () {
+      if (
+        (this.activeFormat === 'dash' || this.activeFormat === 'audio') &&
+        this.manifestSrc === null &&
+        this.legacyFormats.length > 0
+      ) {
+        this.activeFormat = 'legacy'
+      } else if (this.activeFormat === 'legacy' && this.legacyFormats.length === 0 && this.manifestSrc !== null) {
+        this.activeFormat = 'dash'
+      } else if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
+        this.activeFormat = 'dash'
       }
     },
 
@@ -4073,13 +4085,7 @@ export default defineComponent({
       this.activePlaybackEngine = 'yt-dlp'
       this.activePlaybackEngineVersion = source.version
 
-      if (this.activeFormat === 'legacy' && source.legacyFormats.length === 0) {
-        this.activeFormat = 'dash'
-      }
-
-      if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
-        this.activeFormat = 'dash'
-      }
+      this.alignActiveFormatWithAvailableSources()
 
       return true
     },
