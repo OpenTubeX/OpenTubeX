@@ -631,78 +631,6 @@ test.describe('watch page', () => {
     )
   })
 
-  test('stale reply controls disappear after an empty final reply page', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    const comments = page.locator('.comment')
-    const commentIndex = await comments.evaluateAll(elements => (
-      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
-    ))
-    expect(commentIndex).toBeGreaterThanOrEqual(0)
-    const comment = comments.nth(commentIndex)
-    const replyToggle = comment.locator('.commentMoreReplies')
-    await expect(replyToggle).toBeVisible()
-
-    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        onResponseReceivedEndpoints: [{
-          appendContinuationItemsAction: {
-            targetId: 'comment-replies-item-stale'
-          }
-        }]
-      })
-    }), { times: 1 })
-
-    await replyToggle.click()
-
-    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
-    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
-    await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
-  })
-
-  test('reloading fullscreen comments scrolls back to the first comment', async ({ app, page }) => {
-    await mockPlayableWatchPage(app, page)
-    await openMockedVideo(page)
-    await waitForPlayback(page)
-
-    const loadComments = page.locator('.getCommentsTitle')
-    await loadComments.scrollIntoViewIfNeeded()
-    await loadComments.click()
-    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
-
-    await setPlayerFullscreen(page, true)
-    await page.locator('.fullscreenCommentsToggle').click({ force: true })
-
-    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
-    await expect(comments).toBeVisible()
-    await expect.poll(async () => comments.evaluate((element) => element.scrollHeight)).toBeGreaterThan(500)
-
-    // The end of the loaded comments: the offset the reloaded, shorter list has
-    // no room for, so it used to leave the dock parked past its own content.
-    await comments.evaluate((element) => { element.scrollTop = element.scrollHeight })
-    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBeGreaterThan(300)
-
-    const [reloadResponse] = await Promise.all([
-      page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 }),
-      page.locator('.fullscreenCommentHeader').getByRole('button', { name: 'Reload Comments' }).click()
-    ])
-    expect(reloadResponse.ok()).toBe(true)
-    await expect(page.locator('.fullscreenCommentsOverlay .comment').first()).toBeVisible({ timeout: 30_000 })
-
-    // OverlayScrollbars reapplies its remembered offset once the new list has
-    // rendered, so the position has to still be at the top a moment later.
-    await page.waitForTimeout(1000)
-    expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
-  })
-
   test('fullscreen metadata uses one full-dock scrollbar', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)
@@ -1089,5 +1017,91 @@ test.describe('fullscreen playlist dock', () => {
     )
     expect(await dropdown.evaluate(element => element.parentElement?.classList.contains('app'))).toBe(true)
     await expect(moreOptions).toBeVisible()
+  })
+})
+
+test.describe('manual comment loading', () => {
+  // These drive the click-to-load path and the reply pagination on top of a
+  // single loaded page, so they turn off the automatic pagination that would
+  // otherwise load (and keep loading) the comments on its own.
+  test.use({
+    seed: {
+      settings: {
+        ...WATCH_PAGE_SEED,
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      }
+    }
+  })
+
+  test('stale reply controls disappear after an empty final reply page', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    const comments = page.locator('.comment')
+    const commentIndex = await comments.evaluateAll(elements => (
+      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
+    ))
+    expect(commentIndex).toBeGreaterThanOrEqual(0)
+    const comment = comments.nth(commentIndex)
+    const replyToggle = comment.locator('.commentMoreReplies')
+    await expect(replyToggle).toBeVisible()
+
+    await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        onResponseReceivedEndpoints: [{
+          appendContinuationItemsAction: {
+            targetId: 'comment-replies-item-stale'
+          }
+        }]
+      })
+    }), { times: 1 })
+
+    await replyToggle.click()
+
+    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
+    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
+    await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
+  })
+
+  test('reloading fullscreen comments scrolls back to the first comment', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+    await waitForPlayback(page)
+
+    const loadComments = page.locator('.getCommentsTitle')
+    await loadComments.scrollIntoViewIfNeeded()
+    await loadComments.click()
+    await expect(page.locator('.commentsTitle')).toBeVisible({ timeout: 30_000 })
+
+    await setPlayerFullscreen(page, true)
+    await page.locator('.fullscreenCommentsToggle').click({ force: true })
+
+    const comments = page.locator('.fullscreenCommentsOverlay .commentsContentWrapper')
+    await expect(comments).toBeVisible()
+    await expect.poll(async () => comments.evaluate((element) => element.scrollHeight)).toBeGreaterThan(500)
+
+    // The end of the loaded comments: the offset the reloaded, shorter list has
+    // no room for, so it used to leave the dock parked past its own content.
+    await comments.evaluate((element) => { element.scrollTop = element.scrollHeight })
+    await expect.poll(async () => comments.evaluate((element) => element.scrollTop)).toBeGreaterThan(300)
+
+    const [reloadResponse] = await Promise.all([
+      page.waitForResponse(/\/youtubei\/v1\/next/, { timeout: 30_000 }),
+      page.locator('.fullscreenCommentHeader').getByRole('button', { name: 'Reload Comments' }).click()
+    ])
+    expect(reloadResponse.ok()).toBe(true)
+    await expect(page.locator('.fullscreenCommentsOverlay .comment').first()).toBeVisible({ timeout: 30_000 })
+
+    // OverlayScrollbars reapplies its remembered offset once the new list has
+    // rendered, so the position has to still be at the top a moment later.
+    await page.waitForTimeout(1000)
+    expect(await comments.evaluate((element) => element.scrollTop)).toBe(0)
   })
 })

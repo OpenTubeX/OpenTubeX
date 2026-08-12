@@ -5,7 +5,7 @@ import { gunzipSync } from 'node:zlib'
 
 import { repoRoot } from './app.mjs'
 import { fixtureKey, SHARED_PLAYER_SCRIPT } from './innertube.mjs'
-import { demoPlayerResponse, routeDemoMedia, routeIframeApi, stubPoToken } from './media.mjs'
+import { demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
 const watchFixtures = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -68,6 +68,7 @@ export async function mockWatchPage(app, page, { playable = false } = {}) {
 
   await page.route(/^https?:\/\//, (route) => route.abort())
   await routeIframeApi(page)
+  await routeWatchPageHtml(page)
 
   if (playable) {
     await routeDemoMedia(page)

@@ -72,6 +72,86 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
+test('zooms the video and keeps the level for the next video', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+  await attachScreenshot('zoomed video')
+
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  // The zoom level carries over to the next video (#651)
+  await page.locator('.tabBar .newTabButton').click()
+  await expect(page.locator('.tabBar .tab')).toHaveCount(2)
+  const nextVideo = await openMockedVideo(page)
+  await expect(nextVideo).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  await page.locator('body').press('Shift+Z')
+  await expect(nextVideo).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+})
+
+test('shift-dragging moves the visible part of a zoomed video', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+  const readTranslation = () => video.evaluate((element) => {
+    const { m41, m42 } = new DOMMatrix(getComputedStyle(element).transform)
+    return { x: m41, y: m42 }
+  })
+
+  await page.locator('body').press('z')
+  await page.locator('body').press('z')
+  expect(await readTranslation()).toEqual({ x: 0, y: 0 })
+
+  const box = await video.boundingBox()
+  const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+
+  await page.keyboard.down('Shift')
+  await page.mouse.move(center.x, center.y)
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await expect(player).toHaveClass(/videoZoomPannable/)
+
+  await page.mouse.down()
+  await page.mouse.move(center.x - 120, center.y - 40, { steps: 4 })
+  await expect(player).toHaveClass(/videoZoomPanning/)
+  await page.mouse.up()
+  await page.keyboard.up('Shift')
+  await attachScreenshot('panned video')
+
+  const panned = await readTranslation()
+  expect(panned.x).toBeLessThan(0)
+  expect(panned.y).toBeLessThan(0)
+
+  // Panning must not double as a play/pause click
+  expect(await video.evaluate((element) => element.paused)).toBe(false)
+
+  // Turning the zoom off recenters the video
+  await page.locator('body').press('Shift+Z')
+  await page.locator('body').press('Shift+Z')
+  await expect(video).toHaveCSS('transform', 'none')
+})
+
+test('the overflow menu can turn the zoom off again', async ({ app, page, attachScreenshot }) => {
+  const video = await openDemoVideo({ app, page })
+
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+
+  // The control panel is hidden until the pointer is over the player
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  const moreOptions = player.getByRole('button', { name: 'More settings' })
+  await expect(moreOptions).toBeVisible()
+  await moreOptions.click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
+  await attachScreenshot('zoom menu')
+
+  await player.locator('.video-zoom-menu').getByRole('button', { name: 'Off' }).click()
+  await expect(video).toHaveCSS('transform', 'none')
+})
+
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {
   await openDemoVideo({ app, page })
   await page.locator('.ftVideoPlayer').click({ button: 'right' })

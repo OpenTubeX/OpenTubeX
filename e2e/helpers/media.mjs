@@ -173,6 +173,65 @@ export function routeIframeApi(page) {
 }
 
 /**
+ * The renderer scrapes the watch page HTML for the Innertube config and the
+ * BotGuard challenge before it talks to Innertube at all, and throws when
+ * either is missing (FreeTubeApp/FreeTube#9607), which leaves the watch page
+ * without a player.
+ *
+ * Only those two are embedded here. The `/player` and `/next` responses may
+ * also be inlined in the real page, but leaving them out keeps the demo player
+ * response and the recorded fixtures authoritative, at the price of a console
+ * warning the app already tolerates.
+ *
+ * @param {import('@playwright/test').Page} page
+ */
+export function routeWatchPageHtml(page) {
+  const ytConfig = {
+    INNERTUBE_API_KEY: 'e2e-innertube-api-key',
+    INNERTUBE_API_VERSION: 'v1',
+    INNERTUBE_CLIENT_NAME: 'WEB',
+    INNERTUBE_CLIENT_VERSION: '2.20260101.00.00',
+    PLAYER_JS_URL: '/s/player/test-player/player_ias.vflset/en_US/base.js',
+    INNERTUBE_CONTEXT: {
+      client: {
+        hl: 'en',
+        gl: 'US',
+        clientName: 'WEB',
+        clientVersion: '2.20260101.00.00',
+        osName: 'Windows',
+        osVersion: '10.0',
+        platform: 'DESKTOP',
+        deviceMake: '',
+        deviceModel: '',
+        browserName: 'Chrome',
+        browserVersion: '140.0.0.0',
+        originalUrl: 'https://www.youtube.com/',
+        visitorData: 'e2e-visitor-data'
+      },
+      request: { useSsl: true },
+      user: { lockedSafetyMode: false }
+    }
+  }
+
+  // Only has to be parseable: the poToken it feeds into is stubbed out.
+  const attestationData = {
+    challenge: 'e2e-challenge',
+    interpreterUrl: '//www.youtube.com/s/e2e/botguard.js'
+  }
+
+  // Matched with a regex on the other end, so it has to be one statement.
+  const body = `<!DOCTYPE html><html><head><script>ytcfg.set(${JSON.stringify(ytConfig)});</script>` +
+    `<script>window.ytAtN(${JSON.stringify(attestationData)})</script>` +
+    '</head><body></body></html>'
+
+  return page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
+    status: 200,
+    contentType: 'text/html',
+    body
+  }))
+}
+
+/**
  * Replaces the BotGuard-backed poToken generation, which would otherwise
  * need YouTube's attestation servers and fails the video load without them.
  *

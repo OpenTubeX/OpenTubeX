@@ -1519,6 +1519,9 @@ Video:
       Remaining: '{time} remaining'
       Cancel timer: Cancel timer
       Timer ended: Sleep timer ended
+    Zoom:
+      Zoom: Zoom
+      Off: 'Off'
     TranslatedCaptionTemplate: '{language} (translated from "{originalLanguage}")'
     Audio Tracks: Audio Tracks
     Autoplay is off: Autoplay is off
@@ -2062,6 +2065,8 @@ KeyboardShortcutPrompt:
   Full Window: Toggle full window
   Theatre Mode: Toggle theater mode
   Take Screenshot: Take screenshot
+  Video Zoom In: Zoom into the video
+  Video Zoom Out: Zoom out of the video
   Minimize Window: Miminize window
   Close Window: Close window
   Toggle Developer Tools: Toggle developer tools
