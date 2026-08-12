@@ -3,76 +3,24 @@
     :to="fullscreenTarget || 'body'"
     :disabled="fullscreenTarget === null"
   >
-    <TransitionGroup
-      tag="div"
-      name="toast"
+    <Toaster
       class="toast-holder"
       :class="[`position-${toastPosition}`, { 'horizontal-tabs': hasHorizontalTabBar }]"
-      @before-leave="onBeforeLeave"
+      :position="SONNER_POSITION"
+      :gap="TOAST_GAP"
+      :visible-toasts="MAX_VISIBLE_TOASTS"
+      :swipe-directions="swipeDirections"
+      :offset="toasterOffset"
+      :mobile-offset="toasterOffset"
+      :style="{ '--width': TOAST_WIDTH, '--front-toast-width': frontToastWidth, '--stacked-toast-width': stackedToastWidth, '--stack-height': stackHeight, '--stack-width': stackWidth }"
+    />
+    <div
+      v-if="showProgressToast"
+      class="progress-toast-holder"
+      :class="[`position-${toastPosition}`, { 'horizontal-tabs': hasHorizontalTabBar }]"
     >
       <div
-        v-for="toast in toasts"
-        :key="toast.id"
-        class="toast-slot"
-        :class="toast.dismissDirection && `dismiss-${toast.dismissDirection}`"
-        @pointerenter="pause(toast, $event.currentTarget)"
-        @pointerleave="resume(toast)"
-      >
-        <div
-          v-overlay-scrollbars
-          class="toast"
-          :class="{ hasImage: toast.image, actionable: toast.action, dragging: toast.dragging }"
-          :style="dragStyle(toast)"
-          :tabindex="toast.action ? 0 : null"
-          role="status"
-          @click="onClick(toast)"
-          @keydown.enter.prevent="performAction(toast)"
-          @keydown.space.prevent="performAction(toast)"
-          @keydown.esc.prevent="dismiss(toast)"
-          @pointerdown="onPointerDown(toast, $event)"
-          @pointermove="onPointerMove(toast, $event)"
-          @pointerup="onPointerUp(toast, $event)"
-          @pointercancel="onPointerUp(toast, $event)"
-        >
-          <img
-            v-if="toast.image"
-            :src="toast.image"
-            class="image"
-            alt=""
-            draggable="false"
-          >
-          <FontAwesomeIcon
-            v-else-if="toast.icon"
-            :icon="toast.icon"
-            class="icon"
-            fixed-width
-          />
-          <p class="message">
-            {{ toast.message }}
-          </p>
-        </div>
-        <div
-          v-if="showTimeoutIndicator"
-          class="timeout-indicator-track"
-          :class="{ dragging: toast.dragging }"
-          :style="dragStyle(toast)"
-          aria-hidden="true"
-        >
-          <FtEmbeddedProgress
-            class="timeout-indicator"
-            :corner-radius="toastProgressRadius"
-            :end-arc-fraction="0.5"
-            :line-width="toastProgressLineWidth"
-            :start-arc-fraction="0.5"
-            :style="{ '--toast-duration': `${toast.duration}ms` }"
-            @animationstart="onIndicatorAnimationStart(toast, $event)"
-          />
-        </div>
-      </div>
-      <div
-        v-if="showProgressToast"
         ref="progressToast"
-        key="progress"
         class="toast-slot persistent-slot"
         :class="{ minimized: progressToastMinimized }"
         :data-testid="store.getters.getShowProgressBar ? 'progress-toast' : 'subscription-refresh-toast'"
@@ -104,20 +52,21 @@
           />
         </div>
       </div>
-    </TransitionGroup>
+    </div>
   </Teleport>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef } from 'vue'
+import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Toaster, toast as sonner } from 'vue-sonner'
 import { normalizeToastPosition } from '../../constants/toastPosition'
 import { showToast, ToastEventBus } from '../../helpers/utils'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'
+import FtToastItem from './FtToastItem.vue'
 
-let idCounter = 0
 let removeShowToastListener = null
 const { t } = useI18n()
 
@@ -129,41 +78,106 @@ const props = defineProps({
 })
 
 /**
- * @typedef Toast
- * @property {string | (({elapsedMs: number, remainingMs: number}) => string)} message
+ * @typedef ToastState the live state handed to {@link FtToastItem}
+ * @property {string} message
  * @property {Function | null} action
  * @property {string | null} image
  * @property {[string, string] | null} icon
- * @property {NodeJS.Timeout | number} timeout
- * @property {NodeJS.Timeout | number} interval
- * @property {number} id
  * @property {number} duration lifetime of the toast in milliseconds
- * @property {number} remainingMs lifetime remaining when the toast was paused
- * @property {number} expiresAt timestamp the toast is due to auto-dismiss at, used to reschedule after a drag
- * @property {boolean} hovered
- * @property {boolean} dragging
- * @property {boolean} pointerMoved whether the pointer moved enough to count as a drag (suppresses the click action)
- * @property {number} dragOffset current horizontal drag offset in px
- * @property {'left' | 'right' | null} dismissDirection side through which the toast is being dismissed
- * @property {number} [dragStartX] pointer x position where the current drag started
  */
 
-/** Distance in px a toast must be dragged before it slides away instead of snapping back */
-const DRAG_DISMISS_THRESHOLD = 80
+/** How many toasts are on screen at once, oldest first out */
+const MAX_VISIBLE_TOASTS = 5
+/**
+ * Sonner keys its toast list by the `position` prop, so changing it tears the
+ * list down and takes every toast currently on screen with it. The prop is
+ * pinned to one value and the configured position is applied in CSS instead,
+ * off the `position-*` class on the holder.
+ */
+const SONNER_POSITION = 'bottom-left'
+/**
+ * Inline size of the toast column. It spans everything inside the viewport
+ * insets, so each toast is bounded by its own `max-inline-size` rather than by
+ * the column, and the row it sits in only decides which edge it is aligned to.
+ */
+const TOAST_WIDTH = 'calc(100vw - 60px)'
+/**
+ * Distance in px between two toasts: the spacing once the stack is fanned out,
+ * and how far each collapsed toast peeks out from behind the one in front of it.
+ * Sonner lays the stack out from the measured toast heights plus this gap, so
+ * the spacing must not come from margins on the toasts themselves.
+ */
+const TOAST_GAP = 10
+/** Distance in px from the screen edges the toasts are anchored to */
+const VIEWPORT_INSET = 29
+/** Larger top inset that keeps top-positioned toasts below the horizontal tab bar */
+const TAB_BAR_INSET = 61
 /** Distance in px at which the persistent refresh toast gets out of the pointer's way */
 const PROGRESS_TOAST_PROXIMITY = 32
 /** Extra distance required before restoring the toast, to avoid flicker around the boundary */
 const PROGRESS_TOAST_PROXIMITY_HYSTERESIS = 20
 
-/** @type {import('vue').Reactive<Toast[]>} */
-const toasts = reactive([])
-/** @type {Map<number, Animation>} */
-const indicatorAnimations = new Map()
+const toastItem = markRaw(FtToastItem)
+
+/** Intervals refreshing the messages of toasts built from a function, by toast id */
+const messageIntervals = new Map()
+/**
+ * Ids of the toasts currently on screen, oldest first. Sonner keeps everything
+ * past `visibleToasts` queued up out of sight and lets it back in as room frees
+ * up, which would have a toast the user has already seen reappear long after it
+ * was raised, so the queue is capped here instead.
+ * @type {(number | string)[]}
+ */
+const liveToasts = []
+/**
+ * Removes the abort listener of each toast raised with an abort signal, by toast
+ * id.
+ * @type {Map<number | string, () => void>}
+ */
+const abortListeners = new Map()
 /** @type {import('vue').Ref<Element|null>} */
 const fullscreenTarget = ref(null)
 /** @type {import('vue').Ref<HTMLElement|null>} */
 const progressToast = useTemplateRef('progressToast')
 const progressToastMinimized = ref(false)
+const progressToastHeight = ref(0)
+/**
+ * Width of the toast at the front of the stack, as a CSS length. Sonner records
+ * the front toast's height so it can lay the collapsed stack out from it, but
+ * not its width: its own toasts are all one fixed width, ours are only as wide
+ * as their message. Without this the toasts stacked behind the front one keep
+ * their own widths and stick out from underneath it.
+ * @type {import('vue').Ref<string|null>}
+ */
+const frontToastWidth = ref(null)
+/**
+ * Width of the second toast, as a CSS length. The pile of older toasts sits
+ * behind that one rather than behind the front one, so it is the width they have
+ * to tuck under.
+ * @type {import('vue').Ref<string|null>}
+ */
+const stackedToastWidth = ref(null)
+/**
+ * Height of the whole fanned out stack, as a CSS length, used to back it with a
+ * region that holds the hover. Without one the stack collapses the moment the
+ * pointer is between toasts or over one that has just been dismissed, and then
+ * reopens as the next toast slides under the pointer.
+ * @type {import('vue').Ref<string|null>}
+ */
+const stackHeight = ref(null)
+/**
+ * Width of the widest toast in the stack, as a CSS length. The rows the toasts
+ * sit in span the whole column, so the backdrop has to be sized from the toasts
+ * themselves or it reaches most of the way across the window.
+ * @type {import('vue').Ref<string|null>}
+ */
+const stackWidth = ref(null)
+/** @type {ResizeObserver|null} */
+let frontToastResizeObserver = null
+/** @type {MutationObserver|null} */
+let toastListObserver = null
+/** @type {ResizeObserver|null} */
+let progressToastResizeObserver = null
 /** @type {DOMRect|null} */
 let progressToastBounds = null
 /** @type {HTMLElement|null} */
@@ -179,8 +193,34 @@ const toastPosition = computed(() => {
 const hasHorizontalTabBar = computed(() => {
   return process.env.IS_ELECTRON && !store.getters.getUseVerticalTabBar
 })
-/** @type {import('vue').ComputedRef<boolean>} */
-const showTimeoutIndicator = computed(() => store.getters.getShowToastTimeoutIndicator)
+
+/**
+ * Toasts are swiped away towards the screen edge they are anchored to, so they
+ * leave through the nearest edge rather than across the whole window. Centered
+ * toasts have no nearer edge, so they go either way.
+ */
+const swipeDirections = computed(() => {
+  if (toastPosition.value.endsWith('left')) { return ['left'] }
+  if (toastPosition.value.endsWith('right')) { return ['right'] }
+
+  return ['left', 'right']
+})
+
+/**
+ * Keeps the toast column clear of the persistent progress toast, which is
+ * anchored to the same corner but sits outside the toaster.
+ */
+const toasterOffset = computed(() => {
+  const progressInset = showProgressToast.value ? progressToastHeight.value + TOAST_GAP : 0
+
+  return {
+    left: VIEWPORT_INSET,
+    right: VIEWPORT_INSET,
+    bottom: VIEWPORT_INSET + progressInset,
+    top: (hasHorizontalTabBar.value ? TAB_BAR_INSET : VIEWPORT_INSET) + progressInset
+  }
+})
+
 const showProgressToast = computed(() => {
   // The toast holder is teleported into the fullscreen element, so a progress
   // toast would sit on top of the fullscreen player. Hide it until fullscreen
@@ -239,6 +279,60 @@ function updateFullscreenTarget() {
 }
 
 /**
+ * Follows the front toast, which changes as toasts come and go, and remeasures
+ * it whenever it or its message resizes. `offsetWidth` rather than a bounding
+ * box, so a toast measured mid animation reports its laid out width instead of
+ * its scaled one.
+ */
+function trackFrontToast() {
+  const holder = document.querySelector('.toast-holder')
+  const front = holder?.querySelector('[data-sonner-toast] .toast')
+
+  frontToastResizeObserver.disconnect()
+  toastListObserver.disconnect()
+
+  if (holder) {
+    toastListObserver.observe(holder, { childList: true, subtree: true, characterData: true })
+  }
+
+  if (front) {
+    frontToastResizeObserver.observe(front)
+  } else {
+    frontToastWidth.value = null
+  }
+
+  measureStack(holder)
+}
+
+/**
+ * The rows are laid out one gap apart when the stack is fanned out, so their own
+ * heights add up to how much room it takes. `offsetWidth` and `offsetHeight`
+ * rather than bounding boxes, so anything measured mid animation reports its
+ * laid out size instead of its scaled one.
+ * @param {Element|null|undefined} holder
+ */
+function measureStack(holder) {
+  const rows = holder ? [...holder.querySelectorAll('[data-sonner-toast]')] : []
+
+  if (rows.length === 0) {
+    stackHeight.value = null
+    stackWidth.value = null
+    return
+  }
+
+  const height = rows.reduce((total, row) => total + row.offsetHeight, 0) +
+    (rows.length - 1) * TOAST_GAP
+  const width = rows.reduce((widest, row) => {
+    return Math.max(widest, row.querySelector('.toast')?.offsetWidth ?? 0)
+  }, 0)
+  const stacked = rows[1]?.querySelector('.toast')?.offsetWidth
+
+  stackHeight.value = `${height}px`
+  stackWidth.value = `${width}px`
+  stackedToastWidth.value = stacked ? `${stacked}px` : null
+}
+
+/**
  * Keeps the non-interactive refresh toast readable until the mouse approaches,
  * then tucks it into its configured edge of the screen. The expanded bounds
  * remain the hit area while minimized so scaling cannot make the state flicker.
@@ -292,321 +386,112 @@ function resetProgressToastProximity() {
  * @param {CustomEvent<{ message: string | (({elapsedMs: number, remainingMs: number}) => string), time: number | null, action: Function | null, abortSignal: AbortSignal | null, image: string | null, icon: [string, string] | null }>} event
  */
 function open({ detail: { message, time, action, abortSignal, image, icon } }) {
-  const id = idCounter++
-
   time ||= 3000
 
-  /** @type {Toast} */
-  const toast = {
-    id,
-    message,
-    action,
+  /** @type {ToastState} */
+  const state = reactive({
+    message: typeof message === 'function' ? message({ elapsedMs: 0, remainingMs: time }) : message,
+    action: action ?? null,
     image: image ?? null,
     icon: icon ?? null,
-    timeout: 0,
-    interval: 0,
+    duration: time
+  })
+
+  const id = sonner.custom(toastItem, {
     duration: time,
-    remainingMs: time,
-    expiresAt: Date.now() + time,
-    hovered: false,
-    dragging: false,
-    pointerMoved: false,
-    dragOffset: 0,
-    dismissDirection: null
-  }
-  let elapsed = 0
-  const updateDelay = 1000
+    // Stated rather than left to the toaster's default: sonner counts the
+    // toasts at a position to work out how they stack in front of one another,
+    // and a toast that names no position is left out of that count, which puts
+    // the whole stack at or below the depth of the list it sits in
+    position: SONNER_POSITION,
+    componentProps: { toast: state },
+    onDismiss: forgetToast,
+    onAutoClose: forgetToast
+  })
 
   if (typeof message === 'function') {
-    toast.message = message({ elapsedMs: elapsed, remainingMs: time - elapsed })
-    toast.interval = setInterval(() => {
+    let elapsed = 0
+    const updateDelay = 1000
+
+    messageIntervals.set(id, setInterval(() => {
       elapsed += updateDelay
-      // Skip last update
-      if (elapsed >= time) { return }
-
-      // We need to locate the object in the array so we get the reactive proxy,
-      // as modifying the original object won't trigger reactive effects such as updating the DOM
-      const toast = toasts.find(t => t.id === id)
-
-      if (toast) {
-        toast.message = message({ elapsedMs: elapsed, remainingMs: time - elapsed })
+      // Skip the last update, the toast is about to go away anyway
+      if (elapsed >= time) {
+        clearMessageInterval(id)
+        return
       }
-    }, updateDelay)
+
+      state.message = message({ elapsedMs: elapsed, remainingMs: time - elapsed })
+    }, updateDelay))
   }
 
-  toast.timeout = setTimeout(remove, time, toast)
   if (abortSignal != null) {
-    abortSignal.addEventListener('abort', () => {
-      remove(toast)
-    })
+    const abort = () => sonner.dismiss(id)
+    abortSignal.addEventListener('abort', abort)
+    // The signal can outlive the toast, so the listener has to come off when the
+    // toast goes rather than only when the signal fires
+    abortListeners.set(id, () => abortSignal.removeEventListener('abort', abort))
   }
 
-  if (toasts.length > 4) {
-    remove(toasts[0])
-  }
-  toasts.push(toast)
-}
-
-/**
- * @param {Toast} toast
- */
-function performAction(toast) {
-  if (!toast.action) {
-    return
-  }
-
-  toast.action()
-  remove(toast)
-}
-
-/**
- * Dismisses a toast without running its action, for users who want it out of
- * the way. Flags it for the appropriate horizontal leave animation, then removes
- * it on the next tick so the dismiss class is rendered before the leave starts.
- * Removing promptly (rather than after a timeout) lets the toasts above start
- * animating into the freed space without any delay.
- * @param {Toast} toast
- */
-function dismiss(toast, direction = toastPosition.value.endsWith('right') ? 'right' : 'left') {
-  toast.dismissDirection = direction
-  nextTick(() => remove(toast))
-}
-
-/**
- * Runs an available toast action on click, unless the pointer was dragged (in
- * which case the click is the tail end of a drag gesture and should be ignored).
- * @param {Toast} toast
- */
-function onClick(toast) {
-  if (toast.pointerMoved) {
-    toast.pointerMoved = false
-    return
-  }
-  performAction(toast)
-}
-
-/**
- * Pauses auto-dismiss while a toast is hovered.
- * @param {Toast} toast
- * @param {HTMLElement} element
- */
-function pause(toast, element) {
-  if (toast.hovered) { return }
-
-  toast.hovered = true
-  toast.remainingMs = Math.max(0, toast.expiresAt - Date.now())
-  clearTimeout(toast.timeout)
-
-  // `hovered` is already set, so this is the only chance to freeze the line: a
-  // second pointerenter returns early. Retry next frame if the indicator was not
-  // resolvable yet, rather than leaving it draining for the rest of the hover.
-  if (!freezeIndicator(toast, element)) {
-    requestAnimationFrame(() => {
-      if (toast.hovered) { freezeIndicator(toast, element) }
-    })
+  liveToasts.push(id)
+  while (liveToasts.length > MAX_VISIBLE_TOASTS) {
+    sonner.dismiss(liveToasts.shift())
   }
 }
 
 /**
- * Finds the drain animation on a toast's timeout indicator. Matched by name
- * rather than taken by index, because `getAnimations()` also reports
- * transitions and orders them before animations.
- * @param {HTMLElement} element the toast's slot
- * @returns {Animation | undefined}
+ * @param {{ id: number | string }} toast
  */
-function findIndicatorAnimation(element) {
-  return element.querySelector('.timeout-indicator .embeddedProgressPath')
-    ?.getAnimations()
-    .find(animation => animation.animationName?.startsWith('toast-timeout'))
-}
+function forgetToast(toast) {
+  clearMessageInterval(toast.id)
+  abortListeners.get(toast.id)?.()
+  abortListeners.delete(toast.id)
 
-/**
- * Seeks a toast's indicator to its true remaining lifetime and holds it there.
- * @param {Toast} toast
- * @param {HTMLElement} element the toast's slot
- * @returns {boolean} whether the animation could be resolved
- */
-function freezeIndicator(toast, element) {
-  const animation = indicatorAnimations.get(toast.id) ?? findIndicatorAnimation(element)
-  if (!animation) { return false }
-
-  animation.currentTime = toast.duration - toast.remainingMs
-  animation.pause()
-  indicatorAnimations.set(toast.id, animation)
-  return true
-}
-
-/**
- * Resumes auto-dismiss once the toast is no longer hovered.
- * @param {Toast} toast
- */
-function resume(toast) {
-  if (!toast.hovered) { return }
-
-  toast.hovered = false
-  toast.expiresAt = Date.now() + toast.remainingMs
-  indicatorAnimations.get(toast.id)?.play()
-
-  if (!toast.dragging) {
-    toast.timeout = setTimeout(remove, toast.remainingMs, toast)
-  }
-}
-
-/**
- * @param {Toast} toast
- * @param {PointerEvent} event
- */
-function onPointerDown(toast, event) {
-  // Only start dragging with the primary (left) mouse button or touch/pen
-  if (event.pointerType === 'mouse' && event.button !== 0) { return }
-
-  toast.dragging = true
-  toast.pointerMoved = false
-  toast.dragStartX = event.clientX
-  toast.dragOffset = 0
-
-  // Hold off auto-dismiss so the toast can't vanish mid-drag. The deadline in
-  // `expiresAt` keeps running, so this can't be used to keep a toast alive.
-  clearTimeout(toast.timeout)
-
-  event.currentTarget.setPointerCapture(event.pointerId)
-}
-
-/**
- * @param {Toast} toast
- * @param {PointerEvent} event
- */
-function onPointerMove(toast, event) {
-  if (!toast.dragging) { return }
-
-  const offset = event.clientX - toast.dragStartX
-
-  if (toastPosition.value.endsWith('left')) {
-    toast.dragOffset = Math.min(0, offset)
-  } else if (toastPosition.value.endsWith('right')) {
-    toast.dragOffset = Math.max(0, offset)
-  } else {
-    toast.dragOffset = offset
-  }
-
-  if (Math.abs(offset) > 5) {
-    toast.pointerMoved = true
-  }
-}
-
-/**
- * @param {Toast} toast
- * @param {PointerEvent} event
- */
-function onPointerUp(toast, event) {
-  if (!toast.dragging) { return }
-
-  toast.dragging = false
-
-  if (Math.abs(toast.dragOffset) > DRAG_DISMISS_THRESHOLD) {
-    dismiss(toast, toast.dragOffset < 0 ? 'left' : 'right')
-  } else {
-    // Snap back into place and resume the auto-dismiss countdown for whatever
-    // is left of the original lifetime. Keeping the deadline absolute matters
-    // for toasts whose action expires on its own schedule (e.g. the playlist
-    // undo toast), which must not stay clickable after that deadline passes.
-    toast.dragOffset = 0
-    if (!toast.hovered) {
-      toast.timeout = setTimeout(remove, Math.max(0, toast.expiresAt - Date.now()), toast)
-    }
-  }
-
-  // Pointer capture can suppress the leave event when a drag ends outside the
-  // toast. Recheck after capture is released so hover cannot remain stuck.
-  const element = event.currentTarget.parentElement
-  requestAnimationFrame(() => {
-    if (!toasts.includes(toast)) { return }
-
-    if (element.matches(':hover')) {
-      pause(toast, element)
-    } else {
-      resume(toast)
-    }
-  })
-}
-
-/**
- * Pin a leaving toast to the exact viewport spot it occupied before it is taken
- * out of flow, so the remaining toasts can animate up to fill the gap without
- * the leaving one jumping. Fixed positioning keeps it put even though the
- * bottom-anchored holder shrinks as soon as this toast leaves the flow.
- * @param {HTMLElement} el the `.toast-slot` element being removed
- */
-function onBeforeLeave(el) {
-  const { top, left, width, height } = el.getBoundingClientRect()
-
-  el.style.position = 'fixed'
-  el.style.top = `${top}px`
-  el.style.left = `${left}px`
-  el.style.width = `${width}px`
-  el.style.height = `${height}px`
-  el.style.margin = '0'
-}
-
-/**
- * @param {Toast} toast
- * @returns {Record<string, string | number>}
- */
-function dragStyle(toast) {
-  if (toast.dragOffset === 0) { return {} }
-
-  return {
-    transform: `translateX(${toast.dragOffset}px)`,
-    opacity: Math.max(0, 1 - Math.abs(toast.dragOffset) / 200)
-  }
-}
-
-/**
- * Associates the browser-managed animation with its toast and seeks it to the
- * true remaining lifetime. Seeking matters if the indicator is enabled while
- * an existing toast is already partway through its lifetime.
- * @param {Toast} toast
- * @param {AnimationEvent} event
- */
-function onIndicatorAnimationStart(toast, event) {
-  const animation = event.target.getAnimations()
-    .find(candidate => candidate.animationName === event.animationName)
-  if (!animation) { return }
-
-  const remainingMs = toast.hovered
-    ? toast.remainingMs
-    : Math.max(0, toast.expiresAt - Date.now())
-
-  animation.currentTime = toast.duration - remainingMs
-  if (toast.hovered) {
-    animation.pause()
-  }
-  indicatorAnimations.set(toast.id, animation)
-}
-
-/**
- * @param {Toast} toast
- */
-function remove(toast) {
-  const index = toasts.indexOf(toast)
-
+  const index = liveToasts.indexOf(toast.id)
   if (index !== -1) {
-    toasts.splice(index, 1)
-    indicatorAnimations.delete(toast.id)
-    cleanup(toast)
+    liveToasts.splice(index, 1)
   }
 }
 
 /**
- * @param {Toast} toast
+ * @param {number | string} id
  */
-function cleanup(toast) {
-  // assumes `toasts.indexOf(toast) !== -1`
-  clearTimeout(toast.timeout)
-  clearInterval(toast.interval)
+function clearMessageInterval(id) {
+  const interval = messageIntervals.get(id)
+
+  if (interval !== undefined) {
+    clearInterval(interval)
+    messageIntervals.delete(id)
+  }
 }
+
+// The toaster is anchored past the progress toast, so its height has to be
+// known before the toasts can be laid out clear of it.
+watch(progressToast, (element) => {
+  progressToastResizeObserver?.disconnect()
+
+  if (!element) {
+    progressToastHeight.value = 0
+    return
+  }
+
+  progressToastResizeObserver ??= new ResizeObserver(([entry]) => {
+    progressToastHeight.value = entry.target.getBoundingClientRect().height
+  })
+  progressToastResizeObserver.observe(element)
+})
+
+// The holder is recreated when the toasts are teleported into or out of a
+// fullscreen element, so the observers have to be pointed at the new one.
+watch(fullscreenTarget, () => nextTick(trackFrontToast))
 
 onMounted(() => {
+  frontToastResizeObserver = new ResizeObserver(([entry]) => {
+    frontToastWidth.value = `${entry.target.offsetWidth}px`
+  })
+  toastListObserver = new MutationObserver(trackFrontToast)
+  trackFrontToast()
+
   ToastEventBus.addEventListener('toast-open', open)
   document.addEventListener('fullscreenchange', updateFullscreenTarget)
   window.addEventListener('mousemove', onProgressToastPointerMove)
@@ -628,9 +513,15 @@ onBeforeUnmount(() => {
   if (progressToastPointerFrame !== null) {
     cancelAnimationFrame(progressToastPointerFrame)
   }
+  progressToastResizeObserver?.disconnect()
+  frontToastResizeObserver?.disconnect()
+  toastListObserver?.disconnect()
   removeShowToastListener?.()
-  toasts.forEach(cleanup)
+  messageIntervals.forEach(clearInterval)
+  messageIntervals.clear()
+  abortListeners.forEach(remove => remove())
+  abortListeners.clear()
 })
 </script>
 
-<style scoped src="./FtToast.css" />
+<style src="./FtToast.css" />
