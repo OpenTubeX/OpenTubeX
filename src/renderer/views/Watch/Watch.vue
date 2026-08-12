@@ -62,13 +62,13 @@
         <div
           v-else-if="isLoading"
           class="videoPlayer videoPlayerPlaceholder ft-shimmer"
-          data-tab-loading-indicator
+          :data-tab-loading-indicator="isTabPresented ? '' : null"
         />
         <div
           v-else-if="ytDlpStreamsPending && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
           class="videoPlayer videoPlayerPlaceholder streamPlaceholder"
           :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
-          data-tab-loading-indicator
+          :data-tab-loading-indicator="isTabPresented ? '' : null"
         >
           <img
             v-if="thumbnail"

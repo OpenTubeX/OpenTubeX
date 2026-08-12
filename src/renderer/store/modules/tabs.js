@@ -209,7 +209,7 @@ function prepareTabActivationLoading(state, payload) {
   const navigation = getTabNavigationService()
   navigation.setLoadingSuppressed(incomingTabId, false)
   const outgoingTab = state.tabs.find(tab => tab.id === outgoingTabId)
-  if (outgoingTab?.route?.query?.short !== 'true') {
+  if (!outgoingTab?.route?.path?.startsWith('/watch/')) {
     return payload
   }
 
@@ -258,10 +258,10 @@ const actions = {
     navigation.setLoadingSuppressed(tabId, false)
     if (
       activeTabId !== tabId &&
-      activeTab?.route?.query?.short === 'true'
+      activeTab?.route?.path?.startsWith('/watch/')
     ) {
       // Send this before activation so the main process cannot publish the
-      // outgoing Shorts tab as both inactive and transiently loading. The
+      // outgoing Watch tab as both inactive and transiently loading. The
       // hidden Watch view stops contributing its loader during deactivation.
       navigation.setLoadingSuppressed(activeTabId, true)
     }
