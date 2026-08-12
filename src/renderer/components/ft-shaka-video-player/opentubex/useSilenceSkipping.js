@@ -382,7 +382,13 @@ export function useSilenceSkipping({ enabled, isLive, video, outputGain }) {
       try {
         graphSetupPromise ??= setupGraph()
         await graphSetupPromise
+        if (!gain) {
+          graphSetupPromise = null
+        }
       } catch (error) {
+        if (!gain) {
+          graphSetupPromise = null
+        }
         console.warn('Unable to adjust original audio volume', error)
         return
       }

@@ -125,7 +125,14 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
     }
 
     const duration = videoElement.duration
-    if (!Number.isFinite(duration) || duration <= 0 || duration > MAX_VIDEO_DURATION_SECONDS) {
+    if (!Number.isFinite(duration)) {
+      if (enableWhenReady || enableOnReady) {
+        state.value = 'loading'
+      }
+      return
+    }
+
+    if (duration <= 0 || duration > MAX_VIDEO_DURATION_SECONDS) {
       state.value = 'error'
       onError(new RangeError('Voice-over translation only supports videos up to four hours long'))
       return
@@ -161,6 +168,11 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
       }
     } catch (error) {
       if (generation !== requestGeneration) {
+        return
+      }
+
+      if (preserveReadyTrack) {
+        schedulePoll({}, generation, true, enableWhenReady)
         return
       }
 
@@ -261,7 +273,9 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
   }
 
   function handleLoadedMetadata() {
-    if (autoPrepare.value) {
+    if (enableOnReady) {
+      requestTranslation()
+    } else if (autoPrepare.value) {
       prepare()
     }
   }
