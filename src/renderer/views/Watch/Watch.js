@@ -2529,6 +2529,8 @@ export default defineComponent({
         }
 
         if (!this.isUpcoming) {
+          this.alignActiveFormatWithAvailableSources()
+
           // Deliberately not awaited, so that the metadata (title, description,
           // comments, recommendations, ...) is shown while yt-dlp is still extracting.
           this.applyYtDlpPlaybackSource(loadGeneration, videoId)
@@ -2765,6 +2767,8 @@ export default defineComponent({
           }
 
           if (!this.isUpcoming) {
+            this.alignActiveFormatWithAvailableSources()
+
             // Deliberately not awaited, so that the metadata (title, description,
             // comments, recommendations, ...) is shown while yt-dlp is still extracting.
             this.applyYtDlpPlaybackSource(loadGeneration, videoId)

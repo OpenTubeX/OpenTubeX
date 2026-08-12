@@ -127,6 +127,7 @@ test.describe('watch page', () => {
       view.isLive = true
       view.manifestSrc = null
       view.legacyFormats = []
+      view.activeFormat = 'legacy'
       view.activePlaybackEngine = 'built-in'
       await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
       await view.$nextTick()
@@ -135,12 +136,14 @@ test.describe('watch page', () => {
     await expect(page.locator(`${activeTab} .videoTitle`)).toHaveText('Active live stream')
     expect(await watchView.evaluate((view) => ({
       manifestSrc: view.manifestSrc,
+      activeFormat: view.activeFormat,
       activePlaybackEngine: view.activePlaybackEngine,
       activePlaybackEngineVersion: view.activePlaybackEngineVersion,
       playerReady: view.playerReady,
       ytDlpStreamsPending: view.ytDlpStreamsPending
     }))).toEqual({
       manifestSrc: 'https://example.invalid/live.m3u8',
+      activeFormat: 'dash',
       activePlaybackEngine: 'yt-dlp',
       activePlaybackEngineVersion: 'test',
       playerReady: true,
