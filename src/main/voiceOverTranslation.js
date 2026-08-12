@@ -1,8 +1,14 @@
 import { net } from 'electron'
 
 const MAX_VIDEO_DURATION_SECONDS = 4 * 60 * 60
+const MAX_AUDIO_REDIRECTS = 5
 const RESPONSE_LANGUAGES = new Set(['ru', 'en', 'kk'])
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/
+const TRANSLATION_AUDIO_HOST_PATTERNS = [
+  /(^|\.)strm\.yandex\.net$/,
+  /^strm\.yandex\.ru$/,
+  /^storage\.yandexcloud\.net$/,
+]
 
 let clientPromise
 
@@ -16,6 +22,42 @@ function getClient() {
   })
 
   return clientPromise
+}
+
+function isAllowedTranslationAudioUrl(url) {
+  return url.protocol === 'https:' &&
+    TRANSLATION_AUDIO_HOST_PATTERNS.some(pattern => pattern.test(url.hostname))
+}
+
+async function validateTranslationAudioUrl(rawUrl) {
+  let audioUrl = new URL(rawUrl)
+
+  for (let redirectCount = 0; redirectCount <= MAX_AUDIO_REDIRECTS; redirectCount++) {
+    if (!isAllowedTranslationAudioUrl(audioUrl)) {
+      throw new Error('Voice-over service returned an untrusted audio URL')
+    }
+
+    const response = await net.fetch(audioUrl.href, {
+      credentials: 'omit',
+      headers: { Range: 'bytes=0-0' },
+      redirect: 'manual'
+    })
+
+    if (response.status < 300 || response.status >= 400) {
+      await response.body?.cancel()
+      return audioUrl
+    }
+
+    const location = response.headers.get('location')
+    await response.body?.cancel()
+    if (!location) {
+      throw new Error('Voice-over audio redirect did not include a destination')
+    }
+
+    audioUrl = new URL(location, audioUrl)
+  }
+
+  throw new Error('Voice-over audio redirected too many times')
 }
 
 /**
@@ -56,10 +98,7 @@ export async function requestVoiceOverTranslation(payload) {
   })
 
   if (result.translated) {
-    const translationUrl = new URL(result.url)
-    if (translationUrl.protocol !== 'https:') {
-      throw new Error('Voice-over service returned an insecure audio URL')
-    }
+    const translationUrl = await validateTranslationAudioUrl(result.url)
 
     return {
       translated: true,

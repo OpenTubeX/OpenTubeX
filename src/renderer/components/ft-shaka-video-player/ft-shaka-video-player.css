@@ -936,6 +936,13 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .voiceOverTranslationProgressSpinner,
+  :deep(.voice-over-translation-loading > .shaka-ui-icon) {
+    animation: none;
+  }
+}
+
 :deep(.shaka-controls-container:has(
   .shaka-overflow-menu:not(.shaka-hidden),
   .shaka-settings-menu:not(.shaka-hidden),

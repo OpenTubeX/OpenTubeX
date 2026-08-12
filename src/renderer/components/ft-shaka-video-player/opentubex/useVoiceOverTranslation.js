@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 const MAX_VIDEO_DURATION_SECONDS = 4 * 60 * 60
 const MIN_POLL_DELAY_SECONDS = 5
 const MAX_POLL_DELAY_SECONDS = 60
+const MAX_POLL_ATTEMPTS = 30
 const PARTIAL_CONTENT_STATUS = 5
 const MAX_AUDIO_DRIFT_SECONDS = 0.4
 
@@ -31,6 +32,7 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
   /** @type {ReturnType<typeof setTimeout> | null} */
   let pollTimeout = null
   let requestGeneration = 0
+  let pollAttempts = 0
   let enableOnReady = false
 
   function clearPollTimeout() {
@@ -74,6 +76,9 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
   }
 
   function handleAudioError() {
+    requestGeneration++
+    pollAttempts = 0
+    clearPollTimeout()
     enabled.value = false
     state.value = 'error'
     onError(new Error('The translated audio track could not be played'))
@@ -105,6 +110,17 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
   }
 
   function schedulePoll(result, generation, preserveReadyTrack = false, enableWhenReady = true) {
+    if (pollAttempts >= MAX_POLL_ATTEMPTS) {
+      requestGeneration++
+      clearPollTimeout()
+      enabled.value = false
+      syncAudioPlayback()
+      state.value = 'error'
+      onError(new Error('The voice-over translation was not prepared in time'))
+      return
+    }
+
+    pollAttempts++
     const remainingTime = Number.isFinite(result.remainingTime) ? result.remainingTime : MIN_POLL_DELAY_SECONDS
     const delaySeconds = Math.min(MAX_POLL_DELAY_SECONDS, Math.max(MIN_POLL_DELAY_SECONDS, remainingTime))
 
@@ -114,11 +130,12 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
     }, delaySeconds * 1000)
   }
 
-  async function requestTranslation(
-    generation = ++requestGeneration,
-    preserveReadyTrack = false,
-    enableWhenReady = true
-  ) {
+  async function requestTranslation(generation, preserveReadyTrack = false, enableWhenReady = true) {
+    if (generation === undefined) {
+      generation = ++requestGeneration
+      pollAttempts = 0
+    }
+
     const videoElement = video.value
     if (!videoElement) {
       return
@@ -233,6 +250,7 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
 
   function reset() {
     requestGeneration++
+    pollAttempts = 0
     enableOnReady = false
     preparationRequested.value = false
     clearPollTimeout()

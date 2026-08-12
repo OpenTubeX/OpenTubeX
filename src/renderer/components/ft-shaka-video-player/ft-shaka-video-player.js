@@ -938,7 +938,8 @@ export default defineComponent({
       return ['ru', 'en', 'kk'].includes(language) ? language : 'en'
     })
     const voiceOverTranslationVolume = computed(() => {
-      return Math.min(1, Math.max(0, Number(store.getters.getVoiceOverTranslationVolume) / 100))
+      const volume = Number(store.getters.getVoiceOverTranslationVolume) / 100
+      return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 1
     })
     const voiceOverTranslationAvailable = computed(() => {
       return process.env.IS_ELECTRON &&
@@ -1165,10 +1166,8 @@ export default defineComponent({
         return 1
       }
 
-      return Math.min(
-        1,
-        Math.max(0, Number(store.getters.getVoiceOverTranslationOriginalVolume) / 100)
-      )
+      const volume = Number(store.getters.getVoiceOverTranslationOriginalVolume) / 100
+      return Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0.1
     })
 
     const silenceSkipping = useSilenceSkipping({
