@@ -188,10 +188,12 @@
         v-if="!hideActiveSubscriptions"
         class="mobileHidden"
       >
-        <router-link
+        <component
+          :is="enableChannelLinks ? 'router-link' : 'span'"
           v-for="channel in displayedActiveSubscriptions"
           :key="channel.id"
           :to="`/channel/${channel.id}`"
+          :class="enableChannelLinks ? '' : 'disabledIcon'"
           class="navChannel channelLink mobileHidden"
           :title="channel.name"
           role="button"
@@ -221,7 +223,7 @@
           >
             {{ channel.name }}
           </p>
-        </router-link>
+        </component>
         <div
           v-if="hasMoreActiveSubscriptions"
           :key="activeSubscriptionLimit"
@@ -446,6 +448,8 @@ onBeforeUnmount(() => {
   clearTimeout(remeasureTimeoutId)
   window.removeEventListener('resize', updateIndicatorAfterResize)
 })
+
+const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 </script>
 
 <style scoped src="./SideNav.css" />
