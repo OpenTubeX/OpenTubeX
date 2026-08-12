@@ -29,6 +29,7 @@ test('shows returning users only where settings moved', async ({ app, page }) =>
   await expect(tutorial).toBeVisible()
   const lastUsedVersion = await page.evaluate(() => localStorage.getItem('opentubex.lastUsedVersion'))
   expect(lastUsedVersion).toMatch(/^\d+\.\d+\.\d+(?:-|$)/)
+  await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
   await expect(tutorial).toContainText('The cog in that menu opens all settings.')
   await expect(tutorial.locator('.tutorialProgress')).toHaveCount(0)
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
@@ -133,6 +134,7 @@ test('walks new users through the essential controls', async ({ page }) => {
 
   await tutorial.getByRole('button', { name: 'Next' }).click()
   await expect(tutorial).toHaveAccessibleName('Make it yours')
+  await expect(tutorial).toContainText('Right-click it to go straight to profile selection.')
   await expectHighlightCenteredOn(page, '[data-tutorial="quick-settings"]')
 
   await tutorial.getByRole('button', { name: 'Finish' }).click()
