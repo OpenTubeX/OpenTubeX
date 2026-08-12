@@ -148,6 +148,7 @@
           :sabr-reload-caption-index="sabrReloadCaptionIndex"
           :sabr-reload-playback-rate="sabrReloadPlaybackRate"
           :shorts-player="customShortsPlayerActive"
+          :shorts-metadata-open="shortsMetadataOpen"
           :shorts-aspect-ratio="videoAspectRatio"
           class="videoPlayer"
           @error="handlePlayerError"
@@ -226,7 +227,7 @@
                   dir="auto"
                   :aria-label="`${$t('Video.Metadata')}: ${videoTitle}`"
                   :aria-expanded="fullscreenMetadataOpen"
-                  @click="toggleFullscreenMetadata"
+                  @click="toggleShortsMetadata"
                 >
                   {{ videoTitle }}
                 </button>
@@ -599,6 +600,7 @@
             :current-volume="currentVolume"
             :sponsor-block-panel-open="showSidebarSponsorBlock"
             :transcript-open="showTranscript"
+            channel-setting-dropdown-portal
             hide-share-button
             hide-playlist-actions
             hide-fullscreen-dock-actions

@@ -200,6 +200,7 @@
             :icon="['fas', 'floppy-disk']"
             :overlay-icon="channelSettingSaveActions.some(action => action.saved) ? ['fas', 'check'] : null"
             :dropdown-options="channelSettingSaveActions"
+            :dropdown-portal="channelSettingDropdownPortal"
             dropdown-position-x="left"
             @click="saveChannelSetting"
           />
@@ -489,6 +490,10 @@ const props = defineProps({
     default: false
   },
   hideFullscreenDockActions: {
+    type: Boolean,
+    default: false
+  },
+  channelSettingDropdownPortal: {
     type: Boolean,
     default: false
   },
