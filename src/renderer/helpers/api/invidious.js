@@ -1,6 +1,7 @@
 import store from '../../store/index'
 import { calculatePublishedDate, getRelativeTimeFromDate } from '../utils'
 import { isNullOrEmpty } from '../strings'
+import { enrichFallbackInvidiousPublicationDates } from './invidious-channel-videos'
 import { filterUnavailableInvidiousPlaylistVideos } from './invidious-playlists'
 import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
@@ -180,6 +181,10 @@ export async function getInvidiousChannelVideos(channelId, sortBy, continuation)
 
   normalizeManyInvidiousVideosAttributes(response.videos, channelId)
   setMultiplePublishedTimestamps(response.videos)
+  response.videos = await enrichFallbackInvidiousPublicationDates(
+    response.videos,
+    invidiousGetVideoInformation
+  )
 
   return response
 }
