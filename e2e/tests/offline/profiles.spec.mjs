@@ -77,6 +77,47 @@ test.describe('default profile setting', () => {
 })
 
 test.describe('profile manager', () => {
+  test.describe('scroll position', () => {
+    test.use({
+      seed: {
+        profiles: [
+          mainProfile,
+          {
+            ...secondProfile,
+            subscriptions: Array.from({ length: 30 }, (_, index) => ({
+              id: `channel-${index}`,
+              name: `Channel ${index}`,
+              thumbnail: ''
+            }))
+          }
+        ]
+      }
+    })
+
+    test('clamps the scroll position after deleting an open profile', async ({ page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('Second profile').click()
+
+      const scroller = page.locator('.settingsSubpageScroll')
+      await scroller.evaluate(element => { element.scrollTop = element.scrollHeight })
+      await expect.poll(() => scroller.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+      await page.getByRole('button', { name: 'Delete Profile' }).click()
+      await page.getByRole('button', { name: 'Yes, Delete' }).click()
+      await expect(page.locator('.card .profileList').getByText('Second profile')).toHaveCount(0)
+
+      await expect.poll(() => scroller.evaluate(element => {
+        const content = element.firstElementChild
+        const contentEnd = content.getBoundingClientRect().bottom -
+          element.getBoundingClientRect().top + element.scrollTop +
+          Number.parseFloat(getComputedStyle(element).paddingBottom)
+        const maximumScrollTop = Math.max(0, contentEnd - element.clientHeight)
+        return element.scrollTop - maximumScrollTop
+      })).toBeLessThanOrEqual(1)
+    })
+  })
+
   test('a profile can be created through the UI and persists', async ({ app, page }) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()

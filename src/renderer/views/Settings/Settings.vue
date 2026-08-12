@@ -202,8 +202,10 @@
       <template v-else-if="unlocked">
         <template v-if="isProfileManagerOpen">
           <div
+            ref="profileManagerScrollRef"
             v-overlay-scrollbars
             class="settingsSubpageScroll"
+            @scroll.passive="clampProfileManagerScroll"
           >
             <ProfileSettings />
           </div>
@@ -381,6 +383,7 @@ const settingsMenuTransitionClass = ref('')
 const settingsWindowRef = useTemplateRef('settingsWindowRef')
 const settingsPageRef = useTemplateRef('settingsPageRef')
 const settingsContentRef = useTemplateRef('settingsContentRef')
+const profileManagerScrollRef = useTemplateRef('profileManagerScrollRef')
 const settingsSearchInputRef = useTemplateRef('settingsSearchInputRef')
 const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
@@ -389,6 +392,7 @@ const subpageTitle = ref('')
 let closeSubpage = null
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
+let profileManagerResizeObserver = null
 let settingsContentPaddingBottom = 0
 let observationScheduled = false
 let boundsSaveTimer = null
@@ -676,7 +680,10 @@ onBeforeUnmount(() => {
 
 watch(isProfileManagerOpen, (open) => {
   if (!open) {
+    stopObservingProfileManager()
     setInitialSection()
+  } else {
+    nextTick(observeProfileManager)
   }
 })
 watch(activeSection, (section) => {
@@ -690,6 +697,7 @@ function handleMounted() {
   unlocked.value = store.getters.getSettingsPassword === ''
   handleResize(settingsWindowRef.value?.clientWidth ?? windowBounds.value.width)
   setInitialSection()
+  nextTick(observeProfileManager)
   nextTick(() => (settingsSearchInputRef.value ?? settingsCloseButtonRef.value)?.focus())
   if (settingsResizeObserver !== null || observationScheduled) {
     return
@@ -737,8 +745,35 @@ function stopObserving() {
   settingsResizeObserver = null
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
+  stopObservingProfileManager()
   settingsContentPaddingBottom = 0
   window.removeEventListener('resize', clampWindowToViewport)
+}
+
+function observeProfileManager() {
+  stopObservingProfileManager()
+  const content = profileManagerScrollRef.value
+  const profileManager = content?.firstElementChild
+  if (!content || !(profileManager instanceof HTMLElement)) return
+
+  profileManagerResizeObserver = new ResizeObserver(() => {
+    clampOverlayScrollTop(content, profileManager)
+  })
+  profileManagerResizeObserver.observe(profileManager)
+  clampOverlayScrollTop(content, profileManager)
+}
+
+function stopObservingProfileManager() {
+  profileManagerResizeObserver?.disconnect()
+  profileManagerResizeObserver = null
+}
+
+function clampProfileManagerScroll() {
+  const content = profileManagerScrollRef.value
+  const profileManager = content?.firstElementChild
+  if (content && profileManager instanceof HTMLElement) {
+    clampOverlayScrollTop(content, profileManager)
+  }
 }
 
 function observeActiveSettingsSection() {
