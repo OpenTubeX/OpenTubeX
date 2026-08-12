@@ -1623,7 +1623,7 @@ function parseVideoData() {
     }
     uploadedTime.value = premiereDate.toLocaleString([locale.value, 'en'])
     published.value = premiereDate.getTime()
-  } else if (props.data.premiereTimestamp !== undefined) {
+  } else if (props.data.premiereTimestamp > 0) {
     uploadedTime.value = new Date(props.data.premiereTimestamp * 1000).toLocaleString([locale.value, 'en'])
     published.value = props.data.premiereTimestamp * 1000
   } else if (typeof props.data.published === 'number' && !isLive.value) {

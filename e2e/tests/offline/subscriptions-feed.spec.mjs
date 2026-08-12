@@ -14,6 +14,8 @@ function feedVideo(videoId, title, authorId, published, extra = {}) {
     author: authorId === CHANNEL_A ? 'Channel A' : 'Channel B',
     authorId,
     published,
+    // Invidious includes this sentinel value for videos that are not premieres.
+    premiereTimestamp: 0,
     viewCount: 1000,
     lengthSeconds: 120,
     liveNow: false,
