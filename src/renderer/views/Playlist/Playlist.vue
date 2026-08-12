@@ -75,6 +75,7 @@
           <FtElementList
             v-if="listType === 'grid'"
             :data="visiblePlaylistItems"
+            data-type="video"
             display="grid"
             :playlist-id="playlistId"
             :playlist-type="infoSource"
@@ -278,7 +279,7 @@ const sortOrder = computed(() => isUserPlaylistRequested.value ? userPlaylistSor
 const playlistId = computed(() => route.params.id)
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
-const listType = computed(() => isUserPlaylistRequested.value && !forceListView.value ? store.getters.getListType : 'list')
+const listType = computed(() => !forceListView.value ? store.getters.getListType : 'list')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const userPlaylistsReady = computed(() => store.getters.getPlaylistsReady)
