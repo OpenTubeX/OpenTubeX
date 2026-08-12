@@ -1005,6 +1005,7 @@ export async function handleYtDlpDownloadBinary(event, binary) {
  * @property {string | null} language
  * @property {string | null} formatNote
  * @property {string | null} dynamicRange
+ * @property {number | null} availableAt Unix timestamp after which the format can be requested
  */
 
 /**
@@ -1064,7 +1065,8 @@ function mapPlaybackFormat(format) {
     audioChannels: toFiniteNumber(format.audio_channels),
     language: toNonEmptyString(format.language),
     formatNote: toNonEmptyString(format.format_note),
-    dynamicRange: toNonEmptyString(format.dynamic_range)
+    dynamicRange: toNonEmptyString(format.dynamic_range),
+    availableAt: toFiniteNumber(format.available_at)
   }
 }
 
@@ -1101,11 +1103,11 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId) {
     '--no-progress',
     '--socket-timeout',
     '15',
-    // Some yt-dlp versions otherwise select an iOS live HLS manifest, whose
-    // segments can stop working when YouTube enforces a PO token. Android VR
-    // live HLS does not require that token; retain the defaults as fallbacks.
+    // Android VR avoids live HLS streams that require a PO token, while the
+    // embedded client exposes alternate audio languages. Keep yt-dlp's default
+    // clients as fallbacks for videos unsupported by either client.
     '--extractor-args',
-    'youtube:player_client=android_vr,default'
+    'youtube:player_client=android_vr,web_embedded,default'
   ]
 
   await pushProxyArgument(args)

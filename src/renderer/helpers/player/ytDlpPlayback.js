@@ -202,6 +202,14 @@ function getExpiryDate(formats) {
 async function convertAdaptiveFormats(formats, duration) {
   const results = await Promise.all(formats.map(async (format) => {
     try {
+      // Match yt-dlp's own download delay. It compares the timestamp to the
+      // current whole second, so keep that rounding to avoid probing just
+      // before YouTube makes the URL usable.
+      const waitMs = (format.availableAt ?? 0) * 1000 - Math.floor(Date.now() / 1000) * 1000
+      if (waitMs > 0) {
+        await new Promise(resolve => setTimeout(resolve, waitMs))
+      }
+
       const byteRanges = await probeStreamByteRanges(format.url, format.ext === 'webm')
 
       return byteRanges === null ? null : convertYtDlpToLocalFormat(format, byteRanges, duration)

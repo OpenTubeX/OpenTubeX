@@ -103,13 +103,13 @@ test.describe('video downloads', () => {
     await expect(page.locator('.downloadProgressBarTrack')).toHaveCount(0)
   })
 
-  test('requests Android VR streams for yt-dlp playback', async ({ app, page }) => {
+  test('requests compatible streams and alternate audio for yt-dlp playback', async ({ app, page }) => {
     const executable = path.join(app.userDataDir, 'capture-yt-dlp-playback-args.sh')
     const capturedArgs = path.join(app.userDataDir, 'captured-yt-dlp-playback-args.txt')
     await writeFile(executable, [
       '#!/bin/sh',
       `printf '%s\\n' "$@" > "${capturedArgs}"`,
-      'printf \'%s\\n\' \'{"formats":[]}\''
+      'printf \'%s\\n\' \'{"formats":[{"format_id":"140","available_at":123}]}\''
     ].join('\n'))
     await chmod(executable, 0o755)
     await page.evaluate(async (ytDlpPath) => {
@@ -118,11 +118,12 @@ test.describe('video downloads', () => {
     }, executable)
 
     await page.bringToFront()
-    await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
+    const info = await page.evaluate(() => window.ftElectron.ytDlpGetPlaybackInfo('eeeeeeeeeee'))
 
     const passedArguments = (await readFile(capturedArgs, 'utf8')).trim().split('\n')
     const extractorArgsIndex = passedArguments.indexOf('--extractor-args')
-    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=android_vr,default')
+    expect(passedArguments[extractorArgsIndex + 1]).toBe('youtube:player_client=android_vr,web_embedded,default')
+    expect(info.formats[0].availableAt).toBe(123)
   })
 
   test('disables media download actions and rejects direct requests', async ({ page }) => {
