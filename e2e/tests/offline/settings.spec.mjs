@@ -1226,6 +1226,31 @@ test.describe('settings', () => {
     await expect(resetButton).toHaveCount(0)
   })
 
+  test('highlights changed backend fallback and deep-link settings', async ({ page }) => {
+    await goTo(page, 'settings')
+
+    const backendFallbackToggle = page.getByRole('checkbox', {
+      name: /non-preferred backend/i
+    })
+    const openDeepLinksToggle = page.getByRole('checkbox', {
+      name: /Open URLs Passed to OpenTubeX in a New Window/i
+    })
+
+    const backendFallbackSetting = page.locator('.switch-ctn').filter({ has: backendFallbackToggle })
+    const openDeepLinksSetting = page.locator('.switch-ctn').filter({ has: openDeepLinksToggle })
+
+    await backendFallbackSetting.locator('label.switch-label').click()
+    await openDeepLinksSetting.locator('label.switch-label').click()
+    await page.getByRole('button', { name: 'Highlight settings changed from defaults' }).click()
+
+    for (const setting of [backendFallbackSetting, openDeepLinksSetting]) {
+      await expect(setting.getByRole('button', {
+        name: 'Reset this setting to its default'
+      })).toBeVisible()
+      await expect(setting).toHaveCSS('border-left-width', '3px')
+    }
+  })
+
   test('highlights and resets caption appearance settings individually', async ({ page }) => {
     await goTo(page, 'settings')
 

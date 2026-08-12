@@ -7,6 +7,7 @@
         <FtToggleSwitch
           :label="t('Settings.General Settings.Check for Updates')"
           :default-value="checkForUpdates"
+          setting-key="checkForUpdates"
           :compact="true"
           @change="updateCheckForUpdates"
         />
@@ -14,6 +15,7 @@
           v-if="SUPPORTS_LOCAL_API"
           :label="t('Settings.General Settings.Fallback to Non-Preferred Backend on Failure')"
           :default-value="backendFallback"
+          setting-key="backendFallback"
           :compact="true"
           :tooltip="t('Tooltips.General Settings.Fallback to Non-Preferred Backend on Failure')"
           @change="updateBackendFallback"
@@ -41,6 +43,7 @@
           v-if="!IS_MAC && !isLinuxWayland && USING_ELECTRON"
           :label="t('Settings.General Settings.Minimize to system tray')"
           :default-value="hideToTrayOnMinimize"
+          setting-key="hideToTrayOnMinimize"
           :compact="true"
           @change="updateHideToTrayOnMinimize"
         />
@@ -57,6 +60,7 @@
           v-if="USING_ELECTRON"
           :label="t('Settings.General Settings.Open Deep Links In New Window')"
           :default-value="openDeepLinksInNewWindow"
+          setting-key="openDeepLinksInNewWindow"
           :compact="true"
           :tooltip="t('Tooltips.General Settings.Open Deep Links In New Window')"
           @change="updateOpenDeepLinksInNewWindow"
