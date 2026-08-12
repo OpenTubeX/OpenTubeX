@@ -92,6 +92,7 @@ import { normalizeFixedTabWidth } from '../../constants/tabWidth'
 import { getTabAvatarUrl } from '../../tabs/tabPreview'
 import { removeLegacyTabAvatar } from '../../helpers/channelThumbnailStorage'
 import { fetchTabAvatarBytes } from '../../helpers/tabAvatar'
+import { loadMissingTabAvatars } from '../../helpers/loadTabAvatars'
 import SortableTab from './SortableTab.vue'
 import {
   buildCurrentShiftedTabIds,
@@ -116,6 +117,7 @@ const vertical = computed(() => store.getters.getUseVerticalTabBar)
 const showTabIcons = computed(() => store.getters.getShowTabIcons)
 const showTabPreviews = computed(() => store.getters.getShowTabPreviews)
 const migratingAvatarTabIds = new Set()
+let attemptedAutomaticAvatarLoad = false
 
 watch(showTabPreviews, enabled => {
   if (isElectron) {
@@ -128,6 +130,11 @@ watch([showTabIcons, tabs], ([enabled, currentTabs]) => {
 
   window.ftElectron.tabs.setAvatarsEnabled(enabled)
   if (!enabled) return
+
+  if (!attemptedAutomaticAvatarLoad && currentTabs.length > 0) {
+    attemptedAutomaticAvatarLoad = true
+    loadMissingTabAvatars(currentTabs)
+  }
 
   for (const tab of currentTabs) {
     const avatarUrl = getTabAvatarUrl(tab)

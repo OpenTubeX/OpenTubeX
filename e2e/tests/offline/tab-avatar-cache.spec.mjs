@@ -1,8 +1,9 @@
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
+import { createServer } from 'node:http'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 // A 1x1 PNG, small enough to stay well inside the avatar download limit
 const AVATAR_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
@@ -78,4 +79,137 @@ test('tabs of the same channel share one cached avatar file', async ({ app, page
     const files = await listCachedFiles(app.userDataDir, baseline)
     return files.some(file => file.name === sharedAvatar.name)
   }).toBe(false)
+})
+
+test.describe('loading missing tab icons', () => {
+  test.use({
+    seed: {
+      settings: {
+        backendPreference: 'invidious',
+        defaultInvidiousInstance: 'https://invidious.test'
+      }
+    }
+  })
+
+  test('caches an unloaded tab icon without activating the tab', async ({ page }) => {
+    await page.route('https://invidious.test/api/v1/channels/UCmissing?*', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        authorThumbnails: [{ url: 'https://images.test/avatar.png' }],
+        tabs: []
+      })
+    }))
+    await page.route('https://images.test/avatar.png', route => route.fulfill({
+      contentType: 'image/png',
+      body: Buffer.from(AVATAR_PNG, 'base64')
+    }))
+
+    const { tabId, activeTabId } = await page.evaluate(async () => {
+      const activeTabId = (await window.ftElectron.tabs.getState()).activeTabId
+      const tab = await window.ftElectron.tabs.create({
+        route: '/channel/UCmissing',
+        makeActive: false,
+        lazyLoad: true
+      })
+      return { tabId: tab.id, activeTabId }
+    })
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    const loadButton = themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })
+    await loadButton.click()
+    await expect(page.locator('.toast')).toContainText('Missing tab icons loaded: 1')
+    await expect(loadButton).toBeDisabled()
+
+    await expect.poll(() => page.evaluate(tabId => {
+      return window.ftElectron.tabs.getState().then(state => {
+        const tab = state.tabs.find(candidate => candidate.id === tabId)
+        return {
+          activeTabId: state.activeTabId,
+          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
+          isUnloaded: tab?.isUnloaded
+        }
+      })
+    }, tabId)).toEqual({
+      activeTabId,
+      avatarLoaded: true,
+      isUnloaded: true
+    })
+  })
+})
+
+test.describe('automatic missing tab icons', () => {
+  const server = createServer()
+  const seed = {
+    settings: {
+      backendPreference: 'invidious',
+      defaultInvidiousInstance: '',
+      startupBehavior: 'restoreTabLoadState'
+    },
+    tabSessions: [{
+      _id: 'avatar-startup-session',
+      value: {
+        tabs: [{
+          id: 'active-tab',
+          url: 'app://bundle/index.html#/history',
+          title: 'History',
+          isUnloaded: false
+        }, {
+          id: 'missing-avatar-tab',
+          url: 'app://bundle/index.html#/channel/UCstartup',
+          title: 'Unloaded channel',
+          isUnloaded: true
+        }],
+        activeTabId: 'active-tab',
+        bounds: { x: 0, y: 0, width: 1600, height: 900, maximized: false }
+      }
+    }]
+  }
+
+  test.use({ seed })
+
+  test.beforeAll(async () => {
+    server.on('request', (request, response) => {
+      if (request.url?.startsWith('/api/v1/channels/UCstartup')) {
+        response.setHeader('content-type', 'application/json')
+        response.end(JSON.stringify({
+          authorThumbnails: [{ url: `${seed.settings.defaultInvidiousInstance}/avatar.png` }],
+          tabs: []
+        }))
+      } else if (request.url === '/avatar.png') {
+        response.setHeader('content-type', 'image/png')
+        response.end(Buffer.from(AVATAR_PNG, 'base64'))
+      } else {
+        response.statusCode = 404
+        response.end()
+      }
+    })
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+    const address = server.address()
+    seed.settings.defaultInvidiousInstance = `http://127.0.0.1:${address.port}`
+  })
+
+  test.afterAll(async () => {
+    server.closeAllConnections()
+    await new Promise(resolve => server.close(resolve))
+  })
+
+  test('loads restored icons on startup and disables the completed action', async ({ page }) => {
+    await expect.poll(() => page.evaluate(() => {
+      return window.ftElectron.tabs.getState().then(state => {
+        const tab = state.tabs.find(candidate => candidate.id === 'missing-avatar-tab')
+        return {
+          activeTabId: state.activeTabId,
+          avatarLoaded: tab?.avatarUrl?.startsWith('data:image/jpeg;base64,') === true,
+          isUnloaded: tab?.isUnloaded
+        }
+      })
+    })).toEqual({
+      activeTabId: 'active-tab',
+      avatarLoaded: true,
+      isUnloaded: true
+    })
+
+    const themeSection = await goToSettingsSection(page, 'theme')
+    await expect(themeSection.getByRole('button', { name: 'Load Missing Tab Icons' })).toBeDisabled()
+  })
 })
