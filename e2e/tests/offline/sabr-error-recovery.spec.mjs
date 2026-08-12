@@ -104,6 +104,56 @@ function driveWatchView(page, script, options = {}) {
   })
 }
 
+test('a SABR reload preserves the active video quality', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const quality = await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') {
+        return vnode.component.proxy
+      }
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) {
+      throw new Error('Unable to access the watch view')
+    }
+
+    watchView.currentVideoQuality = '360'
+    watchView.getTimestamp = () => 0
+    watchView.reloadView = async () => {}
+    watchView.showTabToast = () => {}
+
+    await watchView.performSabrReload({ videoQuality: '720' }, 'Synthetic SABR reload')
+
+    // Metadata loading normally resets this to the configured default before
+    // initializeVideoQuality restores the state captured from the old player.
+    watchView.currentVideoQuality = '360'
+    watchView.initializeVideoQuality()
+
+    return watchView.currentVideoQuality
+  })
+
+  expect(quality).toBe('720')
+})
+
 test('a second SABR failure after successful playback refetches instead of dropping to legacy', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')

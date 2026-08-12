@@ -5065,7 +5065,7 @@ export default defineComponent({
      * @returns {string | null}
      */
     function getActiveVariantQuality() {
-      const activeVariant = player.getVariantTracks().find(track => track.active)
+      const activeVariant = player?.getVariantTracks().find(track => track.active)
 
       if (!activeVariant) {
         return null
@@ -8618,7 +8618,8 @@ export default defineComponent({
       return {
         wasPlaying: !video.value?.paused,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
-        playbackRate: getCurrentPlaybackRate()
+        playbackRate: getCurrentPlaybackRate(),
+        videoQuality: getActiveVariantQuality()
       }
     }
 
