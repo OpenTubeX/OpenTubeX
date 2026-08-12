@@ -279,6 +279,18 @@ export default defineComponent({
       activePlaybackEngine: 'built-in',
       /** @type {string | null} the yt-dlp version that extracted the current streams */
       activePlaybackEngineVersion: null,
+      /** @type {{
+       *   manifestSrc: string | null,
+       *   manifestMimeType: MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS | MANIFEST_TYPE_SABR,
+       *   sabrData: SabrData | null,
+       *   legacyFormats: object[],
+       *   streamingDataExpiryDate: Date | null
+       * } | null}
+       */
+      builtInPlaybackSource: null,
+      playbackEngineFallbackAttemptedForCurrentVideo: false,
+      /** @type {'built-in' | 'yt-dlp' | null} */
+      playbackEngineFallbackTarget: null,
       // yt-dlp is a separate process that takes a while to extract the streams. The
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
@@ -1474,6 +1486,8 @@ export default defineComponent({
       if (videoIdChanged) {
         this.ipBlockRecoveryAttemptedForCurrentVideo = false
         this.streamErrorReloadAttemptedForCurrentVideo = false
+        this.playbackEngineFallbackAttemptedForCurrentVideo = false
+        this.playbackEngineFallbackTarget = null
         this.sabrErrorRecoveryAttempts = 0
         this.sabrErrorRecoveriesForCurrentVideo = 0
         this.sabrErrorRecoveryLastSeconds = null
@@ -1594,6 +1608,7 @@ export default defineComponent({
       this.sabrData = null
       this.activePlaybackEngine = 'built-in'
       this.activePlaybackEngineVersion = null
+      this.builtInPlaybackSource = null
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
       this.captions = []
@@ -3740,6 +3755,10 @@ export default defineComponent({
           case 429:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
 
+            if (await this.tryPlaybackEngineFallback(error)) {
+              return
+            }
+
             this.errorMessage = '[BAD_HTTP_STATUS: 429] Ratelimited'
             return
           case 403:
@@ -3760,6 +3779,10 @@ export default defineComponent({
                   : '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
 
               if (await this.reloadAfterStreamErrorOnce(specificError)) {
+                return
+              }
+
+              if (await this.tryPlaybackEngineFallback(error)) {
                 return
               }
 
@@ -3786,6 +3809,10 @@ export default defineComponent({
               return
             }
 
+            if (await this.tryPlaybackEngineFallback(error)) {
+              return
+            }
+
             this.errorMessage = specificError
             this.customErrorIcon = ['fas', 'clock']
             return
@@ -3800,7 +3827,11 @@ export default defineComponent({
         )
       ) { return }
 
-      const stopPlaybackRecovery = () => {
+      const stopPlaybackRecovery = async () => {
+        if (await this.tryPlaybackEngineFallback(error)) {
+          return
+        }
+
         this.handleWatchProgressAutoSaveWhenProgressEnabled()
         const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
         this.errorMessage = `[PLAYER_ERROR: ${status}] Unable to recover the video stream. Please reload this video.`
@@ -3816,13 +3847,13 @@ export default defineComponent({
         // Audio is an explicit playback mode, not a degraded video fallback.
         // Keep the bounded refresh behavior above, then stop with the actual
         // error instead of briefly replacing the video player with audio.
-        stopPlaybackRecovery()
+        await stopPlaybackRecovery()
         return
       }
 
       if (this.isLive || this.isPostLiveDvr) {
         if (this.activeFormat === 'dash') {
-          stopPlaybackRecovery()
+          await stopPlaybackRecovery()
         } else {
           console.error('Unable to play audio formats. Reverting to DASH formats...')
           this.enableDashFormat()
@@ -3837,17 +3868,133 @@ export default defineComponent({
               console.error('Unable to play DASH formats. Reverting to legacy formats...')
               this.enableLegacyFormat()
             } else {
-              stopPlaybackRecovery()
+              await stopPlaybackRecovery()
             }
             break
           case 'legacy':
-            stopPlaybackRecovery()
+            await stopPlaybackRecovery()
             break
           case 'audio':
             console.error('Unable to play audio formats. Reverting to DASH formats...')
             this.enableDashFormat()
             break
         }
+      }
+    },
+
+    /**
+     * Tries the other playback engine once after the selected engine exhausts
+     * its own stream recovery options.
+     * @param {import('shaka-player/dist/shaka-player.ui').default.util.Error} error
+     * @returns {Promise<boolean>}
+     */
+    tryPlaybackEngineFallback: async function (error) {
+      if (
+        !process.env.IS_ELECTRON ||
+        this.playbackEngineFallbackAttemptedForCurrentVideo ||
+        this.isUpcoming ||
+        this.isPostLiveDvr
+      ) {
+        return false
+      }
+
+      const status = error.code === shaka.util.Error.Code.BAD_HTTP_STATUS
+        ? error.data[1]
+        : error.code
+      const reason = `[PLAYER_ERROR: ${status}]`
+      const loadGeneration = this.videoLoadGeneration
+      const videoId = this.videoId
+
+      if (this.activePlaybackEngine === 'yt-dlp') {
+        if (this.builtInPlaybackSource === null) {
+          return false
+        }
+
+        this.playbackEngineFallbackAttemptedForCurrentVideo = true
+        this.playbackEngineFallbackTarget = 'built-in'
+        this.ytDlpStreamsPending = true
+        await this.$nextTick()
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          return true
+        }
+
+        const source = this.builtInPlaybackSource
+        if (
+          source.streamingDataExpiryDate !== null &&
+          new Date() > source.streamingDataExpiryDate
+        ) {
+          try {
+            await this.reloadView({ preserveTitle: true })
+            return true
+          } catch (reloadError) {
+            console.error('Refreshing the built-in playback source failed', reloadError)
+            if (this.tabRoute.params.id === videoId) {
+              this.ytDlpStreamsPending = false
+            }
+            return false
+          }
+        }
+
+        this.manifestSrc = source.manifestSrc
+        this.manifestMimeType = source.manifestMimeType
+        this.sabrData = source.sabrData
+        this.legacyFormats = source.legacyFormats
+        this.streamingDataExpiryDate = source.streamingDataExpiryDate
+        this.activePlaybackEngine = 'built-in'
+        this.activePlaybackEngineVersion = null
+
+        this.alignActiveFormatWithAvailableSources()
+
+        this.showTabToast({
+          message: this.t('Change Format.yt-dlp Fallback Template', { error: reason }),
+          icon: ['fas', 'exchange-alt'],
+        })
+        this.ytDlpStreamsPending = false
+        return true
+      }
+
+      this.playbackEngineFallbackAttemptedForCurrentVideo = true
+      this.playbackEngineFallbackTarget = 'yt-dlp'
+      this.ytDlpStreamsPending = true
+      this.showTabToast({
+        message: this.t('Change Format.Built-in Fallback Template', { error: reason }),
+        icon: ['fas', 'exchange-alt'],
+      })
+
+      try {
+        const fallbackApplied = await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          return true
+        }
+        if (!fallbackApplied) {
+          this.playbackEngineFallbackTarget = null
+        }
+        return fallbackApplied
+      } catch (fallbackError) {
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          return true
+        }
+        this.playbackEngineFallbackTarget = null
+        console.error('Falling back to yt-dlp playback failed', fallbackError)
+        return false
+      } finally {
+        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          this.ytDlpStreamsPending = false
+        }
+      }
+    },
+
+    alignActiveFormatWithAvailableSources: function () {
+      if (
+        (this.activeFormat === 'dash' || this.activeFormat === 'audio') &&
+        this.manifestSrc === null &&
+        this.legacyFormats.length > 0
+      ) {
+        this.activeFormat = 'legacy'
+      } else if (this.activeFormat === 'legacy' && this.legacyFormats.length === 0 && this.manifestSrc !== null) {
+        this.activeFormat = 'dash'
+      } else if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
+        this.activeFormat = 'dash'
       }
     },
 
@@ -3863,7 +4010,11 @@ export default defineComponent({
      * @param {string} videoId
      */
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
-      if (!process.env.IS_ELECTRON || this.videoPlaybackEngine !== 'yt-dlp') {
+      if (
+        !process.env.IS_ELECTRON ||
+        this.playbackEngineFallbackTarget === 'built-in' ||
+        (this.videoPlaybackEngine !== 'yt-dlp' && this.playbackEngineFallbackTarget !== 'yt-dlp')
+      ) {
         return
       }
 
@@ -3899,7 +4050,7 @@ export default defineComponent({
       try {
         source = await getYtDlpPlaybackSource(videoId)
       } catch (error) {
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
 
         console.error(`yt-dlp could not provide streams for ${videoId}, falling back to the built-in engine...`, error)
         this.showTabToast({
@@ -3907,10 +4058,18 @@ export default defineComponent({
           time: 7000,
           icon: ['fas', 'circle-exclamation'],
         })
-        return
+        return false
       }
 
-      if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
+      if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
+
+      this.builtInPlaybackSource = {
+        manifestSrc: this.manifestSrc,
+        manifestMimeType: this.manifestMimeType,
+        sabrData: this.sabrData,
+        legacyFormats: this.legacyFormats,
+        streamingDataExpiryDate: this.streamingDataExpiryDate
+      }
 
       this.manifestSrc = source.manifestSrc
       this.manifestMimeType = source.manifestMimeType
@@ -3926,13 +4085,9 @@ export default defineComponent({
       this.activePlaybackEngine = 'yt-dlp'
       this.activePlaybackEngineVersion = source.version
 
-      if (this.activeFormat === 'legacy' && source.legacyFormats.length === 0) {
-        this.activeFormat = 'dash'
-      }
+      this.alignActiveFormatWithAvailableSources()
 
-      if (this.activeFormat === 'audio' && !this.audioFormatAvailable) {
-        this.activeFormat = 'dash'
-      }
+      return true
     },
 
     /**
