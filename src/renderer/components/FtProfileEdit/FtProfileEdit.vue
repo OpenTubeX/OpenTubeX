@@ -11,6 +11,7 @@
             <div
               class="colorOption themeColorOption"
               :class="{ selected: profileBgColor === THEME_BG_COLOR }"
+              :aria-pressed="profileBgColor === THEME_BG_COLOR"
               :title="$t('Profile.Theme Color')"
               tabindex="0"
               role="button"
@@ -22,6 +23,7 @@
               :key="color"
               class="colorOption"
               :class="{ selected: profileBgColor.toLowerCase() === color.toLowerCase() }"
+              :aria-pressed="profileBgColor.toLowerCase() === color.toLowerCase()"
               :title="color + ' ' + $t('Profile.Custom Color')"
               :style="{ background: color }"
               tabindex="0"
@@ -33,6 +35,7 @@
               v-if="profileIcon?.type === 'image'"
               class="colorOption transparentColorOption"
               :class="{ selected: profileBgColor === 'transparent' }"
+              :aria-pressed="profileBgColor === 'transparent'"
               :title="$t('Profile.Transparent')"
               tabindex="0"
               role="button"

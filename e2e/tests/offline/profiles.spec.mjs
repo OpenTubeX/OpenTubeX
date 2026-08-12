@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 // The main profile ('allChannels') must exist in any seeded profiles.db,
 // otherwise the app would recreate the store with only the default profile.
@@ -110,12 +110,11 @@ test.describe('profile manager', () => {
         return profile?.bgColor
       }).toBe('var(--primary-color)')
 
-      // switching the theme color has to repaint the profile, without touching the profile itself
+      ;({ page } = await app.relaunch())
+      // the profile keeps the resolved theme color after restart
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
-      // the narrow layout only shows the section menu after going back to it
-      const themeSection = page.locator('.settingsMenu [data-section="theme"]')
-      if (!await themeSection.isVisible()) await page.locator('.settingsBreadcrumbRoot').click()
-      await themeSection.click()
+      // switching the theme color has to repaint the profile, without touching the profile itself
+      await goToSettingsSection(page, 'theme')
 
       // the labels are translated, so find the main color select and its 'Blue'
       // option through the values of the hidden native select instead
