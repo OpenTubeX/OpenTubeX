@@ -467,7 +467,31 @@ test.describe('watch page', () => {
     await page.keyboard.press('Escape')
 
     await setPlayerFullscreen(page, true)
-    await expect(player.locator('.fullscreenMetadataOverlay.open')).toBeVisible()
+    const fullscreenMetadata = player.locator('.fullscreenMetadataOverlay.open')
+    await expect(fullscreenMetadata).toBeVisible()
+
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenTranscript(true)
+    })
+    const fullscreenTranscript = player.locator('.fullscreenTranscriptOverlay.open')
+    await expect(fullscreenTranscript).toBeVisible()
+    await fullscreenMetadata.locator('.fullscreenMetadataHeader').dblclick({
+      position: { x: 30, y: 26 }
+    })
+    await expect.poll(async () => (await fullscreenMetadata.boundingBox()).height)
+      .toBeLessThan(100)
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenTranscript(false)
+    })
+    await expect(fullscreenTranscript).toHaveCount(0)
+    await fullscreenMetadata.getByRole('button', { name: 'Close video information' }).click()
+    await player.locator('.shortsFullscreenTitleButton').click()
+    await watchComponent.evaluate(component => {
+      component.proxy.$refs.player.setFullscreenTranscript(true)
+    })
+    await expect.poll(async () => (await fullscreenMetadata.boundingBox()).height)
+      .toBeGreaterThan(150)
+
     await setPlayerFullscreen(page, false)
     await expect(auxPanel).toHaveClass(/shortsAuxPanelOpen/)
 

@@ -5831,6 +5831,16 @@ export default defineComponent({
       }
 
       if (isNativeFullscreenActive() || fullWindowEnabled.value) {
+        const openDocks = getFullscreenOpenDocks('metadata')
+        if (open && openDocks.length === 1 && fullscreenDockCollapsedState.metadata != null) {
+          toggleFullscreenDockCollapsed(
+            openDocks,
+            'metadata',
+            fullscreenDockWeights,
+            fullscreenDockCollapsedState,
+            container.value.clientHeight
+          )
+        }
         setFullscreenMetadata(open)
       } else {
         restoreFullscreenMetadata = open
