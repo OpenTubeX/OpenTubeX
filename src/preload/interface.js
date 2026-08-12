@@ -155,7 +155,7 @@ export default {
   },
 
   /**
-   * @param {{ videoId: string, duration: number, responseLanguage: 'ru' | 'en' | 'kk' }} payload
+   * @param {{ videoId: string, duration: number, responseLanguage: 'ru' | 'en' | 'kk', cache?: boolean }} payload
    * @returns {Promise<{ translated: boolean, url?: string, remainingTime: number, status: number }>}
    */
   requestVoiceOverTranslation: (payload) => {

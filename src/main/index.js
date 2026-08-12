@@ -45,7 +45,10 @@ import {
 } from '../searchEngines'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import { LiveReminderManager } from './LiveReminderManager'
-import { requestVoiceOverTranslation } from './voiceOverTranslation'
+import {
+  configureVoiceOverTranslationCache,
+  requestVoiceOverTranslation
+} from './voiceOverTranslation'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -1326,6 +1329,7 @@ function runApp() {
   const isTrayOnMinimizeSupported = process.platform !== 'darwin' && (process.platform !== 'linux' || app.commandLine.getSwitchValue('ozone-platform') !== 'wayland')
 
   const userDataPath = app.getPath('userData')
+  configureVoiceOverTranslationCache(path.join(userDataPath, 'voice_over_translation_cache'))
 
   function broadcastLiveReminderUpdate(videoId, scheduled) {
     for (const window of BrowserWindow.getAllWindows()) {

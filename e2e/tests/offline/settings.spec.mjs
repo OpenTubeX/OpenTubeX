@@ -993,6 +993,9 @@ test.describe('settings', () => {
     })
     await expect(backgroundToggle).toBeVisible()
     await expect(backgroundToggle).not.toBeChecked()
+    await expect(page.getByRole('checkbox', {
+      name: 'Cache voice-over translations for one day'
+    })).toBeChecked()
     await expect(page.getByText('Supported source languages: Russian, English, Chinese, Korean,'))
       .toBeVisible()
   })
