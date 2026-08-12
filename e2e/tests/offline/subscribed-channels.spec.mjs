@@ -84,6 +84,9 @@ test.describe('subscribed channels', () => {
 test.describe('large subscribed channel lists', () => {
   test.use({
     seed: {
+      settings: {
+        generalAutoLoadMorePaginatedItemsEnabled: false
+      },
       profiles: [
         {
           _id: 'allChannels',
