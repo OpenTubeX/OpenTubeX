@@ -62,8 +62,8 @@
           <FtSelect
             :placeholder="t('Downloads.Media Type')"
             :value="options.mode"
-            :select-names="[t('Downloads.Video'), t('Downloads.Audio')]"
-            :select-values="['video', 'audio']"
+            :select-names="[t('Downloads.Video'), t('Downloads.Audio'), t('Downloads.Subtitles')]"
+            :select-values="['video', 'audio', 'subtitles']"
             @change="setOption('mode', $event)"
           />
           <FtSelect
@@ -83,7 +83,7 @@
             @change="setOption('videoFormat', $event)"
           />
           <FtSelect
-            :placeholder="options.mode === 'video' ? t('Downloads.Video Codec') : t('Downloads.Audio Codec')"
+            :placeholder="formatLabel"
             :value="selectedCodec"
             :select-names="codecNames"
             :select-values="codecValues"
@@ -108,6 +108,7 @@
           <div class="optionGrid segmentGrid">
             <FtInput
               :placeholder="t('Downloads.Start Time')"
+              :disabled="subtitlesOnly"
               :show-action-button="false"
               :show-label="true"
               :value="options.startTime"
@@ -115,6 +116,7 @@
             />
             <FtInput
               :placeholder="t('Downloads.End Time')"
+              :disabled="subtitlesOnly"
               :show-action-button="false"
               :show-label="true"
               :value="options.endTime"
@@ -125,7 +127,8 @@
             <FtToggleSwitch
               compact
               :label="t('Downloads.Split by Chapters')"
-              :default-value="options.splitChapters"
+              :default-value="!subtitlesOnly && options.splitChapters"
+              :disabled="subtitlesOnly"
               @change="setOption('splitChapters', $event)"
             />
           </div>
@@ -137,14 +140,15 @@
             <FtToggleSwitch
               compact
               :label="t('Downloads.Remove Segments')"
-              :default-value="options.removeSponsorblock"
+              :default-value="!subtitlesOnly && options.removeSponsorblock"
+              :disabled="subtitlesOnly"
               @change="setOption('removeSponsorblock', $event)"
             />
           </div>
           <div
-            :class="{ disabledOptions: !options.removeSponsorblock }"
-            :inert="!options.removeSponsorblock"
-            :aria-disabled="!options.removeSponsorblock"
+            :class="{ disabledOptions: !sponsorBlockCategoriesEnabled }"
+            :inert="!sponsorBlockCategoriesEnabled"
+            :aria-disabled="!sponsorBlockCategoriesEnabled"
           >
             <FtCheckboxList
               v-model="sponsorBlockCategories"
@@ -161,26 +165,29 @@
             <FtToggleSwitch
               compact
               :label="t('Downloads.Embed Cover Art')"
-              :default-value="options.embedThumbnail"
+              :default-value="!subtitlesOnly && options.embedThumbnail"
+              :disabled="subtitlesOnly"
               @change="setOption('embedThumbnail', $event)"
             />
             <FtToggleSwitch
               compact
               :label="t('Downloads.Embed Metadata')"
-              :default-value="options.embedMetadata"
+              :default-value="!subtitlesOnly && options.embedMetadata"
+              :disabled="subtitlesOnly"
               @change="setOption('embedMetadata', $event)"
             />
             <FtToggleSwitch
               compact
               :label="t('Downloads.Include Subtitles')"
-              :default-value="options.includeSubtitles"
+              :default-value="subtitlesOnly || options.includeSubtitles"
+              :disabled="subtitlesOnly"
               @change="setOption('includeSubtitles', $event)"
             />
             <FtToggleSwitch
               compact
               :label="t('Downloads.Embed Subtitles')"
-              :default-value="options.embedSubtitles"
-              :disabled="!options.includeSubtitles"
+              :default-value="!subtitlesOnly && options.embedSubtitles"
+              :disabled="subtitlesOnly || !options.includeSubtitles"
               @change="setOption('embedSubtitles', $event)"
             />
           </div>
@@ -188,7 +195,7 @@
             class="fullWidth subtitleLanguages"
             :placeholder="t('Downloads.Subtitle Languages')"
             :tooltip="t('Downloads.Subtitle Languages Help')"
-            :disabled="!options.includeSubtitles"
+            :disabled="!subtitlesOnly && !options.includeSubtitles"
             :show-action-button="false"
             :show-label="true"
             :value="options.subtitleLanguages"
@@ -258,12 +265,14 @@
           <FtButton
             v-else-if="downloadInProgress"
             :label="t('Downloads.Cancel Download')"
+            :icon="['fas', 'times-circle']"
             text-color="var(--destructive-text-color)"
             background-color="var(--destructive-color)"
             @click="cancelDownload"
           />
           <FtButton
             :label="activeDownload === null ? t('Cancel') : t('Close')"
+            :icon="['fas', 'xmark']"
             :text-color="null"
             :background-color="null"
             @click="close"
@@ -297,6 +306,7 @@
         />
         <FtButton
           :label="t('Cancel')"
+          :icon="['fas', 'xmark']"
           :text-color="null"
           :background-color="null"
           @click="closeSaveTemplatePrompt"
@@ -320,6 +330,7 @@ import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store/index'
+import { DEFAULT_DOWNLOAD_TEMPLATES } from '../../helpers/downloadTemplates'
 import { showToast } from '../../helpers/utils'
 
 const props = defineProps({
@@ -332,10 +343,17 @@ const props = defineProps({
   thumbnail: { type: String, default: '' }
 })
 const emit = defineEmits(['close'])
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const downloadLabel = computed(() => props.isPlaylist
   ? t('Downloads.Download Playlist')
   : t('Downloads.Download Video'))
+
+// YouTube offers a machine translation of every video into a few hundred languages,
+// and yt-dlp's "all" selector requests every single one of them, which its rate
+// limiting cuts short long before it finishes.
+const DEFAULT_SUBTITLE_LANGUAGES = [...new Set([locale.value.split('-')[0], 'en'])]
+  .map(language => `${language}.*`)
+  .join(',')
 
 const BASE_OPTIONS = Object.freeze({
   mode: 'video',
@@ -351,24 +369,12 @@ const BASE_OPTIONS = Object.freeze({
   sponsorBlockCategories: ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler'],
   includeSubtitles: false,
   embedSubtitles: true,
-  subtitleLanguages: 'all,-live_chat',
+  subtitleLanguages: DEFAULT_SUBTITLE_LANGUAGES,
+  subtitleFormat: '',
   embedThumbnail: false,
   embedMetadata: false,
   customArgs: ''
 })
-const DEFAULT_TEMPLATES = [
-  { value: 'video:best', options: {} },
-  { value: 'video:best:mp4', options: { videoFormat: 'mp4' } },
-  { value: 'video:1080', options: { quality: '1080' } },
-  { value: 'video:1080:mp4', options: { quality: '1080', videoFormat: 'mp4' } },
-  { value: 'video:720', options: { quality: '720' } },
-  { value: 'video:720:mp4', options: { quality: '720', videoFormat: 'mp4' } },
-  { value: 'video:480', options: { quality: '480' } },
-  { value: 'video:480:mp4', options: { quality: '480', videoFormat: 'mp4' } },
-  { value: 'audio:best', options: { mode: 'audio', embedThumbnail: true, embedMetadata: true } },
-  { value: 'audio:mp3', options: { mode: 'audio', audioFormat: 'mp3', embedThumbnail: true, embedMetadata: true } }
-]
-
 const customTemplates = computed(() => JSON.parse(store.getters.getYtDlpDownloadTemplates))
 const storedSelection = store.getters.getYtDlpSelectedTemplate
 const selectedTemplate = ref(storedSelection)
@@ -393,13 +399,30 @@ const sponsorBlockCategoryLabels = computed(() => [
   t('Video.Sponsor Block category.recap'),
   t('Video.Sponsor Block category.filler')
 ])
-const selectedCodec = computed(() => options.mode === 'video' ? options.videoCodec : options.audioFormat)
-const codecNames = computed(() => options.mode === 'video'
-  ? [t('Downloads.Automatic'), 'H.264', 'H.265 / HEVC', 'VP9', 'AV1']
-  : [t('Downloads.Best Available'), 'MP3', 'M4A', 'Opus', 'FLAC'])
-const codecValues = computed(() => options.mode === 'video'
-  ? ['', 'h264', 'h265', 'vp9', 'av1']
-  : ['', 'mp3', 'm4a', 'opus', 'flac'])
+const subtitlesOnly = computed(() => options.mode === 'subtitles')
+// the codec select doubles as the subtitle format select, as neither codec applies to subtitles
+const formatOptionKey = computed(() => {
+  if (subtitlesOnly.value) return 'subtitleFormat'
+  return options.mode === 'video' ? 'videoCodec' : 'audioFormat'
+})
+const formatLabel = computed(() => {
+  if (subtitlesOnly.value) return t('Downloads.Subtitle Format')
+  return options.mode === 'video' ? t('Downloads.Video Codec') : t('Downloads.Audio Codec')
+})
+const sponsorBlockCategoriesEnabled = computed(() => !subtitlesOnly.value && options.removeSponsorblock)
+const selectedCodec = computed(() => options[formatOptionKey.value])
+const codecNames = computed(() => {
+  if (subtitlesOnly.value) return [t('Downloads.Automatic'), 'SRT', 'VTT', 'ASS', 'LRC']
+  return options.mode === 'video'
+    ? [t('Downloads.Automatic'), 'H.264', 'H.265 / HEVC', 'VP9', 'AV1']
+    : [t('Downloads.Best Available'), 'MP3', 'M4A', 'Opus', 'FLAC']
+})
+const codecValues = computed(() => {
+  if (subtitlesOnly.value) return ['', 'srt', 'vtt', 'ass', 'lrc']
+  return options.mode === 'video'
+    ? ['', 'h264', 'h265', 'vp9', 'av1']
+    : ['', 'mp3', 'm4a', 'opus', 'flac']
+})
 const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help', {
   title: '{title}',
   author: '{author}',
@@ -411,7 +434,7 @@ const fileNameTemplateHelp = computed(() => t('Downloads.File Name Template Help
 }))
 
 function getTemplateOptions(value) {
-  const defaultTemplate = DEFAULT_TEMPLATES.find(template => template.value === value)
+  const defaultTemplate = DEFAULT_DOWNLOAD_TEMPLATES.find(template => template.value === value)
   if (defaultTemplate) return defaultTemplate.options
   const custom = customTemplates.value.find(template => `template:${template.name}` === value)
   if (custom?.options) return custom.options
@@ -434,7 +457,7 @@ function optionsMatchTemplate(value) {
 function findMatchingTemplate() {
   const candidates = [
     selectedTemplate.value,
-    ...DEFAULT_TEMPLATES.map(template => template.value),
+    ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => template.value),
     ...customTemplates.value.map(template => `template:${template.name}`)
   ]
 
@@ -447,7 +470,7 @@ function loadTemplate(value) {
   isDirty.value = false
 }
 loadTemplate(
-  DEFAULT_TEMPLATES.some(template => template.value === storedSelection) || storedSelection.startsWith('template:')
+  DEFAULT_DOWNLOAD_TEMPLATES.some(template => template.value === storedSelection) || storedSelection.startsWith('template:')
     ? storedSelection
     : 'video:best'
 )
@@ -456,20 +479,13 @@ const selectedCustomTemplate = computed(() => customTemplates.value.find(
   template => `template:${template.name}` === selectedTemplate.value
 ))
 const displayedTemplate = computed(() => isDirty.value ? 'unsaved' : selectedTemplate.value)
-const defaultTemplateNames = computed(() => [
-  t('Downloads.Templates.Video Best'), `${t('Downloads.Templates.Video Best')} (MP4)`,
-  t('Downloads.Templates.Video Resolution', { resolution: '1080p' }), `${t('Downloads.Templates.Video Resolution', { resolution: '1080p' })} (MP4)`,
-  t('Downloads.Templates.Video Resolution', { resolution: '720p' }), `${t('Downloads.Templates.Video Resolution', { resolution: '720p' })} (MP4)`,
-  t('Downloads.Templates.Video Resolution', { resolution: '480p' }), `${t('Downloads.Templates.Video Resolution', { resolution: '480p' })} (MP4)`,
-  t('Downloads.Templates.Audio Best'), t('Downloads.Templates.Audio Format', { format: 'MP3' })
-])
 const templateNames = computed(() => [
-  ...defaultTemplateNames.value,
+  ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => template.label(t)),
   ...customTemplates.value.map(template => template.name),
   ...(isDirty.value ? [t('Downloads.Unsaved')] : [])
 ])
 const templateValues = computed(() => [
-  ...DEFAULT_TEMPLATES.map(template => template.value),
+  ...DEFAULT_DOWNLOAD_TEMPLATES.map(template => template.value),
   ...customTemplates.value.map(template => `template:${template.name}`),
   ...(isDirty.value ? ['unsaved'] : [])
 ])
@@ -492,7 +508,7 @@ function setOption(key, value) {
   }
 }
 function setSelectedCodec(value) {
-  setOption(options.mode === 'video' ? 'videoCodec' : 'audioFormat', value)
+  setOption(formatOptionKey.value, value)
 }
 function saveTemplate() {
   const name = newTemplateName.value.trim()
@@ -554,7 +570,9 @@ async function startDownload() {
     playlistKey: props.playlistKey,
     isPlaylist: props.isPlaylist,
     title: props.title,
-    thumbnail: props.thumbnail
+    thumbnail: props.thumbnail,
+    // edited options no longer describe the template they started from
+    template: isDirty.value ? '' : selectedTemplate.value
   })
   if (result != null && 'id' in result) downloadId.value = result.id
   else if (result != null && 'error' in result) showToast({ message: t('Downloads.Download Failed'), icon: ['fas', 'circle-exclamation'] })

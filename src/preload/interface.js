@@ -19,6 +19,17 @@ ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
   }
 })
 
+/** @type {Set<{ handler: (videoId: string, scheduled: boolean) => void }>} */
+const liveReminderUpdatedListeners = new Set()
+
+// Video lists subscribe once per row, which would exceed Node's listener
+// warning threshold on this channel, so they share a single IPC listener.
+ipcRenderer.on(IpcChannels.LIVE_REMINDER_UPDATED, (_, videoId, scheduled) => {
+  for (const { handler } of liveReminderUpdatedListeners) {
+    handler(videoId, scheduled)
+  }
+})
+
 export default {
   isFlatpak: process.env.FLATPAK_ID !== undefined,
   runtimeVersions: Object.freeze({
@@ -509,9 +520,9 @@ export default {
      * @returns {() => void}
      */
     onUpdated: (handler) => {
-      const listener = (_event, videoId, scheduled) => handler(videoId, scheduled)
-      ipcRenderer.on(IpcChannels.LIVE_REMINDER_UPDATED, listener)
-      return () => ipcRenderer.removeListener(IpcChannels.LIVE_REMINDER_UPDATED, listener)
+      const subscription = { handler }
+      liveReminderUpdatedListeners.add(subscription)
+      return () => liveReminderUpdatedListeners.delete(subscription)
     }
   },
 

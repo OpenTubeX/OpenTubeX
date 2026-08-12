@@ -1,4 +1,5 @@
 import { test, expect, goTo } from '../../helpers/app.mjs'
+import { IpcChannels } from '../../../src/constants.js'
 
 const now = Date.now()
 const HOUR = 3_600_000
@@ -290,6 +291,30 @@ test.describe('subscriptions feed with upcoming premieres shown', () => {
     await reminderButton.click()
     await expect(upcomingPremiere.getByRole('button', { name: 'Notification on' }))
       .toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('cleans up repeated live-reminder subscriptions independently', async ({ app, page }) => {
+    await page.evaluate(() => {
+      window.liveReminderUpdates = 0
+      const handler = () => { window.liveReminderUpdates++ }
+      window.removeFirstLiveReminderSubscription = window.ftElectron.liveReminder.onUpdated(handler)
+      window.removeSecondLiveReminderSubscription = window.ftElectron.liveReminder.onUpdated(handler)
+    })
+
+    const sendUpdate = () => app.electronApp.evaluate(({ BrowserWindow }, channel) => {
+      BrowserWindow.getAllWindows()[0].webContents.send(channel, 'video-id', true)
+    }, IpcChannels.LIVE_REMINDER_UPDATED)
+
+    await sendUpdate()
+    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(2)
+
+    await page.evaluate(() => window.removeFirstLiveReminderSubscription())
+    await sendUpdate()
+    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(3)
+
+    await page.evaluate(() => window.removeSecondLiveReminderSubscription())
+    await sendUpdate()
+    await expect.poll(() => page.evaluate(() => window.liveReminderUpdates)).toBe(3)
   })
 
   test('does not render adjacent separators in the upcoming-video menu', async ({ page }) => {

@@ -38,7 +38,7 @@ function takeGetInfoAbortSignal(key) {
  * @property {boolean} [isPlaylist]
  * @property {string} [title] only used for display purposes in the renderer
  * @property {string} [thumbnail] only used for display purposes in the renderer
- * @property {'video' | 'audio' | 'custom'} mode
+ * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
  * @property {string} [quality] maximum video resolution e.g. '1080'
  * @property {string} [videoFormat] e.g. 'mp4'
  * @property {string} [audioFormat] e.g. 'mp3'
@@ -52,9 +52,11 @@ function takeGetInfoAbortSignal(key) {
  * @property {boolean} [includeSubtitles]
  * @property {boolean} [embedSubtitles]
  * @property {string} [subtitleLanguages]
+ * @property {string} [subtitleFormat] e.g. 'srt'
  * @property {boolean} [embedThumbnail]
  * @property {boolean} [embedMetadata]
  * @property {string} [customArgs] additional yt-dlp command line arguments
+ * @property {string} [template] the template the options came from, only used for display purposes
  */
 
 /**
@@ -65,6 +67,8 @@ function takeGetInfoAbortSignal(key) {
  * @property {string} playlistKey
  * @property {string} title
  * @property {string} thumbnail
+ * @property {'video' | 'audio' | 'subtitles' | 'custom'} mode
+ * @property {string} template
  * @property {'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled'} status
  * @property {number} percent
  * @property {string | null} speed
@@ -80,6 +84,7 @@ const QUALITY_REGEX = /^\d{3,4}$/
 const VIDEO_FORMATS = ['mp4', 'mkv', 'webm']
 const VIDEO_CODECS = ['h264', 'h265', 'vp9', 'av1']
 const AUDIO_FORMATS = ['mp3', 'm4a', 'opus', 'flac']
+const SUBTITLE_FORMATS = ['srt', 'vtt', 'ass', 'lrc']
 const SPONSORBLOCK_CATEGORIES = ['sponsor', 'intro', 'outro', 'selfpromo', 'interaction', 'music_offtopic', 'preview', 'filler']
 // Keeps local-playlist URLs comfortably below Windows' process command-line limit.
 const MAX_LOCAL_PLAYLIST_VIDEOS = 500
@@ -106,6 +111,8 @@ const YT_DLP_RELEASE_REPOSITORIES = {
 const PROGRESS_REGEX = /^\[download\]\s+(\d+(?:\.\d+)?)%(?:.*?\bat\s+(\S+))?(?:.*?\bETA\s+(\S+))?/
 const DESTINATION_REGEX = /^\[(?:download|ExtractAudio)\] Destination: (.+)$/
 const MERGER_REGEX = /^\[Merger\] Merging formats into "(.+)"$/
+// yt-dlp doesn't include subtitle files in its `after_move:%(filepath)s` output
+const SUBTITLE_DESTINATION_REGEX = /^\[info\] Writing video subtitles to: (.+)$/
 const FINAL_PATH_PREFIX = '__OPENTUBEX_FILE__:'
 
 let downloadCounter = 0
@@ -1168,9 +1175,14 @@ export async function handleYtDlpDownload(event, payload) {
     return null
   }
 
-  if (!['video', 'audio', 'custom'].includes(payload.mode)) {
+  if (!['video', 'audio', 'subtitles', 'custom'].includes(payload.mode)) {
     return null
   }
+
+  const subtitlesOnly = payload.mode === 'subtitles'
+  const subtitleFormat = typeof payload.subtitleFormat === 'string' && SUBTITLE_FORMATS.includes(payload.subtitleFormat)
+    ? payload.subtitleFormat
+    : ''
 
   const customArgs = typeof payload.customArgs === 'string' && payload.customArgs.trim() !== ''
     ? splitArguments(payload.customArgs)
@@ -1287,36 +1299,51 @@ export async function handleYtDlpDownload(event, payload) {
         args.push('--audio-format', payload.audioFormat)
       }
       break
+    case 'subtitles':
+      // `--print` turns on quiet mode, which hides the lines naming the written
+      // subtitle files. Nothing else reports them, as only the media file yt-dlp
+      // isn't downloading here would reach the `after_move` print below.
+      args.push('--skip-download', '--no-quiet')
+      break
     case 'custom':
       break
   }
 
-  if (payload.splitChapters === true) {
+  if (!subtitlesOnly && payload.splitChapters === true) {
     args.push('--split-chapters')
   }
-  if (payload.removeSponsorblock === true) {
+  if (!subtitlesOnly && payload.removeSponsorblock === true) {
     const categories = Array.isArray(payload.sponsorBlockCategories)
       ? payload.sponsorBlockCategories.filter(category => SPONSORBLOCK_CATEGORIES.includes(category))
       : SPONSORBLOCK_CATEGORIES
     if (categories.length > 0) args.push('--sponsorblock-remove', categories.join(','))
   }
-  if (payload.includeSubtitles === true) {
-    args.push('--write-subs', '--write-auto-subs')
-    if (payload.embedSubtitles === true) {
+  if (subtitlesOnly || payload.includeSubtitles === true) {
+    // YouTube advertises a machine translation of every subtitle track into every other
+    // language, which multiplies a language selector like `de.*` into dozens of requests
+    // and runs into its rate limiting. Custom arguments can override this again.
+    args.push('--write-subs', '--write-auto-subs', '--extractor-args', 'youtube:skip=translated_subs')
+    if (!subtitlesOnly && payload.embedSubtitles === true) {
       args.push('--embed-subs')
     }
     if (typeof payload.subtitleLanguages === 'string' && payload.subtitleLanguages.trim() !== '') {
       args.push('--sub-langs', payload.subtitleLanguages.trim())
     }
+    if (subtitleFormat !== '') {
+      // YouTube serves most formats itself, so prefer downloading the requested one directly.
+      // The converter only runs once every track has downloaded, so it would otherwise leave
+      // the original files behind whenever a download fails partway through.
+      args.push('--sub-format', `${subtitleFormat}/best`, '--convert-subs', subtitleFormat)
+    }
   }
-  if (payload.embedThumbnail === true) {
+  if (!subtitlesOnly && payload.embedThumbnail === true) {
     args.push('--embed-thumbnail')
   }
-  if (payload.embedMetadata === true) {
+  if (!subtitlesOnly && payload.embedMetadata === true) {
     args.push('--embed-metadata', '--embed-chapters')
   }
-  const startTime = typeof payload.startTime === 'string' && TIME_REGEX.test(payload.startTime) ? payload.startTime : ''
-  const endTime = typeof payload.endTime === 'string' && TIME_REGEX.test(payload.endTime) ? payload.endTime : ''
+  const startTime = !subtitlesOnly && typeof payload.startTime === 'string' && TIME_REGEX.test(payload.startTime) ? payload.startTime : ''
+  const endTime = !subtitlesOnly && typeof payload.endTime === 'string' && TIME_REGEX.test(payload.endTime) ? payload.endTime : ''
   if (startTime !== '' || endTime !== '') {
     args.push('--download-sections', `*${startTime || '0'}-${endTime || 'inf'}`, '--force-keyframes-at-cuts')
   }
@@ -1357,6 +1384,8 @@ export async function handleYtDlpDownload(event, payload) {
       ? payload.title.slice(0, 255)
       : (isSingleVideo ? payload.videoId : isRemotePlaylist ? payload.playlistId : ''),
     thumbnail: typeof payload.thumbnail === 'string' ? payload.thumbnail.slice(0, 2048) : '',
+    mode: payload.mode,
+    template: typeof payload.template === 'string' ? payload.template.slice(0, 255) : '',
     status: 'downloading',
     percent: 0,
     speed: null,
@@ -1387,6 +1416,8 @@ export async function handleYtDlpDownload(event, payload) {
 
   /** @type {string[]} */
   const stderrLines = []
+  /** @type {Set<string>} */
+  const subtitleDestinations = new Set()
 
   /**
    * @param {string} line
@@ -1395,6 +1426,16 @@ export async function handleYtDlpDownload(event, payload) {
     if (line.startsWith(FINAL_PATH_PREFIX)) {
       status.destination = line.slice(FINAL_PATH_PREFIX.length)
       if (!status.destinations.includes(status.destination)) status.destinations.push(status.destination)
+      sendStatus(true)
+      return
+    }
+
+    const subtitleMatch = SUBTITLE_DESTINATION_REGEX.exec(line)
+    if (subtitleMatch) {
+      const subtitlePath = subtitleMatch[1]
+      subtitleDestinations.add(subtitlePath)
+      status.destination = subtitlePath
+      if (!status.destinations.includes(subtitlePath)) status.destinations.push(subtitlePath)
       sendStatus(true)
       return
     }
@@ -1408,7 +1449,9 @@ export async function handleYtDlpDownload(event, payload) {
       return
     }
 
-    const destinationMatch = DESTINATION_REGEX.exec(line)
+    // subtitle files are announced twice, and only the line handled above
+    // accounts for the extension a conversion gives them
+    const destinationMatch = subtitlesOnly ? null : DESTINATION_REGEX.exec(line)
     if (destinationMatch) {
       status.destination = destinationMatch[1]
 
@@ -1471,6 +1514,16 @@ export async function handleYtDlpDownload(event, payload) {
     if (entry.cancelled) {
       status.status = 'cancelled'
     } else if (code === 0) {
+      if (subtitleFormat !== '') {
+        const convertedSubtitleDestinations = new Map([...subtitleDestinations].map((subtitlePath) => [
+          subtitlePath,
+          subtitlePath.replace(/\.[^.]+$/, `.${subtitleFormat}`)
+        ]))
+        status.destinations = status.destinations.map((destination) => (
+          convertedSubtitleDestinations.get(destination) ?? destination
+        ))
+        status.destination = convertedSubtitleDestinations.get(status.destination) ?? status.destination
+      }
       status.status = 'completed'
       status.percent = 100
     } else {

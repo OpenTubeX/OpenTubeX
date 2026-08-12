@@ -2070,12 +2070,15 @@ Downloads:
   Remove File Confirmation: Remove downloaded file?
   Remove File Warning: 'This will move "{title}" to your device trash.'
   File Not Found: The downloaded file could not be found.
+  More Files: 1 more file | {count} more files
+  Template Used: 'Template: {name}'
   Download Type: Download Type
   Template: Template
   Unsaved: Unsaved
   Media Type: Media Type
   Video: Video
   Audio: Audio
+  Subtitles: Subtitles
   Maximum Resolution: Maximum Resolution
   Best Available: Best Available
   Automatic: Automatic
@@ -2093,6 +2096,7 @@ Downloads:
   Subtitles and Metadata: Subtitles and Metadata
   Include Subtitles: Include subtitles
   Embed Subtitles: Embed subtitles in the media file
+  Subtitle Format: Subtitle Format
   Subtitle Languages: Subtitle Languages
   Subtitle Languages Help: 'Comma-separated yt-dlp language selectors, for example: en.*,de.*'
   Embed Cover Art: Embed thumbnail as cover art
@@ -2120,4 +2124,5 @@ Downloads:
     Video Resolution: Video - {resolution}
     Audio Best: Audio - Best Quality
     Audio Format: Audio - {format}
+    Subtitles Format: Subtitles - {format}
     Custom Arguments: Custom yt-dlp Arguments
