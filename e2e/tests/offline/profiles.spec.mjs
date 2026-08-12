@@ -112,10 +112,19 @@ test.describe('profile manager', () => {
 
       // switching the theme color has to repaint the profile, without touching the profile itself
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
-      await page.locator('.settingsBreadcrumb').getByRole('button', { name: 'Settings' }).click()
-      await page.locator('.settingsMenu [data-section="theme"]').click()
-      await page.getByRole('combobox', { name: 'Main Color Theme' }).click()
-      await page.locator('.selectDropdown').getByRole('option', { name: 'Blue', exact: true }).click()
+      // the narrow layout only shows the section menu after going back to it
+      const themeSection = page.locator('.settingsMenu [data-section="theme"]')
+      if (!await themeSection.isVisible()) await page.locator('.settingsBreadcrumbRoot').click()
+      await themeSection.click()
+
+      // the labels are translated, so find the main color select and its 'Blue'
+      // option through the values of the hidden native select instead
+      const mainColorSelect = page.locator('.settingsContent .select')
+        .filter({ has: page.locator('select option[value="Blue"]') })
+        .first()
+      const blueIndex = await mainColorSelect.locator('option[value="Blue"]').evaluate(option => option.index)
+      await mainColorSelect.getByRole('combobox').click()
+      await page.locator('.selectDropdown .selectOption').nth(blueIndex).click()
       await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(33, 150, 243)')
     })
   })
