@@ -100,6 +100,57 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+    await expect(page.locator(`${activeTab} .videoLayout`)).toBeVisible()
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => ({
+        isLive: true,
+        liveStatus: 'is_live',
+        hlsManifestUrl: 'https://example.invalid/live.m3u8',
+        formats: [],
+        duration: null,
+        version: 'test'
+      }))
+    })
+
+    const watchView = await watchViewHandle(page)
+    await watchView.evaluate(async (view) => {
+      view.isLoading = false
+      view.errorMessage = null
+      view.videoTitle = 'Active live stream'
+      view.isLive = true
+      view.manifestSrc = null
+      view.legacyFormats = []
+      view.activeFormat = 'legacy'
+      view.activePlaybackEngine = 'built-in'
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+      await view.$nextTick()
+    })
+
+    await expect(page.locator(`${activeTab} .videoTitle`)).toHaveText('Active live stream')
+    expect(await watchView.evaluate((view) => ({
+      manifestSrc: view.manifestSrc,
+      activeFormat: view.activeFormat,
+      activePlaybackEngine: view.activePlaybackEngine,
+      activePlaybackEngineVersion: view.activePlaybackEngineVersion,
+      playerReady: view.playerReady,
+      ytDlpStreamsPending: view.ytDlpStreamsPending
+    }))).toEqual({
+      manifestSrc: 'https://example.invalid/live.m3u8',
+      activeFormat: 'dash',
+      activePlaybackEngine: 'yt-dlp',
+      activePlaybackEngineVersion: 'test',
+      playerReady: true,
+      ytDlpStreamsPending: false
+    })
+  })
+
   test('keeps live chat and replay visibility independent and restores a closed chat', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await openMockedVideo(page)

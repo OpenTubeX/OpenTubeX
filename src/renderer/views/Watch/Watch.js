@@ -895,7 +895,13 @@ export default defineComponent({
      * only be created once the streams it is supposed to play are known.
      */
     playerReady() {
-      return !this.isLoading && !this.ytDlpStreamsPending
+      if (this.isLoading || this.ytDlpStreamsPending) {
+        return false
+      }
+
+      return this.activeFormat === 'legacy'
+        ? this.legacyFormats.length > 0
+        : this.manifestSrc !== null
     },
 
     canSaveWatchProgress() {
@@ -2312,16 +2318,20 @@ export default defineComponent({
           }
 
           if (useRemoteManifest) {
-            if (result.streaming_data.dash_manifest_url) {
+            if (result.streaming_data?.dash_manifest_url) {
               this.manifestSrc = result.streaming_data.dash_manifest_url
               this.manifestMimeType = MANIFEST_TYPE_DASH
             } else {
-              this.manifestSrc = result.streaming_data.hls_manifest_url
+              // A blocked live player response can contain all watch-page metadata
+              // without either manifest URL. Keep the missing source as `null`, as
+              // expected by the player availability checks, while yt-dlp extracts
+              // its independent HLS manifest.
+              this.manifestSrc = result.streaming_data?.hls_manifest_url ?? null
               this.manifestMimeType = MANIFEST_TYPE_HLS
             }
           }
 
-          this.streamingDataExpiryDate = result.streaming_data.expires
+          this.streamingDataExpiryDate = result.streaming_data?.expires ?? null
 
           if (this.activeFormat === 'legacy') {
             this.activeFormat = 'dash'
@@ -2519,6 +2529,8 @@ export default defineComponent({
         }
 
         if (!this.isUpcoming) {
+          this.alignActiveFormatWithAvailableSources()
+
           // Deliberately not awaited, so that the metadata (title, description,
           // comments, recommendations, ...) is shown while yt-dlp is still extracting.
           this.applyYtDlpPlaybackSource(loadGeneration, videoId)
@@ -2755,6 +2767,8 @@ export default defineComponent({
           }
 
           if (!this.isUpcoming) {
+            this.alignActiveFormatWithAvailableSources()
+
             // Deliberately not awaited, so that the metadata (title, description,
             // comments, recommendations, ...) is shown while yt-dlp is still extracting.
             this.applyYtDlpPlaybackSource(loadGeneration, videoId)
@@ -4010,10 +4024,20 @@ export default defineComponent({
      * @param {string} videoId
      */
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
+      const builtInLiveSourceMissing =
+        this.videoPlaybackEngine === 'built-in' &&
+        this.isLive &&
+        this.manifestSrc === null &&
+        this.legacyFormats.length === 0
+
       if (
         !process.env.IS_ELECTRON ||
         this.playbackEngineFallbackTarget === 'built-in' ||
-        (this.videoPlaybackEngine !== 'yt-dlp' && this.playbackEngineFallbackTarget !== 'yt-dlp')
+        (
+          this.videoPlaybackEngine !== 'yt-dlp' &&
+          this.playbackEngineFallbackTarget !== 'yt-dlp' &&
+          !builtInLiveSourceMissing
+        )
       ) {
         return
       }
@@ -4028,10 +4052,26 @@ export default defineComponent({
       this.ytDlpStreamsPending = true
 
       try {
-        await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+        const sourceApplied = await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+
+        if (
+          !sourceApplied &&
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          this.manifestSrc === null &&
+          this.legacyFormats.length === 0
+        ) {
+          this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
+        }
       } catch (error) {
         // The callers don't await this, so nothing else can handle it.
         console.error('Applying the yt-dlp playback source failed', error)
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          this.manifestSrc === null &&
+          this.legacyFormats.length === 0
+        ) {
+          this.errorMessage = this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.')
+        }
       } finally {
         // A stale load has already had its state reset (and may have started its own
         // extraction), so it must not clear the flag of the load that replaced it.
