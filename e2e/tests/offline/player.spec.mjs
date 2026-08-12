@@ -137,8 +137,12 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await page.locator('body').press('z')
   await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
 
+  // The control panel is hidden until the pointer is over the player
   const player = page.locator(`${activeTab} .ftVideoPlayer`)
-  await player.getByRole('button', { name: 'More Options' }).click()
+  await player.hover()
+  const moreOptions = player.getByRole('button', { name: 'More settings' })
+  await expect(moreOptions).toBeVisible()
+  await moreOptions.click()
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()

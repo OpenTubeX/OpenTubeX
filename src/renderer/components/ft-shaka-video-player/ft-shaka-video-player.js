@@ -3170,11 +3170,22 @@ export default defineComponent({
 
     watch(videoZoomPannable, (pannable) => {
       if (!pannable) {
-        videoZoomOffset.x = 0
-        videoZoomOffset.y = 0
+        recenterVideoZoom()
         videoZoomPanReady.value = false
       }
     })
+
+    // The zoom level is a preference that carries over, but the framing was
+    // chosen for one specific video, so a player that is reused for the next
+    // one starts centered again.
+    watch(() => props.videoId, () => {
+      recenterVideoZoom()
+    })
+
+    function recenterVideoZoom() {
+      videoZoomOffset.x = 0
+      videoZoomOffset.y = 0
+    }
 
     /** @param {number} value */
     function updateVideoZoom(value) {

@@ -6,7 +6,10 @@ import { mockUnplayableWatchPage, watchHistoryEntry, watchViewHandle } from '../
 
 test.use({
   seed: {
-    history: [{ ...watchHistoryEntry, title: 'IP block test video' }]
+    history: [{ ...watchHistoryEntry, title: 'IP block test video' }],
+    settings: {
+      ytDlpPath: 'opentubex-e2e-missing-yt-dlp'
+    }
   }
 })
 
@@ -135,7 +138,9 @@ test('a streaming URL 403 that survives the reload runs the recovery script', as
       recoveries: 1,
       errorMessage: '[BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
       toasts: [
-        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed'
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] Potential causes: IP block or streaming URL deciphering failed',
+        'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 403]',
+        'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'
       ]
     }
   ])
@@ -176,7 +181,9 @@ test('an expired watch session 403 that survives the reload shows the error', as
       recoveries: 0,
       errorMessage: '[BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
       toasts: [
-        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.'
+        'Reloading video after streaming URL error: [BAD_HTTP_STATUS: 403] YouTube watch session expired. Please reopen this video.',
+        'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 403]',
+        'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'
       ]
     }
   ])
@@ -223,7 +230,9 @@ test('an expired legacy VIDEO_ERROR that survives the reload shows the error', a
       recoveries: 0,
       errorMessage: '[VIDEO_ERROR] YouTube watch session expired. Please reopen this video.',
       toasts: [
-        'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.'
+        'Reloading video after streaming URL error: [VIDEO_ERROR] YouTube watch session expired. Please reopen this video.',
+        'The built-in engine could not play the stream, trying yt-dlp instead: [PLAYER_ERROR: 3016]',
+        'yt-dlp could not provide the streams, using the built-in engine instead: yt-dlp could not be found'
       ]
     }
   ])

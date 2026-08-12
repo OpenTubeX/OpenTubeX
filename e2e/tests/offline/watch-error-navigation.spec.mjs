@@ -5,7 +5,7 @@ import { gunzipSync } from 'node:zlib'
 
 import { goTo, repoRoot, sel, test, expect } from '../../helpers/app.mjs'
 import { fixtureKey } from '../../helpers/innertube.mjs'
-import { demoPlayerResponse } from '../../helpers/media.mjs'
+import { demoPlayerResponse, routeWatchPageHtml } from '../../helpers/media.mjs'
 
 const fixtureDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'watch', 'shows-video-metadata')
 const sharedDir = path.join(repoRoot, 'e2e', 'fixtures', 'innertube', 'shared')
@@ -51,6 +51,7 @@ async function mockBlockedVideo({
   })
 
   await page.route(/^https?:\/\//, (route) => route.abort())
+  await routeWatchPageHtml(page)
   await page.route(/^https?:\/\//, async (route, request) => {
     const url = request.url()
 

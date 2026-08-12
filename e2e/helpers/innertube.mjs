@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync, gunzipSync } from 'node:zlib'
 
 import { test as baseAppTest, expect, setPlayerFullscreen } from './app.mjs'
-import { demoPlayerResponse, routeDemoMedia, routeIframeApi, stubPoToken } from './media.mjs'
+import { demoPlayerResponse, routeDemoMedia, routeIframeApi, routeWatchPageHtml, stubPoToken } from './media.mjs'
 
 const fixturesRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'fixtures', 'innertube')
 
@@ -144,6 +144,7 @@ export async function setupInnertube(app, testInfo) {
     // load aborts when the poToken is missing.
     await stubPoToken(app.electronApp)
     await routeIframeApi(page)
+    await routeWatchPageHtml(page)
     await routeDemoMedia(page)
 
     await page.route(/^https?:\/\//, async (route, request) => {
