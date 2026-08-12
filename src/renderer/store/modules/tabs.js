@@ -1,6 +1,7 @@
 import packageDetails from '../../../../package.json'
 import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
+import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 
 const MAX_LOGICAL_HISTORY_ENTRIES = 100
 const NAV_HISTORY_DISPLAY_LIMIT = 15
@@ -17,7 +18,8 @@ const state = {
   transitionTargetTabId: null,
   containerIds: [],
   tabBarScrollPosition: 0,
-  currentWatchTimestamps: {}
+  currentWatchTimestamps: {},
+  videoZoomByTabId: {}
 }
 
 const getters = {
@@ -33,6 +35,7 @@ const getters = {
   getTabBarScrollPosition: (state) => state.tabBarScrollPosition,
   getCurrentWatchTimestamp: (state) => state.currentWatchTimestamps[state.activeTabId] ?? null,
   getWatchTimestamp: (state) => (tabId) => state.currentWatchTimestamps[tabId] ?? null,
+  getTabVideoZoom: (state) => (tabId) => state.videoZoomByTabId[tabId] ?? DEFAULT_VIDEO_ZOOM,
   getTabHistoryState: (state) => (tabId) => {
     const tab = state.tabs.find(candidate => candidate.id === tabId)
     if (!tab) {
@@ -96,6 +99,11 @@ const mutations = {
     for (const tabId of Object.keys(state.currentWatchTimestamps)) {
       if (!incomingIds.has(tabId)) {
         delete state.currentWatchTimestamps[tabId]
+      }
+    }
+    for (const tabId of Object.keys(state.videoZoomByTabId)) {
+      if (tabId !== 'web' && !incomingIds.has(tabId)) {
+        delete state.videoZoomByTabId[tabId]
       }
     }
   },
@@ -196,6 +204,10 @@ const mutations = {
     } else {
       delete state.currentWatchTimestamps[tabId]
     }
+  },
+
+  setTabVideoZoom(state, { tabId, value }) {
+    state.videoZoomByTabId[tabId] = value
   }
 }
 

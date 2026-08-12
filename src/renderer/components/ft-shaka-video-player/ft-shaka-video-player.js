@@ -3128,6 +3128,9 @@ export default defineComponent({
     })
 
     const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
+    const selectedVideoZoom = computed(() => {
+      return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
+    })
 
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
@@ -3142,7 +3145,7 @@ export default defineComponent({
         return DEFAULT_VIDEO_ZOOM
       }
 
-      return sanitizeVideoZoom(store.getters.getVideoZoom)
+      return selectedVideoZoom.value
     })
 
     /**
@@ -3183,9 +3186,9 @@ export default defineComponent({
       }
     })
 
-    // The zoom level is a preference that carries over, but the framing was
-    // chosen for one specific video, so a player that is reused for the next
-    // one starts centered again.
+    // The zoom level belongs to this player (and therefore this tab), while the
+    // framing belongs to one specific video. A player reused for the next video
+    // keeps its zoom level but starts centered again.
     watch(() => props.videoId, () => {
       recenterVideoZoom()
     })
@@ -3197,7 +3200,10 @@ export default defineComponent({
 
     /** @param {number} value */
     function updateVideoZoom(value) {
-      store.dispatch('updateVideoZoom', sanitizeVideoZoom(value))
+      store.commit('setTabVideoZoom', {
+        tabId: mediaTabId,
+        value: sanitizeVideoZoom(value)
+      })
     }
 
     /** @param {number} direction `1` to zoom in, `-1` to zoom out */

@@ -77,7 +77,7 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
-test('zooms the video and keeps the level for the next video', async ({ app, page, attachScreenshot }) => {
+test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
   await page.locator('body').press('z')
@@ -87,14 +87,27 @@ test('zooms the video and keeps the level for the next video', async ({ app, pag
   await page.locator('body').press('z')
   await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
 
-  // The zoom level carries over to the next video (#651)
+  // Recreating the player for another video in the same tab keeps that tab's
+  // zoom level.
+  const nextVideoInTab = await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect(nextVideoInTab).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  // A new tab starts at the default zoom instead of inheriting another
+  // player's level.
   await page.locator('.tabBar .newTabButton').click()
   await expect(page.locator('.tabBar .tab')).toHaveCount(2)
   const nextVideo = await openMockedVideo(page)
-  await expect(nextVideo).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+  await expect(nextVideo).toHaveCSS('transform', 'none')
 
-  await page.locator('body').press('Shift+Z')
+  await page.locator('body').press('z')
   await expect(nextVideo).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+
+  const tabs = page.locator('.tabBar .tab')
+  await tabs.first().click()
+  await expect(page.locator(`${activeTab} video`)).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  await tabs.last().click()
+  await expect(page.locator(`${activeTab} video`)).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
 })
 
 test('shift-dragging moves the visible part of a zoomed video', async ({ app, page, attachScreenshot }) => {
