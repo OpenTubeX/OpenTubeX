@@ -77,7 +77,7 @@ test('keyboard shortcuts change the playback rate', async ({ app, page, attachSc
   await attachScreenshot('playback rate lowered')
 })
 
-test('keeps each tab\'s video zoom independent', async ({ app, page, attachScreenshot }) => {
+test('keeps video zoom within its tab', async ({ app, page, attachScreenshot }) => {
   const video = await openDemoVideo({ app, page })
 
   await page.locator('body').press('z')
@@ -86,6 +86,11 @@ test('keeps each tab\'s video zoom independent', async ({ app, page, attachScree
 
   await page.locator('body').press('z')
   await expect(video).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
+
+  // Recreating the player for another video in the same tab keeps that tab's
+  // zoom level.
+  const nextVideoInTab = await openMockedVideo(page, 'aqz-KE-bpKQ')
+  await expect(nextVideoInTab).toHaveCSS('transform', 'matrix(1.5, 0, 0, 1.5, 0, 0)')
 
   // A new tab starts at the default zoom instead of inheriting another
   // player's level.

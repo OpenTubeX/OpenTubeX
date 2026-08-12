@@ -3128,7 +3128,9 @@ export default defineComponent({
     })
 
     const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
-    const selectedVideoZoom = ref(DEFAULT_VIDEO_ZOOM)
+    const selectedVideoZoom = computed(() => {
+      return sanitizeVideoZoom(store.getters.getTabVideoZoom(mediaTabId))
+    })
 
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
@@ -3198,7 +3200,10 @@ export default defineComponent({
 
     /** @param {number} value */
     function updateVideoZoom(value) {
-      selectedVideoZoom.value = sanitizeVideoZoom(value)
+      store.commit('setTabVideoZoom', {
+        tabId: mediaTabId,
+        value: sanitizeVideoZoom(value)
+      })
     }
 
     /** @param {number} direction `1` to zoom in, `-1` to zoom out */
