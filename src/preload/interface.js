@@ -790,9 +790,10 @@ export default {
     /**
      * Activate a tab
      * @param {string} tabId
+     * @returns {Promise<boolean>}
      */
     activate: (tabId) => {
-      ipcRenderer.send(IpcChannels.TABS_ACTIVATE, tabId)
+      return ipcRenderer.invoke(IpcChannels.TABS_ACTIVATE, tabId)
     },
 
     /**
