@@ -416,6 +416,7 @@ const state = {
   showSkipSilenceButton: false,
   useVoiceOverTranslation: false,
   voiceOverTranslationPrepareInBackground: false,
+  voiceOverTranslationCache: true,
   voiceOverTranslationLanguage: 'en',
   voiceOverTranslationVolume: 100,
   voiceOverTranslationOriginalVolume: 10,

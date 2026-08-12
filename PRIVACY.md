@@ -28,7 +28,7 @@ Rows for optional services apply only when the feature is enabled. An IP address
 | Legacy sync | Configured sync operator | IP address, account identifier, authentication data, selected synced data, and timing |
 | `yt-dlp` playback and downloads | YouTube and the configured proxy, if any | IP address, requested page and media resources, video identifier, formats, and timing. OpenTubeX's proxy setting is passed to `yt-dlp`. |
 
-Voice-over translation is disabled by default. When it is enabled, no translation-service request is made until you request a translation. The separate background-preparation option is also disabled by default; enabling it requests a translation whenever a supported non-live video loads. These requests omit browser credentials and cookies.
+Voice-over translation is disabled by default. When it is enabled, no translation-service request is made until you request a translation. The separate background-preparation option is also disabled by default; enabling it requests a translation whenever a supported non-live video loads. Prepared translation URLs are cached locally for 24 hours by default and this cache can be disabled in the player settings. These requests omit browser credentials and cookies.
 
 HTTPS encrypts request paths and payloads in transit, but DNS providers and network operators may still learn destination hostnames and traffic patterns. A VPN or Tor changes which parties see your direct IP address; it does not prevent the destination service from seeing the request itself.
 

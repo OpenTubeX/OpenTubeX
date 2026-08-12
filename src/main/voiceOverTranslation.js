@@ -1,16 +1,21 @@
 import { net } from 'electron'
+import { VoiceOverTranslationCache } from './VoiceOverTranslationCache'
+import { isAllowedTranslationAudioUrl } from './voiceOverTranslationUrls'
 
 const MAX_VIDEO_DURATION_SECONDS = 4 * 60 * 60
 const MAX_AUDIO_REDIRECTS = 5
+const PARTIAL_CONTENT_STATUS = 5
 const RESPONSE_LANGUAGES = new Set(['ru', 'en', 'kk'])
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/
-const TRANSLATION_AUDIO_HOST_PATTERNS = [
-  /(^|\.)strm\.yandex\.net$/,
-  /^strm\.yandex\.ru$/,
-  /^storage\.yandexcloud\.net$/,
-]
-
 let clientPromise
+let translationCache
+
+export function configureVoiceOverTranslationCache(directory) {
+  translationCache = new VoiceOverTranslationCache(directory, validateTranslationAudioUrl)
+  translationCache.pruneExpired().catch(error => {
+    console.error('Failed to prune the voice-over translation cache:', error)
+  })
+}
 
 function getClient() {
   clientPromise ??= import('@vot.js/core').then(({ default: VOTClient }) => {
@@ -24,17 +29,12 @@ function getClient() {
   return clientPromise
 }
 
-function isAllowedTranslationAudioUrl(url) {
-  return url.protocol === 'https:' &&
-    TRANSLATION_AUDIO_HOST_PATTERNS.some(pattern => pattern.test(url.hostname))
-}
-
 async function validateTranslationAudioUrl(rawUrl) {
   let audioUrl = new URL(rawUrl)
 
   for (let redirectCount = 0; redirectCount <= MAX_AUDIO_REDIRECTS; redirectCount++) {
     if (!isAllowedTranslationAudioUrl(audioUrl)) {
-      throw new Error('Voice-over service returned an untrusted audio URL')
+      throw new Error(`Voice-over service returned an untrusted audio URL: ${audioUrl.hostname}`)
     }
 
     const response = await net.fetch(audioUrl.href, {
@@ -45,6 +45,11 @@ async function validateTranslationAudioUrl(rawUrl) {
 
     if (response.status < 300 || response.status >= 400) {
       await response.body?.cancel()
+
+      if (!response.ok) {
+        throw new Error(`Voice-over audio URL returned status ${response.status}`)
+      }
+
       return audioUrl
     }
 
@@ -71,7 +76,7 @@ export async function requestVoiceOverTranslation(payload) {
     throw new TypeError('Invalid voice-over translation request')
   }
 
-  const { videoId, duration, responseLanguage } = payload
+  const { videoId, duration, responseLanguage, cache = true } = payload
 
   if (typeof videoId !== 'string' || !YOUTUBE_VIDEO_ID_PATTERN.test(videoId)) {
     throw new TypeError('Invalid YouTube video ID')
@@ -83,6 +88,17 @@ export async function requestVoiceOverTranslation(payload) {
 
   if (!RESPONSE_LANGUAGES.has(responseLanguage)) {
     throw new RangeError('Unsupported voice-over translation language')
+  }
+
+  if (typeof cache !== 'boolean') {
+    throw new TypeError('Invalid voice-over translation cache setting')
+  }
+
+  if (cache) {
+    const cachedResult = await translationCache?.get(videoId, responseLanguage)
+    if (cachedResult) {
+      return cachedResult
+    }
   }
 
   const client = await getClient()
@@ -100,12 +116,22 @@ export async function requestVoiceOverTranslation(payload) {
   if (result.translated) {
     const translationUrl = await validateTranslationAudioUrl(result.url)
 
-    return {
+    const response = {
       translated: true,
       url: translationUrl.href,
       remainingTime: result.remainingTime,
       status: result.status
     }
+
+    if (cache && result.status !== PARTIAL_CONTENT_STATUS) {
+      try {
+        await translationCache?.set(videoId, responseLanguage, response)
+      } catch (error) {
+        console.error('Failed to cache voice-over translation:', error)
+      }
+    }
+
+    return response
   }
 
   return {

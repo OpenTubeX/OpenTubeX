@@ -144,6 +144,16 @@
           @change="updateVoiceOverTranslationPrepareInBackground"
         />
         <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('Settings.Player Settings.Voice-over Translation.Cache')"
+          :compact="true"
+          :disabled="!useVoiceOverTranslation"
+          :default-value="voiceOverTranslationCache"
+          setting-key="voiceOverTranslationCache"
+          :tooltip="t('Settings.Player Settings.Voice-over Translation.Cache Tooltip')"
+          @change="updateVoiceOverTranslationCache"
+        />
+        <FtToggleSwitch
           :label="t('Settings.Player Settings.Automatically Open Chapters')"
           :compact="true"
           :default-value="autoOpenChapters"
@@ -679,6 +689,16 @@ const voiceOverTranslationPrepareInBackground = computed(() => {
  */
 function updateVoiceOverTranslationPrepareInBackground(value) {
   store.dispatch('updateVoiceOverTranslationPrepareInBackground', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const voiceOverTranslationCache = computed(() => store.getters.getVoiceOverTranslationCache)
+
+/**
+ * @param {boolean} value
+ */
+function updateVoiceOverTranslationCache(value) {
+  store.dispatch('updateVoiceOverTranslationCache', value)
 }
 
 const VOICE_OVER_TRANSLATION_LANGUAGE_VALUES = ['en', 'ru', 'kk']

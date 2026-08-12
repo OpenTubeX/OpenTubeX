@@ -15,11 +15,20 @@ const MAX_AUDIO_DRIFT_SECONDS = 0.4
  *   videoId: import('vue').ComputedRef<string>,
  *   responseLanguage: import('vue').ComputedRef<'ru' | 'en' | 'kk'>,
  *   autoPrepare: import('vue').ComputedRef<boolean>,
+ *   cache: import('vue').ComputedRef<boolean>,
  *   voiceVolume: import('vue').ComputedRef<number>,
  *   onError: (error: unknown) => void
  * }} options
  */
-export function useVoiceOverTranslation({ video, videoId, responseLanguage, autoPrepare, voiceVolume, onError }) {
+export function useVoiceOverTranslation({
+  video,
+  videoId,
+  responseLanguage,
+  autoPrepare,
+  cache,
+  voiceVolume,
+  onError
+}) {
   const state = ref('idle')
   const enabled = ref(false)
   const preparationRequested = ref(false)
@@ -163,7 +172,8 @@ export function useVoiceOverTranslation({ video, videoId, responseLanguage, auto
       const result = await window.ftElectron.requestVoiceOverTranslation({
         videoId: videoId.value,
         duration,
-        responseLanguage: responseLanguage.value
+        responseLanguage: responseLanguage.value,
+        cache: cache.value
       })
 
       if (generation !== requestGeneration) {
