@@ -155,6 +155,14 @@ export default {
   },
 
   /**
+   * @param {{ videoId: string, duration: number, responseLanguage: 'ru' | 'en' | 'kk' }} payload
+   * @returns {Promise<{ translated: boolean, url?: string, remainingTime: number, status: number }>}
+   */
+  requestVoiceOverTranslation: (payload) => {
+    return ipcRenderer.invoke(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, payload)
+  },
+
+  /**
    * @param {string} videoId
    * @param {string} context
    * @param {string} initialAttestationData

@@ -45,6 +45,7 @@ import {
 } from '../searchEngines'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import { LiveReminderManager } from './LiveReminderManager'
+import { requestVoiceOverTranslation } from './voiceOverTranslation'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -3642,6 +3643,14 @@ function runApp() {
     await asyncFs.mkdir(PLAYER_CACHE_PATH, { recursive: true })
 
     await asyncFs.writeFile(filePath, new Uint8Array(value))
+  })
+
+  ipcMain.handle(IpcChannels.VOICE_OVER_TRANSLATION_REQUEST, async (event, payload) => {
+    if (!isOpenTubeXUrl(event.senderFrame.url)) {
+      return
+    }
+
+    return await requestVoiceOverTranslation(payload)
   })
 
   /** @type {Map<number, { url: string, authorization: string }>} */
