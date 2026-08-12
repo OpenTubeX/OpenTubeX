@@ -438,6 +438,7 @@ const state = {
   screenshotFilenamePattern: '%Y%M%D-%H%N%S',
   settingsSectionSortEnabled: false,
   highlightChangedSettings: false,
+  showPerformanceImpactIndicators: false,
   fetchSubscriptionsAutomatically: true,
   showNewSubscriptionFeed: true,
   showNewSubscriptionFeedIndicators: false,

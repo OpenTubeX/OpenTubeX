@@ -153,6 +153,18 @@
           <FontAwesomeIcon :icon="['fas', 'pen']" />
         </button>
         <button
+          v-if="!isAboutOpen"
+          type="button"
+          class="settingsHeaderButton"
+          :class="{ active: showPerformanceImpactIndicators }"
+          :aria-label="t('Settings.Performance Impact.Show Performance Impact')"
+          :title="t('Settings.Performance Impact.Show Performance Impact')"
+          :aria-pressed="showPerformanceImpactIndicators"
+          @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
+        >
+          <FontAwesomeIcon :icon="['fas', 'gauge-high']" />
+        </button>
+        <button
           type="button"
           class="settingsHeaderButton"
           :aria-label="maximizeButtonLabel"
@@ -407,6 +419,7 @@ const maximizeButtonLabel = computed(() => isMaximized.value ? t('Restore') : t(
 
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
 const highlightChangedSettings = computed(() => store.getters.getHighlightChangedSettings)
+const showPerformanceImpactIndicators = computed(() => store.getters.getShowPerformanceImpactIndicators)
 const isProfileManagerOpen = computed(() => store.getters.getSettingsWindowView === 'profile')
 const isAboutOpen = computed(() => store.getters.getSettingsWindowView === 'about')
 const isKeyboardShortcutPromptOpen = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
@@ -955,6 +968,10 @@ function showKeyboardShortcutPrompt() {
 
 function updateSettingsSectionSortEnabled(value) {
   store.dispatch('updateSettingsSectionSortEnabled', value)
+}
+
+function updateShowPerformanceImpactIndicators(value) {
+  store.dispatch('updateShowPerformanceImpactIndicators', value)
 }
 
 function updateHighlightChangedSettings(value) {
