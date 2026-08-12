@@ -119,17 +119,32 @@ jobs:
     - name: Build x64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'x64')
       shell: bash
-      run: pnpm run build
+      run: |
+        pnpm run build || {
+          echo 'Build failed; retrying once in 10 seconds.'
+          sleep 10
+          pnpm run build
+        }
 
     - name: Build ARMv7l with Node.js ${{ matrix.node-version}}
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-armv7l')
       shell: bash
-      run: pnpm run build:arm32
+      run: |
+        pnpm run build:arm32 || {
+          echo 'Build failed; retrying once in 10 seconds.'
+          sleep 10
+          pnpm run build:arm32
+        }
 
     - name: Build ARM64 with Node.js ${{ matrix.node-version}}
       if: contains(matrix.runtime, 'arm64')
       shell: bash
-      run: pnpm run build:arm64
+      run: |
+        pnpm run build:arm64 || {
+          echo 'Build failed; retrying once in 10 seconds.'
+          sleep 10
+          pnpm run build:arm64
+        }
 
     - name: Convert x64 AppImage to Anylinux AppImage
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.runtime, 'linux-x64')
