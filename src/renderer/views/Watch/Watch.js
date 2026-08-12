@@ -369,6 +369,8 @@ export default defineComponent({
       sabrReloadCaptionIndex: null,
       /** @type {number|null} */
       sabrReloadPlaybackRate: null,
+      /** @type {string|null} */
+      sabrReloadVideoQuality: null,
       preserveTitleOnNextReload: false,
       ipBlockDetectedInCurrentChain: false,
       ipBlockRecoveryAttemptedForCurrentVideo: false,
@@ -1618,6 +1620,7 @@ export default defineComponent({
       if (!preserveTitle) {
         this.sabrReloadCaptionIndex = null
         this.sabrReloadPlaybackRate = null
+        this.sabrReloadVideoQuality = null
         this.updateTitle()
       }
     },
@@ -4426,6 +4429,11 @@ export default defineComponent({
     },
 
     initializeVideoQuality() {
+      if (this.sabrReloadVideoQuality !== null) {
+        this.currentVideoQuality = this.sabrReloadVideoQuality
+        return
+      }
+
       const rememberPerChannel = this.$store.getters.getRememberVideoQualityPerChannel
       if (rememberPerChannel && this.channelId) {
         try {
@@ -4511,6 +4519,8 @@ export default defineComponent({
       this.sabrReloadPlaybackRate = Number.isFinite(playbackRate) && playbackRate > 0.07
         ? playbackRate
         : this.currentPlaybackRate
+      this.sabrReloadVideoQuality = this.normalizeVideoQuality(payload?.videoQuality) ||
+        this.normalizeVideoQuality(this.currentVideoQuality) || null
       this.preserveTitleOnNextReload = true
       this.showTabToast({ message: toastMessage, icon: ['fas', 'sync'] })
 

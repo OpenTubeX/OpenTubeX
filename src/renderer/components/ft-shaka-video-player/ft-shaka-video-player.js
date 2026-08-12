@@ -67,6 +67,7 @@ import { setupSabrScheme } from '../../helpers/player/SabrSchemePlugin'
 import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../helpers/player/volume-storage'
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
+import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
@@ -5065,13 +5066,14 @@ export default defineComponent({
      * @returns {string | null}
      */
     function getActiveVariantQuality() {
-      const activeVariant = player.getVariantTracks().find(track => track.active)
+      const activeVariant = player?.getVariantTracks().find(track => track.active)
 
       if (!activeVariant) {
         return null
       }
 
-      return getQualityFromDimensions(activeVariant.width, activeVariant.height)
+      const quality = getDashQualityFromDimensions(activeVariant.width, activeVariant.height)
+      return quality === null ? null : `${quality}`
     }
 
     /**
@@ -5096,11 +5098,7 @@ export default defineComponent({
       const isPortrait = variants[0].height > variants[0].width
 
       let matches = variants.filter(variant => {
-        const { width, height } = variant
-        const [primary, secondary] = isPortrait ? [width, height] : [height, width]
-        const aspectRatio = secondary / primary
-        const resolution = aspectRatio > 16 / 9 ? Math.round(secondary * 9 / 16) : primary
-        return quality === resolution
+        return quality === getDashQualityFromDimensions(variant.width, variant.height)
       })
 
       if (matches.length === 0) {
@@ -8618,7 +8616,8 @@ export default defineComponent({
       return {
         wasPlaying: !video.value?.paused,
         captionIndex: captionIndex >= 0 ? captionIndex : null,
-        playbackRate: getCurrentPlaybackRate()
+        playbackRate: getCurrentPlaybackRate(),
+        videoQuality: getActiveVariantQuality()
       }
     }
 
