@@ -165,6 +165,8 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   const overflowMenu = player.locator('.shaka-overflow-menu')
   await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
   await expect(overflowMenu).toHaveCSS('display', 'grid')
+  await expect(overflowMenu).toHaveCSS('overscroll-behavior', 'contain')
+  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
     return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
   })).toBe(true)
@@ -221,6 +223,7 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await player.hover()
   await moreOptions.click()
   await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
+  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
   await watchComponent.dispose()
 })

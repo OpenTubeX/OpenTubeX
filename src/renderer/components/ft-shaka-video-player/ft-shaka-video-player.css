@@ -877,6 +877,10 @@
   display: none;
 }
 
+:deep(.shaka-overflow-menu) {
+  overscroll-behavior: contain;
+}
+
 /*
   The overflow menu grew a row for every new option, so it ended up taller than
   most players. Every entry is a tile instead: icon on top, name below it and the
@@ -912,7 +916,7 @@
   The menu is always dark, so its overlay scrollbar can't take the app's
   scrollbar colour, which is dark itself in most themes.
 */
-:deep(.shaka-overflow-menu.ft-menu-grid > .os-scrollbar) {
+:deep(.shaka-overflow-menu > .os-scrollbar) {
   --os-handle-bg: rgb(255 255 255 / 40%);
   --os-handle-bg-hover: rgb(255 255 255 / 55%);
   --os-handle-bg-active: rgb(255 255 255 / 70%);
