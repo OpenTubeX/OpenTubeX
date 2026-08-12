@@ -64,8 +64,7 @@ import FtProfileFilterChannelsList from '../../components/FtProfileFilterChannel
 
 import store from '../../store/index'
 
-import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
-import { MAIN_PROFILE_ID } from '../../../constants'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 
 /**
  * @typedef {object} Profile
@@ -106,8 +105,8 @@ function openSettingsForNewProfile() {
 
   openSettingsProfile.value = {
     name: '',
-    bgColor: getRandomColor().value,
-    textColor: calculateColorLuminance(getRandomColor().value),
+    bgColor: THEME_BG_COLOR,
+    textColor: THEME_TEXT_COLOR,
     subscriptions: []
   }
 

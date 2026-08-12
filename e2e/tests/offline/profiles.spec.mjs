@@ -88,6 +88,37 @@ test.describe('profile manager', () => {
     await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Created via UI' })).toBeVisible()
   })
 
+  test.describe('theme color profiles', () => {
+    test.use({ seed: { settings: { mainColor: 'Green' } } })
+
+    test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+
+      await page.locator('.themeColorOption').click()
+
+      // 'Green' is the seeded main color theme
+      const preview = page.locator('.profilePreviewIcon')
+      await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('var(--primary-color)')
+
+      // switching the theme color has to repaint the profile, without touching the profile itself
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      await profileIcon(page).click()
+      await page.getByRole('combobox', { name: 'Main Color Theme' }).click()
+      await page.locator('.selectDropdown').getByRole('option', { name: 'Blue', exact: true }).click()
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(33, 150, 243)')
+    })
+  })
+
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {
     await openProfileList(page)
     await page.locator('.profilePanelHeader button').last().click()

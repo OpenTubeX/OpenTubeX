@@ -9,6 +9,15 @@
             class="colorOptions"
           >
             <div
+              class="colorOption themeColorOption"
+              :class="{ selected: profileBgColor === THEME_BG_COLOR }"
+              :title="$t('Profile.Theme Color')"
+              tabindex="0"
+              role="button"
+              @click="profileBgColor = THEME_BG_COLOR"
+              @keydown.enter.space.prevent="profileBgColor = THEME_BG_COLOR"
+            />
+            <div
               v-for="color in COLOR_VALUES"
               :key="color"
               class="colorOption"
@@ -43,7 +52,7 @@
           <FtInput
             class="colorSelection"
             placeholder=""
-            :value="profileBgColor"
+            :value="profileBgColorLabel"
             :show-action-button="false"
             :disabled="true"
           />
@@ -238,8 +247,8 @@ import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
 
 import store from '../../store/index'
 
-import { MAIN_PROFILE_ID } from '../../../constants'
-import { calculateColorLuminance, colors, getRandomColor } from '../../helpers/colors'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
+import { calculateColorLuminance, colors, resolveThemeColor } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 
@@ -289,7 +298,7 @@ const profileName = ref(props.profile.name)
 /** @type {import('vue').Ref<string>} */
 const profileBgColor = ref(props.profile.bgColor)
 const lastOpaqueProfileBgColor = ref(
-  props.profile.bgColor === 'transparent' ? getRandomColor().value : props.profile.bgColor
+  props.profile.bgColor === 'transparent' ? THEME_BG_COLOR : props.profile.bgColor
 )
 
 /** @type {import('vue').Ref<string>} */
@@ -309,7 +318,7 @@ let imageSelectionRequest = 0
 const EMOJI_OPTIONS = ['😀', '😎', '🤓', '🥳', '🤠', '👻', '🐱', '🐶', '🌈', '⭐']
 
 watch(profileBgColor, (value) => {
-  profileTextColor.value = calculateColorLuminance(value)
+  profileTextColor.value = value === THEME_BG_COLOR ? THEME_TEXT_COLOR : calculateColorLuminance(value)
   if (value !== 'transparent') lastOpaqueProfileBgColor.value = value
 })
 
@@ -328,7 +337,13 @@ onBeforeUnmount(() => {
 })
 
 const customColorPickerValue = computed(() => {
+  if (profileBgColor.value === THEME_BG_COLOR) return resolveThemeColor()
+
   return profileBgColor.value === 'transparent' ? '#000000' : profileBgColor.value
+})
+
+const profileBgColorLabel = computed(() => {
+  return profileBgColor.value === THEME_BG_COLOR ? t('Profile.Theme Color') : profileBgColor.value
 })
 
 const translatedProfileName = computed(() => {

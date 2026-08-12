@@ -167,6 +167,10 @@ h3 {
   outline-offset: 2px;
 }
 
+.themeColorOption {
+  background: var(--primary-color);
+}
+
 .transparentColorOption {
   background-color: #fff;
   background-image:
