@@ -43,6 +43,14 @@
           @change="updateShowSkipSilenceButton"
         />
         <FtToggleSwitch
+          :label="t('Settings.Player Settings.Enable Video Zoom')"
+          :compact="true"
+          :default-value="enableVideoZoom"
+          setting-key="enableVideoZoom"
+          :tooltip="t('Tooltips.Player Settings.Enable Video Zoom')"
+          @change="updateEnableVideoZoom"
+        />
+        <FtToggleSwitch
           v-if="USING_ELECTRON"
           :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
           :compact="true"
@@ -667,6 +675,16 @@ function updateShowSkipSilenceButton(value) {
   if (!value) {
     store.dispatch('updateSkipSilence', false)
   }
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
+
+/**
+ * @param {boolean} value
+ */
+function updateEnableVideoZoom(value) {
+  store.dispatch('updateEnableVideoZoom', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

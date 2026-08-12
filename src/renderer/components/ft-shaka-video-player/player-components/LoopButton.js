@@ -98,6 +98,7 @@ export class LoopButton extends shaka.ui.Element {
       ? shaka.ui.Enums.MaterialDesignSVGIcons.UNLOOP
       : shaka.ui.Enums.MaterialDesignSVGIcons.LOOP)
     this.button_.ariaLabel = this.localization.resolve(this.video.loop ? 'EXIT_LOOP_MODE' : 'ENTER_LOOP_MODE')
+    this.button_.ariaPressed = this.video.loop ? 'true' : 'false'
   }
 
   /** @private */

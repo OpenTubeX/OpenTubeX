@@ -106,6 +106,7 @@ export class SkipSilenceButton extends shaka.ui.Element {
     this.currentStateValue_.textContent = this.skipSilence_.value ? enabledLabel : disabledLabel
     this.currentStateSizer_.textContent = this.skipSilence_.value ? disabledLabel : enabledLabel
     this.button_.ariaLabel = label
+    this.button_.ariaPressed = this.skipSilence_.value ? 'true' : 'false'
   }
 
   /** @private */

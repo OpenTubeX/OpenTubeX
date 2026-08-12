@@ -381,6 +381,7 @@ const state = {
   uiRoundness: 100,
   animationSpeed: 100,
   showToastTimeoutIndicator: true,
+  usePlayerMenuGrid: true,
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,
@@ -413,6 +414,7 @@ const state = {
   videoSkipMouseScroll: false,
   videoPlaybackRateInterval: 0.25,
   rememberVolume: true,
+  enableVideoZoom: true,
   // Last zoom level picked in the player, reused for subsequent videos
   videoZoom: DEFAULT_VIDEO_ZOOM,
   skipSilence: false,

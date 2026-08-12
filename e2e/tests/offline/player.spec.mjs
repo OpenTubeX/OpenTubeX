@@ -1,5 +1,10 @@
 import { setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, openMockedVideo } from '../../helpers/player.mjs'
+import {
+  activeTab,
+  expectDockedToBottomRight,
+  findWatchComponent,
+  openMockedVideo,
+} from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
@@ -145,11 +150,97 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await moreOptions.click()
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
+  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
+  await expect(overflowMenu).toHaveCSS('display', 'grid')
+  expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
+    return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
+  })).toBe(true)
+  const overflowMenuHeight = (await overflowMenu.boundingBox()).height
+
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
+  const zoomMenu = player.locator('.video-zoom-menu')
+  await expect(zoomMenu).toHaveClass(/ft-menu-grid/)
+  await expect(zoomMenu).toHaveCSS('flex-wrap', 'wrap')
+  expect((await overflowMenu.boundingBox()).height).toBe(overflowMenuHeight)
+  const zoomHeader = zoomMenu.locator('.shaka-back-to-overflow-button')
+  const zoomHeaderTitle = zoomHeader.getByText('Zoom')
+  const [headerBox, titleBox] = await Promise.all([
+    zoomHeader.boundingBox(),
+    zoomHeaderTitle.boundingBox(),
+  ])
+  expect(Math.abs(
+    (headerBox.x + headerBox.width / 2) - (titleBox.x + titleBox.width / 2)
+  )).toBeLessThanOrEqual(1)
+  expect(await zoomMenu.evaluate((menu) => {
+    // Caption tracks are not part of the local media fixture. Recreate its
+    // Options action in another submenu to verify the shared grid geometry.
+    const options = document.createElement('button')
+    options.className = 'ft-caption-options-button'
+    options.textContent = 'Options'
+    menu.append(options)
+
+    const header = menu.querySelector('.shaka-back-to-overflow-button')
+    const headerBox = header.getBoundingClientRect()
+    const optionsBox = options.getBoundingClientRect()
+    options.remove()
+
+    return Math.abs(
+      (headerBox.top + headerBox.height / 2) - (optionsBox.top + optionsBox.height / 2)
+    )
+  })).toBeLessThanOrEqual(1)
   await attachScreenshot('zoom menu')
 
-  await player.locator('.video-zoom-menu').getByRole('button', { name: 'Off' }).click()
+  await zoomMenu.getByRole('button', { name: 'Off' }).click()
   await expect(video).toHaveCSS('transform', 'none')
+
+  // A narrow player folds Autoplay into the overflow menu.
+  await player.evaluate(element => { element.style.width = '600px' })
+  const autoplaySwitch = overflowMenu.locator('.autoplay-toggle > .ft-autoplay-switch')
+  await moreOptions.click()
+  await expect(autoplaySwitch).toBeVisible()
+  await expect(autoplaySwitch).toHaveCSS('margin-right', '0px')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateUsePlayerMenuGrid', false)
+    await component.proxy.$nextTick()
+  })
+  await player.hover()
+  await moreOptions.click()
+  await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
+  await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
+  await watchComponent.dispose()
+})
+
+test('video zoom can be disabled', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateEnableVideoZoom', false)
+    await component.proxy.$nextTick()
+  })
+  await expect(video).toHaveCSS('transform', 'none')
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await expect(player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }))
+    .toHaveCount(0)
+
+  await page.keyboard.press('Escape')
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'none')
+
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateEnableVideoZoom', true)
+    await component.proxy.$nextTick()
+  })
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+  await watchComponent.dispose()
 })
 
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {

@@ -60,6 +60,7 @@ import {
   FULLSCREEN_DOCK_OUTER_INSET,
   toggleFullscreenDockCollapsed,
 } from '../../helpers/fullscreenDocks'
+import { addOverlayScrollbars, removeOverlayScrollbars } from '../../helpers/overlayScrollbars'
 import { isReducedMotionEnabled } from '../../helpers/reducedMotion'
 import { appendTimestamp, getInvidiousVideoUrl, getYoutubeVideoShareUrl } from '../../helpers/share'
 import { MANIFEST_TYPE_SABR } from '../../helpers/player/SabrManifestParser'
@@ -1472,6 +1473,10 @@ export default defineComponent({
     /** @type {import('vue').ComputedRef<boolean>} */
     const enableScreenshot = computed(() => {
       return store.getters.getEnableScreenshot
+    })
+
+    const usePlayerMenuGrid = computed(() => {
+      return store.getters.getUsePlayerMenuGrid
     })
 
     /** @type {import('vue').ComputedRef<string>} */
@@ -3121,11 +3126,13 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
+
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
       // deliberately lets its content overflow the container, which is what
       // keeps a scaled video from spilling over the page for the other layouts.
-      return props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
+      return enableVideoZoom.value && props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
     })
 
     /** @type {import('vue').ComputedRef<number>} */
@@ -3418,17 +3425,19 @@ export default defineComponent({
       // when full-window mode makes the player wide enough for the desktop
       // control layout.
       if (onlyUseOverFlowMenu.value || props.shortsPlayer) {
+        // Keep related settings together before the one-click actions so the
+        // grid's reading and tab order remain predictable.
         uiConfig.overflowMenuButtons = [
-          ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
-          ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'playback_rate',
-          'ft_skip_silence',
-          'ft_sleep_timer',
-          'ft_voice_over_translation',
           'captions',
           'ft_audio_tracks',
+          'ft_sleep_timer',
+          ...(props.shortsPlayer ? ['ft_shorts_video_info'] : []),
+          ...(!props.shortsPlayer ? ['ft_autoplay_toggle'] : []),
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
+          'ft_skip_silence',
+          'ft_voice_over_translation',
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
@@ -3460,14 +3469,15 @@ export default defineComponent({
           'fullscreen'
         )
 
+        // Keep related settings together before the one-click actions.
         uiConfig.overflowMenuButtons.push(
           'ft_audio_tracks',
           'captions',
           'playback_rate',
-          'ft_skip_silence',
-          'ft_sleep_timer',
-          'ft_voice_over_translation',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
+          'ft_sleep_timer',
+          'ft_skip_silence',
+          'ft_voice_over_translation',
           'ft_ambient_mode',
           'ft_video_zoom',
           'ft_loop',
@@ -3636,6 +3646,7 @@ export default defineComponent({
 
       syncPlayPauseControlIcons()
       syncMuteControlIcons(video.value.muted || video.value.volume === 0)
+      syncPipToggleState(document.pictureInPictureElement === video.value)
     }
 
     function closeChaptersOverlay() {
@@ -4139,11 +4150,91 @@ export default defineComponent({
 
       updateSponsorBlockSubmissionState()
       setupAdaptiveControlPanelLayout()
+      setupOverflowMenuLayout(controlsContainer)
+    }
+
+    /**
+     * The overflow menu and its submenus are rebuilt from scratch whenever the
+     * UI is configured, so they need their scrollbars and their height tracking
+     * back every time.
+     *
+     * @param {HTMLElement} controlsContainer
+     */
+    function setupOverflowMenuLayout(controlsContainer) {
+      overflowMenuResizeObserver?.disconnect()
+      overflowMenuResizeObserver = null
+      overflowMenuIdleHeight = 0
+
+      if (overflowMenuElement) {
+        removeOverlayScrollbars(overflowMenuElement)
+      }
+
+      const menu = controlsContainer.querySelector('.shaka-overflow-menu')
+      overflowMenuElement = menu instanceof HTMLElement ? menu : null
+      if (!overflowMenuElement) {
+        return
+      }
+
+      menu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
+
+      // The caption appearance submenu has controls rather than options, so it
+      // keeps its own layout.
+      const submenus = menu.querySelectorAll(':scope > .shaka-sub-menu:not(.ft-caption-appearance-menu)')
+      for (const submenu of submenus) {
+        submenu.classList.toggle('ft-menu-grid', usePlayerMenuGrid.value)
+      }
+
+      if (!usePlayerMenuGrid.value) {
+        menu.style.minBlockSize = ''
+        return
+      }
+
+      addOverlayScrollbars(menu)
+
+      // Opening a submenu replaces the tiles, which would otherwise resize the
+      // popup around them. Remember how tall the menu is while its own tiles are
+      // shown, so that a shorter submenu only leaves empty space below itself.
+      overflowMenuResizeObserver = new ResizeObserver(() => {
+        if (menu.querySelector(':scope > .shaka-sub-menu:not(.shaka-hidden)')) {
+          return
+        }
+
+        overflowMenuIdleHeight = menu.getBoundingClientRect().height
+      })
+      overflowMenuResizeObserver.observe(menu)
+
+      const controls = ui.getControls()
+      controls.removeEventListener('submenuopen', keepOverflowMenuHeight)
+      controls.removeEventListener('submenuclose', releaseOverflowMenuHeight)
+      controls.addEventListener('submenuopen', keepOverflowMenuHeight)
+      controls.addEventListener('submenuclose', releaseOverflowMenuHeight)
+    }
+
+    function keepOverflowMenuHeight() {
+      const menu = container.value?.querySelector('.shaka-overflow-menu')
+      if (menu instanceof HTMLElement && overflowMenuIdleHeight > 0) {
+        menu.style.minBlockSize = `${overflowMenuIdleHeight}px`
+      }
+    }
+
+    function releaseOverflowMenuHeight() {
+      const menu = container.value?.querySelector('.shaka-overflow-menu')
+      if (menu instanceof HTMLElement) {
+        menu.style.minBlockSize = ''
+      }
     }
 
     watch(uiConfig, (newValue, oldValue) => {
       if (newValue !== oldValue && ui) {
         configureUI()
+      }
+    })
+
+    // The menu is only rebuilt when the UI configuration changes, so switching
+    // the layout has to reach the existing one.
+    watch(usePlayerMenuGrid, () => {
+      if (ui) {
+        setupOverflowMenuLayout(ui.getControls().getControlsContainer())
       }
     })
 
@@ -4283,6 +4374,15 @@ export default defineComponent({
 
     /** @type {ResizeObserver|null} */
     let containerResizeObserver = null
+
+    /** @type {ResizeObserver|null} */
+    let overflowMenuResizeObserver = null
+
+    /** How tall the overflow menu is while its own tiles are shown. */
+    let overflowMenuIdleHeight = 0
+
+    /** @type {HTMLElement|null} */
+    let overflowMenuElement = null
 
     /** @type {ResizeObserver|null} */
     let controlPanelResizeObserver = null
@@ -4615,6 +4715,20 @@ export default defineComponent({
           }
 
           button.setAttribute('data-ft-muted', String(muted))
+        })
+      })
+    }
+
+    /**
+     * shaka-player's picture in picture button only tells its state through its
+     * label, so the overflow menu can't highlight it while it is active.
+     *
+     * @param {boolean} active
+     */
+    function syncPipToggleState(active) {
+      window.requestAnimationFrame(() => {
+        container.value?.querySelectorAll('.shaka-pip-button').forEach((button) => {
+          button.ariaPressed = active ? 'true' : 'false'
         })
       })
     }
@@ -5022,6 +5136,7 @@ export default defineComponent({
       }
 
       notifyPictureInPictureState(true)
+      syncPipToggleState(true)
     }
 
     function handleLeavePictureInPicture() {
@@ -5036,6 +5151,7 @@ export default defineComponent({
       pipWindowHeight.value = null
 
       notifyPictureInPictureState(false)
+      syncPipToggleState(false)
 
       updateScrollMiniPlayer()
     }
@@ -8914,6 +9030,16 @@ export default defineComponent({
       if (containerResizeObserver) {
         containerResizeObserver.disconnect()
         containerResizeObserver = null
+      }
+
+      if (overflowMenuResizeObserver) {
+        overflowMenuResizeObserver.disconnect()
+        overflowMenuResizeObserver = null
+      }
+
+      if (overflowMenuElement) {
+        removeOverlayScrollbars(overflowMenuElement)
+        overflowMenuElement = null
       }
 
       if (controlPanelResizeObserver) {
