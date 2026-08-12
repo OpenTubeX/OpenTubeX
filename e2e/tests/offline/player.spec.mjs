@@ -145,10 +145,47 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await moreOptions.click()
 
   const overflowMenu = player.locator('.shaka-overflow-menu')
+  await expect(overflowMenu).toHaveClass(/ft-menu-grid/)
+  await expect(overflowMenu).toHaveCSS('display', 'grid')
+  expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
+    return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
+  })).toBe(true)
+  const overflowMenuHeight = (await overflowMenu.boundingBox()).height
+
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
+  const zoomMenu = player.locator('.video-zoom-menu')
+  await expect(zoomMenu).toHaveClass(/ft-menu-grid/)
+  await expect(zoomMenu).toHaveCSS('flex-wrap', 'wrap')
+  expect((await overflowMenu.boundingBox()).height).toBe(overflowMenuHeight)
+  const zoomHeader = zoomMenu.locator('.shaka-back-to-overflow-button')
+  const zoomHeaderTitle = zoomHeader.getByText('Zoom')
+  const [headerBox, titleBox] = await Promise.all([
+    zoomHeader.boundingBox(),
+    zoomHeaderTitle.boundingBox(),
+  ])
+  expect(Math.abs(
+    (headerBox.x + headerBox.width / 2) - (titleBox.x + titleBox.width / 2)
+  )).toBeLessThanOrEqual(1)
+  expect(await zoomMenu.evaluate((menu) => {
+    // Caption tracks are not part of the local media fixture. Recreate its
+    // Options action in another submenu to verify the shared grid geometry.
+    const options = document.createElement('button')
+    options.className = 'ft-caption-options-button'
+    options.textContent = 'Options'
+    menu.append(options)
+
+    const header = menu.querySelector('.shaka-back-to-overflow-button')
+    const headerBox = header.getBoundingClientRect()
+    const optionsBox = options.getBoundingClientRect()
+    options.remove()
+
+    return Math.abs(
+      (headerBox.top + headerBox.height / 2) - (optionsBox.top + optionsBox.height / 2)
+    )
+  })).toBeLessThanOrEqual(1)
   await attachScreenshot('zoom menu')
 
-  await player.locator('.video-zoom-menu').getByRole('button', { name: 'Off' }).click()
+  await zoomMenu.getByRole('button', { name: 'Off' }).click()
   await expect(video).toHaveCSS('transform', 'none')
 })
 

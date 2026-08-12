@@ -381,6 +381,7 @@ const state = {
   uiRoundness: 100,
   animationSpeed: 100,
   showToastTimeoutIndicator: true,
+  usePlayerMenuGrid: true,
   toastPosition: 'bottom-left',
   extraThumbnailAction: '',
   blurThumbnails: false,

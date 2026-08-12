@@ -255,6 +255,27 @@ function toggleOverlayScrollbars(element, enabled) {
 }
 
 /**
+ * Adds the overlay scrollbars to an element that isn't rendered by Vue, so it
+ * can't use the directive below. Safe to call again for the same element.
+ *
+ * @param {HTMLElement} element
+ */
+export function addOverlayScrollbars(element) {
+  toggleOverlayScrollbars(element, true)
+}
+
+/**
+ * Counterpart of `addOverlayScrollbars`. Elements that are replaced rather than
+ * unmounted have to give up their instance themselves, otherwise it outlives
+ * them in `instances`.
+ *
+ * @param {HTMLElement} element
+ */
+export function removeOverlayScrollbars(element) {
+  toggleOverlayScrollbars(element, false)
+}
+
+/**
  * Forces any pending layout update before restoring a consumer-managed scroll
  * position. This is needed when a scroll container moves between layouts,
  * because OverlayScrollbars otherwise restores its previous offset afterwards.

@@ -41,6 +41,14 @@
           @change="updateShowToastTimeoutIndicator"
         />
         <FtToggleSwitch
+          :label="$t('Settings.Theme Settings.Use Grid Player Menu')"
+          :tooltip="$t('Tooltips.Theme Settings.Use Grid Player Menu')"
+          compact
+          :default-value="usePlayerMenuGrid"
+          setting-key="usePlayerMenuGrid"
+          @change="updateUsePlayerMenuGrid"
+        />
+        <FtToggleSwitch
           v-if="usingElectron"
           :label="$t('Settings.Theme Settings.Use Fixed Tab Width')"
           :tooltip="$t('Tooltips.Theme Settings.Use Fixed Tab Width')"
@@ -463,6 +471,16 @@ const showToastTimeoutIndicator = computed(() => store.getters.getShowToastTimeo
  */
 function updateShowToastTimeoutIndicator(value) {
   store.dispatch('updateShowToastTimeoutIndicator', value)
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const usePlayerMenuGrid = computed(() => store.getters.getUsePlayerMenuGrid)
+
+/**
+ * @param {boolean} value
+ */
+function updateUsePlayerMenuGrid(value) {
+  store.dispatch('updateUsePlayerMenuGrid', value)
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

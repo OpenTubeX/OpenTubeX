@@ -98,6 +98,7 @@ export class AmbientModeButton extends shaka.ui.Element {
     this.currentStateValue_.textContent = this.ambientMode_.value ? enabledLabel : disabledLabel
     this.currentStateSizer_.textContent = this.ambientMode_.value ? disabledLabel : enabledLabel
     this.button_.ariaLabel = label
+    this.button_.ariaPressed = this.ambientMode_.value ? 'true' : 'false'
   }
 
   /** @private */

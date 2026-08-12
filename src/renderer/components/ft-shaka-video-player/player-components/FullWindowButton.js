@@ -88,6 +88,7 @@ export class FullWindowButton extends shaka.ui.Element {
       KeyboardShortcuts.VIDEO_PLAYER.GENERAL.FULLWINDOW
     )
     this.nameSpan_.textContent = this.button_.ariaLabel = newLabel
+    this.button_.ariaPressed = this.fullWindowEnabled_ ? 'true' : 'false'
   }
 
   /** @private */

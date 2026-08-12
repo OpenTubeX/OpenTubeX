@@ -148,6 +148,9 @@ export class SleepTimer extends shaka.ui.SettingsMenu {
     }
 
     this.cancelButton_.classList.toggle('shaka-hidden', mode.value === null)
+    // A running timer highlights the entry in the overflow menu. This isn't a
+    // toggle button, so it can't use `aria-pressed` for it.
+    this.button.classList.toggle('ft-active', mode.value !== null)
     this.currentSelection.textContent = status
     this.button.setAttribute('shaka-status', status)
   }
