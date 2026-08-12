@@ -96,6 +96,9 @@ function keepPreviousPublicationDate(entry, previousEntry, key) {
     Number.isFinite(Number(entry[key])) &&
     !hasVolatilePublicationDate(entry) &&
     !hasVolatilePublicationDate(previousEntry) &&
+    // Exact video metadata must replace Invidious' cached current-time fallback.
+    !(entry.isInvidiousPublicationDateEnriched === true &&
+      previousEntry.isInvidiousPublicationDateEnriched !== true) &&
     // RSS feeds report exact dates, so they may replace a scraped estimate
     !(entry.isRSS === true && previousEntry.isRSS !== true)
 }

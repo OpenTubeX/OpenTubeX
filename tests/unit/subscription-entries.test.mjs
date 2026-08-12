@@ -149,6 +149,18 @@ test('prefers the exact date of an RSS entry over a cached estimate', () => {
   assert.equal(reconciled[0].published, now - 24 * HOUR)
 })
 
+test('prefers enriched Invidious metadata over a cached fallback date', () => {
+  const exactPublished = Date.parse('2025-12-30T21:00:06Z')
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [video('a', exactPublished, { isInvidiousPublicationDateEnriched: true })],
+    [video('a', now - 2 * 60_000)],
+    'videoId',
+    now - HOUR
+  )
+
+  assert.equal(reconciled[0].published, exactPublished)
+})
+
 test('keeps the cached publication time of posts', () => {
   const reconciled = reconcileFetchedSubscriptionEntries(
     [{ postId: 'p1', publishedTime: now - 24 * HOUR }],
