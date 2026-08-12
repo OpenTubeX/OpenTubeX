@@ -3,6 +3,7 @@ import { FormatUtils, Misc } from 'youtubei.js'
 import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { generateAudioTrackField } from '../api/local'
+import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 
 /** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
 
@@ -173,7 +174,8 @@ function mapYtDlpLegacyFormat(format) {
     mimeType: buildMimeType(format),
     height: format.height,
     width: format.width,
-    url: format.url
+    url: format.url,
+    availableAt: format.availableAt
   }
 }
 
@@ -202,6 +204,10 @@ function getExpiryDate(formats) {
 async function convertAdaptiveFormats(formats, duration) {
   const results = await Promise.all(formats.map(async (format) => {
     try {
+      if (!await waitForYtDlpFormatAvailability(format)) {
+        return null
+      }
+
       const byteRanges = await probeStreamByteRanges(format.url, format.ext === 'webm')
 
       return byteRanges === null ? null : convertYtDlpToLocalFormat(format, byteRanges, duration)
