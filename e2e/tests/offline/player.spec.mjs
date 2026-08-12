@@ -1,5 +1,10 @@
 import { setWindowSize, test, expect } from '../../helpers/app.mjs'
-import { activeTab, expectDockedToBottomRight, openMockedVideo } from '../../helpers/player.mjs'
+import {
+  activeTab,
+  expectDockedToBottomRight,
+  findWatchComponent,
+  openMockedVideo,
+} from '../../helpers/player.mjs'
 import { mockPlayableWatchPage } from '../../helpers/watch.mjs'
 
 // These used to live in the network suite, where they only ran when YouTube
@@ -187,6 +192,37 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
 
   await zoomMenu.getByRole('button', { name: 'Off' }).click()
   await expect(video).toHaveCSS('transform', 'none')
+})
+
+test('video zoom can be disabled', async ({ app, page }) => {
+  const video = await openDemoVideo({ app, page })
+
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateEnableVideoZoom', false)
+    await component.proxy.$nextTick()
+  })
+  await expect(video).toHaveCSS('transform', 'none')
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  await player.getByRole('button', { name: 'More settings' }).click()
+  await expect(player.locator('.shaka-overflow-menu').getByRole('button', { name: 'Zoom' }))
+    .toHaveCount(0)
+
+  await page.keyboard.press('Escape')
+  await page.locator('body').press('z')
+  await expect(video).toHaveCSS('transform', 'none')
+
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateEnableVideoZoom', true)
+    await component.proxy.$nextTick()
+  })
+  await expect(video).toHaveCSS('transform', 'matrix(1.25, 0, 0, 1.25, 0, 0)')
+  await watchComponent.dispose()
 })
 
 test('keeps the context menu open when the pointer leaves a playing video', async ({ app, page, attachScreenshot }) => {

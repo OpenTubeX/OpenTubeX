@@ -3126,11 +3126,13 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    const enableVideoZoom = computed(() => store.getters.getEnableVideoZoom)
+
     const videoZoomPossible = computed(() => {
       // Audio only playback has no video surface to crop and the shorts player
       // deliberately lets its content overflow the container, which is what
       // keeps a scaled video from spilling over the page for the other layouts.
-      return props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
+      return enableVideoZoom.value && props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
     })
 
     /** @type {import('vue').ComputedRef<number>} */

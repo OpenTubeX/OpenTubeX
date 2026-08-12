@@ -1041,7 +1041,6 @@
 :deep(.shaka-sub-menu.ft-menu-grid > .ft-caption-options-button) {
   align-items: center;
   block-size: var(--ft-submenu-header-size);
-  min-block-size: 0 !important;
   padding-block: 0 !important;
 }
 
@@ -1049,7 +1048,10 @@
   The option and its quality mark (`HD`, `4K`) are siblings, so the tile wraps
   them in a row instead of stacking them.
 */
-:deep(.shaka-sub-menu.ft-menu-grid > button:not(.shaka-back-to-overflow-button)) {
+:deep(.shaka-sub-menu.ft-menu-grid > button:not(
+  .shaka-back-to-overflow-button,
+  .ft-caption-options-button
+)) {
   flex-wrap: wrap;
   place-content: center;
   gap: 0 2px;
