@@ -1,6 +1,7 @@
 import store from '../store/index'
 import { getTabAvatarUrl } from '../tabs/tabPreview'
 import { fetchTabAvatarBytes } from './tabAvatar'
+import { mapConcurrently } from './concurrent-map'
 import {
   getLocalChannel,
   getLocalVideoInfo,
@@ -11,6 +12,8 @@ import {
   invidiousGetVideoInformation,
   youtubeImageUrlToInvidious
 } from './api/invidious'
+
+const TAB_AVATAR_LOAD_CONCURRENCY = 4
 
 function normalizeAvatarUrl(url) {
   return typeof url === 'string' && url.startsWith('//') ? `https:${url}` : url
@@ -89,7 +92,17 @@ async function loadTabAvatar(tab) {
  */
 export async function loadMissingTabAvatars(tabs) {
   const missingTabs = getMissingTabAvatarTabs(tabs)
-  const results = await Promise.allSettled(missingTabs.map(loadTabAvatar))
+  const results = await mapConcurrently(
+    missingTabs,
+    TAB_AVATAR_LOAD_CONCURRENCY,
+    async tab => {
+      try {
+        return { status: 'fulfilled', value: await loadTabAvatar(tab) }
+      } catch (reason) {
+        return { status: 'rejected', reason }
+      }
+    }
+  )
 
   return results.reduce((counts, result) => {
     if (result.status === 'fulfilled' && result.value) {
