@@ -12,6 +12,7 @@ import {
   invidiousGetVideoInformation,
   youtubeImageUrlToInvidious
 } from './api/invidious'
+import { getLocalVideoAvatarUrl } from './video-collaborators'
 
 const TAB_AVATAR_LOAD_CONCURRENCY = 4
 
@@ -29,7 +30,7 @@ async function resolveLocalAvatarUrl(path) {
   const videoId = path.match(/^\/watch\/([^/]+)/)?.[1]
   if (videoId) {
     const video = await getLocalVideoInfo(videoId)
-    return normalizeAvatarUrl(video.info?.secondary_info?.owner?.author?.best_thumbnail?.url)
+    return normalizeAvatarUrl(getLocalVideoAvatarUrl(video.info))
   }
 
   return null
