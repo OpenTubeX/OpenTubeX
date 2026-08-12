@@ -58,7 +58,9 @@
         chaptersOverlayOpen: showChaptersOverlay && chapters.length > 0,
         fullscreenDockResizing,
         fullscreenDockReordering,
-        presentationModeChanging
+        presentationModeChanging,
+        videoZoomPannable: videoZoomPanReady,
+        videoZoomPanning
       }"
       :style="[
         captionCssVariables,
@@ -69,6 +71,12 @@
       @mouseenter="handleScrollMiniPlayerEnter"
       @mousemove.capture="handlePlayerMouseMove"
       @mouseleave="handlePlayerMouseLeave"
+      @pointerenter="handleVideoZoomPointerEnter"
+      @pointerleave="handleVideoZoomPointerLeave"
+      @pointerdown.capture="handleVideoZoomPointerDown"
+      @pointermove.capture="handleVideoZoomPointerMove"
+      @pointerup.capture="handleVideoZoomPointerUp"
+      @pointercancel.capture="handleVideoZoomPointerCancel"
       @focusin="handleScrollMiniPlayerEnter"
       @focusout="handleScrollMiniPlayerLeave"
       @contextmenu="positionShortsContextMenu"
@@ -85,6 +93,7 @@
       <video
         ref="video"
         class="player"
+        :style="videoZoomStyle"
         preload="auto"
         crossorigin="anonymous"
         playsinline

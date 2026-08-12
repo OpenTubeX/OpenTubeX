@@ -35,6 +35,21 @@
   transition: inline-size 250ms ease;
 }
 
+/*
+  Holding shift over a zoomed video turns the pointer into a handle for moving
+  the visible part of the frame. shaka-player's controls cover the video, so
+  they have to show the same cursor.
+*/
+.ftVideoPlayer.videoZoomPannable,
+.ftVideoPlayer.videoZoomPannable :deep(.shaka-controls-container) {
+  cursor: grab;
+}
+
+.ftVideoPlayer.videoZoomPanning,
+.ftVideoPlayer.videoZoomPanning :deep(.shaka-controls-container) {
+  cursor: grabbing;
+}
+
 .paidPromotionOverlay {
   position: absolute;
   z-index: 4;

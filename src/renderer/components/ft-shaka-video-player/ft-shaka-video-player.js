@@ -20,6 +20,7 @@ import { LoopButton } from './player-components/LoopButton'
 import { QuickPlaybackRateBar, setQuickPlaybackRateBarContext } from './player-components/QuickPlaybackRateBar'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { SkipSilenceButton } from './player-components/SkipSilenceButton'
+import { VideoZoomSelection } from './player-components/VideoZoomSelection'
 import { VoiceOverTranslationButton } from './player-components/VoiceOverTranslationButton'
 import { SleepTimer } from './player-components/SleepTimer'
 import { ShortsVideoInfoButton } from './player-components/ShortsVideoInfoButton'
@@ -69,6 +70,12 @@ import { getRememberedPlayerVolume, setRememberedPlayerVolume } from '../../help
 import { parseChannelPreferences } from '../../helpers/channel-preferences'
 import { findLegacyFormatForQuality } from '../../helpers/player/legacyFormats'
 import { getDashQualityFromDimensions } from '../../helpers/player/videoQuality'
+import {
+  DEFAULT_VIDEO_ZOOM,
+  formatVideoZoom,
+  sanitizeVideoZoom,
+  stepVideoZoom,
+} from '../../helpers/player/videoZoom'
 import { shouldStartPaidPromotionTimer } from '../../helpers/player/paidPromotion'
 import { resolveSponsorBlockEnterTarget, resolveSponsorBlockEnterTargets } from '../../helpers/player/sponsorBlockShortcut'
 import { createSponsorBlockMuteController } from '../../helpers/player/sponsorBlockMute'
@@ -3114,6 +3121,225 @@ export default defineComponent({
       return props.format === 'dash' && props.vrProjection === 'EQUIRECTANGULAR'
     })
 
+    const videoZoomPossible = computed(() => {
+      // Audio only playback has no video surface to crop and the shorts player
+      // deliberately lets its content overflow the container, which is what
+      // keeps a scaled video from spilling over the page for the other layouts.
+      return props.format !== 'audio' && !props.shortsPlayer && !useVrMode.value
+    })
+
+    /** @type {import('vue').ComputedRef<number>} */
+    const videoZoom = computed(() => {
+      if (!videoZoomPossible.value) {
+        return DEFAULT_VIDEO_ZOOM
+      }
+
+      return sanitizeVideoZoom(store.getters.getVideoZoom)
+    })
+
+    /**
+     * Which part of the zoomed video is visible, as a fraction of the hidden
+     * overflow on each axis (-1 to 1). Kept relative so it survives zoom
+     * changes, and per player because the framing only matters for the video
+     * that is currently on screen.
+     */
+    const videoZoomOffset = reactive({ x: 0, y: 0 })
+
+    /** Whether a shift-drag is currently moving the zoomed video. */
+    const videoZoomPanning = ref(false)
+
+    /** Whether releasing the pointer would start a pan, which the cursor shows. */
+    const videoZoomPanReady = ref(false)
+
+    const videoZoomPannable = computed(() => videoZoom.value !== DEFAULT_VIDEO_ZOOM)
+
+    const videoZoomStyle = computed(() => {
+      if (!videoZoomPannable.value) {
+        return undefined
+      }
+
+      // The translation is applied in the video's own coordinate system, which
+      // the scale then magnifies, so the offset that reaches the edge of the
+      // crop shrinks as the zoom grows.
+      const limit = 50 * (videoZoom.value - 1) / videoZoom.value
+
+      return {
+        transform: `scale(${videoZoom.value}) translate(${videoZoomOffset.x * limit}%, ${videoZoomOffset.y * limit}%)`
+      }
+    })
+
+    watch(videoZoomPannable, (pannable) => {
+      if (!pannable) {
+        videoZoomOffset.x = 0
+        videoZoomOffset.y = 0
+        videoZoomPanReady.value = false
+      }
+    })
+
+    /** @param {number} value */
+    function updateVideoZoom(value) {
+      store.dispatch('updateVideoZoom', sanitizeVideoZoom(value))
+    }
+
+    /** @param {number} direction `1` to zoom in, `-1` to zoom out */
+    function changeVideoZoom(direction) {
+      const newZoom = stepVideoZoom(videoZoom.value, direction)
+
+      if (newZoom !== videoZoom.value) {
+        updateVideoZoom(newZoom)
+      }
+
+      showValueChange(formatVideoZoom(newZoom), 'search')
+    }
+
+    // #region video zoom panning
+
+    /** @type {{ pointerId: number, x: number, y: number, offsetX: number, offsetY: number } | null} */
+    let videoZoomPanStart = null
+    let videoZoomPointerInside = false
+    let videoZoomSuppressClick = false
+
+    function handleVideoZoomPointerEnter() {
+      videoZoomPointerInside = true
+    }
+
+    function handleVideoZoomPointerLeave() {
+      videoZoomPointerInside = false
+
+      if (!videoZoomPanStart) {
+        videoZoomPanReady.value = false
+      }
+    }
+
+    /** @param {KeyboardEvent} event */
+    function handleVideoZoomModifierKey(event) {
+      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
+    }
+
+    /** @param {PointerEvent} event */
+    function handleVideoZoomPointerDown(event) {
+      if (!videoZoomPannable.value || !event.shiftKey || event.button !== 0) {
+        return
+      }
+
+      // shaka-player's controls cover the video, so the drag is claimed in the
+      // capture phase before they can turn it into a play/pause click.
+      event.preventDefault()
+      event.stopPropagation()
+
+      videoZoomPanStart = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        offsetX: videoZoomOffset.x,
+        offsetY: videoZoomOffset.y,
+      }
+      videoZoomPanning.value = true
+      // Chromium still fires the click that follows a prevented pointerdown.
+      videoZoomSuppressClick = true
+      container.value?.setPointerCapture(event.pointerId)
+    }
+
+    /** @param {PointerEvent} event */
+    function handleVideoZoomPointerMove(event) {
+      if (!videoZoomPanStart) {
+        videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
+        return
+      }
+
+      if (event.pointerId !== videoZoomPanStart.pointerId) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      const videoElement = video.value
+      if (!videoElement) {
+        return
+      }
+
+      // `offsetWidth`/`offsetHeight` are the layout size, which the zoom
+      // transform does not change, so this is the overflow the crop hides.
+      const maxX = videoElement.offsetWidth * (videoZoom.value - 1) / 2
+      const maxY = videoElement.offsetHeight * (videoZoom.value - 1) / 2
+
+      if (maxX > 0) {
+        videoZoomOffset.x = clampVideoZoomOffset(
+          videoZoomPanStart.offsetX + (event.clientX - videoZoomPanStart.x) / maxX
+        )
+      }
+
+      if (maxY > 0) {
+        videoZoomOffset.y = clampVideoZoomOffset(
+          videoZoomPanStart.offsetY + (event.clientY - videoZoomPanStart.y) / maxY
+        )
+      }
+    }
+
+    /** @param {PointerEvent} event */
+    function handleVideoZoomPointerUp(event) {
+      if (!endVideoZoomPan(event)) {
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    /** @param {PointerEvent} event */
+    function handleVideoZoomPointerCancel(event) {
+      if (!endVideoZoomPan(event)) {
+        return
+      }
+
+      // A cancelled gesture never produces the click that clears this itself,
+      // so it would otherwise swallow the next unrelated click on the player.
+      videoZoomSuppressClick = false
+    }
+
+    /**
+     * @param {PointerEvent} event
+     * @returns {boolean} whether the event ended this player's pan
+     */
+    function endVideoZoomPan(event) {
+      if (!videoZoomPanStart || event.pointerId !== videoZoomPanStart.pointerId) {
+        return false
+      }
+
+      // A cancelled pointer has already lost the capture.
+      if (container.value?.hasPointerCapture(event.pointerId)) {
+        container.value.releasePointerCapture(event.pointerId)
+      }
+
+      videoZoomPanStart = null
+      videoZoomPanning.value = false
+      videoZoomPanReady.value = videoZoomPointerInside && videoZoomPannable.value && event.shiftKey
+
+      return true
+    }
+
+    /** Swallows the click that a finished pan would otherwise leave behind. */
+    function handleVideoZoomClickCapture(event) {
+      if (!videoZoomSuppressClick) {
+        return
+      }
+
+      videoZoomSuppressClick = false
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
+    /**
+     * @param {number} value
+     * @returns {number}
+     */
+    function clampVideoZoomOffset(value) {
+      return Math.min(Math.max(value, -1), 1)
+    }
+
+    // #endregion video zoom panning
+
     const showInvidiousShareOptions = computed(() => {
       return store.getters.getBackendPreference === 'invidious' || store.getters.getBackendFallback
     })
@@ -3193,6 +3419,7 @@ export default defineComponent({
           'ft_audio_tracks',
           ...(props.chapters.length > 0 ? ['ft_chapters'] : []),
           'ft_ambient_mode',
+          'ft_video_zoom',
           'ft_loop',
           'ft_screenshot',
           'picture_in_picture',
@@ -3231,6 +3458,7 @@ export default defineComponent({
           'ft_voice_over_translation',
           props.format === 'legacy' ? 'ft_legacy_quality' : 'quality',
           'ft_ambient_mode',
+          'ft_video_zoom',
           'ft_loop',
           'recenter_vr',
           'toggle_stereoscopic',
@@ -3258,6 +3486,10 @@ export default defineComponent({
 
       if (props.format === 'audio' || useVrMode.value) {
         removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_ambient_mode')
+      }
+
+      if (!videoZoomPossible.value) {
+        removeFromArrayIfExists(uiConfig.overflowMenuButtons, 'ft_video_zoom')
       }
 
       if (!showSkipSilenceButton.value || isLive.value) {
@@ -6258,6 +6490,23 @@ export default defineComponent({
       registerOwnElement(shakaOverflowMenu, 'ft_ambient_mode', new AmbientModeButtonFactory())
     }
 
+    function registerVideoZoomSelection() {
+      /** @implements {shaka.extern.IUIElement.Factory} */
+      class VideoZoomSelectionFactory {
+        create(rootElement, controls) {
+          return new VideoZoomSelection(
+            videoZoom,
+            updateVideoZoom,
+            events,
+            rootElement,
+            controls
+          )
+        }
+      }
+
+      registerOwnElement(shakaOverflowMenu, 'ft_video_zoom', new VideoZoomSelectionFactory())
+    }
+
     function registerSkipSilenceButton() {
       /** @implements {shaka.extern.IUIElement.Factory} */
       class SkipSilenceButtonFactory {
@@ -6678,6 +6927,7 @@ export default defineComponent({
       shakaContextMenu.registerElement('ft_loop', null)
       shakaContextMenu.registerElement('ft_stats', null)
       shakaOverflowMenu.registerElement('ft_ambient_mode', null)
+      shakaOverflowMenu.registerElement('ft_video_zoom', null)
       shakaOverflowMenu.registerElement('ft_skip_silence', null)
       shakaOverflowMenu.registerElement('ft_voice_over_translation', null)
       shakaOverflowMenu.registerElement('ft_sleep_timer', null)
@@ -7678,6 +7928,14 @@ export default defineComponent({
           }
           blurTooltipButtons()
           break
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VIDEO_ZOOM_IN):
+        case matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VIDEO_ZOOM_OUT):
+          if (videoZoomPossible.value) {
+            event.preventDefault()
+            changeVideoZoom(matches(KeyboardShortcuts.VIDEO_PLAYER.GENERAL.VIDEO_ZOOM_IN) ? 1 : -1)
+          }
+          blurTooltipButtons()
+          break
       }
     }
 
@@ -8075,6 +8333,7 @@ export default defineComponent({
       registerChapterOverlayButton()
       registerAutoplayToggle()
       registerAmbientModeButton()
+      registerVideoZoomSelection()
       registerSkipSilenceButton()
       registerVoiceOverTranslationButton()
       registerSleepTimer()
@@ -8126,6 +8385,11 @@ export default defineComponent({
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('keydown', keyboardShortcutHandler)
       document.addEventListener('keyup', keyboardShortcutKeyupHandler)
+      document.addEventListener('keydown', handleVideoZoomModifierKey)
+      document.addEventListener('keyup', handleVideoZoomModifierKey)
+      // Not a template listener: it only swallows the click that shaka-player
+      // would otherwise read as play/pause at the end of a pan.
+      container.value?.addEventListener('click', handleVideoZoomClickCapture, true)
       document.addEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
       document.addEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.addEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
@@ -8613,6 +8877,9 @@ export default defineComponent({
 
       document.removeEventListener('keydown', keyboardShortcutHandler)
       document.removeEventListener('keyup', keyboardShortcutKeyupHandler)
+      document.removeEventListener('keydown', handleVideoZoomModifierKey)
+      document.removeEventListener('keyup', handleVideoZoomModifierKey)
+      container.value?.removeEventListener('click', handleVideoZoomClickCapture, true)
       document.removeEventListener('pointerup', handleTemporaryPlaybackRatePointerUp, true)
       document.removeEventListener('pointercancel', handleTemporaryPlaybackRatePointerCancel, true)
       document.removeEventListener('visibilitychange', handleTemporaryPlaybackRateVisibilityChange)
@@ -9030,6 +9297,16 @@ export default defineComponent({
       handleTimeupdate,
       handleEnterPictureInPicture,
       handleLeavePictureInPicture,
+
+      videoZoomStyle,
+      videoZoomPanning,
+      videoZoomPanReady,
+      handleVideoZoomPointerEnter,
+      handleVideoZoomPointerLeave,
+      handleVideoZoomPointerDown,
+      handleVideoZoomPointerMove,
+      handleVideoZoomPointerUp,
+      handleVideoZoomPointerCancel,
 
       valueChangeMessage,
       valueChangeIcon,
