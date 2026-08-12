@@ -763,6 +763,48 @@ test.describe('watch page', () => {
     await expect(sponsorBlock.locator('.os-scrollbar-vertical')).toHaveCount(1)
   })
 
+  test('does not restore a SponsorBlock prompt when a skip remains inside the segment', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'terminal-outro',
+          actionType: 'skip',
+          category: 'outro',
+          description: '',
+          locked: 0,
+          segment: [15, 30],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 16
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+
+    const prompt = page.locator('.skippedSegment').filter({ hasText: 'Skip Endcards/Credits?' })
+    await expect(prompt).toBeVisible()
+    await prompt.getByRole('button', { name: /Skip/ }).click()
+    await page.evaluate(() => new Promise(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(resolve))
+    }))
+
+    await expect(page.locator('.skippedSegment').filter({ hasText: 'Endcards/Credits Skipped' })).toBeVisible()
+    await expect(prompt).toHaveCount(0)
+  })
+
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const fullVideoSegment = {

@@ -2370,7 +2370,7 @@ export default defineComponent({
         return false
       }
 
-      sponsorBlockDismissedPromptSegments.delete(uuid)
+      sponsorBlockDismissedPromptSegments.add(uuid)
       removePromptSponsorBlockToast(uuid)
 
       if (segment.actionType === 'mute') {
@@ -2679,7 +2679,7 @@ export default defineComponent({
       if (sponsorBlockShowSkippedToast.value) {
         skippedSegments.forEach(({ uuid, category }) => {
           removePromptSponsorBlockToast(uuid)
-          sponsorBlockDismissedPromptSegments.delete(uuid)
+          sponsorBlockDismissedPromptSegments.add(uuid)
           upsertSkippedSponsorBlockToast({
             uuid,
             translatedCategory: translateSponsorBlockCategory(category),
@@ -2804,7 +2804,7 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.add(uuid)
-      sponsorBlockDismissedPromptSegments.delete(uuid)
+      sponsorBlockDismissedPromptSegments.add(uuid)
       removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
@@ -2853,7 +2853,7 @@ export default defineComponent({
       }
 
       sponsorBlockDoNotSkipSegments.delete(uuid)
-      sponsorBlockDismissedPromptSegments.delete(uuid)
+      sponsorBlockDismissedPromptSegments.add(uuid)
       removePromptSponsorBlockToast(uuid)
 
       if (canSeek()) {
