@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-import { test, expect } from '../../helpers/app.mjs'
+import { test, expect, goToSettingsSection } from '../../helpers/app.mjs'
 
 // The main profile ('allChannels') must exist in any seeded profiles.db,
 // otherwise the app would recreate the store with only the default profile.
@@ -86,6 +86,46 @@ test.describe('profile manager', () => {
     ;({ page } = await app.relaunch())
     await openProfileList(page)
     await expect(page.locator('.profileList .profileOption').filter({ hasText: 'Created via UI' })).toBeVisible()
+  })
+
+  test.describe('theme color profiles', () => {
+    test.use({ seed: { settings: { mainColor: 'Green' } } })
+
+    test('follows the theme color when the theme color option is picked', async ({ app, page }) => {
+      await openProfileList(page)
+      await page.locator('.profilePanelHeader button').last().click()
+      await page.locator('.card .profileList').getByText('All Channels').click()
+
+      await page.locator('.themeColorOption').click()
+
+      // 'Green' is the seeded main color theme
+      const preview = page.locator('.profilePreviewIcon')
+      await expect(preview).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      await page.getByRole('button', { name: 'Update Profile' }).click()
+
+      await expect.poll(async () => {
+        const contents = await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')
+        const records = contents.trim().split('\n').map(line => JSON.parse(line))
+        const profile = records.findLast(record => record._id === 'allChannels' && !record.$$deleted)
+        return profile?.bgColor
+      }).toBe('var(--primary-color)')
+
+      ;({ page } = await app.relaunch())
+      // the profile keeps the resolved theme color after restart
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(76, 175, 80)')
+      // switching the theme color has to repaint the profile, without touching the profile itself
+      await goToSettingsSection(page, 'theme')
+
+      // the labels are translated, so find the main color select and its 'Blue'
+      // option through the values of the hidden native select instead
+      const mainColorSelect = page.locator('.settingsContent .select')
+        .filter({ has: page.locator('select option[value="Blue"]') })
+        .first()
+      const blueIndex = await mainColorSelect.locator('option[value="Blue"]').evaluate(option => option.index)
+      await mainColorSelect.getByRole('combobox').click()
+      await page.locator('.selectDropdown .selectOption').nth(blueIndex).click()
+      await expect(profileIconInitial(page)).toHaveCSS('background-color', 'rgb(33, 150, 243)')
+    })
   })
 
   test('customizes a profile icon with a cropped SVG or emoji', async ({ app, page }) => {

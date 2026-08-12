@@ -550,6 +550,10 @@ const UnsupportedPlayerActions = /** @type {const} */({
 // Utils
 const MAIN_PROFILE_ID = 'allChannels'
 
+// Profile colors that follow the selected theme color instead of a fixed value
+const THEME_BG_COLOR = 'var(--primary-color)'
+const THEME_TEXT_COLOR = 'var(--text-with-main-color)'
+
 // Width threshold in px at which we switch to using a more heavily altered view for mobile users
 const MOBILE_WIDTH_THRESHOLD = 680
 
@@ -638,6 +642,8 @@ export {
   SPONSORBLOCK_ICON_VIEWBOX,
   UnsupportedPlayerActions,
   MAIN_PROFILE_ID,
+  THEME_BG_COLOR,
+  THEME_TEXT_COLOR,
   MOBILE_WIDTH_THRESHOLD,
   PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD,
   MULTIPLE_TABS_CONFIRM_THRESHOLD,

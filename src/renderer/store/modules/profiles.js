@@ -1,14 +1,13 @@
-import { MAIN_PROFILE_ID } from '../../../constants'
+import { MAIN_PROFILE_ID, THEME_BG_COLOR, THEME_TEXT_COLOR } from '../../../constants'
 import { DBProfileHandlers } from '../../../datastores/handlers/index'
-import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
 import { deepCopy } from '../../helpers/utils'
 
 const state = {
   profileList: [{
     _id: MAIN_PROFILE_ID,
     name: 'All Channels',
-    bgColor: '#000000',
-    textColor: '#FFFFFF',
+    bgColor: THEME_BG_COLOR,
+    textColor: THEME_TEXT_COLOR,
     subscriptions: []
   }],
   activeProfile: MAIN_PROFILE_ID
@@ -77,13 +76,11 @@ const actions = {
 
     if (profiles.length === 0) {
       // Create a default profile and persist it
-      const randomColor = getRandomColor().value
-      const textColor = calculateColorLuminance(randomColor)
       const defaultProfile = {
         _id: MAIN_PROFILE_ID,
         name: defaultName,
-        bgColor: randomColor,
-        textColor: textColor,
+        bgColor: THEME_BG_COLOR,
+        textColor: THEME_TEXT_COLOR,
         subscriptions: []
       }
 

@@ -90,6 +90,15 @@ export const colors = [
   { name: 'SolarizedGreen', value: '#859900' },
 ]
 
+/**
+ * Resolves the currently selected theme color to a concrete value,
+ * for the places that can't use `THEME_BG_COLOR` directly.
+ * @returns {string}
+ */
+export function resolveThemeColor() {
+  return getComputedStyle(document.body).getPropertyValue('--primary-color').trim() || '#000000'
+}
+
 export function getRandomColorClass() {
   return 'main' + getRandomColor().name
 }
