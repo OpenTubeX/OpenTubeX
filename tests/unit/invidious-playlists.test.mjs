@@ -20,6 +20,7 @@ test('filters unavailable Invidious playlist videos', () => {
     filterUnavailableInvidiousPlaylistVideos([available, unavailable]),
     [available]
   )
+  assert.deepEqual(filterUnavailableInvidiousPlaylistVideos([unavailable]), [])
 })
 
 test('keeps playlist videos when any identifying metadata is present', () => {
