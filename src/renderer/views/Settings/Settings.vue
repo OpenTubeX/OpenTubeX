@@ -548,16 +548,16 @@ const settingsComponentsData = computed(() => [
 
 const collator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
 const settingsSectionComponents = computed(() => {
-  const sections = settingsSectionSortEnabled.value
-    ? settingsComponentsData.value.toSorted((a, b) => collator.value.compare(a.title, b.title))
-    : settingsComponentsData.value
-
-  return [{
+  const sections = [{
     type: 'general',
     title: t('Settings.General Settings.General Settings'),
     icon: ['fas', 'border-all'],
     component: GeneralSettings
-  }, ...sections]
+  }, ...settingsComponentsData.value]
+
+  return settingsSectionSortEnabled.value
+    ? sections.toSorted((a, b) => collator.value.compare(a.title, b.title))
+    : sections
 })
 const settingsSearchExtraValues = computed(() => ({
   privacy: flattenMessageValues(tm('Settings.Password Settings')),
