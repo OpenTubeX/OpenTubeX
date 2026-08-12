@@ -1327,6 +1327,10 @@
 }
 
 :deep(.shaka-overflow-menu .autoplay-toggle > .ft-autoplay-switch) {
+  margin-inline-end: 14px;
+}
+
+:deep(.shaka-overflow-menu.ft-menu-grid .autoplay-toggle > .ft-autoplay-switch) {
   margin-inline-end: 0;
 }
 

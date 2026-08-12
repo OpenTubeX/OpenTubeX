@@ -192,6 +192,24 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
 
   await zoomMenu.getByRole('button', { name: 'Off' }).click()
   await expect(video).toHaveCSS('transform', 'none')
+
+  // A narrow player folds Autoplay into the overflow menu.
+  await player.evaluate(element => { element.style.width = '600px' })
+  const autoplaySwitch = overflowMenu.locator('.autoplay-toggle > .ft-autoplay-switch')
+  await moreOptions.click()
+  await expect(autoplaySwitch).toBeVisible()
+  await expect(autoplaySwitch).toHaveCSS('margin-right', '0px')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateUsePlayerMenuGrid', false)
+    await component.proxy.$nextTick()
+  })
+  await player.hover()
+  await moreOptions.click()
+  await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
+  await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
+  await watchComponent.dispose()
 })
 
 test('video zoom can be disabled', async ({ app, page }) => {
