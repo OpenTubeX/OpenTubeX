@@ -162,6 +162,7 @@
   max-block-size: calc(100vh - 76px - var(--quick-settings-viewport-offset, calc(0 * 1px)));
   inline-size: min(440px, calc(100vw - 20px));
   line-height: normal;
+  overscroll-behavior: contain;
   overflow-y: auto;
   padding: 0;
   position: absolute;
