@@ -210,23 +210,51 @@ test.describe('background watch tab', () => {
       }).observe(tab, { attributes: true, attributeFilter: ['class'] })
     })
 
+    await page.locator(sel.newTabButton).click()
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    const videoTabId = await videoTab.getAttribute('data-tab-id')
+    await expect(page.locator(`.tabContent[data-tab-id="${videoTabId}"]`))
+      .toHaveAttribute('aria-hidden', 'true')
+
     const watchComponent = await page.evaluateHandle(findWatchComponent)
     await watchComponent.evaluate((component) => {
       window.setTimeout(() => {
         component.proxy.isLoading = true
       }, 250)
     })
+    await expect.poll(() => watchComponent.evaluate(
+      component => component.proxy.isLoading
+    )).toBe(true)
     await watchComponent.dispose()
 
-    await page.locator(sel.newTabButton).click()
-    await expect(page.locator(sel.tabs)).toHaveCount(2)
-    await page.waitForTimeout(500)
     expect(await page.evaluate(
       () => window.__videoTabShowedLoadingAfterDeactivation
     )).toBe(false)
     await expect(videoTab).not.toHaveClass(/loading/)
 
     await videoTab.click()
+    await expect(videoTab).toHaveClass(/loading/)
+    await expect(
+      page.locator('.tabContent[aria-hidden="false"] [data-tab-loading-indicator]')
+    ).toHaveCount(1)
+  })
+
+  test('restores loading updates when tab activation is rejected', async ({ page }) => {
+    await openVideo(page)
+
+    const videoTab = page.locator(sel.tabs).first()
+    await expect(videoTab).not.toHaveClass(/loading/)
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('activateTab', 'missing-tab')
+    })
+
+    const watchComponent = await page.evaluateHandle(findWatchComponent)
+    await watchComponent.evaluate((component) => {
+      component.proxy.isLoading = true
+    })
+    await watchComponent.dispose()
+
     await expect(videoTab).toHaveClass(/loading/)
     await expect(
       page.locator('.tabContent[aria-hidden="false"] [data-tab-loading-indicator]')

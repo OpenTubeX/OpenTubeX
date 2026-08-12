@@ -249,7 +249,7 @@ const actions = {
     return await window.ftElectron.tabs.create(tabOptions)
   },
 
-  activateTab({ rootGetters }, tabId) {
+  async activateTab({ rootGetters }, tabId) {
     if (!process.env.IS_ELECTRON) return
 
     const activeTabId = rootGetters.getActiveTabId
@@ -266,7 +266,10 @@ const actions = {
       navigation.setLoadingSuppressed(activeTabId, true)
     }
 
-    window.ftElectron.tabs.activate(tabId)
+    const activated = await window.ftElectron.tabs.activate(tabId)
+    if (!activated && rootGetters.getActiveTabId === activeTabId) {
+      navigation.setLoadingSuppressed(activeTabId, false)
+    }
   },
 
   setTabSelection({ commit }, tabIds) {
