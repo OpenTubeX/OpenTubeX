@@ -158,6 +158,17 @@ export function reconcileFetchedSubscriptionEntries(
       reconciledEntry[publicationDateKey] = previousEntry[publicationDateKey]
     }
 
+    if (
+      entry.isInvidiousPublicationDateFallback === true &&
+      previousEntry?.isInvidiousPublicationDateEnriched === true
+    ) {
+      reconciledEntry.publishedText = previousEntry.publishedText
+      reconciledEntry.viewCount = previousEntry.viewCount
+      reconciledEntry.viewCountText = previousEntry.viewCountText
+      reconciledEntry.isInvidiousPublicationDateEnriched = true
+      delete reconciledEntry.isInvidiousPublicationDateFallback
+    }
+
     return reconciledEntry
   })
 }

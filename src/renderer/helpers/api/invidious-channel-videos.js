@@ -1,7 +1,27 @@
-import { mapConcurrently } from '../concurrent-map.js'
-
 const FALLBACK_PUBLICATION_DATE_MAX_AGE_MS = 5 * 60 * 1000
 const PUBLICATION_DATE_ENRICHMENT_CONCURRENCY = 3
+const publicationDateEnrichmentQueue = []
+let activePublicationDateEnrichments = 0
+
+async function withPublicationDateEnrichmentLimit(task) {
+  if (activePublicationDateEnrichments >= PUBLICATION_DATE_ENRICHMENT_CONCURRENCY) {
+    await new Promise(resolve => publicationDateEnrichmentQueue.push(resolve))
+  } else {
+    activePublicationDateEnrichments++
+  }
+
+  try {
+    return await task()
+  } finally {
+    const next = publicationDateEnrichmentQueue.shift()
+
+    if (next) {
+      next()
+    } else {
+      activePublicationDateEnrichments--
+    }
+  }
+}
 
 /**
  * YouTube sometimes omits publication and view metadata from channel cards.
@@ -28,13 +48,20 @@ export async function enrichFallbackInvidiousPublicationDates(
   fetchVideoDetails,
   fetchedAt = Date.now()
 ) {
-  return await mapConcurrently(videos, PUBLICATION_DATE_ENRICHMENT_CONCURRENCY, async video => {
+  return await Promise.all(videos.map(async video => {
     if (!usesFallbackInvidiousPublicationDate(video, fetchedAt)) return video
 
-    try {
-      const details = await fetchVideoDetails(video.videoId)
+    const fallbackVideo = {
+      ...video,
+      isInvidiousPublicationDateFallback: true
+    }
 
-      if (typeof details.published !== 'number') return video
+    try {
+      const details = await withPublicationDateEnrichmentLimit(
+        async () => await fetchVideoDetails(video.videoId)
+      )
+
+      if (typeof details.published !== 'number') return fallbackVideo
 
       return {
         ...video,
@@ -45,7 +72,7 @@ export async function enrichFallbackInvidiousPublicationDates(
         isInvidiousPublicationDateEnriched: true
       }
     } catch {
-      return video
+      return fallbackVideo
     }
-  })
+  }))
 }

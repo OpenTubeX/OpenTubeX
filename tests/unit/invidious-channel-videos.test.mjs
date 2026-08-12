@@ -71,5 +71,37 @@ test('keeps channel metadata when video details cannot be fetched', async () => 
     now
   )
 
-  assert.equal(result[0], fallback)
+  assert.deepEqual(result[0], {
+    ...fallback,
+    isInvidiousPublicationDateFallback: true
+  })
+})
+
+test('shares the enrichment request limit across channel fetches', async () => {
+  let activeRequests = 0
+  let maximumActiveRequests = 0
+  const releaseRequests = []
+  const fetchVideoDetails = async () => {
+    activeRequests++
+    maximumActiveRequests = Math.max(maximumActiveRequests, activeRequests)
+    await new Promise(resolve => releaseRequests.push(resolve))
+    activeRequests--
+    return { published: now / 1000 }
+  }
+  const channelVideos = Array.from({ length: 4 }, (_, index) => video({ videoId: `video-${index}` }))
+  const enrichments = [
+    enrichFallbackInvidiousPublicationDates(channelVideos, fetchVideoDetails, now),
+    enrichFallbackInvidiousPublicationDates(channelVideos, fetchVideoDetails, now)
+  ]
+
+  await new Promise(resolve => setTimeout(resolve, 0))
+  assert.equal(maximumActiveRequests, 3)
+
+  while (releaseRequests.length > 0) {
+    releaseRequests.shift()()
+    await new Promise(resolve => setTimeout(resolve, 0))
+  }
+  await Promise.all(enrichments)
+
+  assert.equal(maximumActiveRequests, 3)
 })

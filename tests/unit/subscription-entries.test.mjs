@@ -161,6 +161,34 @@ test('prefers enriched Invidious metadata over a cached fallback date', () => {
   assert.equal(reconciled[0].published, exactPublished)
 })
 
+test('keeps enriched Invidious metadata after a later detail request fails', () => {
+  const exactPublished = Date.parse('2025-12-30T21:00:06Z')
+  const reconciled = reconcileFetchedSubscriptionEntries(
+    [video('a', now, {
+      publishedText: '0 seconds ago',
+      viewCount: 0,
+      viewCountText: '0 views',
+      isInvidiousPublicationDateFallback: true
+    })],
+    [video('a', exactPublished, {
+      publishedText: '7 months ago',
+      viewCount: 620_420,
+      viewCountText: '620K views',
+      isInvidiousPublicationDateEnriched: true
+    })],
+    'videoId',
+    now - HOUR
+  )
+
+  assert.deepEqual(reconciled[0], video('a', exactPublished, {
+    publishedText: '7 months ago',
+    viewCount: 620_420,
+    viewCountText: '620K views',
+    isInvidiousPublicationDateEnriched: true,
+    isNewInSubscriptionFeed: false
+  }))
+})
+
 test('keeps the cached publication time of posts', () => {
   const reconciled = reconcileFetchedSubscriptionEntries(
     [{ postId: 'p1', publishedTime: now - 24 * HOUR }],
