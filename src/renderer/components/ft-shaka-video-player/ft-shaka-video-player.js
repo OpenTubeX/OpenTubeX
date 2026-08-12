@@ -6526,7 +6526,10 @@ export default defineComponent({
     }
 
     function registerLegacyQualitySelection() {
+      let selectionGeneration = 0
+
       events.addEventListener('setLegacyFormat', async (/** @type {CustomEvent} */ event) => {
+        const currentSelectionGeneration = ++selectionGeneration
         const {
           format,
           playbackPosition,
@@ -6553,7 +6556,13 @@ export default defineComponent({
         }
 
         try {
-          if (!await waitForYtDlpFormatAvailability(format)) {
+          const isAvailable = await waitForYtDlpFormatAvailability(format)
+
+          if (currentSelectionGeneration !== selectionGeneration) {
+            return
+          }
+
+          if (!isAvailable) {
             throw new Error('yt-dlp format availability delay is too long')
           }
 
