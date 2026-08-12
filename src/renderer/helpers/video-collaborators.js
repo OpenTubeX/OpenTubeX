@@ -54,5 +54,5 @@ export function parseLocalVideoCollaborators(videoInfo) {
  */
 export function getLocalVideoAvatarUrl(videoInfo) {
   const primaryCollaborator = parseLocalVideoCollaborators(videoInfo)[0]
-  return primaryCollaborator?.thumbnail ?? videoInfo.secondary_info?.owner?.author?.best_thumbnail?.url
+  return primaryCollaborator?.thumbnail || videoInfo.secondary_info?.owner?.author?.best_thumbnail?.url
 }
