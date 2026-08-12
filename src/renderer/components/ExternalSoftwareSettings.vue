@@ -58,7 +58,7 @@
         {{ t('Settings.External Software Settings.Detected Version Template', { version: ytDlpInfo.version }) }}
       </p>
     </FtFlexBox>
-    <FtFlexBox class="binaryStatusEnd">
+    <FtFlexBox>
       <p
         v-if="ffmpegInfo === null"
         class="ytDlpStatus"
