@@ -41,6 +41,10 @@ test.describe('profile selector', () => {
     await profileIcon(page).click({ button: 'right' })
 
     await expect(page.locator('.profileList')).toBeVisible()
+
+    await profileIcon(page).click({ button: 'right' })
+    await page.locator('.topNav .logo').click()
+    await expect(page.locator('.quickSettingsMenu')).toBeHidden()
   })
 
   test('lists seeded profiles and switches the active profile', async ({ page }) => {

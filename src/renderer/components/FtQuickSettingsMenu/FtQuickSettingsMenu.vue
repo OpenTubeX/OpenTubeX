@@ -423,8 +423,8 @@ function handleMenuAfterLeave() {
   if (!menuOpen.value) profilePanelOpen.value = false
 }
 
-function handleTriggerMouseDown() {
-  if (menuOpen.value) {
+function handleTriggerMouseDown(event) {
+  if (event.button === 0 && menuOpen.value) {
     mouseDownOnTrigger = true
   }
 }
