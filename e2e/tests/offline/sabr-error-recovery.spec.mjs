@@ -19,10 +19,15 @@ test.use({
  *
  * @param {import('@playwright/test').Page} page
  * @param {Array<{ error: true } | { reloadRequest: true } | { playFor: number } | { seekTo: number }>} script
- * @param {{ isLoading?: boolean, legacyFormats?: Array<object>, rejectReload?: boolean }} options
+ * @param {{
+ *   isLoading?: boolean,
+ *   legacyFormats?: Array<object>,
+ *   rejectReload?: boolean,
+ *   enablePlaybackEngineFallback?: boolean
+ * }} options
  */
 function driveWatchView(page, script, options = {}) {
-  return page.evaluate(async ({ steps, isLoading, legacyFormats, rejectReload }) => {
+  return page.evaluate(async ({ steps, isLoading, legacyFormats, rejectReload, enablePlaybackEngineFallback }) => {
     const app = document.querySelector('#app')?.__vue_app__
 
     const findWatchView = (vnode) => {
@@ -63,6 +68,16 @@ function driveWatchView(page, script, options = {}) {
       if (rejectReload) throw new Error('Synthetic SABR reload rejection')
     }
 
+    if (enablePlaybackEngineFallback) {
+      watchView.extractYtDlpPlaybackSource = async () => {
+        watchView.activePlaybackEngine = 'yt-dlp'
+        return true
+      }
+    } else {
+      // Existing tests exercise the in-engine recovery chain in isolation.
+      watchView.tryPlaybackEngineFallback = async () => false
+    }
+
     // A critical, non-abort shaka error: the kind that walks the format
     // fallback chain. 1002 = BAD_HTTP_STATUS, category 1 = NETWORK.
     const criticalError = () => ({
@@ -95,14 +110,111 @@ function driveWatchView(page, script, options = {}) {
       formats.push(watchView.activeFormat)
     }
 
-    return { reloads, formats, finalFormat: watchView.activeFormat, errorMessage: watchView.errorMessage }
+    return {
+      reloads,
+      formats,
+      finalFormat: watchView.activeFormat,
+      activePlaybackEngine: watchView.activePlaybackEngine,
+      playbackEngineFallbackAttempted: watchView.playbackEngineFallbackAttemptedForCurrentVideo,
+      errorMessage: watchView.errorMessage
+    }
   }, {
     steps: script,
     isLoading: options.isLoading ?? false,
     legacyFormats: options.legacyFormats ?? [{ itag: 18, qualityLabel: '360p', height: 360, width: 640, url: 'https://example.invalid/360p' }],
-    rejectReload: options.rejectReload ?? false
+    rejectReload: options.rejectReload ?? false,
+    enablePlaybackEngineFallback: options.enablePlaybackEngineFallback ?? false
   })
 }
+
+test('terminal built-in playback failure falls back to yt-dlp once', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await driveWatchView(page, [
+    { error: true },
+    { error: true },
+    { error: true },
+    { error: true },
+    { error: true }
+  ], { enablePlaybackEngineFallback: true })
+
+  expect(result.reloads).toHaveLength(MAX_SABR_ERROR_RECOVERIES)
+  expect(result.activePlaybackEngine).toBe('yt-dlp')
+  expect(result.playbackEngineFallbackAttempted).toBe(true)
+  expect(result.errorMessage).toBe('')
+})
+
+test('terminal yt-dlp playback failure restores the built-in source once', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) throw new Error('Unable to access the watch view')
+
+    watchView.errorMessage = ''
+    watchView.isPostLiveDvr = false
+    watchView.activeFormat = 'dash'
+    watchView.activePlaybackEngine = 'yt-dlp'
+    watchView.activePlaybackEngineVersion = 'test'
+    watchView.manifestSrc = 'data:application/dash+xml,yt-dlp'
+    watchView.manifestMimeType = 'application/dash+xml'
+    watchView.legacyFormats = []
+    watchView.builtInPlaybackSource = {
+      manifestSrc: 'data:application/dash+xml,built-in',
+      manifestMimeType: 'application/dash+xml',
+      sabrData: null,
+      legacyFormats: [{ itag: 18 }],
+      streamingDataExpiryDate: null
+    }
+
+    const error = { code: 1002, data: ['https://example.invalid/video', 500] }
+    const firstFallback = await watchView.tryPlaybackEngineFallback(error)
+    const secondFallback = await watchView.tryPlaybackEngineFallback(error)
+
+    return {
+      firstFallback,
+      secondFallback,
+      activePlaybackEngine: watchView.activePlaybackEngine,
+      activePlaybackEngineVersion: watchView.activePlaybackEngineVersion,
+      manifestSrc: watchView.manifestSrc,
+      legacyFormatCount: watchView.legacyFormats.length
+    }
+  })
+
+  expect(result).toEqual({
+    firstFallback: true,
+    secondFallback: false,
+    activePlaybackEngine: 'built-in',
+    activePlaybackEngineVersion: null,
+    manifestSrc: 'data:application/dash+xml,built-in',
+    legacyFormatCount: 1
+  })
+})
 
 test('a SABR reload preserves the active video quality', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)

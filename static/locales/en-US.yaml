@@ -1659,6 +1659,8 @@ Change Format:
     Audio: Audio only, useful for saving bandwidth or listening in the background
   yt-dlp Fallback Template: 'yt-dlp could not provide the streams, using the built-in
     engine instead: {error}'
+  Built-in Fallback Template: 'The built-in engine could not play the stream, trying
+    yt-dlp instead: {error}'
 Share:
   Share Video: Share Video
   Share Post: Share Post
