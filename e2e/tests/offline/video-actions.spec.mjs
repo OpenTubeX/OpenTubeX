@@ -318,6 +318,61 @@ test.describe('video downloads', () => {
     await goTo(relaunchedPage, 'downloads')
     await expect(relaunchedPage.getByText('Bookmarkable video', { exact: true })).toBeVisible()
   })
+
+  test('downloads subtitles on their own and lists the files they wrote', async ({ app, page }) => {
+    const executable = path.join(app.userDataDir, 'fake-yt-dlp.sh')
+    const argumentsFile = path.join(app.userDataDir, 'yt-dlp-arguments.txt')
+    // yt-dlp announces subtitle files on stdout instead of the `--print` output
+    await writeFile(executable, [
+      '#!/bin/sh',
+      `printf '%s\\n' "$@" > ${argumentsFile}`,
+      'printf "[info] Writing video subtitles to: /tmp/subtitles.en.srt\\n"',
+      'printf "[info] Writing video subtitles to: /tmp/subtitles.de.srt\\n"'
+    ].join('\n'))
+    await chmod(executable, 0o755)
+    await page.evaluate(async (ytDlpPath) => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateYtDlpPath', ytDlpPath)
+    }, executable)
+
+    await goTo(page, 'history')
+    const video = page.locator('.ft-list-video').first()
+    await video.hover()
+    await video.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Download Video' }).click()
+
+    // the prompt animates in with a scale transform, so measure the layout box
+    const promptCard = page.locator('.downloadPromptCard')
+    const heightWithVideoOptions = await promptCard.evaluate(card => card.offsetHeight)
+
+    const templateSelect = page.getByRole('combobox', { name: 'Template' })
+    await templateSelect.click()
+    await page.getByRole('listbox', { name: 'Template' })
+      .getByRole('option', { name: 'Subtitles - SRT', exact: true }).click()
+    await expect(page.getByRole('combobox', { name: 'Subtitle Format' })).toContainText('SRT')
+    // hiding the options that don't apply to subtitles would resize the modal
+    expect(await promptCard.evaluate(card => card.offsetHeight)).toBe(heightWithVideoOptions)
+
+    await page.getByRole('button', { name: 'Download', exact: true }).click()
+    await expect(page.getByText('Download complete', { exact: true })).toBeVisible()
+
+    const passedArguments = (await readFile(argumentsFile, 'utf8')).split('\n')
+    expect(passedArguments).toContain('--skip-download')
+    // `--print` implies quiet mode, which would hide the written subtitle files
+    expect(passedArguments).toContain('--no-quiet')
+    expect(passedArguments).toContain('srt/best')
+    expect(passedArguments).toContain('youtube:skip=translated_subs')
+    expect(passedArguments).not.toContain('--embed-subs')
+
+    await page.getByRole('button', { name: 'Close', exact: true }).click()
+    await goTo(page, 'downloads')
+    const downloadRow = page.locator('.downloadRow').filter({ hasText: 'Bookmarkable video' })
+    await expect(downloadRow.locator('.downloadSummary')).toHaveText('Subtitles • Template: Subtitles - SRT')
+    await expect(downloadRow.locator('.destination')).toHaveText([
+      '/tmp/subtitles.en.srt',
+      '/tmp/subtitles.de.srt'
+    ])
+  })
 })
 
 test('asks for confirmation before removing a downloaded file', async ({ page }) => {

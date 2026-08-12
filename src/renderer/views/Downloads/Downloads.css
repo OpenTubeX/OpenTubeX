@@ -60,17 +60,29 @@
   min-inline-size: 0;
 }
 
-.downloadDetails h3,
-.destination {
+.downloadDetails h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .downloadStatus,
+.downloadSummary,
 .destination {
   color: var(--secondary-text-color);
   font-size: 0.9rem;
+}
+
+.destinationList {
+  list-style: none;
+  margin-block: 4px;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* truncating would hide the file name, which is the interesting part of the path */
+.destination {
+  overflow-wrap: anywhere;
 }
 
 .downloadActions {

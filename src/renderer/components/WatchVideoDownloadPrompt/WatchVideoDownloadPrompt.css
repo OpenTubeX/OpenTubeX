@@ -187,6 +187,7 @@
 
 .downloadStatusLine {
   margin: 0;
+  text-align: center;
 }
 
 .downloadProgressBarFill {
@@ -205,8 +206,13 @@
   color: var(--destructive-color);
   font-family: monospace;
   font-size: 12px;
+  inline-size: min(600px, 100%);
+  margin-inline: auto;
   overflow-wrap: anywhere;
-  text-align: center;
+  text-align: start;
+
+  /* yt-dlp's messages are joined with newlines, which centred prose would run together */
+  white-space: pre-wrap;
 }
 
 @keyframes download-progress-indeterminate {

@@ -25,12 +25,31 @@
           />
         </div>
         <p
-          v-if="download.destination"
-          class="destination"
-          dir="auto"
+          v-if="summary"
+          class="downloadSummary"
         >
-          {{ download.destination }}
+          {{ summary }}
         </p>
+        <ul
+          v-if="destinations.length > 0"
+          class="destinationList"
+        >
+          <li
+            v-for="destination in destinations"
+            :key="destination"
+            class="destination"
+            dir="auto"
+            :title="destination"
+          >
+            {{ destination }}
+          </li>
+          <li
+            v-if="hiddenDestinationCount > 0"
+            class="destination"
+          >
+            {{ t('Downloads.More Files', { count: hiddenDestinationCount }, hiddenDestinationCount) }}
+          </li>
+        </ul>
       </div>
     </div>
     <div class="downloadActions">
@@ -72,11 +91,44 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
+import { downloadTemplateName } from '../../helpers/downloadTemplates'
+
+// keeps a playlist download from filling the page with one line per video
+const MAX_VISIBLE_DESTINATIONS = 3
 
 const props = defineProps({ download: { type: Object, required: true } })
 const emit = defineEmits(['clear', 'open', 'remove'])
 const { t } = useI18n()
 const inProgress = computed(() => ['downloading', 'processing'].includes(props.download.status))
+const modeLabel = computed(() => {
+  switch (props.download.mode) {
+    case 'video':
+      return t('Downloads.Video')
+    case 'audio':
+      return t('Downloads.Audio')
+    case 'subtitles':
+      return t('Downloads.Subtitles')
+    default:
+      return ''
+  }
+})
+const summary = computed(() => {
+  const templateName = downloadTemplateName(props.download.template, t)
+
+  return [
+    modeLabel.value,
+    templateName === '' ? '' : t('Downloads.Template Used', { name: templateName })
+  ].filter(part => part !== '').join(' • ')
+})
+// downloads from before the file list was recorded only know their last file
+const allDestinations = computed(() => {
+  if (Array.isArray(props.download.destinations) && props.download.destinations.length > 0) {
+    return props.download.destinations
+  }
+  return props.download.destination ? [props.download.destination] : []
+})
+const destinations = computed(() => allDestinations.value.slice(0, MAX_VISIBLE_DESTINATIONS))
+const hiddenDestinationCount = computed(() => allDestinations.value.length - destinations.value.length)
 const statusText = computed(() => {
   if (props.download.status === 'downloading') {
     return [`${props.download.percent.toFixed(1)}%`, props.download.speed, props.download.eta ? `ETA ${props.download.eta}` : null].filter(Boolean).join(' • ')
