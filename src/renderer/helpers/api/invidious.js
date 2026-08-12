@@ -1,6 +1,7 @@
 import store from '../../store/index'
 import { calculatePublishedDate, getRelativeTimeFromDate } from '../utils'
 import { isNullOrEmpty } from '../strings'
+import { filterUnavailableInvidiousPlaylistVideos } from './invidious-playlists'
 import autolinker from 'autolinker'
 import { FormatUtils, Misc, Player } from 'youtubei.js'
 
@@ -314,6 +315,7 @@ export async function invidiousGetPlaylistInfo(playlistId) {
     id: playlistId,
   })
 
+  playlist.videos = filterUnavailableInvidiousPlaylistVideos(playlist.videos)
   normalizeManyInvidiousVideosAttributes(playlist.videos)
   setMultiplePublishedTimestamps(playlist.videos)
 
