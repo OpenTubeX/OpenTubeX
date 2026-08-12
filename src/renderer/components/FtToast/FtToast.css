@@ -348,6 +348,7 @@
   color: #fff;
   border-radius: calc(12px * var(--ui-roundness));
   box-shadow: 0 4px 16px rgb(0 0 0 / 35%);
+  transition: background-color var(--toast-transition-duration);
   pointer-events: auto;
   user-select: none;
 
@@ -588,6 +589,14 @@
    shorter peek. */
 .toast-holder[data-sonner-toaster] [data-sonner-toast][data-expanded='false']:not([data-index='0'], [data-index='1']) {
   --y: translateY(calc(var(--lift) * (var(--front-toast-height) + var(--gap) * var(--toasts-before))));
+}
+
+/* Stacked cards overlap by design. Keep their surfaces opaque while collapsed
+   so the shared areas do not become visibly darker from two translucent
+   backgrounds being composited on top of one another. A single toast keeps the
+   regular translucent surface. */
+.toast-holder[data-sonner-toaster]:has([data-sonner-toast][data-expanded='false'][data-index='1']) [data-sonner-toast][data-expanded='false'] .toast {
+  background-color: rgb(28 28 28);
 }
 
 @media (prefers-reduced-motion: reduce) {
