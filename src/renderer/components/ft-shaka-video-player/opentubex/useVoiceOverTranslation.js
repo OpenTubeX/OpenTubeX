@@ -5,7 +5,35 @@ const MIN_POLL_DELAY_SECONDS = 5
 const MAX_POLL_DELAY_SECONDS = 60
 const MAX_POLL_ATTEMPTS = 30
 const PARTIAL_CONTENT_STATUS = 5
-const MAX_AUDIO_DRIFT_SECONDS = 0.4
+const MAX_AUDIO_DRIFT_SECONDS = 0.75
+const AUDIO_DRIFT_DEADBAND_SECONDS = 0.05
+const MAX_AUDIO_RATE_ADJUSTMENT = 0.05
+const AUDIO_SYNC_GAIN = 0.25
+
+/**
+ * Smoothly correct voice-over drift without seeking for ordinary scheduling jitter.
+ *
+ * @param {number} playbackRate
+ * @param {number} drift difference between the video and voice-over positions
+ * @returns {number | null} the corrected rate, or null when a seek is required
+ */
+export function getVoiceOverPlaybackRate(playbackRate, drift) {
+  const wallClockDrift = drift / playbackRate
+
+  if (Math.abs(wallClockDrift) > MAX_AUDIO_DRIFT_SECONDS) {
+    return null
+  }
+
+  if (Math.abs(wallClockDrift) <= AUDIO_DRIFT_DEADBAND_SECONDS) {
+    return playbackRate
+  }
+
+  const adjustment = Math.max(
+    -MAX_AUDIO_RATE_ADJUSTMENT,
+    Math.min(MAX_AUDIO_RATE_ADJUSTMENT, wallClockDrift * AUDIO_SYNC_GAIN)
+  )
+  return playbackRate * (1 + adjustment)
+}
 
 /**
  * Keep a translated audio track synchronized with the player video.
@@ -57,9 +85,17 @@ export function useVoiceOverTranslation({
       return
     }
 
-    if (force || Math.abs(audio.currentTime - videoElement.currentTime) > MAX_AUDIO_DRIFT_SECONDS) {
+    const playbackRate = videoElement.playbackRate
+    const drift = videoElement.currentTime - audio.currentTime
+    const synchronizedPlaybackRate = getVoiceOverPlaybackRate(playbackRate, drift)
+
+    if (force || synchronizedPlaybackRate === null) {
       audio.currentTime = videoElement.currentTime
+      audio.playbackRate = playbackRate
+      return
     }
+
+    audio.playbackRate = synchronizedPlaybackRate
   }
 
   function syncAudioPlayback() {
@@ -72,8 +108,8 @@ export function useVoiceOverTranslation({
       return
     }
 
-    syncAudioPosition()
     audio.playbackRate = video.value.playbackRate
+    syncAudioPosition()
     audio.volume = Math.min(1, video.value.volume * voiceVolume.value)
     audio.muted = video.value.muted
 
@@ -290,6 +326,7 @@ export function useVoiceOverTranslation({
   function handleRateChange() {
     if (audio && video.value) {
       audio.playbackRate = video.value.playbackRate
+      syncAudioPosition()
     }
   }
 
