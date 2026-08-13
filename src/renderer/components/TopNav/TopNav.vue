@@ -370,8 +370,8 @@ const activeDataListProperties = computed(() => {
     const href = searchResultHrefs.value.get(queryText)
 
     properties.push(i < searchHistoryEntriesCount.value
-      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left', href }
-      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
+      ? { isLink: true, isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left', href }
+      : { isLink: true, isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
     )
   }
 

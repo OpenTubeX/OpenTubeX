@@ -88,6 +88,19 @@ test.describe('search history suggestions', () => {
     })).toEqual(['hd', 'subtitles'])
   })
 
+  test('middle-clicking works before the destination href is available', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    const link = suggestions(page).first().locator('.optionWrapper')
+
+    await link.evaluate((element) => element.removeAttribute('href'))
+    await link.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
+  })
+
   test('back navigation restores the active search filters', async ({ page }) => {
     await page.locator(sel.searchInput).click()
     await suggestions(page).first().click()

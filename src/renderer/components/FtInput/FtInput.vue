@@ -95,7 +95,7 @@
           @mouseleave="resetSelectedOption"
         >
           <component
-            :is="getDataListProperty(index)?.href ? 'a' : 'div'"
+            :is="getDataListProperty(index)?.isLink ? 'a' : 'div'"
             class="optionWrapper"
             :href="getDataListProperty(index)?.href"
             @click.prevent="handleOptionClick(index, $event)"
@@ -421,7 +421,7 @@ function handleOptionClick(index, event) {
  * @param {MouseEvent} event
  */
 function handleOptionAuxClick(index, event) {
-  if (!process.env.IS_ELECTRON || !getDataListProperty(index)?.href) {
+  if (!process.env.IS_ELECTRON || !getDataListProperty(index)?.isLink) {
     return
   }
 
