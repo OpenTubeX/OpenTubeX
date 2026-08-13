@@ -322,6 +322,14 @@ const latestMatchingSearchHistoryNames = computed(() => {
 /** @type {import('vue').ComputedRef<string[]>} */
 const latestSearchHistoryNames = computed(() => store.getters.getLatestSearchHistoryNames)
 
+/** @type {import('vue').ComputedRef<string>} */
+const searchFilterTabId = computed(() => process.env.IS_ELECTRON
+  ? (store.getters.getPresentedTabId ?? 'web')
+  : 'web')
+
+/** @type {import('vue').ComputedRef<any>} */
+const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
+
 const activeDataList = computed(() => {
   // show latest search history when the search bar is empty
   if (usingOnlySearchHistoryResults.value) {
@@ -348,17 +356,22 @@ const activeDataList = computed(() => {
   return searchResults
 })
 
-const activeDataListProperties = computed(() => {
-  const searchHistoryEntriesCount = usingOnlySearchHistoryResults.value
-    ? latestSearchHistoryNames.value.length
-    : latestMatchingSearchHistoryNames.value.length
+const searchHistoryEntriesCount = computed(() => usingOnlySearchHistoryResults.value
+  ? latestSearchHistoryNames.value.length
+  : latestMatchingSearchHistoryNames.value.length)
 
+const searchResultHrefs = shallowRef(new Map())
+
+const activeDataListProperties = computed(() => {
   const properties = []
 
   for (let i = 0; i < activeDataList.value.length; i++) {
-    properties.push(i < searchHistoryEntriesCount
-      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left' }
-      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass' }
+    const queryText = activeDataList.value[i]
+    const href = searchResultHrefs.value.get(queryText)
+
+    properties.push(i < searchHistoryEntriesCount.value
+      ? { isLink: true, isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left', href }
+      : { isLink: true, isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
     )
   }
 
@@ -387,10 +400,6 @@ function toggleSideNav() {
   store.commit('toggleSideNav')
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const searchFilterTabId = computed(() => process.env.IS_ELECTRON
-  ? (store.getters.getPresentedTabId ?? 'web')
-  : 'web')
 const searchFilterValueChanged = computed(() => {
   return store.getters.getSearchFilterValueChanged(searchFilterTabId.value)
 })
@@ -485,8 +494,100 @@ if (process.env.IS_ELECTRON) {
   })
 }
 
-/** @type {import('vue').ComputedRef<any>} */
-const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
+/**
+ * @param {string} queryText
+ * @param {object | null} selectedSearchSettings
+ * @returns {Promise<{ path: string, query?: object, searchQueryText: string }>}
+ */
+async function getSearchDestination(queryText, selectedSearchSettings = null) {
+  const result = await store.dispatch('getYoutubeUrlInfo', queryText)
+
+  switch (result.urlType) {
+    case 'video': {
+      const { videoId, timestamp, playlistId, commentId, isShort } = result
+      const query = {}
+
+      if (isShort) query.short = 'true'
+      if (timestamp) query.timestamp = timestamp
+      if (playlistId?.length > 0) query.playlistId = playlistId
+      if (commentId) query.commentId = commentId
+
+      return { path: `/watch/${videoId}`, query, searchQueryText: queryText }
+    }
+
+    case 'playlist':
+      return {
+        path: `/playlist/${result.playlistId}`,
+        query: result.query,
+        searchQueryText: queryText
+      }
+
+    case 'search':
+      return {
+        path: `/search/${encodeURIComponent(result.searchQuery)}`,
+        query: result.query,
+        searchQueryText: result.searchQuery
+      }
+
+    case 'hashtag':
+      return {
+        path: `/hashtag/${encodeURIComponent(result.hashtag)}`,
+        searchQueryText: `#${result.hashtag}`
+      }
+
+    case 'post':
+      return {
+        path: `/post/${result.postId}`,
+        query: result.query,
+        searchQueryText: queryText
+      }
+
+    case 'channel':
+      return {
+        path: `/channel/${result.channelId}/${result.subPath}`,
+        query: { url: result.url },
+        searchQueryText: queryText
+      }
+
+    case 'trending':
+    case 'subscriptions':
+    case 'history':
+    case 'userplaylists':
+      return { path: `/${result.urlType}`, searchQueryText: queryText }
+
+    case 'invalid_url':
+    default: {
+      const settings = selectedSearchSettings ?? searchSettings.value
+      return {
+        path: `/search/${encodeURIComponent(queryText)}`,
+        query: {
+          prioritize: settings.prioritize,
+          time: settings.time,
+          type: settings.type,
+          duration: settings.duration,
+          features: [...settings.features],
+        },
+        searchQueryText: queryText
+      }
+    }
+  }
+}
+
+let searchHrefRequestId = 0
+watch([activeDataList, searchSettings], async ([dataList]) => {
+  const requestId = ++searchHrefRequestId
+  const hrefEntries = await Promise.all(dataList.map(async (queryText, index) => {
+    const searchHistoryEntry = index < searchHistoryEntriesCount.value
+      ? store.getters.getSearchHistoryEntryWithId(queryText)
+      : null
+    const destination = await getSearchDestination(queryText, searchHistoryEntry?.searchSettings)
+    return [queryText, router.resolve({ path: destination.path, query: destination.query }).href]
+  }))
+
+  if (requestId === searchHrefRequestId) {
+    searchResultHrefs.value = new Map(hrefEntries)
+  }
+}, { deep: true, immediate: true })
 
 /**
  * @param {string} queryText
@@ -494,11 +595,13 @@ const searchSettings = computed(() => store.getters.getSearchSettings(searchFilt
  * @param {MouseEvent | KeyboardEvent} options.event
  * @param {number} [options.dataListIndex]
  */
-function goToSearch(queryText, { event, dataListIndex }) {
+async function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewWindow = event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
-  const doCreateNewTab = ctrlOrCmdPressed && !doCreateNewWindow
+  const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
+  const makeActive = !isMiddleClick
 
   if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
     searchContainer.value.blur()
@@ -514,7 +617,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
     : null
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
-  if (selectedSearchSettings != null) {
+  if (selectedSearchSettings != null && !doCreateNewTab && !doCreateNewWindow) {
     const tabId = searchFilterTabId.value
     store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
     store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
@@ -531,138 +634,18 @@ function goToSearch(queryText, { event, dataListIndex }) {
     })
   }
 
-  store.dispatch('getYoutubeUrlInfo', queryText).then((result) => {
-    switch (result.urlType) {
-      case 'video': {
-        const { videoId, timestamp, playlistId, commentId, isShort } = result
-
-        const query = {}
-        if (isShort) {
-          query.short = 'true'
-        }
-        if (timestamp) {
-          query.timestamp = timestamp
-        }
-        if (playlistId && playlistId.length > 0) {
-          query.playlistId = playlistId
-        }
-        if (commentId) {
-          query.commentId = commentId
-        }
-
-        openInternalPath({
-          path: `/watch/${videoId}`,
-          query,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'playlist': {
-        const { playlistId, query } = result
-
-        openInternalPath({
-          path: `/playlist/${playlistId}`,
-          query,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'search': {
-        const { searchQuery, query } = result
-
-        openInternalPath({
-          path: `/search/${encodeURIComponent(searchQuery)}`,
-          query,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: searchQuery,
-        })
-        break
-      }
-
-      case 'hashtag': {
-        const { hashtag } = result
-        openInternalPath({
-          path: `/hashtag/${encodeURIComponent(hashtag)}`,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: `#${hashtag}`,
-        })
-
-        break
-      }
-
-      case 'post': {
-        const { postId, query } = result
-
-        openInternalPath({
-          path: `/post/${postId}`,
-          query,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'channel': {
-        const { channelId, subPath, url } = result
-
-        openInternalPath({
-          path: `/channel/${channelId}/${subPath}`,
-          doCreateNewWindow,
-          doCreateNewTab,
-          query: {
-            url,
-          },
-          searchQueryText: queryText,
-        })
-        break
-      }
-
-      case 'trending':
-      case 'subscriptions':
-      case 'history':
-      case 'userplaylists':
-        openInternalPath({
-          path: `/${result.urlType}`,
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: queryText
-        })
-        break
-
-      case 'invalid_url':
-      default: {
-        const settings = selectedSearchSettings ?? searchSettings.value
-        openInternalPath({
-          path: `/search/${encodeURIComponent(queryText)}`,
-          query: {
-            prioritize: settings.prioritize,
-            time: settings.time,
-            type: settings.type,
-            duration: settings.duration,
-            // Array proxy cannot be cloned during IPC call
-            features: [...settings.features],
-          },
-          doCreateNewWindow,
-          doCreateNewTab,
-          searchQueryText: queryText,
-        })
-      }
-    }
-
-    if (doCreateNewWindow) {
-      // Query text copied to new window = can be removed from current window
-      updateSearchInputText('')
-    }
+  const destination = await getSearchDestination(queryText, selectedSearchSettings)
+  openInternalPath({
+    ...destination,
+    doCreateNewWindow,
+    doCreateNewTab,
+    makeActive,
   })
+
+  if (doCreateNewWindow) {
+    // Query text copied to new window = can be removed from current window
+    updateSearchInputText('')
+  }
 }
 
 function clearLastSuggestionQuery() {

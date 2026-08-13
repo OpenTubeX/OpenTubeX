@@ -266,6 +266,8 @@ body[dir='rtl'] .ft-input-component.search.showClearTextButton:focus-within .inp
   overflow: hidden;
   flex: 1;
   min-inline-size: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .optionWrapper span,

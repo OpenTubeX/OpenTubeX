@@ -91,20 +91,25 @@
           v-for="(entry, index) in visibleDataList"
           :key="index"
           :class="{ hover: searchState.selectedOption === index }"
-          @click="handleOptionClick(index)"
           @mouseenter="searchState.selectedOption = index"
           @mouseleave="resetSelectedOption"
         >
-          <div class="optionWrapper">
+          <component
+            :is="getDataListProperty(index)?.isLink ? 'a' : 'div'"
+            class="optionWrapper"
+            :href="getDataListProperty(index)?.href"
+            @click.prevent="handleOptionClick(index, $event)"
+            @auxclick.middle="handleOptionAuxClick(index, $event)"
+          >
             <FtIcon
-              v-if="dataListProperties[index]?.iconName"
-              :icon="['fas', dataListProperties[index].iconName]"
+              v-if="getDataListProperty(index)?.iconName"
+              :icon="['fas', getDataListProperty(index).iconName]"
               class="searchResultIcon"
             />
             <bdi>{{ entry }}</bdi>
-          </div>
+          </component>
           <a
-            v-if="dataListProperties[index]?.isRemoveable"
+            v-if="getDataListProperty(index)?.isRemoveable"
             class="removeButton"
             :class="{ removeButtonSelected: removeButtonSelectedIndex === index }"
             role="button"
@@ -394,8 +399,9 @@ async function handleActionIconChange() {
 
 /**
  * @param {number} index
+ * @param {MouseEvent} [event]
  */
-function handleOptionClick(index) {
+function handleOptionClick(index, event) {
   if (removeButtonSelectedIndex.value !== -1) {
     handleRemoveClick(index)
     return
@@ -405,7 +411,22 @@ function handleOptionClick(index) {
   searchState.isPointerInList = false
   inputData.value = visibleDataList.value[index]
   emit('input', inputData.value)
-  handleClick(undefined, index)
+  handleClick(event, getDataListIndex(index))
+}
+
+/**
+ * Let web browsers follow the real link themselves. Electron needs to route
+ * middle-clicks through its logical tab service instead.
+ * @param {number} index
+ * @param {MouseEvent} event
+ */
+function handleOptionAuxClick(index, event) {
+  if (!process.env.IS_ELECTRON || !getDataListProperty(index)?.isLink) {
+    return
+  }
+
+  event.preventDefault()
+  handleOptionClick(index, event)
 }
 
 function resetSelectedOption() {
@@ -417,12 +438,28 @@ function resetSelectedOption() {
  * @param {number} index
  */
 function handleRemoveClick(index) {
-  if (!props.dataListProperties[index]?.isRemoveable) { return }
+  if (!getDataListProperty(index)?.isRemoveable) { return }
 
   // keep input in focus even when the to-be-removed "Remove" button was clicked
   inputRef.value.focus()
   removalMade.value = true
   emit('remove', visibleDataList.value[index])
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {number}
+ */
+function getDataListIndex(visibleIndex) {
+  return props.dataList.indexOf(visibleDataList.value[visibleIndex])
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {object | undefined}
+ */
+function getDataListProperty(visibleIndex) {
+  return props.dataListProperties[getDataListIndex(visibleIndex)]
 }
 
 /**

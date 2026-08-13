@@ -43,6 +43,8 @@ test.describe('search history suggestions', () => {
 
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
+    await expect(suggestions(page).first().locator('.optionWrapper'))
+      .toHaveAttribute('href', /#\/search\/baking%20bread/)
   })
 
   test('selecting a recent search restores its filters', async ({ page }) => {
@@ -65,6 +67,38 @@ test.describe('search history suggestions', () => {
       duration: 'three_to_twenty_mins',
       features: ['hd', 'subtitles']
     })
+  })
+
+  test('middle-clicking a recent search opens its link in a background tab', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    const link = suggestions(page).first().locator('.optionWrapper')
+
+    await expect(link).toHaveAttribute('href', /#\/search\/android%20tutorial/)
+    await link.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect(page).not.toHaveURL(/#\/search\/android%20tutorial/)
+
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
+    await expect.poll(() => page.evaluate(() => {
+      const params = new URLSearchParams(location.hash.split('?')[1])
+      return params.getAll('features')
+    })).toEqual(['hd', 'subtitles'])
+  })
+
+  test('middle-clicking works before the destination href is available', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    const link = suggestions(page).first().locator('.optionWrapper')
+
+    await link.evaluate((element) => element.removeAttribute('href'))
+    await link.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
   })
 
   test('back navigation restores the active search filters', async ({ page }) => {
@@ -133,6 +167,25 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
+  })
+})
+
+test.describe('search history URL links', () => {
+  test.use({
+    seed: {
+      settings: { enableSearchSuggestions: false },
+      searchHistory: [{
+        _id: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        lastUpdatedAt: now
+      }]
+    }
+  })
+
+  test('a recognized YouTube URL links to its internal destination', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+
+    await expect(suggestions(page).first().locator('.optionWrapper'))
+      .toHaveAttribute('href', /#\/watch\/dQw4w9WgXcQ/)
   })
 })
 
