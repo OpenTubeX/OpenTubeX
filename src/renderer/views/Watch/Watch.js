@@ -72,7 +72,7 @@ import {
   MANIFEST_TYPE_DASH,
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
-import { getYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -3804,6 +3804,7 @@ export default defineComponent({
       // URL or extraction. Refresh those streams once before changing format or
       // restoring the cached built-in source (which may use SABR).
       if (this.activePlaybackEngine === 'yt-dlp') {
+        invalidateYtDlpPlaybackSource(this.videoId)
         const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
         if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
           return
