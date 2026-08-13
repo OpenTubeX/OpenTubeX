@@ -30,6 +30,10 @@ export function invalidateYtDlpPlaybackSource(videoId) {
   dashPlaybackSourceCache.delete(videoId)
 }
 
+export function invalidateAllYtDlpPlaybackSources() {
+  dashPlaybackSourceCache.clear()
+}
+
 /**
  * @param {YtDlpPlaybackFormat} format
  */

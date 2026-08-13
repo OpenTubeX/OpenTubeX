@@ -85,4 +85,8 @@ export class YtDlpPlaybackSourceCache {
   delete(videoId) {
     this.sources.delete(videoId)
   }
+
+  clear() {
+    this.sources.clear()
+  }
 }

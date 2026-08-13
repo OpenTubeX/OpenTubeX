@@ -78,3 +78,14 @@ test('invalidates a source after a playback error', () => {
 
   assert.equal(cache.get('video', 'settings'), null)
 })
+
+test('clears every source after the managed binary is updated', () => {
+  const cache = new YtDlpPlaybackSourceCache({ now: () => 0 })
+  cache.set('first', 'settings', source(new Date(1000000)))
+  cache.set('second', 'settings', source(new Date(1000000)))
+
+  cache.clear()
+
+  assert.equal(cache.get('first', 'settings'), null)
+  assert.equal(cache.get('second', 'settings'), null)
+})
