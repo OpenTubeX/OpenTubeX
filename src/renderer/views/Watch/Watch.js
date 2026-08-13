@@ -2004,7 +2004,20 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere, watchPageIpBlocked } = videoInfo
+
+        if (watchPageIpBlocked) {
+          this.ipBlockDetectedInCurrentChain = true
+
+          if (process.env.IS_ELECTRON && this.videoPlaybackEngine === 'built-in') {
+            this.playbackEngineFallbackAttemptedForCurrentVideo = true
+            this.playbackEngineFallbackTarget = 'yt-dlp'
+            this.showTabToast({
+              message: this.t('Change Format.Built-in Fallback Template', { error: this.t('Video.IP block') }),
+              icon: ['fas', 'exchange-alt'],
+            })
+          }
+        }
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -2274,7 +2287,13 @@ export default defineComponent({
             }
           }
 
-          if (this.backendFallback) {
+          const tryingYtDlpForIpBlock =
+            this.playbackEngineFallbackTarget === 'yt-dlp' &&
+            this.ipBlockDetectedInCurrentChain
+
+          if (tryingYtDlpForIpBlock) {
+            console.warn('Built-in metadata is IP blocked; continuing so yt-dlp can provide the playback source')
+          } else if (this.backendFallback) {
             throw new Error(errorText)
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -2457,7 +2476,7 @@ export default defineComponent({
 
               this.captions = sortCaptions(captionTracks, this.preferredCaptionLocale)
             }
-          } else {
+          } else if (this.playbackEngineFallbackTarget !== 'yt-dlp') {
             // video might be region locked or something else. This leads to no formats being available
             this.showTabToast({
               message: this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
@@ -2466,6 +2485,8 @@ export default defineComponent({
             })
             this.handleVideoEnded()
             return
+          } else {
+            console.warn('Built-in metadata has no streams; continuing so yt-dlp can provide the playback source')
           }
 
           let storyboard
@@ -2491,6 +2512,7 @@ export default defineComponent({
               ?.projection_type ?? null
 
             if (
+              poToken &&
               videoInfo.info.streaming_data?.server_abr_streaming_url &&
               videoInfo.info.player_config.media_common_config.media_ustreamer_request_config
             ) {
@@ -2561,10 +2583,16 @@ export default defineComponent({
       } catch (err) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        console.error(err)
-        if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
+        let handledError = err
+        if (err.isIpBlock) {
+          this.ipBlockDetectedInCurrentChain = true
+          handledError = new Error(this.t('Video.IP block'), { cause: err })
+        }
+
+        console.error(handledError)
+        if (this.backendPreference === 'local' && this.backendFallback && !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')) {
           const errorMessage = this.t('Local API Error (Click to copy)')
-          showApiErrorToast(errorMessage, err, this.showTabToast)
+          showApiErrorToast(errorMessage, handledError, this.showTabToast)
           this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           this.getVideoInformationInvidious(loadGeneration)
         } else {
@@ -2578,7 +2606,7 @@ export default defineComponent({
           if (!this.thumbnail) {
             this.thumbnail = this.getUnavailableVideoThumbnail()
           }
-          this.errorMessage = err.message || err.toString()
+          this.errorMessage = handledError.message || handledError.toString()
         }
       }
     },
