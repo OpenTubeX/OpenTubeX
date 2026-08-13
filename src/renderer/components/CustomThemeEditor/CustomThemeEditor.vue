@@ -96,11 +96,20 @@
         <FtButton
           :label="t('Settings.Theme Settings.Custom Theme.Reset Colors')"
           :icon="['fas', 'undo']"
+          :disabled="isUsingThemeSourceColors"
           @click="resetTheme"
+        />
+        <FtButton
+          v-if="savedTheme"
+          :label="t('Settings.Theme Settings.Custom Theme.Discard Changes')"
+          :icon="['fas', 'undo']"
+          :disabled="!hasChanges"
+          @click="discardChanges"
         />
         <FtButton
           :label="t('Settings.Theme Settings.Custom Theme.Save and Apply')"
           :icon="['fas', 'floppy-disk']"
+          :disabled="savedTheme !== null && !hasChanges"
           @click="saveAndApply"
         />
       </div>
@@ -109,6 +118,7 @@
         :label="t('Settings.Theme Settings.Custom Theme.Delete Theme Confirmation', { name: draft.name })"
         :option-names="[t('Settings.Theme Settings.Custom Theme.Delete Theme'), t('Cancel')]"
         :option-values="['delete', 'cancel']"
+        autosize
         is-first-option-destructive
         @click="handleDeletePrompt"
       />
@@ -159,6 +169,8 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 const { t, tm } = useI18n()
 const draft = shallowReactive(cloneDefaultCustomTheme())
+const savedTheme = ref(null)
+const themeSourceColors = ref(null)
 const showDeletePrompt = ref(false)
 let previewing = false
 let editorLoadId = 0
@@ -194,11 +206,16 @@ const COLOR_VALUES = colors.map(color => color.name)
 const themeColorNames = useColorTranslations()
 const colorNames = computed(() => tm('Settings.Theme Settings.Custom Theme.Colors'))
 const isSavedTheme = computed(() => store.getters.getCustomThemes.some(({ id }) => id === draft.id))
+const hasChanges = computed(() => savedTheme.value === null || !themesMatch(draft, savedTheme.value))
+const isUsingThemeSourceColors = computed(() => themeSourceColors.value !== null &&
+  CUSTOM_THEME_EDITABLE_COLORS.every(([key]) => draft.colors[key] === themeSourceColors.value[key]))
 
 watch(() => props.open, async (open) => {
   const loadId = ++editorLoadId
   store.commit('setCustomThemeEditorOpen', open)
   if (!open) return
+  savedTheme.value = null
+  themeSourceColors.value = null
   keepSystemThemeOnSave = props.themeId !== null && store.getters.getBaseTheme === 'system' &&
     customThemeIdFromValue(resolveSelectedTheme('system')) === props.themeId
   try {
@@ -208,6 +225,8 @@ watch(() => props.open, async (open) => {
     const theme = themes.find(({ id }) => id === props.themeId)
     if (theme) {
       setDraft(theme)
+      savedTheme.value = normalizeCustomTheme(theme)
+      themeSourceColors.value = readThemeSourceColors()
       previewing = true
       previewTheme()
     } else {
@@ -222,6 +241,7 @@ watch(() => props.open, async (open) => {
           name: newTheme.name,
           colors: { ...selectedCustomTheme.colors }
         }))
+        themeSourceColors.value = readThemeSourceColors()
         previewing = true
         previewTheme()
       } else {
@@ -259,6 +279,21 @@ function setDraft(theme) {
   draft.colors = { ...theme.colors }
 }
 
+function themesMatch(first, second) {
+  return first.version === second.version &&
+    first.id === second.id &&
+    first.name === second.name &&
+    first.basedOn === second.basedOn &&
+    first.mainColor === second.mainColor &&
+    first.secondaryColor === second.secondaryColor &&
+    first.isDark === second.isDark &&
+    colorsMatch(first.colors, second.colors)
+}
+
+function colorsMatch(first, second) {
+  return CUSTOM_THEME_COLORS.every(([key]) => first[key] === second[key])
+}
+
 function previewTheme() {
   applyThemeToDocument(customThemeValue(draft.id), store.getters.getMainColor, store.getters.getSecColor, draft)
 }
@@ -282,6 +317,15 @@ function closeEditor() {
 function resetTheme() {
   cancelPendingColorPreviews()
   copyThemeSources()
+}
+
+function discardChanges() {
+  if (savedTheme.value === null) return
+  cancelPendingColorPreviews()
+  setDraft(savedTheme.value)
+  themeSourceColors.value = readThemeSourceColors()
+  previewing = true
+  previewTheme()
 }
 
 function updateColor(key, property, value) {
@@ -353,7 +397,9 @@ function copySecondaryColor(secondaryColor) {
 
 function copyThemeSources() {
   cancelPendingColorPreviews()
-  draft.colors = readThemeSourceColors()
+  const sourceColors = readThemeSourceColors()
+  themeSourceColors.value = sourceColors
+  draft.colors = { ...sourceColors }
   draft.isDark = !['light', 'pastelPink', 'catppuccinLatte', 'everforestLightHard',
     'everforestLightMedium', 'everforestLightLow', 'gruvboxLight', 'solarizedLight']
     .includes(draft.basedOn)
@@ -364,6 +410,7 @@ function copyThemeSources() {
 function copyThemeColors(keys) {
   cancelPendingColorPreviews()
   const sourceColors = readThemeSourceColors()
+  themeSourceColors.value = sourceColors
   draft.colors = {
     ...draft.colors,
     ...Object.fromEntries(keys.map(key => [key, sourceColors[key]]))
@@ -450,6 +497,8 @@ async function importTheme() {
     const importedTheme = normalizeCustomTheme(JSON.parse(file.content))
     importedTheme.id = crypto.randomUUID()
     setDraft(importedTheme)
+    themeSourceColors.value = readThemeSourceColors()
+    previewing = true
     previewTheme()
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Imported'),
@@ -518,6 +567,7 @@ onBeforeUnmount(() => {
 }
 
 .editorFooter {
+  flex-wrap: wrap;
   justify-content: flex-end;
 }
 

@@ -61,6 +61,8 @@ test.describe('distraction and appearance settings', () => {
 
     // The base theme is applied as a class on <body>.
     await expect(page.locator('body')).toHaveClass(/dark/)
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#0f0f0f')
+    await expect(page.locator('body')).toHaveCSS('--card-bg-color', '#1f1f1f')
 
     await attachScreenshot('dark theme with the hidden elements')
 
@@ -141,7 +143,9 @@ test.describe('custom theme editor', () => {
     await expect(page.getByRole('searchbox', { name: 'Search settings' })).toHaveCount(0)
 
     const editor = page.locator('.customThemeEditor')
-    await expect(editor.getByRole('button', { name: 'Reset colors' }).locator('.ft-icon')).toBeVisible()
+    const resetColorsButton = editor.getByRole('button', { name: 'Reset colors' })
+    await expect(resetColorsButton.locator('.ft-icon')).toBeVisible()
+    await expect(resetColorsButton).toBeDisabled()
     await expect(editor.getByText('Instance menu', { exact: true })).toHaveCount(0)
     await expect(editor.getByText('Visited accent', { exact: true })).toHaveCount(0)
     await editor.getByRole('textbox', { name: 'Theme name' }).fill('Midnight')
@@ -189,6 +193,7 @@ test.describe('custom theme editor', () => {
     }
 
     await setEditorColor('Logo icon', '#123456')
+    await expect(resetColorsButton).toBeEnabled()
     await setEditorColor('Logo text', '#654321')
     await setEditorColor('Background', '#101112')
     await sourceMainColor.click()
@@ -237,8 +242,9 @@ test.describe('custom theme editor', () => {
     const backgroundField = page.locator('.colorField')
       .filter({ has: page.getByText('Background', { exact: true }) })
     const backgroundInput = backgroundField.locator('input[type="color"]')
-    await expect(backgroundInput).toHaveValue('#212121')
-    await expect(page.locator('body')).toHaveCSS('--bg-color', '#212121')
+    await expect(backgroundInput).toHaveValue('#0f0f0f')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#0f0f0f')
+    await expect(resetColorsButton).toBeDisabled()
 
     const dragState = await backgroundInput.evaluate((input) => {
       const code = input.parentElement.querySelector('code')
@@ -264,6 +270,7 @@ test.describe('custom theme editor', () => {
 
     await backgroundInput.evaluate(input => input.dispatchEvent(new Event('change', { bubbles: true })))
     await expect(backgroundField.locator('code')).toHaveText('#445566')
+    await expect(resetColorsButton).toBeEnabled()
 
     const darkTheme = page.getByRole('checkbox', { name: 'Dark theme' })
     await expect(darkTheme).toBeChecked()
@@ -280,13 +287,12 @@ test.describe('custom theme editor', () => {
     await setEditorColor('Text on destructive action', '#fedcba')
 
     const saveAndApplyButton = page.getByRole('button', { name: 'Save and apply' })
-    await saveAndApplyButton.hover()
+    await page.keyboard.press('Tab')
+    await saveAndApplyButton.focus()
     await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(52, 86, 120)')
-    await page.mouse.down()
+    await page.keyboard.down('Space')
     await expect(saveAndApplyButton).toHaveCSS('background-color', 'rgb(69, 103, 137)')
-    await page.mouse.move(0, 0)
-    await page.mouse.up()
-    await saveAndApplyButton.click()
+    await page.keyboard.up('Space')
     await expect.poll(async () => {
       const themes = await readSavedThemes(app.userDataDir)
       const theme = themes.find(({ name }) => name === 'Midnight')
@@ -342,6 +348,20 @@ test.describe('custom theme editor', () => {
     await goTo(page, 'settings')
     await expect(page.getByText('Custom theme creator', { exact: true })).toBeVisible()
     await expect(backgroundInput).toHaveValue('#445566')
+
+    const discardChangesButton = page.getByRole('button', { name: 'Discard changes' })
+    await expect(saveAndApplyButton).toBeDisabled()
+    await expect(discardChangesButton).toBeDisabled()
+
+    await setEditorColor('Background', '#112233')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
+    await expect(saveAndApplyButton).toBeEnabled()
+    await expect(discardChangesButton).toBeEnabled()
+    await discardChangesButton.click()
+    await expect(backgroundInput).toHaveValue('#445566')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
+    await expect(saveAndApplyButton).toBeDisabled()
+    await expect(discardChangesButton).toBeDisabled()
 
     await setEditorColor('Background', '#112233')
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#112233')
@@ -439,6 +459,7 @@ test.describe('custom theme editor', () => {
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await page.getByRole('button', { name: 'Delete theme' }).click()
     const deletePrompt = page.getByRole('dialog', { name: /Delete “Midnight”/ })
+    await expect(deletePrompt).toHaveClass(/autosize/)
     await expect(deletePrompt).toContainText('Delete “Midnight”?')
     await deletePrompt.getByRole('button', { name: 'Delete theme' }).click()
     await expect(page.getByText('Custom theme creator', { exact: true })).toHaveCount(0)
@@ -449,6 +470,33 @@ test.describe('custom theme editor', () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
       return store.getters.getBaseTheme
     })).toBe('dark')
+  })
+})
+
+test.describe('invalid appearance values', () => {
+  test.use({
+    seed: {
+      settings: {
+        baseTheme: 'missingTheme',
+        systemLightTheme: 'missingLightTheme',
+        systemDarkTheme: 'missingDarkTheme',
+        mainColor: 'missingMainColor',
+        secColor: 'missingSecondaryColor'
+      }
+    }
+  })
+
+  test('falls back to defaults', async ({ page }) => {
+    await expect.poll(() => page.evaluate(() => {
+      const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+      return [
+        getters.getBaseTheme,
+        getters.getSystemLightTheme,
+        getters.getSystemDarkTheme,
+        getters.getMainColor,
+        getters.getSecColor
+      ]
+    })).toEqual(['system', 'light', 'dark', 'Red', 'Blue'])
   })
 })
 

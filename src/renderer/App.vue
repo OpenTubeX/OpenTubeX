@@ -334,6 +334,8 @@ import {
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
+import { resolveBaseTheme } from '../appearanceSettings'
+import { resolveColor } from './helpers/colors'
 import { matchesKeyboardShortcut } from './helpers/keyboardShortcuts'
 import { fetchReleasePages, findUpdateReleases, formatReleaseChangelog } from './helpers/releaseUpdates'
 import { createReleaseNotesMarkdown } from './helpers/releaseNotesMarkdown'
@@ -804,6 +806,7 @@ onMounted(async () => {
     if (baseTheme.value === 'custom' && themes.length > 0) {
       await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
     }
+    await sanitizeAppearanceSettings(themes)
   } catch (error) {
     console.error('Failed to load custom theme:', error)
   }
@@ -1779,6 +1782,19 @@ function updateTheme() {
   const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
     (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+}
+
+async function sanitizeAppearanceSettings(customThemes) {
+  const settings = [
+    ['BaseTheme', resolveBaseTheme(store.getters.getBaseTheme, 'system', customThemes)],
+    ['SystemLightTheme', resolveBaseTheme(store.getters.getSystemLightTheme, 'light', customThemes, false)],
+    ['SystemDarkTheme', resolveBaseTheme(store.getters.getSystemDarkTheme, 'dark', customThemes, false)],
+    ['MainColor', resolveColor(store.getters.getMainColor, 'Red')],
+    ['SecColor', resolveColor(store.getters.getSecColor, 'Blue')],
+  ]
+
+  await Promise.all(settings.map(([name, value]) =>
+    store.getters[`get${name}`] === value ? null : store.dispatch(`update${name}`, value)))
 }
 
 function handleSystemColorSchemeChange(event) {

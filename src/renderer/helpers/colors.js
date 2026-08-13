@@ -90,6 +90,12 @@ export const colors = [
   { name: 'SolarizedGreen', value: '#859900' },
 ]
 
+const COLOR_VALUES = new Set(colors.map(({ name }) => name))
+
+export function resolveColor(value, fallback) {
+  return COLOR_VALUES.has(value) ? value : fallback
+}
+
 /**
  * Resolves the currently selected theme color to a concrete value,
  * for the places that can't use `THEME_BG_COLOR` directly.

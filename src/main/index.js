@@ -2204,17 +2204,18 @@ function runApp() {
     // Syncing new window background to theme choice.
     const windowBackground = await baseHandlers.settings._findOne('baseTheme').then(async (setting) => {
       if (!setting) {
-        return nativeTheme.shouldUseDarkColors ? '#212121' : '#f1f1f1'
+        return nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1'
       }
 
       // Determine window color to be shown (shown most prominently during initial app load)
       // Uses the --bg-color for each corresponding theme
       if (isCustomThemeValue(setting.value)) {
-        return (await getSelectedCustomTheme(setting.value))?.colors.background ?? '#212121'
+        return (await getSelectedCustomTheme(setting.value))?.colors.background ??
+          (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
       }
       switch (setting.value) {
         case 'dark':
-          return '#212121'
+          return '#0f0f0f'
         case 'light':
           return '#f1f1f1'
         case 'black':
@@ -2255,12 +2256,12 @@ function runApp() {
           return '#eff1f5'
         case 'system':
         default:
-          return nativeTheme.shouldUseDarkColors ? '#212121' : '#f1f1f1'
+          return nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1'
       }
     }).catch((error) => {
       console.error(error)
       // Default to nativeTheme settings if nothing is found.
-      return nativeTheme.shouldUseDarkColors ? '#212121' : '#f1f1f1'
+      return nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1'
     })
 
     let savedBounds, savedMaximized
@@ -2344,7 +2345,6 @@ function runApp() {
       newWindow,
       ROOT_APP_URL,
       preloadPath,
-      windowBackground,
       sessionData?.sessionId
     )
 

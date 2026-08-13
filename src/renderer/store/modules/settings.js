@@ -20,6 +20,8 @@ import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
 import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
+import { resolveBaseTheme } from '../../../appearanceSettings.js'
+import { resolveColor } from '../../helpers/colors.js'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 
@@ -738,7 +740,46 @@ const customGetters = {
 
 const customMutations = {}
 
+async function updateValidatedSetting(commit, settingId, value) {
+  try {
+    await DBSettingHandlers.upsert(settingId, value)
+    commit(defaultMutationId(settingId), value)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 const customActions = {
+  updateBaseTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'baseTheme',
+    resolveBaseTheme(value, 'system', rootGetters.getCustomThemes)
+  ),
+
+  updateSystemLightTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'systemLightTheme',
+    resolveBaseTheme(value, 'light', rootGetters.getCustomThemes, false)
+  ),
+
+  updateSystemDarkTheme: ({ commit, rootGetters }, value) => updateValidatedSetting(
+    commit,
+    'systemDarkTheme',
+    resolveBaseTheme(value, 'dark', rootGetters.getCustomThemes, false)
+  ),
+
+  updateMainColor: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'mainColor',
+    resolveColor(value, 'Red')
+  ),
+
+  updateSecColor: ({ commit }, value) => updateValidatedSetting(
+    commit,
+    'secColor',
+    resolveColor(value, 'Blue')
+  ),
+
   updateIconPack: async ({ commit }, value) => {
     const previousIconPack = currentIconPack.value
     if (!isIconPack(value) || !await setIconPack(value)) {
