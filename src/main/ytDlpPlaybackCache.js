@@ -1,4 +1,5 @@
 import { app } from 'electron'
+import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -41,14 +42,14 @@ function isValidCacheKey(cacheKey) {
 function isValidEntry(entry) {
   if (entry === null || typeof entry !== 'object') return false
 
-  let serializedLength
+  let serializedEntry
   try {
-    serializedLength = JSON.stringify(entry).length
+    serializedEntry = JSON.stringify(entry)
   } catch {
     return false
   }
 
-  return serializedLength <= MAX_ENTRY_LENGTH &&
+  return Buffer.byteLength(serializedEntry, 'utf8') <= MAX_ENTRY_LENGTH &&
     VIDEO_ID_REGEX.test(entry.videoId) &&
     CACHE_KEY_HASH_REGEX.test(entry.cacheKeyHash) &&
     Number.isFinite(entry.expiryTime) &&
