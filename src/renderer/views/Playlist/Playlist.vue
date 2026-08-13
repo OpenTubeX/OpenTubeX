@@ -251,6 +251,7 @@ const isLoadingMore = ref(false)
 const playlistInEditMode = ref(false)
 const forceListView = ref(false)
 let alreadyShownNotice = false
+let fetchedLocalPlaylistItemCount = 0
 const videoSearchQuery = ref('')
 const promptOpen = ref(false)
 /** @type {import('vue').Ref<string[]>} */
@@ -483,6 +484,7 @@ function resetState() {
   infoSource.value = 'local'
   playlistItems.value = []
   continuationData.value = null
+  fetchedLocalPlaylistItemCount = 0
 }
 
 async function getPlaylistLocal() {
@@ -504,6 +506,7 @@ async function getPlaylistLocal() {
     }
 
     const playlistItems_ = parseLocalPlaylistVideos(result.items)
+    fetchedLocalPlaylistItemCount = result.items.length
 
     playlistTitle.value = result.info.title
     playlistDescription.value = result.info.description ?? ''
@@ -528,10 +531,10 @@ async function getPlaylistLocal() {
     let shouldGetNextPage = false
     if (result.has_continuation) {
       continuationData.value = result
-      shouldGetNextPage = result.items.length < 100 && playlistItems.value.length < 100
+      shouldGetNextPage = playlistItems.value.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
     }
-    // To workaround the effect of useless continuation data
-    // auto load next page again when no. of parsed items < page size
+    // Fill the first page when unplayable entries were filtered out. The raw
+    // item count bounds automatic continuation loading to the playlist size.
     if (shouldGetNextPage) {
       getNextPageLocal()
     }
@@ -730,14 +733,15 @@ async function getNextPageLocal() {
 
   if (result) {
     const parsedVideos = parseLocalPlaylistVideos(result.items)
+    fetchedLocalPlaylistItemCount += result.items.length
     playlistItems.value = playlistItems.value.concat(parsedVideos)
 
     if (result.has_continuation) {
       continuationData.value = result
 
-      // To workaround the effect of useless continuation data
-      // auto load next page again when no. of parsed items < page size
-      shouldGetNextPage = result.items.length < 100 && parsedVideos.length < 100
+      // Keep crossing pages that contain filtered entries until this page is
+      // full or every advertised playlist item has been fetched.
+      shouldGetNextPage = parsedVideos.length < 100 && fetchedLocalPlaylistItemCount < videoCount.value
     } else {
       continuationData.value = null
     }
