@@ -960,15 +960,11 @@ export default defineComponent({
       return voiceOverTranslationAvailable.value &&
         store.getters.getVoiceOverTranslationPrepareInBackground
     })
-    const voiceOverTranslationCache = computed(() => {
-      return store.getters.getVoiceOverTranslationCache
-    })
     const voiceOverTranslation = useVoiceOverTranslation({
       video,
       videoId: computed(() => props.videoId),
       responseLanguage: voiceOverTranslationLanguage,
       autoPrepare: voiceOverTranslationAutoPrepare,
-      cache: voiceOverTranslationCache,
       voiceVolume: voiceOverTranslationVolume,
       onError: error => {
         const message = error instanceof RangeError

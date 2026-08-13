@@ -45,10 +45,7 @@ import {
 } from '../searchEngines'
 import { fetchFaviconDataUrl, resolveFaviconUrl } from './favicon'
 import { LiveReminderManager } from './LiveReminderManager'
-import {
-  configureVoiceOverTranslationCache,
-  requestVoiceOverTranslation
-} from './voiceOverTranslation'
+import { requestVoiceOverTranslation } from './voiceOverTranslation'
 
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -1329,7 +1326,13 @@ function runApp() {
   const isTrayOnMinimizeSupported = process.platform !== 'darwin' && (process.platform !== 'linux' || app.commandLine.getSwitchValue('ozone-platform') !== 'wayland')
 
   const userDataPath = app.getPath('userData')
-  configureVoiceOverTranslationCache(path.join(userDataPath, 'voice_over_translation_cache'))
+
+  asyncFs.rm(path.join(userDataPath, 'voice_over_translation_cache'), {
+    force: true,
+    recursive: true
+  }).catch(error => {
+    console.error('Failed to remove the obsolete voice-over translation cache:', error)
+  })
 
   function broadcastLiveReminderUpdate(videoId, scheduled) {
     for (const window of BrowserWindow.getAllWindows()) {
