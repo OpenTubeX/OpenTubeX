@@ -1,6 +1,6 @@
 name: Bug Report
 description: Report an issue or unexpected behavior that occurs within the application
-title: "[Bug]: "
+title: ""
 type: Bug
 body:
   - type: markdown
