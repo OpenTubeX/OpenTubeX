@@ -95,21 +95,21 @@
           @mouseleave="resetSelectedOption"
         >
           <component
-            :is="dataListProperties[index]?.href ? 'a' : 'div'"
+            :is="getDataListProperty(index)?.href ? 'a' : 'div'"
             class="optionWrapper"
-            :href="dataListProperties[index]?.href"
+            :href="getDataListProperty(index)?.href"
             @click.prevent="handleOptionClick(index, $event)"
             @auxclick.middle="handleOptionAuxClick(index, $event)"
           >
             <FontAwesomeIcon
-              v-if="dataListProperties[index]?.iconName"
-              :icon="['fas', dataListProperties[index].iconName]"
+              v-if="getDataListProperty(index)?.iconName"
+              :icon="['fas', getDataListProperty(index).iconName]"
               class="searchResultIcon"
             />
             <bdi>{{ entry }}</bdi>
           </component>
           <a
-            v-if="dataListProperties[index]?.isRemoveable"
+            v-if="getDataListProperty(index)?.isRemoveable"
             class="removeButton"
             :class="{ removeButtonSelected: removeButtonSelectedIndex === index }"
             role="button"
@@ -411,7 +411,7 @@ function handleOptionClick(index, event) {
   searchState.isPointerInList = false
   inputData.value = visibleDataList.value[index]
   emit('input', inputData.value)
-  handleClick(event, index)
+  handleClick(event, getDataListIndex(index))
 }
 
 /**
@@ -421,7 +421,7 @@ function handleOptionClick(index, event) {
  * @param {MouseEvent} event
  */
 function handleOptionAuxClick(index, event) {
-  if (!process.env.IS_ELECTRON || !props.dataListProperties[index]?.href) {
+  if (!process.env.IS_ELECTRON || !getDataListProperty(index)?.href) {
     return
   }
 
@@ -438,12 +438,28 @@ function resetSelectedOption() {
  * @param {number} index
  */
 function handleRemoveClick(index) {
-  if (!props.dataListProperties[index]?.isRemoveable) { return }
+  if (!getDataListProperty(index)?.isRemoveable) { return }
 
   // keep input in focus even when the to-be-removed "Remove" button was clicked
   inputRef.value.focus()
   removalMade.value = true
   emit('remove', visibleDataList.value[index])
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {number}
+ */
+function getDataListIndex(visibleIndex) {
+  return props.dataList.indexOf(visibleDataList.value[visibleIndex])
+}
+
+/**
+ * @param {number} visibleIndex
+ * @returns {object | undefined}
+ */
+function getDataListProperty(visibleIndex) {
+  return props.dataListProperties[getDataListIndex(visibleIndex)]
 }
 
 /**

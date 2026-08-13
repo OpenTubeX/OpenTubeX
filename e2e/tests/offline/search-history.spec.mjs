@@ -43,6 +43,8 @@ test.describe('search history suggestions', () => {
 
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
+    await expect(suggestions(page).first().locator('.optionWrapper'))
+      .toHaveAttribute('href', /#\/search\/baking%20bread/)
   })
 
   test('selecting a recent search restores its filters', async ({ page }) => {
@@ -152,6 +154,25 @@ test.describe('search history suggestions', () => {
     await page.locator(sel.searchInput).click()
     await expect(suggestions(page)).toHaveCount(1)
     await expect(suggestions(page).first()).toContainText('baking bread')
+  })
+})
+
+test.describe('search history URL links', () => {
+  test.use({
+    seed: {
+      settings: { enableSearchSuggestions: false },
+      searchHistory: [{
+        _id: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        lastUpdatedAt: now
+      }]
+    }
+  })
+
+  test('a recognized YouTube URL links to its internal destination', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+
+    await expect(suggestions(page).first().locator('.optionWrapper'))
+      .toHaveAttribute('href', /#\/watch\/dQw4w9WgXcQ/)
   })
 })
 
