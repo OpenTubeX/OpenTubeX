@@ -294,6 +294,7 @@ export default defineComponent({
       playbackEngineFallbackAttemptedForCurrentVideo: false,
       /** @type {'built-in' | 'yt-dlp' | null} */
       playbackEngineFallbackTarget: null,
+      playbackEngineSwitchGeneration: 0,
       // yt-dlp is a separate process that takes a while to extract the streams. The
       // metadata is already there at that point, so the rest of the page is shown
       // immediately and only the player waits behind a thumbnail placeholder.
@@ -3534,6 +3535,7 @@ export default defineComponent({
         return
       }
 
+      const playbackEngineSwitchGeneration = ++this.playbackEngineSwitchGeneration
       const loadGeneration = this.videoLoadGeneration
       const videoId = this.videoId
       const playbackPosition = this.getTimestamp()
@@ -3554,6 +3556,7 @@ export default defineComponent({
 
       if (
         !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration ||
         this.playbackEngineFallbackTarget !== playbackEngine
       ) {
         return
@@ -3561,9 +3564,12 @@ export default defineComponent({
 
       if (playbackEngine === 'yt-dlp') {
         try {
-          await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+          await this.extractYtDlpPlaybackSource(loadGeneration, videoId, playbackEngineSwitchGeneration)
         } finally {
-          if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+          if (
+            this.isCurrentVideoLoad(loadGeneration, videoId) &&
+            playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+          ) {
             this.ytDlpStreamsPending = false
           }
         }
@@ -4056,6 +4062,7 @@ export default defineComponent({
       const reason = `[PLAYER_ERROR: ${status}]`
       const loadGeneration = this.videoLoadGeneration
       const videoId = this.videoId
+      const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
 
       if (this.activePlaybackEngine === 'yt-dlp') {
         const source = this.builtInPlaybackSource
@@ -4070,7 +4077,10 @@ export default defineComponent({
         this.playbackEngineFallbackTarget = 'built-in'
         this.ytDlpStreamsPending = true
         await this.$nextTick()
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+        ) {
           return true
         }
 
@@ -4083,7 +4093,10 @@ export default defineComponent({
             return true
           } catch (reloadError) {
             console.error('Refreshing the built-in playback source failed', reloadError)
-            if (this.tabRoute.params.id === videoId) {
+            if (
+              this.tabRoute.params.id === videoId &&
+              playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+            ) {
               this.ytDlpStreamsPending = false
             }
             return false
@@ -4117,8 +4130,15 @@ export default defineComponent({
       })
 
       try {
-        const fallbackApplied = await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+        const fallbackApplied = await this.extractYtDlpPlaybackSource(
+          loadGeneration,
+          videoId,
+          playbackEngineSwitchGeneration
+        )
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+        ) {
           return true
         }
         if (!fallbackApplied) {
@@ -4126,14 +4146,20 @@ export default defineComponent({
         }
         return fallbackApplied
       } catch (fallbackError) {
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) {
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+        ) {
           return true
         }
         this.playbackEngineFallbackTarget = null
         console.error('Falling back to yt-dlp playback failed', fallbackError)
         return false
       } finally {
-        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+        ) {
           this.ytDlpStreamsPending = false
         }
       }
@@ -4165,6 +4191,7 @@ export default defineComponent({
      * @param {string} videoId
      */
     applyYtDlpPlaybackSource: async function (loadGeneration, videoId) {
+      const playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
       const builtInLiveSourceMissing =
         this.videoPlaybackEngine === 'built-in' &&
         this.isLive &&
@@ -4193,7 +4220,15 @@ export default defineComponent({
       this.ytDlpStreamsPending = true
 
       try {
-        const sourceApplied = await this.extractYtDlpPlaybackSource(loadGeneration, videoId)
+        const sourceApplied = await this.extractYtDlpPlaybackSource(
+          loadGeneration,
+          videoId,
+          playbackEngineSwitchGeneration
+        )
+
+        if (playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration) {
+          return
+        }
 
         if (
           !sourceApplied &&
@@ -4213,6 +4248,7 @@ export default defineComponent({
         if (
           !sourceApplied &&
           this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
@@ -4223,6 +4259,7 @@ export default defineComponent({
         console.error('Applying the yt-dlp playback source failed', error)
         if (
           this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
@@ -4231,7 +4268,10 @@ export default defineComponent({
       } finally {
         // A stale load has already had its state reset (and may have started its own
         // extraction), so it must not clear the flag of the load that replaced it.
-        if (this.isCurrentVideoLoad(loadGeneration, videoId)) {
+        if (
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          playbackEngineSwitchGeneration === this.playbackEngineSwitchGeneration
+        ) {
           this.ytDlpStreamsPending = false
         }
       }
@@ -4240,13 +4280,21 @@ export default defineComponent({
     /**
      * @param {number} loadGeneration
      * @param {string} videoId
+     * @param {number} playbackEngineSwitchGeneration
      */
-    extractYtDlpPlaybackSource: async function (loadGeneration, videoId) {
+    extractYtDlpPlaybackSource: async function (
+      loadGeneration,
+      videoId,
+      playbackEngineSwitchGeneration = this.playbackEngineSwitchGeneration
+    ) {
       let source
       try {
         source = await getYtDlpPlaybackSource(videoId)
       } catch (error) {
-        if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
+        if (
+          !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+          playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+        ) { return false }
 
         console.error(`yt-dlp could not provide streams for ${videoId}, falling back to the built-in engine...`, error)
         this.showTabToast({
@@ -4257,7 +4305,10 @@ export default defineComponent({
         return false
       }
 
-      if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
+      if (
+        !this.isCurrentVideoLoad(loadGeneration, videoId) ||
+        playbackEngineSwitchGeneration !== this.playbackEngineSwitchGeneration
+      ) { return false }
 
       if (this.playbackEngineFallbackTarget === 'built-in') { return false }
 

@@ -213,6 +213,77 @@ test.describe('watch page', () => {
     })
   })
 
+  test('ignores a superseded yt-dlp extraction after rapid engine switches', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await openMockedVideo(page)
+
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpPlaybackResolvers = []
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => new Promise(resolve => {
+        globalThis.__ytDlpPlaybackResolvers.push(resolve)
+      }))
+    })
+
+    const watchView = await watchViewHandle(page)
+    const builtInManifest = await watchView.evaluate((view) => view.manifestSrc)
+    await watchView.evaluate((view) => {
+      window.__firstEngineSwitch = view.handlePlaybackEngineChange('yt-dlp')
+    })
+    await expect.poll(() => app.electronApp.evaluate(
+      () => globalThis.__ytDlpPlaybackResolvers.length
+    )).toBe(1)
+
+    await watchView.evaluate(async (view) => {
+      await view.handlePlaybackEngineChange('built-in')
+      window.__secondEngineSwitch = view.handlePlaybackEngineChange('yt-dlp')
+    })
+    await expect.poll(() => app.electronApp.evaluate(
+      () => globalThis.__ytDlpPlaybackResolvers.length
+    )).toBe(2)
+
+    await app.electronApp.evaluate(() => {
+      globalThis.__ytDlpPlaybackResolvers.shift()({
+        isLive: true,
+        liveStatus: 'is_live',
+        hlsManifestUrl: 'https://example.invalid/first.m3u8',
+        formats: [],
+        duration: null,
+        version: 'first'
+      })
+    })
+    await page.evaluate(() => window.__firstEngineSwitch)
+    expect(await watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      pending: view.ytDlpStreamsPending
+    }))).toEqual({ activeEngine: 'built-in', pending: true })
+
+    await app.electronApp.evaluate(() => {
+      globalThis.__ytDlpPlaybackResolvers.shift()({
+        isLive: true,
+        liveStatus: 'is_live',
+        hlsManifestUrl: 'https://example.invalid/second.m3u8',
+        formats: [],
+        duration: null,
+        version: 'second'
+      })
+    })
+    await page.evaluate(() => window.__secondEngineSwitch)
+    expect(await watchView.evaluate((view) => ({
+      activeEngine: view.activePlaybackEngine,
+      builtInManifest: view.builtInPlaybackSource.manifestSrc,
+      manifest: view.manifestSrc,
+      pending: view.ytDlpStreamsPending,
+      version: view.activePlaybackEngineVersion
+    }))).toEqual({
+      activeEngine: 'yt-dlp',
+      builtInManifest,
+      manifest: 'https://example.invalid/second.m3u8',
+      pending: false,
+      version: 'second'
+    })
+  })
+
   test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
