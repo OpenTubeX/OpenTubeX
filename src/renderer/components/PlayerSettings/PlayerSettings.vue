@@ -520,7 +520,7 @@
   </FtSettingsSection>
   <FtSettingsSection
     v-if="USING_ELECTRON"
-    class="voiceOverTranslationSettings"
+    class="section voiceOverTranslationSettings"
     :title="t('Settings.Player Settings.Voice-over Translation.Title')"
   >
     <div class="switchGrid">

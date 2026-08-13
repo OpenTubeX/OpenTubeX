@@ -990,6 +990,11 @@ test.describe('settings', () => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()
 
+    const settingsContent = page.locator('.settingsContent')
+    const voiceOverSection = page.locator('.voiceOverTranslationSettings')
+    await settingsContent.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(voiceOverSection).toBeInViewport()
+
     const enableToggle = page.getByRole('checkbox', { name: 'Enable voice-over translation' })
     const backgroundToggle = page.getByRole('checkbox', {
       name: 'Start preparing voice-over translations in the background'
