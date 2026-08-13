@@ -987,7 +987,7 @@
 }
 
 /* The current value (`On`, `2x`, the chapter title, …) stays on a single line. */
-:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label > .shaka-current-selection-span) {
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label .shaka-current-selection-span) {
   max-inline-size: 100%;
   padding-inline-start: 0;
   overflow: hidden;

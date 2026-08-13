@@ -170,6 +170,30 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
     return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
   })).toBe(true)
+  const statusTypography = await overflowMenu.evaluate((menu) => {
+    // The local fixture uses a legacy format, so reproduce Shaka's additional
+    // wrapper around the standard resolution status in the live menu.
+    const button = document.createElement('button')
+    button.innerHTML = `
+      <label class="shaka-overflow-button-label">
+        <span><span class="shaka-current-selection-span">1080p60</span></span>
+      </label>`
+    menu.append(button)
+
+    const resolutionStatus = button.querySelector('.shaka-current-selection-span')
+    const playbackRateStatus = menu.querySelector(
+      '.shaka-playbackrate-button .shaka-current-selection-span'
+    )
+    const typography = (element) => {
+      const { color, fontSize, opacity } = getComputedStyle(element)
+      return { color, fontSize, opacity }
+    }
+    const result = [typography(resolutionStatus), typography(playbackRateStatus)]
+    button.remove()
+    return result
+  })
+  expect(statusTypography[0]).toEqual(statusTypography[1])
+  expect(statusTypography[0]).toMatchObject({ fontSize: '10px', opacity: '0.75' })
   const overflowMenuHeight = (await overflowMenu.boundingBox()).height
 
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
