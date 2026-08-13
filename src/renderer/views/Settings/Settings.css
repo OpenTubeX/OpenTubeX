@@ -335,6 +335,7 @@
 .settingsContent :deep(.settingsSearchTarget) {
   outline: 2px solid transparent;
   outline-offset: 4px;
+  border-radius: calc(4px * var(--ui-roundness));
   animation: settings-search-highlight 2.2s ease-in-out;
 }
 
@@ -358,20 +359,27 @@
   display: none;
 }
 
-/* A setting still at its default reserves the marker's space (the placeholder
-   is only rendered while highlighting is on), so changing it colors the border
-   in rather than shifting the control sideways — which can otherwise re-wrap
-   its label mid-drag. Kept as specific as the rule below, which follows it and
-   therefore wins once the setting really has changed. */
-:deep(.switch-ctn:has(.changedSettingIndicatorPlaceholder)),
-:deep(.select:has(.changedSettingIndicatorPlaceholder)),
-:deep(.ft-input-component:has(.changedSettingIndicatorPlaceholder)),
-:deep(.pure-material-slider:has(.changedSettingIndicatorPlaceholder)),
-:deep(.pure-checkbox:has(.changedSettingIndicatorPlaceholder)),
-:deep(.inputTags:has(.changedSettingIndicatorPlaceholder)),
-:deep(.sponsorBlockCategory:has(.changedSettingIndicatorPlaceholder)) {
+/* Every control reserves the marker gutter while highlighting is on, including
+   controls that cannot be reset. Otherwise those controls sit further towards
+   the edge than their resettable neighbours. The low-specificity :where keeps
+   the colored marker rule below in control when a setting has changed. */
+.settingsContent.highlightChangedSettings :deep(:where(
+  .switch-ctn,
+  .select,
+  .ft-input-component,
+  .pure-material-slider,
+  .pure-checkbox,
+  .inputTags,
+  .sponsorBlockCategory
+)) {
   border-inline-start: 3px solid transparent;
   padding-inline-start: 9px;
+}
+
+/* Select labels are absolutely positioned, so the wrapper padding above does
+   not move them with the field unless their inset reserves the same gutter. */
+.settingsContent.highlightChangedSettings :deep(.select-label) {
+  inset-inline-start: 9px;
 }
 
 :deep(.switch-ctn:has(.changedSettingIndicator)),

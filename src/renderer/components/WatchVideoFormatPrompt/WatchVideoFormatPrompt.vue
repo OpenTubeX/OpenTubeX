@@ -45,8 +45,9 @@
             @click="selectPlaybackEngine(engine.value)"
           >
             {{ engine.label }}
-            <FontAwesomeIcon
+            <FtIcon
               v-if="engine.value === playbackEngineSelection"
+              class="engineOptionCheck"
               :icon="['fas', 'check']"
             />
           </button>

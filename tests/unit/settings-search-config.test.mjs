@@ -24,12 +24,13 @@ test('settings search paths match the canonical locale structure', () => {
     for (const [groupPath, retainedKeys] of Object.entries(
       SETTINGS_SEARCH_SELECT_GROUP_LABELS[section] ?? {}
     )) {
-      const group = getAtPath(messages, groupPath)
-      assert.equal(typeof group, 'object', `${localePath}.${groupPath} must resolve to an object`)
+      const group = groupPath === '' ? messages : getAtPath(messages, groupPath)
+      const fullGroupPath = [localePath, groupPath].filter(Boolean).join('.')
+      assert.equal(typeof group, 'object', `${fullGroupPath} must resolve to an object`)
       for (const retainedKey of retainedKeys) {
         assert.ok(
           Object.hasOwn(group, retainedKey),
-          `${localePath}.${groupPath}.${retainedKey} must exist`
+          `${fullGroupPath}.${retainedKey} must exist`
         )
       }
     }
