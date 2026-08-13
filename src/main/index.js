@@ -2210,7 +2210,8 @@ function runApp() {
       // Determine window color to be shown (shown most prominently during initial app load)
       // Uses the --bg-color for each corresponding theme
       if (isCustomThemeValue(setting.value)) {
-        return (await getSelectedCustomTheme(setting.value))?.colors.background ?? '#0f0f0f'
+        return (await getSelectedCustomTheme(setting.value))?.colors.background ??
+          (nativeTheme.shouldUseDarkColors ? '#0f0f0f' : '#f1f1f1')
       }
       switch (setting.value) {
         case 'dark':
@@ -2344,7 +2345,6 @@ function runApp() {
       newWindow,
       ROOT_APP_URL,
       preloadPath,
-      windowBackground,
       sessionData?.sessionId
     )
 
