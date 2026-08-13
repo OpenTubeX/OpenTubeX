@@ -63,6 +63,30 @@ test.describe('profile selector', () => {
   })
 })
 
+test.describe('profile selector with a custom image', () => {
+  test.use({
+    seed: {
+      profiles: [{
+        ...mainProfile,
+        icon: {
+          type: 'image',
+          value: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+Xw4AAAAASUVORK5CYII='
+        }
+      }]
+    }
+  })
+
+  test('keeps the profile button centered in the top navigation', async ({ page }) => {
+    await expect(profileIconInitial(page).locator('img')).toBeVisible()
+
+    const navigationBox = await page.locator('.topNav').boundingBox()
+    const profileButtonBox = await profileIcon(page).boundingBox()
+
+    expect(profileButtonBox.y + profileButtonBox.height / 2)
+      .toBeCloseTo(navigationBox.y + navigationBox.height / 2, 0)
+  })
+})
+
 test.describe('default profile setting', () => {
   test.use({
     seed: {
