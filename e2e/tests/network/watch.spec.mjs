@@ -896,7 +896,7 @@ test.describe('watch page', () => {
     }])
   })
 
-  test('fullscreen title opens the video information dock', async ({ page, innertube }) => {
+  test('full-window and fullscreen modes show the title', async ({ page, innertube }) => {
     test.skip(innertube.replay, 'watch page hydration needs the real API')
     await page.route(/\/api\/timedtext/, route => route.fulfill({
       body: 'WEBVTT\n\n00:00:00.000 --> 00:00:02.000\nTest transcript line.\n',
@@ -905,8 +905,16 @@ test.describe('watch page', () => {
     await openCaptionedVideoOrSkip(page)
     await waitForPlaybackOrSkip(test, page)
 
-    await setPlayerFullscreen(page, true)
     const title = page.locator('.playerFullscreenTitleOverlay')
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).toHaveClass(/fullWindow/)
+    await expect(title).toBeVisible()
+    await expect(title).toContainText(CAPTIONED_VIDEO.title)
+    await page.keyboard.press('s')
+    await expect(page.locator('.ftVideoPlayer')).not.toHaveClass(/fullWindow/)
+    await expect(title).toBeHidden()
+
+    await setPlayerFullscreen(page, true)
     const titleBounds = await title.boundingBox()
     const playerBounds = await page.locator('.ftVideoPlayer').boundingBox()
     const titleRight = titleBounds.x + titleBounds.width

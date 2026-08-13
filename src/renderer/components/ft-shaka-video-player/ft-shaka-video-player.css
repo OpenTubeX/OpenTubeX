@@ -1929,7 +1929,8 @@
   right: 5px;
 }
 
-.ftVideoPlayer:fullscreen :deep(.playerFullscreenTitleOverlay) {
+.ftVideoPlayer:fullscreen :deep(.playerFullscreenTitleOverlay),
+.ftVideoPlayer.fullWindow :deep(.playerFullscreenTitleOverlay) {
   display: block;
 }
 
