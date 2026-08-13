@@ -221,6 +221,120 @@ test('terminal yt-dlp playback failure restores the built-in source once', async
   })
 })
 
+test('yt-dlp playback refreshes once then prefers built-in SABR over legacy', async ({ app, page }) => {
+  await mockUnplayableWatchPage(app, page)
+  await goTo(page, 'history')
+  await page.getByText('SABR test video').click()
+  await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+  await expect(page.locator('.errorMessage')).toBeVisible({ timeout: 30_000 })
+
+  const result = await page.evaluate(async () => {
+    const app = document.querySelector('#app')?.__vue_app__
+
+    const findWatchView = (vnode) => {
+      if (vnode?.component?.type?.name === 'Watch') return vnode.component.proxy
+      if (vnode?.component?.subTree) {
+        const match = findWatchView(vnode.component.subTree)
+        if (match) return match
+      }
+      if (Array.isArray(vnode?.children)) {
+        for (const child of vnode.children) {
+          const match = findWatchView(child)
+          if (match) return match
+        }
+      }
+      return null
+    }
+
+    const watchView = findWatchView(app?._container?._vnode)
+    if (!watchView) throw new Error('Unable to access the watch view')
+
+    watchView.errorMessage = ''
+    watchView.isLoading = false
+    watchView.isLive = false
+    watchView.isPostLiveDvr = false
+    watchView.activeFormat = 'dash'
+    watchView.activePlaybackEngine = 'yt-dlp'
+    watchView.activePlaybackEngineVersion = 'test'
+    watchView.streamErrorReloadAttemptedForCurrentVideo = false
+    watchView.playbackEngineFallbackAttemptedForCurrentVideo = false
+    watchView.playbackEngineFallbackTarget = null
+    watchView.manifestSrc = 'data:application/dash+xml,yt-dlp'
+    watchView.manifestMimeType = 'application/dash+xml'
+    watchView.legacyFormats = [{ itag: 18 }]
+    watchView.builtInPlaybackSource = {
+      manifestSrc: 'data:application/sabr+json,built-in',
+      manifestMimeType: 'application/sabr+json',
+      sabrData: { scheme: 'sabr-test' },
+      legacyFormats: [],
+      streamingDataExpiryDate: new Date(Date.now() + 60_000)
+    }
+
+    let refreshes = 0
+    watchView.reloadView = async () => {
+      refreshes++
+    }
+    let progressSaves = 0
+    watchView.handleWatchProgressAutoSaveWhenProgressEnabled = () => {
+      progressSaves++
+    }
+
+    const error = { code: 1002, data: ['https://example.invalid/video', 500] }
+    await watchView.handlePlayerError(error)
+    const engineAfterRefresh = watchView.activePlaybackEngine
+    const formatAfterRefresh = watchView.activeFormat
+    await watchView.handlePlayerError(error)
+    const fallbackPlaybackEngine = watchView.activePlaybackEngine
+    const fallbackFormat = watchView.activeFormat
+    const fallbackManifestMimeType = watchView.manifestMimeType
+    const fallbackSabrScheme = watchView.sabrData?.scheme
+
+    watchView.activeFormat = 'dash'
+    watchView.activePlaybackEngine = 'yt-dlp'
+    watchView.playbackEngineFallbackAttemptedForCurrentVideo = false
+    watchView.playbackEngineFallbackTarget = null
+    watchView.manifestSrc = 'data:application/dash+xml,yt-dlp'
+    watchView.manifestMimeType = 'application/dash+xml'
+    watchView.legacyFormats = [{ itag: 18 }]
+    watchView.builtInPlaybackSource = {
+      manifestSrc: null,
+      manifestMimeType: 'application/dash+xml',
+      sabrData: null,
+      legacyFormats: [],
+      streamingDataExpiryDate: null
+    }
+    const emptyBuiltInFallbackApplied = await watchView.tryPlaybackEngineFallback(error)
+
+    return {
+      refreshes,
+      progressSaves,
+      engineAfterRefresh,
+      formatAfterRefresh,
+      fallbackPlaybackEngine,
+      fallbackFormat,
+      fallbackManifestMimeType,
+      fallbackSabrScheme,
+      emptyBuiltInFallbackApplied,
+      engineAfterEmptyBuiltInFallback: watchView.activePlaybackEngine,
+      legacyFormatCount: watchView.legacyFormats.length
+    }
+  })
+
+  expect(result).toEqual({
+    refreshes: 1,
+    progressSaves: 1,
+    engineAfterRefresh: 'yt-dlp',
+    formatAfterRefresh: 'dash',
+    fallbackPlaybackEngine: 'built-in',
+    fallbackFormat: 'dash',
+    fallbackManifestMimeType: 'application/sabr+json',
+    fallbackSabrScheme: 'sabr-test',
+    emptyBuiltInFallbackApplied: false,
+    engineAfterEmptyBuiltInFallback: 'yt-dlp',
+    legacyFormatCount: 1
+  })
+})
+
 test('expired built-in playback source is refreshed before yt-dlp falls back', async ({ app, page }) => {
   await mockUnplayableWatchPage(app, page)
   await goTo(page, 'history')
