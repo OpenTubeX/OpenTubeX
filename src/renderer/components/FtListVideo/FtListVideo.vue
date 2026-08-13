@@ -378,7 +378,7 @@ import {
   deepCopy,
   debounce
 } from '../../helpers/utils.js'
-import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
+import { getLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -1554,8 +1554,14 @@ async function openCollaboratorsPrompt() {
   setCollaboratorsLoading(true)
 
   try {
-    const videoInfo = await getLocalVideoInfo(id.value)
-    channelCollaborators.value = parseLocalVideoCollaborators(videoInfo.info)
+    const videoId = id.value
+    const collaborators = await getLocalVideoCollaborators(videoId)
+
+    if (id.value !== videoId) {
+      return
+    }
+
+    channelCollaborators.value = collaborators
 
     if (channelCollaborators.value.length > 1) {
       showCollaboratorsPrompt.value = true
