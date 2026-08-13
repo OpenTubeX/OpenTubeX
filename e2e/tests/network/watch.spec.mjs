@@ -1498,7 +1498,7 @@ test.describe('custom Shorts player', () => {
     expect((await replayIcon.locator('path').getAttribute('d')).length).toBeGreaterThan(20)
   })
 
-  test('fullscreen Shorts controls follow the video hover area', async ({ page, innertube }) => {
+  test('fullscreen Shorts controls follow the video hover area', async ({ app, page, innertube }) => {
     test.skip(innertube.replay, 'no recorded fixtures for this Short')
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
     await page.locator(sel.searchInput).press('Enter')
@@ -1556,6 +1556,17 @@ test.describe('custom Shorts player', () => {
     )
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('opacity', '1')
+
+    await setPlayerFullscreen(page, false)
+    await setWindowWidth(app, 600)
+    await player.evaluate(element => element.classList.add('fullWindow'))
+    await expect(player).toHaveCSS('width', '600px')
+    const [narrowVideoBounds, narrowSeekBarBounds] = await Promise.all([
+      videoSpace.boundingBox(),
+      seekBar.boundingBox(),
+    ])
+    expect(Math.abs(narrowSeekBarBounds.x - narrowVideoBounds.x)).toBeLessThan(2)
+    expect(Math.abs(narrowSeekBarBounds.width - narrowVideoBounds.width)).toBeLessThan(2)
   })
 
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {
