@@ -60,6 +60,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome-original'
 import faAliasToCanon from '../../icons/faAliasToCanon.json'
 import { currentIconPack } from '../../icons/iconPackState'
 import { normalizeFaIcon, resolveIconifyId } from '../../icons/resolveIconifyId'
+import { getCustomIconImageSource } from '../../helpers/customIcons'
 
 defineOptions({
   inheritAttrs: false
@@ -122,13 +123,7 @@ const customEmoji = computed(() => {
     : ''
 })
 
-const customImageSource = computed(() => {
-  if (props.icon?.type !== 'image' || typeof props.icon.value !== 'string') return ''
-
-  return /^data:image\/(?:gif|jpeg|png|webp);base64,/i.test(props.icon.value)
-    ? props.icon.value
-    : ''
-})
+const customImageSource = computed(() => getCustomIconImageSource(props.icon))
 
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
