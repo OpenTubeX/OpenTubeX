@@ -378,7 +378,7 @@ import {
   deepCopy,
   debounce
 } from '../../helpers/utils.js'
-import { getLocalVideoInfo, parseLocalVideoCollaborators } from '../../helpers/api/local.js'
+import { getLocalVideoCollaborators } from '../../helpers/api/local.js'
 import { isHistoryEntryWatched } from '../../helpers/history.js'
 import { getUpcomingPremiereTimestamp } from '../../helpers/subscription-entries.js'
 import { deArrowData, deArrowThumbnail, getSponsorBlockVideoLabel } from '../../helpers/sponsorblock.js'
@@ -1552,17 +1552,25 @@ async function openCollaboratorsPrompt() {
 
   isFetchingCollaborators.value = true
   setCollaboratorsLoading(true)
+  const videoId = id.value
 
   try {
-    const videoInfo = await getLocalVideoInfo(id.value)
-    channelCollaborators.value = parseLocalVideoCollaborators(videoInfo.info)
+    const collaborators = await getLocalVideoCollaborators(videoId)
+
+    if (id.value !== videoId) {
+      return
+    }
+
+    channelCollaborators.value = collaborators
 
     if (channelCollaborators.value.length > 1) {
       showCollaboratorsPrompt.value = true
     }
   } catch (error) {
-    console.error(`Failed to fetch collaborators for ${id.value}`, error)
-    showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
+    if (id.value === videoId) {
+      console.error(`Failed to fetch collaborators for ${videoId}`, error)
+      showToast({ message: t('Video.Failed to load collaborators'), icon: ['fas', 'circle-exclamation'] })
+    }
   } finally {
     isFetchingCollaborators.value = false
     setCollaboratorsLoading(false)

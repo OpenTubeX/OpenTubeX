@@ -8,6 +8,7 @@ import { loadSearchContinuation } from '../search-continuation'
 import { parseLocalShortLinkedVideo } from '../player/shorts'
 import { getPaidPromotionDurationMs } from '../player/paidPromotion'
 import { getLocalPremiereState } from '../premiere'
+import { parseLocalVideoCollaborators } from '../video-collaborators'
 import {
   CHANNEL_HANDLE_REGEX,
   calculatePublishedDate,
@@ -861,6 +862,58 @@ export async function getLocalShortLinkedVideo(id) {
   })
 
   return parseLocalShortLinkedVideo(response)
+}
+
+const LOCAL_VIDEO_COLLABORATORS_CACHE_SIZE = 100
+const LOCAL_VIDEO_COLLABORATORS_TIMEOUT_MS = 15_000
+const localVideoCollaboratorsCache = new Map()
+
+/**
+ * Loads only the watch-next metadata needed by the collaborators prompt.
+ * Unlike getLocalVideoInfo, this avoids player setup, proof-token generation,
+ * playback requests, and paid-promotion metadata.
+ * @param {string} id
+ * @returns {Promise<ReturnType<typeof parseLocalVideoCollaborators>>}
+ */
+export function getLocalVideoCollaborators(id) {
+  const cachedRequest = localVideoCollaboratorsCache.get(id)
+  if (cachedRequest) {
+    return cachedRequest
+  }
+
+  const request = (async () => {
+    const abortController = new AbortController()
+    const timeout = setTimeout(() => abortController.abort(), LOCAL_VIDEO_COLLABORATORS_TIMEOUT_MS)
+
+    try {
+      const innertube = await createInnertube({
+        fetchFunc: (input, init) => fetch(input, { ...init, signal: abortController.signal })
+      })
+      const response = await innertube.actions.execute('/next', {
+        videoId: id,
+        racyCheckOk: true,
+        contentCheckOk: true,
+        parse: true,
+      })
+      const secondaryInfo = response.contents_memo
+        ?.getType(YTNodes.VideoSecondaryInfo)[0]
+
+      return parseLocalVideoCollaborators({ secondary_info: secondaryInfo })
+    } finally {
+      clearTimeout(timeout)
+    }
+  })().catch((error) => {
+    if (localVideoCollaboratorsCache.get(id) === request) {
+      localVideoCollaboratorsCache.delete(id)
+    }
+    throw error
+  })
+
+  localVideoCollaboratorsCache.set(id, request)
+  if (localVideoCollaboratorsCache.size > LOCAL_VIDEO_COLLABORATORS_CACHE_SIZE) {
+    localVideoCollaboratorsCache.delete(localVideoCollaboratorsCache.keys().next().value)
+  }
+  return request
 }
 
 export { parseLocalVideoCollaborators } from '../video-collaborators'
