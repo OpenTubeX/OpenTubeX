@@ -18,11 +18,38 @@
             {{ engineLabel }}
           </span>
           <span
+            v-if="playbackEngineSelection === playbackEngine"
             class="badge"
             :title="t('Change Format.Streaming Protocol')"
           >
             {{ streamTypeLabel }}
           </span>
+        </div>
+      </div>
+
+      <div
+        v-if="canChangePlaybackEngine"
+        class="engineSelector"
+      >
+        <p class="sectionLabel">
+          {{ t('Change Format.Stream Extraction Method') }}
+        </p>
+        <div class="engineOptions">
+          <button
+            v-for="engine in engines"
+            :key="engine.value"
+            type="button"
+            class="engineOption"
+            :class="{ active: engine.value === playbackEngineSelection }"
+            :aria-pressed="engine.value === playbackEngineSelection"
+            @click="selectPlaybackEngine(engine.value)"
+          >
+            {{ engine.label }}
+            <FontAwesomeIcon
+              v-if="engine.value === playbackEngineSelection"
+              :icon="['fas', 'check']"
+            />
+          </button>
         </div>
       </div>
 
@@ -84,6 +111,11 @@ const props = defineProps({
     type: String,
     default: null
   },
+  /** @type {import('vue').PropType<'built-in' | 'yt-dlp'>} */
+  playbackEngineSelection: {
+    type: String,
+    required: true
+  },
   /** @type {import('vue').PropType<'sabr' | 'dash' | 'hls' | 'none'>} */
   streamType: {
     type: String,
@@ -100,20 +132,26 @@ const props = defineProps({
   audioAvailable: {
     type: Boolean,
     required: true
+  },
+  canChangePlaybackEngine: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['change-format', 'close'])
+const emit = defineEmits(['change-format', 'change-playback-engine', 'close'])
 
 const { t } = useI18n()
 
 const engineLabel = computed(() => {
-  if (props.playbackEngine !== 'yt-dlp') {
+  if (props.playbackEngineSelection !== 'yt-dlp') {
     return t('Change Format.Engines.Built-in')
   }
 
   // showing the version makes it verifiable that the streams really came from yt-dlp
-  return props.playbackEngineVersion === null ? 'yt-dlp' : `yt-dlp ${props.playbackEngineVersion}`
+  return props.playbackEngine !== 'yt-dlp' || props.playbackEngineVersion === null
+    ? 'yt-dlp'
+    : `yt-dlp ${props.playbackEngineVersion}`
 })
 
 const streamTypeLabel = computed(() => {
@@ -128,6 +166,17 @@ const streamTypeLabel = computed(() => {
       return t('Change Format.Protocols.Progressive')
   }
 })
+
+const engines = computed(() => [
+  {
+    value: 'yt-dlp',
+    label: t('Change Format.Engines.yt-dlp')
+  },
+  {
+    value: 'built-in',
+    label: t('Change Format.Engines.Built-in')
+  }
+])
 
 const options = computed(() => [
   {
@@ -159,6 +208,17 @@ const options = computed(() => [
 function selectFormat(value) {
   if (value !== props.activeFormat) {
     emit('change-format', value)
+  }
+
+  emit('close')
+}
+
+/**
+ * @param {'built-in' | 'yt-dlp'} value
+ */
+function selectPlaybackEngine(value) {
+  if (value !== props.playbackEngineSelection) {
+    emit('change-playback-engine', value)
   }
 
   emit('close')
@@ -216,6 +276,51 @@ function selectFormat(value) {
 .engineBadge {
   background-color: var(--accent-color);
   color: var(--text-with-accent-color);
+}
+
+.engineSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionLabel {
+  color: var(--tertiary-text-color);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-block: 0;
+  text-transform: uppercase;
+}
+
+.engineOptions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.engineOption {
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid var(--side-nav-hover-color);
+  border-radius: calc(8px * var(--ui-roundness));
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 600;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 12px;
+}
+
+.engineOption:hover,
+.engineOption:focus-visible {
+  background-color: var(--side-nav-hover-color);
+}
+
+.engineOption.active {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 }
 
 .formatOptions {

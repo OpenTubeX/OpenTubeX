@@ -1755,11 +1755,13 @@ Change Format:
   Legacy formats are not available for this video: Legacy formats are not available
     for this video
   Stream Source: Stream source
+  Stream Extraction Method: Stream extraction method
   Playback Engine: Playback engine
   Streaming Protocol: Streaming protocol
   Not Available For This Video: Not available for this video
   Engines:
     Built-in: Built-in
+    yt-dlp: yt-dlp
   Protocols:
     Progressive: Progressive
   Descriptions:

@@ -263,11 +263,14 @@
       :active-format="activeFormat"
       :playback-engine="playbackEngine"
       :playback-engine-version="playbackEngineVersion"
+      :playback-engine-selection="playbackEngineSelection"
       :stream-type="streamType"
       :dash-available="dashAvailable"
       :legacy-available="legacyAvailable"
       :audio-available="audioAvailable"
+      :can-change-playback-engine="USING_ELECTRON && !isPostLiveDvr"
       @change-format="changeFormat"
+      @change-playback-engine="changePlaybackEngine"
       @close="showFormatPrompt = false"
     />
     <WatchVideoDownloadPrompt
@@ -440,6 +443,11 @@ const props = defineProps({
     type: String,
     default: null
   },
+  /** @type {import('vue').PropType<'built-in' | 'yt-dlp'>} */
+  playbackEngineSelection: {
+    type: String,
+    default: 'built-in'
+  },
   /** @type {import('vue').PropType<'sabr' | 'dash' | 'hls' | 'none'>} */
   streamType: {
     type: String,
@@ -454,6 +462,10 @@ const props = defineProps({
     default: false
   },
   audioAvailable: {
+    type: Boolean,
+    default: false
+  },
+  isPostLiveDvr: {
     type: Boolean,
     default: false
   },
@@ -501,6 +513,7 @@ const props = defineProps({
 
 const emit = defineEmits([
   'change-format',
+  'change-playback-engine',
   'pause-player',
   'save-watched-progress',
   'save-channel-playback-speed',
@@ -670,6 +683,13 @@ const publishedDateText = computed(() => {
  */
 function changeFormat(value) {
   emit('change-format', value)
+}
+
+/**
+ * @param {'built-in' | 'yt-dlp'} value
+ */
+function changePlaybackEngine(value) {
+  emit('change-playback-engine', value)
 }
 
 const watchedProgressSavingInSemiAutoMode = computed(() => {
