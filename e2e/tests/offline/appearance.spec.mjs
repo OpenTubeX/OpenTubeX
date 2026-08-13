@@ -473,6 +473,33 @@ test.describe('custom theme editor', () => {
   })
 })
 
+test.describe('invalid appearance values', () => {
+  test.use({
+    seed: {
+      settings: {
+        baseTheme: 'missingTheme',
+        systemLightTheme: 'missingLightTheme',
+        systemDarkTheme: 'missingDarkTheme',
+        mainColor: 'missingMainColor',
+        secColor: 'missingSecondaryColor'
+      }
+    }
+  })
+
+  test('falls back to defaults', async ({ page }) => {
+    await expect.poll(() => page.evaluate(() => {
+      const getters = document.querySelector('#app').__vue_app__.config.globalProperties.$store.getters
+      return [
+        getters.getBaseTheme,
+        getters.getSystemLightTheme,
+        getters.getSystemDarkTheme,
+        getters.getMainColor,
+        getters.getSecColor
+      ]
+    })).toEqual(['system', 'light', 'dark', 'Red', 'Blue'])
+  })
+})
+
 test.describe('black theme surfaces', () => {
   test.use({ seed: { settings: { baseTheme: 'black' } } })
 
