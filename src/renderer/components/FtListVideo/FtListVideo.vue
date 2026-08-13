@@ -1642,9 +1642,8 @@ function parseVideoData() {
     }
   }
 
-  if (hideVideoViews.value || (props.data.viewCount == null && props.data.viewCountText === undefined)) {
-    hideViews.value = true
-  }
+  hideViews.value = hideVideoViews.value ||
+    (props.data.viewCount == null && props.data.viewCountText === undefined)
 }
 
 async function fetchSponsorBlockVideoLabel(videoId) {
