@@ -193,7 +193,6 @@ import FtFlexBox from './ft-flex-box/ft-flex-box.vue'
 import store from '../store/index'
 
 import { showToast } from '../helpers/utils'
-import { invalidateAllYtDlpPlaybackSources } from '../helpers/player/ytDlpPlayback'
 
 const { t } = useI18n()
 
@@ -478,9 +477,6 @@ async function downloadBinary(binary) {
       binariesInfoCache.value[key].managed = { source: 'managed', available: true, version: result.version }
 
       if (result.updated) {
-        if (binary === 'yt-dlp') {
-          invalidateAllYtDlpPlaybackSources()
-        }
         showToast({
           message: binary === 'yt-dlp'
             ? t('Settings.External Software Settings.yt-dlp Downloaded Template', { version: result.version })

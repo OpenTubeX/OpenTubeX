@@ -12,10 +12,17 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()
+const ytDlpBinaryUpdatedListeners = new Set()
 
 ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
   for (const listener of ytDlpBinaryDownloadProgressListeners) {
     listener(progress)
+  }
+})
+
+ipcRenderer.on(IpcChannels.YT_DLP_BINARY_UPDATED, () => {
+  for (const listener of ytDlpBinaryUpdatedListeners) {
+    listener()
   }
 })
 
@@ -383,6 +390,15 @@ export default {
   addYtDlpBinaryDownloadProgressListener: (handler) => {
     ytDlpBinaryDownloadProgressListeners.add(handler)
     return () => ytDlpBinaryDownloadProgressListeners.delete(handler)
+  },
+
+  /**
+   * @param {() => void} handler
+   * @returns {() => void}
+   */
+  addYtDlpBinaryUpdatedListener: (handler) => {
+    ytDlpBinaryUpdatedListeners.add(handler)
+    return () => ytDlpBinaryUpdatedListeners.delete(handler)
   },
 
   /**

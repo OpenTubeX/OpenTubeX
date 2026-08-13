@@ -982,7 +982,11 @@ export async function handleYtDlpDownloadBinary(event, binary) {
       : await downloadManagedFfmpeg(onProgress, () => sendProgress(0, true))
     return result
   } finally {
-    sendProgress(result != null && 'version' in result && result.updated ? 100 : null, false)
+    const updated = result != null && 'version' in result && result.updated
+    sendProgress(updated ? 100 : null, false)
+    if (binary === 'yt-dlp' && updated) {
+      broadcastToRenderers(IpcChannels.YT_DLP_BINARY_UPDATED)
+    }
   }
 }
 

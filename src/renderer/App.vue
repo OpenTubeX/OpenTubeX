@@ -563,6 +563,7 @@ let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
+let removeYtDlpBinaryUpdatedListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
 const cancelledSubscriptionAutoRefreshKeys = new Set()
@@ -697,10 +698,6 @@ async function initializeManagedExternalSoftware() {
       .filter(({ result }) => result !== null && 'version' in result && result.updated)
       .map(({ binary }) => binary)
 
-    if (updatedBinaries.includes('yt-dlp')) {
-      invalidateAllYtDlpPlaybackSources()
-    }
-
     if (failures.length === 0 && updatedBinaries.length > 0) {
       toolProgressPercentage = 100
       store.commit('setProgressBarPercentage', toolProgressPercentage)
@@ -776,6 +773,9 @@ onMounted(async () => {
   preloadUtilityRoutes()
 
   if (isElectron) {
+    removeYtDlpBinaryUpdatedListener = window.ftElectron.addYtDlpBinaryUpdatedListener(
+      invalidateAllYtDlpPlaybackSources
+    )
     removeTabsStateListener = await store.dispatch('initializeTabs')
     window.ftElectron.tabs.rendererReady()
   }
@@ -927,6 +927,7 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
+  removeYtDlpBinaryUpdatedListener?.()
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
