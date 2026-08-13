@@ -3740,6 +3740,7 @@ export default defineComponent({
       }
 
       this.streamErrorReloadAttemptedForCurrentVideo = true
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
       this.showTabToast({
         message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
         icon: ['fas', 'sync'],
@@ -3769,7 +3770,19 @@ export default defineComponent({
           // shaka-player will keep trying until the internet connection returns and resume playback automatically when it does
           return
         }
-      } else if (error.code === Code.BAD_HTTP_STATUS) {
+      }
+
+      // A terminal player error can still come from a transiently bad yt-dlp
+      // URL or extraction. Refresh those streams once before changing format or
+      // restoring the cached built-in source (which may use SABR).
+      if (this.activePlaybackEngine === 'yt-dlp') {
+        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
+        if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
+          return
+        }
+      }
+
+      if (error.code === Code.BAD_HTTP_STATUS) {
         switch (error.data[1]) {
           case 429:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
@@ -3845,6 +3858,17 @@ export default defineComponent({
           'Refreshing SABR stream after playback error'
         )
       ) { return }
+
+      // yt-dlp legacy formats come from the same extraction as its DASH
+      // formats. Prefer the independent built-in source after the one-shot
+      // yt-dlp refresh above, and keep legacy as the last resort when no
+      // built-in source is available.
+      if (
+        this.activePlaybackEngine === 'yt-dlp' &&
+        await this.tryPlaybackEngineFallback(error)
+      ) {
+        return
+      }
 
       const stopPlaybackRecovery = async () => {
         if (await this.tryPlaybackEngineFallback(error)) {
@@ -3925,7 +3949,11 @@ export default defineComponent({
       const videoId = this.videoId
 
       if (this.activePlaybackEngine === 'yt-dlp') {
-        if (this.builtInPlaybackSource === null) {
+        const source = this.builtInPlaybackSource
+        if (
+          source === null ||
+          (source.manifestSrc === null && source.legacyFormats.length === 0)
+        ) {
           return false
         }
 
@@ -3937,7 +3965,6 @@ export default defineComponent({
           return true
         }
 
-        const source = this.builtInPlaybackSource
         if (
           source.streamingDataExpiryDate !== null &&
           new Date() > source.streamingDataExpiryDate
