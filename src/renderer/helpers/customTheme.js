@@ -68,6 +68,16 @@ export async function deleteCustomTheme(id) {
   return themes
 }
 
+export async function replaceCustomThemes(themes) {
+  const normalizedThemes = normalizeCustomThemes(themes)
+  if (process.env.IS_ELECTRON) {
+    return normalizeCustomThemes(await window.ftElectron.replaceCustomThemes(normalizedThemes))
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedThemes, null, 2))
+  return normalizedThemes
+}
+
 export function handleCustomThemeUpdated(handler) {
   if (!process.env.IS_ELECTRON) return () => {}
   return window.ftElectron.handleCustomThemeUpdated(themes => handler(normalizeCustomThemes(themes)))

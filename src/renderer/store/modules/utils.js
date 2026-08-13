@@ -246,6 +246,10 @@ const getters = {
 }
 
 const actions = {
+  updateCustomThemes({ commit }, themes) {
+    commit('setCustomThemes', themes)
+  },
+
   showOutlines({ commit }) {
     commit('setOutlinesHidden', false)
   },

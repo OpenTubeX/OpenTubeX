@@ -1,7 +1,9 @@
 import { readFile } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import path from 'node:path'
 
 import { test, expect, goToSettingsSection, latestSettings } from '../../helpers/app.mjs'
+import { DEFAULT_CUSTOM_THEME } from '../../../src/customTheme.js'
 
 const syncServerUrl = process.env.OPENTUBEX_SYNC_SERVER_URL
 const channelId = 'UCuAXFkgsw1L7xaCfnd5JJOw'
@@ -307,6 +309,92 @@ test.describe('OpenTubeX sync server', () => {
     expect(await readFile(path.join(app.userDataDir, 'profiles.db'), 'utf8')).toContain(channelId)
     expect(await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')).toContain('sync-playlist')
     expect(await readFile(path.join(app.userDataDir, 'history.db'), 'utf8')).toContain('dQw4w9WgXcQ')
+  })
+
+  test('syncs custom themes and their deletion', async ({ app, page }) => {
+    const enhancedPrivacy = (await getSyncCapabilities()).encrypted_sync === 1
+    test.skip(!enhancedPrivacy, 'Enhanced privacy server required')
+
+    const username = `opentubex-themes-${randomUUID()}`
+    const theme = {
+      ...structuredClone(DEFAULT_CUSTOM_THEME),
+      id: 'synced-theme',
+      name: 'Synced Theme',
+      colors: {
+        ...DEFAULT_CUSTOM_THEME.colors,
+        background: '#123456',
+      },
+    }
+    const themePath = path.join(app.userDataDir, 'themes', `${theme.id}.json`)
+    const settingsPath = path.join(app.userDataDir, 'settings.db')
+
+    await page.evaluate(async customTheme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const themes = await window.ftElectron.saveCustomTheme(customTheme)
+      store.commit('setCustomThemes', themes)
+    }, theme)
+
+    const syncSection = await goToSettingsSection(page, 'sync')
+    await syncSection.getByLabel('Server URL').fill(syncServerUrl)
+    await syncSection.getByLabel('Username').fill(username)
+    await syncSection.getByLabel('Password').fill('local-test-password')
+    await syncSection.getByLabel(/Privacy passphrase/).fill('local-test-privacy-passphrase')
+    await syncSection.getByRole('button', { name: 'Register' }).click()
+    await expect(syncSection.getByText(`Connected as ${username}`)).toBeVisible()
+    await expect(syncSection.getByText(/Last synced:/)).toBeVisible()
+    await expect.poll(async () => {
+      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
+    }).toEqual([theme])
+
+    async function syncNow() {
+      const previousSyncAt = latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+      await syncSection.getByRole('button', { name: 'Sync now' }).click()
+      await expect.poll(async () => (
+        latestSettings(await readFile(settingsPath, 'utf8')).syncServerLastSyncAt
+      )).not.toBe(previousSyncAt)
+    }
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('setSyncServerAutoSync', false)
+      const themes = await window.ftElectron.replaceCustomThemes([])
+      store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSyncServerSnapshot', '')
+    })
+    await syncNow()
+    await expect.poll(async () => {
+      const settings = latestSettings(await readFile(settingsPath, 'utf8'))
+      return JSON.parse(settings.syncServerSnapshot).settings.customThemes.value
+    }).toEqual([theme])
+    await expect.poll(async () => JSON.parse(await readFile(themePath, 'utf8'))).toMatchObject({
+      id: theme.id,
+      name: theme.name,
+      colors: { background: '#123456' },
+    })
+
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'custom:synced-theme')
+      const themes = await window.ftElectron.replaceCustomThemes([])
+      await store.dispatch('updateCustomThemes', themes)
+    })
+    await syncNow()
+
+    await page.evaluate(async customTheme => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      const themes = await window.ftElectron.replaceCustomThemes([customTheme])
+      store.commit('setCustomThemes', themes)
+      await store.dispatch('updateSyncServerSnapshot', '')
+    }, theme)
+    await syncNow()
+    await expect.poll(async () => readFile(themePath, 'utf8').then(
+      () => true,
+      error => error.code !== 'ENOENT'
+    )).toBe(false)
+    await expect.poll(async () => (
+      latestSettings(await readFile(settingsPath, 'utf8')).baseTheme
+    )).toBe(theme.basedOn)
   })
 
   test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {
