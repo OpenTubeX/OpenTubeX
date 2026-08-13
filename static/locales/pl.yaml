@@ -1473,7 +1473,7 @@ Tooltips:
   External Software Settings:
     yt-dlp Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet yt-dlp lub pobrać i zarządzać własną kopią pakietu yt-dlp, która jest przechowywana w katalogu danych użytkownika.
     yt-dlp Channel: Wybierz kanał wydania yt-dlp, który OpenTubeX będzie pobierał i zarządzał. Dla większości użytkowników zalecana jest wersja stabilna.
-    FFmpeg Source: OpenTubeX może wykorzystać zainstalowany w systemie pakiet FFmpeg lub pobrać i zarządzać własną statyczną kompilacją FFmpeg, która jest przechowywana w katalogu danych użytkownika.
+    FFmpeg Source: OpenTubeX może używać FFmpeg i FFprobe zainstalowanych w twoim systemie lub pobierać i zarządzać własnymi kompilacjami statycznymi, które są przechowywane w katalogu danych użytkownika.
     yt-dlp Executable Path: Domyślnie OpenTubeX zakłada, że yt-dlp można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
     FFmpeg Executable Path: FFmpeg jest wymagany do łączenia oddzielnych strumieni wideo i audio oraz do konwersji audio. Domyślnie OpenTubeX zakłada, że FFmpeg można znaleźć za pomocą zmiennej środowiskowej PATH. W razie potrzeby można tutaj ustawić własną ścieżkę.
 Playing Next Video Interval: Odtwarzanie kolejnego filmu już za chwilę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekundę. Wciśnij aby przerwać. | Odtwarzanie kolejnego filmu za {nextVideoInterval} sekund. Wciśnij aby przerwać.
