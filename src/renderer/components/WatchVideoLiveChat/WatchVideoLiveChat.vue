@@ -141,9 +141,24 @@
         </div>
       </div>
     </div>
-    <FtLoader
+    <div
       v-if="isLoading"
-    />
+      class="liveChatSkeleton"
+      data-tab-loading-indicator
+      aria-hidden="true"
+    >
+      <div
+        v-for="index in 8"
+        :key="index"
+        class="liveChatSkeletonMessage"
+      >
+        <div class="liveChatSkeletonAvatar ft-shimmer" />
+        <div class="liveChatSkeletonContent">
+          <div class="liveChatSkeletonAuthor ft-shimmer" />
+          <div class="liveChatSkeletonText ft-shimmer" />
+        </div>
+      </div>
+    </div>
     <div
       v-else-if="hasError"
       class="messageContainer"
@@ -403,7 +418,6 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, u
 import { useI18n } from 'vue-i18n'
 import { YTNodes } from 'youtubei.js'
 
-import FtLoader from '../FtLoader/FtLoader.vue'
 import FtCard from '../ft-card/ft-card.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
@@ -458,9 +472,16 @@ let stayAtBottom = true
 let isScrollingToBottom = false
 /** @type {ReturnType<typeof setTimeout> | null} */
 let scrollToLiveHoldTimer = null
+/** @type {number | null} */
+let startLiveChatFrame = null
+/** @type {ReturnType<typeof setTimeout> | null} */
+let finishLoadingTimer = null
+let skeletonShownAt = 0
 
 /** Hold auto-follow through the message enter animation (~180ms). */
 const SCROLL_TO_LIVE_HOLD_MS = 220
+/** Avoid replacing a fast-loading skeleton before it can be perceived. */
+const MINIMUM_SKELETON_DURATION_MS = 1000
 
 /**
  * Replay messages that were fetched but that the player hasn't reached yet.
@@ -547,6 +568,14 @@ onBeforeUnmount(() => {
     clearTimeout(scrollToLiveHoldTimer)
     scrollToLiveHoldTimer = null
   }
+  if (startLiveChatFrame !== null) {
+    cancelAnimationFrame(startLiveChatFrame)
+    startLiveChatFrame = null
+  }
+  if (finishLoadingTimer !== null) {
+    clearTimeout(finishLoadingTimer)
+    finishLoadingTimer = null
+  }
   handleEnd()
 })
 
@@ -554,13 +583,25 @@ onMounted(() => {
   // Fullscreen docks stop pointer events from bubbling into the player. Capture
   // the event first so clicking another dock can still dismiss this menu.
   document.addEventListener('pointerdown', handleChatSettingsClickOutside, true)
+
+  // Setup can finish after a cached continuation has already returned. Starting
+  // on the next frame guarantees the loading skeleton is painted before chat
+  // polling begins, so it covers the real request instead of flashing afterward.
+  skeletonShownAt = performance.now()
+  startLiveChatFrame = requestAnimationFrame(() => {
+    startLiveChatFrame = null
+    initializeLiveChat()
+  })
 })
 
-if (!process.env.SUPPORTS_LOCAL_API) {
-  hasError.value = true
-  errorMessage.value = t('Video["Live Chat is currently not supported in this build."]')
-  isLoading.value = false
-} else {
+function initializeLiveChat() {
+  if (!process.env.SUPPORTS_LOCAL_API) {
+    hasError.value = true
+    errorMessage.value = t('Video["Live Chat is currently not supported in this build."]')
+    isLoading.value = false
+    return
+  }
+
   switch (backendPreference.value) {
     case 'local':
       if (props.liveChat) {
@@ -587,6 +628,7 @@ function enableLiveChat() {
   hasError.value = false
   showEnableChat.value = false
   isLoading.value = true
+  skeletonShownAt = performance.now()
   getLiveChatLocal()
 }
 
@@ -701,14 +743,33 @@ function handleStart(initialData) {
     handleChatAction(action)
   }
 
-  isLoading.value = false
+  finishLoading()
 
   if (isReplay.value) {
     releaseReplayComments()
     requestMoreReplayComments()
   }
+}
 
-  scrollToLiveAfterLayout()
+function finishLoading() {
+  const remainingDuration = MINIMUM_SKELETON_DURATION_MS - (performance.now() - skeletonShownAt)
+
+  if (finishLoadingTimer !== null) {
+    clearTimeout(finishLoadingTimer)
+    finishLoadingTimer = null
+  }
+
+  if (remainingDuration <= 0) {
+    isLoading.value = false
+    scrollToLiveAfterLayout()
+    return
+  }
+
+  finishLoadingTimer = setTimeout(() => {
+    finishLoadingTimer = null
+    isLoading.value = false
+    scrollToLiveAfterLayout()
+  }, remainingDuration)
 }
 
 /**

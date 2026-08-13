@@ -7,6 +7,57 @@
   overscroll-behavior: contain;
 }
 
+.liveChatSkeleton {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-block-size: 0;
+  padding-block: 8px;
+  gap: 14px;
+}
+
+.liveChatSkeletonMessage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.liveChatSkeletonAvatar {
+  flex: 0 0 25px;
+  block-size: 25px;
+  border-radius: 50%;
+}
+
+.liveChatSkeletonContent {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.liveChatSkeletonAuthor,
+.liveChatSkeletonText {
+  block-size: 10px;
+  border-radius: calc(4px * var(--ui-roundness));
+}
+
+.liveChatSkeletonAuthor {
+  inline-size: 28%;
+}
+
+.liveChatSkeletonText {
+  inline-size: 65%;
+}
+
+.liveChatSkeletonMessage:nth-child(3n + 1) .liveChatSkeletonText {
+  inline-size: 82%;
+}
+
+.liveChatSkeletonMessage:nth-child(3n + 2) .liveChatSkeletonText {
+  inline-size: 48%;
+}
+
 .relative {
   position: relative;
 }
