@@ -8,7 +8,7 @@
       class="fullscreenCommentHeader"
     >
       <h3>
-        <FontAwesomeIcon :icon="['fas', 'comment']" />
+        <FtIcon :icon="['fas', 'comment']" />
         {{ commentsTitle }}
       </h3>
       <div
@@ -26,7 +26,7 @@
           :aria-expanded="String(sortMenuOpen)"
           @click="sortMenuOpen = !sortMenuOpen"
         >
-          <FontAwesomeIcon :icon="['fas', 'arrow-down-short-wide']" />
+          <FtIcon :icon="['fas', 'arrow-down-short-wide']" />
         </button>
         <button
           v-if="!commentsDisabled"
@@ -36,7 +36,7 @@
           :title="$t('Comments.Reload Comments')"
           @click="reloadCommentData"
         >
-          <FontAwesomeIcon :icon="['fas', 'sync']" />
+          <FtIcon :icon="['fas', 'sync']" />
         </button>
         <button
           type="button"
@@ -45,7 +45,7 @@
           :title="$t('Comments.Hide Comments')"
           @click="emit('close-comments')"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
         <div
           v-if="sortMenuOpen"
@@ -59,7 +59,7 @@
             @click="handleSortChange(sortValues[index])"
           >
             <span>{{ name }}</span>
-            <FontAwesomeIcon
+            <FtIcon
               v-if="currentSortValue === sortValues[index]"
               :icon="['fas', 'check']"
             />
@@ -149,6 +149,7 @@
           class="comment commentThread"
           :class="{
             commentThreadExpanded: comment.showReplies,
+            commentThreadCollapsed: comment.numReplies > 0 && !comment.showReplies,
             highlightedComment: comment.id === highlightedCommentId
           }"
         >
@@ -181,7 +182,7 @@
             v-if="comment.isPinned"
             class="commentPinned"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'thumbtack']"
             />
             {{ $t("Comments.Pinned by") }} <bdi>{{ channelName }}</bdi>
@@ -228,7 +229,7 @@
               :aria-label="$t('Comments.Copy YouTube Link')"
               @click="copyCommentYoutubeLink(comment.id)"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'link']"
               />
             </button>
@@ -242,7 +243,7 @@
             <template
               v-if="!hideCommentLikes"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'thumbs-up']"
               />
               {{ comment.likes }}
@@ -258,37 +259,43 @@
                 class="commentHeartBadgeImg"
                 alt=""
               >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'heart']"
                 class="commentHeartBadgeWhite"
               />
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'heart']"
                 class="commentHeartBadgeRed"
               />
             </span>
-            <FtSpinner
-              v-if="comment.numReplies > 0 && !comment.showReplies && isReplyLoading(comment.id)"
-              class="commentMoreRepliesSpinner"
-              inline
-              size="18px"
-              border-width="2px"
-              :label="$t('Comments.Getting comment replies, please wait')"
-            />
-            <span
-              v-else-if="comment.numReplies > 0 && !comment.showReplies"
-              class="commentMoreReplies"
-              role="button"
-              tabindex="0"
-              @click="toggleCommentReplies(index)"
-              @keydown.space.prevent="toggleCommentReplies(index)"
-              @keydown.enter.prevent="toggleCommentReplies(index)"
-            >
-              <span>
-                {{ toggleCommentRepliesLinkText(comment) }}
-              </span>
-            </span>
           </p>
+          <div
+            v-if="comment.numReplies > 0 && !comment.showReplies"
+            class="commentReplyContinuation commentReplyRootToggle"
+          >
+            <button
+              type="button"
+              class="commentReplyContinuationButton"
+              aria-expanded="false"
+              :disabled="isReplyLoading(comment.id)"
+              @click="toggleCommentReplies(index)"
+            >
+              <FtSpinner
+                v-if="isReplyLoading(comment.id)"
+                inline
+                size="18px"
+                border-width="2px"
+                :label="$t('Comments.Getting comment replies, please wait')"
+              />
+              <template v-else>
+                <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+                <FtIcon
+                  :icon="['fas', 'angle-down']"
+                  aria-hidden="true"
+                />
+              </template>
+            </button>
+          </div>
           <div
             v-if="comment.showReplies"
             class="commentReplies"
@@ -311,37 +318,47 @@
               @timestamp-event="onTimestamp"
             />
             <div
-              v-if="isReplyLoading(comment.id)"
-              class="showMoreReplies"
+              v-if="isReplyLoading(comment.id) || comment.hasReplyToken"
+              class="commentReplyContinuation"
             >
-              <FtSpinner
-                inline
-                size="18px"
-                border-width="2px"
-                :label="$t('Comments.Getting comment replies, please wait')"
-              />
-            </div>
-            <div
-              v-else-if="comment.hasReplyToken"
-              class="showMoreReplies"
-              role="button"
-              tabindex="0"
-              @click="getCommentReplies(index)"
-              @keydown.space.prevent="getCommentReplies(index)"
-              @keydown.enter.prevent="getCommentReplies(index)"
-            >
-              <span>{{ $t("Comments.Show More Replies") }}</span>
+              <button
+                type="button"
+                class="commentReplyContinuationButton"
+                :disabled="isReplyLoading(comment.id)"
+                @click="getCommentReplies(index)"
+              >
+                <FtSpinner
+                  v-if="isReplyLoading(comment.id)"
+                  inline
+                  size="18px"
+                  border-width="2px"
+                  :label="$t('Comments.Getting comment replies, please wait')"
+                />
+                <template v-else>
+                  <span>{{ $t("Comments.Show More Replies") }}</span>
+                  <FtIcon
+                    :icon="['fas', 'angle-down']"
+                    aria-hidden="true"
+                  />
+                </template>
+              </button>
             </div>
             <div
               v-if="comment.numReplies > 0"
-              class="hideReplies"
-              role="button"
-              tabindex="0"
-              @click="toggleCommentReplies(index)"
-              @keydown.space.prevent="toggleCommentReplies(index)"
-              @keydown.enter.prevent="toggleCommentReplies(index)"
+              class="commentReplyContinuation"
             >
-              <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+              <button
+                type="button"
+                class="commentReplyContinuationButton"
+                aria-expanded="true"
+                @click="toggleCommentReplies(index)"
+              >
+                <span>{{ toggleCommentRepliesLinkText(comment) }}</span>
+                <FtIcon
+                  :icon="['fas', 'angle-up']"
+                  aria-hidden="true"
+                />
+              </button>
             </div>
           </div>
         </div>
@@ -426,7 +443,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -447,6 +464,7 @@ import { useRelativeTimeClock } from '../../composables/useRelativeTimeClock'
 import {
   getReplyContinuationToken,
   getReplyLoadState,
+  isEmptyReplyContinuation,
   isMissingReplyResponseError,
   shouldLoadInitialReplies
 } from '../../helpers/comment-replies'
@@ -961,15 +979,7 @@ function toggleCommentRepliesLinkText(comment) {
     return t('Comments.Hide {replyCount} replies', { replyCount: comment.numReplies }, comment.numReplies)
   }
 
-  if (comment.hasOwnerReplied) {
-    if (comment.numReplies > 1) {
-      return t('Comments.View {replyCount} replies from {channelName} and others', { replyCount: comment.numReplies, channelName: props.channelName })
-    }
-
-    return t('Comments.View 1 reply from {channelName}', { channelName: props.channelName })
-  }
-
-  return t('Comments.View {replyCount} replies', { replyCount: comment.numReplies }, comment.numReplies)
+  return t('Comments.Reply Count', { replyCount: comment.numReplies }, comment.numReplies)
 }
 
 /**
@@ -1290,6 +1300,20 @@ async function getCommentRepliesLocal(index, commentId = null) {
     const parsedReplies = replyThreads
       .map(reply => parseLocalCommentThread(reply))
       .filter(Boolean)
+
+    if (isEmptyReplyContinuation(parsedReplies.length, nextContinuation !== null)) {
+      replyTokens.delete(comment.id)
+      comment.hasReplyToken = false
+      comment.numReplies = comment.replies.length
+      comment.showReplies = comment.replies.length > 0
+      showToast({
+        message: t('Comments.YouTube did not provide advertised replies'),
+        time: 10000,
+        icon: ['fas', 'comment']
+      })
+      return
+    }
+
     comment.replies = comment.replies.concat(parsedReplies)
 
     const replyLoadState = getReplyLoadState(

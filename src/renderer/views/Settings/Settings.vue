@@ -22,7 +22,7 @@
         :title="t('Back')"
         @click="goBack"
       >
-        <FontAwesomeIcon :icon="['fas', 'arrow-left']" />
+        <FtIcon :icon="['fas', 'arrow-left']" />
       </button>
       <div
         class="settingsBreadcrumb"
@@ -32,7 +32,7 @@
           v-if="isAboutOpen"
           class="settingsBreadcrumbLabel"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="settingsWindowIcon"
             :icon="['fas', 'info-circle']"
             aria-hidden="true"
@@ -45,7 +45,7 @@
           class="settingsBreadcrumbRoot"
           @click="returnToSettingsMenu"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="settingsWindowIcon"
             :icon="['fas', 'cog']"
             aria-hidden="true"
@@ -56,7 +56,7 @@
           v-else
           class="settingsBreadcrumbLabel"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="settingsWindowIcon"
             :icon="['fas', 'cog']"
             aria-hidden="true"
@@ -64,7 +64,7 @@
           <span class="settingsBreadcrumbText">{{ t('Settings.Settings') }}</span>
         </span>
         <template v-if="!isAboutOpen && currentSectionTitle">
-          <FontAwesomeIcon
+          <FtIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
           />
@@ -74,7 +74,7 @@
             class="settingsBreadcrumbParent"
             @click="returnToCategory"
           >
-            <FontAwesomeIcon
+            <FtIcon
               v-if="currentSectionIcon"
               class="settingsBreadcrumbCategoryIcon"
               :icon="currentSectionIcon"
@@ -86,7 +86,7 @@
             v-else
             class="settingsBreadcrumbLabel"
           >
-            <FontAwesomeIcon
+            <FtIcon
               v-if="currentSectionIcon"
               class="settingsBreadcrumbCategoryIcon"
               :icon="currentSectionIcon"
@@ -96,18 +96,26 @@
           </span>
         </template>
         <template v-if="!isAboutOpen && subpageTitle">
-          <FontAwesomeIcon
+          <FtIcon
             class="settingsBreadcrumbSeparator"
             :icon="['fas', 'angle-right']"
           />
-          <span class="settingsBreadcrumbLabel">{{ subpageTitle }}</span>
+          <span class="settingsBreadcrumbLabel">
+            <FtIcon
+              v-if="subpageIcon"
+              class="settingsBreadcrumbCategoryIcon settingsBreadcrumbSubpageIcon"
+              :icon="subpageIcon"
+              aria-hidden="true"
+            />
+            <span class="settingsBreadcrumbText">{{ subpageTitle }}</span>
+          </span>
         </template>
       </div>
       <label
-        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen"
+        v-if="unlocked && !isProfileManagerOpen && !isKeyboardShortcutPromptOpen && !isAboutOpen && !subpageTitle"
         class="settingsSearch"
       >
-        <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
+        <FtIcon :icon="['fas', 'magnifying-glass']" />
         <input
           ref="settingsSearchInputRef"
           v-model="settingsSearchQuery"
@@ -126,7 +134,7 @@
           :title="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
           @click="showKeyboardShortcutPrompt"
         >
-          <FontAwesomeIcon :icon="['fas', 'keyboard']" />
+          <FtIcon :icon="['fas', 'keyboard']" />
         </button>
         <button
           v-if="!isAboutOpen"
@@ -138,7 +146,7 @@
           :aria-pressed="settingsSectionSortEnabled"
           @click="updateSettingsSectionSortEnabled(!settingsSectionSortEnabled)"
         >
-          <FontAwesomeIcon :icon="['fas', 'sort-alpha-down']" />
+          <FtIcon :icon="['fas', 'sort-alpha-down']" />
         </button>
         <button
           v-if="!isAboutOpen"
@@ -150,7 +158,7 @@
           :aria-pressed="highlightChangedSettings"
           @click="updateHighlightChangedSettings(!highlightChangedSettings)"
         >
-          <FontAwesomeIcon :icon="['fas', 'pen']" />
+          <FtIcon :icon="['fas', 'pen']" />
         </button>
         <button
           v-if="!isAboutOpen"
@@ -162,7 +170,7 @@
           :aria-pressed="showPerformanceImpactIndicators"
           @click="updateShowPerformanceImpactIndicators(!showPerformanceImpactIndicators)"
         >
-          <FontAwesomeIcon :icon="['fas', 'gauge-high']" />
+          <FtIcon :icon="['fas', 'gauge-high']" />
         </button>
         <button
           type="button"
@@ -171,7 +179,7 @@
           :title="maximizeButtonLabel"
           @click="toggleMaximized"
         >
-          <FontAwesomeIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
+          <FtIcon :icon="isMaximized ? ['fas', 'compress'] : ['fas', 'expand']" />
         </button>
         <button
           ref="settingsCloseButtonRef"
@@ -181,7 +189,7 @@
           :title="t('Close')"
           @click="closeSettings"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
       </div>
     </header>
@@ -262,7 +270,7 @@
                   class="settingsSearchResultHeading"
                   @click="navigateToSection(result.section.type)"
                 >
-                  <FontAwesomeIcon :icon="result.section.icon" />
+                  <FtIcon :icon="result.section.icon" />
                   {{ result.section.title }}
                 </button>
                 <button
@@ -312,7 +320,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import {
   computed,
   nextTick,
@@ -389,7 +397,9 @@ const settingsCloseButtonRef = useTemplateRef('settingsCloseButtonRef')
 const menuRef = useTemplateRef('menuRef')
 const subpageTargetId = `settings-subpage-${useId().replaceAll(':', '')}`
 const subpageTitle = ref('')
+const subpageIcon = ref(null)
 let closeSubpage = null
+let subpagePersistsOnDeactivate = false
 let settingsResizeObserver = null
 let settingsSectionResizeObserver = null
 let profileManagerResizeObserver = null
@@ -646,14 +656,18 @@ const unlocked = ref(store.getters.getSettingsPassword === '')
 
 provide(settingsSubpageKey, {
   targetId: subpageTargetId,
-  open(title, close) {
+  open(title, close, persistOnDeactivate = false, icon = null) {
     subpageTitle.value = title
+    subpageIcon.value = icon
     closeSubpage = close
+    subpagePersistsOnDeactivate = persistOnDeactivate
   },
   close(close) {
     if (closeSubpage === close) {
       subpageTitle.value = ''
+      subpageIcon.value = null
       closeSubpage = null
+      subpagePersistsOnDeactivate = false
     }
   }
 })
@@ -661,6 +675,9 @@ provide(settingsSubpageKey, {
 onMounted(handleMounted)
 onActivated(handleMounted)
 onDeactivated(() => {
+  if (!subpagePersistsOnDeactivate) {
+    closeSubpage?.()
+  }
   stopObserving()
   stopDragging()
   stopResizing()
@@ -728,7 +745,7 @@ function handleMounted() {
         if (settingsContentRef.value) {
           clampOverlayScrollTop(
             settingsContentRef.value,
-            settingsContentRef.value.querySelector('.section')
+            getActiveSettingsSectionEnd(settingsContentRef.value)
           )
         }
       }
@@ -780,25 +797,32 @@ function observeActiveSettingsSection() {
   settingsSectionResizeObserver?.disconnect()
   settingsSectionResizeObserver = null
   const content = settingsContentRef.value
-  const section = content?.querySelector('.section')
+  const section = getActiveSettingsSectionEnd(content)
   if (!content || !section) return
   settingsContentPaddingBottom = Number.parseFloat(getComputedStyle(content).paddingBottom)
 
   settingsSectionResizeObserver = new ResizeObserver(() => {
     clampOverlayScrollTop(content, section)
   })
-  settingsSectionResizeObserver.observe(section)
+  content.querySelectorAll(':scope > .section').forEach(element => {
+    settingsSectionResizeObserver.observe(element)
+  })
   clampOverlayScrollTop(content, section)
 }
 
 function clampSettingsContentScroll(event) {
   const content = event.currentTarget
-  const section = content.querySelector('.section')
+  const section = getActiveSettingsSectionEnd(content)
   if (!section) return
   const contentEnd = section.offsetTop + section.offsetHeight + settingsContentPaddingBottom
   if (content.scrollTop > Math.max(0, contentEnd - content.clientHeight)) {
     clampOverlayScrollTop(content, section)
   }
+}
+
+function getActiveSettingsSectionEnd(content) {
+  const sections = content?.querySelectorAll(':scope > .section')
+  return sections?.[sections.length - 1] ?? null
 }
 
 function handleUnlock() {
@@ -824,6 +848,7 @@ function navigateToSection(sectionType) {
   const previousSection = activeSection.value
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   activeSection.value = sectionType
   if (isInDesktopView.value && previousSection !== null && previousSection !== sectionType) {
@@ -928,6 +953,7 @@ function getSearchTargetText(element) {
 function handleSettingsSearch() {
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   activeSection.value = settingsSearchQuery.value === '' && isInDesktopView.value
     ? getRememberedSection()
@@ -984,6 +1010,7 @@ function returnToSettingsMenu() {
   }
   closeSubpage?.()
   subpageTitle.value = ''
+  subpageIcon.value = null
   closeSubpage = null
   if (!isInDesktopView.value) {
     const previousSection = activeSection.value

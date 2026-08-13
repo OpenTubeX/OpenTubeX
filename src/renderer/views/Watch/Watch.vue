@@ -6,7 +6,9 @@
       ambientModeActive,
       isLoading,
       shortsPlayerActive: customShortsPlayerActive,
-      useTheatreMode: (useTheatreMode && !isLoading) || (isLoading && defaultViewingMode === 'theatre'),
+      useTheatreMode: isLoading
+        ? (loadingTheatreMode ?? (defaultViewingMode === 'theatre'))
+        : useTheatreMode,
       noSidebar: !theatrePossible && !sidebarPanelLeaving
     }"
   >
@@ -28,7 +30,7 @@
         <div
           v-if="isLoading && customShortsPlayerActive"
           class="videoPlayer videoPlayerPlaceholder shortsPlayerPlaceholder"
-          :data-tab-loading-indicator="isTabPresented ? '' : null"
+          data-tab-loading-indicator
         >
           <img
             v-if="shortsTransitionPreview"
@@ -62,13 +64,13 @@
         <div
           v-else-if="isLoading"
           class="videoPlayer videoPlayerPlaceholder ft-shimmer"
-          :data-tab-loading-indicator="isTabPresented ? '' : null"
+          data-tab-loading-indicator
         />
         <div
           v-else-if="ytDlpStreamsPending && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
           class="videoPlayer videoPlayerPlaceholder streamPlaceholder"
           :class="{ shortsPlayerPlaceholder: customShortsPlayerActive }"
-          :data-tab-loading-indicator="isTabPresented ? '' : null"
+          data-tab-loading-indicator
         >
           <img
             v-if="thumbnail"
@@ -93,6 +95,7 @@
           :legacy-formats="legacyFormats"
           :start-time="startTimeSeconds"
           :captions="captions"
+          :caption-translations="captionTranslations"
           :storyboard-src="videoStoryboardSrc"
           :annotations="videoAnnotations"
           :hide-annotations="hideEndScreenAnnotations"
@@ -251,7 +254,7 @@
             class="premiereDate"
             :class="{trailer: isUpcoming && playabilityStatus === 'OK'}"
           >
-            <font-awesome-icon
+            <ft-icon
               :icon="['fas', 'satellite-dish']"
               class="premiereIcon"
             />
@@ -286,7 +289,7 @@
               :aria-pressed="liveReminderActive"
               @click="toggleLiveReminder"
             >
-              <font-awesome-icon :icon="['fas', 'calendar-days']" />
+              <ft-icon :icon="['fas', 'calendar-days']" />
               {{ liveReminderActive ? $t('Video.Notification on') : $t('Video.Notify me') }}
             </button>
           </div>
@@ -297,7 +300,7 @@
             <div
               class="errorWrapper"
             >
-              <font-awesome-icon
+              <ft-icon
                 :icon="customErrorIcon || ['fas', 'exclamation-circle']"
                 aria-hidden="true"
                 class="errorIcon"
@@ -372,7 +375,7 @@
             @click="openShortsLinkedVideo"
             @auxclick="openShortsLinkedVideo"
           >
-            <font-awesome-icon :icon="['fas', 'play']" />
+            <ft-icon :icon="['fas', 'play']" />
             <span dir="auto">{{ shortsLinkedVideo.title }}</span>
           </RouterLink>
         </div>
@@ -393,7 +396,7 @@
               :title="$t('Video.Previous')"
               @click="navigateSubscriptionShort(-1)"
             >
-              <font-awesome-icon :icon="['fas', 'arrow-up']" />
+              <ft-icon :icon="['fas', 'arrow-up']" />
             </button>
             <button
               type="button"
@@ -403,7 +406,7 @@
               :title="$t('Video.Next')"
               @click="navigateSubscriptionShort(1)"
             >
-              <font-awesome-icon :icon="['fas', 'arrow-down']" />
+              <ft-icon :icon="['fas', 'arrow-down']" />
             </button>
           </div>
           <template v-if="isLoading">
@@ -541,7 +544,7 @@
           class="shortsAuxPanelHeader"
         >
           <h2>
-            <font-awesome-icon :icon="['fas', 'circle-info']" />
+            <ft-icon :icon="['fas', 'circle-info']" />
             {{ $t('Video.Metadata') }}
           </h2>
           <button
@@ -551,7 +554,7 @@
             :title="$t('Video.Close Metadata')"
             @click="toggleShortsMetadata"
           >
-            <font-awesome-icon :icon="['fas', 'xmark']" />
+            <ft-icon :icon="['fas', 'xmark']" />
           </button>
         </div>
         <div
@@ -825,7 +828,7 @@
               :title="$t('Chapters.Close Chapters')"
               @click="closeSidebarChapters"
             >
-              <font-awesome-icon :icon="['fas', 'xmark']" />
+              <ft-icon :icon="['fas', 'xmark']" />
             </button>
           </div>
           <watch-video-chapters

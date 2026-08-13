@@ -18,6 +18,134 @@ const WATCH_PAGE_SEED = {
 
 test.use({ seed: { settings: WATCH_PAGE_SEED } })
 
+test('a background watch tab stays loading until its cached avatar is ready', async ({ app, page }) => {
+  await mockPlayableWatchPage(app, page)
+
+  await page.evaluate(() => {
+    const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+    store.commit('setVideoAvatar', {
+      videoId: 'jNQXAC9IVRw',
+      avatar: 'data:image/png;base64,iVBORw0KGgo='
+    })
+
+    window.__backgroundWatchIconStates = []
+    const record = () => {
+      for (const tab of document.querySelectorAll('.tab')) {
+        window.__backgroundWatchIconStates.push({
+          id: tab.dataset.tabId,
+          loading: tab.querySelector('.loadingDot') != null,
+          avatar: tab.querySelector('.tabAvatar') != null,
+          pageIcon: tab.querySelector('.tabPageIcon') != null
+        })
+      }
+    }
+    new MutationObserver(record).observe(
+      document.querySelector('.tabsContainer'),
+      { childList: true, subtree: true }
+    )
+  })
+
+  const watchTab = await page.evaluate(() => window.ftElectron.tabs.create({
+    route: '/watch/jNQXAC9IVRw',
+    title: 'Cached video',
+    makeActive: false,
+    preloadInBackground: true
+  }))
+  const tab = page.locator(`.tab[data-tab-id="${watchTab.id}"]`)
+
+  await expect(tab.locator('.loadingDot')).toBeVisible()
+  await expect(tab.locator('.loadingDot')).toHaveCount(0)
+  await expect(tab.locator('.tabAvatar')).toBeVisible()
+
+  const states = await page.evaluate(
+    tabId => window.__backgroundWatchIconStates.filter(state => state.id === tabId),
+    watchTab.id
+  )
+  expect(states.some(state => state.loading)).toBe(true)
+  expect(states.some(state => state.pageIcon)).toBe(false)
+})
+
+for (const { defaultViewingMode, currentTheatreMode } of [
+  { defaultViewingMode: 'theatre', currentTheatreMode: false },
+  { defaultViewingMode: 'default', currentTheatreMode: true }
+]) {
+  test.describe(`recommended video morph with ${defaultViewingMode} as the default`, () => {
+    test.use({
+      seed: {
+        settings: {
+          ...WATCH_PAGE_SEED,
+          defaultViewingMode
+        }
+      }
+    })
+
+    test(`uses the current ${currentTheatreMode ? 'theatre' : 'default'} layout`, async ({ app, page }) => {
+      await mockPlayableWatchPage(app, page)
+
+      let releaseRecommendedPlayer
+      await page.route(/\/youtubei\/v1\/player/, async (route, request) => {
+        const videoId = JSON.parse(request.postData() ?? '{}').videoId
+        if (videoId === 'recommended-video') {
+          await new Promise(resolve => { releaseRecommendedPlayer = resolve })
+        }
+        return route.fallback()
+      })
+
+      await openMockedVideo(page)
+      const watchView = await watchViewHandle(page)
+      await watchView.evaluate(async (view, theatreMode) => {
+        view.useTheatreMode = theatreMode
+        view.recommendedVideos = [{
+          videoId: 'recommended-video',
+          title: 'Recommended video',
+          author: 'Recommended channel',
+          authorId: 'UC-recommended-channel',
+          lengthSeconds: 60,
+          published: Date.now(),
+          type: 'video'
+        }]
+        await view.$nextTick()
+      }, currentTheatreMode)
+      const lazyRecommendation = page.locator('.watchVideoRecommendations > div').nth(1)
+      await lazyRecommendation.evaluate(element => { element.style.minHeight = '1px' })
+      await lazyRecommendation.scrollIntoViewIfNeeded()
+      const recommendation = page.locator('.watchVideoRecommendations .title', {
+        hasText: 'Recommended video'
+      })
+      await expect(recommendation).toBeVisible()
+
+      await page.evaluate((activeTabSelector) => {
+        const startViewTransition = document.startViewTransition.bind(document)
+        document.startViewTransition = (update) => {
+          window.__recommendedMorph = {
+            sourceName: document.querySelector('.watchVideoRecommendations .thumbnailImage')
+              ?.style.viewTransitionName
+          }
+          return startViewTransition(async () => {
+            await update()
+            const player = document.querySelector(`${activeTabSelector} .videoPlayer`)
+            const layout = document.querySelector(`${activeTabSelector} .videoLayout`)
+            window.__recommendedMorph.destinationName = getComputedStyle(player).viewTransitionName
+            window.__recommendedMorph.usesTheatreLayout = layout.classList.contains('useTheatreMode')
+          })
+        }
+      }, activeTab)
+
+      await recommendation.click()
+      await expect(page).toHaveURL(/#\/watch\/recommended-video/)
+      await expect.poll(() => page.evaluate(() => window.__recommendedMorph)).toEqual({
+        sourceName: 'video-morph',
+        destinationName: 'video-morph',
+        usesTheatreLayout: currentTheatreMode
+      })
+      expect(await watchView.evaluate(view => view.loadingTheatreMode)).toBe(currentTheatreMode)
+
+      await expect.poll(() => typeof releaseRecommendedPlayer).toBe('function')
+      releaseRecommendedPlayer()
+    })
+  })
+}
+
 const FULLSCREEN_PLAYLIST_ID = 'fullscreen-preview'
 const FULLSCREEN_PLAYLIST = {
   _id: FULLSCREEN_PLAYLIST_ID,
@@ -100,6 +228,52 @@ async function mockTranslatedEndscreen(app, page) {
 }
 
 test.describe('watch page', () => {
+  test('an IP-blocked HTML watch page makes the built-in engine try yt-dlp', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route(/^https:\/\/www\.youtube\.com\/watch\?/, (route) => route.fulfill({
+      status: 429,
+      contentType: 'text/html',
+      body: '<title>Sorry...</title>'
+    }))
+    await app.electronApp.evaluate(({ ipcMain }) => {
+      globalThis.__ytDlpIpBlockFallbackCalls = 0
+      ipcMain.removeHandler('yt-dlp-get-playback-info')
+      ipcMain.handle('yt-dlp-get-playback-info', () => {
+        globalThis.__ytDlpIpBlockFallbackCalls++
+        return { error: 'ENOENT' }
+      })
+    })
+
+    await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
+    await page.locator(sel.searchInput).press('Enter')
+    await expect(page).toHaveURL(/#\/watch\/jNQXAC9IVRw/)
+
+    await expect.poll(() => app.electronApp.evaluate(() => globalThis.__ytDlpIpBlockFallbackCalls)).toBe(1)
+    const watchView = await watchViewHandle(page)
+    expect(await watchView.evaluate((view) => ({
+      ipBlockDetected: view.ipBlockDetectedInCurrentChain,
+      fallbackAttempted: view.playbackEngineFallbackAttemptedForCurrentVideo,
+      fallbackTarget: view.playbackEngineFallbackTarget
+    }))).toEqual({
+      ipBlockDetected: true,
+      fallbackAttempted: true,
+      fallbackTarget: null
+    })
+
+    expect(await watchView.evaluate(async (view) => {
+      let recoveryCalls = 0
+      view.ipBlockDetectedInCurrentChain = true
+      view.playbackEngineFallbackTarget = 'yt-dlp'
+      view.extractYtDlpPlaybackSource = async () => false
+      view.runIpBlockRecoveryScriptAndReload = async () => {
+        recoveryCalls++
+        return true
+      }
+      await view.applyYtDlpPlaybackSource(view.videoLoadGeneration, view.videoId)
+      return recoveryCalls
+    })).toBe(1)
+  })
+
   test('falls back to yt-dlp when the built-in live source has no manifest', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     await page.locator(sel.searchInput).fill('https://www.youtube.com/watch?v=jNQXAC9IVRw')
@@ -808,6 +982,129 @@ test.describe('watch page', () => {
     await expect(prompt).toHaveCount(0)
   })
 
+  test('previews and submits edited SponsorBlock timestamps', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    let submittedBody = null
+
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([]),
+      contentType: 'application/json'
+    }))
+    await page.route('**/api/skipSegments', async route => {
+      submittedBody = route.request().postDataJSON()
+      await route.fulfill({
+        body: JSON.stringify([{
+          UUID: 'submitted-edited-segment',
+          category: 'sponsor',
+          segment: [11.722, 12]
+        }]),
+        contentType: 'application/json'
+      })
+    })
+    await page.evaluate(async () => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+      await store.dispatch('updateSponsorBlockEnableSubmission', true)
+    })
+
+    await openMockedVideo(page)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 11
+    })
+    await page.locator('.sponsorblock-start-button').click({ force: true })
+    await video.evaluate(element => { element.currentTime = 12 })
+    await page.locator('.sponsorblock-end-button').click({ force: true })
+
+    const submissionMenu = page.locator('.sponsorBlockSubmissionMenu')
+    await submissionMenu.locator('.sponsorBlockDraftTimeInput').first().fill('0:11.722')
+    await submissionMenu.getByRole('button', { name: 'Inspect' }).click()
+    await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(11.722, 3)
+
+    await video.evaluate(element => {
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          window.__sponsorBlockPreviewSeekTime ??= value
+          currentTime.set.call(this, value)
+        }
+      })
+    })
+    await submissionMenu.getByRole('button', { name: 'Preview' }).click()
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockPreviewSeekTime ?? null))
+      .toBeCloseTo(9.722, 3)
+    await video.evaluate(element => {
+      element.currentTime = 11.8
+      element.dispatchEvent(new Event('timeupdate'))
+    })
+    await submissionMenu.locator('.sponsorBlockSubmissionButton').click()
+
+    await expect.poll(() => submittedBody).not.toBeNull()
+    expect(submittedBody.segments).toEqual([{
+      actionType: 'skip',
+      category: 'sponsor',
+      description: '',
+      segment: [11.722, 12]
+    }])
+  })
+
+  test('skips SponsorBlock segments at their boundary without timeupdate events', async ({ app, page }) => {
+    await mockPlayableWatchPage(app, page)
+    await page.route('**/api/skipSegments/**', route => route.fulfill({
+      body: JSON.stringify([{
+        videoID: 'jNQXAC9IVRw',
+        segments: [{
+          UUID: 'precise-skip-segment',
+          actionType: 'skip',
+          category: 'sponsor',
+          description: '',
+          locked: 0,
+          segment: [15, 20],
+          videoDuration: 30,
+          votes: 1
+        }]
+      }]),
+      contentType: 'application/json'
+    }))
+    await page.evaluate(() => {
+      const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      store.commit('setUseSponsorBlock', true)
+    })
+
+    await openMockedVideo(page)
+    await expect(page.locator('.sponsorBlockMarker')).toHaveCount(1)
+
+    const video = page.locator('.ftVideoPlayer video')
+    await video.evaluate(element => {
+      element.pause()
+      element.currentTime = 14.57
+      element.dispatchEvent(new Event('timeupdate'))
+
+      const currentTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime')
+      Object.defineProperty(element, 'currentTime', {
+        configurable: true,
+        get: currentTime.get,
+        set(value) {
+          if (value === 20) {
+            window.__sponsorBlockSkipStartedAt = currentTime.get.call(this)
+          }
+          currentTime.set.call(this, value)
+        }
+      })
+      element.addEventListener('timeupdate', event => event.stopImmediatePropagation(), { capture: true })
+      return element.play()
+    })
+
+    await expect.poll(() => page.evaluate(() => window.__sponsorBlockSkipStartedAt ?? null)).not.toBeNull()
+    const skipStartedAt = await page.evaluate(() => window.__sponsorBlockSkipStartedAt)
+    expect(skipStartedAt).toBeGreaterThanOrEqual(15)
+    expect(skipStartedAt).toBeLessThan(15.05)
+  })
+
   test('displays and submits full-video SponsorBlock labels', async ({ app, page }) => {
     await mockPlayableWatchPage(app, page)
     const fullVideoSegment = {
@@ -1140,12 +1437,27 @@ test.describe('manual comment loading', () => {
 
     const comments = page.locator('.comment')
     const commentIndex = await comments.evaluateAll(elements => (
-      elements.findIndex(element => element.querySelector('.commentMoreReplies'))
+      elements.findIndex(element => element.querySelector('.commentReplyRootToggle'))
     ))
     expect(commentIndex).toBeGreaterThanOrEqual(0)
     const comment = comments.nth(commentIndex)
-    const replyToggle = comment.locator('.commentMoreReplies')
+    const replyToggleRow = comment.locator('.commentReplyRootToggle')
+    const replyToggle = replyToggleRow.locator('.commentReplyContinuationButton')
     await expect(replyToggle).toBeVisible()
+    await expect(replyToggle).not.toContainText('View')
+    await expect(replyToggle.locator('svg')).toBeVisible()
+    expect(await replyToggleRow.evaluate(element => (
+      getComputedStyle(element, '::before').borderInlineStartWidth
+    ))).toBe('1px')
+    expect(await comment.evaluate((element) => {
+      const toggle = element.querySelector('.commentReplyRootToggle')
+      const stemStyle = getComputedStyle(element, '::before')
+      const connectorStyle = getComputedStyle(toggle, '::before')
+      const stemBottom = element.getBoundingClientRect().bottom - Number.parseFloat(stemStyle.insetBlockEnd)
+      const connectorTop = toggle.getBoundingClientRect().top +
+        Number.parseFloat(connectorStyle.insetBlockStart)
+      return Math.abs(stemBottom - connectorTop)
+    })).toBeLessThanOrEqual(0.5)
 
     await page.route(/\/youtubei\/v1\/next/, route => route.fulfill({
       status: 200,
@@ -1161,8 +1473,8 @@ test.describe('manual comment loading', () => {
 
     await replyToggle.click()
 
-    await expect(comment.locator('.commentMoreRepliesSpinner')).toHaveCount(0)
-    await expect(comment.locator('.commentMoreReplies')).toHaveCount(0)
+    await expect(comment.locator('.commentReplyRootToggle')).toHaveCount(0)
+    await expect(comment).not.toHaveClass(/commentThreadCollapsed/)
     await expect(comment.locator('.commentReplyBranch')).toHaveCount(0)
   })
 

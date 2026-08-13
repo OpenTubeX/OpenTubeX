@@ -196,7 +196,7 @@ test.describe('background watch tab', () => {
     await expect(page.locator('.commentsTitle')).toBeVisible()
   })
 
-  test('does not show a stale loading indicator after leaving a loaded video tab', async ({ page }) => {
+  test('keeps reporting genuine loading after leaving a video tab', async ({ page }) => {
     await openVideo(page)
 
     const videoTab = page.locator(sel.tabs).first()
@@ -229,8 +229,8 @@ test.describe('background watch tab', () => {
 
     expect(await page.evaluate(
       () => window.__videoTabShowedLoadingAfterDeactivation
-    )).toBe(false)
-    await expect(videoTab).not.toHaveClass(/loading/)
+    )).toBe(true)
+    await expect(videoTab).toHaveClass(/loading/)
 
     await videoTab.click()
     await expect(videoTab).toHaveClass(/loading/)
@@ -239,7 +239,7 @@ test.describe('background watch tab', () => {
     ).toHaveCount(1)
   })
 
-  test('restores loading updates when tab activation is rejected', async ({ page }) => {
+  test('keeps loading updates when tab activation is rejected', async ({ page }) => {
     await openVideo(page)
 
     const videoTab = page.locator(sel.tabs).first()
@@ -704,13 +704,15 @@ test.describe('watch page', () => {
 
     // Exercise reply loading and its continuation path, not only the initial
     // top-level comment batch (8bcf0b58d).
-    const replyToggle = page.locator('.commentMoreReplies').first()
+    const replyToggle = page.locator('.commentReplyRootToggle .commentReplyContinuationButton').first()
     await expect(replyToggle).toBeVisible()
     await replyToggle.click()
     const replies = page.locator('.commentReplyBranch')
     await expect(replies.first()).toBeVisible({ timeout: 30_000 })
 
-    const showMoreReplies = page.locator('.showMoreReplies').first()
+    const showMoreReplies = page.locator(
+      '.commentReplies > .commentReplyContinuation > .commentReplyContinuationButton:not([aria-expanded])'
+    ).first()
     await expect(showMoreReplies).toBeVisible()
     const [continuationResponse] = await Promise.all([
       page.waitForResponse((response) => (
@@ -1441,6 +1443,26 @@ test.describe('custom Shorts player', () => {
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s')
 
+    const hiddenSeekBarState = await player.evaluate(element => {
+      const videoElement = element.querySelector('video')
+      const seekInput = element.querySelector('.shaka-seek-bar')
+      const seekRange = element.ui.getControls().getPlayer().seekRange()
+      const currentTime = seekRange.start + (seekRange.end - seekRange.start) / 2
+      seekInput.value = seekRange.start
+      videoElement.currentTime = currentTime
+      window.dispatchEvent(new Event('blur'))
+      videoElement.dispatchEvent(new Event('timeupdate'))
+      return { currentTime, seekValue: Number(seekInput.value) }
+    })
+    expect(hiddenSeekBarState.seekValue).toBeCloseTo(hiddenSeekBarState.currentTime, 3)
+
+    const volumeSlider = player.locator('.shortsVolumeSlider')
+    await video.evaluate(element => {
+      element.muted = false
+      element.volume = 0.37
+    })
+    await expect(volumeSlider).toHaveValue('37')
+
     await expect(seekBar).toHaveCSS('opacity', '1')
     await expect(seekBar).toHaveCSS('height', '3px')
     await expect(seekBar).toHaveCSS('bottom', '-2px')
@@ -1476,7 +1498,7 @@ test.describe('custom Shorts player', () => {
     expect((await replayIcon.locator('path').getAttribute('d')).length).toBeGreaterThan(20)
   })
 
-  test('fullscreen Shorts controls follow the video hover area', async ({ page, innertube }) => {
+  test('fullscreen Shorts controls follow the video hover area', async ({ app, page, innertube }) => {
     test.skip(innertube.replay, 'no recorded fixtures for this Short')
     await page.locator(sel.searchInput).fill('https://www.youtube.com/shorts/w1WKmSqwM8I')
     await page.locator(sel.searchInput).press('Enter')
@@ -1501,6 +1523,7 @@ test.describe('custom Shorts player', () => {
     const topControls = player.locator('.shortsTopControls')
     const actionDock = player.locator('.fullscreenActions')
     const videoSpace = player.locator('.shortsFullscreenVideoSpace')
+    const seekBar = player.locator('.shaka-seek-bar-container')
     const [playerBounds, videoBounds] = await Promise.all([
       player.boundingBox(),
       videoSpace.boundingBox(),
@@ -1515,12 +1538,17 @@ test.describe('custom Shorts player', () => {
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('opacity', '1')
 
+    await player.evaluate(element => element.classList.add('no-cursor'))
     await page.mouse.move(playerBounds.x + 8, playerBounds.y + playerBounds.height / 2)
+    await expect(player).not.toHaveClass(/no-cursor/)
     await expect(controls).not.toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('transition-duration', '0.6s, 0s, 0.25s, 0.25s')
     await expect(topControls).toHaveCSS('opacity', '0')
     await expect(actionDock).toHaveCSS('opacity', '1')
     await expect(actionDock).toHaveCSS('pointer-events', 'auto')
+    const seekBarBounds = await seekBar.boundingBox()
+    expect(Math.abs(seekBarBounds.x - videoBounds.x)).toBeLessThan(2)
+    expect(Math.abs(seekBarBounds.width - videoBounds.width)).toBeLessThan(2)
 
     await page.mouse.move(
       videoBounds.x + videoBounds.width / 2,
@@ -1528,6 +1556,17 @@ test.describe('custom Shorts player', () => {
     )
     await expect(controls).toHaveAttribute('shown', 'true')
     await expect(topControls).toHaveCSS('opacity', '1')
+
+    await setPlayerFullscreen(page, false)
+    await setWindowWidth(app, 600)
+    await player.evaluate(element => element.classList.add('fullWindow'))
+    await expect(player).toHaveCSS('width', '600px')
+    const [narrowVideoBounds, narrowSeekBarBounds] = await Promise.all([
+      videoSpace.boundingBox(),
+      seekBar.boundingBox(),
+    ])
+    expect(Math.abs(narrowSeekBarBounds.x - narrowVideoBounds.x)).toBeLessThan(2)
+    expect(Math.abs(narrowSeekBarBounds.width - narrowVideoBounds.width)).toBeLessThan(2)
   })
 
   test('preserves the tall aspect ratio of an explicit Shorts link', async ({ page, innertube }) => {

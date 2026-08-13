@@ -11,7 +11,7 @@
       :src="channelThumbnail"
       alt=""
     >
-    <FontAwesomeIcon
+    <FtIcon
       v-else
       :icon="['fas', 'circle-user']"
       class="bubble"
@@ -43,7 +43,7 @@
       v-if="selected"
       class="bubble selected"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'check']"
         class="icon"
       />
@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { useId } from 'vue'
 
 const props = defineProps({

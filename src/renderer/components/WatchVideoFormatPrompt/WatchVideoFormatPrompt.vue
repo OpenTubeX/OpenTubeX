@@ -14,7 +14,7 @@
             class="badge engineBadge"
             :title="t('Change Format.Playback Engine')"
           >
-            <FontAwesomeIcon :icon="['fas', 'circle-play']" />
+            <FtIcon :icon="['fas', 'circle-play']" />
             {{ engineLabel }}
           </span>
           <span
@@ -39,7 +39,7 @@
             :aria-pressed="option.value === activeFormat"
             @click="selectFormat(option.value)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               class="formatOptionIcon"
               :icon="option.icon"
               fixed-width
@@ -50,7 +50,7 @@
                 {{ option.available ? option.description : t('Change Format.Not Available For This Video') }}
               </span>
             </span>
-            <FontAwesomeIcon
+            <FtIcon
               v-if="option.value === activeFormat"
               class="formatOptionCheck"
               :icon="['fas', 'check']"
@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 

@@ -60,8 +60,9 @@ async function fixture(dir, name) {
  * @param {import('@playwright/test').Page} page
  * @param {object} [options]
  * @param {boolean} [options.playable] serve the demo video instead of an error
+ * @param {boolean} [options.captionTranslations] include a translatable caption and target languages
  */
-export async function mockWatchPage(app, page, { playable = false } = {}) {
+export async function mockWatchPage(app, page, { playable = false, captionTranslations = false } = {}) {
   const counters = new Map()
 
   await stubPoToken(app.electronApp)
@@ -72,6 +73,24 @@ export async function mockWatchPage(app, page, { playable = false } = {}) {
 
   if (playable) {
     await routeDemoMedia(page)
+  }
+
+  if (captionTranslations) {
+    await page.route('https://www.youtube.com/api/timedtext**', (route) => {
+      const searchParams = new URL(route.request().url()).searchParams
+      const format = searchParams.get('fmt')
+      const body = format === 'srt'
+        ? '1\n00:00:00,000 --> 00:00:05,000\nTranslated caption\n'
+        : 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nOriginal caption\n'
+      const fulfill = () => route.fulfill({
+        status: 200,
+        contentType: format === 'srt' ? 'application/x-subrip' : 'text/vtt',
+        body
+      })
+      return format === 'srt' && searchParams.get('tlang') === 'fr'
+        ? new Promise(resolve => setTimeout(resolve, 250)).then(fulfill)
+        : fulfill()
+    })
   }
 
   await page.route(/^https?:\/\//, async (route, request) => {
@@ -99,6 +118,32 @@ export async function mockWatchPage(app, page, { playable = false } = {}) {
     if (url.includes('/youtubei/v1/player')) {
       const videoId = JSON.parse(request.postData() ?? '{}').videoId ?? 'jNQXAC9IVRw'
       const json = demoPlayerResponse(videoId)
+
+      if (captionTranslations) {
+        const displayNames = new Intl.DisplayNames(['en'], { type: 'language' })
+        const languageCodes = [
+          'af', 'sq', 'am', 'ar', 'hy', 'as', 'ay', 'az', 'eu', 'be',
+          'bn', 'bs', 'bg', 'my', 'ca', 'ceb', 'zh', 'co', 'hr', 'cs',
+          'da', 'nl', 'dz', 'en', 'eo', 'et', 'ee', 'fo', 'fj', 'fil',
+          'fi', 'fr', 'de'
+        ]
+        json.captions = {
+          playerCaptionsTracklistRenderer: {
+            captionTracks: [{
+              baseUrl: `https://www.youtube.com/api/timedtext?v=${videoId}&caps=asr&kind=asr&lang=en`,
+              name: { simpleText: 'English (auto-generated)' },
+              vssId: 'a.en',
+              languageCode: 'en',
+              kind: 'asr',
+              isTranslatable: true
+            }],
+            translationLanguages: languageCodes.map(languageCode => ({
+              languageCode,
+              languageName: { simpleText: displayNames.of(languageCode) ?? languageCode }
+            }))
+          }
+        }
+      }
 
       if (!playable) {
         json.playabilityStatus = { status: 'UNPLAYABLE', reason: 'Video unavailable' }
@@ -150,8 +195,8 @@ export function mockUnplayableWatchPage(app, page) {
 }
 
 /** @see mockWatchPage */
-export function mockPlayableWatchPage(app, page) {
-  return mockWatchPage(app, page, { playable: true })
+export function mockPlayableWatchPage(app, page, options = {}) {
+  return mockWatchPage(app, page, { ...options, playable: true })
 }
 
 /**

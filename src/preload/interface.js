@@ -12,10 +12,17 @@ ipcRenderer.on(IpcChannels.NATIVE_THEME_UPDATE, (_, shouldUseDarkColors) => {
 let currentUpdateSearchInputTextListener
 let currentYtDlpBinaryDownloadProgressListener
 const ytDlpBinaryDownloadProgressListeners = new Set()
+const ytDlpBinaryUpdatedListeners = new Set()
 
 ipcRenderer.on(IpcChannels.YT_DLP_BINARY_DOWNLOAD_PROGRESS, (_, progress) => {
   for (const listener of ytDlpBinaryDownloadProgressListeners) {
     listener(progress)
+  }
+})
+
+ipcRenderer.on(IpcChannels.YT_DLP_BINARY_UPDATED, () => {
+  for (const listener of ytDlpBinaryUpdatedListeners) {
+    listener()
   }
 })
 
@@ -52,6 +59,24 @@ export default {
    */
   getSystemLocale: () => {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_LOCALE)
+  },
+
+  loadCustomTheme: () => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_LOAD)
+  },
+
+  saveCustomTheme: (theme) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_SAVE, theme)
+  },
+
+  deleteCustomTheme: (themeId) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_DELETE, themeId)
+  },
+
+  handleCustomThemeUpdated: (handler) => {
+    const listener = (_, theme) => handler(theme)
+    ipcRenderer.on(IpcChannels.CUSTOM_THEME_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.CUSTOM_THEME_UPDATED, listener)
   },
 
   /**
@@ -351,6 +376,22 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId)
   },
 
+  ytDlpPlaybackCacheGet: (videoId, cacheKey) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, videoId, cacheKey)
+  },
+
+  ytDlpPlaybackCacheSet: (videoId, cacheKey, expiryTime, source) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, videoId, cacheKey, expiryTime, source)
+  },
+
+  ytDlpPlaybackCacheDelete: (videoId) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, videoId)
+  },
+
+  ytDlpPlaybackCacheClear: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_CLEAR)
+  },
+
   /**
    * @param {'yt-dlp' | 'ffmpeg'} binary
    * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
@@ -383,6 +424,15 @@ export default {
   addYtDlpBinaryDownloadProgressListener: (handler) => {
     ytDlpBinaryDownloadProgressListeners.add(handler)
     return () => ytDlpBinaryDownloadProgressListeners.delete(handler)
+  },
+
+  /**
+   * @param {() => void} handler
+   * @returns {() => void}
+   */
+  addYtDlpBinaryUpdatedListener: (handler) => {
+    ytDlpBinaryUpdatedListeners.add(handler)
+    return () => ytDlpBinaryUpdatedListeners.delete(handler)
   },
 
   /**
@@ -798,10 +848,9 @@ export default {
     /**
      * Activate a tab
      * @param {string} tabId
-     * @returns {Promise<boolean>}
      */
     activate: (tabId) => {
-      return ipcRenderer.invoke(IpcChannels.TABS_ACTIVATE, tabId)
+      ipcRenderer.send(IpcChannels.TABS_ACTIVATE, tabId)
     },
 
     /**

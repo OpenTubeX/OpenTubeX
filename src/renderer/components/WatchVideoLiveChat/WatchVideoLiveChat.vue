@@ -8,7 +8,7 @@
       class="liveChatDockHeader"
     >
       <h3>
-        <FontAwesomeIcon
+        <FtIcon
           class="liveChatDockTitleIcon"
           :icon="['fas', 'message']"
         />
@@ -28,7 +28,7 @@
           :aria-expanded="String(settingsMenuOpen)"
           @click="settingsMenuOpen = !settingsMenuOpen"
         >
-          <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+          <FtIcon :icon="['fas', 'sliders-h']" />
         </button>
         <a
           v-if="!isReplay"
@@ -38,7 +38,7 @@
           target="_blank"
           class="liveChatDockAction"
         >
-          <FontAwesomeIcon :icon="['fas', 'arrow-up-right-from-square']" />
+          <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
         </a>
         <button
           type="button"
@@ -47,7 +47,7 @@
           :title="closeButtonTitle"
           @click="emit('close')"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
         <div
           v-if="settingsMenuOpen"
@@ -98,7 +98,7 @@
           :aria-expanded="String(settingsMenuOpen)"
           @click="settingsMenuOpen = !settingsMenuOpen"
         >
-          <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+          <FtIcon :icon="['fas', 'sliders-h']" />
         </button>
         <a
           v-if="!isReplay"
@@ -108,7 +108,7 @@
           target="_blank"
           class="liveChatActionButton"
         >
-          <FontAwesomeIcon :icon="['fas', 'arrow-up-right-from-square']" />
+          <FtIcon :icon="['fas', 'arrow-up-right-from-square']" />
         </a>
         <button
           type="button"
@@ -117,7 +117,7 @@
           :title="closeButtonTitle"
           @click="emit('close')"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
         <div
           v-if="settingsMenuOpen"
@@ -154,7 +154,7 @@
       >
         {{ errorMessage }}
       </p>
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'exclamation-circle']"
         class="errorIcon"
       />
@@ -387,7 +387,7 @@
         @click="scrollToBottom()"
         @keydown.enter.space.prevent="scrollToBottom()"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="icon"
           :icon="['fas', 'arrow-down']"
         />
@@ -397,7 +397,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowReactive, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

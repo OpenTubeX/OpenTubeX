@@ -1,21 +1,11 @@
 import { net } from 'electron'
-import { VoiceOverTranslationCache } from './VoiceOverTranslationCache'
 import { isAllowedTranslationAudioUrl } from './voiceOverTranslationUrls'
 
 const MAX_VIDEO_DURATION_SECONDS = 4 * 60 * 60
 const MAX_AUDIO_REDIRECTS = 5
-const PARTIAL_CONTENT_STATUS = 5
 const RESPONSE_LANGUAGES = new Set(['ru', 'en', 'kk'])
 const YOUTUBE_VIDEO_ID_PATTERN = /^[\w-]{11}$/
 let clientPromise
-let translationCache
-
-export function configureVoiceOverTranslationCache(directory) {
-  translationCache = new VoiceOverTranslationCache(directory, validateTranslationAudioUrl)
-  translationCache.pruneExpired().catch(error => {
-    console.error('Failed to prune the voice-over translation cache:', error)
-  })
-}
 
 function getClient() {
   clientPromise ??= import('@vot.js/core').then(({ default: VOTClient }) => {
@@ -76,7 +66,7 @@ export async function requestVoiceOverTranslation(payload) {
     throw new TypeError('Invalid voice-over translation request')
   }
 
-  const { videoId, duration, responseLanguage, cache = true } = payload
+  const { videoId, duration, responseLanguage } = payload
 
   if (typeof videoId !== 'string' || !YOUTUBE_VIDEO_ID_PATTERN.test(videoId)) {
     throw new TypeError('Invalid YouTube video ID')
@@ -88,17 +78,6 @@ export async function requestVoiceOverTranslation(payload) {
 
   if (!RESPONSE_LANGUAGES.has(responseLanguage)) {
     throw new RangeError('Unsupported voice-over translation language')
-  }
-
-  if (typeof cache !== 'boolean') {
-    throw new TypeError('Invalid voice-over translation cache setting')
-  }
-
-  if (cache) {
-    const cachedResult = await translationCache?.get(videoId, responseLanguage)
-    if (cachedResult) {
-      return cachedResult
-    }
   }
 
   const client = await getClient()
@@ -116,22 +95,12 @@ export async function requestVoiceOverTranslation(payload) {
   if (result.translated) {
     const translationUrl = await validateTranslationAudioUrl(result.url)
 
-    const response = {
+    return {
       translated: true,
       url: translationUrl.href,
       remainingTime: result.remainingTime,
       status: result.status
     }
-
-    if (cache && result.status !== PARTIAL_CONTENT_STATUS) {
-      try {
-        await translationCache?.set(videoId, responseLanguage, response)
-      } catch (error) {
-        console.error('Failed to cache voice-over translation:', error)
-      }
-    }
-
-    return response
   }
 
   return {

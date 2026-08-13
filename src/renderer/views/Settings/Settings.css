@@ -63,7 +63,7 @@
   padding-inline: 10px;
   color: var(--primary-text-color);
   background: var(--side-nav-color);
-  border-block-end: 1px solid var(--scrollbar-color);
+  border-block-end: 1px solid var(--divider-color);
   cursor: move;
   user-select: none;
 }
@@ -249,7 +249,7 @@
 }
 
 .settingsMenu {
-  border-inline-end: 1px solid var(--scrollbar-color);
+  border-inline-end: 1px solid var(--divider-color);
 }
 
 .settingsContent,

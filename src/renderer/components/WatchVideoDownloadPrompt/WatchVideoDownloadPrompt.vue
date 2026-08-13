@@ -244,7 +244,7 @@
 
       <footer class="downloadFooter">
         <p class="downloadFolderRow">
-          <FontAwesomeIcon :icon="['fas', 'folder-open']" />
+          <FtIcon :icon="['fas', 'folder-open']" />
           <span>{{ downloadFolderDisplay }}</span>
           <button
             type="button"
@@ -317,7 +317,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, reactive, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

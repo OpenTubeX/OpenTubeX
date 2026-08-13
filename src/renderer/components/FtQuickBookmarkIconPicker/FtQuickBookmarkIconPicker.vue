@@ -13,7 +13,7 @@
         :title="iconLabels[icon]"
         @click="emit('update:modelValue', icon)"
       >
-        <FontAwesomeIcon :icon="['fas', icon]" />
+        <FtIcon :icon="['fas', icon]" />
       </button>
     </div>
     <div
@@ -117,8 +117,8 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, useId, useTemplateRef, watch } from 'vue'
+import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
 import FtButton from '../FtButton/FtButton.vue'

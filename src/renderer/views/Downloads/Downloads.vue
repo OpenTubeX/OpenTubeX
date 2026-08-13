@@ -2,7 +2,7 @@
   <FtCard class="downloadsPage">
     <div class="downloadsHeader">
       <h2>
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'download']"
           class="headingIcon"
         />
@@ -49,7 +49,7 @@
       v-if="downloads.length === 0"
       class="emptyDownloads"
     >
-      <FontAwesomeIcon :icon="['fas', 'download']" />
+      <FtIcon :icon="['fas', 'download']" />
       <h2>{{ t('Downloads.No Downloads') }}</h2>
       <p>{{ t('Downloads.No Downloads Description') }}</p>
     </div>
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DownloadRow from './DownloadRow.vue'

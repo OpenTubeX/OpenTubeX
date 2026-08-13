@@ -1,5 +1,6 @@
 <template>
   <FtSettingsSection
+    v-bind="$attrs"
     :title="t('Settings.Player Settings.Player Settings')"
   >
     <div class="switchColumnGrid">
@@ -49,15 +50,6 @@
           setting-key="enableVideoZoom"
           :tooltip="t('Tooltips.Player Settings.Enable Video Zoom')"
           @change="updateEnableVideoZoom"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
-          :compact="true"
-          :default-value="useVoiceOverTranslation"
-          setting-key="useVoiceOverTranslation"
-          :tooltip="t('Tooltips.Player Settings.Voice-over Translation')"
-          @change="updateUseVoiceOverTranslation"
         />
         <FtToggleSwitch
           :label="t('Settings.Player Settings.Hold to Double Playback Speed')"
@@ -142,26 +134,6 @@
           @change="updateLoopShorts"
         />
         <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
-          :compact="true"
-          :disabled="!useVoiceOverTranslation"
-          :default-value="voiceOverTranslationPrepareInBackground"
-          setting-key="voiceOverTranslationPrepareInBackground"
-          :tooltip="t('Settings.Player Settings.Voice-over Translation.Background Preparation Tooltip')"
-          @change="updateVoiceOverTranslationPrepareInBackground"
-        />
-        <FtToggleSwitch
-          v-if="USING_ELECTRON"
-          :label="t('Settings.Player Settings.Voice-over Translation.Cache')"
-          :compact="true"
-          :disabled="!useVoiceOverTranslation"
-          :default-value="voiceOverTranslationCache"
-          setting-key="voiceOverTranslationCache"
-          :tooltip="t('Settings.Player Settings.Voice-over Translation.Cache Tooltip')"
-          @change="updateVoiceOverTranslationCache"
-        />
-        <FtToggleSwitch
           :label="t('Settings.Player Settings.Automatically Open Chapters')"
           :compact="true"
           :default-value="autoOpenChapters"
@@ -199,7 +171,7 @@
         />
       </div>
     </div>
-    <FtFlexBox>
+    <FtFlexBox class="autoPictureInPictureSettings">
       <FtCheckboxList
         v-model="autoPictureInPictureTriggers"
         :title="t('Settings.Player Settings.Auto Picture in Picture.Auto Picture in Picture')"
@@ -210,43 +182,6 @@
         :tooltips="isLinuxWayland ? { minimize: t('Settings.Player Settings.Auto Picture in Picture.Wayland Minimize Unsupported') } : {}"
       />
     </FtFlexBox>
-    <div
-      v-if="USING_ELECTRON && useVoiceOverTranslation"
-      class="voiceOverTranslationControls"
-    >
-      <FtSelect
-        :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
-        :value="voiceOverTranslationLanguage"
-        setting-key="voiceOverTranslationLanguage"
-        :select-names="voiceOverTranslationLanguageNames"
-        :select-values="VOICE_OVER_TRANSLATION_LANGUAGE_VALUES"
-        :icon="['fas', 'language']"
-        @change="updateVoiceOverTranslationLanguage"
-      />
-      <FtSlider
-        :label="t('Settings.Player Settings.Voice-over Translation.Voice Volume')"
-        :default-value="voiceOverTranslationVolume"
-        setting-key="voiceOverTranslationVolume"
-        :min-value="0"
-        :max-value="100"
-        :step="1"
-        value-extension="%"
-        @change="updateVoiceOverTranslationVolume"
-      />
-      <FtSlider
-        :label="t('Settings.Player Settings.Voice-over Translation.Original Volume')"
-        :default-value="voiceOverTranslationOriginalVolume"
-        setting-key="voiceOverTranslationOriginalVolume"
-        :min-value="0"
-        :max-value="100"
-        :step="1"
-        value-extension="%"
-        @change="updateVoiceOverTranslationOriginalVolume"
-      />
-      <p class="voiceOverTranslationLanguageHint">
-        {{ t('Settings.Player Settings.Voice-over Translation.Supported Source Languages') }}
-      </p>
-    </div>
     <FtFlexBox>
       <FtSelect
         :placeholder="t('Settings.Player Settings.Default Viewing Mode.Default Viewing Mode')"
@@ -375,6 +310,7 @@
         <FtButton
           :label="t('Settings.Player Settings.Customize Quick Playback Speed Bar')"
           :icon="['fas', 'sliders-h']"
+          :disabled="!useQuickPlaybackSpeedBar"
           @click="showQuickPlaybackSpeedBarManager = true"
         />
         <FtSyncedSettingIndicator setting-key="quickPlaybackSpeedBarOptions" />
@@ -476,6 +412,7 @@
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
+      :icon="['fas', 'gauge-high']"
       grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >
@@ -516,7 +453,7 @@
             :aria-label="t('Settings.Player Settings.Reorder Playback Speed')"
             @pointerdown.prevent="startQuickPlaybackSpeedDrag(index, $event)"
           >
-            <FontAwesomeIcon :icon="['fas', 'bars']" />
+            <FtIcon :icon="['fas', 'bars']" />
           </button>
           <div class="quickPlaybackSpeedFields">
             <div
@@ -533,7 +470,7 @@
                 :aria-label="t('Settings.Player Settings.Edit Playback Speed Name')"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
               >
-                <FontAwesomeIcon :icon="['fas', 'edit']" />
+                <FtIcon :icon="['fas', 'edit']" />
               </button>
             </div>
             <div
@@ -555,7 +492,7 @@
                 :aria-label="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
                 @click="resetQuickPlaybackSpeedName(option.id)"
               >
-                <FontAwesomeIcon :icon="['fas', 'undo']" />
+                <FtIcon :icon="['fas', 'undo']" />
               </button>
             </div>
           </div>
@@ -576,16 +513,81 @@
             :aria-label="t('Delete')"
             @click="deleteQuickPlaybackSpeed(option.id)"
           >
-            <FontAwesomeIcon :icon="['fas', 'trash']" />
+            <FtIcon :icon="['fas', 'trash']" />
           </button>
         </div>
       </div>
     </FtSettingsSubpage>
   </FtSettingsSection>
+  <FtSettingsSection
+    v-if="USING_ELECTRON"
+    class="section voiceOverTranslationSettings"
+    :title="t('Settings.Player Settings.Voice-over Translation.Title')"
+  >
+    <div class="switchGrid">
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Voice-over Translation.Enable')"
+        :compact="true"
+        :default-value="useVoiceOverTranslation"
+        setting-key="useVoiceOverTranslation"
+        :tooltip="t('Tooltips.Player Settings.Voice-over Translation')"
+        @change="updateUseVoiceOverTranslation"
+      />
+      <FtToggleSwitch
+        :label="t('Settings.Player Settings.Voice-over Translation.Prepare in Background')"
+        :compact="true"
+        :disabled="!useVoiceOverTranslation"
+        :default-value="voiceOverTranslationPrepareInBackground"
+        setting-key="voiceOverTranslationPrepareInBackground"
+        :tooltip="t('Settings.Player Settings.Voice-over Translation.Background Preparation Tooltip')"
+        @change="updateVoiceOverTranslationPrepareInBackground"
+      />
+    </div>
+    <div class="voiceOverTranslationControls">
+      <FtSelect
+        :placeholder="t('Settings.Player Settings.Voice-over Translation.Language')"
+        :value="voiceOverTranslationLanguage"
+        setting-key="voiceOverTranslationLanguage"
+        :select-names="voiceOverTranslationLanguageNames"
+        :select-values="VOICE_OVER_TRANSLATION_LANGUAGE_VALUES"
+        :icon="['fas', 'language']"
+        :disabled="!useVoiceOverTranslation"
+        @change="updateVoiceOverTranslationLanguage"
+      />
+      <FtSlider
+        :label="t('Settings.Player Settings.Voice-over Translation.Voice Volume')"
+        :default-value="voiceOverTranslationVolume"
+        setting-key="voiceOverTranslationVolume"
+        :min-value="0"
+        :max-value="100"
+        :step="1"
+        value-extension="%"
+        :disabled="!useVoiceOverTranslation"
+        @change="updateVoiceOverTranslationVolume"
+      />
+      <FtSlider
+        :label="t('Settings.Player Settings.Voice-over Translation.Original Volume')"
+        :default-value="voiceOverTranslationOriginalVolume"
+        setting-key="voiceOverTranslationOriginalVolume"
+        :min-value="0"
+        :max-value="100"
+        :step="1"
+        value-extension="%"
+        :disabled="!useVoiceOverTranslation"
+        @change="updateVoiceOverTranslationOriginalVolume"
+      />
+      <p
+        class="voiceOverTranslationLanguageHint"
+        :class="{ disabled: !useVoiceOverTranslation }"
+      >
+        {{ t('Settings.Player Settings.Voice-over Translation.Supported Source Languages') }}
+      </p>
+    </div>
+  </FtSettingsSection>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -609,6 +611,8 @@ import {
   MAX_SEGMENT_PREFETCH_LIMIT
 } from '../../helpers/player/segmentPrefetch'
 import { AUTO_QUALITY_FALLBACK, playbackEngineSupportsAutoQuality } from '../../helpers/player/autoQuality'
+
+defineOptions({ inheritAttrs: false })
 
 const { t } = useI18n()
 
@@ -707,16 +711,6 @@ const voiceOverTranslationPrepareInBackground = computed(() => {
  */
 function updateVoiceOverTranslationPrepareInBackground(value) {
   store.dispatch('updateVoiceOverTranslationPrepareInBackground', value)
-}
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const voiceOverTranslationCache = computed(() => store.getters.getVoiceOverTranslationCache)
-
-/**
- * @param {boolean} value
- */
-function updateVoiceOverTranslationCache(value) {
-  store.dispatch('updateVoiceOverTranslationCache', value)
 }
 
 const VOICE_OVER_TRANSLATION_LANGUAGE_VALUES = ['en', 'ru', 'kk']

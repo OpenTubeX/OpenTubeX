@@ -22,7 +22,7 @@
         {{ $t('Comments.Highlighted reply') }}
       </p>
       <span
-        v-if="node.children.length > 0"
+        v-if="node.children.length > 0 || (reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)"
         class="commentReplyChildStem"
         aria-hidden="true"
       />
@@ -80,7 +80,7 @@
           :aria-label="$t('Comments.Copy YouTube Link')"
           @click="emit('copy-youtube-link', reply.id)"
         >
-          <FontAwesomeIcon :icon="['fas', 'link']" />
+          <FtIcon :icon="['fas', 'link']" />
         </button>
       </p>
       <FtTimestampCatcher
@@ -90,7 +90,7 @@
       />
       <p class="commentLikeCount">
         <template v-if="!hideCommentLikes">
-          <FontAwesomeIcon :icon="['fas', 'thumbs-up']" />
+          <FtIcon :icon="['fas', 'thumbs-up']" />
           {{ reply.likes }}
         </template>
         <span
@@ -104,41 +104,19 @@
             class="commentHeartBadgeImg"
             alt=""
           >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'heart']"
             class="commentHeartBadgeWhite"
           />
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'heart']"
             class="commentHeartBadgeRed"
           />
         </span>
       </p>
-      <div
-        v-if="loadingReplyIds.has(reply.id)"
-        class="showMoreReplies"
-      >
-        <FtSpinner
-          inline
-          size="18px"
-          border-width="2px"
-          :label="$t('Comments.Getting comment replies, please wait')"
-        />
-      </div>
-      <div
-        v-else-if="reply.dataType === 'local' && reply.hasReplyToken"
-        class="showMoreReplies"
-        role="button"
-        tabindex="0"
-        @click="emit('get-more-replies', reply.id)"
-        @keydown.space.prevent="emit('get-more-replies', reply.id)"
-        @keydown.enter.prevent="emit('get-more-replies', reply.id)"
-      >
-        <span>{{ $t("Comments.Show More Replies") }}</span>
-      </div>
     </div>
     <div
-      v-if="node.children.length > 0"
+      v-if="node.children.length > 0 || (reply.dataType === 'local' && reply.hasReplyToken) || loadingReplyIds.has(reply.id)"
       class="commentReplyChildren"
     >
       <CommentReply
@@ -157,12 +135,38 @@
         @get-more-replies="emit('get-more-replies', $event)"
         @timestamp-event="emit('timestamp-event', $event)"
       />
+      <div
+        v-if="loadingReplyIds.has(reply.id) || (reply.dataType === 'local' && reply.hasReplyToken)"
+        class="commentReplyContinuation"
+      >
+        <button
+          type="button"
+          class="commentReplyContinuationButton"
+          :disabled="loadingReplyIds.has(reply.id)"
+          @click="emit('get-more-replies', reply.id)"
+        >
+          <FtSpinner
+            v-if="loadingReplyIds.has(reply.id)"
+            inline
+            size="18px"
+            border-width="2px"
+            :label="$t('Comments.Getting comment replies, please wait')"
+          />
+          <template v-else>
+            <span>{{ $t("Comments.Show More Replies") }}</span>
+            <FtIcon
+              :icon="['fas', 'angle-down']"
+              aria-hidden="true"
+            />
+          </template>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
 import FtTimestampCatcher from '../FtTimestampCatcher.vue'
 import FtRetryImage from '../FtRetryImage.vue'

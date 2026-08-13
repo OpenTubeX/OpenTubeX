@@ -1,6 +1,5 @@
 name: Feature request
 description: Suggest an idea for OpenTubeX which you would like to see in a future release
-title: "[Feature Request]: "
 type: Feature
 body:
   - type: markdown

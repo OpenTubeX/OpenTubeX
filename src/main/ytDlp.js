@@ -714,6 +714,7 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
     } catch (error) {
       console.warn('Could not save yt-dlp download metadata', error)
     }
+    broadcastToRenderers(IpcChannels.YT_DLP_BINARY_UPDATED)
   }
 
   return { version, updated: download.data !== null }
@@ -982,7 +983,8 @@ export async function handleYtDlpDownloadBinary(event, binary) {
       : await downloadManagedFfmpeg(onProgress, () => sendProgress(0, true))
     return result
   } finally {
-    sendProgress(result != null && 'version' in result && result.updated ? 100 : null, false)
+    const updated = result != null && 'version' in result && result.updated
+    sendProgress(updated ? 100 : null, false)
   }
 }
 
@@ -1103,11 +1105,13 @@ export async function handleYtDlpGetPlaybackInfo(event, videoId) {
     '--no-progress',
     '--socket-timeout',
     '15',
-    // Android VR avoids live HLS streams that require a PO token, while the
-    // embedded client exposes alternate audio languages. Keep yt-dlp's default
-    // clients as fallbacks for videos unsupported by either client.
+    // The embedded client exposes alternate audio languages without requiring
+    // a PO token. Android VR used to provide the same token-free fallback, but
+    // YouTube now selectively enforces GVS tokens for its non-HLS formats and
+    // returns 403 for the extracted URLs. Keep the remaining default clients as
+    // fallbacks for videos the embedded client cannot access.
     '--extractor-args',
-    'youtube:player_client=android_vr,web_embedded,default'
+    'youtube:player_client=web_embedded,default,-android_vr'
   ]
 
   await pushProxyArgument(args)

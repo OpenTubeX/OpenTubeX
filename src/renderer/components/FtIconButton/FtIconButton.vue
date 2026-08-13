@@ -25,18 +25,18 @@
       @contextmenu.prevent
       @click="handleIconClick"
     >
-      <FontAwesomeLayers
+      <FtIconLayers
         v-if="overlayIcon"
         class="icon"
       >
-        <FontAwesomeIcon :icon="icon" />
-        <FontAwesomeIcon
+        <FtIcon :icon="icon" />
+        <FtIcon
           class="overlayIcon"
           :icon="overlayIcon"
           transform="shrink-7 up-1"
         />
-      </FontAwesomeLayers>
-      <FontAwesomeIcon
+      </FtIconLayers>
+      <FtIcon
         v-else
         class="icon"
         :icon="icon"
@@ -81,7 +81,7 @@
                   v-if="option.icon || option.active"
                   class="optionIconColumn"
                 >
-                  <FontAwesomeIcon
+                  <FtIcon
                     :icon="option.active ? ['fas', 'check'] : option.icon"
                   />
                 </div>
@@ -142,7 +142,7 @@
                   v-if="option.icon || option.active"
                   class="optionIconColumn"
                 >
-                  <FontAwesomeIcon
+                  <FtIcon
                     :icon="option.active ? ['fas', 'check'] : option.icon"
                   />
                 </div>
@@ -157,7 +157,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
+import { FtIcon, FtIconLayers } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef, watch } from 'vue'
 
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -224,7 +224,7 @@ const props = defineProps({
     // - type: ('labelValue'|'divider', default to 'labelValue' for less typing)
     // - label: String (if type === 'labelValue')
     // - value: String (if type === 'labelValue')
-    // - (OPTIONAL) icon: FontAwesome IconDefinition tuple (if type === 'labelValue')
+    // - (OPTIONAL) icon: semantic icon tuple (if type === 'labelValue')
     // - (OPTIONAL) active: Number (if type === 'labelValue')
     // - (OPTIONAL) disabled: Boolean (if type === 'labelValue')
     type: Array,

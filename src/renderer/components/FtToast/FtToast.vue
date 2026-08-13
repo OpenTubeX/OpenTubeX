@@ -29,7 +29,7 @@
           class="toast persistent"
           role="status"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="progressToastIcon"
             class="icon"
             fixed-width
@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, markRaw, nextTick, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Toaster, toast as sonner } from 'vue-sonner'

@@ -140,11 +140,10 @@
   overflow: visible;
   vertical-align: 0;
 
-  --fa-width: 1em;
+  --icon-width: 1em;
 }
 
-.iconButton :deep(.ft-icon),
-.iconButton :deep(.svg-inline--fa) {
+.iconButton :deep(.ft-icon) {
   display: block;
   vertical-align: 0;
 }

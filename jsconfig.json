@@ -8,6 +8,7 @@
     "strictNullChecks": true,
     "paths": {
       "@root/*": ["./*"],
+      "@opentubex/icons": ["./src/renderer/icons/iconComponents.js"],
       "DB_HANDLERS_ELECTRON_RENDERER_OR_WEB": [
         "./src/datastores/handlers/electron",
         "./src/datastores/handlers/web"

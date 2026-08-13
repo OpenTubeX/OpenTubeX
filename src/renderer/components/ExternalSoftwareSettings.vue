@@ -46,7 +46,7 @@
         v-else-if="!ytDlpInfo.available"
         class="ytDlpStatus ytDlpWarning"
       >
-        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        <FtIcon :icon="['fas', 'circle-exclamation']" />
         {{ ytDlpSource === 'managed'
           ? t('Settings.External Software Settings.Managed Not Downloaded')
           : t('Settings.External Software Settings.System yt-dlp Missing Warning') }}
@@ -69,7 +69,7 @@
         v-else-if="!ffmpegInfo.available"
         class="ytDlpStatus ytDlpWarning"
       >
-        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        <FtIcon :icon="['fas', 'circle-exclamation']" />
         {{ ytDlpFfmpegSource === 'managed'
           ? t('Settings.External Software Settings.FFmpeg Managed Not Downloaded')
           : t('Settings.External Software Settings.System FFmpeg Missing Warning') }}
@@ -92,7 +92,7 @@
         v-else-if="!ffprobeInfo.available"
         class="ytDlpStatus ytDlpWarning"
       >
-        <FontAwesomeIcon :icon="['fas', 'circle-exclamation']" />
+        <FtIcon :icon="['fas', 'circle-exclamation']" />
         {{ ytDlpFfmpegSource === 'managed'
           ? t('Settings.External Software Settings.FFprobe Managed Not Downloaded')
           : t('Settings.External Software Settings.System FFprobe Missing Warning') }}
@@ -180,7 +180,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

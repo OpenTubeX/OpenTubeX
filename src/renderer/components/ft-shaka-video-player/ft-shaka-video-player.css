@@ -245,6 +245,30 @@
   transition: none;
 }
 
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) {
+  --shorts-metadata-min-width: min(
+    220px,
+    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
+  );
+  --shorts-video-width: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    calc(
+      100vw - var(--shorts-dock-width, 0px) -
+      var(--shorts-metadata-min-width)
+    )
+  );
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-seek-bar-container) {
+  inset-inline: auto;
+  inset-inline-start: max(
+    calc((100% - var(--shorts-video-width)) / 2),
+    var(--shorts-metadata-min-width)
+  );
+  inline-size: var(--shorts-video-width);
+  transform: none;
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
   opacity: 0;
   transform: scale(0);
@@ -321,11 +345,6 @@
 
 .ftVideoPlayer.shortsPlayer:fullscreen .shortsFullscreenMetadata,
 .ftVideoPlayer.shortsPlayer.fullWindow .shortsFullscreenMetadata {
-  --shorts-metadata-min-width: min(
-    220px,
-    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
-  );
-
   position: absolute;
   z-index: 5;
   inset-block: 0;
@@ -354,13 +373,7 @@
 .shortsFullscreenVideoSpace {
   grid-column: 2;
   block-size: 100%;
-  inline-size: min(
-    calc(100dvh * var(--shorts-aspect-ratio)),
-    calc(
-      100vw - var(--shorts-dock-width, 0px) -
-      var(--shorts-metadata-min-width)
-    )
-  );
+  inline-size: var(--shorts-video-width);
   aspect-ratio: var(--shorts-aspect-ratio);
 }
 
@@ -987,7 +1000,7 @@
 }
 
 /* The current value (`On`, `2x`, the chapter title, …) stays on a single line. */
-:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label > .shaka-current-selection-span) {
+:deep(.shaka-overflow-menu.ft-menu-grid .shaka-overflow-button-label .shaka-current-selection-span) {
   max-inline-size: 100%;
   padding-inline-start: 0;
   overflow: hidden;
@@ -1081,15 +1094,95 @@
   The checkmark would make the selected tile taller than the others, so the
   selection is shown as a highlighted tile instead.
 */
-:deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
+:deep(.shaka-sub-menu.ft-menu-grid .shaka-ui-icon.shaka-chosen-item),
+:deep(.ft-caption-translation-options.ft-menu-grid .shaka-ui-icon.shaka-chosen-item) {
   display: none;
 }
 
-:deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)) {
+:deep(.shaka-sub-menu.ft-menu-grid > button:has(.shaka-chosen-item)),
+:deep(.ft-caption-translation-options.ft-menu-grid > button:has(.shaka-chosen-item)) {
   background: color-mix(in srgb, var(--primary-color) 32%, transparent);
 }
 
 :deep(.shaka-sub-menu.ft-menu-grid > button > span) {
+  display: -webkit-box;
+  overflow: hidden;
+  max-inline-size: 100%;
+  margin-inline-start: 0;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+}
+
+/* Keep the translation header and scrollbar outside each other's regions. */
+:deep(.shaka-overflow-menu:has(> .ft-caption-translation-menu:not(.shaka-hidden))) {
+  block-size: min(50vh, 340px);
+  overflow: hidden;
+}
+
+:deep(.shaka-overflow-menu:has(> .ft-caption-translation-menu:not(.shaka-hidden)) > .os-scrollbar) {
+  display: none;
+}
+
+:deep(.ft-caption-translation-menu) {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  overflow: hidden;
+}
+
+:deep(.ft-caption-translation-menu > .shaka-back-to-overflow-button) {
+  flex: 0 0 auto;
+}
+
+:deep(.ft-caption-translation-options) {
+  flex: 1 1 0;
+  block-size: 0;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+:deep(.ft-caption-translation-options > button) {
+  box-sizing: border-box;
+  inline-size: 100%;
+}
+
+:deep(.ft-caption-translation-options > .os-scrollbar) {
+  --os-handle-bg: rgb(255 255 255 / 40%);
+  --os-handle-bg-hover: rgb(255 255 255 / 55%);
+  --os-handle-bg-active: rgb(255 255 255 / 70%);
+}
+
+:deep(.ft-caption-translation-options.ft-menu-grid) {
+  display: flex;
+  flex-flow: row wrap;
+  place-content: flex-start center;
+  gap: 4px;
+  padding: 4px;
+}
+
+:deep(.ft-caption-translation-options.ft-menu-grid > button) {
+  flex-wrap: wrap;
+  place-content: center;
+  inline-size: 90px;
+  min-block-size: 40px;
+  padding: 6px 4px;
+  border-radius: calc(10px * var(--ui-roundness));
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  background: rgb(255 255 255 / 7%);
+  white-space: normal;
+}
+
+:deep(.ft-caption-translation-options.ft-menu-grid > button:hover),
+:deep(.ft-caption-translation-options.ft-menu-grid > button:focus-visible) {
+  background: rgb(255 255 255 / 20%);
+}
+
+:deep(.ft-caption-translation-options.ft-menu-grid > button > span) {
   display: -webkit-box;
   overflow: hidden;
   max-inline-size: 100%;

@@ -18,7 +18,7 @@
       >
         <div class="titleContent">
           <div class="iconAndTitleText">
-            <FontAwesomeIcon
+            <FtIcon
               :icon="settingsSection.icon"
               class="titleIcon"
             />
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { useTemplateRef } from 'vue'
 
 defineProps({

@@ -267,7 +267,7 @@
             @click="handleFetchMore"
             @keydown.enter.space.prevent="handleFetchMore"
           >
-            <FontAwesomeIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
+            <FtIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
           </div>
         </FtAutoLoadNextPageWrapper>
       </div>
@@ -289,7 +289,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'

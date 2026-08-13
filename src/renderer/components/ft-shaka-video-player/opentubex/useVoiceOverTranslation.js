@@ -43,7 +43,6 @@ export function getVoiceOverPlaybackRate(playbackRate, drift) {
  *   videoId: import('vue').ComputedRef<string>,
  *   responseLanguage: import('vue').ComputedRef<'ru' | 'en' | 'kk'>,
  *   autoPrepare: import('vue').ComputedRef<boolean>,
- *   cache: import('vue').ComputedRef<boolean>,
  *   voiceVolume: import('vue').ComputedRef<number>,
  *   onError: (error: unknown) => void
  * }} options
@@ -53,7 +52,6 @@ export function useVoiceOverTranslation({
   videoId,
   responseLanguage,
   autoPrepare,
-  cache,
   voiceVolume,
   onError
 }) {
@@ -208,8 +206,7 @@ export function useVoiceOverTranslation({
       const result = await window.ftElectron.requestVoiceOverTranslation({
         videoId: videoId.value,
         duration,
-        responseLanguage: responseLanguage.value,
-        cache: cache.value
+        responseLanguage: responseLanguage.value
       })
 
       if (generation !== requestGeneration) {

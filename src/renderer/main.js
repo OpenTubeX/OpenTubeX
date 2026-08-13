@@ -6,18 +6,8 @@ import App from './App.vue'
 import { initializeTabNavigationService } from './tabs/TabNavigationService'
 import { showExternalPlayerUnsupportedActionToast, showToast } from './helpers/utils'
 import { installViewTransitions } from './helpers/viewTransitions'
-import { library } from './fontawesome-minimal'
-import {
-  facFluxer,
-  facHorizontalTabs,
-  facMatrix,
-  facPlaylistAdd,
-  facPlaylistCheck,
-  facVerticalTabs
-} from './customIcons'
 import { initializeAppScrollbars, overlayScrollbarsDirective } from './helpers/overlayScrollbars'
 // import the styles
-import '@fortawesome/fontawesome-svg-core/styles.css'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 // Only the positioning and stacking rules are used, FtToast supplies the design
 import 'vue-sonner/style.css'
@@ -26,320 +16,8 @@ import { register as registerSwiper } from 'swiper/element'
 
 import { ObserveVisibility } from 'vue-observe-visibility'
 
-// Please keep the list of constants sorted by name
-// to avoid code conflict and duplicate entries
-import {
-  faAngleDown,
-  faAngleLeft,
-  faAngleRight,
-  faAngleUp,
-  faArrowDown,
-  faArrowDownShortWide,
-  faArrowDownWideShort,
-  faArrowLeft,
-  faArrowRight,
-  faArrowUp,
-  faArrowUpRightFromSquare,
-  faBars,
-  faBarsProgress,
-  faBorderAll,
-  faBookmark,
-  faBullhorn,
-  faCalendarDays,
-  faChartLine,
-  faCheck,
-  faChevronRight,
-  faCircle,
-  faCircleExclamation,
-  faCirclePlay,
-  faCircleUser,
-  faClapperboard,
-  faClosedCaptioning,
-  faClock,
-  faClockRotateLeft,
-  faClone,
-  faComment,
-  faCompress,
-  faCopy,
-  faDatabase,
-  faDisplay,
-  faDownload,
-  faEdit,
-  faEllipsisH,
-  faEllipsisV,
-  faEnvelope,
-  faExchangeAlt,
-  faExclamationCircle,
-  faExpand,
-  faExternalLinkAlt,
-  faEye,
-  faEyeSlash,
-  faFileDownload,
-  faFileImage,
-  faFileLines,
-  faFileVideo,
-  faFilm,
-  faFilter,
-  faFilterCircleXmark,
-  faFolderOpen,
-  faFlask,
-  faFire,
-  faForward,
-  faForwardFast,
-  faGamepad,
-  faGauge,
-  faGaugeHigh,
-  faGear,
-  faGlobe,
-  faGrip,
-  faHashtag,
-  faHeart,
-  faHistory,
-  faImages,
-  faInfoCircle,
-  faKey,
-  faKeyboard,
-  faLanguage,
-  faLink,
-  faLinkSlash,
-  faList,
-  faLocationDot,
-  faLock,
-  faMessage,
-  faMoneyCheckDollar,
-  faNetworkWired,
-  faPalette,
-  faPause,
-  faPaste,
-  faPen,
-  faPhotoFilm,
-  faPlay,
-  faPlus,
-  faPodcast,
-  faPowerOff,
-  faQuestionCircle,
-  faRandom,
-  faRectangleAd,
-  faRectangleXmark,
-  faRetweet,
-  faRightFromBracket,
-  faRightToBracket,
-  faRss,
-  faSatelliteDish,
-  faSave,
-  faScissors,
-  faSearch,
-  faServer,
-  faShareAlt,
-  faShield,
-  faShieldHalved,
-  faSlash,
-  faSlidersH,
-  faSortAlphaDown,
-  faSortAlphaDownAlt,
-  faSortDown,
-  faStepBackward,
-  faStepForward,
-  faSync,
-  faThumbsDown,
-  faThumbsUp,
-  faThumbtack,
-  faThumbtackSlash,
-  faTicket,
-  faTimes,
-  faTimesCircle,
-  faTowerBroadcast,
-  faTrash,
-  faTriangleExclamation,
-  faTrophy,
-  faUndo,
-  faUserCheck,
-  faUserLock,
-  faUserPlus,
-  faUsers,
-  faUsersSlash,
-  faVideo,
-  faVolumeHigh,
-  faVolumeLow,
-  faVolumeMute,
-  faWifi,
-  faXmark
-} from '@fortawesome/free-solid-svg-icons'
-import {
-  faBookmark as farBookmark,
-  faDotCircle as farDotCircle
-} from '@fortawesome/free-regular-svg-icons'
-import {
-  faBitcoin,
-  faGithub,
-  faMastodon,
-  faMatrix,
-  faYoutube,
-} from '@fortawesome/free-brands-svg-icons'
-import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { registerMappedIcons } from './icons/registerMappedIcons'
+import { FtIcon, FtIconLayers } from './icons/iconComponents'
 import { currentIconPack, setIconPack } from './icons/iconPackState'
-
-// Please keep the list of constants sorted by name
-// to avoid code conflict and duplicate entries
-library.add(
-  // solid icons
-  faAngleDown,
-  faAngleLeft,
-  faAngleRight,
-  faAngleUp,
-  faArrowDown,
-  faArrowDownShortWide,
-  faArrowDownWideShort,
-  faArrowLeft,
-  faArrowRight,
-  faArrowUp,
-  faArrowUpRightFromSquare,
-  faBars,
-  faBarsProgress,
-  faBorderAll,
-  faBookmark,
-  faBullhorn,
-  faCalendarDays,
-  faChartLine,
-  faCheck,
-  faChevronRight,
-  faCircle,
-  faCircleExclamation,
-  faCirclePlay,
-  faCircleUser,
-  faClapperboard,
-  faClosedCaptioning,
-  faClock,
-  faClockRotateLeft,
-  faClone,
-  faComment,
-  faCompress,
-  faCopy,
-  faDatabase,
-  faDisplay,
-  faDownload,
-  faEdit,
-  faEllipsisH,
-  faEllipsisV,
-  faEnvelope,
-  faExchangeAlt,
-  faExclamationCircle,
-  faExpand,
-  faExternalLinkAlt,
-  faEye,
-  faEyeSlash,
-  faFileDownload,
-  faFileImage,
-  faFileLines,
-  faFileVideo,
-  faFilm,
-  faFilter,
-  faFilterCircleXmark,
-  faFolderOpen,
-  faFlask,
-  faFire,
-  faForward,
-  faForwardFast,
-  faGamepad,
-  faGauge,
-  faGaugeHigh,
-  faGear,
-  faGlobe,
-  faGrip,
-  faHashtag,
-  faHeart,
-  faHistory,
-  faImages,
-  faInfoCircle,
-  faKey,
-  faKeyboard,
-  faLanguage,
-  faLink,
-  faLinkSlash,
-  faList,
-  faLocationDot,
-  faLock,
-  faMessage,
-  faMoneyCheckDollar,
-  faNetworkWired,
-  faPalette,
-  faPause,
-  faPaste,
-  faPen,
-  faPhotoFilm,
-  faPlay,
-  faPlus,
-  faPodcast,
-  faPowerOff,
-  faQuestionCircle,
-  faRandom,
-  faRectangleAd,
-  faRectangleXmark,
-  faRetweet,
-  faRightFromBracket,
-  faRightToBracket,
-  faRss,
-  faSatelliteDish,
-  faSave,
-  faScissors,
-  faSearch,
-  faServer,
-  faShareAlt,
-  faShield,
-  faShieldHalved,
-  faSlash,
-  faSlidersH,
-  faSortAlphaDown,
-  faSortAlphaDownAlt,
-  faSortDown,
-  faStepBackward,
-  faStepForward,
-  faSync,
-  faThumbsDown,
-  faThumbsUp,
-  faThumbtack,
-  faThumbtackSlash,
-  faTicket,
-  faTimes,
-  faTimesCircle,
-  faTowerBroadcast,
-  faTrash,
-  faTriangleExclamation,
-  faTrophy,
-  faUndo,
-  faUserCheck,
-  faUserLock,
-  faUserPlus,
-  faUsers,
-  faUsersSlash,
-  faVideo,
-  faVolumeHigh,
-  faVolumeLow,
-  faVolumeMute,
-  faWifi,
-  faXmark,
-
-  // regular icons
-  farBookmark,
-  farDotCircle,
-
-  // brand icons
-  faGithub,
-  faBitcoin,
-  faMastodon,
-  faMatrix,
-  faYoutube,
-
-  // custom icons
-  facFluxer,
-  facHorizontalTabs,
-  facMatrix,
-  facPlaylistAdd,
-  facPlaylistCheck,
-  facVerticalTabs,
-)
-
 registerSwiper()
 
 const app = createApp(App)
@@ -347,8 +25,8 @@ const app = createApp(App)
 app.config.performance = process.env.NODE_ENV === 'development'
 
 app
-  .component('FontAwesomeIcon', FontAwesomeIcon)
-  .component('FontAwesomeLayers', FontAwesomeLayers)
+  .component('FtIcon', FtIcon)
+  .component('FtIconLayers', FtIconLayers)
   .directive('observe-visibility', ObserveVisibility)
   .directive('overlay-scrollbars', overlayScrollbarsDirective)
 
@@ -361,11 +39,10 @@ installViewTransitions(router)
 const tabNavigation = initializeTabNavigationService(router, store)
 
 router.isReady().then(async () => {
-  try {
-    await registerMappedIcons(currentIconPack.value)
-  } catch (error) {
-    console.error(`[icon-pack] failed to load ${currentIconPack.value}; falling back to Font Awesome`, error)
-    await setIconPack('fontawesome')
+  const preferredPack = currentIconPack.value
+  const fallbackPack = preferredPack === 'material' ? 'remix' : 'material'
+  if (!await setIconPack(preferredPack) && !await setIconPack(fallbackPack)) {
+    console.error('[icon-pack] failed to load either icon pack')
   }
   app.mount('#app')
   initializeAppScrollbars()

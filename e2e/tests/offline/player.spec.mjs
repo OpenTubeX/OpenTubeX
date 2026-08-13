@@ -170,6 +170,30 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   expect(await overflowMenu.locator(':scope > button').evaluateAll((buttons) => {
     return buttons.every((button) => getComputedStyle(button).flexDirection === 'column')
   })).toBe(true)
+  const statusTypography = await overflowMenu.evaluate((menu) => {
+    // The local fixture uses a legacy format, so reproduce Shaka's additional
+    // wrapper around the standard resolution status in the live menu.
+    const button = document.createElement('button')
+    button.innerHTML = `
+      <label class="shaka-overflow-button-label">
+        <span><span class="shaka-current-selection-span">1080p60</span></span>
+      </label>`
+    menu.append(button)
+
+    const resolutionStatus = button.querySelector('.shaka-current-selection-span')
+    const playbackRateStatus = menu.querySelector(
+      '.shaka-playbackrate-button .shaka-current-selection-span'
+    )
+    const typography = (element) => {
+      const { color, fontSize, opacity } = getComputedStyle(element)
+      return { color, fontSize, opacity }
+    }
+    const result = [typography(resolutionStatus), typography(playbackRateStatus)]
+    button.remove()
+    return result
+  })
+  expect(statusTypography[0]).toEqual(statusTypography[1])
+  expect(statusTypography[0]).toMatchObject({ fontSize: '10px', opacity: '0.75' })
   const overflowMenuHeight = (await overflowMenu.boundingBox()).height
 
   await overflowMenu.getByRole('button', { name: 'Zoom' }).click()
@@ -225,6 +249,106 @@ test('the overflow menu can turn the zoom off again', async ({ app, page, attach
   await expect(overflowMenu).not.toHaveClass(/ft-menu-grid/)
   await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
   await expect(autoplaySwitch).toHaveCSS('margin-right', '14px')
+  await watchComponent.dispose()
+})
+
+test('auto-translates captions into an arbitrary language', async ({ app, page, attachScreenshot }) => {
+  await mockPlayableWatchPage(app, page, { captionTranslations: true })
+  await openMockedVideo(page)
+
+  const player = page.locator(`${activeTab} .ftVideoPlayer`)
+  await player.hover()
+  const moreOptions = player.getByRole('button', { name: 'More settings' })
+  await moreOptions.click()
+
+  const overflowMenu = player.locator('.shaka-overflow-menu')
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+
+  const translationMenu = player.locator('.ft-caption-translation-menu')
+  const header = translationMenu.locator(':scope > .shaka-back-to-overflow-button')
+  const translations = translationMenu.locator('.ft-caption-translation-options')
+  await expect(translationMenu).toBeVisible()
+  await expect(translations).toHaveClass(/ft-menu-grid/)
+  await expect(translations.locator(':scope > .os-scrollbar-vertical')).toHaveCount(1)
+  await expect(overflowMenu.locator(':scope > .os-scrollbar-vertical')).toHaveCSS('display', 'none')
+  expect(await translations.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true)
+
+  const [headerBounds, translationsBounds, scrollbarBounds] = await Promise.all([
+    header.boundingBox(),
+    translations.boundingBox(),
+    translations.locator(':scope > .os-scrollbar-vertical').boundingBox(),
+  ])
+  expect(translationsBounds.y).toBeGreaterThanOrEqual(headerBounds.y + headerBounds.height - 1)
+  expect(scrollbarBounds.y).toBeGreaterThanOrEqual(translationsBounds.y - 1)
+
+  await translations.evaluate(element => { element.scrollTop = element.scrollHeight })
+  await expect.poll(() => translations.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  await attachScreenshot('auto-translate language grid')
+
+  const frenchResponse = page.waitForResponse(response => {
+    const url = new URL(response.url())
+    return url.pathname === '/api/timedtext' && url.searchParams.get('tlang') === 'fr'
+  })
+  await translations.getByRole('button', { name: 'French' }).click()
+  await translations.getByRole('button', { name: 'German' }).click()
+  await expect(player.locator('.shaka-text-languages')).toBeVisible()
+  expect(await overflowMenu.evaluate(element => element.scrollTop)).toBe(0)
+  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+  await frenchResponse
+  await expect(player.locator('.shaka-text-languages')).toContainText('German')
+
+  const watchComponent = await page.evaluateHandle(findWatchComponent)
+  await watchComponent.evaluate(async (component) => {
+    await component.proxy.$store.dispatch('updateUsePlayerMenuGrid', false)
+    await component.proxy.$nextTick()
+  })
+  await page.keyboard.press('Escape')
+  await player.hover()
+  await moreOptions.click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(translations).not.toHaveClass(/ft-menu-grid/)
+  const selectedTranslation = translations.getByRole('button', { name: 'German' })
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'true')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(2)
+
+  const [listBounds, languageBounds] = await Promise.all([
+    translations.boundingBox(),
+    translations.getByRole('button', { name: 'Afrikaans' }).boundingBox(),
+  ])
+  expect(Math.abs(languageBounds.x - listBounds.x)).toBeLessThanOrEqual(1)
+  expect(Math.abs(languageBounds.width - listBounds.width)).toBeLessThanOrEqual(1)
+
+  await header.click()
+  const captionsMenu = player.locator('.shaka-text-languages')
+  await captionsMenu.getByRole('button', { name: 'Off' }).click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
+
+  await header.click()
+  await captionsMenu.getByRole('button', { name: 'English (auto-generated)', exact: true }).click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await captionsMenu.getByRole('button', { name: 'Auto-translate' }).click()
+  await expect(selectedTranslation).toHaveAttribute('aria-selected', 'false')
+  await expect(selectedTranslation.locator('.shaka-chosen-item')).toHaveCount(0)
+
+  const nextVideoId = 'aqz-KE-bpKQ'
+  await openMockedVideo(page, nextVideoId)
+  await player.hover()
+  await moreOptions.click()
+  await overflowMenu.getByRole('button', { name: 'Captions' }).click()
+  await player.locator('.shaka-text-languages').getByRole('button', { name: 'Auto-translate' }).click()
+  const nextVideoTranslationRequest = page.waitForRequest(request => {
+    const url = new URL(request.url())
+    return url.pathname === '/api/timedtext' &&
+      url.searchParams.get('v') === nextVideoId &&
+      url.searchParams.get('tlang') === 'de'
+  })
+  await translations.getByRole('button', { name: 'German' }).click()
+  await nextVideoTranslationRequest
   await watchComponent.dispose()
 })
 

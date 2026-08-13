@@ -2,38 +2,25 @@ import { computed, ref } from 'vue'
 import { registerMappedIcons } from './registerMappedIcons.js'
 
 export const ICON_PACKS = /** @type {const} */ ([
-  { id: 'fontawesome', label: 'Font Awesome (legacy)' },
-  { id: 'material', label: 'Material Symbols' },
-  { id: 'tabler', label: 'Tabler' },
-  { id: 'phosphor', label: 'Phosphor' },
-  { id: 'lucide', label: 'Lucide' },
-  { id: 'remix', label: 'Remix Icon' },
+  'material',
+  'remix',
 ])
 
-/** @typedef {(typeof ICON_PACKS)[number]['id']} IconPackId */
-
-const STORAGE_KEY = 'otx-icon-pack-preview-v2'
+/** @typedef {(typeof ICON_PACKS)[number]} IconPackId */
 
 /** @type {Set<IconPackId>} */
-const VALID_PACK_IDS = new Set(ICON_PACKS.map((pack) => pack.id))
+const VALID_PACK_IDS = new Set(ICON_PACKS)
 
 /**
- * @returns {IconPackId}
+ * @param {unknown} pack
+ * @returns {pack is IconPackId}
  */
-function readStoredPack() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored && VALID_PACK_IDS.has(/** @type {IconPackId} */ (stored))) {
-      return /** @type {IconPackId} */ (stored)
-    }
-  } catch {
-    // ignore (private mode / unavailable storage)
-  }
-  return 'fontawesome'
+export function isIconPack(pack) {
+  return typeof pack === 'string' && VALID_PACK_IDS.has(/** @type {IconPackId} */ (pack))
 }
 
 /** @type {import('vue').Ref<IconPackId>} */
-const iconPack = ref(readStoredPack())
+const iconPack = ref('material')
 let selectionSequence = 0
 
 export const currentIconPack = computed(() => iconPack.value)
@@ -43,7 +30,7 @@ export const currentIconPack = computed(() => iconPack.value)
  * @returns {Promise<boolean>} whether the pack became the active selection
  */
 export async function setIconPack(pack) {
-  if (!VALID_PACK_IDS.has(pack)) {
+  if (!isIconPack(pack)) {
     return false
   }
   const sequence = ++selectionSequence
@@ -57,10 +44,5 @@ export async function setIconPack(pack) {
   }
   if (sequence !== selectionSequence) return false
   iconPack.value = pack
-  try {
-    localStorage.setItem(STORAGE_KEY, pack)
-  } catch {
-    // ignore
-  }
   return true
 }

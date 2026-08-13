@@ -24,7 +24,7 @@
                 path: `/playlist/${shelf.playlistId}`
               }"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="thumbnail"
                 :icon="['fas', 'list']"
               />
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import store from '../../store/index'

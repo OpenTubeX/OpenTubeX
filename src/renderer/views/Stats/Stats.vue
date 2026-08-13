@@ -2,7 +2,7 @@
   <div>
     <FtCard class="statsPage">
       <h2>
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'chart-line']"
           class="headingIcon"
         />
@@ -206,7 +206,7 @@
           class="resetStatsButton"
           @click="showResetPrompt = true"
         >
-          <FontAwesomeIcon :icon="['fas', 'trash']" />
+          <FtIcon :icon="['fas', 'trash']" />
           {{ t('Stats.Reset statistics') }}
         </button>
       </footer>
@@ -257,7 +257,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'

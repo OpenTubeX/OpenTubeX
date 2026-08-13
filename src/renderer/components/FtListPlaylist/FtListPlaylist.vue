@@ -29,7 +29,7 @@
         <div class="background" />
         <div class="inner">
           <div>{{ videoCount }}</div>
-          <div><FontAwesomeIcon :icon="['fas','list']" /></div>
+          <div><FtIcon :icon="['fas','list']" /></div>
         </div>
       </div>
     </div>
@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

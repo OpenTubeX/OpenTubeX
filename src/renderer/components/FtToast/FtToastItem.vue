@@ -22,7 +22,7 @@
         alt=""
         draggable="false"
       >
-      <FontAwesomeIcon
+      <FtIcon
         v-else-if="toast.icon"
         :icon="toast.icon"
         class="icon"
@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import store from '../../store'
 import FtEmbeddedProgress from '../FtEmbeddedProgress/FtEmbeddedProgress.vue'

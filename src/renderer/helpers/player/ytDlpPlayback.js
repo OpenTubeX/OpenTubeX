@@ -4,11 +4,12 @@ import { MANIFEST_TYPE_DASH, MANIFEST_TYPE_HLS } from './utils'
 import { probeStreamByteRanges } from './streamByteRanges'
 import { generateAudioTrackField } from '../api/local'
 import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
+import { getEarliestYtDlpFormatExpiry, YtDlpPlaybackSourceCache } from './ytDlpPlaybackCache'
 
 /** @typedef {import('../../../main/ytDlp').YtDlpPlaybackFormat} YtDlpPlaybackFormat */
 
 /**
- * @typedef YtDlpPlaybackSource
+ * @typedef {object} YtDlpPlaybackSource
  * @property {string} manifestSrc
  * @property {MANIFEST_TYPE_DASH | MANIFEST_TYPE_HLS} manifestMimeType
  * @property {any[]} legacyFormats
@@ -19,6 +20,25 @@ import { waitForYtDlpFormatAvailability } from './ytDlpFormatAvailability'
 
 // yt-dlp appends the audio track or a suffix like "-drc" to the itag for some formats
 const ITAG_REGEX = /^\d+/
+const dashPlaybackSourceCache = new YtDlpPlaybackSourceCache()
+
+/**
+ * Ensures playback-error recovery extracts fresh signed stream URLs.
+ * @param {string} videoId
+ */
+export function invalidateYtDlpPlaybackSource(videoId) {
+  dashPlaybackSourceCache.delete(videoId)
+  window.ftElectron.ytDlpPlaybackCacheDelete(videoId).catch(error => {
+    console.warn('Could not remove an entry from the persistent yt-dlp playback cache', error)
+  })
+}
+
+export function invalidateAllYtDlpPlaybackSources() {
+  dashPlaybackSourceCache.clear()
+  window.ftElectron.ytDlpPlaybackCacheClear().catch(error => {
+    console.warn('Could not clear the persistent yt-dlp playback cache', error)
+  })
+}
 
 /**
  * @param {YtDlpPlaybackFormat} format
@@ -180,22 +200,6 @@ function mapYtDlpLegacyFormat(format) {
 }
 
 /**
- * @param {YtDlpPlaybackFormat[]} formats
- * @returns {Date | null}
- */
-function getExpiryDate(formats) {
-  for (const format of formats) {
-    const expire = parseInt(new URL(format.url).searchParams.get('expire'))
-
-    if (Number.isFinite(expire)) {
-      return new Date(expire * 1000)
-    }
-  }
-
-  return null
-}
-
-/**
  * Reads the byte ranges of every adaptive format in parallel and drops the ones
  * that the byte ranges couldn't be determined for.
  * @param {YtDlpPlaybackFormat[]} formats
@@ -238,9 +242,33 @@ async function convertAdaptiveFormats(formats, duration) {
  * SABR streaming protocol. Live streams use YouTube's HLS manifests, which keep the
  * DVR window available, so that they can be rewound.
  * @param {string} videoId
+ * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
  * @returns {Promise<YtDlpPlaybackSource>}
  */
-export async function getYtDlpPlaybackSource(videoId) {
+export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
+  let cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
+
+  if (cachedSource === null) {
+    try {
+      const entry = await window.ftElectron.ytDlpPlaybackCacheGet(videoId, cacheKey)
+      if (entry !== null) {
+        const source = { ...entry.source, expiryDate: new Date(entry.expiryTime) }
+        dashPlaybackSourceCache.set(videoId, cacheKey, source)
+        cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
+
+        if (cachedSource === null) {
+          await window.ftElectron.ytDlpPlaybackCacheDelete(videoId)
+        }
+      }
+    } catch (error) {
+      console.warn('Could not read the persistent yt-dlp playback cache', error)
+    }
+  }
+
+  if (cachedSource !== null) {
+    return cachedSource
+  }
+
   const info = await window.ftElectron.ytDlpGetPlaybackInfo(videoId)
 
   if (info === null) {
@@ -266,14 +294,27 @@ export async function getYtDlpPlaybackSource(videoId) {
     if (localFormats.some(format => format.has_video) && localFormats.some(format => format.has_audio)) {
       const manifest = await FormatUtils.toDash({ adaptive_formats: localFormats })
 
-      return {
+      const source = {
         manifestSrc: `data:${MANIFEST_TYPE_DASH};charset=UTF-8,${encodeURIComponent(manifest)}`,
         manifestMimeType: MANIFEST_TYPE_DASH,
         legacyFormats,
-        expiryDate: getExpiryDate(adaptiveFormats),
+        expiryDate: getEarliestYtDlpFormatExpiry(adaptiveFormats),
         isLive: false,
         version: info.version
       }
+
+      dashPlaybackSourceCache.set(videoId, cacheKey, source)
+      try {
+        await window.ftElectron.ytDlpPlaybackCacheSet(
+          videoId,
+          cacheKey,
+          source.expiryDate?.getTime() ?? NaN,
+          source
+        )
+      } catch (error) {
+        console.warn('Could not save the persistent yt-dlp playback cache', error)
+      }
+      return source
     }
   }
 

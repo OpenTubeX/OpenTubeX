@@ -12,7 +12,7 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const rendererRoot = path.join(repoRoot, 'src/renderer')
 const iconRoot = path.join(rendererRoot, 'icons')
-const packs = ['lucide', 'material', 'phosphor', 'remix', 'tabler']
+const packs = ['material', 'remix']
 const aliases = await readJson('faAliasToCanon.json')
 const mapping = await readJson('faIconMap.json')
 
@@ -24,7 +24,7 @@ async function readJson(file) {
   return JSON.parse(await readFile(path.join(iconRoot, file), 'utf8'))
 }
 
-test('normalizes supported Font Awesome icon forms', () => {
+test('normalizes supported semantic icon forms', () => {
   assert.deepEqual(normalizeFaIcon('search'), ['fas', 'search'])
   assert.deepEqual(normalizeFaIcon('far bookmark'), ['far', 'bookmark'])
   assert.deepEqual(normalizeFaIcon(['fab', 'youtube']), ['fab', 'youtube'])
@@ -38,26 +38,21 @@ test('normalizes supported Font Awesome icon forms', () => {
 
 test('resolves aliases, brands, filled bookmarks, and custom fallbacks', () => {
   assert.equal(
-    resolveIconifyId(['fas', 'external-link-alt'], 'lucide'),
-    'lucide:square-arrow-out-up-right'
+    resolveIconifyId(['fas', 'external-link-alt'], 'material'),
+    'material-symbols:open-in-new-down'
   )
-  assert.equal(resolveIconifyId(['fab', 'youtube'], 'tabler'), 'simple-icons:youtube')
-  assert.equal(resolveIconifyId(['fas', 'bookmark'], 'phosphor'), 'ph:bookmark-simple-fill')
-  assert.equal(resolveIconifyId(['far', 'bookmark'], 'phosphor'), 'ph:bookmark-simple')
+  assert.equal(resolveIconifyId(['fab', 'youtube'], 'remix'), 'simple-icons:youtube')
+  assert.equal(resolveIconifyId(['fas', 'bookmark'], 'remix'), 'ri:bookmark-fill')
+  assert.equal(resolveIconifyId(['far', 'bookmark'], 'remix'), 'ri:bookmark-line')
   assert.equal(resolveIconifyId(['fac', 'unmapped-custom'], 'material'), 'otx:unmapped-custom')
 })
 
 test('every mapped glyph is present in its generated pack bundle', async () => {
-  const filledBases = await readJson('lucideFilledBases.json')
-
   for (const pack of packs) {
     const bundle = await readJson(`iconifyBundles/${pack}.json`)
     for (const [name, entry] of Object.entries(mapping)) {
       const iconifyId = resolveIconifyId(['fas', name], pack)
-      const bundledId = pack === 'lucide' && filledBases[iconifyId?.split(':')[1]]
-        ? `lucide:${filledBases[iconifyId.split(':')[1]]}`
-        : iconifyId
-      assert.ok(bundle[bundledId], `${pack} bundle is missing ${bundledId}`)
+      assert.ok(bundle[iconifyId], `${pack} bundle is missing ${iconifyId}`)
 
       if (entry.simple) {
         assert.ok(
@@ -69,7 +64,7 @@ test('every mapped glyph is present in its generated pack bundle', async () => {
   }
 })
 
-test('every Font Awesome icon the renderer asks for has a mapping', async () => {
+test('every semantic icon the renderer asks for has a mapping', async () => {
   // `fac` icons are the project's own glyphs and resolve to the otx: collection
   // without a mapping entry, so they are not part of this.
   const iconPattern = /\[\s*['"](fas|far|fab)['"]\s*,\s*['"]([a-z0-9-]+)['"]\s*\]/g
@@ -78,7 +73,7 @@ test('every Font Awesome icon the renderer asks for has a mapping', async () => 
   for (const file of await readRendererSources()) {
     const source = await readFile(file, 'utf8')
     for (const [, prefix, name] of source.matchAll(iconPattern)) {
-      if (resolveIconifyId([prefix, name], 'lucide') == null) {
+      if (resolveIconifyId([prefix, name], 'material') == null) {
         unmapped.set(`${prefix}:${name}`, path.relative(repoRoot, file))
       }
     }
@@ -87,7 +82,7 @@ test('every Font Awesome icon the renderer asks for has a mapping', async () => 
   assert.deepEqual(
     Object.fromEntries(unmapped),
     {},
-    'these icons fall back to a missing glyph in every non-Font Awesome pack'
+    'these icons are missing from the supported icon packs'
   )
 })
 

@@ -1,32 +1,29 @@
 <template>
-  <span
+  <button
     v-if="canConfigureSync"
+    type="button"
     class="syncedSettingIndicator"
-    :class="{ syncDisabled: !isSynced }"
-    role="button"
-    tabindex="0"
+    :class="{ syncDisabled: !isSynced, indicatorDisabled: disabled }"
+    :disabled="disabled"
     :aria-pressed="isSynced"
     :aria-label="label"
     :title="label"
     @click.prevent.stop="toggleSync"
-    @keydown.enter.prevent.stop="toggleSync"
-    @keydown.space.prevent.stop="toggleSync"
   >
-    <FontAwesomeIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
-  </span>
-  <span
+    <FtIcon :icon="isSynced ? ['fas', 'link'] : ['fas', 'link-slash']" />
+  </button>
+  <button
     v-if="showReset"
+    type="button"
     class="changedSettingIndicator"
-    role="button"
-    tabindex="0"
+    :class="{ indicatorDisabled: disabled }"
+    :disabled="disabled"
     :aria-label="resetLabel"
     :title="resetLabel"
     @click.prevent.stop="resetToDefault"
-    @keydown.enter.prevent.stop="resetToDefault"
-    @keydown.space.prevent.stop="resetToDefault"
   >
-    <FontAwesomeIcon :icon="['fas', 'undo']" />
-  </span>
+    <FtIcon :icon="['fas', 'undo']" />
+  </button>
   <!-- Kept as reserved space rather than left out: a control that grows by an
        icon the moment its value leaves the default reflows, which can re-wrap
        a slider's label while it is still being dragged. -->
@@ -35,12 +32,12 @@
     class="changedSettingIndicatorPlaceholder"
     aria-hidden="true"
   >
-    <FontAwesomeIcon :icon="['fas', 'undo']" />
+    <FtIcon :icon="['fas', 'undo']" />
   </span>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -59,6 +56,10 @@ const props = defineProps({
   isChanged: {
     type: Boolean,
     default: null
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -80,7 +81,8 @@ const isSynced = computed(() => {
 
 const canShowReset = computed(() => {
   return store.state.settings.highlightChangedSettings === true &&
-    props.settingKey !== 'highlightChangedSettings'
+    props.settingKey !== 'highlightChangedSettings' &&
+    (props.settingKey !== '' || props.isChanged !== null)
 })
 
 const showReset = computed(() => {
@@ -111,6 +113,8 @@ function settingsValuesEqual(currentValue, defaultValue) {
 }
 
 function resetToDefault() {
+  if (props.disabled) return
+
   if (props.isChanged !== null) {
     emit('reset')
   } else {
@@ -119,6 +123,8 @@ function resetToDefault() {
 }
 
 async function toggleSync() {
+  if (props.disabled) return
+
   const excluded = Array.isArray(store.state.settings.syncServerSettingsExcluded)
     ? store.state.settings.syncServerSettingsExcluded
     : []
@@ -167,5 +173,11 @@ async function toggleSync() {
 
 .syncDisabled {
   opacity: 0.55;
+}
+
+.indicatorDisabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

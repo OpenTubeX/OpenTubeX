@@ -70,7 +70,9 @@
       </RouterView>
     </FtFlexBox>
     <Transition name="settings-window">
-      <SettingsWindow v-if="settingsWindowOpen" />
+      <KeepAlive>
+        <SettingsWindow v-if="settingsWindowOpen" />
+      </KeepAlive>
     </Transition>
     <FtTutorialOverlay
       v-if="showTutorial"
@@ -151,7 +153,7 @@
       role="search"
       @keydown.stop="handleFindbarNavigationShortcut"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'search']"
         class="findbarIcon"
         aria-hidden="true"
@@ -180,7 +182,7 @@
         :title="t('Previous match')"
         @click="findInPage(true)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'angle-up']"
           aria-hidden="true"
         />
@@ -192,7 +194,7 @@
         :title="t('Next match')"
         @click="findInPage(false)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'angle-down']"
           aria-hidden="true"
         />
@@ -204,7 +206,7 @@
         :title="t('Close')"
         @click="closeFindbar"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'xmark']"
           aria-hidden="true"
         />
@@ -267,7 +269,7 @@
               class="tabSwitcherPreviewFallback"
               aria-hidden="true"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'display']"
                 class="tabSwitcherFallbackIcon"
               />
@@ -281,7 +283,7 @@
               alt=""
               draggable="false"
             >
-            <FontAwesomeIcon
+            <FtIcon
               v-else-if="showTabIcons && getTabPageIcon(tab)"
               :icon="getTabPageIcon(tab)"
               class="tabSwitcherTitleIcon"
@@ -298,7 +300,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'
@@ -321,6 +323,11 @@ import FtTutorialOverlay from './components/FtTutorialOverlay/FtTutorialOverlay.
 import { vSaferHtml } from './directives/vSaferHtml.js'
 
 import store from './store/index'
+import {
+  applyThemeToDocument,
+  handleCustomThemeUpdated,
+  loadCustomThemes,
+} from './helpers/customTheme'
 
 import packageDetails from '../../package.json'
 import { MULTIPLE_TABS_CONFIRM_THRESHOLD, KeyboardShortcuts } from '../constants'
@@ -348,6 +355,7 @@ import { normalizeScrollbarThumbWidth } from './constants/scrollbar'
 import { getTabAccentColor } from './constants/tabColors'
 import { getThumbnailListStyles } from './constants/thumbnailSize'
 import { getLastUsedVersion, setLastUsedVersion } from './helpers/lastUsedVersion'
+import { invalidateAllYtDlpPlaybackSources } from './helpers/player/ytDlpPlayback'
 import { getTabNavigationService } from './tabs/TabNavigationService'
 import { tabRuntimeRegistry } from './tabs/TabRuntimeRegistry'
 import { getTabAvatarUrl, getTabPageIcon, getTabPreviewFallbackUrl } from './tabs/tabPreview'
@@ -562,6 +570,7 @@ let removeTabsStateListener = null
 let removeReloadRequestListener = null
 let removeConfirmMultipleTabsActionListener = null
 let removeOpenUrlListener = null
+let removeYtDlpBinaryUpdatedListener = null
 const pendingSubscriptionAutoRefreshes = []
 const pendingSubscriptionAutoRefreshKeys = new Set()
 const cancelledSubscriptionAutoRefreshKeys = new Set()
@@ -771,12 +780,28 @@ onMounted(async () => {
   preloadUtilityRoutes()
 
   if (isElectron) {
+    removeYtDlpBinaryUpdatedListener = window.ftElectron.addYtDlpBinaryUpdatedListener(
+      invalidateAllYtDlpPlaybackSources
+    )
     removeTabsStateListener = await store.dispatch('initializeTabs')
     window.ftElectron.tabs.rendererReady()
   }
 
   const hasExistingSettings = await store.dispatch('grabUserSettings')
 
+  try {
+    const themes = await loadCustomThemes()
+    store.commit('setCustomThemes', themes)
+    if (baseTheme.value === 'custom' && themes.length > 0) {
+      await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
+    }
+  } catch (error) {
+    console.error('Failed to load custom theme:', error)
+  }
+  removeCustomThemeListener = handleCustomThemeUpdated((themes) => {
+    store.commit('setCustomThemes', themes)
+    updateTheme()
+  })
   updateTheme()
 
   await store.dispatch('fetchInvidiousInstancesFromFile')
@@ -892,6 +917,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  removeCustomThemeListener()
+  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   if (isElectron) {
     window.ftElectron.tabs.setPreviewCapturePaused(false)
     window.ftElectron.tabs.setShortcutsBlocked(false).catch(() => {})
@@ -922,6 +949,7 @@ onBeforeUnmount(() => {
   removeReloadRequestListener?.()
   removeConfirmMultipleTabsActionListener?.()
   removeOpenUrlListener?.()
+  removeYtDlpBinaryUpdatedListener?.()
 })
 
 watch([activeTabId, selectionRevision], ([tabId, revision]) => {
@@ -1700,8 +1728,14 @@ function clearSubscriptionTabAutoRefreshTimer(tab) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
+let removeCustomThemeListener = () => {}
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
 
 watch(baseTheme, updateTheme)
+watch(() => store.getters.getSystemLightTheme, updateTheme)
+watch(() => store.getters.getSystemDarkTheme, updateTheme)
 
 /** @type {import('vue').ComputedRef<string>} */
 const mainColor = computed(() => store.getters.getMainColor)
@@ -1729,8 +1763,18 @@ const thumbnailSize = computed(() => store.getters.getThumbnailSize)
 watch(thumbnailSize, updateThumbnailListSize)
 
 function updateTheme() {
-  document.body.className = `${baseTheme.value || 'system'} main${mainColor.value || 'Red'} sec${secColor.value || 'Blue'}`
-  document.body.dataset.systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  const effectiveTheme = baseTheme.value === 'system'
+    ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
+    : baseTheme.value
+  const customThemes = store.getters.getCustomThemes
+  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
+    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
+  applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
+}
+
+function handleSystemColorSchemeChange(event) {
+  systemUsesDarkTheme.value = event.matches
+  if (baseTheme.value === 'system') updateTheme()
 }
 
 function updateUiRoundness() {

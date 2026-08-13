@@ -10,7 +10,7 @@
       @focus="setFocused(true)"
       @blur="setFocused(false)"
     >
-      <FontAwesomeIcon :icon="['fas', 'question-circle']" />
+      <FtIcon :icon="['fas', 'question-circle']" />
     </button>
     <Teleport :to="tooltipTarget">
       <p
@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { nextTick, onBeforeUnmount, onMounted, ref, shallowRef, useId, useTemplateRef } from 'vue'
 
 const buttonRef = useTemplateRef('buttonRef')

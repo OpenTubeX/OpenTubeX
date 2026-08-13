@@ -501,6 +501,7 @@ test.describe('settings', () => {
     await expect(breadcrumb).toContainText('Settings')
     await expect(breadcrumb).toContainText('Channel Settings')
     await expect(breadcrumb).toContainText('Saved Channel Settings')
+    await expect(breadcrumb.locator('.settingsBreadcrumbSubpageIcon[data-icon="users"]')).toBeVisible()
     await breadcrumb
       .getByRole('button', { name: 'Channel Settings' })
       .locator('.settingsBreadcrumbCategoryIcon')
@@ -649,7 +650,17 @@ test.describe('settings', () => {
   test('keeps quick playback speed actions sticky and reflects the default state', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()
-    await page.getByRole('button', { name: 'Customize Quick Playback Speed Bar' }).click()
+    const customizeButton = page.getByRole('button', {
+      name: 'Customize Quick Playback Speed Bar'
+    })
+    await expect(customizeButton).toBeDisabled()
+    await page.locator('label.switch-label')
+      .filter({ hasText: 'Use Quick Playback Speed Bar' })
+      .click()
+    await expect(customizeButton).toBeEnabled()
+    await customizeButton.click()
+
+    await expect(page.locator('.settingsBreadcrumb [data-icon="gauge-high"]')).toBeVisible()
 
     const scroller = page.locator('.settingsSubpageScroll')
     const toolbar = page.locator('.quickPlaybackSpeedToolbar')
@@ -657,13 +668,14 @@ test.describe('settings', () => {
     const reset = page.getByRole('button', { name: 'Reset to Defaults' })
     await expect(reset).toBeDisabled()
 
-    const [scrollerBounds, listBounds] = await Promise.all([
+    const [scrollerBounds, scrollerClientWidth, listBounds] = await Promise.all([
       scroller.boundingBox(),
+      scroller.evaluate(element => element.clientWidth),
       list.boundingBox()
     ])
     expect(listBounds.width).toBeLessThanOrEqual(800)
     expect(Math.abs(
-      listBounds.x + listBounds.width / 2 - scrollerBounds.x - scrollerBounds.width / 2
+      listBounds.x + listBounds.width / 2 - scrollerBounds.x - scrollerClientWidth / 2
     )).toBeLessThanOrEqual(1)
 
     await page.getByRole('button', { name: 'Add Playback Speed' }).click()
@@ -978,24 +990,36 @@ test.describe('settings', () => {
     await expect(toggle).not.toBeChecked()
   })
 
-  test('offers background voice-over preparation when translation is enabled', async ({ page }) => {
+  test('shows voice-over settings disabled until translation is enabled', async ({ page }) => {
     await goTo(page, 'settings')
     await page.locator('.settingsMenu [data-section="player"]').click()
 
+    const settingsContent = page.locator('.settingsContent')
+    const voiceOverSection = page.locator('.voiceOverTranslationSettings')
+    await settingsContent.evaluate(element => { element.scrollTop = element.scrollHeight })
+    await expect(voiceOverSection).toBeInViewport()
+
     const enableToggle = page.getByRole('checkbox', { name: 'Enable voice-over translation' })
+    const backgroundToggle = page.getByRole('checkbox', {
+      name: 'Start preparing voice-over translations in the background'
+    })
+    const languageSelect = page.getByRole('combobox', {
+      name: 'Voice-over translation language'
+    })
+
     await expect(enableToggle).not.toBeChecked()
+    await expect(backgroundToggle).toBeDisabled()
+    await expect(languageSelect).toBeDisabled()
     await page.locator('label.switch-label')
       .filter({ hasText: 'Enable voice-over translation' })
       .click()
 
-    const backgroundToggle = page.getByRole('checkbox', {
-      name: 'Start preparing voice-over translations in the background'
-    })
-    await expect(backgroundToggle).toBeVisible()
+    await expect(backgroundToggle).toBeEnabled()
     await expect(backgroundToggle).not.toBeChecked()
+    await expect(languageSelect).toBeEnabled()
     await expect(page.getByRole('checkbox', {
       name: 'Cache voice-over translations for one day'
-    })).toBeChecked()
+    })).toHaveCount(0)
     await expect(page.getByText('Supported source languages: Russian, English, Chinese, Korean,'))
       .toBeVisible()
   })
@@ -1122,29 +1146,58 @@ test.describe('settings', () => {
     expect(syncRequests).toEqual([])
   })
 
-  test('loads each experimental icon pack when selected', async ({ page, attachScreenshot }) => {
+  test('switches icon packs from Theme settings and persists the choice', async ({ page, attachScreenshot }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
-    const preview = page.locator('.iconPackPreview')
-    const select = preview.locator('select')
-    for (const pack of ['material', 'tabler', 'phosphor', 'lucide', 'remix']) {
-      await select.selectOption(pack)
-      await expect(preview.locator('.previewIcon.ft-icon').first()).toBeVisible()
-      await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
-      await attachScreenshot(`${pack} icon pack`)
-    }
+    const iconPackSetting = page.locator('.select').filter({ hasText: 'Icon Pack' })
+    const select = iconPackSetting.locator('select')
+    await expect(select).toHaveValue('material')
+    await select.selectOption('remix')
+    await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
+    await attachScreenshot('remix icon pack')
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-    await expect(preview.locator('select')).toHaveValue('remix')
-    await expect(preview.locator('.ft-icon__glyph').first()).toBeVisible()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await expect(iconPackSetting.locator('select')).toHaveValue('remix')
+    await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
+  })
+
+  test('groups theme selects and keeps restart settings aligned', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', {
+      name: 'Highlight settings changed from defaults'
+    }).click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const selectRows = page.locator('.themeSelectRow')
+    await expect(selectRows).toHaveCount(3)
+    await expect(selectRows.nth(0).locator('.select')).toHaveCount(3)
+    await expect(selectRows.nth(1).locator('.select')).toHaveCount(2)
+    await expect(selectRows.nth(2).locator('.select')).toHaveCount(2)
+
+    const baseThemeLabel = selectRows.nth(0).locator('.select').first().locator('.select-label')
+    const alignedLabelParts = await baseThemeLabel
+      .locator('.select-icon, .select-placeholder, .syncedSettingIndicator, .changedSettingIndicatorPlaceholder')
+      .evaluateAll(elements => elements.map(element => {
+        const bounds = element.getBoundingClientRect()
+        return bounds.y + bounds.height / 2
+      }))
+    expect(Math.max(...alignedLabelParts) - Math.min(...alignedLabelParts)).toBeLessThanOrEqual(1)
+
+    const switchPositions = await Promise.all([
+      'Expand Side Bar by Default',
+      'Disable Smooth Scrolling',
+      'Always Show Scrollbars'
+    ].map(label => page.getByRole('checkbox', { name: label }).boundingBox()))
+    const switchX = switchPositions.map(position => position.x)
+    expect(Math.max(...switchX) - Math.min(...switchX)).toBeLessThanOrEqual(1)
   })
 
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
 
     const errors = []
     page.on('pageerror', error => errors.push(error.message))
@@ -1159,37 +1212,19 @@ test.describe('settings', () => {
       }
     })
 
-    const select = page.locator('.iconPackPreview select')
+    const select = page.locator('.select').filter({ hasText: 'Icon Pack' }).locator('select')
     const loadFailure = page.waitForEvent('console', message => (
-      message.type() === 'error' && message.text().includes('[icon-pack] failed to load material')
+      message.type() === 'error' && message.text().includes('[icon-pack] failed to load remix')
     ))
-    await select.selectOption('material')
+    await select.selectOption('remix')
     await loadFailure
     expect(errors).toEqual([])
+    await expect(select).toHaveValue('material')
 
     await page.reload()
     await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-    await expect(select).toHaveValue('fontawesome')
-  })
-
-  test('renders custom icons with the default Font Awesome pack', async ({ page }) => {
-    await goTo(page, 'settings')
-    await page.locator('.settingsMenu [data-section="experimental"]').click()
-
-    const preview = page.locator('.iconPackPreview')
-    await expect(preview.locator('select')).toHaveValue('fontawesome')
-
-    for (const icon of [
-      'vertical-tabs',
-      'horizontal-tabs',
-      'playlist-add',
-      'playlist-check'
-    ]) {
-      await expect(
-        preview.locator(`[title="fac ${icon}"] svg[data-prefix="fac"][data-icon="${icon}"]`)
-      ).toBeVisible()
-    }
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+    await expect(select).toHaveValue('material')
   })
 
   test('a toggled setting persists across restarts', async ({ app }) => {

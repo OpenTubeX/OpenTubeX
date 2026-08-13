@@ -72,7 +72,7 @@ import {
   MANIFEST_TYPE_DASH,
   MANIFEST_TYPE_HLS
 } from '../../helpers/player/utils'
-import { getYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
+import { getYtDlpPlaybackSource, invalidateYtDlpPlaybackSource } from '../../helpers/player/ytDlpPlayback'
 import { selectSponsorBlockFullVideoLabel } from '../../helpers/player/sponsorBlockFullVideo'
 import {
   buildSubscriptionShortsFeed,
@@ -197,6 +197,9 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      // Same-tab navigation keeps the current layout while its skeleton loads.
+      // A newly mounted watch tab falls back to the configured default instead.
+      loadingTheatreMode: null,
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
@@ -297,6 +300,7 @@ export default defineComponent({
       ytDlpStreamsPending: false,
       legacyFormats: [],
       captions: [],
+      captionTranslations: [],
       currentTime: 0,
       showTranscript: false,
       showSidebarChapters: false,
@@ -515,6 +519,26 @@ export default defineComponent({
     },
     proxyVideos: function () {
       return this.$store.getters.getProxyVideos
+    },
+    ytDlpPlaybackCacheKey: function () {
+      const getters = this.$store.getters
+      const proxyConfiguration = getters.getUseProxy
+        ? [
+            getters.getProxyProtocol,
+            getters.getProxyHostname,
+            getters.getProxyPort,
+            getters.getProxyUsername,
+            getters.getProxyPassword
+          ]
+        : []
+
+      return JSON.stringify([
+        getters.getYtDlpSource,
+        getters.getYtDlpChannel,
+        getters.getYtDlpPath,
+        getters.getUseProxy,
+        ...proxyConfiguration
+      ])
     },
     defaultAutoplayInterruptionIntervalHours: function () {
       return this.$store.getters.getDefaultAutoplayInterruptionIntervalHours
@@ -932,6 +956,7 @@ export default defineComponent({
   watch: {
     isLoading(loading) {
       if (!loading) {
+        this.loadingTheatreMode = null
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
 
@@ -1474,6 +1499,7 @@ export default defineComponent({
     async reloadView({ preserveTitle = false } = {}) {
       const loadGeneration = ++this.videoLoadGeneration
       const requestedVideoId = this.tabRoute.params.id
+      this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
 
@@ -1618,6 +1644,7 @@ export default defineComponent({
       this.ytDlpStreamsPending = false
       this.legacyFormats = []
       this.captions = []
+      this.captionTranslations = []
       this.currentTime = 0
       if (!preserveShortsPanels) {
         this.showTranscript = false
@@ -1999,7 +2026,20 @@ export default defineComponent({
         const videoInfo = await getLocalVideoInfo(videoId)
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere } = videoInfo
+        const { info: result, poToken, clientInfo, adEndTimeUnixMs, paidPromotionDurationMs, isPremiere, watchPageIpBlocked } = videoInfo
+
+        if (watchPageIpBlocked) {
+          this.ipBlockDetectedInCurrentChain = true
+
+          if (process.env.IS_ELECTRON && this.videoPlaybackEngine === 'built-in') {
+            this.playbackEngineFallbackAttemptedForCurrentVideo = true
+            this.playbackEngineFallbackTarget = 'yt-dlp'
+            this.showTabToast({
+              message: this.t('Change Format.Built-in Fallback Template', { error: this.t('Video.IP block') }),
+              icon: ['fas', 'exchange-alt'],
+            })
+          }
+        }
 
         const playabilityStatus = result.playability_status
         this.playabilityStatus = playabilityStatus.status
@@ -2269,7 +2309,13 @@ export default defineComponent({
             }
           }
 
-          if (this.backendFallback) {
+          const tryingYtDlpForIpBlock =
+            this.playbackEngineFallbackTarget === 'yt-dlp' &&
+            this.ipBlockDetectedInCurrentChain
+
+          if (tryingYtDlpForIpBlock) {
+            console.warn('Built-in metadata is IP blocked; continuing so yt-dlp can provide the playback source')
+          } else if (this.backendFallback) {
             throw new Error(errorText)
           } else {
             const didReload = await this.runIpBlockRecoveryScriptAndReload()
@@ -2420,6 +2466,10 @@ export default defineComponent({
                 }
               }) ?? []
 
+              this.captionTranslations = (result.captions.translation_languages ?? []).map(language =>
+                this.getTranslatedCaption(result.captions, language)
+              ).filter(Boolean)
+
               if (captionTracks.length > 0) {
                 const languagesSet = new Set([this.preferredCaptionLocale, this.preferredCaptionLocale.split('-')[0]])
 
@@ -2452,7 +2502,7 @@ export default defineComponent({
 
               this.captions = sortCaptions(captionTracks, this.preferredCaptionLocale)
             }
-          } else {
+          } else if (this.playbackEngineFallbackTarget !== 'yt-dlp') {
             // video might be region locked or something else. This leads to no formats being available
             this.showTabToast({
               message: this.t('This video is unavailable because of missing formats. This can happen due to country unavailability.'),
@@ -2461,6 +2511,8 @@ export default defineComponent({
             })
             this.handleVideoEnded()
             return
+          } else {
+            console.warn('Built-in metadata has no streams; continuing so yt-dlp can provide the playback source')
           }
 
           let storyboard
@@ -2486,6 +2538,7 @@ export default defineComponent({
               ?.projection_type ?? null
 
             if (
+              poToken &&
               videoInfo.info.streaming_data?.server_abr_streaming_url &&
               videoInfo.info.player_config.media_common_config.media_ustreamer_request_config
             ) {
@@ -2556,10 +2609,16 @@ export default defineComponent({
       } catch (err) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return }
 
-        console.error(err)
-        if (this.backendPreference === 'local' && this.backendFallback && !err.toString().includes('private') && !err.toString().includes('unavailable')) {
+        let handledError = err
+        if (err.isIpBlock) {
+          this.ipBlockDetectedInCurrentChain = true
+          handledError = new Error(this.t('Video.IP block'), { cause: err })
+        }
+
+        console.error(handledError)
+        if (this.backendPreference === 'local' && this.backendFallback && !handledError.toString().includes('private') && !handledError.toString().includes('unavailable')) {
           const errorMessage = this.t('Local API Error (Click to copy)')
-          showApiErrorToast(errorMessage, err, this.showTabToast)
+          showApiErrorToast(errorMessage, handledError, this.showTabToast)
           this.showTabToast({ message: this.t('Falling back to Invidious API'), icon: ['fas', 'exchange-alt'] })
           this.getVideoInformationInvidious(loadGeneration)
         } else {
@@ -2573,7 +2632,7 @@ export default defineComponent({
           if (!this.thumbnail) {
             this.thumbnail = this.getUnavailableVideoThumbnail()
           }
-          this.errorMessage = err.message || err.toString()
+          this.errorMessage = handledError.message || handledError.toString()
         }
       }
     },
@@ -3735,6 +3794,7 @@ export default defineComponent({
       }
 
       this.streamErrorReloadAttemptedForCurrentVideo = true
+      this.handleWatchProgressAutoSaveWhenProgressEnabled()
       this.showTabToast({
         message: `${this.t('Video.Reloading video after streaming URL error')}: ${specificError}`,
         icon: ['fas', 'sync'],
@@ -3764,7 +3824,20 @@ export default defineComponent({
           // shaka-player will keep trying until the internet connection returns and resume playback automatically when it does
           return
         }
-      } else if (error.code === Code.BAD_HTTP_STATUS) {
+      }
+
+      // A terminal player error can still come from a transiently bad yt-dlp
+      // URL or extraction. Refresh those streams once before changing format or
+      // restoring the cached built-in source (which may use SABR).
+      if (this.activePlaybackEngine === 'yt-dlp') {
+        invalidateYtDlpPlaybackSource(this.videoId)
+        const status = error.code === Code.BAD_HTTP_STATUS ? error.data[1] : error.code
+        if (await this.reloadAfterStreamErrorOnce(`[PLAYER_ERROR: ${status}]`)) {
+          return
+        }
+      }
+
+      if (error.code === Code.BAD_HTTP_STATUS) {
         switch (error.data[1]) {
           case 429:
             this.handleWatchProgressAutoSaveWhenProgressEnabled()
@@ -3840,6 +3913,17 @@ export default defineComponent({
           'Refreshing SABR stream after playback error'
         )
       ) { return }
+
+      // yt-dlp legacy formats come from the same extraction as its DASH
+      // formats. Prefer the independent built-in source after the one-shot
+      // yt-dlp refresh above, and keep legacy as the last resort when no
+      // built-in source is available.
+      if (
+        this.activePlaybackEngine === 'yt-dlp' &&
+        await this.tryPlaybackEngineFallback(error)
+      ) {
+        return
+      }
 
       const stopPlaybackRecovery = async () => {
         if (await this.tryPlaybackEngineFallback(error)) {
@@ -3920,7 +4004,11 @@ export default defineComponent({
       const videoId = this.videoId
 
       if (this.activePlaybackEngine === 'yt-dlp') {
-        if (this.builtInPlaybackSource === null) {
+        const source = this.builtInPlaybackSource
+        if (
+          source === null ||
+          (source.manifestSrc === null && source.legacyFormats.length === 0)
+        ) {
           return false
         }
 
@@ -3932,7 +4020,6 @@ export default defineComponent({
           return true
         }
 
-        const source = this.builtInPlaybackSource
         if (
           source.streamingDataExpiryDate !== null &&
           new Date() > source.streamingDataExpiryDate
@@ -4057,6 +4144,21 @@ export default defineComponent({
         if (
           !sourceApplied &&
           this.isCurrentVideoLoad(loadGeneration, videoId) &&
+          this.playbackEngineFallbackTarget === 'yt-dlp' &&
+          this.ipBlockDetectedInCurrentChain
+        ) {
+          this.playbackEngineFallbackTarget = null
+          const didReload = await this.runIpBlockRecoveryScriptAndReload()
+          if (!this.isCurrentVideoLoad(loadGeneration, videoId) || didReload) {
+            return
+          }
+          this.errorMessage = this.t('Video.IP block')
+          return
+        }
+
+        if (
+          !sourceApplied &&
+          this.isCurrentVideoLoad(loadGeneration, videoId) &&
           this.manifestSrc === null &&
           this.legacyFormats.length === 0
         ) {
@@ -4088,7 +4190,7 @@ export default defineComponent({
     extractYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       let source
       try {
-        source = await getYtDlpPlaybackSource(videoId)
+        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey)
       } catch (error) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
 
@@ -4305,19 +4407,32 @@ export default defineComponent({
      */
     getTranslatedLocaleCaption: function (captions, userLanguages) {
       // check if we can translate to the users language
-      const translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
+      let translationLanguage = captions.translation_languages.find(language => userLanguages.has(language.language_code))
 
-      let translationName, translationCode
       // Otherwise use the preferred caption locale and hope that YouTube can handle it.
       if (!translationLanguage) {
-        translationCode = userLanguages.values().next().value
-        translationName = this.$store.getters.getPreferredCaptionLocale
-          ? new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(translationCode) ?? translationCode
-          : this.t('Locale Name')
-      } else {
-        translationName = translationLanguage.language_name.text
-        translationCode = translationLanguage.language_code
+        const languageCode = userLanguages.values().next().value
+        translationLanguage = {
+          language_code: languageCode,
+          language_name: {
+            text: this.$store.getters.getPreferredCaptionLocale
+              ? new Intl.DisplayNames([this.currentLocale, 'en'], { type: 'language' }).of(languageCode) ?? languageCode
+              : this.t('Locale Name')
+          }
+        }
       }
+
+      return this.getTranslatedCaption(captions, translationLanguage)
+    },
+
+    /**
+     * @param {import('youtubei.js').YTNodes.PlayerCaptionsTracklist} captions
+     * @param {{ language_code: string, language_name: { text: string } }} translationLanguage
+     * @returns {null|{ url: string, label: string, language: string, mimeType: string, isAutotranslated: boolean }}
+     */
+    getTranslatedCaption: function (captions, translationLanguage) {
+      const translationName = translationLanguage.language_name.text
+      const translationCode = translationLanguage.language_code
 
       let trackToTranslate
 
@@ -4331,6 +4446,10 @@ export default defineComponent({
       } else {
         // if there is no auto-generated track choose the first translatable track
         trackToTranslate = captions.caption_tracks.find(track => track.is_translatable) ?? captions.caption_tracks[0]
+      }
+
+      if (!trackToTranslate) {
+        return null
       }
 
       const url = new URL(trackToTranslate.base_url)
@@ -4347,6 +4466,7 @@ export default defineComponent({
         id: `${trackToTranslate.vss_id}.${translationCode}`,
         url: url.toString(),
         label,
+        translationName,
         language: translationCode,
         mimeType: 'text/srt',
         isAutotranslated: true

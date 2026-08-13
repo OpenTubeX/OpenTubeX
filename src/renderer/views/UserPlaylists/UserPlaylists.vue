@@ -5,7 +5,7 @@
     >
       <div class="heading">
         <h2 class="headingText">
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'bookmark']"
             class="headingIcon"
           />
@@ -95,7 +95,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
