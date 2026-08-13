@@ -1,5 +1,4 @@
 import packageDetails from '../../../../package.json'
-import { getTabNavigationService } from '../../tabs/TabNavigationService'
 import { getTabPageIcon } from '../../tabs/tabPageIcon'
 import { DEFAULT_VIDEO_ZOOM } from '../../helpers/player/videoZoom'
 
@@ -211,39 +210,16 @@ const mutations = {
   }
 }
 
-function prepareTabActivationLoading(state, payload) {
-  const outgoingTabId = state.activeTabId
-  const incomingTabId = payload.activeTabId ?? null
-  if (!outgoingTabId || !incomingTabId || outgoingTabId === incomingTabId) {
-    return payload
-  }
-
-  const navigation = getTabNavigationService()
-  navigation.setLoadingSuppressed(incomingTabId, false)
-  const outgoingTab = state.tabs.find(tab => tab.id === outgoingTabId)
-  if (!outgoingTab?.route?.path?.startsWith('/watch/')) {
-    return payload
-  }
-
-  navigation.setLoadingSuppressed(outgoingTabId, true)
-  return {
-    ...payload,
-    tabs: payload.tabs?.map(tab => tab.id === outgoingTabId
-      ? { ...tab, isLoading: false }
-      : tab)
-  }
-}
-
 const actions = {
-  async initializeTabs({ commit, state }) {
+  async initializeTabs({ commit }) {
     if (!process.env.IS_ELECTRON) return () => {}
 
     const removeStateListener = window.ftElectron.tabs.onStateUpdated((newState) => {
-      commit('setTabsState', prepareTabActivationLoading(state, newState))
+      commit('setTabsState', newState)
     })
     const tabState = await window.ftElectron.tabs.getState()
     if (tabState) {
-      commit('setTabsState', prepareTabActivationLoading(state, tabState))
+      commit('setTabsState', tabState)
     }
 
     return () => {
@@ -261,27 +237,9 @@ const actions = {
     return await window.ftElectron.tabs.create(tabOptions)
   },
 
-  async activateTab({ rootGetters }, tabId) {
+  activateTab(_context, tabId) {
     if (!process.env.IS_ELECTRON) return
-
-    const activeTabId = rootGetters.getActiveTabId
-    const activeTab = rootGetters.getTabById(activeTabId)
-    const navigation = getTabNavigationService()
-    navigation.setLoadingSuppressed(tabId, false)
-    if (
-      activeTabId !== tabId &&
-      activeTab?.route?.path?.startsWith('/watch/')
-    ) {
-      // Send this before activation so the main process cannot publish the
-      // outgoing Watch tab as both inactive and transiently loading. The
-      // hidden Watch view stops contributing its loader during deactivation.
-      navigation.setLoadingSuppressed(activeTabId, true)
-    }
-
-    const activated = await window.ftElectron.tabs.activate(tabId)
-    if (!activated && rootGetters.getActiveTabId === activeTabId) {
-      navigation.setLoadingSuppressed(activeTabId, false)
-    }
+    window.ftElectron.tabs.activate(tabId)
   },
 
   setTabSelection({ commit }, tabIds) {

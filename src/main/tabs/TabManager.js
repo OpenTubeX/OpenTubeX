@@ -1071,7 +1071,7 @@ export class TabManager {
       this._deferredCloseTabIds.has(tabId) ||
       this._deferredUnloadTabIds.has(tabId)
     ) {
-      return false
+      return
     }
 
     const previousActiveId = this.activeTabId
@@ -1080,7 +1080,7 @@ export class TabManager {
       tab.pendingActivation !== true &&
       tab.loadState !== 'unloaded'
     ) {
-      return true
+      return
     }
 
     const outgoingTabId = this.presentedTabId ?? previousActiveId
@@ -1103,7 +1103,6 @@ export class TabManager {
     this.bridge.send(IpcChannels.TABS_ACTIVE_CHANGED, tabId, this.selectionRevision)
     this._broadcastStateUpdate()
     this._saveSession()
-    return true
   }
 
   /**
@@ -3007,12 +3006,11 @@ export async function setupTabsIPC(options = {}) {
     }
   })
 
-  ipcMain.handle(IpcChannels.TABS_ACTIVATE, (event, tabId) => {
+  ipcMain.on(IpcChannels.TABS_ACTIVATE, (event, tabId) => {
     const manager = getManager(event)
     if (manager && typeof tabId === 'string') {
-      return manager.activateTab(tabId)
+      manager.activateTab(tabId)
     }
-    return false
   })
 
   ipcMain.on(IpcChannels.TABS_SET_SELECTED, (event, tabIds) => {
