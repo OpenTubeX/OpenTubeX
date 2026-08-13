@@ -69,7 +69,7 @@
 
       <div class="colorGrid">
         <label
-          v-for="([key, property, label]) in CUSTOM_THEME_COLORS"
+          v-for="([key, property, label]) in CUSTOM_THEME_EDITABLE_COLORS"
           :key="key"
           class="colorField"
         >
@@ -90,8 +90,7 @@
           class="deleteThemeButton"
           :label="t('Settings.Theme Settings.Custom Theme.Delete Theme')"
           :icon="['fas', 'trash']"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
+          theme="destructive"
           @click="showDeletePrompt = true"
         />
         <FtButton
@@ -133,6 +132,7 @@ import { useColorTranslations } from '../../composables/colors'
 import {
   cloneDefaultCustomTheme,
   CUSTOM_THEME_COLORS,
+  CUSTOM_THEME_EDITABLE_COLORS,
   customThemeIdFromValue,
   customThemeValue,
   normalizeCustomTheme,

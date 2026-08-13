@@ -2103,7 +2103,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
 /* destructive color in case of conflict with red color themes (sets new destructive color to purple)
   NOTE: RED COLORS MUST CONTAIN 'Red' IN CLASSNAME.
 */
-body[class*='Red'] * {
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom)[class*='Red'] * {
   --destructive-color: #9c27b0;
   --destructive-text-color: #fff;
   --destructive-hover-color: #8e24aa;
@@ -2113,7 +2114,8 @@ body[class*='Red'] * {
 /* destructive color in case of conflict with red and purple color themes (sets new destructive color to yellow)
   NOTE: PURPLE COLORS MUST CONTAIN 'Purple' IN CLASSNAME.
 */
-body[class*='Red'][class*='Purple'] * {
+/* stylelint-disable-next-line selector-no-qualifying-type */
+body:not(.custom)[class*='Red'][class*='Purple'] * {
   --destructive-color: #ff9800;
   --destructive-text-color: #fff;
   --destructive-hover-color: #fb8c00;

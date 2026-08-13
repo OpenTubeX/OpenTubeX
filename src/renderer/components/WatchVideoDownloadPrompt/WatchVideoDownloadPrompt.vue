@@ -48,8 +48,7 @@
           v-if="!isDirty && selectedCustomTemplate !== undefined"
           :label="t('Downloads.Delete Template')"
           :icon="['fas', 'trash']"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
+          theme="destructive"
           @click="deleteTemplate"
         />
       </section>
@@ -266,8 +265,7 @@
             v-else-if="downloadInProgress"
             :label="t('Downloads.Cancel Download')"
             :icon="['fas', 'times-circle']"
-            text-color="var(--destructive-text-color)"
-            background-color="var(--destructive-color)"
+            theme="destructive"
             @click="cancelDownload"
           />
           <FtButton

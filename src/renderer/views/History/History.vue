@@ -28,8 +28,7 @@
             class="historyActionButton"
             :label="t('History.Delete Old History')"
             :icon="['fas', 'trash']"
-            text-color="var(--destructive-text-color)"
-            background-color="var(--destructive-color)"
+            theme="destructive"
             @click="showHistoryCleanupPrompt = true"
           />
         </div>
@@ -153,8 +152,7 @@
             <FtButton
               :label="t('Delete')"
               :icon="['fas', 'trash']"
-              text-color="var(--destructive-text-color)"
-              background-color="var(--destructive-color)"
+              theme="destructive"
               :disabled="historyCleanupDays === null"
               @click="deleteOldHistory"
             />
