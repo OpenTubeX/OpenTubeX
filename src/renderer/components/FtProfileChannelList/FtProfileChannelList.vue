@@ -38,8 +38,7 @@
         <FtButton
           :label="$t('Profile.Delete Selected')"
           :icon="['fas', 'trash']"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
+          theme="destructive"
           @click="displayDeletePrompt"
         />
       </FtFlexBox>

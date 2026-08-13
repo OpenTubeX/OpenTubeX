@@ -239,8 +239,7 @@
           />
           <FtButton
             :label="t('Settings.Sync Settings.Delete Account')"
-            text-color="var(--destructive-text-color)"
-            background-color="var(--destructive-color)"
+            theme="destructive"
             :icon="['fas', 'trash']"
             :disabled="busy"
             @click="showDeleteAccountPrompt = true"
@@ -281,8 +280,7 @@
           <FtFlexBox class="actions">
             <FtButton
               :label="t('Settings.Sync Settings.Confirm Data Loss')"
-              text-color="var(--destructive-text-color)"
-              background-color="var(--destructive-color)"
+              theme="destructive"
               :icon="['fas', 'triangle-exclamation']"
               @click="confirmDataLossSync"
             />
@@ -322,8 +320,7 @@
           <FtFlexBox class="actions">
             <FtButton
               :label="t('Settings.Sync Settings.Confirm Delete Account')"
-              text-color="var(--destructive-text-color)"
-              background-color="var(--destructive-color)"
+              theme="destructive"
               :icon="['fas', 'trash']"
               @click="deleteAccount"
             />

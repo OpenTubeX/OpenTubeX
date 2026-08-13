@@ -1972,12 +1972,14 @@ function parseLockupView(lockupView, channelId = undefined, channelName = undefi
         .find(part => part.text?.text && predicate(part.text.text))?.text?.text
 
       if (thumbnailBottomOverlayView) {
-        const liveBadge = thumbnailBottomOverlayView.badges
-          .find(badge => badge.badge_style === 'THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE')
+        const liveBadge = thumbnailBottomOverlayView.badges.find(badge =>
+          badge.badge_style === 'THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE' ||
+          badge.icon_name === 'LIVE'
+        )
 
         if (liveBadge) {
           liveNow = true
-          isPremiere = liveBadge.text?.toLowerCase() === 'premiere'
+          isPremiere = /premiere/i.test(liveBadge.text ?? '')
         } else if (thumbnailBottomOverlayView.badges.some(badge => badge.text?.toLowerCase() === 'upcoming')) {
           isUpcoming = true
 

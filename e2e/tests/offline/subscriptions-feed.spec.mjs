@@ -111,6 +111,7 @@ test.describe('subscriptions feed from cache', () => {
 
     const runningPremiere = page.locator('.ft-list-video').filter({ hasText: 'Running premiere video' })
     await expect(runningPremiere.locator('.videoDuration')).toHaveText('Premiere')
+    await expect(runningPremiere.locator('.viewCount')).toContainText('1k watching')
 
     const titles = page.locator('.ft-list-video .title, [class*="videoTitle"]')
     await expect(titles.nth(0)).toContainText('Video B newest')

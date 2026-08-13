@@ -93,7 +93,7 @@ test.describe('quick settings menu', () => {
     await expect(menu).toBeHidden()
   })
 
-  test('opens About in the settings-style window', async ({ page }) => {
+  test('opens About and switches to Settings from the quick menu', async ({ page }) => {
     await page.locator('.profileTrigger').click()
     await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'About' }).click()
 
@@ -101,6 +101,13 @@ test.describe('quick settings menu', () => {
     await expect(aboutWindow).toBeVisible()
     await expect(aboutWindow.locator('.settingsBreadcrumb')).toContainText('About')
     await expect(aboutWindow.locator('.settingsMenu')).toHaveCount(0)
+
+    await page.locator('.profileTrigger').click()
+    await page.getByRole('dialog', { name: 'Quick settings' }).getByRole('button', { name: 'All Settings' }).click()
+
+    const settingsWindow = page.getByRole('dialog', { name: 'Settings', exact: true })
+    await expect(settingsWindow).toBeVisible()
+    await expect(settingsWindow.locator('.settingsMenu')).toBeVisible()
   })
 })
 

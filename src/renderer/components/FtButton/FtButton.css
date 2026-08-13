@@ -28,6 +28,54 @@
   cursor: not-allowed;
 }
 
+.btn.primary {
+  color: var(--text-with-main-color);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn.primary:not(:disabled):is(:hover, :focus-visible) {
+  background-color: var(--primary-color-hover);
+  border-color: var(--primary-color-hover);
+}
+
+.btn.primary:not(:disabled):active {
+  background-color: var(--primary-color-active);
+  border-color: var(--primary-color-active);
+}
+
+.btn.secondary {
+  color: var(--text-with-accent-color);
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.btn.secondary:not(:disabled):is(:hover, :focus-visible) {
+  background-color: var(--accent-color-hover);
+  border-color: var(--accent-color-hover);
+}
+
+.btn.secondary:not(:disabled):active {
+  background-color: var(--accent-color-active);
+  border-color: var(--accent-color-active);
+}
+
+.btn.destructive {
+  color: var(--destructive-text-color);
+  background-color: var(--destructive-color);
+  border-color: var(--destructive-color);
+}
+
+.btn.destructive:not(:disabled):is(:hover, :focus-visible) {
+  background-color: var(--destructive-hover-color);
+  border-color: var(--destructive-hover-color);
+}
+
+.btn.destructive:not(:disabled):active {
+  background-color: var(--destructive-active-color);
+  border-color: var(--destructive-active-color);
+}
+
 .ripple {
   position: relative;
   overflow: hidden;

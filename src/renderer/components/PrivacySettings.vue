@@ -102,29 +102,25 @@
     <FtFlexBox>
       <FtButton
         :label="$t('Settings.Privacy Settings.Clear Search History and Cache')"
-        text-color="var(--destructive-text-color)"
-        background-color="var(--destructive-color)"
+        theme="destructive"
         :icon="['fas', 'trash']"
         @click="showSearchCachePrompt = true"
       />
       <FtButton
         :label="$t('Settings.Privacy Settings.Remove Watch History')"
-        text-color="var(--destructive-text-color)"
-        background-color="var(--destructive-color)"
+        theme="destructive"
         :icon="['fas', 'trash']"
         @click="showRemoveHistoryPrompt = true"
       />
       <FtButton
         :label="$t('Settings.Privacy Settings.Remove All Subscriptions / Profiles')"
-        text-color="var(--destructive-text-color)"
-        background-color="var(--destructive-color)"
+        theme="destructive"
         :icon="['fas', 'trash']"
         @click="showRemoveSubscriptionsPrompt = true"
       />
       <FtButton
         :label="$t('Settings.Privacy Settings.Remove All Playlists')"
-        text-color="var(--destructive-text-color)"
-        background-color="var(--destructive-color)"
+        theme="destructive"
         :icon="['fas', 'trash']"
         @click="showRemovePlaylistsPrompt = true"
       />

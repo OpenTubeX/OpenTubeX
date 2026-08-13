@@ -11,10 +11,12 @@
  * @returns {LocalVideoCollaborator[]}
  */
 export function parseLocalVideoCollaborators(videoInfo) {
-  const author = videoInfo.secondary_info?.owner?.author
+  const owner = videoInfo.secondary_info?.owner
+  const author = owner?.author
+  const endpoint = author?.endpoint ?? owner?.endpoint
   const collaborators = author?.collaborators?.length > 0
     ? author.collaborators
-    : author?.endpoint?.command?.inline_content?.custom_content?.items
+    : endpoint?.command?.inline_content?.custom_content?.items
 
   return collaborators?.flatMap((collaborator) => {
     const channelId = collaborator.title?.endpoint?.payload?.browseId ??

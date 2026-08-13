@@ -164,8 +164,7 @@
                   <FtButton
                     v-if="!isMainProfile"
                     :label="$t('Profile.Delete Profile')"
-                    text-color="var(--destructive-text-color)"
-                    background-color="var(--destructive-color)"
+                    theme="destructive"
                     :icon="['fas', 'trash']"
                     @click="showDeletePrompt = true"
                   />

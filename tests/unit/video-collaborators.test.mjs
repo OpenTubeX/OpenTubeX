@@ -75,6 +75,49 @@ test('uses native parsed dialog items when youtubei.js filters out collaborators
   }])
 })
 
+test('uses the video owner endpoint added by youtubei.js 18', () => {
+  const collaborators = [{
+    title: { text: 'Primary collaborator' },
+    renderer_context: {
+      command_context: {
+        on_tap: { payload: { browseId: 'UCprimary' } }
+      }
+    }
+  }, {
+    title: { text: 'Second collaborator' },
+    renderer_context: {
+      command_context: {
+        on_tap: { payload: { browseId: 'UCsecond' } }
+      }
+    }
+  }]
+
+  assert.deepEqual(parseLocalVideoCollaborators({
+    secondary_info: {
+      owner: {
+        author: { collaborators: [] },
+        endpoint: {
+          command: {
+            inline_content: {
+              custom_content: { items: collaborators }
+            }
+          }
+        }
+      }
+    }
+  }), [{
+    id: 'UCprimary',
+    name: 'Primary collaborator',
+    thumbnail: '',
+    subtitle: ''
+  }, {
+    id: 'UCsecond',
+    name: 'Second collaborator',
+    thumbnail: '',
+    subtitle: ''
+  }])
+})
+
 test('uses the regular owner avatar for non-collaboration videos', () => {
   assert.equal(getLocalVideoAvatarUrl({
     secondary_info: {

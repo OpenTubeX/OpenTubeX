@@ -45,6 +45,11 @@ export const CUSTOM_THEME_COLORS = Object.freeze([
   ['destructiveText', '--destructive-text-color', 'Text on destructive action'],
 ])
 
+const LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS = new Set(['instanceMenu', 'accentVisited'])
+export const CUSTOM_THEME_EDITABLE_COLORS = Object.freeze(
+  CUSTOM_THEME_COLORS.filter(([key]) => !LEGACY_UNUSED_CUSTOM_THEME_COLOR_KEYS.has(key))
+)
+
 export const DEFAULT_CUSTOM_THEME = Object.freeze({
   version: 1,
   id: '',

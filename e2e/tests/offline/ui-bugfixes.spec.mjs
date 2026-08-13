@@ -595,6 +595,26 @@ test.describe('select dropdown pixel grid', () => {
     await expect(option).toHaveClass(/active/)
     expect(await textPosition()).toEqual(beforeHover)
 
+    const selectedOption = dropdown.locator('.selectOption[aria-selected="true"]')
+    await selectedOption.hover()
+    await expect(selectedOption).toHaveClass(/active/)
+    const indicatorAppearance = await selectedOption.evaluate(element => {
+      const hoverLayer = getComputedStyle(element, '::before')
+      const selectedIndicator = getComputedStyle(element, '::after')
+      return {
+        hoverLayerZIndex: hoverLayer.zIndex,
+        indicatorColor: selectedIndicator.backgroundColor,
+        indicatorWidth: Number.parseFloat(selectedIndicator.width),
+        indicatorZIndex: selectedIndicator.zIndex
+      }
+    })
+    expect(indicatorAppearance).toMatchObject({
+      hoverLayerZIndex: '-1',
+      indicatorColor: 'rgb(33, 150, 243)',
+      indicatorZIndex: '1'
+    })
+    expect(indicatorAppearance.indicatorWidth).toBeCloseTo(3, 1)
+
     // At arbitrary UI scales, fixed-height options cannot all start on device
     // pixels. Their stable paint layer must therefore prevent the hover
     // background itself from changing text rasterization.
