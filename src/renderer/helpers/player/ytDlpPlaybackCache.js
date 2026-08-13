@@ -42,12 +42,15 @@ export class YtDlpPlaybackSourceCache {
    */
   get(videoId, cacheKey) {
     const entry = this.sources.get(videoId)
+    const expiryTime = entry?.source.expiryDate instanceof Date
+      ? entry.source.expiryDate.getTime()
+      : NaN
 
     if (
       entry === undefined ||
       entry.cacheKey !== cacheKey ||
-      entry.source.expiryDate === null ||
-      this.now() >= entry.source.expiryDate.getTime() - this.expiryMarginMs
+      !Number.isFinite(expiryTime) ||
+      this.now() >= expiryTime - this.expiryMarginMs
     ) {
       this.sources.delete(videoId)
       return null
@@ -65,9 +68,10 @@ export class YtDlpPlaybackSourceCache {
    * @param {import('./ytDlpPlayback').YtDlpPlaybackSource} source
    */
   set(videoId, cacheKey, source) {
+    const expiryTime = source.expiryDate instanceof Date ? source.expiryDate.getTime() : NaN
     if (
-      source.expiryDate === null ||
-      this.now() >= source.expiryDate.getTime() - this.expiryMarginMs
+      !Number.isFinite(expiryTime) ||
+      this.now() >= expiryTime - this.expiryMarginMs
     ) {
       return
     }
