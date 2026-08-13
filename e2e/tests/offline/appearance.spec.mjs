@@ -354,6 +354,12 @@ test.describe('custom theme editor', () => {
     await page.locator('.settingsBackButton').click()
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#f1f1f1')
     await expect(page.locator('body')).toHaveClass(/custom/)
+    await page.getByRole('button', { name: 'Edit custom theme' }).click()
+    await setEditorColor('Background', '#abcdef')
+    await page.getByRole('button', { name: 'Save and apply' }).click()
+    await expect(page.locator('.settingsWindow:visible')
+      .getByRole('combobox', { name: 'Base Theme' })).toHaveText('System default')
+    await expect(page.locator('body')).toHaveCSS('--bg-color', '#abcdef')
 
     const activeBaseThemeSelect = page.locator('.settingsWindow:visible')
       .getByRole('combobox', { name: 'Base Theme' })

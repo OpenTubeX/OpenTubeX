@@ -400,11 +400,15 @@ function readColor(probe, property, background) {
 async function saveAndApply() {
   try {
     flushColorPreviews()
+    const keepSystemTheme = store.getters.getBaseTheme === 'system' &&
+      customThemeIdFromValue(resolveSelectedTheme('system')) === draft.id
     const themes = await saveCustomTheme(draft)
     store.commit('setCustomThemes', themes)
     const savedTheme = themes.find(({ id }) => id === draft.id)
     setDraft(savedTheme)
-    await store.dispatch('updateBaseTheme', customThemeValue(savedTheme.id))
+    if (!keepSystemTheme) {
+      await store.dispatch('updateBaseTheme', customThemeValue(savedTheme.id))
+    }
     showToast({
       message: t('Settings.Theme Settings.Custom Theme.Theme Saved'),
       icon: ['fas', 'check']
