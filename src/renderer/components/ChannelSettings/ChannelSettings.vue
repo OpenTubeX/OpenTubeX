@@ -39,6 +39,7 @@
     <FtSettingsSubpage
       :open="showManager"
       :title="t('Settings.Channel Settings.Saved Channels')"
+      :icon="['fas', 'users']"
       @close="showManager = false"
     >
       <FtInput

@@ -412,6 +412,7 @@
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
+      :icon="['fas', 'gauge-high']"
       grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >

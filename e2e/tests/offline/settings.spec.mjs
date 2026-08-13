@@ -501,6 +501,7 @@ test.describe('settings', () => {
     await expect(breadcrumb).toContainText('Settings')
     await expect(breadcrumb).toContainText('Channel Settings')
     await expect(breadcrumb).toContainText('Saved Channel Settings')
+    await expect(breadcrumb.locator('.settingsBreadcrumbSubpageIcon[data-icon="users"]')).toBeVisible()
     await breadcrumb
       .getByRole('button', { name: 'Channel Settings' })
       .locator('.settingsBreadcrumbCategoryIcon')
@@ -659,19 +660,22 @@ test.describe('settings', () => {
     await expect(customizeButton).toBeEnabled()
     await customizeButton.click()
 
+    await expect(page.locator('.settingsBreadcrumb [data-icon="gauge-high"]')).toBeVisible()
+
     const scroller = page.locator('.settingsSubpageScroll')
     const toolbar = page.locator('.quickPlaybackSpeedToolbar')
     const list = page.locator('.quickPlaybackSpeedList')
     const reset = page.getByRole('button', { name: 'Reset to Defaults' })
     await expect(reset).toBeDisabled()
 
-    const [scrollerBounds, listBounds] = await Promise.all([
+    const [scrollerBounds, scrollerClientWidth, listBounds] = await Promise.all([
       scroller.boundingBox(),
+      scroller.evaluate(element => element.clientWidth),
       list.boundingBox()
     ])
     expect(listBounds.width).toBeLessThanOrEqual(800)
     expect(Math.abs(
-      listBounds.x + listBounds.width / 2 - scrollerBounds.x - scrollerBounds.width / 2
+      listBounds.x + listBounds.width / 2 - scrollerBounds.x - scrollerClientWidth / 2
     )).toBeLessThanOrEqual(1)
 
     await page.getByRole('button', { name: 'Add Playback Speed' }).click()
@@ -1158,6 +1162,37 @@ test.describe('settings', () => {
     await page.locator('.settingsMenu [data-section="theme"]').click()
     await expect(iconPackSetting.locator('select')).toHaveValue('remix')
     await expect(page.locator('[data-icon-pack="remix"]').first()).toBeVisible()
+  })
+
+  test('groups theme selects and keeps restart settings aligned', async ({ page }) => {
+    await goTo(page, 'settings')
+    await page.getByRole('button', {
+      name: 'Highlight settings changed from defaults'
+    }).click()
+    await page.locator('.settingsMenu [data-section="theme"]').click()
+
+    const selectRows = page.locator('.themeSelectRow')
+    await expect(selectRows).toHaveCount(3)
+    await expect(selectRows.nth(0).locator('.select')).toHaveCount(3)
+    await expect(selectRows.nth(1).locator('.select')).toHaveCount(2)
+    await expect(selectRows.nth(2).locator('.select')).toHaveCount(2)
+
+    const baseThemeLabel = selectRows.nth(0).locator('.select').first().locator('.select-label')
+    const alignedLabelParts = await baseThemeLabel
+      .locator('.select-icon, .select-placeholder, .syncedSettingIndicator, .changedSettingIndicatorPlaceholder')
+      .evaluateAll(elements => elements.map(element => {
+        const bounds = element.getBoundingClientRect()
+        return bounds.y + bounds.height / 2
+      }))
+    expect(Math.max(...alignedLabelParts) - Math.min(...alignedLabelParts)).toBeLessThanOrEqual(1)
+
+    const switchPositions = await Promise.all([
+      'Expand Side Bar by Default',
+      'Disable Smooth Scrolling',
+      'Always Show Scrollbars'
+    ].map(label => page.getByRole('checkbox', { name: label }).boundingBox()))
+    const switchX = switchPositions.map(position => position.x)
+    expect(Math.max(...switchX) - Math.min(...switchX)).toBeLessThanOrEqual(1)
   })
 
   test('keeps the current icon pack when another pack fails to load', async ({ page }) => {

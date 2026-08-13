@@ -65,7 +65,7 @@
         :color="iconColor"
       />
       <span class="select-label-text">
-        {{ placeholder }}
+        <span class="select-placeholder">{{ placeholder }}</span>
         <FtPerformanceImpact
           compact
           :setting-key="settingKey"

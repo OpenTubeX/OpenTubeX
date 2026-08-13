@@ -23,6 +23,7 @@
           :label="$t('Settings.Theme Settings.Disable Smooth Scrolling')"
           compact
           :default-value="disableSmoothScrollingToggleValue"
+          reserve-changed-indicator-space
           @change="handleRestartPrompt"
         />
         <FtToggleSwitch
@@ -191,16 +192,7 @@
       />
     </div>
     <br>
-    <FtFlexBox class="themeSelectPair">
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
-        :value="toastPosition"
-        setting-key="toastPosition"
-        :select-names="toastPositionNames"
-        :select-values="TOAST_POSITION_VALUES"
-        :icon="['fas', 'message']"
-        @change="updateToastPosition"
-      />
+    <FtFlexBox class="themeSelectRow">
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Base Theme.Base Theme')"
         :value="baseTheme"
@@ -210,10 +202,28 @@
         :icon="['fas', 'palette']"
         @change="updateBaseTheme"
       />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
+        :value="iconPack"
+        setting-key="iconPack"
+        :select-names="iconPackNames"
+        :select-values="ICON_PACKS"
+        :icon="['fas', 'icons']"
+        @change="updateIconPack"
+      />
+      <FtSelect
+        :placeholder="$t('Settings.Theme Settings.Toast Position.Toast Position')"
+        :value="toastPosition"
+        setting-key="toastPosition"
+        :select-names="toastPositionNames"
+        :select-values="TOAST_POSITION_VALUES"
+        :icon="['fas', 'message']"
+        @change="updateToastPosition"
+      />
     </FtFlexBox>
     <FtFlexBox
       v-if="baseTheme === 'system'"
-      class="themeSelectPair"
+      class="themeSelectRow"
     >
       <FtSelect
         :placeholder="t('Settings.Theme Settings.Light Theme')"
@@ -234,16 +244,7 @@
         @change="store.dispatch('updateSystemDarkTheme', $event)"
       />
     </FtFlexBox>
-    <FtFlexBox class="themeSelectPair">
-      <FtSelect
-        :placeholder="$t('Settings.Theme Settings.Icon Pack.Icon Pack')"
-        :value="iconPack"
-        setting-key="iconPack"
-        :select-names="iconPackNames"
-        :select-values="ICON_PACKS"
-        :icon="['fas', 'icons']"
-        @change="updateIconPack"
-      />
+    <FtFlexBox class="themeSelectRow">
       <FtSelect
         :placeholder="$t('Settings.Theme Settings.Main Color Theme.Main Color Theme')"
         :value="mainColor"
@@ -833,16 +834,23 @@ function handleSmoothScrolling(value) {
   margin-block-start: 24px;
 }
 
-.themeSelectPair {
+.themeSelectRow {
   flex-flow: row nowrap;
   justify-content: center;
   gap: 12px;
 }
 
-.themeSelectPair :deep(.select) {
+.themeSelectRow :deep(.select) {
   flex: 1 1 200px;
   min-inline-size: 0;
   max-inline-size: 200px;
+}
+
+@container settings-content (width <= 720px) {
+  .themeSelectRow {
+    align-items: center;
+    flex-direction: column;
+  }
 }
 
 .sliderGrid :deep(.pure-material-slider) {
