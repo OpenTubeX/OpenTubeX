@@ -90,6 +90,14 @@
           @change="updateShowNewSubscriptionFeed"
         />
         <FtToggleSwitch
+          :label="$t('Settings.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+          :default-value="showScheduledLiveStreamsFirst"
+          setting-key="showScheduledLiveStreamsFirst"
+          :tooltip="$t('Tooltips.Subscription Settings.Show Scheduled Live Streams / Premieres First')"
+          compact
+          @change="updateShowScheduledLiveStreamsFirst"
+        />
+        <FtToggleSwitch
           :label="$t('Settings.Subscription Settings.Show New Content Indicators')"
           :default-value="showNewSubscriptionFeedIndicators"
           setting-key="showNewSubscriptionFeedIndicators"
@@ -208,11 +216,21 @@ const showNewSubscriptionFeedIndicators = computed(() => store.getters.getShowNe
 /** @type {import('vue').ComputedRef<boolean>} */
 const showNewSubscriptionFeed = computed(() => store.getters.getShowNewSubscriptionFeed)
 
+/** @type {import('vue').ComputedRef<boolean>} */
+const showScheduledLiveStreamsFirst = computed(() => store.getters.getShowScheduledLiveStreamsFirst)
+
 /**
  * @param {boolean} value
  */
 function updateShowNewSubscriptionFeed(value) {
   store.dispatch('updateShowNewSubscriptionFeed', value)
+}
+
+/**
+ * @param {boolean} value
+ */
+function updateShowScheduledLiveStreamsFirst(value) {
+  store.dispatch('updateShowScheduledLiveStreamsFirst', value)
 }
 
 /**

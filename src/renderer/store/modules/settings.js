@@ -451,6 +451,7 @@ const state = {
   highlightChangedSettings: false,
   showPerformanceImpactIndicators: false,
   fetchSubscriptionsAutomatically: true,
+  showScheduledLiveStreamsFirst: true,
   showNewSubscriptionFeed: true,
   showNewSubscriptionFeedIndicators: false,
   subscriptionFeedAutoRefreshInterval: '0',
