@@ -91,18 +91,23 @@
           v-for="(entry, index) in visibleDataList"
           :key="index"
           :class="{ hover: searchState.selectedOption === index }"
-          @click="handleOptionClick(index)"
           @mouseenter="searchState.selectedOption = index"
           @mouseleave="resetSelectedOption"
         >
-          <div class="optionWrapper">
+          <component
+            :is="dataListProperties[index]?.href ? 'a' : 'div'"
+            class="optionWrapper"
+            :href="dataListProperties[index]?.href"
+            @click.prevent="handleOptionClick(index, $event)"
+            @auxclick.middle="handleOptionAuxClick(index, $event)"
+          >
             <FontAwesomeIcon
               v-if="dataListProperties[index]?.iconName"
               :icon="['fas', dataListProperties[index].iconName]"
               class="searchResultIcon"
             />
             <bdi>{{ entry }}</bdi>
-          </div>
+          </component>
           <a
             v-if="dataListProperties[index]?.isRemoveable"
             class="removeButton"
@@ -394,8 +399,9 @@ async function handleActionIconChange() {
 
 /**
  * @param {number} index
+ * @param {MouseEvent} [event]
  */
-function handleOptionClick(index) {
+function handleOptionClick(index, event) {
   if (removeButtonSelectedIndex.value !== -1) {
     handleRemoveClick(index)
     return
@@ -405,7 +411,22 @@ function handleOptionClick(index) {
   searchState.isPointerInList = false
   inputData.value = visibleDataList.value[index]
   emit('input', inputData.value)
-  handleClick(undefined, index)
+  handleClick(event, index)
+}
+
+/**
+ * Let web browsers follow the real link themselves. Electron needs to route
+ * middle-clicks through its logical tab service instead.
+ * @param {number} index
+ * @param {MouseEvent} event
+ */
+function handleOptionAuxClick(index, event) {
+  if (!process.env.IS_ELECTRON || !props.dataListProperties[index]?.href) {
+    return
+  }
+
+  event.preventDefault()
+  handleOptionClick(index, event)
 }
 
 function resetSelectedOption() {

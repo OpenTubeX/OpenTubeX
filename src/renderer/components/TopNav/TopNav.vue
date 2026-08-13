@@ -322,6 +322,14 @@ const latestMatchingSearchHistoryNames = computed(() => {
 /** @type {import('vue').ComputedRef<string[]>} */
 const latestSearchHistoryNames = computed(() => store.getters.getLatestSearchHistoryNames)
 
+/** @type {import('vue').ComputedRef<string>} */
+const searchFilterTabId = computed(() => process.env.IS_ELECTRON
+  ? (store.getters.getPresentedTabId ?? 'web')
+  : 'web')
+
+/** @type {import('vue').ComputedRef<any>} */
+const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
+
 const activeDataList = computed(() => {
   // show latest search history when the search bar is empty
   if (usingOnlySearchHistoryResults.value) {
@@ -356,9 +364,25 @@ const activeDataListProperties = computed(() => {
   const properties = []
 
   for (let i = 0; i < activeDataList.value.length; i++) {
+    const queryText = activeDataList.value[i]
+    const searchHistoryEntry = i < searchHistoryEntriesCount
+      ? store.getters.getSearchHistoryEntryWithId(queryText)
+      : null
+    const settings = searchHistoryEntry?.searchSettings ?? searchSettings.value
+    const href = router.resolve({
+      path: `/search/${encodeURIComponent(queryText)}`,
+      query: {
+        prioritize: settings.prioritize,
+        time: settings.time,
+        type: settings.type,
+        duration: settings.duration,
+        features: [...settings.features],
+      }
+    }).href
+
     properties.push(i < searchHistoryEntriesCount
-      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left' }
-      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass' }
+      ? { isRemoveable: true, isSearchHistory: true, iconName: 'clock-rotate-left', href }
+      : { isRemoveable: false, isSearchHistory: false, iconName: 'magnifying-glass', href }
     )
   }
 
@@ -387,10 +411,6 @@ function toggleSideNav() {
   store.commit('toggleSideNav')
 }
 
-/** @type {import('vue').ComputedRef<boolean>} */
-const searchFilterTabId = computed(() => process.env.IS_ELECTRON
-  ? (store.getters.getPresentedTabId ?? 'web')
-  : 'web')
 const searchFilterValueChanged = computed(() => {
   return store.getters.getSearchFilterValueChanged(searchFilterTabId.value)
 })
@@ -485,9 +505,6 @@ if (process.env.IS_ELECTRON) {
   })
 }
 
-/** @type {import('vue').ComputedRef<any>} */
-const searchSettings = computed(() => store.getters.getSearchSettings(searchFilterTabId.value))
-
 /**
  * @param {string} queryText
  * @param {object} options
@@ -498,7 +515,9 @@ function goToSearch(queryText, { event, dataListIndex }) {
   const doCreateNewWindow = event && event.shiftKey
   const ctrlOrCmdPressed = event && ((process.platform !== 'darwin' && event.ctrlKey) ||
     (process.platform === 'darwin' && event.metaKey))
-  const doCreateNewTab = ctrlOrCmdPressed && !doCreateNewWindow
+  const isMiddleClick = event?.type === 'auxclick' && event.button === 1
+  const doCreateNewTab = (ctrlOrCmdPressed || isMiddleClick) && !doCreateNewWindow
+  const makeActive = !isMiddleClick
 
   if (window.innerWidth <= MOBILE_WIDTH_THRESHOLD) {
     searchContainer.value.blur()
@@ -514,7 +533,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
     : null
   const selectedSearchSettings = selectedSearchHistoryEntry?.searchSettings
 
-  if (selectedSearchSettings != null) {
+  if (selectedSearchSettings != null && !doCreateNewTab && !doCreateNewWindow) {
     const tabId = searchFilterTabId.value
     store.commit('setSearchPrioritize', { tabId, value: selectedSearchSettings.prioritize })
     store.commit('setSearchTime', { tabId, value: selectedSearchSettings.time })
@@ -555,6 +574,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           query,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: queryText,
         })
         break
@@ -568,6 +588,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           query,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: queryText,
         })
         break
@@ -581,6 +602,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           query,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: searchQuery,
         })
         break
@@ -592,6 +614,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           path: `/hashtag/${encodeURIComponent(hashtag)}`,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: `#${hashtag}`,
         })
 
@@ -606,6 +629,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           query,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: queryText,
         })
         break
@@ -618,6 +642,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           path: `/channel/${channelId}/${subPath}`,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           query: {
             url,
           },
@@ -634,6 +659,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           path: `/${result.urlType}`,
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: queryText
         })
         break
@@ -653,6 +679,7 @@ function goToSearch(queryText, { event, dataListIndex }) {
           },
           doCreateNewWindow,
           doCreateNewTab,
+          makeActive,
           searchQueryText: queryText,
         })
       }

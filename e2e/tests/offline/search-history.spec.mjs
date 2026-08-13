@@ -67,6 +67,25 @@ test.describe('search history suggestions', () => {
     })
   })
 
+  test('middle-clicking a recent search opens its link in a background tab', async ({ page }) => {
+    await page.locator(sel.searchInput).click()
+    const link = suggestions(page).first().locator('.optionWrapper')
+
+    await expect(link).toHaveAttribute('href', /#\/search\/android%20tutorial/)
+    await link.click({ button: 'middle' })
+
+    await expect(page.locator(sel.tabs)).toHaveCount(2)
+    await expect(page.locator(sel.tabs).first()).toHaveClass(/active/)
+    await expect(page).not.toHaveURL(/#\/search\/android%20tutorial/)
+
+    await page.locator(sel.tabs).nth(1).click()
+    await expect(page).toHaveURL(/#\/search\/android%20tutorial/)
+    await expect.poll(() => page.evaluate(() => {
+      const params = new URLSearchParams(location.hash.split('?')[1])
+      return params.getAll('features')
+    })).toEqual(['hd', 'subtitles'])
+  })
+
   test('back navigation restores the active search filters', async ({ page }) => {
     await page.locator(sel.searchInput).click()
     await suggestions(page).first().click()
