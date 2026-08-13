@@ -714,6 +714,7 @@ async function downloadManagedYtDlp(onProgress, onDownloadStart) {
     } catch (error) {
       console.warn('Could not save yt-dlp download metadata', error)
     }
+    broadcastToRenderers(IpcChannels.YT_DLP_BINARY_UPDATED)
   }
 
   return { version, updated: download.data !== null }
@@ -984,9 +985,6 @@ export async function handleYtDlpDownloadBinary(event, binary) {
   } finally {
     const updated = result != null && 'version' in result && result.updated
     sendProgress(updated ? 100 : null, false)
-    if (binary === 'yt-dlp' && updated) {
-      broadcastToRenderers(IpcChannels.YT_DLP_BINARY_UPDATED)
-    }
   }
 }
 
