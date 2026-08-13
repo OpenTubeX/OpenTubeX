@@ -375,6 +375,7 @@ test.describe('OpenTubeX sync server', () => {
 
     await page.evaluate(async () => {
       const store = document.querySelector('#app').__vue_app__.config.globalProperties.$store
+      await store.dispatch('updateBaseTheme', 'custom:synced-theme')
       const themes = await window.ftElectron.replaceCustomThemes([])
       await store.dispatch('updateCustomThemes', themes)
     })
@@ -391,6 +392,9 @@ test.describe('OpenTubeX sync server', () => {
       () => true,
       error => error.code !== 'ENOENT'
     )).toBe(false)
+    await expect.poll(async () => (
+      latestSettings(await readFile(settingsPath, 'utf8')).baseTheme
+    )).toBe(theme.basedOn)
   })
 
   test('migrates existing plaintext data before locking the account', async ({ app, page }, testInfo) => {

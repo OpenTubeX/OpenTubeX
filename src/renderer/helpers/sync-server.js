@@ -1,5 +1,9 @@
 import { MAIN_PROFILE_ID } from '../../constants'
-import { CUSTOM_THEMES_SYNC_KEY, normalizeCustomThemes } from '../../customTheme'
+import {
+  CUSTOM_THEMES_SYNC_KEY,
+  customThemeIdFromValue,
+  normalizeCustomThemes,
+} from '../../customTheme'
 import {
   SyncServerDataLossError,
   SyncServerCancelledError,
@@ -976,6 +980,28 @@ function settingUpdater(key) {
   return `update${key.charAt(0).toUpperCase()}${key.slice(1)}`
 }
 
+async function repairDeletedCustomThemeReferences(store, previousThemes, themes) {
+  const themeIds = new Set(themes.map(theme => theme.id))
+  const previousById = new Map(previousThemes.map(theme => [theme.id, theme]))
+  const fallbacks = {
+    baseTheme: 'system',
+    systemLightTheme: 'light',
+    systemDarkTheme: 'dark',
+  }
+
+  for (const [key, defaultTheme] of Object.entries(fallbacks)) {
+    const id = customThemeIdFromValue(store.state.settings[key])
+    if (id === null || themeIds.has(id)) continue
+
+    const deletedTheme = previousById.get(id)
+    if (key === 'baseTheme' && deletedTheme) {
+      await store.dispatch('updateMainColor', deletedTheme.mainColor)
+      await store.dispatch('updateSecColor', deletedTheme.secondaryColor)
+    }
+    await store.dispatch(settingUpdater(key), deletedTheme?.basedOn ?? defaultTheme)
+  }
+}
+
 function latestSessionUpdate(sessions) {
   return sessions.reduce((latest, session) => (
     Number.isFinite(session.updatedAt) ? Math.max(latest, session.updatedAt) : latest
@@ -1044,8 +1070,10 @@ export async function syncSettings(client, store, previous = {}) {
     merged[key] = entry
     if (!metadataEquals(value, entry.value)) {
       if (key === CUSTOM_THEMES_SYNC_KEY) {
+        const previousThemes = store.state.utils.customThemes
         const themes = await replaceCustomThemes(entry.value)
         store.commit('setCustomThemes', themes)
+        await repairDeletedCustomThemeReferences(store, previousThemes, themes)
       } else {
         await store.dispatch(settingUpdater(key), deepCopy(entry.value))
       }
