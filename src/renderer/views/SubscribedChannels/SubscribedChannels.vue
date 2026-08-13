@@ -3,7 +3,7 @@
     <ft-card class="card">
       <div class="heading">
         <h2>
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'user-check']"
             class="headingIcon"
           />
@@ -51,7 +51,7 @@
                 alt=""
                 @error.once="updateThumbnail(channel)"
               >
-              <font-awesome-icon
+              <ft-icon
                 v-else
                 class="channelThumbnail"
                 :icon="['fas', 'circle-user']"
@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, onBeforeUnmount, ref, watch, useTemplateRef } from 'vue'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'

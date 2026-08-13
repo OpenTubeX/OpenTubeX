@@ -37,7 +37,7 @@
       :title="t('Search Bar.Clear Input')"
       @click="handleClearTextClick"
     >
-      <FontAwesomeIcon
+      <FtIcon
         class="buttonIcon"
         :icon="['fas', 'times-circle']"
       />
@@ -71,7 +71,7 @@
         }"
         @click="handleClick"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="buttonIcon"
           :icon="actionButtonIconName"
         />
@@ -101,7 +101,7 @@
             @click.prevent="handleOptionClick(index, $event)"
             @auxclick.middle="handleOptionAuxClick(index, $event)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               v-if="getDataListProperty(index)?.iconName"
               :icon="['fas', getDataListProperty(index).iconName]"
               class="searchResultIcon"
@@ -118,7 +118,7 @@
             href="javascript:void(0)"
             @click.prevent.stop="handleRemoveClick(index)"
           >
-            <FontAwesomeIcon :icon="['fas', 'xmark']" />
+            <FtIcon :icon="['fas', 'xmark']" />
           </a>
         </li>
         <!-- skipped -->
@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, reactive, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

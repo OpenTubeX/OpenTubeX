@@ -11,7 +11,7 @@
           :title="expandCollapseSideBarLabel"
           @click="toggleSideNav"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="navIcon"
             :icon="['fas', 'bars']"
           />
@@ -50,7 +50,7 @@
           data-tutorial="search"
           @click="toggleSearchContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="navIcon"
             :icon="['fas', 'search']"
           />
@@ -61,7 +61,7 @@
           :title="newWindowText"
           @click="createNewWindow"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="navIcon"
             :icon="['fas', 'clone']"
           />
@@ -73,7 +73,7 @@
           :title="tabLayoutText"
           @click="toggleVerticalTabBar"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="navIcon"
             :icon="tabLayoutIcon"
           />
@@ -124,7 +124,7 @@
                 :title="t('Search Filters.Search Filters')"
                 @click="showSearchFilters"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   class="navIcon"
                   :icon="['fas', 'filter']"
                 />
@@ -141,7 +141,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

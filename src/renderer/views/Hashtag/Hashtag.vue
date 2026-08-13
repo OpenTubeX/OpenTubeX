@@ -9,7 +9,7 @@
       class="card"
     >
       <h2>
-        <font-awesome-icon
+        <ft-icon
           :icon="['fas', 'hashtag']"
           aria-hidden="false"
           class="headingIcon"
@@ -42,7 +42,7 @@
           @click="handleFetchMore"
           @keydown.enter.space.prevent="handleFetchMore"
         >
-          <FontAwesomeIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
+          <FtIcon :icon="['fas', 'search']" /> {{ $t("Search Filters.Fetch more results") }}
         </div>
       </FtAutoLoadNextPageWrapper>
       <p
@@ -57,7 +57,7 @@
 </template>
 <script setup>
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'

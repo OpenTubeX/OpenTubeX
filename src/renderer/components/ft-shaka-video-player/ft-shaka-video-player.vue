@@ -150,7 +150,7 @@
             >
               <path :d="replayIcon" />
             </svg>
-            <font-awesome-icon
+            <ft-icon
               v-else
               :icon="['fas', shortsPaused ? 'play' : 'pause']"
             />
@@ -162,7 +162,7 @@
               :aria-label="$t('KeyboardShortcutPrompt.Mute')"
               @click.stop="toggleShortsMuted"
             >
-              <font-awesome-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
+              <ft-icon :icon="['fas', shortsMuted ? 'volume-mute' : 'volume-high']" />
             </button>
             <input
               type="range"
@@ -205,7 +205,7 @@
             :aria-label="$t('Video.More Options')"
             @click.stop="openShortsOverflowMenu($event)"
           >
-            <font-awesome-icon :icon="['fas', 'ellipsis-v']" />
+            <ft-icon :icon="['fas', 'ellipsis-v']" />
           </button>
           <button
             type="button"
@@ -214,7 +214,7 @@
             :aria-pressed="String(isFullscreen)"
             @click.stop="toggleShortsFullscreen"
           >
-            <font-awesome-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
+            <ft-icon :icon="['fas', isFullscreen ? 'compress' : 'expand']" />
           </button>
         </div>
       </div>
@@ -317,7 +317,7 @@
           :aria-expanded="String(showFullscreenPlaylist)"
           @click="setFullscreenPlaylist(!showFullscreenPlaylist)"
         >
-          <FontAwesomeIcon :icon="['fas', 'list']" />
+          <FtIcon :icon="['fas', 'list']" />
         </button>
         <button
           v-if="liveChatAvailable"
@@ -329,7 +329,7 @@
           :aria-expanded="String(showFullscreenLiveChat)"
           @click="setFullscreenLiveChat(!showFullscreenLiveChat)"
         >
-          <FontAwesomeIcon :icon="['fas', 'message']" />
+          <FtIcon :icon="['fas', 'message']" />
         </button>
         <button
           v-if="commentsAvailable"
@@ -341,7 +341,7 @@
           :aria-expanded="String(showFullscreenComments)"
           @click="setFullscreenComments(!showFullscreenComments)"
         >
-          <FontAwesomeIcon :icon="['fas', 'comment']" />
+          <FtIcon :icon="['fas', 'comment']" />
         </button>
         <button
           v-if="useSponsorBlock && !isUpcoming"
@@ -357,7 +357,7 @@
           :aria-expanded="String(showFullscreenSponsorBlock)"
           @click="toggleFullscreenSponsorBlock"
         >
-          <FontAwesomeIcon :icon="['fas', 'shield-halved']" />
+          <FtIcon :icon="['fas', 'shield-halved']" />
         </button>
         <button
           v-if="!isLive && !isUpcoming"
@@ -373,7 +373,7 @@
           :aria-expanded="String(showFullscreenTranscript)"
           @click="toggleFullscreenTranscript"
         >
-          <FontAwesomeIcon :icon="['fas', 'file-lines']" />
+          <FtIcon :icon="['fas', 'file-lines']" />
         </button>
         <FtShareButton
           v-if="showFullscreenShareAction"
@@ -405,7 +405,7 @@
           :title="quickBookmarkTitle"
           @click="toggleQuickBookmark"
         >
-          <FontAwesomeIcon :icon="quickBookmarkIcon" />
+          <FtIcon :icon="quickBookmarkIcon" />
         </button>
       </div>
       <!--
@@ -482,7 +482,7 @@
               :title="$t('Chapters.Close Chapters')"
               @click="closeChaptersOverlay"
             >
-              <FontAwesomeIcon :icon="['fas', 'xmark']" />
+              <FtIcon :icon="['fas', 'xmark']" />
             </button>
           </header>
           <WatchVideoChapters
@@ -527,7 +527,7 @@
         />
         <header class="fullscreenMetadataHeader">
           <h2 class="fullscreenDockHeading">
-            <FontAwesomeIcon
+            <FtIcon
               class="fullscreenDockHeadingIcon"
               :icon="['fas', 'info-circle']"
             />
@@ -540,7 +540,7 @@
             :title="$t('Video.Close Metadata', 'Close video information')"
             @click="closeFullscreenMetadata"
           >
-            <FontAwesomeIcon :icon="['fas', 'xmark']" />
+            <FtIcon :icon="['fas', 'xmark']" />
           </button>
         </header>
         <div
@@ -770,7 +770,7 @@
               (showValueChangePopup ? invertValueChangeContentOrder : silenceSkippingActive)
           }"
         >
-          <font-awesome-icon
+          <ft-icon
             v-if="showTemporaryPlaybackRateIndicator || (showValueChangePopup ? valueChangeIcon : silenceSkippingActive)"
             :icon="[
               'fas',
@@ -794,13 +794,13 @@
         v-if="showOfflineMessage"
         class="offlineWrapper"
       >
-        <font-awesome-layers
+        <ft-icon-layers
           class="offlineIcon"
           aria-hidden="true"
         >
-          <font-awesome-icon :icon="['fas', 'wifi']" />
-          <font-awesome-icon :icon="['fas', 'slash']" />
-        </font-awesome-layers>
+          <ft-icon :icon="['fas', 'wifi']" />
+          <ft-icon :icon="['fas', 'slash']" />
+        </ft-icon-layers>
         <p class="offlineMessage">
           <span>
             {{ $t('Video.Player.You appear to be offline') }}
@@ -859,7 +859,7 @@
         >
           <div class="skippedSegmentHeader">
             <div class="skippedSegmentTitle">
-              <font-awesome-icon
+              <ft-icon
                 class="skippedSegmentShield"
                 :icon="['fas', 'shield-halved']"
                 :style="{ color }"
@@ -877,7 +877,7 @@
                 :title="$t('Close')"
                 @click.stop.prevent="dismissPromptSponsorBlockSegment(uuid)"
               >
-                <font-awesome-icon :icon="['fas', 'xmark']" />
+                <ft-icon :icon="['fas', 'xmark']" />
               </button>
             </div>
           </div>
@@ -902,7 +902,7 @@
         >
           <div class="skippedSegmentHeader">
             <div class="skippedSegmentTitle">
-              <font-awesome-icon
+              <ft-icon
                 class="skippedSegmentShield"
                 :icon="['fas', 'shield-halved']"
                 :style="{ color }"
@@ -913,7 +913,7 @@
             </div>
             <div class="skippedSegmentHeaderActions">
               <span class="skippedSegmentTimer">
-                <font-awesome-icon
+                <ft-icon
                   v-if="isSponsorBlockToastCountdownPaused(uuid)"
                   :icon="['fas', 'pause']"
                 />
@@ -926,7 +926,7 @@
                 :title="$t('Close')"
                 @click.stop.prevent="removeSponsorBlockToast(uuid)"
               >
-                <font-awesome-icon :icon="['fas', 'xmark']" />
+                <ft-icon :icon="['fas', 'xmark']" />
               </button>
             </div>
           </div>
@@ -957,7 +957,7 @@
         <div class="sponsorBlockSubmissionMenu">
           <div class="sponsorBlockSubmissionHeader">
             <div class="sponsorBlockSubmissionTitle">
-              <font-awesome-icon
+              <ft-icon
                 class="sponsorBlockSubmissionShield"
                 :icon="['fas', 'shield-halved']"
               />
@@ -968,7 +968,7 @@
               :title="$t('Close')"
               @click="closeSponsorBlockSubmissionMenu"
             >
-              <font-awesome-icon :icon="['fas', 'xmark']" />
+              <ft-icon :icon="['fas', 'xmark']" />
             </button>
           </div>
           <p
@@ -1154,7 +1154,7 @@
           @click.stop.prevent="scrollMiniScrollToTop"
           @mousedown.stop.prevent
         >
-          <font-awesome-icon :icon="['fas', 'angle-up']" />
+          <ft-icon :icon="['fas', 'angle-up']" />
         </button>
         <button
           type="button"
@@ -1168,7 +1168,7 @@
           @pointerdown.stop
           @mousedown.stop.prevent
         >
-          <font-awesome-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
+          <ft-icon :icon="['fas', scrollMiniIsPaused ? 'play' : 'pause']" />
         </button>
         <div
           class="scrollMiniVolume"
@@ -1178,7 +1178,7 @@
           @focusin="handleScrollMiniVolumeMouseEnter"
           @focusout="handleScrollMiniVolumeMouseLeave"
         >
-          <font-awesome-icon
+          <ft-icon
             class="scrollMiniVolumeIcon"
             :icon="scrollMiniVolumeIcon"
           />

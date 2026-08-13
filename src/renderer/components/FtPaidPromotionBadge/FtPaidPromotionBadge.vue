@@ -5,13 +5,13 @@
     @click.stop="openPaidPromotionHelp"
     @dblclick.stop
   >
-    <font-awesome-icon
+    <ft-icon
       :icon="['fas', 'money-check-dollar']"
       class="paidPromotionIcon"
       aria-hidden="true"
     />
     <span>{{ $t('Video.Includes paid promotion') }}</span>
-    <font-awesome-icon
+    <ft-icon
       :icon="['fas', 'chevron-right']"
       class="paidPromotionChevron"
       aria-hidden="true"

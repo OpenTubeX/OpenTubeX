@@ -245,6 +245,30 @@
   transition: none;
 }
 
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) {
+  --shorts-metadata-min-width: min(
+    220px,
+    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
+  );
+  --shorts-video-width: min(
+    calc(100dvh * var(--shorts-aspect-ratio)),
+    calc(
+      100vw - var(--shorts-dock-width, 0px) -
+      var(--shorts-metadata-min-width)
+    )
+  );
+}
+
+.ftVideoPlayer.shortsPlayer:is(:fullscreen, .fullWindow) :deep(.shaka-seek-bar-container) {
+  inset-inline: auto;
+  inset-inline-start: max(
+    calc((100% - var(--shorts-video-width)) / 2),
+    var(--shorts-metadata-min-width)
+  );
+  inline-size: var(--shorts-video-width);
+  transform: none;
+}
+
 .ftVideoPlayer.shortsPlayer :deep(.shaka-seek-bar-container .shaka-range-element::-webkit-slider-thumb) {
   opacity: 0;
   transform: scale(0);
@@ -321,11 +345,6 @@
 
 .ftVideoPlayer.shortsPlayer:fullscreen .shortsFullscreenMetadata,
 .ftVideoPlayer.shortsPlayer.fullWindow .shortsFullscreenMetadata {
-  --shorts-metadata-min-width: min(
-    220px,
-    calc((100vw - var(--shorts-dock-width, 0px)) / 3)
-  );
-
   position: absolute;
   z-index: 5;
   inset-block: 0;
@@ -354,13 +373,7 @@
 .shortsFullscreenVideoSpace {
   grid-column: 2;
   block-size: 100%;
-  inline-size: min(
-    calc(100dvh * var(--shorts-aspect-ratio)),
-    calc(
-      100vw - var(--shorts-dock-width, 0px) -
-      var(--shorts-metadata-min-width)
-    )
-  );
+  inline-size: var(--shorts-video-width);
   aspect-ratio: var(--shorts-aspect-ratio);
 }
 

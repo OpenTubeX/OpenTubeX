@@ -1,5 +1,5 @@
 /**
- * Regenerates `src/renderer/icons/iconifyBundle.json` from `faIconMap.json`
+ * Regenerates the per-pack bundles from `faIconMap.json`
  * and the installed `@iconify-json/*` packages.
  *
  * Usage: node _scripts/generateIconifyBundle.mjs
@@ -13,41 +13,28 @@ import { getIconData } from '@iconify/utils'
 const require = createRequire(import.meta.url)
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const faIconMap = require(join(root, 'src/renderer/icons/faIconMap.json'))
-const lucideFilledBases = require(join(root, 'src/renderer/icons/lucideFilledBases.json'))
 const customPackIcons = require(join(root, 'src/renderer/icons/customPackIcons.json'))
 
 const COLLECTIONS = {
-  lucide: require('@iconify-json/lucide/icons.json'),
-  tabler: require('@iconify-json/tabler/icons.json'),
-  ph: require('@iconify-json/ph/icons.json'),
   ri: require('@iconify-json/ri/icons.json'),
   'material-symbols': require('@iconify-json/material-symbols/icons.json'),
   'simple-icons': require('@iconify-json/simple-icons/icons.json')
 }
 
 const DEFAULT_SIZE = {
-  lucide: 24,
-  tabler: 24,
-  ph: 256,
   ri: 24,
   'material-symbols': 24,
   'simple-icons': 24
 }
 
 const PACK_PREFIXES = {
-  lucide: 'lucide',
   material: 'material-symbols',
-  phosphor: 'ph',
-  remix: 'ri',
-  tabler: 'tabler'
+  remix: 'ri'
 }
 
 const PACK_FIELDS = {
-  lucide: 'lucide',
   material: 'material',
-  phosphor: 'ph',
-  remix: 'ri',
-  tabler: 'tabler'
+  remix: 'ri'
 }
 
 /** @type {Record<string, Record<string, object>>} */
@@ -71,16 +58,11 @@ function add(out, prefix, name, collection) {
     return
   }
 
-  let iconName = name
-  // Lucide filled names are derived at runtime; bundle the stroke base instead.
-  if (prefix === 'lucide' && lucideFilledBases[name]) {
-    iconName = lucideFilledBases[name]
-  }
-  const data = getIconData(collection, iconName)
+  const data = getIconData(collection, name)
   if (!data) {
-    throw new Error(`missing ${prefix}:${iconName}${iconName !== name ? ` (for ${name})` : ''}`)
+    throw new Error(`missing ${prefix}:${name}`)
   }
-  out[`${prefix}:${iconName}`] = data
+  out[id] = data
 }
 
 for (const [pack, prefix] of Object.entries(PACK_PREFIXES)) {
@@ -94,11 +76,8 @@ for (const [pack, prefix] of Object.entries(PACK_PREFIXES)) {
   }
 }
 
-add(bundles.phosphor, 'ph', 'bookmark-simple-fill', COLLECTIONS.ph)
-add(bundles.tabler, 'tabler', 'bookmark-filled', COLLECTIONS.tabler)
 add(bundles.remix, 'ri', 'bookmark-fill', COLLECTIONS.ri)
 add(bundles.material, 'material-symbols', 'bookmark', COLLECTIONS['material-symbols'])
-add(bundles.lucide, 'lucide', 'bookmark', COLLECTIONS.lucide)
 
 // Ensure every custom pack glyph is present even if not referenced yet.
 for (const id of Object.keys(customPackIcons)) {

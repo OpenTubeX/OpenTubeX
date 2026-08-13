@@ -14,7 +14,7 @@
         aria-hidden="true"
         :to="url"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="hashtagImage"
           :icon="['fas', 'hashtag']"
         />
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed } from 'vue'
 
 import store from '../../store/index'

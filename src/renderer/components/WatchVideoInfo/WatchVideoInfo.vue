@@ -23,14 +23,14 @@
           :title="t('Video.AI-generated content')"
           class="videoBadge"
         >
-          <FontAwesomeIcon :icon="['fas', 'info-circle']" />
+          <FtIcon :icon="['fas', 'info-circle']" />
           {{ t('Video.AI') }}
         </div>
         <div
           v-if="sponsorBlockFullVideoCategory"
           class="videoBadge"
         >
-          <FontAwesomeIcon :icon="['fas', 'shield-halved']" />
+          <FtIcon :icon="['fas', 'shield-halved']" />
           {{ t('Video.Player.SponsorBlock.FullVideoLabel', {
             segmentCategory: translateSponsorBlockCategory(sponsorBlockFullVideoCategory)
           }) }}
@@ -72,12 +72,12 @@
             :style="{ background: `linear-gradient(to right, var(--accent-color) ${likePercentageRatio}%, #9E9E9E ${likePercentageRatio}%)` }"
           />
           <div class="likeCounts">
-            <span class="likeCount"><FontAwesomeIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
+            <span class="likeCount"><FtIcon :icon="['fas', 'thumbs-up']" /> {{ parsedLikeCount }}</span>
             <span
               v-if="useReturnYoutubeDislikes"
               class="dislikeCount"
             >
-              <FontAwesomeIcon :icon="['fas', 'thumbs-down']" /> {{ parsedDislikeCount }}
+              <FtIcon :icon="['fas', 'thumbs-down']" /> {{ parsedDislikeCount }}
             </span>
           </div>
         </div>
@@ -281,7 +281,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

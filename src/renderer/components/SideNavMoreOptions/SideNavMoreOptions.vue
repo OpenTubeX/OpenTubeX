@@ -12,7 +12,7 @@
       @click="openMoreOptions = !openMoreOptions"
       @keydown.enter.space.prevent="openMoreOptions = !openMoreOptions"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'ellipsis-h']"
         class="navIcon"
         :class="applyNavIconExpand"
@@ -39,7 +39,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'user-check']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -61,7 +61,7 @@
         to="/trending"
         @click="closeMenu"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'fire']"
           class="navIcon"
           :class="applyNavIconExpand"
@@ -82,7 +82,7 @@
         to="/popular"
         @click="closeMenu"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'users']"
           class="navIcon"
           :class="applyNavIconExpand"
@@ -102,7 +102,7 @@
         to="/about"
         @click="closeMenu"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'info-circle']"
           class="navIcon"
           :class="applyNavIconExpand"
@@ -123,7 +123,7 @@
         to="/stats"
         @click="closeMenu"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'chart-line']"
           class="navIcon"
           :class="applyNavIconExpand"
@@ -142,7 +142,7 @@
       :aria-label="hideLabelsSideBar ? $t('History.History'): null"
       to="/history"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'history']"
         class="navIcon"
         :class="applyNavIconExpand"
@@ -161,7 +161,7 @@
       to="/about"
       :aria-label="hideLabelsSideBar ? $t('About.About') : null"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'info-circle']"
         class="navIcon"
         :class="applyNavIconExpand"
@@ -177,7 +177,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref, onMounted, onBeforeUnmount, useTemplateRef } from 'vue'
 import { useRouter } from 'vue-router'
 

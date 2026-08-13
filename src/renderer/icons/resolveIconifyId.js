@@ -31,10 +31,6 @@ export function resolvePackIconLabel(icon, pack = currentIconPack.value) {
 
   const [, name] = normalized
 
-  if (pack === 'fontawesome') {
-    return name
-  }
-
   const iconifyId = resolveIconifyId(icon, pack)
   if (!iconifyId) {
     return name

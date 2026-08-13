@@ -21,7 +21,7 @@
       @click.stop="handleClose"
       @keydown.enter.space.stop
     >
-      <FontAwesomeIcon
+      <FtIcon
         class="closeIcon"
         :icon="['fas', 'times']"
       />
@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { useId } from 'vue'
 
 defineProps({

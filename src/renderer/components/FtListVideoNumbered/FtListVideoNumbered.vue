@@ -17,7 +17,7 @@
       <p
         class="videoIndexArea"
       >
-        <FontAwesomeIcon
+        <FtIcon
           v-if="isCurrentVideo"
           class="videoIndexIcon"
           :icon="['fas', 'play']"
@@ -26,7 +26,7 @@
         <template
           v-else
         >
-          <FontAwesomeIcon
+          <FtIcon
             v-if="canBecomeDraggable"
             class="grabBar"
             :icon="['fas', 'bars']"
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'

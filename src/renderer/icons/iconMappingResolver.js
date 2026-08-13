@@ -1,5 +1,5 @@
 /**
- * Normalize a Font Awesome icon prop to [prefix, name].
+ * Normalize a legacy semantic icon prop to [prefix, name].
  * @param {string | [string, string] | { prefix?: string, iconName?: string }} icon
  * @returns {[string, string] | null}
  */
@@ -24,17 +24,11 @@ export function normalizeFaIcon(icon) {
 }
 
 const PACK_PREFIX = {
-  lucide: 'lucide',
-  tabler: 'tabler',
-  phosphor: 'ph',
   remix: 'ri',
   material: 'material-symbols'
 }
 
 const PACK_FIELD = {
-  lucide: 'lucide',
-  tabler: 'tabler',
-  phosphor: 'ph',
   remix: 'ri',
   material: 'material'
 }
@@ -48,8 +42,6 @@ const PACK_FIELD = {
  * @returns {string | null}
  */
 export function resolveMappedIcon(icon, pack, aliases, mappings) {
-  if (pack === 'fontawesome') return null
-
   const normalized = normalizeFaIcon(icon)
   if (!normalized) return null
 
@@ -68,11 +60,8 @@ export function resolveMappedIcon(icon, pack, aliases, mappings) {
 
   if (name === 'bookmark' && prefix === 'fas') {
     const filledBookmarks = {
-      lucide: 'lucide:bookmark-filled',
       material: 'material-symbols:bookmark',
-      phosphor: 'ph:bookmark-simple-fill',
-      remix: 'ri:bookmark-fill',
-      tabler: 'tabler:bookmark-filled'
+      remix: 'ri:bookmark-fill'
     }
     return filledBookmarks[pack]
   }

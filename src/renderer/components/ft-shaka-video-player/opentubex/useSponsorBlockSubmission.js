@@ -586,12 +586,16 @@ export function useSponsorBlockSubmission({
   }
 
   async function previewSponsorBlockDraft(segmentId, mode = 'preview') {
-    const draft = sponsorBlockDraftSegments.value.find(segment => segment.id === segmentId)
-    if (!draft || !canSeek()) {
+    if (!sponsorBlockDraftSegments.value.some(segment => segment.id === segmentId) || !canSeek()) {
       return
     }
 
     if (!await saveSponsorBlockDraft(segmentId)) {
+      return
+    }
+
+    const draft = sponsorBlockDraftSegments.value.find(segment => segment.id === segmentId)
+    if (!draft) {
       return
     }
 

@@ -7,7 +7,7 @@
         v-if="useProxy"
         class="proxy-warning"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'circle-exclamation']"
           class="warning-icon"
         />
@@ -125,7 +125,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

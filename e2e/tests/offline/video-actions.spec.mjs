@@ -51,6 +51,49 @@ const SEED = {
 
 test.use({ seed: SEED })
 
+test('persists the yt-dlp playback cache across app restarts', async ({ app, page }) => {
+  const expiryTime = Date.now() + 60 * 60 * 1000
+  const source = {
+    manifestSrc: 'data:application/dash+xml;charset=UTF-8,manifest',
+    manifestMimeType: 'application/dash+xml',
+    legacyFormats: [],
+    isLive: false,
+    version: '2026.08.13'
+  }
+
+  expect(await page.evaluate(({ expiryTime, source }) => {
+    return window.ftElectron.ytDlpPlaybackCacheSet('eeeeeeeeeee', 'settings', expiryTime, source)
+  }, { expiryTime, source })).toBe(true)
+
+  ;({ page } = await app.relaunch())
+
+  expect(await page.evaluate(() => {
+    return window.ftElectron.ytDlpPlaybackCacheGet('eeeeeeeeeee', 'settings')
+  })).toEqual({ expiryTime, source })
+  expect(await page.evaluate(() => {
+    return window.ftElectron.ytDlpPlaybackCacheGet('eeeeeeeeeee', 'other-settings')
+  })).toBeNull()
+})
+
+test('limits persisted yt-dlp playback entries by UTF-8 byte size', async ({ page }) => {
+  const source = {
+    manifestSrc: `data:application/dash+xml;charset=UTF-8,${'€'.repeat(700_000)}`,
+    manifestMimeType: 'application/dash+xml',
+    legacyFormats: [],
+    isLive: false,
+    version: '2026.08.13'
+  }
+
+  expect(await page.evaluate(source => {
+    return window.ftElectron.ytDlpPlaybackCacheSet(
+      'eeeeeeeeeee',
+      'settings',
+      Date.now() + 60 * 60 * 1000,
+      source
+    )
+  }, source)).toBe(false)
+})
+
 async function readPlaylist(app, id) {
   const contents = await readFile(path.join(app.userDataDir, 'playlists.db'), 'utf8')
   const records = contents.trim().split('\n').map((line) => JSON.parse(line))

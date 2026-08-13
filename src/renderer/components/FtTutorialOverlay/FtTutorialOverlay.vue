@@ -36,7 +36,7 @@
           class="tutorialIcon"
           aria-hidden="true"
         >
-          <FontAwesomeIcon :icon="step.icon" />
+          <FtIcon :icon="step.icon" />
         </div>
         <h2
           :id="titleId"
@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

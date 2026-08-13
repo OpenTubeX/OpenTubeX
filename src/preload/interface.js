@@ -61,6 +61,24 @@ export default {
     return ipcRenderer.invoke(IpcChannels.GET_SYSTEM_LOCALE)
   },
 
+  loadCustomTheme: () => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_LOAD)
+  },
+
+  saveCustomTheme: (theme) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_SAVE, theme)
+  },
+
+  deleteCustomTheme: (themeId) => {
+    return ipcRenderer.invoke(IpcChannels.CUSTOM_THEME_DELETE, themeId)
+  },
+
+  handleCustomThemeUpdated: (handler) => {
+    const listener = (_, theme) => handler(theme)
+    ipcRenderer.on(IpcChannels.CUSTOM_THEME_UPDATED, listener)
+    return () => ipcRenderer.removeListener(IpcChannels.CUSTOM_THEME_UPDATED, listener)
+  },
+
   /**
    * @returns {Promise<boolean>}
    */
@@ -356,6 +374,22 @@ export default {
    */
   ytDlpGetPlaybackInfo: (videoId) => {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId)
+  },
+
+  ytDlpPlaybackCacheGet: (videoId, cacheKey) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, videoId, cacheKey)
+  },
+
+  ytDlpPlaybackCacheSet: (videoId, cacheKey, expiryTime, source) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, videoId, cacheKey, expiryTime, source)
+  },
+
+  ytDlpPlaybackCacheDelete: (videoId) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, videoId)
+  },
+
+  ytDlpPlaybackCacheClear: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_CLEAR)
   },
 
   /**

@@ -553,7 +553,10 @@ test.describe('history reorder animation', () => {
 
 test.describe('select dropdown pixel grid', () => {
   // A fractional device pixel ratio is what makes the misalignment visible.
-  test.use({ launchArgs: ['--force-device-scale-factor=1.5'] })
+  test.use({
+    launchArgs: ['--force-device-scale-factor=1.5'],
+    seed: { settings: { uiScale: 95 } }
+  })
 
   test('keeps option text in place when it gains a hover background', async ({ page }) => {
     await goTo(page, 'settings')
@@ -561,18 +564,22 @@ test.describe('select dropdown pixel grid', () => {
     await page.getByRole('combobox', { name: 'Default Landing Page' }).first().click()
     const dropdown = page.locator('.selectDropdown')
     await expect(dropdown).toBeVisible()
-    // The opening animation scales the menu, so wait for its final resting place.
-    await expect
-      .poll(() => dropdown.evaluate(menu => getComputedStyle(menu).transform))
-      .toBe('none')
+    // Scaling a menu rasterizes its labels at changing subpixel positions.
+    // Keep the open/close animation opacity-only so text stays stable.
+    await expect(dropdown).toHaveCSS('transform', 'none')
 
     const dpr = await page.evaluate(() => window.devicePixelRatio)
-    expect(Math.abs(dpr - 1.5)).toBeLessThan(0.001)
+    expect(Math.abs(dpr - 1.425)).toBeLessThan(0.001)
 
     const options = dropdown.locator('.selectOption')
-    const inactiveOptionIndex = await options.evaluateAll(optionElements =>
-      optionElements.findIndex(option => !option.classList.contains('active'))
-    )
+    const inactiveOptionIndex = await options.evaluateAll(optionElements => {
+      const menuBounds = optionElements[0].parentElement.getBoundingClientRect()
+      return optionElements.findIndex(option => {
+        const bounds = option.getBoundingClientRect()
+        return !option.classList.contains('active') &&
+          bounds.top >= menuBounds.top && bounds.bottom <= menuBounds.bottom
+      })
+    })
     expect(inactiveOptionIndex).toBeGreaterThanOrEqual(0)
     const option = options.nth(inactiveOptionIndex)
     // The option label is a direct text node, so measure its rendered range.
@@ -588,24 +595,9 @@ test.describe('select dropdown pixel grid', () => {
     await expect(option).toHaveClass(/active/)
     expect(await textPosition()).toEqual(beforeHover)
 
-    // Chromium only snaps an option's text to the pixel grid once the option
-    // has a background to paint, so an option sitting at a fractional offset
-    // nudges its label the first time it is hovered.
-    const offGrid = await dropdown.evaluate((menu) => {
-      const onGrid = (value) => Math.abs(value * devicePixelRatio - Math.round(value * devicePixelRatio)) < 0.001
-      const bounds = menu.getBoundingClientRect()
-
-      return [
-        ...(onGrid(bounds.left) ? [] : [`menu left ${bounds.left}`]),
-        ...(onGrid(bounds.top) ? [] : [`menu top ${bounds.top}`]),
-        ...[...menu.querySelectorAll('.selectOption')]
-          .map(option => option.getBoundingClientRect().top)
-          .filter(top => !onGrid(top))
-          .map(top => `option top ${top}`)
-      ]
-    })
-
-    expect(offGrid).toEqual([])
+    // At arbitrary UI scales, fixed-height options cannot all start on device
+    // pixels. Their stable paint layer must therefore prevent the hover
+    // background itself from changing text rasterization.
   })
 })
 

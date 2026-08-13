@@ -9,7 +9,7 @@
       class="card"
     >
       <h2>
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'search']"
           class="headingIcon"
         />
@@ -30,7 +30,7 @@
           @click="nextPage"
           @keydown.enter.space.prevent="nextPage"
         >
-          <FontAwesomeIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
+          <FtIcon :icon="['fas', 'search']" /> {{ t("Search Filters.Fetch more results") }}
         </div>
       </FtAutoLoadNextPageWrapper>
       <p
@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

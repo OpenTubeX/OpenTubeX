@@ -12,6 +12,10 @@ const IpcChannels = {
   APP_READY: 'app-ready',
   RELAUNCH_REQUEST: 'relaunch-request',
   SET_WINDOW_TITLE: 'set-window-title',
+  CUSTOM_THEME_LOAD: 'custom-theme-load',
+  CUSTOM_THEME_SAVE: 'custom-theme-save',
+  CUSTOM_THEME_DELETE: 'custom-theme-delete',
+  CUSTOM_THEME_UPDATED: 'custom-theme-updated',
 
   SEARCH_INPUT_HANDLING_READY: 'search-input-handling-ready',
   UPDATE_SEARCH_INPUT_TEXT: 'update-search-input-text',
@@ -131,6 +135,10 @@ const IpcChannels = {
   YT_DLP_CHOOSE_EXECUTABLE: 'yt-dlp-choose-executable',
   YT_DLP_GET_INFO: 'yt-dlp-get-info',
   YT_DLP_GET_PLAYBACK_INFO: 'yt-dlp-get-playback-info',
+  YT_DLP_PLAYBACK_CACHE_GET: 'yt-dlp-playback-cache-get',
+  YT_DLP_PLAYBACK_CACHE_SET: 'yt-dlp-playback-cache-set',
+  YT_DLP_PLAYBACK_CACHE_DELETE: 'yt-dlp-playback-cache-delete',
+  YT_DLP_PLAYBACK_CACHE_CLEAR: 'yt-dlp-playback-cache-clear',
   YT_DLP_DOWNLOAD_BINARY: 'yt-dlp-download-binary',
   YT_DLP_BINARY_DOWNLOAD_PROGRESS: 'yt-dlp-binary-download-progress',
   YT_DLP_BINARY_UPDATED: 'yt-dlp-binary-updated'

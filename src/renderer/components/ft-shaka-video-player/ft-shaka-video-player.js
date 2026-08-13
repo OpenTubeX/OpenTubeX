@@ -108,6 +108,8 @@ import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const SPONSORBLOCK_HIGHLIGHT_LABEL_PLAYBACK_MS = 5000
 const SPONSORBLOCK_SEGMENT_START_TOLERANCE_SECONDS = 0.1
+const SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS = 150
+const SPONSORBLOCK_SKIP_POLL_INTERVAL_MS = 4
 const SPONSORBLOCK_TERMINAL_OUTRO_TOLERANCE_SECONDS = 1
 const SPONSORBLOCK_NOT_FOUND_REFETCH_RECENT_VIDEO_AGE_MS = 24 * 60 * 60 * 1000
 const SPONSORBLOCK_NOT_FOUND_REFETCH_MIN_DELAY_MS = 10000
@@ -1731,6 +1733,7 @@ export default defineComponent({
         sponsorBlockInfoSegments.value = sponsorBlockInfoSegments.value
           .concat(submittedSegments.map(segment => ({ ...segment, locked: 0, votes: 0 })))
           .sort((a, b) => a.startTime - b.startTime)
+        scheduleSponsorBlockSkip()
         emitSponsorBlockInfoState()
         refreshSponsorBlockMarkers()
       },
@@ -1755,6 +1758,15 @@ export default defineComponent({
      */
     let sponsorBlockDismissedPromptSegments = new Set()
     let sponsorBlockNotFoundRefetchTimeout = null
+    let sponsorBlockSkipScheduleTimeout = null
+    let sponsorBlockSkipScheduleInterval = null
+
+    function cancelSponsorBlockSkipSchedule() {
+      clearTimeout(sponsorBlockSkipScheduleTimeout)
+      clearInterval(sponsorBlockSkipScheduleInterval)
+      sponsorBlockSkipScheduleTimeout = null
+      sponsorBlockSkipScheduleInterval = null
+    }
 
     function clearSponsorBlockNotFoundRefetchTimeout() {
       if (sponsorBlockNotFoundRefetchTimeout !== null) {
@@ -1830,6 +1842,7 @@ export default defineComponent({
           syncPromptSponsorBlockSegments(currentTime)
           updateSponsorBlockHighlightState(currentTime)
           syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
+          scheduleSponsorBlockSkip()
         }
       } else {
         scheduleSponsorBlockNotFoundRefetch()
@@ -1843,6 +1856,7 @@ export default defineComponent({
       let refetchWhenNotFound = false
 
       clearSponsorBlockNotFoundRefetchTimeout()
+      cancelSponsorBlockSkipSchedule()
 
       // Reset the do-not-skip set for the new video
       sponsorBlockDoNotSkipSegments = new Set()
@@ -1900,6 +1914,7 @@ export default defineComponent({
         syncPromptSponsorBlockSegments(currentTime)
         updateSponsorBlockHighlightState(currentTime)
         syncSponsorBlockMuteSegments(currentTime, !props.sponsorBlockAutoSkipDisabled)
+        scheduleSponsorBlockSkip()
       }
     }
 
@@ -2687,6 +2702,77 @@ export default defineComponent({
           })
         })
       }
+    }
+
+    function getNextSponsorBlockAutoSkipSegment(currentTime) {
+      const { autoSkip } = sponsorSkips.value
+
+      return sponsorBlockSegments.find(segment =>
+        segment.actionType === 'skip' &&
+        !isSponsorBlockPointSegment(segment) &&
+        !sponsorBlockDoNotSkipSegments.has(segment.uuid) &&
+        autoSkip.has(segment.category) &&
+        segment.startTime > currentTime &&
+        segment.endTime > segment.startTime
+      ) ?? null
+    }
+
+    function startSponsorBlockSkipPolling(segment) {
+      sponsorBlockSkipScheduleInterval = setInterval(() => {
+        const videoElement = video.value
+        if (!videoElement || videoElement.paused || videoElement.ended) {
+          cancelSponsorBlockSkipSchedule()
+          return
+        }
+
+        const currentTime = videoElement.currentTime
+        if (currentTime < segment.startTime) {
+          const remainingMs = (segment.startTime - currentTime) * 1000 / videoElement.playbackRate
+          if (remainingMs > SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
+            scheduleSponsorBlockSkip()
+          }
+          return
+        }
+
+        cancelSponsorBlockSkipSchedule()
+        skipSponsorBlockSegments(currentTime)
+        scheduleSponsorBlockSkip()
+      }, SPONSORBLOCK_SKIP_POLL_INTERVAL_MS)
+    }
+
+    function scheduleSponsorBlockSkip() {
+      cancelSponsorBlockSkipSchedule()
+
+      const videoElement = video.value
+      if (
+        !useSponsorBlock.value ||
+        props.sponsorBlockAutoSkipDisabled ||
+        !videoElement ||
+        videoElement.paused ||
+        videoElement.ended ||
+        !Number.isFinite(videoElement.playbackRate) ||
+        videoElement.playbackRate <= 0 ||
+        sponsorBlockSegments.length === 0 ||
+        !canSeek()
+      ) {
+        return
+      }
+
+      const segment = getNextSponsorBlockAutoSkipSegment(videoElement.currentTime)
+      if (!segment) {
+        return
+      }
+
+      const delayMs = (segment.startTime - videoElement.currentTime) * 1000 / videoElement.playbackRate
+      if (delayMs <= SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS) {
+        startSponsorBlockSkipPolling(segment)
+        return
+      }
+
+      sponsorBlockSkipScheduleTimeout = setTimeout(() => {
+        sponsorBlockSkipScheduleTimeout = null
+        startSponsorBlockSkipPolling(segment)
+      }, delayMs - SPONSORBLOCK_SKIP_SCHEDULE_LEAD_MS)
     }
 
     function syncSponsorBlockMuteSegments(currentTime, autoMuteEnabled = true) {
@@ -4310,12 +4396,18 @@ export default defineComponent({
         closeSponsorBlockInfo()
         sponsorBlockMuteController.reset()
         clearSponsorBlockMuteSegments()
+        cancelSponsorBlockSkipSchedule()
+      } else {
+        scheduleSponsorBlockSkip()
       }
     })
 
     watch(() => props.sponsorBlockAutoSkipDisabled, disabled => {
       syncSponsorBlockMuteSegments(video.value?.currentTime ?? 0, !disabled)
+      scheduleSponsorBlockSkip()
     })
+
+    watch(sponsorSkips, scheduleSponsorBlockSkip)
 
     watch(sponsorBlockEnableSubmission, () => emitSponsorBlockInfoState())
 
@@ -4758,6 +4850,7 @@ export default defineComponent({
 
       sleepTimer.resumeCountdown()
       startSponsorBlockHighlightLabelCountdown()
+      scheduleSponsorBlockSkip()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'playing')
 
@@ -4794,6 +4887,7 @@ export default defineComponent({
 
       sleepTimer.pauseCountdown()
       pauseSponsorBlockHighlightLabelCountdown()
+      cancelSponsorBlockSkipSchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'paused')
 
@@ -4820,6 +4914,7 @@ export default defineComponent({
       const sleepTimerEnded = sleepTimer.consumeEndOfVideo()
 
       pauseSponsorBlockHighlightLabelCountdown()
+      cancelSponsorBlockSkipSchedule()
 
       tabMediaCoordinator.setPlaybackState(mediaTabId, 'none')
 
@@ -4838,6 +4933,7 @@ export default defineComponent({
 
     function handleSeeking() {
       shortsEnded.value = false
+      cancelSponsorBlockSkipSchedule()
       syncPlayPauseControlIcons()
       emit('seeking')
     }
@@ -4901,6 +4997,7 @@ export default defineComponent({
       const video_ = video.value
       const muted = video_.muted || video_.volume === 0
       shortsMuted.value = muted
+      scrollMiniVolume.value = muted ? 0 : video_.volume
 
       syncMuteControlIcons(muted)
 
@@ -4972,6 +5069,7 @@ export default defineComponent({
         const currentTime = video.value.currentTime
         sponsorBlockCurrentTime.value = currentTime
         annotationCurrentTime.value = currentTime
+        updateHiddenShortsSeekBar(currentTime)
 
         emit('timeupdate', currentTime)
         emitTerminalSponsorBlockOutroStarted(currentTime)
@@ -4989,6 +5087,7 @@ export default defineComponent({
 
           if (!props.sponsorBlockAutoSkipDisabled) {
             skipSponsorBlockSegments(currentTime)
+            scheduleSponsorBlockSkip()
           }
         } else {
           sponsorBlockMuteController.setSourceActive('segments', false)
@@ -4996,6 +5095,58 @@ export default defineComponent({
 
         updateScrollMiniDragHandleContrast()
       }
+    }
+
+    /**
+     * Shaka stops refreshing its seek bar while its controls are hidden, but
+     * Shorts keep the seek bar visible. Keep that visible progress in sync
+     * without interfering while Shaka is showing or operating the controls.
+     * @param {number} currentTime
+     */
+    function updateHiddenShortsSeekBar(currentTime) {
+      const controls = ui?.getControls()
+      if (!props.shortsPlayer || !hasLoaded.value || !player || !controls ||
+          controls.getControlsContainer().hasAttribute('shown') || controls.isSeeking()) {
+        return
+      }
+
+      const seekBarContainer = container.value?.querySelector('.shaka-seek-bar-container')
+      const seekBar = seekBarContainer?.querySelector('.shaka-seek-bar')
+      if (!(seekBarContainer instanceof HTMLElement) || !(seekBar instanceof HTMLInputElement)) {
+        return
+      }
+
+      const seekRange = player.seekRange()
+      const seekRangeSize = seekRange.end - seekRange.start
+      if (seekRangeSize <= 0) {
+        return
+      }
+
+      const clampedCurrentTime = Math.min(Math.max(currentTime, seekRange.start), seekRange.end)
+      const buffered = video.value.buffered
+      const bufferedEnd = buffered.length > 0
+        ? Math.min(buffered.end(buffered.length - 1), seekRange.end)
+        : clampedCurrentTime
+      const playedPercent = (clampedCurrentTime - seekRange.start) / seekRangeSize * 100
+      const bufferedPercent = Math.max(
+        playedPercent,
+        (bufferedEnd - seekRange.start) / seekRangeSize * 100
+      )
+      const colors = ui.getConfiguration().seekBarColors
+      const gradient = [
+        'to right',
+        `${colors.played} 0%`,
+        `${colors.played} ${playedPercent}%`,
+        `${colors.buffered} ${playedPercent}%`,
+        `${colors.buffered} ${bufferedPercent}%`,
+        `${colors.base} ${bufferedPercent}%`,
+        `${colors.base} 100%`,
+      ]
+
+      seekBar.min = seekRange.start.toString()
+      seekBar.max = seekRange.end.toString()
+      seekBar.value = clampedCurrentTime.toString()
+      seekBarContainer.style.background = `linear-gradient(${gradient.join(', ')})`
     }
 
     /**
@@ -6047,6 +6198,7 @@ export default defineComponent({
       const bounds = videoSpace.getBoundingClientRect()
       if (event.clientX < bounds.left || event.clientX > bounds.right ||
           event.clientY < bounds.top || event.clientY > bounds.bottom) {
+        container.value.classList.remove('no-cursor')
         event.stopPropagation()
         ui?.getControls().getControlsContainer().removeAttribute('shown')
       }
@@ -8663,12 +8815,14 @@ export default defineComponent({
         if (!temporaryPlaybackRateActive && !silenceSkipping.handlePlaybackRateChange(playbackRate)) {
           emit('playback-rate-updated', playbackRate)
         }
+        scheduleSponsorBlockSkip()
       })
     })
     onUnmounted(() => {
       clearSabrBackoffTimer()
       clearPreRollTimer()
       clearTimeout(sponsorBlockHighlightLabelTimeout)
+      cancelSponsorBlockSkipSchedule()
     })
 
     async function performFirstLoad() {
@@ -9198,6 +9352,7 @@ export default defineComponent({
     async function destroyPlayer() {
       ignoreErrors = true
       cancelPendingVolumeUserSet()
+      cancelSponsorBlockSkipSchedule()
       // The media element can emit one final timeupdate while Shaka is being
       // destroyed, after its internal manifest has already been cleared.
       hasLoaded.value = false

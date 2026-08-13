@@ -5,7 +5,7 @@
   >
     <div class="transcriptHeader">
       <h3 class="transcriptTitle">
-        <FontAwesomeIcon
+        <FtIcon
           v-if="fullscreenOverlay"
           :icon="['fas', 'file-lines']"
         />
@@ -25,7 +25,7 @@
           :aria-expanded="String(searchOpen)"
           @click="toggleTranscriptSearch"
         >
-          <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" />
+          <FtIcon :icon="['fas', 'magnifying-glass']" />
         </button>
         <button
           v-if="captions.length > 1"
@@ -37,7 +37,7 @@
           :aria-expanded="String(languageMenuOpen)"
           @click="languageMenuOpen = !languageMenuOpen"
         >
-          <FontAwesomeIcon :icon="['fas', 'language']" />
+          <FtIcon :icon="['fas', 'language']" />
         </button>
         <div
           v-if="captions.length > 0"
@@ -79,7 +79,7 @@
             @click="selectCaptionLanguage(index)"
           >
             <span>{{ caption.label }}</span>
-            <FontAwesomeIcon
+            <FtIcon
               v-if="selectedCaptionIndex === String(index)"
               :icon="['fas', 'check']"
             />
@@ -140,7 +140,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
