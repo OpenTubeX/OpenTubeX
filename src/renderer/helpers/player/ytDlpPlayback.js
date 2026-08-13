@@ -232,10 +232,11 @@ async function convertAdaptiveFormats(formats, duration) {
  * SABR streaming protocol. Live streams use YouTube's HLS manifests, which keep the
  * DVR window available, so that they can be rewound.
  * @param {string} videoId
+ * @param {string} cacheKey identifies the yt-dlp executable and proxy configuration
  * @returns {Promise<YtDlpPlaybackSource>}
  */
-export async function getYtDlpPlaybackSource(videoId) {
-  const cachedSource = dashPlaybackSourceCache.get(videoId)
+export async function getYtDlpPlaybackSource(videoId, cacheKey = '') {
+  const cachedSource = dashPlaybackSourceCache.get(videoId, cacheKey)
   if (cachedSource !== null) {
     return cachedSource
   }
@@ -274,7 +275,7 @@ export async function getYtDlpPlaybackSource(videoId) {
         version: info.version
       }
 
-      dashPlaybackSourceCache.set(videoId, source)
+      dashPlaybackSourceCache.set(videoId, cacheKey, source)
       return source
     }
   }

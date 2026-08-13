@@ -26,11 +26,11 @@ test('reuses DASH sources until the early expiry margin', () => {
   })
   const cachedSource = source(new Date(now + 300000))
 
-  cache.set('video', cachedSource)
-  assert.equal(cache.get('video'), cachedSource)
+  cache.set('video', 'settings', cachedSource)
+  assert.equal(cache.get('video', 'settings'), cachedSource)
 
   now += 180000
-  assert.equal(cache.get('video'), null)
+  assert.equal(cache.get('video', 'settings'), null)
 })
 
 test('does not cache sources without a safely usable expiry', () => {
@@ -40,11 +40,11 @@ test('does not cache sources without a safely usable expiry', () => {
     now: () => now
   })
 
-  cache.set('missing-expiry', source(null))
-  cache.set('near-expiry', source(new Date(now + 60000)))
+  cache.set('missing-expiry', 'settings', source(null))
+  cache.set('near-expiry', 'settings', source(new Date(now + 60000)))
 
-  assert.equal(cache.get('missing-expiry'), null)
-  assert.equal(cache.get('near-expiry'), null)
+  assert.equal(cache.get('missing-expiry', 'settings'), null)
+  assert.equal(cache.get('near-expiry', 'settings'), null)
 })
 
 test('evicts the least recently used source at the size limit', () => {
@@ -53,21 +53,28 @@ test('evicts the least recently used source at the size limit', () => {
   const second = source(new Date(1000000))
   const third = source(new Date(1000000))
 
-  cache.set('first', first)
-  cache.set('second', second)
-  cache.get('first')
-  cache.set('third', third)
+  cache.set('first', 'settings', first)
+  cache.set('second', 'settings', second)
+  cache.get('first', 'settings')
+  cache.set('third', 'settings', third)
 
-  assert.equal(cache.get('first'), first)
-  assert.equal(cache.get('second'), null)
-  assert.equal(cache.get('third'), third)
+  assert.equal(cache.get('first', 'settings'), first)
+  assert.equal(cache.get('second', 'settings'), null)
+  assert.equal(cache.get('third', 'settings'), third)
+})
+
+test('does not reuse sources extracted with different settings', () => {
+  const cache = new YtDlpPlaybackSourceCache({ now: () => 0 })
+  cache.set('video', 'old-settings', source(new Date(1000000)))
+
+  assert.equal(cache.get('video', 'new-settings'), null)
 })
 
 test('invalidates a source after a playback error', () => {
   const cache = new YtDlpPlaybackSourceCache({ now: () => 0 })
-  cache.set('video', source(new Date(1000000)))
+  cache.set('video', 'settings', source(new Date(1000000)))
 
   cache.delete('video')
 
-  assert.equal(cache.get('video'), null)
+  assert.equal(cache.get('video', 'settings'), null)
 })

@@ -519,6 +519,26 @@ export default defineComponent({
     proxyVideos: function () {
       return this.$store.getters.getProxyVideos
     },
+    ytDlpPlaybackCacheKey: function () {
+      const getters = this.$store.getters
+      const proxyConfiguration = getters.getUseProxy
+        ? [
+            getters.getProxyProtocol,
+            getters.getProxyHostname,
+            getters.getProxyPort,
+            getters.getProxyUsername,
+            getters.getProxyPassword
+          ]
+        : []
+
+      return JSON.stringify([
+        getters.getYtDlpSource,
+        getters.getYtDlpChannel,
+        getters.getYtDlpPath,
+        getters.getUseProxy,
+        ...proxyConfiguration
+      ])
+    },
     defaultAutoplayInterruptionIntervalHours: function () {
       return this.$store.getters.getDefaultAutoplayInterruptionIntervalHours
     },
@@ -4164,7 +4184,7 @@ export default defineComponent({
     extractYtDlpPlaybackSource: async function (loadGeneration, videoId) {
       let source
       try {
-        source = await getYtDlpPlaybackSource(videoId)
+        source = await getYtDlpPlaybackSource(videoId, this.ytDlpPlaybackCacheKey)
       } catch (error) {
         if (!this.isCurrentVideoLoad(loadGeneration, videoId)) { return false }
 

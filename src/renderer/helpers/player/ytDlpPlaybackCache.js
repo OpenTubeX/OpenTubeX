@@ -31,21 +31,23 @@ export class YtDlpPlaybackSourceCache {
     this.expiryMarginMs = expiryMarginMs
     this.maxEntries = maxEntries
     this.now = now
-    /** @type {Map<string, import('./ytDlpPlayback').YtDlpPlaybackSource>} */
+    /** @type {Map<string, { cacheKey: string, source: import('./ytDlpPlayback').YtDlpPlaybackSource }>} */
     this.sources = new Map()
   }
 
   /**
    * @param {string} videoId
+   * @param {string} cacheKey
    * @returns {import('./ytDlpPlayback').YtDlpPlaybackSource | null}
    */
-  get(videoId) {
-    const source = this.sources.get(videoId)
+  get(videoId, cacheKey) {
+    const entry = this.sources.get(videoId)
 
     if (
-      source === undefined ||
-      source.expiryDate === null ||
-      this.now() >= source.expiryDate.getTime() - this.expiryMarginMs
+      entry === undefined ||
+      entry.cacheKey !== cacheKey ||
+      entry.source.expiryDate === null ||
+      this.now() >= entry.source.expiryDate.getTime() - this.expiryMarginMs
     ) {
       this.sources.delete(videoId)
       return null
@@ -53,15 +55,16 @@ export class YtDlpPlaybackSourceCache {
 
     // Refresh insertion order so the size limit evicts the least recently used source.
     this.sources.delete(videoId)
-    this.sources.set(videoId, source)
-    return source
+    this.sources.set(videoId, entry)
+    return entry.source
   }
 
   /**
    * @param {string} videoId
+   * @param {string} cacheKey
    * @param {import('./ytDlpPlayback').YtDlpPlaybackSource} source
    */
-  set(videoId, source) {
+  set(videoId, cacheKey, source) {
     if (
       source.expiryDate === null ||
       this.now() >= source.expiryDate.getTime() - this.expiryMarginMs
@@ -73,7 +76,7 @@ export class YtDlpPlaybackSourceCache {
     while (this.sources.size >= this.maxEntries) {
       this.sources.delete(this.sources.keys().next().value)
     }
-    this.sources.set(videoId, source)
+    this.sources.set(videoId, { cacheKey, source })
   }
 
   /**
