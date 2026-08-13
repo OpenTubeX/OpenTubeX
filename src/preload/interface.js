@@ -358,6 +358,22 @@ export default {
     return ipcRenderer.invoke(IpcChannels.YT_DLP_GET_PLAYBACK_INFO, videoId)
   },
 
+  ytDlpPlaybackCacheGet: (videoId, cacheKey) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_GET, videoId, cacheKey)
+  },
+
+  ytDlpPlaybackCacheSet: (videoId, cacheKey, expiryTime, source) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_SET, videoId, cacheKey, expiryTime, source)
+  },
+
+  ytDlpPlaybackCacheDelete: (videoId) => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_DELETE, videoId)
+  },
+
+  ytDlpPlaybackCacheClear: () => {
+    return ipcRenderer.invoke(IpcChannels.YT_DLP_PLAYBACK_CACHE_CLEAR)
+  },
+
   /**
    * @param {'yt-dlp' | 'ffmpeg'} binary
    * @returns {Promise<{ version: string, updated: boolean } | { error: string } | null>}
