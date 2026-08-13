@@ -1,6 +1,26 @@
 <template>
+  <span
+    v-if="customEmoji"
+    v-bind="forwardedAttrs"
+    class="ft-custom-icon"
+    :class="iconClass"
+    :style="customIconStyle"
+    dir="auto"
+  >
+    <span class="ft-custom-icon__emoji">{{ customEmoji }}</span>
+  </span>
+  <img
+    v-else-if="customImageSource"
+    v-bind="forwardedAttrs"
+    class="ft-custom-icon ft-custom-icon--image"
+    :class="iconClass"
+    :style="customIconStyle"
+    :src="customImageSource"
+    alt=""
+    draggable="false"
+  >
   <FontAwesomeIcon
-    v-if="useFontAwesome || !iconifyId"
+    v-else-if="useFontAwesome || !iconifyId"
     v-bind="forwardedAttrs"
     :icon="icon"
     :fixed-width="fixedWidth"
@@ -96,6 +116,20 @@ const attrs = useAttrs()
 
 const useFontAwesome = computed(() => currentIconPack.value === 'fontawesome')
 
+const customEmoji = computed(() => {
+  return props.icon?.type === 'emoji' && typeof props.icon.value === 'string'
+    ? props.icon.value
+    : ''
+})
+
+const customImageSource = computed(() => {
+  if (props.icon?.type !== 'image' || typeof props.icon.value !== 'string') return ''
+
+  return /^data:image\/(?:gif|jpeg|png|webp);base64,/i.test(props.icon.value)
+    ? props.icon.value
+    : ''
+})
+
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
 // Preserve Font Awesome's semantic metadata when a different pack renders the
@@ -174,6 +208,8 @@ const iconifyWrapperStyle = computed(() => {
   }
   return style
 })
+
+const customIconStyle = computed(() => iconifyWrapperStyle.value)
 
 /**
  * Approximate Font Awesome power-transforms for Iconify glyphs.
@@ -262,6 +298,33 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
 </script>
 
 <style>
+.ft-custom-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  inline-size: 1em;
+  block-size: 1em;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  object-fit: cover;
+  overflow: hidden;
+  position: relative;
+  vertical-align: -0.125em;
+}
+
+.ft-custom-icon--image {
+  border-radius: calc(2px * var(--ui-roundness));
+}
+
+.ft-custom-icon__emoji {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  line-height: 1;
+  position: absolute;
+}
+
 .ft-icon {
   display: inline-block;
   flex-shrink: 0;

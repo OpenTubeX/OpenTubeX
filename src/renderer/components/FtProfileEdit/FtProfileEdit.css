@@ -119,12 +119,10 @@ h3 {
   position: absolute;
 }
 
-.cropZoomLabel {
-  font-weight: bold;
-}
-
 .cropZoom {
   inline-size: min(320px, calc(100vw - 80px));
+  margin-block: 0;
+  margin-inline: 0;
 }
 
 .cropActions {

@@ -8,6 +8,7 @@ test.describe('playlist creation', () => {
     await goTo(page, 'userplaylists')
 
     await page.getByTitle('Create New Playlist').click()
+    await expect(page.getByText('Quick bookmark icon')).toHaveCount(0)
     await page.locator('.playlistNameInput input').fill('Created via UI')
     await page.getByRole('button', { name: 'Create', exact: true }).click()
 
@@ -143,21 +144,21 @@ test.describe('seeded playlists', () => {
     }).toBe(true)
   })
 
-  test('a custom quick bookmark icon persists across restarts', async ({ app, page }) => {
+  test('a custom quick bookmark emoji persists across restarts', async ({ app, page }) => {
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
 
     await page.getByTitle('Edit Playlist Info').click()
-    await page.getByRole('button', { name: 'Watch later' }).click()
+    await page.getByLabel('Custom emoji').fill('❤️‍🔥')
     await page.getByTitle('Save Changes').click()
 
     const quickBookmarkButton = page.getByTitle('Quick Bookmark Enabled')
-    await expect(quickBookmarkButton.locator('[data-icon="clock"]')).toBeVisible()
+    await expect(quickBookmarkButton.locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
 
     ;({ page } = await app.relaunch())
     await goTo(page, 'userplaylists')
     await page.getByText('Favorites').click()
-    await expect(page.getByTitle('Quick Bookmark Enabled').locator('[data-icon="clock"]')).toBeVisible()
+    await expect(page.getByTitle('Quick Bookmark Enabled').locator('.ft-custom-icon__emoji')).toHaveText('❤️‍🔥')
   })
 })
 
@@ -209,6 +210,19 @@ test.describe('custom playlist order', () => {
       has: page.getByText('Custom playlist video 3', { exact: true })
     })
     await thirdVideo.getByTitle('Move Video Up').click()
+    await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
+  })
+
+  test('moves a video to the top from its options menu', async ({ page }) => {
+    await goTo(page, 'userplaylists')
+    await page.getByText('Large custom playlist').click()
+
+    const thirdVideo = page.locator('.ft-list-video').filter({
+      has: page.getByText('Custom playlist video 3', { exact: true })
+    })
+    await thirdVideo.locator('.optionsButton').click()
+    await page.getByRole('option', { name: 'Move Video to the Top' }).click()
+
     await expect(page.locator('.playlistItemsCard .h3Title').first()).toHaveText('Custom playlist video 3')
   })
 })

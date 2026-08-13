@@ -769,13 +769,15 @@ const dropdownOptions = computed(() => {
     if (props.canMoveVideoUp) {
       options.push({
         label: t('User Playlists.Move Video to the Top'),
-        value: 'moveVideoTop'
+        value: 'moveVideoTop',
+        icon: ['fas', 'arrow-up']
       })
     }
     if (props.canMoveVideoDown) {
       options.push({
         label: t('User Playlists.Move Video to the Bottom'),
-        value: 'moveVideoBottom'
+        value: 'moveVideoBottom',
+        icon: ['fas', 'arrow-down']
       })
     }
   }

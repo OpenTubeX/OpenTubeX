@@ -196,21 +196,15 @@
           />
           <div class="cropCircle" />
         </div>
-        <label
-          class="cropZoomLabel"
-          for="profileCropZoom"
-        >
-          {{ $t("Profile.Zoom") }}
-        </label>
-        <input
-          id="profileCropZoom"
-          v-model.number="cropZoom"
+        <FtSlider
           class="cropZoom"
-          type="range"
-          min="1"
-          max="4"
-          step="0.01"
-        >
+          :label="$t('Profile.Zoom')"
+          :default-value="cropZoom"
+          :min-value="1"
+          :max-value="4"
+          :step="0.01"
+          @input="cropZoom = $event"
+        />
         <FtFlexBox class="cropActions">
           <FtButton
             :label="$t('Profile.Apply Crop')"
@@ -247,6 +241,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtProfileIcon from '../FtProfileIcon/FtProfileIcon.vue'
+import FtSlider from '../FtSlider/FtSlider.vue'
 
 import store from '../../store/index'
 

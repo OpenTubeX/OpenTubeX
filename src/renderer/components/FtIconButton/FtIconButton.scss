@@ -120,6 +120,12 @@
   &.favorite:focus-visible {
     color: var(--favorite-icon-color);
 
+    // Emoji and bitmap icons do not inherit `color` like SVG glyphs do.
+    // Tint them while retaining luminance so opaque images keep their detail.
+    :deep(.ft-custom-icon) {
+      filter: var(--favorite-icon-filter);
+    }
+
     &:not(.disabled) {
       color: var(--favorite-icon-color);
     }

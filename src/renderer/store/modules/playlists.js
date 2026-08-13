@@ -6,7 +6,7 @@ import {
   resetPlaylistVideoCounts
 } from '../../helpers/playlist-video-counts'
 import { generateRandomUniqueId, processToBeAddedPlaylistVideo } from '../../helpers/playlists'
-import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
+import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import { deepCopy } from '../../helpers/utils'
 
 function generateRandomPlaylistId() {
@@ -155,7 +155,8 @@ const getters = {
     return state.playlists.find((playlist) => playlist._id === playlistId)
   },
   getQuickBookmarkIcon(state, getters) {
-    return ['fas', getQuickBookmarkIconName(getters.getQuickBookmarkPlaylist)]
+    const icon = getQuickBookmarkIconValue(getters.getQuickBookmarkPlaylist)
+    return typeof icon === 'string' ? ['fas', icon] : icon
   }
 }
 

@@ -310,7 +310,7 @@ import {
   deepCopy,
 } from '../../helpers/utils'
 import { isHistoryEntryWatched } from '../../helpers/history'
-import { getQuickBookmarkIconName } from '../../helpers/quickBookmarkIcons'
+import { getQuickBookmarkIconValue } from '../../helpers/quickBookmarkIcons'
 import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
 const props = defineProps({
@@ -665,7 +665,7 @@ const playlistTitleInput = useTemplateRef('playlistTitleInput')
 function enterEditMode() {
   newTitle.value = props.title
   newDescription.value = props.description
-  newQuickBookmarkIcon.value = getQuickBookmarkIconName(selectedUserPlaylist.value)
+  newQuickBookmarkIcon.value = getQuickBookmarkIconValue(selectedUserPlaylist.value)
   editMode.value = true
 
   emit('enter-edit-mode')
