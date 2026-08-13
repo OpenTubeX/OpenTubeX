@@ -13,14 +13,14 @@
         :title="iconLabels[icon]"
         @click="emit('update:modelValue', icon)"
       >
-        <FontAwesomeIcon :icon="['fas', icon]" />
+        <FtIcon :icon="['fas', icon]" />
       </button>
     </div>
   </fieldset>
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { useI18n } from 'vue-i18n'
 
 import { QUICK_BOOKMARK_ICONS } from '../../helpers/quickBookmarkIcons'

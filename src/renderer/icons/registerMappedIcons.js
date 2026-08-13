@@ -1,6 +1,5 @@
 import { addIcon } from '@iconify/vue/offline'
 
-import lucideFilledBases from './lucideFilledBases.json'
 import {
   facFluxer,
   facHorizontalTabs,
@@ -11,30 +10,13 @@ import {
 } from '../customIcons.js'
 
 /**
- * Derive a filled Lucide glyph from a stroke-only base icon.
- * @param {object} base
- * @returns {object}
- */
-function filledFromLucide(base) {
-  return {
-    ...base,
-    body: base.body
-      .replaceAll('fill="none"', 'fill="currentColor"')
-      .replaceAll(/stroke-width="[^"]*"/g, 'stroke-width="0"')
-  }
-}
-
-/**
- * Register the pre-extracted Iconify glyphs used by the icon-pack preview.
- * Custom FA glyphs stay registered as `otx:*` only as a fallback; non-FA packs
- * use native playlist/tab icons from `faIconMap.json`.
+ * Register the pre-extracted Iconify glyphs used by the selected icon pack.
+ * Project-specific glyphs stay registered as `otx:*` fallbacks; both packs use
+ * native playlist/tab icons where mappings are available.
  */
 const PACK_LOADERS = {
-  lucide: () => import('./iconifyBundles/lucide.json'),
   material: () => import('./iconifyBundles/material.json'),
-  phosphor: () => import('./iconifyBundles/phosphor.json'),
-  remix: () => import('./iconifyBundles/remix.json'),
-  tabler: () => import('./iconifyBundles/tabler.json')
+  remix: () => import('./iconifyBundles/remix.json')
 }
 
 const packPromises = new Map()
@@ -66,30 +48,16 @@ async function loadAndRegisterPack(pack) {
   const bundle = module.default
   for (const [id, data] of Object.entries(bundle)) addIcon(id, data)
 
-  // Lucide is stroke-only — fill solid FA shapes by deriving from the outline glyph.
-  if (pack === 'lucide') {
-    for (const [filledName, baseName] of Object.entries(lucideFilledBases)) {
-      const base = bundle[`lucide:${baseName}`]
-      if (!base) {
-        console.warn(`[icon-pack] missing lucide base for filled icon: ${baseName}`)
-        continue
-      }
-      addIcon(`lucide:${filledName}`, filledFromLucide(base))
-    }
-  }
-
   registerCustomIcons()
 }
 
 /**
- * Load and register only the selected preview pack. Font Awesome requires no
- * Iconify data, so the default path does not parse a generated bundle.
+ * Load and register only the selected pack.
  * @param {import('./iconPackState').IconPackId} pack
  * @returns {Promise<void>}
  */
 export function registerMappedIcons(pack) {
   registerCustomIcons()
-  if (pack === 'fontawesome') return Promise.resolve()
   if (!PACK_LOADERS[pack]) return Promise.reject(new Error(`Unknown icon pack: ${pack}`))
 
   if (!packPromises.has(pack)) {

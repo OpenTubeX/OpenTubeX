@@ -412,6 +412,7 @@
     <FtSettingsSubpage
       :open="showQuickPlaybackSpeedBarManager"
       :title="t('Settings.Player Settings.Quick Playback Speed Bar Manager')"
+      :icon="['fas', 'gauge-high']"
       grow-with-content
       @close="showQuickPlaybackSpeedBarManager = false"
     >
@@ -452,7 +453,7 @@
             :aria-label="t('Settings.Player Settings.Reorder Playback Speed')"
             @pointerdown.prevent="startQuickPlaybackSpeedDrag(index, $event)"
           >
-            <FontAwesomeIcon :icon="['fas', 'bars']" />
+            <FtIcon :icon="['fas', 'bars']" />
           </button>
           <div class="quickPlaybackSpeedFields">
             <div
@@ -469,7 +470,7 @@
                 :aria-label="t('Settings.Player Settings.Edit Playback Speed Name')"
                 @click="editingQuickPlaybackSpeedNameId = option.id"
               >
-                <FontAwesomeIcon :icon="['fas', 'edit']" />
+                <FtIcon :icon="['fas', 'edit']" />
               </button>
             </div>
             <div
@@ -491,7 +492,7 @@
                 :aria-label="t('Settings.Player Settings.Use Automatic Playback Speed Name')"
                 @click="resetQuickPlaybackSpeedName(option.id)"
               >
-                <FontAwesomeIcon :icon="['fas', 'undo']" />
+                <FtIcon :icon="['fas', 'undo']" />
               </button>
             </div>
           </div>
@@ -512,7 +513,7 @@
             :aria-label="t('Delete')"
             @click="deleteQuickPlaybackSpeed(option.id)"
           >
-            <FontAwesomeIcon :icon="['fas', 'trash']" />
+            <FtIcon :icon="['fas', 'trash']" />
           </button>
         </div>
       </div>
@@ -586,7 +587,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

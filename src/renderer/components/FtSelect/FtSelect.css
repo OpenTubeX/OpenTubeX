@@ -93,27 +93,18 @@
   box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
 }
 
-.selectDropdown.above {
-  transform-origin: bottom;
-}
-
-.selectDropdown.below {
-  transform-origin: top;
-}
-
 .select-dropdown-enter-active {
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition: opacity 120ms ease;
 }
 
 .select-dropdown-leave-active {
   pointer-events: none;
-  transition: opacity 120ms ease, transform 120ms ease;
+  transition: opacity 120ms ease;
 }
 
 .select-dropdown-enter-from,
 .select-dropdown-leave-to {
   opacity: 0;
-  transform: scaleY(0.96);
 }
 
 .selectOption {
@@ -122,14 +113,27 @@
   padding-block: 7px;
   padding-inline: 16px;
   cursor: default;
+  isolation: isolate;
   overflow: hidden;
+  position: relative;
   text-overflow: ellipsis;
   user-select: none;
   white-space: nowrap;
 }
 
+.selectOption::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: transparent;
+  z-index: -1;
+}
+
 .selectOption.active {
   color: var(--scrollbar-text-color-hover);
+}
+
+.selectOption.active::before {
   background-color: var(--scrollbar-color-hover);
 }
 
@@ -152,8 +156,7 @@
 }
 
 .iconSelect.ft-icon,
-:deep(.iconSelect.ft-icon),
-:deep(.iconSelect.svg-inline--fa) {
+:deep(.iconSelect.ft-icon) {
   vertical-align: 0;
 }
 
@@ -186,12 +189,14 @@
 .selectIndicators :deep(.syncedSettingIndicator),
 .selectIndicators :deep(.changedSettingIndicator),
 .selectIndicators :deep(.changedSettingIndicatorPlaceholder) {
+  line-height: 1;
   margin-inline-start: 0;
 }
 
 
 /* LABEL ======================================= */
 .select-label {
+  align-items: center;
   font-size: 18px;
   font-weight: normal;
   position: absolute;
@@ -209,7 +214,16 @@
   block-size: 14px;
 }
 
+.select-placeholder {
+  display: block;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .select-label-text {
+  align-items: center;
+  display: inline-flex;
+  line-height: 1;
   min-inline-size: 0;
   white-space: nowrap;
 }

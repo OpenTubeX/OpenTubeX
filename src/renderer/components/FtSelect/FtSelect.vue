@@ -47,7 +47,7 @@
     >
       <span class="selectedValue">{{ selectedName }}</span>
     </button>
-    <FontAwesomeIcon
+    <FtIcon
       :icon="['fas', 'angle-down']"
       class="iconSelect"
     />
@@ -58,14 +58,14 @@
       class="select-label"
       :for="id"
     >
-      <FontAwesomeIcon
+      <FtIcon
         v-if="showIcon && icon !== null"
         :icon="icon"
         class="select-icon"
         :color="iconColor"
       />
       <span class="select-label-text">
-        {{ placeholder }}
+        <span class="select-placeholder">{{ placeholder }}</span>
         <FtPerformanceImpact
           compact
           :setting-key="settingKey"
@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 
 import FtTooltip from '../FtTooltip/FtTooltip.vue'
@@ -521,7 +521,12 @@ function removeDropdownListeners() {
  * @param {Event} event
  */
 function change(event) {
-  emit('change', event.target.value)
+  const select = event.target
+  emit('change', select.value)
+  nextTick(() => {
+    // Keep the native control driven by `value` when an async update is rejected.
+    select.value = props.value
+  })
 }
 </script>
 

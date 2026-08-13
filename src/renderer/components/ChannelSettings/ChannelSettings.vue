@@ -39,6 +39,7 @@
     <FtSettingsSubpage
       :open="showManager"
       :title="t('Settings.Channel Settings.Saved Channels')"
+      :icon="['fas', 'users']"
       @close="showManager = false"
     >
       <FtInput
@@ -89,7 +90,7 @@
                   v-else
                   class="channelThumbnail channelThumbnailPlaceholder"
                 >
-                  <FontAwesomeIcon :icon="['fas', 'circle-user']" />
+                  <FtIcon :icon="['fas', 'circle-user']" />
                 </span>
                 <p
                   class="channelName"
@@ -120,7 +121,7 @@
                 :key="preference.type"
                 class="channelPreference"
               >
-                <FontAwesomeIcon
+                <FtIcon
                   class="preferenceIcon"
                   :icon="preference.icon"
                   :title="preference.label"
@@ -177,7 +178,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

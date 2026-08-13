@@ -108,8 +108,7 @@
   transition: background 0.2s ease-out;
 }
 
-.navButton :deep(.ft-icon),
-.navButton :deep(.svg-inline--fa) {
+.navButton :deep(.ft-icon) {
   display: block;
   vertical-align: 0;
 }

@@ -125,7 +125,7 @@
         :title="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
         :aria-label="$t('Global.Counts.Like Count', {count: formattedVoteCount}, voteCount)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           class="thumbs-up-icon"
           :icon="['fas', 'thumbs-up']"
           aria-hidden="true"
@@ -144,7 +144,7 @@
           :title="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
           :aria-label="$t('Global.Counts.Comment Count', {count: formattedCommentCount}, commentCount)"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="comment-count-icon"
             :icon="['fas', 'comment']"
             aria-hidden="true"
@@ -162,7 +162,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import autolinker from 'autolinker'
 import { A11y, Navigation, Pagination } from 'swiper/modules'
 import { computed, onMounted, useTemplateRef } from 'vue'

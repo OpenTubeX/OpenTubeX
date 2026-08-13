@@ -72,7 +72,7 @@
             class="removeTagButton"
             @click="removeTag(tag)"
           >
-            <FontAwesomeIcon
+            <FtIcon
               :icon="['fas', 'times']"
             />
           </button>
@@ -83,7 +83,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { useId, useTemplateRef, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

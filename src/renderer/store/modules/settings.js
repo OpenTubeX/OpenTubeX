@@ -19,6 +19,7 @@ import { setReducedMotionPreference } from '../../helpers/reducedMotion'
 import { setAnimationSpeed } from '../../helpers/animationSpeed'
 import { DEFAULT_SEARCH_ENGINES_SETTING } from '../../../searchEngines'
 import { DEFAULT_SEGMENT_PREFETCH_LIMIT } from '../../helpers/player/segmentPrefetch'
+import { currentIconPack, isIconPack, setIconPack } from '../../icons/iconPackState'
 
 const YT_DLP_PLAYBACK_ENGINE_MIGRATION_SETTING = 'ytDlpPlaybackEngineDefaultMigration'
 
@@ -198,6 +199,7 @@ const state = {
   baseTheme: 'system',
   systemLightTheme: 'light',
   systemDarkTheme: 'dark',
+  iconPack: 'material',
   mainColor: 'Red',
   secColor: 'Blue',
   defaultAutoplayInterruptionIntervalHours: 3,
@@ -580,6 +582,12 @@ const sideEffectHandlers = {
     }
   },
 
+  iconPack: async (_, value) => {
+    if (!isIconPack(value) || !await setIconPack(value)) {
+      throw new Error(`Unable to apply icon pack: ${value}`)
+    }
+  },
+
   maxVideoPlaybackRate: ({ dispatch, state }, value) => {
     if (state.defaultPlayback > value) {
       dispatch('updateDefaultPlayback', value)
@@ -730,6 +738,25 @@ const customGetters = {
 const customMutations = {}
 
 const customActions = {
+  updateIconPack: async ({ commit }, value) => {
+    const previousIconPack = currentIconPack.value
+    if (!isIconPack(value) || !await setIconPack(value)) {
+      return false
+    }
+
+    try {
+      await DBSettingHandlers.upsert('iconPack', value)
+      commit('setIconPack', value)
+      return true
+    } catch (error) {
+      if (isIconPack(previousIconPack)) {
+        await setIconPack(previousIconPack)
+      }
+      console.error(error)
+      return false
+    }
+  },
+
   resetSettingToDefault: ({ dispatch }, settingKey) => {
     if (!Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, settingKey)) {
       return

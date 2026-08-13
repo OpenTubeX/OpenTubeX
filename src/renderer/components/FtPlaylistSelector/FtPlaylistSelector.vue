@@ -8,7 +8,7 @@
     <div
       class="thumbnail"
     >
-      <FontAwesomeIcon
+      <FtIcon
         v-if="selected"
         class="selectedIcon"
         :icon="['fas', 'check']"
@@ -24,7 +24,7 @@
         <div class="background" />
         <div class="inner">
           <div>{{ playlist.videos.length }}</div>
-          <div><FontAwesomeIcon :icon="['fas', 'list']" /></div>
+          <div><FtIcon :icon="['fas', 'list']" /></div>
         </div>
       </div>
     </div>
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

@@ -11,7 +11,7 @@
         v-if="fullscreenOverlay"
         class="playlistDockHeader"
       >
-        <FontAwesomeIcon :icon="['fas', 'list']" />
+        <FtIcon :icon="['fas', 'list']" />
         <h3
           dir="auto"
           :title="playlistTitle"
@@ -25,7 +25,7 @@
           :title="t('Playlist.Close Playlist')"
           @click="emit('close')"
         >
-          <FontAwesomeIcon :icon="['fas', 'xmark']" />
+          <FtIcon :icon="['fas', 'xmark']" />
         </button>
       </header>
       <div
@@ -127,7 +127,7 @@
               :title="t('Video.Loop Playlist')"
               @click="toggleLoop"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="playlistIcon"
                 :icon="['fas', 'retweet']"
               />
@@ -140,7 +140,7 @@
               :title="t('Video.Shuffle Playlist')"
               @click="toggleShuffle"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="playlistIcon"
                 :icon="['fas', 'random']"
               />
@@ -153,7 +153,7 @@
               :title="t('Video.Reverse Playlist')"
               @click="toggleReversePlaylist"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="playlistIcon"
                 :icon="['fas', 'exchange-alt']"
               />
@@ -165,7 +165,7 @@
               :title="t('User Playlists.Remove Watched Videos')"
               @click="showRemoveWatchedVideosPrompt = true"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 class="playlistIcon"
                 :icon="['fas', 'eye-slash']"
               />
@@ -229,7 +229,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, TransitionGroup, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'

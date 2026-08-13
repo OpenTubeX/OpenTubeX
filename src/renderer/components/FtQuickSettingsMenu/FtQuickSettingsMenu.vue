@@ -46,7 +46,7 @@
               :title="t('Back')"
               @click="closeProfilePanel"
             >
-              <FontAwesomeIcon :icon="['fas', 'arrow-left']" />
+              <FtIcon :icon="['fas', 'arrow-left']" />
             </button>
             <h2>{{ t('Profile.Profile Select') }}</h2>
             <button
@@ -55,7 +55,7 @@
               :title="t('Profile.Profile Settings')"
               @click="openProfileSettings"
             >
-              <FontAwesomeIcon :icon="['fas', 'sliders-h']" />
+              <FtIcon :icon="['fas', 'sliders-h']" />
             </button>
           </header>
           <div
@@ -78,7 +78,7 @@
                 :fallback="profileInitials[profile._id]"
               />
               <span dir="auto">{{ translateProfileName(profile) }}</span>
-              <FontAwesomeIcon
+              <FtIcon
                 v-if="profile._id === activeProfile._id"
                 class="activeProfileIcon"
                 :icon="['fas', 'check']"
@@ -103,7 +103,7 @@
                 <strong dir="auto">{{ translateProfileName(activeProfile) }}</strong>
                 <small>{{ t('Settings.Quick Settings.Profile Selector Hint') }}</small>
               </span>
-              <FontAwesomeIcon :icon="['fas', 'angle-right']" />
+              <FtIcon :icon="['fas', 'angle-right']" />
             </button>
             <button
               type="button"
@@ -112,7 +112,7 @@
               :title="t('Settings.Quick Settings.All Settings')"
               @click="openSettings"
             >
-              <FontAwesomeIcon :icon="['fas', 'cog']" />
+              <FtIcon :icon="['fas', 'cog']" />
             </button>
           </div>
 
@@ -260,9 +260,9 @@
               type="button"
               @click="openKeyboardShortcuts"
             >
-              <FontAwesomeIcon :icon="['fas', 'keyboard']" />
+              <FtIcon :icon="['fas', 'keyboard']" />
               <span>{{ t('KeyboardShortcutPrompt.Keyboard Shortcuts') }}</span>
-              <FontAwesomeIcon
+              <FtIcon
                 class="linkArrow"
                 :icon="['fas', 'angle-right']"
               />
@@ -271,9 +271,9 @@
               type="button"
               @click="openAbout"
             >
-              <FontAwesomeIcon :icon="['fas', 'info-circle']" />
+              <FtIcon :icon="['fas', 'info-circle']" />
               <span>{{ t('About.About') }}</span>
-              <FontAwesomeIcon
+              <FtIcon
                 class="linkArrow"
                 :icon="['fas', 'angle-right']"
               />
@@ -286,7 +286,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 

@@ -55,13 +55,13 @@
         v-if="!revealAnswer"
         class="option-text"
       >
-        <FontAwesomeIcon :icon="['fas', 'eye']" /> {{ $t('Channel.Posts.Reveal Answers') }}
+        <FtIcon :icon="['fas', 'eye']" /> {{ $t('Channel.Posts.Reveal Answers') }}
       </div>
       <div
         v-else
         class="option-text"
       >
-        <FontAwesomeIcon :icon="['fas', 'eye-slash']" /> {{ $t('Channel.Posts.Hide Answers') }}
+        <FtIcon :icon="['fas', 'eye-slash']" /> {{ $t('Channel.Posts.Hide Answers') }}
       </div>
     </div>
   </div>
@@ -69,7 +69,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
 import { formatNumber } from '../../helpers/utils'
 

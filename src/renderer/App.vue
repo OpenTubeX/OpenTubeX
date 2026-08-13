@@ -153,7 +153,7 @@
       role="search"
       @keydown.stop="handleFindbarNavigationShortcut"
     >
-      <FontAwesomeIcon
+      <FtIcon
         :icon="['fas', 'search']"
         class="findbarIcon"
         aria-hidden="true"
@@ -182,7 +182,7 @@
         :title="t('Previous match')"
         @click="findInPage(true)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'angle-up']"
           aria-hidden="true"
         />
@@ -194,7 +194,7 @@
         :title="t('Next match')"
         @click="findInPage(false)"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'angle-down']"
           aria-hidden="true"
         />
@@ -206,7 +206,7 @@
         :title="t('Close')"
         @click="closeFindbar"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="['fas', 'xmark']"
           aria-hidden="true"
         />
@@ -269,7 +269,7 @@
               class="tabSwitcherPreviewFallback"
               aria-hidden="true"
             >
-              <FontAwesomeIcon
+              <FtIcon
                 :icon="['fas', 'display']"
                 class="tabSwitcherFallbackIcon"
               />
@@ -283,7 +283,7 @@
               alt=""
               draggable="false"
             >
-            <FontAwesomeIcon
+            <FtIcon
               v-else-if="showTabIcons && getTabPageIcon(tab)"
               :icon="getTabPageIcon(tab)"
               class="tabSwitcherTitleIcon"
@@ -300,7 +300,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { routerKey, useRoute, useRouter } from 'vue-router'

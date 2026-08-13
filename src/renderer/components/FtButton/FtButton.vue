@@ -9,7 +9,7 @@
     @click="click"
   >
     <slot>
-      <FontAwesomeIcon
+      <FtIcon
         v-if="icon"
         :icon="icon"
       />
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 
 defineProps({
   label: {

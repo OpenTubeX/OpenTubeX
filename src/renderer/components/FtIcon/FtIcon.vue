@@ -1,18 +1,6 @@
 <template>
-  <FontAwesomeIcon
-    v-if="useFontAwesome || !iconifyId"
-    v-bind="forwardedAttrs"
-    :icon="icon"
-    :fixed-width="fixedWidth"
-    :size="size"
-    :color="color"
-    :spin="spin"
-    :transform="transform"
-    :class="iconClass"
-    :style="fontAwesomeStyle"
-  />
   <span
-    v-else
+    v-if="iconifyId"
     v-bind="forwardedAttrs"
     :data-prefix="semanticIcon?.[0]"
     :data-icon="semanticIcon?.[1]"
@@ -35,7 +23,6 @@
 <script setup>
 import { computed, normalizeStyle, useAttrs } from 'vue'
 import { Icon } from '@iconify/vue/offline'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome-original'
 
 import faAliasToCanon from '../../icons/faAliasToCanon.json'
 import { currentIconPack } from '../../icons/iconPackState'
@@ -73,7 +60,7 @@ const props = defineProps({
 })
 
 /** @type {Record<string, string>} */
-const FA_SIZE_TO_EM = {
+const ICON_SIZE_TO_EM = {
   '2xs': '0.625em',
   xs: '0.75em',
   sm: '0.875em',
@@ -94,13 +81,10 @@ const FA_SIZE_TO_EM = {
 
 const attrs = useAttrs()
 
-const useFontAwesome = computed(() => currentIconPack.value === 'fontawesome')
-
 const iconifyId = computed(() => resolveIconifyId(props.icon))
 
-// Preserve Font Awesome's semantic metadata when a different pack renders the
-// glyph. Existing styling and consumers can then identify an icon independently
-// of the active pack's visual name.
+// Preserve the stable semantic metadata used by existing styling and consumers,
+// independently of the active pack's visual name.
 const semanticIcon = computed(() => {
   const normalized = normalizeFaIcon(props.icon)
   if (!normalized) {
@@ -123,6 +107,9 @@ const forwardedAttrs = computed(() => {
     }
     rest[key] = value
   }
+  if (!('aria-hidden' in rest) && !('aria-label' in rest) && !('aria-labelledby' in rest)) {
+    rest['aria-hidden'] = 'true'
+  }
   return rest
 })
 
@@ -140,14 +127,11 @@ const baseStyle = computed(() => {
   }
 })
 
-/** FA branch keeps keyword sizes on the component prop; only merge attrs.style. */
-const fontAwesomeStyle = computed(() => baseStyle.value)
-
 /**
  * @param {string | number | null | undefined} size
  * @returns {string | null}
  */
-function cssFontSizeFromFaSize(size) {
+function cssFontSizeFromIconSize(size) {
   if (size == null || size === '') {
     return null
   }
@@ -155,8 +139,8 @@ function cssFontSizeFromFaSize(size) {
     return `${size}px`
   }
   const key = String(size)
-  if (FA_SIZE_TO_EM[key]) {
-    return FA_SIZE_TO_EM[key]
+  if (ICON_SIZE_TO_EM[key]) {
+    return ICON_SIZE_TO_EM[key]
   }
   // Already a CSS length (e.g. 1.2em, 20px)
   return key
@@ -164,11 +148,11 @@ function cssFontSizeFromFaSize(size) {
 
 const iconifyWrapperStyle = computed(() => {
   const style = { ...baseStyle.value }
-  const fontSize = cssFontSizeFromFaSize(props.size)
+  const fontSize = cssFontSizeFromIconSize(props.size)
   if (fontSize != null) {
     style.fontSize = fontSize
   }
-  // Iconify glyphs paint with currentColor, so Font Awesome's `color` prop has to become CSS
+  // Iconify glyphs paint with currentColor, so the `color` prop becomes CSS.
   if (props.color != null && props.color !== '') {
     style.color = props.color
   }
@@ -176,12 +160,11 @@ const iconifyWrapperStyle = computed(() => {
 })
 
 /**
- * Approximate Font Awesome power-transforms for Iconify glyphs.
- * Uses FA's 16-unit grid: shrink-7 ≈ scale(9/16), up-1 ≈ translateY(-1/16em).
+ * Interpret the existing transform syntax on a 16-unit grid.
  * @param {string | Record<string, unknown> | null | undefined} transform
  * @returns {{ transform?: string }}
  */
-function cssFromFaTransform(transform) {
+function cssFromIconTransform(transform) {
   if (transform == null || transform === '') {
     return {}
   }
@@ -258,14 +241,14 @@ function cssFromFaTransform(transform) {
   }
 }
 
-const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
+const iconifyGlyphStyle = computed(() => cssFromIconTransform(props.transform))
 </script>
 
 <style>
 .ft-icon {
   display: inline-block;
   flex-shrink: 0;
-  inline-size: var(--fa-width, 1.25em);
+  inline-size: var(--icon-width, 1.25em);
   line-height: 1;
   overflow: visible;
   text-align: center;
@@ -276,7 +259,7 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
   display: block;
   /* Center when callers stretch .ft-icon wider than 1em (e.g. SideNav .navIcon). */
   margin-inline: auto;
-  /* Iconify packs leave more padding in their view boxes than Font Awesome. */
+  /* The selected packs leave some padding in their view boxes. */
   scale: 1.2;
 }
 
@@ -284,7 +267,6 @@ const iconifyGlyphStyle = computed(() => cssFromFaTransform(props.transform))
   inline-size: 1.25em;
 }
 
-/* Mirrors Font Awesome's `spin` prop, which only applies to its own SVGs. */
 .ft-icon--spin .ft-icon__glyph {
   animation: ft-icon-spin 2s linear infinite;
 }

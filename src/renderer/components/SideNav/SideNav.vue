@@ -26,7 +26,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'rss']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -47,7 +47,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'user-check']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -69,7 +69,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'fire']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -91,7 +91,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'users']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -113,7 +113,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'bookmark']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -135,7 +135,7 @@
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'history']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -155,7 +155,7 @@
         :title="$t('Downloads.Downloads')"
       >
         <div class="thumbnailContainer">
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'download']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -173,7 +173,7 @@
         :title="$t('Stats.Stats')"
       >
         <div class="thumbnailContainer">
-          <FontAwesomeIcon
+          <FtIcon
             :icon="['fas', 'chart-line']"
             class="navIcon"
             :class="applyNavIconExpand"
@@ -210,7 +210,7 @@
               :src="channel.thumbnail"
               :alt="isOpen ? '' : channel.name"
             >
-            <FontAwesomeIcon
+            <FtIcon
               v-else
               class="channelThumbnail noThumbnail"
               :icon="['fas', 'circle-user']"
@@ -239,7 +239,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'

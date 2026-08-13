@@ -17,7 +17,7 @@
           :style="{visibility: (searchFilterValueChanged ? 'visible' : 'hidden')}"
           @click="clearFilters"
         >
-          <FontAwesomeIcon
+          <FtIcon
             class="clearFilterIcon"
             :icon="['fas', 'filter-circle-xmark']"
           />

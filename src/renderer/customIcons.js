@@ -1,5 +1,5 @@
-// Custom icons in the FontAwesome IconDefinition format, for concepts the
-// free icon set doesn't cover. Drawn on the standard 512x512 solid-icon grid.
+// Custom semantic icons for concepts the selected packs do not cover.
+// The tuple format is retained for compatibility with existing icon data.
 
 // A column of stacked tabs beside a content pane
 export const facVerticalTabs = {

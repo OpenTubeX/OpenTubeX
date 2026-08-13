@@ -24,7 +24,7 @@
             referrerpolicy="no-referrer"
             @error="handleFaviconError(engine)"
           >
-          <FontAwesomeIcon
+          <FtIcon
             v-else
             class="engineIcon fallbackIcon"
             :icon="['fas', 'search']"
@@ -58,7 +58,7 @@
             :title="t('Settings.Context Menu Search Settings.Remove Engine', { engine: engine.name })"
             @click="removeEngine(engine.id)"
           >
-            <FontAwesomeIcon :icon="['fas', 'trash']" />
+            <FtIcon :icon="['fas', 'trash']" />
           </button>
         </template>
         <code v-else>{{ engine.url }}</code>
@@ -94,7 +94,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

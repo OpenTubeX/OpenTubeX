@@ -40,7 +40,7 @@
         :aria-expanded="isProfileDropdownOpen"
         @click="toggleProfileDropdown"
       >
-        <FontAwesomeIcon
+        <FtIcon
           :icon="isProfileDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']"
         />
       </FtButton>
@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { FtIcon } from '@opentubex/icons'
 import { computed, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

@@ -32,7 +32,10 @@
         :tooltip="tooltip"
         :allow-newlines="tooltipAllowNewlines"
       />
-      <FtSyncedSettingIndicator :setting-key="settingKey" />
+      <FtSyncedSettingIndicator
+        :setting-key="settingKey"
+        :is-changed="reserveChangedIndicatorSpace ? false : null"
+      />
     </label>
   </div>
 </template>
@@ -76,6 +79,10 @@ const props = defineProps({
   settingKey: {
     type: String,
     default: ''
+  },
+  reserveChangedIndicatorSpace: {
+    type: Boolean,
+    default: false
   },
 })
 

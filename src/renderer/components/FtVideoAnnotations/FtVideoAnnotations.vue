@@ -12,7 +12,7 @@
       :aria-pressed="annotationsHidden"
       @click.stop="annotationsHidden = !annotationsHidden"
     >
-      <FontAwesomeIcon :icon="['fas', annotationsHidden ? 'eye' : 'eye-slash']" />
+      <FtIcon :icon="['fas', annotationsHidden ? 'eye' : 'eye-slash']" />
       <span>{{ buttonLabel }}</span>
     </button>
 
