@@ -9,6 +9,7 @@ import {
   getSubscriptionVideoSortTimestamp,
   getUpcomingPremiereTimestamp,
   mergeSubscriptionShortThumbnails,
+  mergeUpcomingSubscriptionFeedPublished,
   reconcileFetchedSubscriptionEntries,
   updateUpcomingPremiereState
 } from '../../src/renderer/helpers/subscription-entries.js'
@@ -130,6 +131,30 @@ test('adds selected Shorts thumbnails without replacing RSS metadata', () => {
     }),
     entries[1]
   ])
+})
+
+test('adds RSS announcement dates only to scraped upcoming entries', () => {
+  const scheduledTime = now + HOUR
+  const announcementTime = now - 4 * HOUR
+  const upcoming = video('upcoming', scheduledTime, {
+    isUpcoming: true,
+    premiereDate: new Date(scheduledTime)
+  })
+  const ordinary = video('ordinary', now - HOUR)
+
+  const merged = mergeUpcomingSubscriptionFeedPublished(
+    [upcoming, ordinary],
+    [
+      video('upcoming', announcementTime, { isRSS: true }),
+      video('ordinary', now, { isRSS: true })
+    ]
+  )
+
+  assert.deepEqual(merged, [
+    { ...upcoming, subscriptionFeedPublished: announcementTime },
+    ordinary
+  ])
+  assert.equal(getSubscriptionVideoSortTimestamp(merged[0], false, now), announcementTime)
 })
 
 test('keeps the cached publication date of entries that were already fetched', () => {

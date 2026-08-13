@@ -104,6 +104,35 @@ export function ensureUpcomingSubscriptionFeedPublished(video, fallbackTimestamp
 }
 
 /**
+ * Adds exact announcement dates supplied by RSS to scraped upcoming entries.
+ * @param {object[]} videos
+ * @param {object[]} rssVideos
+ */
+export function mergeUpcomingSubscriptionFeedPublished(videos, rssVideos) {
+  const publishedByVideoId = new Map(
+    rssVideos
+      .filter(video => video.videoId != null && Number.isFinite(Number(video.published)))
+      .map(video => [video.videoId, Number(video.published)])
+  )
+
+  return videos.map(video => {
+    if (video.isUpcoming !== true && video.premiere !== true) {
+      return video
+    }
+
+    const published = publishedByVideoId.get(video.videoId)
+    if (published == null) {
+      return video
+    }
+
+    return {
+      ...video,
+      subscriptionFeedPublished: published
+    }
+  })
+}
+
+/**
  * Returns the announcement position used for an upcoming subscription entry.
  * Exact publication dates are preferred; scraper entries fall back to the time
  * they first entered OpenTubeX's subscription cache.
