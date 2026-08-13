@@ -7,6 +7,7 @@ import {
 import './e2eUserDataOverride'
 import path from 'path'
 import cp from 'child_process'
+import { randomUUID } from 'crypto'
 import { load as loadYaml } from 'js-yaml'
 
 import {
@@ -120,7 +121,7 @@ function runApp() {
 
   async function writeCustomThemeFile(theme) {
     const themePath = getCustomThemePath(theme.id)
-    const temporaryPath = `${themePath}.tmp`
+    const temporaryPath = `${themePath}.${randomUUID()}.tmp`
     await asyncFs.writeFile(temporaryPath, `${JSON.stringify(theme, null, 2)}\n`, 'utf8')
     await asyncFs.rename(temporaryPath, themePath)
   }

@@ -274,6 +274,13 @@ test.describe('custom theme editor', () => {
       secondaryColor: 'Teal',
       isDark: false
     })
+    await page.evaluate(async () => {
+      const [theme] = await window.ftElectron.loadCustomTheme()
+      await Promise.all([
+        window.ftElectron.saveCustomTheme(theme),
+        window.ftElectron.saveCustomTheme(theme)
+      ])
+    })
     await expect(editor).toHaveCount(0)
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
 
@@ -318,9 +325,35 @@ test.describe('custom theme editor', () => {
     ])
     await expect(editor).toHaveCount(0)
 
+    await page.emulateMedia({ colorScheme: 'light' })
     const baseThemeSelect = page.getByRole('combobox', { name: 'Base Theme' })
     await baseThemeSelect.click()
-    await page.getByRole('option', { name: 'Midnight', exact: true }).click()
+    await page.locator(`#${await baseThemeSelect.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: /System default/i }).click()
+    const darkSystemTheme = page.getByRole('combobox', { name: 'Dark theme' })
+    await darkSystemTheme.click()
+    await page.locator(`#${await darkSystemTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Midnight', exact: true }).click()
+
+    await page.locator('.settingsCloseButton').click()
+    await page.locator('.topNav .profileTrigger').click()
+    await expect(page.locator('.quickSettingsMenu .menuSection').filter({ hasText: 'Appearance' })
+      .getByRole('combobox', { name: /Main colou?r theme/i })).toBeEnabled()
+    await page.locator('.topNav .profileTrigger').click()
+    await goTo(page, 'settings')
+    await expect(page.locator('.settingsContent > [data-section="theme"]')).toBeVisible()
+
+    const lightSystemTheme = page.getByRole('combobox', { name: 'Light theme' })
+    await lightSystemTheme.click()
+    await page.locator(`#${await lightSystemTheme.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Paper', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Edit custom theme' })).toBeVisible()
+
+    const activeBaseThemeSelect = page.locator('.settingsWindow:visible')
+      .getByRole('combobox', { name: 'Base Theme' })
+    await activeBaseThemeSelect.click()
+    await page.locator(`#${await activeBaseThemeSelect.getAttribute('aria-controls')}`)
+      .getByRole('option', { name: 'Midnight', exact: true }).click()
     await expect(page.locator('body')).toHaveCSS('--bg-color', '#445566')
     await page.getByRole('button', { name: 'Edit custom theme' }).click()
     await expect(page.getByRole('combobox', { name: 'Based on' })).toHaveText('Dark')

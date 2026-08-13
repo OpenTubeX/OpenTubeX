@@ -161,6 +161,7 @@ const { t, tm } = useI18n()
 const draft = shallowReactive(cloneDefaultCustomTheme())
 const showDeletePrompt = ref(false)
 let previewing = false
+let editorLoadId = 0
 const basedOnTheme = ref('dark')
 const pendingColorPreviews = new Map()
 let colorPreviewTimer = null
@@ -194,10 +195,12 @@ const colorNames = computed(() => tm('Settings.Theme Settings.Custom Theme.Color
 const isSavedTheme = computed(() => store.getters.getCustomThemes.some(({ id }) => id === draft.id))
 
 watch(() => props.open, async (open) => {
+  const loadId = ++editorLoadId
   store.commit('setCustomThemeEditorOpen', open)
   if (!open) return
   try {
     const themes = await loadCustomThemes()
+    if (!props.open || loadId !== editorLoadId) return
     store.commit('setCustomThemes', themes)
     const theme = themes.find(({ id }) => id === props.themeId)
     if (theme) {
@@ -258,6 +261,7 @@ function previewTheme() {
 }
 
 function closeEditor() {
+  editorLoadId++
   previewing = false
   showDeletePrompt.value = false
   store.commit('setCustomThemeEditorOpen', false)

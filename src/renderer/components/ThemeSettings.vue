@@ -422,6 +422,12 @@ const baseTheme = computed(() => {
 })
 const systemLightTheme = computed(() => store.getters.getSystemLightTheme)
 const systemDarkTheme = computed(() => store.getters.getSystemDarkTheme)
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
+
+function updateSystemColorScheme(event) {
+  systemUsesDarkTheme.value = event.matches
+}
 
 /**
  * @param {string} value
@@ -435,7 +441,9 @@ const areColorThemesEnabled = computed(() => baseTheme.value !== 'hotPink' && !(
   (baseTheme.value === 'system' &&
     (isCustomThemeValue(systemLightTheme.value) || isCustomThemeValue(systemDarkTheme.value)))
 ))
-const selectedCustomThemeId = computed(() => customThemeIdFromValue(baseTheme.value))
+const selectedCustomThemeId = computed(() => customThemeIdFromValue(baseTheme.value === 'system'
+  ? (systemUsesDarkTheme.value ? systemDarkTheme.value : systemLightTheme.value)
+  : baseTheme.value))
 
 function openCustomThemeEditor(themeId) {
   editingCustomThemeId.value = themeId
@@ -676,8 +684,14 @@ function updateSystemReducedMotion(event) {
   systemReducedMotionEnabled.value = event.matches
 }
 
-onMounted(() => systemReducedMotion.addEventListener('change', updateSystemReducedMotion))
-onUnmounted(() => systemReducedMotion.removeEventListener('change', updateSystemReducedMotion))
+onMounted(() => {
+  systemReducedMotion.addEventListener('change', updateSystemReducedMotion)
+  systemColorScheme.addEventListener('change', updateSystemColorScheme)
+})
+onUnmounted(() => {
+  systemReducedMotion.removeEventListener('change', updateSystemReducedMotion)
+  systemColorScheme.removeEventListener('change', updateSystemColorScheme)
+})
 
 /**
  * @param {number} value

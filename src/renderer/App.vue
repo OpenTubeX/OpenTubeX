@@ -785,16 +785,15 @@ onMounted(async () => {
   const hasExistingSettings = await store.dispatch('grabUserSettings')
 
   try {
-    customThemes.value = await loadCustomThemes()
-    store.commit('setCustomThemes', customThemes.value)
-    if (baseTheme.value === 'custom' && customThemes.value.length > 0) {
-      await store.dispatch('updateBaseTheme', `custom:${customThemes.value[0].id}`)
+    const themes = await loadCustomThemes()
+    store.commit('setCustomThemes', themes)
+    if (baseTheme.value === 'custom' && themes.length > 0) {
+      await store.dispatch('updateBaseTheme', `custom:${themes[0].id}`)
     }
   } catch (error) {
     console.error('Failed to load custom theme:', error)
   }
   removeCustomThemeListener = handleCustomThemeUpdated((themes) => {
-    customThemes.value = themes
     store.commit('setCustomThemes', themes)
     updateTheme()
   })
@@ -1723,7 +1722,6 @@ function clearSubscriptionTabAutoRefreshTimer(tab) {
 
 /** @type {import('vue').ComputedRef<string>} */
 const baseTheme = computed(() => store.getters.getBaseTheme)
-const customThemes = ref([])
 let removeCustomThemeListener = () => {}
 const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
 const systemUsesDarkTheme = ref(systemColorScheme.matches)
@@ -1762,8 +1760,9 @@ function updateTheme() {
   const effectiveTheme = baseTheme.value === 'system'
     ? (systemUsesDarkTheme.value ? store.getters.getSystemDarkTheme : store.getters.getSystemLightTheme)
     : baseTheme.value
-  const customTheme = customThemes.value.find(theme => `custom:${theme.id}` === effectiveTheme) ??
-    (effectiveTheme === 'custom' ? customThemes.value[0] : null) ?? null
+  const customThemes = store.getters.getCustomThemes
+  const customTheme = customThemes.find(theme => `custom:${theme.id}` === effectiveTheme) ??
+    (effectiveTheme === 'custom' ? customThemes[0] : null) ?? null
   applyThemeToDocument(effectiveTheme, mainColor.value, secColor.value, customTheme)
 }
 

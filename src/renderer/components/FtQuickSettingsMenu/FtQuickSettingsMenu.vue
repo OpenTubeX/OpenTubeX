@@ -315,6 +315,8 @@ import { customThemeValue, isCustomThemeValue } from '../../../customTheme'
 const { locale, t } = useI18n()
 const id = useId()
 const USING_ELECTRON = process.env.IS_ELECTRON
+const systemColorScheme = window.matchMedia('(prefers-color-scheme: dark)')
+const systemUsesDarkTheme = ref(systemColorScheme.matches)
 
 const menuOpen = ref(false)
 const profilePanelOpen = ref(false)
@@ -391,10 +393,9 @@ const localeNames = computed(() => [
 
 const baseTheme = computed(() => store.getters.getBaseTheme)
 const usesCustomThemePalette = computed(() => isCustomThemeValue(baseTheme.value) || (
-  baseTheme.value === 'system' && (
-    isCustomThemeValue(store.getters.getSystemLightTheme) ||
-    isCustomThemeValue(store.getters.getSystemDarkTheme)
-  )
+  baseTheme.value === 'system' && isCustomThemeValue(systemUsesDarkTheme.value
+    ? store.getters.getSystemDarkTheme
+    : store.getters.getSystemLightTheme)
 ))
 const customThemeEditorOpen = computed(() => store.getters.getCustomThemeEditorOpen)
 const mainColor = computed(() => store.getters.getMainColor)
@@ -461,6 +462,10 @@ function handleWindowBlur() {
   pointerDownInsideMenu = false
 }
 
+function handleSystemColorSchemeChange(event) {
+  systemUsesDarkTheme.value = event.matches
+}
+
 function handleDocumentPointerDown(event) {
   pointerDownInsideMenu = event.target instanceof Node && menuRef.value?.$el?.contains(event.target)
 }
@@ -474,6 +479,7 @@ function handleDocumentPointerUp() {
 onMounted(() => {
   window.addEventListener('focus', handleWindowFocus)
   window.addEventListener('blur', handleWindowBlur)
+  systemColorScheme.addEventListener('change', handleSystemColorSchemeChange)
   document.addEventListener('pointerdown', handleDocumentPointerDown, true)
   document.addEventListener('pointerup', handleDocumentPointerUp, true)
   document.addEventListener('pointercancel', handleDocumentPointerUp, true)
@@ -481,6 +487,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('focus', handleWindowFocus)
   window.removeEventListener('blur', handleWindowBlur)
+  systemColorScheme.removeEventListener('change', handleSystemColorSchemeChange)
   document.removeEventListener('pointerdown', handleDocumentPointerDown, true)
   document.removeEventListener('pointerup', handleDocumentPointerUp, true)
   document.removeEventListener('pointercancel', handleDocumentPointerUp, true)
