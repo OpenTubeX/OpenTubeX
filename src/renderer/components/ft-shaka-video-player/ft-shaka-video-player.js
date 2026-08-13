@@ -163,7 +163,17 @@ let liveCustomControlPlayers = 0
 const RequestType = shaka.net.NetworkingEngine.RequestType
 const AdvancedRequestType = shaka.net.NetworkingEngine.AdvancedRequestType
 const TrackLabelFormat = shaka.ui.Overlay.TrackLabelFormat
+const CaptionPositionArea = shaka.config.PositionArea
 const { Severity: ErrorSeverity, Category: ErrorCategory, Code: ErrorCode } = shaka.util.Error
+
+const CAPTION_POSITION_AREAS = Object.freeze({
+  'top-left': CaptionPositionArea.TOP_LEFT,
+  'top-center': CaptionPositionArea.TOP_CENTER,
+  'top-right': CaptionPositionArea.TOP_RIGHT,
+  'bottom-left': CaptionPositionArea.BOTTOM_LEFT,
+  'bottom-center': CaptionPositionArea.BOTTOM_CENTER,
+  'bottom-right': CaptionPositionArea.BOTTOM_RIGHT,
+})
 
 const NORMAL_PLAYBACK_RATE = 1
 
@@ -1199,6 +1209,7 @@ export default defineComponent({
 
     const captionSettings = computed(() => parseCaptionSettings(store.getters.getDefaultCaptionSettings))
     const captionCssVariables = computed(() => getCaptionCssVariables(captionSettings.value))
+    const captionPositionArea = computed(() => CAPTION_POSITION_AREAS[captionSettings.value.anchor])
     const showCaptionAppearanceSample = ref(false)
     const captionAppearanceSampleBottom = ref('var(--caption-hidden-bottom-gap)')
     let captionAppearanceSampleTimeout = null
@@ -1241,6 +1252,10 @@ export default defineComponent({
       store.dispatch('updateDefaultCaptionSettings', JSON.stringify(DEFAULT_CAPTION_SETTINGS))
       previewCaptionAppearance()
     }
+
+    watch(captionPositionArea, positionArea => {
+      player?.configure('textDisplayer.positionArea', positionArea)
+    })
 
     onUnmounted(() => {
       clearTimeout(captionAppearanceSampleTimeout)
@@ -3054,6 +3069,12 @@ export default defineComponent({
               format: '',
               forced: false,
             }],
+
+        // Caption appearance is user-controlled, so discard source WebVTT positioning (for
+        // example YouTube's occasional position:63% cues) before Shaka creates the cue DOM.
+        textDisplayer: {
+          positionArea: captionPositionArea.value,
+        },
 
         // Electron doesn't like YouTube's vp9 VR video streams and throws:
         // "CHUNK_DEMUXER_ERROR_APPEND_FAILED: Projection element is incomplete; ProjectionPoseYaw required."
