@@ -197,6 +197,9 @@ export default defineComponent({
       // because the instance is reused across same-tab navigation.
       hasBeenPresented: false,
       useTheatreMode: false,
+      // Same-tab navigation keeps the current layout while its skeleton loads.
+      // A newly mounted watch tab falls back to the configured default instead.
+      loadingTheatreMode: null,
       applyDefaultTheatreModeAfterLoad: false,
       theatreLayoutAvailable: window.innerWidth > RESPONSIVE_THEATRE_MODE_MAX_WIDTH,
       videoPlayerLoaded: false,
@@ -932,6 +935,7 @@ export default defineComponent({
   watch: {
     isLoading(loading) {
       if (!loading) {
+        this.loadingTheatreMode = null
         this.shortsTransitionPreview = ''
         this.shortsTransitionDirection = 0
 
@@ -1474,6 +1478,7 @@ export default defineComponent({
     async reloadView({ preserveTitle = false } = {}) {
       const loadGeneration = ++this.videoLoadGeneration
       const requestedVideoId = this.tabRoute.params.id
+      this.loadingTheatreMode = this.useTheatreMode
       preserveTitle ||= this.preserveTitleOnNextReload
       this.preserveTitleOnNextReload = false
 

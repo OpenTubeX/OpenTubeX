@@ -18,8 +18,9 @@ let shortMorphRequested = false
  * @param {EventTarget | null} linkElement the clicked watch page link
  * @param {object} [options]
  * @param {boolean} [options.isShort] whether the destination uses the Shorts layout
+ * @param {boolean} [options.allowVisiblePlayer] whether the source can be beside the current player
  */
-export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
+export function requestWatchPageViewTransition(linkElement, { isShort, allowVisiblePlayer = false } = {}) {
   if (typeof document.startViewTransition !== 'function' || isReducedMotionEnabled()) {
     return
   }
@@ -39,14 +40,13 @@ export function requestWatchPageViewTransition(linkElement, { isShort } = {}) {
 
   const thumbnail = findThumbnail(linkElement)
 
-  // Only name the thumbnail when nothing else on the page carries the name
-  // (e.g. the current watch page's player), as duplicate view-transition-names
-  // would abort the transition. Players in hidden background tabs don't count
-  // because display: none elements aren't captured.
+  // Players in hidden background tabs don't count because display: none
+  // elements aren't captured. Recommendations explicitly allow a visible
+  // player: its name is assigned only after the old thumbnail snapshot.
   const hasVisiblePlayer = Array.from(document.querySelectorAll('.videoPlayer'))
     .some((el) => el.offsetParent !== null)
 
-  if (thumbnail instanceof HTMLElement && !hasVisiblePlayer) {
+  if (thumbnail instanceof HTMLElement && (!hasVisiblePlayer || allowVisiblePlayer)) {
     morphSourceElement = thumbnail
     thumbnail.style.viewTransitionName = VIDEO_MORPH_NAME
   }
@@ -131,13 +131,16 @@ export function installViewTransitions(router) {
     shortMorphRequested = false
 
     return new Promise((resolve) => {
-      // Names the watch page's player for the duration of the transition
-      // (a permanent name would force a stacking context on the player,
-      // breaking its full-window mode)
-      document.documentElement.classList.add('viewTransitionMorphActive')
-      document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
-
       const transition = document.startViewTransition(() => {
+        // The old snapshot has been captured, so the thumbnail can give its
+        // name to the destination player. This matters for watch-to-watch
+        // navigation where both elements remain mounted during the update.
+        if (source) {
+          source.style.viewTransitionName = ''
+        }
+        document.documentElement.classList.add('viewTransitionMorphActive')
+        document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
+
         return new Promise((_resolve) => {
           // Let the navigation proceed, then wait for the new view to render
           const stop = router.afterEach(() => {
@@ -205,8 +208,6 @@ export function takePendingViewTransition(maxAge = 1000) {
   let started = false
   const runTransition = async (update) => {
     started = true
-    document.documentElement.classList.add('viewTransitionMorphActive')
-    document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
 
     const cleanup = () => {
       document.documentElement.classList.remove(
@@ -221,6 +222,14 @@ export function takePendingViewTransition(maxAge = 1000) {
     let transition
     try {
       transition = document.startViewTransition(async () => {
+        // The source must lose the shared name before the new snapshot. On a
+        // watch page the recommendations stay mounted while the player updates.
+        if (source) {
+          source.style.viewTransitionName = ''
+        }
+        document.documentElement.classList.add('viewTransitionMorphActive')
+        document.documentElement.classList.toggle('viewTransitionShortMorphActive', shortMorph)
+
         await update()
         await nextTick()
       })

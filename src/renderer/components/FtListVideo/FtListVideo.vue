@@ -1374,7 +1374,8 @@ async function handleWatchPageLinkClick(event) {
   if (opensActiveTab) {
     event.preventDefault()
     requestWatchPageViewTransition(event.currentTarget, {
-      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
+      allowVisiblePlayer: props.appearance === 'recommendation'
     })
     openInternalPath({
       path: `/watch/${id.value}`,
@@ -1412,7 +1413,8 @@ async function handleWatchPageLinkClick(event) {
   // Plain left click navigates in this tab: morph the thumbnail into the player
   if (event?.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
     requestWatchPageViewTransition(event.currentTarget, {
-      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer
+      isShort: props.data.isShort === true && store.getters.getUseCustomShortsPlayer,
+      allowVisiblePlayer: props.appearance === 'recommendation'
     })
   }
 }
